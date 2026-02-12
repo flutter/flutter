@@ -402,7 +402,10 @@ bool BufferBindingsGLES::BindUniformBufferV2(
       return false;
     }
 
-    FML_DCHECK(member.float_type.has_value());
+    if (!member.float_type.has_value()) {
+      VALIDATION_LOG << "Float uniform should have a float type.";
+      return false;
+    }
 
     switch (member.float_type.value()) {
       case ShaderFloatType::kFloat:
