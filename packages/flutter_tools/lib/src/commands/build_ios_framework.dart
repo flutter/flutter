@@ -146,7 +146,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     }
   }
 
-  static Iterable<String> findFrameworkNames(Directory outputDirectory) {
+  static Iterable<String> findCodeAssetFrameworkNames(Directory outputDirectory) {
     final Directory nativeAssetsDirectory = outputDirectory.childDirectory('native_assets');
     if (!nativeAssetsDirectory.existsSync()) {
       return const <String>[];
@@ -332,8 +332,8 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
 
       // Package native assets.
       final Iterable<String> frameworkNames = <String>{
-        ...BuildFrameworkCommand.findFrameworkNames(simulatorBuildOutput),
-        ...BuildFrameworkCommand.findFrameworkNames(iPhoneBuildOutput),
+        ...BuildFrameworkCommand.findCodeAssetFrameworkNames(simulatorBuildOutput),
+        ...BuildFrameworkCommand.findCodeAssetFrameworkNames(iPhoneBuildOutput),
       };
       for (final frameworkName in frameworkNames) {
         final Directory frameworkDirectoryDevice = iPhoneBuildOutput

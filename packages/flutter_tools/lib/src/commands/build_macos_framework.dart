@@ -118,7 +118,9 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
       globals.logger.printStatus(' └─Moving to ${globals.fs.path.relative(modeDirectory.path)}');
 
       // Package native assets.
-      final Iterable<String> frameworkNames = BuildFrameworkCommand.findFrameworkNames(buildOutput);
+      final Iterable<String> frameworkNames = BuildFrameworkCommand.findCodeAssetFrameworkNames(
+        buildOutput,
+      );
       for (final frameworkName in frameworkNames) {
         final Directory frameworkDirectory = buildOutput
             .childDirectory('native_assets')

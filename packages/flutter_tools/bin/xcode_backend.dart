@@ -343,22 +343,8 @@ class Context {
   }) {
     // Copy native assets referenced in the native_assets.json file for the
     // current build.
-    final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
-    var projectPath = '$sourceRoot/..';
-    if (environment['FLUTTER_APPLICATION_PATH'] != null) {
-      projectPath = environment['FLUTTER_APPLICATION_PATH']!;
-    }
-    final String flutterBuildDir = environment['FLUTTER_BUILD_DIR']!;
-    var nativeAssetsPath = '$projectPath/$flutterBuildDir/native_assets/${platform.name}/';
-    final String? builtProductsDir = environment['BUILT_PRODUCTS_DIR'];
-    if (builtProductsDir != null) {
-      final Directory nativeAssetsInBuiltProducts = directoryFromPath(
-        '$builtProductsDir/native_assets/',
-      );
-      if (nativeAssetsInBuiltProducts.existsSync()) {
-        nativeAssetsPath = '${nativeAssetsInBuiltProducts.path}/';
-      }
-    }
+    final String builtProductsDir = environment['BUILT_PRODUCTS_DIR']!;
+    final nativeAssetsPath = '$builtProductsDir/native_assets/';
     final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
 
     final Set<String> referencedFrameworks = {};
