@@ -937,7 +937,6 @@ def gather_dart_tests(
   dart_tests = glob.glob(f'{dart_tests_dir}/*_test.dart')
 
   opengles_skipped_tests = [
-      'codec_test.dart',
       'gpu_test.dart',
       'high_bitrate_texture_test.dart',
   ]
