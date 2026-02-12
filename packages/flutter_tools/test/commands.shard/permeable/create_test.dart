@@ -358,14 +358,22 @@ void main() {
         'bin',
         globals.platform.isWindows ? 'flutter.bat' : 'flutter',
       );
-      final String engineExamplesDirectory = globals.fs.path.join(getFlutterRoot(), 'engine', 'src', 'flutter', 'examples');
+      final String engineExamplesDirectory = globals.fs.path.join(
+        getFlutterRoot(),
+        'engine',
+        'src',
+        'flutter',
+        'examples',
+      );
       const projectName = 'flutter_project';
       final ProcessResult exec = await Process.run(flutterBin, <String>[
         'create',
         projectName,
       ], workingDirectory: engineExamplesDirectory);
       expect(exec.exitCode, 0);
-      globals.fs.file(globals.fs.path.join(engineExamplesDirectory, projectName)).deleteSync(recursive: true);
+      globals.fs
+          .file(globals.fs.path.join(engineExamplesDirectory, projectName))
+          .deleteSync(recursive: true);
     },
     overrides: {
       Pub: () => Pub.test(
