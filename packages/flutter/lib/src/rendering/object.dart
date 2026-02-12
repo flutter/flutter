@@ -1477,7 +1477,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       }
       final RenderObject? rootNode = this.rootNode;
       for (final node in nodesToProcess) {
-        if (node._semantics.parentDataDirty) {
+        if (node._semantics.notInSemanticsTree) {
           // This node is either blocked by a sibling
           // (via SemanticsConfiguration.isBlockingSemanticsOfPreviouslyPaintedNodes)
           // or is hidden by parent through visitChildrenForSemantics. Otherwise,
@@ -1518,7 +1518,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
                     // (via SemanticsConfiguration.isBlockingSemanticsOfPreviouslyPaintedNodes)
                     // or the parent node would have updated this node's parent data and it
                     // would not be dirty.
-                    !object._semantics.parentDataDirty,
+                    !object._semantics.notInSemanticsTree,
               )
               .toList()
             ..sort((RenderObject a, RenderObject b) => a.depth - b.depth);
@@ -1566,33 +1566,13 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       // Conduct the geometry update
       for (final node in nodesToProcessGeometry) {
         _RenderObjectSemantics target = node._semantics;
-        // All the parent data on the active tree should be up to date at this point
-        // except for the blocked branches.
-        //
-        // We MUST NOT update the geometry of the blocked branch since ensureGeometry short
-        // circuited when it reaches a node whose geometry is up to date. Updating
-        // the geometry of the blocked branch half-heartly will cause a gap of render
-        // object with dirty geometry where the future update may never reach.
-        //
-        // Either we update entire tree regardless of whether it is blocked or not, or we only update
-        // the tree that is not blocked. If we go with the first option, we will waste
-        // time updating something that will not be showing up in the final semantics tree.
-        //
-        // Thus, we go for the second option, and the geometry update will only be conducted
-        // once the branch is not blocked.
-        bool isBlocked = target.parentDataDirty;
         // Find the first render object semantics that forms a semantics node
         // and whose geometry is not dirty as the anchor point to start the geometry update.
-        while (!isBlocked &&
-            !target.isRoot &&
-            (target.geometryDirty || !target.shouldFormSemanticsNode)) {
+        while (!target.isRoot && (target.geometryDirty || !target.shouldFormSemanticsNode)) {
           target = target.parent!;
-          isBlocked = target.parentDataDirty;
         }
 
-        if (!isBlocked) {
-          target.ensureGeometry();
-        }
+        target.ensureGeometry();
       }
       if (!kReleaseMode) {
         FlutterTimeline.finishSync();
@@ -1602,7 +1582,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
         FlutterTimeline.startSync('Semantics.ensureSemanticsNode');
       }
       for (final RenderObject node in nodesToProcess.reversed) {
-        if (node._semantics.parentDataDirty) {
+        if (node._semantics.notInSemanticsTree) {
           // same as above.
           continue;
         }
@@ -5568,6 +5548,26 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     return geometry == null;
   }
 
+  bool get notInSemanticsTree {
+    // There are two cases, either a branch is skipped in ExcludeSemantics or
+    // blocked by sibling.
+    return isBlocked || parentDataDirty;
+  }
+
+  bool isBlocked = false;
+
+  void markSubTreeBlocked() {
+    if (isBlocked) {
+      return;
+    }
+    parentData = null;
+    isBlocked = true;
+    renderObject.visitChildrenForSemantics((RenderObject child) {
+      final _RenderObjectSemantics childSemantics = child._semantics;
+      childSemantics.markSubTreeBlocked();
+    });
+  }
+
   /// If this forms a semantics node, all of the properties in config are
   /// used in creating the node. There is nothing to be merged up.
   @override
@@ -5803,6 +5803,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     final result = <_RenderObjectSemantics>[];
     renderObject.visitChildrenForSemantics((RenderObject renderChild) {
       if (renderChild._semantics.isBlockingPreviousSibling) {
+        for (final child in result) {
+          child.markSubTreeBlocked();
+        }
         result.clear();
       }
       result.add(renderChild._semantics);
@@ -5946,6 +5949,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     }
     // Parent data changes may result in node formation changes.
     markNeedsBuild();
+    isBlocked = false;
     parentData = newParentData;
     updateChildren();
   }
@@ -6126,7 +6130,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
   void _produceSemanticsNode({required Set<int> usedSemanticsIds}) {
     assert(!built);
-    built = true;
     final SemanticsNode node = cachedSemanticsNode ??= _createSemanticsNode();
     semanticsNodes.add(node);
     node
@@ -6136,6 +6139,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
     _mergeSiblingGroup(usedSemanticsIds);
     _buildSemanticsSubtree(usedSemanticsIds: usedSemanticsIds);
+    built = true;
   }
 
   SemanticsNode _createSemanticsNode() {
@@ -6395,6 +6399,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     built = false;
     cachedSemanticsNode = null;
     parentData = null;
+    isBlocked = false;
     geometry = null;
     _blocksPreviousSibling = null;
     _containsIncompleteFragment = false;
@@ -6426,6 +6431,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         ifTrue: 'BLOCK PREVIOUS',
       ),
     );
+    properties.add(FlagProperty('blocked', value: isBlocked, ifTrue: 'BLOCKED'));
     if (!parentDataDirty && contributesToSemanticsTree) {
       final String semanticsNodeStatus;
       if (built) {
