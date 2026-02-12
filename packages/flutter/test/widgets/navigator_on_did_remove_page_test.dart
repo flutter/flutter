@@ -92,5 +92,22 @@ void main() {
     expect(removedPage, <Page<void>>[page1]);
   });
 
-  // TODO(victorsanni): Add a test for this PR.
+  testWidgets('pop calls onDidRemovePage immediately', (
+    WidgetTester tester,
+  ) async {
+    final key = GlobalKey<NavigatorState>();
+    final removedPage = <Page<void>>[];
+    const page1 = MaterialPage<void>(name: 'page-1', child: Text('Page 1'));
+    const page2 = MaterialPage<void>(name: 'page-2', child: Text('Page 2'));
+
+    await buildPages(<Page<void>>[page1, page2], tester, removedPage: removedPage, navKey: key);
+    expect(find.text('Page 2'), findsOneWidget);
+
+    key.currentState!.pop();
+    await tester.pump();
+
+    expect(removedPage, <Page<void>>[page2]);
+    await tester.pumpAndSettle();
+    expect(find.text('Page 1'), findsOneWidget);
+  });
 }
