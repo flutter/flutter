@@ -146,7 +146,7 @@ void main() {
         buildCodeAssets: true,
         buildDataAssets: true,
       );
-      final Uri targetUri = environment.buildDir.uri.resolve('native_assets/');
+      final Directory targetDirectory = environment.buildDir.childDirectory('native_assets');
       await installCodeAssets(
         dartHookResult: dartHookResult,
         environmentDefines: environmentDefines,
@@ -154,13 +154,13 @@ void main() {
         projectUri: projectUri,
         fileSystem: fileSystem,
         nativeAssetsFileUri: nonFlutterTesterAssetUri,
-        targetUri: targetUri,
+        targetUri: targetDirectory.uri,
       );
       expect(
         await fileSystem.file(nonFlutterTesterAssetUri).readAsString(),
         isNot(contains('package:bar/bar.dart')),
       );
-      expect(fileSystem.directory(targetUri), exists);
+      expect(targetDirectory, exists);
     },
   );
 

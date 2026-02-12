@@ -437,7 +437,7 @@ Future<void> _copyNativeCodeAssetsForOS(
         codeAsset: assetTargetLocations[codeAsset]!,
   };
 
-  final Directory targetDir = fileSystem.directory(targetUri.toFilePath());
+  final Directory targetDir = fileSystem.directory(targetUri);
   if (!targetDir.existsSync()) {
     targetDir.createSync(recursive: true);
   }
