@@ -1444,31 +1444,37 @@ void main() async {
     }
   });
 
-  final ImageComparer comparer = await ImageComparer.create();
-  for (final (filterQuality, goldenFilename) in [
-    (FilterQuality.none, 'fragment_shader_texture_with_quality_none.png'),
-    (FilterQuality.low, 'fragment_shader_texture_with_quality_low.png'),
-    (FilterQuality.medium, 'fragment_shader_texture_with_quality_medium.png'),
-    (FilterQuality.high, 'fragment_shader_texture_with_quality_high.png'),
-  ]) {
-    test('FragmentShader renders sampler with filter quality ${filterQuality.name}', () async {
-      final FragmentProgram program = await FragmentProgram.fromAsset('texture.frag.iplr');
-      final Image image = _createOvalGradientImage(imageDimension: 16);
-      final FragmentShader shader = program.fragmentShader()
-        ..setImageSampler(0, image, filterQuality: filterQuality);
-      shader.setFloat(0, 300);
-      shader.setFloat(1, 300);
-      // TODO(180595): Switch these to the getUniformFloat API.
-      // shader.getUniformFloat('u_size', 0).set(300);
-      // shader.getUniformFloat('u_size', 1).set(300);
-
-      final Image shaderImage = await _imageFromShader(shader: shader, imageDimension: 300);
-
-      await comparer.addGoldenImage(shaderImage, goldenFilename);
-      shader.dispose();
-      image.dispose();
+  group('ImageComparer tests', () {
+    late final ImageComparer comparer;
+    setUpAll(() async {
+      comparer = await ImageComparer.create();
     });
-  }
+
+    for (final (filterQuality, goldenFilename) in [
+      (FilterQuality.none, 'fragment_shader_texture_with_quality_none.png'),
+      (FilterQuality.low, 'fragment_shader_texture_with_quality_low.png'),
+      (FilterQuality.medium, 'fragment_shader_texture_with_quality_medium.png'),
+      (FilterQuality.high, 'fragment_shader_texture_with_quality_high.png'),
+    ]) {
+      test('FragmentShader renders sampler with filter quality ${filterQuality.name}', () async {
+        final FragmentProgram program = await FragmentProgram.fromAsset('texture.frag.iplr');
+        final Image image = _createOvalGradientImage(imageDimension: 16);
+        final FragmentShader shader = program.fragmentShader()
+          ..setImageSampler(0, image, filterQuality: filterQuality);
+        shader.setFloat(0, 300);
+        shader.setFloat(1, 300);
+        // TODO(180595): Switch these to the getUniformFloat API.
+        // shader.getUniformFloat('u_size', 0).set(300);
+        // shader.getUniformFloat('u_size', 1).set(300);
+
+        final Image shaderImage = await _imageFromShader(shader: shader, imageDimension: 300);
+
+        await comparer.addGoldenImage(shaderImage, goldenFilename);
+        shader.dispose();
+        image.dispose();
+      });
+    }
+  });
 
   test('FragmentShader simple shader renders correctly', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('functions.frag.iplr');
