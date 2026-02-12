@@ -102,8 +102,8 @@ class RenderPerformanceOverlay extends RenderBox {
   }
 
   double get _intrinsicHeight {
-    const double kDefaultGraphHeight = 80.0;
-    double result = 0.0;
+    const kDefaultGraphHeight = 80.0;
+    var result = 0.0;
     if ((optionsMask & _rasterizerMask) != 0) {
       result += kDefaultGraphHeight;
     }

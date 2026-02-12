@@ -31,7 +31,8 @@ void main() {
     expect(r.computeMinIntrinsicHeight(100.0), kGraph);
 
     // One visualize rasterizer stat enabled.
-    final int visualizeRasterMask = 1 << PerformanceOverlayOption.visualizeRasterizerStatistics.index;
+    final int visualizeRasterMask =
+        1 << PerformanceOverlayOption.visualizeRasterizerStatistics.index;
     r.optionsMask = visualizeRasterMask;
     expect(r.computeMinIntrinsicHeight(100.0), kGraph);
 
