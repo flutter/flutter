@@ -1,0 +1,357 @@
+{
+    "_comment": [
+        "The builds defined in this file should not contain tests, ",
+        "and the file should not contain builds that are essentially tests. ",
+        "The only builds in this file should be the builds necessary to produce ",
+        "release artifacts. ",
+        "Tests to run on linux hosts should go in one of the other linux_ build ",
+        "definition files."
+    ],
+    "luci_flags": {
+      "upload_content_hash": true
+    },
+    "builds": [
+        {
+            "archives": [
+                {
+                    "base_path": "out/ci/android_profile/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/ci/android_profile/zip_archives/android-arm-profile/linux-arm64.zip"
+                    ],
+                    "name": "ci/android_profile",
+                    "realm": "production"
+                }
+            ],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux",
+                "cpu=arm64"
+            ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
+            "gn": [
+                "--target-dir",
+                "ci/android_profile",
+                "--runtime-mode",
+                "profile",
+                "--android",
+                "--android-cpu",
+                "arm",
+                "--rbe",
+                "--no-goma"
+            ],
+            "name": "ci/android_profile",
+            "description": "Produces profile mode artifacts to target 32-bit arm Android from an ARM64 Linux host.",
+            "ninja": {
+                "config": "ci/android_profile",
+                "targets": [
+                    "flutter/lib/snapshot",
+                    "flutter/shell/platform/android:gen_snapshot"
+                ]
+            }
+        },
+        {
+            "archives": [
+                {
+                    "base_path": "out/ci/android_release/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/ci/android_release/zip_archives/android-arm-release/linux-arm64.zip"
+                    ],
+                    "name": "ci/android_release",
+                    "realm": "production"
+                }
+            ],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux",
+                "cpu=arm64"
+            ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
+            "gn": [
+                "--target-dir",
+                "ci/android_release",
+                "--runtime-mode",
+                "release",
+                "--android",
+                "--android-cpu",
+                "arm",
+                "--rbe",
+                "--no-goma"
+            ],
+            "name": "ci/android_release",
+            "description": "Produces release mode artifacts to target 32-bit arm Android from an ARM64 Linux host.",
+            "ninja": {
+                "config": "ci/android_release",
+                "targets": [
+                    "flutter/lib/snapshot",
+                    "flutter/shell/platform/android:gen_snapshot"
+                ]
+            }
+        },
+        {
+            "archives": [
+                {
+                    "base_path": "out/ci/android_profile_arm64/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/ci/android_profile_arm64/zip_archives/android-arm64-profile/linux-arm64.zip",
+                        "out/ci/android_profile_arm64/zip_archives/android-arm64-profile/analyze-snapshot-linux-arm64.zip"
+                    ],
+                    "name": "ci/android_profile_arm64",
+                    "realm": "production"
+                }
+            ],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux",
+                "cpu=arm64"
+            ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
+            "gn": [
+                "--target-dir",
+                "ci/android_profile_arm64",
+                "--runtime-mode",
+                "profile",
+                "--android",
+                "--android-cpu",
+                "arm64",
+                "--rbe",
+                "--no-goma"
+            ],
+            "name": "ci/android_profile_arm64",
+            "description": "Produces profile mode artifacts to target 64-bit arm Android from an ARM64 Linux host.",
+            "ninja": {
+                "config": "ci/android_profile_arm64",
+                "targets": [
+                    "flutter/lib/snapshot",
+                    "flutter/shell/platform/android:gen_snapshot",
+                    "flutter/shell/platform/android:analyze_snapshot"
+                ]
+            }
+        },
+        {
+            "archives": [
+                {
+                    "base_path": "out/ci/android_release_arm64/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/ci/android_release_arm64/zip_archives/android-arm64-release/linux-arm64.zip",
+                        "out/ci/android_release_arm64/zip_archives/android-arm64-release/analyze-snapshot-linux-arm64.zip"
+                    ],
+                    "name": "ci/android_release_arm64",
+                    "realm": "production"
+                }
+            ],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux",
+                "cpu=arm64"
+            ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
+            "gn": [
+                "--target-dir",
+                "ci/android_release_arm64",
+                "--runtime-mode",
+                "release",
+                "--android",
+                "--android-cpu",
+                "arm64",
+                "--rbe",
+                "--no-goma"
+            ],
+            "name": "ci/android_release_arm64",
+            "description": "Produces release mode artifacts to target 64-bit arm Android from an ARM64 Linux host.",
+            "ninja": {
+                "config": "ci/android_release_arm64",
+                "targets": [
+                    "flutter/lib/snapshot",
+                    "flutter/shell/platform/android:gen_snapshot",
+                    "flutter/shell/platform/android:analyze_snapshot"
+                ]
+            }
+        },
+        {
+            "archives": [
+                {
+                    "base_path": "out/ci/android_profile_x64/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/ci/android_profile_x64/zip_archives/android-x64-profile/linux-arm64.zip",
+                        "out/ci/android_profile_x64/zip_archives/android-x64-profile/analyze-snapshot-linux-arm64.zip"
+                    ],
+                    "name": "ci/android_profile_x64",
+                    "realm": "production"
+                }
+            ],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux",
+                "cpu=arm64"
+            ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
+            "gn": [
+                "--target-dir",
+                "ci/android_profile_x64",
+                "--runtime-mode",
+                "profile",
+                "--android",
+                "--android-cpu",
+                "x64",
+                "--rbe",
+                "--no-goma"
+            ],
+            "name": "ci/android_profile_x64",
+            "description": "Produces profile mode artifacts to target x64 Android from an ARM64 Linux host.",
+            "ninja": {
+                "config": "ci/android_profile_x64",
+                "targets": [
+                    "flutter/lib/snapshot",
+                    "flutter/shell/platform/android:gen_snapshot",
+                    "flutter/shell/platform/android:analyze_snapshot"
+                ]
+            }
+        },
+        {
+            "archives": [
+                {
+                    "base_path": "out/ci/android_release_x64/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/ci/android_release_x64/zip_archives/android-x64-release/linux-arm64.zip",
+                        "out/ci/android_release_x64/zip_archives/android-x64-release/analyze-snapshot-linux-arm64.zip"
+                    ],
+                    "name": "ci/android_release_x64",
+                    "realm": "production"
+                }
+            ],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux",
+                "cpu=arm64"
+            ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
+            "gn": [
+                "--target-dir",
+                "ci/android_release_x64",
+                "--runtime-mode",
+                "release",
+                "--android",
+                "--android-cpu",
+                "x64",
+                "--rbe",
+                "--no-goma"
+            ],
+            "name": "ci/android_release_x64",
+            "description": "Produces release mode artifacts to target x64 Android from an ARM64 Linux host.",
+            "ninja": {
+                "config": "ci/android_release_x64",
+                "targets": [
+                    "flutter/lib/snapshot",
+                    "flutter/shell/platform/android:gen_snapshot",
+                    "flutter/shell/platform/android:analyze_snapshot"
+                ]
+            }
+        },
+        {
+            "archives": [
+                {
+                    "base_path": "out/ci/android_profile_riscv64/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/ci/android_profile_riscv64/zip_archives/android-riscv64-profile/linux-arm64.zip",
+                        "out/ci/android_profile_riscv64/zip_archives/android-riscv64-profile/analyze-snapshot-linux-arm64.zip"
+                    ],
+                    "name": "ci/android_profile_riscv64",
+                    "realm": "production"
+                }
+            ],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux",
+                "cpu=arm64"
+            ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
+            "gn": [
+                "--target-dir",
+                "ci/android_profile_riscv64",
+                "--runtime-mode",
+                "profile",
+                "--android",
+                "--android-cpu",
+                "riscv64",
+                "--rbe",
+                "--no-goma"
+            ],
+            "name": "ci/android_profile_riscv64",
+            "description": "Produces profile mode artifacts to target riscv64 Android from an ARM64 Linux host.",
+            "ninja": {
+                "config": "ci/android_profile_riscv64",
+                "targets": [
+                    "flutter/lib/snapshot",
+                    "flutter/shell/platform/android:gen_snapshot",
+                    "flutter/shell/platform/android:analyze_snapshot"
+                ]
+            }
+        },
+        {
+            "archives": [
+                {
+                    "base_path": "out/ci/android_release_riscv64/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/ci/android_release_riscv64/zip_archives/android-riscv64-release/linux-arm64.zip",
+                        "out/ci/android_release_riscv64/zip_archives/android-riscv64-release/analyze-snapshot-linux-arm64.zip"
+                    ],
+                    "name": "ci/android_release_riscv64",
+                    "realm": "production"
+                }
+            ],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux",
+                "cpu=arm64"
+            ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
+            "gn": [
+                "--target-dir",
+                "ci/android_release_riscv64",
+                "--runtime-mode",
+                "release",
+                "--android",
+                "--android-cpu",
+                "riscv64",
+                "--rbe",
+                "--no-goma"
+            ],
+            "name": "ci/android_release_riscv64",
+            "description": "Produces release mode artifacts to target riscv64 Android from an ARM64 Linux host.",
+            "ninja": {
+                "config": "ci/android_release_riscv64",
+                "targets": [
+                    "flutter/lib/snapshot",
+                    "flutter/shell/platform/android:gen_snapshot",
+                    "flutter/shell/platform/android:analyze_snapshot"
+                ]
+            }
+        }
+    ],
+    "generators": {},
+    "archives": []
+}
