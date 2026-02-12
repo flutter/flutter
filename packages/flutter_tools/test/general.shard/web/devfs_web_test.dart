@@ -1672,10 +1672,14 @@ void main() {
         webDefines: <String, String>{}, // Empty webDefines
       );
 
-      expect(
-        () async => webAssetServer.handleRequest(Request('GET', Uri.parse('http://foobar/'))),
-        throwsToolExit(message: 'Missing web-define variable: MISSING_VAR'),
+      final Response response = await webAssetServer.handleRequest(
+        Request('GET', Uri.parse('http://foobar/')),
       );
+
+      expect(response.statusCode, HttpStatus.ok);
+      // Verify the placeholder is preserved
+      expect(await response.readAsString(), contains("const apiUrl = '{{MISSING_VAR}}';"));
+      expect(logger.warningText, contains('Missing web-define variable: MISSING_VAR'));
     }),
   );
 

@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/utils.dart';
+import 'globals.dart' as globals;
 
 /// Placeholder for base href
 const kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
@@ -149,7 +150,8 @@ class WebTemplate {
   /// Applies web-define variable substitutions and validates all variables are provided.
   ///
   /// Replaces {{VARIABLE}} placeholders with values from webDefines. Built-in Flutter
-  /// variables are preserved if missing; user-defined variables throw ToolExit.
+  /// variables are preserved if missing; user-defined variables will log a warning
+  /// and be skipped.
   String _applyVariableSubstitutions(String content, Map<String, String> webDefines) {
     final variablePattern = RegExp(r'\{\{([A-Za-z_][A-Za-z0-9_]*)\}\}');
     final missingVariables = <String>{};
@@ -179,22 +181,23 @@ class WebTemplate {
       // Return the original match for missing variables.
       return match.group(0)!;
     });
-    if (missingVariables.isEmpty) {
-      return result;
+    if (missingVariables.isNotEmpty) {
+      final String variables = missingVariables.join(', ');
+      final String suggestion = missingVariables
+          .map((String name) => '--web-define=$name=VALUE')
+          .join(' ');
+      final String variablesList = pluralize('variable', missingVariables.length);
+      globals.logger.printWarning(
+        'Warning: Missing web-define $variablesList: $variables\n\n'
+        'You can provide the missing $variablesList using:\n'
+        'flutter run $suggestion\n'
+        'or\n'
+        'flutter build web $suggestion'
+        'Otherwise, this variable will be skipped.',
+      );
     }
 
-    final String variables = missingVariables.join(', ');
-    final String suggestion = missingVariables
-        .map((String name) => '--web-define=$name=VALUE')
-        .join(' ');
-    final String variablesList = pluralize('variable', missingVariables.length);
-    throwToolExit(
-      'Missing web-define $variablesList: $variables\n\n'
-      'Please provide the missing $variablesList using:\n'
-      'flutter run $suggestion\n'
-      'or\n'
-      'flutter build web $suggestion',
-    );
+    return result;
   }
 }
 
