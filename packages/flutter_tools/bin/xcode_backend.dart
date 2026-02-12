@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
 import 'dart:io';
 
 void main(List<String> arguments) {
@@ -102,8 +101,6 @@ class Context {
   }
 
   Directory directoryFromPath(String path) => Directory(path);
-
-  File fileFromPath(String path) => File(path);
 
   /// Run given command ([bin]) in a synchronous subprocess.
   ///
@@ -345,72 +342,30 @@ class Context {
     // current build.
     final String builtProductsDir = environment['BUILT_PRODUCTS_DIR']!;
     final nativeAssetsPath = '$builtProductsDir/native_assets/';
+    final Directory nativeAssetsDir = directoryFromPath(nativeAssetsPath);
     final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
-
-    final Set<String> referencedFrameworks = {};
-    final appResourcesDir = platform == TargetPlatform.macos ? 'Resources/' : '';
-    final File nativeAssetsJson = fileFromPath(
-      '$xcodeFrameworksDir/App.framework/${appResourcesDir}flutter_assets/NativeAssetsManifest.json',
-    );
-    if (!nativeAssetsJson.existsSync()) {
+    if (!nativeAssetsDir.existsSync()) {
       if (verbose) {
-        print("♦ No native assets to bundle. ${nativeAssetsJson.path} doesn't exist.");
+        print("♦ No native assets to bundle. $nativeAssetsPath doesn't exist.");
       }
       return;
     }
-    // NativeAssetsManifest.json looks like this: {
-    //   "format-version":[1,0,0],
-    //   "native-assets":{
-    //     "ios_arm64":{
-    //       "package:sqlite3/src/ffi/libsqlite3.g.dart":[
-    //         "absolute",
-    //         "sqlite3arm64ios.framework/sqlite3arm64ios"
-    //       ]
-    //     }
-    //   }
-    // }
-    //
-    // Note that this format is also parsed and expected in
-    // engine/src/flutter/assets/native_assets.cc
-    try {
-      final nativeAssetsSpec = json.decode(nativeAssetsJson.readAsStringSync()) as Map;
-      for (final Object? perPlatform
-          in (nativeAssetsSpec['native-assets'] as Map<String, Object?>).values) {
-        for (final Object? asset in (perPlatform! as Map<String, Object?>).values) {
-          if (asset case ['absolute', final String frameworkPath]) {
-            // frameworkPath is usually something like sqlite3arm64ios.framework/sqlite3arm64ios
-            final [String directory, String name] = frameworkPath.split('/');
-            if (directory != '$name.framework') {
-              throw Exception(
-                'Unexpected framework path: $frameworkPath. Should be $name.framework/$name',
-              );
-            }
 
-            referencedFrameworks.add(name);
-          }
-        }
-      }
-    } on Object catch (e, stackTrace) {
-      echo(e.toString());
-      echo(stackTrace.toString());
-      echoXcodeError('Failed to embed native assets: $e');
-      exitApp(-1);
-    }
+    final Iterable<String> frameworks = nativeAssetsDir
+        .listSync()
+        .whereType<Directory>()
+        .where((Directory d) => !d.path.endsWith('.dSYM'))
+        .map(_parseFrameworkNameFromDirectory)
+        .whereType<String>();
 
     if (verbose) {
-      print('♦ Copying native assets ${referencedFrameworks.join(', ')} from $nativeAssetsPath.');
+      print('♦ Copying native assets ${frameworks.join(', ')} from $nativeAssetsPath.');
     }
 
-    for (final framework in referencedFrameworks) {
+    for (final framework in frameworks) {
       final Directory frameworkDirectory = directoryFromPath(
         '$nativeAssetsPath$framework.framework',
       );
-      if (!frameworkDirectory.existsSync()) {
-        throw Exception(
-          'The native assets specification at ${nativeAssetsJson.path} references $framework, '
-          'which was not found in $nativeAssetsPath.',
-        );
-      }
 
       runRsync(frameworkDirectory.path, xcodeFrameworksDir);
       if (codesign && expandedCodeSignIdentity != null) {
@@ -728,3 +683,21 @@ class Context {
 }
 
 enum TargetPlatform { ios, macos }
+
+String? _parseFrameworkNameFromDirectory(Directory dir) {
+  final List<String> pathSegments = dir.uri.pathSegments;
+  if (pathSegments.isEmpty) {
+    return null;
+  }
+  final String basename;
+  if (pathSegments.last.isEmpty && pathSegments.length > 1) {
+    basename = pathSegments[pathSegments.length - 2];
+  } else {
+    basename = pathSegments.last;
+  }
+  final int extensionIndex = basename.indexOf('.framework');
+  if (extensionIndex == -1) {
+    return null;
+  }
+  return basename.substring(0, extensionIndex);
+}

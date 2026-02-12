@@ -441,6 +441,9 @@ Future<void> _copyNativeCodeAssetsForOS(
   if (!targetDir.existsSync()) {
     targetDir.createSync(recursive: true);
   }
+  await for (final FileSystemEntity entity in targetDir.list()) {
+    await entity.delete(recursive: true);
+  }
 
   if (assetTargetLocations.isEmpty) {
     return;
