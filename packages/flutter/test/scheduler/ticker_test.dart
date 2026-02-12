@@ -211,4 +211,113 @@ void main() {
       areCreateAndDispose,
     );
   });
+
+  testWidgets('Ticker pause control test', (WidgetTester tester) async {
+    var tickCount = 0;
+    void handleTick(Duration duration) {
+      tickCount += 1;
+    }
+
+    final ticker = Ticker(handleTick);
+    addTearDown(ticker.dispose);
+
+    expect(ticker.isPaused, isFalse);
+    expect(ticker.isTicking, isFalse);
+    expect(ticker.isActive, isFalse);
+
+    ticker.start();
+
+    expect(ticker.isPaused, isFalse);
+    expect(ticker.isTicking, isTrue);
+    expect(ticker.isActive, isTrue);
+    expect(tickCount, equals(0));
+
+    await tester.pump(const Duration(milliseconds: 10));
+
+    expect(tickCount, equals(1));
+
+    ticker.pause();
+    expect(ticker.isPaused, isTrue);
+    expect(ticker.isTicking, isFalse);
+    expect(ticker.isActive, isTrue);
+
+    await tester.pump(const Duration(milliseconds: 10));
+
+    expect(tickCount, equals(1));
+
+    ticker.resume();
+    expect(ticker.isPaused, isFalse);
+    expect(ticker.isTicking, isTrue);
+    expect(ticker.isActive, isTrue);
+
+    await tester.pump(const Duration(milliseconds: 10));
+
+    expect(tickCount, equals(2));
+
+    ticker.stop();
+  });
+
+  testWidgets('Ticker pause before start has no effect', (WidgetTester tester) async {
+    var tickCount = 0;
+    void handleTick(Duration duration) {
+      tickCount += 1;
+    }
+
+    final ticker = Ticker(handleTick);
+    addTearDown(ticker.dispose);
+
+    ticker.pause();
+    expect(ticker.isPaused, isTrue);
+    expect(ticker.isActive, isFalse);
+
+    ticker.start();
+    expect(ticker.isPaused, isTrue);
+    expect(ticker.isActive, isTrue);
+    expect(ticker.isTicking, isFalse);
+
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(tickCount, equals(0));
+
+    ticker.resume();
+    expect(ticker.isTicking, isTrue);
+
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(tickCount, equals(1));
+
+    ticker.stop();
+  });
+
+  testWidgets('Ticker stop clears pause state implicitly via restart', (WidgetTester tester) async {
+    var tickCount = 0;
+    void handleTick(Duration duration) {
+      tickCount += 1;
+    }
+
+    final ticker = Ticker(handleTick);
+    addTearDown(ticker.dispose);
+
+    ticker.start();
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(tickCount, equals(1));
+
+    ticker.pause();
+    expect(ticker.isPaused, isTrue);
+
+    ticker.stop();
+    expect(ticker.isActive, isFalse);
+
+    ticker.start();
+    expect(ticker.isActive, isTrue);
+    expect(ticker.isPaused, isTrue);
+    expect(ticker.isTicking, isFalse);
+
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(tickCount, equals(1)); // Still paused
+
+    ticker.resume();
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(tickCount, equals(2));
+
+    ticker.stop();
+  });
 }
