@@ -80,6 +80,7 @@ void main() {
           webRenderer: WebRendererMode.canvaskit,
           useLocalCanvasKit: false,
           fileSystem: globals.fs,
+          logger: logger,
         );
         releaseAssetServer = ReleaseAssetServer(
           globals.fs.file('main.dart').uri,
@@ -352,6 +353,7 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
+        logger: logger,
       );
 
       expect(webAssetServer.basePath, 'foo/bar');
@@ -376,6 +378,7 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
+        logger: logger,
       );
 
       // Defaults to "/" when there's no base element.
@@ -402,6 +405,7 @@ void main() {
           webRenderer: WebRendererMode.canvaskit,
           useLocalCanvasKit: false,
           fileSystem: globals.fs,
+          logger: logger,
         ),
         throwsToolExit(),
       );
@@ -427,6 +431,7 @@ void main() {
           webRenderer: WebRendererMode.canvaskit,
           useLocalCanvasKit: false,
           fileSystem: globals.fs,
+          logger: logger,
         ),
         throwsToolExit(),
       );
@@ -500,6 +505,7 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: true,
         fileSystem: globals.fs,
+        logger: logger,
       );
 
       final Response response = await webAssetServer.handleRequest(
@@ -1530,6 +1536,7 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
+        logger: logger,
       );
 
       expect(await webAssetServer.metadataContents('foo/main_module.ddc_merged_metadata'), null);
@@ -1619,6 +1626,7 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
+        logger: logger,
       );
 
       final Response response = await webAssetServer.handleRequest(
@@ -1670,6 +1678,7 @@ void main() {
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
         webDefines: <String, String>{}, // Empty webDefines
+        logger: logger,
       );
 
       final Response response = await webAssetServer.handleRequest(
@@ -1719,6 +1728,7 @@ const config = {
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
         webDefines: <String, String>{'API_URL': 'https://test.api.com', 'DEBUG_MODE': 'true'},
+        logger: logger,
       );
 
       final Response response = await webAssetServer.handleRequest(

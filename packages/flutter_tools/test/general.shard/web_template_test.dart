@@ -5,6 +5,7 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/web_template.dart';
 
 import '../src/common.dart';
@@ -287,6 +288,7 @@ String htmlSampleStaticAssetsUrlReplaced({required String staticAssetsUrl}) =>
 
 void main() {
   final fs = MemoryFileSystem();
+  final logger = BufferLogger.test();
   final File flutterJs = fs.file('flutter.js');
   flutterJs.writeAsStringSync('(flutter.js content)');
 
@@ -318,6 +320,7 @@ void main() {
         baseHref: '/foo/333/',
         serviceWorkerVersion: 'v123xyz',
         flutterJsFile: flutterJs,
+        logger: logger,
       ),
       htmlSample2Replaced(baseHref: '/foo/333/', serviceWorkerVersion: 'v123xyz'),
     );
@@ -330,6 +333,7 @@ void main() {
         baseHref: '/foo/333/',
         serviceWorkerVersion: 'v123xyz',
         flutterJsFile: flutterJs,
+        logger: logger,
       ),
       htmlSample2Replaced(baseHref: '/foo/333/', serviceWorkerVersion: 'v123xyz'),
     );
@@ -345,6 +349,7 @@ void main() {
         serviceWorkerVersion: '(service worker version)',
         flutterJsFile: flutterJs,
         buildConfig: '(build config)',
+        logger: logger,
       ),
       htmlSampleInlineFlutterJsBootstrapOutput,
     );
@@ -361,6 +366,7 @@ void main() {
         flutterJsFile: flutterJs,
         buildConfig: '(build config)',
         flutterBootstrapJs: '(flutter bootstrap script)',
+        logger: logger,
       ),
       htmlSampleFullFlutterBootstrapReplacementOutput,
     );
@@ -376,6 +382,7 @@ void main() {
         serviceWorkerVersion: 'v123xyz',
         flutterJsFile: flutterJs,
         staticAssetsUrl: expectedStaticAssetsUrl,
+        logger: logger,
       ),
       htmlSampleStaticAssetsUrlReplaced(staticAssetsUrl: expectedStaticAssetsUrl),
     );
@@ -389,6 +396,7 @@ void main() {
       baseHref: '/foo/333/',
       serviceWorkerVersion: 'v123xyz',
       flutterJsFile: flutterJs,
+      logger: logger,
     );
     // The parsed base href should be updated after substitutions.
     expect(WebTemplate.baseHref(substituted), 'foo/333');
@@ -454,6 +462,7 @@ void main() {
         'ENV': 'production',
         'DEBUG_MODE': 'false',
       },
+      logger: logger,
     );
 
     expect(result, contains("apiUrl: 'https://api.example.com'"));
@@ -482,6 +491,7 @@ void main() {
       serviceWorkerVersion: null,
       flutterJsFile: flutterJs,
       webDefines: <String, String>{}, // Missing API_URL
+      logger: testLogger,
     );
 
     expect(testLogger.warningText, contains('Missing web-define variable: API_URL'));
@@ -514,6 +524,7 @@ void main() {
       serviceWorkerVersion: null,
       flutterJsFile: flutterJs,
       webDefines: <String, String>{'API_URL': 'test'}, // Missing ENV, VERSION
+      logger: testLogger,
     );
 
     expect(testLogger.warningText, contains('Missing web-define variables: ENV, VERSION'));
@@ -547,6 +558,7 @@ void main() {
         flutterJsFile: flutterJs,
         buildConfig: 'test config',
         webDefines: <String, String>{}, // Missing CUSTOM_VAR but built-in vars should be ignored
+        logger: testLogger,
       );
 
       expect(testLogger.warningText, contains('Missing web-define variable: CUSTOM_VAR'));
@@ -575,6 +587,7 @@ void main() {
       serviceWorkerVersion: null,
       flutterJsFile: flutterJs,
       webDefines: <String, String>{'EMPTY_VAR': ''},
+      logger: logger,
     );
 
     expect(result, contains("const value = '';"));

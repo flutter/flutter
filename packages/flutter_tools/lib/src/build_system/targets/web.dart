@@ -737,6 +737,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
       serviceWorkerVersion: serviceWorkerVersion,
       flutterJsFile: flutterJsFile,
       buildConfig: buildConfig,
+      logger: environment.logger,
     );
 
     final File outputFlutterBootstrapJs = fileSystem.file(
@@ -760,6 +761,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
           flutterJsFile: flutterJsFile,
           buildConfig: buildConfig,
           flutterBootstrapJs: bootstrapContent,
+          logger: environment.logger,
         );
         final File outputIndexHtml = fileSystem.file(
           fileSystem.path.join(environment.outputDir.path, relativePath),
