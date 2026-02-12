@@ -600,9 +600,8 @@ class CachedArtifacts implements Artifacts {
       case Artifact.genSnapshotX64:
         assert(mode != BuildMode.debug, 'Artifact $artifact only available in non-debug mode.');
 
-        // TODO(cbracken): Build Android gen_snapshot as Arm64 binary to run
-        // natively on Apple Silicon. See:
-        // https://github.com/flutter/flutter/issues/152281
+        // macOS gen_snapshot ships as a universal binary under the darwin-x64
+        // directory name, so remap darwin-arm64 to darwin-x64 for path resolution.
         HostPlatform hostPlatform = getCurrentHostPlatform();
         if (hostPlatform == HostPlatform.darwin_arm64) {
           hostPlatform = HostPlatform.darwin_x64;
