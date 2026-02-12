@@ -642,137 +642,133 @@ class _SkwasmUniformVec4Slot implements ui.UniformVec4Slot {
 }
 
 class _SkwasmUniformMat2Slot implements ui.UniformMat2Slot {
-  _SkwasmUniformMat2Slot._(this._m00, this._m01, this._m10, this._m11);
+  _SkwasmUniformMat2Slot._(this._m00, this._m10, this._m01, this._m11);
 
-  // Set the elemnts of the matrix in row-major order.
+  // Set the elements of the matrix in column-major order.
   @override
-  void set(double m00, double m01, double m10, double m11) {
+  void set(double m00, double m10, double m01, double m11) {
     _m00.set(m00);
-    _m01.set(m01);
     _m10.set(m10);
+    _m01.set(m01);
     _m11.set(m11);
   }
 
-  // The elements of the matrix. Where mij referes to the ith row and the jth column.
-  final SkwasmUniformFloatSlot _m00, _m01, _m10, _m11;
+  // The elements of the matrix, stored in column-major order.
+  // mij refers to the ith row and the jth column.
+  final SkwasmUniformFloatSlot _m00, _m10; // Column 0
+  final SkwasmUniformFloatSlot _m01, _m11; // Column 1
 }
 
 class _SkwasmUniformMat3Slot implements ui.UniformMat3Slot {
   _SkwasmUniformMat3Slot._(
     this._m00,
-    this._m01,
-    this._m02,
     this._m10,
-    this._m11,
-    this._m12,
     this._m20,
+    this._m01,
+    this._m11,
     this._m21,
+    this._m02,
+    this._m12,
     this._m22,
   );
 
-  // Set the elemnts of the matrix in row-major order.
+  // Set the elements of the matrix in column-major order.
   @override
   void set(
     double m00,
-    double m01,
-    double m02,
     double m10,
-    double m11,
-    double m12,
     double m20,
+    double m01,
+    double m11,
     double m21,
+    double m02,
+    double m12,
     double m22,
   ) {
     _m00.set(m00);
-    _m01.set(m01);
-    _m02.set(m02);
     _m10.set(m10);
-    _m11.set(m11);
-    _m12.set(m12);
     _m20.set(m20);
+
+    _m01.set(m01);
+    _m11.set(m11);
     _m21.set(m21);
+
+    _m02.set(m02);
+    _m12.set(m12);
     _m22.set(m22);
   }
 
-  // The elements of the matrix. Where mij referes to the ith row and the jth column.
-  final SkwasmUniformFloatSlot _m00, _m01, _m02, _m10, _m11, _m12, _m20, _m21, _m22;
+  // The elements of the matrix, stored in column-major order.
+  // mij refers to the ith row and the jth column.
+  final SkwasmUniformFloatSlot _m00, _m10, _m20; // Column 0
+  final SkwasmUniformFloatSlot _m01, _m11, _m21; // Column 1
+  final SkwasmUniformFloatSlot _m02, _m12, _m22; // Column 2
 }
 
 class _SkwasmUniformMat4Slot implements ui.UniformMat4Slot {
   _SkwasmUniformMat4Slot._(
     this._m00,
-    this._m01,
-    this._m02,
-    this._m03,
     this._m10,
-    this._m11,
-    this._m12,
-    this._m13,
     this._m20,
-    this._m21,
-    this._m22,
-    this._m23,
     this._m30,
+    this._m01,
+    this._m11,
+    this._m21,
     this._m31,
+    this._m02,
+    this._m12,
+    this._m22,
     this._m32,
+    this._m03,
+    this._m13,
+    this._m23,
     this._m33,
   );
 
-  // Set the elemnts of the matrix in row-major order.
+  // Set the elements of the matrix in column-major order.
   @override
   void set(
     double m00,
-    double m01,
-    double m02,
-    double m03,
     double m10,
-    double m11,
-    double m12,
-    double m13,
     double m20,
-    double m21,
-    double m22,
-    double m23,
     double m30,
+    double m01,
+    double m11,
+    double m21,
     double m31,
+    double m02,
+    double m12,
+    double m22,
     double m32,
+    double m03,
+    double m13,
+    double m23,
     double m33,
   ) {
     _m00.set(m00);
-    _m01.set(m01);
-    _m02.set(m02);
-    _m03.set(m03);
     _m10.set(m10);
-    _m11.set(m11);
-    _m12.set(m12);
-    _m13.set(m13);
     _m20.set(m20);
-    _m21.set(m21);
-    _m22.set(m22);
-    _m23.set(m23);
     _m30.set(m30);
+    _m01.set(m01);
+    _m11.set(m11);
+    _m21.set(m21);
     _m31.set(m31);
+    _m02.set(m02);
+    _m12.set(m12);
+    _m22.set(m22);
     _m32.set(m32);
+    _m03.set(m03);
+    _m13.set(m13);
+    _m23.set(m23);
     _m33.set(m33);
   }
 
-  // The elements of the matrix. Where mij referes to the ith row and the jth column.
-  final SkwasmUniformFloatSlot _m00,
-      _m01,
-      _m02,
-      _m03,
-      _m10,
-      _m11,
-      _m12,
-      _m13,
-      _m20,
-      _m21,
-      _m22,
-      _m23,
-      _m30,
-      _m31,
-      _m32,
-      _m33;
+  // The elements of the matrix, stored in column-major order.
+  // mij refers to the ith row and the jth column.
+  final SkwasmUniformFloatSlot _m00, _m10, _m20, _m30; // Column 0
+  final SkwasmUniformFloatSlot _m01, _m11, _m21, _m31; // Column 1
+  final SkwasmUniformFloatSlot _m02, _m12, _m22, _m32; // Column 2
+  final SkwasmUniformFloatSlot _m03, _m13, _m23, _m33; // Column 3
 }
 
 class _SkwasmUniformArray<T extends ui.UniformType> implements ui.UniformArray<T> {
