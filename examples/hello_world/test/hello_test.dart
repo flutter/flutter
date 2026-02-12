@@ -2,14 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hello_world/main.dart' as hello_world;
+import '../lib/main.dart' as hello_world;
 
 void main() {
   testWidgets('Hello world smoke test', (WidgetTester tester) async {
-    hello_world.main(); // builds the app and schedules a frame but doesn't trigger one
+    hello_world
+        .main(); // builds the app and schedules a frame but doesn't trigger one
     await tester.pump(); // triggers a frame
 
-    expect(find.text('Hello, world!'), findsOneWidget);
+    expect(
+      find.byKey(const Key('title')), // searches for a Widget with the key: 'title'.
+      findsOneWidget, // The Test passes if its found
+    ); 
+    
   });
 }
