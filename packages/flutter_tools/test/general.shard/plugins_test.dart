@@ -2658,7 +2658,6 @@ flutter:
     testWithoutContext(
       'returns needsSwiftPackageManagerSupport when podspec exists but no Package.swift',
       () {
-        // Create a plugin with podspec but no Package.swift
         final plugin = Plugin(
           name: 'test_plugin',
           path: '/path/to/test_plugin/',
@@ -2672,7 +2671,6 @@ flutter:
           isDevDependency: false,
         );
 
-        // Create podspec but no Package.swift
         fs.directory('/path/to/test_plugin/ios').createSync(recursive: true);
         fs.file('/path/to/test_plugin/ios/test_plugin.podspec').createSync();
 
@@ -2713,7 +2711,6 @@ flutter:
           isDevDependency: false,
         );
 
-        // Create Package.swift with FlutterFramework dependency
         fs.directory('/path/to/test_plugin/ios/test_plugin').createSync(recursive: true);
         fs.file('/path/to/test_plugin/ios/test_plugin/Package.swift').writeAsStringSync('''
 // swift-tools-version: 5.9
@@ -2773,7 +2770,6 @@ let package = Package(
           isDevDependency: false,
         );
 
-        // Create Package.swift WITHOUT FlutterFramework dependency
         fs.directory('/path/to/test_plugin/ios/test_plugin').createSync(recursive: true);
         fs.file('/path/to/test_plugin/ios/test_plugin/Package.swift').writeAsStringSync('''
 // swift-tools-version: 5.9
@@ -2829,7 +2825,6 @@ let package = Package(
         isDevDependency: false,
       );
 
-      // Create Package.swift with product dependency syntax
       fs.directory('/path/to/test_plugin/ios/test_plugin').createSync(recursive: true);
       fs.file('/path/to/test_plugin/ios/test_plugin/Package.swift').writeAsStringSync('''
 // swift-tools-version: 5.9
@@ -2876,7 +2871,6 @@ let package = Package(
         isDevDependency: false,
       );
 
-      // Create podspec but no Package.swift for macOS
       fs.directory('/path/to/test_plugin/macos').createSync(recursive: true);
       fs.file('/path/to/test_plugin/macos/test_plugin.podspec').createSync();
 
@@ -2900,7 +2894,6 @@ let package = Package(
         defaultPackagePlatforms: const <String, String>{},
         pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
         platforms: <String, PluginPlatform>{
-          // Only Android, no iOS or macOS
           AndroidPlugin.kConfigKey: AndroidPlugin(
             name: 'test_plugin',
             package: 'com.example.test',
@@ -2946,7 +2939,6 @@ let package = Package(
         isDevDependency: false,
       );
 
-      // Create podspec in darwin directory
       fs.directory('/path/to/test_plugin/darwin').createSync(recursive: true);
       fs.file('/path/to/test_plugin/darwin/test_plugin.podspec').createSync();
 
