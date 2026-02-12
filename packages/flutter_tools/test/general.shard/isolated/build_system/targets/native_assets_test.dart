@@ -251,20 +251,11 @@ void main() {
       final List<String> buildInputs = _resolvedInputs(dartBuildForNative, iosEnvironment);
       final List<String> buildOutputs = _resolvedOutputs(dartBuildForNative, iosEnvironment);
       // Re-run if the C source changes.
-      expect(
-        buildInputs,
-        contains(iosEnvironment.fileSystem.file('src/foo.c').path),
-      );
+      expect(buildInputs, contains(iosEnvironment.fileSystem.file('src/foo.c').path));
       // Re-created if the result JSON is deleted.
-      expect(
-        buildOutputs,
-        contains(dartHookResultJsonFile.path),
-      );
+      expect(buildOutputs, contains(dartHookResultJsonFile.path));
       // Re-created if the dylib is deleted.
-      expect(
-        buildOutputs,
-        contains(libFooPath),
-      );
+      expect(buildOutputs, contains(libFooPath));
 
       final File nativeAssetsYaml = iosEnvironment.buildDir.childFile(
         InstallCodeAssets.nativeAssetsFilename,
@@ -274,15 +265,9 @@ void main() {
       final List<String> installInputs = _resolvedInputs(installCodeAssets, iosEnvironment);
       final List<String> installOutputs = _resolvedOutputs(installCodeAssets, iosEnvironment);
       // Re-run if the dylib changes.
-      expect(
-        installInputs,
-        contains(libFooPath),
-      );
+      expect(installInputs, contains(libFooPath));
       // Re-created if the final manifest is deleted.
-      expect(
-        installOutputs,
-        contains(nativeAssetsYaml.path),
-      );
+      expect(installOutputs, contains(nativeAssetsYaml.path));
       // Re-created if deleted by Xcode "Product > Clean Build Folder...".
       expect(
         installOutputs,
