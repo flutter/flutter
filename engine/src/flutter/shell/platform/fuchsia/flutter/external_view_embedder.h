@@ -26,8 +26,8 @@
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 
-#include "flatland_connection.h"
-#include "surface_producer.h"
+#include "flutter/shell/platform/fuchsia/flutter/flatland_connection.h"
+#include "flutter/shell/platform/fuchsia/flutter/surface_producer.h"
 
 namespace flutter_runner {
 
