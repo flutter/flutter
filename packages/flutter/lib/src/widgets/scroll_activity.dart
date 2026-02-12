@@ -172,6 +172,59 @@ abstract class ScrollActivity {
   String toString() => describeIdentity(this);
 }
 
+/// Describes the source of a scroll input.
+///
+/// Used by [RetargetableScrollActivity] and [ScrollPhysics.createScrollActivity]
+/// to determine how to handle the scroll input.
+sealed class ScrollDetails {
+  /// Creates a [ScrollDetails].
+  const ScrollDetails();
+
+  /// Whether this scroll was initiated by a pointer device (mouse wheel, trackpad).
+  bool get isPointer => this is PointerScrollDetails;
+
+  /// Whether this scroll was initiated by a keyboard input.
+  bool get isKeyboard => this is KeyboardScrollDetails;
+
+  /// Whether this scroll was initiated programmatically.
+  bool get isProgrammatic => this is ProgrammaticScrollDetails;
+}
+
+/// Scroll details for pointer-device-initiated scrolling (e.g. mouse wheel).
+final class PointerScrollDetails extends ScrollDetails {
+  /// Creates pointer scroll details with the given [kind].
+  const PointerScrollDetails(this.kind);
+
+  /// The kind of pointer device that initiated the scroll.
+  final PointerDeviceKind kind;
+}
+
+/// Scroll details for keyboard-initiated scrolling.
+final class KeyboardScrollDetails extends ScrollDetails {
+  /// Creates keyboard scroll details.
+  const KeyboardScrollDetails();
+}
+
+/// Scroll details for programmatic scrolling.
+final class ProgrammaticScrollDetails extends ScrollDetails {
+  /// Creates programmatic scroll details.
+  const ProgrammaticScrollDetails();
+}
+
+/// A [ScrollActivity] that can be retargeted with additional scroll deltas.
+///
+/// This is used by scroll coordinators to allow smooth scrolling activities
+/// to absorb additional scroll input without restarting.
+abstract class RetargetableScrollActivity extends ScrollActivity {
+  /// Creates a retargetable scroll activity.
+  RetargetableScrollActivity(super.delegate);
+
+  /// Adjusts the activity's target by the given [delta].
+  ///
+  /// The [details] describe the source of the scroll input.
+  void retarget(double delta, ScrollDetails details);
+}
+
 /// A scroll activity that does nothing.
 ///
 /// When a scroll view is not scrolling, it is performing the idle activity.
