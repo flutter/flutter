@@ -203,7 +203,7 @@ void main() {
     expect(localizations.formatFullDate(DateTime(2015, 7, 23)), 'Thursday, July 23, 2015');
 
     localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('en', 'GB'));
-    expect(localizations.formatMediumDate(DateTime(2015, 7, 23)), 'Thu, 23 Jul');
+    expect(localizations.formatMediumDate(DateTime(2015, 7, 23)), 'Thu 23 Jul');
     expect(localizations.formatFullDate(DateTime(2015, 7, 23)), 'Thursday, 23 July 2015');
 
     localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('es'));
@@ -213,6 +213,11 @@ void main() {
     localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('de'));
     expect(localizations.formatMediumDate(DateTime(2015, 7, 23)), 'Do., 23. Juli');
     expect(localizations.formatFullDate(DateTime(2015, 7, 23)), 'Donnerstag, 23. Juli 2015');
+
+    localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('ru'));
+    expect(localizations.formatMediumDate(DateTime(2015, 7, 23)), 'чт, 23 июл.');
+    // The space before 'г.' is a narrow no-break space (U+202F).
+    expect(localizations.formatFullDate(DateTime(2015, 7, 23)), 'четверг, 23 июля 2015\u202fг.');
   });
 
   testWidgets('Chinese resolution', (WidgetTester tester) async {
