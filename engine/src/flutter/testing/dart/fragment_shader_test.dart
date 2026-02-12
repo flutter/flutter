@@ -1177,14 +1177,18 @@ void main() async {
     });
   });
 
-  test('FragmentProgram getImageSampler', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset('uniform_ordering.frag.iplr');
-    final FragmentShader shader = program.fragmentShader();
-    final Image blueGreenImage = await _createBlueGreenImage();
-    final ImageSamplerSlot slot = shader.getImageSampler('u_texture');
-    slot.set(blueGreenImage);
-    expect(slot.shaderIndex, equals(0));
-  });
+  test(
+    'FragmentProgram getImageSampler',
+    () async {
+      final FragmentProgram program = await FragmentProgram.fromAsset('uniform_ordering.frag.iplr');
+      final FragmentShader shader = program.fragmentShader();
+      final Image blueGreenImage = await _createBlueGreenImage();
+      final ImageSamplerSlot slot = shader.getImageSampler('u_texture');
+      slot.set(blueGreenImage);
+      expect(slot.shaderIndex, equals(0));
+    },
+    skip: Platform.executableArguments.contains('--impeller-backend=opengles'),
+  );
 
   test('FragmentProgram getImageSampler unknown', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('uniform_ordering.frag.iplr');
@@ -1197,21 +1201,27 @@ void main() async {
     }
   });
 
-  test('FragmentShader setSampler throws with out-of-bounds index', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset('blue_green_sampler.frag.iplr');
-    final Image blueGreenImage = await _createBlueGreenImage();
-    final FragmentShader fragmentShader = program.fragmentShader();
+  test(
+    'FragmentShader setSampler throws with out-of-bounds index',
+    () async {
+      final FragmentProgram program = await FragmentProgram.fromAsset(
+        'blue_green_sampler.frag.iplr',
+      );
+      final Image blueGreenImage = await _createBlueGreenImage();
+      final FragmentShader fragmentShader = program.fragmentShader();
 
-    try {
-      fragmentShader.setImageSampler(1, blueGreenImage);
-      fail('Unreachable');
-    } catch (e) {
-      expect(e, contains('Sampler index out of bounds'));
-    } finally {
-      fragmentShader.dispose();
-      blueGreenImage.dispose();
-    }
-  });
+      try {
+        fragmentShader.setImageSampler(1, blueGreenImage);
+        fail('Unreachable');
+      } catch (e) {
+        expect(e, contains('Sampler index out of bounds'));
+      } finally {
+        fragmentShader.dispose();
+        blueGreenImage.dispose();
+      }
+    },
+    skip: Platform.executableArguments.contains('--impeller-backend=opengles'),
+  );
 
   test(
     'FragmentShader with sampler asserts if sampler is missing when assigned to paint',
@@ -1232,50 +1242,62 @@ void main() async {
     },
   );
 
-  test('FragmentShader setImageSampler asserts if image is disposed', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset('blue_green_sampler.frag.iplr');
-    final Image blueGreenImage = await _createBlueGreenImage();
-    final FragmentShader fragmentShader = program.fragmentShader();
+  test(
+    'FragmentShader setImageSampler asserts if image is disposed',
+    () async {
+      final FragmentProgram program = await FragmentProgram.fromAsset(
+        'blue_green_sampler.frag.iplr',
+      );
+      final Image blueGreenImage = await _createBlueGreenImage();
+      final FragmentShader fragmentShader = program.fragmentShader();
 
-    try {
-      blueGreenImage.dispose();
+      try {
+        blueGreenImage.dispose();
+        expect(
+          () {
+            fragmentShader.setImageSampler(0, blueGreenImage);
+          },
+          throwsA(
+            isA<AssertionError>().having(
+              (AssertionError e) => e.message,
+              'message',
+              contains('Image has been disposed'),
+            ),
+          ),
+        );
+      } finally {
+        fragmentShader.dispose();
+      }
+    },
+    skip: Platform.executableArguments.contains('--impeller-backend=opengles'),
+  );
+
+  test(
+    'Disposed FragmentShader on Paint',
+    () async {
+      final FragmentProgram program = await FragmentProgram.fromAsset(
+        'blue_green_sampler.frag.iplr',
+      );
+      final Image blueGreenImage = await _createBlueGreenImage();
+
+      final FragmentShader shader = program.fragmentShader()..setImageSampler(0, blueGreenImage);
+      shader.dispose();
       expect(
         () {
-          fragmentShader.setImageSampler(0, blueGreenImage);
+          Paint().shader = shader;
         },
         throwsA(
           isA<AssertionError>().having(
             (AssertionError e) => e.message,
             'message',
-            contains('Image has been disposed'),
+            contains('Attempted to set a disposed shader'),
           ),
         ),
       );
-    } finally {
-      fragmentShader.dispose();
-    }
-  });
-
-  test('Disposed FragmentShader on Paint', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset('blue_green_sampler.frag.iplr');
-    final Image blueGreenImage = await _createBlueGreenImage();
-
-    final FragmentShader shader = program.fragmentShader()..setImageSampler(0, blueGreenImage);
-    shader.dispose();
-    expect(
-      () {
-        Paint().shader = shader;
-      },
-      throwsA(
-        isA<AssertionError>().having(
-          (AssertionError e) => e.message,
-          'message',
-          contains('Attempted to set a disposed shader'),
-        ),
-      ),
-    );
-    blueGreenImage.dispose();
-  });
+      blueGreenImage.dispose();
+    },
+    skip: Platform.executableArguments.contains('--impeller-backend=opengles'),
+  );
 
   test('Disposed FragmentShader setFloat', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
@@ -1296,26 +1318,32 @@ void main() async {
     );
   });
 
-  test('Disposed FragmentShader setImageSampler', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset('blue_green_sampler.frag.iplr');
-    final Image blueGreenImage = await _createBlueGreenImage();
+  test(
+    'Disposed FragmentShader setImageSampler',
+    () async {
+      final FragmentProgram program = await FragmentProgram.fromAsset(
+        'blue_green_sampler.frag.iplr',
+      );
+      final Image blueGreenImage = await _createBlueGreenImage();
 
-    final FragmentShader shader = program.fragmentShader()..setImageSampler(0, blueGreenImage);
-    shader.dispose();
-    expect(
-      () {
-        shader.setImageSampler(0, blueGreenImage);
-      },
-      throwsA(
-        isA<AssertionError>().having(
-          (AssertionError e) => e.message,
-          'message',
-          contains('Tried to access uniforms on a disposed Shader'),
+      final FragmentShader shader = program.fragmentShader()..setImageSampler(0, blueGreenImage);
+      shader.dispose();
+      expect(
+        () {
+          shader.setImageSampler(0, blueGreenImage);
+        },
+        throwsA(
+          isA<AssertionError>().having(
+            (AssertionError e) => e.message,
+            'message',
+            contains('Tried to access uniforms on a disposed Shader'),
+          ),
         ),
-      ),
-    );
-    blueGreenImage.dispose();
-  });
+      );
+      blueGreenImage.dispose();
+    },
+    skip: Platform.executableArguments.contains('--impeller-backend=opengles'),
+  );
 
   test('Disposed FragmentShader dispose', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
