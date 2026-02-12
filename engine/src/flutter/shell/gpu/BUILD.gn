@@ -74,7 +74,7 @@ source_set("gpu_surface_vulkan") {
   }
 }
 
-if (impeller_enable_vulkan) {
+if (test_enable_vulkan) {
   impeller_component("gpu_surface_vulkan_unittests") {
     testonly = true
 

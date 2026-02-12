@@ -5,6 +5,7 @@
 import("//build/toolchain/clang.gni")
 import("//flutter/common/config.gni")
 import("//flutter/examples/examples.gni")
+import("//flutter/shell/config.gni")
 import("//flutter/shell/platform/config.gni")
 import("//flutter/shell/platform/glfw/config.gni")
 import("//flutter/testing/testing.gni")
@@ -239,7 +240,6 @@ group("unittests") {
         "//flutter/impeller:impeller_dart_unittests",
         "//flutter/impeller:impeller_unittests",
         "//flutter/impeller/toolkit/interop:example",
-        "//flutter/shell/gpu:gpu_surface_vulkan_unittests",
       ]
     }
 
@@ -260,6 +260,10 @@ group("unittests") {
         "//flutter/shell/platform/android/jni:jni_unittests",
         "//flutter/shell/platform/android/platform_view_android_delegate:platform_view_android_delegate_unittests",
       ]
+    }
+
+    if (test_enable_vulkan) {
+      public_deps += [ "//flutter/shell/gpu:gpu_surface_vulkan_unittests" ]
     }
 
     # Unit tests for desktop embeddings should only be built if the desktop
