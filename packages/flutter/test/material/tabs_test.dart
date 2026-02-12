@@ -2863,12 +2863,12 @@ void main() {
   });
 
   testWidgets('TabBar correctly detaches old external TabBarScrollController when switched to a new one', (WidgetTester tester) async {
-    final List<Tab> tabs = <Tab>[
+    final tabs = <Tab>[
       for (int i = 0; i < 10; i++) Tab(text: 'Tab $i'),
     ];
 
-    final TabBarScrollController controllerA = TabBarScrollController();
-    final TabBarScrollController controllerB = TabBarScrollController();
+    final controllerA = TabBarScrollController();
+    final controllerB = TabBarScrollController();
     addTearDown(controllerA.dispose);
     addTearDown(controllerB.dispose);
 
@@ -2903,11 +2903,11 @@ void main() {
   });
 
   testWidgets('TabBar correctly detaches external TabBarScrollController when disposed', (WidgetTester tester) async {
-    final List<Tab> tabs = <Tab>[
+    final tabs = <Tab>[
       for (int i = 0; i < 10; i++) Tab(text: 'Tab $i'),
     ];
 
-    final TabBarScrollController controller = TabBarScrollController();
+    final controller = TabBarScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
