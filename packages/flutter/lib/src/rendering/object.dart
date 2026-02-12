@@ -1508,32 +1508,21 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       // It is possible the updateChildren above caused some nodes to be added
       // to _nodesNeedingSemanticsGeometryUpdate. Therefore, we need to
       // process them here.
-      final List<RenderObject> nodesToProcessGeometry =
-          _nodesNeedingSemanticsGeometryUpdate
-              .where(
-                (RenderObject object) =>
-                    !object._needsLayout &&
-                    object.owner == this &&
-                    // This node is blocked by a sibling
-                    // (via SemanticsConfiguration.isBlockingSemanticsOfPreviouslyPaintedNodes)
-                    // or the parent node would have updated this node's parent data and it
-                    // would not be dirty.
-                    !object._semantics.notInSemanticsTree,
-              )
-              .toList()
-            ..sort((RenderObject a, RenderObject b) => a.depth - b.depth);
+      final List<RenderObject> nodesToProcessGeometry = _nodesNeedingSemanticsGeometryUpdate
+          .where(
+            (RenderObject object) =>
+                !object._needsLayout &&
+                object.owner == this &&
+                // This node is blocked by a sibling
+                // (via SemanticsConfiguration.isBlockingSemanticsOfPreviouslyPaintedNodes)
+                // or the parent node would have updated this node's parent data and it
+                // would not be dirty.
+                !object._semantics.notInSemanticsTree,
+          )
+          .toList();
       _nodesNeedingSemanticsGeometryUpdate.clear();
-      final nodeToEnsureGeometry = <_RenderObjectSemantics>{};
       // Clear geometry for nodes that needs geometry update.
       for (final node in nodesToProcessGeometry) {
-        _RenderObjectSemantics target = node._semantics;
-        while (!target.isRoot && (!target.shouldFormSemanticsNode)) {
-          target = target.parent!;
-        }
-        if (!target.geometryDirty) {
-          nodeToEnsureGeometry.add(target);
-        }
-
         if (node._semantics.shouldFormSemanticsNode && node._semantics.geometryDirty) {
           // This node is already dirty, skip it.
           continue;
@@ -1568,6 +1557,19 @@ base class PipelineOwner with DiagnosticableTreeMixin {
         // nodes in the subtree.
         for (final _RenderObjectSemantics child in node._semantics._children) {
           child.geometry = null;
+        }
+      }
+
+      final nodeToEnsureGeometry = <_RenderObjectSemantics>{};
+      for (final node in nodesToProcessGeometry) {
+        _RenderObjectSemantics target = node._semantics.isRoot
+            ? node._semantics
+            : node._semantics.parent!;
+        while (!target.shouldFormSemanticsNode) {
+          target = target.parent!;
+        }
+        if (!target.geometryDirty) {
+          nodeToEnsureGeometry.add(target);
         }
       }
 
@@ -5977,13 +5979,13 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// be affect after the update. (e.g. the size doesn't change, or new clip
   /// rect doesn't clip the content).
   void ensureGeometry() {
+    assert(!geometryDirty);
     if (isRoot) {
       if (geometry?.rect != renderObject.semanticBounds) {
         markNeedsBuild();
       }
       geometry = _SemanticsGeometry.root(renderObject.semanticBounds);
     }
-    assert(geometry != null);
     _updateChildGeometry(onlyDirtyChildren: true);
   }
 
