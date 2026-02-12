@@ -2678,17 +2678,16 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       expands: widget.expands,
     );
 
-    // Pass error or hint text to semantics so screen readers announce it
-    // along with the input field (via aria-description on web).
-    // Error takes priority over hint since it requires user action.
-    // Note: When an error widget is displayed (even without errorText),
-    // we don't announce hintText since the visual state shows an error.
+    // Pass error text to semantics so screen readers announce it along with
+    // the input field (via aria-description on web). The hintText is already
+    // in the semantics tree via the hint Text widget that merges up through
+    // _RenderDecoration's childSemanticsConfigurationDelegate, so we only
+    // need to add errorText here. Adding hintText would cause duplication.
     // TODO(flutter-zl): A follow-up using aria-describedby with element IDs
     // will address complex cases (custom error widgets, errors outside
     // InputDecoration, custom announcement ordering). See
     // https://github.com/flutter/flutter/issues/180496#issuecomment-3713178684.
-    final bool hasErrorWidget = decoration.error != null || decoration.errorText != null;
-    final String? semanticsHint = hasErrorWidget ? decoration.errorText : decoration.hintText;
+    final String? semanticsHint = decoration.errorText;
 
     final Widget result = Semantics(hint: semanticsHint, child: decorator);
 

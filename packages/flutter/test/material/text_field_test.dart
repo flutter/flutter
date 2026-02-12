@@ -9357,7 +9357,6 @@ void main() {
               children: <TestSemantics>[
                 TestSemantics(
                   label: 'label',
-                  hint: 'hint',
                   textDirection: TextDirection.ltr,
                   inputType: ui.SemanticsInputType.text,
                   maxValueLength: 10,
@@ -9399,7 +9398,6 @@ void main() {
               children: <TestSemantics>[
                 TestSemantics.rootChild(
                   label: 'label',
-                  hint: 'hint', // hintText is now passed to semantics hint
                   textDirection: TextDirection.ltr,
                   textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
                   inputType: ui.SemanticsInputType.text,
@@ -9475,7 +9473,6 @@ void main() {
               children: <TestSemantics>[
                 TestSemantics(
                   label: 'label',
-                  hint: 'hint',
                   textDirection: TextDirection.ltr,
                   inputType: ui.SemanticsInputType.text,
                   currentValueLength: 0,
@@ -9572,86 +9569,54 @@ void main() {
     });
   }
 
-  testWidgets('TextField passes hintText to semantics hint when no error', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('TextField hintText is not duplicated in semantics', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
     final TextEditingController controller = _textEditingController();
     final Key key = UniqueKey();
 
     await tester.pumpWidget(
-      overlay(
-        child: TextField(
-          key: key,
-          controller: controller,
-          decoration: const InputDecoration(labelText: 'Email', hintText: 'Enter your email'),
-        ),
-      ),
-    );
-
-    final SemanticsNode node = tester.getSemantics(find.byKey(key));
-
-    // The semantics hint should be the hintText when no error
-    expect(node.hint, 'Enter your email');
-
-    semantics.dispose();
-  });
-
-  testWidgets('TextField errorText takes priority over hintText for semantics hint', (
-    WidgetTester tester,
-  ) async {
-    final semantics = SemanticsTester(tester);
-    final TextEditingController controller = _textEditingController();
-    final Key key = UniqueKey();
-
-    // When both hintText and errorText are present, errorText should be used
-    // for the semantics hint since errors require immediate user action
-    await tester.pumpWidget(
-      overlay(
-        child: TextField(
-          key: key,
-          controller: controller,
-          decoration: const InputDecoration(
-            labelText: 'Email',
-            hintText: 'Enter your email',
-            errorText: 'Email is required',
+      MaterialApp(
+        home: Scaffold(
+          body: Form(
+            child: TextField(
+              key: key,
+              controller: controller,
+              decoration: const InputDecoration(labelText: 'Search', hintText: 'Search Google Pay'),
+            ),
           ),
         ),
       ),
     );
 
-    final SemanticsNode node = tester.getSemantics(find.byKey(key));
-    expect(node.hint, 'Email is required'); // Error takes priority over hint
+    // Focus the text field so the hint Text widget becomes visible
+    // and merges into the semantics tree.
+    await tester.tap(find.byKey(key));
+    await tester.pumpAndSettle();
 
-    semantics.dispose();
-  });
-
-  testWidgets('TextField does not announce hintText when error widget is present', (
-    WidgetTester tester,
-  ) async {
-    final semantics = SemanticsTester(tester);
-    final TextEditingController controller = _textEditingController();
-    final Key key = UniqueKey();
-
-    // When error widget is present but errorText is null, we should NOT
-    // announce hintText since the visual state shows an error
-    await tester.pumpWidget(
-      overlay(
-        child: TextField(
-          key: key,
-          controller: controller,
-          decoration: const InputDecoration(
-            labelText: 'Email',
-            hintText: 'Enter your email',
-            error: Text('Custom error widget'), // error widget, not errorText
-          ),
-        ),
-      ),
-    );
-
-    final SemanticsNode node = tester.getSemantics(find.byKey(key));
-    // semantics hint should be empty, not hintText, because an error is displayed
+    final SemanticsNode node = tester.getSemantics(find.byType(EditableText));
+    expect(node.label, contains('Search Google Pay'));
     expect(node.hint, isEmpty);
+
+    semantics.dispose();
+  });
+
+  testWidgets('TextField passes errorText to semantics hint', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+    final TextEditingController controller = _textEditingController();
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          key: key,
+          controller: controller,
+          decoration: const InputDecoration(labelText: 'Email', errorText: 'Email is required'),
+        ),
+      ),
+    );
+
+    final SemanticsNode node = tester.getSemantics(find.byKey(key));
+    expect(node.hint, 'Email is required');
 
     semantics.dispose();
   });
