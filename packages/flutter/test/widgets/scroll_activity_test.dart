@@ -361,6 +361,39 @@ void main() {
       areCreateAndDispose,
     );
   });
+
+  test('ScrollDetails type checks', () {
+    const pointer = PointerScrollDetails(PointerDeviceKind.mouse);
+    expect(pointer.isPointer, isTrue);
+    expect(pointer.isKeyboard, isFalse);
+    expect(pointer.isProgrammatic, isFalse);
+
+    const keyboard = KeyboardScrollDetails();
+    expect(keyboard.isPointer, isFalse);
+    expect(keyboard.isKeyboard, isTrue);
+    expect(keyboard.isProgrammatic, isFalse);
+
+    const programmatic = ProgrammaticScrollDetails();
+    expect(programmatic.isPointer, isFalse);
+    expect(programmatic.isKeyboard, isFalse);
+    expect(programmatic.isProgrammatic, isTrue);
+  });
+
+  test('PointerScrollDetails stores pointer device kind', () {
+    const mouse = PointerScrollDetails(PointerDeviceKind.mouse);
+    expect(mouse.kind, PointerDeviceKind.mouse);
+
+    const trackpad = PointerScrollDetails(PointerDeviceKind.trackpad);
+    expect(trackpad.kind, PointerDeviceKind.trackpad);
+  });
+
+  test('RetargetableScrollActivity.retarget is callable', () {
+    final delegate = _ScrollActivityDelegate();
+    final activity = _TestRetargetableScrollActivity(delegate);
+    // Calling retarget should not throw.
+    activity.retarget(10.0, const PointerScrollDetails(PointerDeviceKind.mouse));
+    activity.dispose();
+  });
 }
 
 class PageView62209 extends StatefulWidget {
@@ -558,4 +591,22 @@ class _ScrollActivityDelegate extends ScrollActivityDelegate {
 
   @override
   double setPixels(double pixels) => 0.0;
+}
+
+class _TestRetargetableScrollActivity extends RetargetableScrollActivity {
+  _TestRetargetableScrollActivity(super.delegate);
+
+  @override
+  void retarget(double delta, ScrollDetails details) {
+    // No-op for testing.
+  }
+
+  @override
+  bool get shouldIgnorePointer => false;
+
+  @override
+  bool get isScrolling => false;
+
+  @override
+  double get velocity => 0.0;
 }
