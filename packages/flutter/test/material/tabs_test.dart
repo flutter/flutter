@@ -2862,50 +2862,51 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('TabBar correctly detaches old external TabBarScrollController when switched to a new one', (WidgetTester tester) async {
-    final tabs = <Tab>[
-      for (int i = 0; i < 10; i++) Tab(text: 'Tab $i'),
-    ];
+  testWidgets(
+    'TabBar correctly detaches old external TabBarScrollController when switched to a new one',
+    (WidgetTester tester) async {
+      final tabs = <Tab>[for (int i = 0; i < 10; i++) Tab(text: 'Tab $i')];
 
-    final controllerA = TabBarScrollController();
-    final controllerB = TabBarScrollController();
-    addTearDown(controllerA.dispose);
-    addTearDown(controllerB.dispose);
+      final controllerA = TabBarScrollController();
+      final controllerB = TabBarScrollController();
+      addTearDown(controllerA.dispose);
+      addTearDown(controllerB.dispose);
 
-    await tester.pumpWidget(
-      boilerplate(
-        child: TabBar(
-          isScrollable: true,
-          controller: TabController(length: tabs.length, vsync: const TestVSync()),
-          scrollController: controllerA,
-          tabs: tabs,
+      await tester.pumpWidget(
+        boilerplate(
+          child: TabBar(
+            isScrollable: true,
+            controller: TabController(length: tabs.length, vsync: const TestVSync()),
+            scrollController: controllerA,
+            tabs: tabs,
+          ),
         ),
-      ),
-    );
+      );
 
-    expect(controllerA.debugCheckHasTabBarState(), isTrue);
-    expect(() => controllerB.debugCheckHasTabBarState(), throwsAssertionError);
+      expect(controllerA.debugCheckHasTabBarState(), isTrue);
+      expect(() => controllerB.debugCheckHasTabBarState(), throwsAssertionError);
 
-    // Switch to controllerB
-    await tester.pumpWidget(
-      boilerplate(
-        child: TabBar(
-          isScrollable: true,
-          controller: TabController(length: tabs.length, vsync: const TestVSync()),
-          scrollController: controllerB,
-          tabs: tabs,
+      // Switch to controllerB
+      await tester.pumpWidget(
+        boilerplate(
+          child: TabBar(
+            isScrollable: true,
+            controller: TabController(length: tabs.length, vsync: const TestVSync()),
+            scrollController: controllerB,
+            tabs: tabs,
+          ),
         ),
-      ),
-    );
+      );
 
-    expect(controllerB.debugCheckHasTabBarState(), isTrue);
-    expect(() => controllerA.debugCheckHasTabBarState(), throwsAssertionError);
-  });
+      expect(controllerB.debugCheckHasTabBarState(), isTrue);
+      expect(() => controllerA.debugCheckHasTabBarState(), throwsAssertionError);
+    },
+  );
 
-  testWidgets('TabBar correctly detaches external TabBarScrollController when disposed', (WidgetTester tester) async {
-    final tabs = <Tab>[
-      for (int i = 0; i < 10; i++) Tab(text: 'Tab $i'),
-    ];
+  testWidgets('TabBar correctly detaches external TabBarScrollController when disposed', (
+    WidgetTester tester,
+  ) async {
+    final tabs = <Tab>[for (int i = 0; i < 10; i++) Tab(text: 'Tab $i')];
 
     final controller = TabBarScrollController();
     addTearDown(controller.dispose);
