@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "dart_runner.h"
+#include "flutter/shell/platform/fuchsia/dart_runner/dart_runner.h"
 
 #include <lib/async-loop/loop.h>
 #include <lib/async/default.h>
@@ -16,13 +16,13 @@
 #include <thread>
 #include <utility>
 
-#include "dart_component_controller.h"
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
-#include "runtime/dart/utils/inlines.h"
-#include "runtime/dart/utils/vmservice_object.h"
-#include "service_isolate.h"
+#include "flutter/shell/platform/fuchsia/dart_runner/dart_component_controller.h"
+#include "flutter/shell/platform/fuchsia/dart_runner/service_isolate.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/inlines.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/vmservice_object.h"
 #include "third_party/dart/runtime/include/bin/dart_io_api.h"
 #include "third_party/tonic/dart_microtask_queue.h"
 #include "third_party/tonic/dart_state.h"

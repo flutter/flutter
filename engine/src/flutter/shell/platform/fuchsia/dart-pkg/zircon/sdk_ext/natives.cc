@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "natives.h"
+#include "flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/natives.h"
 
 #include <zircon/syscalls.h>
 
@@ -10,10 +10,10 @@
 #include <memory>
 #include <vector>
 
-#include "handle.h"
-#include "handle_disposition.h"
-#include "handle_waiter.h"
-#include "system.h"
+#include "flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/handle.h"
+#include "flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/handle_disposition.h"
+#include "flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/handle_waiter.h"
+#include "flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/system.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/tonic/dart_binding_macros.h"
 #include "third_party/tonic/dart_class_library.h"
