@@ -46,11 +46,13 @@ class PaintClusters extends TextPaint {
         ui.window.devicePixelRatio,
       );
 
-      WebParagraphDebug.log(
-        '+_paintByBlocks: ${block.textRange} ${block.spanShiftFromLineStart} ${block.shiftFromLineStart} '
-        '${line.advance} + ${line.formattingShift} '
-        '\nsourceRect: $sourceRect targetRect: $targetRect',
-      );
+      if (WebParagraphDebug.logging) {
+        WebParagraphDebug.log(
+          '+_paintByBlocks: ${block.textRange} ${block.spanShiftFromLineStart} ${block.shiftFromLineStart} '
+          '${line.advance} + ${line.formattingShift} '
+          '\nsourceRect: $sourceRect targetRect: $targetRect',
+        );
+      }
       // Let's draw whatever has to be drawn
       switch (styleElement) {
         case StyleElements.background:
@@ -63,8 +65,10 @@ class PaintClusters extends TextPaint {
           );
           fillDecorations(block, sourceRect);
           painter.drawDecorations(canvas, sourceRect, targetRect);
-        default:
-          assert(false);
+        case StyleElements.text:
+          throw Exception('Text should be drawn by clusters, not blocks');
+        case StyleElements.shadows:
+          throw Exception('Shadows should be drawn by clusters, not blocks');
       }
     }
   }
@@ -89,18 +93,20 @@ class PaintClusters extends TextPaint {
         continue;
       }
 
-      WebParagraphDebug.log(
-        '+paintByClusters: ${block.textRange} ${block.clusterRange} ${(block as TextBlock).clusterRangeWithoutWhitespaces} ${block.whitespacesWidth} ${block.isLtr} ${line.advance.left} + ${line.formattingShift} + ${block.shiftFromLineStart}',
-      );
+      if (WebParagraphDebug.logging) {
+        WebParagraphDebug.log(
+          '+paintByClusters: ${block.textRange} ${block.clusterRange} ${(block as TextBlock).clusterRangeWithoutWhitespaces} ${block.whitespacesWidth} ${block.isLtr} ${line.advance.left} + ${line.formattingShift} + ${block.shiftFromLineStart}',
+        );
+      }
 
       // We are painting clusters in visual order so that if they step on each other, the paint
       // order is correct.
       final int start = block.isLtr
-          ? block.clusterRangeWithoutWhitespaces.start
-          : block.clusterRangeWithoutWhitespaces.end - 1;
+          ? (block as TextBlock).clusterRangeWithoutWhitespaces.start
+          : (block as TextBlock).clusterRangeWithoutWhitespaces.end - 1;
       final int end = block.isLtr
-          ? block.clusterRangeWithoutWhitespaces.end
-          : block.clusterRangeWithoutWhitespaces.start - 1;
+          ? (block as TextBlock).clusterRangeWithoutWhitespaces.end
+          : (block as TextBlock).clusterRangeWithoutWhitespaces.start - 1;
       final step = block.isLtr ? 1 : -1;
       for (var i = start; i != end; i += step) {
         final WebCluster clusterText = block is EllipsisBlock
@@ -153,8 +159,10 @@ class PaintClusters extends TextPaint {
                   : layout.paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr,
             );
             painter.drawTextCluster(canvas, sourceRect, targetRect);
-          default:
-            assert(false);
+          case StyleElements.background:
+            throw Exception('Background should be drawn by blocks, not clusters');
+          case StyleElements.decorations:
+            throw Exception('Decorations should be drawn by blocks, not clusters');
         }
       }
     }
@@ -189,9 +197,6 @@ class PaintClusters extends TextPaint {
     paintContext.shadowBlur = shadow.blurRadius;
     paintContext.shadowOffsetX = shadow.offset.dx;
     paintContext.shadowOffsetY = shadow.offset.dy;
-    WebParagraphDebug.log(
-      'Shadow: x=${shadow.offset.dx} y=${shadow.offset.dy} blur=${shadow.blurRadius} color=${shadow.color.toCssString()}',
-    );
 
     // We fill the text cluster into a rectange [0,0,w,h]
     // but we need to shift the y coordinate by the font ascent

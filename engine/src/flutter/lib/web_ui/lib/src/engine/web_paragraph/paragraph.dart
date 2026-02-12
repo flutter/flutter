@@ -1288,9 +1288,11 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
     final text = _fullTextBuffer.toString();
 
     final paragraph = WebParagraph(_paragraphStyle, _spans, text);
-    WebParagraphDebug.apiTrace('WebParagraphBuilder.build(): "$text" ${_spans.length}');
-    for (var i = 0; i < _spans.length; ++i) {
-      WebParagraphDebug.log('$i: ${_spans[i]}');
+    if (WebParagraphDebug.apiLogging) {
+      WebParagraphDebug.apiTrace('WebParagraphBuilder.build(): "$text" ${_spans.length}');
+      for (var i = 0; i < _spans.length; ++i) {
+        WebParagraphDebug.log('$i: ${_spans[i]}');
+      }
     }
     return paragraph;
   }

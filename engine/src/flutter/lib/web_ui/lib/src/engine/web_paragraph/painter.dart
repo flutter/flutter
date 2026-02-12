@@ -49,6 +49,11 @@ abstract class Painter {
       return;
     }
 
+    if (currentDevicePixelRatio != devicePixelRatio) {
+      // We need to reset the scale transform whenever the device pixel ratio changes
+      resetCache();
+    }
+
     // Since the output canvas is zoomed by device pixel ratio,
     // we need to adjust our offscreen canvas accordingly to avoid pixelation
     // that would happen if didn't resize it.
@@ -62,9 +67,11 @@ abstract class Painter {
 
     currentDevicePixelRatio = devicePixelRatio;
 
-    WebParagraphDebug.log(
-      'resizePaintCanvas: ${paintCanvas.width}x${paintCanvas.height} @ $devicePixelRatio',
-    );
+    if (WebParagraphDebug.logging) {
+      WebParagraphDebug.log(
+        'resizePaintCanvas: ${paintCanvas.width}x${paintCanvas.height} @ $devicePixelRatio',
+      );
+    }
   }
 }
 
@@ -73,10 +80,10 @@ const DomHTMLCanvasElement? _domHtmlCanvasElement = null;
 // final DomHTMLCanvasElement? _domHtmlCanvasElement = domDocument.createElement('canvas') as DomHTMLCanvasElement;
 
 class CanvasKitPainter extends Painter {
-  CkImage? singleImageCache;
+  CkImage? _singleImageCache;
 
   @override
-  bool get hasSingleImageCache => singleImageCache != null;
+  bool get hasSingleImageCache => _singleImageCache != null;
 
   @override
   void drawBackground(ui.Canvas canvas, LineBlock block, ui.Rect sourceRect, ui.Rect targetRect) {
@@ -96,6 +103,8 @@ class CanvasKitPainter extends Painter {
 
   @override
   void drawDecorations(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect) {
+    throw UnimplementedError('Decoration drawing is not implemented yet');
+    /*
     final DomImageBitmap bitmap = paintCanvas.transferToImageBitmap();
 
     final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
@@ -110,10 +119,13 @@ class CanvasKitPainter extends Painter {
       targetRect,
       ui.Paint()..filterQuality = ui.FilterQuality.none,
     );
+    */
   }
 
   @override
   void drawShadowCluster(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect) {
+    throw UnimplementedError('Shadow drawing is not implemented yet');
+    /*
     // TODO(jlavrova): calculate the shadow bounds without hardcoding the inflation
     // values. It is good enough for now to demonstrate the shadow effect
     final ui.Rect shadowSourceRect = sourceRect.inflate(100).translate(100, 100);
@@ -132,10 +144,13 @@ class CanvasKitPainter extends Painter {
       shadowTargetRect,
       ui.Paint()..filterQuality = ui.FilterQuality.none,
     );
+    */
   }
 
   @override
   void drawTextCluster(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect) {
+    throw UnimplementedError('Text cluster drawing is not implemented yet');
+    /*    
     final DomImageBitmap bitmap = paintCanvas.transferToImageBitmap();
 
     final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
@@ -150,6 +165,7 @@ class CanvasKitPainter extends Painter {
       targetRect,
       ui.Paint()..filterQuality = ui.FilterQuality.none,
     );
+    */
   }
 
   @override
@@ -163,52 +179,40 @@ class CanvasKitPainter extends Painter {
           'canvas=${paintCanvas.width}x${paintCanvas.height} vs bounds=${sourceRect.width}x${sourceRect.height}',
         );
       }
+      final DomImageData imageData = paintContext.getImageData(
+        0,
+        0,
+        sourceRect.width.ceil(),
+        sourceRect.height.ceil(),
+      );
 
-      SkImage? skImage;
-      if (_domHtmlCanvasElement != null) {
-        _domHtmlCanvasElement!.width = sourceRect.width;
-        _domHtmlCanvasElement!.height = sourceRect.height;
+      final imageInfo = SkImageInfo(
+        alphaType: canvasKit.AlphaType.Premul,
+        colorType: canvasKit.ColorType.RGBA_8888,
+        colorSpace: SkColorSpaceSRGB,
+        width: sourceRect.width,
+        height: sourceRect.height,
+      );
 
-        final context2D =
-            _domHtmlCanvasElement!.getContext('2d', {'willReadFrequently': true})!
-                as DomCanvasRenderingContext2D;
-        context2D.drawImage(paintCanvas, 0, 0);
+      final SkImage? skImage = canvasKit.MakeImage(
+        imageInfo,
+        Uint8List.view(imageData.data.buffer),
+        4 * sourceRect.width,
+      );
 
-        final DomImageData imageData = context2D.getImageData(
-          0,
-          0,
-          sourceRect.width.ceil(),
-          sourceRect.height.ceil(),
-        );
-
-        final imageInfo = SkImageInfo(
-          alphaType: canvasKit.AlphaType.Premul,
-          colorType: canvasKit.ColorType.RGBA_8888,
-          colorSpace: SkColorSpaceSRGB,
-          width: sourceRect.width,
-          height: sourceRect.height,
-        );
-
-        skImage = canvasKit.MakeImage(
-          imageInfo,
-          Uint8List.view(imageData.data.buffer),
-          4 * sourceRect.width,
-        );
-      } else {
-        // Transfer the buffer from the small canvas
-        // This is synchronous and returns the handle immediately
-        final DomImageBitmap bitmap = paintCanvas.transferToImageBitmap();
-        skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
-      }
+      // Transfer the buffer from the small canvas
+      // This is synchronous and returns the handle immediately
+      //final DomImageBitmap bitmap = paintCanvas.transferToImageBitmap();
+      //final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
 
       if (skImage == null) {
         throw Exception('Failed to convert text image bitmap to an SkImage.');
       }
-      singleImageCache = CkImage(skImage);
+      _singleImageCache = CkImage(skImage);
     }
 
     canvas.drawImageRect(
-      singleImageCache!,
+      _singleImageCache!,
       sourceRect,
       targetRect,
       ui.Paint()..filterQuality = ui.FilterQuality.none,
@@ -217,11 +221,14 @@ class CanvasKitPainter extends Painter {
 
   @override
   void resetCache() {
-    singleImageCache = null;
+    if (_singleImageCache != null) {
+      _singleImageCache!.dispose();
+      _singleImageCache = null;
+    }
   }
 
   @override
   bool hasCache() {
-    return singleImageCache != null;
+    return _singleImageCache != null;
   }
 }

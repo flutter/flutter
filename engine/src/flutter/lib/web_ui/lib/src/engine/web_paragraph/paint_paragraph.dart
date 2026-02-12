@@ -28,11 +28,13 @@ class PaintParagraph extends TextPaint {
           continue;
         }
 
-        WebParagraphDebug.log(
-          '+_fillAllBlocks: ${block.textRange} ${block.clusterRange} ${paragraph.getText(block.textRange.start, block.textRange.end)} '
-          '${(block as TextBlock).clusterRangeWithoutWhitespaces} ${block.whitespacesWidth} '
-          '${block.isLtr} ${line.advance.left} + ${block.spanShiftFromLineStart}',
-        );
+        if (WebParagraphDebug.logging) {
+          WebParagraphDebug.log(
+            '+_fillAllBlocks: ${block.textRange} ${block.clusterRange} ${paragraph.getText(block.textRange.start, block.textRange.end)} '
+            '${(block as TextBlock).clusterRangeWithoutWhitespaces} ${block.whitespacesWidth} '
+            '${block.isLtr} ${line.advance.left} + ${block.spanShiftFromLineStart}',
+          );
+        }
 
         paintContext.save();
         switch (styleElement) {
@@ -42,29 +44,30 @@ class PaintParagraph extends TextPaint {
               block.spanShiftFromLineStart,
               line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
             );
-            _fillBlockShadows(layout, block);
+            _fillBlockShadows(layout, block as TextBlock);
           case StyleElements.text:
             // For text and shadows we need to shift to the start of the block
             paintContext.translate(
               block.spanShiftFromLineStart,
               line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
             );
-            _fillBlockText(layout, block);
+            _fillBlockText(layout, block as TextBlock);
           case StyleElements.decorations:
             // For decorations we need to shift to the start of the line
             paintContext.translate(block.shiftFromLineStart, 0);
             // Let's calculate the sizes
             final (ui.Rect sourceRect, ui.Rect targetRect) = calculateBlock(
               layout,
-              block,
+              block as TextBlock,
               ui.Offset(line.advance.left + line.formattingShift, line.advance.top),
               ui.Offset.zero, // We only need sourceRect here so we don't need the offset
               ui.window.devicePixelRatio,
             );
             fillDecorations(block, sourceRect);
-          default:
-            // We only need to draw backgrounds only
-            assert(false);
+          case StyleElements.background:
+            throw Exception(
+              'Background is drawn directly on the output canvas, not on the canvas2D',
+            );
         }
         paintContext.restore();
       }
@@ -109,21 +112,30 @@ class PaintParagraph extends TextPaint {
         switch (styleElement) {
           case StyleElements.background:
             painter.drawBackground(canvas, block, sourceRect, targetRect);
-          default:
-            // We only need to draw backgrounds only
-            assert(false);
+          case StyleElements.decorations:
+            throw Exception(
+              'Decorations are painted on the canvas2D and then drawn as an image on the output canvas, not drawn directly on the output canvas',
+            );
+          case StyleElements.shadows:
+            throw Exception(
+              'Shadows are painted on the canvas2D and then drawn as an image on the output canvas, not drawn directly on the output canvas',
+            );
+          case StyleElements.text:
+            throw Exception(
+              'Texts are painted on the canvas2D and then drawn as an image on the output canvas, not drawn directly on the output canvas',
+            );
         }
       }
     }
   }
 
   void _fillBlockText(TextLayout layout, TextBlock block) {
-    final int start = block.isLtr
-        ? block.clusterRangeWithoutWhitespaces.start
-        : block.clusterRangeWithoutWhitespaces.end - 1;
-    final int end = block.isLtr
-        ? block.clusterRangeWithoutWhitespaces.end
-        : block.clusterRangeWithoutWhitespaces.start - 1;
+    for (final (WebCluster clusterText, bool isLtr) in block.getTextClustersInVisualOrder(layout)) {
+      fillTextCluster(clusterText, isLtr);
+    }
+    /*
+    final int start = block.visualClusterStart;
+    final int end = block.visualClusterEnd;
     final step = block.isLtr ? 1 : -1;
     for (var i = start; i != end; i += step) {
       final WebCluster clusterText = block is EllipsisBlock
@@ -141,6 +153,7 @@ class PaintParagraph extends TextPaint {
             : layout.paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr,
       );
     }
+    */
   }
 
   void _fillBlockShadows(TextLayout layout, TextBlock block) {
@@ -148,12 +161,14 @@ class PaintParagraph extends TextPaint {
       return;
     }
 
-    final int start = block.isLtr
-        ? block.clusterRangeWithoutWhitespaces.start
-        : block.clusterRangeWithoutWhitespaces.end - 1;
-    final int end = block.isLtr
-        ? block.clusterRangeWithoutWhitespaces.end
-        : block.clusterRangeWithoutWhitespaces.start - 1;
+    for (final (WebCluster clusterText, bool isLtr) in block.getTextClustersInVisualOrder(layout)) {
+      for (final ui.Shadow shadow in clusterText.style.shadows!) {
+        fillShadowCluster(clusterText, shadow, isLtr);
+      }
+    }
+    /*
+    final int start = block.visualClusterStart;
+    final int end = block.visualClusterEnd;
     final step = block.isLtr ? 1 : -1;
     for (var i = start; i != end; i += step) {
       final WebCluster clusterText = block is EllipsisBlock
@@ -164,6 +179,7 @@ class PaintParagraph extends TextPaint {
         fillShadowCluster(clusterText, shadow, block.isLtr);
       }
     }
+    */
   }
 
   @override

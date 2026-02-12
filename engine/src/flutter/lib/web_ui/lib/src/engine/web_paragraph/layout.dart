@@ -143,15 +143,11 @@ class TextLayout {
       paragraph.paragraphStyle.textDirection,
     );
 
-    WebParagraphDebug.log('Bidis ${paragraph.paragraphStyle.textDirection}:${regions.length}');
     for (final region in regions) {
       // Regions operate in text indexes, not cluster indexes (one cluster can contain several text points)
       // We need to convert one into another
       final ClusterRange clusterRange = _mapping.toClusterRange(region.start, region.end);
       final run = BidiRun(clusterRange, region.level);
-      WebParagraphDebug.log(
-        'region ${region.level.isEven ? 'ltr' : 'rtl'} [${region.start}:${region.end}) => $clusterRange',
-      );
       bidiRuns.add(run);
     }
   }
@@ -333,10 +329,6 @@ class TextLayout {
 
         // This is the intersection of the bidi region + line + span.
         final ui.TextRange bidiLineSpanTextRange = bidiLineTextRange.intersect(span);
-        WebParagraphDebug.log(
-          'Style: ${span as ui.TextRange} & $bidiLineTextRange = $bidiLineSpanTextRange ',
-        );
-
         final ClusterRange bidiLineSpanRange = _mapping.toClusterRange(
           bidiLineSpanTextRange.start,
           bidiLineSpanTextRange.end,
@@ -384,9 +376,6 @@ class TextLayout {
             (line.visualBlocks.last as TextBlock).clusterRangeWithoutWhitespaces = _mapping
                 .toClusterRange(blockLineNoWhitespaces.start, blockLineNoWhitespaces.end);
             (line.visualBlocks.last as TextBlock).whitespacesWidth = trailingSpacesWidth;
-            WebParagraphDebug.log(
-              'TRAILING: $bidiLineSpanTextRange $blockLineNoWhitespaces $trailingSpacesWidth',
-            );
           }
 
           // Line always counts multipled metrics (no need for the others)
@@ -440,11 +429,6 @@ class TextLayout {
       // TODO(jlavrova): sort our alphabetic/ideographic baseline and how it affects ascent & descent
       line.fontBoundingBoxAscent = math.max(line.fontBoundingBoxAscent, block.ascent);
       line.fontBoundingBoxDescent = math.max(line.fontBoundingBoxDescent, block.descent);
-      WebParagraphDebug.log(
-        'Adjusted metrics: '
-        '${line.fontBoundingBoxAscent} => ${math.max(line.fontBoundingBoxAscent, block.ascent)} '
-        '${line.fontBoundingBoxDescent} => ${math.max(line.fontBoundingBoxDescent, block.descent)} ',
-      );
     }
 
     line.advance = ui.Rect.fromLTWH(
@@ -457,11 +441,6 @@ class TextLayout {
     );
     line.trailingSpacesWidth = trailingSpacesWidth;
     lines.add(line);
-
-    WebParagraphDebug.log(
-      'Line [${line.textClusterRange.start}:${line.textClusterRange.end}) ${line.advance.left},${line.advance.top} ${line.advance.width}x${line.advance.height} '
-      '${ellipsisClusters.isNotEmpty ? 'Ellipsis: "${paragraph.paragraphStyle.ellipsis}" ${ellipsisClusters.length}' : ''}',
-    );
 
     return line.advance.height;
   }
@@ -515,10 +494,12 @@ class TextLayout {
     // TODO(mdebbar): Instead of nested loops, make them two consecutive loops.
     for (var lineIndex = 0; lineIndex < lines.length; ++lineIndex) {
       final TextLine line = lines[lineIndex];
-      WebParagraphDebug.log(
-        'Line: ${line.textClusterRange} & $textRange '
-        '[${line.advance.left}:${line.advance.right} x ${line.advance.top}:${line.advance.bottom}] ',
-      );
+      if (WebParagraphDebug.logging) {
+        WebParagraphDebug.log(
+          'Line: ${line.textClusterRange} & $textRange '
+          '[${line.advance.left}:${line.advance.right} x ${line.advance.top}:${line.advance.bottom}] ',
+        );
+      }
       // We take whitespaces in account
       if (!line.allLineTextRange.overlapsWith(start, end)) {
         continue;
@@ -526,14 +507,12 @@ class TextLayout {
 
       for (final LineBlock block in line.visualBlocks) {
         final ui.TextRange intersect = block.textRange.intersect(textRange);
-        //if (boxWidthStyle == ui.BoxWidthStyle.tight) {
-        //  // Ignore whitespaces at the end of the line
-        //  intersect = intersect.intersect(line.textRange);
-        //}
-        WebParagraphDebug.log(
-          'block: ${block.textRange} & $textRange = $intersect '
-          '${block.span.start}',
-        );
+        if (WebParagraphDebug.logging) {
+          WebParagraphDebug.log(
+            'block: ${block.textRange} & $textRange = $intersect '
+            '${block.span.start}',
+          );
+        }
         if (intersect.size <= 0) {
           continue;
         }
@@ -639,11 +618,13 @@ class TextLayout {
           );
         }
       }
-      WebParagraphDebug.log(
-        'getBoxesForRange: [${line.advance.left}:${line.advance.right}x${line.advance.top}:${line.advance.bottom}]',
-      );
-      for (final rect in result) {
-        WebParagraphDebug.log('[${rect.left}:${rect.right}x${rect.top}:${rect.bottom}]');
+      if (WebParagraphDebug.logging) {
+        WebParagraphDebug.log(
+          'getBoxesForRange: [${line.advance.left}:${line.advance.right}x${line.advance.top}:${line.advance.bottom}]',
+        );
+        for (final rect in result) {
+          WebParagraphDebug.log('[${rect.left}:${rect.right}x${rect.top}:${rect.bottom}]');
+        }
       }
     }
     return result;
@@ -671,9 +652,11 @@ class TextLayout {
         );
       }
     }
-    WebParagraphDebug.log('getBoxesForPlaceholders:');
-    for (final rect in result) {
-      WebParagraphDebug.log('[${rect.left}:${rect.right}x${rect.top}:${rect.bottom}]');
+    if (WebParagraphDebug.logging) {
+      WebParagraphDebug.log('getBoxesForPlaceholders:');
+      for (final rect in result) {
+        WebParagraphDebug.log('[${rect.left}:${rect.right}x${rect.top}:${rect.bottom}]');
+      }
     }
     return result;
   }
@@ -703,7 +686,9 @@ class TextLayout {
         // We are not there yet; we need a line closest to the offset.
         continue;
       }
-      WebParagraphDebug.log('found line: ${line.textClusterRange} ${line.advance} vs $offset');
+      if (WebParagraphDebug.logging) {
+        WebParagraphDebug.log('found line: ${line.textClusterRange} ${line.advance} vs $offset');
+      }
 
       // We found the line that contains the offset; let's go through all the visual blocks to find the position
       final double lineShift = line.advance.left + line.formattingShift;
@@ -722,7 +707,9 @@ class TextLayout {
           );
         }
 
-        WebParagraphDebug.log('found block: $block $left:$right vs $offset');
+        if (WebParagraphDebug.logging) {
+          WebParagraphDebug.log('found block: $block $left:$right vs $offset');
+        }
         // Found the block; let's go through all the clusters IN VISUAL ORDER to find the position
         final int start = block.isLtr ? block.clusterRange.start : block.clusterRange.end - 1;
         final int end = block.isLtr ? block.clusterRange.end : block.clusterRange.start - 1;
@@ -735,7 +722,9 @@ class TextLayout {
           final double right =
               cluster.advance.right + lineShift + block.spanShiftFromLineStart + epsilon;
 
-          WebParagraphDebug.log('test cluster: $left:$right vs $offset');
+          if (WebParagraphDebug.logging) {
+            WebParagraphDebug.log('test cluster: $left:$right vs $offset');
+          }
           if (left <= offset.dx && right > offset.dx) {
             if (offset.dx - left <= right - offset.dx) {
               return ui.TextPosition(offset: cluster.start);
@@ -1049,7 +1038,7 @@ class EmptyCluster extends WebCluster {
 
   @override
   void fillOnContext(DomCanvasRenderingContext2D context, {required double x, required double y}) {
-    assert(false, 'We should not call "fillOnContext" on an EmptyCluster');
+    throw UnsupportedError('We should not call "fillOnContext" on an EmptyCluster');
   }
 
   @override
@@ -1059,7 +1048,7 @@ class EmptyCluster extends WebCluster {
 
   @override
   void addToContext(DomCanvasRenderingContext2D context, double x, double y) {
-    assert(false, 'We should not call "addToContext" on an EmptyCluster');
+    throw UnsupportedError('We should not call "addToContext" on an EmptyCluster');
   }
 }
 
@@ -1091,7 +1080,7 @@ class PlaceholderCluster extends WebCluster {
 
   @override
   void addToContext(DomCanvasRenderingContext2D context, double x, double y) {
-    assert(false, 'We should not call "addToContext" on an PlaceholderCluster');
+    throw UnsupportedError('We should not call "addToContext" on an PlaceholderCluster');
   }
 }
 
@@ -1174,6 +1163,31 @@ class TextBlock extends LineBlock {
   // TODO(jlavrova): Why are we defaulting to 1.0? In Chrome, the default line-height is `1.2` most of the time.
   double get _heightMultiplier => style.height == null ? 1.0 : style.height!;
 
+  int get visualClusterStart => isLtr ? clusterRange.start : clusterRange.end - 1;
+  int get visualClusterEnd => isLtr ? clusterRange.end : clusterRange.start - 1;
+
+  /// Returns a list of pairs of clusters and their directions in the visual order.
+  Iterable<(WebCluster, bool)> getTextClustersInVisualOrder(TextLayout layout) sync* {
+    final int start = visualClusterStart;
+    final int end = visualClusterEnd;
+    final step = isLtr ? 1 : -1;
+    for (var i = start; i != end; i += step) {
+      final WebCluster clusterText = this is EllipsisBlock
+          ? layout.ellipsisClusters[i]
+          : layout.allClusters[i];
+      yield (
+        clusterText,
+        // We shape ellipsis with default direction coming from the attaching block
+        // and all the other blocks with the default paragraph direction.
+        // The reason for shaping ellipsis this way is that we literally attach it to the block
+        // that overflows and we want to keep all the styling attributes (including text direction) consistent.
+        this is EllipsisBlock
+            ? isLtr
+            : layout.paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr,
+      );
+    }
+  }
+
   ClusterRange clusterRangeWithoutWhitespaces;
   double whitespacesWidth;
 }
@@ -1209,9 +1223,6 @@ class PlaceholderBlock extends LineBlock {
 
     final double height = span.height;
     final double offset = span.baselineOffset;
-    WebParagraphDebug.log(
-      'calculatePlaceholderAdvance($lineAscent, $lineDescent): height=$height offset=$offset',
-    );
     switch (span.alignment) {
       case ui.PlaceholderAlignment.baseline:
         // Matches the baseline of the placeholder with the text baseline. You'll need to specify the TextBaseline to use
@@ -1249,7 +1260,6 @@ class PlaceholderBlock extends LineBlock {
     // The advance needs to be calculated relative to the line. In order to do that, we need to start
     // from the span's own advance within the line.
     advance = ui.Rect.fromLTWH(spanShiftFromLineStart, top, span.width, span.height);
-    WebParagraphDebug.log('PlaceholderBlock calculated advance: $advance $ascent $descent');
   }
 
   // TODO(jlavrova): Why are we using separate properties instead of `rawFontBoundingBoxAscent` and `rawFontBoundingBoxDescent`?

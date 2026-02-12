@@ -390,7 +390,7 @@ Future<void> testMain() async {
         Shadow(color: Color(0xFF00FF00), offset: Offset(0, -10), blurRadius: 2.0),
         Shadow(color: Color(0xFFFF0000), offset: Offset(-10, 0), blurRadius: 2.0),
         Shadow(color: Color(0xFF0000FF), offset: Offset(10, 0), blurRadius: 2.0),
-        Shadow(color: Color(0xFF888888), offset: Offset(0, 10), blurRadius: 2.0),
+        Shadow(color: Color(0xFFFF00FF), offset: Offset(0, 10), blurRadius: 2.0),
       ],
     );
     final leftShadow = WebTextStyle(

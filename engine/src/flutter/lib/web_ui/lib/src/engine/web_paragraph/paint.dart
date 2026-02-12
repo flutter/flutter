@@ -2,18 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
 import 'dart:typed_data';
-
 import 'package:ui/ui.dart' as ui;
-
 import '../../engine.dart';
 
-// TODO(mdebbar): Discuss it: we use this canvas for painting the entire block (entire line)
-// so we need to make sure it's big enough to hold the biggest line.
-// Also, we use it to paint shadows (with vertical shifts) so we need to make it tall enough as well.
+// TODO(jlavrova): We use it to paint shadows (with vertical shifts) so we need to make it tall enough as well.
 double? currentDevicePixelRatio;
-final DomOffscreenCanvas paintCanvas = createDomOffscreenCanvas(0, 0);
+//final DomOffscreenCanvas paintCanvas = createDomOffscreenCanvas(0, 0);
+//final paintContext =
+//    paintCanvas.getContext('2d', {'willReadFrequently': true})! as DomCanvasRenderingContext2D;
+
+final DomHTMLCanvasElement paintCanvas =
+    domDocument.createElement('canvas') as DomHTMLCanvasElement;
 final paintContext =
     paintCanvas.getContext('2d', {'willReadFrequently': true})! as DomCanvasRenderingContext2D;
 
@@ -109,11 +109,13 @@ abstract class TextPaint {
         .translate(blockOffset.dx, blockOffset.dy)
         .translate(paragraphOffset.dx, paragraphOffset.dy);
 
-    WebParagraphDebug.log(
-      'calculateBlock "${block.span.text}" ${block.textRange}-${block.span.start} ${block.clusterRange} '
-      'source: ${sourceRect.left}:${sourceRect.right}x${sourceRect.top}:${sourceRect.bottom} => '
-      'target: ${targetRect.left}:${targetRect.right}x${targetRect.top}:${targetRect.bottom}',
-    );
+    if (WebParagraphDebug.logging) {
+      WebParagraphDebug.log(
+        'calculateBlock "${block.span.text}" ${block.textRange}-${block.span.start} ${block.clusterRange} '
+        'source: ${sourceRect.left}:${sourceRect.right}x${sourceRect.top}:${sourceRect.bottom} => '
+        'target: ${targetRect.left}:${targetRect.right}x${targetRect.top}:${targetRect.bottom}',
+      );
+    }
 
     return (sourceRect, targetRect);
   }
@@ -150,10 +152,12 @@ abstract class TextPaint {
     );
     final ui.Rect targetRect = zeroRect.translate(offset.dx, offset.dy);
 
-    WebParagraphDebug.log(
-      'calculateParagraph source: ${sourceRect.left}:${sourceRect.right}x${sourceRect.top}:${sourceRect.bottom} => '
-      'target: ${targetRect.left}:${targetRect.right}x${targetRect.top}:${targetRect.bottom}',
-    );
+    if (WebParagraphDebug.logging) {
+      WebParagraphDebug.log(
+        'calculateParagraph source: ${sourceRect.left}:${sourceRect.right}x${sourceRect.top}:${sourceRect.bottom} => '
+        'target: ${targetRect.left}:${targetRect.right}x${targetRect.top}:${targetRect.bottom}',
+      );
+    }
 
     return (sourceRect, targetRect);
   }
@@ -172,15 +176,10 @@ abstract class TextPaint {
   ) {
     switch (decoration) {
       case ui.TextDecoration.underline:
-        WebParagraphDebug.log(
-          'calculatePosition underline: $thickness + $ascent = ${thickness + ascent}',
-        );
         return thickness + ascent;
       case ui.TextDecoration.overline:
-        WebParagraphDebug.log('calculatePosition overline: 0');
         return thickness / 2;
       case ui.TextDecoration.lineThrough:
-        WebParagraphDebug.log('calculatePosition through: $height / 2 = ${height / 2}');
         return height / 2;
     }
     return 0;
@@ -200,11 +199,6 @@ abstract class TextPaint {
     double xStart = 0;
     final double yStart = y + quarterWave;
 
-    WebParagraphDebug.log(
-      'calculateWaves($x, $y, '
-      '${textBounds.left}:${textBounds.right}x${textBounds.top}:${textBounds.bottom} )'
-      '$thickness $xStart $yStart',
-    );
     paintContext.beginPath();
     paintContext.moveTo(x, yStart);
     while (xStart + quarterWave * 2 < textBounds.width) {
@@ -212,7 +206,6 @@ abstract class TextPaint {
       final double y1 = yStart + quarterWave * (waveCount.isEven ? 1 : -1);
       final double x2 = xStart + quarterWave * 2;
       final y2 = yStart;
-      WebParagraphDebug.log('wave: $x1, $y1, $x2, $y2');
       paintContext.quadraticCurveTo(x1, y1, x2, y2);
       xStart += quarterWave * 2;
       ++waveCount;
@@ -223,14 +216,8 @@ abstract class TextPaint {
     if (remaining > 0) {
       final x1 = xStart;
       final double y1 = yStart + quarterWave * (waveCount.isEven ? 1 : -1);
-      //final double y1 = yStart + remaining / 2 * (waveCount.isEven ? 1 : -1);
       final double x2 = xStart + remaining;
       final y2 = yStart;
-      //final double y2 = yStart + remaining + remaining / quarterWave * y1;
-      WebParagraphDebug.log(
-        'remaining: ${textBounds.width} - $xStart = $remaining '
-        '$x1, $y1, $x2, $y2',
-      );
       paintContext.quadraticCurveTo(x1, y1, x2, y2);
     }
     paintContext.stroke();
@@ -261,7 +248,6 @@ abstract class TextPaint {
           block.multipliedFontBoundingBoxAscent + block.multipliedFontBoundingBoxDescent;
       final double ascent = block.multipliedFontBoundingBoxAscent;
       final double position = calculatePosition(decoration, thickness, height, ascent);
-      WebParagraphDebug.log('decoration=$decoration thickness=$thickness position=$position');
 
       final double width = sourceRect.width;
       final double x = sourceRect.left;
@@ -283,7 +269,6 @@ abstract class TextPaint {
           paintContext.moveTo(x, bottom);
           paintContext.lineTo(x + width, bottom);
           paintContext.stroke();
-          WebParagraphDebug.log('double: $x:${x + width}, $y:$bottom');
 
         case ui.TextDecorationStyle.dashed:
         case ui.TextDecorationStyle.dotted:
@@ -297,16 +282,12 @@ abstract class TextPaint {
           paintContext.moveTo(x, y);
           paintContext.lineTo(x + width, y);
           paintContext.stroke();
-          WebParagraphDebug.log('dashed/dotted: $x:${x + width}, $y');
 
         case ui.TextDecorationStyle.solid:
           paintContext.beginPath();
           paintContext.moveTo(x, y);
           paintContext.lineTo(x + width, y);
           paintContext.stroke();
-          WebParagraphDebug.log(
-            'solid: $x:${x + width}, $y ${block.style.decorationColor!.toCssString()}',
-          );
       }
 
       paintContext.restore();
