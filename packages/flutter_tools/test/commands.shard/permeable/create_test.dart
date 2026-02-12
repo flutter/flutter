@@ -359,7 +359,7 @@ void main() {
         globals.platform.isWindows ? 'flutter.bat' : 'flutter',
       );
       final String engineExamplesDirectory = globals.fs.path.join(getFlutterRoot(), 'engine', 'src', 'flutter', 'examples');
-      final String projectName = 'flutter_project';
+      const projectName = 'flutter_project';
       final ProcessResult exec = await Process.run(flutterBin, <String>[
         'create',
         projectName,
