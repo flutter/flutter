@@ -215,6 +215,7 @@ group("unittests") {
       "//flutter/runtime:runtime_unittests",
       "//flutter/shell/common:shell_unittests",
       "//flutter/shell/geometry:geometry_unittests",
+      "//flutter/shell/gpu:gpu_surface_unittests",
       "//flutter/shell/platform/embedder:embedder_a11y_unittests",
       "//flutter/shell/platform/embedder:embedder_proctable_unittests",
       "//flutter/shell/platform/embedder:embedder_unittests",
@@ -246,7 +247,6 @@ group("unittests") {
     if (is_mac) {
       public_deps += [
         "//flutter/impeller/golden_tests:impeller_golden_tests",
-        "//flutter/shell/gpu:gpu_surface_metal_unittests",
         "//flutter/shell/platform/darwin/common:availability_version_check_unittests",
         "//flutter/shell/platform/darwin/common:framework_common_swift_unittests",
         "//flutter/shell/platform/darwin/common:framework_common_unittests",
@@ -260,10 +260,6 @@ group("unittests") {
         "//flutter/shell/platform/android/jni:jni_unittests",
         "//flutter/shell/platform/android/platform_view_android_delegate:platform_view_android_delegate_unittests",
       ]
-    }
-
-    if (test_enable_vulkan) {
-      public_deps += [ "//flutter/shell/gpu:gpu_surface_vulkan_unittests" ]
     }
 
     # Unit tests for desktop embeddings should only be built if the desktop
