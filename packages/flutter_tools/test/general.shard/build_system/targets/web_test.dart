@@ -293,6 +293,71 @@ name: foo
     );
   });
 
+  group('--web-define', () {
+    test(
+      'WebTemplatedFiles substitutes web-define variables in index.html',
+      () => testbed.run(() async {
+        environment.defines['${kWebDefinePrefix}VERSION'] = 'v1.2.3';
+        environment.defines['${kWebDefinePrefix}API_URL'] = 'https://api.example.com';
+        final Directory webResources = environment.projectDir.childDirectory('web');
+        webResources.childFile('index.html').createSync(recursive: true);
+        webResources.childFile('index.html').writeAsStringSync('''
+<!DOCTYPE html><html><head><base href="/"></head><body>
+<script>
+  const version = '{{VERSION}}';
+  const apiUrl = '{{API_URL}}';
+</script>
+</body></html>
+    ''');
+        environment.buildDir.childFile('main.dart.js').createSync();
+        await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+
+        final String outputHtml = environment.outputDir.childFile('index.html').readAsStringSync();
+        expect(outputHtml, contains("const version = 'v1.2.3'"));
+        expect(outputHtml, contains("const apiUrl = 'https://api.example.com'"));
+      }),
+    );
+
+    test(
+      'WebTemplatedFiles substitutes web-define variables in flutter_bootstrap.js',
+      () => testbed.run(() async {
+        environment.defines['${kWebDefinePrefix}APP_VERSION'] = 'test-build-42';
+        final Directory webResources = environment.projectDir.childDirectory('web');
+        webResources.childFile('index.html').createSync(recursive: true);
+        webResources.childFile('flutter_bootstrap.js').createSync(recursive: true);
+        webResources.childFile('flutter_bootstrap.js').writeAsStringSync('''
+const appVersion = '{{APP_VERSION}}';
+_flutter.loader.load();
+''');
+        environment.buildDir.childFile('main.dart.js').createSync();
+        await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+
+        final String outputBootstrap = environment.outputDir
+            .childFile('flutter_bootstrap.js')
+            .readAsStringSync();
+        expect(outputBootstrap, contains("const appVersion = 'test-build-42'"));
+      }),
+    );
+
+    test(
+      'WebTemplatedFiles works with no web-define variables',
+      () => testbed.run(() async {
+        final Directory webResources = environment.projectDir.childDirectory('web');
+        webResources.childFile('index.html').createSync(recursive: true);
+        webResources.childFile('index.html').writeAsStringSync('''
+<!DOCTYPE html><html><head><base href="/"></head><body></body></html>
+    ''');
+        environment.buildDir.childFile('main.dart.js').createSync();
+        await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+
+        expect(
+          environment.outputDir.childFile('index.html').readAsStringSync(),
+          contains('<base href="/">'),
+        );
+      }),
+    );
+  });
+
   test(
     'WebReleaseBundle copies dart2js output and resource files to output directory',
     () => testbed.run(() async {
