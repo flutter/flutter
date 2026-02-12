@@ -896,11 +896,7 @@ final class TabBarScrollController extends ScrollController {
 
   /// Asserts that this controller is currently attached to a [TabBar]'s [State].
   ///
-  /// To invoke this function, use the following pattern:
-  ///
-  /// ```dart
-  /// assert(debugCheckHasTabBarState());
-  /// ```
+  /// To invoke this function, wrap it in an assert: `assert(debugCheckHasTabBarState());`
   ///
   /// Does nothing if asserts are disabled. Always returns true.
   bool debugCheckHasTabBarState() {
