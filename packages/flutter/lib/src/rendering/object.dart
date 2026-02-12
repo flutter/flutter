@@ -1565,10 +1565,10 @@ base class PipelineOwner with DiagnosticableTreeMixin {
         _RenderObjectSemantics target = node._semantics.isRoot
             ? node._semantics
             : node._semantics.parent!;
-        while (!target.shouldFormSemanticsNode) {
+        while (!target.notInSemanticsTree && !target.shouldFormSemanticsNode) {
           target = target.parent!;
         }
-        if (!target.geometryDirty) {
+        if (!target.geometryDirty && !target.notInSemanticsTree) {
           nodeToEnsureGeometry.add(target);
         }
       }
