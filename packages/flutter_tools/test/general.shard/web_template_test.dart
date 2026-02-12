@@ -533,7 +533,7 @@ void main() {
   });
 
   testUsingContext(
-    'ignores Flutter built-in variables and logs logs warning for missing user variables',
+    'ignores Flutter built-in variables and logs warning for missing user variables',
     () {
       const htmlWithBuiltInVars = '''
 <!DOCTYPE html>
