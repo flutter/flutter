@@ -192,8 +192,8 @@ class WebTemplate {
         'You can provide the missing $variablesList using:\n'
         'flutter run $suggestion\n'
         'or\n'
-        'flutter build web $suggestion'
-        'Otherwise, this variable will be skipped.',
+        'flutter build web $suggestion\n'
+        'This variable will be skipped.\n',
       );
     }
 
