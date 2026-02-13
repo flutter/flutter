@@ -20,6 +20,7 @@ import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../darwin/darwin.dart';
+import '../darwin/swift_package_manager_min_platform_mismatch.dart';
 import '../device.dart';
 import '../features.dart';
 import '../flutter_manifest.dart';
@@ -985,8 +986,8 @@ _XCResultIssueHandlingResult _handleXCResultIssue({
     );
   }
 
-  final _SwiftPackageManagerMinPlatformMismatch? swiftPackageManagerMinPlatformMismatch =
-      _SwiftPackageManagerMinPlatformMismatch.tryParse(message);
+  final SwiftPackageManagerMinPlatformMismatch? swiftPackageManagerMinPlatformMismatch =
+      SwiftPackageManagerMinPlatformMismatch.tryParse(message);
 
   // Add more error messages for flutter users for some special errors.
   if (message.toLowerCase().contains('requires a provisioning profile.')) {
@@ -1083,7 +1084,7 @@ Future<bool> _handleIssues(
   var modifiedPrecompiledSource = false;
   var unableToFindArmDestination = false;
   String? missingPlatform;
-  final swiftPackageManagerMinPlatformMismatches = <_SwiftPackageManagerMinPlatformMismatch>[];
+  final swiftPackageManagerMinPlatformMismatches = <SwiftPackageManagerMinPlatformMismatch>[];
   final duplicateModules = <String>[];
   final missingModules = <String>[];
 
@@ -1152,7 +1153,7 @@ Future<bool> _handleIssues(
         .reduce((a, b) => a < b ? a : b);
 
     logger.printError(
-      _swiftPackageManagerMinPlatformMismatchInstructions(
+      swiftPackageManagerMinPlatformMismatchInstructions(
         requiredMinVersion: requiredMinVersion,
         supportedVersion: supportedVersion,
       ),
@@ -1365,68 +1366,6 @@ String? _parseMissingModule(String message) {
   return null;
 }
 
-class _SwiftPackageManagerMinPlatformMismatch {
-  _SwiftPackageManagerMinPlatformMismatch({
-    required this.packageProduct,
-    required this.requiredMinVersion,
-    required this.targetSupportedVersion,
-    required this.platformName,
-  });
-
-  // Example:
-  // "The package product 'cloud-firestore' requires minimum platform version 13.0 for the iOS platform, but this target supports 12.0"
-  static final RegExp _pattern = RegExp(
-    r"The package product '([^']+)' requires minimum platform version ([0-9]+(?:\.[0-9]+)*) "
-    r'for the (iOS|macOS) platform, but this target supports ([0-9]+(?:\.[0-9]+)*)',
-    caseSensitive: false,
-  );
-
-  static _SwiftPackageManagerMinPlatformMismatch? tryParse(String message) {
-    final RegExpMatch? match = _pattern.firstMatch(message);
-    if (match == null) {
-      return null;
-    }
-
-    final String packageProduct = match.group(1)!;
-    final Version? requiredMinVersion = Version.parse(match.group(2));
-    final String platformName = match.group(3)!.toLowerCase();
-    final Version? targetSupportedVersion = Version.parse(match.group(4));
-    if (requiredMinVersion == null || targetSupportedVersion == null) {
-      return null;
-    }
-
-    return _SwiftPackageManagerMinPlatformMismatch(
-      packageProduct: packageProduct,
-      requiredMinVersion: requiredMinVersion,
-      targetSupportedVersion: targetSupportedVersion,
-      platformName: platformName,
-    );
-  }
-
-  final String packageProduct;
-  final Version requiredMinVersion;
-  final Version targetSupportedVersion;
-  final String platformName;
-}
-
-String _swiftPackageManagerMinPlatformMismatchInstructions({
-  required Version requiredMinVersion,
-  required Version supportedVersion,
-}) {
-  // Mirrors the recommended guidance in https://github.com/flutter/flutter/issues/165420.
-  return '''
-To fix this error, increase your app's minimum platform version from $supportedVersion to at least $requiredMinVersion or remove this dependency.
-To increase your app's minimum platform version:
-1. Open your app (ios/Runner.xcworkspace or macos/Runner.xcworkspace) in Xcode.
-2. In the Project Navigator, select the Runner project > Runner target > General tab.
-3. Increase your app's target Minimum Deployments setting.
-4. If you updated your iOS app's Minimum Deployments, regenerate the iOS project's configuration files:
-    flutter build ios --config-only
-5. If you updated your macOS app's Minimum Deployments, regenerate the macOS project's configuration files:
-    flutter build macos --config-only
-''';
-}
-
 // The result of [_handleXCResultIssue].
 class _XCResultIssueHandlingResult {
   _XCResultIssueHandlingResult({
@@ -1463,7 +1402,7 @@ class _XCResultIssueHandlingResult {
   final bool unableToFindArmDestination;
   /// An issue indicates that a Swift Package Manager dependency requires a higher
   /// minimum platform version than the app is targeting.
-  final _SwiftPackageManagerMinPlatformMismatch? swiftPackageManagerMinPlatformMismatch;
+  final SwiftPackageManagerMinPlatformMismatch? swiftPackageManagerMinPlatformMismatch;
 }
 
 const _kResultBundlePath = 'temporary_xcresult_bundle';
