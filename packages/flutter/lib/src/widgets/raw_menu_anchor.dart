@@ -600,10 +600,10 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   @protected
   void handleCloseRequest();
 
-  /// Request that the submenus of this menu be closed.
+  /// Close the open submenus of this menu..
   ///
-  /// By default, this method will call [handleCloseRequest] on each child of this
-  /// menu, which will trigger the closing sequence of each child.
+  /// This method will call [close] on each child of this menu, which will
+  /// immediately close the child.
   ///
   /// If `inDispose` is true, this method was triggered by the widget being
   /// unmounted.
@@ -611,11 +611,20 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   void closeChildren({bool inDispose = false}) {
     assert(_debugMenuInfo('Closing children of $this${inDispose ? ' (dispose)' : ''}'));
     for (final child in List<_RawMenuAnchorBaseMixin>.of(_anchorChildren)) {
-      if (inDispose) {
-        child.close(inDispose: inDispose);
-      } else {
-        child.handleCloseRequest();
-      }
+      child.close(inDispose: inDispose);
+    }
+  }
+
+  /// Request that the open submenus of this menu be closed.
+  ///
+  /// This method will call [handleCloseRequest] on each child of this
+  /// menu, which will trigger the closing sequence of each child.
+  @protected
+  void closeChildrenWithRequest() {
+    assert(_debugMenuInfo('Calling handleCloseRequest for children of $this'));
+    final children = List<_RawMenuAnchorBaseMixin>.of(_anchorChildren);
+    for (final child in children) {
+      child.handleCloseRequest();
     }
   }
 
@@ -626,7 +635,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   void handleOutsideTap(PointerDownEvent pointerDownEvent) {
     assert(_debugMenuInfo('Tapped Outside $menuController'));
     if (isOpen) {
-      closeChildren();
+      closeChildrenWithRequest();
     }
   }
 
@@ -708,7 +717,7 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
     assert(_debugMenuInfo('Opening $this at ${position ?? Offset.zero}'));
 
     // Close all siblings.
-    _parent?.closeChildren();
+    _parent?.closeChildrenWithRequest();
     assert(!_overlayController.isShowing);
     _menuPosition = position;
     _parent?._childChangedOpenState();
@@ -1018,7 +1027,7 @@ class MenuController {
   /// without closing the menu itself.
   void closeChildren() {
     assert(_anchor != null);
-    _anchor!.closeChildren();
+    _anchor!.closeChildrenWithRequest();
   }
 
   // ignore: use_setters_to_change_properties
