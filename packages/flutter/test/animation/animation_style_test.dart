@@ -34,16 +34,13 @@ void main() {
   });
 
   testWidgets('AnimationStyle.merge() fills in null properties', (WidgetTester tester) async {
-    final AnimationStyle original = AnimationStyle(
+    const original = AnimationStyle(
       curve: Curves.ease,
-      duration: const Duration(seconds: 1),
+      duration: Duration(seconds: 1),
       reverseCurve: Curves.ease,
-      reverseDuration: const Duration(seconds: 1),
+      reverseDuration: Duration(seconds: 1),
     );
-    final AnimationStyle other = AnimationStyle(
-      curve: Curves.linear,
-      duration: const Duration(seconds: 2),
-    );
+    const other = AnimationStyle(curve: Curves.linear, duration: Duration(seconds: 2));
     final AnimationStyle merged = original.merge(other);
     expect(merged.curve, Curves.linear);
     expect(merged.duration, const Duration(seconds: 2));
@@ -78,9 +75,9 @@ void main() {
     expect(AnimationStyle.lerp(a, b, 0), a);
     expect(AnimationStyle.lerp(a, b, 1.0), b);
 
-    const int styleSteps = 5;
-    const int curveSteps = 5;
-    for (int styleStep = 0; styleStep < styleSteps; styleStep += 1) {
+    const styleSteps = 5;
+    const curveSteps = 5;
+    for (var styleStep = 0; styleStep < styleSteps; styleStep += 1) {
       final double styleTransition = (styleStep + 1) / (styleSteps + 1);
       final AnimationStyle? lerpedStyle = AnimationStyle.lerp(a, b, styleTransition);
 
@@ -93,7 +90,7 @@ void main() {
         ui.lerpDouble(aReverse, bReverse, styleTransition)?.round(),
       );
 
-      for (int curveStep = 0; curveStep < curveSteps; curveStep += 1) {
+      for (var curveStep = 0; curveStep < curveSteps; curveStep += 1) {
         final double t = (curveStep + 1) / (curveSteps + 1);
         final double aResult = Curves.ease.transform(t);
         final double bResult = Curves.linear.transform(t);
