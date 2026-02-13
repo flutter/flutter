@@ -5,7 +5,7 @@
 // جميع الحقوق محفوظة لمطوري Flutter لعام 2014.
 // يخضع استخدام هذا الكود لرخصة من نوع BSD ويمكن العثور عليها في ملف LICENSE.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../lib/arabic.dart' as hello_world;
 
