@@ -208,7 +208,7 @@ object FlutterPluginUtils {
 
     @JvmStatic
     @JvmName("shouldProjectDisableAbiFiltering")
-    internal fun shouldProjectDisableAbiFiltering(project: Project): Boolean = project.hasProperty(PROP_DISABLE_ABI_FILTERING)
+    internal fun shouldProjectDisableAbiFiltering(project: Project): Boolean = project.findProperty(PROP_DISABLE_ABI_FILTERING)?.toString()?.toBoolean() ?: false
 
     /**
      * TODO: Remove this AGP hack. https://github.com/flutter/flutter/issues/109560
