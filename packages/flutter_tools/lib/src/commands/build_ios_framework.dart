@@ -316,11 +316,13 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     final Directory podsRoot = hostAppRoot.childDirectory('Pods');
 
     for (final frameworkPath in frameworkPaths) {
-      // Skip Flutter's own frameworks
-      if (frameworkPath.contains('/Flutter.framework') ||
-          frameworkPath.contains('/Flutter.xcframework') ||
-          frameworkPath.contains('/App.framework') ||
-          frameworkPath.contains('/App.xcframework')) {
+      final String frameworkName = globals.fs.path.basename(frameworkPath);
+
+      // Skip Flutter's own frameworks.
+      if (frameworkName == 'Flutter.framework' ||
+          frameworkName == 'Flutter.xcframework' ||
+          frameworkName == 'App.framework' ||
+          frameworkName == 'App.xcframework') {
         continue;
       }
 
@@ -336,7 +338,6 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
         continue;
       }
 
-      final String frameworkName = globals.fs.path.basename(frameworkPath);
       final String binaryName = globals.fs.path.basenameWithoutExtension(frameworkName);
 
       // Skip if we've already processed this framework name
@@ -345,20 +346,20 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       }
       processedFrameworks.add(binaryName);
 
-      // Check if it's already an xcframework
-      if (frameworkName.endsWith('.xcframework')) {
-        final Directory destination = modeDirectory.childDirectory(frameworkName);
-        if (!destination.existsSync()) {
-          globals.logger.printTrace('Copying vendored xcframework: $frameworkName');
-          copyDirectory(frameworkEntity, destination);
-        }
-      } else if (frameworkName.endsWith('.framework')) {
-        final Directory destination = modeDirectory.childDirectory(frameworkName);
-        if (!destination.existsSync()) {
-          globals.logger.printTrace('Copying vendored framework: $frameworkName');
-          copyDirectory(frameworkEntity, destination);
-        }
+      final bool isXcframework = frameworkName.endsWith('.xcframework');
+      final bool isFramework = frameworkName.endsWith('.framework');
+      if (!isXcframework && !isFramework) {
+        continue;
       }
+
+      final Directory destination = modeDirectory.childDirectory(frameworkName);
+      if (destination.existsSync()) {
+        continue;
+      }
+
+      final kind = isXcframework ? 'xcframework' : 'framework';
+      globals.logger.printTrace('Copying vendored $kind: $frameworkName');
+      copyDirectory(frameworkEntity, destination);
     }
   }
 }
