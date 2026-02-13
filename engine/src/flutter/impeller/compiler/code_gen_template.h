@@ -233,12 +233,13 @@ ShaderMetadata Shader::kMetadata{{camel_case(buffer.name)}} = {
   std::vector<ShaderStructMemberMetadata> {
     {% for member in buffer.type.members %}
       ShaderStructMemberMetadata {
-        {{ member.base_type }},      // type
-        "{{ member.name }}",         // name
-        {{ member.offset }},         // offset
-        {{ member.size }},           // size
-        {{ member.byte_length }},    // byte_length
-        {{ member.array_elements }}, // array_elements
+        /*type=*/{{ member.base_type }},
+        /*name=*/"{{ member.name }}",
+        /*offset=*/{{ member.offset }},
+        /*size=*/{{ member.size }},
+        /*byte_length=*/{{ member.byte_length }},
+        /*array_elements=*/{{ member.array_elements }},
+        /*float_type=*/{{ member.float_type }},
       },
     {% endfor %}
   } // members

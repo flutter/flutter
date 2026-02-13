@@ -108,11 +108,46 @@ static std::unique_ptr<ShaderMetadata> MakeShaderMetadata(
 
   size_t member_size = uniform.dimensions.rows * uniform.dimensions.cols *
                        (uniform.bit_width / 8u);
+
+  ShaderType shader_type = GetShaderType(uniform.type);
+  std::optional<ShaderFloatType> float_type;
+  if (shader_type == ShaderType::kFloat) {
+    if (uniform.dimensions.cols == 1) {
+      switch (uniform.dimensions.rows) {
+        case 1:
+          float_type = ShaderFloatType::kFloat;
+          break;
+        case 2:
+          float_type = ShaderFloatType::kVec2;
+          break;
+        case 3:
+          float_type = ShaderFloatType::kVec3;
+          break;
+        case 4:
+          float_type = ShaderFloatType::kVec4;
+          break;
+      }
+    } else if (uniform.dimensions.rows == uniform.dimensions.cols) {
+      switch (uniform.dimensions.rows) {
+        case 2:
+          float_type = ShaderFloatType::kMat2;
+          break;
+        case 3:
+          float_type = ShaderFloatType::kMat3;
+          break;
+        case 4:
+          float_type = ShaderFloatType::kMat4;
+          break;
+      }
+    }
+  }
+
   metadata->members.emplace_back(ShaderStructMemberMetadata{
-      .type = GetShaderType(uniform.type),                      //
+      .type = shader_type,                                      //
       .size = member_size,                                      //
       .byte_length = member_size * array_elements.value_or(1),  //
-      .array_elements = array_elements                          //
+      .array_elements = array_elements,                         //
+      .float_type = float_type,                                 //
   });
 
   return metadata;
