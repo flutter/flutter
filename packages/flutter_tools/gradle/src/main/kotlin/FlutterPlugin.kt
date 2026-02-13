@@ -544,7 +544,7 @@ class FlutterPlugin : Plugin<Project> {
                 // --splits-per-abi is used due to conflicting configuration. This approach
                 // adds them programmatically only when splits are not configured.
                 //
-                // If the user has specified abiFilters in their build.gradle file's . DefaultConfig,
+                // If the user has specified abiFilters in their build.gradle file's DefaultConfig,
                 // those settings will take precedence over these defaults.
                 configureAbiWithoutSplits(projectToAddTasksTo, androidExtension)
             }

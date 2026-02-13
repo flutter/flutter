@@ -42,12 +42,15 @@ void main() {
           .childFile('libflutter.so'),
       exists,
     );
-
+    // Verify that libflutter.so is packaged in the APK for Flutter supported architectures.
+    expect(_checkLibIsInApk(projectDir, 'lib/arm64-v8a/libflutter.so'), false);
+    expect(_checkLibIsInApk(projectDir, 'lib/x86_64/libflutter.so'), true);
+    expect(_checkLibIsInApk(projectDir, 'lib/armeabi-v7a/libflutter.so'), true);
     // Verify that libflutter.so is not packaged in the APK for x86 architecture.
     expect(_checkLibIsInApk(projectDir, 'lib/x86/libflutter.so'), false);
   });
 
-  testWithoutContext('abiFilters provided by the user in buildTypes can be overridden', () async {
+  testWithoutContext('abiFilters provided by the user in buildTypes can override Flutter defaults', () async {
     final Directory projectDir = createProjectWithThirdpartyLib(tempDir);
     final String buildGradleContents = projectDir
         .childFile('android/app/build.gradle.kts')
