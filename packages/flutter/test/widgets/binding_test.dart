@@ -360,12 +360,6 @@ class RentrantObserver implements WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     return Future<AppExitResponse>.value(AppExitResponse.exit);
   }
-
-  @override
-  void handleStatusBarTap() {
-    assert(active);
-    WidgetsBinding.instance.addObserver(this);
-  }
 }
 
 void main() {

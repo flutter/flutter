@@ -771,17 +771,13 @@ class AlertDialog extends StatelessWidget {
         ? _DialogDefaultsM3(context)
         : _DialogDefaultsM2(context);
 
-    String? label = semanticLabel;
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        break;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        label ??= MaterialLocalizations.of(context).alertDialogLabel;
-    }
+    final String? label = switch (defaultTargetPlatform) {
+      TargetPlatform.iOS || TargetPlatform.macOS => semanticLabel,
+      TargetPlatform.android ||
+      TargetPlatform.fuchsia ||
+      TargetPlatform.linux ||
+      TargetPlatform.windows => semanticLabel ?? MaterialLocalizations.of(context).alertDialogLabel,
+    };
 
     // The paddingScaleFactor is used to adjust the padding of Dialog's
     // children.
@@ -1344,7 +1340,7 @@ class SimpleDialog extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[if (title != null) titleWidget!, if (children != null) contentWidget!],
+        children: <Widget>[?titleWidget, ?contentWidget],
       ),
     );
 
