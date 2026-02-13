@@ -16,10 +16,6 @@
 
 @end
 
-@interface FlutterEngine ()
-@property(nonatomic, strong) FlutterMethodChannel* statusBarChannel;
-@end
-
 @implementation NoStatusBarViewController
 - (BOOL)prefersStatusBarHidden {
   return YES;
@@ -214,28 +210,11 @@
           FlutterPlatformViewGestureRecognizersBlockingPolicyWaitUntilTouchesEnded];
 
   UIViewController* rootViewController = flutterViewController;
+  // Make Flutter View's origin x/y not 0.
   if ([scenarioIdentifier isEqualToString:@"non_full_screen_flutter_view_platform_view"]) {
-    // Make Flutter View's origin x/y not 0.
     rootViewController = [[NoStatusBarViewController alloc] init];
     [rootViewController.view addSubview:flutterViewController.view];
     flutterViewController.view.frame = CGRectMake(150, 150, 500, 500);
-  } else if ([scenarioIdentifier isEqualToString:@"tap_status_bar"]) {
-    [engine.binaryMessenger
-        setMessageHandlerOnChannel:@"flutter/status_bar"
-              binaryMessageHandler:^(NSData* _Nullable message, FlutterBinaryReply _Nonnull reply) {
-                NSDictionary* dict = [NSJSONSerialization JSONObjectWithData:message
-                                                                     options:0
-                                                                       error:nil];
-                FlutterBasicMessageChannel* channel = [[FlutterBasicMessageChannel alloc]
-                       initWithName:@"display_data"
-                    binaryMessenger:engine.binaryMessenger
-                              codec:[FlutterJSONMessageCodec sharedInstance]];
-                [channel sendMessage:@{@"data" : dict}];
-                UITextField* text =
-                    [[UITextField alloc] initWithFrame:CGRectMake(0, 400, 300, 100)];
-                text.text = dict[@"method"];
-                [flutterViewController.view addSubview:text];
-              }];
   }
 
   self.window.rootViewController = rootViewController;
