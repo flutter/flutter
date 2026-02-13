@@ -1562,9 +1562,9 @@ base class PipelineOwner with DiagnosticableTreeMixin {
 
       final nodeToEnsureGeometry = <_RenderObjectSemantics>{};
       for (final node in nodesToProcessGeometry) {
-        _RenderObjectSemantics target = node._semantics.isRoot
-            ? node._semantics
-            : node._semantics.parent!;
+        _RenderObjectSemantics target = node._semantics.geometryDirty
+            ? node._semantics.parent!
+            : node._semantics;
         while (!target.notInSemanticsTree && !target.shouldFormSemanticsNode) {
           target = target.parent!;
         }
@@ -5569,6 +5569,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       return;
     }
     parentData = null;
+    geometry = null;
     isBlocked = true;
     renderObject.visitChildrenForSemantics((RenderObject child) {
       final _RenderObjectSemantics childSemantics = child._semantics;
@@ -6420,9 +6421,12 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    return _getNonBlockedChildren()
+    return _children
         .map<DiagnosticsNode>((_RenderObjectSemantics child) => child.toDiagnosticsNode())
         .toList();
+    // return _getNonBlockedChildren()
+    //     .map<DiagnosticsNode>((_RenderObjectSemantics child) => child.toDiagnosticsNode())
+    //     .toList();
   }
 
   @protected
