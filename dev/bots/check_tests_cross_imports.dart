@@ -229,19 +229,8 @@ class TestsCrossImportChecker {
   // TODO(justinmc): Fix all of these tests so there are no cross imports.
   // See https://github.com/flutter/flutter/issues/177028.
   static final Set<String> knownCupertinoCrossImports = <String>{
-    'packages/flutter/test/cupertino/material/tab_scaffold_test.dart',
-    'packages/flutter/test/cupertino/route_test.dart',
+    // TODO(justinmc): This one uses SelectableText. See https://github.com/flutter/flutter/issues/181682
     'packages/flutter/test/cupertino/text_selection_test.dart',
-    'packages/flutter/test/cupertino/app_test.dart',
-    'packages/flutter/test/cupertino/picker_test.dart',
-    'packages/flutter/test/cupertino/text_field_test.dart',
-    'packages/flutter/test/cupertino/date_picker_test.dart',
-    'packages/flutter/test/cupertino/switch_test.dart',
-    'packages/flutter/test/cupertino/magnifier_test.dart',
-    'packages/flutter/test/cupertino/sheet_test.dart',
-    'packages/flutter/test/cupertino/form_row_test.dart',
-    'packages/flutter/test/cupertino/colors_test.dart',
-    'packages/flutter/test/cupertino/text_form_field_row_restoration_test.dart',
   };
 
   static final Set<String> _knownCrossImports = knownWidgetsCrossImports.union(
