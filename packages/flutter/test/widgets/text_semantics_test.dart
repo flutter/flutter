@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
@@ -250,38 +250,25 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/180894
-  testWidgets('Text with semanticsIdentifier in Dialog creates its own semantic node', (
+  // Tests that Text.semanticsIdentifier is not absorbed by a route-scoping ancestor.
+  testWidgets('Text with semanticsIdentifier is not absorbed by route-scoping ancestor', (
     WidgetTester tester,
   ) async {
     final semantics = SemanticsTester(tester);
 
+    // Simulate what a Dialog does: creates a Semantics node with scopesRoute: true
+    // and explicitChildNodes: true. The bug was that Text's identifier would be
+    // absorbed into the route-scoping ancestor.
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Builder(
-            builder: (BuildContext context) {
-              return ElevatedButton(
-                onPressed: () {
-                  showDialog<void>(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return const Dialog(
-                        child: Text('Dialog Text', semanticsIdentifier: 'dialog-text-identifier'),
-                      );
-                    },
-                  );
-                },
-                child: const Text('Open Dialog'),
-              );
-            },
-          ),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Semantics(
+          scopesRoute: true,
+          explicitChildNodes: true,
+          child: const Text('Dialog Text', semanticsIdentifier: 'dialog-text-identifier'),
         ),
       ),
     );
-
-    // Open the dialog
-    await tester.tap(find.text('Open Dialog'));
-    await tester.pumpAndSettle();
 
     // Find all semantic nodes
     final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!;
@@ -296,31 +283,31 @@ void main() {
 
     collectNodes(root);
 
-    // Find the dialog node and the text node
-    final SemanticsNode? dialogNode = allNodes
+    // Find the route-scoping node and the text node
+    final SemanticsNode? routeNode = allNodes
         .where((SemanticsNode n) => n.hasFlag(SemanticsFlag.scopesRoute))
         .firstOrNull;
     final SemanticsNode? textNode = allNodes
         .where((SemanticsNode n) => n.identifier == 'dialog-text-identifier')
         .firstOrNull;
 
-    expect(dialogNode, isNotNull, reason: 'Dialog semantic node should exist');
+    expect(routeNode, isNotNull, reason: 'Route-scoping semantic node should exist');
     expect(textNode, isNotNull, reason: 'Text semantic node should exist with its identifier');
     expect(textNode!.label, 'Dialog Text');
 
-    // The text identifier should NOT be on the dialog node
-    // (This was the bug - the identifier was being absorbed by the dialog)
+    // The text identifier should NOT be on the route-scoping node
+    // (This was the bug - the identifier was being absorbed by the ancestor)
     expect(
-      dialogNode!.identifier,
+      routeNode!.identifier,
       isNot('dialog-text-identifier'),
-      reason: 'Text identifier should not be absorbed by dialog node',
+      reason: 'Text identifier should not be absorbed by route-scoping node',
     );
 
-    // The text node should be a descendant of the dialog, not merged into it
+    // The text node should be separate from the route-scoping node
     expect(
       textNode.id,
-      isNot(dialogNode.id),
-      reason: 'Text should have its own semantic node, not be merged into dialog',
+      isNot(routeNode.id),
+      reason: 'Text should have its own semantic node, not be merged into route-scoping ancestor',
     );
 
     semantics.dispose();
