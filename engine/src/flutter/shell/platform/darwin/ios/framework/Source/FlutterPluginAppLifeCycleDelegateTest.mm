@@ -81,6 +81,25 @@ FLUTTER_ASSERT_ARC
 }
 @end
 
+@interface MutatingDelegate : NSObject <FlutterApplicationLifeCycleDelegate>
+@property(nonatomic, weak) FlutterPluginAppLifeCycleDelegate* container;
+@property(nonatomic, assign) BOOL shouldAdd;  // YES = Add, NO = Remove
+@end
+
+@implementation MutatingDelegate
+- (BOOL)application:(UIApplication*)application
+    didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+  if (self.shouldAdd) {
+    // Case 1: Add a new delegate during the loop over _delegates
+    [self.container addDelegate:[[FakePlugin alloc] init]];
+  } else {
+    // Case 2: Remove itself during the loop over _delegates
+    [self.container removeDelegate:self];
+  }
+  return YES;
+}
+@end
+
 @interface FlutterPluginAppLifeCycleDelegateTest : XCTestCase
 @end
 
@@ -565,6 +584,35 @@ FLUTTER_ASSERT_ARC
   [delegate sceneFallbackDidFinishLaunchingApplication:mockApplication];
   OCMVerify(times(1), [mockPlugin application:mockApplication
                           didFinishLaunchingWithOptions:options]);
+}
+
+- (void)testCanAddDelegateDuringEnumeration {
+  FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
+  MutatingDelegate* mutatingDelegate = [[MutatingDelegate alloc] init];
+  mutatingDelegate.container = delegate;
+  mutatingDelegate.shouldAdd = YES;  // Add Mode
+  
+  [delegate addDelegate:mutatingDelegate];
+  // Without the fix [_delegates allObjects], this crashes with NSGenericException
+  BOOL result = [delegate application:[UIApplication sharedApplication]
+        didFinishLaunchingWithOptions:nil];
+        
+  XCTAssertTrue(result);
+}
+
+- (void)testCanRemoveSelfDuringEnumeration {
+  FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
+  MutatingDelegate* mutatingDelegate = [[MutatingDelegate alloc] init];
+  mutatingDelegate.container = delegate;
+  mutatingDelegate.shouldAdd = NO;  // Delete Mode
+  
+  [delegate addDelegate:mutatingDelegate];
+  // Without the fix [_delegates allObjects], this crashes because the _delegates collection is
+  // modify during the loop
+  BOOL result = [delegate application:[UIApplication sharedApplication]
+        didFinishLaunchingWithOptions:nil];
+        
+  XCTAssertTrue(result);
 }
 
 @end

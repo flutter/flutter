@@ -175,7 +175,7 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions
                isFallbackForScene:(BOOL)isFallback {
-  for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
+  for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in [_delegates allObjects]) {
     if (!delegate || (isFallback && [self pluginSupportsSceneLifecycle:delegate])) {
       continue;
     }
