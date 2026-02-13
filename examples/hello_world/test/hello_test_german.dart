@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/german.dart' as hello_world;
+import 'package:hello_world/german.dart' as hello_world;
 
 void main() {
   testWidgets('Hallo Welt test', (WidgetTester tester) async {
