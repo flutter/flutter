@@ -101,15 +101,19 @@ void main() {
             .childDirectory(createdSwiftPMPlugin.pluginName)
             .childFile('Package.swift');
         final String manifestContents = swiftPMPluginPackageManifest.readAsStringSync();
+        const flutterFrameworkPackageDep =
+            '.package(name: "FlutterFramework", path: "../FlutterFramework")';
+        const flutterFrameworkTargetDep =
+            '.product(name: "FlutterFramework", package: "FlutterFramework")';
         swiftPMPluginPackageManifest.writeAsStringSync(
           manifestContents
               .replaceFirst(
-                'dependencies: []',
-                'dependencies: [.package(name: "${integrationTestPlugin.pluginName}", path: "../${integrationTestPlugin.pluginName}")]',
+                flutterFrameworkPackageDep,
+                '$flutterFrameworkPackageDep,\n.package(name: "${integrationTestPlugin.pluginName}", path: "../${integrationTestPlugin.pluginName}")',
               )
               .replaceFirst(
-                'dependencies: []',
-                'dependencies: [.product(name: "${integrationTestPlugin.pluginName.replaceAll('_', '-')}", package: "${integrationTestPlugin.pluginName}")]',
+                flutterFrameworkTargetDep,
+                '$flutterFrameworkTargetDep,\n.product(name: "${integrationTestPlugin.pluginName.replaceAll('_', '-')}", package: "${integrationTestPlugin.pluginName}")',
               ),
         );
         final File swiftPMPluginPodspec = fileSystem
