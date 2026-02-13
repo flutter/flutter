@@ -468,6 +468,7 @@ def run_cc_tests(
       make_test('embedder_unittests'),
       make_test('fml_unittests'),
       make_test('geometry_unittests'),
+      make_test('gpu_surface_unittests'),
       make_test('no_dart_plugin_registrant_unittests'),
       make_test('runtime_unittests'),
       make_test('testing_unittests'),
@@ -503,7 +504,6 @@ def run_cc_tests(
         make_test('framework_common_swift_unittests'),
         make_test('framework_common_unittests'),
         make_test('spring_animation_unittests'),
-        make_test('gpu_surface_metal_unittests'),
     ]
 
   if is_linux():
