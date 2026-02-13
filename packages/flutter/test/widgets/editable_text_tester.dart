@@ -93,7 +93,7 @@ class _TestTextFieldState extends State<TestTextField>
     super.dispose();
   }
 
-  static const Color _red = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
+  static const Color _red = Color(0xFFF44336);
 
   @override
   Widget build(BuildContext context) {
