@@ -8,7 +8,6 @@
 /// @docImport 'widget_tester.dart';
 library;
 
-import 'package:flutter/foundation.dart' show awaitNotRequired;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
@@ -522,7 +521,6 @@ class TestGesture {
   }
 
   /// In a test, send a pointer remove event for this pointer.
-  @awaitNotRequired
   Future<void> removePointer({Duration timeStamp = Duration.zero, Offset? location}) {
     return TestAsyncUtils.guard<void>(() {
       return _dispatcher(
@@ -578,7 +576,6 @@ class TestGesture {
 
   /// End the gesture by releasing the pointer. For trackpad pointers this
   /// will send a panZoomEnd event instead of an up event.
-  @awaitNotRequired
   Future<void> up({Duration timeStamp = Duration.zero, FlutterView? view}) {
     return TestAsyncUtils.guard<void>(() async {
       if (_pointer.kind == PointerDeviceKind.trackpad) {
