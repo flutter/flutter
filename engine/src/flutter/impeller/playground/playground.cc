@@ -20,10 +20,10 @@
 #include "third_party/glfw/include/GLFW/glfw3.h"
 
 #include "flutter/fml/paths.h"
+#include "flutter/testing/test_swiftshader_utils.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/allocator.h"
 #include "impeller/core/formats.h"
-#include "impeller/playground/backend/vulkan/swiftshader_utilities.h"
 #include "impeller/playground/image/compressed_image.h"
 #include "impeller/playground/imgui/imgui_impl_impeller.h"
 #include "impeller/playground/playground.h"
@@ -83,7 +83,7 @@ static void InitializeGLFWOnce() {
 
 Playground::Playground(PlaygroundSwitches switches) : switches_(switches) {
   InitializeGLFWOnce();
-  SetupSwiftshaderOnce(switches_.use_swiftshader);
+  flutter::testing::SetupSwiftshaderOnce(switches_.use_swiftshader);
 }
 
 Playground::~Playground() = default;
