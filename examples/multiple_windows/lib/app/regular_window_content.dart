@@ -6,6 +6,7 @@
 // ignore_for_file: implementation_imports
 
 import 'package:flutter/material.dart';
+import 'package:multiple_windows/app/popup_button.dart';
 import 'window_content.dart';
 import 'models.dart';
 import 'rotated_wire_cube.dart';
@@ -95,6 +96,8 @@ class RegularWindowContent extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 TooltipButton(parentController: window),
+                const SizedBox(height: 20),
+                PopupButton(parentController: window),
                 const SizedBox(height: 20),
                 Text(
                   'View #${window.rootView.viewId}\n'
