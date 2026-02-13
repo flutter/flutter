@@ -6693,6 +6693,9 @@ class SemanticsConfiguration {
     if (_maxValue != null && other._maxValue != null) {
       return false;
     }
+    if (other._identifier.isNotEmpty) {
+      return false;
+    }
     return true;
   }
 

@@ -1067,6 +1067,25 @@ void main() {
     expect(transparentConfig.copy().hitTestBehavior, SemanticsHitTestBehavior.transparent);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/180894
+  test('SemanticsConfiguration.isCompatibleWith rejects configs with non-empty identifier', () {
+    final configWithIdentifier = SemanticsConfiguration()..identifier = 'test-id';
+    final configWithRole = SemanticsConfiguration()..role = SemanticsRole.dialog;
+    final configWithLabel = SemanticsConfiguration()..label = 'Hello';
+    final emptyConfig = SemanticsConfiguration();
+
+    // A config with a non-empty identifier is incompatible with any annotated config.
+    expect(configWithRole.isCompatibleWith(configWithIdentifier), isFalse);
+    expect(configWithLabel.isCompatibleWith(configWithIdentifier), isFalse);
+
+    // A config without an identifier is still compatible with other configs.
+    expect(emptyConfig.isCompatibleWith(configWithLabel), isTrue);
+
+    // An unannotated config is compatible with an identifier config
+    // (the early return for !hasBeenAnnotated handles this).
+    expect(emptyConfig.isCompatibleWith(configWithIdentifier), isTrue);
+  });
+
   test('SemanticsOwner dispatches memory events', () async {
     await expectLater(
       await memoryEvents(

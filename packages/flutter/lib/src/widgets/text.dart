@@ -804,9 +804,6 @@ class Text extends StatelessWidget {
         textDirection: textDirection,
         label: semanticsLabel,
         identifier: semanticsIdentifier,
-        // Fix for issue #180894: When semanticsIdentifier is provided, set container: true
-        // to prevent the identifier from being absorbed into ancestor semantic nodes.
-        container: semanticsIdentifier != null,
         child: ExcludeSemantics(excluding: semanticsLabel != null, child: result),
       );
     }
