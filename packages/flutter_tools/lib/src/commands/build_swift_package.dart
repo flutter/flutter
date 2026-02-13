@@ -490,10 +490,7 @@ class FlutterPluginSwiftDependencies {
       // Example: https://github.com/firebase/flutterfire/blob/198aef8db6c96a08f57d750f1fa756da5e4a68a5/packages/firebase_core/firebase_core/ios/firebase_core/Package.swift#L21-L26
       final Directory pluginDestination = pluginsDirectory.childDirectory(plugin.name)
         ..createSync(recursive: true);
-      copyDirectory(
-        _utils.fileSystem.directory(plugin.path),
-        pluginDestination,
-      );
+      copyDirectory(_utils.fileSystem.directory(plugin.path), pluginDestination);
 
       final String? swiftPackagePath = plugin.pluginSwiftPackagePath(
         _utils.fileSystem,
@@ -571,20 +568,18 @@ class FlutterPluginSwiftDependencies {
     if (!manifestContents.contains('platforms')) {
       return null;
     }
-    // First attempt to parse with regex, which is fast
-    // e.g. \.iOS\(([\.v\d"\s]*)\) matches .iOS("13.0") or .iOS(.v13) or .iOS(.v10_15)
+    // First, attempt to parse with regex, which is fast
+    // e.g. \.iOS\([\s"]*([\._v\d]*)[\s"]*\) matches .iOS("13.0") or .iOS(.v13) or .iOS(.v10_15)
     final pattern = RegExp(
-      '\\${_targetPlatform.swiftPackagePlatform.displayName}\\(([_v\\.\\d\\s"]*)\\)',
+      r'\'
+      '${_targetPlatform.swiftPackagePlatform.displayName}'
+      r'\([\s"]*([\._v\d]*)[\s"]*\)',
     );
     final Iterable<RegExpMatch> matches = pattern.allMatches(manifestContents);
     if (matches.length == 1) {
       final String? match = matches.first.group(1);
       if (match != null) {
-        final String normalizedVersionString = match
-            .replaceAll('"', '')
-            .replaceAll(' ', '')
-            .replaceAll('.v', '')
-            .replaceAll('_', '.');
+        final String normalizedVersionString = match.replaceAll('.v', '').replaceAll('_', '.');
         final Version? parsedVersion = Version.parse(normalizedVersionString);
         if (parsedVersion != null) {
           return parsedVersion;
@@ -608,8 +603,7 @@ class FlutterPluginSwiftDependencies {
     }
     throwToolExit(
       'Unable to parse ${_targetPlatform.name} supported platform version from '
-      '${swiftPackageManifest.path}. $_kFileAnIssue and include the contents of the aforementioned '
-      'file.',
+      '${swiftPackageManifest.path}. $_kFileAnIssue and include the contents of this file.',
     );
   }
 
@@ -624,8 +618,8 @@ class FlutterPluginSwiftDependencies {
       return json.decode(parsedManifest.stdout.toString()) as Map<String, Object?>;
     } on Exception catch (e, stackTrace) {
       throwToolExit(
-        'Failed to decode ${swiftPackageManifest.path}. $_kFileAnIssue and include aforementioned '
-        'file and the following stack trace: \n$e\n$stackTrace',
+        'Failed to decode ${swiftPackageManifest.path}. $_kFileAnIssue and include this file '
+        'and the following stack trace: \n$e\n$stackTrace',
       );
     }
   }
