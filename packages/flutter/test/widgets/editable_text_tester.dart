@@ -128,7 +128,7 @@ class _TestTextFieldSelectionGestureDetectorBuilder extends TextSelectionGesture
 
   @override
   void onUserTap() {
-    // BasicTestTextField does not have an onTap callback.
+    // TestTextField does not have an onTap callback.
   }
 
   @override
