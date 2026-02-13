@@ -34,7 +34,7 @@ class SemanticScrollable extends SemanticRole {
   /// content under this scrollable area. This element is sized based on the
   /// total scroll extent calculated by scrollExtentMax - scrollExtentMin + rect.height
   /// of the [SemanticsObject] managed by this scrollable.
-  final DomElement _scrollOverflowElement = createDomElement('flt-semantics-scroll-overflow');
+  DomElement? _scrollOverflowElement;
 
   /// Listens to HTML "scroll" gestures detected by the browser.
   ///
@@ -109,18 +109,24 @@ class SemanticScrollable extends SemanticRole {
     // that may still experience overscroll issues when macOS inserts scrollbars
     // into the application.
     semanticsObject.element.style.scrollbarWidth = 'none';
-
-    _scrollOverflowElement.style
-      ..position = 'absolute'
-      ..transformOrigin = '0 0 0'
-      // Ignore pointer events since this is a dummy element.
-      ..pointerEvents = 'none';
-    append(_scrollOverflowElement);
   }
 
   @override
   void update() {
     super.update();
+    if (!_canScroll) {
+      _cleanUp();
+      return;
+    }
+    if (_scrollOverflowElement == null) {
+      _scrollOverflowElement = createDomElement('flt-semantics-scroll-overflow');
+      _scrollOverflowElement!.style
+        ..position = 'absolute'
+        ..transformOrigin = '0 0 0'
+        // Ignore pointer events since this is a dummy element.
+        ..pointerEvents = 'none';
+      append(_scrollOverflowElement!);
+    }
 
     semanticsObject.owner.addOneTimePostUpdateCallback(() {
       if (_canScroll) {
@@ -197,7 +203,7 @@ class SemanticScrollable extends SemanticRole {
     // and size it based on the total scroll extent so the browser
     // knows how much scrollable content there is.
     if (semanticsObject.isVerticalScrollContainer) {
-      _scrollOverflowElement.style
+      _scrollOverflowElement!.style
         // The cross axis size should be non-zero so it is taken into
         // account in the scrollable elements scrollHeight.
         ..width = '1px'
@@ -206,7 +212,7 @@ class SemanticScrollable extends SemanticRole {
         ..verticalScrollAdjustment = element.scrollTop
         ..horizontalScrollAdjustment = 0.0;
     } else if (semanticsObject.isHorizontalScrollContainer) {
-      _scrollOverflowElement.style
+      _scrollOverflowElement!.style
         ..width = '${scrollExtentTotal.toStringAsFixed(1)}px'
         // The cross axis size should be non-zero so it is taken into
         // account in the scrollable elements scrollHeight.
@@ -215,7 +221,7 @@ class SemanticScrollable extends SemanticRole {
         ..verticalScrollAdjustment = 0.0
         ..horizontalScrollAdjustment = element.scrollLeft;
     } else {
-      _scrollOverflowElement.style
+      _scrollOverflowElement!.style
         ..transform = 'translate(0px,0px)'
         ..width = '0px'
         ..height = '0px';
@@ -257,8 +263,13 @@ class SemanticScrollable extends SemanticRole {
   @override
   void dispose() {
     super.dispose();
+    _cleanUp();
+  }
+
+  void _cleanUp() {
+    _scrollOverflowElement?.remove();
+    _scrollOverflowElement = null;
     final DomCSSStyleDeclaration style = element.style;
-    assert(_gestureModeListener != null);
     style.removeProperty('overflowY');
     style.removeProperty('overflowX');
     style.removeProperty('touch-action');
