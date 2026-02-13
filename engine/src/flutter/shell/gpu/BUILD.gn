@@ -74,6 +74,25 @@ source_set("gpu_surface_vulkan") {
   }
 }
 
+if (test_enable_vulkan) {
+  impeller_component("gpu_surface_vulkan_unittests") {
+    testonly = true
+
+    sources = [ "gpu_surface_vulkan_impeller_unittests.cc" ]
+
+    deps = [
+             ":gpu_surface_vulkan",
+             "//flutter/fml",
+             "//flutter/impeller/fixtures",
+             "//flutter/runtime",
+             "//flutter/runtime:libdart",
+             "//flutter/testing",
+             "//flutter/testing:vulkan",
+             "//flutter/third_party/swiftshader/src/Vulkan:swiftshader_libvulkan_static",
+           ] + gpu_common_deps
+  }
+}
+
 if (shell_enable_metal) {
   source_set("gpu_surface_metal") {
     cflags_objc = flutter_cflags_objc
@@ -107,7 +126,6 @@ if (is_mac) {
     cflags_objc = flutter_cflags_objc
     cflags_objcc = flutter_cflags_objcc
 
-    target_type = "executable"
     sources = [
       "gpu_surface_metal_impeller_unittests.mm",
       "gpu_surface_noop_unittests.mm",
@@ -126,5 +144,23 @@ if (is_mac) {
              "//flutter/runtime:libdart",
              "//flutter/testing",
            ] + gpu_common_deps
+  }
+}
+
+impeller_component("gpu_surface_unittests") {
+  testonly = true
+  target_type = "executable"
+
+  sources = [ "gpu_surface_unittests.cc" ]
+  deps = [
+    "//flutter/impeller/fixtures",
+    "//flutter/testing",
+  ]
+
+  if (is_mac) {
+    deps += [ ":gpu_surface_metal_unittests" ]
+  }
+  if (test_enable_vulkan) {
+    deps += [ ":gpu_surface_vulkan_unittests" ]
   }
 }
