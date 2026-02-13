@@ -15,7 +15,6 @@ void main() {
     expect(
       find.byKey(const Key('title')), // sucht für ein Widget mit den Schlüssel 'title'
       findsOneWidget, // Der Test besteht, sofern ein Widget mit folgendem Schlüssel gefunden wurde
-    ); 
-    
+    );
   });
 }
