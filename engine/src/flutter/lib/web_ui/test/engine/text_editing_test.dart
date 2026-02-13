@@ -801,7 +801,7 @@ Future<void> testMain() async {
   group('DomWindow.parent for iframe detection', () {
     test('parent property is accessible', () {
       // Test harness may run in an iframe; just verify the API is accessible.
-      final DomWindow parent = domWindow.parent;
+      final DomWindow? parent = domWindow.parent;
       // parent is always a valid window (itself for top-level, parent for iframes)
       expect(parent, isNotNull);
     });

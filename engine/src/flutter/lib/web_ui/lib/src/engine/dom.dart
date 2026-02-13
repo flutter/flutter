@@ -183,12 +183,6 @@ extension type DomWindow._(JSObject _) implements DomEventTarget {
   /// The Trusted Types API (when available).
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/Trusted_Types_API
   external DomTrustedTypePolicyFactory? get trustedTypes;
-
-  /// Returns the parent window of the current window.
-  ///
-  /// If this window is the topmost window, returns itself.
-  /// Used to detect if the current window is inside an iframe.
-  external DomWindow get parent;
 }
 
 typedef DomRequestAnimationFrameCallback = void Function(JSNumber highResTime);
