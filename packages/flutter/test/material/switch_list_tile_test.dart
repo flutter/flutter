@@ -327,6 +327,32 @@ void main() {
     expect(tester.getTopRight(find.text('L')).dx, 790.0); // 800 - contentPadding.start
   });
 
+  testWidgets('SwitchListTile forwards statesController to ListTile', (WidgetTester tester) async {
+    final controller = WidgetStatesController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: <Widget>[
+              SwitchListTile(
+                value: true,
+                onChanged: (_) {},
+                title: const Text('Switch'),
+                statesController: controller,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final ListTile listTile = tester.widget<ListTile>(find.byType(ListTile));
+
+    expect(listTile.statesController, same(controller));
+  });
+
   testWidgets('SwitchListTile can autofocus unless disabled.', (WidgetTester tester) async {
     final GlobalKey childKey = GlobalKey();
 

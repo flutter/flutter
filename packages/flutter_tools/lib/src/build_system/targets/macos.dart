@@ -43,10 +43,15 @@ abstract class UnpackMacOS extends UnpackDarwin {
   ];
 
   @override
-  List<Source> get outputs => const <Source>[kFlutterMacOSFrameworkBinarySource];
+  List<Source> get outputs {
+    return <Source>[kFlutterMacOSFrameworkBinarySource];
+  }
 
   @override
   List<Target> get dependencies => <Target>[];
+
+  @override
+  FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.macos;
 
   @override
   Future<void> build(Environment environment) async {
@@ -378,6 +383,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/App.framework/App'),
+    Source.pattern('{BUILD_DIR}/${DartBuild.dartHookResultFilename}'),
     ...IconTreeShaker.inputs,
   ];
 

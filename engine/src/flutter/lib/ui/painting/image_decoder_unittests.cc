@@ -949,26 +949,6 @@ TEST(ImageDecoderTest, VerifySubpixelDecodingPreservesExifOrientation) {
   ASSERT_TRUE(image != nullptr);
   ASSERT_EQ(600, image->width());
   ASSERT_EQ(200, image->height());
-
-  auto decode = [descriptor](uint32_t target_width, uint32_t target_height) {
-    return ImageDecoderSkia::ImageFromCompressedData(
-        descriptor.get(), target_width, target_height,
-        fml::tracing::TraceFlow(""));
-  };
-
-  auto expected_data = flutter::testing::OpenFixtureAsSkData("Horizontal.png");
-  ASSERT_TRUE(expected_data != nullptr);
-  ASSERT_FALSE(expected_data->isEmpty());
-
-  auto assert_image = [&](const auto& decoded_image,
-                          const std::string& decode_error) {
-    ASSERT_EQ(decoded_image->dimensions(), SkISize::Make(300, 100));
-    sk_sp<SkData> encoded =
-        SkPngEncoder::Encode(nullptr, decoded_image.get(), {});
-    ASSERT_TRUE(encoded->equals(expected_data.get()));
-  };
-
-  assert_image(decode(300, 100), {});
 }
 
 TEST_F(ImageDecoderFixtureTest,

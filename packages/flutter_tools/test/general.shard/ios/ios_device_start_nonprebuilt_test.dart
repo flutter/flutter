@@ -750,7 +750,7 @@ void main() {
       ], logger);
       fakeXcodeProjectInterpreter = FakeXcodeProjectInterpreter(
         projectInfo: projectInfo,
-        xcodeVersion: Version(15, 0, 0),
+        xcodeVersion: Version(16, 0, 0),
       );
       xcode = Xcode.test(
         processManager: FakeProcessManager.any(),
@@ -1069,7 +1069,7 @@ void main() {
           );
           fakeXcodeProjectInterpreter = FakeXcodeProjectInterpreter(
             projectInfo: projectInfo,
-            xcodeVersion: Version(15, 0, 0),
+            xcodeVersion: Version(16, 0, 0),
           );
           xcode = Xcode.test(
             processManager: FakeProcessManager.any(),

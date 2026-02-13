@@ -34,7 +34,7 @@ import '../../src/throwing_pub.dart';
 class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInterpreter {
   FakeXcodeProjectInterpreterWithBuildSettings({Map<String, String>? overrides, Version? version})
     : _overrides = overrides ?? const <String, String>{},
-      version = version ?? Version(14, 0, 0);
+      version = version ?? Version(15, 0, 0);
 
   final Map<String, String> _overrides;
   Map<String, String> get overrides => _overrides;
@@ -145,7 +145,8 @@ void main() {
     command: <String>['xattr', '-r', '-d', 'com.apple.provenance', '/'],
   );
 
-  FakeCommand setUpXCResultCommand({
+  // Sets up xcresulttool command for Xcode versions below 16.
+  FakeCommand setUpLegacyXCResultCommand({
     String stdout = '',
     void Function(List<String> command)? onRun,
   }) {
@@ -446,7 +447,7 @@ void main() {
   );
 
   testUsingContext(
-    'ipa build uses new "debugging" export method when on Xcode versions > 15.3',
+    'ipa build uses "debugging" export method for development distribution',
     () async {
       final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
       final command = BuildCommand(
@@ -498,13 +499,13 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(16, null, null)),
       Artifacts: () => Artifacts.test(),
     },
   );
 
   testUsingContext(
-    'ipa build uses new "release-testing" export method when on Xcode versions > 15.3',
+    'ipa build uses new "release-testing" export method for ad-hoc distribution',
     () async {
       final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
       final command = BuildCommand(
@@ -556,13 +557,13 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(16, null, null)),
       Artifacts: () => Artifacts.test(),
     },
   );
 
   testUsingContext(
-    'ipa build uses new "app-store-connect" export method when on Xcode versions > 15.3',
+    'ipa build uses "app-store-connect" export method for app-store distribution',
     () async {
       final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
       final command = BuildCommand(
@@ -614,7 +615,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(16, null, null)),
       Artifacts: () => Artifacts.test(),
     },
   );
@@ -655,7 +656,7 @@ void main() {
   );
 
   testUsingContext(
-    'ipa build accepts "enterprise" export method when on Xcode versions > 15.3',
+    'ipa build accepts "enterprise" export method',
     () async {
       final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
       final command = BuildCommand(
@@ -707,7 +708,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(16, null, null)),
       Artifacts: () => Artifacts.test(),
     },
   );
@@ -999,7 +1000,7 @@ void main() {
       expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
       expect(logger.statusText, contains('Building ad-hoc IPA'));
       expect(logger.statusText, contains(RegExp(r'Built IPA to build/ios/ipa \(\d+\.\d+MB\)')));
-      // Don'ltruct how to upload to the App Store.
+      // Don't instruct how to upload to the App Store.
       expect(logger.statusText, isNot(contains('To upload')));
       expect(fakeProcessManager, hasNoRemainingExpectations);
     },
@@ -1370,7 +1371,7 @@ void main() {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
           },
         ),
-        setUpXCResultCommand(),
+        setUpLegacyXCResultCommand(),
       ]);
       createMinimalMockProjectFiles();
 
@@ -1413,7 +1414,7 @@ void main() {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
           },
         ),
-        setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
+        setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssues),
       ]);
       createMinimalMockProjectFiles();
 
@@ -1460,7 +1461,7 @@ void main() {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
           },
         ),
-        setUpXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
+        setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
       ]);
       createMinimalMockProjectFiles();
 
@@ -1555,7 +1556,7 @@ void main() {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
           },
         ),
-        setUpXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
+        setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
       ]);
       createMinimalMockProjectFiles();
 

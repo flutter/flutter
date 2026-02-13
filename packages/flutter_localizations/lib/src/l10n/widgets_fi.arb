@@ -12,7 +12,7 @@
   "shareButtonLabel": "Jaa",
   "pasteButtonLabel": "Liitä",
   "selectAllButtonLabel": "Valitse kaikki",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "Hakutuloksia löytyi",
+  "noResultsFound": "Ei tuloksia",
+  "radioButtonUnselectedLabel": "Ei valittu"
 }

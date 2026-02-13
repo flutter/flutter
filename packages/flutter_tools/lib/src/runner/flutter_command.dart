@@ -372,7 +372,9 @@ abstract class FlutterCommand extends Command<void> {
     );
     argParser.addFlag(
       FlutterOptions.kWebExperimentalHotReload,
-      help: 'Enables new module format that supports hot reload.',
+      help:
+          '(deprecated; will be removed in a future release) '
+          'Enables new module format that supports hot reload.',
       defaultsTo: true,
       hide: !verboseHelp,
     );
@@ -2143,6 +2145,7 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
       return null;
     case TargetPlatform.linux_x64:
     case TargetPlatform.linux_arm64:
+    case TargetPlatform.linux_riscv64:
       if (featureFlags.isLinuxEnabled) {
         return DevelopmentArtifact.linux;
       }

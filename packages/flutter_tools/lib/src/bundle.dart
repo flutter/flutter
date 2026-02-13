@@ -25,9 +25,9 @@ String getDefaultApplicationKernelPath({required bool trackWidgetCreation}) {
 String getDefaultCachedKernelPath({
   required bool trackWidgetCreation,
   required List<String> dartDefines,
+  required Config config,
+  required FileSystem fileSystem,
   List<String> extraFrontEndOptions = const <String>[],
-  FileSystem? fileSystem,
-  Config? config,
 }) {
   final buffer = StringBuffer();
   final List<String> cacheFrontEndOptions = extraFrontEndOptions.toList()
@@ -41,10 +41,7 @@ String getDefaultCachedKernelPath({
     buildPrefix = '${hex.encode(digest.bytes)}.';
   }
   return getKernelPathForTransformerOptions(
-    (fileSystem ?? globals.fs).path.join(
-      getBuildDirectory(config ?? globals.config, fileSystem ?? globals.fs),
-      '${buildPrefix}cache.dill',
-    ),
+    fileSystem.path.join(getBuildDirectory(config, fileSystem), '${buildPrefix}cache.dill'),
     trackWidgetCreation: trackWidgetCreation,
   );
 }
@@ -55,5 +52,3 @@ String getKernelPathForTransformerOptions(String path, {required bool trackWidge
   }
   return path;
 }
-
-const defaultPrivateKeyPath = 'privatekey.der';

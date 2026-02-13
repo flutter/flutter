@@ -12,7 +12,7 @@
   "shareButtonLabel": "مشاركة",
   "pasteButtonLabel": "لصق",
   "selectAllButtonLabel": "اختيار الكل",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "تم العثور على نتائج بحث",
+  "noResultsFound": "لم يتم العثور على نتائج",
+  "radioButtonUnselectedLabel": "غير محدّد"
 }

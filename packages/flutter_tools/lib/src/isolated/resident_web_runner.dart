@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:dds/dds.dart';
 import 'package:dwds/dwds.dart';
 import 'package:package_config/package_config.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -30,6 +31,7 @@ import '../device.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../hook_runner.dart' show hookRunner;
+import '../mdns_device_discovery.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_runner.dart';
@@ -156,6 +158,7 @@ class ResidentWebRunner extends ResidentRunner {
   // Used with the new compiler to generate a bootstrap file containing plugins
   // and platform initialization.
   Directory? _generatedEntrypointDirectory;
+  final _mdnsDiscoveries = <MDNSDeviceDiscovery>[];
 
   // Only non-wasm debug builds of the web support the service protocol.
   @override
@@ -217,6 +220,7 @@ class ResidentWebRunner extends ResidentRunner {
   @override
   Future<void> cleanupAtFinish() async {
     await _cleanup();
+    await super.cleanupAtFinish();
   }
 
   Future<void> _cleanup() async {
@@ -227,6 +231,10 @@ class ResidentWebRunner extends ResidentRunner {
     await _stdErrSub?.cancel();
     await _serviceSub?.cancel();
     await _extensionEventSub?.cancel();
+    for (final MDNSDeviceDiscovery discovery in _mdnsDiscoveries) {
+      await discovery.stop();
+    }
+    _mdnsDiscoveries.clear();
 
     if (stopAppDuringCleanup) {
       await flutterDevice!.device!.stopApp(null);
@@ -377,24 +385,32 @@ class ResidentWebRunner extends ResidentRunner {
       });
     } on WebSocketException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
+      _logger.printError(error.toString(), stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on ChromeDebugException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
+      _logger.printError(error.toString(), stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on AppConnectionException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
+      _logger.printError(error.toString(), stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on SocketException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
+      _logger.printError(error.toString(), stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on HttpException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
+      _logger.printError(error.toString(), stackTrace: stackTrace);
       throwToolExit(kExitMessage);
+    } on DartDevelopmentServiceException catch (error) {
+      // The application may have started shutting down before DDS was able to finish establishing
+      // its connection to DWDS. Don't treat this as an unhandled exception.
+      appFailedToStart();
+      if (error.errorCode == DartDevelopmentServiceException.failedToStartError) {
+        throwToolExit(kExitMessage);
+      }
+      rethrow;
     } on Exception {
       appFailedToStart();
       rethrow;
@@ -905,6 +921,25 @@ class ResidentWebRunner extends ResidentRunner {
             flutterProject: flutterProject,
             printStructuredErrorLogMethod: printStructuredErrorLog,
             vmService: _vmService.service,
+          );
+
+          // Start mDNS server
+          final discovery = MDNSDeviceDiscovery(
+            device: flutterDevice!.device!,
+            vmService: _vmService.service,
+            debuggingOptions: debuggingOptions,
+            logger: logger,
+            platform: _platform,
+            flutterVersion: globals.flutterVersion,
+            systemClock: _systemClock,
+            botDetector: globals.botDetector,
+          );
+          _mdnsDiscoveries.add(discovery);
+          unawaited(
+            discovery.advertise(
+              appName: flutterProject.manifest.appName,
+              vmServiceUri: _vmService.httpAddress,
+            ),
           );
 
           final Uri websocketUri = Uri.parse(debugConnection.uri);
