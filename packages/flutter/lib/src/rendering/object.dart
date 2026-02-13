@@ -1528,7 +1528,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
           continue;
         }
 
-        if (node._semantics.shouldFormSemanticsNode) {
+        if (node._semantics.shouldFormSemanticsNode && (node._isRelayoutBoundary ?? false)) {
           node._semantics.geometry = null;
           continue;
         }
