@@ -9621,6 +9621,47 @@ void main() {
     semantics.dispose();
   });
 
+  // When both errorText and hintText are present, they should end up in
+  // separate semantics properties: hintText in label (via Text widget merge),
+  // errorText in hint (via explicit Semantics wrapper).
+  testWidgets('TextField errorText and hintText do not concatenate in semantics', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+    final TextEditingController controller = _textEditingController();
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Form(
+            child: TextField(
+              key: key,
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                hintText: 'Enter your email',
+                errorText: 'Email is required',
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Focus the text field so the hint Text widget becomes visible.
+    await tester.tap(find.byKey(key));
+    await tester.pumpAndSettle();
+
+    final SemanticsNode node = tester.getSemantics(find.byType(EditableText));
+    // hintText merges into label via the Text widget's markAsMergeUp.
+    expect(node.label, contains('Enter your email'));
+    // errorText is in the hint property via the explicit Semantics wrapper.
+    expect(node.hint, 'Email is required');
+
+    semantics.dispose();
+  });
+
   testWidgets('floating label does not overlap with value at large textScaleFactors', (
     WidgetTester tester,
   ) async {
