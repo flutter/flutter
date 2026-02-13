@@ -348,6 +348,42 @@ let package = Package(
     expect(supportedPlatform.format(), '.iOS("17.0")');
   });
 
+  testWithoutContext('SwiftPackageSupportedPlatform.fromJson parsed iOS', () {
+    final SwiftPackageSupportedPlatform? supportedPlatform = SwiftPackageSupportedPlatform.fromJson(
+      {'platformName': 'ios', 'version': '13.0'},
+    );
+    expect(supportedPlatform, isNotNull);
+    expect(supportedPlatform?.format(), '.iOS("13.0")');
+  });
+
+  testWithoutContext('SwiftPackageSupportedPlatform.fromJson parsed macOS', () {
+    final SwiftPackageSupportedPlatform? supportedPlatform = SwiftPackageSupportedPlatform.fromJson(
+      {'platformName': 'macos', 'version': '10.15'},
+    );
+    expect(supportedPlatform, isNotNull);
+    expect(supportedPlatform?.format(), '.macOS("10.15")');
+  });
+
+  testWithoutContext('SwiftPackageSupportedPlatform.fromJson returns null when invalid', () {
+    final SwiftPackageSupportedPlatform? invalidVersion = SwiftPackageSupportedPlatform.fromJson({
+      'platformName': 'ios',
+      'version': 'v15',
+    });
+    expect(invalidVersion, isNull);
+
+    final SwiftPackageSupportedPlatform? invalidPlatform = SwiftPackageSupportedPlatform.fromJson({
+      'platformName': 'asdf',
+      'version': '13.0',
+    });
+    expect(invalidPlatform, isNull);
+
+    final SwiftPackageSupportedPlatform? invalidJson = SwiftPackageSupportedPlatform.fromJson({
+      'name': 'ios',
+      'version': '13.0',
+    });
+    expect(invalidJson, isNull);
+  });
+
   group('Format SwiftPackageProduct', () {
     testWithoutContext('without targets and libraryType', () {
       final product = SwiftPackageProduct(name: 'ProductName', targets: <String>[]);

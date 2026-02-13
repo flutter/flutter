@@ -2030,6 +2030,14 @@ flutter:
           '/path/to/test/macos/test',
         );
         expect(
+          plugin.pluginSwiftPackagePath(fs, IOSPlugin.kConfigKey, overridePath: '/override'),
+          '/override/ios/test',
+        );
+        expect(
+          plugin.pluginSwiftPackagePath(fs, MacOSPlugin.kConfigKey, overridePath: '/override'),
+          '/override/macos/test',
+        );
+        expect(
           plugin.pluginSwiftPackageManifestPath(fs, IOSPlugin.kConfigKey),
           '/path/to/test/ios/test/Package.swift',
         );
@@ -2076,6 +2084,14 @@ flutter:
           '/path/to/test/darwin/test',
         );
         expect(
+          plugin.pluginSwiftPackagePath(fs, IOSPlugin.kConfigKey, overridePath: '/override'),
+          '/override/darwin/test',
+        );
+        expect(
+          plugin.pluginSwiftPackagePath(fs, MacOSPlugin.kConfigKey, overridePath: '/override'),
+          '/override/darwin/test',
+        );
+        expect(
           plugin.pluginSwiftPackageManifestPath(fs, IOSPlugin.kConfigKey),
           '/path/to/test/darwin/test/Package.swift',
         );
@@ -2117,6 +2133,75 @@ flutter:
         expect(plugin.pluginPodspecPath(fs, IOSPlugin.kConfigKey), isNull);
         expect(plugin.pluginPodspecPath(fs, MacOSPlugin.kConfigKey), isNull);
         expect(plugin.pluginPodspecPath(fs, WindowsPlugin.kConfigKey), isNull);
+      });
+
+      testWithoutContext('supportSwiftPackageManagerForPlatform if manifest exists', () {
+        final fs = MemoryFileSystem.test();
+        final plugin = Plugin(
+          name: 'test',
+          path: '/path/to/test/',
+          defaultPackagePlatforms: const <String, String>{},
+          pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
+          platforms: const <String, PluginPlatform>{
+            IOSPlugin.kConfigKey: IOSPlugin(name: 'test', classPrefix: ''),
+            MacOSPlugin.kConfigKey: MacOSPlugin(name: 'test'),
+          },
+          dependencies: <String>[],
+          isDirectDependency: true,
+          isDevDependency: false,
+        );
+        expect(plugin.supportSwiftPackageManagerForPlatform(fs, IOSPlugin.kConfigKey), isFalse);
+        expect(plugin.supportSwiftPackageManagerForPlatform(fs, MacOSPlugin.kConfigKey), isFalse);
+
+        fs
+            .file(fs.path.join(plugin.path, 'ios', plugin.name, 'Package.swift'))
+            .createSync(recursive: true);
+        expect(plugin.supportSwiftPackageManagerForPlatform(fs, IOSPlugin.kConfigKey), isTrue);
+        expect(plugin.supportSwiftPackageManagerForPlatform(fs, MacOSPlugin.kConfigKey), isFalse);
+
+        fs
+            .file(fs.path.join(plugin.path, 'macos', plugin.name, 'Package.swift'))
+            .createSync(recursive: true);
+        expect(plugin.supportSwiftPackageManagerForPlatform(fs, IOSPlugin.kConfigKey), isTrue);
+        expect(plugin.supportSwiftPackageManagerForPlatform(fs, MacOSPlugin.kConfigKey), isTrue);
+
+        final darwinPlugin = Plugin(
+          name: 'test',
+          path: '/path/to/test/',
+          defaultPackagePlatforms: const <String, String>{},
+          pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
+          platforms: const <String, PluginPlatform>{
+            IOSPlugin.kConfigKey: IOSPlugin(
+              name: 'test',
+              classPrefix: '',
+              sharedDarwinSource: true,
+            ),
+            MacOSPlugin.kConfigKey: MacOSPlugin(name: 'test', sharedDarwinSource: true),
+          },
+          dependencies: <String>[],
+          isDirectDependency: true,
+          isDevDependency: false,
+        );
+        expect(
+          darwinPlugin.supportSwiftPackageManagerForPlatform(fs, IOSPlugin.kConfigKey),
+          isFalse,
+        );
+        expect(
+          darwinPlugin.supportSwiftPackageManagerForPlatform(fs, MacOSPlugin.kConfigKey),
+          isFalse,
+        );
+
+        fs
+            .file(fs.path.join(darwinPlugin.path, 'darwin', darwinPlugin.name, 'Package.swift'))
+            .createSync(recursive: true);
+        expect(
+          darwinPlugin.supportSwiftPackageManagerForPlatform(fs, IOSPlugin.kConfigKey),
+          isTrue,
+        );
+        expect(
+          darwinPlugin.supportSwiftPackageManagerForPlatform(fs, MacOSPlugin.kConfigKey),
+          isTrue,
+        );
       });
     });
 

@@ -10,6 +10,8 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
+import '../base/fingerprint.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/template.dart';
@@ -17,6 +19,7 @@ import '../base/version.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../features.dart';
 import '../flutter_plugins.dart';
@@ -28,6 +31,10 @@ import '../runner/flutter_command.dart';
 import '../version.dart';
 import 'build.dart';
 
+const String _kFileAnIssue =
+    'Please file an issue at https://github.com/flutter/flutter/issues/new/choose';
+const String _kPackages = 'Packages';
+const String _kPlugins = 'Plugins';
 const String kPluginSwiftPackageName = 'FlutterPluginRegistrant';
 const String _kSources = 'Sources';
 const List<String> _kSupportedPlatforms = ['ios', 'macos'];
@@ -191,6 +198,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     buildSystem: _buildSystem,
     cache: _cache,
     fileSystem: _fileSystem,
+    flutterRoot: Cache.flutterRoot!,
     flutterVersion: _flutterVersion,
     logger: logger,
     platform: _platform,
@@ -200,6 +208,10 @@ class BuildSwiftPackage extends BuildSubCommand {
     xcode: _xcode!,
   );
   late final pluginRegistrant = FlutterPluginRegistrantSwiftPackage(
+    targetPlatform: _targetPlatform,
+    utils: utils,
+  );
+  late final pluginSwiftDependencies = FlutterPluginSwiftDependencies(
     targetPlatform: _targetPlatform,
     utils: utils,
   );
@@ -222,10 +234,12 @@ class BuildSwiftPackage extends BuildSubCommand {
     final Directory outputDirectory = _fileSystem.directory(
       _fileSystem.path.absolute(_fileSystem.path.normalize(outputArgument)),
     );
+    final Directory cacheDirectory = outputDirectory.childDirectory('.cache')
+      ..createSync(recursive: true);
     final Directory pluginRegistrantSwiftPackage = outputDirectory.childDirectory(
       kPluginSwiftPackageName,
-    );
-    pluginRegistrantSwiftPackage.createSync(recursive: true);
+    )..createSync(recursive: true);
+    final Directory pluginsDirectory = pluginRegistrantSwiftPackage.childDirectory(_kPlugins);
 
     await project.regeneratePlatformSpecificTooling(releaseMode: false);
 
@@ -236,6 +250,11 @@ class BuildSwiftPackage extends BuildSubCommand {
 
     final List<Plugin> plugins = await findPlugins(project);
     plugins.sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
+    await pluginSwiftDependencies.processPlugins(
+      cacheDirectory: cacheDirectory,
+      plugins: plugins,
+      pluginsDirectory: pluginsDirectory,
+    );
 
     for (final buildInfo in buildInfos) {
       final String xcodeBuildConfiguration = buildInfo.mode.uppercaseName;
@@ -262,6 +281,7 @@ class BuildSwiftPackage extends BuildSubCommand {
         pluginRegistrantSwiftPackage: pluginRegistrantSwiftPackage,
         plugins: plugins,
         xcodeBuildConfiguration: xcodeBuildConfiguration,
+        pluginSwiftDependencies: pluginSwiftDependencies,
       );
     } finally {
       status.stop();
@@ -307,9 +327,21 @@ class FlutterPluginRegistrantSwiftPackage {
     required Directory pluginRegistrantSwiftPackage,
     required List<Plugin> plugins,
     required String xcodeBuildConfiguration,
+    required FlutterPluginSwiftDependencies pluginSwiftDependencies,
   }) async {
-    final List<SwiftPackageTargetDependency> targetDependencies = [];
-    final List<SwiftPackagePackageDependency> packageDependencies = [];
+    final Directory packagesForConfiguration = pluginRegistrantSwiftPackage
+        .childDirectory(xcodeBuildConfiguration)
+        .childDirectory(_kPackages);
+
+    final (
+      List<SwiftPackagePackageDependency> pluginPackageDependencies,
+      List<SwiftPackageTargetDependency> pluginTargetDependencies,
+    ) = pluginSwiftDependencies.generateDependencies(
+      packagesForConfiguration: packagesForConfiguration,
+    );
+
+    final targetDependencies = <SwiftPackageTargetDependency>[...pluginTargetDependencies];
+    final packageDependencies = <SwiftPackagePackageDependency>[...pluginPackageDependencies];
 
     const String swiftPackageName = kPluginSwiftPackageName;
     final File manifestFile = pluginRegistrantSwiftPackage
@@ -329,7 +361,7 @@ class FlutterPluginRegistrantSwiftPackage {
     final pluginsPackage = SwiftPackage(
       manifest: manifestFile,
       name: swiftPackageName,
-      platforms: <SwiftPackageSupportedPlatform>[],
+      platforms: <SwiftPackageSupportedPlatform>[pluginSwiftDependencies.highestSupportedVersion],
       products: <SwiftPackageProduct>[product],
       dependencies: packageDependencies,
       targets: targets,
@@ -381,6 +413,256 @@ class FlutterPluginRegistrantSwiftPackage {
   }
 }
 
+/// Class that encapsulates logic needed to copy Flutter plugins that support SwiftPM and generate
+/// dependencies for the FlutterPluginRegistrant swift package.
+@visibleForTesting
+class FlutterPluginSwiftDependencies {
+  FlutterPluginSwiftDependencies({
+    required FlutterDarwinPlatform targetPlatform,
+    required BuildSwiftPackageUtils utils,
+  }) : _targetPlatform = targetPlatform,
+       _utils = utils;
+
+  final FlutterDarwinPlatform _targetPlatform;
+  final BuildSwiftPackageUtils _utils;
+
+  /// The highest [SwiftPackageSupportedPlatform] among all of the Flutter SwiftPM plugins.
+  /// Defaults to the Flutter framework's [SwiftPackageSupportedPlatform].
+  SwiftPackageSupportedPlatform get highestSupportedVersion => _highestSupportedVersion;
+  late SwiftPackageSupportedPlatform _highestSupportedVersion =
+      _targetPlatform.supportedPackagePlatform;
+
+  @visibleForTesting
+  /// A list of [Plugin]s copied and path to the copied Swift package.
+  final List<(Plugin, String)> copiedPlugins = [];
+
+  /// Copy plugins from pubcache to [pluginsDirectory] and sets [highestSupportedVersion] to later
+  /// be used when creating the FlutterPluginRegistrant.
+  Future<void> processPlugins({
+    required Directory cacheDirectory,
+    required List<Plugin> plugins,
+    required Directory pluginsDirectory,
+  }) async {
+    final Status status = _utils.logger.startProgress('   ├─Processing plugins...');
+    var skipped = false;
+    try {
+      final List<File> manifests = await _copyPlugins(
+        plugins: plugins,
+        pluginsDirectory: pluginsDirectory,
+      );
+      final Version parsedHighestVersion;
+      (parsedHighestVersion, skipped) = await determineHighestSupportedVersion(
+        cacheDirectory: cacheDirectory,
+        manifests: manifests,
+      );
+      _highestSupportedVersion = SwiftPackageSupportedPlatform(
+        platform: _targetPlatform.swiftPackagePlatform,
+        version: parsedHighestVersion,
+      );
+    } finally {
+      status.stop();
+      if (skipped) {
+        _utils.logger.printStatus('   │   └── Skipping processing plugins. No change detected.');
+      }
+    }
+  }
+
+  /// Copies SwiftPM plugins from pubcache to [pluginsDirectory].
+  Future<List<File>> _copyPlugins({
+    required List<Plugin> plugins,
+    required Directory pluginsDirectory,
+  }) async {
+    final List<File> manifests = [];
+    try {
+      ErrorHandlingFileSystem.deleteIfExists(pluginsDirectory, recursive: true);
+    } on FileSystemException catch (e, stackTrace) {
+      // Delete may fail due to Xcode writing hidden files to the directory at the same time.
+      _utils.logger.printTrace('Failed to delete ${pluginsDirectory.path}: $e\n$stackTrace');
+    }
+    for (final plugin in plugins) {
+      // If plugin does not support the platform, skip it.
+      if (!plugin.supportSwiftPackageManagerForPlatform(_utils.fileSystem, _targetPlatform.name)) {
+        continue;
+      }
+
+      // The entire plugin is copied instead of just the Swift package to maintain any relative
+      // links within the plugin.
+      // Example: https://github.com/firebase/flutterfire/blob/198aef8db6c96a08f57d750f1fa756da5e4a68a5/packages/firebase_core/firebase_core/ios/firebase_core/Package.swift#L21-L26
+      final Directory pluginDestination = pluginsDirectory.childDirectory(plugin.name)
+        ..createSync(recursive: true);
+      copyDirectory(_utils.fileSystem.directory(plugin.path), pluginDestination);
+
+      final String? swiftPackagePath = plugin.pluginSwiftPackagePath(
+        _utils.fileSystem,
+        _targetPlatform.name,
+        overridePath: pluginDestination.path,
+      );
+      if (swiftPackagePath == null) {
+        throwToolExit("Failed to find copied ${plugin.name}'s Package.swift. $_kFileAnIssue");
+      }
+      copiedPlugins.add((plugin, swiftPackagePath));
+      manifests.add(_utils.fileSystem.directory(swiftPackagePath).childFile('Package.swift'));
+    }
+    return manifests;
+  }
+
+  /// Returns the highest [SwiftPackageSupportedPlatform.version] among the plugins and `true` if
+  /// it was able to get the version from the cache.
+  ///
+  /// Saves the value to a file in [cacheDirectory] for quicker lookup when the list of Swift
+  /// package manifests has not changed.
+  @visibleForTesting
+  Future<(Version, bool)> determineHighestSupportedVersion({
+    required List<File> manifests,
+    required Directory cacheDirectory,
+  }) async {
+    final File savedHighestVersionFile = cacheDirectory.childFile(
+      '${_targetPlatform.name}.version',
+    );
+    final fingerprinter = Fingerprinter(
+      fileSystem: _utils.fileSystem,
+      fingerprintPath: cacheDirectory.childFile('flutter_swift_pm_plugins.fingerprint').path,
+      paths: [
+        ...manifests.map((manifest) => manifest.path),
+        savedHighestVersionFile.path,
+        _utils.fileSystem.path.join(
+          _utils.flutterRoot,
+          'packages',
+          'flutter_tools',
+          'lib',
+          'src',
+          'commands',
+          'build_swift_package.dart',
+        ),
+      ],
+      logger: _utils.logger,
+    );
+    if (fingerprinter.doesFingerprintMatch() && savedHighestVersionFile.existsSync()) {
+      // Use saved version if possible
+      final String versionAsString = savedHighestVersionFile.readAsStringSync();
+      final Version? savedVersion = Version.parse(versionAsString);
+      if (savedVersion != null) {
+        return (savedVersion, true);
+      }
+    }
+    Version parsedHighestVersion = _highestSupportedVersion.version;
+    for (final manifest in manifests) {
+      // Parse the plugins for the minimum deployment target.
+      // The FlutterPluginRegistrant needs to match the highest version. Otherwise, it will error.
+      final Version? pluginSupportedVersion = await _parseSwiftPackageSupportedPlatform(manifest);
+      if (pluginSupportedVersion != null && (parsedHighestVersion < pluginSupportedVersion)) {
+        parsedHighestVersion = pluginSupportedVersion;
+      }
+    }
+    savedHighestVersionFile
+      ..createSync(recursive: true)
+      ..writeAsStringSync(parsedHighestVersion.toString());
+    fingerprinter.writeFingerprint();
+    return (parsedHighestVersion, false);
+  }
+
+  /// Parses the [SwiftPackageSupportedPlatform] from the Package.swift using either regex or
+  /// `swift` command line tool.
+  Future<Version?> _parseSwiftPackageSupportedPlatform(File swiftPackageManifest) async {
+    final String manifestContents = swiftPackageManifest.readAsStringSync();
+    if (!manifestContents.contains('platforms')) {
+      return null;
+    }
+    // First, attempt to parse with regex, which is fast
+    // e.g. \.iOS\([\s"]*([\._v\d]*)[\s"]*\) matches .iOS("13.0") or .iOS(.v13) or .iOS(.v10_15)
+    final pattern = RegExp(
+      r'\'
+      '${_targetPlatform.swiftPackagePlatform.displayName}'
+      r'\([\s"]*([\._v\d]*)[\s"]*\)',
+    );
+    final Iterable<RegExpMatch> matches = pattern.allMatches(manifestContents);
+    if (matches.length == 1) {
+      final String? match = matches.first.group(1);
+      if (match != null) {
+        final String normalizedVersionString = match.replaceAll('.v', '').replaceAll('_', '.');
+        final Version? parsedVersion = Version.parse(normalizedVersionString);
+        if (parsedVersion != null) {
+          return parsedVersion;
+        }
+      }
+    }
+
+    // If regex matching fails, convert the manifest to json and then parse
+    final Map<String, Object?> manifestAsJson = await _parseSwiftPackage(swiftPackageManifest);
+    if (manifestAsJson case {'platforms': final List<Object?> platformsData}) {
+      for (final Map<String, Object?> platformData
+          in platformsData.whereType<Map<String, Object?>>()) {
+        final SwiftPackageSupportedPlatform? parsedPlatform =
+            SwiftPackageSupportedPlatform.fromJson(platformData);
+        if (parsedPlatform != null &&
+            parsedPlatform.platform == _targetPlatform.swiftPackagePlatform) {
+          return parsedPlatform.version;
+        }
+      }
+      return null;
+    }
+    throwToolExit(
+      'Unable to parse ${_targetPlatform.name} supported platform version from '
+      '${swiftPackageManifest.path}. $_kFileAnIssue and include the contents of this file.',
+    );
+  }
+
+  /// Uses `swift` command line tool to convert Package.swift to json.
+  Future<Map<String, Object?>> _parseSwiftPackage(File swiftPackageManifest) async {
+    try {
+      final ProcessResult parsedManifest = await _utils.processManager.run([
+        'swift',
+        'package',
+        'dump-package',
+      ], workingDirectory: swiftPackageManifest.parent.path);
+      return json.decode(parsedManifest.stdout.toString()) as Map<String, Object?>;
+    } on Exception catch (e, stackTrace) {
+      throwToolExit(
+        'Failed to decode ${swiftPackageManifest.path}. $_kFileAnIssue and include this file '
+        'and the following stack trace: \n$e\n$stackTrace',
+      );
+    }
+  }
+
+  /// Returns dependencies from the SwiftPM-supported plugins for the FlutterPluginRegistrant.
+  ///
+  /// Also creates the symlinks to the Swift package within [packagesForConfiguration].
+  (List<SwiftPackagePackageDependency>, List<SwiftPackageTargetDependency>) generateDependencies({
+    required Directory packagesForConfiguration,
+  }) {
+    final List<SwiftPackagePackageDependency> packageDependencies = [];
+    final List<SwiftPackageTargetDependency> targetDependencies = [];
+    for (final (plugin, swiftPackagePath) in copiedPlugins) {
+      // Symlink the swift package inside the packagesForConfiguration directory
+      final Link symlink = packagesForConfiguration.childLink(plugin.name);
+      final String target = _utils.fileSystem.path.relative(
+        swiftPackagePath,
+        from: symlink.parent.path,
+      );
+      if (symlink.existsSync()) {
+        symlink.updateSync(target);
+      } else {
+        symlink.createSync(target, recursive: true);
+      }
+
+      packageDependencies.add(
+        SwiftPackagePackageDependency(
+          name: plugin.name,
+          path: '$_kSources/$_kPackages/${plugin.name}',
+        ),
+      );
+      targetDependencies.add(
+        SwiftPackageTargetDependency.product(
+          name: plugin.name.replaceAll('_', '-'),
+          packageName: plugin.name,
+        ),
+      );
+    }
+
+    return (packageDependencies, targetDependencies);
+  }
+}
+
 /// Helper class that bundles global context variables for easy passing with less boilerplate.
 @visibleForTesting
 class BuildSwiftPackageUtils {
@@ -390,6 +672,7 @@ class BuildSwiftPackageUtils {
     required this.buildSystem,
     required this.cache,
     required this.fileSystem,
+    required this.flutterRoot,
     required this.flutterVersion,
     required this.logger,
     required this.platform,
@@ -404,6 +687,7 @@ class BuildSwiftPackageUtils {
   final BuildSystem buildSystem;
   final Cache cache;
   final FileSystem fileSystem;
+  final String flutterRoot;
   final FlutterVersion flutterVersion;
   final Logger logger;
   final Platform platform;
