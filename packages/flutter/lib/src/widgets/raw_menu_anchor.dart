@@ -773,6 +773,7 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
 
   @override
   void handleCloseRequest() {
+    closeChildrenWithRequest();
     // Changes in MediaQuery.sizeOf(context) cause RawMenuAnchor to close during
     // didChangeDependencies. When this happens, calling setState during the
     // closing sequence (handleCloseRequest -> onCloseRequested -> hideOverlay)
@@ -948,7 +949,7 @@ class _RawMenuAnchorGroupState extends State<RawMenuAnchorGroup>
   @override
   void handleCloseRequest() {
     assert(_debugMenuInfo('Requesting close $this'));
-    close();
+    closeChildrenWithRequest();
   }
 
   @override
