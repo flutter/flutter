@@ -2903,7 +2903,14 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (void)setTextInputClient:(int)client withConfiguration:(NSDictionary*)configuration {
-  FML_DCHECK(_currentViewController == nil);
+  FlutterViewIdentifier viewId = flutter::kFlutterImplicitViewId;
+  NSObject* requestViewId = configuration[kViewId];
+  if ([requestViewId isKindOfClass:[NSNumber class]]) {
+    viewId = [(NSNumber*)requestViewId longLongValue];
+  }
+  _currentViewController = [_textInputPluginDelegate viewControllerForIdentifier:viewId];
+  FML_DCHECK(_currentViewController != nil);
+
   [self resetAllClientIds];
 
   // Reset pending removal flags set by the previous clearTextInputClient call.
@@ -2964,13 +2971,6 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
                                         repeats:NO];
   }
 
-  FlutterViewIdentifier viewId = flutter::kFlutterImplicitViewId;
-  NSObject* requestViewId = configuration[kViewId];
-  if ([requestViewId isKindOfClass:[NSNumber class]]) {
-    viewId = [(NSNumber*)requestViewId longLongValue];
-  }
-  _currentViewController = [_textInputPluginDelegate viewControllerForIdentifier:viewId];
-  FML_DCHECK(_currentViewController != nil);
 }
 
 // Creates and shows an input field that is not password related and has no autofill

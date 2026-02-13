@@ -10,6 +10,7 @@
 #include "flutter/display_list/utils/dl_matrix_clip_tracker.h"
 #include "flutter/flow/surface_frame.h"
 #include "flutter/flow/view_slicer.h"
+#include "flutter/common/constants.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlayView.h"
@@ -40,6 +41,7 @@ struct PlatformViewData {
   NSObject<FlutterPlatformView>* view;
   FlutterTouchInterceptingView* touch_interceptor;
   UIView* root_view;
+  int64_t flutter_view_id;
 };
 
 // Converts a DlMatrix to CATransform3D.
@@ -297,6 +299,12 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   NSDictionary<NSString*, id>* args = [call arguments];
 
   int64_t viewId = [args[@"id"] longLongValue];
+  int64_t flutterViewId = flutter::kFlutterImplicitViewId;
+  id flutterViewIdValue = [args objectForKey:@"flutterViewId"];
+  if (flutterViewIdValue != nil && flutterViewIdValue != [NSNull null] &&
+      [flutterViewIdValue respondsToSelector:@selector(longLongValue)]) {
+    flutterViewId = [flutterViewIdValue longLongValue];
+  }
   NSString* viewTypeString = args[@"viewType"];
   std::string viewType(viewTypeString.UTF8String);
 
@@ -343,7 +351,8 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   FlutterTouchInterceptingView* touchInterceptor = [[FlutterTouchInterceptingView alloc]
                   initWithEmbeddedView:platformView
                platformViewsController:self
-      gestureRecognizersBlockingPolicy:self.gestureRecognizersBlockingPolicies[viewType]];
+      gestureRecognizersBlockingPolicy:self.gestureRecognizersBlockingPolicies[viewType]
+                         flutterViewId:flutterViewId];
 
   ChildClippingView* clippingView = [[ChildClippingView alloc] initWithFrame:CGRectZero];
   [clippingView addSubview:touchInterceptor];
@@ -351,7 +360,8 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   self.platformViews.emplace(viewId, PlatformViewData{
                                          .view = embeddedView,                   //
                                          .touch_interceptor = touchInterceptor,  //
-                                         .root_view = clippingView               //
+                                         .root_view = clippingView,              //
+                                         .flutter_view_id = flutterViewId        //
                                      });
 
   result(nil);
@@ -416,9 +426,11 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   self.gestureRecognizersBlockingPolicies[idString] = gestureRecognizerBlockingPolicy;
 }
 
-- (void)beginFrameWithSize:(flutter::DlISize)frameSize {
+- (void)beginFrame:(int64_t)flutterViewId
+          withSize:(flutter::DlISize)frameSize {
   [self resetFrameState];
   self.frameSize = frameSize;
+  self.flutterView = [self.flutterViewControllers objectForKey:@(flutterViewId)].view;
 }
 
 - (void)cancelFrame {
@@ -740,24 +752,31 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
      withFlutterViewId:(int64_t)flutterViewId {
   TRACE_EVENT0("flutter", "PlatformViewsController::SubmitFrame");
 
+  FlutterViewController* flutterViewController =
+      [self.flutterViewControllers objectForKey:@(flutterViewId)];
+  UIView* flutterView = flutterViewController.view;
+
   BOOL hadPlatformViews = NO;
   auto it = self.flutterViewHadPlatformViews.find(flutterViewId);
   if (it != self.flutterViewHadPlatformViews.end()) {
     hadPlatformViews = it->second;
   }
 
-  if ((self.compositionOrder.empty() && !hadPlatformViews)) {
+  // No platform views to render.
+  if (flutterView == nil || (self.compositionOrder.empty() && !hadPlatformViews)) {
     // No platform views to render but the FlutterView may need to be resized.
     __weak FlutterPlatformViewsController* weakSelf = self;
-    fml::TaskRunner::RunNowOrPostTask(
-        weakSelf.platformTaskRunner,
-        fml::MakeCopyable([weakSelf, frameSize = weakSelf.frameSize, flutterViewId]() {
-          FlutterPlatformViewsController* strongSelf = weakSelf;
-          if (!strongSelf) {
-            return;
-          }
-          [strongSelf performResize:frameSize currentFlutterViewId:flutterViewId];
-        }));
+    if (flutterView != nil) {
+      fml::TaskRunner::RunNowOrPostTask(
+          weakSelf.platformTaskRunner,
+          fml::MakeCopyable([weakSelf, frameSize = weakSelf.frameSize, flutterViewId]() {
+            FlutterPlatformViewsController* strongSelf = weakSelf;
+            if (!strongSelf) {
+              return;
+            }
+            [strongSelf performResize:frameSize currentFlutterViewId:flutterViewId];
+          }));
+    }
 
     self.flutterViewHadPlatformViews[flutterViewId] = NO;
     return background_frame->Submit();
@@ -921,7 +940,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   TRACE_EVENT0("flutter", "PlatformViewsController::PerformSubmit");
   FML_DCHECK([[NSThread currentThread] isMainThread]);
 
-  self.flutterView = [self.flutterViewControllers objectForKey:@(currentFlutterViewId)].view;
+  // self.flutterView = [self.flutterViewControllers objectForKey:@(currentFlutterViewId)].view;
   if (self.flutterView == nil) {
     return;
   }
@@ -978,13 +997,11 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   }
 
   NSMutableArray* desiredPlatformSubviews = [NSMutableArray array];
-  NSMutableArray* desiredTouchInterceptors = [NSMutableArray array];
   for (int64_t platformViewId : compositionOrder) {
     self.flutterViewPreviousCompositionOrder[currentFlutterViewId].push_back(platformViewId);
     UIView* platformViewRoot = self.platformViews[platformViewId].root_view;
     if (platformViewRoot != nil) {
       [desiredPlatformSubviews addObject:platformViewRoot];
-      [desiredTouchInterceptors addObject:self.platformViews[platformViewId].touch_interceptor];
     }
 
     auto maybeLayerData = layerMap.find(platformViewId);
@@ -1011,10 +1028,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
     for (UIView* subview in desiredPlatformSubviews) {
       // `addSubview` will automatically reorder subview if it is already added.
       [flutterView addSubview:subview];
-    }
-
-    for (FlutterTouchInterceptingView* interceptingView in desiredTouchInterceptors) {
-      interceptingView.flutterViewController = (UIViewController<FlutterViewResponder>*)flutterViewController;
     }
   }
 }
@@ -1126,12 +1139,32 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   self.flutterViewPreviousCompositionOrder.erase(flutterViewId);
 }
 
+- (UIViewController<FlutterViewResponder>* _Nullable)flutterViewController {
+  return (UIViewController<FlutterViewResponder>*)
+      [self.flutterViewControllers objectForKey:@(flutter::kFlutterImplicitViewId)];
+}
+
+- (void)setFlutterViewController:(UIViewController<FlutterViewResponder>* _Nullable)flutterViewController {
+  if (flutterViewController == nil) {
+    [self detachFromFlutterViewController:flutter::kFlutterImplicitViewId];
+    return;
+  }
+  FlutterViewController* controller = (FlutterViewController*)flutterViewController;
+  FML_DCHECK(controller.viewIdentifier == flutter::kFlutterImplicitViewId);
+  [self attachToFlutterViewController:controller];
+}
+
 - (void)attachToFlutterViewController:(__weak FlutterViewController*)controller {
   [self.flutterViewControllers setObject:controller forKey:@(controller.viewIdentifier)];
 }
 
 - (void)detachFromFlutterViewController:(int64_t)flutterViewId {
   [self.flutterViewControllers removeObjectForKey:@(flutterViewId)];
+}
+
+- (UIViewController<FlutterViewResponder>* _Nullable)flutterViewControllerForIdentifier:(FlutterViewIdentifier)viewIdentifier {
+  return (UIViewController<FlutterViewResponder>*)
+      [self.flutterViewControllers objectForKey:@(viewIdentifier)];
 }
 
 #pragma mark - Properties
@@ -1174,6 +1207,10 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
 - (std::unordered_set<int64_t>&)viewsToRecomposite {
   return _viewsToRecomposite;
+}
+
+- (std::vector<int64_t>&)previousCompositionOrder {
+  return self.flutterViewPreviousCompositionOrder[flutter::kFlutterImplicitViewId];
 }
 
 - (std::unordered_map<int64_t, std::vector<int64_t>>&) flutterViewPreviousCompositionOrder {
