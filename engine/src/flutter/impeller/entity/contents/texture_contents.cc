@@ -8,6 +8,7 @@
 #include <optional>
 #include <utility>
 
+#include "fml/logging.h"
 #include "impeller/core/formats.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
@@ -184,7 +185,15 @@ bool TextureContents::Render(const ContentContext& renderer,
         Rect::MakeSize(texture_->GetSize()).Project(source_rect_.Expand(-0.5));
 
     FSStrict::FragInfo frag_info;
-    frag_info.source_rect = Vector4(strict_texture_coords.GetLTRB());
+    if (texture_->GetYCoordScale() < 0.0) {
+      FML_DCHECK(texture_->GetYCoordScale() == -1.0f);
+      frag_info.source_rect = Vector4(strict_texture_coords.GetLeft(),
+                                      1.0f - strict_texture_coords.GetBottom(),
+                                      strict_texture_coords.GetRight(),
+                                      1.0f - strict_texture_coords.GetTop());
+    } else {
+      frag_info.source_rect = Vector4(strict_texture_coords.GetLTRB());
+    }
     frag_info.alpha = GetOpacity();
     FSStrict::BindFragInfo(pass, data_host_buffer.EmplaceUniform((frag_info)));
     FSStrict::BindTextureSampler(

@@ -615,6 +615,13 @@ class RenderTable extends RenderBox {
   final Map<int, SemanticsNode> _cachedRows = <int, SemanticsNode>{};
   final Map<_Index, SemanticsNode> _cachedCells = <_Index, SemanticsNode>{};
 
+  @override
+  void clearSemantics() {
+    super.clearSemantics();
+    _cachedRows.clear();
+    _cachedCells.clear();
+  }
+
   /// Provides custom semantics for tables by generating nodes for rows and maybe cells.
   ///
   /// Table rows are not RenderObjects, so their semantics nodes must be created separately.

@@ -12,6 +12,7 @@ import 'package:usage/uuid/uuid.dart';
 
 import 'artifacts.dart';
 import 'base/common.dart';
+import 'base/config.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
@@ -19,6 +20,7 @@ import 'base/platform.dart';
 import 'base/process.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'bundle.dart';
 import 'convert.dart';
 
 /// Opt-in changes to the dart compilers.
@@ -507,32 +509,90 @@ class _RejectRequest extends _CompilationRequest {
 ///
 /// The wrapper is intended to stay resident in memory as user changes, reloads,
 /// restarts the Flutter app.
-abstract class ResidentCompiler {
-  factory ResidentCompiler(
-    String sdkRoot, {
-    required BuildMode buildMode,
+abstract interface class ResidentCompiler {
+  factory ResidentCompiler({
+    required TargetPlatform targetPlatform,
+    required BuildInfo buildInfo,
     required Logger logger,
     required ProcessManager processManager,
     required Artifacts artifacts,
     required Platform platform,
     required FileSystem fileSystem,
     required ShutdownHooks shutdownHooks,
-    bool testCompilation,
-    bool trackWidgetCreation,
-    bool includeUnsupportedPlatformLibraryStubs,
-    String packagesPath,
-    List<String> fileSystemRoots,
-    String? fileSystemScheme,
-    String initializeFromDill,
-    bool assumeInitializeFromDillUpToDate,
-    TargetModel targetModel,
-    bool unsafePackageSerialization,
-    String? frontendServerStarterPath,
-    List<String> extraFrontEndOptions,
-    String platformDill,
-    List<String>? dartDefines,
-    String librariesSpec,
-  }) = DefaultResidentCompiler;
+    required Config config,
+    bool testCompilation = false,
+    TargetModel? targetModelOverride,
+  }) {
+    String sdkRoot = artifacts.getArtifactPath(
+      Artifact.flutterPatchedSdkPath,
+      platform: targetPlatform,
+      mode: buildInfo.mode,
+    );
+    String? platformDillPath;
+    String? librariesSpec;
+    TargetModel targetModel = targetModelOverride ?? .flutter;
+
+    // Configure the compiler to target the DDC runtime.
+    if (targetPlatform case .web_javascript) {
+      sdkRoot = artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path;
+      targetModel = .dartdevc;
+
+      const platformDillName = 'ddc_outline.dill';
+      platformDillPath = fileSystem
+          .file(
+            fileSystem.path.join(
+              artifacts.getHostArtifact(.webPlatformKernelFolder).path,
+              platformDillName,
+            ),
+          )
+          .absolute
+          .uri
+          .toString();
+
+      librariesSpec = fileSystem
+          .file(artifacts.getHostArtifact(.flutterWebLibrariesJson))
+          .uri
+          .toString();
+
+      buildInfo = buildInfo.copyWith(
+        // Override the filesystem scheme so that the frontend_server can find
+        // the generated entrypoint code.
+        fileSystemScheme: 'org-dartlang-app',
+        extraFrontEndOptions: [
+          ...buildInfo.extraFrontEndOptions,
+          if (buildInfo.webEnableHotReload)
+          // These flags are only valid to be passed when compiling with DDC.
+          ...<String>['--dartdevc-canary', '--dartdevc-module-format=ddc'],
+        ],
+      );
+    } else {
+      if (targetPlatform case .fuchsia_arm64 || .fuchsia_x64) {
+        targetModel = .flutterRunner;
+      }
+      buildInfo = buildInfo.copyWith(
+        extraFrontEndOptions: [
+          ...buildInfo.extraFrontEndOptions,
+          '--enable-experiment=alternative-invalidation-strategy',
+        ],
+      );
+    }
+
+    return DefaultResidentCompiler(
+      sdkRoot,
+      buildInfo: buildInfo,
+      logger: logger,
+      processManager: processManager,
+      artifacts: artifacts,
+      platform: platform,
+      fileSystem: fileSystem,
+      shutdownHooks: shutdownHooks,
+      config: config,
+      targetModel: targetModel,
+      platformDill: platformDillPath,
+      librariesSpec: librariesSpec,
+      testCompilation: testCompilation,
+    );
+  }
 
   // TODO(zanderso): find a better way to configure additional file system
   // roots from the runner.
@@ -633,39 +693,46 @@ abstract class ResidentCompiler {
 class DefaultResidentCompiler implements ResidentCompiler {
   DefaultResidentCompiler(
     String sdkRoot, {
-    required this.buildMode,
+    required BuildInfo buildInfo,
     required Logger logger,
     required ProcessManager processManager,
     required this.artifacts,
     required Platform platform,
     required FileSystem fileSystem,
     required ShutdownHooks shutdownHooks,
+    required Config config,
     this.testCompilation = false,
-    this.trackWidgetCreation = true,
-    this.includeUnsupportedPlatformLibraryStubs = false,
-    this.packagesPath,
-    List<String> fileSystemRoots = const <String>[],
-    this.fileSystemScheme,
-    this.initializeFromDill,
-    this.assumeInitializeFromDillUpToDate = false,
     this.targetModel = TargetModel.flutter,
-    this.unsafePackageSerialization = false,
-    this.frontendServerStarterPath,
-    this.extraFrontEndOptions,
     this.platformDill,
-    List<String>? dartDefines,
     this.librariesSpec,
     @visibleForTesting StdoutHandler? stdoutHandler,
-  }) : _logger = logger,
+  }) : buildMode = buildInfo.mode,
+       trackWidgetCreation = buildInfo.trackWidgetCreation,
+       includeUnsupportedPlatformLibraryStubs = buildInfo.includeUnsupportedPlatformLibraryStubs,
+       packagesPath = buildInfo.packageConfigPath,
+       initializeFromDill =
+           buildInfo.initializeFromDill ??
+           getDefaultCachedKernelPath(
+             config: config,
+             fileSystem: fileSystem,
+             trackWidgetCreation: buildInfo.trackWidgetCreation,
+             dartDefines: buildInfo.dartDefines,
+             extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+           ),
+       extraFrontEndOptions = buildInfo.extraFrontEndOptions,
+       fileSystemScheme = buildInfo.fileSystemScheme,
+       assumeInitializeFromDillUpToDate = buildInfo.assumeInitializeFromDillUpToDate,
+       frontendServerStarterPath = buildInfo.frontendServerStarterPath,
+       _logger = logger,
        _processManager = processManager,
        _shutdownHooks = shutdownHooks,
        _stdoutHandler = stdoutHandler ?? StdoutHandler(logger: logger, fileSystem: fileSystem),
        _platform = platform,
-       dartDefines = dartDefines ?? const <String>[],
+       dartDefines = buildInfo.dartDefines,
        // This is a URI, not a file path, so the forward slash is correct even on Windows.
        sdkRoot = sdkRoot.endsWith('/') ? sdkRoot : '$sdkRoot/',
        // Make a copy, we might need to modify it later.
-       fileSystemRoots = List<String>.from(fileSystemRoots) {
+       fileSystemRoots = List<String>.from(buildInfo.fileSystemRoots) {
     // Currently, the only developer tooling that requires support for importing unsupported
     // platform libraries at compile time is the widget previewer. Only developer tooling use cases
     // should support this, so this is restricted to the widget previewer's runtime target for now.
@@ -693,7 +760,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
   final String? fileSystemScheme;
   final String? initializeFromDill;
   final bool assumeInitializeFromDillUpToDate;
-  final bool unsafePackageSerialization;
   final String? frontendServerStarterPath;
   final List<String>? extraFrontEndOptions;
   final List<String> dartDefines;
@@ -867,52 +933,46 @@ class DefaultResidentCompiler implements ResidentCompiler {
       ];
     }
 
-    final List<String> command =
-        commandToStartFrontendServer +
-        <String>[
-          '--sdk-root',
-          sdkRoot,
-          '--incremental',
-          if (testCompilation) '--no-print-incremental-dependencies',
-          '--target=$targetModel',
-          // TODO(annagrin): remove once this becomes the default behavior
-          // in the frontend_server.
-          // https://github.com/flutter/flutter/issues/59902
-          '--experimental-emit-debug-metadata',
-          for (final Object dartDefine in dartDefines) '-D$dartDefine',
-          if (outputPath != null) ...<String>['--output-dill', outputPath],
-          // If we have a platform dill, we don't need to pass the libraries spec,
-          // since the information is embedded in the .dill file.
-          if (librariesSpec != null && platformDill == null) ...<String>[
-            '--libraries-spec',
-            librariesSpec!,
-          ],
-          if (packagesPath != null) ...<String>['--packages', packagesPath!],
-          ...buildModeOptions(buildMode, dartDefines),
-          if (trackWidgetCreation) '--track-widget-creation',
-          if (includeUnsupportedPlatformLibraryStubs)
-            '--include-unsupported-platform-library-stubs',
-          for (final String root in fileSystemRoots) ...<String>['--filesystem-root', root],
-          if (fileSystemScheme != null) ...<String>['--filesystem-scheme', fileSystemScheme!],
-          if (initializeFromDill != null) ...<String>[
-            '--initialize-from-dill',
-            initializeFromDill!,
-          ],
-          if (assumeInitializeFromDillUpToDate) '--assume-initialize-from-dill-up-to-date',
-          if (additionalSourceUri != null) ...<String>[
-            '--source',
-            additionalSourceUri,
-            '--source',
-            'package:flutter/src/dart_plugin_registrant.dart',
-            '-Dflutter.dart_plugin_registrant=$additionalSourceUri',
-          ],
-          if (nativeAssetsUri != null) ...<String>['--native-assets', nativeAssetsUri],
-          if (platformDill != null) ...<String>['--platform', platformDill!],
-          if (unsafePackageSerialization) '--unsafe-package-serialization',
-          // See: https://github.com/flutter/flutter/issues/103994
-          '--verbosity=error',
-          ...?_filterExtraFrontEndOptions(extraFrontEndOptions),
-        ];
+    final command = <String>[
+      ...commandToStartFrontendServer,
+      '--sdk-root',
+      sdkRoot,
+      '--incremental',
+      if (testCompilation) '--no-print-incremental-dependencies',
+      '--target=$targetModel',
+      // TODO(annagrin): remove once this becomes the default behavior
+      // in the frontend_server.
+      // https://github.com/flutter/flutter/issues/59902
+      '--experimental-emit-debug-metadata',
+      for (final Object dartDefine in dartDefines) '-D$dartDefine',
+      if (outputPath != null) ...<String>['--output-dill', outputPath],
+      // If we have a platform dill, we don't need to pass the libraries spec,
+      // since the information is embedded in the .dill file.
+      if (librariesSpec != null && platformDill == null) ...<String>[
+        '--libraries-spec',
+        librariesSpec!,
+      ],
+      if (packagesPath != null) ...<String>['--packages', packagesPath!],
+      ...buildModeOptions(buildMode, dartDefines),
+      if (trackWidgetCreation) '--track-widget-creation',
+      if (includeUnsupportedPlatformLibraryStubs) '--include-unsupported-platform-library-stubs',
+      for (final String root in fileSystemRoots) ...<String>['--filesystem-root', root],
+      if (fileSystemScheme != null) ...<String>['--filesystem-scheme', fileSystemScheme!],
+      if (initializeFromDill != null) ...<String>['--initialize-from-dill', initializeFromDill!],
+      if (assumeInitializeFromDillUpToDate) '--assume-initialize-from-dill-up-to-date',
+      if (additionalSourceUri != null) ...<String>[
+        '--source',
+        additionalSourceUri,
+        '--source',
+        'package:flutter/src/dart_plugin_registrant.dart',
+        '-Dflutter.dart_plugin_registrant=$additionalSourceUri',
+      ],
+      if (nativeAssetsUri != null) ...<String>['--native-assets', nativeAssetsUri],
+      if (platformDill != null) ...<String>['--platform', platformDill!],
+      // See: https://github.com/flutter/flutter/issues/103994
+      '--verbosity=error',
+      ...?_filterExtraFrontEndOptions(extraFrontEndOptions),
+    ];
     _logger.printTrace(command.join(' '));
     _server = await _processManager.start(command);
     _server?.stdout

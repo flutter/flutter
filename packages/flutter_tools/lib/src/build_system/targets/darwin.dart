@@ -7,11 +7,15 @@ import 'package:meta/meta.dart';
 import '../../artifacts.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
+import '../../darwin/darwin.dart';
 import '../../globals.dart' as globals show stdio;
 import '../build_system.dart';
 
 abstract class UnpackDarwin extends Target {
   const UnpackDarwin();
+
+  @visibleForOverriding
+  FlutterDarwinPlatform get darwinPlatform;
 
   /// Copies the [framework] artifact using `rsync` to the [Environment.outputDir].
   /// Throws an error if copy fails.

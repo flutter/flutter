@@ -2,18 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "file_in_namespace_buffer.h"
+#include "flutter/shell/platform/fuchsia/flutter/file_in_namespace_buffer.h"
 
 #include <fuchsia/io/cpp/fidl.h>
 #include <lib/fdio/directory.h>
 #include <zircon/status.h>
 
 #include "flutter/fml/trace_event.h"
-#include "runtime/dart/utils/files.h"
-#include "runtime/dart/utils/handle_exception.h"
-#include "runtime/dart/utils/mapped_resource.h"
-#include "runtime/dart/utils/tempfs.h"
-#include "runtime/dart/utils/vmo.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/files.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/handle_exception.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/mapped_resource.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/tempfs.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/vmo.h"
 
 namespace flutter_runner {
 

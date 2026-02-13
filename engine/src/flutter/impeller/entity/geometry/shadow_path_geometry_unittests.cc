@@ -50,26 +50,26 @@ bool SimilarPoint(Point p1, Point p2) {
 }
 
 bool SimilarPointPair(std::array<Point, 2> pair1, std::array<Point, 2> pair2) {
-  if (SimilarPoint(pair1[1], pair2[1]) && SimilarPoint(pair1[2], pair2[2])) {
+  if (SimilarPoint(pair1[0], pair2[0]) && SimilarPoint(pair1[1], pair2[1])) {
     return true;
   }
-  if (SimilarPoint(pair1[1], pair2[2]) && SimilarPoint(pair1[2], pair2[1])) {
+  if (SimilarPoint(pair1[0], pair2[1]) && SimilarPoint(pair1[1], pair2[0])) {
     return true;
   }
   return false;
 }
 
 bool SimilarPointTrio(std::array<Point, 3> trio1, std::array<Point, 3> trio2) {
-  if (SimilarPoint(trio1[1], trio2[1]) &&
-      SimilarPointPair({trio1[2], trio1[3]}, {trio2[2], trio2[3]})) {
+  if (SimilarPoint(trio1[0], trio2[0]) &&
+      SimilarPointPair({trio1[1], trio1[2]}, {trio2[1], trio2[2]})) {
     return true;
   }
-  if (SimilarPoint(trio1[1], trio2[2]) &&
-      SimilarPointPair({trio1[2], trio1[3]}, {trio2[1], trio2[3]})) {
+  if (SimilarPoint(trio1[0], trio2[1]) &&
+      SimilarPointPair({trio1[1], trio1[2]}, {trio2[0], trio2[2]})) {
     return true;
   }
-  if (SimilarPoint(trio1[1], trio2[3]) &&
-      SimilarPointPair({trio1[2], trio1[3]}, {trio2[1], trio2[2]})) {
+  if (SimilarPoint(trio1[0], trio2[2]) &&
+      SimilarPointPair({trio1[1], trio1[2]}, {trio2[0], trio2[1]})) {
     return true;
   }
   return false;

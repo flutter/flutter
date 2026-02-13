@@ -14,10 +14,10 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
-#include "pointer_delegate.h"
-#include "tests/fakes/mouse_source.h"
-#include "tests/fakes/touch_source.h"
-#include "tests/pointer_event_utility.h"
+#include "flutter/shell/platform/fuchsia/flutter/pointer_delegate.h"
+#include "flutter/shell/platform/fuchsia/flutter/tests/fakes/mouse_source.h"
+#include "flutter/shell/platform/fuchsia/flutter/tests/fakes/touch_source.h"
+#include "flutter/shell/platform/fuchsia/flutter/tests/pointer_event_utility.h"
 
 namespace flutter_runner::testing {
 

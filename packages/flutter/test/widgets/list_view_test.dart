@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
@@ -112,7 +112,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/100451
-  testWidgets('ListView.separator respects findChildIndexCallback', (WidgetTester tester) async {
+  testWidgets('ListView.separated respects findChildIndexCallback', (WidgetTester tester) async {
     var finderCalled = false;
     var itemCount = 7;
     late StateSetter stateSetter;
@@ -131,7 +131,7 @@ void main() {
                 finderCalled = true;
                 return null;
               },
-              separatorBuilder: (BuildContext _, int _) => const Divider(),
+              separatorBuilder: (BuildContext _, int _) => const SizedBox(),
             );
           },
         ),
@@ -162,7 +162,7 @@ void main() {
         child: ListView(
           itemExtent: 200.0,
           children: List<Widget>.generate(20, (int i) {
-            return ColoredBox(color: Colors.green, child: Text('$i'));
+            return ColoredBox(color: const Color(0xFF00FF00), child: Text('$i'));
           }),
         ),
       ),
@@ -961,7 +961,7 @@ void main() {
         child: ListView.separated(
           itemCount: 10,
           itemBuilder: (BuildContext _, int _) => Container(height: 2000.0),
-          separatorBuilder: (BuildContext _, int _) => const Divider(),
+          separatorBuilder: (BuildContext _, int _) => const SizedBox(),
           clipBehavior: Clip.antiAlias,
         ),
       ),
