@@ -339,12 +339,26 @@ std::string BlitCopyTextureToBufferCommandGLES::GetLabel() const {
 
 bool BlitCopyTextureToBufferCommandGLES::Encode(
     const ReactorGLES& reactor) const {
-  if (source->GetTextureDescriptor().format != PixelFormat::kR8G8B8A8UNormInt) {
-    VALIDATION_LOG << "Only textures with pixel format RGBA are supported yet.";
+  const auto& gl = reactor.GetProcTable();
+
+  PixelFormat source_format = source->GetTextureDescriptor().format;
+  GLenum format;
+  if (source_format == PixelFormat::kR8G8B8A8UNormInt) {
+    format = GL_RGBA;
+  } else if (gl.GetDescription()->HasExtension(
+                 "GL_EXT_texture_format_BGRA8888")) {
+    if (source_format == PixelFormat::kB8G8R8A8UNormInt) {
+      format = GL_BGRA_EXT;
+    } else {
+      VALIDATION_LOG << "Only textures with pixel format RGBA or BGRA are "
+                        "supported.";
+      return false;
+    }
+  } else {
+    VALIDATION_LOG << "Only textures with pixel format RGBA are supported.";
     return false;
   }
 
-  const auto& gl = reactor.GetProcTable();
   TextureCoordinateSystem coord_system = source->GetCoordinateSystem();
 
   GLuint read_fbo = GL_NONE;
@@ -360,13 +374,13 @@ bool BlitCopyTextureToBufferCommandGLES::Encode(
   }
 
   DeviceBufferGLES::Cast(*destination)
-      .UpdateBufferData([&gl, this, coord_system,
+      .UpdateBufferData([&gl, this, format, coord_system,
                          rows = source->GetSize().height](uint8_t* data,
 
                                                           size_t length) {
         gl.ReadPixels(source_region.GetX(), source_region.GetY(),
                       source_region.GetWidth(), source_region.GetHeight(),
-                      GL_RGBA, GL_UNSIGNED_BYTE, data + destination_offset);
+                      format, GL_UNSIGNED_BYTE, data + destination_offset);
         switch (coord_system) {
           case TextureCoordinateSystem::kUploadFromHost:
             break;
