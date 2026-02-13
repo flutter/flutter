@@ -1888,7 +1888,7 @@ void main() {
     );
     expect(tester.getSize(find.byType(TextFormField)), Size.zero);
     controller.selection = const TextSelection.collapsed(offset: 0);
-    await tester.pump();
+    tester.pump();
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/180056.

@@ -214,7 +214,6 @@ abstract class FlutterDriver {
   }
 
   /// Taps at the center of the widget located by [finder].
-  @awaitNotRequired
   Future<void> tap(SerializableFinder finder, {Duration? timeout}) async {
     await sendCommand(Tap(finder, timeout: timeout));
   }
@@ -228,7 +227,6 @@ abstract class FlutterDriver {
   ///
   ///  * [FlutterDriver.runUnsynchronized], which will execute an action
   ///    with frame sync disabled even while frames are pending.
-  @awaitNotRequired
   Future<void> waitFor(SerializableFinder finder, {Duration? timeout}) async {
     await sendCommand(WaitFor(finder, timeout: timeout));
   }

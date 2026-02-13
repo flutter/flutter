@@ -2186,7 +2186,6 @@ void main() {
     expect(material.textStyle!.color, Colors.white);
   });
 
-  @awaitNotRequired
   Future<void> testStatesController(Widget? icon, WidgetTester tester) async {
     var count = 0;
     void valueChanged() {
