@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/platform.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/editable_text_utils.dart';
+import 'editable_text_utils.dart';
 
 Finder findCupertinoOverflowNextButton() {
   return find.byWidgetPredicate((Widget widget) {

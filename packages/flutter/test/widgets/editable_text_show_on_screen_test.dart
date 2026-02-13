@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/src/foundation/constants.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'editable_text_utils.dart';
+import 'editable_text_tester.dart';
 
 class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   _TestSliverPersistentHeaderDelegate({
