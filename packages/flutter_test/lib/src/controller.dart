@@ -1031,6 +1031,20 @@ abstract class WidgetController {
 
   // INTERACTION
 
+  /// Sends a 'handleScrollToTop' message to the test application via the
+  /// [SystemChannels.statusBar] channel, to simulate an iOS status bar tap
+  /// event.
+  void simulateStatusBarTap() {
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(
+      const MethodCall('handleScrollToTop'),
+    );
+    binding.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.statusBar.name,
+      message,
+      (ByteData? data) {},
+    );
+  }
+
   /// Dispatch a pointer down / pointer up sequence at the center of
   /// the given widget, assuming it is exposed.
   ///

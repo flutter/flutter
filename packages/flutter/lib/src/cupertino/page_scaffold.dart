@@ -8,7 +8,7 @@
 /// @docImport 'tab_scaffold.dart';
 library;
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -90,6 +90,8 @@ class CupertinoPageScaffold extends StatefulWidget {
 }
 
 class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> with WidgetsBindingObserver {
+  final GlobalKey _statusBarKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
@@ -112,7 +114,18 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> with Widg
   void handleStatusBarTap() {
     super.handleStatusBarTap();
     final ScrollController? primaryScrollController = PrimaryScrollController.maybeOf(context);
-    if (primaryScrollController != null && primaryScrollController.hasClients) {
+    if (primaryScrollController != null &&
+        primaryScrollController.hasClients &&
+        // TODO(LongCatIsLooong): the iOS embedder used to send status bar tap
+        // evets as fake touches at Offset.zero, such that at most one Scaffold
+        // (usually the foreground CupertinoPageScaffold) can handle the status
+        // bar tap event, thanks to hit-testing and gesture disambiguation.
+        // To keep that behavior, this widget performs an additional hit-test here
+        // to make sure the status bar tap is only handled if this scaffold is
+        // hit-testable (thus in the foreground).
+        // Switch to a better solution when available:
+        // https://github.com/flutter/flutter/issues/182403
+        _HitTestableAtOrigin.hitTestableAtOrigin(_statusBarKey)) {
       primaryScrollController.animateTo(
         0.0,
         // Eyeballed from iOS.
@@ -206,6 +219,15 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> with Widg
                   right: 0.0,
                   child: MediaQuery.withNoTextScaling(child: widget.navigationBar!),
                 ),
+              // Add a touch handler the size of the status bar on top of all contents
+              // to handle scroll to top by status bar taps.
+              Positioned(
+                top: 0.0,
+                left: 0.0,
+                right: 0.0,
+                height: existingMediaQuery.padding.top,
+                child: _HitTestableAtOrigin(_statusBarKey),
+              ),
             ],
           ),
         ),
@@ -259,4 +281,37 @@ abstract class ObstructingPreferredSizeWidget implements PreferredSizeWidget {
   ///
   /// If false, this widget partially obstructs.
   bool shouldFullyObstruct(BuildContext context);
+}
+
+final class _HitTestableAtOrigin extends StatelessWidget {
+  const _HitTestableAtOrigin(this.globalKey);
+
+  final GlobalKey globalKey;
+
+  /// Whether the render box of the [_HitTestableAtOrigin] widget associated
+  /// with the given global `key` is hit-testable at [Offset.zero].
+  ///
+  /// This is used by the `handleStatusBarTap` implementation to avoid sending
+  /// status bar tap events to scroll views in offscreen subtrees.
+  static bool hitTestableAtOrigin(GlobalKey key) {
+    final context = key.currentContext as Element?;
+    if (context == null) {
+      assert(false, 'BuildContext associated with $key is not mounted.');
+      return false;
+    }
+    final renderObject = context.renderObject! as RenderMetaData;
+    final int viewId = View.of(context).viewId;
+    final result = HitTestResult();
+    WidgetsBinding.instance.hitTestInView(result, Offset.zero, viewId);
+    return result.path.any((HitTestEntry entry) => entry.target == renderObject);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MetaData(
+      key: globalKey,
+      behavior: HitTestBehavior.translucent,
+      child: const SizedBox.expand(),
+    );
+  }
 }
