@@ -631,7 +631,7 @@ class FakePlugin extends Fake implements Plugin {
   final Map<String, PluginPlatform> platforms;
 
   @override
-  String? pluginSwiftPackagePath(FileSystem fileSystem, String platform) {
+  String? pluginSwiftPackagePath(FileSystem fileSystem, String platform, {String? overridePath}) {
     return _pluginSwiftPackagePath;
   }
 
