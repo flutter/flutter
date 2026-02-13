@@ -12,6 +12,7 @@ import '../base/os.dart' show HostPlatform;
 import '../base/project_migrator.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
+import '../base/version.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
@@ -61,6 +62,68 @@ final _filteredOutput = RegExp(
   r'Please file a bug at https\://feedbackassistant\.apple\.'
   r').)*$',
 );
+
+class _SwiftPackageManagerMinPlatformMismatch {
+  _SwiftPackageManagerMinPlatformMismatch({
+    required this.packageProduct,
+    required this.requiredMinVersion,
+    required this.targetSupportedVersion,
+    required this.platformName,
+  });
+
+  // Example:
+  // "The package product 'spm-macos12' requires minimum platform version 12.0 for the macOS platform, but this target supports 11.0"
+  static final RegExp _pattern = RegExp(
+    r"The package product '([^']+)' requires minimum platform version ([0-9]+(?:\.[0-9]+)*) "
+    r'for the (iOS|macOS) platform, but this target supports ([0-9]+(?:\.[0-9]+)*)',
+    caseSensitive: false,
+  );
+
+  static _SwiftPackageManagerMinPlatformMismatch? tryParse(String message) {
+    final RegExpMatch? match = _pattern.firstMatch(message);
+    if (match == null) {
+      return null;
+    }
+
+    final String packageProduct = match.group(1)!;
+    final Version? requiredMinVersion = Version.parse(match.group(2));
+    final String platformName = match.group(3)!.toLowerCase();
+    final Version? targetSupportedVersion = Version.parse(match.group(4));
+    if (requiredMinVersion == null || targetSupportedVersion == null) {
+      return null;
+    }
+
+    return _SwiftPackageManagerMinPlatformMismatch(
+      packageProduct: packageProduct,
+      requiredMinVersion: requiredMinVersion,
+      targetSupportedVersion: targetSupportedVersion,
+      platformName: platformName,
+    );
+  }
+
+  final String packageProduct;
+  final Version requiredMinVersion;
+  final Version targetSupportedVersion;
+  final String platformName;
+}
+
+String _swiftPackageManagerMinPlatformMismatchInstructions({
+  required Version requiredMinVersion,
+  required Version supportedVersion,
+}) {
+  // Mirrors the recommended guidance in https://github.com/flutter/flutter/issues/165420.
+  return '''
+To fix this error, increase your app's minimum platform version from $supportedVersion to at least $requiredMinVersion or remove this dependency.
+To increase your app's minimum platform version:
+1. Open your app (ios/Runner.xcworkspace or macos/Runner.xcworkspace) in Xcode.
+2. In the Project Navigator, select the Runner project > Runner target > General tab.
+3. Increase your app's target Minimum Deployments setting.
+4. If you updated your iOS app's Minimum Deployments, regenerate the iOS project's configuration files:
+    flutter build ios --config-only
+5. If you updated your macOS app's Minimum Deployments, regenerate the macOS project's configuration files:
+    flutter build macos --config-only
+''';
+}
 
 /// Builds the macOS project through xcodebuild.
 // TODO(zanderso): refactor to share code with the existing iOS code.
@@ -181,6 +244,8 @@ Future<void> buildMacOS({
   final Status status = globals.logger.startProgress('Building macOS application...');
   int result;
 
+  final swiftPackageManagerMinPlatformMismatches = <_SwiftPackageManagerMinPlatformMismatch>[];
+
   File? disabledSandboxEntitlementFile;
   if (usingCISystem) {
     disabledSandboxEntitlementFile = _createDisabledSandboxEntitlementFile(
@@ -213,6 +278,19 @@ Future<void> buildMacOS({
   // when dependencies don't support them
   final String? excludedArches = buildSettings['EXCLUDED_ARCHS'];
 
+  String? mapAndCaptureOutput(String line) {
+    final _SwiftPackageManagerMinPlatformMismatch? mismatch =
+        _SwiftPackageManagerMinPlatformMismatch.tryParse(line);
+    if (mismatch != null) {
+      swiftPackageManagerMinPlatformMismatches.add(mismatch);
+    }
+
+    if (verboseLogging) {
+      return line;
+    }
+    return _filteredOutput.hasMatch(line) ? line : null;
+  }
+
   try {
     result = await globals.processUtils.stream(
       <String>[
@@ -243,15 +321,29 @@ Future<void> buildMacOS({
       ],
       trace: true,
       stdoutErrorMatcher: verboseLogging ? null : _filteredOutput,
-      mapFunction: verboseLogging
-          ? null
-          : (String line) => _filteredOutput.hasMatch(line) ? line : null,
+      mapFunction: mapAndCaptureOutput,
     );
   } finally {
     status.cancel();
   }
 
   if (result != 0) {
+    if (swiftPackageManagerMinPlatformMismatches.isNotEmpty) {
+      final Version requiredMinVersion = swiftPackageManagerMinPlatformMismatches
+          .map((e) => e.requiredMinVersion)
+          .reduce((a, b) => a > b ? a : b);
+      final Version supportedVersion = swiftPackageManagerMinPlatformMismatches
+          .map((e) => e.targetSupportedVersion)
+          .reduce((a, b) => a < b ? a : b);
+
+      globals.logger.printError(
+        _swiftPackageManagerMinPlatformMismatchInstructions(
+          requiredMinVersion: requiredMinVersion,
+          supportedVersion: supportedVersion,
+        ),
+        emphasis: true,
+      );
+    }
     throwToolExit('Build process failed');
   }
   final String? applicationBundle = MacOSApp.fromMacOSProject(

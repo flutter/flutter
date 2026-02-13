@@ -809,6 +809,49 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         },
       );
     });
+
+    testWithoutContext('parses SwiftPM minimum platform version error', () async {
+      const buildCommands = <String>['xcrun', 'cc', 'blah'];
+      final buildResult = XcodeBuildResult(
+        success: false,
+        stdout: '',
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: buildCommands,
+          appDirectory: '/blah/blah',
+          environmentType: EnvironmentType.physical,
+          buildSettings: buildSettings,
+        ),
+        xcResult: XCResult.test(
+          issues: <XCResultIssue>[
+            XCResultIssue.test(
+              subType: 'Target Integrity',
+              message:
+                  "The package product 'cloud-firestore' requires minimum platform version 13.0 for the iOS platform, but this target supports 12.0",
+            ),
+          ],
+        ),
+      );
+
+      final fs = MemoryFileSystem.test();
+      final project = FakeFlutterProject(fileSystem: fs, usesSwiftPackageManager: true);
+      await diagnoseXcodeBuildFailure(
+        buildResult,
+        logger: logger,
+        analytics: fakeAnalytics,
+        fileSystem: fs,
+        platform: FlutterDarwinPlatform.ios,
+        project: project,
+      );
+
+      expect(
+        logger.errorText,
+        contains(
+          "To fix this error, increase your app's minimum platform version from 12.0 to at least 13.0",
+        ),
+      );
+      expect(logger.errorText, contains('flutter build ios --config-only'));
+      expect(logger.errorText, contains('flutter build macos --config-only'));
+    });
   });
 
   group('Upgrades project.pbxproj for old asset usage', () {

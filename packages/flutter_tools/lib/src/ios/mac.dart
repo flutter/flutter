@@ -985,6 +985,9 @@ _XCResultIssueHandlingResult _handleXCResultIssue({
     );
   }
 
+  final _SwiftPackageManagerMinPlatformMismatch? swiftPackageManagerMinPlatformMismatch =
+      _SwiftPackageManagerMinPlatformMismatch.tryParse(message);
+
   // Add more error messages for flutter users for some special errors.
   if (message.toLowerCase().contains('requires a provisioning profile.')) {
     return _XCResultIssueHandlingResult(
@@ -1051,6 +1054,12 @@ _XCResultIssueHandlingResult _handleXCResultIssue({
       hasProvisioningProfileIssue: false,
       unableToFindArmDestination: true,
     );
+  } else if (swiftPackageManagerMinPlatformMismatch != null) {
+    return _XCResultIssueHandlingResult(
+      requiresProvisioningProfile: false,
+      hasProvisioningProfileIssue: false,
+      swiftPackageManagerMinPlatformMismatch: swiftPackageManagerMinPlatformMismatch,
+    );
   }
   return _XCResultIssueHandlingResult(
     requiresProvisioningProfile: false,
@@ -1074,6 +1083,7 @@ Future<bool> _handleIssues(
   var modifiedPrecompiledSource = false;
   var unableToFindArmDestination = false;
   String? missingPlatform;
+  final swiftPackageManagerMinPlatformMismatches = <_SwiftPackageManagerMinPlatformMismatch>[];
   final duplicateModules = <String>[];
   final missingModules = <String>[];
 
@@ -1097,6 +1107,11 @@ Future<bool> _handleIssues(
       }
       if (handlingResult.missingModule != null) {
         missingModules.add(handlingResult.missingModule!);
+      }
+      if (handlingResult.swiftPackageManagerMinPlatformMismatch != null) {
+        swiftPackageManagerMinPlatformMismatches.add(
+          handlingResult.swiftPackageManagerMinPlatformMismatch!,
+        );
       }
       modifiedPrecompiledSource = handlingResult.modifiedPrecompiledSource;
       unableToFindArmDestination = handlingResult.unableToFindArmDestination;
@@ -1128,6 +1143,21 @@ Future<bool> _handleIssues(
     logger.printError("Also try selecting 'Product > Build' to fix the problem.");
   } else if (missingPlatform != null) {
     logger.printError(missingPlatformInstructions(missingPlatform), emphasis: true);
+  } else if (swiftPackageManagerMinPlatformMismatches.isNotEmpty) {
+    final Version requiredMinVersion = swiftPackageManagerMinPlatformMismatches
+        .map((e) => e.requiredMinVersion)
+        .reduce((a, b) => a > b ? a : b);
+    final Version supportedVersion = swiftPackageManagerMinPlatformMismatches
+        .map((e) => e.targetSupportedVersion)
+        .reduce((a, b) => a < b ? a : b);
+
+    logger.printError(
+      _swiftPackageManagerMinPlatformMismatchInstructions(
+        requiredMinVersion: requiredMinVersion,
+        supportedVersion: supportedVersion,
+      ),
+      emphasis: true,
+    );
   } else if (duplicateModules.isNotEmpty) {
     final bool usesCocoapods = xcodeProject.podfile.existsSync();
     final bool usesSwiftPackageManager = xcodeProject.usesSwiftPackageManager;
@@ -1335,6 +1365,68 @@ String? _parseMissingModule(String message) {
   return null;
 }
 
+class _SwiftPackageManagerMinPlatformMismatch {
+  _SwiftPackageManagerMinPlatformMismatch({
+    required this.packageProduct,
+    required this.requiredMinVersion,
+    required this.targetSupportedVersion,
+    required this.platformName,
+  });
+
+  // Example:
+  // "The package product 'cloud-firestore' requires minimum platform version 13.0 for the iOS platform, but this target supports 12.0"
+  static final RegExp _pattern = RegExp(
+    r"The package product '([^']+)' requires minimum platform version ([0-9]+(?:\.[0-9]+)*) "
+    r'for the (iOS|macOS) platform, but this target supports ([0-9]+(?:\.[0-9]+)*)',
+    caseSensitive: false,
+  );
+
+  static _SwiftPackageManagerMinPlatformMismatch? tryParse(String message) {
+    final RegExpMatch? match = _pattern.firstMatch(message);
+    if (match == null) {
+      return null;
+    }
+
+    final String packageProduct = match.group(1)!;
+    final Version? requiredMinVersion = Version.parse(match.group(2));
+    final String platformName = match.group(3)!.toLowerCase();
+    final Version? targetSupportedVersion = Version.parse(match.group(4));
+    if (requiredMinVersion == null || targetSupportedVersion == null) {
+      return null;
+    }
+
+    return _SwiftPackageManagerMinPlatformMismatch(
+      packageProduct: packageProduct,
+      requiredMinVersion: requiredMinVersion,
+      targetSupportedVersion: targetSupportedVersion,
+      platformName: platformName,
+    );
+  }
+
+  final String packageProduct;
+  final Version requiredMinVersion;
+  final Version targetSupportedVersion;
+  final String platformName;
+}
+
+String _swiftPackageManagerMinPlatformMismatchInstructions({
+  required Version requiredMinVersion,
+  required Version supportedVersion,
+}) {
+  // Mirrors the recommended guidance in https://github.com/flutter/flutter/issues/165420.
+  return '''
+To fix this error, increase your app's minimum platform version from $supportedVersion to at least $requiredMinVersion or remove this dependency.
+To increase your app's minimum platform version:
+1. Open your app (ios/Runner.xcworkspace or macos/Runner.xcworkspace) in Xcode.
+2. In the Project Navigator, select the Runner project > Runner target > General tab.
+3. Increase your app's target Minimum Deployments setting.
+4. If you updated your iOS app's Minimum Deployments, regenerate the iOS project's configuration files:
+    flutter build ios --config-only
+5. If you updated your macOS app's Minimum Deployments, regenerate the macOS project's configuration files:
+    flutter build macos --config-only
+''';
+}
+
 // The result of [_handleXCResultIssue].
 class _XCResultIssueHandlingResult {
   _XCResultIssueHandlingResult({
@@ -1345,6 +1437,7 @@ class _XCResultIssueHandlingResult {
     this.missingModule,
     this.modifiedPrecompiledSource = false,
     this.unableToFindArmDestination = false,
+    this.swiftPackageManagerMinPlatformMismatch,
   });
 
   /// An issue indicates that user didn't provide the provisioning profile.
@@ -1368,6 +1461,9 @@ class _XCResultIssueHandlingResult {
   final bool modifiedPrecompiledSource;
 
   final bool unableToFindArmDestination;
+  /// An issue indicates that a Swift Package Manager dependency requires a higher
+  /// minimum platform version than the app is targeting.
+  final _SwiftPackageManagerMinPlatformMismatch? swiftPackageManagerMinPlatformMismatch;
 }
 
 const _kResultBundlePath = 'temporary_xcresult_bundle';
