@@ -128,11 +128,8 @@ TEST(BufferBindingsGLESTest, BindUniformDataVerticesAndMatrices) {
           make_metadata(ShaderFloatType::kVec2, "vec2", sizeof(Vector2)),
           make_metadata(ShaderFloatType::kVec3, "vec3", sizeof(Vector3)),
           make_metadata(ShaderFloatType::kVec4, "vec4", sizeof(Vector4)),
-          make_metadata(
-              ShaderFloatType::kMat2, "mat2",
-              sizeof(Matrix)),  // Simplification: Render logic usually passes
-                                // full matrix size or appropriate data
-          make_metadata(ShaderFloatType::kMat3, "mat3", sizeof(Matrix)),
+          make_metadata(ShaderFloatType::kMat2, "mat2", sizeof(float) * 4),
+          make_metadata(ShaderFloatType::kMat3, "mat3", sizeof(float) * 9),
           make_metadata(ShaderFloatType::kMat4, "mat4", sizeof(Matrix)),
       }};
 
