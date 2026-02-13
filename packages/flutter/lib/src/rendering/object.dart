@@ -1477,7 +1477,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       }
       final RenderObject? rootNode = this.rootNode;
       for (final node in nodesToProcess) {
-        if (node._semantics.notInSemanticsTree) {
+        if (node._semantics.parentDataDirty) {
           // This node is either blocked by a sibling
           // (via SemanticsConfiguration.isBlockingSemanticsOfPreviouslyPaintedNodes)
           // or is hidden by parent through visitChildrenForSemantics. Otherwise,
@@ -1511,13 +1511,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       final List<RenderObject> nodesToProcessGeometry = _nodesNeedingSemanticsGeometryUpdate
           .where(
             (RenderObject object) =>
-                !object._needsLayout &&
-                object.owner == this &&
-                // This node is blocked by a sibling
-                // (via SemanticsConfiguration.isBlockingSemanticsOfPreviouslyPaintedNodes)
-                // or the parent node would have updated this node's parent data and it
-                // would not be dirty.
-                !object._semantics.notInSemanticsTree,
+                !object._needsLayout && object.owner == this && !object._semantics.parentDataDirty,
           )
           .toList();
       _nodesNeedingSemanticsGeometryUpdate.clear();
@@ -1565,11 +1559,18 @@ base class PipelineOwner with DiagnosticableTreeMixin {
         _RenderObjectSemantics target = node._semantics.geometryDirty
             ? node._semantics.parent!
             : node._semantics;
-        while (!target.notInSemanticsTree && !target.shouldFormSemanticsNode) {
+        while (!target.parentDataDirty && !target.shouldFormSemanticsNode) {
           target = target.parent!;
         }
-        if (!target.geometryDirty && !target.notInSemanticsTree) {
-          nodeToEnsureGeometry.add(target);
+        if (target.parentDataDirty) {
+          continue;
+        }
+        _RenderObjectSemantics? targetWithCleanGeometry = target;
+        while (targetWithCleanGeometry?.geometryDirty ?? false) {
+          targetWithCleanGeometry = targetWithCleanGeometry!.parentInSemanticsTree;
+        }
+        if (targetWithCleanGeometry != null) {
+          nodeToEnsureGeometry.add(targetWithCleanGeometry);
         }
       }
 
@@ -1596,6 +1597,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
         }
         node._semantics.ensureSemanticsNode();
       }
+
       if (!kReleaseMode) {
         FlutterTimeline.finishSync();
       }
@@ -5539,6 +5541,8 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   @override
   _RenderObjectSemantics get owner => this;
 
+  _RenderObjectSemantics? parentInSemanticsTree;
+
   // Parent in render object order.
   _RenderObjectSemantics? get parent => renderObject.parent?._semantics;
 
@@ -5557,24 +5561,16 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   }
 
   bool get notInSemanticsTree {
-    // There are two cases, either a branch is skipped in ExcludeSemantics or
-    // blocked by sibling.
-    return isBlocked || parentDataDirty;
-  }
-
-  bool isBlocked = false;
-
-  void markSubTreeBlocked() {
-    if (isBlocked) {
-      return;
+    var walker = this;
+    // Find the closest ancestor that forms a semantics node.
+    while (!walker.parentDataDirty && !walker.shouldFormSemanticsNode) {
+      walker = walker.parent!;
     }
-    parentData = null;
-    geometry = null;
-    isBlocked = true;
-    renderObject.visitChildrenForSemantics((RenderObject child) {
-      final _RenderObjectSemantics childSemantics = child._semantics;
-      childSemantics.markSubTreeBlocked();
-    });
+
+    while (walker.parentInSemanticsTree != null) {
+      walker = walker.parentInSemanticsTree!;
+    }
+    return !walker.isRoot;
   }
 
   /// If this forms a semantics node, all of the properties in config are
@@ -5735,6 +5731,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     siblingMergeGroups.addAll(result.$2);
 
     // Construct tree for nodes that will form semantics nodes.
+    final Set<_RenderObjectSemantics> oldChildren = _children.toSet();
     _children.clear();
     if (!contributesToSemanticsTree) {
       return;
@@ -5754,6 +5751,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         in result.$1.whereType<_RenderObjectSemantics>()) {
       assert(childSemantics.contributesToSemanticsTree);
       if (childSemantics.shouldFormSemanticsNode) {
+        for (final _RenderObjectSemantics child in childSemantics._children) {
+          child.parentInSemanticsTree = childSemantics;
+        }
         // In general geometry is only dirty during the first build or markNeedsLayout.
         // In both cases, the renderobject will be added to the list of nodes needing
         // geometry update.
@@ -5780,6 +5780,20 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       } else {
         _children.addAll(childSemantics._children);
         siblingMergeGroups.addAll(childSemantics.siblingMergeGroups);
+      }
+    }
+    // If this node is the root, then all of its children are in the semantics tree.
+    // Otherwise, we won't know if this node shouldFormSemanticsNode until the parent
+    // of this node determines it.
+    if (isRoot || configProvider.effective.isSemanticBoundary) {
+      for (final _RenderObjectSemantics child in _children) {
+        child.parentInSemanticsTree = this;
+      }
+    }
+    oldChildren.removeAll(_children);
+    for (final removedChild in oldChildren) {
+      if (removedChild.parentInSemanticsTree == this) {
+        removedChild.parentInSemanticsTree = null;
       }
     }
 
@@ -5812,9 +5826,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     final result = <_RenderObjectSemantics>[];
     renderObject.visitChildrenForSemantics((RenderObject renderChild) {
       if (renderChild._semantics.isBlockingPreviousSibling) {
-        for (final child in result) {
-          child.markSubTreeBlocked();
-        }
         result.clear();
       }
       result.add(renderChild._semantics);
@@ -5958,7 +5969,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     }
     // Parent data changes may result in node formation changes.
     markNeedsBuild();
-    isBlocked = false;
     parentData = newParentData;
     updateChildren();
   }
@@ -6408,7 +6418,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     built = false;
     cachedSemanticsNode = null;
     parentData = null;
-    isBlocked = false;
     geometry = null;
     _blocksPreviousSibling = null;
     _containsIncompleteFragment = false;
@@ -6443,7 +6452,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         ifTrue: 'BLOCK PREVIOUS',
       ),
     );
-    properties.add(FlagProperty('blocked', value: isBlocked, ifTrue: 'BLOCKED'));
     if (!parentDataDirty && contributesToSemanticsTree) {
       final String semanticsNodeStatus;
       if (built) {
