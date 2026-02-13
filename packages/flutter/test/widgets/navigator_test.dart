@@ -12,7 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import 'list_tile_test_utils.dart';
+import 'list_tile_tester.dart';
 import 'navigator_utils.dart';
 import 'observer_tester.dart';
 import 'semantics_tester.dart';
