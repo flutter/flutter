@@ -2867,6 +2867,9 @@ void main() {
     (WidgetTester tester) async {
       final tabs = <Tab>[for (int i = 0; i < 10; i++) Tab(text: 'Tab $i')];
 
+      final tabController = TabController(length: tabs.length, vsync: const TestVSync());
+      addTearDown(tabController.dispose);
+
       final controllerA = TabBarScrollController();
       final controllerB = TabBarScrollController();
       addTearDown(controllerA.dispose);
@@ -2876,7 +2879,7 @@ void main() {
         boilerplate(
           child: TabBar(
             isScrollable: true,
-            controller: TabController(length: tabs.length, vsync: const TestVSync()),
+            controller: tabController,
             scrollController: controllerA,
             tabs: tabs,
           ),
@@ -2891,7 +2894,7 @@ void main() {
         boilerplate(
           child: TabBar(
             isScrollable: true,
-            controller: TabController(length: tabs.length, vsync: const TestVSync()),
+            controller: tabController,
             scrollController: controllerB,
             tabs: tabs,
           ),
@@ -2908,6 +2911,8 @@ void main() {
   ) async {
     final tabs = <Tab>[for (int i = 0; i < 10; i++) Tab(text: 'Tab $i')];
 
+    final tabController = TabController(length: tabs.length, vsync: const TestVSync());
+    addTearDown(tabController.dispose);
     final controller = TabBarScrollController();
     addTearDown(controller.dispose);
 
@@ -2915,7 +2920,7 @@ void main() {
       boilerplate(
         child: TabBar(
           isScrollable: true,
-          controller: TabController(length: tabs.length, vsync: const TestVSync()),
+          controller: tabController,
           scrollController: controller,
           tabs: tabs,
         ),
