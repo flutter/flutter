@@ -627,10 +627,10 @@ List<String> formatTable(List<List<String>> table, {String separator = ' • ', 
   if (table.first.isEmpty) {
     throw Exception('Table header cannot be empty');
   }
-  final List<int> indices = List<int>.generate(table.first.length - 1, (int i) => i);
-  final List<int> widths = List<int>.filled(indices.length, 0);
-  for (final List<String> row in table) {
-    for (final int i in indices) {
+  final indices = List<int>.generate(table.first.length - 1, (int i) => i);
+  final widths = List<int>.filled(indices.length, 0);
+  for (final row in table) {
+    for (final i in indices) {
       widths[i] = math.max(widths[i], row[i].length);
     }
   }
