@@ -713,7 +713,7 @@ Future<void> testMain() async {
 
     tearDown(() {
       editingStrategySpy.disable();
-      IOSTextEditingStrategy.debugResetIsInIframeCache();
+      debugResetIframeDetectionCache();
     });
 
     test('scrollIntoView is called in placeElement when in iframe', () async {
@@ -799,12 +799,33 @@ Future<void> testMain() async {
     });
   });
 
-  group('DomWindow.parent for iframe detection', () {
-    test('parent property is accessible', () {
+  group('Iframe detection utilities', () {
+    tearDown(() {
+      debugResetIframeDetectionCache();
+    });
+
+    test('DomWindow.parent property is accessible', () {
       // Test harness may run in an iframe; just verify the API is accessible.
       final DomWindow? parent = domWindow.parent;
       // parent is always a valid window (itself for top-level, parent for iframes)
       expect(parent, isNotNull);
+    });
+
+    test('isEmbeddedInIframe() returns consistent results', () {
+      // Just verify the function works without throwing
+      final result1 = isEmbeddedInIframe();
+      final result2 = isEmbeddedInIframe();
+      expect(result1, equals(result2), reason: 'Results should be cached');
+    });
+
+    test('debugSetIframeEmbeddingForTests overrides detection', () {
+      debugSetIframeEmbeddingForTests(true);
+      expect(isEmbeddedInIframe(), isTrue);
+
+      debugSetIframeEmbeddingForTests(false);
+      expect(isEmbeddedInIframe(), isFalse);
+
+      debugResetIframeDetectionCache();
     });
   });
 
@@ -4129,23 +4150,18 @@ class GlobalTextEditingStrategySpy extends GloballyPositionedTextEditingStrategy
 class IOSTextEditingStrategySpy extends IOSTextEditingStrategy {
   IOSTextEditingStrategySpy(super.owner);
 
-  /// Override to simulate iframe context for testing.
-  bool? debugIsInIframeOverride;
+  /// Set this to simulate iframe context for testing.
+  /// Uses the shared debugSetIframeEmbeddingForTests() from dom.dart.
+  set debugIsInIframeOverride(bool? value) {
+    debugSetIframeEmbeddingForTests(value);
+  }
 
   /// Count of how many times scrollIntoView was called.
   int scrollIntoViewCallCount = 0;
 
   @override
-  bool get isInIframe {
-    if (debugIsInIframeOverride != null) {
-      return debugIsInIframeOverride!;
-    }
-    return super.isInIframe;
-  }
-
-  @override
   void scrollIntoViewIfInIframe() {
-    if (isInIframe) {
+    if (isEmbeddedInIframe()) {
       activeDomElement.scrollIntoView(<String, dynamic>{'block': 'center', 'inline': 'nearest'});
       scrollIntoViewCallCount++;
     }

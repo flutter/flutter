@@ -1312,50 +1312,11 @@ abstract class DefaultTextEditingStrategy
 
   DomHTMLFormElement? get focusedFormElement => inputConfiguration.autofillGroup?.formElement;
 
-  /// Cached result of iframe detection.
-  static bool? _cachedIsInIframe;
-
-  /// Resets the iframe detection cache. Used for testing.
-  @visibleForTesting
-  static void debugResetIsInIframeCache() {
-    _cachedIsInIframe = null;
-  }
-
-  /// Returns true if the current window is inside an iframe.
-  ///
-  /// This is used to detect when we need to explicitly scroll text inputs
-  /// into view. The result is cached since iframe status doesn't change
-  /// during the app's lifetime.
-  ///
-  /// Handles cross-origin iframes gracefully by assuming embedded context
-  /// when security exceptions occur.
-  @visibleForTesting
-  bool get isInIframe {
-    if (_cachedIsInIframe != null) {
-      return _cachedIsInIframe!;
-    }
-
-    try {
-      final DomWindow? parent = domWindow.parent;
-      if (parent == null) {
-        _cachedIsInIframe = false;
-        return false;
-      }
-      // If window.parent is the same object as window, we're not in an iframe.
-      _cachedIsInIframe = !identical(parent, domWindow);
-      return _cachedIsInIframe!;
-    } catch (e) {
-      // Cross-origin iframe - assume embedded
-      _cachedIsInIframe = true;
-      return true;
-    }
-  }
-
   /// Scrolls the active DOM element into view if running inside an iframe.
   ///
   /// See: https://github.com/flutter/flutter/issues/178743
   void scrollIntoViewIfInIframe() {
-    if (isInIframe) {
+    if (isEmbeddedInIframe()) {
       activeDomElement.scrollIntoView(<String, dynamic>{'block': 'center', 'inline': 'nearest'});
     }
   }
