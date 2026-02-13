@@ -7,7 +7,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/arabic.dart' as hello_world;
+import 'package:hello_world/arabic.dart' as hello_world;
 
 void main() {
   testWidgets('اختبار مرحبا بالعالم', (WidgetTester tester) async {
