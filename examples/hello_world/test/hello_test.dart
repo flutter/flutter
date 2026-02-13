@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/main.dart' as hello_world;
+import 'package:hello_world/main.dart' as hello_world;
 
 void main() {
   testWidgets('Hello world smoke test', (WidgetTester tester) async {
