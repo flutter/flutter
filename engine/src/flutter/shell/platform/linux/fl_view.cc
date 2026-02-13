@@ -121,8 +121,8 @@ static gboolean redraw_cb(gpointer user_data) {
   size_t height = allocation.height * scale_factor;
   size_t frame_width, frame_height;
   fl_compositor_get_frame_size(self->compositor, &frame_width, &frame_height);
-  if (self->sized_to_content && width != frame_width &&
-      height != frame_height) {
+  gboolean frame_size_matches = width == frame_width && height == frame_height;
+  if (self->sized_to_content && !frame_size_matches) {
     gtk_widget_set_size_request(GTK_WIDGET(self->render_area),
                                 frame_width / scale_factor,
                                 frame_height / scale_factor);
