@@ -557,9 +557,6 @@ class FlutterPlugin : Plugin<Project> {
             projectToAddTasksTo: Project,
             extension: ApplicationExtension
         ) {
-            // Developers can set this value by passing `-P disable-abi-filtering=true`
-            // to flutter build. Where "disable-abi-filtering" comes from
-            // com.flutter.gradle.FlutterPluginUtils.PROP_DISABLE_ABI_FILTERING.
             if (!FlutterPluginUtils.shouldProjectDisableAbiFiltering(projectToAddTasksTo)) {
                 extension.defaultConfig.ndk {
                     abiFilters.clear()

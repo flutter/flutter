@@ -206,9 +206,16 @@ object FlutterPluginUtils {
     @JvmName("isProjectVerbose")
     internal fun isProjectVerbose(project: Project): Boolean = project.findProperty(PROP_IS_VERBOSE)?.toString()?.toBoolean() ?: false
 
+
+    /**
+     *  Developers can set this value by passing `-P disable-abi-filtering=true`
+     *  to flutter build. Where "disable-abi-filtering" comes from
+     *  PROP_DISABLE_ABI_FILTERING.
+     */
     @JvmStatic
     @JvmName("shouldProjectDisableAbiFiltering")
-    internal fun shouldProjectDisableAbiFiltering(project: Project): Boolean = project.findProperty(PROP_DISABLE_ABI_FILTERING)?.toString()?.toBoolean() ?: false
+    internal fun shouldProjectDisableAbiFiltering(project: Project): Boolean =
+        project.findProperty(PROP_DISABLE_ABI_FILTERING)?.toString()?.toBoolean() ?: false
 
     /**
      * TODO: Remove this AGP hack. https://github.com/flutter/flutter/issues/109560
