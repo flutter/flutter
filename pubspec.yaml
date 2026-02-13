@@ -211,9 +211,9 @@ dependencies:
   lints: 6.1.0
   pedantic: 1.11.1
   quiver: 3.2.2
-  yaml_edit: 2.2.3
+  yaml_edit: 2.2.4
 
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: 64p8up
+# PUBSPEC CHECKSUM: r03o20
