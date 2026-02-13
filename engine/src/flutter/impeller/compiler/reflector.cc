@@ -26,6 +26,7 @@
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/runtime_stage/runtime_stage.h"
+#include "runtime_stage_types_flatbuffers.h"
 #include "spirv_common.hpp"
 
 namespace impeller {
@@ -372,6 +373,27 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
     uniform_description.columns = spir_type.columns;
     uniform_description.bit_width = spir_type.width;
     uniform_description.array_elements = GetArrayElements(spir_type);
+
+    if (TargetPlatformIsMetal(options_.target_platform) &&
+        uniform_description.type == spirv_cross::SPIRType::BaseType::Float) {
+      // Metal aligns float3 to 16 bytes.
+      // Metal aligns float3x3 COLUMNS to 16 bytes.
+      // For float3: Size 12. Padding 4. Stride 16.
+      // For float3x3: Size 36. Padding 12 (4 per col). Stride 48.
+
+      if (spir_type.vecsize == 3 &&
+          (spir_type.columns == 1 || spir_type.columns == 3)) {
+        for (size_t c = 0; c < spir_type.columns; c++) {
+          for (size_t v = 0; v < 3; v++) {
+            uniform_description.padding_layout.push_back(
+                fb::PaddingType::kFloat);
+          }
+          uniform_description.padding_layout.push_back(
+              fb::PaddingType::kPadding);
+        }
+      }
+    }
+
     FML_CHECK(data->backend != RuntimeStageBackend::kVulkan ||
               spir_type.basetype ==
                   spirv_cross::SPIRType::BaseType::SampledImage)
@@ -396,7 +418,9 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
     size_t binding =
         compiler_->get_decoration(ubo.id, spv::Decoration::DecorationBinding);
     auto members = ReadStructMembers(ubo.type_id);
-    std::vector<uint8_t> struct_layout;
+    std::vector<fb::PaddingType> padding_layout;
+    std::vector<StructField> struct_fields;
+    struct_fields.reserve(members.size());
     size_t float_count = 0;
 
     for (size_t i = 0; i < members.size(); i += 1) {
@@ -407,29 +431,34 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
           size_t padding_count =
               (member.size + sizeof(float) - 1) / sizeof(float);
           while (padding_count > 0) {
-            struct_layout.push_back(0);
+            padding_layout.push_back(fb::PaddingType::kPadding);
             padding_count--;
           }
           break;
         }
         case StructMember::UnderlyingType::kFloat: {
+          StructField field_desc;
+          field_desc.name = member.name;
+          field_desc.byte_size =
+              member.size * member.array_elements.value_or(1);
+          struct_fields.push_back(field_desc);
           if (member.array_elements > 1) {
             // For each array element member, insert 1 layout property per byte
             // and 0 layout property per byte of padding
             for (auto i = 0; i < member.array_elements; i++) {
               for (auto j = 0u; j < member.size / sizeof(float); j++) {
-                struct_layout.push_back(1);
+                padding_layout.push_back(fb::PaddingType::kFloat);
               }
               for (auto j = 0u; j < member.element_padding / sizeof(float);
                    j++) {
-                struct_layout.push_back(0);
+                padding_layout.push_back(fb::PaddingType::kPadding);
               }
             }
           } else {
             size_t member_float_count = member.byte_length / sizeof(float);
             float_count += member_float_count;
             while (member_float_count > 0) {
-              struct_layout.push_back(1);
+              padding_layout.push_back(fb::PaddingType::kFloat);
               member_float_count--;
             }
           }
@@ -446,7 +475,8 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
         .location = binding,
         .binding = binding,
         .type = spirv_cross::SPIRType::Struct,
-        .struct_layout = std::move(struct_layout),
+        .padding_layout = std::move(padding_layout),
+        .struct_fields = std::move(struct_fields),
         .struct_float_count = float_count,
     });
   }
@@ -901,6 +931,29 @@ std::vector<StructMember> Reflector::ReadStructMembers(
           /*p_byte_length=*/total_length,
           /*p_array_elements=*/count,
           /*p_element_padding=*/8,
+      });
+      current_byte_offset += total_length;
+      continue;
+    }
+
+    if (member.basetype == spirv_cross::SPIRType::BaseType::Float &&
+        member.width == 32 && member.columns == 3 && member.vecsize == 3) {
+      // Mat3s are packed as three vec3s with one float of padding after each.
+      // {val, val, val, padding, val, val, val, padding, val, val, val,
+      // padding}.
+      uint32_t count = array_elements.value_or(1) * 3;
+      uint32_t stride = 16;
+      uint32_t total_length = stride * count;
+
+      result.emplace_back(StructMember{
+          /*p_type=*/"Mat3",
+          /*p_base_type=*/spirv_cross::SPIRType::BaseType::Float,
+          /*p_name=*/GetMemberNameAtIndex(struct_type, i),
+          /*p_offset=*/struct_member_offset,
+          /*p_size=*/12,
+          /*p_byte_length=*/total_length,
+          /*p_array_elements=*/count,
+          /*p_element_padding=*/4,
       });
       current_byte_offset += total_length;
       continue;

@@ -7,8 +7,8 @@
 
 #include <zircon/syscalls.h>
 
-#include "handle.h"
-#include "handle_disposition.h"
+#include "flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/handle.h"
+#include "flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/handle_disposition.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/tonic/dart_library_natives.h"
 #include "third_party/tonic/dart_wrappable.h"

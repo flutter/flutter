@@ -30,7 +30,26 @@ More information and tips:
 docs/releases/Hotfix-Documentation-Best-Practices.md
 -->
 
+## Flutter 3.41 Changes
+
+### [3.41.0](https://github.com/flutter/flutter/releases/tag/3.41.0)
+
+Learn about what's new in this release in [the blog post](https://blog.flutter.dev/whats-new-in-flutter-3-41-302ec140e632), and check out the [CHANGELOG](https://docs.flutter.dev/release/release-notes/release-notes-3.41.0) for a detailed list of all the new changes.
+
+
 ## Flutter 3.38 Changes
+
+### [3.38.10](https://github.com/flutter/flutter/releases/tag/3.38.10)
+
+- [flutter/181607](https://github.com/flutter/flutter/pull/181607) When using an ffi plugin on macOS, generated frameworks have the wrong structure.
+
+### [3.38.9](https://github.com/flutter/flutter/releases/tag/3.38.9)
+
+- [flutter/181568](https://github.com/flutter/flutter/pull/181568) Update Dart to 3.10.8.
+
+### [3.38.8](https://github.com/flutter/flutter/releases/tag/3.38.8)
+
+- [flutter/178151](https://github.com/flutter/flutter/issues/178151) - `flutter run -d chrome` may crash with a `DartDevelopmentServiceException` when the application shuts down during the startup sequence.
 
 ### [3.38.7](https://github.com/flutter/flutter/releases/tag/3.38.7)
 

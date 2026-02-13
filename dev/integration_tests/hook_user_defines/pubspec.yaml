@@ -7,7 +7,7 @@ version: 0.0.1
 # resolution: workspace
 
 environment:
-  sdk: ^3.9.0-0
+  sdk: ^3.10.0-0
 
 hooks:
   user_defines:
@@ -15,11 +15,11 @@ hooks:
       magic_value: 1000
 
 dependencies:
-  hooks: 1.0.0
+  hooks: 1.0.1
   logging: 1.3.0
   native_toolchain_c: 0.17.4
 
 dev_dependencies:
   test: 1.29.0
 
-# PUBSPEC CHECKSUM: 76vsd6
+# PUBSPEC CHECKSUM: 3k33b2

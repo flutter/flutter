@@ -1,7 +1,7 @@
 name: _flutter_packages
 
 environment:
-  sdk: ^3.9.0-0
+  sdk: ^3.10.0-0
 
 workspace:
   - dev/a11y_assessments
@@ -115,7 +115,7 @@ dependencies:
   google_mobile_ads: 5.1.0
   googleapis: 14.0.0
   googleapis_auth: 2.0.0
-  hooks: 1.0.0
+  hooks: 1.0.1
   html: 0.15.6
   http: 1.6.0
   http_multi_server: 3.2.2
@@ -124,7 +124,7 @@ dependencies:
   io: 1.0.5
   isolate: 2.1.1
   js: 0.7.2
-  json_annotation: 4.9.0
+  json_annotation: 4.10.0
   leak_tracker: 11.0.2
   leak_tracker_flutter_testing: 3.0.10
   leak_tracker_testing: 3.0.2
@@ -164,7 +164,7 @@ dependencies:
   shrine_images: 2.0.2
   source_map_stack_trace: 2.1.2
   source_maps: 0.10.13
-  source_span: 1.10.1
+  source_span: 1.10.2
   stack_trace: 1.12.1
   standard_message_codec: 0.0.1+4
   stream_channel: 2.1.4
@@ -177,7 +177,7 @@ dependencies:
   typed_data: 1.4.0
   url_launcher: 6.3.2
   url_launcher_android: 6.3.28
-  url_launcher_ios: 6.3.6
+  url_launcher_ios: 6.4.0
   url_launcher_linux: 3.2.2
   url_launcher_macos: 3.2.5
   url_launcher_platform_interface: 2.3.2
@@ -186,7 +186,7 @@ dependencies:
   vector_math: 2.2.0
   video_player: 2.10.1
   video_player_android: 2.9.1
-  video_player_avfoundation: 2.9.0
+  video_player_avfoundation: 2.9.1
   video_player_platform_interface: 6.6.0
   video_player_web: 2.4.0
   vm_service: 15.0.2
@@ -200,7 +200,7 @@ dependencies:
   webview_flutter: 4.9.0
   webview_flutter_android: 3.16.9
   webview_flutter_platform_interface: 2.14.0
-  webview_flutter_wkwebview: 3.23.5
+  webview_flutter_wkwebview: 3.23.6
   xdg_directories: 1.1.0
   xml: 6.6.1
   yaml: 3.1.3
@@ -208,7 +208,7 @@ dependencies:
   dart_style: 3.1.3
   file_testing: 3.0.2
   flutter_lints: 6.0.0
-  lints: 6.0.0
+  lints: 6.1.0
   pedantic: 1.11.1
   quiver: 3.2.2
   yaml_edit: 2.2.3
@@ -216,4 +216,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: qi2roj
+# PUBSPEC CHECKSUM: q8irkm
