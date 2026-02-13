@@ -35,6 +35,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 ### [3.41.1](https://github.com/flutter/flutter/releases/tag/3.41.1)
 
 - [flutter/182314](https://github.com/flutter/flutter/issues/182314) Test coverage is broken due to pinned `test_api` version in `flutter_test`.
+- [flutter/182335](https://github.com/flutter/flutter/issues/182335) Version 1.29 of the Dart test package adds a blank line to test output causing unexpected test failures.
 
 ### [3.41.0](https://github.com/flutter/flutter/releases/tag/3.41.0)
 
