@@ -8,7 +8,6 @@ library;
 import 'package:flutter/foundation.dart';
 
 import 'curves.dart';
-import 'tween.dart';
 
 /// Used to override the default parameters of an animation.
 ///
@@ -65,8 +64,11 @@ class AnimationStyle with Diagnosticable {
     );
   }
 
-  /// Returns a modified version of the `other` style, where its `null` properties
-  /// are filled in with the non-null properties of this style, where applicable.
+  /// Creates a new animation style that is a combination of this animation style
+  /// and the given `other` animation style.
+  ///
+  /// If `other` is non-null, its non-null properties are used to override the
+  /// corresponding properties of this style.
   ///
   /// If a `null` argument is passed, returns this animation style.
   AnimationStyle merge(AnimationStyle? other) {
@@ -95,7 +97,7 @@ class AnimationStyle with Diagnosticable {
   }
 
   @optionalTypeArgs
-  static T? _lerp<T extends Object>(T? a, T? b, double t, T Function(T a, T b, double t) lerp) {
+  static T? _lerp<T extends Object>(T? a, T? b, double t, T Function(T? a, T? b, double t) lerp) {
     if (identical(a, b)) {
       return a;
     }
@@ -105,15 +107,12 @@ class AnimationStyle with Diagnosticable {
     if (t == 1.0) {
       return b;
     }
-    if (a == null || b == null) {
-      return a ?? b;
-    }
     return lerp(a, b, t);
   }
 
-  static Duration _lerpDuration(Duration a, Duration b, double t) {
+  static Duration _lerpDuration(Duration? a, Duration? b, double t) {
     return Duration(
-      microseconds: (a.inMicroseconds * (1.0 - t) + b.inMicroseconds * t).round(),
+      microseconds: ((a?.inMicroseconds ?? 0) * (1.0 - t) + (b?.inMicroseconds ?? 0) * t).round(),
     );
   }
 
@@ -148,7 +147,9 @@ class AnimationStyle with Diagnosticable {
 }
 
 class _LerpedCurve extends Curve {
-  const _LerpedCurve(this.first, this.second, this._t);
+  const _LerpedCurve(Curve? a, Curve? b, this._t)
+    : first = a ?? Curves.linear,
+      second = b ?? Curves.linear;
 
   final Curve first;
   final Curve second;
@@ -163,11 +164,11 @@ class _LerpedCurve extends Curve {
   }
 
   @override
-  bool operator==(Object other) {
-    return other is _LerpedCurve
-        && other.first == first
-        && other.second == second
-        && other._t == _t;
+  bool operator ==(Object other) {
+    return other is _LerpedCurve &&
+        other.first == first &&
+        other.second == second &&
+        other._t == _t;
   }
 
   @override

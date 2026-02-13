@@ -14,7 +14,7 @@ void main() {
     expect(const AnimationStyle().hashCode, const AnimationStyle().copyWith().hashCode);
   });
 
-  testWidgets('AnimationStyle.copyWith() overrides all properties', (WidgetTester tester) async {
+  test('AnimationStyle.copyWith() overrides all properties', () {
     const original = AnimationStyle(
       curve: Curves.ease,
       duration: Duration(seconds: 1),
@@ -33,7 +33,7 @@ void main() {
     expect(copy.reverseDuration, const Duration(seconds: 2));
   });
 
-  testWidgets('AnimationStyle.merge() fills in null properties', (WidgetTester tester) async {
+  test('AnimationStyle.merge() fills in null properties', () {
     const original = AnimationStyle(
       curve: Curves.ease,
       duration: Duration(seconds: 1),
@@ -54,7 +54,7 @@ void main() {
     expect(identical(AnimationStyle.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgets('AnimationStyle.lerp smoothly transitions all values', (WidgetTester tester) async {
+  test('AnimationStyle.lerp smoothly transitions all values', () {
     const a = AnimationStyle(
       curve: Curves.ease,
       duration: Duration(seconds: 1),
@@ -101,7 +101,16 @@ void main() {
     }
   });
 
-  testWidgets('default AnimationStyle debugFillProperties', (WidgetTester tester) async {
+  test('AnimationStyle.lerp with null property', () {
+    const a = AnimationStyle(duration: Duration(seconds: 2));
+    const b = AnimationStyle();
+
+    // Assuming null is treated as Duration.zero for interpolation.
+    expect(AnimationStyle.lerp(a, b, 1 / 2)?.duration, const Duration(seconds: 1));
+    expect(AnimationStyle.lerp(a, b, 1 / 4)?.duration, const Duration(milliseconds: 1500));
+  });
+
+  test('default AnimationStyle debugFillProperties', () {
     final builder = DiagnosticPropertiesBuilder();
 
     const AnimationStyle().debugFillProperties(builder);
@@ -114,7 +123,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('AnimationStyle implements debugFillProperties', (WidgetTester tester) async {
+  test('AnimationStyle implements debugFillProperties', () {
     final builder = DiagnosticPropertiesBuilder();
 
     const AnimationStyle(
