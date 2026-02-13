@@ -135,6 +135,8 @@ class _TestTextFieldSelectionGestureDetectorBuilder extends TextSelectionGesture
   bool get onUserTapAlwaysCalled => false;
 }
 
+/// A minimal set of text selection controls to make it easier to work with text
+/// editing in tests.
 class TestTextSelectionHandleControls extends TextSelectionControls
     with TextSelectionHandleControls {
   @override
@@ -158,4 +160,6 @@ class TestTextSelectionHandleControls extends TextSelectionControls
   }
 }
 
+/// A minimal instance of text selection controls to make it easier to work with
+/// text editing in tests.
 final TextSelectionControls testTextSelectionHandleControls = TestTextSelectionHandleControls();
