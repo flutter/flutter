@@ -143,7 +143,8 @@
 - (instancetype)initWithEmbeddedView:(UIView*)embeddedView
              platformViewsController:(FlutterPlatformViewsController*)platformViewsController
     gestureRecognizersBlockingPolicy:
-        (FlutterPlatformViewGestureRecognizersBlockingPolicy)blockingPolicy;
+        (FlutterPlatformViewGestureRecognizersBlockingPolicy)blockingPolicy
+                       flutterViewId:(FlutterViewIdentifier)flutterViewId;
 
 // Stop delaying any active touch sequence (and let it arrive the embedded view).
 - (void)releaseGesture;
@@ -156,9 +157,6 @@
 
 // Sets flutterAccessibilityContainer as this view's accessibilityContainer.
 @property(nonatomic, retain) id flutterAccessibilityContainer;
-
-/// @brief The flutter view controller.
-@property(nonatomic, weak) UIViewController<FlutterViewResponder>* flutterViewController;
 @end
 
 @interface UIView (FirstResponder)

@@ -558,12 +558,16 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 
 - (void)setViewController:(FlutterViewController*)viewController {
   FML_DCHECK(self.platformView);
-    if (viewController != nil) {
-      // Swap the existing `FlutterViewController` for backward compatibly
-      [self registerViewController:viewController forIdentifier:flutter::kFlutterImplicitViewId];
-    } else {
-      [self deregisterViewControllerForIdentifier:flutter::kFlutterImplicitViewId];
-    }
+  if (viewController != nil) {
+    // Swap the existing `FlutterViewController` for backward compatibly.
+    [self registerViewController:viewController forIdentifier:flutter::kFlutterImplicitViewId];
+  } else {
+    [self deregisterViewControllerForIdentifier:flutter::kFlutterImplicitViewId];
+  }
+}
+
+- (FlutterViewController*)viewController {
+  return [self viewControllerForIdentifier:flutter::kFlutterImplicitViewId];
 }
 
 - (void)registerViewController:(FlutterViewController*)controller
@@ -586,7 +590,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   [self.flutterViewControllerWillDeallocObservers setObject:observer forKey:@(viewIdentifier)];
 
   if (viewIdentifier == flutter::kFlutterImplicitViewId) {
-     self.platformView->SetOwnerViewController(controller);
+    self.platformView->SetOwnerViewController(controller);
     [self maybeSetupPlatformViewChannels];
     [self updateDisplays];
   } else {
@@ -682,7 +686,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   [self.lifecycleChannel sendMessage:@"AppLifecycleState.detached"];
   [self removeViewController:viewIdentifier];
   [self.textInputPlugin resetViewResponder];
-  _viewController = nil;
 }
 
 - (void)destroyContext {

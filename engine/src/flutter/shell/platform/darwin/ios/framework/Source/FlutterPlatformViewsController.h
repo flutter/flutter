@@ -38,6 +38,9 @@ NS_ASSUME_NONNULL_BEGIN
 /// The flutter view.
 @property(nonatomic, weak) UIView* _Nullable flutterView;
 
+/// @brief The flutter view controller.
+@property(nonatomic, weak) UIViewController<FlutterViewResponder>* _Nullable flutterViewController;
+
 /// @brief set the factory used to construct embedded UI Views.
 - (void)registerViewFactory:(NSObject<FlutterPlatformViewFactory>*)factory
                               withId:(NSString*)factoryId
@@ -45,7 +48,8 @@ NS_ASSUME_NONNULL_BEGIN
         (FlutterPlatformViewGestureRecognizersBlockingPolicy)gestureRecognizerBlockingPolicy;
 
 /// @brief Mark the beginning of a frame and record the size of the onscreen.
-- (void)beginFrameWithSize:(flutter::DlISize)frameSize;
+- (void)beginFrame:(int64_t)flutterViewId
+          withSize:(flutter::DlISize)frameSize;
 
 /// @brief Cancel the current frame, indicating that no platform views are composited.
 ///
@@ -134,6 +138,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)attachToFlutterViewController:(__weak FlutterViewController*)controller;
 
 - (void)detachFromFlutterViewController:(int64_t)flutterViewId;
+
+- (UIViewController<FlutterViewResponder>* _Nullable)flutterViewControllerForIdentifier:(FlutterViewIdentifier)viewIdentifier;
 
 @end
 

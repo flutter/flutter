@@ -5,6 +5,7 @@
 #import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
 
+#include "flutter/common/constants.h"
 #include "flutter/fml/platform/darwin/message_loop_darwin.h"
 #import "flutter/lib/ui/window/platform_configuration.h"
 #include "flutter/lib/ui/window/pointer_data.h"
@@ -43,6 +44,7 @@ using namespace flutter::testing;
 @property(nonatomic, assign) BOOL didCallNotifyLowMemory;
 
 - (FlutterTextInputPlugin*)textInputPlugin;
+- (FlutterViewController*)viewControllerForIdentifier:(FlutterViewIdentifier)viewIdentifier;
 
 - (void)sendKeyEvent:(const FlutterKeyEvent&)event
             callback:(nullable FlutterKeyEventCallback)callback
@@ -75,6 +77,13 @@ using namespace flutter::testing;
                           callback(true, userData);
                         });
 }
+
+- (FlutterViewController*)viewControllerForIdentifier:(FlutterViewIdentifier)viewIdentifier {
+  if (viewIdentifier == flutter::kFlutterImplicitViewId) {
+    return self.viewController;
+  }
+  return nil;
+}
 @end
 
 @interface FlutterEngine ()
@@ -82,8 +91,9 @@ using namespace flutter::testing;
          libraryURI:(NSString*)libraryURI
        initialRoute:(NSString*)initialRoute;
 - (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet;
-- (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics;
-- (void)attachView;
+- (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics
+               viewIdentifier:(FlutterViewIdentifier)viewIdentifier;
+- (void)attachView:(FlutterViewIdentifier)viewIdentifier;
 @end
 
 @interface FlutterEngine (TestLowMemory)
@@ -102,6 +112,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 /// Used for testing deallocation.
 @interface MockEngine : NSObject
 @property(nonatomic, strong) FlutterDartProject* project;
+- (void)addViewController:(FlutterViewController*)viewController;
 @end
 
 @implementation MockEngine
@@ -109,6 +120,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   return nil;
 }
 - (void)setViewController:(FlutterViewController*)viewController {
+  // noop
+}
+- (void)addViewController:(FlutterViewController*)viewController {
   // noop
 }
 @end
@@ -984,7 +998,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   mockEngine.viewController = viewControllerB;
   [viewControllerA updateViewportMetricsIfNeeded];
   flutter::ViewportMetrics viewportMetrics;
-  OCMVerify(never(), [mockEngine updateViewportMetrics:viewportMetrics]);
+  OCMVerify(never(), [mockEngine updateViewportMetrics:viewportMetrics
+                                        viewIdentifier:viewControllerA.viewIdentifier]);
 }
 
 - (void)testUpdateViewportMetricsIfNeeded_DoesInvokeEngineWhenIsTheViewController {
@@ -995,7 +1010,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                                                  bundle:nil];
   mockEngine.viewController = viewController;
   flutter::ViewportMetrics viewportMetrics;
-  OCMExpect([mockEngine updateViewportMetrics:viewportMetrics]).ignoringNonObjectArgs();
+  OCMExpect([mockEngine updateViewportMetrics:viewportMetrics
+                                viewIdentifier:viewController.viewIdentifier])
+      .ignoringNonObjectArgs();
   [viewController updateViewportMetricsIfNeeded];
   OCMVerifyAll(mockEngine);
 }
@@ -1057,7 +1074,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   // Should not trigger the engine call when during rotation.
   [viewController updateViewportMetricsIfNeeded];
 
-  OCMVerify(never(), [mockEngine updateViewportMetrics:flutter::ViewportMetrics()]);
+  OCMVerify(never(), [mockEngine updateViewportMetrics:flutter::ViewportMetrics()
+                                        viewIdentifier:viewController.viewIdentifier]);
 }
 
 - (void)testViewWillTransitionToSize_DoesDelayEngineCallIfNonZeroDuration {
@@ -1077,12 +1095,15 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMStub([mockCoordinator transitionDuration]).andReturn(transitionDuration);
 
   flutter::ViewportMetrics viewportMetrics;
-  OCMExpect([mockEngine updateViewportMetrics:viewportMetrics]).ignoringNonObjectArgs();
+  OCMExpect([mockEngine updateViewportMetrics:viewportMetrics
+                                viewIdentifier:viewController.viewIdentifier])
+      .ignoringNonObjectArgs();
 
   [viewController viewWillTransitionToSize:CGSizeZero withTransitionCoordinator:mockCoordinator];
   // Should not immediately call the engine (this request should be ignored).
   [viewController updateViewportMetricsIfNeeded];
-  OCMVerify(never(), [mockEngine updateViewportMetrics:flutter::ViewportMetrics()]);
+  OCMVerify(never(), [mockEngine updateViewportMetrics:flutter::ViewportMetrics()
+                                        viewIdentifier:viewController.viewIdentifier]);
 
   // Should delay the engine call for half of the transition duration.
   // Wait for additional transitionDuration to allow updateViewportMetrics calls if any.
@@ -1110,7 +1131,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMStub([mockCoordinator transitionDuration]).andReturn(0);
 
   flutter::ViewportMetrics viewportMetrics;
-  OCMExpect([mockEngine updateViewportMetrics:viewportMetrics]).ignoringNonObjectArgs();
+  OCMExpect([mockEngine updateViewportMetrics:viewportMetrics
+                                viewIdentifier:viewController.viewIdentifier])
+      .ignoringNonObjectArgs();
 
   // Should immediately trigger the engine call, without delay.
   [viewController viewWillTransitionToSize:CGSizeZero withTransitionCoordinator:mockCoordinator];
@@ -1132,7 +1155,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   mockEngine.viewController = viewControllerB;
   UIView* view = viewControllerA.view;
   XCTAssertNotNil(view);
-  OCMVerify(never(), [mockEngine attachView]);
+  OCMVerify(never(), [mockEngine attachView:viewControllerA.viewIdentifier]);
 }
 
 - (void)testViewDidLoadDoesInvokeEngineWhenIsTheViewController {
@@ -1145,7 +1168,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   mockEngine.viewController = viewController;
   UIView* view = viewController.view;
   XCTAssertNotNil(view);
-  OCMVerify(times(1), [mockEngine attachView]);
+  OCMVerify(times(1), [mockEngine attachView:viewController.viewIdentifier]);
 }
 
 - (void)testViewDidLoadDoesntInvokeEngineAttachViewWhenEngineNeedsLaunch {
@@ -1160,7 +1183,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   mockEngine.viewController = viewController;
   UIView* view = viewController.view;
   XCTAssertNotNil(view);
-  OCMVerify(never(), [mockEngine attachView]);
+  OCMVerify(never(), [mockEngine attachView:viewController.viewIdentifier]);
 }
 
 - (void)testSplashScreenViewRemoveNotCrash {
