@@ -154,7 +154,8 @@ void main() {
         'COMPILER_INDEX_STORE_ENABLE=NO',
         ...?additionalCommandArguments,
       ],
-      stdout: stdout ??
+      stdout:
+          stdout ??
           '''
 STDOUT STUFF
 note: Using new build system
@@ -162,7 +163,8 @@ note: Planning
 note: Build preparation complete
 note: Building targets in dependency order
 ''',
-      stderr: stderr ??
+      stderr:
+          stderr ??
           '''
 2022-03-24 10:07:21.954 xcodebuild[2096:1927385] Requested but did not find extension point with identifier Xcode.IDEKit.ExtensionSentinelHostApplications for extension Xcode.DebuggerFoundation.AppExtensionHosts.watchOS of plug-in com.apple.dt.IDEWatchSupportCore
 2022-03-24 10:07:21.954 xcodebuild[2096:1927385] Requested but did not find extension point with identifier Xcode.IDEKit.ExtensionPointIdentifierToBundleIdentifier for extension Xcode.DebuggerFoundation.AppExtensionToBundleIdentifierMap.watchOS of plug-in com.apple.dt.IDEWatchSupportCore
@@ -397,18 +399,17 @@ STDERR STUFF
       createMinimalMockProjectFiles();
 
       await expectLater(
-        createTestCommandRunner(command).run(const <String>[
-          'build',
-          'macos',
-          '--debug',
-          '--no-pub',
-        ]),
+        createTestCommandRunner(
+          command,
+        ).run(const <String>['build', 'macos', '--debug', '--no-pub']),
         throwsToolExit(message: 'Build process failed'),
       );
 
       expect(
         testLogger.errorText,
-        contains("To fix this error, increase your app's minimum platform version from 11.0 to at least 12.0"),
+        contains(
+          "To fix this error, increase your app's minimum platform version from 11.0 to at least 12.0",
+        ),
       );
       expect(testLogger.errorText, contains('flutter build macos --config-only'));
     },
@@ -418,8 +419,7 @@ STDERR STUFF
         setUpFakeXcodeBuildHandler(
           'Debug',
           exitCode: 1,
-          stderr:
-              '''
+          stderr: '''
 error: The package product 'spm-macos12' requires minimum platform version 12.0 for the macOS platform, but this target supports 11.0
 ''',
         ),
