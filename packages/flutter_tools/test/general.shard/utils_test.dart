@@ -572,28 +572,37 @@ needs to be wrapped.
   testWithoutContext('formatTable', () {
     expect(formatTable(<List<String>>[]), isEmpty);
 
+    expect(() => formatTable(<List<String>>[<String>[]]), throwsException);
+    expect(() => formatTable(<List<String>>[<String>[], <String>[]]), throwsException);
+
     expect(
       formatTable(<List<String>>[
         <String>['Col1', 'Col2'],
         <String>['Value1', 'Value2'],
-      ]),
-      <String>['Col1   • Col2', 'Value1 • Value2'],
+      ]).join('\n'),
+      '''
+Col1   • Col2
+Value1 • Value2''',
     );
 
     expect(
       formatTable(<List<String>>[
         <String>['A', 'B', 'C'],
         <String>['LongValue', 'Short', 'Tiny'],
-      ]),
-      <String>['A         • B     • C', 'LongValue • Short • Tiny'],
+      ]).join('\n'),
+      '''
+A         • B     • C
+LongValue • Short • Tiny''',
     );
 
     expect(
       formatTable(<List<String>>[
         <String>['A', 'B'],
         <String>['1', '2'],
-      ], separator: ' | '),
-      <String>['A | B', '1 | 2'],
+      ], separator: ' | ').join('\n'),
+      '''
+A | B
+1 | 2''',
     );
   });
 
@@ -602,8 +611,10 @@ needs to be wrapped.
       formatTable(<List<String>>[
         <String>['A', 'B'],
         <String>['1', '2'],
-      ], indent: 2),
-      <String>['  A • B', '  1 • 2'],
+      ], indent: 2).join('\n'),
+      '''
+  A • B
+  1 • 2''',
     );
   });
 }

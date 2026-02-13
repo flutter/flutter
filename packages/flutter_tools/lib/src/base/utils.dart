@@ -624,17 +624,25 @@ List<String> formatTable(List<List<String>> table, {String separator = ' • ', 
   }
 
   // Calculate column widths
-  final indices = List<int>.generate(table[0].length - 1, (int i) => i);
-  List<int> widths = indices.map<int>((int i) => 0).toList();
-  for (final row in table) {
-    widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
+  if (table.first.isEmpty) {
+    throw Exception('Table header cannot be empty');
+  }
+  final List<int> indices = List<int>.generate(table.first.length - 1, (int i) => i);
+  final List<int> widths = List<int>.filled(indices.length, 0);
+  for (final List<String> row in table) {
+    for (final int i in indices) {
+      widths[i] = math.max(widths[i], row[i].length);
+    }
   }
 
   final String indentString = ' ' * indent;
 
   // Join columns into lines of text
-  return <String>[
-    for (final List<String> row in table)
-      '$indentString${indices.map<String>((int i) => row[i].padRight(widths[i])).followedBy(<String>[row.last]).join(separator)}',
-  ];
+  return table.map<String>((List<String> row) {
+    final String formatted = indices
+        .map<String>((int i) => row[i].padRight(widths[i]))
+        .followedBy(<String>[row.last])
+        .join(separator);
+    return '$indentString$formatted';
+  }).toList();
 }

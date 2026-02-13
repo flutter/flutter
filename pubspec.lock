@@ -214,10 +214,10 @@ packages:
     dependency: "direct main"
     description:
       name: ffi
-      sha256: d07d37192dbf97461359c1518788f203b0c9102cfd2c35a716b823741219542c
+      sha256: "6d7fd89431262d8f3125e81b50d3847a091d846eafcd4fdb88dd06f36d705a45"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.5"
+    version: "2.2.0"
   ffigen:
     dependency: "direct dev"
     description:
@@ -955,10 +955,10 @@ packages:
     dependency: "direct main"
     description:
       name: video_player_avfoundation
-      sha256: f46e9e20f1fe429760cf4dc118761336320d1bec0f50d255930c2355f2defb5b
+      sha256: f93b93a3baa12ca0ff7d00ca8bc60c1ecd96865568a01ff0c18a99853ee201a5
       url: "https://pub.dev"
     source: hosted
-    version: "2.9.1"
+    version: "2.9.3"
   video_player_platform_interface:
     dependency: "direct main"
     description:
