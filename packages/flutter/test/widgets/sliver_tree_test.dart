@@ -11,7 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'utils.dart';
+import 'button_tester.dart';
 
 List<TreeSliverNode<String>> simpleNodeSet = <TreeSliverNode<String>>[
   TreeSliverNode<String>('Root 0'),

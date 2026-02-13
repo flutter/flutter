@@ -11,7 +11,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
-import 'utils.dart';
+import 'button_tester.dart';
 
 void main() {
   setUp(() {
