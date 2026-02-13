@@ -62,8 +62,12 @@ int ActiveRenderingSurfaceCount() const {
 }
 
 void CreateRenderingSurfaceForView(int64_t view_id) {
-  auto *delegate = static_cast<IOSSurfaceMetalImpeller *>(GetSurface(view_id));
+  auto *ios_surface = GetSurface(view_id);
+  if (!ios_surface) {
+    return;
+  }
 
+  auto *delegate = static_cast<IOSSurfaceMetalImpeller *>(ios_surface);
   rendering_surface_[view_id] = std::make_unique<GPUSurfaceMetalImpeller>(
                   delegate,
                   aiks_context_);
@@ -185,11 +189,15 @@ void PlatformViewIOS::HandlePlatformMessage(std::unique_ptr<flutter::PlatformMes
 }
 
 FlutterViewController* PlatformViewIOS::GetOwnerViewController() const {
-  return owner_controller_;
+  return [viewControllers_ objectForKey:@(flutter::kFlutterImplicitViewId)];
 }
 
 void PlatformViewIOS::SetOwnerViewController(__weak FlutterViewController* owner_controller) {
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+  // Allow replacing the implicit view controller (legacy behavior).
+  if ([viewControllers_ objectForKey:@(flutter::kFlutterImplicitViewId)] != nil) {
+    RemoveOwnerViewController(flutter::kFlutterImplicitViewId);
+  }
   AddOwnerViewController(owner_controller);
   ApplyLocaleToOwnerController();
 }
@@ -212,15 +220,9 @@ void PlatformViewIOS::AddOwnerViewController(__weak FlutterViewController* owner
                     queue:[NSOperationQueue mainQueue]
               usingBlock:^(NSNotification* note) {
                 // Implicit copy of 'this' is fine.
-                FlutterViewController* owner_controller =
-                  (FlutterViewController*)note.object;
-
+                FlutterViewController* owner_controller = (FlutterViewController*)note.object;
+                RemoveOwnerViewController(owner_controller.viewIdentifier);
                 flutter_view_controller_will_dealloc_observers_.erase(owner_controller.viewIdentifier);
-
-                auto iter = accessibility_bridges_.find(owner_controller.viewIdentifier);
-                if (iter != accessibility_bridges_.end()) {
-                  accessibility_bridges_.erase(owner_controller.viewIdentifier);
-                }
               }]);
 
   if (owner_controller && owner_controller.isViewLoaded) {
@@ -239,7 +241,11 @@ void PlatformViewIOS::RemoveOwnerViewController(FlutterViewIdentifier viewIdenti
 
   [viewControllers_ removeObjectForKey:@(viewIdentifier)];
   ios_surfaces_manager_->RemoveSurface(viewIdentifier);
-  accessibility_bridges_.erase(viewIdentifier);
+
+  auto iter = accessibility_bridges_.find(viewIdentifier);
+  if (iter != accessibility_bridges_.end()) {
+    accessibility_bridges_.erase(viewIdentifier);
+  }
 }
 
 void PlatformViewIOS::attachView(FlutterViewIdentifier viewIdentifier) {

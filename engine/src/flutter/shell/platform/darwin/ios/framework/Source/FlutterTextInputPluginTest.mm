@@ -3651,15 +3651,17 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
   [UIApplication.sharedApplication.keyWindow addSubview:inputView];
 
-  [inputView setTextInputClient:123];
+  [self setClientId:123 configuration:self.mutableTemplateCopy];
   [inputView reloadInputViews];
   [inputView becomeFirstResponder];
 
   if (textInputPlugin.keyboardView.superview != nil) {
-    for (UIView* subView in textInputPlugin.keyboardViewContainer.subviews) {
-      [subView removeFromSuperview];
-    }
+    [textInputPlugin.keyboardView removeFromSuperview];
   }
+  for (UIView* subView in textInputPlugin.keyboardViewContainer.subviews) {
+    [subView removeFromSuperview];
+  }
+  [textInputPlugin setValue:nil forKey:@"_keyboardView"];
   XCTAssert(textInputPlugin.keyboardView.superview == nil);
   CGRect keyboardFrame = CGRectMake(0, 500, 500, 500);
   [NSNotificationCenter.defaultCenter
@@ -3698,7 +3700,7 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
   [UIApplication.sharedApplication.keyWindow addSubview:inputView];
 
-  [inputView setTextInputClient:123];
+  [self setClientId:123 configuration:self.mutableTemplateCopy];
   [inputView reloadInputViews];
   [inputView becomeFirstResponder];
 
@@ -3752,7 +3754,7 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
   [UIApplication.sharedApplication.keyWindow addSubview:inputView];
 
-  [inputView setTextInputClient:123];
+  [self setClientId:123 configuration:self.mutableTemplateCopy];
   [inputView reloadInputViews];
   [inputView becomeFirstResponder];
 
@@ -3857,11 +3859,13 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   [window addSubview:viewController.view];
 
   [viewController loadView];
+  [self setClientId:123 configuration:self.mutableTemplateCopy];
+  [self setTextInputShow];
 
   XCTestExpectation* expectation = [[XCTestExpectation alloc]
       initWithDescription:
           @"didResignFirstResponder is called after screenshot keyboard dismissed."];
-  OCMStub([engine flutterTextInputView:[OCMArg any] didResignFirstResponderWithTextInputClient:0])
+  OCMStub([engine flutterTextInputView:[OCMArg any] didResignFirstResponderWithTextInputClient:123])
       .andDo(^(NSInvocation* invocation) {
         [expectation fulfill];
       });
@@ -3969,7 +3973,7 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
   [UIApplication.sharedApplication.keyWindow addSubview:inputView];
 
-  [inputView setTextInputClient:123];
+  [self setClientId:123 configuration:self.mutableTemplateCopy];
   [inputView reloadInputViews];
   [inputView becomeFirstResponder];
 
@@ -4028,6 +4032,7 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   [window addSubview:viewController.view];
 
   [viewController loadView];
+  [self setClientId:123 configuration:self.mutableTemplateCopy];
 
   XCTestExpectation* expectation =
       [[XCTestExpectation alloc] initWithDescription:@"Keyboard animates to proper position."];
@@ -4084,6 +4089,7 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   [window addSubview:viewController.view];
 
   [viewController loadView];
+  [self setClientId:123 configuration:self.mutableTemplateCopy];
 
   XCTestExpectation* expectation =
       [[XCTestExpectation alloc] initWithDescription:@"Keyboard animates to proper position."];

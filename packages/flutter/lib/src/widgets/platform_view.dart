@@ -17,6 +17,7 @@ import 'debug.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
+import 'view.dart' show View;
 
 // Examples can assume:
 // PlatformViewController createFooWebView(PlatformViewCreationParams params) { return (null as dynamic) as PlatformViewController; }
@@ -962,10 +963,12 @@ class _UiKitViewState
     extends _DarwinViewState<UiKitView, UiKitViewController, RenderUiKitView, _UiKitPlatformView> {
   @override
   Future<UiKitViewController> createNewViewController(int id) async {
+    final int flutterViewId = View.of(context).viewId;
     return PlatformViewsService.initUiKitView(
       id: id,
       viewType: widget.viewType,
       layoutDirection: _layoutDirection!,
+      flutterViewId: flutterViewId,
       creationParams: widget.creationParams,
       creationParamsCodec: widget.creationParamsCodec,
       onFocus: () {
