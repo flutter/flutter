@@ -93,6 +93,11 @@ int64_t InternalFlutter_WindowController_CreateTooltipWindow(
     const FlutterWindowCreationRequest* request);
 
 FLUTTER_DARWIN_EXPORT
+int64_t InternalFlutter_WindowController_CreatePopupWindow(
+    int64_t engine_id,
+    const FlutterWindowCreationRequest* request);
+
+FLUTTER_DARWIN_EXPORT
 void InternalFlutter_Window_Destroy(int64_t engine_id, void* window);
 
 FLUTTER_DARWIN_EXPORT

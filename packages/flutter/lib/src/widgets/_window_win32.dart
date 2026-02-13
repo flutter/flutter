@@ -206,6 +206,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
+    required bool isSizedToContent,
   }) {
     throw UnimplementedError('Popup windows are not yet implemented on Windows.');
   }
