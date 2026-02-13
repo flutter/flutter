@@ -713,6 +713,7 @@ Future<void> testMain() async {
 
     tearDown(() {
       editingStrategySpy.disable();
+      IOSTextEditingStrategy.debugResetIsInIframeCache();
     });
 
     test('scrollIntoView is called in placeElement when in iframe', () async {
