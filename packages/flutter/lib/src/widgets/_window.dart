@@ -839,6 +839,7 @@ abstract class PopupWindowController extends BaseWindowController {
     required Rect anchorRect,
     required WindowPositioner positioner,
     BoxConstraints? preferredConstraints,
+    bool isSizedToContent = true,
     PopupWindowControllerDelegate? delegate,
   }) {
     WidgetsFlutterBinding.ensureInitialized();
@@ -846,6 +847,7 @@ abstract class PopupWindowController extends BaseWindowController {
     return owner.createPopupWindowController(
       parent: parent,
       preferredConstraints: preferredConstraints ?? const BoxConstraints(),
+      isSizedToContent: isSizedToContent,
       delegate: delegate ?? PopupWindowControllerDelegate(),
       anchorRect: anchorRect,
       positioner: positioner,
@@ -900,6 +902,14 @@ abstract class PopupWindowController extends BaseWindowController {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void setConstraints(BoxConstraints constraints);
+
+  /// Updates the position of the popup.
+  ///
+  /// This requests that the popup be repositioned according to the new [anchorRect] and/or [positioner].
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void updatePosition({Rect? anchorRect, WindowPositioner? positioner});
 }
 
 /// Delegate class for satellite window controller.
@@ -1212,6 +1222,7 @@ abstract class WindowingOwner {
   PopupWindowController createPopupWindowController({
     required PopupWindowControllerDelegate delegate,
     required BoxConstraints preferredConstraints,
+    required bool isSizedToContent,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -1298,6 +1309,7 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
   PopupWindowController createPopupWindowController({
     required PopupWindowControllerDelegate delegate,
     required BoxConstraints preferredConstraints,
+    required bool isSizedToContent,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,

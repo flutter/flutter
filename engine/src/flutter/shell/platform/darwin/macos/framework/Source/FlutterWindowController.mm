@@ -244,6 +244,25 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
 
 @end
 
+@interface FlutterPopupWindow : NSPanel
+@end
+
+@implementation FlutterPopupWindow
+
+- (BOOL)canBecomeKeyWindow {
+  return NO;
+}
+
+- (BOOL)acceptsFirstResponder {
+  return NO;
+}
+
+- (BOOL)canBecomeMainWindow {
+  return NO;
+}
+
+@end
+
 @implementation FlutterWindowController
 
 - (instancetype)init {
@@ -361,6 +380,57 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
   return controller.viewIdentifier;
 }
 
+- (FlutterViewIdentifier)createPopupWindow:(const FlutterWindowCreationRequest*)request {
+  FlutterViewController* controller = [[FlutterViewController alloc] initWithEngine:_engine
+                                                                            nibName:nil
+                                                                             bundle:nil];
+  // By default this is kFlutterMouseTrackingModeInKeyWindow but popup window is never
+  // key window.
+  controller.mouseTrackingMode = kFlutterMouseTrackingModeInActiveApp;
+
+  NSWindow* window = [[FlutterPopupWindow alloc] init];
+  // If this is not set there will be double free on window close when
+  // using ARC.
+  [window setReleasedWhenClosed:NO];
+
+  window.contentViewController = controller;
+  window.styleMask = NSWindowStyleMaskBorderless;
+  window.hasShadow = NO;
+  window.opaque = NO;
+  window.backgroundColor = [NSColor clearColor];
+
+  FlutterWindowOwner* w = [[FlutterWindowOwner alloc] initWithWindow:window
+                                               flutterViewController:controller
+                                                     creationRequest:*request];
+
+  controller.flutterView.sizingDelegate = w;
+  [controller.flutterView setBackgroundColor:[NSColor clearColor]];
+  // Resend configure event after setting the sizing delegate.
+  [controller.flutterView constraintsDidChange];
+  w.closeWhenParentResignsKey = NO;
+
+  window.delegate = w;
+  [_windows addObject:w];
+
+  NSWindow* parent = nil;
+
+  if (request->parent_view_id != 0) {
+    for (FlutterWindowOwner* owner in _windows) {
+      if (owner.flutterViewController.viewIdentifier == request->parent_view_id) {
+        parent = owner.window;
+        break;
+      }
+    }
+  }
+
+  NSAssert(parent != nil, @"Popup window must have a parent window.");
+
+  window.collectionBehavior = NSWindowCollectionBehaviorAuxiliary;
+  [parent addChildWindow:window ordered:NSWindowAbove];
+  // window.alphaValue = 0.0;
+  return controller.viewIdentifier;
+}
+
 - (FlutterViewIdentifier)createRegularWindow:(const FlutterWindowCreationRequest*)request {
   FlutterViewController* controller = [[FlutterViewController alloc] initWithEngine:_engine
                                                                             nibName:nil
@@ -473,6 +543,14 @@ int64_t InternalFlutter_WindowController_CreateTooltipWindow(
   FlutterEngine* engine = [FlutterEngine engineForIdentifier:engine_id];
   [engine enableMultiView];
   return [engine.windowController createTooltipWindow:request];
+}
+
+int64_t InternalFlutter_WindowController_CreatePopupWindow(
+    int64_t engine_id,
+    const FlutterWindowCreationRequest* request) {
+  FlutterEngine* engine = [FlutterEngine engineForIdentifier:engine_id];
+  [engine enableMultiView];
+  return [engine.windowController createPopupWindow:request];
 }
 
 void InternalFlutter_Window_Destroy(int64_t engine_id, void* window) {
