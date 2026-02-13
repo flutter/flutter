@@ -15,7 +15,6 @@ void main() {
     expect(
       find.byKey(const Key('title')), // searches for a Widget with the key: 'title'.
       findsOneWidget, // The Test passes if its found
-    ); 
-    
+    );
   });
 }
