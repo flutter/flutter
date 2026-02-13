@@ -178,7 +178,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/media_query_test.dart',
     'packages/flutter/test/widgets/editable_text_cursor_test.dart',
     'packages/flutter/test/widgets/sliver_fill_remaining_test.dart',
-    'packages/flutter/test/widgets/semantics_keep_alive_offstage_test.dart',
     'packages/flutter/test/widgets/editable_text_show_on_screen_test.dart',
     'packages/flutter/test/widgets/system_context_menu_test.dart',
     'packages/flutter/test/widgets/scrollable_fling_test.dart',

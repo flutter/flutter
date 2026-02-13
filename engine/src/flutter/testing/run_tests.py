@@ -940,7 +940,6 @@ def gather_dart_tests(
       'codec_test.dart',
       'decode_image_from_pixels_sync_test.dart',
       'encoding_test.dart',
-      'fragment_shader_test.dart',
       'gpu_test.dart',
       'high_bitrate_texture_test.dart',
       'image_dispose_test.dart',
