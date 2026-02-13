@@ -731,44 +731,6 @@ void main() {
     }
 
     testWithoutContext(
-      'resets output files containing FlutterMacOS when using SwiftPM with macOS project',
-      () async {
-        final testFileSystem = MemoryFileSystem.test();
-        final testLogger = BufferLogger.test();
-        final FakeAnalytics testAnalytics = getInitializedFakeAnalyticsInstance(
-          fs: testFileSystem,
-          fakeFlutterVersion: FakeFlutterVersion(),
-        );
-        final swiftPackageManager = FakeSwiftPackageManager(expectedPlugins: []);
-        final cocoaPods = FakeCocoaPods();
-        final FlutterProject project = FakeFlutterProject(
-          usesSwiftPackageManager: true,
-          fileSystem: testFileSystem,
-        );
-        final MacOSProject xcodeProject = project.macos;
-        xcodeProject.xcodeProjectInfoFile.createSync(recursive: true);
-        xcodeProject.xcodeProjectInfoFile.writeAsStringSync('FlutterGeneratedPluginSwiftPackage');
-        xcodeProject.outputFileList
-          ..createSync(recursive: true)
-          ..writeAsStringSync('FlutterMacOS');
-
-        final dependencyManagement = DarwinDependencyManagement(
-          project: project,
-          plugins: [],
-          cocoapods: cocoaPods,
-          swiftPackageManager: swiftPackageManager,
-          fileSystem: testFileSystem,
-          featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-          logger: testLogger,
-          analytics: testAnalytics,
-          platform: FakePlatform(operatingSystem: 'macos'),
-        );
-        await dependencyManagement.setUp(platform: FlutterDarwinPlatform.macos);
-        expect(xcodeProject.outputFileList.readAsStringSync(), isEmpty);
-      },
-    );
-
-    testWithoutContext(
       'does not reset output files not containing FlutterMacOS when using SwiftPM with macOS project',
       () async {
         final testFileSystem = MemoryFileSystem.test();

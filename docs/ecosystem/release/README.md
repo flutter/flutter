@@ -26,6 +26,81 @@ If it is a flake (for example, network issue), a Flutter team member can simply 
 
 The most common source of failure of the `release` task is that another test failed; if that is due to flake, you will need to first re-run the failing test task, then once it's green re-run `release`.
 
+## Batch release
+
+High-traffic packages can enable "Batch release" to group multiple commits into a single periodic release, rather than publishing after every commit (the default "Automatic release" behavior).
+
+### Configuration
+
+To enable batch release for a package:
+
+1.  **Request a branch:** Ask a repo admin to create a protected `release-<package_name>` branch.
+2.  **Submit a PR:** Create a PR with the following changes:
+    *   Add `ci_config.yaml` to the package root:
+        ```yaml
+        release:
+          batch: true
+        ```
+    *   Create a `pending_changes` directory in the package root containing a `template.yaml` file:
+        ```yaml
+        # Use this file as a template to draft an unreleased changelog file.
+        # Make a copy of this file in the same directory, give it an approrpriate name, and fill in the details.
+        changelog: |
+          - Can include a list of changes.
+          - with markdown supported.
+        version: <major|minor|patch|skip>
+        ```
+    *   Add a workflow file `<package_name>_batch.yml` to the [workflows directory](https://github.com/flutter/packages/blob/main/.github/workflows/):
+        ```yaml
+        name: "Creates Batch Release for <package_name>"
+
+        on:
+          workflow_dispatch:
+          schedule:
+            # Run every Monday at 8:00 AM. Update cron as needed.
+            - cron: "0 8 * * 1"
+
+        jobs:
+          dispatch_release_pr:
+            runs-on: ubuntu-latest
+            permissions:
+              contents: write
+            steps:
+              - name: Repository Dispatch
+                uses: peter-evans/repository-dispatch@5fc4efd1a4797ddb68ffd0714a238564e4cc0e6f
+                with:
+                  event-type: batch-release-pr
+                  client-payload: '{"package": "<package_name>"}'
+        ```
+    *   Add a trigger to [release_from_branches.yml](https://github.com/flutter/packages/blob/main/.github/workflows/release_from_branches.yml):
+        ```yaml
+        on:
+          push:
+            branches:
+              - 'release-<package_name>'
+        ```
+    *   Add a trigger to [sync_release_pr.yml](https://github.com/flutter/packages/blob/main/.github/workflows/sync_release_pr.yml):
+        ```yaml
+        on:
+          push:
+            branches:
+              - 'release-<package_name>'
+        ```
+3.  **Merge:** Merge the PR to finalize setup.
+
+### Workflow
+
+Once enabled, contributors **should not** modify `CHANGELOG.md` or `pubspec.yaml` directly. Instead, they must add a new file to the `pending_changes` directory for each PR.
+
+The release process runs automatically:
+
+1.  The cron job in `<package_name>_batch.yml` triggers a new release PR targeting the `release-<package_name>` branch.
+2.  The PR aggregates all files in `pending_changes` to update `CHANGELOG.md` and `pubspec.yaml`.
+3.  A package owner reviews and merges the PR.
+4.  Merging triggers [release_from_branches.yml](https://github.com/flutter/packages/blob/main/.github/workflows/release_from_branches.yml), which publishes the package to pub.dev.
+5.  Simultaneously, [sync_release_pr.yml](https://github.com/flutter/packages/blob/main/.github/workflows/sync_release_pr.yml) creates a "sync PR" targeting the `main` branch.
+6.  A package owner reviews and merges the sync PR.
+
 ## Manual release (only when necessary)
 
 If something has gone wrong that prevents auto-publishing—most commonly, an out-of-band breakage that caused post-submit tests to fail for reasons unrelated to the PR that should have been published—a Flutter team member can publish manually. (An alternative to publishing manually is to revert and re-land the relevant PR; this is especially worth considering for PRs that affect many plugins.)

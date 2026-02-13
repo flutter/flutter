@@ -683,18 +683,13 @@ class _ModalBottomSheet<T> extends StatefulWidget {
 class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   ParametricCurve<double> animationCurve = _modalBottomSheetCurve;
 
-  String _getRouteLabel(MaterialLocalizations localizations) {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        return '';
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return localizations.dialogLabel;
-    }
-  }
+  String _getRouteLabel(MaterialLocalizations localizations) => switch (defaultTargetPlatform) {
+    TargetPlatform.iOS || TargetPlatform.macOS => '',
+    TargetPlatform.android ||
+    TargetPlatform.fuchsia ||
+    TargetPlatform.linux ||
+    TargetPlatform.windows => localizations.dialogLabel,
+  };
 
   EdgeInsets _getNewClipDetails(Size topLayerSize) {
     return EdgeInsets.fromLTRB(0, 0, 0, topLayerSize.height);

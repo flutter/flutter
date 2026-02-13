@@ -29,22 +29,16 @@ Architecture getNativeIOSArchitecture(DarwinArch darwinArch) {
   };
 }
 
+/// Groups native assets by their target framework path for iOS
+/// multi-architecture bundling.
 Map<KernelAssetPath, List<FlutterCodeAsset>> fatAssetTargetLocationsIOS(
   List<FlutterCodeAsset> nativeAssets,
 ) {
-  final alreadyTakenNames = <String>{};
-  final result = <KernelAssetPath, List<FlutterCodeAsset>>{};
-  final idToPath = <String, KernelAssetPath>{};
-  for (final asset in nativeAssets) {
-    // Use same target path for all assets with the same id.
-    final String assetId = asset.codeAsset.id;
-    final KernelAssetPath path =
-        idToPath[assetId] ?? _targetLocationIOS(asset, alreadyTakenNames).path;
-    idToPath[assetId] = path;
-    result[path] ??= <FlutterCodeAsset>[];
-    result[path]!.add(asset);
-  }
-  return result;
+  return fatAssetTargetLocations(
+    nativeAssets,
+    (FlutterCodeAsset asset, Set<String> alreadyTakenNames) =>
+        _targetLocationIOS(asset, alreadyTakenNames),
+  );
 }
 
 Map<FlutterCodeAsset, KernelAsset> assetTargetLocationsIOS(List<FlutterCodeAsset> nativeAssets) {
@@ -92,14 +86,15 @@ KernelAsset _targetLocationIOS(FlutterCodeAsset asset, Set<String> alreadyTakenN
 ///
 /// Code signing is also done here, so that it doesn't have to be done in
 /// in xcode_backend.dart.
-Future<void> copyNativeCodeAssetsIOS(
-  Uri buildUri,
+Future<List<File>> copyNativeCodeAssetsIOS(
+  Uri targetUri,
   Map<KernelAssetPath, List<FlutterCodeAsset>> assetTargetLocations,
   String? codesignIdentity,
   BuildMode buildMode,
   FileSystem fileSystem,
 ) async {
   assert(assetTargetLocations.isNotEmpty);
+  final installedFiles = <File>[];
   final oldToNewInstallNames = <String, String>{};
   final dylibs = <(File, String, Directory)>[];
 
@@ -110,13 +105,23 @@ Future<void> copyNativeCodeAssetsIOS(
       for (final FlutterCodeAsset source in assetMapping.value)
         fileSystem.file(source.codeAsset.file),
     ];
-    final Uri targetUri = buildUri.resolveUri(target);
-    final File dylibFile = fileSystem.file(targetUri);
+    final Uri assetTargetUri = targetUri.resolveUri(target);
+    final File dylibFile = fileSystem.file(assetTargetUri);
     final Directory frameworkDir = dylibFile.parent;
     if (!await frameworkDir.exists()) {
       await frameworkDir.create(recursive: true);
     }
     await lipoDylibs(dylibFile, sources);
+    installedFiles.add(dylibFile);
+
+    if (buildMode != BuildMode.debug) {
+      final dsymPath = '${frameworkDir.path}.dSYM';
+      await dsymutilDylib(dylibFile, dsymPath);
+      await stripDylib(dylibFile);
+      installedFiles.addAll(
+        fileSystem.directory(dsymPath).listSync(recursive: true).whereType<File>(),
+      );
+    }
 
     final String dylibFileName = dylibFile.basename;
     final newInstallName = '@rpath/$dylibFileName.framework/$dylibFileName';
@@ -127,14 +132,16 @@ Future<void> copyNativeCodeAssetsIOS(
     dylibs.add((dylibFile, newInstallName, frameworkDir));
 
     await createInfoPlist(
-      targetUri.pathSegments.last,
+      assetTargetUri.pathSegments.last,
       frameworkDir,
       minimumIOSVersion: '$targetIOSVersion.0',
     );
+    installedFiles.add(frameworkDir.childFile('Info.plist'));
   }
 
   for (final (File dylibFile, String newInstallName, Directory frameworkDir) in dylibs) {
     await setInstallNamesDylib(dylibFile, newInstallName, oldToNewInstallNames);
     await codesignDylib(codesignIdentity, buildMode, frameworkDir);
   }
+  return installedFiles;
 }

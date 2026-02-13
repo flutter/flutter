@@ -1,0 +1,52 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/compiled_action.gni")
+import("//flutter/impeller/tools/impeller.gni")
+import("//flutter/testing/testing.gni")
+
+if (enable_unittests) {
+  test_shaders = [
+    "all_uniforms.frag",
+    "float_array_uniform.frag",
+    "float_uniform.frag",
+    "vec2_uniform.frag",
+    "vec2_array_uniform.frag",
+    "vec3_uniform.frag",
+    "vec3_array_uniform.frag",
+    "vec4_uniform.frag",
+    "vec4_array_uniform.frag",
+    "mat2_uniform.frag",
+    "mat2_array_uniform.frag",
+    "mat3_uniform.frag",
+    "mat3_array_uniform.frag",
+    "mat4_uniform.frag",
+    "mat4_array_uniform.frag",
+  ]
+
+  group("uniforms") {
+    testonly = true
+    deps = [ ":fixtures" ]
+  }
+
+  impellerc("compile_uniforms") {
+    mnemonic = "IMPELLERC_SKSL"
+    shaders = test_shaders
+    shader_target_flags = [
+      "--sksl",
+      "--runtime-stage-metal",
+      "--runtime-stage-gles",
+      "--runtime-stage-vulkan",
+    ]
+    intermediates_subdir = "iplr"
+    sl_file_extension = "iplr"
+    iplr = true
+  }
+
+  test_fixtures("fixtures") {
+    deps = [ ":compile_uniforms" ]
+    fixtures = get_target_outputs(":compile_uniforms")
+    dest = "$root_gen_dir/flutter/lib/ui"
+  }
+}
