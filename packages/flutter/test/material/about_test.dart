@@ -343,12 +343,10 @@ void main() {
     // The bottom padding should include both the gutter size and the bottom
     // safe area padding from MediaQuery.
     final double expectedGutter =
-        MediaQuery.widthOf(
-              tester.element(find.byType(ListView)),
-            ) >=
-            720
-        ? 24.0
-        : 12.0;
+        MediaQuery.widthOf(tester.element(find.byType(ListView))) >=
+            materialGutterThreshold
+        ? wideGutterSize
+        : narrowGutterSize;
     expect(listPadding.bottom, expectedGutter + safeAreaBottom);
   });
 
