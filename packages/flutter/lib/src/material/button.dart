@@ -417,18 +417,15 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
         ),
       ),
     );
-    final Size minSize;
-    switch (widget.materialTapTargetSize) {
-      case MaterialTapTargetSize.padded:
-        minSize = Size(
-          kMinInteractiveDimension + densityAdjustment.dx,
-          kMinInteractiveDimension + densityAdjustment.dy,
-        );
-        assert(minSize.width >= 0.0);
-        assert(minSize.height >= 0.0);
-      case MaterialTapTargetSize.shrinkWrap:
-        minSize = Size.zero;
-    }
+    final Size minSize = switch (widget.materialTapTargetSize) {
+      MaterialTapTargetSize.padded => Size(
+        kMinInteractiveDimension + densityAdjustment.dx,
+        kMinInteractiveDimension + densityAdjustment.dy,
+      ),
+      MaterialTapTargetSize.shrinkWrap => Size.zero,
+    };
+    assert(minSize.width >= 0.0);
+    assert(minSize.height >= 0.0);
 
     return Semantics(
       container: true,

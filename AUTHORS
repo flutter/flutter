@@ -137,5 +137,9 @@ Mairon Slusarz <maironlucaslusarz@gmail.com>
 Ricardo Dalarme <ricardodalarme@outlook.com>
 yiiim <ybz975218925@live.com>
 letrungdo <letrdo@gmail.com>
+<<<<<<< HEAD
 Michal Kucharski <michal.kucharski17@gmail.com>
 Patrick Billingsley <prbillingsley89@gmail.com>
+=======
+Ender Yücel <marijua@schweis.com.tr>
+>>>>>>> a344987a1c8 ([Material] modernize legacy switch statements to expressions in app.dart, bottom_navigation_bar.dart, and button.dart)

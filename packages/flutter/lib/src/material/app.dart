@@ -857,22 +857,24 @@ class MaterialScrollBehavior extends ScrollBehavior {
   Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the base class ScrollBehavior as well.
-    switch (axisDirectionToAxis(details.direction)) {
-      case Axis.horizontal:
-        return child;
-      case Axis.vertical:
-        switch (getPlatform(context)) {
-          case TargetPlatform.linux:
-          case TargetPlatform.macOS:
-          case TargetPlatform.windows:
-            assert(details.controller != null);
-            return Scrollbar(controller: details.controller, child: child);
-          case TargetPlatform.android:
-          case TargetPlatform.fuchsia:
-          case TargetPlatform.iOS:
-            return child;
-        }
-    }
+    assert(
+      axisDirectionToAxis(details.direction) != Axis.vertical ||
+          switch (getPlatform(context)) {
+            TargetPlatform.linux ||
+            TargetPlatform.macOS ||
+            TargetPlatform.windows => details.controller != null,
+            TargetPlatform.android || TargetPlatform.fuchsia || TargetPlatform.iOS => true,
+          },
+    );
+    return switch (axisDirectionToAxis(details.direction)) {
+      Axis.horizontal => child,
+      Axis.vertical => switch (getPlatform(context)) {
+        TargetPlatform.linux ||
+        TargetPlatform.macOS ||
+        TargetPlatform.windows => Scrollbar(controller: details.controller, child: child),
+        TargetPlatform.android || TargetPlatform.fuchsia || TargetPlatform.iOS => child,
+      },
+    };
   }
 
   @override
@@ -882,31 +884,26 @@ class MaterialScrollBehavior extends ScrollBehavior {
     final AndroidOverscrollIndicator indicator = Theme.of(context).useMaterial3
         ? AndroidOverscrollIndicator.stretch
         : AndroidOverscrollIndicator.glow;
-    switch (getPlatform(context)) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        return child;
-      case TargetPlatform.android:
-        switch (indicator) {
-          case AndroidOverscrollIndicator.stretch:
-            return StretchingOverscrollIndicator(
-              axisDirection: details.direction,
-              clipBehavior: details.clipBehavior ?? Clip.hardEdge,
-              child: child,
-            );
-          case AndroidOverscrollIndicator.glow:
-            break;
-        }
-      case TargetPlatform.fuchsia:
-        break;
-    }
-    return GlowingOverscrollIndicator(
+    final Widget glowIndicator = GlowingOverscrollIndicator(
       axisDirection: details.direction,
       color: Theme.of(context).colorScheme.secondary,
       child: child,
     );
+    return switch (getPlatform(context)) {
+      TargetPlatform.iOS ||
+      TargetPlatform.linux ||
+      TargetPlatform.macOS ||
+      TargetPlatform.windows => child,
+      TargetPlatform.android => switch (indicator) {
+        AndroidOverscrollIndicator.stretch => StretchingOverscrollIndicator(
+          axisDirection: details.direction,
+          clipBehavior: details.clipBehavior ?? Clip.hardEdge,
+          child: child,
+        ),
+        AndroidOverscrollIndicator.glow => glowIndicator,
+      },
+      TargetPlatform.fuchsia => glowIndicator,
+    };
   }
 }
 
@@ -1223,40 +1220,31 @@ class _MaterialInspectorButton extends InspectorButton {
   }
 
   BorderSide? _borderSide({required Color color}) {
-    switch (variant) {
-      case InspectorButtonVariant.filled:
-      case InspectorButtonVariant.iconOnly:
-        return null;
-      case InspectorButtonVariant.toggle:
-        return toggledOn == false ? BorderSide(color: color) : null;
-    }
+    return switch (variant) {
+      InspectorButtonVariant.filled || InspectorButtonVariant.iconOnly => null,
+      InspectorButtonVariant.toggle => toggledOn == false ? BorderSide(color: color) : null,
+    };
   }
 
   @override
   Color foregroundColor(BuildContext context) {
     final Color primaryColor = _primaryColor(context);
     final Color secondaryColor = _secondaryColor(context);
-    switch (variant) {
-      case InspectorButtonVariant.filled:
-        return primaryColor;
-      case InspectorButtonVariant.iconOnly:
-        return secondaryColor;
-      case InspectorButtonVariant.toggle:
-        return !toggledOn! ? secondaryColor : primaryColor;
-    }
+    return switch (variant) {
+      InspectorButtonVariant.filled => primaryColor,
+      InspectorButtonVariant.iconOnly => secondaryColor,
+      InspectorButtonVariant.toggle => !toggledOn! ? secondaryColor : primaryColor,
+    };
   }
 
   @override
   Color backgroundColor(BuildContext context) {
     final Color secondaryColor = _secondaryColor(context);
-    switch (variant) {
-      case InspectorButtonVariant.filled:
-        return secondaryColor;
-      case InspectorButtonVariant.iconOnly:
-        return Colors.transparent;
-      case InspectorButtonVariant.toggle:
-        return !toggledOn! ? Colors.transparent : secondaryColor;
-    }
+    return switch (variant) {
+      InspectorButtonVariant.filled => secondaryColor,
+      InspectorButtonVariant.iconOnly => Colors.transparent,
+      InspectorButtonVariant.toggle => !toggledOn! ? Colors.transparent : secondaryColor,
+    };
   }
 
   Color _primaryColor(BuildContext context) {
