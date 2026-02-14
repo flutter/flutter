@@ -1068,7 +1068,11 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
     final String title = widget.packageName;
     final String subtitle = localizations.licensesPackageDetailText(widget.licenseEntries.length);
     final double pad = _getGutterSize(context);
-    final padding = EdgeInsets.only(left: pad, right: pad, bottom: pad);
+    final padding = EdgeInsets.only(
+      left: pad,
+      right: pad,
+      bottom: pad + MediaQuery.paddingOf(context).bottom,
+    );
     final listWidgets = <Widget>[
       ..._licenses,
       if (!_loaded)
