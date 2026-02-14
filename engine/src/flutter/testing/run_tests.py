@@ -968,6 +968,11 @@ def gather_dart_tests(
         continue
 
       for multithreaded in [False, True]:
+        # An opengles implementation that is multithreaded would require the
+        # raster thread and the io thread to have their own contexts in a share
+        # group. This isn't currently supported by swangle.
+        if impeller == 'opengles' and multithreaded:
+          continue
         yield gather_dart_test(
             build_dir, dart_test_file,
             FlutterTesterOptions(
