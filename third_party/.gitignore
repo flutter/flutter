@@ -7,3 +7,5 @@
 
 # Allow custom README.flutter files in each folder.
 **/README.flutter
+
+*.log
