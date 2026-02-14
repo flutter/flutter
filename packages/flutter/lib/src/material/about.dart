@@ -1201,12 +1201,13 @@ Widget? _defaultApplicationIcon(BuildContext context) {
 }
 
 @visibleForTesting
+// ignore: public_member_api_docs
 const int materialGutterThreshold = 720;
-
 @visibleForTesting
+// ignore: public_member_api_docs
 const double wideGutterSize = 24.0;
-
 @visibleForTesting
+// ignore: public_member_api_docs
 const double narrowGutterSize = 12.0;
 
 double _getGutterSize(BuildContext context) =>
