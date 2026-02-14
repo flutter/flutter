@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const String text = 'Hello World! How are you? Life is good!';
@@ -47,12 +48,14 @@ void main() {
               child: StatefulBuilder(
                 builder: (BuildContext context, StateSetter state) {
                   formState = GlobalKey<FormFieldState<String>>();
-                  return CupertinoTextFormFieldRow(
-                    key: formState,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    restorationId: 'text_form_field',
-                    initialValue: 'foo',
-                    validator: errorText,
+                  return Material(
+                    child: CupertinoTextFormFieldRow(
+                      key: formState,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      restorationId: 'text_form_field',
+                      initialValue: 'foo',
+                      validator: errorText,
+                    ),
                   );
                 },
               ),
@@ -105,12 +108,14 @@ void main() {
                 child: StatefulBuilder(
                   builder: (BuildContext context, StateSetter state) {
                     formState = GlobalKey<FormFieldState<String>>();
-                    return CupertinoTextFormFieldRow(
-                      key: formState,
-                      restorationId: 'form_field',
-                      autovalidateMode: mode,
-                      initialValue: 'foo',
-                      validator: errorText,
+                    return Material(
+                      child: CupertinoTextFormFieldRow(
+                        key: formState,
+                        restorationId: 'form_field',
+                        autovalidateMode: mode,
+                        initialValue: 'foo',
+                        validator: errorText,
+                      ),
                     );
                   },
                 ),
@@ -227,13 +232,15 @@ class RestorableTestWidgetState extends State<RestorableTestWidget> with Restora
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      child: SizedBox(
-        width: 50,
-        child: CupertinoTextFormFieldRow(
-          restorationId: 'text',
-          maxLines: 3,
-          controller: widget.useExternalController ? controller.value : null,
+    return Material(
+      child: Align(
+        child: SizedBox(
+          width: 50,
+          child: CupertinoTextFormFieldRow(
+            restorationId: 'text',
+            maxLines: 3,
+            controller: widget.useExternalController ? controller.value : null,
+          ),
         ),
       ),
     );

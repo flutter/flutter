@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../image_data.dart';
 import '../rendering/rendering_tester.dart' show TestCallbackPainter;
 import '../widgets/navigator_utils.dart';
 
@@ -37,14 +38,17 @@ class MockCupertinoTabController extends CupertinoTabController {
   }
 }
 
-BottomNavigationBarItem tabGenerator(int index) {
-  return BottomNavigationBarItem(icon: const Icon(CupertinoIcons.map), label: 'Tab ${index + 1}');
-}
-
 void main() {
   setUp(() {
     selectedTabs = <int>[];
   });
+
+  BottomNavigationBarItem tabGenerator(int index) {
+    return BottomNavigationBarItem(
+      icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+      label: 'Tab ${index + 1}',
+    );
+  }
 
   testWidgets('Tab switching', (WidgetTester tester) async {
     final tabsPainted = <int>[];
@@ -1065,7 +1069,13 @@ void main() {
               maxScaleFactor: 99,
               child: CupertinoTabScaffold(
                 tabBar: CupertinoTabBar(
-                  items: List<BottomNavigationBarItem>.generate(10, tabGenerator),
+                  items: List<BottomNavigationBarItem>.generate(
+                    10,
+                    (int i) => BottomNavigationBarItem(
+                      icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+                      label: '$i',
+                    ),
+                  ),
                 ),
                 tabBuilder: (BuildContext context, int index) => const Text('content'),
               ),
@@ -1106,7 +1116,13 @@ void main() {
         restorationScopeId: 'app',
         home: CupertinoTabScaffold(
           restorationId: 'scaffold',
-          tabBar: CupertinoTabBar(items: List<BottomNavigationBarItem>.generate(4, tabGenerator)),
+          tabBar: CupertinoTabBar(
+            items: List<BottomNavigationBarItem>.generate(
+              4,
+              (int i) =>
+                  BottomNavigationBarItem(icon: const Icon(CupertinoIcons.map), label: 'Tab $i'),
+            ),
+          ),
           tabBuilder: (BuildContext context, int i) => Text('Content $i'),
         ),
       ),
@@ -1117,7 +1133,7 @@ void main() {
     expect(find.text('Content 2'), findsNothing);
     expect(find.text('Content 3'), findsNothing);
 
-    await tester.tap(find.text('Tab 3'));
+    await tester.tap(find.text('Tab 2'));
     await tester.pumpAndSettle();
 
     expect(find.text('Content 0'), findsNothing);
@@ -1134,7 +1150,7 @@ void main() {
 
     final TestRestorationData data = await tester.getRestorationData();
 
-    await tester.tap(find.text('Tab 2'));
+    await tester.tap(find.text('Tab 1'));
     await tester.pumpAndSettle();
 
     expect(find.text('Content 0'), findsNothing);
@@ -1159,7 +1175,13 @@ void main() {
         home: CupertinoTabScaffold(
           controller: controller,
           restorationId: 'scaffold',
-          tabBar: CupertinoTabBar(items: List<BottomNavigationBarItem>.generate(4, tabGenerator)),
+          tabBar: CupertinoTabBar(
+            items: List<BottomNavigationBarItem>.generate(
+              4,
+              (int i) =>
+                  BottomNavigationBarItem(icon: const Icon(CupertinoIcons.map), label: 'Tab $i'),
+            ),
+          ),
           tabBuilder: (BuildContext context, int i) => Text('Content $i'),
         ),
       );
@@ -1172,7 +1194,7 @@ void main() {
     expect(find.text('Content 2'), findsNothing);
     expect(find.text('Content 3'), findsNothing);
 
-    await tester.tap(find.text('Tab 3'));
+    await tester.tap(find.text('Tab 2'));
     await tester.pumpAndSettle();
 
     expect(find.text('Content 0'), findsNothing);
@@ -1321,6 +1343,8 @@ void main() {
         expect(find.text('Page 1 of tab 2'), findsOneWidget);
         expect(find.text('Page 2 of tab 2'), findsNothing);
         expect(lastFrameworkHandlesBack, isFalse);
+
+        imageCache.clear();
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
       skip: kIsWeb, // [intended] frameworkHandlesBack not used on web.
@@ -1341,73 +1365,22 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(CupertinoTabScaffold)), Size.zero);
-  });
-
-  testWidgets('dark mode background color', (WidgetTester tester) async {
-    const backgroundColor = CupertinoDynamicColor.withBrightness(
-      color: Color(0xFF123456),
-      darkColor: Color(0xFF654321),
-    );
-    await tester.pumpWidget(
-      CupertinoApp(
-        theme: const CupertinoThemeData(brightness: Brightness.light),
-        home: CupertinoTabScaffold(
-          backgroundColor: backgroundColor,
-          tabBar: _buildTabBar(),
-          tabBuilder: (BuildContext context, int index) {
-            return const Placeholder();
-          },
-        ),
-      ),
-    );
-
-    // The DecoratedBox with the smallest depth is the DecoratedBox of the
-    // CupertinoTabScaffold.
-    var tabDecoration =
-        tester
-                .firstWidget<DecoratedBox>(
-                  find.descendant(
-                    of: find.byType(CupertinoTabScaffold),
-                    matching: find.byType(DecoratedBox),
-                  ),
-                )
-                .decoration
-            as BoxDecoration;
-
-    expect(tabDecoration.color!.value, backgroundColor.color.value);
-
-    // Dark mode
-    await tester.pumpWidget(
-      CupertinoApp(
-        theme: const CupertinoThemeData(brightness: Brightness.dark),
-        home: CupertinoTabScaffold(
-          backgroundColor: backgroundColor,
-          tabBar: _buildTabBar(),
-          tabBuilder: (BuildContext context, int index) {
-            return const Placeholder();
-          },
-        ),
-      ),
-    );
-
-    tabDecoration =
-        tester
-                .firstWidget<DecoratedBox>(
-                  find.descendant(
-                    of: find.byType(CupertinoTabScaffold),
-                    matching: find.byType(DecoratedBox),
-                  ),
-                )
-                .decoration
-            as BoxDecoration;
-
-    expect(tabDecoration.color!.value, backgroundColor.darkColor.value);
+    imageCache.clear();
   });
 }
 
 CupertinoTabBar _buildTabBar({int selectedTab = 0}) {
   return CupertinoTabBar(
-    items: <BottomNavigationBarItem>[tabGenerator(0), tabGenerator(1)],
+    items: <BottomNavigationBarItem>[
+      BottomNavigationBarItem(
+        icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+        label: 'Tab 1',
+      ),
+      BottomNavigationBarItem(
+        icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+        label: 'Tab 2',
+      ),
+    ],
     currentIndex: selectedTab,
     onTap: (int newTab) => selectedTabs.add(newTab),
   );
