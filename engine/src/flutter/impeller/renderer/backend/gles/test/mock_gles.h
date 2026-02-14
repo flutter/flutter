@@ -55,6 +55,24 @@ class IMockGLESImpl {
                               const GLchar* label) {}
   virtual void Uniform1fv(GLint location, GLsizei count, const GLfloat* value) {
   }
+  virtual void Uniform2fv(GLint location, GLsizei count, const GLfloat* value) {
+  }
+  virtual void Uniform3fv(GLint location, GLsizei count, const GLfloat* value) {
+  }
+  virtual void Uniform4fv(GLint location, GLsizei count, const GLfloat* value) {
+  }
+  virtual void UniformMatrix2fv(GLint location,
+                                GLsizei count,
+                                GLboolean transpose,
+                                const GLfloat* value) {}
+  virtual void UniformMatrix3fv(GLint location,
+                                GLsizei count,
+                                GLboolean transpose,
+                                const GLfloat* value) {}
+  virtual void UniformMatrix4fv(GLint location,
+                                GLsizei count,
+                                GLboolean transpose,
+                                const GLfloat* value) {}
   virtual void GenQueriesEXT(GLsizei n, GLuint* ids) {}
   virtual void BeginQueryEXT(GLenum target, GLuint id) {}
   virtual void EndQueryEXT(GLuint id) {}
@@ -131,6 +149,39 @@ class MockGLESImpl : public IMockGLESImpl {
   MOCK_METHOD(void,
               Uniform1fv,
               (GLint location, GLsizei count, const GLfloat* value),
+              (override));
+  MOCK_METHOD(void,
+              Uniform2fv,
+              (GLint location, GLsizei count, const GLfloat* value),
+              (override));
+  MOCK_METHOD(void,
+              Uniform3fv,
+              (GLint location, GLsizei count, const GLfloat* value),
+              (override));
+  MOCK_METHOD(void,
+              Uniform4fv,
+              (GLint location, GLsizei count, const GLfloat* value),
+              (override));
+  MOCK_METHOD(void,
+              UniformMatrix2fv,
+              (GLint location,
+               GLsizei count,
+               GLboolean transpose,
+               const GLfloat* value),
+              (override));
+  MOCK_METHOD(void,
+              UniformMatrix3fv,
+              (GLint location,
+               GLsizei count,
+               GLboolean transpose,
+               const GLfloat* value),
+              (override));
+  MOCK_METHOD(void,
+              UniformMatrix4fv,
+              (GLint location,
+               GLsizei count,
+               GLboolean transpose,
+               const GLfloat* value),
               (override));
   MOCK_METHOD(void, GenQueriesEXT, (GLsizei n, GLuint* ids), (override));
   MOCK_METHOD(void, BeginQueryEXT, (GLenum target, GLuint id), (override));

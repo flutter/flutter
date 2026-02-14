@@ -74,6 +74,25 @@ Future<void> testMain() async {
     await waitForTextStrategyStopPropagation();
   });
 
+  group('EditableTextStyle', () {
+    test('applies lineHeight (px) if provided', () {
+      final style = <String, dynamic>{
+        'fontFamily': 'Roboto',
+        'fontSize': 10.0,
+        'fontWeightIndex': 0,
+        'textAlignIndex': 0,
+        'textDirectionIndex': 0,
+        'lineHeight': 20.0,
+      };
+
+      final editableTextStyle = EditableTextStyle.fromFrameworkMessage(style);
+      final DomHTMLInputElement element = createDomHTMLInputElement();
+      editableTextStyle.applyToDomElement(element);
+
+      expect(element.style.lineHeight, '20px');
+    });
+  });
+
   group('$GloballyPositionedTextEditingStrategy', () {
     late HybridTextEditing testTextEditing;
 
@@ -1953,6 +1972,41 @@ Future<void> testMain() async {
       setStyle = configureSetStyleMethodCall(12, 'foo bar baz', 4, 4, 1);
       sendFrameworkMessage(codec.encodeMethodCall(setStyle));
       expect(input.style.fontFamily, canonicalizeFontFamily('foo bar baz'));
+
+      hideKeyboard();
+    });
+
+    test('Applies lineHeight, letterSpacing, and wordSpacing', () {
+      showKeyboard(inputType: 'multiline', isMultiline: true);
+      final DomHTMLElement input = textEditing!.strategy.domElement!;
+
+      const setStyle = MethodCall('TextInput.setStyle', <String, dynamic>{
+        'fontSize': 12.0,
+        'fontFamily': 'sans-serif',
+        'textAlignIndex': 0,
+        'textDirectionIndex': 0,
+        'letterSpacing': 1.5,
+        'wordSpacing': 2.5,
+        'lineHeight': 16.0,
+      });
+      sendFrameworkMessage(codec.encodeMethodCall(setStyle));
+
+      expect(input.style.letterSpacing, '1.5px');
+      expect(input.style.wordSpacing, '2.5px');
+      expect(input.style.lineHeight, '16px');
+
+      const setStyleDefault = MethodCall('TextInput.setStyle', <String, dynamic>{
+        'fontSize': 12.0,
+        'fontFamily': 'sans-serif',
+        'textAlignIndex': 0,
+        'textDirectionIndex': 0,
+        // letterSpacing, wordSpacing, lineHeight missing/null
+      });
+      sendFrameworkMessage(codec.encodeMethodCall(setStyleDefault));
+
+      expect(input.style.letterSpacing, '');
+      expect(input.style.wordSpacing, '');
+      expect(input.style.lineHeight, 'normal');
 
       hideKeyboard();
     });
