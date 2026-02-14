@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show LogicalKeyboardKey;
 import 'package:flutter_test/flutter_test.dart';
 
-import 'editable_text_tester.dart';
+import 'editable_text_utils.dart';
 import 'states.dart';
 
 class ItemWidget extends StatefulWidget {
