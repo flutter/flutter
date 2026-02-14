@@ -45,7 +45,7 @@ dependencies:
   term_glyph: 1.2.2
   test_api: 0.7.9
   typed_data: 1.4.0
-  unified_analytics: 8.0.10
+  unified_analytics: 8.0.11
   url_launcher_android: 6.3.28
   url_launcher_ios: 6.4.0
   url_launcher_linux: 3.2.2
@@ -68,4 +68,4 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-# PUBSPEC CHECKSUM: nepob0
+# PUBSPEC CHECKSUM: fv45lk
