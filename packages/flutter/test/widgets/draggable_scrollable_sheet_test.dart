@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import 'button_tester.dart';
 import 'utils.dart';
 
 // TODO(navaronbracke): Remove MaterialApp and material import
