@@ -4,6 +4,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -696,10 +697,12 @@ void main() {
     );
   });
 
-  testWidgets('Picker adapts to CupertinoApp dark mode', (WidgetTester tester) async {
+  // TODO(justinmc): Don't test Material interactions in Cupertino tests.
+  // https://github.com/flutter/flutter/issues/177028
+  testWidgets('Picker adapts to MaterialApp dark mode', (WidgetTester tester) async {
     Widget buildCupertinoPicker(Brightness brightness) {
-      return CupertinoApp(
-        theme: CupertinoThemeData(brightness: brightness),
+      return MaterialApp(
+        theme: ThemeData(brightness: brightness),
         home: Align(
           alignment: Alignment.topLeft,
           child: SizedBox(
@@ -720,20 +723,14 @@ void main() {
     // CupertinoPicker with light theme.
     await tester.pumpWidget(buildCupertinoPicker(Brightness.light));
     RenderParagraph paragraph = tester.renderObject(find.text('1'));
-    final Color expectedLight = CupertinoColors.label.resolveFrom(
-      tester.element(find.byType(CupertinoPicker)),
-    );
-    expect(paragraph.text.style!.color, expectedLight);
+    expect(paragraph.text.style!.color, CupertinoColors.label);
     // Text style should not return unresolved color.
     expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
 
     // CupertinoPicker with dark theme.
     await tester.pumpWidget(buildCupertinoPicker(Brightness.dark));
     paragraph = tester.renderObject(find.text('1'));
-    final Color expectedDark = CupertinoColors.label.resolveFrom(
-      tester.element(find.byType(CupertinoPicker)),
-    );
-    expect(paragraph.text.style!.color, expectedDark);
+    expect(paragraph.text.style!.color, CupertinoColors.label);
     // Text style should not return unresolved color.
     expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
   });
