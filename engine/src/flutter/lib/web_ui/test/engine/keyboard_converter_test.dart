@@ -823,9 +823,34 @@ void testMain() {
     ui_web.OperatingSystem.macOs,
     ui_web.OperatingSystem.iOs,
   ]) {
-    testFakeAsync(
-      'Key guards: key down events while a modifier key is pressed are guarded on $system',
-      (FakeAsync async) {
+    final metaModifiers = <String, Map<String, dynamic>>{
+      'MetaLeft': <String, dynamic>{
+        'code': 'MetaLeft',
+        'key': 'Meta',
+        'location': kLocationLeft,
+        'physical': kPhysicalMetaLeft,
+        'logical': kLogicalMetaLeft,
+      },
+      'MetaRight': <String, dynamic>{
+        'code': 'MetaRight',
+        'key': 'Meta',
+        'location': kLocationRight,
+        'physical': kWebToPhysicalKey['MetaRight']!,
+        'logical': kWebLogicalLocationMap['Meta']![kLocationRight]!,
+      },
+    };
+
+    for (final MapEntry<String, Map<String, dynamic>> entry in metaModifiers.entries) {
+      final String name = entry.key;
+      final Map<String, dynamic> info = entry.value;
+
+      testFakeAsync('Key guards: key down events while $name is pressed are guarded on $system', (
+        FakeAsync async,
+      ) {
+        final physical = info['physical'] as int;
+        final logical = info['logical'] as int;
+        final location = info['location'] as int;
+
         final keyDataList = <ui.KeyData>[];
         final converter = KeyboardConverter((ui.KeyData key) {
           keyDataList.add(key);
@@ -833,7 +858,8 @@ void testMain() {
         }, system);
 
         converter.handleEvent(
-          keyDownEvent('MetaLeft', 'Meta', kMeta, kLocationLeft)..timeStamp = 100,
+          keyDownEvent(info['code'] as String, info['key'] as String, kMeta, location)
+            ..timeStamp = 100,
         );
         async.elapse(const Duration(milliseconds: 100));
 
@@ -864,14 +890,16 @@ void testMain() {
         );
         keyDataList.clear();
 
-        converter.handleEvent(keyUpEvent('MetaLeft', 'Meta', 0, kLocationLeft)..timeStamp = 2700);
+        converter.handleEvent(
+          keyUpEvent(info['code'] as String, info['key'] as String, 0, location)..timeStamp = 2700,
+        );
         expectKeyData(
           keyDataList.last,
           timeStamp: const Duration(milliseconds: 2700),
           type: ui.KeyEventType.up,
           deviceType: ui.KeyEventDeviceType.keyboard,
-          physical: kPhysicalMetaLeft,
-          logical: kLogicalMetaLeft,
+          physical: physical,
+          logical: logical,
           character: null,
         );
         async.elapse(const Duration(milliseconds: 100));
@@ -899,8 +927,9 @@ void testMain() {
           logical: kLogicalKeyA,
           character: null,
         );
-      },
-    );
+        converter.dispose();
+      });
+    }
 
     testFakeAsync(
       'Key guards: key down events while a modifier is not pressed are not guarded on $system',
@@ -977,6 +1006,117 @@ void testMain() {
         expect(keyDataList, hasLength(2));
       },
     );
+
+    final nonMetaModifiers = <String, Map<String, dynamic>>{
+      'ShiftLeft': <String, dynamic>{
+        'code': 'ShiftLeft',
+        'key': 'Shift',
+        'mask': kShift,
+        'location': kLocationLeft,
+        'physical': kPhysicalShiftLeft,
+        'logical': kLogicalShiftLeft,
+      },
+      'ShiftRight': <String, dynamic>{
+        'code': 'ShiftRight',
+        'key': 'Shift',
+        'mask': kShift,
+        'location': kLocationRight,
+        'physical': kPhysicalShiftRight,
+        'logical': kLogicalShiftRight,
+      },
+      'ControlLeft': <String, dynamic>{
+        'code': 'ControlLeft',
+        'key': 'Control',
+        'mask': kCtrl,
+        'location': kLocationLeft,
+        'physical': kWebToPhysicalKey['ControlLeft'],
+        'logical': kLogicalCtrlLeft,
+      },
+      'ControlRight': <String, dynamic>{
+        'code': 'ControlRight',
+        'key': 'Control',
+        'mask': kCtrl,
+        'location': kLocationRight,
+        'physical': kWebToPhysicalKey['ControlRight'],
+        'logical': kWebLogicalLocationMap['Control']![kLocationRight],
+      },
+      'AltLeft': <String, dynamic>{
+        'code': 'AltLeft',
+        'key': 'Alt',
+        'mask': kAlt,
+        'location': kLocationLeft,
+        'physical': kWebToPhysicalKey['AltLeft'],
+        'logical': kLogicalAltLeft,
+      },
+      'AltRight': <String, dynamic>{
+        'code': 'AltRight',
+        'key': 'Alt',
+        'mask': kAlt,
+        'location': kLocationRight,
+        'physical': kWebToPhysicalKey['AltRight'],
+        'logical': kWebLogicalLocationMap['Alt']![kLocationRight],
+      },
+    };
+
+    for (final MapEntry<String, Map<String, dynamic>> entry in nonMetaModifiers.entries) {
+      final String name = entry.key;
+      final Map<String, dynamic> info = entry.value;
+      testFakeAsync(
+        'Key guards: key down events while $name is pressed are not guarded on $system',
+        (FakeAsync async) {
+          final mask = info['mask'] as int;
+          final location = info['location'] as int;
+          final physical = info['physical'] as int;
+          final logical = info['logical'] as int;
+
+          final keyDataList = <ui.KeyData>[];
+          final converter = KeyboardConverter((ui.KeyData key) {
+            keyDataList.add(key);
+            return true;
+          }, system);
+
+          // Press Modifier
+          converter.handleEvent(
+            keyDownEvent(info['code'] as String, info['key'] as String, mask, location)
+              ..timeStamp = 100,
+          );
+          async.elapse(const Duration(milliseconds: 100));
+
+          expectKeyData(
+            keyDataList.last,
+            timeStamp: const Duration(milliseconds: 100),
+            type: ui.KeyEventType.down,
+            deviceType: ui.KeyEventDeviceType.keyboard,
+            physical: physical,
+            logical: logical,
+            character: null,
+          );
+          keyDataList.clear();
+
+          // Press A with Modifier
+          converter.handleEvent(keyDownEvent('KeyA', 'a', mask)..timeStamp = 200);
+          expectKeyData(
+            keyDataList.last,
+            timeStamp: const Duration(milliseconds: 200),
+            type: ui.KeyEventType.down,
+            deviceType: ui.KeyEventDeviceType.keyboard,
+            physical: kPhysicalKeyA,
+            logical: kLogicalKeyA,
+            character: 'a',
+          );
+
+          // Check that NO synthesized key up event happens
+          async.elapse(const Duration(milliseconds: 2500));
+          expect(
+            keyDataList,
+            hasLength(1),
+            reason: 'Failed for modifier $name: No synthetic key up should be generated.',
+          );
+
+          converter.dispose();
+        },
+      );
+    }
   }
 
   testFakeAsync('Key guards: key repeated down events refreshes guards', (FakeAsync async) {
