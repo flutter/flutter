@@ -813,8 +813,8 @@ Future<void> testMain() async {
 
     test('isEmbeddedInIframe() returns consistent results', () {
       // Just verify the function works without throwing
-      final result1 = isEmbeddedInIframe();
-      final result2 = isEmbeddedInIframe();
+      final bool result1 = isEmbeddedInIframe();
+      final bool result2 = isEmbeddedInIframe();
       expect(result1, equals(result2), reason: 'Results should be cached');
     });
 
