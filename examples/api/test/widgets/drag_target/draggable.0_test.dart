@@ -162,4 +162,20 @@ void main() {
     );
     expect(tester.getSize(find.byType(Draggable<bool>)), Size.zero);
   });
+
+  testWidgets('DragTarget does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: DragTarget<bool>(builder: (_, _, _) => Text('X')),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(DragTarget<bool>)), Size.zero);
+  });
 }

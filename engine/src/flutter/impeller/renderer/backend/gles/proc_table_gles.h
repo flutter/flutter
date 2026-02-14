@@ -51,9 +51,21 @@ struct AutoErrorCheck {
   }
 };
 
+template <typename Type>
+struct ArgLogger {
+  static void log(std::stringstream& stream, Type arg) { stream << arg; }
+};
+
+template <typename R, typename... Args>
+struct ArgLogger<R (*)(Args...)> {
+  static void log(std::stringstream& stream, R (*val)(Args...)) {
+    stream << reinterpret_cast<void*>(val);
+  }
+};
+
 template <class Type>
 void BuildGLArgumentsStream(std::stringstream& stream, Type arg) {
-  stream << arg;
+  ArgLogger<Type>::log(stream, arg);
 }
 
 constexpr void BuildGLArgumentsStream(std::stringstream& stream) {}
@@ -219,6 +231,8 @@ struct GLProc {
   PROC(Uniform2fv);                          \
   PROC(Uniform3fv);                          \
   PROC(Uniform4fv);                          \
+  PROC(UniformMatrix2fv);                    \
+  PROC(UniformMatrix3fv);                    \
   PROC(UniformMatrix4fv);                    \
   PROC(UseProgram);                          \
   PROC(VertexAttribPointer);                 \
@@ -256,6 +270,7 @@ void(glDepthRange)(GLdouble n, GLdouble f);
 
 #define FOR_EACH_IMPELLER_EXT_PROC(PROC)    \
   PROC(DebugMessageControlKHR);             \
+  PROC(DebugMessageCallbackKHR);            \
   PROC(DiscardFramebufferEXT);              \
   PROC(FramebufferTexture2DMultisampleEXT); \
   PROC(PushDebugGroupKHR);                  \

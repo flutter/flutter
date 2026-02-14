@@ -12,7 +12,7 @@
   "shareButtonLabel": "Bagikan",
   "pasteButtonLabel": "Tempel",
   "selectAllButtonLabel": "Pilih semua",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "Hasil penelusuran ditemukan",
+  "noResultsFound": "Tidak ditemukan hasil",
+  "radioButtonUnselectedLabel": "Tidak dipilih"
 }

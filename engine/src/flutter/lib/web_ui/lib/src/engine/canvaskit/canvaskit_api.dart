@@ -170,11 +170,23 @@ extension type CanvasKit(JSObject _) implements JSObject {
     bool srcIsPremultiplied,
   );
 
-  SkImage? MakeLazyImageFromTextureSourceWithInfo(Object src, SkPartialImageInfo info) =>
-      _MakeLazyImageFromTextureSource2(src.toJSAnyShallow, info);
+  SkImage? MakeLazyImageFromTextureSourceWithInfo(Object src, SkPartialImageInfo info) {
+    assert(
+      !CanvasKitRenderer.instance.isSoftware,
+      'Cannot use `MakeLazyImageFromTextureSourceWithInfo` in CPU-only mode.',
+    );
+    return _MakeLazyImageFromTextureSource2(src.toJSAnyShallow, info);
+  }
 
-  SkImage? MakeLazyImageFromImageBitmap(DomImageBitmap imageBitmap, bool hasPremultipliedAlpha) =>
-      _MakeLazyImageFromTextureSource3(imageBitmap, 0, hasPremultipliedAlpha);
+  SkImage? MakeLazyImageFromImageBitmap(DomImageBitmap imageBitmap, bool hasPremultipliedAlpha) {
+    assert(
+      !CanvasKitRenderer.instance.isSoftware,
+      'Cannot use `MakeLazyImageFromImageBitmap` in CPU-only mode.',
+    );
+    return _MakeLazyImageFromTextureSource3(imageBitmap, 0, hasPremultipliedAlpha);
+  }
+
+  external SkImage? MakeImageFromCanvasImageSource(JSAny src);
 }
 
 extension type CanvasKitModule(JSObject _) implements JSObject {
@@ -1033,12 +1045,12 @@ extension type SkImageFilterNamespace(JSObject _) implements JSObject {
   );
 
   @JS('MakeMatrixTransform')
-  external SkImageFilter _MakeMatrixTransform(
+  external SkImageFilter? _MakeMatrixTransform(
     JSFloat32Array matrix, // 3x3 matrix
     CkFilterOptions filterOptions,
     void input, // we don't use this yet
   );
-  SkImageFilter MakeMatrixTransform(
+  SkImageFilter? MakeMatrixTransform(
     Float32List matrix, // 3x3 matrix
     CkFilterOptions filterOptions,
     void input, // we don't use this yet
@@ -2102,7 +2114,10 @@ extension type SkFontVariation._(JSObject _) implements JSObject {
   external set value(double? v);
 }
 
-extension type SkTypeface(JSObject _) implements JSObject {}
+extension type SkTypeface(JSObject _) implements JSObject {
+  /// Returns the family name of the typeface.
+  external String? getFamilyName();
+}
 
 @JS('window.flutterCanvasKit.Font')
 extension type SkFont._(JSObject _) implements JSObject {

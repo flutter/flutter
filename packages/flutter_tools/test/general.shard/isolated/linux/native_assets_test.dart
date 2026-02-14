@@ -58,6 +58,8 @@ void main() {
         projectUri: projectUri,
         fileSystem: fileSystem,
         buildRunner: _BuildRunnerWithoutClang(),
+        buildCodeAssets: true,
+        buildDataAssets: true,
       );
       expect(
         (globals.logger as BufferLogger).traceText,

@@ -10,6 +10,7 @@ library;
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -3987,8 +3988,7 @@ void main() {
   testWidgets('Tap on button behind snack bar defined by width', (WidgetTester tester) async {
     tester.view.physicalSize = const Size.square(200);
     tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.reset);
 
     const buttonText = 'Show snackbar';
     const snackbarContent = 'Snackbar';
@@ -4045,8 +4045,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/78537.
     tester.view.physicalSize = const Size.square(200);
     tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.reset);
 
     const buttonText = 'Show snackbar';
     const snackbarContent = 'Snackbar';
@@ -4105,8 +4104,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/78537.
     tester.view.physicalSize = const Size.square(200);
     tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.reset);
 
     const buttonText = 'Show snackbar';
     const snackbarContent = 'Snackbar';
@@ -4203,8 +4201,7 @@ void main() {
       // Regression test for https://github.com/flutter/flutter/issues/148566.
       tester.view.physicalSize = const Size.square(200);
       tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.reset);
 
       const buttonText = 'Show snackbar';
       const snackbarContent = 'Snackbar';

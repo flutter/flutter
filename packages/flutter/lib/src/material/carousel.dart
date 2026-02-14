@@ -145,6 +145,7 @@ class CarouselView extends StatefulWidget {
     this.enableSplash = true,
     required double this.itemExtent,
     required this.children,
+    this.onIndexChanged,
   }) : consumeMaxWeight = true,
        flexWeights = null,
        itemBuilder = null,
@@ -209,6 +210,7 @@ class CarouselView extends StatefulWidget {
     this.enableSplash = true,
     required List<int> this.flexWeights,
     required this.children,
+    this.onIndexChanged,
   }) : itemExtent = null,
        itemBuilder = null,
        itemCount = null;
@@ -252,6 +254,7 @@ class CarouselView extends StatefulWidget {
     required double this.itemExtent,
     required this.itemBuilder,
     this.itemCount,
+    this.onIndexChanged,
   }) : consumeMaxWeight = true,
        flexWeights = null,
        children = const <Widget>[];
@@ -309,6 +312,7 @@ class CarouselView extends StatefulWidget {
     required List<int> this.flexWeights,
     required this.itemBuilder,
     this.itemCount,
+    this.onIndexChanged,
   }) : itemExtent = null,
        children = const <Widget>[];
 
@@ -448,6 +452,34 @@ class CarouselView extends StatefulWidget {
   /// The child widgets for the carousel.
   final List<Widget> children;
 
+  /// {@template flutter.material.CarouselView.onIndexChanged}
+  /// A callback invoked when the leading item changes.
+  ///
+  /// The leading item is the first visible item in the carousel view.
+  ///
+  /// The callback fires only when the leading item is completely out of view,
+  /// whether due to user interaction or programmatic scrolling. If the leading item
+  /// remains partially visible, the leading index will not change and the callback will
+  /// not be invoked.
+  /// {@endtemplate}
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// CarouselView(
+  ///   itemExtent: 200.0,
+  ///   onIndexChanged: (int index) {
+  ///     print('Leading item changed to: $index');
+  ///   },
+  ///   children: <Widget>[
+  ///     Container(color: Colors.red),
+  ///     Container(color: Colors.green),
+  ///     Container(color: Colors.blue),
+  ///   ],
+  /// )
+  /// ```
+  final ValueChanged<int>? onIndexChanged;
+
   /// Called to build carousel item on demand.
   ///
   /// Will be called only for indices greater than or equal to zero and less
@@ -472,6 +504,7 @@ class _CarouselViewState extends State<CarouselView> {
   bool get _consumeMaxWeight => widget.consumeMaxWeight;
   CarouselController? _internalController;
   CarouselController get _controller => widget.controller ?? _internalController!;
+  late int _lastReportedLeadingItem;
 
   @override
   void initState() {
@@ -480,7 +513,9 @@ class _CarouselViewState extends State<CarouselView> {
     if (widget.controller == null) {
       _internalController = CarouselController();
     }
+    _lastReportedLeadingItem = _getInitialLeadingItem();
     _controller._attach(this);
+    _controller.addListener(_handleScroll);
   }
 
   @override
@@ -513,9 +548,37 @@ class _CarouselViewState extends State<CarouselView> {
 
   @override
   void dispose() {
+    _controller.removeListener(_handleScroll);
     _controller._detach(this);
     _internalController?.dispose();
     super.dispose();
+  }
+
+  void _handleScroll() {
+    if (widget.onIndexChanged == null) {
+      return;
+    }
+
+    final ScrollPosition position = _controller.position;
+    final int currentLeadingIndex = (position as _CarouselPosition).leadingItem;
+
+    if (currentLeadingIndex != _lastReportedLeadingItem) {
+      _lastReportedLeadingItem = currentLeadingIndex;
+      widget.onIndexChanged!(currentLeadingIndex);
+    }
+  }
+
+  // For weighted carousel, the initialItem means the index of the item to occupy the first maximum weight
+  // in flexWeights. To get the initial leading item, it should be initialItem - index of the first max weight in flexWeights.
+  // So it might be negative when initialItem value is small but the first max weight index is large. In that case,
+  // the initial leading item should be 0.
+  int _getInitialLeadingItem() {
+    if (widget.flexWeights != null) {
+      final int maxWeight = widget.flexWeights!.max;
+      final int firstMaxWeightIndex = widget.flexWeights!.indexOf(maxWeight);
+      return math.max(_controller.initialItem - firstMaxWeightIndex, 0);
+    }
+    return _controller.initialItem;
   }
 
   AxisDirection _getDirection(BuildContext context) {
@@ -636,15 +699,13 @@ class _CarouselViewState extends State<CarouselView> {
         _itemExtent = widget.itemExtent == null
             ? null
             : clampDouble(widget.itemExtent!, 0, mainAxisExtent);
-
         return Scrollable(
           axisDirection: axisDirection,
           controller: _controller,
           physics: physics,
           viewportBuilder: (BuildContext context, ViewportOffset position) {
             return Viewport(
-              cacheExtent: 0.0,
-              cacheExtentStyle: CacheExtentStyle.viewport,
+              scrollCacheExtent: const ScrollCacheExtent.viewport(0.0),
               axisDirection: axisDirection,
               offset: position,
               clipBehavior: Clip.antiAlias,
@@ -1567,6 +1628,27 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     _flexWeights = value;
   }
 
+  // The index of the leading item in the carousel.
+  // `getItemFromPixels` may return a fractional value (e.g., 0.6 when mid-scroll).
+  // Use `toInt()` to truncate the fractional part, ensuring the leading item
+  // only advances after fully crossing the next item's boundary.
+  int get leadingItem {
+    final int leadingItem = getItemFromPixels(pixels, viewportDimension).toInt();
+    // When `consumeMaxWeight` is true, there is some reserved space before
+    // item 0 so that item 0 can be expanded to occupy the maximum
+    // weight while scrolling. The way how consumeMaxWeight works is that we assume
+    // there are some "invisible" items before the first visible item. Therefore,
+    // to calculate the correct visible leading item, we need to offset the leading
+    // item by the index of the maximum weight.
+    //
+    // The subtraction may cause negative number for leading item. In this case,
+    // constrain the leading item to 0.
+    if (consumeMaxWeight && flexWeights != null) {
+      return math.max(leadingItem - flexWeights!.indexOf(flexWeights!.max), 0);
+    }
+    return leadingItem;
+  }
+
   double updateLeadingItem(List<int>? newFlexWeights, bool newConsumeMaxWeight) {
     final double maxItem;
     if (hasPixels && flexWeights != null) {
@@ -1703,6 +1785,22 @@ class CarouselController extends ScrollController {
 
   /// The item that expands to the maximum size when first creating the [CarouselView].
   final int initialItem;
+
+  /// The current leading item index in the [CarouselView].
+  ///
+  /// {@macro flutter.material.CarouselView.onIndexChanged}
+  int get leadingItem {
+    assert(
+      positions.isNotEmpty,
+      'CarouselController.leadingItem cannot be accessed before a CarouselView is built with it.',
+    );
+    assert(
+      positions.length == 1,
+      'CarouselController.leadingItem cannot be read when multiple CarouselViews '
+      'are attached to the same controller.',
+    );
+    return (position as _CarouselPosition).leadingItem;
+  }
 
   _CarouselViewState? _carouselState;
 

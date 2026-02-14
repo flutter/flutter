@@ -131,7 +131,7 @@ class _ListTileExampleState extends State<ListTileExample>
             child: Center(
               child: SizeTransition(
                 sizeFactor: _sizeAnimation,
-                axisAlignment: -1.0,
+                alignment: Alignment.topLeft,
                 // Wrap the ListTile in a Material widget so the ListTile has someplace
                 // to draw the animated colors during the size transition.
                 child: const Material(
