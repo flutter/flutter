@@ -310,7 +310,7 @@ void main() {
   testWidgets('_PackageLicensePage includes bottom safe area padding', (
     WidgetTester tester,
   ) async {
-    const double safeAreaBottom = 34.0;
+    const safeAreaBottom = 34.0;
 
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
@@ -338,7 +338,7 @@ void main() {
     // Find the ListView that displays license entries and verify its padding
     // includes the bottom safe area inset.
     final ListView listView = tester.widget<ListView>(find.byType(ListView));
-    final EdgeInsets listPadding = listView.padding! as EdgeInsets;
+    final listPadding = listView.padding! as EdgeInsets;
 
     // The bottom padding should include both the gutter size and the bottom
     // safe area padding from MediaQuery.
