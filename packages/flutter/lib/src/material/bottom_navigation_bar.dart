@@ -1012,12 +1012,12 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     final ColorTween iconColorTween = switch (_effectiveType) {
       BottomNavigationBarType.fixed => ColorTween(
         begin:
-            effectiveSelectedIconTheme.color ??
+            effectiveUnselectedIconTheme.color ??
             widget.unselectedItemColor ??
             bottomTheme.unselectedItemColor ??
             themeData.unselectedWidgetColor,
         end:
-            effectiveUnselectedIconTheme.color ??
+            effectiveSelectedIconTheme.color ??
             widget.selectedItemColor ??
             bottomTheme.selectedItemColor ??
             widget.fixedColor ??
