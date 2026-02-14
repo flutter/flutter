@@ -491,36 +491,6 @@ class ExpansionTile extends StatefulWidget {
   /// [WidgetState.hovered], [WidgetState.focused], [WidgetState.pressed],
   /// and [WidgetState.disabled] for the tile's header.
   ///
-  /// {@tool snippet}
-  /// This example listens for hover and press states on an [ExpansionTile].
-  ///
-  /// ```dart
-  /// class ExpansionTileStatesExample extends StatelessWidget {
-  ///   ExpansionTileStatesExample({super.key});
-  ///
-  ///   final WidgetStatesController controller = WidgetStatesController();
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     controller.addListener(() {
-  ///       if (controller.value.contains(WidgetState.hovered)) {
-  ///         debugPrint('Tile is hovered');
-  ///       }
-  ///     });
-  ///
-  ///     return MaterialApp(
-  ///       home: Scaffold(
-  ///         body: ExpansionTile(
-  ///           title: const Text('Settings'),
-  ///           statesController: controller,
-  ///         ),
-  ///       ),
-  ///     );
-  ///   }
-  /// }
-  /// ```
-  /// {@end-tool}
-  ///
   /// If null, the backing [ListTile] will create and manage its own
   /// [WidgetStatesController].
   final WidgetStatesController? statesController;
