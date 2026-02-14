@@ -16,6 +16,7 @@ import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/ios.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
@@ -143,6 +144,101 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
 
     if (!boolArg('plugins') && boolArg('static')) {
       throwToolExit('--static cannot be used with the --no-plugins flag');
+    }
+  }
+
+  static Iterable<String> findCodeAssetFrameworkNames(Directory outputDirectory) {
+    final Directory nativeAssetsDirectory = outputDirectory.childDirectory('native_assets');
+    if (!nativeAssetsDirectory.existsSync()) {
+      return const <String>[];
+    }
+    return nativeAssetsDirectory
+        .listSync()
+        .whereType<Directory>()
+        .where((Directory d) => !d.basename.endsWith('.dSYM'))
+        .map((Directory d) => d.basename);
+  }
+
+  /// Parses the NativeAssetsManifest.json in [outputDirectory] and returns a
+  /// mapping from asset ID to the path of the code asset within the bundle
+  /// (e.g., "MyFramework.framework/MyFramework").
+  static Map<String, String> parseNativeAssetsManifest(Directory outputDirectory) {
+    final File manifestFile = outputDirectory
+        .childDirectory('App.framework')
+        .childDirectory('flutter_assets')
+        .childFile('NativeAssetsManifest.json');
+    if (!manifestFile.existsSync()) {
+      return const <String, String>{};
+    }
+    final manifest = json.decode(manifestFile.readAsStringSync()) as Map<String, Object?>;
+    final nativeAssets = manifest['native-assets'] as Map<String, Object?>?;
+    if (nativeAssets == null) {
+      return const <String, String>{};
+    }
+    final result = <String, String>{};
+    for (final Object? targetAssets in nativeAssets.values) {
+      if (targetAssets is! Map<String, Object?>) {
+        continue;
+      }
+      for (final MapEntry<String, Object?> entry in targetAssets.entries) {
+        final String assetId = entry.key;
+        final Object? pathInfo = entry.value;
+        if (pathInfo is List<Object?> && pathInfo.length >= 2) {
+          final path = pathInfo[1]! as String;
+          result[assetId] = path;
+        }
+      }
+    }
+    return result;
+  }
+
+  /// Verifies that code assets built for physical devices and simulators are
+  /// consistent.
+  ///
+  /// The physical device build is considered the source of truth. Every asset
+  /// in the simulator build must also be in the physical device build and have
+  /// the same framework path.
+  static void verifyCodeAssetConsistency(
+    Directory iPhoneBuildOutput,
+    Directory simulatorBuildOutput,
+  ) {
+    final Map<String, String> deviceAssets = BuildFrameworkCommand.parseNativeAssetsManifest(
+      iPhoneBuildOutput,
+    );
+    final Map<String, String> simulatorAssets = BuildFrameworkCommand.parseNativeAssetsManifest(
+      simulatorBuildOutput,
+    );
+
+    for (final String assetId in deviceAssets.keys) {
+      final String deviceAssetPath = deviceAssets[assetId]!;
+      final String? simulatorAssetPath = simulatorAssets[assetId];
+      if (simulatorAssetPath != null && deviceAssetPath != simulatorAssetPath) {
+        throwToolExit(
+          'Consistent code asset framework names are required for '
+          'XCFramework creation.\n'
+          'The asset "$assetId" has different framework paths across '
+          'platforms:\n'
+          '  - iphoneos: $deviceAssetPath\n'
+          '  - iphonesimulator: $simulatorAssetPath\n\n'
+          'This is likely an issue in the package providing the asset. '
+          'Please report this to the package maintainers and ensure the '
+          '"build.dart" hook produces consistent filenames.',
+        );
+      }
+    }
+
+    for (final String assetId in simulatorAssets.keys) {
+      if (!deviceAssets.containsKey(assetId)) {
+        throwToolExit(
+          'The simulator build contains a code asset "$assetId" that is '
+          'not present in the physical device build. \n'
+          'The device build is the source of truth for distributed '
+          'frameworks. \n\n'
+          'This is likely an issue in the package providing the asset. '
+          'Please report this to the package maintainers and ensure '
+          '"$assetId" is also built for physical devices.',
+        );
+      }
     }
   }
 
@@ -318,27 +414,30 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
         ' └─Moving to ${globals.fs.path.relative(modeDirectory.path)}',
       );
 
-      // Copy the native assets. The native assets have already been signed in
-      // buildNativeAssetsMacOS.
-      final Directory nativeAssetsDirectory = globals.fs
-          .directory(getBuildDirectory())
-          .childDirectory('native_assets/ios/');
-      if (await nativeAssetsDirectory.exists()) {
-        final ProcessResult rsyncResult = await globals.processManager.run(<Object>[
-          'rsync',
-          '-av',
-          '--filter',
-          '- .DS_Store',
-          '--filter',
-          '- native_assets.yaml',
-          '--filter',
-          '- native_assets.json',
-          nativeAssetsDirectory.path,
-          modeDirectory.path,
-        ]);
-        if (rsyncResult.exitCode != 0) {
-          throwToolExit('Failed to copy native assets:\n${rsyncResult.stderr}');
-        }
+      // Package native assets.
+      BuildFrameworkCommand.verifyCodeAssetConsistency(iPhoneBuildOutput, simulatorBuildOutput);
+
+      final Iterable<String> frameworkNames = <String>{
+        ...BuildFrameworkCommand.findCodeAssetFrameworkNames(simulatorBuildOutput),
+        ...BuildFrameworkCommand.findCodeAssetFrameworkNames(iPhoneBuildOutput),
+      };
+      for (final frameworkName in frameworkNames) {
+        final Directory frameworkDirectoryDevice = iPhoneBuildOutput
+            .childDirectory('native_assets')
+            .childDirectory(frameworkName);
+        final Directory frameworkDirectorySimulator = simulatorBuildOutput
+            .childDirectory('native_assets')
+            .childDirectory(frameworkName);
+        final frameworks = <Directory>[
+          if (frameworkDirectoryDevice.existsSync()) frameworkDirectoryDevice,
+          if (frameworkDirectorySimulator.existsSync()) frameworkDirectorySimulator,
+        ];
+        await BuildFrameworkCommand.produceXCFramework(
+          frameworks,
+          frameworkName.replaceAll('.framework', ''),
+          modeDirectory,
+          globals.processManager,
+        );
       }
 
       try {

@@ -2,23 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "fuchsia_intl.h"
+#include "flutter/shell/platform/fuchsia/flutter/fuchsia_intl.h"
 
-#include <sstream>
 #include <string>
 #include <vector>
 
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
-#include "runner.h"
-#include "runtime/dart/utils/tempfs.h"
-#include "third_party/icu/source/common/unicode/bytestream.h"
-#include "third_party/icu/source/common/unicode/errorcode.h"
 #include "third_party/icu/source/common/unicode/locid.h"
-#include "third_party/icu/source/common/unicode/strenum.h"
 #include "third_party/icu/source/common/unicode/stringpiece.h"
-#include "third_party/icu/source/common/unicode/uloc.h"
 
 using icu::Locale;
 

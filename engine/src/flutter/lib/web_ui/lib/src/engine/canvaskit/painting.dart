@@ -423,7 +423,7 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
 
     IndexError.check(index, info.floatCount, message: 'Index `$index` out of bounds for `$name`.');
 
-    return CkUniformFloatSlot._(this, index, name, info.location + index);
+    return CkUniformFloatSlot._(this, index, name, info.floatOffset + index);
   }
 
   @override
@@ -461,7 +461,7 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
     final elements = List<T>.generate(numElements, (i) {
       final slots = List<CkUniformFloatSlot>.generate(
         info.floatCount,
-        (j) => CkUniformFloatSlot._(this, j, name, info.location + i * elementSize + j),
+        (j) => CkUniformFloatSlot._(this, j, name, info.floatOffset + i * elementSize + j),
       );
       return elementFactory(slots);
     });
@@ -511,6 +511,36 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
   }
 
   @override
+  ui.UniformMat2Slot getUniformMat2(String name) {
+    throw UnsupportedError('getUniformMat2 is not supported on the web.');
+  }
+
+  @override
+  ui.UniformMat3Slot getUniformMat3(String name) {
+    throw UnsupportedError('getUniformMat3 is not supported on the web.');
+  }
+
+  @override
+  ui.UniformMat4Slot getUniformMat4(String name) {
+    throw UnsupportedError('getUniformMat4 is not supported on the web.');
+  }
+
+  @override
+  ui.UniformArray<ui.UniformMat2Slot> getUniformMat2Array(String name) {
+    throw UnsupportedError('getUniformMat2Array is not supported on the web.');
+  }
+
+  @override
+  ui.UniformArray<ui.UniformMat3Slot> getUniformMat3Array(String name) {
+    throw UnsupportedError('getUniformMat3Array is not supported on the web.');
+  }
+
+  @override
+  ui.UniformArray<ui.UniformMat4Slot> getUniformMat4Array(String name) {
+    throw UnsupportedError('getUniformMat4Array is not supported on the web.');
+  }
+
+  @override
   ui.ImageSamplerSlot getImageSampler(String name) {
     throw UnsupportedError('getImageSampler is not supported on the web.');
   }
@@ -524,7 +554,7 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
 
     return List<CkUniformFloatSlot>.generate(
       size,
-      (i) => CkUniformFloatSlot._(this, i, name, info.location + i),
+      (i) => CkUniformFloatSlot._(this, i, name, info.floatOffset + i),
     );
   }
 }
