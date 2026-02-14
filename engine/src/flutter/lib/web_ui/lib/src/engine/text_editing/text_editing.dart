@@ -67,6 +67,7 @@ void _setStaticStyleAttributes(DomHTMLElement domElement) {
     ..position = 'absolute'
     ..top = '0'
     ..left = '0'
+    ..margin = '0'
     ..padding = '0'
     ..opacity = '1'
     ..color = 'transparent'
@@ -107,6 +108,7 @@ void _styleAutofillElements(
   final DomCSSStyleDeclaration elementStyle = domElement.style;
   elementStyle
     ..whiteSpace = 'pre-wrap'
+    ..margin = '0'
     ..padding = '0'
     ..opacity = '1'
     ..color = 'transparent'
@@ -1299,6 +1301,9 @@ abstract class DefaultTextEditingStrategy
   /// Size and transform of the editable text on the page.
   EditableTextGeometry? geometry;
 
+  /// The scroll top of the editable text on the page.
+  final Map<String, double> _preservedScrollTops = <String, double>{};
+
   OnChangeCallback? onChange;
   OnActionCallback? onAction;
 
@@ -1454,6 +1459,11 @@ abstract class DefaultTextEditingStrategy
   @override
   void disable() {
     assert(isEnabled);
+    // Preserve the internal scroll position.
+    if (geometry != null && lastEditingState != null) {
+      final key = '${geometry!.hashCode}_${lastEditingState!.text.hashCode}';
+      _preservedScrollTops[key] = activeDomElement.scrollTop;
+    }
 
     isEnabled = false;
     lastEditingState = null;
@@ -1657,6 +1667,12 @@ abstract class DefaultTextEditingStrategy
 
     // Re-focuses after setting editing state.
     moveFocusToActiveDomElement();
+
+    // Restore the internal scroll position.
+    if (geometry != null && lastEditingState != null) {
+      final key = '${geometry!.hashCode}_${lastEditingState!.text.hashCode}';
+      activeDomElement.scrollTop = _preservedScrollTops.remove(key) ?? 0.0;
+    }
   }
 
   /// Prevent default behavior for mouse down, up and move.
@@ -2501,6 +2517,9 @@ class EditableTextStyle {
     required this.textAlign,
     required this.fontFamily,
     required this.fontWeight,
+    required this.letterSpacing,
+    required this.wordSpacing,
+    required this.lineHeight,
   });
 
   factory EditableTextStyle.fromFrameworkMessage(Map<String, dynamic> flutterStyle) {
@@ -2527,6 +2546,9 @@ class EditableTextStyle {
       textAlign: ui.TextAlign.values[textAlignIndex],
       textDirection: ui.TextDirection.values[textDirectionIndex],
       fontWeight: fontWeight,
+      letterSpacing: flutterStyle.tryDouble('letterSpacing'),
+      wordSpacing: flutterStyle.tryDouble('wordSpacing'),
+      lineHeight: flutterStyle.tryDouble('lineHeight'),
     );
   }
 
@@ -2537,6 +2559,9 @@ class EditableTextStyle {
   final String? fontFamily;
   final ui.TextAlign textAlign;
   final ui.TextDirection textDirection;
+  final double? letterSpacing;
+  final double? wordSpacing;
+  final double? lineHeight;
 
   String? get align => textAlignToCssValue(textAlign, textDirection);
 
@@ -2545,7 +2570,10 @@ class EditableTextStyle {
   void applyToDomElement(DomHTMLElement domElement) {
     domElement.style
       ..textAlign = align!
-      ..font = cssFont;
+      ..font = cssFont
+      ..letterSpacing = letterSpacing != null ? '${letterSpacing}px' : ''
+      ..wordSpacing = wordSpacing != null ? '${wordSpacing}px' : ''
+      ..lineHeight = lineHeight != null ? '${lineHeight}px' : 'normal';
   }
 }
 
@@ -2605,4 +2633,18 @@ class EditableTextGeometry {
       ..height = '${height}px'
       ..transform = cssTransform;
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is EditableTextGeometry &&
+        other.width == width &&
+        other.height == height &&
+        listEquals<double>(other.globalTransform, globalTransform);
+  }
+
+  @override
+  int get hashCode => Object.hash(width, height, Object.hashAll(globalTransform));
 }
