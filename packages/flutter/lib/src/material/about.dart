@@ -1200,12 +1200,19 @@ Widget? _defaultApplicationIcon(BuildContext context) {
   return null;
 }
 
-const int _materialGutterThreshold = 720;
-const double _wideGutterSize = 24.0;
-const double _narrowGutterSize = 12.0;
+@visibleForTesting
+const int materialGutterThreshold = 720;
+
+@visibleForTesting
+const double wideGutterSize = 24.0;
+
+@visibleForTesting
+const double narrowGutterSize = 12.0;
 
 double _getGutterSize(BuildContext context) =>
-    MediaQuery.widthOf(context) >= _materialGutterThreshold ? _wideGutterSize : _narrowGutterSize;
+    MediaQuery.widthOf(context) >= materialGutterThreshold
+    ? wideGutterSize
+    : narrowGutterSize;
 
 /// Signature for the builder callback used by [_MasterDetailFlow].
 typedef _MasterViewBuilder = Widget Function(BuildContext context, bool isLateralUI);
