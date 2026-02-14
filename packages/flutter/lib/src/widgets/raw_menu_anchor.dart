@@ -315,6 +315,12 @@ class RawMenuAnchor extends StatefulWidget {
   /// callback can be used to add a delay or a closing animation before the menu
   /// is hidden.
   ///
+  /// This callback is also triggered when a parent [RawMenuAnchor] is opened,
+  /// since that triggers [MenuController.close] on all descendant menu
+  /// controllers. As a result, pending timers or animations started in
+  /// [onCloseRequested] should be canceled when this callback is triggered, to
+  /// prevent them from closing the menu at an unintended time.
+  ///
   /// If the menu is not closed, this callback will also be called when the root
   /// menu anchor is scrolled and when the screen is resized.
   ///
@@ -600,7 +606,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   @protected
   void handleCloseRequest();
 
-  /// Close the open submenus of this menu..
+  /// Close the open submenus of this menu.
   ///
   /// This method will call [close] on each child of this menu, which will
   /// immediately close the child.

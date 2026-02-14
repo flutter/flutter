@@ -2774,6 +2774,116 @@ void main() {
       expect(closeOrder, equals([Tag.a.a.a, Tag.a.a, Tag.a]));
     });
 
+    testWidgets('Async onClose is called on descendants before parent', (
+      WidgetTester tester,
+    ) async {
+      final closeOrder = <NestedTag>[];
+
+      await tester.pumpWidget(
+        App(
+          Menu(
+            controller: controller,
+            onCloseRequested: (hideOverlay) {
+              // Called second
+              Timer(const Duration(milliseconds: 35), hideOverlay);
+            },
+            onClose: () {
+              closeOrder.add(Tag.a);
+            },
+            menuPanel: Panel(
+              children: <Widget>[
+                Menu(
+                  onCloseRequested: (hideOverlay) {
+                    Timer(const Duration(milliseconds: 50), hideOverlay);
+                  },
+                  onClose: () {
+                    closeOrder.add(Tag.a.a);
+                  },
+                  menuPanel: Panel(
+                    children: <Widget>[
+                      Menu(
+                        onCloseRequested: (hideOverlay) {
+                          // Called first
+                          Timer(const Duration(milliseconds: 10), hideOverlay);
+                        },
+                        onClose: () {
+                          closeOrder.add(Tag.a.a.a);
+                        },
+                        menuPanel: Panel(
+                          children: <Widget>[
+                            Menu(
+                              onCloseRequested: (hideOverlay) {
+                                Timer(const Duration(milliseconds: 25), hideOverlay);
+                              },
+                              onClose: () {
+                                closeOrder.add(Tag.a.a.a.a);
+                              },
+                              menuPanel: Panel(children: <Widget>[Text(Tag.a.a.a.a.a.text)]),
+                              child: AnchorButton(Tag.a.a.a.a),
+                            ),
+                          ],
+                        ),
+                        child: AnchorButton(Tag.a.a.a),
+                      ),
+                    ],
+                  ),
+                  child: AnchorButton(Tag.a.a),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Open parent menu.
+      controller.open();
+      await tester.pump();
+
+      // Open submenu.
+      await tester.tap(find.text(Tag.a.a.text));
+      await tester.pump();
+
+      // Open sub-submenu.
+      await tester.tap(find.text(Tag.a.a.a.text));
+      await tester.pump();
+
+      await tester.tap(find.text(Tag.a.a.a.a.text));
+      await tester.pump();
+
+      // Menus call onCloseRequested on their children when opening, so clear
+      // previous close events.
+      closeOrder.clear();
+
+      controller.close();
+      await tester.pump();
+
+      await tester.pump(const Duration(milliseconds: 9));
+
+      expect(closeOrder, isEmpty);
+
+      // 11 milliseconds.
+      await tester.pump(const Duration(milliseconds: 2));
+
+      expect(closeOrder, equals([Tag.a.a.a.a, Tag.a.a.a]));
+
+      // 34 milliseconds.
+      await tester.pump(const Duration(milliseconds: 23));
+
+      expect(closeOrder, equals([Tag.a.a.a.a, Tag.a.a.a]));
+
+      // 36 milliseconds.
+      await tester.pump(const Duration(milliseconds: 2));
+
+      expect(closeOrder, equals([Tag.a.a.a.a, Tag.a.a.a, Tag.a.a, Tag.a]));
+
+      // The test framework checks for pending timers at the end of the
+      // testWidgets function body, before the teardown callbacks run.
+      //
+      // Pump enough time for all timers to complete to ensure that any pending
+      // timers are from the test and not from the teardown.
+      await tester.pump(const Duration(milliseconds: 20));
+    });
+
     testWidgets('DismissMenuAction triggers onCloseRequested', (WidgetTester tester) async {
       final focusNode = FocusNode();
       addTearDown(focusNode.dispose);
