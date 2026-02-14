@@ -1211,9 +1211,7 @@ const double wideGutterSize = 24.0;
 const double narrowGutterSize = 12.0;
 
 double _getGutterSize(BuildContext context) =>
-    MediaQuery.widthOf(context) >= materialGutterThreshold
-    ? wideGutterSize
-    : narrowGutterSize;
+    MediaQuery.widthOf(context) >= materialGutterThreshold ? wideGutterSize : narrowGutterSize;
 
 /// Signature for the builder callback used by [_MasterDetailFlow].
 typedef _MasterViewBuilder = Widget Function(BuildContext context, bool isLateralUI);
