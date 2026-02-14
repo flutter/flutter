@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -147,13 +148,15 @@ void main() {
     expect(errorTextStyle.style.color, CupertinoColors.destructiveRed);
   });
 
-  testWidgets('CupertinoFormRow adapts to CupertinoApp dark mode', (WidgetTester tester) async {
+  // TODO(justinmc): Don't test Material interactions in Cupertino tests.
+  // https://github.com/flutter/flutter/issues/177028
+  testWidgets('CupertinoFormRow adapts to MaterialApp dark mode', (WidgetTester tester) async {
     const Widget prefix = Text('Prefix');
     const Widget helper = Text('Helper');
 
     Widget buildFormRow(Brightness brightness) {
-      return CupertinoApp(
-        theme: CupertinoThemeData(brightness: brightness),
+      return MaterialApp(
+        theme: ThemeData(brightness: brightness),
         home: const Center(
           child: CupertinoFormRow(prefix: prefix, helper: helper, child: CupertinoTextField()),
         ),
@@ -163,28 +166,22 @@ void main() {
     // CupertinoFormRow with light theme.
     await tester.pumpWidget(buildFormRow(Brightness.light));
     RenderParagraph helperParagraph = tester.renderObject(find.text('Helper'));
-    final Color expectedLight = CupertinoColors.label.resolveFrom(
-      tester.element(find.byType(CupertinoFormRow)),
-    );
-    expect(helperParagraph.text.style!.color, expectedLight);
+    expect(helperParagraph.text.style!.color, CupertinoColors.label);
     // Text style should not return unresolved color.
     expect(helperParagraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
     RenderParagraph prefixParagraph = tester.renderObject(find.text('Prefix'));
-    expect(prefixParagraph.text.style!.color, expectedLight);
+    expect(prefixParagraph.text.style!.color, CupertinoColors.label);
     // Text style should not return unresolved color.
     expect(prefixParagraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
 
     // CupertinoFormRow with light theme.
     await tester.pumpWidget(buildFormRow(Brightness.dark));
     helperParagraph = tester.renderObject(find.text('Helper'));
-    final Color expectedDark = CupertinoColors.label.resolveFrom(
-      tester.element(find.byType(CupertinoFormRow)),
-    );
-    expect(helperParagraph.text.style!.color, expectedDark);
+    expect(helperParagraph.text.style!.color, CupertinoColors.label);
     // Text style should not return unresolved color.
     expect(helperParagraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
     prefixParagraph = tester.renderObject(find.text('Prefix'));
-    expect(prefixParagraph.text.style!.color, expectedDark);
+    expect(prefixParagraph.text.style!.color, CupertinoColors.label);
     // Text style should not return unresolved color.
     expect(prefixParagraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
   });
