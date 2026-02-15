@@ -1,0 +1,4 @@
+libpng
+PNG Reference Library License version 2
+(?s)PNG Reference Library License version 2.*
+ \* Copyright \(c\).*

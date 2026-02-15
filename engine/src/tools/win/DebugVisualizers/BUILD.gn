@@ -1,0 +1,24 @@
+# Copyright 2017 The Chromium Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The .natvis files define "native visualizers" for the Visual Studio debugger
+# that allow one to define how custom types appear.
+#
+# One can use them by adding them to a project in visual studio, and they can
+# be embedded in a project's PDB file using the undocumented linker flag
+# /NATVIS. These configs would generally be added to all_dependent_configs
+# on a target so all targets that link to them will reference the visualizers
+# from their PDB files.
+#
+# See https://msdn.microsoft.com/en-us/library/jj620914.aspx for how they work.
+
+import("//build/config/compiler/compiler.gni")
+
+assert(is_win)
+
+config("absl") {
+  # absl.natvis listed as an input in //third_party/abseil-cpp/BUILD.gn to
+  # guarantee relinking on changes.
+  ldflags = [ "/NATVIS:" + rebase_path("absl.natvis", root_build_dir) ]
+}

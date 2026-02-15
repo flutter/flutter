@@ -1,0 +1,6 @@
+apache 2 vulkan validation layers
+(?s)^The majority of files in this project use the Apache 2\.0 License\..*vk_mem_alloc\.h
+(?s)^The majority of files in this project use the Apache 2\.0 License\.
+.*Apache License
+.*Version 2.0, January 2004
+.*See the License for the specific language governing permissions and\s+limitations under the License.

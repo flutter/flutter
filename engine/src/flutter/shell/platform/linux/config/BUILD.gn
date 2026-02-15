@@ -1,0 +1,36 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/linux/pkg_config.gni")
+import("//flutter/shell/platform/glfw/config.gni")
+
+_pkg_configs = [
+  {
+    name = "x11"
+    package = "x11"
+  },
+  {
+    name = "gtk"
+    package = "gtk+-3.0"
+  },
+  {
+    name = "egl"
+    package = "egl"
+  },
+  {
+    name = "epoxy"
+    package = "epoxy"
+  },
+]
+
+foreach(pkg, _pkg_configs) {
+  if (!is_minimal_linux) {
+    pkg_config(pkg.name) {
+      packages = [ pkg.package ]
+    }
+  } else {
+    config(pkg.name) {
+    }
+  }
+}

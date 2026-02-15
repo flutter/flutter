@@ -1,0 +1,13 @@
+InheritParentConfig: true
+
+# EnumCastOutOfRange warns about some common usages of GTK macros
+# Malloc generates false positives with g_autofree usage.
+Checks: >-
+  -clang-analyzer-optin.core.EnumCastOutOfRange,
+  -clang-analyzer-unix.Malloc
+
+CheckOptions:
+  - key: readability-identifier-naming.EnumConstantCase
+    value: "UPPER_CASE"
+  - key: readability-identifier-naming.EnumConstantPrefix
+    value: ""

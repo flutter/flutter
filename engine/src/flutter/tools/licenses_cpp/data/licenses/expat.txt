@@ -1,0 +1,3 @@
+expat
+(?s)XML parser.*Licensed under the MIT license
+(?s).*Copyright \(c\).*Licensed under the MIT license.*USE OR OTHER DEALINGS IN THE SOFTWARE\.

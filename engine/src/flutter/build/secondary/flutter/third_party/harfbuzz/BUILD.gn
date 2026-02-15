@@ -1,0 +1,177 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+config("harfbuzz_config") {
+  include_dirs = [ "src" ]
+}
+
+config("harfbuzz_flags") {
+  cflags = []
+  if (is_clang) {
+    cflags += [
+      "-Wno-missing-field-initializers",
+      "-Wno-unused-variable",
+      "-Wno-sign-compare",
+    ]
+  }
+
+  defines = [
+    "HAVE_OT",
+    "HAVE_ICU",
+    "HAVE_ICU_BUILTIN",
+    "HB_NO_VISIBILITY",
+  ]
+
+  if (is_linux || is_android || is_fuchsia) {
+    defines += [ "HAVE_PTHREAD" ]
+  }
+}
+
+source_set("harfbuzz_sources") {
+  sources = [
+    "src/hb-aat-layout.cc",
+    "src/hb-aat-map.cc",
+    "src/hb-blob.cc",
+    "src/hb-buffer-serialize.cc",
+    "src/hb-buffer-verify.cc",
+    "src/hb-buffer.cc",
+    "src/hb-common.cc",
+    "src/hb-draw.cc",
+    "src/hb-face-builder.cc",
+    "src/hb-face.cc",
+    "src/hb-fallback-shape.cc",
+    "src/hb-font.cc",
+    "src/hb-map.cc",
+    "src/hb-number.cc",
+    "src/hb-ot-cff1-table.cc",
+    "src/hb-ot-cff2-table.cc",
+    "src/hb-ot-color.cc",
+    "src/hb-ot-face.cc",
+    "src/hb-ot-font.cc",
+    "src/hb-ot-layout.cc",
+    "src/hb-ot-map.cc",
+    "src/hb-ot-math.cc",
+    "src/hb-ot-meta.cc",
+    "src/hb-ot-metrics.cc",
+    "src/hb-ot-name.cc",
+    "src/hb-ot-shape-fallback.cc",
+    "src/hb-ot-shape-normalize.cc",
+    "src/hb-ot-shape.cc",
+    "src/hb-ot-shaper-arabic.cc",
+    "src/hb-ot-shaper-default.cc",
+    "src/hb-ot-shaper-hangul.cc",
+    "src/hb-ot-shaper-hebrew.cc",
+    "src/hb-ot-shaper-indic-table.cc",
+    "src/hb-ot-shaper-indic.cc",
+    "src/hb-ot-shaper-khmer.cc",
+    "src/hb-ot-shaper-myanmar.cc",
+    "src/hb-ot-shaper-syllabic.cc",
+    "src/hb-ot-shaper-thai.cc",
+    "src/hb-ot-shaper-use.cc",
+    "src/hb-ot-shaper-vowel-constraints.cc",
+    "src/hb-ot-tag.cc",
+    "src/hb-ot-var.cc",
+    "src/hb-outline.cc",
+    "src/hb-paint-extents.cc",
+    "src/hb-paint.cc",
+    "src/hb-set.cc",
+    "src/hb-shape-plan.cc",
+    "src/hb-shape.cc",
+    "src/hb-shaper.cc",
+    "src/hb-static.cc",
+    "src/hb-style.cc",
+    "src/hb-ucd.cc",
+    "src/hb-unicode.cc",
+  ]
+
+  configs += [ ":harfbuzz_flags" ]
+
+  public_configs = [ ":harfbuzz_config" ]
+
+  deps = [
+    "//third_party/freetype2",
+    "//third_party/icu:icuuc",
+  ]
+}
+
+source_set("harfbuzz_subset") {
+  sources = [
+    "src/graph/gsubgpos-context.cc",
+    "src/hb-aat-layout.cc",
+    "src/hb-aat-map.cc",
+    "src/hb-blob.cc",
+    "src/hb-buffer-serialize.cc",
+    "src/hb-buffer-verify.cc",
+    "src/hb-buffer.cc",
+    "src/hb-common.cc",
+    "src/hb-draw.cc",
+    "src/hb-face-builder.cc",
+    "src/hb-face.cc",
+    "src/hb-fallback-shape.cc",
+    "src/hb-font.cc",
+    "src/hb-map.cc",
+    "src/hb-number.cc",
+    "src/hb-ot-cff1-table.cc",
+    "src/hb-ot-cff2-table.cc",
+    "src/hb-ot-color.cc",
+    "src/hb-ot-face.cc",
+    "src/hb-ot-font.cc",
+    "src/hb-ot-layout.cc",
+    "src/hb-ot-map.cc",
+    "src/hb-ot-math.cc",
+    "src/hb-ot-meta.cc",
+    "src/hb-ot-metrics.cc",
+    "src/hb-ot-name.cc",
+    "src/hb-ot-shape-fallback.cc",
+    "src/hb-ot-shape-normalize.cc",
+    "src/hb-ot-shape.cc",
+    "src/hb-ot-shaper-arabic.cc",
+    "src/hb-ot-shaper-default.cc",
+    "src/hb-ot-shaper-hangul.cc",
+    "src/hb-ot-shaper-hebrew.cc",
+    "src/hb-ot-shaper-indic-table.cc",
+    "src/hb-ot-shaper-indic.cc",
+    "src/hb-ot-shaper-khmer.cc",
+    "src/hb-ot-shaper-myanmar.cc",
+    "src/hb-ot-shaper-syllabic.cc",
+    "src/hb-ot-shaper-thai.cc",
+    "src/hb-ot-shaper-use.cc",
+    "src/hb-ot-shaper-vowel-constraints.cc",
+    "src/hb-ot-tag.cc",
+    "src/hb-ot-var.cc",
+    "src/hb-outline.cc",
+    "src/hb-paint-extents.cc",
+    "src/hb-paint.cc",
+    "src/hb-set.cc",
+    "src/hb-shape-plan.cc",
+    "src/hb-shape.cc",
+    "src/hb-shaper.cc",
+    "src/hb-static.cc",
+    "src/hb-style.cc",
+    "src/hb-subset-cff-common.cc",
+    "src/hb-subset-cff1.cc",
+    "src/hb-subset-cff2.cc",
+    "src/hb-subset-input.cc",
+    "src/hb-subset-instancer-iup.cc",
+    "src/hb-subset-instancer-solver.cc",
+    "src/hb-subset-plan.cc",
+    "src/hb-subset.cc",
+    "src/hb-ucd.cc",
+    "src/hb-unicode.cc",
+  ]
+
+  configs += [ ":harfbuzz_flags" ]
+
+  public_configs = [ ":harfbuzz_config" ]
+
+  deps = [
+    "//third_party/freetype2",
+    "//third_party/icu:icuuc",
+  ]
+}
+
+source_set("harfbuzz") {
+  output_name = "harfbuzz"
+  public_deps = [ ":harfbuzz_sources" ]
+}

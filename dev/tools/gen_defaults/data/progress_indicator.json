@@ -1,0 +1,14 @@
+{
+  "version": "6_1_0",
+
+  "md.comp.progress-indicator.active-indicator.color": "primary",
+  "md.comp.progress-indicator.active-indicator.shape": "md.sys.shape.corner.full",
+  "md.comp.progress-indicator.active-indicator.thickness": 4.0,
+  "md.comp.progress-indicator.active-indicator-track-space": 4.0,
+  "md.comp.progress-indicator.stop-indicator.color": "primary",
+  "md.comp.progress-indicator.stop-indicator.shape": 4.0,
+  "md.comp.progress-indicator.stop-indicator.size": 4.0,
+  "md.comp.progress-indicator.track.color": "secondaryContainer",
+  "md.comp.progress-indicator.track.shape": "md.sys.shape.corner.full",
+  "md.comp.progress-indicator.track.thickness": 4.0
+}

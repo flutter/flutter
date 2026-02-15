@@ -1,0 +1,22 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+declare_args() {
+  # For macOS hosts, we produce a suffixed gen_snapshot indicating the target
+  # CPU architecture (e.g. gen_snapshot_x64 targets x64 devices). This serves
+  # two purposes:
+  # 1. Clearly indicates which architecture gen_snapshot targets.
+  # 2. Avoid build output conflicts -- we produce two gen-snapshot binaries,
+  #    one for each supported macOS host architecture (x64, arm64), then merge
+  #    them to a universal binary. Each of these build outputs must be
+  #    uniquely named.
+  gen_snapshot_suffix = ""
+  if (host_os == "mac") {
+    # Determine suffixed output gen_snapshot name.
+    gen_snapshot_suffix = "_${target_cpu}"
+    if (target_cpu == "arm") {
+      gen_snapshot_suffix = "_armv7"
+    }
+  }
+}

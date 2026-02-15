@@ -1,0 +1,146 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'template.dart';
+
+class CheckboxTemplate extends TokenTemplate {
+  const CheckboxTemplate(
+    super.blockName,
+    super.fileName,
+    super.tokens, {
+    super.colorSchemePrefix = '_colors.',
+  });
+
+  @override
+  String generate() =>
+      '''
+class _${blockName}DefaultsM3 extends CheckboxThemeData {
+  _${blockName}DefaultsM3(BuildContext context)
+    : _theme = Theme.of(context),
+      _colors = Theme.of(context).colorScheme;
+
+  final ThemeData _theme;
+  final ColorScheme _colors;
+
+  @override
+  WidgetStateBorderSide? get side {
+    return WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        if (states.contains(WidgetState.selected)) {
+          return const BorderSide(width: ${getToken('md.comp.checkbox.unselected.disabled.outline.width')}, color: Colors.transparent);
+        }
+        return BorderSide(width: ${getToken('md.comp.checkbox.unselected.disabled.outline.width')}, color: ${componentColor('md.comp.checkbox.unselected.disabled.outline')}.withOpacity(${getToken('md.comp.checkbox.unselected.disabled.container.opacity')}));
+      }
+      if (states.contains(WidgetState.selected)) {
+        return const BorderSide(width: ${getToken('md.comp.checkbox.selected.outline.width')}, color: Colors.transparent);
+      }
+      if (states.contains(WidgetState.error)) {
+        return BorderSide(width: ${getToken('md.comp.checkbox.unselected.disabled.outline.width')}, color: ${componentColor('md.comp.checkbox.unselected.error.outline')});
+      }
+      if (states.contains(WidgetState.pressed)) {
+        return BorderSide(width: ${getToken('md.comp.checkbox.unselected.pressed.outline.width')}, color: ${componentColor('md.comp.checkbox.unselected.pressed.outline')});
+      }
+      if (states.contains(WidgetState.hovered)) {
+        return BorderSide(width: ${getToken('md.comp.checkbox.unselected.hover.outline.width')}, color: ${componentColor('md.comp.checkbox.unselected.hover.outline')});
+      }
+      if (states.contains(WidgetState.focused)) {
+        return BorderSide(width: ${getToken('md.comp.checkbox.unselected.focus.outline.width')}, color: ${componentColor('md.comp.checkbox.unselected.focus.outline')});
+      }
+      return BorderSide(width: ${getToken('md.comp.checkbox.unselected.outline.width')}, color: ${componentColor('md.comp.checkbox.unselected.outline')});
+    });
+  }
+
+  @override
+  WidgetStateProperty<Color> get fillColor {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        if (states.contains(WidgetState.selected)) {
+          return ${componentColor('md.comp.checkbox.selected.disabled.container')};
+        }
+        return Colors.transparent;
+      }
+      if (states.contains(WidgetState.selected)) {
+        if (states.contains(WidgetState.error)) {
+          return ${componentColor('md.comp.checkbox.selected.error.container')};
+        }
+        return ${componentColor('md.comp.checkbox.selected.container')};
+      }
+      return Colors.transparent;
+    });
+  }
+
+  @override
+  WidgetStateProperty<Color> get checkColor {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        if (states.contains(WidgetState.selected)) {
+          return ${componentColor('md.comp.checkbox.selected.disabled.icon')};
+        }
+        return Colors.transparent; // No icons available when the checkbox is unselected.
+      }
+      if (states.contains(WidgetState.selected)) {
+        if (states.contains(WidgetState.error)) {
+          return ${componentColor('md.comp.checkbox.selected.error.icon')};
+        }
+        return ${componentColor('md.comp.checkbox.selected.icon')};
+      }
+      return Colors.transparent; // No icons available when the checkbox is unselected.
+    });
+  }
+
+  @override
+  WidgetStateProperty<Color> get overlayColor {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.error)) {
+        if (states.contains(WidgetState.pressed)) {
+          return ${componentColor('md.comp.checkbox.error.pressed.state-layer')};
+        }
+        if (states.contains(WidgetState.hovered)) {
+          return ${componentColor('md.comp.checkbox.error.hover.state-layer')};
+        }
+        if (states.contains(WidgetState.focused)) {
+          return ${componentColor('md.comp.checkbox.error.focus.state-layer')};
+        }
+      }
+      if (states.contains(WidgetState.selected)) {
+        if (states.contains(WidgetState.pressed)) {
+          return ${componentColor('md.comp.checkbox.selected.pressed.state-layer')};
+        }
+        if (states.contains(WidgetState.hovered)) {
+          return ${componentColor('md.comp.checkbox.selected.hover.state-layer')};
+        }
+        if (states.contains(WidgetState.focused)) {
+          return ${componentColor('md.comp.checkbox.selected.focus.state-layer')};
+        }
+        return Colors.transparent;
+      }
+      if (states.contains(WidgetState.pressed)) {
+        return ${componentColor('md.comp.checkbox.unselected.pressed.state-layer')};
+      }
+      if (states.contains(WidgetState.hovered)) {
+        return ${componentColor('md.comp.checkbox.unselected.hover.state-layer')};
+      }
+      if (states.contains(WidgetState.focused)) {
+        return ${componentColor('md.comp.checkbox.unselected.focus.state-layer')};
+      }
+      return Colors.transparent;
+    });
+  }
+
+  @override
+  double get splashRadius => ${getToken('md.comp.checkbox.state-layer.size')} / 2;
+
+  @override
+  MaterialTapTargetSize get materialTapTargetSize => _theme.materialTapTargetSize;
+
+  @override
+  VisualDensity get visualDensity => VisualDensity.standard;
+
+  @override
+  OutlinedBorder get shape => const RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(${getToken('md.comp.checkbox.unselected.outline.width')})),
+  );
+}
+''';
+}

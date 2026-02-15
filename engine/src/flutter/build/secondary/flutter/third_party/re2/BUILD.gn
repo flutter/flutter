@@ -1,0 +1,49 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+re2_base = "//flutter/third_party/re2"
+
+config("re2_config") {
+  include_dirs = [ "$re2_base" ]  # Relative to the BUILD.gn file
+}
+
+source_set("re2") {
+  public_configs = [ ":re2_config" ]
+  sources = [
+    "$re2_base/re2/bitmap256.cc",
+    "$re2_base/re2/bitstate.cc",
+    "$re2_base/re2/compile.cc",
+    "$re2_base/re2/dfa.cc",
+    "$re2_base/re2/filtered_re2.cc",
+    "$re2_base/re2/filtered_re2.h",
+    "$re2_base/re2/mimics_pcre.cc",
+    "$re2_base/re2/nfa.cc",
+    "$re2_base/re2/onepass.cc",
+    "$re2_base/re2/parse.cc",
+    "$re2_base/re2/perl_groups.cc",
+    "$re2_base/re2/prefilter.cc",
+    "$re2_base/re2/prefilter_tree.cc",
+    "$re2_base/re2/prog.cc",
+    "$re2_base/re2/re2.cc",
+    "$re2_base/re2/re2.h",
+    "$re2_base/re2/regexp.cc",
+    "$re2_base/re2/set.cc",
+    "$re2_base/re2/set.h",
+    "$re2_base/re2/simplify.cc",
+    "$re2_base/re2/stringpiece.h",
+    "$re2_base/re2/tostring.cc",
+    "$re2_base/re2/unicode_casefold.cc",
+    "$re2_base/re2/unicode_groups.cc",
+    "$re2_base/util/rune.cc",
+    "$re2_base/util/strutil.cc",
+  ]
+  deps = [
+    "//third_party/abseil-cpp/absl/base",
+    "//third_party/abseil-cpp/absl/container:flat_hash_map",
+    "//third_party/abseil-cpp/absl/container:flat_hash_set",
+    "//third_party/abseil-cpp/absl/log",
+    "//third_party/abseil-cpp/absl/log:check",
+    "//third_party/abseil-cpp/absl/strings",
+  ]
+}

@@ -1,0 +1,15 @@
+# Run with `dart run ffigen --config ffigen.yaml`.
+name: {{pluginDartClass}}Bindings
+description: |
+  Bindings for `src/{{projectName}}.h`.
+
+  Regenerate bindings with `dart run ffigen --config ffigen.yaml`.
+output: 'lib/{{projectName}}_bindings_generated.dart'
+headers:
+  entry-points:
+    - 'src/{{projectName}}.h'
+  include-directives:
+    - 'src/{{projectName}}.h'
+comments:
+  style: any
+  length: full

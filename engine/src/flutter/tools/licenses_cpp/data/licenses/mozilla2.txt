@@ -1,0 +1,7 @@
+mozilla 2.0
+^Mozilla Public License Version 2\.0
+(?s)^Mozilla Public License Version 2\.0.*
+2\. License Grants and Conditions.*
+3\. Responsibilities.*
+5\. Termination.*
+10\. Versions of the License.*

@@ -1,0 +1,4 @@
+apache2 spdx
+(?s)Copyright.*SPDX-License-Identifier: Apache-2.0
+(?s)Copyright.*\d\d\d\d.*
+SPDX-License-Identifier: Apache-2\.0

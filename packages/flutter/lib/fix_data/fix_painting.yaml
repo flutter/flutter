@@ -1,0 +1,165 @@
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# For details regarding the *Flutter Fix* feature, see
+# https://flutter.dev/to/flutter-fix
+
+# Please add new fixes to the top of the file, separated by one blank line
+# from other fixes. In a comment, include a link to the PR where the change
+# requiring the fix was made.
+
+# Every fix must be tested. See the flutter/packages/flutter/test_fixes/README.md
+# file for instructions on testing these data driven fixes.
+
+# For documentation about this file format, see
+# https://dart.dev/go/data-driven-fixes.
+
+# * Fixes in this file are from the Painting library. *
+version: 1
+transforms:
+  # Change made in https://github.com/flutter/flutter/pull/128522
+  - title: "Migrate to 'textScaler'"
+    date: 2023-06-09
+    element:
+      uris: [ 'painting.dart' ]
+      method: 'computeMaxIntrinsicWidth'
+      inClass: 'TextPainter'
+    changes:
+      - kind: 'addParameter'
+        index: 4
+        name: 'textScaler'
+        style: optional_named
+        argumentValue:
+          expression: 'TextScaler.linear({% textScaleFactor %})'
+          requiredIf: "textScaleFactor != ''"
+      - kind: 'removeParameter'
+        name: 'textScaleFactor'
+    variables:
+      textScaleFactor:
+        kind: 'fragment'
+        value: 'arguments[textScaleFactor]'
+
+  # Change made in https://github.com/flutter/flutter/pull/128522
+  - title: "Migrate to 'textScaler'"
+    date: 2023-06-09
+    element:
+      uris: [ 'painting.dart' ]
+      method: 'computeWidth'
+      inClass: 'TextPainter'
+    changes:
+      - kind: 'addParameter'
+        index: 4
+        name: 'textScaler'
+        style: optional_named
+        argumentValue:
+          expression: 'TextScaler.linear({% textScaleFactor %})'
+          requiredIf: "textScaleFactor != ''"
+      - kind: 'removeParameter'
+        name: 'textScaleFactor'
+    variables:
+      textScaleFactor:
+        kind: 'fragment'
+        value: 'arguments[textScaleFactor]'
+
+  # Change made in https://github.com/flutter/flutter/pull/128522
+  - title: "Migrate to 'textScaler'"
+    date: 2023-06-09
+    element:
+      uris: [ 'painting.dart' ]
+      constructor: ''
+      inClass: 'TextPainter'
+    changes:
+      - kind: 'addParameter'
+        index: 0
+        name: 'textScaler'
+        style: optional_named
+        argumentValue:
+          expression: 'TextScaler.linear({% textScaleFactor %})'
+          requiredIf: "textScaleFactor != ''"
+      - kind: 'removeParameter'
+        name: 'textScaleFactor'
+    variables:
+      textScaleFactor:
+        kind: 'fragment'
+        value: 'arguments[textScaleFactor]'
+
+  # Change made in https://github.com/flutter/flutter/pull/128522
+  - title: "Migrate to 'textScaler'"
+    date: 2023-06-09
+    element:
+      uris: [ 'painting.dart' ]
+      method: 'getTextStyle'
+      inClass: 'TextStyle'
+    changes:
+      - kind: 'addParameter'
+        index: 0
+        name: 'textScaler'
+        style: optional_named
+        argumentValue:
+          expression: 'TextScaler.linear({% textScaleFactor %})'
+          requiredIf: "textScaleFactor != ''"
+      - kind: 'removeParameter'
+        name: 'textScaleFactor'
+    variables:
+      textScaleFactor:
+        kind: 'fragment'
+        value: 'arguments[textScaleFactor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/121152
+  - title: "Rename to 'fromViewPadding'"
+    date: 2022-02-21
+    element:
+      uris: [ 'painting.dart' ]
+      constructor: 'fromWindowPadding'
+      inClass: 'EdgeInsets'
+    changes:
+      - kind: 'rename'
+        newName: 'fromViewPadding'
+
+  - title: "Rename from 'opacity' to 'a'"
+    date: 2024-09-10
+    element:
+      uris: [ 'painting.dart' ]
+      method: 'opacity'
+      inClass: 'Color'
+    changes:
+      - kind: 'rename'
+        newName: 'a'
+
+  - title: "Replace 'value' with 'toARGB32()'"
+    date: 2025-02-03
+    element:
+      uris: [ 'painting.dart' ]
+      method: 'value'
+      inClass: 'Color'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: [ 'painting.dart' ]
+          method: 'toARGB32'
+          inClass: 'Color'
+
+  - title: "Rename 'withOpacity'"
+    date: 2024-09-10
+    element:
+      uris: [ 'painting.dart' ]
+      method: 'withOpacity'
+      inClass: 'Color'
+    changes:
+      - kind: 'rename'
+        newName: 'withValues'
+      - kind: 'removeParameter'
+        index: 0
+      - kind: 'addParameter'
+        index: 0
+        name: 'alpha'
+        style: optional_named
+        argumentValue:
+          expression: '{% opacity %}'
+          requiredIf: "opacity != ''"
+    variables:
+      opacity:
+        kind: 'fragment'
+        value: 'arguments[0]'
+# Before adding a new fix: read instructions at the top of this file.
