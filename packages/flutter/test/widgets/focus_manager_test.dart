@@ -1491,6 +1491,7 @@ void main() {
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
     }, variant: TargetPlatformVariant.all());
 
+    // Regression test for https://github.com/flutter/flutter/pull/180753
     testWidgets(
       'Soft keyboard key events do not change focus highlight mode on Android.',
       (WidgetTester tester) async {

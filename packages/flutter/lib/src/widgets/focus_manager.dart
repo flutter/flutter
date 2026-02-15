@@ -2204,14 +2204,21 @@ class _HighlightModeManager {
   }
 
   bool handleKeyMessage(KeyMessage message) {
-    final bool isFromVirtualKeyboard = _isKeyMessageFromAndroidIME(message);
-
+    // Update highlightMode first, since things responding to the keys might
+    // look at the highlight mode, and it should be accurate.
     // ignore: use_if_null_to_convert_nulls_to_bools
-    if (!isFromVirtualKeyboard && _lastInteractionRequiresTraditionalHighlights != false) {
-      // Update highlightMode first, since things responding to the keys might
-      // look at the highlight mode, and it should be accurate.
-      _lastInteractionRequiresTraditionalHighlights = false;
-      updateMode();
+    if (_lastInteractionRequiresTraditionalHighlights != false) {
+      // Android sends raw key events for "Backspace" key events from virtual
+      // keyboards. These shouldn't switch the highlight mode to traditional.
+      // See: https://github.com/flutter/flutter/issues/180746
+      // TODO(team-text-input): Remove this virtual keyboard check when we
+      // migrate to HardwareKeyboard:
+      // https://github.com/flutter/flutter/issues/136419
+      final bool isFromVirtualKeyboard = _isKeyMessageFromAndroidIME(message);
+      if (!isFromVirtualKeyboard) {
+        _lastInteractionRequiresTraditionalHighlights = false;
+        updateMode();
+      }
     }
 
     assert(_focusDebug(() => 'Received key event $message'));
