@@ -27,6 +27,27 @@ NSString* const kCADisableMinimumFrameDurationOnPhoneKey = @"CADisableMinimumFra
 // When calculating refresh rate difference, anything within 0.1 fps is ignored.
 const static double kRefreshRateDiffToIgnore = 0.1;
 
+namespace {
+
+fml::TimeDelta PredictionHeadroom(const fml::TimeDelta& interval) {
+  if (interval <= fml::TimeDelta::Zero()) {
+    return fml::TimeDelta::Zero();
+  }
+  const fml::TimeDelta proportional_headroom = interval / 10.0;
+  const fml::TimeDelta kHeadroomCap = fml::TimeDelta::FromMilliseconds(2);
+  return proportional_headroom < kHeadroomCap ? proportional_headroom
+                                              : kHeadroomCap;
+}
+
+fml::TimeDelta IntervalFromRefreshRate(double refresh_rate) {
+  if (refresh_rate <= 0.0) {
+    return fml::TimeDelta::Zero();
+  }
+  return fml::TimeDelta::FromSecondsF(1.0 / refresh_rate);
+}
+
+}  // namespace
+
 namespace flutter {
 
 VsyncWaiterIOS::VsyncWaiterIOS(const flutter::TaskRunners& task_runners)
@@ -77,6 +98,16 @@ double VsyncWaiterIOS::GetRefreshRate() const {
   // for the same interval.
   bool _hasLastFiredVsync;
   fml::TimePoint _lastFiredVsyncStartTime;
+
+  // Max display refresh rate used to conservatively account for dynamic
+  // 60Hz/120Hz transitions when predicting the next target.
+  double _maxRefreshRate;
+
+  // Scheduled predicted callbacks are versioned to make cancellation
+  // lock-free and cheap.
+  uint64_t _predictedCallbackGeneration;
+  bool _hasPendingPredictedVsync;
+  fml::TimePoint _pendingPredictedVsyncStartTime;
 }
 
 - (instancetype)initWithTaskRunner:(fml::RefPtr<fml::TaskRunner>)task_runner
@@ -85,9 +116,12 @@ double VsyncWaiterIOS::GetRefreshRate() const {
 
   if (self = [super init]) {
     _refreshRate = DisplayLinkManager.displayRefreshRate;
+    _maxRefreshRate = fmax(_refreshRate, 60);
     _allowPauseAfterVsync = YES;
     _hasLastVsync = false;
     _hasLastFiredVsync = false;
+    _predictedCallbackGeneration = 0;
+    _hasPendingPredictedVsync = false;
     _callback = std::move(callback);
     _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(onDisplayLink:)];
     _displayLink.paused = YES;
@@ -105,6 +139,7 @@ double VsyncWaiterIOS::GetRefreshRate() const {
 }
 
 - (void)setMaxRefreshRate:(double)refreshRate {
+  _maxRefreshRate = fmax(refreshRate, 60);
   if (!DisplayLinkManager.maxRefreshRateEnabledOnIPhone) {
     return;
   }
@@ -118,7 +153,63 @@ double VsyncWaiterIOS::GetRefreshRate() const {
   }
 }
 
-- (BOOL)maybeFireImmediateCallback {
+- (void)cancelPendingPredictedCallback {
+  _predictedCallbackGeneration++;
+  _hasPendingPredictedVsync = false;
+}
+
+- (void)firePredictedCallbackIfValidForGeneration:(uint64_t)generation
+                                    phaseStartTime:(fml::TimePoint)phase_start_time
+                                   phaseTargetTime:(fml::TimePoint)phase_target_time {
+  if (generation != _predictedCallbackGeneration || !_hasPendingPredictedVsync) {
+    return;
+  }
+  _hasPendingPredictedVsync = false;
+
+  if (!_allowPauseAfterVsync || _displayLink == nil || !_displayLink.isPaused) {
+    return;
+  }
+
+  const fml::TimeDelta interval = phase_target_time - phase_start_time;
+  if (interval <= fml::TimeDelta::Zero()) {
+    _displayLink.paused = NO;
+    return;
+  }
+
+  const fml::TimePoint now = fml::TimePoint::Now();
+  // Revalidate at callback time; if we're too close or late, fall back to a
+  // real CADisplayLink tick so we don't miss the frame.
+  if ((phase_target_time - now) <= PredictionHeadroom(interval)) {
+    _displayLink.paused = NO;
+    return;
+  }
+
+  if (_hasLastFiredVsync && phase_start_time <= _lastFiredVsyncStartTime) {
+    return;
+  }
+
+  TRACE_EVENT2_INT("flutter", "PlatformVsyncPredicted", "frame_start_time",
+                   phase_start_time.ToEpochDelta().ToMicroseconds(), "frame_target_time",
+                   phase_target_time.ToEpochDelta().ToMicroseconds());
+
+  std::unique_ptr<flutter::FrameTimingsRecorder> recorder =
+      std::make_unique<flutter::FrameTimingsRecorder>();
+
+  _refreshRate = round(1 / interval.ToSecondsF());
+
+  // Update caches to keep future predictions stable and close to now.
+  _hasLastVsync = true;
+  _lastVsyncStartTime = phase_start_time;
+  _lastVsyncTargetTime = phase_target_time;
+
+  _hasLastFiredVsync = true;
+  _lastFiredVsyncStartTime = phase_start_time;
+
+  recorder->RecordVsync(phase_start_time, phase_target_time);
+  _callback(std::move(recorder));
+}
+
+- (BOOL)maybeSchedulePredictedCallback {
   // Only attempt this optimization in "pause after vsync" mode. Other clients
   // intentionally run CADisplayLink continuously and should not be
   // short-circuited.
@@ -164,50 +255,63 @@ double VsyncWaiterIOS::GetRefreshRate() const {
     return NO;
   }
 
-  // Require at least 10% of the interval, capped at 2ms, to avoid issuing a
-  // begin-frame too close to target.
-  const fml::TimeDelta intervalHeadroom = interval / 10.0;
-  const fml::TimeDelta kMinHeadroom = intervalHeadroom < fml::TimeDelta::FromMilliseconds(2)
-                                          ? intervalHeadroom
-                                          : fml::TimeDelta::FromMilliseconds(2);
-  if ((phase_target_time - now) <= kMinHeadroom) {
+  if (_hasPendingPredictedVsync &&
+      phase_start_time <= _pendingPredictedVsyncStartTime) {
+    return YES;
+  }
+
+  // Dynamic refresh rates can switch between 60Hz and 120Hz. Use the earliest
+  // plausible interval from the configured max refresh rate to avoid over-
+  // predicting a slower cadence.
+  const fml::TimeDelta headroom = PredictionHeadroom(interval);
+  fml::TimePoint fire_time = phase_target_time - headroom - headroom;
+  const fml::TimeDelta min_possible_interval = IntervalFromRefreshRate(_maxRefreshRate);
+  if (min_possible_interval > fml::TimeDelta::Zero() &&
+      min_possible_interval < interval) {
+    const fml::TimePoint conservative_target = phase_start_time + min_possible_interval;
+    const fml::TimeDelta conservative_headroom = PredictionHeadroom(min_possible_interval);
+    const fml::TimePoint conservative_fire =
+        conservative_target - conservative_headroom - conservative_headroom;
+    if (conservative_fire < fire_time) {
+      fire_time = conservative_fire;
+    }
+  }
+
+  if (fire_time <= now) {
     return NO;
   }
 
-  TRACE_EVENT2_INT("flutter", "PlatformVsyncImmediate", "frame_start_time",
-                   phase_start_time.ToEpochDelta().ToMicroseconds(), "frame_target_time",
-                   phase_target_time.ToEpochDelta().ToMicroseconds());
+  _hasPendingPredictedVsync = true;
+  _pendingPredictedVsyncStartTime = phase_start_time;
+  const uint64_t generation = ++_predictedCallbackGeneration;
 
-  std::unique_ptr<flutter::FrameTimingsRecorder> recorder =
-      std::make_unique<flutter::FrameTimingsRecorder>();
-
-  _refreshRate = round(1 / interval.ToSecondsF());
-
-  // Update caches to keep future predictions stable and close to now.
-  _hasLastVsync = true;
-  _lastVsyncStartTime = phase_start_time;
-  _lastVsyncTargetTime = phase_target_time;
-
-  _hasLastFiredVsync = true;
-  _lastFiredVsyncStartTime = phase_start_time;
-
-  recorder->RecordVsync(phase_start_time, phase_target_time);
-  _callback(std::move(recorder));
+  VSyncClient* client = self;
+  const fml::TimeDelta delay = fire_time - now;
+  const int64_t delay_ns = delay > fml::TimeDelta::Zero() ? delay.ToNanoseconds() : 0;
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, delay_ns), dispatch_get_main_queue(), ^{
+    [client firePredictedCallbackIfValidForGeneration:generation
+                                       phaseStartTime:phase_start_time
+                                      phaseTargetTime:phase_target_time];
+  });
   return YES;
 }
 
 - (void)await {
-  if ([self maybeFireImmediateCallback]) {
+  if ([self maybeSchedulePredictedCallback]) {
     return;
   }
+  [self cancelPendingPredictedCallback];
   _displayLink.paused = NO;
 }
 
 - (void)pause {
+  [self cancelPendingPredictedCallback];
   _displayLink.paused = YES;
 }
 
 - (void)onDisplayLink:(CADisplayLink*)link {
+  [self cancelPendingPredictedCallback];
+
   CFTimeInterval delay = CACurrentMediaTime() - link.timestamp;
   fml::TimePoint frame_start_time = fml::TimePoint::Now() - fml::TimeDelta::FromSecondsF(delay);
 
@@ -239,6 +343,7 @@ double VsyncWaiterIOS::GetRefreshRate() const {
 }
 
 - (void)invalidate {
+  [self cancelPendingPredictedCallback];
   [_displayLink invalidate];
   _displayLink = nil;  // Break retain cycle.
   // Clear cached phase state so await() falls back to display link callbacks.
