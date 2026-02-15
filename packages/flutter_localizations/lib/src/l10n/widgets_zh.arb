@@ -12,7 +12,7 @@
   "shareButtonLabel": "分享",
   "pasteButtonLabel": "粘贴",
   "selectAllButtonLabel": "全选",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "找到搜索结果",
+  "noResultsFound": "未找到任何结果",
+  "radioButtonUnselectedLabel": "未选择"
 }

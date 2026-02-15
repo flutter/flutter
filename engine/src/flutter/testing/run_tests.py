@@ -468,6 +468,7 @@ def run_cc_tests(
       make_test('embedder_unittests'),
       make_test('fml_unittests'),
       make_test('geometry_unittests'),
+      make_test('gpu_surface_unittests'),
       make_test('no_dart_plugin_registrant_unittests'),
       make_test('runtime_unittests'),
       make_test('testing_unittests'),
@@ -503,7 +504,6 @@ def run_cc_tests(
         make_test('framework_common_swift_unittests'),
         make_test('framework_common_unittests'),
         make_test('spring_animation_unittests'),
-        make_test('gpu_surface_metal_unittests'),
     ]
 
   if is_linux():
@@ -651,13 +651,13 @@ class FlutterTesterOptions():
   def __init__( # pylint: disable=too-many-arguments
       self,
       multithreaded: bool = False,
-      enable_impeller: bool = False,
+      impeller_backend: str = '',
       enable_vm_service: bool = False,
       enable_microtask_profiling: bool = False,
       expect_failure: bool = False
   ) -> None:
     self.multithreaded = multithreaded
-    self.enable_impeller = enable_impeller
+    self.impeller_backend = impeller_backend
     self.enable_vm_service = enable_vm_service
     self.enable_microtask_profiling = enable_microtask_profiling
     self.expect_failure = expect_failure
@@ -666,8 +666,10 @@ class FlutterTesterOptions():
     if not self.enable_vm_service:
       command_args.append('--disable-vm-service')
 
-    if self.enable_impeller:
-      command_args += ['--enable-impeller', '--enable-flutter-gpu']
+    if self.impeller_backend != '':
+      command_args += [
+          '--enable-impeller', '--enable-flutter-gpu', f'--impeller-backend={self.impeller_backend}'
+      ]
     else:
       command_args += ['--no-enable-impeller']
 
@@ -683,9 +685,14 @@ class FlutterTesterOptions():
     return 'single-threaded'
 
   def impeller_enabled(self) -> str:
-    if self.enable_impeller:
-      return 'impeller swiftshader'
+    if self.impeller_backend != '':
+      return f'impeller {self.impeller_backend}'
     return 'skia software'
+
+  def tester_name(self) -> str:
+    if self.impeller_backend == 'opengles':
+      return 'flutter_tester_opengles'
+    return 'flutter_tester'
 
 
 def gather_dart_test(
@@ -715,7 +722,7 @@ def gather_dart_test(
       kernel_file_output,
   ]
 
-  tester_name = 'flutter_tester'
+  tester_name = options.tester_name()
   _logger.info(
       "Running test '%s' using '%s' (%s, %s)", kernel_file_name, tester_name,
       options.threading_description(), options.impeller_enabled()
@@ -924,40 +931,57 @@ def gather_dart_tests(
       cwd=dart_tests_dir,
   )
 
-  dart_vm_service_tests = glob.glob(f'{dart_tests_dir}/vm_service/*_test.dart')
+  dart_vm_service_tests = [] if 'release' in build_dir else glob.glob(
+      f'{dart_tests_dir}/vm_service/*_test.dart'
+  )
   dart_tests = glob.glob(f'{dart_tests_dir}/*_test.dart')
 
-  if 'release' not in build_dir:
-    for dart_test_file in dart_vm_service_tests:
-      dart_test_basename = os.path.basename(dart_test_file)
-      if test_filter is not None and dart_test_basename not in test_filter:
-        _logger.info("Skipping '%s' due to filter.", dart_test_file)
-      else:
-        _logger.info("Gathering dart test '%s' with VM service enabled", dart_test_file)
-        for multithreaded in [False, True]:
-          for enable_impeller in [False, True]:
-            yield gather_dart_test(
-                build_dir, dart_test_file,
-                FlutterTesterOptions(
-                    multithreaded=multithreaded,
-                    enable_impeller=enable_impeller,
-                    enable_vm_service=True,
-                    enable_microtask_profiling=dart_test_basename ==
-                    'microtask_profiling_test.dart',
-                )
-            )
+  opengles_skipped_tests = [
+      'codec_test.dart',
+      'decode_image_from_pixels_sync_test.dart',
+      'encoding_test.dart',
+      'gpu_test.dart',
+      'high_bitrate_texture_test.dart',
+      'image_dispose_test.dart',
+      'image_resize_test.dart',
+  ]
 
-  for dart_test_file in dart_tests:
-    if test_filter is not None and os.path.basename(dart_test_file) not in test_filter:
+  impeller_backends = ['', 'vulkan', 'opengles']
+  if is_mac():
+    impeller_backends.append('metal')
+
+  for (dart_test_file, enable_vm_service) in (*((test, True) for test in dart_vm_service_tests),
+                                              *((test, False) for test in dart_tests)):
+    dart_test_basename = os.path.basename(dart_test_file)
+    if test_filter is not None and dart_test_basename not in test_filter:
       _logger.info("Skipping '%s' due to filter.", dart_test_file)
+      continue
+
+    if enable_vm_service:
+      _logger.info("Gathering dart test '%s' with VM service enabled", dart_test_file)
     else:
       _logger.info("Gathering dart test '%s'", dart_test_file)
+
+    for impeller in impeller_backends:
+      if impeller == 'opengles' and dart_test_basename in opengles_skipped_tests:
+        _logger.info("Skipping for opengles: '%s'", dart_test_file)
+        continue
+
       for multithreaded in [False, True]:
-        for enable_impeller in [False, True]:
-          yield gather_dart_test(
-              build_dir, dart_test_file,
-              FlutterTesterOptions(multithreaded=multithreaded, enable_impeller=enable_impeller)
-          )
+        # An opengles implementation that is multithreaded would require the
+        # raster thread and the io thread to have their own contexts in a share
+        # group. This isn't currently supported by swangle.
+        if impeller == 'opengles' and multithreaded:
+          continue
+        yield gather_dart_test(
+            build_dir, dart_test_file,
+            FlutterTesterOptions(
+                multithreaded=multithreaded,
+                impeller_backend=impeller,
+                enable_vm_service=enable_vm_service,
+                enable_microtask_profiling=dart_test_basename == 'microtask_profiling_test.dart',
+            )
+        )
 
 
 def gather_dart_smoke_test(
@@ -1112,6 +1136,7 @@ def run_engine_tasks_in_parallel(tasks: typing.List[EngineExecutableTask]) -> bo
     queue_listener.stop()
 
   if len(failures) > 0:
+    print_divider('<')
     _logger.error('The following commands failed:')
     for task, failure_exn in failures:
       _logger.error('%s\n  %s\n\n', str(task), str(failure_exn))

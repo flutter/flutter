@@ -697,14 +697,6 @@ class AndroidProject extends FlutterProjectPlatform {
         .childFile('GeneratedPluginRegistrant.java');
   }
 
-  File get gradleAppOutV1File => gradleAppOutV1Directory.childFile('app-debug.apk');
-
-  Directory get gradleAppOutV1Directory {
-    return globals.fs.directory(
-      globals.fs.path.join(hostAppGradleRoot.path, 'app', 'build', 'outputs', 'apk'),
-    );
-  }
-
   /// Whether the current flutter project has an Android sub-project.
   @override
   bool existsSync() {
@@ -1022,7 +1014,7 @@ See the link below for more information:
 
   /// Returns the `io.flutter.embedding.android.EnableImpeller` manifest value.
   ///
-  /// If there is no manifest file, or the key is not present, returns `false`.
+  /// If there is no manifest file, or the key is not present, returns [_impellerEnabledByDefault].
   bool computeImpellerEnabled() {
     if (!appManifestFile.existsSync()) {
       return _impellerEnabledByDefault;

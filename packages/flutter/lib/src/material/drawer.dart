@@ -250,17 +250,13 @@ class Drawer extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final DrawerThemeData drawerTheme = DrawerTheme.of(context);
-    String? label = semanticLabel;
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        break;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        label = semanticLabel ?? MaterialLocalizations.of(context).drawerLabel;
-    }
+    final String? label = switch (defaultTargetPlatform) {
+      TargetPlatform.iOS || TargetPlatform.macOS => semanticLabel,
+      TargetPlatform.android ||
+      TargetPlatform.fuchsia ||
+      TargetPlatform.linux ||
+      TargetPlatform.windows => semanticLabel ?? MaterialLocalizations.of(context).drawerLabel,
+    };
     final bool useMaterial3 = Theme.of(context).useMaterial3;
     final isDrawerStart = DrawerController.maybeOf(context)?.alignment != DrawerAlignment.end;
     final DrawerThemeData defaults = useMaterial3
@@ -685,17 +681,14 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         return const SizedBox.shrink();
       }
     } else {
-      final bool platformHasBackButton;
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.android:
-          platformHasBackButton = true;
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          platformHasBackButton = false;
-      }
+      final bool platformHasBackButton = switch (defaultTargetPlatform) {
+        TargetPlatform.android => true,
+        TargetPlatform.iOS ||
+        TargetPlatform.macOS ||
+        TargetPlatform.fuchsia ||
+        TargetPlatform.linux ||
+        TargetPlatform.windows => false,
+      };
 
       final Color scrimColor =
           widget.scrimColor ?? DrawerTheme.of(context).scrimColor ?? Colors.black54;

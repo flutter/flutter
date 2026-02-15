@@ -101,6 +101,8 @@ void main() {
             projectUri: projectUri,
             fileSystem: fileSystem,
             buildRunner: buildRunner,
+            buildCodeAssets: true,
+            buildDataAssets: true,
           );
           final expectedDirectory = flutterTester ? code_assets.OS.current.toString() : 'windows';
           final Uri nativeAssetsFileUri = flutterTester
@@ -115,6 +117,7 @@ void main() {
             projectUri: projectUri,
             fileSystem: fileSystem,
             nativeAssetsFileUri: nativeAssetsFileUri,
+            targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/windows/'),
           );
           final expectedOS = flutterTester ? OS.current.toString() : 'windows';
           final expectedArch = flutterTester ? Architecture.current.toString() : 'x64';

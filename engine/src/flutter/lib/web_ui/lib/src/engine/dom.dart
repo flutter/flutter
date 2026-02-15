@@ -119,6 +119,11 @@ extension type DomWindow._(JSObject _) implements DomEventTarget {
   external DomVisualViewport? get visualViewport;
   external DomPerformance get performance;
 
+  /// The parent window of this window.
+  /// Returns null if this is the top-level window, or the same window
+  /// if not in an iframe.
+  external DomWindow? get parent;
+
   @visibleForTesting
   Future<Object?> fetch(String url) {
     // To make sure we have a consistent approach for handling and reporting
@@ -1801,7 +1806,15 @@ extension type DomMediaQueryList._(JSObject _) implements DomEventTarget {
 
 @JS('MediaQueryListEvent')
 extension type DomMediaQueryListEvent._(JSObject _) implements DomEvent {
+  /// https://developer.mozilla.org/en-US/docs/Web/API/MediaQueryListEvent/MediaQueryListEvent
+  @visibleForTesting
+  external DomMediaQueryListEvent(String type, [JSAny initDict]);
   external bool? get matches;
+}
+
+@visibleForTesting
+DomMediaQueryListEvent createDomMediaQueryListEvent(String type, Map<dynamic, dynamic> init) {
+  return DomMediaQueryListEvent(type, init.toJSAnyDeep);
 }
 
 @JS('Path2D')
