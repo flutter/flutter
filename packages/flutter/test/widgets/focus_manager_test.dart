@@ -1503,7 +1503,7 @@ void main() {
 
         expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
 
-        // simulates a soft keyboard key event
+        // Simulates a soft keyboard key event.
         const kAndroidSoftKeyboardFlag = 0x00000002;
         const kAndroidVirtualKeyboardDeviceId = -1;
         final Map<String, dynamic> data = {
