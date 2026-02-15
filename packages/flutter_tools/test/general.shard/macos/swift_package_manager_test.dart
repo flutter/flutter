@@ -6,6 +6,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
@@ -398,7 +399,7 @@ let package = Package(
           });
         });
 
-        group('updatePluginPackageDeploymentTarget', () {
+        group('generatePluginsSwiftPackage deployment target logic', () {
           testWithoutContext('return if invalid deploymentTarget', () async {
             final fs = MemoryFileSystem();
             final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
@@ -412,11 +413,11 @@ let package = Package(
               templateRenderer: const MustacheTemplateRenderer(),
               artifacts: FakeArtifacts(),
             );
-            await spm.updatePluginPackageDeploymentTarget(
-              project: project,
-              platform: platform,
-              deploymentTarget: '',
-              plugins: [],
+            await spm.generatePluginsSwiftPackage(
+              [],
+              platform,
+              project,
+              deploymentTarget: null,
             );
             expect(
               project.flutterPluginSwiftPackageManifest.readAsLinesSync(),
@@ -437,11 +438,11 @@ let package = Package(
               templateRenderer: const MustacheTemplateRenderer(),
               artifacts: FakeArtifacts(),
             );
-            await spm.updatePluginPackageDeploymentTarget(
-              project: project,
-              platform: platform,
-              deploymentTarget: '9.0',
-              plugins: [],
+            await spm.generatePluginsSwiftPackage(
+              [],
+              platform,
+              project,
+              deploymentTarget: Version(9, 0, 0),
             );
             expect(
               project.flutterPluginSwiftPackageManifest.readAsLinesSync(),
@@ -462,11 +463,11 @@ let package = Package(
               templateRenderer: const MustacheTemplateRenderer(),
               artifacts: FakeArtifacts(),
             );
-            await spm.updatePluginPackageDeploymentTarget(
-              project: project,
-              platform: platform,
-              deploymentTarget: platform == FlutterDarwinPlatform.ios ? '13.0' : '10.15',
-              plugins: [],
+            await spm.generatePluginsSwiftPackage(
+              [],
+              platform,
+              project,
+              deploymentTarget: platform == FlutterDarwinPlatform.ios ? Version(13, 0, 0) : Version(10, 15, 0),
             );
             expect(
               project.flutterPluginSwiftPackageManifest.readAsLinesSync(),
@@ -512,18 +513,18 @@ let package = Package(
               templateRenderer: const MustacheTemplateRenderer(),
               artifacts: FakeArtifacts(),
             );
-            await spm.updatePluginPackageDeploymentTarget(
-              project: project,
-              platform: platform,
-              deploymentTarget: '14.0',
-              plugins: [],
+            await spm.generatePluginsSwiftPackage(
+              [],
+              platform,
+              project,
+              deploymentTarget: Version(14, 0, 0),
             );
 
             final String content = project.flutterPluginSwiftPackageManifest.readAsStringSync();
             expect(content.contains(supportedPlatform), isFalse);
             expect(
               content,
-              contains(platform == FlutterDarwinPlatform.ios ? '.iOS("14.0")' : '.macOS("14.0")'),
+              contains(platform == FlutterDarwinPlatform.ios ? '.iOS("14.0.0")' : '.macOS("14.0.0")'),
             );
           });
         });

@@ -16,7 +16,7 @@ import 'package:flutter_tools/src/commands/build_swift_package.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
-import 'package:flutter_tools/src/macos/swift_packages.dart';
+import 'package:flutter_tools/src/macos/swift_package_manager.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/platform_plugins.dart';
 import 'package:flutter_tools/src/plugins.dart';

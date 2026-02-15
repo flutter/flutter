@@ -343,11 +343,13 @@ Future<XcodeBuildResult> buildXcodeProject({
       fileSystem: globals.fs,
       templateRenderer: globals.templateRenderer,
     );
+    final List<Plugin> plugins = await findPlugins(app.project.parent);
     await swiftPackageManager.ensurePluginsAreGenerated(
       project: app.project,
       platform: FlutterDarwinPlatform.ios,
       buildInfo: buildInfo,
       buildSettings: buildSettings,
+      plugins: plugins,
     );
 
 

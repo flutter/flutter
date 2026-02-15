@@ -23,7 +23,7 @@ import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../features.dart';
 import '../flutter_plugins.dart';
-import '../macos/swift_packages.dart';
+import '../macos/swift_package_manager.dart';
 import '../macos/xcode.dart';
 import '../plugins.dart';
 import '../project.dart';

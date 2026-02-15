@@ -22,7 +22,7 @@ import 'ios/code_signing.dart';
 import 'ios/plist_parser.dart';
 import 'ios/xcode_build_settings.dart' as xcode;
 import 'ios/xcodeproj.dart';
-import 'macos/swift_packages.dart';
+import 'macos/swift_package_manager.dart';
 import 'macos/xcode.dart';
 import 'platform_plugins.dart';
 import 'plugins.dart';

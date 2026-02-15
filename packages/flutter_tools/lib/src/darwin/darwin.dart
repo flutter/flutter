@@ -6,7 +6,7 @@ import '../artifacts.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../ios/xcodeproj.dart';
-import '../macos/swift_packages.dart';
+import '../macos/swift_package_manager.dart';
 import '../project.dart';
 
 /// Encapsulates platform-specific values for Darwin targets ([ios] and [macos]).

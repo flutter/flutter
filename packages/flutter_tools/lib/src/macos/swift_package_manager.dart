@@ -9,11 +9,10 @@ import '../base/template.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../darwin/darwin.dart';
-import '../flutter_plugins.dart';
 import '../plugins.dart';
 import '../xcode_project.dart';
 
-import 'swift_packages.dart';
+
 
 
 
@@ -46,6 +45,7 @@ class SwiftPackageManager {
     List<Plugin> plugins,
     FlutterDarwinPlatform platform,
     XcodeBasedProject project, {
+    BuildMode? buildMode,
     bool flutterAsADependency = true,
     Version? deploymentTarget,
   }) async {
@@ -195,10 +195,11 @@ class SwiftPackageManager {
   void createFlutterFrameworkSwiftPackage({
     required XcodeBasedProject project,
     required FlutterDarwinPlatform platform,
+    BuildMode? buildMode,
   }) {
     final String frameworkName = platform.binaryName;
 
-    _symlinkFlutterFramework(platform: platform, project: project, frameworkName: frameworkName);
+    _symlinkFlutterFramework(platform: platform, project: project, frameworkName: frameworkName, buildMode: buildMode);
     final flutterFrameworkPackage = SwiftPackage(
       manifest: project.flutterFrameworkSwiftPackageDirectory.childFile('Package.swift'),
       name: kFlutterGeneratedFrameworkSwiftPackageTargetName,
@@ -243,30 +244,34 @@ class SwiftPackageManager {
   /// FlutterFramework/Flutter.xcframework -> ./Debug/Flutter.xcframework
   /// ```
   void _symlinkFlutterFramework({
-    List<BuildMode> buildModes = const <BuildMode>[
-      BuildMode.debug,
-      BuildMode.profile,
-      BuildMode.release,
-    ],
     required XcodeBasedProject project,
     required FlutterDarwinPlatform platform,
     required String frameworkName,
+    BuildMode? buildMode,
+    List<BuildMode>? buildModes,
   }) {
-    for (final buildMode in buildModes) {
+    final List<BuildMode> modesToSymlink = buildMode != null
+        ? <BuildMode>[buildMode]
+        : buildModes ?? const <BuildMode>[
+            BuildMode.debug,
+            BuildMode.profile,
+            BuildMode.release,
+          ];
+    for (final mode in modesToSymlink) {
       final String frameworkArtifactPath = _artifacts.getArtifactPath(
         platform.xcframeworkArtifact,
         platform: platform.targetPlatform,
-        mode: buildMode,
+        mode: mode,
       );
       final Directory buildModeDirectory = project.flutterFrameworkSwiftPackageDirectory
-          .childDirectory(buildMode.uppercaseName);
+          .childDirectory(mode.uppercaseName);
       final Link frameworkLink = _fileSystem.link(
         buildModeDirectory.childDirectory('$frameworkName.xcframework').path,
       );
       frameworkLink.createSync(frameworkArtifactPath, recursive: true);
     }
     updateFlutterFrameworkSymlink(
-      buildMode: buildModes.first,
+      buildMode: modesToSymlink.first,
       fileSystem: _fileSystem,
       platform: platform,
       project: project,
@@ -298,45 +303,6 @@ class SwiftPackageManager {
     }
   }
 
-  /// If the project's IPHONEOS_DEPLOYMENT_TARGET/MACOSX_DEPLOYMENT_TARGET is
-  /// higher than the FlutterGeneratedPluginSwiftPackage's default
-  /// SupportedPlatform, increase the SupportedPlatform to match the project's
-  /// deployment target.
-  ///
-  /// This is done for the use case of a plugin requiring a higher iOS/macOS
-  /// version than FlutterGeneratedPluginSwiftPackage.
-  ///
-  /// Swift Package Manager emits an error if a dependency isn’t compatible
-  /// with the top-level package’s deployment version. The deployment target of
-  /// a package’s dependencies must be lower than or equal to the top-level
-  /// package’s deployment target version for a particular platform.
-  ///
-  /// To still be able to use the plugin, the user can increase the Xcode
-  /// project's iOS/macOS deployment target and this will then increase the
-  /// deployment target for FlutterGeneratedPluginSwiftPackage.
-  Future<void> updatePluginPackageDeploymentTarget({
-    required XcodeBasedProject project,
-    required FlutterDarwinPlatform platform,
-    required String deploymentTarget,
-    required List<Plugin> plugins,
-  }) async {
-    final Version? projectDeploymentTargetVersion = Version.parse(deploymentTarget);
-    final SwiftPackageSupportedPlatform defaultPlatform = platform.supportedPackagePlatform;
-
-    if (projectDeploymentTargetVersion == null ||
-        projectDeploymentTargetVersion <= defaultPlatform.version ||
-        !project.flutterPluginSwiftPackageManifest.existsSync()) {
-      return;
-    }
-
-    // Regenerate the package with the new deployment target.
-    await generatePluginsSwiftPackage(
-      plugins,
-      platform,
-      project,
-      deploymentTarget: projectDeploymentTargetVersion,
-    );
-  }
 
   /// Ensures that the plugin Swift package is generated and up to date.
   ///
@@ -349,24 +315,436 @@ class SwiftPackageManager {
     required FlutterDarwinPlatform platform,
     required BuildInfo buildInfo,
     required Map<String, String> buildSettings,
+    required List<Plugin> plugins,
   }) async {
-    updateFlutterFrameworkSymlink(
-      buildMode: buildInfo.mode,
-      fileSystem: _fileSystem,
-      platform: platform,
-      project: project,
-    );
-
     final String? deploymentTarget = buildSettings[platform.deploymentTargetBuildSetting];
+    final Version? projectDeploymentTargetVersion = deploymentTarget != null
+        ? Version.parse(deploymentTarget)
+        : null;
 
-    if (deploymentTarget != null) {
-      final List<Plugin> plugins = await findPlugins(project.parent);
-      await updatePluginPackageDeploymentTarget(
+    var generated = false;
+    if (projectDeploymentTargetVersion != null &&
+        projectDeploymentTargetVersion > platform.supportedPackagePlatform.version &&
+        project.flutterPluginSwiftPackageManifest.existsSync()) {
+      await generatePluginsSwiftPackage(
+        plugins,
+        platform,
+        project,
+        deploymentTarget: projectDeploymentTargetVersion,
+        buildMode: buildInfo.mode,
+      );
+      generated = true;
+    }
+
+    if (!generated) {
+      _symlinkFlutterFramework(
         platform: platform,
         project: project,
-        deploymentTarget: deploymentTarget,
-        plugins: plugins,
+        frameworkName: platform.binaryName,
+        buildMode: buildInfo.mode,
       );
     }
+  }
+}
+
+/// Swift toolchain version included with Xcode 15.0.
+const minimumSwiftToolchainVersion = '5.9';
+
+/// The name of the Swift package that's generated by the Flutter tool to add
+/// dependencies on Flutter plugin swift packages.
+const kFlutterGeneratedPluginSwiftPackageName = 'FlutterGeneratedPluginSwiftPackage';
+
+/// The name of the Swift pacakge that's generated by the Flutter tool to add
+/// a dependency on the Flutter/FlutterMacOS framework.
+const kFlutterGeneratedFrameworkSwiftPackageTargetName = 'FlutterFramework';
+
+const _swiftPackageTemplate = '''
+// swift-tools-version: {{swiftToolsVersion}}
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+//
+//  Generated file. Do not edit.
+//
+
+import PackageDescription
+
+let package = Package(
+    name: "{{packageName}}",
+    {{#platforms}}
+    platforms: [
+        {{platforms}}
+    ],
+    {{/platforms}}
+    products: [
+        {{products}}
+    ],
+    dependencies: [
+        {{dependencies}}
+    ],
+    targets: [
+        {{targets}}
+    ]
+)
+''';
+
+const _swiftPackageSourceTemplate = '''
+//
+//  Generated file. Do not edit.
+//
+''';
+
+const _singleIndent = '    ';
+const _doubleIndent = '$_singleIndent$_singleIndent';
+
+/// A Swift Package is reusable code that can be shared across projects and
+/// with other developers in iOS and macOS applications. A Swift Package
+/// requires a Package.swift. This class handles the formatting and creation of
+/// a Package.swift.
+///
+/// See https://developer.apple.com/documentation/packagedescription/package
+/// for more information about Swift Packages and Package.swift.
+class SwiftPackage {
+  SwiftPackage({
+    required File manifest,
+    required String name,
+    required List<SwiftPackageSupportedPlatform> platforms,
+    required List<SwiftPackageProduct> products,
+    required List<SwiftPackagePackageDependency> dependencies,
+    required List<SwiftPackageTarget> targets,
+    required TemplateRenderer templateRenderer,
+  }) : _manifest = manifest,
+       _name = name,
+       _platforms = platforms,
+       _products = products,
+       _dependencies = dependencies,
+       _targets = targets,
+       _templateRenderer = templateRenderer;
+
+  /// [File] for Package.swift.
+  final File _manifest;
+
+  /// The name of the Swift package.
+  final String _name;
+
+  /// The list of minimum versions for platforms supported by the package.
+  final List<SwiftPackageSupportedPlatform> _platforms;
+
+  /// The list of products that this package vends and that clients can use.
+  final List<SwiftPackageProduct> _products;
+
+  /// The list of package dependencies.
+  final List<SwiftPackagePackageDependency> _dependencies;
+
+  /// The list of targets that are part of this package.
+  final List<SwiftPackageTarget> _targets;
+
+  final TemplateRenderer _templateRenderer;
+
+  /// Context for the [_swiftPackageTemplate] template.
+  Map<String, Object> get _templateContext => <String, Object>{
+    'swiftToolsVersion': minimumSwiftToolchainVersion,
+    'packageName': _name,
+    // Supported platforms can't be empty, so only include if not null.
+    'platforms': _formatPlatforms() ?? false,
+    'products': _formatProducts(),
+    'dependencies': _formatDependencies(),
+    'targets': _formatTargets(),
+  };
+
+  /// Create a Package.swift using settings from [_templateContext].
+  void createSwiftPackage() {
+    // Swift Packages require at least one source file per non-binary target,
+    // whether it be in Swift or Objective C. If the target does not have any
+    // files yet, create an empty Swift file.
+    for (final SwiftPackageTarget target in _targets) {
+      if (target.targetType == SwiftPackageTargetType.binaryTarget) {
+        continue;
+      }
+      final Directory targetDirectory = _manifest.parent
+          .childDirectory('Sources')
+          .childDirectory(target.name);
+      if (!targetDirectory.existsSync() || targetDirectory.listSync().isEmpty) {
+        final File requiredSwiftFile = targetDirectory.childFile('${target.name}.swift');
+        requiredSwiftFile.createSync(recursive: true);
+        requiredSwiftFile.writeAsStringSync(_swiftPackageSourceTemplate);
+      }
+    }
+
+    final String renderedTemplate = _templateRenderer.renderString(
+      _swiftPackageTemplate,
+      _templateContext,
+    );
+    _manifest.createSync(recursive: true);
+    _manifest.writeAsStringSync(renderedTemplate);
+  }
+
+  String? _formatPlatforms() {
+    if (_platforms.isEmpty) {
+      return null;
+    }
+    final List<String> platformStrings = _platforms
+        .map((SwiftPackageSupportedPlatform platform) => platform.format())
+        .toList();
+    return platformStrings.join(',\n$_doubleIndent');
+  }
+
+  String _formatProducts() {
+    if (_products.isEmpty) {
+      return '';
+    }
+    final List<String> libraries = _products
+        .map((SwiftPackageProduct product) => product.format())
+        .toList();
+    return libraries.join(',\n$_doubleIndent');
+  }
+
+  String _formatDependencies() {
+    if (_dependencies.isEmpty) {
+      return '';
+    }
+    final List<String> packages = _dependencies
+        .map((SwiftPackagePackageDependency dependency) => dependency.format())
+        .toList();
+    return packages.join(',\n$_doubleIndent');
+  }
+
+  String _formatTargets() {
+    if (_targets.isEmpty) {
+      return '';
+    }
+    final List<String> targetList = _targets
+        .map((SwiftPackageTarget target) => target.format())
+        .toList();
+    return targetList.join(',\n$_doubleIndent');
+  }
+}
+
+enum SwiftPackagePlatform {
+  ios(displayName: '.iOS'),
+  macos(displayName: '.macOS'),
+  tvos(displayName: '.tvOS'),
+  watchos(displayName: '.watchOS');
+
+  const SwiftPackagePlatform({required this.displayName});
+
+  final String displayName;
+}
+
+/// A platform that the Swift package supports.
+///
+/// Representation of SupportedPlatform from
+/// https://developer.apple.com/documentation/packagedescription/supportedplatform.
+class SwiftPackageSupportedPlatform {
+  SwiftPackageSupportedPlatform({required this.platform, required this.version});
+
+  final SwiftPackagePlatform platform;
+  final Version version;
+
+  String format() {
+    // platforms: [
+    //     .macOS("10.15"),
+    //     .iOS("13.0"),
+    // ],
+    return '${platform.displayName}("$version")';
+  }
+
+  static SwiftPackageSupportedPlatform? fromJson(Map<String, Object?> json) {
+    if (json case {
+      'platformName': final String platformName,
+      'version': final String versionString,
+    }) {
+      final Version? parsedVersion = Version.parse(versionString);
+      if (parsedVersion != null) {
+        switch (platformName) {
+          case 'ios':
+            return SwiftPackageSupportedPlatform(platform: .ios, version: parsedVersion);
+          case 'macos':
+            return SwiftPackageSupportedPlatform(platform: .macos, version: parsedVersion);
+        }
+      }
+    }
+    return null;
+  }
+}
+
+/// Types of library linking.
+///
+/// Representation of Product.Library.LibraryType from
+/// https://developer.apple.com/documentation/packagedescription/product/library/librarytype.
+enum SwiftPackageLibraryType {
+  dynamic(name: '.dynamic'),
+  static(name: '.static');
+
+  const SwiftPackageLibraryType({required this.name});
+
+  final String name;
+}
+
+/// An externally visible build artifact that's available to clients of the
+/// package.
+///
+/// Representation of Product from
+/// https://developer.apple.com/documentation/packagedescription/product.
+class SwiftPackageProduct {
+  SwiftPackageProduct({required this.name, required this.targets, this.libraryType});
+
+  final String name;
+  final SwiftPackageLibraryType? libraryType;
+  final List<String> targets;
+
+  String format() {
+    // products: [
+    //     .library(name: "FlutterGeneratedPluginSwiftPackage", targets: ["FlutterGeneratedPluginSwiftPackage"]),
+    //     .library(name: "FlutterDependenciesPackage", type: .dynamic, targets: ["FlutterDependenciesPackage"]),
+    // ],
+    var targetsString = '';
+    if (targets.isNotEmpty) {
+      final List<String> quotedTargets = targets.map((String target) => '"$target"').toList();
+      targetsString = ', targets: [${quotedTargets.join(', ')}]';
+    }
+    var libraryTypeString = '';
+    if (libraryType != null) {
+      libraryTypeString = ', type: ${libraryType!.name}';
+    }
+    return '.library(name: "$name"$libraryTypeString$targetsString)';
+  }
+}
+
+/// A package dependency of a Swift package.
+///
+/// Representation of Package.Dependency from
+/// https://developer.apple.com/documentation/packagedescription/package/dependency.
+class SwiftPackagePackageDependency {
+  SwiftPackagePackageDependency({required this.name, required this.path});
+
+  final String name;
+  final String path;
+
+  String format() {
+    // dependencies: [
+    //     .package(name: "image_picker_ios", path: "/path/to/packages/image_picker/image_picker_ios/ios/image_picker_ios"),
+    // ],
+    return '.package(name: "$name", path: "$path")';
+  }
+}
+
+/// Type of Target constructor.
+///
+/// See https://developer.apple.com/documentation/packagedescription/target for
+/// more information.
+enum SwiftPackageTargetType {
+  target(name: '.target'),
+  binaryTarget(name: '.binaryTarget');
+
+  const SwiftPackageTargetType({required this.name});
+
+  final String name;
+}
+
+/// A building block of a Swift Package that contains a set of source files
+/// that Swift Package Manager compiles into a module.
+///
+/// Representation of Target from
+/// https://developer.apple.com/documentation/packagedescription/target.
+class SwiftPackageTarget {
+  SwiftPackageTarget.defaultTarget({required this.name, this.dependencies})
+    : path = null,
+      targetType = SwiftPackageTargetType.target;
+
+  SwiftPackageTarget.binaryTarget({required this.name, required String relativePath})
+    : path = relativePath,
+      dependencies = null,
+      targetType = SwiftPackageTargetType.binaryTarget;
+
+  final String name;
+  final String? path;
+  final List<SwiftPackageTargetDependency>? dependencies;
+  final SwiftPackageTargetType targetType;
+
+  String format() {
+    // targets: [
+    //     .binaryTarget(
+    //         name: "Flutter",
+    //         path: "Flutter.xcframework"
+    //     ),
+    //     .target(
+    //         name: "FlutterGeneratedPluginSwiftPackage",
+    //         dependencies: [
+    //             .target(name: "Flutter"),
+    //             .product(name: "image_picker_ios", package: "image_picker_ios")
+    //         ]
+    //     ),
+    // ]
+    const String targetIndent = _doubleIndent;
+    const targetDetailsIndent = '$_doubleIndent$_singleIndent';
+
+    final targetDetails = <String>[];
+
+    final nameString = 'name: "$name"';
+    targetDetails.add(nameString);
+
+    if (path != null) {
+      final pathString = 'path: "$path"';
+      targetDetails.add(pathString);
+    }
+
+    if (dependencies != null && dependencies!.isNotEmpty) {
+      final List<String> targetDependencies = dependencies!
+          .map((SwiftPackageTargetDependency dependency) => dependency.format())
+          .toList();
+      final dependenciesString =
+          '''
+dependencies: [
+${targetDependencies.join(",\n")}
+$targetDetailsIndent]''';
+      targetDetails.add(dependenciesString);
+    }
+
+    return '''
+${targetType.name}(
+$targetDetailsIndent${targetDetails.join(",\n$targetDetailsIndent")}
+$targetIndent)''';
+  }
+}
+
+/// Type of Target.Dependency constructor.
+///
+/// See https://developer.apple.com/documentation/packagedescription/target/dependency
+/// for more information.
+enum SwiftPackageTargetDependencyType {
+  product(name: '.product'),
+  target(name: '.target');
+
+  const SwiftPackageTargetDependencyType({required this.name});
+
+  final String name;
+}
+
+/// A dependency for the Target on a product from a package dependency or from
+/// another Target in the same package.
+///
+/// Representation of Target.Dependency from
+/// https://developer.apple.com/documentation/packagedescription/target/dependency.
+class SwiftPackageTargetDependency {
+  SwiftPackageTargetDependency.product({required this.name, required String packageName})
+    : package = packageName,
+      dependencyType = SwiftPackageTargetDependencyType.product;
+
+  SwiftPackageTargetDependency.target({required this.name})
+    : package = null,
+      dependencyType = SwiftPackageTargetDependencyType.target;
+
+  final String name;
+  final String? package;
+  final SwiftPackageTargetDependencyType dependencyType;
+
+  String format() {
+    //         dependencies: [
+    //             .target(name: "Flutter"),
+    //             .product(name: "image_picker_ios", package: "image_picker_ios")
+    //         ]
+    if (dependencyType == SwiftPackageTargetDependencyType.product) {
+      return '$_doubleIndent$_doubleIndent${dependencyType.name}(name: "$name", package: "$package")';
+    }
+    return '$_doubleIndent$_doubleIndent${dependencyType.name}(name: "$name")';
   }
 }
