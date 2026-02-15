@@ -1,1 +1,0 @@
-This directory is a placeholder intended to make Flutter's source tree match the expectations of [depot_tools](https://www.chromium.org/developers/how-tos/depottools/), which is used to build the Flutter engine.

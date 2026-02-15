@@ -1,9 +1,0 @@
-<!-- Copyright 2014 The Flutter Authors. All rights reserved.
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file. -->
-
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-  <item android:state_pressed="true" android:color="@color/grey" />
-  <item android:state_focused="true" android:color="@color/grey" />
-  <item android:color="@color/white"/>
-</selector>

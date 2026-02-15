@@ -1,1 +1,0 @@
-The flutter/plugins repository is no longer in use. See [Setting up the Packages development environment](Setting-up-the-Packages-development-environment.md) instead.
