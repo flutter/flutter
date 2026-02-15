@@ -107,6 +107,22 @@ void main() {
       );
       expect(tester.getSize(find.byType(OrientationBuilder)), Size.zero);
     });
+
+    testWidgets('DeviceOrientationBuilder does not crash at zero area', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox.shrink(
+              child: DeviceOrientationBuilder(builder: (_, _) => const Text('X')),
+            ),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(DeviceOrientationBuilder)), Size.zero);
+    });
   });
 
   group('DeviceOrientationBuilder', () {
