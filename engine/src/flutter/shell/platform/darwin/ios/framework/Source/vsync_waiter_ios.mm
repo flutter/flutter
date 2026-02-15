@@ -35,8 +35,7 @@ fml::TimeDelta PredictionHeadroom(const fml::TimeDelta& interval) {
   }
   const fml::TimeDelta proportional_headroom = interval / 10.0;
   const fml::TimeDelta kHeadroomCap = fml::TimeDelta::FromMilliseconds(2);
-  return proportional_headroom < kHeadroomCap ? proportional_headroom
-                                              : kHeadroomCap;
+  return proportional_headroom < kHeadroomCap ? proportional_headroom : kHeadroomCap;
 }
 
 fml::TimeDelta IntervalFromRefreshRate(double refresh_rate) {
@@ -159,8 +158,8 @@ double VsyncWaiterIOS::GetRefreshRate() const {
 }
 
 - (void)firePredictedCallbackIfValidForGeneration:(uint64_t)generation
-                                    phaseStartTime:(fml::TimePoint)phase_start_time
-                                   phaseTargetTime:(fml::TimePoint)phase_target_time {
+                                   phaseStartTime:(fml::TimePoint)phase_start_time
+                                  phaseTargetTime:(fml::TimePoint)phase_target_time {
   if (generation != _predictedCallbackGeneration || !_hasPendingPredictedVsync) {
     return;
   }
@@ -255,8 +254,7 @@ double VsyncWaiterIOS::GetRefreshRate() const {
     return NO;
   }
 
-  if (_hasPendingPredictedVsync &&
-      phase_start_time <= _pendingPredictedVsyncStartTime) {
+  if (_hasPendingPredictedVsync && phase_start_time <= _pendingPredictedVsyncStartTime) {
     return YES;
   }
 
@@ -266,8 +264,7 @@ double VsyncWaiterIOS::GetRefreshRate() const {
   const fml::TimeDelta headroom = PredictionHeadroom(interval);
   fml::TimePoint fire_time = phase_target_time - headroom - headroom;
   const fml::TimeDelta min_possible_interval = IntervalFromRefreshRate(_maxRefreshRate);
-  if (min_possible_interval > fml::TimeDelta::Zero() &&
-      min_possible_interval < interval) {
+  if (min_possible_interval > fml::TimeDelta::Zero() && min_possible_interval < interval) {
     const fml::TimePoint conservative_target = phase_start_time + min_possible_interval;
     const fml::TimeDelta conservative_headroom = PredictionHeadroom(min_possible_interval);
     const fml::TimePoint conservative_fire =
