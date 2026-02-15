@@ -95,6 +95,18 @@ void main() {
       await tester.pumpWidget(buildTestWidget(width: 200.0, height: 100.0));
       expect(orientation, Orientation.landscape);
     });
+
+    testWidgets('OrientationBuilder does not crash at zero area', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox.shrink(child: OrientationBuilder(builder: (_, _) => const Text('X'))),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(OrientationBuilder)), Size.zero);
+    });
   });
 
   group('DeviceOrientationBuilder', () {
