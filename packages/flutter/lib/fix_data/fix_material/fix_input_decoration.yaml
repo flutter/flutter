@@ -277,4 +277,16 @@ transforms:
         kind: 'fragment'
         value: 'arguments[hasFloatingPlaceholder]'
 
+    # Changes made in https://github.com/flutter/flutter/pull/182477.
+  - title: "Replace 'hintTextDirection' with 'textDirection'"
+    date: 2026-02-16
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'InputDecoration'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'hintTextDirection'
+        newName: 'textDirection'
+
 # Before adding a new fix: read instructions at the top of this file.
