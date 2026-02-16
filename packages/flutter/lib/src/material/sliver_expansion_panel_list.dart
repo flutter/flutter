@@ -130,6 +130,8 @@ class _SliverExpansionPanelItem {
     required this.panelIndex,
     required this.isHeader,
     required this.key,
+    required this.headerBuilder,
+    required this.body,
   });
 
   /// The index of the original [SliverExpansionPanel] in the children list
@@ -150,6 +152,14 @@ class _SliverExpansionPanelItem {
   /// This is used to maintain identity during the diffing process.
   /// This is the [SliverExpansionPanel.key] itself.
   final Key key;
+
+  /// The widget builder that builds the sliver expansion panels' header.
+  final SliverExpansionPanelHeaderBuilder headerBuilder;
+
+  /// The body of the sliver expansion panel that's displayed below the header.
+  ///
+  /// This widget is visible only when the panel is expanded.
+  final Widget body;
 }
 
 /// Signature for a function that builds a widget to represent an item
@@ -483,6 +493,8 @@ class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
         panelIndex: i,
         isHeader: true,
         key: widget.expansionPanels[i].key,
+        headerBuilder: widget.expansionPanels[i].headerBuilder,
+        body: widget.expansionPanels[i].body,
       );
       result.add(headerPanel);
 
@@ -491,6 +503,8 @@ class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
           panelIndex: i,
           isHeader: false,
           key: widget.expansionPanels[i].key,
+          headerBuilder: widget.expansionPanels[i].headerBuilder,
+          body: widget.expansionPanels[i].body,
         );
         result.add(bodyPanel);
       }
@@ -585,6 +599,8 @@ class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
         key: widget.expansionPanels[panelIndex].key,
         panelIndex: panelIndex,
         isHeader: false,
+        headerBuilder: widget.expansionPanels[panelIndex].headerBuilder,
+        body: widget.expansionPanels[panelIndex].body,
       );
       _list.insert(index + 1, itemToAdd);
     }
@@ -603,7 +619,8 @@ class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
   ) {
     return SizeTransition(
       sizeFactor: animation,
-      child: widget.expansionPanels[item.panelIndex].body,
+      //child: widget.expansionPanels[item.panelIndex].body,
+      child: item.body,
     );
   }
 }
