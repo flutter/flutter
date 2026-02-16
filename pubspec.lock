@@ -219,7 +219,7 @@ packages:
     source: hosted
     version: "2.1.4"
   ffigen:
-    dependency: "direct main"
+    dependency: "direct dev"
     description:
       name: ffigen
       sha256: b7803707faeec4ce3c1b0c2274906504b796e3b70ad573577e72333bd1c9b3ba
