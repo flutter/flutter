@@ -126,7 +126,7 @@ class SliverExpansionPanel {
 /// objects and the internal indices of the [SliverAnimatedList].
 class _SliverExpansionPanelItem {
   /// Creates an item for the flattened list.
-  _SliverExpansionPanelItem({
+  const _SliverExpansionPanelItem({
     required this.panelIndex,
     required this.isHeader,
     required this.key,
@@ -139,7 +139,7 @@ class _SliverExpansionPanelItem {
   ///
   /// This index allows the builder to look up the correct [SliverExpansionPanel]
   /// data (like the header builder or body widget) from the source list.
-  int panelIndex;
+  final int panelIndex;
 
   /// Whether this item represents the header of the panel.
   ///
@@ -154,12 +154,12 @@ class _SliverExpansionPanelItem {
   final Key key;
 
   /// The widget builder that builds the sliver expansion panels' header.
-  SliverExpansionPanelHeaderBuilder headerBuilder;
+  final SliverExpansionPanelHeaderBuilder headerBuilder;
 
   /// The body of the sliver expansion panel that's displayed below the header.
   ///
   /// This widget is visible only when the panel is expanded.
-  Widget body;
+  final Widget body;
 }
 
 /// Signature for a function that builds a widget to represent an item
