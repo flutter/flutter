@@ -2312,7 +2312,7 @@ void main() {
           );
 
           final ui.Rect surface = tester.getRect(find.widgetWithText(Container, Tag.a.text));
-          final ui.Offset position = alignment.withinRect(anchorRect);
+          final ui.Offset position = alignment.withinRect(anchorRect).translate(0, 8 * y);
 
           expect(
             position,
@@ -2374,7 +2374,7 @@ void main() {
           );
 
           final ui.Rect surface = tester.getRect(find.widgetWithText(Container, Tag.a.text));
-          final ui.Offset position = alignment.withinRect(anchorRect);
+          final ui.Offset position = alignment.withinRect(anchorRect).translate(0, 8 * y);
 
           expect(
             position,
@@ -2536,7 +2536,7 @@ void main() {
       // the left edge (0px).
       expect(
         overlays.first,
-        rectMoreOrLessEquals(const Rect.fromLTRB(-0.0, 124.5, 262.0, 164.5), epsilon: 0.01),
+        rectMoreOrLessEquals(const Rect.fromLTRB(-0.0, 132.5, 262.0, 172.5), epsilon: 0.01),
       );
     });
 
@@ -2572,7 +2572,7 @@ void main() {
       // at the right edge (200px).
       expect(
         overlays.first,
-        rectMoreOrLessEquals(const Rect.fromLTRB(-62.0, 124.5, 200.0, 164.5), epsilon: 0.01),
+        rectMoreOrLessEquals(const Rect.fromLTRB(-62.0, 132.5, 200.0, 172.5), epsilon: 0.01),
       );
     });
 
@@ -2610,7 +2610,7 @@ void main() {
       // The unclipped menu surface will not grow beyond the screen.
       expect(
         overlays.first,
-        rectMoreOrLessEquals(const Rect.fromLTRB(0.0, 124.5, 200.0, 164.5), epsilon: 0.01),
+        rectMoreOrLessEquals(const Rect.fromLTRB(0.0, 132.5, 200.0, 172.5), epsilon: 0.01),
       );
     });
 
@@ -2648,7 +2648,7 @@ void main() {
       // The unclipped menu surface will not grow beyond the screen.
       expect(
         overlays.first,
-        rectMoreOrLessEquals(const Rect.fromLTRB(0.0, 124.5, 200.0, 164.5), epsilon: 0.01),
+        rectMoreOrLessEquals(const Rect.fromLTRB(0.0, 132.5, 200.0, 172.5), epsilon: 0.01),
       );
     });
 
@@ -2878,7 +2878,7 @@ void main() {
       final Offset anchor = tester.getTopLeft(find.widgetWithText(AnchorButton, Tag.anchor.text));
 
       expect(anchor, offsetMoreOrLessEquals(const Offset(31 + 21, 7 + 11), epsilon: 0.01));
-      expect(overlay, offsetMoreOrLessEquals(const Offset(31, 7 + 11 + 50), epsilon: 0.01));
+      expect(overlay, offsetMoreOrLessEquals(const Offset(31, 7 + 11 + 50 + 8), epsilon: 0.01));
     });
 
     testWidgets('Menu is positioned around display features', (WidgetTester tester) async {
@@ -3013,7 +3013,10 @@ void main() {
       final [ui.Rect menu] = collectOverlays();
       final Rect anchor = tester.getRect(find.widgetWithText(CupertinoButton, Tag.anchor.text));
 
-      expect(menu.topLeft, offsetMoreOrLessEquals(anchor.bottomLeft, epsilon: 0.01));
+      expect(
+        menu.topLeft,
+        offsetMoreOrLessEquals(anchor.bottomLeft + const Offset(0, 8), epsilon: 0.01),
+      );
     });
 
     testWidgets(
@@ -3064,7 +3067,10 @@ void main() {
         final [ui.Rect menu] = collectOverlays();
         final Rect anchor = tester.getRect(find.widgetWithText(CupertinoButton, Tag.anchor.text));
 
-        expect(menu.bottomLeft, offsetMoreOrLessEquals(anchor.topLeft, epsilon: 0.01));
+        expect(
+          menu.bottomLeft + const Offset(0, 8),
+          offsetMoreOrLessEquals(anchor.topLeft, epsilon: 0.01),
+        );
       },
     );
   });
