@@ -126,7 +126,7 @@ class SliverExpansionPanel {
 /// objects and the internal indices of the [SliverAnimatedList].
 class _SliverExpansionPanelItem {
   /// Creates an item for the flattened list.
-  const _SliverExpansionPanelItem({
+  _SliverExpansionPanelItem({
     required this.panelIndex,
     required this.isHeader,
     required this.key,
@@ -139,7 +139,7 @@ class _SliverExpansionPanelItem {
   ///
   /// This index allows the builder to look up the correct [SliverExpansionPanel]
   /// data (like the header builder or body widget) from the source list.
-  final int panelIndex;
+  int panelIndex;
 
   /// Whether this item represents the header of the panel.
   ///
@@ -154,12 +154,12 @@ class _SliverExpansionPanelItem {
   final Key key;
 
   /// The widget builder that builds the sliver expansion panels' header.
-  final SliverExpansionPanelHeaderBuilder headerBuilder;
+  SliverExpansionPanelHeaderBuilder headerBuilder;
 
   /// The body of the sliver expansion panel that's displayed below the header.
   ///
   /// This widget is visible only when the panel is expanded.
-  final Widget body;
+  Widget body;
 }
 
 /// Signature for a function that builds a widget to represent an item
@@ -260,9 +260,13 @@ class _ListModel {
 /// bottom by providing a 10.0 pixel buffer. The shadow is
 /// only visible below and to the sides of the body.
 class _TopClosedClipper extends CustomClipper<Rect> {
+  const _TopClosedClipper({required this.shadowMargin});
+
+  final double shadowMargin;
+
   @override
   Rect getClip(Size size) {
-    return Rect.fromLTRB(-10.0, 0.0, size.width + 10.0, size.height + 10.0);
+    return Rect.fromLTRB(-shadowMargin, 0.0, size.width + shadowMargin, size.height + shadowMargin);
   }
 
   @override
@@ -311,6 +315,7 @@ class SliverExpansionPanelList extends StatefulWidget {
     this.expandIconColor,
     this.dividerColor,
     this.elevation = 2,
+    this.shadowMargin = 10.0,
   });
 
   /// The expansion panels that constitute the list.
@@ -347,6 +352,15 @@ class SliverExpansionPanelList extends StatefulWidget {
   ///
   /// By default, the value of elevation is 2.
   final double elevation;
+
+  /// The margin added to the clipping rect to prevent shadows from being clipped.
+  ///
+  /// When a panel is closed, it is often clipped to prevent it from overlapping
+  /// other slivers. This margin ensures that the shadow cast by the [elevation]
+  /// has enough space to render without being cut off.
+  ///
+  /// Defaults to 10.0.
+  final double shadowMargin;
 
   @override
   State<SliverExpansionPanelList> createState() => _SliverExpansionPanelListState();
@@ -472,7 +486,7 @@ class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
           return _buildHeader(context, index);
         } else {
           return ClipRect(
-            clipper: _TopClosedClipper(),
+            clipper: _TopClosedClipper(shadowMargin: widget.shadowMargin),
             child: PhysicalModel(
               color: Theme.of(context).cardColor,
               elevation: widget.elevation,
@@ -617,10 +631,6 @@ class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
     BuildContext context,
     Animation<double> animation,
   ) {
-    return SizeTransition(
-      sizeFactor: animation,
-      //child: widget.expansionPanels[item.panelIndex].body,
-      child: item.body,
-    );
+    return SizeTransition(sizeFactor: animation, child: item.body);
   }
 }
