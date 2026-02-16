@@ -19398,6 +19398,64 @@ void main() {
     },
     skip: kIsWeb, // [intended] SystemContextMenu is not supported on web.
   );
+
+  testWidgets('TextField propagates textDirection to InputDecorator', (WidgetTester tester) async {
+    const labelText = 'Label';
+    const hintText = 'Hint';
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: TextField(
+            textDirection: TextDirection.rtl,
+            decoration: InputDecoration(labelText: labelText, hintText: hintText),
+          ),
+        ),
+      ),
+    );
+
+    InputDecorator decorator = tester.widget<InputDecorator>(find.byType(InputDecorator));
+    expect(decorator.decoration.textDirection, equals(TextDirection.rtl));
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: TextField(
+            textDirection: TextDirection.ltr,
+            decoration: InputDecoration(
+              labelText: labelText,
+              hintText: hintText,
+              textDirection: TextDirection.rtl,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    decorator = tester.widget<InputDecorator>(find.byType(InputDecorator));
+    expect(decorator.decoration.textDirection, equals(TextDirection.rtl));
+  });
+
+  testWidgets('TextField handles null textDirection by falling back to Directionality', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Scaffold(
+            body: TextField(decoration: InputDecoration(labelText: 'Label')),
+          ),
+        ),
+      ),
+    );
+
+    final InputDecorator decorator = tester.widget<InputDecorator>(find.byType(InputDecorator));
+    expect(decorator.decoration.textDirection, isNull);
+
+    final Text labelText = tester.widget<Text>(find.text('Label'));
+    expect(labelText.textDirection, equals(TextDirection.rtl));
+  });
 }
 
 /// A Simple widget for testing the obscure text.

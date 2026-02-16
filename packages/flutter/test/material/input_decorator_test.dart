@@ -15983,4 +15983,60 @@ void main() {
     );
     expect(tester.getSize(find.byType(InputDecorator)), Size.zero);
   });
+
+  testWidgets('InputDecorator uses textDirection for label and hint', (WidgetTester tester) async {
+    const labelText = 'Label';
+    const hintText = 'Hint';
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: InputDecorator(
+              decoration: InputDecoration(
+                labelText: labelText,
+                hintText: hintText,
+                textDirection: TextDirection.rtl,
+              ),
+              isEmpty: true,
+              child: SizedBox.shrink(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Text labelWidget = tester.widget<Text>(find.text(labelText));
+    expect(labelWidget.textDirection, equals(TextDirection.rtl));
+
+    final Text hintWidget = tester.widget<Text>(find.text(hintText));
+    expect(hintWidget.textDirection, equals(TextDirection.rtl));
+  });
+
+  testWidgets('InputDecorator hintTextDirection takes precedence over textDirection', (
+    WidgetTester tester,
+  ) async {
+    const hintText = 'Hint Priority';
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: InputDecorator(
+              decoration: InputDecoration(
+                hintText: hintText,
+                textDirection: TextDirection.rtl,
+                hintTextDirection: TextDirection.ltr,
+              ),
+              isEmpty: true,
+              child: SizedBox.shrink(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Text hintWidget = tester.widget<Text>(find.text(hintText));
+    expect(hintWidget.textDirection, equals(TextDirection.ltr));
+  });
 }
