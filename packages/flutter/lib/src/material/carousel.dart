@@ -581,18 +581,6 @@ class _CarouselViewState extends State<CarouselView> {
     return _controller.initialItem;
   }
 
-  AxisDirection _getDirection(BuildContext context) {
-    switch (widget.scrollDirection) {
-      case Axis.horizontal:
-        assert(debugCheckHasDirectionality(context));
-        final TextDirection textDirection = Directionality.of(context);
-        final AxisDirection axisDirection = textDirectionToAxisDirection(textDirection);
-        return widget.reverse ? flipAxisDirection(axisDirection) : axisDirection;
-      case Axis.vertical:
-        return widget.reverse ? AxisDirection.up : AxisDirection.down;
-    }
-  }
-
   Widget _buildCarouselItem(int index) {
     final CarouselViewThemeData carouselTheme = CarouselViewTheme.of(context);
     final ColorScheme colorScheme = ColorScheme.of(context);
@@ -685,7 +673,6 @@ class _CarouselViewState extends State<CarouselView> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final AxisDirection axisDirection = _getDirection(context);
     final ScrollPhysics physics = widget.itemSnapping
         ? const CarouselScrollPhysics()
         : ScrollConfiguration.of(context).getScrollPhysics(context);
@@ -696,17 +683,13 @@ class _CarouselViewState extends State<CarouselView> {
           Axis.horizontal => constraints.maxWidth,
           Axis.vertical => constraints.maxHeight,
         };
-        final bool reverse = switch (axisDirection) {
-          AxisDirection.up || AxisDirection.left => true,
-          AxisDirection.down || AxisDirection.right => false,
-        };
 
         _itemExtent = widget.itemExtent == null
             ? null
             : clampDouble(widget.itemExtent!, 0, mainAxisExtent);
         return CustomScrollView(
           scrollDirection: widget.scrollDirection,
-          reverse: reverse,
+          reverse: widget.reverse,
           controller: _controller,
           physics: physics,
           clipBehavior: Clip.antiAlias,
