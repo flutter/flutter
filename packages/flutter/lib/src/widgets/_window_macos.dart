@@ -469,15 +469,6 @@ class PopupWindowControllerMacOS extends PopupWindowController with _WindowContr
   final BaseWindowController _parent;
   WindowPositioner _positioner;
   Rect _anchorRect;
-
-  @override
-  void activate() {
-    _ensureNotDestroyed();
-    _MacOSPlatformInterface.activate(getWindowHandle());
-  }
-
-  @override
-  bool get isActivated => _MacOSPlatformInterface.isActivated(getWindowHandle());
 }
 
 /// Implementation of [RegularWindowController] for the macOS platform.

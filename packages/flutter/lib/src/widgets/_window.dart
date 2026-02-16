@@ -873,24 +873,6 @@ abstract class PopupWindowController extends BaseWindowController {
   /// The popup will be destroyed if its parent is destroyed.
   BaseWindowController get parent;
 
-  /// Whether the window is currently activated.
-  ///
-  /// If `true` this means that the window is currently focused and
-  /// can receive user input.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  bool get isActivated;
-
-  /// Requests that the window receive focus.
-  ///
-  /// The platform may also give the window input focus and bring it to the
-  /// top of the window stack. However, this behavior is platform-dependent.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  void activate();
-
   /// Request change to the constraints of the window.
   ///
   /// The [constraints] describes the new constraints that the window should
