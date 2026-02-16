@@ -18,7 +18,7 @@
 
 - (void)closeAllWindows;
 
-- (void)fixMoveRunLoopMode;
+- (void)fixMoveRunLoopModeIfNeeded;
 
 @end
 
