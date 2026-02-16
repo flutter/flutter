@@ -696,22 +696,22 @@ class _CarouselViewState extends State<CarouselView> {
           Axis.horizontal => constraints.maxWidth,
           Axis.vertical => constraints.maxHeight,
         };
+        final bool reverse = switch (axisDirection) {
+          AxisDirection.up || AxisDirection.left => true,
+          AxisDirection.down || AxisDirection.right => false,
+        };
+
         _itemExtent = widget.itemExtent == null
             ? null
             : clampDouble(widget.itemExtent!, 0, mainAxisExtent);
-        return Scrollable(
-          axisDirection: axisDirection,
+        return CustomScrollView(
+          scrollDirection: widget.scrollDirection,
+          reverse: reverse,
           controller: _controller,
           physics: physics,
-          viewportBuilder: (BuildContext context, ViewportOffset position) {
-            return Viewport(
-              scrollCacheExtent: const ScrollCacheExtent.viewport(0.0),
-              axisDirection: axisDirection,
-              offset: position,
-              clipBehavior: Clip.antiAlias,
-              slivers: <Widget>[_buildSliverCarousel(theme)],
-            );
-          },
+          clipBehavior: Clip.antiAlias,
+          scrollCacheExtent: const ScrollCacheExtent.viewport(0.0),
+          slivers: <Widget>[_buildSliverCarousel(theme)],
         );
       },
     );
