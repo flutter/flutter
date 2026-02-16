@@ -766,6 +766,7 @@ class _MenuOverlay extends StatefulWidget {
 
 class _MenuOverlayState extends State<_MenuOverlay>
     with TickerProviderStateMixin, WidgetsBindingObserver {
+  static const _attachmentOffset = Offset(0, 8);
   static final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
     _FocusDownIntent: _FocusDownAction(),
     _FocusUpIntent: _FocusUpAction(),
@@ -958,8 +959,9 @@ class _MenuOverlayState extends State<_MenuOverlay>
       _attachmentPoint = widget.anchorRect.topLeft + widget.anchorPosition!;
       transformOrigin = _attachmentPoint;
     } else {
-      _attachmentPoint = Alignment(dx, dy).withinRect(widget.anchorRect);
-      transformOrigin = Alignment(0, dy).withinRect(widget.anchorRect);
+      final ui.Offset offset = _attachmentOffset * dy;
+      _attachmentPoint = Alignment(dx, dy).withinRect(widget.anchorRect) + offset;
+      transformOrigin = Alignment(0, dy).withinRect(widget.anchorRect) + offset;
     }
 
     final double xOriginRatio = transformOrigin.dx / widget.overlaySize.width;
