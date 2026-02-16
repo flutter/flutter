@@ -288,7 +288,7 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
   return self;
 }
 
-- (void)fixMoveRunLoopMode {
+- (void)fixMoveRunLoopModeIfNeeded {
   if (_runLoopModeFixApplied) {
     return;
   }
@@ -364,7 +364,7 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
 
   if (parent != nil) {
     dispatch_async(dispatch_get_main_queue(), ^{
-      [self fixMoveRunLoopMode];
+      [self fixMoveRunLoopModeIfNeeded];
       // beginCriticalSheet blocks with nested run loop until the
       // sheet animation is finished.
       [parent beginCriticalSheet:window

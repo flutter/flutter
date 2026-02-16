@@ -59,7 +59,7 @@ class FlutterWindowControllerRetainTest : public ::testing::Test {};
 
 TEST_F(FlutterWindowControllerTest, FixMoveRunLoopMode) {
   FlutterEngine* engine = GetFlutterEngine();
-  [engine.windowController fixMoveRunLoopMode];
+  [engine.windowController fixMoveRunLoopModeIfNeeded];
 
   // Make sure that after fixMoveRunLoopMode _NSMoveTimerRunLoopMode becomes
   // common run loop mode.
