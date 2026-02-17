@@ -194,11 +194,12 @@ class DarwinDependencyManagement {
             'plugin as a dependency.',
           );
         } else {
-           throwToolExit(
+          throwToolExit(
             'Plugin ${plugin.name} is only compatible with Swift Package Manager, but your '
             'project does not currently support it. To support Swift Package Manager:\n'
             '  - Ensure Xcode 15+ is being used '
-            '  - Enable Swift Package Manager feature by running "flutter config --enable-swift-package-manager"'
+            '  - Enable Swift Package Manager feature by running '
+            '"flutter config --enable-swift-package-manager"',
           );
         }
       }
