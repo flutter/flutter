@@ -18,8 +18,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import '../widgets/_window.dart' show WindowManager;
 import '../foundation/_features.dart' show isWindowingEnabled;
+import '../widgets/_window.dart' show WindowManager;
 
 import 'arc.dart';
 import 'button_style.dart';
