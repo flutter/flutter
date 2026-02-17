@@ -216,6 +216,14 @@ public final class FlutterEngineFlags {
   private static final Flag ENABLE_DART_PROFILING =
       new Flag("--enable-dart-profiling", "EnableDartProfiling", true);
 
+  /**
+   * Sets whether the UI thread and platform thread should be merged.
+   *
+   * <p>Allowed in release mode for performance purposes.
+   */
+  private static final Flag MERGED_PLATFORM_UI_THREAD =
+      new Flag("--merged-platform-ui-thread", "MergedPlatformUIThread", true);
+
   // Manifest flags NOT allowed in release mode:
 
   /** Ensures deterministic Skia rendering by skipping CPU feature swaps. */
