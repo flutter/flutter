@@ -8,13 +8,7 @@ import("//flutter/tools/fuchsia/flutter/flutter_component.gni")
 import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
 import("//flutter/tools/fuchsia/gn-sdk/src/package.gni")
 
-config("zircon_config") {
-  include_dirs = [ "." ]
-}
-
 source_set("zircon") {
-  public_configs = [ ":zircon_config" ]
-
   sources = [
     "sdk_ext/handle.cc",
     "sdk_ext/handle.h",

@@ -5,7 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_RUNTIME_DART_UTILS_BUILD_INFO_H_
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_RUNTIME_DART_UTILS_BUILD_INFO_H_
 
-#include "root_inspect_node.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/root_inspect_node.h"
 
 namespace dart_utils {
 

@@ -81,6 +81,7 @@ void main() {
           webRenderer: WebRendererMode.canvaskit,
           useLocalCanvasKit: false,
           fileSystem: globals.fs,
+          logger: logger,
         );
         releaseAssetServer = ReleaseAssetServer(
           globals.fs.file('main.dart').uri,
@@ -329,6 +330,7 @@ void main() {
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
       fileSystem: globals.fs,
+      logger: logger,
     );
 
     expect(webAssetServer.basePath, 'foo/bar');
@@ -350,6 +352,7 @@ void main() {
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
       fileSystem: globals.fs,
+      logger: logger,
     );
 
     // Defaults to "/" when there's no base element.
@@ -373,6 +376,7 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
+        logger: logger,
       ),
       throwsToolExit(),
     );
@@ -395,6 +399,7 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
+        logger: logger,
       ),
       throwsToolExit(),
     );
@@ -1216,6 +1221,7 @@ void main() {
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
       fileSystem: globals.fs,
+      logger: logger,
     );
 
     expect(await webAssetServer.metadataContents('foo/main_module.ddc_merged_metadata'), null);
