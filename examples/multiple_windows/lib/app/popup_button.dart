@@ -7,7 +7,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
-import 'package:multiple_windows/app/window_content.dart';
+
+import 'window_content.dart';
 import 'models.dart';
 
 /// Manages all [_ElementPositionTracker] instances.
