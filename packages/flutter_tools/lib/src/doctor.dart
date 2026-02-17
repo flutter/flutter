@@ -20,7 +20,6 @@ import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/terminal.dart';
 import 'base/time.dart';
-import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'cache.dart';
 import 'custom_devices/custom_device_workflow.dart';
@@ -95,7 +94,6 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
             globals.flutterVersion.fetchTagsAndGetVersion(clock: globals.systemClock),
         devToolsVersion: () => globals.cache.devToolsVersion,
         processManager: globals.processManager,
-        userMessages: globals.userMessages,
         artifacts: globals.artifacts!,
         flutterRoot: () => Cache.flutterRoot!,
         operatingSystemUtils: globals.os,
@@ -141,7 +139,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (windowsWorkflow!.appliesToHostPlatform) visualStudioValidator!,
       if (proxyValidator.shouldShow) proxyValidator,
       if (globals.deviceManager?.canListAnything ?? false)
-        DeviceValidator(deviceManager: globals.deviceManager, userMessages: globals.userMessages),
+        DeviceValidator(deviceManager: globals.deviceManager),
       HttpHostValidator(
         platform: globals.platform,
         featureFlags: featureFlags,
@@ -487,7 +485,6 @@ class FlutterValidator extends DoctorValidator {
     required Platform platform,
     required FlutterVersion Function() flutterVersion,
     required String Function() devToolsVersion,
-    required UserMessages userMessages,
     required FileSystem fileSystem,
     required Artifacts artifacts,
     required ProcessManager processManager,
@@ -497,7 +494,6 @@ class FlutterValidator extends DoctorValidator {
   }) : _flutterVersion = flutterVersion,
        _devToolsVersion = devToolsVersion,
        _platform = platform,
-       _userMessages = userMessages,
        _fileSystem = fileSystem,
        _artifacts = artifacts,
        _processManager = processManager,
@@ -510,7 +506,6 @@ class FlutterValidator extends DoctorValidator {
   final FlutterVersion Function() _flutterVersion;
   final String Function() _devToolsVersion;
   final String Function() _flutterRoot;
-  final UserMessages _userMessages;
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
   final ProcessManager _processManager;
@@ -535,27 +530,27 @@ class FlutterValidator extends DoctorValidator {
       _validateRequiredBinaries(flutterRoot).forEach(messages.add);
       messages.add(_getFlutterUpstreamMessage(version));
       if (gitUrl != null) {
-        messages.add(ValidationMessage(_userMessages.flutterGitUrl(gitUrl)));
+        messages.add(ValidationMessage(flutterGitUrl(gitUrl)));
       }
       messages.add(
         ValidationMessage(
-          _userMessages.flutterRevision(
+          flutterRevision(
             version.frameworkRevisionShort,
             version.frameworkAge,
             version.frameworkCommitDate,
           ),
         ),
       );
-      messages.add(ValidationMessage(_userMessages.engineRevision(version.engineRevisionShort)));
-      messages.add(ValidationMessage(_userMessages.dartRevision(version.dartSdkVersion)));
-      messages.add(ValidationMessage(_userMessages.devToolsVersion(_devToolsVersion())));
+      messages.add(ValidationMessage(engineRevision(version.engineRevisionShort)));
+      messages.add(ValidationMessage(dartRevision(version.dartSdkVersion)));
+      messages.add(ValidationMessage(devToolsVersion(_devToolsVersion())));
       final String? pubUrl = _platform.environment[kPubDevOverride];
       if (pubUrl != null) {
-        messages.add(ValidationMessage(_userMessages.pubMirrorURL(pubUrl)));
+        messages.add(ValidationMessage(pubMirrorURL(pubUrl)));
       }
       final String? storageBaseUrl = _platform.environment[kFlutterStorageBaseUrl];
       if (storageBaseUrl != null) {
-        messages.add(ValidationMessage(_userMessages.flutterMirrorURL(storageBaseUrl)));
+        messages.add(ValidationMessage(flutterMirrorURL(storageBaseUrl)));
       }
       // Add feature flags that are either enabled, or disabled compared to the default setting.
       final featureFlags = <String>[
@@ -585,9 +580,9 @@ class FlutterValidator extends DoctorValidator {
     final String genSnapshotPath = _artifacts.getArtifactPath(Artifact.genSnapshot);
     if (_fileSystem.file(genSnapshotPath).existsSync() && !_genSnapshotRuns(genSnapshotPath)) {
       final buffer = StringBuffer();
-      buffer.writeln(_userMessages.flutterBinariesDoNotRun);
+      buffer.writeln(flutterBinariesDoNotRun);
       if (_platform.isLinux) {
-        buffer.writeln(_userMessages.flutterBinariesLinuxRepairCommands);
+        buffer.writeln(flutterBinariesLinuxRepairCommands);
       } else if (_platform.isMacOS &&
           _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
         buffer.writeln(
@@ -606,13 +601,13 @@ class FlutterValidator extends DoctorValidator {
       // in that case, make it clear that it is fine to continue, but freshness check/upgrades
       // won't be supported.
       valid = ValidationType.partial;
-      messages.add(ValidationMessage(_userMessages.flutterValidatorErrorIntentional));
+      messages.add(ValidationMessage(flutterValidatorErrorIntentional));
     }
 
     return ValidationResult(
       valid,
       messages,
-      statusInfo: _userMessages.flutterStatusInfo(
+      statusInfo: flutterStatusInfo(
         versionChannel,
         frameworkVersion,
         _operatingSystemUtils.name,
@@ -621,16 +616,54 @@ class FlutterValidator extends DoctorValidator {
     );
   }
 
+  String flutterStatusInfo(String? channel, String? version, String os, String locale) =>
+      'Channel ${channel ?? 'unknown'}, ${version ?? 'unknown version'}, on $os, locale $locale';
+
+  String flutterVersion(String version, String channel, String flutterRoot) =>
+      'Flutter version $version on channel $channel at $flutterRoot';
+
+  String get flutterUnknownChannel =>
+      'Currently on an unknown channel. Run `flutter channel` to switch to an official channel.\n'
+      "If that doesn't fix the issue, reinstall Flutter by following instructions at https://flutter.dev/setup.";
+
+  String get flutterUnknownVersion =>
+      'Cannot resolve current version, possibly due to local changes.\n'
+      'Reinstall Flutter by following instructions at https://flutter.dev/setup.';
+
+  String flutterRevision(String revision, String age, String date) =>
+      'Framework revision $revision ($age), $date';
+  String flutterUpstreamRepositoryUrl(String url) => 'Upstream repository $url';
+  String get flutterUpstreamRepositoryUnknown =>
+      'Unknown upstream repository.\n'
+      'Reinstall Flutter by following instructions at https://flutter.dev/setup.';
+  String flutterUpstreamRepositoryUrlEnvMismatch(String url) =>
+      'Upstream repository $url is not the same as FLUTTER_GIT_URL';
+  String flutterUpstreamRepositoryUrlNonStandard(String url) =>
+      'Upstream repository $url is not a standard remote.\n'
+      'Set environment variable "FLUTTER_GIT_URL" to $url to dismiss this error.';
+  String flutterGitUrl(String url) => 'FLUTTER_GIT_URL = $url';
+  String engineRevision(String revision) => 'Engine revision $revision';
+  String dartRevision(String revision) => 'Dart version $revision';
+  String devToolsVersion(String version) => 'DevTools version $version';
+  String pubMirrorURL(String url) => 'Pub download mirror $url';
+  String flutterMirrorURL(String url) => 'Flutter download mirror $url';
+  String get flutterBinariesDoNotRun =>
+      'Downloaded executables cannot execute on host.\n'
+      'See https://github.com/flutter/flutter/issues/6207 for more information.';
+  String get flutterBinariesLinuxRepairCommands =>
+      'On Debian/Ubuntu/Mint: sudo apt-get install lib32stdc++6\n'
+      'On Fedora: dnf install libstdc++.i686\n'
+      'On Arch: pacman -S lib32-gcc-libs';
+  String get flutterValidatorErrorIntentional =>
+      'If those were intentional, you can disregard the above warnings; however it is '
+      'recommended to use "git" directly to perform update checks and upgrades.';
+
   ValidationMessage _getFlutterVersionMessage(
     String frameworkVersion,
     String versionChannel,
     String flutterRoot,
   ) {
-    String flutterVersionMessage = _userMessages.flutterVersion(
-      frameworkVersion,
-      versionChannel,
-      flutterRoot,
-    );
+    String flutterVersionMessage = flutterVersion(frameworkVersion, versionChannel, flutterRoot);
 
     // The tool sets the channel as kUserBranch, if the current branch is on a
     // "detached HEAD" state, doesn't have an upstream, or is on a user branch,
@@ -640,10 +673,10 @@ class FlutterValidator extends DoctorValidator {
       return ValidationMessage(flutterVersionMessage);
     }
     if (versionChannel == kUserBranch) {
-      flutterVersionMessage = '$flutterVersionMessage\n${_userMessages.flutterUnknownChannel}';
+      flutterVersionMessage = '$flutterVersionMessage\n$flutterUnknownChannel';
     }
     if (frameworkVersion == '0.0.0-unknown') {
-      flutterVersionMessage = '$flutterVersionMessage\n${_userMessages.flutterUnknownVersion}';
+      flutterVersionMessage = '$flutterVersionMessage\n$flutterUnknownVersion';
     }
     return ValidationMessage.hint(flutterVersionMessage);
   }
@@ -697,23 +730,19 @@ class FlutterValidator extends DoctorValidator {
     if (upstreamValidationError != null) {
       final String errorMessage = upstreamValidationError.message;
       if (errorMessage.contains('could not determine the remote upstream which is being tracked')) {
-        return ValidationMessage.hint(_userMessages.flutterUpstreamRepositoryUnknown);
+        return ValidationMessage.hint(flutterUpstreamRepositoryUnknown);
       }
       // At this point, repositoryUrl must not be null
       if (errorMessage.contains('Flutter SDK is tracking a non-standard remote')) {
-        return ValidationMessage.hint(
-          _userMessages.flutterUpstreamRepositoryUrlNonStandard(repositoryUrl!),
-        );
+        return ValidationMessage.hint(flutterUpstreamRepositoryUrlNonStandard(repositoryUrl!));
       }
       if (errorMessage.contains(
         'Either remove "FLUTTER_GIT_URL" from the environment or set it to',
       )) {
-        return ValidationMessage.hint(
-          _userMessages.flutterUpstreamRepositoryUrlEnvMismatch(repositoryUrl!),
-        );
+        return ValidationMessage.hint(flutterUpstreamRepositoryUrlEnvMismatch(repositoryUrl!));
       }
     }
-    return ValidationMessage(_userMessages.flutterUpstreamRepositoryUrl(repositoryUrl!));
+    return ValidationMessage(flutterUpstreamRepositoryUrl(repositoryUrl!));
   }
 
   bool _genSnapshotRuns(String genSnapshotPath) {
@@ -728,16 +757,18 @@ class FlutterValidator extends DoctorValidator {
 
 class DeviceValidator extends DoctorValidator {
   // TODO(jmagman): Make required once g3 rolls and is updated.
-  DeviceValidator({DeviceManager? deviceManager, UserMessages? userMessages})
+  DeviceValidator({DeviceManager? deviceManager})
     : _deviceManager = deviceManager ?? globals.deviceManager!,
-      _userMessages = userMessages ?? globals.userMessages,
       super('Connected device');
 
   final DeviceManager _deviceManager;
-  final UserMessages _userMessages;
 
   @override
   String get slowWarning => 'Scanning for devices is taking a long time...';
+
+  String get devicesMissing => 'No devices available';
+
+  String devicesAvailable(int devices) => '$devices available';
 
   @override
   Future<ValidationResult> validateImpl() async {
@@ -758,9 +789,7 @@ class DeviceValidator extends DoctorValidator {
           .map<ValidationMessage>((String message) => ValidationMessage.hint(message))
           .toList();
     } else if (devices.isEmpty) {
-      diagnosticMessages = <ValidationMessage>[
-        ValidationMessage.hint(_userMessages.devicesMissing),
-      ];
+      diagnosticMessages = <ValidationMessage>[ValidationMessage.hint(devicesMissing)];
     }
 
     if (devices.isEmpty) {
@@ -770,13 +799,13 @@ class DeviceValidator extends DoctorValidator {
       return ValidationResult(
         ValidationType.success,
         installedMessages,
-        statusInfo: _userMessages.devicesAvailable(devices.length),
+        statusInfo: devicesAvailable(devices.length),
       );
     } else {
       return ValidationResult(
         ValidationType.success,
         installedMessages,
-        statusInfo: _userMessages.devicesAvailable(devices.length),
+        statusInfo: devicesAvailable(devices.length),
       );
     }
   }

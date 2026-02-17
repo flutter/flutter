@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
-import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_workflow.dart';
@@ -52,10 +51,7 @@ void main() {
     group('device validator', () {
       testWithoutContext('no devices', () async {
         final deviceManager = FakeDeviceManager();
-        final deviceValidator = DeviceValidator(
-          deviceManager: deviceManager,
-          userMessages: UserMessages(),
-        );
+        final deviceValidator = DeviceValidator(deviceManager: deviceManager);
         final ValidationResult result = await deviceValidator.validate();
         expect(result.type, ValidationType.notAvailable);
         expect(result.messages, const <ValidationMessage>[
@@ -67,10 +63,7 @@ void main() {
       testWithoutContext('diagnostic message', () async {
         final deviceManager = FakeDeviceManager()..diagnostics = <String>['Device locked'];
 
-        final deviceValidator = DeviceValidator(
-          deviceManager: deviceManager,
-          userMessages: UserMessages(),
-        );
+        final deviceValidator = DeviceValidator(deviceManager: deviceManager);
         final ValidationResult result = await deviceValidator.validate();
         expect(result.type, ValidationType.notAvailable);
         expect(result.messages, const <ValidationMessage>[ValidationMessage.hint('Device locked')]);
@@ -83,10 +76,7 @@ void main() {
           ..devices = <Device>[device]
           ..diagnostics = <String>['Device locked'];
 
-        final deviceValidator = DeviceValidator(
-          deviceManager: deviceManager,
-          userMessages: UserMessages(),
-        );
+        final deviceValidator = DeviceValidator(deviceManager: deviceManager);
         final ValidationResult result = await deviceValidator.validate();
         expect(result.type, ValidationType.success);
         expect(result.messages, const <ValidationMessage>[
