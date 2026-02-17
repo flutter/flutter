@@ -99,11 +99,17 @@ class _PopupWindowContentState extends State<PopupWindowContent> {
                   color: const Color(0x33FFFFFF),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 child: EditableText(
                   controller: _textController,
                   focusNode: _focusNode,
-                  style: const TextStyle(color: Color(0xFFFFFFFF), fontSize: 14),
+                  style: const TextStyle(
+                    color: Color(0xFFFFFFFF),
+                    fontSize: 14,
+                  ),
                   cursorColor: const Color(0xFFFFFFFF),
                   backgroundCursorColor: const Color(0x99FFFFFF),
                 ),
