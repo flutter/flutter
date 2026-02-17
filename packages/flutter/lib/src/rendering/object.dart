@@ -1585,7 +1585,17 @@ base class PipelineOwner with DiagnosticableTreeMixin {
           // same as above.
           continue;
         }
-        node._semantics.ensureSemanticsNode();
+        final _RenderObjectSemantics target;
+        // When this node is a semantics boundary and a layout boundary and its
+        // geometry becomes invisible after the ensureGeometry call above,
+        // the parent of this node will have to update its semantics subtree to remove
+        // this node from its children.
+        if (!node._semantics.geometry!.isVisible) {
+          target = node._semantics.firstAncestorNodeWithCleanGeometry!;
+        } else {
+          target = node._semantics;
+        }
+        target.ensureSemanticsNode();
       }
 
       if (!kReleaseMode) {
@@ -6557,6 +6567,8 @@ final class _SemanticsGeometry {
 
   /// Value for [SemanticsNode.rect].
   final Rect rect;
+
+  bool get isVisible => !rect.isEmpty && !transform.isZero();
 
   /// Whether the semantics node is completely clipped from ui, i.e. by
   /// paintClipRect, but is still present in semantics tree.

@@ -63,6 +63,26 @@ void main() {
     pumpFrame(phase: EnginePhase.flushSemantics);
     // Does not crash.
   });
+
+  test('semantics size updates to zero size', () {
+    final child = RenderTestLayoutSemanticsBoundary();
+    child.isSemanticBoundary = true;
+    final parent = RenderTestParent(child: child);
+    parent.isSemanticBoundary = true;
+
+    TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics();
+    layout(parent, phase: EnginePhase.flushSemantics);
+
+    // Verify initial state
+    expect(child.size, const Size(100.0, 100.0));
+    expect(child.debugSemantics!.rect, const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0));
+
+    // Change size
+    child.targetSize = Size.zero;
+    child.markNeedsLayout();
+
+    pumpFrame(phase: EnginePhase.flushSemantics);
+  });
 }
 
 class RenderTestParent extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
