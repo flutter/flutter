@@ -511,9 +511,9 @@ dependencies:
           path.join(archivedAppPath, 'Frameworks', '$ffiPackageName.framework', ffiPackageName),
         );
 
-        // The host app example builds plugins statically, url_launcher_ios.framework
-        // should not exist.
-        checkDirectoryNotExists(
+        // With use_frameworks! in the Podfile (required for Xcode 26+ Swift compatibility),
+        // plugins are built as dynamic frameworks. Verify url_launcher_ios.framework exists.
+        checkDirectoryExists(
           path.join(archivedAppPath, 'Frameworks', 'url_launcher_ios.framework'),
         );
 

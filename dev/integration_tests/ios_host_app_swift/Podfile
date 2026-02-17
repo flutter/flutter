@@ -4,6 +4,12 @@ flutter_application_path = '../hello'
 load File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')
 
 target 'Host' do
+  # use_frameworks! is required for Xcode 26+ compatibility.
+  # Xcode 26 removed Swift backward compatibility libraries (swiftCompatibility51, etc.)
+  # that are referenced when building static libraries targeting iOS < 15.
+  # Dynamic frameworks bundle their own Swift runtime, avoiding the missing symbols.
+  # See: https://github.com/flutter/flutter/issues/175905
+  use_frameworks!
   install_all_flutter_pods flutter_application_path
 end
 
