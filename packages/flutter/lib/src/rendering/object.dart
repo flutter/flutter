@@ -1472,6 +1472,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
               .toList()
             ..sort((RenderObject a, RenderObject b) => a.depth - b.depth);
       _nodesNeedingSemantics.clear();
+      final treeShapeToken = Object();
       if (!kReleaseMode) {
         FlutterTimeline.startSync('Semantics.updateChildren');
       }
@@ -1556,21 +1557,9 @@ base class PipelineOwner with DiagnosticableTreeMixin {
 
       final nodeToEnsureGeometry = <_RenderObjectSemantics>{};
       for (final node in nodesToProcessGeometry) {
-        _RenderObjectSemantics target = node._semantics.geometryDirty
-            ? node._semantics.parent!
-            : node._semantics;
-        while (!target.parentDataDirty && !target.shouldFormSemanticsNode) {
-          target = target.parent!;
-        }
-        if (target.parentDataDirty) {
-          continue;
-        }
-        _RenderObjectSemantics? targetWithCleanGeometry = target;
-        while (targetWithCleanGeometry?.geometryDirty ?? false) {
-          targetWithCleanGeometry = targetWithCleanGeometry!.parentInSemanticsTree;
-        }
-        if (targetWithCleanGeometry != null) {
-          nodeToEnsureGeometry.add(targetWithCleanGeometry);
+        node._semantics.computeAncestorInfo(treeShapeToken);
+        if (node._semantics.firstAncestorNodeWithCleanGeometry != null) {
+          nodeToEnsureGeometry.add(node._semantics.firstAncestorNodeWithCleanGeometry!);
         }
       }
 
@@ -1591,6 +1580,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
         FlutterTimeline.startSync('Semantics.ensureSemanticsNode');
       }
       for (final RenderObject node in nodesToProcess.reversed) {
+        node._semantics.computeAncestorInfo(treeShapeToken);
         if (node._semantics.notInSemanticsTree) {
           // same as above.
           continue;
@@ -5560,17 +5550,50 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     return geometry == null;
   }
 
-  bool get notInSemanticsTree {
-    var walker = this;
-    // Find the closest ancestor that forms a semantics node.
-    while (!walker.parentDataDirty && !walker.shouldFormSemanticsNode) {
-      walker = walker.parent!;
+  Object _currentTreeShapeToken = Object();
+  bool notInSemanticsTree = true;
+  _RenderObjectSemantics? firstAncestorNodeWithCleanGeometry;
+
+  void computeAncestorInfo(Object treeShapeToken) {
+    if (treeShapeToken == _currentTreeShapeToken) {
+      return;
+    }
+    _currentTreeShapeToken = treeShapeToken;
+    if (isRoot) {
+      notInSemanticsTree = false;
+      firstAncestorNodeWithCleanGeometry = this;
+      return;
+    }
+    notInSemanticsTree = true;
+    firstAncestorNodeWithCleanGeometry = null;
+    if (parentDataDirty) {
+      return;
+    }
+    _RenderObjectSemantics? next;
+    if (shouldFormSemanticsNode) {
+      if (!geometryDirty) {
+        firstAncestorNodeWithCleanGeometry = this;
+      }
+      next = parentInSemanticsTree;
+    } else {
+      next = this;
+      while (!next!.parentDataDirty && !next.shouldFormSemanticsNode) {
+        next = next.parent;
+      }
     }
 
-    while (walker.parentInSemanticsTree != null) {
-      walker = walker.parentInSemanticsTree!;
+    if (next == null) {
+      notInSemanticsTree = true;
+      return;
     }
-    return !walker.isRoot;
+    next.computeAncestorInfo(treeShapeToken);
+    if (next.notInSemanticsTree) {
+      notInSemanticsTree = true;
+      firstAncestorNodeWithCleanGeometry = null;
+      return;
+    }
+    notInSemanticsTree = false;
+    firstAncestorNodeWithCleanGeometry ??= next.firstAncestorNodeWithCleanGeometry;
   }
 
   /// If this forms a semantics node, all of the properties in config are
