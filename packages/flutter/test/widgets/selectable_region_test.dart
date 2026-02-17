@@ -6536,7 +6536,7 @@ void main() {
     expect(clipboardData['text'], 'Hello my name is Dash.');
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/174246 .
+  // Regression test for https://github.com/flutter/flutter/issues/174246
   testWidgets('SelectableRegion applies correct mouse cursors in its empty region', (
     WidgetTester tester,
   ) async {
