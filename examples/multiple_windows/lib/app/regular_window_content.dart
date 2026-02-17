@@ -6,7 +6,8 @@
 // ignore_for_file: implementation_imports
 
 import 'package:flutter/material.dart';
-import 'package:multiple_windows/app/popup_button.dart';
+
+import 'popup_button.dart';
 import 'window_content.dart';
 import 'models.dart';
 import 'rotated_wire_cube.dart';
