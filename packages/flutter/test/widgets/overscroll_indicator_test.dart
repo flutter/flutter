@@ -762,6 +762,25 @@ void main() {
     );
     expect(tester.getSize(find.byType(GlowingOverscrollIndicator)), Size.zero);
   });
+
+  testWidgets('StretchingOverscrollIndicator does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: StretchingOverscrollIndicator(
+              axisDirection: AxisDirection.down,
+              child: ListView(),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(StretchingOverscrollIndicator)), Size.zero);
+  });
 }
 
 class TestScrollBehavior1 extends ScrollBehavior {
