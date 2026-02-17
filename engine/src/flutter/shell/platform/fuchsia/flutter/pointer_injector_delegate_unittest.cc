@@ -13,9 +13,9 @@
 
 #include <lib/fidl/cpp/binding_set.h>
 
-#include "pointer_injector_delegate.h"
-#include "tests/fakes/mock_injector_registry.h"
-#include "tests/fakes/platform_message.h"
+#include "flutter/shell/platform/fuchsia/flutter/pointer_injector_delegate.h"
+#include "flutter/shell/platform/fuchsia/flutter/tests/fakes/mock_injector_registry.h"
+#include "flutter/shell/platform/fuchsia/flutter/tests/fakes/platform_message.h"
 
 namespace flutter_runner::testing {
 

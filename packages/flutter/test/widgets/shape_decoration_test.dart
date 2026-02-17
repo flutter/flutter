@@ -9,7 +9,7 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui show Image;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../image_data.dart';
@@ -24,10 +24,11 @@ Future<void> main() async {
   testWidgets('ShapeDecoration.image', (WidgetTester tester) async {
     addTearDown(imageCache.clear);
     await tester.pumpWidget(
-      MaterialApp(
-        home: DecoratedBox(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: DecoratedBox(
           decoration: ShapeDecoration(
-            shape: Border.all(color: Colors.white) + Border.all(),
+            shape: Border.all(color: const Color(0xFFFFFFFF)) + Border.all(),
             image: DecorationImage(image: image),
           ),
         ),
@@ -37,34 +38,32 @@ Future<void> main() async {
       find.byType(DecoratedBox),
       paints
         ..drawImageRect(image: rawImage)
-        ..rect(color: Colors.black)
-        ..rect(color: Colors.white),
+        ..rect(color: const Color(0xFF000000))
+        ..rect(color: const Color(0xFFFFFFFF)),
     );
   });
 
   testWidgets('ShapeDecoration.color', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: DecoratedBox(
-          decoration: ShapeDecoration(
-            shape: Border.all(color: Colors.white) + Border.all(),
-            color: Colors.blue,
-          ),
+      DecoratedBox(
+        decoration: ShapeDecoration(
+          shape: Border.all(color: const Color(0xFFFFFFFF)) + Border.all(),
+          color: const Color(0xFF0000FF),
         ),
       ),
     );
     expect(
       find.byType(DecoratedBox),
       paints
-        ..rect(color: Color(Colors.blue.value))
-        ..rect(color: Colors.black)
-        ..rect(color: Colors.white),
+        ..rect(color: const Color(0xFF0000FF))
+        ..rect(color: const Color(0xFF000000))
+        ..rect(color: const Color(0xFFFFFFFF)),
     );
   });
 
   test('ShapeDecoration with BorderDirectional', () {
     const decoration = ShapeDecoration(
-      shape: BorderDirectional(start: BorderSide(color: Colors.red, width: 3)),
+      shape: BorderDirectional(start: BorderSide(color: Color(0xFFFF0000), width: 3)),
     );
 
     expect(decoration.padding, isA<EdgeInsetsDirectional>());
@@ -73,9 +72,10 @@ Future<void> main() async {
   testWidgets('TestBorder and Directionality - 1', (WidgetTester tester) async {
     final log = <String>[];
     await tester.pumpWidget(
-      MaterialApp(
-        home: DecoratedBox(
-          decoration: ShapeDecoration(shape: TestBorder(log.add), color: Colors.green),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: DecoratedBox(
+          decoration: ShapeDecoration(shape: TestBorder(log.add), color: const Color(0xFF00FF00)),
         ),
       ),
     );
@@ -117,7 +117,7 @@ Future<void> main() async {
               focal: AlignmentDirectional.bottomCenter,
               focalRadius: 5,
               radius: 2,
-              colors: <Color>[Colors.red, Colors.black],
+              colors: <Color>[Color(0xFFFF0000), Color(0xFF000000)],
               stops: <double>[0.0, 0.4],
             ),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
@@ -163,7 +163,7 @@ Future<void> main() async {
             width: 250,
             height: 250,
             decoration: ShapeDecoration(
-              color: Colors.black,
+              color: const Color(0xFF000000),
               shape: CircleBorder(side: BorderSide(color: color, width: 50)),
             ),
           ),
@@ -177,7 +177,7 @@ Future<void> main() async {
           width: 800,
           height: 800,
           decoration: const ShapeDecoration(
-            color: Colors.redAccent,
+            color: Color(0xFFFF5252),
             shape: CircleBorder(side: BorderSide(strokeAlign: BorderSide.strokeAlignOutside)),
           ),
           child: Directionality(
@@ -188,13 +188,13 @@ Future<void> main() async {
       );
     }
 
-    await tester.pumpWidget(buildWidget(const Color(0xffffffff)));
+    await tester.pumpWidget(buildWidget(const Color(0xFFFFFFFF)));
     await expectLater(
       find.byKey(key),
       matchesGoldenFile('painting.shape_decoration.outlined_border.should_be_white.png'),
     );
 
-    await tester.pumpWidget(buildWidget(const Color(0xfeffffff)));
+    await tester.pumpWidget(buildWidget(const Color(0xFEFFFFFF)));
     await expectLater(
       find.byKey(key),
       matchesGoldenFile('painting.shape_decoration.outlined_border.show_lines_due_to_opacity.png'),
