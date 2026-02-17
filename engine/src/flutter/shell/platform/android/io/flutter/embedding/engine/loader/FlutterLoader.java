@@ -300,23 +300,6 @@ public class FlutterLoader {
               + File.separator
               + DEFAULT_LIBRARY);
 
-      // Add AOT shared library name flag if set via the command line. This flag,
-      // unlike others, gives precedence to the first occurrence found in shellArgs,
-      // so we must add it here before adding flags from the manifest.
-      if (args != null) {
-        for (String arg : args) {
-          if (arg.startsWith(FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.commandLineArgument)) {
-            // Perform security check for path containing application's compiled Dart
-            // code and potentially user-provided compiled native code.
-            String aotSharedLibraryPath =
-                arg.substring(
-                    FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.commandLineArgument.length());
-            maybeAddAotSharedLibraryNameArg(applicationContext, aotSharedLibraryPath, shellArgs);
-            break;
-          }
-        }
-      }
-
       // Add engine flags provided by metadata in the application manifest. These settings will take
       // precedent over any defaults set below, but will be overridden if additionally set by the
       // command line.
@@ -424,9 +407,15 @@ public class FlutterLoader {
                     + arg
                     + "is not recognized. Please ensure that the flag is defined in the FlutterEngineFlags.");
             continue;
-          } else if (flag.equals(FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME)) {
-            // This flag has already been handled.
-            continue;
+          } else if (flag.equals(FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME)
+              || flag.equals(FlutterEngineFlags.DEPRECATED_AOT_SHARED_LIBRARY_NAME)) {
+            // Perform security check for path containing application's compiled Dart
+            // code and potentially user-provided compiled native code.
+            String aotSharedLibraryPath =
+                arg.substring(
+                    FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.commandLineArgument.length());
+            maybeAddAotSharedLibraryNameArg(applicationContext, aotSharedLibraryPath, shellArgs);
+            break;
           } else if (!flag.allowedInRelease && isRelease) {
             // Flag is not allowed in release builds.
             Log.w(
@@ -533,7 +522,13 @@ public class FlutterLoader {
     }
   }
 
-  /** Adds the AOT shared library name argument to the shell args if the provided path is safe. */
+  /**
+   * Adds the AOT shared library name argument to the shell args if the provided path is safe.
+   *
+   * <p>If the path is safe, it will be added to the beginning of the arguments list of arguments.
+   * The earlier specified path takes precedence over any later specified paths for the AOT shared
+   * library name argument.
+   */
   private void maybeAddAotSharedLibraryNameArg(
       @NonNull Context applicationContext,
       @NonNull String aotSharedLibraryPath,
@@ -551,6 +546,7 @@ public class FlutterLoader {
 
     if (safeAotSharedLibraryName != null) {
       shellArgs.add(
+          0,
           FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.commandLineArgument
               + safeAotSharedLibraryName);
     } else {
