@@ -34,6 +34,8 @@ public class FlutterEngineFlagsTest {
         FlutterEngineFlags.ALL_FLAGS.size());
   }
 
+  // Annotation required because support for setting engine shell arguments via Intent will be
+  // removed; see https://github.com/flutter/flutter/issues/180686.
   @SuppressWarnings("deprecation")
   @Test
   public void allFlags_haveExpectedMetaDataNamePrefix() {
