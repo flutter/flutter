@@ -155,6 +155,7 @@ void AccessibilityBridge::UpdateSemantics(
   SemanticsObject* root = objects_[@(kRootNodeId)];
 
   bool routeChanged = false;
+  NSString* routeName = nil;
   SemanticsObject* lastAdded = nil;
 
   if (root) {
@@ -187,6 +188,7 @@ void AccessibilityBridge::UpdateSemantics(
         ([lastAdded uid] != previous_route_id_ || [newRoutes count] != previous_routes_.size())) {
       previous_route_id_ = [lastAdded uid];
       routeChanged = true;
+      routeName = [lastAdded routeName];
     }
     previous_routes_.clear();
     for (SemanticsObject* route in newRoutes) {
@@ -209,8 +211,9 @@ void AccessibilityBridge::UpdateSemantics(
   if (!ios_delegate_->IsFlutterViewControllerPresentingModalViewController(view_controller_)) {
     layoutChanged = layoutChanged || [doomed_uids count] > 0;
 
-    if (routeChanged) {
-      NSString* routeName = [lastAdded routeName];
+    const bool shouldAnnounceRoute = routeChanged && routeName.length > 0;
+
+    if (shouldAnnounceRoute) {
       ios_delegate_->PostAccessibilityNotification(UIAccessibilityScreenChangedNotification,
                                                    routeName);
     }
@@ -223,7 +226,7 @@ void AccessibilityBridge::UpdateSemantics(
       // change, we always refocus.
       ios_delegate_->PostAccessibilityNotification(
           UIAccessibilityLayoutChangedNotification,
-          (routeChanged || next != lastFocused) ? next.nativeAccessibility : NULL);
+          (shouldAnnounceRoute || next != lastFocused) ? next.nativeAccessibility : NULL);
     } else if (scrollOccured) {
       // TODO(chunhtai): figure out what string to use for notification. At this
       // point, it is guarantee the previous focused object is still in the tree
