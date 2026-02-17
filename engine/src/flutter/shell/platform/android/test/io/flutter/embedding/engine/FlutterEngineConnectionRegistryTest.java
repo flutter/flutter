@@ -11,19 +11,14 @@ import static org.mockito.Mockito.*;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.android.ExclusiveAppComponent;
-import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
-import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.plugin.platform.PlatformViewsController2;
@@ -90,19 +85,6 @@ public class FlutterEngineConnectionRegistryTest {
     when(flutterEngine.getPlatformViewsControllerDelegator())
         .thenReturn(platformViewsControllerDelegator);
 
-    PackageManager packageManager = mock(PackageManager.class);
-    String packageName = "io.flutter.test";
-    ApplicationInfo applicationInfo = new ApplicationInfo();
-    applicationInfo.metaData = new Bundle();
-    when(context.getPackageName()).thenReturn(packageName);
-    when(context.getPackageManager()).thenReturn(packageManager);
-    try {
-      when(packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA))
-          .thenReturn(applicationInfo);
-    } catch (PackageManager.NameNotFoundException e) {
-      fail("Mocking application info threw an exception");
-    }
-
     FlutterLoader flutterLoader = mock(FlutterLoader.class);
 
     ExclusiveAppComponent appComponent = mock(ExclusiveAppComponent.class);
@@ -145,31 +127,41 @@ public class FlutterEngineConnectionRegistryTest {
   }
 
   @Test
-  public void attachToActivityConfiguresSoftwareRendering() {
+  public void softwareRendering() {
     Context context = mock(Context.class);
+
     FlutterEngine flutterEngine = mock(FlutterEngine.class);
     PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
-    FlutterLoader flutterLoader = mock(FlutterLoader.class);
-    ExclusiveAppComponent<Activity> appComponent = mock(ExclusiveAppComponent.class);
-    Activity activity = mock(Activity.class);
-    Lifecycle lifecycle = mock(Lifecycle.class);
-
-    when(flutterEngine.getPlatformViewsController()).thenReturn(platformViewsController);
+    PlatformViewsController2 platformViewsController2 = mock(PlatformViewsController2.class);
     PlatformViewsControllerDelegator platformViewsControllerDelegator =
         mock(PlatformViewsControllerDelegator.class);
     when(flutterEngine.getPlatformViewsControllerDelegator())
         .thenReturn(platformViewsControllerDelegator);
-    when(flutterEngine.getDartExecutor()).thenReturn(mock(DartExecutor.class));
-    when(flutterEngine.getRenderer()).thenReturn(mock(FlutterRenderer.class));
+    when(flutterEngine.getPlatformViewsController()).thenReturn(platformViewsController);
+    when(flutterEngine.getPlatformViewsController2()).thenReturn(platformViewsController2);
+
+    FlutterLoader flutterLoader = mock(FlutterLoader.class);
+
+    ExclusiveAppComponent appComponent = mock(ExclusiveAppComponent.class);
+    Activity activity = mock(Activity.class);
+    when(appComponent.getAppComponent()).thenReturn(activity);
+
+    // Test attachToActivity with an Activity that has no Intent.
     FlutterEngineConnectionRegistry registry =
         new FlutterEngineConnectionRegistry(context, flutterEngine, flutterLoader, null);
+    registry.attachToActivity(appComponent, mock(Lifecycle.class));
+    verify(platformViewsController).setSoftwareRendering(false);
 
-    when(flutterLoader.getSofwareRenderingEnabledViaManifest()).thenReturn(true);
-    when(appComponent.getAppComponent()).thenReturn(activity);
-    when(activity.getIntent()).thenReturn(mock(Intent.class));
+    Intent intent = mock(Intent.class);
+    when(intent.getBooleanExtra("enable-software-rendering", false)).thenReturn(false);
+    when(activity.getIntent()).thenReturn(intent);
 
-    registry.attachToActivity(appComponent, lifecycle);
+    registry.attachToActivity(appComponent, mock(Lifecycle.class));
+    verify(platformViewsController, times(2)).setSoftwareRendering(false);
 
+    when(intent.getBooleanExtra("enable-software-rendering", false)).thenReturn(true);
+
+    registry.attachToActivity(appComponent, mock(Lifecycle.class));
     verify(platformViewsController).setSoftwareRendering(true);
   }
 
