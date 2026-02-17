@@ -14,7 +14,7 @@ import 'dart:ui' show SemanticsHitTestBehavior, SemanticsRole, clampDouble, lerp
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
+import '../foundation/_features.dart' show isWindowingEnabled;
 
 import '../widgets/_window.dart'
     show
