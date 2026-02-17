@@ -19,6 +19,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import '../widgets/_window.dart' show WindowManager;
+import '../foundation/_features.dart' show isWindowingEnabled;
 
 import 'arc.dart';
 import 'button_style.dart';
@@ -1159,11 +1160,14 @@ class _MaterialAppState extends State<MaterialApp> {
       return true;
     }());
 
+    Widget child = HeroControllerScope(controller: _heroController, child: result);
+    if (isWindowingEnabled) {
+      child = WindowManager(child: child);
+    }
+
     return ScrollConfiguration(
       behavior: widget.scrollBehavior ?? const MaterialScrollBehavior(),
-      child: WindowManager(
-        child: HeroControllerScope(controller: _heroController, child: result),
-      ),
+      child: child,
     );
   }
 }
