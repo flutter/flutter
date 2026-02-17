@@ -163,7 +163,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/list_wheel_scroll_view_test.dart',
     'packages/flutter/test/widgets/pop_scope_test.dart',
     'packages/flutter/test/widgets/scrollbar_test.dart',
-    'packages/flutter/test/widgets/actions_test.dart',
     'packages/flutter/test/widgets/scroll_physics_test.dart',
     'packages/flutter/test/widgets/obscured_animated_image_test.dart',
     'packages/flutter/test/widgets/platform_menu_bar_test.dart',
