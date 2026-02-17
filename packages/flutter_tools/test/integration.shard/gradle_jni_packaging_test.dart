@@ -43,7 +43,7 @@ void main() {
       exists,
     );
     // Verify that libflutter.so is packaged in the APK for Flutter supported architectures.
-    expect(_checkLibIsInApk(projectDir, 'lib/arm64-v8a/libflutter.so'), false);
+    expect(_checkLibIsInApk(projectDir, 'lib/arm64-v8a/libflutter.so'), true);
     expect(_checkLibIsInApk(projectDir, 'lib/x86_64/libflutter.so'), true);
     expect(_checkLibIsInApk(projectDir, 'lib/armeabi-v7a/libflutter.so'), true);
     // Verify that libflutter.so is not packaged in the APK for x86 architecture.

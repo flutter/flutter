@@ -206,7 +206,6 @@ object FlutterPluginUtils {
     @JvmName("isProjectVerbose")
     internal fun isProjectVerbose(project: Project): Boolean = project.findProperty(PROP_IS_VERBOSE)?.toString()?.toBoolean() ?: false
 
-
     /**
      *  Developers can set this value by passing `-P disable-abi-filtering=true`
      *  to flutter build. Where "disable-abi-filtering" comes from
