@@ -65,6 +65,13 @@ void main() {
     expect(find.text('page1'), findsOneWidget);
 
     key.currentState!.pop();
+
+    // The page is removed from the pages list immediately to stop the pages
+    // list from going out-of-sync if the widget is rebuilt during the
+    // animation.
+    await tester.pump();
+    expect(removedPage, <Page<void>>[page1]);
+
     await tester.pumpAndSettle();
     expect(find.text('page'), findsOneWidget);
     expect(removedPage, <Page<void>>[page1]);
@@ -87,6 +94,13 @@ void main() {
         },
       ),
     );
+
+    // The page is removed from the pages list immediately to stop the pages
+    // list from going out-of-sync if the widget is rebuilt during the
+    // animation.
+    await tester.pump();
+    expect(removedPage, <Page<void>>[page1]);
+
     await tester.pumpAndSettle();
     expect(find.text('new page'), findsOneWidget);
     expect(removedPage, <Page<void>>[page1]);
