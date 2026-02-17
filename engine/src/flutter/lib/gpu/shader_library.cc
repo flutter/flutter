@@ -231,6 +231,9 @@ fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromFlatbuffer(
                     struct_member->array_elements() == 0
                         ? std::optional<size_t>(std::nullopt)
                         : static_cast<size_t>(struct_member->array_elements()),
+                .float_type = impeller::DeriveShaderFloatType(
+                    FromUniformType(struct_member->type()),
+                    struct_member->element_size_in_bytes()),
             });
           }
         }

@@ -146,5 +146,64 @@ TEST(BufferBindingsGLESTest, BindUniformDataVerticesAndMatrices) {
                                        Range{0, 1}));
 }
 
+TEST(BufferBindingsGLESTest, DeriveShaderFloatTypeFromElementSize) {
+  // Non-float types should always return nullopt.
+  EXPECT_EQ(DeriveShaderFloatType(ShaderType::kUnsignedInt, 4), std::nullopt);
+  EXPECT_EQ(DeriveShaderFloatType(ShaderType::kSignedInt, 4), std::nullopt);
+  EXPECT_EQ(DeriveShaderFloatType(ShaderType::kBoolean, 4), std::nullopt);
+
+  // Float types should be derived from element size.
+  EXPECT_EQ(DeriveShaderFloatType(ShaderType::kFloat, 4),
+            ShaderFloatType::kFloat);
+  EXPECT_EQ(DeriveShaderFloatType(ShaderType::kFloat, 8),
+            ShaderFloatType::kVec2);
+  EXPECT_EQ(DeriveShaderFloatType(ShaderType::kFloat, 12),
+            ShaderFloatType::kVec3);
+  EXPECT_EQ(DeriveShaderFloatType(ShaderType::kFloat, 16),
+            ShaderFloatType::kVec4);
+  EXPECT_EQ(DeriveShaderFloatType(ShaderType::kFloat, 64),
+            ShaderFloatType::kMat4);
+
+  // Unknown sizes should return nullopt.
+  EXPECT_EQ(DeriveShaderFloatType(ShaderType::kFloat, 0), std::nullopt);
+  EXPECT_EQ(DeriveShaderFloatType(ShaderType::kFloat, 32), std::nullopt);
+  EXPECT_EQ(DeriveShaderFloatType(ShaderType::kFloat, 128), std::nullopt);
+}
+
+TEST(BufferBindingsGLESTest, BindUniformFailsWithoutFloatType) {
+  // Verifies that the GLES backend rejects float uniforms that are missing
+  // float_type metadata (the bug that occurred when loading shader bundles).
+  BufferBindingsGLES bindings;
+  absl::flat_hash_map<std::string, GLint> uniform_bindings;
+  uniform_bindings["SHADERMETADATA.FOOBAR"] = 1;
+  bindings.SetUniformBindings(std::move(uniform_bindings));
+  auto mock_gles_impl = std::make_unique<MockGLESImpl>();
+
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gles_impl));
+  std::vector<BufferResource> bound_buffers;
+  std::vector<TextureAndSampler> bound_textures;
+
+  ShaderMetadata shader_metadata = {
+      .name = "shader_metadata",
+      .members = {ShaderStructMemberMetadata{.type = ShaderType::kFloat,
+                                             .name = "foobar",
+                                             .offset = 0,
+                                             .size = sizeof(float),
+                                             .byte_length = sizeof(float),
+                                             .array_elements = std::nullopt,
+                                             .float_type = std::nullopt}}};
+  std::shared_ptr<ReactorGLES> reactor;
+  std::shared_ptr<Allocation> backing_store = std::make_shared<Allocation>();
+  ASSERT_TRUE(backing_store->Truncate(Bytes{sizeof(float)}));
+  DeviceBufferGLES device_buffer(DeviceBufferDescriptor{.size = sizeof(float)},
+                                 reactor, backing_store);
+  BufferView buffer_view(&device_buffer, Range(0, sizeof(float)));
+  bound_buffers.push_back(BufferResource(&shader_metadata, buffer_view));
+
+  EXPECT_FALSE(bindings.BindUniformData(mock_gl->GetProcTable(), bound_textures,
+                                        bound_buffers, Range{0, 0},
+                                        Range{0, 1}));
+}
+
 }  // namespace testing
 }  // namespace impeller

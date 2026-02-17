@@ -82,6 +82,32 @@ struct ShaderStructMemberMetadata {
   std::optional<ShaderFloatType> float_type;
 };
 
+/// @brief Derive the ShaderFloatType from the base ShaderType and element
+///        size in bytes. This is needed when loading shader metadata from
+///        formats (like shader bundles) that don't store float_type directly.
+///        Returns std::nullopt for non-float types.
+constexpr std::optional<ShaderFloatType> DeriveShaderFloatType(
+    ShaderType type,
+    size_t element_size_in_bytes) {
+  if (type != ShaderType::kFloat) {
+    return std::nullopt;
+  }
+  switch (element_size_in_bytes) {
+    case 4:
+      return ShaderFloatType::kFloat;
+    case 8:
+      return ShaderFloatType::kVec2;
+    case 12:
+      return ShaderFloatType::kVec3;
+    case 16:
+      return ShaderFloatType::kVec4;
+    case 64:
+      return ShaderFloatType::kMat4;
+    default:
+      return std::nullopt;
+  }
+}
+
 struct ShaderMetadata {
   // This must match the uniform name in the shader program.
   std::string name;
