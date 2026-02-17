@@ -1709,14 +1709,3 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   @override
   Version? version;
 }
-
-class FakeFlutterManifest extends Fake implements FlutterManifest {
-  @override
-  late final dependencies = <String>{};
-
-  @override
-  String get appName => 'my_app';
-
-  @override
-  YamlMap toYaml() => YamlMap.wrap(<String, String>{});
-}
