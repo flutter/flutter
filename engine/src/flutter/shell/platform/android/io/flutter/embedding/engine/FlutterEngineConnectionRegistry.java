@@ -334,8 +334,7 @@ import java.util.Set;
     // https://github.com/flutter/flutter/issues/180686.
     boolean useSoftwareRendering =
         intent != null
-            ? intent.getBooleanExtra(
-                FlutterShellArgsIntentUtils.ARG_KEY_ENABLE_SOFTWARE_RENDERING, false)
+            ? intent.getBooleanExtra(FlutterShellArgs.ARG_KEY_ENABLE_SOFTWARE_RENDERING, false)
             : false;
 
     // As part of https://github.com/flutter/flutter/issues/172553, the ability to set
@@ -347,8 +346,8 @@ import java.util.Set;
       Log.w(
           TAG,
           "Support for setting engine flags on Android via Intent will soon be dropped; see https://github.com/flutter/flutter/issues/172553 for more information on this breaking change. To migrate, set the "
-              + FlutterShellArgs.ENABLE_SOFTWARE_RENDERING.metadataKey
-              + " metadata in the application manifest. See https://github.com/flutter/flutter/blob/main/docs/engine/Android-Flutter-Shell-Arguments.md for more info.");
+              + FlutterEngineFlags.ENABLE_SOFTWARE_RENDERING.metadataKey
+              + " metadata in the application manifest. See https://github.com/flutter/flutter/blob/main/docs/engine/Android-Flutter-Engine-Flags.md for more info.");
     } else {
       // Check manifest for software rendering configuration.
       useSoftwareRendering = flutterLoader.getSofwareRenderingEnabledViaManifest();

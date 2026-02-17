@@ -971,7 +971,12 @@ public class FlutterLoaderTest {
 
   @Test
   public void itSetsEnableDartProfilingFromMetadata() {
+    // Test debug mode.
     testFlagFromMetadataPresent(
+        "io.flutter.embedding.android.EnableDartProfiling", true, "--enable-dart-profiling");
+
+    // Test release mode.
+    testFlagFromMetadataPresentInReleaseMode(
         "io.flutter.embedding.android.EnableDartProfiling", true, "--enable-dart-profiling");
   }
 
