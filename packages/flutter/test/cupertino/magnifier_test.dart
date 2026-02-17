@@ -6,7 +6,6 @@
 library;
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -45,12 +44,12 @@ void main() {
       final Key fakeTextFieldKey = UniqueKey();
 
       await tester.pumpWidget(
-        MaterialApp(
+        CupertinoApp(
           home: SizedBox.square(
             key: fakeTextFieldKey,
             dimension: 10,
             child: CupertinoTheme(
-              data: const CupertinoThemeData(primaryColor: Colors.green),
+              data: const CupertinoThemeData(primaryColor: CupertinoColors.activeGreen),
               child: Builder(
                 builder: (BuildContext context) {
                   return const Placeholder();
@@ -85,7 +84,7 @@ void main() {
           .widget<CupertinoMagnifier>(find.byType(CupertinoMagnifier))
           .borderSide
           .color;
-      expect(magnifierBorderColor, equals(Colors.green));
+      expect(magnifierBorderColor, equals(CupertinoColors.activeGreen));
     });
 
     group('position', () {
@@ -103,16 +102,20 @@ void main() {
         final Key outerKey = UniqueKey();
 
         await tester.pumpWidget(
-          ColoredBox(
+          CupertinoApp(
             key: outerKey,
-            color: const Color.fromARGB(255, 0, 255, 179),
-            child: MaterialApp(
-              home: Center(
+            theme: const CupertinoThemeData(primaryColor: Color(0xFF6750A4)),
+            // The CupertinoApp adds a `CupertinoUserInterfaceLevel` widget,
+            // which has effect on the color of the background behind the child.
+            // So enforce a consistent background color that fills the background.
+            home: ColoredBox(
+              color: const Color.fromARGB(255, 0, 255, 179),
+              child: Center(
                 child: Container(
                   key: fakeTextFieldKey,
                   width: 10,
                   height: 10,
-                  color: Colors.red,
+                  color: const Color(0xFFF44336),
                   child: const Placeholder(),
                 ),
               ),
@@ -152,7 +155,7 @@ void main() {
         WidgetTester tester,
       ) async {
         await tester.pumpWidget(
-          const MaterialApp(color: Color.fromARGB(7, 0, 129, 90), home: Placeholder()),
+          const CupertinoApp(color: Color.fromARGB(7, 0, 129, 90), home: Placeholder()),
         );
 
         final BuildContext context = tester.firstElement(find.byType(Placeholder));
@@ -177,7 +180,7 @@ void main() {
         final double dragPositionBelowTextField = reasonableTextField.center.dy + 30;
 
         await tester.pumpWidget(
-          const MaterialApp(color: Color.fromARGB(7, 0, 129, 90), home: Placeholder()),
+          const CupertinoApp(color: Color.fromARGB(7, 0, 129, 90), home: Placeholder()),
         );
 
         final BuildContext context = tester.firstElement(find.byType(Placeholder));
@@ -214,7 +217,7 @@ void main() {
         WidgetTester tester,
       ) async {
         await tester.pumpWidget(
-          const MaterialApp(color: Color.fromARGB(7, 0, 129, 90), home: Placeholder()),
+          const CupertinoApp(color: Color.fromARGB(7, 0, 129, 90), home: Placeholder()),
         );
 
         final BuildContext context = tester.firstElement(find.byType(Placeholder));
@@ -251,7 +254,7 @@ void main() {
 
       testWidgets('should re-show if gesture moves back up', (WidgetTester tester) async {
         await tester.pumpWidget(
-          const MaterialApp(color: Color.fromARGB(7, 0, 129, 90), home: Placeholder()),
+          const CupertinoApp(color: Color.fromARGB(7, 0, 129, 90), home: Placeholder()),
         );
 
         final BuildContext context = tester.firstElement(find.byType(Placeholder));
@@ -307,7 +310,7 @@ void main() {
         WidgetTester tester,
       ) async {
         expect(
-          () => MaterialApp(home: Scaffold(body: CupertinoMagnifier(magnificationScale: 0))),
+          () => CupertinoPageScaffold(child: CupertinoMagnifier(magnificationScale: 0)),
           throwsAssertionError,
         );
       });
@@ -316,7 +319,7 @@ void main() {
         WidgetTester tester,
       ) async {
         expect(
-          () => MaterialApp(home: Scaffold(body: CupertinoMagnifier(magnificationScale: -1))),
+          () => CupertinoPageScaffold(child: CupertinoMagnifier(magnificationScale: -1)),
           throwsAssertionError,
         );
       });
@@ -324,7 +327,9 @@ void main() {
       testWidgets('CupertinoMagnifier magnification scale defaults to 1', (
         WidgetTester tester,
       ) async {
-        await tester.pumpWidget(const MaterialApp(home: Scaffold(body: CupertinoMagnifier())));
+        await tester.pumpWidget(
+          const CupertinoApp(home: CupertinoPageScaffold(child: CupertinoMagnifier())),
+        );
 
         expect(
           tester.widget(find.byType(RawMagnifier)),
@@ -340,7 +345,9 @@ void main() {
         WidgetTester tester,
       ) async {
         await tester.pumpWidget(
-          const MaterialApp(home: Scaffold(body: CupertinoMagnifier(magnificationScale: 2))),
+          const CupertinoApp(
+            home: CupertinoPageScaffold(child: CupertinoMagnifier(magnificationScale: 2)),
+          ),
         );
 
         expect(
