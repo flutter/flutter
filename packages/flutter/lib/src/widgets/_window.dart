@@ -1930,7 +1930,7 @@ class WindowEntry {
 /// and renders the new windows using the appropriate window widget as they are
 /// added or removed.
 ///
-/// If windowing is not enabled, this widgets does simply renders
+/// If windowing is not enabled, this widgets renders
 /// [child] and does not provide the [WindowRegistryScope].
 ///
 /// {@tool snippet}
