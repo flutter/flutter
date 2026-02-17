@@ -2320,11 +2320,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         ? _InputDecoratorDefaultsM3(context)
         : _InputDecoratorDefaultsM2(context);
     final IconButtonThemeData iconButtonTheme = IconButtonTheme.of(context);
+    final TextDirection directionality = Directionality.of(context);
+    final TextDirection effectiveLabelTextDirection = decoration.textDirection ?? directionality;
     final TextDirection effectiveHintTextDirection =
-        decoration.hintTextDirection ?? decoration.textDirection ?? Directionality.of(context);
-
-    final TextDirection effectiveLabelTextDirection =
-        decoration.textDirection ?? Directionality.of(context);
+        decoration.hintTextDirection ?? effectiveLabelTextDirection;
 
     final TextStyle labelStyle = _getInlineLabelStyle(themeData, defaults);
     final TextBaseline textBaseline = labelStyle.textBaseline!;
