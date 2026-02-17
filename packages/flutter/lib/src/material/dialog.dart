@@ -1237,7 +1237,11 @@ class SimpleDialog extends StatelessWidget {
   /// {@macro flutter.material.dialog.surfaceTintColor}
   final Color? surfaceTintColor;
 
-  /// Temporarily unused.
+  /// Style for the text in the [children] of this [SimpleDialog].
+  ///
+  /// If null, [DialogThemeData.contentTextStyle] is used. If that is also null,
+  /// defaults to [TextTheme.titleMedium] for Material 2, or [TextTheme.bodyMedium]
+  /// for Material 3.
   final TextStyle? contentTextStyle;
 
   /// The semantic label of the dialog used by accessibility frameworks to
@@ -1273,6 +1277,11 @@ class SimpleDialog extends StatelessWidget {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
 
+    final DialogThemeData dialogTheme = DialogTheme.of(context);
+    final DialogThemeData defaults = theme.useMaterial3
+        ? _DialogDefaultsM3(context)
+        : _DialogDefaultsM2(context);
+
     String? label = semanticLabel;
     switch (defaultTargetPlatform) {
       case TargetPlatform.macOS:
@@ -1287,9 +1296,9 @@ class SimpleDialog extends StatelessWidget {
 
     // The paddingScaleFactor is used to adjust the padding of Dialog
     // children.
-    final TextStyle defaultTextStyle =
-        titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.titleLarge!;
-    final double fontSize = defaultTextStyle.fontSize ?? kDefaultFontSize;
+    final TextStyle effectiveTitleTextStyle =
+        titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.titleLarge!;
+    final double fontSize = effectiveTitleTextStyle.fontSize ?? kDefaultFontSize;
     final double fontSizeToScale = fontSize == 0.0 ? kDefaultFontSize : fontSize;
     final double effectiveTextScale =
         MediaQuery.textScalerOf(context).scale(fontSizeToScale) / fontSizeToScale;
@@ -1309,7 +1318,7 @@ class SimpleDialog extends StatelessWidget {
               : effectiveTitlePadding.bottom,
         ),
         child: DefaultTextStyle(
-          style: defaultTextStyle,
+          style: effectiveTitleTextStyle,
           child: Semantics(
             // For iOS platform, the focus always lands on the title.
             // Set nameRoute to false to avoid title being announce twice.
@@ -1334,7 +1343,10 @@ class SimpleDialog extends StatelessWidget {
                 : effectiveContentPadding.top,
             bottom: effectiveContentPadding.bottom * paddingScaleFactor,
           ),
-          child: ListBody(children: children!),
+          child: DefaultTextStyle(
+            style: contentTextStyle ?? dialogTheme.contentTextStyle ?? defaults.contentTextStyle!,
+            child: ListBody(children: children!),
+          ),
         ),
       );
     }
