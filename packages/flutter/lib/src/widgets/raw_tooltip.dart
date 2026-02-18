@@ -454,9 +454,9 @@ class RawTooltip extends StatefulWidget {
   /// {@endtemplate}
   final TooltipPositionDelegate? positionDelegate;
 
-  /// Whether this tooltip should be invisible to hit testing.
+  /// Whether the tooltip should be invisible to hit testing.
   ///
-  /// Defaults to true.
+  /// Defaults to false.
   ///
   /// See also:
   ///
