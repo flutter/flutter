@@ -116,43 +116,40 @@ static bool OutputReflectionData(const Compiler& compiler,
   ///    May include a JSON file, a C++ header, and/or a C++ TU.
   ///
 
-  if (TargetPlatformNeedsReflection(options.target_platform)) {
-    if (!switches.reflection_json_name.empty()) {
-      auto reflection_json_name = std::filesystem::absolute(
-          std::filesystem::current_path() / switches.reflection_json_name);
-      if (!fml::WriteAtomically(
-              *switches.working_directory,
-              Utf8FromPath(reflection_json_name).c_str(),
-              *compiler.GetReflector()->GetReflectionJSON())) {
-        std::cerr << "Could not write reflection json to "
-                  << switches.reflection_json_name << std::endl;
-        return false;
-      }
+  if (!switches.reflection_json_name.empty()) {
+    auto reflection_json_name = std::filesystem::absolute(
+        std::filesystem::current_path() / switches.reflection_json_name);
+    if (!fml::WriteAtomically(*switches.working_directory,
+                              Utf8FromPath(reflection_json_name).c_str(),
+                              *compiler.GetReflector()->GetReflectionJSON())) {
+      std::cerr << "Could not write reflection json to "
+                << switches.reflection_json_name << std::endl;
+      return false;
     }
+  }
 
-    if (!switches.reflection_header_name.empty()) {
-      auto reflection_header_name = std::filesystem::absolute(
-          std::filesystem::current_path() / switches.reflection_header_name);
-      if (!fml::WriteAtomically(
-              *switches.working_directory,
-              Utf8FromPath(reflection_header_name).c_str(),
-              *compiler.GetReflector()->GetReflectionHeader())) {
-        std::cerr << "Could not write reflection header to "
-                  << switches.reflection_header_name << std::endl;
-        return false;
-      }
+  if (!switches.reflection_header_name.empty()) {
+    auto reflection_header_name = std::filesystem::absolute(
+        std::filesystem::current_path() / switches.reflection_header_name);
+    if (!fml::WriteAtomically(
+            *switches.working_directory,
+            Utf8FromPath(reflection_header_name).c_str(),
+            *compiler.GetReflector()->GetReflectionHeader())) {
+      std::cerr << "Could not write reflection header to "
+                << switches.reflection_header_name << std::endl;
+      return false;
     }
+  }
 
-    if (!switches.reflection_cc_name.empty()) {
-      auto reflection_cc_name = std::filesystem::absolute(
-          std::filesystem::current_path() / switches.reflection_cc_name);
-      if (!fml::WriteAtomically(*switches.working_directory,
-                                Utf8FromPath(reflection_cc_name).c_str(),
-                                *compiler.GetReflector()->GetReflectionCC())) {
-        std::cerr << "Could not write reflection CC to "
-                  << switches.reflection_cc_name << std::endl;
-        return false;
-      }
+  if (!switches.reflection_cc_name.empty()) {
+    auto reflection_cc_name = std::filesystem::absolute(
+        std::filesystem::current_path() / switches.reflection_cc_name);
+    if (!fml::WriteAtomically(*switches.working_directory,
+                              Utf8FromPath(reflection_cc_name).c_str(),
+                              *compiler.GetReflector()->GetReflectionCC())) {
+      std::cerr << "Could not write reflection CC to "
+                << switches.reflection_cc_name << std::endl;
+      return false;
     }
   }
   return true;
