@@ -1504,6 +1504,9 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   }
 
   @override
+  bool get isCoordinatedByParent => true;
+
+  @override
   void jumpToWithoutSettling(double value) {
     assert(false);
   }
