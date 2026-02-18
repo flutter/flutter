@@ -232,6 +232,7 @@ class OverscrollNotification extends ScrollNotification {
     this.dragDetails,
     required this.overscroll,
     this.velocity = 0.0,
+    this.shouldDelegateOverscroll = false,
   }) : assert(overscroll.isFinite),
        assert(overscroll != 0.0);
 
@@ -254,6 +255,20 @@ class OverscrollNotification extends ScrollNotification {
   /// for overscrolls that happened from a [BallisticScrollActivity] or
   /// [DrivenScrollActivity].
   final double velocity;
+
+  /// Whether the [ScrollPhysics] of the scrollable that generated this
+  /// notification has opted in to overscroll delegation.
+  ///
+  /// When true, ancestor scrollables may consume this overscroll and apply
+  /// it to their own scroll position. When false (the default), the
+  /// overscroll is "trapped" in the originating scrollable.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollPhysics.shouldDelegateOverscroll], which controls this value.
+  ///  * [OverscrollDelegatingScrollPhysics], a convenience class that
+  ///    sets [ScrollPhysics.shouldDelegateOverscroll] to true.
+  final bool shouldDelegateOverscroll;
 
   @override
   void debugFillDescription(List<String> description) {

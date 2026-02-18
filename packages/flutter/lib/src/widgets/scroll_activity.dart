@@ -117,12 +117,14 @@ abstract class ScrollActivity {
   void dispatchOverscrollNotification(
     ScrollMetrics metrics,
     BuildContext context,
-    double overscroll,
-  ) {
+    double overscroll, {
+    bool shouldDelegateOverscroll = false,
+  }) {
     OverscrollNotification(
       metrics: metrics,
       context: context,
       overscroll: overscroll,
+      shouldDelegateOverscroll: shouldDelegateOverscroll,
     ).dispatch(context);
   }
 
@@ -511,8 +513,9 @@ class DragScrollActivity extends ScrollActivity {
   void dispatchOverscrollNotification(
     ScrollMetrics metrics,
     BuildContext context,
-    double overscroll,
-  ) {
+    double overscroll, {
+    bool shouldDelegateOverscroll = false,
+  }) {
     final dynamic lastDetails = _controller!.lastDetails;
     assert(lastDetails is DragUpdateDetails);
     OverscrollNotification(
@@ -520,6 +523,7 @@ class DragScrollActivity extends ScrollActivity {
       context: context,
       overscroll: overscroll,
       dragDetails: lastDetails as DragUpdateDetails,
+      shouldDelegateOverscroll: shouldDelegateOverscroll,
     ).dispatch(context);
   }
 
@@ -646,13 +650,15 @@ class BallisticScrollActivity extends ScrollActivity {
   void dispatchOverscrollNotification(
     ScrollMetrics metrics,
     BuildContext context,
-    double overscroll,
-  ) {
+    double overscroll, {
+    bool shouldDelegateOverscroll = false,
+  }) {
     OverscrollNotification(
       metrics: metrics,
       context: context,
       overscroll: overscroll,
       velocity: velocity,
+      shouldDelegateOverscroll: shouldDelegateOverscroll,
     ).dispatch(context);
   }
 
@@ -777,13 +783,15 @@ class DrivenScrollActivity extends ScrollActivity {
   void dispatchOverscrollNotification(
     ScrollMetrics metrics,
     BuildContext context,
-    double overscroll,
-  ) {
+    double overscroll, {
+    bool shouldDelegateOverscroll = false,
+  }) {
     OverscrollNotification(
       metrics: metrics,
       context: context,
       overscroll: overscroll,
       velocity: velocity,
+      shouldDelegateOverscroll: shouldDelegateOverscroll,
     ).dispatch(context);
   }
 

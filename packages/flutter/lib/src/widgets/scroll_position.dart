@@ -1093,7 +1093,12 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// not applied to the [pixels] value.
   void didOverscrollBy(double value) {
     assert(activity!.isScrolling);
-    activity!.dispatchOverscrollNotification(copyWith(), context.notificationContext!, value);
+    activity!.dispatchOverscrollNotification(
+      copyWith(),
+      context.notificationContext!,
+      value,
+      shouldDelegateOverscroll: physics.shouldDelegateOverscroll,
+    );
   }
 
   /// Dispatches a notification that the [userScrollDirection] has changed.
