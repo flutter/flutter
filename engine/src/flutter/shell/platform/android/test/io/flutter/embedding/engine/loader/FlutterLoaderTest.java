@@ -803,7 +803,7 @@ public class FlutterLoaderTest {
         "io.flutter.embedding.android.DisableImpeller", true, "--enable-impeller=true");
   }
 
-    @Test
+  @Test
   public void itSetsEnableImpellerFromMetadata() {
     // Test debug mode.
     testFlagFromMetadataPresent(
@@ -813,7 +813,6 @@ public class FlutterLoaderTest {
     testFlagFromMetadataPresentInReleaseMode(
         "io.flutter.embedding.android.EnableImpeller", null, "--enable-impeller");
   }
-
 
   @Test
   public void itSetsImpellerBackendFromMetadata() {
@@ -999,110 +998,20 @@ public class FlutterLoaderTest {
         "io.flutter.embedding.android.ProfileStartup", null, "--profile-startup");
 
     // Test release mode.
-    testFlagFromMetadataPresentInReleaseMode("io.flutter.embedding.android.ProfileStartup", null, "--profile-startup");
+    testFlagFromMetadataPresentInReleaseMode(
+        "io.flutter.embedding.android.ProfileStartup", null, "--profile-startup");
   }
 
   @Test
   public void itSetsMergedPlatformUiThread() {
     // Test debug mode.
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.MergedPlatformUIThread",
-        null,
-        "--merged-platform-ui-thread");
+        "io.flutter.embedding.android.MergedPlatformUIThread", null, "--merged-platform-ui-thread");
 
     // Test release mode.
-      testFlagFromMetadataPresentInReleaseMode(
-        "io.flutter.embedding.android.MergedPlatformUIThread",
-        null,
-        "--merged-platform-ui-thread");  
+    testFlagFromMetadataPresentInReleaseMode(
+        "io.flutter.embedding.android.MergedPlatformUIThread", null, "--merged-platform-ui-thread");
   }
-
-  @Test
-  public void itSetsRouteFromMetadata() {
-    String testRoutePath = "some/route";
-
-    // Test debug mode.
-    testFlagFromMetadataPresent("io.flutter.embedding.android.Route", testRoutePath, "--route=" + testRoutePath);
-
-    // Test release mode.
-    testFlagFromMetadataPresentInReleaseMode("io.flutter.embedding.android.Route", testRoutePath, "--route=" + testRoutePath);
-  }
-
-  @Test
-  public void itSetsAotVmServiceSharedLibraryFromMetadata() {
-    String testAotVmServiceSharedLibraryName = "some/route";
-
-    // Test debug mode.
-    testFlagFromMetadataPresent("io.flutter.embedding.android.AotVMServiceSharedLibraryName", testAotVmServiceSharedLibraryName , "--route=" + testAotVmServiceSharedLibraryName);
-
-    // Test release mode.
-    testFlagFromMetadataPresentInReleaseMode("io.flutter.embedding.android.AotVMServiceSharedLibraryName", testAotVmServiceSharedLibraryName, "--route=" + testAotVmServiceSharedLibraryName);
-  }
-
-  @Test
-  public void itSetsCacheDirPathFromMetadata() {
-    String testCacheDirPath = "some/path";
-
-    // Test debug mode.
-    testFlagFromMetadataPresent("io.flutter.embedding.android.CacheDirPath", testCacheDirPath, "--cache-dir-path=" + testCacheDirPath );
-    
-    // Test release mode.
-    testFlagFromMetadataPresentInReleaseMode("io.flutter.embedding.android.CacheDirPath", testCacheDirPath, "--cache-dir-path=" + testCacheDirPath);
-}
-
-@Test
-public void itSetsICUDataFilePathFromMetadata() {
-  String icuDataFilePath = "some/path";
-
-  // Test debug mode.
-  testFlagFromMetadataPresent("io.flutter.embedding.android.ICUDataFilePath", icuDataFilePath, "--icu-data-file-path=" + icuDataFilePath);
-
-  // Test release mode.
-  testFlagFromMetadataPresentInReleaseMode("io.flutter.embedding.android.ICUDataFilePath",icuDataFilePath, "--icu-data-file-path=" + icuDataFilePath);
-}
-
-@Test
-public void itSetsICUSymbolPrefixFromMetadata() {
-    String icuSymbolPrefix = "somePrefix";
-
-    // Test debug mode.
-    testFlagFromMetadataPresent("io.flutter.embedding.android.ICUSymbolPrefix", icuSymbolPrefix, "--icu-symbol-prefix=" + icuSymbolPrefix);
-
-    // Test release mode.
-    testFlagFromMetadataPresentInReleaseMode("io.flutter.embedding.android.ICUSymbolPrefix",icuSymbolPrefix, "--icu-symbol-prefix=" + icuSymbolPrefix);
-}
-
-@Test
-public void itSetsICUNativeLibPathFromMetadata() {
-    String icuNativeLibPath = "some/path";
-
-    // Test debug mode.
-    testFlagFromMetadataPresent("io.flutter.embedding.android.ICUNativeLibPath", icuNativeLibPath, "--icu-native-lib-path=" + icuNativeLibPath);
-
-    // Test release mode.
-    testFlagFromMetadataPresentInReleaseMode("io.flutter.embedding.android.ICUNativeLibPath",icuNativeLibPath, "--icu-native-lib-path=" + icuNativeLibPath)
-}
-
-@Test
-public void itSetsEnableServicePortFallback() {
-    // Test debug mode.
-    testFlagFromMetadataPresent("io.flutter.embedding.android.EnableServicePortFallback", null, "--enable-service-port-fallback");
-
-    // Test release mode.
-    testFlagFromMetadataPresentInReleaseMode("io.flutter.embedding.android.EnableServicePortFallback", null, "--enable-service-port-fallback");
-}
-
-@Test
-public void itSetsDomainNetworkPolicyFromMetadata() {
-    String expectedDomainNetworkPolicy = "policy";
-
-    // Test debug mode.
-    testFlagFromMetadataPresent("io.flutter.embedding.android.DomainNetworkPolicy", expectedDomainNetworkPolicy, "--domain-network-policy=" + expectedDomainNetworkPolicy);
-
-    // Test release mode.
-    testFlagFromMetadataPresentInReleaseMode("io.flutter.embedding.android.DomainNetworkPolicy", expectedDomainNetworkPolicy, "--domain-network-policy=" + expectedDomainNetworkPolicy);
-}
-
 
   @Test
   public void itSetsTraceSkiaFromMetadata() {
@@ -1160,57 +1069,6 @@ public void itSetsDomainNetworkPolicyFromMetadata() {
   }
 
   @Test
-  public void itSetsEnableCheckedModeFromMetadata() {
-
-  }
-
-  @Test
-  public void itSetsDeviceVmServiceHostFromMetadata() {
-
-  }
-
-  @Test
-  public void itSetsSnapshotAssetPathFromMetadata() {
-
-  }
-
-  @Test
-  public void itSetsVmSnapshotInstructionsFromMetadata() {
-
-  }
-
-  @Test
-  public void itSetsIsolateSnapshotDataFromMetadata() {
-
-  }
-
-  @test
-  public void itSetsDisableVmServiceFromMetadata() {
-  }
-
-  @Test
-  public void itSetsDisableVmServicePublicationFromMetadata() {
-  }
-
-  @Test
-  public void itSetsDisableDartAssets() {
-
-  }
-
-  @Test
-  public void itSetsEnableSerialGCFromMetadata() {
-
-  }
-
-  @Test
-  public void itSetsDisallowInsecureConnections() {
-
-  }
-
-  
-
-
-  @Test
   public void itSetsDartFlagsFromMetadata() {
     String expectedDartFlags = "--enable-asserts --enable-vm-service";
     testFlagFromMetadataPresent(
@@ -1252,39 +1110,6 @@ public void itSetsDomainNetworkPolicyFromMetadata() {
             .getMessage()
             .contains(
                 "io.flutter.embedding.android.DisableMergedPlatformUIThread is disabled and no longer allowed."));
-  }
-
-  @Test
-  public void itDoesNotSetUnrecognizedCommandLineArgument() {
-    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
-    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
-    Bundle metadata = new Bundle();
-
-    String[] unrecognizedArg = {"--unrecognized-argument"};
-
-    FlutterLoader.Settings settings = new FlutterLoader.Settings();
-    assertFalse(flutterLoader.initialized());
-    flutterLoader.startInitialization(ctx, settings);
-    flutterLoader.ensureInitializationComplete(ctx, unrecognizedArg);
-    shadowOf(getMainLooper()).idle();
-
-    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
-    verify(mockFlutterJNI, times(1))
-        .init(
-            eq(ctx),
-            shellArgsCaptor.capture(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyLong(),
-            anyInt());
-    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
-
-    assertFalse(
-        "Unrecognized argument '"
-            + unrecognizedArg[0]
-            + "' was found in the arguments passed to FlutterJNI.init",
-        arguments.contains(unrecognizedArg[0]));
   }
 
   @Test
@@ -1449,7 +1274,7 @@ public void itSetsDomainNetworkPolicyFromMetadata() {
 
     // Place metadata key and value into the metadata bundle used to mock the manifest.
     if (metadataValue == null) {
-        metadata.putString(metadataKey, null);
+      metadata.putString(metadataKey, null);
     } else if (metadataValue instanceof Boolean) {
       metadata.putBoolean(metadataKey, (Boolean) metadataValue);
     } else if (metadataValue instanceof Integer) {

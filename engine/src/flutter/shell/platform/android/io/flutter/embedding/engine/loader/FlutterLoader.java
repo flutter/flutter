@@ -365,8 +365,7 @@ public class FlutterLoader {
             // Perform security check for path containing application's compiled Dart
             // code and potentially user-provided compiled native code.
             String aotSharedLibraryPath = applicationMetaData.getString(metadataKey);
-            maybeAddAotSharedLibraryNameArg(
-                applicationContext, aotSharedLibraryPath, shellArgs);
+            maybeAddAotSharedLibraryNameArg(applicationContext, aotSharedLibraryPath, shellArgs);
             continue;
           }
 
@@ -387,7 +386,7 @@ public class FlutterLoader {
           }
 
           shellArgs.add(arg);
-      }
+        }
       }
 
       // Add any remaining engine flags provided by the command line. These settings will take
@@ -397,13 +396,14 @@ public class FlutterLoader {
         for (String arg : args) {
           FlutterEngineFlags.Flag flag = FlutterEngineFlags.getFlagByCommandLineArgument(arg);
           if (flag == null) {
+            // TODO(camsim99): Reject unknown flags specified on the command line:
+            // https://github.com/flutter/flutter/issues/182557.
             // Command line flag was not recognized.
             Log.w(
                 TAG,
                 "Command line argument "
                     + arg
                     + "is not recognized. Please ensure that the flag is defined in the FlutterEngineFlags.");
-            continue;
           } else if (flag.equals(FlutterEngineFlags.TEST_FLAG)) {
             Log.w(
                 TAG,

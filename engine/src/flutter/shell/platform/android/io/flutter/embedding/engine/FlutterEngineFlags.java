@@ -150,15 +150,14 @@ public final class FlutterEngineFlags {
    * <p>Allowed in release to control which rendering backend is used in production.
    */
   private static final Flag DISBALE_IMPELLER =
-      new Flag("--enable-impeller=", "EnableOrDisableImpeller", true);
+      new Flag("--enable-impeller=", "DisableImpeller", true);
 
   /**
    * Enables Impeller.
    *
    * <p>Allowed in release to control which rendering backend is used in production.
    */
-  private static final Flag ENABLE_IMPELLER =
-      new Flag("--enable-impeller", "EnableImpeller", true);
+  private static final Flag ENABLE_IMPELLER = new Flag("--enable-impeller", "EnableImpeller", true);
   /**
    * Specifies the backend to use for Impeller rendering.
    *
@@ -239,65 +238,6 @@ public final class FlutterEngineFlags {
   private static final Flag MERGED_PLATFORM_UI_THREAD =
       new Flag("--merged-platform-ui-thread", "MergedPlatformUIThread", true);
 
-  /**
-   * Start app with an specific route defined on the framework.
-   *
-   * <p>Allowed in release mode to allow starting with a specific route.
-   */
-  private static final Flag ROUTE = new Flag("--route=", "Route", true);
-
-  /**
-   * Specifies the name of the *.so containing AOT compiled Dart assets for launching the service
-   * isolate.
-   *
-   * <p>Allowed in release mode to support AOT compilation for service isolates in production.
-   */
-  // TODO(camsim99): subject this to internal storage check
-  private static final Flag AOT_VM_SERVICE_SHARED_LIBRARY_NAME =
-      new Flag("--aot-vmservice-shared-library-name=", "AotVMServiceSharedLibraryName", true);
-
-  /**
-   * Specifies the path to the cache directory.
-   *
-   * <p>Allowed in release mode to enable custom cache directory locations in production.
-   */
-  private static final Flag CACHE_DIR_PATH = new Flag("--cache-dir-path=", "CacheDirPath", true);
-
-  /**
-   * Specifies the path to the ICU data file.
-   *
-   * <p>Allowed in release mode to support custom ICU data files in production.
-   */
-  private static final Flag ICU_DATA_FILE_PATH =
-      new Flag("--icu-data-file-path=", "ICUDataFilePath", true);
-
-  /** Prefix for the symbols representing ICU data linked into the Flutter library. */
-  private static final Flag ICU_SYMBOL_PREFIX =
-      new Flag("--icu-symbol-prefix=", "ICUSymbolPrefix", true);
-
-  /** Path to the library file that exports the ICU data. */
-  private static final Flag ICU_NATIVE_LIB_PATH =
-      new Flag("--icu-native-lib-path=", "ICUNativeLibPath", true);
-
-  /**
-   * Allow the VM service to fallback to automatic port selection if binding to a specified port
-   * fails.
-   *
-   * <p>Allowed in release to allow the VM service to start even if the default port is blocked.
-   */
-  private static final Flag ENABLE_SERVICE_PORT_FALLBACK =
-      new Flag("--enable-service-port-fallback", "EnableServicePortFallback", true);
-
-  /**
-   * JSON encoded network policy per domain. This overrides the DisallowInsecureConnections switch.
-   * Embedder can specify whether to allow or disallow insecure connections at a domain level.
-   *
-   * <p>Allowed in release mode to enable fine-grained control over network security policies in
-   * production.
-   */
-  private static final Flag DOMAIN_NETWORK_POLICY =
-      new Flag("--domain-network-policy=", "DomainNetworkPolicy", true);
-
   // Manifest flags NOT allowed in release mode:
 
   /** Ensures deterministic Skia rendering by skipping CPU feature swaps. */
@@ -327,8 +267,7 @@ public final class FlutterEngineFlags {
       new Flag("--enable-vulkan-gpu-tracing", "EnableVulkanGPUTracing");
 
   /** Fake flag used for integration testing of the Android embedding processing engine flags. */
-  @VisibleForTesting
-  public static final Flag TEST_FLAG = new Flag("--test-flag", "TestFlag");
+  @VisibleForTesting public static final Flag TEST_FLAG = new Flag("--test-flag", "TestFlag");
 
   /**
    * Set whether leave or clean up the VM after the last shell shuts down. It can be set from app's
@@ -385,86 +324,6 @@ public final class FlutterEngineFlags {
 
   /** Enables logging at all severity levels. */
   private static final Flag VERBOSE_LOGGING = new Flag("--verbose-logging", "VerboseLogging");
-
-  /**
-   * Enables Dart checked mode that enables certain runtime checks and assertions to help catch
-   * errors during development.
-   */
-  private static final Flag ENABLE_CHECKED_MODE =
-      new Flag("--enable-checked-mode", "EnableCheckedMode");
-
-  /** The hostname/IP address on which the Dart VM Service should be served. */
-  private static final Flag DEVICE_VM_SERVICE_HOST =
-      new Flag("--vm-service-host=", "DeviceVMServiceHost", true);
-
-  /** Specifies the path to the directory containing the snapshot assets. */
-  private static final Flag SNAPSHOT_ASSET_PATH =
-      new Flag("--snapshot-asset-path=", "SnapshotAssetPath");
-
-  /** Specifies the path to the VM snapshot instructions. */
-  private static final Flag VM_SNAPSHOT_INSTRUCTIONS =
-      new Flag("--vm-snapshot-instr=", "VmSnapshotInstructions");
-
-  /** Specifies the path to the isolate snapshot instructions. */
-  private static final Flag ISOLATE_SNAPSHOT_INSTRUCTIONS =
-      new Flag("--isolate-snapshot-instr=", "IsolateSnapshotInstructions");
-
-  /** Disable the Dart VM Service. */
-  private static final Flag DISABLE_VM_SERVICE =
-      new Flag("--disable-vm-service", "DisableVMService");
-
-  /** Disable mDNS Dart VM Service publication. */
-  private static final Flag DISABLE_VM_SERVICE_PUBLICATION =
-      new Flag("--disable-vm-service-publication", "DisableVMServicePublication");
-
-  /** Disable Dart asserts. */
-  private static final Flag DISABLE_DART_ASSERTS =
-      new Flag("--disable-dart-asserts", "DisableDartAsserts");
-
-  /** Turns off all concurrent GC activities. */
-  private static final Flag ENABLE_SERIAL_GC = new Flag("--enable-serial-gc", "EnableSerialGC");
-
-  /**
-   * By default, dart:io allows all socket connections. If this switch is set, all insecure
-   * connections are rejected.
-   */
-  private static final Flag DISALLOW_INSECURE_CONNECTIONS =
-      new Flag("--disallow-insecure-connections", "DisallowInsecureConnections");
-
-  /**
-   * Uses separate threads for the platform, UI, GPU and IO task runners. By default, a single
-   * thread is used for all task runners. Only available in the flutter_tester.
-   */
-  private static final Flag FORCE_MULTITHREADING =
-      new Flag("--force-multithreading", "ForceMultithreading");
-
-  /**
-   * Only cache the shader in SkSL instead of binary or GLSL. This should only be used during
-   * development phases. The generated SkSLs can later be used in the release build for shader
-   * precompilation at launch in order to eliminate the shader-compile jank.
-   */
-  private static final Flag CACHE_SKSL = new Flag("--cache-sksl", "CacheSkSL");
-
-  /**
-   * Prevents usage of any non-test fonts unless they were explicitly Loaded via dart:ui font APIs.
-   * This option is only available on the desktop test shells.
-   */
-  private static final Flag DISABLE_ASSET_FONTS =
-      new Flag("--disable-asset-fonts", "DisableAssetFonts");
-
-  /**
-   * Indicates whether the embedding started a prefetch of the default font manager before creating
-   * the engine.
-   */
-  private static final Flag PREFETCHED_DEFAULT_FONT_MANAGER =
-      new Flag("--prefetched-default-font-manager", "PrefetchedDefaultFontManager");
-
-  /** In non-interactive mode, keep the shell running after the Dart script has completed. */
-  private static final Flag RUN_FOREVER = new Flag("--run-forever", "RunForever");
-
-  /** Enable support for isolates that run on the platform thread. */
-  private static final Flag ENABLE_PLATFORM_ISOLATES =
-      new Flag("--enable-platform-isolates", "EnablePlatformIsolates");
 
   /** Enable the SurfaceControl backed swapchain when supported. */
   private static final Flag ENABLE_ANDROID_SURFACE_CONTROL =
@@ -526,34 +385,12 @@ public final class FlutterEngineFlags {
               PURGE_PERSISTENT_CACHE,
               VERBOSE_LOGGING,
               DART_FLAGS,
-              AOT_VM_SERVICE_SHARED_LIBRARY_NAME,
-              SNAPSHOT_ASSET_PATH,
-              VM_SNAPSHOT_INSTRUCTIONS,
-              ISOLATE_SNAPSHOT_INSTRUCTIONS,
-              CACHE_DIR_PATH,
-              ICU_DATA_FILE_PATH,
-              ICU_SYMBOL_PREFIX,
-              ICU_NATIVE_LIB_PATH,
-              DEVICE_VM_SERVICE_HOST,
-              DISABLE_VM_SERVICE,
-              DISABLE_VM_SERVICE_PUBLICATION,
-              ENABLE_SERVICE_PORT_FALLBACK,
-              DISABLE_DART_ASSERTS,
-              ENABLE_SERIAL_GC,
-              DISALLOW_INSECURE_CONNECTIONS,
-              DOMAIN_NETWORK_POLICY,
-              FORCE_MULTITHREADING,
-              CACHE_SKSL,
-              DISABLE_ASSET_FONTS,
-              PREFETCHED_DEFAULT_FONT_MANAGER,
-              RUN_FOREVER,
-              ENABLE_PLATFORM_ISOLATES,
-              ENABLE_ANDROID_SURFACE_CONTROL,
               MERGED_PLATFORM_UI_THREAD,
               DISABLE_MERGED_PLATFORM_UI_THREAD,
               DEPRECATED_AOT_SHARED_LIBRARY_NAME,
               DEPRECATED_FLUTTER_ASSETS_DIR,
               DISBALE_IMPELLER,
+              ENABLE_ANDROID_SURFACE_CONTROL,
               TEST_FLAG));
 
   // Flags that have been turned off.
