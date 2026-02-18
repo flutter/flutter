@@ -149,8 +149,8 @@ public final class FlutterEngineFlags {
    *
    * <p>Allowed in release to control which rendering backend is used in production.
    */
-  private static final Flag DISBALE_IMPELLER =
-      new Flag("--enable-impeller=", "DisableImpeller", true);
+  private static final Flag TOGGLE_IMPELLER =
+      new Flag("--enable-impeller=", "ToggleImpeller", true);
 
   /**
    * Enables Impeller.
@@ -165,54 +165,6 @@ public final class FlutterEngineFlags {
    */
   private static final Flag IMPELLER_BACKEND =
       new Flag("--impeller-backend=", "ImpellerBackend", true);
-
-  /**
-   * Enables Android SurfaceControl for rendering.
-   *
-   * <p>Allowed in release to opt-in to this rendering feature in production.
-   */
-  private static final Flag ENABLE_SURFACE_CONTROL =
-      new Flag("--enable-surface-control", "EnableSurfaceControl", true);
-
-  /**
-   * Enables the Flutter GPU backend.
-   *
-   * <p>Allowed in release for developers to use the Flutter GPU backend in production.
-   */
-  private static final Flag ENABLE_FLUTTER_GPU =
-      new Flag("--enable-flutter-gpu", "EnableFlutterGPU", true);
-
-  /**
-   * Enables lazy initialization of Impeller shaders.
-   *
-   * <p>Allowed in release for performance tuning of the Impeller backend.
-   */
-  private static final Flag IMPELLER_LAZY_SHADER_MODE =
-      new Flag("--impeller-lazy-shader-mode=", "ImpellerLazyShaderInitialization", true);
-
-  /**
-   * Enables antialiasing for lines in Impeller.
-   *
-   * <p>Allowed in release to control rendering quality in production.
-   */
-  private static final Flag IMPELLER_ANTIALIAS_LINES =
-      new Flag("--impeller-antialias-lines", "ImpellerAntialiasLines", true);
-
-  /**
-   * Specifies the path to the VM snapshot data file.
-   *
-   * <p>Allowed in release to support different snapshot configurations.
-   */
-  public static final Flag VM_SNAPSHOT_DATA =
-      new Flag("--vm-snapshot-data=", "VmSnapshotData", true);
-
-  /**
-   * Specifies the path to the isolate snapshot data file.
-   *
-   * <p>Allowed in release to support different snapshot configurations.
-   */
-  public static final Flag ISOLATE_SNAPSHOT_DATA =
-      new Flag("--isolate-snapshot-data=", "IsolateSnapshotData", true);
 
   /**
    * Enables Dart profiling for use with DevTools.
@@ -231,12 +183,35 @@ public final class FlutterEngineFlags {
   private static final Flag PROFILE_STARTUP = new Flag("--profile-startup", "ProfileStartup", true);
 
   /**
+   * Measures startup time and switches to an endless trace buffer.
+   *
+   * <p>Allowed in release mode to allow the startup performance to be profiled by DevTools.
+   */
+  private static final Flag TRACE_STARTUP = new Flag("--trace-startup", "TraceStartup", true);
+
+  /**
    * Sets whether the UI thread and platform thread should be merged.
    *
    * <p>Allowed in release mode for performance purposes.
    */
   private static final Flag MERGED_PLATFORM_UI_THREAD =
       new Flag("--merged-platform-ui-thread", "MergedPlatformUIThread", true);
+
+  /**
+   * Specifies the path to the VM snapshot data file.
+   *
+   * <p>Allowed in release to support different snapshot configurations.
+   */
+  public static final Flag VM_SNAPSHOT_DATA =
+      new Flag("--vm-snapshot-data=", "VmSnapshotData", true);
+
+  /**
+   * Specifies the path to the isolate snapshot data file.
+   *
+   * <p>Allowed in release to support different snapshot configurations.
+   */
+  public static final Flag ISOLATE_SNAPSHOT_DATA =
+      new Flag("--isolate-snapshot-data=", "IsolateSnapshotData", true);
 
   // Manifest flags NOT allowed in release mode:
 
@@ -258,14 +233,6 @@ public final class FlutterEngineFlags {
   private static final Flag ENABLE_VULKAN_VALIDATION =
       new Flag("--enable-vulkan-validation", "EnableVulkanValidation");
 
-  /** Enables GPU tracing for OpenGL. */
-  private static final Flag ENABLE_OPENGL_GPU_TRACING =
-      new Flag("--enable-opengl-gpu-tracing", "EnableOpenGLGPUTracing");
-
-  /** Enables GPU tracing for Vulkan. */
-  private static final Flag ENABLE_VULKAN_GPU_TRACING =
-      new Flag("--enable-vulkan-gpu-tracing", "EnableVulkanGPUTracing");
-
   /** Fake flag used for integration testing of the Android embedding processing engine flags. */
   @VisibleForTesting public static final Flag TEST_FLAG = new Flag("--test-flag", "TestFlag");
 
@@ -281,10 +248,6 @@ public final class FlutterEngineFlags {
    * https://github.com/flutter/flutter/issues/96843
    */
   public static final Flag LEAK_VM = new Flag("--leak-vm=", "LeakVM");
-
-  /** Measures startup time and switches to an endless trace buffer. */
-  private static final Flag TRACE_STARTUP =
-      new Flag("--trace-startup", "TraceStartup"); // TODO(camsim99): allow in release?
 
   /** Pauses Dart code execution at launch until a debugger is attached. */
   private static final Flag START_PAUSED = new Flag("--start-paused", "StartPaused");
@@ -325,9 +288,8 @@ public final class FlutterEngineFlags {
   /** Enables logging at all severity levels. */
   private static final Flag VERBOSE_LOGGING = new Flag("--verbose-logging", "VerboseLogging");
 
-  /** Enable the SurfaceControl backed swapchain when supported. */
-  private static final Flag ENABLE_ANDROID_SURFACE_CONTROL =
-      new Flag("--enable-surface-control", "EnableAndroidSurfaceControl");
+  /** Only cache the shader in SkSL instead of binary or GLSL. */
+  private static final Flag CACHE_SKSL = new Flag("--cache-sksl", "CacheSksl");
 
   /**
    * Passes additional flags to the Dart VM.
@@ -357,20 +319,9 @@ public final class FlutterEngineFlags {
               SKIA_DETERMINISTIC_RENDERING,
               AOT_SHARED_LIBRARY_NAME,
               FLUTTER_ASSETS_DIR,
-              OLD_GEN_HEAP_SIZE,
               ENABLE_IMPELLER,
               IMPELLER_BACKEND,
-              ENABLE_SURFACE_CONTROL,
-              ENABLE_FLUTTER_GPU,
-              IMPELLER_LAZY_SHADER_MODE,
-              IMPELLER_ANTIALIAS_LINES,
-              VM_SNAPSHOT_DATA,
-              ISOLATE_SNAPSHOT_DATA,
               ENABLE_VULKAN_VALIDATION,
-              ENABLE_OPENGL_GPU_TRACING,
-              ENABLE_VULKAN_GPU_TRACING,
-              LEAK_VM,
-              TRACE_STARTUP,
               START_PAUSED,
               DISABLE_SERVICE_AUTH_CODES,
               ENDLESS_TRACE_BUFFER,
@@ -382,15 +333,20 @@ public final class FlutterEngineFlags {
               TRACE_TO_FILE,
               PROFILE_MICROTASKS,
               DUMP_SKP_ON_SHADER_COMPILATION,
-              PURGE_PERSISTENT_CACHE,
               VERBOSE_LOGGING,
               DART_FLAGS,
               MERGED_PLATFORM_UI_THREAD,
               DISABLE_MERGED_PLATFORM_UI_THREAD,
               DEPRECATED_AOT_SHARED_LIBRARY_NAME,
               DEPRECATED_FLUTTER_ASSETS_DIR,
-              DISBALE_IMPELLER,
-              ENABLE_ANDROID_SURFACE_CONTROL,
+              TOGGLE_IMPELLER,
+              OLD_GEN_HEAP_SIZE,
+              VM_SNAPSHOT_DATA,
+              ISOLATE_SNAPSHOT_DATA,
+              CACHE_SKSL,
+              PURGE_PERSISTENT_CACHE,
+              TRACE_STARTUP,
+              LEAK_VM,
               TEST_FLAG));
 
   // Flags that have been turned off.
@@ -421,14 +377,6 @@ public final class FlutterEngineFlags {
     }
     FLAG_BY_COMMAND_LINE_ARG = Collections.unmodifiableMap(map);
     FLAG_BY_META_DATA_KEY = Collections.unmodifiableMap(metaMap);
-  }
-
-  /** Looks up a {@link Flag} by its metadataKey. */
-  // TODO(camsim99): determine if I even need this anymore
-  public static Flag getFlagByMetadataKey(String key) {
-    Flag flag = FLAG_BY_META_DATA_KEY.get(key);
-    Flag replacementFlag = getReplacementFlagIfDeprecated(flag);
-    return replacementFlag != null ? replacementFlag : flag;
   }
 
   /** Looks up a {@link Flag} by its commandLineArgument. */

@@ -34,7 +34,6 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /** Finds Flutter resources in an application APK and also loads Flutter's native library. */
 public class FlutterLoader {
@@ -306,8 +305,8 @@ public class FlutterLoader {
               .getApplicationInfo(
                   applicationContext.getPackageName(), PackageManager.GET_META_DATA);
       Bundle applicationMetaData = applicationInfo.metaData;
-      final AtomicBoolean oldGenHeapSizeSet = new AtomicBoolean(false);
-      final AtomicBoolean isLeakVMSet = new AtomicBoolean(false);
+      boolean oldGenHeapSizeSet = false;
+      boolean isLeakVMSet = false;
 
       if (applicationMetaData != null) {
         for (FlutterEngineFlags.Flag flag : FlutterEngineFlags.ALL_FLAGS) {
@@ -350,10 +349,10 @@ public class FlutterLoader {
           if (flag == FlutterEngineFlags.OLD_GEN_HEAP_SIZE) {
             // Mark if old gen heap size is set to track whether or not to set default
             // internally.
-            oldGenHeapSizeSet.set(true); // TODO(camsim99): check if I need atomic boolean anymore.
+            oldGenHeapSizeSet = true;
           } else if (flag == FlutterEngineFlags.LEAK_VM) {
             // Mark if leak VM is set to track whether or not to set default internally.
-            isLeakVMSet.set(true);
+            isLeakVMSet = true;
           } else if (flag == FlutterEngineFlags.ENABLE_SOFTWARE_RENDERING) {
             // Enabling software rendering impacts platform views, so save this value
             // so that the PlatformViewsController can be properly configured.
@@ -398,12 +397,8 @@ public class FlutterLoader {
           if (flag == null) {
             // TODO(camsim99): Reject unknown flags specified on the command line:
             // https://github.com/flutter/flutter/issues/182557.
-            // Command line flag was not recognized.
-            Log.w(
-                TAG,
-                "Command line argument "
-                    + arg
-                    + "is not recognized. Please ensure that the flag is defined in the FlutterEngineFlags.");
+            shellArgs.add(arg);
+            continue;
           } else if (flag.equals(FlutterEngineFlags.TEST_FLAG)) {
             Log.w(
                 TAG,
@@ -480,7 +475,7 @@ public class FlutterLoader {
         shellArgs.add("--log-tag=" + settings.getLogTag());
       }
 
-      if (!oldGenHeapSizeSet.get()) {
+      if (!oldGenHeapSizeSet) {
         // Default to half of total memory.
         ActivityManager activityManager =
             (ActivityManager) applicationContext.getSystemService(Context.ACTIVITY_SERVICE);
@@ -502,7 +497,7 @@ public class FlutterLoader {
 
       shellArgs.add("--prefetched-default-font-manager");
 
-      if (!isLeakVMSet.get()) {
+      if (!isLeakVMSet) {
         shellArgs.add(FlutterEngineFlags.LEAK_VM.commandLineArgument + "true");
       }
 

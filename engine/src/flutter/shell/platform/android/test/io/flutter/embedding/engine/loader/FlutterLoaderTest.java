@@ -793,14 +793,14 @@ public class FlutterLoaderTest {
   }
 
   @Test
-  public void itSetsDisableImpellerFromMetadata() {
+  public void itSetsToggleImpellerFromMetadata() {
     // Test debug mode.
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.DisableImpeller", true, "--enable-impeller=true");
+        "io.flutter.embedding.android.ToggleImpeller", true, "--enable-impeller=true");
 
     // Test release mode.
     testFlagFromMetadataPresentInReleaseMode(
-        "io.flutter.embedding.android.DisableImpeller", true, "--enable-impeller=true");
+        "io.flutter.embedding.android.ToggleImpeller", true, "--enable-impeller=true");
   }
 
   @Test
@@ -829,54 +829,6 @@ public class FlutterLoaderTest {
         "io.flutter.embedding.android.ImpellerBackend",
         expectedImpellerBackend,
         "--impeller-backend=" + expectedImpellerBackend);
-  }
-
-  @Test
-  public void itSetsEnableSurfaceControlFromMetadata() {
-    // Test debug mode.
-    testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.EnableSurfaceControl", null, "--enable-surface-control");
-
-    // Test release mode.
-    testFlagFromMetadataPresentInReleaseMode(
-        "io.flutter.embedding.android.EnableSurfaceControl", null, "--enable-surface-control");
-  }
-
-  @Test
-  public void itSetsEnableFlutterGPUFromMetadata() {
-    // Test debug mode.
-    testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.EnableFlutterGPU", null, "--enable-flutter-gpu");
-
-    // Test release mode.
-    testFlagFromMetadataPresentInReleaseMode(
-        "io.flutter.embedding.android.EnableFlutterGPU", null, "--enable-flutter-gpu");
-  }
-
-  @Test
-  public void itSetsImpellerLazyShaderModeFromMetadata() {
-    // Test debug mode.
-    testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.ImpellerLazyShaderInitialization",
-        true,
-        "--impeller-lazy-shader-mode=true");
-
-    // Test release mode.
-    testFlagFromMetadataPresentInReleaseMode(
-        "io.flutter.embedding.android.ImpellerLazyShaderInitialization",
-        true,
-        "--impeller-lazy-shader-mode=true");
-  }
-
-  @Test
-  public void itSetsImpellerAntiAliasLinesFromMetadata() {
-    // Test debug mode.
-    testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.ImpellerAntialiasLines", null, "--impeller-antialias-lines");
-
-    // Test release mode.
-    testFlagFromMetadataPresentInReleaseMode(
-        "io.flutter.embedding.android.ImpellerAntialiasLines", null, "--impeller-antialias-lines");
   }
 
   @Test
@@ -932,18 +884,6 @@ public class FlutterLoaderTest {
   public void itSetsEnableVulkanValidationFromMetadata() {
     testFlagFromMetadataPresent(
         "io.flutter.embedding.android.EnableVulkanValidation", null, "--enable-vulkan-validation");
-  }
-
-  @Test
-  public void itSetsEnableOpenGLGPUTracingFromMetadata() {
-    testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.EnableOpenGLGPUTracing", null, "--enable-opengl-gpu-tracing");
-  }
-
-  @Test
-  public void itSetsEnableVulkanGPUTracingFromMetadata() {
-    testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.EnableVulkanGPUTracing", null, "--enable-vulkan-gpu-tracing");
   }
 
   @Test

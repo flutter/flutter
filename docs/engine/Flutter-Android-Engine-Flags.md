@@ -67,15 +67,15 @@ the leading `--flag=` prefix).
 
 ### Examples
 
-Set the `--old-gen-heap-size=` flag to 322 MB:
+Set the `--trace-to-file=` flag to `some_file.txt`:
 
 ```xml
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.myapp">
     <application ...>
         <meta-data
-            android:name="io.flutter.embedding.android.OldGenHeapSize"
-            android:value="322"/>
+            android:name="io.flutter.embedding.android.TraceToFile"
+            android:value="some_file.txt"/>
             ...
     </application>
 </manifest>
@@ -121,7 +121,7 @@ class MyApp : Application() {
         // Initialize the Flutter engine with desired flags
         val args = arrayOf(
             "--trace-startup",
-            "--old-gen-heap-size=256",
+            "--trace-to-file=some_file.txt",
             "--enable-software-rendering"
         )
         val flutterEngine = FlutterEngine(this, args)
@@ -166,7 +166,7 @@ class MyApplication : FlutterApplication() {
 
         val args = arrayOf(
             "--trace-startup",
-            "--old-gen-heap-size=256",
+            "--trace-to-file=some_file.txt",
             "--enable-software-rendering"
         )
         val flutterEngine = FlutterEngine(this, args)

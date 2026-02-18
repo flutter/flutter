@@ -52,21 +52,6 @@ public class FlutterEngineFlagsTest {
   }
 
   @Test
-  public void getFlagByMetadataKey_returnsExpectedFlagWhenValidKeySpecified() {
-    FlutterEngineFlags.Flag flag =
-        FlutterEngineFlags.getFlagByMetadataKey(
-            "io.flutter.embedding.android.AOTSharedLibraryName");
-    assertEquals(FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME, flag);
-  }
-
-  @Test
-  public void getFlagByMetadataKey_returnsNullWhenInvalidKeySpecified() {
-    FlutterEngineFlags.Flag flag =
-        FlutterEngineFlags.getFlagByMetadataKey("io.flutter.embedding.android.InvalidMetaDataKey");
-    assertNull("Should return null for an invalid meta-data key", flag);
-  }
-
-  @Test
   public void getFlagByCommandLineArgument_returnsExpectedFlagWhenValidArgumentSpecified() {
     FlutterEngineFlags.Flag flag =
         FlutterEngineFlags.getFlagByCommandLineArgument("--flutter-assets-dir=");
