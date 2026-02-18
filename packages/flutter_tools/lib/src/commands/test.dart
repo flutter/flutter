@@ -80,6 +80,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     addEnableImpellerFlag(verboseHelp: verboseHelp);
     addMachineOutputFlag(verboseHelp: verboseHelp);
     addEnableFlutterGpuFlag(verboseHelp: verboseHelp);
+    addEnableSurfaceControlFlag(verboseHelp: verboseHelp);
 
     argParser
       ..addFlag(
