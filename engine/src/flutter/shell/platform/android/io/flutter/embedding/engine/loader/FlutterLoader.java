@@ -327,6 +327,10 @@ public class FlutterLoader {
                             + metadataKey
                             + " is not recognized. Please ensure that the flag is defined in the FlutterEngineFlags.");
                     return;
+                  } else if (flag == FlutterEngineFlags.TEST_FLAG) {
+                    Log.w(
+                        TAG,
+                        "For testing purposes only: test flag specified in the manifest was loaded by the FlutterLoader.");
                   } else if (FlutterEngineFlags.isDisabled(flag)) {
                     // Do not allow disabled flags.
                     throw new IllegalArgumentException(
@@ -406,6 +410,11 @@ public class FlutterLoader {
                 "Command line argument "
                     + arg
                     + "is not recognized. Please ensure that the flag is defined in the FlutterEngineFlags.");
+            continue;
+          } else if (flag.equals(FlutterEngineFlags.TEST_FLAG)) {
+            Log.w(
+                TAG,
+                "For testing purposes only: test flag specified on the command line was loaded by the FlutterLoader.");
             continue;
           } else if (flag.equals(FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME)
               || flag.equals(FlutterEngineFlags.DEPRECATED_AOT_SHARED_LIBRARY_NAME)) {

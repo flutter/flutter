@@ -243,8 +243,7 @@ public final class FlutterEngineFlags {
    * Specifies the name of the *.so containing AOT compiled Dart assets for launching the service
    * isolate.
    *
-   * <p>Allowed in release mode to support AOT compilation for service isolates in
-   * production.
+   * <p>Allowed in release mode to support AOT compilation for service isolates in production.
    */
   // TODO(camsim99): subject this to internal storage check
   private static final Flag AOT_VM_SERVICE_SHARED_LIBRARY_NAME =
@@ -277,8 +276,7 @@ public final class FlutterEngineFlags {
    * Allow the VM service to fallback to automatic port selection if binding to a specified port
    * fails.
    *
-   * <p>Allowed in release to allow the VM service to start even if the default port is
-   * blocked.
+   * <p>Allowed in release to allow the VM service to start even if the default port is blocked.
    */
   private static final Flag ENABLE_SERVICE_PORT_FALLBACK =
       new Flag("--enable-service-port-fallback", "EnableServicePortFallback", true);
@@ -287,8 +285,8 @@ public final class FlutterEngineFlags {
    * JSON encoded network policy per domain. This overrides the DisallowInsecureConnections switch.
    * Embedder can specify whether to allow or disallow insecure connections at a domain level.
    *
-   * <p>Allowed in release mode to enable fine-grained control over network security
-   * policies in production.
+   * <p>Allowed in release mode to enable fine-grained control over network security policies in
+   * production.
    */
   private static final Flag DOMAIN_NETWORK_POLICY =
       new Flag("--domain-network-policy=", "DomainNetworkPolicy", true);
@@ -320,6 +318,9 @@ public final class FlutterEngineFlags {
   /** Enables GPU tracing for Vulkan. */
   private static final Flag ENABLE_VULKAN_GPU_TRACING =
       new Flag("--enable-vulkan-gpu-tracing", "EnableVulkanGPUTracing");
+
+  /** Fake flag used for integration testing of the Android embedding processing engine flags. */
+  private static final Flag TEST_FLAG = new Flag("--test-flag=", "TestFlag");
 
   /**
    * Set whether leave or clean up the VM after the last shell shuts down. It can be set from app's
@@ -541,7 +542,8 @@ public final class FlutterEngineFlags {
               ENABLE_ANDROID_SURFACE_CONTROL,
               DISABLE_MERGED_PLATFORM_UI_THREAD,
               DEPRECATED_AOT_SHARED_LIBRARY_NAME,
-              DEPRECATED_FLUTTER_ASSETS_DIR));
+              DEPRECATED_FLUTTER_ASSETS_DIR,
+              TEST_FLAG));
 
   // Flags that have been turned off.
   private static final List<Flag> DISABLED_FLAGS =
