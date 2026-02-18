@@ -32,6 +32,11 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.41 Changes
 
+### [3.41.2](https://github.com/flutter/flutter/releases/tag/3.41.2)
+
+- [flutter/179673](https://github.com/flutter/flutter/issues/179673) When content sizing is not enabled on Android, a race condition can sometimes make platform views not render correctly.
+- [flutter/182076](https://github.com/flutter/flutter/issues/182076) Fix flutter build web ignoring --web-define flag
+
 ### [3.41.1](https://github.com/flutter/flutter/releases/tag/3.41.1)
 
 - [flutter/182314](https://github.com/flutter/flutter/issues/182314) Test coverage is broken due to pinned `test_api` version in `flutter_test`.
