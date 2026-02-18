@@ -2675,7 +2675,7 @@ flutter:
         fs.file('/path/to/test_plugin/ios/test_plugin.podspec').createSync();
 
         final SwiftPackageManagerPluginValidationResult result =
-            validatePluginSwiftPackageManagerSupport(
+            DarwinDependencyManagement.validatePluginSwiftPackageManagerSupport(
               plugin,
               fileSystem: fs,
               platform: IOSPlugin.kConfigKey,
@@ -2739,7 +2739,7 @@ let package = Package(
 ''');
 
         final SwiftPackageManagerPluginValidationResult result =
-            validatePluginSwiftPackageManagerSupport(
+            DarwinDependencyManagement.validatePluginSwiftPackageManagerSupport(
               plugin,
               fileSystem: fs,
               platform: IOSPlugin.kConfigKey,
@@ -2791,7 +2791,7 @@ let package = Package(
 ''');
 
         final SwiftPackageManagerPluginValidationResult result =
-            validatePluginSwiftPackageManagerSupport(
+            DarwinDependencyManagement.validatePluginSwiftPackageManagerSupport(
               plugin,
               fileSystem: fs,
               platform: IOSPlugin.kConfigKey,
@@ -2853,7 +2853,66 @@ let package = Package(
 ''');
 
       final SwiftPackageManagerPluginValidationResult result =
-          validatePluginSwiftPackageManagerSupport(
+          DarwinDependencyManagement.validatePluginSwiftPackageManagerSupport(
+            plugin,
+            fileSystem: fs,
+            platform: IOSPlugin.kConfigKey,
+          );
+
+      expect(result.hasPodspec, isFalse);
+      expect(result.hasPackageSwift, isTrue);
+      expect(result.hasFlutterFrameworkDependency, isFalse);
+      expect(result.isFullyCompatible, isFalse);
+      expect(result.validationMessages, hasLength(1));
+      expect(
+        result.validationMessages.first,
+        contains('is missing a dependency on FlutterFramework'),
+      );
+    });
+
+    testWithoutContext('ignores block-commented FlutterFramework dependency', () {
+      final plugin = Plugin(
+        name: 'test_plugin',
+        path: '/path/to/test_plugin/',
+        defaultPackagePlatforms: const <String, String>{},
+        pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
+        platforms: const <String, PluginPlatform>{
+          IOSPlugin.kConfigKey: IOSPlugin(name: 'test_plugin', classPrefix: ''),
+        },
+        dependencies: <String>[],
+        isDirectDependency: true,
+        isDevDependency: false,
+      );
+
+      fs.directory('/path/to/test_plugin/ios/test_plugin').createSync(recursive: true);
+      fs.file('/path/to/test_plugin/ios/test_plugin/Package.swift').writeAsStringSync('''
+// swift-tools-version: 5.9
+import PackageDescription
+
+let package = Package(
+    name: "test_plugin",
+    platforms: [
+        .iOS("13.0"),
+    ],
+    products: [
+        .library(name: "test-plugin", targets: ["test_plugin"]),
+    ],
+    dependencies: [
+        /* .package(name: "FlutterFramework", path: "../FlutterFramework") */
+    ],
+    targets: [
+        .target(
+            name: "test_plugin",
+            dependencies: [
+                /* .product(name: "FlutterFramework", package: "FlutterFramework") */
+            ]
+        ),
+    ]
+)
+''');
+
+      final SwiftPackageManagerPluginValidationResult result =
+          DarwinDependencyManagement.validatePluginSwiftPackageManagerSupport(
             plugin,
             fileSystem: fs,
             platform: IOSPlugin.kConfigKey,
@@ -2912,7 +2971,7 @@ let package = Package(
 ''');
 
       final SwiftPackageManagerPluginValidationResult result =
-          validatePluginSwiftPackageManagerSupport(
+          DarwinDependencyManagement.validatePluginSwiftPackageManagerSupport(
             plugin,
             fileSystem: fs,
             platform: IOSPlugin.kConfigKey,
@@ -2940,7 +2999,7 @@ let package = Package(
       fs.file('/path/to/test_plugin/macos/test_plugin.podspec').createSync();
 
       final SwiftPackageManagerPluginValidationResult result =
-          validatePluginSwiftPackageManagerSupport(
+          DarwinDependencyManagement.validatePluginSwiftPackageManagerSupport(
             plugin,
             fileSystem: fs,
             platform: MacOSPlugin.kConfigKey,
@@ -2973,7 +3032,7 @@ let package = Package(
       );
 
       final SwiftPackageManagerPluginValidationResult result =
-          validatePluginSwiftPackageManagerSupport(
+          DarwinDependencyManagement.validatePluginSwiftPackageManagerSupport(
             plugin,
             fileSystem: fs,
             platform: IOSPlugin.kConfigKey,
@@ -3008,7 +3067,7 @@ let package = Package(
       fs.file('/path/to/test_plugin/darwin/test_plugin.podspec').createSync();
 
       final SwiftPackageManagerPluginValidationResult iosResult =
-          validatePluginSwiftPackageManagerSupport(
+          DarwinDependencyManagement.validatePluginSwiftPackageManagerSupport(
             plugin,
             fileSystem: fs,
             platform: IOSPlugin.kConfigKey,
@@ -3019,7 +3078,7 @@ let package = Package(
       expect(iosResult.needsSwiftPackageManagerSupport, isTrue);
 
       final SwiftPackageManagerPluginValidationResult macosResult =
-          validatePluginSwiftPackageManagerSupport(
+          DarwinDependencyManagement.validatePluginSwiftPackageManagerSupport(
             plugin,
             fileSystem: fs,
             platform: MacOSPlugin.kConfigKey,
