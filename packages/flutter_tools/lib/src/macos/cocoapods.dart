@@ -386,35 +386,10 @@ class CocoaPods {
     if (stdout is! String || stderr is! String) {
       return;
     }
-    if (stdout.contains('Unable to find a specification for')) {
-      // Example: Unable to find a specification for `plugin_a` depended upon by `plugin_b`
-      final pattern = RegExp(r'Unable to find a specification for `(.*)` depended upon by `(.*)`');
-      final Iterable<RegExpMatch> matches = pattern.allMatches(stdout);
-      for (final match in matches) {
-        final String? missingPlugin = match.group(1);
-        final String? requiringPlugin = match.group(2);
-        if (missingPlugin != null && requiringPlugin != null) {
-          final List<Plugin> plugins = await findPlugins(xcodeProject.parent);
-          final bool missingPluginSupportsSwiftPM = plugins.any(
-            (plugin) =>
-                plugin.name == missingPlugin &&
-                plugin.supportSwiftPackageManagerForPlatform(
-                  _fileSystem,
-                  xcodeProject.pluginConfigKey,
-                ),
-          );
-          if (missingPluginSupportsSwiftPM) {
-            _logger.printError(
-              'Error: A dependency conflict has occurred because $requiringPlugin uses CocoaPods while '
-              '$missingPlugin uses Swift Package Manager. Please contact the $requiringPlugin '
-              'maintainers to request Swift Package Manager adoption.\n\n'
-              '$kDisableSwiftPMInstructions',
-              emphasis: true,
-            );
-            return;
-          }
-        }
-      }
+    final String? conflict = await _pluginDependencyManagerConflictError(stdout, xcodeProject);
+    if (conflict != null) {
+      _logger.printError(conflict, emphasis: true);
+      return;
     }
     if (stdout.contains('out-of-date source repos')) {
       _logger.printError(
@@ -520,6 +495,47 @@ class CocoaPods {
         emphasis: true,
       );
     }
+  }
+
+  /// Returns a guided error message when a CocoaPod plugin has a dependency on a SwiftPM plugin
+  /// and SwiftPM is enabled. Otherwise returns `null`.
+  Future<String?> _pluginDependencyManagerConflictError(
+    String stdout,
+    XcodeBasedProject xcodeProject,
+  ) async {
+    if (!xcodeProject.usesSwiftPackageManager) {
+      return null;
+    }
+    final pattern = RegExp(
+      r'Unable to find a specification for `([^`]*)` depended upon by `([^`]*)`',
+    );
+    // Example: Unable to find a specification for `plugin_a` depended upon by `plugin_b`
+    final Iterable<RegExpMatch> matches = pattern.allMatches(stdout);
+    if (matches.isEmpty) {
+      return null;
+    }
+    final List<Plugin> plugins = await findPlugins(xcodeProject.parent);
+    for (final match in matches) {
+      final String? missingPlugin = match.group(1);
+      final String? requiringPlugin = match.group(2);
+      if (missingPlugin != null && requiringPlugin != null) {
+        final bool missingPluginSupportsSwiftPM = plugins.any(
+          (plugin) =>
+              plugin.name == missingPlugin &&
+              plugin.supportSwiftPackageManagerForPlatform(
+                _fileSystem,
+                xcodeProject.pluginConfigKey,
+              ),
+        );
+        if (missingPluginSupportsSwiftPM) {
+          return 'Error: A dependency conflict has occurred because $requiringPlugin uses CocoaPods while '
+              '$missingPlugin uses Swift Package Manager. Please contact the $requiringPlugin '
+              'maintainers to request Swift Package Manager adoption.\n\n'
+              '$kDisableSwiftPMInstructions';
+        }
+      }
+    }
+    return null;
   }
 
   ({String failingPod, String sourcePlugin, String podPluginSubdir})?

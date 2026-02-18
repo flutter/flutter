@@ -1595,6 +1595,7 @@ end''');
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
       },
     );
   });
