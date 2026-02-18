@@ -118,6 +118,8 @@ void main() {
 
   testWidgets('DecoratedSliver golden test', (WidgetTester tester) async {
     const decoration = BoxDecoration(color: Color(0xFF2196F3));
+    const redColor = Color(0xFFF44336);
+    const yellowColor = Color(0xFFFFEB3B);
 
     final Key backgroundKey = UniqueKey();
     await tester.pumpWidget(
@@ -132,9 +134,9 @@ void main() {
                   padding: const EdgeInsets.all(16),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate.fixed(<Widget>[
-                      Container(height: 100, color: const Color(0xFFF44336)),
-                      Container(height: 100, color: const Color(0xFFFFEB3B)),
-                      Container(height: 100, color: const Color(0xFFF44336)),
+                      Container(height: 100, color: redColor),
+                      Container(height: 100, color: yellowColor),
+                      Container(height: 100, color: redColor),
                     ]),
                   ),
                 ),
@@ -164,9 +166,9 @@ void main() {
                   padding: const EdgeInsets.all(16),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate.fixed(<Widget>[
-                      Container(height: 100, color: const Color(0xFFF44336)),
-                      Container(height: 100, color: const Color(0xFFFFEB3B)),
-                      Container(height: 100, color: const Color(0xFFF44336)),
+                      Container(height: 100, color: redColor),
+                      Container(height: 100, color: yellowColor),
+                      Container(height: 100, color: redColor),
                     ]),
                   ),
                 ),
