@@ -7,8 +7,11 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('DecoratedSliver creates, paints, and disposes BoxPainter', (
@@ -16,16 +19,14 @@ void main() {
   ) async {
     final decoration = TestDecoration();
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: CustomScrollView(
-            slivers: <Widget>[
-              DecoratedSliver(
-                decoration: decoration,
-                sliver: const SliverToBoxAdapter(child: SizedBox(width: 100, height: 100)),
-              ),
-            ],
-          ),
+      TestWidgetsApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            DecoratedSliver(
+              decoration: decoration,
+              sliver: const SliverToBoxAdapter(child: SizedBox(width: 100, height: 100)),
+            ),
+          ],
         ),
       ),
     );
@@ -48,21 +49,19 @@ void main() {
     Decoration activateDecoration = decorationA;
     late StateSetter localSetState;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              localSetState = setState;
-              return CustomScrollView(
-                slivers: <Widget>[
-                  DecoratedSliver(
-                    decoration: activateDecoration,
-                    sliver: const SliverToBoxAdapter(child: SizedBox(width: 100, height: 100)),
-                  ),
-                ],
-              );
-            },
-          ),
+      TestWidgetsApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            localSetState = setState;
+            return CustomScrollView(
+              slivers: <Widget>[
+                DecoratedSliver(
+                  decoration: activateDecoration,
+                  sliver: const SliverToBoxAdapter(child: SizedBox(width: 100, height: 100)),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -87,22 +86,20 @@ void main() {
     DecorationPosition activePosition = DecorationPosition.foreground;
     late StateSetter localSetState;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              localSetState = setState;
-              return CustomScrollView(
-                slivers: <Widget>[
-                  DecoratedSliver(
-                    decoration: decoration,
-                    position: activePosition,
-                    sliver: const SliverToBoxAdapter(child: SizedBox(width: 100, height: 100)),
-                  ),
-                ],
-              );
-            },
-          ),
+      TestWidgetsApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            localSetState = setState;
+            return CustomScrollView(
+              slivers: <Widget>[
+                DecoratedSliver(
+                  decoration: decoration,
+                  position: activePosition,
+                  sliver: const SliverToBoxAdapter(child: SizedBox(width: 100, height: 100)),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -120,31 +117,29 @@ void main() {
   });
 
   testWidgets('DecoratedSliver golden test', (WidgetTester tester) async {
-    const decoration = BoxDecoration(color: Colors.blue);
+    const decoration = BoxDecoration(color: Color(0xFF2196F3));
 
     final Key backgroundKey = UniqueKey();
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: RepaintBoundary(
-            key: backgroundKey,
-            child: CustomScrollView(
-              slivers: <Widget>[
-                DecoratedSliver(
-                  decoration: decoration,
-                  sliver: SliverPadding(
-                    padding: const EdgeInsets.all(16),
-                    sliver: SliverList(
-                      delegate: SliverChildListDelegate.fixed(<Widget>[
-                        Container(height: 100, color: Colors.red),
-                        Container(height: 100, color: Colors.yellow),
-                        Container(height: 100, color: Colors.red),
-                      ]),
-                    ),
+      TestWidgetsApp(
+        home: RepaintBoundary(
+          key: backgroundKey,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              DecoratedSliver(
+                decoration: decoration,
+                sliver: SliverPadding(
+                  padding: const EdgeInsets.all(16),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate.fixed(<Widget>[
+                      Container(height: 100, color: const Color(0xFFF44336)),
+                      Container(height: 100, color: const Color(0xFFFFEB3B)),
+                      Container(height: 100, color: const Color(0xFFF44336)),
+                    ]),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -157,28 +152,26 @@ void main() {
 
     final Key foregroundKey = UniqueKey();
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: RepaintBoundary(
-            key: foregroundKey,
-            child: CustomScrollView(
-              slivers: <Widget>[
-                DecoratedSliver(
-                  decoration: decoration,
-                  position: DecorationPosition.foreground,
-                  sliver: SliverPadding(
-                    padding: const EdgeInsets.all(16),
-                    sliver: SliverList(
-                      delegate: SliverChildListDelegate.fixed(<Widget>[
-                        Container(height: 100, color: Colors.red),
-                        Container(height: 100, color: Colors.yellow),
-                        Container(height: 100, color: Colors.red),
-                      ]),
-                    ),
+      TestWidgetsApp(
+        home: RepaintBoundary(
+          key: foregroundKey,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              DecoratedSliver(
+                decoration: decoration,
+                position: DecorationPosition.foreground,
+                sliver: SliverPadding(
+                  padding: const EdgeInsets.all(16),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate.fixed(<Widget>[
+                      Container(height: 100, color: const Color(0xFFF44336)),
+                      Container(height: 100, color: const Color(0xFFFFEB3B)),
+                      Container(height: 100, color: const Color(0xFFF44336)),
+                    ]),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -568,7 +561,7 @@ void main() {
     const key = Key('DecoratedSliver with border');
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Align(
           alignment: Alignment.topLeft,
           child: SizedBox(
@@ -579,11 +572,16 @@ void main() {
               slivers: <Widget>[
                 DecoratedSliver(
                   key: key,
-                  decoration: BoxDecoration(border: Border.all()),
-                  sliver: const SliverAppBar(
+                  decoration: BoxDecoration(
+                    border: Border.all(),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  sliver: SliverPersistentHeader(
                     pinned: true,
-                    stretch: true,
-                    title: SizedBox(height: 50, width: 300),
+                    delegate: _TestStretchDelegate(
+                      minExtent: 56.0,
+                      maxExtent: 56.0,
+                    ),
                   ),
                 ),
                 const SliverToBoxAdapter(child: SizedBox(height: 1000)),
@@ -600,7 +598,7 @@ void main() {
     expect(
       find.byKey(key),
       paints..something((methodName, arguments) {
-        if (methodName != #drawRRect) {
+        if (methodName != #drawDRRect) {
           return false;
         }
         final Rect rect = (arguments[0] as RRect).outerRect;
@@ -640,5 +638,33 @@ class TestBoxPainter extends BoxPainter {
     assert(!disposed);
     disposed = true;
     super.dispose();
+  }
+}
+
+class _TestStretchDelegate extends SliverPersistentHeaderDelegate {
+  _TestStretchDelegate({required this.minExtent, required this.maxExtent});
+
+  @override
+  final double minExtent;
+
+  @override
+  final double maxExtent;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      height: maxExtent,
+      width: 300,
+      color: const Color(0xFF2196F3),
+    );
+  }
+
+  @override
+  OverScrollHeaderStretchConfiguration get stretchConfiguration =>
+      OverScrollHeaderStretchConfiguration();
+
+  @override
+  bool shouldRebuild(_TestStretchDelegate oldDelegate) {
+    return minExtent != oldDelegate.minExtent || maxExtent != oldDelegate.maxExtent;
   }
 }
