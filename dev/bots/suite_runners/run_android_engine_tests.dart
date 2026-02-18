@@ -57,7 +57,7 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
     // TODO(matanlurey): Enable once `flutter drive` retains error logs.
     // final RegExp impellerStdoutPattern = RegExp('Using the Imepller rendering backend (.*)');
 
-    Future<void> runTest(FileSystemEntity file) async {
+    Future<void> runTest(FileSystemEntity file, {bool useHCPPFlag = false}) async {
       final CommandResult result = await runCommand(
         'flutter',
         <String>[
@@ -107,6 +107,12 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
 
     // Test HCPP Platform Views on Vulkan.
     if (impellerBackend == ImpellerBackend.vulkan) {
+      // Run upgrade_legacy_pv_types first, as it is testing the flag and not the manifest
+      await runTest(
+        mains.firstWhere((file) => file.path.contains('upgrade_legacy_pv_types')),
+        useHCPPFlag: true,
+      );
+
       androidManifestXml.writeAsStringSync(
         androidManifestXml.readAsStringSync().replaceFirst(
           kSurfaceControlMetadataDisabled,
@@ -116,8 +122,8 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
       for (final file in mains) {
         // This statement is attempting to catch all tests inside of the
         // dev/integration_tests/android_engine_test/lib/hcpp
-        // directory.
-        if (!file.path.contains('hcpp')) {
+        // directory, except for upgrade_legacy_pv_types which we already ran.
+        if (!file.path.contains('hcpp') || file.path.contains('upgrade_legacy_pv_types')) {
           continue;
         }
         await runTest(file);
