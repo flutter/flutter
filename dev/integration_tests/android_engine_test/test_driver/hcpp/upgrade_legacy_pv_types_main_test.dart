@@ -9,13 +9,11 @@ import 'package:android_driver_extensions/native_driver.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart';
 
-/// Smoke test: verifies that when HCPP (surface control) is enabled, all three
-/// legacy platform view creation APIs (HC via initExpensiveAndroidView, TLHC
-/// via initSurfaceAndroidView, and TLHC/VD via initAndroidView) are
-/// transparently upgraded to HCPP mode without crashing.
-///
-/// Verifies the HCPP code path was taken by inspecting engine-side logcat
-/// output, rather than exposing a "which mode am I in" API to Dart.
+/// Smoke test: verifies that when HCPP is enabled, all three
+/// legacy platform view creation APIs (HC via initExpensiveAndroidView,
+/// TLHC with HC fallback via initSurfaceAndroidView, and
+/// TLHC with VD fallback via initAndroidView) are upgraded to HCPP mode
+/// without crashing.
 void main() async {
   late final FlutterDriver flutterDriver;
   late final NativeDriver nativeDriver;
