@@ -20,6 +20,7 @@ import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
+import '../ios/plist_parser.dart';
 import '../ios/xcodeproj.dart';
 import '../macos/cocoapod_utils.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
@@ -276,6 +277,180 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       );
     }
   }
+
+  /// Copies vendored frameworks from CocoaPods plugins to the output directory.
+  ///
+  /// Parses the Pods.xcodeproj/project.pbxproj to find vendored frameworks
+  /// in PBXGroups named "Frameworks", then copies them to the output directory.
+  /// This approach is more reliable than parsing podspecs because CocoaPods
+  /// has already resolved all paths, wildcards, and platform-specific entries.
+  ///
+  /// Note: This only copies frameworks from CocoaPods-based plugins.
+  /// Swift Package Manager support will be added in a separate command.
+  Future<void> copyVendoredFrameworks(
+    Directory modeDirectory,
+    Directory hostAppRoot,
+    PlistParser plistParser,
+  ) async {
+    final File projectFile = hostAppRoot
+        .childDirectory('Pods')
+        .childDirectory('Pods.xcodeproj')
+        .childFile('project.pbxproj');
+
+    if (!projectFile.existsSync()) {
+      globals.logger.printTrace('Pods.xcodeproj not found, skipping vendored frameworks');
+      return;
+    }
+
+    final List<String> frameworkPaths = parseVendoredFrameworksFromPbxproj(
+      projectFile,
+      plistParser,
+      globals.logger,
+    );
+
+    if (frameworkPaths.isEmpty) {
+      return;
+    }
+
+    final processedFrameworks = <String>{};
+    final Directory podsRoot = hostAppRoot.childDirectory('Pods');
+
+    for (final frameworkPath in frameworkPaths) {
+      final String frameworkName = globals.fs.path.basename(frameworkPath);
+
+      // Skip Flutter's own frameworks.
+      if (frameworkName == 'Flutter.framework' ||
+          frameworkName == 'Flutter.xcframework' ||
+          frameworkName == 'App.framework' ||
+          frameworkName == 'App.xcframework') {
+        continue;
+      }
+
+      // Framework paths from CocoaPods virtual groups (e.g. "Development Pods/[plugin]/Frameworks")
+      // may have a "../../../" prefix. Strip it so the path resolves correctly relative to Pods.
+      final String absolutePath = globals.fs.path.normalize(
+        globals.fs.path.join(podsRoot.path, frameworkPath.replaceFirst('../../../', '')),
+      );
+      final Directory frameworkEntity = globals.fs.directory(absolutePath);
+
+      if (!frameworkEntity.existsSync()) {
+        globals.logger.printTrace('Vendored framework not found: $absolutePath');
+        continue;
+      }
+
+      final String binaryName = globals.fs.path.basenameWithoutExtension(frameworkName);
+
+      // Skip if we've already processed this framework name
+      if (processedFrameworks.contains(binaryName)) {
+        continue;
+      }
+      processedFrameworks.add(binaryName);
+
+      final bool isXcframework = frameworkName.endsWith('.xcframework');
+      final bool isFramework = frameworkName.endsWith('.framework');
+      if (!isXcframework && !isFramework) {
+        continue;
+      }
+
+      final Directory destination = modeDirectory.childDirectory(frameworkName);
+      if (destination.existsSync()) {
+        continue;
+      }
+
+      final kind = isXcframework ? 'xcframework' : 'framework';
+      globals.logger.printTrace('Copying vendored $kind: $frameworkName');
+      copyDirectory(frameworkEntity, destination);
+    }
+  }
+}
+
+/// Parses vendored framework paths from a Pods.xcodeproj/project.pbxproj file.
+///
+/// This function uses PlistParser to parse the project.pbxproj file and finds
+/// all framework/xcframework references in PBXGroups named "Frameworks".
+///
+/// Returns a list of framework paths relative to the Pods directory.
+@visibleForTesting
+List<String> parseVendoredFrameworksFromPbxproj(
+  File projectFile,
+  PlistParser plistParser,
+  Logger logger,
+) {
+  final String? jsonContent = plistParser.plistJsonContent(projectFile.path);
+  if (jsonContent == null) {
+    logger.printTrace('Failed to parse project.pbxproj');
+    return <String>[];
+  }
+
+  final Map<String, Object?> projectData;
+  try {
+    projectData = json.decode(jsonContent) as Map<String, Object?>;
+  } on FormatException catch (e) {
+    logger.printTrace('Failed to decode project.pbxproj JSON: $e');
+    return <String>[];
+  }
+
+  final objects = projectData['objects'] as Map<String, Object?>?;
+  if (objects == null) {
+    return <String>[];
+  }
+
+  final results = <String>[];
+  final fileReferenceIds = <String>{};
+
+  // Find all PBXGroups named "Frameworks" and collect their children
+  for (final MapEntry<String, Object?> entry in objects.entries) {
+    final objectValue = entry.value as Map<String, Object?>?;
+    if (objectValue == null) {
+      continue;
+    }
+
+    final isa = objectValue['isa'] as String?;
+    if (isa != 'PBXGroup') {
+      continue;
+    }
+
+    final name = objectValue['name'] as String?;
+    if (name != 'Frameworks') {
+      continue;
+    }
+
+    final children = objectValue['children'] as List<Object?>?;
+    if (children == null) {
+      continue;
+    }
+
+    for (final Object? child in children) {
+      if (child is String) {
+        fileReferenceIds.add(child);
+      }
+    }
+  }
+
+  // Look up the file paths for each file reference
+  for (final refId in fileReferenceIds) {
+    final fileRef = objects[refId] as Map<String, Object?>?;
+    if (fileRef == null) {
+      continue;
+    }
+
+    final isa = fileRef['isa'] as String?;
+    if (isa != 'PBXFileReference') {
+      continue;
+    }
+
+    final path = fileRef['path'] as String?;
+    if (path == null) {
+      continue;
+    }
+
+    // Only include .framework and .xcframework files
+    if (path.endsWith('.framework') || path.endsWith('.xcframework')) {
+      results.add(path);
+    }
+  }
+
+  return results;
 }
 
 /// Produces a .framework for integration into a host iOS app. The .framework
@@ -746,6 +921,9 @@ end
           );
         }
       }
+
+      // Copy vendored frameworks from CocoaPods plugins.
+      await copyVendoredFrameworks(modeDirectory, project.ios.hostAppRoot, globals.plistParser);
     } finally {
       status.stop();
     }
