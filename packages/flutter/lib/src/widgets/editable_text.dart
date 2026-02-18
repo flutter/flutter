@@ -3299,6 +3299,14 @@ class EditableTextState extends State<EditableText>
       if (newViewId != _viewId) {
         _textInputConnection!.updateConfig(_effectiveAutofillClient.textInputConfiguration);
       }
+      // The style may have changed due to dependency changes
+      // (e.g. MediaQuery.boldTextOf, MediaQuery.textScalerOf, etc.).
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+        if (!mounted || !_hasInputConnection) {
+          return;
+        }
+        _textInputConnection!.updateStyle(_getTextInputStyle(context));
+      }, debugLabel: 'EditableText.updateStyle');
     }
 
     if (defaultTargetPlatform != TargetPlatform.iOS &&
@@ -3409,13 +3417,14 @@ class EditableTextState extends State<EditableText>
           ? widget.style.merge(const TextStyle(fontWeight: FontWeight.bold))
           : widget.style;
       if (_hasInputConnection) {
-        _textInputConnection!.setStyle(
-          fontFamily: _style.fontFamily,
-          fontSize: _style.fontSize,
-          fontWeight: _style.fontWeight,
-          textDirection: _textDirection,
-          textAlign: widget.textAlign,
-        );
+        // Schedule the style update after layout to ensure preferredLineHeight
+        // is computed with the new style.
+        SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+          if (!mounted || !_hasInputConnection) {
+            return;
+          }
+          _textInputConnection!.updateStyle(_getTextInputStyle(context));
+        }, debugLabel: 'EditableText.updateStyle');
       }
     }
 
@@ -3436,6 +3445,24 @@ class EditableTextState extends State<EditableText>
       _scrollNotificationObserver!.removeListener(_handleContextMenuOnParentScroll);
       _scrollNotificationObserver = null;
     }
+  }
+
+  TextInputStyle _getTextInputStyle(BuildContext context) {
+    final double? letterSpacingOverride = MediaQuery.maybeLetterSpacingOverrideOf(context);
+    final double? wordSpacingOverride = MediaQuery.maybeWordSpacingOverrideOf(context);
+
+    return TextInputStyle(
+      fontFamily: _style.fontFamily,
+      fontSize: _style.fontSize,
+      fontWeight: _style.fontWeight,
+      textDirection: _textDirection,
+      textAlign: widget.textAlign,
+      letterSpacing: letterSpacingOverride ?? _style.letterSpacing,
+      wordSpacing: wordSpacingOverride ?? _style.wordSpacing,
+      // preferredLineHeight already includes lineHeightScaleFactor from
+      // _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides.
+      lineHeight: renderEditable.preferredLineHeight,
+    );
   }
 
   @protected
@@ -3959,13 +3986,7 @@ class EditableTextState extends State<EditableText>
       _updateSizeAndTransform();
       _schedulePeriodicPostFrameCallbacks();
       _textInputConnection!
-        ..setStyle(
-          fontFamily: _style.fontFamily,
-          fontSize: _style.fontSize,
-          fontWeight: _style.fontWeight,
-          textDirection: _textDirection,
-          textAlign: widget.textAlign,
-        )
+        ..updateStyle(_getTextInputStyle(context))
         ..setEditingState(localValue)
         ..show();
       if (_needsAutofill) {
@@ -4029,13 +4050,7 @@ class EditableTextState extends State<EditableText>
 
     newConnection
       ..show()
-      ..setStyle(
-        fontFamily: _style.fontFamily,
-        fontSize: _style.fontSize,
-        fontWeight: _style.fontWeight,
-        textDirection: _textDirection,
-        textAlign: widget.textAlign,
-      )
+      ..updateStyle(_getTextInputStyle(context))
       ..setEditingState(_value);
     _lastKnownRemoteTextEditingValue = _value;
   }
