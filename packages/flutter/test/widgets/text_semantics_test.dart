@@ -241,7 +241,6 @@ void main() {
       ),
     );
 
-    // The Text widget should create its own semantic node with the identifier
     final SemanticsNode node = tester.getSemantics(find.text('Hello World'));
     expect(node.identifier, 'my-text-identifier');
     expect(node.label, 'Hello World');
@@ -256,9 +255,6 @@ void main() {
   ) async {
     final semantics = SemanticsTester(tester);
 
-    // Simulate what a Dialog does: creates a Semantics node with scopesRoute: true
-    // and explicitChildNodes: true. The bug was that Text's identifier would be
-    // absorbed into the route-scoping ancestor.
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -270,7 +266,6 @@ void main() {
       ),
     );
 
-    // Find all semantic nodes
     final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!;
     final allNodes = <SemanticsNode>[];
     void collectNodes(SemanticsNode node) {
@@ -283,7 +278,6 @@ void main() {
 
     collectNodes(root);
 
-    // Find the route-scoping node and the text node
     final SemanticsNode? routeNode = allNodes
         .where((SemanticsNode n) => n.hasFlag(SemanticsFlag.scopesRoute))
         .firstOrNull;
@@ -295,20 +289,8 @@ void main() {
     expect(textNode, isNotNull, reason: 'Text semantic node should exist with its identifier');
     expect(textNode!.label, 'Dialog Text');
 
-    // The text identifier should NOT be on the route-scoping node
-    // (This was the bug - the identifier was being absorbed by the ancestor)
-    expect(
-      routeNode!.identifier,
-      isNot('dialog-text-identifier'),
-      reason: 'Text identifier should not be absorbed by route-scoping node',
-    );
-
-    // The text node should be separate from the route-scoping node
-    expect(
-      textNode.id,
-      isNot(routeNode.id),
-      reason: 'Text should have its own semantic node, not be merged into route-scoping ancestor',
-    );
+    expect(routeNode!.identifier, isNot('dialog-text-identifier'));
+    expect(textNode.id, isNot(routeNode.id));
 
     semantics.dispose();
   });
