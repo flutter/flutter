@@ -222,8 +222,8 @@ void AccessibilityBridge::UpdateSemantics(
       SemanticsObject* next = FindNextFocusableIfNecessary();
       SemanticsObject* lastFocused = [objects_ objectForKey:@(last_focused_semantics_object_id_)];
       // Only specify the focus item if the new focus is different, avoiding double focuses on the
-      // same item. See: https://github.com/flutter/flutter/issues/104176. If there is a route
-      // change, we always refocus.
+      // same item. See: https://github.com/flutter/flutter/issues/104176. If there is a named
+      // route announcement, we always refocus.
       ios_delegate_->PostAccessibilityNotification(
           UIAccessibilityLayoutChangedNotification,
           (shouldAnnounceRoute || next != lastFocused) ? next.nativeAccessibility : NULL);
