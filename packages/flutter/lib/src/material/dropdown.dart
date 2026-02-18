@@ -1019,7 +1019,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.barrierDismissible = true,
     this.mouseCursor,
     this.dropdownMenuItemMouseCursor,
-    this.isVerticallyExpanded = true,
+    this.isVerticallyExpanded = false,
     // When adding new arguments, consider adding similar arguments to
     // DropdownButtonFormField.
   }) : assert(
@@ -1777,11 +1777,16 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     final bool childHasButtonSemantic =
         hintIndex != null || (_selectedIndex != null && widget.selectedItemBuilder == null);
 
-    // When not vertically expanded, force the widget to its default height
-    // using heightFactor: 1.0. This prevents the item from expanding
-    // to fill the parent's available vertical space.
+    // When vertical expansion is disabled, wrap with UnconstrainedBox
+    // to prevent the widget from stretching to fill the parent's
+    // available height. Only the horizontal axis remains constrained,
+    // preserving the width defined by the parent.
     if (!widget.isVerticallyExpanded) {
-      result = Align(alignment: Alignment.topCenter, heightFactor: 1.0, child: result);
+      result = UnconstrainedBox(
+        constrainedAxis: Axis.horizontal, // Keep width constrained by parent
+        alignment: Alignment.topCenter,
+        child: result,
+      );
     }
 
     return Semantics(
