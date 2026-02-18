@@ -124,7 +124,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/editable_text_scribble_test.dart',
     'packages/flutter/test/widgets/autofill_group_test.dart',
     'packages/flutter/test/widgets/range_maintaining_scroll_physics_test.dart',
-    'packages/flutter/test/widgets/interactive_viewer_test.dart',
     'packages/flutter/test/widgets/selectable_region_test.dart',
     'packages/flutter/test/widgets/editable_text_scribe_test.dart',
     'packages/flutter/test/widgets/scrollable_test.dart',
