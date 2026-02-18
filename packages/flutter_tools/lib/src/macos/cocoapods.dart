@@ -387,7 +387,7 @@ class CocoaPods {
       return;
     }
     if (stdout.contains('Unable to find a specification for')) {
-      // Example: Unable to find a specification for `plguin_a` depended upon by `plugin_b`
+      // Example: Unable to find a specification for `plugin_a` depended upon by `plugin_b`
       final pattern = RegExp(r'Unable to find a specification for `(.*)` depended upon by `(.*)`');
       final Iterable<RegExpMatch> matches = pattern.allMatches(stdout);
       for (final match in matches) {
