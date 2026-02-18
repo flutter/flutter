@@ -36,6 +36,8 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 - [flutter/179673](https://github.com/flutter/flutter/issues/179673) When content sizing is not enabled on Android, a race condition can sometimes make platform views not render correctly.
 - [flutter/182076](https://github.com/flutter/flutter/issues/182076) Fix flutter build web ignoring --web-define flag
+- [flutter/182243](https://github.com/flutter/flutter/issues/182243) Don't throw an exception if no web define variable is set.
+- [flutter/182292](https://github.com/flutter/flutter/issues/182292) Fix bug in multisurfacerenderer where canvases do not have "position: absolute"
 
 ### [3.41.1](https://github.com/flutter/flutter/releases/tag/3.41.1)
 
