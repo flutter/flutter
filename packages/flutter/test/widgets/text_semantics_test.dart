@@ -228,7 +228,7 @@ void main() {
     expect(localeStringAttribute.locale.toLanguageTag(), 'de-DE');
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/180894
+  // Regression test for https://github.com/flutter/flutter/issues/180894.
   testWidgets('Text with semanticsIdentifier creates its own semantic node', (
     WidgetTester tester,
   ) async {
@@ -249,7 +249,7 @@ void main() {
     semantics.dispose();
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/180894
+  // Regression test for https://github.com/flutter/flutter/issues/180894.
   // Tests that Text.semanticsIdentifier is not absorbed by a route-scoping ancestor.
   testWidgets('Text with semanticsIdentifier is not absorbed by route-scoping ancestor', (
     WidgetTester tester,

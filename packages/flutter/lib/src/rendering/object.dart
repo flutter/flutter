@@ -4786,7 +4786,7 @@ mixin SemanticsAnnotationsMixin on RenderObject {
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    config.isSemanticBoundary = container;
+    config.isSemanticBoundary = container || (_properties.identifier != null);
     config.explicitChildNodes = explicitChildNodes;
     config.isBlockingUserActions = blockUserActions;
     if (localeForSubtree != null) {

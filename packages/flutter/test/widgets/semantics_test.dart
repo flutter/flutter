@@ -2464,6 +2464,52 @@ void main() {
     await tester.pumpAndSettle();
     expect(label10, matchesSemantics(isHidden: false)); // ignore: avoid_redundant_argument_values
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/180894.
+  testWidgets('Semantics with identifier creates a semantic boundary', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Semantics(
+          label: 'parent',
+          child: Semantics(
+            identifier: 'child-id',
+            label: 'child',
+            child: const SizedBox(width: 10, height: 10),
+          ),
+        ),
+      ),
+    );
+
+    final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!;
+    final allNodes = <SemanticsNode>[];
+    void collectNodes(SemanticsNode node) {
+      allNodes.add(node);
+      node.visitChildren((SemanticsNode child) {
+        collectNodes(child);
+        return true;
+      });
+    }
+
+    collectNodes(root);
+
+    final SemanticsNode? parentNode = allNodes
+        .where((SemanticsNode n) => n.label == 'parent')
+        .firstOrNull;
+    final SemanticsNode? childNode = allNodes
+        .where((SemanticsNode n) => n.identifier == 'child-id')
+        .firstOrNull;
+
+    expect(parentNode, isNotNull);
+    expect(childNode, isNotNull);
+    expect(childNode!.label, 'child');
+    expect(parentNode!.identifier, isNot('child-id'));
+    expect(childNode.id, isNot(parentNode.id));
+
+    semantics.dispose();
+  });
 }
 
 class CustomSortKey extends OrdinalSortKey {
