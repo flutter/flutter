@@ -2,16 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/fuchsia/dart-pkg/zircon_ffi/channel.h"
+#include "flutter/shell/platform/fuchsia/dart_pkg/zircon_ffi/basic_types.h"
 
-#include "flutter/fml/logging.h"
-#include "flutter/fml/macros.h"
+#include <lib/zx/channel.h>
+#include <zircon/types.h>
 
 #include <cstdlib>
 #include <vector>
 
-#include <lib/zx/channel.h>
-#include <zircon/types.h>
+#include "flutter/shell/platform/fuchsia/dart_pkg/zircon_ffi/handle.h"
 
 static zircon_dart_handle_t* MakeHandle(zx_handle_t handle) {
   zircon_dart_handle_t* result =

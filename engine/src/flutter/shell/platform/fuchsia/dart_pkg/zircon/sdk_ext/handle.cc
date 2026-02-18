@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/handle.h"
+#include "flutter/shell/platform/fuchsia/dart_pkg/zircon/sdk_ext/handle.h"
 
 #include <algorithm>
 
