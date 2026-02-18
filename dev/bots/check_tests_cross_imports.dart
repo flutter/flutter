@@ -122,7 +122,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/sliver_floating_header_test.dart',
     'packages/flutter/test/widgets/page_transitions_test.dart',
     'packages/flutter/test/widgets/editable_text_scribble_test.dart',
-    'packages/flutter/test/widgets/draggable_scrollable_sheet_test.dart',
     'packages/flutter/test/widgets/autofill_group_test.dart',
     'packages/flutter/test/widgets/range_maintaining_scroll_physics_test.dart',
     'packages/flutter/test/widgets/interactive_viewer_test.dart',
@@ -148,7 +147,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/sliver_semantics_test.dart',
     'packages/flutter/test/widgets/sliver_constraints_test.dart',
     'packages/flutter/test/widgets/autocomplete_test.dart',
-    'packages/flutter/test/widgets/decorated_sliver_test.dart',
     'packages/flutter/test/widgets/shadow_test.dart',
     'packages/flutter/test/widgets/routes_transition_test.dart',
     'packages/flutter/test/widgets/route_notification_messages_test.dart',
@@ -163,7 +161,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/list_wheel_scroll_view_test.dart',
     'packages/flutter/test/widgets/pop_scope_test.dart',
     'packages/flutter/test/widgets/scrollbar_test.dart',
-    'packages/flutter/test/widgets/actions_test.dart',
     'packages/flutter/test/widgets/scroll_physics_test.dart',
     'packages/flutter/test/widgets/obscured_animated_image_test.dart',
     'packages/flutter/test/widgets/platform_menu_bar_test.dart',
@@ -178,11 +175,9 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/media_query_test.dart',
     'packages/flutter/test/widgets/editable_text_cursor_test.dart',
     'packages/flutter/test/widgets/sliver_fill_remaining_test.dart',
-    'packages/flutter/test/widgets/semantics_keep_alive_offstage_test.dart',
     'packages/flutter/test/widgets/editable_text_show_on_screen_test.dart',
     'packages/flutter/test/widgets/system_context_menu_test.dart',
     'packages/flutter/test/widgets/scrollable_fling_test.dart',
-    'packages/flutter/test/widgets/transformed_scrollable_test.dart',
     'packages/flutter/test/widgets/scrollable_in_overlay_test.dart',
     'packages/flutter/test/widgets/navigator_and_layers_test.dart',
     'packages/flutter/test/widgets/snapshot_widget_test.dart',
@@ -214,9 +209,7 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/baseline_test.dart',
     'packages/flutter/test/widgets/selection_container_test.dart',
     'packages/flutter/test/widgets/scrollable_semantics_test.dart',
-    'packages/flutter/test/widgets/single_child_scroll_view_test.dart',
     'packages/flutter/test/widgets/pinned_header_sliver_test.dart',
-    'packages/flutter/test/widgets/raw_radio_test.dart',
     'packages/flutter/test/widgets/form_test.dart',
   };
 
@@ -231,19 +224,8 @@ class TestsCrossImportChecker {
   // TODO(justinmc): Fix all of these tests so there are no cross imports.
   // See https://github.com/flutter/flutter/issues/177028.
   static final Set<String> knownCupertinoCrossImports = <String>{
-    'packages/flutter/test/cupertino/material/tab_scaffold_test.dart',
-    'packages/flutter/test/cupertino/route_test.dart',
+    // TODO(justinmc): This one uses SelectableText. See https://github.com/flutter/flutter/issues/181682
     'packages/flutter/test/cupertino/text_selection_test.dart',
-    'packages/flutter/test/cupertino/app_test.dart',
-    'packages/flutter/test/cupertino/picker_test.dart',
-    'packages/flutter/test/cupertino/text_field_test.dart',
-    'packages/flutter/test/cupertino/date_picker_test.dart',
-    'packages/flutter/test/cupertino/switch_test.dart',
-    'packages/flutter/test/cupertino/magnifier_test.dart',
-    'packages/flutter/test/cupertino/sheet_test.dart',
-    'packages/flutter/test/cupertino/form_row_test.dart',
-    'packages/flutter/test/cupertino/colors_test.dart',
-    'packages/flutter/test/cupertino/text_form_field_row_restoration_test.dart',
   };
 
   static final Set<String> _knownCrossImports = knownWidgetsCrossImports.union(
