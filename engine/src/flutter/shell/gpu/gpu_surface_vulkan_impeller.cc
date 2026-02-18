@@ -155,6 +155,11 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
       return nullptr;
     }
 
+    impeller::ContextVK& context_vk =
+        impeller::ContextVK::Cast(*impeller_context_);
+
+    context_vk.DisposeThreadLocalCachedResources();
+
     impeller::vk::Image vk_image =
         impeller::vk::Image(reinterpret_cast<VkImage>(flutter_image.image));
 
@@ -165,9 +170,6 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
     desc.mip_count = 1;
     desc.compression_type = impeller::CompressionType::kLossless;
     desc.usage = impeller::TextureUsage::kRenderTarget;
-
-    impeller::ContextVK& context_vk =
-        impeller::ContextVK::Cast(*impeller_context_);
 
     impeller::vk::ImageViewCreateInfo view_info = {};
     view_info.viewType = impeller::vk::ImageViewType::e2D;

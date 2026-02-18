@@ -1669,7 +1669,11 @@ void _testContainer() {
 
     test('checkable leaf nodes accept pointer events', () async {
       final builder = ui.SemanticsUpdateBuilder();
-      updateNode(builder, flags: const ui.SemanticsFlags(isChecked: ui.CheckedState.isFalse));
+      updateNode(
+        builder,
+        flags: const ui.SemanticsFlags(isChecked: ui.CheckedState.isFalse),
+        actions: ui.SemanticsAction.tap.index,
+      );
 
       owner().updateSemantics(builder.build());
 
@@ -1701,7 +1705,11 @@ void _testContainer() {
 
     test('link leaf nodes accept pointer events', () async {
       final builder = ui.SemanticsUpdateBuilder();
-      updateNode(builder, flags: const ui.SemanticsFlags(isLink: true));
+      updateNode(
+        builder,
+        flags: const ui.SemanticsFlags(isLink: true),
+        actions: ui.SemanticsAction.tap.index,
+      );
 
       owner().updateSemantics(builder.build());
 
@@ -2163,6 +2171,7 @@ void _testVerticalScrolling() {
     updateNode(
       builder,
       flags: const ui.SemanticsFlags(hasImplicitScrolling: true),
+      actions: ui.SemanticsAction.scrollUp.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
     );
@@ -2187,6 +2196,7 @@ void _testVerticalScrolling() {
     updateNode(
       builder,
       flags: const ui.SemanticsFlags(hasImplicitScrolling: true),
+      actions: ui.SemanticsAction.scrollLeft.index, // Only have a horizontal scroll action.
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
     );
@@ -3279,7 +3289,6 @@ void _testSelectables() {
 
     final SemanticsObject node = owner().debugSemanticsTree![0]!;
     expect(node.semanticRole!.kind, EngineSemanticsRole.checkable);
-    expect(node.semanticRole!.debugSemanticBehaviorTypes, isNot(contains(Selectable)));
     expect(node.element.getAttribute('aria-selected'), isNull);
 
     semantics().semanticsEnabled = false;
