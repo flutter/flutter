@@ -52,5 +52,3 @@ String getKernelPathForTransformerOptions(String path, {required bool trackWidge
   }
   return path;
 }
-
-const defaultPrivateKeyPath = 'privatekey.der';

@@ -376,7 +376,7 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
 
     IndexError.check(index, info.floatCount, message: 'Index `$index` out of bounds for `$name`.');
 
-    return SkwasmUniformFloatSlot._(this, index, name, info.location + index);
+    return SkwasmUniformFloatSlot._(this, index, name, info.floatOffset + index);
   }
 
   @override
@@ -398,6 +398,106 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
   }
 
   @override
+  ui.UniformMat2Slot getUniformMat2(String name) {
+    final List<SkwasmUniformFloatSlot> slots = _getUniformFloatSlots(name, 4);
+    return _SkwasmUniformMat2Slot._(slots[0], slots[1], slots[2], slots[3]);
+  }
+
+  @override
+  ui.UniformMat3Slot getUniformMat3(String name) {
+    final List<SkwasmUniformFloatSlot> slots = _getUniformFloatSlots(name, 9);
+    return _SkwasmUniformMat3Slot._(
+      slots[0],
+      slots[1],
+      slots[2],
+      slots[3],
+      slots[4],
+      slots[5],
+      slots[6],
+      slots[7],
+      slots[8],
+    );
+  }
+
+  @override
+  ui.UniformMat4Slot getUniformMat4(String name) {
+    final List<SkwasmUniformFloatSlot> slots = _getUniformFloatSlots(name, 16);
+    return _SkwasmUniformMat4Slot._(
+      slots[0],
+      slots[1],
+      slots[2],
+      slots[3],
+      slots[4],
+      slots[5],
+      slots[6],
+      slots[7],
+      slots[8],
+      slots[9],
+      slots[10],
+      slots[11],
+      slots[12],
+      slots[13],
+      slots[14],
+      slots[15],
+    );
+  }
+
+  @override
+  ui.UniformArray<ui.UniformMat2Slot> getUniformMat2Array(String name) {
+    return _getUniformArray<_SkwasmUniformMat2Slot>(
+      name,
+      4,
+      (components) =>
+          _SkwasmUniformMat2Slot._(components[0], components[1], components[2], components[3]),
+    );
+  }
+
+  @override
+  ui.UniformArray<ui.UniformMat3Slot> getUniformMat3Array(String name) {
+    return _getUniformArray<_SkwasmUniformMat3Slot>(
+      name,
+      9,
+      (components) => _SkwasmUniformMat3Slot._(
+        components[0],
+        components[1],
+        components[2],
+        components[3],
+        components[4],
+        components[5],
+        components[6],
+        components[7],
+        components[8],
+      ),
+    );
+  }
+
+  @override
+  ui.UniformArray<ui.UniformMat4Slot> getUniformMat4Array(String name) {
+    return _getUniformArray<_SkwasmUniformMat4Slot>(
+      name,
+      16,
+      (components) => _SkwasmUniformMat4Slot._(
+        components[0],
+        components[1],
+        components[2],
+        components[3],
+        components[4],
+        components[5],
+        components[6],
+        components[7],
+        components[8],
+        components[9],
+        components[10],
+        components[11],
+        components[12],
+        components[13],
+        components[14],
+        components[15],
+      ),
+    );
+  }
+
+  @override
   ui.ImageSamplerSlot getImageSampler(String name) {
     throw UnsupportedError('getImageSampler is not supported on the web.');
   }
@@ -411,7 +511,7 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
 
     return List<SkwasmUniformFloatSlot>.generate(
       size,
-      (i) => SkwasmUniformFloatSlot._(this, i, name, info.location + i),
+      (i) => SkwasmUniformFloatSlot._(this, i, name, info.floatOffset + i),
     );
   }
 
@@ -432,7 +532,7 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
     final elements = List<T>.generate(numElements, (i) {
       final slots = List<SkwasmUniformFloatSlot>.generate(
         info.floatCount,
-        (j) => SkwasmUniformFloatSlot._(this, j, name, info.location + i * elementSize + j),
+        (j) => SkwasmUniformFloatSlot._(this, j, name, info.floatOffset + i * elementSize + j),
       );
       return elementFactory(slots);
     });
@@ -539,6 +639,136 @@ class _SkwasmUniformVec4Slot implements ui.UniformVec4Slot {
   }
 
   final SkwasmUniformFloatSlot _xSlot, _ySlot, _zSlot, _wSlot;
+}
+
+class _SkwasmUniformMat2Slot implements ui.UniformMat2Slot {
+  _SkwasmUniformMat2Slot._(this._m00, this._m10, this._m01, this._m11);
+
+  // Set the elements of the matrix in column-major order.
+  @override
+  void set(double m00, double m10, double m01, double m11) {
+    _m00.set(m00);
+    _m10.set(m10);
+    _m01.set(m01);
+    _m11.set(m11);
+  }
+
+  // The elements of the matrix, stored in column-major order.
+  // mij refers to the ith row and the jth column.
+  final SkwasmUniformFloatSlot _m00, _m10; // Column 0
+  final SkwasmUniformFloatSlot _m01, _m11; // Column 1
+}
+
+class _SkwasmUniformMat3Slot implements ui.UniformMat3Slot {
+  _SkwasmUniformMat3Slot._(
+    this._m00,
+    this._m10,
+    this._m20,
+    this._m01,
+    this._m11,
+    this._m21,
+    this._m02,
+    this._m12,
+    this._m22,
+  );
+
+  // Set the elements of the matrix in column-major order.
+  @override
+  void set(
+    double m00,
+    double m10,
+    double m20,
+    double m01,
+    double m11,
+    double m21,
+    double m02,
+    double m12,
+    double m22,
+  ) {
+    _m00.set(m00);
+    _m10.set(m10);
+    _m20.set(m20);
+
+    _m01.set(m01);
+    _m11.set(m11);
+    _m21.set(m21);
+
+    _m02.set(m02);
+    _m12.set(m12);
+    _m22.set(m22);
+  }
+
+  // The elements of the matrix, stored in column-major order.
+  // mij refers to the ith row and the jth column.
+  final SkwasmUniformFloatSlot _m00, _m10, _m20; // Column 0
+  final SkwasmUniformFloatSlot _m01, _m11, _m21; // Column 1
+  final SkwasmUniformFloatSlot _m02, _m12, _m22; // Column 2
+}
+
+class _SkwasmUniformMat4Slot implements ui.UniformMat4Slot {
+  _SkwasmUniformMat4Slot._(
+    this._m00,
+    this._m10,
+    this._m20,
+    this._m30,
+    this._m01,
+    this._m11,
+    this._m21,
+    this._m31,
+    this._m02,
+    this._m12,
+    this._m22,
+    this._m32,
+    this._m03,
+    this._m13,
+    this._m23,
+    this._m33,
+  );
+
+  // Set the elements of the matrix in column-major order.
+  @override
+  void set(
+    double m00,
+    double m10,
+    double m20,
+    double m30,
+    double m01,
+    double m11,
+    double m21,
+    double m31,
+    double m02,
+    double m12,
+    double m22,
+    double m32,
+    double m03,
+    double m13,
+    double m23,
+    double m33,
+  ) {
+    _m00.set(m00);
+    _m10.set(m10);
+    _m20.set(m20);
+    _m30.set(m30);
+    _m01.set(m01);
+    _m11.set(m11);
+    _m21.set(m21);
+    _m31.set(m31);
+    _m02.set(m02);
+    _m12.set(m12);
+    _m22.set(m22);
+    _m32.set(m32);
+    _m03.set(m03);
+    _m13.set(m13);
+    _m23.set(m23);
+    _m33.set(m33);
+  }
+
+  // The elements of the matrix, stored in column-major order.
+  // mij refers to the ith row and the jth column.
+  final SkwasmUniformFloatSlot _m00, _m10, _m20, _m30; // Column 0
+  final SkwasmUniformFloatSlot _m01, _m11, _m21, _m31; // Column 1
+  final SkwasmUniformFloatSlot _m02, _m12, _m22, _m32; // Column 2
+  final SkwasmUniformFloatSlot _m03, _m13, _m23, _m33; // Column 3
 }
 
 class _SkwasmUniformArray<T extends ui.UniformType> implements ui.UniformArray<T> {
