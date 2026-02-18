@@ -2080,7 +2080,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.text(tooltipText), findsOneWidget);
 
-    // Move the mouse to the Tooltip overlay.
+    // Move the mouse to the tooltip overlay.
     final Finder tooltipOverlayFinder = find.text(tooltipText);
     await gesture.moveTo(tester.getCenter(tooltipOverlayFinder));
     await tester.pumpAndSettle();
