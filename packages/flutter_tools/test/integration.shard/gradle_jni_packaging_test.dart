@@ -50,44 +50,47 @@ void main() {
     expect(_checkLibIsInApk(projectDir, 'lib/x86/libflutter.so'), false);
   });
 
-  testWithoutContext('abiFilters provided by the user in buildTypes can override Flutter defaults', () async {
-    final Directory projectDir = createProjectWithThirdpartyLib(tempDir);
-    final String buildGradleContents = projectDir
-        .childFile('android/app/build.gradle.kts')
-        .readAsStringSync();
+  testWithoutContext(
+    'abiFilters provided by the user in buildTypes can override Flutter defaults',
+    () async {
+      final Directory projectDir = createProjectWithThirdpartyLib(tempDir);
+      final String buildGradleContents = projectDir
+          .childFile('android/app/build.gradle.kts')
+          .readAsStringSync();
 
-    // Modify the project's build.gradle.kts file to include abiFilters for a single ABI only.
-    final String updatedBuildGradleContents = buildGradleContents.replaceFirstMapped(
-      RegExp(r'(buildTypes\s*\{\s*release\s*\{)([^}]*)\}', dotAll: true),
-      (Match match) {
-        final String before = match.group(1)!;
-        final String body = match.group(2)!;
-        const ndkBlock = '''
+      // Modify the project's build.gradle.kts file to include abiFilters for a single ABI only.
+      final String updatedBuildGradleContents = buildGradleContents.replaceFirstMapped(
+        RegExp(r'(buildTypes\s*\{\s*release\s*\{)([^}]*)\}', dotAll: true),
+        (Match match) {
+          final String before = match.group(1)!;
+          final String body = match.group(2)!;
+          const ndkBlock = '''
                 ndk {
                     abiFilters.clear()
                     abiFilters.addAll(listOf("arm64-v8a"))
                 }
     ''';
-        return '$before$body$ndkBlock        }';
-      },
-    );
-    projectDir
-        .childFile('android/app/build.gradle.kts')
-        .writeAsStringSync(updatedBuildGradleContents);
+          return '$before$body$ndkBlock        }';
+        },
+      );
+      projectDir
+          .childFile('android/app/build.gradle.kts')
+          .writeAsStringSync(updatedBuildGradleContents);
 
-    processManager.runSync(<String>[
-      flutterBin,
-      'build',
-      'apk',
-      '-P',
-      'disable-abi-filtering=true',
-    ], workingDirectory: projectDir.path);
+      processManager.runSync(<String>[
+        flutterBin,
+        'build',
+        'apk',
+        '-P',
+        'disable-abi-filtering=true',
+      ], workingDirectory: projectDir.path);
 
-    expect(_checkLibIsInApk(projectDir, 'lib/arm64-v8a/libflutter.so'), true);
-    expect(_checkLibIsInApk(projectDir, 'lib/x86_64/libflutter.so'), false);
-    expect(_checkLibIsInApk(projectDir, 'lib/armeabi-v7a/libflutter.so'), false);
-    expect(_checkLibIsInApk(projectDir, 'lib/x86/libflutter.so'), false);
-  });
+      expect(_checkLibIsInApk(projectDir, 'lib/arm64-v8a/libflutter.so'), true);
+      expect(_checkLibIsInApk(projectDir, 'lib/x86_64/libflutter.so'), false);
+      expect(_checkLibIsInApk(projectDir, 'lib/armeabi-v7a/libflutter.so'), false);
+      expect(_checkLibIsInApk(projectDir, 'lib/x86/libflutter.so'), false);
+    },
+  );
 
   testWithoutContext(
     'abiFilters provided by the user in defaultConfig take precedence over flutter',
