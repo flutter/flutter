@@ -217,12 +217,27 @@ public final class FlutterEngineFlags {
       new Flag("--enable-dart-profiling", "EnableDartProfiling", true);
 
   /**
+   * Discards new profiler samples once the buffer is full. Only meaningful when set in conjunction
+   * with {@link ENABLE_DART_PROFILING}.
+   *
+   * <p>Allowed in release mode to allow the startup performance to be profiled by DevTools.
+   */
+  private static final Flag PROFILE_STARTUP = new Flag("--profile-startup", "ProfileStartup", true);
+
+  /**
    * Sets whether the UI thread and platform thread should be merged.
    *
    * <p>Allowed in release mode for performance purposes.
    */
   private static final Flag MERGED_PLATFORM_UI_THREAD =
       new Flag("--merged-platform-ui-thread", "MergedPlatformUIThread", true);
+
+  /**
+   * Start app with an specific route defined on the framework.
+   *
+   * <p>Allowed in release mode to allow starting with a specific route.
+   */
+  private static final Flag ROUTE = new Flag("--route=", "Route", true);
 
   // Manifest flags NOT allowed in release mode:
 
@@ -266,7 +281,8 @@ public final class FlutterEngineFlags {
   public static final Flag LEAK_VM = new Flag("--leak-vm=", "LeakVM");
 
   /** Measures startup time and switches to an endless trace buffer. */
-  private static final Flag TRACE_STARTUP = new Flag("--trace-startup", "TraceStartup");
+  private static final Flag TRACE_STARTUP =
+      new Flag("--trace-startup", "TraceStartup"); // TODO(camsim99): allow in release?
 
   /** Pauses Dart code execution at launch until a debugger is attached. */
   private static final Flag START_PAUSED = new Flag("--start-paused", "StartPaused");
@@ -278,9 +294,6 @@ public final class FlutterEngineFlags {
   /** Enables an endless trace buffer for timeline events. */
   private static final Flag ENDLESS_TRACE_BUFFER =
       new Flag("--endless-trace-buffer", "EndlessTraceBuffer");
-
-  /** Discards new profiler samples once the buffer is full. */
-  private static final Flag PROFILE_STARTUP = new Flag("--profile-startup", "ProfileStartup");
 
   /** Enables tracing of Skia GPU calls. */
   private static final Flag TRACE_SKIA = new Flag("--trace-skia", "TraceSkia");
@@ -309,6 +322,13 @@ public final class FlutterEngineFlags {
 
   /** Enables logging at all severity levels. */
   private static final Flag VERBOSE_LOGGING = new Flag("--verbose-logging", "VerboseLogging");
+
+  /**
+   * Enables Dart checked mode that enables certain runtime checks and assertions to help catch
+   * errors during development.
+   */
+  private static final Flag ENABLE_CHECKED_MODE =
+      new Flag("--enable-checked-mode", "EnableCheckedMode");
 
   /**
    * Passes additional flags to the Dart VM.
