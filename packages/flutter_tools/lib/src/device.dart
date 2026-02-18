@@ -983,6 +983,7 @@ class DebuggingOptions {
     this.enableVulkanValidation = false,
     this.uninstallFirst = false,
     this.enableDartProfiling = true,
+    this.enableSurfaceControl = false,
     this.profileStartup = false,
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
@@ -1017,6 +1018,7 @@ class DebuggingOptions {
     this.enableVulkanValidation = false,
     this.uninstallFirst = false,
     this.enableDartProfiling = true,
+    this.enableSurfaceControl = false,
     this.profileStartup = false,
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
@@ -1100,6 +1102,7 @@ class DebuggingOptions {
     required this.enableVulkanValidation,
     required this.uninstallFirst,
     required this.enableDartProfiling,
+    required this.enableSurfaceControl,
     required this.profileStartup,
     required this.enableEmbedderApi,
     required this.usingCISystem,
@@ -1146,6 +1149,7 @@ class DebuggingOptions {
   final bool enableFlutterGpu;
   final bool enableVulkanValidation;
   final bool enableDartProfiling;
+  final bool enableSurfaceControl;
   final bool profileStartup;
   final bool enableEmbedderApi;
   final bool usingCISystem;
@@ -1296,6 +1300,7 @@ class DebuggingOptions {
     'enableFlutterGpu': enableFlutterGpu,
     'enableVulkanValidation': enableVulkanValidation,
     'enableDartProfiling': enableDartProfiling,
+    'enableSurfaceControl': enableSurfaceControl,
     'profileStartup': profileStartup,
     'enableEmbedderApi': enableEmbedderApi,
     'usingCISystem': usingCISystem,
@@ -1365,6 +1370,7 @@ class DebuggingOptions {
         enableVulkanValidation: (json['enableVulkanValidation'] as bool?) ?? false,
         uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
         enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
+        enableSurfaceControl: (json['enableSurfaceControl'] as bool?) ?? false,
         profileStartup: (json['profileStartup'] as bool?) ?? false,
         enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,
         usingCISystem: (json['usingCISystem'] as bool?) ?? false,

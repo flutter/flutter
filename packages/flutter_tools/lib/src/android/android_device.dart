@@ -687,6 +687,11 @@ class AndroidDevice extends Device {
           'dart-flags',
           debuggingOptions.dartFlags,
         ],
+        if (debuggingOptions.enableSurfaceControl) ...<String>[
+          '--ez',
+          'enable-surface-control',
+          'true',
+        ],
         if (debuggingOptions.useTestFonts) ...<String>['--ez', 'use-test-fonts', 'true'],
         if (debuggingOptions.verboseSystemLogs) ...<String>['--ez', 'verbose-logging', 'true'],
         if (userIdentifier != null) ...<String>['--user', userIdentifier],
