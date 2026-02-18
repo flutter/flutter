@@ -5877,7 +5877,6 @@ targets:
   - name: Windows framework_tests_misc_leak_tracking
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true # New builder https://github.com/flutter/flutter/pull/176992
     properties:
       test_timeout_secs: "3600" # 1 hour
       dependencies: >-
