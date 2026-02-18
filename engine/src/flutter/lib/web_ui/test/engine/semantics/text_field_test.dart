@@ -528,12 +528,97 @@ void testMain() {
       createTextFieldSemantics(isRequired: false, value: 'hello');
       expectSemanticsTree(owner(), '''<sem><input aria-required="false" /></sem>''');
     });
+
+    test('renders hint as aria-description on input element', () {
+      final SemanticsObject textFieldSemantics = createTextFieldSemantics(
+        value: '',
+        label: 'Email',
+        hint: 'Enter your email address',
+      );
+      final textField = textFieldSemantics.semanticRole! as SemanticTextField;
+
+      expect(textField.editableElement.getAttribute('aria-label'), 'Email');
+      expect(
+        textField.editableElement.getAttribute('aria-description'),
+        'Enter your email address',
+      );
+    });
+
+    test('hint updates when semantics change', () {
+      final tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        label: 'Password',
+        hint: 'Enter your password',
+        value: '',
+        flags: const ui.SemanticsFlags(isTextField: true),
+        hasTap: true,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        textDirection: ui.TextDirection.ltr,
+      );
+      tester.apply();
+
+      final SemanticsObject node = owner().debugSemanticsTree![0]!;
+      final textField = node.semanticRole! as SemanticTextField;
+
+      expect(textField.editableElement.getAttribute('aria-description'), 'Enter your password');
+
+      // Update to show error message (simulates validation error)
+      tester.updateNode(
+        id: 0,
+        label: 'Password',
+        hint: 'Password is required',
+        value: '',
+        flags: const ui.SemanticsFlags(isTextField: true),
+        hasTap: true,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        textDirection: ui.TextDirection.ltr,
+      );
+      tester.apply();
+
+      expect(textField.editableElement.getAttribute('aria-description'), 'Password is required');
+    });
+
+    test('empty hint removes aria-description', () {
+      final tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        label: 'Email',
+        hint: 'Enter email',
+        value: '',
+        flags: const ui.SemanticsFlags(isTextField: true),
+        hasTap: true,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        textDirection: ui.TextDirection.ltr,
+      );
+      tester.apply();
+
+      final SemanticsObject node = owner().debugSemanticsTree![0]!;
+      final textField = node.semanticRole! as SemanticTextField;
+
+      expect(textField.editableElement.getAttribute('aria-description'), 'Enter email');
+
+      // Remove hint (omitting it uses the default null value)
+      tester.updateNode(
+        id: 0,
+        label: 'Email',
+        value: '',
+        flags: const ui.SemanticsFlags(isTextField: true),
+        hasTap: true,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+        textDirection: ui.TextDirection.ltr,
+      );
+      tester.apply();
+
+      expect(textField.editableElement.getAttribute('aria-description'), isNull);
+    });
   });
 }
 
 SemanticsObject createTextFieldSemantics({
   required String value,
   String label = '',
+  String? hint,
   bool isEnabled = true,
   bool isFocused = false,
   bool isMultiline = false,
@@ -548,6 +633,7 @@ SemanticsObject createTextFieldSemantics({
   tester.updateNode(
     id: 0,
     label: label,
+    hint: hint,
     value: value,
     flags: ui.SemanticsFlags(
       isEnabled: isEnabled ? ui.Tristate.isTrue : ui.Tristate.none,

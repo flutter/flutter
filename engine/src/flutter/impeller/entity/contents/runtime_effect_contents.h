@@ -37,11 +37,17 @@ class RuntimeEffectContents final : public ColorSourceContents {
   bool BootstrapShader(const ContentContext& renderer) const;
 
   // Visible for testing
-  static BufferView EmplaceVulkanUniform(
-      const std::shared_ptr<const std::vector<uint8_t>>& input_data,
-      HostBuffer& host_buffer,
-      const RuntimeUniformDescription& uniform,
-      size_t minimum_uniform_alignment);
+  /// Copies the uniform data into the host buffer.
+  ///
+  /// If the `uniform` has a `padding_layout`, it is used to repack the data.
+  ///
+  /// @param source_data The pointer to the start of the uniform data in the
+  ///        source.
+  /// @param host_buffer The host buffer to emplace the uniform data into.
+  /// @param uniform The description of the uniform being emplaced.
+  static BufferView EmplaceUniform(const uint8_t* source_data,
+                                   HostBuffer& host_buffer,
+                                   const RuntimeUniformDescription& uniform);
 
  private:
   bool RegisterShader(const ContentContext& renderer) const;
