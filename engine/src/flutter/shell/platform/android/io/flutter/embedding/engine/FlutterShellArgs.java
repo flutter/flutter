@@ -136,7 +136,7 @@ public class FlutterShellArgs {
       args.add(ARG_ENABLE_VULKAN_VALIDATION);
     }
     if (intent.hasExtra(ARG_KEY_TOGGLE_SURFACE_CONTROL)) {
-      if (intent.getBooleanExtra(ARG_KEY_TOGGLE_SURFACE_CONTROL, true)) {
+      if (intent.getBooleanExtra(ARG_KEY_TOGGLE_SURFACE_CONTROL, false)) {
         args.add(ARG_ENABLE_SURFACE_CONTROL);
       } else {
         args.add(ARG_DISABLE_SURFACE_CONTROL);
