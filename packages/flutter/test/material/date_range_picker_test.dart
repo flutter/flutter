@@ -2034,7 +2034,6 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          useMaterial3: true,
           datePickerTheme: const DatePickerThemeData(
             dayShape: WidgetStatePropertyAll<OutlinedBorder>(customShape),
           ),
