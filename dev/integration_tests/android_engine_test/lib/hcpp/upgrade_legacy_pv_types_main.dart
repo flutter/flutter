@@ -53,17 +53,11 @@ class _MyAppState extends State<MyApp> {
             ),
             if (_showViews) ...<Widget>[
               // 1. HC platform view (initExpensiveAndroidView)
-              const Expanded(
-                child: _HCPlatformView(viewType: 'box_platform_view'),
-              ),
+              const Expanded(child: _HCPlatformView(viewType: 'box_platform_view')),
               // 2. TLHC platform view (initSurfaceAndroidView)
-              const Expanded(
-                child: _TLHCPlatformView(viewType: 'box_platform_view'),
-              ),
+              const Expanded(child: _TLHCWithHCFallbackPlatformView(viewType: 'box_platform_view')),
               // 3. VD platform view (initAndroidView)
-              const Expanded(
-                child: _VDPlatformView(viewType: 'box_platform_view'),
-              ),
+              const Expanded(child: _TLHCWithVDFallbackPlatformView(viewType: 'box_platform_view')),
             ],
           ],
         ),
@@ -103,8 +97,8 @@ class _HCPlatformView extends StatelessWidget {
 }
 
 /// Uses initSurfaceAndroidView — the TLHC (with HC fallback) path.
-class _TLHCPlatformView extends StatelessWidget {
-  const _TLHCPlatformView({required this.viewType});
+class _TLHCWithHCFallbackPlatformView extends StatelessWidget {
+  const _TLHCWithHCFallbackPlatformView({required this.viewType});
   final String viewType;
 
   @override
@@ -133,8 +127,8 @@ class _TLHCPlatformView extends StatelessWidget {
 }
 
 /// Uses initAndroidView — the TLHC/VD path.
-class _VDPlatformView extends StatelessWidget {
-  const _VDPlatformView({required this.viewType});
+class _TLHCWithVDFallbackPlatformView extends StatelessWidget {
+  const _TLHCWithVDFallbackPlatformView({required this.viewType});
   final String viewType;
 
   @override
