@@ -6,6 +6,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -161,6 +162,52 @@ void main() {
           'bin',
           'snapshots',
           'frontend_server_aot.dart.snapshot',
+        ),
+      );
+    });
+
+    testWithoutContext('getArtifactPath resolves gen_snapshot to linux-x64 on x64 Linux host', () {
+      expect(
+        artifacts.getArtifactPath(
+          Artifact.genSnapshot,
+          platform: TargetPlatform.android_arm64,
+          mode: BuildMode.release,
+        ),
+        fileSystem.path.join(
+          'root',
+          'bin',
+          'cache',
+          'artifacts',
+          'engine',
+          'android-arm64-release',
+          'linux-x64',
+          'gen_snapshot',
+        ),
+      );
+    });
+
+    testWithoutContext('getArtifactPath resolves gen_snapshot to linux-arm64 on arm64 Linux host', () {
+      final arm64Artifacts = CachedArtifacts(
+        fileSystem: fileSystem,
+        cache: cache,
+        platform: platform,
+        operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
+      );
+      expect(
+        arm64Artifacts.getArtifactPath(
+          Artifact.genSnapshot,
+          platform: TargetPlatform.android_arm64,
+          mode: BuildMode.release,
+        ),
+        fileSystem.path.join(
+          'root',
+          'bin',
+          'cache',
+          'artifacts',
+          'engine',
+          'android-arm64-release',
+          'linux-arm64',
+          'gen_snapshot',
         ),
       );
     });
