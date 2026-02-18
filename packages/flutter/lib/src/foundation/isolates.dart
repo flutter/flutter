@@ -29,8 +29,8 @@ typedef ComputeImpl =
 ///
 /// {@template flutter.foundation.compute.usecase}
 /// This is useful for operations that take longer than a few milliseconds, and
-/// which would therefore risk skipping frames. For tasks that will only take a
-/// few milliseconds, consider [SchedulerBinding.scheduleTask] instead.
+/// which would therefore risk skipping frames. For tasks that will only take up
+/// to a millisecond, consider [SchedulerBinding.scheduleTask] instead.
 /// {@endtemplate}
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=5AxWC49ZMzs}
