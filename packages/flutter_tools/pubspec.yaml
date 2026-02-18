@@ -94,7 +94,7 @@ dependencies:
   glob: 2.1.3
   http_parser: 4.1.2
   io: 1.0.5
-  json_rpc_2: 4.0.0
+  json_rpc_2: 4.1.0
   matcher: 0.12.18
   petitparser: 7.0.2
   platform: 3.1.6
@@ -129,4 +129,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: d3f462
+# PUBSPEC CHECKSUM: nn0u39
