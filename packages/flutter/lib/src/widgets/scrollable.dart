@@ -976,8 +976,9 @@ class ScrollableState extends State<Scrollable>
     // Use applyScrollDeltaWithPhysics instead of pointerScroll.
     // pointerScroll ignores physics boundary conditions and hard-clamps the position.
     // applyScrollDeltaWithPhysics respects physics (e.g. BouncingScrollPhysics) and
-    // allows overscroll/bounce effects.
-    position.applyScrollDeltaWithPhysics(overscroll);
+    // allows overscroll/bounce effects. Pass velocity so fling momentum is
+    // seamlessly transferred from the descendant to the parent scrollable.
+    position.applyScrollDeltaWithPhysics(overscroll, velocity: notification.velocity);
     return true; // Consumed, don't propagate further
   }
 

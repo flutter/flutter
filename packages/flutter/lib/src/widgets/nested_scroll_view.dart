@@ -1019,11 +1019,11 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     goBallistic(0.0);
   }
 
-  void applyScrollDeltaWithPhysics(double delta) {
+  void applyScrollDeltaWithPhysics(double delta, {double velocity = 0.0}) {
     // If an update is made here, consider if the same (or similar) change
     // should be made in ScrollPositionWithSingleContext.applyScrollDeltaWithPhysics.
     if (delta == 0.0) {
-      goBallistic(0.0);
+      goBallistic(velocity);
       return;
     }
 
@@ -1069,7 +1069,8 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     for (final _NestedScrollPosition position in _innerPositions) {
       position.didEndScroll();
     }
-    goBallistic(0.0);
+    // Pass velocity to goBallistic for seamless fling momentum transfer.
+    goBallistic(velocity);
   }
 
   @override
@@ -1498,8 +1499,8 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   }
 
   @override
-  void applyScrollDeltaWithPhysics(double delta) {
-    return coordinator.applyScrollDeltaWithPhysics(delta);
+  void applyScrollDeltaWithPhysics(double delta, {double velocity = 0.0}) {
+    return coordinator.applyScrollDeltaWithPhysics(delta, velocity: velocity);
   }
 
   @override

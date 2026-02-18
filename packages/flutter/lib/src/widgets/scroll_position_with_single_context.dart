@@ -236,11 +236,11 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   }
 
   @override
-  void applyScrollDeltaWithPhysics(double delta) {
+  void applyScrollDeltaWithPhysics(double delta, {double velocity = 0.0}) {
     // If an update is made here, consider if the same (or similar) change
     // should be made in _NestedScrollCoordinator.applyScrollDeltaWithPhysics.
     if (delta == 0.0) {
-      goBallistic(0.0);
+      goBallistic(velocity);
       return;
     }
     goIdle();
@@ -251,9 +251,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     isScrollingNotifier.value = true;
     // Route through applyBoundaryConditions instead of hard-clamping.
     // For BouncingScrollPhysics, applyBoundaryConditions returns 0.0,
-    // allowing the position to go past the extents. goBallistic(0.0) then
-    // creates a BouncingScrollSimulation that springs the position back,
-    // producing the expected iOS bounce/stretch effect.
+    // allowing the position to go past the extents.
     // For ClampingScrollPhysics, applyBoundaryConditions returns the excess,
     // so the position is clamped as before.
     final double overscroll = applyBoundaryConditions(pixels + delta);
@@ -264,7 +262,11 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
       didUpdateScrollPositionBy(pixels - oldPixels);
       didEndScroll();
     }
-    goBallistic(0.0);
+    // Pass velocity to goBallistic so that fling momentum is transferred
+    // from the descendant scrollable to this one. For touch-driven
+    // overscrolls, velocity is 0.0 and goBallistic creates a
+    // BouncingScrollSimulation that springs back.
+    goBallistic(velocity);
   }
 
   // flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/44609
