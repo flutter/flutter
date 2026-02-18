@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 
@@ -859,21 +858,8 @@ abstract class Device {
       ]);
     }
 
-    // Calculate column widths
-    final indices = List<int>.generate(table[0].length - 1, (int i) => i);
-    List<int> widths = indices.map<int>((int i) => 0).toList();
-    for (final row in table) {
-      widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
-    }
-
     // Join columns into lines of text
-    return <String>[
-      for (final List<String> row in table)
-        indices
-            .map<String>((int i) => row[i].padRight(widths[i]))
-            .followedBy(<String>[row.last])
-            .join(' • '),
-    ];
+    return formatTable(table);
   }
 
   static Future<void> printDevices(

@@ -4,10 +4,13 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'utils.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
   group(ActionDispatcher, () {
@@ -837,13 +840,9 @@ void main() {
       addTearDown(buttonNode.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: FocusableActionDetector(
-            child: ElevatedButton(
-              onPressed: () {},
-              focusNode: buttonNode,
-              child: const Text('Test'),
-            ),
+            child: TestButton(onPressed: () {}, focusNode: buttonNode, child: const Text('Test')),
           ),
         ),
       );
@@ -855,14 +854,10 @@ void main() {
       expect(buttonNode.hasFocus, isTrue);
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: FocusableActionDetector(
             descendantsAreFocusable: false,
-            child: ElevatedButton(
-              onPressed: () {},
-              focusNode: buttonNode,
-              child: const Text('Test'),
-            ),
+            child: TestButton(onPressed: () {}, focusNode: buttonNode, child: const Text('Test')),
           ),
         ),
       );
@@ -888,21 +883,13 @@ void main() {
       });
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: FocusableActionDetector(
             focusNode: skipTraversalNode,
             child: Column(
               children: <Widget>[
-                ElevatedButton(
-                  onPressed: () {},
-                  focusNode: buttonNode1,
-                  child: const Text('Node 1'),
-                ),
-                ElevatedButton(
-                  onPressed: () {},
-                  focusNode: buttonNode2,
-                  child: const Text('Node 2'),
-                ),
+                TestButton(onPressed: () {}, focusNode: buttonNode1, child: const Text('Node 1')),
+                TestButton(onPressed: () {}, focusNode: buttonNode2, child: const Text('Node 2')),
               ],
             ),
           ),
@@ -919,22 +906,14 @@ void main() {
       expect(buttonNode2.hasFocus, isTrue);
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: FocusableActionDetector(
             focusNode: skipTraversalNode,
             descendantsAreTraversable: false,
             child: Column(
               children: <Widget>[
-                ElevatedButton(
-                  onPressed: () {},
-                  focusNode: buttonNode1,
-                  child: const Text('Node 1'),
-                ),
-                ElevatedButton(
-                  onPressed: () {},
-                  focusNode: buttonNode2,
-                  child: const Text('Node 2'),
-                ),
+                TestButton(onPressed: () {}, focusNode: buttonNode1, child: const Text('Node 1')),
+                TestButton(onPressed: () {}, focusNode: buttonNode2, child: const Text('Node 2')),
               ],
             ),
           ),
@@ -953,64 +932,37 @@ void main() {
 
     testWidgets('FocusableActionDetector can exclude Focus semantics', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: FocusableActionDetector(
             child: Column(
               children: <Widget>[
-                TextButton(onPressed: () {}, child: const Text('Button 1')),
-                TextButton(onPressed: () {}, child: const Text('Button 2')),
+                TestButton(onPressed: () {}, child: const Text('Button 1')),
+                TestButton(onPressed: () {}, child: const Text('Button 2')),
               ],
             ),
           ),
         ),
       );
 
-      expect(
-        tester.getSemantics(find.byType(FocusableActionDetector)),
-        matchesSemantics(
-          scopesRoute: true,
-          children: <Matcher>[
-            // This semantic is from `Focus` widget under `FocusableActionDetector`.
-            matchesSemantics(
-              isFocusable: true,
-              hasFocusAction: true,
-              children: <Matcher>[
-                matchesSemantics(
-                  hasTapAction: true,
-                  hasFocusAction: true,
-                  isButton: true,
-                  hasEnabledState: true,
-                  isEnabled: true,
-                  isFocusable: true,
-                  label: 'Button 1',
-                  textDirection: TextDirection.ltr,
-                ),
-                matchesSemantics(
-                  hasTapAction: true,
-                  hasFocusAction: true,
-                  isButton: true,
-                  hasEnabledState: true,
-                  isEnabled: true,
-                  isFocusable: true,
-                  label: 'Button 2',
-                  textDirection: TextDirection.ltr,
-                ),
-              ],
-            ),
-          ],
-        ),
+      // With includeFocusSemantics: true (default), the Focus widget under
+      // FocusableActionDetector adds isFocusable semantics.
+      final Focus focusWidgetIncluded = tester.widget<Focus>(
+        find
+            .descendant(of: find.byType(FocusableActionDetector), matching: find.byType(Focus))
+            .first,
       );
+      expect(focusWidgetIncluded.includeSemantics, isTrue);
 
       // Set `includeFocusSemantics` to false to exclude semantics
       // from `Focus` widget under `FocusableActionDetector`.
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: FocusableActionDetector(
             includeFocusSemantics: false,
             child: Column(
               children: <Widget>[
-                TextButton(onPressed: () {}, child: const Text('Button 1')),
-                TextButton(onPressed: () {}, child: const Text('Button 2')),
+                TestButton(onPressed: () {}, child: const Text('Button 1')),
+                TestButton(onPressed: () {}, child: const Text('Button 2')),
               ],
             ),
           ),
@@ -1018,34 +970,12 @@ void main() {
       );
 
       // Semantics from the `Focus` widget will be removed.
-      expect(
-        tester.getSemantics(find.byType(FocusableActionDetector)),
-        matchesSemantics(
-          scopesRoute: true,
-          children: <Matcher>[
-            matchesSemantics(
-              hasTapAction: true,
-              hasFocusAction: true,
-              isButton: true,
-              hasEnabledState: true,
-              isEnabled: true,
-              isFocusable: true,
-              label: 'Button 1',
-              textDirection: TextDirection.ltr,
-            ),
-            matchesSemantics(
-              hasTapAction: true,
-              hasFocusAction: true,
-              isButton: true,
-              hasEnabledState: true,
-              isEnabled: true,
-              isFocusable: true,
-              label: 'Button 2',
-              textDirection: TextDirection.ltr,
-            ),
-          ],
-        ),
+      final Focus focusWidgetExcluded = tester.widget<Focus>(
+        find
+            .descendant(of: find.byType(FocusableActionDetector), matching: find.byType(Focus))
+            .first,
       );
+      expect(focusWidgetExcluded.includeSemantics, isFalse);
     });
   });
 
