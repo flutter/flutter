@@ -149,9 +149,16 @@ public final class FlutterEngineFlags {
    *
    * <p>Allowed in release to control which rendering backend is used in production.
    */
-  private static final Flag ENABLE_IMPELLER =
-      new Flag("--enable-impeller=", "EnableImpeller", true);
+  private static final Flag DISBALE_IMPELLER =
+      new Flag("--enable-impeller=", "EnableOrDisableImpeller", true);
 
+  /**
+   * Enables Impeller.
+   *
+   * <p>Allowed in release to control which rendering backend is used in production.
+   */
+  private static final Flag ENABLE_IMPELLER =
+      new Flag("--enable-impeller", "EnableImpeller", true);
   /**
    * Specifies the backend to use for Impeller rendering.
    *
@@ -320,7 +327,8 @@ public final class FlutterEngineFlags {
       new Flag("--enable-vulkan-gpu-tracing", "EnableVulkanGPUTracing");
 
   /** Fake flag used for integration testing of the Android embedding processing engine flags. */
-  private static final Flag TEST_FLAG = new Flag("--test-flag=", "TestFlag");
+  @VisibleForTesting
+  public static final Flag TEST_FLAG = new Flag("--test-flag", "TestFlag");
 
   /**
    * Set whether leave or clean up the VM after the last shell shuts down. It can be set from app's
@@ -412,6 +420,7 @@ public final class FlutterEngineFlags {
   /** Disable Dart asserts. */
   private static final Flag DISABLE_DART_ASSERTS =
       new Flag("--disable-dart-asserts", "DisableDartAsserts");
+
   /** Turns off all concurrent GC activities. */
   private static final Flag ENABLE_SERIAL_GC = new Flag("--enable-serial-gc", "EnableSerialGC");
 
@@ -540,9 +549,11 @@ public final class FlutterEngineFlags {
               RUN_FOREVER,
               ENABLE_PLATFORM_ISOLATES,
               ENABLE_ANDROID_SURFACE_CONTROL,
+              MERGED_PLATFORM_UI_THREAD,
               DISABLE_MERGED_PLATFORM_UI_THREAD,
               DEPRECATED_AOT_SHARED_LIBRARY_NAME,
               DEPRECATED_FLUTTER_ASSETS_DIR,
+              DISBALE_IMPELLER,
               TEST_FLAG));
 
   // Flags that have been turned off.

@@ -311,12 +311,10 @@ public class FlutterLoader {
 
       if (applicationMetaData != null) {
         for (FlutterEngineFlags.Flag flag : FlutterEngineFlags.ALL_FLAGS) {
-          if (!applicationMetaData.containsKey(flag.metadataKey)) {
+          String metadataKey = flag.metadataKey;
+          if (!applicationMetaData.containsKey(metadataKey)) {
             continue;
           }
-
-          Object valueObj = applicationMetaData.get(flag.metadataKey);
-          String value = valueObj != null ? valueObj.toString() : null;
 
           // Check if flag is valid:
 
@@ -324,6 +322,7 @@ public class FlutterLoader {
             Log.w(
                 TAG,
                 "For testing purposes only: test flag specified in the manifest was loaded by the FlutterLoader.");
+            continue;
           } else if (FlutterEngineFlags.isDisabled(flag)) {
             // Do not allow disabled flags.
             throw new IllegalArgumentException(
@@ -333,9 +332,9 @@ public class FlutterLoader {
             Log.w(
                 TAG,
                 "If you are trying to specify "
-                    + flag.metadataKey
+                    + metadataKey
                     + " in your application manifest, please make sure to use the new metadata key name: "
-                    + FlutterEngineFlags.getReplacementFlagIfDeprecated(flag).metadataKey);
+                    + FlutterEngineFlags.getReplacementFlagIfDeprecated(flag));
           } else if (!flag.allowedInRelease && isRelease) {
             // Manifest flag is not allowed in release builds.
             Log.w(
@@ -343,7 +342,7 @@ public class FlutterLoader {
                 "Flag with metadata key "
                     + metadataKey
                     + " is not allowed in release builds and will be ignored if specified in the application manifest or via the command line.");
-            return;
+            continue;
           }
 
           // Handle special cases for specific flags:
@@ -351,7 +350,7 @@ public class FlutterLoader {
           if (flag == FlutterEngineFlags.OLD_GEN_HEAP_SIZE) {
             // Mark if old gen heap size is set to track whether or not to set default
             // internally.
-            oldGenHeapSizeSet.set(true);
+            oldGenHeapSizeSet.set(true); // TODO(camsim99): check if I need atomic boolean anymore.
           } else if (flag == FlutterEngineFlags.LEAK_VM) {
             // Mark if leak VM is set to track whether or not to set default internally.
             isLeakVMSet.set(true);
@@ -368,7 +367,7 @@ public class FlutterLoader {
             String aotSharedLibraryPath = applicationMetaData.getString(metadataKey);
             maybeAddAotSharedLibraryNameArg(
                 applicationContext, aotSharedLibraryPath, shellArgs);
-            return;
+            continue;
           }
 
           // Add flag to shell args.
@@ -377,17 +376,18 @@ public class FlutterLoader {
             Object valueObj = applicationMetaData.get(metadataKey);
             String value = valueObj != null ? valueObj.toString() : null;
             if (value == null) {
-              Log.w(
+              Log.e(
                   TAG,
                   "Flag with metadata key "
                       + metadataKey
                       + " requires a value, but no value was found. Please ensure that the value is a string.");
-              return;
+              continue;
             }
             arg += value;
           }
 
           shellArgs.add(arg);
+      }
       }
 
       // Add any remaining engine flags provided by the command line. These settings will take
@@ -417,7 +417,7 @@ public class FlutterLoader {
                 arg.substring(
                     FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.commandLineArgument.length());
             maybeAddAotSharedLibraryNameArg(applicationContext, aotSharedLibraryPath, shellArgs);
-            break;
+            continue;
           } else if (!flag.allowedInRelease && isRelease) {
             // Flag is not allowed in release builds.
             Log.w(
