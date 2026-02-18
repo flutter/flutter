@@ -21,6 +21,11 @@ const kFlutterGeneratedPluginSwiftPackageName = 'FlutterGeneratedPluginSwiftPack
 /// a dependency on the Flutter/FlutterMacOS framework.
 const kFlutterGeneratedFrameworkSwiftPackageTargetName = 'FlutterFramework';
 
+const kDisableSwiftPMInstructions =
+    'You can also disable Swift Package Manager for the project by following these instructions:\n'
+    '  https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#how-to-turn-off-swift-package-manager\n'
+    'Disabling Swift Package Manager will not be allowed in a future version of Flutter.\n';
+
 /// Swift Package Manager is a dependency management solution for iOS and macOS
 /// applications.
 ///
