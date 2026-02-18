@@ -1585,11 +1585,11 @@ base class PipelineOwner with DiagnosticableTreeMixin {
           // same as above.
           continue;
         }
-        final _RenderObjectSemantics target;
         // When this node is a semantics boundary and a layout boundary and its
         // geometry becomes invisible after the ensureGeometry call above,
         // the parent of this node will have to update its semantics subtree to remove
         // this node from its children.
+        final _RenderObjectSemantics target;
         if (!node._semantics.geometry!.isVisible) {
           target = node._semantics.firstAncestorNodeWithCleanGeometry!;
         } else {
@@ -6058,6 +6058,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
                   ? <_RenderObjectSemantics>[siblingChild]
                   : siblingChild._children,
             )) {
+      if (onlyDirtyChildren && !explicitSiblingChild.geometryDirty) {
+        continue;
+      }
       final _SemanticsGeometry childGeometry = _SemanticsGeometry.computeChildGeometry(
         parentPaintClipRect: parentGeometry.paintClipRect,
         parentSemanticsClipRect: parentGeometry.semanticsClipRect,
@@ -6155,6 +6158,8 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
   /// Builds the semantics subtree under the [cachedSemanticsNode].
   void _buildSemanticsSubtree({required Set<int> usedSemanticsIds}) {
+    // This will most likely short circuit itself.
+    _updateChildGeometry(onlyDirtyChildren: true);
     final children = <SemanticsNode>[];
     for (final _RenderObjectSemantics child in _children) {
       assert(child.shouldFormSemanticsNode);
@@ -6463,12 +6468,12 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    return _children
-        .map<DiagnosticsNode>((_RenderObjectSemantics child) => child.toDiagnosticsNode())
-        .toList();
-    // return _getNonBlockedChildren()
+    // return _children
     //     .map<DiagnosticsNode>((_RenderObjectSemantics child) => child.toDiagnosticsNode())
     //     .toList();
+    return _getNonBlockedChildren()
+        .map<DiagnosticsNode>((_RenderObjectSemantics child) => child.toDiagnosticsNode())
+        .toList();
   }
 
   @protected
