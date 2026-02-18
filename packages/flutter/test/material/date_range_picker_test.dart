@@ -2025,6 +2025,59 @@ void main() {
 
     expect(tester.takeException(), null);
   });
+
+  testWidgets('DateRangePicker respects DatePickerTheme.dayShape', (WidgetTester tester) async {
+    const OutlinedBorder customShape = BeveledRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(10)),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          datePickerTheme: const DatePickerThemeData(
+            dayShape: WidgetStatePropertyAll<OutlinedBorder>(customShape),
+          ),
+        ),
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                onPressed: () => showDateRangePicker(
+                  context: context,
+                  firstDate: DateTime(2023),
+                  lastDate: DateTime(2024),
+                  initialDateRange: DateTimeRange(
+                    start: DateTime(2023, 1, 15),
+                    end: DateTime(2023, 1, 20),
+                  ),
+                ),
+                child: const Text('Open Picker'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open Picker'));
+    await tester.pumpAndSettle();
+
+    final Finder selectedDayText = find.text('15');
+
+    final Finder dayContainerFinder = find
+        .ancestor(
+          of: selectedDayText,
+          matching: find.byWidgetPredicate((Widget widget) {
+            return widget is Container && widget.decoration is ShapeDecoration;
+          }),
+        )
+        .first;
+
+    final Container dayContainer = tester.widget<Container>(dayContainerFinder);
+    final decoration = dayContainer.decoration! as ShapeDecoration;
+
+    expect(decoration.shape, customShape);
+  });
 }
 
 class _RestorableDateRangePickerDialogTestWidget extends StatefulWidget {
