@@ -111,41 +111,6 @@ SubpixelPosition TextFrame::ComputeSubpixelPosition(
   }
 }
 
-Matrix TextFrame::GetOffsetTransform() const {
-  return transform_ * Matrix::MakeTranslation(offset_);
-}
-
-void TextFrame::SetPerFrameData(Rational scale,
-                                Point offset,
-                                const Matrix& transform,
-                                std::optional<GlyphProperties> properties) {
-  bound_values_.clear();
-  scale_ = scale;
-  offset_ = offset;
-  properties_ = properties;
-  transform_ = transform;
-}
-
-Rational TextFrame::GetScale() const {
-  return scale_;
-}
-
-Point TextFrame::GetOffset() const {
-  return offset_;
-}
-
-std::optional<GlyphProperties> TextFrame::GetProperties() const {
-  return properties_;
-}
-
-void TextFrame::AppendFrameBounds(const FrameBounds& frame_bounds) {
-  bound_values_.push_back(frame_bounds);
-}
-
-void TextFrame::ClearFrameBounds() {
-  bound_values_.clear();
-}
-
 fml::StatusOr<flutter::DlPath> TextFrame::GetPath() const {
   if (path_creator_) {
     return path_creator_();
@@ -153,9 +118,34 @@ fml::StatusOr<flutter::DlPath> TextFrame::GetPath() const {
   return fml::Status(fml::StatusCode::kCancelled, "no path creator specified.");
 }
 
-bool TextFrame::IsFrameComplete() const {
+RenderTextFrame::RenderTextFrame(
+    const std::shared_ptr<TextFrame>& frame,
+    Rational scale,
+    Point offset,
+    const Matrix& offset_transform,
+    bool render_as_path,
+    const std::optional<GlyphProperties>& properties)
+    : frame_(frame),
+      scale_(scale),
+      offset_(offset),
+      offset_transform_(offset_transform),
+      render_as_path_(render_as_path),
+      properties_(properties) {}
+
+std::shared_ptr<RenderTextFrame> RenderTextFrame::Make(
+    const std::shared_ptr<TextFrame>& frame,
+    Rational scale,
+    Point offset,
+    const Matrix& offset_transform,
+    bool render_as_path,
+    const std::optional<GlyphProperties>& properties) {
+  return std::make_shared<RenderTextFrame>(
+      frame, scale, offset, offset_transform, render_as_path, properties);
+}
+
+bool RenderTextFrame::IsFrameComplete() const {
   size_t run_size = 0;
-  for (const auto& x : runs_) {
+  for (const auto& x : frame_->GetRuns()) {
     run_size += x.GetGlyphCount();
   }
   return bound_values_.size() == run_size;
@@ -172,7 +162,7 @@ std::optional<Glyph> TextFrame::AsSingleGlyph() const {
   return std::nullopt;
 }
 
-const FrameBounds& TextFrame::GetFrameBounds(size_t index) const {
+const FrameBounds& RenderTextFrame::GetFrameBounds(size_t index) const {
   FML_DCHECK(index < bound_values_.size());
   return bound_values_[index];
 }
@@ -184,6 +174,15 @@ std::pair<size_t, intptr_t> TextFrame::GetAtlasGenerationAndID() const {
 void TextFrame::SetAtlasGeneration(size_t value, intptr_t atlas_id) {
   generation_ = value;
   atlas_id_ = atlas_id;
+}
+
+bool RenderTextFrame::operator==(const RenderTextFrame& other) const {
+  return (this->frame_.get() == other.frame_.get() &&            //
+          this->offset_transform_ == other.offset_transform_ &&  //
+          this->offset_ == other.offset_ &&                      //
+          this->scale_ == other.scale_ &&                        //
+          this->render_as_path_ == other.render_as_path_ &&      //
+          this->properties_ == other.properties_);
 }
 
 }  // namespace impeller

@@ -840,20 +840,36 @@ void DlDispatcherBase::drawDisplayList(
 }
 
 // |flutter::DlOpReceiver|
-void DlDispatcherBase::drawText(const std::shared_ptr<flutter::DlText>& text,
-                                DlScalar x,
-                                DlScalar y) {
+void CanvasDlDispatcher::drawText(const std::shared_ptr<flutter::DlText>& text,
+                                  DlScalar x,
+                                  DlScalar y) {
   AUTO_DEPTH_WATCHER(1u);
 
   auto text_frame = text->GetTextFrame();
 
+  if (text_frame == nullptr) {
+    return;
+  }
+
+  FML_DCHECK(render_frame_index_ < render_frames_.size());
+  std::shared_ptr<RenderTextFrame>& render_frame =
+      render_frames_[render_frame_index_++];
+  if (render_frame == nullptr) {
+    return;
+  }
+
+#ifndef NDEBUG
+  auto reference_frame = Canvas::MakeRenderTextFrame(
+      text_frame, GetCanvas().GetCurrentTransform(), Point(x, y), paint_);
+  FML_DCHECK(reference_frame != nullptr);
+  FML_DCHECK(*render_frame == *reference_frame);
+#endif
+
   // When running with Impeller enabled Skia text blobs are converted to
   // Impeller text frames in paragraph_skia.cc
   FML_CHECK(text_frame != nullptr);
-  GetCanvas().DrawTextFrame(text_frame,             //
-                            impeller::Point{x, y},  //
-                            paint_                  //
-  );
+  FML_CHECK(render_frame != nullptr);
+  GetCanvas().DrawTextFrame(render_frame, paint_);
 }
 
 // |flutter::DlOpReceiver|
@@ -959,6 +975,11 @@ void CanvasDlDispatcher::SetBackdropData(
     std::unordered_map<int64_t, BackdropData> backdrop,
     size_t backdrop_count) {
   GetCanvas().SetBackdropData(std::move(backdrop), backdrop_count);
+}
+
+void CanvasDlDispatcher::SetRenderTextFrames(
+    std::vector<std::shared_ptr<RenderTextFrame>> render_frames) {
+  render_frames_ = std::move(render_frames);
 }
 
 //// Text Frame Dispatcher
@@ -1079,33 +1100,19 @@ void FirstPassDispatcher::transformReset() {
 void FirstPassDispatcher::drawText(const std::shared_ptr<flutter::DlText>& text,
                                    DlScalar x,
                                    DlScalar y) {
-  GlyphProperties properties;
   auto text_frame = text->GetTextFrame();
   if (text_frame == nullptr) {
     return;
   }
 
-  if (paint_.style == Paint::Style::kStroke) {
-    properties.stroke = paint_.stroke;
-  }
+  std::shared_ptr<RenderTextFrame> render_frame =
+      Canvas::MakeRenderTextFrame(text_frame,   //
+                                  matrix_,      //
+                                  Point(x, y),  //
+                                  paint_);
 
-  if (text_frame->HasColor()) {
-    // Alpha is always applied when rendering, remove it here so
-    // we do not double-apply the alpha.
-    properties.color = paint_.color.WithAlpha(1.0);
-  }
-  auto scale = TextFrame::RoundScaledFontSize(
-      (matrix_ * Matrix::MakeTranslation(Point(x, y))).GetMaxBasisLengthXY());
-
-  renderer_.GetLazyGlyphAtlas()->AddTextFrame(
-      text_frame,   //
-      scale,        //
-      Point(x, y),  //
-      matrix_,
-      (properties.stroke.has_value() || text_frame->HasColor())  //
-          ? std::optional<GlyphProperties>(properties)           //
-          : std::nullopt                                         //
-  );
+  all_render_frames_.push_back(render_frame);
+  renderer_.GetLazyGlyphAtlas()->AddTextFrame(render_frame);
 }
 
 const Rect FirstPassDispatcher::GetCurrentLocalCullingBounds() const {
@@ -1213,8 +1220,17 @@ bool PixelFormatSupportsMSAA(std::optional<PixelFormat> pixel_format) {
 std::pair<std::unordered_map<int64_t, BackdropData>, size_t>
 FirstPassDispatcher::TakeBackdropData() {
   std::unordered_map<int64_t, BackdropData> temp;
+  // swap is safer here, but this FirstPassDispatcher should never be reused.
   std::swap(temp, backdrop_data_);
   return std::make_pair(temp, backdrop_count_);
+}
+
+std::vector<std::shared_ptr<RenderTextFrame>>
+FirstPassDispatcher::TakeRenderTextFrames() {
+  std::vector<std::shared_ptr<RenderTextFrame>> temp;
+  // swap is safer here, but this FirstPassDispatcher should never be reused.
+  std::swap(temp, all_render_frames_);
+  return temp;
 }
 
 std::shared_ptr<Texture> DisplayListToTexture(
@@ -1281,6 +1297,7 @@ std::shared_ptr<Texture> DisplayListToTexture(
   );
   const auto& [data, count] = collector.TakeBackdropData();
   impeller_dispatcher.SetBackdropData(data, count);
+  impeller_dispatcher.SetRenderTextFrames(collector.TakeRenderTextFrames());
   context.GetContentContext().GetTextShadowCache().MarkFrameStart();
   fml::ScopedCleanupClosure cleanup([&] {
     if (reset_host_buffer) {
@@ -1317,6 +1334,7 @@ bool RenderToTarget(ContentContext& context,
   );
   const auto& [data, count] = collector.TakeBackdropData();
   impeller_dispatcher.SetBackdropData(data, count);
+  impeller_dispatcher.SetRenderTextFrames(collector.TakeRenderTextFrames());
   context.GetTextShadowCache().MarkFrameStart();
   fml::ScopedCleanupClosure cleanup([&] {
     if (reset_host_buffer) {

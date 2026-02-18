@@ -118,6 +118,10 @@ class LazyRenderingConfig {
 class Canvas {
  public:
   static constexpr uint32_t kMaxDepth = 1 << 24;
+  // If the text point size * max basis XY is larger than this value,
+  // render the text as paths (if available) for faster and higher
+  // fidelity rendering. This is a somewhat arbitrary cutoff
+  static constexpr Scalar kMaxTextScale = 250;
 
   using BackdropFilterProc = std::function<std::shared_ptr<FilterContents>(
       FilterInput::Ref,
@@ -239,8 +243,7 @@ class Canvas {
       const SamplerDescriptor& sampler = {},
       SourceRectConstraint src_rect_constraint = SourceRectConstraint::kFast);
 
-  void DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
-                     Point position,
+  void DrawTextFrame(const std::shared_ptr<RenderTextFrame>& text_frame,
                      const Paint& paint);
 
   void DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
@@ -281,6 +284,15 @@ class Canvas {
   /// For picture snapshots we need addition steps to verify that final mipmaps
   /// are generated.
   bool EnsureFinalMipmapGeneration() const;
+
+  /// Construct a RenderTextFrame using the supplied data, calculating
+  /// the offset transform, the Rounded Scale, and the GlyphProperties
+  /// associated with the information in the TextFrame and Paint objects.
+  static std::shared_ptr<RenderTextFrame> MakeRenderTextFrame(
+      const std::shared_ptr<TextFrame>& text_frame,
+      const Matrix& matrix,
+      Point offset,
+      const Paint& paint);
 
  private:
   class BlurShape {

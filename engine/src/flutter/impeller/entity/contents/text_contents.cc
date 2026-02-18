@@ -29,8 +29,9 @@ TextContents::TextContents() = default;
 
 TextContents::~TextContents() = default;
 
-void TextContents::SetTextFrame(const std::shared_ptr<TextFrame>& frame) {
-  frame_ = frame;
+void TextContents::SetTextFrame(
+    const std::shared_ptr<RenderTextFrame>& render_frame) {
+  render_frame_ = render_frame;
 }
 
 void TextContents::SetColor(Color color) {
@@ -45,22 +46,18 @@ void TextContents::SetInheritedOpacity(Scalar opacity) {
   inherited_opacity_ = opacity;
 }
 
-void TextContents::SetOffset(Vector2 offset) {
-  offset_ = offset;
-}
-
 void TextContents::SetForceTextColor(bool value) {
   force_text_color_ = value;
 }
 
 std::optional<Rect> TextContents::GetCoverage(const Entity& entity) const {
-  return frame_->GetBounds().TransformBounds(entity.GetTransform());
+  return render_frame_->GetBounds().TransformBounds(entity.GetTransform());
 }
 
 void TextContents::SetTextProperties(
     Color color,
     const std::optional<StrokeParameters>& stroke) {
-  if (frame_->HasColor()) {
+  if (render_frame_->HasColor()) {
     // Alpha is always applied when rendering, remove it here so
     // we do not double-apply the alpha.
     properties_.color = color.WithAlpha(1.0);
@@ -86,10 +83,8 @@ Scalar AttractToOne(Scalar x) {
 
 void TextContents::ComputeVertexData(
     VS::PerVertexData* vtx_contents,
-    const std::shared_ptr<TextFrame>& frame,
-    Scalar scale,
+    const std::shared_ptr<RenderTextFrame>& render_frame,
     const Matrix& entity_transform,
-    Vector2 offset,
     std::optional<GlyphProperties> glyph_properties,
     const std::shared_ptr<GlyphAtlas>& atlas) {
   // Common vertex information for all glyphs.
@@ -109,7 +104,7 @@ void TextContents::ComputeVertexData(
   VS::PerVertexData vtx;
   size_t i = 0u;
   size_t bounds_offset = 0u;
-  Rational rounded_scale = frame->GetScale();
+  Rational rounded_scale = render_frame->GetScale();
   Scalar inverted_rounded_scale = static_cast<Scalar>(rounded_scale.Invert());
   Matrix unscaled_basis =
       basis_transform *
@@ -120,9 +115,9 @@ void TextContents::ComputeVertexData(
   unscaled_basis.m[0] = AttractToOne(unscaled_basis.m[0]);
   unscaled_basis.m[5] = AttractToOne(unscaled_basis.m[5]);
 
-  for (const TextRun& run : frame->GetRuns()) {
+  for (const TextRun& run : render_frame->GetRuns()) {
     const Font& font = run.GetFont();
-    const Matrix transform = frame->GetOffsetTransform();
+    const Matrix transform = render_frame->GetOffsetTransform();
     FontGlyphAtlas* font_atlas = nullptr;
 
     // Adjust glyph position based on the subpixel rounding
@@ -146,7 +141,8 @@ void TextContents::ComputeVertexData(
     Point screen_offset = (entity_transform * Point(0, 0));
     for (const TextRun::GlyphPosition& glyph_position :
          run.GetGlyphPositions()) {
-      const FrameBounds& frame_bounds = frame->GetFrameBounds(bounds_offset);
+      const FrameBounds& frame_bounds =
+          render_frame->GetFrameBounds(bounds_offset);
       bounds_offset++;
       auto atlas_glyph_bounds = frame_bounds.atlas_bounds;
       auto glyph_bounds = frame_bounds.glyph_bounds;
@@ -225,7 +221,7 @@ bool TextContents::Render(const ContentContext& renderer,
     return true;
   }
 
-  GlyphAtlas::Type type = frame_->GetAtlasType();
+  GlyphAtlas::Type type = render_frame_->GetAtlasType();
   const std::shared_ptr<GlyphAtlas>& atlas =
       renderer.GetLazyGlyphAtlas()->CreateOrGetGlyphAtlas(
           *renderer.GetContext(), renderer.GetTransientsDataBuffer(), type);
@@ -234,7 +230,7 @@ bool TextContents::Render(const ContentContext& renderer,
     VALIDATION_LOG << "Cannot render glyphs without prepared atlas.";
     return false;
   }
-  if (!frame_->IsFrameComplete()) {
+  if (!render_frame_->IsFrameComplete()) {
     VALIDATION_LOG << "Failed to find font glyph bounds.";
     return false;
   }
@@ -290,7 +286,7 @@ bool TextContents::Render(const ContentContext& renderer,
   HostBuffer& data_host_buffer = renderer.GetTransientsDataBuffer();
   HostBuffer& indexes_host_buffer = renderer.GetTransientsIndexesBuffer();
   size_t glyph_count = 0;
-  for (const auto& run : frame_->GetRuns()) {
+  for (const auto& run : render_frame_->GetRuns()) {
     glyph_count += run.GetGlyphPositions().size();
   }
   size_t vertex_count = glyph_count * 4;
@@ -302,10 +298,8 @@ bool TextContents::Render(const ContentContext& renderer,
         VS::PerVertexData* vtx_contents =
             reinterpret_cast<VS::PerVertexData*>(data);
         ComputeVertexData(/*vtx_contents=*/vtx_contents,
-                          /*frame=*/frame_,
-                          /*scale=*/scale_,
+                          /*render_frame=*/render_frame_,
                           /*entity_transform=*/entity_transform,
-                          /*offset=*/offset_,
                           /*glyph_properties=*/GetGlyphProperties(),
                           /*atlas=*/atlas);
       });
@@ -332,7 +326,7 @@ bool TextContents::Render(const ContentContext& renderer,
 }
 
 std::optional<GlyphProperties> TextContents::GetGlyphProperties() const {
-  return (properties_.stroke || frame_->HasColor())
+  return (properties_.stroke || render_frame_->HasColor())
              ? std::optional<GlyphProperties>(properties_)
              : std::nullopt;
 }

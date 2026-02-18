@@ -422,17 +422,25 @@ static Rect ComputeGlyphSize(const SkFont& font,
 std::pair<std::vector<FontGlyphPair>, std::vector<Rect>>
 TypographerContextSkia::CollectNewGlyphs(
     const std::shared_ptr<GlyphAtlas>& atlas,
-    const std::vector<std::shared_ptr<TextFrame>>& text_frames) {
+    const std::vector<std::shared_ptr<RenderTextFrame>>& render_frames) {
   std::vector<FontGlyphPair> new_glyphs;
   std::vector<Rect> glyph_sizes;
   size_t generation_id = atlas->GetAtlasGeneration();
   intptr_t atlas_id = reinterpret_cast<intptr_t>(atlas.get());
-  for (const auto& frame : text_frames) {
+  for (const auto& render_frame : render_frames) {
 // TODO(jonahwilliams): determine how to re-enable this. See
 // https://github.com/flutter/flutter/issues/163730 for example. This can
 // happen when the Aiks/Typographer context are re-created, but the last
 // DisplayList is re-used. The "atlas_id" check is not reliable, perhaps
 // because it may end up with the same memory?
+// Another thing to consider is that this is stored on the TextFrame which
+// can be reused in different scale contexts which means the true check
+// as to whether this TextFrame is already populated would involve checking
+// not just that the frame has the same ID, but it has the same ID/scale
+// pairing.
+// This gets even more complicated now that we store the scale information
+// in a RenderTextFrame which gets recreated on each frame. The TextFrame
+// can be used with multiple scales within one frame because of this.
 #if false
     auto [frame_generation_id, frame_atlas_id] =
         frame->GetAtlasGenerationAndID();
@@ -442,13 +450,14 @@ TypographerContextSkia::CollectNewGlyphs(
       continue;
     }
 #endif  // false
-    frame->ClearFrameBounds();
-    frame->SetAtlasGeneration(generation_id, atlas_id);
+    render_frame->ClearFrameBounds();
+    render_frame->SetAtlasGeneration(generation_id, atlas_id);
 
-    for (const auto& run : frame->GetRuns()) {
+    for (const auto& run : render_frame->GetRuns()) {
       auto metrics = run.GetFont().GetMetrics();
 
-      auto rounded_scale = TextFrame::RoundScaledFontSize(frame->GetScale());
+      auto rounded_scale =
+          TextFrame::RoundScaledFontSize(render_frame->GetScale());
       ScaledFont scaled_font{.font = run.GetFont(), .scale = rounded_scale};
 
       FontGlyphAtlas* font_glyph_atlas =
@@ -471,9 +480,9 @@ TypographerContextSkia::CollectNewGlyphs(
       for (const auto& glyph_position : run.GetGlyphPositions()) {
         SubpixelPosition subpixel = TextFrame::ComputeSubpixelPosition(
             glyph_position, scaled_font.font.GetAxisAlignment(),
-            frame->GetOffsetTransform());
+            render_frame->GetOffsetTransform());
         SubpixelGlyph subpixel_glyph(glyph_position.glyph, subpixel,
-                                     frame->GetProperties());
+                                     render_frame->GetProperties());
         const auto& font_glyph_bounds =
             font_glyph_atlas->FindGlyphBounds(subpixel_glyph);
 
@@ -489,10 +498,10 @@ TypographerContextSkia::CollectNewGlyphs(
               /*placeholder=*/true         //
           };
 
-          frame->AppendFrameBounds(frame_bounds);
+          render_frame->AppendFrameBounds(frame_bounds);
           font_glyph_atlas->AppendGlyph(subpixel_glyph, frame_bounds);
         } else {
-          frame->AppendFrameBounds(font_glyph_bounds.value());
+          render_frame->AppendFrameBounds(font_glyph_bounds.value());
         }
       }
     }
@@ -505,7 +514,7 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
     GlyphAtlas::Type type,
     HostBuffer& data_host_buffer,
     const std::shared_ptr<GlyphAtlasContext>& atlas_context,
-    const std::vector<std::shared_ptr<TextFrame>>& text_frames) const {
+    const std::vector<std::shared_ptr<RenderTextFrame>>& render_frames) const {
   TRACE_EVENT0("impeller", __FUNCTION__);
   if (!IsValid()) {
     return nullptr;
@@ -513,7 +522,7 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
   std::shared_ptr<GlyphAtlas> last_atlas = atlas_context->GetGlyphAtlas();
   FML_DCHECK(last_atlas->GetType() == type);
 
-  if (text_frames.empty()) {
+  if (render_frames.empty()) {
     return last_atlas;
   }
 
@@ -522,7 +531,7 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
   //         with the current atlas and reuse if possible. For each new font and
   //         glyph pair, compute the glyph size at scale.
   // ---------------------------------------------------------------------------
-  auto [new_glyphs, glyph_sizes] = CollectNewGlyphs(last_atlas, text_frames);
+  auto [new_glyphs, glyph_sizes] = CollectNewGlyphs(last_atlas, render_frames);
   if (new_glyphs.size() == 0) {
     return last_atlas;
   }
@@ -595,7 +604,7 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
         type, /*initial_generation=*/last_atlas->GetAtlasGeneration() + 1);
 
     auto [update_glyphs, update_sizes] =
-        CollectNewGlyphs(new_atlas, text_frames);
+        CollectNewGlyphs(new_atlas, render_frames);
     new_glyphs = std::move(update_glyphs);
     glyph_sizes = std::move(update_sizes);
 

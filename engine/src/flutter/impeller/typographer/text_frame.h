@@ -80,15 +80,6 @@ class TextFrame {
   /// @brief      The type of atlas this run should be place in.
   GlyphAtlas::Type GetAtlasType() const;
 
-  /// @brief Verifies that all glyphs in this text frame have computed bounds
-  ///        information.
-  bool IsFrameComplete() const;
-
-  /// @brief Retrieve the frame bounds for the glyph at [index].
-  ///
-  /// This method is only valid if [IsFrameComplete] returns true.
-  const FrameBounds& GetFrameBounds(size_t index) const;
-
   /// @brief If this text frame contains a single glyph (such as for an Icon),
   ///        then return it, otherwise std::nullopt.
   std::optional<Glyph> AsSingleGlyph() const;
@@ -96,32 +87,20 @@ class TextFrame {
   /// @brief Return the font of the first glyph run.
   const Font& GetFont() const;
 
-  /// @brief Store text frame scale, offset, and properties for hashing in th
-  /// glyph atlas.
-  void SetPerFrameData(Rational scale,
-                       Point offset,
-                       const Matrix& transform,
-                       std::optional<GlyphProperties> properties);
-
   // A generation id for the glyph atlas this text run was associated
   // with. As long as the frame generation matches the atlas generation,
   // the contents are guaranteed to be populated and do not need to be
   // processed.
   std::pair<size_t, intptr_t> GetAtlasGenerationAndID() const;
 
-  Rational GetScale() const;
-
-  const Matrix& GetTransform() const { return transform_; }
-
   fml::StatusOr<flutter::DlPath> GetPath() const;
-
-  Point GetOffset() const;
 
   Matrix GetOffsetTransform() const;
 
  private:
   friend class TypographerContextSkia;
   friend class LazyGlyphAtlas;
+  friend class RenderTextFrame;
 
   std::optional<GlyphProperties> GetProperties() const;
 
@@ -136,15 +115,101 @@ class TextFrame {
   bool has_color_;
   const PathCreator path_creator_;
 
+  size_t generation_ = 0;
+  intptr_t atlas_id_ = 0;
+};
+
+/// @brief Combine a text frame along with its specific contextual scale,
+///        offset, and properties for rendering and hashing in the glyph atlas.
+class RenderTextFrame {
+ public:
+  RenderTextFrame(
+      const std::shared_ptr<TextFrame>& frame,
+      Rational scale,
+      Point offset,
+      const Matrix& offset_transform = Matrix(),
+      bool render_as_path = false,
+      const std::optional<GlyphProperties>& properties = std::nullopt);
+
+  static std::shared_ptr<RenderTextFrame> Make(
+      const std::shared_ptr<TextFrame>& frame,
+      Rational scale,
+      Point offset,
+      const Matrix& offset_transform = Matrix(),
+      bool render_as_path = false,
+      const std::optional<GlyphProperties>& properties = std::nullopt);
+
+  /// The text frame with which the data is associated.
+  const std::shared_ptr<TextFrame>& GetFrame() const { return frame_; }
+
+  /// Return the Bounds information from the associated TextFrame.
+  Rect GetBounds() const { return frame_->GetBounds(); }
+
+  /// Return the HasColor information from the associated TextFrame.
+  bool HasColor() const { return frame_->HasColor(); }
+
+  /// Return the AtlasType information from the associated TextFrame.
+  GlyphAtlas::Type GetAtlasType() const { return frame_->GetAtlasType(); }
+
+  /// Return the Run information from the associated TextFrame.
+  const std::vector<TextRun>& GetRuns() const { return frame_->GetRuns(); }
+
+  /// Return the Path information from the associated TextFrame.
+  fml::StatusOr<flutter::DlPath> GetPath() const { return frame_->GetPath(); }
+
+  /// Set the AtlasGeneration information on the associated TextFrame.
+  void SetAtlasGeneration(size_t value, intptr_t atlas_id) {
+    frame_->SetAtlasGeneration(value, atlas_id);
+  }
+
+  /// The scaled applied within the context that the frame is used.
+  Rational GetScale() const { return scale_; }
+
+  /// The location within the context that the frame is used where the
+  /// text_frame is located (the x,y of the drawText operation).
+  Point GetOffset() const { return offset_; }
+
+  /// The full matrix within the context that the frame is used including
+  /// the offset to the text_frame position (offset).
+  const Matrix& GetOffsetTransform() const { return offset_transform_; }
+
+  /// True if the combined transform and font size is large enough to
+  /// recommend rendering the entire frame as a path for fidelity.
+  bool ShouldRenderAsPath() const { return render_as_path_; }
+
+  /// The glyph properties within the context that the frame is used.
+  const std::optional<GlyphProperties>& GetProperties() const {
+    return properties_;
+  }
+
+  /// @brief Verifies that all glyphs in this text frame have computed bounds
+  ///        information.
+  bool IsFrameComplete() const;
+
+  void AppendFrameBounds(const FrameBounds& frame_bounds) {
+    bound_values_.push_back(frame_bounds);
+  }
+
+  void ClearFrameBounds() { bound_values_.clear(); }
+
+  /// @brief Retrieve the frame bounds for the glyph at [index].
+  ///
+  /// This method is only valid if [IsFrameComplete] returns true.
+  const FrameBounds& GetFrameBounds(size_t index) const;
+
+  bool operator==(const RenderTextFrame& other) const;
+
+ private:
+  const std::shared_ptr<TextFrame> frame_;
+  Rational scale_;
+  Point offset_;
+  Matrix offset_transform_;
+  bool render_as_path_;
+  std::optional<GlyphProperties> properties_;
+
   // Data that is cached when rendering the text frame and is only
   // valid for the current atlas generation.
   std::vector<FrameBounds> bound_values_;
-  Rational scale_ = Rational(0, 1);
-  size_t generation_ = 0;
-  intptr_t atlas_id_ = 0;
-  Point offset_;
-  std::optional<GlyphProperties> properties_;
-  Matrix transform_;
 };
 
 }  // namespace impeller

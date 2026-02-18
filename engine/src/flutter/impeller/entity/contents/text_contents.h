@@ -26,7 +26,7 @@ class TextContents final : public Contents {
 
   ~TextContents();
 
-  void SetTextFrame(const std::shared_ptr<TextFrame>& frame);
+  void SetTextFrame(const std::shared_ptr<RenderTextFrame>& render_frame);
 
   void SetColor(Color color);
 
@@ -45,15 +45,10 @@ class TextContents final : public Contents {
   // |Contents|
   void SetInheritedOpacity(Scalar opacity) override;
 
-  // The offset is only used for computing the subpixel glyph position.
-  void SetOffset(Vector2 offset);
-
   std::optional<Rect> GetTextFrameBounds() const;
 
   // |Contents|
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
-
-  void SetScale(Scalar scale) { scale_ = scale; }
 
   // |Contents|
   bool Render(const ContentContext& renderer,
@@ -62,20 +57,16 @@ class TextContents final : public Contents {
 
   static void ComputeVertexData(
       GlyphAtlasPipeline::VertexShader::PerVertexData* vtx_contents,
-      const std::shared_ptr<TextFrame>& frame,
-      Scalar scale,
+      const std::shared_ptr<RenderTextFrame>& render_frame,
       const Matrix& entity_transform,
-      Vector2 offset,
       std::optional<GlyphProperties> glyph_properties,
       const std::shared_ptr<GlyphAtlas>& atlas);
 
  private:
   std::optional<GlyphProperties> GetGlyphProperties() const;
 
-  std::shared_ptr<TextFrame> frame_;
-  Scalar scale_ = 1.0;
+  std::shared_ptr<RenderTextFrame> render_frame_;
   Scalar inherited_opacity_ = 1.0;
-  Vector2 offset_;
   bool force_text_color_ = false;
   Color color_;
   GlyphProperties properties_;

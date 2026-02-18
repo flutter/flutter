@@ -34,12 +34,23 @@ static std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(
     const TypographerContext* typographer_context,
     HostBuffer& data_host_buffer,
     GlyphAtlas::Type type,
+    const std::shared_ptr<GlyphAtlasContext>& atlas_context,
+    const std::shared_ptr<RenderTextFrame>& render_frame) {
+  return typographer_context->CreateGlyphAtlas(context, type, data_host_buffer,
+                                               atlas_context, {render_frame});
+}
+
+static std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(
+    Context& context,
+    const TypographerContext* typographer_context,
+    HostBuffer& data_host_buffer,
+    GlyphAtlas::Type type,
     Rational scale,
     const std::shared_ptr<GlyphAtlasContext>& atlas_context,
     const std::shared_ptr<TextFrame>& frame) {
-  frame->SetPerFrameData(scale, {0, 0}, Matrix(), std::nullopt);
-  return typographer_context->CreateGlyphAtlas(context, type, data_host_buffer,
-                                               atlas_context, {frame});
+  auto render_frame = RenderTextFrame::Make(frame, scale, Point());
+  return CreateGlyphAtlas(context, typographer_context, data_host_buffer, type,
+                          atlas_context, {render_frame});
 }
 
 static std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(
@@ -52,11 +63,14 @@ static std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(
     const std::vector<std::shared_ptr<TextFrame>>& frames,
     const std::vector<std::optional<GlyphProperties>>& properties) {
   size_t offset = 0;
+  std::vector<std::shared_ptr<RenderTextFrame>> frames_with_data;
+  frames_with_data.reserve(frames.size());
   for (auto& frame : frames) {
-    frame->SetPerFrameData(scale, {0, 0}, Matrix(), properties[offset++]);
+    frames_with_data.push_back(RenderTextFrame::Make(
+        frame, scale, Point(), Matrix(), false, properties[offset++]));
   }
   return typographer_context->CreateGlyphAtlas(context, type, data_host_buffer,
-                                               atlas_context, frames);
+                                               atlas_context, frames_with_data);
 }
 
 TEST_P(TypographerTest, CanConvertTextBlob) {
@@ -139,14 +153,16 @@ TEST_P(TypographerTest, LazyAtlasTracksColor) {
 
   LazyGlyphAtlas lazy_atlas(TypographerContextSkia::Make());
 
-  lazy_atlas.AddTextFrame(frame, Rational(1), {0, 0}, Matrix(), {});
+  lazy_atlas.AddTextFrame(
+      RenderTextFrame::Make(frame, Rational(1), Point(), Matrix()));
 
   frame = MakeTextFrameFromTextBlobSkia(
       SkTextBlob::MakeFromString("😀 ", emoji_font));
 
   ASSERT_TRUE(frame->GetAtlasType() == GlyphAtlas::Type::kColorBitmap);
 
-  lazy_atlas.AddTextFrame(frame, Rational(1), {0, 0}, Matrix(), {});
+  lazy_atlas.AddTextFrame(
+      RenderTextFrame::Make(frame, Rational(1), Point(), Matrix()));
 
   // Creates different atlases for color and red bitmap.
   auto color_atlas = lazy_atlas.CreateOrGetGlyphAtlas(
@@ -229,15 +245,15 @@ TEST_P(TypographerTest, GlyphAtlasWithLotsOfdUniqueGlyphSize) {
   ASSERT_TRUE(blob);
 
   size_t size_count = 8;
-  std::vector<std::shared_ptr<TextFrame>> frames;
+  std::vector<std::shared_ptr<RenderTextFrame>> frames_with_data;
   for (size_t index = 0; index < size_count; index += 1) {
-    frames.push_back(MakeTextFrameFromTextBlobSkia(blob));
-    frames.back()->SetPerFrameData(Rational(6 * index, 10), {0, 0}, Matrix(),
-                                   {});
+    frames_with_data.push_back(
+        RenderTextFrame::Make(MakeTextFrameFromTextBlobSkia(blob),
+                              Rational(6 * index, 10), Point(), Matrix()));
   };
-  auto atlas =
-      context->CreateGlyphAtlas(*GetContext(), GlyphAtlas::Type::kAlphaBitmap,
-                                *data_host_buffer, atlas_context, frames);
+  auto atlas = context->CreateGlyphAtlas(
+      *GetContext(), GlyphAtlas::Type::kAlphaBitmap, *data_host_buffer,
+      atlas_context, frames_with_data);
   ASSERT_NE(atlas, nullptr);
   ASSERT_NE(atlas->GetTexture(), nullptr);
 
@@ -495,7 +511,8 @@ TEST_P(TypographerTest, GlyphAtlasTextureWillGrowTilMaxTextureSize) {
                          atlas_context, MakeTextFrameFromTextBlobSkia(blob));
     ASSERT_TRUE(!!atlas);
     EXPECT_EQ(atlas->GetTexture()->GetTextureDescriptor().size,
-              expected_sizes[i]);
+              expected_sizes[i])
+        << "index: " << i;
   }
 
   // The final atlas should contain both the "A" glyph (which was not present
@@ -510,8 +527,10 @@ TEST_P(TypographerTest, TextFrameInitialBoundsArePlaceholder) {
       "the quick brown fox jumped over the lazy dog.", font);
   ASSERT_TRUE(blob);
   auto frame = MakeTextFrameFromTextBlobSkia(blob);
+  auto render_frame =
+      RenderTextFrame::Make(frame, Rational(1), Point(), Matrix());
 
-  EXPECT_FALSE(frame->IsFrameComplete());
+  EXPECT_FALSE(render_frame->IsFrameComplete());
 
   auto context = TypographerContextSkia::Make();
   auto atlas_context =
@@ -521,21 +540,21 @@ TEST_P(TypographerTest, TextFrameInitialBoundsArePlaceholder) {
       GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
 
   auto atlas = CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
-                                GlyphAtlas::Type::kAlphaBitmap,
-                                /*scale=*/Rational(1), atlas_context, frame);
+                                GlyphAtlas::Type::kAlphaBitmap, atlas_context,
+                                render_frame);
 
   // The glyph position in the atlas was not known when this value
   // was recorded. It is marked as a placeholder.
-  EXPECT_TRUE(frame->IsFrameComplete());
-  EXPECT_TRUE(frame->GetFrameBounds(0).is_placeholder);
+  EXPECT_TRUE(render_frame->IsFrameComplete());
+  EXPECT_TRUE(render_frame->GetFrameBounds(0).is_placeholder);
 
   atlas = CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
-                           GlyphAtlas::Type::kAlphaBitmap,
-                           /*scale=*/Rational(1), atlas_context, frame);
+                           GlyphAtlas::Type::kAlphaBitmap, atlas_context,
+                           render_frame);
 
   // The second time the glyph is rendered, the bounds are correcly known.
-  EXPECT_TRUE(frame->IsFrameComplete());
-  EXPECT_FALSE(frame->GetFrameBounds(0).is_placeholder);
+  EXPECT_TRUE(render_frame->IsFrameComplete());
+  EXPECT_FALSE(render_frame->GetFrameBounds(0).is_placeholder);
 }
 
 TEST_P(TypographerTest, TextFrameInvalidationWithScale) {
@@ -544,8 +563,10 @@ TEST_P(TypographerTest, TextFrameInvalidationWithScale) {
       "the quick brown fox jumped over the lazy dog.", font);
   ASSERT_TRUE(blob);
   auto frame = MakeTextFrameFromTextBlobSkia(blob);
+  auto render_frame1 =
+      RenderTextFrame::Make(frame, Rational(1), Point(), Matrix());
 
-  EXPECT_FALSE(frame->IsFrameComplete());
+  EXPECT_FALSE(render_frame1->IsFrameComplete());
 
   auto context = TypographerContextSkia::Make();
   auto atlas_context =
@@ -555,23 +576,34 @@ TEST_P(TypographerTest, TextFrameInvalidationWithScale) {
       GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
 
   auto atlas = CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
-                                GlyphAtlas::Type::kAlphaBitmap,
-                                /*scale=*/Rational(1), atlas_context, frame);
+                                GlyphAtlas::Type::kAlphaBitmap, atlas_context,
+                                render_frame1);
 
   // The glyph position in the atlas was not known when this value
   // was recorded. It is marked as a placeholder.
-  EXPECT_TRUE(frame->IsFrameComplete());
-  EXPECT_TRUE(frame->GetFrameBounds(0).is_placeholder);
+  EXPECT_TRUE(render_frame1->IsFrameComplete());
+  EXPECT_TRUE(render_frame1->GetFrameBounds(0).is_placeholder);
+
+  atlas = CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
+                           GlyphAtlas::Type::kAlphaBitmap, atlas_context,
+                           render_frame1);
+
+  // Creating a new atlas without changing the scale will produce glyph
+  // data that is not a placeholder.
+  EXPECT_TRUE(render_frame1->IsFrameComplete());
+  EXPECT_FALSE(render_frame1->GetFrameBounds(0).is_placeholder);
 
   // Change the scale and the glyph data will still be a placeholder, as the
   // old data is no longer valid.
+  auto render_frame2 =
+      RenderTextFrame::Make(frame, Rational(2), Point(), Matrix());
   atlas = CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
-                           GlyphAtlas::Type::kAlphaBitmap,
-                           /*scale=*/Rational(2), atlas_context, frame);
+                           GlyphAtlas::Type::kAlphaBitmap, atlas_context,
+                           render_frame2);
 
   // The second time the glyph is rendered, the bounds are correcly known.
-  EXPECT_TRUE(frame->IsFrameComplete());
-  EXPECT_TRUE(frame->GetFrameBounds(0).is_placeholder);
+  EXPECT_TRUE(render_frame2->IsFrameComplete());
+  EXPECT_TRUE(render_frame2->GetFrameBounds(0).is_placeholder);
 }
 
 TEST_P(TypographerTest, TextFrameAtlasGenerationTracksState) {
@@ -580,8 +612,10 @@ TEST_P(TypographerTest, TextFrameAtlasGenerationTracksState) {
       "the quick brown fox jumped over the lazy dog.", font);
   ASSERT_TRUE(blob);
   auto frame = MakeTextFrameFromTextBlobSkia(blob);
+  auto render_frame =
+      RenderTextFrame::Make(frame, Rational(1), Point(), Matrix());
 
-  EXPECT_FALSE(frame->IsFrameComplete());
+  EXPECT_FALSE(render_frame->IsFrameComplete());
 
   auto context = TypographerContextSkia::Make();
   auto atlas_context =
@@ -591,13 +625,13 @@ TEST_P(TypographerTest, TextFrameAtlasGenerationTracksState) {
       GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
 
   auto atlas = CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
-                                GlyphAtlas::Type::kAlphaBitmap,
-                                /*scale=*/Rational(1), atlas_context, frame);
+                                GlyphAtlas::Type::kAlphaBitmap, atlas_context,
+                                render_frame);
 
   // The glyph position in the atlas was not known when this value
   // was recorded. It is marked as a placeholder.
-  EXPECT_TRUE(frame->IsFrameComplete());
-  EXPECT_TRUE(frame->GetFrameBounds(0).is_placeholder);
+  EXPECT_TRUE(render_frame->IsFrameComplete());
+  EXPECT_TRUE(render_frame->GetFrameBounds(0).is_placeholder);
   if (GetBackend() == PlaygroundBackend::kOpenGLES) {
     // OpenGLES must always increase the atlas backend if the texture grows.
     EXPECT_EQ(frame->GetAtlasGenerationAndID().first, 1u);
@@ -606,12 +640,12 @@ TEST_P(TypographerTest, TextFrameAtlasGenerationTracksState) {
   }
 
   atlas = CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
-                           GlyphAtlas::Type::kAlphaBitmap,
-                           /*scale=*/Rational(1), atlas_context, frame);
+                           GlyphAtlas::Type::kAlphaBitmap, atlas_context,
+                           render_frame);
 
   // The second time the glyph is rendered, the bounds are correcly known.
-  EXPECT_TRUE(frame->IsFrameComplete());
-  EXPECT_FALSE(frame->GetFrameBounds(0).is_placeholder);
+  EXPECT_TRUE(render_frame->IsFrameComplete());
+  EXPECT_FALSE(render_frame->GetFrameBounds(0).is_placeholder);
   if (GetBackend() == PlaygroundBackend::kOpenGLES) {
     EXPECT_EQ(frame->GetAtlasGenerationAndID().first, 1u);
   } else {
@@ -621,8 +655,8 @@ TEST_P(TypographerTest, TextFrameAtlasGenerationTracksState) {
   // Force increase the generation.
   atlas_context->GetGlyphAtlas()->SetAtlasGeneration(2u);
   atlas = CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
-                           GlyphAtlas::Type::kAlphaBitmap,
-                           /*scale=*/Rational(1), atlas_context, frame);
+                           GlyphAtlas::Type::kAlphaBitmap, atlas_context,
+                           render_frame);
 
   EXPECT_EQ(frame->GetAtlasGenerationAndID().first, 2u);
 }
@@ -633,8 +667,10 @@ TEST_P(TypographerTest, InvalidAtlasForcesRepopulation) {
       "the quick brown fox jumped over the lazy dog.", font);
   ASSERT_TRUE(blob);
   auto frame = MakeTextFrameFromTextBlobSkia(blob);
+  auto render_frame =
+      RenderTextFrame::Make(frame, Rational(1), Point(), Matrix());
 
-  EXPECT_FALSE(frame->IsFrameComplete());
+  EXPECT_FALSE(render_frame->IsFrameComplete());
 
   auto context = TypographerContextSkia::Make();
   auto atlas_context =
@@ -644,13 +680,13 @@ TEST_P(TypographerTest, InvalidAtlasForcesRepopulation) {
       GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
 
   auto atlas = CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
-                                GlyphAtlas::Type::kAlphaBitmap,
-                                /*scale=*/Rational(1), atlas_context, frame);
+                                GlyphAtlas::Type::kAlphaBitmap, atlas_context,
+                                render_frame);
 
   // The glyph position in the atlas was not known when this value
   // was recorded. It is marked as a placeholder.
-  EXPECT_TRUE(frame->IsFrameComplete());
-  EXPECT_TRUE(frame->GetFrameBounds(0).is_placeholder);
+  EXPECT_TRUE(render_frame->IsFrameComplete());
+  EXPECT_TRUE(render_frame->GetFrameBounds(0).is_placeholder);
   if (GetBackend() == PlaygroundBackend::kOpenGLES) {
     // OpenGLES must always increase the atlas backend if the texture grows.
     EXPECT_EQ(frame->GetAtlasGenerationAndID().first, 1u);
@@ -666,7 +702,7 @@ TEST_P(TypographerTest, InvalidAtlasForcesRepopulation) {
 
   atlas = CreateGlyphAtlas(*GetContext(), second_context.get(),
                            *data_host_buffer, GlyphAtlas::Type::kAlphaBitmap,
-                           /*scale=*/Rational(1), second_atlas_context, frame);
+                           second_atlas_context, render_frame);
 
   EXPECT_TRUE(second_atlas_context->GetGlyphAtlas()->IsValid());
 }

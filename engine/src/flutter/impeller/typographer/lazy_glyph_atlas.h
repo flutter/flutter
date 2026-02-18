@@ -20,11 +20,7 @@ class LazyGlyphAtlas {
 
   ~LazyGlyphAtlas();
 
-  void AddTextFrame(const std::shared_ptr<TextFrame>& frame,
-                    Rational scale,
-                    Point offset,
-                    const Matrix& transform,
-                    std::optional<GlyphProperties> properties);
+  void AddTextFrame(const std::shared_ptr<RenderTextFrame>& frame);
 
   void ResetTextFrames();
 
@@ -36,8 +32,8 @@ class LazyGlyphAtlas {
  private:
   std::shared_ptr<TypographerContext> typographer_context_;
 
-  std::vector<std::shared_ptr<TextFrame>> alpha_text_frames_;
-  std::vector<std::shared_ptr<TextFrame>> color_text_frames_;
+  std::vector<std::shared_ptr<RenderTextFrame>> alpha_text_frames_;
+  std::vector<std::shared_ptr<RenderTextFrame>> color_text_frames_;
   std::shared_ptr<GlyphAtlasContext> alpha_context_;
   std::shared_ptr<GlyphAtlasContext> color_context_;
   mutable std::shared_ptr<GlyphAtlas> alpha_atlas_;

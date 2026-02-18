@@ -238,11 +238,6 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
                        DlScalar opacity) override;
 
   // |flutter::DlOpReceiver|
-  void drawText(const std::shared_ptr<flutter::DlText>& text,
-                DlScalar x,
-                DlScalar y) override;
-
-  // |flutter::DlOpReceiver|
   void drawShadow(const DlPath& path,
                   const flutter::DlColor color,
                   const DlScalar elevation,
@@ -274,6 +269,9 @@ class CanvasDlDispatcher : public DlDispatcherBase {
   void SetBackdropData(std::unordered_map<int64_t, BackdropData> backdrop,
                        size_t backdrop_count);
 
+  void SetRenderTextFrames(
+      std::vector<std::shared_ptr<RenderTextFrame>> render_frames);
+
   // |flutter::DlOpReceiver|
   void save() override {
     // This dispatcher should never be used with the save() variant
@@ -293,6 +291,11 @@ class CanvasDlDispatcher : public DlDispatcherBase {
   }
   using DlDispatcherBase::saveLayer;
 
+  // |flutter::DlOpReceiver|
+  void drawText(const std::shared_ptr<flutter::DlText>& text,
+                DlScalar x,
+                DlScalar y) override;
+
   void FinishRecording() { canvas_.EndReplay(); }
 
   // |flutter::DlOpReceiver|
@@ -302,6 +305,8 @@ class CanvasDlDispatcher : public DlDispatcherBase {
  private:
   Canvas canvas_;
   const ContentContext& renderer_;
+  std::vector<std::shared_ptr<RenderTextFrame>> render_frames_;
+  size_t render_frame_index_ = 0u;
 
   Canvas& GetCanvas() override;
 };
@@ -383,6 +388,8 @@ class FirstPassDispatcher : public flutter::IgnoreAttributeDispatchHelper,
   std::pair<std::unordered_map<int64_t, BackdropData>, size_t>
   TakeBackdropData();
 
+  std::vector<std::shared_ptr<RenderTextFrame>> TakeRenderTextFrames();
+
  private:
   const Rect GetCurrentLocalCullingBounds() const;
 
@@ -390,6 +397,7 @@ class FirstPassDispatcher : public flutter::IgnoreAttributeDispatchHelper,
   Matrix matrix_;
   std::vector<Matrix> stack_;
   std::unordered_map<int64_t, BackdropData> backdrop_data_;
+  std::vector<std::shared_ptr<RenderTextFrame>> all_render_frames_;
   // note: cull rects are always in the global coordinate space.
   std::vector<Rect> cull_rect_state_;
   bool has_image_filter_ = false;

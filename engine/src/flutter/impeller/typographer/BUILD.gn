@@ -45,7 +45,10 @@ impeller_component("typographer") {
 impeller_component("typographer_unittests") {
   testonly = true
 
-  sources = [ "typographer_unittests.cc" ]
+  sources = [
+    "text_frame_unittests.cc",
+    "typographer_unittests.cc",
+  ]
 
   deps = [
     "../playground:playground_test",

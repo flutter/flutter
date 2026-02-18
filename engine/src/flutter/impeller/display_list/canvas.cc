@@ -1861,21 +1861,13 @@ bool Canvas::AttemptBlurredTextOptimization(
   }
 }
 
-// If the text point size * max basis XY is larger than this value,
-// render the text as paths (if available) for faster and higher
-// fidelity rendering. This is a somewhat arbitrary cutoff
-static constexpr Scalar kMaxTextScale = 250;
-
-void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
-                           Point position,
+void Canvas::DrawTextFrame(const std::shared_ptr<RenderTextFrame>& render_frame,
                            const Paint& paint) {
-  Scalar max_scale = GetCurrentTransform().GetMaxBasisLengthXY();
-  if (max_scale * text_frame->GetFont().GetMetrics().point_size >
-      kMaxTextScale) {
-    fml::StatusOr<flutter::DlPath> path = text_frame->GetPath();
+  if (render_frame->ShouldRenderAsPath()) {
+    fml::StatusOr<flutter::DlPath> path = render_frame->GetPath();
     if (path.ok()) {
       Save(1);
-      Concat(Matrix::MakeTranslation(position));
+      Concat(Matrix::MakeTranslation(render_frame->GetOffset()));
       DrawPath(path.value(), paint);
       Restore();
       return;
@@ -1887,21 +1879,18 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
   entity.SetBlendMode(paint.blend_mode);
 
   auto text_contents = std::make_shared<TextContents>();
-  text_contents->SetTextFrame(text_frame);
+  text_contents->SetTextFrame(render_frame);
   text_contents->SetForceTextColor(paint.mask_blur_descriptor.has_value());
-  text_contents->SetScale(max_scale);
   text_contents->SetColor(paint.color);
-  text_contents->SetOffset(position);
   text_contents->SetTextProperties(paint.color,
                                    paint.style == Paint::Style::kStroke
                                        ? std::optional(paint.stroke)
                                        : std::nullopt);
 
-  entity.SetTransform(GetCurrentTransform() *
-                      Matrix::MakeTranslation(position));
+  entity.SetTransform(render_frame->GetOffsetTransform());
 
-  if (AttemptBlurredTextOptimization(text_frame, text_contents, entity,
-                                     paint)) {
+  if (AttemptBlurredTextOptimization(render_frame->GetFrame(), text_contents,
+                                     entity, paint)) {
     return;
   }
 
@@ -2087,6 +2076,38 @@ void Canvas::AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth) {
 
 RenderPass& Canvas::GetCurrentRenderPass() const {
   return *render_passes_.back().GetInlinePassContext()->GetRenderPass();
+}
+
+std::shared_ptr<RenderTextFrame> Canvas::MakeRenderTextFrame(
+    const std::shared_ptr<TextFrame>& text_frame,
+    const Matrix& matrix,
+    Point offset,
+    const Paint& paint) {
+  Matrix offset_matrix = matrix * Matrix::MakeTranslation(offset);
+  Scalar scale = offset_matrix.GetMaxBasisLengthXY();
+  Scalar text_scale = scale * text_frame->GetFont().GetMetrics().point_size;
+  bool render_as_path = text_scale > kMaxTextScale;
+
+  std::optional<GlyphProperties> properties;
+
+  auto settable_properties = [&properties]() -> GlyphProperties& {
+    if (properties.has_value()) {
+      return properties.value();
+    }
+    return properties.emplace(GlyphProperties{});
+  };
+
+  if (paint.style == Paint::Style::kStroke) {
+    settable_properties().stroke = paint.stroke;
+  }
+
+  if (text_frame->HasColor()) {
+    settable_properties().color = paint.color.WithAlpha(1.0f);
+  }
+
+  return std::make_shared<RenderTextFrame>(
+      text_frame, TextFrame::RoundScaledFontSize(scale), offset, offset_matrix,
+      render_as_path, properties);
 }
 
 void Canvas::SetBackdropData(

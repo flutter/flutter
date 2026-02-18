@@ -49,7 +49,12 @@ std::shared_ptr<TextFrame> MakeTextFrame(const std::string& text,
   return MakeTextFrameFromTextBlobSkia(blob);
 }
 
-std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(
+struct FrameAndAtlas {
+  std::shared_ptr<RenderTextFrame> render_frame;
+  std::shared_ptr<GlyphAtlas> atlas;
+};
+
+FrameAndAtlas CreateGlyphAtlas(
     Context& context,
     const TypographerContext* typographer_context,
     HostBuffer& data_host_buffer,
@@ -58,14 +63,21 @@ std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(
     const std::shared_ptr<GlyphAtlasContext>& atlas_context,
     const std::shared_ptr<TextFrame>& frame,
     Point offset) {
-  frame->SetPerFrameData(
-      TextFrame::RoundScaledFontSize(scale), /*offset=*/offset,
-      /*transform=*/
-      Matrix::MakeScale(
-          Vector3{static_cast<Scalar>(scale), static_cast<Scalar>(scale), 1}),
-      /*properties=*/std::nullopt);
-  return typographer_context->CreateGlyphAtlas(context, type, data_host_buffer,
-                                               atlas_context, {frame});
+  FrameAndAtlas frame_and_atlas;
+  Matrix matrix = Matrix::MakeScale(
+      Vector3{static_cast<Scalar>(scale), static_cast<Scalar>(scale), 1});
+  Matrix offset_transform = matrix * Matrix::MakeTranslation(offset);
+  frame_and_atlas.render_frame =
+      RenderTextFrame::Make(frame,
+                            /*scale=*/TextFrame::RoundScaledFontSize(scale),
+                            /*offset=*/offset,
+                            /*offset_transform=*/offset_transform,
+                            /*render_as_path=*/false,
+                            /*properties=*/std::nullopt);
+  frame_and_atlas.atlas = typographer_context->CreateGlyphAtlas(
+      context, type, data_host_buffer, atlas_context,
+      {frame_and_atlas.render_frame});
+  return frame_and_atlas;
 }
 
 Rect PerVertexDataPositionToRect(
@@ -124,16 +136,16 @@ TEST_P(TextContentsTest, SimpleComputeVertexData) {
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
       GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
   ASSERT_TRUE(context && context->IsValid());
-  std::shared_ptr<GlyphAtlas> atlas =
+  FrameAndAtlas frame_and_atlas =
       CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
                        GlyphAtlas::Type::kAlphaBitmap, /*scale=*/Rational(1, 1),
                        atlas_context, text_frame, /*offset=*/{0, 0});
 
-  ISize texture_size = atlas->GetTexture()->GetSize();
-  TextContents::ComputeVertexData(data.data(), text_frame, /*scale=*/1.0,
+  ISize texture_size = frame_and_atlas.atlas->GetTexture()->GetSize();
+  TextContents::ComputeVertexData(data.data(), frame_and_atlas.render_frame,
                                   /*entity_transform=*/Matrix(),
-                                  /*offset=*/Vector2(0, 0),
-                                  /*glyph_properties=*/std::nullopt, atlas);
+                                  /*glyph_properties=*/std::nullopt,
+                                  frame_and_atlas.atlas);
 
   Rect position_rect = PerVertexDataPositionToRect(data.begin());
   Rect uv_rect = PerVertexDataUVToRect(data.begin(), texture_size);
@@ -161,19 +173,18 @@ TEST_P(TextContentsTest, SimpleComputeVertexData2x) {
       GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
   ASSERT_TRUE(context && context->IsValid());
   Rational font_scale(2, 1);
-  std::shared_ptr<GlyphAtlas> atlas =
+  FrameAndAtlas frame_and_atlas =
       CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
                        GlyphAtlas::Type::kAlphaBitmap, font_scale,
                        atlas_context, text_frame, /*offset=*/{0, 0});
 
-  ISize texture_size = atlas->GetTexture()->GetSize();
+  ISize texture_size = frame_and_atlas.atlas->GetTexture()->GetSize();
   TextContents::ComputeVertexData(
-      data.data(), text_frame, static_cast<Scalar>(font_scale),
+      data.data(), frame_and_atlas.render_frame,
       /*entity_transform=*/
       Matrix::MakeScale({static_cast<Scalar>(font_scale),
                          static_cast<Scalar>(font_scale), 1}),
-      /*offset=*/Vector2(0, 0),
-      /*glyph_properties=*/std::nullopt, atlas);
+      /*glyph_properties=*/std::nullopt, frame_and_atlas.atlas);
 
   Rect position_rect = PerVertexDataPositionToRect(data.begin());
   Rect uv_rect = PerVertexDataUVToRect(data.begin(), texture_size);
@@ -201,19 +212,18 @@ TEST_P(TextContentsTest, MaintainsShape) {
     {
       std::vector<GlyphAtlasPipeline::VertexShader::PerVertexData> data(12);
 
-      std::shared_ptr<GlyphAtlas> atlas =
+      FrameAndAtlas frame_and_atlas =
           CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
                            GlyphAtlas::Type::kAlphaBitmap, font_scale,
                            atlas_context, text_frame, /*offset=*/{0, 0});
-      ISize texture_size = atlas->GetTexture()->GetSize();
+      ISize texture_size = frame_and_atlas.atlas->GetTexture()->GetSize();
 
       TextContents::ComputeVertexData(
-          data.data(), text_frame, static_cast<Scalar>(font_scale),
+          data.data(), frame_and_atlas.render_frame,
           /*entity_transform=*/
           Matrix::MakeScale({static_cast<Scalar>(font_scale),
                              static_cast<Scalar>(font_scale), 1}),
-          /*offset=*/Vector2(0, 0),
-          /*glyph_properties=*/std::nullopt, atlas);
+          /*glyph_properties=*/std::nullopt, frame_and_atlas.atlas);
       position_rect[0] = PerVertexDataPositionToRect(data.begin());
       uv_rect[0] = PerVertexDataUVToRect(data.begin(), texture_size);
       position_rect[1] = PerVertexDataPositionToRect(data.begin() + 4);
@@ -243,16 +253,16 @@ TEST_P(TextContentsTest, SimpleSubpixel) {
       GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
   ASSERT_TRUE(context && context->IsValid());
   Point offset = Point(0.5, 0);
-  std::shared_ptr<GlyphAtlas> atlas =
+  FrameAndAtlas frame_and_atlas =
       CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
                        GlyphAtlas::Type::kAlphaBitmap, /*scale=*/Rational(1),
                        atlas_context, text_frame, offset);
 
-  ISize texture_size = atlas->GetTexture()->GetSize();
+  ISize texture_size = frame_and_atlas.atlas->GetTexture()->GetSize();
   TextContents::ComputeVertexData(
-      data.data(), text_frame, /*scale=*/1.0,
-      /*entity_transform=*/Matrix::MakeTranslation(offset), offset,
-      /*glyph_properties=*/std::nullopt, atlas);
+      data.data(), frame_and_atlas.render_frame,
+      /*entity_transform=*/Matrix::MakeTranslation(offset),
+      /*glyph_properties=*/std::nullopt, frame_and_atlas.atlas);
 
   Rect position_rect = PerVertexDataPositionToRect(data.begin());
   Rect uv_rect = PerVertexDataUVToRect(data.begin(), texture_size);
@@ -282,20 +292,19 @@ TEST_P(TextContentsTest, SimpleSubpixel3x) {
   ASSERT_TRUE(context && context->IsValid());
   Rational font_scale(3, 1);
   Point offset = {0.16667, 0};
-  std::shared_ptr<GlyphAtlas> atlas =
+  FrameAndAtlas frame_and_atlas =
       CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
                        GlyphAtlas::Type::kAlphaBitmap, font_scale,
                        atlas_context, text_frame, offset);
 
-  ISize texture_size = atlas->GetTexture()->GetSize();
+  ISize texture_size = frame_and_atlas.atlas->GetTexture()->GetSize();
   TextContents::ComputeVertexData(
-      data.data(), text_frame, static_cast<Scalar>(font_scale),
+      data.data(), frame_and_atlas.render_frame,
       /*entity_transform=*/
       Matrix::MakeTranslation(offset) *
           Matrix::MakeScale({static_cast<Scalar>(font_scale),
                              static_cast<Scalar>(font_scale), 1}),
-      offset,
-      /*glyph_properties=*/std::nullopt, atlas);
+      /*glyph_properties=*/std::nullopt, frame_and_atlas.atlas);
 
   Rect position_rect = PerVertexDataPositionToRect(data.begin());
   Rect uv_rect = PerVertexDataUVToRect(data.begin(), texture_size);
@@ -326,16 +335,16 @@ TEST_P(TextContentsTest, SimpleSubpixel26) {
       GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
   ASSERT_TRUE(context && context->IsValid());
   Point offset = Point(0.26, 0);
-  std::shared_ptr<GlyphAtlas> atlas =
+  FrameAndAtlas frame_and_atlas =
       CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
                        GlyphAtlas::Type::kAlphaBitmap, /*scale=*/Rational(1),
                        atlas_context, text_frame, offset);
 
-  ISize texture_size = atlas->GetTexture()->GetSize();
+  ISize texture_size = frame_and_atlas.atlas->GetTexture()->GetSize();
   TextContents::ComputeVertexData(
-      data.data(), text_frame, /*scale=*/1.0,
-      /*entity_transform=*/Matrix::MakeTranslation(offset), offset,
-      /*glyph_properties=*/std::nullopt, atlas);
+      data.data(), frame_and_atlas.render_frame,
+      /*entity_transform=*/Matrix::MakeTranslation(offset),
+      /*glyph_properties=*/std::nullopt, frame_and_atlas.atlas);
 
   Rect position_rect = PerVertexDataPositionToRect(data.begin());
   Rect uv_rect = PerVertexDataUVToRect(data.begin(), texture_size);
@@ -364,16 +373,16 @@ TEST_P(TextContentsTest, SimpleSubpixel80) {
       GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
   ASSERT_TRUE(context && context->IsValid());
   Point offset = Point(0.80, 0);
-  std::shared_ptr<GlyphAtlas> atlas =
+  FrameAndAtlas frame_and_atlas =
       CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
                        GlyphAtlas::Type::kAlphaBitmap, /*scale=*/Rational(1),
                        atlas_context, text_frame, offset);
 
-  ISize texture_size = atlas->GetTexture()->GetSize();
+  ISize texture_size = frame_and_atlas.atlas->GetTexture()->GetSize();
   TextContents::ComputeVertexData(
-      data.data(), text_frame, /*scale=*/1.0,
-      /*entity_transform=*/Matrix::MakeTranslation(offset), offset,
-      /*glyph_properties=*/std::nullopt, atlas);
+      data.data(), frame_and_atlas.render_frame,
+      /*entity_transform=*/Matrix::MakeTranslation(offset),
+      /*glyph_properties=*/std::nullopt, frame_and_atlas.atlas);
 
   Rect position_rect = PerVertexDataPositionToRect(data.begin());
   Rect uv_rect = PerVertexDataUVToRect(data.begin(), texture_size);

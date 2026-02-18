@@ -27,6 +27,10 @@ struct GlyphProperties {
              lhs.stroke == rhs.stroke;
     }
   };
+  bool operator==(const impeller::GlyphProperties& other) const {
+    return (this->color.ToARGB() == other.color.ToARGB() &&
+            this->stroke == other.stroke);
+  }
 };
 
 //------------------------------------------------------------------------------

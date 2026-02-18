@@ -37,4 +37,15 @@ class Rational {
 
 }  // namespace impeller
 
+namespace std {
+
+inline std::ostream& operator<<(std::ostream& out,
+                                const impeller::Rational& p) {
+  out << "(" << p.GetNumerator() << " / " << p.GetDenominator()
+      << " == " << static_cast<impeller::Scalar>(p) << ")";
+  return out;
+}
+
+}  // namespace std
+
 #endif  // FLUTTER_IMPELLER_GEOMETRY_RATIONAL_H_

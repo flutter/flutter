@@ -731,19 +731,17 @@ TEST_P(AiksTest, TextContentsMismatchedTransformTest) {
   Matrix preroll_matrix =
       Matrix::MakeTranslateScale({1.5, 1.5, 1}, {100, 50, 0});
   Point preroll_point = Point{23, 45};
-  {
-    auto scale = TextFrame::RoundScaledFontSize(
-        (preroll_matrix * Matrix::MakeTranslation(preroll_point))
-            .GetMaxBasisLengthXY());
+  EXPECT_EQ(preroll_matrix.GetMaxBasisLengthXY(), 1.5f);
 
-    aiks_context.GetContentContext().GetLazyGlyphAtlas()->AddTextFrame(
-        text_frame,     //
-        scale,          //
-        preroll_point,  //
-        preroll_matrix,
-        std::nullopt  //
-    );
-  }
+  std::shared_ptr<RenderTextFrame> render_frame =
+      Canvas::MakeRenderTextFrame(text_frame,      //
+                                  preroll_matrix,  //
+                                  preroll_point,   //
+                                  Paint());
+  EXPECT_EQ(render_frame->GetScale(), TextFrame::RoundScaledFontSize(1.5f));
+
+  aiks_context.GetContentContext().GetLazyGlyphAtlas()->AddTextFrame(
+      render_frame);
 
   // Now simulate rendering with a slightly different scale factor.
   RenderTarget render_target =
@@ -752,13 +750,18 @@ TEST_P(AiksTest, TextContentsMismatchedTransformTest) {
           ->CreateOffscreenMSAA(*aiks_context.GetContext(), {100, 100}, 1);
 
   TextContents text_contents;
-  text_contents.SetTextFrame(text_frame);
-  text_contents.SetOffset(preroll_point);
-  text_contents.SetScale(1.6);
+  text_contents.SetTextFrame(render_frame);
   text_contents.SetColor(Color::Aqua());
 
-  Matrix not_preroll_matrix =
-      Matrix::MakeTranslateScale({1.5, 1.5, 1}, {100, 50, 0});
+  // Matrix from preroll is scaled again by 1.6.
+  Matrix not_preroll_matrix = preroll_matrix * Matrix::MakeScale({1.6, 1.6, 1});
+
+  EXPECT_EQ(not_preroll_matrix.GetMaxBasisLengthXY(), 1.5f * 1.6f);
+  EXPECT_NE(Canvas::MakeRenderTextFrame(text_frame,          //
+                                        not_preroll_matrix,  //
+                                        preroll_point,       //
+                                        Paint()),
+            render_frame);
 
   Entity entity;
   entity.SetTransform(not_preroll_matrix);
@@ -938,6 +941,265 @@ TEST_P(AiksTest, VarietyOfTextScalesShowingRasterAndPath) {
     builder.Restore();
   }
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+namespace {
+std::shared_ptr<TextFrame> MakeDefaultTextFrame(const std::string& text,
+                                                Scalar font_size) {
+  // Construct the text blob.
+  // auto mapping = flutter::testing::OpenFixtureAsSkData("wtf.otf");
+  auto mapping = flutter::testing::OpenFixtureAsSkData("Roboto-Regular.ttf");
+  if (mapping == nullptr) {
+    return nullptr;
+  }
+
+  sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
+  SkFont sk_font(font_mgr->makeFromData(mapping), font_size);
+  sk_sp<SkTextBlob> blob = SkTextBlob::MakeFromString("Hi", sk_font);
+
+  std::shared_ptr<TextFrame> text_frame = MakeTextFrameFromTextBlobSkia(blob);
+  return text_frame;
+}
+
+void DrawTextFramesMultipleScalesWithWithReuse(AiksTest* test,
+                                               Scalar first_scale,
+                                               Scalar second_scale) {
+  DisplayListBuilder builder;
+  builder.Scale(test->GetContentScale().x, test->GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  std::shared_ptr<TextFrame> reuse_frame = MakeDefaultTextFrame("Hi", 20.0f);
+  ASSERT_NE(reuse_frame, nullptr);
+
+  builder.Save();
+  builder.Translate(100, 100);
+  builder.Scale(first_scale, first_scale);
+  builder.DrawText(DlTextImpeller::Make(reuse_frame), 0, 0,
+                   DlPaint(DlColor::kBlue()));
+  builder.Restore();
+
+  builder.Save();
+  builder.Translate(400, 100);
+  builder.Scale(second_scale, second_scale);
+  builder.DrawText(DlTextImpeller::Make(reuse_frame), 0, 0,
+                   DlPaint(DlColor::kPurple()));
+  builder.Restore();
+
+  builder.Save();
+  builder.Translate(100, 400);
+  builder.Scale(first_scale, first_scale);
+  std::shared_ptr<TextFrame> single_use_frame1 =
+      MakeDefaultTextFrame("Hi", 20.0f);
+  builder.DrawText(DlTextImpeller::Make(single_use_frame1), 0, 0,
+                   DlPaint(DlColor::kBlue()));
+  builder.Restore();
+
+  builder.Save();
+  builder.Translate(400, 400);
+  builder.Scale(second_scale, second_scale);
+  std::shared_ptr<TextFrame> single_use_frame2 =
+      MakeDefaultTextFrame("Hi", 20.0f);
+  builder.DrawText(DlTextImpeller::Make(single_use_frame2), 0, 0,
+                   DlPaint(DlColor::kPurple()));
+  builder.Restore();
+
+  ASSERT_TRUE(test->OpenPlaygroundHere(builder.Build()));
+}
+}  // namespace
+
+TEST_P(AiksTest, TextFramesDoNotShareRenderDataBigSmall) {
+  DrawTextFramesMultipleScalesWithWithReuse(this,                  //
+                                            /*first_scale=*/4.0f,  //
+                                            /*second_scale=*/0.5f);
+}
+
+TEST_P(AiksTest, TextFramesDoNotShareRenderDataSmallBig) {
+  DrawTextFramesMultipleScalesWithWithReuse(this,                  //
+                                            /*first_scale=*/0.5f,  //
+                                            /*second_scale=*/4.0f);
+}
+
+TEST(AiksTest, MakeRenderTextFrameSimple) {
+  SkFont font = flutter::testing::CreateTestFontOfSize(12);
+  auto blob = SkTextBlob::MakeFromString(
+      "the quick brown fox jumped over the lazy dog.", font);
+  ASSERT_TRUE(blob);
+  std::shared_ptr<TextFrame> text_frame = MakeTextFrameFromTextBlobSkia(blob);
+
+  Matrix matrix = Matrix::MakeScale({2.0f, 2.0f, 1.0f});
+  Point offset = Point(10, 10);
+  Paint paint;
+
+  std::shared_ptr<RenderTextFrame> render_frame =
+      Canvas::MakeRenderTextFrame(text_frame, matrix, offset, paint);
+
+  EXPECT_EQ(render_frame->GetFrame(), text_frame);
+  EXPECT_EQ(render_frame->GetOffset(), offset);
+  EXPECT_EQ(render_frame->GetOffsetTransform(),
+            matrix * Matrix::MakeTranslation(offset));
+  EXPECT_EQ(render_frame->ShouldRenderAsPath(), false);
+  EXPECT_EQ(render_frame->GetProperties(), std::nullopt);
+}
+
+TEST(AiksTest, MakeRenderTextFrameAlmostHugeFont) {
+  SkFont font =
+      flutter::testing::CreateTestFontOfSize(Canvas::kMaxTextScale - 1);
+  auto blob = SkTextBlob::MakeFromString(
+      "the quick brown fox jumped over the lazy dog.", font);
+  ASSERT_TRUE(blob);
+  std::shared_ptr<TextFrame> text_frame = MakeTextFrameFromTextBlobSkia(blob);
+
+  Matrix matrix = Matrix();
+  Point offset = Point(10, 10);
+  Paint paint;
+
+  std::shared_ptr<RenderTextFrame> render_frame =
+      Canvas::MakeRenderTextFrame(text_frame, matrix, offset, paint);
+
+  EXPECT_EQ(render_frame->GetFrame(), text_frame);
+  EXPECT_EQ(render_frame->GetOffset(), offset);
+  EXPECT_EQ(render_frame->GetOffsetTransform(),
+            matrix * Matrix::MakeTranslation(offset));
+  // MaxScale - 1 does not need to be rendered as a path
+  EXPECT_EQ(render_frame->ShouldRenderAsPath(), false);
+  EXPECT_EQ(render_frame->GetProperties(), std::nullopt);
+}
+
+TEST(AiksTest, MakeRenderTextFrameOverlyHugeFont) {
+  SkFont font =
+      flutter::testing::CreateTestFontOfSize(Canvas::kMaxTextScale + 1);
+  auto blob = SkTextBlob::MakeFromString(
+      "the quick brown fox jumped over the lazy dog.", font);
+  ASSERT_TRUE(blob);
+  std::shared_ptr<TextFrame> text_frame = MakeTextFrameFromTextBlobSkia(blob);
+
+  Matrix matrix = Matrix();
+  Point offset = Point(10, 10);
+  Paint paint;
+
+  std::shared_ptr<RenderTextFrame> render_frame =
+      Canvas::MakeRenderTextFrame(text_frame, matrix, offset, paint);
+
+  EXPECT_EQ(render_frame->GetFrame(), text_frame);
+  EXPECT_EQ(render_frame->GetOffset(), offset);
+  EXPECT_EQ(render_frame->GetOffsetTransform(),
+            matrix * Matrix::MakeTranslation(offset));
+  // MaxScale + 1 should be rendered as a path
+  EXPECT_EQ(render_frame->ShouldRenderAsPath(), true);
+  EXPECT_EQ(render_frame->GetProperties(), std::nullopt);
+}
+
+TEST(AiksTest, MakeRenderTextFrameBigFontScaledTooFar) {
+  SkFont font =
+      flutter::testing::CreateTestFontOfSize(Canvas::kMaxTextScale / 2.0f);
+  auto blob = SkTextBlob::MakeFromString(
+      "the quick brown fox jumped over the lazy dog.", font);
+  ASSERT_TRUE(blob);
+  std::shared_ptr<TextFrame> text_frame = MakeTextFrameFromTextBlobSkia(blob);
+
+  Matrix matrix = Matrix::MakeScale({2.1f, 2.1f, 1.0f});
+  Point offset = Point(10, 10);
+  Paint paint;
+
+  std::shared_ptr<RenderTextFrame> render_frame =
+      Canvas::MakeRenderTextFrame(text_frame, matrix, offset, paint);
+
+  EXPECT_EQ(render_frame->GetFrame(), text_frame);
+  EXPECT_EQ(render_frame->GetOffset(), offset);
+  EXPECT_EQ(render_frame->GetOffsetTransform(),
+            matrix * Matrix::MakeTranslation(offset));
+  // (MaxScale / 2) * 2.1 should be rendered as a path
+  EXPECT_EQ(render_frame->ShouldRenderAsPath(), true);
+  EXPECT_EQ(render_frame->GetProperties(), std::nullopt);
+}
+
+TEST(AiksTest, MakeRenderTextFrameHugeFontScaledDown) {
+  SkFont font =
+      flutter::testing::CreateTestFontOfSize(Canvas::kMaxTextScale * 2.0f);
+  auto blob = SkTextBlob::MakeFromString(
+      "the quick brown fox jumped over the lazy dog.", font);
+  ASSERT_TRUE(blob);
+  std::shared_ptr<TextFrame> text_frame = MakeTextFrameFromTextBlobSkia(blob);
+
+  Matrix matrix = Matrix::MakeScale({0.48f, 0.48f, 1.0f});
+  Point offset = Point(10, 10);
+  Paint paint;
+
+  std::shared_ptr<RenderTextFrame> render_frame =
+      Canvas::MakeRenderTextFrame(text_frame, matrix, offset, paint);
+
+  EXPECT_EQ(render_frame->GetFrame(), text_frame);
+  EXPECT_EQ(render_frame->GetOffset(), offset);
+  EXPECT_EQ(render_frame->GetOffsetTransform(),
+            matrix * Matrix::MakeTranslation(offset));
+  // (MaxScale / 2) * 2.1 should be rendered as a path
+  EXPECT_EQ(render_frame->ShouldRenderAsPath(), false);
+  EXPECT_EQ(render_frame->GetProperties(), std::nullopt);
+}
+
+TEST(AiksTest, MakeRenderTextFrameStroked) {
+  SkFont font =
+      flutter::testing::CreateTestFontOfSize(Canvas::kMaxTextScale / 2.0f);
+  auto blob = SkTextBlob::MakeFromString(
+      "the quick brown fox jumped over the lazy dog.", font);
+  ASSERT_TRUE(blob);
+  std::shared_ptr<TextFrame> text_frame = MakeTextFrameFromTextBlobSkia(blob);
+
+  Matrix matrix = Matrix::MakeScale({2.1f, 2.1f, 1.0f});
+  Point offset = Point(10, 10);
+  Paint paint;
+  paint.style = Paint::Style::kStroke;
+  paint.stroke.width = 12.0f;
+
+  std::shared_ptr<RenderTextFrame> render_frame =
+      Canvas::MakeRenderTextFrame(text_frame, matrix, offset, paint);
+
+  GlyphProperties expected_properties{
+      .color = Color::Black(),
+      .stroke = StrokeParameters{.width = 12.0f},
+  };
+
+  EXPECT_EQ(render_frame->GetFrame(), text_frame);
+  EXPECT_EQ(render_frame->GetOffset(), offset);
+  EXPECT_EQ(render_frame->GetOffsetTransform(),
+            matrix * Matrix::MakeTranslation(offset));
+  // (MaxScale / 2) * 2.1 should be rendered as a path
+  EXPECT_EQ(render_frame->ShouldRenderAsPath(), true);
+  EXPECT_EQ(render_frame->GetProperties(), expected_properties);
+}
+
+TEST(AiksTest, MakeRenderTextFrameWithColor) {
+  SkFont font = flutter::testing::CreateTestFontOfSize(12);
+  auto blob = SkTextBlob::MakeFromString(
+      "the quick brown fox jumped over the lazy dog.", font);
+  ASSERT_TRUE(blob);
+  std::shared_ptr<TextFrame> reference_frame =
+      MakeTextFrameFromTextBlobSkia(blob);
+
+  std::vector<TextRun> runs;
+  runs.emplace_back(reference_frame->GetFont());
+  std::shared_ptr<TextFrame> text_frame =
+      std::make_shared<TextFrame>(runs, Rect::MakeLTRB(0, 0, 10, 10),
+                                  /*has_color=*/true);
+
+  Matrix matrix = Matrix::MakeScale({2.1f, 2.1f, 1.0f});
+  Point offset = Point(10, 10);
+  Paint paint;
+  paint.color = Color::Beige();
+
+  std::shared_ptr<RenderTextFrame> render_frame =
+      Canvas::MakeRenderTextFrame(text_frame, matrix, offset, paint);
+
+  GlyphProperties expected_properties{
+      .color = Color::Beige(),
+  };
+
+  EXPECT_EQ(render_frame->GetFrame(), text_frame);
+  EXPECT_EQ(render_frame->GetOffset(), offset);
+  EXPECT_EQ(render_frame->GetOffsetTransform(),
+            matrix * Matrix::MakeTranslation(offset));
+  EXPECT_EQ(render_frame->ShouldRenderAsPath(), false);
+  EXPECT_EQ(render_frame->GetProperties(), expected_properties);
 }
 
 }  // namespace testing
