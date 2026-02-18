@@ -327,7 +327,7 @@ class IOSCoreDeviceControl {
     //   * Don't ignore flutter logs:
     //     2025-09-16 12:50:07.953318-0500 Runner[1279:149305] flutter: ...
     RegExp(
-      r'^\S* \S* \S*\[[0-9:]*] ((?!(\[INFO|\[WARNING|\[ERROR|\[IMPORTANT|\[FATAL):))(?!(flutter:)).*',
+      r'^\S* \S* \S*\[[0-9:]*] ((?!(\[INFO|\[WARNING|\[ERROR|\[IMPORTANT|\[FATAL):))(?!(flutter:))(?!(\[UIKit App Config\] `UIScene` lifecycle)).*',
     ),
     // Ignore iOS execution mode and potential error. This is not meaningful to the developer.
     // Example:

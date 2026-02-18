@@ -143,6 +143,10 @@ Future<void> testMain() async {
         // https://github.com/flutter/flutter/issues/152709
         continue;
       }
+      if (testFile == 'b464333052.jpg') {
+        // This is an undecodable image used to test a Skia failure code path.
+        continue;
+      }
       testCodecs.add(
         UrlTestCodec(
           testFile,

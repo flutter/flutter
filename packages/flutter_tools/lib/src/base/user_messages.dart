@@ -16,74 +16,7 @@ class UserMessages {
   String get flutterToolBugInstructions =>
       'Please report a bug at https://github.com/flutter/flutter/issues.';
 
-  // Messages used in FlutterValidator
-  String flutterStatusInfo(String? channel, String? version, String os, String locale) =>
-      'Channel ${channel ?? 'unknown'}, ${version ?? 'unknown version'}, on $os, locale $locale';
-  String flutterVersion(String version, String channel, String flutterRoot) =>
-      'Flutter version $version on channel $channel at $flutterRoot';
-  String get flutterUnknownChannel =>
-      'Currently on an unknown channel. Run `flutter channel` to switch to an official channel.\n'
-      "If that doesn't fix the issue, reinstall Flutter by following instructions at https://flutter.dev/setup.";
-  String get flutterUnknownVersion =>
-      'Cannot resolve current version, possibly due to local changes.\n'
-      'Reinstall Flutter by following instructions at https://flutter.dev/setup.';
-  String flutterRevision(String revision, String age, String date) =>
-      'Framework revision $revision ($age), $date';
-  String flutterUpstreamRepositoryUrl(String url) => 'Upstream repository $url';
-  String get flutterUpstreamRepositoryUnknown =>
-      'Unknown upstream repository.\n'
-      'Reinstall Flutter by following instructions at https://flutter.dev/setup.';
-  String flutterUpstreamRepositoryUrlEnvMismatch(String url) =>
-      'Upstream repository $url is not the same as FLUTTER_GIT_URL';
-  String flutterUpstreamRepositoryUrlNonStandard(String url) =>
-      'Upstream repository $url is not a standard remote.\n'
-      'Set environment variable "FLUTTER_GIT_URL" to $url to dismiss this error.';
-  String flutterGitUrl(String url) => 'FLUTTER_GIT_URL = $url';
-  String engineRevision(String revision) => 'Engine revision $revision';
-  String dartRevision(String revision) => 'Dart version $revision';
-  String devToolsVersion(String version) => 'DevTools version $version';
-  String pubMirrorURL(String url) => 'Pub download mirror $url';
-  String flutterMirrorURL(String url) => 'Flutter download mirror $url';
-  String get flutterBinariesDoNotRun =>
-      'Downloaded executables cannot execute on host.\n'
-      'See https://github.com/flutter/flutter/issues/6207 for more information.';
-  String get flutterBinariesLinuxRepairCommands =>
-      'On Debian/Ubuntu/Mint: sudo apt-get install lib32stdc++6\n'
-      'On Fedora: dnf install libstdc++.i686\n'
-      'On Arch: pacman -S lib32-gcc-libs';
-  String get flutterValidatorErrorIntentional =>
-      'If those were intentional, you can disregard the above warnings; however it is '
-      'recommended to use "git" directly to perform update checks and upgrades.';
-
-  // Messages used in NoIdeValidator
-  String get noIdeStatusInfo => 'No supported IDEs installed';
-  List<String> get noIdeInstallationInfo => <String>[
-    'IntelliJ - https://www.jetbrains.com/idea/',
-    'Android Studio - https://developer.android.com/studio/',
-    'VS Code - https://code.visualstudio.com/',
-  ];
-
-  // Messages used in IntellijValidator
-  String intellijStatusInfo(String version) => 'version $version';
-  String get intellijPluginInfo =>
-      'For information about installing plugins, see\n'
-      'https://flutter.dev/to/intellij-setup';
-  String intellijMinimumVersion(String minVersion) =>
-      'This install is older than the minimum recommended version of $minVersion.';
-  String intellijLocation(String installPath) => 'IntelliJ at $installPath';
-
-  // Message used in IntellijValidatorOnMac
-  String get intellijMacUnknownResult => 'Cannot determine if IntelliJ is installed';
-
-  // Messages used in DeviceValidator
-  String get devicesMissing => 'No devices available';
-  String devicesAvailable(int devices) => '$devices available';
-
   // Messages used in AndroidValidator
-  String androidCantRunJavaBinary(String javaBinary) =>
-      'Cannot execute $javaBinary to determine the version';
-  String get androidUnknownJavaVersion => 'Could not determine java version';
-  String androidJavaVersion(String javaVersion) => 'Java version $javaVersion';
   String androidJavaMinimumVersion(String javaVersion) =>
       'Java version $javaVersion is older than the minimum recommended version of ${gradle_utils.warnJavaMinVersionAndroid}';
   String androidSdkLicenseOnly(String envKey) =>
@@ -128,10 +61,6 @@ class UserMessages {
       'Android license status unknown.\n'
       'Run `flutter doctor --android-licenses` to accept the SDK licenses.\n'
       'See ${androidSdkInstallUrl(platform)} for more details.';
-  String androidSdkManagerOutdated(String managerPath) =>
-      'A newer version of the Android SDK is required. To update, run:\n'
-      '$managerPath --update\n';
-  String androidLicensesTimeout(String managerPath) => 'Intentionally killing $managerPath';
   String get androidSdkShort => 'Unable to locate Android SDK.';
   String androidMissingSdkManager(String sdkManagerPath, Platform platform) =>
       'Android sdkmanager tool not found ($sdkManagerPath).\n'
@@ -150,19 +79,10 @@ class UserMessages {
       'To update the Android SDK visit ${androidSdkInstallUrl(platform)} for detailed instructions.';
 
   // Messages used in AndroidStudioValidator
-  String androidStudioVersion(String version) => 'version $version';
-  String androidStudioLocation(String location) => 'Android Studio at $location';
-  String get androidStudioNeedsUpdate => 'Try updating or re-installing Android Studio.';
-  String get androidStudioResetDir =>
-      'Consider removing your android-studio-dir setting by running:\n'
-      'flutter config --android-studio-dir=';
   String get aaptNotFound =>
       'Could not locate aapt. Please ensure you have the Android buildtools installed.';
 
   // Messages used in NoAndroidStudioValidator
-  String androidStudioMissing(String location) =>
-      'android-studio-dir = $location\n'
-      'but Android Studio not found at this location.';
   String androidStudioInstallation(Platform platform) =>
       'Android Studio not found; download from https://developer.android.com/studio/index.html\n'
       '(or visit ${androidSdkInstallUrl(platform)} for detailed instructions).';
@@ -299,11 +219,6 @@ class UserMessages {
       'Error: No pubspec.yaml file found.\n'
       'This command should be run from the root of your Flutter project.';
   String flutterTargetFileMissing(String path) => 'Target file "$path" not found.';
-  String get flutterBasePatchFlagsExclusive => 'Error: Only one of --baseline, --patch is allowed.';
-  String get flutterBaselineRequiresTraceFile =>
-      'Error: --baseline requires --compilation-trace-file to be specified.';
-  String get flutterPatchRequiresTraceFile =>
-      'Error: --patch requires --compilation-trace-file to be specified.';
 
   // Messages used in FlutterCommandRunner
   String runnerNoRoot(String error) => 'Unable to locate flutter root: $error';
@@ -311,11 +226,6 @@ class UserMessages {
       'Argument to --wrap-column must be a positive integer. You supplied $value.';
   String runnerWrapColumnParseError(dynamic value) =>
       'Unable to parse argument --wrap-column=$value. Must be a positive integer.';
-  String runnerBugReportFinished(String zipFileName) =>
-      'Bug report written to $zipFileName.\n'
-      'Warning: this bug report contains local paths, device identifiers, and log snippets.';
-  String get runnerNoRecordTo => 'record-to location not specified';
-  String get runnerNoReplayFrom => 'replay-from location not specified';
   String runnerNoEngineSrcDir(String enginePackageName, String engineEnvVar) =>
       'Unable to detect local Flutter engine src directory.\n'
       'Either specify a dependency_override for the $enginePackageName package in your pubspec.yaml and '
@@ -336,21 +246,6 @@ class UserMessages {
   String runnerNoEngineBuild(String engineBuildPath) =>
       'No Flutter engine build found at $engineBuildPath.';
   String runnerNoWebSdk(String webSdkPath) => 'No Flutter web sdk found at $webSdkPath.';
-  String runnerWrongFlutterInstance(String flutterRoot, String currentDir) =>
-      "Warning: the 'flutter' tool you are currently running is not the one from the current directory:\n"
-      '  running Flutter  : $flutterRoot\n'
-      '  current directory: $currentDir\n'
-      'This can happen when you have multiple copies of flutter installed. Please check your system path to verify '
-      "that you're running the expected version (run 'flutter --version' to see which flutter is on your path).\n";
-  String runnerChangedFlutterRepo(String flutterRoot, String flutterPath) =>
-      "Warning! The 'flutter' tool you are currently running is from a different Flutter "
-      'repository than the one last used by this package. The repository from which the '
-      "'flutter' tool is currently executing will be used instead.\n"
-      '  running Flutter tool: $flutterRoot\n'
-      '  previous reference  : $flutterPath\n'
-      'This can happen when you have multiple copies of flutter installed. Please check '
-      'your system path to verify that you are running the expected version (run '
-      "'flutter --version' to see which flutter is on your path).\n";
   String invalidVersionSettingHintMessage(String invalidVersion) =>
       'Invalid version $invalidVersion found, default value will be used.\n'
       'In pubspec.yaml, a valid version should look like: build-name+build-number.\n'
@@ -372,4 +267,8 @@ class UserMessages {
       return '${baseUrl}android-setup';
     }
   }
+
+  /// Overridable message to be shown when detected from device logs that UIScene migration is
+  /// still required.
+  String? uiSceneMigrationWarning;
 }

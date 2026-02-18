@@ -8,9 +8,11 @@
 library;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('RawRadio control test', (WidgetTester tester) async {
@@ -111,7 +113,7 @@ void main() {
       addTearDown(node.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: RawRadio<int>(
             value: 1,
             mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.click),
@@ -146,7 +148,7 @@ void main() {
       addTearDown(node.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: RawRadio<int>(
             value: 1,
             mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.click),

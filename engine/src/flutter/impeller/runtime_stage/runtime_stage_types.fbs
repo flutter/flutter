@@ -8,7 +8,7 @@ namespace impeller.fb;
 // incremented any time there is a change to this file which changes the
 // resulting flat buffer format.
 enum RuntimeStagesFormatVersion:uint32 {
-  kVersion = 1
+  kVersion = 2
 }
 
 enum Stage:byte {
@@ -29,9 +29,14 @@ enum UniformDataType:uint32 {
 // A struct is made up solely of 4 byte floats and 4-byte paddings between
 // them.
 // This enum describes whether a particular byte is a float or padding.
-enum StructByteType:uint8 {
+enum PaddingType:uint8 {
   kPadding = 0,
   kFloat = 1,
+}
+
+table StructField {
+  name: string;
+  byte_size: uint64;
 }
 
 table UniformDescription {
@@ -43,7 +48,8 @@ table UniformDescription {
   rows: uint64;
   columns: uint64;
   array_elements: uint64;
-  struct_layout: [StructByteType];
+  padding_layout: [PaddingType];
+  struct_fields: [StructField];
   struct_float_count: uint64;
 }
 

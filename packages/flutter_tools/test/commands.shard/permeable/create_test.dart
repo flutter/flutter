@@ -351,6 +351,44 @@ void main() {
   );
 
   testUsingContext(
+    'can create a project in the engine examples directory',
+    () async {
+      final String flutterBin = globals.fs.path.join(
+        getFlutterRoot(),
+        'bin',
+        globals.platform.isWindows ? 'flutter.bat' : 'flutter',
+      );
+      final String engineExamplesDirectory = globals.fs.path.join(
+        getFlutterRoot(),
+        'engine',
+        'src',
+        'flutter',
+        'examples',
+      );
+      const projectName = 'flutter_project';
+      final ProcessResult exec = await Process.run(flutterBin, <String>[
+        'create',
+        projectName,
+      ], workingDirectory: engineExamplesDirectory);
+      expect(exec.exitCode, 0);
+      globals.fs
+          .file(globals.fs.path.join(engineExamplesDirectory, projectName))
+          .deleteSync(recursive: true);
+    },
+    overrides: {
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
+      ...noColorTerminalOverride,
+    },
+  );
+
+  testUsingContext(
     'Will create an app project if non-empty non-project directory exists without .metadata',
     () async {
       await projectDir.absolute.childDirectory('blag').create(recursive: true);
@@ -4278,6 +4316,25 @@ void main() {
       throwsToolExit(message: 'The web platform is not supported in plugin_ffi template.'),
     );
   });
+
+  testUsingContext('plugin_ffi template shows deprecation warning', () async {
+    final command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--template=plugin_ffi',
+      '--platforms=android',
+      projectDir.path,
+    ]);
+    expect(logger.warningText, contains('The "plugin_ffi" template is deprecated'));
+    expect(logger.warningText, contains('Use the "package_ffi" template instead.'));
+    expect(
+      logger.warningText,
+      contains('https://docs.flutter.dev/platform-integration/bind-native-code'),
+    );
+  }, overrides: {Logger: () => logger});
 
   testUsingContext(
     'should show warning when disabled platforms are selected while creating an FFI plugin',

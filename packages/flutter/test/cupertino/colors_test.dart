@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class DependentWidget extends StatelessWidget {
@@ -530,97 +529,6 @@ void main() {
     );
 
     expect(color.value, dynamicColor.darkHighContrastElevatedColor.value);
-  });
-
-  // TODO(justinmc): Don't test Material interactions in Cupertino tests.
-  // https://github.com/flutter/flutter/issues/177028
-  group('MaterialApp:', () {
-    Color? color;
-    setUp(() {
-      color = null;
-    });
-
-    testWidgets('dynamic color works in cupertino override theme', (WidgetTester tester) async {
-      CupertinoDynamicColor typedColor() => color! as CupertinoDynamicColor;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(
-            cupertinoOverrideTheme: const CupertinoThemeData(
-              brightness: Brightness.dark,
-              primaryColor: dynamicColor,
-            ),
-          ),
-          home: MediaQuery(
-            data: const MediaQueryData(),
-            child: CupertinoUserInterfaceLevel(
-              data: CupertinoUserInterfaceLevelData.base,
-              child: Builder(
-                builder: (BuildContext context) {
-                  color = CupertinoTheme.of(context).primaryColor;
-                  return const Placeholder();
-                },
-              ),
-            ),
-          ),
-        ),
-      );
-
-      // Explicit brightness is respected.
-      expect(typedColor().value, dynamicColor.darkColor.value);
-      color = null;
-
-      // Changing dependencies works.
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(
-            cupertinoOverrideTheme: const CupertinoThemeData(
-              brightness: Brightness.dark,
-              primaryColor: dynamicColor,
-            ),
-          ),
-          home: MediaQuery(
-            data: const MediaQueryData(platformBrightness: Brightness.dark, highContrast: true),
-            child: CupertinoUserInterfaceLevel(
-              data: CupertinoUserInterfaceLevelData.elevated,
-              child: Builder(
-                builder: (BuildContext context) {
-                  color = CupertinoTheme.of(context).primaryColor;
-                  return const Placeholder();
-                },
-              ),
-            ),
-          ),
-        ),
-      );
-
-      expect(typedColor().value, dynamicColor.darkHighContrastElevatedColor.value);
-    });
-
-    testWidgets('dynamic color does not work in a material theme', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          // This will create a MaterialBasedCupertinoThemeData with primaryColor set to `dynamicColor`.
-          theme: ThemeData(colorScheme: const ColorScheme.dark(primary: dynamicColor)),
-          home: MediaQuery(
-            data: const MediaQueryData(platformBrightness: Brightness.dark, highContrast: true),
-            child: CupertinoUserInterfaceLevel(
-              data: CupertinoUserInterfaceLevelData.elevated,
-              child: Builder(
-                builder: (BuildContext context) {
-                  color = CupertinoTheme.of(context).primaryColor;
-                  return const Placeholder();
-                },
-              ),
-            ),
-          ),
-        ),
-      );
-
-      // The color is not resolved.
-      expect(color, dynamicColor);
-      expect(color, isNot(dynamicColor.darkHighContrastElevatedColor));
-    });
   });
 }
 

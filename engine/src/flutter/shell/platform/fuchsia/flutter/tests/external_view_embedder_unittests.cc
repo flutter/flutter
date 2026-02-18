@@ -27,9 +27,9 @@
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
-#include "fakes/scenic/fake_flatland.h"
-#include "fakes/scenic/fake_flatland_types.h"
 #include "flutter/shell/platform/fuchsia/flutter/surface_producer.h"
+#include "flutter/shell/platform/fuchsia/flutter/tests/fakes/scenic/fake_flatland.h"
+#include "flutter/shell/platform/fuchsia/flutter/tests/fakes/scenic/fake_flatland_types.h"
 
 #include "gmock/gmock.h"  // For EXPECT_THAT and matchers
 #include "gtest/gtest.h"
