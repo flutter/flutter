@@ -235,6 +235,38 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     }
   }
 
+  @override
+  void applyScrollDeltaWithPhysics(double delta) {
+    // If an update is made here, consider if the same (or similar) change
+    // should be made in _NestedScrollCoordinator.applyScrollDeltaWithPhysics.
+    if (delta == 0.0) {
+      goBallistic(0.0);
+      return;
+    }
+    goIdle();
+    updateUserScrollDirection(-delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse);
+    final double oldPixels = pixels;
+    // Set the notifier before calling forcePixels.
+    // This is set to false again after going ballistic below.
+    isScrollingNotifier.value = true;
+    // Route through applyBoundaryConditions instead of hard-clamping.
+    // For BouncingScrollPhysics, applyBoundaryConditions returns 0.0,
+    // allowing the position to go past the extents. goBallistic(0.0) then
+    // creates a BouncingScrollSimulation that springs the position back,
+    // producing the expected iOS bounce/stretch effect.
+    // For ClampingScrollPhysics, applyBoundaryConditions returns the excess,
+    // so the position is clamped as before.
+    final double overscroll = applyBoundaryConditions(pixels + delta);
+    final double newPixels = pixels + delta - overscroll;
+    if (newPixels != oldPixels) {
+      forcePixels(newPixels);
+      didStartScroll();
+      didUpdateScrollPositionBy(pixels - oldPixels);
+      didEndScroll();
+    }
+    goBallistic(0.0);
+  }
+
   // flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/44609
   @Deprecated('This will lead to bugs.')
   @override

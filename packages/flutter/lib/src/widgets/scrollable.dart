@@ -957,31 +957,28 @@ class ScrollableState extends State<Scrollable>
     }
 
     // Calculate if this scrollable can consume the overscroll
-    // Overscroll is positive when scrolling past max extent (scrolling down at bottom)
-    // Overscroll is negative when scrolling past min extent (scrolling up at top)
-    final bool canScrollInDirection =
-        (overscroll > 0 && position.pixels < position.maxScrollExtent) ||
-        (overscroll < 0 && position.pixels > position.minScrollExtent);
+    //
+    // Use applyBoundaryConditions to determine if the physics allows scrolling
+    // in the given direction.
+    // For BouncingScrollPhysics, this always returns 0.0 (allowing overscroll).
+    // For ClampingScrollPhysics, this returns the overscroll amount if at the boundary.
+    final double newPixels = position.pixels + overscroll;
+    final double acceptedDelta =
+        overscroll - position.physics.applyBoundaryConditions(position, newPixels);
+
+    final bool canScrollInDirection = acceptedDelta.abs() > precisionErrorTolerance;
 
     if (!canScrollInDirection) {
       // Can't scroll in this direction, let notification propagate
       return false;
     }
 
-    // Apply the overscroll to this scrollable's position
-    final double targetPixels = clampDouble(
-      position.pixels + overscroll,
-      position.minScrollExtent,
-      position.maxScrollExtent,
-    );
-
-    if (targetPixels != position.pixels) {
-      // Use pointerScroll to apply the delta properly
-      position.pointerScroll(overscroll);
-      return true; // Consumed, don't propagate further
-    }
-
-    return false;
+    // Use applyScrollDeltaWithPhysics instead of pointerScroll.
+    // pointerScroll ignores physics boundary conditions and hard-clamps the position.
+    // applyScrollDeltaWithPhysics respects physics (e.g. BouncingScrollPhysics) and
+    // allows overscroll/bounce effects.
+    position.applyScrollDeltaWithPhysics(overscroll);
+    return true; // Consumed, don't propagate further
   }
 
   // SCROLL WHEEL
