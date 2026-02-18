@@ -68,6 +68,7 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
           // make less things start up unnecessarily.
           '--no-dds',
           '--no-enable-dart-profiling',
+          if (useHCPPFlag) '--enable-surface-control',
           '--test-arguments=test',
           '--test-arguments=--reporter=expanded',
         ],
