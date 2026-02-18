@@ -104,7 +104,7 @@ public class PlatformViewsChannel {
               result.success(null);
               return;
             }
-            Log.e(TAG, "Using legacy platform view rendering strategy.");
+            Log.i(TAG, "Using legacy platform view rendering strategy.");
             if (usesPlatformViewLayer) {
               final PlatformViewCreationRequest request =
                   PlatformViewCreationRequest.createHybridCompositionRequest(
