@@ -45,9 +45,6 @@ public class FlutterLoader {
   private static final String AOT_VMSERVICE_SHARED_LIBRARY_NAME =
       "aot-vmservice-shared-library-name";
 
-  // Flag set for generating GeneratedPluginRegistrant.java.
-  private static final String FLUTTER_EMBEDDING_KEY = "flutterEmbedding";
-
   // Resource names used for components of the precompiled snapshot.
   private static final String DEFAULT_LIBRARY = "libflutter.so";
   private static final String DEFAULT_KERNEL_BLOB = "kernel_blob.bin";
@@ -313,88 +310,84 @@ public class FlutterLoader {
       final AtomicBoolean isLeakVMSet = new AtomicBoolean(false);
 
       if (applicationMetaData != null) {
-        applicationMetaData.keySet().stream()
-            .filter(metadataKey -> !metadataKey.equals(FLUTTER_EMBEDDING_KEY))
-            .forEach(
-                metadataKey -> {
-                  FlutterEngineFlags.Flag flag =
-                      FlutterEngineFlags.getFlagByMetadataKey(metadataKey);
-                  if (flag == null) {
-                    // Manifest flag was not recognized.
-                    Log.w(
-                        TAG,
-                        "Flag with metadata key "
-                            + metadataKey
-                            + " is not recognized. Please ensure that the flag is defined in the FlutterEngineFlags.");
-                    return;
-                  } else if (flag == FlutterEngineFlags.TEST_FLAG) {
-                    Log.w(
-                        TAG,
-                        "For testing purposes only: test flag specified in the manifest was loaded by the FlutterLoader.");
-                  } else if (FlutterEngineFlags.isDisabled(flag)) {
-                    // Do not allow disabled flags.
-                    throw new IllegalArgumentException(
-                        metadataKey
-                            + " is disabled and no longer allowed. Please remove this flag from your application manifest.");
-                  } else if (FlutterEngineFlags.getReplacementFlagIfDeprecated(flag) != null) {
-                    Log.w(
-                        TAG,
-                        "If you are trying to specify "
-                            + flag.metadataKey
-                            + " in your application manifest, please make sure to use the new metadata key name: "
-                            + FlutterEngineFlags.getReplacementFlagIfDeprecated(flag).metadataKey);
-                  } else if (!flag.allowedInRelease && isRelease) {
-                    // Manifest flag is not allowed in release builds.
-                    Log.w(
-                        TAG,
-                        "Flag with metadata key "
-                            + metadataKey
-                            + " is not allowed in release builds and will be ignored if specified in the application manifest or via the command line.");
-                    return;
-                  }
+        for (FlutterEngineFlags.Flag flag : FlutterEngineFlags.ALL_FLAGS) {
+          if (!applicationMetaData.containsKey(flag.metadataKey)) {
+            continue;
+          }
 
-                  // Handle special cases for specific flags.
-                  if (flag == FlutterEngineFlags.OLD_GEN_HEAP_SIZE) {
-                    // Mark if old gen heap size is set to track whether or not to set default
-                    // internally.
-                    oldGenHeapSizeSet.set(true);
-                  } else if (flag == FlutterEngineFlags.LEAK_VM) {
-                    // Mark if leak VM is set to track whether or not to set default internally.
-                    isLeakVMSet.set(true);
-                  } else if (flag == FlutterEngineFlags.ENABLE_SOFTWARE_RENDERING) {
-                    // Enabling software rendering impacts platform views, so save this value
-                    // so that the PlatformViewsController can be properly configured.
-                    enableSoftwareRendering =
-                        applicationMetaData.getBoolean(
-                            FlutterEngineFlags.ENABLE_SOFTWARE_RENDERING.metadataKey, false);
-                  } else if (flag == FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME
-                      || flag == FlutterEngineFlags.DEPRECATED_AOT_SHARED_LIBRARY_NAME) {
-                    // Perform security check for path containing application's compiled Dart
-                    // code and potentially user-provided compiled native code.
-                    String aotSharedLibraryPath = applicationMetaData.getString(metadataKey);
-                    maybeAddAotSharedLibraryNameArg(
-                        applicationContext, aotSharedLibraryPath, shellArgs);
-                    return;
-                  }
+          Object valueObj = applicationMetaData.get(flag.metadataKey);
+          String value = valueObj != null ? valueObj.toString() : null;
 
-                  // Add flag to shell args.
-                  String arg = flag.commandLineArgument;
-                  if (flag.hasValue()) {
-                    Object valueObj = applicationMetaData.get(metadataKey);
-                    String value = valueObj != null ? valueObj.toString() : null;
-                    if (value == null) {
-                      Log.w(
-                          TAG,
-                          "Flag with metadata key "
-                              + metadataKey
-                              + " requires a value, but no value was found. Please ensure that the value is a string.");
-                      return;
-                    }
-                    arg += value;
-                  }
+          // Check if flag is valid:
 
-                  shellArgs.add(arg);
-                });
+          if (flag == FlutterEngineFlags.TEST_FLAG) {
+            Log.w(
+                TAG,
+                "For testing purposes only: test flag specified in the manifest was loaded by the FlutterLoader.");
+          } else if (FlutterEngineFlags.isDisabled(flag)) {
+            // Do not allow disabled flags.
+            throw new IllegalArgumentException(
+                metadataKey
+                    + " is disabled and no longer allowed. Please remove this flag from your application manifest.");
+          } else if (FlutterEngineFlags.getReplacementFlagIfDeprecated(flag) != null) {
+            Log.w(
+                TAG,
+                "If you are trying to specify "
+                    + flag.metadataKey
+                    + " in your application manifest, please make sure to use the new metadata key name: "
+                    + FlutterEngineFlags.getReplacementFlagIfDeprecated(flag).metadataKey);
+          } else if (!flag.allowedInRelease && isRelease) {
+            // Manifest flag is not allowed in release builds.
+            Log.w(
+                TAG,
+                "Flag with metadata key "
+                    + metadataKey
+                    + " is not allowed in release builds and will be ignored if specified in the application manifest or via the command line.");
+            return;
+          }
+
+          // Handle special cases for specific flags:
+
+          if (flag == FlutterEngineFlags.OLD_GEN_HEAP_SIZE) {
+            // Mark if old gen heap size is set to track whether or not to set default
+            // internally.
+            oldGenHeapSizeSet.set(true);
+          } else if (flag == FlutterEngineFlags.LEAK_VM) {
+            // Mark if leak VM is set to track whether or not to set default internally.
+            isLeakVMSet.set(true);
+          } else if (flag == FlutterEngineFlags.ENABLE_SOFTWARE_RENDERING) {
+            // Enabling software rendering impacts platform views, so save this value
+            // so that the PlatformViewsController can be properly configured.
+            enableSoftwareRendering =
+                applicationMetaData.getBoolean(
+                    FlutterEngineFlags.ENABLE_SOFTWARE_RENDERING.metadataKey, false);
+          } else if (flag == FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME
+              || flag == FlutterEngineFlags.DEPRECATED_AOT_SHARED_LIBRARY_NAME) {
+            // Perform security check for path containing application's compiled Dart
+            // code and potentially user-provided compiled native code.
+            String aotSharedLibraryPath = applicationMetaData.getString(metadataKey);
+            maybeAddAotSharedLibraryNameArg(
+                applicationContext, aotSharedLibraryPath, shellArgs);
+            return;
+          }
+
+          // Add flag to shell args.
+          String arg = flag.commandLineArgument;
+          if (flag.hasValue()) {
+            Object valueObj = applicationMetaData.get(metadataKey);
+            String value = valueObj != null ? valueObj.toString() : null;
+            if (value == null) {
+              Log.w(
+                  TAG,
+                  "Flag with metadata key "
+                      + metadataKey
+                      + " requires a value, but no value was found. Please ensure that the value is a string.");
+              return;
+            }
+            arg += value;
+          }
+
+          shellArgs.add(arg);
       }
 
       // Add any remaining engine flags provided by the command line. These settings will take

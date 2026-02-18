@@ -576,6 +576,7 @@ public final class FlutterEngineFlags {
   }
 
   /** Looks up a {@link Flag} by its metadataKey. */
+  // TODO(camsim99): determine if I even need this anymore
   public static Flag getFlagByMetadataKey(String key) {
     Flag flag = FLAG_BY_META_DATA_KEY.get(key);
     Flag replacementFlag = getReplacementFlagIfDeprecated(flag);
