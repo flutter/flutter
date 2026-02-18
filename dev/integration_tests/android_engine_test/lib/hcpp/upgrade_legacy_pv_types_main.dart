@@ -52,11 +52,8 @@ class _MyAppState extends State<MyApp> {
               child: Text(_showViews ? 'Remove Views' : 'Add Views'),
             ),
             if (_showViews) ...<Widget>[
-              // 1. HC platform view (initExpensiveAndroidView)
               const Expanded(child: _HCPlatformView(viewType: 'box_platform_view')),
-              // 2. TLHC platform view (initSurfaceAndroidView)
               const Expanded(child: _TLHCWithHCFallbackPlatformView(viewType: 'box_platform_view')),
-              // 3. VD platform view (initAndroidView)
               const Expanded(child: _TLHCWithVDFallbackPlatformView(viewType: 'box_platform_view')),
             ],
           ],
