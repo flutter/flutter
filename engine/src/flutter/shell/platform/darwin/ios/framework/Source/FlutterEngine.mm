@@ -147,9 +147,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 @property(nonatomic, strong) FlutterMethodChannel* navigationChannel;
 @property(nonatomic, strong) FlutterMethodChannel* restorationChannel;
 @property(nonatomic, strong) FlutterMethodChannel* platformChannel;
-// This channel only sends status bar related events to the framework thus has
-// no handlers.
-@property(nonatomic, strong) FlutterMethodChannel* statusBarChannel;
 @property(nonatomic, strong) FlutterMethodChannel* platformViewsChannel;
 @property(nonatomic, strong) FlutterMethodChannel* textInputChannel;
 @property(nonatomic, strong) FlutterMethodChannel* undoManagerChannel;
@@ -580,7 +577,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   self.navigationChannel = nil;
   self.restorationChannel = nil;
   self.platformChannel = nil;
-  self.statusBarChannel = nil;
   self.platformViewsChannel = nil;
   self.textInputChannel = nil;
   self.undoManagerChannel = nil;
@@ -644,12 +640,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
       [[FlutterMethodChannel alloc] initWithName:@"flutter/platform"
                                  binaryMessenger:self.binaryMessenger
                                            codec:[FlutterJSONMethodCodec sharedInstance]];
-
-  self.statusBarChannel =
-      [[FlutterMethodChannel alloc] initWithName:@"flutter/status_bar"
-                                 binaryMessenger:self.binaryMessenger
-                                           codec:[FlutterJSONMethodCodec sharedInstance]];
-  [self.statusBarChannel resizeChannelBuffer:0];  // No buffering.
 
   self.platformViewsChannel =
       [[FlutterMethodChannel alloc] initWithName:@"flutter/platform_views"
@@ -1491,13 +1481,6 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
     return;
   }
   [self.localizationChannel invokeMethod:@"setLocale" arguments:localeData];
-}
-
-- (void)onStatusBarTap {
-  // Called by FlutterViewController to notify the framework that a tap landed
-  // on the status bar, and the most relevant vertical scroll view visible in the
-  // app, if applicable, should scroll to top.
-  [self.statusBarChannel invokeMethod:@"handleScrollToTop" arguments:nil];
 }
 
 - (void)waitForFirstFrameSync:(NSTimeInterval)timeout

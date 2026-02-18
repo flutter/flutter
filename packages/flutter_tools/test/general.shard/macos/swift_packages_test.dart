@@ -116,6 +116,40 @@ void main() {
       expect(target2SourceFile.existsSync(), isFalse);
     });
 
+    testWithoutContext(
+      'createSwiftPackage does not creates source file if generateEmptySources is false',
+      () {
+        final fs = MemoryFileSystem();
+        final File swiftPackageFile = fs.systemTempDirectory.childFile(
+          'Packages/FlutterGeneratedPluginSwiftPackage/Package.swift',
+        );
+        const target1Name = 'Target1';
+        const target2Name = 'Target2';
+        final File target1SourceFile = fs.systemTempDirectory.childFile(
+          'Packages/FlutterGeneratedPluginSwiftPackage/Sources/$target1Name/$target1Name.swift',
+        );
+        final File target2SourceFile = fs.systemTempDirectory.childFile(
+          'Packages/FlutterGeneratedPluginSwiftPackage/Sources/$target2Name/$target2Name.swift',
+        );
+        final swiftPackage = SwiftPackage(
+          manifest: swiftPackageFile,
+          name: 'FlutterGeneratedPluginSwiftPackage',
+          platforms: <SwiftPackageSupportedPlatform>[],
+          products: <SwiftPackageProduct>[],
+          dependencies: <SwiftPackagePackageDependency>[],
+          targets: <SwiftPackageTarget>[
+            SwiftPackageTarget.defaultTarget(name: target1Name),
+            SwiftPackageTarget.defaultTarget(name: 'Target2'),
+          ],
+          templateRenderer: const MustacheTemplateRenderer(),
+        );
+        swiftPackage.createSwiftPackage(generateEmptySources: false);
+        expect(swiftPackageFile.existsSync(), isTrue);
+        expect(target1SourceFile.existsSync(), isFalse);
+        expect(target2SourceFile.existsSync(), isFalse);
+      },
+    );
+
     group('create Package.swift from template', () {
       testWithoutContext('with none in each field', () {
         final fs = MemoryFileSystem();
@@ -312,6 +346,42 @@ let package = Package(
       version: Version(17, 0, null),
     );
     expect(supportedPlatform.format(), '.iOS("17.0")');
+  });
+
+  testWithoutContext('SwiftPackageSupportedPlatform.fromJson parsed iOS', () {
+    final SwiftPackageSupportedPlatform? supportedPlatform = SwiftPackageSupportedPlatform.fromJson(
+      {'platformName': 'ios', 'version': '13.0'},
+    );
+    expect(supportedPlatform, isNotNull);
+    expect(supportedPlatform?.format(), '.iOS("13.0")');
+  });
+
+  testWithoutContext('SwiftPackageSupportedPlatform.fromJson parsed macOS', () {
+    final SwiftPackageSupportedPlatform? supportedPlatform = SwiftPackageSupportedPlatform.fromJson(
+      {'platformName': 'macos', 'version': '10.15'},
+    );
+    expect(supportedPlatform, isNotNull);
+    expect(supportedPlatform?.format(), '.macOS("10.15")');
+  });
+
+  testWithoutContext('SwiftPackageSupportedPlatform.fromJson returns null when invalid', () {
+    final SwiftPackageSupportedPlatform? invalidVersion = SwiftPackageSupportedPlatform.fromJson({
+      'platformName': 'ios',
+      'version': 'v15',
+    });
+    expect(invalidVersion, isNull);
+
+    final SwiftPackageSupportedPlatform? invalidPlatform = SwiftPackageSupportedPlatform.fromJson({
+      'platformName': 'asdf',
+      'version': '13.0',
+    });
+    expect(invalidPlatform, isNull);
+
+    final SwiftPackageSupportedPlatform? invalidJson = SwiftPackageSupportedPlatform.fromJson({
+      'name': 'ios',
+      'version': '13.0',
+    });
+    expect(invalidJson, isNull);
   });
 
   group('Format SwiftPackageProduct', () {
