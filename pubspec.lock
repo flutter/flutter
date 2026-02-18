@@ -13,10 +13,10 @@ packages:
     dependency: "direct main"
     description:
       name: _fe_analyzer_shared
-      sha256: "5b7468c326d2f8a4f630056404ca0d291ade42918f4a3c6233618e724f39da8e"
+      sha256: "0e4db51a88671b676adc09e923ffebd765a1f0c2b04dc19b08b35a335de2972c"
       url: "https://pub.dev"
     source: hosted
-    version: "92.0.0"
+    version: "95.0.0"
   adaptive_breakpoints:
     dependency: "direct main"
     description:
@@ -29,10 +29,10 @@ packages:
     dependency: "direct main"
     description:
       name: analyzer
-      sha256: "70e4b1ef8003c64793a9e268a551a82869a8a96f39deb73dea28084b0e8bf75e"
+      sha256: "3d577a36cde804a46bd1d89e673c3d87c3538c49a39c35d4d336f7760b48c319"
       url: "https://pub.dev"
     source: hosted
-    version: "9.0.0"
+    version: "10.1.0"
   animations:
     dependency: "direct main"
     description:
@@ -182,10 +182,10 @@ packages:
     dependency: "direct main"
     description:
       name: dart_style
-      sha256: a9c30492da18ff84efe2422ba2d319a89942d93e58eb0b73d32abe822ef54b7b
+      sha256: "15a7db352c8fc6a4d2bc475ba901c25b39fe7157541da4c16eacce6f8be83e49"
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.3"
+    version: "3.1.5"
   device_info:
     dependency: "direct main"
     description:
@@ -614,10 +614,10 @@ packages:
     dependency: "direct main"
     description:
       name: petitparser
-      sha256: "1a97266a94f7350d30ae522c0af07890c70b8e62c71e8e3920d1db4d23c057d1"
+      sha256: "91bd59303e9f769f108f8df05e371341b15d59e995e6806aefab827b58336675"
       url: "https://pub.dev"
     source: hosted
-    version: "7.0.1"
+    version: "7.0.2"
   platform:
     dependency: "direct main"
     description:
@@ -883,10 +883,10 @@ packages:
     dependency: "direct main"
     description:
       name: url_launcher_ios
-      sha256: b1aca26728b7cc7a3af971bb6f601554a8ae9df2e0a006de8450ba06a17ad36a
+      sha256: "580fe5dfb51671ae38191d316e027f6b76272b026370708c2d898799750a02b0"
       url: "https://pub.dev"
     source: hosted
-    version: "6.4.0"
+    version: "6.4.1"
   url_launcher_linux:
     dependency: "direct main"
     description:

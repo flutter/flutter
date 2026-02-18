@@ -3269,6 +3269,10 @@ class _RouteEntry extends RouteTransitionRecord {
 
     if (previousState == _RouteLifecycle.replace || previousState == _RouteLifecycle.pushReplace) {
       navigator._observedRouteAdditions.add(_NavigatorReplaceObservation(route, previousPresent));
+      if (previousPresent != null && previousPresent._isPageBased) {
+        final page = previousPresent.settings as Page<Object?>;
+        navigator.widget.onDidRemovePage?.call(page);
+      }
     } else {
       assert(previousState == _RouteLifecycle.push);
       navigator._observedRouteAdditions.add(_NavigatorPushObservation(route, previousPresent));
@@ -3325,6 +3329,10 @@ class _RouteEntry extends RouteTransitionRecord {
       return false;
     }
     route.onPopInvokedWithResult(true, pendingResult);
+    if (pageBased && imperativeRemoval) {
+      final page = route.settings as Page<Object?>;
+      navigator.widget.onDidRemovePage?.call(page);
+    }
     pendingResult = null;
     return true;
   }
@@ -4523,9 +4531,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         case _RouteLifecycle.dispose:
           // Delay disposal until didChangeNext/didChangePrevious have been sent.
           toBeDisposed.add(_history.removeAt(index));
-          if (entry.pageBased && entry.imperativeRemoval) {
-            widget.onDidRemovePage?.call(entry.route.settings as Page<Object?>);
-          }
           entry = next;
         case _RouteLifecycle.disposing:
         case _RouteLifecycle.disposed:
