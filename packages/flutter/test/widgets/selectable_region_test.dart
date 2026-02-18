@@ -6534,6 +6534,121 @@ void main() {
     final clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
     expect(clipboardData['text'], 'Hello my name is Dash.');
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/181231.
+  testWidgets(
+    'Nested SelectableRegion - right click on child does not trigger parent context menu on Linux and Windows',
+    (WidgetTester tester) async {
+      SelectedContent? parentSelection;
+      SelectedContent? childSelection;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            selectionControls: materialTextSelectionControls,
+            onSelectionChanged: (SelectedContent? content) {
+              parentSelection = content;
+            },
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                const Text('Parent Text'),
+                SelectableRegion(
+                  selectionControls: materialTextSelectionControls,
+                  onSelectionChanged: (SelectedContent? content) {
+                    childSelection = content;
+                  },
+                  child: const Text('Child Text'),
+                ),
+                const Text('Other Parent Text'),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final Finder childTextFinder = find.text('Child Text');
+      expect(childTextFinder, findsOneWidget);
+
+      // Perform a right click (secondary tap) on the child text.
+      // Wait past kPressTimeout (100ms) so both parent and child
+      // TapGestureRecognizers fire handleTapDown.
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(childTextFinder),
+        kind: PointerDeviceKind.mouse,
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pump(const Duration(milliseconds: 200));
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Context menu should appear from the child's SelectableRegion.
+      expect(find.text('Select all'), findsOneWidget);
+
+      // Tap Select All.
+      await tester.tap(find.text('Select all'));
+      await tester.pumpAndSettle();
+
+      expect(parentSelection, isNull);
+      expect(childSelection?.plainText, 'Child Text');
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+    }),
+    skip: kIsWeb, // [intended] This test verifies desktop behavior.
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/181231.
+  testWidgets(
+    'Nested SelectableRegion - right click on child does not select parent text on macOS',
+    (WidgetTester tester) async {
+      SelectedContent? parentSelection;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            selectionControls: materialTextSelectionControls,
+            onSelectionChanged: (SelectedContent? content) {
+              parentSelection = content;
+            },
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                const Text('Parent Text'),
+                SelectableRegion(
+                  selectionControls: materialTextSelectionControls,
+                  child: const Text('Child Text'),
+                ),
+                const Text('Other Parent Text'),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final Finder childTextFinder = find.text('Child Text');
+      expect(childTextFinder, findsOneWidget);
+
+      // Perform a right click (secondary tap) on the child text.
+      // Wait past kPressTimeout (100ms) so both parent and child
+      // TapGestureRecognizers fire handleTapDown.
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(childTextFinder),
+        kind: PointerDeviceKind.mouse,
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pump(const Duration(milliseconds: 200));
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(parentSelection, isNull);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.macOS}),
+    skip: kIsWeb, // [intended] Web use its native context menu.
+  );
 }
 
 class ColumnSelectionContainerDelegate extends StaticSelectionContainerDelegate {

@@ -29,6 +29,7 @@ import 'framework.dart';
 import 'gesture_detector.dart';
 import 'magnifier.dart';
 import 'media_query.dart';
+import 'notification_listener.dart';
 import 'overlay.dart';
 import 'platform_selectable_region_context_menu.dart';
 import 'selection_container.dart';
@@ -397,6 +398,7 @@ class SelectableRegionState extends State<SelectableRegion>
 
   final Map<Type, GestureRecognizerFactory> _gestureRecognizers =
       <Type, GestureRecognizerFactory>{};
+  bool _childHandledSecondaryTap = false;
   SelectionOverlay? _selectionOverlay;
   final LayerLink _startHandleLayerLink = LayerLink();
   final LayerLink _endHandleLayerLink = LayerLink();
@@ -1041,6 +1043,12 @@ class SelectableRegionState extends State<SelectableRegion>
   void _handleRightClickDown(TapDownDetails details) {
     final Offset? previousSecondaryTapDownPosition = _lastSecondaryTapDownPosition;
     final bool toolbarIsVisible = _selectionOverlay?.toolbarIsVisible ?? false;
+    // If a child handling the right click has already been detected, do not handle it again.
+    if (_childHandledSecondaryTap) {
+      // The flag is reset in a post-frame callback.
+      return;
+    }
+    const _SelectableRegionSecondaryTapNotification().dispatch(context);
     _lastSecondaryTapDownPosition = details.globalPosition;
     _focusNode.requestFocus();
     switch (defaultTargetPlatform) {
@@ -1062,14 +1070,20 @@ class SelectableRegionState extends State<SelectableRegion>
           return;
         }
         _collapseSelectionAt(offset: _lastSecondaryTapDownPosition!);
+        // ignore: unnecessary_breaks
+        break;
       case TargetPlatform.iOS:
         _selectWordAt(offset: _lastSecondaryTapDownPosition!);
+        // ignore: unnecessary_breaks
+        break;
       case TargetPlatform.macOS:
         if (previousSecondaryTapDownPosition == _lastSecondaryTapDownPosition && toolbarIsVisible) {
           hideToolbar();
           return;
         }
         _selectWordAt(offset: _lastSecondaryTapDownPosition!);
+        // ignore: unnecessary_breaks
+        break;
       case TargetPlatform.linux:
         if (toolbarIsVisible) {
           hideToolbar();
@@ -1946,31 +1960,43 @@ class SelectableRegionState extends State<SelectableRegion>
     if (_webContextMenuEnabled) {
       result = PlatformSelectableRegionContextMenu(child: result);
     }
-    return TapRegion(
-      groupId: SelectableRegion,
-      onTapOutside: (PointerDownEvent event) {
-        // To match the native web behavior, this selectable region is
-        // unfocused when tapping outside of it causing the selection to
-        // be dismissed.
-        //
-        // Tapping outside the selectable region does not unfocus
-        // the region on non-web platforms.
-        if (kIsWeb) {
-          _focusNode.unfocus();
+    return NotificationListener<_SelectableRegionSecondaryTapNotification>(
+      onNotification: (_SelectableRegionSecondaryTapNotification notification) {
+        if (_childHandledSecondaryTap) {
+          return false;
         }
+        _childHandledSecondaryTap = true;
+        SchedulerBinding.instance.addPostFrameCallback((_) {
+          _childHandledSecondaryTap = false;
+        });
+        return false;
       },
-      child: CompositedTransformTarget(
-        link: _toolbarLayerLink,
-        child: RawGestureDetector(
-          gestures: _gestureRecognizers,
-          behavior: HitTestBehavior.translucent,
-          excludeFromSemantics: true,
-          child: Actions(
-            actions: _actions,
-            child: Focus.withExternalFocusNode(
-              includeSemantics: false,
-              focusNode: _focusNode,
-              child: result,
+      child: TapRegion(
+        groupId: SelectableRegion,
+        onTapOutside: (PointerDownEvent event) {
+          // To match the native web behavior, this selectable region is
+          // unfocused when tapping outside of it causing the selection to
+          // be dismissed.
+          //
+          // Tapping outside the selectable region does not unfocus
+          // the region on non-web platforms.
+          if (kIsWeb) {
+            _focusNode.unfocus();
+          }
+        },
+        child: CompositedTransformTarget(
+          link: _toolbarLayerLink,
+          child: RawGestureDetector(
+            gestures: _gestureRecognizers,
+            behavior: HitTestBehavior.translucent,
+            excludeFromSemantics: true,
+            child: Actions(
+              actions: _actions,
+              child: Focus.withExternalFocusNode(
+                includeSemantics: false,
+                focusNode: _focusNode,
+                child: result,
+              ),
             ),
           ),
         ),
@@ -3657,4 +3683,13 @@ final class SelectionListenerNotifier extends ChangeNotifier {
   void addListener(VoidCallback listener) {
     super.addListener(listener);
   }
+}
+
+/// A notification that indicates a secondary tap (right click) has occurred in a
+/// [SelectableRegion].
+///
+/// This is used to prevent the context menu from appearing in parent
+/// [SelectionArea]s when a nested [SelectionArea] is right-clicked.
+class _SelectableRegionSecondaryTapNotification extends Notification {
+  const _SelectableRegionSecondaryTapNotification();
 }
