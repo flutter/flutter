@@ -79,6 +79,7 @@ class WebAssetServer implements AssetReader {
     required this.webRenderer,
     required this.useLocalCanvasKit,
     required this.fileSystem,
+    required this.logger,
     Map<String, String> webDefines = const <String, String>{},
   }) : basePath = WebTemplate.baseHref(htmlTemplate(fileSystem, 'index.html', _kDefaultIndex)),
        _webDefines = webDefines {
@@ -266,6 +267,7 @@ class WebAssetServer implements AssetReader {
       webRenderer: webRenderer,
       useLocalCanvasKit: useLocalCanvasKit,
       fileSystem: fileSystem,
+      logger: logger,
       webDefines: webDefines,
     );
     final int selectedPort = server.selectedPort;
@@ -595,6 +597,7 @@ class WebAssetServer implements AssetReader {
   final bool useLocalCanvasKit;
 
   final FileSystem fileSystem;
+  final Logger logger;
 
   String get _buildConfigString {
     final buildConfig = <String, Object>{
@@ -634,6 +637,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
       serviceWorkerVersion: null,
       buildConfig: _buildConfigString,
       flutterJsFile: _flutterJsFile,
+      logger: logger,
       webDefines: _webDefines,
     );
   }
@@ -657,6 +661,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
         buildConfig: _buildConfigString,
         flutterJsFile: _flutterJsFile,
         flutterBootstrapJs: _flutterBootstrapJsContent,
+        logger: logger,
         webDefines: _webDefines,
       ),
       encoding: utf8,

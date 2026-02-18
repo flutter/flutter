@@ -1608,7 +1608,7 @@ class _RenderDecoration extends RenderBox
       // +1 shifts the range of x from (-1.0, 1.0) to (0.0, 2.0).
       final double floatAlign = decoration.floatingLabelAlignment._x + 1;
       final double floatWidth = labelWidth * _kFinalLabelScale;
-      final double borderWeight = decoration.border.borderSide.width;
+      final BorderSide borderSide = decoration.border.borderSide;
       final double t = decoration.floatingLabelProgress;
       // The center of the outline border label ends up a little below the
       // center of the top border line.
@@ -1616,7 +1616,7 @@ class _RenderDecoration extends RenderBox
       // Temporary opt-in fix for https://github.com/flutter/flutter/issues/54028
       // Center the scaled label relative to the border.
       final double outlinedFloatingY =
-          (-labelHeight * _kFinalLabelScale) / 2.0 + borderWeight / 2.0;
+          (-labelHeight * _kFinalLabelScale) / 2.0 - borderSide.strokeOffset / 2.0;
       final double floatingY = isOutlineBorder
           ? outlinedFloatingY
           : contentPadding.top + _densityOffset.dy / 2;
@@ -2678,11 +2678,24 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       expands: widget.expands,
     );
 
+    // Pass error text to semantics so screen readers announce it along with
+    // the input field (via aria-description on web). The hintText is already
+    // in the semantics tree via the hint Text widget that merges up through
+    // _RenderDecoration's childSemanticsConfigurationDelegate, so we only
+    // need to add errorText here. Adding hintText would cause duplication.
+    // TODO(flutter-zl): A follow-up using aria-describedby with element IDs
+    // will address complex cases (custom error widgets, errors outside
+    // InputDecoration, custom announcement ordering). See
+    // https://github.com/flutter/flutter/issues/180496#issuecomment-3713178684.
+    final String? semanticsHint = decoration.errorText;
+
+    final Widget result = Semantics(hint: semanticsHint, child: decorator);
+
     final BoxConstraints? constraints = decoration.constraints;
     if (constraints != null) {
-      return ConstrainedBox(constraints: constraints, child: decorator);
+      return ConstrainedBox(constraints: constraints, child: result);
     }
-    return decorator;
+    return result;
   }
 }
 

@@ -754,6 +754,11 @@ std::optional<nlohmann::json::object_t> Reflector::ReflectType(
       } else {
         member["array_elements"] = "std::nullopt";
       }
+      if (struct_member.float_type.has_value()) {
+        member["float_type"] = struct_member.float_type.value();
+      } else {
+        member["float_type"] = "std::nullopt";
+      }
       members.emplace_back(std::move(member));
     }
   }
@@ -931,6 +936,31 @@ std::vector<StructMember> Reflector::ReadStructMembers(
           /*p_byte_length=*/total_length,
           /*p_array_elements=*/count,
           /*p_element_padding=*/8,
+          /*p_float_type=*/"ShaderFloatType::kMat2",
+      });
+      current_byte_offset += total_length;
+      continue;
+    }
+
+    if (member.basetype == spirv_cross::SPIRType::BaseType::Float &&
+        member.width == 32 && member.columns == 3 && member.vecsize == 3) {
+      // Mat3s are packed as three vec3s with one float of padding after each.
+      // {val, val, val, padding, val, val, val, padding, val, val, val,
+      // padding}.
+      uint32_t count = array_elements.value_or(1) * 3;
+      uint32_t stride = 16;
+      uint32_t total_length = stride * count;
+
+      result.emplace_back(StructMember{
+          /*p_type=*/"Mat3",
+          /*p_base_type=*/spirv_cross::SPIRType::BaseType::Float,
+          /*p_name=*/GetMemberNameAtIndex(struct_type, i),
+          /*p_offset=*/struct_member_offset,
+          /*p_size=*/12,
+          /*p_byte_length=*/total_length,
+          /*p_array_elements=*/count,
+          /*p_element_padding=*/4,
+          /*p_float_type=*/"ShaderFloatType::kMat3",
       });
       current_byte_offset += total_length;
       continue;
@@ -954,6 +984,7 @@ std::vector<StructMember> Reflector::ReadStructMembers(
           /*p_byte_length=*/stride * array_elements.value_or(1),
           /*p_array_elements=*/array_elements,
           /*p_element_padding=*/element_padding,
+          /*p_float_type=*/"ShaderFloatType::kMat4",
       });
       current_byte_offset += stride * array_elements.value_or(1);
       continue;
@@ -1022,6 +1053,7 @@ std::vector<StructMember> Reflector::ReadStructMembers(
           /*p_byte_length=*/stride * array_elements.value_or(1),
           /*p_array_elements=*/array_elements,
           /*p_element_padding=*/element_padding,
+          /*p_float_type=*/"ShaderFloatType::kVec2",
       });
       current_byte_offset += stride * array_elements.value_or(1);
       continue;
@@ -1044,6 +1076,7 @@ std::vector<StructMember> Reflector::ReadStructMembers(
           /*p_byte_length=*/stride * array_elements.value_or(1),
           /*p_array_elements=*/array_elements,
           /*p_element_padding=*/element_padding,
+          /*p_float_type=*/"ShaderFloatType::kVec3",
       });
       current_byte_offset += stride * array_elements.value_or(1);
       continue;
@@ -1066,6 +1099,7 @@ std::vector<StructMember> Reflector::ReadStructMembers(
           /*p_byte_length=*/stride * array_elements.value_or(1),
           /*p_array_elements=*/array_elements,
           /*p_element_padding=*/element_padding,
+          /*p_float_type=*/"ShaderFloatType::kVec4",
       });
       current_byte_offset += stride * array_elements.value_or(1);
       continue;
@@ -1151,7 +1185,12 @@ std::vector<StructMember> Reflector::ReadStructMembers(
         if (stride == 0) {
           stride = maybe_known_type.value().byte_size;
         }
+        std::optional<std::string> float_type = std::nullopt;
+        if (member.basetype == spirv_cross::SPIRType::BaseType::Float) {
+          float_type = "ShaderFloatType::kFloat";
+        }
         uint32_t element_padding = stride - maybe_known_type.value().byte_size;
+
         // Add the type directly.
         result.emplace_back(StructMember{
             /*p_type=*/maybe_known_type.value().name,
@@ -1162,6 +1201,7 @@ std::vector<StructMember> Reflector::ReadStructMembers(
             /*p_byte_length=*/stride * array_elements.value_or(1),
             /*p_array_elements=*/array_elements,
             /*p_element_padding=*/element_padding,
+            /*p_float_type=*/float_type,
         });
         current_byte_offset += stride * array_elements.value_or(1);
         continue;
@@ -1257,6 +1297,11 @@ nlohmann::json::object_t Reflector::EmitStructDefinition(
       member["array_elements"] = "std::nullopt";
     }
     member["element_padding"] = struct_member.element_padding;
+    if (struct_member.float_type.has_value()) {
+      member["float_type"] = struct_member.float_type.value();
+    } else {
+      member["float_type"] = "std::nullopt";
+    }
   }
   return result;
 }

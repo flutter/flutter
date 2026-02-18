@@ -20,9 +20,34 @@
 
 @end
 
+struct FlutterWindowRect {
+  double left;
+  double top;
+  double width;
+  double height;
+
+  static FlutterWindowRect fromNSRect(const NSRect& rect) {
+    return {
+        rect.origin.x,
+        rect.origin.y,
+        rect.size.width,
+        rect.size.height,
+    };
+  }
+
+  NSRect toNSRect() const { return NSMakeRect(left, top, width, height); }
+};
+
 struct FlutterWindowSize {
   double width;
   double height;
+
+  static FlutterWindowSize fromNSSize(const NSSize& size) {
+    return {
+        size.width,
+        size.height,
+    };
+  }
 };
 
 struct FlutterWindowConstraints {
@@ -41,6 +66,11 @@ struct FlutterWindowCreationRequest {
   void (*on_should_close)();
   void (*on_will_close)();
   void (*notify_listeners)();
+  // For sized to content windows with positioner returns the desired window position for given
+  // configuration. All coordinates are in logical space.
+  FlutterWindowRect* (*on_get_window_position)(const FlutterWindowSize& child_size,
+                                               const FlutterWindowRect& parent_rect,
+                                               const FlutterWindowRect& output_rect);
 };
 
 extern "C" {
@@ -54,6 +84,11 @@ int64_t InternalFlutter_WindowController_CreateRegularWindow(
 
 FLUTTER_DARWIN_EXPORT
 int64_t InternalFlutter_WindowController_CreateDialogWindow(
+    int64_t engine_id,
+    const FlutterWindowCreationRequest* request);
+
+FLUTTER_DARWIN_EXPORT
+int64_t InternalFlutter_WindowController_CreateTooltipWindow(
     int64_t engine_id,
     const FlutterWindowCreationRequest* request);
 
@@ -105,6 +140,9 @@ char* InternalFlutter_Window_GetTitle(void* window);
 
 FLUTTER_DARWIN_EXPORT
 bool InternalFlutter_Window_IsActivated(void* window);
+
+FLUTTER_DARWIN_EXPORT
+void InternalFlutter_Window_UpdatePosition(void* window);
 
 // NOLINTEND(google-objc-function-naming)
 }

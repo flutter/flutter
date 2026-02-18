@@ -24,7 +24,7 @@
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
-#include "surface_producer.h"
+#include "flutter/shell/platform/fuchsia/flutter/surface_producer.h"
 
 namespace flutter_runner {
 

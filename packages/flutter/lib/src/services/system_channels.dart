@@ -183,26 +183,6 @@ abstract final class SystemChannels {
     JSONMethodCodec(),
   );
 
-  /// An unidirectional JSON [MethodChannel] for receiving status bar related
-  /// events from iOS.
-  ///
-  /// The only method this channel receives is `handleScrollToTop` which
-  /// is called on iOS when the user taps the status bar to scroll a scroll view
-  /// to the top.
-  ///
-  /// Typically you should not subscribe to this channel directly. The events are
-  /// dispatched to registered [WidgetsBindingObserver]s via the
-  /// [WidgetsBindingObserver.handleStatusBarTap] callback.
-  ///
-  /// See also:
-  ///
-  ///  * [WidgetsBindingObserver.handleStatusBarTap], the widgets library callback
-  ///    for dispatching the status bar tap event to the widget tree.
-  static const OptionalMethodChannel statusBar = OptionalMethodChannel(
-    'flutter/status_bar',
-    JSONMethodCodec(),
-  );
-
   /// A [MethodChannel] for handling text processing actions.
   ///
   /// This channel exposes the text processing feature for supported platforms.
