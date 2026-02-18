@@ -18,6 +18,16 @@ The easiest way to symbolicate stack traces for Android and older iOS apps is to
 
    To download the symbols for android-arm, download this URL _using your browser_ (replacing the hash again, and noting that this URL is on a different host, "storage", compared to the one above, which uses "console"): `https://storage.cloud.google.com/flutter_infra_release/flutter/cea5ed2b9be42a981eac762af3664e4a17d0a53f/android-arm/symbols.zip`.
 
+   Since https://github.com/flutter/flutter/pull/161546, the artifact at the following url is an unstripped version of `libflutter.so`, not the symbols themselves. To retrieve the symbols, use `llvm-objcopy`. If you have run `gclient sync` you should have a copy at
+   ```
+   <FLUTTER_ROOT>/third_party/android_tools/sdk/ndk/<VERSION>/toolchains/llvm/prebuilt/<ARCH>/bin/llvm-objcopy
+   ```
+
+   which you can use to run on the downloaded `libflutter.so`:
+   ```
+   llvm-objcopy --only-keep-debug <PATH_TO_DOWNLOADED_LIBFLUTTER> <PATH_TO_DOWNLOADED_LIBFLUTTER>.dbg
+   ```
+
    Please be aware that the type of the symbol must match your Apps release type. In above example, this refers to a android-arm **debug** build. If you work with a **release** or **profile** build, the URLs would look like this:
 
     * <https://storage.cloud.google.com/flutter_infra_release/flutter/cea5ed2b9be42a981eac762af3664e4a17d0a53f/android-arm-release/symbols.zip>
@@ -161,9 +171,7 @@ If the crash is in AOT Dart code (in `--release` or `--profile` builds) on iOS, 
 
 When running with a local engine build, the symbolization workflow can be cumbersome and unnecessary. Instead, it is possible to build the engine itself with symbols and disable Gradle's automatic symbol stripping. This is also required to see symbol names in Android Studio CPU profiles.
 
-1. In the android engine configuration, provide a --no-stripped argument to gn. For example: `gn --android --android-cpu=arm64 --unopt --no-stripped`
-
-2. In the flutter project file `android/app/build.gradle`, add the following line under the `android` block:
+1. In the flutter project file `android/app/build.gradle`, add the following line under the `android` block:
 
 ```gradle
 packagingOptions{
