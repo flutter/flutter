@@ -122,7 +122,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/sliver_floating_header_test.dart',
     'packages/flutter/test/widgets/page_transitions_test.dart',
     'packages/flutter/test/widgets/editable_text_scribble_test.dart',
-    'packages/flutter/test/widgets/draggable_scrollable_sheet_test.dart',
     'packages/flutter/test/widgets/autofill_group_test.dart',
     'packages/flutter/test/widgets/range_maintaining_scroll_physics_test.dart',
     'packages/flutter/test/widgets/interactive_viewer_test.dart',
@@ -148,7 +147,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/sliver_semantics_test.dart',
     'packages/flutter/test/widgets/sliver_constraints_test.dart',
     'packages/flutter/test/widgets/autocomplete_test.dart',
-    'packages/flutter/test/widgets/decorated_sliver_test.dart',
     'packages/flutter/test/widgets/shadow_test.dart',
     'packages/flutter/test/widgets/routes_transition_test.dart',
     'packages/flutter/test/widgets/route_notification_messages_test.dart',
@@ -211,7 +209,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/baseline_test.dart',
     'packages/flutter/test/widgets/selection_container_test.dart',
     'packages/flutter/test/widgets/scrollable_semantics_test.dart',
-    'packages/flutter/test/widgets/single_child_scroll_view_test.dart',
     'packages/flutter/test/widgets/pinned_header_sliver_test.dart',
     'packages/flutter/test/widgets/form_test.dart',
   };

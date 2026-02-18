@@ -3,13 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'utils.dart';
-
-// TODO(navaronbracke): Remove MaterialApp and material import
+import 'widgets_app_tester.dart';
 
 void main() {
   Widget boilerplateWidget(
@@ -796,7 +795,7 @@ void main() {
     (WidgetTester tester) async {
       var s = 0;
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return DraggableScrollableSheet(
@@ -1628,7 +1627,7 @@ void main() {
     final controller = DraggableScrollableController();
     addTearDown(controller.dispose);
     Widget buildFrame(ScrollPhysics? physics) {
-      return MaterialApp(
+      return TestWidgetsApp(
         home: DraggableScrollableSheet(
           controller: controller,
           initialChildSize: 0.25,
@@ -1671,7 +1670,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/67219
     var buildCount = 0;
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return DraggableScrollableSheet(
@@ -1719,7 +1718,7 @@ void main() {
 
     var controller = controller1;
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return DraggableScrollableSheet(
@@ -1779,7 +1778,7 @@ void main() {
 
     var controller = controller1;
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return DraggableScrollableSheet(
@@ -1916,7 +1915,7 @@ void main() {
       children.insert(0, Container(color: const Color(0xFF00FF00), height: 100));
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return DraggableScrollableSheet(
@@ -1961,13 +1960,13 @@ void main() {
 
       await tester.fling(find.text('Item 0'), Offset(0, -itemHeight), 100);
       await tester.pumpFrames(
-        tester.widget(find.byType(MaterialApp)),
+        tester.widget(find.byType(TestWidgetsApp)),
         const Duration(milliseconds: 500),
       );
 
       await tester.fling(find.text('Item 2'), Offset(0, itemHeight), 500);
       await tester.pumpFrames(
-        tester.widget(find.byType(MaterialApp)),
+        tester.widget(find.byType(TestWidgetsApp)),
         const Duration(milliseconds: 500),
       );
 
