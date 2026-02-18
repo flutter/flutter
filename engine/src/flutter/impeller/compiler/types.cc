@@ -312,24 +312,5 @@ bool TargetPlatformIsVulkan(TargetPlatform platform) {
   FML_UNREACHABLE();
 }
 
-bool TargetPlatformBundlesSkSL(TargetPlatform platform) {
-  switch (platform) {
-    case TargetPlatform::kSkSL:
-    case TargetPlatform::kRuntimeStageMetal:
-    case TargetPlatform::kRuntimeStageGLES:
-    case TargetPlatform::kRuntimeStageGLES3:
-    case TargetPlatform::kRuntimeStageVulkan:
-      return true;
-    case TargetPlatform::kMetalDesktop:
-    case TargetPlatform::kMetalIOS:
-    case TargetPlatform::kUnknown:
-    case TargetPlatform::kOpenGLES:
-    case TargetPlatform::kOpenGLDesktop:
-    case TargetPlatform::kVulkan:
-      return false;
-  }
-  FML_UNREACHABLE();
-}
-
 }  // namespace compiler
 }  // namespace impeller

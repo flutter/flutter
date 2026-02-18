@@ -10,6 +10,7 @@
 #include "flutter/fml/string_conversion.h"
 #include "flutter/testing/testing.h"
 #include "impeller/compiler/switches.h"
+#include "impeller/compiler/types.h"
 #include "impeller/compiler/utilities.h"
 
 namespace impeller {
@@ -101,7 +102,7 @@ TEST(SwitchesTest, EntryPointPrefixIsApplied) {
   EXPECT_EQ(switches.entry_point_prefix, "my_prefix_");
 
   switches.source_file_name = "test.frag";
-  auto options = switches.CreateSourceOptions();
+  auto options = switches.CreateSourceOptions(TargetPlatform::kUnknown);
   EXPECT_EQ(options.entry_point_name, "my_prefix_test_fragment_main");
 }
 

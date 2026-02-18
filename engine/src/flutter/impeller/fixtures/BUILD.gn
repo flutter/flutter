@@ -105,6 +105,22 @@ impellerc("runtime_stages") {
   sl_file_extension = "iplr"
 
   shader_target_flags = [
+    "--sksl",
+    "--runtime-stage-metal",
+    "--runtime-stage-gles",
+    "--runtime-stage-gles3",
+    "--runtime-stage-vulkan",
+  ]
+
+  iplr = true
+}
+
+impellerc("runtime_stages_non_sksl") {
+  mnemonic = "IMPELLERC_IPLR"
+  shaders = [ "runtime_stage_simple_no_sksl.frag" ]
+  sl_file_extension = "iplr"
+
+  shader_target_flags = [
     "--runtime-stage-metal",
     "--runtime-stage-gles",
     "--runtime-stage-gles3",
@@ -172,7 +188,12 @@ test_fixtures("file_fixtures") {
   }
   fixtures +=
       filter_include(get_target_outputs(":runtime_stages"), [ "*.iplr" ])
-  deps = [ ":runtime_stages" ]
+  fixtures += filter_include(get_target_outputs(":runtime_stages_non_sksl"),
+                             [ "*.iplr" ])
+  deps = [
+    ":runtime_stages",
+    ":runtime_stages_non_sksl",
+  ]
 }
 
 impellerc("flutter_gpu_shaders") {

@@ -56,12 +56,10 @@ class Switches {
 
   /// A vector containing at least one valid platform.
   std::vector<TargetPlatform> PlatformsToCompile() const;
-  TargetPlatform SelectDefaultTargetPlatform() const;
 
   // Creates source options from these switches for the specified
-  // TargetPlatform. Uses SelectDefaultTargetPlatform if not specified.
-  SourceOptions CreateSourceOptions(
-      std::optional<TargetPlatform> target_platform = std::nullopt) const;
+  // TargetPlatform.
+  SourceOptions CreateSourceOptions(TargetPlatform target_platform) const;
 
   static void PrintHelp(std::ostream& stream);
 
