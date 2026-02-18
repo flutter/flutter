@@ -740,6 +740,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
 
     float uiContrast = uiModeManager.getContrast();
+    // TODO(xxxOVALxxx): Move contrast value to a separate API
+    // as Android supports a range from -1.0 to 1.0, not just a boolean state.
+
     // 0.0 (standard), 0.5 (medium), 1.0 (high)
     // Any enhancement above standard is considered high contrast
     boolean isHighContrastEnabled = uiContrast > 0.0f;
