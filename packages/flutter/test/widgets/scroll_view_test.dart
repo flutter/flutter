@@ -5,12 +5,13 @@
 import 'dart:math';
 
 import 'package:flutter/gestures.dart' show DragStartBehavior;
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show LogicalKeyboardKey;
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'editable_text_utils.dart';
 import 'states.dart';
+import 'widgets_app_tester.dart';
 
 class ItemWidget extends StatefulWidget {
   const ItemWidget({super.key, required this.value});
@@ -29,47 +30,6 @@ class _ItemWidgetState extends State<ItemWidget> {
   }
 }
 
-class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
-  @override
-  bool isSupported(Locale locale) => true;
-
-  @override
-  Future<MaterialLocalizations> load(Locale locale) => DefaultMaterialLocalizations.load(locale);
-
-  @override
-  bool shouldReload(MaterialLocalizationsDelegate old) => false;
-}
-
-class WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
-  @override
-  bool isSupported(Locale locale) => true;
-
-  @override
-  Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
-
-  @override
-  bool shouldReload(WidgetsLocalizationsDelegate old) => false;
-}
-
-Widget textFieldBoilerplate({required Widget child}) {
-  return MaterialApp(
-    home: Localizations(
-      locale: const Locale('en', 'US'),
-      delegates: <LocalizationsDelegate<dynamic>>[
-        WidgetsLocalizationsDelegate(),
-        MaterialLocalizationsDelegate(),
-      ],
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(size: Size(800.0, 600.0)),
-          child: Center(child: Material(child: child)),
-        ),
-      ),
-    ),
-  );
-}
-
 Widget primaryScrollControllerBoilerplate({
   required Widget child,
   required ScrollController controller,
@@ -84,6 +44,8 @@ Widget primaryScrollControllerBoilerplate({
 }
 
 void main() {
+  const green = Color(0xFF00FF00);
+
   testWidgets('ListView control test', (WidgetTester tester) async {
     final log = <String>[];
 
@@ -131,47 +93,51 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          children: focusNodes.map((FocusNode focusNode) {
-            return Container(
-              height: 50,
-              color: Colors.green,
-              child: TestTextField(
-                focusNode: focusNode,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          }).toList(),
+      TestWidgetsApp(
+        home: Center(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            children: focusNodes.map((FocusNode focusNode) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNode,
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isFalse);
+    expect(textField.focusNode.hasFocus, isFalse);
   });
 
   testWidgets('GridView.builder supports null items', (WidgetTester tester) async {
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 42),
-          itemCount: 42,
-          itemBuilder: (BuildContext context, int index) {
-            if (index == 5) {
-              return null;
-            }
+      TestWidgetsApp(
+        home: Center(
+          child: GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 42),
+            itemCount: 42,
+            itemBuilder: (BuildContext context, int index) {
+              if (index == 5) {
+                return null;
+              }
 
-            return const Text('item');
-          },
+              return const Text('item');
+            },
+          ),
         ),
       ),
     );
@@ -181,16 +147,18 @@ void main() {
 
   testWidgets('ListView.builder supports null items', (WidgetTester tester) async {
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: ListView.builder(
-          itemCount: 42,
-          itemBuilder: (BuildContext context, int index) {
-            if (index == 5) {
-              return null;
-            }
+      TestWidgetsApp(
+        home: Center(
+          child: ListView.builder(
+            itemCount: 42,
+            itemBuilder: (BuildContext context, int index) {
+              if (index == 5) {
+                return null;
+              }
 
-            return const Text('item');
-          },
+              return const Text('item');
+            },
+          ),
         ),
       ),
     );
@@ -203,17 +171,19 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: PageView.builder(
-          itemCount: 5,
-          controller: controller,
-          itemBuilder: (BuildContext context, int index) {
-            if (index == 2) {
-              return null;
-            }
+      TestWidgetsApp(
+        home: Center(
+          child: PageView.builder(
+            itemCount: 5,
+            controller: controller,
+            itemBuilder: (BuildContext context, int index) {
+              if (index == 2) {
+                return null;
+              }
 
-            return const Text('item');
-          },
+              return const Text('item');
+            },
+          ),
         ),
       ),
     );
@@ -223,19 +193,21 @@ void main() {
 
   testWidgets('ListView.separated supports null items in itemBuilder', (WidgetTester tester) async {
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: ListView.separated(
-          itemCount: 42,
-          separatorBuilder: (BuildContext context, int index) {
-            return const Text('separator');
-          },
-          itemBuilder: (BuildContext context, int index) {
-            if (index == 5) {
-              return null;
-            }
+      TestWidgetsApp(
+        home: Center(
+          child: ListView.separated(
+            itemCount: 42,
+            separatorBuilder: (BuildContext context, int index) {
+              return const Text('separator');
+            },
+            itemBuilder: (BuildContext context, int index) {
+              if (index == 5) {
+                return null;
+              }
 
-            return const Text('item');
-          },
+              return const Text('item');
+            },
+          ),
         ),
       ),
     );
@@ -253,33 +225,35 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: ListView.builder(
-          padding: EdgeInsets.zero,
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          itemCount: focusNodes.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Container(
-              height: 50,
-              color: Colors.green,
-              child: TestTextField(
-                focusNode: focusNodes[index],
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          },
+      TestWidgetsApp(
+        home: Center(
+          child: ListView.builder(
+            padding: EdgeInsets.zero,
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            itemCount: focusNodes.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNodes[index],
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isFalse);
+    expect(textField.focusNode.hasFocus, isFalse);
   });
 
   testWidgets('ListView.custom dismiss keyboard onDrag test', (WidgetTester tester) async {
@@ -291,32 +265,34 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: ListView.custom(
-          padding: EdgeInsets.zero,
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          childrenDelegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-            return Container(
-              height: 50,
-              color: Colors.green,
-              child: TestTextField(
-                focusNode: focusNodes[index],
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          }, childCount: focusNodes.length),
+      TestWidgetsApp(
+        home: Center(
+          child: ListView.custom(
+            padding: EdgeInsets.zero,
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            childrenDelegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNodes[index],
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            }, childCount: focusNodes.length),
+          ),
         ),
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isFalse);
+    expect(textField.focusNode.hasFocus, isFalse);
   });
 
   testWidgets('ListView.separated dismiss keyboard onDrag test', (WidgetTester tester) async {
@@ -328,34 +304,36 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: ListView.separated(
-          padding: EdgeInsets.zero,
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          itemCount: focusNodes.length,
-          separatorBuilder: (BuildContext context, int index) => const SizedBox(),
-          itemBuilder: (BuildContext context, int index) {
-            return Container(
-              height: 50,
-              color: Colors.green,
-              child: TestTextField(
-                focusNode: focusNodes[index],
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          },
+      TestWidgetsApp(
+        home: Center(
+          child: ListView.separated(
+            padding: EdgeInsets.zero,
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            itemCount: focusNodes.length,
+            separatorBuilder: (BuildContext context, int index) => const SizedBox(),
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNodes[index],
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isFalse);
+    expect(textField.focusNode.hasFocus, isFalse);
   });
 
   testWidgets('GridView dismiss keyboard onDrag test', (WidgetTester tester) async {
@@ -367,33 +345,35 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: GridView(
-          padding: EdgeInsets.zero,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          children: focusNodes.map((FocusNode focusNode) {
-            return Container(
-              height: 50,
-              color: Colors.green,
-              child: TestTextField(
-                focusNode: focusNode,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          }).toList(),
+      TestWidgetsApp(
+        home: Center(
+          child: GridView(
+            padding: EdgeInsets.zero,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            children: focusNodes.map((FocusNode focusNode) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNode,
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isFalse);
+    expect(textField.focusNode.hasFocus, isFalse);
   });
 
   testWidgets('GridView.builder dismiss keyboard onDrag test', (WidgetTester tester) async {
@@ -405,34 +385,36 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: GridView.builder(
-          padding: EdgeInsets.zero,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          itemCount: focusNodes.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Container(
-              height: 50,
-              color: Colors.green,
-              child: TestTextField(
-                focusNode: focusNodes[index],
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          },
+      TestWidgetsApp(
+        home: Center(
+          child: GridView.builder(
+            padding: EdgeInsets.zero,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            itemCount: focusNodes.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNodes[index],
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isFalse);
+    expect(textField.focusNode.hasFocus, isFalse);
   });
 
   testWidgets('GridView.count dismiss keyboard onDrag test', (WidgetTester tester) async {
@@ -444,33 +426,35 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: GridView.count(
-          padding: EdgeInsets.zero,
-          crossAxisCount: 2,
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          children: focusNodes.map((FocusNode focusNode) {
-            return Container(
-              height: 50,
-              color: Colors.green,
-              child: TestTextField(
-                focusNode: focusNode,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          }).toList(),
+      TestWidgetsApp(
+        home: Center(
+          child: GridView.count(
+            padding: EdgeInsets.zero,
+            crossAxisCount: 2,
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            children: focusNodes.map((FocusNode focusNode) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNode,
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isFalse);
+    expect(textField.focusNode.hasFocus, isFalse);
   });
 
   testWidgets('GridView.extent dismiss keyboard onDrag test', (WidgetTester tester) async {
@@ -482,33 +466,35 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: GridView.extent(
-          padding: EdgeInsets.zero,
-          maxCrossAxisExtent: 300,
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          children: focusNodes.map((FocusNode focusNode) {
-            return Container(
-              height: 50,
-              color: Colors.green,
-              child: TestTextField(
-                focusNode: focusNode,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          }).toList(),
+      TestWidgetsApp(
+        home: Center(
+          child: GridView.extent(
+            padding: EdgeInsets.zero,
+            maxCrossAxisExtent: 300,
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            children: focusNodes.map((FocusNode focusNode) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNode,
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isFalse);
+    expect(textField.focusNode.hasFocus, isFalse);
   });
 
   testWidgets('GridView.custom dismiss keyboard onDrag test', (WidgetTester tester) async {
@@ -520,33 +506,35 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: GridView.custom(
-          padding: EdgeInsets.zero,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          childrenDelegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-            return Container(
-              height: 50,
-              color: Colors.green,
-              child: TestTextField(
-                focusNode: focusNodes[index],
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          }, childCount: focusNodes.length),
+      TestWidgetsApp(
+        home: Center(
+          child: GridView.custom(
+            padding: EdgeInsets.zero,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            childrenDelegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNodes[index],
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            }, childCount: focusNodes.length),
+          ),
         ),
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isFalse);
+    expect(textField.focusNode.hasFocus, isFalse);
   });
 
   testWidgets('ListView dismiss keyboard manual test', (WidgetTester tester) async {
@@ -558,31 +546,33 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: focusNodes.map((FocusNode focusNode) {
-            return Container(
-              height: 50,
-              color: Colors.green,
-              child: TestTextField(
-                focusNode: focusNode,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          }).toList(),
+      TestWidgetsApp(
+        home: Center(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: focusNodes.map((FocusNode focusNode) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNode,
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
   });
 
   testWidgets('ListView.builder dismiss keyboard manual test', (WidgetTester tester) async {
@@ -594,32 +584,34 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: ListView.builder(
-          padding: EdgeInsets.zero,
-          itemCount: focusNodes.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Container(
-              height: 50,
-              color: Colors.green,
-              child: TestTextField(
-                focusNode: focusNodes[index],
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          },
+      TestWidgetsApp(
+        home: Center(
+          child: ListView.builder(
+            padding: EdgeInsets.zero,
+            itemCount: focusNodes.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNodes[index],
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
   });
 
   testWidgets('ListView.custom dismiss keyboard manual test', (WidgetTester tester) async {
@@ -631,31 +623,33 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: ListView.custom(
-          padding: EdgeInsets.zero,
-          childrenDelegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-            return Container(
-              height: 50,
-              color: Colors.green,
-              child: TestTextField(
-                focusNode: focusNodes[index],
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          }, childCount: focusNodes.length),
+      TestWidgetsApp(
+        home: Center(
+          child: ListView.custom(
+            padding: EdgeInsets.zero,
+            childrenDelegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNodes[index],
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            }, childCount: focusNodes.length),
+          ),
         ),
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
   });
 
   testWidgets('ListView.separated dismiss keyboard manual test', (WidgetTester tester) async {
@@ -667,33 +661,35 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: ListView.separated(
-          padding: EdgeInsets.zero,
-          itemCount: focusNodes.length,
-          separatorBuilder: (BuildContext context, int index) => const SizedBox(),
-          itemBuilder: (BuildContext context, int index) {
-            return Container(
-              height: 50,
-              color: Colors.green,
-              child: TestTextField(
-                focusNode: focusNodes[index],
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          },
+      TestWidgetsApp(
+        home: Center(
+          child: ListView.separated(
+            padding: EdgeInsets.zero,
+            itemCount: focusNodes.length,
+            separatorBuilder: (BuildContext context, int index) => const SizedBox(),
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNodes[index],
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
   });
 
   testWidgets('GridView dismiss keyboard manual test', (WidgetTester tester) async {
@@ -705,32 +701,34 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: GridView(
-          padding: EdgeInsets.zero,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-          children: focusNodes.map((FocusNode focusNode) {
-            return Container(
-              height: 50,
-              color: Colors.green,
-              child: TestTextField(
-                focusNode: focusNode,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          }).toList(),
+      TestWidgetsApp(
+        home: Center(
+          child: GridView(
+            padding: EdgeInsets.zero,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+            children: focusNodes.map((FocusNode focusNode) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNode,
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
   });
 
   testWidgets('GridView.builder dismiss keyboard manual test', (WidgetTester tester) async {
@@ -742,33 +740,35 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: GridView.builder(
-          padding: EdgeInsets.zero,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-          itemCount: focusNodes.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Container(
-              height: 50,
-              color: Colors.green,
-              child: TestTextField(
-                focusNode: focusNodes[index],
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          },
+      TestWidgetsApp(
+        home: Center(
+          child: GridView.builder(
+            padding: EdgeInsets.zero,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+            itemCount: focusNodes.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNodes[index],
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
   });
 
   testWidgets('GridView.count dismiss keyboard manual test', (WidgetTester tester) async {
@@ -780,32 +780,34 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: GridView.count(
-          padding: EdgeInsets.zero,
-          crossAxisCount: 2,
-          children: focusNodes.map((FocusNode focusNode) {
-            return Container(
-              height: 50,
-              color: Colors.green,
-              child: TestTextField(
-                focusNode: focusNode,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          }).toList(),
+      TestWidgetsApp(
+        home: Center(
+          child: GridView.count(
+            padding: EdgeInsets.zero,
+            crossAxisCount: 2,
+            children: focusNodes.map((FocusNode focusNode) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNode,
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
   });
 
   testWidgets('GridView.extent dismiss keyboard manual test', (WidgetTester tester) async {
@@ -817,32 +819,34 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: GridView.extent(
-          padding: EdgeInsets.zero,
-          maxCrossAxisExtent: 300,
-          children: focusNodes.map((FocusNode focusNode) {
-            return Container(
-              height: 50,
-              color: Colors.green,
-              child: TestTextField(
-                focusNode: focusNode,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          }).toList(),
+      TestWidgetsApp(
+        home: Center(
+          child: GridView.extent(
+            padding: EdgeInsets.zero,
+            maxCrossAxisExtent: 300,
+            children: focusNodes.map((FocusNode focusNode) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNode,
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
   });
 
   testWidgets('GridView.custom dismiss keyboard manual test', (WidgetTester tester) async {
@@ -854,32 +858,34 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: GridView.custom(
-          padding: EdgeInsets.zero,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-          childrenDelegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-            return Container(
-              height: 50,
-              color: Colors.green,
-              child: TestTextField(
-                focusNode: focusNodes[index],
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          }, childCount: focusNodes.length),
+      TestWidgetsApp(
+        home: Center(
+          child: GridView.custom(
+            padding: EdgeInsets.zero,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+            childrenDelegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNodes[index],
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            }, childCount: focusNodes.length),
+          ),
         ),
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
   });
 
   testWidgets('ListView restart ballistic activity out of range', (WidgetTester tester) async {
@@ -963,36 +969,38 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: CustomScrollView(
-          dragStartBehavior: DragStartBehavior.down,
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          slivers: <Widget>[
-            SliverList.list(
-              children: focusNodes.map((FocusNode focusNode) {
-                return Container(
-                  height: 50,
-                  color: Colors.green,
-                  child: TestTextField(
-                    focusNode: focusNode,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
+      TestWidgetsApp(
+        home: Center(
+          child: CustomScrollView(
+            dragStartBehavior: DragStartBehavior.down,
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            slivers: <Widget>[
+              SliverList.list(
+                children: focusNodes.map((FocusNode focusNode) {
+                  return Container(
+                    height: 50,
+                    color: green,
+                    child: TestTextField(
+                      focusNode: focusNode,
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
         ),
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isFalse);
+    expect(textField.focusNode.hasFocus, isFalse);
   });
 
   testWidgets('Can jumpTo during drag', (WidgetTester tester) async {
@@ -1450,17 +1458,15 @@ void main() {
     }
 
     Widget buildFrame(Widget firstSeparator) {
-      return MaterialApp(
-        home: Material(
-          child: ListView.separated(
-            itemBuilder: (BuildContext context, int index) {
-              return Text(listOfValues[index]);
-            },
-            separatorBuilder: (BuildContext context, int index) {
-              return index == 0 ? firstSeparator : buildDivider();
-            },
-            itemCount: listOfValues.length,
-          ),
+      return TestWidgetsApp(
+        home: ListView.separated(
+          itemBuilder: (BuildContext context, int index) {
+            return Text(listOfValues[index]);
+          },
+          separatorBuilder: (BuildContext context, int index) {
+            return index == 0 ? firstSeparator : buildDivider();
+          },
+          itemCount: listOfValues.length,
         ),
       );
     }
@@ -1474,17 +1480,15 @@ void main() {
     const listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
 
     Widget buildFrame(bool throwOnFirstItem) {
-      return MaterialApp(
-        home: Material(
-          child: ListView.builder(
-            itemBuilder: (BuildContext context, int index) {
-              if (index == 0 && throwOnFirstItem) {
-                throw Exception('itemBuilder fail');
-              }
-              return Text(listOfValues[index]);
-            },
-            itemCount: listOfValues.length,
-          ),
+      return TestWidgetsApp(
+        home: ListView.builder(
+          itemBuilder: (BuildContext context, int index) {
+            if (index == 0 && throwOnFirstItem) {
+              throw Exception('itemBuilder fail');
+            }
+            return Text(listOfValues[index]);
+          },
+          itemCount: listOfValues.length,
         ),
       );
     }
@@ -1506,21 +1510,19 @@ void main() {
     const key = Key('list');
 
     Widget buildFrame(bool throwOnFirstSeparator) {
-      return MaterialApp(
-        home: Material(
-          child: ListView.separated(
-            key: key,
-            itemBuilder: (BuildContext context, int index) {
-              return Text(listOfValues[index]);
-            },
-            separatorBuilder: (BuildContext context, int index) {
-              if (index == 0 && throwOnFirstSeparator) {
-                throw Exception('separatorBuilder fail');
-              }
-              return const SizedBox();
-            },
-            itemCount: listOfValues.length,
-          ),
+      return TestWidgetsApp(
+        home: ListView.separated(
+          key: key,
+          itemBuilder: (BuildContext context, int index) {
+            return Text(listOfValues[index]);
+          },
+          separatorBuilder: (BuildContext context, int index) {
+            if (index == 0 && throwOnFirstSeparator) {
+              throw Exception('separatorBuilder fail');
+            }
+            return const SizedBox();
+          },
+          itemCount: listOfValues.length,
         ),
       );
     }
@@ -1619,7 +1621,7 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: CustomScrollView(
           primary: true,
           slivers: List<Widget>.generate(20, (int index) {
@@ -1676,7 +1678,7 @@ void main() {
     }
 
     await tester.pumpWidget(
-      MaterialApp(home: Row(children: <Widget>[getScrollView(), getScrollView()])),
+      TestWidgetsApp(home: Row(children: <Widget>[getScrollView(), getScrollView()])),
     );
     await tester.pumpAndSettle();
     expect(
@@ -1701,27 +1703,25 @@ void main() {
     final numbers = <int>[0, 1, 2];
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return ListView.builder(
-                itemBuilder: (BuildContext context, int index) {
-                  return SizedBox(
-                    key: ValueKey<int>(numbers[index]),
-                    // children with different heights
-                    height: 20 + numbers[index] * 10,
-                    child: ReorderableDragStartListener(
-                      index: index,
-                      child: Text(numbers[index].toString()),
-                    ),
-                  );
-                },
-                itemCount: numbers.length,
-                itemExtent: 30,
-              );
-            },
-          ),
+      TestWidgetsApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return ListView.builder(
+              itemBuilder: (BuildContext context, int index) {
+                return SizedBox(
+                  key: ValueKey<int>(numbers[index]),
+                  // children with different heights
+                  height: 20 + numbers[index] * 10,
+                  child: ReorderableDragStartListener(
+                    index: index,
+                    child: Text(numbers[index].toString()),
+                  ),
+                );
+              },
+              itemCount: numbers.length,
+              itemExtent: 30,
+            );
+          },
         ),
       ),
     );
@@ -1741,27 +1741,25 @@ void main() {
     final numbers = <int>[0, 1, 2];
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return ListView.builder(
-                itemBuilder: (BuildContext context, int index) {
-                  return SizedBox(
-                    key: ValueKey<int>(numbers[index]),
-                    // children with different heights
-                    height: 20 + numbers[index] * 10,
-                    child: ReorderableDragStartListener(
-                      index: index,
-                      child: Text(numbers[index].toString()),
-                    ),
-                  );
-                },
-                itemCount: numbers.length,
-                prototypeItem: const SizedBox(height: 30, child: Text('3')),
-              );
-            },
-          ),
+      TestWidgetsApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return ListView.builder(
+              itemBuilder: (BuildContext context, int index) {
+                return SizedBox(
+                  key: ValueKey<int>(numbers[index]),
+                  // children with different heights
+                  height: 20 + numbers[index] * 10,
+                  child: ReorderableDragStartListener(
+                    index: index,
+                    child: Text(numbers[index].toString()),
+                  ),
+                );
+              },
+              itemCount: numbers.length,
+              prototypeItem: const SizedBox(height: 30, child: Text('3')),
+            );
+          },
         ),
       ),
     );
@@ -1775,68 +1773,23 @@ void main() {
     expect(item2Height, 30.0);
   });
 
-  testWidgets('ListView dismiss keyboard onDrag and keep dismissed on drawer opened test', (
-    WidgetTester tester,
-  ) async {
-    final list = List<int>.generate(50, (int i) => i);
-    final scaffoldKey = GlobalKey<ScaffoldState>();
-
-    await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: Scaffold(
-          key: scaffoldKey,
-          drawer: Container(),
-          body: Column(
-            children: <Widget>[
-              const TestTextField(),
-              Expanded(
-                child: ListView(
-                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                  children: list.map((int i) {
-                    return Container(height: 50);
-                  }).toList(),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    expect(tester.testTextInput.isVisible, isFalse);
-    final Finder finder = find.byType(TestTextField).first;
-    await tester.tap(finder);
-    expect(tester.testTextInput.isVisible, isTrue);
-
-    await tester.drag(find.byType(ListView).first, const Offset(0.0, -40.0));
-    await tester.pumpAndSettle();
-
-    expect(tester.testTextInput.isVisible, isFalse);
-    scaffoldKey.currentState!.openDrawer();
-    await tester.pumpAndSettle();
-
-    expect(tester.testTextInput.isVisible, isFalse);
-  });
-
   testWidgets('ListView.separated findItemIndexCallback preserves state correctly', (
     WidgetTester tester,
   ) async {
     final items = <String>['A', 'B', 'C'];
 
     Widget buildFrame(List<String> itemList) {
-      return MaterialApp(
-        home: Material(
-          child: ListView.separated(
-            itemCount: itemList.length,
-            findItemIndexCallback: (Key key) {
-              final valueKey = key as ValueKey<String>;
-              return itemList.indexOf(valueKey.value);
-            },
-            itemBuilder: (BuildContext context, int index) {
-              return ItemWidget(key: ValueKey<String>(itemList[index]), value: itemList[index]);
-            },
-            separatorBuilder: (BuildContext context, int index) => const SizedBox(),
-          ),
+      return TestWidgetsApp(
+        home: ListView.separated(
+          itemCount: itemList.length,
+          findItemIndexCallback: (Key key) {
+            final valueKey = key as ValueKey<String>;
+            return itemList.indexOf(valueKey.value);
+          },
+          itemBuilder: (BuildContext context, int index) {
+            return ItemWidget(key: ValueKey<String>(itemList[index]), value: itemList[index]);
+          },
+          separatorBuilder: (BuildContext context, int index) => const SizedBox(),
         ),
       );
     }
@@ -1871,23 +1824,21 @@ void main() {
     final items = <String>['A', 'B', 'C'];
 
     Widget buildFrame(List<String> itemList) {
-      return MaterialApp(
-        home: Material(
-          child: CustomScrollView(
-            slivers: <Widget>[
-              SliverList.separated(
-                itemCount: itemList.length,
-                findItemIndexCallback: (Key key) {
-                  final valueKey = key as ValueKey<String>;
-                  return itemList.indexOf(valueKey.value);
-                },
-                itemBuilder: (BuildContext context, int index) {
-                  return ItemWidget(key: ValueKey<String>(itemList[index]), value: itemList[index]);
-                },
-                separatorBuilder: (BuildContext context, int index) => const SizedBox(),
-              ),
-            ],
-          ),
+      return TestWidgetsApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverList.separated(
+              itemCount: itemList.length,
+              findItemIndexCallback: (Key key) {
+                final valueKey = key as ValueKey<String>;
+                return itemList.indexOf(valueKey.value);
+              },
+              itemBuilder: (BuildContext context, int index) {
+                return ItemWidget(key: ValueKey<String>(itemList[index]), value: itemList[index]);
+              },
+              separatorBuilder: (BuildContext context, int index) => const SizedBox(),
+            ),
+          ],
         ),
       );
     }
