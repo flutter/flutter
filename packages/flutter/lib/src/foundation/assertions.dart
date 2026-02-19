@@ -10,7 +10,7 @@ import 'package:meta/meta.dart';
 import 'basic_types.dart';
 import 'constants.dart';
 import 'diagnostics.dart';
-import 'print.dart';
+import 'error_dumper.dart';
 import 'stack_frame.dart';
 
 export 'basic_types.dart' show IterableFilter;
@@ -1035,7 +1035,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
     if (_errorCount == 0 || forceReport) {
       // Diagnostics is only available in debug mode. In profile and release modes fallback to plain print.
       if (isInDebugMode) {
-        debugPrint(
+        ErrorToConsoleDumper.dump(
           TextTreeRenderer(
             wrapWidthProperties: wrapWidth,
             maxDescendentsTruncatableNode: 5,
@@ -1049,7 +1049,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
         );
       }
     } else {
-      debugPrint('Another exception was thrown: ${details.summary}');
+      ErrorToConsoleDumper.dump('Another exception was thrown: ${details.summary}');
     }
     _errorCount += 1;
   }
@@ -1219,7 +1219,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
 /// The `label` argument, if present, will be printed before the stack.
 void debugPrintStack({StackTrace? stackTrace, String? label, int? maxFrames}) {
   if (label != null) {
-    debugPrint(label);
+    ErrorToConsoleDumper.dump(label);
   }
   if (stackTrace == null) {
     stackTrace = StackTrace.current;
@@ -1240,7 +1240,7 @@ void debugPrintStack({StackTrace? stackTrace, String? label, int? maxFrames}) {
   if (maxFrames != null) {
     lines = lines.take(maxFrames);
   }
-  debugPrint(FlutterError.defaultStackFilter(lines).join('\n'));
+  ErrorToConsoleDumper.dump(FlutterError.defaultStackFilter(lines).join('\n'));
 }
 
 /// Diagnostic with a [StackTrace] [value] suitable for displaying stack traces
