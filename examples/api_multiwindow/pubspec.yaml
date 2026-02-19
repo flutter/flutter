@@ -1,5 +1,7 @@
 name: api_multiwindow
-publish_to: 'none'
+publish_to: "none"
+
+version: 1.0.0
 
 environment:
   sdk: ^3.9.0-0
