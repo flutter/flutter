@@ -10,7 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'clipboard_utils.dart';
-import 'editable_text_utils.dart' show TestTextField;
+import 'editable_text_tester.dart';
 import 'keyboard_utils.dart';
 import 'process_text_utils.dart';
 import 'semantics_tester.dart';

@@ -7,7 +7,7 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'editable_text_utils.dart' show TestTextField;
+import 'editable_text_tester.dart';
 
 void main() {
   testWidgets('Radio group control test', (WidgetTester tester) async {

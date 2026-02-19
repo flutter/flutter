@@ -9,8 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'editable_text_utils.dart';
-import 'list_tile_test_utils.dart';
+import 'editable_text_tester.dart';
+import 'list_tile_tester.dart';
 import 'multi_view_testing.dart';
 import 'widgets_app_tester.dart';
 
