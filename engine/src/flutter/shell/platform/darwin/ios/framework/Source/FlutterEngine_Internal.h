@@ -124,6 +124,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)sendDeepLinkToFramework:(NSURL*)url completionHandler:(void (^)(BOOL success))completion;
 
+- (void)onStatusBarTap;
 @end
 
 @interface FlutterImplicitEngineBridgeImpl : NSObject <FlutterImplicitEngineBridge>
