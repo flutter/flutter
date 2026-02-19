@@ -14,6 +14,7 @@ export '_ide_theme_desktop.dart'
 
 /// IDE-supplied theming.
 final class IdeTheme {
+  // ignore: prefer_initializing_formals
   const IdeTheme({this.backgroundColor, this.foregroundColor, bool? isDarkMode})
     : _isDarkMode = isDarkMode;
 

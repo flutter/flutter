@@ -10,6 +10,7 @@ import 'widget_preview_scaffold_controller.dart';
 /// Provides controls to change the zoom level of a [WidgetPreview].
 class ZoomControls extends StatelessWidget {
   /// Provides controls to change the zoom level of a [WidgetPreview].
+  // ignore: prefer_initializing_formals
   const ZoomControls({
     super.key,
     required TransformationController transformationController,
