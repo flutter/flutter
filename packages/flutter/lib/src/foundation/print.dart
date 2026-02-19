@@ -46,6 +46,7 @@ typedef DebugPrintCallback = void Function(String? message, {int? wrapWidth});
 ///
 ///   * [DebugPrintCallback], for function parameters and usage details.
 ///   * [debugPrintThrottled], the default implementation.
+///   * [ErrorToConsoleDumper], for error messages dumped to the console.
 DebugPrintCallback debugPrint = debugPrintThrottled;
 
 /// Alternative implementation of [debugPrint] that does not throttle.
