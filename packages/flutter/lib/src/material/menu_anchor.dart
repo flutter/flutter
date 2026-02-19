@@ -4125,7 +4125,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   }
 
   @override
-  WidgetStateProperty<MouseCursor?>? get mouseCursor => WidgetStateMouseCursor.adaptiveClickable;
+  WidgetStateProperty<MouseCursor?>? get mouseCursor => Theme.of(context).textButtonTheme.style?.mouseCursor ?? WidgetStateMouseCursor.adaptiveClickable;
 
   @override
   WidgetStateProperty<Color?>? get overlayColor {
