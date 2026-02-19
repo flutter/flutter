@@ -2,6 +2,7 @@ package com.flutter.gradle
 
 import com.android.build.api.dsl.ApplicationDefaultConfig
 import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
@@ -48,6 +49,7 @@ class FlutterPluginTest {
         fakeEngineRealmFile.writeText(FAKE_ENGINE_REALM)
         val project = mockk<Project>(relaxed = true)
         val mockAbstractAppExtension = mockk<AbstractAppExtension>(relaxed = true)
+        val mockLibraryExtension = mockk<LibraryExtension>(relaxed = true)
         every { project.extensions.findByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
         val mockAndroidComponentsExtension = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
         every { project.extensions.getByType(AndroidComponentsExtension::class.java) } returns mockAndroidComponentsExtension
@@ -56,6 +58,7 @@ class FlutterPluginTest {
                 every { all() } returns mockk()
             }
         every { project.extensions.getByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
+        every { project.extensions.getByType(LibraryExtension::class.java) } returns mockLibraryExtension
         every { project.extensions.findByName("android") } returns mockAbstractAppExtension
         every { project.projectDir } returns projectDir.toFile()
         every { project.findProperty("flutter.sdk") } returns fakeFlutterSdkDir.toString()
@@ -67,6 +70,7 @@ class FlutterPluginTest {
         every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
         val mockApplicationExtension = mockk<ApplicationExtension>(relaxed = true)
         every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockApplicationExtension
+        every { project.extensions.getByType(ApplicationExtension::class.java) } returns mockApplicationExtension
         val mockApplicationDefaultConfig = mockk<ApplicationDefaultConfig>(relaxed = true)
         every { mockApplicationExtension.defaultConfig } returns mockApplicationDefaultConfig
         every { project.rootProject } returns project
@@ -129,6 +133,7 @@ class FlutterPluginTest {
         every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
         val mockApplicationExtension = mockk<ApplicationExtension>(relaxed = true)
         every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockApplicationExtension
+        every { project.extensions.getByType(ApplicationExtension::class.java) } returns mockApplicationExtension
         val mockApplicationDefaultConfig = mockk<ApplicationDefaultConfig>(relaxed = true)
         every { mockApplicationExtension.defaultConfig } returns mockApplicationDefaultConfig
         every { project.rootProject } returns project
