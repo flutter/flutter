@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
+import 'utils.dart';
 
 void main() {
   setUp(() {
@@ -2395,20 +2396,25 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: Column(
-            children: <Widget>[
-              Semantics(
-                traversalChildIdentifier: identifier,
-                child: Semantics(
-                  container: true, 
-                  child: Semantics(
-                    traversalParentIdentifier: identifier,
-                    child: const SizedBox(width: 50, height: 50),
+          child: Semantics(
+            container: true,
+            child: Column(
+              children: <Widget>[
+                Semantics(
+                  label: 'child_node',
+                  traversalChildIdentifier: identifier,
+                  child: TestButton(
+                    onPressed: () {},
+                    child: Semantics(
+                      label: 'parent_node',
+                      traversalParentIdentifier: identifier,
+                      child: const Text('Button Text'),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox.square(dimension: 10),
-            ],
+                const SizedBox.square(dimension: 10),
+              ],
+            ),
           ),
         ),
       );
@@ -2418,8 +2424,13 @@ void main() {
       final error = exception! as FlutterError;
       expect(
         error.message,
-        'The traversalParent 2 cannot be the child of the traversalChild 1 in hit-test order',
+        matches(
+          RegExp(
+            r'The traversalParent \d+ cannot be the child of the traversalChild \d+ in hit-test order',
+          ),
+        ),
       );
+
       semantics.dispose();
     },
     skip: kIsWeb, // [intended] the web traversal order by using ARIA-OWNS.

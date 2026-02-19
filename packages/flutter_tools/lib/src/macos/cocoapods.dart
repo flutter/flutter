@@ -18,10 +18,13 @@ import '../base/project_migrator.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../flutter_plugins.dart';
 import '../ios/xcodeproj.dart';
 import '../migrations/cocoapods_script_symlink.dart';
 import '../migrations/cocoapods_toolchain_directory_migration.dart';
+import '../plugins.dart';
 import '../project.dart';
+import 'swift_package_manager.dart';
 
 const noCocoaPodsConsequence = '''
   CocoaPods is a package manager for iOS or macOS platform code.
@@ -362,7 +365,7 @@ class CocoaPods {
 
     if (result.exitCode != 0) {
       invalidatePodInstallOutput(xcodeProject);
-      _diagnosePodInstallFailure(result, xcodeProject);
+      await _diagnosePodInstallFailure(result, xcodeProject);
       throwToolExit('Error running pod install');
     } else if (xcodeProject.podfileLock.existsSync()) {
       // Even if the Podfile.lock didn't change, update its modified date to now
@@ -374,10 +377,18 @@ class CocoaPods {
     }
   }
 
-  void _diagnosePodInstallFailure(ProcessResult result, XcodeBasedProject xcodeProject) {
+  Future<void> _diagnosePodInstallFailure(
+    ProcessResult result,
+    XcodeBasedProject xcodeProject,
+  ) async {
     final Object? stdout = result.stdout;
     final Object? stderr = result.stderr;
     if (stdout is! String || stderr is! String) {
+      return;
+    }
+    final String? conflict = await _pluginDependencyManagerConflictError(stdout, xcodeProject);
+    if (conflict != null) {
+      _logger.printError(conflict, emphasis: true);
       return;
     }
     if (stdout.contains('out-of-date source repos')) {
@@ -484,6 +495,47 @@ class CocoaPods {
         emphasis: true,
       );
     }
+  }
+
+  /// Returns a guided error message when a CocoaPod plugin has a dependency on a SwiftPM plugin
+  /// and SwiftPM is enabled. Otherwise returns `null`.
+  Future<String?> _pluginDependencyManagerConflictError(
+    String stdout,
+    XcodeBasedProject xcodeProject,
+  ) async {
+    if (!xcodeProject.usesSwiftPackageManager) {
+      return null;
+    }
+    final pattern = RegExp(
+      r'Unable to find a specification for `([^`]*)` depended upon by `([^`]*)`',
+    );
+    // Example: Unable to find a specification for `plugin_a` depended upon by `plugin_b`
+    final Iterable<RegExpMatch> matches = pattern.allMatches(stdout);
+    if (matches.isEmpty) {
+      return null;
+    }
+    final List<Plugin> plugins = await findPlugins(xcodeProject.parent);
+    for (final match in matches) {
+      final String? missingPlugin = match.group(1);
+      final String? requiringPlugin = match.group(2);
+      if (missingPlugin != null && requiringPlugin != null) {
+        final bool missingPluginSupportsSwiftPM = plugins.any(
+          (plugin) =>
+              plugin.name == missingPlugin &&
+              plugin.supportSwiftPackageManagerForPlatform(
+                _fileSystem,
+                xcodeProject.pluginConfigKey,
+              ),
+        );
+        if (missingPluginSupportsSwiftPM) {
+          return 'Error: A dependency conflict has occurred because $requiringPlugin uses CocoaPods while '
+              '$missingPlugin uses Swift Package Manager. Please contact the $requiringPlugin '
+              'maintainers to request Swift Package Manager adoption.\n\n'
+              '$kDisableSwiftPMInstructions';
+        }
+      }
+    }
+    return null;
   }
 
   ({String failingPod, String sourcePlugin, String podPluginSubdir})?

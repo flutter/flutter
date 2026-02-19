@@ -2003,6 +2003,88 @@ void main() {
       );
     });
 
+    group('OutlineInputBorder strokeAlign', () {
+      const borderWidth = 4.0;
+      const borderRadius = 12.0;
+      const inputDecoratorWidth = 800.0;
+      const inputDecoratorHeight = 56.0;
+
+      Future<void> testStrokeAlign({
+        required WidgetTester tester,
+        required double strokeAlign,
+        required RRect expectedRRect,
+      }) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: const Color(0xFF00FF00),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: const BorderRadius.all(Radius.circular(borderRadius)),
+                borderSide: BorderSide(width: borderWidth, strokeAlign: strokeAlign),
+              ),
+            ),
+          ),
+        );
+
+        final RenderBox box = tester.renderObject(find.byType(InputDecorator));
+
+        expect(
+          box,
+          paints
+            ..rrect(style: PaintingStyle.stroke, strokeWidth: borderWidth, rrect: expectedRRect),
+        );
+      }
+
+      testWidgets('strokeAlignOutside should draw border outside bounds', (
+        WidgetTester tester,
+      ) async {
+        await testStrokeAlign(
+          tester: tester,
+          strokeAlign: BorderSide.strokeAlignOutside,
+          expectedRRect: RRect.fromLTRBR(
+            -borderWidth / 2,
+            -borderWidth / 2,
+            inputDecoratorWidth + borderWidth / 2,
+            inputDecoratorHeight + borderWidth / 2,
+            const Radius.circular(borderRadius + borderWidth / 2),
+          ),
+        );
+      });
+
+      testWidgets('strokeAlignCenter should draw border between bounds', (
+        WidgetTester tester,
+      ) async {
+        await testStrokeAlign(
+          tester: tester,
+          strokeAlign: BorderSide.strokeAlignCenter,
+          expectedRRect: RRect.fromLTRBR(
+            0,
+            0,
+            inputDecoratorWidth,
+            inputDecoratorHeight,
+            const Radius.circular(borderRadius),
+          ),
+        );
+      });
+
+      testWidgets('strokeAlignInside should draw border inside bounds', (
+        WidgetTester tester,
+      ) async {
+        await testStrokeAlign(
+          tester: tester,
+          strokeAlign: BorderSide.strokeAlignInside,
+          expectedRRect: RRect.fromLTRBR(
+            borderWidth / 2,
+            borderWidth / 2,
+            inputDecoratorWidth - borderWidth / 2,
+            inputDecoratorHeight - borderWidth / 2,
+            const Radius.circular(borderRadius - borderWidth / 2),
+          ),
+        );
+      });
+    });
+
     testWidgets('InputDecorator UnderlineInputBorder fillColor is clipped by border', (
       WidgetTester tester,
     ) async {
@@ -8127,7 +8209,13 @@ void main() {
       ),
     );
 
-    final RenderObject renderer = tester.renderObject(find.byType(InputDecorator));
+    // Find the _RenderDecoration render object (which may be wrapped by Semantics)
+    RenderObject renderer = tester.renderObject(find.byType(InputDecorator));
+    // If wrapped by Semantics, walk down to find the actual _RenderDecoration
+    while (renderer.debugDescribeChildren().length == 1 &&
+        renderer.debugDescribeChildren().first.name == 'child') {
+      renderer = renderer.debugDescribeChildren().first.value! as RenderObject;
+    }
     final Iterable<String> nodeNames = renderer.debugDescribeChildren().map(
       (DiagnosticsNode node) => node.name!,
     );
@@ -14388,7 +14476,13 @@ void main() {
         ),
       );
 
-      final RenderObject renderer = tester.renderObject(find.byType(InputDecorator));
+      // Find the _RenderDecoration render object (which may be wrapped by Semantics)
+      RenderObject renderer = tester.renderObject(find.byType(InputDecorator));
+      // If wrapped by Semantics, walk down to find the actual _RenderDecoration
+      while (renderer.debugDescribeChildren().length == 1 &&
+          renderer.debugDescribeChildren().first.name == 'child') {
+        renderer = renderer.debugDescribeChildren().first.value! as RenderObject;
+      }
       final Iterable<String> nodeNames = renderer.debugDescribeChildren().map(
         (DiagnosticsNode node) => node.name!,
       );
