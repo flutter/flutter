@@ -20,6 +20,10 @@ Future<void> main() async {
   debugPrint = (String? message, {int? wrapWidth}) {
     errorMessage.writeln(message);
   };
+  // Error messages on the web are printed to console.error.
+  ErrorToConsoleDumper.addWebDumpListener((String message) {
+    errorMessage.writeln(message);
+  });
 
   runApp(const ThrowingWidget());
 
