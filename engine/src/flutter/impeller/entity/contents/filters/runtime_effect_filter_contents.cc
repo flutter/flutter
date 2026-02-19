@@ -11,6 +11,7 @@
 #include "impeller/entity/contents/anonymous_contents.h"
 #include "impeller/entity/contents/runtime_effect_contents.h"
 #include "impeller/entity/contents/texture_contents.h"
+#include "impeller/geometry/point.h"
 #include "impeller/geometry/size.h"
 
 namespace impeller {
@@ -67,6 +68,8 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
   // this branch for the unit test `ComposePaintRuntimeOuter`, but do it for
   // `ComposeBackdropRuntimeOuterBlurInner`.
   if (input_snapshot->ShouldRasterizeForRuntimeEffects()) {
+    Vector2 entity_offset =
+        Vector2(entity.GetTransform().m[12], entity.GetTransform().m[13]);
     Matrix inverse = input_snapshot->transform.Invert();
     Quad quad = inverse.Transform(Quad{
         coverage.GetLeftTop(),     //
@@ -84,10 +87,37 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
       texture_contents.SetStencilEnabled(false);
       texture_contents.SetSamplerDescriptor(input_snapshot->sampler_descriptor);
 
+      // Use an AnonymousContents to restore the padding around the input that
+      // may have been cut out with a clip rect to maintain the correct
+      // coordinates for the fragment shader to perform.
+      auto anonymous_contents = AnonymousContents::Make(
+          [&texture_contents](const ContentContext& renderer,
+                              const Entity& entity, RenderPass& pass) -> bool {
+            return texture_contents.Render(renderer, entity, pass);
+          },
+          [maybe_input_coverage,
+           entity_offset](const Entity& entity) -> std::optional<Rect> {
+            Rect coverage = maybe_input_coverage.value();
+            // The LT values come from the offset of the clip rect, that creates
+            // the clipping effect on the content that will be rendered from
+            // the fragment shader.  The RB values define the region we'll be
+            // synthesizing and ultimately defines the width and the height of
+            // the rasterized image.  The LT values can be thought of shifting
+            // the window that will be rasterized. Since we are shifting from
+            // the top-left corner, that is effectively pushing the the bottom
+            // right corner lower, outside of the rendering space.  So, we can
+            // clamp those values to the coverage's RB values.  This doesn't
+            // cause the fragment shader's rendering to deform because the
+            // magic width/height values sent to the fragment shader don't take
+            // the rasterized image's size into account.
+            return Rect::MakeLTRB(entity_offset.x, entity_offset.y,
+                                  coverage.GetRight(), coverage.GetBottom());
+          });
+
       Entity entity;
       // In order to maintain precise coordinates in the fragment shader we need
       // to eliminate the padding typically given to RenderToSnapshot results.
-      input_snapshot = texture_contents.RenderToSnapshot(
+      input_snapshot = anonymous_contents->RenderToSnapshot(
           renderer, entity, {.coverage_expansion = 0});
       if (!input_snapshot.has_value()) {
         return std::nullopt;

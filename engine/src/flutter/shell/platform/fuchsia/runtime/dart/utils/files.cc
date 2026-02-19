@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "files.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/files.h"
 
 #include <fcntl.h>
 #include <unistd.h>
