@@ -143,6 +143,10 @@ Future<void> testMain() async {
         // https://github.com/flutter/flutter/issues/152709
         continue;
       }
+      if (testFile == 'rgb24prof.bmp' && isSafari) {
+        // This file causes Safari to crash with `EncodingError`.
+        continue;
+      }
       if (testFile == 'b464333052.jpg') {
         // This is an undecodable image used to test a Skia failure code path.
         continue;

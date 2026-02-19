@@ -71,9 +71,12 @@ void main() {
               .childDirectory(platformName)
               .childFile('${createdCocoaPodsPlugin.pluginName}.podspec');
           expect(podspec.existsSync(), isTrue);
-          expect(podspec.readAsStringSync(), contains('Classes'));
-          expect(podspec.readAsStringSync().contains('Sources'), isFalse);
+          // New plugins always use SwiftPM structure.
+          expect(podspec.readAsStringSync(), contains('Sources'));
+          expect(podspec.readAsStringSync().contains('Classes'), isFalse);
 
+          // Even though the plugin uses SwiftPM structure, building with SwiftPM disabled
+          // should fall back to CocoaPods at runtime.
           await SwiftPackageManagerUtils.buildApp(
             flutterBin,
             appDirectoryPath,
@@ -81,6 +84,7 @@ void main() {
             expectedLines: SwiftPackageManagerUtils.expectedLines(
               platform: platformName,
               appDirectoryPath: appDirectoryPath,
+              // Use cocoaPodsPlugin because the plugin is installed via CocoaPods when SwiftPM is disabled.
               cocoaPodsPlugin: createdCocoaPodsPlugin,
             ),
             unexpectedLines: SwiftPackageManagerUtils.unexpectedLines(
@@ -94,47 +98,6 @@ void main() {
             flutterBin,
             workingDirectoryPath,
           );
-
-          // Convert CocoaPod plugin to support SwiftPM
-          fileSystem
-              .directory(createdCocoaPodsPlugin.pluginPath)
-              .childDirectory(platformName)
-              .childDirectory(createdCocoaPodsPlugin.pluginName)
-              .childFile('Package.swift')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
-// swift-tools-version: 5.9
-// The swift-tools-version declares the minimum version of Swift required to build this package.
-
-import PackageDescription
-let package = Package(
-    name: "${createdCocoaPodsPlugin.pluginName}",
-    products: [
-        .library(name: "${createdCocoaPodsPlugin.pluginName.replaceAll('_', '-')}", targets: ["${createdCocoaPodsPlugin.pluginName}"])
-    ],
-    targets: [
-        .target(
-            name: "${createdCocoaPodsPlugin.pluginName}"
-        )
-    ]
-)
-''');
-          fileSystem
-              .directory(createdCocoaPodsPlugin.pluginPath)
-              .childDirectory(platformName)
-              .childDirectory(createdCocoaPodsPlugin.pluginName)
-              .childDirectory('Sources')
-              .childDirectory(createdCocoaPodsPlugin.pluginName)
-              .childFile('${createdCocoaPodsPlugin.className}.swift')
-            ..createSync(recursive: true)
-            ..writeAsStringSync(
-              fileSystem
-                  .directory(createdCocoaPodsPlugin.pluginPath)
-                  .childDirectory(platformName)
-                  .childDirectory('Classes')
-                  .childFile('${createdCocoaPodsPlugin.className}.swift')
-                  .readAsStringSync(),
-            );
 
           await SwiftPackageManagerUtils.buildApp(
             flutterBin,
