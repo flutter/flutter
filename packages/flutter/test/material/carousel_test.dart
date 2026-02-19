@@ -2331,6 +2331,163 @@ void main() {
     }
   });
 
+  testWidgets('CarouselView infinite animateToItem scrolls forward to next item', (
+    WidgetTester tester,
+  ) async {
+    final controller = CarouselController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView(
+            itemExtent: 200,
+            itemSnapping: true,
+            infinite: true,
+            controller: controller,
+            children: List<Widget>.generate(5, (int index) {
+              return Center(child: Text('Item $index'));
+            }),
+          ),
+        ),
+      ),
+    );
+
+    final double initialOffset = controller.offset;
+    final int initialItem = controller.leadingItem;
+
+    // Animate forward by one item. The offset should increase (scroll forward),
+    // not decrease (scroll backward).
+    controller.animateToItem(
+      initialItem + 1,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.linear,
+    );
+    await tester.pumpAndSettle();
+
+    expect(controller.leadingItem, equals((initialItem + 1) % 5));
+    expect(controller.offset, greaterThan(initialOffset));
+  });
+
+  testWidgets('CarouselView.weighted infinite animateToItem scrolls forward to next item', (
+    WidgetTester tester,
+  ) async {
+    final controller = CarouselController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView.weighted(
+            flexWeights: const <int>[1, 7, 1],
+            itemSnapping: true,
+            infinite: true,
+            controller: controller,
+            children: List<Widget>.generate(5, (int index) {
+              return Center(child: Text('Item $index'));
+            }),
+          ),
+        ),
+      ),
+    );
+
+    final double initialOffset = controller.offset;
+
+    // With consumeMaxWeight and [1,7,1], animateToItem(1) places item 1 in the
+    // max-weight position. This is one item forward from initial (item 0 in hero).
+    // The offset should increase (scroll forward), not decrease (scroll backward).
+    controller.animateToItem(1, duration: const Duration(milliseconds: 200), curve: Curves.linear);
+    await tester.pumpAndSettle();
+
+    expect(controller.offset, greaterThan(initialOffset));
+    // Item 1 should now be visible in the hero position.
+    expect(find.text('Item 1'), findsOneWidget);
+  });
+
+  testWidgets('CarouselView infinite animateToItem scrolls forward even to item just behind', (
+    WidgetTester tester,
+  ) async {
+    final controller = CarouselController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView(
+            itemExtent: 200,
+            itemSnapping: true,
+            infinite: true,
+            controller: controller,
+            children: List<Widget>.generate(5, (int index) {
+              return Center(child: Text('Item $index'));
+            }),
+          ),
+        ),
+      ),
+    );
+
+    // First scroll forward to item 2.
+    controller.animateToItem(2, duration: const Duration(milliseconds: 200), curve: Curves.linear);
+    await tester.pumpAndSettle();
+    expect(controller.leadingItem, equals(2));
+
+    final double offsetAtItem2 = controller.offset;
+
+    // Now animate to item 1 which is just behind. In infinite mode this should
+    // scroll forward through items 3 → 4 → 0 → 1, not backward.
+    controller.animateToItem(1, duration: const Duration(milliseconds: 200), curve: Curves.linear);
+    await tester.pumpAndSettle();
+
+    expect(controller.leadingItem, equals(1));
+    expect(controller.offset, greaterThan(offsetAtItem2));
+  });
+
+  testWidgets(
+    'CarouselView.weighted infinite animateToItem scrolls forward even to item just behind',
+    (WidgetTester tester) async {
+      final controller = CarouselController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CarouselView.weighted(
+              flexWeights: const <int>[1, 7, 1],
+              itemSnapping: true,
+              infinite: true,
+              controller: controller,
+              children: List<Widget>.generate(5, (int index) {
+                return Center(child: Text('Item $index'));
+              }),
+            ),
+          ),
+        ),
+      );
+
+      // First scroll forward to item 2 (in hero position).
+      controller.animateToItem(
+        2,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.linear,
+      );
+      await tester.pumpAndSettle();
+
+      final double offsetAtItem2 = controller.offset;
+
+      // Now animate to item 1 which is just behind. In infinite mode this should
+      // scroll forward through the remaining items, not backward.
+      controller.animateToItem(
+        1,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.linear,
+      );
+      await tester.pumpAndSettle();
+
+      expect(controller.offset, greaterThan(offsetAtItem2));
+      expect(find.text('Item 1'), findsOneWidget);
+    },
+  );
+
   group('CarouselView onIndexChanged callback', () {
     Widget buildCarousel({
       required CarouselController controller,

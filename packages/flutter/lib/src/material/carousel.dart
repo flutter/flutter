@@ -2009,7 +2009,11 @@ class CarouselController extends ScrollController {
 
   double _getTargetOffset(_CarouselPosition position, int index, bool hasFlexWeights) {
     if (!hasFlexWeights) {
-      return index * _carouselState!._itemExtent!;
+      final double targetInFirstCycle = index * _carouselState!._itemExtent!;
+      if (!_carouselState!.widget.infinite) {
+        return targetInFirstCycle;
+      }
+      return _adjustForInfiniteCycle(position, targetInFirstCycle);
     }
 
     final _CarouselViewState carouselState = _carouselState!;
@@ -2027,7 +2031,35 @@ class CarouselController extends ScrollController {
       leadingIndex = leadingIndex.clamp(0, itemCount - 1);
     }
 
-    return dimension * (weights.first / totalWeight) * leadingIndex;
+    final double targetInFirstCycle = dimension * (weights.first / totalWeight) * leadingIndex;
+    if (!carouselState.widget.infinite) {
+      return targetInFirstCycle;
+    }
+    return _adjustForInfiniteCycle(position, targetInFirstCycle);
+  }
+
+  /// Adjusts a target offset (computed for the first cycle) to always scroll
+  /// forward from the current position.
+  ///
+  /// In infinite mode, the scroll position can be many cycles ahead of 0.
+  /// This method finds the next forward occurrence of the target offset,
+  /// ensuring the animation always moves in the forward direction.
+  double _adjustForInfiniteCycle(_CarouselPosition position, double targetInFirstCycle) {
+    final double cycleLength = position._getCycleLengthInPixels();
+    if (cycleLength <= 0) {
+      return targetInFirstCycle;
+    }
+    final double currentPixels = position.pixels;
+    // Determine which cycle the current position is in.
+    final double currentCycleStart = (currentPixels / cycleLength).floorToDouble() * cycleLength;
+    // Candidate target in the same cycle as the current position.
+    final double sameCycleTarget = currentCycleStart + targetInFirstCycle;
+
+    // Always scroll forward: pick the first target at or ahead of current position.
+    if (sameCycleTarget >= currentPixels) {
+      return sameCycleTarget;
+    }
+    return sameCycleTarget + cycleLength;
   }
 
   int? _getItemCount() {
