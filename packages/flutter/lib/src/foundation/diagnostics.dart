@@ -1927,9 +1927,9 @@ class MessageProperty extends DiagnosticsProperty<void> {
   MessageProperty(
     String name,
     String message, {
-    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
-    DiagnosticLevel level = DiagnosticLevel.info,
-  }) : super(name, null, description: message, style: style, level: level);
+    super.style = DiagnosticsTreeStyle.singleLine,
+    super.level = DiagnosticLevel.info,
+  }) : super(name, null, description: message);
 }
 
 /// Property which encloses its string [value] in quotes.
