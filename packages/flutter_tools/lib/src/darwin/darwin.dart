@@ -111,9 +111,18 @@ enum FlutterDarwinPlatform {
 
   /// Returns corresponding [FlutterDarwinPlatform] for the [targetPlatform].
   static FlutterDarwinPlatform? fromTargetPlatform(TargetPlatform targetPlatform) {
-
     for (final FlutterDarwinPlatform darwinPlatform in FlutterDarwinPlatform.values) {
       if (targetPlatform == darwinPlatform.targetPlatform) {
+        return darwinPlatform;
+      }
+    }
+    return null;
+  }
+
+  /// Returns corresponding [FlutterDarwinPlatform] for the [name].
+  static FlutterDarwinPlatform? fromName(String name) {
+    for (final FlutterDarwinPlatform darwinPlatform in FlutterDarwinPlatform.values) {
+      if (name == darwinPlatform.name) {
         return darwinPlatform;
       }
     }

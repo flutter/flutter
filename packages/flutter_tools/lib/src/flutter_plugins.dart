@@ -530,9 +530,31 @@ import {{name}}
 {{/methodChannelPlugins}}
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
-  {{#methodChannelPlugins}}
+{{#methodChannelPlugins}}
   {{class}}.register(with: registry.registrar(forPlugin: "{{class}}"))
 {{/methodChannelPlugins}}
+}
+''';
+
+const _swiftPluginRegistrantTemplate = '''
+//
+//  Generated file. Do not edit.
+//
+import Flutter
+import UIKit
+
+{{#methodChannelPlugins}}
+import {{name}}
+{{/methodChannelPlugins}}
+
+@objc public class GeneratedPluginRegistrant: NSObject {
+    @objc public static func register(with registry: FlutterPluginRegistry) {
+        {{#methodChannelPlugins}}
+        if let {{classVar}} = registry.registrar(forPlugin: "{{class}}") {
+            {{class}}.register(with: {{classVar}})
+        }
+        {{/methodChannelPlugins}}
+    }
 }
 ''';
 
@@ -778,7 +800,13 @@ $_dartPluginRegisterWith
 }
 ''';
 
-Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
+/// Writes the iOS plugin registrant.
+Future<void> writeIOSPluginRegistrant(
+  FlutterProject project,
+  List<Plugin> plugins, {
+  File? swiftPluginRegistrant,
+  TemplateRenderer? templateRenderer,
+}) async {
   final List<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(
     plugins,
     IOSPlugin.kConfigKey,
@@ -799,20 +827,32 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
       _pluginRegistrantPodspecTemplate,
       context,
       registryDirectory.childFile('FlutterPluginRegistrant.podspec'),
-      globals.templateRenderer,
+      templateRenderer ?? globals.templateRenderer,
     );
   }
+
+  // If swiftPluginRegistrant is provided, write to that file.
+  if (swiftPluginRegistrant != null) {
+    await _renderTemplateToFile(
+      _swiftPluginRegistrantTemplate,
+      context,
+      swiftPluginRegistrant,
+      templateRenderer ?? globals.templateRenderer,
+    );
+    return;
+  }
+
   await _renderTemplateToFile(
     _objcPluginRegistryHeaderTemplate,
     context,
     project.ios.pluginRegistrantHeader,
-    globals.templateRenderer,
+    templateRenderer ?? globals.templateRenderer,
   );
   await _renderTemplateToFile(
     _objcPluginRegistryImplementationTemplate,
     context,
     project.ios.pluginRegistrantImplementation,
-    globals.templateRenderer,
+    templateRenderer ?? globals.templateRenderer,
   );
 }
 
@@ -893,7 +933,13 @@ Future<void> _writePluginCmakefile(
   );
 }
 
-Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
+/// Writes the macOS plugin registrant.
+Future<void> writeMacOSPluginRegistrant(
+  FlutterProject project,
+  List<Plugin> plugins, {
+  File? pluginRegistrantImplementation,
+  TemplateRenderer? templateRenderer,
+}) async {
   final List<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(
     plugins,
     MacOSPlugin.kConfigKey,
@@ -910,8 +956,8 @@ Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> pl
   await _renderTemplateToFile(
     _swiftPluginRegistryTemplate,
     context,
-    project.macos.managedDirectory.childFile('GeneratedPluginRegistrant.swift'),
-    globals.templateRenderer,
+    pluginRegistrantImplementation ?? project.macos.managedDirectory.childFile('GeneratedPluginRegistrant.swift'),
+    templateRenderer ?? globals.templateRenderer,
   );
 }
 
@@ -1294,10 +1340,10 @@ Future<void> injectPlugins(
       pluginResolutionType: _PluginResolutionType.nativeOrDart,
     );
     if (iosPlatform) {
-      await _writeIOSPluginRegistrant(project, pluginsByPlatform[IOSPlugin.kConfigKey]!);
+      await writeIOSPluginRegistrant(project, pluginsByPlatform[IOSPlugin.kConfigKey]!);
     }
     if (macOSPlatform) {
-      await _writeMacOSPluginRegistrant(project, pluginsByPlatform[MacOSPlugin.kConfigKey]!);
+      await writeMacOSPluginRegistrant(project, pluginsByPlatform[MacOSPlugin.kConfigKey]!);
     }
     final DarwinDependencyManagement darwinDependencyManagerSetup =
         darwinDependencyManagement ??
@@ -1307,6 +1353,7 @@ Future<void> injectPlugins(
           cocoapods: globals.cocoaPods!,
           swiftPackageManager: SwiftPackageManager(
             fileSystem: globals.fs,
+            logger: globals.logger,
             templateRenderer: globals.templateRenderer,
             artifacts: globals.artifacts!,
           ),

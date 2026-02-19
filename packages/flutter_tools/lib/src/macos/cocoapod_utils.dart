@@ -59,6 +59,7 @@ Future<void> processPodsIfNeeded(
     // Generate an empty Swift Package Manager manifest to invalidate fingerprinter
     final swiftPackageManager = SwiftPackageManager(
       fileSystem: globals.localFileSystem,
+      logger: globals.logger,
       templateRenderer: globals.templateRenderer,
       artifacts: globals.artifacts!,
     );

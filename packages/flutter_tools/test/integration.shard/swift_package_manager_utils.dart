@@ -127,6 +127,10 @@ class SwiftPackageManagerUtils {
           'stdout: \n${result.stdout}\n'
           'stderr: \n${result.stderr}\n',
     );
+    if (result.exitCode != 0) {
+      print('STDOUT: \n${result.stdout}');
+      print('STDERR: \n${result.stderr}');
+    }
     expect(
       remainingExpectedLines,
       isEmpty,

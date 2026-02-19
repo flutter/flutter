@@ -5,6 +5,7 @@
 import '../artifacts.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../base/template.dart';
 import '../base/version.dart';
 import '../build_info.dart';
@@ -29,13 +30,16 @@ class SwiftPackageManager {
   const SwiftPackageManager({
     required Artifacts artifacts,
     required FileSystem fileSystem,
+    required Logger logger,
     required TemplateRenderer templateRenderer,
   }) : _artifacts = artifacts,
        _fileSystem = fileSystem,
+       _logger = logger,
        _templateRenderer = templateRenderer;
 
   final Artifacts _artifacts;
   final FileSystem _fileSystem;
+  final Logger _logger;
   final TemplateRenderer _templateRenderer;
 
   /// Creates a Swift Package called 'FlutterGeneratedPluginSwiftPackage' that
@@ -48,10 +52,12 @@ class SwiftPackageManager {
     BuildMode? buildMode,
     bool flutterAsADependency = true,
     Version? deploymentTarget,
+    bool force = false,
   }) async {
     final Directory symlinkDirectory = project.relativeSwiftPackagesDirectory;
-    ErrorHandlingFileSystem.deleteIfExists(symlinkDirectory, recursive: true);
-    symlinkDirectory.createSync(recursive: true);
+    if (!symlinkDirectory.existsSync()) {
+      symlinkDirectory.createSync(recursive: true);
+    }
 
     final (
       List<SwiftPackagePackageDependency> packageDependencies,
@@ -68,8 +74,11 @@ class SwiftPackageManager {
     // it's not needed. If the project has already been migrated, regenerate
     // the Package.swift even if there are no dependencies in case there
     // were dependencies previously.
-    if (packageDependencies.isEmpty && !project.flutterPluginSwiftPackageInProjectSettings) {
+    if (!force && packageDependencies.isEmpty && !project.flutterPluginSwiftPackageInProjectSettings) {
       return;
+    }
+    if (!project.flutterPluginSwiftPackageInProjectSettings) {
+      _logger.printStatus('Adding Swift Package Manager integration...');
     }
 
     // Add Flutter framework Swift package dependency
@@ -146,8 +155,26 @@ class SwiftPackageManager {
       }
 
       final Link pluginSymlink = symlinkDirectory.childLink(plugin.name);
-      ErrorHandlingFileSystem.deleteIfExists(pluginSymlink);
-      pluginSymlink.createSync(packagePath);
+      final String absoluteTarget = _fileSystem.path.isAbsolute(packagePath)
+          ? packagePath
+          : _fileSystem.path.canonicalize(_fileSystem.path.join(pluginSymlink.parent.path, packagePath));
+
+      bool symlinkIsValid = false;
+      if (pluginSymlink.existsSync()) {
+        final String currentTarget = pluginSymlink.targetSync();
+        final String absoluteCurrent = _fileSystem.path.isAbsolute(currentTarget)
+            ? currentTarget
+            : _fileSystem.path.canonicalize(_fileSystem.path.join(pluginSymlink.parent.path, currentTarget));
+        if (absoluteCurrent == absoluteTarget) {
+          symlinkIsValid = true;
+        }
+      }
+
+      if (!symlinkIsValid) {
+        ErrorHandlingFileSystem.deleteIfExists(pluginSymlink);
+        pluginSymlink.createSync(packagePath);
+      }
+
       packagePath = pluginSymlink.path;
       packagePath = _fileSystem.path.relative(packagePath, from: pathRelativeTo);
 
@@ -268,6 +295,21 @@ class SwiftPackageManager {
       final Link frameworkLink = _fileSystem.link(
         buildModeDirectory.childDirectory('$frameworkName.xcframework').path,
       );
+      final String absoluteTarget = _fileSystem.path.isAbsolute(frameworkArtifactPath)
+          ? frameworkArtifactPath
+          : _fileSystem.path.canonicalize(_fileSystem.path.join(frameworkLink.parent.path, frameworkArtifactPath));
+
+      if (frameworkLink.existsSync()) {
+        final String currentTarget = frameworkLink.targetSync();
+        final String absoluteCurrent = _fileSystem.path.isAbsolute(currentTarget)
+            ? currentTarget
+            : _fileSystem.path.canonicalize(_fileSystem.path.join(frameworkLink.parent.path, currentTarget));
+        if (absoluteCurrent == absoluteTarget) {
+          continue;
+        }
+      }
+
+      ErrorHandlingFileSystem.deleteIfExists(frameworkLink);
       frameworkLink.createSync(frameworkArtifactPath, recursive: true);
     }
     updateFlutterFrameworkSymlink(
@@ -293,11 +335,24 @@ class SwiftPackageManager {
           .childDirectory('$frameworkName.xcframework')
           .path,
     );
+    final String targetPath = './${buildMode.uppercaseName}/$frameworkName.xcframework';
     if (frameworkLink.existsSync()) {
-      frameworkLink.updateSync('./${buildMode.uppercaseName}/$frameworkName.xcframework');
+      final String absoluteTarget = fileSystem.path.isAbsolute(targetPath)
+          ? targetPath
+          : fileSystem.path.join(frameworkLink.parent.path, targetPath);
+      final String canonicalTarget = fileSystem.path.canonicalize(absoluteTarget);
+
+      final String currentTarget = frameworkLink.targetSync();
+      final String absoluteCurrent = fileSystem.path.isAbsolute(currentTarget)
+          ? currentTarget
+          : fileSystem.path.join(frameworkLink.parent.path, currentTarget);
+
+      if (fileSystem.path.canonicalize(absoluteCurrent) != canonicalTarget) {
+        frameworkLink.updateSync(targetPath);
+      }
     } else if (createIfNotFound) {
       frameworkLink.createSync(
-        './${buildMode.uppercaseName}/$frameworkName.xcframework',
+        targetPath,
         recursive: true,
       );
     }
@@ -316,27 +371,27 @@ class SwiftPackageManager {
     required BuildInfo buildInfo,
     required Map<String, String> buildSettings,
     required List<Plugin> plugins,
+    bool force = false,
   }) async {
     final String? deploymentTarget = buildSettings[platform.deploymentTargetBuildSetting];
     final Version? projectDeploymentTargetVersion = deploymentTarget != null
         ? Version.parse(deploymentTarget)
         : null;
 
-    var generated = false;
-    if (projectDeploymentTargetVersion != null &&
-        projectDeploymentTargetVersion > platform.supportedPackagePlatform.version &&
-        project.flutterPluginSwiftPackageManifest.existsSync()) {
+    if (force ||
+        plugins.isNotEmpty ||
+        project.flutterPluginSwiftPackageInProjectSettings ||
+        (projectDeploymentTargetVersion != null &&
+            projectDeploymentTargetVersion > platform.supportedPackagePlatform.version)) {
       await generatePluginsSwiftPackage(
         plugins,
         platform,
         project,
         deploymentTarget: projectDeploymentTargetVersion,
         buildMode: buildInfo.mode,
+        force: force,
       );
-      generated = true;
-    }
-
-    if (!generated) {
+    } else {
       _symlinkFlutterFramework(
         platform: platform,
         project: project,
@@ -366,6 +421,10 @@ const _swiftPackageTemplate = '''
 //
 
 import PackageDescription
+{{#swiftCodeBeforePackageDefinition}}
+
+{{swiftCodeBeforePackageDefinition}}
+{{/swiftCodeBeforePackageDefinition}}
 
 let package = Package(
     name: "{{packageName}}",
@@ -411,6 +470,7 @@ class SwiftPackage {
     required List<SwiftPackagePackageDependency> dependencies,
     required List<SwiftPackageTarget> targets,
     required TemplateRenderer templateRenderer,
+    this.swiftCodeBeforePackageDefinition,
   }) : _manifest = manifest,
        _name = name,
        _platforms = platforms,
@@ -439,6 +499,9 @@ class SwiftPackage {
 
   final TemplateRenderer _templateRenderer;
 
+  /// Swift code to include before the package definition in Package.swift.
+  final String? swiftCodeBeforePackageDefinition;
+
   /// Context for the [_swiftPackageTemplate] template.
   Map<String, Object> get _templateContext => <String, Object>{
     'swiftToolsVersion': minimumSwiftToolchainVersion,
@@ -448,24 +511,27 @@ class SwiftPackage {
     'products': _formatProducts(),
     'dependencies': _formatDependencies(),
     'targets': _formatTargets(),
+    'swiftCodeBeforePackageDefinition': swiftCodeBeforePackageDefinition ?? false,
   };
 
   /// Create a Package.swift using settings from [_templateContext].
-  void createSwiftPackage() {
+  void createSwiftPackage({bool generateEmptySources = true}) {
     // Swift Packages require at least one source file per non-binary target,
     // whether it be in Swift or Objective C. If the target does not have any
     // files yet, create an empty Swift file.
-    for (final SwiftPackageTarget target in _targets) {
-      if (target.targetType == SwiftPackageTargetType.binaryTarget) {
-        continue;
-      }
-      final Directory targetDirectory = _manifest.parent
-          .childDirectory('Sources')
-          .childDirectory(target.name);
-      if (!targetDirectory.existsSync() || targetDirectory.listSync().isEmpty) {
-        final File requiredSwiftFile = targetDirectory.childFile('${target.name}.swift');
-        requiredSwiftFile.createSync(recursive: true);
-        requiredSwiftFile.writeAsStringSync(_swiftPackageSourceTemplate);
+    if (generateEmptySources) {
+      for (final SwiftPackageTarget target in _targets) {
+        if (target.targetType == SwiftPackageTargetType.binaryTarget) {
+          continue;
+        }
+        final Directory targetDirectory = _manifest.parent
+            .childDirectory('Sources')
+            .childDirectory(target.name);
+        if (!targetDirectory.existsSync() || targetDirectory.listSync().isEmpty) {
+          final File requiredSwiftFile = targetDirectory.childFile('${target.name}.swift');
+          requiredSwiftFile.createSync(recursive: true);
+          requiredSwiftFile.writeAsStringSync(_swiftPackageSourceTemplate);
+        }
       }
     }
 
@@ -473,6 +539,9 @@ class SwiftPackage {
       _swiftPackageTemplate,
       _templateContext,
     );
+    if (_manifest.existsSync() && _manifest.readAsStringSync() == renderedTemplate) {
+      return;
+    }
     _manifest.createSync(recursive: true);
     _manifest.writeAsStringSync(renderedTemplate);
   }

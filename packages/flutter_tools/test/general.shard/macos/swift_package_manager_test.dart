@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/macos/swift_package_manager.dart';
 import 'package:flutter_tools/src/platform_plugins.dart';
@@ -36,6 +37,7 @@ void main() {
 
             final spm = SwiftPackageManager(
               fileSystem: fs,
+              logger: BufferLogger.test(),
               templateRenderer: const MustacheTemplateRenderer(),
               artifacts: FakeArtifacts(),
             );
@@ -54,6 +56,7 @@ void main() {
 
             final spm = SwiftPackageManager(
               fileSystem: fs,
+              logger: BufferLogger.test(),
               templateRenderer: const MustacheTemplateRenderer(),
               artifacts: FakeArtifacts(),
             );
@@ -107,6 +110,7 @@ let package = Package(
 
               final spm = SwiftPackageManager(
                 fileSystem: fs,
+                logger: BufferLogger.test(),
                 templateRenderer: const MustacheTemplateRenderer(),
                 artifacts: FakeArtifacts(),
               );
@@ -167,6 +171,7 @@ $_doubleIndent
             );
             final spm = SwiftPackageManager(
               fileSystem: fs,
+              logger: BufferLogger.test(),
               templateRenderer: const MustacheTemplateRenderer(),
               artifacts: FakeArtifacts(),
             );
@@ -257,6 +262,7 @@ let package = Package(
 
             final spm = SwiftPackageManager(
               fileSystem: fs,
+              logger: BufferLogger.test(),
               templateRenderer: const MustacheTemplateRenderer(),
               artifacts: FakeArtifacts(),
             );
@@ -332,6 +338,7 @@ let package = Package(
 
             final spm = SwiftPackageManager(
               fileSystem: fs,
+              logger: BufferLogger.test(),
               templateRenderer: const MustacheTemplateRenderer(),
               artifacts: FakeArtifacts(),
             );
@@ -410,6 +417,7 @@ let package = Package(
             project.flutterPluginSwiftPackageManifest.writeAsStringSync(supportedPlatform);
             final spm = SwiftPackageManager(
               fileSystem: fs,
+              logger: BufferLogger.test(),
               templateRenderer: const MustacheTemplateRenderer(),
               artifacts: FakeArtifacts(),
             );
@@ -417,7 +425,6 @@ let package = Package(
               [],
               platform,
               project,
-              deploymentTarget: null,
             );
             expect(
               project.flutterPluginSwiftPackageManifest.readAsLinesSync(),
@@ -435,6 +442,7 @@ let package = Package(
             project.flutterPluginSwiftPackageManifest.writeAsStringSync(supportedPlatform);
             final spm = SwiftPackageManager(
               fileSystem: fs,
+              logger: BufferLogger.test(),
               templateRenderer: const MustacheTemplateRenderer(),
               artifacts: FakeArtifacts(),
             );
@@ -460,6 +468,7 @@ let package = Package(
             project.flutterPluginSwiftPackageManifest.writeAsStringSync(supportedPlatform);
             final spm = SwiftPackageManager(
               fileSystem: fs,
+              logger: BufferLogger.test(),
               templateRenderer: const MustacheTemplateRenderer(),
               artifacts: FakeArtifacts(),
             );
@@ -510,6 +519,7 @@ let package = Package(
 ''');
             final spm = SwiftPackageManager(
               fileSystem: fs,
+              logger: BufferLogger.test(),
               templateRenderer: const MustacheTemplateRenderer(),
               artifacts: FakeArtifacts(),
             );

@@ -84,6 +84,52 @@ Future<void> buildMacOS({
     );
   }
 
+  final Directory xcodeProject = flutterProject.macos.xcodeProject;
+
+  // If the standard project exists, specify it to getInfo to handle the case where there are
+  // other Xcode projects in the macos/ directory. Otherwise pass no name, which will work
+  // regardless of the project name so long as there is exactly one project.
+  final String? xcodeProjectName = xcodeProject.existsSync() ? xcodeProject.basename : null;
+  final XcodeProjectInfo? projectInfo = await globals.xcodeProjectInterpreter?.getInfo(
+    xcodeProject.parent.path,
+    projectFilename: xcodeProjectName,
+  );
+  final String? scheme = projectInfo?.schemeFor(buildInfo);
+  if (scheme == null) {
+    projectInfo!.reportFlavorNotFoundAndExit();
+  }
+  final String? configuration = projectInfo?.buildConfigurationFor(buildInfo, scheme);
+  if (configuration == null) {
+    throwToolExit('Unable to find expected configuration in Xcode project.');
+  }
+
+  final Map<String, String> buildSettings =
+      await flutterProject.macos.buildSettingsForBuildInfo(
+        buildInfo,
+        scheme: scheme,
+        configuration: configuration,
+      ) ??
+      <String, String>{};
+
+  if (flutterProject.macos.usesSwiftPackageManager) {
+    final swiftPackageManager = SwiftPackageManager(
+      artifacts: globals.artifacts!,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      templateRenderer: globals.templateRenderer,
+    );
+
+    final List<Plugin> plugins = await findPlugins(flutterProject);
+    await swiftPackageManager.ensurePluginsAreGenerated(
+      project: flutterProject.macos,
+      platform: FlutterDarwinPlatform.macos,
+      buildInfo: buildInfo,
+      buildSettings: buildSettings,
+      plugins: plugins,
+      force: true,
+    );
+  }
+
   final migrators = <ProjectMigrator>[
     RemoveMacOSFrameworkLinkAndEmbeddingMigration(
       flutterProject.macos,
@@ -120,32 +166,6 @@ Future<void> buildMacOS({
     flutterBuildDir.createSync(recursive: true);
   }
 
-  final Directory xcodeProject = flutterProject.macos.xcodeProject;
-
-  // If the standard project exists, specify it to getInfo to handle the case where there are
-  // other Xcode projects in the macos/ directory. Otherwise pass no name, which will work
-  // regardless of the project name so long as there is exactly one project.
-  final String? xcodeProjectName = xcodeProject.existsSync() ? xcodeProject.basename : null;
-  final XcodeProjectInfo? projectInfo = await globals.xcodeProjectInterpreter?.getInfo(
-    xcodeProject.parent.path,
-    projectFilename: xcodeProjectName,
-  );
-  final String? scheme = projectInfo?.schemeFor(buildInfo);
-  if (scheme == null) {
-    projectInfo!.reportFlavorNotFoundAndExit();
-  }
-  final String? configuration = projectInfo?.buildConfigurationFor(buildInfo, scheme);
-  if (configuration == null) {
-    throwToolExit('Unable to find expected configuration in Xcode project.');
-  }
-
-  final Map<String, String> buildSettings =
-      await flutterProject.macos.buildSettingsForBuildInfo(
-        buildInfo,
-        scheme: scheme,
-        configuration: configuration,
-      ) ??
-      <String, String>{};
 
   // Write configuration to an xconfig file in a standard location.
   await updateGeneratedXcodeProperties(
@@ -155,23 +175,6 @@ Future<void> buildMacOS({
     useMacOSConfig: true,
   );
 
-  if (flutterProject.macos.usesSwiftPackageManager) {
-    final swiftPackageManager = SwiftPackageManager(
-      artifacts: globals.artifacts!,
-      fileSystem: globals.fs,
-      templateRenderer: globals.templateRenderer,
-    );
-
-    final List<Plugin> plugins = await findPlugins(flutterProject);
-    await swiftPackageManager.ensurePluginsAreGenerated(
-      project: flutterProject.macos,
-      platform: FlutterDarwinPlatform.macos,
-      buildInfo: buildInfo,
-      buildSettings: buildSettings,
-      plugins: plugins,
-    );
-
-  }
 
 
   await processPodsIfNeeded(flutterProject.macos, getMacOSBuildDirectory(), buildInfo.mode);

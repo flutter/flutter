@@ -8,6 +8,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
+import '../base/version.dart';
 import '../darwin/darwin.dart';
 import '../features.dart';
 import '../plugins.dart';
@@ -72,7 +73,34 @@ class DarwinDependencyManagement {
           _project.macos.outputFileList.readAsStringSync().contains('FlutterMacOS')) {
         _project.macos.outputFileList.writeAsStringSync('');
       }
-      await _swiftPackageManager.generatePluginsSwiftPackage(_plugins, platform, xcodeProject);
+      // 1. Bootstrap generation: Generate a basic Package.swift so that xcodebuild (called by
+      // buildSettingsForBuildInfo) doesn't fail due to missing package dependencies.
+      await _swiftPackageManager.generatePluginsSwiftPackage(
+        _plugins,
+        platform,
+        xcodeProject,
+      );
+
+      // 2. Extract real build settings (now that Package.swift exists, this should succeed).
+      Version? deploymentTarget;
+      final Map<String, String>? buildSettings = await xcodeProject.buildSettingsForBuildInfo(null);
+      if (buildSettings != null) {
+        final String? deploymentTargetString = buildSettings[platform.deploymentTargetBuildSetting];
+        if (deploymentTargetString != null) {
+          deploymentTarget = Version.parse(deploymentTargetString);
+        }
+      }
+
+      // 3. Final generation: If we found a project-specific deployment target, re-generate
+      // to ensure the Package.swift is strictly correct.
+      if (deploymentTarget != null && deploymentTarget > platform.supportedPackagePlatform.version) {
+        await _swiftPackageManager.generatePluginsSwiftPackage(
+          _plugins,
+          platform,
+          xcodeProject,
+          deploymentTarget: deploymentTarget,
+        );
+      }
     } else if (xcodeProject.flutterPluginSwiftPackageInProjectSettings) {
       // If Swift Package Manager is not enabled but the project is already
       // integrated for Swift Package Manager, pass no plugins to the generator.

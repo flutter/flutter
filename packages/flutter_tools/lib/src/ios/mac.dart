@@ -144,53 +144,11 @@ Future<XcodeBuildResult> buildXcodeProject({
   XcodeBuildAction buildAction = XcodeBuildAction.build,
   bool disablePortPublication = false,
 }) async {
+  final FlutterProject project = app.project.parent;
+
   if (!upgradePbxProjWithFlutterAssets(app.project, globals.logger)) {
     return XcodeBuildResult(success: false);
   }
-
-  final FlutterProject project = FlutterProject.current();
-
-  final migrators = <ProjectMigrator>[
-    RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.analytics),
-    XcodeBuildSystemMigration(app.project, globals.logger),
-    ProjectBaseConfigurationMigration(app.project, globals.logger),
-    ProjectBuildLocationMigration(app.project, globals.logger),
-    IOSDeploymentTargetMigration(app.project, globals.logger),
-    XcodeProjectObjectVersionMigration(app.project, globals.logger),
-    HostAppInfoPlistMigration(app.project, globals.logger),
-    XcodeScriptBuildPhaseMigration(app.project, globals.logger),
-    RemoveBitcodeMigration(app.project, globals.logger),
-    XcodeThinBinaryBuildPhaseInputPathsMigration(app.project, globals.logger),
-    UIApplicationMainDeprecationMigration(app.project, globals.logger),
-    SwiftPackageManagerIntegrationMigration(
-      app.project,
-      FlutterDarwinPlatform.ios,
-      buildInfo,
-      xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
-      logger: globals.logger,
-      fileSystem: globals.fs,
-      plistParser: globals.plistParser,
-    ),
-    SwiftPackageManagerGitignoreMigration(project, globals.logger),
-    MetalAPIValidationMigrator.ios(app.project, globals.logger),
-    LLDBInitMigration(
-      app.project,
-      buildInfo,
-      globals.logger,
-      deviceID: deviceID,
-      fileSystem: globals.fs,
-      environmentType: environmentType,
-    ),
-    UISceneMigration(
-      app.project,
-      globals.logger,
-      isMigrationFeatureEnabled: featureFlags.isUISceneMigrationEnabled,
-      plistParser: globals.plistParser,
-    ),
-  ];
-
-  final migration = ProjectMigration(migrators);
-  await migration.run();
 
   if (!_checkXcodeVersion()) {
     return XcodeBuildResult(success: false);
@@ -283,6 +241,66 @@ Future<XcodeBuildResult> buildXcodeProject({
       ) ??
       <String, String>{};
 
+  if (app.project.usesSwiftPackageManager) {
+    final swiftPackageManager = SwiftPackageManager(
+      artifacts: globals.artifacts!,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      templateRenderer: globals.templateRenderer,
+    );
+    final List<Plugin> plugins = await findPlugins(app.project.parent);
+    await swiftPackageManager.ensurePluginsAreGenerated(
+      project: app.project,
+      platform: FlutterDarwinPlatform.ios,
+      buildInfo: buildInfo,
+      buildSettings: buildSettings,
+      plugins: plugins,
+      force: true,
+    );
+  }
+
+  final migrators = <ProjectMigrator>[
+    RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.analytics),
+    XcodeBuildSystemMigration(app.project, globals.logger),
+    ProjectBaseConfigurationMigration(app.project, globals.logger),
+    ProjectBuildLocationMigration(app.project, globals.logger),
+    IOSDeploymentTargetMigration(app.project, globals.logger),
+    XcodeProjectObjectVersionMigration(app.project, globals.logger),
+    HostAppInfoPlistMigration(app.project, globals.logger),
+    XcodeScriptBuildPhaseMigration(app.project, globals.logger),
+    RemoveBitcodeMigration(app.project, globals.logger),
+    XcodeThinBinaryBuildPhaseInputPathsMigration(app.project, globals.logger),
+    UIApplicationMainDeprecationMigration(app.project, globals.logger),
+    SwiftPackageManagerIntegrationMigration(
+      app.project,
+      FlutterDarwinPlatform.ios,
+      buildInfo,
+      xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
+      logger: globals.logger,
+      fileSystem: globals.fs,
+      plistParser: globals.plistParser,
+    ),
+    SwiftPackageManagerGitignoreMigration(project, globals.logger),
+    MetalAPIValidationMigrator.ios(app.project, globals.logger),
+    LLDBInitMigration(
+      app.project,
+      buildInfo,
+      globals.logger,
+      deviceID: deviceID,
+      fileSystem: globals.fs,
+      environmentType: environmentType,
+    ),
+    UISceneMigration(
+      app.project,
+      globals.logger,
+      isMigrationFeatureEnabled: featureFlags.isUISceneMigrationEnabled,
+      plistParser: globals.plistParser,
+    ),
+  ];
+
+  final migration = ProjectMigration(migrators);
+  await migration.run();
+
   final String? targetBuildDirPath = buildSettings['TARGET_BUILD_DIR'];
   final Directory? targetBuildDir = targetBuildDirPath != null
       ? globals.fs.directory(targetBuildDirPath)
@@ -337,27 +355,8 @@ Future<XcodeBuildResult> buildXcodeProject({
     targetOverride: targetOverride,
     buildInfo: buildInfo,
   );
-  if (app.project.usesSwiftPackageManager) {
-    final swiftPackageManager = SwiftPackageManager(
-      artifacts: globals.artifacts!,
-      fileSystem: globals.fs,
-      templateRenderer: globals.templateRenderer,
-    );
-    final List<Plugin> plugins = await findPlugins(app.project.parent);
-    await swiftPackageManager.ensurePluginsAreGenerated(
-      project: app.project,
-      platform: FlutterDarwinPlatform.ios,
-      buildInfo: buildInfo,
-      buildSettings: buildSettings,
-      plugins: plugins,
-    );
 
-
-
-
-  }
-
-  await processPodsIfNeeded(project.ios, buildDirectoryPath, buildInfo.mode);
+  await processPodsIfNeeded(app.project, buildDirectoryPath, buildInfo.mode);
   if (configOnly) {
     return XcodeBuildResult(success: true);
   }
@@ -977,18 +976,15 @@ _XCResultIssueHandlingResult _handleXCResultIssue({
         missingPlatform: missingPlatform,
       );
     }
-  } else if (message.toLowerCase().contains('redefinition of module')) {
-    final String? duplicateModule = _parseModuleRedefinition(message);
-    return _XCResultIssueHandlingResult(
-      requiresProvisioningProfile: false,
-      hasProvisioningProfileIssue: false,
-      duplicateModule: duplicateModule,
-    );
-  } else if (message.toLowerCase().contains('duplicate symbols')) {
-    // The message does not contain the plugin name, must parse the stdout.
+  } else if (message.toLowerCase().contains('redefinition of module') || message.toLowerCase().contains('duplicate symbols')) {
     String? duplicateModule;
-    if (result.stdout != null) {
-      duplicateModule = _parseDuplicateSymbols(result.stdout!);
+    if (message.toLowerCase().contains('redefinition of module')) {
+      duplicateModule = _parseModuleRedefinition(message);
+    } else if (message.toLowerCase().contains('duplicate symbols')) {
+      // The message does not contain the plugin name, must parse the stdout.
+      if (result.stdout != null) {
+        duplicateModule = _parseDuplicateSymbols(result.stdout!);
+      }
     }
     return _XCResultIssueHandlingResult(
       requiresProvisioningProfile: false,

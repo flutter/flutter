@@ -8,10 +8,7 @@ import 'dart:io' as io; // flutter_ignore: dart_io_import
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/tester/flutter_tester.dart';
-import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice, WebServerDevice;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart';
@@ -44,7 +41,7 @@ abstract final class FlutterTestDriver {
 
   final Directory _projectFolder;
   final String _logPrefix;
-  Process? _process;
+  io.Process? _process;
   int? _processPid;
   final _stdout = StreamController<String>.broadcast();
   final _stderr = StreamController<String>.broadcast();
@@ -259,7 +256,7 @@ abstract final class FlutterTestDriver {
 
   Future<int> _killForcefully() {
     debugPrint('Sending SIGKILL to $_processPid..');
-    ProcessSignal.sigkill.send(_processPid!);
+    io.Process.killPid(_processPid!, io.ProcessSignal.sigkill);
     return _process!.exitCode;
   }
 
@@ -579,9 +576,9 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
   }) async {
     List<String> deviceArgs;
     switch (device) {
-      case GoogleChromeDevice.kChromeDeviceId:
+      case 'chrome':
         deviceArgs = <String>[
-          GoogleChromeDevice.kChromeDeviceId,
+          'chrome',
           '--web-run-headless',
           '--no-web-resources-cdn',
           if (!expressionEvaluation) '--no-web-enable-expression-evaluation',
@@ -593,7 +590,7 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
     await _setupProcess(
       <String>[
         'run',
-        if (device != GoogleChromeDevice.kChromeDeviceId) '--disable-service-auth-codes',
+        if (device != 'chrome') '--disable-service-auth-codes',
         '--machine',
         if (!spawnDdsInstance) '--no-dds',
         if (ddsPort != null) '--dds-port=$ddsPort',
@@ -608,10 +605,10 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
       withDebugger: withDebugger,
       withDevtools: !noDevtools,
       startPaused: startPaused,
-      waitForDebugPort: device != WebServerDevice.kWebServerDeviceId && !wasm,
+      waitForDebugPort: device != 'web-server' && !wasm,
       waitForDtdAndDevTools:
-          device != WebServerDevice.kWebServerDeviceId &&
-          device != GoogleChromeDevice.kChromeDeviceId &&
+          device != 'web-server' &&
+          device != 'chrome' &&
           !noDevtools &&
           spawnDdsInstance,
       pauseOnExceptions: pauseOnExceptions,
@@ -801,7 +798,7 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
   }
 
   Future<int> detach() async {
-    final Process? process = _process;
+    final io.Process? process = _process;
     if (process == null) {
       return 0;
     }
@@ -833,7 +830,7 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
       debugPrint('Closing VM service...');
       await vmService.dispose();
     }
-    final Process? process = _process;
+    final io.Process? process = _process;
     if (_currentRunningAppId != null) {
       debugPrint('Stopping application...');
       await Future.any<void>(<Future<void>>[
@@ -956,7 +953,7 @@ final class FlutterTestTestDriver extends FlutterTestDriver {
 
   Map<String, Object?>? _parseJsonResponse(String line) {
     try {
-      return castStringKeyedMap(json.decode(line));
+      return _castStringKeyedMap(json.decode(line));
     } on Exception {
       // Not valid JSON, so likely some other output.
       return null;
@@ -985,6 +982,7 @@ final class FlutterTestTestDriver extends FlutterTestDriver {
   }
 }
 
+
 Stream<String> transformToLines(Stream<List<int>> byteStream) {
   return byteStream.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
 }
@@ -992,7 +990,7 @@ Stream<String> transformToLines(Stream<List<int>> byteStream) {
 Map<String, Object?>? parseFlutterResponse(String line) {
   if (line.startsWith('[') && line.endsWith(']') && line.length > 2) {
     try {
-      final Map<String, Object?>? response = castStringKeyedMap(
+      final Map<String, Object?>? response = _castStringKeyedMap(
         (json.decode(line) as List<Object?>)[0],
       );
       return response;
@@ -1030,4 +1028,9 @@ Future<Isolate> waitForExtension(VmService vmService, String extension) async {
   }
   await completer.future;
   return isolate;
+}
+
+Map<String, Object?>? _castStringKeyedMap(Object? untyped) {
+  final Map<dynamic, dynamic>? map = untyped as Map<dynamic, dynamic>?;
+  return map?.cast<String, Object?>();
 }
