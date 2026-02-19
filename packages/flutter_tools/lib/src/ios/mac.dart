@@ -578,10 +578,9 @@ Future<XcodeBuildResult> buildXcodeProject({
       if (globals.fs.directory(expectedOutputDirectory).existsSync()) {
         // Copy app folder to a place where other tools can find it without knowing
         // the BuildInfo.
-        outputDir = targetBuildDir;
-        if (configuration != null) {
-          outputDir = outputDir.replaceFirst('/$configuration-', '/');
-        }
+        outputDir = configuration != null
+            ? targetBuildDir.replaceFirst('/$configuration-', '/')
+            : targetBuildDir;
 
         globals.fs.directory(outputDir).createSync(recursive: true);
 
