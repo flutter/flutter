@@ -103,9 +103,9 @@ class _TestTextFieldState extends State<TestTextField>
         key: editableTextKey,
         autofillHints: widget.autofillHints,
         autofocus: widget.autofocus,
-        backgroundCursorColor: _red, // Colors.red, required by editable text.
+        backgroundCursorColor: _red, // required by editable text.
         contextMenuBuilder: widget.contextMenuBuilder,
-        cursorColor: widget.cursorColor ?? _red, // Colors.red, required by editable text.
+        cursorColor: widget.cursorColor ?? _red, // required by editable text.
         cursorOpacityAnimates: widget.cursorOpacityAnimates,
         focusNode: _effectiveFocusNode, // required by editable text.
         groupId: widget.groupId,
