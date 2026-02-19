@@ -16,62 +16,7 @@ class UserMessages {
   String get flutterToolBugInstructions =>
       'Please report a bug at https://github.com/flutter/flutter/issues.';
 
-  // Messages used in FlutterValidator
-  String flutterStatusInfo(String? channel, String? version, String os, String locale) =>
-      'Channel ${channel ?? 'unknown'}, ${version ?? 'unknown version'}, on $os, locale $locale';
-  String flutterVersion(String version, String channel, String flutterRoot) =>
-      'Flutter version $version on channel $channel at $flutterRoot';
-  String get flutterUnknownChannel =>
-      'Currently on an unknown channel. Run `flutter channel` to switch to an official channel.\n'
-      "If that doesn't fix the issue, reinstall Flutter by following instructions at https://flutter.dev/setup.";
-  String get flutterUnknownVersion =>
-      'Cannot resolve current version, possibly due to local changes.\n'
-      'Reinstall Flutter by following instructions at https://flutter.dev/setup.';
-  String flutterRevision(String revision, String age, String date) =>
-      'Framework revision $revision ($age), $date';
-  String flutterUpstreamRepositoryUrl(String url) => 'Upstream repository $url';
-  String get flutterUpstreamRepositoryUnknown =>
-      'Unknown upstream repository.\n'
-      'Reinstall Flutter by following instructions at https://flutter.dev/setup.';
-  String flutterUpstreamRepositoryUrlEnvMismatch(String url) =>
-      'Upstream repository $url is not the same as FLUTTER_GIT_URL';
-  String flutterUpstreamRepositoryUrlNonStandard(String url) =>
-      'Upstream repository $url is not a standard remote.\n'
-      'Set environment variable "FLUTTER_GIT_URL" to $url to dismiss this error.';
-  String flutterGitUrl(String url) => 'FLUTTER_GIT_URL = $url';
-  String engineRevision(String revision) => 'Engine revision $revision';
-  String dartRevision(String revision) => 'Dart version $revision';
-  String devToolsVersion(String version) => 'DevTools version $version';
-  String pubMirrorURL(String url) => 'Pub download mirror $url';
-  String flutterMirrorURL(String url) => 'Flutter download mirror $url';
-  String get flutterBinariesDoNotRun =>
-      'Downloaded executables cannot execute on host.\n'
-      'See https://github.com/flutter/flutter/issues/6207 for more information.';
-  String get flutterBinariesLinuxRepairCommands =>
-      'On Debian/Ubuntu/Mint: sudo apt-get install lib32stdc++6\n'
-      'On Fedora: dnf install libstdc++.i686\n'
-      'On Arch: pacman -S lib32-gcc-libs';
-  String get flutterValidatorErrorIntentional =>
-      'If those were intentional, you can disregard the above warnings; however it is '
-      'recommended to use "git" directly to perform update checks and upgrades.';
-
-  // Messages used in NoIdeValidator
-  String get noIdeStatusInfo => 'No supported IDEs installed';
-  List<String> get noIdeInstallationInfo => <String>[
-    'IntelliJ - https://www.jetbrains.com/idea/',
-    'Android Studio - https://developer.android.com/studio/',
-    'VS Code - https://code.visualstudio.com/',
-  ];
-
-  // Messages used in DeviceValidator
-  String get devicesMissing => 'No devices available';
-  String devicesAvailable(int devices) => '$devices available';
-
   // Messages used in AndroidValidator
-  String androidCantRunJavaBinary(String javaBinary) =>
-      'Cannot execute $javaBinary to determine the version';
-  String get androidUnknownJavaVersion => 'Could not determine java version';
-  String androidJavaVersion(String javaVersion) => 'Java version $javaVersion';
   String androidJavaMinimumVersion(String javaVersion) =>
       'Java version $javaVersion is older than the minimum recommended version of ${gradle_utils.warnJavaMinVersionAndroid}';
   String androidSdkLicenseOnly(String envKey) =>
