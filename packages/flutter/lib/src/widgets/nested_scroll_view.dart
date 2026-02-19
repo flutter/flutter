@@ -1019,60 +1019,6 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     goBallistic(0.0);
   }
 
-  void applyScrollDeltaWithPhysics(double delta, {double velocity = 0.0}) {
-    // If an update is made here, consider if the same (or similar) change
-    // should be made in ScrollPositionWithSingleContext.applyScrollDeltaWithPhysics.
-    if (delta == 0.0) {
-      goBallistic(velocity);
-      return;
-    }
-
-    goIdle();
-    updateUserScrollDirection(delta < 0.0 ? ScrollDirection.forward : ScrollDirection.reverse);
-
-    _outerPosition!.isScrollingNotifier.value = true;
-    _outerPosition!.didStartScroll();
-    for (final _NestedScrollPosition position in _innerPositions) {
-      position.isScrollingNotifier.value = true;
-      position.didStartScroll();
-    }
-
-    // Unlike pointerScroll, we use applyFullDragUpdate which routes through
-    // applyBoundaryConditions, allowing BouncingScrollPhysics to permit
-    // overscroll and trigger bounce animations.
-    if (_innerPositions.isEmpty) {
-      _outerPosition!.applyFullDragUpdate(-delta);
-    } else if (delta > 0.0) {
-      // Scrolling "down" (positive delta = past max extent)
-      var outerDelta = delta;
-      for (final _NestedScrollPosition position in _innerPositions) {
-        if (position.pixels < 0.0) {
-          final double potentialOuterDelta = position.applyClampedPointerSignalUpdate(delta);
-          outerDelta = math.max(outerDelta, potentialOuterDelta);
-        }
-      }
-      if (outerDelta != 0.0) {
-        _outerPosition!.applyFullDragUpdate(-outerDelta);
-      }
-    } else {
-      // Scrolling "up" (negative delta = past min extent)
-      var innerDelta = delta;
-      if (_floatHeaderSlivers) {
-        innerDelta = _outerPosition!.applyClampedPointerSignalUpdate(delta);
-      }
-      if (innerDelta != 0.0) {
-        _outerPosition!.applyFullDragUpdate(-innerDelta);
-      }
-    }
-
-    _outerPosition!.didEndScroll();
-    for (final _NestedScrollPosition position in _innerPositions) {
-      position.didEndScroll();
-    }
-    // Pass velocity to goBallistic for seamless fling momentum transfer.
-    goBallistic(velocity);
-  }
-
   @override
   double setPixels(double newPixels) {
     assert(false);
@@ -1496,11 +1442,6 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   @override
   void pointerScroll(double delta) {
     return coordinator.pointerScroll(delta);
-  }
-
-  @override
-  void applyScrollDeltaWithPhysics(double delta, {double velocity = 0.0}) {
-    return coordinator.applyScrollDeltaWithPhysics(delta, velocity: velocity);
   }
 
   @override

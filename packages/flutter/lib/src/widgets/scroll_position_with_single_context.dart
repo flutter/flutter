@@ -235,7 +235,24 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     }
   }
 
-  @override
+  /// Applies a scroll [delta] to the position while respecting the current
+  /// [physics] boundary conditions, and transfers [velocity] to the physics
+  /// simulation.
+  ///
+  /// Unlike [pointerScroll], which hard-clamps the scroll offset to the
+  /// [minScrollExtent] and [maxScrollExtent], this method routes the delta
+  /// through [applyBoundaryConditions]. This allows [ScrollPhysics] that
+  /// support overscroll (like [BouncingScrollPhysics]) to go out of bounds,
+  /// creating bounce or stretch effects.
+  ///
+  /// The [velocity] parameter represents the scroll velocity at the time of
+  /// the update. It is passed to [goBallistic] to allow the physics to settle
+  /// the position naturally, which is essential for seamless momentum
+  /// transfer during overscroll delegation.
+  ///
+  /// This is typically used by ancestor [Scrollable]s when handling an
+  /// [OverscrollNotification] from a descendant, provided that overscroll
+  /// delegation is enabled in the [ScrollBehavior].
   void applyScrollDeltaWithPhysics(double delta, {double velocity = 0.0}) {
     // If an update is made here, consider if the same (or similar) change
     // should be made in _NestedScrollCoordinator.applyScrollDeltaWithPhysics.

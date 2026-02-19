@@ -950,25 +950,6 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// update the [ScrollDirection].
   void pointerScroll(double delta);
 
-  /// Applies [delta] to the scroll position, routing through
-  /// [ScrollPhysics.applyBoundaryConditions] so that physics like
-  /// [BouncingScrollPhysics] can permit overscroll and trigger bounce
-  /// animations.
-  ///
-  /// Unlike [pointerScroll], this does not clamp [delta] to the scroll
-  /// extents. Instead, it calls [applyBoundaryConditions] and then
-  /// [goBallistic] to allow the physics to settle the position — producing
-  /// a bounce/spring-back effect when the position goes out of range.
-  ///
-  /// The [velocity] parameter represents the scroll velocity at the time of
-  /// overscroll. When non-zero (e.g. from a fling gesture), this velocity is
-  /// passed to [goBallistic] to seamlessly transfer momentum from the
-  /// descendant scrollable to this one.
-  ///
-  /// Used when delegating overscroll from a descendant scrollable to its
-  /// ancestor, so that the ancestor's physics are fully respected.
-  void applyScrollDeltaWithPhysics(double delta, {double velocity = 0.0});
-
   /// Calls [jumpTo] if duration is null or [Duration.zero], otherwise
   /// [animateTo] is called.
   ///

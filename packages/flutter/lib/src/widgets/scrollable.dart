@@ -37,6 +37,7 @@ import 'scroll_controller.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
+import 'scroll_position_with_single_context.dart';
 import 'scrollable_helpers.dart';
 import 'selectable_region.dart';
 import 'selection_container.dart';
@@ -978,12 +979,16 @@ class ScrollableState extends State<Scrollable>
       return false;
     }
 
-    // Use applyScrollDeltaWithPhysics instead of pointerScroll.
-    // pointerScroll ignores physics boundary conditions and hard-clamps the position.
-    // applyScrollDeltaWithPhysics respects physics (e.g. BouncingScrollPhysics) and
-    // allows overscroll/bounce effects. Pass velocity so fling momentum is
-    // seamlessly transferred from the descendant to the parent scrollable.
-    position.applyScrollDeltaWithPhysics(overscroll, velocity: notification.velocity);
+    // Use applyScrollDeltaWithPhysics to allow overscroll/bounce effects.
+    // This method is available on ScrollPositionWithSingleContext, which handles
+    // the physics logic.
+    final ScrollPosition currentPosition = position;
+    if (currentPosition is ScrollPositionWithSingleContext) {
+      currentPosition.applyScrollDeltaWithPhysics(overscroll, velocity: notification.velocity);
+    } else {
+      // Fallback for other ScrollPosition implementations
+      currentPosition.pointerScroll(overscroll);
+    }
     return true; // Consumed, don't propagate further
   }
 
