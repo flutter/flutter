@@ -228,8 +228,8 @@ inline std::ostream& operator<<(std::ostream& out, const UniformInfo& info) {
 
 TEST_P(CompilerTestRuntime, UniformsAppearInJson) {
   if (GetParam() == TargetPlatform::kRuntimeStageVulkan) {
-    // TODO: Investigate why does not pass:
-    // https://github.com/flutter/flutter/issues/182578
+    // TODO(https://github.com/flutter/flutter/issues/182578): Investigate why
+    // this does not pass.
     GTEST_SKIP() << "Not supported with Vulkan";
   }
 
@@ -280,8 +280,8 @@ TEST_P(CompilerTestRuntime, UniformsAppearInJson) {
 
 TEST_P(CompilerTestRuntime, PositionedUniformsAppearInJson) {
   if (GetParam() == TargetPlatform::kRuntimeStageVulkan) {
-    // TODO: Investigate why does not pass:
-    // https://github.com/flutter/flutter/issues/182578
+    // TODO(https://github.com/flutter/flutter/issues/182578): Investigate why
+    // this does not pass.
     GTEST_SKIP() << "Not supported with Vulkan";
   }
 
