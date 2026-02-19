@@ -145,19 +145,13 @@ public final class FlutterEngineFlags {
       new Flag("--old-gen-heap-size=", "OldGenHeapSize", true);
 
   /**
-   * Enables or disables the Impeller renderer.
-   *
-   * <p>Allowed in release to control which rendering backend is used in production.
-   */
-  private static final Flag TOGGLE_IMPELLER =
-      new Flag("--enable-impeller=", "ToggleImpeller", true);
-
-  /**
    * Enables Impeller.
    *
    * <p>Allowed in release to control which rendering backend is used in production.
    */
-  private static final Flag ENABLE_IMPELLER = new Flag("--enable-impeller", "EnableImpeller", true);
+  private static final Flag ENABLE_IMPELLER =
+      new Flag("--enable-impeller=", "EnableImpeller", true);
+
   /**
    * Specifies the backend to use for Impeller rendering.
    *
@@ -341,7 +335,6 @@ public final class FlutterEngineFlags {
               DISABLE_MERGED_PLATFORM_UI_THREAD,
               DEPRECATED_AOT_SHARED_LIBRARY_NAME,
               DEPRECATED_FLUTTER_ASSETS_DIR,
-              TOGGLE_IMPELLER,
               OLD_GEN_HEAP_SIZE,
               VM_SNAPSHOT_DATA,
               ISOLATE_SNAPSHOT_DATA,

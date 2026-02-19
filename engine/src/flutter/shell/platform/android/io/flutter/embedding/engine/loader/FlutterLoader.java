@@ -333,7 +333,7 @@ public class FlutterLoader {
                 "If you are trying to specify "
                     + metadataKey
                     + " in your application manifest, please make sure to use the new metadata key name: "
-                    + FlutterEngineFlags.getReplacementFlagIfDeprecated(flag));
+                    + FlutterEngineFlags.getReplacementFlagIfDeprecated(flag).metadataKey);
           } else if (!flag.allowedInRelease && isRelease) {
             // Manifest flag is not allowed in release builds.
             Log.e(

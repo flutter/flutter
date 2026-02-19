@@ -793,25 +793,14 @@ public class FlutterLoaderTest {
   }
 
   @Test
-  public void itSetsToggleImpellerFromMetadata() {
-    // Test debug mode.
-    testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.ToggleImpeller", true, "--enable-impeller=true");
-
-    // Test release mode.
-    testFlagFromMetadataPresentInReleaseMode(
-        "io.flutter.embedding.android.ToggleImpeller", true, "--enable-impeller=true");
-  }
-
-  @Test
   public void itSetsEnableImpellerFromMetadata() {
     // Test debug mode.
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.EnableImpeller", null, "--enable-impeller");
+        "io.flutter.embedding.android.EnableImpeller", true, "--enable-impeller=true");
 
     // Test release mode.
     testFlagFromMetadataPresentInReleaseMode(
-        "io.flutter.embedding.android.EnableImpeller", null, "--enable-impeller");
+        "io.flutter.embedding.android.EnableImpeller", false, "--enable-impeller=false");
   }
 
   @Test
