@@ -310,10 +310,8 @@ std::vector<TargetPlatform> Switches::PlatformsToCompile() const {
   return {target_platform_};
 }
 
-SourceOptions Switches::CreateSourceOptions(
-    TargetPlatform target_platform) const {
+SourceOptions Switches::CreateSourceOptions() const {
   SourceOptions options;
-  options.target_platform = target_platform;
   options.source_language = source_language;
   if (input_type == SourceType::kUnknown) {
     options.type = SourceTypeFromFileName(source_file_name);

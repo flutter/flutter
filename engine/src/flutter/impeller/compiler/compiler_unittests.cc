@@ -15,51 +15,45 @@ namespace impeller {
 namespace compiler {
 namespace testing {
 
-#define INSTANTIATE_TARGET_PLATFORM_TEST_SUITE_P(suite_name)                 \
-  INSTANTIATE_TEST_SUITE_P(                                                  \
-      suite_name, CompilerTest,                                              \
-      ::testing::Values(TargetPlatform::kOpenGLES,                           \
-                        TargetPlatform::kOpenGLDesktop,                      \
-                        TargetPlatform::kMetalDesktop,                       \
-                        TargetPlatform::kMetalIOS, TargetPlatform::kVulkan), \
-      [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) {    \
-        return TargetPlatformToString(info.param);                           \
-      });
+INSTANTIATE_TEST_SUITE_P(
+    CompilerSuite,
+    CompilerTest,
+    ::testing::Values(TargetPlatform::kOpenGLES,
+                      TargetPlatform::kOpenGLDesktop,
+                      TargetPlatform::kMetalDesktop,
+                      TargetPlatform::kMetalIOS,
+                      TargetPlatform::kVulkan),
+    [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) {
+      return TargetPlatformToString(info.param);
+    });
 
-INSTANTIATE_TARGET_PLATFORM_TEST_SUITE_P(CompilerSuite);
+INSTANTIATE_TEST_SUITE_P(
+    CompilerSuite,
+    CompilerTestRuntime,
+    ::testing::Values(TargetPlatform::kRuntimeStageMetal,
+                      TargetPlatform::kRuntimeStageGLES,
+                      TargetPlatform::kRuntimeStageGLES3,
+                      TargetPlatform::kRuntimeStageVulkan,
+                      TargetPlatform::kSkSL),
+    [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) {
+      return TargetPlatformToString(info.param);
+    });
 
-#define INSTANTIATE_RUNTIME_TARGET_PLATFORM_TEST_SUITE_P(suite_name)      \
-  INSTANTIATE_TEST_SUITE_P(                                               \
-      suite_name, CompilerTestRuntime,                                    \
-      ::testing::Values(TargetPlatform::kRuntimeStageMetal,               \
-                        TargetPlatform::kRuntimeStageGLES,                \
-                        TargetPlatform::kRuntimeStageGLES3,               \
-                        TargetPlatform::kRuntimeStageVulkan,              \
-                        TargetPlatform::kSkSL),                           \
-      [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) { \
-        return TargetPlatformToString(info.param);                        \
-      });
+INSTANTIATE_TEST_SUITE_P(
+    CompilerSuite,
+    CompilerTestSkSL,
+    ::testing::Values(TargetPlatform::kSkSL),
+    [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) {
+      return TargetPlatformToString(info.param);
+    });
 
-INSTANTIATE_RUNTIME_TARGET_PLATFORM_TEST_SUITE_P(CompilerSuite);
-
-#define INSTANTIATE_SKSL_TARGET_PLATFORM_TEST_SUITE_P(suite_name)             \
-  INSTANTIATE_TEST_SUITE_P(                                                   \
-      suite_name, CompilerTestSkSL, ::testing::Values(TargetPlatform::kSkSL), \
-      [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) {     \
-        return TargetPlatformToString(info.param);                            \
-      });
-
-INSTANTIATE_SKSL_TARGET_PLATFORM_TEST_SUITE_P(CompilerSuite);
-
-#define INSTANTIATE_UNKNOWN_TARGET_PLATFORM_TEST_SUITE_P(suite_name)      \
-  INSTANTIATE_TEST_SUITE_P(                                               \
-      suite_name, CompilerTestUnknownPlatform,                            \
-      ::testing::Values(TargetPlatform::kUnknown),                        \
-      [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) { \
-        return TargetPlatformToString(info.param);                        \
-      });
-
-INSTANTIATE_UNKNOWN_TARGET_PLATFORM_TEST_SUITE_P(CompilerSuite);
+INSTANTIATE_TEST_SUITE_P(
+    CompilerSuite,
+    CompilerTestUnknownPlatform,
+    ::testing::Values(TargetPlatform::kUnknown),
+    [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) {
+      return TargetPlatformToString(info.param);
+    });
 
 TEST(CompilerTest, Defines) {
   std::shared_ptr<const fml::Mapping> fixture =
@@ -233,10 +227,9 @@ inline std::ostream& operator<<(std::ostream& out, const UniformInfo& info) {
 }  // namespace
 
 TEST_P(CompilerTestRuntime, UniformsAppearInJson) {
-  if (GetParam() == TargetPlatform::kSkSL) {
-    GTEST_SKIP() << "Not supported with SkSL";
-  }
   if (GetParam() == TargetPlatform::kRuntimeStageVulkan) {
+    // TODO: Investigate why does not pass:
+    // https://github.com/flutter/flutter/issues/182578
     GTEST_SKIP() << "Not supported with Vulkan";
   }
 
@@ -286,10 +279,9 @@ TEST_P(CompilerTestRuntime, UniformsAppearInJson) {
 }
 
 TEST_P(CompilerTestRuntime, PositionedUniformsAppearInJson) {
-  if (GetParam() == TargetPlatform::kSkSL) {
-    GTEST_SKIP() << "Not supported with SkSL";
-  }
   if (GetParam() == TargetPlatform::kRuntimeStageVulkan) {
+    // TODO: Investigate why does not pass:
+    // https://github.com/flutter/flutter/issues/182578
     GTEST_SKIP() << "Not supported with Vulkan";
   }
 

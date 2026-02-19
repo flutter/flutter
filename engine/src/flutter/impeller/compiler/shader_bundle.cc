@@ -215,11 +215,7 @@ bool GenerateShaderBundle(Switches& switches) {
   ///
 
   auto shader_bundle = GenerateShaderBundleFlatbuffer(
-      switches.shader_bundle,
-      switches.CreateSourceOptions(
-          // This TargetPlatform does not matter because it is overridden by
-          // GenerateShaderBackendFB().
-          TargetPlatform::kUnknown));
+      switches.shader_bundle, switches.CreateSourceOptions());
   if (!shader_bundle.has_value()) {
     // Specific error messages are already handled by
     // GenerateShaderBundleFlatbuffer.

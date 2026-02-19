@@ -102,7 +102,7 @@ TEST(SwitchesTest, EntryPointPrefixIsApplied) {
   EXPECT_EQ(switches.entry_point_prefix, "my_prefix_");
 
   switches.source_file_name = "test.frag";
-  auto options = switches.CreateSourceOptions(TargetPlatform::kUnknown);
+  auto options = switches.CreateSourceOptions();
   EXPECT_EQ(options.entry_point_name, "my_prefix_test_fragment_main");
 }
 

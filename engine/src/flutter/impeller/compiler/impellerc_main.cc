@@ -39,7 +39,8 @@ static bool OutputIPLR(
 
   RuntimeStageData stages;
   for (const auto& platform : switches.PlatformsToCompile()) {
-    SourceOptions options = switches.CreateSourceOptions(platform);
+    SourceOptions options = switches.CreateSourceOptions();
+    options.target_platform = platform;
 
     // Invoke the compiler and generate reflection data for a single shader.
 
@@ -210,8 +211,12 @@ bool Main(const fml::CommandLine& command_line) {
   // Create at least one compiler to output the SL file, reflection data, and a
   // depfile.
 
-  SourceOptions options =
-      switches.CreateSourceOptions(switches.PlatformsToCompile().front());
+  SourceOptions options = switches.CreateSourceOptions();
+  // If there are multiple platform compile targets, the specific target
+  // platform that is used does not matter because the output files won't depend
+  // on the target platform. Arbitrarily choose the first one from
+  // PlatformsToCompile().
+  options.target_platform = switches.PlatformsToCompile().front();
 
   // Invoke the compiler and generate reflection data for a single shader.
 
