@@ -7,6 +7,7 @@
 #import "ViewFactory.h"
 #import "TextFieldFactory.h"
 #import "ButtonFactory.h"
+#import "WebViewFactory.h"
 
 @implementation AppDelegate
 
@@ -18,6 +19,7 @@
   [registrar registerViewFactory:[[ViewFactory alloc] init] withId:@"platform_view"];
   [registrar registerViewFactory:[[TextFieldFactory alloc] init] withId:@"platform_text_field"];
   [registrar registerViewFactory:[[ButtonFactory alloc] init] withId:@"platform_button"];
+  [registrar registerViewFactory:[[WebViewFactory alloc] init] withId:@"platform_web_view"];
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
