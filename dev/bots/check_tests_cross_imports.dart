@@ -167,7 +167,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/container_test.dart',
     'packages/flutter/test/widgets/drawer_test.dart',
     'packages/flutter/test/widgets/framework_test.dart',
-    'packages/flutter/test/widgets/ticker_mode_test.dart',
     'packages/flutter/test/widgets/absorb_pointer_test.dart',
     'packages/flutter/test/widgets/semantics_role_checks_test.dart',
     'packages/flutter/test/widgets/media_query_test.dart',
