@@ -951,6 +951,11 @@ class ScrollableState extends State<Scrollable>
       return false;
     }
 
+    // Only handle if the scroll configuration allows delegation
+    if (!_configuration.delegateOverscroll) {
+      return false;
+    }
+
     final double overscroll = notification.overscroll;
     if (overscroll == 0.0) {
       return false;
@@ -1145,10 +1150,12 @@ class ScrollableState extends State<Scrollable>
     // Wrap with NotificationListener to handle descendant overscroll events.
     // This enables seamless scroll delegation from nested scrollables,
     // similar to how mouse wheel events propagate to ancestor scrollables.
-    result = NotificationListener<OverscrollNotification>(
-      onNotification: _handleDescendantOverscroll,
-      child: result,
-    );
+    if (_configuration.delegateOverscroll) {
+      result = NotificationListener<OverscrollNotification>(
+        onNotification: _handleDescendantOverscroll,
+        child: result,
+      );
+    }
 
     return result;
   }
