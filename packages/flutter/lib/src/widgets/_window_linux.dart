@@ -198,7 +198,7 @@ const int _GDK_WINDOW_STATE_MAXIMIZED = 1 << 2;
 const int _GDK_WINDOW_STATE_FULLSCREEN = 1 << 4;
 
 const int _GDK_WINDOW_TYPE_HINT_DIALOG = 1;
-const int _GDK_WINDOW_TYPE_HINT_TOOLTIP = 10;
+//const int _GDK_WINDOW_TYPE_HINT_TOOLTIP = 10;
 
 /// Wraps GtkWindow
 class _GtkWindow extends _GtkContainer {
