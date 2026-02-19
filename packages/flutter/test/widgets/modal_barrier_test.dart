@@ -12,6 +12,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 import 'widgets_app_tester.dart';
 
+const Color _kTestRed = Color(0xFFFF0000);
+
 void main() {
   late bool tapped;
   late bool hovered;
@@ -21,7 +23,7 @@ void main() {
 
   setUp(() {
     tapped = false;
-    colorAnimation = const AlwaysStoppedAnimation<Color?>(Color(0xFFFF0000));
+    colorAnimation = const AlwaysStoppedAnimation<Color?>(_kTestRed);
     tapTarget = GestureDetector(
       onTap: () {
         tapped = true;
@@ -1046,7 +1048,7 @@ class AnimatedSecondWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedModalBarrier(
       key: const ValueKey<String>('barrier'),
-      color: const AlwaysStoppedAnimation<Color?>(Color(0xFFFF0000)),
+      color: const AlwaysStoppedAnimation<Color?>(_kTestRed),
       onDismiss: onDismiss,
     );
   }
@@ -1077,7 +1079,7 @@ class AnimatedSecondWidgetWithCompetence extends StatelessWidget {
       children: <Widget>[
         const AnimatedModalBarrier(
           key: ValueKey<String>('barrier'),
-          color: AlwaysStoppedAnimation<Color?>(Color(0xFFFF0000)),
+          color: AlwaysStoppedAnimation<Color?>(_kTestRed),
         ),
         GestureDetector(
           onVerticalDragStart: (_) {},
