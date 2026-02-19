@@ -950,17 +950,6 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// update the [ScrollDirection].
   void pointerScroll(double delta);
 
-  /// Whether this scroll position is coordinated by a parent scroll
-  /// coordinator (e.g., [NestedScrollView]'s [_NestedScrollCoordinator]).
-  ///
-  /// When `true`, overscroll delegation via [OverscrollNotification]s should
-  /// be skipped for this position to avoid double-scrolling. The coordinator
-  /// already distributes scroll deltas between its managed positions
-  /// internally.
-  ///
-  /// Defaults to `false`.
-  bool get isCoordinatedByParent => false;
-
   /// Applies [delta] to the scroll position, routing through
   /// [ScrollPhysics.applyBoundaryConditions] so that physics like
   /// [BouncingScrollPhysics] can permit overscroll and trigger bounce

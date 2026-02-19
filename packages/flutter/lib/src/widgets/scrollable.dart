@@ -951,16 +951,6 @@ class ScrollableState extends State<Scrollable>
       return false;
     }
 
-    // Don't handle if this position is coordinated by a parent scroll
-    // coordinator (e.g., NestedScrollView). The coordinator already
-    // distributes scroll deltas internally via applyUserOffset/goBallistic.
-    // Handling the notification here would cause double-scrolling.
-    // The notification will continue to bubble up to any grandparent
-    // scrollable that is NOT coordinator-managed.
-    if (position.isCoordinatedByParent) {
-      return false;
-    }
-
     final double overscroll = notification.overscroll;
     if (overscroll == 0.0) {
       return false;
