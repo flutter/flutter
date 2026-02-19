@@ -336,7 +336,7 @@ public class FlutterLoader {
                     + FlutterEngineFlags.getReplacementFlagIfDeprecated(flag));
           } else if (!flag.allowedInRelease && isRelease) {
             // Manifest flag is not allowed in release builds.
-            Log.w(
+            Log.e(
                 TAG,
                 "Flag with metadata key "
                     + metadataKey
@@ -378,7 +378,7 @@ public class FlutterLoader {
                   TAG,
                   "Flag with metadata key "
                       + metadataKey
-                      + " requires a value, but no value was found. Please ensure that the value is a string.");
+                      + " requires a value, but no value was found. Please specify a value.");
               continue;
             }
             arg += value;
@@ -535,7 +535,7 @@ public class FlutterLoader {
       safeAotSharedLibraryName =
           getSafeAotSharedLibraryName(applicationContext, aotSharedLibraryPath);
     } catch (IOException exception) {
-      Log.w(
+      Log.e(
           TAG,
           "Error while validating AOT shared library name flag: " + aotSharedLibraryPath,
           exception);
@@ -548,7 +548,7 @@ public class FlutterLoader {
               + safeAotSharedLibraryName);
     } else {
       // If the library path is not safe, we will skip adding this argument.
-      Log.w(
+      Log.e(
           TAG,
           "Skipping unsafe AOT shared library name flag: "
               + aotSharedLibraryPath

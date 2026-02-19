@@ -302,9 +302,11 @@ public final class FlutterEngineFlags {
    */
   private static final Flag DART_FLAGS = new Flag("--dart-flags=", "DartFlags");
 
-  // Deprecated flags:
-
-  /** Disables the merging of the UI and platform threads. */
+  /**
+   * Disables the merging of the UI and platform threads.
+   *
+   * <p>This flag is disabled and only exists for the purpose of throwing an exception when used.
+   */
   @VisibleForTesting
   public static final Flag DISABLE_MERGED_PLATFORM_UI_THREAD =
       new Flag("--no-enable-merged-platform-ui-thread", "DisableMergedPlatformUIThread");

@@ -338,7 +338,7 @@ import java.util.Set;
             : false;
 
     // As part of https://github.com/flutter/flutter/issues/172553, the ability to set
-    // --enable-software-rendering via Intent is planned to be removed. Warn
+    // --enable-software-rendering via Intent will be removed. Inform
     // developers about the new method for doing so if this was attempted.
     // TODO(camsim99): Remove this warning after a stable release has passed:
     // https://github.com/flutter/flutter/issues/179274.

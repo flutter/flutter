@@ -162,14 +162,14 @@ public final class ApplicationInfoLoader {
     return new FlutterApplicationInfo(
         getStringWithFallback(
             appInfo.metaData,
-            FlutterEngineFlags.DEPRECATED_AOT_SHARED_LIBRARY_NAME.metadataKey,
-            FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.metadataKey),
+            FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.metadataKey,
+            FlutterEngineFlags.DEPRECATED_AOT_SHARED_LIBRARY_NAME.metadataKey),
         getString(appInfo.metaData, FlutterEngineFlags.VM_SNAPSHOT_DATA.metadataKey),
         getString(appInfo.metaData, FlutterEngineFlags.ISOLATE_SNAPSHOT_DATA.metadataKey),
         getStringWithFallback(
             appInfo.metaData,
-            FlutterEngineFlags.DEPRECATED_FLUTTER_ASSETS_DIR.metadataKey,
-            FlutterEngineFlags.FLUTTER_ASSETS_DIR.metadataKey),
+            FlutterEngineFlags.FLUTTER_ASSETS_DIR.metadataKey,
+            FlutterEngineFlags.DEPRECATED_FLUTTER_ASSETS_DIR.metadataKey),
         getNetworkPolicy(appInfo, applicationContext),
         appInfo.nativeLibraryDir,
         getBoolean(appInfo.metaData, PUBLIC_AUTOMATICALLY_REGISTER_PLUGINS_METADATA_KEY, true));

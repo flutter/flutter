@@ -1023,6 +1023,12 @@ public class FlutterLoaderTest {
   }
 
   @Test
+  public void itDoesNotSetFlagDisallowedinReleaseMode() {
+    testFlagFromMetadataNotPresentInReleaseMode(
+        "io.flutter.embedding.android.TraceSkia", null, "--test-flag");
+  }
+
+  @Test
   public void itDoesNotSetDisableMergedPlatformUIThreadFromMetadata() {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
@@ -1189,6 +1195,11 @@ public class FlutterLoaderTest {
   private void testFlagFromMetadataPresentInReleaseMode(
       String metadataKey, Object metadataValue, String expectedArg) {
     testFlagFromMetadata(metadataKey, metadataValue, expectedArg, true, true);
+  }
+
+  private void testFlagFromMetadataNotPresentInReleaseMode(
+      String metadataKey, Object metadataValue, String expectedArg) {
+    testFlagFromMetadata(metadataKey, metadataValue, expectedArg, false, true);
   }
 
   private void testFlagFromMetadataNotPresent(

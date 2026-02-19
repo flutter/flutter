@@ -674,11 +674,7 @@ class AndroidDevice extends Device {
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (debuggingOptions.buildInfo.isDebug) ...<String>[
           ...<String>['--ez', 'enable-checked-mode', 'true'],
-          ...<String>[
-            '--ez',
-            'verify-entry-points',
-            'true',
-          ], // TODO(camsim99): check if this is even used
+          ...<String>['--ez', 'verify-entry-points', 'true'],
         ],
         if (debuggingOptions.startPaused) ...<String>['--ez', 'start-paused', 'true'],
         if (debuggingOptions.disableServiceAuthCodes) ...<String>[
