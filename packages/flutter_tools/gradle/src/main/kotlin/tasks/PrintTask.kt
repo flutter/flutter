@@ -14,3 +14,16 @@ abstract class PrintTask : DefaultTask() {
         println(message.get())
     }
 }
+
+abstract class PrintTaskDeferred<T> : DefaultTask() {
+    @get:Input
+    abstract var closureInput: T
+
+    @get:Input
+    abstract var messageClosure: (input: T) -> String
+
+    @TaskAction
+    fun run() {
+        println(messageClosure(closureInput))
+    }
+}

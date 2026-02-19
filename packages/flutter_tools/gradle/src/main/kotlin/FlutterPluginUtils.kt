@@ -8,17 +8,20 @@ import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
+import com.android.build.gradle.api.BaseVariantOutput
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.DeepLinkJsonFromManifestTask
 import com.flutter.gradle.tasks.PrintTask
+import com.flutter.gradle.tasks.PrintTaskDeferred
 import groovy.lang.Closure
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.logging.Logger
+import org.gradle.api.plugins.ExtensionContainer
 import org.gradle.kotlin.dsl.register
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -710,10 +713,11 @@ object FlutterPluginUtils {
     @JvmStatic
     @JvmName("addTaskForJavaVersion")
     internal fun addTaskForJavaVersion(project: Project) {
-        project.tasks.register<PrintTask>("javaVersion") {
+        project.tasks.register<PrintTaskDeferred<Unit>>("javaVersion") {
             description = "Print the current java version used by gradle. see: " +
                 "https://docs.gradle.org/current/javadoc/org/gradle/api/JavaVersion.html"
-            message.set(VersionFetcher.getJavaVersion().toString())
+            closureInput = Unit
+            messageClosure = { VersionFetcher.getJavaVersion().toString() }
         }
     }
 
@@ -746,27 +750,30 @@ object FlutterPluginUtils {
     @JvmStatic
     @JvmName("addTaskForPrintBuildVariants")
     internal fun addTaskForPrintBuildVariants(project: Project) {
-        project.tasks.register<PrintTask>("printBuildVariants") {
+        project.tasks.register<PrintTaskDeferred<ExtensionContainer>>("printBuildVariants") {
             description = "Prints out all build variants for this Android project"
-            project.provider {
-                // Groovy was dynamically getting a different subtype here than our Kotlin getAndroidExtension method.
-                // TODO(gmackall): We should take another pass at the different types we are using in our conversion of
-                //                 the groovy `flutter.android` lines.
-                val androidExtension = project.extensions.getByType(AbstractAppExtension::class.java)
-
-                val messageBuilder = StringBuilder()
-                androidExtension.applicationVariants.forEach { variant ->
-                    messageBuilder.append("BuildVariant: ${variant.name}\n")
-                }
-                message.set(messageBuilder.toString())
-            }
+            closureInput = project.extensions
+            messageClosure = ::createPrintBuildVariantsString
         }
+    }
+
+    internal fun createPrintBuildVariantsString(extensions: ExtensionContainer): String {
+        // Groovy was dynamically getting a different subtype here than our Kotlin getAndroidExtension method.
+        // TODO(gmackall): We should take another pass at the different types we are using in our conversion of
+        //                 the groovy `flutter.android` lines.
+        val androidExtension = extensions.getByType(AbstractAppExtension::class.java)
+
+        val messageBuilder = StringBuilder()
+        androidExtension.applicationVariants.forEach { variant ->
+            messageBuilder.append("BuildVariant: ${variant.name}\n")
+        }
+        return messageBuilder.toString()
     }
 
     // TODO(gmackall): Migrate to AGPs variant api.
     //    https://github.com/flutter/flutter/issues/166550
     @Suppress("DEPRECATION")
-    private fun findProcessResources(baseVariantOutput: com.android.build.gradle.api.BaseVariantOutput): ProcessAndroidResources =
+    private fun findProcessResources(baseVariantOutput: BaseVariantOutput): ProcessAndroidResources =
         baseVariantOutput.processResourcesProvider?.get() ?: baseVariantOutput.processResources
 
     /**

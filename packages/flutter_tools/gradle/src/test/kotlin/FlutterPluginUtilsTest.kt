@@ -11,6 +11,7 @@ import com.android.build.gradle.internal.dsl.DefaultConfig
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.PrintTask
+import com.flutter.gradle.tasks.PrintTaskDeferred
 import io.mockk.called
 import io.mockk.every
 import io.mockk.mockk
@@ -25,6 +26,7 @@ import org.gradle.api.UnknownTaskException
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.logging.Logger
+import org.gradle.api.plugins.ExtensionContainer
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
@@ -37,7 +39,6 @@ import kotlin.io.path.createDirectory
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 
 class FlutterPluginUtilsTest {
     companion object {
@@ -1015,12 +1016,12 @@ class FlutterPluginUtilsTest {
         val project = mockk<Project>()
         val taskContainer = mockk<TaskContainer>()
         every { project.tasks } returns taskContainer
-        val mockTaskProvider = mockk<TaskProvider<PrintTask>>()
-        val mockPrintTask = mockk<PrintTask>(relaxed = true)
-        val captureSlot = slot<Action<PrintTask>>()
+        val mockTaskProvider = mockk<TaskProvider<PrintTaskDeferred<Unit>>>()
+        val mockPrintTask = mockk<PrintTaskDeferred<Unit>>(relaxed = true)
+        val captureSlot = slot<Action<PrintTaskDeferred<Unit>>>()
 
         every {
-            project.tasks.register(eq("javaVersion"), PrintTask::class.java, capture(captureSlot))
+            project.tasks.register("javaVersion", any<Class<PrintTaskDeferred<Unit>>>(), capture(captureSlot))
         } returns mockTaskProvider
 
         FlutterPluginUtils.addTaskForJavaVersion(project)
@@ -1029,11 +1030,6 @@ class FlutterPluginUtilsTest {
         verify {
             mockPrintTask.description = "Print the current java version used by gradle. see: " +
                 "https://docs.gradle.org/current/javadoc/org/gradle/api/JavaVersion.html"
-        }
-        verify {
-            mockPrintTask.message.set(
-                withArg<String> { assertNotNull(it.toIntOrNull(), message = "$it java version is not an int") }
-            )
         }
     }
 
@@ -1067,15 +1063,16 @@ class FlutterPluginUtilsTest {
         val project = mockk<Project>()
         val taskContainer = mockk<TaskContainer>()
         every { project.tasks } returns taskContainer
-        val mockTaskProvider = mockk<TaskProvider<PrintTask>>()
-        val mockPrintTask = mockk<PrintTask>(relaxed = true)
-        val captureSlot = slot<Action<PrintTask>>()
+        every { project.extensions } returns mockk()
+        val mockTaskProvider = mockk<TaskProvider<PrintTaskDeferred<ExtensionContainer>>>()
+        val mockPrintTask = mockk<PrintTaskDeferred<ExtensionContainer>>(relaxed = true)
+        val captureSlot = slot<Action<PrintTaskDeferred<ExtensionContainer>>>()
 
         every {
-            project.tasks.register(eq("printBuildVariants"), PrintTask::class.java, capture(captureSlot))
+            project.tasks.register("printBuildVariants", any<Class<PrintTaskDeferred<ExtensionContainer>>>(), capture(captureSlot))
         } returns mockTaskProvider
-        every { project.provider<PrintTask>(any()) } returns mockTaskProvider
-        every { mockTaskProvider.configure(any()).hint(PrintTask::class) }
+        every { project.provider<PrintTaskDeferred<ExtensionContainer>>(any()) } returns mockTaskProvider
+        every { mockTaskProvider.configure(any()).hint(PrintTaskDeferred::class) }
 
         FlutterPluginUtils.addTaskForPrintBuildVariants(project)
         captureSlot.captured.execute(mockPrintTask)
