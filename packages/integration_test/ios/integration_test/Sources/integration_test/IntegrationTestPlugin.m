@@ -48,17 +48,14 @@ static IntegrationTestPlugin *sInstance;
 }
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar {
-  NSLog(@"[IntegrationTestPlugin] registerWithRegistrar called");
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
-    NSLog(@"[IntegrationTestPlugin] Creating singleton instance with registrar");
     sInstance = [[IntegrationTestPlugin alloc] initWithRegistrar:registrar];
   });
   FlutterMethodChannel *channel = [FlutterMethodChannel methodChannelWithName:kIntegrationTestPluginChannel
                                                               binaryMessenger:registrar.messenger];
   [registrar addMethodCallDelegate:sInstance channel:channel];
   [registrar addSceneDelegate:sInstance];
-  NSLog(@"[IntegrationTestPlugin] Added scene delegate - UIScene migration complete");
 }
 
 /// Handle method calls from Dart code:
@@ -91,18 +88,11 @@ static IntegrationTestPlugin *sInstance;
 - (UIImage *)capturePngScreenshot {
   // Get all windows from the window scene
   UIViewController *viewController = self.registrar.viewController;
-  NSLog(@"[IntegrationTestPlugin] capturePngScreenshot - viewController: %@", viewController);
-  NSLog(@"[IntegrationTestPlugin] capturePngScreenshot - view: %@", viewController.view);
-  NSLog(@"[IntegrationTestPlugin] capturePngScreenshot - window: %@", viewController.view.window);
-  NSLog(@"[IntegrationTestPlugin] capturePngScreenshot - windowScene: %@", viewController.view.window.windowScene);
-  
   NSArray<UIWindow *> *windows;
   if (viewController && viewController.view.window.windowScene) {
     windows = viewController.view.window.windowScene.windows;
-    NSLog(@"[IntegrationTestPlugin] Got %lu windows from windowScene (UIScene API working!)", (unsigned long)windows.count);
   } else {
     // Fallback for cases where viewController is not available
-    NSLog(@"[IntegrationTestPlugin] WARNING: windowScene not available, using empty array");
     windows = @[];
   }
 
@@ -110,10 +100,8 @@ static IntegrationTestPlugin *sInstance;
   CGRect screenBounds;
   if (viewController.view.window.windowScene.screen) {
     screenBounds = viewController.view.window.windowScene.screen.bounds;
-    NSLog(@"[IntegrationTestPlugin] Got screen bounds from windowScene.screen: %@", NSStringFromCGRect(screenBounds));
   } else {
     screenBounds = [UIScreen mainScreen].bounds;
-    NSLog(@"[IntegrationTestPlugin] WARNING: Using deprecated [UIScreen mainScreen]: %@", NSStringFromCGRect(screenBounds));
   }
 
   UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithBounds:screenBounds];
