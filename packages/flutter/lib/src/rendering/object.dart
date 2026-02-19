@@ -1585,13 +1585,16 @@ base class PipelineOwner with DiagnosticableTreeMixin {
           // same as above.
           continue;
         }
-        // When this node is a semantics boundary and a layout boundary and its
-        // geometry becomes invisible after the ensureGeometry call above,
-        // the parent of this node will have to update its semantics subtree to remove
-        // this node from its children.
+
         final _RenderObjectSemantics target;
-        if (!node._semantics.geometry!.isVisible) {
+        if (node._semantics.geometry == null) {
           target = node._semantics.firstAncestorNodeWithCleanGeometry!;
+        } else if (!node._semantics.geometry!.isVisible && !node._semantics.isRoot) {
+          // When this node is a semantics boundary and a layout boundary and its
+          // geometry becomes invisible after the ensureGeometry call above,
+          // the parent of this node will have to update its semantics subtree to remove
+          // this node from its children.
+          target = node._semantics.parentInSemanticsTree!;
         } else {
           target = node._semantics;
         }
