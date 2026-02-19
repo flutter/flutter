@@ -14,13 +14,17 @@ import Foundation
 @objc public final class FlutterRunLoop: NSObject {
   private static let flutterRunLoopMode = CFRunLoopMode("FlutterRunLoopMode" as CFString)
 
+  // The `ensureMainLoopInitialized` method must be called before using this
+  // class to set this variable.
   private static nonisolated(unsafe) var _mainRunLoop: FlutterRunLoop?
 
-  private nonisolated(unsafe) let runLoop: CFRunLoop = CFRunLoopGetCurrent()
-  private var tasks: [Task] = []
+  private let runLoop: CFRunLoop = CFRunLoopGetCurrent()
+
   private let tasksLock = NSLock()
-  private nonisolated(unsafe) var source: CFRunLoopSource!
-  private nonisolated(unsafe) var timer: CFRunLoopTimer!
+  private var tasks: [Task] = []
+
+  private let source: CFRunLoopSource
+  private let timer: CFRunLoopTimer
 
   private struct Task {
     let block: @MainActor () -> Void
@@ -29,11 +33,9 @@ import Foundation
 
   @MainActor
   private override init() {
-    super.init()
-
     var sourceContext = CFRunLoopSourceContext(
       version: 0,
-      info: Unmanaged.passUnretained(self).toOpaque(),
+      info: nil, // Temporarily set to nil.
       retain: nil,
       release: nil,
       copyDescription: nil,
@@ -49,13 +51,11 @@ import Foundation
     guard let createdSource = CFRunLoopSourceCreate(kCFAllocatorDefault, 0, &sourceContext) else {
       fatalError("Failed to create CFRunLoopSource")
     }
-    source = createdSource
-    CFRunLoopAddSource(runLoop, source, .commonModes)
-    CFRunLoopAddSource(runLoop, source, Self.flutterRunLoopMode)
+    self.source = createdSource
 
     var timerContext = CFRunLoopTimerContext(
       version: 0,
-      info: Unmanaged.passUnretained(self).toOpaque(),
+      info: nil, // Temporarily set to nil.
       retain: nil,
       release: nil,
       copyDescription: nil
@@ -76,7 +76,16 @@ import Foundation
     else {
       fatalError("Failed to create CFRunLoopTimer")
     }
-    timer = createdTimer
+    self.timer = createdTimer
+
+    super.init()
+    let info = Unmanaged.passUnretained(self).toOpaque();
+    sourceContext.info = info;
+    timerContext.info = info
+
+    CFRunLoopAddSource(runLoop, source, .commonModes)
+    CFRunLoopAddSource(runLoop, source, Self.flutterRunLoopMode)
+
     CFRunLoopAddTimer(runLoop, timer, .commonModes)
     CFRunLoopAddTimer(runLoop, timer, Self.flutterRunLoopMode)
   }

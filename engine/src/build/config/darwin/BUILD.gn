@@ -76,6 +76,6 @@ config("compiler") {
     "-swift-version",
     _swift_version,
     "-strict-concurrency",
-    "targeted",
+    "complete",
   ]
 }
