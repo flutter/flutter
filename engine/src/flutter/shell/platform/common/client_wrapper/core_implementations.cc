@@ -183,7 +183,7 @@ void ResizeChannel(BinaryMessenger* messenger, std::string name, int new_size) {
       messenger, kControlChannelName, &StandardMethodCodec::GetInstance());
 
   // The deserialization logic handles only 32 bits values, see
-  // https://github.com/flutter/engine/blob/93e8901490e78c7ba7e319cce4470d9c6478c6dc/lib/ui/channel_buffers.dart#L495.
+  // https://github.com/flutter/flutter/blob/230240c56880f2c19bf92d2c32203b064054f173/engine/src/flutter/lib/ui/channel_buffers.dart#L523
   control_channel->InvokeMethod(
       kResizeMethod, std::make_unique<EncodableValue>(EncodableList{
                          EncodableValue(name),

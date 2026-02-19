@@ -1482,7 +1482,7 @@ class TextPainter {
   // The condition is derived from
   // https://github.com/google/skia/blob/0086a17e0d4cc676cf88cae671ba5ee967eb7241/modules/skparagraph/src/TextLine.cpp#L1244-L1246
   // which is set here:
-  // https://github.com/flutter/engine/blob/a821b8790c9fd0e095013cd5bd1f20273bc1ee47/third_party/txt/src/skia/paragraph_builder_skia.cc#L134
+  // https://github.com/flutter/flutter/blob/230240c56880f2c19bf92d2c32203b064054f173/engine/src/flutter/txt/src/skia/paragraph_builder_skia.cc#L129
   bool get _strutDisabled => switch (strutStyle) {
     null || StrutStyle.disabled => true,
     StrutStyle(:final double? fontSize) => fontSize == 0.0,
