@@ -178,7 +178,7 @@ class ButtonStyle with Diagnosticable {
     this.iconAlignment,
     this.side,
     this.shape,
-    this.mouseCursor,
+    this.mouseCursor = WidgetStateMouseCursor.adaptiveClickable,
     this.visualDensity,
     this.tapTargetSize,
     this.animationDuration,

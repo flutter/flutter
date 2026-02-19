@@ -1378,9 +1378,12 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         widget.splashColor ??
         Theme.of(context).splashColor;
 
-    final MouseCursor effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor>(
-      widget.mouseCursor ?? WidgetStateMouseCursor.adaptiveClickable,
-      statesController.value,
+    final MouseCursor effectiveMouseCursor =
+        widget.mouseCursor ??
+        theme.textButtonTheme.style?.mouseCursor?.resolve(statesController.value) ??
+        WidgetStateProperty.resolveAs<MouseCursor>(
+         WidgetStateMouseCursor.adaptiveClickable,
+          statesController.value,
     );
 
     return _ParentInkResponseProvider(
