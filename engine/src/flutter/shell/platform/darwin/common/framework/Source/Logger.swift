@@ -12,17 +12,17 @@ import Foundation
 @objc(FlutterLogLevel) public enum LogLevel: Int {
   /// Informational messages that are helpful for tracing application flow.
   case info
-  
+
   /// Messages indicating a potential issue or an unexpected situation that isn't critical.
   case warning
-  
+
   /// Messages indicating a runtime error from which the application can potentially recover.
   case error
-  
+
   /// Messages that, while not an error, highlight significant progress or state changes in the
   /// application, and must be logged.
   case important
-  
+
   /// Messages indicating a critical condition. Causes the application to immediately terminate.
   case fatal
 }
@@ -43,23 +43,23 @@ import Foundation
   nonisolated(unsafe) private static var shared = Logger()
   private let outputWriter: OutputWriter
   public let logLevel: LogLevel
-  
+
   init(outputWriter: OutputWriter, logLevel: LogLevel) {
     self.outputWriter = outputWriter
     self.logLevel = logLevel
   }
-  
+
   override convenience init() {
-#if os(iOS)
-    // On iOS, the user has no access to stdout.
-    // Output can be read from the log by the user or the `flutter` tool.
-    self.init(outputWriter: SyslogOutputWriter(), logLevel: .info)
-#elseif os(macOS)
-    // On macOS, both the user and the tool read from stdout.
-    self.init(outputWriter: StdoutOutputWriter(), logLevel: .info)
-#endif
+    #if os(iOS)
+      // On iOS, the user has no access to stdout.
+      // Output can be read from the log by the user or the `flutter` tool.
+      self.init(outputWriter: SyslogOutputWriter(), logLevel: .info)
+    #elseif os(macOS)
+      // On macOS, both the user and the tool read from stdout.
+      self.init(outputWriter: StdoutOutputWriter(), logLevel: .info)
+    #endif
   }
-  
+
   public func log(level: LogLevel, _ message: String) {
     if level.rawValue >= logLevel.rawValue {
       outputWriter.writeLine(level: level, message)
@@ -74,7 +74,7 @@ extension Logger {
     get { return shared.outputWriter }
     set(newValue) { shared = Logger(outputWriter: newValue, logLevel: shared.logLevel) }
   }
-  
+
   @objc static var logLevel: LogLevel {
     shared.logLevel
   }
@@ -85,28 +85,28 @@ extension Logger {
   @objc public static func logInfo(_ message: String) {
     shared.log(level: .info, message)
   }
-  
+
   /// Logs a message at `LogLevel.important`.
   @objc public static func logImportant(_ message: String) {
     shared.log(level: .important, message)
   }
-  
+
   /// Logs a message at `LogLevel.warning`.
   @objc public static func logWarning(_ message: String) {
     shared.log(level: .warning, message)
   }
-  
+
   /// Logs a message at `LogLevel.error`.
   @objc public static func logError(_ message: String) {
     shared.log(level: .error, message)
   }
-  
+
   /// Logs a message at `LogLevel.fatal` and immediately terminates the application.
   @objc public static func logFatal(_ message: String) {
     shared.log(level: .fatal, message)
     abort()
   }
-  
+
   /// Logs a message unconditionally.
   @objc public static func logDirect(_ message: String) {
     shared.outputWriter.writeLine(level: .important, message)
