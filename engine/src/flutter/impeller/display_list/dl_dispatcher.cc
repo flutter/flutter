@@ -851,7 +851,16 @@ void CanvasDlDispatcher::drawText(const std::shared_ptr<flutter::DlText>& text,
     return;
   }
 
-  FML_DCHECK(render_frame_index_ < render_frames_.size());
+  FML_CHECK(render_frame_index_ < render_frames_.size());
+  while (render_frame_index_ < render_frames_.size()) {
+    if (render_frames_[render_frame_index_]->GetFrame().get() ==
+        text_frame.get()) {
+      break;
+    }
+    render_frame_index_++;
+    FML_DLOG(INFO) << "Skipping a precomputed text frame during render phase";
+  }
+  FML_CHECK(render_frame_index_ < render_frames_.size());
   std::shared_ptr<RenderTextFrame>& render_frame =
       render_frames_[render_frame_index_++];
   if (render_frame == nullptr) {
