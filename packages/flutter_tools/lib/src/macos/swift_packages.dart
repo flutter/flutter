@@ -18,6 +18,7 @@ const _swiftPackageTemplate = '''
 
 import PackageDescription
 
+{{#hasSwiftCodeBefore}}\n{{swiftCodeBefore}}\n\n{{/hasSwiftCodeBefore}}
 let package = Package(
     name: "{{packageName}}",
     {{#platforms}}
@@ -62,13 +63,15 @@ class SwiftPackage {
     required List<SwiftPackagePackageDependency> dependencies,
     required List<SwiftPackageTarget> targets,
     required TemplateRenderer templateRenderer,
+    String? swiftCodeBeforePackageDefinition,
   }) : _manifest = manifest,
        _name = name,
        _platforms = platforms,
        _products = products,
        _dependencies = dependencies,
        _targets = targets,
-       _templateRenderer = templateRenderer;
+       _templateRenderer = templateRenderer,
+       _swiftCodeBeforePackageDefinition = swiftCodeBeforePackageDefinition;
 
   /// [File] for Package.swift.
   final File _manifest;
@@ -90,9 +93,13 @@ class SwiftPackage {
 
   final TemplateRenderer _templateRenderer;
 
+  final String? _swiftCodeBeforePackageDefinition;
+
   /// Context for the [_swiftPackageTemplate] template.
   Map<String, Object> get _templateContext => <String, Object>{
     'swiftToolsVersion': minimumSwiftToolchainVersion,
+    'hasSwiftCodeBefore': _swiftCodeBeforePackageDefinition != null,
+    'swiftCodeBefore': _swiftCodeBeforePackageDefinition ?? '',
     'packageName': _name,
     // Supported platforms can't be empty, so only include if not null.
     'platforms': _formatPlatforms() ?? false,
@@ -102,10 +109,10 @@ class SwiftPackage {
   };
 
   /// Create a Package.swift using settings from [_templateContext].
-  void createSwiftPackage() {
-    // Swift Packages require at least one source file per non-binary target,
-    // whether it be in Swift or Objective C. If the target does not have any
-    // files yet, create an empty Swift file.
+  ///
+  /// When [generateEmptySources] is true (the default), it creates an empty Swift source file since
+  /// Swift packages require at least one source file per non-binary target.
+  void createSwiftPackage({bool generateEmptySources = true}) {
     for (final SwiftPackageTarget target in _targets) {
       if (target.targetType == SwiftPackageTargetType.binaryTarget) {
         continue;
@@ -113,7 +120,8 @@ class SwiftPackage {
       final Directory targetDirectory = _manifest.parent
           .childDirectory('Sources')
           .childDirectory(target.name);
-      if (!targetDirectory.existsSync() || targetDirectory.listSync().isEmpty) {
+      if (generateEmptySources &&
+          (!targetDirectory.existsSync() || targetDirectory.listSync().isEmpty)) {
         final File requiredSwiftFile = targetDirectory.childFile('${target.name}.swift');
         requiredSwiftFile.createSync(recursive: true);
         requiredSwiftFile.writeAsStringSync(_swiftPackageSourceTemplate);
@@ -170,14 +178,14 @@ class SwiftPackage {
 }
 
 enum SwiftPackagePlatform {
-  ios(name: '.iOS'),
-  macos(name: '.macOS'),
-  tvos(name: '.tvOS'),
-  watchos(name: '.watchOS');
+  ios(displayName: '.iOS'),
+  macos(displayName: '.macOS'),
+  tvos(displayName: '.tvOS'),
+  watchos(displayName: '.watchOS');
 
-  const SwiftPackagePlatform({required this.name});
+  const SwiftPackagePlatform({required this.displayName});
 
-  final String name;
+  final String displayName;
 }
 
 /// A platform that the Swift package supports.
@@ -195,7 +203,25 @@ class SwiftPackageSupportedPlatform {
     //     .macOS("10.15"),
     //     .iOS("13.0"),
     // ],
-    return '${platform.name}("$version")';
+    return '${platform.displayName}("$version")';
+  }
+
+  static SwiftPackageSupportedPlatform? fromJson(Map<String, Object?> json) {
+    if (json case {
+      'platformName': final String platformName,
+      'version': final String versionString,
+    }) {
+      final Version? parsedVersion = Version.parse(versionString);
+      if (parsedVersion != null) {
+        switch (platformName) {
+          case 'ios':
+            return SwiftPackageSupportedPlatform(platform: .ios, version: parsedVersion);
+          case 'macos':
+            return SwiftPackageSupportedPlatform(platform: .macos, version: parsedVersion);
+        }
+      }
+    }
+    return null;
   }
 }
 

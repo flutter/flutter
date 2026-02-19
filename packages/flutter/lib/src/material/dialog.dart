@@ -771,17 +771,13 @@ class AlertDialog extends StatelessWidget {
         ? _DialogDefaultsM3(context)
         : _DialogDefaultsM2(context);
 
-    String? label = semanticLabel;
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        break;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        label ??= MaterialLocalizations.of(context).alertDialogLabel;
-    }
+    final String? label = switch (defaultTargetPlatform) {
+      TargetPlatform.iOS || TargetPlatform.macOS => semanticLabel,
+      TargetPlatform.android ||
+      TargetPlatform.fuchsia ||
+      TargetPlatform.linux ||
+      TargetPlatform.windows => semanticLabel ?? MaterialLocalizations.of(context).alertDialogLabel,
+    };
 
     // The paddingScaleFactor is used to adjust the padding of Dialog's
     // children.
@@ -1173,6 +1169,7 @@ class SimpleDialog extends StatelessWidget {
     this.titleTextStyle,
     this.children,
     this.contentPadding = const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 16.0),
+    this.contentTextStyle,
     this.backgroundColor,
     this.elevation,
     this.shadowColor,
@@ -1240,6 +1237,13 @@ class SimpleDialog extends StatelessWidget {
   /// {@macro flutter.material.dialog.surfaceTintColor}
   final Color? surfaceTintColor;
 
+  /// Style for the text in the [children] of this [SimpleDialog].
+  ///
+  /// If null, [DialogThemeData.contentTextStyle] is used. If that is also null,
+  /// defaults to [TextTheme.titleMedium] for Material 2, or [TextTheme.bodyMedium]
+  /// for Material 3.
+  final TextStyle? contentTextStyle;
+
   /// The semantic label of the dialog used by accessibility frameworks to
   /// announce screen transitions when the dialog is opened and closed.
   ///
@@ -1273,6 +1277,11 @@ class SimpleDialog extends StatelessWidget {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
 
+    final DialogThemeData dialogTheme = DialogTheme.of(context);
+    final DialogThemeData defaults = theme.useMaterial3
+        ? _DialogDefaultsM3(context)
+        : _DialogDefaultsM2(context);
+
     String? label = semanticLabel;
     switch (defaultTargetPlatform) {
       case TargetPlatform.macOS:
@@ -1287,9 +1296,9 @@ class SimpleDialog extends StatelessWidget {
 
     // The paddingScaleFactor is used to adjust the padding of Dialog
     // children.
-    final TextStyle defaultTextStyle =
-        titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.titleLarge!;
-    final double fontSize = defaultTextStyle.fontSize ?? kDefaultFontSize;
+    final TextStyle effectiveTitleTextStyle =
+        titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.titleLarge!;
+    final double fontSize = effectiveTitleTextStyle.fontSize ?? kDefaultFontSize;
     final double fontSizeToScale = fontSize == 0.0 ? kDefaultFontSize : fontSize;
     final double effectiveTextScale =
         MediaQuery.textScalerOf(context).scale(fontSizeToScale) / fontSizeToScale;
@@ -1309,7 +1318,7 @@ class SimpleDialog extends StatelessWidget {
               : effectiveTitlePadding.bottom,
         ),
         child: DefaultTextStyle(
-          style: defaultTextStyle,
+          style: effectiveTitleTextStyle,
           child: Semantics(
             // For iOS platform, the focus always lands on the title.
             // Set nameRoute to false to avoid title being announce twice.
@@ -1334,7 +1343,10 @@ class SimpleDialog extends StatelessWidget {
                 : effectiveContentPadding.top,
             bottom: effectiveContentPadding.bottom * paddingScaleFactor,
           ),
-          child: ListBody(children: children!),
+          child: DefaultTextStyle(
+            style: contentTextStyle ?? dialogTheme.contentTextStyle ?? defaults.contentTextStyle!,
+            child: ListBody(children: children!),
+          ),
         ),
       );
     }
@@ -1344,7 +1356,7 @@ class SimpleDialog extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[if (title != null) titleWidget!, if (children != null) contentWidget!],
+        children: <Widget>[?titleWidget, ?contentWidget],
       ),
     );
 

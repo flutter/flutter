@@ -21,6 +21,11 @@ const kFlutterGeneratedPluginSwiftPackageName = 'FlutterGeneratedPluginSwiftPack
 /// a dependency on the Flutter/FlutterMacOS framework.
 const kFlutterGeneratedFrameworkSwiftPackageTargetName = 'FlutterFramework';
 
+const kDisableSwiftPMInstructions =
+    'You can also disable Swift Package Manager for the project by following these instructions:\n'
+    '  https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#how-to-turn-off-swift-package-manager\n'
+    'Disabling Swift Package Manager will not be allowed in a future version of Flutter.\n';
+
 /// Swift Package Manager is a dependency management solution for iOS and macOS
 /// applications.
 ///
@@ -204,11 +209,7 @@ class SwiftPackageManager {
       targets: <SwiftPackageTarget>[
         SwiftPackageTarget.defaultTarget(
           name: kFlutterGeneratedFrameworkSwiftPackageTargetName,
-          dependencies: [SwiftPackageTargetDependency.target(name: frameworkName)],
-        ),
-        SwiftPackageTarget.binaryTarget(
-          name: frameworkName,
-          relativePath: '$frameworkName.xcframework',
+          dependencies: [],
         ),
       ],
       templateRenderer: _templateRenderer,

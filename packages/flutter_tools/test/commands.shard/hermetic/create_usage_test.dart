@@ -130,6 +130,27 @@ void main() {
               'templates',
               'plugin_cocoapods',
             ),
+            globals.fs.path.join(
+              'flutter',
+              'packages',
+              'flutter_tools',
+              'templates',
+              'plugin_swift_package_manager',
+            ),
+            globals.fs.path.join(
+              'flutter',
+              'packages',
+              'flutter_tools',
+              'templates',
+              'plugin_darwin_cocoapods',
+            ),
+            globals.fs.path.join(
+              'flutter',
+              'packages',
+              'flutter_tools',
+              'templates',
+              'plugin_darwin_spm',
+            ),
           ];
           for (final templatePath in templatePaths) {
             globals.fs.directory(templatePath).createSync(recursive: true);

@@ -31,7 +31,7 @@ class ImageComparer {
     }
 
     final workDirectory = Directory(
-      impellerEnabled ? '${workDirectoryPath}_iplr' : workDirectoryPath,
+      impellerEnabled ? '${workDirectoryPath}_iplr_$impellerBackend' : workDirectoryPath,
     )..createSync();
     final dimensions = <String, String>{
       'impeller_enabled': impellerEnabled.toString(),

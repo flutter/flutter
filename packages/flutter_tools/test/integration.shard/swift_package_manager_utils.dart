@@ -261,6 +261,49 @@ class SwiftPackageManagerUtils {
     );
   }
 
+  /// Converts a plugin from SwiftPM structure to legacy CocoaPods structure.
+  /// This is used for testing backward compatibility with plugins created
+  /// before SwiftPM was introduced.
+  static void convertToLegacyCocoaPodsPlugin(
+    SwiftPackageManagerPlugin plugin, {
+    required String platform,
+  }) {
+    final Directory pluginDir = fileSystem.directory(plugin.pluginPath);
+    final Directory platformDir = pluginDir.childDirectory(platform);
+
+    // Get the plugin name directory (contains Package.swift and Sources)
+    final Directory spmPluginDir = platformDir.childDirectory(plugin.pluginName);
+
+    // Read the Swift source file from SwiftPM structure
+    final Directory sourcesDir = spmPluginDir
+        .childDirectory('Sources')
+        .childDirectory(plugin.pluginName);
+    final File swiftFile = sourcesDir.childFile('${plugin.className}.swift');
+    final String swiftContent = swiftFile.readAsStringSync();
+
+    // Create Classes/ directory with the Swift file
+    final Directory classesDir = platformDir.childDirectory('Classes');
+    classesDir.createSync(recursive: true);
+    classesDir.childFile('${plugin.className}.swift').writeAsStringSync(swiftContent);
+
+    // Delete the SwiftPM structure (pluginName directory with Package.swift and Sources)
+    if (spmPluginDir.existsSync()) {
+      spmPluginDir.deleteSync(recursive: true);
+    }
+
+    // Update podspec to point to Classes/ instead of Sources/
+    final File podspec = platformDir.childFile('${plugin.pluginName}.podspec');
+    if (podspec.existsSync()) {
+      String podspecContent = podspec.readAsStringSync();
+      // Update source_files path from SwiftPM to CocoaPods structure
+      podspecContent = podspecContent.replaceAll(
+        '${plugin.pluginName}/Sources/${plugin.pluginName}/**/*',
+        'Classes/**/*',
+      );
+      podspec.writeAsStringSync(podspecContent);
+    }
+  }
+
   static String _capitalize(String str) {
     return str[0].toUpperCase() + str.substring(1);
   }

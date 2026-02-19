@@ -28,14 +28,14 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "fakes/focuser.h"
-#include "fakes/platform_message.h"
-#include "fakes/touch_source.h"
-#include "fakes/view_ref_focused.h"
 #include "flutter/shell/platform/fuchsia/flutter/surface.h"
 #include "flutter/shell/platform/fuchsia/flutter/task_runner_adapter.h"
+#include "flutter/shell/platform/fuchsia/flutter/tests/fakes/focuser.h"
+#include "flutter/shell/platform/fuchsia/flutter/tests/fakes/platform_message.h"
+#include "flutter/shell/platform/fuchsia/flutter/tests/fakes/touch_source.h"
+#include "flutter/shell/platform/fuchsia/flutter/tests/fakes/view_ref_focused.h"
+#include "flutter/shell/platform/fuchsia/flutter/tests/pointer_event_utility.h"
 #include "platform/assert.h"
-#include "pointer_event_utility.h"
 
 namespace flutter_runner::testing {
 namespace {

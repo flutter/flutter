@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('Nested TickerMode cannot turn tickers back on', (WidgetTester tester) async {
@@ -185,11 +187,11 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        routes: <String, WidgetBuilder>{'/foo': (BuildContext context) => const Text('New route')},
+      TestWidgetsApp(
         home: const Row(
           children: <Widget>[_TickingWidget(), _MultiTickingWidget(), Text('Old route')],
         ),
+        routes: <String, WidgetBuilder>{'/foo': (BuildContext context) => const Text('New route')},
       ),
     );
 

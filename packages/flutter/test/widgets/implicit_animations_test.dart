@@ -680,6 +680,21 @@ void main() {
     // TODO(nate-thegrate): add every class!
   });
 
+  testWidgets('AnimatedScale does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: AnimatedScale(scale: 2, duration: Duration(milliseconds: 300), child: Text('X')),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(AnimatedScale)), Size.zero);
+  });
+
   testWidgets('AnimatedRotation does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
@@ -697,6 +712,81 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(AnimatedRotation)), Size.zero);
+  });
+
+  testWidgets('AnimatedOpacity does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            child: AnimatedOpacity(opacity: 0.5, duration: Duration(milliseconds: 300)),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(AnimatedOpacity)), Size.zero);
+  });
+
+  testWidgets('AnimatedDefaultTextStyle does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: AnimatedDefaultTextStyle(
+              style: TextStyle(fontStyle: FontStyle.italic),
+              duration: Duration(milliseconds: 300),
+              child: Text('X'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(AnimatedDefaultTextStyle)), Size.zero);
+  });
+
+  testWidgets('AnimatedPhysicalModel does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: AnimatedPhysicalModel(
+              color: Colors.teal,
+              shadowColor: Colors.tealAccent,
+              duration: Duration(milliseconds: 300),
+              child: Text('X'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(AnimatedPhysicalModel)), Size.zero);
+  });
+
+  testWidgets('AnimatedFractionallySizedBox does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: AnimatedFractionallySizedBox(
+              duration: Duration(milliseconds: 300),
+              widthFactor: 0.5,
+              heightFactor: 0.5,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(AnimatedFractionallySizedBox)), Size.zero);
   });
 }
 
