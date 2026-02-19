@@ -657,9 +657,8 @@ void main() {
     expect(renderBox.size.height, equals(appBarHeight));
   });
 
-  Widget buildStatusBarTestApp(TargetPlatform? platform) {
+  Widget buildStatusBarTestApp() {
     return MaterialApp(
-      theme: ThemeData(platform: platform),
       home: MediaQuery(
         data: const MediaQueryData(padding: EdgeInsets.only(top: 25.0)), // status bar
         child: Scaffold(
@@ -679,23 +678,6 @@ void main() {
       ),
     );
   }
-
-  testWidgets(
-    'Tapping the status bar scrolls to top',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(buildStatusBarTestApp(debugDefaultTargetPlatformOverride));
-      final ScrollableState scrollable = tester.state(find.byType(Scrollable));
-      scrollable.position.jumpTo(500.0);
-      expect(scrollable.position.pixels, equals(500.0));
-      await tester.tapAt(const Offset(100.0, 10.0));
-      await tester.pumpAndSettle();
-      expect(scrollable.position.pixels, equals(0.0));
-    },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    }),
-  );
 
   testWidgets(
     'No status bar when primary is false',
@@ -782,11 +764,11 @@ void main() {
       final stops = <double>[0.842, 0.959, 0.993, 1.0];
       const double scrollOffset = 1000;
 
-      await tester.pumpWidget(buildStatusBarTestApp(debugDefaultTargetPlatformOverride));
+      await tester.pumpWidget(buildStatusBarTestApp());
       final ScrollableState scrollable = tester.state(find.byType(Scrollable));
       scrollable.position.jumpTo(scrollOffset);
-      await tester.tapAt(const Offset(100.0, 10.0));
 
+      tester.simulateStatusBarTap();
       await tester.pump(Duration.zero);
       expect(scrollable.position.pixels, equals(scrollOffset));
 
@@ -794,31 +776,53 @@ void main() {
         await tester.pump(Duration(milliseconds: duration ~/ stops.length));
         // Scroll pixel position is very long double, compare with floored int
         // pixel position
-        expect(scrollable.position.pixels.toInt(), equals((scrollOffset * (1 - stops[i])).toInt()));
+        expect(
+          scrollable.position.pixels.toInt(),
+          equals((scrollOffset * (1 - stops[i])).toInt()),
+          reason: 'stop $i',
+        );
       }
 
       // Finally stops at the top.
       expect(scrollable.position.pixels, equals(0.0));
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    }),
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
   testWidgets(
-    'Tapping the status bar does not scroll to top',
+    'status bar tap only scrolls the foregrounded primary controller',
     (WidgetTester tester) async {
-      await tester.pumpWidget(buildStatusBarTestApp(TargetPlatform.android));
-      final ScrollableState scrollable = tester.state(find.byType(Scrollable));
-      scrollable.position.jumpTo(500.0);
-      expect(scrollable.position.pixels, equals(500.0));
-      await tester.tapAt(const Offset(100.0, 10.0));
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
-      expect(scrollable.position.pixels, equals(500.0));
+      final app = MaterialApp(
+        initialRoute: 'a',
+        onGenerateInitialRoutes: (initialRoute) {
+          return [
+            MaterialPageRoute(builder: (context) => _ScaffoldWithPrimaryScrollView()),
+            MaterialPageRoute(builder: (context) => _ScaffoldWithPrimaryScrollView()),
+          ];
+        },
+        onGenerateRoute: (_) => throw UnimplementedError(),
+      );
+      await tester.pumpWidget(app);
+
+      final Iterable<ScrollableState> scrollables = tester.stateList<ScrollableState>(
+        find.descendant(
+          of: find.byType(_ScaffoldWithPrimaryScrollView, skipOffstage: false),
+          matching: find.byType(Scrollable, skipOffstage: false),
+          skipOffstage: false,
+        ),
+      );
+
+      final [ScrollableState scrollable1, ScrollableState scrollable2] = scrollables.toList();
+      expect(scrollable1.position.pixels, 1000);
+      expect(scrollable2.position.pixels, 1000);
+
+      tester.simulateStatusBarTap();
+      await tester.pumpAndSettle();
+
+      expect(scrollable1.position.pixels, 1000);
+      expect(scrollable2.position.pixels, 0);
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
   testWidgets('Bottom sheet cannot overlap app bar', (WidgetTester tester) async {
@@ -3867,5 +3871,26 @@ class _CustomPageRoute<T> extends PageRoute<T> {
     Widget child,
   ) {
     return child;
+  }
+}
+
+class _ScaffoldWithPrimaryScrollView extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => _ScaffoldWithPrimaryScrollViewState();
+}
+
+class _ScaffoldWithPrimaryScrollViewState extends State<_ScaffoldWithPrimaryScrollView> {
+  final ScrollController controller = ScrollController(initialScrollOffset: 1000);
+  @override
+  Widget build(BuildContext context) {
+    return MediaQuery(
+      data: const MediaQueryData(padding: EdgeInsets.only(top: 25.0)), // status bar
+      child: PrimaryScrollController(
+        controller: controller,
+        child: const Scaffold(
+          body: SingleChildScrollView(primary: true, child: SizedBox(height: 2000)),
+        ),
+      ),
+    );
   }
 }
