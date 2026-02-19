@@ -727,7 +727,7 @@ TEST(RasterizerTest, drawMultipleViewsWithExternalViewEmbedder) {
               SubmitFlutterView(/*flutter_view_id=*/0, _, _, _))
       .Times(1);
   EXPECT_CALL(*external_view_embedder,
-              PrepareFlutterView(kImplicitViewId, /*frame_size=*/DlISize(),
+              PrepareFlutterView(/*flutter_view_id=*/1, /*frame_size=*/DlISize(),
                                  /*device_pixel_ratio=*/2.0))
       .Times(1);
   EXPECT_CALL(*external_view_embedder,
