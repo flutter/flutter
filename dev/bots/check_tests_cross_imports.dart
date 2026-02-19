@@ -192,7 +192,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/sliversemantics_test.dart',
     'packages/flutter/test/widgets/tap_region_test.dart',
     'packages/flutter/test/widgets/lookup_boundary_test.dart',
-    'packages/flutter/test/widgets/html_element_view_test.dart',
     'packages/flutter/test/widgets/navigator_test.dart',
     'packages/flutter/test/widgets/safe_area_test.dart',
     'packages/flutter/test/widgets/page_view_test.dart',
