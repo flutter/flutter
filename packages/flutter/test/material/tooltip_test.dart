@@ -2055,6 +2055,39 @@ void main() {
     expect(tester.getSize(find.byType(Tooltip)), Size.zero);
     expect(find.text('X'), findsOne);
   });
+
+  testWidgets('Tooltip should disappear even if mouse is hovering over the tooltip overlay', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: Tooltip(message: tooltipText, child: Text('Hover me')),
+        ),
+      ),
+    );
+
+    // Hover over the target widget.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+
+    final Finder targetFinder = find.text('Hover me');
+    await gesture.moveTo(tester.getCenter(targetFinder));
+    await tester.pump();
+
+    // Wait for the tooltip to actually appear.
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text(tooltipText), findsOneWidget);
+
+    // Move the mouse to the tooltip overlay.
+    final Finder tooltipOverlayFinder = find.text(tooltipText);
+    await gesture.moveTo(tester.getCenter(tooltipOverlayFinder));
+    await tester.pumpAndSettle();
+
+    // Verify the tooltip overlay is no longer displayed.
+    expect(find.text(tooltipText), findsNothing);
+  });
 }
 
 Future<void> _testGestureTap(WidgetTester tester, Finder tooltip) async {
