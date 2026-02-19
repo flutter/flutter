@@ -1687,7 +1687,7 @@ void main() {
       const Directionality(textDirection: TextDirection.ltr, child: Placeholder()),
     );
     final navigationBarTheme = _TestInheritedElement(
-      const TestInheritedWidget(child: Placeholder()),
+      const _TestInheritedWidget(child: Placeholder()),
     );
 
     // Dependencies are added out of alphabetical order.
@@ -1714,7 +1714,7 @@ void main() {
     expect(dependencies.length, equals(3));
     expect(
       dependenciesProperty.toDescription(),
-      '[Directionality, FocusTraversalOrder, TestInheritedWidget]',
+      '[Directionality, FocusTraversalOrder, _TestInheritedWidget]',
     );
   });
 
@@ -2138,11 +2138,11 @@ The findRenderObject() method was called for the following element:
   );
 }
 
-class TestInheritedWidget extends InheritedWidget {
-  const TestInheritedWidget({super.key, required super.child});
+class _TestInheritedWidget extends InheritedWidget {
+  const _TestInheritedWidget({super.key, required super.child});
 
   @override
-  bool updateShouldNotify(TestInheritedWidget oldWidget) => false;
+  bool updateShouldNotify(_TestInheritedWidget oldWidget) => false;
 }
 
 class _TestInheritedElement extends InheritedElement {
