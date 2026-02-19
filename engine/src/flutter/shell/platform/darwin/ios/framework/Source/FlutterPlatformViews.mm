@@ -95,11 +95,13 @@ static BOOL _preparedOnce = NO;
 - (instancetype)initWithFrame:(CGRect)frame
                    blurRadius:(CGFloat)blurRadius
                  cornerRadius:(CGFloat)cornerRadius
+                        isRSE:(BOOL)isRSE
              visualEffectView:(UIVisualEffectView*)visualEffectView {
   if (self = [super init]) {
     _frame = frame;
     _blurRadius = blurRadius;
     _cornerRadius = cornerRadius;
+    _isRSE = isRSE;
     [PlatformViewFilter prepareOnce:visualEffectView];
     if (![PlatformViewFilter isUIVisualEffectViewImplementationValid]) {
       FML_DLOG(ERROR) << "Apple's API for UIVisualEffectView changed. Update the implementation to "
@@ -166,6 +168,9 @@ static BOOL _preparedOnce = NO;
   visualEffectView.frame = _frame;
 
   visualEffectView.layer.cornerRadius = _cornerRadius;
+  if (_isRSE) {
+    visualEffectView.layer.cornerCurve = kCACornerCurveContinuous;
+  }
   visualEffectView.clipsToBounds = YES;
 
   self.backdropFilterView = visualEffectView;

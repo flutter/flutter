@@ -457,6 +457,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
         [[PlatformViewFilter alloc] initWithFrame:CGRectMake(0, 0, 10, 10)
                                        blurRadius:5
                                      cornerRadius:0
+                                            isRSE:NO
                                  visualEffectView:visualEffectView1];
 
     [clippingView applyBlurBackdropFilters:@[ platformViewFilter1 ]];
@@ -469,6 +470,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
         [[PlatformViewFilter alloc] initWithFrame:CGRectMake(0, 0, 10, 10)
                                        blurRadius:5
                                      cornerRadius:0
+                                            isRSE:NO
                                  visualEffectView:visualEffectView2];
     [clippingView applyBlurBackdropFilters:@[ platformViewFilter2 ]];
 
@@ -1721,6 +1723,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
         [[PlatformViewFilter alloc] initWithFrame:CGRectMake(0, 0, 10, 10)
                                        blurRadius:5
                                      cornerRadius:0
+                                            isRSE:NO
                                  visualEffectView:visualEffectView];
     CGColorRef visualEffectSubviewBackgroundColor = nil;
     for (UIView* view in [platformViewFilter backdropFilterView].subviews) {
