@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "engine.h"
+#include "flutter/shell/platform/fuchsia/flutter/engine.h"
 
 #include <fuchsia/accessibility/semantics/cpp/fidl.h>
 #include <fuchsia/media/cpp/fidl.h>
@@ -30,15 +30,15 @@
 #include "third_party/skia/include/gpu/ganesh/GrTypes.h"
 #include "third_party/skia/include/ports/SkFontMgr_fuchsia.h"
 
-#include "../runtime/dart/utils/files.h"
-#include "../runtime/dart/utils/root_inspect_node.h"
-#include "focus_delegate.h"
-#include "fuchsia_intl.h"
-#include "platform_view.h"
-#include "software_surface_producer.h"
-#include "surface.h"
-#include "vsync_waiter.h"
-#include "vulkan_surface_producer.h"
+#include "flutter/shell/platform/fuchsia/flutter/focus_delegate.h"
+#include "flutter/shell/platform/fuchsia/flutter/fuchsia_intl.h"
+#include "flutter/shell/platform/fuchsia/flutter/platform_view.h"
+#include "flutter/shell/platform/fuchsia/flutter/software_surface_producer.h"
+#include "flutter/shell/platform/fuchsia/flutter/surface.h"
+#include "flutter/shell/platform/fuchsia/flutter/vsync_waiter.h"
+#include "flutter/shell/platform/fuchsia/flutter/vulkan_surface_producer.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/files.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/root_inspect_node.h"
 
 namespace flutter_runner {
 namespace {

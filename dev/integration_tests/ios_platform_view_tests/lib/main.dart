@@ -90,6 +90,18 @@ class _MyHomePageState extends State<MyHomePage> {
               );
             },
           ),
+          TextButton(
+            key: const ValueKey<String>('web_view_behind_context_menu_test'),
+            child: const Text('web view behind context menu test'),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute<WebViewBehindContextMenuTestPage>(
+                  builder: (BuildContext context) => const WebViewBehindContextMenuTestPage(),
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -210,6 +222,51 @@ class _ZOrderTestPageState extends State<ZOrderTestPage> {
               child: const Text('Show Alert'),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A page to test a web view link is still tappable after dismissing a context menu.
+/// See [this issue](https://github.com/flutter/flutter/issues/175099).
+class WebViewBehindContextMenuTestPage extends StatefulWidget {
+  const WebViewBehindContextMenuTestPage({super.key});
+
+  @override
+  State<WebViewBehindContextMenuTestPage> createState() => _WebViewBehindContextMenuTestPageState();
+}
+
+class _WebViewBehindContextMenuTestPageState extends State<WebViewBehindContextMenuTestPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Web view behind context menu test'),
+        actions: <Widget>[
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (String value) {},
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(value: 'button 1', child: Text('menu button 1')),
+                const PopupMenuItem<String>(value: 'button 2', child: Text('menu button 2')),
+                const PopupMenuItem<String>(value: 'button 3', child: Text('menu button 3')),
+                const PopupMenuItem<String>(value: 'button 4', child: Text('menu button 4')),
+                const PopupMenuItem<String>(value: 'button 5', child: Text('menu button 5')),
+              ];
+            },
+          ),
+        ],
+      ),
+      body: const Center(
+        child: SizedBox(
+          width: 500,
+          height: 500,
+          child: UiKitView(
+            viewType: 'platform_web_view',
+            creationParamsCodec: StandardMessageCodec(),
+          ),
         ),
       ),
     );

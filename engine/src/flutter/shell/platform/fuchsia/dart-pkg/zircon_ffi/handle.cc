@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "handle.h"
+#include "flutter/shell/platform/fuchsia/dart-pkg/zircon_ffi/handle.h"
 
 #include "flutter/fml/logging.h"
 
