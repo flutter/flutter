@@ -212,45 +212,6 @@ Future<XcodeBuildResult> buildXcodeProject({
     projectInfo.reportFlavorNotFoundAndExit();
   }
   final String? configuration = projectInfo.buildConfigurationFor(buildInfo, scheme);
-  if (configuration == null) {
-    globals.printError('');
-    globals.printError(
-      'The Xcode project defines build configurations: ${projectInfo.buildConfigurations.join(', ')}',
-    );
-    globals.printError(
-      'Flutter expects a build configuration named ${XcodeProjectInfo.expectedBuildConfigurationFor(buildInfo, scheme)} or similar.',
-    );
-    globals.printError('Open Xcode to fix the problem:');
-    globals.printError('  open ios/Runner.xcworkspace');
-    globals.printError('1. Click on "Runner" in the project navigator.');
-    globals.printError('2. Ensure the Runner PROJECT is selected, not the Runner TARGET.');
-    if (buildInfo.isDebug) {
-      globals.printError(
-        '3. Click the Editor->Add Configuration->Duplicate "Debug" Configuration.',
-      );
-    } else {
-      globals.printError(
-        '3. Click the Editor->Add Configuration->Duplicate "Release" Configuration.',
-      );
-    }
-    globals.printError('');
-    globals.printError(
-      '   If this option is disabled, it is likely you have the target selected instead',
-    );
-    globals.printError('   of the project; see:');
-    globals.printError(
-      '   https://stackoverflow.com/questions/19842746/adding-a-build-configuration-in-xcode',
-    );
-    globals.printError('');
-    globals.printError('   If you have created a completely custom set of build configurations,');
-    globals.printError('   you can set the FLUTTER_BUILD_MODE=${buildInfo.modeName.toLowerCase()}');
-    globals.printError('   in the .xcconfig file for that configuration and run from Xcode.');
-    globals.printError('');
-    globals.printError(
-      '4. If you are not using completely custom build configurations, name the newly created configuration ${buildInfo.modeName}.',
-    );
-    return XcodeBuildResult(success: false);
-  }
 
   final FlutterManifest manifest = app.project.parent.manifest;
   final String? buildName = parsedBuildName(manifest: manifest, buildInfo: buildInfo);
@@ -292,8 +253,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   final buildCommands = <String>[
     ...globals.xcode!.xcrunCommand(),
     'xcodebuild',
-    '-configuration',
-    configuration,
+    if (configuration != null) ...<String>['-configuration', configuration],
   ];
 
   // Check the public headers before checking Xcode version so headers fingerprinter is created
@@ -618,7 +578,11 @@ Future<XcodeBuildResult> buildXcodeProject({
       if (globals.fs.directory(expectedOutputDirectory).existsSync()) {
         // Copy app folder to a place where other tools can find it without knowing
         // the BuildInfo.
-        outputDir = targetBuildDir.replaceFirst('/$configuration-', '/');
+        outputDir = targetBuildDir;
+        if (configuration != null) {
+          outputDir = outputDir.replaceFirst('/$configuration-', '/');
+        }
+
         globals.fs.directory(outputDir).createSync(recursive: true);
 
         // rsync instead of copy to maintain timestamps to support incremental

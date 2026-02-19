@@ -38,6 +38,7 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
   FakeXcodeProjectInterpreterWithBuildSettings({
     this.productBundleIdentifier,
     this.developmentTeam = 'abc',
+    this.buildConfigurations = const <String>['Debug', 'Release'],
   });
 
   @override
@@ -58,6 +59,18 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
   final String? productBundleIdentifier;
 
   final String? developmentTeam;
+
+  final List<String> buildConfigurations;
+
+  @override
+  Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
+    return XcodeProjectInfo(
+      <String>['Runner'],
+      buildConfigurations,
+      <String>['Runner'],
+      BufferLogger.test(),
+    );
+  }
 }
 
 final Platform macosPlatform = FakePlatform(
@@ -114,15 +127,18 @@ void main() {
     command: <String>['xattr', '-r', '-d', 'com.apple.provenance', '/'],
   );
 
-  FakeCommand setUpRsyncCommand({void Function(List<String> command)? onRun}) {
+  FakeCommand setUpRsyncCommand({
+    String destination = 'build/ios/iphoneos',
+    void Function(List<String> command)? onRun,
+  }) {
     return FakeCommand(
-      command: const <String>[
+      command: <String>[
         'rsync',
         '-8',
         '-av',
         '--delete',
         'build/ios/Release-iphoneos/Runner.app',
-        'build/ios/iphoneos',
+        destination,
       ],
       onRun: onRun,
     );
@@ -155,6 +171,7 @@ void main() {
     bool simulator = false,
     bool customNaming = false,
     bool disablePortPublication = false,
+    bool includeConfiguration = true,
     String? deviceId,
     int exitCode = 0,
     String? stdout,
@@ -164,8 +181,10 @@ void main() {
       command: <String>[
         'xcrun',
         'xcodebuild',
-        '-configuration',
-        if (simulator) 'Debug' else 'Release',
+        if (includeConfiguration) ...<String>[
+          '-configuration',
+          if (simulator) 'Debug' else 'Release',
+        ],
         if (verbose) 'VERBOSE_SCRIPT_LOGGING=YES' else '-quiet',
         '-allowProvisioningUpdates',
         '-allowProvisioningDeviceRegistration',
@@ -360,6 +379,46 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
+
+  testUsingContext(
+    'ios build omits -configuration when no matching build configuration exists',
+    () async {
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+      );
+      createMinimalMockProjectFiles();
+
+      processManager.addCommands(<FakeCommand>[
+        xattrCommand,
+        setUpFakeXcodeBuildHandler(
+          includeConfiguration: false,
+          onRun: (_) {
+            fileSystem
+                .directory('build/ios/Release-iphoneos/Runner.app')
+                .createSync(recursive: true);
+          },
+        ),
+        setUpRsyncCommand(destination: 'build/ios/Release-iphoneos'),
+      ]);
+
+      await createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']);
+      expect(testLogger.statusText, contains('build/ios/Release-iphoneos/Runner.app'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(
+        buildConfigurations: const <String>['Debug-F'],
+      ),
       Artifacts: () => Artifacts.test(),
     },
   );
