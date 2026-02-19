@@ -1847,13 +1847,12 @@ class WindowRegistry extends ChangeNotifier {
   ///
   /// Returns null if no registry is found in the widget tree.
   ///
+  /// This does not throw when used in a non-windowing environment, as this
+  /// may be a signal to the owner that windowing itself is unavailable.
+  ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   static WindowRegistry? maybeOf(BuildContext context) {
-    if (!isWindowingEnabled) {
-      throw UnsupportedError(_kWindowingDisabledErrorMessage);
-    }
-
     return context.dependOnInheritedWidgetOfExactType<WindowRegistryScope>()?._registry;
   }
 }
