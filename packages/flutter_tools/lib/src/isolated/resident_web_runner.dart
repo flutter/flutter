@@ -98,11 +98,11 @@ class ResidentWebRunner extends ResidentRunner {
   ResidentWebRunner(
     FlutterDevice device, {
     String? target,
-    bool stayResident = true,
-    bool machine = false,
-    String? projectRootPath,
+    super.stayResident = true,
+    super.machine = false,
+    super.projectRootPath,
     required this.flutterProject,
-    required DebuggingOptions debuggingOptions,
+    required super.debuggingOptions,
     required FileSystem fileSystem,
     required Logger logger,
     required Terminal terminal,
@@ -122,9 +122,6 @@ class ResidentWebRunner extends ResidentRunner {
        super(
          <FlutterDevice>[device],
          target: target ?? fileSystem.path.join('lib', 'main.dart'),
-         debuggingOptions: debuggingOptions,
-         stayResident: stayResident,
-         machine: machine,
          commandHelp: CommandHelp(
            logger: logger,
            terminal: terminal,
@@ -132,7 +129,6 @@ class ResidentWebRunner extends ResidentRunner {
            outputPreferences: outputPreferences,
          ),
          dartBuilder: hookRunner,
-         projectRootPath: projectRootPath,
        );
 
   final FileSystem _fileSystem;

@@ -450,20 +450,12 @@ FakeDesktopDevice setUpDesktopDevice({
 /// A trivial subclass of DesktopDevice for testing the shared functionality.
 class FakeDesktopDevice extends DesktopDevice {
   FakeDesktopDevice({
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
+    required super.processManager,
+    required super.logger,
+    required super.fileSystem,
+    required super.operatingSystemUtils,
     this.nullExecutablePathForDevice = false,
-  }) : super(
-         'dummy',
-         platformType: PlatformType.linux,
-         ephemeral: false,
-         processManager: processManager,
-         logger: logger,
-         fileSystem: fileSystem,
-         operatingSystemUtils: operatingSystemUtils,
-       );
+  }) : super('dummy', platformType: PlatformType.linux, ephemeral: false);
 
   /// The `mainPath` last passed to [buildForDevice].
   String? lastBuiltMainPath;
