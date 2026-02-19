@@ -252,7 +252,7 @@ migrate away from using those sub-components. We wholeheartedly recommend Skia
 for most rendering needs.
 
 All of Impellers shaders are [manually authored and
-compiled](https://github.com/flutter/flutter/tree/master/engine/src/flutter/impeller#the-offline-shader-compilation-pipeline)
+compiled](https://github.com/flutter/flutter/tree/main/engine/src/flutter/impeller#the-offline-shader-compilation-pipeline)
 during build time and packaged with the Flutter engine. There is no runtime
 shader generation, reflection, or compilation. Skia can and does generate and
 compile shaders at runtime.
