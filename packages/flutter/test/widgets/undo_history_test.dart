@@ -3,11 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'editable_text_utils.dart';
+import 'widgets_app_tester.dart';
 
 final FocusNode _focusNode = FocusNode(debugLabel: 'UndoHistory Node');
 
@@ -38,7 +39,7 @@ void main() {
       addTearDown(value.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: UndoHistory<int>(
             key: undoHistoryGlobalKey,
             value: value,
@@ -73,7 +74,7 @@ void main() {
       addTearDown(value.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: UndoHistory<int>(
             key: undoHistoryGlobalKey,
             value: value,
@@ -110,7 +111,7 @@ void main() {
       addTearDown(value.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: UndoHistory<int>(
             key: undoHistoryGlobalKey,
             value: value,
@@ -130,7 +131,7 @@ void main() {
       expect(UndoManager.client, undoHistoryState);
 
       // Cause the UndoHistory widget to dispose its state.
-      await tester.pumpWidget(const MaterialApp(home: SizedBox()));
+      await tester.pumpWidget(const TestWidgetsApp(home: SizedBox()));
 
       // Ensure that the disposed UndoHistory state is not still the global
       // undo/redo history client.
@@ -146,7 +147,7 @@ void main() {
         addTearDown(controller.dispose);
 
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: UndoHistory<int>(
               value: value,
               controller: controller,
@@ -242,7 +243,7 @@ void main() {
         addTearDown(controller.dispose);
 
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: UndoHistory<int>(
               controller: controller,
               value: value,
@@ -337,7 +338,7 @@ void main() {
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: UndoHistory<int>(
             controller: controller,
             value: value,
@@ -392,7 +393,7 @@ void main() {
       final key = GlobalKey<UndoHistoryState<int>>();
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: UndoHistory<int>(
             key: key,
             value: value,
@@ -453,7 +454,7 @@ void main() {
         addTearDown(controller.dispose);
 
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: UndoHistory<int>(
               controller: controller,
               value: value,
@@ -537,7 +538,7 @@ void main() {
         addTearDown(controller.dispose);
 
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: UndoHistory<int>(
               controller: controller,
               value: value,
