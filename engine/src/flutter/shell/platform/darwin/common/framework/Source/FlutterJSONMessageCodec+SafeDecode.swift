@@ -9,8 +9,10 @@ import Foundation
 // before passing it to the JSON parser. In Swift the initializer replaces
 // unpaired surrogates in the String with `U+FFFD`, but this doesn't happen in
 // Objective-C.
-@objc extension JSONSerialization {
-  @objc public class func decodeJSON(_ data: Data) throws -> Any {
+//
+// Seealso: https://github.com/flutter/flutter/issues/179727.
+@objc extension FlutterJSONMessageCodec {
+  func decodeMessage(_ data: Data) throws -> Any {
     return try JSONSerialization.jsonObject(
       with: data,
       options: [.fragmentsAllowed]

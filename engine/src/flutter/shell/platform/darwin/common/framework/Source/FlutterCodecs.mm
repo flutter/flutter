@@ -89,7 +89,7 @@ FLUTTER_ASSERT_ARC
     return nil;
   }
   NSError* error;
-  id decoded = [NSJSONSerialization decodeJSON:message error:&error];
+  id decoded = [self decodeMessage:message error:&error];
   NSAssert(decoded, @"Invalid JSON message, decoding failed: %@", error);
   return decoded;
 }

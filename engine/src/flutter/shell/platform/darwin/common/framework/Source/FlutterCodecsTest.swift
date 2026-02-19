@@ -31,8 +31,7 @@ import Testing
   // These two tests currently do not run on CI.
   #if compiler(>=6.2)
     @available(macOS 13.0, *)
-    @Test
-    func encodingAssertsOnInvalidInput() async {
+    @Test func encodingAssertsOnInvalidInput() async {
       let result = await #expect(
         processExitsWith: .signal(SIGABRT),
         observing: [\.standardErrorContent]
@@ -51,8 +50,7 @@ import Testing
     }
 
     @available(macOS 13.0, *)
-    @Test
-    func decodingAssertsOnInvalidInput() async {
+    @Test func decodingAssertsOnInvalidInput() async {
       let result = await #expect(
         processExitsWith: .signal(SIGABRT),
         observing: [\.standardErrorContent]
