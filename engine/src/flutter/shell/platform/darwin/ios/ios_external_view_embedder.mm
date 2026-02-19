@@ -54,7 +54,7 @@ void IOSExternalViewEmbedder::PrepareFlutterView(int64_t flutter_view_id, DlISiz
 
   pending_frame_ = create_surface_frame_callback_(flutter_view_id, frame_size);
 
-  [platform_views_controller_ beginFrame:flutter_view_id withSize:frame_size];
+  [platform_views_controller_ beginFrameWithSize:frame_size flutterViewId:flutterViewId];
 }
 
 // |ExternalViewEmbedder|
