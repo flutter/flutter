@@ -636,7 +636,7 @@ class WindowingOwnerLinux extends WindowingOwner {
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
-    final TooltipWindowControllerLinux controller = TooltipWindowControllerLinux(
+    final controller = TooltipWindowControllerLinux(
       owner: this,
       delegate: delegate,
       preferredConstraints: preferredConstraints,
@@ -1035,7 +1035,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
       onDestroy: _delegate.onWindowDestroyed,
     );
     setConstraints(preferredConstraints);
-    final _FlView view = _FlView(isSizedToContent: isSizedToContent);
+    final view = _FlView(isSizedToContent: isSizedToContent);
     final int viewId = view.getId();
     rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
