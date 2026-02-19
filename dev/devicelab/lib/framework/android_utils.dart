@@ -7,7 +7,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:xml/xml.dart';
 
-void addMetadataToManifest(String testDirectory, List<(String, String)> keyPairs) {
+void addMetadataToManifest(String testDirectory, List<(String, String?)> keyPairs) {
   final String manifestPath = path.join(
     testDirectory,
     'android',
@@ -27,7 +27,7 @@ void addMetadataToManifest(String testDirectory, List<(String, String)> keyPairs
   final XmlElement applicationNode = xmlDoc.findAllElements('application').first;
 
   // Check if the meta-data node already exists.
-  for (final (String key, String value) in keyPairs) {
+  for (final (String key, String? value) in keyPairs) {
     final Iterable<XmlElement> existingMetaData = applicationNode
         .findAllElements('meta-data')
         .where((XmlElement node) => node.getAttribute('android:name') == key);
@@ -38,7 +38,7 @@ void addMetadataToManifest(String testDirectory, List<(String, String)> keyPairs
     } else {
       final metaData = XmlElement(XmlName('meta-data'), <XmlAttribute>[
         XmlAttribute(XmlName('android:name'), key),
-        XmlAttribute(XmlName('android:value'), value),
+        if (value != null) XmlAttribute(XmlName('android:value'), value),
       ]);
       applicationNode.children.add(metaData);
     }
