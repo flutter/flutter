@@ -53,6 +53,44 @@ void main() {
     expect(controller.position.pixels, 100.0);
   });
 
+  testWidgets('keyboardDismissBehavior.OnDrag with drawer tests', (WidgetTester tester) async {
+    final scaffoldKey = GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          drawer: Container(),
+          body: Column(
+            children: <Widget>[
+              const TextField(),
+              Expanded(
+                child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                  child: Container(height: 1000),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.testTextInput.isVisible, isFalse);
+    final Finder finder = find.byType(TextField).first;
+    await tester.tap(finder);
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    await tester.drag(find.byType(SingleChildScrollView).first, const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+
+    expect(tester.testTextInput.isVisible, isFalse);
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+
+    expect(tester.testTextInput.isVisible, isFalse);
+  });
+
   testWidgets('Scaffold drawer callback test', (WidgetTester tester) async {
     var isDrawerOpen = false;
     var isEndDrawerOpen = false;
@@ -122,6 +160,51 @@ void main() {
     await tester.flingFrom(Offset(width - 1, 0.0), const Offset(-10.0, 0.0), 10.0);
     await tester.pumpAndSettle();
     expect(onEndDrawerChangedCalled, false);
+  });
+
+  testWidgets('ListView dismiss keyboard onDrag and keep dismissed on drawer opened test', (
+    WidgetTester tester,
+  ) async {
+    final list = List<int>.generate(50, (int i) => i);
+    final scaffoldKey = GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Scaffold(
+            key: scaffoldKey,
+            drawer: Container(),
+            body: Column(
+              children: <Widget>[
+                const TextField(),
+                Expanded(
+                  child: ListView(
+                    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                    children: list.map((int i) {
+                      return Container(height: 50);
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.testTextInput.isVisible, isFalse);
+    final Finder finder = find.byType(EditableText).first;
+    await tester.tap(finder);
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    await tester.drag(find.byType(ListView).first, const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+
+    expect(tester.testTextInput.isVisible, isFalse);
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+
+    expect(tester.testTextInput.isVisible, isFalse);
   });
 
   testWidgets('Scaffold control test', (WidgetTester tester) async {
