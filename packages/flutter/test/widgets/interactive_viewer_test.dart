@@ -1941,6 +1941,18 @@ void main() {
       expect(nearestPoint.y, moreOrLessEquals(10.8, epsilon: 0.1));
     });
   });
+
+  testWidgets('InteractiveViewer does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: InteractiveViewer(child: const Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(InteractiveViewer)), Size.zero);
+  });
 }
 
 Rect _axisAlignedBoundingBox(Quad quad) {
