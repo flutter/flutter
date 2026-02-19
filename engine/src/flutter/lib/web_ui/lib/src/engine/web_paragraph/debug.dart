@@ -55,6 +55,9 @@ class WebParagraphProfiler {
 
   /// Register an engine benchmark callback to collect profiling data for WebParagraph operations.
   static void register() {
+    if (!Profiler.isBenchmarkMode) {
+      return;
+    }
     Profiler.ensureInitialized();
     engineBenchmarkValueCallback = (String name, double value) {
       counts[name] = (counts[name] ?? 0) + 1;
@@ -64,6 +67,9 @@ class WebParagraphProfiler {
 
   /// Logs the collected profiling information to the console.
   static void log() {
+    if (!Profiler.isBenchmarkMode) {
+      return;
+    }
     for (final MapEntry<String, Duration> entry in durations.entries) {
       print('${entry.key}: ${entry.value.inMilliseconds}ms');
     }
@@ -72,5 +78,6 @@ class WebParagraphProfiler {
   /// Resets the collected profiling information.
   static void reset() {
     durations = {};
+    counts = {};
   }
 }

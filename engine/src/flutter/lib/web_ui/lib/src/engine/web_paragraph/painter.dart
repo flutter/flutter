@@ -104,68 +104,16 @@ class CanvasKitPainter extends Painter {
   @override
   void drawDecorations(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect) {
     throw UnimplementedError('Decoration drawing is not implemented yet');
-    /*
-    final DomImageBitmap bitmap = paintCanvas.transferToImageBitmap();
-
-    final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
-    if (skImage == null) {
-      throw Exception('Failed to convert text image bitmap to an SkImage.');
-    }
-
-    final ckImage = CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
-    canvas.drawImageRect(
-      ckImage,
-      sourceRect,
-      targetRect,
-      ui.Paint()..filterQuality = ui.FilterQuality.none,
-    );
-    */
   }
 
   @override
   void drawShadowCluster(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect) {
     throw UnimplementedError('Shadow drawing is not implemented yet');
-    /*
-    // TODO(jlavrova): calculate the shadow bounds without hardcoding the inflation
-    // values. It is good enough for now to demonstrate the shadow effect
-    final ui.Rect shadowSourceRect = sourceRect.inflate(100).translate(100, 100);
-    final ui.Rect shadowTargetRect = targetRect.inflate(100);
-
-    final DomImageBitmap bitmap = paintCanvas.transferToImageBitmap();
-
-    final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
-    if (skImage == null) {
-      throw Exception('Failed to convert text image bitmap to an SkImage.');
-    }
-    final ckImage = CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
-    canvas.drawImageRect(
-      ckImage,
-      shadowSourceRect,
-      shadowTargetRect,
-      ui.Paint()..filterQuality = ui.FilterQuality.none,
-    );
-    */
   }
 
   @override
   void drawTextCluster(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect) {
     throw UnimplementedError('Text cluster drawing is not implemented yet');
-    /*    
-    final DomImageBitmap bitmap = paintCanvas.transferToImageBitmap();
-
-    final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
-    if (skImage == null) {
-      throw Exception('Failed to convert text image bitmap to an SkImage.');
-    }
-
-    final ckImage = CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
-    canvas.drawImageRect(
-      ckImage,
-      sourceRect,
-      targetRect,
-      ui.Paint()..filterQuality = ui.FilterQuality.none,
-    );
-    */
   }
 
   @override
