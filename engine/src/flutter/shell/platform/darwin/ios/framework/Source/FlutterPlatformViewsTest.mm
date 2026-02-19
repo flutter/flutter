@@ -538,8 +538,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   OCMStub([implicitFlutterViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
   OCMStub([implicitFlutterViewController view]).andReturn(flutterView);
   flutterPlatformViewsController.flutterViewController = implicitFlutterViewController;
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId
-            withSize:flutter::DlISize(100, 100)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(100, 100) flutterViewId:flutter::kFlutterImplicitViewId];
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
@@ -629,8 +628,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   OCMStub([implicitFlutterViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
   OCMStub([implicitFlutterViewController view]).andReturn(flutterView);
   flutterPlatformViewsController.flutterViewController = implicitFlutterViewController;
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId
-            withSize:flutter::DlISize(100, 100)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(100, 100) flutterViewId:flutter::kFlutterImplicitViewId];
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
@@ -806,8 +804,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   OCMStub([implicitFlutterViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
   OCMStub([implicitFlutterViewController view]).andReturn(flutterView);
   flutterPlatformViewsController.flutterViewController = implicitFlutterViewController;
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId
-            withSize:flutter::DlISize(100, 100)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(100, 100) flutterViewId:flutter::kFlutterImplicitViewId];
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
@@ -941,8 +938,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   OCMStub([implicitFlutterViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
   OCMStub([implicitFlutterViewController view]).andReturn(flutterView);
   flutterPlatformViewsController.flutterViewController = implicitFlutterViewController;
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId
-            withSize:flutter::DlISize(100, 100)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(100, 100) flutterViewId:flutter::kFlutterImplicitViewId];
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
@@ -1102,8 +1098,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   OCMStub([implicitFlutterViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
   OCMStub([implicitFlutterViewController view]).andReturn(flutterView);
   flutterPlatformViewsController.flutterViewController = implicitFlutterViewController;
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId
-            withSize:flutter::DlISize(100, 100)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(100, 100) flutterViewId:flutter::kFlutterImplicitViewId];
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
@@ -1411,8 +1406,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   OCMStub([implicitFlutterViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
   OCMStub([implicitFlutterViewController view]).andReturn(flutterView);
   flutterPlatformViewsController.flutterViewController = implicitFlutterViewController;
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId
-            withSize:flutter::DlISize(100, 100)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(100, 100) flutterViewId:flutter::kFlutterImplicitViewId];
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
@@ -1732,8 +1726,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   OCMStub([implicitFlutterViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
   OCMStub([implicitFlutterViewController view]).andReturn(flutterView);
   flutterPlatformViewsController.flutterViewController = implicitFlutterViewController;
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId
-            withSize:flutter::DlISize(100, 100)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(100, 100) flutterViewId:flutter::kFlutterImplicitViewId];
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
@@ -1993,8 +1986,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   OCMStub([implicitFlutterViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
   OCMStub([implicitFlutterViewController view]).andReturn(flutterView);
   flutterPlatformViewsController.flutterViewController = implicitFlutterViewController;
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId
-            withSize:flutter::DlISize(100, 100)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(100, 100) flutterViewId:flutter::kFlutterImplicitViewId];
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
@@ -2005,7 +1997,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
       screenScaleMatrix, flutter::DlSize(10, 10), stack);
 
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId withSize:flutter::DlISize(0, 0)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(0, 0) flutterViewId:flutter::kFlutterImplicitViewId];
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
   [flutterPlatformViewsController pushVisitedPlatformViewId:2];
@@ -2043,7 +2035,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   // New frame, with no filter pushed.
   auto embeddedViewParams2 = std::make_unique<flutter::EmbeddedViewParams>(
       screenScaleMatrix, flutter::DlSize(10, 10), stack);
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId withSize:flutter::DlISize(0, 0)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(0, 0) flutterViewId:flutter::kFlutterImplicitViewId];
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams2)];
   [flutterPlatformViewsController
@@ -2107,8 +2099,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   OCMStub([implicitFlutterViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
   OCMStub([implicitFlutterViewController view]).andReturn(flutterView);
   flutterPlatformViewsController.flutterViewController = implicitFlutterViewController;
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId
-            withSize:flutter::DlISize(100, 100)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(100, 100) flutterViewId:flutter::kFlutterImplicitViewId];
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
@@ -2269,8 +2260,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   OCMStub([implicitFlutterViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
   OCMStub([implicitFlutterViewController view]).andReturn(flutterView);
   flutterPlatformViewsController.flutterViewController = implicitFlutterViewController;
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId
-            withSize:flutter::DlISize(100, 100)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(100, 100) flutterViewId:flutter::kFlutterImplicitViewId];
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack.
@@ -2349,8 +2339,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   OCMStub([implicitFlutterViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
   OCMStub([implicitFlutterViewController view]).andReturn(flutterView);
   flutterPlatformViewsController.flutterViewController = implicitFlutterViewController;
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId
-            withSize:flutter::DlISize(100, 100)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(100, 100) flutterViewId:flutter::kFlutterImplicitViewId];
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
@@ -2434,8 +2423,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   OCMStub([implicitFlutterViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
   OCMStub([implicitFlutterViewController view]).andReturn(flutterView);
   flutterPlatformViewsController.flutterViewController = implicitFlutterViewController;
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId
-            withSize:flutter::DlISize(100, 100)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(100, 100) flutterViewId:flutter::kFlutterImplicitViewId];
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
@@ -2539,8 +2527,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   OCMStub([implicitFlutterViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
   OCMStub([implicitFlutterViewController view]).andReturn(flutterView);
   flutterPlatformViewsController.flutterViewController = implicitFlutterViewController;
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId
-            withSize:flutter::DlISize(100, 100)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(100, 100) flutterViewId:flutter::kFlutterImplicitViewId];
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
@@ -2652,8 +2639,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   OCMStub([implicitFlutterViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
   OCMStub([implicitFlutterViewController view]).andReturn(flutterView);
   flutterPlatformViewsController.flutterViewController = implicitFlutterViewController;
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId
-            withSize:flutter::DlISize(100, 100)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(100, 100) flutterViewId:flutter::kFlutterImplicitViewId];
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
@@ -2782,8 +2768,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   OCMStub([implicitFlutterViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
   OCMStub([implicitFlutterViewController view]).andReturn(flutterView);
   flutterPlatformViewsController.flutterViewController = implicitFlutterViewController;
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId
-            withSize:flutter::DlISize(100, 100)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(100, 100) flutterViewId:flutter::kFlutterImplicitViewId];
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
@@ -2895,8 +2880,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   OCMStub([implicitFlutterViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
   OCMStub([implicitFlutterViewController view]).andReturn(flutterView);
   flutterPlatformViewsController.flutterViewController = implicitFlutterViewController;
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId
-            withSize:flutter::DlISize(100, 100)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(100, 100) flutterViewId:flutter::kFlutterImplicitViewId];
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
@@ -4360,7 +4344,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
             result:result];
 
   // First frame, |embeddedViewCount| is not empty after composite.
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId withSize:flutter::DlISize(300, 300)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300) flutterViewId:flutter::kFlutterImplicitViewId];
   flutter::MutatorsStack stack;
   flutter::DlMatrix finalMatrix;
   auto embeddedViewParams1 =
@@ -4374,7 +4358,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 1UL);
 
   // Second frame, |embeddedViewCount| should be empty at the start
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId withSize:flutter::DlISize(300, 300)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300) flutterViewId:flutter::kFlutterImplicitViewId];
   XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 0UL);
 
   auto embeddedViewParams2 =
@@ -4441,7 +4425,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
             result:result];
   UIView* view2 = gMockPlatformView;
 
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId withSize:flutter::DlISize(300, 300)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300) flutterViewId:flutter::kFlutterImplicitViewId];
   flutter::MutatorsStack stack;
   flutter::DlMatrix finalMatrix;
   auto embeddedViewParams1 =
@@ -4473,7 +4457,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                 @"The first clipping view should be added before the second clipping view.");
 
   // Need to recreate these params since they are `std::move`ed.
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId withSize:flutter::DlISize(300, 300)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300) flutterViewId:flutter::kFlutterImplicitViewId];
   // Process the second frame in the opposite order.
   embeddedViewParams2 =
       std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, flutter::DlSize(500, 500), stack);
@@ -4553,7 +4537,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
             result:result];
   UIView* view2 = gMockPlatformView;
 
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId withSize:flutter::DlISize(300, 300)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300) flutterViewId:flutter::kFlutterImplicitViewId];
   flutter::MutatorsStack stack;
   flutter::DlMatrix finalMatrix;
   auto embeddedViewParams1 =
@@ -4585,7 +4569,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                 @"The first clipping view should be added before the second clipping view.");
 
   // Need to recreate these params since they are `std::move`ed.
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId withSize:flutter::DlISize(300, 300)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300) flutterViewId:flutter::kFlutterImplicitViewId];
   // Process the second frame in the same order.
   embeddedViewParams1 =
       std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, flutter::DlSize(300, 300), stack);
@@ -4741,8 +4725,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   OCMStub([implicitFlutterViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
   OCMStub([implicitFlutterViewController view]).andReturn(flutterView);
   flutterPlatformViewsController.flutterViewController = implicitFlutterViewController;
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId
-            withSize:flutter::DlISize(100, 100)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(100, 100) flutterViewId:flutter::kFlutterImplicitViewId];
   // Create embedded view params
   flutter::MutatorsStack stack1;
   // Layer tree always pushes a screen scale factor to the stack
@@ -4767,7 +4750,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   XCTAssertNotNil(maskView1);
 
   // Composite a new frame.
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId withSize:flutter::DlISize(100, 100)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(100, 100) flutterViewId:flutter::kFlutterImplicitViewId];
   flutter::MutatorsStack stack2;
   auto embeddedViewParams2 = std::make_unique<flutter::EmbeddedViewParams>(
       screenScaleMatrix, flutter::DlSize(10, 10), stack2);
@@ -4859,8 +4842,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   OCMStub([implicitFlutterViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
   OCMStub([implicitFlutterViewController view]).andReturn(flutterView);
   flutterPlatformViewsController.flutterViewController = implicitFlutterViewController;
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId
-            withSize:flutter::DlISize(100, 100)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(100, 100) flutterViewId:flutter::kFlutterImplicitViewId];
   // Create embedded view params
   flutter::MutatorsStack stack1;
   // Layer tree always pushes a screen scale factor to the stack
@@ -4941,8 +4923,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   OCMStub([implicitFlutterViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
   OCMStub([implicitFlutterViewController view]).andReturn(flutterView);
   flutterPlatformViewsController.flutterViewController = implicitFlutterViewController;
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId
-            withSize:flutter::DlISize(100, 100)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(100, 100) flutterViewId:flutter::kFlutterImplicitViewId];
   // Create embedded view params
   flutter::MutatorsStack stack1;
   // Layer tree always pushes a screen scale factor to the stack
@@ -5053,7 +5034,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   {
     // **** First frame, view id 0, 1 in the composition_order_, disposing view 0 is called. **** //
     // No view should be disposed, or removed from the composition order.
-    [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId withSize:flutter::DlISize(300, 300)];
+    [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300) flutterViewId:flutter::kFlutterImplicitViewId];
     flutter::MutatorsStack stack;
     flutter::DlMatrix finalMatrix;
     auto embeddedViewParams0 = std::make_unique<flutter::EmbeddedViewParams>(
@@ -5099,7 +5080,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   {
     // **** Second frame, view id 1 in the composition_order_, no disposing view is called,  **** //
     // View 0 is removed from the composition order in this frame, hence also disposed.
-    [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId withSize:flutter::DlISize(300, 300)];
+    [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300) flutterViewId:flutter::kFlutterImplicitViewId];
     flutter::MutatorsStack stack;
     flutter::DlMatrix finalMatrix;
     auto embeddedViewParams1 = std::make_unique<flutter::EmbeddedViewParams>(
@@ -5231,8 +5212,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   OCMStub([implicitFlutterViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
   OCMStub([implicitFlutterViewController view]).andReturn(flutterView);
   flutterPlatformViewsController.flutterViewController = implicitFlutterViewController;
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId
-            withSize:flutter::DlISize(100, 100)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(100, 100) flutterViewId:flutter::kFlutterImplicitViewId];
   [flutterPlatformViewsController
       onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
                                                      arguments:@{
@@ -5317,8 +5297,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   OCMStub([implicitFlutterViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
   OCMStub([implicitFlutterViewController view]).andReturn(flutterView);
   flutterPlatformViewsController.flutterViewController = implicitFlutterViewController;
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId
-            withSize:flutter::DlISize(100, 100)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(100, 100) flutterViewId:flutter::kFlutterImplicitViewId];
 
   // Create embedded view params
   flutter::MutatorsStack stack;
@@ -5432,7 +5411,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                                      }]
             result:result];
 
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId withSize:flutter::DlISize(300, 300)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300) flutterViewId:flutter::kFlutterImplicitViewId];
   flutter::MutatorsStack stack;
   flutter::DlMatrix finalMatrix;
   auto embeddedViewParams1 =
@@ -5512,8 +5491,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   OCMStub([implicitFlutterViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
   OCMStub([implicitFlutterViewController view]).andReturn(flutterView);
   flutterPlatformViewsController.flutterViewController = implicitFlutterViewController;
-  [flutterPlatformViewsController beginFrame:flutter::kFlutterImplicitViewId
-            withSize:flutter::DlISize(100, 100)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(100, 100) flutterViewId:flutter::kFlutterImplicitViewId];
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack

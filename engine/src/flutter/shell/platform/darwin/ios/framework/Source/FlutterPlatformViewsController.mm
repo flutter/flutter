@@ -426,8 +426,8 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   self.gestureRecognizersBlockingPolicies[idString] = gestureRecognizerBlockingPolicy;
 }
 
-- (void)beginFrame:(int64_t)flutterViewId
-          withSize:(flutter::DlISize)frameSize {
+- (void)beginFrameWithSize:(DlISize)frameSize
+             flutterViewId:(int64_t)flutterViewId {
   [self resetFrameState];
   self.frameSize = frameSize;
   self.flutterView = [self.flutterViewControllers objectForKey:@(flutterViewId)].view;
