@@ -38,7 +38,7 @@ void main() async {
   }, timeout: Timeout.none);
 
   test('all three platform view types render without crashing', () async {
-    final health = await flutterDriver.checkHealth();
+    final Health health = await flutterDriver.checkHealth();
     expect(health.status, HealthStatus.ok);
   }, timeout: Timeout.none);
 
@@ -46,7 +46,7 @@ void main() async {
     await flutterDriver.tap(find.byValueKey('ToggleViews'));
     await Future<void>.delayed(const Duration(seconds: 1));
 
-    final health = await flutterDriver.checkHealth();
+    final Health health = await flutterDriver.checkHealth();
     expect(health.status, HealthStatus.ok);
   }, timeout: Timeout.none);
 
@@ -58,7 +58,7 @@ void main() async {
       '-s',
       'PlatformViewsChannel:*',
     ]);
-    final String logcat = result.stdout as String;
+    final logcat = result.stdout as String;
 
     // We created 3 platform views — expect 3 HCPP log lines.
     final int hcppCount = 'Using HCPP platform view rendering strategy.'.allMatches(logcat).length;
