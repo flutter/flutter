@@ -498,6 +498,16 @@ void main() {
         TargetPlatform.android,
       }),
     );
+
+    testWidgets('ModalBarrier does not crash at zero area', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(child: SizedBox.shrink(child: ModalBarrier())),
+        ),
+      );
+      expect(tester.getSize(find.byType(ModalBarrier)), Size.zero);
+    });
   });
   group('AnimatedModalBarrier', () {
     testWidgets('prevents interactions with widgets behind it', (WidgetTester tester) async {

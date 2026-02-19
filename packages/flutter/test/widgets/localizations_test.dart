@@ -210,6 +210,24 @@ void main() {
       expect(node3.getSemanticsData().locale, isNull);
     });
   });
+
+  testWidgets('Localizations does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: Localizations(
+              locale: const Locale('fo'),
+              delegates: <LocalizationsDelegate<dynamic>>[WidgetsLocalizationsDelegate()],
+              child: const Text('X'),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Localizations)), Size.zero);
+  });
 }
 
 class FakeLocalizationsDelegate extends LocalizationsDelegate<String> {

@@ -38,6 +38,18 @@ void main() {
     expect(childBox.size, equals(const Size(50.0, 100.0)));
   });
 
+  testWidgets('LayoutBuilder does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: LayoutBuilder(builder: (_, _) => const Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(LayoutBuilder)), Size.zero);
+  });
+
   testWidgets('SliverLayoutBuilder parent geometry', (WidgetTester tester) async {
     late SliverConstraints parentConstraints1;
     late SliverConstraints parentConstraints2;
