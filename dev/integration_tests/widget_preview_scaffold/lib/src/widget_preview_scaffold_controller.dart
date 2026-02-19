@@ -20,10 +20,10 @@ typedef PreviewsCallback = WidgetPreviews Function();
 /// Controller used to process events and determine which previews should be
 /// displayed and how they should be displayed in the [WidgetPreviewScaffold].
 class WidgetPreviewScaffoldController {
-  // ignore: prefer_initializing_formals
   WidgetPreviewScaffoldController({
     required PreviewsCallback previews,
     @visibleForTesting WidgetPreviewScaffoldDtdServices? dtdServicesOverride,
+    // ignore: prefer_initializing_formals
   }) : _previews = previews,
        dtdServices = dtdServicesOverride ?? WidgetPreviewScaffoldDtdServices();
 

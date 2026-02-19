@@ -818,10 +818,10 @@ class _WidgetPreviewWrapper extends SingleChildRenderObjectWidget {
 
 /// Custom render box that forces constraints onto unconstrained widgets.
 class _WidgetPreviewWrapperBox extends RenderShiftedBox {
-  // ignore: prefer_initializing_formals
   _WidgetPreviewWrapperBox({
     required RenderBox? child,
     required BoxConstraints previewerConstraints,
+    // ignore: prefer_initializing_formals
   }) : _previewerConstraints = previewerConstraints,
        super(child);
 
