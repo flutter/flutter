@@ -1093,10 +1093,7 @@ Future<bool> _handleIssues(
         'looking at your "ios/Podfile.lock" dependency tree and requesting the '
         'author add Swift Package Manager compatibility. See https://stackoverflow.com/a/27955017 '
         'to learn more about understanding Podlock dependency tree. \n\n'
-        'You can also disable Swift Package Manager for the project by adding the '
-        'following in the project\'s pubspec.yaml under the "flutter" section:\n'
-        '  config:'
-        '    enable-swift-package-manager: false\n',
+        '$kDisableSwiftPMInstructions',
       );
     }
   } else if (missingModules.isNotEmpty) {

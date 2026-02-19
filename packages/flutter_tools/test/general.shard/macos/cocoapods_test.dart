@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_plugins.dart';
@@ -1551,6 +1552,52 @@ end''');
       );
       expect(projectUnderTest.ios.podManifestLock.existsSync(), isFalse);
     });
+
+    testUsingContext(
+      'throws, if unable to find a specification',
+      () async {
+        final FlutterProject projectUnderTest = setupProjectUnderTest();
+        pretendPodIsInstalled();
+        pretendPodVersionIs('100.0.0');
+        projectUnderTest.ios.podfile.createSync(recursive: true);
+        final pluginNames = <String>['plugin_1_name', 'plugin_2_name'];
+        createFakePlugins(projectUnderTest, fileSystem, pluginNames);
+        fileSystem.systemTempDirectory
+            .childFile('/.tmp_rand0/fake_pub_cache/plugin_1_name/ios/plugin_1_name/Package.swift')
+            .createSync(recursive: true);
+
+        fakeProcessManager.addCommand(
+          const FakeCommand(
+            command: <String>['pod', 'install', '--verbose'],
+            workingDirectory: 'project/ios',
+            environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true', 'LANG': 'en_US.UTF-8'},
+            exitCode: 1,
+            // This output is the output that a real CocoaPods install would generate.
+            stdout: '''
+    [!] Unable to find a specification for `plugin_1_name` depended upon by `plugin_2_name`
+
+    You have either:
+     * out-of-date source repos which you can update with `pod repo update` or with `pod install --repo-update`.
+     * mistyped the name or version.
+     * not added the source repo that hosts the Podspec to your Podfile.''',
+          ),
+        );
+
+        await expectLater(
+          cocoaPodsUnderTest.processPods(
+            xcodeProject: projectUnderTest.ios,
+            buildMode: BuildMode.debug,
+          ),
+          throwsToolExit(),
+        );
+        expect(logger.errorText, contains('Error: A dependency conflict has occurred because'));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+      },
+    );
   });
 }
 
@@ -1606,6 +1653,50 @@ Resolving dependencies of `Podfile`
     $fakePluginName (from `Flutter/ephemeral/.symlinks/plugins/$fakePluginName/$subdir`)
 
 Specs satisfying the `$fakePluginName (from `Flutter/ephemeral/.symlinks/plugins/$fakePluginName/$subdir`)` dependency were found, but they required a higher minimum deployment target.''';
+}
+
+void createFakePlugins(
+  FlutterProject flutterProject,
+  FileSystem fileSystem,
+  List<String> pluginNames,
+) {
+  const pluginYamlTemplate = '''
+  flutter:
+    plugin:
+      platforms:
+        ios:
+          pluginClass: PLUGIN_CLASS
+        macos:
+          pluginClass: PLUGIN_CLASS
+  ''';
+
+  final Directory fakePubCache = fileSystem.systemTempDirectory.childDirectory('fake_pub_cache');
+
+  writePackageConfigFiles(
+    directory: flutterProject.directory,
+    mainLibName: 'my_app',
+    packages: <String, String>{
+      for (final String name in pluginNames) name: fakePubCache.childDirectory(name).path,
+    },
+  );
+
+  for (final name in pluginNames) {
+    final Directory pluginDirectory = fakePubCache.childDirectory(name);
+    pluginDirectory.childFile('pubspec.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(pluginYamlTemplate.replaceAll('PLUGIN_CLASS', name));
+  }
+
+  final File graph = flutterProject.dartTool.childFile('package_graph.json')
+    ..createSync(recursive: true);
+
+  final packages = <Map<String, Object>>[
+    <String, Object>{'name': 'my_app', 'dependencies': pluginNames, 'devDependencies': <String>[]},
+    for (final String name in pluginNames)
+      <String, Object>{'name': name, 'dependencies': <String>[], 'devDependencies': <String>[]},
+  ];
+
+  graph.writeAsStringSync(jsonEncode(<String, Object>{'configVersion': 1, 'packages': packages}));
 }
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
