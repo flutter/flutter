@@ -24,3 +24,4 @@ linter:
     missing_whitespace_between_adjacent_strings: false # too many false positives
     public_member_api_docs: true # dart:ui is public API
     use_string_in_part_of_directives: false # needs to be evaluated, dart:ui frequently uses non-strings
+    prefer_initializing_formals: false # https://github.com/flutter/flutter/issues/182617#issuecomment-3928680061
