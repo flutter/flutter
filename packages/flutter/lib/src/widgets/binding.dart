@@ -152,6 +152,22 @@ abstract mixin class WidgetsBindingObserver {
   /// predictive back feature.
   void handleCancelBackGesture() {}
 
+  /// Called when the user taps the status bar on iOS, to scroll a scroll
+  /// view to the top.
+  ///
+  /// This event should usually only be handled by at most one scroll view, so
+  /// implementer(s) of this callback must coordinate to determine the most
+  /// suitable scroll view for handling this event.
+  ///
+  /// This callback is only called on iOS. The default implementation provided by
+  /// [WidgetsBindingObserver] does nothing.
+  ///
+  /// See also:
+  ///
+  ///  * [Scaffold] and [CupertinoPageScaffold] which use this callback to implement
+  ///    iOS scroll-to-top.
+  void handleStatusBarTap() {}
+
   /// Called when the host tells the application to push a new route onto the
   /// navigator.
   ///
@@ -461,6 +477,7 @@ mixin WidgetsBinding
     platformDispatcher.onLocaleChanged = handleLocaleChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
     SystemChannels.backGesture.setMethodCallHandler(_handleBackGestureInvocation);
+    SystemChannels.statusBar.setMethodCallHandler(_handleStatusBarActions);
     assert(() {
       FlutterErrorDetails.propertiesTransformers.add(debugTransformDebugCreator);
       return true;
@@ -905,6 +922,24 @@ mixin WidgetsBinding
   void dispatchAccessibilityFeaturesChanged() {
     for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangeAccessibilityFeatures();
+    }
+  }
+
+  Future<void> _handleStatusBarActions(MethodCall call) async {
+    assert(call.method == 'handleScrollToTop');
+    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+      try {
+        observer.handleStatusBarTap();
+      } catch (exception, stack) {
+        final details = FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets library',
+          context: ErrorDescription('handling status bar action'),
+        );
+        FlutterError.reportError(details);
+        // No error widget possible here since it wouldn't have a view to render into.
+      }
     }
   }
 
