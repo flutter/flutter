@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
+import 'widgets_app_tester.dart';
 
 const String tooltipText = 'TIP';
 
@@ -2739,6 +2740,45 @@ void main() {
     // The tooltip should be positioned at target + (25, -25-14).
     expect(tooltipPosition.dx, closeTo(targetCenter.dx + 25, 5.0));
     expect(tooltipPosition.dy, closeTo(targetCenter.dy - 25 - 14, 5.0));
+  });
+
+  testWidgets('RawTooltip ignores pointer events when ignorePointer is true', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: RawTooltip(
+            semanticsTooltip: tooltipText,
+            tooltipBuilder: (BuildContext context, Animation<double> animation) =>
+                const Placeholder(child: Text(tooltipText)),
+            ignorePointer: true,
+            child: const Text('Hover me'),
+          ),
+        ),
+      ),
+    );
+
+    // Hover over the target widget.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+
+    final Finder targetFinder = find.text('Hover me');
+    await gesture.moveTo(tester.getCenter(targetFinder));
+    await tester.pump();
+
+    // Wait for the tooltip to actually appear.
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text(tooltipText), findsOneWidget);
+
+    // Move the mouse to the tooltip overlay.
+    final Finder tooltipOverlayFinder = find.text(tooltipText);
+    await gesture.moveTo(tester.getCenter(tooltipOverlayFinder));
+    await tester.pumpAndSettle();
+
+    // Verify the tooltip overlay is no longer displayed.
+    expect(find.text(tooltipText), findsNothing);
   });
 }
 
