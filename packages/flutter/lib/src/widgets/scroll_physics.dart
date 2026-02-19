@@ -226,28 +226,6 @@ class ScrollPhysics {
     return parent!.shouldAcceptUserOffset(position);
   }
 
-  /// Whether overscroll from a scrollable using this physics should be
-  /// delegated to ancestor scrollables.
-  ///
-  /// When this returns true (the default) and a scrollable using this physics
-  /// overscrolls, the overscroll delta will be forwarded to ancestor
-  /// scrollables that listen for [OverscrollNotification]s, causing them to
-  /// scroll as well. This enables behaviors like a child [ListView] scrolling
-  /// its parent [SingleChildScrollView] when the child reaches its scroll
-  /// extent.
-  ///
-  /// When this returns false, overscroll is not forwarded to ancestors and
-  /// the gesture is "trapped" in the current scrollable. This is useful for
-  /// scrollables inside modals, dropdowns, or other contexts where the
-  /// gesture should not affect the parent.
-  ///
-  /// See also:
-  ///
-  ///  * [TrappingScrollPhysics], a convenience class that sets this to false.
-  bool get shouldDelegateOverscroll {
-    return parent?.shouldDelegateOverscroll ?? true;
-  }
-
   /// Provides a heuristic to determine if expensive frame-bound tasks should be
   /// deferred.
   ///
@@ -1002,45 +980,4 @@ class NeverScrollableScrollPhysics extends ScrollPhysics {
 
   @override
   bool get allowImplicitScrolling => false;
-}
-
-/// Scroll physics that prevents overscroll from being delegated to ancestor
-/// scrollables.
-///
-/// When a scrollable uses this physics, its overscroll gestures are "trapped"
-/// and will not cause ancestor scrollables to scroll. This is useful for
-/// scrollables inside modals, dropdowns, chat bubbles, or other contexts
-/// where the gesture should be contained.
-///
-/// This physics can be combined with other physics using the parent chain:
-///
-/// ```dart
-/// ListView(
-///   physics: const TrappingScrollPhysics(
-///     parent: BouncingScrollPhysics(),
-///   ),
-/// )
-/// ```
-///
-/// By default, overscroll delegation is enabled (see
-/// [ScrollPhysics.shouldDelegateOverscroll]). This class explicitly opts out
-/// of the behavior.
-///
-/// See also:
-///
-///  * [BouncingScrollPhysics], which provides iOS-style bouncing overscroll.
-///  * [ClampingScrollPhysics], which provides Android-style clamping overscroll.
-///  * [NeverScrollableScrollPhysics], which prevents user scrolling entirely.
-class TrappingScrollPhysics extends ScrollPhysics {
-  /// Creates scroll physics that traps overscroll, preventing delegation
-  /// to ancestor scrollables.
-  const TrappingScrollPhysics({super.parent});
-
-  @override
-  TrappingScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    return TrappingScrollPhysics(parent: buildParent(ancestor));
-  }
-
-  @override
-  bool get shouldDelegateOverscroll => false;
 }

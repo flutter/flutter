@@ -961,14 +961,6 @@ class ScrollableState extends State<Scrollable>
       return false;
     }
 
-    // Don't handle if the child's physics hasn't opted in to overscroll
-    // delegation. By default, shouldDelegateOverscroll is false, meaning
-    // overscroll is trapped in the child scrollable. Developers can opt in
-    // by using OverscrollDelegatingScrollPhysics on the child.
-    if (!notification.shouldDelegateOverscroll) {
-      return false;
-    }
-
     final double overscroll = notification.overscroll;
     if (overscroll == 0.0) {
       return false;
