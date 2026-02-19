@@ -725,7 +725,7 @@ void main() {
   );
 
   testUsingContext(
-    'plugin project with Swift Package Manager',
+    'plugin project supports both SwiftPM and CocoaPods',
     () async {
       return _createProject(
         projectDir,
@@ -744,10 +744,14 @@ void main() {
           'example/ios/Runner/AppDelegate.swift',
           'example/ios/Runner/Runner-Bridging-Header.h',
           'example/lib/main.dart',
-          'ios/Classes/FlutterProjectPlugin.swift',
-          'ios/Resources/PrivacyInfo.xcprivacy',
-          'macos/Classes/FlutterProjectPlugin.swift',
-          'macos/Resources/PrivacyInfo.xcprivacy',
+          'ios/flutter_project/Package.swift',
+          'ios/flutter_project/Sources/flutter_project/FlutterProjectPlugin.swift',
+          'ios/flutter_project/Sources/flutter_project/PrivacyInfo.xcprivacy',
+          'macos/flutter_project/Package.swift',
+          'macos/flutter_project/Sources/flutter_project/FlutterProjectPlugin.swift',
+          'macos/flutter_project/Sources/flutter_project/PrivacyInfo.xcprivacy',
+          'ios/flutter_project.podspec',
+          'macos/flutter_project.podspec',
           'lib/flutter_project.dart',
         ],
         unexpectedPaths: <String>[
@@ -758,17 +762,20 @@ void main() {
           'example/ios/Runner/main.m',
           'ios/Classes/FlutterProjectPlugin.h',
           'ios/Classes/FlutterProjectPlugin.m',
+          // No duplicate Classes/ since code is in SwiftPM structure
+          'ios/Classes/FlutterProjectPlugin.swift',
+          'macos/Classes/FlutterProjectPlugin.swift',
         ],
       );
     },
     overrides: {
-      // Test flags disable Swift Package Manager.
+      // Even with Swift Package Manager feature flag disabled, plugins use SwiftPM structure.
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     },
   );
 
   testUsingContext(
-    'plugin project with Swift Package Manager',
+    'plugin project supports both SwiftPM and CocoaPods when SwiftPM enabled',
     () async {
       return _createProject(
         projectDir,
@@ -780,6 +787,8 @@ void main() {
           'macos/flutter_project/Package.swift',
           'macos/flutter_project/Sources/flutter_project/FlutterProjectPlugin.swift',
           'macos/flutter_project/Sources/flutter_project/PrivacyInfo.xcprivacy',
+          'ios/flutter_project.podspec',
+          'macos/flutter_project.podspec',
         ],
         unexpectedPaths: <String>[
           'ios/Classes/FlutterProjectPlugin.swift',
@@ -2059,49 +2068,7 @@ void main() {
   });
 
   testUsingContext(
-    'can re-gen plugin ios/ and example/ folders, reusing custom org, without Swift Package Manager',
-    () async {
-      await _createProject(projectDir, <String>[
-        '--no-pub',
-        '--template=plugin',
-        '--org',
-        'com.bar.foo',
-        '-i',
-        'objc',
-        '-a',
-        'java',
-        '--platforms',
-        'ios,android',
-      ], <String>[]);
-      projectDir.childDirectory('example').deleteSync(recursive: true);
-      projectDir.childDirectory('ios').deleteSync(recursive: true);
-      await _createProject(
-        projectDir,
-        <String>['--no-pub', '--template=plugin', '-a', 'java', '--platforms', 'ios,android'],
-        <String>[
-          'example/android/app/src/main/java/com/bar/foo/flutter_project_example/MainActivity.java',
-          'ios/Classes/FlutterProjectPlugin.swift',
-        ],
-        unexpectedPaths: <String>[
-          'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
-          'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
-          'ios/flutter_project/Sources/flutter_project/include/flutter_project/FlutterProjectPlugin.swift',
-        ],
-      );
-      final FlutterProject project = FlutterProject.fromDirectory(projectDir);
-      expect(
-        await project.example.ios.productBundleIdentifier(BuildInfo.debug),
-        'com.bar.foo.flutterProjectExample',
-      );
-    },
-    overrides: {
-      // Test flags disable Swift Package Manager.
-      FeatureFlags: () => TestFeatureFlags(),
-    },
-  );
-
-  testUsingContext(
-    'can re-gen plugin ios/ and example/ folders, reusing custom org, with Swift Package Manager',
+    'can re-gen plugin ios/ and example/ folders, reusing custom org',
     () async {
       await _createProject(projectDir, <String>[
         '--no-pub',
@@ -2122,6 +2089,49 @@ void main() {
           'example/android/app/src/main/java/com/bar/foo/flutter_project_example/MainActivity.java',
           'ios/flutter_project/Sources/flutter_project/FlutterProjectPlugin.swift',
           'ios/flutter_project/Package.swift',
+          'ios/flutter_project.podspec',
+        ],
+        unexpectedPaths: <String>[
+          'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
+          'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
+          'ios/Classes/FlutterProjectPlugin.swift',
+        ],
+      );
+      final FlutterProject project = FlutterProject.fromDirectory(projectDir);
+      expect(
+        await project.example.ios.productBundleIdentifier(BuildInfo.debug),
+        'com.bar.foo.flutterProjectExample',
+      );
+    },
+    overrides: {
+      // Even with SwiftPM feature flag disabled, plugins use SwiftPM structure.
+      FeatureFlags: () => TestFeatureFlags(),
+    },
+  );
+
+  testUsingContext(
+    'can re-gen plugin ios/ and example/ folders, reusing custom org, with SwiftPM enabled',
+    () async {
+      await _createProject(projectDir, <String>[
+        '--no-pub',
+        '--template=plugin',
+        '--org',
+        'com.bar.foo',
+        '-a',
+        'java',
+        '--platforms',
+        'ios,android',
+      ], <String>[]);
+      projectDir.childDirectory('example').deleteSync(recursive: true);
+      projectDir.childDirectory('ios').deleteSync(recursive: true);
+      await _createProject(
+        projectDir,
+        <String>['--no-pub', '--template=plugin', '-a', 'java', '--platforms', 'ios,android'],
+        <String>[
+          'example/android/app/src/main/java/com/bar/foo/flutter_project_example/MainActivity.java',
+          'ios/flutter_project/Sources/flutter_project/FlutterProjectPlugin.swift',
+          'ios/flutter_project/Package.swift',
+          'ios/flutter_project.podspec',
         ],
         unexpectedPaths: <String>[
           'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
@@ -2136,6 +2146,47 @@ void main() {
       );
     },
     overrides: {FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true)},
+  );
+
+  testUsingContext(
+    'can re-gen plugin preserving existing CocoaPods structure',
+    () async {
+      await _createProject(
+        projectDir,
+        <String>['--no-pub', '--template=plugin', '--platforms', 'ios'],
+        <String>[
+          'ios/flutter_project/Sources/flutter_project/FlutterProjectPlugin.swift',
+          'ios/flutter_project/Package.swift',
+          'ios/flutter_project.podspec',
+        ],
+      );
+
+      final Directory iosDir = projectDir.childDirectory('ios');
+      final Directory sourcesDir = iosDir
+          .childDirectory('flutter_project')
+          .childDirectory('Sources')
+          .childDirectory('flutter_project');
+      final File swiftFile = sourcesDir.childFile('FlutterProjectPlugin.swift');
+      final String swiftContent = swiftFile.readAsStringSync();
+
+      final Directory classesDir = iosDir.childDirectory('Classes');
+      classesDir.createSync(recursive: true);
+      classesDir.childFile('FlutterProjectPlugin.swift').writeAsStringSync(swiftContent);
+
+      // Delete SwiftPM structure and re-generate the plugin. It should preserve CocoaPods structure..
+      iosDir.childDirectory('flutter_project').deleteSync(recursive: true);
+
+      await _createProject(
+        projectDir,
+        <String>['--no-pub', '--template=plugin', '--platforms', 'ios'],
+        <String>['ios/Classes/FlutterProjectPlugin.swift', 'ios/flutter_project.podspec'],
+        unexpectedPaths: <String>[
+          'ios/flutter_project/Sources/flutter_project/FlutterProjectPlugin.swift',
+          'ios/flutter_project/Package.swift',
+        ],
+      );
+    },
+    overrides: {FeatureFlags: () => TestFeatureFlags()},
   );
 
   testUsingContext('fails to re-gen without specified org when org is ambiguous', () async {
@@ -3483,7 +3534,7 @@ void main() {
   });
 
   testUsingContext(
-    'creates a plugin with shared darwin implementation using CocoaPods',
+    'creates a plugin with shared darwin implementation',
     () async {
       final command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -3527,11 +3578,19 @@ void main() {
 
       final File swiftFile = projectDir
           .childDirectory('darwin')
-          .childDirectory('Classes')
+          .childDirectory('darwin_plugin')
+          .childDirectory('Sources')
+          .childDirectory('darwin_plugin')
           .childFile('DarwinPlugin.swift');
       final String swiftContent = await swiftFile.readAsString();
       expect(swiftContent, contains('#if os(iOS)'));
       expect(swiftContent, contains('#elseif os(macOS)'));
+
+      final File packageSwift = projectDir
+          .childDirectory('darwin')
+          .childDirectory('darwin_plugin')
+          .childFile('Package.swift');
+      expect(packageSwift.existsSync(), isTrue, reason: 'Package.swift should exist');
     },
     overrides: {FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true)},
   );
@@ -3545,11 +3604,16 @@ void main() {
         <String>[
           'pubspec.yaml',
           'darwin/flutter_project.podspec',
-          'darwin/Classes/FlutterProjectPlugin.swift',
+          'darwin/flutter_project/Sources/flutter_project/FlutterProjectPlugin.swift',
+          'darwin/flutter_project/Package.swift',
           'example/ios/Runner.xcworkspace',
           'example/macos/Runner.xcworkspace',
         ],
-        unexpectedPaths: <String>['ios/flutter_project.podspec', 'macos/flutter_project.podspec'],
+        unexpectedPaths: <String>[
+          'ios/flutter_project.podspec',
+          'macos/flutter_project.podspec',
+          'darwin/Classes/FlutterProjectPlugin.swift',
+        ],
       );
       final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
       final pubspec = Pubspec.parse(rawPubspec);
@@ -3574,7 +3638,7 @@ void main() {
   );
 
   testUsingContext(
-    'creates a plugin with shared darwin implementation using Swift Package Manager',
+    'creates a plugin with shared darwin implementation with both SwiftPM and CocoaPods',
     () async {
       final command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -3602,6 +3666,50 @@ void main() {
       final String packageSwiftContent = await packageSwift.readAsString();
       expect(packageSwiftContent, contains('.macOS("10.15")'));
       expect(packageSwiftContent, contains('.iOS("13.0")'));
+
+      // Verify podspec exists (CocoaPods)
+      final File podspec = projectDir.childDirectory('darwin').childFile('darwin_plugin.podspec');
+      expect(podspec.existsSync(), isTrue, reason: 'podspec should exist for CocoaPods support');
+    },
+    overrides: {
+      // Even with SwiftPM feature flag disabled, plugins should support both.
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+    },
+  );
+
+  testUsingContext(
+    'creates a plugin with shared darwin implementation with SwiftPM enabled',
+    () async {
+      final command = CreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+
+      await runner.run(<String>[
+        'create',
+        '--no-pub',
+        '--template=plugin',
+        '--platforms=darwin',
+        '--project-name=darwin_plugin',
+        projectDir.path,
+      ]);
+
+      expect(
+        projectDir.childDirectory('darwin').existsSync(),
+        isTrue,
+        reason: 'darwin directory should exist',
+      );
+
+      // Verify Package.swift content (SwiftPM)
+      final File packageSwift = projectDir
+          .childDirectory('darwin')
+          .childDirectory('darwin_plugin')
+          .childFile('Package.swift');
+      final String packageSwiftContent = await packageSwift.readAsString();
+      expect(packageSwiftContent, contains('.macOS("10.15")'));
+      expect(packageSwiftContent, contains('.iOS("13.0")'));
+
+      // Verify podspec exists (CocoaPods)
+      final File podspec = projectDir.childDirectory('darwin').childFile('darwin_plugin.podspec');
+      expect(podspec.existsSync(), isTrue, reason: 'podspec should exist for CocoaPods support');
     },
     overrides: {
       // Ensure Swift Package Manager is enabled to test the SPM path
