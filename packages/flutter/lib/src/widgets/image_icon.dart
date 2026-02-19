@@ -75,7 +75,7 @@ class ImageIcon extends StatelessWidget {
   /// Whether to render the image using its original colors.
   ///
   /// If this is false (the default), the image is colorized by merging the
-  /// [color] (or the [IconTheme] color) with the image using [BlendMode.srcIn].
+  /// [color] (or, if that is null, the [IconTheme] color) with the image using [BlendMode.srcIn].
   /// This is the standard behavior for icons.
   ///
   /// If this is true, the color-blend filter is disabled, and the image is
