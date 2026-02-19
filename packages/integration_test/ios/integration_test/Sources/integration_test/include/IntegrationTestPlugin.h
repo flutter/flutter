@@ -8,7 +8,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /** A Flutter plugin that's responsible for communicating the test results back
  * to iOS XCTest. */
-@interface IntegrationTestPlugin : NSObject <FlutterPlugin>
+@interface IntegrationTestPlugin : NSObject <FlutterPlugin, FlutterSceneLifeCycleDelegate>
 
 /**
  * Test results that are sent from Dart when integration test completes. Before the

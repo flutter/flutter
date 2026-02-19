@@ -15,8 +15,10 @@ static NSString *const kMethodRevertImage = @"revertFlutterImage";
 @interface IntegrationTestPlugin ()
 
 @property(nonatomic, readwrite) NSDictionary<NSString *, NSString *> *testResults;
+@property(nonatomic, weak) NSObject<FlutterPluginRegistrar> *registrar;
 
 - (instancetype)init NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar;
 
 @end
 
@@ -25,17 +27,18 @@ static NSString *const kMethodRevertImage = @"revertFlutterImage";
   NSMutableDictionary<NSString *, UIImage *> *_capturedScreenshotsByName;
 }
 
+static IntegrationTestPlugin *sInstance;
+
 + (instancetype)instance {
-  static dispatch_once_t onceToken;
-  static IntegrationTestPlugin *sInstance;
-  dispatch_once(&onceToken, ^{
-    sInstance = [[IntegrationTestPlugin alloc] initForRegistration];
-  });
   return sInstance;
 }
 
-- (instancetype)initForRegistration {
-  return [self init];
+- (instancetype)initWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar {
+  self = [self init];
+  if (self) {
+    _registrar = registrar;
+  }
+  return self;
 }
 
 - (instancetype)init {
@@ -45,9 +48,17 @@ static NSString *const kMethodRevertImage = @"revertFlutterImage";
 }
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar {
+  NSLog(@"[IntegrationTestPlugin] registerWithRegistrar called");
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    NSLog(@"[IntegrationTestPlugin] Creating singleton instance with registrar");
+    sInstance = [[IntegrationTestPlugin alloc] initWithRegistrar:registrar];
+  });
   FlutterMethodChannel *channel = [FlutterMethodChannel methodChannelWithName:kIntegrationTestPluginChannel
                                                               binaryMessenger:registrar.messenger];
-  [registrar addMethodCallDelegate:[self instance] channel:channel];
+  [registrar addMethodCallDelegate:sInstance channel:channel];
+  [registrar addSceneDelegate:sInstance];
+  NSLog(@"[IntegrationTestPlugin] Added scene delegate - UIScene migration complete");
 }
 
 /// Handle method calls from Dart code:
@@ -78,16 +89,32 @@ static NSString *const kMethodRevertImage = @"revertFlutterImage";
 }
 
 - (UIImage *)capturePngScreenshot {
-  // Get all windows in the app
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-  // TODO(jmagman) Use scenes instead of deprecated windows. See
-  // https://github.com/flutter/flutter/issues/154365
-  NSArray<UIWindow *> *windows = [UIApplication sharedApplication].windows;
-#pragma clang diagnostic pop
+  // Get all windows from the window scene
+  UIViewController *viewController = self.registrar.viewController;
+  NSLog(@"[IntegrationTestPlugin] capturePngScreenshot - viewController: %@", viewController);
+  NSLog(@"[IntegrationTestPlugin] capturePngScreenshot - view: %@", viewController.view);
+  NSLog(@"[IntegrationTestPlugin] capturePngScreenshot - window: %@", viewController.view.window);
+  NSLog(@"[IntegrationTestPlugin] capturePngScreenshot - windowScene: %@", viewController.view.window.windowScene);
+  
+  NSArray<UIWindow *> *windows;
+  if (viewController && viewController.view.window.windowScene) {
+    windows = viewController.view.window.windowScene.windows;
+    NSLog(@"[IntegrationTestPlugin] Got %lu windows from windowScene (UIScene API working!)", (unsigned long)windows.count);
+  } else {
+    // Fallback for cases where viewController is not available
+    NSLog(@"[IntegrationTestPlugin] WARNING: windowScene not available, using empty array");
+    windows = @[];
+  }
 
   // Find the overall bounding rect for all windows
-  CGRect screenBounds = [UIScreen mainScreen].bounds;
+  CGRect screenBounds;
+  if (viewController.view.window.windowScene.screen) {
+    screenBounds = viewController.view.window.windowScene.screen.bounds;
+    NSLog(@"[IntegrationTestPlugin] Got screen bounds from windowScene.screen: %@", NSStringFromCGRect(screenBounds));
+  } else {
+    screenBounds = [UIScreen mainScreen].bounds;
+    NSLog(@"[IntegrationTestPlugin] WARNING: Using deprecated [UIScreen mainScreen]: %@", NSStringFromCGRect(screenBounds));
+  }
 
   UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithBounds:screenBounds];
   UIImage *screenshot =
