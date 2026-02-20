@@ -32,19 +32,19 @@ class XcodeValidator extends DoctorValidator {
   final IOSSimulatorUtils _iosSimulatorUtils;
   final UserMessages _userMessages;
 
-  static String xcodeRecommended(String recommendedVersion) =>
+  String xcodeRecommended(String recommendedVersion) =>
       'Flutter recommends a minimum Xcode version of $recommendedVersion.\n'
       'Download the latest version or update via the Mac App Store.';
 
-  static String xcodeOutdated(String requiredVersion) =>
+  String xcodeOutdated(String requiredVersion) =>
       'Flutter requires Xcode $requiredVersion or higher.\n'
       'Download the latest version or update via the Mac App Store.';
 
-  static String xcodeLocation(String location) => 'Xcode at $location';
-  static String get xcodeEula =>
+  String xcodeLocation(String location) => 'Xcode at $location';
+  String get xcodeEula =>
       "Xcode end user license agreement not signed; open Xcode or run the command 'sudo xcodebuild -license'.";
 
-  static String get xcodeMissingSimct =>
+  String get xcodeMissingSimct =>
       'Xcode requires additional components to be installed in order to run.\n'
       'Launch Xcode and install additional required components when prompted or run:\n'
       '  sudo xcodebuild -runFirstLaunch';

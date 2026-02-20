@@ -187,9 +187,9 @@ class AndroidValidator extends DoctorValidator {
     }
   }
 
-  static String androidSdkLocation(String directory) => 'Android SDK at $directory';
+  String androidSdkLocation(String directory) => 'Android SDK at $directory';
 
-  static String androidSdkPlatformToolsVersion(String platform, String tools) =>
+  String androidSdkPlatformToolsVersion(String platform, String tools) =>
       'Platform $platform, build-tools $tools';
 
   @override
