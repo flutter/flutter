@@ -1581,25 +1581,39 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       }
       for (final RenderObject node in nodesToProcess.reversed) {
         node._semantics.computeAncestorInfo(treeShapeToken);
-        if (node._semantics.notInSemanticsTree) {
-          // same as above.
-          continue;
-        }
-
-        final _RenderObjectSemantics target;
+        final targets = <_RenderObjectSemantics>[];
         if (node._semantics.geometry == null) {
-          target = node._semantics.firstAncestorNodeWithCleanGeometry!;
-        } else if (!node._semantics.geometry!.isVisible && !node._semantics.isRoot) {
+          if (node._semantics.firstAncestorNodeWithCleanGeometry != null) {
+            targets.add(node._semantics.firstAncestorNodeWithCleanGeometry!);
+          }
+        } else {
           // When this node is a semantics boundary and a layout boundary and its
           // geometry becomes invisible after the ensureGeometry call above,
           // the parent of this node will have to update its semantics subtree to remove
           // this node from its children.
-          target = node._semantics.parentInSemanticsTree!;
-        } else {
-          target = node._semantics;
+          if (!node._semantics.geometry!.isVisible &&
+              !node._semantics.isRoot &&
+              node._semantics.parentInSemanticsTree != null) {
+            targets.add(node._semantics.parentInSemanticsTree!);
+          }
+          targets.add(node._semantics);
         }
-        target.ensureSemanticsNode();
+
+        for (final target in targets) {
+          if (target.parentDataDirty) {
+            // This node can't be updated since it is not in the tree.
+            continue;
+          }
+          target.ensureSemanticsNode();
+        }
       }
+
+      assert(() {
+        if (rootNode != null) {
+          _RenderObjectSemantics.debugCheckForBuilds(rootNode._semantics);
+        }
+        return true;
+      }());
 
       if (!kReleaseMode) {
         FlutterTimeline.finishSync();
@@ -5600,12 +5614,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       return;
     }
     next.computeAncestorInfo(treeShapeToken);
-    if (next.notInSemanticsTree) {
-      notInSemanticsTree = true;
-      firstAncestorNodeWithCleanGeometry = null;
-      return;
-    }
-    notInSemanticsTree = false;
+    notInSemanticsTree = next.notInSemanticsTree;
     firstAncestorNodeWithCleanGeometry ??= next.firstAncestorNodeWithCleanGeometry;
   }
 
@@ -5650,6 +5659,11 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     }
 
     debugCheckParentDataNotDirty(root._semantics);
+  }
+
+  static void debugCheckForBuilds(_RenderObjectSemantics node) {
+    assert(node.built);
+    node._children.forEach(debugCheckForBuilds);
   }
 
   /// Whether this render object semantics will block other render object
@@ -6418,6 +6432,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       // (See semantics_10_test.dart for an example why this is required).
       renderObject.owner!._nodesNeedingSemantics.remove(renderObject);
     }
+
     if (!node._semantics.parentDataDirty || node._semantics.isRoot) {
       if (renderObject.owner != null) {
         assert(node._semantics.configProvider.effective.isSemanticBoundary || node.parent == null);
@@ -6471,10 +6486,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    // return _children
-    //     .map<DiagnosticsNode>((_RenderObjectSemantics child) => child.toDiagnosticsNode())
-    //     .toList();
-    return _getNonBlockedChildren()
+    return _children
         .map<DiagnosticsNode>((_RenderObjectSemantics child) => child.toDiagnosticsNode())
         .toList();
   }

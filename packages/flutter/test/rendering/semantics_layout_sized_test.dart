@@ -83,6 +83,46 @@ void main() {
 
     pumpFrame(phase: EnginePhase.flushSemantics);
   });
+
+  test('semantics updates when child changes in RenderTestLastChildSemanticsMultiChildParent', () {
+    final childOfChild = RenderTestLayoutSemanticsBoundary();
+    final originalChild = RenderTestParent(child: childOfChild);
+    originalChild.isSemanticBoundary = true;
+    originalChild.explicitChildNode = true;
+
+    final parent = RenderTestLastChildSemanticsMultiChildParent(
+      children: <RenderBox>[originalChild],
+    );
+    parent.explicitChildNode = true;
+
+    TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics();
+    // RenderTestLastChildSemanticsMultiChildParent is the parent.
+    layout(parent, phase: EnginePhase.flushSemantics);
+
+    final SemanticsNode parentSemantics = parent.debugSemantics!;
+
+    // Initial state: exposes originalChild
+    expect(parentSemantics.childrenCount, 1);
+
+    // Add new child
+    final newChild = RenderTestLayoutSemanticsBoundary();
+    newChild.isSemanticBoundary = true;
+    parent.add(newChild);
+
+    pumpFrame(phase: EnginePhase.flushSemantics);
+
+    // This adds originalChild to the dirty list, but shouldn't be updated
+    childOfChild.markNeedsLayout();
+    pumpFrame(phase: EnginePhase.flushSemantics);
+
+    // Remove the new child
+    parent.remove(newChild);
+
+    pumpFrame(phase: EnginePhase.flushSemantics);
+
+    // State after removal: exposes originalChild again
+    expect(parentSemantics.childrenCount, 1);
+  });
 }
 
 class RenderTestParent extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
@@ -180,6 +220,62 @@ class RenderTestMultiChildParent extends RenderBox
     config.explicitChildNodes = explicitChildNode;
     config.label = 'Test Parent';
     config.textDirection = TextDirection.ltr;
+  }
+}
+
+class RenderTestLastChildSemanticsMultiChildParent extends RenderBox
+    with
+        ContainerRenderObjectMixin<RenderBox, TestParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, TestParentData> {
+  RenderTestLastChildSemanticsMultiChildParent({List<RenderBox>? children}) {
+    if (children != null) {
+      addAll(children);
+    }
+  }
+
+  bool explicitChildNode = false;
+
+  @override
+  void setupParentData(RenderObject child) {
+    if (child.parentData is! TestParentData) {
+      child.parentData = TestParentData();
+    }
+  }
+
+  @override
+  void performLayout() {
+    RenderBox? child = firstChild;
+    while (child != null) {
+      child.layout(constraints.loosen());
+      child = childAfter(child);
+    }
+    size = constraints.biggest;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    defaultPaint(context, offset);
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    return defaultHitTestChildren(result, position: position);
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isSemanticBoundary = true;
+    config.explicitChildNodes = explicitChildNode;
+    config.label = 'Test Parent';
+    config.textDirection = TextDirection.ltr;
+  }
+
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    if (lastChild != null) {
+      visitor(lastChild!);
+    }
   }
 }
 
