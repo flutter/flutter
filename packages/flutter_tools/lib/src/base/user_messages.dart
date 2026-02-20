@@ -42,6 +42,7 @@ class UserMessages {
       'Try re-installing or updating your Android SDK,\n'
       'visit ${androidSdkInstallUrl(platform)} for detailed instructions.';
   String androidStatusInfo(String version) => 'Android SDK version $version';
+
   // Messages used in AndroidLicenseValidator
   String get androidMissingJdk =>
       'No Java Development Kit (JDK) found; You must have the environment '
