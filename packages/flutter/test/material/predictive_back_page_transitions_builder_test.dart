@@ -640,16 +640,13 @@ void main() {
     expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
     expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
 
-    // Pump till animation is half-way through.
     await tester.tap(find.text('push'));
-    await tester.pump();
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
 
-    // Verify that the render box is painting the right color for scaffolded pages.
-    final RenderBox scaffoldedRenderBox = tester.firstRenderObject<RenderBox>(
-      find.byType(MaterialApp),
-    );
-    expect(scaffoldedRenderBox, paints..rect(color: Colors.black.withAlpha(0)));
+    final Finder coloredBoxFinder = find.byType(ColoredBox).last;
+    expect(coloredBoxFinder, findsOneWidget);
+    final ColoredBox coloredBox = tester.widget<ColoredBox>(coloredBoxFinder);
+    expect(coloredBox.color, Colors.black);
 
     await tester.pumpAndSettle();
   }, variant: TargetPlatformVariant.all());
