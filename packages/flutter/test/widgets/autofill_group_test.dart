@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'editable_text_utils.dart';
+import 'widgets_app_tester.dart';
 
 final Matcher _matchesCommit = isMethodCall('TextInput.finishAutofillContext', arguments: true);
 final Matcher _matchesCancel = isMethodCall('TextInput.finishAutofillContext', arguments: false);
@@ -19,19 +20,17 @@ void main() {
     const client2 = TestTextField(autofillHints: <String>['2']);
 
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: AutofillGroup(
-            key: outerKey,
-            child: Column(
-              children: <Widget>[
-                client1,
-                AutofillGroup(
-                  key: innerKey,
-                  child: Column(children: <Widget>[client2, TestTextField(autofillHints: null)]),
-                ),
-              ],
-            ),
+      const TestWidgetsApp(
+        home: AutofillGroup(
+          key: outerKey,
+          child: Column(
+            children: <Widget>[
+              client1,
+              AutofillGroup(
+                key: innerKey,
+                child: Column(children: <Widget>[client2, TestTextField(autofillHints: null)]),
+              ),
+            ],
           ),
         ),
       ),
@@ -61,16 +60,14 @@ void main() {
     late StateSetter setState;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: AutofillGroup(
-            key: scopeKey,
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setter) {
-                setState = setter;
-                return Column(children: <Widget>[client1, client2]);
-              },
-            ),
+      TestWidgetsApp(
+        home: AutofillGroup(
+          key: scopeKey,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
+              return Column(children: <Widget>[client1, client2]);
+            },
           ),
         ),
       ),
@@ -117,24 +114,22 @@ void main() {
     const client2 = TestTextField(autofillHints: <String>['2']);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: AutofillGroup(
-            key: outerKey,
-            child: Column(
-              children: <Widget>[
-                client1,
-                AutofillGroup(
-                  key: innerKey,
-                  child: Column(
-                    children: <Widget>[
-                      client2,
-                      TestTextField(key: keyClient3, autofillHints: const <String>['3']),
-                    ],
-                  ),
+      TestWidgetsApp(
+        home: AutofillGroup(
+          key: outerKey,
+          child: Column(
+            children: <Widget>[
+              client1,
+              AutofillGroup(
+                key: innerKey,
+                child: Column(
+                  children: <Widget>[
+                    client2,
+                    TestTextField(key: keyClient3, autofillHints: const <String>['3']),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -154,20 +149,18 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: AutofillGroup(
-            key: outerKey,
-            child: Column(
-              children: <Widget>[
-                client1,
-                TestTextField(key: keyClient3, autofillHints: const <String>['3']),
-                const AutofillGroup(
-                  key: innerKey,
-                  child: Column(children: <Widget>[client2]),
-                ),
-              ],
-            ),
+      TestWidgetsApp(
+        home: AutofillGroup(
+          key: outerKey,
+          child: Column(
+            children: <Widget>[
+              client1,
+              TestTextField(key: keyClient3, autofillHints: const <String>['3']),
+              const AutofillGroup(
+                key: innerKey,
+                child: Column(children: <Widget>[client2]),
+              ),
+            ],
           ),
         ),
       ),
@@ -199,14 +192,12 @@ void main() {
     ];
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setter) {
-              setState = setter;
-              return Column(children: children);
-            },
-          ),
+      TestWidgetsApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            setState = setter;
+            return Column(children: children);
+          },
         ),
       ),
     );

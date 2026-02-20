@@ -211,5 +211,221 @@ void main() {
 
       expect(textDirection, isNotNull);
     });
+
+    testWidgets('routes can be navigated with pushNamed', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pushNamed('/details');
+                },
+                child: const Text('Home Page'),
+              );
+            },
+          ),
+          routes: <String, WidgetBuilder>{
+            '/details': (BuildContext context) => const Text('Details Page'),
+          },
+        ),
+      );
+
+      expect(find.text('Home Page'), findsOneWidget);
+      expect(find.text('Details Page'), findsNothing);
+
+      await tester.tap(find.text('Home Page'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Details Page'), findsOneWidget);
+    });
+
+    testWidgets('routes support pop navigation', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pushNamed('/details');
+                },
+                child: const Text('Home Page'),
+              );
+            },
+          ),
+          routes: <String, WidgetBuilder>{
+            '/details': (BuildContext context) => GestureDetector(
+              onTap: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Details Page - Tap to go back'),
+            ),
+          },
+        ),
+      );
+
+      expect(find.text('Home Page'), findsOneWidget);
+
+      await tester.tap(find.text('Home Page'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Details Page - Tap to go back'), findsOneWidget);
+      expect(find.text('Home Page'), findsNothing);
+
+      await tester.tap(find.text('Details Page - Tap to go back'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Home Page'), findsOneWidget);
+      expect(find.text('Details Page - Tap to go back'), findsNothing);
+    });
+
+    testWidgets('uses no transition by default for simpler testing', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pushNamed('/details');
+                },
+                child: const Text('Home Page'),
+              );
+            },
+          ),
+          routes: <String, WidgetBuilder>{
+            '/details': (BuildContext context) => const Text('Details Page'),
+          },
+        ),
+      );
+
+      await tester.tap(find.text('Home Page'));
+      // Single pump is sufficient with zero-duration transitions.
+      await tester.pump();
+
+      // Route should be immediately visible without needing pumpAndSettle.
+      expect(find.text('Details Page'), findsOneWidget);
+    });
+
+    testWidgets('custom pageRouteBuilder is used', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pushNamed('/details');
+                },
+                child: const Text('Home Page'),
+              );
+            },
+          ),
+          routes: <String, WidgetBuilder>{
+            '/details': (BuildContext context) => const Text('Details Page'),
+          },
+          pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+            return PageRouteBuilder<T>(
+              settings: settings,
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) => builder(context),
+              transitionsBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                    Widget child,
+                  ) {
+                    return ScaleTransition(scale: animation, child: child);
+                  },
+            );
+          },
+        ),
+      );
+
+      await tester.tap(find.text('Home Page'));
+      await tester.pump();
+
+      // Custom pageRouteBuilder wraps the route with ScaleTransition.
+      expect(find.byType(ScaleTransition), findsWidgets);
+      expect(find.text('Details Page'), findsOneWidget);
+    });
+
+    testWidgets('multiple routes can be defined', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              return Column(
+                children: <Widget>[
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).pushNamed('/page1');
+                    },
+                    child: const Text('Go to Page 1'),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).pushNamed('/page2');
+                    },
+                    child: const Text('Go to Page 2'),
+                  ),
+                ],
+              );
+            },
+          ),
+          routes: <String, WidgetBuilder>{
+            '/page1': (BuildContext context) => const Text('Page 1 Content'),
+            '/page2': (BuildContext context) => const Text('Page 2 Content'),
+          },
+        ),
+      );
+
+      // Navigate to page 1.
+      await tester.tap(find.text('Go to Page 1'));
+      await tester.pumpAndSettle();
+      expect(find.text('Page 1 Content'), findsOneWidget);
+
+      // Go back.
+      tester.state<NavigatorState>(find.byType(Navigator)).pop();
+      await tester.pumpAndSettle();
+
+      // Navigate to page 2.
+      await tester.tap(find.text('Go to Page 2'));
+      await tester.pumpAndSettle();
+      expect(find.text('Page 2 Content'), findsOneWidget);
+    });
+
+    testWidgets('navigatorKey provides access to NavigatorState', (WidgetTester tester) async {
+      final navigatorKey = GlobalKey<NavigatorState>();
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          navigatorKey: navigatorKey,
+          home: const Text('Home Page'),
+          routes: <String, WidgetBuilder>{
+            '/details': (BuildContext context) => const Text('Details Page'),
+          },
+        ),
+      );
+
+      expect(find.text('Home Page'), findsOneWidget);
+      expect(find.text('Details Page'), findsNothing);
+
+      // Use navigatorKey to navigate directly.
+      navigatorKey.currentState!.pushNamed('/details');
+      await tester.pumpAndSettle();
+
+      expect(find.text('Details Page'), findsOneWidget);
+
+      // Use navigatorKey to pop.
+      navigatorKey.currentState!.pop();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Home Page'), findsOneWidget);
+      expect(find.text('Details Page'), findsNothing);
+    });
   });
 }

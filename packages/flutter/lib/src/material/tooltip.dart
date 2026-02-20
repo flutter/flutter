@@ -531,10 +531,8 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         semanticsTooltip: excludeFromSemantics
             ? null
             : widget.message ?? widget.richMessage?.toPlainText() ?? '',
-        tooltipBuilder: (BuildContext context, Animation<double> animation) => IgnorePointer(
-          ignoring: widget.ignorePointer ?? widget.message != null,
-          child: FadeTransition(opacity: animation, child: tooltipBox),
-        ),
+        tooltipBuilder: (BuildContext context, Animation<double> animation) =>
+            FadeTransition(opacity: animation, child: tooltipBox),
         touchDelay: widget.showDuration ?? _tooltipTheme.showDuration ?? _defaultShowDuration,
         triggerMode: widget.triggerMode ?? _tooltipTheme.triggerMode ?? _defaultTriggerMode,
         enableFeedback:
@@ -544,6 +542,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         onTriggered: widget.onTriggered,
         dismissDelay: widget.exitDuration ?? _tooltipTheme.exitDuration ?? _defaultExitDuration,
         positionDelegate: _getDefaultPositionDelegate,
+        ignorePointer: widget.ignorePointer ?? widget.message != null,
         child: effectiveChild,
       );
     }

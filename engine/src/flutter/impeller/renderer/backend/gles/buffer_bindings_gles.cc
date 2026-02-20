@@ -402,41 +402,33 @@ bool BufferBindingsGLES::BindUniformBufferV2(
       return false;
     }
 
-    switch (member.size) {
-      case sizeof(Matrix):
-        gl.UniformMatrix4fv(location,       // location
-                            element_count,  // count
-                            GL_FALSE,       // normalize
-                            buffer_data     // data
-        );
-        continue;
-      case sizeof(Vector4):
-        gl.Uniform4fv(location,       // location
-                      element_count,  // count
-                      buffer_data     // data
-        );
-        continue;
-      case sizeof(Vector3):
-        gl.Uniform3fv(location,       // location
-                      element_count,  // count
-                      buffer_data     // data
-        );
-        continue;
-      case sizeof(Vector2):
-        gl.Uniform2fv(location,       // location
-                      element_count,  // count
-                      buffer_data     // data
-        );
-        continue;
-      case sizeof(Scalar):
-        gl.Uniform1fv(location,       // location
-                      element_count,  // count
-                      buffer_data     // data
-        );
-        continue;
-      default:
-        VALIDATION_LOG << "Invalid member size binding: " << member.size;
-        return false;
+    if (!member.float_type.has_value()) {
+      VALIDATION_LOG << "Float uniform should have a float type.";
+      return false;
+    }
+
+    switch (member.float_type.value()) {
+      case ShaderFloatType::kFloat:
+        gl.Uniform1fv(location, element_count, buffer_data);
+        break;
+      case ShaderFloatType::kVec2:
+        gl.Uniform2fv(location, element_count, buffer_data);
+        break;
+      case ShaderFloatType::kVec3:
+        gl.Uniform3fv(location, element_count, buffer_data);
+        break;
+      case ShaderFloatType::kVec4:
+        gl.Uniform4fv(location, element_count, buffer_data);
+        break;
+      case ShaderFloatType::kMat2:
+        gl.UniformMatrix2fv(location, element_count, GL_FALSE, buffer_data);
+        break;
+      case ShaderFloatType::kMat3:
+        gl.UniformMatrix3fv(location, element_count, GL_FALSE, buffer_data);
+        break;
+      case ShaderFloatType::kMat4:
+        gl.UniformMatrix4fv(location, element_count, GL_FALSE, buffer_data);
+        break;
     }
   }
   return true;
