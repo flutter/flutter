@@ -113,7 +113,7 @@ static void ApplyComplexClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
         break;
       case flutter::MutatorType::kClipRRect: {
         if (transform.IsIdentity()) {
-          overlay_canvas->ClipRoundRect((*iter)->GetRRect(), flutter::DlClipOp::kIntersect, / true);
+          overlay_canvas->ClipRoundRect((*iter)->GetRRect(), flutter::DlClipOp::kIntersect, true);
         } else {
           auto path = flutter::DlPath::MakeRoundRect((*iter)->GetRRect());
           auto transformed_path =
