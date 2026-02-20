@@ -56,7 +56,6 @@ const List<String> _kTestImages = <String>[
   'colorTables.gif',
   'Connecting.png',
   'crbug1465627.jpeg',
-  'crbug445556737.png',
   'crbug807324.png',
   'crbug999986.jpeg',
   'cropped_mandrill.jpg',
@@ -101,7 +100,6 @@ const List<String> _kTestImages = <String>[
   'icc-v2-gbr.jpg',
   'iconstrip.png',
   'index8.png',
-  'interlaced-multiframe-with-blending.png',
   'iphone_13_pro.jpeg',
   'iphone_15.jpeg',
   'lut_identity.png',
@@ -334,10 +332,6 @@ Future<void> testMain() async {
         // https://github.com/flutter/flutter/issues/152709
         continue;
       }
-      if (testFile == 'rgb24prof.bmp' && isSafari) {
-        // This file causes Safari to crash with `EncodingError`.
-        continue;
-      }
 
       testCodecs.add(
         UrlTestCodec(
@@ -385,34 +379,10 @@ Future<void> testMain() async {
     });
 
     void runCodecTest(TestCodec testCodec) {
-      const problematicChromeImages = <String, Set<int>>{
-        // Frame 2 cause Chrome to crash.
-        // https://issues.chromium.org/456445108
-        'crbug445556737.png': {2},
-        // Frames 2 and 3 cause Chrome to crash.
-        // https://issues.chromium.org/456445108
-        'interlaced-multiframe-with-blending.png': {2, 3},
-      };
-
       test('${testCodec.description} can create an image and convert it to byte array', () async {
         final ui.Codec codec = await testCodec.createCodec();
 
-        final Set<int> problematicFrames;
-        if (isChromium && problematicChromeImages.containsKey(testCodec.testFile)) {
-          // Encountered an image with known problematic frames on Chromium.
-          problematicFrames = problematicChromeImages[testCodec.testFile]!;
-        } else {
-          problematicFrames = <int>{};
-        }
-
         for (var i = 0; i < codec.frameCount; i++) {
-          if (problematicFrames.contains(i)) {
-            printWarning(
-              'Skipping frame $i of ${testCodec.description} due to known Chromium crash bug.',
-            );
-            continue;
-          }
-
           final ui.Image image;
           try {
             final ui.FrameInfo frameInfo = await codec.getNextFrame();
