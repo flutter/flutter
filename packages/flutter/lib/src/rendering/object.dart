@@ -5578,7 +5578,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   }
 
   Object _currentTreeShapeToken = Object();
-  bool notInSemanticsTree = true;
   _RenderObjectSemantics? firstAncestorNodeWithCleanGeometry;
 
   void computeAncestorInfo(Object treeShapeToken) {
@@ -5587,11 +5586,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     }
     _currentTreeShapeToken = treeShapeToken;
     if (isRoot) {
-      notInSemanticsTree = false;
       firstAncestorNodeWithCleanGeometry = this;
       return;
     }
-    notInSemanticsTree = true;
     firstAncestorNodeWithCleanGeometry = null;
     if (parentDataDirty) {
       return;
@@ -5610,11 +5607,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     }
 
     if (next == null) {
-      notInSemanticsTree = true;
       return;
     }
     next.computeAncestorInfo(treeShapeToken);
-    notInSemanticsTree = next.notInSemanticsTree;
     firstAncestorNodeWithCleanGeometry ??= next.firstAncestorNodeWithCleanGeometry;
   }
 
