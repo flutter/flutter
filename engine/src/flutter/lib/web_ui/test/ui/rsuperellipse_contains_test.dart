@@ -115,7 +115,7 @@ void testMain() {
       checkPointAndMirrors(const Offset(39.99, 94.73));
       checkPointAndMirrors(const Offset(44.13, 89.99));
       checkPointAndMirrors(const Offset(48.46, 79.99));
-      checkPointAndMirrors(const Offset(49.68, 69.99));
+      checkPointAndMirrors(const Offset(49.70, 69.99));
       checkPointAndMirrors(const Offset(49.97, 59.99));
       checkPointAndMirrors(const Offset(49.99, 49.99)); // Right mid-edge
     });
@@ -151,7 +151,7 @@ void testMain() {
       }
 
       // A few other points along the edge
-      checkDiagonalPoints(const Offset(-40.0, -49.59));
+      checkDiagonalPoints(const Offset(-40.0, -49.58));
       checkDiagonalPoints(const Offset(-20.0, -45.64));
       checkDiagonalPoints(const Offset(0.0, -37.01));
       checkDiagonalPoints(const Offset(20.0, -21.96));

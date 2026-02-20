@@ -12,7 +12,7 @@
   "shareButtonLabel": "షేర్ చేయండి",
   "pasteButtonLabel": "పేస్ట్ చేయండి",
   "selectAllButtonLabel": "అన్నింటినీ ఎంచుకోండి",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "సెర్చ్ ఫలితాలు కనుగొనబడ్డాయి",
+  "noResultsFound": "ఫలితాలు ఏవీ కనుగొనబడలేదు",
+  "radioButtonUnselectedLabel": "ఎంచుకోబడలేదు"
 }

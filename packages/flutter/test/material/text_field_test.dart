@@ -9535,6 +9535,7 @@ void main() {
                 children: <TestSemantics>[
                   TestSemantics.rootChild(
                     label: 'label',
+                    hint: 'oh no!',
                     textDirection: TextDirection.ltr,
                     actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                     flags: <SemanticsFlag>[
@@ -9567,6 +9568,99 @@ void main() {
       debugDefaultTargetPlatformOverride = null;
     });
   }
+
+  testWidgets('TextField hintText is not duplicated in semantics', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+    final TextEditingController controller = _textEditingController();
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Form(
+            child: TextField(
+              key: key,
+              controller: controller,
+              decoration: const InputDecoration(labelText: 'Search', hintText: 'Search Google Pay'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Focus the text field so the hint Text widget becomes visible
+    // and merges into the semantics tree.
+    await tester.tap(find.byKey(key));
+    await tester.pumpAndSettle();
+
+    final SemanticsNode node = tester.getSemantics(find.byType(EditableText));
+    expect(node.label, contains('Search Google Pay'));
+    expect(node.hint, isEmpty);
+
+    semantics.dispose();
+  });
+
+  testWidgets('TextField passes errorText to semantics hint', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+    final TextEditingController controller = _textEditingController();
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          key: key,
+          controller: controller,
+          decoration: const InputDecoration(labelText: 'Email', errorText: 'Email is required'),
+        ),
+      ),
+    );
+
+    final SemanticsNode node = tester.getSemantics(find.byKey(key));
+    expect(node.hint, 'Email is required');
+
+    semantics.dispose();
+  });
+
+  // When both errorText and hintText are present, they should end up in
+  // separate semantics properties: hintText in label (via Text widget merge),
+  // errorText in hint (via explicit Semantics wrapper).
+  testWidgets('TextField errorText and hintText do not concatenate in semantics', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+    final TextEditingController controller = _textEditingController();
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Form(
+            child: TextField(
+              key: key,
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                hintText: 'Enter your email',
+                errorText: 'Email is required',
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Focus the text field so the hint Text widget becomes visible.
+    await tester.tap(find.byKey(key));
+    await tester.pumpAndSettle();
+
+    final SemanticsNode node = tester.getSemantics(find.byType(EditableText));
+    // hintText merges into label via the Text widget's markAsMergeUp.
+    expect(node.label, contains('Enter your email'));
+    // errorText is in the hint property via the explicit Semantics wrapper.
+    expect(node.hint, 'Email is required');
+
+    semantics.dispose();
+  });
 
   testWidgets('floating label does not overlap with value at large textScaleFactors', (
     WidgetTester tester,
@@ -18979,7 +19073,7 @@ void main() {
     );
     expect(tester.getSize(find.byType(TextField)), Size.zero);
     controller.selection = const TextSelection.collapsed(offset: 0);
-    tester.pump();
+    await tester.pump();
   });
 
   testWidgets(
@@ -19068,6 +19162,248 @@ void main() {
     variant: TargetPlatformVariant.only(TargetPlatform.android),
     // [intended] only applies to platforms where we supply the context menu.
     skip: kIsWeb,
+  );
+
+  testWidgets('entering text does not scroll a surrounding PageView', (WidgetTester tester) async {
+    // regression test for https://github.com/flutter/flutter/issues/19523
+    final pageController = PageController(initialPage: 1);
+    final controller = TextEditingController();
+    addTearDown(pageController.dispose);
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Material(
+              child: PageView(
+                controller: pageController,
+                children: <Widget>[
+                  Container(color: Colors.red),
+                  ColoredBox(
+                    color: Colors.green,
+                    child: TextField(controller: controller),
+                  ),
+                  Container(color: Colors.red),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(EditableText));
+    await tester.pumpAndSettle();
+    expect(controller.text, '');
+    tester.testTextInput.enterText('H');
+    final int frames = await tester.pumpAndSettle();
+
+    // The text input should not trigger any animations, which would indicate
+    // that the surrounding PageView is incorrectly scrolling back-and-forth.
+    expect(frames, 1);
+
+    expect(controller.text, 'H');
+  });
+
+  testWidgets('Cursor does not show when not focused', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/106512 .
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: TextField(focusNode: focusNode, autofocus: true)),
+      ),
+    );
+    assert(focusNode.hasFocus);
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    focusNode.unfocus();
+    await tester.pump();
+
+    for (var i = 0; i < 10; i += 10) {
+      // Make sure it does not paint for a period of time.
+      expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
+      expect(tester.hasRunningAnimations, isFalse);
+      await tester.pump(const Duration(milliseconds: 29));
+    }
+
+    // Refocus and it should paint the caret.
+    focusNode.requestFocus();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(renderEditable, isNot(paintsExactlyCountTimes(#drawRect, 0)));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/175511.
+  testWidgets('Radio group does not intercept key events when no radio is focused', (
+    WidgetTester tester,
+  ) async {
+    final log = <String>[];
+    late final shortcuts = <ShortcutActivator, Intent>{
+      const SingleActivator(LogicalKeyboardKey.arrowLeft): VoidCallbackIntent(() => log.add('←')),
+      const SingleActivator(LogicalKeyboardKey.arrowRight): VoidCallbackIntent(() => log.add('→')),
+      const SingleActivator(LogicalKeyboardKey.arrowDown): VoidCallbackIntent(() => log.add('↓')),
+      const SingleActivator(LogicalKeyboardKey.arrowUp): VoidCallbackIntent(() => log.add('↑')),
+      const SingleActivator(LogicalKeyboardKey.space): VoidCallbackIntent(() => log.add('_')),
+    };
+
+    final firstRadioFocusNode = FocusNode();
+    addTearDown(firstRadioFocusNode.dispose);
+    final textFieldFocusNode = FocusNode();
+    addTearDown(textFieldFocusNode.dispose);
+    StateSetter setState;
+    int? groupValue;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Shortcuts(
+            shortcuts: shortcuts,
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter stateSetter) {
+                setState = stateSetter;
+                return RadioGroup<int>(
+                  groupValue: groupValue,
+                  onChanged: (int? newValue) {
+                    setState(() {
+                      groupValue = newValue;
+                    });
+                  },
+                  child: Column(
+                    children: <Widget>[
+                      Radio<int>(focusNode: firstRadioFocusNode, value: 0),
+                      const RadioListTile<int>(value: 1),
+                      const Radio<int>(value: 2),
+                      TextField(focusNode: textFieldFocusNode),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Focus on the first radio and toggle it.
+    firstRadioFocusNode.requestFocus();
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+    expect(groupValue, 0);
+    expect(firstRadioFocusNode.hasFocus, isTrue);
+
+    // Toggle the second radio with shortcut.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(groupValue, 1);
+    // Log is empty because radio group handles shortcuts.
+    expect(log, isEmpty);
+
+    // Toggle the first radio with shortcut.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(groupValue, 0);
+    expect(log, isEmpty);
+
+    // Move focus to the text field.
+    // Now radio group will ignore shortcuts as there are no focused radios.
+    textFieldFocusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    // Verify that shortcuts are not intercepted by the radio group.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(groupValue, 0);
+    expect(log, <String>['←']);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(groupValue, 0);
+    expect(log, <String>['←', '→']);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(groupValue, 0);
+    expect(log, <String>['←', '→', '↓']);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pumpAndSettle();
+    expect(groupValue, 0);
+    expect(log, <String>['←', '→', '↓', '↑']);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+    expect(groupValue, 0);
+    expect(log, <String>['←', '→', '↓', '↑', '_']);
+
+    log.clear();
+    expect(log, isEmpty);
+
+    // Focus on the first radio.
+    firstRadioFocusNode.requestFocus();
+    await tester.pump();
+    expect(groupValue, 0);
+    expect(firstRadioFocusNode.hasFocus, isTrue);
+
+    // Verify that radio group handles shortcuts again.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(groupValue, 1);
+    expect(log, isEmpty);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pumpAndSettle();
+    expect(groupValue, 0);
+    expect(log, isEmpty);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/170521.
+  testWidgets(
+    'when supportsShowingSystemContextMenu is false, SystemContextMenu throws',
+    (WidgetTester tester) async {
+      final controller = TextEditingController(text: 'one two three');
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context) {
+            final MediaQueryData mediaQueryData = MediaQuery.of(context);
+            return MediaQuery(
+              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: false),
+              child: MaterialApp(
+                home: Scaffold(
+                  body: Center(
+                    child: TextField(
+                      controller: controller,
+                      contextMenuBuilder:
+                          (BuildContext context, EditableTextState editableTextState) {
+                            return SystemContextMenu.editableText(
+                              editableTextState: editableTextState,
+                            );
+                          },
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+      expect(find.byType(SystemContextMenu), findsNothing);
+
+      await tester.tap(find.byType(TextField));
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.showToolbar(), true);
+      await tester.pump();
+
+      expect(tester.takeException(), isAssertionError);
+    },
+    skip: kIsWeb, // [intended] SystemContextMenu is not supported on web.
   );
 }
 

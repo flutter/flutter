@@ -107,8 +107,11 @@ void main() {
     createCoreMockProjectFiles();
   }
 
-  const xattrCommand = FakeCommand(
+  const xattrCommand1 = FakeCommand(
     command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', '/'],
+  );
+  const xattrCommand2 = FakeCommand(
+    command: <String>['xattr', '-r', '-d', 'com.apple.provenance', '/'],
   );
 
   FakeCommand setUpRsyncCommand({void Function(List<String> command)? onRun}) {
@@ -125,7 +128,8 @@ void main() {
     );
   }
 
-  FakeCommand setUpXCResultCommand({
+  // Sets up xcresulttool command for Xcode versions below 16.
+  FakeCommand setUpLegacyXCResultCommand({
     String stdout = '',
     void Function(List<String> command)? onRun,
   }) {
@@ -303,7 +307,9 @@ void main() {
       FileSystem: () => fileSystem,
       Pub: ThrowingPub.new,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem
@@ -332,7 +338,9 @@ void main() {
       createMinimalMockProjectFiles();
 
       processManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem
@@ -376,7 +384,9 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           disablePortPublication: true,
           onRun: (_) {
@@ -414,7 +424,9 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem
@@ -443,7 +455,9 @@ void main() {
       );
 
       processManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           customNaming: true,
           onRun: (_) {
@@ -490,7 +504,9 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       processManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           deviceId: '1234',
           onRun: (_) {
@@ -529,7 +545,9 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       processManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           simulator: true,
           onRun: (_) {
@@ -568,7 +586,9 @@ void main() {
       );
       createMinimalMockProjectFiles();
       processManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           verbose: true,
           onRun: (_) {
@@ -603,7 +623,9 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       processManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem
@@ -693,7 +715,9 @@ void main() {
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-          xattrCommand,
+          xattrCommand1,
+
+          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             onRun: (_) {
               fileSystem
@@ -746,7 +770,9 @@ void main() {
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-          xattrCommand,
+          xattrCommand1,
+
+          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             onRun: (_) {
               fileSystem
@@ -795,14 +821,16 @@ void main() {
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand,
+          xattrCommand1,
+
+          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             exitCode: 1,
             onRun: (_) {
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(),
+          setUpLegacyXCResultCommand(),
           setUpRsyncCommand(),
         ]);
 
@@ -837,7 +865,9 @@ void main() {
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand,
+          xattrCommand1,
+
+          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             exitCode: 1,
             onRun: (_) {
@@ -845,7 +875,7 @@ void main() {
             },
             stdout: 'Lots of spew from Xcode',
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssues),
           setUpRsyncCommand(),
         ]);
 
@@ -886,14 +916,16 @@ void main() {
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand,
+          xattrCommand1,
+
+          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             exitCode: 1,
             onRun: (_) {
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
           setUpRsyncCommand(),
         ]);
 
@@ -940,9 +972,11 @@ void main() {
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand,
+          xattrCommand1,
+
+          xattrCommand2,
           setUpFakeXcodeBuildHandler(exitCode: 1),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssues),
           setUpRsyncCommand(),
         ]);
 
@@ -979,14 +1013,16 @@ void main() {
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand,
+          xattrCommand1,
+
+          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             exitCode: 1,
             onRun: (_) {
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
           setUpRsyncCommand(),
         ]);
 
@@ -1036,14 +1072,16 @@ void main() {
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand,
+          xattrCommand1,
+
+          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             exitCode: 1,
             onRun: (_) {
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithNoProvisioningProfileIssue),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithNoProvisioningProfileIssue),
           setUpRsyncCommand(),
         ]);
 
@@ -1084,14 +1122,16 @@ void main() {
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand,
+          xattrCommand1,
+
+          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             exitCode: 1,
             onRun: (_) {
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithActionIssues),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithActionIssues),
           setUpRsyncCommand(),
         ]);
 
@@ -1126,7 +1166,9 @@ void main() {
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand,
+          xattrCommand1,
+
+          xattrCommand2,
           // Intentionally fail the first xcodebuild command with concurrent run failure message.
           setUpFakeXcodeBuildHandler(
             exitCode: 1,
@@ -1153,7 +1195,7 @@ void main() {
                   .createSync(recursive: true);
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonNoIssues),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonNoIssues),
           setUpRsyncCommand(),
         ]);
 
@@ -1185,7 +1227,9 @@ void main() {
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand,
+          xattrCommand1,
+
+          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             exitCode: 1,
             stdout: '''
@@ -1195,7 +1239,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
           setUpRsyncCommand(),
         ]);
 
@@ -1230,14 +1274,16 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand,
+          xattrCommand1,
+
+          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             exitCode: 1,
             onRun: (_) {
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
           setUpRsyncCommand(),
         ]);
 
@@ -1285,7 +1331,9 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-          xattrCommand,
+          xattrCommand1,
+
+          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             exitCode: 1,
             stdout: '''
@@ -1295,7 +1343,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonNoIssues),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonNoIssues),
           setUpRsyncCommand(),
         ]),
         Pub: ThrowingPub.new,
@@ -1317,14 +1365,16 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand,
+          xattrCommand1,
+
+          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             exitCode: 1,
             onRun: (_) {
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
           setUpRsyncCommand(),
         ]);
 
@@ -1359,14 +1409,16 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand,
+          xattrCommand1,
+
+          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             exitCode: 1,
             onRun: (_) {
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithNoProvisioningProfileIssue),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithNoProvisioningProfileIssue),
           setUpRsyncCommand(),
         ]);
 
@@ -1403,14 +1455,16 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand,
+          xattrCommand1,
+
+          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             exitCode: 1,
             onRun: (_) {
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
           setUpRsyncCommand(),
         ]);
 
@@ -1456,7 +1510,9 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand,
+          xattrCommand1,
+
+          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             simulator: true,
             exitCode: 1,
@@ -1464,7 +1520,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(),
+          setUpLegacyXCResultCommand(),
           setUpRsyncCommand(),
         ]);
 
@@ -1501,7 +1557,9 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand,
+          xattrCommand1,
+
+          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             simulator: true,
             exitCode: 1,
@@ -1509,7 +1567,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssues),
           setUpRsyncCommand(),
         ]);
 
@@ -1551,7 +1609,9 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         );
 
         processManager.addCommands(<FakeCommand>[
-          xattrCommand,
+          xattrCommand1,
+
+          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             simulator: true,
             exitCode: 1,
@@ -1559,7 +1619,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
           setUpRsyncCommand(),
         ]);
 
@@ -1608,9 +1668,11 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand,
+          xattrCommand1,
+
+          xattrCommand2,
           setUpFakeXcodeBuildHandler(simulator: true, exitCode: 1),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssues),
           setUpRsyncCommand(),
         ]);
 

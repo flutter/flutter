@@ -412,6 +412,12 @@ class FakeFlutterVersion implements FlutterVersion {
   bool get didFetchTagsAndUpdate => _didFetchTagsAndUpdate;
   var _didFetchTagsAndUpdate = false;
 
+  bool get didEnsureVersionFile => _didEnsureVersionFile;
+  var _didEnsureVersionFile = false;
+
+  bool get didDeleteVersionFile => _didDeleteVersionFile;
+  var _didDeleteVersionFile = false;
+
   /// Will be returned by [fetchTagsAndGetVersion] if not null.
   final FlutterVersion? nextFlutterVersion;
 
@@ -483,7 +489,14 @@ class FakeFlutterVersion implements FlutterVersion {
   }
 
   @override
-  Future<void> ensureVersionFile() async {}
+  Future<void> ensureVersionFile() async {
+    _didEnsureVersionFile = true;
+  }
+
+  @override
+  void deleteVersionFile() {
+    _didDeleteVersionFile = true;
+  }
 
   @override
   String getBranchName({bool redactUnknownBranches = false}) {
@@ -530,6 +543,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isSwiftPackageManagerEnabled = false,
     this.isOmitLegacyVersionFileEnabled = false,
     this.isWindowingEnabled = false,
+    this.isAccessibilityEvaluationsEnabled = false,
     this.isLLDBDebuggingEnabled = false,
     this.isUISceneMigrationEnabled = false,
     this.isRiscv64SupportEnabled = false,
@@ -578,6 +592,9 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isWindowingEnabled;
 
   @override
+  final bool isAccessibilityEvaluationsEnabled;
+
+  @override
   final bool isLLDBDebuggingEnabled;
 
   @override
@@ -602,6 +619,7 @@ class TestFeatureFlags implements FeatureFlags {
       swiftPackageManager => isSwiftPackageManagerEnabled,
       omitLegacyVersionFile => isOmitLegacyVersionFileEnabled,
       windowingFeature => isWindowingEnabled,
+      accessibilityEvaluationsFeature => isAccessibilityEvaluationsEnabled,
       lldbDebugging => isLLDBDebuggingEnabled,
       uiSceneMigration => isUISceneMigrationEnabled,
       riscv64 => isRiscv64SupportEnabled,
@@ -625,6 +643,7 @@ class TestFeatureFlags implements FeatureFlags {
     swiftPackageManager,
     omitLegacyVersionFile,
     windowingFeature,
+    accessibilityEvaluationsFeature,
     lldbDebugging,
     uiSceneMigration,
     riscv64,

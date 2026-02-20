@@ -276,8 +276,10 @@ class DatePickerThemeData with Diagnosticable {
   /// [DatePickerDialog.currentDate] label in the grid of the date
   /// picker.
   ///
-  /// The border side's [BorderSide.color] is not used,
-  /// [todayForegroundColor] is used instead.
+  /// If the border side's [BorderSide.color] is transparent (has 0 opacity),
+  /// [todayForegroundColor] is used instead. Otherwise, the border's color
+  /// is used as specified. To omit the border entirely,
+  /// set [todayBorder] to [BorderSide.none].
   ///
   /// {@tool dartpad}
   /// This sample demonstrates how to customize the day selector shape decoration

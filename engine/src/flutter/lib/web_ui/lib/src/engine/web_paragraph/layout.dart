@@ -99,6 +99,8 @@ class TextLayout {
     }
 
     // One more dummy element in the end to avoid extra checks
+    // TODO(jlavrova): for empty space we need to keep this empty span -
+    // it has some metrics (like ascent/descent) that we need to keep
     final emptySpan = TextSpan(
       start: paragraph.text.length,
       end: paragraph.text.length,
@@ -176,6 +178,9 @@ class TextLayout {
       paragraph.longestLine = double.negativeInfinity;
       paragraph.maxLineWidthWithTrailingSpaces = double.negativeInfinity;
       paragraph.height = _mapping._clusters.last.advance.height;
+      // TODO(jlavrova): This is not 100% correct but we have no text to measure the baselines from
+      paragraph.alphabeticBaseline = _mapping._clusters.first.advance.height;
+      paragraph.ideographicBaseline = _mapping._clusters.first.advance.height;
       return;
     }
 
@@ -187,6 +192,11 @@ class TextLayout {
     paragraph.longestLine = wrapper.longestLine;
     paragraph.maxLineWidthWithTrailingSpaces = wrapper.maxLineWidthWithTrailingSpaces;
     paragraph.height = wrapper.height;
+    // TODO(jlavrova): Discuss it with Mouad - it's exactly how it's implemented in SkParagraph
+    // but it only makes sense if we have one line
+    paragraph.alphabeticBaseline = lines.first.fontBoundingBoxAscent;
+    paragraph.ideographicBaseline =
+        lines.first.fontBoundingBoxAscent + lines.first.fontBoundingBoxDescent;
   }
 
   double addLine(
@@ -659,6 +669,7 @@ class TextLayout {
 
   ui.TextPosition getPositionForOffset(ui.Offset offset) {
     WebParagraphDebug.apiTrace('getPositionForOffset("${paragraph.text}", $offset)');
+
     if (paragraph.text.isEmpty) {
       return ui.TextPosition(
         offset: 0,
@@ -684,39 +695,38 @@ class TextLayout {
       WebParagraphDebug.log('found line: ${line.textClusterRange} ${line.advance} vs $offset');
 
       // We found the line that contains the offset; let's go through all the visual blocks to find the position
+      final double lineShift = line.advance.left + line.formattingShift;
       for (final LineBlock block in line.visualBlocks) {
-        final ui.Rect blockRect = block.advance
-            .translate(line.advance.left + line.formattingShift, line.advance.top)
-            .inflate(epsilon);
-        if (blockRect.right < offset.dx) {
+        // Calculate left and right edges of the block
+        final double left = block.advance.left + lineShift - epsilon;
+        final double right = block.advance.right + lineShift + epsilon;
+
+        if (right < offset.dx) {
+          // We are not there yet; we need a block containing the offset (or the closest to it)
+          continue;
+        } else if (left > offset.dx) {
           return ui.TextPosition(
             offset: line.textClusterRange.end - 1,
             /*affinity: ui.TextAffinity.downstream,*/
           );
-        } else if (blockRect.left > offset.dx) {
-          // We are not there yet; we need a block containing the offset (or the closest to it)
-          continue;
         }
 
-        WebParagraphDebug.log('found block: $block $blockRect vs $offset');
+        WebParagraphDebug.log('found block: $block $left:$right vs $offset');
         // Found the block; let's go through all the clusters IN VISUAL ORDER to find the position
         final int start = block.isLtr ? block.clusterRange.start : block.clusterRange.end - 1;
         final int end = block.isLtr ? block.clusterRange.end : block.clusterRange.start - 1;
         final step = block.isLtr ? 1 : -1;
         for (var i = start; i != end; i += step) {
           final WebCluster cluster = allClusters[i];
-          final ui.Rect rect = cluster.advance
-              .translate(
-                // TODO(mdebbar): Using `block.spanShiftFromLineStart` here is unfortunate. We should try
-                //                to come up with a better API and probably not use `cluster.advance` directly.
-                //                See other TODO above [WebCluster.bounds].
-                line.advance.left + line.formattingShift + block.spanShiftFromLineStart,
-                line.advance.top + line.fontBoundingBoxAscent,
-              )
-              .inflate(epsilon);
-          WebParagraphDebug.log('test cluster: $rect vs $offset');
-          if (rect.contains(offset)) {
-            if (offset.dx - rect.left <= rect.right - offset.dx) {
+          // Calculate left and right edges of the cluster
+          final double left =
+              cluster.advance.left + lineShift + block.spanShiftFromLineStart - epsilon;
+          final double right =
+              cluster.advance.right + lineShift + block.spanShiftFromLineStart + epsilon;
+
+          WebParagraphDebug.log('test cluster: $left:$right vs $offset');
+          if (left <= offset.dx && right > offset.dx) {
+            if (offset.dx - left <= right - offset.dx) {
               return ui.TextPosition(offset: cluster.start);
             } else if (cluster.end == paragraph.text.length) {
               return ui.TextPosition(offset: cluster.end - 1);

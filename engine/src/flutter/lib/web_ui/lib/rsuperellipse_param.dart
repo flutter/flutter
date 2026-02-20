@@ -35,9 +35,33 @@ extension type _RSuperellipsePath(Path path) {
     path.cubicTo(p2.dx, p2.dy, p3.dx, p3.dy, p4.dx, p4.dy);
   }
 
+  void conicToPoints(Offset cp, Offset p2, double weight) {
+    path.conicTo(cp.dx, cp.dy, p2.dx, p2.dy, weight);
+  }
+
   void lineToPoint(Offset p) {
     path.lineTo(p.dx, p.dy);
   }
+}
+
+class _ConicParam {
+  const _ConicParam({required this.p1, required this.cp, required this.p2, required this.weight});
+
+  final Offset p1;
+  final Offset cp;
+  final Offset p2;
+  final double weight;
+}
+
+Offset _intersection(Offset p1, double k1, Offset p2, double k2) {
+  if ((k1 - k2).abs() < 1e-5) {
+    return (p1 + p2) / 2;
+  }
+
+  final double x = (k1 * p1.dx - k2 * p2.dx + p2.dy - p1.dy) / (k1 - k2);
+  final double y = k1 * (x - p1.dx) + p1.dy;
+
+  return Offset(x, y);
 }
 
 // An octant of an RSuperellipse, used in _RSuperellipseQuadrant.
@@ -121,14 +145,11 @@ class _RSuperellipseOctant {
     }
 
     final List<Offset> circlePoints = _circularArcPoints();
-    final List<Offset> sePoints = _superellipseArcPoints();
+    final (_ConicParam conic1, _ConicParam conic2) = _superellipseArcPoints();
 
     if (!reverse) {
-      path.cubicToPoints(
-        transform.apply(sePoints[1]),
-        transform.apply(sePoints[2]),
-        transform.apply(sePoints[3]),
-      );
+      path.conicToPoints(transform.apply(conic1.cp), transform.apply(conic1.p2), conic1.weight);
+      path.conicToPoints(transform.apply(conic2.cp), transform.apply(conic2.p2), conic2.weight);
       path.cubicToPoints(
         transform.apply(circlePoints[1]),
         transform.apply(circlePoints[2]),
@@ -140,29 +161,31 @@ class _RSuperellipseOctant {
         transform.apply(circlePoints[1]),
         transform.apply(circlePoints[0]),
       );
-      path.cubicToPoints(
-        transform.apply(sePoints[2]),
-        transform.apply(sePoints[1]),
-        transform.apply(sePoints[0]),
-      );
+      path.conicToPoints(transform.apply(conic2.cp), transform.apply(conic2.p1), conic2.weight);
+      path.conicToPoints(transform.apply(conic1.cp), transform.apply(conic1.p1), conic1.weight);
     }
   }
 
-  List<Offset> _superellipseArcPoints() {
-    final start = Offset(0, seA);
-    final Offset end = circleStart;
-    const startTangent = Offset(1, 0);
-    final Offset circleStartVector = circleStart - circleCenter;
-    final Offset endTangent =
-        Offset(-circleStartVector.dy, circleStartVector.dx) / circleStartVector.distance;
+  (_ConicParam, _ConicParam) _superellipseArcPoints() {
+    final posA = Offset(0, seA);
+    final Offset posJ = circleStart;
 
-    final (double startFactor, double endFactor) = _superellipseBezierFactors(seN);
-    return <Offset>[
-      start,
-      start + startTangent * startFactor * seA,
-      end + endTangent * endFactor * seA,
-      end,
-    ];
+    final (:double weight1, :double weight2, :double yHOverA) = _superellipseBezierFactors(
+      seN,
+      posJ.dx / seA,
+      posJ.dy / seA,
+    );
+
+    final posH = Offset(math.pow(1 - math.pow(yHOverA, seN), 1 / seN) * seA, yHOverA * seA);
+
+    const kA = 0.0;
+    final kJ = -math.pow(posJ.dx / posJ.dy, seN - 1) as double;
+    final kH = -math.pow(posH.dx / posH.dy, seN - 1) as double;
+
+    return (
+      _ConicParam(p1: posA, cp: _intersection(posA, kA, posH, kH), p2: posH, weight: weight1),
+      _ConicParam(p1: posH, cp: _intersection(posH, kH, posJ, kJ), p2: posJ, weight: weight2),
+    );
   }
 
   List<Offset> _circularArcPoints() {
@@ -188,22 +211,25 @@ class _RSuperellipseOctant {
     return Offset(p.dx * cosine - p.dy * sine, p.dx * sine + p.dy * cosine);
   }
 
-  static (double, double) _superellipseBezierFactors(double n) {
+  static ({double weight1, double weight2, double yHOverA}) _superellipseBezierFactors(
+    double n,
+    double xJOverA,
+    double yJOverA,
+  ) {
     const kPrecomputedVariables = <(double, double)>[
-      /*n= 2.0*/ (0.01339448, 0.05994973),
-      /*n= 3.0*/ (0.13664115, 0.13592082),
-      /*n= 4.0*/ (0.24545546, 0.14099516),
-      /*n= 5.0*/ (0.32353151, 0.12808021),
-      /*n= 6.0*/ (0.39093068, 0.11726264),
-      /*n= 7.0*/ (0.44847800, 0.10808278),
-      /*n= 8.0*/ (0.49817452, 0.10026175),
-      /*n= 9.0*/ (0.54105583, 0.09344429),
-      /*n=10.0*/ (0.57812578, 0.08748984),
-      /*n=11.0*/ (0.61050961, 0.08224722),
-      /*n=12.0*/ (0.63903989, 0.07759639),
-      /*n=13.0*/ (0.66416338, 0.07346530),
-      /*n=14.0*/ (0.68675338, 0.06974996),
-      /*n=15.0*/ (0.70678034, 0.06529512),
+      /*n= 2.0*/ (0.7078, 8.3194),
+      /*n= 3.0*/ (0.7895, 2.4523),
+      /*n= 4.0*/ (0.8379, 1.8528),
+      /*n= 5.0*/ (0.8701, 1.6891),
+      /*n= 6.0*/ (0.8932, 1.5806),
+      /*n= 7.0*/ (0.9107, 1.5043),
+      /*n= 8.0*/ (0.9244, 1.4470),
+      /*n= 9.0*/ (0.9355, 1.4037),
+      /*n=10.0*/ (0.9448, 1.3701),
+      /*n=11.0*/ (0.9526, 1.3431),
+      /*n=12.0*/ (0.9594, 1.3212),
+      /*n=13.0*/ (0.9653, 1.3032),
+      /*n=14.0*/ (0.9705, 1.2880),
     ];
     final int kNumRecords = kPrecomputedVariables.length;
     const kStep = 1.00;
@@ -211,19 +237,25 @@ class _RSuperellipseOctant {
     final double kMaxN = kMinN + (kNumRecords - 1) * kStep;
 
     if (n >= kMaxN) {
-      return (
-        1.07 - math.exp(1.307649835) * math.pow(n, -0.8568516731),
-        -0.01 + math.exp(-0.9287690322) * math.pow(n, -0.6120901398),
-      );
+      n = kMaxN;
     }
 
     final double steps = ((n - kMinN) / kStep).clamp(0, kNumRecords - 1);
     final int left = steps.floor().clamp(0, kNumRecords - 2);
     final double frac = steps - left;
 
+    final double factor1 =
+        (1 - frac) * kPrecomputedVariables[left].$1 + frac * kPrecomputedVariables[left + 1].$1;
+    final double factor2 =
+        (1 - frac) * kPrecomputedVariables[left].$2 + frac * kPrecomputedVariables[left + 1].$2;
+
+    final double yHProportion = math.sqrt(n);
+    const yAOverA = 1.0;
+
     return (
-      (1 - frac) * kPrecomputedVariables[left].$1 + frac * kPrecomputedVariables[left + 1].$1,
-      (1 - frac) * kPrecomputedVariables[left].$2 + frac * kPrecomputedVariables[left + 1].$2,
+      weight1: factor1 * math.sqrt(n),
+      weight2: factor2 * xJOverA,
+      yHOverA: (yAOverA * yHProportion + yJOverA) / (yHProportion + 1.0),
     );
   }
 

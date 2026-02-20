@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "basic_types.h"
+#include "flutter/shell/platform/fuchsia/dart-pkg/zircon_ffi/basic_types.h"
 
 #include <cstdint>
 #include <cstdlib>

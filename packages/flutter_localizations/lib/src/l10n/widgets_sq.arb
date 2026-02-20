@@ -12,7 +12,7 @@
   "shareButtonLabel": "Ndaj",
   "pasteButtonLabel": "Ngjit",
   "selectAllButtonLabel": "Zgjidh të gjitha",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "U gjetën rezultate kërkimi",
+  "noResultsFound": "Nuk u gjet asnjë rezultat",
+  "radioButtonUnselectedLabel": "Nuk është zgjedhur"
 }

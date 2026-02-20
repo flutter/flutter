@@ -333,6 +333,19 @@ class FormState extends State<Form> {
     _fieldDidChange();
   }
 
+  /// Clears the validation errors for all [FormField]s in this [Form]
+  /// without resetting their values.
+  ///
+  /// See also:
+  ///
+  ///  * [FormFieldState.clearError], which clears the error for a single form field.
+  void clearError() {
+    for (final FormFieldState<dynamic> field in _fields) {
+      field._clearErrorInternal();
+    }
+    _fieldDidChange();
+  }
+
   /// Validates every [FormField] that is a descendant of this [Form], and
   /// returns true if there are no errors.
   ///
@@ -649,10 +662,25 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   void reset() {
     setState(() {
       _value = widget.initialValue;
-      _hasInteractedByUser.value = false;
-      _errorText.value = null;
+      _clearErrorInternal();
     });
     widget.onReset?.call();
+    Form.maybeOf(context)?._fieldDidChange();
+  }
+
+  /// Clears any visible validation error for this field without resetting the field's value.
+  ///
+  /// This sets [errorText] to null and [hasInteractedByUser] to false.
+  ///
+  /// If [AutovalidateMode.always] is used, the error may reappear immediately
+  /// because the field will trigger a new validation cycle during the next build.
+  /// See also:
+  ///
+  ///  * [FormState.clearError], which clears errors across all fields in the form.
+  void clearError() {
+    setState(() {
+      _clearErrorInternal();
+    });
     Form.maybeOf(context)?._fieldDidChange();
   }
 
@@ -669,6 +697,11 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       _validate();
     });
     return !hasError;
+  }
+
+  void _clearErrorInternal() {
+    _errorText.value = null;
+    _hasInteractedByUser.value = false;
   }
 
   void _validate() {

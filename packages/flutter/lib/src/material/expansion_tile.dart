@@ -272,7 +272,7 @@ class ExpansionTile extends StatefulWidget {
   ///
   /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
   ///   [ExpansionTileThemeData].
-  final Alignment? expandedAlignment;
+  final AlignmentGeometry? expandedAlignment;
 
   /// Specifies the alignment of each child within [children] when the tile is expanded.
   ///
@@ -636,7 +636,7 @@ class _ExpansionTileState extends State<ExpansionTile> {
         // blockNode prevents this node from being part of the focus traversal.
         label: semanticsHint,
         liveRegion: true,
-        accessiblityFocusBlockType: AccessiblityFocusBlockType.blockNode,
+        accessibilityFocusBlockType: AccessibilityFocusBlockType.blockNode,
         child: Semantics(hint: semanticsHint, onTapHint: onTapHint, child: child),
       );
     }

@@ -1359,8 +1359,11 @@ uint16_t PolygonInfo::AppendVertex(const Point& vertex, Scalar gaussian) {
   FML_DCHECK(index == gaussians_.size());
   // TODO(jimgraham): Turn this condition into a failure of the tessellation
   FML_DCHECK(index <= std::numeric_limits<uint16_t>::max());
-  if (gaussian == gaussians_.back() && vertex == vertices_.back()) {
-    return index - 1;
+  if (index > 0u) {
+    FML_DCHECK(!gaussians_.empty() && !vertices_.empty());
+    if (gaussian == gaussians_.back() && vertex == vertices_.back()) {
+      return index - 1;
+    }
   }
   vertices_.push_back(vertex);
   gaussians_.push_back(gaussian);

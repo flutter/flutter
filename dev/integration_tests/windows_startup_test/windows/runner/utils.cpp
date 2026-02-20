@@ -49,13 +49,17 @@ std::string Utf8FromUtf16(const wchar_t* utf16_string) {
   if (utf16_string == nullptr) {
     return std::string();
   }
-  unsigned int target_length = ::WideCharToMultiByte(
+  // First, find the length of the string with a safe upper bound (CWE-126).
+  // UNICODE_STRING_MAX_CHARS (32767) is the maximum length of a UNICODE_STRING.
+  int input_length = static_cast<int>(wcsnlen(utf16_string, UNICODE_STRING_MAX_CHARS));
+  // Now use that bounded length to determine the required buffer size.
+  // When an explicit length is passed, WideCharToMultiByte does not include
+  // the null terminator in its returned size.
+  int target_length = ::WideCharToMultiByte(
       CP_UTF8, WC_ERR_INVALID_CHARS, utf16_string,
-      -1, nullptr, 0, nullptr, nullptr)
-    -1; // remove the trailing null character
-  int input_length = (int)wcslen(utf16_string);
+      input_length, nullptr, 0, nullptr, nullptr);
   std::string utf8_string;
-  if (target_length == 0 || target_length > utf8_string.max_size()) {
+  if (target_length == 0 || static_cast<size_t>(target_length) > utf8_string.max_size()) {
     return utf8_string;
   }
   utf8_string.resize(target_length);

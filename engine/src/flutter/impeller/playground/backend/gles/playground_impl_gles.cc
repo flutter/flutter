@@ -79,6 +79,11 @@ PlaygroundImplGLES::PlaygroundImplGLES(PlaygroundSwitches switches)
   FML_CHECK(use_angle_) << "Must use Angle on macOS for OpenGL ES.";
   ::glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
 #endif  // FML_OS_MACOSX
+#if FML_OS_LINUX
+  // Use EGL even on X11 then the client can select the GLES implementation
+  // by defining __EGL_VENDOR_LIBRARY_FILENAMES
+  ::glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
+#endif
   ::glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
   ::glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
   ::glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
@@ -91,6 +96,9 @@ PlaygroundImplGLES::PlaygroundImplGLES(PlaygroundSwitches switches)
   ::glfwWindowHint(GLFW_SAMPLES, 4);       // 4xMSAA
 
   ::glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+#ifndef NDEBUG
+  ::glfwWindowHint(GLFW_CONTEXT_DEBUG, GLFW_TRUE);
+#endif
 
   auto window = ::glfwCreateWindow(1, 1, "Test", nullptr, nullptr);
 
@@ -133,6 +141,25 @@ std::shared_ptr<Context> PlaygroundImplGLES::GetContext() const {
     return nullptr;
   }
 
+  if (gl->GetDescription()->HasDebugExtension()) {
+    gl->DebugMessageCallbackKHR(
+        +[](GLenum /* source */, GLenum message_type, GLuint /* message_id */,
+            GLenum /* severity */, GLsizei /* length */, const GLchar* message,
+            const void* /* user_param */) {
+          switch (message_type) {
+            case GL_DEBUG_TYPE_ERROR_KHR:
+              FML_LOG(ERROR) << "GL Error: " << message;
+              return;
+            default:
+              return;
+          }
+        },
+        nullptr);
+
+#ifndef NDEBUG
+    gl->Enable(GL_DEBUG_OUTPUT_SYNCHRONOUS_KHR);
+#endif
+  }
   auto context =
       ContextGLES::Create(switches_.flags, std::move(gl),
                           ShaderLibraryMappingsForPlayground(), true);
