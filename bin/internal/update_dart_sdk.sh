@@ -159,7 +159,7 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != "$(< "$ENGINE_STAMP")" ]; 
     # 33  HTTP range error. The range "command" didn't work.
     # https://man7.org/linux/man-pages/man1/curl.1.html#EXIT_CODES
     if [ "$curlExitCode" -ne 33 ]; then
-      return $curlExitCode
+      exit "$curlExitCode"
     fi
     curl ${verbose_curl} --retry 3 --location --output "$DART_SDK_ZIP" "$DART_SDK_URL" 2>&1
   } || {
