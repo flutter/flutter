@@ -139,13 +139,18 @@ class AndroidValidator extends DoctorValidator {
   String androidJavaMinimumVersion(String javaVersion) =>
       'Java version $javaVersion is older than the minimum recommended version of ${gradle_utils.warnJavaMinVersionAndroid}';
 
+  String get androidMissingJdk =>
+      'No Java Development Kit (JDK) found; You must have the environment '
+      'variable JAVA_HOME set and the java binary in your PATH. '
+      'You can download the JDK from https://www.oracle.com/technetwork/java/javase/downloads/.';
+
   /// Returns false if we cannot determine the Java version or if the version
   /// is older that the minimum allowed version.
   Future<bool> _checkJavaVersion(List<ValidationMessage> messages) async {
     _task = 'Checking Java status';
     try {
       if (_java?.binaryPath == null) {
-        messages.add(ValidationMessage.error(_userMessages.androidMissingJdk));
+        messages.add(ValidationMessage.error(androidMissingJdk));
         return false;
       }
       messages.add(
@@ -333,6 +338,16 @@ class AndroidLicenseValidator extends DoctorValidator {
   @override
   String get slowWarning => 'Checking Android licenses is taking an unexpectedly long time...';
 
+  String get androidLicensesAll => 'All Android licenses accepted.';
+
+  String get androidLicensesSome =>
+      'Some Android licenses not accepted. To resolve this, run: flutter doctor --android-licenses';
+
+  String get androidLicensesNone =>
+      'Android licenses not accepted. To resolve this, run: flutter doctor --android-licenses';
+
+  String get androidSdkShort => 'Unable to locate Android SDK.';
+
   @override
   Future<ValidationResult> validateImpl() async {
     final messages = <ValidationMessage>[];
@@ -352,12 +367,12 @@ class AndroidLicenseValidator extends DoctorValidator {
     // Check for licenses.
     switch (await licensesAccepted) {
       case LicensesAccepted.all:
-        messages.add(ValidationMessage(_userMessages.androidLicensesAll));
+        messages.add(ValidationMessage(androidLicensesAll));
       case LicensesAccepted.some:
-        messages.add(ValidationMessage.hint(_userMessages.androidLicensesSome));
+        messages.add(ValidationMessage.hint(androidLicensesSome));
         return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
       case LicensesAccepted.none:
-        messages.add(ValidationMessage.error(_userMessages.androidLicensesNone));
+        messages.add(ValidationMessage.error(androidLicensesNone));
         return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
       case LicensesAccepted.unknown:
         messages.add(ValidationMessage.error(_userMessages.androidLicensesUnknown(_platform)));
@@ -446,7 +461,7 @@ class AndroidLicenseValidator extends DoctorValidator {
   /// Run the Android SDK manager tool in order to accept SDK licenses.
   Future<bool> runLicenseManager() async {
     if (_androidSdk == null) {
-      _logger.printStatus(_userMessages.androidSdkShort);
+      _logger.printStatus(androidSdkShort);
       return false;
     }
 
