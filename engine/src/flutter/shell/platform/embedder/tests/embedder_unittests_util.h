@@ -140,7 +140,7 @@ class EmbedderTestTaskRunner {
   }
 
   void SetDestructionCallback(std::function<void()> callback) {
-    destruction_callback_ = callback;
+    destruction_callback_ = std::move(callback);
   }
 
   const FlutterTaskRunnerDescription& GetFlutterTaskRunnerDescription() {
