@@ -176,7 +176,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       // project has been already migrated, whether automatically or manually.
       final bool isSchemeMigrated = _isSchemeMigrated(schemeInfo);
       final bool isPbxprojMigrated = _xcodeProject.flutterPluginSwiftPackageInProjectSettings;
-      final bool isOptionalFilesMigrated = _isOptionalFilesMigrated(_xcodeProjectInfoFile);
+      final bool isOptionalFilesMigrated = _areOptionalFilesMigrated(_xcodeProjectInfoFile);
       optionalOnly = isPbxprojMigrated && isSchemeMigrated && !isOptionalFilesMigrated;
       if (isSchemeMigrated && isPbxprojMigrated && isOptionalFilesMigrated) {
         return;
@@ -193,6 +193,8 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       if (!isPbxprojMigrated) {
         _migratePbxproj();
       } else if (!isOptionalFilesMigrated) {
+        // _migratePbxproj also migrates the optional files, so only migrate the optional
+        // specifically if _migratePbxproj is not called.
         _migrateOptionalPbxproj();
       } else {
         logger.printTrace('${_xcodeProjectInfoFile.basename} already migrated. Skipping...');
@@ -209,7 +211,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
           throw Exception('Settings were not updated correctly.');
         }
       } else if (!isOptionalFilesMigrated) {
-        if (!_isOptionalFilesMigratedCorrectly(updatedInfo, logErrorIfNotMigrated: true)) {
+        if (!_areOptionalFilesMigratedCorrectly(updatedInfo, logErrorIfNotMigrated: true)) {
           throw Exception('Settings were not updated correctly.');
         }
       }
@@ -414,15 +416,15 @@ $newContent
     }
   }
 
-  bool _isOptionalFilesMigrated(File xcodeProjectInfoFile) {
-    final bool
-    flutterGeneratedPackageAsFileReference = xcodeProjectInfoFile.readAsStringSync().contains(
+  bool _areOptionalFilesMigrated(File xcodeProjectInfoFile) {
+    final String fileContents = xcodeProjectInfoFile.readAsStringSync();
+    final bool flutterGeneratedPackageAsFileReference = fileContents.contains(
       '$_flutterPluginsSwiftPackageFileIdentifer /* $kFlutterGeneratedPluginSwiftPackageName */ = {isa = PBXFileReference',
     );
 
     var pluginPackageAsFileReference = true;
     if (_examplePlugin != null) {
-      pluginPackageAsFileReference = xcodeProjectInfoFile.readAsStringSync().contains(
+      pluginPackageAsFileReference = fileContents.contains(
         '$_flutterPluginLocalOverrideFileIdenitifier /* ${_examplePlugin.name} */ = {isa = PBXFileReference',
       );
     }
@@ -430,7 +432,7 @@ $newContent
     return flutterGeneratedPackageAsFileReference && pluginPackageAsFileReference;
   }
 
-  bool _isOptionalFilesMigratedCorrectly(
+  bool _areOptionalFilesMigratedCorrectly(
     ParsedProjectInfo projectInfo, {
     bool logErrorIfNotMigrated = false,
   }) {
@@ -501,7 +503,7 @@ $newContent
       projectInfo,
       logErrorIfNotMigrated: logErrorIfNotMigrated,
     );
-    final bool optionalMigrated = _isOptionalFilesMigratedCorrectly(
+    final bool optionalMigrated = _areOptionalFilesMigratedCorrectly(
       projectInfo,
       logErrorIfNotMigrated: logErrorIfNotMigrated,
     );
