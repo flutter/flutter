@@ -1021,10 +1021,11 @@ class SelectableRegionState extends State<SelectableRegion>
     _finalizeSelection();
     _updateSelectedContentIfNeeded();
     _finalizeSelectableRegionStatus();
-    _showToolbar();
+    
     if (defaultTargetPlatform == TargetPlatform.android) {
       _showHandles();
     }
+    _showToolbar();
   }
 
   bool _positionIsOnActiveSelection({required Offset globalPosition}) {
