@@ -298,6 +298,7 @@ void main() {
     final TestGesture gesture = await tester.startGesture(
       tester.getCenter(find.byType(Scrollable), warnIfMissed: true),
     );
+    addTearDown(gesture.removePointer);
     await gesture.moveBy(const Offset(0.0, -0.5));
     expect(getScrollOffset(tester), 0.5);
     await gesture.moveBy(const Offset(0.0, -0.5), timeStamp: const Duration(milliseconds: 10));
@@ -313,6 +314,7 @@ void main() {
       final TestGesture gesture = await tester.startGesture(
         tester.getCenter(find.byType(Scrollable), warnIfMissed: true),
       );
+      addTearDown(gesture.removePointer);
       await gesture.moveBy(const Offset(0.0, -0.5));
       expect(getScrollOffset(tester), 0.0);
       await gesture.moveBy(const Offset(0.0, -0.5), timeStamp: const Duration(milliseconds: 10));
@@ -342,6 +344,7 @@ void main() {
       final TestGesture gesture = await tester.startGesture(
         tester.getCenter(find.byType(Scrollable), warnIfMissed: true),
       );
+      addTearDown(gesture.removePointer);
       await gesture.moveBy(const Offset(0.0, -30.0));
       // No offset lost from threshold.
       expect(getScrollOffset(tester), 30.0);
@@ -359,6 +362,7 @@ void main() {
       final TestGesture gesture = await tester.startGesture(
         tester.getCenter(find.byType(Scrollable), warnIfMissed: true),
       );
+      addTearDown(gesture.removePointer);
       // This is a typical 'hesitant' iOS scroll start.
       await gesture.moveBy(const Offset(0.0, -10.0));
       expect(getScrollOffset(tester), moreOrLessEquals(1.1666666666666667));
@@ -379,6 +383,7 @@ void main() {
       final TestGesture gesture = await tester.startGesture(
         tester.getCenter(find.byType(Scrollable), warnIfMissed: true),
       );
+      addTearDown(gesture.removePointer);
       await gesture.moveBy(const Offset(0.0, -30.0)); // Break threshold.
       expect(getScrollOffset(tester), 30.0);
       await gesture.moveBy(const Offset(0.0, -0.5), timeStamp: const Duration(milliseconds: 20));
@@ -401,6 +406,7 @@ void main() {
       final TestGesture gesture = await tester.startGesture(
         tester.getCenter(find.byType(Scrollable), warnIfMissed: true),
       );
+      addTearDown(gesture.removePointer);
       await gesture.moveBy(const Offset(0.0, -30.0)); // Break threshold.
       expect(getScrollOffset(tester), 30.0);
       await gesture.moveBy(const Offset(0.0, -0.5), timeStamp: const Duration(milliseconds: 20));
@@ -1532,6 +1538,7 @@ void main() {
       tester.getCenter(find.byType(Scrollable), warnIfMissed: true),
       kind: ui.PointerDeviceKind.unknown,
     );
+    addTearDown(gesture.removePointer);
     expect(getScrollOffset(tester), 0.0);
     await gesture.moveBy(const Offset(0.0, -200));
     await tester.pump();
@@ -1556,6 +1563,7 @@ void main() {
       tester.getCenter(find.byType(Scrollable), warnIfMissed: true),
       kind: ui.PointerDeviceKind.unknown,
     );
+    addTearDown(gesture.removePointer);
     expect(getScrollOffset(tester), 0.0);
     await gesture.moveBy(const Offset(0.0, -200));
     await tester.pump();
@@ -1631,6 +1639,7 @@ void main() {
     // Change state to include mouse pointer device.
     await tester.tap(find.text('Toggle dragDevices'));
     await tester.pump();
+    await gesture.up();
 
     // Gesture should work after state change.
     gesture = await tester.startGesture(
@@ -1641,6 +1650,7 @@ void main() {
     await gesture.moveBy(const Offset(0.0, -200));
     await tester.pumpAndSettle();
     expect(getScrollOffset(tester), 200);
+    await gesture.up();
   });
 
   testWidgets('dragDevices change updates widget when oldWidget scrollBehavior is null', (
@@ -1698,6 +1708,7 @@ void main() {
     await gesture.moveBy(const Offset(0.0, -200));
     await tester.pumpAndSettle();
     expect(getScrollOffset(tester), 0.0);
+    await gesture.up();
 
     // Change state to include mouse pointer device.
     await tester.tap(find.text('Update ScrollBehavior'));
@@ -1712,6 +1723,7 @@ void main() {
     await gesture.moveBy(const Offset(0.0, -200));
     await tester.pumpAndSettle();
     expect(getScrollOffset(tester), 200);
+    await gesture.up();
   });
 }
 
