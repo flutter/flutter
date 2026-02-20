@@ -1480,43 +1480,40 @@ void main() {
     final GlobalKey key = GlobalKey();
     final GlobalKey key1 = GlobalKey();
     Widget buildScrollable(bool withViewPort) {
-      return Scrollable(
-        key: key,
-        viewportBuilder: (BuildContext context, ViewportOffset position) {
-          if (withViewPort) {
-            final offset = ViewportOffset.zero();
-            addTearDown(() => offset.dispose());
-            return Viewport(
-              slivers: <Widget>[
-                SliverToBoxAdapter(
-                  child: Semantics(key: key1, container: true, child: const Text('text1')),
-                ),
-              ],
-              offset: offset,
-            );
-          }
-          return Semantics(key: key1, container: true, child: const Text('text1'));
-        },
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Scrollable(
+          key: key,
+          viewportBuilder: (BuildContext context, ViewportOffset position) {
+            if (withViewPort) {
+              final offset = ViewportOffset.zero();
+              addTearDown(() => offset.dispose());
+              return Viewport(
+                slivers: <Widget>[
+                  SliverToBoxAdapter(
+                    child: Semantics(key: key1, container: true, child: const Text('text1')),
+                  ),
+                ],
+                offset: offset,
+              );
+            }
+            return Semantics(key: key1, container: true, child: const Text('text1'));
+          },
+        ),
       );
     }
 
     // This should cache the inner node in Scrollable with the children text1.
-    await tester.pumpWidget(
-      Directionality(textDirection: TextDirection.ltr, child: buildScrollable(true)),
-    );
+    await tester.pumpWidget(buildScrollable(true));
     expect(semantics, includesNodeWith(tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics}));
     // This does not use two panel, this should clear cached inner node.
-    await tester.pumpWidget(
-      Directionality(textDirection: TextDirection.ltr, child: buildScrollable(false)),
-    );
+    await tester.pumpWidget(buildScrollable(false));
     expect(
       semantics,
       isNot(includesNodeWith(tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics})),
     );
     // If the inner node was cleared in the previous step, this should not crash.
-    await tester.pumpWidget(
-      Directionality(textDirection: TextDirection.ltr, child: buildScrollable(true)),
-    );
+    await tester.pumpWidget(buildScrollable(true));
     expect(semantics, includesNodeWith(tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics}));
     expect(tester.takeException(), isNull);
     semantics.dispose();
