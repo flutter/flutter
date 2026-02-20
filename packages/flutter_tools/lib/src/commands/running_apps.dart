@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 import 'package:multicast_dns/multicast_dns.dart';
@@ -118,23 +117,8 @@ class RunningAppsCommand extends FlutterCommand {
       table.add(<String>['$projectName ($mode)', deviceString, platform, vmServiceUri, age]);
     }
 
-    // TODO(jwren): consider combining this logic with the logic in `flutter devices`,
-    // see https://github.com/flutter/flutter/issues/180949
-    // Calculate column widths
-    final indices = List<int>.generate(table[0].length - 1, (int i) => i);
-    List<int> widths = indices.map<int>((int i) => 0).toList();
-    for (final row in table) {
-      widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
-    }
-
     // Join columns into lines of text
-    for (final row in table) {
-      final String rowString = indices
-          .map<String>((int i) => row[i].padRight(widths[i]))
-          .followedBy(<String>[row.last])
-          .join(' • ');
-      _logger.printStatus('  $rowString');
-    }
+    _logger.printStatus(formatTable(table, indent: 2).join('\n'));
     return FlutterCommandResult.success();
   }
 
