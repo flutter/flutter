@@ -439,7 +439,7 @@ class _FadeForwardsPageTransition extends StatelessWidget {
 ///  * [FadeUpwardsPageTransitionsBuilder], which defines a page transition
 ///    that's similar to the one provided by Android O.
 ///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
-///    that's similar to the one provided by Andoird P.
+///    that's similar to the one provided by Android P.
 ///  * [ZoomPageTransitionsBuilder], which defines the default page transition
 ///    that's similar to the one provided in Android Q.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
