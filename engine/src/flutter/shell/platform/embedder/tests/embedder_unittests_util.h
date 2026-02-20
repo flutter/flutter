@@ -130,12 +130,17 @@ class EmbedderTestTaskRunner {
 
       real_task_runner->PostTaskForTime(invoke_task, target_time);
     };
-    task_runner_description_.destruction_callback = [](void* user_data) {};
+    task_runner_description_.destruction_callback = [](void* user_data) {
+      auto thiz = reinterpret_cast<EmbedderTestTaskRunner*>(user_data);
+      if (thiz->destruction_callback_) {
+        thiz->destruction_callback_();
+      }
+    };
     task_runner_description_.identifier = identifier_;
   }
 
-  void SetDestructionCallback(VoidCallback callback) {
-    task_runner_description_.destruction_callback = callback;
+  void SetDestructionCallback(std::function<void()> callback) {
+    destruction_callback_ = callback;
   }
 
   const FlutterTaskRunnerDescription& GetFlutterTaskRunnerDescription() {
@@ -148,6 +153,7 @@ class EmbedderTestTaskRunner {
   fml::RefPtr<fml::TaskRunner> real_task_runner_;
   TaskExpiryCallback on_task_expired_;
   FlutterTaskRunnerDescription task_runner_description_ = {};
+  std::function<void()> destruction_callback_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTestTaskRunner);
 };

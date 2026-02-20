@@ -206,22 +206,30 @@ TEST_F(EmbedderTest, CanSpecifyCustomUITaskRunner) {
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
   auto ui_thread = std::make_unique<fml::Thread>("test_ui_thread");
   auto ui_task_runner = ui_thread->GetTaskRunner();
+  std::mutex ui_task_runner_mutex;
+  bool ui_task_runner_destroyed = false;
   auto platform_thread = std::make_unique<fml::Thread>("test_platform_thread");
   auto platform_task_runner = platform_thread->GetTaskRunner();
-  static std::mutex engine_mutex;
   UniqueEngine engine;
 
   EmbedderTestTaskRunner test_ui_task_runner(
       ui_task_runner, [&](FlutterTask task) {
-        std::scoped_lock lock(engine_mutex);
-        if (!engine.is_valid()) {
+        // The UI task runner will be destroyed during engine shutdown.  It
+        // should continue dispatching tasks until the engine invokes the
+        // destruction callback.  After that it must stop using the engine.
+        std::scoped_lock lock(ui_task_runner_mutex);
+        if (ui_task_runner_destroyed) {
           return;
         }
         FlutterEngineRunTask(engine.get(), &task);
       });
+  test_ui_task_runner.SetDestructionCallback([&]() {
+    std::scoped_lock lock(ui_task_runner_mutex);
+    ui_task_runner_destroyed = true;
+  });
+
   EmbedderTestTaskRunner test_platform_task_runner(
       platform_task_runner, [&](FlutterTask task) {
-        std::scoped_lock lock(engine_mutex);
         if (!engine.is_valid()) {
           return;
         }
@@ -253,10 +261,7 @@ TEST_F(EmbedderTest, CanSpecifyCustomUITaskRunner) {
           ASSERT_TRUE(platform_task_runner->RunsTasksOnCurrentThread());
           signal_latch_platform.Signal();
         });
-    {
-      std::scoped_lock lock(engine_mutex);
-      engine = builder.InitializeEngine();
-    }
+    engine = builder.InitializeEngine();
     ASSERT_EQ(FlutterEngineRunInitialized(engine.get()), kSuccess);
     ASSERT_TRUE(engine.is_valid());
   });
@@ -444,7 +449,7 @@ TEST_F(EmbedderTest, CanSpecifyCustomPlatformTaskRunner) {
   auto platform_task_runner = CreateNewThread("test_platform_thread");
   static std::mutex engine_mutex;
   static bool signaled_once = false;
-  static std::atomic<bool> destruction_callback_called = false;
+  std::atomic<bool> destruction_callback_called = false;
   UniqueEngine engine;
 
   EmbedderTestTaskRunner test_task_runner(
@@ -466,7 +471,7 @@ TEST_F(EmbedderTest, CanSpecifyCustomPlatformTaskRunner) {
         latch.Signal();
       });
   test_task_runner.SetDestructionCallback(
-      [](void* user_data) { destruction_callback_called = true; });
+      [&]() { destruction_callback_called = true; });
 
   platform_task_runner->PostTask([&]() {
     EmbedderConfigBuilder builder(context);
