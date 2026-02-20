@@ -58,9 +58,7 @@ if (![string]::IsNullOrEmpty($env:FLUTTER_PREBUILT_ENGINE_VERSION)) {
 # Fallback to using git to triangulate which upstream/master (or origin/master)
 # the current branch is forked from, which would be the last version of the
 # engine artifacts built from CI.
-} else {
-  $engineVersion = Invoke-Expression "& '$flutterRoot/bin/internal/content_aware_hash.ps1'"
-}
+  $engineVersion = & "$flutterRoot/bin/internal/content_aware_hash.ps1"
 
 # Write the engine version out so downstream tools know what to look for.
 Set-Content -Path $flutterRoot/bin/cache/engine.stamp -Value $engineVersion -Encoding Ascii

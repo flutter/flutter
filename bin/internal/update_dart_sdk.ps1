@@ -20,8 +20,8 @@ $cachePath = "$flutterRoot\bin\cache"
 $dartSdkPath = "$cachePath\dart-sdk"
 $dartSdkLicense = "$cachePath\LICENSE.dart_sdk_archive.md"
 $engineStamp = "$cachePath\engine-dart-sdk.stamp"
-$engineVersion = (Get-Content "$flutterRoot\bin\cache\engine.stamp")
-$engineRealm = (Get-Content "$flutterRoot\bin\cache\engine.realm")
+$engineVersion = (Get-Content "$flutterRoot\bin\cache\engine.stamp" -Raw).Trim()
+$engineRealm = (Get-Content "$flutterRoot\bin\cache\engine.realm" -Raw).Trim()
 
 $oldDartSdkPrefix = "dart-sdk.old"
 
