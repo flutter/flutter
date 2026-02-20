@@ -6170,8 +6170,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
   /// Builds the semantics subtree under the [cachedSemanticsNode].
   void _buildSemanticsSubtree({required Set<int> usedSemanticsIds}) {
-    // This will most likely short circuit itself.
-    _updateChildGeometry(onlyDirtyChildren: true);
     final children = <SemanticsNode>[];
     for (final _RenderObjectSemantics child in _children) {
       assert(child.shouldFormSemanticsNode);
