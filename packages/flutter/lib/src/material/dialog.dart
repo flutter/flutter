@@ -14,9 +14,9 @@ import 'dart:ui' show SemanticsHitTestBehavior, SemanticsRole, clampDouble, lerp
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import '../foundation/_features.dart' show isWindowingEnabled;
+import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
 
-import '../widgets/_window.dart'
+import 'package:flutter/src/widgets/_window.dart'
     show
         BaseWindowController,
         DialogWindowController,
@@ -1728,17 +1728,17 @@ Future<T?> showDialog<T>({
   if (windowingConfiguration != null && isWindowingEnabled) {
     try {
       final Size? parentSize = WindowScope.maybeContentSizeOf(context);
-      final NavigatorState nav = Navigator.of(context, rootNavigator: useRootNavigator);
-      return nav.push<T>(
+      final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
+      return navigator.push<T>(
         _DialogWindowRoute<T>(
           builder: (BuildContext context) {
             // Wrap the build dialog with the theme, text direcction, and media
             // query data from the parent context.
-            final TextDirection textDirection = Directionality.of(nav.context);
-            final ThemeData themeData = Theme.of(nav.context);
-            final MediaQueryData mediaQuery = MediaQuery.of(nav.context);
+            final TextDirection textDirection = Directionality.of(navigator.context);
+            final ThemeData themeData = Theme.of(navigator.context);
+            final MediaQueryData mediaQuery = MediaQuery.of(navigator.context);
             final Widget dialogContent = _DialogPopScope(
-              onPop: Navigator.of(nav.context).pop,
+              onPop: Navigator.of(navigator.context).pop,
               child: Builder(
                 builder: (BuildContext innerContext) {
                   return _FullWindowDialogWrapper(child: builder(innerContext));
