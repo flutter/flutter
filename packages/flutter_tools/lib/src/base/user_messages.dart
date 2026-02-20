@@ -41,6 +41,7 @@ class UserMessages {
   String androidSdkInstallHelp(Platform platform) =>
       'Try re-installing or updating your Android SDK,\n'
       'visit ${androidSdkInstallUrl(platform)} for detailed instructions.';
+  // Also occurs in AndroidLicenseValidator
   String androidStatusInfo(String version) => 'Android SDK version $version';
 
   // Messages used in AndroidLicenseValidator
