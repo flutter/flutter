@@ -212,29 +212,35 @@ TEST_F(EmbedderTest, CanSpecifyCustomUITaskRunner) {
   auto platform_task_runner = platform_thread->GetTaskRunner();
   UniqueEngine engine;
 
-  EmbedderTestTaskRunner test_ui_task_runner(
-      ui_task_runner, [&](FlutterTask task) {
-        // The UI task runner will be destroyed during engine shutdown.  It
-        // should continue dispatching tasks until the engine invokes the
-        // destruction callback.  After that it must stop using the engine.
-        std::scoped_lock lock(ui_task_runner_mutex);
-        if (ui_task_runner_destroyed) {
-          return;
-        }
-        FlutterEngineRunTask(engine.get(), &task);
-      });
-  test_ui_task_runner.SetDestructionCallback([&]() {
-    std::scoped_lock lock(ui_task_runner_mutex);
-    ui_task_runner_destroyed = true;
-  });
+  EmbedderTestTaskRunner test_ui_task_runner =
+      EmbedderTestTaskRunnerBuilder()
+          .SetRealTaskRunner(ui_task_runner)
+          .SetTaskExpiryCallback([&](FlutterTask task) {
+            // The UI task runner will be destroyed during engine shutdown.  It
+            // should continue dispatching tasks until the engine invokes the
+            // destruction callback.  After that it must stop using the engine.
+            std::scoped_lock lock(ui_task_runner_mutex);
+            if (ui_task_runner_destroyed) {
+              return;
+            }
+            FlutterEngineRunTask(engine.get(), &task);
+          })
+          .SetDestructionCallback([&]() {
+            std::scoped_lock lock(ui_task_runner_mutex);
+            ui_task_runner_destroyed = true;
+          })
+          .Build();
 
-  EmbedderTestTaskRunner test_platform_task_runner(
-      platform_task_runner, [&](FlutterTask task) {
-        if (!engine.is_valid()) {
-          return;
-        }
-        FlutterEngineRunTask(engine.get(), &task);
-      });
+  EmbedderTestTaskRunner test_platform_task_runner =
+      EmbedderTestTaskRunnerBuilder()
+          .SetRealTaskRunner(platform_task_runner)
+          .SetTaskExpiryCallback([&](FlutterTask task) {
+            if (!engine.is_valid()) {
+              return;
+            }
+            FlutterEngineRunTask(engine.get(), &task);
+          })
+          .Build();
 
   fml::AutoResetWaitableEvent signal_latch_ui;
   fml::AutoResetWaitableEvent signal_latch_platform;
@@ -452,26 +458,29 @@ TEST_F(EmbedderTest, CanSpecifyCustomPlatformTaskRunner) {
   std::atomic<bool> destruction_callback_called = false;
   UniqueEngine engine;
 
-  EmbedderTestTaskRunner test_task_runner(
-      platform_task_runner, [&](FlutterTask task) {
-        std::scoped_lock lock(engine_mutex);
-        if (!engine.is_valid()) {
-          return;
-        }
-        // There may be multiple tasks posted but we only need to check
-        // assertions once.
-        if (signaled_once) {
-          FlutterEngineRunTask(engine.get(), &task);
-          return;
-        }
+  EmbedderTestTaskRunner test_task_runner =
+      EmbedderTestTaskRunnerBuilder()
+          .SetRealTaskRunner(platform_task_runner)
+          .SetTaskExpiryCallback([&](FlutterTask task) {
+            std::scoped_lock lock(engine_mutex);
+            if (!engine.is_valid()) {
+              return;
+            }
+            // There may be multiple tasks posted but we only need to check
+            // assertions once.
+            if (signaled_once) {
+              FlutterEngineRunTask(engine.get(), &task);
+              return;
+            }
 
-        signaled_once = true;
-        ASSERT_TRUE(engine.is_valid());
-        ASSERT_EQ(FlutterEngineRunTask(engine.get(), &task), kSuccess);
-        latch.Signal();
-      });
-  test_task_runner.SetDestructionCallback(
-      [&]() { destruction_callback_called = true; });
+            signaled_once = true;
+            ASSERT_TRUE(engine.is_valid());
+            ASSERT_EQ(FlutterEngineRunTask(engine.get(), &task), kSuccess);
+            latch.Signal();
+          })
+          .SetDestructionCallback(
+              [&]() { destruction_callback_called.store(true); })
+          .Build();
 
   platform_task_runner->PostTask([&]() {
     EmbedderConfigBuilder builder(context);
@@ -506,7 +515,7 @@ TEST_F(EmbedderTest, CanSpecifyCustomPlatformTaskRunner) {
   ASSERT_TRUE(signaled_once);
   signaled_once = false;
 
-  ASSERT_TRUE(destruction_callback_called);
+  ASSERT_TRUE(destruction_callback_called.load());
   destruction_callback_called = false;
 }
 
