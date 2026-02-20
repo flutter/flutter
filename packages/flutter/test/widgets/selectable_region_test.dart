@@ -2950,6 +2950,57 @@ void main() {
     );
 
     testWidgets(
+      'context menu receives taps over selection handle on Android after long press',
+      (WidgetTester tester) async {
+        var contextMenuTapCount = 0;
+        final contextMenuKey = UniqueKey();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SelectableRegion(
+              selectionControls: materialTextSelectionHandleControls,
+              contextMenuBuilder:
+                  (BuildContext context, SelectableRegionState selectableRegionState) {
+                    return GestureDetector(
+                      key: contextMenuKey,
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => contextMenuTapCount += 1,
+                      // Cover the handle area so hit testing reveals overlay order.
+                      child: Transform.translate(
+                        offset: const Offset(-2000.0, -2000.0),
+                        child: const SizedBox(width: 4000.0, height: 4000.0),
+                      ),
+                    );
+                  },
+              child: const Text('How are you?'),
+            ),
+          ),
+        );
+
+        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+          find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)),
+        );
+        final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2));
+        addTearDown(gesture.removePointer);
+        await tester.pump(const Duration(milliseconds: 500));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(contextMenuKey), findsOneWidget);
+
+        final List<TextBox> boxes = paragraph.getBoxesForSelection(paragraph.selections[0]);
+        expect(boxes.length, 1);
+        final Offset handlePos = globalize(boxes[0].toRect().bottomRight, paragraph);
+
+        await tester.tapAt(handlePos);
+        await tester.pumpAndSettle();
+
+        expect(contextMenuTapCount, 1);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+      skip: kIsWeb, // [intended] Web uses its native context menu.
+    );
+
+    testWidgets(
       'single tap on the previous selection toggles the toolbar on iOS',
       (WidgetTester tester) async {
         var buttonTypes = <ContextMenuButtonType>{};

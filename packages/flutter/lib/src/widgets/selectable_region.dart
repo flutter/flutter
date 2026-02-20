@@ -1021,7 +1021,6 @@ class SelectableRegionState extends State<SelectableRegion>
     _finalizeSelection();
     _updateSelectedContentIfNeeded();
     _finalizeSelectableRegionStatus();
-    
     if (defaultTargetPlatform == TargetPlatform.android) {
       _showHandles();
     }
