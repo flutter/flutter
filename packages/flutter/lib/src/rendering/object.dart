@@ -6172,6 +6172,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   void _buildSemanticsSubtree({required Set<int> usedSemanticsIds}) {
     final children = <SemanticsNode>[];
     for (final _RenderObjectSemantics child in _children) {
+      if (child.parentDataDirty) {
+        continue;
+      }
       assert(child.shouldFormSemanticsNode);
       // Cached semantics node may be part of sibling merging group prior
       // to this update. In this case, the semantics node may continue to
