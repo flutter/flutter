@@ -592,8 +592,8 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
           [pendingClipRRects removeAllObjects];
         }
         visualEffectView.layer.cornerRadius = cornerRadius;
-        if (isRSE) {
-          visualEffectView.layer.cornerCurve = kCACornerCurveContinuous;
+        if (@available(iOS 13.0, *)) {
+          visualEffectView.layer.cornerCurve = isRSE ? kCACornerCurveContinuous : kCACornerCurveCircular;
         }
         visualEffectView.clipsToBounds = YES;
 

@@ -168,8 +168,8 @@ static BOOL _preparedOnce = NO;
   visualEffectView.frame = _frame;
 
   visualEffectView.layer.cornerRadius = _cornerRadius;
-  if (_isRSE) {
-    visualEffectView.layer.cornerCurve = kCACornerCurveContinuous;
+  if (@available(iOS 13.0, *)) {
+    visualEffectView.layer.cornerCurve = _isRSE ? kCACornerCurveContinuous : kCACornerCurveCircular;
   }
   visualEffectView.clipsToBounds = YES;
 
