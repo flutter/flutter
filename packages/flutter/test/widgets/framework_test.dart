@@ -2139,7 +2139,7 @@ The findRenderObject() method was called for the following element:
 }
 
 class _TestInheritedWidget extends InheritedWidget {
-  const _TestInheritedWidget({super.key, required super.child});
+  const _TestInheritedWidget({required super.child});
 
   @override
   bool updateShouldNotify(_TestInheritedWidget oldWidget) => false;
