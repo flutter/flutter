@@ -593,7 +593,8 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
         }
         visualEffectView.layer.cornerRadius = cornerRadius;
         if (@available(iOS 13.0, *)) {
-          visualEffectView.layer.cornerCurve = isRSE ? kCACornerCurveContinuous : kCACornerCurveCircular;
+          visualEffectView.layer.cornerCurve =
+              isRSE ? kCACornerCurveContinuous : kCACornerCurveCircular;
         }
         visualEffectView.clipsToBounds = YES;
 
