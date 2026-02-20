@@ -1044,27 +1044,30 @@ void main() {
         var calledStart = false;
         var calledUpdate = false;
         var calledEnd = false;
-        const sizedBox = SizedBox(width: 200.0, height: 200.0);
         await tester.pumpWidget(
-          Center(
-            child: InteractiveViewer(
-              transformationController: transformationController,
-              scaleEnabled: false,
-              onInteractionStart: (ScaleStartDetails details) {
-                calledStart = true;
-              },
-              onInteractionUpdate: (ScaleUpdateDetails details) {
-                calledUpdate = true;
-              },
-              onInteractionEnd: (ScaleEndDetails details) {
-                calledEnd = true;
-              },
-              child: sizedBox,
+          MaterialApp(
+            home: Scaffold(
+              body: Center(
+                child: InteractiveViewer(
+                  transformationController: transformationController,
+                  scaleEnabled: false,
+                  onInteractionStart: (ScaleStartDetails details) {
+                    calledStart = true;
+                  },
+                  onInteractionUpdate: (ScaleUpdateDetails details) {
+                    calledUpdate = true;
+                  },
+                  onInteractionEnd: (ScaleEndDetails details) {
+                    calledEnd = true;
+                  },
+                  child: const SizedBox(width: 200.0, height: 200.0),
+                ),
+              ),
             ),
           ),
         );
 
-        final Offset childOffset = tester.getTopLeft(find.byWidget(sizedBox));
+        final Offset childOffset = tester.getTopLeft(find.byType(SizedBox));
         final childInterior = Offset(childOffset.dx + 20.0, childOffset.dy + 20.0);
         TestGesture gesture = await tester.startGesture(childOffset);
 
@@ -1116,27 +1119,30 @@ void main() {
         var calledStart = false;
         var calledUpdate = false;
         var calledEnd = false;
-        const sizedBox = SizedBox(width: 200.0, height: 200.0);
         await tester.pumpWidget(
-          Center(
-            child: InteractiveViewer(
-              transformationController: transformationController,
-              scaleEnabled: false,
-              onInteractionStart: (ScaleStartDetails details) {
-                calledStart = true;
-              },
-              onInteractionUpdate: (ScaleUpdateDetails details) {
-                calledUpdate = true;
-              },
-              onInteractionEnd: (ScaleEndDetails details) {
-                calledEnd = true;
-              },
-              child: sizedBox,
+          MaterialApp(
+            home: Scaffold(
+              body: Center(
+                child: InteractiveViewer(
+                  transformationController: transformationController,
+                  scaleEnabled: false,
+                  onInteractionStart: (ScaleStartDetails details) {
+                    calledStart = true;
+                  },
+                  onInteractionUpdate: (ScaleUpdateDetails details) {
+                    calledUpdate = true;
+                  },
+                  onInteractionEnd: (ScaleEndDetails details) {
+                    calledEnd = true;
+                  },
+                  child: const SizedBox(width: 200.0, height: 200.0),
+                ),
+              ),
             ),
           ),
         );
 
-        final Offset childOffset = tester.getTopLeft(find.byWidget(sizedBox));
+        final Offset childOffset = tester.getTopLeft(find.byType(SizedBox));
         final childInterior = Offset(childOffset.dx + 20.0, childOffset.dy + 20.0);
         final TestGesture gesture = await tester.startGesture(
           childOffset,
