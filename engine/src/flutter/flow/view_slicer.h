@@ -6,6 +6,7 @@
 #define FLUTTER_FLOW_VIEW_SLICER_H_
 
 #include <unordered_map>
+#include <unordered_set>
 #include "display_list/dl_canvas.h"
 #include "flow/embedded_views.h"
 
@@ -13,12 +14,15 @@ namespace flutter {
 
 /// @brief Compute the required overlay layers and clip the view slices
 ///        according to the size and position of the platform views.
+/// @param preserve_underlay_for_views The platform view IDs for which we
+///        should not subtract the overlap from the background canvas.
 std::unordered_map<int64_t, DlRect> SliceViews(
     DlCanvas* background_canvas,
     const std::vector<int64_t>& composition_order,
     const std::unordered_map<int64_t, std::unique_ptr<EmbedderViewSlice>>&
         slices,
-    const std::unordered_map<int64_t, DlRect>& view_rects);
+    const std::unordered_map<int64_t, DlRect>& view_rects,
+    const std::unordered_set<int64_t>* preserve_underlay_for_views = nullptr);
 
 }  // namespace flutter
 
