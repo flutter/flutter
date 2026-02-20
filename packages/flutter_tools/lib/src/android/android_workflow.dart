@@ -182,6 +182,11 @@ class AndroidValidator extends DoctorValidator {
     }
   }
 
+  static String androidSdkLocation(String directory) => 'Android SDK at $directory';
+
+  static String androidSdkPlatformToolsVersion(String platform, String tools) =>
+      'Platform $platform, build-tools $tools';
+
   @override
   Future<ValidationResult> validateImpl() async {
     final messages = <ValidationMessage>[];
@@ -203,7 +208,7 @@ class AndroidValidator extends DoctorValidator {
       return ValidationResult(ValidationType.missing, messages);
     }
 
-    messages.add(ValidationMessage(_userMessages.androidSdkLocation(androidSdk.directory.path)));
+    messages.add(ValidationMessage(androidSdkLocation(androidSdk.directory.path)));
     messages.add(
       ValidationMessage(
         'Emulator version ${await getEmulatorVersion(androidSdk, _processManager) ?? 'unknown'}',
@@ -252,7 +257,7 @@ class AndroidValidator extends DoctorValidator {
 
       messages.add(
         ValidationMessage(
-          _userMessages.androidSdkPlatformToolsVersion(
+          androidSdkPlatformToolsVersion(
             androidSdkLatestVersion.platformName,
             androidSdkLatestVersion.buildToolsVersionName,
           ),

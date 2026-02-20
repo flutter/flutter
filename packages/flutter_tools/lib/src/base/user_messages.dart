@@ -38,15 +38,10 @@ class UserMessages {
       '(or visit ${androidSdkInstallUrl(platform)} for detailed instructions).\n'
       'If the Android SDK has been installed to a custom location, please use\n'
       '`flutter config --android-sdk` to update to that location.\n';
-  String androidSdkLocation(String directory) => 'Android SDK at $directory';
-  String androidSdkPlatformToolsVersion(String platform, String tools) =>
-      'Platform $platform, build-tools $tools';
   String androidSdkInstallHelp(Platform platform) =>
       'Try re-installing or updating your Android SDK,\n'
       'visit ${androidSdkInstallUrl(platform)} for detailed instructions.';
-  // Also occurs in AndroidLicenseValidator
   String androidStatusInfo(String version) => 'Android SDK version $version';
-
   // Messages used in AndroidLicenseValidator
   String get androidMissingJdk =>
       'No Java Development Kit (JDK) found; You must have the environment '
@@ -78,32 +73,12 @@ class UserMessages {
       'Flutter requires Android SDK $sdkMinVersion and the Android BuildTools $buildToolsMinVersion\n'
       'To update the Android SDK visit ${androidSdkInstallUrl(platform)} for detailed instructions.';
 
-  // Messages used in AndroidStudioValidator
-  String get aaptNotFound =>
-      'Could not locate aapt. Please ensure you have the Android buildtools installed.';
-
   // Messages used in NoAndroidStudioValidator
   String androidStudioInstallation(Platform platform) =>
       'Android Studio not found; download from https://developer.android.com/studio/index.html\n'
       '(or visit ${androidSdkInstallUrl(platform)} for detailed instructions).';
 
   // Messages used in XcodeValidator
-  String xcodeLocation(String location) => 'Xcode at $location';
-
-  String xcodeOutdated(String requiredVersion) =>
-      'Flutter requires Xcode $requiredVersion or higher.\n'
-      'Download the latest version or update via the Mac App Store.';
-
-  String xcodeRecommended(String recommendedVersion) =>
-      'Flutter recommends a minimum Xcode version of $recommendedVersion.\n'
-      'Download the latest version or update via the Mac App Store.';
-
-  String get xcodeEula =>
-      "Xcode end user license agreement not signed; open Xcode or run the command 'sudo xcodebuild -license'.";
-  String get xcodeMissingSimct =>
-      'Xcode requires additional components to be installed in order to run.\n'
-      'Launch Xcode and install additional required components when prompted or run:\n'
-      '  sudo xcodebuild -runFirstLaunch';
   String get xcodeMissing =>
       'Xcode not installed; this is necessary for iOS and macOS development.\n'
       'Download at https://developer.apple.com/xcode/.';
