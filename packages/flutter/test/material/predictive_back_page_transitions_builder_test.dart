@@ -602,6 +602,110 @@ void main() {
       expect(find.text('page c'), findsNothing);
     }, variant: TargetPlatformVariant.all());
   }
+
+  testWidgets('PredictiveBackPageTransitionsBuilder uses fallbackColor', (
+    WidgetTester tester,
+  ) async {
+    const PageTransitionsBuilder pageTransitionsBuilder = PredictiveBackPageTransitionsBuilder(
+      fallbackColor: Colors.black,
+    );
+    final routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => Material(
+        child: TextButton(
+          child: const Text('push'),
+          onPressed: () {
+            Navigator.of(context).pushNamed('/b');
+          },
+        ),
+      ),
+      '/b': (BuildContext context) => const Text('page b'),
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          pageTransitionsTheme: PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              for (final TargetPlatform platform in TargetPlatform.values)
+                platform: pageTransitionsBuilder,
+            },
+          ),
+        ),
+        routes: routes,
+      ),
+    );
+
+    expect(find.text('push'), findsOneWidget);
+    expect(find.text('page b'), findsNothing);
+    expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
+    expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
+
+    // Pump till animation is half-way through.
+    await tester.tap(find.text('push'));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    // Verify that the render box is painting the right color for scaffolded pages.
+    final RenderBox scaffoldedRenderBox = tester.firstRenderObject<RenderBox>(
+      find.byType(MaterialApp),
+    );
+    expect(scaffoldedRenderBox, paints..rect(color: Colors.black.withAlpha(0)));
+
+    await tester.pumpAndSettle();
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets(
+    'PredictiveBackFullscreenPageTransitionsBuilder uses fallbackColor',
+    (WidgetTester tester) async {
+      const PageTransitionsBuilder pageTransitionsBuilder =
+          PredictiveBackFullscreenPageTransitionsBuilder(fallbackColor: Colors.black);
+      final routes = <String, WidgetBuilder>{
+        '/': (BuildContext context) => Material(
+          child: TextButton(
+            child: const Text('push'),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/b');
+            },
+          ),
+        ),
+        '/b': (BuildContext context) => const Text('page b'),
+      };
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            pageTransitionsTheme: PageTransitionsTheme(
+              builders: <TargetPlatform, PageTransitionsBuilder>{
+                for (final TargetPlatform platform in TargetPlatform.values)
+                  platform: pageTransitionsBuilder,
+              },
+            ),
+          ),
+          routes: routes,
+        ),
+      );
+
+      expect(find.text('push'), findsOneWidget);
+      expect(find.text('page b'), findsNothing);
+      expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
+      expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
+
+      // Pump till animation is half-way through.
+      await tester.tap(find.text('push'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 125));
+
+      // Verify that the render box is painting the right color.
+      final RenderBox nonScaffoldedRenderBox = tester.firstRenderObject<RenderBox>(
+        find.byType(MaterialApp),
+      );
+      // Expect the color to be at exactly 59.6% opacity at this time.
+      expect(nonScaffoldedRenderBox, paints..rect(color: Colors.black.withOpacity(0.596)));
+
+      await tester.pumpAndSettle();
+    },
+    variant: TargetPlatformVariant.all(),
+  );
 }
 
 String _getTransitionsString(PageTransitionsBuilder pageTransitionsBuilder) {
