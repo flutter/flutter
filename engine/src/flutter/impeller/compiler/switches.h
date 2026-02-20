@@ -57,10 +57,10 @@ class Switches {
   /// A vector containing at least one valid platform.
   std::vector<TargetPlatform> PlatformsToCompile() const;
 
-  // Creates source options from these switches. The returned options does not
-  // have a set TargetPlatform because that cannot be determined based purely
-  // on the switches. Clients must set a valid TargetPlatform on the returned
-  // options before before it is used.
+  /// Creates source options from these switches. The returned options does not
+  /// have a set TargetPlatform because that cannot be determined based purely
+  /// on the switches. Clients must set a valid TargetPlatform on the returned
+  /// options before before it is used.
   SourceOptions CreateSourceOptions() const;
 
   static void PrintHelp(std::ostream& stream);
