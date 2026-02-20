@@ -471,12 +471,18 @@ TEST_P(RuntimeStageTest, ContainsExpectedShaderTypes) {
   auto stages_result = OpenAssetAsRuntimeStage("ink_sparkle.frag.iplr");
   ABSL_ASSERT_OK(stages_result);
   auto stages = stages_result.value();
-  // Right now, SkSL gets implicitly bundled regardless of what the build rule
-  // for this test requested. After
-  // https://github.com/flutter/flutter/issues/138919, this may require a build
-  // rule change or a new test.
   EXPECT_TRUE(stages[RuntimeStageBackend::kSkSL]);
+  EXPECT_TRUE(stages[RuntimeStageBackend::kOpenGLES]);
+  EXPECT_TRUE(stages[RuntimeStageBackend::kMetal]);
+  EXPECT_TRUE(stages[RuntimeStageBackend::kVulkan]);
+}
 
+TEST_P(RuntimeStageTest, ContainsExpectedShaderTypesNoSksl) {
+  auto stages_result =
+      OpenAssetAsRuntimeStage("runtime_stage_simple_no_sksl.frag.iplr");
+  ABSL_ASSERT_OK(stages_result);
+  auto stages = stages_result.value();
+  EXPECT_FALSE(stages[RuntimeStageBackend::kSkSL]);
   EXPECT_TRUE(stages[RuntimeStageBackend::kOpenGLES]);
   EXPECT_TRUE(stages[RuntimeStageBackend::kMetal]);
   EXPECT_TRUE(stages[RuntimeStageBackend::kVulkan]);

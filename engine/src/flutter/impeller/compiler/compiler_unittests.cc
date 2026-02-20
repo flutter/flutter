@@ -15,6 +15,46 @@ namespace impeller {
 namespace compiler {
 namespace testing {
 
+INSTANTIATE_TEST_SUITE_P(
+    CompilerSuite,
+    CompilerTest,
+    ::testing::Values(TargetPlatform::kOpenGLES,
+                      TargetPlatform::kOpenGLDesktop,
+                      TargetPlatform::kMetalDesktop,
+                      TargetPlatform::kMetalIOS,
+                      TargetPlatform::kVulkan),
+    [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) {
+      return TargetPlatformToString(info.param);
+    });
+
+INSTANTIATE_TEST_SUITE_P(
+    CompilerSuite,
+    CompilerTestRuntime,
+    ::testing::Values(TargetPlatform::kRuntimeStageMetal,
+                      TargetPlatform::kRuntimeStageGLES,
+                      TargetPlatform::kRuntimeStageGLES3,
+                      TargetPlatform::kRuntimeStageVulkan,
+                      TargetPlatform::kSkSL),
+    [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) {
+      return TargetPlatformToString(info.param);
+    });
+
+INSTANTIATE_TEST_SUITE_P(
+    CompilerSuite,
+    CompilerTestSkSL,
+    ::testing::Values(TargetPlatform::kSkSL),
+    [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) {
+      return TargetPlatformToString(info.param);
+    });
+
+INSTANTIATE_TEST_SUITE_P(
+    CompilerSuite,
+    CompilerTestUnknownPlatform,
+    ::testing::Values(TargetPlatform::kUnknown),
+    [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) {
+      return TargetPlatformToString(info.param);
+    });
+
 TEST(CompilerTest, Defines) {
   std::shared_ptr<const fml::Mapping> fixture =
       flutter::testing::OpenFixtureAsMapping("check_gles_definition.frag");
@@ -48,9 +88,6 @@ TEST(CompilerTest, ShaderKindMatchingIsSuccessful) {
 }
 
 TEST_P(CompilerTest, CanCompile) {
-  if (GetParam() == TargetPlatform::kSkSL) {
-    GTEST_SKIP() << "Not supported with SkSL";
-  }
   ASSERT_TRUE(CanCompileAndReflect("sample.vert"));
   ASSERT_TRUE(CanCompileAndReflect("sample.vert", SourceType::kVertexShader));
   ASSERT_TRUE(CanCompileAndReflect("sample.vert", SourceType::kVertexShader,
@@ -58,17 +95,11 @@ TEST_P(CompilerTest, CanCompile) {
 }
 
 TEST_P(CompilerTest, CanCompileHLSL) {
-  if (GetParam() == TargetPlatform::kSkSL) {
-    GTEST_SKIP() << "Not supported with SkSL";
-  }
   ASSERT_TRUE(CanCompileAndReflect(
       "simple.vert.hlsl", SourceType::kVertexShader, SourceLanguage::kHLSL));
 }
 
 TEST_P(CompilerTest, CanCompileHLSLWithMultipleStages) {
-  if (GetParam() == TargetPlatform::kSkSL) {
-    GTEST_SKIP() << "Not supported with SkSL";
-  }
   ASSERT_TRUE(CanCompileAndReflect("multiple_stages.hlsl",
                                    SourceType::kVertexShader,
                                    SourceLanguage::kHLSL, "VertexShader"));
@@ -87,18 +118,12 @@ TEST_P(CompilerTest, CanCompileComputeShader) {
 }
 
 TEST_P(CompilerTest, MustFailDueToExceedingResourcesLimit) {
-  if (GetParam() == TargetPlatform::kSkSL) {
-    GTEST_SKIP() << "Not supported with SkSL";
-  }
   ScopedValidationDisable disable_validation;
   ASSERT_FALSE(
       CanCompileAndReflect("resources_limit.vert", SourceType::kVertexShader));
 }
 
 TEST_P(CompilerTest, MustFailDueToMultipleLocationPerStructMember) {
-  if (GetParam() == TargetPlatform::kSkSL) {
-    GTEST_SKIP() << "Not supported with SkSL";
-  }
   ScopedValidationDisable disable_validation;
   ASSERT_FALSE(CanCompileAndReflect("struct_def_bug.vert"));
 }
@@ -202,6 +227,12 @@ inline std::ostream& operator<<(std::ostream& out, const UniformInfo& info) {
 }  // namespace
 
 TEST_P(CompilerTestRuntime, UniformsAppearInJson) {
+  if (GetParam() == TargetPlatform::kRuntimeStageVulkan) {
+    // TODO(https://github.com/flutter/flutter/issues/182578): Investigate why
+    // this does not pass.
+    GTEST_SKIP() << "Not supported with Vulkan";
+  }
+
   ASSERT_TRUE(CanCompileAndReflect("sample_with_uniforms.frag",
                                    SourceType::kFragmentShader,
                                    SourceLanguage::kGLSL));
@@ -248,6 +279,12 @@ TEST_P(CompilerTestRuntime, UniformsAppearInJson) {
 }
 
 TEST_P(CompilerTestRuntime, PositionedUniformsAppearInJson) {
+  if (GetParam() == TargetPlatform::kRuntimeStageVulkan) {
+    // TODO(https://github.com/flutter/flutter/issues/182578): Investigate why
+    // this does not pass.
+    GTEST_SKIP() << "Not supported with Vulkan";
+  }
+
   ASSERT_TRUE(CanCompileAndReflect("sample_with_positioned_uniforms.frag",
                                    SourceType::kFragmentShader,
                                    SourceLanguage::kGLSL));
@@ -377,39 +414,11 @@ TEST_P(CompilerTestSkSL, CompilesWithValidArrayInitialization) {
                            SourceType::kFragmentShader));
 }
 
-#define INSTANTIATE_TARGET_PLATFORM_TEST_SUITE_P(suite_name)               \
-  INSTANTIATE_TEST_SUITE_P(                                                \
-      suite_name, CompilerTest,                                            \
-      ::testing::Values(TargetPlatform::kOpenGLES,                         \
-                        TargetPlatform::kOpenGLDesktop,                    \
-                        TargetPlatform::kMetalDesktop,                     \
-                        TargetPlatform::kMetalIOS, TargetPlatform::kSkSL), \
-      [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) {  \
-        return TargetPlatformToString(info.param);                         \
-      });
-
-INSTANTIATE_TARGET_PLATFORM_TEST_SUITE_P(CompilerSuite);
-
-#define INSTANTIATE_RUNTIME_TARGET_PLATFORM_TEST_SUITE_P(suite_name)      \
-  INSTANTIATE_TEST_SUITE_P(                                               \
-      suite_name, CompilerTestRuntime,                                    \
-      ::testing::Values(TargetPlatform::kRuntimeStageMetal),              \
-      [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) { \
-        return TargetPlatformToString(info.param);                        \
-      });
-
-INSTANTIATE_RUNTIME_TARGET_PLATFORM_TEST_SUITE_P(CompilerSuite);
-
-#define INSTANTIATE_SKSL_TARGET_PLATFORM_TEST_SUITE_P(suite_name)             \
-  INSTANTIATE_TEST_SUITE_P(                                                   \
-      suite_name, CompilerTestSkSL, ::testing::Values(TargetPlatform::kSkSL), \
-      [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) {     \
-        return TargetPlatformToString(info.param);                            \
-      });
-
-INSTANTIATE_SKSL_TARGET_PLATFORM_TEST_SUITE_P(CompilerSuite);
-
 TEST_P(CompilerTestRuntime, Mat2Reflection) {
+  if (GetParam() == TargetPlatform::kSkSL) {
+    GTEST_SKIP() << "Not supported with SkSL";
+  }
+
   ASSERT_TRUE(CanCompileAndReflect(
       "mat2_test.frag", SourceType::kFragmentShader, SourceLanguage::kGLSL));
 
@@ -446,6 +455,11 @@ TEST_P(CompilerTestRuntime, Mat2Reflection) {
 
   // Offset 0
   EXPECT_EQ(mat2Member["offset"], 0u);
+}
+
+TEST_P(CompilerTestUnknownPlatform, MustFailDueToUnknownPlatform) {
+  ASSERT_FALSE(
+      CanCompileAndReflect("sample.frag", SourceType::kFragmentShader));
 }
 
 }  // namespace testing

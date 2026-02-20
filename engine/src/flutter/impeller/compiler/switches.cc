@@ -25,12 +25,13 @@ static const std::map<std::string, TargetPlatform> kKnownPlatforms = {
     {"opengl-desktop", TargetPlatform::kOpenGLDesktop},
 };
 
-static const std::map<std::string, TargetPlatform> kKnownRuntimeStages = {
-    {"sksl", TargetPlatform::kSkSL},
-    {"runtime-stage-metal", TargetPlatform::kRuntimeStageMetal},
-    {"runtime-stage-gles", TargetPlatform::kRuntimeStageGLES},
-    {"runtime-stage-gles3", TargetPlatform::kRuntimeStageGLES3},
-    {"runtime-stage-vulkan", TargetPlatform::kRuntimeStageVulkan},
+static const std::vector<std::pair<std::string, TargetPlatform>>
+    kKnownRuntimeStages = {
+        {"sksl", TargetPlatform::kSkSL},
+        {"runtime-stage-metal", TargetPlatform::kRuntimeStageMetal},
+        {"runtime-stage-gles", TargetPlatform::kRuntimeStageGLES},
+        {"runtime-stage-gles3", TargetPlatform::kRuntimeStageGLES3},
+        {"runtime-stage-vulkan", TargetPlatform::kRuntimeStageVulkan},
 };
 
 static const std::map<std::string, SourceType> kKnownSourceTypes = {
@@ -309,19 +310,8 @@ std::vector<TargetPlatform> Switches::PlatformsToCompile() const {
   return {target_platform_};
 }
 
-TargetPlatform Switches::SelectDefaultTargetPlatform() const {
-  if (target_platform_ == TargetPlatform::kUnknown &&
-      !runtime_stages_.empty()) {
-    return runtime_stages_.front();
-  }
-  return target_platform_;
-}
-
-SourceOptions Switches::CreateSourceOptions(
-    std::optional<TargetPlatform> target_platform) const {
+SourceOptions Switches::CreateSourceOptions() const {
   SourceOptions options;
-  options.target_platform =
-      target_platform.value_or(SelectDefaultTargetPlatform());
   options.source_language = source_language;
   if (input_type == SourceType::kUnknown) {
     options.type = SourceTypeFromFileName(source_file_name);

@@ -10,6 +10,7 @@
 #include "flutter/fml/string_conversion.h"
 #include "flutter/testing/testing.h"
 #include "impeller/compiler/switches.h"
+#include "impeller/compiler/types.h"
 #include "impeller/compiler/utilities.h"
 
 namespace impeller {
