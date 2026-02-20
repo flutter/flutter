@@ -1536,10 +1536,10 @@ void main() {
         // ignore: invalid_use_of_protected_member
         () => paragraph.positionInlineChildren(boxes),
         throwsA(
-          isA<AssertionError>().having(
-            (AssertionError e) => e.message,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
             'message',
-            contains('The length of boxes (3) must not be greater than childCount (2)'),
+            contains('Invalid number of boxes provided'),
           ),
         ),
       );
