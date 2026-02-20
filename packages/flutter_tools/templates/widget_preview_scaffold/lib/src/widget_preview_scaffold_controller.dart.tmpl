@@ -23,6 +23,7 @@ class WidgetPreviewScaffoldController {
   WidgetPreviewScaffoldController({
     required PreviewsCallback previews,
     @visibleForTesting WidgetPreviewScaffoldDtdServices? dtdServicesOverride,
+    // ignore: prefer_initializing_formals
   }) : _previews = previews,
        dtdServices = dtdServicesOverride ?? WidgetPreviewScaffoldDtdServices();
 
