@@ -952,7 +952,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     if (_currentUnifiedActivity is RetargetableScrollActivity) {
       (_currentUnifiedActivity! as RetargetableScrollActivity).retarget(
         delta,
-        const PointerScrollDetails(PointerDeviceKind.mouse),
+        ScrollInputSource.pointer,
       );
     }
     // 2. Try creating a new smooth scroll activity from physics.
@@ -961,7 +961,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
         this,
         _unifiedPixels,
         delta,
-        const PointerScrollDetails(PointerDeviceKind.mouse),
+        ScrollInputSource.pointer,
       );
       if (activity != null) {
         _beginUnifiedActivity(activity);

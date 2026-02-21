@@ -421,9 +421,9 @@ class ScrollPhysics {
     ScrollActivityDelegate delegate,
     double from,
     double delta,
-    ScrollDetails details,
+    ScrollInputSource source,
   ) {
-    return parent?.createScrollActivity(delegate, from, delta, details);
+    return parent?.createScrollActivity(delegate, from, delta, source);
   }
 
   static final SpringDescription _kDefaultSpring = SpringDescription.withDampingRatio(

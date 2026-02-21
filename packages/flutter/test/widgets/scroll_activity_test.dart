@@ -362,36 +362,22 @@ void main() {
     );
   });
 
-  test('ScrollDetails type checks', () {
-    const pointer = PointerScrollDetails(PointerDeviceKind.mouse);
-    expect(pointer.isPointer, isTrue);
-    expect(pointer.isKeyboard, isFalse);
-    expect(pointer.isProgrammatic, isFalse);
+  test('ScrollInputSource enum values', () {
+    expect(ScrollInputSource.values.length, 3);
+    expect(ScrollInputSource.pointer, isNotNull);
+    expect(ScrollInputSource.keyboard, isNotNull);
+    expect(ScrollInputSource.programmatic, isNotNull);
 
-    const keyboard = KeyboardScrollDetails();
-    expect(keyboard.isPointer, isFalse);
-    expect(keyboard.isKeyboard, isTrue);
-    expect(keyboard.isProgrammatic, isFalse);
-
-    const programmatic = ProgrammaticScrollDetails();
-    expect(programmatic.isPointer, isFalse);
-    expect(programmatic.isKeyboard, isFalse);
-    expect(programmatic.isProgrammatic, isTrue);
-  });
-
-  test('PointerScrollDetails stores pointer device kind', () {
-    const mouse = PointerScrollDetails(PointerDeviceKind.mouse);
-    expect(mouse.kind, PointerDeviceKind.mouse);
-
-    const trackpad = PointerScrollDetails(PointerDeviceKind.trackpad);
-    expect(trackpad.kind, PointerDeviceKind.trackpad);
+    expect(ScrollInputSource.pointer, isNot(ScrollInputSource.keyboard));
+    expect(ScrollInputSource.pointer, isNot(ScrollInputSource.programmatic));
+    expect(ScrollInputSource.keyboard, isNot(ScrollInputSource.programmatic));
   });
 
   test('RetargetableScrollActivity.retarget is callable', () {
     final delegate = _ScrollActivityDelegate();
     final activity = _TestRetargetableScrollActivity(delegate);
     // Calling retarget should not throw.
-    activity.retarget(10.0, const PointerScrollDetails(PointerDeviceKind.mouse));
+    activity.retarget(10.0, ScrollInputSource.pointer);
     activity.dispose();
   });
 }
@@ -597,7 +583,7 @@ class _TestRetargetableScrollActivity extends RetargetableScrollActivity {
   _TestRetargetableScrollActivity(super.delegate);
 
   @override
-  void retarget(double delta, ScrollDetails details) {
+  void retarget(double delta, ScrollInputSource source) {
     // No-op for testing.
   }
 

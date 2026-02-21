@@ -372,7 +372,7 @@ FlutterError
       _TestScrollActivityDelegate(),
       0.0,
       10.0,
-      const ProgrammaticScrollDetails(),
+      ScrollInputSource.programmatic,
     );
     expect(activity, isNull);
   });
@@ -384,7 +384,7 @@ FlutterError
       _TestScrollActivityDelegate(),
       0.0,
       10.0,
-      const ProgrammaticScrollDetails(),
+      ScrollInputSource.programmatic,
     );
     expect(activity, isNotNull);
     activity!.dispose();
@@ -421,7 +421,7 @@ class _NonNullCreateScrollActivityPhysics extends ScrollPhysics {
     ScrollActivityDelegate delegate,
     double from,
     double delta,
-    ScrollDetails details,
+    ScrollInputSource source,
   ) {
     return IdleScrollActivity(delegate);
   }

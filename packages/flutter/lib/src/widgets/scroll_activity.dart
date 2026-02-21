@@ -176,39 +176,15 @@ abstract class ScrollActivity {
 ///
 /// Used by [RetargetableScrollActivity] and [ScrollPhysics.createScrollActivity]
 /// to determine how to handle the scroll input.
-sealed class ScrollDetails {
-  /// Creates a [ScrollDetails].
-  const ScrollDetails();
+enum ScrollInputSource {
+  /// The scroll was initiated by a pointer device (e.g. mouse wheel, trackpad).
+  pointer,
 
-  /// Whether this scroll was initiated by a pointer device (mouse wheel, trackpad).
-  bool get isPointer => this is PointerScrollDetails;
+  /// The scroll was initiated by a keyboard input.
+  keyboard,
 
-  /// Whether this scroll was initiated by a keyboard input.
-  bool get isKeyboard => this is KeyboardScrollDetails;
-
-  /// Whether this scroll was initiated programmatically.
-  bool get isProgrammatic => this is ProgrammaticScrollDetails;
-}
-
-/// Scroll details for pointer-device-initiated scrolling (e.g. mouse wheel).
-final class PointerScrollDetails extends ScrollDetails {
-  /// Creates pointer scroll details with the given [kind].
-  const PointerScrollDetails(this.kind);
-
-  /// The kind of pointer device that initiated the scroll.
-  final PointerDeviceKind kind;
-}
-
-/// Scroll details for keyboard-initiated scrolling.
-final class KeyboardScrollDetails extends ScrollDetails {
-  /// Creates keyboard scroll details.
-  const KeyboardScrollDetails();
-}
-
-/// Scroll details for programmatic scrolling.
-final class ProgrammaticScrollDetails extends ScrollDetails {
-  /// Creates programmatic scroll details.
-  const ProgrammaticScrollDetails();
+  /// The scroll was initiated programmatically (e.g. [ScrollController.animateTo]).
+  programmatic,
 }
 
 /// A [ScrollActivity] that can be retargeted with additional scroll deltas.
@@ -221,8 +197,8 @@ abstract class RetargetableScrollActivity extends ScrollActivity {
 
   /// Adjusts the activity's target by the given [delta].
   ///
-  /// The [details] describe the source of the scroll input.
-  void retarget(double delta, ScrollDetails details);
+  /// The [source] describes the source of the scroll input.
+  void retarget(double delta, ScrollInputSource source);
 }
 
 /// A scroll activity that does nothing.
