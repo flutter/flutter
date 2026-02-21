@@ -30,6 +30,7 @@ const _kProxy = 'proxy';
 const _kHeaders = 'headers';
 const _kCertKeyPath = 'cert-key-path';
 const _kCertPath = 'cert-path';
+const _kBaseHref = 'base-href';
 
 /// Checks if a given [value] has the expected type [T].
 ///
@@ -50,6 +51,7 @@ class WebDevServerConfig {
     this.port = 0,
     this.https,
     this.proxy = const <ProxyRule>[],
+    this.baseHref,
   });
 
   factory WebDevServerConfig.fromYaml(YamlMap yaml, Logger logger) {
@@ -162,6 +164,7 @@ class WebDevServerConfig {
     HttpsConfig? https,
     Map<String, String>? headers,
     List<ProxyRule>? proxy,
+    String? baseHref,
   }) {
     return WebDevServerConfig(
       host: host ?? this.host,
@@ -169,6 +172,7 @@ class WebDevServerConfig {
       https: https ?? this.https,
       headers: {...this.headers, ...?headers},
       proxy: proxy ?? this.proxy,
+      baseHref: baseHref ?? this.baseHref,
     );
   }
 
@@ -177,6 +181,7 @@ class WebDevServerConfig {
   final int port;
   final HttpsConfig? https;
   final List<ProxyRule> proxy;
+  final String? baseHref;
 
   @override
   String toString() {
@@ -186,7 +191,8 @@ WebDevServerConfig:
   $_kHost: $host
   $_kPort: $port
   $_kHttps: $https
-  $_kProxy: $proxy''';
+  $_kProxy: $proxy
+  $_kBaseHref: $baseHref''';
   }
 }
 
