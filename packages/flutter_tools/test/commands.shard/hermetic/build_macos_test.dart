@@ -124,9 +124,6 @@ void main() {
     void Function(List<String> command)? onRun,
     List<String>? additionalCommandArguments,
     String hostPlatformArch = 'x86_64',
-    int exitCode = 0,
-    String? stdout,
-    String? stderr,
   }) {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
@@ -154,18 +151,14 @@ void main() {
         'COMPILER_INDEX_STORE_ENABLE=NO',
         ...?additionalCommandArguments,
       ],
-      stdout:
-          stdout ??
-          '''
+      stdout: '''
 STDOUT STUFF
 note: Using new build system
 note: Planning
 note: Build preparation complete
 note: Building targets in dependency order
 ''',
-      stderr:
-          stderr ??
-          '''
+      stderr: '''
 2022-03-24 10:07:21.954 xcodebuild[2096:1927385] Requested but did not find extension point with identifier Xcode.IDEKit.ExtensionSentinelHostApplications for extension Xcode.DebuggerFoundation.AppExtensionHosts.watchOS of plug-in com.apple.dt.IDEWatchSupportCore
 2022-03-24 10:07:21.954 xcodebuild[2096:1927385] Requested but did not find extension point with identifier Xcode.IDEKit.ExtensionPointIdentifierToBundleIdentifier for extension Xcode.DebuggerFoundation.AppExtensionToBundleIdentifierMap.watchOS of plug-in com.apple.dt.IDEWatchSupportCore
 2023-11-10 10:44:58.030 xcodebuild[61115:1017566] [MT] DVTAssertions: Warning in /System/Volumes/Data/SWE/Apps/DT/BuildRoots/BuildRoot11/ActiveBuildRoot/Library/Caches/com.apple.xbs/Sources/IDEFrameworks/IDEFrameworks-22267/IDEFoundation/Provisioning/Capabilities Infrastructure/IDECapabilityQuerySelection.swift:103
@@ -175,7 +168,6 @@ Thread:   <_NSMainThread: 0x6000027c0280>{number = 1, name = main}
 Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
 STDERR STUFF
 ''',
-      exitCode: exitCode,
       onRun: (List<String> command) {
         fileSystem.file(fileSystem.path.join('macos', 'Flutter', 'ephemeral', '.app_filename'))
           ..createSync(recursive: true)
@@ -381,51 +373,6 @@ STDERR STUFF
           FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler('Release')]),
       Platform: () => macosPlatform,
       Pub: ThrowingPub.new,
-      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
-    },
-  );
-
-  testUsingContext(
-    'macOS build prints SwiftPM minimum deployment guidance when a package requires a higher macOS deployment target',
-    () async {
-      final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-      );
-      createMinimalMockProjectFiles();
-
-      await expectLater(
-        createTestCommandRunner(
-          command,
-        ).run(const <String>['build', 'macos', '--debug', '--no-pub']),
-        throwsToolExit(message: 'Build process failed'),
-      );
-
-      expect(
-        testLogger.errorText,
-        contains(
-          "To fix this error, increase your app's minimum platform version from 11.0 to at least 12.0",
-        ),
-      );
-      expect(testLogger.errorText, contains('flutter build macos --config-only'));
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        setUpFakeXcodeBuildHandler(
-          'Debug',
-          exitCode: 1,
-          stderr: '''
-error: The package product 'spm-macos12' requires minimum platform version 12.0 for the macOS platform, but this target supports 11.0
-''',
-        ),
-      ]),
-      Pub: ThrowingPub.new,
-      Platform: () => macosPlatform,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
       OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
     },

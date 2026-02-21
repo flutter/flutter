@@ -12,11 +12,9 @@ import '../base/os.dart' show HostPlatform;
 import '../base/project_migrator.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
-import '../base/version.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
-import '../darwin/swift_package_manager_min_platform_mismatch.dart';
 import '../globals.dart' as globals;
 import '../ios/migrations/metal_api_validation_migration.dart';
 import '../ios/xcode_build_settings.dart';
@@ -183,8 +181,6 @@ Future<void> buildMacOS({
   final Status status = globals.logger.startProgress('Building macOS application...');
   int result;
 
-  final swiftPackageManagerMinPlatformMismatches = <SwiftPackageManagerMinPlatformMismatch>[];
-
   File? disabledSandboxEntitlementFile;
   if (usingCISystem) {
     disabledSandboxEntitlementFile = _createDisabledSandboxEntitlementFile(
@@ -217,19 +213,6 @@ Future<void> buildMacOS({
   // when dependencies don't support them
   final String? excludedArches = buildSettings['EXCLUDED_ARCHS'];
 
-  String? mapAndCaptureOutput(String line) {
-    final SwiftPackageManagerMinPlatformMismatch? mismatch =
-        SwiftPackageManagerMinPlatformMismatch.tryParse(line);
-    if (mismatch != null) {
-      swiftPackageManagerMinPlatformMismatches.add(mismatch);
-    }
-
-    if (verboseLogging) {
-      return line;
-    }
-    return _filteredOutput.hasMatch(line) ? line : null;
-  }
-
   try {
     result = await globals.processUtils.stream(
       <String>[
@@ -260,29 +243,15 @@ Future<void> buildMacOS({
       ],
       trace: true,
       stdoutErrorMatcher: verboseLogging ? null : _filteredOutput,
-      mapFunction: mapAndCaptureOutput,
+      mapFunction: verboseLogging
+          ? null
+          : (String line) => _filteredOutput.hasMatch(line) ? line : null,
     );
   } finally {
     status.cancel();
   }
 
   if (result != 0) {
-    if (swiftPackageManagerMinPlatformMismatches.isNotEmpty) {
-      final Version requiredMinVersion = swiftPackageManagerMinPlatformMismatches
-          .map((e) => e.requiredMinVersion)
-          .reduce((a, b) => a > b ? a : b);
-      final Version supportedVersion = swiftPackageManagerMinPlatformMismatches
-          .map((e) => e.targetSupportedVersion)
-          .reduce((a, b) => a < b ? a : b);
-
-      globals.logger.printError(
-        swiftPackageManagerMinPlatformMismatchInstructions(
-          requiredMinVersion: requiredMinVersion,
-          supportedVersion: supportedVersion,
-        ),
-        emphasis: true,
-      );
-    }
     throwToolExit('Build process failed');
   }
   final String? applicationBundle = MacOSApp.fromMacOSProject(
