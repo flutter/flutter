@@ -102,12 +102,15 @@ class WebDevServerConfig {
       ...?proxyList?.whereType<YamlMap>().map((e) => ProxyRule.fromYaml(e, logger)).nonNulls,
     ];
 
+    final String? baseHref = _validateType<String>(value: yaml[_kBaseHref], fieldName: _kBaseHref);
+
     return WebDevServerConfig(
       headers: headers,
       host: host ?? webDevAnyHostDefault,
       port: port ?? 0,
       https: https == null ? null : HttpsConfig.fromYaml(https),
       proxy: proxyRules,
+      baseHref: baseHref,
     );
   }
 
