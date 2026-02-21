@@ -98,7 +98,7 @@ description: 'Project for testing user-defines.'
 version: 0.0.1
 
 environment:
-  sdk: ^3.9.0-0
+  sdk: ^3.10.0-0
 
 hooks:
   user_defines:

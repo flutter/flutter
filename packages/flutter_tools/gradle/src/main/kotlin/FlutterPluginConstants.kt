@@ -4,6 +4,8 @@
 
 package com.flutter.gradle
 
+import org.gradle.api.GradleException
+
 // TODO(gmackall): this should be collapsed back into the core FlutterPlugin once the Groovy to
 //                 kotlin conversion is complete.
 object FlutterPluginConstants {
@@ -49,4 +51,14 @@ object FlutterPluginConstants {
             PLATFORM_ARM64,
             PLATFORM_X86_64
         )
+
+    /**
+     * List of supported ABIs as strings.
+     *
+     * @throws GradleException if not all platforms in `DEFAULT_PLATFORMS` have an entry in `PLATFORM_ARCH_MAP`.
+     */
+    @JvmStatic val PLATFORM_ABI_LIST: List<String> =
+        DEFAULT_PLATFORMS.map { platform ->
+            PLATFORM_ARCH_MAP[platform] ?: throw GradleException("Invalid platform: $platform")
+        }
 }

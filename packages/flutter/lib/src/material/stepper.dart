@@ -123,6 +123,13 @@ const double _kStepSize = 24.0;
 const double _kTriangleSqrt = 0.866025; // sqrt(3.0) / 2.0
 const double _kTriangleHeight = _kStepSize * _kTriangleSqrt;
 const double _kMaxStepSize = 80.0;
+const EdgeInsetsDirectional _kDefaultVerticalContentPadding = EdgeInsetsDirectional.only(
+  start: 60.0,
+  end: 24.0,
+  bottom: 24.0,
+);
+const EdgeInsets _kDefaultHorizontalContentPadding = EdgeInsets.all(24.0);
+const EdgeInsetsGeometry _kDefaultHeaderPadding = EdgeInsets.symmetric(horizontal: 24.0);
 
 /// A material step used in [Stepper]. The step can have a title and subtitle,
 /// an icon within its circle, some content and a state that governs its
@@ -220,6 +227,8 @@ class Stepper extends StatefulWidget {
     this.stepIconWidth,
     this.stepIconMargin,
     this.clipBehavior = Clip.none,
+    this.headerPadding,
+    this.contentPadding,
   }) : assert(0 <= currentStep && currentStep < steps.length),
        assert(
          stepIconHeight == null ||
@@ -379,6 +388,23 @@ class Stepper extends StatefulWidget {
   ///  * [Clip], which explains how to use this property.
   final Clip clipBehavior;
 
+  /// The padding around the header row in both [StepperType.vertical] and
+  /// [StepperType.horizontal] steppers.
+  ///
+  /// Defaults to to `EdgeInsets.symmetric(horizontal: 24.0)`.
+  final EdgeInsetsGeometry? headerPadding;
+
+  /// The padding around the content area in both [StepperType.vertical] and
+  /// [StepperType.horizontal] steppers.
+  ///
+  /// For [StepperType.horizontal], defaults to `EdgeInsets.all(24.0)`.
+  ///
+  /// For [StepperType.vertical], defaults to
+  /// `EdgeInsetsDirectional.only(start: 60.0, end: 24.0, bottom: 24.0)`.
+  /// The `start` padding is also increased by the `left` value of
+  /// [stepIconMargin] if it is provided.
+  final EdgeInsetsGeometry? contentPadding;
+
   @override
   State<Stepper> createState() => _StepperState();
 }
@@ -412,6 +438,8 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   double? get _stepIconHeight => widget.stepIconHeight;
 
   double? get _stepIconWidth => widget.stepIconWidth;
+
+  EdgeInsetsGeometry get effectiveHeaderPadding => widget.headerPadding ?? _kDefaultHeaderPadding;
 
   double get _heightFactor {
     return (_isLabel() && _stepIconHeight != null) ? 2.5 : 2.0;
@@ -737,7 +765,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     final bool isActive = widget.steps[index].isActive;
     final bool isPreviousActive = index > 0 && widget.steps[index - 1].isActive;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      padding: effectiveHeaderPadding,
       child: Row(
         children: <Widget>[
           Column(
@@ -765,6 +793,11 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     final double? marginRight = _stepIconMargin?.resolve(TextDirection.ltr).right;
     final double? additionalMarginLeft = marginLeft != null ? marginLeft / 2.0 : null;
     final double? additionalMarginRight = marginRight != null ? marginRight / 2.0 : null;
+    // Adjust vertical content padding to align with step icon when stepIconMargin is set.
+    final EdgeInsetsGeometry effectiveVerticalContentPadding =
+        (widget.contentPadding ?? _kDefaultVerticalContentPadding).add(
+          EdgeInsetsDirectional.only(start: marginLeft ?? 0.0),
+        );
 
     return Stack(
       children: <Widget>[
@@ -790,13 +823,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         AnimatedCrossFade(
           firstChild: const SizedBox(width: double.infinity, height: 0),
           secondChild: Padding(
-            padding: EdgeInsetsDirectional.only(
-              // Adjust [controlsBuilder] padding so that the content is
-              // centered vertically.
-              start: 60.0 + (marginLeft ?? 0.0),
-              end: 24.0,
-              bottom: 24.0,
-            ),
+            padding: effectiveVerticalContentPadding,
             child: Column(
               children: <Widget>[
                 ClipRect(clipBehavior: widget.clipBehavior, child: widget.steps[index].content),
@@ -849,6 +876,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildHorizontal() {
+    // Effective horizontal content padding (custom or default).
+    final EdgeInsetsGeometry effectiveHorizontalContentPadding =
+        widget.contentPadding ?? _kDefaultHorizontalContentPadding;
+
     final children = <Widget>[
       for (int i = 0; i < widget.steps.length; i += 1) ...<Widget>[
         InkResponse(
@@ -915,7 +946,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         Material(
           elevation: widget.elevation ?? 2,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            padding: effectiveHeaderPadding,
             child: SizedBox(
               height: _stepIconHeight != null ? _stepIconHeight! * _heightFactor : null,
               child: Row(children: children),
@@ -926,7 +957,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           child: ListView(
             controller: widget.controller,
             physics: widget.physics,
-            padding: const EdgeInsets.all(24.0),
+            padding: effectiveHorizontalContentPadding,
             children: <Widget>[
               AnimatedSize(
                 curve: Curves.fastOutSlowIn,
