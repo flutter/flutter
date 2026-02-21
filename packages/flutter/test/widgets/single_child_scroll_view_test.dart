@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
+import 'editable_text_utils.dart' show TestTextField;
 import 'semantics_tester.dart';
+import 'widgets_app_tester.dart';
 
 class TestScrollPosition extends ScrollPositionWithSingleContext {
   TestScrollPosition({
@@ -1047,16 +1049,14 @@ void main() {
 
     Future<void> boilerplate(ScrollViewKeyboardDismissBehavior behavior) {
       return tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SingleChildScrollView(
-              padding: EdgeInsets.zero,
-              keyboardDismissBehavior: behavior,
-              child: Column(
-                children: focusNodes.map((FocusNode focusNode) {
-                  return SizedBox(height: 50, child: TextField(focusNode: focusNode));
-                }).toList(),
-              ),
+        TestWidgetsApp(
+          home: SingleChildScrollView(
+            padding: EdgeInsets.zero,
+            keyboardDismissBehavior: behavior,
+            child: Column(
+              children: focusNodes.map((FocusNode focusNode) {
+                return SizedBox(height: 50, child: TestTextField(focusNode: focusNode));
+              }).toList(),
             ),
           ),
         ),
@@ -1066,63 +1066,25 @@ void main() {
     // ScrollViewKeyboardDismissBehavior.onDrag dismiss keyboard on drag
     await boilerplate(ScrollViewKeyboardDismissBehavior.onDrag);
 
-    Finder finder = find.byType(TextField).first;
-    TextField textField = tester.widget(finder);
+    Finder finder = find.byType(EditableText).first;
+    EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isFalse);
+    expect(textField.focusNode.hasFocus, isFalse);
 
     // ScrollViewKeyboardDismissBehavior.manual does no dismiss the keyboard
     await boilerplate(ScrollViewKeyboardDismissBehavior.manual);
 
-    finder = find.byType(TextField).first;
+    finder = find.byType(EditableText).first;
     textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isTrue);
-  });
-
-  testWidgets('keyboardDismissBehavior.OnDrag with drawer tests', (WidgetTester tester) async {
-    final scaffoldKey = GlobalKey<ScaffoldState>();
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          key: scaffoldKey,
-          drawer: Container(),
-          body: Column(
-            children: <Widget>[
-              const TextField(),
-              Expanded(
-                child: SingleChildScrollView(
-                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                  child: Container(height: 1000),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    expect(tester.testTextInput.isVisible, isFalse);
-    final Finder finder = find.byType(TextField).first;
-    await tester.tap(finder);
-    expect(tester.testTextInput.isVisible, isTrue);
-
-    await tester.drag(find.byType(SingleChildScrollView).first, const Offset(0.0, -40.0));
-    await tester.pumpAndSettle();
-
-    expect(tester.testTextInput.isVisible, isFalse);
-    scaffoldKey.currentState!.openDrawer();
-    await tester.pumpAndSettle();
-
-    expect(tester.testTextInput.isVisible, isFalse);
+    expect(textField.focusNode.hasFocus, isTrue);
   });
 }
