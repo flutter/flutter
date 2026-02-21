@@ -1165,10 +1165,10 @@ class DebuggingOptions {
   /// This is not implemented for every platform.
   final bool uninstallFirst;
 
-  /// Whether the tool should uninstall the app after running integration tests.
+  /// Whether the tool should uninstall the app after running.
   ///
-  /// Defaults to true. Set to false via `--no-uninstall` to keep the app
-  /// installed on the device after tests complete.
+  /// This is currently only implemented for integration tests.
+  /// Defaults to true.
   final bool uninstallApp;
 
   /// Whether to run the browser in headless mode.

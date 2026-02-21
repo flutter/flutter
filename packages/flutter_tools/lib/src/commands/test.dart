@@ -301,7 +301,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         defaultsTo: true,
         help:
             'Whether to uninstall the app after running integration tests. '
-            'Set "--no-uninstall" to keep the app installed on the device. ',
+            'Set "--no-uninstall" to keep the app installed on the device.',
       );
 
     addDdsOptions(verboseHelp: verboseHelp);
