@@ -243,6 +243,9 @@ class FormState extends State<Form> {
   bool _hasInteractedByUser = false;
   final Set<FormFieldState<dynamic>> _fields = <FormFieldState<dynamic>>{};
 
+  /// The [FormFieldState] objects that are currently registered with this [Form].
+  Iterable<FormFieldState<dynamic>> get fields => _fields;
+
   // Called when a form field has changed. This will cause all form fields
   // to rebuild, useful if form fields have interdependencies.
   void _fieldDidChange() {
