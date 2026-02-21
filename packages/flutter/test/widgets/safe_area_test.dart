@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -103,10 +103,7 @@ void main() {
       Widget boilerplate(Widget child) {
         return Localizations(
           locale: const Locale('en', 'us'),
-          delegates: const <LocalizationsDelegate<dynamic>>[
-            DefaultWidgetsLocalizations.delegate,
-            DefaultMaterialLocalizations.delegate,
-          ],
+          delegates: const <LocalizationsDelegate<dynamic>>[DefaultWidgetsLocalizations.delegate],
           child: Directionality(textDirection: TextDirection.ltr, child: child),
         );
       }
@@ -175,13 +172,12 @@ void main() {
         expect(initialPoint, finalPoint);
       });
 
-      testWidgets('SafeArea with nested Scaffold', (WidgetTester tester) async {
+      testWidgets('SafeArea with nested fixed-size container', (WidgetTester tester) async {
         final Widget child = boilerplate(
           const SafeArea(
             maintainBottomViewPadding: true,
-            child: Scaffold(
-              resizeToAvoidBottomInset: false,
-              body: Column(children: <Widget>[Expanded(child: Placeholder())]),
+            child: SizedBox.expand(
+              child: Column(children: <Widget>[Expanded(child: Placeholder())]),
             ),
           ),
         );
@@ -211,39 +207,39 @@ void main() {
         expect(initialPoint, finalPoint);
       });
 
-      testWidgets('SafeArea with nested Scaffold  - partial ViewInsets consume Padding', (
-        WidgetTester tester,
-      ) async {
-        final Widget child = boilerplate(
-          const SafeArea(
-            maintainBottomViewPadding: true,
-            child: Scaffold(
-              resizeToAvoidBottomInset: false,
-              body: Column(children: <Widget>[Expanded(child: Placeholder())]),
+      testWidgets(
+        'SafeArea with nested fixed-size container - partial ViewInsets consume Padding',
+        (WidgetTester tester) async {
+          final Widget child = boilerplate(
+            const SafeArea(
+              maintainBottomViewPadding: true,
+              child: SizedBox.expand(
+                child: Column(children: <Widget>[Expanded(child: Placeholder())]),
+              ),
             ),
-          ),
-        );
+          );
 
-        await tester.pumpWidget(
-          MediaQuery(
-            data: const MediaQueryData(viewPadding: EdgeInsets.only(bottom: 20.0)),
-            child: child,
-          ),
-        );
-        final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
-        // Consume bottom padding - as if by the keyboard opening
-        await tester.pumpWidget(
-          MediaQuery(
-            data: const MediaQueryData(
-              viewPadding: EdgeInsets.only(bottom: 20.0),
-              viewInsets: EdgeInsets.only(bottom: 10.0),
+          await tester.pumpWidget(
+            MediaQuery(
+              data: const MediaQueryData(viewPadding: EdgeInsets.only(bottom: 20.0)),
+              child: child,
             ),
-            child: child,
-          ),
-        );
-        final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
-        expect(initialPoint, finalPoint);
-      });
+          );
+          final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
+          // Consume bottom padding - as if by the keyboard opening
+          await tester.pumpWidget(
+            MediaQuery(
+              data: const MediaQueryData(
+                viewPadding: EdgeInsets.only(bottom: 20.0),
+                viewInsets: EdgeInsets.only(bottom: 10.0),
+              ),
+              child: child,
+            ),
+          );
+          final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
+          expect(initialPoint, finalPoint);
+        },
+      );
     });
   });
 

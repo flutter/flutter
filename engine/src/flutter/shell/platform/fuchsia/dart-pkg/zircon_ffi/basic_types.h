@@ -5,7 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_DART_PKG_ZIRCON_FFI_BASIC_TYPES_H_
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_DART_PKG_ZIRCON_FFI_BASIC_TYPES_H_
 
-#include "macros.h"
+#include "flutter/shell/platform/fuchsia/dart-pkg/zircon_ffi/macros.h"
 
 #include <stdint.h>
 

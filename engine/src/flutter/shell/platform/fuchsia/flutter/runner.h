@@ -10,16 +10,16 @@
 
 #include <fuchsia/component/runner/cpp/fidl.h>
 #include <lib/async-loop/cpp/loop.h>
+#include <lib/fidl/cpp/binding_set.h>
 #include <lib/sys/cpp/component_context.h>
 #include <lib/trace-engine/instrumentation.h>
 #include <lib/trace/observer.h>
 
-#include "component_v2.h"
 #include "flutter/fml/macros.h"
-#include "fml/memory/ref_ptr.h"
-#include "fml/task_runner.h"
-#include "lib/fidl/cpp/binding_set.h"
-#include "runtime/dart/utils/vmservice_object.h"
+#include "flutter/fml/memory/ref_ptr.h"
+#include "flutter/fml/task_runner.h"
+#include "flutter/shell/platform/fuchsia/flutter/component_v2.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/vmservice_object.h"
 
 namespace flutter_runner {
 

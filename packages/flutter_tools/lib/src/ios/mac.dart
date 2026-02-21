@@ -196,7 +196,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     return XcodeBuildResult(success: false);
   }
 
-  await removeFinderExtendedAttributes(
+  await removeExtendedAttributes(
     app.project.parent.directory,
     globals.processUtils,
     globals.logger,
@@ -710,23 +710,36 @@ bool publicHeadersChanged({
   return headersChanged;
 }
 
-/// Extended attributes applied by Finder can cause code signing errors. Remove them.
-/// https://developer.apple.com/library/archive/qa/qa1940/_index.html
-Future<void> removeFinderExtendedAttributes(
+/// Extended attributes can cause code signing errors. Remove them.
+///
+/// Attributes like `com.apple.FinderInfo` and `com.apple.provenance` are added
+/// by Finder, cloud storage services (OneDrive, iCloud, Dropbox), or when files
+/// are downloaded. These must be removed before code signing.
+///
+/// See: https://developer.apple.com/library/archive/qa/qa1940/_index.html
+/// See: https://github.com/flutter/flutter/issues/180351
+Future<void> removeExtendedAttributes(
   FileSystemEntity projectDirectory,
   ProcessUtils processUtils,
   Logger logger,
 ) async {
-  final bool success = await processUtils.exitsHappy(<String>[
-    'xattr',
-    '-r',
-    '-d',
-    'com.apple.FinderInfo',
-    projectDirectory.path,
-  ]);
-  // Ignore all errors, for example if directory is missing.
-  if (!success) {
-    logger.printTrace('Failed to remove xattr com.apple.FinderInfo from ${projectDirectory.path}');
+  // Remove specific extended attributes that cause code signing failures.
+  // We remove com.apple.FinderInfo and com.apple.provenance, but preserve
+  // com.apple.xcode.CreatedByBuildSystem which Xcode uses to manage build directories.
+  const attributesToRemove = <String>{'com.apple.FinderInfo', 'com.apple.provenance'};
+
+  for (final attribute in attributesToRemove) {
+    final bool success = await processUtils.exitsHappy(<String>[
+      'xattr',
+      '-r',
+      '-d',
+      attribute,
+      projectDirectory.path,
+    ]);
+    // Ignore all errors, for example if directory is missing or attribute doesn't exist.
+    if (!success) {
+      logger.printTrace('Failed to remove $attribute from ${projectDirectory.path}');
+    }
   }
 }
 
@@ -1093,10 +1106,7 @@ Future<bool> _handleIssues(
         'looking at your "ios/Podfile.lock" dependency tree and requesting the '
         'author add Swift Package Manager compatibility. See https://stackoverflow.com/a/27955017 '
         'to learn more about understanding Podlock dependency tree. \n\n'
-        'You can also disable Swift Package Manager for the project by adding the '
-        'following in the project\'s pubspec.yaml under the "flutter" section:\n'
-        '  config:'
-        '    enable-swift-package-manager: false\n',
+        '$kDisableSwiftPMInstructions',
       );
     }
   } else if (missingModules.isNotEmpty) {

@@ -434,22 +434,23 @@ class _FlView extends _GtkWidget {
 class _FlWindowMonitor extends _GObject {
   /// Create a new FlWindowMonitor.
   factory _FlWindowMonitor(
-    _GtkWindow window,
-    void Function() onConfigure,
-    void Function() onStateChanged,
-    void Function() onIsActiveNotify,
-    void Function() onTitleNotify,
-    void Function() onClose,
-    void Function() onDestroy,
-  ) {
+    _GtkWindow window, {
+    VoidCallback? onConfigure,
+    VoidCallback? onStateChanged,
+    VoidCallback? onIsActiveNotify,
+    VoidCallback? onTitleNotify,
+    VoidCallback? onClose,
+    VoidCallback? onDestroy,
+  }) {
+    void noop() {}
     return _FlWindowMonitor._internal(
       window.instance,
-      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onConfigure),
-      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onStateChanged),
-      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onIsActiveNotify),
-      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onTitleNotify),
-      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onClose),
-      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onDestroy),
+      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onConfigure ?? noop),
+      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onStateChanged ?? noop),
+      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onIsActiveNotify ?? noop),
+      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onTitleNotify ?? noop),
+      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onClose ?? noop),
+      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onDestroy ?? noop),
     );
   }
 
@@ -654,20 +655,14 @@ class RegularWindowControllerLinux extends RegularWindowController {
 
     _windowMonitor = _FlWindowMonitor(
       _window,
-      // onConfigure
-      notifyListeners,
-      // onStateChanged
-      notifyListeners,
-      // onIsActiveNotify
-      notifyListeners,
-      // onTitleNotify
-      notifyListeners,
-      // onClose
-      () {
+      onConfigure: notifyListeners,
+      onStateChanged: notifyListeners,
+      onIsActiveNotify: notifyListeners,
+      onTitleNotify: notifyListeners,
+      onClose: () {
         _delegate.onWindowCloseRequested(this);
       },
-      // onDestroy
-      _delegate.onWindowDestroyed,
+      onDestroy: _delegate.onWindowDestroyed,
     );
     if (preferredSize != null) {
       _window.setDefaultSize(preferredSize.width.toInt(), preferredSize.height.toInt());
@@ -838,20 +833,14 @@ class DialogWindowControllerLinux extends DialogWindowController {
 
     _windowMonitor = _FlWindowMonitor(
       _window,
-      // onConfigure
-      notifyListeners,
-      // onStateChanged
-      notifyListeners,
-      // onIsActiveNotify
-      notifyListeners,
-      // onTitleNotify
-      notifyListeners,
-      // onClose
-      () {
+      onConfigure: notifyListeners,
+      onStateChanged: notifyListeners,
+      onIsActiveNotify: notifyListeners,
+      onTitleNotify: notifyListeners,
+      onClose: () {
         _delegate.onWindowCloseRequested(this);
       },
-      // onDestroy
-      _delegate.onWindowDestroyed,
+      onDestroy: _delegate.onWindowDestroyed,
     );
     if (preferredSize != null) {
       _window.setDefaultSize(preferredSize.width.toInt(), preferredSize.height.toInt());
