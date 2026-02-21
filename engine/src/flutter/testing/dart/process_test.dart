@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 
 void main() {
   test('start process with missing executable', () async {
-    Future<Process> proc = Process.start('nonexistent-executable', []);
-    expect(() async => await proc, throwsA(isA<ProcessException>()));
+    final Future<Process> proc = Process.start('nonexistent-executable', []);
+    expect(proc, throwsA(isA<ProcessException>()));
   });
 }
