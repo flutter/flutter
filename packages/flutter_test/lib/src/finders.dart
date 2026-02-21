@@ -374,20 +374,22 @@ class CommonFinders {
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder byTooltip(Pattern message, {bool skipOffstage = true}) {
     return byWidgetPredicate((Widget widget) {
-      // In cases where Tooltip.excludeFromSemantics is true, Tooltip provides
-      // no semantics tooltip to RawTooltip, so its message must be checked
-      // directly.
-      if (widget is Tooltip && (widget.excludeFromSemantics ?? false)) {
-        return (message is RegExp
-            ? ((widget.message != null && message.hasMatch(widget.message!)) ||
-                  (widget.richMessage != null &&
-                      message.hasMatch(widget.richMessage!.toPlainText())))
-            : ((widget.message ?? widget.richMessage?.toPlainText()) == message));
+      // Compare RawTooltip's semantics tooltip with the given message.
+      // However, Tooltip's message needs to be checked directly if:
+      // 1. Tooltip.excludeFromSemantics is true, since in this case Tooltip
+      //    provides no semantics tooltip to the underlying RawTooltip.
+      // 2. Tooltip.message and Tooltip.richMessage are empty, since in this
+      //    case no RawTooltip is created.
+      if (widget is Tooltip) {
+        final String tooltipMessage = widget.message ?? widget.richMessage!.toPlainText();
+        if ((widget.excludeFromSemantics ?? false) || tooltipMessage.isEmpty) {
+          return message is RegExp ? message.hasMatch(tooltipMessage) : tooltipMessage == message;
+        }
       }
       return widget is RawTooltip &&
           (message is RegExp
               ? message.hasMatch(widget.semanticsTooltip ?? '')
-              : (widget.semanticsTooltip == message));
+              : widget.semanticsTooltip == message);
     }, skipOffstage: skipOffstage);
   }
 
