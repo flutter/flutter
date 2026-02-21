@@ -75,10 +75,6 @@ template("impellerc") {
     shader_target_flags = []
   }
 
-  sksl = false
-  foreach(shader_target_flag, shader_target_flags) {
-    sksl = shader_target_flag == "--sksl"
-  }
   iplr = false
   if (defined(invoker.iplr) && invoker.iplr) {
     iplr = invoker.iplr
@@ -91,7 +87,6 @@ template("impellerc") {
   # Not needed on every path.
   not_needed([
                "iplr",
-               "sksl",
                "shader_bundle",
                "shader_bundle_output",
              ])
@@ -181,11 +176,7 @@ template("impellerc") {
       ]
 
       outputs = [ sl_output ]
-    } else if (sksl) {
-      # When SkSL is selected as a `shader_target_flags`, don't generate
-      # C++ reflection state. Nothing needs to use it and it's likely invalid
-      # given the special cases when generating SkSL.
-      # Note that this configuration is orthogonal to the "--iplr" flag
+    } else {
       sl_output =
           "$generated_dir/{{source_file_part}}.${invoker.sl_file_extension}"
       sl_output_path = rebase_path(sl_output, root_build_dir)
@@ -198,40 +189,39 @@ template("impellerc") {
       ]
 
       outputs = [ sl_output ]
-    } else {
-      # The default branch. Here we just generate one shader along with all of
-      # its C++ reflection state.
 
-      sl_output =
-          "$generated_dir/{{source_file_part}}.${invoker.sl_file_extension}"
-      sl_output_path = rebase_path(sl_output, root_build_dir)
+      # Generate reflection state only if a non-runtime target is provided.
+      if (filter_include(shader_target_flags,
+                         [
+                           "--metal-ios",
+                           "--metal-desktop",
+                           "--opengl-es",
+                           "--opengl-desktop",
+                           "--vulkan",
+                         ]) != []) {
+        reflection_json_intermediate =
+            "$generated_dir/{{source_file_part}}.json"
+        reflection_header_intermediate = "$generated_dir/{{source_file_part}}.h"
+        reflection_cc_intermediate = "$generated_dir/{{source_file_part}}.cc"
 
-      reflection_json_intermediate = "$generated_dir/{{source_file_part}}.json"
-      reflection_header_intermediate = "$generated_dir/{{source_file_part}}.h"
-      reflection_cc_intermediate = "$generated_dir/{{source_file_part}}.cc"
+        reflection_json_path =
+            rebase_path(reflection_json_intermediate, root_build_dir)
+        reflection_header_path =
+            rebase_path(reflection_header_intermediate, root_build_dir)
+        reflection_cc_path =
+            rebase_path(reflection_cc_intermediate, root_build_dir)
 
-      spirv_intermediate = "$generated_dir/{{source_file_part}}.spirv"
-      spirv_intermediate_path = rebase_path(spirv_intermediate, root_build_dir)
-      reflection_json_path =
-          rebase_path(reflection_json_intermediate, root_build_dir)
-      reflection_header_path =
-          rebase_path(reflection_header_intermediate, root_build_dir)
-      reflection_cc_path =
-          rebase_path(reflection_cc_intermediate, root_build_dir)
+        args += [
+          "--reflection-json=$reflection_json_path",
+          "--reflection-header=$reflection_header_path",
+          "--reflection-cc=$reflection_cc_path",
+        ]
 
-      args += [
-        "--sl=$sl_output_path",
-        "--spirv=$spirv_intermediate_path",
-        "--reflection-json=$reflection_json_path",
-        "--reflection-header=$reflection_header_path",
-        "--reflection-cc=$reflection_cc_path",
-      ]
-
-      outputs = [
-        sl_output,
-        reflection_header_intermediate,
-        reflection_cc_intermediate,
-      ]
+        outputs += [
+          reflection_header_intermediate,
+          reflection_cc_intermediate,
+        ]
+      }
     }
 
     if (defined(invoker.defines)) {
