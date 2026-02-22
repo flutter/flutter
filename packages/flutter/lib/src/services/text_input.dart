@@ -531,6 +531,7 @@ class TextInputConfiguration {
     this.allowedMimeTypes = const <String>[],
     this.enableDeltaModel = false,
     this.hintLocales = const <Locale>[],
+    this.enableInlinePrediction = true,
   }) : smartDashesType =
            smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType =
@@ -702,6 +703,15 @@ class TextInputConfiguration {
   /// {@endtemplate}
   final List<Locale>? hintLocales;
 
+  /// Whether to enable inline predictive text (e.g. iOS 17+ inline suggestions).
+  ///
+  /// When true, the platform may show inline prediction in the text field.
+  /// When false, inline prediction is disabled. Only affects platforms that
+  /// support it (e.g. iOS 17+); other platforms ignore this setting.
+  ///
+  /// Defaults to true.
+  final bool enableInlinePrediction;
+
   /// Creates a copy of this [TextInputConfiguration] with the given fields
   /// replaced with new values.
   TextInputConfiguration copyWith({
@@ -723,6 +733,7 @@ class TextInputConfiguration {
     AutofillConfiguration? autofillConfiguration,
     bool? enableDeltaModel,
     List<Locale>? hintLocales,
+    bool? enableInlinePrediction,
   }) {
     return TextInputConfiguration(
       viewId: viewId ?? this.viewId,
@@ -744,6 +755,7 @@ class TextInputConfiguration {
       autofillConfiguration: autofillConfiguration ?? this.autofillConfiguration,
       enableDeltaModel: enableDeltaModel ?? this.enableDeltaModel,
       hintLocales: hintLocales ?? this.hintLocales,
+      enableInlinePrediction: enableInlinePrediction ?? this.enableInlinePrediction,
     );
   }
 
@@ -794,6 +806,7 @@ class TextInputConfiguration {
       'autofill': ?autofill,
       'enableDeltaModel': enableDeltaModel,
       'hintLocales': hintLocales?.map((Locale locale) => locale.toLanguageTag()).toList(),
+      'enableInlinePrediction': enableInlinePrediction,
     };
   }
 
@@ -823,7 +836,8 @@ class TextInputConfiguration {
         other.enableIMEPersonalizedLearning == enableIMEPersonalizedLearning &&
         listEquals(other.allowedMimeTypes, allowedMimeTypes) &&
         other.enableDeltaModel == enableDeltaModel &&
-        other.hintLocales == hintLocales;
+        other.hintLocales == hintLocales &&
+        other.enableInlinePrediction == enableInlinePrediction;
   }
 
   @override
@@ -847,6 +861,7 @@ class TextInputConfiguration {
       Object.hashAll(allowedMimeTypes),
       enableDeltaModel,
       hintLocales,
+      enableInlinePrediction,
     );
   }
 
@@ -871,6 +886,7 @@ class TextInputConfiguration {
       'allowedMimeTypes: $allowedMimeTypes',
       'enableDeltaModel: $enableDeltaModel',
       if (hintLocales != null) 'hintLocales: $hintLocales',
+      'enableInlinePrediction: $enableInlinePrediction',
     ];
     return 'TextInputConfiguration(${description.join(', ')})';
   }

@@ -41,7 +41,7 @@ import Foundation
 ///   - Thread Safety: The class manages its internal state in a thread-safe manner to coordinate
 ///     actions between the platform thread and the raster thread.
 @objc(FlutterResizeSynchronizer)
-public final class ResizeSynchronizer: NSObject, @unchecked Sendable {
+public final class ResizeSynchronizer: NSObject {
   private static let invalidSize = CGSize(width: -1, height: -1)
 
   // Synchronizes access to _isInResize_unsafe: isInResize is accessed from multiple threads and

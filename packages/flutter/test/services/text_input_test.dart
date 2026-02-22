@@ -400,6 +400,21 @@ void main() {
         fakeTextInputConfiguration.enableDeltaModel,
         equals(fakeTextInputConfiguration2.enableDeltaModel),
       );
+      expect(
+        fakeTextInputConfiguration.enableInlinePrediction,
+        equals(fakeTextInputConfiguration2.enableInlinePrediction),
+      );
+    });
+
+    test('toJson includes enableInlinePrediction', () {
+      expect(
+        const TextInputConfiguration().toJson()['enableInlinePrediction'],
+        true,
+      );
+      expect(
+        const TextInputConfiguration(enableInlinePrediction: false).toJson()['enableInlinePrediction'],
+        false,
+      );
     });
 
     test('copyWith method works correctly', () {
@@ -419,6 +434,10 @@ void main() {
       expect(
         fakeTextInputConfiguration.enableSuggestions,
         equals(fakeTextInputConfiguration2.enableSuggestions),
+      );
+      expect(
+        fakeTextInputConfiguration.enableInlinePrediction,
+        equals(fakeTextInputConfiguration2.enableInlinePrediction),
       );
       expect(
         fakeTextInputConfiguration.obscureText,
@@ -465,6 +484,10 @@ void main() {
         fakeTextInputConfiguration.enableDeltaModel,
         equals(fakeTextInputConfiguration2.enableDeltaModel),
       );
+      expect(
+        fakeTextInputConfiguration.enableInlinePrediction,
+        equals(fakeTextInputConfiguration2.enableInlinePrediction),
+      );
     });
 
     test('hashCode works correctly', () {
@@ -489,6 +512,10 @@ void main() {
       expect(
         fakeTextInputConfiguration.enableSuggestions.hashCode,
         equals(fakeTextInputConfiguration2.enableSuggestions.hashCode),
+      );
+      expect(
+        fakeTextInputConfiguration.enableInlinePrediction.hashCode,
+        equals(fakeTextInputConfiguration2.enableInlinePrediction.hashCode),
       );
       expect(
         fakeTextInputConfiguration.obscureText.hashCode,

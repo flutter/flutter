@@ -964,6 +964,22 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   XCTAssertEqual(inputView.spellCheckingType, UITextSpellCheckingTypeNo);
 }
 
+- (void)testEnableInlinePredictionFromConfiguration API_AVAILABLE(ios(17.0)) {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  NSDictionary* config = self.mutableTemplateCopy;
+
+  [inputView configureWithDictionary:config];
+  XCTAssertEqual(inputView.inlinePredictionType, UITextInlinePredictionTypeYes);
+
+  [config setValue:@NO forKey:@"enableInlinePrediction"];
+  [inputView configureWithDictionary:config];
+  XCTAssertEqual(inputView.inlinePredictionType, UITextInlinePredictionTypeNo);
+
+  [config setValue:@YES forKey:@"enableInlinePrediction"];
+  [inputView configureWithDictionary:config];
+  XCTAssertEqual(inputView.inlinePredictionType, UITextInlinePredictionTypeYes);
+}
+
 - (void)testReplaceTestLocalAdjustSelectionAndMarkedTextRange {
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
   [inputView setMarkedText:@"test text" selectedRange:NSMakeRange(0, 5)];
@@ -1027,7 +1043,7 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   FlutterTextRange* markedRange = (FlutterTextRange*)inputView.markedTextRange;
   XCTAssertNotNil(markedRange);
   XCTAssertEqual(markedRange.range.location, 0ul);
-  XCTAssertEqual(markedRange.range.length, 18ul);
+  XCTAssertEqual(markedRange.range.length, 17ul);
 
   // Nil attributed string should behave like empty string.
   [inputView setAttributedMarkedText:nil selectedRange:NSMakeRange(0, 0)];

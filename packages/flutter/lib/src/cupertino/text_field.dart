@@ -309,6 +309,8 @@ class CupertinoTextField extends StatefulWidget {
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
+    this.enableInlinePrediction = true,
+    this.composingStyle,
   }) : assert(obscuringCharacter.length == 1),
        smartDashesType =
            smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -448,6 +450,8 @@ class CupertinoTextField extends StatefulWidget {
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
+    this.enableInlinePrediction = true,
+    this.composingStyle,
   }) : assert(obscuringCharacter.length == 1),
        smartDashesType =
            smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -835,6 +839,17 @@ class CupertinoTextField extends StatefulWidget {
   /// ** See code in examples/api/lib/widgets/text_magnifier/text_magnifier.0.dart **
   /// {@end-tool}
   final TextMagnifierConfiguration? magnifierConfiguration;
+
+  /// Whether to enable inline predictive text (e.g. iOS 17+ inline suggestions).
+  ///
+  /// Defaults to true. Only affects platforms that support it.
+  final bool enableInlinePrediction;
+
+  /// Optional style for the composing (and inline prediction) region.
+  ///
+  /// When set, applied to the composing range (IME and inline predictive text).
+  /// When null, the default is used (underlined).
+  final TextStyle? composingStyle;
 
   /// {@macro flutter.widgets.EditableText.spellCheckConfiguration}
   ///
@@ -1622,6 +1637,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
             contentInsertionConfiguration: widget.contentInsertionConfiguration,
             contextMenuBuilder: widget.contextMenuBuilder,
             spellCheckConfiguration: spellCheckConfiguration,
+            enableInlinePrediction: widget.enableInlinePrediction,
+            composingStyle: widget.composingStyle,
           ),
         ),
       ),

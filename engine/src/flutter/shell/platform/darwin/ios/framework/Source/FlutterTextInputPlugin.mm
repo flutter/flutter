@@ -80,6 +80,7 @@ static NSString* const kAutofillEditingValue = @"editingValue";
 static NSString* const kAutofillHints = @"hints";
 
 static NSString* const kAutocorrectionType = @"autocorrect";
+static NSString* const kEnableInlinePrediction = @"enableInlinePrediction";
 
 #pragma mark - Static Functions
 
@@ -1103,6 +1104,13 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   // The input field needs to be visible for the system autofill
   // to find it.
   self.isVisibleToAutofill = autofill || _secureTextEntry;
+
+  if (@available(iOS 17.0, *)) {
+    NSNumber* enableInlinePrediction = configuration[kEnableInlinePrediction];
+    BOOL enabled = enableInlinePrediction == nil || [enableInlinePrediction boolValue];
+    self.inlinePredictionType =
+        enabled ? UITextInlinePredictionTypeYes : UITextInlinePredictionTypeNo;
+  }
 }
 
 - (UITextContentType)textContentType {

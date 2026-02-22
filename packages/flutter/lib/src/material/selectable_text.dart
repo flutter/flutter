@@ -46,6 +46,7 @@ class _TextSpanEditingController extends TextEditingController {
     required BuildContext context,
     TextStyle? style,
     required bool withComposing,
+    TextStyle? composingStyle,
   }) {
     // This does not care about composing.
     return TextSpan(style: style, children: <TextSpan>[_textSpan]);
