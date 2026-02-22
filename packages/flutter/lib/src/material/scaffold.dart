@@ -3084,7 +3084,7 @@ class ScaffoldState extends State<Scaffold>
         removeLeftPadding: false,
         removeTopPadding: true,
         removeRightPadding: false,
-        removeBottomPadding: _resizeToAvoidBottomInset,
+        removeBottomPadding: false,
       );
     }
 
