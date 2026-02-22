@@ -857,21 +857,13 @@ class MaterialScrollBehavior extends ScrollBehavior {
   Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the base class ScrollBehavior as well.
-    assert(
-      axisDirectionToAxis(details.direction) != Axis.vertical ||
-          switch (getPlatform(context)) {
-            TargetPlatform.linux ||
-            TargetPlatform.macOS ||
-            TargetPlatform.windows => details.controller != null,
-            TargetPlatform.android || TargetPlatform.fuchsia || TargetPlatform.iOS => true,
-          },
-    );
     return switch (axisDirectionToAxis(details.direction)) {
       Axis.horizontal => child,
       Axis.vertical => switch (getPlatform(context)) {
-        TargetPlatform.linux ||
-        TargetPlatform.macOS ||
-        TargetPlatform.windows => Scrollbar(controller: details.controller, child: child),
+        TargetPlatform.linux || TargetPlatform.macOS || TargetPlatform.windows => Scrollbar(
+          controller: details.controller!, // ignore: unnecessary_null_checks
+          child: child,
+        ),
         TargetPlatform.android || TargetPlatform.fuchsia || TargetPlatform.iOS => child,
       },
     };
