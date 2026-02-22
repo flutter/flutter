@@ -110,7 +110,10 @@ class BidsStatus extends StatelessWidget {
               ];
             case ConnectionState.waiting:
               children = const <Widget>[
-                SizedBox.square(dimension: 60, child: CircularProgressIndicator()),
+                SizedBox.square(
+                  dimension: 60,
+                  child: CircularProgressIndicator(),
+                ),
                 Padding(
                   padding: EdgeInsets.only(top: 16),
                   child: Text('Awaiting bids...'),
