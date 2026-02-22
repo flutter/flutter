@@ -21,7 +21,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
 
 import '../impeller_test_helpers.dart';
-import 'utils.dart';
+import 'button_tester.dart';
 import 'widget_inspector_test_utils.dart';
 import 'widgets_app_tester.dart';
 
@@ -170,7 +170,7 @@ class RenderRepaintBoundaryWithDebugPaint extends RenderRepaintBoundary {
       final paint = Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.0
-        ..color = const Color(0xFFF44336);
+        ..color = const Color(0xFFFF0000);
       {
         final pictureLayer = PictureLayer(Offset.zero & size);
         final recorder = ui.PictureRecorder();
@@ -430,8 +430,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         required GlobalKey key,
       }) {
         exitWidgetSelectionButtonKey = key;
-        return GestureDetector(
-          onTap: onPressed,
+        return TestButton(
+          onPressed: onPressed,
           key: key,
           behavior: HitTestBehavior.opaque,
           child: const SizedBox(width: 48.0, height: 48.0),
@@ -487,15 +487,15 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             tapBehaviorButtonBuilder: null,
             child: ListView(
               children: <Widget>[
-                GestureDetector(
-                  onTap: () {
+                TestButton(
+                  onPressed: () {
                     log.add('top');
                   },
                   behavior: HitTestBehavior.opaque,
                   child: SizedBox(key: topButtonKey, height: 48.0, child: const Text('TOP')),
                 ),
-                GestureDetector(
-                  onTap: () {
+                TestButton(
+                  onPressed: () {
                     log.add('bottom');
                   },
                   behavior: HitTestBehavior.opaque,
@@ -611,8 +611,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         required GlobalKey key,
       }) {
         exitWidgetSelectionButtonKey = key;
-        return GestureDetector(
-          onTap: onPressed,
+        return TestButton(
+          onPressed: onPressed,
           key: key,
           behavior: HitTestBehavior.opaque,
           child: const SizedBox(width: 48.0, height: 48.0),
@@ -865,8 +865,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           required String semanticsLabel,
           required GlobalKey key,
         }) {
-          return GestureDetector(
-            onTap: onPressed,
+          return TestButton(
+            onPressed: onPressed,
             key: key,
             behavior: HitTestBehavior.opaque,
             child: const SizedBox(width: 48.0, height: 48.0),
@@ -5105,20 +5105,21 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       });
 
       Future<void> pumpWidgetForLayoutExplorer(WidgetTester tester) async {
-        const Widget widget = Directionality(
-          textDirection: TextDirection.ltr,
-          child: Center(
-            child: Row(
-              children: <Widget>[
-                Flexible(
-                  child: ColoredBox(color: Color(0xFF00FF00), child: Text('a')),
-                ),
-                Text('b'),
-              ],
+        await tester.pumpWidget(
+          const Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Row(
+                children: <Widget>[
+                  Flexible(
+                    child: ColoredBox(color: Color(0xFF00FF00), child: Text('a')),
+                  ),
+                  Text('b'),
+                ],
+              ),
             ),
           ),
         );
-        await tester.pumpWidget(widget);
       }
 
       testWidgets('ext.flutter.inspector.getLayoutExplorerNode for RenderBox with BoxParentData', (
@@ -5487,24 +5488,25 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         'ext.flutter.inspector.getLayoutExplorerNode, on a deeply nested widget, does not throw StackOverflowError',
         (WidgetTester tester) async {
           // Regression test for https://github.com/flutter/devtools/issues/5946
-          const Widget widget = Directionality(
-            textDirection: TextDirection.ltr,
-            child: Center(
-              child: Row(
-                children: <Widget>[
-                  Flexible(
-                    child: ColoredBox(
-                      color: Color(0xFF00FF00),
-                      child: SizedBox(
-                        child: Padding(padding: EdgeInsets.zero, child: Text('a')),
+          await tester.pumpWidget(
+            const Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Row(
+                  children: <Widget>[
+                    Flexible(
+                      child: ColoredBox(
+                        color: Color(0xFF00FF00),
+                        child: SizedBox(
+                          child: Padding(padding: EdgeInsets.zero, child: Text('a')),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );
-          await tester.pumpWidget(widget);
 
           final Element padding = tester.element(find.byType(Padding).first);
           service.setSelection(padding, group);
@@ -5895,8 +5897,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         service.addPubRootDirectories(<String>[pubRootTest]);
 
         final String summary = service.getRootWidgetSummaryTree('foo1');
-        // ignore: avoid_dynamic_calls
-        final childrenOfRoot = json.decode(summary)['children'] as List<Object?>;
+        final childrenOfRoot =
+            (json.decode(summary) as Map<String, Object?>)['children']! as List<Object?>;
         // Root -> Directionality -> Column -> [Padding, Center]
         final directionality = childrenOfRoot.first! as Map<String, Object?>;
         final childrenOfDirectionality = directionality['children']! as List<Object?>;
@@ -5907,14 +5909,13 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(padding['description'], 'Padding');
         final objectId = padding['valueId']! as String;
         final String details = service.getDetailsSubtree(objectId, 'foo2');
-        // ignore: avoid_dynamic_calls
-        final detailedChildren = json.decode(details)['children'] as List<Object?>;
+        final detailedChildren =
+            (json.decode(details) as Map<String, Object?>)['children']! as List<Object?>;
 
         final texts = <Map<String, Object?>>[];
         void visitChildren(List<Object?> children) {
           for (final Map<String, Object?> child in children.cast<Map<String, Object?>>()) {
-            if (child['description'] != null &&
-                (child['description']! as String).startsWith('Text')) {
+            if (child['description'] case final String desc when desc.startsWith('Text')) {
               texts.add(child);
             }
             if (child.containsKey('children')) {

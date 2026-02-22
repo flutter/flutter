@@ -13,6 +13,7 @@ const TextStyle testFont = TextStyle(color: Color(0xFF00FF00));
 
 Future<void> pumpTest(WidgetTester tester, TargetPlatform platform) async {
   debugDefaultTargetPlatformOverride = platform;
+  addTearDown(() => debugDefaultTargetPlatformOverride = null);
   await tester.pumpWidget(Container());
   await tester.pumpWidget(
     TestWidgetsApp(

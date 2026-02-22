@@ -904,10 +904,7 @@ void main() {
           controller: controller,
           slivers: <Widget>[
             const SliverToBoxAdapter(child: SizedBox(height: 600)),
-            SliverPersistentHeader(
-              delegate: TestDelegate(minExtent: 30.0),
-              floating: true,
-            ),
+            SliverPersistentHeader(delegate: TestDelegate(minExtent: 30.0), floating: true),
           ],
           otherSlivers: <Widget>[const SliverToBoxAdapter(child: SizedBox(height: 2400))],
         ),
@@ -930,7 +927,7 @@ void main() {
       expect(renderHeader.geometry!.paintExtent, equals(10));
       expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
 
-      // Without snap, the header stays at the current extent after gesture release.
+      // After gesture release, the floating header remains at its current extent.
       await gesture.up();
       await tester.pumpAndSettle();
       expect(renderHeader.geometry!.paintExtent, equals(10));
@@ -974,7 +971,7 @@ void main() {
       expect(renderHeader.geometry!.paintExtent, equals(30.0));
       expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-20.0));
 
-      // Without snap, the header stays at the current extent after gesture release.
+      // After gesture release, the floating header remains at its current extent.
       await gesture.up();
       await tester.pumpAndSettle();
       expect(renderHeader.geometry!.paintExtent, equals(30.0));
@@ -1031,31 +1028,19 @@ void main() {
         slivers: <Widget>[
           MockSliverToBoxAdapter(
             incrementCounter: incrementCounter,
-            child: Container(
-              height: 1000,
-              decoration: const BoxDecoration(color: kYellowColor),
-            ),
+            child: Container(height: 1000, decoration: const BoxDecoration(color: kYellowColor)),
           ),
           MockSliverToBoxAdapter(
             incrementCounter: incrementCounter,
-            child: Container(
-              height: 400,
-              decoration: const BoxDecoration(color: kYellowColor),
-            ),
+            child: Container(height: 400, decoration: const BoxDecoration(color: kYellowColor)),
           ),
           MockSliverToBoxAdapter(
             incrementCounter: incrementCounter,
-            child: Container(
-              height: 500,
-              decoration: const BoxDecoration(color: kYellowColor),
-            ),
+            child: Container(height: 500, decoration: const BoxDecoration(color: kYellowColor)),
           ),
           MockSliverToBoxAdapter(
             incrementCounter: incrementCounter,
-            child: Container(
-              height: 300,
-              decoration: const BoxDecoration(color: kYellowColor),
-            ),
+            child: Container(height: 300, decoration: const BoxDecoration(color: kYellowColor)),
           ),
         ],
       ),
