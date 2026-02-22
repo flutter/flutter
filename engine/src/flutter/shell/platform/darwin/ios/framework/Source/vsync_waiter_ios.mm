@@ -120,6 +120,15 @@ double VsyncWaiterIOS::GetRefreshRate() const {
   CFTimeInterval duration = link.targetTimestamp - link.timestamp;
   fml::TimePoint frame_target_time = frame_start_time + fml::TimeDelta::FromSecondsF(duration);
 
+  // Clamp frame_start_time to the past so FireCallback's DCHECK(Now() >= frame_start_time) holds.
+  // CADisplayLink timestamps can occasionally be in the future (e.g. first frame, ProMotion).
+  fml::TimePoint now = fml::TimePoint::Now();
+  if (frame_start_time > now) {
+    fml::TimeDelta frame_duration = frame_target_time - frame_start_time;
+    frame_start_time = now;
+    frame_target_time = frame_start_time + frame_duration;
+  }
+
   TRACE_EVENT2_INT("flutter", "PlatformVsync", "frame_start_time",
                    frame_start_time.ToEpochDelta().ToMicroseconds(), "frame_target_time",
                    frame_target_time.ToEpochDelta().ToMicroseconds());

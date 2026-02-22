@@ -65,6 +65,11 @@ static const UIAccessibilityTraits kUIAccessibilityTraitUndocumentedEmptyLine = 
   // requirements change.
 }
 
+- (void)setAttributedMarkedText:(NSAttributedString*)attributedString
+                 selectedRange:(NSRange)selectedRange API_AVAILABLE(ios(17.0)) {
+  // Required for UITextInput protocol; no-op for inactive text input.
+}
+
 - (void)unmarkText {
   // This method is required but not called by accessibility API for
   // features we are using it for. It may need to be implemented if
@@ -355,6 +360,12 @@ static const UIAccessibilityTraits kUIAccessibilityTraitUndocumentedEmptyLine = 
 }
 
 - (void)setMarkedText:(NSString*)markedText selectedRange:(NSRange)selectedRange {
+  [[self textInputSurrogate] setMarkedText:markedText selectedRange:selectedRange];
+}
+
+- (void)setAttributedMarkedText:(NSAttributedString*)attributedString
+                 selectedRange:(NSRange)selectedRange API_AVAILABLE(ios(17.0)) {
+  NSString* markedText = attributedString ? [attributedString string] : @"";
   [[self textInputSurrogate] setMarkedText:markedText selectedRange:selectedRange];
 }
 

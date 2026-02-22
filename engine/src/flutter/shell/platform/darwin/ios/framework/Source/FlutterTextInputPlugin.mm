@@ -863,6 +863,9 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     _smartQuotesType = UITextSmartQuotesTypeYes;
     _smartDashesType = UITextSmartDashesTypeYes;
     _selectionRects = [[NSArray alloc] init];
+    if (@available(iOS 17.0, *)) {
+      _inlinePredictionType = UITextInlinePredictionTypeYes;
+    }
 
     if (@available(iOS 14.0, *)) {
       UIScribbleInteraction* interaction = [[UIScribbleInteraction alloc] initWithDelegate:self];
@@ -1593,6 +1596,14 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   } else {
     [self updateEditingState];
   }
+}
+
+// iOS 17+ inline predictive text uses setAttributedMarkedText:selectedRange:.
+// Forward to the existing setMarkedText implementation by extracting the plain string.
+- (void)setAttributedMarkedText:(NSAttributedString*)attributedString
+                 selectedRange:(NSRange)selectedRange API_AVAILABLE(ios(17.0)) {
+  NSString* markedText = attributedString ? [attributedString string] : @"";
+  [self setMarkedText:markedText selectedRange:selectedRange];
 }
 
 - (void)unmarkText {

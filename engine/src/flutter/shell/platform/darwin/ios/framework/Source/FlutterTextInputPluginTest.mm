@@ -1011,6 +1011,30 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   }
 }
 
+- (void)testSetAttributedMarkedTextSelectedRange API_AVAILABLE(ios(17.0)) {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  NSAttributedString* attributedText =
+      [[NSAttributedString alloc] initWithString:@"inline prediction"
+                                      attributes:@{
+                                        NSForegroundColorAttributeName : [UIColor grayColor],
+                                      }];
+  [inputView setAttributedMarkedText:attributedText selectedRange:NSMakeRange(0, 7)];
+
+  XCTAssertEqualObjects(inputView.text, @"inline prediction");
+  NSRange selectedRange = ((FlutterTextRange*)inputView.selectedTextRange).range;
+  XCTAssertEqual(selectedRange.location, 0ul);
+  XCTAssertEqual(selectedRange.length, 7ul);
+  FlutterTextRange* markedRange = (FlutterTextRange*)inputView.markedTextRange;
+  XCTAssertNotNil(markedRange);
+  XCTAssertEqual(markedRange.range.location, 0ul);
+  XCTAssertEqual(markedRange.range.length, 18ul);
+
+  // Nil attributed string should behave like empty string.
+  [inputView setAttributedMarkedText:nil selectedRange:NSMakeRange(0, 0)];
+  XCTAssertEqualObjects(inputView.text, @"");
+  XCTAssertNil(inputView.markedTextRange);
+}
+
 #pragma mark - TextEditingDelta tests
 - (void)testTextEditingDeltasAreGeneratedOnTextInput {
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
