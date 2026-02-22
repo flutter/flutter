@@ -1746,6 +1746,35 @@ void _paragraphTests() {
     skip: isFirefox,
   ); // Intended: Headless firefox has no webgl support https://github.com/flutter/flutter/issues/109265
 
+  // Regression test for https://github.com/flutter/flutter/issues/182722
+  //
+  // Verifies that WebGLContext.sampleCount and WebGLContext.stencilSize
+  // convenience getters return the same values as manual getParameter calls.
+  test(
+    'WebGLContext convenience getters match getParameter calls',
+    () {
+      final DomHTMLCanvasElement canvas = createDomCanvasElement(width: 100, height: 100);
+
+      // Create a WebGL context first (via CanvasKit) so the context exists.
+      canvasKit.GetWebGLContext(
+        canvas,
+        SkWebGLContextOptions(antialias: 0, majorVersion: webGLVersion.toDouble()),
+      );
+
+      final WebGLContext gl = canvas.getGlContext(webGLVersion);
+
+      // The new convenience getters should return the same values as the
+      // manual getParameter calls.
+      expect(gl.sampleCount, equals(gl.getParameter(gl.samples)));
+      expect(gl.stencilSize, equals(gl.getParameter(gl.stencilBits)));
+
+      // Both values should be non-negative.
+      expect(gl.sampleCount, greaterThanOrEqualTo(0));
+      expect(gl.stencilSize, greaterThanOrEqualTo(0));
+    },
+    skip: isFirefox,
+  ); // Intended: Headless firefox has no webgl support https://github.com/flutter/flutter/issues/109265
+
   test(
     'MakeRenderTarget test',
     () {

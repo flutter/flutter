@@ -139,6 +139,24 @@ bool get _workAroundBug91333 => _isIOS;
 bool get browserSupportsCanvaskitChromium =>
     domIntl.v8BreakIterator != null && domIntl.Segmenter != null;
 
+/// Whether the current browser may provide a multisampled WebGL default
+/// framebuffer even when the `antialias` context attribute is set to false.
+///
+/// Per the WebGL spec, the `antialias` attribute is only a hint. Firefox is
+/// known to ignore this hint and provide a multisampled default framebuffer
+/// regardless. When this is true, the actual sample count and stencil bits
+/// must be queried from the WebGL context rather than using hardcoded values,
+/// to avoid rendering failures such as black screens when compositing
+/// platform views (e.g., video elements).
+///
+/// See also: https://github.com/flutter/flutter/issues/182722
+bool get browserMayOverrideAntialiasHint =>
+    debugBrowserMayOverrideAntialiasHint ?? isFirefox;
+
+/// Used in tests to override [browserMayOverrideAntialiasHint].
+@visibleForTesting
+bool? debugBrowserMayOverrideAntialiasHint;
+
 /// Whether the current browser is Safari 17.4 or newer.
 ///
 /// Safari 17.4 introduced support for aria-description.

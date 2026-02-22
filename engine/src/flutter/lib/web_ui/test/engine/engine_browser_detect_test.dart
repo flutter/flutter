@@ -69,6 +69,28 @@ void testMain() {
       expect(browserSupportsCanvaskitChromium, isFalse);
     });
   });
+
+  group('browserMayOverrideAntialiasHint', () {
+    tearDown(() {
+      debugBrowserMayOverrideAntialiasHint = null;
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/182722
+    test('can be overridden for testing', () {
+      debugBrowserMayOverrideAntialiasHint = true;
+      expect(browserMayOverrideAntialiasHint, isTrue);
+
+      debugBrowserMayOverrideAntialiasHint = false;
+      expect(browserMayOverrideAntialiasHint, isFalse);
+    });
+
+    test('defaults to browser detection when debug override is null', () {
+      debugBrowserMayOverrideAntialiasHint = null;
+      // The actual value depends on the browser running the test.
+      // On Firefox, it should be true; on other browsers, false.
+      expect(browserMayOverrideAntialiasHint, equals(isFirefox));
+    });
+  });
 }
 
 @JS('window.Intl.v8BreakIterator')
