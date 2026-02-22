@@ -451,7 +451,7 @@ linter:
   UIs.
 * **Text:** Use `Theme.of(context).textTheme` for text styles.
 - **Text Fields:** Configure `textCapitalization`, `keyboardType`, and
-  `placehoder`.
+  `placeholder`.
 
 ## Material Theming Best Practices
 
