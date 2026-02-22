@@ -40,8 +40,7 @@ mobile platforms.
 * **Widgets are for UI:** Everything in Flutter's UI is a widget. Compose
   complex UIs from smaller, reusable widgets.
 * **Navigation:** Use a modern routing package like `auto_route` or `go_router`.
-  See the [navigation guide](./navigation.md) for a detailed example using
-  `go_router`.
+  For more guidelines around navigation, see the section on [routing](#routing).
 
 ## Package Management
 * **Pub Tool:** To manage packages, use the `pub` tool, if available.
@@ -75,7 +74,8 @@ mobile platforms.
     * Use `PascalCase` for classes, `camelCase` for
       members/variables/functions/enums, and `snake_case` for files.
 * **Functions:**
-    * Functions short and with a single purpose (strive for less than 20 lines).
+    * Keep functions short and with a single purpose.
+      Strive for less than 20 lines.
 * **Testing:** Write code with testing in mind. Use the `file`, `process`, and
   `platform` packages, if appropriate, so you can inject in-memory and fake
   versions of the objects.
@@ -151,7 +151,7 @@ When building reusable APIs, such as a library, follow these principles.
 ## Lint Rules
 
 Include the package in the `analysis_options.yaml` file. Use the following
-analysis_options.yaml file as a starting point:
+`analysis_options.yaml` file as a starting point:
 
 ```yaml
 include: package:flutter_lints/flutter.yaml
@@ -431,38 +431,27 @@ linter:
   always include `loadingBuilder` and `errorBuilder` for a better user
   experience.
 
-    ```dart
-    Image.network(
-      'https://picsum.photos/200/300',
-      loadingBuilder: (context, child, progress) {
-        if (progress == null) return child;
-        return const Center(child: CircularProgressIndicator());
-      },
-      errorBuilder: (context, error, stackTrace) {
-        return const Icon(Icons.error);
-      },
-    )
-    ```
+  ```dart
+  // When using network images, always provide an errorBuilder.
+  Image.network(
+    'https://picsum.photos/200/300',
+    loadingBuilder: (context, child, progress) {
+      if (progress == null) return child;
+      return const Center(child: CircularProgressIndicator());
+    },
+    errorBuilder: (context, error, stackTrace) {
+      return const Icon(Icons.error);
+    },
+  )
+  ```
+
 ## UI Theming and Styling Code
 
 * **Responsiveness:** Use `LayoutBuilder` or `MediaQuery` to create responsive
   UIs.
 * **Text:** Use `Theme.of(context).textTheme` for text styles.
-* **Text Fields:** Configure `textCapitalization`, `keyboardType`, and
-* **Responsiveness:** Use `LayoutBuilder` or `MediaQuery` to create responsive
-  UIs.
-* **Text:** Use `Theme.of(context).textTheme` for text styles.
-  remote images.
-
-```dart
-// When using network images, always provide an errorBuilder.
-Image.network(
-  'https://example.com/image.png',
-  errorBuilder: (context, error, stackTrace) {
-    return const Icon(Icons.error); // Show an error icon
-  },
-);
-```
+- **Text Fields:** Configure `textCapitalization`, `keyboardType`, and
+  `placehoder`.
 
 ## Material Theming Best Practices
 
