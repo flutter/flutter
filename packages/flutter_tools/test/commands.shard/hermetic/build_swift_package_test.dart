@@ -33,6 +33,9 @@ void main() {
   const commandFilePath =
       '/path/to/flutter/packages/flutter_tools/lib/src/commands/build_swift_package.dart';
   const pluginRegistrantSwiftPackagePath = 'output/FlutterPluginRegistrant';
+  const debugModeDirectoryPath = '$pluginRegistrantSwiftPackagePath/Debug';
+  const debugFrameworksDirectoryPath = '$debugModeDirectoryPath/Frameworks';
+  const debugPackagesDirectoryPath = '$debugModeDirectoryPath/Packages';
   const cacheDirectoryPath = 'output/.cache';
   const pluginsDirectoryPath = '$pluginRegistrantSwiftPackagePath/Plugins';
   const engineArtifactPath = '/flutter/bin/cache/artifacts/engine/ios/Flutter.xcframework';
@@ -104,22 +107,26 @@ void main() {
           targetPlatform: targetPlatform,
           utils: testUtils,
         );
-        final Directory swiftPackageOutput = fs.directory(pluginRegistrantSwiftPackagePath);
+        final flutterFrameworkDependency = FlutterFrameworkDependency(
+          targetPlatform: targetPlatform,
+          utils: testUtils,
+        );
+        final Directory modeDirectory = fs.directory(debugModeDirectoryPath);
         final pluginA = FakePlugin(name: 'PluginA', darwinPlatform: targetPlatform);
         pluginSwiftDependencies.copiedPlugins.add((pluginA, '$pluginsDirectoryPath/PluginA'));
 
         await package.generateSwiftPackage(
-          pluginRegistrantSwiftPackage: swiftPackageOutput,
+          modeDirectory: modeDirectory,
           plugins: [pluginA],
           xcodeBuildConfiguration: 'Debug',
           pluginSwiftDependencies: pluginSwiftDependencies,
+          flutterFrameworkDependency: flutterFrameworkDependency,
+          packagesForConfiguration: fs.directory(debugPackagesDirectoryPath),
         );
 
         expect(logger.traceText, isEmpty);
         expect(processManager.hasRemainingExpectations, false);
-        final File generatedPackageManifest = swiftPackageOutput
-            .childDirectory('Debug')
-            .childFile('Package.swift');
+        final File generatedPackageManifest = modeDirectory.childFile('Package.swift');
         expect(generatedPackageManifest, exists);
         expect(generatedPackageManifest.readAsStringSync(), '''
 // swift-tools-version: 5.9
@@ -141,20 +148,21 @@ let package = Package(
         .library(name: "FlutterPluginRegistrant", type: .static, targets: ["FlutterPluginRegistrant"])
     ],
     dependencies: [
+        .package(name: "FlutterFramework", path: "Sources/Packages/FlutterFramework"),
         .package(name: "PluginA", path: "Sources/Packages/PluginA")
     ],
     targets: [
         .target(
             name: "FlutterPluginRegistrant",
             dependencies: [
+                .product(name: "FlutterFramework", package: "FlutterFramework"),
                 .product(name: "PluginA", package: "PluginA")
             ]
         )
     ]
 )
 ''');
-        final File generatedSource = swiftPackageOutput
-            .childDirectory('Debug')
+        final File generatedSource = modeDirectory
             .childDirectory('FlutterPluginRegistrant')
             .childFile('GeneratedPluginRegistrant.swift');
         expect(generatedSource, exists);
@@ -175,6 +183,127 @@ import PluginA
     }
 }
 ''');
+      });
+    });
+
+    group('FlutterFrameworkDependency', () {
+      testWithoutContext('generateArtifacts', () async {
+        final fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        final Directory xcframeworkOutput = fs.directory(debugFrameworksDirectoryPath);
+        final processManager = FakeProcessManager.list([
+          FakeCommand(
+            command: [
+              'rsync',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store/',
+              '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+              engineArtifactPath,
+              xcframeworkOutput.path,
+            ],
+          ),
+        ]);
+        const FlutterDarwinPlatform targetPlatform = .ios;
+        final testUtils = BuildSwiftPackageUtils(
+          analytics: FakeAnalytics(),
+          artifacts: FakeArtifacts(engineArtifactPath),
+          buildSystem: FakeBuildSystem(),
+          cache: FakeCache(),
+          fileSystem: fs,
+          flutterRoot: flutterRoot,
+          flutterVersion: FakeFlutterVersion(),
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: processManager,
+          project: FakeFlutterProject(),
+          templateRenderer: const MustacheTemplateRenderer(),
+          xcode: FakeXcode(),
+        );
+        final flutterFrameworkDependency = FlutterFrameworkDependency(
+          targetPlatform: targetPlatform,
+          utils: testUtils,
+        );
+
+        await flutterFrameworkDependency.generateArtifacts(
+          buildMode: BuildMode.debug,
+          xcframeworkOutput: xcframeworkOutput,
+        );
+        expect(processManager.hasRemainingExpectations, isFalse);
+      });
+
+      testWithoutContext('generateSwiftPackage', () async {
+        final fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+
+        final processManager = FakeProcessManager.list([]);
+        const FlutterDarwinPlatform targetPlatform = .ios;
+        final testUtils = BuildSwiftPackageUtils(
+          analytics: FakeAnalytics(),
+          artifacts: FakeArtifacts(engineArtifactPath),
+          buildSystem: FakeBuildSystem(),
+          cache: FakeCache(),
+          fileSystem: fs,
+          flutterRoot: flutterRoot,
+          flutterVersion: FakeFlutterVersion(),
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: processManager,
+          project: FakeFlutterProject(),
+          templateRenderer: const MustacheTemplateRenderer(),
+          xcode: FakeXcode(),
+        );
+        final flutterFrameworkDependency = FlutterFrameworkDependency(
+          targetPlatform: targetPlatform,
+          utils: testUtils,
+        );
+        final Directory packageDirectory = fs.directory(debugPackagesDirectoryPath);
+        await flutterFrameworkDependency.generateSwiftPackage(packageDirectory);
+        expect(packageDirectory.existsSync(), isTrue);
+        final File manifest = packageDirectory
+            .childDirectory('FlutterFramework')
+            .childFile('Package.swift');
+        expect(manifest.existsSync(), isTrue);
+        expect(manifest.readAsStringSync(), '''
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+//
+//  Generated file. Do not edit.
+//
+
+import PackageDescription
+
+let package = Package(
+    name: "FlutterFramework",
+    products: [
+        .library(name: "FlutterFramework", targets: ["FlutterFramework"])
+    ],
+    dependencies: [\n        \n    ],
+    targets: [
+        .target(
+            name: "FlutterFramework",
+            dependencies: [
+                .target(name: "Flutter")
+            ]
+        ),
+        .binaryTarget(
+            name: "Flutter",
+            path: "../../Frameworks/Flutter.xcframework"
+        )
+    ]
+)
+''');
+        final Directory xcframework = fs.directory(
+          '$debugFrameworksDirectoryPath/Flutter.xcframework',
+        )..createSync(recursive: true);
+        expect(
+          packageDirectory
+              .childDirectory('FlutterFramework')
+              .childDirectory('../../Frameworks/Flutter.xcframework')
+              .resolveSymbolicLinksSync(),
+          '/${xcframework.path}',
+        );
       });
     });
 
@@ -442,22 +571,26 @@ import PluginA
           targetPlatform: targetPlatform,
           utils: testUtils,
         );
-        final Directory swiftPackageOutput = fs.directory(pluginRegistrantSwiftPackagePath);
+        final flutterFrameworkDependency = FlutterFrameworkDependency(
+          targetPlatform: targetPlatform,
+          utils: testUtils,
+        );
+        final Directory modeDirectory = fs.directory(debugModeDirectoryPath);
         final pluginA = FakePlugin(name: 'PluginA', darwinPlatform: targetPlatform);
         pluginSwiftDependencies.copiedPlugins.add((pluginA, '$pluginsDirectoryPath/PluginA'));
 
         await package.generateSwiftPackage(
-          pluginRegistrantSwiftPackage: swiftPackageOutput,
+          modeDirectory: modeDirectory,
           plugins: [pluginA],
           xcodeBuildConfiguration: 'Debug',
           pluginSwiftDependencies: pluginSwiftDependencies,
+          flutterFrameworkDependency: flutterFrameworkDependency,
+          packagesForConfiguration: fs.directory(debugPackagesDirectoryPath),
         );
 
         expect(logger.traceText, isEmpty);
         expect(processManager.hasRemainingExpectations, false);
-        final File generatedPackageManifest = swiftPackageOutput
-            .childDirectory('Debug')
-            .childFile('Package.swift');
+        final File generatedPackageManifest = modeDirectory.childFile('Package.swift');
         expect(generatedPackageManifest, exists);
         expect(generatedPackageManifest.readAsStringSync(), '''
 // swift-tools-version: 5.9
@@ -479,20 +612,21 @@ let package = Package(
         .library(name: "FlutterPluginRegistrant", type: .static, targets: ["FlutterPluginRegistrant"])
     ],
     dependencies: [
+        .package(name: "FlutterFramework", path: "Sources/Packages/FlutterFramework"),
         .package(name: "PluginA", path: "Sources/Packages/PluginA")
     ],
     targets: [
         .target(
             name: "FlutterPluginRegistrant",
             dependencies: [
+                .product(name: "FlutterFramework", package: "FlutterFramework"),
                 .product(name: "PluginA", package: "PluginA")
             ]
         )
     ]
 )
 ''');
-        final File generatedSourceImplementation = swiftPackageOutput
-            .childDirectory('Debug')
+        final File generatedSourceImplementation = modeDirectory
             .childDirectory('FlutterPluginRegistrant')
             .childFile('GeneratedPluginRegistrant.swift');
         expect(generatedSourceImplementation, exists);

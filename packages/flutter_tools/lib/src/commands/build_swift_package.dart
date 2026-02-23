@@ -23,6 +23,7 @@ import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../features.dart';
 import '../flutter_plugins.dart';
+import '../macos/swift_package_manager.dart';
 import '../macos/swift_packages.dart';
 import '../macos/xcode.dart';
 import '../plugins.dart';
@@ -33,6 +34,7 @@ import 'build.dart';
 
 const String _kFileAnIssue =
     'Please file an issue at https://github.com/flutter/flutter/issues/new/choose';
+const String _kFrameworks = 'Frameworks';
 const String _kPackages = 'Packages';
 const String _kPlugins = 'Plugins';
 const String kPluginSwiftPackageName = 'FlutterPluginRegistrant';
@@ -215,6 +217,10 @@ class BuildSwiftPackage extends BuildSubCommand {
     targetPlatform: _targetPlatform,
     utils: utils,
   );
+  late final flutterFrameworkDependency = FlutterFrameworkDependency(
+    targetPlatform: _targetPlatform,
+    utils: utils,
+  );
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -258,6 +264,12 @@ class BuildSwiftPackage extends BuildSubCommand {
 
     for (final buildInfo in buildInfos) {
       final String xcodeBuildConfiguration = buildInfo.mode.uppercaseName;
+      final Directory xcframeworkOutput = pluginRegistrantSwiftPackage
+          .childDirectory(xcodeBuildConfiguration)
+          .childDirectory(_kFrameworks);
+
+      await _buildXcframeworks(buildInfo, xcodeBuildConfiguration, xcframeworkOutput);
+
       await _generateSwiftPackages(
         pluginRegistrantSwiftPackage: pluginRegistrantSwiftPackage,
         plugins: plugins,
@@ -270,6 +282,20 @@ class BuildSwiftPackage extends BuildSubCommand {
     return FlutterCommandResult.success();
   }
 
+  /// Copy or build xcframeworks for the Flutter framework, App framework, CocoaPod plugins,
+  /// and native assets.
+  Future<void> _buildXcframeworks(
+    BuildInfo buildInfo,
+    String xcodeBuildConfiguration,
+    Directory xcframeworkOutput,
+  ) async {
+    logger.printStatus('Building for $xcodeBuildConfiguration...');
+    await flutterFrameworkDependency.generateArtifacts(
+      buildMode: buildInfo.mode,
+      xcframeworkOutput: xcframeworkOutput,
+    );
+  }
+
   Future<void> _generateSwiftPackages({
     required Directory pluginRegistrantSwiftPackage,
     required List<Plugin> plugins,
@@ -277,11 +303,20 @@ class BuildSwiftPackage extends BuildSubCommand {
   }) async {
     final Status status = logger.startProgress('   ├─Generating swift packages...');
     try {
+      final Directory modeDirectory = pluginRegistrantSwiftPackage.childDirectory(
+        xcodeBuildConfiguration,
+      );
+      final Directory packagesForConfiguration = modeDirectory.childDirectory(_kPackages);
+
+      await flutterFrameworkDependency.generateSwiftPackage(packagesForConfiguration);
+
       await pluginRegistrant.generateSwiftPackage(
-        pluginRegistrantSwiftPackage: pluginRegistrantSwiftPackage,
+        modeDirectory: modeDirectory,
         plugins: plugins,
         xcodeBuildConfiguration: xcodeBuildConfiguration,
         pluginSwiftDependencies: pluginSwiftDependencies,
+        flutterFrameworkDependency: flutterFrameworkDependency,
+        packagesForConfiguration: packagesForConfiguration,
       );
     } finally {
       status.stop();
@@ -324,15 +359,13 @@ class FlutterPluginRegistrantSwiftPackage {
   final BuildSwiftPackageUtils _utils;
 
   Future<void> generateSwiftPackage({
-    required Directory pluginRegistrantSwiftPackage,
+    required Directory modeDirectory,
+    required Directory packagesForConfiguration,
     required List<Plugin> plugins,
     required String xcodeBuildConfiguration,
     required FlutterPluginSwiftDependencies pluginSwiftDependencies,
+    required FlutterFrameworkDependency flutterFrameworkDependency,
   }) async {
-    final Directory packagesForConfiguration = pluginRegistrantSwiftPackage
-        .childDirectory(xcodeBuildConfiguration)
-        .childDirectory(_kPackages);
-
     final (
       List<SwiftPackagePackageDependency> pluginPackageDependencies,
       List<SwiftPackageTargetDependency> pluginTargetDependencies,
@@ -340,13 +373,17 @@ class FlutterPluginRegistrantSwiftPackage {
       packagesForConfiguration: packagesForConfiguration,
     );
 
-    final targetDependencies = <SwiftPackageTargetDependency>[...pluginTargetDependencies];
-    final packageDependencies = <SwiftPackagePackageDependency>[...pluginPackageDependencies];
+    final targetDependencies = <SwiftPackageTargetDependency>[
+      flutterFrameworkDependency.targetDependency,
+      ...pluginTargetDependencies,
+    ];
+    final packageDependencies = <SwiftPackagePackageDependency>[
+      flutterFrameworkDependency.packageDependency,
+      ...pluginPackageDependencies,
+    ];
 
     const String swiftPackageName = kPluginSwiftPackageName;
-    final File manifestFile = pluginRegistrantSwiftPackage
-        .childDirectory(xcodeBuildConfiguration)
-        .childFile('Package.swift');
+    final File manifestFile = modeDirectory.childFile('Package.swift');
 
     final product = SwiftPackageProduct(
       name: swiftPackageName,
@@ -372,7 +409,7 @@ class FlutterPluginRegistrantSwiftPackage {
     pluginsPackage.createSwiftPackage(generateEmptySources: false);
 
     await _generateSourceFiles(
-      pluginRegistrantSwiftPackage: pluginRegistrantSwiftPackage,
+      modeDirectory: modeDirectory,
       plugins: plugins,
       xcodeBuildConfiguration: xcodeBuildConfiguration,
     );
@@ -380,18 +417,15 @@ class FlutterPluginRegistrantSwiftPackage {
 
   /// Generates GeneratedPluginRegistrant source files.
   Future<void> _generateSourceFiles({
-    required Directory pluginRegistrantSwiftPackage,
+    required Directory modeDirectory,
     required List<Plugin> plugins,
     required String xcodeBuildConfiguration,
   }) async {
-    final Directory sourcesDirectory = pluginRegistrantSwiftPackage.childDirectory(
-      xcodeBuildConfiguration,
-    );
     ErrorHandlingFileSystem.deleteIfExists(
-      sourcesDirectory.childDirectory(kPluginSwiftPackageName),
+      modeDirectory.childDirectory(kPluginSwiftPackageName),
       recursive: true,
     );
-    final File swiftFile = sourcesDirectory
+    final File swiftFile = modeDirectory
         .childDirectory(kPluginSwiftPackageName)
         .childFile('GeneratedPluginRegistrant.swift');
     switch (_targetPlatform) {
@@ -411,6 +445,108 @@ class FlutterPluginRegistrantSwiftPackage {
         );
     }
   }
+}
+
+/// Class that encapsulates logic needed to copy the Flutter framework and generate dependencies
+/// for the FlutterPluginRegistrant swift package.
+@visibleForTesting
+class FlutterFrameworkDependency {
+  FlutterFrameworkDependency({
+    required FlutterDarwinPlatform targetPlatform,
+    required BuildSwiftPackageUtils utils,
+  }) : _targetPlatform = targetPlatform,
+       _utils = utils;
+
+  final FlutterDarwinPlatform _targetPlatform;
+  final BuildSwiftPackageUtils _utils;
+
+  /// Copies the Flutter/FlutterMacOS xcframework to [xcframeworkOutput].
+  Future<void> generateArtifacts({
+    required BuildMode buildMode,
+    required Directory xcframeworkOutput,
+  }) async {
+    final Status status = _utils.logger.startProgress('   ├─Copying Flutter.xcframework...');
+    try {
+      final String frameworkArtifactPath = _utils.artifacts.getArtifactPath(
+        _targetPlatform.xcframeworkArtifact,
+        platform: _targetPlatform.targetPlatform,
+        mode: buildMode,
+      );
+      final ProcessResult result = await _utils.processManager.run(<String>[
+        'rsync',
+        '-av',
+        '--delete',
+        '--filter',
+        '- .DS_Store/',
+        '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+        frameworkArtifactPath,
+        xcframeworkOutput.path,
+      ]);
+      if (result.exitCode != 0) {
+        throwToolExit(
+          'Failed to copy $frameworkArtifactPath (exit ${result.exitCode}:\n'
+          '${result.stdout}\n---\n${result.stderr}',
+        );
+      }
+    } finally {
+      status.stop();
+    }
+  }
+
+  /// Creates a FlutterFramework swift package within the [packagesForConfiguration]. This swift
+  /// package vends the Flutter xcframework.
+  Future<void> generateSwiftPackage(Directory packagesForConfiguration) async {
+    final flutterFrameworkPackage = SwiftPackage(
+      manifest: packagesForConfiguration
+          .childDirectory(kFlutterGeneratedFrameworkSwiftPackageTargetName)
+          .childFile('Package.swift'),
+      name: kFlutterGeneratedFrameworkSwiftPackageTargetName,
+      platforms: [],
+      products: [
+        SwiftPackageProduct(
+          name: kFlutterGeneratedFrameworkSwiftPackageTargetName,
+          targets: <String>[kFlutterGeneratedFrameworkSwiftPackageTargetName],
+        ),
+      ],
+      dependencies: [],
+      targets: [
+        SwiftPackageTarget.defaultTarget(
+          name: kFlutterGeneratedFrameworkSwiftPackageTargetName,
+          dependencies: [SwiftPackageTargetDependency.target(name: _targetPlatform.binaryName)],
+        ),
+        SwiftPackageTarget.binaryTarget(
+          name: _targetPlatform.binaryName,
+          relativePath: '../../$_kFrameworks/${_targetPlatform.binaryName}.xcframework',
+        ),
+      ],
+      templateRenderer: _utils.templateRenderer,
+    );
+    flutterFrameworkPackage.createSwiftPackage();
+  }
+
+  /// The package dependency for the FlutterFramework.
+  ///
+  /// ```swift
+  ///   dependencies: [
+  ///     .package(name: "FlutterFramework", path: "Sources/Packages/FlutterFramework"),
+  /// ```
+  SwiftPackagePackageDependency get packageDependency => SwiftPackagePackageDependency(
+    name: kFlutterGeneratedFrameworkSwiftPackageTargetName,
+    path: '$_kSources/$_kPackages/$kFlutterGeneratedFrameworkSwiftPackageTargetName',
+  );
+
+  /// The target dependency for the FlutterFramework.
+  ///
+  /// ```swift
+  ///  .target(
+  ///    name: "FlutterPluginRegistrant",
+  ///    dependencies: [
+  ///      .product(name: "FlutterFramework", package: "FlutterFramework"),
+  /// ```
+  SwiftPackageTargetDependency get targetDependency => SwiftPackageTargetDependency.product(
+    name: kFlutterGeneratedFrameworkSwiftPackageTargetName,
+    packageName: kFlutterGeneratedFrameworkSwiftPackageTargetName,
+  );
 }
 
 /// Class that encapsulates logic needed to copy Flutter plugins that support SwiftPM and generate
