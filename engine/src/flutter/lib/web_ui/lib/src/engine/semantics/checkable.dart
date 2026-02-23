@@ -157,8 +157,11 @@ class Selectable extends SemanticBehavior {
 
   @override
   void update() {
+    // Do not use the [Selectable] behavior on checkables. Checkables use
+    // special ARIA roles and `aria-checked`. Adding `aria-selected` in addition
+    // to `aria-checked` would be confusing.
     if (semanticsObject.isFlagsDirty) {
-      if (semanticsObject.isSelectable) {
+      if (semanticsObject.isSelectable && !semanticsObject.isCheckable) {
         final ui.SemanticsRole currentRole = semanticsObject.role;
         final bool isSelected = semanticsObject.isSelected;
 

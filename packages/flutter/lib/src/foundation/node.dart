@@ -8,9 +8,11 @@ import 'package:meta/meta.dart';
 // during device lab performance tests. When editing this file, check to make sure
 // that it didn't break that test.
 
-/// Deprecated. Unused by the framework and will be removed in a future version
-/// of Flutter. If needed, inline any required functionality of this class
-/// directly in the subclass.
+/// Deprecated; unused by the framework and will be removed in a future version
+/// of Flutter.
+///
+/// If needed, inline any required functionality of this class directly in the
+/// subclass.
 ///
 /// An abstract node in a tree.
 ///
