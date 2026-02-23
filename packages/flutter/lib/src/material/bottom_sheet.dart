@@ -698,6 +698,22 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   }
 
   @override
+  void didUpdateWidget(_ModalBottomSheet<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    super.didUpdateWidget(oldWidget);
+    assert(oldWidget.route == widget.route);
+
+    assert(
+      _curvedSheetAnimation.curve == (widget.animationStyle?.curve ?? _kModalBottomSheetCurve),
+    );
+    assert(
+      _curvedSheetAnimation.reverseCurve ==
+          (widget.animationStyle?.reverseCurve ?? _kModalBottomSheetCurve),
+    );
+    assert(_sheetAnimation.parent == _curvedSheetAnimation);
+  }
+
+  @override
   void dispose() {
     // Detach to avoid leaking listeners on the route animation.
     _sheetAnimation.parent = kAlwaysDismissedAnimation;
