@@ -2273,6 +2273,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
               controller: controller.value,
               decoration: inputDecoration,
               validator: widget.validator,
+              autovalidateMode: AutovalidateMode.disabled,
               onEditingComplete: () => widget.onSavedSubmitted(controller.value.text),
               onSaved: widget.onSavedSubmitted,
               onFieldSubmitted: widget.onSavedSubmitted,

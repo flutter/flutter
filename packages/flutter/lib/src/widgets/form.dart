@@ -13,7 +13,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
-import 'binding.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
@@ -28,6 +27,16 @@ import 'will_pop_scope.dart';
 
 // Duration for delay before announcement in IOS so that the announcement won't be interrupted.
 const Duration _kIOSAnnouncementDelayDuration = Duration(seconds: 1);
+
+/// Defines how a [Form] validation is triggered.
+enum _FormValidation {
+  /// Automatic validation driven by the [Form]'s [AutovalidateMode].
+  auto,
+
+  /// Explicit validation via [FormState.validate] or
+  /// [FormState.validateGranularly].
+  manual,
+}
 
 // Examples can assume:
 // late BuildContext context;
@@ -360,7 +369,7 @@ class FormState extends State<Form> {
   bool validate() {
     _hasInteractedByUser = true;
     _forceRebuild();
-    return _validate(View.of(context));
+    return _validate(View.of(context), validation: _FormValidation.manual);
   }
 
   /// Validates every [FormField] that is a descendant of this [Form], and
@@ -377,28 +386,31 @@ class FormState extends State<Form> {
     final invalidFields = <FormFieldState<Object?>>{};
     _hasInteractedByUser = true;
     _forceRebuild();
-    _validate(View.of(context), invalidFields);
+    _validate(View.of(context), validation: _FormValidation.manual, invalidFields: invalidFields);
     return invalidFields;
   }
 
-  bool _validate(FlutterView view, [Set<FormFieldState<Object?>>? invalidFields]) {
+  bool _validate(
+    FlutterView view, {
+    _FormValidation validation = _FormValidation.auto,
+    Set<FormFieldState<Object?>>? invalidFields,
+  }) {
     var hasError = false;
     var errorMessage = '';
-    final validateOnFocusChange = widget.autovalidateMode == AutovalidateMode.onUnfocus;
 
     for (final FormFieldState<dynamic> field in _fields) {
-      final bool hasFocus = field._focusNode.hasFocus;
+      if (validation == _FormValidation.auto && !field._shouldValidate) {
+        continue;
+      }
 
-      if (!validateOnFocusChange || !hasFocus || (validateOnFocusChange && hasFocus)) {
-        final bool isFieldValid = field.validate();
-        hasError |= !isFieldValid;
-        // Ensure that only the first error message gets announced to the user.
-        if (errorMessage.isEmpty) {
-          errorMessage = field.errorText ?? '';
-        }
-        if (invalidFields != null && !isFieldValid) {
-          invalidFields.add(field);
-        }
+      final bool isFieldValid = field.validate();
+      hasError |= !isFieldValid;
+      // Ensure that only the first error message gets announced to the user.
+      if (errorMessage.isEmpty) {
+        errorMessage = field.errorText ?? '';
+      }
+      if (invalidFields != null && !isFieldValid) {
+        invalidFields.add(field);
       }
     }
 
@@ -507,9 +519,9 @@ class FormField<T> extends StatefulWidget {
     this.errorBuilder,
     this.initialValue,
     this.enabled = true,
-    AutovalidateMode? autovalidateMode,
+    this.autovalidateMode,
     this.restorationId,
-  }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
+  });
 
   /// Function that returns the widget representing this form field.
   ///
@@ -591,9 +603,11 @@ class FormField<T> extends StatefulWidget {
   /// will auto-validate even without user interaction. If
   /// [AutovalidateMode.disabled], auto-validation will be disabled.
   ///
-  /// Defaults to [AutovalidateMode.disabled].
+  /// If the [Form] ancestor of this [FormField] has a non-null [Form.autovalidateMode], then
+  /// that will take precedence over this [autovalidateMode] and the form field will auto-validate according to the
+  /// form's [Form.autovalidateMode] instead of this [autovalidateMode].
   /// {@endtemplate}
-  final AutovalidateMode autovalidateMode;
+  final AutovalidateMode? autovalidateMode;
 
   /// Restoration ID to save and restore the state of the form field.
   ///
@@ -622,6 +636,8 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   late final RestorableStringN _errorText;
   final RestorableBool _hasInteractedByUser = RestorableBool(false);
   final FocusNode _focusNode = FocusNode();
+
+  FormState? _formState;
 
   /// The current value of the form field.
   T? get value => _value;
@@ -668,7 +684,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       _clearErrorInternal();
     });
     widget.onReset?.call();
-    Form.maybeOf(context)?._fieldDidChange();
+    _formState?._fieldDidChange();
   }
 
   /// Clears any visible validation error for this field without resetting the field's value.
@@ -731,7 +747,28 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       _value = value;
       _hasInteractedByUser.value = true;
     });
-    Form.maybeOf(context)?._fieldDidChange();
+    _formState?._fieldDidChange();
+  }
+
+  bool get _shouldValidate {
+    final AutovalidateMode mode = _effectiveAutovalidateMode;
+
+    final bool fieldHasInteracted = _hasInteractedByUser.value;
+    final bool formHasInteracted = _formState?._hasInteractedByUser ?? false;
+
+    return switch (mode) {
+      AutovalidateMode.always => true,
+      AutovalidateMode.disabled => false,
+      AutovalidateMode.onUnfocus => fieldHasInteracted && !_focusNode.hasFocus,
+      AutovalidateMode.onUserInteractionIfError => fieldHasInteracted && hasError,
+      AutovalidateMode.onUserInteraction =>
+        // When inherited from the [Form], validation is enabled after
+        // user interaction within the form. When defined on the field,
+        // validation is enabled after user interaction with the field.
+        widget.autovalidateMode == null
+            ? formHasInteracted || fieldHasInteracted
+            : fieldHasInteracted,
+    };
   }
 
   /// Sets the value associated with this form field.
@@ -784,20 +821,11 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    switch (Form.maybeOf(context)?.widget.autovalidateMode) {
-      case AutovalidateMode.always:
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          // If the form is already validated, don't validate again.
-          if (widget.enabled && !hasError && !isValid) {
-            validate();
-          }
-        });
-      case AutovalidateMode.onUnfocus:
-      case AutovalidateMode.onUserInteraction:
-      case AutovalidateMode.onUserInteractionIfError:
-      case AutovalidateMode.disabled:
-      case null:
-        break;
+    final FormState? newFormState = Form.maybeOf(context);
+    if (_formState != newFormState) {
+      _formState?._unregister(this);
+      _formState = newFormState;
+      _formState?._register(this);
     }
   }
 
@@ -812,25 +840,9 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   @protected
   @override
   Widget build(BuildContext context) {
-    if (widget.enabled) {
-      switch (widget.autovalidateMode) {
-        case AutovalidateMode.always:
-          _validate();
-        case AutovalidateMode.onUserInteraction:
-          if (_hasInteractedByUser.value) {
-            _validate();
-          }
-        case AutovalidateMode.onUserInteractionIfError:
-          if (_hasInteractedByUser.value && hasError) {
-            _validate();
-          }
-        case AutovalidateMode.onUnfocus:
-        case AutovalidateMode.disabled:
-          break;
-      }
+    if (widget.enabled && _shouldValidate) {
+      _validate();
     }
-
-    Form.maybeOf(context)?._register(this);
 
     final Widget child = Semantics(
       validationResult: hasError
@@ -839,25 +851,32 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       child: widget.builder(this),
     );
 
-    if (Form.maybeOf(context)?.widget.autovalidateMode == AutovalidateMode.onUnfocus &&
-            widget.autovalidateMode != AutovalidateMode.always ||
-        widget.autovalidateMode == AutovalidateMode.onUnfocus) {
-      return Focus(
-        canRequestFocus: false,
-        skipTraversal: true,
-        onFocusChange: (bool value) {
-          if (!value) {
-            setState(() {
-              _validate();
-            });
-          }
-        },
-        focusNode: _focusNode,
-        child: child,
-      );
-    }
+    return switch (_effectiveAutovalidateMode) {
+      AutovalidateMode.onUnfocus
+          when switch (_effectiveAutovalidateMode) {
+            AutovalidateMode.always => false,
+            AutovalidateMode.onUnfocus => true,
+            _ => true,
+          } =>
+        Focus(
+          canRequestFocus: false,
+          skipTraversal: true,
+          onFocusChange: (bool value) {
+            if (!value) {
+              setState(_validate);
+            }
+          },
+          focusNode: _focusNode,
+          child: child,
+        ),
+      _ => child,
+    };
+  }
 
-    return child;
+  AutovalidateMode get _effectiveAutovalidateMode {
+    return widget.autovalidateMode ??
+        _formState?.widget.autovalidateMode ??
+        AutovalidateMode.disabled;
   }
 }
 
