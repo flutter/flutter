@@ -204,20 +204,14 @@ extension on Rect {
 ///  * [CustomClipper], for creating custom clips.
 class SliverClipRRect extends SingleChildRenderObjectWidget {
   /// Creates a sliver that clips its child using a rounded rectangle.
-  SliverClipRRect({
+  const SliverClipRRect({
     super.key,
     required Widget sliver,
     this.borderRadius = BorderRadius.zero,
     this.clipper,
     this.clipBehavior = Clip.antiAlias,
     this.clipOverlap = true,
-  }) : super(
-         child: SliverClipRect(
-           clipOverlap: clipOverlap,
-           clipBehavior: clipOverlap ? clipBehavior : Clip.none,
-           sliver: sliver,
-         ),
-       );
+  }) : super(child: sliver);
 
   /// The border radius of the rounded corners.
   ///
@@ -518,7 +512,7 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
         AxisDirection.left => Offset(geometry!.paintExtent - mainAxisPosition, crossAxisPosition),
       };
 
-      final T? clip = _clip;
+      final T? clip = getClip();
       if (clip != null && !clipContains(hitOffset, clip)) {
         return false;
       }
