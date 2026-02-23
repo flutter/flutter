@@ -644,6 +644,19 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         // further effect after this point.
         _defaultRouteName = '/';
         return;
+
+      case 'flutter/scroll':
+        const codec = StandardMessageCodec();
+        final dynamic decoded = codec.decodeMessage(data);
+        if (decoded is Map) {
+          final double deltaX = (decoded['deltaX'] as num?)?.toDouble() ?? 0.0;
+          final double deltaY = (decoded['deltaY'] as num?)?.toDouble() ?? 0.0;
+          scrollParentWindow(deltaX, deltaY);
+          replyToPlatformMessage(callback, codec.encodeMessage(true));
+        } else {
+          replyToPlatformMessage(callback, codec.encodeMessage(false));
+        }
+        return;
     }
 
     if (pluginMessageCallHandler != null) {

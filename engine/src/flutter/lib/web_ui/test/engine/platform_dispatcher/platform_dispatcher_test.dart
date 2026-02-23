@@ -215,6 +215,34 @@ void testMain() {
       expect(codec.decodeEnvelope(response!), true);
     });
 
+    test('responds to flutter/scroll with valid scroll deltas', () async {
+      const codec = StandardMessageCodec();
+      final completer = Completer<ByteData?>();
+      ui.PlatformDispatcher.instance.sendPlatformMessage(
+        'flutter/scroll',
+        codec.encodeMessage(<String, dynamic>{'deltaX': 0.0, 'deltaY': 100.0}),
+        completer.complete,
+      );
+
+      final ByteData? response = await completer.future;
+      expect(response, isNotNull);
+      expect(codec.decodeMessage(response), true);
+    });
+
+    test('responds to flutter/scroll with invalid data', () async {
+      const codec = StandardMessageCodec();
+      final completer = Completer<ByteData?>();
+      ui.PlatformDispatcher.instance.sendPlatformMessage(
+        'flutter/scroll',
+        codec.encodeMessage('invalid'),
+        completer.complete,
+      );
+
+      final ByteData? response = await completer.future;
+      expect(response, isNotNull);
+      expect(codec.decodeMessage(response), false);
+    });
+
     test('can set application locale', () async {
       final DomElement host1 = createDomHTMLDivElement();
       final view1 = EngineFlutterView(dispatcher, host1);
