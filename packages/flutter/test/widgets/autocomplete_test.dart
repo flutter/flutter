@@ -3783,4 +3783,45 @@ void main() {
     // The options view has shrunk to the available height.
     expect(tester.getSize(find.byType(Placeholder)).height, closeTo(initialSize - padding, 0.1));
   });
+
+  testWidgets('RawAutocomplete does not crash when recreated and options are hidden', (
+    WidgetTester tester,
+  ) async {
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    final controller = TextEditingController();
+    addTearDown(controller.dispose);
+
+    Widget buildAutocomplete(bool toggleKey) {
+      return MaterialApp(
+        home: Material(
+          child: RawAutocomplete<String>(
+            key: ValueKey<bool>(toggleKey),
+            focusNode: focusNode,
+            textEditingController: controller,
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return const <String>['Option 1'];
+            },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  return const SizedBox();
+                },
+          ),
+        ),
+      );
+    }
+
+    // Pump the initial widget.
+    await tester.pumpWidget(buildAutocomplete(false));
+
+    // Pump again with a new key to force the widget to recreate entirely.
+    // If the fix is missing, this pump will throw an assertion error because
+    // it attempts to unconditionally hide an overlay that was never shown.
+    await tester.pumpWidget(buildAutocomplete(true));
+  });
 }
