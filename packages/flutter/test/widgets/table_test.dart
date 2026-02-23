@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'editable_text_utils.dart' show TestTextField;
 import 'semantics_tester.dart';
 
 class TestStatefulWidget extends StatefulWidget {
@@ -1034,7 +1035,7 @@ void main() {
         home: Scaffold(
           body: Table(
             children: <TableRow>[
-              TableRow(children: <Widget>[TextField(focusNode: focusNode)]),
+              TableRow(children: <Widget>[TestTextField(focusNode: focusNode)]),
             ],
           ),
         ),

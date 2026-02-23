@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
+import 'list_tile_test_utils.dart';
 
 class _CustomPhysics extends ClampingScrollPhysics {
   const _CustomPhysics({super.parent});
@@ -340,7 +341,7 @@ void main() {
               physics: const BouncingScrollPhysics(),
               itemCount: 15,
               itemBuilder: (BuildContext context, int index) {
-                return ListTile(
+                return TestListTile(
                   title: Text('Item $index'),
                   onTap: () {
                     tapped = true;
@@ -423,7 +424,7 @@ void main() {
               itemExtent: 56,
               itemCount: 15,
               itemBuilder: (BuildContext context, int index) {
-                return ListTile(
+                return TestListTile(
                   title: Text('Item $index'),
                   onTap: () {
                     tapped = true;
@@ -537,7 +538,7 @@ void main() {
               itemExtent: 56,
               itemCount: 15,
               itemBuilder: (BuildContext context, int index) {
-                return ListTile(
+                return TestListTile(
                   title: Text('Item $index'),
                   onTap: () {
                     tapped = true;
@@ -1007,7 +1008,7 @@ void main() {
                                       // This builder is called for each child.
                                       // In this example, we just number each list
                                       // item.
-                                      return ListTile(title: Text('Item $index'));
+                                      return TestListTile(title: Text('Item $index'));
                                     },
                                   ),
                                 ),
@@ -1101,7 +1102,9 @@ void main() {
     expect(find.text('Item 2'), findsOneWidget);
     expect(find.text('Item 0'), findsOneWidget);
     expect(
-      tester.getTopLeft(find.ancestor(of: find.text('Item 0'), matching: find.byType(ListTile))).dy,
+      tester
+          .getTopLeft(find.ancestor(of: find.text('Item 0'), matching: find.byType(TestListTile)))
+          .dy,
       tester.getBottomLeft(find.byType(AppBar)).dy + 8.0,
     );
     checkPhysicalLayer(elevation: 4);
@@ -1666,7 +1669,7 @@ void main() {
                       itemExtent: 50.0,
                       itemCount: 30,
                       itemBuilder: (BuildContext context, int index) =>
-                          ListTile(title: Text('Item $index')),
+                          TestListTile(title: Text('Item $index')),
                     ),
                   ],
                 );
@@ -2711,7 +2714,7 @@ void main() {
                     itemExtent: 48.0,
                     itemCount: 30,
                     itemBuilder: (BuildContext context, int index) {
-                      return ListTile(title: Text('Item $index'));
+                      return TestListTile(title: Text('Item $index'));
                     },
                   ),
                 ),
@@ -2767,7 +2770,7 @@ void main() {
                       itemExtent: 48.0,
                       itemCount: 30,
                       itemBuilder: (BuildContext context, int index) {
-                        return ListTile(title: Text('Item $index'));
+                        return TestListTile(title: Text('Item $index'));
                       },
                     ),
                   ),
@@ -2821,7 +2824,7 @@ void main() {
                       itemExtent: 50.0,
                       itemCount: 30,
                       itemBuilder: (BuildContext context, int index) =>
-                          ListTile(title: Text('Item $index')),
+                          TestListTile(title: Text('Item $index')),
                     ),
                   ],
                 );
@@ -2909,7 +2912,7 @@ void main() {
                       itemExtent: 50.0,
                       itemCount: 30,
                       itemBuilder: (BuildContext context, int index) =>
-                          ListTile(title: Text('Item $index')),
+                          TestListTile(title: Text('Item $index')),
                     ),
                   ],
                 );
@@ -3072,13 +3075,13 @@ void main() {
                     ),
                     PinnedHeaderSliver(
                       key: pinnedHeaderSliverKey,
-                      child: const ListTile(title: Text('Pinned Header')),
+                      child: const TestListTile(title: Text('Pinned Header')),
                     ),
                     SliverFixedExtentList.builder(
                       itemExtent: 50.0,
                       itemCount: 30,
                       itemBuilder: (BuildContext context, int index) =>
-                          ListTile(title: Text('Item $index')),
+                          TestListTile(title: Text('Item $index')),
                     ),
                   ],
                 );
@@ -3380,7 +3383,7 @@ void main() {
                   sliver: SliverList.builder(
                     itemCount: 30,
                     itemBuilder: (BuildContext context, int index) {
-                      return ListTile(title: Text('Item $index'));
+                      return TestListTile(title: Text('Item $index'));
                     },
                   ),
                 ),
@@ -3421,7 +3424,7 @@ void main() {
 
     final Finder finder = find.text('Item 14', skipOffstage: false);
     final Finder findAny = find
-        .descendant(of: find.byType(SliverList), matching: find.byType(ListTile))
+        .descendant(of: find.byType(SliverList), matching: find.byType(TestListTile))
         .first;
 
     Future<void> scroll(VerticalDirection direction) async {

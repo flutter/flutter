@@ -125,7 +125,8 @@ void main() {
     );
   }
 
-  FakeCommand setUpXCResultCommand({
+  // Sets up xcresulttool command for Xcode versions below 16.
+  FakeCommand setUpLegacyXCResultCommand({
     String stdout = '',
     void Function(List<String> command)? onRun,
   }) {
@@ -802,7 +803,7 @@ void main() {
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(),
+          setUpLegacyXCResultCommand(),
           setUpRsyncCommand(),
         ]);
 
@@ -845,7 +846,7 @@ void main() {
             },
             stdout: 'Lots of spew from Xcode',
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssues),
           setUpRsyncCommand(),
         ]);
 
@@ -893,7 +894,7 @@ void main() {
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
           setUpRsyncCommand(),
         ]);
 
@@ -942,7 +943,7 @@ void main() {
         processManager.addCommands(<FakeCommand>[
           xattrCommand,
           setUpFakeXcodeBuildHandler(exitCode: 1),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssues),
           setUpRsyncCommand(),
         ]);
 
@@ -986,7 +987,7 @@ void main() {
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
           setUpRsyncCommand(),
         ]);
 
@@ -1043,7 +1044,7 @@ void main() {
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithNoProvisioningProfileIssue),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithNoProvisioningProfileIssue),
           setUpRsyncCommand(),
         ]);
 
@@ -1091,7 +1092,7 @@ void main() {
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithActionIssues),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithActionIssues),
           setUpRsyncCommand(),
         ]);
 
@@ -1153,7 +1154,7 @@ void main() {
                   .createSync(recursive: true);
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonNoIssues),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonNoIssues),
           setUpRsyncCommand(),
         ]);
 
@@ -1195,7 +1196,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
           setUpRsyncCommand(),
         ]);
 
@@ -1237,7 +1238,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
           setUpRsyncCommand(),
         ]);
 
@@ -1295,7 +1296,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonNoIssues),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonNoIssues),
           setUpRsyncCommand(),
         ]),
         Pub: ThrowingPub.new,
@@ -1324,7 +1325,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
           setUpRsyncCommand(),
         ]);
 
@@ -1366,7 +1367,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithNoProvisioningProfileIssue),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithNoProvisioningProfileIssue),
           setUpRsyncCommand(),
         ]);
 
@@ -1410,7 +1411,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
           setUpRsyncCommand(),
         ]);
 
@@ -1464,7 +1465,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(),
+          setUpLegacyXCResultCommand(),
           setUpRsyncCommand(),
         ]);
 
@@ -1509,7 +1510,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssues),
           setUpRsyncCommand(),
         ]);
 
@@ -1559,7 +1560,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
           setUpRsyncCommand(),
         ]);
 
@@ -1610,7 +1611,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         processManager.addCommands(<FakeCommand>[
           xattrCommand,
           setUpFakeXcodeBuildHandler(simulator: true, exitCode: 1),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssues),
           setUpRsyncCommand(),
         ]);
 

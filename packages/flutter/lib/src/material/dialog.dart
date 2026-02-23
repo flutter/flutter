@@ -771,17 +771,13 @@ class AlertDialog extends StatelessWidget {
         ? _DialogDefaultsM3(context)
         : _DialogDefaultsM2(context);
 
-    String? label = semanticLabel;
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        break;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        label ??= MaterialLocalizations.of(context).alertDialogLabel;
-    }
+    final String? label = switch (defaultTargetPlatform) {
+      TargetPlatform.iOS || TargetPlatform.macOS => semanticLabel,
+      TargetPlatform.android ||
+      TargetPlatform.fuchsia ||
+      TargetPlatform.linux ||
+      TargetPlatform.windows => semanticLabel ?? MaterialLocalizations.of(context).alertDialogLabel,
+    };
 
     // The paddingScaleFactor is used to adjust the padding of Dialog's
     // children.
@@ -1173,6 +1169,7 @@ class SimpleDialog extends StatelessWidget {
     this.titleTextStyle,
     this.children,
     this.contentPadding = const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 16.0),
+    this.contentTextStyle,
     this.backgroundColor,
     this.elevation,
     this.shadowColor,
@@ -1239,6 +1236,9 @@ class SimpleDialog extends StatelessWidget {
 
   /// {@macro flutter.material.dialog.surfaceTintColor}
   final Color? surfaceTintColor;
+
+  /// Temporarily unused.
+  final TextStyle? contentTextStyle;
 
   /// The semantic label of the dialog used by accessibility frameworks to
   /// announce screen transitions when the dialog is opened and closed.
@@ -1344,7 +1344,7 @@ class SimpleDialog extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[if (title != null) titleWidget!, if (children != null) contentWidget!],
+        children: <Widget>[?titleWidget, ?contentWidget],
       ),
     );
 

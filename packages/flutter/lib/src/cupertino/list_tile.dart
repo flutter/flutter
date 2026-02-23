@@ -360,7 +360,7 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
                 DefaultTextStyle(style: coloredStyle, maxLines: 1, child: additionalInfo),
                 if (widget.trailing != null) const SizedBox(width: _kAdditionalInfoToTrailing),
               ],
-              if (widget.trailing != null) widget.trailing!,
+              ?widget.trailing,
             ],
           ),
         ),

@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
@@ -1551,10 +1552,17 @@ flutter:
 }
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
-  FakeXcodeProjectInterpreter({this.isInstalled = true, this.schemes = const <String>['Runner']});
+  FakeXcodeProjectInterpreter({
+    this.isInstalled = true,
+    this.version,
+    this.schemes = const <String>['Runner'],
+  });
 
   @override
   final bool isInstalled;
+
+  @override
+  final Version? version;
 
   List<String> schemes;
 

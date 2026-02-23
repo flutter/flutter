@@ -3188,6 +3188,50 @@ void main() {
     expect(FocusScope.of(tester.element(find.text('dialog'))).hasFocus, false);
     expect(focusNode.hasFocus, true);
   });
+
+  group('CupertinoPageTransitionsBuilder', () {
+    testWidgets('builds a CupertinoPageTransition', (WidgetTester tester) async {
+      final routes = <String, WidgetBuilder>{
+        '/': (BuildContext context) => CupertinoPageScaffold(
+          child: CupertinoButton(
+            child: const Text('push'),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/b');
+            },
+          ),
+        ),
+        '/b': (BuildContext context) => const CupertinoPageScaffold(child: Text('page b')),
+      };
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          theme: const CupertinoThemeData(brightness: Brightness.light),
+          routes: routes,
+        ),
+      );
+
+      expect(find.byType(CupertinoPageTransition), findsOneWidget);
+
+      await tester.tap(find.text('push'));
+      await tester.pumpAndSettle();
+      expect(find.text('page b'), findsOneWidget);
+      expect(find.byType(CupertinoPageTransition), findsOneWidget);
+    });
+
+    testWidgets('has correct transitionDuration of 500ms', (WidgetTester tester) async {
+      const builder = CupertinoPageTransitionsBuilder();
+
+      // CupertinoRouteTransitionMixin.kTransitionDuration is 500ms
+      expect(builder.transitionDuration, const Duration(milliseconds: 500));
+    });
+
+    testWidgets('has delegatedTransition', (WidgetTester tester) async {
+      const builder = CupertinoPageTransitionsBuilder();
+
+      expect(builder.delegatedTransition, isNotNull);
+      expect(builder.delegatedTransition, CupertinoPageTransition.delegatedTransition);
+    });
+  });
 }
 
 class MockNavigatorObserver extends NavigatorObserver {

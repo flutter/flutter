@@ -191,7 +191,12 @@ class NavigationDrawer extends StatelessWidget {
         child: Column(
           children: <Widget>[
             ?header,
-            Expanded(child: ListView(children: wrappedChildren)),
+            Expanded(
+              child: Material(
+                type: MaterialType.transparency,
+                child: ListView(children: wrappedChildren),
+              ),
+            ),
             ?footer,
           ],
         ),

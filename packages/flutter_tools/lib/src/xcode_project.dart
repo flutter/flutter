@@ -154,6 +154,10 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   Directory get flutterPluginSwiftPackageDirectory =>
       flutterSwiftPackagesDirectory.childDirectory(kFlutterGeneratedPluginSwiftPackageName);
 
+  /// The Flutter generated directory for the Swift package handling the Flutter framework.
+  Directory get flutterFrameworkSwiftPackageDirectory => relativeSwiftPackagesDirectory
+      .childDirectory(kFlutterGeneratedFrameworkSwiftPackageTargetName);
+
   /// The Flutter generated Swift package manifest (Package.swift) for plugin
   /// dependencies.
   File get flutterPluginSwiftPackageManifest =>
@@ -164,6 +168,15 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   bool get flutterPluginSwiftPackageInProjectSettings {
     return xcodeProjectInfoFile.existsSync() &&
         xcodeProjectInfoFile.readAsStringSync().contains(kFlutterGeneratedPluginSwiftPackageName);
+  }
+
+  /// Checks if FlutterFramework has been added to the project's build settings by checking the
+  /// contents of the pbxproj.
+  bool get flutterFrameworkSwiftPackageInProjectSettings {
+    return xcodeProjectInfoFile.existsSync() &&
+        xcodeProjectInfoFile.readAsStringSync().contains(
+          kFlutterGeneratedFrameworkSwiftPackageTargetName,
+        );
   }
 
   /// True if this project doesn't have Swift Package Manager disabled in the

@@ -19,12 +19,16 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.annotation.TargetApi;
 import android.content.Context;
+import androidx.activity.BackEventCompat;
 import androidx.activity.OnBackPressedCallback;
+import androidx.activity.OnBackPressedDispatcher;
 import androidx.fragment.app.FragmentActivity;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import io.flutter.Build;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterEngineCache;
 import io.flutter.embedding.engine.FlutterJNI;
@@ -34,6 +38,7 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.annotation.Config;
 
 @RunWith(AndroidJUnit4.class)
 public class FlutterFragmentTest {
@@ -64,7 +69,7 @@ public class FlutterFragmentTest {
     assertNull(fragment.getDartEntrypointLibraryUri());
     assertNull(fragment.getDartEntrypointArgs());
     assertEquals("/", fragment.getInitialRoute());
-    assertArrayEquals(new String[] {}, fragment.getFlutterShellArgs().toArray());
+    assertArrayEquals(new String[] {}, fragment.getFlutterShellArgs());
     assertTrue(fragment.shouldAttachEngineToActivity());
     assertFalse(fragment.shouldHandleDeeplinking());
     assertNull(fragment.getCachedEngineId());
@@ -95,7 +100,7 @@ public class FlutterFragmentTest {
     assertEquals("package:foo/bar.dart", fragment.getDartEntrypointLibraryUri());
     assertEquals("/custom/route", fragment.getInitialRoute());
     assertArrayEquals(new String[] {"foo", "bar"}, fragment.getDartEntrypointArgs().toArray());
-    assertArrayEquals(new String[] {}, fragment.getFlutterShellArgs().toArray());
+    assertArrayEquals(new String[] {}, fragment.getFlutterShellArgs());
     assertFalse(fragment.shouldAttachEngineToActivity());
     assertTrue(fragment.shouldHandleDeeplinking());
     assertNull(fragment.getCachedEngineId());
@@ -124,7 +129,7 @@ public class FlutterFragmentTest {
     assertEquals("my_cached_engine_group", fragment.getCachedEngineGroupId());
     assertEquals("custom_entrypoint", fragment.getDartEntrypointFunctionName());
     assertEquals("/custom/route", fragment.getInitialRoute());
-    assertArrayEquals(new String[] {}, fragment.getFlutterShellArgs().toArray());
+    assertArrayEquals(new String[] {}, fragment.getFlutterShellArgs());
     assertFalse(fragment.shouldAttachEngineToActivity());
     assertTrue(fragment.shouldHandleDeeplinking());
     assertNull(fragment.getCachedEngineId());
@@ -286,7 +291,9 @@ public class FlutterFragmentTest {
   }
 
   @Test
-  public void itDelegatesOnBackPressedWithSetFrameworkHandlesBack() {
+  @Config(sdk = Build.API_LEVELS.API_33)
+  @TargetApi(Build.API_LEVELS.API_33)
+  public void itDelegatesOnBackPressedWithSetFrameworkHandlesBackForSdk33() {
     // We need to mock FlutterJNI to avoid triggering native code.
     FlutterJNI flutterJNI = mock(FlutterJNI.class);
     when(flutterJNI.isAttached()).thenReturn(true);
@@ -330,6 +337,72 @@ public class FlutterFragmentTest {
             fragment.setFrameworkHandlesBack(true);
             activity.getOnBackPressedDispatcher().onBackPressed();
             verify(mockDelegate, times(1)).onBackPressed();
+          });
+    }
+  }
+
+  @Test
+  @Config(sdk = Build.API_LEVELS.API_34)
+  @TargetApi(Build.API_LEVELS.API_34)
+  public void itDelegatesOnBackPressedWithSetFrameworkHandlesBackForSdk34OrHigher() {
+    // We need to mock FlutterJNI to avoid triggering native code.
+    FlutterJNI flutterJNI = mock(FlutterJNI.class);
+    when(flutterJNI.isAttached()).thenReturn(true);
+
+    FlutterEngine flutterEngine =
+        new FlutterEngine(ctx, new FlutterLoader(), flutterJNI, null, false);
+    FlutterEngineCache.getInstance().put("my_cached_engine", flutterEngine);
+
+    FlutterFragment fragment =
+        FlutterFragment.withCachedEngine("my_cached_engine")
+            // This enables the use of onBackPressedCallback, which is what
+            // sends backs to the framework if setFrameworkHandlesBack is true.
+            .shouldAutomaticallyHandleOnBackPressed(true)
+            .build();
+
+    try (ActivityScenario<FragmentActivity> scenario =
+        ActivityScenario.launch(FragmentActivity.class)) {
+      scenario.onActivity(
+          activity -> {
+            activity
+                .getSupportFragmentManager()
+                .beginTransaction()
+                .add(android.R.id.content, fragment)
+                .commitNow();
+
+            FlutterActivityAndFragmentDelegate mockDelegate =
+                mock(FlutterActivityAndFragmentDelegate.class);
+            isDelegateAttached = true;
+            when(mockDelegate.isAttached()).thenAnswer(invocation -> isDelegateAttached);
+            doAnswer(invocation -> isDelegateAttached = false).when(mockDelegate).onDetach();
+            TestDelegateFactory delegateFactory = new TestDelegateFactory(mockDelegate);
+            fragment.setDelegateFactory(delegateFactory);
+
+            BackEventCompat mockBackEvent = mock(BackEventCompat.class);
+            OnBackPressedDispatcher dispatcher = activity.getOnBackPressedDispatcher();
+
+            // Back gesture events now will still be handled by Android (the default),
+            // until setFrameworkHandlesBack is set to true.
+            dispatcher.dispatchOnBackStarted(mockBackEvent);
+            dispatcher.dispatchOnBackProgressed(mockBackEvent);
+            dispatcher.onBackPressed();
+            dispatcher.dispatchOnBackCancelled();
+            verify(mockDelegate, times(0)).startBackGesture(any());
+            verify(mockDelegate, times(0)).updateBackGestureProgress(any());
+            verify(mockDelegate, times(0)).commitBackGesture();
+            verify(mockDelegate, times(0)).cancelBackGesture();
+
+            // Setting setFrameworkHandlesBack to true means the delegate will receive
+            // the back and Android won't handle it.
+            fragment.setFrameworkHandlesBack(true);
+            dispatcher.dispatchOnBackStarted(mockBackEvent);
+            dispatcher.dispatchOnBackProgressed(mockBackEvent);
+            dispatcher.onBackPressed();
+            dispatcher.dispatchOnBackCancelled();
+            verify(mockDelegate, times(1)).startBackGesture(any());
+            verify(mockDelegate, times(1)).updateBackGestureProgress(any());
+            verify(mockDelegate, times(1)).commitBackGesture();
+            verify(mockDelegate, times(1)).cancelBackGesture();
           });
     }
   }

@@ -826,11 +826,24 @@ mixin WidgetsBinding
   Future<AppExitResponse> handleRequestAppExit() async {
     var didCancel = false;
     for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
-      if ((await observer.didRequestAppExit()) == AppExitResponse.cancel) {
-        didCancel = true;
-        // Don't early return. For the case where someone is just using the
-        // observer to know when exit happens, we want to call all the
-        // observers, even if we already know we're going to cancel.
+      try {
+        if ((await observer.didRequestAppExit()) == AppExitResponse.cancel) {
+          didCancel = true;
+          // Don't early return. For the case where someone is just using the
+          // observer to know when exit happens, we want to call all the
+          // observers, even if we already know we're going to cancel.
+        }
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didRequestAppExit',
+            ),
+          ),
+        );
       }
     }
     return didCancel ? AppExitResponse.cancel : AppExitResponse.exit;
@@ -840,7 +853,20 @@ mixin WidgetsBinding
   void handleMetricsChanged() {
     super.handleMetricsChanged();
     for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
-      observer.didChangeMetrics();
+      try {
+        observer.didChangeMetrics();
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didChangeMetrics',
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -848,7 +874,20 @@ mixin WidgetsBinding
   void handleTextScaleFactorChanged() {
     super.handleTextScaleFactorChanged();
     for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
-      observer.didChangeTextScaleFactor();
+      try {
+        observer.didChangeTextScaleFactor();
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didChangeTextScaleFactor',
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -856,7 +895,20 @@ mixin WidgetsBinding
   void handlePlatformBrightnessChanged() {
     super.handlePlatformBrightnessChanged();
     for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
-      observer.didChangePlatformBrightness();
+      try {
+        observer.didChangePlatformBrightness();
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didChangePlatformBrightness',
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -864,7 +916,20 @@ mixin WidgetsBinding
   void handleAccessibilityFeaturesChanged() {
     super.handleAccessibilityFeaturesChanged();
     for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
-      observer.didChangeAccessibilityFeatures();
+      try {
+        observer.didChangeAccessibilityFeatures();
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didChangeAccessibilityFeatures',
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -890,7 +955,20 @@ mixin WidgetsBinding
   @mustCallSuper
   void dispatchLocalesChanged(List<Locale>? locales) {
     for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
-      observer.didChangeLocales(locales);
+      try {
+        observer.didChangeLocales(locales);
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didChangeLocales',
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -947,8 +1025,21 @@ mixin WidgetsBinding
   @visibleForTesting
   Future<bool> handlePopRoute() async {
     for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
-      if (await observer.didPopRoute()) {
-        return true;
+      try {
+        if (await observer.didPopRoute()) {
+          return true;
+        }
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didPopRoute',
+            ),
+          ),
+        );
       }
     }
     SystemNavigator.pop();
@@ -962,8 +1053,21 @@ mixin WidgetsBinding
     _backGestureObservers.clear();
     final backEvent = PredictiveBackEvent.fromMap(arguments);
     for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
-      if (observer.handleStartBackGesture(backEvent)) {
-        _backGestureObservers.add(observer);
+      try {
+        if (observer.handleStartBackGesture(backEvent)) {
+          _backGestureObservers.add(observer);
+        }
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.handleStartBackGesture',
+            ),
+          ),
+        );
       }
     }
     return _backGestureObservers.isNotEmpty;
@@ -976,7 +1080,20 @@ mixin WidgetsBinding
 
     final backEvent = PredictiveBackEvent.fromMap(arguments);
     for (final WidgetsBindingObserver observer in _backGestureObservers) {
-      observer.handleUpdateBackGestureProgress(backEvent);
+      try {
+        observer.handleUpdateBackGestureProgress(backEvent);
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.handleUpdateBackGestureProgress',
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -991,13 +1108,39 @@ mixin WidgetsBinding
       return;
     }
     for (final WidgetsBindingObserver observer in _backGestureObservers) {
-      observer.handleCommitBackGesture();
+      try {
+        observer.handleCommitBackGesture();
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.handleCommitBackGesture',
+            ),
+          ),
+        );
+      }
     }
   }
 
   void _handleCancelBackGesture() {
     for (final WidgetsBindingObserver observer in _backGestureObservers) {
-      observer.handleCancelBackGesture();
+      try {
+        observer.handleCancelBackGesture();
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.handleCancelBackGesture',
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -1017,8 +1160,21 @@ mixin WidgetsBinding
   Future<bool> handlePushRoute(String route) async {
     final routeInformation = RouteInformation(uri: Uri.parse(route));
     for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
-      if (await observer.didPushRouteInformation(routeInformation)) {
-        return true;
+      try {
+        if (await observer.didPushRouteInformation(routeInformation)) {
+          return true;
+        }
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didPushRouteInformation',
+            ),
+          ),
+        );
       }
     }
     return false;
@@ -1030,8 +1186,21 @@ mixin WidgetsBinding
       state: routeArguments['state'] as Object?,
     );
     for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
-      if (await observer.didPushRouteInformation(routeInformation)) {
-        return true;
+      try {
+        if (await observer.didPushRouteInformation(routeInformation)) {
+          return true;
+        }
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didPushRouteInformation',
+            ),
+          ),
+        );
       }
     }
     return false;
@@ -1065,7 +1234,20 @@ mixin WidgetsBinding
   void handleAppLifecycleStateChanged(AppLifecycleState state) {
     super.handleAppLifecycleStateChanged(state);
     for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
-      observer.didChangeAppLifecycleState(state);
+      try {
+        observer.didChangeAppLifecycleState(state);
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didChangeAppLifecycleState',
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -1073,7 +1255,20 @@ mixin WidgetsBinding
   void handleViewFocusChanged(ViewFocusEvent event) {
     super.handleViewFocusChanged(event);
     for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
-      observer.didChangeViewFocus(event);
+      try {
+        observer.didChangeViewFocus(event);
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didChangeViewFocus',
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -1081,7 +1276,20 @@ mixin WidgetsBinding
   void handleMemoryPressure() {
     super.handleMemoryPressure();
     for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
-      observer.didHaveMemoryPressure();
+      try {
+        observer.didHaveMemoryPressure();
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didHaveMemoryPressure',
+            ),
+          ),
+        );
+      }
     }
   }
 

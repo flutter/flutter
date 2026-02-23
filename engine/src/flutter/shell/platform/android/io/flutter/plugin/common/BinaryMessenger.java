@@ -34,10 +34,10 @@ public interface BinaryMessenger {
    * channels' constructors to control the threading policy for handling platform channels'
    * messages.
    */
-  public interface TaskQueue {}
+  interface TaskQueue {}
 
   /** Options that control how a TaskQueue should operate and be created. */
-  public static class TaskQueueOptions {
+  class TaskQueueOptions {
     private boolean isSerial = true;
 
     public boolean getIsSerial() {

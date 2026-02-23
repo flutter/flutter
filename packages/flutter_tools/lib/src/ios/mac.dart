@@ -338,6 +338,12 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildInfo: buildInfo,
   );
   if (app.project.usesSwiftPackageManager) {
+    SwiftPackageManager.updateFlutterFrameworkSymlink(
+      buildMode: buildInfo.mode,
+      fileSystem: globals.fs,
+      platform: FlutterDarwinPlatform.ios,
+      project: app.project,
+    );
     final String? iosDeploymentTarget = buildSettings['IPHONEOS_DEPLOYMENT_TARGET'];
     if (iosDeploymentTarget != null) {
       SwiftPackageManager.updateMinimumDeployment(

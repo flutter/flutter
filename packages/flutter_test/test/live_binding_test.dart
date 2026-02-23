@@ -4,6 +4,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // This file is for testings that require a `LiveTestWidgetsFlutterBinding`
@@ -73,6 +74,7 @@ void main() {
   });
 
   testWidgets('setSurfaceSize works', (WidgetTester tester) async {
+    addTearDown(binding.resetLayers);
     await tester.pumpWidget(const MaterialApp(home: Center(child: Text('Test'))));
 
     final Size windowCenter = tester.view.physicalSize / tester.view.devicePixelRatio / 2;
@@ -128,6 +130,36 @@ void main() {
       binding.shouldPropagateDevicePointerEvents = false;
     },
   );
+
+  testWidgets('resetLayers resets configuration and replaces root layer', (
+    WidgetTester tester,
+  ) async {
+    // Ensure cleanup. This statement is not part of the test.
+    addTearDown(binding.resetLayers);
+
+    final ViewConfiguration currentConfig = binding.renderView.configuration;
+    await binding.setSurfaceSize(const Size(400, 400));
+    binding.renderView.configuration = const ViewConfiguration(devicePixelRatio: 10.0);
+    final Layer? currentRootLayer = binding.renderView.debugLayer;
+
+    await binding.resetLayers(); // This statement is the testee.
+
+    // Verify that all properties have been reset
+    expect(
+      binding.renderView.configuration.logicalConstraints,
+      equals(currentConfig.logicalConstraints),
+    );
+    expect(
+      binding.renderView.configuration.physicalConstraints,
+      equals(currentConfig.physicalConstraints),
+    );
+    expect(
+      binding.renderView.configuration.devicePixelRatio,
+      equals(currentConfig.devicePixelRatio),
+    );
+    // Verify that root layer has been replaced
+    expect(binding.renderView.debugLayer, isNot(same(currentRootLayer)));
+  });
 }
 
 /// A widget that shows the number of times it has been tapped.
