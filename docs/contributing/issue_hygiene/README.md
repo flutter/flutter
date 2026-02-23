@@ -212,7 +212,7 @@ Common naming conventions for labels include:
 - **`d: *`** - The purple `d` ("devtools") labels are for organizing our developer tool issues.
 - **`d: *`** - The green `d` ("documentation") labels are for organizing our documentation-related issues.
 - **`dependency: *`** - Indicates the upstream team for issues that are blocked on some work from an upstream project (e.g. Skia, Dart).
-- **`e: *`** - The `e` ("engine") prefix is for subsets of the Flutter engine ([flutter/engine](https://github.com/flutter/engine)).
+- **`e: *`** - The `e` ("engine") prefix is for subsets of the Flutter engine ([flutter/engine](https://github.com/flutter/flutter/tree/main/engine)).
 - **`f: *`** - The `f` ("framework") prefix is for subsets of the Flutter framework ([flutter/flutter's packages/flutter/](https://github.com/flutter/flutter/tree/main/packages/flutter)).
 - **`found in release: x.yy`** - Used for a series of labels that indicate which versions of Flutter an issue was found in.
 - **`from: *`** - Labels that indicate where an issue originated (e.g. research, postmortems), if it wasn't filed organically.
