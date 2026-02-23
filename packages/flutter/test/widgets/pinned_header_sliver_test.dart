@@ -247,6 +247,7 @@ void main() {
     expect(tester.getRect(find.text('PinnedHeaderSliver 2')), rect2);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/179022.
   testWidgets(
     'PinnedHeaderSliver: presence of RenderViewport.excludeFromScrolling tag when pinned',
     (WidgetTester tester) async {
@@ -283,6 +284,15 @@ void main() {
         ),
       );
 
+      Rect getHeaderRect() => tester.getRect(find.text('PinnedHeaderSliver'));
+      Rect getFirstChildRect() => tester.getRect(find.text('First child'));
+
+      // Pinned header appears after first child initially.
+      final Rect firstChildRect = getFirstChildRect();
+      expect(firstChildRect.top, 0.0);
+      expect(firstChildRect.height, 100.0);
+      expect(getHeaderRect().top, 100.0);
+
       expect(
         semantics,
         isNot(
@@ -294,6 +304,9 @@ void main() {
 
       await tester.drag(find.byType(CustomScrollView), const Offset(0, -100));
       await tester.pumpAndSettle();
+
+      // Pinned header should be pinned to the top after drag.
+      expect(getHeaderRect().top, 0.0);
 
       expect(
         semantics,
