@@ -219,26 +219,23 @@ mixin RenderInlineChildrenContainerDefaults
     for (final box in boxes) {
       if (child == null) {
         assert(() {
-          if (boxes.length > childCount) {
-            throw FlutterError.fromParts(<DiagnosticsNode>[
-              ErrorSummary('Invalid number of boxes provided to positionInlineChildren.'),
-              ErrorDescription(
-                'The number of boxes (${boxes.length}) exceeds the number of child render objects ($childCount). '
-                'Each box corresponds to a child, but there are not enough children to position all boxes.',
-              ),
-              ErrorHint(
-                'This error typically occurs when a custom InlineSpan implementation returns a list of boxes '
-                'that is longer than the number of inline children. Ensure that the number of boxes returned '
-                'by `computeLineMetrics` or similar methods does not exceed the number of children.',
-              ),
-              DiagnosticsProperty<RenderObject>(
-                'The RenderParagraph receiving the boxes',
-                this,
-                style: DiagnosticsTreeStyle.errorProperty,
-              ),
-            ]);
-          }
-          return true;
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('Invalid number of boxes provided to positionInlineChildren.'),
+            ErrorDescription(
+              'The number of boxes (${boxes.length}) exceeds the number of child render objects ($childCount). '
+              'Each box corresponds to a child, but there are not enough children to position all boxes.',
+            ),
+            ErrorHint(
+              'This error typically occurs when a custom InlineSpan implementation returns a list of boxes '
+              'that is longer than the number of inline children. Ensure that the number of boxes returned '
+              'by `computeLineMetrics` or similar methods does not exceed the number of children.',
+            ),
+            DiagnosticsProperty<RenderObject>(
+              'The RenderParagraph receiving the boxes',
+              this,
+              style: DiagnosticsTreeStyle.errorProperty,
+            ),
+          ]);
         }());
         return;
       }
