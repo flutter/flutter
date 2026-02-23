@@ -603,9 +603,10 @@ class FormField<T> extends StatefulWidget {
   /// will auto-validate even without user interaction. If
   /// [AutovalidateMode.disabled], auto-validation will be disabled.
   ///
-  /// If the [Form] ancestor of this [FormField] has a non-null [Form.autovalidateMode], then
-  /// that will take precedence over this [autovalidateMode] and the form field will auto-validate according to the
-  /// form's [Form.autovalidateMode] instead of this [autovalidateMode].
+  /// If not null, this `autovalidateMode` takes precedence over the [Form]'s
+  /// `autovalidateMode`. If null, the form's `autovalidateMode` is used.
+  ///
+  /// If both are null, this defaults to [AutovalidateMode.disabled].
   /// {@endtemplate}
   final AutovalidateMode? autovalidateMode;
 
@@ -852,23 +853,17 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     );
 
     return switch (_effectiveAutovalidateMode) {
-      AutovalidateMode.onUnfocus
-          when switch (_effectiveAutovalidateMode) {
-            AutovalidateMode.always => false,
-            AutovalidateMode.onUnfocus => true,
-            _ => true,
-          } =>
-        Focus(
-          canRequestFocus: false,
-          skipTraversal: true,
-          onFocusChange: (bool value) {
-            if (!value) {
-              setState(_validate);
-            }
-          },
-          focusNode: _focusNode,
-          child: child,
-        ),
+      AutovalidateMode.onUnfocus => Focus(
+        canRequestFocus: false,
+        skipTraversal: true,
+        onFocusChange: (bool value) {
+          if (!value) {
+            setState(_validate);
+          }
+        },
+        focusNode: _focusNode,
+        child: child,
+      ),
       _ => child,
     };
   }
