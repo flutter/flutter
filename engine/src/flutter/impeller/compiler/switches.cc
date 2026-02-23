@@ -200,6 +200,8 @@ Switches::Switches(const fml::CommandLine& command_line)
       use_half_textures(command_line.HasOption("use-half-textures")),
       require_framebuffer_fetch(
           command_line.HasOption("require-framebuffer-fetch")),
+      verbose_error_output(
+          GetOptionAsPath(command_line, "verbose-error-output")),
       target_platform_(TargetPlatformFromCommandLine(command_line)),
       runtime_stages_(RuntimeStagesFromCommandLine(command_line)) {
   auto language = ToLowerCase(

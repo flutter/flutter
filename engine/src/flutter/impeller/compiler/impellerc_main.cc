@@ -17,6 +17,9 @@
 #include "impeller/compiler/types.h"
 #include "impeller/compiler/utilities.h"
 
+constexpr int kVerboseErrorLineThreshold = 20;
+constexpr int kTruncatedErrorShowLines = 5;
+
 namespace impeller {
 namespace compiler {
 
@@ -42,6 +45,64 @@ static std::shared_ptr<Compiler> CreateCompiler(
       CreateReflectorOptions(options, switches);
   return std::make_shared<Compiler>(source_file_mapping, options,
                                     reflector_options);
+}
+
+static void OutputCompilationError(const Compiler& compiler,
+                                   TargetPlatform platform,
+                                   const Switches& switches) {
+  std::cerr << "impellerc failed to compile " << switches.source_file_name
+            << " to target: " << TargetPlatformToString(platform) << std::endl;
+  auto error = compiler.GetErrorMessages();
+
+  // No need to write to a file if no error output filename was provided or the
+  // error is short. Output the error directly to cerr.
+  auto line_count = std::count(error.begin(), error.end(), '\n');
+  if (switches.verbose_error_output.empty() ||
+      line_count <= kVerboseErrorLineThreshold) {
+    std::cerr << error << std::endl;
+    return;
+  }
+
+  // Output truncated error to cerr.
+  auto prefix = InferShaderNameFromPath(switches.source_file_name) + ": ";
+  std::vector<std::string> first_lines;
+  std::vector<std::string> last_lines;
+  std::stringstream error_stream(error);
+  std::string line;
+  for (int line_index = 0; std::getline(error_stream, line); line_index++) {
+    if (line_index < kTruncatedErrorShowLines) {
+      first_lines.push_back(line);
+    } else if (line_index > line_count - kTruncatedErrorShowLines) {
+      last_lines.push_back(line);
+    }
+  }
+  for (size_t i = 0; i < kTruncatedErrorShowLines; ++i) {
+    std::cerr << prefix << first_lines[i] << std::endl;
+  }
+  std::cerr << prefix << ">>>> TRUNCATED "
+            << line_count - 2 * kTruncatedErrorShowLines << " LINES <<<<"
+            << std::endl;
+  for (size_t i = 0; i < kTruncatedErrorShowLines; ++i) {
+    std::cerr << prefix << last_lines[i] << std::endl;
+  }
+
+  // Write full error to file.
+  auto error_mapping = std::make_shared<fml::NonOwnedMapping>(
+      reinterpret_cast<const uint8_t*>(error.data()), error.size(),
+      [](auto, auto) {});
+  auto output_path = std::filesystem::absolute(std::filesystem::current_path() /
+                                               switches.verbose_error_output);
+  if (fml::WriteAtomically(*switches.working_directory,
+                           Utf8FromPath(output_path).c_str(), *error_mapping)) {
+    std::cerr << prefix
+              << "Error output was truncated. Full error output written to "
+              << switches.verbose_error_output << std::endl;
+  } else {
+    std::cerr
+        << prefix
+        << "Error output was truncated. Failed to write full error output to "
+        << switches.verbose_error_output << std::endl;
+  }
 }
 
 static bool OutputIPLR(const std::vector<std::shared_ptr<Compiler>>& compilers,
@@ -198,9 +259,7 @@ bool Main(const fml::CommandLine& command_line) {
     if (compiler->IsValid()) {
       compilers.push_back(compiler);
     } else {
-      std::cerr << "Compilation failed for target: "
-                << TargetPlatformToString(platform) << std::endl;
-      std::cerr << compiler->GetErrorMessages() << std::endl;
+      OutputCompilationError(*compiler, platform, switches);
       return false;
     }
   }

@@ -184,6 +184,7 @@ class ShaderCompiler {
       '--input-type=frag',
       '--include=${input.parent.path}',
       '--include=$shaderLibPath',
+      '--verbose-error-output=${_fs.path.join(getBuildDirectory(), 'impellerc_error_${input.path.hashCode}.txt')}',
     ];
     _logger.printTrace('shaderc command: $cmd');
     final Process impellercProcess = await _processManager.start(cmd);
@@ -196,9 +197,7 @@ class ShaderCompiler {
       if (fatal) {
         throw ShaderCompilerException._(
           'Shader compilation of "${input.path}" to "$outputPath" '
-          'failed with exit code $code.\n'
-          'impellerc stdout:\n$stdout\n'
-          'impellerc stderr:\n$stderr',
+          'failed with exit code $code.',
         );
       }
       return false;
