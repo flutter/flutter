@@ -3794,24 +3794,22 @@ void main() {
     addTearDown(controller.dispose);
 
     Widget buildAutocomplete(bool toggleKey) {
-      return MaterialApp(
-        home: Material(
-          child: RawAutocomplete<String>(
-            key: ValueKey<bool>(toggleKey),
-            focusNode: focusNode,
-            textEditingController: controller,
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              return const <String>['Option 1'];
-            },
-            optionsViewBuilder:
-                (
-                  BuildContext context,
-                  AutocompleteOnSelected<String> onSelected,
-                  Iterable<String> options,
-                ) {
-                  return const SizedBox();
-                },
-          ),
+      return TestWidgetsApp(
+        home: RawAutocomplete<String>(
+          key: ValueKey<bool>(toggleKey),
+          focusNode: focusNode,
+          textEditingController: controller,
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            return const <String>['Option 1'];
+          },
+          optionsViewBuilder:
+              (
+                BuildContext context,
+                AutocompleteOnSelected<String> onSelected,
+                Iterable<String> options,
+              ) {
+                return const SizedBox();
+              },
         ),
       );
     }
