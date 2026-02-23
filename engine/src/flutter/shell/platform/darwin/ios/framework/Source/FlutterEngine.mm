@@ -572,6 +572,13 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 
 - (void)registerViewController:(FlutterViewController*)controller
                  forIdentifier:(FlutterViewIdentifier)viewIdentifier {
+  id<NSObject> existingObserver =
+      [self.flutterViewControllerWillDeallocObservers objectForKey:@(viewIdentifier)];
+  if (existingObserver) {
+    [[NSNotificationCenter defaultCenter] removeObserver:existingObserver];
+    [self.flutterViewControllerWillDeallocObservers removeObjectForKey:@(viewIdentifier)];
+  }
+
   [_viewControllers setObject:controller forKey:@(viewIdentifier)];
   [controller setupViewIdentifier:viewIdentifier];
    NSAssert(controller.viewIdentifier == viewIdentifier, @"Failed to assign view ID.");
