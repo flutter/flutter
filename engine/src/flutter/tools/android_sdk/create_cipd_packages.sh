@@ -108,7 +108,7 @@ for platform in "${platforms[@]}"; do
   export REPO_OS_OVERRIDE=$platform
 
   # Download all the packages with sdkmanager.
-  for package in $(cat $package_file_name); do
+  for package in $(< $package_file_name); do
     echo $package
     split=(${package//:/ })
     IFS=',' read -ra ADDR <<< "${split[0]}"

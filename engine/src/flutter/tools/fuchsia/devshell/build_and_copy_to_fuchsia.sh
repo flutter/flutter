@@ -72,7 +72,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-fuchsia_flutter_git_revision="$(cat $FUCHSIA_DIR/integration/jiri.lock | grep -A 1 "\"package\": \"flutter/fuchsia\"" | grep "git_revision" | tr ":" "\n" | sed -n 3p | tr "\"" "\n" | sed -n 1p)"
+fuchsia_flutter_git_revision="$(grep -A 1 "\"package\": \"flutter/fuchsia\"" < "$FUCHSIA_DIR/integration/jiri.lock" | grep "git_revision" | tr ":" "\n" | sed -n 3p | tr "\"" "\n" | sed -n 1p)"
 current_flutter_git_revision="$(git -C $ENGINE_DIR/flutter rev-parse HEAD)"
 if [[ $fuchsia_flutter_git_revision != $current_flutter_git_revision ]]
 then

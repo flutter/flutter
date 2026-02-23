@@ -50,18 +50,15 @@ if [[ "$CURRENT_BRANCH" != "main" && \
   # This is a development branch. Find the merge-base.
   # We will fallback to origin if upstream is not detected.
   REMOTE="origin"
-  set +e
-  git -C "$FLUTTER_ROOT" remote get-url upstream >/dev/null 2>&1
-  if [[ $? -eq 0 ]]; then
+  if git -C "$FLUTTER_ROOT" remote get-url upstream >/dev/null 2>&1; then
     REMOTE="upstream"
   fi
 
   # Try to find the merge-base with master, then main.
-  MERGEBASE=$(git -C "$FLUTTER_ROOT" merge-base HEAD "$REMOTE/master" 2>/dev/null)
+  MERGEBASE=$(git -C "$FLUTTER_ROOT" merge-base HEAD "$REMOTE/master" 2>/dev/null || true)
   if [[ -z "$MERGEBASE" ]]; then
-    MERGEBASE=$(git -C "$FLUTTER_ROOT" merge-base HEAD "$REMOTE/main" 2>/dev/null)
+    MERGEBASE=$(git -C "$FLUTTER_ROOT" merge-base HEAD "$REMOTE/main" 2>/dev/null || true)
   fi
-  set -e
 
   if [[ -n "$MERGEBASE" ]]; then
     BASEREF="$MERGEBASE"
