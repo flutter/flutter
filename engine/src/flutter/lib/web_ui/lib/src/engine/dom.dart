@@ -207,6 +207,51 @@ external double parseFloatImpl(String value);
 @JS('window')
 external DomWindow get domWindow;
 
+/// Cached result of iframe detection for [isEmbeddedInIframe].
+bool? _cachedIsEmbeddedInIframe;
+
+/// Resets the iframe detection cache. Used for testing.
+@visibleForTesting
+void debugResetIframeDetectionCache() {
+  _cachedIsEmbeddedInIframe = null;
+}
+
+/// Overrides iframe detection for tests. Pass `null` to restore auto-detection.
+@visibleForTesting
+void debugSetIframeEmbeddingForTests(bool? isInIframe) {
+  _cachedIsEmbeddedInIframe = isInIframe;
+}
+
+/// Returns true if the current window is inside an iframe.
+///
+/// This is a shared utility used by multiple engine components that need
+/// to detect iframe embedding (e.g., pointer binding, text editing).
+///
+/// The result is cached since iframe status doesn't change during the app's
+/// lifetime. Handles cross-origin iframes gracefully by assuming embedded
+/// context when security exceptions occur.
+bool isEmbeddedInIframe() {
+  if (_cachedIsEmbeddedInIframe != null) {
+    return _cachedIsEmbeddedInIframe!;
+  }
+
+  try {
+    final DomWindow? parent = domWindow.parent;
+    if (parent == null) {
+      _cachedIsEmbeddedInIframe = false;
+      return false;
+    }
+    // If window.parent is the same object as window, we're not in an iframe.
+    // If they're different, we're in an iframe.
+    _cachedIsEmbeddedInIframe = !identical(parent, domWindow);
+    return _cachedIsEmbeddedInIframe!;
+  } catch (e) {
+    // Cross-origin iframe - assume embedded
+    _cachedIsEmbeddedInIframe = true;
+    return true;
+  }
+}
+
 @JS('Intl')
 external DomIntl get domIntl;
 
@@ -482,6 +527,25 @@ extension type DomElement._(JSObject _) implements DomNode {
   external double scrollTop;
   external double scrollLeft;
   external DomTokenList get classList;
+
+  /// Scrolls the element into the visible area of the browser window.
+  ///
+  /// See: https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView
+  @JS('scrollIntoView')
+  external void _scrollIntoView([JSAny? options]);
+
+  /// Scrolls the element into view with optional configuration.
+  ///
+  /// If [options] is null, scrolls with default behavior.
+  /// Common options: {'block': 'center', 'inline': 'nearest', 'behavior': 'smooth'}
+  void scrollIntoView([Map<String, dynamic>? options]) {
+    if (options == null) {
+      _scrollIntoView();
+    } else {
+      _scrollIntoView(options.toJSAnyDeep);
+    }
+  }
+
   external String className;
 
   external void blur();
