@@ -43,7 +43,7 @@ vars = {
   # updates to Clang Tidy will not turn the tree red.
   #
   # See https://github.com/flutter/flutter/wiki/Engine-pre‐submits-and-post‐submits#post-submit
-  'clang_version': 'git_revision:8c7a2ce01a77c96028fe2c8566f65c45ad9408d3',
+  'clang_version': 'git_revision:80743bd43fd5b38fedc503308e7a652e23d3ec93',
 
   'reclient_version': 're_client_version:0.185.0.db415f21-gomaip',
 
