@@ -398,41 +398,26 @@ void main() {
     expect(getHeaderHeight(), 100);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/179687.
   testWidgets(
     'SliverResizingHeader: presence of RenderViewport.excludeFromScrolling tag when pinned',
     (WidgetTester tester) async {
       final semantics = SemanticsTester(tester);
 
       await tester.pumpWidget(
-        Semantics(
-          textDirection: TextDirection.ltr,
-          child: Localizations(
-            locale: const Locale('en', 'us'),
-            delegates: const <LocalizationsDelegate<dynamic>>[
-              DefaultWidgetsLocalizations.delegate,
-              DefaultMaterialLocalizations.delegate,
-            ],
-            child: Directionality(
-              textDirection: TextDirection.ltr,
-              child: MediaQuery(
-                data: const MediaQueryData(),
-                child: CustomScrollView(
-                  slivers: <Widget>[
-                    const SliverToBoxAdapter(
-                      child: SizedBox(height: 100, child: Text('First child')),
-                    ),
-                    const SliverResizingHeader(
-                      minExtentPrototype: SizedBox(height: 300),
-                      child: SizedBox(height: 300, child: Text('header')),
-                    ),
-                    SliverList.builder(
-                      itemCount: 50,
-                      itemBuilder: (BuildContext context, int index) => Text('Item $index'),
-                    ),
-                  ],
-                ),
+        TestWidgetsApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              const SliverToBoxAdapter(child: SizedBox(height: 100, child: Text('First child'))),
+              const SliverResizingHeader(
+                minExtentPrototype: SizedBox(height: 300),
+                child: SizedBox(height: 300, child: Text('header')),
               ),
-            ),
+              SliverList.builder(
+                itemCount: 50,
+                itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+              ),
+            ],
           ),
         ),
       );
