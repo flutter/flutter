@@ -700,25 +700,31 @@ Future<void> testMain() async {
     );
   });
 
-  group('IOSTextEditingStrategy iframe scrollIntoView', () {
+  group('IOSTextEditingStrategy scrollIntoView for embedded scenarios', () {
     late HybridTextEditing testTextEditing;
     late IOSTextEditingStrategySpy editingStrategySpy;
+    late bool originalMultiViewEnabled;
 
     setUp(() {
       testTextEditing = HybridTextEditing();
       editingStrategySpy = IOSTextEditingStrategySpy(testTextEditing);
       testTextEditing.debugTextEditingStrategyOverride = editingStrategySpy;
       testTextEditing.configuration = multilineConfig;
+      originalMultiViewEnabled = configuration.multiViewEnabled;
     });
 
     tearDown(() {
       editingStrategySpy.disable();
       debugResetIframeDetectionCache();
+      debugOverrideJsConfiguration(
+        JsFlutterConfiguration(multiViewEnabled: originalMultiViewEnabled),
+      );
     });
 
     test('scrollIntoView is called in placeElement when in iframe', () async {
       // Simulate being in an iframe
       editingStrategySpy.debugIsInIframeOverride = true;
+      debugOverrideJsConfiguration(JsFlutterConfiguration(multiViewEnabled: false));
 
       editingStrategySpy.enable(
         multilineConfig,
@@ -740,9 +746,51 @@ Future<void> testMain() async {
       );
     });
 
-    test('scrollIntoView is NOT called when not in iframe', () async {
-      // Simulate NOT being in an iframe
+    test('scrollIntoView is called in placeElement when in multi-view mode', () async {
       editingStrategySpy.debugIsInIframeOverride = false;
+      debugOverrideJsConfiguration(JsFlutterConfiguration(multiViewEnabled: true));
+
+      editingStrategySpy.enable(
+        multilineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+
+      expect(editingStrategySpy.isEnabled, isTrue);
+
+      editingStrategySpy.placeElement();
+
+      expect(
+        editingStrategySpy.scrollIntoViewCallCount,
+        greaterThan(0),
+        reason: 'scrollIntoView should be called when in multi-view mode',
+      );
+    });
+
+    test('scrollIntoView is called when both iframe and multi-view are true', () async {
+      editingStrategySpy.debugIsInIframeOverride = true;
+      debugOverrideJsConfiguration(JsFlutterConfiguration(multiViewEnabled: true));
+
+      editingStrategySpy.enable(
+        multilineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+
+      expect(editingStrategySpy.isEnabled, isTrue);
+
+      editingStrategySpy.placeElement();
+
+      expect(
+        editingStrategySpy.scrollIntoViewCallCount,
+        greaterThan(0),
+        reason: 'scrollIntoView should be called when both iframe and multi-view are true',
+      );
+    });
+
+    test('scrollIntoView is NOT called when not embedded', () async {
+      editingStrategySpy.debugIsInIframeOverride = false;
+      debugOverrideJsConfiguration(JsFlutterConfiguration(multiViewEnabled: false));
 
       editingStrategySpy.enable(
         multilineConfig,
@@ -758,12 +806,13 @@ Future<void> testMain() async {
       expect(
         editingStrategySpy.scrollIntoViewCallCount,
         equals(0),
-        reason: 'scrollIntoView should NOT be called when not in iframe',
+        reason: 'scrollIntoView should NOT be called when not embedded',
       );
     });
 
     test('placeElement applies geometry before scrollIntoView', () async {
       editingStrategySpy.debugIsInIframeOverride = true;
+      debugOverrideJsConfiguration(JsFlutterConfiguration(multiViewEnabled: false));
 
       editingStrategySpy.enable(
         multilineConfig,
@@ -4160,8 +4209,8 @@ class IOSTextEditingStrategySpy extends IOSTextEditingStrategy {
   int scrollIntoViewCallCount = 0;
 
   @override
-  void scrollIntoViewIfInIframe() {
-    if (isEmbeddedInIframe()) {
+  void scrollIntoViewIfEmbedded() {
+    if (isEmbeddedInIframe() || configuration.multiViewEnabled) {
       activeDomElement.scrollIntoView(<String, dynamic>{'block': 'center', 'inline': 'nearest'});
       scrollIntoViewCallCount++;
     }

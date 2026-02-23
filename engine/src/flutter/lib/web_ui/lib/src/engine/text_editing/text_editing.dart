@@ -12,6 +12,7 @@ import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
+import '../configuration.dart';
 import '../dom.dart';
 import '../mouse/prevent_default.dart';
 import '../platform_dispatcher.dart';
@@ -1312,11 +1313,17 @@ abstract class DefaultTextEditingStrategy
 
   DomHTMLFormElement? get focusedFormElement => inputConfiguration.autofillGroup?.formElement;
 
-  /// Scrolls the active DOM element into view if running inside an iframe.
+  /// Scrolls the active DOM element into view if running inside an iframe
+  /// or in multi-view mode.
+  ///
+  /// This handles two cases where iOS browsers don't automatically scroll
+  /// text fields into view when the keyboard appears:
+  /// 1. Flutter embedded in an iframe
+  /// 2. Flutter in multi-view mode (embedded as a component)
   ///
   /// See: https://github.com/flutter/flutter/issues/178743
-  void scrollIntoViewIfInIframe() {
-    if (isEmbeddedInIframe()) {
+  void scrollIntoViewIfEmbedded() {
+    if (isEmbeddedInIframe() || configuration.multiViewEnabled) {
       activeDomElement.scrollIntoView(<String, dynamic>{'block': 'center', 'inline': 'nearest'});
     }
   }
@@ -1899,7 +1906,7 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
   void placeElement() {
     moveFocusToActiveDomElement();
     geometry?.applyToDomElement(activeDomElement);
-    scrollIntoViewIfInIframe();
+    scrollIntoViewIfEmbedded();
   }
 }
 
