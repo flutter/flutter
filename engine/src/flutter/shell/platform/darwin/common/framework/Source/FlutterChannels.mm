@@ -18,7 +18,7 @@ static void ResizeChannelBuffer(NSObject<FlutterBinaryMessenger>* binaryMessenge
   NSCAssert(newSize >= 0, @"Channel buffer size must be non-negative");
   // Cast newSize to int because the deserialization logic handles only 32 bits values,
   // see
-  // https://github.com/flutter/engine/blob/93e8901490e78c7ba7e319cce4470d9c6478c6dc/lib/ui/channel_buffers.dart#L495.
+  // https://github.com/flutter/flutter/blob/230240c56880f2c19bf92d2c32203b064054f173/engine/src/flutter/lib/ui/channel_buffers.dart#L523
   NSArray* args = @[ channel, @(static_cast<int>(newSize)) ];
   FlutterMethodCall* resizeMethodCall = [FlutterMethodCall methodCallWithMethodName:kResizeMethod
                                                                           arguments:args];

@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/commands/running_apps.dart';
 import 'package:multicast_dns/multicast_dns.dart';
 import 'package:test/fake.dart';
 
-import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -194,11 +193,15 @@ dart_version=2.0.0''',
     // Verify formatting - 2 spaces indent, bullet separator
     expect(
       testLogger.statusText,
-      contains('  app_one (debug)   • macos  • darwin-arm64   • ws://127.0.0.1:1234/ws • 1s'),
+      contains(
+        '  app_one (debug)   • macos  • darwin-arm64   • ws://127.0.0.1:1234/ws • 0 minutes ago',
+      ),
     );
     expect(
       testLogger.statusText,
-      contains('  app_two (release) • chrome • web-javascript • ws://127.0.0.1:5678/ws • 2s'),
+      contains(
+        '  app_two (release) • chrome • web-javascript • ws://127.0.0.1:5678/ws • 0 minutes ago',
+      ),
     );
   });
 
@@ -329,41 +332,6 @@ dart_version=2.0.0''',
     expect(testLogger.statusText, contains('Found 1 running Flutter app:'));
     expect('app_one'.allMatches(testLogger.statusText), hasLength(1));
     expect(testLogger.statusText, contains('ws://127.0.0.1:1234/ws'));
-  });
-
-  testWithoutContext('processAge', () {
-    const kSecondMs = 1000;
-    const int kMinuteMs = kSecondMs * 60;
-    const int kHourMs = kMinuteMs * 60;
-    const int kDayMs = kHourMs * 24;
-
-    const kNowMs = 10_000_000;
-    const int kFiveSecondsMs = 5 * kSecondMs;
-    const int kFiftyNineSecondsMs = 59 * kSecondMs;
-    const int kFiftyNineMinutesMs = 59 * kMinuteMs;
-    const int kTwentyThreeHoursMs = 23 * kHourMs;
-    const int kTwoDaysMs = 2 * kDayMs;
-
-    final now = DateTime.fromMillisecondsSinceEpoch(kNowMs);
-    final clock = SystemClock.fixed(now);
-
-    expect(processAge(null, clock), 'unknown age');
-
-    // Seconds
-    expect(processAge(kNowMs - kFiveSecondsMs, clock), '5s');
-    expect(processAge(kNowMs - kFiftyNineSecondsMs, clock), '59s');
-
-    // Minutes
-    expect(processAge(kNowMs - kMinuteMs, clock), '1m');
-    expect(processAge(kNowMs - kFiftyNineMinutesMs, clock), '59m');
-
-    // Hours
-    expect(processAge(kNowMs - kHourMs, clock), '1h');
-    expect(processAge(kNowMs - kTwentyThreeHoursMs, clock), '23h');
-
-    // Days
-    expect(processAge(kNowMs - kDayMs, clock), '1d');
-    expect(processAge(kNowMs - kTwoDaysMs, clock), '2d');
   });
 }
 
