@@ -761,7 +761,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
     });
   });
 
-  group('remove Finder extended attributes', () {
+  group('remove extended attributes', () {
     late Directory projectDirectory;
     setUp(() {
       final fs = MemoryFileSystem.test();
@@ -773,9 +773,12 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         FakeCommand(
           command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', projectDirectory.path],
         ),
+        FakeCommand(
+          command: <String>['xattr', '-r', '-d', 'com.apple.provenance', projectDirectory.path],
+        ),
       ]);
 
-      await removeFinderExtendedAttributes(
+      await removeExtendedAttributes(
         projectDirectory,
         ProcessUtils(processManager: processManager, logger: logger),
         logger,
@@ -789,14 +792,19 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
           command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', projectDirectory.path],
           exitCode: 1,
         ),
+        FakeCommand(
+          command: <String>['xattr', '-r', '-d', 'com.apple.provenance', projectDirectory.path],
+          exitCode: 1,
+        ),
       ]);
 
-      await removeFinderExtendedAttributes(
+      await removeExtendedAttributes(
         projectDirectory,
         ProcessUtils(processManager: processManager, logger: logger),
         logger,
       );
-      expect(logger.traceText, contains('Failed to remove xattr com.apple.FinderInfo'));
+      expect(logger.traceText, contains('Failed to remove com.apple.FinderInfo'));
+      expect(logger.traceText, contains('Failed to remove com.apple.provenance'));
       expect(processManager, hasNoRemainingExpectations);
     });
   });
