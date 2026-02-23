@@ -15,6 +15,7 @@ import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.DeepLinkJsonFromManifestTask
+import com.flutter.gradle.tasks.PrintKgpTask
 import com.flutter.gradle.tasks.PrintTask
 import com.flutter.gradle.tasks.PrintTaskDeferred
 import groovy.lang.Closure
@@ -754,10 +755,12 @@ object FlutterPluginUtils {
     @JvmStatic
     @JvmName("addTaskForKGPVersion")
     internal fun addTaskForKGPVersion(project: Project) {
+        // TODO remove
         project.tasks.register<PrintTask>("kgpVersion") {
-            description = "Print the current kgp version used by the project."
             message.set(project.provider { "KGP Version: " + VersionFetcher.getKGPVersion(project).toString() })
         }
+
+        project.tasks.register<PrintKgpTask>("kgpVersion2")
     }
 
     // Add a task that can be called on Flutter projects that prints the available build variants

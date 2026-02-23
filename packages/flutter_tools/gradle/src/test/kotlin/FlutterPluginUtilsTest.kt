@@ -10,6 +10,7 @@ import com.android.build.gradle.internal.dsl.CmakeOptions
 import com.android.build.gradle.internal.dsl.DefaultConfig
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
+import com.flutter.gradle.tasks.PrintKgpTask
 import com.flutter.gradle.tasks.PrintTask
 import com.flutter.gradle.tasks.PrintTaskDeferred
 import io.mockk.called
@@ -1046,6 +1047,9 @@ class FlutterPluginUtilsTest {
         every {
             project.tasks.register(eq("kgpVersion"), PrintTask::class.java, capture(captureSlot))
         } returns mockTaskProvider
+        every {
+            project.tasks.register(eq("kgpVersion2"), PrintKgpTask::class.java, any())
+        } returns mockk()
         every { project.provider<PrintTask>(any()) } returns mockTaskProvider
         every { mockTaskProvider.configure(any()).hint(PrintTask::class) }
 
