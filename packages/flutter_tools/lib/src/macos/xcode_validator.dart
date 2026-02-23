@@ -32,7 +32,7 @@ class XcodeValidator extends DoctorValidator {
   final IOSSimulatorUtils _iosSimulatorUtils;
   final UserMessages _userMessages;
 
-  String xcodeRecommended(String recommendedVersion) =>
+  String _xcodeRecommended(String recommendedVersion) =>
       'Flutter recommends a minimum Xcode version of $recommendedVersion.\n'
       'Download the latest version or update via the Mac App Store.';
 
@@ -40,11 +40,11 @@ class XcodeValidator extends DoctorValidator {
       'Flutter requires Xcode $requiredVersion or higher.\n'
       'Download the latest version or update via the Mac App Store.';
 
-  String xcodeLocation(String location) => 'Xcode at $location';
-  String get xcodeEula =>
+  String _xcodeLocation(String location) => 'Xcode at $location';
+  String get _xcodeEula =>
       "Xcode end user license agreement not signed; open Xcode or run the command 'sudo xcodebuild -license'.";
 
-  String get xcodeMissingSimct =>
+  String get _xcodeMissingSimct =>
       'Xcode requires additional components to be installed in order to run.\n'
       'Launch Xcode and install additional required components when prompted or run:\n'
       '  sudo xcodebuild -runFirstLaunch';
@@ -60,7 +60,7 @@ class XcodeValidator extends DoctorValidator {
     if (_xcode.isInstalled) {
       xcodeStatus = ValidationType.success;
       if (xcodeSelectPath != null) {
-        messages.add(ValidationMessage(xcodeLocation(xcodeSelectPath)));
+        messages.add(ValidationMessage(_xcodeLocation(xcodeSelectPath)));
       }
       final String? versionText = _xcode.versionText;
       if (versionText != null) {
@@ -77,16 +77,16 @@ class XcodeValidator extends DoctorValidator {
         messages.add(ValidationMessage.error(xcodeOutdated(xcodeRequiredVersion.toString())));
       } else if (!_xcode.isRecommendedVersionSatisfactory) {
         xcodeStatus = ValidationType.partial;
-        messages.add(ValidationMessage.hint(xcodeRecommended(xcodeRecommendedVersion.toString())));
+        messages.add(ValidationMessage.hint(_xcodeRecommended(xcodeRecommendedVersion.toString())));
       }
 
       if (!_xcode.eulaSigned) {
         xcodeStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(xcodeEula));
+        messages.add(ValidationMessage.error(_xcodeEula));
       }
       if (!_xcode.isSimctlInstalled) {
         xcodeStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(xcodeMissingSimct));
+        messages.add(ValidationMessage.error(_xcodeMissingSimct));
       }
 
       final ValidationMessage? missingSimulatorMessage = await _validateSimulatorRuntimeInstalled();

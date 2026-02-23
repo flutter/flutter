@@ -156,7 +156,7 @@ class FlutterManifest {
   // Flag to avoid printing multiple invalid version messages.
   var _hasShowInvalidVersionMsg = false;
 
-  String invalidVersionSettingHintMessage(String invalidVersion) =>
+  String _invalidVersionSettingHintMessage(String invalidVersion) =>
       'Invalid version $invalidVersion found, default value will be used.\n'
       'In pubspec.yaml, a valid version should look like: build-name+build-number.\n'
       'In Android, build-name is used as versionName while build-number used as versionCode.\n'
@@ -178,7 +178,7 @@ class FlutterManifest {
       version = Version.parse(verStr);
     } on Exception {
       if (!_hasShowInvalidVersionMsg) {
-        _logger.printStatus(invalidVersionSettingHintMessage(verStr), emphasis: true);
+        _logger.printStatus(_invalidVersionSettingHintMessage(verStr), emphasis: true);
         _hasShowInvalidVersionMsg = true;
       }
     }
