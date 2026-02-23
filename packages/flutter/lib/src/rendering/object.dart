@@ -1462,17 +1462,14 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       return true;
     }());
     try {
-      // This has to be top-to-down order since the geometries of a child and its
-      // subtree depends on ancestors' transforms and clips. If it updates child
-      // first, it may use dirty geometry in parent's semantics node to
-      // calculate the geometries in the subtree.
+      // This has to be a top-down order to be more performant. Otherwise, a parent
+      // change can invalidate the whole subtree.
       final List<RenderObject> nodesToProcess =
           _nodesNeedingSemantics
               .where((RenderObject object) => !object._needsLayout && object.owner == this)
               .toList()
             ..sort((RenderObject a, RenderObject b) => a.depth - b.depth);
       _nodesNeedingSemantics.clear();
-      final treeShapeToken = Object();
       if (!kReleaseMode) {
         FlutterTimeline.startSync('Semantics.updateChildren');
       }
@@ -1485,8 +1482,9 @@ base class PipelineOwner with DiagnosticableTreeMixin {
           // the parent node would have updated this node's parent data and it
           // would not be dirty.
           //
-          // We MUST NOT update the parent data now since it may create a gap of render
-          // object with dirty parent data when this branch later rejoin the rendering tree.
+          // We MUST NOT update the parent data now since it may create a gap of
+          // render objects with dirty parent data when this branch later rejoins
+          // the rendering tree.
           continue;
         }
         node._semantics.updateChildren();
@@ -1516,6 +1514,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
           )
           .toList();
       _nodesNeedingSemanticsGeometryUpdate.clear();
+
       // Clear geometry for nodes that needs geometry update.
       for (final node in nodesToProcessGeometry) {
         if (node._semantics.shouldFormSemanticsNode && node._semantics.geometryDirty) {
@@ -1524,6 +1523,8 @@ base class PipelineOwner with DiagnosticableTreeMixin {
         }
 
         if (node._semantics.shouldFormSemanticsNode && (node._isRelayoutBoundary ?? false)) {
+          // If this node is a relayout boundary, it can change size without parent relayout.
+          // In this case, we still need to clear its geometry.
           node._semantics.geometry = null;
           continue;
         }
@@ -1555,15 +1556,24 @@ base class PipelineOwner with DiagnosticableTreeMixin {
         }
       }
 
+      // Used to invalidate the [_RenderObjectSemantics.firstAncestorNodeWithCleanGeometry] cache.
+      //
+      // Multiple items in [nodesToProcessGeometry] often share the same first
+      // ancestor, making redundant searches expensive. Passing this token allows
+      // nodes to reuse cached ancestor lookups.
+      //
+      // See [_RenderObjectSemantics.computeAncestorInfo] for details.
+      final treeShapeToken = Object();
+
       final nodeToEnsureGeometry = <_RenderObjectSemantics>{};
       for (final node in nodesToProcessGeometry) {
+        // We need a node that has clean geometry to start from.
         node._semantics.computeAncestorInfo(treeShapeToken);
         if (node._semantics.firstAncestorNodeWithCleanGeometry != null) {
           nodeToEnsureGeometry.add(node._semantics.firstAncestorNodeWithCleanGeometry!);
         }
       }
 
-      // Conduct the geometry update
       for (final _RenderObjectSemantics node
           in nodeToEnsureGeometry.toList()..sort(
             (_RenderObjectSemantics a, _RenderObjectSemantics b) =>
@@ -5577,9 +5587,26 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     return geometry == null;
   }
 
-  Object _currentTreeShapeToken = Object();
+  /// Validates the [firstAncestorNodeWithCleanGeometry] cache.
+  ///
+  /// Updated by [computeAncestorInfo] during [PipelineOwner.flushSemantics] to
+  /// prevent redundant ancestor lookups within a single flush cycle.
+  Object _currentTreeShapeToken = const Object();
+
+  /// The nearest semantics-forming ancestor node with clean geometry.
+  ///
+  /// Cached by [computeAncestorInfo] during [PipelineOwner.flushSemantics].
   _RenderObjectSemantics? firstAncestorNodeWithCleanGeometry;
 
+  /// Finds and caches the nearest semantics-forming ancestor with clean geometry.
+  ///
+  /// The [treeShapeToken] parameter prevents redundant calculation by verifying
+  /// whether the tree shape changed since the previous lookup.
+  ///
+  /// This method requires all dirty nodes in [PipelineOwner._nodesNeedingSemantics]
+  /// to have completed their [updateChildren] calls.
+  ///
+  /// See phase 2 in the [_RenderObjectSemantics] documentation.
   void computeAncestorInfo(Object treeShapeToken) {
     if (treeShapeToken == _currentTreeShapeToken) {
       return;
