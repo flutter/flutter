@@ -39,6 +39,7 @@ class CopyFlutterBundle extends Target {
     Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
     Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
     Source.pattern('{BUILD_DIR}/app.dill'),
+    Source.pattern('{BUILD_DIR}/${DartBuild.dartHookResultFilename}'),
     ...IconTreeShaker.inputs,
     ...ShaderCompiler.inputs,
   ];
@@ -48,6 +49,7 @@ class CopyFlutterBundle extends Target {
     Source.pattern('{OUTPUT_DIR}/vm_snapshot_data'),
     Source.pattern('{OUTPUT_DIR}/isolate_snapshot_data'),
     Source.pattern('{OUTPUT_DIR}/kernel_blob.bin'),
+    Source.pattern('{BUILD_DIR}/${DartBuild.dartHookResultFilename}'),
   ];
 
   @override

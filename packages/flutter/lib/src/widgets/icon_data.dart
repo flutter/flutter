@@ -53,9 +53,11 @@ class IconData {
   });
 
   /// The Unicode code point at which this icon is stored in the icon font.
+  @_retainForIconTreeShaker
   final int codePoint;
 
   /// The font family from which the glyph for the [codePoint] will be selected.
+  @_retainForIconTreeShaker
   final String? fontFamily;
 
   /// The name of the package from which the font family is included.
@@ -66,6 +68,7 @@ class IconData {
   /// See also:
   ///
   ///  * [TextStyle], which describes how to use fonts from other packages.
+  @_retainForIconTreeShaker
   final String? fontPackage;
 
   /// Whether this icon should be automatically mirrored in right-to-left
@@ -73,11 +76,13 @@ class IconData {
   ///
   /// The [Icon] widget respects this value by mirroring the icon when the
   /// [Directionality] is [TextDirection.rtl].
+  @_retainForIconTreeShaker
   final bool matchTextDirection;
 
   /// The ordered list of font families to fall back on when a glyph cannot be found in a higher priority font family.
   ///
   /// For more details, refer to the documentation of [TextStyle]
+  @_retainForIconTreeShaker
   final List<String>? fontFamilyFallback;
 
   @override
@@ -154,3 +159,10 @@ class _StaticIconProvider {
 /// }
 /// ```
 const Object staticIconProvider = _StaticIconProvider();
+
+/// Retain the fields of [IconData] to ensure the icon tree shaker can access
+/// those fields after tree shaking the application.
+///
+/// This may be replaced with a `@RecordUse()` annotation once icon tree
+/// shaking uses the new link hooks.
+const _retainForIconTreeShaker = pragma('vm:entry-point');

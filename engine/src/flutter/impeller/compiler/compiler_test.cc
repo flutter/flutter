@@ -142,53 +142,50 @@ bool CompilerTestBase::CanCompileAndReflect(
     return false;
   }
 
-  if (TargetPlatformNeedsReflection(GetParam())) {
-    auto reflector = compiler.GetReflector();
-    if (!reflector) {
-      VALIDATION_LOG
-          << "No reflector was found for target platform SL compiler.";
-      return false;
-    }
+  auto reflector = compiler.GetReflector();
+  if (!reflector) {
+    VALIDATION_LOG << "No reflector was found for target platform SL compiler.";
+    return false;
+  }
 
-    auto reflection_json = reflector->GetReflectionJSON();
-    auto reflection_header = reflector->GetReflectionHeader();
-    auto reflection_source = reflector->GetReflectionCC();
+  auto reflection_json = reflector->GetReflectionJSON();
+  auto reflection_header = reflector->GetReflectionHeader();
+  auto reflection_source = reflector->GetReflectionCC();
 
-    if (!reflection_json) {
-      VALIDATION_LOG << "Reflection JSON was not found.";
-      return false;
-    }
+  if (!reflection_json) {
+    VALIDATION_LOG << "Reflection JSON was not found.";
+    return false;
+  }
 
-    if (!reflection_header) {
-      VALIDATION_LOG << "Reflection header was not found.";
-      return false;
-    }
+  if (!reflection_header) {
+    VALIDATION_LOG << "Reflection header was not found.";
+    return false;
+  }
 
-    if (!reflection_source) {
-      VALIDATION_LOG << "Reflection source was not found.";
-      return false;
-    }
+  if (!reflection_source) {
+    VALIDATION_LOG << "Reflection source was not found.";
+    return false;
+  }
 
-    if (!fml::WriteAtomically(intermediates_directory_,
-                              ReflectionHeaderName(fixture_name).c_str(),
-                              *reflection_header)) {
-      VALIDATION_LOG << "Could not write reflection header intermediates.";
-      return false;
-    }
+  if (!fml::WriteAtomically(intermediates_directory_,
+                            ReflectionHeaderName(fixture_name).c_str(),
+                            *reflection_header)) {
+    VALIDATION_LOG << "Could not write reflection header intermediates.";
+    return false;
+  }
 
-    if (!fml::WriteAtomically(intermediates_directory_,
-                              ReflectionCCName(fixture_name).c_str(),
-                              *reflection_source)) {
-      VALIDATION_LOG << "Could not write reflection CC intermediates.";
-      return false;
-    }
+  if (!fml::WriteAtomically(intermediates_directory_,
+                            ReflectionCCName(fixture_name).c_str(),
+                            *reflection_source)) {
+    VALIDATION_LOG << "Could not write reflection CC intermediates.";
+    return false;
+  }
 
-    if (!fml::WriteAtomically(intermediates_directory_,
-                              ReflectionJSONName(fixture_name).c_str(),
-                              *reflection_json)) {
-      VALIDATION_LOG << "Could not write reflection json intermediates.";
-      return false;
-    }
+  if (!fml::WriteAtomically(intermediates_directory_,
+                            ReflectionJSONName(fixture_name).c_str(),
+                            *reflection_json)) {
+    VALIDATION_LOG << "Could not write reflection json intermediates.";
+    return false;
   }
   return true;
 }

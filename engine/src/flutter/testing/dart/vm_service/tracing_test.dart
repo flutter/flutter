@@ -68,49 +68,55 @@ Future<void> _testPerfettoFormatTrace(vms.VmService vmService) async {
 }
 
 void main() {
-  test('Canvas.saveLayer emits tracing', () async {
-    final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
+  test(
+    'Canvas.saveLayer emits tracing',
+    () async {
+      final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
 
-    if (info.serverUri == null) {
-      fail('This test must not be run with --disable-vm-service.');
-    }
+      if (info.serverUri == null) {
+        fail('This test must not be run with --disable-vm-service.');
+      }
 
-    final vms.VmService vmService = await vmServiceConnectUri(
-      'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws',
-    );
-    await vmService.clearVMTimeline();
+      final vms.VmService vmService = await vmServiceConnectUri(
+        'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws',
+      );
+      await vmService.clearVMTimeline();
 
-    final completer = Completer<void>();
-    PlatformDispatcher.instance.onBeginFrame = (Duration timeStamp) async {
-      final recorder = PictureRecorder();
-      final canvas = Canvas(recorder);
-      canvas.drawColor(const Color(0xff0000ff), BlendMode.srcOut);
-      // Will saveLayer implicitly for Skia, but not Impeller.
-      canvas.drawPaint(Paint()..imageFilter = ImageFilter.blur(sigmaX: 2, sigmaY: 3));
-      canvas.saveLayer(null, Paint());
-      canvas.drawRect(const Rect.fromLTRB(10, 10, 20, 20), Paint());
-      canvas.saveLayer(const Rect.fromLTWH(0, 0, 100, 100), Paint());
-      canvas.drawRect(const Rect.fromLTRB(10, 10, 20, 20), Paint());
-      canvas.drawRect(const Rect.fromLTRB(15, 15, 25, 25), Paint());
-      canvas.restore();
-      canvas.restore();
-      final Picture picture = recorder.endRecording();
+      final completer = Completer<void>();
+      PlatformDispatcher.instance.onBeginFrame = (Duration timeStamp) async {
+        final recorder = PictureRecorder();
+        final canvas = Canvas(recorder);
+        canvas.drawColor(const Color(0xff0000ff), BlendMode.srcOut);
+        // Will saveLayer implicitly for Skia, but not Impeller.
+        canvas.drawPaint(Paint()..imageFilter = ImageFilter.blur(sigmaX: 2, sigmaY: 3));
+        canvas.saveLayer(null, Paint());
+        canvas.drawRect(const Rect.fromLTRB(10, 10, 20, 20), Paint());
+        canvas.saveLayer(const Rect.fromLTWH(0, 0, 100, 100), Paint());
+        canvas.drawRect(const Rect.fromLTRB(10, 10, 20, 20), Paint());
+        canvas.drawRect(const Rect.fromLTRB(15, 15, 25, 25), Paint());
+        canvas.restore();
+        canvas.restore();
+        final Picture picture = recorder.endRecording();
 
-      final builder = SceneBuilder();
-      builder.addPicture(Offset.zero, picture);
-      final Scene scene = builder.build();
+        final builder = SceneBuilder();
+        builder.addPicture(Offset.zero, picture);
+        final Scene scene = builder.build();
 
-      await scene.toImage(100, 100);
-      scene.dispose();
-      completer.complete();
-    };
-    PlatformDispatcher.instance.scheduleFrame();
-    await completer.future;
+        await scene.toImage(100, 100);
+        scene.dispose();
+        completer.complete();
+      };
+      PlatformDispatcher.instance.scheduleFrame();
+      await completer.future;
 
-    await _testChromeFormatTrace(vmService);
-    await _testPerfettoFormatTrace(vmService);
-    await vmService.dispose();
-  });
+      await _testChromeFormatTrace(vmService);
+      await _testPerfettoFormatTrace(vmService);
+      await vmService.dispose();
+    },
+    // Test times out with the default 30 second timeout:
+    // https://github.com/flutter/flutter/issues/182150
+    timeout: const Timeout(Duration(seconds: 60)),
+  );
 
   test('Frame request pending begin/end pairs are matched', () async {
     final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
