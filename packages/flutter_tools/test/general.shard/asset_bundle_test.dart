@@ -966,6 +966,7 @@ flutter:
               '--input-type=frag',
               '--include=/$assetsPath',
               '--include=$shaderLibDir',
+              '--verbose-error-output=build/impellerc_error_679178849.txt',
             ],
             onRun: (_) {
               fileSystem.file(outputPath).createSync(recursive: true);
@@ -1027,6 +1028,7 @@ flutter:
               '--input-type=frag',
               '--include=/$assetsPath',
               '--include=$shaderLibDir',
+              '--verbose-error-output=build/impellerc_error_679178849.txt',
             ],
             onRun: (_) {
               fileSystem.file(outputPath).createSync(recursive: true);
@@ -1082,6 +1084,7 @@ flutter:
                 '--input-type=frag',
                 '--include=${fileSystem.path.join(materialDir.path, 'shaders')}',
                 '--include=$shaderLibDir',
+                '--verbose-error-output=build/impellerc_error_1058349169.txt',
               ],
               onRun: (_) {
                 fileSystem.file(outputPath).createSync(recursive: true);

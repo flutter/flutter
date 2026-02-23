@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/devfs.dart';
 
 import '../../../src/common.dart';
+import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 
 const fragDir = '/shaders';
@@ -21,6 +22,8 @@ const fragPath = '/shaders/my_shader.frag';
 const notFragPath = '/shaders/not_a_frag.file';
 const outputSpirvPath = '/output/shaders/my_shader.frag.spirv';
 const outputPath = '/output/shaders/my_shader.frag';
+const fragVerboseErrorOutputPath = 'build/impellerc_error_14017323.txt';
+const notFragVerboseErrorOutputPath = 'build/impellerc_error_877390012.txt';
 
 void main() {
   late BufferLogger logger;
@@ -39,7 +42,7 @@ void main() {
     fileSystem.file(notFragPath).createSync(recursive: true);
   });
 
-  testWithoutContext('compileShader invokes impellerc for .frag files and web target', () async {
+  testUsingContext('compileShader invokes impellerc for .frag files and web target', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
@@ -53,6 +56,7 @@ void main() {
           '--input-type=frag',
           '--include=$fragDir',
           '--include=$shaderLibDir',
+          '--verbose-error-output=$fragVerboseErrorOutputPath',
         ],
         onRun: (_) {
           fileSystem.file(outputPath).createSync(recursive: true);
@@ -79,7 +83,7 @@ void main() {
     expect(fileSystem.file(outputSpirvPath).existsSync(), false);
   });
 
-  testWithoutContext(
+  testUsingContext(
     'compileShader invokes impellerc for .frag files and metal ios target',
     () async {
       final processManager = FakeProcessManager.list(<FakeCommand>[
@@ -94,6 +98,7 @@ void main() {
             '--input-type=frag',
             '--include=$fragDir',
             '--include=$shaderLibDir',
+            '--verbose-error-output=$fragVerboseErrorOutputPath',
           ],
           onRun: (_) {
             fileSystem.file(outputPath).createSync(recursive: true);
@@ -119,7 +124,7 @@ void main() {
     },
   );
 
-  testWithoutContext('compileShader invokes impellerc for .frag files and Android', () async {
+  testUsingContext('compileShader invokes impellerc for .frag files and Android', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
@@ -135,6 +140,7 @@ void main() {
           '--input-type=frag',
           '--include=$fragDir',
           '--include=$shaderLibDir',
+          '--verbose-error-output=$fragVerboseErrorOutputPath',
         ],
         onRun: (_) {
           fileSystem.file(outputPath).createSync(recursive: true);
@@ -159,7 +165,7 @@ void main() {
     expect(fileSystem.file(outputPath).existsSync(), true);
   });
 
-  testWithoutContext('compileShader invokes impellerc for non-.frag files', () async {
+  testUsingContext('compileShader invokes impellerc for non-.frag files', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
@@ -173,6 +179,7 @@ void main() {
           '--input-type=frag',
           '--include=$fragDir',
           '--include=$shaderLibDir',
+          '--verbose-error-output=$notFragVerboseErrorOutputPath',
         ],
         onRun: (_) {
           fileSystem.file(outputPath).createSync(recursive: true);
@@ -199,7 +206,7 @@ void main() {
     expect(fileSystem.file(outputSpirvPath).existsSync(), false);
   });
 
-  testWithoutContext('compileShader throws an exception when impellerc fails', () async {
+  testUsingContext('compileShader throws an exception when impellerc fails', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
@@ -213,6 +220,7 @@ void main() {
           '--input-type=frag',
           '--include=$fragDir',
           '--include=$shaderLibDir',
+          '--verbose-error-output=$notFragVerboseErrorOutputPath',
         ],
         stdout: 'impellerc stdout',
         stderr: 'impellerc stderr',
@@ -234,14 +242,19 @@ void main() {
       );
       fail('unreachable');
     } on ShaderCompilerException catch (e) {
-      expect(e.toString(), contains('impellerc stdout:\nimpellerc stdout'));
-      expect(e.toString(), contains('impellerc stderr:\nimpellerc stderr'));
+      expect(
+        e.toString(),
+        contains(
+          'ShaderCompilerException: Shader compilation of "/shaders/not_a_frag.file" to '
+          '"/output/shaders/my_shader.frag" failed with exit code 1.',
+        ),
+      );
     }
 
     expect(fileSystem.file(outputPath).existsSync(), false);
   });
 
-  testWithoutContext('DevelopmentShaderCompiler can compile for android non-impeller', () async {
+  testUsingContext('DevelopmentShaderCompiler can compile for android non-impeller', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
@@ -257,6 +270,7 @@ void main() {
           '--input-type=frag',
           '--include=$fragDir',
           '--include=$shaderLibDir',
+          '--verbose-error-output=$fragVerboseErrorOutputPath',
         ],
         onRun: (_) {
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
@@ -290,7 +304,7 @@ void main() {
     expect(fileSystem.file('/.tmp_rand0/0.8255140718871702.temp'), isNot(exists));
   });
 
-  testWithoutContext(
+  testUsingContext(
     'DevelopmentShaderCompiler can compile for Flutter Tester with Impeller and Vulkan',
     () async {
       final processManager = FakeProcessManager.list(<FakeCommand>[
@@ -306,6 +320,7 @@ void main() {
             '--input-type=frag',
             '--include=$fragDir',
             '--include=$shaderLibDir',
+            '--verbose-error-output=$fragVerboseErrorOutputPath',
           ],
           onRun: (_) {
             fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
@@ -339,7 +354,7 @@ void main() {
     },
   );
 
-  testWithoutContext('DevelopmentShaderCompiler can compile for android with impeller', () async {
+  testUsingContext('DevelopmentShaderCompiler can compile for android with impeller', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
@@ -355,6 +370,7 @@ void main() {
           '--input-type=frag',
           '--include=$fragDir',
           '--include=$shaderLibDir',
+          '--verbose-error-output=$fragVerboseErrorOutputPath',
         ],
         onRun: (_) {
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
@@ -388,7 +404,7 @@ void main() {
     expect(fileSystem.file('/.tmp_rand0/0.8255140718871702.temp'), isNot(exists));
   });
 
-  testWithoutContext(
+  testUsingContext(
     'DevelopmentShaderCompiler can compile for Flutter Tester with Impeller and Vulkan',
     () async {
       final processManager = FakeProcessManager.list(<FakeCommand>[
@@ -404,6 +420,7 @@ void main() {
             '--input-type=frag',
             '--include=$fragDir',
             '--include=$shaderLibDir',
+            '--verbose-error-output=$fragVerboseErrorOutputPath',
           ],
           onRun: (List<String> args) {
             fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
@@ -437,7 +454,7 @@ void main() {
     },
   );
 
-  testWithoutContext('DevelopmentShaderCompiler can compile for android with impeller', () async {
+  testUsingContext('DevelopmentShaderCompiler can compile for android with impeller', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
@@ -453,6 +470,7 @@ void main() {
           '--input-type=frag',
           '--include=$fragDir',
           '--include=$shaderLibDir',
+          '--verbose-error-output=$fragVerboseErrorOutputPath',
         ],
         onRun: (List<String> args) {
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
@@ -486,7 +504,7 @@ void main() {
     expect(fileSystem.file('/.tmp_rand0/0.8255140718871702.temp'), isNot(exists));
   });
 
-  testWithoutContext('DevelopmentShaderCompiler can compile JSON for web targets', () async {
+  testUsingContext('DevelopmentShaderCompiler can compile JSON for web targets', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
@@ -500,6 +518,7 @@ void main() {
           '--input-type=frag',
           '--include=$fragDir',
           '--include=$shaderLibDir',
+          '--verbose-error-output=$fragVerboseErrorOutputPath',
         ],
         onRun: (_) {
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
