@@ -156,6 +156,30 @@ incomplete patch from the list of [issues with partial patches][has-partial-patc
 
 [has-partial-patch]: https://github.com/flutter/flutter/labels/has%20partial%20patch
 
+
+Reviewing Code
+--------------
+
+Reviewing code is just as valuable as writing it. It is one of the fastest ways to learn the codebase and help the team move faster. We welcome reviews from everyone, regardless of whether you have commit access.
+
+### The Reviewer Path
+
+We think of code review as a progression of community trust:
+
+| Role | How you contribute | Authority |
+| :--- | :--- | :--- |
+| **Community Reviewer** | Anyone. Read PRs, catch typos, test logic, and leave helpful comments. | **Feedback:** Vital for catching bugs early and learning more about Flutter. |
+| **Trusted Contributor** | Members with commit access. They have demonstrated a deep understanding of Flutter's style and values. | **Approval (LGTM):** Their approval is the "gate" required to land code. |
+| **Area Owner** | Tech Leads or experts for a specific domain (e.g., Engine, Material). | **Final Sign-off:** Ensures the change aligns with the long-term design of that library. |
+
+### How to Review
+
+If you are new to reviewing, start by:
+
+1. **[Reading the Tree Hygiene guide.](./docs/contributing/Tree-hygiene.md#how)** It contains a 10-point checklist of what we look for (CLA, tests, API design, etc.).
+2. **Leaving comments.** Even if you can't "Approve" a PR yet, pointing out a missing test or a style violation helps the author and saves the maintainers time.
+3. **Being Gracious.** Follow our mantra: Be polite, explain the why, and provide clear next steps.
+
 Outreach
 --------
 
