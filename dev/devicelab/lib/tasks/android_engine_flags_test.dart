@@ -233,7 +233,7 @@ TaskFunction _testCommandLineFlagPrecedence() {
       } else if (result is bool) {
         if (!result) {
           throw Exception(
-            'Test flags specified in the manifest unexpectedly took precedence over that specified on the command line.',
+            'Test flag specified in the manifest unexpectedly took precedence over that specified on the command line.',
           );
         }
       }
