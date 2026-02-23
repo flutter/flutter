@@ -700,7 +700,6 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   @override
   void didUpdateWidget(_ModalBottomSheet<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    super.didUpdateWidget(oldWidget);
     assert(oldWidget.route == widget.route);
 
     assert(
