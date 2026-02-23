@@ -757,6 +757,7 @@ object FlutterPluginUtils {
     internal fun addTaskForKGPVersion(project: Project) {
         // TODO remove
         project.tasks.register<PrintTask>("kgpVersion") {
+            description = "Print the current kgp version used by the project."
             message.set(project.provider { "KGP Version: " + VersionFetcher.getKGPVersion(project).toString() })
         }
 

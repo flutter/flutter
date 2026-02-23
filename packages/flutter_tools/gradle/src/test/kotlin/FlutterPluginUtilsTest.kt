@@ -1045,11 +1045,12 @@ class FlutterPluginUtilsTest {
         val captureSlot = slot<Action<PrintTask>>()
 
         every {
-            project.tasks.register(eq("kgpVersion"), PrintTask::class.java, capture(captureSlot))
+            project.tasks.register(eq("kgpVersion"), any<Class<PrintTask>>(), capture(captureSlot))
         } returns mockTaskProvider
         every {
-            project.tasks.register(eq("kgpVersion2"), PrintKgpTask::class.java, any())
+            project.tasks.register(any(), any<Class<PrintKgpTask>>())
         } returns mockk()
+
         every { project.provider<PrintTask>(any()) } returns mockTaskProvider
         every { mockTaskProvider.configure(any()).hint(PrintTask::class) }
 
@@ -1058,6 +1059,24 @@ class FlutterPluginUtilsTest {
 
         verify {
             mockPrintTask.description = "Print the current kgp version used by the project."
+        }
+
+    }
+    @Test
+    fun `addTaskForKGPVersion adds task for KGP version 2`() {
+        val project = mockk<Project>()
+
+        every {
+            project.tasks.register(any(), any<Class<PrintTask>>(), any())
+        } returns mockk()
+        every {
+            project.tasks.register(eq("kgpVersion2"), PrintKgpTask::class.java)
+        } returns mockk()
+
+        FlutterPluginUtils.addTaskForKGPVersion(project)
+
+        verify {
+            project.tasks.register(eq("kgpVersion2"), PrintKgpTask::class.java)
         }
     }
 
