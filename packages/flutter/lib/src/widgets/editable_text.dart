@@ -312,10 +312,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
       return TextSpan(style: style, text: text);
     }
 
-    final TextStyle effectiveComposingStyle = composingStyle != null
-        ? (style?.merge(composingStyle) ?? composingStyle)
-        : (style?.merge(const TextStyle(decoration: TextDecoration.underline)) ??
-            const TextStyle(decoration: TextDecoration.underline));
+    final TextStyle finalComposingStyle = composingStyle ?? const TextStyle(decoration: TextDecoration.underline);
+    final TextStyle effectiveComposingStyle = style?.merge(finalComposingStyle) ?? finalComposingStyle;
     return TextSpan(
       style: style,
       children: <TextSpan>[
