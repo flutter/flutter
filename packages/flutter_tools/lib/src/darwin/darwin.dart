@@ -14,7 +14,6 @@ import '../project.dart';
 /// This includes details like binary names, artifact locations, and deployment versions.
 enum FlutterDarwinPlatform {
   ios(
-    name: 'ios',
     binaryName: 'Flutter',
     targetPlatform: TargetPlatform.ios,
     swiftPackagePlatform: SwiftPackagePlatform.ios,
@@ -24,7 +23,6 @@ enum FlutterDarwinPlatform {
     sdks: <XcodeSdk>[XcodeSdk.IPhoneOS, XcodeSdk.IPhoneSimulator],
   ),
   macos(
-    name: 'macos',
     binaryName: 'FlutterMacOS',
     targetPlatform: TargetPlatform.darwin,
     swiftPackagePlatform: SwiftPackagePlatform.macos,
@@ -35,7 +33,6 @@ enum FlutterDarwinPlatform {
   );
 
   const FlutterDarwinPlatform({
-    required this.name,
     required this.binaryName,
     required this.targetPlatform,
     required this.swiftPackagePlatform,
@@ -44,9 +41,6 @@ enum FlutterDarwinPlatform {
     required this.xcframeworkArtifact,
     required this.sdks,
   }) : _artifactName = artifactName;
-
-  /// The name of the platform in all lowercase. Matches the corresponding [TargetPlatform].
-  final String name;
 
   /// The name of the binary file within the [xcframeworkArtifact].
   final String binaryName;
@@ -107,6 +101,16 @@ enum FlutterDarwinPlatform {
   static FlutterDarwinPlatform? fromTargetPlatform(TargetPlatform targetPlatform) {
     for (final FlutterDarwinPlatform darwinPlatform in FlutterDarwinPlatform.values) {
       if (targetPlatform == darwinPlatform.targetPlatform) {
+        return darwinPlatform;
+      }
+    }
+    return null;
+  }
+
+  /// Returns [FlutterDarwinPlatform] that matches the [name]. Returns null if no match is found.
+  static FlutterDarwinPlatform? fromName(String name) {
+    for (final FlutterDarwinPlatform darwinPlatform in FlutterDarwinPlatform.values) {
+      if (name == darwinPlatform.name) {
         return darwinPlatform;
       }
     }

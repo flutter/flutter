@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_IMPELLER_PLAYGROUND_BACKEND_VULKAN_SWIFTSHADER_UTILITIES_H_
-#define FLUTTER_IMPELLER_PLAYGROUND_BACKEND_VULKAN_SWIFTSHADER_UTILITIES_H_
+#ifndef FLUTTER_TESTING_TEST_SWIFTSHADER_UTILS_H_
+#define FLUTTER_TESTING_TEST_SWIFTSHADER_UTILS_H_
 
-namespace impeller {
+namespace flutter::testing {
 
 //------------------------------------------------------------------------------
 /// @brief      Find and setup the installable client driver for a locally built
@@ -21,6 +21,6 @@ namespace impeller {
 ///
 void SetupSwiftshaderOnce(bool use_swiftshader);
 
-}  // namespace impeller
+}  // namespace flutter::testing
 
-#endif  // FLUTTER_IMPELLER_PLAYGROUND_BACKEND_VULKAN_SWIFTSHADER_UTILITIES_H_
+#endif  // FLUTTER_TESTING_TEST_SWIFTSHADER_UTILS_H_
