@@ -1991,7 +1991,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// matched with [CommonFinders.bySemanticsIdentifier].
   ///
   /// When set, this property implicitly forces the creation of a new
-  /// [SemanticsNode] (equivalent to setting [container] to true in
+  /// [SemanticsNode] (equivalent to setting `container` to true in
   /// [Semantics]). This ensures the identifier is always attached to its
   /// own node and is not merged into an ancestor.
   ///
