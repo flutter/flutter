@@ -14,7 +14,6 @@ import 'base/deferred_component.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
-import 'globals.dart' as globals;
 import 'platform_plugins.dart';
 import 'plugins.dart';
 
@@ -157,6 +156,15 @@ class FlutterManifest {
   // Flag to avoid printing multiple invalid version messages.
   var _hasShowInvalidVersionMsg = false;
 
+  String _invalidVersionSettingHintMessage(String invalidVersion) =>
+      'Invalid version $invalidVersion found, default value will be used.\n'
+      'In pubspec.yaml, a valid version should look like: build-name+build-number.\n'
+      'In Android, build-name is used as versionName while build-number used as versionCode.\n'
+      'Read more about Android versioning at https://developer.android.com/studio/publish/versioning\n'
+      'In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.\n'
+      'Read more about iOS versioning at\n'
+      'https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html\n';
+
   /// The version String from the `pubspec.yaml` file.
   /// Can be null if it isn't set or has a wrong format.
   String? get appVersion {
@@ -170,10 +178,7 @@ class FlutterManifest {
       version = Version.parse(verStr);
     } on Exception {
       if (!_hasShowInvalidVersionMsg) {
-        _logger.printStatus(
-          globals.userMessages.invalidVersionSettingHintMessage(verStr),
-          emphasis: true,
-        );
+        _logger.printStatus(_invalidVersionSettingHintMessage(verStr), emphasis: true);
         _hasShowInvalidVersionMsg = true;
       }
     }
