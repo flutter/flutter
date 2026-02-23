@@ -166,6 +166,9 @@ void runSemanticsTests() {
   group('loadingSpinner', () {
     _testLoadingSpinner();
   });
+  group('AccessibilityFocusBlocked', () {
+    _testAccessibilityFocusBlocked();
+  });
 }
 
 void _testSemanticRole() {
@@ -6411,4 +6414,34 @@ Future<void> createPlatformView(int id, String viewType) {
     (dynamic _) => completer.complete(),
   );
   return completer.future;
+}
+
+void _testAccessibilityFocusBlocked() {
+  test('sets and removes aria-hidden for isAccessibilityFocusBlocked', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    // Create a node with isAccessibilityFocusBlocked = true
+    {
+      final builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        flags: const ui.SemanticsFlags(isAccessibilityFocusBlocked: true),
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      owner().updateSemantics(builder.build());
+      expectSemanticsTree(owner(), '<sem aria-hidden="true"></sem>');
+    }
+
+    // Update to isAccessibilityFocusBlocked = false
+    {
+      final builder = ui.SemanticsUpdateBuilder();
+      updateNode(builder, rect: const ui.Rect.fromLTRB(0, 0, 100, 50));
+      owner().updateSemantics(builder.build());
+      expectSemanticsTree(owner(), '<sem></sem>');
+    }
+
+    semantics().semanticsEnabled = false;
+  });
 }

@@ -888,6 +888,14 @@ abstract class SemanticRole {
       updateValidationResult();
     }
 
+    if (semanticsObject.isFlagsDirty) {
+      if (semanticsObject.flags.isAccessibilityFocusBlocked) {
+        element.setAttribute('aria-hidden', 'true');
+      } else {
+        element.removeAttribute('aria-hidden');
+      }
+    }
+
     final List<SemanticBehavior>? behaviors = _behaviors;
     if (behaviors != null) {
       for (final SemanticBehavior behavior in behaviors) {
