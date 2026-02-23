@@ -34,7 +34,11 @@ void addMetadataToManifest(String testDirectory, List<(String, String?)> keyPair
 
     if (existingMetaData.isNotEmpty) {
       final XmlElement existingEntry = existingMetaData.first;
-      existingEntry.setAttribute('android:value', value);
+      if (value == null) {
+        existingEntry.removeAttribute('android:value');
+      } else {
+        existingEntry.setAttribute('android:value', value);
+      }
     } else {
       final metaData = XmlElement(XmlName('meta-data'), <XmlAttribute>[
         XmlAttribute(XmlName('android:name'), key),

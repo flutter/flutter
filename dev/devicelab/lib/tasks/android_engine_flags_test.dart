@@ -75,7 +75,6 @@ TaskFunction _testInvalidFlag(String buildMode) {
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
           .listen((String line) {
-            print('CAMILLE :$line');
             if (line.contains(
               "Skipping unsafe AOT shared library name flag: something/completely/and/totally/invalid.so. Please ensure that the library is vetted and placed in your application's internal storage.",
             )) {
@@ -198,7 +197,7 @@ TaskFunction _testCommandLineFlagPrecedence() {
       addMetadataToManifest(path.join(tempDir.path, projectName), metadataKeyPairs);
 
       section('Run Flutter Android app with modified manifest and --test-flag');
-      final metadataLineFoundFirst = Completer<bool>();
+      final commandLinePrecedenceCompleter = Completer<bool>();
       late Process run;
 
       await inDirectory(path.join(tempDir.path, projectName), () async {
@@ -209,23 +208,23 @@ TaskFunction _testCommandLineFlagPrecedence() {
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
           .listen((String line) {
-            if (metadataLineFoundFirst.isCompleted) {
+            if (commandLinePrecedenceCompleter.isCompleted) {
               return;
             } else if (line.contains(
               'For testing purposes only: test flag specified on the command line was loaded by the FlutterLoader.',
             )) {
-              metadataLineFoundFirst.complete(false);
+              commandLinePrecedenceCompleter.complete(true);
             } else if (line.contains(
               'For testing purposes only: test flag specified in the manifest was loaded by the FlutterLoader.',
             )) {
-              metadataLineFoundFirst.complete(true);
+              commandLinePrecedenceCompleter.complete(false);
             }
           });
 
       section('Check that the test flag logs are found in the expected order in STDOUT');
-      final Future<bool> assetsContentFoundFuture = metadataLineFoundFirst.future;
+      final Future<bool> commandLinePrecedenceFuture = commandLinePrecedenceCompleter.future;
       final Object result = await Future.any(<Future<Object>>[
-        assetsContentFoundFuture,
+        commandLinePrecedenceFuture,
         run.exitCode,
       ]);
 
