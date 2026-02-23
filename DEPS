@@ -271,7 +271,7 @@ deps = {
    Var('chromium_git') + '/external/github.com/google/benchmark' + '@' + '431abd149fd76a072f821913c0340137cc755f36',
 
   'engine/src/flutter/third_party/googletest':
-   Var('chromium_git') + '/external/github.com/google/googletest' + '@' + '7f036c5563af7d0329f20e8bb42effb04629f0c0',
+   Var('chromium_git') + '/external/github.com/google/googletest' + '@' + 'e9907112b47255d50b4d343e7e2160bce8dc85d1',
 
   'engine/src/flutter/third_party/re2':
    Var('chromium_git') + '/external/github.com/google/re2' + '@' + 'c84a140c93352cdabbfb547c531be34515b12228',
