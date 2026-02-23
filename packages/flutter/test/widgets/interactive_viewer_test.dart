@@ -5,8 +5,8 @@
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4, Quad, Vector3;
 
@@ -26,14 +26,10 @@ void main() {
 
     testWidgets('child fits in viewport', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: InteractiveViewer(
-                transformationController: transformationController,
-                child: const SizedBox(width: 200.0, height: 200.0),
-              ),
-            ),
+        Center(
+          child: InteractiveViewer(
+            transformationController: transformationController,
+            child: const SizedBox(width: 200.0, height: 200.0),
           ),
         ),
       );
@@ -74,15 +70,11 @@ void main() {
     testWidgets('boundary slightly bigger than child', (WidgetTester tester) async {
       const boundaryMargin = 10.0;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: InteractiveViewer(
-                boundaryMargin: const EdgeInsets.all(boundaryMargin),
-                transformationController: transformationController,
-                child: const SizedBox(width: 200.0, height: 200.0),
-              ),
-            ),
+        Center(
+          child: InteractiveViewer(
+            boundaryMargin: const EdgeInsets.all(boundaryMargin),
+            transformationController: transformationController,
+            child: const SizedBox(width: 200.0, height: 200.0),
           ),
         ),
       );
@@ -125,16 +117,12 @@ void main() {
 
     testWidgets('child bigger than viewport', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: InteractiveViewer(
-                constrained: false,
-                scaleEnabled: false,
-                transformationController: transformationController,
-                child: const SizedBox(width: 2000.0, height: 2000.0),
-              ),
-            ),
+        Center(
+          child: InteractiveViewer(
+            constrained: false,
+            scaleEnabled: false,
+            transformationController: transformationController,
+            child: const SizedBox(width: 2000.0, height: 2000.0),
           ),
         ),
       );
@@ -197,16 +185,12 @@ void main() {
 
     testWidgets('child has no dimensions', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: InteractiveViewer(
-                constrained: false,
-                scaleEnabled: false,
-                transformationController: transformationController,
-                child: const SizedBox.shrink(),
-              ),
-            ),
+        Center(
+          child: InteractiveViewer(
+            constrained: false,
+            scaleEnabled: false,
+            transformationController: transformationController,
+            child: const SizedBox.shrink(),
           ),
         ),
       );
@@ -229,15 +213,11 @@ void main() {
     testWidgets('no boundary', (WidgetTester tester) async {
       const minScale = 0.8;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: InteractiveViewer(
-                boundaryMargin: const EdgeInsets.all(double.infinity),
-                transformationController: transformationController,
-                child: const SizedBox(width: 200.0, height: 200.0),
-              ),
-            ),
+        Center(
+          child: InteractiveViewer(
+            boundaryMargin: const EdgeInsets.all(double.infinity),
+            transformationController: transformationController,
+            child: const SizedBox(width: 200.0, height: 200.0),
           ),
         ),
       );
@@ -282,15 +262,11 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: InteractiveViewer(
-                boundaryMargin: const EdgeInsets.all(double.infinity),
-                transformationController: transformationController,
-                child: const SizedBox(width: 200.0, height: 200.0),
-              ),
-            ),
+        Center(
+          child: InteractiveViewer(
+            boundaryMargin: const EdgeInsets.all(double.infinity),
+            transformationController: transformationController,
+            child: const SizedBox(width: 200.0, height: 200.0),
           ),
         ),
       );
@@ -318,16 +294,12 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: InteractiveViewer(
-                panAxis: PanAxis.aligned,
-                boundaryMargin: const EdgeInsets.all(double.infinity),
-                transformationController: transformationController,
-                child: const SizedBox(width: 200.0, height: 200.0),
-              ),
-            ),
+        Center(
+          child: InteractiveViewer(
+            panAxis: PanAxis.aligned,
+            boundaryMargin: const EdgeInsets.all(double.infinity),
+            transformationController: transformationController,
+            child: const SizedBox(width: 200.0, height: 200.0),
           ),
         ),
       );
@@ -355,16 +327,12 @@ void main() {
       'PanAxis.aligned allows panning in one direction only for horizontal leaning gesture',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: Center(
-                child: InteractiveViewer(
-                  panAxis: PanAxis.aligned,
-                  boundaryMargin: const EdgeInsets.all(double.infinity),
-                  transformationController: transformationController,
-                  child: const SizedBox(width: 200.0, height: 200.0),
-                ),
-              ),
+          Center(
+            child: InteractiveViewer(
+              panAxis: PanAxis.aligned,
+              boundaryMargin: const EdgeInsets.all(double.infinity),
+              transformationController: transformationController,
+              child: const SizedBox(width: 200.0, height: 200.0),
             ),
           ),
         );
@@ -393,16 +361,12 @@ void main() {
       'PanAxis.horizontal allows panning in the horizontal direction only for diagonal gesture',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: Center(
-                child: InteractiveViewer(
-                  panAxis: PanAxis.horizontal,
-                  boundaryMargin: const EdgeInsets.all(double.infinity),
-                  transformationController: transformationController,
-                  child: const SizedBox(width: 200.0, height: 200.0),
-                ),
-              ),
+          Center(
+            child: InteractiveViewer(
+              panAxis: PanAxis.horizontal,
+              boundaryMargin: const EdgeInsets.all(double.infinity),
+              transformationController: transformationController,
+              child: const SizedBox(width: 200.0, height: 200.0),
             ),
           ),
         );
@@ -431,16 +395,12 @@ void main() {
       'PanAxis.horizontal allows panning in the horizontal direction only for horizontal leaning gesture',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: Center(
-                child: InteractiveViewer(
-                  panAxis: PanAxis.horizontal,
-                  boundaryMargin: const EdgeInsets.all(double.infinity),
-                  transformationController: transformationController,
-                  child: const SizedBox(width: 200.0, height: 200.0),
-                ),
-              ),
+          Center(
+            child: InteractiveViewer(
+              panAxis: PanAxis.horizontal,
+              boundaryMargin: const EdgeInsets.all(double.infinity),
+              transformationController: transformationController,
+              child: const SizedBox(width: 200.0, height: 200.0),
             ),
           ),
         );
@@ -469,16 +429,12 @@ void main() {
       'PanAxis.horizontal does not allow panning in vertical direction on vertical gesture',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: Center(
-                child: InteractiveViewer(
-                  panAxis: PanAxis.horizontal,
-                  boundaryMargin: const EdgeInsets.all(double.infinity),
-                  transformationController: transformationController,
-                  child: const SizedBox(width: 200.0, height: 200.0),
-                ),
-              ),
+          Center(
+            child: InteractiveViewer(
+              panAxis: PanAxis.horizontal,
+              boundaryMargin: const EdgeInsets.all(double.infinity),
+              transformationController: transformationController,
+              child: const SizedBox(width: 200.0, height: 200.0),
             ),
           ),
         );
@@ -507,16 +463,12 @@ void main() {
       'PanAxis.vertical allows panning in the vertical direction only for diagonal gesture',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: Center(
-                child: InteractiveViewer(
-                  panAxis: PanAxis.vertical,
-                  boundaryMargin: const EdgeInsets.all(double.infinity),
-                  transformationController: transformationController,
-                  child: const SizedBox(width: 200.0, height: 200.0),
-                ),
-              ),
+          Center(
+            child: InteractiveViewer(
+              panAxis: PanAxis.vertical,
+              boundaryMargin: const EdgeInsets.all(double.infinity),
+              transformationController: transformationController,
+              child: const SizedBox(width: 200.0, height: 200.0),
             ),
           ),
         );
@@ -545,16 +497,12 @@ void main() {
       'PanAxis.vertical allows panning in the vertical direction only for vertical leaning gesture',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: Center(
-                child: InteractiveViewer(
-                  panAxis: PanAxis.vertical,
-                  boundaryMargin: const EdgeInsets.all(double.infinity),
-                  transformationController: transformationController,
-                  child: const SizedBox(width: 200.0, height: 200.0),
-                ),
-              ),
+          Center(
+            child: InteractiveViewer(
+              panAxis: PanAxis.vertical,
+              boundaryMargin: const EdgeInsets.all(double.infinity),
+              transformationController: transformationController,
+              child: const SizedBox(width: 200.0, height: 200.0),
             ),
           ),
         );
@@ -583,16 +531,12 @@ void main() {
       'PanAxis.vertical does not allow panning in horizontal direction on vertical gesture',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: Center(
-                child: InteractiveViewer(
-                  panAxis: PanAxis.vertical,
-                  boundaryMargin: const EdgeInsets.all(double.infinity),
-                  transformationController: transformationController,
-                  child: const SizedBox(width: 200.0, height: 200.0),
-                ),
-              ),
+          Center(
+            child: InteractiveViewer(
+              panAxis: PanAxis.vertical,
+              boundaryMargin: const EdgeInsets.all(double.infinity),
+              transformationController: transformationController,
+              child: const SizedBox(width: 200.0, height: 200.0),
             ),
           ),
         );
@@ -620,15 +564,11 @@ void main() {
     testWidgets('inertia fling and boundary sliding', (WidgetTester tester) async {
       const boundaryMargin = 50.0;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: InteractiveViewer(
-                boundaryMargin: const EdgeInsets.all(boundaryMargin),
-                transformationController: transformationController,
-                child: const SizedBox(width: 200.0, height: 200.0),
-              ),
-            ),
+        Center(
+          child: InteractiveViewer(
+            boundaryMargin: const EdgeInsets.all(boundaryMargin),
+            transformationController: transformationController,
+            child: const SizedBox(width: 200.0, height: 200.0),
           ),
         ),
       );
@@ -681,16 +621,12 @@ void main() {
       const boundaryMargin = 50.0;
       const minScale = 0.1;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: InteractiveViewer(
-                boundaryMargin: const EdgeInsets.all(boundaryMargin),
-                minScale: minScale,
-                transformationController: transformationController,
-                child: const SizedBox(width: 200.0, height: 200.0),
-              ),
-            ),
+        Center(
+          child: InteractiveViewer(
+            boundaryMargin: const EdgeInsets.all(boundaryMargin),
+            minScale: minScale,
+            transformationController: transformationController,
+            child: const SizedBox(width: 200.0, height: 200.0),
           ),
         ),
       );
@@ -767,17 +703,13 @@ void main() {
         const boundaryMargin = 50.0;
         const minScale = 0.1;
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: Center(
-                child: InteractiveViewer(
-                  panAxis: PanAxis.aligned,
-                  boundaryMargin: const EdgeInsets.all(boundaryMargin),
-                  minScale: minScale,
-                  transformationController: transformationController,
-                  child: const SizedBox(width: 200.0, height: 200.0),
-                ),
-              ),
+          Center(
+            child: InteractiveViewer(
+              panAxis: PanAxis.aligned,
+              boundaryMargin: const EdgeInsets.all(boundaryMargin),
+              minScale: minScale,
+              transformationController: transformationController,
+              child: const SizedBox(width: 200.0, height: 200.0),
             ),
           ),
         );
@@ -857,14 +789,10 @@ void main() {
 
     testWidgets('Can scale with mouse', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: InteractiveViewer(
-                transformationController: transformationController,
-                child: const SizedBox(width: 200.0, height: 200.0),
-              ),
-            ),
+        Center(
+          child: InteractiveViewer(
+            transformationController: transformationController,
+            child: const SizedBox(width: 200.0, height: 200.0),
           ),
         ),
       );
@@ -878,15 +806,11 @@ void main() {
 
     testWidgets('Cannot scale with mouse when scale is disabled', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: InteractiveViewer(
-                transformationController: transformationController,
-                scaleEnabled: false,
-                child: const SizedBox(width: 200.0, height: 200.0),
-              ),
-            ),
+        Center(
+          child: InteractiveViewer(
+            transformationController: transformationController,
+            scaleEnabled: false,
+            child: const SizedBox(width: 200.0, height: 200.0),
           ),
         ),
       );
@@ -905,25 +829,21 @@ void main() {
       late Velocity currentVelocity;
       late bool calledStart;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: InteractiveViewer(
-                transformationController: transformationController,
-                onInteractionStart: (ScaleStartDetails details) {
-                  calledStart = true;
-                },
-                onInteractionUpdate: (ScaleUpdateDetails details) {
-                  scaleChange = details.scale;
-                  focalPoint = details.focalPoint;
-                  localFocalPoint = details.localFocalPoint;
-                },
-                onInteractionEnd: (ScaleEndDetails details) {
-                  currentVelocity = details.velocity;
-                },
-                child: const SizedBox(width: 200.0, height: 200.0),
-              ),
-            ),
+        Center(
+          child: InteractiveViewer(
+            transformationController: transformationController,
+            onInteractionStart: (ScaleStartDetails details) {
+              calledStart = true;
+            },
+            onInteractionUpdate: (ScaleUpdateDetails details) {
+              scaleChange = details.scale;
+              focalPoint = details.focalPoint;
+              localFocalPoint = details.localFocalPoint;
+            },
+            onInteractionEnd: (ScaleEndDetails details) {
+              currentVelocity = details.velocity;
+            },
+            child: const SizedBox(width: 200.0, height: 200.0),
           ),
         ),
       );
@@ -953,17 +873,13 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: InteractiveViewer(
-                constrained: false,
-                maxScale: 100000,
-                minScale: 0.01,
-                transformationController: transformationController,
-                child: const SizedBox(width: 1000.0, height: 1000.0),
-              ),
-            ),
+        Center(
+          child: InteractiveViewer(
+            constrained: false,
+            maxScale: 100000,
+            minScale: 0.01,
+            transformationController: transformationController,
+            child: const SizedBox(width: 1000.0, height: 1000.0),
           ),
         ),
       );
@@ -992,25 +908,21 @@ void main() {
       late Velocity currentVelocity;
       late bool calledStart;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: InteractiveViewer(
-                transformationController: transformationController,
-                onInteractionStart: (ScaleStartDetails details) {
-                  calledStart = true;
-                },
-                onInteractionUpdate: (ScaleUpdateDetails details) {
-                  scaleChange = details.scale;
-                  focalPoint = details.focalPoint;
-                  localFocalPoint = details.localFocalPoint;
-                },
-                onInteractionEnd: (ScaleEndDetails details) {
-                  currentVelocity = details.velocity;
-                },
-                child: const SizedBox(width: 200.0, height: 200.0),
-              ),
-            ),
+        Center(
+          child: InteractiveViewer(
+            transformationController: transformationController,
+            onInteractionStart: (ScaleStartDetails details) {
+              calledStart = true;
+            },
+            onInteractionUpdate: (ScaleUpdateDetails details) {
+              scaleChange = details.scale;
+              focalPoint = details.focalPoint;
+              localFocalPoint = details.localFocalPoint;
+            },
+            onInteractionEnd: (ScaleEndDetails details) {
+              currentVelocity = details.velocity;
+            },
+            child: const SizedBox(width: 200.0, height: 200.0),
           ),
         ),
       );
@@ -1044,30 +956,27 @@ void main() {
         var calledStart = false;
         var calledUpdate = false;
         var calledEnd = false;
+        const sizedBox = SizedBox(width: 200.0, height: 200.0);
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: Center(
-                child: InteractiveViewer(
-                  transformationController: transformationController,
-                  scaleEnabled: false,
-                  onInteractionStart: (ScaleStartDetails details) {
-                    calledStart = true;
-                  },
-                  onInteractionUpdate: (ScaleUpdateDetails details) {
-                    calledUpdate = true;
-                  },
-                  onInteractionEnd: (ScaleEndDetails details) {
-                    calledEnd = true;
-                  },
-                  child: const SizedBox(width: 200.0, height: 200.0),
-                ),
-              ),
+          Center(
+            child: InteractiveViewer(
+              transformationController: transformationController,
+              scaleEnabled: false,
+              onInteractionStart: (ScaleStartDetails details) {
+                calledStart = true;
+              },
+              onInteractionUpdate: (ScaleUpdateDetails details) {
+                calledUpdate = true;
+              },
+              onInteractionEnd: (ScaleEndDetails details) {
+                calledEnd = true;
+              },
+              child: sizedBox,
             ),
           ),
         );
 
-        final Offset childOffset = tester.getTopLeft(find.byType(SizedBox));
+        final Offset childOffset = tester.getTopLeft(find.byWidget(sizedBox));
         final childInterior = Offset(childOffset.dx + 20.0, childOffset.dy + 20.0);
         TestGesture gesture = await tester.startGesture(childOffset);
 
@@ -1119,30 +1028,27 @@ void main() {
         var calledStart = false;
         var calledUpdate = false;
         var calledEnd = false;
+        const sizedBox = SizedBox(width: 200.0, height: 200.0);
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: Center(
-                child: InteractiveViewer(
-                  transformationController: transformationController,
-                  scaleEnabled: false,
-                  onInteractionStart: (ScaleStartDetails details) {
-                    calledStart = true;
-                  },
-                  onInteractionUpdate: (ScaleUpdateDetails details) {
-                    calledUpdate = true;
-                  },
-                  onInteractionEnd: (ScaleEndDetails details) {
-                    calledEnd = true;
-                  },
-                  child: const SizedBox(width: 200.0, height: 200.0),
-                ),
-              ),
+          Center(
+            child: InteractiveViewer(
+              transformationController: transformationController,
+              scaleEnabled: false,
+              onInteractionStart: (ScaleStartDetails details) {
+                calledStart = true;
+              },
+              onInteractionUpdate: (ScaleUpdateDetails details) {
+                calledUpdate = true;
+              },
+              onInteractionEnd: (ScaleEndDetails details) {
+                calledEnd = true;
+              },
+              child: sizedBox,
             ),
           ),
         );
 
-        final Offset childOffset = tester.getTopLeft(find.byType(SizedBox));
+        final Offset childOffset = tester.getTopLeft(find.byWidget(sizedBox));
         final childInterior = Offset(childOffset.dx + 20.0, childOffset.dy + 20.0);
         final TestGesture gesture = await tester.startGesture(
           childOffset,
@@ -1184,14 +1090,10 @@ void main() {
       addTearDown(tester.view.reset);
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: InteractiveViewer(
-                transformationController: transformationController,
-                child: Container(),
-              ),
-            ),
+        Center(
+          child: InteractiveViewer(
+            transformationController: transformationController,
+            child: Container(),
           ),
         ),
       );
@@ -1229,15 +1131,11 @@ void main() {
     testWidgets('gesture can start as pan and become scale', (WidgetTester tester) async {
       const boundaryMargin = 50.0;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: InteractiveViewer(
-                boundaryMargin: const EdgeInsets.all(boundaryMargin),
-                transformationController: transformationController,
-                child: const SizedBox(width: 200.0, height: 200.0),
-              ),
-            ),
+        Center(
+          child: InteractiveViewer(
+            boundaryMargin: const EdgeInsets.all(boundaryMargin),
+            transformationController: transformationController,
+            child: const SizedBox(width: 200.0, height: 200.0),
           ),
         ),
       );
@@ -1275,17 +1173,13 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: InteractiveViewer(
-                constrained: false,
-                minScale: 1.0,
-                maxScale: 1.0,
-                transformationController: transformationController,
-                child: const SizedBox(width: 200.0, height: 200.0),
-              ),
-            ),
+        Center(
+          child: InteractiveViewer(
+            constrained: false,
+            minScale: 1.0,
+            maxScale: 1.0,
+            transformationController: transformationController,
+            child: const SizedBox(width: 200.0, height: 200.0),
           ),
         ),
       );
@@ -1316,20 +1210,16 @@ void main() {
       double? initialScale;
       double? scale;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: GestureDetector(
-                onTapUp: (TapUpDetails details) {},
-                child: InteractiveViewer(
-                  onInteractionUpdate: (ScaleUpdateDetails details) {
-                    initialScale ??= details.scale;
-                    scale = details.scale;
-                  },
-                  transformationController: transformationController,
-                  child: const SizedBox(width: 200.0, height: 200.0),
-                ),
-              ),
+        Center(
+          child: GestureDetector(
+            onTapUp: (TapUpDetails details) {},
+            child: InteractiveViewer(
+              onInteractionUpdate: (ScaleUpdateDetails details) {
+                initialScale ??= details.scale;
+                scale = details.scale;
+              },
+              transformationController: transformationController,
+              child: const SizedBox(width: 200.0, height: 200.0),
             ),
           ),
         ),
@@ -1386,17 +1276,13 @@ void main() {
 
     testWidgets('Check if ClipRect is present in the tree', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: InteractiveViewer(
-                constrained: false,
-                clipBehavior: Clip.none,
-                minScale: 1.0,
-                maxScale: 1.0,
-                child: const SizedBox(width: 200.0, height: 200.0),
-              ),
-            ),
+        Center(
+          child: InteractiveViewer(
+            constrained: false,
+            clipBehavior: Clip.none,
+            minScale: 1.0,
+            maxScale: 1.0,
+            child: const SizedBox(width: 200.0, height: 200.0),
           ),
         ),
       );
@@ -1405,16 +1291,12 @@ void main() {
       expect(renderClip.clipBehavior, equals(Clip.none));
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: InteractiveViewer(
-                constrained: false,
-                minScale: 1.0,
-                maxScale: 1.0,
-                child: const SizedBox(width: 200.0, height: 200.0),
-              ),
-            ),
+        Center(
+          child: InteractiveViewer(
+            constrained: false,
+            minScale: 1.0,
+            maxScale: 1.0,
+            child: const SizedBox(width: 200.0, height: 200.0),
           ),
         ),
       );
@@ -1423,36 +1305,33 @@ void main() {
     });
 
     testWidgets('builder can change widgets that are off-screen', (WidgetTester tester) async {
+      const green = Color(0xFF00FF00);
+      const red = Color(0xFFFF0000);
+
       const childHeight = 10.0;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: SizedBox(
-                key: const Key('outer box'),
-                height: 50.0,
-                child: InteractiveViewer.builder(
-                  transformationController: transformationController,
-                  scaleEnabled: false,
-                  boundaryMargin: const EdgeInsets.all(double.infinity),
-                  // Build visible children green, off-screen children red.
-                  builder: (BuildContext context, Quad viewportQuad) {
-                    final Rect viewport = _axisAlignedBoundingBox(viewportQuad);
-                    final children = <Container>[];
-                    for (var i = 0; i < 10; i++) {
-                      final double childTop = i * childHeight;
-                      final double childBottom = childTop + childHeight;
-                      final bool visible =
-                          (childBottom >= viewport.top && childBottom <= viewport.bottom) ||
-                          (childTop >= viewport.top && childTop <= viewport.bottom);
-                      children.add(
-                        Container(height: childHeight, color: visible ? Colors.green : Colors.red),
-                      );
-                    }
-                    return Column(children: children);
-                  },
-                ),
-              ),
+        Center(
+          child: SizedBox(
+            key: const Key('outer box'),
+            height: 50.0,
+            child: InteractiveViewer.builder(
+              transformationController: transformationController,
+              scaleEnabled: false,
+              boundaryMargin: const EdgeInsets.all(double.infinity),
+              // Build visible children green, off-screen children red.
+              builder: (BuildContext context, Quad viewportQuad) {
+                final Rect viewport = _axisAlignedBoundingBox(viewportQuad);
+                final children = <Container>[];
+                for (var i = 0; i < 10; i++) {
+                  final double childTop = i * childHeight;
+                  final double childBottom = childTop + childHeight;
+                  final bool visible =
+                      (childBottom >= viewport.top && childBottom <= viewport.bottom) ||
+                      (childTop >= viewport.top && childTop <= viewport.bottom);
+                  children.add(Container(height: childHeight, color: visible ? green : red));
+                }
+                return Column(children: children);
+              },
             ),
           ),
         ),
@@ -1465,9 +1344,9 @@ void main() {
       for (final Element element in find.byType(Container, skipOffstage: false).evaluate()) {
         final container = element.widget as Container;
         if (i < 6) {
-          expect(container.color, Colors.green);
+          expect(container.color, green);
         } else {
-          expect(container.color, Colors.red);
+          expect(container.color, red);
         }
         i++;
       }
@@ -1491,9 +1370,9 @@ void main() {
       for (final Element element in find.byType(Container, skipOffstage: false).evaluate()) {
         final container = element.widget as Container;
         if (i > 0 && i < 7) {
-          expect(container.color, Colors.green);
+          expect(container.color, green);
         } else {
-          expect(container.color, Colors.red);
+          expect(container.color, red);
         }
         i++;
       }
@@ -1506,27 +1385,17 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: InteractiveViewer(child: const SizedBox(width: 200.0, height: 200.0)),
-            ),
-          ),
-        ),
+        Center(child: InteractiveViewer(child: const SizedBox(width: 200.0, height: 200.0))),
       );
 
       expect(find.byType(LayoutBuilder), findsNothing);
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: InteractiveViewer.builder(
-                builder: (BuildContext context, Quad viewport) {
-                  return const SizedBox(width: 200.0, height: 200.0);
-                },
-              ),
-            ),
+        Center(
+          child: InteractiveViewer.builder(
+            builder: (BuildContext context, Quad viewport) {
+              return const SizedBox(width: 200.0, height: 200.0);
+            },
           ),
         ),
       );
@@ -1538,16 +1407,12 @@ void main() {
       const scrollAmount = 30.0;
       Future<void> pumpScaleFactor(double scaleFactor) {
         return tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: Center(
-                child: InteractiveViewer(
-                  boundaryMargin: const EdgeInsets.all(double.infinity),
-                  transformationController: transformationController,
-                  scaleFactor: scaleFactor,
-                  child: const SizedBox(width: 200.0, height: 200.0),
-                ),
-              ),
+          Center(
+            child: InteractiveViewer(
+              boundaryMargin: const EdgeInsets.all(double.infinity),
+              transformationController: transformationController,
+              scaleFactor: scaleFactor,
+              child: const SizedBox(width: 200.0, height: 200.0),
             ),
           ),
         );
@@ -1616,13 +1481,7 @@ void main() {
     testWidgets('alignment argument is used properly', (WidgetTester tester) async {
       const Alignment alignment = Alignment.center;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: InteractiveViewer(alignment: alignment, child: Container()),
-          ),
-        ),
-      );
+      await tester.pumpWidget(InteractiveViewer(alignment: alignment, child: Container()));
 
       final Transform transform = tester.firstWidget(find.byType(Transform));
       expect(transform.alignment, alignment);
@@ -1633,17 +1492,13 @@ void main() {
       final transformationController1 = TransformationController();
       addTearDown(transformationController1.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SizedBox(
-              width: 200,
-              height: 200,
-              child: InteractiveViewer(
-                constrained: false,
-                transformationController: transformationController1,
-                child: const SizedBox(width: 2000.0, height: 2000.0),
-              ),
-            ),
+        SizedBox(
+          width: 200,
+          height: 200,
+          child: InteractiveViewer(
+            constrained: false,
+            transformationController: transformationController1,
+            child: const SizedBox(width: 2000.0, height: 2000.0),
           ),
         ),
       );
@@ -1659,18 +1514,14 @@ void main() {
       final transformationController2 = TransformationController();
       addTearDown(transformationController2.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SizedBox(
-              width: 200,
-              height: 200,
-              child: InteractiveViewer(
-                constrained: false,
-                interactionEndFrictionCoefficient: 0.01,
-                transformationController: transformationController2,
-                child: const SizedBox(width: 2000.0, height: 2000.0),
-              ),
-            ),
+        SizedBox(
+          width: 200,
+          height: 200,
+          child: InteractiveViewer(
+            constrained: false,
+            interactionEndFrictionCoefficient: 0.01,
+            transformationController: transformationController2,
+            child: const SizedBox(width: 2000.0, height: 2000.0),
           ),
         ),
       );
@@ -1689,15 +1540,11 @@ void main() {
     testWidgets('discrete scroll pointer events', (WidgetTester tester) async {
       const boundaryMargin = 50.0;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: InteractiveViewer(
-                boundaryMargin: const EdgeInsets.all(boundaryMargin),
-                transformationController: transformationController,
-                child: const SizedBox(width: 200.0, height: 200.0),
-              ),
-            ),
+        Center(
+          child: InteractiveViewer(
+            boundaryMargin: const EdgeInsets.all(boundaryMargin),
+            transformationController: transformationController,
+            child: const SizedBox(width: 200.0, height: 200.0),
           ),
         ),
       );
@@ -1732,15 +1579,11 @@ void main() {
     testWidgets('discrete scale pointer event', (WidgetTester tester) async {
       const boundaryMargin = 50.0;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: InteractiveViewer(
-                boundaryMargin: const EdgeInsets.all(boundaryMargin),
-                transformationController: transformationController,
-                child: const SizedBox(width: 200.0, height: 200.0),
-              ),
-            ),
+        Center(
+          child: InteractiveViewer(
+            boundaryMargin: const EdgeInsets.all(boundaryMargin),
+            transformationController: transformationController,
+            child: const SizedBox(width: 200.0, height: 200.0),
           ),
         ),
       );
@@ -1768,16 +1611,12 @@ void main() {
     testWidgets('trackpadScrollCausesScale', (WidgetTester tester) async {
       const boundaryMargin = 50.0;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: InteractiveViewer(
-                boundaryMargin: const EdgeInsets.all(boundaryMargin),
-                transformationController: transformationController,
-                trackpadScrollCausesScale: true,
-                child: const SizedBox(width: 200.0, height: 200.0),
-              ),
-            ),
+        Center(
+          child: InteractiveViewer(
+            boundaryMargin: const EdgeInsets.all(boundaryMargin),
+            transformationController: transformationController,
+            trackpadScrollCausesScale: true,
+            child: const SizedBox(width: 200.0, height: 200.0),
           ),
         ),
       );
@@ -1809,16 +1648,12 @@ void main() {
     testWidgets('trackpad pointer scroll events cause scale', (WidgetTester tester) async {
       const boundaryMargin = 50.0;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: InteractiveViewer(
-                boundaryMargin: const EdgeInsets.all(boundaryMargin),
-                transformationController: transformationController,
-                trackpadScrollCausesScale: true,
-                child: const SizedBox(width: 200.0, height: 200.0),
-              ),
-            ),
+        Center(
+          child: InteractiveViewer(
+            boundaryMargin: const EdgeInsets.all(boundaryMargin),
+            transformationController: transformationController,
+            trackpadScrollCausesScale: true,
+            child: const SizedBox(width: 200.0, height: 200.0),
           ),
         ),
       );
@@ -1865,16 +1700,12 @@ void main() {
     testWidgets('Scaling inertia', (WidgetTester tester) async {
       const boundaryMargin = 50.0;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: InteractiveViewer(
-                boundaryMargin: const EdgeInsets.all(boundaryMargin),
-                transformationController: transformationController,
-                trackpadScrollCausesScale: true,
-                child: const SizedBox(width: 200.0, height: 200.0),
-              ),
-            ),
+        Center(
+          child: InteractiveViewer(
+            boundaryMargin: const EdgeInsets.all(boundaryMargin),
+            transformationController: transformationController,
+            trackpadScrollCausesScale: true,
+            child: const SizedBox(width: 200.0, height: 200.0),
           ),
         ),
       );
@@ -2111,6 +1942,18 @@ void main() {
       expect(nearestPoint.x, moreOrLessEquals(5.8, epsilon: 0.1));
       expect(nearestPoint.y, moreOrLessEquals(10.8, epsilon: 0.1));
     });
+  });
+
+  testWidgets('InteractiveViewer does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: InteractiveViewer(child: const Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(InteractiveViewer)), Size.zero);
   });
 }
 

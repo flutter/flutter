@@ -138,8 +138,11 @@ void main() {
     createCoreMockProjectFiles();
   }
 
-  const xattrCommand = FakeCommand(
+  const xattrCommand1 = FakeCommand(
     command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', '/'],
+  );
+  const xattrCommand2 = FakeCommand(
+    command: <String>['xattr', '-r', '-d', 'com.apple.provenance', '/'],
   );
 
   // Sets up xcresulttool command for Xcode versions below 16.
@@ -418,7 +421,9 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
       ]);
@@ -453,7 +458,9 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(
           exportOptionsPlist: _exportOptionsPlist,
@@ -509,7 +516,9 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(
           exportOptionsPlist: _exportOptionsPlist,
@@ -565,7 +574,9 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(
           exportOptionsPlist: _exportOptionsPlist,
@@ -620,7 +631,9 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
       ]);
@@ -654,7 +667,9 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(
           exportOptionsPlist: _exportOptionsPlist,
@@ -709,7 +724,9 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
       ]);
@@ -743,7 +760,9 @@ void main() {
       };
 
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(exportOptionsPlist: exportOptions.path),
       ]);
@@ -784,7 +803,9 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         const FakeCommand(
           command: <String>[
@@ -844,7 +865,9 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(
           exportOptionsPlist: _exportOptionsPlist,
@@ -880,7 +903,9 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(
           exportOptionsPlist: _exportOptionsPlist,
@@ -939,7 +964,9 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(
           exportOptionsPlist: _exportOptionsPlist,
@@ -1000,7 +1027,9 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(
           exportOptionsPlist: _exportOptionsPlist,
@@ -1060,7 +1089,9 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(verbose: true),
         exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
       ]);
@@ -1091,7 +1122,9 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
       ]);
@@ -1123,7 +1156,9 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         const FakeCommand(
           command: <String>[
             'xcrun',
@@ -1221,7 +1256,9 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem.file('build/flutter_size_01/snapshot.arm64.json')
@@ -1280,7 +1317,9 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(),
       ]);
@@ -1323,7 +1362,9 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
           onRun: (_) {
@@ -1364,7 +1405,9 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
           onRun: (_) {
@@ -1409,7 +1452,9 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
           onRun: (_) {
@@ -1462,7 +1507,9 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(exitCode: 1),
       ]);
       createMinimalMockProjectFiles();
@@ -1500,7 +1547,9 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
           onRun: (_) {
@@ -1551,7 +1600,9 @@ void main() {
       const plistPath =
           'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem.file(plistPath).createSync(recursive: true);
@@ -1610,7 +1661,9 @@ void main() {
       const plistPath =
           'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem.file(plistPath).createSync(recursive: true);
@@ -1674,7 +1727,9 @@ void main() {
       const plistPath =
           'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem.file(plistPath).createSync(recursive: true);
@@ -1737,7 +1792,9 @@ void main() {
       const plistPath =
           'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem.file(plistPath).createSync(recursive: true);
@@ -1786,7 +1843,9 @@ void main() {
       const plistPath =
           'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem.file(plistPath).createSync(recursive: true);
@@ -1844,7 +1903,9 @@ void main() {
           '/flutter_template_images/templates/app/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
 
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem.file(templateIconContentsJsonPath)
@@ -1937,7 +1998,9 @@ void main() {
           '/flutter_template_images/templates/app/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
 
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem.file(templateIconContentsJsonPath)
@@ -2026,7 +2089,9 @@ void main() {
           'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
 
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem.file(projectIconContentsJsonPath)
@@ -2101,7 +2166,9 @@ void main() {
           'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
 
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem.file(projectIconContentsJsonPath)
@@ -2176,7 +2243,9 @@ void main() {
           'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
 
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem.file(projectIconContentsJsonPath)
@@ -2251,7 +2320,9 @@ void main() {
           'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
 
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             // Uses unknown format version 123.
@@ -2334,7 +2405,9 @@ void main() {
       ];
 
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             // The following json contains examples of:
@@ -2453,7 +2526,9 @@ void main() {
           '/flutter_template_images/templates/app/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png';
 
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem.file(templateLaunchImageContentsJsonPath)
@@ -2544,7 +2619,9 @@ void main() {
           '/flutter_template_images/templates/app/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png';
 
       fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
+        xattrCommand1,
+
+        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem.file(templateLaunchImageContentsJsonPath)
