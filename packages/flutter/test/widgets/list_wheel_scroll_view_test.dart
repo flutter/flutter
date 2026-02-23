@@ -2040,13 +2040,15 @@ void main() {
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/140780.
+  // and https://github.com/flutter/flutter/issues/6537.
   testWidgets(
-    'ListWheelScrollView in an AnimatedContainer with zero height does not throw an error',
+    'ListWheelScrollView in an AnimatedContainer with zero width and height does not throw an error',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: AnimatedContainer(
+              width: 0,
               height: 0,
               duration: Duration.zero,
               child: ListWheelScrollView(
@@ -2059,6 +2061,8 @@ void main() {
       );
 
       expect(tester.takeException(), isNull);
+      expect(tester.getSize(find.byType(ListWheelScrollView)), Size.zero);
+      expect(tester.getSize(find.byType(ListWheelViewport)), Size.zero);
     },
   );
 }

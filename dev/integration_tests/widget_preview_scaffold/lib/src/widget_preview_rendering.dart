@@ -821,6 +821,7 @@ class _WidgetPreviewWrapperBox extends RenderShiftedBox {
   _WidgetPreviewWrapperBox({
     required RenderBox? child,
     required BoxConstraints previewerConstraints,
+    // ignore: prefer_initializing_formals
   }) : _previewerConstraints = previewerConstraints,
        super(child);
 
