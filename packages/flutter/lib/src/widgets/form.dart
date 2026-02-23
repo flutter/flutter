@@ -28,16 +28,6 @@ import 'will_pop_scope.dart';
 // Duration for delay before announcement in IOS so that the announcement won't be interrupted.
 const Duration _kIOSAnnouncementDelayDuration = Duration(seconds: 1);
 
-/// Defines how a [Form] validation is triggered.
-enum _FormValidation {
-  /// Automatic validation driven by the [Form]'s [AutovalidateMode].
-  auto,
-
-  /// Explicit validation via [FormState.validate] or
-  /// [FormState.validateGranularly].
-  manual,
-}
-
 // Examples can assume:
 // late BuildContext context;
 
@@ -369,7 +359,7 @@ class FormState extends State<Form> {
   bool validate() {
     _hasInteractedByUser = true;
     _forceRebuild();
-    return _validate(View.of(context), validation: _FormValidation.manual);
+    return _validate(View.of(context), useFieldAutovalidateMode: true);
   }
 
   /// Validates every [FormField] that is a descendant of this [Form], and
@@ -386,20 +376,20 @@ class FormState extends State<Form> {
     final invalidFields = <FormFieldState<Object?>>{};
     _hasInteractedByUser = true;
     _forceRebuild();
-    _validate(View.of(context), validation: _FormValidation.manual, invalidFields: invalidFields);
+    _validate(View.of(context), useFieldAutovalidateMode: true, invalidFields: invalidFields);
     return invalidFields;
   }
 
   bool _validate(
     FlutterView view, {
-    _FormValidation validation = _FormValidation.auto,
+    bool useFieldAutovalidateMode = false,
     Set<FormFieldState<Object?>>? invalidFields,
   }) {
     var hasError = false;
     var errorMessage = '';
 
     for (final FormFieldState<dynamic> field in _fields) {
-      if (validation == _FormValidation.auto && !field._shouldValidate) {
+      if (!useFieldAutovalidateMode && !field._shouldValidate) {
         continue;
       }
 
