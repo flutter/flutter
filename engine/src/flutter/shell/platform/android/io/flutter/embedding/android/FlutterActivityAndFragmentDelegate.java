@@ -1117,6 +1117,7 @@ import java.util.Set;
     @NonNull
     Lifecycle getLifecycle();
 
+    /** Returns the {@link FlutterShellArgs} that should be used when initializing Flutter. */
     @NonNull
     FlutterShellArgs getFlutterShellArgs();
 

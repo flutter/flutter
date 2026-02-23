@@ -364,7 +364,15 @@ public class FlutterLoader {
             // Perform security check for path containing application's compiled Dart
             // code and potentially user-provided compiled native code.
             String aotSharedLibraryPath = applicationMetaData.getString(metadataKey);
-            maybeAddAotSharedLibraryNameArg(applicationContext, aotSharedLibraryPath, shellArgs);
+            if (aotSharedLibraryPath == null) {
+              Log.e(
+                  TAG,
+                  "Flag "
+                      + metadataKey
+                      + " was specified with an empty path. Please specify a path to the desired AOT shared library.");
+            } else {
+              maybeAddAotSharedLibraryNameArg(applicationContext, aotSharedLibraryPath, shellArgs);
+            }
             continue;
           }
 
@@ -415,7 +423,7 @@ public class FlutterLoader {
             continue;
           } else if (!flag.allowedInRelease && isRelease) {
             // Flag is not allowed in release builds.
-            Log.w(
+            Log.e(
                 TAG,
                 "Command line argument "
                     + arg

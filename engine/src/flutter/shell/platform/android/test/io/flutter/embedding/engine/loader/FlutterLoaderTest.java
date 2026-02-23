@@ -1181,6 +1181,37 @@ public class FlutterLoaderTest {
         arguments.contains("--enable-opengl-gpu-tracing"));
   }
 
+  @Test
+  public void itDoesNotSetCommandLineFlagWhenDisallowedInReleaseMode() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    String expectedArg = "--verbose-logging";
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, new String[] {expectedArg}, true);
+    shadowOf(getMainLooper()).idle();
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+
+    assertFalse(
+        "Unexpected argument '"
+            + expectedArg
+            + "' was found in the arguments passed to FlutterJNI.init",
+        arguments.contains(expectedArg));
+  }
+
   private void testFlagFromMetadataPresentInReleaseMode(
       String metadataKey, Object metadataValue, String expectedArg) {
     testFlagFromMetadata(metadataKey, metadataValue, expectedArg, true, true);
