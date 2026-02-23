@@ -49,7 +49,7 @@ internal object VersionFetcher {
         // AGP's method is internal, we try to use it anyway.
         // KGP's version in org.jetbrains.kotlin.gradle.plugin.DefaultKotlinBasePlugin is not
         // available when this method is called.
-
+        // When testing call `setAgpKotlinVersionToNull(project)`.
         val agpDefinedKgpVersion = getKotlinAndroidPluginVersion(project)
         if (agpDefinedKgpVersion != null && agpDefinedKgpVersion != "unknown") {
             return Version.fromString(agpDefinedKgpVersion)

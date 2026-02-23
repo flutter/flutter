@@ -41,6 +41,7 @@ tasks.withType<JavaCompile> {
 tasks.test {
     useJUnitPlatform()
 }
+
 // https://stackoverflow.com/questions/55456176/unresolved-reference-compilekotlin-in-build-gradle-kts
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     compilerOptions {
