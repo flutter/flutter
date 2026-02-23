@@ -366,4 +366,33 @@ FlutterError
     );
     await tester.fling(find.text('Index 2'), const Offset(0.0, -300.0), 10000.0);
   });
+
+  test('BouncingScrollPhysics selects correct spring for createBallisticSimulation', () {
+    const physics = BouncingScrollPhysics();
+
+    final ScrollMetrics metrics = FixedScrollMetrics(
+      minScrollExtent: 0.0,
+      maxScrollExtent: 1000.0,
+      pixels: -500.0,
+      viewportDimension: 500.0,
+      axisDirection: AxisDirection.down,
+      devicePixelRatio: 1.0,
+    );
+
+    final Simulation simStationary = physics.createBallisticSimulation(metrics, 0.0)!;
+    final Simulation simMoving = physics.createBallisticSimulation(metrics, -100.0)!;
+
+    final double xStationary = simStationary.x(0.2);
+    final double xMoving = simMoving.x(0.2);
+
+    expect(simStationary, isA<BouncingScrollSimulation>());
+    expect(simMoving, isA<BouncingScrollSimulation>());
+
+    // Both simulations should still be in motion.
+    expect(xStationary.abs(), greaterThan(0));
+    expect(xMoving.abs(), greaterThan(0));
+
+    // Stationary spring should recover faster.
+    expect(xStationary.abs(), lessThan(xMoving.abs()));
+  });
 }
