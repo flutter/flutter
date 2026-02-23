@@ -106,7 +106,9 @@ class EmbedderTestTaskRunner {
 
   EmbedderTestTaskRunner(fml::RefPtr<fml::TaskRunner> real_task_runner,
                          TaskExpiryCallback on_task_expired)
-      : EmbedderTestTaskRunner(real_task_runner, on_task_expired, {}) {}
+      : EmbedderTestTaskRunner(std::move(real_task_runner),
+                               std::move(on_task_expired),
+                               {}) {}
 
   EmbedderTestTaskRunner(fml::RefPtr<fml::TaskRunner> real_task_runner,
                          TaskExpiryCallback on_task_expired,
@@ -138,12 +140,14 @@ class EmbedderTestTaskRunner {
 
       real_task_runner->PostTaskForTime(invoke_task, target_time);
     };
-    task_runner_description_.destruction_callback = [](void* user_data) {
-      auto thiz = reinterpret_cast<EmbedderTestTaskRunner*>(user_data);
-      if (thiz->destruction_callback_) {
+    if (destruction_callback_) {
+      task_runner_description_.destruction_callback = [](void* user_data) {
+        auto thiz = reinterpret_cast<EmbedderTestTaskRunner*>(user_data);
         thiz->destruction_callback_();
-      }
-    };
+      };
+    } else {
+      task_runner_description_.destruction_callback = [](void* user_data) {};
+    }
     task_runner_description_.identifier = identifier_;
   }
 
@@ -154,9 +158,9 @@ class EmbedderTestTaskRunner {
  private:
   static std::atomic_size_t sEmbedderTaskRunnerIdentifiers;
   const size_t identifier_;
-  fml::RefPtr<fml::TaskRunner> real_task_runner_;
-  TaskExpiryCallback on_task_expired_;
-  DestructionCallback destruction_callback_;
+  const fml::RefPtr<fml::TaskRunner> real_task_runner_;
+  const TaskExpiryCallback on_task_expired_;
+  const DestructionCallback destruction_callback_;
   FlutterTaskRunnerDescription task_runner_description_ = {};
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTestTaskRunner);
