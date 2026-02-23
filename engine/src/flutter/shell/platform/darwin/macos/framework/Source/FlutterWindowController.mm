@@ -427,7 +427,7 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
 
   window.collectionBehavior = NSWindowCollectionBehaviorAuxiliary;
   [parent addChildWindow:window ordered:NSWindowAbove];
-  // window.alphaValue = 0.0;
+  window.alphaValue = 0.0;
   return controller.viewIdentifier;
 }
 
