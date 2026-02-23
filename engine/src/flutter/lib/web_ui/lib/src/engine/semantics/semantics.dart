@@ -890,9 +890,9 @@ abstract class SemanticRole {
 
     if (semanticsObject.isFlagsDirty) {
       if (semanticsObject.flags.isAccessibilityFocusBlocked) {
-        element.setAttribute('aria-hidden', 'true');
+        setAttribute('aria-hidden', 'true');
       } else {
-        element.removeAttribute('aria-hidden');
+        removeAttribute('aria-hidden');
       }
     }
 
