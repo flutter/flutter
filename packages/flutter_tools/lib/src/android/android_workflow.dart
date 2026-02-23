@@ -189,7 +189,7 @@ class AndroidValidator extends DoctorValidator {
 
   String _androidSdkLocation(String directory) => 'Android SDK at $directory';
 
-  String androidSdkPlatformToolsVersion(String platform, String tools) =>
+  String _androidSdkPlatformToolsVersion(String platform, String tools) =>
       'Platform $platform, build-tools $tools';
 
   @override
@@ -262,7 +262,7 @@ class AndroidValidator extends DoctorValidator {
 
       messages.add(
         ValidationMessage(
-          androidSdkPlatformToolsVersion(
+          _androidSdkPlatformToolsVersion(
             androidSdkLatestVersion.platformName,
             androidSdkLatestVersion.buildToolsVersionName,
           ),

@@ -36,7 +36,7 @@ class XcodeValidator extends DoctorValidator {
       'Flutter recommends a minimum Xcode version of $recommendedVersion.\n'
       'Download the latest version or update via the Mac App Store.';
 
-  String xcodeOutdated(String requiredVersion) =>
+  String _xcodeOutdated(String requiredVersion) =>
       'Flutter requires Xcode $requiredVersion or higher.\n'
       'Download the latest version or update via the Mac App Store.';
 
@@ -74,7 +74,7 @@ class XcodeValidator extends DoctorValidator {
       }
       if (!_xcode.isInstalledAndMeetsVersionCheck) {
         xcodeStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(xcodeOutdated(xcodeRequiredVersion.toString())));
+        messages.add(ValidationMessage.error(_xcodeOutdated(xcodeRequiredVersion.toString())));
       } else if (!_xcode.isRecommendedVersionSatisfactory) {
         xcodeStatus = ValidationType.partial;
         messages.add(ValidationMessage.hint(_xcodeRecommended(xcodeRecommendedVersion.toString())));
