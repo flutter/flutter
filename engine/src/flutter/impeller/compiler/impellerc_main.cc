@@ -50,7 +50,12 @@ static bool OutputIPLR(const std::vector<std::shared_ptr<Compiler>>& compilers,
 
   RuntimeStageData stages;
   for (const auto& compiler : compilers) {
-    stages.AddShader(compiler->GetReflector()->GetRuntimeStageShaderData());
+    auto stage_data = compiler->GetReflector()->GetRuntimeStageShaderData();
+    if (!stage_data) {
+      std::cerr << "Runtime stage information was nil." << std::endl;
+      return false;
+    }
+    stages.AddShader(stage_data);
   }
 
   auto stage_data_mapping = switches.json_format ? stages.CreateJsonMapping()
