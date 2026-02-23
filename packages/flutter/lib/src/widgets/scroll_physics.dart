@@ -702,12 +702,12 @@ class BouncingScrollPhysics extends ScrollPhysics {
   /// - Fast mode: r2 = -1e5 * lambda (vanishes almost instantly)
   ///
   /// Mathematical derivation:
-  /// - r1 + r2 = -damping/mass, so damping = 100001 * lambda
+  /// - r1 + r2 = -damping/mass, so damping = (1e5 + 1) * lambda
   /// - r1 * r2 = stiffness/mass, so stiffness = 1e5 * lambda^2
   static final SpringDescription rubberBandSpring = SpringDescription(
     mass: 1.0,
     stiffness: 1e5 * _rubberBandLambda * _rubberBandLambda,
-    damping: 100001 * _rubberBandLambda,
+    damping: (1e5 + 1) * _rubberBandLambda,
   );
 
   @override
