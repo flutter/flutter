@@ -499,6 +499,24 @@ void main() {
     expect(state.groupValue, 0);
     expect(log, isEmpty);
   });
+
+  testWidgets('RadioGroup does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(
+              child: RadioGroup<int>(
+                onChanged: (_) {},
+                child: const Column(children: [Radio<int>(value: 1), Radio<int>(value: 2)]),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(RadioGroup<int>)), Size.zero);
+  });
 }
 
 class TestRadioGroup<T> extends StatefulWidget {
