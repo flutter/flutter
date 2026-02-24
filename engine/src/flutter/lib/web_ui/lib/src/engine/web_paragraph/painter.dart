@@ -75,10 +75,6 @@ abstract class Painter {
   }
 }
 
-const DomHTMLCanvasElement? _domHtmlCanvasElement = null;
-// TODO(jlavrova): uncommend the next line if you want to use an alternative approach
-// final DomHTMLCanvasElement? _domHtmlCanvasElement = domDocument.createElement('canvas') as DomHTMLCanvasElement;
-
 class CanvasKitPainter extends Painter {
   CkImage? _singleImageCache;
 

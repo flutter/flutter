@@ -105,8 +105,8 @@ class PaintClusters extends TextPaint {
           ? (block as TextBlock).clusterRangeWithoutWhitespaces.start
           : (block as TextBlock).clusterRangeWithoutWhitespaces.end - 1;
       final int end = block.isLtr
-          ? (block as TextBlock).clusterRangeWithoutWhitespaces.end
-          : (block as TextBlock).clusterRangeWithoutWhitespaces.start - 1;
+          ? block.clusterRangeWithoutWhitespaces.end
+          : block.clusterRangeWithoutWhitespaces.start - 1;
       final step = block.isLtr ? 1 : -1;
       for (var i = start; i != end; i += step) {
         final WebCluster clusterText = block is EllipsisBlock

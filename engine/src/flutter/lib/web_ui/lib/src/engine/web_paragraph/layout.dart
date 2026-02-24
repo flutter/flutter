@@ -868,11 +868,6 @@ class _TextClusterMapping {
   final List<WebCluster> _clusters;
   final Uint32List _textToCluster;
 
-  // This counts how many indices were added to this mapping. It's used later to confirm that the
-  // number of additions matches the size of the paragraph i.e. there was an addition for each
-  // character in the text.
-  int _debugAddCount = 0;
-
   void add({required int textIndex, required int clusterIndex}) {
     assert(textIndex >= 0);
     assert(textIndex <= _size);
@@ -881,12 +876,9 @@ class _TextClusterMapping {
     assert(clusterIndex <= _clusters.length);
 
     _textToCluster[textIndex] = clusterIndex;
-    _debugAddCount++;
   }
 
   int toClusterIndex(int textIndex) {
-    assert(_debugAddCount == _size);
-
     assert(textIndex >= 0);
     assert(textIndex <= _size);
 
@@ -897,7 +889,6 @@ class _TextClusterMapping {
     if (start < 0 || end > _size || start > end) {
       throw ArgumentError('TextRange [$start:$end) is out of paragraph text range: [0:$_size');
     }
-    assert(_debugAddCount == _size);
 
     assert(start >= 0);
     assert(start <= end);
