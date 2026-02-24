@@ -101,6 +101,7 @@ void main() {
           projectUri: projectUri,
           fileSystem: fileSystem,
           nativeAssetsFileUri: nonFlutterTesterAssetUri,
+          targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/android/'),
         );
         expect(
           (globals.logger as BufferLogger).traceText,

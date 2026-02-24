@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "vmservice_object.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/vmservice_object.h"
 
 #include <dirent.h>
 #include <fuchsia/io/cpp/fidl.h>

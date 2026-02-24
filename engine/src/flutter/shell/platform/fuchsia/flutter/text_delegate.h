@@ -19,8 +19,6 @@
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/platform/fuchsia/flutter/keyboard.h"
 
-#include "logging.h"
-
 namespace flutter_runner {
 
 /// The channel name used for text editing platofrm messages.

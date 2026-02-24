@@ -295,6 +295,71 @@ void main() {
     expect(materialWidget.clipBehavior, Clip.antiAlias);
   });
 
+  testWidgets('SimpleDialog Custom Content Text Style', (WidgetTester tester) async {
+    const contentText = 'Content';
+    const contentTextStyle = TextStyle(color: Colors.pink);
+    const dialog = SimpleDialog(
+      contentTextStyle: contentTextStyle,
+      children: <Widget>[Text(contentText)],
+    );
+    await tester.pumpWidget(_buildAppWithDialog(dialog));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
+    expect(content.text.style, contentTextStyle);
+  });
+
+  testWidgets('SimpleDialog Custom Content Text Style - DialogTheme', (WidgetTester tester) async {
+    const contentText = 'Content';
+    const contentTextStyle = TextStyle(color: Colors.orange);
+    const dialog = SimpleDialog(children: <Widget>[Text(contentText)]);
+    final theme = ThemeData(dialogTheme: const DialogThemeData(contentTextStyle: contentTextStyle));
+    await tester.pumpWidget(_buildAppWithDialog(dialog, theme: theme));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
+    expect(content.text.style, contentTextStyle);
+  });
+
+  testWidgets('Material3 - SimpleDialog Custom Content Text Style - Theme', (
+    WidgetTester tester,
+  ) async {
+    const contentText = 'Content';
+    const contentTextStyle = TextStyle(color: Colors.purple);
+    const dialog = SimpleDialog(children: <Widget>[Text(contentText)]);
+    final theme = ThemeData(textTheme: const TextTheme(bodyMedium: contentTextStyle));
+    await tester.pumpWidget(_buildAppWithDialog(dialog, theme: theme));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
+    expect(content.text.style!.color, contentTextStyle.color);
+  });
+
+  testWidgets('Material2 - SimpleDialog Custom Content Text Style - Theme', (
+    WidgetTester tester,
+  ) async {
+    const contentText = 'Content';
+    const contentTextStyle = TextStyle(color: Colors.teal);
+    const dialog = SimpleDialog(children: <Widget>[Text(contentText)]);
+    final theme = ThemeData(
+      useMaterial3: false,
+      textTheme: const TextTheme(titleMedium: contentTextStyle),
+    );
+    await tester.pumpWidget(_buildAppWithDialog(dialog, theme: theme));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
+    expect(content.text.style!.color, contentTextStyle.color);
+  });
+
   testWidgets('Custom dialog shape', (WidgetTester tester) async {
     const customBorder = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(16.0)),

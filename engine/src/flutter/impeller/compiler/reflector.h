@@ -39,6 +39,7 @@ struct StructMember {
   size_t byte_length = 0u;
   std::optional<size_t> array_elements = std::nullopt;
   size_t element_padding = 0u;
+  std::optional<std::string> float_type = std::nullopt;
   UnderlyingType underlying_type = UnderlyingType::kOther;
 
   static std::string BaseTypeToString(spirv_cross::SPIRType::BaseType type) {
@@ -135,6 +136,7 @@ struct StructMember {
   /// treated as arrays of columns, this includes the column count.
   /// @param p_element_padding The padding in bytes after each array
   /// element to satisfy alignment requirements (stride - size).
+  /// @param p_float_type The float type of the member.
   /// @param p_underlying_type The underlying type category, used for
   /// runtime validation.
   StructMember(std::string p_type,
@@ -145,6 +147,7 @@ struct StructMember {
                size_t p_byte_length,
                std::optional<size_t> p_array_elements,
                size_t p_element_padding,
+               std::optional<std::string> p_float_type = std::nullopt,
                UnderlyingType p_underlying_type = UnderlyingType::kOther)
       : type(std::move(p_type)),
         base_type(p_base_type),
@@ -154,6 +157,7 @@ struct StructMember {
         byte_length(p_byte_length),
         array_elements(p_array_elements),
         element_padding(p_element_padding),
+        float_type(std::move(p_float_type)),
         underlying_type(DetermineUnderlyingType(p_base_type)) {}
 };
 

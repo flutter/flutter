@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "software_surface.h"
+#include "flutter/shell/platform/fuchsia/flutter/software_surface.h"
 
+#include <fuchsia/sysmem/cpp/fidl.h>
 #include <lib/async/default.h>
 #include <zircon/rights.h>
 #include <zircon/status.h>
@@ -13,14 +14,13 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
-#include "fuchsia/sysmem/cpp/fidl.h"
 #include "include/core/SkImageInfo.h"
 
 #include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
-#include "../runtime/dart/utils/inlines.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/inlines.h"
 
 namespace flutter_runner {
 

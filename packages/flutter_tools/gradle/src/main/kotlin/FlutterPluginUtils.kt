@@ -5,6 +5,8 @@
 package com.flutter.gradle
 
 import com.android.build.api.artifact.SingleArtifact
+import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
@@ -204,9 +206,15 @@ object FlutterPluginUtils {
     @JvmName("isProjectVerbose")
     internal fun isProjectVerbose(project: Project): Boolean = project.findProperty(PROP_IS_VERBOSE)?.toString()?.toBoolean() ?: false
 
+    /**
+     *  Developers can set this value by passing `-P disable-abi-filtering=true`
+     *  to flutter build. Where "disable-abi-filtering" comes from
+     *  PROP_DISABLE_ABI_FILTERING.
+     */
     @JvmStatic
     @JvmName("shouldProjectDisableAbiFiltering")
-    internal fun shouldProjectDisableAbiFiltering(project: Project): Boolean = project.hasProperty(PROP_DISABLE_ABI_FILTERING)
+    internal fun shouldProjectDisableAbiFiltering(project: Project): Boolean =
+        project.findProperty(PROP_DISABLE_ABI_FILTERING)?.toString()?.toBoolean() ?: false
 
     /**
      * TODO: Remove this AGP hack. https://github.com/flutter/flutter/issues/109560
@@ -385,11 +393,26 @@ object FlutterPluginUtils {
         return project.property(PROP_LOCAL_ENGINE_BUILD_MODE) == flutterBuildMode
     }
 
+    /**
+     * Returns BaseExtension for the project. Used for compatibility.
+     *
+     * From BaseExtension docs:
+     * "Don't use this extension directly Instead, use one of the following:
+     *  ApplicationExtension, LibraryExtension, TestExtension, DynamicFeatureExtension"
+     *
+     *  For ApplicationExtension use `getAndroidApplicationExtension`.
+     *  For LibraryExtension use `getAndroidLibraryExtension`.
+     */
     internal fun getAndroidExtension(project: Project): BaseExtension {
         // Common supertype of the android extension types.
         // But maybe this should be https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/dsl/TestedExtension.
         return project.extensions.findByType(BaseExtension::class.java)!!
     }
+
+    internal fun getAndroidLibraryExtension(project: Project): LibraryExtension = project.extensions.getByType(LibraryExtension::class.java)
+
+    internal fun getAndroidApplicationExtension(project: Project): ApplicationExtension =
+        project.extensions.getByType(ApplicationExtension::class.java)
 
     // Avoid new usages this class is not part of the public AGP DSL.
     private fun getAndroidAppExtensionOrNull(project: Project): AbstractAppExtension? =
