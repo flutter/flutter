@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../artifacts.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/template.dart';
 import '../base/version.dart';
-import '../build_info.dart';
 import '../darwin/darwin.dart';
 import '../plugins.dart';
 import '../xcode_project.dart';
@@ -36,14 +34,11 @@ const kDisableSwiftPMInstructions =
 ///     documentation on Swift Package Manager manifest file, Package.swift.
 class SwiftPackageManager {
   const SwiftPackageManager({
-    required Artifacts artifacts,
     required FileSystem fileSystem,
     required TemplateRenderer templateRenderer,
-  }) : _artifacts = artifacts,
-       _fileSystem = fileSystem,
+  }) : _fileSystem = fileSystem,
        _templateRenderer = templateRenderer;
 
-  final Artifacts _artifacts;
   final FileSystem _fileSystem;
   final TemplateRenderer _templateRenderer;
 
@@ -192,9 +187,6 @@ class SwiftPackageManager {
     required XcodeBasedProject project,
     required FlutterDarwinPlatform platform,
   }) {
-    final String frameworkName = platform.binaryName;
-
-    _symlinkFlutterFramework(platform: platform, project: project, frameworkName: frameworkName);
     final flutterFrameworkPackage = SwiftPackage(
       manifest: project.flutterFrameworkSwiftPackageDirectory.childFile('Package.swift'),
       name: kFlutterGeneratedFrameworkSwiftPackageTargetName,
@@ -215,79 +207,6 @@ class SwiftPackageManager {
       templateRenderer: _templateRenderer,
     );
     flutterFrameworkPackage.createSwiftPackage();
-  }
-
-  /// Creates a subdirectory in [XcodeBasedProject.flutterFrameworkSwiftPackageDirectory] for each
-  /// mode in [buildModes] and symlinks the corresponding Flutter/FlutterMacOS xcframework from
-  /// the engine artifact cache. Also creates a symlink directly in
-  /// [XcodeBasedProject.flutterFrameworkSwiftPackageDirectory] that links to first build mode
-  /// subdirectory's xcframework.
-  ///
-  /// When Xcode builds the project, it'll use the xcframework symlink directly in
-  /// [XcodeBasedProject.flutterFrameworkSwiftPackageDirectory]. The symlink is updated during the
-  /// build pre-action.
-  ///
-  /// Example:
-  /// ```txt
-  /// FlutterFramework/Debug/Flutter.xcframework -> [path to engine cache]/ios/Flutter.xcframework
-  /// FlutterFramework/Profile/Flutter.xcframework -> [path to engine cache]/ios-profile/Flutter.xcframework
-  /// FlutterFramework/Release/Flutter.xcframework -> [path to engine cache]/ios-release/Flutter.xcframework
-  /// FlutterFramework/Flutter.xcframework -> ./Debug/Flutter.xcframework
-  /// ```
-  void _symlinkFlutterFramework({
-    List<BuildMode> buildModes = const <BuildMode>[
-      BuildMode.debug,
-      BuildMode.profile,
-      BuildMode.release,
-    ],
-    required XcodeBasedProject project,
-    required FlutterDarwinPlatform platform,
-    required String frameworkName,
-  }) {
-    for (final buildMode in buildModes) {
-      final String frameworkArtifactPath = _artifacts.getArtifactPath(
-        platform.xcframeworkArtifact,
-        platform: platform.targetPlatform,
-        mode: buildMode,
-      );
-      final Directory buildModeDirectory = project.flutterFrameworkSwiftPackageDirectory
-          .childDirectory(buildMode.uppercaseName);
-      final Link frameworkLink = _fileSystem.link(
-        buildModeDirectory.childDirectory('$frameworkName.xcframework').path,
-      );
-      frameworkLink.createSync(frameworkArtifactPath, recursive: true);
-    }
-    updateFlutterFrameworkSymlink(
-      buildMode: buildModes.first,
-      fileSystem: _fileSystem,
-      platform: platform,
-      project: project,
-      createIfNotFound: true,
-    );
-  }
-
-  /// Update the symlink for the Flutter framework dependency to use the correct [buildMode].
-  static void updateFlutterFrameworkSymlink({
-    required BuildMode buildMode,
-    required FileSystem fileSystem,
-    required FlutterDarwinPlatform platform,
-    required XcodeBasedProject project,
-    bool createIfNotFound = false,
-  }) {
-    final String frameworkName = platform.binaryName;
-    final Link frameworkLink = fileSystem.link(
-      project.flutterFrameworkSwiftPackageDirectory
-          .childDirectory('$frameworkName.xcframework')
-          .path,
-    );
-    if (frameworkLink.existsSync()) {
-      frameworkLink.updateSync('./${buildMode.uppercaseName}/$frameworkName.xcframework');
-    } else if (createIfNotFound) {
-      frameworkLink.createSync(
-        './${buildMode.uppercaseName}/$frameworkName.xcframework',
-        recursive: true,
-      );
-    }
   }
 
   /// If the project's IPHONEOS_DEPLOYMENT_TARGET/MACOSX_DEPLOYMENT_TARGET is
