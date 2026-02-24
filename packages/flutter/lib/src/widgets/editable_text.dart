@@ -312,8 +312,10 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
       return TextSpan(style: style, text: text);
     }
 
-    final TextStyle finalComposingStyle = composingStyle ?? const TextStyle(decoration: TextDecoration.underline);
-    final TextStyle effectiveComposingStyle = style?.merge(finalComposingStyle) ?? finalComposingStyle;
+    final TextStyle finalComposingStyle =
+        composingStyle ?? const TextStyle(decoration: TextDecoration.underline);
+    final TextStyle effectiveComposingStyle =
+        style?.merge(finalComposingStyle) ?? finalComposingStyle;
     return TextSpan(
       style: style,
       children: <TextSpan>[
@@ -916,7 +918,7 @@ class EditableText extends StatefulWidget {
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
     this.undoController,
     this.hintLocales,
-    this.enableInlinePrediction = true,
+    this.enableInlinePrediction = null,
     this.composingStyle,
   }) : assert(obscuringCharacter.length == 1),
        autocorrect = autocorrect ?? _inferAutocorrect(autofillHints: autofillHints),
@@ -2069,17 +2071,18 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.hintLocales}
   final List<Locale>? hintLocales;
 
-  /// Whether to enable inline predictive text (e.g. iOS 17+ inline suggestions).
+  /// Whether to enable inline predictive text on iOS 17 and later (e.g. inline
+  /// suggestions as you type).
   ///
-  /// Defaults to true. Only affects platforms that support it.
-  final bool enableInlinePrediction;
+  /// When null, the platform default is used. Has no effect on other platforms.
+  final bool? enableInlinePrediction;
 
   /// Optional style for the composing (and inline prediction) region.
   ///
   /// When set, this style is used for the segment of text in the composing
   /// range (e.g. IME composition and inline predictive text). When null,
-  /// the default is used (underlined). Applies to both IME composition and
-  /// inline prediction.
+  /// the default is used ([TextDecoration.underline]). Applies to both IME
+  /// composition and inline prediction.
   final TextStyle? composingStyle;
 
   /// The default value for [selectionHeightStyle].
@@ -2489,7 +2492,11 @@ class EditableText extends StatefulWidget {
       DiagnosticsProperty<List<Locale>?>('hintLocales', hintLocales, defaultValue: null),
     );
     properties.add(
-      DiagnosticsProperty<bool>('enableInlinePrediction', enableInlinePrediction, defaultValue: true),
+      DiagnosticsProperty<bool?>(
+        'enableInlinePrediction',
+        enableInlinePrediction,
+        defaultValue: null,
+      ),
     );
     properties.add(
       DiagnosticsProperty<TextStyle?>('composingStyle', composingStyle, defaultValue: null),

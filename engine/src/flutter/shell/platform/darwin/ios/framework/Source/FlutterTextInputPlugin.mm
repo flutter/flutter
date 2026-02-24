@@ -865,7 +865,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     _smartDashesType = UITextSmartDashesTypeYes;
     _selectionRects = [[NSArray alloc] init];
     if (@available(iOS 17.0, *)) {
-      _inlinePredictionType = UITextInlinePredictionTypeYes;
+      _inlinePredictionType = UITextInlinePredictionTypeDefault;
     }
 
     if (@available(iOS 14.0, *)) {
@@ -1106,10 +1106,16 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   self.isVisibleToAutofill = autofill || _secureTextEntry;
 
   if (@available(iOS 17.0, *)) {
+    // Boolean from TextInputConfiguration.toJson(); deserialized as NSNumber.
+    // nil or missing key = use system default; YES = Yes; NO = No.
     NSNumber* enableInlinePrediction = configuration[kEnableInlinePrediction];
-    BOOL enabled = enableInlinePrediction == nil || [enableInlinePrediction boolValue];
-    self.inlinePredictionType =
-        enabled ? UITextInlinePredictionTypeYes : UITextInlinePredictionTypeNo;
+    if (enableInlinePrediction == nil) {
+      self.inlinePredictionType = UITextInlinePredictionTypeDefault;
+    } else if ([enableInlinePrediction boolValue]) {
+      self.inlinePredictionType = UITextInlinePredictionTypeYes;
+    } else {
+      self.inlinePredictionType = UITextInlinePredictionTypeNo;
+    }
   }
 }
 

@@ -130,6 +130,7 @@ class OverflowWidgetTextEditingController extends TextEditingController {
     required BuildContext context,
     TextStyle? style,
     required bool withComposing,
+    TextStyle? composingStyle,
   }) {
     return TextSpan(
       style: style,

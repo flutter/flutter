@@ -966,10 +966,11 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 
 - (void)testEnableInlinePredictionFromConfiguration API_AVAILABLE(ios(17.0)) {
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
-  NSDictionary* config = self.mutableTemplateCopy;
+  NSMutableDictionary* config = self.mutableTemplateCopy;
 
+  // Template does not include enableInlinePrediction -> system default.
   [inputView configureWithDictionary:config];
-  XCTAssertEqual(inputView.inlinePredictionType, UITextInlinePredictionTypeYes);
+  XCTAssertEqual(inputView.inlinePredictionType, UITextInlinePredictionTypeDefault);
 
   [config setValue:@NO forKey:@"enableInlinePrediction"];
   [inputView configureWithDictionary:config];
@@ -978,6 +979,11 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   [config setValue:@YES forKey:@"enableInlinePrediction"];
   [inputView configureWithDictionary:config];
   XCTAssertEqual(inputView.inlinePredictionType, UITextInlinePredictionTypeYes);
+
+  // Explicit nil / missing key -> system default.
+  [config removeObjectForKey:@"enableInlinePrediction"];
+  [inputView configureWithDictionary:config];
+  XCTAssertEqual(inputView.inlinePredictionType, UITextInlinePredictionTypeDefault);
 }
 
 - (void)testReplaceTestLocalAdjustSelectionAndMarkedTextRange {
@@ -1043,6 +1049,7 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   FlutterTextRange* markedRange = (FlutterTextRange*)inputView.markedTextRange;
   XCTAssertNotNil(markedRange);
   XCTAssertEqual(markedRange.range.location, 0ul);
+  // Marked range length must match the attributed string length (17 for "inline prediction").
   XCTAssertEqual(markedRange.range.length, 17ul);
 
   // Nil attributed string should behave like empty string.

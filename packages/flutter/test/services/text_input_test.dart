@@ -407,13 +407,19 @@ void main() {
     });
 
     test('toJson includes enableInlinePrediction', () {
+      expect(const TextInputConfiguration().toJson()['enableInlinePrediction'], null);
       expect(
-        const TextInputConfiguration().toJson()['enableInlinePrediction'],
-        true,
-      );
-      expect(
-        const TextInputConfiguration(enableInlinePrediction: false).toJson()['enableInlinePrediction'],
+        const TextInputConfiguration(
+          enableInlinePrediction: false,
+        ).toJson()['enableInlinePrediction'],
         false,
+      );
+      // null means use system default on platforms that support it (e.g. iOS 17+).
+      expect(
+        const TextInputConfiguration(
+          enableInlinePrediction: null,
+        ).toJson()['enableInlinePrediction'],
+        null,
       );
     });
 

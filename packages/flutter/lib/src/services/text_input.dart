@@ -531,7 +531,7 @@ class TextInputConfiguration {
     this.allowedMimeTypes = const <String>[],
     this.enableDeltaModel = false,
     this.hintLocales = const <Locale>[],
-    this.enableInlinePrediction = true,
+    this.enableInlinePrediction = null,
   }) : smartDashesType =
            smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType =
@@ -706,11 +706,13 @@ class TextInputConfiguration {
   /// Whether to enable inline predictive text (e.g. iOS 17+ inline suggestions).
   ///
   /// When true, the platform may show inline prediction in the text field.
-  /// When false, inline prediction is disabled. Only affects platforms that
-  /// support it (e.g. iOS 17+); other platforms ignore this setting.
+  /// When false, inline prediction is disabled.
+  /// When null, the platform uses the system default (e.g. follows user settings
+  /// and context). Only affects platforms that support it (e.g. iOS 17+); other
+  /// platforms ignore this setting.
   ///
-  /// Defaults to true.
-  final bool enableInlinePrediction;
+  /// Defaults to null (use platform default).
+  final bool? enableInlinePrediction;
 
   /// Creates a copy of this [TextInputConfiguration] with the given fields
   /// replaced with new values.

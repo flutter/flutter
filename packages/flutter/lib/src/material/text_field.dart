@@ -327,7 +327,7 @@ class TextField extends StatefulWidget {
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
     this.hintLocales,
-    this.enableInlinePrediction = true,
+    this.enableInlinePrediction = null,
     this.composingStyle,
   }) : assert(obscuringCharacter.length == 1),
        smartDashesType =
@@ -889,8 +889,8 @@ class TextField extends StatefulWidget {
 
   /// Whether to enable inline predictive text (e.g. iOS 17+ inline suggestions).
   ///
-  /// Defaults to true. Only affects platforms that support it.
-  final bool enableInlinePrediction;
+  /// When null, the platform default is used. Only affects platforms that support it.
+  final bool? enableInlinePrediction;
 
   /// Optional style for the composing (and inline prediction) region.
   ///
