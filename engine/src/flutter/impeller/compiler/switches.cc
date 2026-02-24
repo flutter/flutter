@@ -115,6 +115,9 @@ void Switches::PrintHelp(std::ostream& stream) {
             "targeting metal)"
          << std::endl;
   stream << optional_prefix << "--require-framebuffer-fetch" << std::endl;
+  stream << optional_prefix << "--verbose_error_output=<file> "
+         << "(if verbose error output is available, it is written to this file)"
+         << std::endl;
 }
 
 Switches::Switches() = default;

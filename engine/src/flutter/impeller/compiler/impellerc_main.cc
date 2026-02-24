@@ -48,6 +48,13 @@ std::shared_ptr<Compiler> CreateCompiler(
 
 void OutputVerboseError(const std::shared_ptr<std::string>& verbose_error,
                         const Switches& switches) {
+  if (switches.verbose_error_output.empty()) {
+    std::cerr << "Compilation failure was truncated due to length. Use "
+                 "--verbose-error-output to output the full error "
+                 "message to a file.";
+    return;
+  }
+
   auto error_mapping = std::make_shared<fml::NonOwnedMapping>(
       reinterpret_cast<const uint8_t*>(verbose_error->data()),
       verbose_error->size(), [](auto, auto) {});
@@ -55,11 +62,14 @@ void OutputVerboseError(const std::shared_ptr<std::string>& verbose_error,
                                                switches.verbose_error_output);
   if (fml::WriteAtomically(*switches.working_directory,
                            Utf8FromPath(output_path).c_str(), *error_mapping)) {
-    std::cerr << "Full error output written to "
-              << switches.verbose_error_output << std::endl;
+    std::cerr << "Full \"" << InferShaderNameFromPath(switches.source_file_name)
+              << "\" error output written to " << switches.verbose_error_output
+              << std::endl;
   } else {
-    std::cerr << "Failed to write full error output to "
-              << switches.verbose_error_output << std::endl;
+    std::cerr << "Failed to write full \""
+              << InferShaderNameFromPath(switches.source_file_name)
+              << "\" error output to " << switches.verbose_error_output
+              << std::endl;
   }
 }
 
@@ -230,8 +240,7 @@ bool Main(const fml::CommandLine& command_line) {
                 << TargetPlatformToString(platform) << std::endl;
       std::cerr << compiler->GetErrorMessages();
 
-      if (!switches.verbose_error_output.empty() &&
-          compiler->GetVerboseError()) {
+      if (compiler->GetVerboseError()) {
         OutputVerboseError(compiler->GetVerboseError(), switches);
       }
 
