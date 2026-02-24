@@ -68,7 +68,7 @@ void main() async {
     image.dispose();
   });
 
-  test('Picture.toImageSync with rgbaFloat32, toByteData rgbaFloat32', () async {
+  test('decodeImageFromPixels with rgbaFloat32, toByteData rgbaFloat32', () async {
     const dimension = 1;
     final floats = <double>[1.0, 0.66, 0.33, 1.0];
     final floatList = Float32List.fromList(floats);
