@@ -1127,6 +1127,45 @@ abstract class UniformVec4Slot extends UniformType {
   void set(double x, double y, double z, double w);
 }
 
+abstract class UniformMat2Slot extends UniformType {
+  void set(double m00, double m01, double m10, double m11);
+}
+
+abstract class UniformMat3Slot extends UniformType {
+  void set(
+    double m00,
+    double m01,
+    double m02,
+    double m10,
+    double m11,
+    double m12,
+    double m20,
+    double m21,
+    double m22,
+  );
+}
+
+abstract class UniformMat4Slot extends UniformType {
+  void set(
+    double m00,
+    double m01,
+    double m02,
+    double m03,
+    double m10,
+    double m11,
+    double m12,
+    double m13,
+    double m20,
+    double m21,
+    double m22,
+    double m23,
+    double m30,
+    double m31,
+    double m32,
+    double m33,
+  );
+}
+
 abstract class UniformArray<T extends UniformType> {
   T operator [](int index);
   int get length;
@@ -1157,6 +1196,12 @@ abstract class FragmentShader implements Shader {
 
   UniformVec4Slot getUniformVec4(String name);
 
+  UniformMat2Slot getUniformMat2(String name);
+
+  UniformMat3Slot getUniformMat3(String name);
+
+  UniformMat4Slot getUniformMat4(String name);
+
   UniformArray<UniformFloatSlot> getUniformFloatArray(String name);
 
   UniformArray<UniformVec2Slot> getUniformVec2Array(String name);
@@ -1164,6 +1209,12 @@ abstract class FragmentShader implements Shader {
   UniformArray<UniformVec3Slot> getUniformVec3Array(String name);
 
   UniformArray<UniformVec4Slot> getUniformVec4Array(String name);
+
+  UniformArray<UniformMat2Slot> getUniformMat2Array(String name);
+
+  UniformArray<UniformMat3Slot> getUniformMat3Array(String name);
+
+  UniformArray<UniformMat4Slot> getUniformMat4Array(String name);
 
   ImageSamplerSlot getImageSampler(String name);
 }

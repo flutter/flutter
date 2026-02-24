@@ -18,6 +18,7 @@ import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/platform.dart';
+import 'base/process.dart';
 import 'base/signals.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
@@ -34,6 +35,7 @@ import 'globals.dart' as globals;
 import 'hook_runner.dart' show FlutterHookRunner;
 import 'ios/application_package.dart';
 import 'ios/devices.dart';
+import 'mdns_device_discovery.dart';
 import 'project.dart';
 import 'run_cold.dart';
 import 'run_hot.dart';
@@ -298,6 +300,7 @@ class FlutterDevice {
         }
 
         await (await device!.getLogReader(app: package)).provideVmService(vmService!);
+
         completer.complete();
         await subscription.cancel();
       },
@@ -950,6 +953,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     this.machine = false,
     CommandHelp? commandHelp,
     this.dartBuilder,
+    ShutdownHooks? shutdownHooks,
   }) : mainPath = globals.fs.file(target).absolute.path,
        packagesFilePath = debuggingOptions.buildInfo.packageConfigPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
@@ -965,10 +969,12 @@ abstract class ResidentRunner extends ResidentHandlers {
              terminal: globals.terminal,
              platform: globals.platform,
              outputPreferences: globals.outputPreferences,
-           ) {
+           ),
+       shutdownHooks = shutdownHooks ?? globals.shutdownHooks {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
     }
+    this.shutdownHooks.addShutdownHook(cleanupAtFinish);
   }
 
   @override
@@ -996,6 +1002,7 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   final CommandHelp commandHelp;
   final bool machine;
+  final ShutdownHooks shutdownHooks;
 
   var _exited = false;
   var _finished = Completer<int>();
@@ -1253,6 +1260,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
     _finished = Completer<int>();
     // Listen for service protocol connection to close.
+    final String appName = FlutterProject.current().manifest.appName;
     for (final FlutterDevice? device in flutterDevices) {
       await device!.connect(
         debuggingOptions: debuggingOptions,
@@ -1263,6 +1271,25 @@ abstract class ResidentRunner extends ResidentHandlers {
         printStructuredErrorLogMethod: printStructuredErrorLog,
       );
       await device.vmService!.getFlutterViews();
+
+      // Start mDNS service
+      if (debuggingOptions.enableLocalDiscovery) {
+        final mdnsDeviceDiscovery = MDNSDeviceDiscovery(
+          device: device.device!,
+          vmService: device.vmService!.service,
+          debuggingOptions: debuggingOptions,
+          logger: globals.logger,
+          platform: globals.platform,
+          flutterVersion: globals.flutterVersion,
+          systemClock: globals.systemClock,
+          botDetector: globals.botDetector,
+        );
+        _mdnsDiscoveries.add(mdnsDeviceDiscovery);
+        await mdnsDeviceDiscovery.advertise(
+          appName: appName,
+          vmServiceUri: device.vmService!.httpAddress,
+        );
+      }
 
       // This hooks up callbacks for when the connection stops in the future.
       // We don't want to wait for them. We don't handle errors in those callbacks'
@@ -1311,10 +1338,19 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
   }
 
+  final _mdnsDiscoveries = <MDNSDeviceDiscovery>[];
+
   Future<int> waitForAppToFinish() async {
     final int exitCode = await _finished.future;
     await cleanupAtFinish();
     return exitCode;
+  }
+
+  @mustCallSuper
+  Future<void> cleanupAtFinish() async {
+    final discoveries = List<MDNSDeviceDiscovery>.of(_mdnsDiscoveries);
+    _mdnsDiscoveries.clear();
+    await discoveries.map((MDNSDeviceDiscovery discovery) => discovery.stop()).wait;
   }
 
   @mustCallSuper
@@ -1444,9 +1480,6 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   @override
   Future<void> cleanupAfterSignal();
-
-  /// Called right before we exit.
-  Future<void> cleanupAtFinish();
 }
 
 class OperationResult {

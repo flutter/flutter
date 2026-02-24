@@ -2114,7 +2114,10 @@ extension type SkFontVariation._(JSObject _) implements JSObject {
   external set value(double? v);
 }
 
-extension type SkTypeface(JSObject _) implements JSObject {}
+extension type SkTypeface(JSObject _) implements JSObject {
+  /// Returns the family name of the typeface.
+  external String? getFamilyName();
+}
 
 @JS('window.flutterCanvasKit.Font')
 extension type SkFont._(JSObject _) implements JSObject {

@@ -32,7 +32,8 @@ TEST(FlutterView, ShouldInheritContentsScaleReturnsYes) {
   FlutterView* view = [[FlutterView alloc] initWithMTLDevice:device
                                                 commandQueue:queue
                                                     delegate:delegate
-                                              viewIdentifier:kImplicitViewId];
+                                              viewIdentifier:kImplicitViewId
+                                             enableWideGamut:NO];
   EXPECT_EQ([view layer:view.layer shouldInheritContentsScale:3.0 fromWindow:view.window], YES);
 }
 
@@ -75,7 +76,8 @@ TEST(FlutterView, CursorUpdateDoesHitTest) {
   TestFlutterView* view = [[TestFlutterView alloc] initWithMTLDevice:device
                                                         commandQueue:queue
                                                             delegate:delegate
-                                                      viewIdentifier:kImplicitViewId];
+                                                      viewIdentifier:kImplicitViewId
+                                                     enableWideGamut:NO];
   NSWindow* window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
                                                  styleMask:NSBorderlessWindowMask
                                                    backing:NSBackingStoreBuffered
@@ -117,7 +119,8 @@ TEST(FlutterView, CursorUpdateDoesNotOverridePlatformView) {
   TestFlutterView* view = [[TestFlutterView alloc] initWithMTLDevice:device
                                                         commandQueue:queue
                                                             delegate:delegate
-                                                      viewIdentifier:kImplicitViewId];
+                                                      viewIdentifier:kImplicitViewId
+                                                     enableWideGamut:NO];
   NSWindow* window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
                                                  styleMask:NSBorderlessWindowMask
                                                    backing:NSBackingStoreBuffered

@@ -242,7 +242,6 @@ static CompilerBackend CreateCompiler(const spirv_cross::ParsedIR& ir,
     case TargetPlatform::kRuntimeStageVulkan:
       compiler = CreateVulkanCompiler(ir, source_options);
       break;
-    case TargetPlatform::kUnknown:
     case TargetPlatform::kOpenGLES:
     case TargetPlatform::kOpenGLDesktop:
     case TargetPlatform::kRuntimeStageGLES:
@@ -251,6 +250,9 @@ static CompilerBackend CreateCompiler(const spirv_cross::ParsedIR& ir,
       break;
     case TargetPlatform::kSkSL:
       compiler = CreateSkSLCompiler(ir, source_options);
+      break;
+    case TargetPlatform::kUnknown:
+      FML_UNREACHABLE();
   }
   if (!compiler) {
     return {};

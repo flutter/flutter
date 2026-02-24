@@ -33,7 +33,7 @@ void main() {
         'textDirection': TextDirection.ltr,
         'expectedDaysOfWeek': <String>['В', 'П', 'В', 'С', 'Ч', 'П', 'С'],
         'expectedDaysOfMonth': List<String>.generate(30, (int i) => '${i + 1}'),
-        'expectedMonthYearHeader': 'сентябрь 2017 г.',
+        'expectedMonthYearHeader': 'сентябрь 2017\u202fг.',
       },
       const Locale('ro', 'RO'): <String, dynamic>{
         'textDirection': TextDirection.ltr,
@@ -46,7 +46,7 @@ void main() {
         'textDirection': TextDirection.rtl,
         'expectedDaysOfWeek': <String>['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'],
         'expectedDaysOfMonth': List<String>.generate(30, (int i) => arabicNumbers.format(i + 1)),
-        'expectedMonthYearHeader': 'سبتمبر ٢٠١٧',
+        'expectedMonthYearHeader': 'سبتمبر 2017',
       },
     };
 
@@ -69,7 +69,6 @@ void main() {
           locale: locale,
           textDirection: textDirection,
         );
-
         expect(find.text(expectedMonthYearHeader), findsOneWidget);
 
         for (final dayOfWeek in expectedDaysOfWeek) {
@@ -422,7 +421,7 @@ Future<void> _pumpBoilerplate(
   await tester.pumpWidget(
     MaterialApp(
       home: Directionality(
-        textDirection: TextDirection.ltr,
+        textDirection: textDirection,
         child: Localizations(
           locale: locale,
           delegates: GlobalMaterialLocalizations.delegates,

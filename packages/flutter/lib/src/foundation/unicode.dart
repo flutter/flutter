@@ -11,26 +11,26 @@
 ///  * <http://unicode.org/reports/tr9/>, which describes the Unicode
 ///    bidirectional text algorithm.
 abstract final class Unicode {
-  /// `U+202A LEFT-TO-RIGHT EMBEDDING`
+  /// The `U+202A LEFT-TO-RIGHT EMBEDDING` character.
   ///
   /// Treat the following text as embedded left-to-right.
   ///
   /// Use [PDF] to end the embedding.
   static const String LRE = '\u202A';
 
-  /// `U+202B RIGHT-TO-LEFT EMBEDDING`
+  /// The `U+202B RIGHT-TO-LEFT EMBEDDING` character.
   ///
   /// Treat the following text as embedded right-to-left.
   ///
   /// Use [PDF] to end the embedding.
   static const String RLE = '\u202B';
 
-  /// `U+202C POP DIRECTIONAL FORMATTING`
+  /// The `U+202C POP DIRECTIONAL FORMATTING` character.
   ///
   /// End the scope of the last [LRE], [RLE], [RLO], or [LRO].
   static const String PDF = '\u202C';
 
-  /// `U+202A LEFT-TO-RIGHT OVERRIDE`
+  /// The `U+202D LEFT-TO-RIGHT OVERRIDE` character.
   ///
   /// Force following characters to be treated as strong left-to-right characters.
   ///
@@ -39,7 +39,7 @@ abstract final class Unicode {
   /// Use [PDF] to end the override.
   static const String LRO = '\u202D';
 
-  /// `U+202B RIGHT-TO-LEFT OVERRIDE`
+  /// The `U+202E RIGHT-TO-LEFT OVERRIDE` character.
   ///
   /// Force following characters to be treated as strong right-to-left characters.
   ///
@@ -48,21 +48,21 @@ abstract final class Unicode {
   /// Use [PDF] to end the override.
   static const String RLO = '\u202E';
 
-  /// `U+2066 LEFT-TO-RIGHT ISOLATE`
+  /// The `U+2066 LEFT-TO-RIGHT ISOLATE` character.
   ///
   /// Treat the following text as isolated and left-to-right.
   ///
   /// Use [PDI] to end the isolated scope.
   static const String LRI = '\u2066';
 
-  /// `U+2067 RIGHT-TO-LEFT ISOLATE`
+  /// The `U+2067 RIGHT-TO-LEFT ISOLATE` character.
   ///
   /// Treat the following text as isolated and right-to-left.
   ///
   /// Use [PDI] to end the isolated scope.
   static const String RLI = '\u2067';
 
-  /// `U+2068 FIRST STRONG ISOLATE`
+  /// The `U+2068 FIRST STRONG ISOLATE` character.
   ///
   /// Treat the following text as isolated and in the direction of its first
   /// strong directional character that is not inside a nested isolate.
@@ -75,22 +75,22 @@ abstract final class Unicode {
   /// Use [PDI] to end the isolated scope.
   static const String FSI = '\u2068';
 
-  /// `U+2069 POP DIRECTIONAL ISOLATE`
+  /// The `U+2069 POP DIRECTIONAL ISOLATE` character.
   ///
   /// End the scope of the last [LRI], [RLI], or [FSI].
   static const String PDI = '\u2069';
 
-  /// `U+200E LEFT-TO-RIGHT MARK`
+  /// The `U+200E LEFT-TO-RIGHT MARK` character.
   ///
   /// Left-to-right zero-width character.
   static const String LRM = '\u200E';
 
-  /// `U+200F RIGHT-TO-LEFT MARK`
+  /// The `U+200F RIGHT-TO-LEFT MARK` character.
   ///
   /// Right-to-left zero-width non-Arabic character.
   static const String RLM = '\u200F';
 
-  /// `U+061C ARABIC LETTER MARK`
+  /// The `U+061C ARABIC LETTER MARK` character.
   ///
   /// Right-to-left zero-width Arabic character.
   static const String ALM = '\u061C';
