@@ -44,11 +44,14 @@ class Compiler {
 
   const Reflector* GetReflector() const;
 
+  const std::shared_ptr<std::string>& GetVerboseError() const;
+
  private:
   SourceOptions options_;
   std::shared_ptr<fml::Mapping> spirv_assembly_;
   std::shared_ptr<fml::Mapping> sl_mapping_;
   std::stringstream error_stream_;
+  std::shared_ptr<std::string> verbose_error_;
   std::unique_ptr<Reflector> reflector_;
   std::vector<std::string> included_file_names_;
   bool is_valid_ = false;
@@ -56,6 +59,8 @@ class Compiler {
   std::string GetSourcePrefix() const;
 
   std::string GetDependencyNames(const std::string& separator) const;
+
+  bool ValidateSkSLResult(const std::string& sksl);
 
   Compiler(const Compiler&) = delete;
 
