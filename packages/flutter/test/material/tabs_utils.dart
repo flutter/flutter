@@ -281,3 +281,60 @@ RRect tabIndicatorRRectElasticAnimation(
     topRight: const Radius.circular(indicatorWeight),
   );
 }
+
+// This decoration is used to test async image loading in indicator.
+class TabBarAsyncImageIndicatorDecoration extends Decoration {
+  TabBarAsyncImageIndicatorDecoration() : _paintCounter = _TabBarPaintCounter();
+
+  final _TabBarPaintCounter _paintCounter;
+
+  /// The number of times the indicator has been painted.
+  int get paintCount => _paintCounter.count;
+
+  @override
+  BoxPainter createBoxPainter([VoidCallback? onChanged]) {
+    return TabBarAsyncImageIndicatorBoxPainter(
+      onChanged: onChanged,
+      onPaint: _paintCounter.increment,
+    );
+  }
+}
+
+// Helper class to track paint counts.
+class _TabBarPaintCounter {
+  int count = 0;
+
+  void increment() {
+    count++;
+  }
+}
+
+// Box painter that simulates async image loading for testing TabBar indicators.
+class TabBarAsyncImageIndicatorBoxPainter extends BoxPainter {
+  TabBarAsyncImageIndicatorBoxPainter({VoidCallback? onChanged, this.onPaint}) : super(onChanged);
+
+  final VoidCallback? onPaint;
+  bool _imagePainted = false;
+
+  @override
+  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
+    onPaint?.call();
+
+    // Simulate async image loading on first paint.
+    if (!_imagePainted && onChanged != null) {
+      _imagePainted = true;
+      Future.delayed(Duration.zero, () {
+        onChanged!();
+      });
+    }
+
+    // Paint a simple rectangle to indicate the indicator was painted.
+    final paint = Paint()
+      ..color = Colors.blue
+      ..style = PaintingStyle.fill;
+    canvas.drawRect(
+      Rect.fromLTWH(offset.dx, configuration.size!.height - 2.0, configuration.size!.width, 2.0),
+      paint,
+    );
+  }
+}

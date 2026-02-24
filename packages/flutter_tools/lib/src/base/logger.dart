@@ -405,7 +405,6 @@ class DelegatingLogger implements Logger {
 /// the first delegate with the matching type.
 ///
 /// Throws a [StateError] if no matching delegate is found.
-@override
 T asLogger<T extends Logger>(Logger logger) {
   final original = logger;
   while (true) {

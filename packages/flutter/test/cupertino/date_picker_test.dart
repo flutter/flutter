@@ -12,7 +12,6 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -2078,10 +2077,72 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('DatePicker adapts to MaterialApp dark mode', (WidgetTester tester) async {
+  testWidgets('CupertinoDatePicker semantics excludes disabled dates', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    debugResetSemanticsIdCounter();
+    final minimumDate = DateTime(2018, 6, 10);
+    final maximumDate = DateTime(2018, 6, 20);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox(
+            height: 400.0,
+            width: 400.0,
+            child: CupertinoDatePicker(
+              minimumDate: minimumDate,
+              maximumDate: maximumDate,
+              initialDateTime: minimumDate, // Start at minimum date
+              onDateTimeChanged: (DateTime newDateTime) {},
+              mode: CupertinoDatePickerMode.date,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Find the day picker column semantics node
+    // The day picker should have increase action (to go to day 11) but NO decrease action
+    // (because day 9 is disabled and wrapped with ExcludeSemantics)
+    final SemanticsNode rootNode = tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!;
+
+    // Find semantics node with value '10' (the current day)
+    SemanticsNode? findNodeWithValue(SemanticsNode node, String value) {
+      if (node.value == value) {
+        return node;
+      }
+      SemanticsNode? result;
+      node.visitChildren((SemanticsNode child) {
+        result ??= findNodeWithValue(child, value);
+        return result == null;
+      });
+      return result;
+    }
+
+    final SemanticsNode? dayPickerNode = findNodeWithValue(rootNode, '10');
+    expect(dayPickerNode, isNotNull, reason: 'Should find day picker at day 10');
+
+    // At the minimum date (day 10), the day picker should NOT have a decrease action
+    // because day 9 is disabled (wrapped with ExcludeSemantics)
+    final SemanticsData data = dayPickerNode!.getSemanticsData();
+    expect(
+      data.hasAction(SemanticsAction.decrease),
+      isFalse,
+      reason: 'Day picker at minimum date should not have decrease action (day 9 is disabled)',
+    );
+    expect(
+      data.hasAction(SemanticsAction.increase),
+      isTrue,
+      reason: 'Day picker at minimum date should have increase action (day 11 is valid)',
+    );
+
+    handle.dispose();
+  });
+
+  testWidgets('DatePicker adapts to CupertinoApp dark mode', (WidgetTester tester) async {
     Widget buildDatePicker(Brightness brightness) {
-      return MaterialApp(
-        theme: ThemeData(brightness: brightness),
+      return CupertinoApp(
+        theme: CupertinoThemeData(brightness: brightness),
         home: CupertinoDatePicker(
           mode: CupertinoDatePickerMode.date,
           onDateTimeChanged: (DateTime neData) {},
@@ -2093,22 +2154,28 @@ void main() {
     // CupertinoDatePicker with light theme.
     await tester.pumpWidget(buildDatePicker(Brightness.light));
     RenderParagraph paragraph = tester.renderObject(find.text('October').first);
-    expect(paragraph.text.style!.color, CupertinoColors.label);
+    final Color expectedLight = CupertinoColors.label.resolveFrom(
+      tester.element(find.byType(CupertinoDatePicker)),
+    );
+    expect(paragraph.text.style!.color, expectedLight);
     // Text style should not return unresolved color.
     expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
 
     // CupertinoDatePicker with dark theme.
     await tester.pumpWidget(buildDatePicker(Brightness.dark));
     paragraph = tester.renderObject(find.text('October').first);
-    expect(paragraph.text.style!.color, CupertinoColors.label);
+    final Color expectedDark = CupertinoColors.label.resolveFrom(
+      tester.element(find.byType(CupertinoDatePicker)),
+    );
+    expect(paragraph.text.style!.color, expectedDark);
     // Text style should not return unresolved color.
     expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
   });
 
-  testWidgets('TimerPicker adapts to MaterialApp dark mode', (WidgetTester tester) async {
+  testWidgets('TimerPicker adapts to CupertinoApp dark mode', (WidgetTester tester) async {
     Widget buildTimerPicker(Brightness brightness) {
-      return MaterialApp(
-        theme: ThemeData(brightness: brightness),
+      return CupertinoApp(
+        theme: CupertinoThemeData(brightness: brightness),
         home: CupertinoTimerPicker(
           mode: CupertinoTimerPickerMode.hm,
           onTimerDurationChanged: (Duration newDuration) {},
@@ -2120,14 +2187,20 @@ void main() {
     // CupertinoTimerPicker with light theme.
     await tester.pumpWidget(buildTimerPicker(Brightness.light));
     RenderParagraph paragraph = tester.renderObject(find.text('hours'));
-    expect(paragraph.text.style!.color, CupertinoColors.label);
+    final Color expectedLight = CupertinoColors.label.resolveFrom(
+      tester.element(find.byType(CupertinoTimerPicker)),
+    );
+    expect(paragraph.text.style!.color, expectedLight);
     // Text style should not return unresolved color.
     expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
 
     // CupertinoTimerPicker with light theme.
     await tester.pumpWidget(buildTimerPicker(Brightness.dark));
     paragraph = tester.renderObject(find.text('hours'));
-    expect(paragraph.text.style!.color, CupertinoColors.label);
+    final Color expectedDark = CupertinoColors.label.resolveFrom(
+      tester.element(find.byType(CupertinoTimerPicker)),
+    );
+    expect(paragraph.text.style!.color, expectedDark);
     // Text style should not return unresolved color.
     expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
   });

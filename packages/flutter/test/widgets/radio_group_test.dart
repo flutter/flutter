@@ -7,6 +7,8 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'editable_text_utils.dart' show TestTextField;
+
 void main() {
   testWidgets('Radio group control test', (WidgetTester tester) async {
     final key0 = UniqueKey();
@@ -26,33 +28,33 @@ void main() {
     );
     expect(
       tester.getSemantics(find.byKey(key0)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
     );
     expect(
       tester.getSemantics(find.byKey(key1)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
     );
 
     await tester.tap(find.byKey(key0));
     await tester.pumpAndSettle();
     expect(
       tester.getSemantics(find.byKey(key0)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: true, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: true, isEnabled: true),
     );
     expect(
       tester.getSemantics(find.byKey(key1)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
     );
 
     await tester.tap(find.byKey(key1));
     await tester.pumpAndSettle();
     expect(
       tester.getSemantics(find.byKey(key0)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
     );
     expect(
       tester.getSemantics(find.byKey(key1)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: true, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: true, isEnabled: true),
     );
   });
 
@@ -74,11 +76,11 @@ void main() {
     );
     expect(
       tester.getSemantics(find.byKey(key0)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: false),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: false),
     );
     expect(
       tester.getSemantics(find.byKey(key1)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
     );
 
     await tester.tap(find.byKey(key0));
@@ -86,11 +88,11 @@ void main() {
     // Can't be select because the radio is disabled.
     expect(
       tester.getSemantics(find.byKey(key0)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: false),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: false),
     );
     expect(
       tester.getSemantics(find.byKey(key1)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
     );
   });
 
@@ -243,7 +245,7 @@ void main() {
         home: Material(
           child: Column(
             children: <Widget>[
-              TextField(focusNode: textFieldBefore),
+              TestTextField(focusNode: textFieldBefore),
               TestRadioGroup<int>(
                 child: Column(
                   children: <Widget>[
@@ -253,7 +255,7 @@ void main() {
                   ],
                 ),
               ),
-              TextField(focusNode: textFieldAfter),
+              TestTextField(focusNode: textFieldAfter),
             ],
           ),
         ),
@@ -412,7 +414,7 @@ void main() {
                   Radio<int>(focusNode: firstRadioFocusNode, value: 0),
                   const RadioListTile<int>(value: 1),
                   const Radio<int>(value: 2),
-                  TextField(focusNode: textFieldFocusNode),
+                  TestTextField(focusNode: textFieldFocusNode),
                 ],
               ),
             ),

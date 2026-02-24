@@ -136,6 +136,9 @@ class EngineColorFilter implements LayerImageFilter, ui.ColorFilter {
   ui.Rect filterBounds(ui.Rect inputBounds) => inputBounds;
 
   @override
+  String get debugShortDescription => toString();
+
+  @override
   String toString() {
     return switch (type) {
       ColorFilterType.mode => 'ColorFilter.mode($color, $blendMode)',

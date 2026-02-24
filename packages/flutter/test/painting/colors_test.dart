@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show ColorSpace;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -538,6 +540,57 @@ void main() {
             '$name: HSLColor.fromColor($debugColorConstructor) should be close to HSLColor.fromAHSL(1.0, $hue, $sHSL, $l)',
       );
     }
+  });
+
+  // Verifies that P3-to-sRGB color conversion operates in linear light.
+  // Mid-range values expose the gamma nonlinearity: the correct pipeline
+  // is EOTF(decode) -> 3x3 matrix -> OETF(encode).
+  test('Display P3 to extended sRGB color conversion', () {
+    // P3 #1ECAD3 (30/255, 202/255, 211/255)
+    const p3Color = Color.from(
+      alpha: 1.0,
+      red: 30 / 255.0,
+      green: 202 / 255.0,
+      blue: 211 / 255.0,
+      colorSpace: ColorSpace.displayP3,
+    );
+
+    final Color esrgb = p3Color.withValues(colorSpace: ColorSpace.extendedSRGB);
+    expect(esrgb.colorSpace, ColorSpace.extendedSRGB);
+
+    // Correct values from linearize -> matrix -> encode pipeline.
+    // The red channel must be strongly negative for a P3 teal in extended sRGB.
+    // Correct: ~-0.376. Wrong (gamma-encoded matrix): ~-0.120.
+    expect(esrgb.r, within<double>(distance: 0.01, from: -0.376));
+    expect(esrgb.g, within<double>(distance: 0.01, from: 0.807));
+    expect(esrgb.b, within<double>(distance: 0.01, from: 0.837));
+  });
+
+  test('Display P3 pure green to extended sRGB', () {
+    const p3Green = Color.from(
+      alpha: 1.0,
+      red: 0.0,
+      green: 1.0,
+      blue: 0.0,
+      colorSpace: ColorSpace.displayP3,
+    );
+    final Color esrgb = p3Green.withValues(colorSpace: ColorSpace.extendedSRGB);
+
+    // P3 pure green -> extended sRGB should have negative red and blue.
+    // Correct: R ~-0.512, G ~1.018, B ~-0.311
+    expect(esrgb.r, within<double>(distance: 0.01, from: -0.512));
+    expect(esrgb.g, within<double>(distance: 0.01, from: 1.018));
+    expect(esrgb.b, within<double>(distance: 0.01, from: -0.311));
+  });
+
+  test('sRGB to Display P3 round-trip', () {
+    const srgbColor = Color.from(alpha: 1.0, red: 0.5, green: 0.3, blue: 0.8);
+    // sRGB -> P3 -> sRGB should round-trip.
+    final Color p3 = srgbColor.withValues(colorSpace: ColorSpace.displayP3);
+    final Color backToSrgb = p3.withValues(colorSpace: ColorSpace.extendedSRGB);
+    expect(backToSrgb.r, within<double>(distance: 0.01, from: srgbColor.r));
+    expect(backToSrgb.g, within<double>(distance: 0.01, from: srgbColor.g));
+    expect(backToSrgb.b, within<double>(distance: 0.01, from: srgbColor.b));
   });
 
   test('ColorSwatch test', () {

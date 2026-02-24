@@ -220,8 +220,19 @@ class StrokePathSegmentReceiver : public PathAndArcSegmentReceiver {
       // curve as well.
       HandlePreviousJoin(start_perpendicular);
 
-      Scalar count =
-          std::ceilf(curve.SubdivisionCount(scale_ * half_stroke_width_));
+      // We use the scale suggested by the transform basis which is the
+      // same scale that would be used for filling the path. But we also
+      // need to adjust the scale for the magnification of the curve
+      // features that occurs when we draw with a wide pen and the outer
+      // curves of that stroked path are larger than the base curve itself.
+      // So, we scale by both the transform basis and (half) the stroke
+      // width, but we also make sure that we aren't reducing the scale
+      // in the uncommon case that someone is drawing at a large scale
+      // with a very tiny stroke width. To accomplish this, we multiply
+      // the scale basis by half the stroke width, but make sure the width
+      // is at least 1.0 so that we don't reduce the natural transform scale.
+      Scalar stroke_scale = scale_ * std::max(1.0f, half_stroke_width_);
+      Scalar count = std::ceilf(curve.SubdivisionCount(stroke_scale));
 
       Point prev = curve.p1;
       SeparatedVector2 prev_perpendicular = start_perpendicular;
@@ -247,7 +258,9 @@ class StrokePathSegmentReceiver : public PathAndArcSegmentReceiver {
                           const SeparatedVector2& cur_perpendicular) {
     if (prev_perpendicular.GetAlignment(cur_perpendicular) < trigs_[1].cos) {
       // We only connect 2 curved segments if their change in direction
-      // is faster than a single sample of a round join.
+      // is faster than a single sample of a round join. We always use a
+      // round join here because this is about smoothness of curves rather
+      // than a decoration for specific segments of the path.
       AppendVertices(cur, prev_perpendicular);
       AddJoin(Join::kRound, cur, prev_perpendicular, cur_perpendicular);
     }

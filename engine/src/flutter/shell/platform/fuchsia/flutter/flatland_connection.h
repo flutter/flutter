@@ -15,8 +15,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
-
-#include "vsync_waiter.h"
+#include "flutter/shell/platform/fuchsia/flutter/vsync_waiter.h"
 
 #include <cstdint>
 #include <mutex>

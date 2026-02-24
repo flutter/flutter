@@ -79,7 +79,10 @@ class WebAssetServer implements AssetReader {
     required this.webRenderer,
     required this.useLocalCanvasKit,
     required this.fileSystem,
-  }) : basePath = WebTemplate.baseHref(htmlTemplate(fileSystem, 'index.html', _kDefaultIndex)) {
+    required this.logger,
+    Map<String, String> webDefines = const <String, String>{},
+  }) : basePath = WebTemplate.baseHref(htmlTemplate(fileSystem, 'index.html', _kDefaultIndex)),
+       _webDefines = webDefines {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
     if (_ddcModuleSystem) {
@@ -196,6 +199,7 @@ class WebAssetServer implements AssetReader {
     required Logger logger,
     required Platform platform,
     bool shouldEnableMiddleware = true,
+    Map<String, String> webDefines = const <String, String>{},
   }) async {
     final String hostname = webDevServerConfig.host;
     final int port = webDevServerConfig.port;
@@ -263,6 +267,8 @@ class WebAssetServer implements AssetReader {
       webRenderer: webRenderer,
       useLocalCanvasKit: useLocalCanvasKit,
       fileSystem: fileSystem,
+      logger: logger,
+      webDefines: webDefines,
     );
     final int selectedPort = server.selectedPort;
 
@@ -400,6 +406,7 @@ class WebAssetServer implements AssetReader {
 
   final bool _ddcModuleSystem;
   final bool _canaryFeatures;
+  final Map<String, String> _webDefines;
   final HttpServer _httpServer;
   final _webMemoryFS = WebMemoryFS();
   final PackageConfig _packages;
@@ -590,6 +597,7 @@ class WebAssetServer implements AssetReader {
   final bool useLocalCanvasKit;
 
   final FileSystem fileSystem;
+  final Logger logger;
 
   String get _buildConfigString {
     final buildConfig = <String, Object>{
@@ -629,6 +637,8 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
       serviceWorkerVersion: null,
       buildConfig: _buildConfigString,
       flutterJsFile: _flutterJsFile,
+      logger: logger,
+      webDefines: _webDefines,
     );
   }
 
@@ -651,6 +661,8 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
         buildConfig: _buildConfigString,
         flutterJsFile: _flutterJsFile,
         flutterBootstrapJs: _flutterBootstrapJsContent,
+        logger: logger,
+        webDefines: _webDefines,
       ),
       encoding: utf8,
       headers: <String, String>{HttpHeaders.contentTypeHeader: 'text/html'},

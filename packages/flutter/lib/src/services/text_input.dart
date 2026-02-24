@@ -1518,6 +1518,114 @@ mixin DeltaTextInputClient implements TextInputClient {
   void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas);
 }
 
+/// Text styling information for the current input client.
+///
+/// See also:
+///
+///  * [TextInputConnection.updateStyle], which uses this class to send style
+///    information to the platform.
+///  * [TextInputControl.updateStyle], which receives this style information
+///    in custom text input controls.
+@immutable
+final class TextInputStyle with Diagnosticable {
+  /// Creates text styling information for the current input client.
+  const TextInputStyle({
+    this.fontFamily,
+    this.fontSize,
+    this.fontWeight,
+    required this.textDirection,
+    required this.textAlign,
+    this.letterSpacing,
+    this.wordSpacing,
+    this.lineHeight,
+  });
+
+  /// The name of the font to use when painting the text (e.g., Roboto).
+  final String? fontFamily;
+
+  /// The size of fonts (in logical pixels) to use when painting the text.
+  final double? fontSize;
+
+  /// The typeface thickness to use when painting the text (e.g., bold).
+  final FontWeight? fontWeight;
+
+  /// The directionality of the text.
+  final TextDirection textDirection;
+
+  /// How the text should be aligned horizontally.
+  final TextAlign textAlign;
+
+  /// The amount of space (in logical pixels) to add between each letter.
+  final double? letterSpacing;
+
+  /// The amount of space (in logical pixels) to add at each sequence of
+  /// white-space (i.e. between each word).
+  final double? wordSpacing;
+
+  /// The line height in logical pixels.
+  final double? lineHeight;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is TextInputStyle &&
+        other.fontFamily == fontFamily &&
+        other.fontSize == fontSize &&
+        other.fontWeight == fontWeight &&
+        other.textDirection == textDirection &&
+        other.textAlign == textAlign &&
+        other.letterSpacing == letterSpacing &&
+        other.wordSpacing == wordSpacing &&
+        other.lineHeight == lineHeight;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(
+      fontFamily,
+      fontSize,
+      fontWeight,
+      textDirection,
+      textAlign,
+      letterSpacing,
+      wordSpacing,
+      lineHeight,
+    );
+  }
+
+  /// Returns a representation of this object as a JSON object.
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'fontFamily': fontFamily,
+      'fontSize': fontSize,
+      'fontWeightIndex': fontWeight?.index,
+      'textAlignIndex': textAlign.index,
+      'textDirectionIndex': textDirection.index,
+      'letterSpacing': letterSpacing,
+      'wordSpacing': wordSpacing,
+      'lineHeight': lineHeight,
+    };
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('fontFamily', fontFamily, defaultValue: null));
+    properties.add(DoubleProperty('fontSize', fontSize, defaultValue: null));
+    properties.add(DiagnosticsProperty<FontWeight>('fontWeight', fontWeight, defaultValue: null));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection));
+    properties.add(EnumProperty<TextAlign>('textAlign', textAlign));
+    properties.add(DoubleProperty('letterSpacing', letterSpacing, defaultValue: null));
+    properties.add(DoubleProperty('wordSpacing', wordSpacing, defaultValue: null));
+    properties.add(DoubleProperty('lineHeight', lineHeight, defaultValue: null));
+  }
+}
+
 /// An interface for interacting with a text input control.
 ///
 /// See also:
@@ -1655,6 +1763,10 @@ class TextInputConnection {
   /// This information is used by the Flutter Web Engine to change the style
   /// of the hidden native input's content. Hence, the content size will match
   /// to the size of the editable widget's content.
+  @Deprecated(
+    'Use updateStyle instead. '
+    'This feature was deprecated after v3.41.0-0.0.pre.',
+  )
   void setStyle({
     required String? fontFamily,
     required double? fontSize,
@@ -1662,15 +1774,25 @@ class TextInputConnection {
     required TextDirection textDirection,
     required TextAlign textAlign,
   }) {
-    assert(attached);
-
-    TextInput._instance._setStyle(
-      fontFamily: fontFamily,
-      fontSize: fontSize,
-      fontWeight: fontWeight,
-      textDirection: textDirection,
-      textAlign: textAlign,
+    updateStyle(
+      TextInputStyle(
+        fontFamily: fontFamily,
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        textDirection: textDirection,
+        textAlign: textAlign,
+      ),
     );
+  }
+
+  /// Send text styling information.
+  ///
+  /// This information is used by the Flutter Web Engine to change the style
+  /// of the hidden native input's content. Hence, the content size will match
+  /// to the size of the editable widget's content.
+  void updateStyle(TextInputStyle style) {
+    assert(attached);
+    TextInput._instance._updateStyle(style);
   }
 
   /// Stop interacting with the text input control.
@@ -2219,21 +2341,9 @@ class TextInput {
     }
   }
 
-  void _setStyle({
-    required String? fontFamily,
-    required double? fontSize,
-    required FontWeight? fontWeight,
-    required TextDirection textDirection,
-    required TextAlign textAlign,
-  }) {
+  void _updateStyle(TextInputStyle style) {
     for (final TextInputControl control in _inputControls) {
-      control.setStyle(
-        fontFamily: fontFamily,
-        fontSize: fontSize,
-        fontWeight: fontWeight,
-        textDirection: textDirection,
-        textAlign: textAlign,
-      );
+      control.updateStyle(style);
     }
   }
 
@@ -2424,6 +2534,10 @@ mixin TextInputControl {
   ///
   /// This method is called on the when the attached input client's text style
   /// changes.
+  @Deprecated(
+    'Use updateStyle instead. '
+    'This feature was deprecated after v3.41.0-0.0.pre.',
+  )
   void setStyle({
     required String? fontFamily,
     required double? fontSize,
@@ -2431,6 +2545,12 @@ mixin TextInputControl {
     required TextDirection textDirection,
     required TextAlign textAlign,
   }) {}
+
+  /// Informs the text input control about text style changes.
+  ///
+  /// This method is called on the when the attached input client's text style
+  /// changes.
+  void updateStyle(TextInputStyle style) {}
 
   /// Requests autofill from the text input control.
   ///
@@ -2557,13 +2677,20 @@ class _PlatformTextInputControl with TextInputControl {
     required TextDirection textDirection,
     required TextAlign textAlign,
   }) {
-    _channel.invokeMethod<void>('TextInput.setStyle', <String, dynamic>{
-      'fontFamily': fontFamily,
-      'fontSize': fontSize,
-      'fontWeightIndex': fontWeight?.index,
-      'textAlignIndex': textAlign.index,
-      'textDirectionIndex': textDirection.index,
-    });
+    updateStyle(
+      TextInputStyle(
+        fontFamily: fontFamily,
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        textDirection: textDirection,
+        textAlign: textAlign,
+      ),
+    );
+  }
+
+  @override
+  void updateStyle(TextInputStyle style) {
+    _channel.invokeMethod<void>('TextInput.setStyle', style.toJson());
   }
 
   @override

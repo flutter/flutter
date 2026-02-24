@@ -18,8 +18,8 @@
 # The following files define an Application Binary Interface (ABI) that must maintain
 # both forward and backward compatibility. Changes should be heavily
 # scrutinized as mistakes are irreversible.
-/engine/src/flutter/shell/platform/embedder/embedder.h @chinmaygarde @loic-sharma
-/engine/src/flutter/shell/platform/embedder/tests/embedder_frozen.h @chinmaygarde @loic-sharma
+/engine/src/flutter/shell/platform/embedder/embedder.h @loic-sharma
+/engine/src/flutter/shell/platform/embedder/tests/embedder_frozen.h @loic-sharma
 
 # Android team - keep this synced with .github/labeler.yml's team-android section.
 /docs/platform/android/** @flutter/android-reviewers

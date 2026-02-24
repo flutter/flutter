@@ -130,6 +130,43 @@ void main() {
     }
   });
 
+  test('rename uniforms', () async {
+    if (impellerEnabled) {
+      // Needs https://github.com/flutter/flutter/issues/129659
+      return;
+    }
+    final testAssetName = 'test_rename_uniforms_${DateTime.now().millisecondsSinceEpoch}.frag.iplr';
+    final String buildDir = Platform.environment['FLUTTER_BUILD_DIRECTORY']!;
+    final String assetsDir = path.join(buildDir, 'gen/flutter/lib/ui/assets');
+    final String shaderSrcA = path.join(assetsDir, 'uniforms.frag.iplr');
+    final String shaderSrcB = path.join(assetsDir, 'uniforms_renamed.frag.iplr');
+    final String shaderSrcC = path.join(assetsDir, testAssetName);
+
+    final fileC = File(shaderSrcC);
+    final Uint8List sourceA = File(shaderSrcA).readAsBytesSync();
+    final Uint8List sourceB = File(shaderSrcB).readAsBytesSync();
+
+    fileC.writeAsBytesSync(sourceA, flush: true);
+
+    try {
+      final FragmentProgram program = await FragmentProgram.fromAsset(testAssetName);
+      final FragmentShader shader = program.fragmentShader();
+      final UniformFloatSlot slotA = shader.getUniformFloat('iFloatUniform');
+      slotA.set(1.0);
+
+      fileC.writeAsBytesSync(sourceB, flush: true);
+      await _performReload(testAssetName);
+
+      final UniformFloatSlot slotB = shader.getUniformFloat('iFloatUniformRenamed');
+      // Make sure this doesn't break.
+      slotB.set(0.0);
+    } finally {
+      if (fileC.existsSync()) {
+        fileC.deleteSync();
+      }
+    }
+  });
+
   test('reorder samplers', () async {
     if (impellerEnabled) {
       // Needs https://github.com/flutter/flutter/issues/129659

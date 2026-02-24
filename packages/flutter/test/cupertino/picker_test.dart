@@ -4,7 +4,6 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -97,6 +96,75 @@ void main() {
         actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
       ),
     );
+    semantics.dispose();
+  });
+
+  testWidgets('Picker semantics excludes current item with empty label', (
+    WidgetTester tester,
+  ) async {
+    // When the current item has an empty label (e.g., wrapped with ExcludeSemantics),
+    // the picker should not set any value, increasedValue, decreasedValue, or actions.
+    final semantics = SemanticsTester(tester);
+    final controller = FixedExtentScrollController(initialItem: 1);
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: SizedBox(
+          height: 300.0,
+          width: 300.0,
+          child: CupertinoPicker(
+            scrollController: controller,
+            itemExtent: 50.0,
+            onSelectedItemChanged: (_) {},
+            children: const <Widget>[
+              Text('0'),
+              // Item at index 1 is excluded from semantics (simulating a disabled item).
+              ExcludeSemantics(child: Text('1')),
+              Text('2'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // When the current item (index 1) has an empty label due to ExcludeSemantics,
+    // the picker should not have any value or actions set.
+    expect(semantics, isNot(includesNodeWith(value: '1')));
+    // Also verify that no increase/decrease actions are set for this item.
+    expect(
+      semantics,
+      isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.increase])),
+    );
+    expect(
+      semantics,
+      isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.decrease])),
+    );
+
+    // Scroll to item 0 which has a valid label.
+    controller.jumpToItem(0);
+    await tester.pumpAndSettle();
+
+    // Now the picker should have value '0' but no increase action
+    // because the next item (1) has an empty label.
+    expect(semantics, includesNodeWith(value: '0'));
+    expect(
+      semantics,
+      isNot(includesNodeWith(value: '0', actions: <SemanticsAction>[SemanticsAction.increase])),
+    );
+
+    // Scroll to item 2 which has a valid label.
+    controller.jumpToItem(2);
+    await tester.pumpAndSettle();
+
+    // Now the picker should have value '2' but no decrease action
+    // because the previous item (1) has an empty label.
+    expect(semantics, includesNodeWith(value: '2'));
+    expect(
+      semantics,
+      isNot(includesNodeWith(value: '2', actions: <SemanticsAction>[SemanticsAction.decrease])),
+    );
+
     semantics.dispose();
   });
 
@@ -628,10 +696,10 @@ void main() {
     );
   });
 
-  testWidgets('Picker adapts to MaterialApp dark mode', (WidgetTester tester) async {
+  testWidgets('Picker adapts to CupertinoApp dark mode', (WidgetTester tester) async {
     Widget buildCupertinoPicker(Brightness brightness) {
-      return MaterialApp(
-        theme: ThemeData(brightness: brightness),
+      return CupertinoApp(
+        theme: CupertinoThemeData(brightness: brightness),
         home: Align(
           alignment: Alignment.topLeft,
           child: SizedBox(
@@ -652,14 +720,20 @@ void main() {
     // CupertinoPicker with light theme.
     await tester.pumpWidget(buildCupertinoPicker(Brightness.light));
     RenderParagraph paragraph = tester.renderObject(find.text('1'));
-    expect(paragraph.text.style!.color, CupertinoColors.label);
+    final Color expectedLight = CupertinoColors.label.resolveFrom(
+      tester.element(find.byType(CupertinoPicker)),
+    );
+    expect(paragraph.text.style!.color, expectedLight);
     // Text style should not return unresolved color.
     expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
 
     // CupertinoPicker with dark theme.
     await tester.pumpWidget(buildCupertinoPicker(Brightness.dark));
     paragraph = tester.renderObject(find.text('1'));
-    expect(paragraph.text.style!.color, CupertinoColors.label);
+    final Color expectedDark = CupertinoColors.label.resolveFrom(
+      tester.element(find.byType(CupertinoPicker)),
+    );
+    expect(paragraph.text.style!.color, expectedDark);
     // Text style should not return unresolved color.
     expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
   });

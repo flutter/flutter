@@ -4,12 +4,15 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind, kSecondaryButton;
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
+import 'widgets_app_tester.dart';
+
+const Color _kTestRed = Color(0xFFFF0000);
 
 void main() {
   late bool tapped;
@@ -20,7 +23,7 @@ void main() {
 
   setUp(() {
     tapped = false;
-    colorAnimation = const AlwaysStoppedAnimation<Color?>(Colors.red);
+    colorAnimation = const AlwaysStoppedAnimation<Color?>(_kTestRed);
     tapTarget = GestureDetector(
       onTap: () {
         tapped = true;
@@ -194,7 +197,7 @@ void main() {
         '/modal': (BuildContext context) => const SecondWidget(),
       };
 
-      await tester.pumpWidget(MaterialApp(routes: routes));
+      await tester.pumpWidget(TestWidgetsApp(routes: routes));
 
       // Initially the barrier is not visible
       expect(find.byKey(const ValueKey<String>('barrier')), findsNothing);
@@ -227,7 +230,7 @@ void main() {
         '/modal': (BuildContext context) => const SecondWidget(),
       };
 
-      await tester.pumpWidget(MaterialApp(routes: routes));
+      await tester.pumpWidget(TestWidgetsApp(routes: routes));
 
       // Initially the barrier is not visible
       expect(find.byKey(const ValueKey<String>('barrier')), findsNothing);
@@ -263,7 +266,7 @@ void main() {
         '/modal': (BuildContext context) => const SecondWidgetWithCompetence(),
       };
 
-      await tester.pumpWidget(MaterialApp(routes: routes));
+      await tester.pumpWidget(TestWidgetsApp(routes: routes));
 
       // Initially the barrier is not visible
       expect(find.byKey(const ValueKey<String>('barrier')), findsNothing);
@@ -305,7 +308,7 @@ void main() {
         ),
       };
 
-      await tester.pumpWidget(MaterialApp(routes: routes));
+      await tester.pumpWidget(TestWidgetsApp(routes: routes));
 
       // Initially the barrier is not visible
       expect(find.byKey(const ValueKey<String>('barrier')), findsNothing);
@@ -351,7 +354,7 @@ void main() {
         ),
       };
 
-      await tester.pumpWidget(MaterialApp(routes: routes));
+      await tester.pumpWidget(TestWidgetsApp(routes: routes));
 
       // Initially the barrier is not visible
       expect(find.byKey(const ValueKey<String>('barrier')), findsNothing);
@@ -388,7 +391,7 @@ void main() {
         ),
       };
 
-      await tester.pumpWidget(MaterialApp(routes: routes));
+      await tester.pumpWidget(TestWidgetsApp(routes: routes));
 
       // Initially the barrier is not visible
       expect(find.byKey(const ValueKey<String>('barrier')), findsNothing);
@@ -415,10 +418,8 @@ void main() {
 
       final barrierKey = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ModalBarrier(key: barrierKey, onDismiss: () => throw Exception('deliberate')),
-          ),
+        TestWidgetsApp(
+          home: ModalBarrier(key: barrierKey, onDismiss: () => throw Exception('deliberate')),
         ),
       );
       await tester.tap(find.byKey(barrierKey));
@@ -434,7 +435,7 @@ void main() {
         '/modal': (BuildContext context) => SecondWidget(onDismiss: () {}),
       };
 
-      await tester.pumpWidget(MaterialApp(routes: routes));
+      await tester.pumpWidget(TestWidgetsApp(routes: routes));
 
       // Initially the barrier is not visible
       expect(find.byKey(const ValueKey<String>('barrier')), findsNothing);
@@ -498,6 +499,16 @@ void main() {
         TargetPlatform.android,
       }),
     );
+
+    testWidgets('ModalBarrier does not crash at zero area', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(child: SizedBox.shrink(child: ModalBarrier())),
+        ),
+      );
+      expect(tester.getSize(find.byType(ModalBarrier)), Size.zero);
+    });
   });
   group('AnimatedModalBarrier', () {
     testWidgets('prevents interactions with widgets behind it', (WidgetTester tester) async {
@@ -661,7 +672,7 @@ void main() {
         '/modal': (BuildContext context) => const AnimatedSecondWidget(),
       };
 
-      await tester.pumpWidget(MaterialApp(routes: routes));
+      await tester.pumpWidget(TestWidgetsApp(routes: routes));
 
       // Initially the barrier is not visible
       expect(find.byKey(const ValueKey<String>('barrier')), findsNothing);
@@ -694,7 +705,7 @@ void main() {
         '/modal': (BuildContext context) => const AnimatedSecondWidget(),
       };
 
-      await tester.pumpWidget(MaterialApp(routes: routes));
+      await tester.pumpWidget(TestWidgetsApp(routes: routes));
 
       // Initially the barrier is not visible
       expect(find.byKey(const ValueKey<String>('barrier')), findsNothing);
@@ -730,7 +741,7 @@ void main() {
         '/modal': (BuildContext context) => const AnimatedSecondWidgetWithCompetence(),
       };
 
-      await tester.pumpWidget(MaterialApp(routes: routes));
+      await tester.pumpWidget(TestWidgetsApp(routes: routes));
 
       // Initially the barrier is not visible
       expect(find.byKey(const ValueKey<String>('barrier')), findsNothing);
@@ -772,7 +783,7 @@ void main() {
         ),
       };
 
-      await tester.pumpWidget(MaterialApp(routes: routes));
+      await tester.pumpWidget(TestWidgetsApp(routes: routes));
 
       // Initially the barrier is not visible
       expect(find.byKey(const ValueKey<String>('barrier')), findsNothing);
@@ -818,7 +829,7 @@ void main() {
         ),
       };
 
-      await tester.pumpWidget(MaterialApp(routes: routes));
+      await tester.pumpWidget(TestWidgetsApp(routes: routes));
 
       // Initially the barrier is not visible
       expect(find.byKey(const ValueKey<String>('barrier')), findsNothing);
@@ -855,7 +866,7 @@ void main() {
         ),
       };
 
-      await tester.pumpWidget(MaterialApp(routes: routes));
+      await tester.pumpWidget(TestWidgetsApp(routes: routes));
 
       // Initially the barrier is not visible
       expect(find.byKey(const ValueKey<String>('barrier')), findsNothing);
@@ -879,7 +890,7 @@ void main() {
         '/modal': (BuildContext context) => AnimatedSecondWidget(onDismiss: () {}),
       };
 
-      await tester.pumpWidget(MaterialApp(routes: routes));
+      await tester.pumpWidget(TestWidgetsApp(routes: routes));
 
       // Initially the barrier is not visible
       expect(find.byKey(const ValueKey<String>('barrier')), findsNothing);
@@ -1047,7 +1058,7 @@ class AnimatedSecondWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedModalBarrier(
       key: const ValueKey<String>('barrier'),
-      color: const AlwaysStoppedAnimation<Color?>(Colors.red),
+      color: const AlwaysStoppedAnimation<Color?>(_kTestRed),
       onDismiss: onDismiss,
     );
   }
@@ -1078,7 +1089,7 @@ class AnimatedSecondWidgetWithCompetence extends StatelessWidget {
       children: <Widget>[
         const AnimatedModalBarrier(
           key: ValueKey<String>('barrier'),
-          color: AlwaysStoppedAnimation<Color?>(Colors.red),
+          color: AlwaysStoppedAnimation<Color?>(_kTestRed),
         ),
         GestureDetector(
           onVerticalDragStart: (_) {},

@@ -59,20 +59,6 @@ void testMain() {
       expect(ui.PlatformDispatcher.instance.displays.length, greaterThan(0));
     });
 
-    test('high contrast in accessibilityFeatures has the correct value', () {
-      final mockHighContrast = MockHighContrastSupport();
-      HighContrastSupport.instance = mockHighContrast;
-
-      final dispatcher = EnginePlatformDispatcher();
-
-      expect(dispatcher.accessibilityFeatures.highContrast, isTrue);
-      mockHighContrast.isEnabled = false;
-      mockHighContrast.invokeListeners(mockHighContrast.isEnabled);
-      expect(dispatcher.accessibilityFeatures.highContrast, isFalse);
-
-      dispatcher.dispose();
-    });
-
     test('AppLifecycleState transitions through all states', () {
       final states = <ui.AppLifecycleState>[];
       void listener(ui.AppLifecycleState state) {
@@ -581,6 +567,90 @@ void testMain() {
       expect(drawFrameCalled.isCompleted, true);
     });
 
+    group('Media query values', () {
+      late EnginePlatformDispatcher dispatcher;
+
+      setUp(() {
+        dispatcher = EnginePlatformDispatcher();
+      });
+
+      tearDown(() {
+        dispatcher.dispose();
+      });
+
+      test('high contrast in accessibilityFeatures has the correct value', () {
+        const String mediaQuery = MediaQueryManager.FORCED_COLORS;
+
+        mediaQueries.debugTriggerListener(
+          mediaQuery,
+          event: createDomMediaQueryListEvent('change', {'media': mediaQuery, 'matches': false}),
+        );
+
+        expect(dispatcher.accessibilityFeatures.highContrast, isFalse);
+
+        mediaQueries.debugTriggerListener(
+          mediaQuery,
+          event: createDomMediaQueryListEvent('change', {'media': mediaQuery, 'matches': true}),
+        );
+
+        expect(dispatcher.accessibilityFeatures.highContrast, isTrue);
+      });
+
+      test('configuration.platformBrightness (dark mode) has the correct value', () {
+        const String mediaQuery = MediaQueryManager.DARK_MODE;
+
+        mediaQueries.debugTriggerListener(
+          mediaQuery,
+          event: createDomMediaQueryListEvent('change', {'media': mediaQuery, 'matches': false}),
+        );
+
+        expect(dispatcher.configuration.platformBrightness, ui.Brightness.light);
+
+        mediaQueries.debugTriggerListener(
+          mediaQuery,
+          event: createDomMediaQueryListEvent('change', {'media': mediaQuery, 'matches': true}),
+        );
+
+        expect(dispatcher.configuration.platformBrightness, ui.Brightness.dark);
+      });
+
+      test('reduced motion (disable animations) has the correct value', () {
+        const String mediaQuery = MediaQueryManager.REDUCED_MOTION;
+
+        mediaQueries.debugTriggerListener(
+          mediaQuery,
+          event: createDomMediaQueryListEvent('change', {'media': mediaQuery, 'matches': false}),
+        );
+
+        expect(
+          dispatcher.accessibilityFeatures.reduceMotion,
+          isFalse,
+          reason: 'reduceMotion is wrong',
+        );
+        expect(
+          dispatcher.accessibilityFeatures.disableAnimations,
+          isFalse,
+          reason: 'disableAnimations is wrong',
+        );
+
+        mediaQueries.debugTriggerListener(
+          mediaQuery,
+          event: createDomMediaQueryListEvent('change', {'media': mediaQuery, 'matches': true}),
+        );
+
+        expect(
+          dispatcher.accessibilityFeatures.reduceMotion,
+          isTrue,
+          reason: 'reduceMotion is wrong',
+        );
+        expect(
+          dispatcher.accessibilityFeatures.disableAnimations,
+          isTrue,
+          reason: 'disableAnimations is wrong',
+        );
+      });
+    });
+
     group('NavigationTarget', () {
       test('creates with element and nodeId', () {
         final DomElement element = createDomHTMLDivElement();
@@ -803,31 +873,6 @@ void testMain() {
       });
     });
   }, skip: ui_web.browser.isFirefox);
-}
-
-class MockHighContrastSupport implements HighContrastSupport {
-  bool isEnabled = true;
-
-  final List<HighContrastListener> _listeners = <HighContrastListener>[];
-
-  @override
-  bool get isHighContrastEnabled => isEnabled;
-
-  void invokeListeners(bool val) {
-    for (final HighContrastListener listener in _listeners) {
-      listener(val);
-    }
-  }
-
-  @override
-  void addListener(HighContrastListener listener) {
-    _listeners.add(listener);
-  }
-
-  @override
-  void removeListener(HighContrastListener listener) {
-    _listeners.remove(listener);
-  }
 }
 
 class MockAppLifecycleState extends AppLifecycleState {

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'test_widgets.dart';
@@ -38,11 +38,12 @@ void main() {
       final Key outerContainer = GlobalKey();
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Center(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
             child: Container(
               key: outerContainer,
-              color: Colors.purple,
+              color: const Color(0xFF0000FF),
               width: 400.0,
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -52,7 +53,7 @@ void main() {
                     controller: controller,
                     itemBuilder: (BuildContext context, int index) {
                       return Container(
-                        color: index.isEven ? Colors.red : Colors.green,
+                        color: index.isEven ? const Color(0xFFFF0000) : const Color(0xFF00FF00),
                         height: 200.0,
                         child: Text('Hello $index'),
                       );
@@ -86,7 +87,7 @@ void main() {
       expect(controller.offset, currentOffset);
 
       // Dispose the scrollables while the finger is still down, this should not crash.
-      await tester.pumpWidget(MaterialApp(home: Container()));
+      await tester.pumpWidget(const SizedBox());
       await tester.pumpAndSettle();
       expect(controller.hasClients, isFalse);
 

@@ -154,7 +154,7 @@ function main() {
     echo "Staging documentation output left in $STAGING_DIR"
   else
     echo "Removing staging documentation output from $STAGING_DIR"
-    rm -rf "$STAGING_DIR"
+    rm -rf -- "$STAGING_DIR"
   fi
   echo "Wrote docs ZIP file to $DESTINATION"
 }

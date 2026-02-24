@@ -26,6 +26,7 @@ import android.view.DisplayCutout;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
+import android.view.RoundedCorner;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -104,8 +105,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *       io.flutter.embedding.android.RenderMode#surface} render mode.
  * </ol>
  *
- * See <a>https://source.android.com/devices/graphics/arch-tv#surface_or_texture</a> for more
- * information comparing {@link android.view.SurfaceView} and {@link android.view.TextureView}.
+ * See <a
+ * href="https://source.android.com/devices/graphics/arch-tv#surface_or_texture">https://source.android.com/devices/graphics/arch-tv#surface_or_texture</a>
+ * for more information comparing {@link android.view.SurfaceView} and {@link
+ * android.view.TextureView}.
  */
 public class FlutterView extends FrameLayout
     implements MouseCursorPlugin.MouseCursorViewDelegate, KeyboardManager.ViewDelegate {
@@ -119,6 +122,9 @@ public class FlutterView extends FrameLayout
 
   // Maximum size allowed for a content sized view.
   @VisibleForTesting static final int CONTENT_SIZING_MAX = 2 << 12;
+
+  // Flag to enable content sizing.
+  @VisibleForTesting boolean isContentSizingEnabled = false;
 
   // Internal view hierarchy references.
   @Nullable private FlutterSurfaceView flutterSurfaceView;
@@ -421,6 +427,8 @@ public class FlutterView extends FrameLayout
       addView(flutterImageView);
     }
 
+    isContentSizingEnabled = ContentSizingFlag.isEnabled(getContext());
+
     // FlutterView needs to be focusable so that the InputMethodManager can interact with it.
     setFocusable(true);
     setFocusableInTouchMode(true);
@@ -479,7 +487,7 @@ public class FlutterView extends FrameLayout
     super.onConfigurationChanged(newConfig);
     // We've observed on Android Q that going to the background, changing
     // orientation, and bringing the app back to foreground results in a sequence
-    // of detatch from flutterEngine, onConfigurationChanged, followed by attach
+    // of detached from flutterEngine, onConfigurationChanged, followed by attach
     // to flutterEngine.
     // No-op here so that we avoid NPE; these channels will get notified once
     // the activity or fragment tell the view to attach to the Flutter engine
@@ -518,7 +526,7 @@ public class FlutterView extends FrameLayout
     viewportMetrics.width = width;
     viewportMetrics.height = height;
 
-    if (heightMode == MeasureSpec.UNSPECIFIED) {
+    if (isContentSizingEnabled && heightMode == MeasureSpec.UNSPECIFIED) {
       Log.d(TAG, "FlutterView height is set to wrap content - updating viewport metrics to max");
       viewportMetrics.minHeight = 0;
       viewportMetrics.maxHeight = CONTENT_SIZING_MAX;
@@ -526,7 +534,7 @@ public class FlutterView extends FrameLayout
       viewportMetrics.minHeight = viewportMetrics.height;
       viewportMetrics.maxHeight = viewportMetrics.height;
     }
-    if (widthMode == MeasureSpec.UNSPECIFIED) {
+    if (isContentSizingEnabled && widthMode == MeasureSpec.UNSPECIFIED) {
       Log.d(TAG, "FlutterView width is set to wrap content - updating viewport metrics to max");
       viewportMetrics.minWidth = 0;
       viewportMetrics.maxWidth = CONTENT_SIZING_MAX;
@@ -612,7 +620,7 @@ public class FlutterView extends FrameLayout
       Log.v(
           TAG,
           "WindowInfoTracker Display Feature reported with bounds = "
-              + displayFeature.getBounds().toString()
+              + displayFeature.getBounds()
               + " and type = "
               + displayFeature.getClass().getSimpleName());
       if (displayFeature instanceof FoldingFeature) {
@@ -850,6 +858,20 @@ public class FlutterView extends FrameLayout
       delegate.growViewportMetricsToCaptionBar(getContext(), viewportMetrics);
     }
 
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_31) {
+      RoundedCorner topLeft = insets.getRoundedCorner(RoundedCorner.POSITION_TOP_LEFT);
+      RoundedCorner topRight = insets.getRoundedCorner(RoundedCorner.POSITION_TOP_RIGHT);
+      RoundedCorner bottomRight = insets.getRoundedCorner(RoundedCorner.POSITION_BOTTOM_RIGHT);
+      RoundedCorner bottomLeft = insets.getRoundedCorner(RoundedCorner.POSITION_BOTTOM_LEFT);
+
+      viewportMetrics.displayCornerRadiusTopLeft = topLeft != null ? topLeft.getRadius() : 0;
+      viewportMetrics.displayCornerRadiusTopRight = topRight != null ? topRight.getRadius() : 0;
+      viewportMetrics.displayCornerRadiusBottomRight =
+          bottomRight != null ? bottomRight.getRadius() : 0;
+      viewportMetrics.displayCornerRadiusBottomLeft =
+          bottomLeft != null ? bottomLeft.getRadius() : 0;
+    }
+
     Log.v(
         TAG,
         "Updating window insets (onApplyWindowInsets()):\n"
@@ -1054,9 +1076,7 @@ public class FlutterView extends FrameLayout
     findViewByAccessibilityIdTraversalMethod.setAccessible(true);
     try {
       return (View) findViewByAccessibilityIdTraversalMethod.invoke(this, accessibilityId);
-    } catch (IllegalAccessException exception) {
-      return null;
-    } catch (InvocationTargetException exception) {
+    } catch (IllegalAccessException | InvocationTargetException ignored) {
       return null;
     }
   }
@@ -1081,9 +1101,7 @@ public class FlutterView extends FrameLayout
       if (getAccessibilityViewIdMethod.invoke(currentView).equals(accessibilityId)) {
         return currentView;
       }
-    } catch (IllegalAccessException exception) {
-      return null;
-    } catch (InvocationTargetException exception) {
+    } catch (IllegalAccessException | InvocationTargetException ignored) {
       return null;
     }
     if (currentView instanceof ViewGroup) {
@@ -1173,7 +1191,9 @@ public class FlutterView extends FrameLayout
     isFlutterUiDisplayed = flutterRenderer.isDisplayingFlutterUi();
     renderSurface.attachToRenderer(flutterRenderer);
     flutterRenderer.addIsDisplayingFlutterUiListener(flutterUiDisplayListener);
-    flutterRenderer.addResizingFlutterUiListener(flutterUiResizeListener);
+    if (isContentSizingEnabled) {
+      flutterRenderer.addResizingFlutterUiListener(flutterUiResizeListener);
+    }
 
     // Initialize various components that know how to process Android View I/O
     // in a way that Flutter understands.
@@ -1320,7 +1340,9 @@ public class FlutterView extends FrameLayout
     FlutterRenderer flutterRenderer = flutterEngine.getRenderer();
     isFlutterUiDisplayed = false;
     flutterRenderer.removeIsDisplayingFlutterUiListener(flutterUiDisplayListener);
-    flutterRenderer.removeResizingFlutterUiListener(flutterUiResizeListener);
+    if (isContentSizingEnabled) {
+      flutterRenderer.removeResizingFlutterUiListener(flutterUiResizeListener);
+    }
     flutterRenderer.stopRenderingToSurface();
     flutterRenderer.setSemanticsEnabled(false);
 
@@ -1576,12 +1598,20 @@ public class FlutterView extends FrameLayout
   @Override
   public void onProvideAutofillVirtualStructure(@NonNull ViewStructure structure, int flags) {
     super.onProvideAutofillVirtualStructure(structure, flags);
-    textInputPlugin.onProvideAutofillVirtualStructure(structure, flags);
+    // Defensive null check to prevent NPE when textInputPlugin is not yet initialized
+    // (e.g., when attachToEngineAutomatically is false).
+    if (textInputPlugin != null) {
+      textInputPlugin.onProvideAutofillVirtualStructure(structure, flags);
+    }
   }
 
   @Override
   public void autofill(@NonNull SparseArray<AutofillValue> values) {
-    textInputPlugin.autofill(values);
+    // Defensive null check to prevent NPE when textInputPlugin is not yet initialized
+    // (e.g., when attachToEngineAutomatically is false).
+    if (textInputPlugin != null) {
+      textInputPlugin.autofill(values);
+    }
   }
 
   @Override

@@ -46,6 +46,13 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake implements WidgetPreview
   Uri? get dtdUri => Uri();
 
   @override
+  final String widgetPreviewService = WidgetPreviewDtdServices.kWidgetPreviewServiceRoot;
+
+  @override
+  final String widgetPreviewScaffoldStream =
+      WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot;
+
+  @override
   Future<void> launchAndConnect() async {}
 }
 

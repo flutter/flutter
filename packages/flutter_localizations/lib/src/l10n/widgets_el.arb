@@ -12,7 +12,7 @@
   "shareButtonLabel": "Κοινή χρήση",
   "pasteButtonLabel": "Επικόλληση",
   "selectAllButtonLabel": "Επιλογή όλων",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "Βρέθηκαν αποτελέσματα αναζήτησης",
+  "noResultsFound": "Δεν βρέθηκαν αποτελέσματα",
+  "radioButtonUnselectedLabel": "Δεν έχει επιλεγεί"
 }

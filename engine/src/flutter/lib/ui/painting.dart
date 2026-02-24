@@ -3908,58 +3908,124 @@ class _ClampTransform implements _ColorTransform {
   }
 }
 
-class _MatrixColorTransform implements _ColorTransform {
-  /// Row-major.
-  const _MatrixColorTransform(this.values);
+// sRGB standard constants for transfer functions.
+// See https://en.wikipedia.org/wiki/SRGB.
+const double _kSrgbGamma = 2.4;
+const double _kSrgbLinearThreshold = 0.04045;
+const double _kSrgbLinearSlope = 12.92;
+const double _kSrgbEncodedOffset = 0.055;
+const double _kSrgbEncodedDivisor = 1.055;
+const double _kSrgbLinearToEncodedThreshold = 0.0031308;
 
-  final List<double> values;
+/// sRGB electro-optical transfer function (gamma decode to linear).
+double _srgbEOTF(double v) {
+  if (v <= _kSrgbLinearThreshold) {
+    return v / _kSrgbLinearSlope;
+  }
+  return math.pow((v + _kSrgbEncodedOffset) / _kSrgbEncodedDivisor, _kSrgbGamma).toDouble();
+}
+
+/// sRGB opto-electronic transfer function (linear to gamma encode).
+double _srgbOETF(double v) {
+  if (v <= _kSrgbLinearToEncodedThreshold) {
+    return v * _kSrgbLinearSlope;
+  }
+  return _kSrgbEncodedDivisor * math.pow(v, 1.0 / _kSrgbGamma).toDouble() - _kSrgbEncodedOffset;
+}
+
+/// Extended versions that handle negative values by mirroring.
+double _srgbEOTFExtended(double v) {
+  return v < 0.0 ? -_srgbEOTF(-v) : _srgbEOTF(v);
+}
+
+double _srgbOETFExtended(double v) {
+  return v < 0.0 ? -_srgbOETF(-v) : _srgbOETF(v);
+}
+
+/// Display P3 to sRGB 3x3 matrix in linear space.
+/// M = sRGB_XYZ_to_RGB * P3_RGB_to_XYZ
+const List<double> _kP3ToSrgbLinear = <double>[
+  1.2249401,
+  -0.2249402,
+  0.0,
+  -0.0420569,
+  1.0420571,
+  0.0,
+  -0.0196376,
+  -0.0786507,
+  1.0982884,
+];
+
+/// sRGB to Display P3 3x3 matrix in linear space (inverse of [_kP3ToSrgbLinear]).
+const List<double> _kSrgbToP3Linear = <double>[
+  0.8224622,
+  0.1775380,
+  0.0,
+  0.0331942,
+  0.9668058,
+  0.0,
+  0.0170806,
+  0.0723974,
+  0.9105220,
+];
+
+/// Converts Display P3 (gamma-encoded) to extended sRGB (gamma-encoded).
+/// Pipeline: EOTF(decode) -> 3x3 matrix -> OETF(encode).
+class _P3ToSrgbTransform implements _ColorTransform {
+  const _P3ToSrgbTransform();
 
   @override
   Color transform(Color color, ColorSpace resultColorSpace) {
+    final double rLin = _srgbEOTFExtended(color.r);
+    final double gLin = _srgbEOTFExtended(color.g);
+    final double bLin = _srgbEOTFExtended(color.b);
+
+    final double rOut =
+        _kP3ToSrgbLinear[0] * rLin + _kP3ToSrgbLinear[1] * gLin + _kP3ToSrgbLinear[2] * bLin;
+    final double gOut =
+        _kP3ToSrgbLinear[3] * rLin + _kP3ToSrgbLinear[4] * gLin + _kP3ToSrgbLinear[5] * bLin;
+    final double bOut =
+        _kP3ToSrgbLinear[6] * rLin + _kP3ToSrgbLinear[7] * gLin + _kP3ToSrgbLinear[8] * bLin;
+
     return Color.from(
       alpha: color.a,
-      red: values[0] * color.r + values[1] * color.g + values[2] * color.b + values[3],
-      green: values[4] * color.r + values[5] * color.g + values[6] * color.b + values[7],
-      blue: values[8] * color.r + values[9] * color.g + values[10] * color.b + values[11],
+      red: _srgbOETFExtended(rOut),
+      green: _srgbOETFExtended(gOut),
+      blue: _srgbOETFExtended(bOut),
+      colorSpace: resultColorSpace,
+    );
+  }
+}
+
+/// Converts sRGB (gamma-encoded) to Display P3 (gamma-encoded).
+/// Pipeline: EOTF(decode) -> 3x3 matrix -> OETF(encode).
+class _SrgbToP3Transform implements _ColorTransform {
+  const _SrgbToP3Transform();
+
+  @override
+  Color transform(Color color, ColorSpace resultColorSpace) {
+    final double rLin = _srgbEOTFExtended(color.r);
+    final double gLin = _srgbEOTFExtended(color.g);
+    final double bLin = _srgbEOTFExtended(color.b);
+
+    final double rOut =
+        _kSrgbToP3Linear[0] * rLin + _kSrgbToP3Linear[1] * gLin + _kSrgbToP3Linear[2] * bLin;
+    final double gOut =
+        _kSrgbToP3Linear[3] * rLin + _kSrgbToP3Linear[4] * gLin + _kSrgbToP3Linear[5] * bLin;
+    final double bOut =
+        _kSrgbToP3Linear[6] * rLin + _kSrgbToP3Linear[7] * gLin + _kSrgbToP3Linear[8] * bLin;
+
+    return Color.from(
+      alpha: color.a,
+      red: _srgbOETFExtended(rOut),
+      green: _srgbOETFExtended(gOut),
+      blue: _srgbOETFExtended(bOut),
       colorSpace: resultColorSpace,
     );
   }
 }
 
 _ColorTransform _getColorTransform(ColorSpace source, ColorSpace destination) {
-  // The transforms were calculated with the following octave script from known
-  // conversions. These transforms have a white point that matches Apple's.
-  //
-  // p3Colors = [
-  //   1, 0, 0, 0.25;
-  //   0, 1, 0, 0.5;
-  //   0, 0, 1, 0.75;
-  //   1, 1, 1, 1;
-  // ];
-  // srgbColors = [
-  //   1.0930908918380737,  -0.5116420984268188, -0.0003518527664709836, 0.12397786229848862;
-  //   -0.22684034705162048, 1.0182716846466064,  0.00027732315356843174,  0.5073589086532593;
-  //   -0.15007957816123962, -0.31062406301498413, 1.0420056581497192,  0.771118700504303;
-  //   1,       1,       1,       1;
-  // ];
-  //
-  // format long
-  // p3ToSrgb = srgbColors * inv(p3Colors)
-  // srgbToP3 = inv(p3ToSrgb)
-  const srgbToP3 = _MatrixColorTransform(<double>[
-    0.808052267214446, 0.220292047628890, -0.139648846160100,
-    0.145738111193222, //
-    0.096480880462996, 0.916386732581291, -0.086093928394828,
-    0.089490172325882, //
-    -0.127099563510240, -0.068983484963878, 0.735426667591299, 0.233655661600230,
-  ]);
-  const _ColorTransform p3ToSrgb = _MatrixColorTransform(<double>[
-    1.306671048092539, -0.298061942172353, 0.213228303487995,
-    -0.213580156254466, //
-    -0.117390025596251, 1.127722006101976, 0.109727644608938,
-    -0.109450321455370, //
-    0.214813187718391, 0.054268702864647, 1.406898424029350, -0.364892765879631,
-  ]);
   switch (source) {
     case ColorSpace.sRGB:
       switch (destination) {
@@ -3968,7 +4034,7 @@ _ColorTransform _getColorTransform(ColorSpace source, ColorSpace destination) {
         case ColorSpace.extendedSRGB:
           return const _IdentityColorTransform();
         case ColorSpace.displayP3:
-          return srgbToP3;
+          return const _SrgbToP3Transform();
       }
     case ColorSpace.extendedSRGB:
       switch (destination) {
@@ -3977,14 +4043,14 @@ _ColorTransform _getColorTransform(ColorSpace source, ColorSpace destination) {
         case ColorSpace.extendedSRGB:
           return const _IdentityColorTransform();
         case ColorSpace.displayP3:
-          return const _ClampTransform(srgbToP3);
+          return const _ClampTransform(_SrgbToP3Transform());
       }
     case ColorSpace.displayP3:
       switch (destination) {
         case ColorSpace.sRGB:
-          return const _ClampTransform(p3ToSrgb);
+          return const _ClampTransform(_P3ToSrgbTransform());
         case ColorSpace.extendedSRGB:
-          return p3ToSrgb;
+          return const _P3ToSrgbTransform();
         case ColorSpace.displayP3:
           return const _IdentityColorTransform();
       }
@@ -4169,7 +4235,7 @@ class ColorFilter implements ImageFilter {
   }
 
   @override
-  String get _shortDescription {
+  String get debugShortDescription {
     switch (_type) {
       case _kTypeMode:
         return 'ColorFilter.mode($_color, $_blendMode)';
@@ -4266,8 +4332,39 @@ abstract class ImageFilter {
   ImageFilter._(); // ignore: unused_element
 
   /// Creates an image filter that applies a Gaussian blur.
-  factory ImageFilter.blur({double sigmaX = 0.0, double sigmaY = 0.0, TileMode? tileMode}) {
-    return _GaussianBlurImageFilter(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
+  ///
+  /// The `sigma_x` and `sigma_y` are the standard deviation of the Gaussian
+  /// kernel in the X direction and the Y direction, respectively.
+  ///
+  /// The `tile_mode` defines the behavior of sampling pixels at the edges when
+  /// performing a standard, unbounded blur.
+  ///
+  /// The `bounds` argument is optional and enables "bounded blur" mode. When
+  /// `bounds` is non-null, the image filter substitutes transparent black for
+  /// any sample it reads from outside the defined bounding rectangle. The final
+  /// weighted sum is then divided by the total weight of the non-transparent samples
+  /// (the effective alpha), resulting in opaque output.
+  ///
+  /// The bounded mode prevents color bleeding from content adjacent to the
+  /// bounds into the blurred area, and is typically used when the blur must be
+  /// strictly contained within a clipped region, such as for iOS-style frosted
+  /// glass effects.
+  ///
+  /// The `bounds` rectangle is specified in the canvas's current coordinate
+  /// space and is affected by the current transform; consequently, the bounds
+  /// may not be axis-aligned in the final canvas coordinates.
+  factory ImageFilter.blur({
+    double sigmaX = 0.0,
+    double sigmaY = 0.0,
+    TileMode? tileMode,
+    Rect? bounds,
+  }) {
+    return _GaussianBlurImageFilter(
+      sigmaX: sigmaX,
+      sigmaY: sigmaY,
+      tileMode: tileMode,
+      bounds: bounds,
+    );
   }
 
   /// Creates an image filter that dilates each input pixel's channel values
@@ -4307,6 +4404,20 @@ abstract class ImageFilter {
 
   /// Creates an image filter from a [FragmentShader].
   ///
+  /// > [!WARNING]
+  /// > This API is only supported when using the Impeller rendering engine.
+  /// > On other backends, an [UnsupportedError] will be thrown.
+  ///
+  /// > To check at runtime whether this API is supported, use [isShaderFilterSupported].
+  ///
+  /// Example usage:
+  ///
+  /// ```dart
+  /// if (ui.ImageFilter.isShaderFilterSupported) {
+  ///   // Use the filter...
+  /// }
+  /// ```
+  ///
   /// The fragment shader provided here has additional requirements to be used
   /// by the engine for filtering. The first uniform value must be a vec2, this
   /// will be set by the engine to the size of the bound texture. There must
@@ -4342,10 +4453,6 @@ abstract class ImageFilter {
   /// }
   ///
   /// ```
-  ///
-  /// This API is only supported when using the Impeller rendering engine. On
-  /// other backends a [UnsupportedError] will be thrown. To check at runtime
-  /// whether this API is suppored use [isShaderFilterSupported].
   factory ImageFilter.shader(FragmentShader shader) {
     if (!_impellerEnabled) {
       throw UnsupportedError('ImageFilter.shader only supported with Impeller rendering engine.');
@@ -4363,20 +4470,25 @@ abstract class ImageFilter {
       if (invalidSampler) {
         buffer.write('The shader is missing a sampler uniform.\n');
       }
+      throw StateError(buffer.toString());
     }
     return _FragmentShaderImageFilter(shader);
   }
 
   /// Whether [ImageFilter.shader] is supported on the current backend.
+  ///
+  /// > [!WARNING]
+  /// > This property will only return true when the Impeller rendering engine is enabled.
+  /// > Attempting to create an [ImageFilter.shader] when this property is `false` will throw an [UnsupportedError].
   static bool get isShaderFilterSupported => _impellerEnabled;
 
   // Converts this to a native DlImageFilter. See the comments of this method in
   // subclasses for the exact type of DlImageFilter this method converts to.
   _ImageFilter _toNativeImageFilter();
 
-  // The description text to show when the filter is part of a composite
-  // [ImageFilter] created using [ImageFilter.compose].
-  String get _shortDescription;
+  /// The description text to show when the filter is part of a composite
+  /// [ImageFilter] created using [ImageFilter.compose].
+  String get debugShortDescription => toString();
 }
 
 class _MatrixImageFilter implements ImageFilter {
@@ -4391,7 +4503,7 @@ class _MatrixImageFilter implements ImageFilter {
   _ImageFilter _toNativeImageFilter() => nativeFilter;
 
   @override
-  String get _shortDescription => 'matrix($data, $filterQuality)';
+  String get debugShortDescription => 'matrix($data, $filterQuality)';
 
   @override
   String toString() => 'ImageFilter.matrix($data, $filterQuality)';
@@ -4411,11 +4523,17 @@ class _MatrixImageFilter implements ImageFilter {
 }
 
 class _GaussianBlurImageFilter implements ImageFilter {
-  _GaussianBlurImageFilter({required this.sigmaX, required this.sigmaY, required this.tileMode});
+  _GaussianBlurImageFilter({
+    required this.sigmaX,
+    required this.sigmaY,
+    required this.tileMode,
+    this.bounds,
+  });
 
   final double sigmaX;
   final double sigmaY;
   final TileMode? tileMode;
+  final Rect? bounds;
 
   // MakeBlurFilter
   late final _ImageFilter nativeFilter = _ImageFilter.blur(this);
@@ -4438,10 +4556,12 @@ class _GaussianBlurImageFilter implements ImageFilter {
   }
 
   @override
-  String get _shortDescription => 'blur($sigmaX, $sigmaY, $_modeString)';
+  String get debugShortDescription => 'blur($sigmaX, $sigmaY, $_modeString${_boundsString()})';
+
+  String _boundsString() => bounds == null ? '' : ', bounds: $bounds';
 
   @override
-  String toString() => 'ImageFilter.blur($sigmaX, $sigmaY, $_modeString)';
+  String toString() => 'ImageFilter.blur($sigmaX, $sigmaY, $_modeString${_boundsString()})';
 
   @override
   bool operator ==(Object other) {
@@ -4451,11 +4571,12 @@ class _GaussianBlurImageFilter implements ImageFilter {
     return other is _GaussianBlurImageFilter &&
         other.sigmaX == sigmaX &&
         other.sigmaY == sigmaY &&
+        other.bounds == bounds &&
         other.tileMode == tileMode;
   }
 
   @override
-  int get hashCode => Object.hash(sigmaX, sigmaY);
+  int get hashCode => Object.hash(sigmaX, sigmaY, bounds, tileMode);
 }
 
 class _DilateImageFilter implements ImageFilter {
@@ -4469,7 +4590,7 @@ class _DilateImageFilter implements ImageFilter {
   _ImageFilter _toNativeImageFilter() => nativeFilter;
 
   @override
-  String get _shortDescription => 'dilate($radiusX, $radiusY)';
+  String get debugShortDescription => 'dilate($radiusX, $radiusY)';
 
   @override
   String toString() => 'ImageFilter.dilate($radiusX, $radiusY)';
@@ -4497,7 +4618,7 @@ class _ErodeImageFilter implements ImageFilter {
   _ImageFilter _toNativeImageFilter() => nativeFilter;
 
   @override
-  String get _shortDescription => 'erode($radiusX, $radiusY)';
+  String get debugShortDescription => 'erode($radiusX, $radiusY)';
 
   @override
   String toString() => 'ImageFilter.erode($radiusX, $radiusY)';
@@ -4526,11 +4647,11 @@ class _ComposeImageFilter implements ImageFilter {
   _ImageFilter _toNativeImageFilter() => nativeFilter;
 
   @override
-  String get _shortDescription =>
-      '${innerFilter._shortDescription} -> ${outerFilter._shortDescription}';
+  String get debugShortDescription =>
+      '${innerFilter.debugShortDescription} -> ${outerFilter.debugShortDescription}';
 
   @override
-  String toString() => 'ImageFilter.compose(source -> $_shortDescription -> result)';
+  String toString() => 'ImageFilter.compose(source -> $debugShortDescription -> result)';
 
   @override
   bool operator ==(Object other) {
@@ -4557,7 +4678,7 @@ class _FragmentShaderImageFilter implements ImageFilter {
   _ImageFilter _toNativeImageFilter() => nativeFilter;
 
   @override
-  String get _shortDescription => 'shader';
+  String get debugShortDescription => 'shader';
 
   @override
   String toString() => 'ImageFilter.shader(Shader#${shader.hashCode})';
@@ -4588,7 +4709,17 @@ base class _ImageFilter extends NativeFieldWrapperClass1 {
   /// Creates an image filter that applies a Gaussian blur.
   _ImageFilter.blur(_GaussianBlurImageFilter filter) : creator = filter {
     _constructor();
-    _initBlur(filter.sigmaX, filter.sigmaY, filter.tileMode?.index ?? -1);
+    final Rect bounds = filter.bounds ?? Rect.zero;
+    _initBlur(
+      filter.sigmaX,
+      filter.sigmaY,
+      filter.tileMode?.index ?? -1,
+      filter.bounds != null,
+      bounds.left,
+      bounds.top,
+      bounds.right,
+      bounds.bottom,
+    );
   }
 
   /// Creates an image filter that dilates each input pixel's channel values
@@ -4640,11 +4771,19 @@ base class _ImageFilter extends NativeFieldWrapperClass1 {
   @Native<Void Function(Handle)>(symbol: 'ImageFilter::Create')
   external void _constructor();
 
-  @Native<Void Function(Pointer<Void>, Double, Double, Int32)>(
-    symbol: 'ImageFilter::initBlur',
-    isLeaf: true,
-  )
-  external void _initBlur(double sigmaX, double sigmaY, int tileMode);
+  @Native<
+    Void Function(Pointer<Void>, Double, Double, Int32, Bool, Double, Double, Double, Double)
+  >(symbol: 'ImageFilter::initBlur', isLeaf: true)
+  external void _initBlur(
+    double sigmaX,
+    double sigmaY,
+    int tileMode,
+    bool bounded,
+    double boundsLeft,
+    double boundsTop,
+    double boundsRight,
+    double boundsBottom,
+  );
 
   @Native<Void Function(Pointer<Void>, Double, Double)>(
     symbol: 'ImageFilter::initDilate',
@@ -5255,6 +5394,8 @@ base class ImageShader extends Shader {
   external void _dispose();
 }
 
+typedef _UniformFloatInfo = ({int index, int size});
+
 /// An instance of [FragmentProgram] creates [Shader] objects (as used by
 /// [Paint.shader]).
 ///
@@ -5337,7 +5478,13 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
           return true;
         }
 
-        slot._shaderIndex = program._getUniformFloatIndex(slot.name, slot.index);
+        if (!program._hasUniform(slot.name)) {
+          return true;
+        }
+
+        final _UniformFloatInfo info = program._getUniformFloatInfo(slot.name);
+        slot._shaderIndex = info.index + slot.index;
+
         return false;
       });
 
@@ -5352,6 +5499,15 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
       });
 
       return false;
+    });
+  }
+
+  bool _hasUniform(String name) {
+    return _uniformInfo.any((dynamic entryDynamic) {
+      final entry = entryDynamic! as Map<String, Object>;
+      return entry['name'] == name ||
+          (entry['type'] == 'Struct' &&
+              (entry['struct_field_names']! as List<dynamic>).contains(name));
     });
   }
 
@@ -5372,37 +5528,55 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
     }
 
     if (!found) {
-      throw ArgumentError('No uniform named "$name".');
+      if (_hasUniform(name)) {
+        throw ArgumentError('Uniform "$name" is not an image sampler.');
+      } else {
+        throw ArgumentError('No uniform named "$name".');
+      }
     }
     return index;
   }
 
-  int _getUniformFloatIndex(String name, int index) {
-    if (index < 0) {
-      throw ArgumentError('Index `$index` out of bounds for `$name`.');
-    }
-
+  _UniformFloatInfo _getUniformFloatInfo(String name) {
     var offset = 0;
+    var sizeInFloats = 0;
     var found = false;
     const sizeOfFloat = 4;
     for (final Object? entryDynamic in _uniformInfo) {
       final entry = entryDynamic! as Map<String, Object>;
-      final int sizeInFloats = (entry['size'] as int? ?? 0) ~/ sizeOfFloat;
-      if (entry['name'] == name) {
-        if (index + 1 > sizeInFloats) {
-          throw ArgumentError('Index `$index` out of bounds for `$name`.');
-        }
-        found = true;
+      if (found) {
         break;
       }
-      offset += sizeInFloats;
+
+      if (entry['type'] == 'Struct') {
+        final elementNames = entry['struct_field_names']! as List<dynamic>;
+        final elementSizes = entry['struct_field_bytes']! as List<dynamic>;
+
+        for (var i = 0; i < elementNames.length; ++i) {
+          final elementName = elementNames[i]! as String;
+          final elementSize = elementSizes[i]! as int;
+          sizeInFloats = elementSize ~/ sizeOfFloat;
+          if (elementName == name) {
+            found = true;
+            break;
+          }
+          offset += sizeInFloats;
+        }
+      } else {
+        sizeInFloats = (entry['size'] as int? ?? 0) ~/ sizeOfFloat;
+        if (entry['name'] == name) {
+          found = true;
+          break;
+        }
+        offset += sizeInFloats;
+      }
     }
 
     if (!found) {
       throw ArgumentError('No uniform named "$name".');
     }
 
-    return offset + index;
+    return (index: offset, size: sizeInFloats);
   }
 
   @pragma('vm:entry-point')
@@ -5429,6 +5603,10 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
   }
 }
 
+/// A binding into a uniform defined in a shader. Used now to restrict the types
+/// of UniformArrays that can be created.
+sealed class UniformType {}
+
 /// A binding to a uniform of type float. Calling [set] on this object updates
 /// a float uniform's value.
 ///
@@ -5445,7 +5623,7 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
 /// See also:
 ///   [FragmentShader.getUniformFloat] - How [UniformFloatSlot] instances are acquired.
 ///
-base class UniformFloatSlot {
+base class UniformFloatSlot extends UniformType {
   UniformFloatSlot._(this._shader, this.name, this.index, this._shaderIndex);
 
   /// Set the float value of the bound uniform.
@@ -5467,6 +5645,298 @@ base class UniformFloatSlot {
 
   /// The offset into the bound uniform. For example, 1 for `.y` or 2 for `.b`.
   final int index;
+}
+
+/// A binding to a uniform of type vec2. Calling [set] on this object updates
+/// the uniform's value.
+///
+/// Example:
+///
+/// ```dart
+/// void updateShader(ui.FragmentShader shader) {
+///   shader.getUniformVec2('uSize').set(100, 100);
+/// }
+/// ```
+///
+/// See also:
+///   [FragmentShader.getUniformVec2] - How [UniformVec2Slot] instances are acquired.
+///
+base class UniformVec2Slot extends UniformType {
+  UniformVec2Slot._(this._xSlot, this._ySlot);
+
+  /// Set the float value of the bound uniform.
+  void set(double x, double y) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+  }
+
+  final UniformFloatSlot _xSlot, _ySlot;
+}
+
+/// A binding to a uniform of type vec3. Calling [set] on this object updates
+/// the uniform's value.
+///
+/// Example:
+///
+/// ```dart
+/// void updateShader(ui.FragmentShader shader, double time) {
+///   shader.getUniformVec3('uScaledTime').set(time, time*0.1, time*0.01);
+/// }
+/// ```
+///
+/// See also:
+///   [FragmentShader.getUniformVec3] - How [UniformVec3Slot] instances are acquired.
+///
+base class UniformVec3Slot extends UniformType {
+  UniformVec3Slot._(this._xSlot, this._ySlot, this._zSlot);
+
+  /// Set the float value of the bound uniform.
+  void set(double x, double y, double z) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+    _zSlot.set(z);
+  }
+
+  final UniformFloatSlot _xSlot, _ySlot, _zSlot;
+}
+
+/// A binding to a uniform of type vec4. Calling [set] on this object updates
+/// the uniform's value.
+///
+/// Example:
+///
+/// ```dart
+/// void updateShader(ui.FragmentShader shader) {
+///   shader.getUniformVec4('uColor').set(1.0, 0.0, 1.0, 1.0);
+/// }
+/// ```
+///
+/// See also:
+///   [FragmentShader.getUniformVec4] - How [UniformVec4Slot] instances are acquired.
+///
+base class UniformVec4Slot extends UniformType {
+  UniformVec4Slot._(this._xSlot, this._ySlot, this._zSlot, this._wSlot);
+
+  /// Set the float value of the bound uniform.
+  void set(double x, double y, double z, double w) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+    _zSlot.set(z);
+    _wSlot.set(w);
+  }
+
+  final UniformFloatSlot _xSlot, _ySlot, _zSlot, _wSlot;
+}
+
+/// A binding to a uniform of type mat2. Calling [set] on this object updates
+/// the uniform's value.
+///
+/// Example:
+///
+/// ```dart
+/// void updateShader(ui.FragmentShader shader) {
+///   shader.getUniformMat2('uIdentity').set(
+///     1.0, 0.0,
+///     0.0, 1.0
+///   );
+/// }
+/// ```
+///
+/// See also:
+///   [FragmentShader.getUniformMat2] - How [UniformMat2Slot] instances are acquired.
+///
+base class UniformMat2Slot extends UniformType {
+  UniformMat2Slot._(this._m00, this._m01, this._m10, this._m11);
+
+  /// Set the float value of the matrix in row-major order.
+  void set(double m00, double m01, double m10, double m11) {
+    _m00.set(m00);
+    _m01.set(m01);
+    _m10.set(m10);
+    _m11.set(m11);
+  }
+
+  final UniformFloatSlot _m00, _m01, _m10, _m11;
+}
+
+/// A binding to a uniform of type mat3. Calling [set] on this object updates
+/// the uniform's value.
+///
+/// Example:
+///
+/// ```dart
+/// void updateShader(ui.FragmentShader shader) {
+///   shader.getUniformMat3('uIdentity').set(
+///     1.0, 0.0, 0.0,
+///     0.0, 1.0, 0.0,
+///     0.0, 0.0, 1.0
+///   );
+/// }
+/// ```
+///
+/// See also:
+///   [FragmentShader.getUniformMat3] - How [UniformMat3Slot] instances are acquired.
+///
+base class UniformMat3Slot extends UniformType {
+  UniformMat3Slot._(
+    this._m00,
+    this._m01,
+    this._m02,
+    this._m10,
+    this._m11,
+    this._m12,
+    this._m20,
+    this._m21,
+    this._m22,
+  );
+
+  /// Set the float value of the matrix in row-major order.
+  void set(
+    double m00,
+    double m01,
+    double m02,
+    double m10,
+    double m11,
+    double m12,
+    double m20,
+    double m21,
+    double m22,
+  ) {
+    _m00.set(m00);
+    _m01.set(m01);
+    _m02.set(m02);
+    _m10.set(m10);
+    _m11.set(m11);
+    _m12.set(m12);
+    _m20.set(m20);
+    _m21.set(m21);
+    _m22.set(m22);
+  }
+
+  final UniformFloatSlot _m00, _m01, _m02, _m10, _m11, _m12, _m20, _m21, _m22;
+}
+
+/// A binding to a uniform of type mat4. Calling [set] on this object updates
+/// the uniform's value.
+///
+/// Example:
+///
+/// ```dart
+/// void updateShader(ui.FragmentShader shader) {
+///   shader.getUniformMat4('uIdentity').set(
+///     1.0, 0.0, 0.0, 0.0,
+///     0.0, 1.0, 0.0, 0.0,
+///     0.0, 0.0, 1.0, 0.0,
+///     0.0, 0.0, 0.0, 1.0
+///   );
+/// }
+/// ```
+///
+/// See also:
+///   [FragmentShader.getUniformMat4] - How [UniformMat4Slot] instances are acquired.
+///
+
+base class UniformMat4Slot extends UniformType {
+  UniformMat4Slot._(
+    this._m00,
+    this._m01,
+    this._m02,
+    this._m03,
+    this._m10,
+    this._m11,
+    this._m12,
+    this._m13,
+    this._m20,
+    this._m21,
+    this._m22,
+    this._m23,
+    this._m30,
+    this._m31,
+    this._m32,
+    this._m33,
+  );
+
+  /// Set the float value of the matrix in row-major order.
+  void set(
+    double m00,
+    double m01,
+    double m02,
+    double m03,
+    double m10,
+    double m11,
+    double m12,
+    double m13,
+    double m20,
+    double m21,
+    double m22,
+    double m23,
+    double m30,
+    double m31,
+    double m32,
+    double m33,
+  ) {
+    _m00.set(m00);
+    _m01.set(m01);
+    _m02.set(m02);
+    _m03.set(m03);
+    _m10.set(m10);
+    _m11.set(m11);
+    _m12.set(m12);
+    _m13.set(m13);
+    _m20.set(m20);
+    _m21.set(m21);
+    _m22.set(m22);
+    _m23.set(m23);
+    _m30.set(m30);
+    _m31.set(m31);
+    _m32.set(m32);
+    _m33.set(m33);
+  }
+
+  final UniformFloatSlot _m00,
+      _m01,
+      _m02,
+      _m03,
+      _m10,
+      _m11,
+      _m12,
+      _m13,
+      _m20,
+      _m21,
+      _m22,
+      _m23,
+      _m30,
+      _m31,
+      _m32,
+      _m33;
+}
+
+/// An array of bindings to uniforms of the same type T. Access elements via [] and
+/// set them individually.
+/// Example:
+///
+/// ```dart
+/// void updateShader(ui.FragmentShader shader) {
+///   final ui.UniformArray<ui.UniformVec4Slot> colors = shader.getUniformVec4Array('uColorArray');
+///   colors[0].set(1.0, 0.0, 1.0, 0.3);
+/// }
+/// ```
+///
+/// See also:
+///   [FragmentShader.getUniformFloatArray] - How [UniformArray<Float>] instances are acquired.
+///
+class UniformArray<T extends UniformType> {
+  UniformArray._(this._elements);
+
+  /// Access an element of the UniformArray.
+  T operator [](int index) {
+    return _elements[index];
+  }
+
+  /// The number of Uniforms in the UniformArray.
+  int get length => _elements.length;
+
+  final List<T> _elements;
 }
 
 /// A binding to a shader's image sampler. Calling [set] on this object updates
@@ -5519,6 +5989,22 @@ base class FragmentShader extends Shader {
 
   void _reinitialize() {
     _floats = _constructor(_program, _program._uniformFloatCount, _program._samplerCount);
+  }
+
+  List<UniformFloatSlot> _getSlotsForUniform(String name, int size) {
+    final _UniformFloatInfo info = _program._getUniformFloatInfo(name);
+
+    if (info.size != size) {
+      throw ArgumentError('Uniform `$name` has size ${info.size}, not size $size.');
+    }
+
+    final slots = List<UniformFloatSlot>.generate(
+      size,
+      (i) => UniformFloatSlot._(this, name, i, info.index + i),
+    );
+    _slots.removeWhere((WeakReference<UniformFloatSlot> ref) => ref.target == null);
+    _slots.addAll(slots.map((slot) => WeakReference<UniformFloatSlot>(slot)));
+    return slots;
   }
 
   /// Sets the float uniform at [index] to [value].
@@ -5594,11 +6080,381 @@ base class FragmentShader extends Shader {
   /// ```
   UniformFloatSlot getUniformFloat(String name, [int? index]) {
     index ??= 0;
-    final int shaderIndex = _program._getUniformFloatIndex(name, index);
-    final result = UniformFloatSlot._(this, name, index, shaderIndex);
+
+    final _UniformFloatInfo info = _program._getUniformFloatInfo(name);
+
+    IndexError.check(index, info.size, message: 'Index `$index` out of bounds for `$name`.');
+
+    final result = UniformFloatSlot._(this, name, index, info.index + index);
     _slots.removeWhere((WeakReference<UniformFloatSlot> ref) => ref.target == null);
     _slots.add(WeakReference<UniformFloatSlot>(result));
     return result;
+  }
+
+  /// Access the float binding for a vec2 uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform float uScale;
+  /// uniform vec2 uMagnitude;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   shader.getUniformFloat('uScale');
+  ///   shader.getUniformVec2('uMagnitude');
+  /// }
+  /// ```
+  UniformVec2Slot getUniformVec2(String name) {
+    final List<UniformFloatSlot> slots = _getSlotsForUniform(name, 2);
+    return UniformVec2Slot._(slots[0], slots[1]);
+  }
+
+  /// Access the float binding for a vec3 uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform float uScale;
+  /// uniform vec3 uScaledTime;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   shader.getUniformFloat('uScale');
+  ///   shader.getUniformVec3('uScaledTime');
+  /// }
+  /// ```
+  UniformVec3Slot getUniformVec3(String name) {
+    final List<UniformFloatSlot> slots = _getSlotsForUniform(name, 3);
+    return UniformVec3Slot._(slots[0], slots[1], slots[2]);
+  }
+
+  /// Access the float binding for a vec4 uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform float uScale;
+  /// uniform vec4 uColor;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   shader.getUniformFloat('uScale');
+  ///   shader.getUniformVec4('uColor');
+  /// }
+  /// ```
+  UniformVec4Slot getUniformVec4(String name) {
+    final List<UniformFloatSlot> slots = _getSlotsForUniform(name, 4);
+    return UniformVec4Slot._(slots[0], slots[1], slots[2], slots[3]);
+  }
+
+  /// Access the float binding for a mat2 uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform mat2 uIdentity;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   shader.getUniformMat2('uIdentity');
+  /// }
+  /// ```
+  UniformMat2Slot getUniformMat2(String name) {
+    final List<UniformFloatSlot> slots = _getSlotsForUniform(name, 4);
+    return UniformMat2Slot._(slots[0], slots[1], slots[2], slots[3]);
+  }
+
+  /// Access the float binding for a mat3 uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform mat3 uIdentity;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   shader.getUniformMat3('uIdentity');
+  /// }
+  /// ```
+  UniformMat3Slot getUniformMat3(String name) {
+    final List<UniformFloatSlot> slots = _getSlotsForUniform(name, 9);
+    return UniformMat3Slot._(
+      slots[0],
+      slots[1],
+      slots[2],
+      slots[3],
+      slots[4],
+      slots[5],
+      slots[6],
+      slots[7],
+      slots[8],
+    );
+  }
+
+  /// Access the float binding for a mat4 uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform mat4 uIdentity;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   shader.getUniformMat4('uIdentity');
+  /// }
+  /// ```
+  UniformMat4Slot getUniformMat4(String name) {
+    final List<UniformFloatSlot> slots = _getSlotsForUniform(name, 16);
+    return UniformMat4Slot._(
+      slots[0],
+      slots[1],
+      slots[2],
+      slots[3],
+      slots[4],
+      slots[5],
+      slots[6],
+      slots[7],
+      slots[8],
+      slots[9],
+      slots[10],
+      slots[11],
+      slots[12],
+      slots[13],
+      slots[14],
+      slots[15],
+    );
+  }
+
+  UniformArray<T> _getUniformArray<T extends UniformType>(
+    String name,
+    int elementSize,
+    T Function(List<UniformFloatSlot> slots) elementFactory,
+  ) {
+    final _UniformFloatInfo info = _program._getUniformFloatInfo(name);
+
+    if (info.size % elementSize != 0) {
+      throw ArgumentError(
+        'Uniform size (${info.size}) for "$name" is not a multiple of $elementSize.',
+      );
+    }
+    final int numElements = info.size ~/ elementSize;
+
+    final elements = List<T>.generate(numElements, (i) {
+      final slots = List<UniformFloatSlot>.generate(
+        info.size,
+        (j) => UniformFloatSlot._(this, name, j, info.index + i * elementSize + j),
+      );
+      _slots.addAll(slots.map((slot) => WeakReference<UniformFloatSlot>(slot)));
+      return elementFactory(slots);
+    });
+
+    _slots.removeWhere((WeakReference<UniformFloatSlot> ref) => ref.target == null);
+
+    return UniformArray<T>._(elements);
+  }
+
+  /// Access the binding for a float[] uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform float[10] uValues;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   final ui.UniformArray<ui.UniformFloatSlot> values = shader.getUniformFloatArray('uValues');
+  ///   values[2].set(1.0);
+  /// }
+  /// ```
+  UniformArray<UniformFloatSlot> getUniformFloatArray(String name) {
+    return _getUniformArray(name, 1, (components) => components.first);
+  }
+
+  /// Access the binding for a vec2[] uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform vec2[10] uPositions;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   final ui.UniformArray<ui.UniformVec2Slot> positions = shader.getUniformVec2Array('uPositions');
+  ///   positions[2].set(6.0, 7.0);
+  /// }
+  /// ```
+  UniformArray<UniformVec2Slot> getUniformVec2Array(String name) {
+    return _getUniformArray<UniformVec2Slot>(
+      name,
+      2, // 2 floats per element
+      (components) => UniformVec2Slot._(
+        components[0],
+        components[1],
+      ), // Create Vec2 from two UniformFloat components
+    );
+  }
+
+  /// Access the binding for a vec3[] uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform vec3[10] uColors;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   final ui.UniformArray<ui.UniformVec3Slot> colors = shader.getUniformVec3Array('uColors');
+  ///   colors[0].set(1.0, 0.0, 1.0);
+  /// }
+  /// ```
+  UniformArray<UniformVec3Slot> getUniformVec3Array(String name) {
+    return _getUniformArray<UniformVec3Slot>(
+      name,
+      3, // 3 floats per element
+      (components) => UniformVec3Slot._(components[0], components[1], components[2]), // Create Vec3
+    );
+  }
+
+  /// Access the binding for a vec4[] uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform vec4[10] uColors;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   final ui.UniformArray<ui.UniformVec4Slot> colors = shader.getUniformVec4Array('uColors');
+  ///   colors[0].set(1.0, 0.0, 1.0, 0.5);
+  /// }
+  /// ```
+  UniformArray<UniformVec4Slot> getUniformVec4Array(String name) {
+    return _getUniformArray<UniformVec4Slot>(
+      name,
+      4, // 4 floats per element
+      (components) => UniformVec4Slot._(
+        components[0],
+        components[1],
+        components[2],
+        components[3],
+      ), // Create Vec4
+    );
+  }
+
+  /// Access the binding for a mat2[] uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform mat2[10] uMatricies;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   final ui.UniformArray<ui.UniformMat2Slot> mats = shader.getUniformMat2Array('uMatricies');
+  ///   mats[0].set(
+  ///     1.0, 0.0,
+  ///     1.0, 0.5
+  ///   );
+  /// }
+  /// ```
+  UniformArray<UniformMat2Slot> getUniformMat2Array(String name) {
+    return _getUniformArray<UniformMat2Slot>(
+      name,
+      4,
+      (components) => UniformMat2Slot._(components[0], components[1], components[2], components[3]),
+    );
+  }
+
+  /// Access the binding for a mat3[] uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform mat3[10] uMatricies;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   final ui.UniformArray<ui.UniformMat3Slot> mats = shader.getUniformMat3Array('uMatricies');
+  ///   mats[0].set(
+  ///     1.0, 0.0, 0.0,
+  ///     1.0, 0.5, 0.0,
+  ///     1.0, 0.3, 1.2
+  ///   );
+  /// }
+  /// ```
+  UniformArray<UniformMat3Slot> getUniformMat3Array(String name) {
+    return _getUniformArray<UniformMat3Slot>(
+      name,
+      9,
+      (components) => UniformMat3Slot._(
+        components[0],
+        components[1],
+        components[2],
+        components[3],
+        components[4],
+        components[5],
+        components[6],
+        components[7],
+        components[8],
+      ),
+    );
+  }
+
+  /// Access the binding for a mat4[] uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform mat4[10] uMatricies;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   final ui.UniformArray<ui.UniformMat4Slot> mats = shader.getUniformMat4Array('uMatricies');
+  ///   mats[0].set(
+  ///     1.0, 0.0, 0.0, 1.0,
+  ///     1.0, 0.5, 0.0, 0.4,
+  ///     1.0, 0.3, 1.2, 0.2,
+  ///     0.0, 0.0, 1.0, 0.3,
+  ///   );
+  /// }
+  /// ```
+  UniformArray<UniformMat4Slot> getUniformMat4Array(String name) {
+    return _getUniformArray<UniformMat4Slot>(
+      name,
+      16, // 4 floats per element
+      (components) => UniformMat4Slot._(
+        components[0],
+        components[1],
+        components[2],
+        components[3],
+        components[4],
+        components[5],
+        components[6],
+        components[7],
+        components[8],
+        components[9],
+        components[10],
+        components[11],
+        components[12],
+        components[13],
+        components[14],
+        components[15],
+      ),
+    );
   }
 
   /// Access the [ImageSamplerSlot] binding associated with the sampler named

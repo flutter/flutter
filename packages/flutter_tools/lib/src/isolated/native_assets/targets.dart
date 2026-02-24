@@ -69,6 +69,8 @@ sealed class AssetBuildTarget {
         return _linuxTarget(supportedAssetTypes, Architecture.x64);
       case TargetPlatform.linux_arm64:
         return _linuxTarget(supportedAssetTypes, Architecture.arm64);
+      case TargetPlatform.linux_riscv64:
+        return _linuxTarget(supportedAssetTypes, Architecture.riscv64);
       case TargetPlatform.windows_arm64:
         return _windowsTarget(supportedAssetTypes, Architecture.arm64);
       case TargetPlatform.darwin:
@@ -402,6 +404,7 @@ List<AndroidArch> _androidArchs(TargetPlatform targetPlatform, String? androidAr
     case TargetPlatform.fuchsia_x64:
     case TargetPlatform.ios:
     case TargetPlatform.linux_arm64:
+    case TargetPlatform.linux_riscv64:
     case TargetPlatform.linux_x64:
     case TargetPlatform.tester:
     case TargetPlatform.web_javascript:

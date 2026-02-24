@@ -349,4 +349,11 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/166382
   Switch(activeColor: Colors.red, value: false, onChanged: null);
   SwitchListTile(activeColor: Colors.red, value: false, onChanged: null);
+
+  // Changes made in https://github.com/flutter/flutter/pull/179776
+  PageTransitionsTheme(
+    builders: <TargetPlatform, PageTransitionsBuilder>{
+      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+    },
+  );
 }

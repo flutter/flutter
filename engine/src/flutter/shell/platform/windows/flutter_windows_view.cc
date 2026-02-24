@@ -105,9 +105,15 @@ FlutterWindowsView::FlutterWindowsView(
     FlutterViewId view_id,
     FlutterWindowsEngine* engine,
     std::unique_ptr<WindowBindingHandler> window_binding,
+    bool is_sized_to_content,
+    const BoxConstraints& box_constraints,
+    FlutterWindowsViewSizingDelegate* sizing_delegate,
     std::shared_ptr<WindowsProcTable> windows_proc_table)
     : view_id_(view_id),
       engine_(engine),
+      is_sized_to_content_(is_sized_to_content),
+      box_constraints_(box_constraints),
+      sizing_delegate_(sizing_delegate),
       windows_proc_table_(std::move(windows_proc_table)) {
   if (windows_proc_table_ == nullptr) {
     windows_proc_table_ = std::make_shared<WindowsProcTable>();
@@ -154,6 +160,15 @@ bool FlutterWindowsView::OnFrameGenerated(size_t width, size_t height) {
   // Called on the raster thread.
   std::unique_lock<std::mutex> lock(resize_mutex_);
 
+  if (IsSizedToContent()) {
+    if (!ResizeRenderSurface(width, height)) {
+      return false;
+    }
+
+    sizing_delegate_->DidUpdateViewSize(width, height);
+    return true;
+  }
+
   if (surface_ == nullptr || !surface_->IsValid()) {
     return false;
   }
@@ -185,6 +200,11 @@ void FlutterWindowsView::ForceRedraw() {
 
 // Called on the platform thread.
 bool FlutterWindowsView::OnWindowSizeChanged(size_t width, size_t height) {
+  if (IsSizedToContent()) {
+    // No resize synchronization needed for views sized to content.
+    return true;
+  }
+
   if (!engine_->egl_manager()) {
     SendWindowMetrics(width, height, binding_handler_->GetDpiScale());
     return true;
@@ -374,6 +394,16 @@ void FlutterWindowsView::SendWindowMetrics(size_t width,
   event.struct_size = sizeof(event);
   event.width = width;
   event.height = height;
+  event.has_constraints = true;
+  auto const constraints = GetConstraints();
+  event.min_width_constraint =
+      static_cast<size_t>(constraints.smallest().width());
+  event.min_height_constraint =
+      static_cast<size_t>(constraints.smallest().height());
+  event.max_width_constraint =
+      static_cast<size_t>(constraints.biggest().width());
+  event.max_height_constraint =
+      static_cast<size_t>(constraints.biggest().height());
   event.pixel_ratio = pixel_ratio;
   event.display_id = display_id;
   event.view_id = view_id_;
@@ -389,6 +419,16 @@ FlutterWindowMetricsEvent FlutterWindowsView::CreateWindowMetricsEvent() const {
   event.struct_size = sizeof(event);
   event.width = bounds.width;
   event.height = bounds.height;
+  auto constraints = GetConstraints();
+  event.has_constraints = true;
+  event.min_width_constraint =
+      static_cast<size_t>(constraints.smallest().width());
+  event.min_height_constraint =
+      static_cast<size_t>(constraints.smallest().height());
+  event.max_width_constraint =
+      static_cast<size_t>(constraints.biggest().width());
+  event.max_height_constraint =
+      static_cast<size_t>(constraints.biggest().height());
   event.pixel_ratio = pixel_ratio;
   event.display_id = display_id;
   event.view_id = view_id_;
@@ -846,6 +886,30 @@ bool FlutterWindowsView::NeedsVsync() const {
   // the system itself synchronizes with vsync.
   // See: https://learn.microsoft.com/windows/win32/dwm/composition-ovw
   return !windows_proc_table_->DwmIsCompositionEnabled();
+}
+
+bool FlutterWindowsView::IsSizedToContent() const {
+  return is_sized_to_content_;
+}
+
+BoxConstraints FlutterWindowsView::GetConstraints() const {
+  if (!is_sized_to_content_) {
+    PhysicalWindowBounds bounds = binding_handler_->GetPhysicalWindowBounds();
+    return BoxConstraints(Size(bounds.width, bounds.height),
+                          Size(bounds.width, bounds.height));
+  }
+
+  Size smallest = box_constraints_.smallest();
+  Size biggest = box_constraints_.biggest();
+  if (sizing_delegate_) {
+    auto const work_area = sizing_delegate_->GetWorkArea();
+    double const width = std::min(static_cast<double>(work_area.width),
+                                  box_constraints_.biggest().width());
+    double const height = std::min(static_cast<double>(work_area.height),
+                                   box_constraints_.biggest().height());
+    biggest = Size(width, height);
+  }
+  return BoxConstraints(smallest, biggest);
 }
 
 }  // namespace flutter

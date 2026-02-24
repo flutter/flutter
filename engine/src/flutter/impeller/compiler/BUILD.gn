@@ -71,6 +71,7 @@ impeller_component("compiler_lib") {
     "../runtime_stage",
     "//flutter/fml",
     "//flutter/impeller/shader_bundle:shader_bundle_flatbuffers",
+    "//flutter/skia",
 
     # All third_party deps must be included by the global license script.
     "//third_party/inja",

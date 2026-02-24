@@ -336,6 +336,40 @@ void main() {
     expect(columnRect.right, 100.0);
   });
 
+  testWidgets('ExpansionTile expandedAlignment with directional test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Material(
+            child: Center(
+              child: ExpansionTile(
+                title: Text('title'),
+                expandedAlignment: AlignmentDirectional.topEnd,
+                children: <Widget>[
+                  SizedBox(height: 100, width: 100),
+                  SizedBox(height: 100, width: 80),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    final Rect columnRect = tester.getRect(find.byType(Column).last);
+
+    // The expandedAlignment is used to define the alignment of the Column widget in
+    // expanded tile, not the alignment of the children inside the Column.
+    expect(columnRect.left, 0.0);
+    // The width of the Column is the width of the largest child. The largest width
+    // being 100.0, the offset of the right edge of Column from X-axis should be 100.0.
+    expect(columnRect.right, 100.0);
+  });
+
   testWidgets('ExpansionTile expandedCrossAxisAlignment test', (WidgetTester tester) async {
     const child0Key = Key('child0');
     const child1Key = Key('child1');
@@ -378,6 +412,57 @@ void main() {
 
     // Considering the value of expandedCrossAxisAlignment is CrossAxisAlignment.start,
     // the offset of the left edge of both the children from X-axis should be 700.0.
+    expect(child0Rect.left, 700.0);
+    expect(child1Rect.left, 700.0);
+  });
+
+  testWidgets('ExpansionTile expandedCrossAxisAlignment with directional expandedAlignment test', (
+    WidgetTester tester,
+  ) async {
+    const child0Key = Key('child0');
+    const child1Key = Key('child1');
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Material(
+            child: Center(
+              child: ExpansionTile(
+                title: Text('title'),
+                // Set the column's alignment to AlignmentDirectional.centerStart to test CrossAxisAlignment
+                // of children widgets. This helps distinguish the effect of expandedAlignment
+                // and expandedCrossAxisAlignment later in the test.
+                expandedAlignment: AlignmentDirectional.centerStart,
+                expandedCrossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
+                  SizedBox(height: 100, width: 100, key: child0Key),
+                  SizedBox(height: 100, width: 80, key: child1Key),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    final Rect columnRect = tester.getRect(find.byType(Column).last);
+    final Rect child0Rect = tester.getRect(find.byKey(child0Key));
+    final Rect child1Rect = tester.getRect(find.byKey(child1Key));
+
+    // With `textDirection` set to `TextDirection.rtl`, `AlignmentDirectional.centerStart`
+    // resolves to `Alignment.centerRight`. The column of children should be aligned to the
+    // center right of the expanded tile.
+    expect(columnRect.right, 800.0);
+    // The width of the Column is the width of the largest child. The largest width
+    // being 100.0, the offset of the left edge of Column from X-axis should be 700.0.
+    expect(columnRect.left, 700.0);
+
+    // With `textDirection` set to `TextDirection.rtl`, `CrossAxisAlignment.end` aligns children to the left.
+    // The offset of the left edge of both children from the X-axis should be 700.0.
     expect(child0Rect.left, 700.0);
     expect(child1Rect.left, 700.0);
   });
@@ -809,7 +894,10 @@ void main() {
       // The announcement should be the opposite of the current state.
       // The ExpansionTile is expanded, so the announcement should be
       // "Expanded".
-      expect(tester.takeAnnouncements().first.message, localizations.collapsedHint);
+      expect(
+        tester.takeAnnouncements().first,
+        isAccessibilityAnnouncement(localizations.collapsedHint),
+      );
 
       // Tap the title to collapse ExpansionTile.
       await tester.tap(find.text('Title'));
@@ -818,11 +906,17 @@ void main() {
       // The announcement should be the opposite of the current state.
       // The ExpansionTile is collapsed, so the announcement should be
       // "Collapsed".
-      expect(tester.takeAnnouncements().first.message, localizations.expandedHint);
+      expect(
+        tester.takeAnnouncements().first,
+        isAccessibilityAnnouncement(localizations.expandedHint),
+      );
       handle.dispose();
     },
-    // [intended] https://github.com/flutter/flutter/issues/122101.
-    skip: defaultTargetPlatform == TargetPlatform.iOS,
+    // [intended] iOS: https://github.com/flutter/flutter/issues/122101.
+    // android: https://github.com/flutter/flutter/issues/165510
+    skip:
+        defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.android,
   );
 
   // This is a regression test for https://github.com/flutter/flutter/issues/132264.
@@ -849,13 +943,19 @@ void main() {
       await tester.tap(find.text('Title'));
       await tester.pump(const Duration(seconds: 1)); // Wait for the announcement to be made.
 
-      expect(tester.takeAnnouncements().first.message, localizations.collapsedHint);
+      expect(
+        tester.takeAnnouncements().first,
+        isAccessibilityAnnouncement(localizations.collapsedHint),
+      );
 
       // Tap the title to collapse ExpansionTile.
       await tester.tap(find.text('Title'));
       await tester.pump(const Duration(seconds: 1)); // Wait for the announcement to be made.
 
-      expect(tester.takeAnnouncements().first.message, localizations.expandedHint);
+      expect(
+        tester.takeAnnouncements().first,
+        isAccessibilityAnnouncement(localizations.expandedHint),
+      );
       handle.dispose();
     },
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
@@ -1905,7 +2005,7 @@ void main() {
   );
 
   // Regression test for https://github.com/flutter/flutter/issues/173060
-  group('Semantics tests for non-iOS/macOS platforms', () {
+  group('Semantics tests for non-iOS/macOS/android platforms', () {
     testWidgets(
       'Semantics hint should show current state',
       (WidgetTester tester) async {
@@ -1995,6 +2095,67 @@ void main() {
         TargetPlatform.linux,
         TargetPlatform.windows,
       }),
+    );
+  });
+  group('Semantics tests for android platform', () {
+    testWidgets(
+      'Semantics liveregion updates when expansion state changes',
+      (WidgetTester tester) async {
+        final SemanticsHandle handle = tester.ensureSemantics();
+        const localizations = DefaultMaterialLocalizations();
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Material(
+              child: ExpansionTile(title: Text('Test Tile'), children: <Widget>[Text('Child')]),
+            ),
+          ),
+        );
+
+        // Initially collapsed - live region label is "Collapsed".
+
+        SemanticsNode liveRegionSemantics = tester.getSemantics(
+          find.ancestor(
+            of: find.byType(ListTile),
+            matching: find.byWidgetPredicate(
+              (Widget widget) => widget is Semantics && (widget.properties.liveRegion ?? false),
+            ),
+          ),
+        );
+        expect(liveRegionSemantics.label, localizations.expandedHint);
+
+        // Tap to expand.
+        await tester.tap(find.text('Test Tile'));
+        await tester.pumpAndSettle();
+
+        // Now expanded - should show "Expanded".
+        liveRegionSemantics = tester.getSemantics(
+          find.ancestor(
+            of: find.byType(ListTile),
+            matching: find.byWidgetPredicate(
+              (Widget widget) => widget is Semantics && (widget.properties.liveRegion ?? false),
+            ),
+          ),
+        );
+        expect(liveRegionSemantics.label, localizations.collapsedHint);
+
+        // Tap to collapse.
+        await tester.tap(find.text('Test Tile'));
+        await tester.pumpAndSettle();
+
+        // Back to collapsed - should show "Collapsed" again.
+        liveRegionSemantics = tester.getSemantics(
+          find.ancestor(
+            of: find.byType(ListTile),
+            matching: find.byWidgetPredicate(
+              (Widget widget) => widget is Semantics && (widget.properties.liveRegion ?? false),
+            ),
+          ),
+        );
+        expect(liveRegionSemantics.label, localizations.expandedHint);
+
+        handle.dispose();
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
     );
   });
 }

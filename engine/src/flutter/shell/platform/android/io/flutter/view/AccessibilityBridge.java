@@ -1109,18 +1109,35 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
     result.setCheckable(hasCheckedState || hasToggledState);
     if (hasCheckedState) {
-      result.setChecked(semanticsNode.hasFlag(Flag.IS_CHECKED));
       if (semanticsNode.hasFlag(Flag.IS_IN_MUTUALLY_EXCLUSIVE_GROUP)) {
         result.setClassName("android.widget.RadioButton");
       } else {
         result.setClassName("android.widget.CheckBox");
       }
+      // Starting on API level 36, setChecked takes int instead.
+      if (Build.VERSION.SDK_INT >= API_LEVELS.API_36) {
+        result.setChecked(
+            semanticsNode.hasFlag(Flag.IS_CHECK_STATE_MIXED)
+                ? AccessibilityNodeInfo.CHECKED_STATE_PARTIAL
+                : semanticsNode.hasFlag(Flag.IS_CHECKED)
+                    ? AccessibilityNodeInfo.CHECKED_STATE_TRUE
+                    : AccessibilityNodeInfo.CHECKED_STATE_FALSE);
+      } else {
+        result.setChecked(semanticsNode.hasFlag(Flag.IS_CHECKED));
+      }
     } else if (hasToggledState) {
-      result.setChecked(semanticsNode.hasFlag(Flag.IS_TOGGLED));
       result.setClassName("android.widget.Switch");
+      // Starting on API level 36, setChecked takes int instead.
+      if (Build.VERSION.SDK_INT >= API_LEVELS.API_36) {
+        result.setChecked(
+            semanticsNode.hasFlag(Flag.IS_TOGGLED)
+                ? AccessibilityNodeInfo.CHECKED_STATE_TRUE
+                : AccessibilityNodeInfo.CHECKED_STATE_FALSE);
+      } else {
+        result.setChecked(semanticsNode.hasFlag(Flag.IS_TOGGLED));
+      }
     }
     result.setSelected(semanticsNode.hasFlag(Flag.IS_SELECTED));
-
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_36) {
       if (semanticsNode.hasFlag(Flag.HAS_EXPANDED_STATE)) {
         final boolean isExpanded = semanticsNode.hasFlag(Flag.IS_EXPANDED);
@@ -1174,12 +1191,13 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         //
         // See the case above for how virtual displays are handled.
         if (!platformViewsAccessibilityDelegate.usesVirtualDisplay(child.platformViewId)) {
-          assert embeddedView != null;
-          // The embedded view is initially marked as not important at creation in the platform
-          // view controller, so we must explicitly mark it as important here.
-          embeddedView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
-          result.addChild(embeddedView);
-          continue;
+          if (embeddedView != null) {
+            // The embedded view is initially marked as not important at creation in the platform
+            // view controller, so we must explicitly mark it as important here.
+            embeddedView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+            result.addChild(embeddedView);
+            continue;
+          }
         }
       }
       result.addChild(rootAccessibilityView, child.id);
@@ -2373,7 +2391,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     REDUCE_MOTION(1 << 4), // NOT SUPPORTED
     HIGH_CONTRAST(1 << 5), // NOT SUPPORTED
     ON_OFF_SWITCH_LABELS(1 << 6), // NOT SUPPORTED
-    NO_ANNOUNCE(1 << 7);
+    NO_ANNOUNCE(1 << 7),
+    NO_AUTO_PLAY_ANIMATED_IMAGES(1 << 8), // NOT SUPPORTED
+    NO_AUTO_PLAY_VIDEOS(1 << 9), // NOT SUPPORTED
+    DETERMINISTIC_CURSOR(1 << 10); // NOT SUPPORTED
 
     final int value;
 

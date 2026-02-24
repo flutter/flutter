@@ -80,6 +80,7 @@ void main() {
           webRenderer: WebRendererMode.canvaskit,
           useLocalCanvasKit: false,
           fileSystem: globals.fs,
+          logger: logger,
         );
         releaseAssetServer = ReleaseAssetServer(
           globals.fs.file('main.dart').uri,
@@ -352,6 +353,7 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
+        logger: logger,
       );
 
       expect(webAssetServer.basePath, 'foo/bar');
@@ -376,6 +378,7 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
+        logger: logger,
       );
 
       // Defaults to "/" when there's no base element.
@@ -402,6 +405,7 @@ void main() {
           webRenderer: WebRendererMode.canvaskit,
           useLocalCanvasKit: false,
           fileSystem: globals.fs,
+          logger: logger,
         ),
         throwsToolExit(),
       );
@@ -427,6 +431,7 @@ void main() {
           webRenderer: WebRendererMode.canvaskit,
           useLocalCanvasKit: false,
           fileSystem: globals.fs,
+          logger: logger,
         ),
         throwsToolExit(),
       );
@@ -500,6 +505,7 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: true,
         fileSystem: globals.fs,
+        logger: logger,
       );
 
       final Response response = await webAssetServer.handleRequest(
@@ -1455,6 +1461,64 @@ void main() {
   );
 
   test(
+    'ReleaseAssetServer does not serve files outside of the project',
+    () => testbed.run(() async {
+      const testHomePath = '/home/user';
+      const testFlutterRoot = '/home/user/flutter';
+      const testProjectPath = '/home/user/project';
+      const testWebBuildPath = '/home/user/project/build/web';
+
+      final platform = FakePlatform();
+      platform.environment = <String, String>{'HOME': testHomePath};
+
+      // The secret file that should not be accessible.
+      globals.fs.directory(testHomePath).childFile('secret.txt')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('top secret');
+
+      // The index.html file of the project.
+      globals.fs.directory(testWebBuildPath).childFile('index.html')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('<html><body>Test</body></html>');
+
+      // Set current directory to the project path.
+      globals.fs.currentDirectory = globals.fs.directory(testProjectPath)
+        ..createSync(recursive: true);
+
+      final server = ReleaseAssetServer(
+        globals.fs.directory(testProjectPath).childFile('main.dart').uri,
+        fileSystem: globals.fs,
+        platform: platform,
+        flutterRoot: testFlutterRoot,
+        webBuildDirectory: testWebBuildPath,
+        needsCoopCoep: false,
+      );
+
+      final possibleSecretPaths = <String>[
+        // A direct path in the home directory.
+        'secret.txt',
+        // A relative path that escapes the project directory.
+        '../secret.txt',
+        '../../user/secret.txt',
+        // An absolute path.
+        '/home/user/secret.txt',
+      ];
+
+      for (final path in possibleSecretPaths) {
+        final Response response = await server.handle(
+          Request('GET', Uri.parse('http://foobar/$path')),
+        );
+        expect(response.statusCode, 200, reason: 'Path "$path" should return 200 and index.html');
+        expect(
+          await response.readAsString(),
+          '<html><body>Test</body></html>',
+          reason: 'Path "$path" should return 200 and index.html',
+        );
+      }
+    }, overrides: <Type, Generator>{Platform: () => linux}),
+  );
+
+  test(
     'WebAssetServer strips leading base href off of asset requests',
     () => testbed.run(() async {
       const htmlContent = '<html><head><base href="/foo/"></head><body id="test"></body></html>';
@@ -1472,6 +1536,7 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
+        logger: logger,
       );
 
       expect(await webAssetServer.metadataContents('foo/main_module.ddc_merged_metadata'), null);
@@ -1535,6 +1600,208 @@ void main() {
 
       await webDevFS.destroy();
     }, overrides: <Type, Generator>{Artifacts: () => Artifacts.test()}),
+  );
+
+  test(
+    'WebAssetServer serves index.html without user defined web-define variables',
+    () => testbed.run(() async {
+      // Simple test case with no custom variables - should work like before
+      globals.fs.file(
+          globals.fs.path.join(
+            globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+            'flutter.js',
+          ),
+        )
+        ..createSync(recursive: true)
+        ..writeAsStringSync('flutter.js content');
+
+      final webAssetServer = WebAssetServer(
+        FakeHttpServer(),
+        PackageConfig.empty,
+        InternetAddress.anyIPv4,
+        <String, String>{},
+        <String, String>{},
+        usesDdcModuleSystem,
+        canaryFeatures,
+        webRenderer: WebRendererMode.canvaskit,
+        useLocalCanvasKit: false,
+        fileSystem: globals.fs,
+        logger: logger,
+      );
+
+      final Response response = await webAssetServer.handleRequest(
+        Request('GET', Uri.parse('http://foobar/')),
+      );
+      expect(response.statusCode, 200);
+    }),
+  );
+
+  test(
+    'WebAssetServer warns for missing user defined web-define variables in index.html',
+    () => testbed.run(() async {
+      const htmlContent = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test</title>
+  <base href="/">
+</head>
+<body>
+  <script>
+    const apiUrl = '{{MISSING_VAR}}';
+  </script>
+</body>
+</html>''';
+
+      globals.fs.currentDirectory.childDirectory('web').childFile('index.html')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(htmlContent);
+
+      globals.fs.file(
+          globals.fs.path.join(
+            globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+            'flutter.js',
+          ),
+        )
+        ..createSync(recursive: true)
+        ..writeAsStringSync('flutter.js content');
+
+      final webAssetServer = WebAssetServer(
+        FakeHttpServer(),
+        PackageConfig.empty,
+        InternetAddress.anyIPv4,
+        <String, String>{},
+        <String, String>{},
+        usesDdcModuleSystem,
+        canaryFeatures,
+        webRenderer: WebRendererMode.canvaskit,
+        useLocalCanvasKit: false,
+        fileSystem: globals.fs,
+        webDefines: <String, String>{}, // Empty webDefines
+        logger: logger,
+      );
+
+      final Response response = await webAssetServer.handleRequest(
+        Request('GET', Uri.parse('http://foobar/')),
+      );
+
+      expect(response.statusCode, HttpStatus.ok);
+      // Verify the placeholder is preserved
+      expect(await response.readAsString(), contains("const apiUrl = '{{MISSING_VAR}}';"));
+      expect(logger.warningText, contains('Missing web-define variable: MISSING_VAR'));
+    }),
+  );
+
+  test(
+    'WebAssetServer logs warning for multiple missing web-define variables in index.html',
+    () => testbed.run(() async {
+      const htmlContent = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test</title>
+  <base href="/">
+</head>
+<body>
+  <script>
+    const apiUrl = '{{MISSING_VAR_1}}';
+    const apiKey = '{{MISSING_VAR_2}}';
+  </script>
+</body>
+</html>''';
+
+      globals.fs.currentDirectory.childDirectory('web').childFile('index.html')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(htmlContent);
+
+      globals.fs.file(
+          globals.fs.path.join(
+            globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+            'flutter.js',
+          ),
+        )
+        ..createSync(recursive: true)
+        ..writeAsStringSync('flutter.js content');
+
+      final webAssetServer = WebAssetServer(
+        FakeHttpServer(),
+        PackageConfig.empty,
+        InternetAddress.anyIPv4,
+        <String, String>{},
+        <String, String>{},
+        usesDdcModuleSystem,
+        canaryFeatures,
+        webRenderer: WebRendererMode.canvaskit,
+        useLocalCanvasKit: false,
+        fileSystem: globals.fs,
+        webDefines: <String, String>{}, // Empty webDefines
+        logger: logger,
+      );
+
+      final Response response = await webAssetServer.handleRequest(
+        Request('GET', Uri.parse('http://foobar/')),
+      );
+
+      expect(response.statusCode, HttpStatus.ok);
+      // Verify the placeholders are preserved
+      final String responseBody = await response.readAsString();
+      expect(responseBody, contains("const apiUrl = '{{MISSING_VAR_1}}';"));
+      expect(responseBody, contains("const apiKey = '{{MISSING_VAR_2}}';"));
+      expect(
+        logger.warningText,
+        contains('Missing web-define variables: MISSING_VAR_1, MISSING_VAR_2'),
+      );
+    }),
+  );
+
+  test(
+    'WebAssetServer serves flutter_bootstrap.js with web-define variables',
+    () => testbed.run(() async {
+      const bootstrapContent = '''
+// Flutter bootstrap script
+const config = {
+  api: '{{API_URL}}',
+  debug: {{DEBUG_MODE}}
+};
+''';
+
+      globals.fs.currentDirectory.childDirectory('web').childFile('flutter_bootstrap.js')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(bootstrapContent);
+
+      globals.fs.file(
+          globals.fs.path.join(
+            globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+            'flutter.js',
+          ),
+        )
+        ..createSync(recursive: true)
+        ..writeAsStringSync('flutter.js content');
+
+      final webAssetServer = WebAssetServer(
+        FakeHttpServer(),
+        PackageConfig.empty,
+        InternetAddress.anyIPv4,
+        <String, String>{},
+        <String, String>{},
+        usesDdcModuleSystem,
+        canaryFeatures,
+        webRenderer: WebRendererMode.canvaskit,
+        useLocalCanvasKit: false,
+        fileSystem: globals.fs,
+        webDefines: <String, String>{'API_URL': 'https://test.api.com', 'DEBUG_MODE': 'true'},
+        logger: logger,
+      );
+
+      final Response response = await webAssetServer.handleRequest(
+        Request('GET', Uri.parse('http://foobar/flutter_bootstrap.js')),
+      );
+      expect(response.statusCode, 200);
+
+      final String body = await response.readAsString();
+      expect(body, contains("api: 'https://test.api.com'"));
+      expect(body, contains('debug: true'));
+    }),
   );
 }
 

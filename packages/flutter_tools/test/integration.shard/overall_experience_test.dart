@@ -317,49 +317,69 @@ void main() {
         logging: false,
       );
       expect(result.exitCode, 0);
-      expect(result.stdout, <Object>[
-        startsWith('Performing hot reload...'),
-        '',
-        '══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════',
-        'The following assertion was thrown during layout:',
-        'A RenderFlex overflowed by 69200 pixels on the right.',
-        '',
-        'The relevant error-causing widget was:',
-        matches(RegExp(r'^  Row.+/dev/integration_tests/ui/lib/overflow\.dart:32:18$')),
-        '',
-        'To inspect this widget in Flutter DevTools, visit:',
-        startsWith('http'),
-        '',
-        'The overflowing RenderFlex has an orientation of Axis.horizontal.',
-        'The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and',
-        'black striped pattern. This is usually caused by the contents being too big for the RenderFlex.',
-        'Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the',
-        'RenderFlex to fit within the available space instead of being sized to their natural size.',
-        'This is considered an error condition because it indicates that there is content that cannot be',
-        'seen. If the content is legitimately bigger than the available space, consider clipping it with a',
-        'ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,',
-        'like a ListView.',
-        matches(RegExp(r'^The specific RenderFlex in question is: RenderFlex#..... OVERFLOWING:$')),
-        startsWith('  creator: Row ← Test ← '),
-        contains(' ← '),
-        endsWith(' ⋯'),
-        '  parentData: <none> (can use size)',
-        '  constraints: BoxConstraints(w=800.0, h=600.0)',
-        '  size: Size(800.0, 600.0)',
-        '  direction: horizontal',
-        '  mainAxisAlignment: start',
-        '  mainAxisSize: max',
-        '  crossAxisAlignment: center',
-        '  textDirection: ltr',
-        '  verticalDirection: down',
-        '  spacing: 0.0',
-        '◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤',
-        '════════════════════════════════════════════════════════════════════════════════════════════════════',
-        '',
-        startsWith('Reloaded 0 libraries in '),
-        '',
-        'Application finished.',
-      ]);
+
+      List<Object> expectedStdout({required bool wrapRow}) {
+        return <Object>[
+          startsWith('Performing hot reload...'),
+          '',
+          '══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════',
+          'The following assertion was thrown during layout:',
+          'A RenderFlex overflowed by 69200 pixels on the right.',
+          '',
+          'The relevant error-causing widget was:',
+          if (wrapRow) ...[
+            '  Row',
+            matches(RegExp(r'^  Row:.+/dev/integration_tests/ui/lib/overflow\.dart:32:18$')),
+          ] else
+            matches(RegExp(r'^  Row Row:.+/dev/integration_tests/ui/lib/overflow\.dart:32:18$')),
+          '',
+          'To inspect this widget in Flutter DevTools, visit:',
+          startsWith('http'),
+          '',
+          'The overflowing RenderFlex has an orientation of Axis.horizontal.',
+          'The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and',
+          'black striped pattern. This is usually caused by the contents being too big for the RenderFlex.',
+          'Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the',
+          'RenderFlex to fit within the available space instead of being sized to their natural size.',
+          'This is considered an error condition because it indicates that there is content that cannot be',
+          'seen. If the content is legitimately bigger than the available space, consider clipping it with a',
+          'ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,',
+          'like a ListView.',
+          matches(
+            RegExp(r'^The specific RenderFlex in question is: RenderFlex#..... OVERFLOWING:$'),
+          ),
+          startsWith('  creator: Row ← Test ← '),
+          contains(' ← '),
+          endsWith(' ⋯'),
+          '  parentData: <none> (can use size)',
+          '  constraints: BoxConstraints(w=800.0, h=600.0)',
+          '  size: Size(800.0, 600.0)',
+          '  direction: horizontal',
+          '  mainAxisAlignment: start',
+          '  mainAxisSize: max',
+          '  crossAxisAlignment: center',
+          '  textDirection: ltr',
+          '  verticalDirection: down',
+          '  spacing: 0.0',
+          '◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤',
+          '════════════════════════════════════════════════════════════════════════════════════════════════════',
+          '',
+          startsWith('Reloaded 0 libraries in '),
+          '',
+          'Application finished.',
+        ];
+      }
+
+      // Since diagnostics string builder sometimes wraps lines based on their length, it's
+      // possible for lines with file paths to wrap on some systems and not on others. This
+      // checks stdout against the expected output with and without wrapping the line specifying
+      // the location of the overflowing widget.
+      //
+      // See https://github.com/flutter/flutter/issues/174502.
+      expect(
+        result.stdout,
+        anyOf(equals(expectedStdout(wrapRow: true)), equals(expectedStdout(wrapRow: false))),
+      );
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
     }

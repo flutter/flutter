@@ -540,6 +540,79 @@ void main() {
       );
     });
 
+    testWidgets('Non-null todayBorder color should be respected over foreground color', (
+      WidgetTester tester,
+    ) async {
+      const Color customBorderColor = Colors.red;
+      await tester.pumpWidget(
+        calendarDatePicker(
+          initialDate: DateTime(2016, 1, 15),
+          currentDate: DateTime(2016, 1, 2),
+          theme: ThemeData(
+            datePickerTheme: DatePickerThemeData(
+              todayBorder: const BorderSide(color: customBorderColor),
+              todayForegroundColor: WidgetStateProperty.all(Colors.blue),
+            ),
+          ),
+        ),
+      );
+      expect(
+        Material.of(tester.element(find.text('2'))),
+        // The current day should be painted with the custom border color.
+        paints..circle(color: customBorderColor, style: PaintingStyle.stroke, strokeWidth: 1.0),
+      );
+    });
+
+    testWidgets('Non-null todayBorder color is used even when disabled', (
+      WidgetTester tester,
+    ) async {
+      const Color customBorderColor = Colors.red;
+      await tester.pumpWidget(
+        calendarDatePicker(
+          firstDate: DateTime(2016, 1, 3),
+          lastDate: DateTime(2016, 1, 31),
+          currentDate: DateTime(2016, 1, 2), // not between first and last
+          initialDate: DateTime(2016, 1, 5),
+          theme: ThemeData(
+            datePickerTheme: DatePickerThemeData(
+              todayBorder: const BorderSide(color: customBorderColor),
+              todayForegroundColor: WidgetStateProperty.all(Colors.blue),
+            ),
+          ),
+        ),
+      );
+      expect(
+        Material.of(tester.element(find.text('2'))),
+        // The current day should be painted with the custom border color,
+        // not with foreground color opacity applied, even it's disabled day.
+        paints..circle(color: customBorderColor, style: PaintingStyle.stroke, strokeWidth: 1.0),
+      );
+    });
+
+    testWidgets('Transparent todayBorder should fall back to foreground color', (
+      WidgetTester tester,
+    ) async {
+      const Color customForegroundColor = Colors.green;
+      await tester.pumpWidget(
+        calendarDatePicker(
+          initialDate: DateTime(2016, 1, 15),
+          currentDate: DateTime(2016, 1, 2),
+          theme: ThemeData(
+            datePickerTheme: DatePickerThemeData(
+              todayBorder: const BorderSide(color: Color(0x00000000)),
+              todayForegroundColor: WidgetStateProperty.all(customForegroundColor),
+            ),
+          ),
+        ),
+      );
+      expect(
+        Material.of(tester.element(find.text('2'))),
+        // The current day should use the foreground color since
+        // todayBorder color is transparent.
+        paints..circle(color: customForegroundColor, style: PaintingStyle.stroke, strokeWidth: 1.0),
+      );
+    });
+
     testWidgets('Selecting date does not switch picker to year selection', (
       WidgetTester tester,
     ) async {
@@ -1492,8 +1565,10 @@ void main() {
 
           // The initial date should be announced.
           expect(
-            tester.takeAnnouncements().last.message,
-            '${localizations.formatFullDate(initialDate)}$semanticLabelSuffix',
+            tester.takeAnnouncements().last,
+            isAccessibilityAnnouncement(
+              '${localizations.formatFullDate(initialDate)}$semanticLabelSuffix',
+            ),
           );
 
           // Select a new date.
@@ -1502,8 +1577,10 @@ void main() {
 
           // The selected date should be announced.
           expect(
-            tester.takeAnnouncements().last.message,
-            '${localizations.selectedDateLabel} ${localizations.formatFullDate(selectedDate!)}$semanticLabelSuffix',
+            tester.takeAnnouncements().last,
+            isAccessibilityAnnouncement(
+              '${localizations.selectedDateLabel} ${localizations.formatFullDate(selectedDate!)}$semanticLabelSuffix',
+            ),
           );
 
           // Select the initial date.
@@ -1511,8 +1588,10 @@ void main() {
 
           // The initial date should be announced as selected.
           expect(
-            tester.takeAnnouncements().first.message,
-            '${localizations.selectedDateLabel} ${localizations.formatFullDate(initialDate)}$semanticLabelSuffix',
+            tester.takeAnnouncements().first,
+            isAccessibilityAnnouncement(
+              '${localizations.selectedDateLabel} ${localizations.formatFullDate(initialDate)}$semanticLabelSuffix',
+            ),
           );
 
           semantics.dispose();

@@ -135,7 +135,7 @@ void main() {
             'Text in SliverFillRemaining',
           );
           expect(textInSliverFillRemaining, findsOne);
-          expect(textInSliverFillRemaining, containsSemantics(isHidden: false));
+          expect(textInSliverFillRemaining, isSemantics(isHidden: false));
           handle.dispose();
         });
 
@@ -170,7 +170,7 @@ void main() {
             'Text in SliverFillRemaining',
           );
           expect(textInSliverFillRemaining, findsOne);
-          expect(textInSliverFillRemaining, containsSemantics(isHidden: true));
+          expect(textInSliverFillRemaining, isSemantics(isHidden: true));
           handle.dispose();
         });
 
@@ -418,7 +418,7 @@ void main() {
             'Text in SliverFillRemaining',
           );
           expect(textInSliverFillRemaining, findsOne);
-          expect(textInSliverFillRemaining, containsSemantics(isHidden: false));
+          expect(textInSliverFillRemaining, isSemantics(isHidden: false));
           handle.dispose();
         });
 
@@ -454,7 +454,7 @@ void main() {
             'Text in SliverFillRemaining',
           );
           expect(textInSliverFillRemaining, findsOne);
-          expect(textInSliverFillRemaining, containsSemantics(isHidden: true));
+          expect(textInSliverFillRemaining, isSemantics(isHidden: true));
           handle.dispose();
         });
 
@@ -810,7 +810,7 @@ void main() {
                 'Text in SliverFillRemaining',
               );
               expect(textInSliverFillRemaining, findsOne);
-              expect(textInSliverFillRemaining, containsSemantics(isHidden: false));
+              expect(textInSliverFillRemaining, isSemantics(isHidden: false));
               handle.dispose();
             },
             variant: const TargetPlatformVariant(<TargetPlatform>{
@@ -854,7 +854,7 @@ void main() {
                 'Text in SliverFillRemaining',
               );
               expect(textInSliverFillRemaining, findsOne);
-              expect(textInSliverFillRemaining, containsSemantics(isHidden: true));
+              expect(textInSliverFillRemaining, isSemantics(isHidden: true));
               handle.dispose();
             },
             variant: const TargetPlatformVariant(<TargetPlatform>{

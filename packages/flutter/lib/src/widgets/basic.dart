@@ -48,6 +48,7 @@ export 'package:flutter/rendering.dart'
         FlowPaintingContext,
         FractionalOffsetTween,
         HitTestBehavior,
+        ImageFilterConfig,
         LayerLink,
         MainAxisAlignment,
         MainAxisSize,
@@ -635,14 +636,26 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   ///
   /// The [blendMode] argument will default to [BlendMode.srcOver] and must not be
   /// null if provided.
+  ///
+  /// Exactly one of [filter] or [filterConfig] must be provided.
+  /// Providing both or neither will result in an assertion error.
   const BackdropFilter({
     super.key,
-    required this.filter,
+    this.filter,
+    this.filterConfig,
     super.child,
     this.blendMode = BlendMode.srcOver,
     this.enabled = true,
     this.backdropGroupKey,
-  }) : _useSharedKey = false;
+  }) : assert(
+         filter != null || filterConfig != null,
+         'Either filter or filterConfig must be provided.',
+       ),
+       assert(
+         filter == null || filterConfig == null,
+         'Cannot provide both a filter and a filterConfig.',
+       ),
+       _useSharedKey = false;
 
   /// Creates a backdrop filter that groups itself with the nearest parent
   /// [BackdropGroup].
@@ -653,20 +666,48 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   /// This constructor will automatically look up the nearest [BackdropGroup]
   /// and will share the backdrop input with sibling and child [BackdropFilter]
   /// widgets.
+  ///
+  /// Exactly one of [filter] or [filterConfig] must be provided.
+  /// Providing both or neither will result in an assertion error.
   const BackdropFilter.grouped({
     super.key,
-    required this.filter,
+    this.filter,
+    this.filterConfig,
     super.child,
     this.blendMode = BlendMode.srcOver,
     this.enabled = true,
-  }) : backdropGroupKey = null,
+  }) : assert(
+         filter != null || filterConfig != null,
+         'Either filter or filterConfig must be provided.',
+       ),
+       assert(
+         filter == null || filterConfig == null,
+         'Cannot provide both a filter and a filterConfig.',
+       ),
+       backdropGroupKey = null,
        _useSharedKey = true;
 
   /// The image filter to apply to the existing painted content before painting the child.
   ///
   /// For example, consider using [ImageFilter.blur] to create a backdrop
   /// blur effect.
-  final ui.ImageFilter filter;
+  ///
+  /// The [filter] parameter is equivalent to [filterConfig] (with the help of
+  /// the [ImageFilterConfig.new] constructor), except for features only
+  /// supported by [ImageFilterConfig] (such as the `bounds` parameter in
+  /// [ImageFilterConfig.blur]).
+  final ui.ImageFilter? filter;
+
+  /// The configuration for the image filter to apply to the existing painted content.
+  ///
+  /// For example, consider using [ImageFilterConfig.blur] to create a backdrop
+  /// blur effect.
+  ///
+  /// The [filterConfig] parameter is equivalent to [filter] (with the help of
+  /// the [ImageFilterConfig.new] constructor), except for features only
+  /// supported by [ImageFilterConfig] (such as the `bounds` parameter in
+  /// [ImageFilterConfig.blur]).
+  final ImageFilterConfig? filterConfig;
 
   /// The blend mode to use to apply the filtered background content onto the background
   /// surface.
@@ -696,10 +737,14 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
     return backdropGroupKey;
   }
 
+  ImageFilterConfig get _effectiveFilterConfig {
+    return filterConfig ?? ImageFilterConfig(filter!);
+  }
+
   @override
   RenderBackdropFilter createRenderObject(BuildContext context) {
     return RenderBackdropFilter(
-      filter: filter,
+      filterConfig: _effectiveFilterConfig,
       blendMode: blendMode,
       enabled: enabled,
       backdropKey: _getBackdropGroupKey(context),
@@ -709,10 +754,21 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, RenderBackdropFilter renderObject) {
     renderObject
-      ..filter = filter
+      ..filterConfig = _effectiveFilterConfig
       ..enabled = enabled
       ..blendMode = blendMode
       ..backdropKey = _getBackdropGroupKey(context);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ui.ImageFilter>('filter', filter, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<ImageFilterConfig>('filterConfig', filterConfig, defaultValue: null),
+    );
+    properties.add(EnumProperty<BlendMode>('blendMode', blendMode));
+    properties.add(FlagProperty('enabled', value: enabled, ifTrue: 'enabled'));
   }
 }
 
@@ -3992,7 +4048,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required bool? readOnly,
     required bool? focusable,
     required bool? focused,
-    required AccessiblityFocusBlockType? accessiblityFocusBlockType,
+    required AccessibilityFocusBlockType? accessibilityFocusBlockType,
     required bool? inMutuallyExclusiveGroup,
     required bool? obscured,
     required bool? multiline,
@@ -4052,6 +4108,8 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required ui.SemanticsHitTestBehavior? hitTestBehavior,
     required ui.SemanticsInputType? inputType,
     required Locale? localeForSubtree,
+    required String? minValue,
+    required String? maxValue,
   }) : this.fromProperties(
          key: key,
          child: child,
@@ -4078,7 +4136,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
            readOnly: readOnly,
            focusable: focusable,
            focused: focused,
-           accessiblityFocusBlockType: accessiblityFocusBlockType,
+           accessibilityFocusBlockType: accessibilityFocusBlockType,
            inMutuallyExclusiveGroup: inMutuallyExclusiveGroup,
            obscured: obscured,
            multiline: multiline,
@@ -4137,6 +4195,8 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
            validationResult: validationResult,
            hitTestBehavior: hitTestBehavior,
            inputType: inputType,
+           minValue: minValue,
+           maxValue: maxValue,
          ),
        );
 
@@ -4324,7 +4384,7 @@ class SliverSemantics extends _SemanticsBase {
     super.readOnly,
     super.focusable,
     super.focused,
-    super.accessiblityFocusBlockType,
+    super.accessibilityFocusBlockType,
     super.inMutuallyExclusiveGroup,
     super.obscured,
     super.multiline,
@@ -4384,6 +4444,8 @@ class SliverSemantics extends _SemanticsBase {
     super.hitTestBehavior,
     super.inputType,
     super.localeForSubtree,
+    super.minValue,
+    super.maxValue,
   }) : super(child: sliver);
 
   /// {@macro flutter.widgets.SemanticsBase.fromProperties}
@@ -7907,7 +7969,7 @@ class Semantics extends _SemanticsBase {
     super.readOnly,
     super.focusable,
     super.focused,
-    super.accessiblityFocusBlockType,
+    super.accessibilityFocusBlockType,
     super.inMutuallyExclusiveGroup,
     super.obscured,
     super.multiline,
@@ -7967,6 +8029,8 @@ class Semantics extends _SemanticsBase {
     super.hitTestBehavior,
     super.inputType,
     super.localeForSubtree,
+    super.minValue,
+    super.maxValue,
   });
 
   /// {@macro flutter.widgets.SemanticsBase.fromProperties}

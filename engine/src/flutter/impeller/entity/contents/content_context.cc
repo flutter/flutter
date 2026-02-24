@@ -128,12 +128,8 @@ class Variants : public GenericVariants {
     context.GetPipelineLibrary()->LogPipelineCreation(*desc);
     options.ApplyToPipelineDescriptor(*desc);
     desc_ = desc;
-    if (context.GetFlags().lazy_shader_mode) {
-      SetDefault(options, nullptr);
-    } else {
-      SetDefault(options, std::make_unique<PipelineHandleT>(context, desc_,
-                                                            /*async=*/true));
-    }
+    SetDefault(options, std::make_unique<PipelineHandleT>(context, desc_,
+                                                          /*async=*/true));
   }
 
   PipelineHandleT* Get(const ContentContextOptions& options) const {
@@ -164,7 +160,8 @@ template <class RenderPipelineHandleT>
 RenderPipelineHandleT* CreateIfNeeded(
     const ContentContext* context,
     Variants<RenderPipelineHandleT>& container,
-    ContentContextOptions opts) {
+    ContentContextOptions opts,
+    PipelineCompileQueue* compile_queue) {
   if (!context->IsValid()) {
     return nullptr;
   }
@@ -183,7 +180,7 @@ RenderPipelineHandleT* CreateIfNeeded(
   FML_CHECK(default_handle != nullptr);
 
   const std::shared_ptr<Pipeline<PipelineDescriptor>>& pipeline =
-      default_handle->WaitAndGet();
+      default_handle->WaitAndGet(compile_queue);
   if (!pipeline) {
     return nullptr;
   }
@@ -204,11 +201,14 @@ template <class TypedPipeline>
 PipelineRef GetPipeline(const ContentContext* context,
                         Variants<TypedPipeline>& container,
                         ContentContextOptions opts) {
-  TypedPipeline* pipeline = CreateIfNeeded(context, container, opts);
+  auto compile_queue =
+      context->GetContext()->GetPipelineLibrary()->GetPipelineCompileQueue();
+  TypedPipeline* pipeline =
+      CreateIfNeeded(context, container, opts, compile_queue);
   if (!pipeline) {
     return raw_ptr<Pipeline<PipelineDescriptor>>();
   }
-  return raw_ptr(pipeline->WaitAndGet());
+  return raw_ptr(pipeline->WaitAndGet(compile_queue));
 }
 
 }  // namespace
@@ -290,12 +290,14 @@ struct ContentContext::Pipelines {
   Variants<RadialGradientUniformFillPipeline> radial_gradient_uniform_fill;
   Variants<RRectBlurPipeline> rrect_blur;
   Variants<RSuperellipseBlurPipeline> rsuperellipse_blur;
+  Variants<ShadowVerticesShader> shadow_vertices_;
   Variants<SolidFillPipeline> solid_fill;
   Variants<SrgbToLinearFilterPipeline> srgb_to_linear_filter;
   Variants<SweepGradientFillPipeline> sweep_gradient_fill;
   Variants<SweepGradientSSBOFillPipeline> sweep_gradient_ssbo_fill;
   Variants<SweepGradientUniformFillPipeline> sweep_gradient_uniform_fill;
   Variants<TextureDownsamplePipeline> texture_downsample;
+  Variants<TextureDownsampleBoundedPipeline> texture_downsample_bounded;
   Variants<TexturePipeline> texture;
   Variants<TextureStrictSrcPipeline> texture_strict_src;
   Variants<TiledTexturePipeline> tiled_texture;
@@ -690,15 +692,12 @@ ContentContext::ContentContext(
     }
     clip_pipeline_descriptor->SetColorAttachmentDescriptors(
         std::move(clip_color_attachments));
-    if (GetContext()->GetFlags().lazy_shader_mode) {
-      pipelines_->clip.SetDefaultDescriptor(clip_pipeline_descriptor);
-      pipelines_->clip.SetDefault(options, nullptr);
-    } else {
-      pipelines_->clip.SetDefault(
-          options,
-          std::make_unique<ClipPipeline>(*context_, clip_pipeline_descriptor));
-    }
+    pipelines_->clip.SetDefault(
+        options,
+        std::make_unique<ClipPipeline>(*context_, clip_pipeline_descriptor));
     pipelines_->texture_downsample.CreateDefault(
+        *context_, options_no_msaa_no_depth_stencil);
+    pipelines_->texture_downsample_bounded.CreateDefault(
         *context_, options_no_msaa_no_depth_stencil);
     pipelines_->rrect_blur.CreateDefault(*context_, options_trianglestrip);
     pipelines_->rsuperellipse_blur.CreateDefault(*context_,
@@ -712,6 +711,7 @@ ContentContext::ContentContext(
                                                options_trianglestrip);
     pipelines_->color_matrix_color_filter.CreateDefault(*context_,
                                                         options_trianglestrip);
+    pipelines_->shadow_vertices_.CreateDefault(*context_, options);
     pipelines_->vertices_uber_1_.CreateDefault(*context_, options,
                                                {supports_decal});
     pipelines_->vertices_uber_2_.CreateDefault(*context_, options,
@@ -1013,9 +1013,6 @@ void ContentContext::ResetTransientsBuffers() {
 }
 
 void ContentContext::InitializeCommonlyUsedShadersIfNeeded() const {
-  if (GetContext()->GetFlags().lazy_shader_mode) {
-    return;
-  }
   GetContext()->InitializeCommonlyUsedShadersIfNeeded();
 }
 
@@ -1410,6 +1407,11 @@ PipelineRef ContentContext::GetDownsamplePipeline(
   return GetPipeline(this, pipelines_->texture_downsample, opts);
 }
 
+PipelineRef ContentContext::GetDownsampleBoundedPipeline(
+    ContentContextOptions opts) const {
+  return GetPipeline(this, pipelines_->texture_downsample_bounded, opts);
+}
+
 PipelineRef ContentContext::GetFramebufferBlendColorPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
@@ -1498,6 +1500,11 @@ PipelineRef ContentContext::GetFramebufferBlendSoftLightPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
   return GetPipeline(this, pipelines_->framebuffer_blend_softlight, opts);
+}
+
+PipelineRef ContentContext::GetDrawShadowVerticesPipeline(
+    ContentContextOptions opts) const {
+  return GetPipeline(this, pipelines_->shadow_vertices_, opts);
 }
 
 PipelineRef ContentContext::GetDrawVerticesUberPipeline(

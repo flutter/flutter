@@ -34,6 +34,7 @@ class ShaderData {
 
     var textureCount = 0;
     var floatCount = 0;
+    var floatOffset = 0;
     for (var i = 0; i < rawUniforms.length; i += 1) {
       final Object? rawUniformData = rawUniforms[i];
       if (rawUniformData is! Map<String, Object?>) {
@@ -78,7 +79,9 @@ class ShaderData {
         location: location,
         type: type,
         floatCount: uniformFloatCount,
+        floatOffset: floatOffset,
       );
+      floatOffset += uniformFloatCount;
     }
     return ShaderData(
       source: source,
@@ -100,18 +103,21 @@ class UniformData {
     required this.location,
     required this.type,
     required this.floatCount,
+    required this.floatOffset,
   });
 
   final String name;
   final UniformType type;
   final int location;
   final int floatCount;
+  final int floatOffset;
 
   static const UniformData empty = UniformData(
     name: '',
     location: -1,
     type: UniformType.Float,
     floatCount: -1,
+    floatOffset: -1,
   );
 }
 

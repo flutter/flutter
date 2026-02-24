@@ -1,6 +1,6 @@
-platforms;android-36:platforms
+platforms;android-36,platforms;android-35,platforms;android-34:platforms
 cmdline-tools;latest:cmdline-tools
-build-tools;36.1.0,build-tools;35.0.0,build-tools;34.0.0:build-tools
+build-tools;36.1.0,build-tools;35.0.0,build-tools;34.0.0,build-tools;33.0.1:build-tools
 platform-tools:platform-tools
 tools:tools
 cmake;3.22.1:cmake
