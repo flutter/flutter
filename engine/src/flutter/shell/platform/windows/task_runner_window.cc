@@ -185,12 +185,11 @@ void TaskRunnerWindow::ProcessTasks() {
 }
 
 void TaskRunnerWindow::SetTimer(std::chrono::nanoseconds when) {
-  if (when == std::chrono::nanoseconds::max()) {
-    timer_thread_.ScheduleAt(
-        std::chrono::time_point<std::chrono::high_resolution_clock>::max());
-  } else {
-    timer_thread_.ScheduleAt(std::chrono::high_resolution_clock::now() + when);
-  }
+  auto now = std::chrono::high_resolution_clock::now();
+  auto remaining_to_max =
+      std::chrono::nanoseconds::max() - now.time_since_epoch();
+  when = std::min(when, remaining_to_max);
+  timer_thread_.ScheduleAt(now + when);
 }
 
 WNDCLASS TaskRunnerWindow::RegisterWindowClass() {
