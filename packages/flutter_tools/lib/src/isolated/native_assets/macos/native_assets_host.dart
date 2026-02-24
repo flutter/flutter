@@ -13,6 +13,7 @@ import '../../../base/process.dart';
 import '../../../build_info.dart';
 import '../../../build_system/targets/darwin.dart';
 import '../../../globals.dart' as globals;
+import '../../../ios/mac.dart';
 import '../native_assets.dart';
 
 /// Create an `Info.plist` in [target] for a framework with a single dylib.
@@ -179,8 +180,8 @@ Future<void> codesignDylib(
     codesignIdentity = '-';
   }
   // Strip extended attributes (com.apple.provenance, etc.) that cause codesign
-  // failures on macOS 26+. See https://github.com/flutter/flutter/issues/181103
-  await globals.processUtils.run(<String>['xattr', '-cr', target.path]);
+  // failures on macOS 14+. See https://github.com/flutter/flutter/issues/181103
+  await removeExtendedAttributes(target, globals.processUtils, globals.logger);
   final codesignCommand = <String>[
     'xcrun',
     'codesign',
