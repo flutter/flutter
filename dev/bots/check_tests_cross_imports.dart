@@ -114,7 +114,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/two_dimensional_viewport_test.dart',
     'packages/flutter/test/widgets/list_view_viewporting_test.dart',
     'packages/flutter/test/widgets/table_test.dart',
-    'packages/flutter/test/widgets/ticker_provider_test.dart',
     'packages/flutter/test/widgets/semantics_clipping_test.dart',
     'packages/flutter/test/widgets/restoration_scopes_moving_test.dart',
     'packages/flutter/test/widgets/page_transitions_test.dart',

@@ -13,7 +13,6 @@ import 'semantics_tester.dart';
 import 'widgets_app_tester.dart';
 
 void main() {
-  const kWhiteColor = Color(0xFFFFFFFF);
   const kOrangeColor = Color(0xFFFF8800);
   const kBlueColor = Color(0xFF0000FF);
 
@@ -1212,19 +1211,7 @@ void main() {
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       bool? value = true;
       Widget buildApp() {
-        return WidgetsApp(
-          color: kWhiteColor,
-          pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
-            return PageRouteBuilder<T>(
-              settings: settings,
-              pageBuilder:
-                  (
-                    BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                  ) => builder(context),
-            );
-          },
+        return TestWidgetsApp(
           shortcuts: <LogicalKeySet, Intent>{
             LogicalKeySet(LogicalKeyboardKey.space): const PrioritizedIntents(
               orderedIntents: <Intent>[
@@ -1244,8 +1231,7 @@ void main() {
               children: <Widget>[
                 StatefulBuilder(
                   builder: (BuildContext context, StateSetter setState) {
-                    // A focusable widget that handles ActivateIntent,
-                    // replacing Checkbox for this widgets-layer test.
+                    // A focusable widget that handles ActivateIntent.
                     return Actions(
                       actions: <Type, Action<Intent>>{
                         ActivateIntent: CallbackAction<ActivateIntent>(

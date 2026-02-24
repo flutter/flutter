@@ -14,6 +14,7 @@ import 'widgets_app_tester.dart';
 
 const _kRedColor = Color(0xFFFF0000);
 const _kGreenColor = Color(0xFF00FF00);
+const _kDragHandleIconData = IconData(0xe25d, fontFamily: 'MaterialIcons');
 
 void main() {
   testWidgets('SliverReorderableList works well when having gestureSettings', (
@@ -1712,7 +1713,7 @@ void main() {
                   onTap: () => setState(() {
                     showList = false;
                   }),
-                  child: const Text('Close drawer'),
+                  child: const Text('Close list'),
                 ),
               ],
             );
@@ -1732,7 +1733,7 @@ void main() {
     await drag.moveBy(const Offset(0, 200));
     await tester.pump();
 
-    await tester.tap(find.text('Close drawer'));
+    await tester.tap(find.text('Close list'));
     await tester.pumpAndSettle();
 
     expect(item0, findsNothing);
@@ -1777,7 +1778,7 @@ void main() {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text('item ${items[index]}'),
-                          const Icon(IconData(0xe25d, fontFamily: 'MaterialIcons')),
+                          const Icon(_kDragHandleIconData),
                         ],
                       ),
                     ),
@@ -2174,7 +2175,7 @@ class TestList extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Text('item ${items[index]}'),
-                              const Icon(IconData(0xe25d, fontFamily: 'MaterialIcons')),
+                              const Icon(_kDragHandleIconData),
                             ],
                           ),
                         ),
