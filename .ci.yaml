@@ -2984,7 +2984,8 @@ targets:
       task_name: native_assets_android
 
   - name: Linux_android_emu android_engine_flags_debug_test
-    bringup: true
+    # bringup: true TESTING ONLY
+    presubmit: true # TESTING ONLY
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -2993,7 +2994,8 @@ targets:
       task_name: android_engine_flags_debug_test
 
   - name: Linux_android_emu android_engine_flags_release_test
-    bringup: true
+    # bringup: true TESTING ONLY
+    presubmit: true # TESTING ONLY
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
