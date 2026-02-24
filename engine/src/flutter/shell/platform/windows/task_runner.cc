@@ -64,6 +64,9 @@ std::chrono::nanoseconds TaskRunner::ProcessTasks() {
   {
     std::lock_guard<std::mutex> lock(task_queue_mutex_);
     if (task_queue_.empty()) {
+      // TaskRunnerWindow::SetTimer() has special handling for
+      // std::chrono::nanoseconds::max() to avoid overflow when calculating the
+      // absolute timer fire time.
       return std::chrono::nanoseconds::max();
     } else {
       return task_queue_.top().fire_time - now;
