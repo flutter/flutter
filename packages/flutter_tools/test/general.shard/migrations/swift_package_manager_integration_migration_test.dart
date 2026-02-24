@@ -872,6 +872,41 @@ void main() {
               ProcessManager: () => FakeProcessManager.any(),
             },
           );
+
+          testUsingContext(
+            'FlutterFramework PBXFileReference',
+            () async {
+              final testLogger = BufferLogger.test();
+              final project = FakeXcodeProject(
+                platform: FlutterDarwinPlatform.ios.name,
+                fileSystem: memoryFileSystem,
+                logger: testLogger,
+                projectDir: memoryFileSystem.currentDirectory
+                    .childDirectory('my_app')
+                    .childDirectory('example'),
+              );
+              _createProjectFiles(project, FlutterDarwinPlatform.ios, isExampleApp: true);
+              project.xcodeProjectInfoFile.writeAsStringSync('784666492D4C4C64000A1A5F');
+
+              final projectMigration = SwiftPackageManagerIntegrationMigration(
+                project,
+                FlutterDarwinPlatform.ios,
+                BuildInfo.debug,
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+                logger: testLogger,
+                fileSystem: memoryFileSystem,
+                plistParser: FakePlistParser(),
+              );
+              expect(
+                () => projectMigration.migrate(),
+                throwsToolExit(message: 'Duplicate id found for FlutterFramework PBXFileReference'),
+              );
+            },
+            overrides: <Type, Generator>{
+              FileSystem: () => memoryFileSystem,
+              ProcessManager: () => FakeProcessManager.any(),
+            },
+          );
         });
       });
 
@@ -3067,6 +3102,7 @@ void main() {
               expect(plistParser.hasRemainingExpectations, isFalse);
             },
           );
+
           group('migrates plugin when already partially migrated', () {
             late MemoryFileSystem memoryFileSystem;
             setUp(() {
@@ -3554,13 +3590,18 @@ const unmigratedFileReferenceSection = '''
 ''';
 
 String migratedFileReferenceSection(FlutterDarwinPlatform platform, {bool includePlugin = false}) {
-  return '''
-/* Begin PBXFileReference section */
-		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
-		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
-		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = ${_relativeEphemeralPath(platform)}/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };${includePlugin ? '\n		78DABEA22ED26510000E7860 /* $pluginName */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = $pluginName; path = ../../${platform.name}/$pluginName; sourceTree = "<group>"; };' : ''}
-/* End PBXFileReference section */
-''';
+  var pluginFileReferences = '';
+  if (includePlugin) {
+    pluginFileReferences =
+        '		784666492D4C4C64000A1A5F /* FlutterFramework */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterFramework; path = ${_relativeEphemeralPath(platform)}/Packages/.packages/FlutterFramework; sourceTree = "<group>"; };\n'
+        '		78DABEA22ED26510000E7860 /* $pluginName */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = $pluginName; path = ../../${platform.name}/$pluginName; sourceTree = "<group>"; };\n';
+  }
+  return '/* Begin PBXFileReference section */\n'
+      '		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };\n'
+      '		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };\n'
+      '		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = ${_relativeEphemeralPath(platform)}/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };\n'
+      '$pluginFileReferences'
+      '/* End PBXFileReference section */\n';
 }
 
 String unmigratedFileReferenceAsJson(
@@ -3624,6 +3665,13 @@ String migratedFileReferenceAsJson(FlutterDarwinPlatform platform, {bool include
     migratedJson =
         '''
 $migratedJson,
+    "784666492D4C4C64000A1A5F": {
+      "path": "${_relativeEphemeralPath(platform)}/Packages/.packages/FlutterFramework",
+      "isa": "PBXFileReference",
+      "name": "flutter",
+      "lastKnownFileType": "wrapper",
+      "sourceTree": "<group>"
+    },
     "78DABEA22ED26510000E7860": {
       "path": "../../${platform.name}/$pluginName",
       "isa": "PBXFileReference",
@@ -3744,13 +3792,19 @@ String migratedGroupSection(
     if (missingChildren) ...<String>[
       '			children = (',
       '				78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */,',
-      if (includePlugin) '				78DABEA22ED26510000E7860 /* $pluginName */,',
+      if (includePlugin) ...[
+        '				78DABEA22ED26510000E7860 /* $pluginName */,',
+        '				784666492D4C4C64000A1A5F /* FlutterFramework */,',
+      ],
       '			);',
       '			isa = PBXGroup;',
     ] else ...<String>[
       '			isa = PBXGroup;',
       '			children = (',
-      if (includePlugin) '				78DABEA22ED26510000E7860 /* $pluginName */,',
+      if (includePlugin) ...[
+        '				78DABEA22ED26510000E7860 /* $pluginName */,',
+        '				784666492D4C4C64000A1A5F /* FlutterFramework */,',
+      ],
       '				78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */,',
       '				3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */,',
       '				9740EEB21CF90195004384FC /* Debug.xcconfig */,',
@@ -3800,10 +3854,16 @@ String migratedGroupSectionAsJson(
     '        "children": [',
     if (missingChildren) ...<String>[
       '            "78E0A7A72DC9AD7400C4905E",',
-      if (includePlugin) '            "78DABEA22ED26510000E7860",',
+      if (includePlugin) ...[
+        '            "78DABEA22ED26510000E7860",',
+        '            "784666492D4C4C64000A1A5F",',
+      ],
     ] else ...<String>[
       '            "78E0A7A72DC9AD7400C4905E",',
-      if (includePlugin) '            "78DABEA22ED26510000E7860",',
+      if (includePlugin) ...[
+        '            "78DABEA22ED26510000E7860",',
+        '            "784666492D4C4C64000A1A5F",',
+      ],
       '            "3B3967151E833CAA004F5970",',
       '            "9740EEB21CF90195004384FC",',
       '            "7AFA3C8E1D35360C0083082E",',

@@ -107,6 +107,10 @@ void main() {
           pbxprojFileContents = pbxprojFile.readAsStringSync();
           expect(pbxprojFileContents.contains('FlutterGeneratedPluginSwiftPackage'), isTrue);
           expect(
+            pbxprojFileContents.contains('784666492D4C4C64000A1A5F /* FlutterFramework */'),
+            isTrue,
+          );
+          expect(
             pbxprojFileContents.contains(
               '78DABEA22ED26510000E7860 /* ${createdCocoaPodsPlugin.pluginName} */',
             ),

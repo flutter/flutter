@@ -54,6 +54,9 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   /// New identifier for FlutterGeneratedPluginSwiftPackage XCSwiftPackageProductDependency.
   static const _flutterPluginsSwiftPackageProductDependencyIdentifier = '78A3181F2AECB46A00862997';
 
+  /// New identifier for FlutterFramework PBXFileReference.
+  static const _flutterFrameworkLocalOverrideFileIdentifier = '784666492D4C4C64000A1A5F';
+
   /// New identifier for a plugin in an example app PBXFileReference.
   static const _flutterPluginLocalOverrideFileIdenitifier = '78DABEA22ED26510000E7860';
 
@@ -410,20 +413,26 @@ $newContent
     }
   }
 
+  /// Returns true if optional PBXFileReferences (FlutterGeneratedPluginSwiftPackage for all apps,
+  /// plugin Swift package and FlutterFramework for plugin example app only) are already migrated.
   bool _areOptionalFilesMigrated(File xcodeProjectInfoFile) {
     final String fileContents = xcodeProjectInfoFile.readAsStringSync();
     final bool flutterGeneratedPackageAsFileReference = fileContents.contains(
       '$_flutterPluginsSwiftPackageFileIdentifer /* $kFlutterGeneratedPluginSwiftPackageName */ = {isa = PBXFileReference',
     );
 
-    var pluginPackageAsFileReference = true;
+    var pluginExampleAppMigrated = true;
     if (_examplePlugin != null) {
-      pluginPackageAsFileReference = fileContents.contains(
+      final bool pluginPackageAsFileReference = fileContents.contains(
         '$_flutterPluginLocalOverrideFileIdenitifier /* ${_examplePlugin.name} */ = {isa = PBXFileReference',
       );
+      final bool flutterFrameworkMigrated = fileContents.contains(
+        '$_flutterFrameworkLocalOverrideFileIdentifier /* $kFlutterGeneratedFrameworkSwiftPackageTargetName */ = {isa = PBXFileReference',
+      );
+      pluginExampleAppMigrated = pluginPackageAsFileReference && flutterFrameworkMigrated;
     }
 
-    return flutterGeneratedPackageAsFileReference && pluginPackageAsFileReference;
+    return flutterGeneratedPackageAsFileReference && pluginExampleAppMigrated;
   }
 
   bool _areOptionalFilesMigratedCorrectly(
@@ -444,26 +453,39 @@ $newContent
     );
 
     // Validate plugin is added (for example app only)
-    var localPluginFileReferenceMigrated = true;
-    var localPluginGroupMigrated = true;
+    var pluginExampleAppMigrated = true;
     if (_examplePlugin != null) {
-      localPluginFileReferenceMigrated = _isFileReferenceMigrated(
+      final bool localPluginFileReferenceMigrated = _isFileReferenceMigrated(
         projectInfo,
         logErrorIfNotMigrated: logErrorIfNotMigrated,
         identifer: _flutterPluginLocalOverrideFileIdenitifier,
         name: _examplePlugin.name,
       );
-      localPluginGroupMigrated = _isGroupMigrated(
+      final bool localPluginGroupMigrated = _isGroupMigrated(
         projectInfo,
         logErrorIfNotMigrated: logErrorIfNotMigrated,
         fileReferenceIdentifier: _flutterPluginLocalOverrideFileIdenitifier,
       );
+      // Validate FlutterFramework is added to example app
+      final bool frameworkFileReferenceMigrated = _isFileReferenceMigrated(
+        projectInfo,
+        logErrorIfNotMigrated: logErrorIfNotMigrated,
+        identifer: _flutterFrameworkLocalOverrideFileIdentifier,
+        name: kFlutterGeneratedFrameworkSwiftPackageTargetName,
+      );
+      final bool frameworkPackageGroupMigrated = _isGroupMigrated(
+        projectInfo,
+        logErrorIfNotMigrated: logErrorIfNotMigrated,
+        fileReferenceIdentifier: _flutterFrameworkLocalOverrideFileIdentifier,
+      );
+      pluginExampleAppMigrated =
+          localPluginFileReferenceMigrated &&
+          localPluginGroupMigrated &&
+          frameworkFileReferenceMigrated &&
+          frameworkPackageGroupMigrated;
     }
 
-    return packageFileReferenceMigrated &&
-        packageGroupMigrated &&
-        localPluginFileReferenceMigrated &&
-        localPluginGroupMigrated;
+    return packageFileReferenceMigrated && packageGroupMigrated && pluginExampleAppMigrated;
   }
 
   /// Checks if all sections have been migrated. If [logErrorIfNotMigrated] is
@@ -585,12 +607,21 @@ $newContent
         'Duplicate id found for $kFlutterGeneratedPluginSwiftPackageName PBXFileReference.',
       );
     }
-    if (_examplePlugin != null &&
-        !originalProjectContents.contains(
-          '$_flutterPluginLocalOverrideFileIdenitifier /* ${_examplePlugin.name} */',
-        ) &&
-        originalProjectContents.contains(_flutterPluginLocalOverrideFileIdenitifier)) {
-      throw Exception('Duplicate id found for ${_examplePlugin.name} PBXFileReference.');
+    if (_examplePlugin != null) {
+      if (!originalProjectContents.contains(
+            '$_flutterPluginLocalOverrideFileIdenitifier /* ${_examplePlugin.name} */',
+          ) &&
+          originalProjectContents.contains(_flutterPluginLocalOverrideFileIdenitifier)) {
+        throw Exception('Duplicate id found for ${_examplePlugin.name} PBXFileReference.');
+      }
+      if (!originalProjectContents.contains(
+            '$_flutterFrameworkLocalOverrideFileIdentifier /* $kFlutterGeneratedFrameworkSwiftPackageTargetName */',
+          ) &&
+          originalProjectContents.contains(_flutterFrameworkLocalOverrideFileIdentifier)) {
+        throw Exception(
+          'Duplicate id found for $kFlutterGeneratedFrameworkSwiftPackageTargetName PBXFileReference.',
+        );
+      }
     }
   }
 
@@ -1104,8 +1135,28 @@ $newContent
       kFlutterGeneratedPluginSwiftPackageName,
     );
 
-    // Add plugin as a local package override (for example app only)
+    // Add the plugin Swift package and FlutterFramework as a local package overrides (for example
+    // app only). The plugin Swift package is added as a PBXFileReference so that Xcode live issues
+    // work properly (see https://github.com/flutter/flutter/issues/179032). The FlutterFramework
+    // is also needed since it's referred to by relative path and adding the plugin as a local
+    // package override changes the relative path.
     if (_examplePlugin != null) {
+      lines = _migrateFileReference(
+        lines,
+        projectInfo,
+        identifier: _flutterFrameworkLocalOverrideFileIdentifier,
+        name: kFlutterGeneratedFrameworkSwiftPackageTargetName,
+        path: _xcodeProject.flutterFrameworkSwiftPackageDirectory.path.replaceAll(
+          _xcodeProject.ephemeralDirectory.path,
+          _relativeEphemeralPath,
+        ),
+      );
+      lines = _migrateGroup(
+        lines,
+        projectInfo,
+        _flutterFrameworkLocalOverrideFileIdentifier,
+        kFlutterGeneratedFrameworkSwiftPackageTargetName,
+      );
       lines = _migrateFileReference(
         lines,
         projectInfo,
