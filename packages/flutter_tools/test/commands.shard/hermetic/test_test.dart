@@ -523,7 +523,7 @@ resolution: workspace
         ]),
         throwsToolExit(
           message: RegExp(
-            r'Regular expression syntax is invalid. FormatException: Nothing to repeat[ \t]*"\$\+"',
+            r'Error: Regular expression syntax is invalid. FormatException: Nothing to repeat[ \t]*"\$\+"',
           ),
         ),
       );
