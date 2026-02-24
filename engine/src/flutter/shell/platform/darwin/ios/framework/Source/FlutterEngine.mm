@@ -1694,10 +1694,14 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
     [lifeCycleProvider addApplicationLifeCycleDelegate:delegate];
   }
   if (![delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleDelegate)]) {
-    // TODO(vashworth): If the plugin doesn't conform to the FlutterSceneLifeCycleDelegate,
-    // print a warning pointing to documentation: https://github.com/flutter/flutter/issues/175956
-    // [FlutterLogger logWarning:[NSString stringWithFormat:@"Plugin %@ has not migrated to
-    // scenes.", self.key]];
+    [FlutterLogger
+        logWarning:[NSString
+                       stringWithFormat:@"Plugin %@ uses application lifecycle events but has not "
+                                        @"adopted scenes. "
+                                        @"See migration guide: "
+                                        @"https://docs.flutter.dev/release/breaking-changes/"
+                                        @"uiscenedelegate#migration-guide-for-flutter-plugins",
+                                        self.key]];
   }
 }
 
