@@ -445,9 +445,6 @@ config("compiler") {
       "-Wl,--no-undefined",
       "-Wl,--exclude-libs,ALL",
 
-      # Enable identical code folding to reduce size.
-      "-Wl,--icf=all",
-
       # Currently defaults to 4k, but Android will be moving to 16k page size,
       # and for future-proofing, 64k boundaries will be required.
       "-Wl,-z,max-page-size=65536",
@@ -996,6 +993,14 @@ if (is_win) {
       common_optimize_on_ldflags += [ "-Wl,--as-needed" ]
     }
   }
+}
+# Identical code folding to reduce size.
+# Warning: This changes C/C++ semantics of function pointer comparison.
+if (is_win) {
+  common_optimize_on_ldflags += [ "/OPT:ICF" ]
+} else if (is_clang && !is_wasm && !using_sanitizer) {
+  # Needs lld/gold/mold instead of GNU ld/Mac ld.
+  common_optimize_on_ldflags += [ "-Wl,--icf=all" ]
 }
 
 # Default "optimization on" config. On Windows, this favors size over speed.

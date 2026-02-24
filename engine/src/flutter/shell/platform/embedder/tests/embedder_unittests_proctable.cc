@@ -34,24 +34,6 @@ TEST(EmbedderProcTable, AllPointersProvided) {
   }
 }
 
-// Ensures that there are no duplicate pointers in the proc table, to catch
-// copy/paste mistakes when adding a new entry to FlutterEngineGetProcAddresses.
-TEST(EmbedderProcTable, NoDuplicatePointers) {
-  FlutterEngineProcTable procs = {};
-  procs.struct_size = sizeof(FlutterEngineProcTable);
-  ASSERT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
-
-  void (**proc)() = reinterpret_cast<void (**)()>(&procs.CreateAOTData);
-  const uintptr_t end_address =
-      reinterpret_cast<uintptr_t>(&procs) + procs.struct_size;
-  std::set<void (*)()> seen_procs;
-  while (reinterpret_cast<uintptr_t>(proc) < end_address) {
-    auto result = seen_procs.insert(*proc);
-    EXPECT_TRUE(result.second);
-    ++proc;
-  }
-}
-
 // Spot-checks that calling one of the function pointers works.
 TEST(EmbedderProcTable, CallProc) {
   FlutterEngineProcTable procs = {};
