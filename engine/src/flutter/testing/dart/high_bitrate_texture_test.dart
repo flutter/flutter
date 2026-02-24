@@ -69,8 +69,8 @@ void main() async {
   });
 
   test('Picture.toImageSync with rgbaFloat32, toByteData rgbaFloat32', () async {
-    if (!impellerEnabled) {
-      print('Skipped for Skia');
+    if (impellerEnabled) {
+      print('Skipped for Impeller');
       return;
     }
     const dimension = 1;
