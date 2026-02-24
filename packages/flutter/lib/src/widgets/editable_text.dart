@@ -2071,10 +2071,7 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.hintLocales}
   final List<Locale>? hintLocales;
 
-  /// Whether to enable inline predictive text on iOS 17 and later (e.g. inline
-  /// suggestions as you type).
-  ///
-  /// When null, the platform default is used. Has no effect on other platforms.
+  /// {@macro flutter.services.TextInputConfiguration.enableInlinePrediction}
   final bool? enableInlinePrediction;
 
   /// Optional style for the composing (and inline prediction) region.

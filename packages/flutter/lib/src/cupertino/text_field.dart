@@ -840,15 +840,13 @@ class CupertinoTextField extends StatefulWidget {
   /// {@end-tool}
   final TextMagnifierConfiguration? magnifierConfiguration;
 
-  /// Whether to enable inline predictive text (e.g. iOS 17+ inline suggestions).
-  ///
-  /// When null, the platform default is used. Only affects platforms that support it.
+  /// {@macro flutter.services.TextInputConfiguration.enableInlinePrediction}
   final bool? enableInlinePrediction;
 
   /// Optional style for the composing (and inline prediction) region.
   ///
   /// When set, applied to the composing range (IME and inline predictive text).
-  /// When null, the default is used (underlined).
+  /// When null, the default is used ([TextDecoration.underline]).
   final TextStyle? composingStyle;
 
   /// {@macro flutter.widgets.EditableText.spellCheckConfiguration}

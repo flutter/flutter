@@ -703,15 +703,15 @@ class TextInputConfiguration {
   /// {@endtemplate}
   final List<Locale>? hintLocales;
 
-  /// Whether to enable inline predictive text (e.g. iOS 17+ inline suggestions).
+  /// {@template flutter.services.TextInputConfiguration.enableInlinePrediction}
+  /// Whether to enable inline predictive text.
   ///
-  /// When true, the platform may show inline prediction in the text field.
-  /// When false, inline prediction is disabled.
-  /// When null, the platform uses the system default (e.g. follows user settings
-  /// and context). Only affects platforms that support it (e.g. iOS 17+); other
-  /// platforms ignore this setting.
+  /// This is an iOS-specific feature (iOS 17 and later). When true, inline
+  /// prediction may be shown; when false, it is disabled; when null, on iOS
+  /// the platform default is used and other platforms ignore this.
   ///
   /// Defaults to null (use platform default).
+  /// {@endtemplate}
   final bool? enableInlinePrediction;
 
   /// Creates a copy of this [TextInputConfiguration] with the given fields

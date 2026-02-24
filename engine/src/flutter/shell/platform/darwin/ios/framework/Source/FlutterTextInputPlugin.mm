@@ -1106,8 +1106,9 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   self.isVisibleToAutofill = autofill || _secureTextEntry;
 
   if (@available(iOS 17.0, *)) {
-    // Boolean from TextInputConfiguration.toJson(); deserialized as NSNumber.
-    // nil or missing key = use system default; YES = Yes; NO = No.
+    // iOS 17+ inline prediction. From TextInputConfiguration.toJson();
+    // deserialized as NSNumber. nil or missing key = use system default;
+    // YES = enable; NO = disable.
     NSNumber* enableInlinePrediction = configuration[kEnableInlinePrediction];
     if (enableInlinePrediction == nil) {
       self.inlinePredictionType = UITextInlinePredictionTypeDefault;
