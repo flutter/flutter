@@ -95,13 +95,13 @@ static BOOL _preparedOnce = NO;
 - (instancetype)initWithFrame:(CGRect)frame
                    blurRadius:(CGFloat)blurRadius
                  cornerRadius:(CGFloat)cornerRadius
-                        isRSE:(BOOL)isRSE
+        isRoundedSuperellipse:(BOOL)isRoundedSuperellipse
              visualEffectView:(UIVisualEffectView*)visualEffectView {
   if (self = [super init]) {
     _frame = frame;
     _blurRadius = blurRadius;
     _cornerRadius = cornerRadius;
-    _isRSE = isRSE;
+    _isRoundedSuperellipse = isRoundedSuperellipse;
     [PlatformViewFilter prepareOnce:visualEffectView];
     if (![PlatformViewFilter isUIVisualEffectViewImplementationValid]) {
       FML_DLOG(ERROR) << "Apple's API for UIVisualEffectView changed. Update the implementation to "
@@ -169,7 +169,8 @@ static BOOL _preparedOnce = NO;
 
   visualEffectView.layer.cornerRadius = _cornerRadius;
   if (@available(iOS 13.0, *)) {
-    visualEffectView.layer.cornerCurve = _isRSE ? kCACornerCurveContinuous : kCACornerCurveCircular;
+    visualEffectView.layer.cornerCurve =
+        _isRoundedSuperellipse ? kCACornerCurveContinuous : kCACornerCurveCircular;
   }
   visualEffectView.clipsToBounds = YES;
 

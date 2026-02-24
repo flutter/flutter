@@ -583,25 +583,25 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
         // TODO(https://github.com/flutter/flutter/issues/179126)
         CGFloat cornerRadius = 0.0;
-        BOOL isRSE = NO;
+        BOOL isRoundedSuperellipse = NO;
         // If there's multiple clips, this uses the innermost to decide if its
         // rse or not. The assumption being the innermost will be the tightest
         if ([pendingClipRRects count] > 0) {
           cornerRadius = pendingClipRRects.lastObject.topLeftRadius;
-          isRSE = pendingClipRRects.lastObject.isRSE;
+          isRoundedSuperellipse = pendingClipRRects.lastObject.isRoundedSuperellipse;
           [pendingClipRRects removeAllObjects];
         }
         visualEffectView.layer.cornerRadius = cornerRadius;
         if (@available(iOS 13.0, *)) {
           visualEffectView.layer.cornerCurve =
-              isRSE ? kCACornerCurveContinuous : kCACornerCurveCircular;
+              isRoundedSuperellipse ? kCACornerCurveContinuous : kCACornerCurveCircular;
         }
         visualEffectView.clipsToBounds = YES;
 
         PlatformViewFilter* filter = [[PlatformViewFilter alloc] initWithFrame:frameInClipView
                                                                     blurRadius:blurRadius
                                                                   cornerRadius:cornerRadius
-                                                                         isRSE:isRSE
+                                                         isRoundedSuperellipse:isRoundedSuperellipse
                                                               visualEffectView:visualEffectView];
         if (!filter) {
           self.canApplyBlurBackdrop = NO;
@@ -638,7 +638,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
         clip.topRightRadius = radii.top_right.width;
         clip.bottomLeftRadius = radii.bottom_left.width;
         clip.bottomRightRadius = radii.bottom_right.width;
-        clip.isRSE = YES;
+        clip.isRoundedSuperellipse = YES;
         [pendingClipRRects addObject:clip];
         break;
       }

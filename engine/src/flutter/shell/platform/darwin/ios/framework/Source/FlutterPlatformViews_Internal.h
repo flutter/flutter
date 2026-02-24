@@ -98,7 +98,7 @@
 @property(nonatomic, readonly) CGFloat cornerRadius;
 
 // Whether the clip shape is a rounded superellipse (continuous corner curve).
-@property(nonatomic, readonly) BOOL isRSE;
+@property(nonatomic, readonly) BOOL isRoundedSuperellipse;
 
 // For testing only.
 + (void)resetPreparation;
@@ -118,7 +118,7 @@
 - (instancetype)initWithFrame:(CGRect)frame
                    blurRadius:(CGFloat)blurRadius
                  cornerRadius:(CGFloat)cornerRadius
-                        isRSE:(BOOL)isRSE
+        isRoundedSuperellipse:(BOOL)isRoundedSuperellipse
              visualEffectView:(UIVisualEffectView*)visualEffectView NS_DESIGNATED_INITIALIZER;
 
 @end
@@ -208,7 +208,7 @@
 @property(nonatomic) CGFloat topRightRadius;
 @property(nonatomic) CGFloat bottomRightRadius;
 @property(nonatomic) CGFloat bottomLeftRadius;
-@property(nonatomic) BOOL isRSE;
+@property(nonatomic) BOOL isRoundedSuperellipse;
 @end
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORMVIEWS_INTERNAL_H_
