@@ -133,6 +133,9 @@ void ImGui_ImplImpeller_Shutdown() {
   auto* bd = ImGui_ImplImpeller_GetBackendData();
   IM_ASSERT(bd != nullptr &&
             "No renderer backend to shutdown, or already shutdown?");
+  ImGuiIO& io = ImGui::GetIO();
+
+  io.BackendRendererUserData = nullptr;
   delete bd;
 }
 
