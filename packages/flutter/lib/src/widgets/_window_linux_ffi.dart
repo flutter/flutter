@@ -11,6 +11,9 @@ import 'dart:ui';
 // In C this would be INT_MAX, but since we can't determine that from Dart let's assume it's 32 bit signed. In any case this is far beyond any reasonable window size.
 const int _kMaxWindowDimensions = 0x7fffffff;
 
+const int GTK_WINDOW_TOPLEVEL = 0;
+const int GTK_WINDOW_POPUP = 0;
+
 const int GDK_GRAVITY_NORTH_WEST = 1;
 const int GDK_GRAVITY_NORTH = 2;
 const int GDK_GRAVITY_NORTH_EAST = 3;
@@ -275,7 +278,7 @@ final class _GdkGeometry extends ffi.Struct {
 /// Wraps GtkWindow
 class GtkWindow extends GtkContainer {
   /// Create a new [GtkWindow].
-  GtkWindow() : super(_gtkWindowNew(0));
+  GtkWindow(int type) : super(_gtkWindowNew(type));
 
   /// Make window visible and grab focus.
   void present() {

@@ -182,7 +182,7 @@ class RegularWindowControllerLinux extends RegularWindowController {
     String? title,
   }) : _owner = owner,
        _delegate = delegate,
-       _window = GtkWindow(),
+       _window = GtkWindow(GTK_WINDOW_TOPLEVEL),
        super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
@@ -351,7 +351,7 @@ class DialogWindowControllerLinux extends DialogWindowController {
   }) : _owner = owner,
        _delegate = delegate,
        _parent = parent,
-       _window = GtkWindow(),
+       _window = GtkWindow(GTK_WINDOW_TOPLEVEL),
        super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
@@ -506,7 +506,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
   }) : _owner = owner,
        _delegate = delegate,
        _parent = parent,
-       _window = GtkWindow(),
+       _window = GtkWindow(GTK_WINDOW_POPUP),
        super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
