@@ -13,6 +13,22 @@
 
 FLUTTER_ASSERT_ARC
 
+@interface FlutterPluginAppLifeCycleDelegate (TestUtils)
+- (void)removeDelegate:(NSObject<FlutterApplicationLifeCycleDelegate>*)delegate;
+@end
+
+@implementation FlutterPluginAppLifeCycleDelegate (TestUtils)
+- (void)removeDelegate:(NSObject<FlutterApplicationLifeCycleDelegate>*)delegate {
+  NSPointerArray* delegates = [self valueForKey:@"_delegates"];
+  for (NSUInteger i = 0; i < delegates.count; i++) {
+    if ([delegates pointerAtIndex:i] == (__bridge void*)delegate) {
+      [delegates removePointerAtIndex:i];
+      break;
+    }
+  }
+}
+@end
+
 @protocol TestFlutterPluginWithSceneEvents <NSObject,
                                             FlutterApplicationLifeCycleDelegate,
                                             FlutterSceneLifeCycleDelegate>
