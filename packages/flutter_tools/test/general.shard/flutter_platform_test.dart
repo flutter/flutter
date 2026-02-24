@@ -211,7 +211,7 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(
           BuildInfo.debug,
           startPaused: true,
-          disableServiceAuthCodes: true,
+          enableServiceAuthCodes: false,
           hostVmServicePort: 200,
         ),
         enableVmService: true,
@@ -235,7 +235,7 @@ void main() {
       expect(flutterPlatform.flutterTesterBinPath, equals('abc'));
       expect(flutterPlatform.debuggingOptions.buildInfo, equals(BuildInfo.debug));
       expect(flutterPlatform.debuggingOptions.startPaused, equals(true));
-      expect(flutterPlatform.debuggingOptions.disableServiceAuthCodes, equals(true));
+      expect(flutterPlatform.debuggingOptions.enableServiceAuthCodes, equals(false));
       expect(flutterPlatform.debuggingOptions.hostVmServicePort, equals(200));
       expect(flutterPlatform.enableVmService, equals(true));
       expect(flutterPlatform.machine, equals(true));

@@ -855,7 +855,7 @@ class ProxiedDartDevelopmentService
     FlutterDevice? device,
     int? ddsPort,
     bool? ipv6,
-    bool? disableServiceAuthCodes,
+    bool? enableServiceAuthCodes,
     bool enableDevTools = false,
     bool cacheStartupProfile = false,
     String? google3WorkspaceRoot,
@@ -874,7 +874,7 @@ class ProxiedDartDevelopmentService
         vmServiceUri,
         ddsPort: ddsPort,
         ipv6: ipv6,
-        disableServiceAuthCodes: disableServiceAuthCodes,
+        enableServiceAuthCodes: enableServiceAuthCodes,
         cacheStartupProfile: cacheStartupProfile,
         enableDevTools: enableDevTools,
         google3WorkspaceRoot: google3WorkspaceRoot,
@@ -910,7 +910,7 @@ class ProxiedDartDevelopmentService
       final Object? response = await connection.sendRequest(method, <String, Object?>{
         'deviceId': deviceId,
         'vmServiceUri': remoteVMServiceUri.toString(),
-        'disableServiceAuthCodes': disableServiceAuthCodes,
+        'enableServiceAuthCodes': enableServiceAuthCodes,
         'enableDevTools': enableDevTools,
         if (devToolsServerAddress != null)
           'devToolsServerAddress': devToolsServerAddress.toString(),

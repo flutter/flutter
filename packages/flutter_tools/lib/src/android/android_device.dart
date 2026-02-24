@@ -677,7 +677,7 @@ class AndroidDevice extends Device {
           ...<String>['--ez', 'verify-entry-points', 'true'],
         ],
         if (debuggingOptions.startPaused) ...<String>['--ez', 'start-paused', 'true'],
-        if (debuggingOptions.disableServiceAuthCodes) ...<String>[
+        if (!debuggingOptions.enableServiceAuthCodes) ...<String>[
           '--ez',
           'disable-service-auth-codes',
           'true',

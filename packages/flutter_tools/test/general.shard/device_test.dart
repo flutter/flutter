@@ -677,7 +677,7 @@ void main() {
       final original = DebuggingOptions.enabled(
         BuildInfo.debug,
         startPaused: true,
-        disableServiceAuthCodes: true,
+        enableServiceAuthCodes: false,
         enableDds: false,
         dartEntrypointArgs: <String>['a', 'b'],
         dartFlags: 'c',
@@ -691,7 +691,7 @@ void main() {
       final Map<String, dynamic> decoded = castStringKeyedMap(json.decode(jsonString))!;
       final DebuggingOptions deserialized = DebuggingOptions.fromJson(decoded, BuildInfo.debug);
       expect(deserialized.startPaused, original.startPaused);
-      expect(deserialized.disableServiceAuthCodes, original.disableServiceAuthCodes);
+      expect(deserialized.enableServiceAuthCodes, original.enableServiceAuthCodes);
       expect(deserialized.enableDds, original.enableDds);
       expect(deserialized.dartEntrypointArgs, original.dartEntrypointArgs);
       expect(deserialized.dartFlags, original.dartFlags);
@@ -710,7 +710,7 @@ void main() {
         final original = DebuggingOptions.enabled(
           BuildInfo.debug,
           startPaused: true,
-          disableServiceAuthCodes: true,
+          enableServiceAuthCodes: false,
           disablePortPublication: true,
           dartFlags: '--foo',
           useTestFonts: true,
@@ -867,7 +867,7 @@ void main() {
         final original = DebuggingOptions.enabled(
           BuildInfo.debug,
           startPaused: true,
-          disableServiceAuthCodes: true,
+          enableServiceAuthCodes: false,
           disablePortPublication: true,
           dartFlags: '--foo',
           useTestFonts: true,

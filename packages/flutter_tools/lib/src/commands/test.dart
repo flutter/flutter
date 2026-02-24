@@ -463,7 +463,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final debuggingOptions = DebuggingOptions.enabled(
       buildInfo,
       startPaused: startPaused,
-      disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
+      enableServiceAuthCodes: !boolArg('disable-service-auth-codes'),
       // On iOS >=14, keeping this enabled will leave a prompt on the screen.
       disablePortPublication: true,
       enableDds: enableDds,

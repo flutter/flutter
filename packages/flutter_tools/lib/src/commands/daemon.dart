@@ -1262,6 +1262,7 @@ class DeviceDomain extends Domain {
   Future<Map<String, Object?>> startDartDevelopmentService(Map<String, Object?> args) async {
     final String? deviceId = _getStringArg(args, 'deviceId', required: true);
     final bool? disableServiceAuthCodes = _getBoolArg(args, 'disableServiceAuthCodes');
+    final bool? enableServiceAuthCodes = _getBoolArg(args, 'enableServiceAuthCodes') ?? (disableServiceAuthCodes != null ? !disableServiceAuthCodes : null);
     final String vmServiceUriStr = _getStringArg(args, 'vmServiceUri', required: true)!;
     final bool enableDevTools = _getBoolArg(args, 'enableDevTools') ?? false;
     final String? devToolsServerAddressStr = _getStringArg(args, 'devToolsServerAddress');
@@ -1278,7 +1279,7 @@ class DeviceDomain extends Domain {
 
     await device.dds.startDartDevelopmentService(
       Uri.parse(vmServiceUriStr),
-      disableServiceAuthCodes: disableServiceAuthCodes,
+      enableServiceAuthCodes: enableServiceAuthCodes,
       enableDevTools: enableDevTools,
       devToolsServerAddress: devToolsServerAddress,
     );

@@ -588,7 +588,7 @@ void main() {
       final DebuggingOptions options = await command.createDebuggingOptions();
 
       expect(options.startPaused, true);
-      expect(options.disableServiceAuthCodes, true);
+      expect(options.enableServiceAuthCodes, false);
       expect(options.traceSkia, true);
       expect(options.traceSystrace, true);
       expect(options.traceToFile, 'path/to/trace.binpb');

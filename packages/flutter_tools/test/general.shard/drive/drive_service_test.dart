@@ -542,7 +542,7 @@ class FakeDartDevelopmentService extends Fake
     FlutterDevice? device,
     int? ddsPort,
     bool? ipv6,
-    bool? disableServiceAuthCodes,
+    bool? enableServiceAuthCodes,
     bool enableDevTools = false,
     bool cacheStartupProfile = false,
     String? google3WorkspaceRoot,

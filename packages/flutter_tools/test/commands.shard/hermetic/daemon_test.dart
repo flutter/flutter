@@ -660,7 +660,7 @@ void main() {
             'method': 'device.startDartDevelopmentService',
             'params': <String, Object?>{
               'deviceId': 'device',
-              'disableServiceAuthCodes': false,
+              'enableServiceAuthCodes': true,
               'vmServiceUri': 'http://fake_uri/auth_code',
               'enableDevTools': true,
             },
@@ -675,7 +675,7 @@ void main() {
         final ddsUri = result!['ddsUri'] as String?;
         expect(ddsUri, fakeDdsUri.toString());
         expect(device.dds.startCalled, true);
-        expect(device.dds.startDisableServiceAuthCodes, false);
+        expect(device.dds.startEnableServiceAuthCodes, true);
         expect(device.dds.startVMServiceUri, Uri.parse('http://fake_uri/auth_code'));
         expect(device.dds.enableDevTools, true);
 
@@ -1228,7 +1228,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
   bool startCalled = false;
   late Uri startVMServiceUri;
-  bool? startDisableServiceAuthCodes;
+  bool? startEnableServiceAuthCodes;
 
   bool shutdownCalled = false;
   bool enableDevTools = false;
@@ -1251,7 +1251,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
     int? ddsPort,
     FlutterDevice? device,
     bool? ipv6,
-    bool? disableServiceAuthCodes,
+    bool? enableServiceAuthCodes,
     bool enableDevTools = false,
     bool cacheStartupProfile = false,
     String? google3WorkspaceRoot,
@@ -1259,7 +1259,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   }) async {
     startCalled = true;
     startVMServiceUri = vmServiceUri;
-    startDisableServiceAuthCodes = disableServiceAuthCodes;
+    startEnableServiceAuthCodes = enableServiceAuthCodes;
     this.enableDevTools = enableDevTools;
   }
 

@@ -243,7 +243,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(
         BuildInfo.debug,
         startPaused: true,
-        disableServiceAuthCodes: true,
+        enableServiceAuthCodes: false,
         dartFlags: 'foo',
         enableSoftwareRendering: true,
         skiaDeterministicRendering: true,

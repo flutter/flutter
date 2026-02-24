@@ -1543,7 +1543,7 @@ server:
       final DebuggingOptions options = await command.createDebuggingOptions();
 
       expect(options.startPaused, true);
-      expect(options.disableServiceAuthCodes, true);
+      expect(options.enableServiceAuthCodes, false);
       expect(options.useTestFonts, true);
       expect(options.traceSkia, true);
       expect(options.traceSystrace, true);

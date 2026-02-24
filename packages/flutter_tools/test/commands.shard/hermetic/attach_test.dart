@@ -1845,7 +1845,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
     int? ddsPort,
     FlutterDevice? device,
     bool? ipv6,
-    bool? disableServiceAuthCodes,
+    bool? enableServiceAuthCodes,
     bool enableDevTools = false,
     bool cacheStartupProfile = false,
     String? google3WorkspaceRoot,

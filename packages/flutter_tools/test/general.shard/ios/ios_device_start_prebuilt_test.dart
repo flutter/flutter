@@ -657,7 +657,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(
         BuildInfo.debug,
         startPaused: true,
-        disableServiceAuthCodes: true,
+        enableServiceAuthCodes: false,
         disablePortPublication: true,
         dartFlags: '--foo',
         useTestFonts: true,

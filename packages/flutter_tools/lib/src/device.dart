@@ -942,7 +942,7 @@ class DebuggingOptions {
   DebuggingOptions.enabled(
     this.buildInfo, {
     this.startPaused = false,
-    this.disableServiceAuthCodes = false,
+    this.enableServiceAuthCodes = true,
     this.enableDds = true,
     this.cacheStartupProfile = false,
     this.dartEntrypointArgs = const <String>[],
@@ -1027,7 +1027,7 @@ class DebuggingOptions {
        useTestFonts = false,
        startPaused = false,
        dartFlags = '',
-       disableServiceAuthCodes = false,
+       enableServiceAuthCodes = true,
        enableDds = false,
        cacheStartupProfile = false,
        enableSoftwareRendering = false,
@@ -1061,7 +1061,7 @@ class DebuggingOptions {
     required this.startPaused,
     required this.dartFlags,
     required this.dartEntrypointArgs,
-    required this.disableServiceAuthCodes,
+    required this.enableServiceAuthCodes,
     required this.enableDds,
     required this.cacheStartupProfile,
     required this.enableSoftwareRendering,
@@ -1118,7 +1118,7 @@ class DebuggingOptions {
   final bool startPaused;
   final String dartFlags;
   final List<String> dartEntrypointArgs;
-  final bool disableServiceAuthCodes;
+  final bool enableServiceAuthCodes;
   final bool enableDds;
   final bool cacheStartupProfile;
   final bool enableSoftwareRendering;
@@ -1209,7 +1209,7 @@ class DebuggingOptions {
     return <String>[
       if (enableDartProfiling) '--enable-dart-profiling',
       if (profileStartup) '--profile-startup',
-      if (disableServiceAuthCodes) '--disable-service-auth-codes',
+      if (!enableServiceAuthCodes) '--disable-service-auth-codes',
       if (disablePortPublication) '--disable-vm-service-publication',
       if (startPaused) '--start-paused',
       // Wrap dart flags in quotes for physical devices
@@ -1253,7 +1253,7 @@ class DebuggingOptions {
     'startPaused': startPaused,
     'dartFlags': dartFlags,
     'dartEntrypointArgs': dartEntrypointArgs,
-    'disableServiceAuthCodes': disableServiceAuthCodes,
+    'enableServiceAuthCodes': enableServiceAuthCodes,
     'enableDds': enableDds,
     'cacheStartupProfile': cacheStartupProfile,
     'enableSoftwareRendering': enableSoftwareRendering,
@@ -1324,7 +1324,7 @@ class DebuggingOptions {
         startPaused: json['startPaused']! as bool,
         dartFlags: json['dartFlags']! as String,
         dartEntrypointArgs: (json['dartEntrypointArgs']! as List<dynamic>).cast<String>(),
-        disableServiceAuthCodes: json['disableServiceAuthCodes']! as bool,
+        enableServiceAuthCodes: (json['enableServiceAuthCodes'] as bool?) ?? !(json['disableServiceAuthCodes'] as bool? ?? false),
         enableDds: json['enableDds']! as bool,
         cacheStartupProfile: json['cacheStartupProfile']! as bool,
         enableSoftwareRendering: json['enableSoftwareRendering']! as bool,

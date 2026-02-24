@@ -649,7 +649,7 @@ void main() {
 
       final Future<void> startFuture = dds.startDartDevelopmentService(
         Uri.parse('http://127.0.0.1:100/fake'),
-        disableServiceAuthCodes: true,
+        enableServiceAuthCodes: false,
         ddsPort: 150,
         ipv6: false,
       );
@@ -660,7 +660,7 @@ void main() {
       expect(startMessage.data['params'], <String, Object?>{
         'deviceId': 'test_id',
         'vmServiceUri': 'http://127.0.0.1:200/fake',
-        'disableServiceAuthCodes': true,
+        'enableServiceAuthCodes': false,
         'enableDevTools': false,
       });
 
@@ -709,7 +709,7 @@ void main() {
 
         final Future<void> startFuture = dds.startDartDevelopmentService(
           Uri.parse('http://127.0.0.1:100/fake'),
-          disableServiceAuthCodes: true,
+          enableServiceAuthCodes: false,
           ddsPort: 150,
           ipv6: false,
         );
@@ -720,7 +720,7 @@ void main() {
         expect(startMessage.data['params'], <String, Object?>{
           'deviceId': 'test_id',
           'vmServiceUri': 'http://127.0.0.1:200/fake',
-          'disableServiceAuthCodes': true,
+          'enableServiceAuthCodes': false,
           'enableDevTools': false,
         });
 
@@ -769,7 +769,7 @@ void main() {
         expect(localDds.startCalled, false);
         await dds.startDartDevelopmentService(
           Uri.parse('http://127.0.0.1:100/fake'),
-          disableServiceAuthCodes: true,
+          enableServiceAuthCodes: false,
           ddsPort: 150,
           ipv6: false,
         );
@@ -811,7 +811,7 @@ void main() {
 
         final Future<void> startFuture = dds.startDartDevelopmentService(
           Uri.parse('http://127.0.0.1:100/fake'),
-          disableServiceAuthCodes: true,
+          enableServiceAuthCodes: false,
           ddsPort: 150,
           ipv6: false,
         );
@@ -823,7 +823,7 @@ void main() {
         expect(startMessage.data['params'], <String, Object?>{
           'deviceId': 'test_id',
           'vmServiceUri': 'http://127.0.0.1:200/fake',
-          'disableServiceAuthCodes': true,
+          'enableServiceAuthCodes': false,
           'enableDevTools': false,
         });
 
@@ -1234,7 +1234,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
     FlutterDevice? device,
     int? ddsPort,
     bool? ipv6,
-    bool? disableServiceAuthCodes,
+    bool? enableServiceAuthCodes,
     bool enableDevTools = false,
     bool cacheStartupProfile = false,
     String? google3WorkspaceRoot,

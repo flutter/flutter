@@ -102,7 +102,7 @@ class FlutterTesterTestDevice extends TestDevice {
         // the obvious simplification to this code and remove this entire feature.
         '--vm-service-port=${debuggingOptions.enableDds ? 0 : debuggingOptions.hostVmServicePort}',
         if (debuggingOptions.startPaused) '--start-paused',
-        if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
+        if (!debuggingOptions.enableServiceAuthCodes) '--disable-service-auth-codes',
       ] else
         '--disable-vm-service',
       if (host!.type == InternetAddressType.IPv6) '--ipv6',

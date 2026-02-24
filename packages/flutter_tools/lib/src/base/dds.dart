@@ -66,7 +66,7 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
     int? ddsPort,
-    bool? disableServiceAuthCodes,
+    bool? enableServiceAuthCodes,
     bool? ipv6,
     bool enableDevTools = true,
     bool cacheStartupProfile = false,
@@ -94,7 +94,7 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
       _ddsInstance = await ddsLauncherCallback(
         remoteVmServiceUri: vmServiceUri,
         serviceUri: ddsUri,
-        enableAuthCodes: disableServiceAuthCodes != true,
+        enableAuthCodes: enableServiceAuthCodes ?? true,
         // Enables caching of CPU samples collected during application startup.
         cachedUserTags: cacheStartupProfile ? const <String>['AppStartUp'] : const <String>[],
         serveDevTools: enableDevTools,
@@ -131,7 +131,7 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
     int? ddsPort,
-    bool? disableServiceAuthCodes,
+    bool? enableServiceAuthCodes,
     bool? ipv6,
     bool enableDevTools = true,
     bool cacheStartupProfile = false,
@@ -147,7 +147,7 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
   }) => startDartDevelopmentService(
     vmServiceUri,
     ddsPort: debuggingOptions.ddsPort,
-    disableServiceAuthCodes: debuggingOptions.disableServiceAuthCodes,
+    enableServiceAuthCodes: debuggingOptions.enableServiceAuthCodes,
     ipv6: debuggingOptions.ipv6,
     enableDevTools: debuggingOptions.enableDevTools,
     cacheStartupProfile: debuggingOptions.cacheStartupProfile,

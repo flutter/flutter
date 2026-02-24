@@ -2126,7 +2126,7 @@ flutter:
         await flutterDevice.connect(
           debuggingOptions: DebuggingOptions.enabled(
             BuildInfo.debug,
-            disableServiceAuthCodes: true,
+            enableServiceAuthCodes: false,
             ipv6: true,
           ),
         );

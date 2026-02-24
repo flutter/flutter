@@ -302,7 +302,7 @@ class CustomDeviceAppSession {
           'verify-entry-points=true',
         ],
         if (debuggingOptions.startPaused) 'start-paused=true',
-        if (debuggingOptions.disableServiceAuthCodes) 'disable-service-auth-codes=true',
+        if (!debuggingOptions.enableServiceAuthCodes) 'disable-service-auth-codes=true',
         if (debuggingOptions.dartFlags.isNotEmpty) 'dart-flags=${debuggingOptions.dartFlags}',
         if (debuggingOptions.useTestFonts) 'use-test-fonts=true',
         if (debuggingOptions.verboseSystemLogs) 'verbose-logging=true',

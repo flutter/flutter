@@ -189,7 +189,7 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(
           BuildInfo.debug,
           startPaused: true,
-          disableServiceAuthCodes: true,
+          enableServiceAuthCodes: false,
           enableSoftwareRendering: true,
           skiaDeterministicRendering: true,
           traceSkia: true,

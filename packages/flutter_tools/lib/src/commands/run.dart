@@ -253,7 +253,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get traceStartup => boolArg('trace-startup');
   bool get enableDartProfiling => boolArg('enable-dart-profiling');
   bool get purgePersistentCache => boolArg('purge-persistent-cache');
-  bool get disableServiceAuthCodes => boolArg('disable-service-auth-codes');
+  bool get enableServiceAuthCodes => !boolArg('disable-service-auth-codes');
   bool get cacheStartupProfile => boolArg('cache-startup-profile');
   bool get runningWithPrebuiltApplication =>
       argResults![FlutterOptions.kUseApplicationBinary] != null;
@@ -335,7 +335,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       return DebuggingOptions.enabled(
         buildInfo,
         startPaused: boolArg('start-paused'),
-        disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
+        enableServiceAuthCodes: enableServiceAuthCodes,
         cacheStartupProfile: cacheStartupProfile,
         enableDds: enableDds,
         dartEntrypointArgs: stringsArg('dart-entrypoint-args'),
