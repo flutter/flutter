@@ -3188,6 +3188,10 @@ abstract class Path {
   /// number of contours, **not the length of the path**. To get the length of
   /// a contour in a path, use [PathMetric.length].
   ///
+  /// Zero-length contours (where the start and end points are the same, such as
+  /// `Path()..lineTo(0, 0)`) are not included in the returned [PathMetrics].
+  /// Only contours with a positive length will have a corresponding [PathMetric].
+  ///
   /// If `forceClosed` is set to true, the contours of the path will be measured
   /// as if they had been closed, even if they were not explicitly closed.
   PathMetrics computeMetrics({bool forceClosed = false});
