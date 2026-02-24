@@ -4263,11 +4263,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
   ///
   /// Semantics events should be sent to inform interested parties (like
   /// the accessibility system of the operating system) about changes to the UI.
-  void sendEvent(SemanticsEvent event) {
+  Future<void> sendEvent(SemanticsEvent event) async {
     if (!attached) {
       return;
     }
-    SystemChannels.accessibility.send(event.toMap(nodeId: id));
+    await SystemChannels.accessibility.send(event.toMap(nodeId: id));
   }
 
   bool _debugIsActionBlocked(SemanticsAction action) {

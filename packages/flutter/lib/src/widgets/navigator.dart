@@ -3292,11 +3292,11 @@ class _RouteEntry extends RouteTransitionRecord {
             // TODO(hangyujin): update this logic if Android provide a better way to do so.
             final int? reFocusNode = lastFocusNode;
             await Future<void>.delayed(_kAndroidRefocusingDelayDuration);
-            SystemChannels.accessibility.send(
+            await SystemChannels.accessibility.send(
               const FocusSemanticEvent().toMap(nodeId: reFocusNode),
             );
           case TargetPlatform.iOS:
-            SystemChannels.accessibility.send(
+            await SystemChannels.accessibility.send(
               const FocusSemanticEvent().toMap(nodeId: lastFocusNode),
             );
           case _:
