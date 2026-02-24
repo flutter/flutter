@@ -42,13 +42,13 @@ void testMainWithTTOn() {
         createTrustedScriptUrl(badUrl);
       }, throwsAssertionError);
     });
-  }, skip: !isBlink);
+  }, skip: domWindow.trustedTypes == null);
 
   group('Trusted Types API NOT supported', () {
     test('createTrustedScriptUrl - returns unmodified url', () async {
       expect(createTrustedScriptUrl(badUrl), badUrl);
     });
-  }, skip: isBlink);
+  }, skip: domWindow.trustedTypes != null);
 }
 
 /// Enables Trusted Types by setting the appropriate meta tag in the DOM:
