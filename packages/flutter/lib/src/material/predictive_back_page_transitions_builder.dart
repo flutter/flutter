@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+///
 /// @docImport 'page.dart';
 library;
 
@@ -27,7 +29,7 @@ import 'page_transitions_theme.dart';
 /// See also:
 ///
 ///  * [PredictiveBackFullscreenPageTransitionsBuilder], which is another
-///    variant of Android's predictive back page transitition.
+///    variant of Android's predictive back page transition.
 ///  * [FadeForwardsPageTransitionsBuilder], which defines the default page transition
 ///    that's similar to the one provided in Android 16.
 ///  * [ZoomPageTransitionsBuilder], which defines the default page transition
