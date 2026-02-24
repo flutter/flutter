@@ -8,11 +8,12 @@
 library;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart' show TestCallbackPainter, TestClipPaintingContext;
+import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('ListWheelScrollView respects clipBehavior', (WidgetTester tester) async {
@@ -2045,9 +2046,9 @@ void main() {
     'ListWheelScrollView in an AnimatedContainer with zero width and height does not throw an error',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: AnimatedContainer(
+        TestWidgetsApp(
+          home: Align(
+            child: AnimatedContainer(
               width: 0,
               height: 0,
               duration: Duration.zero,
