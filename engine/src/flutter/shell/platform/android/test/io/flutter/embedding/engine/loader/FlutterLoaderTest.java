@@ -1007,6 +1007,66 @@ public class FlutterLoaderTest {
   }
 
   @Test
+  public void itSetsEnableSurfaceControlFromMetadata() {
+    // Test debug mode.
+    testFlagFromMetadataPresent(
+        "io.flutter.embedding.android.EnableSurfaceControl", null, "--enable-surface-control");
+
+    // Test release mode.
+    testFlagFromMetadataPresentInReleaseMode(
+        "io.flutter.embedding.android.EnableSurfaceControl", null, "--enable-surface-control");
+  }
+
+  @Test
+  public void itSetsEnableFlutterGPUFromMetadata() {
+    // Test debug mode.
+    testFlagFromMetadataPresent(
+        "io.flutter.embedding.android.EnableFlutterGPU", null, "--enable-flutter-gpu");
+
+    // Test release mode.
+    testFlagFromMetadataPresentInReleaseMode(
+        "io.flutter.embedding.android.EnableFlutterGPU", null, "--enable-flutter-gpu");
+  }
+
+  @Test
+  public void itSetsImpellerLazyShaderModeFromMetadata() {
+    // Test debug mode.
+    testFlagFromMetadataPresent(
+        "io.flutter.embedding.android.ImpellerLazyShaderInitialization",
+        true,
+        "--impeller-lazy-shader-mode");
+
+    // Test release mode.
+    testFlagFromMetadataPresentInReleaseMode(
+        "io.flutter.embedding.android.ImpellerLazyShaderInitialization",
+        true,
+        "--impeller-lazy-shader-mode");
+  }
+
+  @Test
+  public void itSetsImpellerAntiAliasLinesFromMetadata() {
+    // Test debug mode.
+    testFlagFromMetadataPresent(
+        "io.flutter.embedding.android.ImpellerAntialiasLines", null, "--impeller-antialias-lines");
+
+    // Test release mode.
+    testFlagFromMetadataPresentInReleaseMode(
+        "io.flutter.embedding.android.ImpellerAntialiasLines", null, "--impeller-antialias-lines");
+  }
+
+  @Test
+  public void itSetsEnableOpenGLGPUTracingFromMetadata() {
+    testFlagFromMetadataPresent(
+        "io.flutter.embedding.android.EnableOpenGLGPUTracing", null, "--enable-opengl-gpu-tracing");
+  }
+
+  @Test
+  public void itSetsEnableVulkanGPUTracingFromMetadata() {
+    testFlagFromMetadataPresent(
+        "io.flutter.embedding.android.EnableVulkanGPUTracing", null, "--enable-vulkan-gpu-tracing");
+  }
+
+  @Test
   public void itDoesNotSetTestFlagFromMetadata() {
     testFlagFromMetadataNotPresent("io.flutter.embedding.android.TestFlag", null, "--test-flag");
   }

@@ -207,7 +207,47 @@ public final class FlutterEngineFlags {
   public static final Flag ISOLATE_SNAPSHOT_DATA =
       new Flag("--isolate-snapshot-data=", "IsolateSnapshotData", true);
 
+  /**
+   * Enables Android SurfaceControl for rendering.
+   *
+   * <p>Allowed in release to opt-in to this rendering feature in production.
+   */
+  private static final Flag ENABLE_SURFACE_CONTROL =
+      new Flag("--enable-surface-control", "EnableSurfaceControl", true);
+
+  /**
+   * Enables the Flutter GPU backend.
+   *
+   * <p>Allowed in release for developers to use the Flutter GPU backend in production.
+   */
+  private static final Flag ENABLE_FLUTTER_GPU =
+      new Flag("--enable-flutter-gpu", "EnableFlutterGPU", true);
+
+  /**
+   * Enables lazy initialization of Impeller shaders.
+   *
+   * <p>Allowed in release for performance tuning of the Impeller backend.
+   */
+  private static final Flag IMPELLER_LAZY_SHADER_MODER =
+      new Flag("--impeller-lazy-shader-mode", "ImpellerLazyShaderInitialization", true);
+
+  /**
+   * Enables antialiasing for lines in Impeller.
+   *
+   * <p>Allowed in release to control rendering quality in production.
+   */
+  private static final Flag IMPELLER_ANTIALIAS_LINES =
+      new Flag("--impeller-antialias-lines", "ImpellerAntialiasLines", true);
+
   // Manifest flags NOT allowed in release mode:
+
+  /** Enables GPU tracing for OpenGL. */
+  private static final Flag IMPELLER_OPENGL_GPU_TRACING =
+      new Flag("--enable-opengl-gpu-tracing", "EnableOpenGLGPUTracing");
+
+  /** Enables GPU tracing for Vulkan. */
+  private static final Flag IMPELLER_VULKAN_GPU_TRACING =
+      new Flag("--enable-vulkan-gpu-tracing", "EnableVulkanGPUTracing");
 
   /** Ensures deterministic Skia rendering by skipping CPU feature swaps. */
   private static final Flag SKIA_DETERMINISTIC_RENDERING =
@@ -342,7 +382,13 @@ public final class FlutterEngineFlags {
               PURGE_PERSISTENT_CACHE,
               TRACE_STARTUP,
               LEAK_VM,
-              TEST_FLAG));
+              TEST_FLAG,
+              ENABLE_SURFACE_CONTROL,
+              ENABLE_FLUTTER_GPU,
+              IMPELLER_LAZY_SHADER_MODER,
+              IMPELLER_ANTIALIAS_LINES,
+              IMPELLER_OPENGL_GPU_TRACING,
+              IMPELLER_VULKAN_GPU_TRACING));
 
   // Flags that have been turned off.
   private static final List<Flag> DISABLED_FLAGS =
