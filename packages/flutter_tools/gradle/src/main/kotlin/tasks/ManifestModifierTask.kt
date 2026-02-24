@@ -53,13 +53,5 @@ abstract class ManifestModifierTask : DefaultTask() {
         updatedManifestFile.get().asFile.bufferedWriter().use { writer ->
             groovy.xml.XmlUtil.serialize(manifest, writer)
         }
-
-        /////////////// IMPLEMENTATION WITHOUT XMLPARSER BELOW: ///////////////
-        // val originalManifestText = manifestFile.get().asFile.readText()
-        // val updatedManifestText = originalManifestText.replace(
-        //     "</application>",
-        //     "    <meta-data android:name=\"androidEngineShellArgs\" android:value=\"${androidEngineShellArgsStr.get()}\" />\n    </application>"
-        // )
-        // updatedManifestFile.get().asFile.writeText(updatedManifestText)
     }
 }
