@@ -555,8 +555,8 @@ void main() {
       fileSystem.file('shader.glsl').writeAsStringSync('test');
 
       processManager.addCommands(<FakeCommand>[
-        const FakeCommand(
-          command: <String>[
+        FakeCommand(
+          command: <Pattern>[
             'HostArtifact.impellerc',
             '--sksl',
             '--runtime-stage-gles',
@@ -569,7 +569,7 @@ void main() {
             '--input-type=frag',
             '--include=/',
             '--include=/./shader_lib',
-            '--verbose-error-output=build/impellerc_error_317495402.txt',
+            RegExp(r'--verbose-error-output=build/impellerc_error_\d+.txt'),
           ],
         ),
       ]);
