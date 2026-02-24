@@ -155,6 +155,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         platform: globals.platform,
         osUtils: globals.os,
         projectFactory: globals.projectFactory,
+        stdio: globals.stdio,
       ),
       CocoaPods: () => CocoaPods(
         fileSystem: globals.fs,

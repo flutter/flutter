@@ -10,7 +10,7 @@ import 'package:meta/meta.dart';
 import '../convert.dart';
 import 'common.dart';
 import 'io.dart';
-import 'terminal.dart' show OutputPreferences, Terminal, TerminalColor;
+import 'terminal.dart' show AnsiTerminal, OutputPreferences, Terminal, TerminalColor;
 import 'utils.dart';
 
 const kDefaultStatusPadding = 59;
@@ -1404,7 +1404,7 @@ class AnonymousSpinnerStatus extends Status {
     assert(_timer != null);
     assert(_timer!.isActive);
     if (_terminal.supportsColor) {
-      _writeToStdOut('\r\x1B[K'); // go to start of line and clear line
+      _writeToStdOut(AnsiTerminal.clearAndReturnCode);
     } else {
       _clear(_currentLineLength);
     }
