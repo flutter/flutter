@@ -23,8 +23,10 @@ constexpr int kTruncatedErrorShowLines = 5;
 namespace impeller {
 namespace compiler {
 
-static Reflector::Options CreateReflectorOptions(const SourceOptions& options,
-                                                 const Switches& switches) {
+namespace {
+
+Reflector::Options CreateReflectorOptions(const SourceOptions& options,
+                                          const Switches& switches) {
   Reflector::Options reflector_options;
   reflector_options.target_platform = options.target_platform;
   reflector_options.entry_point_name = options.entry_point_name;
@@ -35,7 +37,7 @@ static Reflector::Options CreateReflectorOptions(const SourceOptions& options,
   return reflector_options;
 }
 
-static std::shared_ptr<Compiler> CreateCompiler(
+std::shared_ptr<Compiler> CreateCompiler(
     TargetPlatform platform,
     const std::shared_ptr<const fml::Mapping>& source_file_mapping,
     const Switches& switches) {
@@ -105,13 +107,19 @@ static void OutputCompilationError(const Compiler& compiler,
   }
 }
 
-static bool OutputIPLR(const std::vector<std::shared_ptr<Compiler>>& compilers,
-                       const Switches& switches) {
+bool OutputIPLR(const std::vector<std::shared_ptr<Compiler>>& compilers,
+                const Switches& switches) {
   FML_DCHECK(switches.iplr);
 
   RuntimeStageData stages;
   for (const auto& compiler : compilers) {
-    stages.AddShader(compiler->GetReflector()->GetRuntimeStageShaderData());
+    std::shared_ptr<RuntimeStageData::Shader> stage_data =
+        compiler->GetReflector()->GetRuntimeStageShaderData();
+    if (!stage_data) {
+      std::cerr << "Runtime stage information was nil." << std::endl;
+      return false;
+    }
+    stages.AddShader(stage_data);
   }
 
   auto stage_data_mapping = switches.json_format ? stages.CreateJsonMapping()
@@ -136,7 +144,7 @@ static bool OutputIPLR(const std::vector<std::shared_ptr<Compiler>>& compilers,
   return true;
 }
 
-static bool OutputSLFile(const Compiler& compiler, const Switches& switches) {
+bool OutputSLFile(const Compiler& compiler, const Switches& switches) {
   auto sl_file_name = std::filesystem::absolute(
       std::filesystem::current_path() / switches.sl_file_name);
   if (!fml::WriteAtomically(*switches.working_directory,
@@ -149,7 +157,7 @@ static bool OutputSLFile(const Compiler& compiler, const Switches& switches) {
   return true;
 }
 
-static bool OutputSPIRV(const Compiler& compiler, const Switches& switches) {
+bool OutputSPIRV(const Compiler& compiler, const Switches& switches) {
   auto spriv_file_name = std::filesystem::absolute(
       std::filesystem::current_path() / switches.spirv_file_name);
   if (!fml::WriteAtomically(*switches.working_directory,
@@ -162,14 +170,13 @@ static bool OutputSPIRV(const Compiler& compiler, const Switches& switches) {
   return true;
 }
 
-static bool ShouldOutputReflectionData(const Switches& switches) {
+bool ShouldOutputReflectionData(const Switches& switches) {
   return !switches.reflection_json_name.empty() ||
          !switches.reflection_header_name.empty() ||
          !switches.reflection_cc_name.empty();
 }
 
-static bool OutputReflectionData(const Compiler& compiler,
-                                 const Switches& switches) {
+bool OutputReflectionData(const Compiler& compiler, const Switches& switches) {
   if (!switches.reflection_json_name.empty()) {
     auto reflection_json_name = std::filesystem::absolute(
         std::filesystem::current_path() / switches.reflection_json_name);
@@ -209,7 +216,7 @@ static bool OutputReflectionData(const Compiler& compiler,
   return true;
 }
 
-static bool OutputDepfile(const Compiler& compiler, const Switches& switches) {
+bool OutputDepfile(const Compiler& compiler, const Switches& switches) {
   if (!switches.depfile_path.empty()) {
     std::string result_file = Utf8FromPath(switches.sl_file_name);
     auto depfile_path = std::filesystem::absolute(
@@ -225,6 +232,8 @@ static bool OutputDepfile(const Compiler& compiler, const Switches& switches) {
 
   return true;
 }
+
+}  // namespace
 
 bool Main(const fml::CommandLine& command_line) {
   fml::InstallCrashHandler();
@@ -254,8 +263,10 @@ bool Main(const fml::CommandLine& command_line) {
   }
 
   std::vector<std::shared_ptr<Compiler>> compilers;
+  compilers.reserve(switches.PlatformsToCompile().size());
   for (const auto& platform : switches.PlatformsToCompile()) {
-    auto compiler = CreateCompiler(platform, source_file_mapping, switches);
+    std::shared_ptr<Compiler> compiler =
+        CreateCompiler(platform, source_file_mapping, switches);
     if (compiler->IsValid()) {
       compilers.push_back(compiler);
     } else {
