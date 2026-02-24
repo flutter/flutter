@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
@@ -13,6 +12,210 @@ import 'package:ui/ui.dart' as ui;
 
 import '../common/test_initialization.dart';
 import 'utils.dart';
+
+const List<String> _kTestImages = <String>[
+  '16x1.png',
+  '1x1.png',
+  '1x16.png',
+  '1x3.png',
+  '2x2.png',
+  '32bpp-topdown-320x240.bmp',
+  '3x1.png',
+  '3x3.png',
+  'alphabetAnim.gif',
+  'apng-test-suite--basic--ignoring-default-image.png',
+  'apng-test-suite--basic--trivial-static-image.png',
+  'apng-test-suite--basic--using-default-image.png',
+  'apng-test-suite--blend-ops--over-on-solid-and-transparent.png',
+  'apng-test-suite--blend-ops--over-repeatedly.png',
+  'apng-test-suite--blend-ops--source-on-nearly-transparent.png',
+  'apng-test-suite--blend-ops--source-on-solid.png',
+  'apng-test-suite--dispose-ops--none-basic.png',
+  'apng-test-suite--num-plays--0.png',
+  'apng-test-suite--num-plays--1.png',
+  'apng-test-suite--num-plays--2.png',
+  'apng-test-suite--regions--dispose-op-none.png',
+  'arrow.png',
+  'b78329453.jpeg',
+  'baby_tux.png',
+  'baby_tux.webp',
+  'basn2c16-sbit565.png',
+  'blendBG.webp',
+  'bmp-size-32x32-8bpp.bmp',
+  'box.gif',
+  'brickwork_normal-map.jpg',
+  'brickwork-texture.jpg',
+  'cicp_pq.png',
+  'cmyk_yellow_224_224_32.jpg',
+  'CMYK.jpg',
+  'color_wheel_with_profile.png',
+  'color_wheel.gif',
+  'color_wheel.jpg',
+  'color_wheel.png',
+  'color_wheel.webp',
+  'colorTables.gif',
+  'Connecting.png',
+  'crbug1465627.jpeg',
+  'crbug807324.png',
+  'crbug999986.jpeg',
+  'cropped_mandrill.jpg',
+  'dog.jpg',
+  'ducky.jpg',
+  'ducky.png',
+  'example_1.png',
+  'example_2.png',
+  'example_3.png',
+  'example_4.png',
+  'example_5.png',
+  'example_6.png',
+  'exif-orientation-2-ur.jpg',
+  'explosion_sprites.png',
+  'F-exif-chunk-early.png',
+  'f16-trc-tables.png',
+  'filter_reference.png',
+  'flightAnim.gif',
+  'flutter_logo.jpg',
+  'gainmap_gcontainer_only.jpg',
+  'gainmap_gdat_no_gmap.png',
+  'gainmap_iso21496_1_adobe_gcontainer.jpg',
+  'gainmap_iso21496_1.jpg',
+  'gainmap_no_gdat.png',
+  'gainmap.png',
+  'gamut.png',
+  'Generic_Error.png',
+  'gif-transparent-index.gif',
+  'gradient_adobe_to_p3.jpeg',
+  'gradient_adobe_to_p3.png',
+  'gradient_adobergb.jpeg',
+  'gradient_adobergb.png',
+  'gradient_displayp3.jpeg',
+  'gradient_displayp3.png',
+  'gradient_p3_to_adobe.jpeg',
+  'gradient_p3_to_adobe.png',
+  'grayscale.jpg',
+  'grayscale.png',
+  'green15x15.png',
+  'half-transparent-white-pixel.png',
+  'half-transparent-white-pixel.webp',
+  'icc-v2-gbr.jpg',
+  'iconstrip.png',
+  'index8.png',
+  'iphone_13_pro.jpeg',
+  'iphone_15.jpeg',
+  'lut_identity.png',
+  'lut_sepia.png',
+  'mandrill_128.png',
+  'mandrill_16.png',
+  'mandrill_1600.png',
+  'mandrill_256.png',
+  'mandrill_32.png',
+  'mandrill_512_q075.jpg',
+  'mandrill_512.png',
+  'mandrill_64.png',
+  'mandrill_cmyk.jpg',
+  'mandrill_h1v1.jpg',
+  'mandrill_h2v1.jpg',
+  'mandrill_sepia.png',
+  'Onboard.png',
+  'orientation/1_410.jpg',
+  'orientation/1_411.jpg',
+  'orientation/1_420.jpg',
+  'orientation/1_422.jpg',
+  'orientation/1_440.jpg',
+  'orientation/1_444.jpg',
+  'orientation/1.webp',
+  'orientation/2_410.jpg',
+  'orientation/2_411.jpg',
+  'orientation/2_420.jpg',
+  'orientation/2_422.jpg',
+  'orientation/2_440.jpg',
+  'orientation/2_444.jpg',
+  'orientation/2.webp',
+  'orientation/3_410.jpg',
+  'orientation/3_411.jpg',
+  'orientation/3_420.jpg',
+  'orientation/3_422.jpg',
+  'orientation/3_440.jpg',
+  'orientation/3_444.jpg',
+  'orientation/3.webp',
+  'orientation/4_410.jpg',
+  'orientation/4_411.jpg',
+  'orientation/4_420.jpg',
+  'orientation/4_422.jpg',
+  'orientation/4_440.jpg',
+  'orientation/4_444.jpg',
+  'orientation/4.webp',
+  'orientation/5_410.jpg',
+  'orientation/5_411.jpg',
+  'orientation/5_420.jpg',
+  'orientation/5_422.jpg',
+  'orientation/5_440.jpg',
+  'orientation/5_444.jpg',
+  'orientation/5.webp',
+  'orientation/6_410.jpg',
+  'orientation/6_411.jpg',
+  'orientation/6_420.jpg',
+  'orientation/6_422.jpg',
+  'orientation/6_440.jpg',
+  'orientation/6_444.jpg',
+  'orientation/6.webp',
+  'orientation/7_410.jpg',
+  'orientation/7_411.jpg',
+  'orientation/7_420.jpg',
+  'orientation/7_422.jpg',
+  'orientation/7_440.jpg',
+  'orientation/7_444.jpg',
+  'orientation/7.webp',
+  'orientation/8_410.jpg',
+  'orientation/8_411.jpg',
+  'orientation/8_420.jpg',
+  'orientation/8_422.jpg',
+  'orientation/8_440.jpg',
+  'orientation/8_444.jpg',
+  'orientation/8.webp',
+  'orientation/exif.jpg',
+  'orientation/subifd.jpg',
+  'out-of-palette.gif',
+  'plane_interlaced.png',
+  'plane.png',
+  'plte_trns_gama.png',
+  'plte_trns.png',
+  'png-zero-gamma-color-profile.png',
+  'pngsuite/basn0g04.png',
+  'pngsuite/basn2c08.png',
+  'pngsuite/basn2c16.png',
+  'pngsuite/basn3p01.png',
+  'purple-displayprofile.png',
+  'rainbow-gradient.png',
+  'randPixels.bmp',
+  'randPixels.gif',
+  'randPixels.jpg',
+  'randPixels.png',
+  'randPixels.webp',
+  'randPixelsAnim.gif',
+  'randPixelsAnim2.gif',
+  'randPixelsOffset.gif',
+  'red-hlg-profile.png',
+  'red-pq-profile.png',
+  'required.gif',
+  'required.webp',
+  'rle.bmp',
+  'shadowreference.png',
+  'ship.png',
+  'stoplight_h.webp',
+  'stoplight.webp',
+  'test640x479.gif',
+  'text.png',
+  'webp-color-profile-crash.webp',
+  'webp-color-profile-lossless.webp',
+  'webp-color-profile-lossy-alpha.webp',
+  'webp-color-profile-lossy.webp',
+  'wide_gamut_yellow_224_224_64.jpeg',
+  'wide-gamut.png',
+  'xOffsetTooBig.gif',
+  'yellow_rose.png',
+  'yellow_rose.webp',
+];
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -121,36 +324,15 @@ class BitmapSingleFrameCodec implements ui.Codec {
 }
 
 Future<void> testMain() async {
-  final HttpFetchResponse listingResponse = await httpFetch('/test_images/');
-  final List<String> testFiles =
-      ((await listingResponse.json() as JSAny?).dartify()! as List<Object?>).cast<String>();
-
   List<TestCodec> createTestCodecs({int testTargetWidth = 300, int testTargetHeight = 300}) {
-    // Sanity-check the test file list. If suddenly test files are moved or
-    // deleted, and the test server returns an empty list, or is missing some
-    // important test files, we want to know.
-    assert(testFiles.isNotEmpty);
-    assert(testFiles.any((String testFile) => testFile.endsWith('.jpg')));
-    assert(testFiles.any((String testFile) => testFile.endsWith('.png')));
-    assert(testFiles.any((String testFile) => testFile.endsWith('.gif')));
-    assert(testFiles.any((String testFile) => testFile.endsWith('.webp')));
-    assert(testFiles.any((String testFile) => testFile.endsWith('.bmp')));
-
     final testCodecs = <TestCodec>[];
-    for (final testFile in testFiles) {
+    for (final String testFile in _kTestImages) {
       if (testFile == 'xOffsetTooBig.gif' && isSafari) {
         // This file causes Safari to crash with `EncodingError`. See:
         // https://github.com/flutter/flutter/issues/152709
         continue;
       }
-      if (testFile == 'rgb24prof.bmp' && isSafari) {
-        // This file causes Safari to crash with `EncodingError`.
-        continue;
-      }
-      if (testFile == 'b464333052.jpg') {
-        // This is an undecodable image used to test a Skia failure code path.
-        continue;
-      }
+
       testCodecs.add(
         UrlTestCodec(
           testFile,
@@ -197,34 +379,10 @@ Future<void> testMain() async {
     });
 
     void runCodecTest(TestCodec testCodec) {
-      const problematicChromeImages = <String, Set<int>>{
-        // Frame 2 cause Chrome to crash.
-        // https://issues.chromium.org/456445108
-        'crbug445556737.png': {2},
-        // Frames 2 and 3 cause Chrome to crash.
-        // https://issues.chromium.org/456445108
-        'interlaced-multiframe-with-blending.png': {2, 3},
-      };
-
       test('${testCodec.description} can create an image and convert it to byte array', () async {
         final ui.Codec codec = await testCodec.createCodec();
 
-        final Set<int> problematicFrames;
-        if (isChromium && problematicChromeImages.containsKey(testCodec.testFile)) {
-          // Encountered an image with known problematic frames on Chromium.
-          problematicFrames = problematicChromeImages[testCodec.testFile]!;
-        } else {
-          problematicFrames = <int>{};
-        }
-
         for (var i = 0; i < codec.frameCount; i++) {
-          if (problematicFrames.contains(i)) {
-            printWarning(
-              'Skipping frame $i of ${testCodec.description} due to known Chromium crash bug.',
-            );
-            continue;
-          }
-
           final ui.Image image;
           try {
             final ui.FrameInfo frameInfo = await codec.getNextFrame();
