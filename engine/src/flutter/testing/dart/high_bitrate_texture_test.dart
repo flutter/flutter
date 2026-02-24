@@ -69,12 +69,8 @@ void main() async {
   });
 
   test('Picture.toImageSync with rgbaFloat32, toByteData rgbaFloat32', () async {
-    if (impellerEnabled) {
-      print('Skipped for Impeller');
-      return;
-    }
     const dimension = 1;
-    final floats = <double>[1.0, 0.66, 0.33, 0.0];
+    final floats = <double>[1.0, 0.66, 0.33, 1.0];
     final floatList = Float32List.fromList(floats);
     final intList = Uint8List.view(floatList.buffer);
     final completer = Completer<Image>();
@@ -96,7 +92,7 @@ void main() async {
     expect(pixels[0], closeTo(1.0, 0.001));
     expect(pixels[1], closeTo(0.66, 0.001));
     expect(pixels[2], closeTo(0.33, 0.001));
-    expect(pixels[3], closeTo(0.0, 0.001));
+    expect(pixels[3], closeTo(1.0, 0.001));
     image.dispose();
   });
 
