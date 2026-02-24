@@ -5,9 +5,9 @@
 #ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_DART_PKG_ZIRCON_FFI_CHANNEL_H_
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_DART_PKG_ZIRCON_FFI_CHANNEL_H_
 
-#include "basic_types.h"
-#include "handle.h"
-#include "macros.h"
+#include "flutter/shell/platform/fuchsia/dart-pkg/zircon_ffi/basic_types.h"
+#include "flutter/shell/platform/fuchsia/dart-pkg/zircon_ffi/handle.h"
+#include "flutter/shell/platform/fuchsia/dart-pkg/zircon_ffi/macros.h"
 
 #include <stdint.h>
 

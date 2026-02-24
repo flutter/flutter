@@ -7,7 +7,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -40,7 +39,6 @@ void main() {
       platform: FakePlatform(localeName: 'en_US.UTF-8', environment: <String, String>{}),
       flutterVersion: () => flutterVersion,
       devToolsVersion: () => '2.8.0',
-      userMessages: UserMessages(),
       artifacts: artifacts,
       fileSystem: fileSystem,
       flutterRoot: () => '/sdk/flutter',
@@ -82,7 +80,6 @@ void main() {
       ),
       flutterVersion: () => flutterVersion,
       devToolsVersion: () => '2.8.0',
-      userMessages: UserMessages(),
       artifacts: artifacts,
       fileSystem: fileSystem,
       flutterRoot: () => 'sdk/flutter',
@@ -126,7 +123,6 @@ void main() {
         ),
         flutterVersion: () => flutterVersion,
         devToolsVersion: () => '2.8.0',
-        userMessages: UserMessages(),
         artifacts: Artifacts.test(),
         fileSystem: MemoryFileSystem.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(name: 'Windows'),
@@ -153,7 +149,6 @@ void main() {
       platform: FakePlatform(operatingSystem: 'windows', localeName: 'en_US.UTF-8'),
       flutterVersion: () => FakeThrowingFlutterVersion(),
       devToolsVersion: () => '2.8.0',
-      userMessages: UserMessages(),
       artifacts: Artifacts.test(),
       fileSystem: MemoryFileSystem.test(),
       operatingSystemUtils: FakeOperatingSystemUtils(name: 'Windows'),
@@ -191,7 +186,6 @@ void main() {
       platform: platform,
       flutterVersion: () => flutterVersion,
       devToolsVersion: () => '2.8.0',
-      userMessages: UserMessages(),
       artifacts: artifacts,
       fileSystem: fileSystem,
       processManager: FakeProcessManager.any(),
@@ -222,7 +216,6 @@ void main() {
       platform: platform,
       flutterVersion: () => flutterVersion,
       devToolsVersion: () => '2.8.0',
-      userMessages: UserMessages(),
       artifacts: artifacts,
       fileSystem: fileSystem,
       processManager: FakeProcessManager.any(),
@@ -254,7 +247,6 @@ void main() {
       platform: platform,
       flutterVersion: () => flutterVersion,
       devToolsVersion: () => '2.8.0',
-      userMessages: UserMessages(),
       artifacts: artifacts,
       fileSystem: fileSystem,
       processManager: FakeProcessManager.any(),
@@ -286,7 +278,6 @@ void main() {
       platform: platform,
       flutterVersion: () => flutterVersion,
       devToolsVersion: () => '2.8.0',
-      userMessages: UserMessages(),
       artifacts: artifacts,
       fileSystem: fileSystem,
       processManager: FakeProcessManager.any(),
@@ -319,7 +310,6 @@ void main() {
         ),
         flutterVersion: () => FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta'),
         devToolsVersion: () => '2.8.0',
-        userMessages: UserMessages(),
         artifacts: Artifacts.test(),
         fileSystem: MemoryFileSystem.test(),
         processManager: FakeProcessManager.any(),
@@ -353,7 +343,6 @@ void main() {
       platform: FakePlatform(localeName: 'en_US.UTF-8'),
       flutterVersion: () => FakeFlutterVersion(branch: 'unknown', frameworkVersion: '1.0.0'),
       devToolsVersion: () => '2.8.0',
-      userMessages: UserMessages(),
       artifacts: Artifacts.test(),
       fileSystem: MemoryFileSystem.test(),
       processManager: FakeProcessManager.any(),
@@ -387,7 +376,6 @@ void main() {
       platform: FakePlatform(localeName: 'en_US.UTF-8'),
       flutterVersion: () => FakeFlutterVersion(frameworkVersion: '0.0.0-unknown', branch: 'beta'),
       devToolsVersion: () => '2.8.0',
-      userMessages: UserMessages(),
       artifacts: Artifacts.test(),
       fileSystem: MemoryFileSystem.test(),
       processManager: FakeProcessManager.any(),
@@ -422,7 +410,6 @@ void main() {
         platform: FakePlatform(localeName: 'en_US.UTF-8'),
         flutterVersion: () => FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta'),
         devToolsVersion: () => '2.8.0',
-        userMessages: UserMessages(),
         artifacts: Artifacts.test(),
         fileSystem: MemoryFileSystem.test(),
         processManager: FakeProcessManager.any(),
@@ -452,7 +439,6 @@ void main() {
           repositoryUrl: 'https://githubmirror.com/flutter.git',
         ),
         devToolsVersion: () => '2.8.0',
-        userMessages: UserMessages(),
         artifacts: Artifacts.test(),
         fileSystem: MemoryFileSystem.test(),
         processManager: FakeProcessManager.any(),
@@ -487,7 +473,6 @@ void main() {
         flutterVersion: () =>
             FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta', repositoryUrl: null),
         devToolsVersion: () => '2.8.0',
-        userMessages: UserMessages(),
         artifacts: Artifacts.test(),
         fileSystem: MemoryFileSystem.test(),
         processManager: FakeProcessManager.any(),
@@ -523,7 +508,6 @@ void main() {
         platform: FakePlatform(localeName: 'en_US.UTF-8'),
         flutterVersion: () => FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta'),
         devToolsVersion: () => '2.8.0',
-        userMessages: UserMessages(),
         artifacts: Artifacts.test(),
         fileSystem: MemoryFileSystem.test(),
         processManager: FakeProcessManager.any(),
@@ -556,7 +540,6 @@ void main() {
       platform: FakePlatform(localeName: 'en_US.UTF-8'),
       flutterVersion: () => FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta'),
       devToolsVersion: () => '2.8.0',
-      userMessages: UserMessages(),
       artifacts: Artifacts.test(),
       fileSystem: MemoryFileSystem.test(),
       processManager: FakeProcessManager.any(),
@@ -594,7 +577,6 @@ void main() {
       platform: FakePlatform(operatingSystem: 'windows', localeName: 'en_US.UTF-8'),
       flutterVersion: () => FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta'),
       devToolsVersion: () => '2.8.0',
-      userMessages: UserMessages(),
       artifacts: Artifacts.test(),
       fileSystem: fs,
       processManager: FakeProcessManager.empty(),
@@ -633,7 +615,6 @@ void main() {
       platform: FakePlatform(operatingSystem: 'windows', localeName: 'en_US.UTF-8'),
       flutterVersion: () => FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta'),
       devToolsVersion: () => '2.8.0',
-      userMessages: UserMessages(),
       artifacts: Artifacts.test(),
       fileSystem: fs,
       processManager: FakeProcessManager.empty(),
@@ -667,7 +648,6 @@ void main() {
       platform: FakePlatform(localeName: 'en_US.UTF-8'),
       flutterVersion: () => FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta'),
       devToolsVersion: () => '2.8.0',
-      userMessages: UserMessages(),
       artifacts: Artifacts.test(),
       fileSystem: fs,
       processManager: FakeProcessManager.any(),
@@ -704,7 +684,6 @@ void main() {
       platform: FakePlatform(localeName: 'en_US.UTF-8'),
       flutterVersion: () => FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta'),
       devToolsVersion: () => '2.8.0',
-      userMessages: UserMessages(),
       artifacts: Artifacts.test(),
       fileSystem: fs,
       processManager: FakeProcessManager.any(),
@@ -817,6 +796,9 @@ class FakeFlutterFeatures extends FeatureFlags {
 
   @override
   bool get isWindowingEnabled => _enabled;
+
+  @override
+  bool get isAccessibilityEvaluationsEnabled => _enabled;
 
   @override
   bool get isLLDBDebuggingEnabled => _enabled;

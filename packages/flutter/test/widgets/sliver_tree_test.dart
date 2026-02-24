@@ -7,9 +7,11 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'utils.dart';
 
 List<TreeSliverNode<String>> simpleNodeSet = <TreeSliverNode<String>>[
   TreeSliverNode<String>('Root 0'),
@@ -79,8 +81,9 @@ void main() {
       final children = <TreeSliverNode<String>>[TreeSliverNode<String>('child')];
       final node = TreeSliverNode<String>('parent', children: children, expanded: true);
       await tester.pumpWidget(
-        MaterialApp(
-          home: CustomScrollView(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
             slivers: <Widget>[
               TreeSliver<String>(tree: <TreeSliverNode<String>>[node]),
             ],
@@ -132,8 +135,9 @@ void main() {
       final controller = TreeSliverController();
       TreeSliverController? returnedController;
       await tester.pumpWidget(
-        MaterialApp(
-          home: CustomScrollView(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
             slivers: <Widget>[
               TreeSliver<String>(
                 tree: simpleNodeSet,
@@ -158,8 +162,9 @@ void main() {
     testWidgets('Can get default controller on TreeSliver', (WidgetTester tester) async {
       TreeSliverController? returnedController;
       await tester.pumpWidget(
-        MaterialApp(
-          home: CustomScrollView(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
             slivers: <Widget>[
               TreeSliver<String>(
                 tree: simpleNodeSet,
@@ -183,8 +188,9 @@ void main() {
     testWidgets('Can get node for TreeSliverNode.content', (WidgetTester tester) async {
       final controller = TreeSliverController();
       await tester.pumpWidget(
-        MaterialApp(
-          home: CustomScrollView(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
             slivers: <Widget>[TreeSliver<String>(tree: simpleNodeSet, controller: controller)],
           ),
         ),
@@ -196,8 +202,9 @@ void main() {
     testWidgets('Can get isExpanded for a node', (WidgetTester tester) async {
       final controller = TreeSliverController();
       await tester.pumpWidget(
-        MaterialApp(
-          home: CustomScrollView(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
             slivers: <Widget>[TreeSliver<String>(tree: simpleNodeSet, controller: controller)],
           ),
         ),
@@ -209,8 +216,9 @@ void main() {
     testWidgets('Can get isActive for a node', (WidgetTester tester) async {
       final controller = TreeSliverController();
       await tester.pumpWidget(
-        MaterialApp(
-          home: CustomScrollView(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
             slivers: <Widget>[TreeSliver<String>(tree: simpleNodeSet, controller: controller)],
           ),
         ),
@@ -225,8 +233,9 @@ void main() {
     testWidgets('Can toggleNode, to collapse or expand', (WidgetTester tester) async {
       final controller = TreeSliverController();
       await tester.pumpWidget(
-        MaterialApp(
-          home: CustomScrollView(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
             slivers: <Widget>[TreeSliver<String>(tree: simpleNodeSet, controller: controller)],
           ),
         ),
@@ -257,8 +266,9 @@ void main() {
     testWidgets('Can expandNode, then collapseAll', (WidgetTester tester) async {
       final controller = TreeSliverController();
       await tester.pumpWidget(
-        MaterialApp(
-          home: CustomScrollView(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
             slivers: <Widget>[TreeSliver<String>(tree: simpleNodeSet, controller: controller)],
           ),
         ),
@@ -290,8 +300,9 @@ void main() {
     testWidgets('Can collapseNode, then expandAll', (WidgetTester tester) async {
       final controller = TreeSliverController();
       await tester.pumpWidget(
-        MaterialApp(
-          home: CustomScrollView(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
             slivers: <Widget>[TreeSliver<String>(tree: simpleNodeSet, controller: controller)],
           ),
         ),
@@ -361,8 +372,9 @@ void main() {
     var toggled = false;
     TreeSliverNode<String>? toggledNode;
     await tester.pumpWidget(
-      MaterialApp(
-        home: CustomScrollView(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
           slivers: <Widget>[
             TreeSliver<String>(
               tree: simpleNodeSet,
@@ -388,8 +400,9 @@ void main() {
     toggledNode = null;
     // Use toggleNodeWith to make the whole row trigger the node state.
     await tester.pumpWidget(
-      MaterialApp(
-        home: CustomScrollView(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
           slivers: <Widget>[
             TreeSliver<String>(
               tree: simpleNodeSet,
@@ -474,8 +487,9 @@ void main() {
 
     AnimationStyle? style;
     await tester.pumpWidget(
-      MaterialApp(
-        home: CustomScrollView(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
           slivers: <Widget>[
             TreeSliver<String>(
               tree: simpleNodeSet,
@@ -497,8 +511,9 @@ void main() {
     expect(style, TreeSliver.defaultToggleAnimationStyle);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: CustomScrollView(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
           slivers: <Widget>[
             TreeSliver<String>(
               tree: simpleNodeSet,
@@ -523,8 +538,9 @@ void main() {
     style = null;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: CustomScrollView(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
           slivers: <Widget>[
             TreeSliver<String>(
               tree: simpleNodeSet,
@@ -575,20 +591,28 @@ void main() {
     ];
     final controller = TreeSliverController();
     await tester.pumpWidget(
-      MaterialApp(
-        home: StatefulBuilder(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return Scaffold(
-              body: CustomScrollView(
-                slivers: <Widget>[TreeSliver<String>(tree: simpleNodeSet, controller: controller)],
-              ),
-              floatingActionButton: FloatingActionButton(
-                onPressed: () {
-                  setState(() {
-                    simpleNodeSet.add(TreeSliverNode<String>('Added root'));
-                  });
-                },
-              ),
+            return Column(
+              children: [
+                TestButton(
+                  onPressed: () {
+                    setState(() {
+                      simpleNodeSet.add(TreeSliverNode<String>('Added root'));
+                    });
+                  },
+                  child: const Text('Add root'),
+                ),
+                Expanded(
+                  child: CustomScrollView(
+                    slivers: <Widget>[
+                      TreeSliver<String>(tree: simpleNodeSet, controller: controller),
+                    ],
+                  ),
+                ),
+              ],
             );
           },
         ),
@@ -606,7 +630,7 @@ void main() {
     expect(find.text('Root 3'), findsOneWidget);
     expect(find.text('Added root'), findsNothing);
 
-    await tester.tap(find.byType(FloatingActionButton));
+    await tester.tap(find.text('Add root'));
     await tester.pump();
 
     expect(find.text('Root 0'), findsOneWidget);
@@ -645,20 +669,28 @@ void main() {
     ];
     final controller = TreeSliverController();
     await tester.pumpWidget(
-      MaterialApp(
-        home: StatefulBuilder(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return Scaffold(
-              body: CustomScrollView(
-                slivers: <Widget>[TreeSliver<String>(tree: simpleNodeSet, controller: controller)],
-              ),
-              floatingActionButton: FloatingActionButton(
-                onPressed: () {
-                  setState(() {
-                    simpleNodeSet[1].children.add(TreeSliverNode<String>('Added child'));
-                  });
-                },
-              ),
+            return Column(
+              children: [
+                TestButton(
+                  onPressed: () {
+                    setState(() {
+                      simpleNodeSet[1].children.add(TreeSliverNode<String>('Added child'));
+                    });
+                  },
+                  child: const Text('Add child'),
+                ),
+                Expanded(
+                  child: CustomScrollView(
+                    slivers: <Widget>[
+                      TreeSliver<String>(tree: simpleNodeSet, controller: controller),
+                    ],
+                  ),
+                ),
+              ],
             );
           },
         ),
@@ -674,7 +706,7 @@ void main() {
     expect(find.text('Child 2:0'), findsNothing);
     expect(find.text('Child 2:1'), findsNothing);
     expect(find.text('Root 3'), findsOneWidget);
-    await tester.tap(find.byType(FloatingActionButton));
+    await tester.tap(find.text('Add child'));
     await tester.pump();
     expect(find.text('Root 0'), findsOneWidget);
     expect(find.text('Root 1'), findsOneWidget);
@@ -723,8 +755,9 @@ void main() {
       ];
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: CustomScrollView(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
             slivers: <Widget>[
               TreeSliver<String>(
                 tree: tree,
@@ -810,35 +843,34 @@ void main() {
       ];
 
       Widget buildTreeSliver(TreeSliverController controller) {
-        return MaterialApp(
-          home: Scaffold(
-            body: CustomScrollView(
-              shrinkWrap: true,
-              slivers: <Widget>[
-                TreeSliver<String>(
-                  tree: tree,
-                  controller: controller,
-                  toggleAnimationStyle: const AnimationStyle(
-                    curve: Curves.easeInOut,
-                    duration: Duration(milliseconds: 200),
-                  ),
-                  treeNodeBuilder:
-                      (
-                        BuildContext context,
-                        TreeSliverNode<Object?> node,
-                        AnimationStyle animationStyle,
-                      ) {
-                        final Widget child = GestureDetector(
-                          key: ValueKey<String>(node.content! as String),
-                          behavior: HitTestBehavior.translucent,
-                          onTap: () => controller.toggleNode(node),
-                          child: TreeSliver.defaultTreeNodeBuilder(context, node, animationStyle),
-                        );
-                        return child;
-                      },
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            shrinkWrap: true,
+            slivers: <Widget>[
+              TreeSliver<String>(
+                tree: tree,
+                controller: controller,
+                toggleAnimationStyle: const AnimationStyle(
+                  curve: Curves.easeInOut,
+                  duration: Duration(milliseconds: 200),
                 ),
-              ],
-            ),
+                treeNodeBuilder:
+                    (
+                      BuildContext context,
+                      TreeSliverNode<Object?> node,
+                      AnimationStyle animationStyle,
+                    ) {
+                      final Widget child = GestureDetector(
+                        key: ValueKey<String>(node.content! as String),
+                        behavior: HitTestBehavior.translucent,
+                        onTap: () => controller.toggleNode(node),
+                        child: TreeSliver.defaultTreeNodeBuilder(context, node, animationStyle),
+                      );
+                      return child;
+                    },
+              ),
+            ],
           ),
         );
       }
@@ -888,7 +920,7 @@ void main() {
                           TreeSliverNode<Object?> node,
                           AnimationStyle animationStyle,
                         ) {
-                          return const ColoredBox(color: Colors.red);
+                          return const ColoredBox(color: Color(0xFFF44336));
                         },
                   ),
                 ],
@@ -960,7 +992,7 @@ void main() {
                           TreeSliverNode<Object?> node,
                           AnimationStyle animationStyle,
                         ) {
-                          return const ColoredBox(color: Colors.red);
+                          return const ColoredBox(color: Color(0xFFF44336));
                         },
                   ),
                   const SliverToBoxAdapter(child: SizedBox(height: 20)),

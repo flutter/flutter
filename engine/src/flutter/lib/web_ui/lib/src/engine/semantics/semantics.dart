@@ -848,12 +848,7 @@ abstract class SemanticRole {
 
   /// Adds the [Selectable] behavior, if the node is selectable but not checkable.
   void addSelectableBehavior() {
-    // Do not use the [Selectable] behavior on checkables. Checkables use
-    // special ARIA roles and `aria-checked`. Adding `aria-selected` in addition
-    // to `aria-checked` would be confusing.
-    if (semanticsObject.isSelectable && !semanticsObject.isCheckable) {
-      addSemanticBehavior(Selectable(semanticsObject, this));
-    }
+    addSemanticBehavior(Selectable(semanticsObject, this));
   }
 
   void addExpandableBehavior() {
@@ -1066,9 +1061,7 @@ final class GenericRole extends SemanticRole {
     // tappable. For example, the dismiss barrier of a pop-up menu is a tappable
     // ancestor of the menu itself, while the menu may contain tappable
     // children.
-    if (semanticsObject.isTappable) {
-      addTappable();
-    }
+    addTappable();
   }
 
   @override

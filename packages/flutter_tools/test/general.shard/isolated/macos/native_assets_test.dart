@@ -82,6 +82,7 @@ void main() {
             if (flutterTester) ...<FakeCommand>[
               FakeCommand(
                 command: <Pattern>[
+                  'xcrun',
                   'lipo',
                   '-create',
                   '-output',
@@ -89,8 +90,17 @@ void main() {
                   '${isArm64 ? 'arm64' : 'x64'}/libbar.dylib',
                 ],
               ),
+              if (buildMode == BuildMode.release) ...<FakeCommand>[
+                FakeCommand(
+                  command: <Pattern>['xcrun', 'dsymutil', dylibPathBar, '-o', '$signPathBar.dSYM'],
+                  onRun: (_) {
+                    fileSystem.directory('$signPathBar.dSYM').createSync(recursive: true);
+                  },
+                ),
+                FakeCommand(command: <Pattern>['xcrun', 'strip', '-x', '-S', dylibPathBar]),
+              ],
               FakeCommand(
-                command: <Pattern>['otool', '-D', dylibPathBar],
+                command: <Pattern>['xcrun', 'otool', '-D', dylibPathBar],
                 stdout: <String>[
                   '$dylibPathBar (architecture x86_64):',
                   '@rpath/libbar.dylib',
@@ -100,6 +110,7 @@ void main() {
               ),
               FakeCommand(
                 command: <Pattern>[
+                  'xcrun',
                   'lipo',
                   '-create',
                   '-output',
@@ -107,8 +118,17 @@ void main() {
                   '${isArm64 ? 'arm64' : 'x64'}/libbuz.dylib',
                 ],
               ),
+              if (buildMode == BuildMode.release) ...<FakeCommand>[
+                FakeCommand(
+                  command: <Pattern>['xcrun', 'dsymutil', dylibPathBuz, '-o', '$signPathBuz.dSYM'],
+                  onRun: (_) {
+                    fileSystem.directory('$signPathBuz.dSYM').createSync(recursive: true);
+                  },
+                ),
+                FakeCommand(command: <Pattern>['xcrun', 'strip', '-x', '-S', dylibPathBuz]),
+              ],
               FakeCommand(
-                command: <Pattern>['otool', '-D', dylibPathBuz],
+                command: <Pattern>['xcrun', 'otool', '-D', dylibPathBuz],
                 stdout: <String>[
                   '$dylibPathBuz (architecture ${isArm64 ? 'arm64' : 'x86_64'}):',
                   '@rpath/libbuz.dylib',
@@ -116,6 +136,7 @@ void main() {
               ),
               FakeCommand(
                 command: <Pattern>[
+                  'xcrun',
                   'install_name_tool',
                   '-id',
                   dylibPathBar,
@@ -130,6 +151,7 @@ void main() {
               ),
               FakeCommand(
                 command: <Pattern>[
+                  'xcrun',
                   'codesign',
                   '--force',
                   '--sign',
@@ -140,6 +162,7 @@ void main() {
               ),
               FakeCommand(
                 command: <Pattern>[
+                  'xcrun',
                   'install_name_tool',
                   '-id',
                   dylibPathBuz,
@@ -154,6 +177,7 @@ void main() {
               ),
               FakeCommand(
                 command: <Pattern>[
+                  'xcrun',
                   'codesign',
                   '--force',
                   '--sign',
@@ -165,6 +189,7 @@ void main() {
             ] else ...<FakeCommand>[
               FakeCommand(
                 command: <Pattern>[
+                  'xcrun',
                   'lipo',
                   '-create',
                   '-output',
@@ -173,8 +198,17 @@ void main() {
                   'x64/libbar.dylib',
                 ],
               ),
+              if (buildMode == BuildMode.release) ...<FakeCommand>[
+                FakeCommand(
+                  command: <Pattern>['xcrun', 'dsymutil', dylibPathBar, '-o', '$signPathBar.dSYM'],
+                  onRun: (_) {
+                    fileSystem.directory('$signPathBar.dSYM').createSync(recursive: true);
+                  },
+                ),
+                FakeCommand(command: <Pattern>['xcrun', 'strip', '-x', '-S', dylibPathBar]),
+              ],
               FakeCommand(
-                command: <Pattern>['otool', '-D', dylibPathBar],
+                command: <Pattern>['xcrun', 'otool', '-D', dylibPathBar],
                 stdout: <String>[
                   '$dylibPathBar (architecture x86_64):',
                   '@rpath/libbar.dylib',
@@ -184,6 +218,7 @@ void main() {
               ),
               FakeCommand(
                 command: <Pattern>[
+                  'xcrun',
                   'lipo',
                   '-create',
                   '-output',
@@ -192,8 +227,17 @@ void main() {
                   'x64/libbuz.dylib',
                 ],
               ),
+              if (buildMode == BuildMode.release) ...<FakeCommand>[
+                FakeCommand(
+                  command: <Pattern>['xcrun', 'dsymutil', dylibPathBuz, '-o', '$signPathBuz.dSYM'],
+                  onRun: (_) {
+                    fileSystem.directory('$signPathBuz.dSYM').createSync(recursive: true);
+                  },
+                ),
+                FakeCommand(command: <Pattern>['xcrun', 'strip', '-x', '-S', dylibPathBuz]),
+              ],
               FakeCommand(
-                command: <Pattern>['otool', '-D', dylibPathBuz],
+                command: <Pattern>['xcrun', 'otool', '-D', dylibPathBuz],
                 stdout: <String>[
                   '$dylibPathBuz (architecture x86_64):',
                   '@rpath/libbuz.dylib',
@@ -203,6 +247,7 @@ void main() {
               ),
               FakeCommand(
                 command: <Pattern>[
+                  'xcrun',
                   'install_name_tool',
                   '-id',
                   '@rpath/bar.framework/bar',
@@ -217,6 +262,7 @@ void main() {
               ),
               FakeCommand(
                 command: <Pattern>[
+                  'xcrun',
                   'install_name_tool',
                   '-id',
                   '@rpath/buz.framework/buz',
@@ -312,6 +358,7 @@ void main() {
             projectUri: projectUri,
             fileSystem: fileSystem,
             nativeAssetsFileUri: nativeAssetsFileUri,
+            targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/macos/'),
           );
           final expectedArchsBeingBuilt = flutterTester
               ? (isArm64 ? 'macos_arm64' : 'macos_x64')

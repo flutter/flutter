@@ -8,18 +8,22 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart' hide Target;
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
+import 'package:flutter_tools/src/isolated/native_assets/ios/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:hooks/hooks.dart';
+import 'package:hooks_runner/hooks_runner.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
+import '../../../src/fakes.dart';
 import '../fake_native_assets_build_runner.dart';
 
 void main() {
@@ -54,6 +58,7 @@ void main() {
         ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <Pattern>[
+              'xcrun',
               'lipo',
               '-create',
               '-output',
@@ -62,8 +67,38 @@ void main() {
               'x64/libbar.dylib',
             ],
           ),
+          if (buildMode == BuildMode.release) ...<FakeCommand>[
+            FakeCommand(
+              command: const <Pattern>[
+                'xcrun',
+                'dsymutil',
+                '/build/native_assets/ios/bar.framework/bar',
+                '-o',
+                '/build/native_assets/ios/bar.framework.dSYM',
+              ],
+              onRun: (_) {
+                fileSystem
+                    .directory('/build/native_assets/ios/bar.framework.dSYM')
+                    .createSync(recursive: true);
+              },
+            ),
+            const FakeCommand(
+              command: <Pattern>[
+                'xcrun',
+                'strip',
+                '-x',
+                '-S',
+                '/build/native_assets/ios/bar.framework/bar',
+              ],
+            ),
+          ],
           FakeCommand(
-            command: const <Pattern>['otool', '-D', '/build/native_assets/ios/bar.framework/bar'],
+            command: const <Pattern>[
+              'xcrun',
+              'otool',
+              '-D',
+              '/build/native_assets/ios/bar.framework/bar',
+            ],
             stdout: <String>[
               '/build/native_assets/ios/bar.framework/bar (architecture x86_64):',
               '@rpath/libbar.dylib',
@@ -73,6 +108,7 @@ void main() {
           ),
           const FakeCommand(
             command: <Pattern>[
+              'xcrun',
               'lipo',
               '-create',
               '-output',
@@ -81,8 +117,38 @@ void main() {
               'x64/libbuz.dylib',
             ],
           ),
+          if (buildMode == BuildMode.release) ...<FakeCommand>[
+            FakeCommand(
+              command: const <Pattern>[
+                'xcrun',
+                'dsymutil',
+                '/build/native_assets/ios/buz.framework/buz',
+                '-o',
+                '/build/native_assets/ios/buz.framework.dSYM',
+              ],
+              onRun: (_) {
+                fileSystem
+                    .directory('/build/native_assets/ios/buz.framework.dSYM')
+                    .createSync(recursive: true);
+              },
+            ),
+            const FakeCommand(
+              command: <Pattern>[
+                'xcrun',
+                'strip',
+                '-x',
+                '-S',
+                '/build/native_assets/ios/buz.framework/buz',
+              ],
+            ),
+          ],
           FakeCommand(
-            command: const <Pattern>['otool', '-D', '/build/native_assets/ios/buz.framework/buz'],
+            command: const <Pattern>[
+              'xcrun',
+              'otool',
+              '-D',
+              '/build/native_assets/ios/buz.framework/buz',
+            ],
             stdout: <String>[
               '/build/native_assets/ios/buz.framework/buz (architecture x86_64):',
               '@rpath/libbuz.dylib',
@@ -92,6 +158,7 @@ void main() {
           ),
           const FakeCommand(
             command: <Pattern>[
+              'xcrun',
               'install_name_tool',
               '-id',
               '@rpath/bar.framework/bar',
@@ -106,6 +173,7 @@ void main() {
           ),
           FakeCommand(
             command: <Pattern>[
+              'xcrun',
               'codesign',
               '--force',
               '--sign',
@@ -116,6 +184,7 @@ void main() {
           ),
           const FakeCommand(
             command: <Pattern>[
+              'xcrun',
               'install_name_tool',
               '-id',
               '@rpath/buz.framework/buz',
@@ -130,6 +199,7 @@ void main() {
           ),
           FakeCommand(
             command: <Pattern>[
+              'xcrun',
               'codesign',
               '--force',
               '--sign',
@@ -201,6 +271,7 @@ void main() {
           projectUri: projectUri,
           fileSystem: fileSystem,
           nativeAssetsFileUri: nonFlutterTesterAssetUri,
+          targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/ios/'),
         );
         expect(
           (globals.logger as BufferLogger).traceText,
@@ -216,4 +287,50 @@ void main() {
       },
     );
   }
+
+  testUsingContext(
+    'pick-first warning',
+    () async {
+      final assets = <FlutterCodeAsset>[
+        FlutterCodeAsset(
+          codeAsset: CodeAsset(
+            package: 'bar',
+            name: 'bar.dart',
+            linkMode: DynamicLoadingBundled(),
+            file: Uri.file('arm64/libbar.dylib'),
+          ),
+          target: Target.fromArchitectureAndOS(Architecture.arm64, OS.iOS),
+        ),
+        FlutterCodeAsset(
+          codeAsset: CodeAsset(
+            package: 'bar',
+            name: 'bar.dart',
+            linkMode: DynamicLoadingBundled(),
+            file: Uri.file('x64/libbar_different.dylib'),
+          ),
+          target: Target.fromArchitectureAndOS(Architecture.x64, OS.iOS),
+        ),
+      ];
+
+      fatAssetTargetLocationsIOS(assets);
+
+      final fakeStdio = globals.stdio as FakeStdio;
+      expect(
+        fakeStdio.writtenToStderr,
+        contains(
+          contains(
+            'Code asset "package:bar/bar.dart" has different framework names for '
+            'different architectures. Picking "bar.framework" and '
+            'ignoring "bar_different.framework".',
+          ),
+        ),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Logger: () => logger,
+      Stdio: () => FakeStdio(),
+    },
+  );
 }
