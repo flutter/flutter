@@ -25,8 +25,8 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
   /// When [exitOnFail] is set to true, the [handleResults] and [attemptToolExit]
   /// methods will exit the tool when this validator detects a recommended
   /// change. This defaults to true.
-  DeferredComponentsGenSnapshotValidator(this.env, {bool exitOnFail = true, String? title})
-    : super(env.projectDir, env.logger, env.platform, exitOnFail: exitOnFail, title: title);
+  DeferredComponentsGenSnapshotValidator(this.env, {super.exitOnFail = true, super.title})
+    : super(env.projectDir, env.logger, env.platform);
 
   /// The build environment that should be used to find the input files to run
   /// checks against.
