@@ -532,15 +532,15 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
     );
     view.show();
     _window.add(view);
-    _window.show();
 
-    _window.realize();
-    final GtkWindow? parentWindow = owner._windows[parent.rootView.viewId];
+    final GtkWindow? parentWindow = _owner._windows[_parent.rootView.viewId];
     if (parentWindow != null) {
       _window.setTransientFor(parentWindow);
     }
 
     updatePosition(anchorRect: anchorRect, positioner: positioner);
+
+    _window.show();
   }
 
   final WindowingOwnerLinux _owner;
