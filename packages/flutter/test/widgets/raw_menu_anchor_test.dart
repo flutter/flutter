@@ -2962,6 +2962,22 @@ void main() {
     expect(tester.getSize(find.byType(RawMenuAnchor)), Size.zero);
     controller.open();
   });
+
+  testWidgets('RawMenuAnchorGroup does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final controller = MenuController();
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: RawMenuAnchorGroup(controller: controller, child: const Text('X')),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(RawMenuAnchorGroup)), Size.zero);
+    controller.open();
+  });
 }
 
 // Custom MenuController that extends the base MenuController
