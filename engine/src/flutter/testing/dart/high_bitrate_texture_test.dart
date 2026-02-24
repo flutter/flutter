@@ -88,7 +88,6 @@ void main() async {
     final ByteData data = (await image.toByteData(format: ImageByteFormat.rawExtendedRgba128))!;
     final Float32List pixels = data.buffer.asFloat32List();
     expect(pixels.length, 4);
-    print('foobar: ${pixels[0]}, ${pixels[1]}, ${pixels[2]}, ${pixels[3]}');
     expect(pixels[0], closeTo(1.0, 0.001));
     expect(pixels[1], closeTo(0.66, 0.001));
     expect(pixels[2], closeTo(0.33, 0.001));
