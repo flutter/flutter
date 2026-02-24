@@ -514,13 +514,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
 
     //_window.setTypeHint(_GDK_WINDOW_TYPE_HINT_TOOLTIP);
     _window.setDecorated(false);
-    final GtkWindow? parentWindow = owner._windows[parent.rootView.viewId];
-    if (parentWindow != null) {
-      _window.setTransientFor(parentWindow);
-    }
     _window.realize();
-
-    // TODO(robert-ancell): Apply anchor and positioner.
 
     _windowMonitor = FlWindowMonitor(
       _window,
@@ -538,12 +532,22 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
     );
     view.show();
     _window.add(view);
-    _window.present();
+    _window.show();
+
+    _window.realize();
+    final GtkWindow? parentWindow = owner._windows[parent.rootView.viewId];
+    if (parentWindow != null) {
+      _window.setTransientFor(parentWindow);
+    }
+
+    updatePosition(anchorRect: anchorRect, positioner: positioner);
   }
 
   final WindowingOwnerLinux _owner;
   final TooltipWindowControllerDelegate _delegate;
   final GtkWindow _window;
+  late Rect _anchorRect;
+  late WindowPositioner _positioner;
   final BaseWindowController _parent;
   late final FlWindowMonitor _windowMonitor;
   bool _destroyed = false;
@@ -566,7 +570,70 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
 
   @override
   void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {
-    // TODO(robert-ancell): Apply anchor and positioner.
+    if (anchorRect != null) {
+      _anchorRect = anchorRect;
+    }
+    if (positioner != null) {
+      _positioner = positioner;
+    }
+
+    _window.getWindow().moveToRect(
+      x: _anchorRect.left.toInt(),
+      y: _anchorRect.top.toInt(),
+      width: (_anchorRect.right - _anchorRect.left).toInt(),
+      height: (_anchorRect.bottom - _anchorRect.top).toInt(),
+      rectAnchor: _anchorToGravity(_positioner.parentAnchor),
+      windowAnchor: _anchorToGravity(_positioner.childAnchor),
+      anchorHints: _constraintAdjustmentToHints(_positioner.constraintAdjustment),
+      rectAnchorDx: _positioner.offset.dx.toInt(),
+      rectAnchorDy: _positioner.offset.dy.toInt(),
+    );
+  }
+
+  int _anchorToGravity(WindowPositionerAnchor anchor) {
+    switch (anchor) {
+      case WindowPositionerAnchor.center:
+        return 0; // FIXME
+      case WindowPositionerAnchor.top:
+        return GDK_GRAVITY_NORTH;
+      case WindowPositionerAnchor.bottom:
+        return GDK_GRAVITY_SOUTH;
+      case WindowPositionerAnchor.left:
+        return GDK_GRAVITY_WEST;
+      case WindowPositionerAnchor.right:
+        return GDK_GRAVITY_EAST;
+      case WindowPositionerAnchor.topLeft:
+        return GDK_GRAVITY_NORTH_WEST;
+      case WindowPositionerAnchor.bottomLeft:
+        return GDK_GRAVITY_SOUTH_WEST;
+      case WindowPositionerAnchor.topRight:
+        return GDK_GRAVITY_NORTH_EAST;
+      case WindowPositionerAnchor.bottomRight:
+        return GDK_GRAVITY_SOUTH_EAST;
+    }
+  }
+
+  int _constraintAdjustmentToHints(WindowPositionerConstraintAdjustment adjustment) {
+    int hints = 0;
+    if (adjustment.flipX) {
+      hints |= GDK_ANCHOR_FLIP_X;
+    }
+    if (adjustment.flipY) {
+      hints |= GDK_ANCHOR_FLIP_Y;
+    }
+    if (adjustment.slideX) {
+      hints |= GDK_ANCHOR_SLIDE_X;
+    }
+    if (adjustment.slideY) {
+      hints |= GDK_ANCHOR_SLIDE_Y;
+    }
+    if (adjustment.resizeX) {
+      hints |= GDK_ANCHOR_RESIZE_X;
+    }
+    if (adjustment.resizeY) {
+      hints |= GDK_ANCHOR_RESIZE_Y;
+    }
+    return hints;
   }
 
   @override

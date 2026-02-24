@@ -11,6 +11,39 @@ import 'dart:ui';
 // In C this would be INT_MAX, but since we can't determine that from Dart let's assume it's 32 bit signed. In any case this is far beyond any reasonable window size.
 const int _kMaxWindowDimensions = 0x7fffffff;
 
+const int GDK_GRAVITY_NORTH_WEST = 1;
+const int GDK_GRAVITY_NORTH = 2;
+const int GDK_GRAVITY_NORTH_EAST = 3;
+const int GDK_GRAVITY_WEST = 4;
+const int GDK_GRAVITY_CENTER = 5;
+const int GDK_GRAVITY_EAST = 6;
+const int GDK_GRAVITY_SOUTH_WEST = 7;
+const int GDK_GRAVITY_SOUTH = 8;
+const int GDK_GRAVITY_SOUTH_EAST = 9;
+const int GDK_GRAVITY_STATIC = 10;
+
+const int GDK_ANCHOR_FLIP_X = 1;
+const int GDK_ANCHOR_FLIP_Y = 2;
+const int GDK_ANCHOR_SLIDE_X = 4;
+const int GDK_ANCHOR_SLIDE_Y = 8;
+const int GDK_ANCHOR_RESIZE_X = 16;
+const int GDK_ANCHOR_RESIZE_Y = 32;
+
+/// Flag to indicated if a window is iconified.
+const int GDK_WINDOW_STATE_ICONIFIED = 1 << 1;
+
+/// Flag to indicated if a window is maximized.
+const int GDK_WINDOW_STATE_MAXIMIZED = 1 << 2;
+
+/// Flag to indicated if a window is fullscreen.
+const int GDK_WINDOW_STATE_FULLSCREEN = 1 << 4;
+
+/// Window hint for dialogs.
+const int GDK_WINDOW_TYPE_HINT_DIALOG = 1;
+
+/// Window hint for tooltips.
+const int _GDK_WINDOW_TYPE_HINT_TOOLTIP = 10;
+
 @ffi.Native<ffi.Pointer<ffi.NativeType> Function(ffi.Int)>(symbol: 'g_malloc0')
 external ffi.Pointer<ffi.NativeType> _gMalloc0(int count);
 
@@ -122,8 +155,80 @@ class GdkWindow extends GObject {
     return _gdkWindowGetState(instance);
   }
 
+  /// FIXME
+  void moveToRect({
+    required int x,
+    required int y,
+    required int width,
+    required int height,
+    required int rectAnchor,
+    required int windowAnchor,
+    required int anchorHints,
+    int rectAnchorDx = 0,
+    int rectAnchorDy = 0,
+  }) {
+    final ffi.Pointer<_GdkRectangle> rect = _gMalloc0(
+      ffi.sizeOf<_GdkRectangle>(),
+    ).cast<_GdkRectangle>();
+    final r = rect.ref;
+    r.x = x;
+    r.y = y;
+    r.width = width;
+    r.height = height;
+    _gdkWindowMoveToRect(
+      instance,
+      rect,
+      rectAnchor,
+      windowAnchor,
+      anchorHints,
+      rectAnchorDx,
+      rectAnchorDy,
+    );
+    _gFree(rect);
+  }
+
   @ffi.Native<ffi.Int Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gdk_window_get_state')
   external static int _gdkWindowGetState(ffi.Pointer<ffi.NativeType> window);
+
+  @ffi.Native<
+    ffi.Void Function(
+      ffi.Pointer<ffi.NativeType>,
+      ffi.Pointer<ffi.NativeType>,
+      ffi.Int,
+      ffi.Int,
+      ffi.Int,
+      ffi.Int,
+      ffi.Int,
+    )
+  >(symbol: 'gdk_window_move_to_rect')
+  external static void _gdkWindowMoveToRect(
+    ffi.Pointer<ffi.NativeType> window,
+    ffi.Pointer<ffi.NativeType> rect,
+    int rectAnchor,
+    int windowAnchor,
+    int anchorHints,
+    int rectAnchorDx,
+    int rectAnchorDy,
+  );
+}
+
+/// Wraps GdkRectangle.
+final class _GdkRectangle extends ffi.Struct {
+  factory _GdkRectangle() {
+    return ffi.Struct.create();
+  }
+
+  @ffi.Int()
+  external int x;
+
+  @ffi.Int()
+  external int y;
+
+  @ffi.Int()
+  external int width;
+
+  @ffi.Int()
+  external int height;
 }
 
 /// Wraps GdkGeometry.
@@ -166,21 +271,6 @@ final class _GdkGeometry extends ffi.Struct {
   @ffi.Int()
   external int winGravity;
 }
-
-/// Flag to indicated if a window is iconified.
-const int GDK_WINDOW_STATE_ICONIFIED = 1 << 1;
-
-/// Flag to indicated if a window is maximized.
-const int GDK_WINDOW_STATE_MAXIMIZED = 1 << 2;
-
-/// Flag to indicated if a window is fullscreen.
-const int GDK_WINDOW_STATE_FULLSCREEN = 1 << 4;
-
-/// Window hint for dialogs.
-const int GDK_WINDOW_TYPE_HINT_DIALOG = 1;
-
-/// Window hint for tooltips.
-const int _GDK_WINDOW_TYPE_HINT_TOOLTIP = 10;
 
 /// Wraps GtkWindow
 class GtkWindow extends GtkContainer {
