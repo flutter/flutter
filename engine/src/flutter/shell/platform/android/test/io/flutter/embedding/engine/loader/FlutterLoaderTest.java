@@ -1010,22 +1010,22 @@ public class FlutterLoaderTest {
   public void itSetsEnableSurfaceControlFromMetadata() {
     // Test debug mode.
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.EnableSurfaceControl", null, "--enable-surface-control");
+        "io.flutter.embedding.android.EnableSurfaceControl", true, "--enable-surface-control");
 
     // Test release mode.
     testFlagFromMetadataPresentInReleaseMode(
-        "io.flutter.embedding.android.EnableSurfaceControl", null, "--enable-surface-control");
+        "io.flutter.embedding.android.EnableSurfaceControl", true, "--enable-surface-control");
   }
 
   @Test
   public void itSetsEnableFlutterGPUFromMetadata() {
     // Test debug mode.
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.EnableFlutterGPU", null, "--enable-flutter-gpu");
+        "io.flutter.embedding.android.EnableFlutterGPU", true, "--enable-flutter-gpu");
 
     // Test release mode.
     testFlagFromMetadataPresentInReleaseMode(
-        "io.flutter.embedding.android.EnableFlutterGPU", null, "--enable-flutter-gpu");
+        "io.flutter.embedding.android.EnableFlutterGPU", true, "--enable-flutter-gpu");
   }
 
   @Test
@@ -1047,23 +1047,23 @@ public class FlutterLoaderTest {
   public void itSetsImpellerAntiAliasLinesFromMetadata() {
     // Test debug mode.
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.ImpellerAntialiasLines", null, "--impeller-antialias-lines");
+        "io.flutter.embedding.android.ImpellerAntialiasLines", true, "--impeller-antialias-lines");
 
     // Test release mode.
     testFlagFromMetadataPresentInReleaseMode(
-        "io.flutter.embedding.android.ImpellerAntialiasLines", null, "--impeller-antialias-lines");
+        "io.flutter.embedding.android.ImpellerAntialiasLines", true, "--impeller-antialias-lines");
   }
 
   @Test
   public void itSetsEnableOpenGLGPUTracingFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.EnableOpenGLGPUTracing", null, "--enable-opengl-gpu-tracing");
+        "io.flutter.embedding.android.EnableOpenGLGPUTracing", true, "--enable-opengl-gpu-tracing");
   }
 
   @Test
   public void itSetsEnableVulkanGPUTracingFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.EnableVulkanGPUTracing", null, "--enable-vulkan-gpu-tracing");
+        "io.flutter.embedding.android.EnableVulkanGPUTracing", true, "--enable-vulkan-gpu-tracing");
   }
 
   @Test

@@ -81,8 +81,8 @@ public final class FlutterEngineFlags {
       this.allowedInRelease = allowedInRelease;
     }
 
-    /** Returns true if this flag requires a value to be specified. */
-    public boolean hasValue() {
+    /** Returns true if the command line flag requires a value to be specified. */
+    public boolean hasCommandLineValue() {
       return commandLineArgument.endsWith("=");
     }
   }

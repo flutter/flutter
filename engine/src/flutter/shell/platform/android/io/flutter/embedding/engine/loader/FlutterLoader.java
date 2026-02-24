@@ -378,7 +378,9 @@ public class FlutterLoader {
 
           // Add flag to shell args.
           String arg = flag.commandLineArgument;
-          if (flag.hasValue()) {
+
+          // Handle case where flag takes a value.
+          if (flag.hasCommandLineValue()) {
             Object valueObj = applicationMetaData.get(metadataKey);
             String value = valueObj != null ? valueObj.toString() : null;
             if (value == null) {
@@ -389,10 +391,15 @@ public class FlutterLoader {
                       + " requires a value, but no value was found. Please specify a value.");
               continue;
             }
-            arg += value;
+            shellArgs.add(arg + value);
+            continue;
           }
 
-          shellArgs.add(arg);
+          // Check if a boolean value is specified and if so, use it to determine if the
+          // flags should be added. If not, assume the flag is meant to be added.
+          if (applicationMetaData.getBoolean(metadataKey, true)) {
+            shellArgs.add(arg);
+          }
         }
       }
 

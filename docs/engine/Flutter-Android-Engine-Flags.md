@@ -86,6 +86,17 @@ Set the `--enable-flutter-gpu` flag:
 ```xml
 <meta-data
     android:name="io.flutter.embedding.android.EnableFlutterGPU"
+    android:value=true
+/>
+```
+
+For flags that take boolean values, if you omit a value entirely, it
+will be assumed to be true. For example, this is the same as the
+example above:
+
+```xml
+<meta-data
+    android:name="io.flutter.embedding.android.EnableFlutterGPU"
 />
 ```
 
