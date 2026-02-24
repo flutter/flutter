@@ -11,7 +11,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 
-abstract class AddStaticManifestTask : DefaultTask() {
+abstract class GenerateEngineFlagsManifestTask : DefaultTask() {
     @get:Input
     abstract val shellArgs: Property<String>
 

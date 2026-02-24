@@ -14,7 +14,7 @@ import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.DeepLinkJsonFromManifestTask
-import com.flutter.gradle.tasks.AddStaticManifestTask
+import com.flutter.gradle.tasks.GenerateEngineFlagsManifestTask
 import com.flutter.gradle.tasks.ManifestModifierTask
 import groovy.lang.Closure
 import org.gradle.api.GradleException
@@ -846,10 +846,10 @@ object FlutterPluginUtils {
         val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
 
         androidComponents.onVariants { variant ->
-            val genTask = project.tasks.register("${variant.name}AddStaticManifestTask", AddStaticManifestTask::class.java) {
+            val genTask = project.tasks.register("${variant.name}GenerateEngineFlagsManifestTask", GenerateEngineFlagsManifestTask::class.java) {
                 shellArgs.set(androidEngineShellArgs)
                 manifestOutputFile.set(
-                                project.layout.buildDirectory.file("generated/extra_manifest/${variant.name}/AndroidManifest.xml")
+                                project.layout.buildDirectory.file("intermediates/flutter/extra_manifest/${variant.name}/AndroidManifest.xml")
                             )
             }
 
