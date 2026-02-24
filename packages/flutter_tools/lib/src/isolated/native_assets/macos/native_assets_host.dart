@@ -178,6 +178,9 @@ Future<void> codesignDylib(
   if (codesignIdentity == null || codesignIdentity.isEmpty) {
     codesignIdentity = '-';
   }
+  // Strip extended attributes (com.apple.provenance, etc.) that cause codesign
+  // failures on macOS 26+. See https://github.com/flutter/flutter/issues/181103
+  await globals.processManager.run(<String>['xattr', '-cr', target.path]);
   final codesignCommand = <String>[
     'xcrun',
     'codesign',
