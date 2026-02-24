@@ -1018,6 +1018,12 @@ public class FlutterLoaderTest {
   }
 
   @Test
+  public void itDoesNotSetEnableSurfaceControlWhenSetToFalse() {
+    testFlagFromMetadataNotPresent(
+        "io.flutter.embedding.android.EnableSurfaceControl", false, "--enable-surface-control");
+  }
+
+  @Test
   public void itSetsEnableFlutterGPUFromMetadata() {
     // Test debug mode.
     testFlagFromMetadataPresent(
