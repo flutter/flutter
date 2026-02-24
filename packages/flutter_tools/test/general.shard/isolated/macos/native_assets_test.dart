@@ -150,6 +150,9 @@ void main() {
                 ],
               ),
               FakeCommand(
+                command: <Pattern>['xattr', '-cr', signPathBar],
+              ),
+              FakeCommand(
                 command: <Pattern>[
                   'xcrun',
                   'codesign',
@@ -174,6 +177,9 @@ void main() {
                   signPathBuz,
                   signPathBuz,
                 ],
+              ),
+              FakeCommand(
+                command: <Pattern>['xattr', '-cr', signPathBuz],
               ),
               FakeCommand(
                 command: <Pattern>[
