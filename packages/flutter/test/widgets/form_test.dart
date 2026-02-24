@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'editable_text_utils.dart';
+import 'editable_text_tester.dart';
 
 void main() {
   testWidgets('onSaved callback is called', (WidgetTester tester) async {

@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
-import 'editable_text_utils.dart' show TestTextField;
+import 'editable_text_tester.dart';
 import 'semantics_tester.dart';
 import 'widgets_app_tester.dart';
 
