@@ -163,6 +163,11 @@ public interface FlutterPlugin {
       return flutterAssets;
     }
 
+    @Nullable
+    public FlutterPlugin getPlugin(@NonNull Class<? extends FlutterPlugin> pluginClass) {
+      return flutterEngine.getPlugins().get(pluginClass);
+    }
+
     /**
      * Accessor for the {@link FlutterEngineGroup} used to create the {@link FlutterEngine} for the
      * app.
