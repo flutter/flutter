@@ -569,7 +569,7 @@ void main() {
             '--input-type=frag',
             '--include=/',
             '--include=/./shader_lib',
-            '--verbose-error-output=build/impellerc_error_317495402.txt'
+            '--verbose-error-output=build/impellerc_error_317495402.txt',
           ],
         ),
       ]);
