@@ -34,6 +34,28 @@ void main() {
     );
   });
 
+  test('Can start the animation when resync() is called', () {
+    final controller = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      vsync: const TestVSync(),
+    );
+
+    Object? error;
+
+    try {
+      controller
+        ..forward()
+        ..resync(TestVSync()); // ignore: prefer_const_constructors, we want a unique object
+
+      tick(const Duration(seconds: 1));
+    } on Object catch (e) {
+      error = e;
+    }
+
+    expect(error, isNull);
+    controller.dispose();
+  });
+
   test('Can set value during status callback', () {
     final controller = AnimationController(
       duration: const Duration(milliseconds: 100),

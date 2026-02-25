@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import 'editable_text_utils.dart';
+import 'editable_text_tester.dart';
 import 'semantics_tester.dart';
 
 void main() {
