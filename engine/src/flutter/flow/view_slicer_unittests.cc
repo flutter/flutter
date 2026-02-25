@@ -43,7 +43,7 @@ TEST(ViewSlicerTest, CanSlicerNonOverlappingViews) {
       {1, DlRect::MakeLTRB(50, 50, 60, 60)}};
 
   auto computed_overlays =
-      SliceViews(&builder, composition_order, slices, view_rects);
+      SliceViews(&builder, composition_order, slices, view_rects, {});
 
   EXPECT_TRUE(computed_overlays.empty());
 }
@@ -59,7 +59,7 @@ TEST(ViewSlicerTest, IgnoresFractionalOverlaps) {
       {1, DlRect::MakeLTRB(50.5, 50.5, 100, 100)}};
 
   auto computed_overlays =
-      SliceViews(&builder, composition_order, slices, view_rects);
+      SliceViews(&builder, composition_order, slices, view_rects, {});
 
   EXPECT_TRUE(computed_overlays.empty());
 }
@@ -75,7 +75,7 @@ TEST(ViewSlicerTest, ComputesOverlapWith1PV) {
       {1, DlRect::MakeLTRB(0, 0, 100, 100)}};
 
   auto computed_overlays =
-      SliceViews(&builder, composition_order, slices, view_rects);
+      SliceViews(&builder, composition_order, slices, view_rects, {});
 
   EXPECT_EQ(computed_overlays.size(), 1u);
   auto overlay = computed_overlays.find(1);
@@ -98,7 +98,7 @@ TEST(ViewSlicerTest, ComputesOverlapWith2PV) {
   };
 
   auto computed_overlays =
-      SliceViews(&builder, composition_order, slices, view_rects);
+      SliceViews(&builder, composition_order, slices, view_rects, {});
 
   EXPECT_EQ(computed_overlays.size(), 2u);
 
@@ -132,7 +132,7 @@ TEST(ViewSlicerTest, OverlappingTwoPVs) {
   };
 
   auto computed_overlays =
-      SliceViews(&builder, composition_order, slices, view_rects);
+      SliceViews(&builder, composition_order, slices, view_rects, {});
 
   EXPECT_EQ(computed_overlays.size(), 1u);
 
@@ -153,7 +153,7 @@ TEST(ViewSlicerTest, PreservesUnderlayForSelectedViews) {
   AddSliceOfSize(baseline_slices, 1, DlRect::MakeLTRB(0, 0, 50, 50));
   DisplayListBuilder baseline_builder(DlRect::MakeLTRB(0, 0, 100, 100));
   auto baseline_overlays = SliceViews(&baseline_builder, composition_order,
-                                      baseline_slices, view_rects);
+                                      baseline_slices, view_rects, {});
   EXPECT_EQ(baseline_overlays.size(), 1u);
   auto baseline_dl = baseline_builder.Build();
   EXPECT_TRUE(ContainsClipDifferenceRect(baseline_dl));
@@ -165,7 +165,7 @@ TEST(ViewSlicerTest, PreservesUnderlayForSelectedViews) {
   DisplayListBuilder preserve_builder(DlRect::MakeLTRB(0, 0, 100, 100));
   auto preserve_overlays =
       SliceViews(&preserve_builder, composition_order, preserve_slices,
-                 view_rects, &preserve_underlay_for_views);
+                 view_rects, preserve_underlay_for_views);
   EXPECT_EQ(preserve_overlays.size(), 1u);
   auto preserve_dl = preserve_builder.Build();
   EXPECT_FALSE(ContainsClipDifferenceRect(preserve_dl));

@@ -16,7 +16,7 @@ std::unordered_map<int64_t, DlRect> SliceViews(
     const std::unordered_map<int64_t, std::unique_ptr<EmbedderViewSlice>>&
         slices,
     const std::unordered_map<int64_t, DlRect>& view_rects,
-    const std::unordered_set<int64_t>* preserve_underlay_for_views) {
+    const std::unordered_set<int64_t>& preserve_underlay_for_views) {
   std::unordered_map<int64_t, DlRect> overlay_layers;
 
   auto current_frame_view_count = composition_order.size();
@@ -112,9 +112,8 @@ std::unordered_map<int64_t, DlRect> SliceViews(
       overlay_layers.insert({view_id, full_joined_rect});
 
       const bool preserve_underlay =
-          preserve_underlay_for_views &&
-          preserve_underlay_for_views->find(view_id) !=
-              preserve_underlay_for_views->end();
+          preserve_underlay_for_views.find(view_id) !=
+          preserve_underlay_for_views.end();
       if (!preserve_underlay) {
         // Clip the background canvas, so it doesn't contain any of the pixels
         // drawn on the overlay layer.
