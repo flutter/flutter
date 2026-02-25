@@ -2,17 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'clipboard_utils.dart';
 import 'editable_text_utils.dart';
-import 'widgets_app_tester.dart';
 
 void main() {
-  const kGreyColor = Color(0xFFAAAAAA);
-  const kRedColor = Color(0xFFFF0000);
   final mockClipboard = MockClipboard();
   TestWidgetsFlutterBinding.ensureInitialized().defaultBinaryMessenger.setMockMethodCallHandler(
     SystemChannels.platform,
@@ -31,12 +28,14 @@ void main() {
     late final BuildContext context;
 
     await tester.pumpWidget(
-      TestWidgetsApp(
-        home: Builder(
-          builder: (BuildContext localContext) {
-            context = localContext;
-            return const SizedBox.shrink();
-          },
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext localContext) {
+              context = localContext;
+              return const SizedBox.shrink();
+            },
+          ),
         ),
       ),
     );
@@ -98,12 +97,14 @@ void main() {
     late final BuildContext context;
 
     await tester.pumpWidget(
-      TestWidgetsApp(
-        home: Builder(
-          builder: (BuildContext localContext) {
-            context = localContext;
-            return const SizedBox.shrink();
-          },
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext localContext) {
+              context = localContext;
+              return const SizedBox.shrink();
+            },
+          ),
         ),
       ),
     );
@@ -148,12 +149,14 @@ void main() {
     late final BuildContext context;
 
     await tester.pumpWidget(
-      TestWidgetsApp(
-        home: Builder(
-          builder: (BuildContext localContext) {
-            context = localContext;
-            return const SizedBox.shrink();
-          },
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext localContext) {
+              context = localContext;
+              return const SizedBox.shrink();
+            },
+          ),
         ),
       ),
     );
@@ -192,22 +195,24 @@ void main() {
       addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
-        TestWidgetsApp(
-          home: Builder(
-            builder: (BuildContext localContext) {
-              context = localContext;
-              return EditableText(
-                controller: textEditingController,
-                backgroundCursorColor: kGreyColor,
-                focusNode: focusNode,
-                style: const TextStyle(),
-                cursorColor: kRedColor,
-                selectionControls: testTextSelectionHandleControls,
-                contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
-                  return Placeholder(key: builtInKey);
-                },
-              );
-            },
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (BuildContext localContext) {
+                context = localContext;
+                return EditableText(
+                  controller: textEditingController,
+                  backgroundCursorColor: Colors.grey,
+                  focusNode: focusNode,
+                  style: const TextStyle(),
+                  cursorColor: Colors.red,
+                  selectionControls: materialTextSelectionHandleControls,
+                  contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                    return Placeholder(key: builtInKey);
+                  },
+                );
+              },
+            ),
           ),
         ),
       );

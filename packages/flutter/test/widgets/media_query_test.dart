@@ -6,11 +6,8 @@ import 'dart:ui'
     show Brightness, DisplayFeature, DisplayFeatureState, DisplayFeatureType, GestureSettings;
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'utils.dart';
-import 'widgets_app_tester.dart';
 
 class _MediaQueryAspectCase {
   const _MediaQueryAspectCase(this.method, this.data);
@@ -1697,7 +1694,7 @@ void main() {
               children: <Widget>[
                 showSize,
                 showTextScaler,
-                TestButton(
+                ElevatedButton(
                   onPressed: () {
                     setState(() {
                       data = data.copyWith(size: Size(data.size.width + 100, data.size.height));
@@ -1705,7 +1702,7 @@ void main() {
                   },
                   child: const Text('Increase width by 100'),
                 ),
-                TestButton(
+                ElevatedButton(
                   onPressed: () {
                     setState(() {
                       data = data.copyWith(textScaler: TextScaler.noScaling);
@@ -1720,7 +1717,7 @@ void main() {
       },
     );
 
-    await tester.pumpWidget(TestWidgetsApp(home: page));
+    await tester.pumpWidget(MaterialApp(home: page));
     expect(find.text('size: Size(800.0, 600.0)'), findsOneWidget);
     expect(find.text('textScaler: linear (1.1x)'), findsOneWidget);
     expect(sizeBuildCount, 1);
@@ -1763,7 +1760,7 @@ void main() {
             child: ListView(
               children: <Widget>[
                 builder,
-                TestButton(
+                ElevatedButton(
                   onPressed: () {
                     setState(() {
                       data = _MediaQueryAspectVariant.aspect!.data;
@@ -1771,7 +1768,7 @@ void main() {
                   },
                   child: const Text('Change data'),
                 ),
-                TestButton(
+                ElevatedButton(
                   onPressed: () {
                     setState(() {
                       data = data.copyWith();
@@ -1785,7 +1782,7 @@ void main() {
         },
       );
 
-      await tester.pumpWidget(TestWidgetsApp(home: page));
+      await tester.pumpWidget(MaterialApp(home: page));
       expect(buildCount, 1);
 
       await tester.tap(find.text('Copy data'));
@@ -2012,7 +2009,7 @@ void main() {
               children: <Widget>[
                 showWidth,
                 showHeight,
-                TestButton(
+                ElevatedButton(
                   onPressed: () {
                     setState(() {
                       data = data.copyWith(size: Size(data.size.width + 100, data.size.height));
@@ -2020,7 +2017,7 @@ void main() {
                   },
                   child: const Text('Increase width by 100'),
                 ),
-                TestButton(
+                ElevatedButton(
                   onPressed: () {
                     setState(() {
                       data = data.copyWith(size: Size(data.size.width, data.size.height + 100));
@@ -2035,7 +2032,7 @@ void main() {
       },
     );
 
-    await tester.pumpWidget(TestWidgetsApp(home: page));
+    await tester.pumpWidget(MaterialApp(home: page));
     expect(find.text('width: 800.0'), findsOneWidget);
     expect(find.text('height: 600.0'), findsOneWidget);
     expect(widthBuildCount, 1);
