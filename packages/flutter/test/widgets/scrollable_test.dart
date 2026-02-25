@@ -846,7 +846,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(expensiveWidgets, 17);
+    expect(expensiveWidgets, 22);
     expect(cheapWidgets, 0);
 
     // The position value here is different from the maximum velocity we will
@@ -857,21 +857,21 @@ void main() {
     // to reset here.
     controller.animateTo(5000, duration: const Duration(seconds: 2), curve: Curves.linear);
 
-    expect(expensiveWidgets, 17);
+    expect(expensiveWidgets, 22);
     expect(widgetTracker.every((String type) => type == 'expensive'), true);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
-    expect(expensiveWidgets, 17);
+    expect(expensiveWidgets, 22);
     expect(cheapWidgets, 25);
-    expect(widgetTracker.skip(17).every((String type) => type == 'cheap'), true);
+    expect(widgetTracker.skip(22).every((String type) => type == 'cheap'), true);
 
     await tester.pumpAndSettle();
 
-    expect(expensiveWidgets, 22);
+    expect(expensiveWidgets, 27);
     expect(cheapWidgets, 95);
-    expect(widgetTracker.skip(17).skip(25).take(70).every((String type) => type == 'cheap'), true);
+    expect(widgetTracker.skip(22).skip(25).take(70).every((String type) => type == 'cheap'), true);
     expect(
-      widgetTracker.skip(17).skip(25).skip(70).every((String type) => type == 'expensive'),
+      widgetTracker.skip(22).skip(25).skip(70).every((String type) => type == 'expensive'),
       true,
     );
   });
@@ -899,7 +899,7 @@ void main() {
     expect(find.byKey(const ValueKey<String>('Box 0')), findsOneWidget);
     expect(find.byKey(const ValueKey<String>('Box 52')), findsNothing);
 
-    expect(expensiveWidgets, 17);
+    expect(expensiveWidgets, 22);
     expect(cheapWidgets, 0);
 
     // Getting the tester to simulate a life-like fling is difficult.
@@ -913,8 +913,8 @@ void main() {
     expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
     expect(find.byKey(const ValueKey<String>('Box 52')), findsOneWidget);
 
-    expect(expensiveWidgets, 40);
-    expect(cheapWidgets, 21);
+    expect(expensiveWidgets, 45);
+    expect(cheapWidgets, 20);
   });
 
   testWidgets('Can recommendDeferredLoadingForContext - override heuristic', (
@@ -946,8 +946,8 @@ void main() {
     expect(find.byKey(const ValueKey<String>('Box 0')), findsOneWidget);
     expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsNothing);
 
-    expect(physics.count, 17);
-    expect(expensiveWidgets, 17);
+    expect(physics.count, 22);
+    expect(expensiveWidgets, 22);
     expect(cheapWidgets, 0);
 
     // Getting the tester to simulate a life-like fling is difficult.
@@ -960,9 +960,9 @@ void main() {
     expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
     expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsOneWidget);
 
-    expect(expensiveWidgets, 17);
-    expect(cheapWidgets, 44);
-    expect(physics.count, 44 + 17);
+    expect(expensiveWidgets, 22);
+    expect(cheapWidgets, 43);
+    expect(physics.count, 43 + 22);
   });
 
   testWidgets(
@@ -996,7 +996,7 @@ void main() {
       expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsNothing);
 
       expect(expensiveWidgets, 0);
-      expect(cheapWidgets, 17);
+      expect(cheapWidgets, 22);
 
       // Getting the tester to simulate a life-like fling is difficult.
       // Instead, just manually drive the activity with a ballistic simulation as
@@ -1009,7 +1009,7 @@ void main() {
       expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsOneWidget);
 
       expect(expensiveWidgets, 0);
-      expect(cheapWidgets, 61);
+      expect(cheapWidgets, 65);
     },
   );
 

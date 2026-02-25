@@ -462,6 +462,7 @@ void main() {
               width: 300,
               child: CustomScrollView(
                 controller: controller,
+                scrollCacheExtent: const ScrollCacheExtent.pixels(250),
                 slivers: <Widget>[
                   DecoratedSliver(
                     key: key,

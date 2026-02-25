@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter_test/flutter_test.dart';
 
@@ -2723,6 +2724,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
                 thumbVisibility: true,
                 controller: scrollController,
                 child: CustomScrollView(
+                  scrollCacheExtent: const ScrollCacheExtent.pixels(250),
                   controller: scrollController,
                   slivers: <Widget>[
                     SliverList.builder(

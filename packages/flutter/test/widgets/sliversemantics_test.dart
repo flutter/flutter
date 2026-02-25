@@ -2909,6 +2909,11 @@ void _tests() {
                 TestSemantics(label: 'Label 2', textDirection: TextDirection.ltr),
                 TestSemantics(
                   flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                  label: 'Label 3',
+                  textDirection: TextDirection.ltr,
+                ),
+                TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                   label: 'Label 4',
                   textDirection: TextDirection.ltr,
                 ),

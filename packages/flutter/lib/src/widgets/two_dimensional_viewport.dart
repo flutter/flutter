@@ -561,6 +561,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
              horizontalAxisDirection == AxisDirection.right,
          'TwoDimensionalViewport.horizontalAxisDirection is not Axis.horizontal.',
        ),
+       assert(cacheExtentStyle == null || cacheExtent != null),
        _childManager = childManager,
        _horizontalOffset = horizontalOffset,
        _horizontalAxisDirection = horizontalAxisDirection,
@@ -575,7 +576,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
                    CacheExtentStyle.pixel || null => ScrollCacheExtent.pixels(cacheExtent),
                    CacheExtentStyle.viewport => ScrollCacheExtent.viewport(cacheExtent),
                  }
-               : const ScrollCacheExtent.pixels(RenderAbstractViewport.defaultCacheExtent)),
+               : RenderAbstractViewport.kDefaultScrollCacheExtent),
        _clipBehavior = clipBehavior {
     assert(() {
       _debugDanglingKeepAlives = <RenderBox>[];
@@ -719,9 +720,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       return;
     }
     if (value == null) {
-      _scrollCacheExtent = const ScrollCacheExtent.pixels(
-        RenderAbstractViewport.defaultCacheExtent,
-      );
+      _scrollCacheExtent = RenderAbstractViewport.kDefaultScrollCacheExtent;
     } else {
       _scrollCacheExtent = switch (cacheExtentStyle) {
         CacheExtentStyle.pixel => ScrollCacheExtent.pixels(value),
@@ -746,6 +745,9 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       return;
     }
     if (value == null) {
+      if (_scrollCacheExtent == RenderAbstractViewport.kDefaultScrollCacheExtent) {
+        return;
+      }
       _scrollCacheExtent = ScrollCacheExtent.pixels(cacheExtent);
     } else {
       _scrollCacheExtent = switch (value) {
@@ -764,9 +766,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       return;
     }
     if (value == null) {
-      _scrollCacheExtent = const ScrollCacheExtent.pixels(
-        RenderAbstractViewport.defaultCacheExtent,
-      );
+      _scrollCacheExtent = RenderAbstractViewport.kDefaultScrollCacheExtent;
     } else {
       _scrollCacheExtent = value;
     }

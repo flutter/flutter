@@ -2327,7 +2327,7 @@ void main() {
     bool loadNotCalled(_TestImageProvider provider) => !provider.loadCalled;
 
     expect(find.bySemanticsLabel('5'), findsOneWidget);
-    expect(imageProviders.length, 12);
+    expect(imageProviders.length, 15);
     expect(imageProviders.every(loadCalled), true);
 
     imageProviders.clear();
@@ -2337,9 +2337,9 @@ void main() {
     await tester.pumpAndSettle();
     // The last 15 images on screen have loaded because the scrolling settled there.
     // The rest have not loaded.
-    expect(imageProviders.length, 309);
-    expect(imageProviders.skip(309 - 15).every(loadCalled), true);
-    expect(imageProviders.take(309 - 15).every(loadNotCalled), true);
+    expect(imageProviders.length, 336);
+    expect(imageProviders.skip(336 - 21).every(loadCalled), true);
+    expect(imageProviders.take(336 - 21).every(loadNotCalled), true);
   });
 
   testWidgets('Same image provider in multiple parts of the tree, no cache room left', (
