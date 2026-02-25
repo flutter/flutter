@@ -3,11 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-
 import 'package:ui/ui.dart' as ui;
-
 import 'code_unit_flags.dart';
-import 'debug.dart';
 import 'layout.dart';
 import 'paragraph.dart';
 
@@ -58,8 +55,6 @@ class TextWrapper {
 
       if (hardLineBreak) {
         // Break the line and then continue with the current cluster as usual
-        WebParagraphDebug.log('isHardLineBreak: $index');
-
         line.consumePendingText();
 
         // This is the case when the ellipsis will be added to the empty line; weird...
@@ -70,7 +65,6 @@ class TextWrapper {
         }
       } else if (_isSoftLineBreak(cluster) && line.isNotEmpty) {
         // Mark the potential line break and then continue with the current cluster as usual
-        WebParagraphDebug.log('isSoftLineBreak: $index');
         if (line.hasLeadingWhitespaces) {
           // There is one case when we have to ignore this soft line break: if we only had whitespaces so far -
           // these are the leading spaces and Flutter wants them to be preserved
@@ -162,20 +156,6 @@ class TextWrapper {
         end: _layout.textClusters.length - 1,
       );
       _top +=_layout.addLine(emptyClusterRange, 0.0, emptyClusterRange, 0.0, false, _top,);
-    }
-    */
-    /*
-    if (WebParagraphDebug.logging) {
-      for (int i = 0; i < _layout.lines.length; ++i) {
-        final TextLine line = _layout.lines[i];
-        final String text = _text.substring(line.textRange.start, line.textRange.end);
-        final String whitespaces =
-            !line.whitespacesRange.isEmpty ? '${line.whitespacesRange.width}' : 'no';
-        final String hardLineBreak = line.hardLineBreak ? 'hardlineBreak' : '';
-        WebParagraphDebug.log(
-          '$i: "$text" [${line.textRange.start}:${line.textRange.end}) $width $hardLineBreak ($whitespaces trailing whitespaces)',
-        );
-      }
     }
     */
   }
@@ -412,8 +392,9 @@ class _LineBuilder {
         // We have removed all the clusters in this line and still can't fit the ellipsis
         // Not sure what to do in this case
         // TODO(jlavrova): Implement this case
-        assert(false, 'Ellipsizing requires removing the whole line, not implemented yet');
-        return false;
+        throw UnimplementedError(
+          'Ellipsizing requires removing the whole line, not implemented yet',
+        );
       }
       final WebCluster cluster = _layout.allClusters[clusterIndex - 1];
       final double widthCluster = cluster.advance.width;
@@ -426,33 +407,23 @@ class _LineBuilder {
             ? ui.TextDirection.ltr
             : ui.TextDirection.rtl,
       );
-      WebParagraphDebug.log(
-        'Ellipsize: $clusterIndex $_widthConsumedText $_widthWhitespaces $_widthPendingText - $cutOffWidth - $widthCluster + ${ellipsisSpan.advanceWidth()!} ??? $_maxWidth',
-      );
       cutOffWidth += widthCluster;
       if (_isWhitespace(cluster)) {
         // We skip whitespaces when cutting off for ellipsis, so just continue
-        WebParagraphDebug.log('Ellipsize: whitespace');
       } else if (canFit(ellipsisSpan.advanceWidth()! - cutOffWidth)) {
-        WebParagraphDebug.log('Ellipsize: stop $clusterIndex');
         // We can fit the ellipsis now
         _layout.ellipsisClusters = ellipsisSpan.extractClusters();
         break;
-      } else {
-        WebParagraphDebug.log('Ellipsize: continue $clusterIndex');
       }
       // Remove this cluster, correct the structures and try again
       clusterIndex -= 1;
       if (clusterIndex >= _whitespaceEnd) {
-        WebParagraphDebug.log('Ellipsize: pending text >= $_whitespaceEnd');
         _widthPendingText -= widthCluster;
         _pendingTextEnd = clusterIndex;
       } else if (clusterIndex >= _whitespaceStart) {
-        WebParagraphDebug.log('Ellipsize: whitespaces => $_whitespaceStart');
         _widthWhitespaces -= widthCluster;
         _whitespaceEnd = clusterIndex;
       } else {
-        WebParagraphDebug.log('Ellipsize: consumed text >= $start');
         _widthConsumedText -= widthCluster;
         _whitespaceStart = clusterIndex;
         _whitespaceEnd = clusterIndex;

@@ -167,11 +167,21 @@ Future<void> testMain() async {
 
     final ui.TextBox top0 = rectsTop[0];
     final ui.TextBox top1 = rectsTop[1];
+    final ui.TextBox bottom0 = rectsBottom[0];
     final ui.TextBox bottom1 = rectsBottom[1];
+    final ui.TextBox middle0 = rectsMiddle[0];
     final ui.TextBox middle1 = rectsMiddle[1];
-    expect((top0.bottom - bottom1.top).abs() < EPSILON, true);
-    expect(middle1.top > bottom1.top, true);
-    expect(middle1.top < top1.top, true);
+
+    expect((top0.top - bottom0.top).abs() < EPSILON, true);
+    expect((top0.top - middle0.top).abs() < EPSILON, true);
+    expect(top0.bottom < middle0.bottom, true);
+    expect(middle0.bottom < bottom0.bottom, true);
+
+    expect((top0.bottom - top1.top).abs() < EPSILON, true);
+    expect((middle0.bottom - middle1.top).abs() < EPSILON, true);
+    expect((bottom0.bottom - bottom1.top).abs() < EPSILON, true);
+    expect(top1.bottom < middle1.bottom, true);
+    expect(middle1.bottom < bottom1.bottom, true);
   });
 
   test('Paragraph getBoxesForRange 1 finite line', () {

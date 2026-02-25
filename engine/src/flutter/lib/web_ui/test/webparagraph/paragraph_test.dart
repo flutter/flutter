@@ -390,7 +390,7 @@ Future<void> testMain() async {
         Shadow(color: Color(0xFF00FF00), offset: Offset(0, -10), blurRadius: 2.0),
         Shadow(color: Color(0xFFFF0000), offset: Offset(-10, 0), blurRadius: 2.0),
         Shadow(color: Color(0xFF0000FF), offset: Offset(10, 0), blurRadius: 2.0),
-        Shadow(color: Color(0xFF888888), offset: Offset(0, 10), blurRadius: 2.0),
+        Shadow(color: Color(0xFFFF00FF), offset: Offset(0, 10), blurRadius: 2.0),
       ],
     );
     final leftShadow = WebTextStyle(
@@ -455,7 +455,11 @@ Future<void> testMain() async {
     const greenColor = Color(0xFF00FF00);
     const grayColor = Color(0xFF888888);
 
-    final paragraphStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 40);
+    final paragraphStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 40,
+      color: const Color(0xFF000000),
+    );
 
     final defaultStyle = WebTextStyle(foreground: blackPaint);
 
@@ -663,6 +667,7 @@ Future<void> testMain() async {
         canvas.drawRect(rect.toRect(), bluePaint);
       }
     }
+
     {
       final List<TextBox> rects = paragraph.getBoxesForRange(
         0,
@@ -674,6 +679,7 @@ Future<void> testMain() async {
         canvas.drawRect(rect.toRect(), redPaint);
       }
     }
+
     {
       final List<TextBox> rects = paragraph.getBoxesForRange(
         0,
@@ -983,7 +989,6 @@ Future<void> testMain() async {
 
     {
       final builder = WebParagraphBuilder(paragraphStyle);
-
       builder.pushStyle(style30);
       builder.addText('This is a long text that should be ellipsized at the end');
       builder.pop();
