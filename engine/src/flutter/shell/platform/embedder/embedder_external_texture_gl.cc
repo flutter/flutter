@@ -138,13 +138,19 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
     return nullptr;
   }
 
+  if (texture->format != GL_RGBA8) {
+    FML_LOG(ERROR) << "Only support GL_RGBA8 format now";
+    return nullptr;
+  }
+
   impeller::TextureDescriptor desc;
   desc.size = impeller::ISize(texture->width, texture->height);
+  desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
 
   impeller::ContextGLES& context =
       impeller::ContextGLES::Cast(*aiks_context->GetContext());
   impeller::HandleGLES handle = context.GetReactor()->CreateHandle(
-      impeller::HandleType::kTexture, texture->target);
+      impeller::HandleType::kTexture, texture->name);
   std::shared_ptr<impeller::TextureGLES> image =
       impeller::TextureGLES::WrapTexture(context.GetReactor(), desc, handle);
 
@@ -165,6 +171,8 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
     FML_LOG(ERROR) << "Could not register destruction callback";
     return nullptr;
   }
+  image->SetCoordinateSystem(
+      impeller::TextureCoordinateSystem::kUploadFromHost);
 
   return impeller::DlImageImpeller::Make(image);
 }
