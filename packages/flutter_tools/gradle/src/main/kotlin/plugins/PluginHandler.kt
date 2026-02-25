@@ -56,24 +56,6 @@ class PluginHandler(
         return pluginList!!
     }
 
-    // TODO(54566, 48918): Remove in favor of [getPluginList] only, see also
-    //  https://github.com/flutter/flutter/blob/1c90ed8b64d9ed8ce2431afad8bc6e6d9acc4556/packages/flutter_tools/lib/src/flutter_plugins.dart#L212
-
-    /** Gets the plugins dependencies from `.flutter-plugins-dependencies`. */
-    private fun getPluginDependencies(): List<Map<String?, Any?>> {
-        if (pluginDependencies == null) {
-            val meta: Map<String, Any> =
-                NativePluginLoaderReflectionBridge.getDependenciesMetadata(
-                    project.extraProperties,
-                    FlutterPluginUtils.getFlutterSourceDirectory(project)
-                )
-            check(meta["dependencyGraph"] is List<*>)
-            @Suppress("UNCHECKED_CAST")
-            pluginDependencies = meta["dependencyGraph"] as List<Map<String?, Any?>>
-        }
-        return pluginDependencies!!
-    }
-
     internal fun configurePlugins(engineVersionValue: String) {
         val pluginList: List<Map<String?, Any?>> = getPluginList()
         pluginList.forEach { plugin: Map<String?, Any?> ->
