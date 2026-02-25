@@ -29,6 +29,45 @@ import 'plugins.dart';
 import 'project.dart';
 import 'template.dart';
 
+final RegExp _buildSettingsTargetHeaderPattern = RegExp(
+  r'^Build settings for action build and target "?([^":\r\n]+)"?:\s*$',
+);
+
+/// Parses xcodebuild `-showBuildSettings` output into a dictionary keyed by target.
+Map<String, Map<String, String>> parseXcodeAllTargetsBuildSettings(String buildSettingsOutput) {
+  final Map<String, Map<String, String>> settingsByTarget = <String, Map<String, String>>{};
+  String? currentTarget;
+
+  for (final String line in buildSettingsOutput.split('\n')) {
+    final String settingsLine = line.trim();
+
+    final RegExpMatch? headerMatch = _buildSettingsTargetHeaderPattern.firstMatch(settingsLine);
+    if (headerMatch != null) {
+      currentTarget = headerMatch.group(1)!.trim();
+      settingsByTarget.putIfAbsent(currentTarget, () => <String, String>{});
+      continue;
+    }
+
+    if (currentTarget == null || !settingsLine.contains('=')) {
+      continue;
+    }
+
+    int equalsIndex = settingsLine.indexOf(' = ');
+    int separatorLength = 3;
+    if (equalsIndex == -1) {
+      equalsIndex = settingsLine.indexOf('=');
+      separatorLength = 1;
+    }
+    final String key = settingsLine.substring(0, equalsIndex).trim();
+    final String value = settingsLine.substring(equalsIndex + separatorLength).trim();
+    if (key.isNotEmpty) {
+      settingsByTarget[currentTarget]![key] = value;
+    }
+  }
+
+  return settingsByTarget;
+}
+
 /// Represents an Xcode-based sub-project.
 ///
 /// This defines interfaces common to iOS and macOS projects.
@@ -521,33 +560,27 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       return;
     }
 
-    final targetHeader = RegExp(
-      r'^Build settings for action build and target "?([^":\r\n]+)"?:\s*$',
+    final Map<String, Map<String, String>> settingsByTarget = parseXcodeAllTargetsBuildSettings(
+      buildSettings,
     );
 
     final pluginsExcludingArmArch = <String>{};
-    String? currentTarget;
-
-    for (final String eachLine in buildSettings.split('\n')) {
-      final String settingsLine = eachLine.trim();
-
-      final RegExpMatch? headerMatch = targetHeader.firstMatch(settingsLine);
-      if (headerMatch != null) {
-        currentTarget = headerMatch.group(1)!.trim();
+    for (final String pluginTargetName in iosPluginTargetNames) {
+      final Map<String, String>? targetSettings = settingsByTarget[pluginTargetName];
+      if (targetSettings == null) {
         continue;
       }
 
-      if (currentTarget == null || !iosPluginTargetNames.contains(currentTarget)) {
-        continue;
-      }
+      final bool excludesArm64 = targetSettings.entries.any((MapEntry<String, String> entry) {
+        if (!entry.key.startsWith('EXCLUDED_ARCHS')) {
+          return false;
+        }
+        final Iterable<String> tokens = entry.value.split(RegExp(r'\s+'));
+        return tokens.contains('arm64');
+      });
 
-      if (!settingsLine.startsWith('EXCLUDED_ARCHS') || !settingsLine.contains('=')) {
-        continue;
-      }
-
-      final Iterable<String> tokens = settingsLine.split(' ');
-      if (tokens.contains('arm64')) {
-        pluginsExcludingArmArch.add(currentTarget);
+      if (excludesArm64) {
+        pluginsExcludingArmArch.add(pluginTargetName);
       }
     }
 
