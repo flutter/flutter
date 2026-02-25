@@ -863,13 +863,13 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   std::vector<std::shared_ptr<flutter::OverlayLayer>> unusedLayers =
       self.layerPool->RemoveUnusedLayers();
   self.layerPool->RecycleLayers();
-  auto task = [self,                                                //
-               platformViewLayers = std::move(platformViewLayers),            //
+  auto task = [self,                                                      //
+               platformViewLayers = std::move(platformViewLayers),        //
                currentCompositionParams = self.currentCompositionParams,  //
                viewsToRecomposite = self.viewsToRecomposite,              //
                compositionOrder = self.compositionOrder,                  //
-               unusedLayers = std::move(unusedLayers),                        //
-               surfaceFrames = std::move(surfaceFrames),                      //
+               unusedLayers = std::move(unusedLayers),                    //
+               surfaceFrames = std::move(surfaceFrames),                  //
                currentFlutterViewId = flutterViewId                       //
   ]() mutable {
     [self performSubmit:platformViewLayers
