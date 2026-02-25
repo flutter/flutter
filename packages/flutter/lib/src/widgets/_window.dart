@@ -959,29 +959,9 @@ mixin class SatelliteWindowControllerDelegate {
 /// controller to release the resources associated with the window.
 ///
 /// {@tool snippet}
-/// An example usage might look like:
+/// An example usage of [SatelliteWindowController] looks like:
 ///
-///
-/// ```dart
-/// // TODO(mattkae): remove invalid_use_of_internal_member ignore comment when this API is stable.
-/// // ignore_for_file: invalid_use_of_internal_member
-/// import 'package:flutter/widgets.dart';
-/// import 'package:flutter/material.dart';
-/// import 'package:flutter/src/widgets/_window.dart';
-///
-/// void main() {
-///   runWidget(
-///     RegularWindow(
-///       controller: RegularWindowController(
-///         preferredSize: const Size(800, 600),
-///         preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
-///         title: 'Example Window',
-///       ),
-///       child: MaterialApp(home: Container()),
-///     ),
-///   );
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/windows/satellite.0.dart **
 /// {@end-tool}
 ///
 /// Children of a [SatelliteWindow] widget can access the [SatelliteWindowController]
@@ -1313,6 +1293,8 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
   SatelliteWindowController createSatelliteWindowController({
     required SatelliteWindowControllerDelegate delegate,
     required BaseWindowController parent,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
