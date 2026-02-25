@@ -835,8 +835,8 @@ void testMain() {
         'code': 'MetaRight',
         'key': 'Meta',
         'location': kLocationRight,
-        'physical': kWebToPhysicalKey['MetaRight']!,
-        'logical': kWebLogicalLocationMap['Meta']![kLocationRight]!,
+        'physical': kWebToPhysicalKey['MetaRight'],
+        'logical': kWebLogicalLocationMap['Meta']![kLocationRight],
       },
     };
 
