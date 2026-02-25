@@ -1431,20 +1431,24 @@ void main() {
   ) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: Tooltip(message: tooltipText, child: Text(tooltipText)),
+        home: Tooltip(message: '', child: Text(tooltipText)),
       ),
     );
     expect(find.text(tooltipText), findsOneWidget);
+    expect(find.byType(Tooltip), findsOneWidget);
+
+    await tester.longPress(find.text(tooltipText));
+    expect(find.byType(Tooltip), findsOneWidget);
+    expect(find.byType(RawTooltip), findsNothing);
   });
 
   testWidgets('Tooltip should not be shown with empty message (without child)', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const MaterialApp(home: Tooltip(message: tooltipText)));
-    expect(find.text(tooltipText), findsNothing);
-    if (tooltipText.isEmpty) {
-      expect(find.byType(SizedBox), findsOneWidget);
-    }
+    await tester.pumpWidget(const MaterialApp(home: Tooltip(message: '')));
+    expect(find.byType(Tooltip), findsOneWidget);
+    expect(find.byType(SizedBox), findsOneWidget);
+    expect(find.byType(RawTooltip), findsNothing);
   });
 
   testWidgets('Tooltip should not ignore users tap on richMessage', (WidgetTester tester) async {
@@ -2054,6 +2058,39 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(Tooltip)), Size.zero);
     expect(find.text('X'), findsOne);
+  });
+
+  testWidgets('Tooltip should disappear even if mouse is hovering over the tooltip overlay', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: Tooltip(message: tooltipText, child: Text('Hover me')),
+        ),
+      ),
+    );
+
+    // Hover over the target widget.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+
+    final Finder targetFinder = find.text('Hover me');
+    await gesture.moveTo(tester.getCenter(targetFinder));
+    await tester.pump();
+
+    // Wait for the tooltip to actually appear.
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text(tooltipText), findsOneWidget);
+
+    // Move the mouse to the tooltip overlay.
+    final Finder tooltipOverlayFinder = find.text(tooltipText);
+    await gesture.moveTo(tester.getCenter(tooltipOverlayFinder));
+    await tester.pumpAndSettle();
+
+    // Verify the tooltip overlay is no longer displayed.
+    expect(find.text(tooltipText), findsNothing);
   });
 }
 

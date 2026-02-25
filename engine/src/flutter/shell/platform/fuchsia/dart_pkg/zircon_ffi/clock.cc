@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/fuchsia/dart-pkg/zircon_ffi/clock.h"
+#include "flutter/shell/platform/fuchsia/dart_pkg/zircon_ffi/clock.h"
 
 #include <zircon/syscalls.h>
 
