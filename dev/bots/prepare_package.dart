@@ -63,7 +63,7 @@ Future<void> main(List<String> rawArguments) async {
   argParser.addFlag(
     'dry_run',
     negatable: false,
-    help: 'Prints gsutil commands instead of executing them.',
+    help: 'Prints gcloud storage commands instead of executing them.',
   );
   argParser.addFlag('help', negatable: false, help: 'Print help for this command.');
 

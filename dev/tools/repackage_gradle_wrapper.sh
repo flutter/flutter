@@ -68,7 +68,7 @@ popd > /dev/null
 echo
 echo "Uploading repackaged gradle wrapper..."
 echo "Content hash: $STAMP"
-gsutil.py cp -n "$WRAPPER_TEMP_DIR/gradle-wrapper.tgz" "gs://flutter_infra_release/gradle-wrapper/$STAMP/gradle-wrapper.tgz"
+gcloud storage cp --no-clobber "$WRAPPER_TEMP_DIR/gradle-wrapper.tgz" "gs://flutter_infra_release/gradle-wrapper/$STAMP/gradle-wrapper.tgz"
 
 echo "flutter_infra_release/gradle-wrapper/$STAMP/gradle-wrapper.tgz" > "$WRAPPER_VERSION_PATH"
 

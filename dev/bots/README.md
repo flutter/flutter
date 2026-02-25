@@ -48,7 +48,7 @@ To run `prepare_package.dart` locally:
 - Run `dart [path to your normal Flutter repo]/dev/bots/prepare_package.dart
   --temp_dir=. --revision=[revision to package] --branch=[branch to deploy to]
   --publish`.
-- If you're running into `gsutil` permission issues, check with @Hixie to make sure
+- If you're running into `gcloud storage` permission issues, check with @Hixie to make sure
   you have the right push permissions.
 
 ### Editing a recipe
@@ -173,7 +173,7 @@ dart ./unpublish_package.dart --confirm --temp_dir=/tmp/foo --revision d444a455d
 ```
 
 and it will perform the actions. You will of course need to have access
-to the cloud storage server and have `gsutil` installed to perform this
+to the cloud storage server and have `gcloud storage` installed to perform this
 operation. Only runs on Linux or macOS systems.
 
 See `dart ./unpublish_package.dart --help` for more details.

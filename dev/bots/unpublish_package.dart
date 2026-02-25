@@ -281,7 +281,7 @@ class ArchiveUnpublisher {
   Future<Map<String, dynamic>> _loadMetadata() async {
     final metadataFile = File(path.join(tempDir.absolute.path, getMetadataFilename(platform)));
     // Always run this, even in dry runs.
-    await _runGsUtil(<String>['cp', metadataGsPath, metadataFile.absolute.path], confirm: true);
+    await _runGcloudStorage(<String>['cp', metadataGsPath, metadataFile.absolute.path], confirm: true);
     final String currentMetadata = metadataFile.readAsStringSync();
     if (currentMetadata.isEmpty) {
       throw UnpublishException('Empty metadata received from server');
@@ -298,8 +298,8 @@ class ArchiveUnpublisher {
   }
 
   Future<void> _updateMetadata(Map<String, dynamic> jsonData) async {
-    // We can't just cat the metadata from the server with 'gsutil cat', because
-    // Windows wants to echo the commands that execute in gsutil.bat to the
+    // We can't just cat the metadata from the server with 'gcloud storage cat', because
+    // Windows wants to echo the commands that execute in gcloud.cmd to the
     // stdout when we do that. So, we copy the file locally and then read it
     // back in.
     final metadataFile = File(path.join(tempDir.absolute.path, getMetadataFilename(platform)));
@@ -311,13 +311,13 @@ class ArchiveUnpublisher {
     await _cloudReplaceDest(metadataFile.absolute.path, metadataGsPath);
   }
 
-  Future<String> _runGsUtil(
+  Future<String> _runGcloudStorage(
     List<String> args, {
     Directory? workingDirectory,
     bool failOk = false,
     bool confirm = false,
   }) async {
-    final command = <String>['gsutil', '--', ...args];
+    final command = <String>['gcloud', 'storage', ...args];
     if (confirm) {
       return _processRunner.runProcess(command, workingDirectory: workingDirectory, failOk: failOk);
     } else {
@@ -337,7 +337,7 @@ class ArchiveUnpublisher {
         print('  $file');
       }
     }
-    await _runGsUtil(<String>['rm', ...files], failOk: true, confirm: confirmed);
+    await _runGcloudStorage(<String>['rm', ...files], failOk: true, confirm: confirmed);
   }
 
   Future<String> _cloudReplaceDest(String src, String dest) async {
@@ -345,7 +345,7 @@ class ArchiveUnpublisher {
     assert(!src.startsWith('gs:'), '_cloudReplaceDest must have a local source file.');
     // We often don't have permission to overwrite, but
     // we have permission to remove, so that's what we do first.
-    await _runGsUtil(<String>['rm', dest], failOk: true, confirm: confirmed);
+    await _runGcloudStorage(<String>['rm', dest], failOk: true, confirm: confirmed);
     String? mimeType;
     if (dest.endsWith('.tar.xz')) {
       mimeType = 'application/x-gtar';
@@ -356,13 +356,13 @@ class ArchiveUnpublisher {
     if (dest.endsWith('.json')) {
       mimeType = 'application/json';
     }
-    final args = <String>[
-      // Use our preferred MIME type for the files we care about
-      // and let gsutil figure it out for anything else.
-      if (mimeType != null) ...<String>['-h', 'Content-Type:$mimeType'],
-      ...<String>['cp', src, dest],
-    ];
-    return _runGsUtil(args, confirm: confirmed);
+    final args = <String>['cp', src, dest];
+    // Use our preferred MIME type for the files we care about
+    // and let gcloud storage figure it out for anything else.
+    if (mimeType != null) {
+      args.add('--content-type=$mimeType');
+    }
+    return _runGcloudStorage(args, confirm: confirmed);
   }
 }
 
