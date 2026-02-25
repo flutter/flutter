@@ -134,7 +134,7 @@ class GtkWidget extends GObject {
   (int, int)? translateCoordinates(GtkWidget destWidget, (int, int) src) {
     final ffi.Pointer<ffi.Int> destX = _gMalloc0(ffi.sizeOf<ffi.Int>()).cast<ffi.Int>();
     final ffi.Pointer<ffi.Int> destY = _gMalloc0(ffi.sizeOf<ffi.Int>()).cast<ffi.Int>();
-    final translated = _gtkWidgetTranslateCoordinates(
+    final bool translated = _gtkWidgetTranslateCoordinates(
       instance,
       destWidget.instance,
       src.$1,
@@ -142,7 +142,7 @@ class GtkWidget extends GObject {
       destX,
       destY,
     );
-    final result = translated ? (destX.value, destY.value) : null;
+    final (int, int)? result = translated ? (destX.value, destY.value) : null;
     _gFree(destX);
     _gFree(destY);
     return result;
@@ -217,7 +217,7 @@ class GdkWindow extends GObject {
     final ffi.Pointer<_GdkRectangle> rect = _gMalloc0(
       ffi.sizeOf<_GdkRectangle>(),
     ).cast<_GdkRectangle>();
-    final r = rect.ref;
+    final _GdkRectangle r = rect.ref;
     r.x = x;
     r.y = y;
     r.width = width;
