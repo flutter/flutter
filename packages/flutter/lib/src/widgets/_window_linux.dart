@@ -79,6 +79,9 @@ class WindowingOwnerLinux extends WindowingOwner {
   /// GTK windows keyed by view ID.
   final Map<int, GtkWindow> _windows = <int, GtkWindow>{};
 
+  /// View windows keyed by view ID.
+  final Map<int, FlView> _views = <int, FlView>{};
+
   @internal
   @override
   RegularWindowController createRegularWindowController({
@@ -95,6 +98,7 @@ class WindowingOwnerLinux extends WindowingOwner {
       title: title,
     );
     _windows[controller.rootView.viewId] = controller._window;
+    _views[controller.rootView.viewId] = controller._view;
     return controller;
   }
 
@@ -116,6 +120,7 @@ class WindowingOwnerLinux extends WindowingOwner {
       title: title,
     );
     _windows[controller.rootView.viewId] = controller._window;
+    _views[controller.rootView.viewId] = controller._view;
     return controller;
   }
 
@@ -139,6 +144,7 @@ class WindowingOwnerLinux extends WindowingOwner {
       parent: parent,
     );
     _windows[controller.rootView.viewId] = controller._window;
+    _views[controller.rootView.viewId] = controller._view;
     return controller;
   }
 
@@ -208,19 +214,20 @@ class RegularWindowControllerLinux extends RegularWindowController {
     if (title != null) {
       setTitle(title);
     }
-    final view = FlView(WidgetsBinding.instance.platformDispatcher.engineId!);
-    final int viewId = view.getId();
+    _view = FlView(WidgetsBinding.instance.platformDispatcher.engineId!);
+    final int viewId = _view.getId();
     rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
     );
-    view.show();
-    _window.add(view);
+    _view.show();
+    _window.add(_view);
     _window.present();
   }
 
   final WindowingOwnerLinux _owner;
   final RegularWindowControllerDelegate _delegate;
   final GtkWindow _window;
+  late final FlView _view;
   late final FlWindowMonitor _windowMonitor;
   bool _destroyed = false;
 
@@ -238,6 +245,7 @@ class RegularWindowControllerLinux extends RegularWindowController {
     _windowMonitor.unref();
     _destroyed = true;
     _owner._windows.remove(rootView.viewId);
+    _owner._views.remove(rootView.viewId);
   }
 
   @override
@@ -386,13 +394,13 @@ class DialogWindowControllerLinux extends DialogWindowController {
     if (title != null) {
       setTitle(title);
     }
-    final view = FlView(WidgetsBinding.instance.platformDispatcher.engineId!);
-    final int viewId = view.getId();
+    _view = FlView(WidgetsBinding.instance.platformDispatcher.engineId!);
+    final int viewId = _view.getId();
     rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
     );
-    view.show();
-    _window.add(view);
+    _view.show();
+    _window.add(_view);
     _window.present();
   }
 
@@ -400,6 +408,7 @@ class DialogWindowControllerLinux extends DialogWindowController {
   final DialogWindowControllerDelegate _delegate;
   final GtkWindow _window;
   final BaseWindowController? _parent;
+  late final FlView _view;
   late final FlWindowMonitor _windowMonitor;
   bool _destroyed = false;
 
@@ -417,6 +426,7 @@ class DialogWindowControllerLinux extends DialogWindowController {
     _windowMonitor.unref();
     _destroyed = true;
     _owner._windows.remove(rootView.viewId);
+    _owner._views.remove(rootView.viewId);
   }
 
   @override
@@ -522,22 +532,21 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
       onDestroy: _delegate.onWindowDestroyed,
     );
     setConstraints(preferredConstraints);
-    final view = FlView(
+    _view = FlView(
       WidgetsBinding.instance.platformDispatcher.engineId!,
       isSizedToContent: isSizedToContent,
     );
-    final int viewId = view.getId();
+    final int viewId = _view.getId();
     rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
     );
-    view.show();
-    _window.add(view);
+    _view.show();
+    _window.add(_view);
 
     final GtkWindow? parentWindow = _owner._windows[_parent.rootView.viewId];
     if (parentWindow != null) {
       _window.setTransientFor(parentWindow);
     }
-
     updatePosition(anchorRect: anchorRect, positioner: positioner);
 
     _window.show();
@@ -549,6 +558,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
   late Rect _anchorRect;
   late WindowPositioner _positioner;
   final BaseWindowController _parent;
+  late final FlView _view;
   late final FlWindowMonitor _windowMonitor;
   bool _destroyed = false;
 
@@ -566,6 +576,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
     _windowMonitor.unref();
     _destroyed = true;
     _owner._windows.remove(rootView.viewId);
+    _owner._views.remove(rootView.viewId);
   }
 
   @override
@@ -577,9 +588,15 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
       _positioner = positioner;
     }
 
+    final GtkWindow? parentWindow = _owner._windows[_parent.rootView.viewId];
+    final FlView? view = _owner._views[_parent.rootView.viewId];
+    var offset = (0, 0);
+    if (parentWindow != null && view != null) {
+      offset = view.translateCoordinates(parentWindow, (0, 0)) ?? (0, 0);
+    }
     _window.getWindow().moveToRect(
-      x: _anchorRect.left.toInt(),
-      y: _anchorRect.top.toInt(),
+      x: _anchorRect.left.toInt() + offset.$1,
+      y: _anchorRect.top.toInt() + offset.$2,
       width: (_anchorRect.right - _anchorRect.left).toInt(),
       height: (_anchorRect.bottom - _anchorRect.top).toInt(),
       rectAnchor: _anchorToGravity(_positioner.parentAnchor),

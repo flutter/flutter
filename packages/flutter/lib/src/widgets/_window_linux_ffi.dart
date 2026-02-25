@@ -126,6 +126,28 @@ class GtkWidget extends GObject {
     return GdkWindow(_gtkWidgetGetWindow(instance));
   }
 
+  /// Get the scale factor that maps window coordinates to device pixels.
+  int getScaleFactor() {
+    return _gtkWidgetGetScaleFactor(instance);
+  }
+
+  (int, int)? translateCoordinates(GtkWidget destWidget, (int, int) src) {
+    final ffi.Pointer<ffi.Int> destX = _gMalloc0(ffi.sizeOf<ffi.Int>()).cast<ffi.Int>();
+    final ffi.Pointer<ffi.Int> destY = _gMalloc0(ffi.sizeOf<ffi.Int>()).cast<ffi.Int>();
+    final translated = _gtkWidgetTranslateCoordinates(
+      instance,
+      destWidget.instance,
+      src.$1,
+      src.$2,
+      destX,
+      destY,
+    );
+    final result = translated ? (destX.value, destY.value) : null;
+    _gFree(destX);
+    _gFree(destY);
+    return result;
+  }
+
   /// Destroy the widget.
   void destroy() {
     _gtkWindowDestroy(instance);
@@ -146,6 +168,28 @@ class GtkWidget extends GObject {
 
   @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_widget_destroy')
   external static void _gtkWindowDestroy(ffi.Pointer<ffi.NativeType> widget);
+
+  @ffi.Native<ffi.Int Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_widget_get_scale_factor')
+  external static int _gtkWidgetGetScaleFactor(ffi.Pointer<ffi.NativeType> widget);
+
+  @ffi.Native<
+    ffi.Bool Function(
+      ffi.Pointer<ffi.NativeType>,
+      ffi.Pointer<ffi.NativeType>,
+      ffi.Int,
+      ffi.Int,
+      ffi.Pointer<ffi.Int>,
+      ffi.Pointer<ffi.Int>,
+    )
+  >(symbol: 'gtk_widget_translate_coordinates')
+  external static bool _gtkWidgetTranslateCoordinates(
+    ffi.Pointer<ffi.NativeType> widget,
+    ffi.Pointer<ffi.NativeType> destWidget,
+    int srcX,
+    int srcY,
+    ffi.Pointer<ffi.Int> destX,
+    ffi.Pointer<ffi.Int> destY,
+  );
 }
 
 /// Wraps GdkWindow
