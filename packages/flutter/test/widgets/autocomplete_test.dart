@@ -3784,42 +3784,46 @@ void main() {
     expect(tester.getSize(find.byType(Placeholder)).height, closeTo(initialSize - padding, 0.1));
   });
 
-  testWidgets('RawAutocomplete does not crash when recreated and options are hidden', (
+  testWidgets('RawAutocomplete does not crash when hiding non-displayed overlay', (
     WidgetTester tester,
   ) async {
-    final focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
-
     final controller = TextEditingController();
-    addTearDown(controller.dispose);
+    final focusNode = FocusNode();
 
-    Widget buildAutocomplete(bool toggleKey) {
-      return TestWidgetsApp(
+    await tester.pumpWidget(
+      TestWidgetsApp(
         home: RawAutocomplete<String>(
-          key: ValueKey<bool>(toggleKey),
-          focusNode: focusNode,
+          key: const ValueKey('initial'),
           textEditingController: controller,
-          optionsBuilder: (TextEditingValue textEditingValue) {
-            return const <String>['Option 1'];
+          focusNode: focusNode,
+          optionsBuilder: (TextEditingValue value) => [],
+          fieldViewBuilder: (context, ctrl, node, onFieldSubmitted) {
+            return TestTextField(controller: ctrl, focusNode: node);
           },
-          optionsViewBuilder:
-              (
-                BuildContext context,
-                AutocompleteOnSelected<String> onSelected,
-                Iterable<String> options,
-              ) {
-                return const SizedBox();
-              },
+          optionsViewBuilder: (context, onSelected, options) => const SizedBox(),
         ),
-      );
-    }
+      ),
+    );
 
-    // Pump the initial widget.
-    await tester.pumpWidget(buildAutocomplete(false));
+    // Change the key to force the RawAutocomplete to dispose and re-initialize.
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: RawAutocomplete<String>(
+          key: const ValueKey('new-key'),
+          textEditingController: controller,
+          focusNode: focusNode,
+          optionsBuilder: (TextEditingValue value) => [],
+          fieldViewBuilder: (context, ctrl, node, onFieldSubmitted) {
+            return TestTextField(controller: ctrl, focusNode: node);
+          },
+          optionsViewBuilder: (context, onSelected, options) => const SizedBox(),
+        ),
+      ),
+    );
 
-    // Pump again with a new key to force the widget to recreate entirely.
-    // If the fix is missing, this pump will throw an assertion error because
-    // it attempts to unconditionally hide an overlay that was never shown.
-    await tester.pumpWidget(buildAutocomplete(true));
+    await tester.enterText(find.byType(TestTextField), 'trigger');
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
   });
 }
