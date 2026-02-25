@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -396,6 +397,157 @@ void main() {
       await tester.tap(find.text('Go to Page 2'));
       await tester.pumpAndSettle();
       expect(find.text('Page 2 Content'), findsOneWidget);
+    });
+
+    testWidgets('initialRoute navigates to the specified route on launch', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          initialRoute: '/details',
+          routes: <String, WidgetBuilder>{
+            '/': (BuildContext context) => const Text('Home Page'),
+            '/details': (BuildContext context) => const Text('Details Page'),
+          },
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('Details Page'), findsOneWidget);
+    });
+
+    testWidgets('initialRoute defaults to null', (WidgetTester tester) async {
+      await tester.pumpWidget(const TestWidgetsApp(home: Placeholder()));
+
+      final WidgetsApp widgetsApp = tester.widget(find.byType(WidgetsApp));
+      expect(widgetsApp.initialRoute, isNull);
+    });
+
+    testWidgets('builder wraps the navigator content', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          builder: (BuildContext context, Widget? child) {
+            return Column(
+              children: <Widget>[
+                const Text('Header from builder'),
+                Expanded(child: child ?? const SizedBox.shrink()),
+              ],
+            );
+          },
+          home: const Text('Content'),
+        ),
+      );
+
+      expect(find.text('Header from builder'), findsOneWidget);
+      expect(find.text('Content'), findsOneWidget);
+    });
+
+    testWidgets('builder defaults to null', (WidgetTester tester) async {
+      await tester.pumpWidget(const TestWidgetsApp(home: Placeholder()));
+
+      final WidgetsApp widgetsApp = tester.widget(find.byType(WidgetsApp));
+      expect(widgetsApp.builder, isNull);
+    });
+
+    testWidgets('builder receives the navigator as child', (WidgetTester tester) async {
+      Widget? receivedChild;
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          builder: (BuildContext context, Widget? child) {
+            receivedChild = child;
+            return child ?? const SizedBox.shrink();
+          },
+          home: const Text('Home'),
+        ),
+      );
+
+      expect(receivedChild, isNotNull);
+    });
+
+    testWidgets('shortcuts defaults to null', (WidgetTester tester) async {
+      await tester.pumpWidget(const TestWidgetsApp(home: Placeholder()));
+
+      final WidgetsApp widgetsApp = tester.widget(find.byType(WidgetsApp));
+      expect(widgetsApp.shortcuts, isNull);
+    });
+
+    testWidgets('custom shortcuts are passed to WidgetsApp', (WidgetTester tester) async {
+      final customShortcuts = <ShortcutActivator, Intent>{
+        const SingleActivator(LogicalKeyboardKey.keyX, control: true): VoidCallbackIntent(() {}),
+      };
+
+      await tester.pumpWidget(
+        TestWidgetsApp(home: const Placeholder(), shortcuts: customShortcuts),
+      );
+
+      final WidgetsApp widgetsApp = tester.widget(find.byType(WidgetsApp));
+      expect(widgetsApp.shortcuts, customShortcuts);
+    });
+
+    testWidgets('custom shortcuts respond to key events', (WidgetTester tester) async {
+      var shortcutTriggered = false;
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          shortcuts: <ShortcutActivator, Intent>{
+            const SingleActivator(LogicalKeyboardKey.keyK, control: true): VoidCallbackIntent(() {
+              shortcutTriggered = true;
+            }),
+          },
+          actions: <Type, Action<Intent>>{VoidCallbackIntent: VoidCallbackAction()},
+          home: const Focus(autofocus: true, child: Placeholder()),
+        ),
+      );
+
+      await tester.pump();
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.control);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyK);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyK);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.control);
+
+      expect(shortcutTriggered, isTrue);
+    });
+
+    testWidgets('actions defaults to null', (WidgetTester tester) async {
+      await tester.pumpWidget(const TestWidgetsApp(home: Placeholder()));
+
+      final WidgetsApp widgetsApp = tester.widget(find.byType(WidgetsApp));
+      expect(widgetsApp.actions, isNull);
+    });
+
+    testWidgets('custom actions are passed to WidgetsApp', (WidgetTester tester) async {
+      final customActions = <Type, Action<Intent>>{VoidCallbackIntent: VoidCallbackAction()};
+
+      await tester.pumpWidget(TestWidgetsApp(home: const Placeholder(), actions: customActions));
+
+      final WidgetsApp widgetsApp = tester.widget(find.byType(WidgetsApp));
+      expect(widgetsApp.actions, customActions);
+    });
+
+    testWidgets('restorationScopeId is passed to WidgetsApp', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const TestWidgetsApp(home: Placeholder(), restorationScopeId: 'test-app'),
+      );
+
+      final WidgetsApp widgetsApp = tester.widget(find.byType(WidgetsApp));
+      expect(widgetsApp.restorationScopeId, 'test-app');
+    });
+
+    testWidgets('restorationScopeId defaults to null', (WidgetTester tester) async {
+      await tester.pumpWidget(const TestWidgetsApp(home: Placeholder()));
+
+      final WidgetsApp widgetsApp = tester.widget(find.byType(WidgetsApp));
+      expect(widgetsApp.restorationScopeId, isNull);
+    });
+
+    testWidgets('restorationScopeId inserts RootRestorationScope', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const TestWidgetsApp(home: Placeholder(), restorationScopeId: 'test-scope'),
+      );
+
+      expect(find.byType(RootRestorationScope), findsOneWidget);
     });
 
     testWidgets('navigatorKey provides access to NavigatorState', (WidgetTester tester) async {
