@@ -7,10 +7,10 @@
 
 #include <memory>
 
+#include "flutter/flow/surface.h"
 #include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/common/platform_view.h"
-#include "flutter/flow/surface.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterTexture.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
@@ -151,9 +151,7 @@ class PlatformViewIOS final : public PlatformView {
    * Gets the accessibility bridge created in this platform view.
    */
   AccessibilityBridge* GetAccessibilityBridge() {
-    return accessibility_bridges_.empty()
-               ? nullptr
-               : accessibility_bridges_.begin()->second.get();
+    return accessibility_bridges_.empty() ? nullptr : accessibility_bridges_.begin()->second.get();
   }
 
   bool HasRenderingSurface(int64_t flutter_view_id) override;

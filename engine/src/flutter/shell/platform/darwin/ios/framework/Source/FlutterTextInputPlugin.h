@@ -54,7 +54,7 @@ typedef NS_ENUM(NSInteger, FlutterScribbleInteractionStatus) {
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
-- (instancetype)initWithDelegate:(id<FlutterTextInputPluginDelegate>) delegate
+- (instancetype)initWithDelegate:(id<FlutterTextInputPluginDelegate>)delegate
                textInputDelegate:(id<FlutterTextInputDelegate>)textInputDelegate
     NS_DESIGNATED_INITIALIZER;
 

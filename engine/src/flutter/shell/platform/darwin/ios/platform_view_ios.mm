@@ -11,94 +11,88 @@
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/trace_event.h"
-#include "flutter/shell/common/shell_io_manager.h"
-#include "flutter/shell/platform/darwin/ios/ios_surface_metal_impeller.h"
-#include "flutter/shell/gpu/gpu_surface_metal_impeller.h"
 #include "flutter/impeller/renderer/backend/metal/formats_mtl.h"
+#include "flutter/shell/common/shell_io_manager.h"
+#include "flutter/shell/gpu/gpu_surface_metal_impeller.h"
 #import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
-
+#include "flutter/shell/platform/darwin/ios/ios_surface_metal_impeller.h"
 
 FLUTTER_ASSERT_ARC
 
 namespace flutter {
 
 class IOSSurfacesManager {
-public:
+ public:
   IOSSurfacesManager(const std::shared_ptr<IOSContext>& context)
-    : impeller_context_(context ? context->GetImpellerContext() : nullptr),
-      aiks_context_(context ? context->GetAiksContext() : nullptr) {
-  if (!impeller_context_ || !aiks_context_) {
-    return;
+      : impeller_context_(context ? context->GetImpellerContext() : nullptr),
+        aiks_context_(context ? context->GetAiksContext() : nullptr) {
+    if (!impeller_context_ || !aiks_context_) {
+      return;
+    }
   }
-}
 
   ~IOSSurfacesManager() = default;
 
-void AddSurface(int64_t view_id, std::unique_ptr<IOSSurface> surface) {
-  std::unique_lock<std::shared_mutex> lock(ios_surface_mutex_);
-  ios_surfaces_.emplace(view_id, std::move(surface));
-}
+  void AddSurface(int64_t view_id, std::unique_ptr<IOSSurface> surface) {
+    std::unique_lock<std::shared_mutex> lock(ios_surface_mutex_);
+    ios_surfaces_.emplace(view_id, std::move(surface));
+  }
 
-void RemoveSurface(int64_t view_id) {
-  std::unique_lock<std::shared_mutex> lock(ios_surface_mutex_);
-  ios_surfaces_.erase(view_id);
-}
+  void RemoveSurface(int64_t view_id) {
+    std::unique_lock<std::shared_mutex> lock(ios_surface_mutex_);
+    ios_surfaces_.erase(view_id);
+  }
 
-std::unique_ptr<Surface> CreateGPUSurface() {
-  // Create a dump `GPUSurfaceMetalImpeller`
-  std::shared_lock<std::shared_mutex> lock(ios_surface_mutex_);
-  auto iter = ios_surfaces_.begin();
-  if (iter != ios_surfaces_.end()) {
+  std::unique_ptr<Surface> CreateGPUSurface() {
+    // Create a dump `GPUSurfaceMetalImpeller`
+    std::shared_lock<std::shared_mutex> lock(ios_surface_mutex_);
+    auto iter = ios_surfaces_.begin();
+    if (iter != ios_surfaces_.end()) {
       return iter->second.get()->CreateGPUSurface();
+    }
+
+    return nullptr;
   }
 
-  return nullptr;
-}
+  int ActiveRenderingSurfaceCount() const { return rendering_surface_.size(); }
 
-int ActiveRenderingSurfaceCount() const {
-  return rendering_surface_.size();
-}
+  void CreateRenderingSurfaceForView(int64_t view_id) {
+    auto* ios_surface = GetSurface(view_id);
+    if (!ios_surface) {
+      return;
+    }
 
-void CreateRenderingSurfaceForView(int64_t view_id) {
-  auto *ios_surface = GetSurface(view_id);
-  if (!ios_surface) {
-    return;
+    auto* delegate = static_cast<IOSSurfaceMetalImpeller*>(ios_surface);
+    rendering_surface_[view_id] =
+        std::make_unique<GPUSurfaceMetalImpeller>(delegate, aiks_context_);
   }
 
-  auto *delegate = static_cast<IOSSurfaceMetalImpeller *>(ios_surface);
-  rendering_surface_[view_id] = std::make_unique<GPUSurfaceMetalImpeller>(
-                  delegate,
-                  aiks_context_);
-}
+  void DestroyRenderingSurfaceForView(int64_t view_id) { rendering_surface_.erase(view_id); }
 
-void DestroyRenderingSurfaceForView(int64_t view_id) {
-  rendering_surface_.erase(view_id);
-}
-
-Surface *GetRenderingSurface(int64_t view_id) {
-  auto iter = rendering_surface_.find(view_id);
-  if (iter != rendering_surface_.end()) {
-    return iter->second.get();
+  Surface* GetRenderingSurface(int64_t view_id) {
+    auto iter = rendering_surface_.find(view_id);
+    if (iter != rendering_surface_.end()) {
+      return iter->second.get();
+    }
+    return nullptr;
   }
-  return nullptr;
-}
 
-std::unique_ptr<SurfaceFrame> CreateSurfaceFrame(int64_t flutter_view_id, DlISize& frame_size) {
+  std::unique_ptr<SurfaceFrame> CreateSurfaceFrame(int64_t flutter_view_id, DlISize& frame_size) {
     auto iter = rendering_surface_.find(flutter_view_id);
     if (iter != rendering_surface_.end()) {
       return iter->second.get()->AcquireFrame(frame_size);
     }
     return nullptr;
-}
+  }
 
-private:
+ private:
   IOSSurface* GetSurface(int64_t view_id) const {
     std::shared_lock<std::shared_mutex> lock(ios_surface_mutex_);
     auto iter = ios_surfaces_.find(view_id);
     if (iter != ios_surfaces_.end()) {
-        return iter->second.get();
+      return iter->second.get();
     }
 
     return nullptr;
@@ -156,11 +150,11 @@ void PlatformViewIOS::NotifyCreated(int64_t view_id) {
 
   IOSSurfacesManager* surfaces_manager_ptr = ios_surfaces_manager_.get();
   fml::ManualResetWaitableEvent latch;
-  fml::TaskRunner::RunNowOrPostTask(
-      task_runners_.GetRasterTaskRunner(), [&latch, surfaces_manager_ptr, view_id]() {
-        surfaces_manager_ptr->CreateRenderingSurfaceForView(view_id);
-        latch.Signal();
-      });
+  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetRasterTaskRunner(),
+                                    [&latch, surfaces_manager_ptr, view_id]() {
+                                      surfaces_manager_ptr->CreateRenderingSurfaceForView(view_id);
+                                      latch.Signal();
+                                    });
   latch.Wait();
 }
 
@@ -174,12 +168,11 @@ void PlatformViewIOS::NotifyDestroyed(int64_t view_id) {
   }
   IOSSurfacesManager* surfaces_manager_ptr = ios_surfaces_manager_.get();
   fml::AutoResetWaitableEvent latch;
-  fml::TaskRunner::RunNowOrPostTask(
-      task_runners_.GetRasterTaskRunner(),
-      [&latch, surfaces_manager_ptr, view_id]() {
-        surfaces_manager_ptr->DestroyRenderingSurfaceForView(view_id);
-        latch.Signal();
-      });
+  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetRasterTaskRunner(),
+                                    [&latch, surfaces_manager_ptr, view_id]() {
+                                      surfaces_manager_ptr->DestroyRenderingSurfaceForView(view_id);
+                                      latch.Signal();
+                                    });
   latch.Wait();
 }
 
@@ -212,17 +205,17 @@ void PlatformViewIOS::AddOwnerViewController(__weak FlutterViewController* owner
 
   // Add an observer that will clear out the owner_controller_ ivar and
   // the accessibility_bridge_ in case the view controller is deleted.
-  auto [it, inserted] =
-    flutter_view_controller_will_dealloc_observers_.try_emplace(viewIdentifier);
+  auto [it, inserted] = flutter_view_controller_will_dealloc_observers_.try_emplace(viewIdentifier);
   it->second.reset([[NSNotificationCenter defaultCenter]
       addObserverForName:FlutterViewControllerWillDealloc
                   object:owner_controller
-                    queue:[NSOperationQueue mainQueue]
+                   queue:[NSOperationQueue mainQueue]
               usingBlock:^(NSNotification* note) {
                 // Implicit copy of 'this' is fine.
                 FlutterViewController* owner_controller = (FlutterViewController*)note.object;
                 RemoveOwnerViewController(owner_controller.viewIdentifier);
-                flutter_view_controller_will_dealloc_observers_.erase(owner_controller.viewIdentifier);
+                flutter_view_controller_will_dealloc_observers_.erase(
+                    owner_controller.viewIdentifier);
               }]);
 
   if (owner_controller && owner_controller.isViewLoaded) {
@@ -249,16 +242,15 @@ void PlatformViewIOS::RemoveOwnerViewController(FlutterViewIdentifier viewIdenti
 }
 
 void PlatformViewIOS::attachView(FlutterViewIdentifier viewIdentifier) {
-  FlutterViewController* owner_controller =
-      [viewControllers_ objectForKey:@(viewIdentifier)];
+  FlutterViewController* owner_controller = [viewControllers_ objectForKey:@(viewIdentifier)];
   FML_DCHECK(owner_controller);
   FML_DCHECK(owner_controller.isViewLoaded) << "FlutterViewController's view should be loaded "
-                                                "before attaching to PlatformViewIOS.";
+                                               "before attaching to PlatformViewIOS.";
   FlutterView* flutter_view = static_cast<FlutterView*>(owner_controller.view);
   CALayer* ca_layer = flutter_view.layer;
   auto ios_surface = IOSSurface::Create(ios_context_, ca_layer, false);
   FML_DCHECK(ios_surface != nullptr);
-  ios_surfaces_manager_->AddSurface( viewIdentifier, std::move(ios_surface));
+  ios_surfaces_manager_->AddSurface(viewIdentifier, std::move(ios_surface));
 
   auto iter = accessibility_bridges_.find(owner_controller.viewIdentifier);
   if (iter != accessibility_bridges_.end()) {
@@ -292,13 +284,12 @@ std::unique_ptr<Surface> PlatformViewIOS::CreateRenderingSurface() {
 
 // |PlatformView|
 std::shared_ptr<ExternalViewEmbedder> PlatformViewIOS::CreateExternalViewEmbedder() {
-    IOSSurfacesManager* surfaces_manager_ptr = ios_surfaces_manager_.get();
+  IOSSurfacesManager* surfaces_manager_ptr = ios_surfaces_manager_.get();
   return std::make_shared<IOSExternalViewEmbedder>(
-            platform_views_controller_,
-            ios_context_,
-            [surfaces_manager_ptr](int64_t view_id, DlISize& frame_size) {
-                return surfaces_manager_ptr->CreateSurfaceFrame(view_id, frame_size);
-            });
+      platform_views_controller_, ios_context_,
+      [surfaces_manager_ptr](int64_t view_id, DlISize& frame_size) {
+        return surfaces_manager_ptr->CreateSurfaceFrame(view_id, frame_size);
+      });
 }
 
 // |PlatformView|
@@ -348,7 +339,6 @@ void PlatformViewIOS::SetSemanticsTreeEnabled(bool enabled) {
         if (iter != accessibility_bridges_.end()) {
           return;
         }
-
 
         accessibility_bridges_[controller.viewIdentifier] =
             std::make_unique<AccessibilityBridge>(controller, this, platform_views_controller_);
@@ -427,8 +417,8 @@ void PlatformViewIOS::ApplyLocaleToOwnerController() {
     NSEnumerator* e = [viewControllers_ objectEnumerator];
     FlutterViewController* controller = nil;
     while ((controller = [e nextObject])) {
-    controller.applicationLocale =
-        application_locale_.empty() ? nil : @(application_locale_.data());
+      controller.applicationLocale =
+          application_locale_.empty() ? nil : @(application_locale_.data());
     }
   }
 }

@@ -6,11 +6,11 @@
 #include "display_list/geometry/dl_geometry_types.h"
 #include "impeller/geometry/rounding_radii.h"
 
+#include "flutter/common/constants.h"
 #include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
 #include "flutter/display_list/utils/dl_matrix_clip_tracker.h"
 #include "flutter/flow/surface_frame.h"
 #include "flutter/flow/view_slicer.h"
-#include "flutter/common/constants.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlayView.h"
@@ -146,7 +146,8 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 /// @brief The composition order from the previous thread.
 ///
 /// Only accessed from the platform thread.
-@property(nonatomic, readonly) std::unordered_map<int64_t, std::vector<int64_t>>& flutterViewPreviousCompositionOrder;
+@property(nonatomic, readonly)
+    std::unordered_map<int64_t, std::vector<int64_t>>& flutterViewPreviousCompositionOrder;
 
 @property(nonatomic, readonly) std::unordered_map<int64_t, BOOL>& flutterViewHadPlatformViews;
 
@@ -164,7 +165,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 /// Defaults to YES, but becomes NO if blurred backdrop filters cannot be applied.
 @property(nonatomic, assign) BOOL canApplyBlurBackdrop;
 
-@property(nonatomic, strong) NSMapTable<NSNumber *, FlutterViewController *> *flutterViewControllers;
+@property(nonatomic, strong) NSMapTable<NSNumber*, FlutterViewController*>* flutterViewControllers;
 
 /// Populate any missing overlay layers.
 ///
@@ -426,8 +427,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   self.gestureRecognizersBlockingPolicies[idString] = gestureRecognizerBlockingPolicy;
 }
 
-- (void)beginFrameWithSize:(DlISize)frameSize
-             flutterViewId:(int64_t)flutterViewId {
+- (void)beginFrameWithSize:(DlISize)frameSize flutterViewId:(int64_t)flutterViewId {
   [self resetFrameState];
   self.frameSize = frameSize;
   self.flutterView = [self.flutterViewControllers objectForKey:@(flutterViewId)].view;
@@ -748,8 +748,8 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 }
 
 - (BOOL)submitFrame:(std::unique_ptr<flutter::SurfaceFrame>)background_frame
-     withIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext
-     withFlutterViewId:(int64_t)flutterViewId {
+       withIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext
+    withFlutterViewId:(int64_t)flutterViewId {
   TRACE_EVENT0("flutter", "PlatformViewsController::SubmitFrame");
 
   FlutterViewController* flutterViewController =
@@ -863,14 +863,14 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   std::vector<std::shared_ptr<flutter::OverlayLayer>> unusedLayers =
       self.layerPool->RemoveUnusedLayers();
   self.layerPool->RecycleLayers();
-  auto task = [self,                                                      //
-               platformViewLayers = std::move(platformViewLayers),        //
+  auto task = [self,                                                //
+               platformViewLayers = std::move(platformViewLayers),            //
                currentCompositionParams = self.currentCompositionParams,  //
                viewsToRecomposite = self.viewsToRecomposite,              //
                compositionOrder = self.compositionOrder,                  //
-               unusedLayers = std::move(unusedLayers),                    //
-               surfaceFrames = std::move(surfaceFrames),                  //
-               currentFlutterViewId = flutterViewId           //
+               unusedLayers = std::move(unusedLayers),                        //
+               surfaceFrames = std::move(surfaceFrames),                      //
+               currentFlutterViewId = flutterViewId                       //
   ]() mutable {
     [self performSubmit:platformViewLayers
         currentCompositionParams:currentCompositionParams
@@ -913,11 +913,13 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   }
 }
 
-- (void)performResize:(const flutter::DlISize&)frameSize currentFlutterViewId:(int64_t)currentFlutterViewId {
+- (void)performResize:(const flutter::DlISize&)frameSize
+    currentFlutterViewId:(int64_t)currentFlutterViewId {
   TRACE_EVENT0("flutter", "PlatformViewsController::PerformResize");
   FML_DCHECK([[NSThread currentThread] isMainThread]);
 
-  FlutterViewController* flutterViewController = [self.flutterViewControllers objectForKey:@(currentFlutterViewId)];
+  FlutterViewController* flutterViewController =
+      [self.flutterViewControllers objectForKey:@(currentFlutterViewId)];
   UIView* flutterView = flutterViewController.view;
   FML_DCHECK(flutterView);
 
@@ -963,7 +965,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
   // Composite Platform Views.
   for (int64_t viewId : viewsToRecomposite) {
-      [self compositeView:viewId withParams:currentCompositionParams[viewId]];
+    [self compositeView:viewId withParams:currentCompositionParams[viewId]];
   }
 
   // Present callbacks.
@@ -973,7 +975,9 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
   // If a layer was allocated in the previous frame, but it's not used in the current frame,
   // then it can be removed from the scene.
-  [self removeUnusedLayers:unusedLayers withCompositionOrder:compositionOrder currentFlutterViewId:currentFlutterViewId];
+  [self removeUnusedLayers:unusedLayers
+      withCompositionOrder:compositionOrder
+      currentFlutterViewId:currentFlutterViewId];
 
   // Organize the layers by their z indexes.
   [self bringLayersIntoView:platformViewLayers
@@ -986,7 +990,8 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 - (void)bringLayersIntoView:(const LayersMap&)layerMap
        withCompositionOrder:(const std::vector<int64_t>&)compositionOrder
        currentFlutterViewId:(int64_t)currentFlutterViewId {
-  FlutterViewController* flutterViewController = [self.flutterViewControllers objectForKey:@(currentFlutterViewId)];
+  FlutterViewController* flutterViewController =
+      [self.flutterViewControllers objectForKey:@(currentFlutterViewId)];
   UIView* flutterView = flutterViewController.view;
   FML_DCHECK(flutterView);
   auto it = self.flutterViewPreviousCompositionOrder.find(currentFlutterViewId);
@@ -1140,11 +1145,12 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 }
 
 - (UIViewController<FlutterViewResponder>* _Nullable)flutterViewController {
-  return (UIViewController<FlutterViewResponder>*)
-      [self.flutterViewControllers objectForKey:@(flutter::kFlutterImplicitViewId)];
+  return (UIViewController<FlutterViewResponder>*)[self.flutterViewControllers
+      objectForKey:@(flutter::kFlutterImplicitViewId)];
 }
 
-- (void)setFlutterViewController:(UIViewController<FlutterViewResponder>* _Nullable)flutterViewController {
+- (void)setFlutterViewController:
+    (UIViewController<FlutterViewResponder>* _Nullable)flutterViewController {
   if (flutterViewController == nil) {
     [self detachFromFlutterViewController:flutter::kFlutterImplicitViewId];
     return;
@@ -1162,9 +1168,10 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   [self.flutterViewControllers removeObjectForKey:@(flutterViewId)];
 }
 
-- (UIViewController<FlutterViewResponder>* _Nullable)flutterViewControllerForIdentifier:(FlutterViewIdentifier)viewIdentifier {
-  return (UIViewController<FlutterViewResponder>*)
-      [self.flutterViewControllers objectForKey:@(viewIdentifier)];
+- (UIViewController<FlutterViewResponder>* _Nullable)flutterViewControllerForIdentifier:
+    (FlutterViewIdentifier)viewIdentifier {
+  return (UIViewController<FlutterViewResponder>*)[self.flutterViewControllers
+      objectForKey:@(viewIdentifier)];
 }
 
 #pragma mark - Properties
@@ -1213,11 +1220,11 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   return self.flutterViewPreviousCompositionOrder[flutter::kFlutterImplicitViewId];
 }
 
-- (std::unordered_map<int64_t, std::vector<int64_t>>&) flutterViewPreviousCompositionOrder {
+- (std::unordered_map<int64_t, std::vector<int64_t>>&)flutterViewPreviousCompositionOrder {
   return _flutterViewPreviousCompositionOrder;
 }
 
-- (std::unordered_map<int64_t, BOOL>&) flutterViewHadPlatformViews {
+- (std::unordered_map<int64_t, BOOL>&)flutterViewHadPlatformViews {
   return _flutterViewHadPlatformViews;
 }
 
