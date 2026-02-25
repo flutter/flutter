@@ -45,6 +45,7 @@ tests = [
   "platform_isolate_test.dart",
   "platform_isolate_shutdown_test.dart",
   "plugin_utilities_test.dart",
+  "process_test.dart",
   "semantics_test.dart",
   "serial_gc_test.dart",
   "spawn_helper.dart",
