@@ -415,13 +415,13 @@ FLUTTER_ASSERT_ARC
   FlutterViewController* newViewController = nil;
   @autoreleasepool {
     FlutterViewController* oldViewController = [[FlutterViewController alloc] initWithEngine:engine
-                                                                                      nibName:nil
-                                                                                       bundle:nil];
+                                                                                     nibName:nil
+                                                                                      bundle:nil];
     weakOldViewController = oldViewController;
 
     newViewController = [[FlutterViewController alloc] initWithEngine:engine
-                                                               nibName:nil
-                                                                bundle:nil];
+                                                              nibName:nil
+                                                               bundle:nil];
     XCTAssertEqual(engine.viewController, newViewController);
 
     oldViewController = nil;
@@ -430,8 +430,7 @@ FLUTTER_ASSERT_ARC
   XCTAssertNil(weakOldViewController);
 
   // Drain enqueued observer callbacks on the main queue.
-  XCTestExpectation* drainedMainQueue =
-      [self expectationWithDescription:@"drained-main-queue"];
+  XCTestExpectation* drainedMainQueue = [self expectationWithDescription:@"drained-main-queue"];
   dispatch_async(dispatch_get_main_queue(), ^{
     [drainedMainQueue fulfill];
   });

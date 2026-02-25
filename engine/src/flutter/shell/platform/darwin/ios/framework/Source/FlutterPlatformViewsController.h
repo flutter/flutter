@@ -48,8 +48,7 @@ NS_ASSUME_NONNULL_BEGIN
         (FlutterPlatformViewGestureRecognizersBlockingPolicy)gestureRecognizerBlockingPolicy;
 
 /// @brief Mark the beginning of a frame and record the size of the onscreen.
-- (void)beginFrameWithSize:(flutter::DlISize)frameSize
-             flutterViewId:(int64_t)flutterViewId;
+- (void)beginFrameWithSize:(flutter::DlISize)frameSize flutterViewId:(int64_t)flutterViewId;
 
 /// @brief Cancel the current frame, indicating that no platform views are composited.
 ///
@@ -98,8 +97,8 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 /// Called from the raster thread.
 - (BOOL)submitFrame:(std::unique_ptr<flutter::SurfaceFrame>)frame
-     withIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext
-     withFlutterViewId:(int64_t)flutterViewId;
+       withIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext
+    withFlutterViewId:(int64_t)flutterViewId;
 
 /// @brief Handler for platform view message channels.
 - (void)onMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
@@ -139,7 +138,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)detachFromFlutterViewController:(int64_t)flutterViewId;
 
-- (UIViewController<FlutterViewResponder>* _Nullable)flutterViewControllerForIdentifier:(FlutterViewIdentifier)viewIdentifier;
+- (UIViewController<FlutterViewResponder>* _Nullable)flutterViewControllerForIdentifier:
+    (FlutterViewIdentifier)viewIdentifier;
 
 @end
 

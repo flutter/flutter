@@ -15,10 +15,9 @@ FLUTTER_ASSERT_ARC
 
 namespace flutter {
 
-IOSSurfaceMetalImpeller::IOSSurfaceMetalImpeller(
-    CAMetalLayer* layer,
-    const std::shared_ptr<IOSContext>& context,
-    bool render_to_surface)
+IOSSurfaceMetalImpeller::IOSSurfaceMetalImpeller(CAMetalLayer* layer,
+                                                 const std::shared_ptr<IOSContext>& context,
+                                                 bool render_to_surface)
     : IOSSurface(context),
       GPUSurfaceMetalDelegate(MTLRenderTargetType::kCAMetalLayer),
       layer_(layer),
