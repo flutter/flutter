@@ -473,11 +473,14 @@ class OutlineInputBorder extends InputBorder {
     const double cornerArcSweep = math.pi / 2.0;
     final path = Path();
 
-    // Top left corner
+    // Top left corner - lerp from full arc to gap-aware arc so corner is visible
+    // throughout animation (avoids empty corner until animation completes).
     if (scaledRRect.tlRadius != Radius.zero) {
-      final double tlCornerArcSweep = math.acos(
-        clampDouble((1 - start / tlRadiusX) * gapPercentage, 0.0, 1.0),
-      );
+      final double targetTlSweep = start > tlRadiusX
+          ? cornerArcSweep
+          : math.acos(clampDouble(1 - start / tlRadiusX, 0.0, 1.0));
+      final double tlCornerArcSweep =
+          lerpDouble(cornerArcSweep, targetTlSweep, gapPercentage)!;
       path.addArc(tlCorner, math.pi, tlCornerArcSweep);
     } else {
       // Because the path is painted with Paint.strokeCap = StrokeCap.butt, horizontal coordinate is moved
@@ -502,8 +505,14 @@ class OutlineInputBorder extends InputBorder {
         path.addArc(trCorner, trCornerArcStart, cornerArcSweep);
       }
     } else if (start + extent < scaledRRect.width) {
+      // start and extent are already dependent on gapPercentage from paint().
+      // Lerp from full arc to gap-aware arc so corner is visible throughout animation.
       final double dx = scaledRRect.width - (start + extent);
-      final double sweep = math.asin(clampDouble((1 - dx / trRadiusX) * gapPercentage, 0.0, 1.0));
+      final double targetSweep = dx > trRadiusX
+          ? 0.0
+          : math.asin(clampDouble(1 - dx / trRadiusX, 0.0, 1.0));
+      final double sweep =
+          lerpDouble(0.0, targetSweep, gapPercentage)!;
       path.addArc(trCorner, trCornerArcStart + sweep, cornerArcSweep - sweep);
     }
 
