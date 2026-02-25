@@ -318,7 +318,7 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
     // Currently there's only ever one window, but the channel's format allows
     // more than one window's menu hierarchy to be defined.
     final windowMenu = <String, Object?>{'0': representation};
-    channel.invokeMethod<void>(_kMenuSetMethod, windowMenu);
+    channel.invokeMethod<void>(_kMenuSetMethod, windowMenu); // ignore: unawaited_futures
   }
 
   /// Defines the channel that the [DefaultPlatformMenuDelegate] uses to

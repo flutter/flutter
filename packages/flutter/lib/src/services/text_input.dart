@@ -2592,7 +2592,7 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void attach(TextInputClient client, TextInputConfiguration configuration) {
-    _channel.invokeMethod<void>('TextInput.setClient', <Object>[
+    _channel.invokeMethod<void>('TextInput.setClient', <Object>[  // ignore: unawaited_futures
       TextInput._instance._currentConnection!._id,
       _configurationToJson(configuration),
     ]);
@@ -2600,32 +2600,32 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void detach(TextInputClient client) {
-    _channel.invokeMethod<void>('TextInput.clearClient');
+    _channel.invokeMethod<void>('TextInput.clearClient');  // ignore: unawaited_futures
   }
 
   @override
   void updateConfig(TextInputConfiguration configuration) {
-    _channel.invokeMethod<void>('TextInput.updateConfig', _configurationToJson(configuration));
+    _channel.invokeMethod<void>('TextInput.updateConfig', _configurationToJson(configuration));  // ignore: unawaited_futures
   }
 
   @override
   void setEditingState(TextEditingValue value) {
-    _channel.invokeMethod<void>('TextInput.setEditingState', value.toJSON());
+    _channel.invokeMethod<void>('TextInput.setEditingState', value.toJSON());  // ignore: unawaited_futures
   }
 
   @override
   void show() {
-    _channel.invokeMethod<void>('TextInput.show');
+    _channel.invokeMethod<void>('TextInput.show');  // ignore: unawaited_futures
   }
 
   @override
   void hide() {
-    _channel.invokeMethod<void>('TextInput.hide');
+    _channel.invokeMethod<void>('TextInput.hide');  // ignore: unawaited_futures
   }
 
   @override
   void setEditableSizeAndTransform(Size editableBoxSize, Matrix4 transform) {
-    _channel.invokeMethod<void>('TextInput.setEditableSizeAndTransform', <String, dynamic>{
+    _channel.invokeMethod<void>('TextInput.setEditableSizeAndTransform', <String, dynamic>{  // ignore: unawaited_futures
       'width': editableBoxSize.width,
       'height': editableBoxSize.height,
       'transform': transform.storage,
@@ -2634,7 +2634,7 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void setComposingRect(Rect rect) {
-    _channel.invokeMethod<void>('TextInput.setMarkedTextRect', <String, dynamic>{
+    _channel.invokeMethod<void>('TextInput.setMarkedTextRect', <String, dynamic>{  // ignore: unawaited_futures
       'width': rect.width,
       'height': rect.height,
       'x': rect.left,
@@ -2644,7 +2644,7 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void setCaretRect(Rect rect) {
-    _channel.invokeMethod<void>('TextInput.setCaretRect', <String, dynamic>{
+    _channel.invokeMethod<void>('TextInput.setCaretRect', <String, dynamic>{  // ignore: unawaited_futures
       'width': rect.width,
       'height': rect.height,
       'x': rect.left,
@@ -2654,7 +2654,7 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void setSelectionRects(List<SelectionRect> selectionRects) {
-    _channel.invokeMethod<void>(
+    _channel.invokeMethod<void>(  // ignore: unawaited_futures
       'TextInput.setSelectionRects',
       selectionRects.map((SelectionRect rect) {
         return <num>[
@@ -2690,17 +2690,17 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void updateStyle(TextInputStyle style) {
-    _channel.invokeMethod<void>('TextInput.setStyle', style.toJson());
+    _channel.invokeMethod<void>('TextInput.setStyle', style.toJson());  // ignore: unawaited_futures
   }
 
   @override
   void requestAutofill() {
-    _channel.invokeMethod<void>('TextInput.requestAutofill');
+    _channel.invokeMethod<void>('TextInput.requestAutofill');  // ignore: unawaited_futures
   }
 
   @override
   void finishAutofillContext({bool shouldSave = true}) {
-    _channel.invokeMethod<void>('TextInput.finishAutofillContext', shouldSave);
+    _channel.invokeMethod<void>('TextInput.finishAutofillContext', shouldSave);  // ignore: unawaited_futures
   }
 }
 

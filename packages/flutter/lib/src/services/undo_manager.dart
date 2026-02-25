@@ -90,8 +90,8 @@ class UndoManager {
     throw MissingPluginException();
   }
 
-  void _setUndoState({bool canUndo = false, bool canRedo = false}) {
-    _channel.invokeMethod<void>('UndoManager.setUndoState', <String, bool>{
+  Future<void> _setUndoState({bool canUndo = false, bool canRedo = false}) async {
+    await _channel.invokeMethod<void>('UndoManager.setUndoState', <String, bool>{
       'canUndo': canUndo,
       'canRedo': canRedo,
     });

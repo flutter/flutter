@@ -485,10 +485,10 @@ mixin RendererBinding
     );
   }
 
-  void _handleWebFirstFrame(Duration _) {
+  Future<void> _handleWebFirstFrame(Duration _) async {
     assert(kIsWeb);
     const methodChannel = MethodChannel('flutter/service_worker');
-    methodChannel.invokeMethod<void>('first-frame');
+    await methodChannel.invokeMethod<void>('first-frame');
   }
 
   void _handlePersistentFrameCallback(Duration timeStamp) {

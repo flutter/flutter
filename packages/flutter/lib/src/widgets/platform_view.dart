@@ -801,12 +801,12 @@ class _AndroidViewState extends State<AndroidView> {
     }
   }
 
-  void _onFocusChange(bool isFocused) {
+  Future<void> _onFocusChange(bool isFocused) async {
     if (!_controller.isCreated) {
       return;
     }
     if (!isFocused) {
-      _controller.clearFocus().catchError((dynamic e) {
+      await _controller.clearFocus().catchError((dynamic e) {
         if (e is MissingPluginException) {
           // We land the framework part of Android platform views keyboard
           // support before the engine part. There will be a commit range where
@@ -819,7 +819,7 @@ class _AndroidViewState extends State<AndroidView> {
       });
       return;
     }
-    SystemChannels.textInput
+    await SystemChannels.textInput
         .invokeMethod<void>('TextInput.setPlatformViewClient', <String, dynamic>{
           'platformViewId': _id,
         })
@@ -944,14 +944,14 @@ abstract class _DarwinViewState<
 
   Future<ControllerT> createNewViewController(int id);
 
-  void _onFocusChange(bool isFocused, ControllerT controller) {
+  Future<void> _onFocusChange(bool isFocused, ControllerT controller) async {
     if (!isFocused) {
       // Unlike Android, we do not need to send "clearFocus" channel message
       // to the engine, because focusing on another view will automatically
       // cancel the focus on the previously focused platform view.
       return;
     }
-    SystemChannels.textInput.invokeMethod<void>(
+    await SystemChannels.textInput.invokeMethod<void>(
       'TextInput.setPlatformViewClient',
       <String, dynamic>{'platformViewId': controller.id},
     );
@@ -1285,11 +1285,11 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
     }
   }
 
-  void _handleFrameworkFocusChanged(bool isFocused) {
+  Future<void> _handleFrameworkFocusChanged(bool isFocused) async {
     if (!isFocused) {
       _controller?.clearFocus();
     }
-    SystemChannels.textInput.invokeMethod<void>(
+    await SystemChannels.textInput.invokeMethod<void>(
       'TextInput.setPlatformViewClient',
       <String, dynamic>{'platformViewId': _id},
     );
