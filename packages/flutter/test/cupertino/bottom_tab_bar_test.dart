@@ -702,4 +702,49 @@ Future<void> main() async {
     );
     expect(tester.getSize(find.byType(CupertinoTabBar)), Size.zero);
   });
+
+  testWidgets('CupertinoTabBar item semanticsLabel overrides label for accessibility', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await pumpWidgetWithBoilerplate(
+      tester,
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: CupertinoTabBar(
+          items: <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+              label: 'A',
+              semanticsLabel: 'Custom A label',
+            ),
+            BottomNavigationBarItem(
+              icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+              label: 'B',
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // Tab A should use the custom semanticsLabel
+    expect(
+      semantics,
+      includesNodeWith(
+        label: 'Custom A label',
+        hint: 'Tab 1 of 2',
+        flags: <SemanticsFlag>[SemanticsFlag.hasSelectedState, SemanticsFlag.isSelected],
+        textDirection: TextDirection.ltr,
+      ),
+    );
+
+    // Tab B should use the default label since no semanticsLabel is provided
+    expect(
+      semantics,
+      includesNodeWith(label: 'B', hint: 'Tab 2 of 2', textDirection: TextDirection.ltr),
+    );
+
+    semantics.dispose();
+  });
 }

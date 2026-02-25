@@ -26,7 +26,6 @@ import 'package:flutter/widgets.dart';
 import 'color_scheme.dart';
 import 'constants.dart';
 import 'debug.dart';
-import 'material_state.dart';
 import 'range_slider_parts.dart';
 import 'slider_theme.dart';
 import 'slider_value_indicator_shape.dart';
@@ -567,15 +566,17 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
   }
 
   void _handleDragStart(RangeValues values) {
-    assert(widget.onChangeStart != null);
-    _dragging = true;
-    widget.onChangeStart!(_lerpRangeValues(values));
+    setState(() {
+      _dragging = true;
+    });
+    widget.onChangeStart?.call(_lerpRangeValues(values));
   }
 
   void _handleDragEnd(RangeValues values) {
-    assert(widget.onChangeEnd != null);
-    _dragging = false;
-    widget.onChangeEnd!(_lerpRangeValues(values));
+    setState(() {
+      _dragging = false;
+    });
+    widget.onChangeEnd?.call(_lerpRangeValues(values));
   }
 
   // Returns a number between min and max, proportional to value, which must
@@ -764,8 +765,8 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
           textScaleFactor: effectiveTextScale,
           screenSize: screenSize(),
           onChanged: _enabled && (widget.max > widget.min) ? _handleChanged : null,
-          onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
-          onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
+          onChangeStart: _handleDragStart,
+          onChangeEnd: _handleDragEnd,
           state: this,
           semanticFormatterCallback: widget.semanticFormatterCallback,
           hovering: _showHoverHighlight,
@@ -1352,6 +1353,13 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     );
 
     if (_lastThumbSelection != null) {
+      switch (_lastThumbSelection!) {
+        case Thumb.start:
+          _state.startFocusNode.requestFocus();
+        case Thumb.end:
+          _state.endFocusNode.requestFocus();
+      }
+
       _active = true;
       // We supply the *current* values as the start locations, so that if we have
       // a tap, it consists of a call to onChangeStart with the previous value and
@@ -1428,7 +1436,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
           math.max(currentDragValue, currentValues.start + _minThumbSeparationValue),
         ),
       };
-      onChanged!(_newValues);
+      onChanged!(_discretizeRangeValues(_newValues));
     }
   }
 
@@ -1759,7 +1767,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       textDirection: textDirection,
       sliderTheme: thumbWidth != null && thumbHeight != null
           ? _sliderTheme.copyWith(
-              thumbSize: MaterialStatePropertyAll<Size?>(Size(thumbWidth, thumbHeight)),
+              thumbSize: WidgetStatePropertyAll<Size?>(Size(thumbWidth, thumbHeight)),
             )
           : _sliderTheme,
       thumb: bottomThumb,
@@ -1848,7 +1856,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       textDirection: textDirection,
       sliderTheme: thumbWidth != null && thumbHeight != null
           ? _sliderTheme.copyWith(
-              thumbSize: MaterialStatePropertyAll<Size?>(Size(thumbWidth, thumbHeight)),
+              thumbSize: WidgetStatePropertyAll<Size?>(Size(thumbWidth, thumbHeight)),
             )
           : _sliderTheme,
       thumb: topThumb,

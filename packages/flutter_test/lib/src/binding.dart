@@ -163,16 +163,22 @@ class CapturedAccessibilityAnnouncement {
 }
 
 class _TestFlutterView implements FlutterView {
-  _TestFlutterView({required this.controller, required TestPlatformDispatcher platformDispatcher})
-    : _platformDispatcher = platformDispatcher,
-      _viewId = _nextViewId++ {
+  _TestFlutterView({
+    required this.controller,
+    required TestPlatformDispatcher platformDispatcher,
+    this.constraints,
+    this.onRender,
+  }) : _platformDispatcher = platformDispatcher,
+       _viewId = _nextViewId++ {
     platformDispatcher.addTestView(this);
   }
 
   static int _nextViewId = 1;
   final BaseWindowController controller;
   final TestPlatformDispatcher _platformDispatcher;
+  final BoxConstraints? constraints;
   final int _viewId;
+  final void Function(Size? size)? onRender;
 
   @override
   double get devicePixelRatio => display.devicePixelRatio;
@@ -190,7 +196,14 @@ class _TestFlutterView implements FlutterView {
   ui.ViewPadding get padding => ui.ViewPadding.zero;
 
   @override
-  ui.ViewConstraints get physicalConstraints => ui.ViewConstraints.tight(physicalSize);
+  ui.ViewConstraints get physicalConstraints => constraints != null
+      ? ui.ViewConstraints(
+          minWidth: constraints!.minWidth,
+          maxWidth: constraints!.maxWidth,
+          minHeight: constraints!.minHeight,
+          maxHeight: constraints!.maxHeight,
+        )
+      : ui.ViewConstraints.tight(physicalSize);
 
   @override
   ui.Size get physicalSize => controller.contentSize * devicePixelRatio;
@@ -211,7 +224,12 @@ class _TestFlutterView implements FlutterView {
   ui.ViewPadding get viewPadding => ui.ViewPadding.zero;
 
   @override
-  void render(ui.Scene scene, {ui.Size? size}) {}
+  ui.DisplayCornerRadii? get displayCornerRadii => null;
+
+  @override
+  void render(ui.Scene scene, {ui.Size? size}) {
+    onRender?.call(size);
+  }
 
   @override
   void updateSemantics(ui.SemanticsUpdate update) {}
@@ -294,7 +312,11 @@ class _TestRegularWindowController extends RegularWindowController with _ChildWi
        _title = title ?? 'Test Window',
        super.empty() {
     _constrainToBounds();
-    rootView = _TestFlutterView(controller: this, platformDispatcher: platformDispatcher);
+    rootView = _TestFlutterView(
+      controller: this,
+      platformDispatcher: platformDispatcher,
+      constraints: _constraints,
+    );
 
     // Automatically activate the window when created.
     activate();
@@ -442,7 +464,11 @@ class _TestDialogWindowController extends DialogWindowController with _ChildWind
        _title = title ?? 'Test Window',
        super.empty() {
     _constrainToBounds();
-    rootView = _TestFlutterView(controller: this, platformDispatcher: platformDispatcher);
+    rootView = _TestFlutterView(
+      controller: this,
+      platformDispatcher: platformDispatcher,
+      constraints: _constraints,
+    );
     _addChildToParent(parent, this);
 
     // Automatically activate the window when created.
@@ -526,6 +552,76 @@ class _TestDialogWindowController extends DialogWindowController with _ChildWind
   }
 }
 
+class _TestTooltipWindowController extends TooltipWindowController with _ChildWindowHierarchyMixin {
+  _TestTooltipWindowController({
+    required TooltipWindowControllerDelegate delegate,
+    required TestPlatformDispatcher platformDispatcher,
+    required this.windowingOwner,
+    required BoxConstraints preferredConstraints,
+    required bool isSizedToContent,
+    required ui.Rect anchorRect,
+    required WindowPositioner positioner,
+    required BaseWindowController parent,
+  }) : _delegate = delegate,
+       _constraints = preferredConstraints,
+       _isSizedToContent = isSizedToContent,
+       _anchorRect = anchorRect,
+       _positioner = positioner,
+       _parent = parent,
+       super.empty() {
+    rootView = _TestFlutterView(
+      controller: this,
+      platformDispatcher: platformDispatcher,
+      constraints: _constraints,
+      onRender: (size) {
+        if (_isSizedToContent && _lastRenderedSize != size) {
+          _lastRenderedSize = size;
+          scheduleMicrotask(() {
+            notifyListeners();
+          });
+        }
+      },
+    );
+    _addChildToParent(parent, this);
+  }
+
+  final TooltipWindowControllerDelegate _delegate;
+  final _TestWindowingOwner windowingOwner;
+  BoxConstraints _constraints;
+  ui.Rect _anchorRect;
+  WindowPositioner _positioner;
+  final BaseWindowController _parent;
+  final bool _isSizedToContent;
+  Size? _lastRenderedSize;
+
+  @override
+  Size get contentSize =>
+      _isSizedToContent && _lastRenderedSize != null ? _lastRenderedSize! : _constraints.biggest;
+
+  @override
+  BaseWindowController get parent => _parent;
+
+  @override
+  void setConstraints(BoxConstraints constraints) {
+    _constraints = constraints;
+    notifyListeners();
+  }
+
+  @override
+  void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {
+    _anchorRect = anchorRect ?? _anchorRect;
+    _positioner = positioner ?? _positioner;
+  }
+
+  @override
+  void destroy() {
+    _delegate.onWindowDestroyed();
+    removeAllChildren();
+    windowingOwner.deactivateWindowController(this);
+    _removeChildFromParent(parent, this);
+  }
+}
+
 class _TestPopupWindowController extends PopupWindowController with _ChildWindowHierarchyMixin {
   _TestPopupWindowController({
     required PopupWindowControllerDelegate delegate,
@@ -541,7 +637,11 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
        _positioner = positioner,
        _parent = parent,
        super.empty() {
-    rootView = _TestFlutterView(controller: this, platformDispatcher: platformDispatcher);
+    rootView = _TestFlutterView(
+      controller: this,
+      platformDispatcher: platformDispatcher,
+      constraints: _constraints,
+    );
     _addChildToParent(parent, this);
 
     // Automatically activate the window when created.
@@ -738,8 +838,16 @@ class _TestWindowingOwner extends WindowingOwner {
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
-    // TODO(mattkae): implement createTooltipWindowController
-    throw UnimplementedError();
+    return _TestTooltipWindowController(
+      delegate: delegate,
+      platformDispatcher: _platformDispatcher,
+      windowingOwner: this,
+      preferredConstraints: preferredConstraints,
+      isSizedToContent: isSizedToContent,
+      anchorRect: anchorRect,
+      positioner: positioner,
+      parent: parent,
+    );
   }
 
   @override
@@ -1397,7 +1505,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     return announcements;
   }
 
-  static const TextStyle _messageStyle = TextStyle(color: Color(0xFF917FFF), fontSize: 40.0);
+  static const TextStyle _messageStyle = TextStyle(color: Color(0xFF8F7FFF), fontSize: 40.0);
 
   static const Widget _preTestMessage = Center(
     child: Text('Test starting...', style: _messageStyle, textDirection: TextDirection.ltr),
@@ -1836,6 +1944,36 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       }
       return true;
     }());
+  }
+
+  /// Replaces the root layers of all managed [renderViews] with new, unused
+  /// layers.
+  ///
+  /// This method is typically used in a test's [addTearDown] to ensure that
+  /// resources associated with the root transform layer are properly disposed
+  /// of between tests. It is useful for tests that modify the view
+  /// configuration (for example, by calling [setSurfaceSize] or changing
+  /// [ViewConfiguration]). Such tests might cause the root layer to not be
+  /// automatically disposed before the leak check, triggering false negatives.
+  ///
+  /// This method also resets view configuration to its default value.
+  ///
+  /// See also:
+  ///
+  ///  * [setSurfaceSize], which often necessitates calling this method during
+  ///    tear down.
+  Future<void> resetLayers() async {
+    await setSurfaceSize(null);
+    for (final RenderView renderView in renderViews) {
+      // To reliably trigger [RenderView.replaceRootLayer], we assign a new
+      // device pixel ratio that differs from the current one.
+      renderView.configuration = ViewConfiguration(
+        devicePixelRatio: renderView.flutterView.devicePixelRatio + 1.0,
+      );
+      // Reset the device pixel ratio (and other view configurations) to their
+      // default values.
+      renderView.configuration = createViewConfigurationFor(renderView);
+    }
   }
 
   /// Called by the [testWidgets] function after a test is executed.

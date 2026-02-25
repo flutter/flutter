@@ -26,12 +26,12 @@ enum ServiceWorkerStrategy implements CliEnum {
 
   @override
   String get helpText => switch (this) {
-    ServiceWorkerStrategy.offlineFirst =>
+    offlineFirst =>
       'Attempt to cache the application shell eagerly and then lazily '
           'cache all subsequent assets as they are loaded. When making a '
           'network request for an asset, the offline cache will be '
           'preferred.',
-    ServiceWorkerStrategy.none =>
+    none =>
       'Generate a service worker with no body. This is useful for local '
           'testing or in cases where the service worker caching '
           'functionality is not desirable',

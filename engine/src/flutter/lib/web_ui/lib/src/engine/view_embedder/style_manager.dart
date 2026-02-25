@@ -107,7 +107,7 @@ void applyGlobalCssRulesToSheet(
     '}'
     // Hide outline when the flutter-view root element is focused.
     '$cssSelectorPrefix:focus {'
-    ' outline: none;'
+    ' outline: rgb(0, 0, 0) none 0px;'
     '}',
   );
 

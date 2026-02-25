@@ -7,11 +7,11 @@ import 'package:meta/meta.dart';
 import '../../asset.dart';
 import '../../base/logger.dart' show Logger;
 import '../../build_info.dart';
-import '../../globals.dart' as globals;
 import '../../hook_runner.dart' show FlutterHookRunner;
 import '../../isolated/native_assets/dart_hook_result.dart' show DartHooksResult;
-import '../build_system.dart' show BuildResult, Environment, ExceptionMeasurement;
-import 'native_assets.dart' show DartBuild;
+import '../../isolated/native_assets/native_assets.dart';
+import '../build_system.dart' show Environment;
+import 'native_assets.dart' show createFlutterNativeAssetsBuildRunner;
 
 class FlutterHookRunnerNative implements FlutterHookRunner {
   FlutterHookResult? _flutterHookResult;
@@ -33,29 +33,20 @@ class FlutterHookRunnerNative implements FlutterHookRunner {
     }
     logger?.printTrace('runHooks() - will perform dart build');
 
-    // Use a clone of the environment with a different output directory
-    // to avoid conflicts with the primary build's outputs.
-    final String outputDirPath = environment.fileSystem.path.join(
-      environment.outputDir.path,
-      kHooksOutputDirectory,
+    final FlutterNativeAssetsBuildRunner buildRunner = await createFlutterNativeAssetsBuildRunner(
+      environment,
     );
-    final Environment hooksEnvironment = environment.copyWith(
-      outputDir: environment.fileSystem.directory(outputDirPath),
-    );
-    final BuildResult lastBuild = await globals.buildSystem.build(
-      DartBuild(specifiedTargetPlatform: targetPlatform),
-      hooksEnvironment,
-    );
-    if (!lastBuild.success) {
-      for (final ExceptionMeasurement exceptionMeasurement in lastBuild.exceptions.values) {
-        logger?.printError(
-          exceptionMeasurement.exception.toString(),
-          stackTrace: logger.isVerbose ? exceptionMeasurement.stackTrace : null,
-        );
-      }
-    }
 
-    final DartHooksResult dartHooksResult = await DartBuild.loadHookResult(environment);
+    final DartHooksResult dartHooksResult = await runFlutterSpecificHooks(
+      environmentDefines: environment.defines,
+      buildRunner: buildRunner,
+      targetPlatform: targetPlatform,
+      projectUri: environment.projectDir.uri,
+      fileSystem: environment.fileSystem,
+      buildCodeAssets: false,
+      buildDataAssets: true,
+    );
+
     final FlutterHookResult flutterHookResult = dartHooksResult.asFlutterResult;
     _flutterHookResult = flutterHookResult;
     logger?.printTrace('runHooks() - done');

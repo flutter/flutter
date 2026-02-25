@@ -39,10 +39,14 @@ import android.media.ImageReader;
 import android.os.Build;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
+import android.util.SparseArray;
 import android.view.DisplayCutout;
+import android.view.RoundedCorner;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewStructure;
 import android.view.WindowInsets;
+import android.view.autofill.AutofillValue;
 import android.widget.FrameLayout;
 import androidx.core.util.Consumer;
 import androidx.test.core.app.ActivityScenario;
@@ -58,6 +62,7 @@ import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.plugin.platform.PlatformViewsController2;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1204,6 +1209,52 @@ public class FlutterViewTest {
     validateViewportMetricPadding(viewportMetricsCaptor, 100, 0, 100, 0);
   }
 
+  @Test
+  @TargetApi(31)
+  @Config(minSdk = API_LEVELS.API_31)
+  public void itSetsDisplayCornerRadii() {
+    FlutterView flutterView = new FlutterView(ctx);
+    FlutterEngine flutterEngine = spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+    FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
+    when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
+
+    // When the new FlutterView is attached to the engine without any system insets, the corner
+    // radii default to -1.
+    flutterView.attachToFlutterEngine(flutterEngine);
+    ArgumentCaptor<FlutterRenderer.ViewportMetrics> viewportMetricsCaptor =
+        ArgumentCaptor.forClass(FlutterRenderer.ViewportMetrics.class);
+    verify(flutterRenderer).setViewportMetrics(viewportMetricsCaptor.capture());
+    assertEquals(-1, viewportMetricsCaptor.getValue().displayCornerRadiusTopLeft);
+    assertEquals(-1, viewportMetricsCaptor.getValue().displayCornerRadiusTopRight);
+    assertEquals(-1, viewportMetricsCaptor.getValue().displayCornerRadiusBottomRight);
+    assertEquals(-1, viewportMetricsCaptor.getValue().displayCornerRadiusBottomLeft);
+
+    // Simulate the system applying a window inset.
+    WindowInsets windowInsets =
+        new WindowInsets.Builder()
+            .setRoundedCorner(
+                RoundedCorner.POSITION_TOP_LEFT,
+                new RoundedCorner(RoundedCorner.POSITION_TOP_LEFT, 1, 1, 1))
+            .setRoundedCorner(
+                RoundedCorner.POSITION_TOP_RIGHT,
+                new RoundedCorner(RoundedCorner.POSITION_TOP_RIGHT, 2, 2, 2))
+            .setRoundedCorner(
+                RoundedCorner.POSITION_BOTTOM_RIGHT,
+                new RoundedCorner(RoundedCorner.POSITION_BOTTOM_RIGHT, 3, 3, 3))
+            .setRoundedCorner(
+                RoundedCorner.POSITION_BOTTOM_LEFT,
+                new RoundedCorner(RoundedCorner.POSITION_BOTTOM_LEFT, 4, 4, 4))
+            .build();
+    flutterView.onApplyWindowInsets(windowInsets);
+
+    // Verify.
+    verify(flutterRenderer, times(3)).setViewportMetrics(viewportMetricsCaptor.capture());
+    assertEquals(1, viewportMetricsCaptor.getValue().displayCornerRadiusTopLeft);
+    assertEquals(2, viewportMetricsCaptor.getValue().displayCornerRadiusTopRight);
+    assertEquals(3, viewportMetricsCaptor.getValue().displayCornerRadiusBottomRight);
+    assertEquals(4, viewportMetricsCaptor.getValue().displayCornerRadiusBottomLeft);
+  }
+
   // TODO(mattcarroll): turn this into an e2e test. GitHub #42990
   @Test
   public void itSendsDarkPlatformBrightnessToFlutter() {
@@ -1307,6 +1358,7 @@ public class FlutterViewTest {
   public void onMeasure_whenWrapContent_sendsCorrectViewportMetrics() {
     FlutterSurfaceView flutterSurfaceView = spy(new FlutterSurfaceView(ctx));
     FlutterView flutterView = new FlutterView(ctx, flutterSurfaceView);
+    flutterView.isContentSizingEnabled = true;
     FlutterEngine flutterEngine = spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
     FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
     when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
@@ -1415,5 +1467,33 @@ public class FlutterViewTest {
     public int getWindowSystemUiVisibility() {
       return View.SYSTEM_UI_FLAG_FULLSCREEN;
     }
+  }
+
+  /**
+   * Test that autofill methods do nothing when TextInputPlugin is null. This verifies that no
+   * NullPointerException is thrown and the plugin methods are not called.
+   */
+  @Test
+  public void autofill_doesNothingWhenTextInputPluginIsNull() throws Exception {
+    // Setup: Create FlutterView without attaching to engine
+    // This simulates the case where textInputPlugin is null (e.g., when
+    // attachToEngineAutomatically is false)
+    FlutterView flutterView = new FlutterView(ctx);
+
+    // Verify textInputPlugin is null (not initialized)
+    Field textInputPluginField = FlutterView.class.getDeclaredField("textInputPlugin");
+    textInputPluginField.setAccessible(true);
+    assertNull(textInputPluginField.get(flutterView));
+
+    // Test onProvideAutofillVirtualStructure - should not throw NPE
+    ViewStructure structure = mock(ViewStructure.class);
+    int flags = 0;
+    flutterView.onProvideAutofillVirtualStructure(structure, flags);
+    // No exception should be thrown
+
+    // Test autofill - should not throw NPE
+    SparseArray<AutofillValue> values = mock(SparseArray.class);
+    flutterView.autofill(values);
+    // No exception should be thrown
   }
 }
