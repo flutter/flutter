@@ -138,7 +138,6 @@ test-suites:
     test-bundle: dart2js-canvaskit-experimental-webparagraph
     run-config: chrome-experimental-webparagraph
     artifact-deps: [ canvaskit_experimental_webparagraph ]
-    enable-ci: false
 
   - name: chrome-dart2wasm-wimp-ui
     test-bundle: dart2wasm-skwasm-ui
