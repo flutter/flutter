@@ -506,39 +506,33 @@ bool Compiler::ValidateSkSLResult(const std::string& sksl) {
   std::stringstream output;
   bool is_truncated = false;
 
+  // Lambda to append text to the output stream, truncating if needed.
+  auto append_and_truncate = [&](const std::string& text) {
+    std::stringstream text_stream(text);
+    std::string line;
+    int line_index = 0;
+    while (std::getline(text_stream, line)) {
+      output << "\n        " << line;
+      if (++line_index == kVerboseErrorLineThreshold) {
+        auto full_line_count = std::count(text.begin(), text.end(), '\n');
+        if (full_line_count >= line_index) {
+          output << "\n... (truncated " << full_line_count - line_index + 1
+                 << " lines)";
+          is_truncated = true;
+        }
+        break;
+      }
+    }
+  };
+
   // Output the SkSL result, truncating if necessary.
   output << "\nCompiled to invalid SkSL:";
-  std::stringstream sksl_stream(sksl);
-  std::string sksl_line;
-  int sksl_line_index = 0;
-  while (std::getline(sksl_stream, sksl_line)) {
-    output << "\n        " << sksl_line;
-    if (++sksl_line_index == kVerboseErrorLineThreshold) {
-      auto full_line_count = std::count(sksl.begin(), sksl.end(), '\n');
-      output << "\n... (truncated "
-             << full_line_count - kVerboseErrorLineThreshold << " lines)";
-      is_truncated = true;
-      break;
-    }
-  }
+  append_and_truncate(sksl);
 
   // Output the error, truncating if necessary.
   output << "\nSkSL Error:";
   std::string error_text(result.errorText.c_str());
-  std::stringstream error_text_stream(error_text);
-  std::string error_text_line;
-  int error_text_line_index = 0;
-  while (std::getline(error_text_stream, error_text_line)) {
-    output << "\n        " << error_text_line;
-    if (++error_text_line_index == kVerboseErrorLineThreshold) {
-      auto full_line_count =
-          std::count(error_text.begin(), error_text.end(), '\n');
-      output << "\n... (truncated "
-             << full_line_count - kVerboseErrorLineThreshold << " lines)";
-      is_truncated = true;
-      break;
-    }
-  }
+  append_and_truncate(error_text);
 
   COMPILER_ERROR(error_stream_) << output.str();
 

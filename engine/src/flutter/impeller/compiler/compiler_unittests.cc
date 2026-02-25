@@ -420,7 +420,7 @@ TEST_P(CompilerTestSkSL, FailsToCompileDueToArrayAssignment) {
       "        \n"
       "        vec4 frag_color;\n"
       "        \n"
-      "... (truncated 15 lines)\n"
+      "... (truncated 16 lines)\n"
       "SkSL Error:\n"
       "        error: 12: initializers are not permitted on arrays (or structs "
       "containing arrays)\n"
