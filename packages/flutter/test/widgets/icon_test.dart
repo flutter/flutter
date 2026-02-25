@@ -2,16 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
 void main() {
-  const kTimeToLeaveIcon = IconData(0xe65f, fontFamily: 'MaterialIcons');
-  const kAbcIcon = IconData(0xf04b6, fontFamily: 'MaterialIcons');
-  const kSaveIcon = IconData(0xe550, fontFamily: 'MaterialIcons');
-
   testWidgets('Can set opacity for an Icon', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
@@ -245,9 +241,7 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(
-          child: Icon(IconData(0xe668, fontFamily: 'MaterialIcons'), semanticLabel: 'a label'),
-        ),
+        child: Center(child: Icon(Icons.title, semanticLabel: 'a label')),
       ),
     );
 
@@ -277,7 +271,7 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(child: Icon(kTimeToLeaveIcon)),
+        child: Center(child: Icon(Icons.time_to_leave)),
       ),
     );
 
@@ -286,7 +280,7 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(child: Icon(kTimeToLeaveIcon, semanticLabel: 'a label')),
+        child: Center(child: Icon(Icons.time_to_leave, semanticLabel: 'a label')),
       ),
     );
 
@@ -316,7 +310,7 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      const Directionality(textDirection: TextDirection.ltr, child: Icon(kAbcIcon)),
+      const Directionality(textDirection: TextDirection.ltr, child: Icon(Icons.abc)),
     );
 
     RichText text = tester.widget(find.byType(RichText));
@@ -330,7 +324,7 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Icon(kAbcIcon, fill: 0.5, weight: 300, grade: 200, opticalSize: 48),
+        child: Icon(Icons.abc, fill: 0.5, weight: 300, grade: 200, opticalSize: 48),
       ),
     );
 
@@ -352,7 +346,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: IconTheme(
           data: IconThemeData(fill: 0.2, weight: 3.0, grade: 4.0, opticalSize: 5.0),
-          child: Icon(kAbcIcon),
+          child: Icon(Icons.abc),
         ),
       ),
     );
@@ -374,7 +368,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: IconTheme(
           data: IconThemeData(fill: 0.2, weight: 3.0, grade: 4.0, opticalSize: 5.0),
-          child: Icon(kAbcIcon, fill: 0.6, weight: 7.0, grade: 8.0, opticalSize: 9.0),
+          child: Icon(Icons.abc, fill: 0.6, weight: 7.0, grade: 8.0, opticalSize: 9.0),
         ),
       ),
     );
@@ -410,19 +404,19 @@ void main() {
   });
 
   test('Throws if given invalid values', () {
-    expect(() => Icon(kAbcIcon, fill: -0.1), throwsAssertionError);
-    expect(() => Icon(kAbcIcon, fill: 1.1), throwsAssertionError);
-    expect(() => Icon(kAbcIcon, weight: -0.1), throwsAssertionError);
-    expect(() => Icon(kAbcIcon, weight: 0.0), throwsAssertionError);
-    expect(() => Icon(kAbcIcon, opticalSize: -0.1), throwsAssertionError);
-    expect(() => Icon(kAbcIcon, opticalSize: 0), throwsAssertionError);
+    expect(() => Icon(Icons.abc, fill: -0.1), throwsAssertionError);
+    expect(() => Icon(Icons.abc, fill: 1.1), throwsAssertionError);
+    expect(() => Icon(Icons.abc, weight: -0.1), throwsAssertionError);
+    expect(() => Icon(Icons.abc, weight: 0.0), throwsAssertionError);
+    expect(() => Icon(Icons.abc, opticalSize: -0.1), throwsAssertionError);
+    expect(() => Icon(Icons.abc, opticalSize: 0), throwsAssertionError);
   });
 
   testWidgets('Icon does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(child: SizedBox.shrink(child: Icon(kSaveIcon))),
+        child: Center(child: SizedBox.shrink(child: Icon(Icons.save))),
       ),
     );
     expect(tester.getSize(find.byType(Icon)), Size.zero);

@@ -982,6 +982,7 @@ class DebuggingOptions {
     this.enableFlutterGpu = false,
     this.enableVulkanValidation = false,
     this.uninstallFirst = false,
+    this.uninstallApp = true,
     this.enableDartProfiling = true,
     this.enableSurfaceControl = false,
     this.profileStartup = false,
@@ -1017,6 +1018,7 @@ class DebuggingOptions {
     this.enableFlutterGpu = false,
     this.enableVulkanValidation = false,
     this.uninstallFirst = false,
+    this.uninstallApp = true,
     this.enableDartProfiling = true,
     this.enableSurfaceControl = false,
     this.profileStartup = false,
@@ -1101,6 +1103,7 @@ class DebuggingOptions {
     required this.enableFlutterGpu,
     required this.enableVulkanValidation,
     required this.uninstallFirst,
+    required this.uninstallApp,
     required this.enableDartProfiling,
     required this.enableSurfaceControl,
     required this.profileStartup,
@@ -1165,6 +1168,12 @@ class DebuggingOptions {
   ///
   /// This is not implemented for every platform.
   final bool uninstallFirst;
+
+  /// Whether the tool should uninstall the app after running.
+  ///
+  /// This is currently only implemented for integration tests.
+  /// Defaults to true.
+  final bool uninstallApp;
 
   /// Whether to run the browser in headless mode.
   ///
@@ -1299,6 +1308,7 @@ class DebuggingOptions {
     'enableImpeller': enableImpeller.asBool,
     'enableFlutterGpu': enableFlutterGpu,
     'enableVulkanValidation': enableVulkanValidation,
+    'uninstallApp': uninstallApp,
     'enableDartProfiling': enableDartProfiling,
     'enableSurfaceControl': enableSurfaceControl,
     'profileStartup': profileStartup,
@@ -1369,6 +1379,7 @@ class DebuggingOptions {
         enableFlutterGpu: json['enableFlutterGpu']! as bool,
         enableVulkanValidation: (json['enableVulkanValidation'] as bool?) ?? false,
         uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
+        uninstallApp: (json['uninstallApp'] as bool?) ?? true,
         enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
         enableSurfaceControl: (json['enableSurfaceControl'] as bool?) ?? false,
         profileStartup: (json['profileStartup'] as bool?) ?? false,
