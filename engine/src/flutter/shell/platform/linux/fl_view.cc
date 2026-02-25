@@ -129,6 +129,7 @@ static gboolean redraw_cb(gpointer user_data) {
     GtkWidget* toplevel =
         gtk_widget_get_toplevel(GTK_WIDGET(self->render_area));
     if (GTK_IS_WINDOW(toplevel)) {
+      // FIXME: Breaking the positioner
       gtk_window_resize(GTK_WINDOW(toplevel), 1, 1);
     }
     return FALSE;
