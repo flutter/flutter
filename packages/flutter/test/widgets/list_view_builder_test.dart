@@ -38,10 +38,10 @@ void main() {
       callbackTracker,
       equals(<int>[
         0, 1, 2, 3, 4, 5, // visible in viewport
-        6, 7, 8, // in caching area
+        6, 7, 8, 9, 10, // in caching area
       ]),
     );
-    check(visible: <int>[0, 1, 2, 3, 4, 5], hidden: <int>[6, 7, 8]);
+    check(visible: <int>[0, 1, 2, 3, 4, 5], hidden: <int>[6, 7, 8, 9, 10]);
 
     callbackTracker.clear();
     testWidget.flip();
@@ -57,10 +57,10 @@ void main() {
       callbackTracker,
       equals(<int>[
         0, 1, 2, 3, 4, 5,
-        6, 7, 8, // in caching area
+        6, 7, 8, 9, 10, // in caching area
       ]),
     );
-    check(visible: <int>[0, 1, 2, 3, 4, 5], hidden: <int>[6, 7, 8]);
+    check(visible: <int>[0, 1, 2, 3, 4, 5], hidden: <int>[6, 7, 8, 9, 10]);
   });
 
   testWidgets('ListView.builder vertical', (WidgetTester tester) async {
@@ -109,10 +109,10 @@ void main() {
       equals(<int>[
         0, // in caching area
         1, 2, 3, 4,
-        5, // in caching area
+        5, 6, // in caching area
       ]),
     );
-    check(visible: <int>[1, 2, 3, 4], hidden: <int>[0, 5]);
+    check(visible: <int>[1, 2, 3, 4], hidden: <int>[0, 5, 6]);
     callbackTracker.clear();
 
     jumpTo(400.0);
@@ -125,10 +125,10 @@ void main() {
       equals(<int>[
         0, 1, // in caching area
         2, 3, 4,
-        5, 6, // in caching area
+        5, 6, 7, // in caching area
       ]),
     );
-    check(visible: <int>[2, 3, 4], hidden: <int>[0, 1, 5, 6]);
+    check(visible: <int>[2, 3, 4], hidden: <int>[0, 1, 5, 6, 7]);
     callbackTracker.clear();
 
     jumpTo(500.0);
@@ -141,10 +141,10 @@ void main() {
       equals(<int>[
         0, 1, // in caching area
         2, 3, 4, 5,
-        6, // in caching area
+        6, 7, // in caching area
       ]),
     );
-    check(visible: <int>[2, 3, 4, 5], hidden: <int>[0, 1, 6]);
+    check(visible: <int>[2, 3, 4, 5], hidden: <int>[0, 1, 6, 7]);
     callbackTracker.clear();
   });
 
@@ -195,10 +195,10 @@ void main() {
       equals(<int>[
         0, // in caching area
         1, 2, 3, 4, 5,
-        6, // in caching area
+        6, 7, 8, // in caching area
       ]),
     );
-    check(visible: <int>[1, 2, 3, 4, 5], hidden: <int>[0, 6]);
+    check(visible: <int>[1, 2, 3, 4, 5], hidden: <int>[0, 6, 7, 8]);
     callbackTracker.clear();
 
     jumpTo(400.0);
@@ -211,10 +211,10 @@ void main() {
       equals(<int>[
         0, 1, // in caching area
         2, 3, 4, 5,
-        6, 7, // in caching area
+        6, 7, 8, 9, // in caching area
       ]),
     );
-    check(visible: <int>[2, 3, 4, 5], hidden: <int>[0, 1, 6, 7]);
+    check(visible: <int>[2, 3, 4, 5], hidden: <int>[0, 1, 6, 7, 8, 9]);
     callbackTracker.clear();
 
     jumpTo(500.0);
@@ -227,10 +227,10 @@ void main() {
       equals(<int>[
         0, 1, // in caching area
         2, 3, 4, 5, 6,
-        7, // in caching area
+        7, 8, 9, // in caching area
       ]),
     );
-    check(visible: <int>[2, 3, 4, 5, 6], hidden: <int>[0, 1, 7]);
+    check(visible: <int>[2, 3, 4, 5, 6], hidden: <int>[0, 1, 7, 8, 9]);
     callbackTracker.clear();
   });
 
@@ -257,29 +257,29 @@ void main() {
     }
 
     await tester.pumpWidget(testWidget);
-    expect(callbackTracker, equals(<int>[0, 1, 2]));
-    check(visible: <int>[0, 1], hidden: <int>[2]);
+    expect(callbackTracker, equals(<int>[0, 1, 2, 3]));
+    check(visible: <int>[0, 1], hidden: <int>[2, 3]);
     callbackTracker.clear();
 
     jumpTo(150.0);
     await tester.pump();
 
-    expect(callbackTracker, equals(<int>[3]));
-    check(visible: <int>[0, 1, 2], hidden: <int>[3]);
+    expect(callbackTracker, equals(<int>[4]));
+    check(visible: <int>[0, 1, 2], hidden: <int>[3, 4]);
     callbackTracker.clear();
 
     jumpTo(600.0);
     await tester.pump();
 
-    expect(callbackTracker, equals(<int>[4]));
-    check(visible: <int>[2, 3], hidden: <int>[0, 1, 4]);
+    expect(callbackTracker, equals(<int>[5]));
+    check(visible: <int>[2, 3], hidden: <int>[0, 1, 4, 5]);
     callbackTracker.clear();
 
     jumpTo(750.0);
     await tester.pump();
 
-    expect(callbackTracker, equals(<int>[5]));
-    check(visible: <int>[2, 3, 4], hidden: <int>[0, 1, 5]);
+    expect(callbackTracker, equals(<int>[6]));
+    check(visible: <int>[2, 3, 4], hidden: <int>[0, 1, 5, 6]);
     callbackTracker.clear();
   });
 
@@ -314,9 +314,9 @@ void main() {
     await tester.pumpWidget(testWidget);
 
     // 2 is in the cache area, but not visible.
-    expect(callbackTracker, equals(<int>[0, 1, 2]));
+    expect(callbackTracker, equals(<int>[0, 1, 2, 3]));
     final initialExpectedHidden = List<int>.generate(28, (int i) => i + 2);
-    check(visible: <int>[0, 1], hidden: initialExpectedHidden);
+    check(visible: <int>[0, 1], hidden: <int>[2, 3, ...initialExpectedHidden.sublist(2)]);
     callbackTracker.clear();
 
     // Jump to the end of the ListView.
@@ -324,9 +324,16 @@ void main() {
     await tester.pump();
 
     // 27 is in the cache area, but not visible.
-    expect(callbackTracker, equals(<int>[27, 28, 29]));
-    final finalExpectedHidden = List<int>.generate(28, (int i) => i);
-    check(visible: <int>[28, 29], hidden: finalExpectedHidden);
+    expect(callbackTracker, equals(<int>[26, 27, 28, 29]));
+    final finalExpectedHidden = List<int>.generate(29, (int i) => i);
+    check(
+      visible: <int>[28, 29],
+      hidden: <int>[
+        26,
+        27,
+        ...finalExpectedHidden.where((int i) => i != 26 && i != 27 && i != 28 && i != 29),
+      ],
+    );
     callbackTracker.clear();
   });
 

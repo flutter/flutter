@@ -48,6 +48,23 @@ class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate
 }
 
 void main() {
+  test('RenderViewport cacheExtent setter bug reproduction', () {
+    final viewport = RenderViewport(
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.fixed(0.0),
+    );
+
+    // New default is viewport-based
+    expect(viewport.scrollCacheExtent.style, CacheExtentStyle.viewport);
+
+    // Using deprecated setter with a pixel value
+    viewport.cacheExtent = 300.0;
+
+    // BUG: It still thinks it's in 'viewport' style, so it's now 300 viewports.
+    expect(viewport.scrollCacheExtent.style, CacheExtentStyle.pixel);
+    expect(viewport.scrollCacheExtent.value, 300.0);
+  });
+
   testWidgets('Scrollable widget scrollDirection update test', (WidgetTester tester) async {
     final controller = ScrollController();
     addTearDown(controller.dispose);
@@ -801,13 +818,14 @@ void main() {
               height: 200.0,
               width: 300.0,
               child: ListView(
+                cacheExtent: 250.0,
                 controller: outer,
                 children: <Widget>[
                   const SizedBox(height: 200.0),
                   SizedBox(
                     height: 200.0,
                     width: 300.0,
-                    child: ListView(controller: inner, children: children),
+                    child: ListView(cacheExtent: 250.0, controller: inner, children: children),
                   ),
                   const SizedBox(height: 200.0),
                 ],

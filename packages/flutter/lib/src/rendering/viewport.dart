@@ -20,6 +20,7 @@ import 'box.dart';
 import 'debug.dart';
 import 'layer.dart';
 import 'object.dart';
+import 'proxy_box.dart';
 import 'sliver.dart';
 import 'viewport_offset.dart';
 
@@ -286,7 +287,20 @@ abstract interface class RenderAbstractViewport extends RenderObject {
   /// See also:
   ///
   ///  * [RenderViewportBase.cacheExtent] for a definition of the cache extent.
+  @Deprecated(
+    'Use kDefaultScrollCacheExtent instead. '
+    'This feature was deprecated after v3.41.0-0.0.pre.',
+  )
   static const double defaultCacheExtent = 250.0;
+
+  /// The default value for the cache extent of the viewport.
+  ///
+  /// This default provides a [ScrollCacheExtent] instance that uses the
+  /// [ScrollCacheExtent.style] of [CacheExtentStyle.viewport] with a value of
+  /// [RenderSemanticsGestureHandler.kScrollFactor].
+  static const ScrollCacheExtent kDefaultScrollCacheExtent = ScrollCacheExtent.viewport(
+    RenderSemanticsGestureHandler.kScrollFactor,
+  );
 }
 
 /// Return value for [RenderAbstractViewport.getOffsetToReveal].
@@ -428,12 +442,12 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       'Use scrollCacheExtent instead. '
       'This feature was deprecated after v3.41.0-0.0.pre.',
     )
-    CacheExtentStyle cacheExtentStyle = CacheExtentStyle.pixel,
+    CacheExtentStyle? cacheExtentStyle,
     ScrollCacheExtent? scrollCacheExtent,
     SliverPaintOrder paintOrder = SliverPaintOrder.firstIsTop,
     Clip clipBehavior = Clip.hardEdge,
   }) : assert(axisDirectionToAxis(axisDirection) != axisDirectionToAxis(crossAxisDirection)),
-       assert(cacheExtent != null || cacheExtentStyle == CacheExtentStyle.pixel),
+       assert(cacheExtent != null || cacheExtentStyle == null),
        _axisDirection = axisDirection,
        _crossAxisDirection = crossAxisDirection,
        _offset = offset,
@@ -444,6 +458,10 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
                cacheExtent ?? RenderAbstractViewport.defaultCacheExtent,
              ),
              CacheExtentStyle.viewport => ScrollCacheExtent.viewport(cacheExtent!),
+             null =>
+               cacheExtent != null
+                   ? ScrollCacheExtent.pixels(cacheExtent)
+                   : RenderAbstractViewport.kDefaultScrollCacheExtent,
            },
        _paintOrder = paintOrder,
        _clipBehavior = clipBehavior;
@@ -562,14 +580,18 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       return;
     }
     if (value == null) {
-      _scrollCacheExtent = const ScrollCacheExtent.pixels(
-        RenderAbstractViewport.defaultCacheExtent,
-      );
+      _scrollCacheExtent = RenderAbstractViewport.kDefaultScrollCacheExtent;
     } else {
-      _scrollCacheExtent = switch (_scrollCacheExtent) {
-        _PixelScrollCacheExtent() => ScrollCacheExtent.pixels(value),
-        _ViewportScrollCacheExtent() => ScrollCacheExtent.viewport(value),
-      };
+      if (scrollCacheExtent == RenderAbstractViewport.kDefaultScrollCacheExtent) {
+        // The scrollCacheExtent was default value, this means developer hasn't set the
+        // cacheExtentStyle yet. Thus default to pixels style.
+        _scrollCacheExtent = ScrollCacheExtent.pixels(value);
+      } else {
+        _scrollCacheExtent = switch (_scrollCacheExtent) {
+          _PixelScrollCacheExtent() => ScrollCacheExtent.pixels(value),
+          _ViewportScrollCacheExtent() => ScrollCacheExtent.viewport(value),
+        };
+      }
     }
     markNeedsLayout();
   }
@@ -595,8 +617,9 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   ///
   /// The getter can never return null, but the field is nullable
   /// because the setter can be set to null to reset the value to
-  /// [RenderAbstractViewport.defaultCacheExtent] pixels (in which case
-  /// [ScrollCacheExtent.style] must be [CacheExtentStyle.pixel]).
+  /// [RenderAbstractViewport.kDefaultScrollCacheExtent] (in which case
+  /// [ScrollCacheExtent.style] must be [CacheExtentStyle.viewport] and
+  /// [ScrollCacheExtent.value] is [RenderSemanticsGestureHandler.kScrollFactor]).
   ///
   /// See also:
   ///
@@ -605,7 +628,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   ScrollCacheExtent _scrollCacheExtent;
   set scrollCacheExtent(ScrollCacheExtent? value) {
     final ScrollCacheExtent effectiveValue =
-        value ?? const ScrollCacheExtent.pixels(RenderAbstractViewport.defaultCacheExtent);
+        value ?? RenderAbstractViewport.kDefaultScrollCacheExtent;
     if (effectiveValue == _scrollCacheExtent) {
       return;
     }

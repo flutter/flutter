@@ -43,7 +43,7 @@ void main() {
       callbackTracker,
       equals(<int>[
         0, 1, 2, 3, 4, 5, // visible
-        6, 7, 8, // in cached area
+        6, 7, 8, 9, 10, // in cached area
       ]),
     );
 
@@ -61,7 +61,7 @@ void main() {
       callbackTracker,
       equals(<int>[
         0, 1, 2, 3, 4, 5, // visible
-        6, 7, 8, // in cached area
+        6, 7, 8, 9, 10, // in cached area
       ]),
     );
   });
@@ -103,7 +103,7 @@ void main() {
       callbackTracker,
       equals(<int>[
         0, 1, 2, 3, 4,
-        5, // in cached area
+        5, 6, // in cached area
       ]),
     );
     callbackTracker.clear();
@@ -119,7 +119,7 @@ void main() {
       equals(<int>[
         0, 1, 2,
         3, 4, 5, //visible
-        6, 7,
+        6, 7, 8,
       ]),
     );
     callbackTracker.clear();
@@ -130,9 +130,9 @@ void main() {
     expect(
       callbackTracker,
       equals(<int>[
-        1, 2,
+        0, 1, 2,
         3, 4, 5, // visible
-        6, 7,
+        6, 7, 8,
       ]),
     );
     callbackTracker.clear();
@@ -175,7 +175,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     // 0 is built to find its width
-    expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4, 5, 6, 7]));
+    expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]));
 
     callbackTracker.clear();
 
@@ -185,13 +185,13 @@ void main() {
     await tester.pumpWidget(builder());
 
     // We build the visible children to find their new size.
-    expect(callbackTracker, equals(<int>[1, 2, 3, 4, 5, 6, 7, 8]));
+    expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));
     callbackTracker.clear();
 
     await tester.pumpWidget(builder());
 
     // 0 isn't built because they're not visible.
-    expect(callbackTracker, equals(<int>[1, 2, 3, 4, 5, 6, 7, 8]));
+    expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));
     callbackTracker.clear();
   });
 
@@ -228,12 +228,12 @@ void main() {
       callbackTracker,
       equals(<int>[
         0, 1, 2,
-        3, // in cached area
+        3, 4, // in cached area
       ]),
     );
     callbackTracker.clear();
     tester.allWidgets.forEach(collectText);
-    expect(text, equals(<String>['0', '1', '2', '3']));
+    expect(text, equals(<String>['0', '1', '2', '3', '4']));
     text.clear();
 
     await tester.pumpWidget(builder());
@@ -242,12 +242,12 @@ void main() {
       callbackTracker,
       equals(<int>[
         0, 1, 2,
-        3, // in cached area
+        3, 4, // in cached area
       ]),
     );
     callbackTracker.clear();
     tester.allWidgets.forEach(collectText);
-    expect(text, equals(<String>['0', '1', '2', '3']));
+    expect(text, equals(<String>['0', '1', '2', '3', '4']));
     text.clear();
   });
 
@@ -352,7 +352,7 @@ void main() {
         ' │   0.0, precedingScrollExtent: 0.0, remainingPaintExtent: 600.0,\n'
         ' │   crossAxisExtent: 800.0, crossAxisDirection:\n'
         ' │   AxisDirection.right, viewportMainAxisExtent: 600.0,\n'
-        ' │   remainingCacheExtent: 850.0, cacheOrigin: 0.0)\n'
+        ' │   remainingCacheExtent: 1080.0, cacheOrigin: 0.0)\n'
         ' │ geometry: SliverGeometry(scrollExtent: 300.0, paintExtent: 300.0,\n'
         ' │   maxPaintExtent: 300.0, cacheExtent: 300.0)\n'
         ' │ currently live children: 0 to 2\n'

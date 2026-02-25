@@ -1731,7 +1731,7 @@ void main() {
       addTearDown(renderViewport.dispose);
 
       expect(renderViewport.clipBehavior, Clip.hardEdge);
-      expect(renderViewport.cacheExtent, RenderAbstractViewport.defaultCacheExtent);
+      expect(renderViewport.scrollCacheExtent, RenderAbstractViewport.kDefaultScrollCacheExtent);
       expect(renderViewport.isRepaintBoundary, isTrue);
       expect(renderViewport.sizedByParent, isTrue);
       // No size yet, should assert.
