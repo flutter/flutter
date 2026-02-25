@@ -5,6 +5,7 @@
 @DefaultAsset('skwasm')
 library skwasm_impl;
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
@@ -231,6 +232,14 @@ class StackScope {
 T withStackScope<T>(T Function(StackScope scope) f) {
   final StackPointer stack = stackSave();
   final T result = f(StackScope());
+  if (result is Future) {
+    throw StateError(
+      'withStackScope() closure returned a Future. '
+      'The closure passed to withStackScope must be synchronous and must not '
+      'use async/await, because the stack is restored immediately after the '
+      'closure returns.',
+    );
+  }
   stackRestore(stack);
   return result;
 }
