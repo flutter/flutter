@@ -67,8 +67,8 @@ template("runner_sources") {
       "${fuchsia_sdk}/pkg/zx",
       "fidl:dart_test",
       "//flutter/common",
-      "//flutter/shell/platform/fuchsia/dart-pkg/fuchsia",
-      "//flutter/shell/platform/fuchsia/dart-pkg/zircon",
+      "//flutter/shell/platform/fuchsia/dart_pkg/fuchsia",
+      "//flutter/shell/platform/fuchsia/dart_pkg/zircon",
       "//flutter/third_party/tonic",
     ]
   }

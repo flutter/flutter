@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/fuchsia/dart-pkg/zircon_ffi/handle.h"
-
-#include "flutter/fml/logging.h"
-
-#include <iostream>
-#include <vector>
+#include "flutter/shell/platform/fuchsia/dart_pkg/zircon_ffi/handle.h"
 
 #include <zircon/syscalls.h>
+
+#include <vector>
+
+#include "flutter/fml/logging.h"
+#include "include/dart_api_dl.h"
 
 static void HandleFree(void* isolate_callback_data, void* peer) {
   FML_CHECK(peer);
