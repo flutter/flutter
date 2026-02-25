@@ -611,9 +611,7 @@ class UnlabeledLeafNodeEvaluation extends AccessibilityEvaluation {
       return true;
     });
 
-    if (node.isMergedIntoParent ||
-        node.isInvisible ||
-        node.flagsCollection.isHidden) {
+    if (node.isMergedIntoParent || node.isInvisible || node.flagsCollection.isHidden) {
       return violations;
     }
 
