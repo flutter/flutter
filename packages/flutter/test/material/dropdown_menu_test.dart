@@ -3633,6 +3633,18 @@ void main() {
   testWidgets('DropdownMenu.scrollPadding is passed through to TextField', (
     WidgetTester tester,
   ) async {
+    // Check default value.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren)),
+      ),
+    );
+
+    expect(find.byType(TextField), findsOneWidget);
+    TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.scrollPadding, const EdgeInsets.all(20.0));
+
+    // Check custom value.
     const EdgeInsets scrollPadding = EdgeInsets.zero;
     await tester.pumpWidget(
       MaterialApp(
@@ -3645,8 +3657,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(TextField), findsOneWidget);
-    final TextField textField = tester.widget(find.byType(TextField));
+    textField = tester.widget(find.byType(TextField));
     expect(textField.scrollPadding, scrollPadding);
   });
 
