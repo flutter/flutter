@@ -200,6 +200,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.enableFilter = false,
     this.enableSearch = true,
     this.keyboardType,
+    this.scrollPadding = const EdgeInsets.all(20.0),
     this.textStyle,
     this.textAlign = TextAlign.start,
     // TODO(bleroux): Clean this up once `InputDecorationTheme` is fully normalized.
@@ -373,6 +374,9 @@ class DropdownMenu<T> extends StatefulWidget {
   ///
   /// Defaults to [TextInputType.text].
   final TextInputType? keyboardType;
+
+  /// {@macro flutter.widgets.editableText.scrollPadding}
+  final EdgeInsets scrollPadding;
 
   /// The text style for the [TextField] of the [DropdownMenu];
   ///
@@ -1283,6 +1287,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
               enableInteractiveSelection: !isButton,
               readOnly: isButton,
               keyboardType: widget.keyboardType,
+              scrollPadding: widget.scrollPadding,
               textAlign: widget.textAlign,
               textAlignVertical: TextAlignVertical.center,
               maxLines: widget.maxLines,

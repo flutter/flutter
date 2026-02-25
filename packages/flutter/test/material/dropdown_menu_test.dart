@@ -3630,6 +3630,26 @@ void main() {
     expect(textField.keyboardType, TextInputType.text);
   });
 
+  testWidgets('DropdownMenu.scrollPadding is passed through to TextField', (
+    WidgetTester tester,
+  ) async {
+    const EdgeInsets scrollPadding = EdgeInsets.zero;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DropdownMenu<TestMenu>(
+            dropdownMenuEntries: menuChildren,
+            scrollPadding: scrollPadding,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(TextField), findsOneWidget);
+    final TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.scrollPadding, scrollPadding);
+  });
+
   testWidgets('DropdownMenu passes an alignmentOffset to MenuAnchor', (WidgetTester tester) async {
     const alignmentOffset = Offset(0, 16);
 
