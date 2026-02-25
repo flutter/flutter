@@ -22,7 +22,7 @@ std::unordered_map<int64_t, DlRect> SliceViews(
     const std::unordered_map<int64_t, std::unique_ptr<EmbedderViewSlice>>&
         slices,
     const std::unordered_map<int64_t, DlRect>& view_rects,
-    const std::unordered_set<int64_t>* preserve_underlay_for_views = nullptr);
+    const std::unordered_set<int64_t>& preserve_underlay_for_views);
 
 }  // namespace flutter
 

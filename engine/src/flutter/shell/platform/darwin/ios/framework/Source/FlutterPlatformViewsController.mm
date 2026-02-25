@@ -4,10 +4,10 @@
 
 #import "shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
 #include "display_list/geometry/dl_geometry_types.h"
-#include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "impeller/geometry/rounding_radii.h"
 
 #include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/display_list/utils/dl_matrix_clip_tracker.h"
 #include "flutter/flow/surface_frame.h"
 #include "flutter/flow/view_slicer.h"
@@ -812,7 +812,7 @@ static void ApplyComplexClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
 
   std::unordered_map<int64_t, DlRect> overlayLayers =
       SliceViews(background_frame->Canvas(), self.compositionOrder, self.slices, viewRects,
-                 &preserveUnderlayForViews);
+                 preserveUnderlayForViews);
 
   size_t requiredOverlayLayers = 0;
   for (int64_t viewId : self.compositionOrder) {
