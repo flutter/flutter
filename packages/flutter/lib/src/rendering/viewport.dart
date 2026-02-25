@@ -258,18 +258,25 @@ abstract interface class RenderAbstractViewport extends RenderObject {
   /// returned [RevealedOffset.offset] only represents the offset of one of the
   /// the two [ScrollPosition]s.
   ///
-  /// See also:
-  ///
   ///  * [RevealedOffset], which describes the return value of this method.
   RevealedOffset getOffsetToReveal(RenderObject target, double alignment, {Rect? rect, Axis? axis});
 
-  /// Deprecated, the viewport defaults cache extent by using [CacheExtentStyle.viewport]
-  /// and [RawGestureDetector.kDefaultSemanticsScrollFactor].
+  /// Deprecated.
+  ///
+  /// In the widgets layer, `ScrollView`s default to using [CacheExtentStyle.viewport]
+  /// with a value of `RawGestureDetector.kDefaultSemanticsScrollFactor`.
+  ///
+  /// In the rendering layer, viewports default to 250.0 pixels if no cache extent is provided.
   @Deprecated(
-    'Use CacheExtentStyle.viewport and RawGestureDetector.kDefaultSemanticsScrollFactor instead. '
+    'Use CacheExtentStyle.viewport and kDefaultScrollCacheExtent instead. '
     'This feature was deprecated after v3.41.0-0.0.pre.',
   )
   static const double defaultCacheExtent = 250.0;
+
+  /// The default [ScrollCacheExtent] used by viewports.
+  ///
+  /// This defaults to a [ScrollCacheExtent.viewport] with a value of `0.8`.
+  static const ScrollCacheExtent kDefaultScrollCacheExtent = ScrollCacheExtent.viewport(0.8);
 }
 
 /// Return value for [RenderAbstractViewport.getOffsetToReveal].
@@ -421,12 +428,12 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
        _offset = offset,
        _scrollCacheExtent =
            scrollCacheExtent ??
-           switch (cacheExtentStyle) {
-             CacheExtentStyle.pixel => ScrollCacheExtent.pixels(
-               cacheExtent ?? RenderAbstractViewport.defaultCacheExtent,
-             ),
-             CacheExtentStyle.viewport => ScrollCacheExtent.viewport(cacheExtent!),
-           },
+           (cacheExtent == null
+               ? RenderAbstractViewport.kDefaultScrollCacheExtent
+               : switch (cacheExtentStyle) {
+                   CacheExtentStyle.pixel => ScrollCacheExtent.pixels(cacheExtent),
+                   CacheExtentStyle.viewport => ScrollCacheExtent.viewport(cacheExtent),
+                 }),
        _paintOrder = paintOrder,
        _clipBehavior = clipBehavior;
 
@@ -587,7 +594,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   ScrollCacheExtent _scrollCacheExtent;
   set scrollCacheExtent(ScrollCacheExtent? value) {
     final ScrollCacheExtent effectiveValue =
-        value ?? const ScrollCacheExtent.pixels(RenderAbstractViewport.defaultCacheExtent);
+        value ?? RenderAbstractViewport.kDefaultScrollCacheExtent;
     if (effectiveValue == _scrollCacheExtent) {
       return;
     }

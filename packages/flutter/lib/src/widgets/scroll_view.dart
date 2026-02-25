@@ -55,9 +55,7 @@ enum ScrollViewKeyboardDismissBehavior {
 ///
 ///  1. A [Scrollable] widget, which listens for various user gestures and
 ///     implements the interaction design for scrolling.
-///  2. A viewport widget, such as [Viewport] or [ShrinkWrappingViewport], which
-///     implements the visual design for scrolling by displaying only a portion
-///     of the widgets inside the scroll view.
+/// A widget that composites many other widgets into a scrollable view.
 ///  3. One or more slivers, which are widgets that can be composed to created
 ///     various scrolling effects, such as lists, grids, and expanding headers.
 ///
@@ -476,10 +474,10 @@ abstract class ScrollView extends StatelessWidget {
           return true;
       }
     }());
-    final ScrollCacheExtent effectiveScrollCacheExtent =
+    final ScrollCacheExtent? effectiveScrollCacheExtent =
         scrollCacheExtent ??
         (cacheExtent == null
-            ? const ScrollCacheExtent.viewport(RawGestureDetector.kDefaultSemanticsScrollFactor)
+            ? null
             : ScrollCacheExtent.pixels(cacheExtent!));
 
     if (shrinkWrap) {

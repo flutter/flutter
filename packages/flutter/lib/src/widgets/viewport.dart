@@ -482,7 +482,7 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
           return ScrollCacheExtent.viewport(cacheExtent!);
       }
     }
-    return null;
+    return RenderAbstractViewport.kDefaultScrollCacheExtent;
   }
 
   @override
