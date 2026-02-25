@@ -45,7 +45,7 @@ const int GDK_WINDOW_STATE_FULLSCREEN = 1 << 4;
 const int GDK_WINDOW_TYPE_HINT_DIALOG = 1;
 
 /// Window hint for tooltips.
-const int _GDK_WINDOW_TYPE_HINT_TOOLTIP = 10;
+const int GDK_WINDOW_TYPE_HINT_TOOLTIP = 10;
 
 @ffi.Native<ffi.Pointer<ffi.NativeType> Function(ffi.Int)>(symbol: 'g_malloc0')
 external ffi.Pointer<ffi.NativeType> _gMalloc0(int count);
