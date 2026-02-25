@@ -5,12 +5,9 @@
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
-import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/matchers.dart';
 import 'canvaskit_api_test.dart';
-
-final bool isBlink = ui_web.browser.browserEngine == ui_web.BrowserEngine.blink;
 
 const String goodUrl = 'https://www.unpkg.com/blah-blah/33.x/canvaskit.js';
 const String badUrl = 'https://www.unpkg.com/soemthing/not-canvaskit.js';
@@ -42,13 +39,13 @@ void testMainWithTTOn() {
         createTrustedScriptUrl(badUrl);
       }, throwsAssertionError);
     });
-  }, skip: !isBlink);
+  }, skip: domWindow.trustedTypes == null);
 
   group('Trusted Types API NOT supported', () {
     test('createTrustedScriptUrl - returns unmodified url', () async {
       expect(createTrustedScriptUrl(badUrl), badUrl);
     });
-  }, skip: isBlink);
+  }, skip: domWindow.trustedTypes != null);
 }
 
 /// Enables Trusted Types by setting the appropriate meta tag in the DOM:
