@@ -479,8 +479,7 @@ class OutlineInputBorder extends InputBorder {
       final double targetTlSweep = start > tlRadiusX
           ? cornerArcSweep
           : math.acos(clampDouble(1 - start / tlRadiusX, 0.0, 1.0));
-      final double tlCornerArcSweep =
-          lerpDouble(cornerArcSweep, targetTlSweep, gapPercentage)!;
+      final double tlCornerArcSweep = lerpDouble(cornerArcSweep, targetTlSweep, gapPercentage)!;
       path.addArc(tlCorner, math.pi, tlCornerArcSweep);
     } else {
       // Because the path is painted with Paint.strokeCap = StrokeCap.butt, horizontal coordinate is moved
@@ -511,8 +510,7 @@ class OutlineInputBorder extends InputBorder {
       final double targetSweep = dx > trRadiusX
           ? 0.0
           : math.asin(clampDouble(1 - dx / trRadiusX, 0.0, 1.0));
-      final double sweep =
-          lerpDouble(0.0, targetSweep, gapPercentage)!;
+      final double sweep = lerpDouble(0.0, targetSweep, gapPercentage)!;
       path.addArc(trCorner, trCornerArcStart + sweep, cornerArcSweep - sweep);
     }
 
