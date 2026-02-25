@@ -45,15 +45,16 @@ class TextContents final : public Contents {
   // |Contents|
   void SetInheritedOpacity(Scalar opacity) override;
 
-  // The offset is only used for computing the subpixel glyph position.
-  void SetOffset(Vector2 offset);
+  void SetPosition(Point position);
 
-  std::optional<Rect> GetTextFrameBounds() const;
+  // The true screen space transform of the text, ignoring any offsets
+  // and adjustments that may be imparted on the text by the rendering
+  // context. This value is based only on the screen (not device) space
+  // transform and the location provided in the drawText call.
+  void SetScreenTransform(const Matrix& transform);
 
   // |Contents|
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
-
-  void SetScale(Scalar scale) { scale_ = scale; }
 
   // |Contents|
   bool Render(const ContentContext& renderer,
@@ -62,10 +63,10 @@ class TextContents final : public Contents {
 
   static void ComputeVertexData(
       GlyphAtlasPipeline::VertexShader::PerVertexData* vtx_contents,
+      const Matrix& entity_raw_transform,
       const std::shared_ptr<TextFrame>& frame,
-      Scalar scale,
-      const Matrix& entity_transform,
-      Vector2 offset,
+      Point position,
+      const Matrix& screen_transform,
       std::optional<GlyphProperties> glyph_properties,
       const std::shared_ptr<GlyphAtlas>& atlas);
 
@@ -73,9 +74,9 @@ class TextContents final : public Contents {
   std::optional<GlyphProperties> GetGlyphProperties() const;
 
   std::shared_ptr<TextFrame> frame_;
-  Scalar scale_ = 1.0;
   Scalar inherited_opacity_ = 1.0;
-  Vector2 offset_;
+  Point position_;
+  Matrix screen_transform_;
   bool force_text_color_ = false;
   Color color_;
   GlyphProperties properties_;
