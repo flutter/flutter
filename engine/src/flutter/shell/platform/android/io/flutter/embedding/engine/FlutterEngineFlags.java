@@ -433,21 +433,20 @@ public final class FlutterEngineFlags {
    * Looks up a {@link Flag} by its Intent key.
    *
    * <p>Previously, the Intent keys were used to set Flutter shell arguments via Intent. The Intent
-   * keys match the command line argument without the "--" prefix and "=" suffix if the argument
-   * takes a value.
+   * keys typically match the command line argument without the "--" prefix and "=" suffix if the
+   * argument takes a value.
    */
   public static Flag getFlagFromIntentKey(String intentKey) {
-    for (Flag flag : ALL_FLAGS) {
-      String commandLineArg = flag.commandLineArgument;
-      String key = commandLineArg.startsWith("--") ? commandLineArg.substring(2) : commandLineArg;
-      if (key.endsWith("=")) {
-        key = key.substring(0, key.length() - 1);
-      }
-      if (key.equals(intentKey)) {
-        return flag;
-      }
+    Flag toReturn = getFlagByCommandLineArgument(intentKey);
+
+    if (toReturn == null) {
+      toReturn = getFlagByCommandLineArgument("--" + intentKey);
     }
-    return null;
+    if (toReturn == null) {
+      toReturn = getFlagByCommandLineArgument("--" + intentKey + "=");
+    }
+
+    return toReturn;
   }
 
   /** Returns whether or not a flag is disabled and should raise an exception if used. */
