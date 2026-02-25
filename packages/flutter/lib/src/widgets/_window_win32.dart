@@ -211,6 +211,8 @@ class WindowingOwnerWin32 extends WindowingOwner {
   SatelliteWindowController createSatelliteWindowController({
     required SatelliteWindowControllerDelegate delegate,
     required BaseWindowController parent,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,

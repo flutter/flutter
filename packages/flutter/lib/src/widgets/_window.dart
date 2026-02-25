@@ -939,8 +939,7 @@ mixin class SatelliteWindowControllerDelegate {
 /// A satellite window is an auxiliary window to a regular or dialog window.
 /// Satellite windows maintain their position relative to their parent and are
 /// hidden when the application loses focus. They are also hidden when their parent
-/// becomes fullscreen or maximized. They may be minimized and resized
-/// by the user.
+/// becomes fullscreen or maximized. They may be resized by the user.
 ///
 /// A satellite may be reparented. For example, if an application has two documents
 /// open, the satellite may choose to reparent to the active document such that
@@ -995,6 +994,16 @@ abstract class SatelliteWindowController extends BaseWindowController {
   ///
   /// Upon construction, the window is created by the platform.
   ///
+  /// The [parent] argument specifies the parent window of this satellite.
+  ///
+  /// The [anchorRect] argument specifies the rectangle in the parent's coordinate
+  /// space to which the tooltip is anchored.
+  ///
+  /// The [positioner] argument specifies how the satellite should be positioned
+  /// relative to the [anchorRect]. The positioner is only applied the first
+  /// time that the window is shown. Afterwards, the user may move and resize
+  /// the window to their preference.
+  ///
   /// {@template flutter.widgets.windowing.constraints}
   /// The [preferredSize] is the preferred content size of the window.
   /// This might not be honored by the platform. This is the size that
@@ -1028,6 +1037,8 @@ abstract class SatelliteWindowController extends BaseWindowController {
   @internal
   factory SatelliteWindowController({
     required BaseWindowController parent,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
@@ -1045,6 +1056,8 @@ abstract class SatelliteWindowController extends BaseWindowController {
     return owner.createSatelliteWindowController(
       delegate: delegate ?? SatelliteWindowControllerDelegate(),
       parent: parent,
+      anchorRect: anchorRect,
+      positioner: positioner,
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       title: title,
@@ -1065,6 +1078,11 @@ abstract class SatelliteWindowController extends BaseWindowController {
   @protected
   SatelliteWindowController.empty();
 
+  /// The parent controller of this satellite.
+  ///
+  /// The satellite will be destroyed if its parent is destroyed.
+  BaseWindowController get parent;
+
   /// The current title of the window.
   ///
   /// This might differ from the requested title.
@@ -1082,11 +1100,13 @@ abstract class SatelliteWindowController extends BaseWindowController {
   @internal
   bool get isActivated;
 
-  /// Whether or not window is currently minimized.
+  /// Request to change the parent of the window.
+  ///
+  /// The satellite will maintain its current position after being reparented.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  bool get isMinimized;
+  void setParent(BaseWindowController parent);
 
   /// Request change to the content size of the window.
   ///
@@ -1130,12 +1150,6 @@ abstract class SatelliteWindowController extends BaseWindowController {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void activate();
-
-  /// Requests window to be minimized.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  void setMinimized(bool minimized);
 }
 
 /// [WindowingOwner] is responsible for creating and managing window controllers.
@@ -1220,6 +1234,8 @@ abstract class WindowingOwner {
   SatelliteWindowController createSatelliteWindowController({
     required SatelliteWindowControllerDelegate delegate,
     required BaseWindowController parent,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
@@ -1595,6 +1611,68 @@ class PopupWindow extends StatelessWidget {
   }
 }
 
+/// The [SatelliteWindow] widget provides a way to render a satellite window in the
+/// widget tree.
+///
+/// The provided [controller] creates the native window that backs
+/// the widget. The [child] widget is rendered into this newly created window.
+///
+/// When a [SatelliteWindow] widget is removed from the tree, the window that was created
+/// by the [controller] remains valid until the caller destroys it by calling
+/// [SatelliteWindowController.destroy].
+///
+/// Widgets in the same tree as the [child] widget will have access to the
+/// [SatelliteWindowController] via the [WindowScope] widget.
+///
+/// {@macro flutter.widgets.windowing.experimental}
+///
+/// See also:
+///
+/// * [SatelliteWindowController], the controller that creates and manages satellite windows.
+@internal
+class SatelliteWindow extends StatelessWidget {
+  /// Creates a satellite window widget.
+  ///
+  /// The [controller] creates the native backing window into which the
+  /// [child] widget is rendered.
+  ///
+  /// It is up to the caller to destroy the window by calling
+  /// [SatelliteWindowController.destroy] when the window is no longer needed.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  SatelliteWindow({super.key, required this.controller, required this.child}) {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+  }
+
+  /// Controller for this widget.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  final SatelliteWindowController controller;
+
+  /// The content rendered into this window.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  final Widget child;
+
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: controller,
+      builder: (BuildContext context, Widget? widget) => WindowScope(
+        controller: controller,
+        child: View(view: controller.rootView, child: child),
+      ),
+    );
+  }
+}
+
 enum _WindowControllerAspect { contentSize, title, activated, maximized, minimized, fullscreen }
 
 /// Provides descendants with access to the [BaseWindowController] associated with
@@ -1827,7 +1905,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
       DialogWindowController() => controller.isMinimized,
       TooltipWindowController() => false,
       PopupWindowController() => false,
-      SatelliteWindowController() => controller.isMinimized,
+      SatelliteWindowController() => false,
     };
   }
 
@@ -1852,7 +1930,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
       DialogWindowController() => controller.isMinimized,
       TooltipWindowController() => false,
       PopupWindowController() => false,
-      SatelliteWindowController() => controller.isMinimized,
+      SatelliteWindowController() => false,
     };
   }
 
@@ -2052,9 +2130,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
                 dialog.isMinimized != (oldWidget.controller as DialogWindowController).isMinimized,
               TooltipWindowController() => false,
               PopupWindowController() => false,
-              final SatelliteWindowController satellite =>
-                satellite.isMinimized !=
-                    (oldWidget.controller as SatelliteWindowController).isMinimized,
+              SatelliteWindowController() => false,
             },
             _WindowControllerAspect.fullscreen => switch (controller) {
               final RegularWindowController regular =>
