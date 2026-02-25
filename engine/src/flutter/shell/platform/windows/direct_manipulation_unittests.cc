@@ -153,44 +153,43 @@ TEST(DirectManipulationTest, TestGesture) {
       fml::MakeRefCounted<DirectManipulationEventHandler>(owner.get());
   int32_t device_id = (int32_t)reinterpret_cast<int64_t>(handler.get());
   EXPECT_CALL(viewport, GetPrimaryContent(_, _))
-      .WillOnce(::testing::Invoke([&content](REFIID in, void** out) {
+      .WillOnce([&content](REFIID in, void** out) {
         *out = &content;
         return S_OK;
-      }))
+      })
       .RetiresOnSaturation();
   EXPECT_CALL(content, GetContentTransform(_, 6))
-      .WillOnce(::testing::Invoke([scale](float* transform, DWORD size) {
+      .WillOnce([scale](float* transform, DWORD size) {
         transform[0] = 1.0f;
         transform[4] = 0.0;
         transform[5] = 0.0;
         return S_OK;
-      }))
+      })
       .RetiresOnSaturation();
   EXPECT_CALL(delegate, OnPointerPanZoomStart(device_id));
   handler->OnViewportStatusChanged((IDirectManipulationViewport*)&viewport,
                                    DIRECTMANIPULATION_RUNNING,
                                    DIRECTMANIPULATION_READY);
   EXPECT_CALL(content, GetContentTransform(_, 6))
-      .WillOnce(::testing::Invoke(
-          [scale, pan_x, pan_y](float* transform, DWORD size) {
-            transform[0] = scale;
-            transform[4] = pan_x;
-            transform[5] = pan_y;
-            return S_OK;
-          }));
+      .WillOnce([scale, pan_x, pan_y](float* transform, DWORD size) {
+        transform[0] = scale;
+        transform[4] = pan_x;
+        transform[5] = pan_y;
+        return S_OK;
+      });
   EXPECT_CALL(delegate,
               OnPointerPanZoomUpdate(device_id, pan_x, pan_y, scale, 0));
   handler->OnContentUpdated((IDirectManipulationViewport*)&viewport,
                             (IDirectManipulationContent*)&content);
   EXPECT_CALL(delegate, OnPointerPanZoomEnd(device_id));
   EXPECT_CALL(viewport, GetViewportRect(_))
-      .WillOnce(::testing::Invoke([DISPLAY_WIDTH, DISPLAY_HEIGHT](RECT* rect) {
+      .WillOnce([DISPLAY_WIDTH, DISPLAY_HEIGHT](RECT* rect) {
         rect->left = 0;
         rect->top = 0;
         rect->right = DISPLAY_WIDTH;
         rect->bottom = DISPLAY_HEIGHT;
         return S_OK;
-      }));
+      });
   EXPECT_CALL(viewport, ZoomToRect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT, false))
       .WillOnce(::testing::Return(S_OK));
   handler->OnViewportStatusChanged((IDirectManipulationViewport*)&viewport,
@@ -215,30 +214,30 @@ TEST(DirectManipulationTest, TestRounding) {
       fml::MakeRefCounted<DirectManipulationEventHandler>(owner.get());
   int32_t device_id = (int32_t)reinterpret_cast<int64_t>(handler.get());
   EXPECT_CALL(viewport, GetPrimaryContent(_, _))
-      .WillOnce(::testing::Invoke([&content](REFIID in, void** out) {
+      .WillOnce([&content](REFIID in, void** out) {
         *out = &content;
         return S_OK;
-      }))
+      })
       .RetiresOnSaturation();
   EXPECT_CALL(content, GetContentTransform(_, 6))
-      .WillOnce(::testing::Invoke([scale](float* transform, DWORD size) {
+      .WillOnce([scale](float* transform, DWORD size) {
         transform[0] = 1.0f;
         transform[4] = 0.0;
         transform[5] = 0.0;
         return S_OK;
-      }))
+      })
       .RetiresOnSaturation();
   EXPECT_CALL(delegate, OnPointerPanZoomStart(device_id));
   handler->OnViewportStatusChanged((IDirectManipulationViewport*)&viewport,
                                    DIRECTMANIPULATION_RUNNING,
                                    DIRECTMANIPULATION_READY);
   EXPECT_CALL(content, GetContentTransform(_, 6))
-      .WillOnce(::testing::Invoke([scale](float* transform, DWORD size) {
+      .WillOnce([scale](float* transform, DWORD size) {
         transform[0] = 1.5000001f;
         transform[4] = 4.0;
         transform[5] = 0.0;
         return S_OK;
-      }))
+      })
       .RetiresOnSaturation();
   EXPECT_CALL(delegate,
               OnPointerPanZoomUpdate(device_id, 4.0, 0, 1.5000001f, 0))
@@ -247,12 +246,12 @@ TEST(DirectManipulationTest, TestRounding) {
       .Times(1)
       .RetiresOnSaturation();
   EXPECT_CALL(content, GetContentTransform(_, 6))
-      .WillOnce(::testing::Invoke([scale](float* transform, DWORD size) {
+      .WillOnce([scale](float* transform, DWORD size) {
         transform[0] = 1.50000065f;
         transform[4] = 2.0;
         transform[5] = 0.0;
         return S_OK;
-      }))
+      })
       .RetiresOnSaturation();
   EXPECT_CALL(delegate,
               OnPointerPanZoomUpdate(device_id, 2.0, 0, 1.50000065f, 0))
@@ -263,13 +262,13 @@ TEST(DirectManipulationTest, TestRounding) {
       .RetiresOnSaturation();
   EXPECT_CALL(delegate, OnPointerPanZoomEnd(device_id));
   EXPECT_CALL(viewport, GetViewportRect(_))
-      .WillOnce(::testing::Invoke([DISPLAY_WIDTH, DISPLAY_HEIGHT](RECT* rect) {
+      .WillOnce([DISPLAY_WIDTH, DISPLAY_HEIGHT](RECT* rect) {
         rect->left = 0;
         rect->top = 0;
         rect->right = DISPLAY_WIDTH;
         rect->bottom = DISPLAY_HEIGHT;
         return S_OK;
-      }));
+      });
   EXPECT_CALL(viewport, ZoomToRect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT, false))
       .WillOnce(::testing::Return(S_OK));
   handler->OnContentUpdated((IDirectManipulationViewport*)&viewport,
@@ -297,13 +296,13 @@ TEST(DirectManipulationTest, TestInertiaCancelSentForUserCancel) {
   int32_t device_id = (int32_t)reinterpret_cast<int64_t>(handler.get());
   // No need to mock the actual gesture, just start at the end.
   EXPECT_CALL(viewport, GetViewportRect(_))
-      .WillOnce(::testing::Invoke([DISPLAY_WIDTH, DISPLAY_HEIGHT](RECT* rect) {
+      .WillOnce([DISPLAY_WIDTH, DISPLAY_HEIGHT](RECT* rect) {
         rect->left = 0;
         rect->top = 0;
         rect->right = DISPLAY_WIDTH;
         rect->bottom = DISPLAY_HEIGHT;
         return S_OK;
-      }));
+      });
   EXPECT_CALL(viewport, ZoomToRect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT, false))
       .WillOnce(::testing::Return(S_OK));
   EXPECT_CALL(delegate, OnPointerPanZoomEnd(device_id));
@@ -312,21 +311,21 @@ TEST(DirectManipulationTest, TestInertiaCancelSentForUserCancel) {
                                    DIRECTMANIPULATION_RUNNING);
   // Have pan_y change by 10 between inertia updates.
   EXPECT_CALL(content, GetContentTransform(_, 6))
-      .WillOnce(::testing::Invoke([](float* transform, DWORD size) {
+      .WillOnce([](float* transform, DWORD size) {
         transform[0] = 1;
         transform[4] = 0;
         transform[5] = 100;
         return S_OK;
-      }));
+      });
   handler->OnContentUpdated((IDirectManipulationViewport*)&viewport,
                             (IDirectManipulationContent*)&content);
   EXPECT_CALL(content, GetContentTransform(_, 6))
-      .WillOnce(::testing::Invoke([](float* transform, DWORD size) {
+      .WillOnce([](float* transform, DWORD size) {
         transform[0] = 1;
         transform[4] = 0;
         transform[5] = 110;
         return S_OK;
-      }));
+      });
   handler->OnContentUpdated((IDirectManipulationViewport*)&viewport,
                             (IDirectManipulationContent*)&content);
   // This looks like an interruption in the middle of synthetic inertia because
@@ -350,13 +349,13 @@ TEST(DirectManipulationTest, TestInertiaCamcelNotSentAtInertiaEnd) {
   int32_t device_id = (int32_t)reinterpret_cast<int64_t>(handler.get());
   // No need to mock the actual gesture, just start at the end.
   EXPECT_CALL(viewport, GetViewportRect(_))
-      .WillOnce(::testing::Invoke([DISPLAY_WIDTH, DISPLAY_HEIGHT](RECT* rect) {
+      .WillOnce([DISPLAY_WIDTH, DISPLAY_HEIGHT](RECT* rect) {
         rect->left = 0;
         rect->top = 0;
         rect->right = DISPLAY_WIDTH;
         rect->bottom = DISPLAY_HEIGHT;
         return S_OK;
-      }));
+      });
   EXPECT_CALL(viewport, ZoomToRect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT, false))
       .WillOnce(::testing::Return(S_OK));
   EXPECT_CALL(delegate, OnPointerPanZoomEnd(device_id));
@@ -365,21 +364,21 @@ TEST(DirectManipulationTest, TestInertiaCamcelNotSentAtInertiaEnd) {
                                    DIRECTMANIPULATION_RUNNING);
   // Have no change in pan between events.
   EXPECT_CALL(content, GetContentTransform(_, 6))
-      .WillOnce(::testing::Invoke([](float* transform, DWORD size) {
+      .WillOnce([](float* transform, DWORD size) {
         transform[0] = 1;
         transform[4] = 0;
         transform[5] = 140;
         return S_OK;
-      }));
+      });
   handler->OnContentUpdated((IDirectManipulationViewport*)&viewport,
                             (IDirectManipulationContent*)&content);
   EXPECT_CALL(content, GetContentTransform(_, 6))
-      .WillOnce(::testing::Invoke([](float* transform, DWORD size) {
+      .WillOnce([](float* transform, DWORD size) {
         transform[0] = 1;
         transform[4] = 0;
         transform[5] = 140;
         return S_OK;
-      }));
+      });
   handler->OnContentUpdated((IDirectManipulationViewport*)&viewport,
                             (IDirectManipulationContent*)&content);
   // OnScrollInertiaCancel should not be called.
@@ -406,44 +405,43 @@ TEST(DirectManipulationTest, TestGestureWithInitialData) {
       fml::MakeRefCounted<DirectManipulationEventHandler>(owner.get());
   int32_t device_id = (int32_t)reinterpret_cast<int64_t>(handler.get());
   EXPECT_CALL(viewport, GetPrimaryContent(_, _))
-      .WillOnce(::testing::Invoke([&content](REFIID in, void** out) {
+      .WillOnce([&content](REFIID in, void** out) {
         *out = &content;
         return S_OK;
-      }))
+      })
       .RetiresOnSaturation();
   EXPECT_CALL(content, GetContentTransform(_, 6))
-      .WillOnce(::testing::Invoke([scale](float* transform, DWORD size) {
+      .WillOnce([scale](float* transform, DWORD size) {
         transform[0] = 2.0f;
         transform[4] = 234.0;
         transform[5] = 345.0;
         return S_OK;
-      }))
+      })
       .RetiresOnSaturation();
   EXPECT_CALL(delegate, OnPointerPanZoomStart(device_id));
   handler->OnViewportStatusChanged((IDirectManipulationViewport*)&viewport,
                                    DIRECTMANIPULATION_RUNNING,
                                    DIRECTMANIPULATION_READY);
   EXPECT_CALL(content, GetContentTransform(_, 6))
-      .WillOnce(::testing::Invoke(
-          [scale, pan_x, pan_y](float* transform, DWORD size) {
-            transform[0] = 2.0f * scale;
-            transform[4] = 234.0 + pan_x;
-            transform[5] = 345.0 + pan_y;
-            return S_OK;
-          }));
+      .WillOnce([scale, pan_x, pan_y](float* transform, DWORD size) {
+        transform[0] = 2.0f * scale;
+        transform[4] = 234.0 + pan_x;
+        transform[5] = 345.0 + pan_y;
+        return S_OK;
+      });
   EXPECT_CALL(delegate,
               OnPointerPanZoomUpdate(device_id, pan_x, pan_y, scale, 0));
   handler->OnContentUpdated((IDirectManipulationViewport*)&viewport,
                             (IDirectManipulationContent*)&content);
   EXPECT_CALL(delegate, OnPointerPanZoomEnd(device_id));
   EXPECT_CALL(viewport, GetViewportRect(_))
-      .WillOnce(::testing::Invoke([DISPLAY_WIDTH, DISPLAY_HEIGHT](RECT* rect) {
+      .WillOnce([DISPLAY_WIDTH, DISPLAY_HEIGHT](RECT* rect) {
         rect->left = 0;
         rect->top = 0;
         rect->right = DISPLAY_WIDTH;
         rect->bottom = DISPLAY_HEIGHT;
         return S_OK;
-      }));
+      });
   EXPECT_CALL(viewport, ZoomToRect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT, false))
       .WillOnce(::testing::Return(S_OK));
   handler->OnViewportStatusChanged((IDirectManipulationViewport*)&viewport,

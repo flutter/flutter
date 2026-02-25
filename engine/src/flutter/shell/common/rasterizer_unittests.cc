@@ -1034,8 +1034,9 @@ TEST(
       std::make_shared<const fml::SyncSwitch>(false);
   ON_CALL(delegate, GetIsGpuDisabledSyncSwitch())
       .WillByDefault(Return(is_gpu_disabled_sync_switch));
-  ON_CALL(*surface, AcquireFrame(DlISize()))
-      .WillByDefault(::testing::Invoke([] { return nullptr; }));
+  ON_CALL(*surface, AcquireFrame(DlISize())).WillByDefault([] {
+    return nullptr;
+  });
   EXPECT_CALL(*surface, AcquireFrame(DlISize()));
   EXPECT_CALL(*surface, MakeRenderContextCurrent())
       .WillOnce(Return(ByMove(std::make_unique<GLContextDefaultResult>(true))));
@@ -1090,21 +1091,20 @@ TEST(RasterizerTest,
   auto surface = std::make_unique<NiceMock<MockSurface>>();
   EXPECT_CALL(*surface, AllowsDrawingWhenGpuDisabled())
       .WillRepeatedly(Return(true));
-  ON_CALL(*surface, AcquireFrame(DlISize()))
-      .WillByDefault(::testing::Invoke([] {
-        SurfaceFrame::FramebufferInfo framebuffer_info;
-        framebuffer_info.supports_readback = true;
-        return std::make_unique<SurfaceFrame>(
-            /*surface=*/
-            nullptr, framebuffer_info,
-            /*encode_callback=*/
-            [](const SurfaceFrame&, DlCanvas*) { return true; },
-            /*submit_callback=*/[](const SurfaceFrame& frame) { return true; },
-            /*frame_size=*/DlISize(800, 600));
-      }));
-  ON_CALL(*surface, MakeRenderContextCurrent())
-      .WillByDefault(::testing::Invoke(
-          [] { return std::make_unique<GLContextDefaultResult>(true); }));
+  ON_CALL(*surface, AcquireFrame(DlISize())).WillByDefault([] {
+    SurfaceFrame::FramebufferInfo framebuffer_info;
+    framebuffer_info.supports_readback = true;
+    return std::make_unique<SurfaceFrame>(
+        /*surface=*/
+        nullptr, framebuffer_info,
+        /*encode_callback=*/
+        [](const SurfaceFrame&, DlCanvas*) { return true; },
+        /*submit_callback=*/[](const SurfaceFrame& frame) { return true; },
+        /*frame_size=*/DlISize(800, 600));
+  });
+  ON_CALL(*surface, MakeRenderContextCurrent()).WillByDefault([] {
+    return std::make_unique<GLContextDefaultResult>(true);
+  });
 
   fml::CountDownLatch count_down_latch(2);
   auto first_timestamp = fml::TimePoint::Now();
@@ -1276,7 +1276,7 @@ TEST(RasterizerTest, presentationTimeSetWhenVsyncTargetInFuture) {
   auto surface = std::make_unique<MockSurface>();
   ON_CALL(*surface, AllowsDrawingWhenGpuDisabled()).WillByDefault(Return(true));
   ON_CALL(*surface, AcquireFrame(DlISize()))
-      .WillByDefault(::testing::Invoke([&] {
+      .WillByDefault([&] {
         SurfaceFrame::FramebufferInfo framebuffer_info;
         framebuffer_info.supports_readback = true;
         return std::make_unique<SurfaceFrame>(
@@ -1292,11 +1292,11 @@ TEST(RasterizerTest, presentationTimeSetWhenVsyncTargetInFuture) {
               return true;
             },
             /*frame_size=*/DlISize(800, 600));
-      }));
+      });
 
   ON_CALL(*surface, MakeRenderContextCurrent())
-      .WillByDefault(::testing::Invoke(
-          [] { return std::make_unique<GLContextDefaultResult>(true); }));
+      .WillByDefault(
+          [] { return std::make_unique<GLContextDefaultResult>(true); });
 
   thread_host.raster_thread->GetTaskRunner()->PostTask([&] {
     rasterizer->Setup(std::move(surface));
@@ -1362,7 +1362,7 @@ TEST(RasterizerTest, presentationTimeNotSetWhenVsyncTargetInPast) {
   auto surface = std::make_unique<MockSurface>();
   ON_CALL(*surface, AllowsDrawingWhenGpuDisabled()).WillByDefault(Return(true));
   ON_CALL(*surface, AcquireFrame(DlISize()))
-      .WillByDefault(::testing::Invoke([&] {
+      .WillByDefault([&] {
         SurfaceFrame::FramebufferInfo framebuffer_info;
         framebuffer_info.supports_readback = true;
         return std::make_unique<SurfaceFrame>(
@@ -1376,11 +1376,11 @@ TEST(RasterizerTest, presentationTimeNotSetWhenVsyncTargetInPast) {
               return true;
             },
             /*frame_size=*/DlISize(800, 600));
-      }));
+      });
 
   ON_CALL(*surface, MakeRenderContextCurrent())
-      .WillByDefault(::testing::Invoke(
-          [] { return std::make_unique<GLContextDefaultResult>(true); }));
+      .WillByDefault(
+          [] { return std::make_unique<GLContextDefaultResult>(true); });
 
   thread_host.raster_thread->GetTaskRunner()->PostTask([&] {
     rasterizer->Setup(std::move(surface));
