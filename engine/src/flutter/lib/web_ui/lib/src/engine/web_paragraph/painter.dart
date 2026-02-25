@@ -123,6 +123,7 @@ class CanvasKitPainter extends Painter {
           'canvas=${paintCanvas.width}x${paintCanvas.height} vs bounds=${sourceRect.width}x${sourceRect.height}',
         );
       }
+
       final DomImageData imageData = paintContext.getImageData(
         0,
         0,
@@ -131,13 +132,12 @@ class CanvasKitPainter extends Painter {
       );
 
       final imageInfo = SkImageInfo(
-        alphaType: canvasKit.AlphaType.Premul,
+        alphaType: canvasKit.AlphaType.Unpremul,
         colorType: canvasKit.ColorType.RGBA_8888,
         colorSpace: SkColorSpaceSRGB,
         width: sourceRect.width,
         height: sourceRect.height,
       );
-
       final SkImage? skImage = canvasKit.MakeImage(
         imageInfo,
         Uint8List.view(imageData.data.buffer),
