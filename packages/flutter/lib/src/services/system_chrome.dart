@@ -758,7 +758,8 @@ abstract final class SystemChrome {
     scheduleMicrotask(() {
       assert(_pendingStyle != null);
       if (_pendingStyle != _latestStyle) {
-        SystemChannels.platform.invokeMethod<void>(  // ignore: unawaited_futures
+        SystemChannels.platform.invokeMethod<void>(
+          // ignore: unawaited_futures
           'SystemChrome.setSystemUIOverlayStyle',
           _pendingStyle!._toMap(),
         );

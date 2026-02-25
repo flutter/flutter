@@ -76,7 +76,7 @@ void main() {
           }
         },
       );
-      expect(await channel.invokeMethod<List<String>>('sayHello', 'hello'), throwsA(isA<TypeError>()));
+      expect(channel.invokeMethod<List<String>>('sayHello', 'hello'), throwsA(isA<TypeError>()));
       expect(await channel.invokeListMethod<String>('sayHello', 'hello'), <String>[
         'hello',
         'world',
@@ -113,7 +113,7 @@ void main() {
         },
       );
       expect(
-        await channel.invokeMethod<Map<String, String>>('sayHello', 'hello'),
+        channel.invokeMethod<Map<String, String>>('sayHello', 'hello'),
         throwsA(isA<TypeError>()),
       );
       expect(await channel.invokeMapMethod<String, String>('sayHello', 'hello'), <String, String>{
@@ -148,7 +148,7 @@ void main() {
         },
       );
       expect(
-        () => channel.invokeMethod<dynamic>('sayHello', 'hello'),  // ignore: unawaited_futures
+        () => channel.invokeMethod<dynamic>('sayHello', 'hello'), // ignore: unawaited_futures
         throwsA(
           isA<PlatformException>()
               .having((PlatformException e) => e.code, 'code', equals('bad'))
@@ -168,7 +168,7 @@ void main() {
         (ByteData? message) async => null,
       );
       expect(
-        () => channel.invokeMethod<void>('sayHello', 'hello'),  // ignore: unawaited_futures
+        () => channel.invokeMethod<void>('sayHello', 'hello'), // ignore: unawaited_futures
         throwsA(
           isA<MissingPluginException>().having(
             (MissingPluginException e) => e.message,
