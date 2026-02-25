@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'list_tile_tester.dart';
 import 'semantics_tester.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('SliverReorderableList works well when having gestureSettings', (
@@ -2136,6 +2137,23 @@ void main() {
     expect(tester.getBottomLeft(find.text('0')), const Offset(0, 400));
     await drag.up();
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('ReorderableList does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: ReorderableList(
+              itemBuilder: (_, _) => const Text(key: Key('x'), 'X'),
+              itemCount: 3,
+              onReorderItem: (_, _) {},
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(ReorderableList)), Size.zero);
   });
 }
 
