@@ -72,7 +72,6 @@ Future<double> _runBasicStandardParallel(
       basicStandard.send(payload),
       _runBasicStandardParallelRecurse(basicStandard, counter, count, completer, payload),
     ]);
-
   }
   await completer.future;
   watch.stop();
