@@ -4,7 +4,7 @@
 
 #include <ostream>
 
-#include "focus_delegate.h"
+#include "flutter/shell/platform/fuchsia/flutter/focus_delegate.h"
 
 namespace flutter_runner {
 

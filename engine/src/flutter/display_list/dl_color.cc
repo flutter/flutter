@@ -5,36 +5,87 @@
 #include "flutter/display_list/dl_color.h"
 
 #include <algorithm>
+#include <cmath>
 
 namespace flutter {
 
 namespace {
-const std::array<DlScalar, 12> kP3ToSrgb = {
-    1.306671048092539,  -0.298061942172353,
-    0.213228303487995,  -0.213580156254466,  //
-    -0.117390025596251, 1.127722006101976,
-    0.109727644608938,  -0.109450321455370,  //
-    0.214813187718391,  0.054268702864647,
-    1.406898424029350,  -0.364892765879631};
 
-DlColor transform(const DlColor& color,
-                  const std::array<DlScalar, 12>& matrix,
-                  DlColorSpace color_space) {
-  return DlColor(color.getAlphaF(),
-                 matrix[0] * color.getRedF() +        //
-                     matrix[1] * color.getGreenF() +  //
-                     matrix[2] * color.getBlueF() +   //
-                     matrix[3],                       //
-                 matrix[4] * color.getRedF() +        //
-                     matrix[5] * color.getGreenF() +  //
-                     matrix[6] * color.getBlueF() +   //
-                     matrix[7],                       //
-                 matrix[8] * color.getRedF() +        //
-                     matrix[9] * color.getGreenF() +  //
-                     matrix[10] * color.getBlueF() +  //
-                     matrix[11],                      //
-                 color_space);
+/// sRGB standard constants for transfer functions.
+/// See https://en.wikipedia.org/wiki/SRGB.
+constexpr double kSrgbGamma = 2.4;
+constexpr double kSrgbLinearThreshold = 0.04045;
+constexpr double kSrgbLinearSlope = 12.92;
+constexpr double kSrgbEncodedOffset = 0.055;
+constexpr double kSrgbEncodedDivisor = 1.055;
+constexpr double kSrgbLinearToEncodedThreshold = 0.0031308;
+
+/// sRGB electro-optical transfer function (gamma decode, gamma ~2.2 to linear).
+double srgbEOTF(double v) {
+  if (v <= kSrgbLinearThreshold) {
+    return v / kSrgbLinearSlope;
+  }
+  return std::pow((v + kSrgbEncodedOffset) / kSrgbEncodedDivisor, kSrgbGamma);
 }
+
+/// sRGB opto-electronic transfer function (linear to gamma encode).
+double srgbOETF(double v) {
+  if (v <= kSrgbLinearToEncodedThreshold) {
+    return v * kSrgbLinearSlope;
+  }
+  return kSrgbEncodedDivisor * std::pow(v, 1.0 / kSrgbGamma) -
+         kSrgbEncodedOffset;
+}
+
+/// sRGB EOTF extended to handle negative values (for extended sRGB).
+double srgbEOTFExtended(double v) {
+  return v < 0.0 ? -srgbEOTF(-v) : srgbEOTF(v);
+}
+
+/// sRGB OETF extended to handle negative values (for extended sRGB).
+double srgbOETFExtended(double v) {
+  return v < 0.0 ? -srgbOETF(-v) : srgbOETF(v);
+}
+
+/// Display P3 to sRGB linear 3x3 matrix.
+/// Both P3 and sRGB use the same D65 white point.
+/// P3 has wider primaries than sRGB, so converting P3 colors to sRGB
+/// can produce values outside [0,1] (extended sRGB).
+///
+/// Matrix derived from:
+///   M = sRGB_XYZ_to_RGB * P3_RGB_to_XYZ
+static constexpr double kP3ToSrgbLinear[9] = {
+    1.2249401, -0.2249402, 0.0,        -0.0420569, 1.0420571,
+    0.0,       -0.0196376, -0.0786507, 1.0982884,
+};
+
+/// Converts a Display P3 color (gamma-encoded) to extended sRGB
+/// (gamma-encoded). Steps: P3 gamma decode -> linear P3 -> linear sRGB (via 3x3
+/// matrix) -> sRGB gamma encode.
+DlColor p3ToExtendedSrgb(const DlColor& color) {
+  // Linearize P3 values (P3 uses same transfer function as sRGB).
+  double r_lin = srgbEOTFExtended(static_cast<double>(color.getRedF()));
+  double g_lin = srgbEOTFExtended(static_cast<double>(color.getGreenF()));
+  double b_lin = srgbEOTFExtended(static_cast<double>(color.getBlueF()));
+
+  // Apply 3x3 P3-to-sRGB matrix in linear space.
+  double r_srgb_lin = kP3ToSrgbLinear[0] * r_lin + kP3ToSrgbLinear[1] * g_lin +
+                      kP3ToSrgbLinear[2] * b_lin;
+  double g_srgb_lin = kP3ToSrgbLinear[3] * r_lin + kP3ToSrgbLinear[4] * g_lin +
+                      kP3ToSrgbLinear[5] * b_lin;
+  double b_srgb_lin = kP3ToSrgbLinear[6] * r_lin + kP3ToSrgbLinear[7] * g_lin +
+                      kP3ToSrgbLinear[8] * b_lin;
+
+  // Gamma encode back to sRGB.
+  double r_out = srgbOETFExtended(r_srgb_lin);
+  double g_out = srgbOETFExtended(g_srgb_lin);
+  double b_out = srgbOETFExtended(b_srgb_lin);
+
+  return DlColor(color.getAlphaF(), static_cast<float>(r_out),
+                 static_cast<float>(g_out), static_cast<float>(b_out),
+                 DlColorSpace::kExtendedSRGB);
+}
+
 }  // namespace
 
 DlColor DlColor::withColorSpace(DlColorSpace color_space) const {
@@ -65,10 +116,9 @@ DlColor DlColor::withColorSpace(DlColorSpace color_space) const {
     case DlColorSpace::kDisplayP3:
       switch (color_space) {
         case DlColorSpace::kSRGB:
-          return transform(*this, kP3ToSrgb, DlColorSpace::kExtendedSRGB)
-              .withColorSpace(DlColorSpace::kSRGB);
+          return p3ToExtendedSrgb(*this).withColorSpace(DlColorSpace::kSRGB);
         case DlColorSpace::kExtendedSRGB:
-          return transform(*this, kP3ToSrgb, DlColorSpace::kExtendedSRGB);
+          return p3ToExtendedSrgb(*this);
         case DlColorSpace::kDisplayP3:
           return *this;
       }

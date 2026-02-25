@@ -224,6 +224,12 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         FlutterOptions.kWebWasmFlag,
         help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
         negatable: false,
+      )
+      ..addFlag(
+        RunCommand.kEnableLocalDiscovery,
+        help:
+            'Whether to advertise the application on the local network (via mDNS) '
+            'for discovery by "flutter running-apps".',
       );
     usesWebOptions(verboseHelp: verboseHelp);
     usesTargetOption();
@@ -258,6 +264,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get enableVulkanValidation => boolArg('enable-vulkan-validation');
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
+  bool get enableLocalDiscovery => boolArg(RunCommand.kEnableLocalDiscovery);
 
   @override
   bool get refreshWirelessDevices => true;
@@ -322,6 +329,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         usingCISystem: usingCISystem,
         debugLogsDirectoryPath: debugLogsDirectoryPath,
         webDevServerConfig: webDevServerConfig,
+        enableLocalDiscovery: enableLocalDiscovery,
       );
     } else {
       return DebuggingOptions.enabled(
@@ -384,6 +392,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
         ipv6: boolArg(FlutterCommand.ipv6Flag),
         printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
+        enableLocalDiscovery: enableLocalDiscovery,
         webDevServerConfig: webDevServerConfig,
       );
     }
@@ -430,6 +439,7 @@ class RunCommand extends RunCommandBase {
     addPublishPort(verboseHelp: verboseHelp);
     addIgnoreDeprecationOption();
     addMachineOutputFlag(verboseHelp: verboseHelp);
+
     argParser
       ..addFlag(
         'await-first-frame-when-tracing',
@@ -496,6 +506,8 @@ class RunCommand extends RunCommandBase {
 
   @override
   final name = 'run';
+
+  static const String kEnableLocalDiscovery = 'enable-local-discovery';
 
   @override
   DeprecationBehavior get deprecationBehavior =>
@@ -699,6 +711,26 @@ class RunCommand extends RunCommandBase {
       throwToolExit('Skwasm renderer requires --wasm');
     }
 
+    if (argResults?.wasParsed(FlutterOptions.kWebExperimentalHotReload) ?? false) {
+      final bool webEnableHotReload = boolArg(FlutterOptions.kWebExperimentalHotReload);
+      if (webEnableHotReload) {
+        globals.printWarning(
+          'Hot reload on the web is now enabled by default. '
+          'The "--${FlutterOptions.kWebExperimentalHotReload}" flag is deprecated '
+          'and will be removed in an upcoming release.',
+        );
+      } else {
+        globals.printWarning(
+          'Hot reload on the web is now enabled by default. '
+          'The "--no-${FlutterOptions.kWebExperimentalHotReload}" flag is deprecated '
+          'and will be removed in an upcoming release. '
+          'If your web development workflow depends on disabling hot reload, '
+          'please open an issue explaining why at '
+          'https://github.com/dart-lang/sdk/issues/new?template=5_web_hot_reload.yml.',
+        );
+      }
+    }
+
     final String? flavor = stringArg('flavor');
     final bool flavorsSupportedOnEveryDevice = devices!.every(
       (Device device) => device.supportsFlavors,
@@ -848,16 +880,10 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    List<String>? expFlags;
-    if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
-        stringsArg(FlutterOptions.kEnableExperiment).isNotEmpty) {
-      expFlags = stringsArg(FlutterOptions.kEnableExperiment);
-    }
     final flutterDevices = <FlutterDevice>[
       for (final Device device in devices!)
         await FlutterDevice.create(
           device,
-          experimentalFlags: expFlags,
           target: targetFile,
           buildInfo: buildInfo,
           userIdentifier: userIdentifier,
@@ -880,9 +906,9 @@ class RunCommand extends RunCommandBase {
     final appStartedTimeRecorder = Completer<void>.sync();
 
     TerminalHandler? handler;
-    // This callback can't throw.
     unawaited(
-      appStartedTimeRecorder.future.then<void>((_) {
+      // This callback is executed once the application has successfully started.
+      appStartedTimeRecorder.future.then<void>((_) async {
         appStartedTime = globals.systemClock.now();
         if (stayResident) {
           handler =

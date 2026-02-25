@@ -149,14 +149,16 @@ class CupertinoSearchTextField extends StatefulWidget {
   }) : assert(
          !((decoration != null) && (backgroundColor != null)),
          'Cannot provide both a background color and a decoration\n'
-         'To provide both, use "decoration: BoxDecoration(color: '
-         'backgroundColor)"',
+         'The backgroundColor argument is just a shorthand for '
+         '"decoration: BoxDecoration(color: backgroundColor)".\n'
+         'To use both a backgroundColor and other decoration properties, set the color in the BoxDecoration instead.',
        ),
        assert(
          !((decoration != null) && (borderRadius != null)),
          'Cannot provide both a border radius and a decoration\n'
-         'To provide both, use "decoration: BoxDecoration(borderRadius: '
-         'borderRadius)"',
+         'The borderRadius argument is just a shorthand for '
+         '"decoration: BoxDecoration(borderRadius: borderRadius)".\n'
+         'To use both a radius and other decoration properties, set the radius in the BoxDecoration instead.',
        );
 
   /// Controls the text being edited.

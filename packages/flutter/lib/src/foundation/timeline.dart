@@ -87,8 +87,9 @@ abstract final class FlutterTimeline {
     Timeline.instantSync(name, arguments: arguments);
   }
 
-  /// A utility method to time a synchronous `function`. Internally calls
-  /// `function` bracketed by calls to [startSync] and [finishSync].
+  /// A utility method to time a synchronous `function`.
+  ///
+  /// Internally calls `function` bracketed by calls to [startSync] and [finishSync].
   ///
   /// This is a drop-in replacement for [Timeline.timeSync].
   static T timeSync<T>(
