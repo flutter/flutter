@@ -67,12 +67,13 @@ Future<double> _runBasicStandardParallel(
   final completer = Completer<int>();
   final counter = _Counter();
   watch.start();
-  for (var i = 0; i < parallel; ++i) {
-    await Future.wait([
-      basicStandard.send(payload),
-      _runBasicStandardParallelRecurse(basicStandard, counter, count, completer, payload),
-    ]);
-  }
+  await Future.wait(
+    Iterable.generate(parallel, (_) async {
+      await basicStandard.send(payload);
+      // ignore: unawaited_futures
+      _runBasicStandardParallelRecurse(basicStandard, counter, count, completer, payload);
+    }),
+  );
   await completer.future;
   watch.stop();
   return watch.elapsedMicroseconds / count;
