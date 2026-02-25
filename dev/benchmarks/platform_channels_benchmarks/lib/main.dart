@@ -52,9 +52,8 @@ Future<void> _runBasicStandardParallelRecurse(
   if (counter.count == count) {
     completer.complete(counter.count);
   } else if (counter.count < count) {
-    await basicStandard.send(payload).then((Object? result) {
-      _runBasicStandardParallelRecurse(basicStandard, counter, count, completer, payload);
-    });
+    await basicStandard.send(payload);
+    _runBasicStandardParallelRecurse(basicStandard, counter, count, completer, payload);
   }
 }
 
@@ -69,9 +68,11 @@ Future<double> _runBasicStandardParallel(
   final counter = _Counter();
   watch.start();
   for (var i = 0; i < parallel; ++i) {
-    await basicStandard.send(payload).then((Object? result) {
-      _runBasicStandardParallelRecurse(basicStandard, counter, count, completer, payload);
-    });
+    await Future.wait([
+      basicStandard.send(payload),
+      _runBasicStandardParallelRecurse(basicStandard, counter, count, completer, payload),
+    ]);
+
   }
   await completer.future;
   watch.stop();
