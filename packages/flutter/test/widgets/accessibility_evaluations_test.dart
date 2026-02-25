@@ -206,7 +206,7 @@ void main() {
         ),
       );
       final EvaluationResult result = await evaluation.evaluate(tester.binding);
-      expect(result.violations, isEmpty); // Should pass
+      expect(result.violations, isEmpty);
       handle.dispose();
     });
 
@@ -222,7 +222,38 @@ void main() {
         ),
       );
       final EvaluationResult result = await evaluation.evaluate(tester.binding);
-      expect(result.violations, isEmpty); // Should pass
+      expect(result.violations, isEmpty);
+      handle.dispose();
+    });
+    testWidgets('Passes if node has value', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Semantics(
+            container: true,
+            value: 'test',
+            child: const SizedBox(width: 10.0, height: 10.0),
+          ),
+        ),
+      );
+      final EvaluationResult result = await evaluation.evaluate(tester.binding);
+      expect(result.violations, isEmpty);
+      handle.dispose();
+    });
+
+    testWidgets('Passes if node has hint', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Semantics(
+            container: true,
+            hint: 'test',
+            child: const SizedBox(width: 10.0, height: 10.0),
+          ),
+        ),
+      );
+      final EvaluationResult result = await evaluation.evaluate(tester.binding);
+      expect(result.violations, isEmpty);
       handle.dispose();
     });
 
@@ -257,7 +288,7 @@ void main() {
         ),
       );
       final EvaluationResult result = await evaluation.evaluate(tester.binding);
-      expect(result.violations, isEmpty); // Should pass
+      expect(result.violations, isEmpty);
       handle.dispose();
     });
 
