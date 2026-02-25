@@ -22,12 +22,12 @@ static const SEL kSelectorsHandledByPlugins[] = {
 typedef NS_ENUM(NSInteger, FlutterPluginAppLifeCycleDelegateState) {
   /// The FlutterPluginAppLifeCycleDelegate was just initialized and neither
   /// willFinishLaunching or didFinishLaunching has been sent to the plugins.
-  AppLifecycleInitialized,
+  kAppLifecycleInitialized,
   /// The willFinishLaunching event has been sent to the plugins
   /// (but not didFinishLaunching).
-  AppLifecycleWillLaunchSent,
+  kAppLifecycleWillLaunchSent,
   /// The didFinishLaunching event has been sent to the plugins.
-  AppLifecycleDidLaunchSent,
+  kAppLifecycleDidLaunchSent,
 };
 
 @interface FlutterPluginAppLifeCycleDelegate ()
@@ -77,7 +77,7 @@ typedef NS_ENUM(NSInteger, FlutterPluginAppLifeCycleDelegateState) {
                   selector:@selector(handleWillTerminate:)];
     }
     _delegates = [NSPointerArray weakObjectsPointerArray];
-    _state = AppLifecycleInitialized;
+    _state = kAppLifecycleInitialized;
     _debugBackgroundTask = UIBackgroundTaskInvalid;
   }
   return self;
@@ -170,7 +170,7 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
   // (now deprecated)
   // -[UIApplication application:continueUserActivity:restorationHandler:]
   // method.
-  if (_state < AppLifecycleDidLaunchSent && ![self application:application
+  if (_state < kAppLifecycleDidLaunchSent && ![self application:application
                                                 didFinishLaunchingWithOptions:convertedLaunchOptions
                                                            isFallbackForScene:YES]) {
     return NO;
@@ -200,7 +200,7 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions
                isFallbackForScene:(BOOL)isFallback {
-  if (_state >= AppLifecycleDidLaunchSent && !isFallback) {
+  if (_state >= kAppLifecycleDidLaunchSent) {
     return YES;
   }
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
@@ -208,7 +208,7 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
       continue;
     }
     if ([delegate respondsToSelector:@selector(application:didFinishLaunchingWithOptions:)]) {
-      _state = AppLifecycleDidLaunchSent;
+      _state = kAppLifecycleDidLaunchSent;
       if (![delegate application:application didFinishLaunchingWithOptions:launchOptions]) {
         return NO;
       }
@@ -249,7 +249,7 @@ static NSDictionary<UIApplicationLaunchOptionsKey, id>* ConvertConnectionOptions
 - (BOOL)application:(UIApplication*)application
     willFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
   flutter::DartCallbackCache::LoadCacheFromDisk();
-  if (_state >= AppLifecycleWillLaunchSent) {
+  if (_state >= kAppLifecycleWillLaunchSent) {
     return YES;
   }
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in [_delegates allObjects]) {
@@ -257,7 +257,7 @@ static NSDictionary<UIApplicationLaunchOptionsKey, id>* ConvertConnectionOptions
       continue;
     }
     if ([delegate respondsToSelector:_cmd]) {
-      _state = AppLifecycleWillLaunchSent;
+      _state = kAppLifecycleWillLaunchSent;
       if (![delegate application:application willFinishLaunchingWithOptions:launchOptions]) {
         return NO;
       }
