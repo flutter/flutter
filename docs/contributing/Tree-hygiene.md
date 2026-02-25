@@ -15,8 +15,8 @@ Across the document we use the word "tree" to mean "the health state of flutter/
 
 - On our [build dashboard](https://flutter-dashboard.appspot.com/)
 - On every PR (referred to as "Tree Status")
-  - Note that if the "tree-status" check is failing on a PR, it is not something that you can fix in the
-    PR itself, you just have to wait for the tree maintainers to fix the tree and then it will go green.
+  - A failing "tree-status" check on a PR indicates a problem with the main branch,
+    not the PR itself. The check will pass once tree maintainers resolve the issue; no action is needed within the PR.
 - In the [tree-status](https://discord.com/channels/608014603317936148/613398423093116959) Discord channel
 
 ## Overview
