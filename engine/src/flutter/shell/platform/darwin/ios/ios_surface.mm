@@ -15,10 +15,9 @@ FLUTTER_ASSERT_ARC
 
 namespace flutter {
 
-std::unique_ptr<IOSSurface> IOSSurface::Create(
-      std::shared_ptr<IOSContext> context,
-      CALayer* layer,
-      bool render_to_surface) {
+std::unique_ptr<IOSSurface> IOSSurface::Create(std::shared_ptr<IOSContext> context,
+                                               CALayer* layer,
+                                               bool render_to_surface) {
   FML_DCHECK(layer);
   FML_DCHECK(context);
 

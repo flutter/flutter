@@ -788,8 +788,8 @@ static BOOL _preparedOnce = NO;
     // so that all the touch events in the same sequence are forwarded to the same
     // `_flutterViewController`.
     FlutterTouchInterceptingView* touchInterceptingView = (FlutterTouchInterceptingView*)self.view;
-    _flutterViewController =
-        [_platformViewsController flutterViewControllerForIdentifier:touchInterceptingView.flutterViewId];
+    _flutterViewController = [_platformViewsController
+        flutterViewControllerForIdentifier:touchInterceptingView.flutterViewId];
   }
   [_flutterViewController touchesBegan:touches withEvent:event];
   _currentTouchPointersCount += touches.count;

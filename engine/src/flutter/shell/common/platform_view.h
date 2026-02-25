@@ -1001,9 +1001,7 @@ class PlatformView {
   ///             Impeller context creation can be moved off the startup path.
   virtual void SetupImpellerContext() {}
 
-  virtual bool HasRenderingSurface(int64_t flutter_view_id) {
-    return true;
-  }
+  virtual bool HasRenderingSurface(int64_t flutter_view_id) { return true; }
 
  protected:
   // This is the only method called on the raster task runner.

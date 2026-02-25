@@ -35,7 +35,8 @@ NS_ASSUME_NONNULL_BEGIN
 // Indicates whether this engine has **ever** been manually registered to a scene.
 @property(nonatomic, assign) BOOL manuallyRegisteredToScene;
 
-- (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics viewIdentifier:(FlutterViewIdentifier)viewIdentifier;
+- (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics
+               viewIdentifier:(FlutterViewIdentifier)viewIdentifier;
 - (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet;
 
 - (fml::RefPtr<fml::TaskRunner>)platformTaskRunner;

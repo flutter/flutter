@@ -98,7 +98,9 @@ class MockExternalViewEmbedder : public ExternalViewEmbedder {
       (override));
   MOCK_METHOD(void,
               PrepareFlutterView,
-              (int64_t flutter_view_id, DlISize frame_size, double device_pixel_ratio),
+              (int64_t flutter_view_id,
+               DlISize frame_size,
+               double device_pixel_ratio),
               (override));
   MOCK_METHOD(void,
               PrerollCompositeEmbeddedView,
@@ -236,10 +238,10 @@ TEST(RasterizerTest,
                          /*raster_thread_merger=*/
                          fml::RefPtr<fml::RasterThreadMerger>(nullptr)))
       .Times(1);
-  EXPECT_CALL(*external_view_embedder, PrepareFlutterView(
-                                            kImplicitViewId,
-                                           /*frame_size=*/DlISize(),
-                                           /*device_pixel_ratio=*/2.0))
+  EXPECT_CALL(*external_view_embedder,
+              PrepareFlutterView(kImplicitViewId,
+                                 /*frame_size=*/DlISize(),
+                                 /*device_pixel_ratio=*/2.0))
       .Times(1);
   EXPECT_CALL(*external_view_embedder,
               SubmitFlutterView(/*flutter_view_id=*/kImplicitViewId, _, _, _))
@@ -314,10 +316,10 @@ TEST(
   EXPECT_CALL(*external_view_embedder, BeginFrame(/*context=*/nullptr,
                                                   /*raster_thread_merger=*/_))
       .Times(1);
-  EXPECT_CALL(*external_view_embedder, PrepareFlutterView(
-                                            kImplicitViewId,
-                                           /*frame_size=*/DlISize(),
-                                           /*device_pixel_ratio=*/2.0))
+  EXPECT_CALL(*external_view_embedder,
+              PrepareFlutterView(kImplicitViewId,
+                                 /*frame_size=*/DlISize(),
+                                 /*device_pixel_ratio=*/2.0))
       .Times(1);
   EXPECT_CALL(*external_view_embedder,
               SubmitFlutterView(/*flutter_view_id=*/kImplicitViewId, _, _, _))
@@ -396,10 +398,10 @@ TEST(
   EXPECT_CALL(*external_view_embedder, BeginFrame(/*context=*/nullptr,
                                                   /*raster_thread_merger=*/_))
       .Times(1);
-  EXPECT_CALL(*external_view_embedder, PrepareFlutterView(
-                                            kImplicitViewId,
-                                           /*frame_size=*/DlISize(),
-                                           /*device_pixel_ratio=*/2.0))
+  EXPECT_CALL(*external_view_embedder,
+              PrepareFlutterView(kImplicitViewId,
+                                 /*frame_size=*/DlISize(),
+                                 /*device_pixel_ratio=*/2.0))
       .Times(1);
   EXPECT_CALL(*external_view_embedder,
               SubmitFlutterView(/*flutter_view_id=*/kImplicitViewId, _, _, _))
@@ -482,9 +484,10 @@ TEST(RasterizerTest,
   EXPECT_CALL(*external_view_embedder, BeginFrame(/*context=*/nullptr,
                                                   /*raster_thread_merger=*/_))
       .Times(2);
-  EXPECT_CALL(*external_view_embedder, PrepareFlutterView(kImplicitViewId,
-                                           /*frame_size=*/DlISize(),
-                                           /*device_pixel_ratio=*/2.0))
+  EXPECT_CALL(*external_view_embedder,
+              PrepareFlutterView(kImplicitViewId,
+                                 /*frame_size=*/DlISize(),
+                                 /*device_pixel_ratio=*/2.0))
       .Times(2);
   EXPECT_CALL(*external_view_embedder,
               SubmitFlutterView(/*flutter_view_id=*/kImplicitViewId, _, _, _))
@@ -598,9 +601,10 @@ TEST(RasterizerTest, externalViewEmbedderDoesntEndFrameWhenNotUsedThisFrame) {
   EXPECT_CALL(*external_view_embedder, BeginFrame(/*context=*/nullptr,
                                                   /*raster_thread_merger=*/_))
       .Times(0);
-  EXPECT_CALL(*external_view_embedder, PrepareFlutterView(kImplicitViewId,
-                                           /*frame_size=*/DlISize(),
-                                           /*device_pixel_ratio=*/2.0))
+  EXPECT_CALL(*external_view_embedder,
+              PrepareFlutterView(kImplicitViewId,
+                                 /*frame_size=*/DlISize(),
+                                 /*device_pixel_ratio=*/2.0))
       .Times(0);
   EXPECT_CALL(
       *external_view_embedder,
@@ -726,9 +730,10 @@ TEST(RasterizerTest, drawMultipleViewsWithExternalViewEmbedder) {
   EXPECT_CALL(*external_view_embedder,
               SubmitFlutterView(/*flutter_view_id=*/0, _, _, _))
       .Times(1);
-  EXPECT_CALL(*external_view_embedder,
-              PrepareFlutterView(/*flutter_view_id=*/1, /*frame_size=*/DlISize(),
-                                 /*device_pixel_ratio=*/2.0))
+  EXPECT_CALL(
+      *external_view_embedder,
+      PrepareFlutterView(/*flutter_view_id=*/1, /*frame_size=*/DlISize(),
+                         /*device_pixel_ratio=*/2.0))
       .Times(1);
   EXPECT_CALL(*external_view_embedder,
               SubmitFlutterView(/*flutter_view_id=*/1, _, _, _))

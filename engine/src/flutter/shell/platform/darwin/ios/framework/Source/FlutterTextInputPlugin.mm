@@ -2653,9 +2653,10 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
         animations:^{
           double keyboardDestination =
               shouldDismissKeyboardBasedOnVelocity ? screenHeight : screenHeight - keyboardHeight;
-          _keyboardViewContainer.frame = CGRectMake(
-              0, keyboardDestination, _currentViewController.flutterScreenIfViewLoaded.bounds.size.width,
-              _keyboardViewContainer.frame.size.height);
+          _keyboardViewContainer.frame =
+              CGRectMake(0, keyboardDestination,
+                         _currentViewController.flutterScreenIfViewLoaded.bounds.size.width,
+                         _keyboardViewContainer.frame.size.height);
         }
         completion:^(BOOL finished) {
           if (shouldDismissKeyboardBasedOnVelocity) {
@@ -2721,10 +2722,10 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 - (void)hideKeyboardWithoutAnimationAndAvoidCursorDismissUpdate {
   [UIView setAnimationsEnabled:NO];
   UIApplication* flutterApplication = FlutterSharedApplication.application;
-  _cachedFirstResponder =
-      flutterApplication
-          ? flutterApplication.keyWindow.flutterFirstResponder
-          : self.currentViewController.flutterWindowSceneIfViewLoaded.keyWindow.flutterFirstResponder;
+  _cachedFirstResponder = flutterApplication
+                              ? flutterApplication.keyWindow.flutterFirstResponder
+                              : self.currentViewController.flutterWindowSceneIfViewLoaded.keyWindow
+                                    .flutterFirstResponder;
 
   _activeView.preventCursorDismissWhenResignFirstResponder = YES;
   [_cachedFirstResponder resignFirstResponder];
@@ -2970,7 +2971,6 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
                                        userInfo:nil
                                         repeats:NO];
   }
-
 }
 
 // Creates and shows an input field that is not password related and has no autofill

@@ -134,7 +134,8 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 @property(nonatomic, readwrite, copy) NSString* isolateId;
 @property(nonatomic, copy) NSString* initialRoute;
 // @property(nonatomic, strong) id<NSObject> flutterViewControllerWillDeallocObserver;
-@property(nonatomic, strong) NSMutableDictionary<NSNumber *, id<NSObject>>* flutterViewControllerWillDeallocObservers;
+@property(nonatomic, strong)
+    NSMutableDictionary<NSNumber*, id<NSObject>>* flutterViewControllerWillDeallocObservers;
 @property(nonatomic, strong) FlutterDartVMServicePublisher* publisher;
 @property(nonatomic, strong) FlutterConnectionCollection* connections;
 @property(nonatomic, assign) int64_t nextTextureId;
@@ -403,9 +404,10 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 
   NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
   if ([self.flutterViewControllerWillDeallocObservers count] > 0) {
-    [self.flutterViewControllerWillDeallocObservers enumerateKeysAndObjectsUsingBlock:^(NSNumber *key, id<NSObject> observer, BOOL *stop) {
-      [center removeObserver:observer];
-    }];
+    [self.flutterViewControllerWillDeallocObservers
+        enumerateKeysAndObjectsUsingBlock:^(NSNumber* key, id<NSObject> observer, BOOL* stop) {
+          [center removeObserver:observer];
+        }];
   }
 
   [center removeObserver:self];
@@ -416,7 +418,8 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   return *_shell;
 }
 
-- (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics viewIdentifier:(FlutterViewIdentifier)viewIdentifier {
+- (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics
+               viewIdentifier:(FlutterViewIdentifier)viewIdentifier {
   if (!self.platformView) {
     return;
   }
@@ -581,19 +584,16 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 
   [_viewControllers setObject:controller forKey:@(viewIdentifier)];
   [controller setupViewIdentifier:viewIdentifier];
-   NSAssert(controller.viewIdentifier == viewIdentifier, @"Failed to assign view ID.");
+  NSAssert(controller.viewIdentifier == viewIdentifier, @"Failed to assign view ID.");
   __weak __block FlutterEngine* weakSelf = self;
-  id <NSObject> observer =
-      [[NSNotificationCenter defaultCenter] addObserverForName:FlutterViewControllerWillDealloc
-                                                        object:controller
-                                                         queue:[NSOperationQueue mainQueue]
-                                                    usingBlock:^(NSNotification* note) {
-                                                      FlutterViewController* view_controller =
-                                                          (FlutterViewController*)note.object;
-                                                      [weakSelf
-                                                          notifyViewControllerDeallocated:view_controller
-                                                                                          .viewIdentifier];
-                                                    }];
+  id<NSObject> observer = [[NSNotificationCenter defaultCenter]
+      addObserverForName:FlutterViewControllerWillDealloc
+                  object:controller
+                   queue:[NSOperationQueue mainQueue]
+              usingBlock:^(NSNotification* note) {
+                FlutterViewController* view_controller = (FlutterViewController*)note.object;
+                [weakSelf notifyViewControllerDeallocated:view_controller.viewIdentifier];
+              }];
   [self.flutterViewControllerWillDeallocObservers setObject:observer forKey:@(viewIdentifier)];
 
   if (viewIdentifier == flutter::kFlutterImplicitViewId) {
@@ -602,21 +602,20 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
     [self updateDisplays];
   } else {
     self.platformView->AddOwnerViewController(controller);
-     flutter::ViewportMetrics metrics = {};
-     bool added = false;
-     self.platformView->AddView(viewIdentifier, metrics, [&added] (bool result){
-       added = result;
-     });
-     // The callback should be called synchronously from platform thread.
-     FML_DCHECK(added);
-     if (!added) {
-       NSLog(@"Failed to add view with ID %llu", viewIdentifier);
-     }
-   }
+    flutter::ViewportMetrics metrics = {};
+    bool added = false;
+    self.platformView->AddView(viewIdentifier, metrics, [&added](bool result) { added = result; });
+    // The callback should be called synchronously from platform thread.
+    FML_DCHECK(added);
+    if (!added) {
+      NSLog(@"Failed to add view with ID %llu", viewIdentifier);
+    }
+  }
 }
 
 - (void)deregisterViewControllerForIdentifier:(FlutterViewIdentifier)viewIdentifier {
-  id<NSObject> observer = [self.flutterViewControllerWillDeallocObservers objectForKey:@(viewIdentifier)];
+  id<NSObject> observer =
+      [self.flutterViewControllerWillDeallocObservers objectForKey:@(viewIdentifier)];
   [[NSNotificationCenter defaultCenter] removeObserver:observer];
   [self.flutterViewControllerWillDeallocObservers removeObjectForKey:@(viewIdentifier)];
   {
@@ -624,8 +623,8 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
       bool removed = NO;
       dispatch_semaphore_t sem = dispatch_semaphore_create(0);
       self.platformView->RemoveView(viewIdentifier, [&removed, &sem](bool result) {
-          removed = result;
-          dispatch_semaphore_signal(sem);
+        removed = result;
+        dispatch_semaphore_signal(sem);
       });
       dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
       // The callback should be called synchronously from platform thread.
@@ -829,7 +828,8 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
                                        binaryMessenger:self.binaryMessenger
                                                  codec:[FlutterJSONMessageCodec sharedInstance]];
 
-  self.textInputPlugin = [[FlutterTextInputPlugin alloc] initWithDelegate:self textInputDelegate:self];
+  self.textInputPlugin = [[FlutterTextInputPlugin alloc] initWithDelegate:self
+                                                        textInputDelegate:self];
   self.textInputPlugin.indirectScribbleDelegate = self;
   [self.textInputPlugin setUpIndirectScribbleInteraction:self.viewController];
 

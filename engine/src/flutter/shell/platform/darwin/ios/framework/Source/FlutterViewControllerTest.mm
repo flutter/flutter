@@ -1011,7 +1011,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   mockEngine.viewController = viewController;
   flutter::ViewportMetrics viewportMetrics;
   OCMExpect([mockEngine updateViewportMetrics:viewportMetrics
-                                viewIdentifier:viewController.viewIdentifier])
+                               viewIdentifier:viewController.viewIdentifier])
       .ignoringNonObjectArgs();
   [viewController updateViewportMetricsIfNeeded];
   OCMVerifyAll(mockEngine);
@@ -1096,7 +1096,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
   flutter::ViewportMetrics viewportMetrics;
   OCMExpect([mockEngine updateViewportMetrics:viewportMetrics
-                                viewIdentifier:viewController.viewIdentifier])
+                               viewIdentifier:viewController.viewIdentifier])
       .ignoringNonObjectArgs();
 
   [viewController viewWillTransitionToSize:CGSizeZero withTransitionCoordinator:mockCoordinator];
@@ -1132,7 +1132,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
   flutter::ViewportMetrics viewportMetrics;
   OCMExpect([mockEngine updateViewportMetrics:viewportMetrics
-                                viewIdentifier:viewController.viewIdentifier])
+                               viewIdentifier:viewController.viewIdentifier])
       .ignoringNonObjectArgs();
 
   // Should immediately trigger the engine call, without delay.
@@ -1770,13 +1770,13 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterViewController* newViewController = nil;
   @autoreleasepool {
     FlutterViewController* oldViewController = [[FlutterViewController alloc] initWithEngine:engine
-                                                                                      nibName:nil
-                                                                                       bundle:nil];
+                                                                                     nibName:nil
+                                                                                      bundle:nil];
     weakOldViewController = oldViewController;
 
     newViewController = [[FlutterViewController alloc] initWithEngine:engine
-                                                               nibName:nil
-                                                                bundle:nil];
+                                                              nibName:nil
+                                                               bundle:nil];
     XCTAssertEqual(engine.viewController, newViewController);
 
     oldViewController = nil;
@@ -1785,8 +1785,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   XCTAssertNil(weakOldViewController);
 
   // Drain enqueued observer callbacks on the main queue.
-  XCTestExpectation* drainedMainQueue =
-      [self expectationWithDescription:@"drained-main-queue"];
+  XCTestExpectation* drainedMainQueue = [self expectationWithDescription:@"drained-main-queue"];
   dispatch_async(dispatch_get_main_queue(), ^{
     [drainedMainQueue fulfill];
   });
