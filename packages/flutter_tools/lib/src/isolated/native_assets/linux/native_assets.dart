@@ -33,6 +33,9 @@ Future<CCompilerConfig?> cCompilerConfigLinux({Directory? cmakeDirectory}) async
   }
 
   const archiverVariable = 'CMAKE_AR';
+  // Flutter CMake projects use `LANGUAGES CXX`, so we can't read a configured C
+  // compiler directly. We read the C++ compiler and infer the C compiler from
+  // there.
   const compilerVariable = 'CMAKE_CXX_COMPILER';
   const linkerVariable = 'CMAKE_LINKER';
 

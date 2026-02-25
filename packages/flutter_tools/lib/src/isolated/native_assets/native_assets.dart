@@ -85,28 +85,13 @@ Future<DartHooksResult> runFlutterSpecificHooks({
     targetPlatform == TargetPlatform.tester,
   );
 
-  // When building for Linux, we need access to the native build directory to
-  // read compiler options from CMakeLists.txt that are then forwarded to build
-  // hooks.
-  Directory? nativeBuildDirectory;
-  if (buildCodeAssets?.appBuildDirectory case final appBuildDirectory?) {
-    if (targetPlatform
-        case TargetPlatform.linux_x64 ||
-            TargetPlatform.linux_arm64 ||
-            TargetPlatform.linux_riscv64) {
-      nativeBuildDirectory = appBuildDirectory
-          .childDirectory('linux')
-          .childDirectory(targetPlatform.simpleName)
-          .childDirectory(buildMode.cliName);
-    }
-  }
-
   final List<AssetBuildTarget> targets = AssetBuildTarget.targetsFor(
     targetPlatform: targetPlatform,
+    buildMode: buildMode,
     environmentDefines: environmentDefines,
     fileSystem: fileSystem,
     supportedAssetTypes: supportedAssetTypes,
-    nativeBuildDirectory: nativeBuildDirectory,
+    buildDirectory: buildCodeAssets?.appBuildDirectory,
   );
 
   if (supportedAssetTypes.contains(SupportedAssetTypes.codeAssets)) {

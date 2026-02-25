@@ -11,6 +11,7 @@ import '../../base/common.dart' show throwToolExit;
 import '../../build_info.dart'
     show
         AndroidArch,
+        BuildMode,
         DarwinArch,
         EnvironmentType,
         TargetPlatform,
@@ -57,24 +58,26 @@ sealed class AssetBuildTarget {
   /// It needs access to other parameters such as the [fileSystem] or
   /// [environmentDefines] to retrieve options for some of the targets.
   ///
-  /// When building for Linux, [nativeBuildDirectory] should point to the CMake
-  /// build (e.g. `build/linux/x64/release/`).
+  /// When building for Linux, [buildDirectory] should point to the build
+  /// directory of the app (e.g. `build/`). It is used to infer configured
+  /// compilers by reading `CMakeCache.txt`.
   static List<AssetBuildTarget> targetsFor({
     required TargetPlatform targetPlatform,
+    required BuildMode buildMode,
     required Map<String, String> environmentDefines,
     required FileSystem fileSystem,
     required List<SupportedAssetTypes> supportedAssetTypes,
-    required Directory? nativeBuildDirectory,
+    required Directory? buildDirectory,
   }) {
     switch (targetPlatform) {
       case TargetPlatform.windows_x64:
         return _windowsTarget(supportedAssetTypes, Architecture.x64);
       case TargetPlatform.linux_x64:
-        return _linuxTarget(supportedAssetTypes, Architecture.x64, nativeBuildDirectory);
+        return _linuxTarget(supportedAssetTypes, Architecture.x64, buildMode, buildDirectory);
       case TargetPlatform.linux_arm64:
-        return _linuxTarget(supportedAssetTypes, Architecture.arm64, nativeBuildDirectory);
+        return _linuxTarget(supportedAssetTypes, Architecture.arm64, buildMode, buildDirectory);
       case TargetPlatform.linux_riscv64:
-        return _linuxTarget(supportedAssetTypes, Architecture.riscv64, nativeBuildDirectory);
+        return _linuxTarget(supportedAssetTypes, Architecture.riscv64, buildMode, buildDirectory);
       case TargetPlatform.windows_arm64:
         return _windowsTarget(supportedAssetTypes, Architecture.arm64);
       case TargetPlatform.darwin:
@@ -100,13 +103,22 @@ sealed class AssetBuildTarget {
   static List<AssetBuildTarget> _linuxTarget(
     List<SupportedAssetTypes> supportedAssetTypes,
     Architecture architecture,
-    Directory? nativeBuildDirectory,
+    BuildMode buildMode,
+    Directory? buildDirectory,
   ) {
+    Directory? cmakeBuildDirectory;
+    if (buildDirectory != null) {
+      cmakeBuildDirectory = buildDirectory
+          .childDirectory('linux')
+          .childDirectory(architecture.name)
+          .childDirectory(buildMode.cliName);
+    }
+
     return <AssetBuildTarget>[
       LinuxAssetTarget(
         architecture: architecture,
         supportedAssetTypes: supportedAssetTypes,
-        cmakeBuildDirectory: nativeBuildDirectory,
+        cmakeBuildDirectory: cmakeBuildDirectory,
       ),
     ];
   }
