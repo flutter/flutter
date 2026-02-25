@@ -121,6 +121,7 @@ G_DEFINE_TYPE_WITH_CODE(
     G_TYPE_OBJECT,
     G_IMPLEMENT_INTERFACE(fl_plugin_registry_get_type(),
                           fl_engine_plugin_registry_iface_init))
+
 enum { PROP_0, PROP_BINARY_MESSENGER, PROP_LAST };
 
 // Parse a locale into its components.
