@@ -604,7 +604,7 @@ class UnlabeledLeafNodeEvaluation extends AccessibilityEvaluation {
 
   List<Violation> _traverse(SemanticsNode node) {
     final violations = <Violation>[];
-    bool hasChildren = false;
+    var hasChildren = false;
     node.visitChildren((SemanticsNode child) {
       hasChildren = true;
       violations.addAll(_traverse(child));
