@@ -11,6 +11,7 @@ import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.api.ApkVariant
 import com.android.build.gradle.tasks.PackageAndroidArtifact
 import com.android.build.gradle.tasks.ProcessAndroidResources
+import com.flutter.gradle.FlutterPluginConstants.PLATFORM_ABI_LIST
 import com.flutter.gradle.FlutterPluginUtils.readPropertiesIfExist
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.FlutterTask
@@ -133,51 +134,6 @@ class FlutterPlugin : Plugin<Project> {
 
         this.addFlutterTasks(project)
 
-        // By default, assembling APKs generates fat APKs if multiple platforms are passed.
-        // Configuring split per ABI allows to generate separate APKs for each abi.
-        // This is a noop when building a bundle.
-        if (FlutterPluginUtils.shouldProjectSplitPerAbi(project)) {
-            FlutterPluginUtils.getAndroidExtension(project).splits.abi {
-                isEnable = true
-                reset()
-                isUniversalApk = false
-            }
-        } else {
-            // When splits-per-abi is NOT enabled, configure abiFilters to control which
-            // native libraries are included in the APK.
-            //
-            // This is crucial: If a project includes third-party dependencies with x86 native libraries,
-            // without these abiFilters, Google Play would incorrectly identify the app as supporting x86.
-            // When users with x86 devices install the app, it would crash at runtime because Flutter's
-            // native libraries aren't available for x86. By filtering out x86 at build time, Google Play
-            // correctly excludes x86 devices from the compatible device list.
-            //
-            // NOTE: This code does NOT affect "add-to-app" scenarios because:
-            // 1. For 'flutter build aar': abiFilters have no effect since libflutter.so and libapp.so
-            //    are not packaged into AAR artifacts - they are only added as dependencies
-            //    in pom files.
-            // 2. For project dependencies (implementation(project(":flutter"))): The Flutter
-            //    Gradle Plugin is not applied to the main app subproject, so this apply()
-            //    method is never called.
-            //
-            // abiFilters cannot be added to templates because it would break builds when
-            // --splits-per-abi is used due to conflicting configuration. This approach
-            // adds them programmatically only when splits are not configured.
-            //
-            // If the user has specified abiFilters in their build.gradle file, those
-            // settings will take precedence over these defaults.
-            if (!FlutterPluginUtils.shouldProjectDisableAbiFiltering(project)) {
-                FlutterPluginUtils.getAndroidExtension(project).buildTypes.forEach { buildType ->
-                    buildType.ndk.abiFilters.clear()
-                    FlutterPluginConstants.DEFAULT_PLATFORMS.forEach { platform ->
-                        val abiValue: String =
-                            FlutterPluginConstants.PLATFORM_ARCH_MAP[platform]
-                                ?: throw GradleException("Invalid platform: $platform")
-                        buildType.ndk.abiFilters.add(abiValue)
-                    }
-                }
-            }
-        }
         val propDeferredComponentNames = "deferred-component-names"
         val deferredComponentNamesValue: String? =
             project.findProperty(propDeferredComponentNames) as? String
@@ -187,10 +143,8 @@ class FlutterPlugin : Plugin<Project> {
                     .split(',')
                     .map { ":$it" }
                     .toSet()
-            // TODO(gmackall): Unify the types we use for the android extension. This is yet
-            //   another type we need unfortunately.
             val androidExtensionAsApplicationExtension =
-                project.extensions.getByType(ApplicationExtension::class.java)
+                FlutterPluginUtils.getAndroidApplicationExtension(project)
             // TODO(gmackall): Should we clear here? I think this is equivalent to what we used to
             //    do, but unsure. Can't use a closure.
             androidExtensionAsApplicationExtension.dynamicFeatures.clear()
@@ -361,6 +315,7 @@ class FlutterPlugin : Plugin<Project> {
         val targetPlatforms: List<String> =
             FlutterPluginUtils.getTargetPlatforms(projectToAddTasksTo)
 
+        // TODO(reidbaker): Migrate to getAndroidApplicationExtension and getAndroidLibraryExtension.
         val androidExtension = FlutterPluginUtils.getAndroidExtension(projectToAddTasksTo)
         androidExtension.sourceSets.all {
             val sourceSet = this
@@ -374,7 +329,8 @@ class FlutterPlugin : Plugin<Project> {
         val flutterPlugin = this
 
         if (FlutterPluginUtils.isFlutterAppProject(projectToAddTasksTo)) {
-            // TODO(gmackall): I think this can be BaseExtension, with findByType.
+            val appExtension = FlutterPluginUtils.getAndroidApplicationExtension(projectToAddTasksTo)
+            configureAbis(projectToAddTasksTo, appExtension)
             val android: AbstractAppExtension =
                 projectToAddTasksTo.extensions.findByName("android") as AbstractAppExtension
             android.applicationVariants.configureEach {
@@ -549,6 +505,65 @@ class FlutterPlugin : Plugin<Project> {
          * to match.
          */
         private const val FLUTTER_BUILD_PREFIX: String = "flutterBuild"
+
+        /**
+         * Configures flutter default abi support respecting flutter command line flags.
+         */
+        private fun configureAbis(
+            projectToAddTasksTo: Project,
+            androidExtension: ApplicationExtension
+        ) {
+            // By default, assembling APKs generates fat APKs if multiple platforms are passed.
+            // Configuring split per ABI allows to generate separate APKs for each abi.
+            // This is a noop when building a bundle.
+            if (FlutterPluginUtils.shouldProjectSplitPerAbi(projectToAddTasksTo)) {
+                androidExtension.splits.abi {
+                    isEnable = true
+                    reset()
+                    isUniversalApk = false
+                }
+            } else {
+                // When splits-per-abi is NOT enabled, configure abiFilters to control which
+                // native libraries are included in the APK.
+                //
+                //  If a project includes third-party dependencies with x86 native libraries,
+                // without these abiFilters, Google Play would incorrectly identify the app as supporting x86.
+                // When users with x86 devices install the app, it would crash at runtime because Flutter's
+                // native libraries aren't available for x86. By filtering out x86 at build time, Google Play
+                // correctly excludes x86 devices from the compatible device list.
+                //
+                // This code does NOT affect "add-to-app" scenarios because:
+                // 1. For 'flutter build aar': abiFilters have no effect since libflutter.so and libapp.so
+                //    are not packaged into AAR artifacts - they are only added as dependencies
+                //    in pom files.
+                // 2. For project dependencies (implementation(project(":flutter"))): The Flutter
+                //    Gradle Plugin is not applied to the main app subproject, so this apply()
+                //    method is never called.
+                //
+                // abiFilters cannot be added to templates because it would break builds when
+                // --splits-per-abi is used due to conflicting configuration. This approach
+                // adds them programmatically only when splits are not configured.
+                //
+                // If the user has specified abiFilters in their build.gradle file's DefaultConfig,
+                // those settings will take precedence over these defaults.
+                configureAbiWithoutSplits(projectToAddTasksTo, androidExtension)
+            }
+        }
+
+        /**
+         * Clears existing abi configuration and sets ABI's supported by flutter.
+         */
+        private fun configureAbiWithoutSplits(
+            projectToAddTasksTo: Project,
+            extension: ApplicationExtension
+        ) {
+            if (!FlutterPluginUtils.shouldProjectDisableAbiFiltering(projectToAddTasksTo)) {
+                extension.defaultConfig.ndk {
+                    abiFilters.clear()
+                    abiFilters.addAll(PLATFORM_ABI_LIST)
+                }
+            }
+        }
 
         /**
          * Finds a task by name, returning null if the task does not exist.
