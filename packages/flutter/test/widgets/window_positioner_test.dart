@@ -11,20 +11,20 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('WindowPositioner.toString', () {
     expect(
-      WindowPositioner(
+      const WindowPositioner(
         parentAnchor: WindowPositionerAnchor.topLeft,
         childAnchor: WindowPositionerAnchor.bottomRight,
         offset: Offset(1.2, 3.4),
-        constraintAdjustment: const WindowPositionerConstraintAdjustment(
-          flipX: false,
+        constraintAdjustment: WindowPositionerConstraintAdjustment(
+          flipX: true,
           flipY: true,
           slideX: true,
-          slideY: false,
+          slideY: true,
           resizeX: true,
           resizeY: true,
         ),
       ).toString(),
-      "WindowPositioner(parentAnchor: WindowPositionerAnchor.topLeft, childAnchor: WindowPositionerAnchor.bottomRight, offset: Offset(1.2, 3.4), constraintAdjustment: WindowPositionerConstraintAdjustment(flipX: false, flipY: true, slideX: true, slideY: false, resizeX: true, resizeY: true)",
+      'WindowPositioner(parentAnchor: WindowPositionerAnchor.topLeft, childAnchor: WindowPositionerAnchor.bottomRight, offset: Offset(1.2, 3.4), constraintAdjustment: WindowPositionerConstraintAdjustment(flipX: true, flipY: true, slideX: true, slideY: true, resizeX: true, resizeY: true))',
     );
   });
 
