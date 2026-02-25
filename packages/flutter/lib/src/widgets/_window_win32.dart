@@ -206,6 +206,18 @@ class WindowingOwnerWin32 extends WindowingOwner {
     throw UnimplementedError('Popup windows are not yet implemented on Windows.');
   }
 
+  @internal
+  @override
+  SatelliteWindowController createSatelliteWindowController({
+    required SatelliteWindowControllerDelegate delegate,
+    required BaseWindowController parent,
+    Size? preferredSize,
+    BoxConstraints? preferredConstraints,
+    String? title,
+  }) {
+    throw UnimplementedError('Satellite windows are not yet implement on Windows.');
+  }
+
   /// Register a new [WindowsMessageHandler].
   ///
   /// The handler will be triggered for unhandled messages for all top level
