@@ -584,3 +584,58 @@ Iterable<Element> _collectElementsByText(Element root, String text) {
   });
   return result;
 }
+
+/// {@macro flutter.widgets.accessibility_evaluations.internal}
+///
+/// An evaluation which enforces that all leaf semantics nodes have a label,
+/// value, hint, or tooltip.
+@internal
+class UnlabeledLeafNodeEvaluation extends AccessibilityEvaluation {
+  const UnlabeledLeafNodeEvaluation();
+
+  @override
+  FutureOr<EvaluationResult> _evaluate(WidgetsBinding binding) {
+    final violations = <Violation>[];
+    for (final RenderView view in binding.renderViews) {
+      violations.addAll(_traverse(view.owner!.semanticsOwner!.rootSemanticsNode!));
+    }
+    return EvaluationResult(violations);
+  }
+
+  List<Violation> _traverse(SemanticsNode node) {
+    final violations = <Violation>[];
+    bool hasChildren = false;
+    node.visitChildren((SemanticsNode child) {
+      hasChildren = true;
+      violations.addAll(_traverse(child));
+      return true;
+    });
+
+    if (node.isMergedIntoParent ||
+        node.isInvisible ||
+        node.flagsCollection.isHidden) {
+      return violations;
+    }
+
+    // If not merging descendants and has children, it's not a leaf.
+    if (hasChildren && !node.mergeAllDescendantsIntoThisNode) {
+      return violations;
+    }
+
+    final SemanticsData data = node.getSemanticsData();
+    if (data.label.trim().isEmpty &&
+        data.value.trim().isEmpty &&
+        data.hint.trim().isEmpty &&
+        data.tooltip.trim().isEmpty) {
+      violations.add(
+        Violation(
+          node,
+          '$node: expected leaf semantics node to have a label, value, hint, or tooltip, '
+          'but none was found.',
+        ),
+      );
+    }
+
+    return violations;
+  }
+}

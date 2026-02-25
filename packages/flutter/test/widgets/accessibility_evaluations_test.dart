@@ -180,4 +180,121 @@ void main() {
       handle.dispose();
     });
   });
+
+  group('UnlabeledLeafNodeEvaluation', () {
+    late final Set<String> originalFeatureFlags;
+    setUpAll(() {
+      originalFeatureFlags = {...debugEnabledFeatureFlags};
+      debugEnabledFeatureFlags.add('accessibility_evaluations');
+    });
+    tearDownAll(() {
+      debugEnabledFeatureFlags.clear();
+      debugEnabledFeatureFlags.addAll(originalFeatureFlags);
+    });
+
+    const evaluation = UnlabeledLeafNodeEvaluation();
+
+    testWidgets('Passes if node has label', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Semantics(
+            container: true,
+            label: 'test',
+            child: const SizedBox(width: 10.0, height: 10.0),
+          ),
+        ),
+      );
+      final EvaluationResult result = await evaluation.evaluate(tester.binding);
+      expect(result.violations, isEmpty); // Should pass
+      handle.dispose();
+    });
+
+    testWidgets('Passes if node has tooltip', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Semantics(
+            container: true,
+            tooltip: 'test',
+            child: const SizedBox(width: 10.0, height: 10.0),
+          ),
+        ),
+      );
+      final EvaluationResult result = await evaluation.evaluate(tester.binding);
+      expect(result.violations, isEmpty); // Should pass
+      handle.dispose();
+    });
+
+    testWidgets('Fails if node has no label', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Semantics(container: true, child: const SizedBox(width: 10.0, height: 10.0)),
+        ),
+      );
+      final EvaluationResult result = await evaluation.evaluate(tester.binding);
+      expect(result.violations, hasLength(1));
+      expect(
+        result.violations.first.reason,
+        contains('expected leaf semantics node to have a label'),
+      );
+      handle.dispose();
+    });
+
+    testWidgets('Passes if node is not a leaf', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Semantics(
+            container: true,
+            child: Column(
+              children: <Widget>[
+                Semantics(label: 'Child 1', child: const SizedBox(width: 10, height: 10)),
+              ],
+            ),
+          ),
+        ),
+      );
+      final EvaluationResult result = await evaluation.evaluate(tester.binding);
+      expect(result.violations, isEmpty); // Should pass
+      handle.dispose();
+    });
+
+    testWidgets('Passes if node merges descendants', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: MergeSemantics(
+            child: Column(
+              children: <Widget>[
+                Semantics(label: 'Child 1', child: const SizedBox(width: 10, height: 10)),
+              ],
+            ),
+          ),
+        ),
+      );
+      final EvaluationResult result = await evaluation.evaluate(tester.binding);
+      expect(result.violations, isEmpty); // Should pass (merged node has label from child)
+      handle.dispose();
+    });
+
+    testWidgets('Fails if node merges descendants but has no label', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: MergeSemantics(
+            child: Semantics(container: true, child: const SizedBox(width: 10, height: 10)),
+          ),
+        ),
+      );
+      final EvaluationResult result = await evaluation.evaluate(tester.binding);
+      expect(result.violations, hasLength(1));
+      expect(
+        result.violations.first.reason,
+        contains('expected leaf semantics node to have a label'),
+      );
+      handle.dispose();
+    });
+  });
 }
