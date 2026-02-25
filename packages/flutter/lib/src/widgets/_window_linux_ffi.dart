@@ -12,7 +12,7 @@ import 'dart:ui';
 const int _kMaxWindowDimensions = 0x7fffffff;
 
 const int GTK_WINDOW_TOPLEVEL = 0;
-const int GTK_WINDOW_POPUP = 0;
+const int GTK_WINDOW_POPUP = 1;
 
 const int GDK_GRAVITY_NORTH_WEST = 1;
 const int GDK_GRAVITY_NORTH = 2;
