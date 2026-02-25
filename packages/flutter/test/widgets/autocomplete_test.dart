@@ -3790,6 +3790,9 @@ void main() {
     final controller = TextEditingController();
     final focusNode = FocusNode();
 
+    addTearDown(controller.dispose);
+    addTearDown(focusNode.dispose);
+
     await tester.pumpWidget(
       TestWidgetsApp(
         home: RawAutocomplete<String>(
