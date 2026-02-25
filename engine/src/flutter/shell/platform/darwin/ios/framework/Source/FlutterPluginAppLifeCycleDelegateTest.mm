@@ -110,7 +110,7 @@ FLUTTER_ASSERT_ARC
     [self.container addDelegate:[[FakePlugin alloc] init]];
   } else {
     // Case 2: Remove itself during the loop over _delegates
-    [self.container removeDelegate:self];
+    [(id)self.container removeDelegate:self];
   }
   return YES;
 }
@@ -607,12 +607,12 @@ FLUTTER_ASSERT_ARC
   MutatingDelegate* mutatingDelegate = [[MutatingDelegate alloc] init];
   mutatingDelegate.container = delegate;
   mutatingDelegate.shouldAdd = YES;  // Add Mode
-  
+
   [delegate addDelegate:mutatingDelegate];
   // Without the fix [_delegates allObjects], this crashes with NSGenericException
   BOOL result = [delegate application:[UIApplication sharedApplication]
-        didFinishLaunchingWithOptions:nil];
-        
+        didFinishLaunchingWithOptions:@{}];
+
   XCTAssertTrue(result);
 }
 
@@ -621,13 +621,13 @@ FLUTTER_ASSERT_ARC
   MutatingDelegate* mutatingDelegate = [[MutatingDelegate alloc] init];
   mutatingDelegate.container = delegate;
   mutatingDelegate.shouldAdd = NO;  // Delete Mode
-  
+
   [delegate addDelegate:mutatingDelegate];
   // Without the fix [_delegates allObjects], this crashes because the _delegates collection is
   // modify during the loop
   BOOL result = [delegate application:[UIApplication sharedApplication]
-        didFinishLaunchingWithOptions:nil];
-        
+        didFinishLaunchingWithOptions:@{}];
+
   XCTAssertTrue(result);
 }
 
