@@ -434,22 +434,25 @@ class OutlineInputBorder extends InputBorder {
   @override
   bool get preferPaintInterior => true;
 
-  Path _gapBorderPath(Canvas canvas, RRect center, double outerWidth, double start, double extent) {
-    // When the corner radii on any side add up to be greater than the
-    // given height, each radius has to be scaled to not exceed the
-    // size of the width/height of the RRect.
-    final RRect scaledRRect = center.scaleRadii();
-
+  Path _gapBorderPath(
+    Canvas canvas,
+    RRect scaledRRect,
+    double start,
+    double extent,
+    double gapPercentage,
+  ) {
+    final double tlRadiusX = scaledRRect.tlRadiusX;
+    final double trRadiusX = scaledRRect.trRadiusX;
     final tlCorner = Rect.fromLTWH(
       scaledRRect.left,
       scaledRRect.top,
-      scaledRRect.tlRadiusX * 2.0,
+      tlRadiusX * 2.0,
       scaledRRect.tlRadiusY * 2.0,
     );
     final trCorner = Rect.fromLTWH(
-      scaledRRect.right - scaledRRect.trRadiusX * 2.0,
+      scaledRRect.right - trRadiusX * 2.0,
       scaledRRect.top,
-      scaledRRect.trRadiusX * 2.0,
+      trRadiusX * 2.0,
       scaledRRect.trRadiusY * 2.0,
     );
     final brCorner = Rect.fromLTWH(
@@ -473,7 +476,7 @@ class OutlineInputBorder extends InputBorder {
     // Top left corner
     if (scaledRRect.tlRadius != Radius.zero) {
       final double tlCornerArcSweep = math.acos(
-        clampDouble(1 - start / scaledRRect.tlRadiusX, 0.0, 1.0),
+        clampDouble((1 - start / tlRadiusX) * gapPercentage, 0.0, 1.0),
       );
       path.addArc(tlCorner, math.pi, tlCornerArcSweep);
     } else {
@@ -483,23 +486,25 @@ class OutlineInputBorder extends InputBorder {
     }
 
     // Draw top border from top left corner to gap start.
-    if (start > scaledRRect.tlRadiusX) {
+    if (start > tlRadiusX) {
       path.lineTo(start, scaledRRect.top);
     }
 
     // Draw top border from gap end to top right corner and draw top right corner.
     const double trCornerArcStart = (3 * math.pi) / 2.0;
-    const trCornerArcSweep = cornerArcSweep;
-    if (start + extent < outerWidth - scaledRRect.trRadiusX) {
-      path.moveTo(start + extent, scaledRRect.top);
-      path.lineTo(scaledRRect.right - scaledRRect.trRadiusX, scaledRRect.top);
+    if (start + extent < scaledRRect.width - trRadiusX) {
+      path.moveTo(
+        scaledRRect.left + trRadiusX * (1 - gapPercentage) + start + extent,
+        scaledRRect.top,
+      );
+      path.lineTo(scaledRRect.right - trRadiusX, scaledRRect.top);
       if (scaledRRect.trRadius != Radius.zero) {
-        path.addArc(trCorner, trCornerArcStart, trCornerArcSweep);
+        path.addArc(trCorner, trCornerArcStart, cornerArcSweep);
       }
-    } else if (start + extent < outerWidth) {
-      final double dx = outerWidth - (start + extent);
-      final double sweep = math.asin(clampDouble(1 - dx / scaledRRect.trRadiusX, 0.0, 1.0));
-      path.addArc(trCorner, trCornerArcStart + sweep, trCornerArcSweep - sweep);
+    } else if (start + extent < scaledRRect.width) {
+      final double dx = scaledRRect.width - (start + extent);
+      final double sweep = math.asin(clampDouble((1 - dx / trRadiusX) * gapPercentage, 0.0, 1.0));
+      path.addArc(trCorner, trCornerArcStart + sweep, cornerArcSweep - sweep);
     }
 
     // Draw right border and bottom right corner.
@@ -549,12 +554,22 @@ class OutlineInputBorder extends InputBorder {
     if (gapStart == null || gapExtent <= 0.0 || gapPercentage == 0.0) {
       canvas.drawRRect(center, paint);
     } else {
+      // When the corner radii on any side add up to be greater than the
+      // given height, each radius has to be scaled to not exceed the
+      // size of the width/height of the RRect.
+      final RRect scaledRRect = center.scaleRadii();
       final double extent = lerpDouble(0.0, gapExtent + gapPadding * 2.0, gapPercentage)!;
       final double start = switch (textDirection!) {
         TextDirection.rtl => gapStart + gapPadding - extent,
         TextDirection.ltr => gapStart - gapPadding,
       };
-      final Path path = _gapBorderPath(canvas, center, outer.width, math.max(0.0, start), extent);
+      final Path path = _gapBorderPath(
+        canvas,
+        scaledRRect,
+        start * gapPercentage,
+        extent,
+        gapPercentage,
+      );
       canvas.drawPath(path, paint);
     }
   }
