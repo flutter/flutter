@@ -1188,7 +1188,70 @@ Information about project "Runner":
       }
 
       testUsingContext(
-        'prints Warning when a plugin excludes arm64 on Xcode 26+',
+        'excludes arm64 simulator when build setting fetch fails',
+        () async {
+          const BuildInfo buildInfo = BuildInfo.debug;
+
+          final Directory projectDir = fs.directory('path/to/project')..createSync(recursive: true);
+          projectDir.childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('name: my_app\n');
+
+          final FlutterProject project = FlutterProject.fromDirectoryTest(projectDir);
+
+          final Directory podXcodeProject =
+              project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
+                ..createSync(recursive: true);
+          project.ios.podManifestLock.createSync(recursive: true);
+
+          final String buildDirectory = fs.path.absolute('build', 'ios');
+
+          fakeProcessManager.addCommands(<FakeCommand>[
+            kWhichSysctlCommand,
+            kARMCheckCommand,
+            FakeCommand(
+              command: <String>[
+                '/usr/bin/arch',
+                '-arm64e',
+                'xcrun',
+                'xcodebuild',
+                '-alltargets',
+                '-sdk',
+                'iphonesimulator',
+                '-project',
+                podXcodeProject.path,
+                '-showBuildSettings',
+                'BUILD_DIR=$buildDirectory',
+                'OBJROOT=$buildDirectory',
+              ],
+              exitCode: 1,
+            ),
+          ]);
+
+          await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+
+          final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+          expect(
+            config.readAsStringSync(),
+            contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386 arm64'),
+          );
+          expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7'));
+        },
+        overrides: <Type, Generator>{
+          Artifacts: () => localIosArtifacts,
+          Platform: () => macOS,
+          FileSystem: () => fs,
+          ProcessManager: () => fakeProcessManager,
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+          Xcode: () => xcode,
+          Logger: () => logger,
+        },
+      );
+
+      testUsingContext(
+        'prints Warning when a plugin or transitive dependency excludes arm64 on Xcode 26+',
         () async {
           const BuildInfo buildInfo = BuildInfo.debug;
 
@@ -1230,22 +1293,60 @@ Information about project "Runner":
 Build settings for action build and target bad_plugin:
     EXCLUDED_ARCHS = i386 arm64
 
+Build settings for action build and target BadPluginPodDependency:
+    EXCLUDED_ARCHS = i386 arm64
+
+Build settings for action build and target SecondPodDependency:
+    EXCLUDED_ARCHS = i386 arm64
+
+Build settings for action build and target ThirdPodDependency-Sub:
+    EXCLUDED_ARCHS = i386 arm64
+
+Build settings for action build and target FourthPodDependency:
+    EXCLUDED_ARCHS = i386 arm64
+
 Build settings for action build and target good_plugin:
     EXCLUDED_ARCHS = i386
 ''',
             ),
           ]);
 
+          fs.file('path/to/project/ios/Podfile.lock').writeAsStringSync('''
+PODS:
+  - good_plugin (1.0.0):
+    - Flutter
+  - bad_plugin (1.0.0):
+    - Flutter
+    - BadPluginPodDependency
+  - BadPluginPodDependency (1.0.0):
+    - SecondPodDependency/Sub
+  - SecondPodDependency/Sub (1.0.0):
+    - ThirdPodDependency
+  - ThirdPodDependency (1.0.0):
+  - FourthPodDependency (1.0.0):
+''');
           await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
 
           expect(
             logger.warningText,
             contains(
-              'The following plugin(s) are excluding the arm64 architecture, which is a requirement for Xcode 26+',
+              'The following target(s) do not support arm64 architecture, which is a requirement for '
+              'Apple Silicon iOS 26+ simulators:\n'
+              '  - bad_plugin (Flutter plugin)\n'
+              '  - BadPluginPodDependency (transitive dependency of Flutter plugin bad_plugin)\n'
+              '  - SecondPodDependency (transitive dependency of Flutter plugin bad_plugin)\n'
+              '  - ThirdPodDependency-Sub (transitive dependency of Flutter plugin bad_plugin)\n'
+              '  - FourthPodDependency\n',
             ),
           );
-          expect(logger.warningText, contains('bad_plugin'));
           expect(fakeProcessManager, hasNoRemainingExpectations);
+
+          final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+          expect(
+            config.readAsStringSync(),
+            contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386 arm64'),
+          );
+          expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7'));
         },
         overrides: <Type, Generator>{
           Artifacts: () => localIosArtifacts,
@@ -1257,8 +1358,9 @@ Build settings for action build and target good_plugin:
           Logger: () => logger,
         },
       );
+
       testUsingContext(
-        'succeeds when no plugins exclude arm64 on Xcode 26+',
+        'does not exclude arm64 simulator when supported by all plugins',
         () async {
           const BuildInfo buildInfo = BuildInfo.debug;
 
@@ -1304,6 +1406,7 @@ Build settings for action build and target good_plugin:
           await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
 
           final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+          expect(logger.warningText, isEmpty);
           expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386'));
           expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7'));
           expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -1338,7 +1441,6 @@ Build settings for action build and target good_plugin:
           createFakePlugins(project, fs, <String>['good_plugin']);
 
           final String buildDirectory = fs.path.absolute('build', 'ios');
-          final testLogger = BufferLogger.test();
 
           fakeProcessManager.addCommands(<FakeCommand>[
             kWhichSysctlCommand,
@@ -1367,7 +1469,10 @@ Build settings for action build and target good_plugin:
 
           await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
 
-          expect(testLogger.warningText, isEmpty);
+          final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+          expect(logger.warningText, isEmpty);
+          expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386'));
+          expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7'));
           expect(fakeProcessManager, hasNoRemainingExpectations);
         },
         overrides: <Type, Generator>{
@@ -1432,11 +1537,15 @@ Build settings for action build and target bad_plugin:
           expect(
             logger.warningText,
             contains(
-              'The following plugin(s) are excluding the arm64 architecture, which is a requirement for Xcode 26+',
+              'The following target(s) do not support arm64 architecture, which is a requirement for '
+              'Apple Silicon iOS 26+ simulators:',
             ),
           );
           expect(logger.warningText, contains('bad_plugin'));
           expect(fakeProcessManager, hasNoRemainingExpectations);
+          final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+          expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386'));
+          expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7'));
         },
         overrides: <Type, Generator>{
           Artifacts: () => localIosArtifacts,
@@ -1450,8 +1559,16 @@ Build settings for action build and target bad_plugin:
       );
 
       testUsingContext(
-        'ignores non-plugin targets that exclude arm64',
+        'does not print warning on Xcode < 26',
         () async {
+          xcodeProjectInterpreter = XcodeProjectInterpreter.test(
+            processManager: fakeProcessManager,
+            version: Version(16, 0, 0),
+          );
+          xcode = Xcode.test(
+            processManager: fakeProcessManager,
+            xcodeProjectInterpreter: xcodeProjectInterpreter,
+          );
           const BuildInfo buildInfo = BuildInfo.debug;
 
           final Directory projectDir = fs.directory('path/to/project')..createSync(recursive: true);
@@ -1466,10 +1583,9 @@ Build settings for action build and target bad_plugin:
                 ..createSync(recursive: true);
           project.ios.podManifestLock.createSync(recursive: true);
 
-          createFakePlugins(project, fs, <String>['good_plugin']);
+          createFakePlugins(project, fs, <String>['bad_plugin', 'good_plugin']);
 
           final String buildDirectory = fs.path.absolute('build', 'ios');
-          final testLogger = BufferLogger.test();
 
           fakeProcessManager.addCommands(<FakeCommand>[
             kWhichSysctlCommand,
@@ -1490,8 +1606,20 @@ Build settings for action build and target bad_plugin:
                 'OBJROOT=$buildDirectory',
               ],
               stdout: '''
-Build settings for action build and target SomeNonPluginTarget:
-    EXCLUDED_ARCHS = arm64
+Build settings for action build and target bad_plugin:
+    EXCLUDED_ARCHS = i386 arm64
+
+Build settings for action build and target BadPluginPodDependency:
+    EXCLUDED_ARCHS = i386 arm64
+
+Build settings for action build and target SecondPodDependency:
+    EXCLUDED_ARCHS = i386 arm64
+
+Build settings for action build and target ThirdPodDependency-Sub:
+    EXCLUDED_ARCHS = i386 arm64
+
+Build settings for action build and target FourthPodDependency:
+    EXCLUDED_ARCHS = i386 arm64
 
 Build settings for action build and target good_plugin:
     EXCLUDED_ARCHS = i386
@@ -1499,49 +1627,31 @@ Build settings for action build and target good_plugin:
             ),
           ]);
 
+          fs.file('path/to/project/ios/Podfile.lock').writeAsStringSync('''
+PODS:
+  - good_plugin (1.0.0):
+    - Flutter
+  - bad_plugin (1.0.0):
+    - Flutter
+    - BadPluginPodDependency
+  - BadPluginPodDependency (1.0.0):
+    - SecondPodDependency/Sub
+  - SecondPodDependency/Sub (1.0.0):
+    - ThirdPodDependency
+  - ThirdPodDependency (1.0.0):
+  - FourthPodDependency (1.0.0):
+''');
           await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
 
-          expect(testLogger.warningText, isEmpty);
+          expect(logger.warningText, isEmpty);
           expect(fakeProcessManager, hasNoRemainingExpectations);
-        },
-        overrides: <Type, Generator>{
-          Artifacts: () => localIosArtifacts,
-          Platform: () => macOS,
-          FileSystem: () => fs,
-          ProcessManager: () => fakeProcessManager,
-          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
-          Xcode: () => xcode,
-          Logger: () => BufferLogger.test(),
-        },
-      );
-
-      testUsingContext(
-        'succeeds and skips check on Xcode 16 even if a plugin excludes arm64',
-        () async {
-          xcodeProjectInterpreter = XcodeProjectInterpreter.test(
-            processManager: fakeProcessManager,
-            version: Version(16, 0, 0),
-          );
-          xcode = Xcode.test(
-            processManager: fakeProcessManager,
-            xcodeProjectInterpreter: xcodeProjectInterpreter,
-          );
-
-          const BuildInfo buildInfo = BuildInfo.debug;
-          final FlutterProject project = FlutterProject.fromDirectoryTest(
-            fs.directory('path/to/project'),
-          );
-          project.ios.hostAppRoot
-              .childDirectory('Pods')
-              .childDirectory('Pods.xcodeproj')
-              .createSync(recursive: true);
-
-          await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
 
           final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
-          expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386'));
+          expect(
+            config.readAsStringSync(),
+            contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386 arm64'),
+          );
           expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7'));
-          expect(fakeProcessManager, hasNoRemainingExpectations);
         },
         overrides: <Type, Generator>{
           Artifacts: () => localIosArtifacts,
