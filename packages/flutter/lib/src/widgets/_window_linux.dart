@@ -610,7 +610,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
   int _anchorToGravity(WindowPositionerAnchor anchor) {
     switch (anchor) {
       case WindowPositionerAnchor.center:
-        return 0; // FIXME
+        return GDK_GRAVITY_CENTER;
       case WindowPositionerAnchor.top:
         return GDK_GRAVITY_NORTH;
       case WindowPositionerAnchor.bottom:
