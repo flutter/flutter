@@ -631,7 +631,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
   }
 
   int _constraintAdjustmentToHints(WindowPositionerConstraintAdjustment adjustment) {
-    int hints = 0;
+    var hints = 0;
     if (adjustment.flipX) {
       hints |= GDK_ANCHOR_FLIP_X;
     }
