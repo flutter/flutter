@@ -171,8 +171,8 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
   // -[UIApplication application:continueUserActivity:restorationHandler:]
   // method.
   if (_state < AppLifecycleDidLaunchSent && ![self application:application
-          didFinishLaunchingWithOptions:convertedLaunchOptions
-                     isFallbackForScene:YES]) {
+                                                didFinishLaunchingWithOptions:convertedLaunchOptions
+                                                           isFallbackForScene:YES]) {
     return NO;
   }
 
@@ -203,17 +203,17 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
   if (_state >= AppLifecycleDidLaunchSent && !isFallback) {
     return YES;
   }
-    for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
-      if (!delegate || (isFallback && [self pluginSupportsSceneLifecycle:delegate])) {
-        continue;
-      }
-      if ([delegate respondsToSelector:@selector(application:didFinishLaunchingWithOptions:)]) {
-        _state = AppLifecycleDidLaunchSent;
-        if (![delegate application:application didFinishLaunchingWithOptions:launchOptions]) {
-          return NO;
-        }
+  for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
+    if (!delegate || (isFallback && [self pluginSupportsSceneLifecycle:delegate])) {
+      continue;
+    }
+    if ([delegate respondsToSelector:@selector(application:didFinishLaunchingWithOptions:)]) {
+      _state = AppLifecycleDidLaunchSent;
+      if (![delegate application:application didFinishLaunchingWithOptions:launchOptions]) {
+        return NO;
       }
     }
+  }
   return YES;
 }
 
