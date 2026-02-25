@@ -9,6 +9,25 @@ import 'package:flutter/src/widgets/_window_positioner.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('WindowPositioner.toString', () {
+    expect(
+      WindowPositioner(
+        parentAnchor: WindowPositionerAnchor.topLeft,
+        childAnchor: WindowPositionerAnchor.bottomRight,
+        offset: Offset(1.2, 3.4),
+        constraintAdjustment: const WindowPositionerConstraintAdjustment(
+          flipX: false,
+          flipY: true,
+          slideX: true,
+          slideY: false,
+          resizeX: true,
+          resizeY: true,
+        ),
+      ).toString(),
+      "WindowPositioner(parentAnchor: WindowPositionerAnchor.topLeft, childAnchor: WindowPositionerAnchor.bottomRight, offset: Offset(1.2, 3.4), constraintAdjustment: WindowPositionerConstraintAdjustment(flipX: false, flipY: true, slideX: true, slideY: false, resizeX: true, resizeY: true)",
+    );
+  });
+
   group('WindowPlacementTest', () {
     const clientDisplayArea = Rect.fromLTWH(0, 0, 800, 600);
     const clientParentSize = Size(400, 300);
