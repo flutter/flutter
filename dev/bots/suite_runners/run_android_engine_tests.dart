@@ -130,7 +130,8 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
         // This statement is attempting to catch all tests inside of the
         // dev/integration_tests/android_engine_test/lib/hcpp
         // directory, except for upgrade_legacy_pv_types which we already ran.
-        if (!file.path.contains('hcpp') || runFirstTests.any((String name) => file.path.contains(name))) {
+        if (!file.path.contains('hcpp') ||
+            runFirstTests.any((String name) => file.path.contains(name))) {
           continue;
         }
         await runTest(file);
