@@ -90,7 +90,7 @@ Scalar AttractToOne(Scalar x) {
 
 void TextContents::ComputeVertexData(
     VS::PerVertexData* vtx_contents,
-    const Matrix& entity_raw_transorm,
+    const Matrix& entity_transform,
     const std::shared_ptr<TextFrame>& frame,
     Point position,
     const Matrix& screen_transform,
@@ -106,12 +106,12 @@ void TextContents::ComputeVertexData(
   constexpr std::array<Point, 4> unit_points = {Point{0, 0}, Point{1, 0},
                                                 Point{0, 1}, Point{1, 1}};
 
-  Matrix entity_transform =
-      entity_raw_transorm * Matrix::MakeTranslation(position);
+  Matrix entity_offset_transform =
+      entity_transform * Matrix::MakeTranslation(position);
 
   ISize atlas_size = atlas->GetTexture()->GetSize();
-  bool is_translation_scale = entity_transform.IsTranslationScaleOnly();
-  Matrix basis_transform = entity_transform.Basis();
+  bool is_translation_scale = entity_offset_transform.IsTranslationScaleOnly();
+  Matrix basis_transform = entity_offset_transform.Basis();
 
   VS::PerVertexData vtx;
   size_t i = 0u;
@@ -131,7 +131,7 @@ void TextContents::ComputeVertexData(
   unscaled_basis.m[5] = AttractToOne(unscaled_basis.m[5]);
 
   // Compute the device origin of the entire frame.
-  Point screen_offset = (entity_transform * Point(0, 0));
+  Point screen_offset = (entity_offset_transform * Point(0, 0));
 
   for (const TextRun& run : frame->GetRuns()) {
     const Font& font = run.GetFont();
@@ -214,7 +214,7 @@ void TextContents::ComputeVertexData(
         } else {
           Rect scaled_bounds =
               frame_bounds.glyph_bounds.Scale(inverted_rounded_scale);
-          position = entity_transform *
+          position = entity_offset_transform *
                      (glyph_position.position + scaled_bounds.GetLeftTop() +
                       point * scaled_bounds.GetSize());
         }
@@ -306,7 +306,7 @@ bool TextContents::Render(const ContentContext& renderer,
         VS::PerVertexData* vtx_contents =
             reinterpret_cast<VS::PerVertexData*>(data);
         ComputeVertexData(/*vtx_contents=*/vtx_contents,
-                          /*entity_raw_transform=*/entity.GetTransform(),
+                          /*entity_transform=*/entity.GetTransform(),
                           /*frame=*/frame_,
                           /*position=*/position_,
                           /*screen_transform=*/screen_transform_,
