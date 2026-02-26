@@ -956,6 +956,7 @@ void main() {
         var calledStart = false;
         var calledUpdate = false;
         var calledEnd = false;
+        const sizedBox = SizedBox(width: 200.0, height: 200.0);
         await tester.pumpWidget(
           Center(
             child: InteractiveViewer(
@@ -970,12 +971,12 @@ void main() {
               onInteractionEnd: (ScaleEndDetails details) {
                 calledEnd = true;
               },
-              child: const SizedBox(width: 200.0, height: 200.0),
+              child: sizedBox,
             ),
           ),
         );
 
-        final Offset childOffset = tester.getTopLeft(find.byType(SizedBox));
+        final Offset childOffset = tester.getTopLeft(find.byWidget(sizedBox));
         final childInterior = Offset(childOffset.dx + 20.0, childOffset.dy + 20.0);
         TestGesture gesture = await tester.startGesture(childOffset);
 
@@ -1027,6 +1028,7 @@ void main() {
         var calledStart = false;
         var calledUpdate = false;
         var calledEnd = false;
+        const sizedBox = SizedBox(width: 200.0, height: 200.0);
         await tester.pumpWidget(
           Center(
             child: InteractiveViewer(
@@ -1041,12 +1043,12 @@ void main() {
               onInteractionEnd: (ScaleEndDetails details) {
                 calledEnd = true;
               },
-              child: const SizedBox(width: 200.0, height: 200.0),
+              child: sizedBox,
             ),
           ),
         );
 
-        final Offset childOffset = tester.getTopLeft(find.byType(SizedBox));
+        final Offset childOffset = tester.getTopLeft(find.byWidget(sizedBox));
         final childInterior = Offset(childOffset.dx + 20.0, childOffset.dy + 20.0);
         final TestGesture gesture = await tester.startGesture(
           childOffset,
@@ -1940,6 +1942,18 @@ void main() {
       expect(nearestPoint.x, moreOrLessEquals(5.8, epsilon: 0.1));
       expect(nearestPoint.y, moreOrLessEquals(10.8, epsilon: 0.1));
     });
+  });
+
+  testWidgets('InteractiveViewer does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: InteractiveViewer(child: const Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(InteractiveViewer)), Size.zero);
   });
 }
 

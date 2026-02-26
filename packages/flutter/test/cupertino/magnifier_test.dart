@@ -370,4 +370,18 @@ void main() {
     );
     expect(tester.getSize(find.byType(CupertinoMagnifier)), Size.zero);
   });
+
+  testWidgets('RawMagnifier does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: RawMagnifier(size: Size.square(2), child: Text('X')),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(RawMagnifier)), Size.zero);
+  });
 }
