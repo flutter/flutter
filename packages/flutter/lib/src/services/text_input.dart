@@ -706,11 +706,11 @@ class TextInputConfiguration {
   /// {@template flutter.services.TextInputConfiguration.enableInlinePrediction}
   /// Whether to enable inline predictive text.
   ///
-  /// This is an iOS-specific feature (iOS 17 and later). When true, inline
-  /// prediction may be shown; when false, it is disabled; when null, on iOS
-  /// the platform default is used and other platforms ignore this.
+  /// This feature is specific to iOS 17 and later. It has no effect on other platforms.
   ///
-  /// Defaults to null (use platform default).
+  /// By default, this property is null, meaning the platform setting is used.
+  /// Setting this flag overrides the platform setting.
+  /// When true, inline prediction is shown; when false, it is disabled.
   /// {@endtemplate}
   final bool? enableInlinePrediction;
 
