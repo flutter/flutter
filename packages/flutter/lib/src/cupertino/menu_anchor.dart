@@ -42,6 +42,9 @@ bool get _isCupertino {
   }
 }
 
+// TODO(davidhicks980): Move typography constants to a more appropriate
+// location. https://github.com/flutter/flutter/issues/182933
+
 /// The font family for menu items at smaller text scales.
 const String _kBodyFont = 'CupertinoSystemText';
 
