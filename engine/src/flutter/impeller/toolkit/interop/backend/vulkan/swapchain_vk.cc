@@ -47,6 +47,9 @@ ScopedObject<SurfaceVK> SwapchainVK::AcquireNextSurface() {
     return nullptr;
   }
 
+  auto& context_vk = impeller::ContextVK::Cast(*context_->GetContext());
+  context_vk.DisposeThreadLocalCachedResources();
+
   auto impeller_surface = swapchain_->AcquireNextDrawable();
   if (!impeller_surface) {
     VALIDATION_LOG << "Could not acquire next drawable.";
