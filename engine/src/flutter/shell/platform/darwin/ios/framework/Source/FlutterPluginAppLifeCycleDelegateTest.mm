@@ -13,12 +13,14 @@
 
 FLUTTER_ASSERT_ARC
 
+// --- Test Category to avoid modifying the original production source code ---
 @interface FlutterPluginAppLifeCycleDelegate (TestUtils)
 - (void)removeDelegate:(NSObject<FlutterApplicationLifeCycleDelegate>*)delegate;
 @end
 
 @implementation FlutterPluginAppLifeCycleDelegate (TestUtils)
 - (void)removeDelegate:(NSObject<FlutterApplicationLifeCycleDelegate>*)delegate {
+  // Access the private _delegates member via Key-Value Coding (KVC)
   NSPointerArray* delegates = [self valueForKey:@"_delegates"];
   for (NSUInteger i = 0; i < delegates.count; i++) {
     if ([delegates pointerAtIndex:i] == (__bridge void*)delegate) {
@@ -28,6 +30,7 @@ FLUTTER_ASSERT_ARC
   }
 }
 @end
+// -----------------------------------------------------------------------
 
 @protocol TestFlutterPluginWithSceneEvents <NSObject,
                                             FlutterApplicationLifeCycleDelegate,
@@ -97,20 +100,25 @@ FLUTTER_ASSERT_ARC
 }
 @end
 
-@interface MutatingDelegate : NSObject <FlutterApplicationLifeCycleDelegate>
-@property(nonatomic, weak) FlutterPluginAppLifeCycleDelegate* container;
+/**
+ * A mock plugin that simulates behavior causing a mutation crash.
+ * This represents a "downstream" mutation where a plugin adds or removes
+ * delegates during a lifecycle notification loop.
+ */
+@interface MutatingPlugin : NSObject <FlutterApplicationLifeCycleDelegate>
+@property(nonatomic, weak) FlutterPluginAppLifeCycleDelegate* lifecycleDelegate;
 @property(nonatomic, assign) BOOL shouldAdd;  // YES = Add, NO = Remove
 @end
 
-@implementation MutatingDelegate
+@implementation MutatingPlugin
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
   if (self.shouldAdd) {
     // Case 1: Add a new delegate during the loop over _delegates
-    [self.container addDelegate:[[FakePlugin alloc] init]];
+    [self.lifecycleDelegate addDelegate:[[FakePlugin alloc] init]];
   } else {
-    // Case 2: Remove itself during the loop over _delegates
-    [(id)self.container removeDelegate:self];
+    // Case 2: Remove itself during the loop over _delegates via TestUtils category
+    [(id)self.lifecycleDelegate removeDelegate:self];
   }
   return YES;
 }
@@ -604,12 +612,14 @@ FLUTTER_ASSERT_ARC
 
 - (void)testCanAddDelegateDuringEnumeration {
   FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
-  MutatingDelegate* mutatingDelegate = [[MutatingDelegate alloc] init];
-  mutatingDelegate.container = delegate;
-  mutatingDelegate.shouldAdd = YES;  // Add Mode
+  MutatingPlugin* mutatingPlugin = [[MutatingPlugin alloc] init];
+  mutatingPlugin.lifecycleDelegate = delegate;
+  mutatingPlugin.shouldAdd = YES;  // Add Mode
 
-  [delegate addDelegate:mutatingDelegate];
-  // Without the fix [_delegates allObjects], this crashes with NSGenericException
+  [delegate addDelegate:mutatingPlugin];
+
+  // Validation that [_delegates allObjects] (snapshotting) prevents NSGenericException crash
+  // when a plugin adds another plugin during the dispatch loop.
   BOOL result = [delegate application:[UIApplication sharedApplication]
         didFinishLaunchingWithOptions:@{}];
 
@@ -618,13 +628,14 @@ FLUTTER_ASSERT_ARC
 
 - (void)testCanRemoveSelfDuringEnumeration {
   FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
-  MutatingDelegate* mutatingDelegate = [[MutatingDelegate alloc] init];
-  mutatingDelegate.container = delegate;
-  mutatingDelegate.shouldAdd = NO;  // Delete Mode
+  MutatingPlugin* mutatingPlugin = [[MutatingPlugin alloc] init];
+  mutatingPlugin.lifecycleDelegate = delegate;
+  mutatingPlugin.shouldAdd = NO;  // Delete Mode
 
-  [delegate addDelegate:mutatingDelegate];
-  // Without the fix [_delegates allObjects], this crashes because the _delegates collection is
-  // modify during the loop
+  [delegate addDelegate:mutatingPlugin];
+
+  // Validation that [_delegates allObjects] (snapshotting) prevents crash
+  // when a plugin removes itself via removeDelegate during the dispatch loop.
   BOOL result = [delegate application:[UIApplication sharedApplication]
         didFinishLaunchingWithOptions:@{}];
 

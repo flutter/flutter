@@ -175,6 +175,8 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions
                isFallbackForScene:(BOOL)isFallback {
+  // Use a snapshot of the delegates to allow plugins to add or remove themselves
+  // during the notification loop without causing a mutation crash.
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in [_delegates allObjects]) {
     if (!delegate || (isFallback && [self pluginSupportsSceneLifecycle:delegate])) {
       continue;
