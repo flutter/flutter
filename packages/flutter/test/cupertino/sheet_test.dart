@@ -2272,7 +2272,7 @@ void main() {
       expect(find.text('Page 2'), findsOneWidget);
     }
 
-    testWidgets('Non-null filter quality should add ImageFilterLayer during transition', (
+    testWidgets('enabling filter should add ImageFilterLayer during transition', (
       WidgetTester tester,
     ) async {
       await pumpSheet(tester, true);
@@ -2292,7 +2292,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('Null filter quality should not add ImageFilterLayer during transition', (
+    testWidgets('disabling filter should not add ImageFilterLayer during transition', (
       WidgetTester tester,
     ) async {
       await pumpSheet(tester, false);
