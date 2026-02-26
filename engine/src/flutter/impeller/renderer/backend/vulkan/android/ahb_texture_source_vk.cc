@@ -13,6 +13,8 @@ namespace impeller {
 
 namespace {
 
+using AHBProperties = AHBTextureSourceVK::AHBProperties;
+
 bool RequiresYCBCRConversion(vk::Format format) {
   switch (format) {
     case vk::Format::eG8B8R83Plane420Unorm:
@@ -28,11 +30,9 @@ bool RequiresYCBCRConversion(vk::Format format) {
   return false;
 }
 
-bool HardwareBufferFormatHasOpaqueAlpha(AHardwareBuffer_Format format) {
+bool IsOpaque(AHardwareBuffer_Format format) {
   return format == AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM;
 }
-
-using AHBProperties = AHBTextureSourceVK::AHBProperties;
 
 vk::UniqueDeviceMemory ImportVKDeviceMemoryFromAndroidHarwareBuffer(
     const vk::Device& device,
@@ -410,8 +410,7 @@ AHBTextureSourceVK::ImageViewInfo AHBTextureSourceVK::CreateImageViewInfo(
   view_info.image = image;
   view_info.viewType = vk::ImageViewType::e2D;
   view_info.format = ahb_format.format;
-  if (HardwareBufferFormatHasOpaqueAlpha(
-          static_cast<AHardwareBuffer_Format>(ahb_desc.format))) {
+  if (IsOpaque(static_cast<AHardwareBuffer_Format>(ahb_desc.format))) {
     view_info.components.a = vk::ComponentSwizzle::eOne;
   }
   view_info.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;

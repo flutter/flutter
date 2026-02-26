@@ -71,11 +71,14 @@ class AHBTextureSourceVK final : public TextureSourceVK {
                                            // Core in 1.1
                                            vk::SamplerYcbcrConversionInfo>;
 
+  /// Create a VkImage that wraps an Android hardware buffer.
   static vk::UniqueImage CreateVKImageWrapperForAndroidHarwareBuffer(
       const vk::Device& device,
       const AHBProperties& ahb_props,
       const AHardwareBuffer_Desc& ahb_desc);
 
+  /// Create a VkImageViewCreateInfo that matches the properties of an Android
+  /// hardware buffer.
   static ImageViewInfo CreateImageViewInfo(
       const vk::Image& image,
       const std::shared_ptr<YUVConversionVK>& yuv_conversion_wrapper,
