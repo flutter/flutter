@@ -2116,7 +2116,9 @@ abstract class WidgetController {
       final FlutterView view = _viewOf(finder);
       final result = HitTestResult();
       binding.hitTestInView(result, location, view.viewId);
-      final bool found = result.path.any((HitTestEntry entry) => entry.target == box);
+      final bool found = result.path.any(
+        (HitTestEntry entry) => finders.isRenderObjectAncestorOfTarget(box, entry.target),
+      );
       if (!found) {
         final RenderView renderView = binding.renderViews.firstWhere(
           (RenderView r) => r.flutterView == view,

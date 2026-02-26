@@ -15,6 +15,8 @@ Across the document we use the word "tree" to mean "the health state of flutter/
 
 - On our [build dashboard](https://flutter-dashboard.appspot.com/)
 - On every PR (referred to as "Tree Status")
+  - A failing "tree-status" check on a PR indicates a problem with the main branch,
+    not the PR itself. The check will pass once tree maintainers resolve the issue; no action is needed within the PR.
 - In the [tree-status](https://discord.com/channels/608014603317936148/613398423093116959) Discord channel
 
 ## Overview
@@ -84,6 +86,13 @@ The general process for submitting code to a Flutter repository is as follows:
 
    **If the trees or dashboards are showing any regressions, only fixes
    that improve the situation are allowed to go in.**
+
+   Two pre-commit tests are special, as failures are not caused by the PR's code and cannot be fixed directly within the PR.
+   - The "tree-status" test is a status indicator for the stability of the main branch.
+     It will pass once the issues blocking the tree are resolved.
+   - The "Google Testing" tests run internally at Google and are not publicly accessible.
+     If these fail, a Google employee (for example, the PR reviewer) should be contacted
+     to check the internal tests and recommend a solution.
 
 9. Once everything is green and you have an LGTM from the owners of the code you are affecting (or someone to whom they
    have delegated), and an LGTM from any other contributor who left comments, add the "autosubmit" label if you're in the flutter-hackers github group. A bot will land the patch when it feels like it. If you're not in the flutter-hackers group a reviewer will add the label for you.
