@@ -21,7 +21,6 @@ class RepeatingAnimationBuilderExampleApp extends StatelessWidget {
           seedColor: Colors.purple,
           brightness: Brightness.dark,
         ),
-        useMaterial3: true,
       ),
       home: const RepeatingAnimationBuilderExample(),
     );
