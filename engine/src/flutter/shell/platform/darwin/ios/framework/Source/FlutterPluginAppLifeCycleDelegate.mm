@@ -170,9 +170,10 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
   // (now deprecated)
   // -[UIApplication application:continueUserActivity:restorationHandler:]
   // method.
-  if (_state < kAppLifecycleDidLaunchSent && ![self application:application
-                                                didFinishLaunchingWithOptions:convertedLaunchOptions
-                                                           isFallbackForScene:YES]) {
+  if (_state < kAppLifecycleDidLaunchSent &&
+      ![self application:application
+          didFinishLaunchingWithOptions:convertedLaunchOptions
+                     isFallbackForScene:YES]) {
     return NO;
   }
 
