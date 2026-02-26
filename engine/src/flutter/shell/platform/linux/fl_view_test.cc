@@ -229,8 +229,7 @@ TEST(FlViewTest, ViewDestroyError) {
   fl_gtk_widget_destroy(GTK_WIDGET(implicit_view));
 }
 
-// Check if sized to content selected view will change size when Flutter changes
-// frame size.
+// Check can create a view that is sized to the content.
 TEST(FlViewTest, SizedToContent) {
   flutter::testing::fl_ensure_gtk_init();
 
