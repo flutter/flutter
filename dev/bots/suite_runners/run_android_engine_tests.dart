@@ -108,12 +108,12 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
 
     // Test HCPP Platform Views on Vulkan.
     if (impellerBackend == ImpellerBackend.vulkan) {
-      final List<String> runFirstTests = <String>[
+      final runFirstTests = <String>[
         // Run upgrade_legacy_pv_types first, as it is testing the flag and not the manifest
         'upgrade_legacy_pv_types',
       ];
 
-      for (final String testName in runFirstTests) {
+      for (final testName in runFirstTests) {
         await runTest(
           mains.firstWhere((FileSystemEntity file) => file.path.contains(testName)),
           useHCPPFlag: true,
