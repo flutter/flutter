@@ -2081,15 +2081,22 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: ListView(
+        child: Column(
           children: <Widget>[
-            for (int level = 1; level <= 6; level++)
-              Semantics(
-                key: ValueKey<String>('heading-$level'),
-                headingLevel: level,
-                child: Text('Heading level $level'),
+            const SizedBox(height: 50, child: Text('Headings')),
+            Expanded(
+              child: ListView(
+                children: <Widget>[
+                  for (int level = 1; level <= 6; level++)
+                    Semantics(
+                      key: ValueKey<String>('heading-$level'),
+                      headingLevel: level,
+                      child: Text('Heading level $level'),
+                    ),
+                  const Text('This is not a heading'),
+                ],
               ),
-            const Text('This is not a heading'),
+            ),
           ],
         ),
       ),
