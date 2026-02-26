@@ -8,7 +8,7 @@ chrome:
 firefox:
   # Latest version can be found here:
   # https://www.firefox.com/en-US/releases/
-  version: '143.0'
+  version: '148.0'
 
 edge:
   launcher_version: '1.2.0.0'

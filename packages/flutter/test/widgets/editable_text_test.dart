@@ -22,6 +22,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/clipboard_utils.dart';
+import 'editable_text_tester.dart';
 import 'editable_text_utils.dart';
 import 'live_text_utils.dart';
 import 'semantics_tester.dart';
@@ -5663,6 +5664,9 @@ void main() {
           'fontWeightIndex': 5,
           'textAlignIndex': 4,
           'textDirectionIndex': 0,
+          'letterSpacing': null,
+          'wordSpacing': null,
+          'lineHeight': 20.0,
         },
       ),
     );
@@ -5705,6 +5709,9 @@ void main() {
           'fontWeightIndex': FontWeight.bold.index,
           'textAlignIndex': 4,
           'textDirectionIndex': 0,
+          'letterSpacing': null,
+          'wordSpacing': null,
+          'lineHeight': 20.0,
         },
       ),
     );
@@ -5722,6 +5729,8 @@ void main() {
       fontSize: 20.0,
       fontFamily: 'Raleway',
       fontWeight: FontWeight.w700,
+      letterSpacing: 1.0,
+      wordSpacing: 2.0,
     );
     var currentTextStyle = textStyle1;
 
@@ -5783,6 +5792,9 @@ void main() {
           'fontWeightIndex': 6,
           'textAlignIndex': 4,
           'textDirectionIndex': 1,
+          'letterSpacing': 1.0,
+          'wordSpacing': 2.0,
+          'lineHeight': 20.0,
         },
       ),
     );
