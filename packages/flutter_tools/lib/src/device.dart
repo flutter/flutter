@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 
@@ -859,21 +858,8 @@ abstract class Device {
       ]);
     }
 
-    // Calculate column widths
-    final indices = List<int>.generate(table[0].length - 1, (int i) => i);
-    List<int> widths = indices.map<int>((int i) => 0).toList();
-    for (final row in table) {
-      widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
-    }
-
     // Join columns into lines of text
-    return <String>[
-      for (final List<String> row in table)
-        indices
-            .map<String>((int i) => row[i].padRight(widths[i]))
-            .followedBy(<String>[row.last])
-            .join(' • '),
-    ];
+    return formatTable(table);
   }
 
   static Future<void> printDevices(
@@ -996,6 +982,7 @@ class DebuggingOptions {
     this.enableFlutterGpu = false,
     this.enableVulkanValidation = false,
     this.uninstallFirst = false,
+    this.uninstallApp = true,
     this.enableDartProfiling = true,
     this.profileStartup = false,
     this.enableEmbedderApi = false,
@@ -1030,6 +1017,7 @@ class DebuggingOptions {
     this.enableFlutterGpu = false,
     this.enableVulkanValidation = false,
     this.uninstallFirst = false,
+    this.uninstallApp = true,
     this.enableDartProfiling = true,
     this.profileStartup = false,
     this.enableEmbedderApi = false,
@@ -1113,6 +1101,7 @@ class DebuggingOptions {
     required this.enableFlutterGpu,
     required this.enableVulkanValidation,
     required this.uninstallFirst,
+    required this.uninstallApp,
     required this.enableDartProfiling,
     required this.profileStartup,
     required this.enableEmbedderApi,
@@ -1175,6 +1164,12 @@ class DebuggingOptions {
   ///
   /// This is not implemented for every platform.
   final bool uninstallFirst;
+
+  /// Whether the tool should uninstall the app after running.
+  ///
+  /// This is currently only implemented for integration tests.
+  /// Defaults to true.
+  final bool uninstallApp;
 
   /// Whether to run the browser in headless mode.
   ///
@@ -1309,6 +1304,7 @@ class DebuggingOptions {
     'enableImpeller': enableImpeller.asBool,
     'enableFlutterGpu': enableFlutterGpu,
     'enableVulkanValidation': enableVulkanValidation,
+    'uninstallApp': uninstallApp,
     'enableDartProfiling': enableDartProfiling,
     'profileStartup': profileStartup,
     'enableEmbedderApi': enableEmbedderApi,
@@ -1378,6 +1374,7 @@ class DebuggingOptions {
         enableFlutterGpu: json['enableFlutterGpu']! as bool,
         enableVulkanValidation: (json['enableVulkanValidation'] as bool?) ?? false,
         uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
+        uninstallApp: (json['uninstallApp'] as bool?) ?? true,
         enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
         profileStartup: (json['profileStartup'] as bool?) ?? false,
         enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,

@@ -180,8 +180,54 @@ static_assert(CheckSameSignature<decltype(mockDeleteQueriesEXT),  //
 void mockUniform1fv(GLint location, GLsizei count, const GLfloat* value) {
   CallMockMethod(&IMockGLESImpl::Uniform1fv, location, count, value);
 }
-static_assert(CheckSameSignature<decltype(mockUniform1fv),  //
-                                 decltype(glUniform1fv)>::value);
+// Uniform1fv is already here, adding others
+void mockUniform2fv(GLint location, GLsizei count, const GLfloat* value) {
+  CallMockMethod(&IMockGLESImpl::Uniform2fv, location, count, value);
+}
+static_assert(CheckSameSignature<decltype(mockUniform2fv),  //
+                                 decltype(glUniform2fv)>::value);
+
+void mockUniform3fv(GLint location, GLsizei count, const GLfloat* value) {
+  CallMockMethod(&IMockGLESImpl::Uniform3fv, location, count, value);
+}
+static_assert(CheckSameSignature<decltype(mockUniform3fv),  //
+                                 decltype(glUniform3fv)>::value);
+
+void mockUniform4fv(GLint location, GLsizei count, const GLfloat* value) {
+  CallMockMethod(&IMockGLESImpl::Uniform4fv, location, count, value);
+}
+static_assert(CheckSameSignature<decltype(mockUniform4fv),  //
+                                 decltype(glUniform4fv)>::value);
+
+void mockUniformMatrix2fv(GLint location,
+                          GLsizei count,
+                          GLboolean transpose,
+                          const GLfloat* value) {
+  CallMockMethod(&IMockGLESImpl::UniformMatrix2fv, location, count, transpose,
+                 value);
+}
+static_assert(CheckSameSignature<decltype(mockUniformMatrix2fv),  //
+                                 decltype(glUniformMatrix2fv)>::value);
+
+void mockUniformMatrix3fv(GLint location,
+                          GLsizei count,
+                          GLboolean transpose,
+                          const GLfloat* value) {
+  CallMockMethod(&IMockGLESImpl::UniformMatrix3fv, location, count, transpose,
+                 value);
+}
+static_assert(CheckSameSignature<decltype(mockUniformMatrix3fv),  //
+                                 decltype(glUniformMatrix3fv)>::value);
+
+void mockUniformMatrix4fv(GLint location,
+                          GLsizei count,
+                          GLboolean transpose,
+                          const GLfloat* value) {
+  CallMockMethod(&IMockGLESImpl::UniformMatrix4fv, location, count, transpose,
+                 value);
+}
+static_assert(CheckSameSignature<decltype(mockUniformMatrix4fv),  //
+                                 decltype(glUniformMatrix4fv)>::value);
 
 void mockGenTextures(GLsizei n, GLuint* textures) {
   CallMockMethod(&IMockGLESImpl::GenTextures, n, textures);
@@ -313,6 +359,18 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(mockGetQueryObjectuivEXT);
   } else if (strcmp(name, "glUniform1fv") == 0) {
     return reinterpret_cast<void*>(mockUniform1fv);
+  } else if (strcmp(name, "glUniform2fv") == 0) {
+    return reinterpret_cast<void*>(mockUniform2fv);
+  } else if (strcmp(name, "glUniform3fv") == 0) {
+    return reinterpret_cast<void*>(mockUniform3fv);
+  } else if (strcmp(name, "glUniform4fv") == 0) {
+    return reinterpret_cast<void*>(mockUniform4fv);
+  } else if (strcmp(name, "glUniformMatrix2fv") == 0) {
+    return reinterpret_cast<void*>(mockUniformMatrix2fv);
+  } else if (strcmp(name, "glUniformMatrix3fv") == 0) {
+    return reinterpret_cast<void*>(mockUniformMatrix3fv);
+  } else if (strcmp(name, "glUniformMatrix4fv") == 0) {
+    return reinterpret_cast<void*>(mockUniformMatrix4fv);
   } else if (strcmp(name, "glGenTextures") == 0) {
     return reinterpret_cast<void*>(mockGenTextures);
   } else if (strcmp(name, "glObjectLabelKHR") == 0) {
