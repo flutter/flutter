@@ -9535,6 +9535,7 @@ void main() {
                 children: <TestSemantics>[
                   TestSemantics.rootChild(
                     label: 'label',
+                    hint: 'oh no!',
                     textDirection: TextDirection.ltr,
                     actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                     flags: <SemanticsFlag>[
@@ -9567,6 +9568,99 @@ void main() {
       debugDefaultTargetPlatformOverride = null;
     });
   }
+
+  testWidgets('TextField hintText is not duplicated in semantics', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+    final TextEditingController controller = _textEditingController();
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Form(
+            child: TextField(
+              key: key,
+              controller: controller,
+              decoration: const InputDecoration(labelText: 'Search', hintText: 'Search Google Pay'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Focus the text field so the hint Text widget becomes visible
+    // and merges into the semantics tree.
+    await tester.tap(find.byKey(key));
+    await tester.pumpAndSettle();
+
+    final SemanticsNode node = tester.getSemantics(find.byType(EditableText));
+    expect(node.label, contains('Search Google Pay'));
+    expect(node.hint, isEmpty);
+
+    semantics.dispose();
+  });
+
+  testWidgets('TextField passes errorText to semantics hint', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+    final TextEditingController controller = _textEditingController();
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          key: key,
+          controller: controller,
+          decoration: const InputDecoration(labelText: 'Email', errorText: 'Email is required'),
+        ),
+      ),
+    );
+
+    final SemanticsNode node = tester.getSemantics(find.byKey(key));
+    expect(node.hint, 'Email is required');
+
+    semantics.dispose();
+  });
+
+  // When both errorText and hintText are present, they should end up in
+  // separate semantics properties: hintText in label (via Text widget merge),
+  // errorText in hint (via explicit Semantics wrapper).
+  testWidgets('TextField errorText and hintText do not concatenate in semantics', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+    final TextEditingController controller = _textEditingController();
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Form(
+            child: TextField(
+              key: key,
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                hintText: 'Enter your email',
+                errorText: 'Email is required',
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Focus the text field so the hint Text widget becomes visible.
+    await tester.tap(find.byKey(key));
+    await tester.pumpAndSettle();
+
+    final SemanticsNode node = tester.getSemantics(find.byType(EditableText));
+    // hintText merges into label via the Text widget's markAsMergeUp.
+    expect(node.label, contains('Enter your email'));
+    // errorText is in the hint property via the explicit Semantics wrapper.
+    expect(node.hint, 'Email is required');
+
+    semantics.dispose();
+  });
 
   testWidgets('floating label does not overlap with value at large textScaleFactors', (
     WidgetTester tester,
