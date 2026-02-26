@@ -34,7 +34,7 @@ class CompilerTestBase : public ::testing::TestWithParam<TargetPlatform> {
       SourceLanguage source_language = SourceLanguage::kGLSL,
       const char* entry_point_name = "main");
 
-  const Compiler* GetCompiler() const;
+  const Compiler& GetCompiler() const;
 
  private:
   std::string intermediates_path_;
