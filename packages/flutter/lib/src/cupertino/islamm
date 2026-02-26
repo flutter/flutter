@@ -1,0 +1,77 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(IslamicNiyamApp());
+}
+
+class IslamicNiyamApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'ইসলামিক নিয়াম',
+      theme: ThemeData(primarySwatch: Colors.green),
+      home: HomeScreen(),
+    );
+  }
+}
+
+// Home Screen
+class HomeScreen extends StatelessWidget {
+  final List<Map<String, String>> niyams = [
+    {'title': 'নিয়াম ১', 'description': 'বিস্তারিত বিবরণ ১'},
+    {'title': 'নিয়াম ২', 'description': 'বিস্তারিত বিবরণ ২'},
+    {'title': 'নিয়াম ৩', 'description': 'বিস্তারিত বিবরণ ৩'},
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('ইসলামিক নিয়াম')),
+      body: ListView.builder(
+        itemCount: niyams.length,
+        itemBuilder: (context, index) {
+          return Card(
+            child: ListTile(
+              title: Text(niyams[index]['title']!),
+              subtitle: Text(niyams[index]['description']!),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DetailScreen(
+                      title: niyams[index]['title']!,
+                      description: niyams[index]['description']!,
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// Detail Screen
+class DetailScreen extends StatelessWidget {
+  final String title;
+  final String description;
+
+  DetailScreen({required this.title, required this.description});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Text(
+          description,
+          style: TextStyle(fontSize: 18),
+        ),
+      ),
+    );
+  }
+}
