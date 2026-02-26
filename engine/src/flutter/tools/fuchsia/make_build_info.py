@@ -61,19 +61,20 @@ def main():
 
     # Read, interpolate, write.
     with open(args.input, "r") as i, open(args.output, "w") as o:
-        # fmt: skip
+        # fmt: off
         o.write(
-            i.read()
-            .replace(
-                "{{DART_SDK_GIT_REVISION}}", GetDartSdkGitRevision(args.buildroot).decode("utf-8")
-            )
-            .replace(
-                "{{DART_SDK_SEMANTIC_VERSION}}",
-                GetDartSdkSemanticVersion(args.buildroot).decode("utf-8"),
-            )
-            .replace("{{FLUTTER_ENGINE_GIT_REVISION}}", args.engine_version)
-            .replace("{{FUCHSIA_SDK_VERSION}}", GetFuchsiaSdkVersion(args.buildroot))
+            i.read().replace(
+                '{{DART_SDK_GIT_REVISION}}',
+                GetDartSdkGitRevision(args.buildroot).decode('utf-8')
+            ).replace(
+                '{{DART_SDK_SEMANTIC_VERSION}}',
+                GetDartSdkSemanticVersion(args.buildroot).decode('utf-8')
+            ).replace(
+                '{{FLUTTER_ENGINE_GIT_REVISION}}',
+                args.engine_version
+            ).replace('{{FUCHSIA_SDK_VERSION}}', GetFuchsiaSdkVersion(args.buildroot))
         )
+        # fmt: on
 
 
 if __name__ == "__main__":
