@@ -895,7 +895,7 @@ class MaterialScrollBehavior extends ScrollBehavior {
             return StretchingOverscrollIndicator(
               axisDirection: details.direction,
               clipBehavior: details.clipBehavior ?? Clip.hardEdge,
-              child: Material(child: child),
+              child: Material(type: .transparency, child: child),
             );
           case AndroidOverscrollIndicator.glow:
             break;
