@@ -57,9 +57,6 @@ Color _scaleAlpha(Color x, double factor) {
   return x.withValues(alpha: clampDouble(x.a * factor, 0, 1));
 }
 
-/// Returns the wider of two color spaces.
-///
-/// Display P3 is considered wider than sRGB.
 ColorSpace _widerColorSpace(ColorSpace a, ColorSpace b) {
   return a == ColorSpace.displayP3 || b == ColorSpace.displayP3 ? ColorSpace.displayP3 : a;
 }
