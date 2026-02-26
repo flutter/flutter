@@ -35,7 +35,7 @@ final RegExp _buildSettingsTargetHeaderPattern = RegExp(
 
 /// Parses xcodebuild `-showBuildSettings` output into a dictionary keyed by target.
 Map<String, Map<String, String>> parseXcodeAllTargetsBuildSettings(String buildSettingsOutput) {
-  final Map<String, Map<String, String>> settingsByTarget = <String, Map<String, String>>{};
+  final settingsByTarget = <String, Map<String, String>>{};
   String? currentTarget;
 
   for (final String line in buildSettingsOutput.split('\n')) {
@@ -53,7 +53,7 @@ Map<String, Map<String, String>> parseXcodeAllTargetsBuildSettings(String buildS
     }
 
     int equalsIndex = settingsLine.indexOf(' = ');
-    int separatorLength = 3;
+    var separatorLength = 3;
     if (equalsIndex == -1) {
       equalsIndex = settingsLine.indexOf('=');
       separatorLength = 1;
@@ -560,12 +560,11 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       return;
     }
 
-    final Map<String, Map<String, String>> settingsByTarget = parseXcodeAllTargetsBuildSettings(
-      buildSettings,
-    );
+    final Map<String, Map<String, String>> settingsByTarget =
+        parseXcodeAllTargetsBuildSettings(buildSettings);
 
     final pluginsExcludingArmArch = <String>{};
-    for (final String pluginTargetName in iosPluginTargetNames) {
+    for (final pluginTargetName in iosPluginTargetNames) {
       final Map<String, String>? targetSettings = settingsByTarget[pluginTargetName];
       if (targetSettings == null) {
         continue;
