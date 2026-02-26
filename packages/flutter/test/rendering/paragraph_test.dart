@@ -1578,6 +1578,7 @@ void main() {
     expect(dryIdeographic, equals(ideographic));
     expect(dryAlphabetic, isNot(equals(dryIdeographic)));
   });
+
   group('positionInlineChildren', () {
     test('asserts when boxes length exceeds childCount', () {
       final paragraph = RenderParagraph(
