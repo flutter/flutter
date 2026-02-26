@@ -10,9 +10,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'clipboard_utils.dart';
+import 'editable_text_tester.dart';
 import 'keyboard_utils.dart';
 import 'process_text_utils.dart';
 import 'semantics_tester.dart';
+import 'widgets_app_tester.dart';
 
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
   const caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
@@ -3632,7 +3634,7 @@ void main() {
                   children: <Widget>[
                     const Text('How are you?'),
                     const Text('Good, and you?'),
-                    TextField(controller: controller, focusNode: textFieldFocus),
+                    TestTextField(controller: controller, focusNode: textFieldFocus),
                   ],
                 ),
               ),
@@ -3704,7 +3706,7 @@ void main() {
                   children: <Widget>[
                     const Text('How are you?'),
                     const Text('Good, and you?'),
-                    TextField(controller: controller, focusNode: textFieldFocus),
+                    TestTextField(controller: controller, focusNode: textFieldFocus),
                   ],
                 ),
               ),
@@ -6532,6 +6534,81 @@ void main() {
 
     final clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
     expect(clipboardData['text'], 'Hello my name is Dash.');
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/174246
+  testWidgets('SelectableRegion applies correct mouse cursors in its empty region', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey innerRegion = GlobalKey();
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        // Region 1 (fullscreen)
+        home: MouseRegion(
+          cursor: SystemMouseCursors.grab,
+          child: Center(
+            child: Container(
+              decoration: BoxDecoration(border: Border.all()),
+              // Region 2 (SelectableRegion)
+              child: SelectableRegion(
+                selectionControls: emptyTextSelectionControls,
+                child: Padding(
+                  padding: const EdgeInsets.all(40),
+                  // Region 3 (inner MouseRegion)
+                  child: MouseRegion(
+                    key: innerRegion,
+                    cursor: SystemMouseCursors.forbidden,
+                    onHover: (_) {},
+                    child: Container(color: const Color(0xFFAA9933), width: 200, height: 50),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    // On web, ensure that the HtmlElementView is initialized.
+    if (kIsWeb) {
+      expect(
+        find.byWidgetPredicate(
+          (Widget widget) => widget.toString().contains('_PlatformViewPlaceHolder'),
+        ),
+        findsNothing,
+      );
+    }
+
+    const region1 = Offset(10, 10);
+    final Offset region2 = tester.getTopLeft(find.byKey(innerRegion)) - const Offset(3, 3);
+    final Offset region3 = tester.getCenter(find.byKey(innerRegion));
+
+    final TestGesture gesture = await tester.startGesture(region1, kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grab,
+    );
+
+    await gesture.moveTo(region2);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grab,
+    );
+
+    await gesture.moveTo(region3);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.forbidden,
+    );
+
+    await gesture.moveTo(region2);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grab,
+    );
   });
 }
 
