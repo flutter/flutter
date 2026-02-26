@@ -166,11 +166,15 @@ abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
   /// This constructor provides a reliable hook for a kernel transformer to find
   /// error messages that need to be rewritten to include object references for
   /// interactive display of errors.
-  _ErrorDiagnostic(
-    String message, {
-    super.style = DiagnosticsTreeStyle.flat,
-    super.level = DiagnosticLevel.info,
-  }) : super(null, <Object>[message], showName: false, showSeparator: false, defaultValue: null);
+  _ErrorDiagnostic(String message, {super.level = DiagnosticLevel.info})
+    : super(
+        null,
+        <Object>[message],
+        showName: false,
+        showSeparator: false,
+        defaultValue: null,
+        style: DiagnosticsTreeStyle.flat,
+      );
 
   /// In debug builds, a kernel transformer rewrites calls to the default
   /// constructors for [ErrorSummary], [ErrorDescription], and [ErrorHint] to use
