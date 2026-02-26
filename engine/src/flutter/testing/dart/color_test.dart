@@ -157,8 +157,8 @@ void main() {
   });
 
   test('Color.lerp mixed colorspaces at midpoint', () {
-    const Color srgbRed = Color.from(alpha: 1, red: 1, green: 0, blue: 0);
-    const Color p3Green = Color.from(
+    const srgbRed = Color.from(alpha: 1, red: 1, green: 0, blue: 0);
+    const p3Green = Color.from(
       alpha: 1,
       red: 0,
       green: 1,
@@ -168,7 +168,7 @@ void main() {
     final Color? result = Color.lerp(srgbRed, p3Green, 0.5);
     expect(result!.colorSpace, equals(ColorSpace.displayP3));
     final Color srgbRedAsP3 = srgbRed.withValues(colorSpace: ColorSpace.displayP3);
-    final Color expected = Color.from(
+    final expected = Color.from(
       alpha: (srgbRedAsP3.a + p3Green.a) / 2,
       red: (srgbRedAsP3.r + p3Green.r) / 2,
       green: (srgbRedAsP3.g + p3Green.g) / 2,
@@ -179,8 +179,8 @@ void main() {
   });
 
   test('Color.lerp mixed colorspaces with different alpha values', () {
-    const Color srgbColor = Color.from(alpha: 0.5, red: 1, green: 0, blue: 0);
-    const Color p3Color = Color.from(
+    const srgbColor = Color.from(alpha: 0.5, red: 1, green: 0, blue: 0);
+    const p3Color = Color.from(
       alpha: 1,
       red: 0,
       green: 0,
