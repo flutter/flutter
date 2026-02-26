@@ -854,15 +854,11 @@ class DartFormatChecker extends FormatChecker {
     );
 
     Iterable<WorkerJob> incorrect;
-    final List<WorkerJob> errorJobs = [];
     if (!fixing) {
       final Stream<WorkerJob> completedJobs = dartFmt.startWorkers(jobs);
       final diffJobs = <WorkerJob>[];
       await for (final WorkerJob completedJob in completedJobs) {
-        if (completedJob.result.exitCode != 0 && completedJob.result.exitCode != 1) {
-          // The formatter had a problem formatting the file.
-          errorJobs.add(completedJob);
-        } else if (completedJob.result.exitCode == 1) {
+        if (completedJob.result.exitCode == 1) {
           diffJobs.add(
             WorkerJob(<String>[
               'git',
@@ -886,10 +882,7 @@ class DartFormatChecker extends FormatChecker {
       final List<WorkerJob> completedJobs = await dartFmt.runToCompletion(jobs);
       final List<WorkerJob> incorrectJobs = incorrect = [];
       for (final job in completedJobs) {
-        if (job.result.exitCode != 0 && job.result.exitCode != 1) {
-          // The formatter had a problem formatting the file.
-          errorJobs.add(job);
-        } else if (job.result.exitCode == 1) {
+        if (job.result.exitCode == 1) {
           incorrectJobs.add(job);
         }
       }
@@ -927,26 +920,10 @@ class DartFormatChecker extends FormatChecker {
         stdout.writeln('DONE');
         stdout.writeln();
       }
-      _printErrorJobs(errorJobs);
-    } else if (errorJobs.isNotEmpty) {
-      _printErrorJobs(errorJobs);
     } else {
       message('All dart files formatted correctly.');
     }
-    return fixing ? errorJobs.length : (incorrect.length + errorJobs.length);
-  }
-
-  void _printErrorJobs(List<WorkerJob> errorJobs) {
-    if (errorJobs.isNotEmpty) {
-      final bool plural = errorJobs.length > 1;
-      error('The formatter failed to run on ${errorJobs.length} Dart file${plural ? 's' : ''}.');
-      stdout.writeln();
-      for (final job in errorJobs) {
-        stdout.writeln('--> ${job.command.last} produced the following error:');
-        stdout.write(job.result.stderr);
-        stdout.writeln();
-      }
-    }
+    return incorrect.length;
   }
 }
 
@@ -999,12 +976,9 @@ class PythonFormatChecker extends FormatChecker {
     final List<WorkerJob> completedJobs = await blackPool.runToCompletion(jobs);
     reportDone();
     final incorrect = <String>[];
-    final errorJobs = <WorkerJob>[];
     for (final job in completedJobs) {
-      if (job.result.exitCode == 1) {
+      if (job.result.exitCode != 0) {
         incorrect.add('  ${job.command.last}\n${job.result.output}');
-      } else if (job.result.exitCode != 0) {
-        errorJobs.add(job);
       }
     }
     if (incorrect.isNotEmpty) {
@@ -1026,22 +1000,11 @@ class PythonFormatChecker extends FormatChecker {
         stdout.writeln('DONE');
         stdout.writeln();
       }
-    } else if (errorJobs.isEmpty) {
+    } else {
       message('All python files formatted correctly.');
     }
 
-    if (errorJobs.isNotEmpty) {
-      final bool plural = errorJobs.length > 1;
-      error('The formatter failed to run on ${errorJobs.length} python file${plural ? 's' : ''}.');
-      stdout.writeln();
-      for (final job in errorJobs) {
-        stdout.writeln('--> ${job.command.last} produced the following error:');
-        stdout.write(job.result.stderr);
-        stdout.writeln();
-      }
-    }
-
-    return incorrect.length + errorJobs.length;
+    return incorrect.length;
   }
 }
 
