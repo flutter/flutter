@@ -70,8 +70,7 @@ Future<double> _runBasicStandardParallel(
   await Future.wait(
     Iterable.generate(parallel, (_) async {
       await basicStandard.send(payload);
-      // ignore: unawaited_futures
-      _runBasicStandardParallelRecurse(basicStandard, counter, count, completer, payload);
+      await _runBasicStandardParallelRecurse(basicStandard, counter, count, completer, payload);
     }),
   );
   await completer.future;
