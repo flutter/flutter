@@ -83,9 +83,6 @@ G_DEFINE_TYPE(FlCompositorOpenGL,
               fl_compositor_opengl,
               fl_compositor_get_type())
 
-// Maximum time to wait for a frame to be ready before giving up and rendering.
-constexpr gint64 kRenderTimeoutMicroseconds = 100000;  // 100ms
-
 // Returns the log for the given OpenGL shader. Must be freed by the caller.
 static gchar* get_shader_log(GLuint shader) {
   GLint log_length;
@@ -398,7 +395,8 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
   // If frame not ready, then wait for it.
   gint scale_factor = gdk_window_get_scale_factor(window);
   size_t width, height;
-  gint64 expiry_time = g_get_monotonic_time() + kRenderTimeoutMicroseconds;
+  gint64 expiry_time =
+      g_get_monotonic_time() + kCompositorRenderTimeoutMicroseconds;
   while (true) {
     width = gdk_window_get_width(window) * scale_factor;
     height = gdk_window_get_height(window) * scale_factor;

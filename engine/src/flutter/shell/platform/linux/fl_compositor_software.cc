@@ -27,9 +27,6 @@ G_DEFINE_TYPE(FlCompositorSoftware,
               fl_compositor_software,
               fl_compositor_get_type())
 
-// Maximum time to wait for a frame to be ready before giving up and rendering.
-constexpr gint64 kRenderTimeoutMicroseconds = 100000;  // 100ms
-
 static gboolean fl_compositor_software_present_layers(
     FlCompositor* compositor,
     const FlutterLayer** layers,
@@ -101,7 +98,8 @@ static gboolean fl_compositor_software_render(FlCompositor* compositor,
   // If frame not ready, then wait for it.
   gint scale_factor = gdk_window_get_scale_factor(window);
   if (wait_for_frame) {
-    gint64 expiry_time = g_get_monotonic_time() + kRenderTimeoutMicroseconds;
+    gint64 expiry_time =
+        g_get_monotonic_time() + kCompositorRenderTimeoutMicroseconds;
     while (true) {
       size_t width = gdk_window_get_width(window) * scale_factor;
       size_t height = gdk_window_get_height(window) * scale_factor;
