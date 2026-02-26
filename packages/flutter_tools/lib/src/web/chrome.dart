@@ -240,6 +240,8 @@ class ChromiumLauncher {
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
+      '--password-store=basic',
+      '--use-mock-keychain',
 
       // Remove the search engine choice screen. It's irrelevant for app
       // debugging purposes.
