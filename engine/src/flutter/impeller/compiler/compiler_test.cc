@@ -191,10 +191,8 @@ bool CompilerTestBase::CanCompileAndReflect(const char* fixture_name,
   return true;
 }
 
-const Compiler& CompilerTestBase::GetCompiler() const {
-  EXPECT_NE(compiler_, nullptr)
-      << "Compiler is not set. CanCompileAndReflect must be called to set it.";
-  return *compiler_;
+const Compiler* CompilerTestBase::GetCompiler() const {
+  return compiler_.get();
 }
 
 }  // namespace testing
