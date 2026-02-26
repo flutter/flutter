@@ -86,6 +86,8 @@ vars = {
 
   'ocmock_rev': 'c4ec0e3a7a9f56cfdbd0aa01f4f97bb4b75c5ef8', # v3.7.1
 
+  'black_version': 'version:2@25.1.0.1',
+
   # Download a prebuilt Dart SDK by default
   'download_dart_sdk': True,
 
@@ -199,9 +201,7 @@ vars = {
   "upstream_webdev": "https://github.com/dart-lang/webdev.git",
   "upstream_webkit_inspection_protocol": "https://github.com/google/webkit_inspection_protocol.dart.git",
   "upstream_wuffs-mirror-release-c": "https://github.com/google/wuffs-mirror-release-c.git",
-  "upstream_yapf": "https://github.com/google/yapf.git",
   "upstream_zlib": "https://github.com/madler/zlib.git",
-
   # The version / instance id of the cipd:chromium/fuchsia/test-scripts which
   # will be used altogether with fuchsia-sdk to setup the build / test
   # environment.
@@ -279,11 +279,18 @@ deps = {
   'engine/src/flutter/third_party/brotli':
    Var('skia_git') + '/external/github.com/google/brotli.git' + '@' + '350100a5bb9d9671aca85213b2ec7a70a361b0cd',
 
-  'engine/src/flutter/third_party/yapf':
-  Var('flutter_git') + '/third_party/yapf' + '@' + '212c5b5ad8e172d2d914ae454c121c89cccbcb35',
+  'engine/src/flutter/third_party/black': {
+    'packages': [
+      {
+        'package': 'fuchsia/third_party/black/${{platform}}',
+        'version': Var('black_version'),
+      }
+    ],
+    'dep_type': 'cipd',
+  },
 
   'engine/src/flutter/third_party/boringssl/src':
-  'https://boringssl.googlesource.com/boringssl.git' + '@' + Var('dart_boringssl_rev'),
+   'https://boringssl.googlesource.com/boringssl.git' + '@' + Var('dart_boringssl_rev'),
 
   'engine/src/flutter/third_party/protobuf':
    Var('flutter_git') + '/third_party/protobuf' + '@' + Var('dart_libprotobuf_rev'),

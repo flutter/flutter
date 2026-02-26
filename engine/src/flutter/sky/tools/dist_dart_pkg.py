@@ -13,20 +13,20 @@ import sys
 
 
 def main():
-  parser = argparse.ArgumentParser(description='Copy a Dart package')
+    parser = argparse.ArgumentParser(description="Copy a Dart package")
 
-  parser.add_argument('--source', type=str, help='Source directory assembled by dart_pkg.py')
-  parser.add_argument('--dest', type=str, help='Destination directory for the package')
+    parser.add_argument("--source", type=str, help="Source directory assembled by dart_pkg.py")
+    parser.add_argument("--dest", type=str, help="Destination directory for the package")
 
-  args = parser.parse_args()
+    args = parser.parse_args()
 
-  if os.path.exists(args.dest):
-    shutil.rmtree(args.dest)
+    if os.path.exists(args.dest):
+        shutil.rmtree(args.dest)
 
-  # dart_pkg.py will create a packages directory within the package.
-  # Do not copy this into the release output.
-  shutil.copytree(args.source, args.dest, ignore=shutil.ignore_patterns('packages'))
+    # dart_pkg.py will create a packages directory within the package.
+    # Do not copy this into the release output.
+    shutil.copytree(args.source, args.dest, ignore=shutil.ignore_patterns("packages"))
 
 
-if __name__ == '__main__':
-  sys.exit(main())
+if __name__ == "__main__":
+    sys.exit(main())

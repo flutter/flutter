@@ -13,27 +13,27 @@ import sys
 
 
 def cp_files(args):
-  """Copies files from source to destination.
+    """Copies files from source to destination.
 
-  It creates the destination folder if it does not exists yet.
-  """
-  for src, dst in args.input_pairs:
-    os.makedirs(os.path.dirname(dst), exist_ok=True)
-    shutil.copyfile(src, dst)
+    It creates the destination folder if it does not exists yet.
+    """
+    for src, dst in args.input_pairs:
+        os.makedirs(os.path.dirname(dst), exist_ok=True)
+        shutil.copyfile(src, dst)
 
 
 def main():
-  parser = argparse.ArgumentParser()
-  parser.add_argument(
-      '-i',
-      dest='input_pairs',
-      nargs=2,
-      action='append',
-      help='The input file and its destination.'
-  )
-  cp_files(parser.parse_args())
-  return 0
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-i",
+        dest="input_pairs",
+        nargs=2,
+        action="append",
+        help="The input file and its destination.",
+    )
+    cp_files(parser.parse_args())
+    return 0
 
 
-if __name__ == '__main__':
-  sys.exit(main())
+if __name__ == "__main__":
+    sys.exit(main())

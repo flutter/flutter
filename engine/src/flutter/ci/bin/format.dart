@@ -950,7 +950,7 @@ class DartFormatChecker extends FormatChecker {
   }
 }
 
-/// Checks the format of any .py files using the "yapf" command.
+/// Checks the format of any .py files using the "black" command.
 class PythonFormatChecker extends FormatChecker {
   PythonFormatChecker({
     super.processManager,
@@ -959,57 +959,52 @@ class PythonFormatChecker extends FormatChecker {
     super.allFiles,
     super.messageCallback,
   }) : super(repoDir: repoDir) {
-    yapfBin = File(
-      path.join(engineDir(repoDir).path, 'tools', Platform.isWindows ? 'yapf.bat' : 'yapf.sh'),
+    blackBin = File(
+      path.join(engineDir(repoDir).path, 'tools', Platform.isWindows ? 'black.bat' : 'black.sh'),
     );
-    _yapfStyle = File(path.join(engineDir(repoDir).path, '.style.yapf'));
   }
 
-  late final File yapfBin;
-  late final File _yapfStyle;
+  late final File blackBin;
 
   @override
   Future<bool> checkFormatting() async {
     message('Checking Python formatting...');
-    return (await _runYapfCheck(fixing: false)) == 0;
+    return (await _runBlackCheck(fixing: false)) == 0;
   }
 
   @override
   Future<bool> fixFormatting() async {
     message('Fixing Python formatting...');
-    await _runYapfCheck(fixing: true);
-    // The yapf script shouldn't fail when fixing errors.
+    await _runBlackCheck(fixing: true);
+    // The black script shouldn't fail when fixing errors.
     return true;
   }
 
-  Future<int> _runYapfCheck({required bool fixing}) async {
+  Future<int> _runBlackCheck({required bool fixing}) async {
     final filesToCheck = <String>[
       ...await getFileList(<String>['*.py']),
       // Always include flutter/tools/gn.
       '${engineDir(repoDir).path}/tools/gn',
     ];
 
-    final cmd = <String>[
-      yapfBin.path,
-      '--style',
-      _yapfStyle.path,
-      if (!fixing) '--diff',
-      if (fixing) '--in-place',
-    ];
+    final cmd = <String>[blackBin.path, '--fast', if (!fixing) '--check', if (!fixing) '--diff'];
     final jobs = <WorkerJob>[];
     for (final file in filesToCheck) {
       jobs.add(WorkerJob(<String>[...cmd, file]));
     }
-    final yapfPool = ProcessPool(
+    final blackPool = ProcessPool(
       processRunner: _processRunner,
       printReport: namedReport('python format'),
     );
-    final List<WorkerJob> completedJobs = await yapfPool.runToCompletion(jobs);
+    final List<WorkerJob> completedJobs = await blackPool.runToCompletion(jobs);
     reportDone();
     final incorrect = <String>[];
+    final errorJobs = <WorkerJob>[];
     for (final job in completedJobs) {
       if (job.result.exitCode == 1) {
         incorrect.add('  ${job.command.last}\n${job.result.output}');
+      } else if (job.result.exitCode != 0) {
+        errorJobs.add(job);
       }
     }
     if (incorrect.isNotEmpty) {
@@ -1031,10 +1026,22 @@ class PythonFormatChecker extends FormatChecker {
         stdout.writeln('DONE');
         stdout.writeln();
       }
-    } else {
+    } else if (errorJobs.isEmpty) {
       message('All python files formatted correctly.');
     }
-    return incorrect.length;
+
+    if (errorJobs.isNotEmpty) {
+      final bool plural = errorJobs.length > 1;
+      error('The formatter failed to run on ${errorJobs.length} python file${plural ? 's' : ''}.');
+      stdout.writeln();
+      for (final job in errorJobs) {
+        stdout.writeln('--> ${job.command.last} produced the following error:');
+        stdout.write(job.result.stderr);
+        stdout.writeln();
+      }
+    }
+
+    return incorrect.length + errorJobs.length;
   }
 }
 

@@ -164,7 +164,7 @@ Objective-C++ and is automatically formatted with `clang-format`.
 ### Python
 
 Follows the [Google Python Style Guide][google_python_style] and is
-automatically formatted with `yapf`.
+automatically formatted with `black`.
 
 > [!WARNING]
 > Historically, the engine grew a number of one-off Python scripts, often as
