@@ -613,20 +613,29 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   ///
   /// If `inDispose` is true, this method was triggered by the widget being
   /// unmounted.
+  ///
+  /// See also:
+  /// * [requestChildrenClose], which triggers the closing sequence of each
+  ///   child by calling [handleCloseRequest] on each child.
   @protected
   void closeChildren({bool inDispose = false}) {
     assert(_debugMenuInfo('Closing children of $this${inDispose ? ' (dispose)' : ''}'));
-    for (final child in List<_RawMenuAnchorBaseMixin>.of(_anchorChildren)) {
+    final children = List<_RawMenuAnchorBaseMixin>.of(_anchorChildren);
+    for (final child in children) {
       child.close(inDispose: inDispose);
     }
   }
 
   /// Request that the open submenus of this menu be closed.
   ///
-  /// This method will call [handleCloseRequest] on each child of this
-  /// menu, which will trigger the closing sequence of each child.
+  /// This method will call [handleCloseRequest] on each child of this menu,
+  /// which will trigger the closing sequence of each child.
+  ///
+  /// See also:
+  /// * [closeChildren], which immediately closes each child without triggering
+  ///   the closing sequence.
   @protected
-  void closeChildrenWithRequest() {
+  void requestChildrenClose() {
     assert(_debugMenuInfo('Calling handleCloseRequest for children of $this'));
     final children = List<_RawMenuAnchorBaseMixin>.of(_anchorChildren);
     for (final child in children) {
@@ -641,7 +650,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   void handleOutsideTap(PointerDownEvent pointerDownEvent) {
     assert(_debugMenuInfo('Tapped Outside $menuController'));
     if (isOpen) {
-      closeChildrenWithRequest();
+      requestChildrenClose();
     }
   }
 
@@ -723,7 +732,7 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
     assert(_debugMenuInfo('Opening $this at ${position ?? Offset.zero}'));
 
     // Close all siblings.
-    _parent?.closeChildrenWithRequest();
+    _parent?.requestChildrenClose();
     assert(!_overlayController.isShowing);
     _menuPosition = position;
     _parent?._childChangedOpenState();
@@ -779,7 +788,7 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
 
   @override
   void handleCloseRequest() {
-    closeChildrenWithRequest();
+    requestChildrenClose();
     // Changes in MediaQuery.sizeOf(context) cause RawMenuAnchor to close during
     // didChangeDependencies. When this happens, calling setState during the
     // closing sequence (handleCloseRequest -> onCloseRequested -> hideOverlay)
@@ -955,7 +964,7 @@ class _RawMenuAnchorGroupState extends State<RawMenuAnchorGroup>
   @override
   void handleCloseRequest() {
     assert(_debugMenuInfo('Requesting close $this'));
-    closeChildrenWithRequest();
+    requestChildrenClose();
   }
 
   @override
@@ -1034,7 +1043,7 @@ class MenuController {
   /// without closing the menu itself.
   void closeChildren() {
     assert(_anchor != null);
-    _anchor!.closeChildrenWithRequest();
+    _anchor!.requestChildrenClose();
   }
 
   // ignore: use_setters_to_change_properties
