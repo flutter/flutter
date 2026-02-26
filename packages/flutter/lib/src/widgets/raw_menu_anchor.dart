@@ -320,7 +320,7 @@ class RawMenuAnchor extends StatefulWidget {
   /// while this menu is open. In this case, the callback can be used to add a
   /// delay or a closing animation while the sibling menu opens. When
   /// implementing this behavior, the closing menu should immediately stop being
-  /// interactive, so that it doesn't interfere with the opening sibling menu.
+  /// interactive so that it doesn't interfere with the opening sibling menu.
   /// Semantics, focus, and hit testing for the closing menu should be disabled
   /// for the duration of the closing animation.
   ///
