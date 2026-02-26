@@ -117,6 +117,8 @@ class Chrome {
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
+      '--password-store=basic',
+      '--use-mock-keychain',
       if (jsFlags.isNotEmpty) '--js-flags=$jsFlags',
     ];
 

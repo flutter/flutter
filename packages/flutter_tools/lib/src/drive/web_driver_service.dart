@@ -343,6 +343,8 @@ Map<String, dynamic> getDesiredCapabilities(
         '--no-default-browser-check',
         '--no-sandbox',
         '--no-first-run',
+        '--password-store=basic',
+        '--use-mock-keychain',
         if (headless!) '--headless',
         ...webBrowserFlags,
       ],
