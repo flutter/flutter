@@ -30,4 +30,66 @@ transforms:
         oldName: 'value'
         newName: 'initialValue'
 
+  # Changes made in https://github.com/flutter/flutter/pull/182419.
+  - title: "Migrate to 'enabled: false'"
+    date: 2026-02-14
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: "DropdownButton"
+    oneOf:
+      - if: "onChanged == 'null' && enabled == 'false'"
+        changes:
+          - kind: "removeParameter"
+            name: "onChanged"
+      - if: "onChanged == 'null' && enabled == ''"
+        changes:
+          - kind: "addParameter"
+            index: 0
+            name: "enabled"
+            style: "optional_named"
+            argumentValue:
+              expression: "false"
+              requiredIf: "onChanged == 'null'"
+          - kind: "removeParameter"
+            name: "onChanged"
+    variables:
+      onChanged:
+        kind: "fragment"
+        value: "arguments[onChanged]"
+      enabled:
+        kind: "fragment"
+        value: "arguments[enabled]"
+
+  # Changes made in https://github.com/flutter/flutter/pull/182419.
+  - title: "Migrate to 'enabled: false'"
+    date: 2026-02-14
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: "DropdownButtonFormField"
+    oneOf:
+      - if: "onChanged == 'null' && enabled == 'false'"
+        changes:
+          - kind: "removeParameter"
+            name: "onChanged"
+      - if: "onChanged == 'null' && enabled == ''"
+        changes:
+          - kind: "addParameter"
+            index: 0
+            name: "enabled"
+            style: "optional_named"
+            argumentValue:
+              expression: "false"
+              requiredIf: "onChanged == 'null'"
+          - kind: "removeParameter"
+            name: "onChanged"
+    variables:
+      onChanged:
+        kind: "fragment"
+        value: "arguments[onChanged]"
+      enabled:
+        kind: "fragment"
+        value: "arguments[enabled]"
+
 # Before adding a new fix: read instructions at the top of this file.
