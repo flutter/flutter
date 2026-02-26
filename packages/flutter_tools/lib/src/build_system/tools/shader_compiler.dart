@@ -184,7 +184,6 @@ class ShaderCompiler {
       '--input-type=frag',
       '--include=${input.parent.path}',
       '--include=$shaderLibPath',
-      '--verbose-error-output=${_fs.path.join(getBuildDirectory(), 'impellerc_error_${input.path.hashCode}.txt')}',
     ];
     _logger.printTrace('shaderc command: $cmd');
     final Process impellercProcess = await _processManager.start(cmd);

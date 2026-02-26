@@ -953,7 +953,7 @@ flutter:
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
           FakeCommand(
-            command: <Pattern>[
+            command: <String>[
               impellerc,
               '--sksl',
               '--runtime-stage-gles',
@@ -966,7 +966,6 @@ flutter:
               '--input-type=frag',
               '--include=/$assetsPath',
               '--include=$shaderLibDir',
-              RegExp(r'--verbose-error-output=build/impellerc_error_\d+.txt'),
             ],
             onRun: (_) {
               fileSystem.file(outputPath).createSync(recursive: true);
@@ -1017,7 +1016,7 @@ flutter:
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
           FakeCommand(
-            command: <Pattern>[
+            command: <String>[
               impellerc,
               '--sksl',
               '--iplr',
@@ -1028,7 +1027,6 @@ flutter:
               '--input-type=frag',
               '--include=/$assetsPath',
               '--include=$shaderLibDir',
-              RegExp(r'--verbose-error-output=build/impellerc_error_\d+.txt'),
             ],
             onRun: (_) {
               fileSystem.file(outputPath).createSync(recursive: true);
@@ -1073,7 +1071,7 @@ flutter:
         for (final shader in testShaders) {
           (globals.processManager as FakeProcessManager).addCommand(
             FakeCommand(
-              command: <Pattern>[
+              command: <String>[
                 impellerc,
                 '--sksl',
                 '--iplr',
@@ -1084,7 +1082,6 @@ flutter:
                 '--input-type=frag',
                 '--include=${fileSystem.path.join(materialDir.path, 'shaders')}',
                 '--include=$shaderLibDir',
-                RegExp(r'--verbose-error-output=build/impellerc_error_\d+.txt'),
               ],
               onRun: (_) {
                 fileSystem.file(outputPath).createSync(recursive: true);

@@ -45,7 +45,7 @@ class Switches {
   std::string entry_point_prefix = "";
   bool use_half_textures = false;
   bool require_framebuffer_fetch = false;
-  std::filesystem::path verbose_error_output;
+  bool verbose = false;
 
   Switches();
 

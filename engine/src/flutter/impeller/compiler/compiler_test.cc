@@ -111,7 +111,7 @@ bool CompilerTestBase::CanCompileAndReflect(const char* fixture_name,
   reflector_options.shader_name = "shader_name";
 
   compiler_ =
-      std::make_shared<Compiler>(fixture, source_options, reflector_options);
+      std::make_unique<Compiler>(fixture, source_options, reflector_options);
   if (!compiler_->IsValid()) {
     VALIDATION_LOG << "Compilation failed: " << compiler_->GetErrorMessages();
     return false;
@@ -191,8 +191,8 @@ bool CompilerTestBase::CanCompileAndReflect(const char* fixture_name,
   return true;
 }
 
-const std::shared_ptr<Compiler>& CompilerTestBase::GetCompiler() const {
-  return compiler_;
+const Compiler* CompilerTestBase::GetCompiler() const {
+  return compiler_.get();
 }
 
 }  // namespace testing

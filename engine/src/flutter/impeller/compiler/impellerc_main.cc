@@ -46,30 +46,23 @@ std::shared_ptr<Compiler> CreateCompiler(
                                     reflector_options);
 }
 
-void OutputVerboseError(const std::shared_ptr<std::string>& verbose_error,
-                        const Switches& switches) {
-  if (switches.verbose_error_output.empty()) {
-    std::cerr << "Compilation failure was truncated due to length. Use "
-                 "--verbose-error-output to output the full error "
-                 "message to a file.";
-    return;
-  }
-
+void OutputVerboseErrorFile(const std::string& verbose_error_messages,
+                            const Switches& switches) {
   auto error_mapping = std::make_shared<fml::NonOwnedMapping>(
-      reinterpret_cast<const uint8_t*>(verbose_error->data()),
-      verbose_error->size(), [](auto, auto) {});
-  auto output_path = std::filesystem::absolute(std::filesystem::current_path() /
-                                               switches.verbose_error_output);
+      reinterpret_cast<const uint8_t*>(verbose_error_messages.data()),
+      verbose_error_messages.size(), [](auto, auto) {});
+  std::filesystem::path output_path =
+      std::filesystem::path(fml::CreateTemporaryDirectory()) /
+      "impellerc_verbose_error.txt";
+
   if (fml::WriteAtomically(*switches.working_directory,
                            Utf8FromPath(output_path).c_str(), *error_mapping)) {
     std::cerr << "Full \"" << InferShaderNameFromPath(switches.source_file_name)
-              << "\" error output written to " << switches.verbose_error_output
-              << std::endl;
+              << "\" error output written to " << output_path << std::endl;
   } else {
     std::cerr << "Failed to write full \""
               << InferShaderNameFromPath(switches.source_file_name)
-              << "\" error output to " << switches.verbose_error_output
-              << std::endl;
+              << "\" error output to " << output_path << std::endl;
   }
 }
 
@@ -238,10 +231,23 @@ bool Main(const fml::CommandLine& command_line) {
     } else {
       std::cerr << "Compilation failed for target: "
                 << TargetPlatformToString(platform) << std::endl;
-      std::cerr << compiler->GetErrorMessages();
 
-      if (compiler->GetVerboseError()) {
-        OutputVerboseError(compiler->GetVerboseError(), switches);
+      std::string verbose_error_messages = compiler->GetVerboseErrorMessages();
+      if (verbose_error_messages.empty()) {
+        // No verbose error messages. Output the regular error messages.
+        std::cerr << compiler->GetErrorMessages();
+      } else {
+        if (switches.verbose) {
+          // Verbose messages are available and the --verbose flag was set.
+          // Directly output the verbose error messages.
+          std::cerr << verbose_error_messages;
+        } else {
+          // Verbose messages are available and the --verbose flag was not set.
+          // Output the regular error messages and write the verbose error
+          // messages to a file.
+          std::cerr << compiler->GetErrorMessages();
+          OutputVerboseErrorFile(verbose_error_messages, switches);
+        }
       }
 
       return false;

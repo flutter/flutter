@@ -529,8 +529,8 @@ void main() {
       final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
       final File infoPlist = frameworkDirectory.childFile('Info.plist');
       processManager.addCommands(<FakeCommand>[
-        FakeCommand(
-          command: <Pattern>[
+        const FakeCommand(
+          command: <String>[
             'HostArtifact.impellerc',
             '--runtime-stage-metal',
             '--iplr',
@@ -540,7 +540,6 @@ void main() {
             '--input-type=frag',
             '--include=/',
             '--include=/./shader_lib',
-            RegExp(r'--verbose-error-output=build/impellerc_error_\d+.txt'),
           ],
         ),
         createPlutilFakeCommand(infoPlist),
