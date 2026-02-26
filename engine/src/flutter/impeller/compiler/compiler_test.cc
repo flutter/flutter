@@ -88,7 +88,8 @@ bool CompilerTestBase::CanCompileAndReflect(
     const char* fixture_name,
     SourceType source_type,
     SourceLanguage source_language,
-    const char* entry_point_name) const {
+    const char* entry_point_name,
+    ESSLLanguageVersion gles_language_version) const {
   std::shared_ptr<fml::Mapping> fixture =
       flutter::testing::OpenFixtureAsMapping(fixture_name);
   if (!fixture || !fixture->GetMapping()) {
@@ -99,6 +100,8 @@ bool CompilerTestBase::CanCompileAndReflect(
   SourceOptions source_options(fixture_name, source_type);
   source_options.target_platform = GetParam();
   source_options.source_language = source_language;
+  source_options.gles_language_version =
+      static_cast<uint32_t>(gles_language_version);
   source_options.working_directory = std::make_shared<fml::UniqueFD>(
       flutter::testing::OpenFixturesDirectory());
   source_options.entry_point_name = EntryPointFunctionNameFromSourceName(
