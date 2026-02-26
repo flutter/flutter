@@ -2237,6 +2237,8 @@ Stream<File> _allFiles(
 class EvalResult {
   EvalResult({required this.stdout, required this.stderr, this.exitCode = 0});
 
+  static const kNotFoundExitCode = 127;
+
   final String stdout;
   final String stderr;
   final int exitCode;
@@ -2260,12 +2262,18 @@ Future<EvalResult> _evalCommand(
   }
 
   final time = Stopwatch()..start();
-  final Process process = await Process.start(
-    executable,
-    arguments,
-    workingDirectory: workingDirectory,
-    environment: environment,
-  );
+  final Process process;
+
+  try {
+    process = await Process.start(
+      executable,
+      arguments,
+      workingDirectory: workingDirectory,
+      environment: environment,
+    );
+  } on ProcessException catch (e) {
+    return EvalResult(stdout: '', stderr: e.toString(), exitCode: EvalResult.kNotFoundExitCode);
+  }
 
   final Future<List<List<int>>> savedStdout = process.stdout.toList();
   final Future<List<List<int>>> savedStderr = process.stderr.toList();
@@ -2532,7 +2540,9 @@ Future<void> lintKotlinFiles(String workingDirectory) async {
     '--baseline=$flutterRoot/$baselineRelativePath',
     '--editorconfig=$flutterRoot/$editorConfigRelativePath',
   ], workingDirectory: workingDirectory);
-  if (lintResult.exitCode != 0) {
+  if (lintResult.exitCode == EvalResult.kNotFoundExitCode) {
+    foundError(<String>['Failed to find ktlint on PATH. Kotlin code analysis failed.']);
+  } else if (lintResult.exitCode != 0) {
     final errorMessage =
         'Found lint violations in Kotlin files:\n ${lintResult.stdout}\n\n'
         'To reproduce this lint locally:\n'
