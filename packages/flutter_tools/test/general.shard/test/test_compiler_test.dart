@@ -271,6 +271,9 @@ class FakeTestCompiler extends TestCompiler {
 
   @override
   Future<ResidentCompiler?> createCompiler() async {
+    // Verify that the compiler was correctly initialized with the generated
+    // dill for the test.
+    expect(buildInfo.initializeFromDill, testFilePath);
     return residentCompiler;
   }
 }

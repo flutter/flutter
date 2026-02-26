@@ -11,13 +11,24 @@ import 'package:flutter/src/widgets/_window_positioner.dart';
 
 class KeyedWindow {
   KeyedWindow({
-    this.parent,
     this.isMainWindow = false,
     required this.key,
     required this.controller,
   });
 
-  final BaseWindowController? parent;
+  BaseWindowController? get parent {
+    switch (controller) {
+      case RegularWindowController():
+        return null;
+      case DialogWindowController dialogController:
+        return dialogController.parent;
+      case TooltipWindowController tooltipController:
+        return tooltipController.parent;
+      default:
+        throw Exception('Unknown controller type');
+    }
+  }
+
   final bool isMainWindow;
   final UniqueKey key;
   final BaseWindowController controller;
@@ -43,6 +54,10 @@ class WindowManager extends ChangeNotifier {
   void remove(UniqueKey key) {
     _windows.removeWhere((KeyedWindow window) => window.key == key);
     notifyListeners();
+  }
+
+  Iterable<KeyedWindow> getWindows({required BaseWindowController? parent}) {
+    return _windows.where((KeyedWindow window) => window.parent == parent);
   }
 }
 

@@ -16,11 +16,13 @@ const List<Widget> fooBarTexts = <Text>[
 void main() {
   group('image', () {
     testWidgets('finds Image widgets', (WidgetTester tester) async {
+      addTearDown(imageCache.clear);
       await tester.pumpWidget(_boilerplate(Image(image: FileImage(File('test')))));
       expect(find.image(FileImage(File('test'))), findsOneWidget);
     });
 
     testWidgets('finds Button widgets with Image', (WidgetTester tester) async {
+      addTearDown(imageCache.clear);
       await tester.pumpWidget(
         _boilerplate(ElevatedButton(onPressed: null, child: Image(image: FileImage(File('test'))))),
       );
@@ -166,13 +168,11 @@ void main() {
     });
 
     testWidgets('finds EditableText widgets', (WidgetTester tester) async {
+      final controller = TextEditingController()..text = 'this is test';
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: _boilerplate(
-              TextField(controller: TextEditingController()..text = 'this is test'),
-            ),
-          ),
+          home: Scaffold(body: _boilerplate(TextField(controller: controller))),
         ),
       );
 
@@ -557,6 +557,22 @@ void main() {
   });
 
   group('hitTestable', () {
+    Future<void> tapAndCheckHitTestWarning(
+      WidgetTester tester,
+      Finder finder, {
+      bool shouldWarn = false,
+    }) async {
+      WidgetController.hitTestWarningShouldBeFatal = true;
+      FlutterError? tapError;
+      try {
+        await tester.tap(finder);
+      } on FlutterError catch (e) {
+        tapError = e;
+      }
+      expect(tapError, shouldWarn ? isNotNull : isNull);
+      WidgetController.hitTestWarningShouldBeFatal = false;
+    }
+
     testWidgets('excludes non-hit-testable widgets', (WidgetTester tester) async {
       await tester.pumpWidget(
         _boilerplate(
@@ -585,6 +601,254 @@ void main() {
       expect(hitTestable, findsOneWidget);
       expect(tester.widget(hitTestable).key, const ValueKey<int>(0));
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/100758
+    testWidgets(
+      'GestureDetector inside Transform is tappable and hit testable and warnIfMissed will not warn if button is not missed',
+      (WidgetTester tester) async {
+        var tapCount = 0;
+
+        await tester.pumpWidget(
+          Center(
+            child: _ButtonWithTransform(
+              onTap: () {
+                tapCount++;
+              },
+            ),
+          ),
+        );
+
+        await tapAndCheckHitTestWarning(tester, find.byType(_ButtonWithTransform));
+
+        expect(find.byType(_ButtonWithTransform).hitTestable(), findsOneWidget);
+
+        expect(tapCount, 1);
+      },
+    );
+
+    // Regression test for https://github.com/flutter/flutter/issues/99302
+    testWidgets(
+      'GestureDetector inside AnimatedScale is tappable and hit testable and warnIfMissed will not warn if button is not missed',
+      (WidgetTester tester) async {
+        var tapCount = 0;
+
+        await tester.pumpWidget(
+          Center(
+            child: _ButtonWithAnimatedScale(
+              onTap: () {
+                tapCount++;
+              },
+            ),
+          ),
+        );
+
+        await tapAndCheckHitTestWarning(tester, find.byType(_ButtonWithAnimatedScale));
+
+        expect(find.byType(_ButtonWithAnimatedScale).hitTestable(), findsOneWidget);
+
+        expect(tapCount, 1);
+      },
+    );
+
+    testWidgets(
+      'GestureDetector inside IgnorePointer is tappable and hit testable and warnIfMissed will not warn when ignoring is false',
+      (WidgetTester tester) async {
+        var tapCount = 0;
+
+        await tester.pumpWidget(
+          Center(
+            child: _ButtonWithIgnorePointer(
+              onTap: () {
+                tapCount++;
+              },
+              ignoring: false,
+            ),
+          ),
+        );
+
+        await tapAndCheckHitTestWarning(tester, find.byType(_ButtonWithIgnorePointer));
+
+        expect(find.byType(_ButtonWithIgnorePointer).hitTestable(), findsOneWidget);
+
+        expect(tapCount, 1);
+      },
+    );
+
+    testWidgets(
+      'GestureDetector inside IgnorePointer is not tappable or hit testable and warnIfMissed will warn when ignoring is true',
+      (WidgetTester tester) async {
+        var tapCount = 0;
+
+        await tester.pumpWidget(
+          Center(
+            child: _ButtonWithIgnorePointer(
+              onTap: () {
+                tapCount++;
+              },
+              ignoring: true,
+            ),
+          ),
+        );
+
+        await tapAndCheckHitTestWarning(
+          tester,
+          find.byType(_ButtonWithIgnorePointer),
+          shouldWarn: true,
+        );
+
+        expect(find.byType(_ButtonWithIgnorePointer).hitTestable(), findsNothing);
+
+        expect(tapCount, 0);
+      },
+    );
+
+    testWidgets(
+      'GestureDetector inside AbsorbPointer is not hit testable and warnIfMissed will warn',
+      (WidgetTester tester) async {
+        var tapCount = 0;
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: AbsorbPointer(
+                child: GestureDetector(
+                  onTap: () {
+                    tapCount++;
+                  },
+                  child: const Text('Target'),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tapAndCheckHitTestWarning(tester, find.text('Target'), shouldWarn: true);
+        expect(find.text('Target').hitTestable(), findsNothing);
+        expect(tapCount, 0);
+      },
+    );
+
+    testWidgets(
+      'GestureDetector obscured by another widget in a Stack is not hit testable and warnIfMissed will warn',
+      (WidgetTester tester) async {
+        var tapCount = 0;
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Stack(
+                children: <Widget>[
+                  GestureDetector(
+                    onTap: () {
+                      tapCount++;
+                    },
+                    child: const Text('Target'),
+                  ),
+                  GestureDetector(
+                    onTap: () {},
+                    child: Container(color: const Color(0xFF000000), width: 100, height: 100),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        await tapAndCheckHitTestWarning(tester, find.text('Target'), shouldWarn: true);
+        expect(find.text('Target').hitTestable(), findsNothing);
+        expect(tapCount, 0);
+      },
+    );
+
+    testWidgets(
+      'GestureDetector inside Visibility(visible: false) is not hit testable and warnIfMissed will warn',
+      (WidgetTester tester) async {
+        var tapCount = 0;
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Visibility(
+                visible: false,
+                child: GestureDetector(
+                  onTap: () {
+                    tapCount++;
+                  },
+                  child: const Text('Target'),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tapAndCheckHitTestWarning(
+          tester,
+          find.text('Target', skipOffstage: false),
+          shouldWarn: true,
+        );
+        expect(find.text('Target', skipOffstage: false).hitTestable(), findsNothing);
+        expect(tapCount, 0);
+      },
+    );
+
+    testWidgets('GestureDetector inside Offstage is not hit testable and warnIfMissed will warn', (
+      WidgetTester tester,
+    ) async {
+      var tapCount = 0;
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Offstage(
+              child: GestureDetector(
+                onTap: () {
+                  tapCount++;
+                },
+                child: const Text('Target'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tapAndCheckHitTestWarning(
+        tester,
+        find.text('Target', skipOffstage: false),
+        shouldWarn: true,
+      );
+      expect(find.text('Target', skipOffstage: false).hitTestable(), findsNothing);
+      expect(tapCount, 0);
+    });
+
+    testWidgets(
+      'GestureDetector off-screen in a ScrollView is not hit testable and warnIfMissed will warn',
+      (WidgetTester tester) async {
+        var tapCount = 0;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: ListView(
+              children: <Widget>[
+                const SizedBox(height: 2000), // Push the target off-screen
+                GestureDetector(
+                  onTap: () {
+                    tapCount++;
+                  },
+                  child: const Text('Target'),
+                ),
+              ],
+            ),
+          ),
+        );
+
+        await tapAndCheckHitTestWarning(
+          tester,
+          find.text('Target', skipOffstage: false),
+          shouldWarn: true,
+        );
+        expect(find.text('Target', skipOffstage: false).hitTestable(), findsNothing);
+        expect(tapCount, 0);
+      },
+    );
 
     // Regression test for https://github.com/flutter/flutter/issues/67743.
     testWidgets('tapping directly on a Sliver produces an error', (WidgetTester tester) async {
@@ -780,11 +1044,16 @@ void main() {
     });
 
     testWidgets('finds only static text for now', (WidgetTester tester) async {
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final controller = TextEditingController(text: 'text');
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         _boilerplate(
           EditableText(
-            controller: TextEditingController(text: 'text'),
-            focusNode: FocusNode(),
+            controller: controller,
+            focusNode: focusNode,
             style: const TextStyle(),
             cursorColor: const Color(0x00000000),
             backgroundCursorColor: const Color(0x00000000),
@@ -826,6 +1095,7 @@ void main() {
   });
 
   testWidgets('finds multiple subtypes', (WidgetTester tester) async {
+    addTearDown(imageCache.clear);
     await tester.pumpWidget(
       _boilerplate(
         Row(
@@ -1498,6 +1768,7 @@ void main() {
     group('scrollable', () {
       testWidgets('can find node that can scroll up', (WidgetTester tester) async {
         final controller = ScrollController();
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
             home: SingleChildScrollView(
@@ -1515,6 +1786,7 @@ void main() {
 
       testWidgets('can find node that can scroll down', (WidgetTester tester) async {
         final controller = ScrollController(initialScrollOffset: 400);
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
             home: SingleChildScrollView(
@@ -1532,6 +1804,7 @@ void main() {
 
       testWidgets('can find node that can scroll left', (WidgetTester tester) async {
         final controller = ScrollController();
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
             home: SingleChildScrollView(
@@ -1550,6 +1823,7 @@ void main() {
 
       testWidgets('can find node that can scroll right', (WidgetTester tester) async {
         final controller = ScrollController(initialScrollOffset: 200);
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
             home: SingleChildScrollView(
@@ -1873,5 +2147,56 @@ class _FakeFinder extends FinderBase<String> {
   @override
   Iterable<String> findInCandidates(Iterable<String> candidates) {
     return findInCandidatesCallback?.call(candidates) ?? candidates;
+  }
+}
+
+class _ButtonWithTransform extends StatelessWidget {
+  const _ButtonWithTransform({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Transform.scale(
+    scale: 1.1,
+    child: GestureDetector(
+      onTap: onTap,
+      child: Container(width: 40, height: 40, color: const Color(0xffff0000)),
+    ),
+  );
+}
+
+class _ButtonWithAnimatedScale extends StatelessWidget {
+  const _ButtonWithAnimatedScale({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedScale(
+      scale: 0.9,
+      duration: const Duration(milliseconds: 200),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(width: 40, height: 40, color: const Color(0xffff0000)),
+      ),
+    );
+  }
+}
+
+class _ButtonWithIgnorePointer extends StatelessWidget {
+  const _ButtonWithIgnorePointer({required this.onTap, required this.ignoring});
+
+  final VoidCallback onTap;
+  final bool ignoring;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      ignoring: ignoring,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(width: 40, height: 40, color: const Color(0xffff0000)),
+      ),
+    );
   }
 }

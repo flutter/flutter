@@ -817,8 +817,12 @@ void main() {
           command: <String>[
             'Artifact.genSnapshotArm64.TargetPlatform.darwin.release',
             '--deterministic',
-            '--snapshot_kind=app-aot-assembly',
-            '--assembly=${environment.buildDir.childFile('arm64/snapshot_assembly.S').path}',
+            '--snapshot_kind=app-aot-macho-dylib',
+            '--macho=${environment.buildDir.childFile('arm64/App.framework/App').path}',
+            '--macho-object=${environment.buildDir.childFile('arm64/app.o').path}',
+            '--macho-min-os-version=10.15',
+            '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
+            '--macho-install-name=@rpath/App.framework/App',
             environment.buildDir.childFile('app.dill').path,
           ],
         ),
@@ -826,79 +830,13 @@ void main() {
           command: <String>[
             'Artifact.genSnapshotX64.TargetPlatform.darwin.release',
             '--deterministic',
-            '--snapshot_kind=app-aot-assembly',
-            '--assembly=${environment.buildDir.childFile('x86_64/snapshot_assembly.S').path}',
+            '--snapshot_kind=app-aot-macho-dylib',
+            '--macho=${environment.buildDir.childFile('x86_64/App.framework/App').path}',
+            '--macho-object=${environment.buildDir.childFile('x86_64/app.o').path}',
+            '--macho-min-os-version=10.15',
+            '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
+            '--macho-install-name=@rpath/App.framework/App',
             environment.buildDir.childFile('app.dill').path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'xcrun',
-            'cc',
-            '-arch',
-            'arm64',
-            '-c',
-            environment.buildDir.childFile('arm64/snapshot_assembly.S').path,
-            '-o',
-            environment.buildDir.childFile('arm64/snapshot_assembly.o').path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'xcrun',
-            'cc',
-            '-arch',
-            'x86_64',
-            '-c',
-            environment.buildDir.childFile('x86_64/snapshot_assembly.S').path,
-            '-o',
-            environment.buildDir.childFile('x86_64/snapshot_assembly.o').path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'xcrun',
-            'clang',
-            '-arch',
-            'arm64',
-            '-dynamiclib',
-            '-Xlinker',
-            '-rpath',
-            '-Xlinker',
-            '@executable_path/Frameworks',
-            '-Xlinker',
-            '-rpath',
-            '-Xlinker',
-            '@loader_path/Frameworks',
-            '-fapplication-extension',
-            '-install_name',
-            '@rpath/App.framework/App',
-            '-o',
-            environment.buildDir.childFile('arm64/App.framework/App').path,
-            environment.buildDir.childFile('arm64/snapshot_assembly.o').path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'xcrun',
-            'clang',
-            '-arch',
-            'x86_64',
-            '-dynamiclib',
-            '-Xlinker',
-            '-rpath',
-            '-Xlinker',
-            '@executable_path/Frameworks',
-            '-Xlinker',
-            '-rpath',
-            '-Xlinker',
-            '@loader_path/Frameworks',
-            '-fapplication-extension',
-            '-install_name',
-            '@rpath/App.framework/App',
-            '-o',
-            environment.buildDir.childFile('x86_64/App.framework/App').path,
-            environment.buildDir.childFile('x86_64/snapshot_assembly.o').path,
           ],
         ),
         FakeCommand(
@@ -974,40 +912,6 @@ void main() {
     },
   );
 
-  testUsingContext(
-    'can be skipped with Swift Package Manager',
-    () async {
-      final Directory projectDirectory = fileSystem.systemTempDirectory.childDirectory(
-        'my_project',
-      );
-      projectDirectory.childFile('pubspec.yaml').createSync(recursive: true);
-      projectDirectory.childDirectory('macos').createSync();
-      projectDirectory
-          .childDirectory('macos')
-          .childDirectory('Flutter')
-          .childDirectory('ephemeral')
-          .childDirectory('Packages')
-          .childDirectory('.packages')
-          .childDirectory('FlutterFramework')
-          .createSync(recursive: true);
-      final environment = Environment.test(
-        fileSystem.currentDirectory,
-        processManager: processManager,
-        artifacts: artifacts,
-        logger: logger,
-        fileSystem: fileSystem,
-        projectDir: projectDirectory,
-        defines: <String, String>{kXcodeBuildScript: 'build'},
-      );
-      const Target target = ReleaseUnpackMacOS();
-      expect(await target.canSkip(environment), isTrue);
-    },
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
-    },
-  );
-
   group('FlutterMacOS output', () {
     late MemoryFileSystem testFileSystem;
 
@@ -1019,20 +923,6 @@ void main() {
           .directory('macos/Flutter/ephemeral/Packages/.packages/FlutterFramework')
           .createSync(recursive: true);
     });
-
-    testUsingContext(
-      'not included when using SwiftPM',
-      () async {
-        const Target target = ReleaseUnpackMacOS();
-        expect(target.outputs.contains(kFlutterMacOSFrameworkBinarySource), isFalse);
-      },
-      overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
-        FileSystem: () => testFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
     testUsingContext(
       'included when not using SwiftPM',
       () async {
