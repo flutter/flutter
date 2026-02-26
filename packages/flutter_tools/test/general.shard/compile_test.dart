@@ -166,7 +166,7 @@ void main() {
         (e) => e != .web_javascript,
       )) {
         try {
-          ResidentCompiler(
+          const ResidentCompilerFactory().create(
             targetPlatform: target,
             buildInfo: BuildInfo.debug.copyWith(includeUnsupportedPlatformLibraryStubs: true),
             logger: BufferLogger.test(),
@@ -189,8 +189,8 @@ void main() {
 
       // Initializing the compiler with includeUnsupportedPlatformLibraryStubs for DDC is
       // supported.
-      ResidentCompiler(
-        targetPlatform: .web_javascript,
+      const ResidentCompilerFactory().create(
+        targetPlatform:.web_javascript,
         buildInfo: BuildInfo.debug.copyWith(includeUnsupportedPlatformLibraryStubs: true),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
