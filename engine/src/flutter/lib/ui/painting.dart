@@ -436,22 +436,19 @@ class Color {
     } else {
       if (x == null) {
         return _scaleAlpha(y, t);
-      } else if (x.colorSpace == y.colorSpace) {
-        return Color.from(
-          alpha: clampDouble(_lerpDouble(x.a, y.a, t), 0, 1),
-          red: clampDouble(_lerpDouble(x.r, y.r, t), 0, 1),
-          green: clampDouble(_lerpDouble(x.g, y.g, t), 0, 1),
-          blue: clampDouble(_lerpDouble(x.b, y.b, t), 0, 1),
-          colorSpace: x.colorSpace,
-        );
       } else {
-        final ColorSpace resultColorSpace = _widerColorSpace(x.colorSpace, y.colorSpace);
-        final Color a = x.colorSpace == resultColorSpace
-            ? x
-            : x.withValues(colorSpace: resultColorSpace);
-        final Color b = y.colorSpace == resultColorSpace
-            ? y
-            : y.withValues(colorSpace: resultColorSpace);
+        final Color a;
+        final Color b;
+        final ColorSpace resultColorSpace;
+        if (x.colorSpace == y.colorSpace) {
+          a = x;
+          b = y;
+          resultColorSpace = x.colorSpace;
+        } else {
+          resultColorSpace = _widerColorSpace(x.colorSpace, y.colorSpace);
+          a = x.withValues(colorSpace: resultColorSpace);
+          b = y.withValues(colorSpace: resultColorSpace);
+        }
         return Color.from(
           alpha: clampDouble(_lerpDouble(a.a, b.a, t), 0, 1),
           red: clampDouble(_lerpDouble(a.r, b.r, t), 0, 1),
