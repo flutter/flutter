@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -2218,6 +2219,98 @@ void main() {
       await tester.pumpAndSettle();
     });
   });
+
+  group('enableFilter parameter tests', () {
+    final GlobalKey scaffoldKey = GlobalKey();
+
+    bool checkHasImageFilterLayer() {
+      // The transition widget is the ancestor of the scaffold
+      final BuildContext context = scaffoldKey.currentContext!;
+      var found = false;
+      context.visitAncestorElements((element) {
+        final RenderObject? renderObject = element.findRenderObject();
+        if (renderObject?.debugLayer is ImageFilterLayer) {
+          found = true;
+          return false;
+        }
+        return true;
+      });
+      return found;
+    }
+
+    Widget dragGestureApp(bool enableFilter) {
+      return CupertinoApp(
+        home: CupertinoPageScaffold(
+          key: scaffoldKey,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                const Text('Page 1'),
+                CupertinoButton(
+                  onPressed: () {
+                    showCupertinoSheet<void>(
+                      context: scaffoldKey.currentContext!,
+                      enableFilter: enableFilter,
+                      pageBuilder: (BuildContext context) {
+                        return const CupertinoPageScaffold(child: Center(child: Text('Page 2')));
+                      },
+                    );
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    Future<void> pumpSheet(WidgetTester tester, bool enableFilter) async {
+      await tester.pumpWidget(dragGestureApp(enableFilter));
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
+      expect(find.text('Page 2'), findsOneWidget);
+    }
+
+    testWidgets('Non-null filter quality should add ImageFilterLayer during transition', (
+      WidgetTester tester,
+    ) async {
+      await pumpSheet(tester, true);
+
+      // ImageFilterLayer should not be found after the transition is completed
+      // because the ScaleTransition/MatrixTransition will set the Transform.filterQuality to null
+      expect(checkHasImageFilterLayer(), false);
+
+      final TestGesture gesture = await tester.startGesture(const Offset(100, 300));
+      await gesture.moveBy(const Offset(0, 100));
+      await tester.pump();
+
+      // ImageFilterLayer should be found when the sheet is dragged
+      expect(checkHasImageFilterLayer(), true);
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('Null filter quality should not add ImageFilterLayer during transition', (
+      WidgetTester tester,
+    ) async {
+      await pumpSheet(tester, false);
+
+      expect(checkHasImageFilterLayer(), false);
+
+      final TestGesture gesture = await tester.startGesture(const Offset(100, 300));
+      await gesture.moveBy(const Offset(0, 100));
+      await tester.pump();
+
+      // ImageFilterLayer should not be found even the sheet is dragged
+      expect(checkHasImageFilterLayer(), false);
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    });
+  });
+
   testWidgets('didUpdateWidget in sheet transition does not try and use multiple tickers', (
     WidgetTester tester,
   ) async {
