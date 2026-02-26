@@ -2155,6 +2155,19 @@ void main() {
     );
     expect(tester.getSize(find.byType(ReorderableList)), Size.zero);
   });
+
+  testWidgets('ReorderableDragStartListener does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const TestWidgetsApp(
+        home: Center(
+          child: SizedBox.shrink(child: ReorderableDragStartListener(index: 1, child: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(ReorderableDragStartListener)), Size.zero);
+  });
 }
 
 class TestList extends StatelessWidget {
