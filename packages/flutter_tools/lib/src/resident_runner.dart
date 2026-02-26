@@ -71,7 +71,7 @@ class FlutterDevice {
       fileSystem: globals.fs,
     );
 
-    final generator = ResidentCompiler(
+    final ResidentCompiler generator = residentCompilerFactory.create(
       artifacts: globals.artifacts!,
       processManager: globals.processManager,
       logger: globals.logger,

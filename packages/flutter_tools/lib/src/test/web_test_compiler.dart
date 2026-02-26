@@ -135,7 +135,7 @@ class WebTestCompiler {
       fileSystem: _fileSystem,
       config: _config,
     );
-    final residentCompiler = ResidentCompiler(
+    final ResidentCompiler residentCompiler = residentCompilerFactory.create(
       buildInfo: buildInfo.copyWith(
         fileSystemRoots: <String>[projectDirectory.childDirectory('test').path, testOutputDir],
         initializeFromDill: cachedKernelPath,
