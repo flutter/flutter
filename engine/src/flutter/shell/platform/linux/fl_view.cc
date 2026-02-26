@@ -199,16 +199,18 @@ static void handle_geometry_changed(FlView* self) {
     display_id = fl_display_monitor_get_display_id(
         fl_engine_get_display_monitor(self->engine), monitor);
   }
+  size_t width = allocation.width, height = allocation.height;
+  size_t min_width = width, min_height = height;
+  size_t max_width = width, max_height = height;
   fl_engine_send_window_metrics_event(
-      self->engine, display_id, self->view_id, allocation.width * scale_factor,
-      allocation.height * scale_factor, scale_factor);
+      self->engine, display_id, self->view_id, min_width * scale_factor,
+      min_height * scale_factor, max_width * scale_factor,
+      max_height * scale_factor, scale_factor);
 }
 
 static void view_added_cb(GObject* object,
                           GAsyncResult* result,
                           gpointer user_data) {
-  FlView* self = FL_VIEW(user_data);
-
   g_autoptr(GError) error = nullptr;
   if (!fl_engine_add_view_finish(FL_ENGINE(object), result, &error)) {
     if (g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
@@ -219,8 +221,6 @@ static void view_added_cb(GObject* object,
     // FIXME: Show on the GLArea
     return;
   }
-
-  handle_geometry_changed(self);
 }
 
 // Called when the engine updates accessibility.
@@ -779,8 +779,11 @@ G_MODULE_EXPORT FlView* fl_view_new_for_engine(FlEngine* engine) {
 
   self->engine = FL_ENGINE(g_object_ref(engine));
 
-  self->view_id = fl_engine_add_view(engine, FL_RENDERABLE(self), 1, 1, 1.0,
-                                     self->cancellable, view_added_cb, self);
+  size_t min_width = 1, min_height = 1, max_width = 1, max_height = 1;
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  self->view_id = fl_engine_add_view(
+      engine, FL_RENDERABLE(self), min_width, min_height, max_width, max_height,
+      scale_factor, self->cancellable, view_added_cb, self);
 
   setup_engine(self);
 
