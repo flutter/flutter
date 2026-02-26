@@ -15,7 +15,6 @@ import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.DeepLinkJsonFromManifestTask
 import com.flutter.gradle.tasks.GenerateEngineFlagsManifestTask
-import com.flutter.gradle.tasks.ManifestModifierTask
 import groovy.lang.Closure
 import org.gradle.api.GradleException
 import org.gradle.api.Project
