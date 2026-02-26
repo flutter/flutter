@@ -1008,7 +1008,7 @@ void main() {
         registrar: registrar,
       );
 
-      final SemanticsConfiguration config = SemanticsConfiguration();
+      final config = SemanticsConfiguration();
       paragraph.describeSemanticsConfiguration(config);
 
       expect(config.isTextField, isTrue);
@@ -1025,7 +1025,7 @@ void main() {
         registrar: registrar,
       );
 
-      final SemanticsConfiguration config = SemanticsConfiguration();
+      final config = SemanticsConfiguration();
       paragraph.describeSemanticsConfiguration(config);
 
       expect(config.isTextField, isFalse);
