@@ -8,9 +8,9 @@ This page outlines the current process for determining that information.
 
 ## Process
 
-### Finding the Dart SDK commit contained in FLutter SDK commit X
+### Finding the Dart SDK commit contained in Flutter SDK commit X
 
-To find out which Dart SDK sha is contained in a particular FLutter SDK commit of:
+To find out which Dart SDK sha is contained in a particular Flutter SDK commit of:
 
 1. Let the Flutter SDK commit be _SDK_COMMIT_
 
