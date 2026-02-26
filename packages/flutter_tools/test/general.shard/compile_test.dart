@@ -190,7 +190,7 @@ void main() {
       // Initializing the compiler with includeUnsupportedPlatformLibraryStubs for DDC is
       // supported.
       const ResidentCompilerFactory().create(
-        targetPlatform:.web_javascript,
+        targetPlatform: .web_javascript,
         buildInfo: BuildInfo.debug.copyWith(includeUnsupportedPlatformLibraryStubs: true),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
