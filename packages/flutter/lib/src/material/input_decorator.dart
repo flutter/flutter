@@ -2580,7 +2580,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     // The _Decoration widget and _RenderDecoration assume that contentPadding
     // has been resolved to EdgeInsets.
-    final TextDirection textDirection = Directionality.of(context);
+    final TextDirection textDirection = decoration.textDirection ?? Directionality.of(context);
     final bool flipHorizontal = switch (textDirection) {
       TextDirection.ltr => false,
       TextDirection.rtl => true,
@@ -2680,7 +2680,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         counter: counter,
         container: container,
       ),
-      textDirection: decoration.textDirection ?? textDirection,
+      textDirection: textDirection,
       textBaseline: textBaseline,
       textAlignVertical: widget.textAlignVertical,
       isFocused: isFocused,
