@@ -790,6 +790,10 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
 
   @override
   void handleCloseRequest() {
+    if (!isOpen) {
+      return;
+    }
+
     // Changes in MediaQuery.sizeOf(context) cause RawMenuAnchor to close during
     // didChangeDependencies. When this happens, calling setState during the
     // closing sequence (handleCloseRequest -> onCloseRequested -> hideOverlay)

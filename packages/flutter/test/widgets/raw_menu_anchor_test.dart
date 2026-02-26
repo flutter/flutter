@@ -2933,7 +2933,7 @@ void main() {
       await tester.pump();
 
       expect(find.text(Tag.a.a.a.a.text), findsOneWidget);
-      expect(closeRequests, <Tag>[Tag.a.a, Tag.a.a.a]);
+      expect(closeRequests, <Tag>[]);
 
       closeRequests.clear();
 
