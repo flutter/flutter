@@ -367,8 +367,7 @@ class RegularWindowControllerMacOS extends RegularWindowController with _WindowC
     BoxConstraints? preferredConstraints,
     String? title,
     bool decorated = true,
-  }) : _owner = owner,
-       _delegate = delegate,
+  }) : _delegate = delegate,
        super.empty() {
     _initController(owner);
 
@@ -505,8 +504,7 @@ class DialogWindowControllerMacOS extends DialogWindowController with _WindowCon
     BoxConstraints? preferredConstraints,
     String? title,
     bool decorated = true,
-  }) : _owner = owner,
-       _delegate = delegate,
+  }) : _delegate = delegate,
        super.empty() {
     _initController(owner);
 
