@@ -28,7 +28,7 @@ import 'menu_style.dart';
 ///
 ///  * [DropdownMenu], which is the underlying text field without the [Form]
 ///    integration.
-class DropdownMenuFormField<T extends Object> extends FormField<T> {
+class DropdownMenuFormField<T> extends FormField<T> {
   /// Creates a [DropdownMenu] widget that is a [FormField].
   ///
   /// For a description of the `onSaved`, `validator`, or `autovalidateMode`
@@ -164,7 +164,7 @@ class DropdownMenuFormField<T extends Object> extends FormField<T> {
   FormFieldState<T> createState() => _DropdownMenuFormFieldState<T>();
 }
 
-class _DropdownMenuFormFieldState<T extends Object> extends FormFieldState<T> {
+class _DropdownMenuFormFieldState<T> extends FormFieldState<T> {
   DropdownMenuFormField<T> get _dropdownMenuFormField => widget as DropdownMenuFormField<T>;
 
   // The controller used to restore the selected item.

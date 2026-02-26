@@ -99,6 +99,7 @@ impellerc("runtime_stages") {
     "uniforms_and_sampler_1.frag",
     "uniforms_and_sampler_2.frag",
     "runtime_stage_border.frag",
+    "runtime_stage_vector_array.frag",
   ]
   sl_file_extension = "iplr"
 
@@ -162,6 +163,7 @@ test_fixtures("file_fixtures") {
     "types.h",
     "wtf.otf",
     "texture_lookup.frag",
+    "mat2_test.frag",
   ]
   if (host_os == "mac") {
     fixtures += [ "/System/Library/Fonts/Apple Color Emoji.ttc" ]

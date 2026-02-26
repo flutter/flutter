@@ -40,8 +40,16 @@ void main() {
               .childDirectory('Runner.xcodeproj')
               .childFile('project.pbxproj');
           expect(pbxprojFile.existsSync(), isTrue);
+          String pbxprojFileContents = pbxprojFile.readAsStringSync();
+          expect(pbxprojFileContents.contains('FlutterGeneratedPluginSwiftPackage'), isFalse);
           expect(
-            pbxprojFile.readAsStringSync().contains('FlutterGeneratedPluginSwiftPackage'),
+            pbxprojFileContents.contains('784666492D4C4C64000A1A5F /* FlutterFramework */'),
+            isFalse,
+          );
+          expect(
+            pbxprojFileContents.contains(
+              '78DABEA22ED26510000E7860 /* ${createdCocoaPodsPlugin.pluginName} */',
+            ),
             isFalse,
           );
 
@@ -80,6 +88,70 @@ void main() {
               appDirectoryPath: appDirectoryPath,
               cocoaPodsPlugin: createdCocoaPodsPlugin,
             ),
+          );
+
+          await SwiftPackageManagerUtils.enableSwiftPackageManager(
+            flutterBin,
+            workingDirectoryPath,
+          );
+
+          // Convert CocoaPod plugin to support SwiftPM
+          fileSystem
+              .directory(createdCocoaPodsPlugin.pluginPath)
+              .childDirectory(platformName)
+              .childDirectory(createdCocoaPodsPlugin.pluginName)
+              .childFile('Package.swift')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+
+import PackageDescription
+let package = Package(
+    name: "${createdCocoaPodsPlugin.pluginName}",
+    products: [
+        .library(name: "${createdCocoaPodsPlugin.pluginName.replaceAll('_', '-')}", targets: ["${createdCocoaPodsPlugin.pluginName}"])
+    ],
+    targets: [
+        .target(
+            name: "${createdCocoaPodsPlugin.pluginName}"
+        )
+    ]
+)
+''');
+          fileSystem
+              .directory(createdCocoaPodsPlugin.pluginPath)
+              .childDirectory(platformName)
+              .childDirectory(createdCocoaPodsPlugin.pluginName)
+              .childDirectory('Sources')
+              .childDirectory(createdCocoaPodsPlugin.pluginName)
+              .childFile('${createdCocoaPodsPlugin.className}.swift')
+            ..createSync(recursive: true)
+            ..writeAsStringSync(
+              fileSystem
+                  .directory(createdCocoaPodsPlugin.pluginPath)
+                  .childDirectory(platformName)
+                  .childDirectory('Classes')
+                  .childFile('${createdCocoaPodsPlugin.className}.swift')
+                  .readAsStringSync(),
+            );
+
+          await SwiftPackageManagerUtils.buildApp(
+            flutterBin,
+            appDirectoryPath,
+            options: <String>[platformName, '--debug', '-v'],
+          );
+          pbxprojFileContents = pbxprojFile.readAsStringSync();
+          expect(pbxprojFileContents.contains('FlutterGeneratedPluginSwiftPackage'), isTrue);
+          expect(
+            pbxprojFileContents.contains('784666492D4C4C64000A1A5F /* FlutterFramework */'),
+            isTrue,
+          );
+          expect(
+            pbxprojFileContents.contains(
+              '78DABEA22ED26510000E7860 /* ${createdCocoaPodsPlugin.pluginName} */',
+            ),
+            isTrue,
           );
         } finally {
           await SwiftPackageManagerUtils.disableSwiftPackageManager(

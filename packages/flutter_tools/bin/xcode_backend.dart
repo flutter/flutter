@@ -286,15 +286,15 @@ class Context {
     final xcodeFrameworksDir =
         '${environment['TARGET_BUILD_DIR']}/${environment['FRAMEWORKS_FOLDER_PATH']}';
     runSync('mkdir', <String>['-p', '--', xcodeFrameworksDir]);
-    runRsync('${environment['BUILT_PRODUCTS_DIR']}/App.framework', xcodeFrameworksDir);
 
     final String? expandedCodeSignIdentity = environment['EXPANDED_CODE_SIGN_IDENTITY'];
-
     final bool codesign =
         platform == TargetPlatform.macos &&
         expandedCodeSignIdentity != null &&
         expandedCodeSignIdentity.isNotEmpty &&
         environment['CODE_SIGNING_REQUIRED'] != 'NO';
+
+    _embedAppFramework(xcodeFrameworksDir, codesign ? expandedCodeSignIdentity : null);
 
     var shouldEmbedFlutterFramework = true;
     if (_usingFlutterFrameworkSwiftPackage()) {
@@ -332,7 +332,6 @@ class Context {
           );
 
           if (codesign) {
-            _codesignFramework(expandedCodeSignIdentity, '$xcodeFrameworksDir/App.framework/App');
             _codesignFramework(
               expandedCodeSignIdentity,
               '$xcodeFrameworksDir/FlutterMacOS.framework/FlutterMacOS',
@@ -350,6 +349,13 @@ class Context {
 
     if (platform == TargetPlatform.ios) {
       addVmServiceBonjourService();
+    }
+  }
+
+  void _embedAppFramework(String xcodeFrameworksDir, String? expandedCodeSignIdentity) {
+    runRsync('${environment['BUILT_PRODUCTS_DIR']}/App.framework', xcodeFrameworksDir);
+    if (expandedCodeSignIdentity != null) {
+      _codesignFramework(expandedCodeSignIdentity, '$xcodeFrameworksDir/App.framework/App');
     }
   }
 

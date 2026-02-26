@@ -185,7 +185,11 @@ void ShellTest::SetViewportMetrics(Shell* shell, double width, double height) {
       std::vector<double>(),  // display features bounds
       std::vector<int>(),     // display features type
       std::vector<int>(),     // display features state
-      0                       // Display ID
+      0,                      // Display ID
+      0,                      // display corner radius top left
+      0,                      // display corner radius top right
+      0,                      // display corner radius bottom right
+      0,                      // display corner radius bottom left
   };
   // Set viewport to nonempty, and call Animator::BeginFrame to make the layer
   // tree pipeline nonempty. Without either of this, the layer tree below

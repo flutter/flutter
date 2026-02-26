@@ -23,14 +23,14 @@ class FlutterWindowControllerTest : public FlutterEngineTest {
 
     [GetFlutterEngine() runWithEntrypoint:@"testWindowController"];
 
-    bool signalled = false;
+    signalled_ = false;
 
     AddNativeCallback("SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
                         isolate_ = Isolate::Current();
-                        signalled = true;
+                        signalled_ = true;
                       }));
 
-    while (!signalled) {
+    while (!signalled_) {
       CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, false);
     }
   }
@@ -51,6 +51,7 @@ class FlutterWindowControllerTest : public FlutterEngineTest {
   }
 
   std::optional<flutter::Isolate> isolate_;
+  bool signalled_;
 };
 
 class FlutterWindowControllerRetainTest : public ::testing::Test {};
@@ -144,7 +145,7 @@ TEST_F(FlutterWindowControllerTest, DestroyRegularWindow) {
   EXPECT_EQ(viewController, nil);
 }
 
-TEST_F(FlutterWindowControllerTest, InternalFlutter_Window_GetHandle) {
+TEST_F(FlutterWindowControllerTest, InternalFlutterWindowGetHandle) {
   FlutterWindowCreationRequest request{
       .has_size = true,
       .size = {.width = 800, .height = 600},

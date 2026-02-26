@@ -75,6 +75,9 @@ typedef ErrorCallback = bool Function(Object exception, StackTrace stackTrace);
 // A gesture setting value that indicates it has not been set by the engine.
 const double _kUnsetGestureSetting = -1.0;
 
+// A display corner radius value that indicates it has not been set by the engine.
+const double _kUnsetDisplayCornerRadius = -1.0;
+
 // A message channel to receive KeyData from the platform.
 //
 // See embedder.cc::kFlutterKeyDataChannel for more information.
@@ -1975,6 +1978,7 @@ class _ViewConfiguration {
     this.displayFeatures = const <DisplayFeature>[],
     this.displayId = 0,
     this.viewConstraints = const ViewConstraints(maxWidth: 0, maxHeight: 0),
+    this.displayCornerRadii,
   });
 
   /// The identifier for a display for this view, in
@@ -2055,6 +2059,12 @@ class _ViewConfiguration {
   /// [DisplayFeatureType.fold] also have a [DisplayFeature.state] which can be
   /// used to determine the posture the device is in.
   final List<DisplayFeature> displayFeatures;
+
+  /// The radii of the display corners in physical pixels.
+  ///
+  /// This is currently populated only on Android API 31+. On earlier Android
+  /// versions, iOS, and other platforms, this value is `null`.
+  final DisplayCornerRadii? displayCornerRadii;
 
   @override
   String toString() {
@@ -2747,6 +2757,63 @@ enum DisplayFeatureState {
   /// There is a non-flat angle between parts of the flexible screen or between
   /// physical screen panels such that the screens start to face each other.
   postureHalfOpened,
+}
+
+/// A set of radii for the four corners of the display.
+///
+/// This class represents the curvature of the display corners. The radii values
+/// are defined in physical pixels.
+///
+/// If a corner is square (not rounded), the radius is 0.0.
+///
+/// This is currently populated only on Android API 31+.
+class DisplayCornerRadii {
+  /// Creates a [DisplayCornerRadii].
+  const DisplayCornerRadii({
+    required this.topLeft,
+    required this.topRight,
+    required this.bottomRight,
+    required this.bottomLeft,
+  }) : assert(topLeft >= 0),
+       assert(topRight >= 0),
+       assert(bottomRight >= 0),
+       assert(bottomLeft >= 0);
+
+  /// The radius of the top-left corner of the display, in physical pixels.
+  final double topLeft;
+
+  /// The radius of the top-right corner of the display, in physical pixels.
+  final double topRight;
+
+  /// The radius of the bottom-right corner of the display, in physical pixels.
+  final double bottomRight;
+
+  /// The radius of the bottom-left corner of the display, in physical pixels.
+  final double bottomLeft;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is DisplayCornerRadii &&
+        topLeft == other.topLeft &&
+        topRight == other.topRight &&
+        bottomRight == other.bottomRight &&
+        bottomLeft == other.bottomLeft;
+  }
+
+  @override
+  int get hashCode => Object.hash(topLeft, topRight, bottomRight, bottomLeft);
+
+  @override
+  String toString() {
+    return 'DisplayCornerRadii(topLeft: $topLeft, topRight: $topRight, '
+        'bottomRight: $bottomRight, bottomLeft: $bottomLeft)';
+  }
 }
 
 /// An identifier used to select a user's language and formatting preferences.

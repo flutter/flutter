@@ -87,13 +87,13 @@ void CanvasPathMeasure::getSegment(Dart_Handle path_handle,
           contour_index) >= measures_.size()) {
     CanvasPath::Create(path_handle);
   }
-  SkPath dst;
+  SkPathBuilder dst;
   bool success = measures_[contour_index]->getSegment(
       SafeNarrow(start_d), SafeNarrow(stop_d), &dst, start_with_move_to);
   if (!success) {
     CanvasPath::Create(path_handle);
   } else {
-    CanvasPath::CreateFrom(path_handle, dst);
+    CanvasPath::CreateFrom(path_handle, dst.detach());
   }
 }
 

@@ -189,6 +189,8 @@ void main() {
 
     testWidgets('Material text field - amber on amber', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
+      final controller = TextEditingController(text: 'this is a test');
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         _boilerplate(
           Container(
@@ -197,7 +199,7 @@ void main() {
             color: Colors.amberAccent,
             child: TextField(
               style: const TextStyle(color: Colors.amber),
-              controller: TextEditingController(text: 'this is a test'),
+              controller: controller,
             ),
           ),
         ),
@@ -236,13 +238,10 @@ void main() {
 
     testWidgets('Material text field - default style', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
+      final controller = TextEditingController(text: 'this is a test');
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
-        _boilerplate(
-          SizedBox(
-            width: 100,
-            child: TextField(controller: TextEditingController(text: 'this is a test')),
-          ),
-        ),
+        _boilerplate(SizedBox(width: 100, child: TextField(controller: controller))),
       );
       await tester.idle();
       await expectLater(tester, meetsGuideline(textContrastGuideline));
@@ -820,6 +819,8 @@ void main() {
     });
 
     testWidgets('Does not fail on links', (WidgetTester tester) async {
+      final recognizer = TapGestureRecognizer()..onTap = () {};
+      addTearDown(recognizer.dispose);
       Widget textWithLink() {
         return Builder(
           builder: (BuildContext context) {
@@ -827,7 +828,7 @@ void main() {
               text: TextSpan(
                 children: <InlineSpan>[
                   const TextSpan(text: 'See examples at '),
-                  TextSpan(text: 'flutter repo', recognizer: TapGestureRecognizer()..onTap = () {}),
+                  TextSpan(text: 'flutter repo', recognizer: recognizer),
                 ],
               ),
             );
@@ -844,6 +845,7 @@ void main() {
 
     testWidgets('Tap size test can handle partially off-screen items', (WidgetTester tester) async {
       final controller = ScrollController();
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(

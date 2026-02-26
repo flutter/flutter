@@ -401,6 +401,50 @@ enum DisplayFeatureType { unknown, fold, hinge, cutout }
 
 enum DisplayFeatureState { unknown, postureFlat, postureHalfOpened, postureFlipped }
 
+class DisplayCornerRadii {
+  const DisplayCornerRadii({
+    required this.topLeft,
+    required this.topRight,
+    required this.bottomRight,
+    required this.bottomLeft,
+  }) : assert(topLeft >= 0),
+       assert(topRight >= 0),
+       assert(bottomRight >= 0),
+       assert(bottomLeft >= 0);
+
+  final double topLeft;
+
+  final double topRight;
+
+  final double bottomRight;
+
+  final double bottomLeft;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is DisplayCornerRadii &&
+        topLeft == other.topLeft &&
+        topRight == other.topRight &&
+        bottomRight == other.bottomRight &&
+        bottomLeft == other.bottomLeft;
+  }
+
+  @override
+  int get hashCode => Object.hash(topLeft, topRight, bottomRight, bottomLeft);
+
+  @override
+  String toString() {
+    return 'DisplayCornerRadii(topLeft: $topLeft, topRight: $topRight, '
+        'bottomRight: $bottomRight, bottomLeft: $bottomLeft)';
+  }
+}
+
 class Locale {
   const Locale(this._languageCode, [this._countryCode])
     : assert(_languageCode != ''),

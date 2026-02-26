@@ -411,6 +411,16 @@ void main() {
     expect(() => Icon(Icons.abc, opticalSize: -0.1), throwsAssertionError);
     expect(() => Icon(Icons.abc, opticalSize: 0), throwsAssertionError);
   });
+
+  testWidgets('Icon does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: SizedBox.shrink(child: Icon(Icons.save))),
+      ),
+    );
+    expect(tester.getSize(find.byType(Icon)), Size.zero);
+  });
 }
 
 final class _TextDoubler extends TextScaler {
