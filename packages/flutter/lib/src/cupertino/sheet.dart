@@ -143,10 +143,10 @@ typedef _GetSheetDragged = bool Function();
 /// When `showDragHandle` is set to `true`, then a drag handle will be placed at
 /// the top of the sheet. This flag will default to false.
 ///
-/// The `filterQuality` parameter is used to customize the filter quality of
-/// the scale transition applied to the **underlying route**.
-/// This defaults to [FilterQuality.medium].
-/// If the underlying page contains platform views, set this to `null`
+/// When `enableFilter` is set to `true`, then filter quality will be set
+/// for the [ScaleTransition] that is applied to the underlying route.
+/// This defaults to `true`.
+/// If the underlying route contains platform views, set this to `false`
 /// to avoid rendering conflicts caused by the implicit image filter.
 ///
 /// iOS sheet widgets are generally designed to be tightly coupled to the context
@@ -194,7 +194,7 @@ Future<T?> showCupertinoSheet<T>({
   RouteSettings? settings,
   double? topGap,
   bool showDragHandle = false,
-  FilterQuality? filterQuality = FilterQuality.medium,
+  bool enableFilter = true,
 }) {
   assert(topGap == null || (topGap >= 0.0 && topGap <= 0.9), 'topGap must be between 0.0 and 0.9');
   assert(pageBuilder != null || builder != null || scrollableBuilder != null);
@@ -212,7 +212,7 @@ Future<T?> showCupertinoSheet<T>({
       settings: settings,
       enableDrag: enableDrag,
       topGap: topGap,
-      filterQuality: filterQuality,
+      enableFilter: enableFilter,
     );
 
     return Navigator.of(context, rootNavigator: true).push<T>(route);
@@ -275,7 +275,7 @@ class CupertinoSheetTransition extends StatefulWidget {
     required this.secondaryRouteAnimation,
     required this.child,
     required this.linearTransition,
-    required this.filterQuality,
+    this.enableFilter = true,
     this.topGap = _kTopGapRatio,
   });
 
@@ -307,13 +307,29 @@ class CupertinoSheetTransition extends StatefulWidget {
   /// {@endtemplate}
   final double topGap;
 
-  /// {@template flutter.cupertino.CupertinoSheetTransition.filterQuality}
-  /// The filter quality to use for the scaling of the underlying route.
+  /// {@template flutter.cupertino.CupertinoSheetTransition.enableFilter}
+  /// Whether to enable filter for the scaling of the underlying route.
   ///
-  /// If the underlying page contains platform views, set this to `null`
+  /// If the underlying page contains platform views, set this to `false`
   /// to avoid rendering conflicts caused by the implicit image filter.
   /// {@endtemplate}
-  final FilterQuality? filterQuality;
+  final bool enableFilter;
+
+  static Widget _delegateTransitionWithFilter(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    bool allowSnapshotting,
+    Widget? child,
+  ) => _delegateTransition(context, animation, secondaryAnimation, allowSnapshotting, child, true);
+
+  static Widget _delegateTransitionWithoutFilter(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    bool allowSnapshotting,
+    Widget? child,
+  ) => _delegateTransition(context, animation, secondaryAnimation, allowSnapshotting, child, false);
 
   /// The primary delegated transition. Will slide a non [CupertinoSheetRoute] page down.
   ///
@@ -321,16 +337,16 @@ class CupertinoSheetTransition extends StatefulWidget {
   ///
   /// If a [CupertinoSheetRoute] already exists in the stack, then it will
   /// slide the previous sheet upwards instead.
-  static Widget delegateTransition(
+  static Widget _delegateTransition(
     BuildContext context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
     bool allowSnapshotting,
     Widget? child,
-    FilterQuality? filterQuality,
+    bool enableFilter,
   ) {
     if (CupertinoSheetRoute.hasParentSheet(context)) {
-      return _delegatedCoverSheetSecondaryTransition(secondaryAnimation, child, filterQuality);
+      return _delegatedCoverSheetSecondaryTransition(secondaryAnimation, child, enableFilter);
     }
     final bool linear = Navigator.of(context).userGestureInProgress;
 
@@ -389,7 +405,7 @@ class CupertinoSheetTransition extends StatefulWidget {
           position: slideAnimation,
           child: ScaleTransition(
             scale: scaleAnimation,
-            filterQuality: filterQuality,
+            filterQuality: enableFilter ? FilterQuality.medium : null,
             alignment: Alignment.topCenter,
             child: AnimatedBuilder(
               animation: radiusAnimation,
@@ -412,7 +428,7 @@ class CupertinoSheetTransition extends StatefulWidget {
   static Widget _delegatedCoverSheetSecondaryTransition(
     Animation<double> secondaryAnimation,
     Widget? child,
-    FilterQuality? filterQuality,
+    bool enableFilter,
   ) {
     const Curve curve = Curves.linearToEaseOut;
     const Curve reverseCurve = Curves.easeInToLinear;
@@ -431,7 +447,7 @@ class CupertinoSheetTransition extends StatefulWidget {
       transformHitTests: false,
       child: ScaleTransition(
         scale: scaleAnimation,
-        filterQuality: filterQuality,
+        filterQuality: enableFilter ? FilterQuality.medium : null,
         alignment: Alignment.topCenter,
         child: ClipRSuperellipse(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
@@ -550,7 +566,7 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
       transformHitTests: false,
       child: ScaleTransition(
         scale: _secondaryScaleAnimation,
-        filterQuality: widget.filterQuality,
+        filterQuality: widget.enableFilter ? FilterQuality.medium : null,
         alignment: Alignment.topCenter,
         child: child,
       ),
@@ -662,7 +678,7 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
     this.scrollableBuilder,
     this.enableDrag = true,
     this.showDragHandle = false,
-    this.filterQuality,
+    this.enableFilter = true,
     double? topGap,
   }) : assert(
          topGap == null || (topGap >= 0.0 && topGap <= 0.9),
@@ -703,7 +719,7 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
   final bool enableDrag;
 
   @override
-  final FilterQuality? filterQuality;
+  final bool enableFilter;
 
   // The gap between the top of the screen and the top of the sheet.
   final double? _topGap;
@@ -843,15 +859,9 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
     if (_hasCustomTopGap) {
       return null;
     }
-    return (context, animation, secondaryAnimation, allowSnapshotting, child) =>
-        CupertinoSheetTransition.delegateTransition(
-          context,
-          animation,
-          secondaryAnimation,
-          allowSnapshotting,
-          child,
-          filterQuality,
-        );
+    return enableFilter
+        ? CupertinoSheetTransition._delegateTransitionWithFilter
+        : CupertinoSheetTransition._delegateTransitionWithoutFilter;
   }
 
   /// Determines whether the content can be dragged.
@@ -865,8 +875,8 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
   /// {@macro flutter.cupertino.CupertinoSheetTransition.topGap}
   double get topGap;
 
-  /// {@macro flutter.cupertino.CupertinoSheetTransition.filterQuality}
-  FilterQuality? get filterQuality;
+  /// {@macro flutter.cupertino.CupertinoSheetTransition.enableFilter}
+  bool get enableFilter;
 
   /// Whether a custom top gap has been set.
   bool get _hasCustomTopGap;
@@ -902,7 +912,7 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
     Widget child,
     bool enableDrag,
     double topGap,
-    FilterQuality? filterQuality,
+    bool enableFilter,
   ) {
     final bool linearTransition = route.popGestureInProgress;
     return CupertinoSheetTransition(
@@ -910,7 +920,7 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
       secondaryRouteAnimation: secondaryAnimation,
       linearTransition: linearTransition,
       topGap: topGap,
-      filterQuality: filterQuality,
+      enableFilter: enableFilter,
       child: _CupertinoDragGestureDetector<T>(
         enabledCallback: () => enableDrag,
         onStartPopGesture: () => _startPopGesture<T>(route, topGap),
@@ -947,7 +957,7 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
       child,
       enableDrag,
       topGap,
-      filterQuality,
+      enableFilter,
     );
   }
 }
