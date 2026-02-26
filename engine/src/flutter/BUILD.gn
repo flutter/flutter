@@ -8,6 +8,7 @@ import("//flutter/examples/examples.gni")
 import("//flutter/shell/config.gni")
 import("//flutter/shell/platform/config.gni")
 import("//flutter/shell/platform/glfw/config.gni")
+import("//flutter/shell/platform/linux/config.gni")
 import("//flutter/testing/testing.gni")
 import("$dart_src/build/dart/copy_tree.gni")
 
@@ -280,7 +281,7 @@ group("unittests") {
         public_deps += [ "//flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests" ]
       }
 
-      if (is_linux) {
+      if (is_linux && !use_gtk4) {
         public_deps +=
             [ "//flutter/shell/platform/linux:flutter_linux_unittests" ]
         if (build_glfw_shell) {

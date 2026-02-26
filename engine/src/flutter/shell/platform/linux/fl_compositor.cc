@@ -22,7 +22,7 @@ gboolean fl_compositor_present_layers(FlCompositor* self,
 
 gboolean fl_compositor_render(FlCompositor* self,
                               cairo_t* cr,
-                              GdkWindow* window) {
+                              FlGdkSurface* surface) {
   g_return_val_if_fail(FL_IS_COMPOSITOR(self), FALSE);
-  return FL_COMPOSITOR_GET_CLASS(self)->render(self, cr, window);
+  return FL_COMPOSITOR_GET_CLASS(self)->render(self, cr, surface);
 }

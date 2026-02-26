@@ -34,6 +34,28 @@ struct _FlPlatformHandler {
 
 G_DEFINE_TYPE(FlPlatformHandler, fl_platform_handler, G_TYPE_OBJECT)
 
+#if FLUTTER_LINUX_GTK4
+// Called when clipboard text received.
+static void clipboard_text_cb(GObject* object,
+                              GAsyncResult* result,
+                              gpointer user_data) {
+  g_autoptr(FlMethodCall) method_call = FL_METHOD_CALL(user_data);
+  g_autofree gchar* text =
+      gdk_clipboard_read_text_finish(GDK_CLIPBOARD(object), result, nullptr);
+  fl_platform_channel_respond_clipboard_get_data(method_call, text);
+}
+
+// Called when clipboard text received during has_strings.
+static void clipboard_text_has_strings_cb(GObject* object,
+                                          GAsyncResult* result,
+                                          gpointer user_data) {
+  g_autoptr(FlMethodCall) method_call = FL_METHOD_CALL(user_data);
+  g_autofree gchar* text =
+      gdk_clipboard_read_text_finish(GDK_CLIPBOARD(object), result, nullptr);
+  fl_platform_channel_respond_clipboard_has_strings(
+      method_call, text != nullptr && strlen(text) > 0);
+}
+#else
 // Called when clipboard text received.
 static void clipboard_text_cb(GtkClipboard* clipboard,
                               const gchar* text,
@@ -50,14 +72,21 @@ static void clipboard_text_has_strings_cb(GtkClipboard* clipboard,
   fl_platform_channel_respond_clipboard_has_strings(
       method_call, text != nullptr && strlen(text) > 0);
 }
+#endif
 
 // Called when Flutter wants to copy to the clipboard.
 static FlMethodResponse* clipboard_set_data(FlMethodCall* method_call,
                                             const gchar* text,
                                             gpointer user_data) {
+#if FLUTTER_LINUX_GTK4
+  GdkClipboard* clipboard =
+      gdk_display_get_clipboard(gdk_display_get_default());
+  gdk_clipboard_set_text(clipboard, text);
+#else
   GtkClipboard* clipboard =
       gtk_clipboard_get_default(gdk_display_get_default());
   gtk_clipboard_set_text(clipboard, text, -1);
+#endif
 
   return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
 }
@@ -72,10 +101,17 @@ static FlMethodResponse* clipboard_get_data(FlMethodCall* method_call,
         nullptr));
   }
 
+#if FLUTTER_LINUX_GTK4
+  GdkClipboard* clipboard =
+      gdk_display_get_clipboard(gdk_display_get_default());
+  gdk_clipboard_read_text_async(clipboard, nullptr, clipboard_text_cb,
+                                g_object_ref(method_call));
+#else
   GtkClipboard* clipboard =
       gtk_clipboard_get_default(gdk_display_get_default());
   gtk_clipboard_request_text(clipboard, clipboard_text_cb,
                              g_object_ref(method_call));
+#endif
 
   // Will respond later.
   return nullptr;
@@ -85,10 +121,18 @@ static FlMethodResponse* clipboard_get_data(FlMethodCall* method_call,
 // be pasted, without actually accessing the clipboard content itself.
 static FlMethodResponse* clipboard_has_strings(FlMethodCall* method_call,
                                                gpointer user_data) {
+#if FLUTTER_LINUX_GTK4
+  GdkClipboard* clipboard =
+      gdk_display_get_clipboard(gdk_display_get_default());
+  gdk_clipboard_read_text_async(clipboard, nullptr,
+                                clipboard_text_has_strings_cb,
+                                g_object_ref(method_call));
+#else
   GtkClipboard* clipboard =
       gtk_clipboard_get_default(gdk_display_get_default());
   gtk_clipboard_request_text(clipboard, clipboard_text_has_strings_cb,
                              g_object_ref(method_call));
+#endif
 
   // Will respond later.
   return nullptr;

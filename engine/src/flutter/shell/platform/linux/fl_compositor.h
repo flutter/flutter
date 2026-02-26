@@ -9,6 +9,7 @@
 #include <gdk/gdk.h>
 
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/linux/fl_gtk.h"
 
 G_BEGIN_DECLS
 
@@ -21,7 +22,9 @@ struct _FlCompositorClass {
                              const FlutterLayer** layers,
                              size_t layers_count);
 
-  gboolean (*render)(FlCompositor* compositor, cairo_t* cr, GdkWindow* window);
+  gboolean (*render)(FlCompositor* compositor,
+                     cairo_t* cr,
+                     FlGdkSurface* surface);
 };
 
 /**
@@ -48,7 +51,7 @@ gboolean fl_compositor_present_layers(FlCompositor* compositor,
  * fl_compositor_render:
  * @compositor: an #FlCompositor.
  * @cr: a Cairo rendering context.
- * @window: window being rendered into.
+ * @surface: surface being rendered into.
  *
  * Renders the current frame. Called from the GTK thread.
  *
@@ -56,7 +59,7 @@ gboolean fl_compositor_present_layers(FlCompositor* compositor,
  */
 gboolean fl_compositor_render(FlCompositor* compositor,
                               cairo_t* cr,
-                              GdkWindow* window);
+                              FlGdkSurface* surface);
 
 G_END_DECLS
 

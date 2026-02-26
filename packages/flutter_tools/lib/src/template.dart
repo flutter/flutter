@@ -258,6 +258,18 @@ class Template {
       }
       // Only build a Linux project if explicitly asked.
       final bool linux = (context['linux'] as bool?) ?? false;
+      final String linuxGtkVersion = (context['linuxGtkVersion'] as String?) ?? 'gtk4';
+      final bool linuxGtk3Template = relativeDestinationPath.startsWith('linux-gtk3.tmpl');
+      final bool linuxGtk4Template = relativeDestinationPath.startsWith('linux-gtk4.tmpl');
+      if ((linuxGtk3Template || linuxGtk4Template) && !linux) {
+        return null;
+      }
+      if (linuxGtk3Template && linuxGtkVersion != 'gtk3') {
+        return null;
+      }
+      if (linuxGtk4Template && linuxGtkVersion != 'gtk4') {
+        return null;
+      }
       if (relativeDestinationPath.startsWith('linux.tmpl') && !linux) {
         return null;
       }

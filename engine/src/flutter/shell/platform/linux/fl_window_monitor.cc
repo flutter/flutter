@@ -27,6 +27,7 @@ struct _FlWindowMonitor {
 
 G_DEFINE_TYPE(FlWindowMonitor, fl_window_monitor, G_TYPE_OBJECT)
 
+#if !FLUTTER_LINUX_GTK4
 static gboolean configure_event_cb(FlWindowMonitor* self,
                                    GdkEventConfigure* event) {
   flutter::IsolateScope scope(self->isolate);
@@ -42,6 +43,7 @@ static gboolean window_state_event_cb(FlWindowMonitor* self,
 
   return FALSE;
 }
+#endif
 
 static void is_active_notify_cb(FlWindowMonitor* self) {
   flutter::IsolateScope scope(self->isolate);
@@ -53,6 +55,13 @@ static void title_notify_cb(FlWindowMonitor* self) {
   self->on_title_notify();
 }
 
+#if FLUTTER_LINUX_GTK4
+static gboolean close_request_cb(FlWindowMonitor* self) {
+  flutter::IsolateScope scope(self->isolate);
+  self->on_close();
+  return FALSE;
+}
+#else
 static gboolean delete_event_cb(FlWindowMonitor* self, GdkEvent* event) {
   flutter::IsolateScope scope(self->isolate);
   self->on_close();
@@ -60,6 +69,7 @@ static gboolean delete_event_cb(FlWindowMonitor* self, GdkEvent* event) {
   // Stop default behaviour of destroying the window.
   return TRUE;
 }
+#endif
 
 static void destroy_cb(FlWindowMonitor* self) {
   flutter::IsolateScope scope(self->isolate);
@@ -102,16 +112,23 @@ G_MODULE_EXPORT FlWindowMonitor* fl_window_monitor_new(
   self->on_title_notify = on_title_notify;
   self->on_close = on_close;
   self->on_destroy = on_destroy;
+#if !FLUTTER_LINUX_GTK4
   g_signal_connect_swapped(window, "configure-event",
                            G_CALLBACK(configure_event_cb), self);
   g_signal_connect_swapped(window, "window-state-event",
                            G_CALLBACK(window_state_event_cb), self);
+#endif
   g_signal_connect_swapped(window, "notify::is-active",
                            G_CALLBACK(is_active_notify_cb), self);
   g_signal_connect_swapped(window, "notify::title", G_CALLBACK(title_notify_cb),
                            self);
+#if FLUTTER_LINUX_GTK4
+  g_signal_connect_swapped(window, "close-request",
+                           G_CALLBACK(close_request_cb), self);
+#else
   g_signal_connect_swapped(window, "delete-event", G_CALLBACK(delete_event_cb),
                            self);
+#endif
   g_signal_connect_swapped(window, "destroy", G_CALLBACK(destroy_cb), self);
 
   return self;

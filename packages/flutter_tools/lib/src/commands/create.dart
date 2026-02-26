@@ -83,6 +83,12 @@ class CreateCommand extends FlutterCommand with CreateBase {
       help:
           'The language to use for Android-specific code, either Kotlin (recommended) or Java (legacy).',
     );
+    argParser.addOption(
+      'linux-gtk',
+      defaultsTo: 'gtk4',
+      allowed: <String>['gtk4', 'gtk3'],
+      help: 'Select the GTK version for Linux templates (gtk4 default, gtk3 opt-in).',
+    );
     argParser.addFlag(
       'skip-name-checks',
       help:
@@ -461,6 +467,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
       darwin: includeDarwin,
       web: includeWeb,
       linux: includeLinux,
+      linuxGtkVersion: stringArg('linux-gtk') ?? 'gtk4',
       macos: includeMacos,
       windows: includeWindows,
       dartSdkVersionBounds: '^$dartSdk',

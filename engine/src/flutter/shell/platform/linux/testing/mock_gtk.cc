@@ -25,6 +25,89 @@ static void fl_mock_keymap_class_init(FlMockKeymapClass* klass) {
 
 static void fl_mock_keymap_init(FlMockKeymap* self) {}
 
+#if FLUTTER_LINUX_GTK4
+G_DECLARE_FINAL_TYPE(FlMockGtk4Surface,
+                     fl_mock_gtk4_surface,
+                     FL,
+                     MOCK_GTK4_SURFACE,
+                     GObject)
+
+struct _FlMockGtk4Surface {
+  GObject parent_instance;
+  GdkToplevelState state;
+  gboolean mapped;
+};
+
+G_DEFINE_TYPE_WITH_CODE(FlMockGtk4Surface,
+                        fl_mock_gtk4_surface,
+                        G_TYPE_OBJECT,
+                        G_IMPLEMENT_INTERFACE(GDK_TYPE_TOPLEVEL, nullptr))
+
+enum {
+  kPropState = 1,
+  kPropMapped,
+  kPropLast,
+};
+
+static GParamSpec* g_properties[kPropLast];
+
+static void fl_mock_gtk4_surface_set_property(GObject* object,
+                                              guint prop_id,
+                                              const GValue* value,
+                                              GParamSpec* pspec) {
+  FlMockGtk4Surface* self = FL_MOCK_GTK4_SURFACE(object);
+  switch (prop_id) {
+    case kPropState:
+      self->state = static_cast<GdkToplevelState>(g_value_get_flags(value));
+      break;
+    case kPropMapped:
+      self->mapped = g_value_get_boolean(value);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+      break;
+  }
+}
+
+static void fl_mock_gtk4_surface_get_property(GObject* object,
+                                              guint prop_id,
+                                              GValue* value,
+                                              GParamSpec* pspec) {
+  FlMockGtk4Surface* self = FL_MOCK_GTK4_SURFACE(object);
+  switch (prop_id) {
+    case kPropState:
+      g_value_set_flags(value, self->state);
+      break;
+    case kPropMapped:
+      g_value_set_boolean(value, self->mapped);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+      break;
+  }
+}
+
+static void fl_mock_gtk4_surface_class_init(FlMockGtk4SurfaceClass* klass) {
+  GObjectClass* object_class = G_OBJECT_CLASS(klass);
+  object_class->set_property = fl_mock_gtk4_surface_set_property;
+  object_class->get_property = fl_mock_gtk4_surface_get_property;
+
+  g_properties[kPropState] =
+      g_param_spec_flags("state", "state", "state", GDK_TYPE_TOPLEVEL_STATE,
+                         static_cast<GdkToplevelState>(0),
+                         static_cast<GParamFlags>(G_PARAM_READWRITE));
+  g_properties[kPropMapped] =
+      g_param_spec_boolean("mapped", "mapped", "mapped", FALSE,
+                           static_cast<GParamFlags>(G_PARAM_READWRITE));
+  g_object_class_install_properties(object_class, kPropLast, g_properties);
+}
+
+static void fl_mock_gtk4_surface_init(FlMockGtk4Surface* self) {
+  self->state = static_cast<GdkToplevelState>(0);
+  self->mapped = FALSE;
+}
+#endif  // FLUTTER_LINUX_GTK4
+
 // Override GdkKeymap
 GType gdk_keymap_get_type() {
   return fl_mock_keymap_get_type();
@@ -92,6 +175,17 @@ GdkWindowState gdk_window_get_state(GdkWindow* window) {
   return mock->gdk_window_get_state(window);
 }
 
+#if FLUTTER_LINUX_GTK4
+GdkToplevelState gdk_toplevel_get_state(GdkToplevel* toplevel) {
+  check_thread();
+  if (mock != nullptr) {
+    return mock->gdk_toplevel_get_state(toplevel);
+  }
+  FlMockGtk4Surface* surface = FL_MOCK_GTK4_SURFACE(toplevel);
+  return surface->state;
+}
+#endif
+
 GdkDisplay* gdk_window_get_display(GdkWindow* window) {
   check_thread();
   return GDK_DISPLAY(g_object_new(gdk_wayland_display_get_type(), nullptr));
@@ -140,6 +234,17 @@ GdkGLContext* gdk_window_create_gl_context(GdkWindow* window, GError** error) {
   check_thread();
   return nullptr;
 }
+
+#if FLUTTER_LINUX_GTK4
+gboolean gdk_surface_get_mapped(GdkSurface* surface) {
+  check_thread();
+  if (mock != nullptr) {
+    return mock->gdk_surface_get_mapped(surface);
+  }
+  FlMockGtk4Surface* gtk4_surface = FL_MOCK_GTK4_SURFACE(surface);
+  return gtk4_surface->mapped;
+}
+#endif
 
 void gdk_cairo_set_source_rgba(cairo_t* cr, const GdkRGBA* rgba) {
   check_thread();
@@ -300,6 +405,27 @@ GdkWindow* gtk_widget_get_window(GtkWidget* widget) {
   check_thread();
   return nullptr;
 }
+
+#if FLUTTER_LINUX_GTK4
+GtkNative* gtk_widget_get_native(GtkWidget* widget) {
+  check_thread();
+  static GObject* mock_native = nullptr;
+  if (mock_native == nullptr) {
+    mock_native = G_OBJECT(g_object_new(G_TYPE_OBJECT, nullptr));
+  }
+  return reinterpret_cast<GtkNative*>(mock_native);
+}
+
+GdkSurface* gtk_native_get_surface(GtkNative* native) {
+  check_thread();
+  static FlMockGtk4Surface* mock_surface = nullptr;
+  if (mock_surface == nullptr) {
+    mock_surface = FL_MOCK_GTK4_SURFACE(
+        g_object_new(fl_mock_gtk4_surface_get_type(), nullptr));
+  }
+  return reinterpret_cast<GdkSurface*>(mock_surface);
+}
+#endif  // FLUTTER_LINUX_GTK4
 
 void gtk_im_context_set_client_window(GtkIMContext* context,
                                       GdkWindow* window) {

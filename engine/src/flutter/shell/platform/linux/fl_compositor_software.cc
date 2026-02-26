@@ -4,6 +4,8 @@
 
 #include "fl_compositor_software.h"
 
+#include "flutter/shell/platform/linux/fl_gtk.h"
+
 struct _FlCompositorSoftware {
   FlCompositor parent_instance;
 
@@ -70,7 +72,7 @@ static gboolean fl_compositor_software_present_layers(
 
 static gboolean fl_compositor_software_render(FlCompositor* compositor,
                                               cairo_t* cr,
-                                              GdkWindow* window) {
+                                              FlGdkSurface* surface) {
   FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(compositor);
 
   g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
@@ -80,9 +82,22 @@ static gboolean fl_compositor_software_render(FlCompositor* compositor,
   }
 
   // If frame not ready, then wait for it.
-  gint scale_factor = gdk_window_get_scale_factor(window);
-  size_t width = gdk_window_get_width(window) * scale_factor;
-  size_t height = gdk_window_get_height(window) * scale_factor;
+  gint scale_factor = fl_gtk_surface_get_scale_factor(surface);
+#if FLUTTER_LINUX_GTK4
+  // In GTK4, the draw surface is the toplevel. Use the Cairo clip
+  // extents to get the drawing area size for this widget.
+  double x1 = 0.0, y1 = 0.0, x2 = 0.0, y2 = 0.0;
+  cairo_clip_extents(cr, &x1, &y1, &x2, &y2);
+  size_t width = static_cast<size_t>(x2 - x1);
+  size_t height = static_cast<size_t>(y2 - y1);
+  if (width == 0 || height == 0) {
+    width = fl_gtk_surface_get_width(surface);
+    height = fl_gtk_surface_get_height(surface);
+  }
+#else
+  size_t width = fl_gtk_surface_get_width(surface) * scale_factor;
+  size_t height = fl_gtk_surface_get_height(surface) * scale_factor;
+#endif
   while (self->width != width || self->height != height) {
     g_mutex_unlock(&self->frame_mutex);
     fl_task_runner_wait(self->task_runner);
