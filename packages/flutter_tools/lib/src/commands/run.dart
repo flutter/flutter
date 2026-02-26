@@ -256,8 +256,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get disableServiceAuthCodes => boolArg('disable-service-auth-codes');
   bool get cacheStartupProfile => boolArg('cache-startup-profile');
   bool get runningWithPrebuiltApplication => prebuiltApplicationBinaryPath != null;
-  String? get prebuiltApplicationBinaryPath =>
-      stringArg(FlutterOptions.kUseApplicationBinary);
+  String? get prebuiltApplicationBinaryPath => stringArg(FlutterOptions.kUseApplicationBinary);
   bool get trackWidgetCreation => boolArg('track-widget-creation');
   ImpellerStatus get enableImpeller =>
       ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?);
