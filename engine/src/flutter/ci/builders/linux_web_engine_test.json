@@ -371,7 +371,7 @@
         },
         {
           "dependency": "firefox",
-          "version": "version:143.0"
+          "version": "version:148.0"
         }
       ],
       "tasks": [
