@@ -1250,229 +1250,6 @@ class _AppBarState extends State<AppBar> {
   }
 }
 
-class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  _SliverAppBarDelegate({
-    required this.leading,
-    required this.automaticallyImplyLeading,
-    required this.title,
-    required this.actions,
-    required this.automaticallyImplyActions,
-    required this.flexibleSpace,
-    required this.bottom,
-    required this.elevation,
-    required this.scrolledUnderElevation,
-    required this.shadowColor,
-    required this.surfaceTintColor,
-    required this.forceElevated,
-    required this.backgroundColor,
-    required this.foregroundColor,
-    required this.iconTheme,
-    required this.actionsIconTheme,
-    required this.primary,
-    required this.centerTitle,
-    required this.excludeHeaderSemantics,
-    required this.titleSpacing,
-    required this.expandedHeight,
-    required this.collapsedHeight,
-    required this.topPadding,
-    required this.floating,
-    required this.pinned,
-    required this.vsync,
-    required this.snapConfiguration,
-    required this.stretchConfiguration,
-    required this.showOnScreenConfiguration,
-    required this.shape,
-    required this.toolbarHeight,
-    required this.leadingWidth,
-    required this.toolbarTextStyle,
-    required this.titleTextStyle,
-    required this.systemOverlayStyle,
-    required this.forceMaterialTransparency,
-    required this.useDefaultSemanticsOrder,
-    required this.clipBehavior,
-    required this.variant,
-    required this.accessibleNavigation,
-    required this.actionsPadding,
-  }) : assert(primary || topPadding == 0.0),
-       _bottomHeight = bottom?.preferredSize.height ?? 0.0;
-
-  final Widget? leading;
-  final bool automaticallyImplyLeading;
-  final Widget? title;
-  final List<Widget>? actions;
-  final bool automaticallyImplyActions;
-  final Widget? flexibleSpace;
-  final PreferredSizeWidget? bottom;
-  final double? elevation;
-  final double? scrolledUnderElevation;
-  final Color? shadowColor;
-  final Color? surfaceTintColor;
-  final bool forceElevated;
-  final Color? backgroundColor;
-  final Color? foregroundColor;
-  final IconThemeData? iconTheme;
-  final IconThemeData? actionsIconTheme;
-  final bool primary;
-  final bool? centerTitle;
-  final bool excludeHeaderSemantics;
-  final double? titleSpacing;
-  final double? expandedHeight;
-  final double collapsedHeight;
-  final double topPadding;
-  final bool floating;
-  final bool pinned;
-  final ShapeBorder? shape;
-  final double? toolbarHeight;
-  final double? leadingWidth;
-  final TextStyle? toolbarTextStyle;
-  final TextStyle? titleTextStyle;
-  final SystemUiOverlayStyle? systemOverlayStyle;
-  final double _bottomHeight;
-  final bool forceMaterialTransparency;
-  final bool useDefaultSemanticsOrder;
-  final Clip? clipBehavior;
-  final _SliverAppVariant variant;
-  final bool accessibleNavigation;
-  final EdgeInsetsGeometry? actionsPadding;
-
-  @override
-  double get minExtent => collapsedHeight;
-
-  @override
-  double get maxExtent => math.max(
-    topPadding + (expandedHeight ?? (toolbarHeight ?? kToolbarHeight) + _bottomHeight),
-    minExtent,
-  );
-
-  @override
-  final TickerProvider vsync;
-
-  @override
-  final FloatingHeaderSnapConfiguration? snapConfiguration;
-
-  @override
-  final OverScrollHeaderStretchConfiguration? stretchConfiguration;
-
-  @override
-  final PersistentHeaderShowOnScreenConfiguration? showOnScreenConfiguration;
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    final double visibleMainHeight = maxExtent - shrinkOffset - topPadding;
-    final double extraToolbarHeight = math.max(
-      minExtent - _bottomHeight - topPadding - (toolbarHeight ?? kToolbarHeight),
-      0.0,
-    );
-    final double visibleToolbarHeight = visibleMainHeight - _bottomHeight - extraToolbarHeight;
-
-    final bool isScrolledUnder =
-        overlapsContent || forceElevated || (pinned && shrinkOffset > maxExtent - minExtent);
-    final bool isPinnedWithOpacityFade =
-        pinned && floating && bottom != null && extraToolbarHeight == 0.0;
-    final double toolbarOpacity = !accessibleNavigation && (!pinned || isPinnedWithOpacityFade)
-        ? clampDouble(visibleToolbarHeight / (toolbarHeight ?? kToolbarHeight), 0.0, 1.0)
-        : 1.0;
-    final Widget? effectiveTitle = switch (variant) {
-      _SliverAppVariant.small => title,
-      _SliverAppVariant.medium || _SliverAppVariant.large => AnimatedOpacity(
-        opacity: isScrolledUnder ? 1 : 0,
-        duration: const Duration(milliseconds: 500),
-        curve: const Cubic(0.2, 0.0, 0.0, 1.0),
-        child: title,
-      ),
-    };
-
-    final Widget appBar = FlexibleSpaceBar.createSettings(
-      minExtent: minExtent,
-      maxExtent: maxExtent,
-      currentExtent: math.max(minExtent, maxExtent - shrinkOffset),
-      toolbarOpacity: toolbarOpacity,
-      isScrolledUnder: isScrolledUnder,
-      hasLeading: leading != null || automaticallyImplyLeading,
-      child: AppBar(
-        clipBehavior: clipBehavior,
-        leading: leading,
-        automaticallyImplyLeading: automaticallyImplyLeading,
-        title: effectiveTitle,
-        actions: actions,
-        automaticallyImplyActions: automaticallyImplyActions,
-        flexibleSpace: (title == null && flexibleSpace != null && !excludeHeaderSemantics)
-            ? Semantics(header: true, child: flexibleSpace)
-            : flexibleSpace,
-        bottom: bottom,
-        elevation: isScrolledUnder ? elevation : 0.0,
-        scrolledUnderElevation: scrolledUnderElevation,
-        shadowColor: shadowColor,
-        surfaceTintColor: surfaceTintColor,
-        backgroundColor: backgroundColor,
-        foregroundColor: foregroundColor,
-        iconTheme: iconTheme,
-        actionsIconTheme: actionsIconTheme,
-        primary: primary,
-        centerTitle: centerTitle,
-        excludeHeaderSemantics: excludeHeaderSemantics,
-        titleSpacing: titleSpacing,
-        shape: shape,
-        toolbarOpacity: toolbarOpacity,
-        bottomOpacity: pinned ? 1.0 : clampDouble(visibleMainHeight / _bottomHeight, 0.0, 1.0),
-        toolbarHeight: toolbarHeight,
-        leadingWidth: leadingWidth,
-        toolbarTextStyle: toolbarTextStyle,
-        titleTextStyle: titleTextStyle,
-        systemOverlayStyle: systemOverlayStyle,
-        forceMaterialTransparency: forceMaterialTransparency,
-        useDefaultSemanticsOrder: useDefaultSemanticsOrder,
-        actionsPadding: actionsPadding,
-      ),
-    );
-    return appBar;
-  }
-
-  @override
-  bool shouldRebuild(covariant _SliverAppBarDelegate oldDelegate) {
-    return leading != oldDelegate.leading ||
-        automaticallyImplyLeading != oldDelegate.automaticallyImplyLeading ||
-        title != oldDelegate.title ||
-        actions != oldDelegate.actions ||
-        automaticallyImplyActions != oldDelegate.automaticallyImplyActions ||
-        flexibleSpace != oldDelegate.flexibleSpace ||
-        bottom != oldDelegate.bottom ||
-        _bottomHeight != oldDelegate._bottomHeight ||
-        elevation != oldDelegate.elevation ||
-        shadowColor != oldDelegate.shadowColor ||
-        backgroundColor != oldDelegate.backgroundColor ||
-        foregroundColor != oldDelegate.foregroundColor ||
-        iconTheme != oldDelegate.iconTheme ||
-        actionsIconTheme != oldDelegate.actionsIconTheme ||
-        primary != oldDelegate.primary ||
-        centerTitle != oldDelegate.centerTitle ||
-        titleSpacing != oldDelegate.titleSpacing ||
-        expandedHeight != oldDelegate.expandedHeight ||
-        topPadding != oldDelegate.topPadding ||
-        pinned != oldDelegate.pinned ||
-        floating != oldDelegate.floating ||
-        vsync != oldDelegate.vsync ||
-        snapConfiguration != oldDelegate.snapConfiguration ||
-        stretchConfiguration != oldDelegate.stretchConfiguration ||
-        showOnScreenConfiguration != oldDelegate.showOnScreenConfiguration ||
-        forceElevated != oldDelegate.forceElevated ||
-        toolbarHeight != oldDelegate.toolbarHeight ||
-        leadingWidth != oldDelegate.leadingWidth ||
-        toolbarTextStyle != oldDelegate.toolbarTextStyle ||
-        titleTextStyle != oldDelegate.titleTextStyle ||
-        systemOverlayStyle != oldDelegate.systemOverlayStyle ||
-        forceMaterialTransparency != oldDelegate.forceMaterialTransparency ||
-        useDefaultSemanticsOrder != oldDelegate.useDefaultSemanticsOrder ||
-        accessibleNavigation != oldDelegate.accessibleNavigation ||
-        actionsPadding != oldDelegate.actionsPadding;
-  }
-
-  @override
-  String toString() {
-    return '${describeIdentity(this)}(topPadding: ${topPadding.toStringAsFixed(1)}, bottomHeight: ${_bottomHeight.toStringAsFixed(1)}, ...)';
-  }
-}
-
 /// A Material Design app bar that integrates with a [CustomScrollView].
 ///
 /// An app bar consists of a toolbar and potentially other widgets, such as a
@@ -2033,79 +1810,26 @@ class SliverAppBar extends StatefulWidget {
   State<SliverAppBar> createState() => _SliverAppBarState();
 }
 
-// This class is only Stateful because it owns the TickerProvider used
-// by the floating appbar snap animation (via FloatingHeaderSnapConfiguration).
-class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMixin {
-  FloatingHeaderSnapConfiguration? _snapConfiguration;
-  OverScrollHeaderStretchConfiguration? _stretchConfiguration;
-  PersistentHeaderShowOnScreenConfiguration? _showOnScreenConfiguration;
-
-  void _updateSnapConfiguration() {
-    if (widget.snap && widget.floating) {
-      _snapConfiguration = FloatingHeaderSnapConfiguration(
-        curve: Curves.easeOut,
-        duration: const Duration(milliseconds: 200),
-      );
-    } else {
-      _snapConfiguration = null;
-    }
-
-    _showOnScreenConfiguration = widget.floating & widget.snap
-        ? const PersistentHeaderShowOnScreenConfiguration(minShowOnScreenExtent: double.infinity)
-        : null;
-  }
-
-  void _updateStretchConfiguration() {
-    if (widget.stretch) {
-      _stretchConfiguration = OverScrollHeaderStretchConfiguration(
-        stretchTriggerOffset: widget.stretchTriggerOffset,
-        onStretchTrigger: widget.onStretchTrigger,
-      );
-    } else {
-      _stretchConfiguration = null;
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _updateSnapConfiguration();
-    _updateStretchConfiguration();
-  }
-
-  @override
-  void didUpdateWidget(SliverAppBar oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.snap != oldWidget.snap || widget.floating != oldWidget.floating) {
-      _updateSnapConfiguration();
-    }
-    if (widget.stretch != oldWidget.stretch) {
-      _updateStretchConfiguration();
-    }
-  }
-
+// This class is Stateful to allow future extensions. The TickerProvider for
+// the floating appbar snap animation is now owned by RawSliverAppBar.
+class _SliverAppBarState extends State<SliverAppBar> {
   @override
   Widget build(BuildContext context) {
     assert(!widget.primary || debugCheckHasMediaQuery(context));
     final double bottomHeight = widget.bottom?.preferredSize.height ?? 0.0;
-    final double topPadding = widget.primary ? MediaQuery.paddingOf(context).top : 0.0;
-    final double collapsedHeight = (widget.pinned && widget.floating && widget.bottom != null)
-        ? (widget.collapsedHeight ?? 0.0) + bottomHeight + topPadding
-        : (widget.collapsedHeight ?? widget.toolbarHeight) + bottomHeight + topPadding;
     final double? effectiveExpandedHeight;
-    final double effectiveCollapsedHeight;
+    final double? effectiveCollapsedHeight;
     final Widget? effectiveFlexibleSpace;
     switch (widget._variant) {
       case _SliverAppVariant.small:
         effectiveExpandedHeight = widget.expandedHeight;
-        effectiveCollapsedHeight = collapsedHeight;
+        effectiveCollapsedHeight = widget.collapsedHeight;
         effectiveFlexibleSpace = widget.flexibleSpace;
       case _SliverAppVariant.medium:
         effectiveExpandedHeight =
             widget.expandedHeight ?? _MediumScrollUnderFlexibleConfig.expandedHeight + bottomHeight;
         effectiveCollapsedHeight =
-            widget.collapsedHeight ??
-            topPadding + _MediumScrollUnderFlexibleConfig.collapsedHeight + bottomHeight;
+            widget.collapsedHeight ?? _MediumScrollUnderFlexibleConfig.collapsedHeight;
         effectiveFlexibleSpace =
             widget.flexibleSpace ??
             _ScrollUnderFlexibleSpace(
@@ -2119,8 +1843,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
         effectiveExpandedHeight =
             widget.expandedHeight ?? _LargeScrollUnderFlexibleConfig.expandedHeight + bottomHeight;
         effectiveCollapsedHeight =
-            widget.collapsedHeight ??
-            topPadding + _LargeScrollUnderFlexibleConfig.collapsedHeight + bottomHeight;
+            widget.collapsedHeight ?? _LargeScrollUnderFlexibleConfig.collapsedHeight;
         effectiveFlexibleSpace =
             widget.flexibleSpace ??
             _ScrollUnderFlexibleSpace(
@@ -2132,56 +1855,87 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
             );
     }
 
-    return MediaQuery.removePadding(
-      context: context,
-      removeBottom: true,
-      child: SliverPersistentHeader(
-        floating: widget.floating,
-        pinned: widget.pinned,
-        delegate: _SliverAppBarDelegate(
-          vsync: this,
-          leading: widget.leading,
-          automaticallyImplyLeading: widget.automaticallyImplyLeading,
-          title: widget.title,
-          actions: widget.actions,
-          automaticallyImplyActions: widget.automaticallyImplyActions,
-          flexibleSpace: effectiveFlexibleSpace,
-          bottom: widget.bottom,
-          elevation: widget.elevation,
-          scrolledUnderElevation: widget.scrolledUnderElevation,
-          shadowColor: widget.shadowColor,
-          surfaceTintColor: widget.surfaceTintColor,
-          forceElevated: widget.forceElevated,
-          backgroundColor: widget.backgroundColor,
-          foregroundColor: widget.foregroundColor,
-          iconTheme: widget.iconTheme,
-          actionsIconTheme: widget.actionsIconTheme,
-          primary: widget.primary,
-          centerTitle: widget.centerTitle,
-          excludeHeaderSemantics: widget.excludeHeaderSemantics,
-          titleSpacing: widget.titleSpacing,
-          expandedHeight: effectiveExpandedHeight,
-          collapsedHeight: effectiveCollapsedHeight,
-          topPadding: topPadding,
-          floating: widget.floating,
-          pinned: widget.pinned,
-          shape: widget.shape,
-          snapConfiguration: _snapConfiguration,
-          stretchConfiguration: _stretchConfiguration,
-          showOnScreenConfiguration: _showOnScreenConfiguration,
-          toolbarHeight: widget.toolbarHeight,
-          leadingWidth: widget.leadingWidth,
-          toolbarTextStyle: widget.toolbarTextStyle,
-          titleTextStyle: widget.titleTextStyle,
-          systemOverlayStyle: widget.systemOverlayStyle,
-          forceMaterialTransparency: widget.forceMaterialTransparency,
-          useDefaultSemanticsOrder: widget.useDefaultSemanticsOrder,
-          clipBehavior: widget.clipBehavior,
-          variant: widget._variant,
-          accessibleNavigation: MediaQuery.of(context).accessibleNavigation,
-          actionsPadding: widget.actionsPadding,
-        ),
-      ),
+    return RawSliverAppBar(
+      toolbarHeight: widget.toolbarHeight,
+      leading: widget.leading,
+      bottom: widget.bottom,
+      expandedHeight: effectiveExpandedHeight,
+      collapsedHeight: effectiveCollapsedHeight,
+      floating: widget.floating,
+      pinned: widget.pinned,
+      snap: widget.snap,
+      stretch: widget.stretch,
+      stretchTriggerOffset: widget.stretchTriggerOffset,
+      onStretchTrigger: widget.onStretchTrigger,
+      forceElevated: widget.forceElevated,
+      primary: widget.primary,
+      appBarBuilder:
+          (
+            BuildContext context, {
+            required double toolbarOpacity,
+            required double bottomOpacity,
+            required bool isScrolledUnder,
+            required double minExtent,
+            required double maxExtent,
+            required double currentExtent,
+          }) {
+            final Widget? effectiveTitle = switch (widget._variant) {
+              _SliverAppVariant.small => widget.title,
+              _SliverAppVariant.medium || _SliverAppVariant.large => AnimatedOpacity(
+                opacity: isScrolledUnder ? 1 : 0,
+                duration: const Duration(milliseconds: 500),
+                curve: const Cubic(0.2, 0.0, 0.0, 1.0),
+                child: widget.title,
+              ),
+            };
+
+            return FlexibleSpaceBar.createSettings(
+              minExtent: minExtent,
+              maxExtent: maxExtent,
+              currentExtent: currentExtent,
+              toolbarOpacity: toolbarOpacity,
+              isScrolledUnder: isScrolledUnder,
+              hasLeading: widget.leading != null || widget.automaticallyImplyLeading,
+              child: AppBar(
+                clipBehavior: widget.clipBehavior,
+                leading: widget.leading,
+                automaticallyImplyLeading: widget.automaticallyImplyLeading,
+                title: effectiveTitle,
+                actions: widget.actions,
+                automaticallyImplyActions: widget.automaticallyImplyActions,
+                flexibleSpace:
+                    (widget.title == null &&
+                        effectiveFlexibleSpace != null &&
+                        !widget.excludeHeaderSemantics)
+                    ? Semantics(header: true, child: effectiveFlexibleSpace)
+                    : effectiveFlexibleSpace,
+                bottom: widget.bottom,
+                elevation: isScrolledUnder ? widget.elevation : 0.0,
+                scrolledUnderElevation: widget.scrolledUnderElevation,
+                shadowColor: widget.shadowColor,
+                surfaceTintColor: widget.surfaceTintColor,
+                backgroundColor: widget.backgroundColor,
+                foregroundColor: widget.foregroundColor,
+                iconTheme: widget.iconTheme,
+                actionsIconTheme: widget.actionsIconTheme,
+                primary: widget.primary,
+                centerTitle: widget.centerTitle,
+                excludeHeaderSemantics: widget.excludeHeaderSemantics,
+                titleSpacing: widget.titleSpacing,
+                shape: widget.shape,
+                toolbarOpacity: toolbarOpacity,
+                bottomOpacity: bottomOpacity,
+                toolbarHeight: widget.toolbarHeight,
+                leadingWidth: widget.leadingWidth,
+                toolbarTextStyle: widget.toolbarTextStyle,
+                titleTextStyle: widget.titleTextStyle,
+                systemOverlayStyle: widget.systemOverlayStyle,
+                forceMaterialTransparency: widget.forceMaterialTransparency,
+                useDefaultSemanticsOrder: widget.useDefaultSemanticsOrder,
+                actionsPadding: widget.actionsPadding,
+              ),
+            );
+          },
     );
   }
 }

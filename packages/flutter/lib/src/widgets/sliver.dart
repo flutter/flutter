@@ -9,7 +9,6 @@
 /// @docImport 'implicit_animations.dart';
 /// @docImport 'scroll_view.dart';
 /// @docImport 'sliver_fill.dart';
-/// @docImport 'sliver_persistent_header.dart';
 /// @docImport 'sliver_prototype_extent_list.dart';
 /// @docImport 'text.dart';
 /// @docImport 'two_dimensional_viewport.dart';
@@ -25,8 +24,13 @@ import 'package:flutter/rendering.dart';
 
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
+import 'debug.dart';
 import 'framework.dart';
+import 'media_query.dart';
+import 'preferred_size.dart';
 import 'scroll_delegate.dart';
+import 'sliver_persistent_header.dart';
+import 'ticker_provider.dart';
 
 /// A base class for slivers that have [KeepAlive] children.
 ///
@@ -1921,4 +1925,486 @@ class SliverEnsureSemantics extends SingleChildRenderObjectWidget {
 class _RenderSliverEnsureSemantics extends RenderProxySliver {
   @override
   bool get ensureSemantics => true;
+}
+
+/// Signature for a function that builds the app bar widget for [RawSliverAppBar].
+///
+/// The [context] is the build context.
+/// The [toolbarOpacity] is the opacity of the toolbar area (0.0 to 1.0).
+/// The [bottomOpacity] is the opacity of the bottom area (0.0 to 1.0).
+/// The [isScrolledUnder] indicates whether content has been scrolled under this bar.
+/// The [minExtent] is the minimum height of the app bar (fully collapsed).
+/// The [maxExtent] is the maximum height of the app bar (fully expanded).
+/// The [currentExtent] is the current height of the app bar.
+typedef RawSliverAppBarBuilder =
+    Widget Function(
+      BuildContext context, {
+      required double toolbarOpacity,
+      required double bottomOpacity,
+      required bool isScrolledUnder,
+      required double minExtent,
+      required double maxExtent,
+      required double currentExtent,
+    });
+
+/// An [InheritedWidget] that communicates the current extent and scroll state
+/// of a [RawSliverAppBar] to its descendants.
+///
+/// This is the widgets-layer equivalent of `FlexibleSpaceBarSettings` from the
+/// Material library. It provides information about the app bar's current state
+/// to child widgets so they can adjust their appearance based on scroll position.
+///
+/// See also:
+///
+///  * [RawSliverAppBar], which creates this settings widget.
+class RawSliverAppBarSettings extends InheritedWidget {
+  /// Creates a [RawSliverAppBarSettings] widget.
+  const RawSliverAppBarSettings({
+    super.key,
+    required this.toolbarOpacity,
+    required this.minExtent,
+    required this.maxExtent,
+    required this.currentExtent,
+    required super.child,
+    this.isScrolledUnder,
+    this.hasLeading,
+  }) : assert(minExtent >= 0),
+       assert(maxExtent >= 0),
+       assert(currentExtent >= 0),
+       assert(toolbarOpacity >= 0.0),
+       assert(minExtent <= maxExtent),
+       assert(minExtent <= currentExtent),
+       assert(currentExtent <= maxExtent);
+
+  /// Creates a [RawSliverAppBarSettings] with sensible defaults for optional parameters.
+  ///
+  /// This is analogous to `FlexibleSpaceBar.createSettings`.
+  factory RawSliverAppBarSettings.createSettings({
+    Key? key,
+    double? toolbarOpacity,
+    double? minExtent,
+    double? maxExtent,
+    bool? isScrolledUnder,
+    bool? hasLeading,
+    required double currentExtent,
+    required Widget child,
+  }) {
+    return RawSliverAppBarSettings(
+      key: key,
+      toolbarOpacity: toolbarOpacity ?? 1.0,
+      minExtent: minExtent ?? currentExtent,
+      maxExtent: maxExtent ?? currentExtent,
+      isScrolledUnder: isScrolledUnder,
+      hasLeading: hasLeading,
+      currentExtent: currentExtent,
+      child: child,
+    );
+  }
+
+  /// Affects how transparent the text within the toolbar appears.
+  final double toolbarOpacity;
+
+  /// Minimum height of the app bar when fully collapsed.
+  final double minExtent;
+
+  /// Maximum height of the app bar when fully expanded.
+  final double maxExtent;
+
+  /// The current height of the app bar.
+  final double currentExtent;
+
+  /// True if content has been scrolled under the app bar.
+  ///
+  /// Null if the caller hasn't determined the scroll state.
+  final bool? isScrolledUnder;
+
+  /// True if the app bar has a leading widget.
+  ///
+  /// Null if the caller hasn't determined the leading state.
+  final bool? hasLeading;
+
+  @override
+  bool updateShouldNotify(RawSliverAppBarSettings oldWidget) {
+    return toolbarOpacity != oldWidget.toolbarOpacity ||
+        minExtent != oldWidget.minExtent ||
+        maxExtent != oldWidget.maxExtent ||
+        currentExtent != oldWidget.currentExtent ||
+        isScrolledUnder != oldWidget.isScrolledUnder ||
+        hasLeading != oldWidget.hasLeading;
+  }
+}
+
+/// A [SliverPersistentHeaderDelegate] for [RawSliverAppBar].
+///
+/// This delegate computes the toolbar and bottom opacity based on scroll
+/// position and delegates the actual app bar widget building to a
+/// [RawSliverAppBarBuilder] callback.
+class _RawSliverAppBarDelegate extends SliverPersistentHeaderDelegate {
+  _RawSliverAppBarDelegate({
+    required this.toolbarHeight,
+    required this.bottomHeight,
+    required this.expandedHeight,
+    required this.collapsedHeight,
+    required this.topPadding,
+    required this.floating,
+    required this.pinned,
+    required this.primary,
+    required this.vsync,
+    required this.snapConfiguration,
+    required this.stretchConfiguration,
+    required this.showOnScreenConfiguration,
+    required this.appBarBuilder,
+    required this.accessibleNavigation,
+    this.leading,
+    this.forceElevated = false,
+  }) : assert(primary || topPadding == 0.0);
+
+  final double toolbarHeight;
+  final double bottomHeight;
+  final double? expandedHeight;
+  final double collapsedHeight;
+  final double topPadding;
+  final bool floating;
+  final bool pinned;
+  final bool primary;
+  final bool forceElevated;
+  final bool accessibleNavigation;
+  final Widget? leading;
+
+  /// The callback that builds the actual app bar widget.
+  final RawSliverAppBarBuilder appBarBuilder;
+
+  @override
+  double get minExtent => collapsedHeight;
+
+  @override
+  double get maxExtent =>
+      math.max(topPadding + (expandedHeight ?? toolbarHeight + bottomHeight), minExtent);
+
+  @override
+  final TickerProvider vsync;
+
+  @override
+  final FloatingHeaderSnapConfiguration? snapConfiguration;
+
+  @override
+  final OverScrollHeaderStretchConfiguration? stretchConfiguration;
+
+  @override
+  final PersistentHeaderShowOnScreenConfiguration? showOnScreenConfiguration;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    final double visibleMainHeight = maxExtent - shrinkOffset - topPadding;
+    final double extraToolbarHeight = math.max(
+      minExtent - bottomHeight - topPadding - toolbarHeight,
+      0.0,
+    );
+    final double visibleToolbarHeight = visibleMainHeight - bottomHeight - extraToolbarHeight;
+
+    final bool isScrolledUnder =
+        overlapsContent || forceElevated || (pinned && shrinkOffset > maxExtent - minExtent);
+    final bool isPinnedWithOpacityFade =
+        pinned && floating && bottomHeight > 0 && extraToolbarHeight == 0.0;
+    final double toolbarOpacity = !accessibleNavigation && (!pinned || isPinnedWithOpacityFade)
+        ? clampDouble(visibleToolbarHeight / toolbarHeight, 0.0, 1.0)
+        : 1.0;
+    final double bottomOpacity = pinned
+        ? 1.0
+        : clampDouble(visibleMainHeight / bottomHeight, 0.0, 1.0);
+
+    final Widget appBar = RawSliverAppBarSettings(
+      toolbarOpacity: toolbarOpacity,
+      minExtent: minExtent,
+      maxExtent: maxExtent,
+      currentExtent: math.max(minExtent, maxExtent - shrinkOffset),
+      isScrolledUnder: isScrolledUnder,
+      hasLeading: leading != null,
+      child: appBarBuilder(
+        context,
+        toolbarOpacity: toolbarOpacity,
+        bottomOpacity: bottomOpacity,
+        isScrolledUnder: isScrolledUnder,
+        minExtent: minExtent,
+        maxExtent: maxExtent,
+        currentExtent: math.max(minExtent, maxExtent - shrinkOffset),
+      ),
+    );
+    return appBar;
+  }
+
+  @override
+  bool shouldRebuild(covariant _RawSliverAppBarDelegate oldDelegate) {
+    return toolbarHeight != oldDelegate.toolbarHeight ||
+        bottomHeight != oldDelegate.bottomHeight ||
+        expandedHeight != oldDelegate.expandedHeight ||
+        collapsedHeight != oldDelegate.collapsedHeight ||
+        topPadding != oldDelegate.topPadding ||
+        floating != oldDelegate.floating ||
+        pinned != oldDelegate.pinned ||
+        primary != oldDelegate.primary ||
+        forceElevated != oldDelegate.forceElevated ||
+        accessibleNavigation != oldDelegate.accessibleNavigation ||
+        leading != oldDelegate.leading ||
+        vsync != oldDelegate.vsync ||
+        snapConfiguration != oldDelegate.snapConfiguration ||
+        stretchConfiguration != oldDelegate.stretchConfiguration ||
+        showOnScreenConfiguration != oldDelegate.showOnScreenConfiguration ||
+        appBarBuilder != oldDelegate.appBarBuilder;
+  }
+
+  @override
+  String toString() {
+    return '${describeIdentity(this)}(topPadding: ${topPadding.toStringAsFixed(1)}, bottomHeight: ${bottomHeight.toStringAsFixed(1)}, ...)';
+  }
+}
+
+/// A design-system-agnostic sliver app bar for use in a [CustomScrollView].
+///
+/// [RawSliverAppBar] provides the structural and scrolling behavior of a sliver
+/// app bar without any Material Design or Cupertino styling. It delegates the
+/// actual visual rendering of the app bar to the [appBarBuilder] callback.
+///
+/// This widget wraps a [SliverPersistentHeader] and manages:
+///   * Collapsing/expanding based on scroll position
+///   * Floating and snapping behavior
+///   * Stretch behavior with overscroll
+///   * Status bar padding (when [primary] is true)
+///
+/// For a Material Design styled sliver app bar, use [SliverAppBar] from the
+/// Material library, which uses this widget internally.
+///
+/// {@tool snippet}
+///
+/// This is an example of how to use [RawSliverAppBar] in a [CustomScrollView]:
+///
+/// ```dart
+/// CustomScrollView(
+///   slivers: <Widget>[
+///     RawSliverAppBar(
+///       toolbarHeight: 56.0,
+///       expandedHeight: 200.0,
+///       pinned: true,
+///       appBarBuilder: (context, {
+///         required toolbarOpacity,
+///         required bottomOpacity,
+///         required isScrolledUnder,
+///         required minExtent,
+///         required maxExtent,
+///         required currentExtent,
+///       }) {
+///         return Container(
+///           color: isScrolledUnder ? Colors.blue : Colors.transparent,
+///           child: Center(child: Text('My App Bar')),
+///         );
+///       },
+///     ),
+///   ],
+/// )
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [CustomScrollView], which integrates the [RawSliverAppBar] into its
+///    scrolling.
+///  * [SliverPersistentHeader], the lower-level primitive that this widget uses.
+class RawSliverAppBar extends StatefulWidget {
+  /// Creates a design-system-agnostic sliver app bar.
+  ///
+  /// The [appBarBuilder] callback is responsible for building the visual content
+  /// of the app bar. It receives the current `toolbarOpacity`, `bottomOpacity`,
+  /// and `isScrolledUnder` state so that it can adjust its appearance.
+  const RawSliverAppBar({
+    super.key,
+    required this.toolbarHeight,
+    required this.appBarBuilder,
+    this.leading,
+    this.bottom,
+    this.expandedHeight,
+    this.collapsedHeight,
+    this.floating = false,
+    this.pinned = false,
+    this.snap = false,
+    this.stretch = false,
+    this.stretchTriggerOffset = 100.0,
+    this.onStretchTrigger,
+    this.forceElevated = false,
+    this.primary = true,
+  }) : assert(floating || !snap, 'The "snap" argument only makes sense for floating app bars.'),
+       assert(stretchTriggerOffset > 0.0),
+       assert(
+         collapsedHeight == null || collapsedHeight >= toolbarHeight,
+         'The "collapsedHeight" argument has to be larger than or equal to [toolbarHeight].',
+       );
+
+  /// The height of the toolbar area of the app bar.
+  ///
+  /// This is typically the height of an [AppBar] toolbar or equivalent, not
+  /// including the bottom widget.
+  final double toolbarHeight;
+
+  /// A widget to display before the toolbar's title (if applicable).
+  ///
+  /// This is used to determine the [RawSliverAppBarSettings.hasLeading] value
+  /// passed to descendants.
+  final Widget? leading;
+
+  /// A widget that appears across the bottom of the app bar.
+  ///
+  /// Only widgets that implement [PreferredSizeWidget] can be used.
+  /// The [PreferredSizeWidget.preferredSize] height is used to compute
+  /// the collapsed and expanded heights.
+  final PreferredSizeWidget? bottom;
+
+  /// The size of the app bar when it is fully expanded.
+  ///
+  /// By default, the total height of the toolbar and the bottom widget (if any).
+  ///
+  /// This does not include the status bar height (which will be automatically
+  /// included if [primary] is true).
+  final double? expandedHeight;
+
+  /// Defines the height of the app bar when it is collapsed.
+  ///
+  /// By default, the collapsed height is [toolbarHeight]. If [bottom] is
+  /// specified, then its height is added. If [primary] is true, then the
+  /// [MediaQuery] top padding is added as well.
+  ///
+  /// If [pinned] and [floating] are true with [bottom] set, the default
+  /// collapsed height is only the height of the bottom widget with the
+  /// [MediaQuery] top padding.
+  final double? collapsedHeight;
+
+  /// Whether the app bar should become visible as soon as the user scrolls
+  /// towards the app bar.
+  final bool floating;
+
+  /// Whether the app bar should remain visible at the start of the scroll view.
+  final bool pinned;
+
+  /// If [snap] and [floating] are true then the floating app bar will "snap"
+  /// into view.
+  final bool snap;
+
+  /// Whether the app bar should stretch to fill the over-scroll area.
+  final bool stretch;
+
+  /// The offset of overscroll required to activate [onStretchTrigger].
+  ///
+  /// This defaults to 100.0.
+  final double stretchTriggerOffset;
+
+  /// The callback function to be executed when a user over-scrolls to the
+  /// offset specified by [stretchTriggerOffset].
+  final AsyncCallback? onStretchTrigger;
+
+  /// Whether to show the elevation even if the content is not scrolled under
+  /// the app bar.
+  ///
+  /// Defaults to false.
+  final bool forceElevated;
+
+  /// Whether this app bar is being displayed at the top of the screen.
+  ///
+  /// If true, the app bar's toolbar elements and [bottom] widget will be
+  /// padded on top by the height of the system status bar.
+  final bool primary;
+
+  /// Builds the actual visual content of the app bar.
+  ///
+  /// This callback is called by the delegate whenever the app bar needs to
+  /// rebuild. It receives the current scroll state so the builder can
+  /// adjust the visual appearance of the app bar accordingly.
+  final RawSliverAppBarBuilder appBarBuilder;
+
+  @override
+  State<RawSliverAppBar> createState() => _RawSliverAppBarState();
+}
+
+class _RawSliverAppBarState extends State<RawSliverAppBar> with TickerProviderStateMixin {
+  FloatingHeaderSnapConfiguration? _snapConfiguration;
+  OverScrollHeaderStretchConfiguration? _stretchConfiguration;
+  PersistentHeaderShowOnScreenConfiguration? _showOnScreenConfiguration;
+
+  void _updateSnapConfiguration() {
+    if (widget.snap && widget.floating) {
+      _snapConfiguration = FloatingHeaderSnapConfiguration(
+        curve: Curves.easeOut,
+        duration: const Duration(milliseconds: 200),
+      );
+    } else {
+      _snapConfiguration = null;
+    }
+
+    _showOnScreenConfiguration = widget.floating & widget.snap
+        ? const PersistentHeaderShowOnScreenConfiguration(minShowOnScreenExtent: double.infinity)
+        : null;
+  }
+
+  void _updateStretchConfiguration() {
+    if (widget.stretch) {
+      _stretchConfiguration = OverScrollHeaderStretchConfiguration(
+        stretchTriggerOffset: widget.stretchTriggerOffset,
+        onStretchTrigger: widget.onStretchTrigger,
+      );
+    } else {
+      _stretchConfiguration = null;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _updateSnapConfiguration();
+    _updateStretchConfiguration();
+  }
+
+  @override
+  void didUpdateWidget(RawSliverAppBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.snap != oldWidget.snap || widget.floating != oldWidget.floating) {
+      _updateSnapConfiguration();
+    }
+    if (widget.stretch != oldWidget.stretch) {
+      _updateStretchConfiguration();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    assert(!widget.primary || debugCheckHasMediaQuery(context));
+    final double bottomHeight = widget.bottom?.preferredSize.height ?? 0.0;
+    final double topPadding = widget.primary ? MediaQuery.paddingOf(context).top : 0.0;
+    final double collapsedHeight = (widget.pinned && widget.floating && widget.bottom != null)
+        ? (widget.collapsedHeight ?? 0.0) + bottomHeight + topPadding
+        : (widget.collapsedHeight ?? widget.toolbarHeight) + bottomHeight + topPadding;
+
+    return MediaQuery.removePadding(
+      context: context,
+      removeBottom: true,
+      child: SliverPersistentHeader(
+        floating: widget.floating,
+        pinned: widget.pinned,
+        delegate: _RawSliverAppBarDelegate(
+          vsync: this,
+          toolbarHeight: widget.toolbarHeight,
+          bottomHeight: bottomHeight,
+          expandedHeight: widget.expandedHeight,
+          collapsedHeight: collapsedHeight,
+          topPadding: topPadding,
+          floating: widget.floating,
+          pinned: widget.pinned,
+          primary: widget.primary,
+          forceElevated: widget.forceElevated,
+          accessibleNavigation: MediaQuery.of(context).accessibleNavigation,
+          leading: widget.leading,
+          snapConfiguration: _snapConfiguration,
+          stretchConfiguration: _stretchConfiguration,
+          showOnScreenConfiguration: _showOnScreenConfiguration,
+          appBarBuilder: widget.appBarBuilder,
+        ),
+      ),
+    );
+  }
 }
