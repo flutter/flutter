@@ -443,6 +443,8 @@ class CupertinoMenuAnchor extends StatefulWidget {
   ///
   /// Typically, this is a button that calls [MenuController.open] when pressed.
   ///
+  /// The [builder] will rebuild when the menu's [AnimationStatus] changes.
+  ///
   /// If null, the [CupertinoMenuAnchor] will be the size that its parent
   /// allocates for it.
   final RawMenuAnchorChildBuilder? builder;
@@ -539,7 +541,7 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
 
   MenuController get _menuController => widget.controller ?? _internalMenuController!;
   MenuController? _internalMenuController;
-  bool get isOpening => _animationStatus.isForwardOrCompleted;
+  bool get isOpenOrOpening => _animationStatus.isForwardOrCompleted;
   bool get enableSwipe =>
       widget.enableSwipe &&
       switch (_animationStatus) {
@@ -622,7 +624,7 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
   }
 
   void _handleAnchorSwipeStart() {
-    if (isOpening || !widget.enableLongPressToOpen) {
+    if (isOpenOrOpening || !widget.enableLongPressToOpen) {
       return;
     }
     _menuController.open();
@@ -666,11 +668,11 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
 
   Widget _buildMenuOverlay(BuildContext childContext, RawMenuOverlayInfo info) {
     return ExcludeSemantics(
-      excluding: !isOpening,
+      excluding: !isOpenOrOpening,
       child: IgnorePointer(
-        ignoring: !isOpening,
+        ignoring: !isOpenOrOpening,
         child: ExcludeFocus(
-          excluding: !isOpening,
+          excluding: !isOpenOrOpening,
           child: _MenuOverlay(
             constrainCrossAxis: widget.constrainCrossAxis,
             visibilityAnimation: _animationController.view,
