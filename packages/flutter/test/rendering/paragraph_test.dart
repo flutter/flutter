@@ -1000,6 +1000,21 @@ void main() {
       expect(registrar.selectables.length, 0);
     });
 
+    test('exposes selectable paragraph semantics as read-only text field', () {
+      final registrar = TestSelectionRegistrar();
+      final paragraph = RenderParagraph(
+        const TextSpan(text: 'hello world'),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+      );
+
+      final SemanticsConfiguration config = SemanticsConfiguration();
+      paragraph.describeSemanticsConfiguration(config);
+
+      expect(config.isTextField, isTrue);
+      expect(config.isReadOnly, isTrue);
+    });
+
     test('paints selection highlight', () async {
       final registrar = TestSelectionRegistrar();
       const selectionColor = Color(0xAF6694e8);

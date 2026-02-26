@@ -1225,6 +1225,12 @@ class RenderParagraph extends RenderBox
       config.attributedLabel = _cachedAttributedLabels![0];
       config.textDirection = textDirection;
     }
+
+    if (_registrar != null) {
+      config
+        ..isTextField = true
+        ..isReadOnly = true;
+    }
   }
 
   ChildSemanticsConfigurationsResult _childSemanticsConfigurationsDelegate(
