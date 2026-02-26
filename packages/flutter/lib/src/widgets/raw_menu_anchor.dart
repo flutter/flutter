@@ -310,10 +310,11 @@ class RawMenuAnchor extends StatefulWidget {
 
   /// Called when a request is made to close the menu.
   ///
-  /// This callback is triggered every time [MenuController.close] is called,
-  /// regardless of whether the overlay is already hidden. As a result, this
-  /// callback can be used to add a delay or a closing animation before the menu
-  /// is hidden.
+  /// This callback can be used to add a delay or a closing animation before the
+  /// menu is hidden.
+  ///
+  /// This callback is triggered every time [MenuController.close] is called
+  /// while this menu is open.
   ///
   /// This callback is also triggered when a sibling [RawMenuAnchor] is opened
   /// while this menu is open. In this case, the callback can be used to add a
@@ -322,6 +323,10 @@ class RawMenuAnchor extends StatefulWidget {
   /// interactive, so that it doesn't interfere with the opening sibling menu.
   /// Semantics, focus, and hit testing for the closing menu should be disabled
   /// for the duration of the closing animation.
+  ///
+  /// Pending timers or animations started in a previous call to
+  /// [onCloseRequested] should be canceled when this callback is triggered to
+  /// prevent them from closing the menu at an unintended time.
   ///
   /// If the menu is not closed, this callback will also be called when the root
   /// menu anchor is scrolled and when the screen is resized.
