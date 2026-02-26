@@ -315,10 +315,9 @@ class RawMenuAnchor extends StatefulWidget {
   /// callback can be used to add a delay or a closing animation before the menu
   /// is hidden.
   ///
-  /// This callback is also triggered when a parent [RawMenuAnchor] is opened,
-  /// since that triggers [MenuController.close] on all descendant menu
-  /// controllers. As a result, pending timers or animations started in
-  /// [onCloseRequested] should be canceled when this callback is triggered, to
+  /// This callback is also triggered when a sibling [RawMenuAnchor] is opened.
+  /// As a result, pending timers or animations previously started in
+  /// [onCloseRequested] should be canceled when this callback is triggered to
   /// prevent them from closing the menu at an unintended time.
   ///
   /// If the menu is not closed, this callback will also be called when the root
