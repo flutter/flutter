@@ -335,6 +335,40 @@ void main() {
     expect(columnRect.right, 100.0);
   });
 
+  testWidgets('ExpansionTile expandedAlignment with directional test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Material(
+            child: Center(
+              child: ExpansionTile(
+                title: Text('title'),
+                expandedAlignment: AlignmentDirectional.topEnd,
+                children: <Widget>[
+                  SizedBox(height: 100, width: 100),
+                  SizedBox(height: 100, width: 80),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    final Rect columnRect = tester.getRect(find.byType(Column).last);
+
+    // The expandedAlignment is used to define the alignment of the Column widget in
+    // expanded tile, not the alignment of the children inside the Column.
+    expect(columnRect.left, 0.0);
+    // The width of the Column is the width of the largest child. The largest width
+    // being 100.0, the offset of the right edge of Column from X-axis should be 100.0.
+    expect(columnRect.right, 100.0);
+  });
+
   testWidgets('ExpansionTile expandedCrossAxisAlignment test', (WidgetTester tester) async {
     const child0Key = Key('child0');
     const child1Key = Key('child1');
@@ -377,6 +411,57 @@ void main() {
 
     // Considering the value of expandedCrossAxisAlignment is CrossAxisAlignment.start,
     // the offset of the left edge of both the children from X-axis should be 700.0.
+    expect(child0Rect.left, 700.0);
+    expect(child1Rect.left, 700.0);
+  });
+
+  testWidgets('ExpansionTile expandedCrossAxisAlignment with directional expandedAlignment test', (
+    WidgetTester tester,
+  ) async {
+    const child0Key = Key('child0');
+    const child1Key = Key('child1');
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Material(
+            child: Center(
+              child: ExpansionTile(
+                title: Text('title'),
+                // Set the column's alignment to AlignmentDirectional.centerStart to test CrossAxisAlignment
+                // of children widgets. This helps distinguish the effect of expandedAlignment
+                // and expandedCrossAxisAlignment later in the test.
+                expandedAlignment: AlignmentDirectional.centerStart,
+                expandedCrossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
+                  SizedBox(height: 100, width: 100, key: child0Key),
+                  SizedBox(height: 100, width: 80, key: child1Key),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    final Rect columnRect = tester.getRect(find.byType(Column).last);
+    final Rect child0Rect = tester.getRect(find.byKey(child0Key));
+    final Rect child1Rect = tester.getRect(find.byKey(child1Key));
+
+    // With `textDirection` set to `TextDirection.rtl`, `AlignmentDirectional.centerStart`
+    // resolves to `Alignment.centerRight`. The column of children should be aligned to the
+    // center right of the expanded tile.
+    expect(columnRect.right, 800.0);
+    // The width of the Column is the width of the largest child. The largest width
+    // being 100.0, the offset of the left edge of Column from X-axis should be 700.0.
+    expect(columnRect.left, 700.0);
+
+    // With `textDirection` set to `TextDirection.rtl`, `CrossAxisAlignment.end` aligns children to the left.
+    // The offset of the left edge of both children from the X-axis should be 700.0.
     expect(child0Rect.left, 700.0);
     expect(child1Rect.left, 700.0);
   });
@@ -1661,5 +1746,241 @@ void main() {
     expect(controller2.isExpanded, isTrue);
     await tester.pumpAndSettle();
     expect(find.text('Child 0'), findsOne);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/176566
+  testWidgets(
+    'ExpansionTile semantics hint uses defaultTargetPlatform for VoiceOver regardless of theme platform',
+    (WidgetTester tester) async {
+      // Regression test for VoiceOver accessibility when theme platform differs from device platform.
+      // When someone sets theme.platform to TargetPlatform.android on an iOS device,
+      // VoiceOver should still work correctly by using the actual device platform for semantics hints.
+
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const localizations = DefaultMaterialLocalizations();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.android),
+          home: const Material(
+            child: Column(
+              children: <Widget>[
+                ExpansionTile(title: Text('First Expansion Tile')),
+                ExpansionTile(initiallyExpanded: true, title: Text('Second Expansion Tile')),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      SemanticsNode semantics = tester.getSemantics(
+        find.ancestor(of: find.byType(ListTile).first, matching: find.byType(Semantics)).first,
+      );
+
+      expect(semantics, isNotNull);
+      // On iOS/macOS platform, the semantics hint should include expanded/collapsed state guidance
+      // even theme platform is set to Android.
+      expect(
+        semantics.hint,
+        '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}',
+      );
+
+      semantics = tester.getSemantics(
+        find.ancestor(of: find.byType(ListTile).last, matching: find.byType(Semantics)).first,
+      );
+
+      expect(semantics, isNotNull);
+      expect(
+        semantics.hint,
+        '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}',
+      );
+      handle.dispose();
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    }),
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/173060
+  group('Semantics tests for non-iOS/macOS/android platforms', () {
+    testWidgets(
+      'Semantics hint should show current state',
+      (WidgetTester tester) async {
+        final SemanticsHandle handle = tester.ensureSemantics();
+        const localizations = DefaultMaterialLocalizations();
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Material(
+              child: Column(
+                children: <Widget>[
+                  ExpansionTile(title: Text('First Expansion Tile')),
+                  ExpansionTile(initiallyExpanded: true, title: Text('Second Expansion Tile')),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        // Test collapsed tile - should show "Collapsed" hint.
+        SemanticsNode semantics = tester.getSemantics(
+          find.ancestor(of: find.byType(ListTile).first, matching: find.byType(Semantics)).first,
+        );
+        expect(semantics, isNotNull);
+        expect(semantics.hint, localizations.expandedHint);
+
+        // Test expanded tile - should show "Expanded" hint.
+        semantics = tester.getSemantics(
+          find.ancestor(of: find.byType(ListTile).last, matching: find.byType(Semantics)).first,
+        );
+        expect(semantics, isNotNull);
+        expect(semantics.hint, localizations.collapsedHint);
+
+        handle.dispose();
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.android,
+        TargetPlatform.fuchsia,
+        TargetPlatform.linux,
+        TargetPlatform.windows,
+      }),
+    );
+
+    testWidgets(
+      'Semantics hint updates when expansion state changes',
+      (WidgetTester tester) async {
+        final SemanticsHandle handle = tester.ensureSemantics();
+        const localizations = DefaultMaterialLocalizations();
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Material(
+              child: ExpansionTile(title: Text('Test Tile'), children: <Widget>[Text('Child')]),
+            ),
+          ),
+        );
+
+        // Initially collapsed - should show "Collapsed".
+        SemanticsNode semantics = tester.getSemantics(
+          find.ancestor(of: find.byType(ListTile), matching: find.byType(Semantics)).first,
+        );
+        expect(semantics.hint, localizations.expandedHint);
+
+        // Tap to expand.
+        await tester.tap(find.text('Test Tile'));
+        await tester.pumpAndSettle();
+
+        // Now expanded - should show "Expanded".
+        semantics = tester.getSemantics(
+          find.ancestor(of: find.byType(ListTile), matching: find.byType(Semantics)).first,
+        );
+        expect(semantics.hint, localizations.collapsedHint);
+
+        // Tap to collapse.
+        await tester.tap(find.text('Test Tile'));
+        await tester.pumpAndSettle();
+
+        // Back to collapsed - should show "Collapsed" again.
+        semantics = tester.getSemantics(
+          find.ancestor(of: find.byType(ListTile), matching: find.byType(Semantics)).first,
+        );
+        expect(semantics.hint, localizations.expandedHint);
+
+        handle.dispose();
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.android,
+        TargetPlatform.fuchsia,
+        TargetPlatform.linux,
+        TargetPlatform.windows,
+      }),
+    );
+  });
+  group('Semantics tests for android platform', () {
+    testWidgets(
+      'Semantics liveregion updates when expansion state changes',
+      (WidgetTester tester) async {
+        final SemanticsHandle handle = tester.ensureSemantics();
+        const localizations = DefaultMaterialLocalizations();
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Material(
+              child: ExpansionTile(title: Text('Test Tile'), children: <Widget>[Text('Child')]),
+            ),
+          ),
+        );
+
+        // Initially collapsed - live region label is "Collapsed".
+
+        SemanticsNode liveRegionSemantics = tester.getSemantics(
+          find.ancestor(
+            of: find.byType(ListTile),
+            matching: find.byWidgetPredicate(
+              (Widget widget) => widget is Semantics && (widget.properties.liveRegion ?? false),
+            ),
+          ),
+        );
+        expect(liveRegionSemantics.label, localizations.expandedHint);
+
+        // Tap to expand.
+        await tester.tap(find.text('Test Tile'));
+        await tester.pumpAndSettle();
+
+        // Now expanded - should show "Expanded".
+        liveRegionSemantics = tester.getSemantics(
+          find.ancestor(
+            of: find.byType(ListTile),
+            matching: find.byWidgetPredicate(
+              (Widget widget) => widget is Semantics && (widget.properties.liveRegion ?? false),
+            ),
+          ),
+        );
+        expect(liveRegionSemantics.label, localizations.collapsedHint);
+
+        // Tap to collapse.
+        await tester.tap(find.text('Test Tile'));
+        await tester.pumpAndSettle();
+
+        // Back to collapsed - should show "Collapsed" again.
+        liveRegionSemantics = tester.getSemantics(
+          find.ancestor(
+            of: find.byType(ListTile),
+            matching: find.byWidgetPredicate(
+              (Widget widget) => widget is Semantics && (widget.properties.liveRegion ?? false),
+            ),
+          ),
+        );
+        expect(liveRegionSemantics.label, localizations.expandedHint);
+
+        handle.dispose();
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
+    );
+  });
+
+  testWidgets('ExpansionTile forwards statesController to ListTile', (tester) async {
+    final controller = WidgetStatesController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ExpansionTile(title: const Text('Tile'), statesController: controller),
+        ),
+      ),
+    );
+
+    final ListTile listTile = tester.widget<ListTile>(find.byType(ListTile));
+    expect(listTile.statesController, controller);
+  });
+
+  testWidgets('ExpansionTile forwards null statesController to ListTile', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(child: ExpansionTile(title: Text('Tile'))),
+      ),
+    );
+
+    final ListTile listTile = tester.widget<ListTile>(find.byType(ListTile));
+    expect(listTile.statesController, isNull);
   });
 }

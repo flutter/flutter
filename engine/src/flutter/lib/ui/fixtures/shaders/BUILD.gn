@@ -13,6 +13,7 @@ if (enable_unittests) {
       "//flutter/lib/ui/fixtures/shaders/general_shaders",
       "//flutter/lib/ui/fixtures/shaders/supported_glsl_op_shaders",
       "//flutter/lib/ui/fixtures/shaders/supported_op_shaders",
+      "//flutter/lib/ui/fixtures/shaders/uniforms",
     ]
   }
 
@@ -22,6 +23,7 @@ if (enable_unittests) {
       "--sksl",
       "--runtime-stage-metal",
       "--runtime-stage-gles",
+      "--runtime-stage-gles3",
       "--runtime-stage-vulkan",
     ]
     intermediates_subdir = "iplr"

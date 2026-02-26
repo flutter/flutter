@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('Controller expands and collapses the widget', (WidgetTester tester) async {
     final controller = ExpansibleController();
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Expansible(
           controller: controller,
           bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
@@ -42,7 +42,7 @@ void main() {
     });
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Expansible(
           controller: controller,
           bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
@@ -79,7 +79,7 @@ void main() {
     final controller = ExpansibleController();
     controller.expand();
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: SingleChildScrollView(
           child: Column(
             children: <Widget>[
@@ -112,7 +112,7 @@ void main() {
   testWidgets('Can compose header and body with expansibleBuilder', (WidgetTester tester) async {
     final controller = ExpansibleController();
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Expansible(
           controller: controller,
           bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
@@ -157,7 +157,7 @@ void main() {
     final controller1 = ExpansibleController();
     final controller2 = ExpansibleController();
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: SingleChildScrollView(
           child: Column(
             children: <Widget>[
@@ -201,7 +201,7 @@ void main() {
   testWidgets('Respects animation duration and curves', (WidgetTester tester) async {
     final controller = ExpansibleController();
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Expansible(
           controller: controller,
           duration: const Duration(milliseconds: 120),
@@ -224,15 +224,15 @@ void main() {
     // Check that the curve is respected.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getBottomLeft(find.byType(Placeholder)).dy, 90.08984375);
+    expect(tester.getBottomLeft(find.byType(Placeholder)).dy, 56.08984375);
 
     // The animation has completed.
     await tester.pump(const Duration(milliseconds: 60) + const Duration(microseconds: 1));
-    expect(tester.getBottomLeft(find.byType(Placeholder)).dy, 98.0);
+    expect(tester.getBottomLeft(find.byType(Placeholder)).dy, 64.0);
 
     // Since the animation has completed, the vertical position doesn't change.
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getBottomLeft(find.byType(Placeholder)).dy, 98.0);
+    expect(tester.getBottomLeft(find.byType(Placeholder)).dy, 64.0);
 
     await tester.pumpAndSettle();
     await tester.tap(find.text('Header'));
@@ -240,7 +240,7 @@ void main() {
     // Check that the reverse curve is respected.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getBottomLeft(find.byType(Placeholder)).dy, 80.91015625);
+    expect(tester.getBottomLeft(find.byType(Placeholder)).dy, 46.91015625);
 
     // The animation has completed.
     await tester.pump(const Duration(milliseconds: 60) + const Duration(microseconds: 1));
@@ -258,13 +258,11 @@ void main() {
     });
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Expansible(
-            controller: controller1,
-            headerBuilder: (_, _) => const Text('Header'),
-            bodyBuilder: (_, _) => const Text('Body'),
-          ),
+      TestWidgetsApp(
+        home: Expansible(
+          controller: controller1,
+          headerBuilder: (_, _) => const Text('Header'),
+          bodyBuilder: (_, _) => const Text('Body'),
         ),
       ),
     );
@@ -283,13 +281,11 @@ void main() {
     expect(find.text('Body'), findsNothing);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Expansible(
-            controller: controller2,
-            headerBuilder: (_, _) => const Text('Header'),
-            bodyBuilder: (_, _) => const Text('Body'),
-          ),
+      TestWidgetsApp(
+        home: Expansible(
+          controller: controller2,
+          headerBuilder: (_, _) => const Text('Header'),
+          bodyBuilder: (_, _) => const Text('Body'),
         ),
       ),
     );
@@ -319,13 +315,11 @@ void main() {
     });
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Expansible(
-            controller: controller1,
-            headerBuilder: (_, _) => const Text('Header'),
-            bodyBuilder: (_, _) => const Text('Body'),
-          ),
+      TestWidgetsApp(
+        home: Expansible(
+          controller: controller1,
+          headerBuilder: (_, _) => const Text('Header'),
+          bodyBuilder: (_, _) => const Text('Body'),
         ),
       ),
     );
@@ -339,13 +333,11 @@ void main() {
     expect(find.text('Body'), findsOne);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Expansible(
-            controller: controller2,
-            headerBuilder: (_, _) => const Text('Header'),
-            bodyBuilder: (_, _) => const Text('Body'),
-          ),
+      TestWidgetsApp(
+        home: Expansible(
+          controller: controller2,
+          headerBuilder: (_, _) => const Text('Header'),
+          bodyBuilder: (_, _) => const Text('Body'),
         ),
       ),
     );
@@ -368,7 +360,7 @@ void main() {
   testWidgets('Respects animationStyle duration and curves', (WidgetTester tester) async {
     final controller = ExpansibleController();
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Expansible(
           controller: controller,
           animationStyle: const AnimationStyle(
@@ -393,15 +385,15 @@ void main() {
     // Check that the curve is respected.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getBottomLeft(find.byType(Placeholder)).dy, 90.08984375);
+    expect(tester.getBottomLeft(find.byType(Placeholder)).dy, 56.08984375);
 
     // The animation has completed.
     await tester.pump(const Duration(milliseconds: 60) + const Duration(microseconds: 1));
-    expect(tester.getBottomLeft(find.byType(Placeholder)).dy, 98.0);
+    expect(tester.getBottomLeft(find.byType(Placeholder)).dy, 64.0);
 
     // Since the animation has completed, the vertical position doesn't change.
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getBottomLeft(find.byType(Placeholder)).dy, 98.0);
+    expect(tester.getBottomLeft(find.byType(Placeholder)).dy, 64.0);
 
     await tester.pumpAndSettle();
     await tester.tap(find.text('Header'));
@@ -409,7 +401,7 @@ void main() {
     // Check that the reverse curve is respected.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getBottomLeft(find.byType(Placeholder)).dy, 80.91015625);
+    expect(tester.getBottomLeft(find.byType(Placeholder)).dy, 46.91015625);
 
     // The animation has completed.
     await tester.pump(const Duration(milliseconds: 60) + const Duration(microseconds: 1));
@@ -423,7 +415,7 @@ void main() {
   ) async {
     final controller = ExpansibleController();
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Expansible(
           controller: controller,
           animationStyle: const AnimationStyle(
@@ -449,13 +441,13 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
     // With linear curve at 50ms out of 100ms, should be at approximately 50% height
     final double midAnimationY = tester.getBottomLeft(find.byType(Placeholder)).dy;
-    // Should be more than base (48.0) and less than fully expanded (98.0)
-    expect(midAnimationY, greaterThan(48.0));
-    expect(midAnimationY, lessThan(98.0));
+    // Should be more than base (14.0) and less than fully expanded (64.0)
+    expect(midAnimationY, greaterThan(14.0));
+    expect(midAnimationY, lessThan(64.0));
 
     // Animation should complete at 100ms
     await tester.pump(const Duration(milliseconds: 50) + const Duration(microseconds: 1));
-    expect(tester.getBottomLeft(find.byType(Placeholder)).dy, 98.0);
+    expect(tester.getBottomLeft(find.byType(Placeholder)).dy, 64.0);
 
     controller.dispose();
   });
@@ -463,7 +455,7 @@ void main() {
   testWidgets('AnimationStyle.noAnimation disables animation', (WidgetTester tester) async {
     final controller = ExpansibleController();
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Expansible(
           controller: controller,
           animationStyle: AnimationStyle.noAnimation,
@@ -520,7 +512,7 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Expansible(
           controller: controller,
           bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),

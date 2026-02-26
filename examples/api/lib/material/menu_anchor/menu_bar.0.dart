@@ -29,11 +29,17 @@ class MenuEntry {
   final VoidCallback? onPressed;
   final List<MenuEntry>? menuChildren;
 
-  static List<Widget> build(List<MenuEntry> selections) {
+  static List<Widget> build(
+    List<MenuEntry> selections, [
+    Duration hoverOpenDelay = Duration.zero,
+  ]) {
     Widget buildSelection(MenuEntry selection) {
       if (selection.menuChildren != null) {
         return SubmenuButton(
-          menuChildren: MenuEntry.build(selection.menuChildren!),
+          menuChildren: MenuEntry.build(
+            selection.menuChildren!,
+            const Duration(milliseconds: 150),
+          ),
           child: Text(selection.label),
         );
       }

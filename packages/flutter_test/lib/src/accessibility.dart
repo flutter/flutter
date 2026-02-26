@@ -9,7 +9,6 @@ library;
 
 import 'dart:async';
 import 'dart:ui' as ui;
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -141,7 +140,7 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
     return result;
   }
 
-  Evaluation _traverse(FlutterView view, SemanticsNode node) {
+  Evaluation _traverse(ui.FlutterView view, SemanticsNode node) {
     var result = const Evaluation.pass();
     node.visitChildren((SemanticsNode child) {
       result += _traverse(view, child);
@@ -598,14 +597,14 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
   Future<Evaluation> evaluate(WidgetTester tester) async {
     // Collate all evaluations into a final evaluation, then return.
     var result = const Evaluation.pass();
-    final images = <FlutterView, ui.Image>{};
+    final images = <ui.FlutterView, ui.Image>{};
     try {
       // Compute elements to be evaluated.
       final List<Element> elements = finder.evaluate().toList();
-      final byteDatas = <FlutterView, ByteData>{};
+      final byteDatas = <ui.FlutterView, ByteData>{};
 
       for (final element in elements) {
-        final FlutterView view = tester.viewOf(
+        final ui.FlutterView view = tester.viewOf(
           find.byElementPredicate((Element e) => e == element),
         );
         final RenderView renderView = tester.binding.renderViews.firstWhere(
