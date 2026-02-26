@@ -218,6 +218,10 @@ abstract class RegularWindowController extends BaseWindowController {
   /// The [title] argument configures the window's initial title.
   /// If omitted, some platforms might fall back to the app's name.
   ///
+  /// The [decorated] argument configures whether the window has decorations
+  /// such as title bar, borders, etc. If false, the user should provide their
+  /// own decorations.
+  ///
   /// The [delegate] argument can be used to listen to the window's
   /// lifecycle. For example, it can be used to save state before
   /// a window is closed.
@@ -506,6 +510,10 @@ abstract class DialogWindowController extends BaseWindowController {
   ///
   /// The [title] argument configures the window's initial title.
   /// If omitted, some platforms might fall back to the app's name.
+  ///
+  /// The [decorated] argument configures whether the window has decorations
+  /// such as title bar, borders, etc. If false, the user should provide their
+  /// own decorations.
   ///
   /// The [delegate] argument can be used to listen to the window's
   /// lifecycle. For example, it can be used to save state before
