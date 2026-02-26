@@ -8,6 +8,7 @@ library;
 
 import 'dart:ui' show VoidCallback;
 
+import 'package:flutter/src/foundation/pure_dart_data_primitives.dart';
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
@@ -91,7 +92,7 @@ abstract class Listenable {
 ///  * [ValueListenableBuilder], a widget that uses a builder callback to
 ///    rebuild whenever a [ValueListenable] object triggers its notifications,
 ///    providing the builder with the value of the object.
-abstract class ValueListenable<T> extends Listenable {
+abstract class ValueListenable<T> extends Listenable implements ObservableInterface<T> {
   /// This constructor enables subclasses to provide const constructors so that
   /// they can be used in const expressions.
   const ValueListenable();
@@ -100,6 +101,7 @@ abstract class ValueListenable<T> extends Listenable {
   ///
   /// When the value changes, the callbacks registered with [addListener] will be
   /// invoked.
+  @override
   T get value;
 }
 
