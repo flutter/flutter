@@ -2771,7 +2771,7 @@ void main() {
       controller.close();
       await tester.pump();
 
-      expect(closeOrder, equals([Tag.a.a.a, Tag.a.a, Tag.a]));
+      expect(closeOrder, equals([Tag.a, Tag.a.a, Tag.a.a.a]));
     });
 
     testWidgets('Async onClose is called on descendants before parent', (
@@ -2945,7 +2945,7 @@ void main() {
 
       await tester.pump();
 
-      expect(closeRequests, <Tag>[Tag.a.a.a, Tag.a.a, Tag.a]);
+      expect(closeRequests, <Tag>[Tag.a, Tag.a.a, Tag.a.a.a]);
       expect(find.text(Tag.a.a.a.a.text), findsOneWidget);
     });
 

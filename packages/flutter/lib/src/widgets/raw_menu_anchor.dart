@@ -755,7 +755,9 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
       return;
     }
 
+    // Parents will close after children do.
     closeChildren(inDispose: inDispose);
+
     // Don't hide if we're in the middle of a build.
     if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
       _overlayController.hide();
@@ -788,7 +790,6 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
 
   @override
   void handleCloseRequest() {
-    requestChildrenClose();
     // Changes in MediaQuery.sizeOf(context) cause RawMenuAnchor to close during
     // didChangeDependencies. When this happens, calling setState during the
     // closing sequence (handleCloseRequest -> onCloseRequested -> hideOverlay)
@@ -804,6 +805,9 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
         }
       }, debugLabel: 'RawMenuAnchor.handleCloseRequest');
     }
+
+    // Parents will request close before children do.
+    requestChildrenClose();
   }
 
   Widget _buildOverlay(BuildContext context, OverlayChildLayoutInfo layoutInfo) {
