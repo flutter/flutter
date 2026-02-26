@@ -188,7 +188,7 @@ class PlatformViewIOS final : public PlatformView {
   std::shared_ptr<PlatformMessageHandlerIos> platform_message_handler_;
   std::shared_ptr<IOSSurfacesManager> ios_surfaces_manager_;
   // It can't use NSDictionary, because the values need to be weak references.
-  NSMapTable* viewControllers_;
+  NSMapTable* view_controllers_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewIOS);
 };
