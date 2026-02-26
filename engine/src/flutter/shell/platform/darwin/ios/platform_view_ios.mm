@@ -25,7 +25,7 @@ namespace flutter {
 
 class IOSSurfacesManager {
  public:
-  IOSSurfacesManager(const std::shared_ptr<IOSContext>& context)
+  explicit IOSSurfacesManager(const std::shared_ptr<IOSContext>& context)
       : impeller_context_(context ? context->GetImpellerContext() : nullptr),
         aiks_context_(context ? context->GetAiksContext() : nullptr) {
     if (!impeller_context_ || !aiks_context_) {
@@ -122,7 +122,7 @@ PlatformViewIOS::PlatformViewIOS(PlatformView::Delegate& delegate,
       platform_message_handler_(
           new PlatformMessageHandlerIos(task_runners.GetPlatformTaskRunner())),
       ios_surfaces_manager_(std::make_shared<IOSSurfacesManager>(context)),
-      viewControllers_([NSMapTable weakToWeakObjectsMapTable]) {}
+      view_controllers_([NSMapTable weakToWeakObjectsMapTable]) {}
 
 PlatformViewIOS::PlatformViewIOS(
     PlatformView::Delegate& delegate,
@@ -182,13 +182,13 @@ void PlatformViewIOS::HandlePlatformMessage(std::unique_ptr<flutter::PlatformMes
 }
 
 FlutterViewController* PlatformViewIOS::GetOwnerViewController() const {
-  return [viewControllers_ objectForKey:@(flutter::kFlutterImplicitViewId)];
+  return [view_controllers_ objectForKey:@(flutter::kFlutterImplicitViewId)];
 }
 
 void PlatformViewIOS::SetOwnerViewController(__weak FlutterViewController* owner_controller) {
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
   // Allow replacing the implicit view controller (legacy behavior).
-  if ([viewControllers_ objectForKey:@(flutter::kFlutterImplicitViewId)] != nil) {
+  if ([view_controllers_ objectForKey:@(flutter::kFlutterImplicitViewId)] != nil) {
     RemoveOwnerViewController(flutter::kFlutterImplicitViewId);
   }
   AddOwnerViewController(owner_controller);
@@ -200,8 +200,8 @@ void PlatformViewIOS::AddOwnerViewController(__weak FlutterViewController* owner
 
   std::lock_guard<std::mutex> guard(ios_surface_mutex_);
   FlutterViewIdentifier viewIdentifier = owner_controller.viewIdentifier;
-  FML_DCHECK([viewControllers_ objectForKey:@(viewIdentifier)] == nil);
-  [viewControllers_ setObject:owner_controller forKey:@(viewIdentifier)];
+  FML_DCHECK([view_controllers_ objectForKey:@(viewIdentifier)] == nil);
+  [view_controllers_ setObject:owner_controller forKey:@(viewIdentifier)];
 
   // Add an observer that will clear out the owner_controller_ ivar and
   // the accessibility_bridge_ in case the view controller is deleted.
@@ -232,7 +232,7 @@ void PlatformViewIOS::RemoveOwnerViewController(FlutterViewIdentifier viewIdenti
 
   std::lock_guard<std::mutex> guard(ios_surface_mutex_);
 
-  [viewControllers_ removeObjectForKey:@(viewIdentifier)];
+  [view_controllers_ removeObjectForKey:@(viewIdentifier)];
   ios_surfaces_manager_->RemoveSurface(viewIdentifier);
 
   auto iter = accessibility_bridges_.find(viewIdentifier);
@@ -242,7 +242,7 @@ void PlatformViewIOS::RemoveOwnerViewController(FlutterViewIdentifier viewIdenti
 }
 
 void PlatformViewIOS::attachView(FlutterViewIdentifier viewIdentifier) {
-  FlutterViewController* owner_controller = [viewControllers_ objectForKey:@(viewIdentifier)];
+  FlutterViewController* owner_controller = [view_controllers_ objectForKey:@(viewIdentifier)];
   FML_DCHECK(owner_controller);
   FML_DCHECK(owner_controller.isViewLoaded) << "FlutterViewController's view should be loaded "
                                                "before attaching to PlatformViewIOS.";
@@ -311,7 +311,7 @@ void PlatformViewIOS::SetAccessibilityFeatures(int32_t flags) {
 void PlatformViewIOS::UpdateSemantics(int64_t view_id,
                                       flutter::SemanticsNodeUpdates update,
                                       flutter::CustomAccessibilityActionUpdates actions) {
-  FlutterViewController* owner_controller = [viewControllers_ objectForKey:@(view_id)];
+  FlutterViewController* owner_controller = [view_controllers_ objectForKey:@(view_id)];
   if (owner_controller) {
     auto iter = accessibility_bridges_.find(owner_controller.viewIdentifier);
     if (iter != accessibility_bridges_.end()) {
@@ -330,8 +330,8 @@ void PlatformViewIOS::SetApplicationLocale(std::string locale) {
 
 // |PlatformView|
 void PlatformViewIOS::SetSemanticsTreeEnabled(bool enabled) {
-  if ([viewControllers_ count] > 0) {
-    NSEnumerator* e = [viewControllers_ objectEnumerator];
+  if ([view_controllers_ count] > 0) {
+    NSEnumerator* e = [view_controllers_ objectEnumerator];
     FlutterViewController* controller = nil;
     while ((controller = [e nextObject])) {
       if (enabled) {
@@ -362,8 +362,8 @@ void PlatformViewIOS::OnPreEngineRestart() const {
     }
   }
 
-  if ([viewControllers_ count] > 0) {
-    NSEnumerator* e = [viewControllers_ objectEnumerator];
+  if ([view_controllers_ count] > 0) {
+    NSEnumerator* e = [view_controllers_ objectEnumerator];
     FlutterViewController* controller = nil;
     while ((controller = [e nextObject])) {
       [controller.platformViewsController reset];
@@ -413,8 +413,8 @@ bool PlatformViewIOS::HasRenderingSurface(int64_t flutter_view_id) {
 }
 
 void PlatformViewIOS::ApplyLocaleToOwnerController() {
-  if ([viewControllers_ count] > 0) {
-    NSEnumerator* e = [viewControllers_ objectEnumerator];
+  if ([view_controllers_ count] > 0) {
+    NSEnumerator* e = [view_controllers_ objectEnumerator];
     FlutterViewController* controller = nil;
     while ((controller = [e nextObject])) {
       controller.applicationLocale =
