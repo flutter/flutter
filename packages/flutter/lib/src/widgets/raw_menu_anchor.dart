@@ -316,7 +316,7 @@ class RawMenuAnchor extends StatefulWidget {
   /// is hidden.
   ///
   /// This callback is also triggered when a sibling [RawMenuAnchor] is opened.
-  /// As a result, pending timers or animations previously started in
+  /// Pending timers or animations previously started in a previous call to
   /// [onCloseRequested] should be canceled when this callback is triggered to
   /// prevent them from closing the menu at an unintended time.
   ///
