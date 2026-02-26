@@ -33,6 +33,7 @@ FLUTTER_ASSERT_ARC
 
 @property(nonatomic, strong) UISceneConnectionOptions* connectionOptions;
 @property(nonatomic, assign) BOOL sceneWillConnectEventHandledByPlugin;
+@property(nonatomic, assign) BOOL sceneWillConnectFallbackCalled;
 
 @end
 
@@ -42,6 +43,7 @@ FLUTTER_ASSERT_ARC
     _flutterManagedEngines = [NSPointerArray weakObjectsPointerArray];
     _developerManagedEngines = [NSPointerArray weakObjectsPointerArray];
     _sceneWillConnectEventHandledByPlugin = NO;
+    _sceneWillConnectFallbackCalled = NO;
   }
   return self;
 }
@@ -217,14 +219,17 @@ FLUTTER_ASSERT_ARC
   if (self.sceneWillConnectEventHandledByPlugin) {
     availableOptions = nil;
   }
-  BOOL handledByPlugin =
-      [engine.sceneLifeCycleDelegate scene:scene
-                      willConnectToSession:session
-                                   options:availableOptions]
-      // If no plugins handled this, give the application fallback a chance to handle it.
-      // the sceneWillConnectFallback method will shortcircuit if it has already been called
-      // for the application.
-      || [[self applicationLifeCycleDelegate] sceneWillConnectFallback:connectionOptions];
+  BOOL handledByPlugin = [engine.sceneLifeCycleDelegate scene:scene
+                                         willConnectToSession:session
+                                                      options:availableOptions];
+  if (!self.sceneWillConnectFallbackCalled && !handledByPlugin) {
+    self.sceneWillConnectFallbackCalled = YES;
+    // If no plugins handled this, give the application fallback a chance to handle it.
+    // the sceneWillConnectFallback method will shortcircuit if it has already been called
+    // for the application.
+    handledByPlugin =
+        [self.applicationLifeCycleDelegate sceneWillConnectFallback:connectionOptions];
+  }
 
   if (handledByPlugin) {
     self.sceneWillConnectEventHandledByPlugin = YES;
