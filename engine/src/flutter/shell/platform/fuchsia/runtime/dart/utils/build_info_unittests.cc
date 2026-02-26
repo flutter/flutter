@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "build_info.h"
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <lib/async-loop/cpp/loop.h>
 #include <lib/async-loop/default.h>
 #include <lib/inspect/cpp/reader.h>
+
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/build_info.h"
 
 const std::string& inspect_node_name = "build_info_unittests";
 

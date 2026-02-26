@@ -1191,7 +1191,9 @@ public class FlutterView extends FrameLayout
     isFlutterUiDisplayed = flutterRenderer.isDisplayingFlutterUi();
     renderSurface.attachToRenderer(flutterRenderer);
     flutterRenderer.addIsDisplayingFlutterUiListener(flutterUiDisplayListener);
-    flutterRenderer.addResizingFlutterUiListener(flutterUiResizeListener);
+    if (isContentSizingEnabled) {
+      flutterRenderer.addResizingFlutterUiListener(flutterUiResizeListener);
+    }
 
     // Initialize various components that know how to process Android View I/O
     // in a way that Flutter understands.
@@ -1338,7 +1340,9 @@ public class FlutterView extends FrameLayout
     FlutterRenderer flutterRenderer = flutterEngine.getRenderer();
     isFlutterUiDisplayed = false;
     flutterRenderer.removeIsDisplayingFlutterUiListener(flutterUiDisplayListener);
-    flutterRenderer.removeResizingFlutterUiListener(flutterUiResizeListener);
+    if (isContentSizingEnabled) {
+      flutterRenderer.removeResizingFlutterUiListener(flutterUiResizeListener);
+    }
     flutterRenderer.stopRenderingToSurface();
     flutterRenderer.setSemanticsEnabled(false);
 
@@ -1594,12 +1598,20 @@ public class FlutterView extends FrameLayout
   @Override
   public void onProvideAutofillVirtualStructure(@NonNull ViewStructure structure, int flags) {
     super.onProvideAutofillVirtualStructure(structure, flags);
-    textInputPlugin.onProvideAutofillVirtualStructure(structure, flags);
+    // Defensive null check to prevent NPE when textInputPlugin is not yet initialized
+    // (e.g., when attachToEngineAutomatically is false).
+    if (textInputPlugin != null) {
+      textInputPlugin.onProvideAutofillVirtualStructure(structure, flags);
+    }
   }
 
   @Override
   public void autofill(@NonNull SparseArray<AutofillValue> values) {
-    textInputPlugin.autofill(values);
+    // Defensive null check to prevent NPE when textInputPlugin is not yet initialized
+    // (e.g., when attachToEngineAutomatically is false).
+    if (textInputPlugin != null) {
+      textInputPlugin.autofill(values);
+    }
   }
 
   @Override

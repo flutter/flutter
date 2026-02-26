@@ -49,7 +49,6 @@ export 'src/cupertino/list_section.dart';
 export 'src/cupertino/list_tile.dart';
 export 'src/cupertino/localizations.dart';
 export 'src/cupertino/magnifier.dart';
-export 'src/cupertino/menu_anchor.dart';
 export 'src/cupertino/nav_bar.dart';
 export 'src/cupertino/page_scaffold.dart';
 export 'src/cupertino/picker.dart';
