@@ -6936,6 +6936,26 @@ void main() {
     expect(find.text('1/10'), findsOneWidget);
   });
 
+  testWidgets('maxLength counter can measure Unicode code points', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(maxLength: 10, maxLengthCountType: MaxLengthCountType.codePoints),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('0/10'), findsOneWidget);
+
+    const familyEmoji = '👨👩👦';
+    await tester.enterText(find.byType(TextField), familyEmoji);
+    await tester.pump();
+
+    expect(find.text('3/10'), findsOneWidget);
+  });
+
   testWidgets('setting maxLength to TextField.noMaxLength shows only entered length', (
     WidgetTester tester,
   ) async {

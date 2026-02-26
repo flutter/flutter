@@ -282,6 +282,7 @@ class TextField extends StatefulWidget {
     this.expands = false,
     this.maxLength,
     this.maxLengthEnforcement,
+    this.maxLengthCountType = MaxLengthCountType.characters,
     this.onChanged,
     this.onEditingComplete,
     this.onSubmitted,
@@ -580,6 +581,9 @@ class TextField extends StatefulWidget {
   ///
   /// {@macro flutter.services.textFormatter.maxLengthEnforcement}
   final MaxLengthEnforcement? maxLengthEnforcement;
+
+  /// Determines how text length is counted for [maxLength].
+  final MaxLengthCountType maxLengthCountType;
 
   /// {@macro flutter.widgets.editableText.onChanged}
   ///
@@ -1031,6 +1035,13 @@ class TextField extends StatefulWidget {
       ),
     );
     properties.add(
+      EnumProperty<MaxLengthCountType>(
+        'maxLengthCountType',
+        maxLengthCountType,
+        defaultValue: MaxLengthCountType.characters,
+      ),
+    );
+    properties.add(
       EnumProperty<TextInputAction>('textInputAction', textInputAction, defaultValue: null),
     );
     properties.add(
@@ -1171,14 +1182,17 @@ class _TextFieldState extends State<TextField>
 
   bool get _isEnabled => widget.enabled ?? widget.decoration?.enabled ?? true;
 
-  int get _currentLength => _effectiveController.value.text.characters.length;
+  int get _currentLength => LengthLimitingTextInputFormatter.getTextLength(
+    _effectiveController.value.text,
+    maxLengthCountType: widget.maxLengthCountType,
+  );
 
   bool get _hasIntrinsicError =>
       widget.maxLength != null &&
       widget.maxLength! > 0 &&
       (widget.controller == null
-          ? !restorePending && _effectiveController.value.text.characters.length > widget.maxLength!
-          : _effectiveController.value.text.characters.length > widget.maxLength!);
+          ? !restorePending && _currentLength > widget.maxLength!
+          : _currentLength > widget.maxLength!);
 
   bool get _hasError =>
       widget.decoration?.errorText != null ||
@@ -1545,6 +1559,7 @@ class _TextFieldState extends State<TextField>
         LengthLimitingTextInputFormatter(
           widget.maxLength,
           maxLengthEnforcement: _effectiveMaxLengthEnforcement,
+          maxLengthCountType: widget.maxLengthCountType,
         ),
     ];
 

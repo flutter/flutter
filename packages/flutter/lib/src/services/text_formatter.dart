@@ -67,6 +67,15 @@ enum MaxLengthEnforcement {
   truncateAfterCompositionEnds,
 }
 
+/// Mechanisms for counting text length when max length is configured.
+enum MaxLengthCountType {
+  /// Count text as user-perceived grapheme clusters.
+  characters,
+
+  /// Count text as Unicode code points.
+  codePoints,
+}
+
 /// A [TextInputFormatter] can be optionally injected into an [EditableText]
 /// to provide as-you-type validation and formatting of the text being edited.
 ///
@@ -448,8 +457,11 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   ///
   /// The [maxLength] must be null, -1 or greater than zero. If it is null or -1
   /// then no limit is enforced.
-  LengthLimitingTextInputFormatter(this.maxLength, {this.maxLengthEnforcement})
-    : assert(maxLength == null || maxLength == -1 || maxLength > 0);
+  LengthLimitingTextInputFormatter(
+    this.maxLength, {
+    this.maxLengthEnforcement,
+    this.maxLengthCountType = MaxLengthCountType.characters,
+  }) : assert(maxLength == null || maxLength == -1 || maxLength > 0);
 
   /// The limit on the number of user-perceived characters that this formatter
   /// will allow.
@@ -496,6 +508,9 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   /// {@macro flutter.services.textFormatter.maxLengthEnforcement}
   final MaxLengthEnforcement? maxLengthEnforcement;
 
+  /// Determines how text length is counted for [maxLength].
+  final MaxLengthCountType maxLengthCountType;
+
   /// Returns a [MaxLengthEnforcement] that follows the specified [platform]'s
   /// convention.
   ///
@@ -531,19 +546,24 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
     }
   }
 
-  /// Truncate the given TextEditingValue to maxLength user-perceived
-  /// characters.
-  ///
-  /// See also:
-  ///  * [Dart's characters package](https://pub.dev/packages/characters).
-  ///  * [Dart's documentation on runes and grapheme clusters](https://dart.dev/guides/language/language-tour#runes-and-grapheme-clusters).
+  /// Truncate the given TextEditingValue to maxLength by [maxLengthCountType].
   @visibleForTesting
-  static TextEditingValue truncate(TextEditingValue value, int maxLength) {
-    final iterator = CharacterRange(value.text);
-    if (value.text.characters.length > maxLength) {
-      iterator.expandNext(maxLength);
+  static TextEditingValue truncate(
+    TextEditingValue value,
+    int maxLength, {
+    MaxLengthCountType maxLengthCountType = MaxLengthCountType.characters,
+  }) {
+    final String truncated;
+    switch (maxLengthCountType) {
+      case MaxLengthCountType.characters:
+        final iterator = CharacterRange(value.text);
+        if (value.text.characters.length > maxLength) {
+          iterator.expandNext(maxLength);
+        }
+        truncated = iterator.current;
+      case MaxLengthCountType.codePoints:
+        truncated = String.fromCharCodes(value.text.runes.take(maxLength));
     }
-    final String truncated = iterator.current;
 
     return TextEditingValue(
       text: truncated,
@@ -560,11 +580,25 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
     );
   }
 
+  static int getTextLength(
+    String text, {
+    MaxLengthCountType maxLengthCountType = MaxLengthCountType.characters,
+  }) {
+    switch (maxLengthCountType) {
+      case MaxLengthCountType.characters:
+        return text.characters.length;
+      case MaxLengthCountType.codePoints:
+        return text.runes.length;
+    }
+  }
+
   @override
   TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
     final int? maxLength = this.maxLength;
 
-    if (maxLength == null || maxLength == -1 || newValue.text.characters.length <= maxLength) {
+    if (maxLength == null ||
+        maxLength == -1 ||
+        getTextLength(newValue.text, maxLengthCountType: maxLengthCountType) <= maxLength) {
       return newValue;
     }
 
@@ -576,16 +610,18 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
       case MaxLengthEnforcement.enforced:
         // If already at the maximum and tried to enter even more, and has no
         // selection, keep the old value.
-        if (oldValue.text.characters.length == maxLength && oldValue.selection.isCollapsed) {
+        if (getTextLength(oldValue.text, maxLengthCountType: maxLengthCountType) == maxLength &&
+            oldValue.selection.isCollapsed) {
           return oldValue;
         }
 
         // Enforced to return a truncated value.
-        return truncate(newValue, maxLength);
+        return truncate(newValue, maxLength, maxLengthCountType: maxLengthCountType);
       case MaxLengthEnforcement.truncateAfterCompositionEnds:
         // If already at the maximum and tried to enter even more, and the old
         // value is not composing, keep the old value.
-        if (oldValue.text.characters.length == maxLength && !oldValue.composing.isValid) {
+        if (getTextLength(oldValue.text, maxLengthCountType: maxLengthCountType) == maxLength &&
+            !oldValue.composing.isValid) {
           return oldValue;
         }
 
@@ -596,7 +632,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
           return newValue;
         }
 
-        return truncate(newValue, maxLength);
+        return truncate(newValue, maxLength, maxLengthCountType: maxLengthCountType);
     }
   }
 }

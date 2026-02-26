@@ -439,6 +439,17 @@ void main() {
         expect(truncated.selection.baseOffset, stringTruncated.length);
         expect(truncated.selection.extentOffset, stringTruncated.length);
       });
+
+      test('Can count as Unicode code points', () async {
+        const stringOverflowing = 'o\u03081234567890';
+        const value = TextEditingValue(text: stringOverflowing);
+        final TextEditingValue truncated = LengthLimitingTextInputFormatter.truncate(
+          value,
+          10,
+          maxLengthCountType: MaxLengthCountType.codePoints,
+        );
+        expect(truncated.text, 'o\u030812345678');
+      });
     });
 
     group('formatEditUpdate', () {
@@ -466,6 +477,17 @@ void main() {
         final formatter = LengthLimitingTextInputFormatter(maxLength);
         final TextEditingValue formatted = formatter.formatEditUpdate(oldValue, newValue);
         expect(formatted.text, 'bbbbbbbbbb');
+      });
+
+      test('Can enforce maxLength using code points', () async {
+        const oldValue = TextEditingValue(text: '');
+        const newValue = TextEditingValue(text: 'o\u03081234567890');
+        final formatter = LengthLimitingTextInputFormatter(
+          maxLength,
+          maxLengthCountType: MaxLengthCountType.codePoints,
+        );
+        final TextEditingValue formatted = formatter.formatEditUpdate(oldValue, newValue);
+        expect(formatted.text, 'o\u030812345678');
       });
     });
 
