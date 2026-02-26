@@ -12,13 +12,13 @@ void main() {
 
 void testMain() {
   group('withStackScope', () {
-    test('throws StateError when closure is async', () {
+    test('throws AssertionError when closure is async', () {
       expect(
         () => withStackScope((scope) async {
           return 1;
         }),
         throwsA(
-          isA<StateError>().having(
+          isA<AssertionError>().having(
             (e) => e.message,
             'message',
             contains('withStackScope() closure returned a Future'),
