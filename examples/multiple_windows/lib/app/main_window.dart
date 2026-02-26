@@ -232,7 +232,7 @@ class _WindowCreatorCard extends StatelessWidget {
                               ),
                               title: 'Modeless Dialog',
                               preferredSize: windowSettings.dialogSize,
-                              decorated: windowSettings.regularDecorated,
+                              decorated: windowSettings.dialogDecorated,
                             ),
                           ),
                         );
