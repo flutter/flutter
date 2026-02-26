@@ -688,9 +688,7 @@ class RegularWindowControllerLinux extends RegularWindowController {
     if (title != null) {
       setTitle(title);
     }
-    if (!decorated) {
-      _window.setDecorated(false);
-    }
+    _window.setDecorated(decorated);
     final view = _FlView();
     final int viewId = view.getId();
     rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
@@ -870,9 +868,7 @@ class DialogWindowControllerLinux extends DialogWindowController {
     if (title != null) {
       setTitle(title);
     }
-    if (!decorated) {
-      _window.setDecorated(false);
-    }
+    _window.setDecorated(decorated);
     final view = _FlView();
     final int viewId = view.getId();
     rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
