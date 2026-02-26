@@ -531,9 +531,10 @@ void main() {
     await tester.idle(); // Let the failed completer's future hit the stream completer.
     expect(tester.binding.microtaskCount, 0);
 
-    // Since there's no listeners attached yet, the error is silenced.
-    expect(reportedException, isNull);
-    expect(reportedStackTrace, isNull);
+    // Since there's no listeners attached yet, report error up via
+    // FlutterError.
+    expect(reportedException, testException);
+    expect(reportedStackTrace, testStack);
 
     streamUnderTest.addListener(ImageStreamListener(listener, onError: errorListener));
 
@@ -3043,10 +3044,10 @@ void main() {
   });
 
   testWidgets(
-    'FlutterError report is silenced when widget is disposed, even if errorBuilder was not provided',
+    'errorBuilder prevents FlutterError report only if errorBuilder is non-null when widget is disposed',
     (WidgetTester tester) async {
-      // This test verifies that if the widget is disposed, the error is silenced
-      // because no active listeners remain, preventing global error noise.
+      // This test verifies that if an errorBuilder is provided, FlutterError.reportError
+      // is called, only if the errorBuilder stays present when the widget is unmounted.
 
       // 1. Setup: Capture FlutterError reports
       final reportedErrors = <FlutterErrorDetails>[];
@@ -3095,14 +3096,12 @@ void main() {
       // Restore the handler now in case `expect`s in step 6 fail.
       FlutterError.onError = oldHandler;
 
-      // 6. Verify that NO FlutterError was reported via the onError handler.
-      // Since the widget is disposed, only the passive ImageCache listener remains.
-      // The error should be silenced to avoid noise.
+      // 6. Verify that a FlutterError was reported via the onError handler
       expect(
         reportedErrors,
-        isEmpty,
+        isNotEmpty,
         reason:
-            'FlutterError.onError should NOT be called when the widget is disposed, as no active listeners remain.',
+            'FlutterError.onError should be called when an errorBuilder was not provided eventually.',
       );
       // Also check takeException as a standard backup.
       expect(tester.takeException(), isNull);

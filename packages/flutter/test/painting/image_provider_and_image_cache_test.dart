@@ -56,16 +56,7 @@ void main() {
     expect(imageCache.statusForKey(provider).untracked, true);
     expect(imageCache.pendingImageCount, 0);
 
-    final ImageStream stream = provider.resolve(ImageConfiguration.empty);
-    // Add a listener with onError to ensure the error is reported.
-    final listener = ImageStreamListener(
-      (ImageInfo info, bool syncCall) {},
-      onError: (Object exception, StackTrace? stackTrace) {
-        throw exception;
-      },
-    );
-    stream.addListener(listener);
-    addTearDown(() => stream.removeListener(listener));
+    provider.resolve(ImageConfiguration.empty);
 
     expect(imageCache.statusForKey(key).pending, true);
     expect(imageCache.pendingImageCount, 1);
@@ -81,9 +72,9 @@ void main() {
     final imageProvider = MemoryImage(bytes);
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
     final completer = Completer<void>();
-    final listener = ImageStreamListener((ImageInfo info, bool syncCall) => completer.complete());
-    stream.addListener(listener);
-    addTearDown(() => stream.removeListener(listener));
+    stream.addListener(
+      ImageStreamListener((ImageInfo info, bool syncCall) => completer.complete()),
+    );
     await completer.future;
 
     expect(imageCache.currentSize, 1);
@@ -102,16 +93,16 @@ void main() {
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
     final completer = Completer<void>();
     final cacheCompleter = Completer<void>();
-    final listener = ImageStreamListener((ImageInfo info, bool syncCall) {
-      completer.complete();
-    });
-    stream.addListener(listener);
-    addTearDown(() => stream.removeListener(listener));
-    final cacheListener = ImageStreamListener((ImageInfo info, bool syncCall) {
-      cacheCompleter.complete();
-    });
-    cacheStream.addListener(cacheListener);
-    addTearDown(() => cacheStream.removeListener(cacheListener));
+    stream.addListener(
+      ImageStreamListener((ImageInfo info, bool syncCall) {
+        completer.complete();
+      }),
+    );
+    cacheStream.addListener(
+      ImageStreamListener((ImageInfo info, bool syncCall) {
+        cacheCompleter.complete();
+      }),
+    );
     await Future.wait(<Future<void>>[completer.future, cacheCompleter.future]);
 
     expect(otherCache.currentSize, 1);
@@ -128,16 +119,16 @@ void main() {
       caughtError.complete(false);
     };
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
-    final listener = ImageStreamListener(
-      (ImageInfo info, bool syncCall) {
-        caughtError.complete(false);
-      },
-      onError: (dynamic error, StackTrace? stackTrace) {
-        caughtError.complete(true);
-      },
+    stream.addListener(
+      ImageStreamListener(
+        (ImageInfo info, bool syncCall) {
+          caughtError.complete(false);
+        },
+        onError: (dynamic error, StackTrace? stackTrace) {
+          caughtError.complete(true);
+        },
+      ),
     );
-    stream.addListener(listener);
-    addTearDown(() => stream.removeListener(listener));
     expect(await caughtError.future, true);
   });
 }

@@ -804,10 +804,6 @@ abstract class ImageStreamCompleter with Diagnosticable {
 
     _ephemeralErrorListeners.clear();
 
-    if (localErrorListeners.isEmpty) {
-      return;
-    }
-
     var handled = false;
     for (final errorListener in localErrorListeners) {
       try {

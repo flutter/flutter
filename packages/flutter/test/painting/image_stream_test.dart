@@ -89,29 +89,8 @@ void main() {
   });
 
   testWidgets('Codec future fails', (WidgetTester tester) async {
-    // When there are no listeners, the error should be silenced.
     final completer = Completer<Codec>();
     MultiFrameImageStreamCompleter(codec: completer.future, scale: 1.0);
-    completer.completeError('failure message');
-    await tester.idle();
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('Codec future fails with onError listener', (WidgetTester tester) async {
-    // When there is a listener with onError that rethrows, the error should be reported.
-    final completer = Completer<Codec>();
-    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
-      codec: completer.future,
-      scale: 1.0,
-    );
-    final listener = ImageStreamListener(
-      (ImageInfo image, bool synchronousCall) {},
-      onError: (Object exception, StackTrace? stackTrace) {
-        throw exception;
-      },
-    );
-    imageStream.addListener(listener);
-    addTearDown(() => imageStream.removeListener(listener));
     completer.completeError('failure message');
     await tester.idle();
     expect(tester.takeException(), 'failure message');
@@ -137,7 +116,6 @@ void main() {
     }
 
     imageStream.addListener(ImageStreamListener(listener));
-    addTearDown(() => imageStream.removeListener(ImageStreamListener(listener)));
     await tester.idle();
     expect(mockCodec.numFramesAsked, 1);
     expect(mockCodec.disposed, false);
@@ -159,7 +137,6 @@ void main() {
     }
 
     imageStream.addListener(ImageStreamListener(listener));
-    addTearDown(() => imageStream.removeListener(ImageStreamListener(listener)));
     await tester.idle();
     expect(mockCodec.numFramesAsked, 0);
 
@@ -208,14 +185,14 @@ void main() {
       chunkEvents: streamController.stream,
     );
 
-    final listener = ImageStreamListener(
-      (ImageInfo image, bool synchronousCall) {},
-      onChunk: (ImageChunkEvent event) {
-        chunkEvents.add(event);
-      },
+    imageStream.addListener(
+      ImageStreamListener(
+        (ImageInfo image, bool synchronousCall) {},
+        onChunk: (ImageChunkEvent event) {
+          chunkEvents.add(event);
+        },
+      ),
     );
-    imageStream.addListener(listener);
-    addTearDown(() => imageStream.removeListener(listener));
     streamController.add(const ImageChunkEvent(cumulativeBytesLoaded: 1, expectedTotalBytes: 3));
     streamController.add(const ImageChunkEvent(cumulativeBytesLoaded: 2, expectedTotalBytes: 3));
     await tester.idle();
@@ -238,14 +215,14 @@ void main() {
 
       streamController.add(const ImageChunkEvent(cumulativeBytesLoaded: 1, expectedTotalBytes: 3));
       await tester.idle();
-      final listener = ImageStreamListener(
-        (ImageInfo image, bool synchronousCall) {},
-        onChunk: (ImageChunkEvent event) {
-          chunkEvents.add(event);
-        },
+      imageStream.addListener(
+        ImageStreamListener(
+          (ImageInfo image, bool synchronousCall) {},
+          onChunk: (ImageChunkEvent event) {
+            chunkEvents.add(event);
+          },
+        ),
       );
-      imageStream.addListener(listener);
-      addTearDown(() => imageStream.removeListener(listener));
       streamController.add(const ImageChunkEvent(cumulativeBytesLoaded: 2, expectedTotalBytes: 3));
       await tester.idle();
 
@@ -267,14 +244,14 @@ void main() {
       scale: 1.0,
     );
 
-    final listener = ImageStreamListener(
-      (ImageInfo image, bool synchronousCall) {},
-      onChunk: (ImageChunkEvent event) {
-        chunkEvents.add(event);
-      },
+    imageStream.addListener(
+      ImageStreamListener(
+        (ImageInfo image, bool synchronousCall) {},
+        onChunk: (ImageChunkEvent event) {
+          chunkEvents.add(event);
+        },
+      ),
     );
-    imageStream.addListener(listener);
-    addTearDown(() => imageStream.removeListener(listener));
     streamController.add(const ImageChunkEvent(cumulativeBytesLoaded: 1, expectedTotalBytes: 3));
     streamController.add(const ImageChunkEvent(cumulativeBytesLoaded: 2, expectedTotalBytes: 3));
     await tester.idle();
@@ -300,14 +277,14 @@ void main() {
 
       streamController.add(const ImageChunkEvent(cumulativeBytesLoaded: 1, expectedTotalBytes: 3));
       await tester.idle();
-      final listener = ImageStreamListener(
-        (ImageInfo image, bool synchronousCall) {},
-        onChunk: (ImageChunkEvent event) {
-          chunkEvents.add(event);
-        },
+      imageStream.addListener(
+        ImageStreamListener(
+          (ImageInfo image, bool synchronousCall) {},
+          onChunk: (ImageChunkEvent event) {
+            chunkEvents.add(event);
+          },
+        ),
       );
-      imageStream.addListener(listener);
-      addTearDown(() => imageStream.removeListener(listener));
       streamController.add(const ImageChunkEvent(cumulativeBytesLoaded: 2, expectedTotalBytes: 3));
       await tester.idle();
 
@@ -318,7 +295,6 @@ void main() {
   );
 
   testWidgets('Chunk errors are reported', (WidgetTester tester) async {
-    // When there is a listener without onError, chunk errors should be silenced.
     final chunkEvents = <ImageChunkEvent>[];
     final completer = Completer<Codec>();
     final streamController = StreamController<ImageChunkEvent>();
@@ -328,27 +304,25 @@ void main() {
       scale: 1.0,
     );
 
-    final listener = ImageStreamListener(
-      (ImageInfo image, bool synchronousCall) {},
-      onChunk: (ImageChunkEvent event) {
-        chunkEvents.add(event);
-      },
+    imageStream.addListener(
+      ImageStreamListener(
+        (ImageInfo image, bool synchronousCall) {},
+        onChunk: (ImageChunkEvent event) {
+          chunkEvents.add(event);
+        },
+      ),
     );
-    imageStream.addListener(listener);
-    addTearDown(() => imageStream.removeListener(listener));
     streamController.addError(Error());
     streamController.add(const ImageChunkEvent(cumulativeBytesLoaded: 2, expectedTotalBytes: 3));
     await tester.idle();
 
-    // No error listeners = error is silently ignored.
-    expect(tester.takeException(), isNull);
+    expect(tester.takeException(), isNotNull);
     expect(chunkEvents.length, 1);
     expect(chunkEvents[0].cumulativeBytesLoaded, 2);
     expect(chunkEvents[0].expectedTotalBytes, 3);
   });
 
   testWidgets('getNextFrame future fails', (WidgetTester tester) async {
-    // When there is a listener without onError, the error should be silenced.
     final mockCodec = MockCodec();
     mockCodec.frameCount = 1;
     final codecCompleter = Completer<Codec>();
@@ -363,55 +337,6 @@ void main() {
     }
 
     imageStream.addListener(ImageStreamListener(listener));
-    addTearDown(() => imageStream.removeListener(ImageStreamListener(listener)));
-    codecCompleter.complete(mockCodec);
-    // MultiFrameImageStreamCompleter only sets an error handler for the next
-    // frame future after the codec future has completed.
-    // Idling here lets the MultiFrameImageStreamCompleter advance and set the
-    // error handler for the nextFrame future.
-    await tester.idle();
-
-    mockCodec.failNextFrame('frame completion error');
-    await tester.idle();
-
-    // No error listeners = error is silently ignored.
-    expect(tester.takeException(), isNull);
-    expect(mockCodec.disposed, false);
-  });
-
-  testWidgets('getNextFrame future fails with onError listener', (WidgetTester tester) async {
-    // When there is a listener with onError that rethrows, the error should be reported.
-    final mockCodec = MockCodec();
-    mockCodec.frameCount = 1;
-    final codecCompleter = Completer<Codec>();
-
-    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
-      codec: codecCompleter.future,
-      scale: 1.0,
-    );
-
-    void listener(ImageInfo image, bool synchronousCall) {
-      addTearDown(image.dispose);
-    }
-
-    imageStream.addListener(
-      ImageStreamListener(
-        listener,
-        onError: (Object exception, StackTrace? stackTrace) {
-          throw exception;
-        },
-      ),
-    );
-    addTearDown(
-      () => imageStream.removeListener(
-        ImageStreamListener(
-          listener,
-          onError: (Object exception, StackTrace? stackTrace) {
-            throw exception;
-          },
-        ),
-      ),
-    );
     codecCompleter.complete(mockCodec);
     // MultiFrameImageStreamCompleter only sets an error handler for the next
     // frame future after the codec future has completed.
@@ -802,11 +727,6 @@ void main() {
     streamUnderTest.addListener(
       ImageStreamListener((ImageInfo image, bool synchronousCall) {}, onError: errorListener),
     );
-    addTearDown(
-      () => streamUnderTest.removeListener(
-        ImageStreamListener((ImageInfo image, bool synchronousCall) {}, onError: errorListener),
-      ),
-    );
 
     codecCompleter.complete(mockCodec);
     // MultiFrameImageStreamCompleter only sets an error handler for the next
@@ -1025,9 +945,7 @@ void main() {
 
     // Adding a new listener for decoded imageSteam, the one frame image should
     // not be decoded again.
-    final newListener = ImageStreamListener((ImageInfo info, bool syncCall) {});
-    imageStream.addListener(newListener);
-    addTearDown(() => imageStream.removeListener(newListener));
+    imageStream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {}));
     expect(oneFrameCodec.numFramesAsked, 1);
   }); // https://github.com/flutter/flutter/issues/82532
 
@@ -1069,11 +987,11 @@ void main() {
     imageStream.setCompleter(imageStreamCompleter);
 
     bool? synchronouslyCalled;
-    final listener = ImageStreamListener((ImageInfo image, bool synchronousCall) {
-      synchronouslyCalled = synchronousCall;
-    });
-    imageStream.addListener(listener);
-    addTearDown(() => imageStream.removeListener(listener));
+    imageStream.addListener(
+      ImageStreamListener((ImageInfo image, bool synchronousCall) {
+        synchronouslyCalled = synchronousCall;
+      }),
+    );
 
     expect(synchronouslyCalled, true);
   });
@@ -1087,11 +1005,11 @@ void main() {
     final imageStream = ImageStream();
 
     bool? synchronouslyCalled;
-    final listener = ImageStreamListener((ImageInfo image, bool synchronousCall) {
-      synchronouslyCalled = synchronousCall;
-    });
-    imageStream.addListener(listener);
-    addTearDown(() => imageStream.removeListener(listener));
+    imageStream.addListener(
+      ImageStreamListener((ImageInfo image, bool synchronousCall) {
+        synchronouslyCalled = synchronousCall;
+      }),
+    );
 
     imageStream.setCompleter(imageStreamCompleter);
 

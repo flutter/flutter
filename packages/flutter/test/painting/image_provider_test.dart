@@ -74,16 +74,7 @@ void main() {
     expect(imageCache.statusForKey(provider).untracked, true);
     expect(imageCache.pendingImageCount, 0);
 
-    final ImageStream stream = provider.resolve(ImageConfiguration.empty);
-    // Add a listener with onError to ensure the error is reported.
-    final listener = ImageStreamListener(
-      (ImageInfo info, bool syncCall) {},
-      onError: (Object exception, StackTrace? stackTrace) {
-        throw exception;
-      },
-    );
-    stream.addListener(listener);
-    addTearDown(() => stream.removeListener(listener));
+    provider.resolve(ImageConfiguration.empty);
 
     expect(imageCache.statusForKey(provider).pending, true);
     expect(imageCache.pendingImageCount, 1);
@@ -102,24 +93,17 @@ void main() {
     final File file = fs.file('/empty.png')..createSync(recursive: true);
     final provider = FileImage(file);
 
-    final ImageStreamCompleter completer = provider.loadBuffer(provider, (
-      ImmutableBuffer buffer, {
-      int? cacheWidth,
-      int? cacheHeight,
-      bool? allowUpscaling,
-    }) async {
-      return Future<Codec>.value(createNoOpCodec());
-    });
-    expect(completer, isA<MultiFrameImageStreamCompleter>());
-    // Add a listener with onError to ensure the error is reported.
-    final listener = ImageStreamListener(
-      (ImageInfo info, bool syncCall) {},
-      onError: (Object exception, StackTrace? stackTrace) {
-        throw exception;
-      },
+    expect(
+      provider.loadBuffer(provider, (
+        ImmutableBuffer buffer, {
+        int? cacheWidth,
+        int? cacheHeight,
+        bool? allowUpscaling,
+      }) async {
+        return Future<Codec>.value(createNoOpCodec());
+      }),
+      isA<MultiFrameImageStreamCompleter>(),
     );
-    completer.addListener(listener);
-    addTearDown(() => completer.removeListener(listener));
 
     expect(await error.future, isStateError);
   });
@@ -180,16 +164,7 @@ void main() {
     expect(imageCache.statusForKey(provider).untracked, true);
     expect(imageCache.pendingImageCount, 0);
 
-    final ImageStream stream = provider.resolve(ImageConfiguration.empty);
-    // Add a listener with onError to ensure the error is reported.
-    final listener = ImageStreamListener(
-      (ImageInfo info, bool syncCall) {},
-      onError: (Object exception, StackTrace? stackTrace) {
-        throw exception;
-      },
-    );
-    stream.addListener(listener);
-    addTearDown(() => stream.removeListener(listener));
+    provider.resolve(ImageConfiguration.empty);
 
     expect(imageCache.statusForKey(provider).pending, true);
     expect(imageCache.pendingImageCount, 1);
