@@ -940,5 +940,50 @@ TEST_P(AiksTest, VarietyOfTextScalesShowingRasterAndPath) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+// Verifies that non-uniform (anisotropic) scaling uses bilinear filtering
+// to avoid jagged/aliased text, while uniform scaling remains pixel-perfect.
+// Regression test for https://github.com/flutter/flutter/issues/182143
+TEST_P(AiksTest, TextWithNonUniformScale) {
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
+  builder.DrawPaint(paint);
+
+  // Row 1: Uniform scale (should use nearest-neighbor, pixel-perfect).
+  builder.Save();
+  builder.Scale(2, 2);
+  ASSERT_TRUE(RenderTextInCanvasSkia(
+      GetContext(), builder, "Uniform 2x2", "Roboto-Regular.ttf",
+      TextRenderOptions{.font_size = 30, .position = DlPoint(20, 40)}));
+  builder.Restore();
+
+  // Row 2: Non-uniform scale Y-only (ratio 2.0, triggers bilinear).
+  builder.Save();
+  builder.Scale(1, 2);
+  ASSERT_TRUE(RenderTextInCanvasSkia(
+      GetContext(), builder, "ScaleY 1x2", "Roboto-Regular.ttf",
+      TextRenderOptions{.font_size = 30, .position = DlPoint(20, 140)}));
+  builder.Restore();
+
+  // Row 3: Non-uniform scale X-only (ratio 3.0, triggers bilinear).
+  builder.Save();
+  builder.Scale(3, 1);
+  ASSERT_TRUE(RenderTextInCanvasSkia(
+      GetContext(), builder, "ScaleX 3x1", "Roboto-Regular.ttf",
+      TextRenderOptions{.font_size = 30, .position = DlPoint(20, 300)}));
+  builder.Restore();
+
+  // Row 4: Slightly non-uniform (ratio 1.1, below threshold, nearest).
+  builder.Save();
+  builder.Scale(2, 2.2);
+  ASSERT_TRUE(RenderTextInCanvasSkia(
+      GetContext(), builder, "Near-uniform 2x2.2", "Roboto-Regular.ttf",
+      TextRenderOptions{.font_size = 30, .position = DlPoint(20, 200)}));
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller
