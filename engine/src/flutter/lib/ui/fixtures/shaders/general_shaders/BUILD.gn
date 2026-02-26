@@ -23,13 +23,13 @@ if (enable_unittests) {
     "simple.frag",
     "texture.frag",
     "uniform_arrays.frag",
+    "uniform_mat2.frag",
     "uniform_ordering.frag",
     "uniforms_inserted.frag",
     "uniforms_renamed.frag",
     "uniforms_reordered.frag",
     "uniforms_sorted.frag",
     "uniforms.frag",
-    "vec3_uniform.frag",
   ]
 
   group("general_shaders") {
@@ -44,6 +44,7 @@ if (enable_unittests) {
       "--sksl",
       "--runtime-stage-metal",
       "--runtime-stage-gles",
+      "--runtime-stage-gles3",
       "--runtime-stage-vulkan",
     ]
     intermediates_subdir = "iplr"

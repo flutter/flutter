@@ -6,7 +6,6 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
 import 'package:ui/src/engine.dart';
-import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/fake_asset_manager.dart';
 import '../common/test_initialization.dart';
@@ -113,7 +112,7 @@ void testMain() {
     });
 
     group('fonts with special characters', () {
-      test('Register Asset twice with special character slash', () async {
+      test('Register Asset once with special character slash', () async {
         const testFontFamily = '/Ahem';
         final fontFamilyList = <String>[];
 
@@ -127,17 +126,11 @@ void testMain() {
           fontFamilyList.add(f.family!);
         });
 
-        if (ui_web.browser.browserEngine != ui_web.BrowserEngine.firefox) {
-          expect(fontFamilyList.length, equals(2));
-          expect(fontFamilyList, contains("'/Ahem'"));
-          expect(fontFamilyList, contains('/Ahem'));
-        } else {
-          expect(fontFamilyList.length, equals(1));
-          expect(fontFamilyList.first, '"/Ahem"');
-        }
+        expect(fontFamilyList.length, equals(1));
+        expect(fontFamilyList.first, testFontFamily);
       });
 
-      test('Register Asset twice with exclamation mark', () async {
+      test('Register Asset once with exclamation mark', () async {
         const testFontFamily = 'Ahem!!ahem';
         final fontFamilyList = <String>[];
 
@@ -151,17 +144,11 @@ void testMain() {
           fontFamilyList.add(f.family!);
         });
 
-        if (ui_web.browser.browserEngine != ui_web.BrowserEngine.firefox) {
-          expect(fontFamilyList.length, equals(2));
-          expect(fontFamilyList, contains("'Ahem!!ahem'"));
-          expect(fontFamilyList, contains('Ahem!!ahem'));
-        } else {
-          expect(fontFamilyList.length, equals(1));
-          expect(fontFamilyList.first, '"Ahem!!ahem"');
-        }
+        expect(fontFamilyList.length, equals(1));
+        expect(fontFamilyList.first, testFontFamily);
       });
 
-      test('Register Asset twice with comma', () async {
+      test('Register Asset once with comma', () async {
         const testFontFamily = 'Ahem ,ahem';
         final fontFamilyList = <String>[];
 
@@ -175,17 +162,11 @@ void testMain() {
           fontFamilyList.add(f.family!);
         });
 
-        if (ui_web.browser.browserEngine != ui_web.BrowserEngine.firefox) {
-          expect(fontFamilyList.length, equals(2));
-          expect(fontFamilyList, contains("'Ahem ,ahem'"));
-          expect(fontFamilyList, contains('Ahem ,ahem'));
-        } else {
-          expect(fontFamilyList.length, equals(1));
-          expect(fontFamilyList.first, '"Ahem ,ahem"');
-        }
+        expect(fontFamilyList.length, equals(1));
+        expect(fontFamilyList.first, testFontFamily);
       });
 
-      test('Register Asset twice with a digit at the start of a token', () async {
+      test('Register Asset once with a digit at the start of a token', () async {
         const testFontFamily = 'Ahem 1998';
         final fontFamilyList = <String>[];
 
@@ -199,14 +180,8 @@ void testMain() {
           fontFamilyList.add(f.family!);
         });
 
-        if (ui_web.browser.browserEngine != ui_web.BrowserEngine.firefox) {
-          expect(fontFamilyList.length, equals(2));
-          expect(fontFamilyList, contains('Ahem 1998'));
-          expect(fontFamilyList, contains("'Ahem 1998'"));
-        } else {
-          expect(fontFamilyList.length, equals(1));
-          expect(fontFamilyList.first, '"Ahem 1998"');
-        }
+        expect(fontFamilyList.length, equals(1));
+        expect(fontFamilyList.first, testFontFamily);
       });
     });
   });

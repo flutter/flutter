@@ -374,20 +374,22 @@ class CommonFinders {
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder byTooltip(Pattern message, {bool skipOffstage = true}) {
     return byWidgetPredicate((Widget widget) {
-      // In cases where Tooltip.excludeFromSemantics is true, Tooltip provides
-      // no semantics tooltip to RawTooltip, so its message must be checked
-      // directly.
-      if (widget is Tooltip && (widget.excludeFromSemantics ?? false)) {
-        return (message is RegExp
-            ? ((widget.message != null && message.hasMatch(widget.message!)) ||
-                  (widget.richMessage != null &&
-                      message.hasMatch(widget.richMessage!.toPlainText())))
-            : ((widget.message ?? widget.richMessage?.toPlainText()) == message));
+      // Compare RawTooltip's semantics tooltip with the given message.
+      // However, Tooltip's message needs to be checked directly if:
+      // 1. Tooltip.excludeFromSemantics is true, since in this case Tooltip
+      //    provides no semantics tooltip to the underlying RawTooltip.
+      // 2. Tooltip.message and Tooltip.richMessage are empty, since in this
+      //    case no RawTooltip is created.
+      if (widget is Tooltip) {
+        final String tooltipMessage = widget.message ?? widget.richMessage!.toPlainText();
+        if ((widget.excludeFromSemantics ?? false) || tooltipMessage.isEmpty) {
+          return message is RegExp ? message.hasMatch(tooltipMessage) : tooltipMessage == message;
+        }
       }
       return widget is RawTooltip &&
           (message is RegExp
               ? message.hasMatch(widget.semanticsTooltip ?? '')
-              : (widget.semanticsTooltip == message));
+              : widget.semanticsTooltip == message);
     }, skipOffstage: skipOffstage);
   }
 
@@ -567,8 +569,15 @@ class CommonFinders {
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder bySemanticsLabel(Pattern label, {bool skipOffstage = true}) {
+    final String description = switch (label) {
+      final RegExp regExp => 'a semantics label matching the pattern "${regExp.pattern}"',
+      final String labelString => 'a semantics label named "$labelString"',
+      _ => 'a semantics label matching "$label"',
+    };
+
     return _bySemanticsProperty(
       label,
+      description,
       (SemanticsNode? semantics) => semantics?.label,
       skipOffstage: skipOffstage,
     );
@@ -591,8 +600,15 @@ class CommonFinders {
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder bySemanticsIdentifier(Pattern identifier, {bool skipOffstage = true}) {
+    final String description = switch (identifier) {
+      final RegExp regExp => 'a semantics identifier matching the pattern "${regExp.pattern}"',
+      final String id => 'a semantics identifier named "$id"',
+      _ => 'a semantics identifier matching "$identifier"',
+    };
+
     return _bySemanticsProperty(
       identifier,
+      description,
       (SemanticsNode? semantics) => semantics?.identifier,
       skipOffstage: skipOffstage,
     );
@@ -600,6 +616,7 @@ class CommonFinders {
 
   Finder _bySemanticsProperty(
     Pattern pattern,
+    String description,
     String? Function(SemanticsNode?) propertyGetter, {
     bool skipOffstage = true,
   }) {
@@ -610,18 +627,23 @@ class CommonFinders {
         'this finder, and call dispose on its return value after.',
       );
     }
-    return byElementPredicate((Element element) {
-      // Multiple elements can have the same renderObject - we want the "owner"
-      // of the renderObject, i.e. the RenderObjectElement.
-      if (element is! RenderObjectElement) {
-        return false;
-      }
-      final String? propertyValue = propertyGetter(element.renderObject.debugSemantics);
-      if (propertyValue == null) {
-        return false;
-      }
-      return pattern is RegExp ? pattern.hasMatch(propertyValue) : pattern == propertyValue;
-    }, skipOffstage: skipOffstage);
+
+    return byElementPredicate(
+      (Element element) {
+        // Multiple elements can have the same renderObject - we want the "owner"
+        // of the renderObject, i.e. the RenderObjectElement.
+        if (element is! RenderObjectElement) {
+          return false;
+        }
+        final String? propertyValue = propertyGetter(element.renderObject.debugSemantics);
+        if (propertyValue == null) {
+          return false;
+        }
+        return pattern is RegExp ? pattern.hasMatch(propertyValue) : pattern == propertyValue;
+      },
+      description: description,
+      skipOffstage: skipOffstage,
+    );
   }
 }
 

@@ -3,11 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('SemanticsNode ids are stable', (WidgetTester tester) async {
@@ -198,9 +199,13 @@ void main() {
       'THEN the SemanticsNode contains the correct language tag', (WidgetTester tester) async {
     const locale = Locale('de', 'DE');
     const text = 'Flutter 2050';
+
     await tester.pumpWidget(
-      const MaterialApp(
-        home: SelectionArea(child: Text(text, locale: locale)),
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: emptyTextSelectionControls,
+          child: const Text(text, locale: locale),
+        ),
       ),
     );
     await tester.pumpAndSettle();

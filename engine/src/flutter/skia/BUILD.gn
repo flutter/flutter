@@ -94,9 +94,6 @@ config("skia_private") {
   }
   libs = []
   lib_dirs = []
-  if (skia_use_vma) {
-    defines += [ "SK_USE_VMA" ]
-  }
 }
 
 # Any code that's linked into Skia-the-library should use this config
@@ -400,9 +397,6 @@ optional("gpu_shared") {
     if (skia_enable_vulkan_debug_layers) {
       public_defines += [ "SK_ENABLE_VK_LAYERS" ]
     }
-    if (skia_use_vma) {
-      public_deps += [ "$_skia_root/src/gpu/vk/vulkanmemoryallocator" ]
-    }
   }
 
   if (skia_use_metal) {
@@ -576,7 +570,7 @@ optional("png_encode") {
     "SK_CODEC_ENCODES_PNG_WITH_LIBPNG",
   ]
 
-  public = skia_encode_png_public
+  public = skia_encode_libpng_public
   deps = [ "//flutter/third_party/libpng" ]
   sources = skia_encode_png_base + skia_encode_libpng_srcs
 }
@@ -714,8 +708,8 @@ skia_component("skia") {
   if (is_win) {
     sources += skia_ports_windows_sources
     sources += [
-      "$_skia_root/src/ports/SkDebug_win.cpp",
       "$_skia_root/src/ports/SkImageGeneratorWIC.cpp",
+      "$_skia_root/src/ports/SkLog_win.cpp",
     ]
     libs += [
       "Ole32.lib",
@@ -738,7 +732,7 @@ skia_component("skia") {
 
   if (is_android) {
     deps += [ "//flutter/third_party/expat" ]
-    sources += [ "$_skia_root/src/ports/SkDebug_android.cpp" ]
+    sources += [ "$_skia_root/src/ports/SkLog_android.cpp" ]
     libs += [
       "EGL",
       "GLESv2",
@@ -747,7 +741,7 @@ skia_component("skia") {
   }
 
   if (is_linux || is_wasm || is_qnx) {
-    sources += [ "$_skia_root/src/ports/SkDebug_stdio.cpp" ]
+    sources += [ "$_skia_root/src/ports/SkLog_stdio.cpp" ]
     if (skia_use_egl) {
       libs += [ "GLESv2" ]
     }
@@ -756,8 +750,8 @@ skia_component("skia") {
   if (is_mac) {
     public += [ "$_skia_root/include/ports/SkCFObject.h" ]
     sources += [
-      "$_skia_root/src/ports/SkDebug_stdio.cpp",
       "$_skia_root/src/ports/SkImageGeneratorCG.cpp",
+      "$_skia_root/src/ports/SkLog_stdio.cpp",
     ]
     frameworks = [
       "ApplicationServices.framework",
@@ -768,8 +762,8 @@ skia_component("skia") {
   if (is_ios) {
     public += [ "$_skia_root/include/ports/SkCFObject.h" ]
     sources += [
-      "$_skia_root/src/ports/SkDebug_stdio.cpp",
       "$_skia_root/src/ports/SkImageGeneratorCG.cpp",
+      "$_skia_root/src/ports/SkLog_stdio.cpp",
     ]
     frameworks = [
       "CoreFoundation.framework",
@@ -779,6 +773,6 @@ skia_component("skia") {
   }
 
   if (is_fuchsia) {
-    sources += [ "$_skia_root/src/ports/SkDebug_stdio.cpp" ]
+    sources += [ "$_skia_root/src/ports/SkLog_stdio.cpp" ]
   }
 }

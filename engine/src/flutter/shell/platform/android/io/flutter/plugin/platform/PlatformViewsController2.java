@@ -312,11 +312,11 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
    * PlatformViewsController} detaches from JNI.
    */
   public void onDetachedFromJNI() {
-    diposeAllViews();
+    disposeAllViews();
   }
 
   public void onPreEngineRestart() {
-    diposeAllViews();
+    disposeAllViews();
   }
 
   @Override
@@ -410,7 +410,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     return toLogicalPixels(physicalPixels, getDisplayDensity());
   }
 
-  private void diposeAllViews() {
+  private void disposeAllViews() {
     while (platformViews.size() > 0) {
       final int viewId = platformViews.keyAt(0);
       // Dispose deletes the entry from platformViews and clears associated resources.
@@ -549,9 +549,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   // NOT called from UI thread.
   public synchronized void swapTransactions() {
     activeTransactions.clear();
-    for (int i = 0; i < pendingTransactions.size(); i++) {
-      activeTransactions.add(pendingTransactions.get(i));
-    }
+    activeTransactions.addAll(pendingTransactions);
     pendingTransactions.clear();
   }
 

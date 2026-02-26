@@ -253,6 +253,7 @@ name: my_app
           final devices = <FlutterDevice>[
             FlutterDevice(
               device,
+              targetPlatform: .unsupported,
               generator: residentCompiler,
               buildInfo: BuildInfo.debug,
               developmentShaderCompiler: const FakeShaderCompiler(),
@@ -283,6 +284,7 @@ name: my_app
           final devices = <FlutterDevice>[
             FlutterDevice(
               device,
+              targetPlatform: .unsupported,
               generator: residentCompiler,
               buildInfo: BuildInfo.debug,
               developmentShaderCompiler: const FakeShaderCompiler(),

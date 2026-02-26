@@ -2,16 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
 class TestState extends StatefulWidget {
   const TestState({super.key, required this.child, required this.log});
+
   final Widget child;
   final List<String> log;
+
   @override
   State<TestState> createState() => _TestStateState();
 }
@@ -38,10 +40,7 @@ void main() {
     Widget boilerPlate(Widget sliver) {
       return Localizations(
         locale: const Locale('en', 'us'),
-        delegates: const <LocalizationsDelegate<dynamic>>[
-          DefaultWidgetsLocalizations.delegate,
-          DefaultMaterialLocalizations.delegate,
-        ],
+        delegates: const <LocalizationsDelegate<dynamic>>[DefaultWidgetsLocalizations.delegate],
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(

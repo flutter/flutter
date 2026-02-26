@@ -133,6 +133,7 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterViewEngineProvider.h",
     "framework/Source/FlutterViewEngineProvider.mm",
     "framework/Source/FlutterViewProvider.h",
+    "framework/Source/FlutterView_Internal.h",
     "framework/Source/FlutterWindowController.h",
     "framework/Source/FlutterWindowController.mm",
     "framework/Source/KeyCodeMap.g.mm",
@@ -239,10 +240,10 @@ executable("flutter_desktop_darwin_unittests") {
     "framework/Source/FlutterViewControllerTestUtils.mm",
     "framework/Source/FlutterViewEngineProviderTest.mm",
     "framework/Source/FlutterViewTest.mm",
+    "framework/Source/FlutterWindowControllerTest.mm",
     "framework/Source/KeyCodeMapTest.mm",
     "framework/Source/TestFlutterPlatformView.h",
     "framework/Source/TestFlutterPlatformView.mm",
-    "framework/source/FlutterWindowControllerTest.mm",
   ]
 
   deps = [

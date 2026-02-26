@@ -152,6 +152,7 @@ class ExpansionTile extends StatefulWidget {
     this.enabled = true,
     this.expansionAnimationStyle,
     this.internalAddSemanticForOnTap = false,
+    this.statesController,
   }) : assert(
          expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
          'CrossAxisAlignment.baseline is not supported since the expanded children '
@@ -272,7 +273,7 @@ class ExpansionTile extends StatefulWidget {
   ///
   /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
   ///   [ExpansionTileThemeData].
-  final Alignment? expandedAlignment;
+  final AlignmentGeometry? expandedAlignment;
 
   /// Specifies the alignment of each child within [children] when the tile is expanded.
   ///
@@ -484,6 +485,16 @@ class ExpansionTile extends StatefulWidget {
   // the default value to true.
   final bool internalAddSemanticForOnTap;
 
+  /// The controller that notifies when the widget's [WidgetState]s change.
+  ///
+  /// This allows listening to and controlling states such as
+  /// [WidgetState.hovered], [WidgetState.focused], [WidgetState.pressed],
+  /// and [WidgetState.disabled] for the tile's header.
+  ///
+  /// If null, the backing [ListTile] will create and manage its own
+  /// [WidgetStatesController].
+  final WidgetStatesController? statesController;
+
   @override
   State<ExpansionTile> createState() => _ExpansionTileState();
 }
@@ -626,6 +637,7 @@ class _ExpansionTileState extends State<ExpansionTile> {
             : null,
         minTileHeight: widget.minTileHeight,
         internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
+        statesController: widget.statesController,
       ),
     );
 
@@ -636,7 +648,7 @@ class _ExpansionTileState extends State<ExpansionTile> {
         // blockNode prevents this node from being part of the focus traversal.
         label: semanticsHint,
         liveRegion: true,
-        accessiblityFocusBlockType: AccessiblityFocusBlockType.blockNode,
+        accessibilityFocusBlockType: AccessibilityFocusBlockType.blockNode,
         child: Semantics(hint: semanticsHint, onTapHint: onTapHint, child: child),
       );
     }
