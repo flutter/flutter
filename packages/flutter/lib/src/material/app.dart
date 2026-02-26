@@ -24,6 +24,7 @@ import 'button_style.dart';
 import 'colors.dart';
 import 'icon_button.dart';
 import 'icons.dart';
+import 'material.dart';
 import 'material_localizations.dart';
 import 'page.dart';
 import 'scaffold.dart' show ScaffoldMessenger, ScaffoldMessengerState;
@@ -894,7 +895,7 @@ class MaterialScrollBehavior extends ScrollBehavior {
             return StretchingOverscrollIndicator(
               axisDirection: details.direction,
               clipBehavior: details.clipBehavior ?? Clip.hardEdge,
-              child: child,
+              child: Material(child: child),
             );
           case AndroidOverscrollIndicator.glow:
             break;
