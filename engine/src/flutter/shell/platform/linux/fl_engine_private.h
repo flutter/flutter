@@ -255,8 +255,8 @@ void fl_engine_set_platform_message_handler(
  * @display_id: the display this view is rendering on.
  * @view_id: the view that the event occured on.
  * @min_width: minimum width of view in pixels.
- * @max_width: maximum width of view in pixels.
  * @min_height: minimum height of view in pixels.
+ * @max_width: maximum width of view in pixels.
  * @max_height: maximum height of view in pixels.
  * @pixel_ratio: scale factor for view.
  *
