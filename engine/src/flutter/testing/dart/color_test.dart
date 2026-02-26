@@ -168,10 +168,14 @@ void main() {
     final Color? result = Color.lerp(srgbRed, p3Green, 0.5);
     expect(result!.colorSpace, equals(ColorSpace.displayP3));
     final Color srgbRedAsP3 = srgbRed.withValues(colorSpace: ColorSpace.displayP3);
-    expect(result.a, closeTo((srgbRedAsP3.a + p3Green.a) / 2, 1e-4));
-    expect(result.r, closeTo((srgbRedAsP3.r + p3Green.r) / 2, 1e-4));
-    expect(result.g, closeTo((srgbRedAsP3.g + p3Green.g) / 2, 1e-4));
-    expect(result.b, closeTo((srgbRedAsP3.b + p3Green.b) / 2, 1e-4));
+    final Color expected = Color.from(
+      alpha: (srgbRedAsP3.a + p3Green.a) / 2,
+      red: (srgbRedAsP3.r + p3Green.r) / 2,
+      green: (srgbRedAsP3.g + p3Green.g) / 2,
+      blue: (srgbRedAsP3.b + p3Green.b) / 2,
+      colorSpace: ColorSpace.displayP3,
+    );
+    expect(result, colorMatches(expected, threshold: 1e-4));
   });
 
   test('Color.lerp mixed colorspaces with different alpha values', () {
