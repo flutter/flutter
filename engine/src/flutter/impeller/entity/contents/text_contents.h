@@ -78,7 +78,7 @@ class TextContents final : public Contents {
   ///                    text relative to screen space and is not adjusted
   ///                    relative to the origin of an intermidate buffer
   ///                    as the entity_transform may be. This transform is
-  ///                    used to retriev metrics and glyph information from
+  ///                    used to retrieve metrics and glyph information from
   ///                    the atlas so that the data matches what was stored
   ///                    in the atlas when the global DisplayList did a
   ///                    pre-pass to collect the glyph information.

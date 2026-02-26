@@ -939,7 +939,6 @@ namespace {
 std::shared_ptr<TextFrame> MakeDefaultTextFrame(const std::string& text,
                                                 Scalar font_size) {
   // Construct the text blob.
-  // auto mapping = flutter::testing::OpenFixtureAsSkData("wtf.otf");
   auto mapping = flutter::testing::OpenFixtureAsSkData("Roboto-Regular.ttf");
   if (mapping == nullptr) {
     return nullptr;
@@ -953,9 +952,9 @@ std::shared_ptr<TextFrame> MakeDefaultTextFrame(const std::string& text,
   return text_frame;
 }
 
-void DrawTextFramesMultipleScalesWithWithReuse(AiksTest* test,
-                                               Scalar first_scale,
-                                               Scalar second_scale) {
+void DrawTextFramesMultipleScalesWithReuse(AiksTest* test,
+                                           Scalar first_scale,
+                                           Scalar second_scale) {
   DisplayListBuilder builder;
   builder.Scale(test->GetContentScale().x, test->GetContentScale().y);
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
@@ -1000,15 +999,15 @@ void DrawTextFramesMultipleScalesWithWithReuse(AiksTest* test,
 }  // namespace
 
 TEST_P(AiksTest, TextFramesDoNotShareRenderDataBigSmall) {
-  DrawTextFramesMultipleScalesWithWithReuse(this,                  //
-                                            /*first_scale=*/4.0f,  //
-                                            /*second_scale=*/0.5f);
+  DrawTextFramesMultipleScalesWithReuse(this,                  //
+                                        /*first_scale=*/4.0f,  //
+                                        /*second_scale=*/0.5f);
 }
 
 TEST_P(AiksTest, TextFramesDoNotShareRenderDataSmallBig) {
-  DrawTextFramesMultipleScalesWithWithReuse(this,                  //
-                                            /*first_scale=*/0.5f,  //
-                                            /*second_scale=*/4.0f);
+  DrawTextFramesMultipleScalesWithReuse(this,                  //
+                                        /*first_scale=*/0.5f,  //
+                                        /*second_scale=*/4.0f);
 }
 
 }  // namespace testing

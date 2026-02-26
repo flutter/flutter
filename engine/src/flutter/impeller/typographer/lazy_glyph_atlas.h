@@ -42,7 +42,7 @@ class LazyGlyphAtlas {
 
     std::vector<RenderableText> renderable_frames;
     std::shared_ptr<GlyphAtlasContext> context;
-    mutable std::shared_ptr<GlyphAtlas> atlas;
+    std::shared_ptr<GlyphAtlas> atlas;
 
     void reset();
   };

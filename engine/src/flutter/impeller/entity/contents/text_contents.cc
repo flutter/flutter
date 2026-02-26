@@ -58,7 +58,9 @@ void TextContents::SetForceTextColor(bool value) {
 }
 
 std::optional<Rect> TextContents::GetCoverage(const Entity& entity) const {
-  return frame_->GetBounds().TransformBounds(entity.GetTransform());
+  const Matrix entity_offset_transform =
+      entity.GetTransform() * Matrix::MakeTranslation(position_);
+  return frame_->GetBounds().TransformBounds(entity_offset_transform);
 }
 
 void TextContents::SetTextProperties(
