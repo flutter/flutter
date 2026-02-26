@@ -255,8 +255,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get purgePersistentCache => boolArg('purge-persistent-cache');
   bool get disableServiceAuthCodes => boolArg('disable-service-auth-codes');
   bool get cacheStartupProfile => boolArg('cache-startup-profile');
-  bool get runningWithPrebuiltApplication =>
-      argResults![FlutterOptions.kUseApplicationBinary] != null;
+  bool get runningWithPrebuiltApplication => prebuiltApplicationBinaryPath != null;
+  String? get prebuiltApplicationBinaryPath => stringArg(FlutterOptions.kUseApplicationBinary);
   bool get trackWidgetCreation => boolArg('track-widget-creation');
   ImpellerStatus get enableImpeller =>
       ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?);
@@ -816,7 +816,7 @@ class RunCommand extends RunCommandBase {
     // Enable hot mode by default if `--no-hot` was not passed and we are in
     // debug mode.
     final bool hotMode = shouldUseHotMode(buildInfo);
-    final String? applicationBinaryPath = stringArg(FlutterOptions.kUseApplicationBinary);
+    final String? applicationBinaryPath = prebuiltApplicationBinaryPath;
     final WebDevServerConfig? webDevServerConfig = await getWebDevServerConfig();
 
     if (outputMachineFormat) {

@@ -160,6 +160,22 @@ void main() {
       });
 
       testUsingContext(
+        'prebuiltApplicationBinaryPath is set when --use-application-binary is provided',
+        () async {
+          testDeviceManager.devices = <Device>[FakeDevice()];
+          final RunCommand command = TestRunCommandThatOnlyValidates();
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+          await runner.run(<String>['run', '--no-pub', '--use-application-binary=path/to/binary']);
+          expect(command.prebuiltApplicationBinaryPath, 'path/to/binary');
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          DeviceManager: () => testDeviceManager,
+        },
+      );
+
+      testUsingContext(
         'exits with a user message when no supported devices attached',
         () async {
           final command = RunCommand();
