@@ -1203,7 +1203,7 @@ std::shared_ptr<impeller::TextFrame> GetTestTextFrame(int index) {
     return it->second;
   }
   auto blob = GetTestTextBlob(index);
-  auto frame = impeller::MakeTextFrameFromTextBlobSkia(blob);
+  auto frame = impeller::MakeTextFrameFromTextBlobSkia(blob, std::nullopt);
   text_frames.insert(std::make_pair(index, frame));
   return frame;
 }

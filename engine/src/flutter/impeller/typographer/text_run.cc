@@ -23,8 +23,8 @@ TextRun::TextRun(const Font& font, std::vector<GlyphPosition>& glyphs)
 
 TextRun::~TextRun() = default;
 
-bool TextRun::AddGlyph(Glyph glyph, Point position) {
-  glyphs_.emplace_back(GlyphPosition{glyph, position});
+bool TextRun::AddGlyph(Glyph glyph, Point position, Rect bounds) {
+  glyphs_.emplace_back(GlyphPosition{glyph, position, bounds});
   return true;
 }
 

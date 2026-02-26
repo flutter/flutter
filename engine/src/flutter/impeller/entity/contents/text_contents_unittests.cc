@@ -46,7 +46,7 @@ std::shared_ptr<TextFrame> MakeTextFrame(const std::string& text,
     return nullptr;
   }
 
-  return MakeTextFrameFromTextBlobSkia(blob);
+  return MakeTextFrameFromTextBlobSkia(blob, std::nullopt);
 }
 
 std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(

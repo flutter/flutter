@@ -548,7 +548,8 @@ TEST(DlOpSpy, DrawDisplayList) {
 #if IMPELLER_SUPPORTS_RENDERING
 TEST(DlOpSpy, DrawTextFrame) {
   {  // Non-transparent color.
-    auto test_text = DlTextImpeller::MakeFromBlob(GetTestTextBlob(42));
+    auto test_text =
+        DlTextImpeller::MakeFromBlob(GetTestTextBlob(42), std::nullopt);
     DisplayListBuilder builder;
     DlPaint paint(DlColor::kBlack());
     std::string string = "xx";
@@ -559,7 +560,8 @@ TEST(DlOpSpy, DrawTextFrame) {
     ASSERT_DID_DRAW(dl_op_spy, dl);
   }
   {  // transparent color.
-    auto test_text = DlTextImpeller::MakeFromBlob(GetTestTextBlob(43));
+    auto test_text =
+        DlTextImpeller::MakeFromBlob(GetTestTextBlob(43), std::nullopt);
     DisplayListBuilder builder;
     DlPaint paint(DlColor::kTransparent());
     std::string string = "xx";
