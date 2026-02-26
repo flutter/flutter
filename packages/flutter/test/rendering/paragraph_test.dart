@@ -1015,6 +1015,23 @@ void main() {
       expect(config.isReadOnly, isTrue);
     });
 
+    test('does not expose text-field semantics when rich text needs child semantics', () {
+      final registrar = TestSelectionRegistrar();
+      final gestureRecognizer = TapGestureRecognizer()..onTap = () {};
+      addTearDown(gestureRecognizer.dispose);
+      final paragraph = RenderParagraph(
+        TextSpan(text: 'hello world', recognizer: gestureRecognizer),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+      );
+
+      final SemanticsConfiguration config = SemanticsConfiguration();
+      paragraph.describeSemanticsConfiguration(config);
+
+      expect(config.isTextField, isFalse);
+      expect(config.isReadOnly, isFalse);
+    });
+
     test('paints selection highlight', () async {
       final registrar = TestSelectionRegistrar();
       const selectionColor = Color(0xAF6694e8);

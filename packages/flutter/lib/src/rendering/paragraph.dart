@@ -1226,7 +1226,7 @@ class RenderParagraph extends RenderBox
       config.textDirection = textDirection;
     }
 
-    if (_registrar != null) {
+    if (_registrar != null && !needsAssembleSemanticsNode && !needsChildConfigurationsDelegate) {
       config
         ..isTextField = true
         ..isReadOnly = true;
