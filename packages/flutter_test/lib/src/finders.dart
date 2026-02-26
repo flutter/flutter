@@ -34,7 +34,7 @@ typedef DescribeMatchCallback = String Function(Plurality plurality);
 ///
 /// This is useful for hit testing because some render objects (like
 /// [RenderTransform]) don't add themselves to the hit test path but instead
-/// just transforms the hit test point and pass it to their children.
+/// just transform the hit test point and pass it to their children.
 bool isRenderObjectAncestorOfTarget(RenderObject renderObject, HitTestTarget target) {
   if (target == renderObject) {
     return true;
