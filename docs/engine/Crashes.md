@@ -114,9 +114,10 @@ Google Play Console can automatically desymbolicate crash reports when you uploa
 
 When building with `--obfuscate --split-debug-info=<dir>`, Flutter generates symbol files named like `app.android-arm64.symbols`. Play Console requires a `.so` extension to accept these uploads.
 
-A [fix](https://github.com/flutter/flutter/pull/181275) for proper symbol packaging has been merged to `master` but is not yet in a stable release. In the meantime, rename each generated symbol file by replacing the `.symbols` extension with `.so` and changing the first `.` separator to `-`:
+A [fix](https://github.com/flutter/flutter/pull/181275) for proper symbol packaging has been merged to `master` but is not yet in a stable release. In the meantime, rename each generated symbol file from `app.<arch>.symbols` to `app-<arch>.so`:
 
 ```
+app.android-arm.symbols    →  app-android-arm.so
 app.android-arm64.symbols  →  app-android-arm64.so
 app.android-x64.symbols    →  app-android-x64.so
 ```
