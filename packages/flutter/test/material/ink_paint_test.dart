@@ -165,9 +165,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Material(
           child: Center(
-            child: SizedBox(
-              width: 100.0,
-              height: 100.0,
+            child: SizedBox.square(
+              dimension: 100.0,
               child: InkWell(
                 borderRadius: borderRadius,
                 highlightColor: highlightColor,
@@ -432,9 +431,8 @@ void main() {
             textDirection: TextDirection.ltr,
             child: Material(
               child: Center(
-                child: SizedBox(
-                  width: 100.0,
-                  height: 100.0,
+                child: SizedBox.square(
+                  dimension: 100.0,
                   child: InkWell(
                     borderRadius: borderRadius,
                     highlightColor: highlightColor,
@@ -524,9 +522,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Material(
           child: Center(
-            child: SizedBox(
-              width: 100.0,
-              height: 100.0,
+            child: SizedBox.square(
+              dimension: 100.0,
               child: InkWell(onTap: () {}, radius: 100.0, splashFactory: InkRipple.splashFactory),
             ),
           ),
@@ -558,9 +555,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Material(
           child: Center(
-            child: SizedBox(
-              width: 100.0,
-              height: 100.0,
+            child: SizedBox.square(
+              dimension: 100.0,
               child: InkWell(
                 splashColor: splashColor,
                 highlightColor: highlightColor,

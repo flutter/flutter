@@ -31,9 +31,8 @@ void main() {
             Positioned(
               top: 100.0,
               left: 100.0,
-              child: SizedBox(
-                width: 100.0,
-                height: 100.0,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: Transform(
                   transform: Matrix4.diagonal3Values(0.5, 0.5, 1.0),
                   origin: const Offset(100.0, 50.0),
@@ -73,9 +72,8 @@ void main() {
             Positioned(
               top: 100.0,
               left: 100.0,
-              child: SizedBox(
-                width: 100.0,
-                height: 100.0,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: Transform(
                   transform: Matrix4.diagonal3Values(0.5, 0.5, 1.0),
                   alignment: Alignment.centerRight,
@@ -116,9 +114,8 @@ void main() {
             Positioned(
               top: 100.0,
               left: 100.0,
-              child: SizedBox(
-                width: 100.0,
-                height: 100.0,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: Transform(
                   transform: Matrix4.diagonal3Values(0.5, 0.5, 1.0),
                   alignment: alignment,
@@ -180,9 +177,8 @@ void main() {
             Positioned(
               top: 100.0,
               left: 100.0,
-              child: SizedBox(
-                width: 100.0,
-                height: 100.0,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: Transform(
                   transform: Matrix4.diagonal3Values(0.5, 0.5, 1.0),
                   origin: const Offset(100.0, 0.0),
@@ -661,14 +657,13 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      SizedBox(
-        width: 400,
-        height: 400,
+      SizedBox.square(
+        dimension: 400,
         child: Center(
           child: Transform.rotate(
             angle: math.pi / 4,
             filterQuality: FilterQuality.low,
-            child: const SizedBox(width: 100, height: 100),
+            child: const SizedBox.square(dimension: 100),
           ),
         ),
       ),
@@ -825,9 +820,8 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: SizedBox(
-          height: 400,
-          width: 400,
+        child: SizedBox.square(
+          dimension: 400,
           child: Center(
             child: Transform.scale(
               scale: scale,
@@ -856,9 +850,8 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: SizedBox(
-          height: 400,
-          width: 400,
+        child: SizedBox.square(
+          dimension: 400,
           child: Center(
             child: Transform.scale(
               scaleX: scaleX,

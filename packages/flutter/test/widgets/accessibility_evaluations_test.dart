@@ -28,9 +28,8 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         TestWidgetsApp(
-          home: SizedBox(
-            width: 48.0,
-            height: 48.0,
+          home: SizedBox.square(
+            dimension: 48.0,
             child: Semantics(label: 'button', onTap: () {}),
           ),
         ),
@@ -45,9 +44,8 @@ void main() {
       await tester.pumpWidget(
         TestWidgetsApp(
           home: Center(
-            child: SizedBox(
-              width: 40.0,
-              height: 40.0,
+            child: SizedBox.square(
+              dimension: 40.0,
               child: Semantics(label: 'button', onTap: () {}),
             ),
           ),
@@ -66,9 +64,8 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         TestWidgetsApp(
-          home: SizedBox(
-            width: 40.0,
-            height: 40.0,
+          home: SizedBox.square(
+            dimension: 40.0,
             child: Semantics(label: 'button', onTap: () {}, hidden: true),
           ),
         ),
@@ -95,9 +92,8 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         TestWidgetsApp(
-          home: SizedBox(
-            width: 48.0,
-            height: 48.0,
+          home: SizedBox.square(
+            dimension: 48.0,
             child: Semantics(label: 'button', onTap: () {}),
           ),
         ),
@@ -140,9 +136,8 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         const TestWidgetsApp(
-          home: SizedBox(
-            width: 100,
-            height: 100,
+          home: SizedBox.square(
+            dimension: 100.0,
             child: ColoredBox(
               color: Color(0xFFFFFFFF),
               child: Center(
@@ -163,9 +158,8 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         const TestWidgetsApp(
-          home: SizedBox(
-            width: 100,
-            height: 100,
+          home: SizedBox.square(
+            dimension: 100,
             child: ColoredBox(
               color: Color(0xFFFFFFFF),
               child: Center(
@@ -200,9 +194,8 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         const TestWidgetsApp(
-          home: SizedBox(
-            width: 100,
-            height: 100,
+          home: SizedBox.square(
+            dimension: 100,
             child: ColoredBox(
               color: Color(0xFFFFFFFF),
               child: Center(
@@ -225,9 +218,8 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         const TestWidgetsApp(
-          home: SizedBox(
-            width: 100,
-            height: 100,
+          home: SizedBox.square(
+            dimension: 100,
             child: ColoredBox(
               color: Color(0xFFFFFFFF),
               child: Center(
