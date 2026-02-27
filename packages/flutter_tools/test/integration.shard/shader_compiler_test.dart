@@ -84,16 +84,11 @@ void main() {
 }
 ''';
 
-    expect(
+    await expectLater(
       () => testCompileShader(kShaderWithInput),
-      throwsA(
-        isA<ShaderCompilerException>().having(
-          (ShaderCompilerException exception) => exception.message,
-          'message',
-          contains('SkSL does not support inputs'),
-        ),
-      ),
+      throwsA(isA<ShaderCompilerException>()),
     );
+    expect(logger.errorText, contains('SkSL does not support inputs'));
   });
 
   testUsingContext('Compilation error with UBO', () async {
@@ -109,16 +104,11 @@ void main() {
 }
 ''';
 
-    expect(
+    await expectLater(
       () => testCompileShader(kShaderWithInput),
-      throwsA(
-        isA<ShaderCompilerException>().having(
-          (ShaderCompilerException exception) => exception.message,
-          'message',
-          contains('SkSL does not support UBOs or SSBOs'),
-        ),
-      ),
+      throwsA(isA<ShaderCompilerException>()),
     );
+    expect(logger.errorText, contains('SkSL does not support UBOs or SSBOs'));
   });
 
   testUsingContext(
@@ -134,15 +124,13 @@ void main() {
 }
 ''';
 
-      expect(
+      await expectLater(
         () => testCompileShader(kShaderWithInput),
-        throwsA(
-          isA<ShaderCompilerException>().having(
-            (ShaderCompilerException exception) => exception.message,
-            'message',
-            contains('Only sampler and position arguments are supported in texture() calls'),
-          ),
-        ),
+        throwsA(isA<ShaderCompilerException>()),
+      );
+      expect(
+        logger.errorText,
+        contains('Only sampler and position arguments are supported in texture() calls'),
       );
     },
   );
@@ -157,15 +145,10 @@ layout(location = 0) out vec4 fragColor;
 void main() {}
 ''';
 
-    expect(
+    await expectLater(
       () => testCompileShader(kShaderWithInput),
-      throwsA(
-        isA<ShaderCompilerException>().having(
-          (ShaderCompilerException exception) => exception.message,
-          'message',
-          contains('SkSL does not support unsigned integers'),
-        ),
-      ),
+      throwsA(isA<ShaderCompilerException>()),
     );
+    expect(logger.errorText, contains('SkSL does not support unsigned integers'));
   });
 }

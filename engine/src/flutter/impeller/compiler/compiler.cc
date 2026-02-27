@@ -32,6 +32,7 @@ namespace {
 constexpr const char* kEGLImageExternalExtension = "GL_OES_EGL_image_external";
 constexpr const char* kEGLImageExternalExtension300 =
     "GL_OES_EGL_image_external_essl3";
+constexpr int kVerboseErrorLineThreshold = 6;
 }  // namespace
 
 // This value should be <= 7372. UBOs can be larger on some devices but a
@@ -471,17 +472,9 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
     return;
   }
 
-  if (sl_compiler.GetType() == CompilerBackend::Type::kSkSL) {
-    // Validate compiled SkSL by trying to create a SkRuntimeEffect.
-    SkRuntimeEffect::Result result =
-        SkRuntimeEffect::MakeForShader(SkString(sl_compilation_result_str));
-    if (result.effect == nullptr) {
-      COMPILER_ERROR(error_stream_)
-          << "Compiled to invalid SkSL:\n"
-          << sl_compilation_result_str << "\nSkSL Error:\n"
-          << result.errorText.c_str();
-      return;
-    }
+  if (sl_compiler.GetType() == CompilerBackend::Type::kSkSL &&
+      !ValidateSkSLResult(sl_compilation_result_str).ok()) {
+    return;
   }
 
   reflector_ = std::make_unique<Reflector>(std::move(reflector_options),  //
@@ -497,6 +490,59 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
   }
 
   is_valid_ = true;
+}
+
+absl::Status Compiler::ValidateSkSLResult(const std::string& sksl) {
+  // Validate compiled SkSL by trying to create a SkRuntimeEffect.
+  SkRuntimeEffect::Result result =
+      SkRuntimeEffect::MakeForShader(SkString(sksl));
+
+  if (result.effect != nullptr) {
+    return absl::OkStatus();
+  }
+
+  // SkSL is invalid. Output the SkSL and the error.
+
+  std::stringstream output;
+  bool is_truncated = false;
+
+  // Lambda to append text to the output stream, truncating if needed.
+  auto append_and_truncate = [&](const std::string& text) {
+    std::stringstream text_stream(text);
+    std::string line;
+    int lines_outputted = 0;
+    while (std::getline(text_stream, line)) {
+      output << "\n        " << line;
+      if (++lines_outputted == kVerboseErrorLineThreshold) {
+        break;
+      }
+    }
+    if (lines_outputted == kVerboseErrorLineThreshold) {
+      auto full_line_count = std::count(text.begin(), text.end(), '\n') + 1;
+      output << "\n... (truncated " << full_line_count - lines_outputted
+             << " lines)";
+      is_truncated = true;
+    }
+  };
+
+  output << "\nCompiled to invalid SkSL:";
+  append_and_truncate(sksl);
+  output << "\nSkSL Error:";
+  std::string error_text(result.errorText.c_str());
+  append_and_truncate(error_text);
+
+  // Output maybe-truncated SkSL and error to error_stream_.
+  COMPILER_ERROR(error_stream_) << output.str();
+
+  // If the output was truncated, output the full SkSL and error to
+  // verbose_error_stream_.
+  if (is_truncated) {
+    COMPILER_ERROR(verbose_error_stream_) << "\nCompiled to invalid SkSL:\n"
+                                          << sksl << "\nSkSL Error:\n"
+                                          << error_text;
+  }
+
+  return absl::InternalError("SkSL validation failed.");
 }
 
 Compiler::~Compiler() = default;
@@ -521,6 +567,10 @@ std::string Compiler::GetSourcePrefix() const {
 
 std::string Compiler::GetErrorMessages() const {
   return error_stream_.str();
+}
+
+std::string Compiler::GetVerboseErrorMessages() const {
+  return verbose_error_stream_.str();
 }
 
 const std::vector<std::string>& Compiler::GetIncludedFileNames() const {

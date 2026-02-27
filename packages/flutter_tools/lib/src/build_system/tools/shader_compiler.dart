@@ -196,9 +196,7 @@ class ShaderCompiler {
       if (fatal) {
         throw ShaderCompilerException._(
           'Shader compilation of "${input.path}" to "$outputPath" '
-          'failed with exit code $code.\n'
-          'impellerc stdout:\n$stdout\n'
-          'impellerc stderr:\n$stderr',
+          'failed with exit code $code.',
         );
       }
       return false;

@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <memory>
 
 namespace impeller {
 namespace compiler {
@@ -84,11 +85,10 @@ std::unique_ptr<fml::FileMapping> CompilerTestBase::GetShaderFile(
   return fml::FileMapping::CreateReadOnly(fd);
 }
 
-bool CompilerTestBase::CanCompileAndReflect(
-    const char* fixture_name,
-    SourceType source_type,
-    SourceLanguage source_language,
-    const char* entry_point_name) const {
+bool CompilerTestBase::CanCompileAndReflect(const char* fixture_name,
+                                            SourceType source_type,
+                                            SourceLanguage source_language,
+                                            const char* entry_point_name) {
   std::shared_ptr<fml::Mapping> fixture =
       flutter::testing::OpenFixtureAsMapping(fixture_name);
   if (!fixture || !fixture->GetMapping()) {
@@ -110,13 +110,14 @@ bool CompilerTestBase::CanCompileAndReflect(
   reflector_options.header_file_name = ReflectionHeaderName(fixture_name);
   reflector_options.shader_name = "shader_name";
 
-  Compiler compiler(fixture, source_options, reflector_options);
-  if (!compiler.IsValid()) {
-    VALIDATION_LOG << "Compilation failed: " << compiler.GetErrorMessages();
+  compiler_ =
+      std::make_unique<Compiler>(fixture, source_options, reflector_options);
+  if (!compiler_->IsValid()) {
+    VALIDATION_LOG << "Compilation failed: " << compiler_->GetErrorMessages();
     return false;
   }
 
-  auto spirv_assembly = compiler.GetSPIRVAssembly();
+  auto spirv_assembly = compiler_->GetSPIRVAssembly();
   if (!spirv_assembly) {
     VALIDATION_LOG << "No spirv was generated.";
     return false;
@@ -129,7 +130,7 @@ bool CompilerTestBase::CanCompileAndReflect(
     return false;
   }
 
-  auto sl_source = compiler.GetSLShaderSource();
+  auto sl_source = compiler_->GetSLShaderSource();
   if (!sl_source) {
     VALIDATION_LOG << "No SL source was generated.";
     return false;
@@ -142,7 +143,7 @@ bool CompilerTestBase::CanCompileAndReflect(
     return false;
   }
 
-  auto reflector = compiler.GetReflector();
+  auto reflector = compiler_->GetReflector();
   if (!reflector) {
     VALIDATION_LOG << "No reflector was found for target platform SL compiler.";
     return false;
@@ -188,6 +189,10 @@ bool CompilerTestBase::CanCompileAndReflect(
     return false;
   }
   return true;
+}
+
+const Compiler* CompilerTestBase::GetCompiler() const {
+  return compiler_.get();
 }
 
 }  // namespace testing
