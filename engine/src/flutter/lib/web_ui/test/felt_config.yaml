@@ -30,6 +30,10 @@ test-sets:
   - name: canvaskit
     directory: canvaskit
 
+  # Tests for skwasm-renderer-specific functionality
+  - name: skwasm
+    directory: skwasm
+
   # Tests for renderer functionality that can be run on any renderer
   - name: ui
     directory: ui
@@ -61,6 +65,10 @@ test-bundles:
 
   - name: dart2wasm-skwasm-ui
     test-set: ui
+    compile-configs: dart2wasm-skwasm
+
+  - name: dart2wasm-skwasm-skwasm
+    test-set: skwasm
     compile-configs: dart2wasm-skwasm
 
   - name: fallbacks
@@ -141,6 +149,11 @@ test-suites:
 
   - name: chrome-dart2wasm-wimp-ui
     test-bundle: dart2wasm-skwasm-ui
+    run-config: chrome-wimp
+    artifact-deps: [ skwasm ]
+
+  - name: chrome-dart2wasm-wimp-skwasm
+    test-bundle: dart2wasm-skwasm-skwasm
     run-config: chrome-wimp
     artifact-deps: [ skwasm ]
 
@@ -257,8 +270,18 @@ test-suites:
     run-config: chrome-coi
     artifact-deps: [ skwasm ]
 
+  - name: chrome-coi-dart2wasm-skwasm-skwasm
+    test-bundle: dart2wasm-skwasm-skwasm
+    run-config: chrome-coi
+    artifact-deps: [ skwasm ]
+
   - name: chrome-force-st-dart2wasm-skwasm-ui
     test-bundle: dart2wasm-skwasm-ui
+    run-config: chrome-force-st
+    artifact-deps: [ skwasm ]
+
+  - name: chrome-force-st-dart2wasm-skwasm-skwasm
+    test-bundle: dart2wasm-skwasm-skwasm
     run-config: chrome-force-st
     artifact-deps: [ skwasm ]
 

@@ -47,6 +47,28 @@
       }
     },
     {
+      "name": "web_tests/test_bundles/dart2wasm-skwasm-skwasm",
+      "drone_dimensions": [
+        "device_type=none",
+        "os=Linux"
+      ],
+      "generators": {
+        "tasks": [
+          {
+            "name": "compile bundle dart2wasm-skwasm-skwasm",
+            "parameters": [
+              "test",
+              "--compile",
+              "--bundle=dart2wasm-skwasm-skwasm"
+            ],
+            "scripts": [
+              "flutter/lib/web_ui/dev/felt"
+            ]
+          }
+        ]
+      }
+    },
+    {
       "name": "web_tests/test_bundles/dart2js-canvaskit-engine",
       "drone_dimensions": [
         "device_type=none",
@@ -189,6 +211,7 @@
       "dependencies": [
         "web_tests/test_bundles/dart2js-canvaskit-experimental-webparagraph",
         "web_tests/test_bundles/dart2wasm-skwasm-ui",
+        "web_tests/test_bundles/dart2wasm-skwasm-skwasm",
         "web_tests/test_bundles/dart2js-canvaskit-engine",
         "web_tests/test_bundles/dart2js-canvaskit-canvaskit",
         "web_tests/test_bundles/dart2js-canvaskit-ui",
@@ -213,6 +236,7 @@
             "--copy-artifacts",
             "--suite=chrome-dart2js-experimental-webparagraph-ui",
             "--suite=chrome-dart2wasm-wimp-ui",
+            "--suite=chrome-dart2wasm-wimp-skwasm",
             "--suite=chrome-dart2js-canvaskit-engine",
             "--suite=chrome-dart2js-canvaskit-canvaskit",
             "--suite=chrome-dart2js-canvaskit-ui",
@@ -220,7 +244,9 @@
             "--suite=chrome-full-dart2js-canvaskit-ui",
             "--suite=chrome-dart2wasm-canvaskit-engine",
             "--suite=chrome-coi-dart2wasm-skwasm-ui",
+            "--suite=chrome-coi-dart2wasm-skwasm-skwasm",
             "--suite=chrome-force-st-dart2wasm-skwasm-ui",
+            "--suite=chrome-force-st-dart2wasm-skwasm-skwasm",
             "--suite=chrome-fallbacks",
             "--suite=chrome-coi-fallbacks",
             "--suite=chrome-force-st-fallbacks"
@@ -242,6 +268,15 @@
             "test",
             "--run",
             "--suite=chrome-dart2wasm-wimp-ui"
+          ],
+          "script": "flutter/lib/web_ui/dev/felt"
+        },
+        {
+          "name": "run suite chrome-dart2wasm-wimp-skwasm",
+          "parameters": [
+            "test",
+            "--run",
+            "--suite=chrome-dart2wasm-wimp-skwasm"
           ],
           "script": "flutter/lib/web_ui/dev/felt"
         },
@@ -309,11 +344,29 @@
           "script": "flutter/lib/web_ui/dev/felt"
         },
         {
+          "name": "run suite chrome-coi-dart2wasm-skwasm-skwasm",
+          "parameters": [
+            "test",
+            "--run",
+            "--suite=chrome-coi-dart2wasm-skwasm-skwasm"
+          ],
+          "script": "flutter/lib/web_ui/dev/felt"
+        },
+        {
           "name": "run suite chrome-force-st-dart2wasm-skwasm-ui",
           "parameters": [
             "test",
             "--run",
             "--suite=chrome-force-st-dart2wasm-skwasm-ui"
+          ],
+          "script": "flutter/lib/web_ui/dev/felt"
+        },
+        {
+          "name": "run suite chrome-force-st-dart2wasm-skwasm-skwasm",
+          "parameters": [
+            "test",
+            "--run",
+            "--suite=chrome-force-st-dart2wasm-skwasm-skwasm"
           ],
           "script": "flutter/lib/web_ui/dev/felt"
         },
