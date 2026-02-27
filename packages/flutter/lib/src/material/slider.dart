@@ -1857,9 +1857,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     if (isInteractive &&
-            label != null &&
-            (shouldShowValueIndicatorWhenDragged && !_valueIndicatorAnimation.isDismissed) ||
-        shouldAlwaysShowValueIndicator) {
+        label != null &&
+        ((shouldShowValueIndicatorWhenDragged && !_valueIndicatorAnimation.isDismissed) ||
+            shouldAlwaysShowValueIndicator)) {
       _state.paintValueIndicator = (PaintingContext context, Offset offset) {
         if (attached && _labelPainter.text != null) {
           _sliderTheme.valueIndicatorShape!.paint(
