@@ -3,8 +3,6 @@
 chrome:
   # Latest version can be found here:
   # https://googlechromelabs.github.io/chrome-for-testing/
-  # Good: 144.0.7535.0
-  # Bad: 144.0.7540.0
   version: '145.0.7632.117'
 
 firefox:
