@@ -121,7 +121,7 @@ app.android-arm64.symbols  →  app-android-arm64.so
 app.android-x64.symbols    →  app-android-x64.so
 ```
 
-Then upload the renamed `.so` files to Play Console under **Android vitals > Deobfuscation files**.
+Then upload the renamed `.so` files to Play Console under **All app bundles > All app bundles > Native debug symbols**.
 
 ### iOS
 
