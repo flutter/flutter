@@ -145,7 +145,6 @@ linter:
     - null_check_on_nullable_type_parameter
     - null_closures
     # - omit_local_variable_types # superset of omit_obvious_local_variable_types
-    - omit_obvious_local_variable_types # not yet tested
     # - omit_obvious_property_types # conflicts with type_annotate_public_apis
     # - one_member_abstracts # too many false positives
     - only_throw_errors # this does get disabled in a few places where we have legacy code that uses strings et al
@@ -204,9 +203,6 @@ linter:
     - sort_constructors_first
     # - sort_pub_dependencies # prevents separating pinned transitive dependencies
     - sort_unnamed_constructors_first
-    - specify_nonobvious_local_variable_types
-    - specify_nonobvious_property_types
-    - strict_top_level_inference
     - test_types_in_equals
     - throw_in_finally
     - tighten_type_of_initializing_formals
@@ -242,7 +238,6 @@ linter:
     - unnecessary_string_interpolations
     - unnecessary_this
     - unnecessary_to_list_in_spreads
-    - unnecessary_underscores
     - unreachable_from_main
     - unrelated_type_equality_checks
     # - unsafe_variance # not yet tested
@@ -265,6 +260,5 @@ linter:
     - use_super_parameters
     - use_test_throws_matchers
     # - use_to_and_as_if_applicable # has false positives, so we prefer to catch this by code-review
-    - use_truncating_division
     - valid_regexps
     - void_checks
