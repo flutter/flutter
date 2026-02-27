@@ -9,6 +9,10 @@
 #include "impeller/renderer/backend/vulkan/texture_source_vk.h"
 #include "impeller/renderer/backend/vulkan/yuv_conversion_library_vk.h"
 
+// vulkan.hpp generates some clang-tidy warnings.
+// NOLINTBEGIN(clang-analyzer-security.PointerSub)
+// NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+
 namespace impeller {
 
 namespace {
@@ -435,3 +439,6 @@ AHBTextureSourceVK::ImageViewInfo AHBTextureSourceVK::CreateImageViewInfo(
 }
 
 }  // namespace impeller
+
+// NOLINTEND(clang-analyzer-core.StackAddressEscape)
+// NOLINTEND(clang-analyzer-security.PointerSub)
