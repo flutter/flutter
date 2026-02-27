@@ -5,12 +5,15 @@ You can set flags for the Flutter engine on Android in two different ways:
 - From the command line when launching an app with the Flutter tool
 - Via `AndroidManifest.xml` metadata (static, per-build configuration)
 
-All flags available on Android can be set via the command line **and** via
-manifest metadata. See `src/flutter/shell/common/switches.cc` for
-the list of all supported flags, and see
+Flags available on Android may be set via the command line **and/or** via
+manifest metadata depending on the flag. See
 `src/flutter/shell/platform/android/io/flutter/embedding/engine/`
-`FlutterEngineFlags.java` for the list of flags that can be set for the
-Android shell.
+`FlutterEngineFlags.java` for the list of flags that can be set for
+the Android shell, and see  `src/flutter/shell/common/switch_defs.h`
+for the list of all supported flags.
+
+For flags that can be set on the command line and via the manifest,
+see below to determine which method to use.
 
 ## When to use manifest metadata versus the command line
 

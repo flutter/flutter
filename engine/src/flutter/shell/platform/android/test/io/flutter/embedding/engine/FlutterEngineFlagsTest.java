@@ -45,21 +45,21 @@ public class FlutterEngineFlagsTest {
       if (!flag.equals(FlutterEngineFlags.DEPRECATED_AOT_SHARED_LIBRARY_NAME)
           && !flag.equals(FlutterEngineFlags.DEPRECATED_FLUTTER_ASSETS_DIR)) {
         assertTrue(
-            "Flag " + flag.commandLineArgument + " does not have the correct metadata key prefix.",
+            "Flag " + flag.engineArgument + " does not have the correct metadata key prefix.",
             flag.metadataKey.startsWith(defaultPrefix));
       }
     }
   }
 
   @Test
-  public void getFlagByCommandLineArgument_returnsExpectedFlagWhenValidArgumentSpecified() {
+  public void getFlagByEngineArgument_returnsExpectedFlagWhenValidArgumentSpecified() {
     FlutterEngineFlags.Flag flag =
-        FlutterEngineFlags.getFlagByCommandLineArgument("--flutter-assets-dir=");
+        FlutterEngineFlags.getFlagByEngineArgument("--flutter-assets-dir=");
     assertEquals(FlutterEngineFlags.FLUTTER_ASSETS_DIR, flag);
   }
 
   @Test
-  public void getFlagByCommandLineArgument_returnsNullWhenInvalidArgumentSpecified() {
+  public void getFlagByEngineArgument_returnsNullWhenInvalidArgumentSpecified() {
     assertNull(FlutterEngineFlags.getFlagFromIntentKey("--non-existent-flag"));
   }
 

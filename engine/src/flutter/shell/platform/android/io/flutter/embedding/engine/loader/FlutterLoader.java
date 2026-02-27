@@ -377,7 +377,7 @@ public class FlutterLoader {
           }
 
           // Add flag to shell args.
-          String arg = flag.commandLineArgument;
+          String arg = flag.engineArgument;
 
           // Handle case where flag takes a value.
           if (flag.hasCommandLineValue()) {
@@ -408,7 +408,7 @@ public class FlutterLoader {
       // metadata and any defaults set below.
       if (args != null) {
         for (String arg : args) {
-          FlutterEngineFlags.Flag flag = FlutterEngineFlags.getFlagByCommandLineArgument(arg);
+          FlutterEngineFlags.Flag flag = FlutterEngineFlags.getFlagByEngineArgument(arg);
           if (flag == null) {
             // TODO(camsim99): Reject unknown flags specified on the command line:
             // https://github.com/flutter/flutter/issues/182557.
@@ -424,8 +424,7 @@ public class FlutterLoader {
             // Perform security check for path containing application's compiled Dart
             // code and potentially user-provided compiled native code.
             String aotSharedLibraryPath =
-                arg.substring(
-                    FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.commandLineArgument.length());
+                arg.substring(FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.engineArgument.length());
             maybeAddAotSharedLibraryNameArg(applicationContext, aotSharedLibraryPath, shellArgs);
             continue;
           } else if (!flag.allowedInRelease && isRelease) {
@@ -452,24 +451,24 @@ public class FlutterLoader {
         kernelPath = snapshotAssetPath + File.separator + DEFAULT_KERNEL_BLOB;
         shellArgs.add("--" + SNAPSHOT_ASSET_PATH_KEY + "=" + snapshotAssetPath);
         shellArgs.add(
-            FlutterEngineFlags.VM_SNAPSHOT_DATA.commandLineArgument
+            FlutterEngineFlags.VM_SNAPSHOT_DATA.engineArgument
                 + flutterApplicationInfo.vmSnapshotData);
         shellArgs.add(
-            FlutterEngineFlags.ISOLATE_SNAPSHOT_DATA.commandLineArgument
+            FlutterEngineFlags.ISOLATE_SNAPSHOT_DATA.engineArgument
                 + flutterApplicationInfo.isolateSnapshotData);
       } else {
         // Add default AOT shared library name arg. Note that if a different library
         // is set in the manifest, that value will take precendence and the default
         // libraries will be used as fallbacks in the order that they are added.
         shellArgs.add(
-            FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.commandLineArgument
+            FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.engineArgument
                 + flutterApplicationInfo.aotSharedLibraryName);
 
         // Some devices cannot load the an AOT shared library based on the library name
         // with no directory path. So, we provide a fully qualified path to the default library
         // as a workaround for devices where that fails.
         shellArgs.add(
-            FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.commandLineArgument
+            FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.engineArgument
                 + flutterApplicationInfo.nativeLibraryDir
                 + File.separator
                 + flutterApplicationInfo.aotSharedLibraryName);
@@ -498,7 +497,7 @@ public class FlutterLoader {
         activityManager.getMemoryInfo(memInfo);
         int oldGenHeapSizeMegaBytes = (int) (memInfo.totalMem / 1e6 / 2);
         shellArgs.add(
-            FlutterEngineFlags.OLD_GEN_HEAP_SIZE.commandLineArgument
+            FlutterEngineFlags.OLD_GEN_HEAP_SIZE.engineArgument
                 + String.valueOf(oldGenHeapSizeMegaBytes));
       }
 
@@ -513,7 +512,7 @@ public class FlutterLoader {
       shellArgs.add("--prefetched-default-font-manager");
 
       if (!isLeakVMSet) {
-        shellArgs.add(FlutterEngineFlags.LEAK_VM.commandLineArgument + "true");
+        shellArgs.add(FlutterEngineFlags.LEAK_VM.engineArgument + "true");
       }
 
       long initTimeMillis = SystemClock.uptimeMillis() - initStartTimestampMillis;
@@ -558,9 +557,7 @@ public class FlutterLoader {
 
     if (safeAotSharedLibraryName != null) {
       shellArgs.add(
-          0,
-          FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.commandLineArgument
-              + safeAotSharedLibraryName);
+          0, FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.engineArgument + safeAotSharedLibraryName);
     } else {
       // If the library path is not safe, we will skip adding this argument.
       Log.e(

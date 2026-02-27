@@ -32,8 +32,8 @@ public final class FlutterEngineFlags {
 
   /** Represents a Flutter shell flag that can be set via manifest metadata or command line. */
   public static class Flag {
-    /** The command line argument used to specify the flag. */
-    public final String commandLineArgument;
+    /** The actual argument used to specify the flag in the engine. */
+    public final String engineArgument;
 
     /**
      * The metadata key name used to specify the flag in AndroidManifest.xml.
@@ -51,13 +51,13 @@ public final class FlutterEngineFlags {
      * Creates a new Flutter shell flag that is not allowed in release mode with the default flag
      * prefix.
      */
-    private Flag(String commandLineArgument, String metaDataName) {
-      this(commandLineArgument, metaDataName, "io.flutter.embedding.android.", false);
+    private Flag(String engineArgument, String metaDataName) {
+      this(engineArgument, metaDataName, "io.flutter.embedding.android.", false);
     }
 
     /** Creates a new Flutter shell flag with the default flag prefix. */
-    private Flag(String commandLineArgument, String metaDataName, boolean allowedInRelease) {
-      this(commandLineArgument, metaDataName, "io.flutter.embedding.android.", allowedInRelease);
+    private Flag(String engineArgument, String metaDataName, boolean allowedInRelease) {
+      this(engineArgument, metaDataName, "io.flutter.embedding.android.", allowedInRelease);
     }
 
     /**
@@ -72,18 +72,15 @@ public final class FlutterEngineFlags {
      * explaining why it should be allowed in release.
      */
     private Flag(
-        String commandLineArgument,
-        String metaDataName,
-        String flagPrefix,
-        boolean allowedInRelease) {
-      this.commandLineArgument = commandLineArgument;
+        String engineArgument, String metaDataName, String flagPrefix, boolean allowedInRelease) {
+      this.engineArgument = engineArgument;
       this.metadataKey = flagPrefix + metaDataName;
       this.allowedInRelease = allowedInRelease;
     }
 
     /** Returns true if the command line flag requires a value to be specified. */
     public boolean hasCommandLineValue() {
-      return commandLineArgument.endsWith("=");
+      return engineArgument.endsWith("=");
     }
   }
 
@@ -96,7 +93,8 @@ public final class FlutterEngineFlags {
    * but will fall back to the libraries set internally by the embedding if the path specified by
    * this argument is invalid.
    *
-   * <p>Allowed in release to support the same AOT configuration regardless of build mode.
+   * <p>Allowed in release to support the same AOT configuration regardless of build mode. Only
+   * settable via the manifest.
    */
   public static final Flag AOT_SHARED_LIBRARY_NAME =
       new Flag("--aot-shared-library-name=", "AOTSharedLibraryName", true);
@@ -118,7 +116,8 @@ public final class FlutterEngineFlags {
   /**
    * Sets the directory containing Flutter assets.
    *
-   * <p>Allowed in release to specify custom asset locations in production.
+   * <p>Allowed in release to specify custom asset locations in production. Only settable via the
+   * manifest.
    */
   public static final Flag FLUTTER_ASSETS_DIR =
       new Flag("--flutter-assets-dir=", "FlutterAssetsDir", true);
@@ -139,7 +138,7 @@ public final class FlutterEngineFlags {
   /**
    * Sets the old generation heap size for the Dart VM in megabytes.
    *
-   * <p>Allowed in release for performance tuning.
+   * <p>Allowed in release for performance tuning. Only settable via the manifest.
    */
   public static final Flag OLD_GEN_HEAP_SIZE =
       new Flag("--old-gen-heap-size=", "OldGenHeapSize", true);
@@ -147,7 +146,8 @@ public final class FlutterEngineFlags {
   /**
    * Enables Impeller.
    *
-   * <p>Allowed in release to control which rendering backend is used in production.
+   * <p>Allowed in release to control which rendering backend is used in production. Settable via
+   * the command line and manifest.
    */
   private static final Flag ENABLE_IMPELLER =
       new Flag("--enable-impeller=", "EnableImpeller", true);
@@ -155,7 +155,8 @@ public final class FlutterEngineFlags {
   /**
    * Specifies the backend to use for Impeller rendering.
    *
-   * <p>Allowed in release to select a specific graphics backend for Impeller in production.
+   * <p>Allowed in release to select a specific graphics backend for Impeller in production. Only
+   * settable via the manifest.
    */
   private static final Flag IMPELLER_BACKEND =
       new Flag("--impeller-backend=", "ImpellerBackend", true);
@@ -163,7 +164,8 @@ public final class FlutterEngineFlags {
   /**
    * Enables Dart profiling for use with DevTools.
    *
-   * <p>Allowed in release mode for testing purposes.
+   * <p>Allowed in release mode for testing purposes. Settable via the command line and the
+   * manifest.
    */
   private static final Flag ENABLE_DART_PROFILING =
       new Flag("--enable-dart-profiling", "EnableDartProfiling", true);
@@ -173,6 +175,7 @@ public final class FlutterEngineFlags {
    * with {@link ENABLE_DART_PROFILING}.
    *
    * <p>Allowed in release mode to allow the startup performance to be profiled by DevTools.
+   * Settable via the command line and the manifest.
    */
   private static final Flag PROFILE_STARTUP = new Flag("--profile-startup", "ProfileStartup", true);
 
@@ -180,13 +183,14 @@ public final class FlutterEngineFlags {
    * Measures startup time and switches to an endless trace buffer.
    *
    * <p>Allowed in release mode to allow the startup performance to be profiled by DevTools.
+   * Settable via the command line and the manifest.
    */
   private static final Flag TRACE_STARTUP = new Flag("--trace-startup", "TraceStartup", true);
 
   /**
    * Sets whether the UI thread and platform thread should be merged.
    *
-   * <p>Allowed in release mode for performance purposes.
+   * <p>Allowed in release mode for performance purposes. Only settable via the manifest.
    */
   private static final Flag MERGED_PLATFORM_UI_THREAD =
       new Flag("--merged-platform-ui-thread", "MergedPlatformUIThread", true);
@@ -194,7 +198,8 @@ public final class FlutterEngineFlags {
   /**
    * Specifies the path to the VM snapshot data file.
    *
-   * <p>Allowed in release to support different snapshot configurations.
+   * <p>Allowed in release to support different snapshot configurations. Only settable via the
+   * manifest.
    */
   public static final Flag VM_SNAPSHOT_DATA =
       new Flag("--vm-snapshot-data=", "VmSnapshotData", true);
@@ -202,7 +207,8 @@ public final class FlutterEngineFlags {
   /**
    * Specifies the path to the isolate snapshot data file.
    *
-   * <p>Allowed in release to support different snapshot configurations.
+   * <p>Allowed in release to support different snapshot configurations. Only settable via the
+   * manifest.
    */
   public static final Flag ISOLATE_SNAPSHOT_DATA =
       new Flag("--isolate-snapshot-data=", "IsolateSnapshotData", true);
@@ -210,7 +216,8 @@ public final class FlutterEngineFlags {
   /**
    * Enables Android SurfaceControl for rendering.
    *
-   * <p>Allowed in release to opt-in to this rendering feature in production.
+   * <p>Allowed in release to opt-in to this rendering feature in production. Only settable via the
+   * manifest.
    */
   private static final Flag ENABLE_SURFACE_CONTROL =
       new Flag("--enable-surface-control", "EnableSurfaceControl", true);
@@ -218,7 +225,8 @@ public final class FlutterEngineFlags {
   /**
    * Enables the Flutter GPU backend.
    *
-   * <p>Allowed in release for developers to use the Flutter GPU backend in production.
+   * <p>Allowed in release for developers to use the Flutter GPU backend in production. Settable via
+   * the command line and the manifest.
    */
   private static final Flag ENABLE_FLUTTER_GPU =
       new Flag("--enable-flutter-gpu", "EnableFlutterGPU", true);
@@ -226,7 +234,8 @@ public final class FlutterEngineFlags {
   /**
    * Enables lazy initialization of Impeller shaders.
    *
-   * <p>Allowed in release for performance tuning of the Impeller backend.
+   * <p>Allowed in release for performance tuning of the Impeller backend. Only settable via the
+   * manifest.
    */
   private static final Flag IMPELLER_LAZY_SHADER_MODER =
       new Flag("--impeller-lazy-shader-mode", "ImpellerLazyShaderInitialization", true);
@@ -234,40 +243,73 @@ public final class FlutterEngineFlags {
   /**
    * Enables antialiasing for lines in Impeller.
    *
-   * <p>Allowed in release to control rendering quality in production.
+   * <p>Allowed in release to control rendering quality in production. Only settable via the
+   * manifest.
    */
   private static final Flag IMPELLER_ANTIALIAS_LINES =
       new Flag("--impeller-antialias-lines", "ImpellerAntialiasLines", true);
 
   // Manifest flags NOT allowed in release mode:
 
-  /** Enables GPU tracing for OpenGL. */
+  /**
+   * Enables GPU tracing for OpenGL.
+   *
+   * <p>Only settable via the manifest.
+   */
   private static final Flag IMPELLER_OPENGL_GPU_TRACING =
       new Flag("--enable-opengl-gpu-tracing", "EnableOpenGLGPUTracing");
 
-  /** Enables GPU tracing for Vulkan. */
+  /**
+   * Enables GPU tracing for Vulkan.
+   *
+   * <p>Only settable via the manifest.
+   */
   private static final Flag IMPELLER_VULKAN_GPU_TRACING =
       new Flag("--enable-vulkan-gpu-tracing", "EnableVulkanGPUTracing");
 
-  /** Ensures deterministic Skia rendering by skipping CPU feature swaps. */
+  /**
+   * Ensures deterministic Skia rendering by skipping CPU feature swaps.
+   *
+   * <p>Settable via the command line and the manifest.
+   */
   private static final Flag SKIA_DETERMINISTIC_RENDERING =
       new Flag("--skia-deterministic-rendering", "SkiaDeterministicRendering");
 
-  /** Use Skia software backend for rendering. */
+  /**
+   * Use Skia software backend for rendering.
+   *
+   * <p>Settable via the command line and the manifest.
+   */
   public static final Flag ENABLE_SOFTWARE_RENDERING =
       new Flag("--enable-software-rendering", "EnableSoftwareRendering");
 
-  /** Use the Ahem test font for font resolution. */
+  /**
+   * Use the Ahem test font for font resolution.
+   *
+   * <p>Settable via the command line and the manifest.
+   */
   private static final Flag USE_TEST_FONTS = new Flag("--use-test-fonts", "UseTestFonts");
 
-  /** Sets the port for the Dart VM Service. */
+  /**
+   * Sets the port for the Dart VM Service.
+   *
+   * <p>Settable via the command line and the manifest.
+   */
   private static final Flag VM_SERVICE_PORT = new Flag("--vm-service-port=", "VMServicePort");
 
-  /** Enables Vulkan validation layers if available. */
+  /**
+   * Enables Vulkan validation layers if available.
+   *
+   * <p>Settable via the command line and the manifest.
+   */
   private static final Flag ENABLE_VULKAN_VALIDATION =
       new Flag("--enable-vulkan-validation", "EnableVulkanValidation");
 
-  /** Fake flag used for integration testing of the Android embedding processing engine flags. */
+  /**
+   * Fake flag used for integration testing of the Android embedding processing engine flags.
+   *
+   * <p>Only settable via the manifest.
+   */
   @VisibleForTesting public static final Flag TEST_FLAG = new Flag("--test-flag", "TestFlag");
 
   /**
@@ -278,61 +320,106 @@ public final class FlutterEngineFlags {
    * <p>If your want to let your app destroy the last shell and re-create shells more quickly, set
    * it to true, otherwise if you want to clean up the memory of the leak VM, set it to false.
    *
+   * <p>Only settable via the manifest.
+   *
    * <p>TODO(eggfly): Should it be set to false by default?
    * https://github.com/flutter/flutter/issues/96843
    */
   public static final Flag LEAK_VM = new Flag("--leak-vm=", "LeakVM");
 
-  /** Pauses Dart code execution at launch until a debugger is attached. */
+  /**
+   * Pauses Dart code execution at launch until a debugger is attached.
+   *
+   * <p>Settable via the command line and the manifest.
+   */
   private static final Flag START_PAUSED = new Flag("--start-paused", "StartPaused");
 
-  /** Disables authentication codes for VM service communication. */
+  /**
+   * Disables authentication codes for VM service communication.
+   *
+   * <p>Settable via the command line and the manifest.
+   */
   private static final Flag DISABLE_SERVICE_AUTH_CODES =
       new Flag("--disable-service-auth-codes", "DisableServiceAuthCodes");
 
-  /** Enables an endless trace buffer for timeline events. */
+  /**
+   * Enables an endless trace buffer for timeline events.
+   *
+   * <p>Settable via the command line and the manifest.
+   */
   private static final Flag ENDLESS_TRACE_BUFFER =
       new Flag("--endless-trace-buffer", "EndlessTraceBuffer");
 
-  /** Enables tracing of Skia GPU calls. */
+  /**
+   * Enables tracing of Skia GPU calls.
+   *
+   * <p>Settable via the command line and the manifest.
+   */
   private static final Flag TRACE_SKIA = new Flag("--trace-skia", "TraceSkia");
 
-  /** Only traces specified Skia event categories. */
+  /**
+   * Only traces specified Skia event categories.
+   *
+   * <p>Settable via the command line and the manifest.
+   */
   private static final Flag TRACE_SKIA_ALLOWLIST =
       new Flag("--trace-skia-allowlist=", "TraceSkiaAllowList");
 
-  /** Traces to the system tracer on supported platforms. */
+  /**
+   * Traces to the system tracer on supported platforms.
+   *
+   * <p>Settable via the command line and the manifest.
+   */
   private static final Flag TRACE_SYSTRACE = new Flag("--trace-systrace", "TraceSystrace");
 
-  /** Writes timeline trace to a file in Perfetto format. */
+  /**
+   * Writes timeline trace to a file in Perfetto format.
+   *
+   * <p>Settable via the command line and the manifest.
+   */
   private static final Flag TRACE_TO_FILE = new Flag("--trace-to-file=", "TraceToFile");
 
-  /** Collects and logs information about microtasks. */
+  /**
+   * Collects and logs information about microtasks.
+   *
+   * <p>Settable via the command line and the manifest.
+   */
   private static final Flag PROFILE_MICROTASKS =
       new Flag("--profile-microtasks", "ProfileMicrotasks");
 
-  /** Dumps SKP files that trigger shader compilations. */
+  /**
+   * Dumps SKP files that trigger shader compilations.
+   *
+   * <p>Only settable via the manifest.
+   */
   private static final Flag DUMP_SKP_ON_SHADER_COMPILATION =
       new Flag("--dump-skp-on-shader-compilation", "DumpSkpOnShaderCompilation");
 
-  /** Removes all persistent cache files for debugging. */
+  /**
+   * Removes all persistent cache files for debugging.
+   *
+   * <p>Settable via the command line and the manifest.
+   */
   private static final Flag PURGE_PERSISTENT_CACHE =
       new Flag("--purge-persistent-cache", "PurgePersistentCache");
 
-  /** Enables logging at all severity levels. */
+  /**
+   * Enables logging at all severity levels.
+   *
+   * <p>Settable via the command line (use `--verbose-system-logs`) and the manifest.
+   */
   private static final Flag VERBOSE_LOGGING = new Flag("--verbose-logging", "VerboseLogging");
-
-  /** Only cache the shader in SkSL instead of binary or GLSL. */
-  private static final Flag CACHE_SKSL = new Flag("--cache-sksl", "CacheSksl");
 
   /**
    * Passes additional flags to the Dart VM.
    *
    * <p>All flags provided with this argument are subject to filtering based on a list of allowed
-   * flags in shell/common/switches.cc. If any flag provided is not allowed, the process will
+   * flags in shell/common/switch_defs.h. If any flag provided is not allowed, the process will
    * immediately terminate.
    *
    * <p>Flags should be separated by a space, e.g. "--dart-flags=--flag-1 --flag-2=2".
+   *
+   * <p>Settable via the command line and the manifest.
    */
   private static final Flag DART_FLAGS = new Flag("--dart-flags=", "DartFlags");
 
@@ -378,7 +465,6 @@ public final class FlutterEngineFlags {
               OLD_GEN_HEAP_SIZE,
               VM_SNAPSHOT_DATA,
               ISOLATE_SNAPSHOT_DATA,
-              CACHE_SKSL,
               PURGE_PERSISTENT_CACHE,
               TRACE_STARTUP,
               LEAK_VM,
@@ -413,15 +499,15 @@ public final class FlutterEngineFlags {
     Map<String, Flag> map = new HashMap<String, Flag>(ALL_FLAGS.size());
     Map<String, Flag> metaMap = new HashMap<String, Flag>(ALL_FLAGS.size());
     for (Flag flag : ALL_FLAGS) {
-      map.put(flag.commandLineArgument, flag);
+      map.put(flag.engineArgument, flag);
       metaMap.put(flag.metadataKey, flag);
     }
     FLAG_BY_COMMAND_LINE_ARG = Collections.unmodifiableMap(map);
     FLAG_BY_META_DATA_KEY = Collections.unmodifiableMap(metaMap);
   }
 
-  /** Looks up a {@link Flag} by its commandLineArgument. */
-  public static Flag getFlagByCommandLineArgument(String arg) {
+  /** Looks up a {@link Flag} by its engineArgument. */
+  public static Flag getFlagByEngineArgument(String arg) {
     int equalsIndex = arg.indexOf('=');
     Flag flag =
         FLAG_BY_COMMAND_LINE_ARG.get(equalsIndex == -1 ? arg : arg.substring(0, equalsIndex + 1));
@@ -437,13 +523,13 @@ public final class FlutterEngineFlags {
    * argument takes a value.
    */
   public static Flag getFlagFromIntentKey(String intentKey) {
-    Flag toReturn = getFlagByCommandLineArgument(intentKey);
+    Flag toReturn = getFlagByEngineArgument(intentKey);
 
     if (toReturn == null) {
-      toReturn = getFlagByCommandLineArgument("--" + intentKey);
+      toReturn = getFlagByEngineArgument("--" + intentKey);
     }
     if (toReturn == null) {
-      toReturn = getFlagByCommandLineArgument("--" + intentKey + "=");
+      toReturn = getFlagByEngineArgument("--" + intentKey + "=");
     }
 
     return toReturn;

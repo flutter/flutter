@@ -364,7 +364,7 @@ import java.util.Set;
         Log.w(
             TAG,
             "Support for setting engine flags on Android via Intent will soon be dropped; see https://github.com/flutter/flutter/issues/180686 for more information on this breaking change. To migrate, set "
-                + flag.commandLineArgument
+                + flag.engineArgument
                 + " or any other flags specified via Intent extras on the command line or see https://github.com/flutter/flutter/blob/main/docs/engine/Flutter-Android-Engine-Flags.md for alternative methods.");
         break;
       }
