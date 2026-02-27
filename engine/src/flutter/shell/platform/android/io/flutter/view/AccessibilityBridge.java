@@ -416,9 +416,17 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       touchExplorationStateChangeListener;
 
   // Listener that is notified when the high contrast mode is turned on/off.
-  // This is a UiModeManager.ContrastChangeListener on API 34+, null otherwise.
-  // Type is Object to avoid requiring API 34 for the field declaration.
-  private final Object highContrastObserver;
+  private interface ContrastChangedListener {
+    void onContrastChanged(float contrast);
+  }
+
+  private final ContrastChangedListener highContrastObserver =
+      (Build.VERSION.SDK_INT >= API_LEVELS.API_34)
+          ? (ContrastChangedListener & UiModeManager.ContrastChangeListener)
+              contrast -> setHighContrastFlag()
+          : contrast -> {
+            /* no-op */
+          };
 
   // Listener that is notified when the invert colors flag is turned on/off.
   private final AccessibilityFeatureObserver invertColorsObserver;
@@ -601,12 +609,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
     // Initialize and register contrast listener
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_34) {
-      highContrastObserver =
-          (UiModeManager.ContrastChangeListener) contrast -> setHighContrastFlag();
       setHighContrastFlag();
       registerHighContrastObserver(rootAccessibilityView.getContext());
-    } else {
-      highContrastObserver = null;
     }
 
     platformViewsAccessibilityDelegate.attachAccessibilityBridge(this);
