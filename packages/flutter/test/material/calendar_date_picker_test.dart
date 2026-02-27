@@ -1751,7 +1751,7 @@ void main() {
         await tester.tap(nextMonthIcon);
         await tester.pumpAndSettle();
 
-        const String expectedLabel = 'February 2016';
+        const expectedLabel = 'February 2016';
         expect(tester.takeAnnouncements(), [
           isAccessibilityAnnouncement(expectedLabel, textDirection: TextDirection.ltr),
         ]);
@@ -1784,7 +1784,7 @@ void main() {
         await tester.tap(modeToggleButton);
         await tester.pumpAndSettle();
 
-        const String yearLabel = '2016';
+        const yearLabel = '2016';
         expect(tester.takeAnnouncements(), [
           isAccessibilityAnnouncement(yearLabel, textDirection: TextDirection.ltr),
         ]);
@@ -1793,7 +1793,7 @@ void main() {
         await tester.tap(modeToggleButton);
         await tester.pumpAndSettle();
 
-        const String dayLabel = 'January 2016';
+        const dayLabel = 'January 2016';
         expect(tester.takeAnnouncements(), [
           isAccessibilityAnnouncement(dayLabel, textDirection: TextDirection.ltr),
         ]);
@@ -1813,7 +1813,7 @@ void main() {
 
       await tester.pumpWidget(
         MediaQuery(
-          data: MediaQueryData(supportsAnnounce: false),
+          data: const MediaQueryData(),
           child: calendarDatePicker(initialDate: initialDate),
         ),
       );
@@ -1823,7 +1823,7 @@ void main() {
         (Widget widget) =>
             widget is Semantics &&
             widget.properties.label == expectedLabel &&
-            widget.properties.liveRegion == true,
+            (widget.properties.liveRegion ?? false),
       );
       expect(
         tester.getSemantics(liveRegionFinder),
@@ -1841,7 +1841,7 @@ void main() {
 
         await tester.pumpWidget(
           MediaQuery(
-            data: MediaQueryData(supportsAnnounce: false),
+            data: const MediaQueryData(),
             child: calendarDatePicker(initialDate: initialDate),
           ),
         );
@@ -1852,12 +1852,12 @@ void main() {
 
         // The _MonthPicker live region should be updated.
         // Verify that the live region exists and has the correct label.
-        const String expectedLabel = 'February 2016';
+        const expectedLabel = 'February 2016';
         final Finder liveRegionFinder = find.byWidgetPredicate(
           (Widget widget) =>
               widget is Semantics &&
               widget.properties.label == expectedLabel &&
-              widget.properties.liveRegion == true,
+              (widget.properties.liveRegion ?? false),
         );
         expect(
           tester.getSemantics(liveRegionFinder),
@@ -1877,7 +1877,7 @@ void main() {
 
         await tester.pumpWidget(
           MediaQuery(
-            data: MediaQueryData(supportsAnnounce: false),
+            data: const MediaQueryData(),
             child: calendarDatePicker(initialDate: initialDate),
           ),
         );
@@ -1890,12 +1890,12 @@ void main() {
         await tester.pumpAndSettle();
 
         // Verify that the live region exists and has the correct label.
-        const String yearLabel = '2016';
+        const yearLabel = '2016';
         final Finder yearLiveRegionFinder = find.byWidgetPredicate(
           (Widget widget) =>
               widget is Semantics &&
               widget.properties.label == yearLabel &&
-              widget.properties.liveRegion == true,
+              (widget.properties.liveRegion ?? false),
         );
         expect(
           tester.getSemantics(yearLiveRegionFinder),
@@ -1907,12 +1907,12 @@ void main() {
         await tester.pumpAndSettle();
 
         // Verify that the live region exists and has the correct label.
-        const String dayLabel = 'January 2016';
+        const dayLabel = 'January 2016';
         final Finder dayLiveRegionFinder = find.byWidgetPredicate(
           (Widget widget) =>
               widget is Semantics &&
               widget.properties.label == dayLabel &&
-              widget.properties.liveRegion == true,
+              (widget.properties.liveRegion ?? false),
         );
         expect(
           tester.getSemantics(dayLiveRegionFinder),

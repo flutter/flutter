@@ -403,15 +403,16 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
     );
     return Stack(
       children: <Widget>[
-        (MediaQuery.maybeSupportsAnnounceOf(context) ?? false)
-            ? picker
-            : Semantics(
-                container: true,
-                liveRegion: true,
-                accessibilityFocusBlockType: AccessibilityFocusBlockType.blockNode,
-                label: _announcementText,
-                child: picker,
-              ),
+        if (MediaQuery.maybeSupportsAnnounceOf(context) ?? false)
+          picker
+        else
+          Semantics(
+            container: true,
+            liveRegion: true,
+            accessibilityFocusBlockType: AccessibilityFocusBlockType.blockNode,
+            label: _announcementText,
+            child: picker,
+          ),
 
         // Put the mode toggle button on top so that it won't be covered up by the _MonthPicker
         MediaQuery.withClampedTextScaling(
@@ -619,7 +620,6 @@ class _MonthPickerState extends State<_MonthPicker> {
   late DateTime _currentMonth;
   late PageController _pageController;
   late MaterialLocalizations _localizations;
-  late TextDirection _textDirection;
   Map<ShortcutActivator, Intent>? _shortcutMap;
   Map<Type, Action<Intent>>? _actionMap;
   late FocusNode _dayGridFocus;
@@ -658,7 +658,6 @@ class _MonthPickerState extends State<_MonthPicker> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _localizations = MaterialLocalizations.of(context);
-    _textDirection = Directionality.of(context);
   }
 
   @override
@@ -884,7 +883,7 @@ class _MonthPickerState extends State<_MonthPicker> {
         DatePickerTheme.of(context).subHeaderForegroundColor ??
         DatePickerTheme.defaults(context).subHeaderForegroundColor;
 
-    final supportsAnnounce = MediaQuery.maybeSupportsAnnounceOf(context) ?? false;
+    final bool supportsAnnounce = MediaQuery.maybeSupportsAnnounceOf(context) ?? false;
     return Semantics(
       container: true,
       explicitChildNodes: true,
