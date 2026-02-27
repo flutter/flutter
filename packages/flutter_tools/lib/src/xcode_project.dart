@@ -5,6 +5,8 @@
 /// @docImport 'ios/mac.dart';
 library;
 
+import 'package:yaml/yaml.dart' as yaml;
+
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -489,77 +491,205 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   /// True if the app project uses Swift.
   bool get isSwift => appDelegateSwift.existsSync();
 
-  /// Prints a warning if any plugin(s) are excluding `arm64` architecture.
+  /// Returns true if all plugins and their dependencies support arm64.
   ///
-  /// Xcode 26 no longer allows you to build x86-only architecture for the simulator
-  Future<void> checkForPluginsExcludingArmSimulator() async {
+  /// When using Xcode 26+, print a warning if a plugin or its dependencies does not support
+  /// arm64.
+  Future<bool> pluginsSupportArmSimulator({required bool printWarnings}) async {
+    final Version? xcodeVersion = globals.xcode?.currentVersion;
     final Directory podXcodeProject = hostAppRoot
         .childDirectory('Pods')
         .childDirectory('Pods.xcodeproj');
     if (!podXcodeProject.existsSync()) {
-      return;
+      return true;
     }
 
     final XcodeProjectInterpreter? xcodeProjectInterpreter = globals.xcodeProjectInterpreter;
     if (xcodeProjectInterpreter == null) {
-      return;
+      // Xcode isn't installed, don't try to check.
+      return true;
     }
     final String? buildSettings = await xcodeProjectInterpreter.pluginsBuildSettingsOutput(
       podXcodeProject,
     );
-
     if (buildSettings == null || buildSettings.isEmpty) {
-      return;
+      globals.logger.printTrace('Unable to get build settings for Pods.');
+      return true;
     }
 
+    // When using Xcode 26, print a warning if a target does not support arm.
+    if (xcodeVersion != null && xcodeVersion.major >= 26 && printWarnings) {
+      final List<({String target, String? plugin})> targetsExcludingArm =
+          await _targetsExcludingArm(buildSettings);
+      if (targetsExcludingArm.isNotEmpty) {
+        final String list = targetsExcludingArm
+            .map((target) {
+              var targetItem = '  - ${target.target}';
+              if (target.target == target.plugin) {
+                targetItem = '$targetItem (Flutter plugin)';
+              } else if (target.plugin != null) {
+                targetItem =
+                    '$targetItem (transitive dependency of Flutter plugin ${target.plugin})';
+              }
+              return targetItem;
+            })
+            .join('\n');
+        globals.logger.printWarning(
+          'The following target(s) do not support arm64 architecture, which is a requirement for '
+          'Apple Silicon iOS 26+ simulators:\n'
+          '$list\n\n'
+          'Please contact plugin maintainers to request arm64 support to continue to be able to '
+          'use the plugin on a simulator.',
+        );
+      }
+    }
+
+    return !buildSettings.contains(RegExp('EXCLUDED_ARCHS.*arm64'));
+  }
+
+  /// Returns a list of targets and their associated plugin (if found) that exclude arm64 architecture.
+  Future<List<({String target, String? plugin})>> _targetsExcludingArm(String buildSettings) async {
+    final Map<String, List<String>> cocoapodsDependencyGraph = _cocoapodsDependencyGraph();
     final List<Plugin> allPlugins = await findPlugins(parent);
-    final iosPluginTargetNames = <String>{
+    final pluginNames = <String>{
       for (final Plugin plugin in allPlugins)
         if (plugin.platforms.containsKey(IOSPlugin.kConfigKey)) plugin.name,
     };
-    if (iosPluginTargetNames.isEmpty) {
-      return;
-    }
-
-    final targetHeader = RegExp(
+    final targetHeaderPattern = RegExp(
       r'^Build settings for action build and target "?([^":\r\n]+)"?:\s*$',
     );
 
-    final pluginsExcludingArmArch = <String>{};
+    final List<({String target, String? plugin})> foundTargets = [];
     String? currentTarget;
-
     for (final String eachLine in buildSettings.split('\n')) {
       final String settingsLine = eachLine.trim();
-
-      final RegExpMatch? headerMatch = targetHeader.firstMatch(settingsLine);
+      final RegExpMatch? headerMatch = targetHeaderPattern.firstMatch(settingsLine);
       if (headerMatch != null) {
         currentTarget = headerMatch.group(1)!.trim();
         continue;
       }
-
-      if (currentTarget == null || !iosPluginTargetNames.contains(currentTarget)) {
+      if (currentTarget == null ||
+          !settingsLine.startsWith('EXCLUDED_ARCHS') ||
+          !settingsLine.contains('=')) {
         continue;
       }
-
-      if (!settingsLine.startsWith('EXCLUDED_ARCHS') || !settingsLine.contains('=')) {
-        continue;
-      }
-
       final Iterable<String> tokens = settingsLine.split(' ');
-      if (tokens.contains('arm64')) {
-        pluginsExcludingArmArch.add(currentTarget);
+      if (!tokens.contains('arm64')) {
+        continue;
+      }
+
+      if (pluginNames.contains(currentTarget)) {
+        foundTargets.add((target: currentTarget, plugin: currentTarget));
+      } else {
+        // If it's not a plugin, it may be a transitive dependency of a plugin
+        final String? parentPlugin = _pluginUsingDependency(
+          targetName: currentTarget,
+          pluginNames: pluginNames.toList(),
+          cocoapodsDependencyGraph: cocoapodsDependencyGraph,
+        );
+        if (parentPlugin != null) {
+          foundTargets.add((target: currentTarget, plugin: parentPlugin));
+        } else if (currentTarget.startsWith('Pods-')) {
+          // Skip Pods- targets since they are not actual dependencies.
+          continue;
+        } else {
+          foundTargets.add((target: currentTarget, plugin: null));
+        }
       }
     }
+    return foundTargets;
+  }
 
-    if (pluginsExcludingArmArch.isNotEmpty) {
-      final String list = pluginsExcludingArmArch.map((String n) => '  - $n').join('\n');
-
-      globals.logger.printWarning(
-        'The following plugin(s) are excluding the arm64 architecture, which is a requirement for Xcode 26+:\n'
-        '$list\n'
-        'Consider installing the "Universal" Xcode or file an issue with the plugin(s) to support arm64.',
+  /// Returns the plugin that uses the given target.
+  String? _pluginUsingDependency({
+    required String targetName,
+    required List<String> pluginNames,
+    required Map<String, List<String>> cocoapodsDependencyGraph,
+  }) {
+    final String? pluginName = _findPluginForDependency(
+      targetName,
+      cocoapodsDependencyGraph,
+      pluginNames,
+    );
+    if (pluginName != null) {
+      return pluginName;
+    }
+    if (targetName.contains('-')) {
+      // Resource bundle targets are prefixed with the name of the pod and then the name of the
+      // resource. Strip the resource name to get the pod name.
+      return _findPluginForDependency(
+        targetName.split('-').first,
+        cocoapodsDependencyGraph,
+        pluginNames,
+      );
+    } else {
+      // Sometimes the target name is a prefix of pod name.
+      // Example: target name "GoogleMLKit" and pod name "GoogleMLKit/Translate".
+      return _findPluginForDependency(
+        targetName,
+        cocoapodsDependencyGraph,
+        pluginNames,
+        searchByPrefix: true,
       );
     }
+  }
+
+  /// Returns a map of pods and their dependencies.
+  Map<String, List<String>> _cocoapodsDependencyGraph() {
+    final Map<String, List<String>> podDependencies = {};
+    try {
+      if (podfileLock.existsSync()) {
+        final String podfileLockString = podfileLock.readAsStringSync().split('\n\n').first;
+        final dynamic podsYaml = yaml.loadYaml(podfileLockString);
+        if (podsYaml is yaml.YamlMap) {
+          final dynamic podsList = podsYaml['PODS'];
+          if (podsList is List<dynamic>) {
+            // ignore: specify_nonobvious_local_variable_types
+            for (final dynamic pod in podsList) {
+              if (pod is yaml.YamlMap) {
+                final name = pod.keys.first as String;
+                final dynamic value = pod.value[name];
+                if (value is yaml.YamlList) {
+                  podDependencies[name.split(' ').first] = value
+                      .map((dep) => (dep as String).split(' ').first)
+                      .toList();
+                }
+              }
+            }
+          }
+        }
+      }
+    } on Exception catch (e) {
+      globals.logger.printTrace('Failed to parse podfile.lock: $e');
+    }
+
+    return podDependencies;
+  }
+
+  /// Recursively searches the pod dependency graph for a Flutter plugin that uses the given target.
+  String? _findPluginForDependency(
+    String targetName,
+    Map<String, List<String>> cocoapodTree,
+    List<String> pluginNames, {
+    bool searchByPrefix = false,
+  }) {
+    for (final MapEntry<String, List<String>> pod in cocoapodTree.entries) {
+      final String podName = pod.key;
+      final List<String> podDependencies = pod.value;
+      bool podHasTargetAsDependency;
+      if (searchByPrefix) {
+        podHasTargetAsDependency = podDependencies.any((dep) => dep.startsWith('$targetName/'));
+      } else {
+        podHasTargetAsDependency = podDependencies.contains(targetName);
+      }
+      if (podHasTargetAsDependency) {
+        if (pluginNames.contains(podName)) {
+          return podName;
+        }
+        return _findPluginForDependency(podName, cocoapodTree, pluginNames);
+      }
+    }
+    return null;
   }
 
   @override
