@@ -2904,8 +2904,8 @@ void main() {
     }
 
     Future<void> expectValueIndicator({
-      required bool visibleDragged,
-      required bool visibleReleased,
+      required bool visibleWhenDragged,
+      required bool visibleWhenReleased,
       required SliderThemeData theme,
       int? divisions,
       bool enabled = true,
@@ -2928,36 +2928,36 @@ void main() {
       }
 
       await tester.pumpWidget(buildApp(sliderTheme: theme, divisions: divisions, enabled: enabled));
-      expectIndicatorVisible(visibleReleased);
+      expectIndicatorVisible(visibleWhenReleased);
 
       final Offset center = tester.getCenter(find.byType(Slider));
       final TestGesture gesture = await tester.startGesture(center);
       await tester.pumpAndSettle();
-      expectIndicatorVisible(visibleDragged);
+      expectIndicatorVisible(visibleWhenDragged);
 
       await gesture.up();
       await tester.pumpAndSettle();
-      expectIndicatorVisible(visibleReleased);
+      expectIndicatorVisible(visibleWhenReleased);
     }
 
     // Default (showValueIndicator set to onlyForDiscrete).
     await expectValueIndicator(
-      visibleDragged: true,
-      visibleReleased: false,
+      visibleWhenDragged: true,
+      visibleWhenReleased: false,
       theme: theme,
       divisions: 3,
     );
     await expectValueIndicator(
-      visibleDragged: false,
-      visibleReleased: false,
+      visibleWhenDragged: false,
+      visibleWhenReleased: false,
       theme: theme,
       divisions: 3,
       enabled: false,
     );
-    await expectValueIndicator(visibleDragged: false, visibleReleased: false, theme: theme);
+    await expectValueIndicator(visibleWhenDragged: false, visibleWhenReleased: false, theme: theme);
     await expectValueIndicator(
-      visibleDragged: false,
-      visibleReleased: false,
+      visibleWhenDragged: false,
+      visibleWhenReleased: false,
       theme: theme,
       enabled: false,
     );
@@ -2965,22 +2965,22 @@ void main() {
     // With showValueIndicator set to onlyForContinuous.
     theme = theme.copyWith(showValueIndicator: ShowValueIndicator.onlyForContinuous);
     await expectValueIndicator(
-      visibleDragged: false,
-      visibleReleased: false,
+      visibleWhenDragged: false,
+      visibleWhenReleased: false,
       theme: theme,
       divisions: 3,
     );
     await expectValueIndicator(
-      visibleDragged: false,
-      visibleReleased: false,
+      visibleWhenDragged: false,
+      visibleWhenReleased: false,
       theme: theme,
       divisions: 3,
       enabled: false,
     );
-    await expectValueIndicator(visibleDragged: true, visibleReleased: false, theme: theme);
+    await expectValueIndicator(visibleWhenDragged: true, visibleWhenReleased: false, theme: theme);
     await expectValueIndicator(
-      visibleDragged: false,
-      visibleReleased: false,
+      visibleWhenDragged: false,
+      visibleWhenReleased: false,
       theme: theme,
       enabled: false,
     );
@@ -2988,22 +2988,22 @@ void main() {
     // discrete enabled widget with showValueIndicator set to onDrag.
     theme = theme.copyWith(showValueIndicator: ShowValueIndicator.onDrag);
     await expectValueIndicator(
-      visibleDragged: true,
-      visibleReleased: false,
+      visibleWhenDragged: true,
+      visibleWhenReleased: false,
       theme: theme,
       divisions: 3,
     );
     await expectValueIndicator(
-      visibleDragged: false,
-      visibleReleased: false,
+      visibleWhenDragged: false,
+      visibleWhenReleased: false,
       theme: theme,
       divisions: 3,
       enabled: false,
     );
-    await expectValueIndicator(visibleDragged: true, visibleReleased: false, theme: theme);
+    await expectValueIndicator(visibleWhenDragged: true, visibleWhenReleased: false, theme: theme);
     await expectValueIndicator(
-      visibleDragged: false,
-      visibleReleased: false,
+      visibleWhenDragged: false,
+      visibleWhenReleased: false,
       theme: theme,
       enabled: false,
     );
@@ -3011,22 +3011,22 @@ void main() {
     // discrete enabled widget with showValueIndicator set to never.
     theme = theme.copyWith(showValueIndicator: ShowValueIndicator.never);
     await expectValueIndicator(
-      visibleDragged: false,
-      visibleReleased: false,
+      visibleWhenDragged: false,
+      visibleWhenReleased: false,
       theme: theme,
       divisions: 3,
     );
     await expectValueIndicator(
-      visibleDragged: false,
-      visibleReleased: false,
+      visibleWhenDragged: false,
+      visibleWhenReleased: false,
       theme: theme,
       divisions: 3,
       enabled: false,
     );
-    await expectValueIndicator(visibleDragged: false, visibleReleased: false, theme: theme);
+    await expectValueIndicator(visibleWhenDragged: false, visibleWhenReleased: false, theme: theme);
     await expectValueIndicator(
-      visibleDragged: false,
-      visibleReleased: false,
+      visibleWhenDragged: false,
+      visibleWhenReleased: false,
       theme: theme,
       enabled: false,
     );
@@ -3034,22 +3034,22 @@ void main() {
     // discrete enabled widget with showValueIndicator set to alwaysVisible.
     theme = theme.copyWith(showValueIndicator: ShowValueIndicator.alwaysVisible);
     await expectValueIndicator(
-      visibleDragged: true,
-      visibleReleased: true,
+      visibleWhenDragged: true,
+      visibleWhenReleased: true,
       theme: theme,
       divisions: 3,
     );
     await expectValueIndicator(
-      visibleDragged: true,
-      visibleReleased: true,
+      visibleWhenDragged: true,
+      visibleWhenReleased: true,
       theme: theme,
       divisions: 3,
       enabled: false,
     );
-    await expectValueIndicator(visibleDragged: true, visibleReleased: true, theme: theme);
+    await expectValueIndicator(visibleWhenDragged: true, visibleWhenReleased: true, theme: theme);
     await expectValueIndicator(
-      visibleDragged: true,
-      visibleReleased: true,
+      visibleWhenDragged: true,
+      visibleWhenReleased: true,
       theme: theme,
       enabled: false,
     );
@@ -5576,13 +5576,15 @@ void main() {
 class _FixedSizeCircle extends SliderComponentShape {
   const _FixedSizeCircle();
 
+  static const circleDiameter = 40.0;
+
   @override
   Size getPreferredSize(
     bool isEnabled,
     bool isDiscrete, {
     TextPainter? labelPainter,
     double? textScaleFactor,
-  }) => const Size(40, 40);
+  }) => const Size.square(circleDiameter);
 
   @override
   void paint(
@@ -5600,24 +5602,11 @@ class _FixedSizeCircle extends SliderComponentShape {
     required Size sizeWithOverflow,
   }) {
     final Canvas canvas = context.canvas;
-    const circleDiameter = 44.0;
-    final circleCenter = Offset(
-      center.dx,
-      center.dy - circleDiameter - 10,
-    );
-
     final paint = Paint()
       ..color = sliderTheme.valueIndicatorColor ?? Colors.purple
       ..style = PaintingStyle.fill;
 
-    // Draw the circle
-    canvas.drawCircle(circleCenter, circleDiameter / 2, paint);
-
-    // Draw the text centered in the circle
-    final textOffset = Offset(
-      circleCenter.dx - (labelPainter.width / 2),
-      circleCenter.dy - (labelPainter.height / 2),
-    );
-    labelPainter.paint(canvas, textOffset);
+    canvas.drawCircle(center, circleDiameter / 2, paint);
+    labelPainter.paint(canvas, center);
   }
 }
