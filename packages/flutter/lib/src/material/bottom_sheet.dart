@@ -24,12 +24,12 @@ import 'motion.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
-const Duration _bottomSheetEnterDuration = Duration(milliseconds: 250);
-const Duration _bottomSheetExitDuration = Duration(milliseconds: 200);
-const Curve _modalBottomSheetCurve = Easing.legacyDecelerate;
-const double _minFlingVelocity = 700.0;
-const double _closeProgressThreshold = 0.5;
-const double _defaultScrollControlDisabledMaxHeightRatio = 9.0 / 16.0;
+const Duration _kBottomSheetEnterDuration = Duration(milliseconds: 250);
+const Duration _kBottomSheetExitDuration = Duration(milliseconds: 200);
+const Curve _kModalBottomSheetCurve = Easing.legacyDecelerate;
+const double _kMinFlingVelocity = 700.0;
+const double _kCloseProgressThreshold = 0.5;
+const double _kDefaultScrollControlDisabledMaxHeightRatio = 9.0 / 16.0;
 
 /// A callback for when the user begins dragging the bottom sheet.
 ///
@@ -246,8 +246,8 @@ class BottomSheet extends StatefulWidget {
     AnimationStyle? sheetAnimationStyle,
   }) {
     return AnimationController(
-      duration: sheetAnimationStyle?.duration ?? _bottomSheetEnterDuration,
-      reverseDuration: sheetAnimationStyle?.reverseDuration ?? _bottomSheetExitDuration,
+      duration: sheetAnimationStyle?.duration ?? _kBottomSheetEnterDuration,
+      reverseDuration: sheetAnimationStyle?.reverseDuration ?? _kBottomSheetExitDuration,
       debugLabel: 'BottomSheet',
       vsync: vsync,
     );
@@ -298,7 +298,7 @@ class _BottomSheetState extends State<BottomSheet> {
       dragHandleStates.remove(WidgetState.dragged);
     });
     var isClosing = false;
-    if (details.velocity.pixelsPerSecond.dy > _minFlingVelocity) {
+    if (details.velocity.pixelsPerSecond.dy > _kMinFlingVelocity) {
       final double flingVelocity = -details.velocity.pixelsPerSecond.dy / _childHeight;
       if (widget.animationController!.value > 0.0) {
         widget.animationController!.fling(velocity: flingVelocity);
@@ -306,7 +306,7 @@ class _BottomSheetState extends State<BottomSheet> {
       if (flingVelocity < 0.0) {
         isClosing = true;
       }
-    } else if (widget.animationController!.value < _closeProgressThreshold) {
+    } else if (widget.animationController!.value < _kCloseProgressThreshold) {
       if (widget.animationController!.value > 0.0) {
         widget.animationController!.fling(velocity: -1.0);
       }
@@ -660,9 +660,10 @@ class _ModalBottomSheet<T> extends StatefulWidget {
     this.clipBehavior,
     this.constraints,
     this.isScrollControlled = false,
-    this.scrollControlDisabledMaxHeightRatio = _defaultScrollControlDisabledMaxHeightRatio,
+    this.scrollControlDisabledMaxHeightRatio = _kDefaultScrollControlDisabledMaxHeightRatio,
     this.enableDrag = true,
     this.showDragHandle = false,
+    this.animationStyle,
   });
 
   final ModalBottomSheetRoute<T> route;
@@ -675,13 +676,49 @@ class _ModalBottomSheet<T> extends StatefulWidget {
   final BoxConstraints? constraints;
   final bool enableDrag;
   final bool showDragHandle;
+  final AnimationStyle? animationStyle;
 
   @override
   _ModalBottomSheetState<T> createState() => _ModalBottomSheetState<T>();
 }
 
 class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
-  ParametricCurve<double> animationCurve = _modalBottomSheetCurve;
+  late final ProxyAnimation _sheetAnimation;
+  late final CurvedAnimation _curvedSheetAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _curvedSheetAnimation = CurvedAnimation(
+      parent: widget.route.animation!,
+      curve: widget.animationStyle?.curve ?? _kModalBottomSheetCurve,
+      reverseCurve: widget.animationStyle?.reverseCurve ?? _kModalBottomSheetCurve,
+    );
+    _sheetAnimation = ProxyAnimation(_curvedSheetAnimation);
+  }
+
+  @override
+  void didUpdateWidget(_ModalBottomSheet<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    assert(oldWidget.route == widget.route);
+
+    assert(
+      _curvedSheetAnimation.curve == (widget.animationStyle?.curve ?? _kModalBottomSheetCurve),
+    );
+    assert(
+      _curvedSheetAnimation.reverseCurve ==
+          (widget.animationStyle?.reverseCurve ?? _kModalBottomSheetCurve),
+    );
+    assert(_sheetAnimation.parent == _curvedSheetAnimation);
+  }
+
+  @override
+  void dispose() {
+    // Detach to avoid leaking listeners on the route animation.
+    _sheetAnimation.parent = kAlwaysDismissedAnimation;
+    _curvedSheetAnimation.dispose();
+    super.dispose();
+  }
 
   String _getRouteLabel(MaterialLocalizations localizations) => switch (defaultTargetPlatform) {
     TargetPlatform.iOS || TargetPlatform.macOS => '',
@@ -697,12 +734,12 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 
   void handleDragStart(DragStartDetails details) {
     // Allow the bottom sheet to track the user's finger accurately.
-    animationCurve = Curves.linear;
+    _sheetAnimation.parent = widget.route.animation;
   }
 
   void handleDragEnd(DragEndDetails details, {bool? isClosing}) {
     // Allow the bottom sheet to animate smoothly from its current position.
-    animationCurve = Split(widget.route.animation!.value, endCurve: _modalBottomSheetCurve);
+    _sheetAnimation.parent = _curvedSheetAnimation;
   }
 
   @override
@@ -713,7 +750,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
     final String routeLabel = _getRouteLabel(localizations);
 
     return AnimatedBuilder(
-      animation: widget.route.animation!,
+      animation: _sheetAnimation,
       child: BottomSheet(
         animationController: widget.route._animationController,
         onClosing: () {
@@ -733,7 +770,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         onDragEnd: handleDragEnd,
       ),
       builder: (BuildContext context, Widget? child) {
-        final double animationValue = animationCurve.transform(widget.route.animation!.value);
+        final double animationValue = _sheetAnimation.value;
         return Semantics(
           scopesRoute: true,
           namesRoute: true,
@@ -834,7 +871,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.enableDrag = true,
     this.showDragHandle,
     required this.isScrollControlled,
-    this.scrollControlDisabledMaxHeightRatio = _defaultScrollControlDisabledMaxHeightRatio,
+    this.scrollControlDisabledMaxHeightRatio = _kDefaultScrollControlDisabledMaxHeightRatio,
     super.settings,
     super.requestFocus,
     this.transitionAnimationController,
@@ -1040,14 +1077,14 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   Duration get transitionDuration =>
       transitionAnimationController?.duration ??
       sheetAnimationStyle?.duration ??
-      _bottomSheetEnterDuration;
+      _kBottomSheetEnterDuration;
 
   @override
   Duration get reverseTransitionDuration =>
       transitionAnimationController?.reverseDuration ??
       transitionAnimationController?.duration ??
       sheetAnimationStyle?.reverseDuration ??
-      _bottomSheetExitDuration;
+      _kBottomSheetExitDuration;
 
   @override
   bool get barrierDismissible => isDismissible;
@@ -1091,6 +1128,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
               : const BottomSheetThemeData();
           return _ModalBottomSheet<T>(
             route: this,
+            animationStyle: sheetAnimationStyle,
             backgroundColor:
                 backgroundColor ??
                 sheetTheme.modalBackgroundColor ??
@@ -1246,7 +1284,7 @@ Future<T?> showModalBottomSheet<T>({
   BoxConstraints? constraints,
   Color? barrierColor,
   bool isScrollControlled = false,
-  double scrollControlDisabledMaxHeightRatio = _defaultScrollControlDisabledMaxHeightRatio,
+  double scrollControlDisabledMaxHeightRatio = _kDefaultScrollControlDisabledMaxHeightRatio,
   bool useRootNavigator = false,
   bool isDismissible = true,
   bool enableDrag = true,

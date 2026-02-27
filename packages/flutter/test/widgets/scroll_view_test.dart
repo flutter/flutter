@@ -9,7 +9,7 @@ import 'package:flutter/services.dart' show LogicalKeyboardKey;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'editable_text_utils.dart';
+import 'editable_text_tester.dart';
 import 'states.dart';
 import 'widgets_app_tester.dart';
 
