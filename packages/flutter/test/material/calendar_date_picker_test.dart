@@ -1709,30 +1709,34 @@ void main() {
       expect((innerMaterial as dynamic).debugInkFeatures, hasLength(31));
     });
   });
-  group('Android announcements', () {
-    testWidgets(
-      'Initial date announcement on Android',
-      (WidgetTester tester) async {
-        final SemanticsHandle semantics = tester.ensureSemantics();
-        const localizations = DefaultMaterialLocalizations();
-        final initialDate = DateTime(2016, DateTime.january, 15);
-        final String expectedLabel = localizations.formatFullDate(initialDate);
+  group('live region announcements', () {
+    testWidgets('Initial date announcement', (WidgetTester tester) async {
+      final SemanticsHandle semantics = tester.ensureSemantics();
+      const localizations = DefaultMaterialLocalizations();
+      final initialDate = DateTime(2016, DateTime.january, 15);
+      final String expectedLabel = localizations.formatFullDate(initialDate);
 
-        await tester.pumpWidget(calendarDatePicker(initialDate: initialDate));
+      await tester.pumpWidget(
+        MediaQuery(
+          data: MediaQueryData(supportsAnnounce: false),
+          child: calendarDatePicker(initialDate: initialDate),
+        ),
+      );
 
-        // Verify that the live region exists and has the correct label.
-        final Finder liveRegionFinder = find.byWidgetPredicate(
-          (Widget widget) => widget is Semantics && widget.properties.label == expectedLabel && widget.properties.liveRegion == true,
-        );
-        expect(
-          tester.getSemantics(liveRegionFinder),
-          matchesSemantics(label: expectedLabel, isLiveRegion: true),
-        );
+      // Verify that the live region exists and has the correct label.
+      final Finder liveRegionFinder = find.byWidgetPredicate(
+        (Widget widget) =>
+            widget is Semantics &&
+            widget.properties.label == expectedLabel &&
+            widget.properties.liveRegion == true,
+      );
+      expect(
+        tester.getSemantics(liveRegionFinder),
+        matchesSemantics(label: expectedLabel, isLiveRegion: true),
+      );
 
-        semantics.dispose();
-      },
-      variant: TargetPlatformVariant.only(TargetPlatform.android),
-    );
+      semantics.dispose();
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
     testWidgets(
       'Month navigation announcement on Android',
@@ -1740,7 +1744,12 @@ void main() {
         final SemanticsHandle semantics = tester.ensureSemantics();
         final initialDate = DateTime(2016, DateTime.january, 15);
 
-        await tester.pumpWidget(calendarDatePicker(initialDate: initialDate));
+        await tester.pumpWidget(
+          MediaQuery(
+            data: MediaQueryData(supportsAnnounce: false),
+            child: calendarDatePicker(initialDate: initialDate),
+          ),
+        );
 
         // Tap next month.
         await tester.tap(nextMonthIcon);
@@ -1750,7 +1759,10 @@ void main() {
         // Verify that the live region exists and has the correct label.
         const String expectedLabel = 'February 2016';
         final Finder liveRegionFinder = find.byWidgetPredicate(
-          (Widget widget) => widget is Semantics && widget.properties.label == expectedLabel && widget.properties.liveRegion == true,
+          (Widget widget) =>
+              widget is Semantics &&
+              widget.properties.label == expectedLabel &&
+              widget.properties.liveRegion == true,
         );
         expect(
           tester.getSemantics(liveRegionFinder),
@@ -1768,17 +1780,27 @@ void main() {
         final SemanticsHandle semantics = tester.ensureSemantics();
         final initialDate = DateTime(2016, DateTime.january, 15);
 
-        await tester.pumpWidget(calendarDatePicker(initialDate: initialDate));
+        await tester.pumpWidget(
+          MediaQuery(
+            data: MediaQueryData(supportsAnnounce: false),
+            child: calendarDatePicker(initialDate: initialDate),
+          ),
+        );
 
         // Switch to year mode.
-        final Finder modeToggleButton = find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_DatePickerModeToggleButton');
+        final Finder modeToggleButton = find.byWidgetPredicate(
+          (Widget widget) => widget.runtimeType.toString() == '_DatePickerModeToggleButton',
+        );
         await tester.tap(modeToggleButton);
         await tester.pumpAndSettle();
 
         // Verify that the live region exists and has the correct label.
         const String yearLabel = '2016';
         final Finder yearLiveRegionFinder = find.byWidgetPredicate(
-          (Widget widget) => widget is Semantics && widget.properties.label == yearLabel && widget.properties.liveRegion == true,
+          (Widget widget) =>
+              widget is Semantics &&
+              widget.properties.label == yearLabel &&
+              widget.properties.liveRegion == true,
         );
         expect(
           tester.getSemantics(yearLiveRegionFinder),
@@ -1792,7 +1814,10 @@ void main() {
         // Verify that the live region exists and has the correct label.
         const String dayLabel = 'January 2016';
         final Finder dayLiveRegionFinder = find.byWidgetPredicate(
-          (Widget widget) => widget is Semantics && widget.properties.label == dayLabel && widget.properties.liveRegion == true,
+          (Widget widget) =>
+              widget is Semantics &&
+              widget.properties.label == dayLabel &&
+              widget.properties.liveRegion == true,
         );
         expect(
           tester.getSemantics(dayLiveRegionFinder),

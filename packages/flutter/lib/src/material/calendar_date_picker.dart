@@ -243,13 +243,12 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
 
   // Auxiliary method for handling the difference between platforms
   void _announce(String message) {
-    // SemanticsService.sendAnnouncement is deprecated on android.
-    // We use live region to achieve the announcement effect instead.
-    if (Theme.of(context).platform == TargetPlatform.android) {
-      _announcementText = message;
-    } else {
-      // Maintains the mandatory announcement for other platforms
+    if (MediaQuery.maybeSupportsAnnounceOf(context) ?? false) {
       SemanticsService.sendAnnouncement(View.of(context), message, Directionality.of(context));
+    } else {
+      // If SemanticsService.sendAnnouncement is not supported,
+      // we use live region to achieve the announcement effect instead.
+      _announcementText = message;
     }
   }
 
@@ -404,15 +403,15 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
     );
     return Stack(
       children: <Widget>[
-        Theme.of(context).platform == TargetPlatform.android
-            ? Semantics(
+        (MediaQuery.maybeSupportsAnnounceOf(context) ?? false)
+            ? picker
+            : Semantics(
                 container: true,
                 liveRegion: true,
                 accessibilityFocusBlockType: AccessibilityFocusBlockType.blockNode,
                 label: _announcementText,
                 child: picker,
-              )
-            : picker,
+              ),
 
         // Put the mode toggle button on top so that it won't be covered up by the _MonthPicker
         MediaQuery.withClampedTextScaling(
@@ -676,13 +675,12 @@ class _MonthPickerState extends State<_MonthPicker> {
 
   // Auxiliary method for handling the difference between platforms
   void _announce(String message) {
-    // SemanticsService.sendAnnouncement is deprecated on android.
-    // We use live region to achieve the announcement effect instead.
-    if (Theme.of(context).platform == TargetPlatform.android) {
-      _announcementText = message;
-    } else {
-      // Maintains the mandatory announcement for other platforms
+    if (MediaQuery.maybeSupportsAnnounceOf(context) ?? false) {
       SemanticsService.sendAnnouncement(View.of(context), message, Directionality.of(context));
+    } else {
+      // If SemanticsService.sendAnnouncement is not supported,
+      // we use live region to achieve the announcement effect instead.
+      _announcementText = message;
     }
   }
 
@@ -886,12 +884,15 @@ class _MonthPickerState extends State<_MonthPicker> {
         DatePickerTheme.of(context).subHeaderForegroundColor ??
         DatePickerTheme.defaults(context).subHeaderForegroundColor;
 
+    final supportsAnnounce = MediaQuery.maybeSupportsAnnounceOf(context) ?? false;
     return Semantics(
       container: true,
       explicitChildNodes: true,
-      liveRegion: Theme.of(context).platform == TargetPlatform.android,
-      accessibilityFocusBlockType: AccessibilityFocusBlockType.blockNode,
-      label: Theme.of(context).platform == TargetPlatform.android ? _announcementText : null,
+      liveRegion: !supportsAnnounce,
+      accessibilityFocusBlockType: !supportsAnnounce
+          ? AccessibilityFocusBlockType.blockNode
+          : AccessibilityFocusBlockType.none,
+      label: !supportsAnnounce ? _announcementText : null,
       child: Column(
         children: <Widget>[
           SizedBox(
