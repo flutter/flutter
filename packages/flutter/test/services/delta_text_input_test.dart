@@ -307,6 +307,11 @@ class FakeDeltaTextInputClient implements DeltaTextInputClient {
   }
 
   @override
+  void refocus() {
+    latestMethodCall = 'refocus';
+  }
+
+  @override
   void connectionClosed() {
     latestMethodCall = 'connectionClosed';
   }

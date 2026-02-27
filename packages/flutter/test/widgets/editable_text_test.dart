@@ -1736,6 +1736,88 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
   });
 
+  testWidgets('can re-acquire focus when the platform asks for refocus', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              autofocus: true,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(focusNode.hasFocus, isTrue);
+    final EditableTextState editableText = tester.state(find.byType(EditableText));
+    editableText.connectionClosed();
+    await tester.pump();
+
+    expect(focusNode.hasFocus, isFalse);
+
+    editableText.refocus();
+    await tester.pump();
+
+    expect(focusNode.hasFocus, isTrue);
+  });
+
+  testWidgets('does not refocus when it is unmounted', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              autofocus: true,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(focusNode.hasFocus, isTrue);
+    final EditableTextState editableText = tester.state(find.byType(EditableText));
+    editableText.connectionClosed();
+    await tester.pump();
+
+    expect(focusNode.hasFocus, isFalse);
+
+    await tester.pumpWidget(
+      const MediaQuery(
+        data: MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Text('Text field does not exist anymore!'),
+        ),
+      ),
+    );
+
+    editableText.refocus();
+    await tester.pump();
+
+    expect(focusNode.hasFocus, isFalse);
+  });
+
   // Test case for
   // https://github.com/flutter/flutter/issues/123523
   // https://github.com/flutter/flutter/issues/134846 .
