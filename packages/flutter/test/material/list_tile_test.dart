@@ -4831,6 +4831,7 @@ void main() {
       await tester.pumpAndSettle();
     }
     await expectLater(find.byType(MaterialApp), matchesGoldenFile('list_tile.overscroll.png'));
+    await gesture.up();
   });
 }
 
