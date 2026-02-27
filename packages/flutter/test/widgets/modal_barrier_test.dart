@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async' show unawaited;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind, kSecondaryButton;
 import 'package:flutter/rendering.dart';
@@ -1020,6 +1022,88 @@ void main() {
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.basic,
     );
+  });
+
+  testWidgets('ModalBarrier does not dismiss underlying route during iOS pop gesture', (
+    WidgetTester tester,
+  ) async {
+    final navigatorKey = GlobalKey<NavigatorState>();
+    const Key topRouteKey = ValueKey<String>('top-route');
+    const Key bottomRouteKey = ValueKey<String>('bottom-route');
+
+    Future<void> pushDialog({required String routeName, required bool dismissible}) async {
+      await navigatorKey.currentState!.push<void>(
+        RawDialogRoute<void>(
+          pageBuilder:
+              (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+              ) {
+                return SizedBox.expand(
+                  child: Center(
+                    child: Text(
+                      routeName,
+                      key: ValueKey<String>(routeName),
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ),
+                );
+              },
+          barrierDismissible: dismissible,
+          barrierLabel: 'Dismiss',
+          barrierColor: const Color(0x7F000000),
+          transitionDuration: const Duration(milliseconds: 300),
+          transitionBuilder:
+              (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+                Widget child,
+              ) {
+                return FadeTransition(opacity: animation, child: child);
+              },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      TestWidgetsApp(navigatorKey: navigatorKey, home: const SizedBox.shrink()),
+    );
+
+    // Set up two stacked modal barriers: lower route is dismissible, upper route is not.
+    unawaited(pushDialog(routeName: 'bottom-route', dismissible: true));
+    await tester.pumpAndSettle();
+    expect(find.byKey(bottomRouteKey), findsOneWidget);
+
+    unawaited(pushDialog(routeName: 'top-route', dismissible: false));
+    await tester.pumpAndSettle();
+    expect(find.byKey(topRouteKey), findsOneWidget);
+
+    // Simulate an iOS-style interactive pop while the top barrier reverses.
+    final NavigatorState navigator = navigatorKey.currentState!;
+    navigator.didStartUserGesture();
+    addTearDown(navigator.didStopUserGesture);
+    navigator.pop();
+    await tester.pump();
+    expect(find.byKey(topRouteKey), findsOneWidget);
+
+    // Tapping while the gesture is in progress must not dismiss the lower route.
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pump();
+
+    expect(
+      find.byKey(bottomRouteKey),
+      findsOneWidget,
+      reason:
+          'Pointer events should not pass through to the lower modal barrier during iOS pop gesture.',
+    );
+
+    // Finish the interactive pop and verify only the top route is closed.
+    navigator.didStopUserGesture();
+    await tester.pumpAndSettle();
+    expect(find.byKey(topRouteKey), findsNothing);
+    expect(find.byKey(bottomRouteKey), findsOneWidget);
   });
 }
 
