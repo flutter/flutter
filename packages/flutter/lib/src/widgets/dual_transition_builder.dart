@@ -84,10 +84,10 @@ class DualTransitionBuilder extends StatefulWidget {
   /// This child widget will be wrapped by the transitions built by
   /// [forwardBuilder] and [reverseBuilder].
   ///
-  /// The [child] is passed back to the [forwardBuilder] and [reverseBuilder]
-  /// to allow for efficient rebuilding. This is the preferred way to provide
-  /// a child to the transitions to avoid expensive subtree rebuilds during
-  /// the animation.
+  /// The [child] is passed to the [reverseBuilder], and the result of that is
+  /// in turn passed to the [forwardBuilder]. This allows for efficient
+  /// rebuilding and is the preferred way to provide a child to the transitions
+  /// to avoid expensive subtree rebuilds during the animation.
   final Widget? child;
 
   @override
