@@ -1492,9 +1492,8 @@ void main() {
       final transformationController1 = TransformationController();
       addTearDown(transformationController1.dispose);
       await tester.pumpWidget(
-        SizedBox(
-          width: 200,
-          height: 200,
+        SizedBox.square(
+          dimension: 200.0,
           child: InteractiveViewer(
             constrained: false,
             transformationController: transformationController1,
@@ -1514,9 +1513,8 @@ void main() {
       final transformationController2 = TransformationController();
       addTearDown(transformationController2.dispose);
       await tester.pumpWidget(
-        SizedBox(
-          width: 200,
-          height: 200,
+        SizedBox.square(
+          dimension: 200.0,
           child: InteractiveViewer(
             constrained: false,
             interactionEndFrictionCoefficient: 0.01,

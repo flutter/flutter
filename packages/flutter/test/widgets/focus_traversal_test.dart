@@ -572,16 +572,15 @@ void main() {
           child: FocusScope(
             child: Column(
               children: <Widget>[
-                Focus(focusNode: node1, child: const SizedBox(width: 100, height: 100)),
-                SizedBox(
-                  width: 100,
-                  height: 100,
+                Focus(focusNode: node1, child: const SizedBox.square(dimension: 100.0)),
+                SizedBox.square(
+                  dimension: 100.0,
                   child: Navigator(
                     pages: <Page<void>>[
                       TestPage<void>(
                         child: Focus(
                           focusNode: node2,
-                          child: const SizedBox(width: 100, height: 100),
+                          child: const SizedBox.square(dimension: 100.0),
                         ),
                       ),
                     ],
@@ -3071,9 +3070,8 @@ void main() {
                   children: <Widget>[
                     Row(
                       children: <Widget>[
-                        SizedBox(
-                          width: 100,
-                          height: 100,
+                        SizedBox.square(
+                          dimension: 100.0,
                           child: EditableText(
                             autofocus: true,
                             key: upperLeftKey,
@@ -3084,9 +3082,8 @@ void main() {
                             style: const TextStyle(),
                           ),
                         ),
-                        SizedBox(
-                          width: 100,
-                          height: 100,
+                        SizedBox.square(
+                          dimension: 100.0,
                           child: EditableText(
                             key: upperRightKey,
                             controller: controller2,
@@ -3100,9 +3097,8 @@ void main() {
                     ),
                     Row(
                       children: <Widget>[
-                        SizedBox(
-                          width: 100,
-                          height: 100,
+                        SizedBox.square(
+                          dimension: 100.0,
                           child: EditableText(
                             key: lowerLeftKey,
                             controller: controller3,
@@ -3112,9 +3108,8 @@ void main() {
                             style: const TextStyle(),
                           ),
                         ),
-                        SizedBox(
-                          width: 100,
-                          height: 100,
+                        SizedBox.square(
+                          dimension: 100.0,
                           child: EditableText(
                             key: lowerRightKey,
                             controller: controller4,
