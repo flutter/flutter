@@ -42,8 +42,8 @@ FLUTTER_ASSERT_ARC
   if (self = [super init]) {
     _flutterManagedEngines = [NSPointerArray weakObjectsPointerArray];
     _developerManagedEngines = [NSPointerArray weakObjectsPointerArray];
-    _sceneWillConnectFallbackCalled = NO;
     _sceneWillConnectEventHandledByPlugin = NO;
+    _sceneWillConnectFallbackCalled = NO;
   }
   return self;
 }
@@ -213,7 +213,8 @@ FLUTTER_ASSERT_ARC
     willConnectToSession:(UISceneSession*)session
            flutterEngine:(FlutterEngine*)engine
                  options:(UISceneConnectionOptions*)connectionOptions {
-  // Don't send connection options if a plugin has already used them.
+  // Don't send connection options if a plugin (potentially from a different engine)
+  // has already used them.
   UISceneConnectionOptions* availableOptions = connectionOptions;
   if (self.sceneWillConnectEventHandledByPlugin) {
     availableOptions = nil;
@@ -221,15 +222,15 @@ FLUTTER_ASSERT_ARC
   BOOL handledByPlugin = [engine.sceneLifeCycleDelegate scene:scene
                                          willConnectToSession:session
                                                       options:availableOptions];
-
-  // If no plugins handled this, give the application fallback a chance to handle it.
-  // Only call the fallback once since it's per application.
-  if (!handledByPlugin && !self.sceneWillConnectFallbackCalled) {
+  if (!self.sceneWillConnectFallbackCalled && !handledByPlugin) {
     self.sceneWillConnectFallbackCalled = YES;
-    if ([[self applicationLifeCycleDelegate] sceneWillConnectFallback:connectionOptions]) {
-      handledByPlugin = YES;
-    }
+    // If no plugins handled this, give the application fallback a chance to handle it.
+    // the sceneWillConnectFallback method will shortcircuit if it has already been called
+    // for the application.
+    handledByPlugin =
+        [self.applicationLifeCycleDelegate sceneWillConnectFallback:connectionOptions];
   }
+
   if (handledByPlugin) {
     self.sceneWillConnectEventHandledByPlugin = YES;
   }

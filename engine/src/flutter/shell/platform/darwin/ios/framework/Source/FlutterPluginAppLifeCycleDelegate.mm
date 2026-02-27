@@ -19,6 +19,17 @@ static const SEL kSelectorsHandledByPlugins[] = {
     @selector(application:didReceiveRemoteNotification:fetchCompletionHandler:),
     @selector(application:performFetchWithCompletionHandler:)};
 
+typedef NS_ENUM(NSInteger, FlutterPluginAppLifeCycleDelegateState) {
+  /// The FlutterPluginAppLifeCycleDelegate was just initialized and neither
+  /// willFinishLaunching or didFinishLaunching has been sent to the plugins.
+  kAppLifecycleInitialized,
+  /// The willFinishLaunching event has been sent to the plugins
+  /// (but not didFinishLaunching).
+  kAppLifecycleWillLaunchSent,
+  /// The didFinishLaunching event has been sent to the plugins.
+  kAppLifecycleDidLaunchSent,
+};
+
 @interface FlutterPluginAppLifeCycleDelegate ()
 - (void)handleDidEnterBackground:(NSNotification*)notification
     NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in app extensions");
@@ -30,9 +41,6 @@ static const SEL kSelectorsHandledByPlugins[] = {
     NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in app extensions");
 - (void)handleWillTerminate:(NSNotification*)notification
     NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in app extensions");
-
-@property(nonatomic, assign) BOOL didForwardApplicationWillLaunch;
-@property(nonatomic, assign) BOOL didForwardApplicationDidLaunch;
 @end
 
 @implementation FlutterPluginAppLifeCycleDelegate {
@@ -40,6 +48,12 @@ static const SEL kSelectorsHandledByPlugins[] = {
 
   // Weak references to registered plugins.
   NSPointerArray* _delegates;
+  // Wether this FlutterPluginAppLifeCycleDelegate class has sent
+  // applicationWillFinishLaunching / applicationDidFinishLaunching events to
+  // any plugin. Each event is supposed to only be sent at most once during the
+  // lifespan of this application. The state doesn't advance when an event is
+  // sent but none of the plugins implemented the corresponding callback.
+  FlutterPluginAppLifeCycleDelegateState _state;
 }
 
 - (void)addObserverFor:(NSString*)name selector:(SEL)selector {
@@ -63,6 +77,7 @@ static const SEL kSelectorsHandledByPlugins[] = {
                   selector:@selector(handleWillTerminate:)];
     }
     _delegates = [NSPointerArray weakObjectsPointerArray];
+    _state = kAppLifecycleInitialized;
     _debugBackgroundTask = UIBackgroundTaskInvalid;
   }
   return self;
@@ -119,35 +134,17 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 }
 
 - (void)sceneFallbackDidFinishLaunchingApplication:(UIApplication*)application {
-  // If the application:didFinishingLaunchingWithOptions: event has already been sent to plugins, do
-  // not send again.
-  if (self.didForwardApplicationDidLaunch) {
-    return;
-  }
   // Send nil launchOptions since UIKit sends nil when UIScene is enabled.
   [self application:application didFinishLaunchingWithOptions:@{}];
 }
 
 - (void)sceneFallbackWillFinishLaunchingApplication:(UIApplication*)application {
-  // If the application:willFinishLaunchingWithOptions: event has already been sent to plugins, do
-  // not send again.
-  if (self.didForwardApplicationWillLaunch) {
-    return;
-  }
-  // If the application:didFinishingLaunchingWithOptions: event has already been sent to plugins, do
-  // not send willFinishLaunchingWithOptions since it should happen before, not after.
-  if (self.didForwardApplicationDidLaunch) {
-    return;
-  }
-  // Send nil launchOptions since UIKit sends nil when UIScene is enabled.
+  // Send empty launchOptions since UIKit sends nil when UIScene is enabled.
   [self application:application willFinishLaunchingWithOptions:@{}];
 }
 
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
-  if (_delegates.count > 0) {
-    self.didForwardApplicationDidLaunch = YES;
-  }
   return [self application:application
       didFinishLaunchingWithOptions:launchOptions
                  isFallbackForScene:NO];
@@ -160,26 +157,59 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
   }
   NSDictionary<UIApplicationLaunchOptionsKey, id>* convertedLaunchOptions =
       ConvertConnectionOptions(connectionOptions);
+
+  // Only use fallback if there are meaningful launch options.
   if (convertedLaunchOptions.count == 0) {
-    // Only use fallback if there are meaningful launch options.
     return NO;
   }
-  if (![self application:application
+
+  // Send appDidFinishLaunching, but only if we've never sent it.
+  //
+  // If there is an unmigrated plugin returned NO, do not attempt continuing
+  // user activities. This is based on the documented behavior of the
+  // (now deprecated)
+  // -[UIApplication application:continueUserActivity:restorationHandler:]
+  // method.
+  if (_state < kAppLifecycleDidLaunchSent &&
+      ![self application:application
           didFinishLaunchingWithOptions:convertedLaunchOptions
                      isFallbackForScene:YES]) {
-    return YES;
+    return NO;
   }
-  return NO;
+
+  UIApplicationShortcutItem* shortcutItem = connectionOptions.shortcutItem;
+  BOOL shortcutHandled = shortcutItem && [self application:application
+                                             performActionForShortcutItem:shortcutItem
+                                                        completionHandler:^(BOOL succeeded) {
+                                                          // Do nothing. Plugins respond
+                                                          // synchronously whether they consume the
+                                                          // item.
+                                                        }
+                                                       isFallbackForScene:YES];
+
+  for (NSUserActivity* activity in connectionOptions.userActivities) {
+    if ([self application:application
+            continueUserActivity:activity
+              restorationHandler:nil
+              isFallbackForScene:YES]) {
+      return YES;
+    }
+  }
+  return shortcutHandled;
 }
 
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions
                isFallbackForScene:(BOOL)isFallback {
+  if (_state >= kAppLifecycleDidLaunchSent) {
+    return YES;
+  }
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
     if (!delegate || (isFallback && [self pluginSupportsSceneLifecycle:delegate])) {
       continue;
     }
     if ([delegate respondsToSelector:@selector(application:didFinishLaunchingWithOptions:)]) {
+      _state = kAppLifecycleDidLaunchSent;
       if (![delegate application:application didFinishLaunchingWithOptions:launchOptions]) {
         return NO;
       }
@@ -219,15 +249,16 @@ static NSDictionary<UIApplicationLaunchOptionsKey, id>* ConvertConnectionOptions
 
 - (BOOL)application:(UIApplication*)application
     willFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
-  if (_delegates.count > 0) {
-    self.didForwardApplicationWillLaunch = YES;
-  }
   flutter::DartCallbackCache::LoadCacheFromDisk();
+  if (_state >= kAppLifecycleWillLaunchSent) {
+    return YES;
+  }
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in [_delegates allObjects]) {
     if (!delegate) {
       continue;
     }
     if ([delegate respondsToSelector:_cmd]) {
+      _state = kAppLifecycleWillLaunchSent;
       if (![delegate application:application willFinishLaunchingWithOptions:launchOptions]) {
         return NO;
       }
