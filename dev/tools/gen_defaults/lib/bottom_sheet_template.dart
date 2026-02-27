@@ -13,7 +13,8 @@ class BottomSheetTemplate extends TokenTemplate {
   });
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends BottomSheetThemeData {
   _${blockName}DefaultsM3(this.context)
     : super(

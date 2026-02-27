@@ -17,10 +17,7 @@ class FadeTransitionExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: FadeTransitionExample(
-        duration: duration,
-        curve: curve,
-      ),
+      home: FadeTransitionExample(duration: duration, curve: curve),
     );
   }
 }
@@ -81,10 +78,7 @@ class _FadeTransitionExampleState extends State<FadeTransitionExample>
       color: Colors.white,
       child: FadeTransition(
         opacity: _animation,
-        child: const Padding(
-          padding: EdgeInsets.all(8),
-          child: FlutterLogo(),
-        ),
+        child: const Padding(padding: EdgeInsets.all(8), child: FlutterLogo()),
       ),
     );
   }

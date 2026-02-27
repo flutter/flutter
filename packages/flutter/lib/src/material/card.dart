@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dialog.dart';
+/// @docImport 'ink_well.dart';
+/// @docImport 'list_tile.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'card_theme.dart';
@@ -42,9 +47,16 @@ enum _CardVariant { elevated, filled, outlined }
 /// ** See code in examples/api/lib/material/card/card.1.dart **
 /// {@end-tool}
 ///
-/// Material Design 3 introduced new types of cards. The default [Card] is the
-/// elevated card. To create a filled card, use [Card.filled]; to create a outlined
-/// card, use [Card.outlined].
+/// For Material Design 2 (when [ThemeData.useMaterial3] is false), there is a
+/// single card type: the elevated card. In that mode the named constructors
+/// ([Card.filled], [Card.outlined]) behave the same as the default [Card].
+///
+/// For Material Design 3 (when [ThemeData.useMaterial3] is true), three visual
+/// variants are available: the default [Card] (elevated), [Card.filled], and
+/// [Card.outlined]. All variants share the same theme class, [CardThemeData],
+/// so theme properties (for example [CardThemeData.shape]) apply to every card
+/// variant within the theme's scope.
+///
 /// {@tool dartpad}
 /// This sample shows creation of [Card] widgets for elevated, filled and
 /// outlined types, as described in: https://m3.material.io/components/cards/overview
@@ -59,7 +71,10 @@ enum _CardVariant { elevated, filled, outlined }
 ///  * <https://material.io/design/components/cards.html>
 ///  * <https://m3.material.io/components/cards>
 class Card extends StatelessWidget {
-  /// Creates a Material Design card.
+  /// Creates an elevated variant of Card.
+  ///
+  /// Elevated cards have a drop shadow, providing more separation from the
+  /// background than filled cards, but less than outlined cards.
   ///
   /// The [elevation] must be null or non-negative.
   const Card({
@@ -80,7 +95,10 @@ class Card extends StatelessWidget {
   /// Create a filled variant of Card.
   ///
   /// Filled cards provide subtle separation from the background. This has less
-  /// emphasis than elevated(default) or outlined cards.
+  /// emphasis than elevated cards (the default) or outlined cards.
+  ///
+  /// If [ThemeData.useMaterial3] is false, this constructor is equivalent to
+  /// the default constructor of [Card].
   const Card.filled({
     super.key,
     this.color,
@@ -100,6 +118,15 @@ class Card extends StatelessWidget {
   ///
   /// Outlined cards have a visual boundary around the container. This can
   /// provide greater emphasis than the other types.
+  ///
+  /// The card's outline is defined by the [shape] property. By default, the
+  /// card uses a [RoundedRectangleBorder] with a 12.0 corner radius, a 1.0
+  /// border width, and the color from [ColorScheme.outlineVariant]. If you
+  /// provide a custom [shape], it is recommended to use an [OutlinedBorder]
+  /// with a non-null [OutlinedBorder.side] to keep a visible outline.
+  ///
+  /// If [ThemeData.useMaterial3] is false, this constructor is equivalent to
+  /// the default constructor of [Card].
   const Card.outlined({
     super.key,
     this.color,
@@ -126,7 +153,7 @@ class Card extends StatelessWidget {
 
   /// The color to paint the shadow below the card.
   ///
-  /// If null then the ambient [CardTheme]'s shadowColor is used.
+  /// If null then the ambient [CardThemeData.shadowColor] is used.
   /// If that's null too, then the overall theme's [ThemeData.shadowColor]
   /// (default black) is used.
   final Color? shadowColor;
@@ -153,18 +180,19 @@ class Card extends StatelessWidget {
   ///
   /// Defines the card's [Material.elevation].
   ///
-  /// If this property is null then [CardTheme.elevation] of
-  /// [ThemeData.cardTheme] is used. If that's null, the default value is 1.0.
+  /// If this property is null then the ambient [CardThemeData.elevation] is
+  /// used. If that's null, the default value is 1.0.
   final double? elevation;
 
   /// The shape of the card's [Material].
   ///
   /// Defines the card's [Material.shape].
   ///
-  /// If this property is null then [CardTheme.shape] of [ThemeData.cardTheme]
-  /// is used. If that's null then the shape will be a [RoundedRectangleBorder]
-  /// with a circular corner radius of 12.0 and if [ThemeData.useMaterial3] is
-  /// false, then the circular corner radius will be 4.0.
+  /// If null, the ambient [CardTheme.shape] from [ThemeData.cardTheme] is used.
+  /// If that is also null, the shape defaults to a [RoundedRectangleBorder].
+  /// The default corner radius is 12.0 when [ThemeData.useMaterial3] is true,
+  /// and 4.0 otherwise. For Material 3 outlined cards, the default [shape] also
+  /// includes a border side (see [OutlinedBorder.side]).
   final ShapeBorder? shape;
 
   /// Whether to paint the [shape] border in front of the [child].
@@ -175,17 +203,17 @@ class Card extends StatelessWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// If this property is null then [CardTheme.clipBehavior] of
-  /// [ThemeData.cardTheme] is used. If that's null then the behavior will be [Clip.none].
+  /// If this property is null then the ambient [CardThemeData.clipBehavior] is
+  /// used. If that's null then the behavior will be [Clip.none].
   final Clip? clipBehavior;
 
   /// The empty space that surrounds the card.
   ///
   /// Defines the card's outer [Container.margin].
   ///
-  /// If this property is null then [CardTheme.margin] of
-  /// [ThemeData.cardTheme] is used. If that's null, the default margin is 4.0
-  /// logical pixels on all sides: `EdgeInsets.all(4.0)`.
+  /// If this property is null then the ambient [CardThemeData.margin] is used.
+  /// If that's null, the default margin is 4.0 logical pixels on
+  /// all sides: `EdgeInsets.all(4.0)`.
   final EdgeInsetsGeometry? margin;
 
   /// Whether this widget represents a single semantic container, or if false
@@ -210,12 +238,12 @@ class Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final CardTheme cardTheme = CardTheme.of(context);
-    final CardTheme defaults;
+    final CardThemeData cardTheme = CardTheme.of(context);
+    final CardThemeData defaults;
     if (Theme.of(context).useMaterial3) {
       defaults = switch (_variant) {
         _CardVariant.elevated => _CardDefaultsM3(context),
-        _CardVariant.filled   => _FilledCardDefaultsM3(context),
+        _CardVariant.filled => _FilledCardDefaultsM3(context),
         _CardVariant.outlined => _OutlinedCardDefaultsM3(context),
       };
     } else {
@@ -230,15 +258,13 @@ class Card extends StatelessWidget {
           type: MaterialType.card,
           color: color ?? cardTheme.color ?? defaults.color,
           shadowColor: shadowColor ?? cardTheme.shadowColor ?? defaults.shadowColor,
-          surfaceTintColor: surfaceTintColor ?? cardTheme.surfaceTintColor ?? defaults.surfaceTintColor,
+          surfaceTintColor:
+              surfaceTintColor ?? cardTheme.surfaceTintColor ?? defaults.surfaceTintColor,
           elevation: elevation ?? cardTheme.elevation ?? defaults.elevation!,
           shape: shape ?? cardTheme.shape ?? defaults.shape,
           borderOnForeground: borderOnForeground,
           clipBehavior: clipBehavior ?? cardTheme.clipBehavior ?? defaults.clipBehavior!,
-          child: Semantics(
-            explicitChildNodes: !semanticContainer,
-            child: child,
-          ),
+          child: Semantics(explicitChildNodes: !semanticContainer, child: child),
         ),
       ),
     );
@@ -246,16 +272,14 @@ class Card extends StatelessWidget {
 }
 
 // Hand coded defaults based on Material Design 2.
-class _CardDefaultsM2 extends CardTheme {
+class _CardDefaultsM2 extends CardThemeData {
   const _CardDefaultsM2(this.context)
     : super(
         clipBehavior: Clip.none,
         elevation: 1.0,
         margin: const EdgeInsets.all(4.0),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(4.0)),
-        )
-    );
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
+      );
 
   final BuildContext context;
 
@@ -273,7 +297,8 @@ class _CardDefaultsM2 extends CardTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-class _CardDefaultsM3 extends CardTheme {
+// dart format off
+class _CardDefaultsM3 extends CardThemeData {
   _CardDefaultsM3(this.context)
     : super(
         clipBehavior: Clip.none,
@@ -296,6 +321,7 @@ class _CardDefaultsM3 extends CardTheme {
   @override
   ShapeBorder? get shape =>const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0)));
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - Card
 
@@ -306,7 +332,8 @@ class _CardDefaultsM3 extends CardTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-class _FilledCardDefaultsM3 extends CardTheme {
+// dart format off
+class _FilledCardDefaultsM3 extends CardThemeData {
   _FilledCardDefaultsM3(this.context)
     : super(
         clipBehavior: Clip.none,
@@ -329,6 +356,7 @@ class _FilledCardDefaultsM3 extends CardTheme {
   @override
   ShapeBorder? get shape =>const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0)));
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - FilledCard
 
@@ -339,7 +367,8 @@ class _FilledCardDefaultsM3 extends CardTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-class _OutlinedCardDefaultsM3 extends CardTheme {
+// dart format off
+class _OutlinedCardDefaultsM3 extends CardThemeData {
   _OutlinedCardDefaultsM3(this.context)
     : super(
         clipBehavior: Clip.none,
@@ -365,5 +394,6 @@ class _OutlinedCardDefaultsM3 extends CardTheme {
       side: BorderSide(color: _colors.outlineVariant)
     );
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - OutlinedCard

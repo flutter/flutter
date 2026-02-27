@@ -11,20 +11,14 @@ import 'package:flutter/services.dart';
 void main() => runApp(const FormApp());
 
 class FormApp extends StatelessWidget {
-  const FormApp({
-    super.key,
-  });
+  const FormApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Confirmation Dialog Example'),
-        ),
-        body: Center(
-          child: _SaveableForm(),
-        ),
+        appBar: AppBar(title: const Text('Confirmation Dialog Example')),
+        body: Center(child: _SaveableForm()),
       ),
     );
   }
@@ -107,7 +101,9 @@ class _SaveableFormState extends State<_SaveableForm> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          const Text('If the field below is unsaved, a confirmation dialog will be shown on back.'),
+          const Text(
+            'If the field below is unsaved, a confirmation dialog will be shown on back.',
+          ),
           const SizedBox(height: 20.0),
           Form(
             canPop: !_isDirty,
@@ -142,9 +138,7 @@ class _SaveableFormState extends State<_SaveableForm> {
                     children: <Widget>[
                       const Text('Save'),
                       if (_controller.text.isNotEmpty)
-                        Icon(
-                          _isDirty ? Icons.warning : Icons.check,
-                        ),
+                        Icon(_isDirty ? Icons.warning : Icons.check),
                     ],
                   ),
                 ),
@@ -153,7 +147,8 @@ class _SaveableFormState extends State<_SaveableForm> {
           ),
           TextButton(
             onPressed: () async {
-              final bool shouldPop = !_isDirty || (await _showDialog() ?? false);
+              final bool shouldPop =
+                  !_isDirty || (await _showDialog() ?? false);
               if (!shouldPop) {
                 return;
               }

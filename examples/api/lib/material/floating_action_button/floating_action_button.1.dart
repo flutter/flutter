@@ -13,10 +13,7 @@ class FloatingActionButtonExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(useMaterial3: true),
-      home: const FloatingActionButtonExample(),
-    );
+    return const MaterialApp(home: FloatingActionButtonExample());
   }
 }
 
@@ -26,9 +23,7 @@ class FloatingActionButtonExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('FloatingActionButton Sample'),
-      ),
+      appBar: AppBar(title: const Text('FloatingActionButton Sample')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,

@@ -11,33 +11,54 @@ void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
   test('StackParentData basic test', () {
-    final StackParentData parentData = StackParentData();
-    const Size stackSize = Size(800.0, 600.0);
+    final parentData = StackParentData();
+    const stackSize = Size(800.0, 600.0);
     expect(parentData.isPositioned, isFalse);
 
     parentData.width = -100.0;
     expect(parentData.isPositioned, isTrue);
-    expect(parentData.positionedChildConstraints(stackSize), const BoxConstraints.tightFor(width: 0.0));
+    expect(
+      parentData.positionedChildConstraints(stackSize),
+      const BoxConstraints.tightFor(width: 0.0),
+    );
 
     parentData.width = 100.0;
-    expect(parentData.positionedChildConstraints(stackSize), const BoxConstraints.tightFor(width: 100.0));
+    expect(
+      parentData.positionedChildConstraints(stackSize),
+      const BoxConstraints.tightFor(width: 100.0),
+    );
 
     parentData.left = 0.0;
     parentData.right = 0.0;
-    expect(parentData.positionedChildConstraints(stackSize), const BoxConstraints.tightFor(width: 800.0));
+    expect(
+      parentData.positionedChildConstraints(stackSize),
+      const BoxConstraints.tightFor(width: 800.0),
+    );
 
     parentData.height = -100.0;
-    expect(parentData.positionedChildConstraints(stackSize), const BoxConstraints.tightFor(width: 800.0, height: 0.0));
+    expect(
+      parentData.positionedChildConstraints(stackSize),
+      const BoxConstraints.tightFor(width: 800.0, height: 0.0),
+    );
 
     parentData.height = 100.0;
-    expect(parentData.positionedChildConstraints(stackSize), const BoxConstraints.tightFor(width: 800.0, height: 100.0));
+    expect(
+      parentData.positionedChildConstraints(stackSize),
+      const BoxConstraints.tightFor(width: 800.0, height: 100.0),
+    );
 
     parentData.top = 0.0;
     parentData.bottom = 0.0;
-    expect(parentData.positionedChildConstraints(stackSize), const BoxConstraints.tightFor(width: 800.0, height: 600.0));
+    expect(
+      parentData.positionedChildConstraints(stackSize),
+      const BoxConstraints.tightFor(width: 800.0, height: 600.0),
+    );
 
     parentData.bottom = 1000.0;
-    expect(parentData.positionedChildConstraints(stackSize), const BoxConstraints.tightFor(width: 800.0, height: 0.0));
+    expect(
+      parentData.positionedChildConstraints(stackSize),
+      const BoxConstraints.tightFor(width: 800.0, height: 0.0),
+    );
   });
 
   test('Stack can layout with top, right, bottom, left 0.0', () {
@@ -46,23 +67,19 @@ void main() {
     );
 
     final RenderBox red = RenderDecoratedBox(
-      decoration: const BoxDecoration(
-        color: Color(0xFFFF0000),
-      ),
+      decoration: const BoxDecoration(color: Color(0xFFFF0000)),
       child: size,
     );
 
     final RenderBox green = RenderDecoratedBox(
-      decoration: const BoxDecoration(
-        color: Color(0xFFFF0000),
-      ),
+      decoration: const BoxDecoration(color: Color(0xFFFF0000)),
     );
 
     final RenderBox stack = RenderStack(
       textDirection: TextDirection.ltr,
       children: <RenderBox>[red, green],
     );
-    final StackParentData greenParentData = green.parentData! as StackParentData;
+    final greenParentData = green.parentData! as StackParentData;
     greenParentData
       ..top = 0.0
       ..right = 0.0
@@ -82,10 +99,7 @@ void main() {
   });
 
   test('Stack can layout with no children', () {
-    final RenderBox stack = RenderStack(
-      textDirection: TextDirection.ltr,
-      children: <RenderBox>[],
-    );
+    final RenderBox stack = RenderStack(textDirection: TextDirection.ltr, children: <RenderBox>[]);
 
     layout(stack, constraints: BoxConstraints.tight(const Size(100.0, 100.0)));
 
@@ -94,13 +108,13 @@ void main() {
   });
 
   test('Stack has correct clipBehavior', () {
-    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    const viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
 
-    for (final Clip? clip in <Clip?>[null, ...Clip.values]) {
-      final TestClipPaintingContext context = TestClipPaintingContext();
+    for (final clip in <Clip?>[null, ...Clip.values]) {
+      final context = TestClipPaintingContext();
       final RenderBox child = box200x200;
       final RenderStack stack;
-      switch (clip){
+      switch (clip) {
         case Clip.none:
         case Clip.hardEdge:
         case Clip.antiAlias:
@@ -111,16 +125,19 @@ void main() {
             clipBehavior: clip!,
           );
         case null:
-          stack = RenderStack(
-            textDirection: TextDirection.ltr,
-            children: <RenderBox>[child],
-          );
+          stack = RenderStack(textDirection: TextDirection.ltr, children: <RenderBox>[child]);
       }
-      { // Make sure that the child is positioned so the stack will consider it as overflowed.
-        final StackParentData parentData = child.parentData! as StackParentData;
+      {
+        // Make sure that the child is positioned so the stack will consider it as overflowed.
+        final parentData = child.parentData! as StackParentData;
         parentData.left = parentData.right = 0;
       }
-      layout(stack, constraints: viewport, phase: EnginePhase.composite, onErrors: expectNoFlutterErrors);
+      layout(
+        stack,
+        constraints: viewport,
+        phase: EnginePhase.composite,
+        onErrors: expectNoFlutterErrors,
+      );
       context.paintChild(stack, Offset.zero);
       // By default, clipBehavior should be Clip.hardEdge
       expect(context.clipBehavior, equals(clip ?? Clip.hardEdge), reason: 'for $clip');
@@ -144,7 +161,7 @@ void main() {
         children: <RenderBox>[child1, child2, child3],
       );
 
-      final List<RenderObject> visitedChildren = <RenderObject>[];
+      final visitedChildren = <RenderObject>[];
       void visitor(RenderObject child) {
         visitedChildren.add(child);
       }
@@ -215,24 +232,19 @@ void main() {
 
   test('Stack in Flex can layout with no children', () {
     // Render an empty Stack in a Flex
-    final RenderFlex flex = RenderFlex(
+    final flex = RenderFlex(
       textDirection: TextDirection.ltr,
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: <RenderBox>[
-        RenderStack(
-          textDirection: TextDirection.ltr,
-          children: <RenderBox>[],
-        ),
-      ]
+      children: <RenderBox>[RenderStack(textDirection: TextDirection.ltr, children: <RenderBox>[])],
     );
 
-    bool stackFlutterErrorThrown = false;
+    var stackFlutterErrorThrown = false;
     layout(
       flex,
       constraints: BoxConstraints.tight(const Size(100.0, 100.0)),
       onErrors: () {
         stackFlutterErrorThrown = true;
-      }
+      },
     );
 
     expect(stackFlutterErrorThrown, false);

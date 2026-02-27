@@ -145,7 +145,7 @@
   "menuDismissLabel": "Ketepikan menu",
   "lookUpButtonLabel": "Lihat ke Atas",
   "searchWebButtonLabel": "Buat carian pada Web",
-  "shareButtonLabel": "Kongsi...",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "Kongsi",
+  "clearButtonTooltip": "Kosongkan teks",
+  "selectedDateLabel": "Dipilih"
 }

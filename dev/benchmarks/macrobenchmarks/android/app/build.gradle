@@ -26,12 +26,13 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.example.macrobenchmarks"
-    compileSdk flutter.compileSdkVersion
+    namespace = "com.example.macrobenchmarks"
+    compileSdk = flutter.compileSdkVersion
+
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     defaultConfig {
@@ -46,13 +47,13 @@ android {
     buildTypes {
         release {
             // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
+            signingConfig = signingConfigs.debug
         }
     }
 }
 
 flutter {
-    source '../..'
+    source = '../..'
 }
 
 dependencies {

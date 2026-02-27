@@ -16,11 +16,9 @@ class IconButtonApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
+      theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4)),
       title: 'Icon Button Types',
-      home: const Scaffold(
-        body: ButtonTypesExample(),
-      ),
+      home: const Scaffold(body: ButtonTypesExample()),
     );
   }
 }
@@ -58,16 +56,28 @@ class ButtonTypesGroup extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
-          IconButton(icon: const Icon(Icons.filter_drama), onPressed: onPressed),
+          IconButton(
+            icon: const Icon(Icons.filter_drama),
+            onPressed: onPressed,
+          ),
 
           // Filled icon button
-          IconButton.filled(onPressed: onPressed, icon: const Icon(Icons.filter_drama)),
+          IconButton.filled(
+            onPressed: onPressed,
+            icon: const Icon(Icons.filter_drama),
+          ),
 
           // Filled tonal icon button
-          IconButton.filledTonal(onPressed: onPressed, icon: const Icon(Icons.filter_drama)),
+          IconButton.filledTonal(
+            onPressed: onPressed,
+            icon: const Icon(Icons.filter_drama),
+          ),
 
           // Outlined icon button
-          IconButton.outlined(onPressed: onPressed, icon: const Icon(Icons.filter_drama)),
+          IconButton.outlined(
+            onPressed: onPressed,
+            icon: const Icon(Icons.filter_drama),
+          ),
         ],
       ),
     );

@@ -6,7 +6,6 @@ import 'package:archive/archive.dart';
 
 import '../application_package.dart';
 import '../base/file_system.dart';
-import '../base/utils.dart';
 import '../build_info.dart';
 import '../cmake.dart';
 import '../cmake_project.dart';
@@ -17,9 +16,7 @@ abstract class WindowsApp extends ApplicationPackage {
 
   /// Creates a new [WindowsApp] from a windows sub project.
   factory WindowsApp.fromWindowsProject(WindowsProject project) {
-    return BuildableWindowsApp(
-      project: project,
-    );
+    return BuildableWindowsApp(project: project);
   }
 
   /// Creates a new [WindowsApp] from an existing executable or a zip archive.
@@ -52,7 +49,7 @@ abstract class WindowsApp extends ApplicationPackage {
       globals.printError('Invalid prebuilt Windows app. Unable to extract from archive.');
       return null;
     }
-    final List<FileSystemEntity> exeFilesFound = <FileSystemEntity>[
+    final exeFilesFound = <FileSystemEntity>[
       for (final FileSystemEntity file in tempDir.listSync())
         if (file.basename.endsWith('.exe')) file,
     ];
@@ -80,11 +77,9 @@ abstract class WindowsApp extends ApplicationPackage {
 }
 
 class PrebuiltWindowsApp extends WindowsApp implements PrebuiltApplicationPackage {
-  PrebuiltWindowsApp({
-    required String executable,
-    required this.applicationPackage,
-  }) : _executable = executable,
-       super(projectBundleId: executable);
+  PrebuiltWindowsApp({required String executable, required this.applicationPackage})
+    : _executable = executable,
+      super(projectBundleId: executable);
 
   final String _executable;
 
@@ -99,9 +94,8 @@ class PrebuiltWindowsApp extends WindowsApp implements PrebuiltApplicationPackag
 }
 
 class BuildableWindowsApp extends WindowsApp {
-  BuildableWindowsApp({
-    required this.project,
-  }) : super(projectBundleId: project.parent.manifest.appName);
+  BuildableWindowsApp({required this.project})
+    : super(projectBundleId: project.parent.manifest.appName);
 
   final WindowsProject project;
 
@@ -109,10 +103,10 @@ class BuildableWindowsApp extends WindowsApp {
   String executable(BuildMode buildMode, TargetPlatform targetPlatform) {
     final String? binaryName = getCmakeExecutableName(project);
     return globals.fs.path.join(
-        getWindowsBuildDirectory(targetPlatform),
-        'runner',
-        sentenceCase(buildMode.cliName),
-        '$binaryName.exe',
+      getWindowsBuildDirectory(targetPlatform),
+      'runner',
+      buildMode.uppercaseName,
+      '$binaryName.exe',
     );
   }
 

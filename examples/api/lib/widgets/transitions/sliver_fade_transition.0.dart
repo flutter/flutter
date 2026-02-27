@@ -16,9 +16,7 @@ class SliverFadeTransitionExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('SliverFadeTransition Sample')),
-        body: const Center(
-          child: SliverFadeTransitionExample(),
-        ),
+        body: const Center(child: SliverFadeTransitionExample()),
       ),
     );
   }
@@ -28,10 +26,13 @@ class SliverFadeTransitionExample extends StatefulWidget {
   const SliverFadeTransitionExample({super.key});
 
   @override
-  State<SliverFadeTransitionExample> createState() => _SliverFadeTransitionExampleState();
+  State<SliverFadeTransitionExample> createState() =>
+      _SliverFadeTransitionExampleState();
 }
 
-class _SliverFadeTransitionExampleState extends State<SliverFadeTransitionExample> with SingleTickerProviderStateMixin {
+class _SliverFadeTransitionExampleState
+    extends State<SliverFadeTransitionExample>
+    with SingleTickerProviderStateMixin {
   late final AnimationController controller = AnimationController(
     duration: const Duration(milliseconds: 1000),
     vsync: this,
@@ -62,21 +63,21 @@ class _SliverFadeTransitionExampleState extends State<SliverFadeTransitionExampl
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(slivers: <Widget>[
-      SliverFadeTransition(
-        opacity: animation,
-        sliver: SliverFixedExtentList(
-          itemExtent: 100.0,
-          delegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) {
+    return CustomScrollView(
+      slivers: <Widget>[
+        SliverFadeTransition(
+          opacity: animation,
+          sliver: SliverFixedExtentList.builder(
+            itemExtent: 100.0,
+            itemCount: 5,
+            itemBuilder: (BuildContext context, int index) {
               return Container(
                 color: index.isEven ? Colors.indigo[200] : Colors.orange[200],
               );
             },
-            childCount: 5,
           ),
         ),
-      ),
-    ]);
+      ],
+    );
   }
 }

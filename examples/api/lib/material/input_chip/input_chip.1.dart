@@ -25,10 +25,7 @@ class EditableChipFieldApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(useMaterial3: true),
-      home: const EditableChipFieldExample(),
-    );
+    return const MaterialApp(home: EditableChipFieldExample());
   }
 }
 
@@ -49,9 +46,7 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Editable Chip Field Sample'),
-      ),
+      appBar: AppBar(title: const Text('Editable Chip Field Sample')),
       body: Column(
         children: <Widget>[
           Padding(
@@ -189,10 +184,9 @@ class ChipsInputState<T> extends State<ChipsInput<T>> {
   void initState() {
     super.initState();
 
-    controller = ChipsInputEditingController<T>(
-      <T>[...widget.values],
-      widget.chipBuilder,
-    );
+    controller = ChipsInputEditingController<T>(<T>[
+      ...widget.values,
+    ], widget.chipBuilder);
     controller.addListener(_textListener);
   }
 
@@ -240,8 +234,10 @@ class ChipsInputState<T> extends State<ChipsInput<T>> {
 
   static int countReplacements(String text) {
     return text.codeUnits
-      .where((int u) => u == ChipsInputEditingController.kObjectReplacementChar)
-      .length;
+        .where(
+          (int u) => u == ChipsInputEditingController.kObjectReplacementChar,
+        )
+        .length;
   }
 
   @override
@@ -265,9 +261,7 @@ class ChipsInputState<T> extends State<ChipsInput<T>> {
 
 class ChipsInputEditingController<T> extends TextEditingController {
   ChipsInputEditingController(this.values, this.chipBuilder)
-      : super(
-          text: String.fromCharCode(kObjectReplacementChar) * values.length,
-        );
+    : super(text: String.fromCharCode(kObjectReplacementChar) * values.length);
 
   // This constant character acts as a placeholder in the TextField text value.
   // There will be one character for each of the InputChip displayed.
@@ -299,18 +293,21 @@ class ChipsInputEditingController<T> extends TextEditingController {
   String get textWithReplacements => text;
 
   @override
-  TextSpan buildTextSpan(
-      {required BuildContext context, TextStyle? style, required bool withComposing}) {
-
-    final Iterable<WidgetSpan> chipWidgets =
-        values.map((T v) => WidgetSpan(child: chipBuilder(context, v)));
+  TextSpan buildTextSpan({
+    required BuildContext context,
+    TextStyle? style,
+    required bool withComposing,
+  }) {
+    final Iterable<WidgetSpan> chipWidgets = values.map(
+      (T v) => WidgetSpan(child: chipBuilder(context, v)),
+    );
 
     return TextSpan(
       style: style,
       children: <InlineSpan>[
         ...chipWidgets,
         if (textWithoutReplacements.isNotEmpty)
-          TextSpan(text: textWithoutReplacements)
+          TextSpan(text: textWithoutReplacements),
       ],
     );
   }
@@ -326,11 +323,7 @@ class ToppingSuggestion extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       key: ObjectKey(topping),
-      leading: CircleAvatar(
-        child: Text(
-          topping[0].toUpperCase(),
-        ),
-      ),
+      leading: CircleAvatar(child: Text(topping[0].toUpperCase())),
       title: Text(topping),
       onTap: () => onTap?.call(topping),
     );
@@ -356,9 +349,7 @@ class ToppingInputChip extends StatelessWidget {
       child: InputChip(
         key: ObjectKey(topping),
         label: Text(topping),
-        avatar: CircleAvatar(
-          child: Text(topping[0].toUpperCase()),
-        ),
+        avatar: CircleAvatar(child: Text(topping[0].toUpperCase())),
         onDeleted: () => onDeleted(topping),
         onSelected: (bool value) => onSelected(topping),
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,

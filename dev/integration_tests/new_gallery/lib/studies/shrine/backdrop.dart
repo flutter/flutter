@@ -16,10 +16,7 @@ const double _peakVelocityTime = 0.248210;
 const double _peakVelocityProgress = 0.379146;
 
 class _FrontLayer extends StatelessWidget {
-  const _FrontLayer({
-    this.onTap,
-    required this.child,
-  });
+  const _FrontLayer({this.onTap, required this.child});
 
   final VoidCallback? onTap;
   final Widget child;
@@ -29,33 +26,30 @@ class _FrontLayer extends StatelessWidget {
     // An area at the top of the product page.
     // When the menu page is shown, tapping this area will close the menu
     // page and reveal the product page.
-    final Widget pageTopArea = Container(
-      height: 40,
-      alignment: AlignmentDirectional.centerStart,
-    );
+    final Widget pageTopArea = Container(height: 40, alignment: AlignmentDirectional.centerStart);
 
     return Material(
       elevation: 16,
       shape: const BeveledRectangleBorder(
-        borderRadius:
-            BorderRadiusDirectional.only(topStart: Radius.circular(46)),
+        borderRadius: BorderRadiusDirectional.only(topStart: Radius.circular(46)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          if (onTap != null) MouseRegion(
-                  cursor: SystemMouseCursors.click,
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    excludeFromSemantics:
-                        true, // Because there is already a "Close Menu" button on screen.
-                    onTap: onTap,
-                    child: pageTopArea,
-                  ),
-                ) else pageTopArea,
-          Expanded(
-            child: child,
-          ),
+          if (onTap != null)
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                excludeFromSemantics:
+                    true, // Because there is already a "Close Menu" button on screen.
+                onTap: onTap,
+                child: pageTopArea,
+              ),
+            )
+          else
+            pageTopArea,
+          Expanded(child: child),
         ],
       ),
     );
@@ -81,92 +75,85 @@ class _BackdropTitle extends AnimatedWidget {
       curve: const Interval(0, 0.78),
     );
 
-    final int textDirectionScalar =
-        Directionality.of(context) == TextDirection.ltr ? 1 : -1;
+    final textDirectionScalar = Directionality.of(context) == TextDirection.ltr ? 1 : -1;
 
-    const ImageIcon slantedMenuIcon =
-        ImageIcon(AssetImage('packages/shrine_images/slanted_menu.png'));
+    const slantedMenuIcon = ImageIcon(AssetImage('packages/shrine_images/slanted_menu.png'));
 
-    final Widget directionalSlantedMenuIcon =
-        Directionality.of(context) == TextDirection.ltr
-            ? slantedMenuIcon
-            : Transform(
-                alignment: Alignment.center,
-                transform: Matrix4.rotationY(pi),
-                child: slantedMenuIcon,
-              );
+    final Widget directionalSlantedMenuIcon = Directionality.of(context) == TextDirection.ltr
+        ? slantedMenuIcon
+        : Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.rotationY(pi),
+            child: slantedMenuIcon,
+          );
 
     final String? menuButtonTooltip = animation.isCompleted
         ? GalleryLocalizations.of(context)!.shrineTooltipOpenMenu
         : animation.isDismissed
-            ? GalleryLocalizations.of(context)!.shrineTooltipCloseMenu
-            : null;
+        ? GalleryLocalizations.of(context)!.shrineTooltipCloseMenu
+        : null;
 
     return DefaultTextStyle(
       style: Theme.of(context).primaryTextTheme.titleLarge!,
       softWrap: false,
       overflow: TextOverflow.ellipsis,
-      child: Row(children: <Widget>[
-        // branded icon
-        SizedBox(
-          width: 72,
-          child: Semantics(
-            container: true,
-            child: IconButton(
-              padding: const EdgeInsetsDirectional.only(end: 8),
-              onPressed: onPress,
-              tooltip: menuButtonTooltip,
-              icon: Stack(children: <Widget>[
-                Opacity(
-                  opacity: animation.value,
-                  child: directionalSlantedMenuIcon,
+      child: Row(
+        children: <Widget>[
+          // branded icon
+          SizedBox(
+            width: 72,
+            child: Semantics(
+              container: true,
+              child: IconButton(
+                padding: const EdgeInsetsDirectional.only(end: 8),
+                onPressed: onPress,
+                tooltip: menuButtonTooltip,
+                icon: Stack(
+                  children: <Widget>[
+                    Opacity(opacity: animation.value, child: directionalSlantedMenuIcon),
+                    FractionalTranslation(
+                      translation: Tween<Offset>(
+                        begin: Offset.zero,
+                        end: Offset(1.0 * textDirectionScalar, 0.0),
+                      ).evaluate(animation),
+                      child: const ImageIcon(AssetImage('packages/shrine_images/diamond.png')),
+                    ),
+                  ],
                 ),
-                FractionalTranslation(
-                  translation: Tween<Offset>(
-                    begin: Offset.zero,
-                    end: Offset(1.0 * textDirectionScalar, 0.0),
-                  ).evaluate(animation),
-                  child: const ImageIcon(
-                    AssetImage('packages/shrine_images/diamond.png'),
-                  ),
-                ),
-              ]),
+              ),
             ),
           ),
-        ),
-        // Here, we do a custom cross fade between backTitle and frontTitle.
-        // This makes a smooth animation between the two texts.
-        Stack(
-          children: <Widget>[
-            Opacity(
-              opacity: CurvedAnimation(
-                parent: ReverseAnimation(animation),
-                curve: const Interval(0.5, 1),
-              ).value,
-              child: FractionalTranslation(
-                translation: Tween<Offset>(
-                  begin: Offset.zero,
-                  end: Offset(0.5 * textDirectionScalar, 0),
-                ).evaluate(animation),
-                child: backTitle,
+          // Here, we do a custom cross fade between backTitle and frontTitle.
+          // This makes a smooth animation between the two texts.
+          Stack(
+            children: <Widget>[
+              Opacity(
+                opacity: CurvedAnimation(
+                  parent: ReverseAnimation(animation),
+                  curve: const Interval(0.5, 1),
+                ).value,
+                child: FractionalTranslation(
+                  translation: Tween<Offset>(
+                    begin: Offset.zero,
+                    end: Offset(0.5 * textDirectionScalar, 0),
+                  ).evaluate(animation),
+                  child: backTitle,
+                ),
               ),
-            ),
-            Opacity(
-              opacity: CurvedAnimation(
-                parent: animation,
-                curve: const Interval(0.5, 1),
-              ).value,
-              child: FractionalTranslation(
-                translation: Tween<Offset>(
-                  begin: Offset(-0.25 * textDirectionScalar, 0),
-                  end: Offset.zero,
-                ).evaluate(animation),
-                child: frontTitle,
+              Opacity(
+                opacity: CurvedAnimation(parent: animation, curve: const Interval(0.5, 1)).value,
+                child: FractionalTranslation(
+                  translation: Tween<Offset>(
+                    begin: Offset(-0.25 * textDirectionScalar, 0),
+                    end: Offset.zero,
+                  ).evaluate(animation),
+                  child: frontTitle,
+                ),
               ),
-            ),
-          ],
-        ),
-      ]),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -197,8 +184,7 @@ class Backdrop extends StatefulWidget {
   State<Backdrop> createState() => _BackdropState();
 }
 
-class _BackdropState extends State<Backdrop>
-    with SingleTickerProviderStateMixin {
+class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin {
   final GlobalKey _backdropKey = GlobalKey(debugLabel: 'Backdrop');
   late AnimationController _controller;
   late Animation<RelativeRect> _layerAnimation;
@@ -211,8 +197,7 @@ class _BackdropState extends State<Backdrop>
 
   bool get _frontLayerVisible {
     final AnimationStatus status = _controller.status;
-    return status == AnimationStatus.completed ||
-        status == AnimationStatus.forward;
+    return status == AnimationStatus.completed || status == AnimationStatus.forward;
   }
 
   void _toggleBackdropLayerVisibility() {
@@ -237,10 +222,7 @@ class _BackdropState extends State<Backdrop>
       secondCurve = _decelerateCurve;
       firstWeight = _peakVelocityTime;
       secondWeight = 1 - _peakVelocityTime;
-      animation = CurvedAnimation(
-        parent: _controller.view,
-        curve: const Interval(0, 0.78),
-      );
+      animation = CurvedAnimation(parent: _controller.view, curve: const Interval(0, 0.78));
     } else {
       // These values are only used when the controller runs from t=1.0 to t=0.0
       firstCurve = _decelerateCurve.flipped;
@@ -250,43 +232,36 @@ class _BackdropState extends State<Backdrop>
       animation = _controller.view;
     }
 
-    return TweenSequence<RelativeRect>(
-      <TweenSequenceItem<RelativeRect>>[
-        TweenSequenceItem<RelativeRect>(
-          tween: RelativeRectTween(
-            begin: RelativeRect.fromLTRB(
-              0,
-              layerTop,
-              0,
-              layerTop - layerSize.height,
-            ),
-            end: RelativeRect.fromLTRB(
-              0,
-              layerTop * _peakVelocityProgress,
-              0,
-              (layerTop - layerSize.height) * _peakVelocityProgress,
-            ),
-          ).chain(CurveTween(curve: firstCurve)),
-          weight: firstWeight,
-        ),
-        TweenSequenceItem<RelativeRect>(
-          tween: RelativeRectTween(
-            begin: RelativeRect.fromLTRB(
-              0,
-              layerTop * _peakVelocityProgress,
-              0,
-              (layerTop - layerSize.height) * _peakVelocityProgress,
-            ),
-            end: RelativeRect.fill,
-          ).chain(CurveTween(curve: secondCurve)),
-          weight: secondWeight,
-        ),
-      ],
-    ).animate(animation);
+    return TweenSequence<RelativeRect>(<TweenSequenceItem<RelativeRect>>[
+      TweenSequenceItem<RelativeRect>(
+        tween: RelativeRectTween(
+          begin: RelativeRect.fromLTRB(0, layerTop, 0, layerTop - layerSize.height),
+          end: RelativeRect.fromLTRB(
+            0,
+            layerTop * _peakVelocityProgress,
+            0,
+            (layerTop - layerSize.height) * _peakVelocityProgress,
+          ),
+        ).chain(CurveTween(curve: firstCurve)),
+        weight: firstWeight,
+      ),
+      TweenSequenceItem<RelativeRect>(
+        tween: RelativeRectTween(
+          begin: RelativeRect.fromLTRB(
+            0,
+            layerTop * _peakVelocityProgress,
+            0,
+            (layerTop - layerSize.height) * _peakVelocityProgress,
+          ),
+          end: RelativeRect.fill,
+        ).chain(CurveTween(curve: secondCurve)),
+        weight: secondWeight,
+      ),
+    ]).animate(animation);
   }
 
   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
-    const int layerTitleHeight = 48;
+    const layerTitleHeight = 48;
     final Size layerSize = constraints.biggest;
     final double layerTop = layerSize.height - layerTitleHeight;
 
@@ -295,10 +270,7 @@ class _BackdropState extends State<Backdrop>
     return Stack(
       key: _backdropKey,
       children: <Widget>[
-        ExcludeSemantics(
-          excluding: _frontLayerVisible,
-          child: widget.backLayer,
-        ),
+        ExcludeSemantics(excluding: _frontLayerVisible, child: widget.backLayer),
         PositionedTransition(
           rect: _layerAnimation,
           child: ExcludeSemantics(
@@ -308,9 +280,7 @@ class _BackdropState extends State<Backdrop>
               builder: (BuildContext context, Widget? child) => AnimatedBuilder(
                 animation: PageStatus.of(context)!.menuController,
                 builder: (BuildContext context, Widget? child) => _FrontLayer(
-                  onTap: menuPageIsVisible(context)
-                      ? _toggleBackdropLayerVisibility
-                      : null,
+                  onTap: menuPageIsVisible(context) ? _toggleBackdropLayerVisibility : null,
                   child: widget.frontLayer,
                 ),
               ),
@@ -323,7 +293,7 @@ class _BackdropState extends State<Backdrop>
 
   @override
   Widget build(BuildContext context) {
-    final AppBar appBar = AppBar(
+    final appBar = AppBar(
       automaticallyImplyLeading: false,
       systemOverlayStyle: SystemUiOverlayStyle.dark,
       elevation: 0,
@@ -353,9 +323,7 @@ class _BackdropState extends State<Backdrop>
         excluding: cartPageIsVisible(context),
         child: Scaffold(
           appBar: appBar,
-          body: LayoutBuilder(
-            builder: _buildStack,
-          ),
+          body: LayoutBuilder(builder: _buildStack),
         ),
       ),
     );
@@ -363,11 +331,7 @@ class _BackdropState extends State<Backdrop>
 }
 
 class DesktopBackdrop extends StatelessWidget {
-  const DesktopBackdrop({
-    super.key,
-    required this.frontLayer,
-    required this.backLayer,
-  });
+  const DesktopBackdrop({super.key, required this.frontLayer, required this.backLayer});
 
   final Widget frontLayer;
   final Widget backLayer;
@@ -381,12 +345,8 @@ class DesktopBackdrop extends StatelessWidget {
           padding: EdgeInsetsDirectional.only(
             start: desktopCategoryMenuPageWidth(context: context),
           ),
-          child: Material(
-            elevation: 16,
-            color: Colors.white,
-            child: frontLayer,
-          ),
-        )
+          child: Material(elevation: 16, color: Colors.white, child: frontLayer),
+        ),
       ],
     );
   }

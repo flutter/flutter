@@ -7,10 +7,10 @@ import 'package:flutter_api_samples/material/badge/badge.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Verify Badges have label and count', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.BadgeExampleApp(),
-    );
+  testWidgets('Verify Badges have label and count', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.BadgeExampleApp());
     // Verify that two Badge(s) are present
     expect(find.byType(Badge), findsNWidgets(2));
 

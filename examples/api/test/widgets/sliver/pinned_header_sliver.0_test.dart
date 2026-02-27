@@ -3,14 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/sliver/pinned_header_sliver.0.dart' as example;
+import 'package:flutter_api_samples/widgets/sliver/pinned_header_sliver.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('PinnedHeaderSliver example', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.PinnedHeaderSliverApp(),
-    );
+    await tester.pumpWidget(const example.PinnedHeaderSliverApp());
 
     expect(find.text('PinnedHeaderSliver'), findsOneWidget);
 

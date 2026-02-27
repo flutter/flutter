@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'package:file/local.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 
@@ -11,6 +12,8 @@ import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart' as platform;
 
 import 'package:process/process.dart';
+
+import 'utils.dart';
 
 class CommandException implements Exception {}
 
@@ -32,38 +35,32 @@ Future<void> postProcess() async {
   }
   final String checkoutPath = Platform.environment['SDK_CHECKOUT_PATH']!;
   final String docsPath = path.join(checkoutPath, 'dev', 'docs');
-  await runProcessWithValidations(
-    <String>[
-      'curl',
-      '-L',
-      'https://storage.googleapis.com/flutter_infra_release/flutter/$revision/api_docs.zip',
-      '--output',
-      zipDestination,
-      '--fail',
-    ],
-    docsPath,
-  );
+  await runProcessWithValidations(<String>[
+    'curl',
+    '-L',
+    'https://storage.googleapis.com/flutter_infra_release/flutter/$revision/api_docs.zip',
+    '--output',
+    zipDestination,
+    '--fail',
+  ], docsPath);
 
   // Unzip to docs folder.
-  await runProcessWithValidations(
-    <String>[
-      'unzip',
-      '-o',
-      zipDestination,
-    ],
-    docsPath,
-  );
+  await runProcessWithValidations(<String>['unzip', '-o', zipDestination], docsPath);
 
   // Generate versions file.
-  await runProcessWithValidations(
-    <String>['flutter', '--version'],
-    docsPath,
-  );
-  final File versionFile = File('version');
-  final String version = versionFile.readAsStringSync();
+  await runProcessWithValidations(<String>['flutter', '--version'], docsPath);
+  final String version;
+  switch (await Version.resolveIn(const LocalFileSystem().directory(checkoutPath))) {
+    case VersionError(:final String error):
+      print('Could not read flutter version: $error');
+      exit(1);
+    case VersionOk(version: final String parsedVersion):
+      version = parsedVersion;
+  }
+
   // Recreate footer
   final String publishPath = path.join(docsPath, '..', 'docs', 'doc', 'flutter', 'footer.js');
-  final File footerFile = File(publishPath)..createSync(recursive: true);
+  final footerFile = File(publishPath)..createSync(recursive: true);
   createFooter(footerFile, version);
 }
 
@@ -74,7 +71,7 @@ Future<String> gitRevision({
   @visibleForTesting platform.Platform platform = const platform.LocalPlatform(),
   @visibleForTesting ProcessManager processManager = const LocalProcessManager(),
 }) async {
-  const int kGitRevisionLength = 10;
+  const kGitRevisionLength = 10;
 
   final ProcessResult gitResult = processManager.runSync(<String>['git', 'rev-parse', 'HEAD']);
   if (gitResult.exitCode != 0) {
@@ -84,7 +81,9 @@ Future<String> gitRevision({
   if (fullLength) {
     return gitRevision;
   }
-  return gitRevision.length > kGitRevisionLength ? gitRevision.substring(0, kGitRevisionLength) : gitRevision;
+  return gitRevision.length > kGitRevisionLength
+      ? gitRevision.substring(0, kGitRevisionLength)
+      : gitRevision;
 }
 
 /// Wrapper function to run a subprocess checking exit code and printing stderr and stdout.
@@ -96,8 +95,11 @@ Future<void> runProcessWithValidations(
   @visibleForTesting ProcessManager processManager = const LocalProcessManager(),
   bool verbose = true,
 }) async {
-  final ProcessResult result =
-      processManager.runSync(command, stdoutEncoding: utf8, workingDirectory: workingDirectory);
+  final ProcessResult result = processManager.runSync(
+    command,
+    stdoutEncoding: utf8,
+    workingDirectory: workingDirectory,
+  );
   if (result.exitCode == 0) {
     if (verbose) {
       print('stdout: ${result.stdout}');
@@ -118,30 +120,40 @@ Future<String> getBranchName({
   @visibleForTesting platform.Platform platform = const platform.LocalPlatform(),
   @visibleForTesting ProcessManager processManager = const LocalProcessManager(),
 }) async {
-  final RegExp gitBranchRegexp = RegExp(r'^## (.*)');
+  final gitBranchRegexp = RegExp(r'^## (.*)');
   final String? luciBranch = platform.environment['LUCI_BRANCH'];
   if (luciBranch != null && luciBranch.trim().isNotEmpty) {
     return luciBranch.trim();
   }
-  final ProcessResult gitResult = processManager.runSync(<String>['git', 'status', '-b', '--porcelain']);
+  final ProcessResult gitResult = processManager.runSync(<String>[
+    'git',
+    'status',
+    '-b',
+    '--porcelain',
+  ]);
   if (gitResult.exitCode != 0) {
     throw 'git status exit with non-zero exit code: ${gitResult.exitCode}';
   }
-  final RegExpMatch? gitBranchMatch = gitBranchRegexp.firstMatch((gitResult.stdout as String).trim().split('\n').first);
+  final RegExpMatch? gitBranchMatch = gitBranchRegexp.firstMatch(
+    (gitResult.stdout as String).trim().split('\n').first,
+  );
   return gitBranchMatch == null ? '' : gitBranchMatch.group(1)!.split('...').first;
 }
 
 /// Updates the footer of the api documentation with the correct branch and versions.
 /// [footerPath] is the path to the location of the footer js file and [version] is a
 /// string with the version calculated by the flutter tool.
-Future<void> createFooter(File footerFile, String version,
-    {@visibleForTesting String? timestampParam,
-    @visibleForTesting String? branchParam,
-    @visibleForTesting String? revisionParam}) async {
+Future<void> createFooter(
+  File footerFile,
+  String version, {
+  @visibleForTesting String? timestampParam,
+  @visibleForTesting String? branchParam,
+  @visibleForTesting String? revisionParam,
+}) async {
   final String timestamp = timestampParam ?? DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
   final String gitBranch = branchParam ?? await getBranchName();
   final String revision = revisionParam ?? await gitRevision();
-  final String gitBranchOut = gitBranch.isEmpty ? '' : '• $gitBranch';
+  final gitBranchOut = gitBranch.isEmpty ? '' : '• $gitBranch';
   footerFile.writeAsStringSync('''
 (function() {
   var span = document.querySelector('footer>span');

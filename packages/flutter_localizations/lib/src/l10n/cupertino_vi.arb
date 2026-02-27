@@ -27,5 +27,13 @@
   "lookUpButtonLabel": "Tra cứu",
   "searchWebButtonLabel": "Tìm kiếm trên web",
   "shareButtonLabel": "Chia sẻ...",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "Xoá",
+  "cancelButtonLabel": "Huỷ",
+  "backButtonLabel": "Quay lại",
+  "expansionTileExpandedHint": "nhấn đúp để thu gọn",
+  "expansionTileCollapsedHint": "nhấn đúp để mở rộng",
+  "expansionTileExpandedTapHint": "Thu gọn",
+  "expansionTileCollapsedTapHint": "Mở rộng để xem thêm chi tiết",
+  "expandedHint": "Đã thu gọn",
+  "collapsedHint": "Đã mở rộng"
 }

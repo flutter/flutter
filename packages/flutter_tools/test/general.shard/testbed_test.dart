@@ -18,9 +18,8 @@ import '../src/testbed.dart';
 
 void main() {
   group('Testbed', () {
-
     test('Can provide default interfaces', () async {
-      final Testbed testbed = Testbed();
+      final testbed = TestBed();
 
       late FileSystem localFileSystem;
       await testbed.run(() {
@@ -28,14 +27,11 @@ void main() {
       });
 
       expect(localFileSystem, isA<ErrorHandlingFileSystem>());
-      expect((localFileSystem as ErrorHandlingFileSystem).fileSystem,
-             isA<MemoryFileSystem>());
+      expect((localFileSystem as ErrorHandlingFileSystem).fileSystem, isA<MemoryFileSystem>());
     });
 
     test('Can provide setup interfaces', () async {
-      final Testbed testbed = Testbed(overrides: <Type, Generator>{
-        A: () => A(),
-      });
+      final testbed = TestBed(overrides: <Type, Generator>{A: () => A()});
 
       A? instance;
       await testbed.run(() {
@@ -46,24 +42,20 @@ void main() {
     });
 
     test('Can provide local overrides', () async {
-      final Testbed testbed = Testbed(overrides: <Type, Generator>{
-        A: () => A(),
-      });
+      final testbed = TestBed(overrides: <Type, Generator>{A: () => A()});
 
       A? instance;
       await testbed.run(() {
         instance = context.get<A>();
-      }, overrides: <Type, Generator>{
-        A: () => B(),
-      });
+      }, overrides: <Type, Generator>{A: () => B()});
 
       expect(instance, isA<B>());
     });
 
     test('provides a mocked http client', () async {
-      final Testbed testbed = Testbed();
+      final testbed = TestBed();
       await testbed.run(() async {
-        final HttpClient client = HttpClient();
+        final client = HttpClient();
         final HttpClientRequest request = await client.getUrl(Uri.parse('http://foo.dev'));
         final HttpClientResponse response = await request.close();
 
@@ -73,32 +65,33 @@ void main() {
     });
 
     test('Throws StateError if Timer is left pending', () async {
-      final Testbed testbed = Testbed();
+      final testbed = TestBed();
 
-      expect(testbed.run(() async {
-        Timer.periodic(const Duration(seconds: 1), (Timer timer) { });
-      }), throwsStateError);
+      expect(
+        testbed.run(() async {
+          Timer.periodic(const Duration(seconds: 1), (Timer timer) {});
+        }),
+        throwsStateError,
+      );
     });
 
     test("Doesn't throw a StateError if Timer is left cleaned up", () async {
-      final Testbed testbed = Testbed();
+      final testbed = TestBed();
 
       await testbed.run(() async {
-        final Timer timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) { });
+        final timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {});
         timer.cancel();
       });
     });
 
-    test('Throws if ProcessUtils is injected',() {
-      final Testbed testbed = Testbed(overrides: <Type, Generator>{
-        ProcessUtils: () => null,
-      });
+    test('Throws if ProcessUtils is injected', () {
+      final testbed = TestBed(overrides: <Type, Generator>{ProcessUtils: () => null});
 
       expect(() => testbed.run(() {}), throwsStateError);
     });
   });
 }
 
-class A { }
+class A {}
 
-class B extends A { }
+class B extends A {}

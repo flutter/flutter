@@ -16,9 +16,7 @@ class AbsorbPointerApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('AbsorbPointer Sample')),
-        body: const Center(
-          child: AbsorbPointerExample(),
-        ),
+        body: const Center(child: AbsorbPointerExample()),
       ),
     );
   }
@@ -35,10 +33,7 @@ class AbsorbPointerExample extends StatelessWidget {
         SizedBox(
           width: 200.0,
           height: 100.0,
-          child: ElevatedButton(
-            onPressed: () {},
-            child: null,
-          ),
+          child: ElevatedButton(onPressed: () {}, child: null),
         ),
         SizedBox(
           width: 100.0,

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'system_channels.dart';
 
 /// A sound provided by the system.
@@ -12,6 +11,11 @@ enum SystemSoundType {
   /// A short indication that a button was pressed.
   click,
 
+  /// A short indication that a picker value was changed.
+  ///
+  /// This is ignored on all platforms except iOS.
+  tick,
+
   /// A short system alert sound indicating the need for user attention.
   ///
   /// Desktop platforms are the only platforms that support a system alert
@@ -20,8 +24,12 @@ enum SystemSoundType {
   /// ignored on the web as well.
   alert,
 
-  // If you add new values here, you also need to update the `SoundType` Java
-  // enum in `PlatformChannel.java`.
+  // If you add new values here, you also need to update:
+  // - the `SoundType` Java enum in `PlatformChannel.java` (Android);
+  // - `FlutterPlatformPlugin.mm` (iOS);
+  // - `FlutterPlatformPlugin.mm` (macOS);
+  // - `fl_platform_handler.cc` (Linux);
+  // - `platform_handler.cc` (Windows);
 }
 
 /// Provides access to the library of short system specific sounds for common
@@ -33,9 +41,6 @@ abstract final class SystemSound {
   /// The web platform currently does not support playing sounds, so this call
   /// will yield no behavior on that platform.
   static Future<void> play(SystemSoundType type) async {
-    await SystemChannels.platform.invokeMethod<void>(
-      'SystemSound.play',
-      type.toString(),
-    );
+    await SystemChannels.platform.invokeMethod<void>('SystemSound.play', type.toString());
   }
 }

@@ -8,10 +8,10 @@ import 'package:flutter_api_samples/widgets/async/future_builder.0.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('StreamBuilder listens to internal stream', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.FutureBuilderExampleApp(),
-    );
+  testWidgets('StreamBuilder listens to internal stream', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.FutureBuilderExampleApp());
 
     expect(find.byType(CircularProgressIndicator), findsOne);
     expect(find.text('Awaiting result...'), findsOne);

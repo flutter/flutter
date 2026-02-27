@@ -2,17 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+/// @docImport 'package:flutter/material.dart';
+library;
 
+import 'dart:async';
+import 'dart:math' as math show max;
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'basic.dart';
-import 'container.dart';
+import 'constants.dart';
 import 'editable_text.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 import 'inherited_notifier.dart';
+import 'localizations.dart';
+import 'media_query.dart';
 import 'overlay.dart';
 import 'shortcuts.dart';
 import 'tap_region.dart';
@@ -27,7 +35,8 @@ import 'tap_region.dart';
 /// See also:
 ///
 ///   * [RawAutocomplete.optionsBuilder], which is of this type.
-typedef AutocompleteOptionsBuilder<T extends Object> = FutureOr<Iterable<T>> Function(TextEditingValue textEditingValue);
+typedef AutocompleteOptionsBuilder<T extends Object> =
+    FutureOr<Iterable<T>> Function(TextEditingValue textEditingValue);
 
 /// The type of the callback used by the [RawAutocomplete] widget to indicate
 /// that the user has selected an option.
@@ -49,11 +58,12 @@ typedef AutocompleteOnSelected<T extends Object> = void Function(T option);
 /// See also:
 ///
 ///   * [RawAutocomplete.optionsViewBuilder], which is of this type.
-typedef AutocompleteOptionsViewBuilder<T extends Object> = Widget Function(
-  BuildContext context,
-  AutocompleteOnSelected<T> onSelected,
-  Iterable<T> options,
-);
+typedef AutocompleteOptionsViewBuilder<T extends Object> =
+    Widget Function(
+      BuildContext context,
+      AutocompleteOnSelected<T> onSelected,
+      Iterable<T> options,
+    );
 
 /// The type of the Autocomplete callback which returns the widget that
 /// contains the input [TextField] or [TextFormField].
@@ -61,12 +71,13 @@ typedef AutocompleteOptionsViewBuilder<T extends Object> = Widget Function(
 /// See also:
 ///
 ///   * [RawAutocomplete.fieldViewBuilder], which is of this type.
-typedef AutocompleteFieldViewBuilder = Widget Function(
-  BuildContext context,
-  TextEditingController textEditingController,
-  FocusNode focusNode,
-  VoidCallback onFieldSubmitted,
-);
+typedef AutocompleteFieldViewBuilder =
+    Widget Function(
+      BuildContext context,
+      TextEditingController textEditingController,
+      FocusNode focusNode,
+      VoidCallback onFieldSubmitted,
+    );
 
 /// The type of the [RawAutocomplete] callback that converts an option value to
 /// a string which can be displayed in the widget's options menu.
@@ -97,6 +108,16 @@ enum OptionsViewOpenDirection {
   /// The top edge of the options view will align with the bottom edge
   /// of the text field built by [RawAutocomplete.fieldViewBuilder].
   down,
+
+  /// Open in the direction with the most available space within the overlay.
+  ///
+  /// The available space is calculated as the distance from the field's top
+  /// edge to the overlay's top edge (for upward opening) or from the field's
+  /// bottom edge to the overlay's bottom edge (for downward opening).
+  ///
+  /// If both directions have the same available space, the options view opens
+  /// downward.
+  mostSpace,
 }
 
 // TODO(justinmc): Mention AutocompleteCupertino when it is implemented.
@@ -107,6 +128,11 @@ enum OptionsViewOpenDirection {
 /// The user's text input is received in a field built with the
 /// [fieldViewBuilder] parameter. The options to be displayed are determined
 /// using [optionsBuilder] and rendered with [optionsViewBuilder].
+///
+/// The options view opens when the field gains focus or when the field's text
+/// changes, as long as [optionsBuilder] returns at least one option. The options
+/// view closes when the user selects an option, when there are no matching
+/// options, or when the field loses focus.
 /// {@endtemplate}
 ///
 /// This is a core framework widget with very basic UI.
@@ -158,10 +184,10 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
     this.textEditingController,
     this.initialValue,
   }) : assert(
-         fieldViewBuilder != null
-            || (key != null && focusNode != null && textEditingController != null),
+         fieldViewBuilder != null ||
+             (key != null && focusNode != null && textEditingController != null),
          'Pass in a fieldViewBuilder, or otherwise create a separate field and pass in the FocusNode, TextEditingController, and a key. Use the key with RawAutocomplete.onFieldSubmitted.',
-        ),
+       ),
        assert((focusNode == null) == (textEditingController == null)),
        assert(
          !(textEditingController != null && initialValue != null),
@@ -202,16 +228,16 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// {@endtemplate}
   ///
   /// If this parameter is not null, then [textEditingController] must also be
-  /// not null.
+  /// non-null.
   final FocusNode? focusNode;
 
   /// {@template flutter.widgets.RawAutocomplete.optionsViewBuilder}
   /// Builds the selectable options widgets from a list of options objects.
   ///
-  /// The options are displayed floating below or above the field using a
-  /// [CompositedTransformFollower] inside of an [Overlay], not at the same
-  /// place in the widget tree as [RawAutocomplete]. To control whether it opens
-  /// upward or downward, use [optionsViewOpenDirection].
+  /// The options are displayed floating below or above the field inside of an
+  /// [Overlay], not at the same place in the widget tree as [RawAutocomplete].
+  /// To control whether it opens upward or downward, use
+  /// [optionsViewOpenDirection].
   ///
   /// In order to track which item is highlighted by keyboard navigation, the
   /// resulting options will be wrapped in an inherited
@@ -225,7 +251,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   final AutocompleteOptionsViewBuilder<T> optionsViewBuilder;
 
   /// {@template flutter.widgets.RawAutocomplete.optionsViewOpenDirection}
-  /// The direction in which to open the options-view overlay.
+  /// Determines the direction in which to open the options view.
   ///
   /// Defaults to [OptionsViewOpenDirection.down].
   /// {@endtemplate}
@@ -256,7 +282,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.RawAutocomplete.split}
   ///
-  /// If this parameter is not null, then [focusNode] must also be not null.
+  /// If this parameter is not null, then [focusNode] must also be non-null.
   final TextEditingController? textEditingController;
 
   /// {@template flutter.widgets.RawAutocomplete.initialValue}
@@ -283,7 +309,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   ///  * [focusNode] and [textEditingController], which contain a code example
   ///    showing how to create a separate field outside of fieldViewBuilder.
   static void onFieldSubmitted<T extends Object>(GlobalKey key) {
-    final _RawAutocompleteState<T> rawAutocomplete = key.currentState! as _RawAutocompleteState<T>;
+    final rawAutocomplete = key.currentState! as _RawAutocompleteState<T>;
     rawAutocomplete._onFieldSubmitted();
   }
 
@@ -300,20 +326,31 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
 }
 
 class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> {
-  final GlobalKey _fieldKey = GlobalKey();
-  final LayerLink _optionsLayerLink = LayerLink();
-  final OverlayPortalController _optionsViewController = OverlayPortalController(debugLabel: '_RawAutocompleteState');
+  final OverlayPortalController _optionsViewController = OverlayPortalController(
+    debugLabel: '_RawAutocompleteState',
+  );
+
+  // The number of options to scroll by "page", such as when using the page
+  // up/down keys.
+  static const int _pageSize = 4;
+
+  /// Whether the field currently has focus.
+  ///
+  /// This is used to determine whether the focus state has changed.
+  late bool _hasFocus;
+
+  /// Whether an option is currently being selected.
+  bool _selecting = false;
 
   TextEditingController? _internalTextEditingController;
   TextEditingController get _textEditingController {
-    return widget.textEditingController
-       ?? (_internalTextEditingController ??= TextEditingController()..addListener(_onChangedField));
+    return widget.textEditingController ??
+        (_internalTextEditingController ??= TextEditingController()..addListener(_onChangedField));
   }
 
   FocusNode? _internalFocusNode;
   FocusNode get _focusNode {
-    return widget.focusNode
-        ?? (_internalFocusNode ??= FocusNode()..addListener(_updateOptionsViewVisibility));
+    return widget.focusNode ?? (_internalFocusNode ??= FocusNode()..addListener(_onFocusChange));
   }
 
   late final Map<Type, CallbackAction<Intent>> _actionMap = <Type, CallbackAction<Intent>>{
@@ -325,6 +362,23 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       onInvoke: _highlightNextOption,
       isEnabledCallback: () => _canShowOptionsView,
     ),
+    AutocompleteFirstOptionIntent: _AutocompleteCallbackAction<AutocompleteFirstOptionIntent>(
+      onInvoke: _highlightFirstOption,
+      isEnabledCallback: () => _canShowOptionsView,
+    ),
+    AutocompleteLastOptionIntent: _AutocompleteCallbackAction<AutocompleteLastOptionIntent>(
+      onInvoke: _highlightLastOption,
+      isEnabledCallback: () => _canShowOptionsView,
+    ),
+    AutocompleteNextPageOptionIntent: _AutocompleteCallbackAction<AutocompleteNextPageOptionIntent>(
+      onInvoke: _highlightNextPageOption,
+      isEnabledCallback: () => _canShowOptionsView,
+    ),
+    AutocompletePreviousPageOptionIntent:
+        _AutocompleteCallbackAction<AutocompletePreviousPageOptionIntent>(
+          onInvoke: _highlightPreviousPageOption,
+          isEnabledCallback: () => _canShowOptionsView,
+        ),
     DismissIntent: CallbackAction<DismissIntent>(onInvoke: _hideOptions),
   };
 
@@ -335,13 +389,50 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   String? _lastFieldText;
   final ValueNotifier<int> _highlightedOptionIndex = ValueNotifier<int>(0);
 
-  static const Map<ShortcutActivator, Intent> _shortcuts = <ShortcutActivator, Intent>{
-    SingleActivator(LogicalKeyboardKey.arrowUp): AutocompletePreviousOptionIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowDown): AutocompleteNextOptionIntent(),
+  static const Map<ShortcutActivator, Intent> _appleShortcuts = <ShortcutActivator, Intent>{
+    SingleActivator(LogicalKeyboardKey.arrowUp, meta: true): AutocompleteFirstOptionIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowDown, meta: true): AutocompleteLastOptionIntent(),
   };
 
-  bool get _canShowOptionsView => _focusNode.hasFocus && _selection == null && _options.isNotEmpty;
+  static const Map<ShortcutActivator, Intent> _nonAppleShortcuts = <ShortcutActivator, Intent>{
+    SingleActivator(LogicalKeyboardKey.arrowUp, control: true): AutocompleteFirstOptionIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowDown, control: true): AutocompleteLastOptionIntent(),
+  };
 
+  static const Map<ShortcutActivator, Intent> _commonShortcuts = <ShortcutActivator, Intent>{
+    SingleActivator(LogicalKeyboardKey.arrowUp): AutocompletePreviousOptionIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowDown): AutocompleteNextOptionIntent(),
+    SingleActivator(LogicalKeyboardKey.pageUp): AutocompletePreviousPageOptionIntent(),
+    SingleActivator(LogicalKeyboardKey.pageDown): AutocompleteNextPageOptionIntent(),
+  };
+
+  static Map<ShortcutActivator, Intent> get _shortcuts => <ShortcutActivator, Intent>{
+    ..._commonShortcuts,
+    ...switch (defaultTargetPlatform) {
+      TargetPlatform.iOS => _appleShortcuts,
+      TargetPlatform.macOS => _appleShortcuts,
+      TargetPlatform.android => _nonAppleShortcuts,
+      TargetPlatform.linux => _nonAppleShortcuts,
+      TargetPlatform.windows => _nonAppleShortcuts,
+      TargetPlatform.fuchsia => _nonAppleShortcuts,
+    },
+  };
+
+  /// The options view is considered eligible to show only while the field has
+  /// focus and there is at least one option to display.
+  bool get _canShowOptionsView => _focusNode.hasFocus && _options.isNotEmpty;
+
+  void _onFocusChange() {
+    if (_focusNode.hasFocus != _hasFocus) {
+      _hasFocus = _focusNode.hasFocus;
+      // Gaining focus can open the options view (if there are options). Losing
+      // focus always closes it.
+      _updateOptionsViewVisibility();
+    }
+  }
+
+  /// Shows the options view when the field is focused and there is at least one
+  /// option to display; otherwise hides the options view.
   void _updateOptionsViewVisibility() {
     if (_canShowOptionsView) {
       _optionsViewController.show();
@@ -350,10 +441,47 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     }
   }
 
+  void _announceSemantics(bool resultsAvailable) {
+    if (!MediaQuery.supportsAnnounceOf(context)) {
+      return;
+    }
+    final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
+    final String optionsHint = resultsAvailable
+        ? localizations.searchResultsFound
+        : localizations.noResultsFound;
+    SemanticsService.announce(optionsHint, localizations.textDirection);
+  }
+
+  // Assigning an ID to every call of _onChangedField is necessary to avoid a
+  // situation where _options is updated by an older call when multiple
+  // _onChangedField calls are running simultaneously.
+  int _onChangedCallId = 0;
   // Called when _textEditingController changes.
   Future<void> _onChangedField() async {
+    // During a selection, changes to the field text should not trigger
+    // options update.
+    if (_selecting) {
+      return;
+    }
     final TextEditingValue value = _textEditingController.value;
+
+    // Makes sure that options change only when content of the field changes.
+    var shouldUpdateOptions = false;
+    if (value.text != _lastFieldText) {
+      shouldUpdateOptions = true;
+      _onChangedCallId += 1;
+    }
+    _lastFieldText = value.text;
+    final int callId = _onChangedCallId;
     final Iterable<T> options = await widget.optionsBuilder(value);
+
+    // Makes sure that previous call results do not replace new ones.
+    if (callId != _onChangedCallId || !shouldUpdateOptions) {
+      return;
+    }
+    if (_options.isEmpty != options.isEmpty) {
+      _announceSemantics(options.isNotEmpty);
+    }
     _options = options;
     _updateHighlight(_highlightedOptionIndex.value);
     final T? selection = _selection;
@@ -361,12 +489,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       _selection = null;
     }
 
-    // Make sure the options are no longer hidden if the content of the field
-    // changes (ignore selection changes).
-    if (value.text != _lastFieldText) {
-      _lastFieldText = value.text;
-      _updateOptionsViewVisibility();
-    }
+    _updateOptionsViewVisibility();
   }
 
   // Called from fieldViewBuilder when the user submits the field.
@@ -381,6 +504,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     if (nextSelection == _selection) {
       return;
     }
+    _selecting = true;
     _selection = nextSelection;
     final String selectionString = widget.displayStringForOption(nextSelection);
     _textEditingController.value = TextEditingValue(
@@ -388,25 +512,45 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       text: selectionString,
     );
     widget.onSelected?.call(nextSelection);
-    _updateOptionsViewVisibility();
+    if (_optionsViewController.isShowing) {
+      _optionsViewController.hide(); // Close the options view after a selection is made.
+    }
+    _selecting = false;
   }
 
-  void _updateHighlight(int newIndex) {
-    _highlightedOptionIndex.value = _options.isEmpty ? 0 : newIndex % _options.length;
+  void _updateHighlight(int nextIndex) {
+    _highlightedOptionIndex.value = _options.isEmpty ? 0 : nextIndex.clamp(0, _options.length - 1);
   }
 
   void _highlightPreviousOption(AutocompletePreviousOptionIntent intent) {
-    assert(_canShowOptionsView);
-    _updateOptionsViewVisibility();
-    assert(_optionsViewController.isShowing);
-    _updateHighlight(_highlightedOptionIndex.value - 1);
+    _highlightOption(_highlightedOptionIndex.value - 1);
   }
 
   void _highlightNextOption(AutocompleteNextOptionIntent intent) {
+    _highlightOption(_highlightedOptionIndex.value + 1);
+  }
+
+  void _highlightFirstOption(AutocompleteFirstOptionIntent intent) {
+    _highlightOption(0);
+  }
+
+  void _highlightLastOption(AutocompleteLastOptionIntent intent) {
+    _highlightOption(_options.length - 1);
+  }
+
+  void _highlightNextPageOption(AutocompleteNextPageOptionIntent intent) {
+    _highlightOption(_highlightedOptionIndex.value + _pageSize);
+  }
+
+  void _highlightPreviousPageOption(AutocompletePreviousPageOptionIntent intent) {
+    _highlightOption(_highlightedOptionIndex.value - _pageSize);
+  }
+
+  void _highlightOption(int index) {
     assert(_canShowOptionsView);
     _updateOptionsViewVisibility();
     assert(_optionsViewController.isShowing);
-    _updateHighlight(_highlightedOptionIndex.value + 1);
+    _updateHighlight(index);
   }
 
   Object? _hideOptions(DismissIntent intent) {
@@ -418,27 +562,71 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     }
   }
 
-  Widget _buildOptionsView(BuildContext context) {
-    final TextDirection textDirection = Directionality.of(context);
-    final Alignment followerAlignment = switch (widget.optionsViewOpenDirection) {
-      OptionsViewOpenDirection.up => AlignmentDirectional.bottomStart,
-      OptionsViewOpenDirection.down => AlignmentDirectional.topStart,
-    }.resolve(textDirection);
-    final Alignment targetAnchor = switch (widget.optionsViewOpenDirection) {
-      OptionsViewOpenDirection.up => AlignmentDirectional.topStart,
-      OptionsViewOpenDirection.down => AlignmentDirectional.bottomStart,
-    }.resolve(textDirection);
+  // A big enough height for about one item in the default
+  // Autocomplete.optionsViewBuilder. The assumption is that the user likely
+  // wants the list of options to move to stay on the screen rather than get any
+  // smaller than this. Allows Autocomplete to work when it has very little
+  // screen height available (as in b/317115348) by positioning itself on top of
+  // the field, while in other cases to size itself based on the height under
+  // the field.
+  static const double _kMinUsableHeight = kMinInteractiveDimension;
 
-    return CompositedTransformFollower(
-      link: _optionsLayerLink,
-      showWhenUnlinked: false,
-      targetAnchor: targetAnchor,
-      followerAnchor: followerAlignment,
-      child: TextFieldTapRegion(
-        child: AutocompleteHighlightedOption(
-          highlightIndexNotifier: _highlightedOptionIndex,
-          child: Builder(
-            builder: (BuildContext context) => widget.optionsViewBuilder(context, _select, _options),
+  Widget _buildOptionsView(BuildContext context, OverlayChildLayoutInfo layoutInfo) {
+    if (layoutInfo.childPaintTransform.determinant() == 0.0) {
+      // The child is not visible.
+      return const SizedBox.shrink();
+    }
+    final Size fieldSize = layoutInfo.childSize;
+    final Matrix4 invertTransform = layoutInfo.childPaintTransform.clone()..invert();
+
+    // This may not work well if the paint transform has rotation in it.
+    // MatrixUtils.transformRect returns the bounding rect of the rotated overlay
+    // rect.
+    final Rect overlayRectInField = MatrixUtils.transformRect(
+      invertTransform,
+      Offset.zero & layoutInfo.overlaySize,
+    );
+
+    final double spaceAbove = -overlayRectInField.top;
+    final double spaceBelow = overlayRectInField.bottom - fieldSize.height;
+    final bool opensUp = switch (widget.optionsViewOpenDirection) {
+      OptionsViewOpenDirection.up => true,
+      OptionsViewOpenDirection.down => false,
+      OptionsViewOpenDirection.mostSpace => spaceAbove > spaceBelow,
+    };
+
+    final double optionsViewMaxHeight = opensUp
+        ? -overlayRectInField.top
+        : overlayRectInField.bottom - fieldSize.height;
+
+    final optionsViewBoundingBox = Size(
+      fieldSize.width,
+      math.max(optionsViewMaxHeight, _kMinUsableHeight),
+    );
+
+    final double originY = opensUp
+        ? overlayRectInField.top
+        : overlayRectInField.bottom - optionsViewBoundingBox.height;
+
+    final Matrix4 transform = layoutInfo.childPaintTransform.clone()
+      ..translateByDouble(0.0, originY, 0, 1);
+    final Widget child = Builder(
+      builder: (BuildContext context) => widget.optionsViewBuilder(context, _select, _options),
+    );
+    return Transform(
+      transform: transform,
+      child: Align(
+        alignment: Alignment.topLeft,
+        child: ConstrainedBox(
+          constraints: BoxConstraints.tight(optionsViewBoundingBox),
+          child: Align(
+            alignment: opensUp ? AlignmentDirectional.bottomStart : AlignmentDirectional.topStart,
+            child: TextFieldTapRegion(
+              child: AutocompleteHighlightedOption(
+                highlightIndexNotifier: _highlightedOptionIndex,
+                child: child,
+              ),
+            ),
           ),
         ),
       ),
@@ -448,10 +636,12 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   @override
   void initState() {
     super.initState();
-    final TextEditingController initialController = widget.textEditingController
-                                                 ?? (_internalTextEditingController = TextEditingController.fromValue(widget.initialValue));
+    final TextEditingController initialController =
+        widget.textEditingController ??
+        (_internalTextEditingController = TextEditingController.fromValue(widget.initialValue));
     initialController.addListener(_onChangedField);
-    widget.focusNode?.addListener(_updateOptionsViewVisibility);
+    _hasFocus = _focusNode.hasFocus;
+    widget.focusNode?.addListener(_onFocusChange);
   }
 
   @override
@@ -487,24 +677,22 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
   @override
   Widget build(BuildContext context) {
-    final Widget fieldView = widget.fieldViewBuilder?.call(context, _textEditingController, _focusNode, _onFieldSubmitted)
-                          ?? const SizedBox.shrink();
-    return OverlayPortal.targetsRootOverlay(
+    final Widget fieldView =
+        widget.fieldViewBuilder?.call(
+          context,
+          _textEditingController,
+          _focusNode,
+          _onFieldSubmitted,
+        ) ??
+        // Horizontally expand to make sure the options view's width won't be zero.
+        const SizedBox(width: double.infinity, height: 0.0);
+    return OverlayPortal.overlayChildLayoutBuilder(
       controller: _optionsViewController,
       overlayChildBuilder: _buildOptionsView,
       child: TextFieldTapRegion(
-        child: Container(
-          key: _fieldKey,
-          child: Shortcuts(
-            shortcuts: _shortcuts,
-            child: Actions(
-              actions: _actionMap,
-              child: CompositedTransformTarget(
-                link: _optionsLayerLink,
-                child: fieldView,
-              ),
-            ),
-          ),
+        child: Shortcuts(
+          shortcuts: _shortcuts,
+          child: Actions(actions: _actionMap, child: fieldView),
         ),
       ),
     );
@@ -512,10 +700,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 }
 
 class _AutocompleteCallbackAction<T extends Intent> extends CallbackAction<T> {
-  _AutocompleteCallbackAction({
-    required super.onInvoke,
-    required this.isEnabledCallback,
-  });
+  _AutocompleteCallbackAction({required super.onInvoke, required this.isEnabledCallback});
 
   // The enabled state determines whether the action will consume the
   // key shortcut or let it continue on to the underlying text field.
@@ -542,10 +727,36 @@ class AutocompleteNextOptionIntent extends Intent {
   const AutocompleteNextOptionIntent();
 }
 
+/// An [Intent] to highlight the first option in the autocomplete list.
+class AutocompleteFirstOptionIntent extends Intent {
+  /// Creates an instance of AutocompleteFirstOptionIntent.
+  const AutocompleteFirstOptionIntent();
+}
+
+/// An [Intent] to highlight the last option in the autocomplete list.
+class AutocompleteLastOptionIntent extends Intent {
+  /// Creates an instance of AutocompleteLastOptionIntent.
+  const AutocompleteLastOptionIntent();
+}
+
+/// An [Intent] to highlight the option one page after the currently highlighted
+/// option in the autocomplete list.
+class AutocompleteNextPageOptionIntent extends Intent {
+  /// Creates an instance of AutocompleteNextPageOptionIntent.
+  const AutocompleteNextPageOptionIntent();
+}
+
+/// An [Intent] to highlight the option one page before the currently
+/// highlighted option in the autocomplete list.
+class AutocompletePreviousPageOptionIntent extends Intent {
+  /// Creates an instance of AutocompletePreviousPageOptionIntent.
+  const AutocompletePreviousPageOptionIntent();
+}
+
 /// An inherited widget used to indicate which autocomplete option should be
 /// highlighted for keyboard navigation.
 ///
-/// The `RawAutoComplete` widget will wrap the options view generated by the
+/// The `RawAutocomplete` widget will wrap the options view generated by the
 /// `optionsViewBuilder` with this widget to provide the highlighted option's
 /// index to the builder.
 ///
@@ -577,6 +788,10 @@ class AutocompleteHighlightedOption extends InheritedNotifier<ValueNotifier<int>
   /// int highlightedIndex = AutocompleteHighlightedOption.of(context);
   /// ```
   static int of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<AutocompleteHighlightedOption>()?.notifier?.value ?? 0;
+    return context
+            .dependOnInheritedWidgetOfExactType<AutocompleteHighlightedOption>()
+            ?.notifier
+            ?.value ??
+        0;
   }
 }

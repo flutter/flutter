@@ -4,7 +4,7 @@
   "datePickerMinuteSemanticsLabelOne": "1분",
   "datePickerMinuteSemanticsLabelOther": "$minute분",
   "datePickerDateOrder": "ymd",
-  "datePickerDateTimeOrder": "date_time_dayPeriod",
+  "datePickerDateTimeOrder": "date_dayPeriod_time",
   "anteMeridiemAbbreviation": "오전",
   "postMeridiemAbbreviation": "오후",
   "todayLabel": "오늘",
@@ -15,7 +15,7 @@
   "timerPickerMinuteLabelOther": "분",
   "timerPickerSecondLabelOne": "초",
   "timerPickerSecondLabelOther": "초",
-  "cutButtonLabel": "잘라냄",
+  "cutButtonLabel": "잘라내기",
   "copyButtonLabel": "복사",
   "pasteButtonLabel": "붙여넣기",
   "selectAllButtonLabel": "전체 선택",
@@ -27,5 +27,13 @@
   "lookUpButtonLabel": "찾기",
   "searchWebButtonLabel": "웹 검색",
   "shareButtonLabel": "공유...",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "삭제",
+  "cancelButtonLabel": "취소",
+  "backButtonLabel": "뒤로",
+  "expansionTileExpandedHint": "두 번 탭하여 접기",
+  "expansionTileCollapsedHint": "두 번 탭하여 펼치기",
+  "expansionTileExpandedTapHint": "접기",
+  "expansionTileCollapsedTapHint": "자세히 알아보려면 펼치기",
+  "expandedHint": "접힘",
+  "collapsedHint": "펼침"
 }

@@ -6,7 +6,13 @@ import 'template.dart';
 import 'token_logger.dart';
 
 class ColorSchemeTemplate extends TokenTemplate {
-  ColorSchemeTemplate(this._colorTokensLight, this._colorTokensDark, super.blockName, super.fileName, super.tokens);
+  ColorSchemeTemplate(
+    this._colorTokensLight,
+    this._colorTokensDark,
+    super.blockName,
+    super.fileName,
+    super.tokens,
+  );
 
   // Map of light color scheme token data from tokens.
   final Map<String, dynamic> _colorTokensLight;
@@ -25,7 +31,8 @@ class ColorSchemeTemplate extends TokenTemplate {
   }
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 const ColorScheme _colorSchemeLightM3 = ColorScheme(
   brightness: Brightness.light,
   primary: Color(${light('md.sys.color.primary')}),

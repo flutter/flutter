@@ -14,7 +14,7 @@ import '../src/common.dart';
 import '../src/fakes.dart';
 import 'test_utils.dart';
 
-const String base64PlistXml =
+const base64PlistXml =
     'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPCFET0NUWVBFIHBsaXN0I'
     'FBVQkxJQyAiLS8vQXBwbGUvL0RURCBQTElTVCAxLjAvL0VOIiAiaHR0cDovL3d3dy5hcHBsZS'
     '5jb20vRFREcy9Qcm9wZXJ0eUxpc3QtMS4wLmR0ZCI+CjxwbGlzdCB2ZXJzaW9uPSIxLjAiPgo'
@@ -22,16 +22,16 @@ const String base64PlistXml =
     'dHJpbmc+CiAgPGtleT5DRkJ1bmRsZUlkZW50aWZpZXI8L2tleT4KICA8c3RyaW5nPmlvLmZsd'
     'XR0ZXIuZmx1dHRlci5hcHA8L3N0cmluZz4KPC9kaWN0Pgo8L3BsaXN0Pgo=';
 
-const String base64PlistBinary =
+const base64PlistBinary =
     'YnBsaXN0MDDSAQIDBF8QEkNGQnVuZGxlRXhlY3V0YWJsZV8QEkNGQnVuZGxlSWRlbnRpZmllc'
     'lNBcHBfEBZpby5mbHV0dGVyLmZsdXR0ZXIuYXBwCA0iNzsAAAAAAAABAQAAAAAAAAAFAAAAAA'
     'AAAAAAAAAAAAAAVA==';
 
-const String base64PlistJson =
+const base64PlistJson =
     'eyJDRkJ1bmRsZUV4ZWN1dGFibGUiOiJBcHAiLCJDRkJ1bmRsZUlkZW50aWZpZXIiOiJpby5mb'
     'HV0dGVyLmZsdXR0ZXIuYXBwIn0=';
 
-const String base64PlistXmlWithComplexDatatypes =
+const base64PlistXmlWithComplexDatatypes =
     'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPCFET0NUWVBFIHBsaXN0I'
     'FBVQkxJQyAiLS8vQXBwbGUvL0RURCBQTElTVCAxLjAvL0VOIiAiaHR0cDovL3d3dy5hcHBsZS'
     '5jb20vRFREcy9Qcm9wZXJ0eUxpc3QtMS4wLmR0ZCI+CjxwbGlzdCB2ZXJzaW9uPSIxLjAiPgo'
@@ -57,16 +57,9 @@ void main() {
   setUp(() {
     logger = BufferLogger(
       outputPreferences: OutputPreferences.test(),
-      terminal: AnsiTerminal(
-        platform: const LocalPlatform(),
-        stdio: FakeStdio(),
-      ),
+      terminal: AnsiTerminal(platform: const LocalPlatform(), stdio: FakeStdio()),
     );
-    parser = PlistParser(
-      fileSystem: fileSystem,
-      processManager: processManager,
-      logger: logger,
-    );
+    parser = PlistParser(fileSystem: fileSystem, processManager: processManager, logger: logger);
     file = fileSystem.file('foo.plist')..createSync();
   });
 
@@ -77,8 +70,14 @@ void main() {
   testWithoutContext('PlistParser.getValueFromFile<String> works with an XML file', () {
     file.writeAsBytesSync(base64.decode(base64PlistXml));
 
-    expect(parser.getValueFromFile<String>(file.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
-    expect(parser.getValueFromFile<String>(file.absolute.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
+    expect(
+      parser.getValueFromFile<String>(file.path, 'CFBundleIdentifier'),
+      'io.flutter.flutter.app',
+    );
+    expect(
+      parser.getValueFromFile<String>(file.absolute.path, 'CFBundleIdentifier'),
+      'io.flutter.flutter.app',
+    );
     expect(logger.statusText, isEmpty);
     expect(logger.errorText, isEmpty);
   }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
@@ -86,8 +85,14 @@ void main() {
   testWithoutContext('PlistParser.getValueFromFile<String> works with a binary file', () {
     file.writeAsBytesSync(base64.decode(base64PlistBinary));
 
-    expect(parser.getValueFromFile<String>(file.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
-    expect(parser.getValueFromFile<String>(file.absolute.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
+    expect(
+      parser.getValueFromFile<String>(file.path, 'CFBundleIdentifier'),
+      'io.flutter.flutter.app',
+    );
+    expect(
+      parser.getValueFromFile<String>(file.absolute.path, 'CFBundleIdentifier'),
+      'io.flutter.flutter.app',
+    );
     expect(logger.statusText, isEmpty);
     expect(logger.errorText, isEmpty);
   }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
@@ -95,57 +100,96 @@ void main() {
   testWithoutContext('PlistParser.getValueFromFile<String> works with a JSON file', () {
     file.writeAsBytesSync(base64.decode(base64PlistJson));
 
-    expect(parser.getValueFromFile<String>(file.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
-    expect(parser.getValueFromFile<String>(file.absolute.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
-    expect(logger.statusText, isEmpty);
-    expect(logger.errorText, isEmpty);
-  }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
-
-  testWithoutContext('PlistParser.getValueFromFile<String> returns null for a non-existent plist file', () {
-    expect(parser.getValueFromFile<String>('missing.plist', 'CFBundleIdentifier'), null);
-    expect(logger.statusText, isEmpty);
-    expect(logger.errorText, isEmpty);
-  }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
-
-  testWithoutContext('PlistParser.getValueFromFile<String> returns null for a non-existent key within a plist', () {
-    file.writeAsBytesSync(base64.decode(base64PlistXml));
-
-    expect(parser.getValueFromFile<String>(file.path, 'BadKey'), null);
-    expect(parser.getValueFromFile<String>(file.absolute.path, 'BadKey'), null);
-    expect(logger.statusText, isEmpty);
-    expect(logger.errorText, isEmpty);
-  }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
-
-  testWithoutContext('PlistParser.getValueFromFile<String> returns null for a malformed plist file', () {
-    file.writeAsBytesSync(const <int>[1, 2, 3, 4, 5, 6]);
-
-    expect(parser.getValueFromFile<String>(file.path, 'CFBundleIdentifier'), null);
-    expect(logger.statusText, contains('Property List error: Unexpected character \x01 at line 1 / '
-      'JSON error: JSON text did not start with array or object and option to allow fragments not '
-      'set. around line 1, column 0.\n'));
-    expect(logger.errorText, 'ProcessException: The command failed with exit code 1\n'
-              '  Command: /usr/bin/plutil -convert xml1 -o - ${file.absolute.path}\n');
-  }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
-
-  testWithoutContext('PlistParser.getValueFromFile<String> throws when /usr/bin/plutil is not found', () async {
-    file.writeAsBytesSync(base64.decode(base64PlistXml));
-
     expect(
-      () => parser.getValueFromFile<String>(file.path, 'unused'),
-      throwsA(isA<FileNotFoundException>()),
+      parser.getValueFromFile<String>(file.path, 'CFBundleIdentifier'),
+      'io.flutter.flutter.app',
+    );
+    expect(
+      parser.getValueFromFile<String>(file.absolute.path, 'CFBundleIdentifier'),
+      'io.flutter.flutter.app',
     );
     expect(logger.statusText, isEmpty);
     expect(logger.errorText, isEmpty);
-  }, skip: platform.isMacOS); // [intended] requires absence of macos tool chain.
+  }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
+
+  testWithoutContext(
+    'PlistParser.getValueFromFile<String> returns null for a non-existent plist file',
+    () {
+      expect(parser.getValueFromFile<String>('missing.plist', 'CFBundleIdentifier'), null);
+      expect(logger.statusText, isEmpty);
+      expect(logger.errorText, isEmpty);
+    },
+    skip: !platform.isMacOS, // [intended] requires macos tool chain.
+  );
+
+  testWithoutContext(
+    'PlistParser.getValueFromFile<String> returns null for a non-existent key within a plist',
+    () {
+      file.writeAsBytesSync(base64.decode(base64PlistXml));
+
+      expect(parser.getValueFromFile<String>(file.path, 'BadKey'), null);
+      expect(parser.getValueFromFile<String>(file.absolute.path, 'BadKey'), null);
+      expect(logger.statusText, isEmpty);
+      expect(logger.errorText, isEmpty);
+    },
+    skip: !platform.isMacOS, // [intended] requires macos tool chain.
+  );
+
+  testWithoutContext(
+    'PlistParser.getValueFromFile<String> returns null for a malformed plist file',
+    () {
+      file.writeAsBytesSync(const <int>[1, 2, 3, 4, 5, 6]);
+
+      expect(parser.getValueFromFile<String>(file.path, 'CFBundleIdentifier'), null);
+      expect(
+        logger.statusText,
+        contains(
+          'Property List error: Unexpected character \x01 at line 1 / '
+          'JSON error: JSON text did not start with array or object and option to allow fragments not '
+          'set. around line 1, column 0.\n',
+        ),
+      );
+      expect(
+        logger.errorText,
+        'ProcessException: The command failed with exit code 1\n'
+        '  Command: /usr/bin/plutil -convert xml1 -o - ${file.absolute.path}\n',
+      );
+    },
+    skip: !platform.isMacOS, // [intended] requires macos tool chain.
+  );
+
+  testWithoutContext(
+    'PlistParser.getValueFromFile<String> throws when /usr/bin/plutil is not found',
+    () async {
+      file.writeAsBytesSync(base64.decode(base64PlistXml));
+
+      expect(
+        () => parser.getValueFromFile<String>(file.path, 'unused'),
+        throwsA(isA<FileNotFoundException>()),
+      );
+      expect(logger.statusText, isEmpty);
+      expect(logger.errorText, isEmpty);
+    },
+    skip: platform.isMacOS, // [intended] requires absence of macos tool chain.
+  );
 
   testWithoutContext('PlistParser.replaceKey can replace a key', () async {
     file.writeAsBytesSync(base64.decode(base64PlistXml));
 
-    expect(parser.getValueFromFile<String>(file.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
-    expect(parser.replaceKey(file.path, key: 'CFBundleIdentifier', value: 'dev.flutter.fake'), isTrue);
+    expect(
+      parser.getValueFromFile<String>(file.path, 'CFBundleIdentifier'),
+      'io.flutter.flutter.app',
+    );
+    expect(
+      parser.replaceKey(file.path, key: 'CFBundleIdentifier', value: 'dev.flutter.fake'),
+      isTrue,
+    );
     expect(logger.statusText, isEmpty);
     expect(logger.errorText, isEmpty);
-    expect(parser.getValueFromFile<String>(file.path, 'CFBundleIdentifier'), equals('dev.flutter.fake'));
+    expect(
+      parser.getValueFromFile<String>(file.path, 'CFBundleIdentifier'),
+      equals('dev.flutter.fake'),
+    );
   }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
 
   testWithoutContext('PlistParser.replaceKey can create a new key', () async {
@@ -181,20 +225,42 @@ void main() {
   testWithoutContext('PlistParser.replaceKey returns false for a malformed plist file', () {
     file.writeAsBytesSync(const <int>[1, 2, 3, 4, 5, 6]);
 
-    expect(parser.replaceKey(file.path, key: 'CFBundleIdentifier', value: 'dev.flutter.fake'), isFalse);
-    expect(logger.statusText, contains('foo.plist: Property List error: Unexpected character \x01 '
-      'at line 1 / JSON error: JSON text did not start with array or object and option to allow '
-      'fragments not set. around line 1, column 0.\n'));
-    expect(logger.errorText, equals('ProcessException: The command failed with exit code 1\n'
-      '  Command: /usr/bin/plutil -replace CFBundleIdentifier -string dev.flutter.fake foo.plist\n'));
+    expect(
+      parser.replaceKey(file.path, key: 'CFBundleIdentifier', value: 'dev.flutter.fake'),
+      isFalse,
+    );
+    expect(
+      logger.statusText,
+      contains(
+        'foo.plist: Property List error: Unexpected character \x01 '
+        'at line 1 / JSON error: JSON text did not start with array or object and option to allow '
+        'fragments not set. around line 1, column 0.\n',
+      ),
+    );
+    expect(
+      logger.errorText,
+      equals(
+        'ProcessException: The command failed with exit code 1\n'
+        '  Command: /usr/bin/plutil -replace CFBundleIdentifier -string dev.flutter.fake foo.plist\n',
+      ),
+    );
   }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
 
   testWithoutContext('PlistParser.replaceKey works with a JSON file', () {
     file.writeAsBytesSync(base64.decode(base64PlistJson));
 
-    expect(parser.getValueFromFile<String>(file.absolute.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
-    expect(parser.replaceKey(file.path, key:'CFBundleIdentifier', value: 'dev.flutter.fake'), isTrue);
-    expect(parser.getValueFromFile<String>(file.absolute.path, 'CFBundleIdentifier'), 'dev.flutter.fake');
+    expect(
+      parser.getValueFromFile<String>(file.absolute.path, 'CFBundleIdentifier'),
+      'io.flutter.flutter.app',
+    );
+    expect(
+      parser.replaceKey(file.path, key: 'CFBundleIdentifier', value: 'dev.flutter.fake'),
+      isTrue,
+    );
+    expect(
+      parser.getValueFromFile<String>(file.absolute.path, 'CFBundleIdentifier'),
+      'dev.flutter.fake',
+    );
     expect(logger.statusText, isEmpty);
     expect(logger.errorText, isEmpty);
   }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
@@ -222,15 +288,12 @@ void main() {
       'flutter_gallery',
       'ios',
       'Runner.xcodeproj',
-      'project.pbxproj'
+      'project.pbxproj',
     );
 
-    final BufferLogger logger = BufferLogger(
-      terminal: Terminal.test(),
-      outputPreferences: OutputPreferences(),
-    );
+    final logger = BufferLogger(terminal: Terminal.test(), outputPreferences: OutputPreferences());
 
-    final PlistParser parser = PlistParser(
+    final parser = PlistParser(
       fileSystem: fileSystem,
       processManager: processManager,
       logger: logger,
@@ -242,44 +305,45 @@ void main() {
     expect(logger.errorText, isEmpty);
   }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
 
-  testWithoutContext('PlistParser.plistJsonContent can parse pbxproj file with unicode and emojis', () async {
-    String xcodeProjectFile = fileSystem.path.join(
-      getFlutterRoot(),
-      'dev',
-      'integration_tests',
-      'flutter_gallery',
-      'ios',
-      'Runner.xcodeproj',
-      'project.pbxproj'
-    );
+  testWithoutContext(
+    'PlistParser.plistJsonContent can parse pbxproj file with unicode and emojis',
+    () async {
+      String xcodeProjectFile = fileSystem.path.join(
+        getFlutterRoot(),
+        'dev',
+        'integration_tests',
+        'flutter_gallery',
+        'ios',
+        'Runner.xcodeproj',
+        'project.pbxproj',
+      );
 
-    final BufferLogger logger = BufferLogger(
-      terminal: Terminal.test(),
-      outputPreferences: OutputPreferences(),
-    );
+      final logger = BufferLogger(
+        terminal: Terminal.test(),
+        outputPreferences: OutputPreferences(),
+      );
 
-    final PlistParser parser = PlistParser(
-      fileSystem: fileSystem,
-      processManager: processManager,
-      logger: logger,
-    );
+      final parser = PlistParser(
+        fileSystem: fileSystem,
+        processManager: processManager,
+        logger: logger,
+      );
 
-    xcodeProjectFile = xcodeProjectFile.replaceAll('AppDelegate.m', 'AppDélegate.m');
-    xcodeProjectFile = xcodeProjectFile.replaceAll('AppDelegate.h', 'App👍Delegate.h');
+      xcodeProjectFile = xcodeProjectFile.replaceAll('AppDelegate.m', 'AppDélegate.m');
+      xcodeProjectFile = xcodeProjectFile.replaceAll('AppDelegate.h', 'App👍Delegate.h');
 
-    final String? projectFileAsJson = parser.plistJsonContent(xcodeProjectFile);
-    expect(projectFileAsJson, isNotNull);
-    expect(projectFileAsJson, contains('"PRODUCT_NAME":"Flutter Gallery"'));
-    expect(logger.errorText, isEmpty);
-  }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
+      final String? projectFileAsJson = parser.plistJsonContent(xcodeProjectFile);
+      expect(projectFileAsJson, isNotNull);
+      expect(projectFileAsJson, contains('"PRODUCT_NAME":"Flutter Gallery"'));
+      expect(logger.errorText, isEmpty);
+    },
+    skip: !platform.isMacOS, // [intended] requires macos tool chain.
+  );
 
   testWithoutContext('PlistParser.plistJsonContent returns null when errors', () async {
-    final BufferLogger logger = BufferLogger(
-      terminal: Terminal.test(),
-      outputPreferences: OutputPreferences(),
-    );
+    final logger = BufferLogger(terminal: Terminal.test(), outputPreferences: OutputPreferences());
 
-    final PlistParser parser = PlistParser(
+    final parser = PlistParser(
       fileSystem: fileSystem,
       processManager: processManager,
       logger: logger,

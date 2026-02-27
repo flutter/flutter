@@ -9,9 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Checkbox can be checked', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.CheckboxExampleApp(),
-    );
+    await tester.pumpWidget(const example.CheckboxExampleApp());
 
     expect(find.byType(Checkbox), findsNWidgets(3));
     Checkbox checkbox = tester.widget(find.byType(Checkbox).first);

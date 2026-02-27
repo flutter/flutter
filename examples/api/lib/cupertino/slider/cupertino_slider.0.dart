@@ -74,9 +74,9 @@ class _CupertinoSliderExampleState extends State<CupertinoSliderExample> {
             ),
             Text(
               _sliderStatus ?? '',
-              style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                    fontSize: 12,
-                  ),
+              style: CupertinoTheme.of(
+                context,
+              ).textTheme.textStyle.copyWith(fontSize: 12),
             ),
           ],
         ),

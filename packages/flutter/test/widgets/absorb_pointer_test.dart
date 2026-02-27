@@ -9,18 +9,12 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('AbsorbPointers do not block siblings', (WidgetTester tester) async {
-    bool tapped = false;
+    var tapped = false;
     await tester.pumpWidget(
       Column(
         children: <Widget>[
-          Expanded(
-            child: GestureDetector(
-              onTap: () => tapped = true,
-            ),
-          ),
-          const Expanded(
-            child: AbsorbPointer(),
-          ),
+          Expanded(child: GestureDetector(onTap: () => tapped = true)),
+          const Expanded(child: AbsorbPointer()),
         ],
       ),
     );
@@ -30,16 +24,12 @@ void main() {
 
   group('AbsorbPointer semantics', () {
     testWidgets('does not change semantics when not absorbing', (WidgetTester tester) async {
-      final UniqueKey key = UniqueKey();
+      final key = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
           home: AbsorbPointer(
             absorbing: false,
-            child: ElevatedButton(
-              key: key,
-              onPressed: () { },
-              child: const Text('button'),
-            ),
+            child: ElevatedButton(key: key, onPressed: () {}, child: const Text('button')),
           ),
         ),
       );
@@ -58,17 +48,13 @@ void main() {
     });
 
     testWidgets('drops semantics when its ignoreSemantics is true', (WidgetTester tester) async {
-      final SemanticsTester semantics = SemanticsTester(tester);
-      final UniqueKey key = UniqueKey();
+      final semantics = SemanticsTester(tester);
+      final key = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
           home: AbsorbPointer(
             ignoringSemantics: true,
-            child: ElevatedButton(
-              key: key,
-              onPressed: () { },
-              child: const Text('button'),
-            ),
+            child: ElevatedButton(key: key, onPressed: () {}, child: const Text('button')),
           ),
         ),
       );
@@ -77,15 +63,11 @@ void main() {
     });
 
     testWidgets('ignores user interactions', (WidgetTester tester) async {
-      final UniqueKey key = UniqueKey();
+      final key = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
           home: AbsorbPointer(
-            child: ElevatedButton(
-              key: key,
-              onPressed: () { },
-              child: const Text('button'),
-            ),
+            child: ElevatedButton(key: key, onPressed: () {}, child: const Text('button')),
           ),
         ),
       );

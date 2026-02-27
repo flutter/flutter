@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class InnerWidget extends StatefulWidget {
-  const InnerWidget({ super.key });
+  const InnerWidget({super.key});
 
   @override
   InnerWidgetState createState() => InnerWidgetState();
@@ -28,7 +28,7 @@ class InnerWidgetState extends State<InnerWidget> {
 }
 
 class OuterContainer extends StatefulWidget {
-  const OuterContainer({ super.key, required this.child });
+  const OuterContainer({super.key, required this.child});
 
   final InnerWidget child;
 
@@ -45,18 +45,18 @@ class OuterContainerState extends State<OuterContainer> {
 
 void main() {
   testWidgets('resync stateful widget', (WidgetTester tester) async {
-    const Key innerKey = Key('inner');
-    const Key outerKey = Key('outer');
+    const innerKey = Key('inner');
+    const outerKey = Key('outer');
 
-    const InnerWidget inner1 = InnerWidget(key: innerKey);
+    const inner1 = InnerWidget(key: innerKey);
     InnerWidget inner2;
-    const OuterContainer outer1 = OuterContainer(key: outerKey, child: inner1);
+    const outer1 = OuterContainer(key: outerKey, child: inner1);
     OuterContainer outer2;
 
     await tester.pumpWidget(outer1);
 
     final StatefulElement innerElement = tester.element(find.byKey(innerKey));
-    final InnerWidgetState innerElementState = innerElement.state as InnerWidgetState;
+    final innerElementState = innerElement.state as InnerWidgetState;
     expect(innerElementState.widget, equals(inner1));
     expect(innerElementState._didInitState, isTrue);
     expect(innerElement.renderObject!.attached, isTrue);

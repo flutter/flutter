@@ -20,12 +20,14 @@ class ScaffoldFloatingActionButtonAnimatorApp extends StatelessWidget {
 }
 
 enum FabAnimator { defaultStyle, none }
+
 const List<(FabAnimator, String)> fabAnimatoregments = <(FabAnimator, String)>[
   (FabAnimator.defaultStyle, 'Default'),
   (FabAnimator.none, 'None'),
 ];
 
 enum FabLocation { centerFloat, endFloat, endTop }
+
 const List<(FabLocation, String)> fabLocationegments = <(FabLocation, String)>[
   (FabLocation.centerFloat, 'centerFloat'),
   (FabLocation.endFloat, 'endFloat'),
@@ -36,11 +38,15 @@ class ScaffoldFloatingActionButtonAnimatorExample extends StatefulWidget {
   const ScaffoldFloatingActionButtonAnimatorExample({super.key});
 
   @override
-  State<ScaffoldFloatingActionButtonAnimatorExample> createState() => _ScaffoldFloatingActionButtonAnimatorExampleState();
+  State<ScaffoldFloatingActionButtonAnimatorExample> createState() =>
+      _ScaffoldFloatingActionButtonAnimatorExampleState();
 }
 
-class _ScaffoldFloatingActionButtonAnimatorExampleState extends State<ScaffoldFloatingActionButtonAnimatorExample> {
-  Set<FabAnimator> _selectedFabAnimator = <FabAnimator>{FabAnimator.defaultStyle};
+class _ScaffoldFloatingActionButtonAnimatorExampleState
+    extends State<ScaffoldFloatingActionButtonAnimatorExample> {
+  Set<FabAnimator> _selectedFabAnimator = <FabAnimator>{
+    FabAnimator.defaultStyle,
+  };
   Set<FabLocation> _selectedFabLocation = <FabLocation>{FabLocation.endFloat};
   FloatingActionButtonAnimator? _floatingActionButtonAnimator;
   FloatingActionButtonLocation? _floatingActionButtonLocation;
@@ -62,18 +68,22 @@ class _ScaffoldFloatingActionButtonAnimatorExampleState extends State<ScaffoldFl
                 setState(() {
                   _floatingActionButtonAnimator = switch (styles.first) {
                     FabAnimator.defaultStyle => null,
-                    FabAnimator.none => FloatingActionButtonAnimator.noAnimation,
+                    FabAnimator.none =>
+                      FloatingActionButtonAnimator.noAnimation,
                   };
                   _selectedFabAnimator = styles;
                 });
               },
-              segments: fabAnimatoregments
-                .map<ButtonSegment<FabAnimator>>(((FabAnimator, String) fabAnimator) {
-                  final FabAnimator animator = fabAnimator.$1;
-                  final String label = fabAnimator.$2;
-                  return ButtonSegment<FabAnimator>(value: animator, label: Text(label));
-                })
-                .toList(),
+              segments: fabAnimatoregments.map<ButtonSegment<FabAnimator>>((
+                (FabAnimator, String) fabAnimator,
+              ) {
+                final FabAnimator animator = fabAnimator.$1;
+                final String label = fabAnimator.$2;
+                return ButtonSegment<FabAnimator>(
+                  value: animator,
+                  label: Text(label),
+                );
+              }).toList(),
             ),
             const SizedBox(height: 10),
             SegmentedButton<FabLocation>(
@@ -81,20 +91,25 @@ class _ScaffoldFloatingActionButtonAnimatorExampleState extends State<ScaffoldFl
               onSelectionChanged: (Set<FabLocation> styles) {
                 setState(() {
                   _floatingActionButtonLocation = switch (styles.first) {
-                    FabLocation.centerFloat => FloatingActionButtonLocation.centerFloat,
-                    FabLocation.endFloat => FloatingActionButtonLocation.endFloat,
+                    FabLocation.centerFloat =>
+                      FloatingActionButtonLocation.centerFloat,
+                    FabLocation.endFloat =>
+                      FloatingActionButtonLocation.endFloat,
                     FabLocation.endTop => FloatingActionButtonLocation.endTop,
                   };
                   _selectedFabLocation = styles;
                 });
               },
-              segments: fabLocationegments
-                .map<ButtonSegment<FabLocation>>(((FabLocation, String) fabLocation) {
-                  final FabLocation location = fabLocation.$1;
-                  final String label = fabLocation.$2;
-                  return ButtonSegment<FabLocation>(value: location, label: Text(label));
-                })
-                .toList(),
+              segments: fabLocationegments.map<ButtonSegment<FabLocation>>((
+                (FabLocation, String) fabLocation,
+              ) {
+                final FabLocation location = fabLocation.$1;
+                final String label = fabLocation.$2;
+                return ButtonSegment<FabLocation>(
+                  value: location,
+                  label: Text(label),
+                );
+              }).toList(),
             ),
             const SizedBox(height: 10),
             FilledButton.icon(
@@ -110,11 +125,11 @@ class _ScaffoldFloatingActionButtonAnimatorExampleState extends State<ScaffoldFl
         ),
       ),
       floatingActionButton: !_showFab
-        ? null
-        : FloatingActionButton(
-            onPressed: () {},
-            child: const Icon(Icons.add),
-          ),
+          ? null
+          : FloatingActionButton(
+              onPressed: () {},
+              child: const Icon(Icons.add),
+            ),
     );
   }
 }

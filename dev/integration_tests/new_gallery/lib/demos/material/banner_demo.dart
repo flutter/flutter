@@ -7,11 +7,7 @@ import '../../gallery_localizations.dart';
 
 // BEGIN bannerDemo
 
-enum BannerDemoAction {
-  reset,
-  showMultipleActions,
-  showLeading,
-}
+enum BannerDemoAction { reset, showMultipleActions, showLeading }
 
 class BannerDemo extends StatefulWidget {
   const BannerDemo({super.key});
@@ -64,7 +60,7 @@ class _BannerDemoState extends State<BannerDemo> with RestorationMixin {
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
-    final MaterialBanner banner = MaterialBanner(
+    final banner = MaterialBanner(
       content: Text(localizations.bannerDemoText),
       leading: _showLeading.value
           ? CircleAvatar(
@@ -130,8 +126,7 @@ class _BannerDemoState extends State<BannerDemo> with RestorationMixin {
           }
           return ListTile(
             title: Text(
-              localizations.starterAppDrawerItem(
-                  _displayBanner.value ? index : index + 1),
+              localizations.starterAppDrawerItem(_displayBanner.value ? index : index + 1),
             ),
           );
         },

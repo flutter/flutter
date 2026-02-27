@@ -34,26 +34,29 @@ void main() {
         expect(list, isNotNull);
 
         // Scroll down
-        for (int i = 0; i < 5; i += 1) {
+        for (var i = 0; i < 5; i += 1) {
           await driver.scroll(list, 0.0, -300.0, const Duration(milliseconds: 300));
           await Future<void>.delayed(const Duration(milliseconds: 500));
         }
 
         // Scroll up
-        for (int i = 0; i < 5; i += 1) {
+        for (var i = 0; i < 5; i += 1) {
           await driver.scroll(list, 0.0, 300.0, const Duration(milliseconds: 300));
           await Future<void>.delayed(const Duration(milliseconds: 500));
         }
       });
 
-      final TimelineSummary summary = TimelineSummary.summarize(timeline);
+      final summary = TimelineSummary.summarize(timeline);
       summary.writeTimelineToFile(summaryName, pretty: true);
     }
 
     test('platform_views_scroll_perf_hybrid_composition', () async {
       // Disable frame sync, since there are ongoing animations.
       await driver.runUnsynchronized(() async {
-        await testScrollPerf('platform-views-scroll', 'platform_views_scroll_perf_hybrid_composition');
+        await testScrollPerf(
+          'platform-views-scroll',
+          'platform_views_scroll_perf_hybrid_composition',
+        );
       });
     }, timeout: Timeout.none);
   });

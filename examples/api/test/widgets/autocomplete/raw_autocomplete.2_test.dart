@@ -3,16 +3,22 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/autocomplete/raw_autocomplete.2.dart' as example;
+import 'package:flutter_api_samples/widgets/autocomplete/raw_autocomplete.2.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Form is entirely visible and rejects invalid responses', (WidgetTester tester) async {
+  testWidgets('Form is entirely visible and rejects invalid responses', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.AutocompleteExampleApp());
     expect(find.text('RawAutocomplete Form'), findsOneWidget);
     expect(find.byType(TextFormField), findsNWidgets(2));
     expect(find.byIcon(Icons.arrow_downward), findsOneWidget);
-    expect(find.text('This is a regular DropdownButtonFormField'), findsOneWidget);
+    expect(
+      find.text('This is a regular DropdownButtonFormField'),
+      findsOneWidget,
+    );
     expect(find.text('This is a regular TextFormField'), findsOneWidget);
     expect(find.text('This is a RawAutocomplete!'), findsOneWidget);
     expect(find.text('Submit'), findsOneWidget);
@@ -58,10 +64,12 @@ void main() {
       'regular user input',
     );
 
-    await tester.tap(find.ancestor(
-      of: find.text('This is a RawAutocomplete!'),
-      matching: find.byType(TextFormField),
-    ));
+    await tester.tap(
+      find.ancestor(
+        of: find.text('This is a RawAutocomplete!'),
+        matching: find.byType(TextFormField),
+      ),
+    );
     await tester.pump();
     expect(find.text('aardvark'), findsOneWidget);
     expect(find.text('bobcat'), findsOneWidget);

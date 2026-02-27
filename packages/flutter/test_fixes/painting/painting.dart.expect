@@ -18,4 +18,9 @@ void main() {
 
   TextPainter.computeWidth(textScaler: TextScaler.linear(textScaleFactor));
   TextPainter.computeMaxIntrinsicWidth(textScaler: TextScaler.linear(textScaleFactor));
+
+  Color color = Color.from(alpha: 1, red: 0, green: 1, blue: 0);
+  print(color.a);
+  print(color.toARGB32());
+  color = color.withValues(alpha: 0.55);
 }

@@ -12,7 +12,7 @@ class PrintOverrideTestBinding extends AutomatedTestWidgetsFlutterBinding {
   @override
   DebugPrintCallback get debugPrintOverride => _enablePrint ? debugPrint : _emptyPrint;
 
-  static void _emptyPrint(String? message, { int? wrapWidth }) {}
+  static void _emptyPrint(String? message, {int? wrapWidth}) {}
 
   static bool _enablePrint = true;
 
@@ -40,7 +40,6 @@ void main() {
   });
 
   test('addListener and removeListener add and remove listeners.', () {
-
     final ObjectEvent event = ObjectDisposed(object: 'object');
     ObjectEvent? receivedEvent;
     void listener(ObjectEvent event) => receivedEvent = event;
@@ -62,16 +61,18 @@ void main() {
 
   testWidgets('dispatchObjectEvent handles bad listeners', (WidgetTester tester) async {
     final ObjectEvent event = ObjectDisposed(object: 'object');
-    final List<String> log = <String>[];
+    final log = <String>[];
     void badListener1(ObjectEvent event) {
       log.add('badListener1');
       throw ArgumentError();
     }
+
     void listener1(ObjectEvent event) => log.add('listener1');
     void badListener2(ObjectEvent event) {
       log.add('badListener2');
       throw ArgumentError();
     }
+
     void listener2(ObjectEvent event) => log.add('listener2');
 
     ma.addListener(badListener1);
@@ -80,10 +81,8 @@ void main() {
     ma.addListener(badListener2);
     ma.addListener(listener2);
 
-    PrintOverrideTestBinding.runWithDebugPrintDisabled(
-      () => ma.dispatchObjectEvent(event)
-    );
-    expect(log, <String>['badListener1', 'listener1', 'badListener2','listener2']);
+    PrintOverrideTestBinding.runWithDebugPrintDisabled(() => ma.dispatchObjectEvent(event));
+    expect(log, <String>['badListener1', 'listener1', 'badListener2', 'listener2']);
     expect(tester.takeException(), contains('Multiple exceptions (2)'));
 
     ma.removeListener(badListener1);
@@ -101,7 +100,7 @@ void main() {
 
   test('dispatchObjectEvent does not invoke concurrently added listeners', () {
     final ObjectEvent event = ObjectDisposed(object: 'object');
-    final List<String> log = <String>[];
+    final log = <String>[];
 
     void listener2(ObjectEvent event) => log.add('listener2');
     void listener1(ObjectEvent event) {
@@ -117,7 +116,7 @@ void main() {
     log.clear();
 
     ma.dispatchObjectEvent(event);
-    expect(log, <String>['listener1','listener2']);
+    expect(log, <String>['listener1', 'listener2']);
     log.clear();
 
     ma.removeListener(listener1);
@@ -131,7 +130,7 @@ void main() {
 
   test('dispatchObjectEvent does not invoke concurrently removed listeners', () {
     final ObjectEvent event = ObjectDisposed(object: 'object');
-    final List<String> log = <String>[];
+    final log = <String>[];
 
     void listener2(ObjectEvent event) => log.add('listener2');
     void listener1(ObjectEvent event) {
@@ -175,7 +174,7 @@ void main() {
   });
 
   test('publishers in Flutter dispatch events in debug mode', () async {
-    int eventCount = 0;
+    var eventCount = 0;
     void listener(ObjectEvent event) => eventCount++;
     ma.addListener(listener);
 
@@ -204,18 +203,28 @@ void _checkSdkHandlersNotSet() {
 
 /// Create and dispose Flutter objects to fire memory allocation events.
 Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
-  int count = 0;
+  var count = 0;
 
-  final ValueNotifier<bool> valueNotifier = ValueNotifier<bool>(true); count++;
-  final ChangeNotifier changeNotifier = ChangeNotifier()..addListener(() {}); count++;
-  final Picture picture = _createPicture(); count++;
+  final valueNotifier = ValueNotifier<bool>(true);
+  count++;
+  final changeNotifier = ChangeNotifier()..addListener(() {});
+  count++;
+  final Picture picture = _createPicture();
+  count++;
 
-  valueNotifier.dispose(); count++;
-  changeNotifier.dispose(); count++;
-  picture.dispose(); count++;
+  valueNotifier.dispose();
+  count++;
+  changeNotifier.dispose();
+  count++;
+  picture.dispose();
+  count++;
 
-  final Image image = await _createImage(); count++; count++; count++;
-  image.dispose(); count++;
+  final Image image = await _createImage();
+  count++;
+  count++;
+  count++;
+  image.dispose();
+  count++;
 
   return count;
 }
@@ -228,9 +237,9 @@ Future<Image> _createImage() async {
 }
 
 Picture _createPicture() {
-  final PictureRecorder recorder = PictureRecorder();
-  final Canvas canvas = Canvas(recorder);
-  const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+  final recorder = PictureRecorder();
+  final canvas = Canvas(recorder);
+  const rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
   canvas.clipRect(rect);
   return recorder.endRecording();
 }

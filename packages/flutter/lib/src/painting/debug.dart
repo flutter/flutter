@@ -5,6 +5,8 @@
 /// @docImport 'dart:developer';
 /// @docImport 'dart:ui';
 ///
+/// @docImport 'package:flutter_test/flutter_test.dart';
+///
 /// @docImport 'borders.dart';
 /// @docImport 'box_decoration.dart';
 /// @docImport 'box_shadow.dart';
@@ -14,7 +16,7 @@
 library;
 
 import 'dart:io';
-import 'dart:ui' show Image, Picture, Size;
+import 'dart:ui' show Image, Picture, Size, TextDirection;
 
 import 'package:flutter/foundation.dart';
 
@@ -91,21 +93,15 @@ class ImageSizeInfo {
   int _sizeToBytes(Size size) {
     // Assume 4 bytes per pixel and that mipmapping will be used, which adds
     // 4/3.
-    return (size.width * size.height * 4 * (4/3)).toInt();
+    return (size.width * size.height * 4 * (4 / 3)).toInt();
   }
 
   /// Returns a JSON encodable representation of this object.
   Map<String, Object?> toJson() {
     return <String, Object?>{
       'source': source,
-      'displaySize': <String, Object?>{
-        'width': displaySize.width,
-        'height': displaySize.height,
-      },
-      'imageSize': <String, Object?>{
-        'width': imageSize.width,
-        'height': imageSize.height,
-      },
+      'displaySize': <String, Object?>{'width': displaySize.width, 'height': displaySize.height},
+      'imageSize': <String, Object?>{'width': imageSize.width, 'height': imageSize.height},
       'displaySizeInBytes': displaySizeInBytes,
       'decodedSizeInBytes': decodedSizeInBytes,
     };
@@ -116,10 +112,10 @@ class ImageSizeInfo {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ImageSizeInfo
-        && other.source == source
-        && other.imageSize == imageSize
-        && other.displaySize == displaySize;
+    return other is ImageSizeInfo &&
+        other.source == source &&
+        other.imageSize == imageSize &&
+        other.displaySize == displaySize;
   }
 
   @override
@@ -197,7 +193,7 @@ int debugImageOverheadAllowance = _imageOverheadAllowanceDefault;
 /// The `debugDisableShadowsOverride` argument can be provided to override
 /// the expected value for [debugDisableShadows]. (This exists because the
 /// test framework itself overrides this value in some cases.)
-bool debugAssertAllPaintingVarsUnset(String reason, { bool debugDisableShadowsOverride = false }) {
+bool debugAssertAllPaintingVarsUnset(String reason, {bool debugDisableShadowsOverride = false}) {
   assert(() {
     if (debugDisableShadows != debugDisableShadowsOverride ||
         debugNetworkImageHttpClientProvider != null ||
@@ -236,3 +232,40 @@ bool _defaultPictureCapture(Picture picture) => true;
 /// Tests may use this to capture the picture and run assertions on it.
 ShaderWarmUpImageCallback debugCaptureShaderWarmUpImage = _defaultImageCapture;
 bool _defaultImageCapture(Image image) => true;
+
+/// Asserts that a given [TextDirection] is not null.
+///
+/// Used by painting library classes that require a [TextDirection] to resolve
+/// their properties, such as [BorderRadiusDirectional].
+///
+/// Does nothing if asserts are disabled. Always returns true.
+///
+/// See also:
+///
+///  * [debugCheckHasDirectionality], which is a similar widgets-library level function.
+bool debugCheckCanResolveTextDirection(TextDirection? direction, String target) {
+  assert(() {
+    if (direction == null) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('No TextDirection found.'),
+        ErrorDescription(
+          'To resolve $target properties, it must be provided with a TextDirection.',
+        ),
+        ErrorHint(
+          'This error usually occurs when $target is used in a widget without '
+          'a Directionality ancestor.',
+        ),
+        ErrorHint(
+          'Typically, the Directionality widget is introduced by the MaterialApp '
+          'or WidgetsApp widget at the top of your application widget tree. It '
+          'determines the ambient reading direction and is used, for example, to '
+          'determine how to lay out text, how to interpret "start" and "end" '
+          'values, and to resolve EdgeInsetsDirectional, '
+          'AlignmentDirectional, and other *Directional objects.',
+        ),
+      ]);
+    }
+    return true;
+  }());
+  return true;
+}

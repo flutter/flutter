@@ -13,18 +13,18 @@ class SnackBarApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: SnackBarExample(),
-    );
+    return const MaterialApp(home: SnackBarExample());
   }
 }
 
 enum AnimationStyles { defaultStyle, custom, none }
-const List<(AnimationStyles, String)> animationStyleSegments = <(AnimationStyles, String)>[
-  (AnimationStyles.defaultStyle, 'Default'),
-  (AnimationStyles.custom, 'Custom'),
-  (AnimationStyles.none, 'None'),
-];
+
+const List<(AnimationStyles, String)> animationStyleSegments =
+    <(AnimationStyles, String)>[
+      (AnimationStyles.defaultStyle, 'Default'),
+      (AnimationStyles.custom, 'Custom'),
+      (AnimationStyles.none, 'None'),
+    ];
 
 class SnackBarExample extends StatefulWidget {
   const SnackBarExample({super.key});
@@ -34,7 +34,9 @@ class SnackBarExample extends StatefulWidget {
 }
 
 class _SnackBarExampleState extends State<SnackBarExample> {
-  Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{AnimationStyles.defaultStyle};
+  Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{
+    AnimationStyles.defaultStyle,
+  };
   AnimationStyle? _animationStyle;
 
   @override
@@ -51,9 +53,9 @@ class _SnackBarExampleState extends State<SnackBarExample> {
                 setState(() {
                   _animationStyle = switch (styles.first) {
                     AnimationStyles.defaultStyle => null,
-                    AnimationStyles.custom => AnimationStyle(
-                      duration: const Duration(seconds: 3),
-                      reverseDuration: const Duration(seconds: 1),
+                    AnimationStyles.custom => const AnimationStyle(
+                      duration: Duration(seconds: 3),
+                      reverseDuration: Duration(seconds: 1),
                     ),
                     AnimationStyles.none => AnimationStyle.noAnimation,
                   };
@@ -61,10 +63,15 @@ class _SnackBarExampleState extends State<SnackBarExample> {
                 });
               },
               segments: animationStyleSegments
-                .map<ButtonSegment<AnimationStyles>>(((AnimationStyles, String) shirt) {
-                  return ButtonSegment<AnimationStyles>(value: shirt.$1, label: Text(shirt.$2));
-                })
-                .toList(),
+                  .map<ButtonSegment<AnimationStyles>>((
+                    (AnimationStyles, String) shirt,
+                  ) {
+                    return ButtonSegment<AnimationStyles>(
+                      value: shirt.$1,
+                      label: Text(shirt.$2),
+                    );
+                  })
+                  .toList(),
             ),
             const SizedBox(height: 10),
             Builder(
@@ -81,7 +88,7 @@ class _SnackBarExampleState extends State<SnackBarExample> {
                   },
                   child: const Text('Show SnackBar'),
                 );
-              }
+              },
             ),
           ],
         ),

@@ -14,7 +14,6 @@ class ExpansionTileApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(useMaterial3: true),
       home: Scaffold(
         appBar: AppBar(title: const Text('ExpansionTile Sample')),
         body: const ExpansionTileExample(),
@@ -40,15 +39,15 @@ class _ExpansionTileExampleState extends State<ExpansionTileExample> {
         const ExpansionTile(
           title: Text('ExpansionTile 1'),
           subtitle: Text('Trailing expansion arrow icon'),
-          children: <Widget>[
-            ListTile(title: Text('This is tile number 1')),
-          ],
+          children: <Widget>[ListTile(title: Text('This is tile number 1'))],
         ),
         ExpansionTile(
           title: const Text('ExpansionTile 2'),
           subtitle: const Text('Custom expansion arrow icon'),
           trailing: Icon(
-            _customTileExpanded ? Icons.arrow_drop_down_circle : Icons.arrow_drop_down,
+            _customTileExpanded
+                ? Icons.arrow_drop_down_circle
+                : Icons.arrow_drop_down,
           ),
           children: const <Widget>[
             ListTile(title: Text('This is tile number 2')),
@@ -63,9 +62,7 @@ class _ExpansionTileExampleState extends State<ExpansionTileExample> {
           title: Text('ExpansionTile 3'),
           subtitle: Text('Leading expansion arrow icon'),
           controlAffinity: ListTileControlAffinity.leading,
-          children: <Widget>[
-            ListTile(title: Text('This is tile number 3')),
-          ],
+          children: <Widget>[ListTile(title: Text('This is tile number 3'))],
         ),
       ],
     );

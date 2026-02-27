@@ -15,9 +15,7 @@ class RestorableValueExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('RestorableValue Sample'),
-        ),
+        appBar: AppBar(title: const Text('RestorableValue Sample')),
         body: const RestorableValueExample(restorationId: 'main'),
       ),
     );
@@ -34,7 +32,8 @@ class RestorableValueExample extends StatefulWidget {
 }
 
 /// RestorationProperty objects can be used because of RestorationMixin.
-class _RestorableValueExampleState extends State<RestorableValueExample> with RestorationMixin {
+class _RestorableValueExampleState extends State<RestorableValueExample>
+    with RestorationMixin {
   // In this example, the restoration ID for the mixin is passed in through
   // the [StatefulWidget]'s constructor.
   @override

@@ -19,6 +19,7 @@ import 'src/color_filter_cache.dart';
 import 'src/color_filter_with_unstable_child.dart';
 import 'src/cubic_bezier.dart';
 import 'src/cull_opacity.dart';
+import 'src/draw_arcs.dart';
 import 'src/draw_atlas.dart';
 import 'src/draw_points.dart';
 import 'src/draw_vertices.dart';
@@ -37,11 +38,11 @@ import 'src/picture_cache_complexity_scoring.dart';
 import 'src/post_backdrop_filter.dart';
 import 'src/raster_cache_use_memory.dart';
 import 'src/rrect_blur.dart' show RRectBlur;
+import 'src/rsuperellipse_blur.dart' show RSuperellipseBlur;
 import 'src/shader_mask_cache.dart';
 import 'src/simple_animation.dart';
 import 'src/simple_scroll.dart';
 import 'src/sliders.dart';
-import 'src/stack_size.dart';
 import 'src/text.dart';
 import 'src/very_long_picture_scrolling.dart';
 
@@ -65,34 +66,44 @@ class MacrobenchmarksApp extends StatelessWidget {
         kPostBackdropFilterRouteName: (BuildContext context) => const PostBackdropFilterPage(),
         kSimpleAnimationRouteName: (BuildContext context) => const SimpleAnimationPage(),
         kPictureCacheRouteName: (BuildContext context) => const PictureCachePage(),
-        kPictureCacheComplexityScoringRouteName: (BuildContext context) => const PictureCacheComplexityScoringPage(),
+        kPictureCacheComplexityScoringRouteName: (BuildContext context) =>
+            const PictureCacheComplexityScoringPage(),
         kLargeImageChangerRouteName: (BuildContext context) => const LargeImageChangerPage(),
         kLargeImagesRouteName: (BuildContext context) => const LargeImagesPage(),
         kTextRouteName: (BuildContext context) => const TextPage(),
-        kPathTessellationRouteName: (BuildContext context) => const PathTessellationPage(),
+        kPathTessellationRouteName: (BuildContext context) =>
+            const PathTessellationPage(paintStyle: PaintingStyle.fill),
+        kPathStrokeTessellationRouteName: (BuildContext context) =>
+            const PathTessellationPage(paintStyle: PaintingStyle.stroke),
         kFullscreenTextRouteName: (BuildContext context) => const TextFieldPage(),
         kAnimatedPlaceholderRouteName: (BuildContext context) => const AnimatedPlaceholderPage(),
         kClipperCacheRouteName: (BuildContext context) => const ClipperCachePage(),
         kColorFilterAndFadeRouteName: (BuildContext context) => const ColorFilterAndFadePage(),
         kColorFilterCacheRouteName: (BuildContext context) => const ColorFilterCachePage(),
-        kColorFilterWithUnstableChildName: (BuildContext context) => const ColorFilterWithUnstableChildPage(),
-        kFadingChildAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.opacity),
-        kImageFilteredTransformAnimationRouteName: (BuildContext context) => const FilteredChildAnimationPage(FilterType.rotateFilter),
-        kMultiWidgetConstructionRouteName: (BuildContext context) => const MultiWidgetConstructTable(10, 20),
+        kColorFilterWithUnstableChildName: (BuildContext context) =>
+            const ColorFilterWithUnstableChildPage(),
+        kFadingChildAnimationRouteName: (BuildContext context) =>
+            const FilteredChildAnimationPage(FilterType.opacity),
+        kImageFilteredTransformAnimationRouteName: (BuildContext context) =>
+            const FilteredChildAnimationPage(FilterType.rotateFilter),
+        kMultiWidgetConstructionRouteName: (BuildContext context) =>
+            const MultiWidgetConstructTable(10, 20),
         kHeavyGridViewRouteName: (BuildContext context) => const HeavyGridViewPage(),
         kRasterCacheUseMemory: (BuildContext context) => const RasterCacheUseMemory(),
         kShaderMaskCacheRouteName: (BuildContext context) => const ShaderMaskCachePage(),
         kSimpleScrollRouteName: (BuildContext context) => const SimpleScroll(),
-        kStackSizeRouteName: (BuildContext context) => const StackSizePage(),
-        kAnimationWithMicrotasksRouteName: (BuildContext context) => const AnimationWithMicrotasks(),
+        kAnimationWithMicrotasksRouteName: (BuildContext context) =>
+            const AnimationWithMicrotasks(),
         kAnimatedImageRouteName: (BuildContext context) => const AnimatedImagePage(),
         kOpacityPeepholeRouteName: (BuildContext context) => const OpacityPeepholePage(),
         ...opacityPeepholeRoutes,
         kGradientPerfRouteName: (BuildContext context) => const GradientPerfHomePage(),
         ...gradientPerfRoutes,
-        kAnimatedComplexOpacityPerfRouteName: (BuildContext context) => const AnimatedComplexOpacity(),
+        kAnimatedComplexOpacityPerfRouteName: (BuildContext context) =>
+            const AnimatedComplexOpacity(),
         kListTextLayoutRouteName: (BuildContext context) => const ColumnOfText(),
-        kAnimatedComplexImageFilteredPerfRouteName: (BuildContext context) => const AnimatedComplexImageFiltered(),
+        kAnimatedComplexImageFilteredPerfRouteName: (BuildContext context) =>
+            const AnimatedComplexImageFiltered(),
         kAnimatedBlurBackdropFilter: (BuildContext context) => const AnimatedBlurBackdropFilter(),
         kSlidersRouteName: (BuildContext context) => const SlidersPage(),
         kDrawPointsPageRougeName: (BuildContext context) => const DrawPointsPage(),
@@ -100,7 +111,13 @@ class MacrobenchmarksApp extends StatelessWidget {
         kDrawAtlasPageRouteName: (BuildContext context) => const DrawAtlasPage(),
         kAnimatedAdvancedBlend: (BuildContext context) => const AnimatedAdvancedBlend(),
         kRRectBlurRouteName: (BuildContext context) => const RRectBlur(),
-        kVeryLongPictureScrollingRouteName: (BuildContext context) => const VeryLongPictureScrollingPerf(),
+        kRSuperellipseBlurRouteName: (BuildContext context) => const RSuperellipseBlur(),
+        kVeryLongPictureScrollingRouteName: (BuildContext context) =>
+            const VeryLongPictureScrollingPerf(),
+        kDrawArcsAllFillStylesPageRouteName: (BuildContext context) =>
+            const DrawArcsPage(paintStyle: PaintingStyle.fill),
+        kDrawArcsAllStrokeStylesPageRouteName: (BuildContext context) =>
+            const DrawArcsPage(paintStyle: PaintingStyle.stroke),
       },
     );
   }
@@ -179,6 +196,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Path Tessellation'),
             onPressed: () {
               Navigator.pushNamed(context, kPathTessellationRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kPathStrokeTessellationRouteName),
+            child: const Text('Path Stroke Tessellation'),
+            onPressed: () {
+              Navigator.pushNamed(context, kPathStrokeTessellationRouteName);
             },
           ),
           ElevatedButton(
@@ -280,13 +304,6 @@ class HomePage extends StatelessWidget {
             },
           ),
           ElevatedButton(
-            key: const Key(kStackSizeRouteName),
-            child: const Text('Stack Size'),
-            onPressed: () {
-              Navigator.pushNamed(context, kStackSizeRouteName);
-            },
-          ),
-          ElevatedButton(
             key: const Key(kAnimationWithMicrotasksRouteName),
             child: const Text('Animation With Microtasks'),
             onPressed: () {
@@ -385,10 +402,31 @@ class HomePage extends StatelessWidget {
             },
           ),
           ElevatedButton(
+            key: const Key(kRSuperellipseBlurRouteName),
+            child: const Text('Rounded superellipse Blur'),
+            onPressed: () {
+              Navigator.pushNamed(context, kRSuperellipseBlurRouteName);
+            },
+          ),
+          ElevatedButton(
             key: const Key(kVeryLongPictureScrollingRouteName),
             child: const Text('Very Long Picture Scrolling'),
             onPressed: () {
               Navigator.pushNamed(context, kVeryLongPictureScrollingRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kDrawArcsAllFillStylesPageRouteName),
+            child: const Text('Draw Fill Style Arcs'),
+            onPressed: () {
+              Navigator.pushNamed(context, kDrawArcsAllFillStylesPageRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kDrawArcsAllStrokeStylesPageRouteName),
+            child: const Text('Draw Stroke Style Arcs'),
+            onPressed: () {
+              Navigator.pushNamed(context, kDrawArcsAllStrokeStylesPageRouteName);
             },
           ),
         ],

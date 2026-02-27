@@ -8,9 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Can toggle nodes in TreeSliver', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.TreeSliverExampleApp(),
-    );
+    await tester.pumpWidget(const example.TreeSliverExampleApp());
     expect(find.text('lib'), findsOneWidget);
     expect(find.text('src'), findsNothing);
     // Toggle tree node.

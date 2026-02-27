@@ -13,9 +13,7 @@ class PopupSurfaceApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const CupertinoApp(
-      home: PopupSurfaceExample(),
-    );
+    return const CupertinoApp(home: PopupSurfaceExample());
   }
 }
 
@@ -44,7 +42,8 @@ class _PopupSurfaceExampleState extends State<PopupSurfaceExample> {
                 const SizedBox(width: 16.0),
                 CupertinoSwitch(
                   value: _shouldPaintSurface,
-                  onChanged: (bool value) => setState(() => _shouldPaintSurface = value),
+                  onChanged: (bool value) =>
+                      setState(() => _shouldPaintSurface = value),
                 ),
               ],
             ),
@@ -75,7 +74,9 @@ class _PopupSurfaceExampleState extends State<PopupSurfaceExample> {
                     decoration: _shouldPaintSurface
                         ? null
                         : BoxDecoration(
-                            color: CupertinoTheme.of(context).scaffoldBackgroundColor,
+                            color: CupertinoTheme.of(
+                              context,
+                            ).scaffoldBackgroundColor,
                             borderRadius: BorderRadius.circular(8.0),
                           ),
                     child: const Text('This is a popup surface.'),

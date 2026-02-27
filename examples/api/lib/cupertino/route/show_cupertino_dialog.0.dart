@@ -27,9 +27,7 @@ class CupertinoDialogExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Home'),
-      ),
+      navigationBar: const CupertinoNavigationBar(middle: Text('Home')),
       child: Center(
         child: CupertinoButton(
           onPressed: () {
@@ -42,7 +40,10 @@ class CupertinoDialogExample extends StatelessWidget {
   }
 
   @pragma('vm:entry-point')
-  static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
+  static Route<Object?> _dialogBuilder(
+    BuildContext context,
+    Object? arguments,
+  ) {
     return CupertinoDialogRoute<void>(
       context: context,
       builder: (BuildContext context) {

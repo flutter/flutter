@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'icon_button.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -20,15 +23,15 @@ import 'theme.dart';
 ///
 /// The [style]'s properties override [IconButton]'s default style. Only
 /// the style's non-null property values or resolved non-null
-/// [MaterialStateProperty] values are used.
+/// [WidgetStateProperty] values are used.
 ///
 /// See also:
 ///
 ///  * [IconButtonTheme], the theme which is configured with this class.
 ///  * [IconButton.styleFrom], which converts simple values into a
 ///    [ButtonStyle] that's consistent with [IconButton]'s defaults.
-///  * [MaterialStateProperty.resolve], "resolve" a material state property
-///    to a simple value based on a set of [MaterialState]s.
+///  * [WidgetStateProperty.resolve], "resolve" a material state property
+///    to a simple value based on a set of [WidgetState]s.
 ///  * [ThemeData.iconButtonTheme], which can be used to override the default
 ///    [ButtonStyle] for [IconButton]s below the overall [Theme].
 @immutable
@@ -36,12 +39,12 @@ class IconButtonThemeData with Diagnosticable {
   /// Creates a [IconButtonThemeData].
   ///
   /// The [style] may be null.
-  const IconButtonThemeData({ this.style });
+  const IconButtonThemeData({this.style});
 
   /// Overrides for [IconButton]'s default style if [ThemeData.useMaterial3]
   /// is set to true.
   ///
-  /// Non-null properties or non-null resolved [MaterialStateProperty]
+  /// Non-null properties or non-null resolved [WidgetStateProperty]
   /// values override the default [ButtonStyle] in [IconButton].
   ///
   /// If [style] is null, then this theme doesn't override anything.
@@ -52,9 +55,7 @@ class IconButtonThemeData with Diagnosticable {
     if (identical(a, b)) {
       return a;
     }
-    return IconButtonThemeData(
-      style: ButtonStyle.lerp(a?.style, b?.style, t),
-    );
+    return IconButtonThemeData(style: ButtonStyle.lerp(a?.style, b?.style, t));
   }
 
   @override
@@ -89,16 +90,12 @@ class IconButtonThemeData with Diagnosticable {
 ///    [ButtonStyle] for [IconButton]s below the overall [Theme].
 class IconButtonTheme extends InheritedTheme {
   /// Create a [IconButtonTheme].
-  const IconButtonTheme({
-    super.key,
-    required this.data,
-    required super.child,
-  });
+  const IconButtonTheme({super.key, required this.data, required super.child});
 
   /// The configuration of this theme.
   final IconButtonThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Retrieves the [IconButtonThemeData] from the closest ancestor [IconButtonTheme].
   ///
   /// If there is no enclosing [IconButtonTheme] widget, then
   /// [ThemeData.iconButtonTheme] is used.
@@ -109,7 +106,8 @@ class IconButtonTheme extends InheritedTheme {
   /// IconButtonThemeData theme = IconButtonTheme.of(context);
   /// ```
   static IconButtonThemeData of(BuildContext context) {
-    final IconButtonTheme? buttonTheme = context.dependOnInheritedWidgetOfExactType<IconButtonTheme>();
+    final IconButtonTheme? buttonTheme = context
+        .dependOnInheritedWidgetOfExactType<IconButtonTheme>();
     return buttonTheme?.data ?? Theme.of(context).iconButtonTheme;
   }
 

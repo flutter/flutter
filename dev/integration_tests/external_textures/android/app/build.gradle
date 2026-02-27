@@ -16,11 +16,13 @@ if (localPropertiesFile.exists()) {
 }
 
 android {
-    compileSdk flutter.compileSdkVersion
+    namespace = "io.flutter.externalui"
+    compileSdk = flutter.compileSdkVersion
+
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     defaultConfig {
@@ -33,11 +35,11 @@ android {
 
     buildTypes {
         release {
-            signingConfig signingConfigs.debug
+            signingConfig = signingConfigs.debug
         }
     }
 }
 
 flutter {
-    source '../..'
+    source = '../..'
 }

@@ -16,32 +16,39 @@ void main() {
   });
 
   testWidgets('A mouse click should only cause one hit test', (WidgetTester tester) async {
-    int hitCount = 0;
+    var hitCount = 0;
     await tester.pumpWidget(
       _HitTestCounter(
-        onHitTestCallback: () { hitCount += 1; },
+        onHitTestCallback: () {
+          hitCount += 1;
+        },
         child: Container(),
       ),
     );
 
-    final TestGesture gesture =
-        await tester.startGesture(tester.getCenter(find.byType(_HitTestCounter)), kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.byType(_HitTestCounter)),
+      kind: PointerDeviceKind.mouse,
+    );
     await gesture.up();
 
     expect(hitCount, 1);
   });
 
   testWidgets('Non-mouse events should not cause movement hit tests', (WidgetTester tester) async {
-    int hitCount = 0;
+    var hitCount = 0;
     await tester.pumpWidget(
       _HitTestCounter(
-        onHitTestCallback: () { hitCount += 1; },
+        onHitTestCallback: () {
+          hitCount += 1;
+        },
         child: Container(),
       ),
     );
 
-    final TestGesture gesture =
-        await tester.startGesture(tester.getCenter(find.byType(_HitTestCounter)));
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.byType(_HitTestCounter)),
+    );
     await gesture.moveBy(const Offset(1, 1));
     await gesture.up();
 
@@ -49,28 +56,20 @@ void main() {
   });
 }
 
-
 // The [_HitTestCounter] invokes [onHitTestCallback] every time
 // [hitTestChildren] is called.
 class _HitTestCounter extends SingleChildRenderObjectWidget {
-  const _HitTestCounter({
-    required Widget super.child,
-    required this.onHitTestCallback,
-  });
+  const _HitTestCounter({required Widget super.child, required this.onHitTestCallback});
 
   final VoidCallback? onHitTestCallback;
 
   @override
   _RenderHitTestCounter createRenderObject(BuildContext context) {
-    return _RenderHitTestCounter()
-      .._onHitTestCallback = onHitTestCallback;
+    return _RenderHitTestCounter().._onHitTestCallback = onHitTestCallback;
   }
 
   @override
-  void updateRenderObject(
-    BuildContext context,
-    _RenderHitTestCounter renderObject,
-  ) {
+  void updateRenderObject(BuildContext context, _RenderHitTestCounter renderObject) {
     renderObject._onHitTestCallback = onHitTestCallback;
   }
 }

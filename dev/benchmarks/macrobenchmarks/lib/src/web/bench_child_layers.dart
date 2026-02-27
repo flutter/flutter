@@ -9,8 +9,7 @@ import 'recorder.dart';
 /// Repeatedly paints a grid of rectangles where each rectangle is drawn in its
 /// own [Picture].
 ///
-/// Measures the performance of updating many layers. For example, the HTML
-/// rendering backend attempts to reuse the DOM nodes created for engine layers.
+/// Measures the performance of updating many layers.
 ///
 /// See also `bench_draw_rect.dart`, which draws nearly identical UI but puts all
 /// rectangles into the same picture.
@@ -40,16 +39,13 @@ class BenchUpdateManyChildLayers extends SceneBuilderRecorder {
   Future<void> setUpAll() async {
     _pictures = <Picture>[];
     viewSize = view.physicalSize;
-    cellSize = Size(
-      viewSize.width / kColumns,
-      viewSize.height / kRows,
-    );
+    cellSize = Size(viewSize.width / kColumns, viewSize.height / kRows);
     rectSize = cellSize * 0.8;
 
-    final Paint paint = Paint()..color = const Color.fromARGB(255, 255, 0, 0);
-    for (int i = 0; i < kRows * kColumns; i++) {
-      final PictureRecorder pictureRecorder = PictureRecorder();
-      final Canvas canvas = Canvas(pictureRecorder);
+    final paint = Paint()..color = const Color.fromARGB(255, 255, 0, 0);
+    for (var i = 0; i < kRows * kColumns; i++) {
+      final pictureRecorder = PictureRecorder();
+      final canvas = Canvas(pictureRecorder);
       canvas.drawRect(Offset.zero & rectSize, paint);
       _pictures.add(pictureRecorder.endRecording());
     }
@@ -61,8 +57,8 @@ class BenchUpdateManyChildLayers extends SceneBuilderRecorder {
   @override
   void onDrawFrame(SceneBuilder sceneBuilder) {
     _rootLayer = sceneBuilder.pushOffset(0, 0, oldLayer: _rootLayer);
-    for (int row = 0; row < kRows; row++) {
-      for (int col = 0; col < kColumns; col++) {
+    for (var row = 0; row < kRows; row++) {
+      for (var col = 0; col < kColumns; col++) {
         final int layerId = 1000000 * row + col;
         final OffsetEngineLayer? oldLayer = _layers[layerId];
         final double wobbleOffsetX = col * cellSize.width + (wobbleCounter - 5).abs();
@@ -73,11 +69,7 @@ class BenchUpdateManyChildLayers extends SceneBuilderRecorder {
         if (shouldRetain) {
           sceneBuilder.addRetained(oldLayer);
         } else {
-          _layers[layerId] = sceneBuilder.pushOffset(
-            wobbleOffsetX,
-            offsetY,
-            oldLayer: oldLayer,
-          );
+          _layers[layerId] = sceneBuilder.pushOffset(wobbleOffsetX, offsetY, oldLayer: oldLayer);
           sceneBuilder.addPicture(Offset.zero, _pictures[row * kColumns + col]);
           sceneBuilder.pop();
         }

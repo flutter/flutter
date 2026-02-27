@@ -2,18 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show PointerDeviceKind;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RendererBinding;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('DrawerButton control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: Scaffold(
-          body: DrawerButton(),
-          drawer: Drawer(),
-        ),
+        home: Scaffold(body: DrawerButton(), drawer: Drawer()),
       ),
     );
 
@@ -28,16 +28,14 @@ void main() {
     expect(find.byType(Drawer), findsOneWidget);
   });
 
-  testWidgets('DrawerButton onPressed overrides default end drawer open behaviour',
-      (WidgetTester tester) async {
-    bool customCallbackWasCalled = false;
+  testWidgets('DrawerButton onPressed overrides default end drawer open behaviour', (
+    WidgetTester tester,
+  ) async {
+    var customCallbackWasCalled = false;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: Center(
-            child: DrawerButton(
-                onPressed: () => customCallbackWasCalled = true),
-          ),
+          body: Center(child: DrawerButton(onPressed: () => customCallbackWasCalled = true)),
           drawer: const Drawer(),
         ),
       ),
@@ -45,8 +43,7 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(find.byType(Drawer), findsNothing); // Start off with a closed drawer
-    expect(customCallbackWasCalled,
-        false); // customCallbackWasCalled should still be false.
+    expect(customCallbackWasCalled, false); // customCallbackWasCalled should still be false.
     await tester.tap(find.byType(DrawerButton));
 
     await tester.pumpAndSettle();
@@ -93,16 +90,21 @@ void main() {
       ),
     );
 
-    final Icon androidIcon = tester.widget(find.descendant(
-        of: find.byKey(androidKey), matching: find.byType(Icon)));
+    final Icon androidIcon = tester.widget(
+      find.descendant(of: find.byKey(androidKey), matching: find.byType(Icon)),
+    );
     final Icon iOSIcon = tester.widget(
-        find.descendant(of: find.byKey(iOSKey), matching: find.byType(Icon)));
+      find.descendant(of: find.byKey(iOSKey), matching: find.byType(Icon)),
+    );
     final Icon linuxIcon = tester.widget(
-        find.descendant(of: find.byKey(linuxKey), matching: find.byType(Icon)));
+      find.descendant(of: find.byKey(linuxKey), matching: find.byType(Icon)),
+    );
     final Icon macOSIcon = tester.widget(
-        find.descendant(of: find.byKey(macOSKey), matching: find.byType(Icon)));
-    final Icon windowsIcon = tester.widget(find.descendant(
-        of: find.byKey(windowsKey), matching: find.byType(Icon)));
+      find.descendant(of: find.byKey(macOSKey), matching: find.byType(Icon)),
+    );
+    final Icon windowsIcon = tester.widget(
+      find.descendant(of: find.byKey(windowsKey), matching: find.byType(Icon)),
+    );
 
     // All icons for drawer are the same
     expect(iOSIcon.icon == androidIcon.icon, isTrue);
@@ -114,39 +116,30 @@ void main() {
   testWidgets('DrawerButton color', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: Material(
-          child: DrawerButton(
-            color: Colors.red,
-          ),
-        ),
+        home: Material(child: DrawerButton(color: Colors.red)),
       ),
     );
 
-    final RichText iconText = tester.firstWidget(find.descendant(
-      of: find.byType(DrawerButton),
-      matching: find.byType(RichText),
-    ));
+    final RichText iconText = tester.firstWidget(
+      find.descendant(of: find.byType(DrawerButton), matching: find.byType(RichText)),
+    );
     expect(iconText.text.style!.color, Colors.red);
   });
 
   testWidgets('DrawerButton color with ButtonStyle', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: true),
-        home: const Material(
+      const MaterialApp(
+        home: Material(
           child: DrawerButton(
-            style: ButtonStyle(
-              iconColor: MaterialStatePropertyAll<Color>(Colors.red),
-            ),
+            style: ButtonStyle(iconColor: MaterialStatePropertyAll<Color>(Colors.red)),
           ),
         ),
       ),
     );
 
-    final RichText iconText = tester.firstWidget(find.descendant(
-      of: find.byType(DrawerButton),
-      matching: find.byType(RichText),
-    ));
+    final RichText iconText = tester.firstWidget(
+      find.descendant(of: find.byType(DrawerButton), matching: find.byType(RichText)),
+    );
     expect(iconText.text.style!.color, Colors.red);
   });
 
@@ -154,11 +147,7 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       const MaterialApp(
-        home: Material(
-          child: Center(
-            child: DrawerButton(),
-          ),
-        ),
+        home: Material(child: Center(child: DrawerButton())),
       ),
     );
 
@@ -175,26 +164,26 @@ void main() {
       case TargetPlatform.windows:
         expectedLabel = null;
     }
-    expect(tester.getSemantics(find.byType(DrawerButton)), matchesSemantics(
-      tooltip: 'Open navigation menu',
-      label: expectedLabel,
-      isButton: true,
-      hasEnabledState: true,
-      isEnabled: true,
-      hasTapAction: true,
-      hasFocusAction: true,
-      isFocusable: true,
-    ));
+    expect(
+      tester.getSemantics(find.byType(DrawerButton)),
+      matchesSemantics(
+        tooltip: 'Open navigation menu',
+        label: expectedLabel,
+        isButton: true,
+        hasEnabledState: true,
+        isEnabled: true,
+        hasTapAction: true,
+        hasFocusAction: defaultTargetPlatform != TargetPlatform.iOS,
+        isFocusable: true,
+      ),
+    );
     handle.dispose();
   }, variant: TargetPlatformVariant.all());
 
   testWidgets('EndDrawerButton control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: Scaffold(
-          body: EndDrawerButton(),
-          endDrawer: Drawer(),
-        ),
+        home: Scaffold(body: EndDrawerButton(), endDrawer: Drawer()),
       ),
     );
 
@@ -213,11 +202,7 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       const MaterialApp(
-        home: Material(
-          child: Center(
-            child: EndDrawerButton(),
-          ),
-        ),
+        home: Material(child: Center(child: EndDrawerButton())),
       ),
     );
 
@@ -233,67 +218,60 @@ void main() {
       case TargetPlatform.windows:
         expectedLabel = null;
     }
-    expect(tester.getSemantics(find.byType(EndDrawerButton)), matchesSemantics(
-      tooltip: 'Open navigation menu',
-      label: expectedLabel,
-      isButton: true,
-      hasEnabledState: true,
-      isEnabled: true,
-      hasTapAction: true,
-      hasFocusAction: true,
-      isFocusable: true,
-    ));
+    expect(
+      tester.getSemantics(find.byType(EndDrawerButton)),
+      matchesSemantics(
+        tooltip: 'Open navigation menu',
+        label: expectedLabel,
+        isButton: true,
+        hasEnabledState: true,
+        isEnabled: true,
+        hasTapAction: true,
+        hasFocusAction: defaultTargetPlatform != TargetPlatform.iOS,
+        isFocusable: true,
+      ),
+    );
     handle.dispose();
   }, variant: TargetPlatformVariant.all());
 
   testWidgets('EndDrawerButton color', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: Material(
-          child: EndDrawerButton(
-            color: Colors.red,
-          ),
-        ),
+        home: Material(child: EndDrawerButton(color: Colors.red)),
       ),
     );
 
-    final RichText iconText = tester.firstWidget(find.descendant(
-      of: find.byType(EndDrawerButton),
-      matching: find.byType(RichText),
-    ));
+    final RichText iconText = tester.firstWidget(
+      find.descendant(of: find.byType(EndDrawerButton), matching: find.byType(RichText)),
+    );
     expect(iconText.text.style!.color, Colors.red);
   });
 
   testWidgets('EndDrawerButton color with ButtonStyle', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: true),
-        home: const Material(
+      const MaterialApp(
+        home: Material(
           child: EndDrawerButton(
-            style: ButtonStyle(
-              iconColor: MaterialStatePropertyAll<Color>(Colors.red),
-            ),
+            style: ButtonStyle(iconColor: MaterialStatePropertyAll<Color>(Colors.red)),
           ),
         ),
       ),
     );
 
-    final RichText iconText = tester.firstWidget(find.descendant(
-      of: find.byType(EndDrawerButton),
-      matching: find.byType(RichText),
-    ));
+    final RichText iconText = tester.firstWidget(
+      find.descendant(of: find.byType(EndDrawerButton), matching: find.byType(RichText)),
+    );
     expect(iconText.text.style!.color, Colors.red);
   });
 
-  testWidgets('EndDrawerButton onPressed overrides default end drawer open behaviour',
-      (WidgetTester tester) async {
-    bool customCallbackWasCalled = false;
+  testWidgets('EndDrawerButton onPressed overrides default end drawer open behaviour', (
+    WidgetTester tester,
+  ) async {
+    var customCallbackWasCalled = false;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: Center(
-            child: EndDrawerButton(onPressed: () => customCallbackWasCalled = true),
-          ),
+          body: Center(child: EndDrawerButton(onPressed: () => customCallbackWasCalled = true)),
           endDrawer: const Drawer(),
         ),
       ),
@@ -301,8 +279,7 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(find.byType(Drawer), findsNothing); // Start off with a closed drawer
-    expect(customCallbackWasCalled,
-        false); // customCallbackWasCalled should still be false.
+    expect(customCallbackWasCalled, false); // customCallbackWasCalled should still be false.
     await tester.tap(find.byType(EndDrawerButton));
 
     await tester.pumpAndSettle();
@@ -311,5 +288,112 @@ void main() {
     expect(find.byType(Drawer), findsNothing);
     // The custom callback is called, setting customCallbackWasCalled to true.
     expect(customCallbackWasCalled, true);
+  });
+
+  testWidgets('DrawerButton has expected default mouse cursor on hover', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: Material(child: DrawerButton())));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(1000, 1000));
+    addTearDown(gesture.removePointer);
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
+
+    await gesture.moveTo(tester.getCenter(find.byType(DrawerButton)));
+    await tester.pumpAndSettle();
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
+  });
+
+  testWidgets('EndDrawerButton has expected default mouse cursor on hover', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: Material(child: EndDrawerButton())));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(1000, 1000));
+    addTearDown(gesture.removePointer);
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
+
+    await gesture.moveTo(tester.getCenter(find.byType(EndDrawerButton)));
+    await tester.pumpAndSettle();
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
+  });
+
+  testWidgets('DrawerButton has expected mouse cursor when explicitly configured', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DrawerButton(
+            style: ButtonStyle(
+              mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.cell),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: tester.getCenter(find.byType(DrawerButton)));
+    addTearDown(gesture.removePointer);
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.cell,
+    );
+  });
+
+  testWidgets('EndDrawerButton has expected mouse cursor when explicitly configured', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: EndDrawerButton(
+            style: ButtonStyle(
+              mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.cell),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: tester.getCenter(find.byType(EndDrawerButton)));
+    addTearDown(gesture.removePointer);
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.cell,
+    );
+  });
+
+  testWidgets('DrawerButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: Scaffold(body: DrawerButton())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(DrawerButton)), Size.zero);
   });
 }

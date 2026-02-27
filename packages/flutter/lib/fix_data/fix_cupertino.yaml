@@ -295,4 +295,209 @@ transforms:
     - kind: 'rename'
       newName: 'buildOverscrollIndicator'
 
+  # Changes made in https://github.com/flutter/flutter/pull/151367
+  - title: "Rename to 'activeTrackColor'"
+    date: 2024-07-15
+    element:
+      uris: [ 'cupertino.dart' ]
+      getter: 'activeColor'
+      inClass: 'CupertinoSwitch'
+    changes:
+      - kind: 'rename'
+        newName: 'activeTrackColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/151367
+  - title: "Migrate to 'activeTrackColor'"
+    date: 2024-07-15
+    element:
+      uris: [ 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'CupertinoSwitch'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'activeColor'
+        newName: 'activeTrackColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/151367
+  - title: "Rename to 'inactiveTrackColor'"
+    date: 2024-07-15
+    element:
+      uris: [ 'cupertino.dart' ]
+      getter: 'trackColor'
+      inClass: 'CupertinoSwitch'
+    changes:
+      - kind: 'rename'
+        newName: 'inactiveTrackColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/151367
+  - title: "Migrate to 'inactiveTrackColor'"
+    date: 2024-07-15
+    element:
+      uris: [ 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'CupertinoSwitch'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'trackColor'
+        newName: 'inactiveTrackColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/152981
+  - title: "Replace with 'fillColor'"
+    date: 2024-08-08
+    element:
+      uris: [ 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'CupertinoCheckbox'
+    oneOf:
+      - if: "fillColor == '' && activeColor != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 5
+            name: 'fillColor'
+            style: optional_named
+            argumentValue:
+              expression: "WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {\n
+                        if (states.contains(WidgetState.disabled)) {\n
+                          return CupertinoColors.white.withOpacity(0.5);\n
+                        }\n
+                        if (states.contains(WidgetState.selected)) {\n
+                          return {% activeColor %};\n
+                        }\n
+                        return {% inactiveColor %};\n
+                  })"
+              requiredIf: "inactiveColor != ''"
+          - kind: 'removeParameter'
+            name: inactiveColor
+      - if: "fillColor == '' && activeColor == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 5
+            name: 'fillColor'
+            style: optional_named
+            argumentValue:
+              expression: "WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {\n
+                        if (states.contains(WidgetState.disabled)) {\n
+                          return CupertinoColors.white.withOpacity(0.5);\n
+                        }\n
+                        if (states.contains(WidgetState.selected)) {\n
+                          return CupertinoDynamicColor.resolve(CupertinoDynamicColor.withBrightness(\n
+                            color: CupertinoColors.activeBlue,\n
+                            darkColor: Color.fromARGB(255, 50, 100, 215),\n
+                          ), context);\n
+                        }\n
+                        return {% inactiveColor %};\n
+                  })"
+              requiredIf: "inactiveColor != ''"
+          - kind: 'removeParameter'
+            name: inactiveColor
+      - if: "fillColor != ''"
+        changes:
+          - kind: 'removeParameter'
+            name: inactiveColor
+    variables:
+      inactiveColor:
+        kind: fragment
+        value: 'arguments[inactiveColor]'
+      activeColor:
+        kind: fragment
+        value: 'arguments[activeColor]'
+      fillColor:
+        kind: fragment
+        value: 'arguments[fillColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/161295
+  - title: "Migrate 'minSize' to 'minimumSize'"
+    date: 2025-01-09
+    element:
+      uris: [ 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'CupertinoButton'
+    oneOf:
+      - if: "minSize != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 7
+            name: 'minimumSize'
+            style: optional_named
+            argumentValue:
+              expression: 'Size({% minSize %}, {% minSize %})'
+              requiredIf: "minSize != ''"
+          - kind: 'removeParameter'
+            name: 'minSize'
+    variables:
+      minSize:
+        kind: fragment
+        value: 'arguments[minSize]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/170625
+  - title: "Migrate to 'builder'"
+    date: 2025-06-14
+    element:
+      uris: [ 'cupertino.dart' ]
+      function: 'showCupertinoSheet'
+    oneOf:
+      - if: "pageBuilder != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'builder'
+            style: optional_named
+            argumentValue:
+              expression: '{% pageBuilder %}'
+              requiredIf: "pageBuilder != ''"
+          - kind: 'removeParameter'
+            name: 'pageBuilder'
+    variables:
+      pageBuilder:
+        kind: fragment
+        value: 'arguments[pageBuilder]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/171160
+  - title: "Rename from 'opacity' to 'a'"
+    date: 2025-06-24
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'opacity'
+      inClass: 'CupertinoDynamicColor'
+    changes:
+      - kind: 'rename'
+        newName: 'a'
+
+  # Changes made in https://github.com/flutter/flutter/pull/171160
+  - title: "Replace 'value' with 'toARGB32()'"
+    date: 2025-06-24
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'value'
+      inClass: 'CupertinoDynamicColor'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: [ 'cupertino.dart' ]
+          method: 'toARGB32'
+          inClass: 'CupertinoDynamicColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/171160
+  - title: "Rename 'withOpacity'"
+    date: 2025-06-24
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'withOpacity'
+      inClass: 'CupertinoDynamicColor'
+    changes:
+      - kind: 'rename'
+        newName: 'withValues'
+      - kind: 'removeParameter'
+        index: 0
+      - kind: 'addParameter'
+        index: 0
+        name: 'alpha'
+        style: optional_named
+        argumentValue:
+          expression: '{% opacity %}'
+          requiredIf: "opacity != ''"
+    variables:
+      opacity:
+        kind: 'fragment'
+        value: 'arguments[0]'
 # Before adding a new fix: read instructions at the top of this file.

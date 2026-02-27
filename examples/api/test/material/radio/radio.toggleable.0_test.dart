@@ -8,10 +8,10 @@ import 'package:flutter_api_samples/material/radio/radio.toggleable.0.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('StreamBuilder listens to internal stream', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.ToggleableExampleApp(),
-    );
+  testWidgets('StreamBuilder listens to internal stream', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.ToggleableExampleApp());
 
     expect(find.byType(Radio<int>), findsExactly(5));
     expect(find.text('Hercules Mulligan'), findsOne);
@@ -24,8 +24,11 @@ void main() {
       await tester.tap(find.byType(Radio<int>).at(i));
       await tester.pump();
       expect(
-        find.byWidgetPredicate((Widget widget) => widget is Radio<int> && widget.groupValue == i),
-        findsExactly(5),
+        find.byWidgetPredicate(
+          (Widget widget) =>
+              widget is RadioGroup<int> && widget.groupValue == i,
+        ),
+        findsOne,
       );
     }
   });

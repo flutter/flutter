@@ -23,11 +23,13 @@ class ShowBottomSheetExampleApp extends StatelessWidget {
 }
 
 enum AnimationStyles { defaultStyle, custom, none }
-const List<(AnimationStyles, String)> animationStyleSegments = <(AnimationStyles, String)>[
-  (AnimationStyles.defaultStyle, 'Default'),
-  (AnimationStyles.custom, 'Custom'),
-  (AnimationStyles.none, 'None'),
-];
+
+const List<(AnimationStyles, String)> animationStyleSegments =
+    <(AnimationStyles, String)>[
+      (AnimationStyles.defaultStyle, 'Default'),
+      (AnimationStyles.custom, 'Custom'),
+      (AnimationStyles.none, 'None'),
+    ];
 
 class ShowBottomSheetExample extends StatefulWidget {
   const ShowBottomSheetExample({super.key});
@@ -37,7 +39,9 @@ class ShowBottomSheetExample extends StatefulWidget {
 }
 
 class _ShowBottomSheetExampleState extends State<ShowBottomSheetExample> {
-  Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{AnimationStyles.defaultStyle};
+  Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{
+    AnimationStyles.defaultStyle,
+  };
   AnimationStyle? _animationStyle;
 
   @override
@@ -52,9 +56,9 @@ class _ShowBottomSheetExampleState extends State<ShowBottomSheetExample> {
               setState(() {
                 _animationStyle = switch (styles.first) {
                   AnimationStyles.defaultStyle => null,
-                  AnimationStyles.custom => AnimationStyle(
-                    duration: const Duration(seconds: 3),
-                    reverseDuration: const Duration(seconds: 1),
+                  AnimationStyles.custom => const AnimationStyle(
+                    duration: Duration(seconds: 3),
+                    reverseDuration: Duration(seconds: 1),
                   ),
                   AnimationStyles.none => AnimationStyle.noAnimation,
                 };
@@ -62,10 +66,15 @@ class _ShowBottomSheetExampleState extends State<ShowBottomSheetExample> {
               });
             },
             segments: animationStyleSegments
-              .map<ButtonSegment<AnimationStyles>>(((AnimationStyles, String) shirt) {
-                return ButtonSegment<AnimationStyles>(value: shirt.$1, label: Text(shirt.$2));
-              })
-              .toList(),
+                .map<ButtonSegment<AnimationStyles>>((
+                  (AnimationStyles, String) shirt,
+                ) {
+                  return ButtonSegment<AnimationStyles>(
+                    value: shirt.$1,
+                    label: Text(shirt.$2),
+                  );
+                })
+                .toList(),
           ),
           const SizedBox(height: 10),
           ElevatedButton(

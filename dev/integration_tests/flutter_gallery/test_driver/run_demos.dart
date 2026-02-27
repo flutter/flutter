@@ -22,7 +22,7 @@ Future<void> runDemos(List<String> demos, WidgetController controller) async {
   final Finder demoList = find.byType(Scrollable);
   String? currentDemoCategory;
 
-  for (final String demo in demos) {
+  for (final demo in demos) {
     if (kSkippedDemos.contains(demo)) {
       continue;
     }
@@ -57,7 +57,7 @@ Future<void> runDemos(List<String> demos, WidgetController controller) async {
       return controller.tap(backButton);
     }
 
-    for (int i = 0; i < 2; i += 1) {
+    for (var i = 0; i < 2; i += 1) {
       final Finder demoItem = find.text(demoName);
       await controller.scrollUntilVisible(demoItem, 48.0);
       await controller.pumpAndSettle();
@@ -73,8 +73,8 @@ Future<void> runDemos(List<String> demos, WidgetController controller) async {
 
       if (kUnsynchronizedDemos.contains(demo)) {
         // These tests have animation, pumpAndSettle cannot be used.
-        // This time is questionable. 400ms is the tested reasonable result.
-        await controller.pump(const Duration(milliseconds: 400));
+        // This time is questionable. 600ms is the tested reasonable result.
+        await controller.pump(const Duration(milliseconds: 600));
         await controller.pump();
         await pageBack();
       } else {

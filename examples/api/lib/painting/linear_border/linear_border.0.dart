@@ -15,9 +15,8 @@ class ExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData.light(useMaterial3: true),
-      home: const Directionality(
+    return const MaterialApp(
+      home: Directionality(
         // TRY THIS: Switch to TextDirection.rtl to see how the borders change.
         textDirection: TextDirection.ltr,
         child: Home(),
@@ -27,7 +26,12 @@ class ExampleApp extends StatelessWidget {
 }
 
 class SampleCard extends StatelessWidget {
-  const SampleCard({super.key, required this.title, required this.subtitle, required this.children});
+  const SampleCard({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.children,
+  });
 
   final String title;
   final String subtitle;
@@ -47,11 +51,20 @@ class SampleCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Text(title, style: textTheme.titleMedium),
-            Text(subtitle, style: textTheme.bodyMedium!.copyWith(color: colorScheme.secondary)),
+            Text(
+              subtitle,
+              style: textTheme.bodyMedium!.copyWith(
+                color: colorScheme.secondary,
+              ),
+            ),
             const SizedBox(height: 16),
             Row(
-              children: List<Widget>.generate(children.length * 2 - 1, (int index) {
-                return index.isEven ? children[index ~/ 2] : const SizedBox(width: 16);
+              children: List<Widget>.generate(children.length * 2 - 1, (
+                int index,
+              ) {
+                return index.isEven
+                    ? children[index ~/ 2]
+                    : const SizedBox(width: 16);
               }),
             ),
           ],
@@ -76,9 +89,18 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final BorderSide primarySide0 = BorderSide(width: 0, color: colorScheme.inversePrimary); // hairline
-    final BorderSide primarySide2 = BorderSide(width: 2, color: colorScheme.onPrimaryContainer);
-    final BorderSide primarySide3 = BorderSide(width: 3, color: colorScheme.inversePrimary);
+    final BorderSide primarySide0 = BorderSide(
+      width: 0,
+      color: colorScheme.inversePrimary,
+    ); // hairline
+    final BorderSide primarySide2 = BorderSide(
+      width: 2,
+      color: colorScheme.onPrimaryContainer,
+    );
+    final BorderSide primarySide3 = BorderSide(
+      width: 3,
+      color: colorScheme.inversePrimary,
+    );
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -182,9 +204,7 @@ class _HomeState extends State<Home> {
                   TextButton(
                     style: TextButton.styleFrom(
                       side: primarySide2,
-                      shape: LinearBorder.bottom(
-                        size: 0.5,
-                      ),
+                      shape: LinearBorder.bottom(size: 0.5),
                     ),
                     onPressed: () {},
                     child: const Text('Center'),
@@ -192,10 +212,7 @@ class _HomeState extends State<Home> {
                   TextButton(
                     style: TextButton.styleFrom(
                       side: primarySide2,
-                      shape: LinearBorder.bottom(
-                        size: 0.75,
-                        alignment: -1,
-                      ),
+                      shape: LinearBorder.bottom(size: 0.75, alignment: -1),
                     ),
                     onPressed: () {},
                     child: const Text('Start'),
@@ -203,10 +220,7 @@ class _HomeState extends State<Home> {
                   TextButton(
                     style: TextButton.styleFrom(
                       side: primarySide2,
-                      shape: LinearBorder.bottom(
-                        size: 0.75,
-                        alignment: 1,
-                      ),
+                      shape: LinearBorder.bottom(size: 0.75, alignment: 1),
                     ),
                     onPressed: () {},
                     child: const Text('End'),
@@ -281,11 +295,19 @@ class _HomeState extends State<Home> {
                   ),
                   TextButton(
                     style: ButtonStyle(
-                      side: MaterialStateProperty.resolveWith<BorderSide?>((Set<MaterialState> states) {
-                        return states.contains(MaterialState.hovered) ? primarySide3 : null;
+                      side: WidgetStateProperty.resolveWith<BorderSide?>((
+                        Set<WidgetState> states,
+                      ) {
+                        return states.contains(WidgetState.hovered)
+                            ? primarySide3
+                            : null;
                       }),
-                      shape: MaterialStateProperty.resolveWith<OutlinedBorder>((Set<MaterialState> states) {
-                        return states.contains(MaterialState.hovered) ? shape0 : shape1;
+                      shape: WidgetStateProperty.resolveWith<OutlinedBorder>((
+                        Set<WidgetState> states,
+                      ) {
+                        return states.contains(WidgetState.hovered)
+                            ? shape0
+                            : shape1;
                       }),
                     ),
                     onPressed: () {},

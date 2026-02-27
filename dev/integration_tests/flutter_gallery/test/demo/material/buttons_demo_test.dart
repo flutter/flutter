@@ -10,10 +10,12 @@ void main() {
   testWidgets('Button locations are OK', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/85351
     {
-      await tester.pumpWidget(MaterialApp(theme: ThemeData(useMaterial3: false), home: const ButtonsDemo()));
-      expect(find.byType(ElevatedButton).evaluate().length, 2);
+      await tester.pumpWidget(
+        MaterialApp(theme: ThemeData(useMaterial3: false), home: const ButtonsDemo()),
+      );
+      expect(find.byType(ElevatedButton).evaluate().length, 4);
       final Offset topLeft1 = tester.getTopLeft(find.byType(ElevatedButton).first);
-      final Offset topLeft2 = tester.getTopLeft(find.byType(ElevatedButton).last);
+      final Offset topLeft2 = tester.getTopLeft(find.byType(ElevatedButton).at(1));
       expect(topLeft1.dx, 203);
       expect(topLeft2.dx, 453);
       expect(topLeft1.dy, topLeft2.dy);
@@ -22,9 +24,9 @@ void main() {
     {
       await tester.tap(find.text('TEXT'));
       await tester.pumpAndSettle();
-      expect(find.byType(TextButton).evaluate().length, 2);
+      expect(find.byType(TextButton).evaluate().length, 4);
       final Offset topLeft1 = tester.getTopLeft(find.byType(TextButton).first);
-      final Offset topLeft2 = tester.getTopLeft(find.byType(TextButton).last);
+      final Offset topLeft2 = tester.getTopLeft(find.byType(TextButton).at(1));
       expect(topLeft1.dx, 247);
       expect(topLeft2.dx, 425);
       expect(topLeft1.dy, topLeft2.dy);
@@ -33,9 +35,9 @@ void main() {
     {
       await tester.tap(find.text('OUTLINED'));
       await tester.pumpAndSettle();
-      expect(find.byType(OutlinedButton).evaluate().length, 2);
+      expect(find.byType(OutlinedButton).evaluate().length, 4);
       final Offset topLeft1 = tester.getTopLeft(find.byType(OutlinedButton).first);
-      final Offset topLeft2 = tester.getTopLeft(find.byType(OutlinedButton).last);
+      final Offset topLeft2 = tester.getTopLeft(find.byType(OutlinedButton).at(1));
       expect(topLeft1.dx, 203);
       expect(topLeft2.dx, 453);
       expect(topLeft1.dy, topLeft2.dy);

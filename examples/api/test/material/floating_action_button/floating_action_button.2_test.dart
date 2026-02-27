@@ -9,15 +9,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('FloatingActionButton variants', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.FloatingActionButtonExampleApp(),
-    );
+    await tester.pumpWidget(const example.FloatingActionButtonExampleApp());
 
     FloatingActionButton getFAB(Finder finder) {
       return tester.widget<FloatingActionButton>(finder);
     }
 
-    final ColorScheme colorScheme = ThemeData(useMaterial3: true).colorScheme;
+    final ColorScheme colorScheme = ThemeData().colorScheme;
 
     // Test the FAB with surface color mapping.
     FloatingActionButton fab = getFAB(find.byType(FloatingActionButton).at(0));

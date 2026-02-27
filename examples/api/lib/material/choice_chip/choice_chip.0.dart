@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [ActionChoice].
+/// Flutter code sample for [ChoiceChip].
 
 void main() => runApp(const ChipApp());
 
@@ -14,7 +14,7 @@ class ChipApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
+      theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4)),
       home: const ActionChoiceExample(),
     );
   }
@@ -35,9 +35,7 @@ class _ActionChoiceExampleState extends State<ActionChoiceExample> {
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('ActionChoice Sample'),
-      ),
+      appBar: AppBar(title: const Text('ActionChoice Sample')),
       body: Center(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,20 +45,17 @@ class _ActionChoiceExampleState extends State<ActionChoiceExample> {
             const SizedBox(height: 10.0),
             Wrap(
               spacing: 5.0,
-              children: List<Widget>.generate(
-                3,
-                (int index) {
-                  return ChoiceChip(
-                    label: Text('Item $index'),
-                    selected: _value == index,
-                    onSelected: (bool selected) {
-                      setState(() {
-                        _value = selected ? index : null;
-                      });
-                    },
-                  );
-                },
-              ).toList(),
+              children: List<Widget>.generate(3, (int index) {
+                return ChoiceChip(
+                  label: Text('Item $index'),
+                  selected: _value == index,
+                  onSelected: (bool selected) {
+                    setState(() {
+                      _value = selected ? index : null;
+                    });
+                  },
+                );
+              }).toList(),
             ),
           ],
         ),

@@ -16,9 +16,7 @@ class MouseRegionApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('MouseRegion.onExit Sample')),
-        body: const Center(
-          child: MouseRegionExample(),
-        ),
+        body: const Center(child: MouseRegionExample()),
       ),
     );
   }
@@ -26,7 +24,11 @@ class MouseRegionApp extends StatelessWidget {
 
 // A region that hides its content one second after being hovered.
 class MyTimedButton extends StatefulWidget {
-  const MyTimedButton({super.key, required this.onEnterButton, required this.onExitButton});
+  const MyTimedButton({
+    super.key,
+    required this.onEnterButton,
+    required this.onExitButton,
+  });
 
   final VoidCallback onEnterButton;
   final VoidCallback onExitButton;

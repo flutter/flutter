@@ -48,10 +48,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
         // Provide a background color for the popup.
         color: CupertinoColors.systemBackground.resolveFrom(context),
         // Use a SafeArea widget to avoid system overlaps.
-        child: SafeArea(
-          top: false,
-          child: child,
-        ),
+        child: SafeArea(top: false, child: child),
       ),
     );
   }
@@ -94,9 +91,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
                     // user's locale settings.
                     child: Text(
                       '${date.month}-${date.day}-${date.year}',
-                      style: const TextStyle(
-                        fontSize: 22.0,
-                      ),
+                      style: const TextStyle(fontSize: 22.0),
                     ),
                   ),
                 ],
@@ -122,9 +117,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
                     // the user's locale settings.
                     child: Text(
                       '${time.hour}:${time.minute}',
-                      style: const TextStyle(
-                        fontSize: 22.0,
-                      ),
+                      style: const TextStyle(fontSize: 22.0),
                     ),
                   ),
                 ],
@@ -149,9 +142,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
                     // user's locale settings.
                     child: Text(
                       '${dateTime.month}-${dateTime.day}-${dateTime.year} ${dateTime.hour}:${dateTime.minute}',
-                      style: const TextStyle(
-                        fontSize: 22.0,
-                      ),
+                      style: const TextStyle(fontSize: 22.0),
                     ),
                   ),
                 ],
@@ -175,14 +166,8 @@ class _DatePickerItem extends StatelessWidget {
     return DecoratedBox(
       decoration: const BoxDecoration(
         border: Border(
-          top: BorderSide(
-            color: CupertinoColors.inactiveGray,
-            width: 0.0,
-          ),
-          bottom: BorderSide(
-            color: CupertinoColors.inactiveGray,
-            width: 0.0,
-          ),
+          top: BorderSide(color: CupertinoColors.inactiveGray, width: 0.0),
+          bottom: BorderSide(color: CupertinoColors.inactiveGray, width: 0.0),
         ),
       ),
       child: Padding(

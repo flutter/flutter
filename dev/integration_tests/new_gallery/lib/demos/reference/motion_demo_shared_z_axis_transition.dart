@@ -22,61 +22,79 @@ class SharedZAxisTransitionDemo extends StatelessWidget {
 
   Route<void> _createHomeRoute() {
     return PageRouteBuilder<void>(
-      pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-        final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+      pageBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+          ) {
+            final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
-        return Scaffold(
-          appBar: AppBar(
-            automaticallyImplyLeading: false,
-            title: Column(
-              children: <Widget>[
-                Text(localizations.demoSharedZAxisTitle),
-                Text(
-                  '(${localizations.demoSharedZAxisDemoInstructions})',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleSmall!
-                      .copyWith(color: Colors.white),
+            return Scaffold(
+              appBar: AppBar(
+                automaticallyImplyLeading: false,
+                title: Column(
+                  children: <Widget>[
+                    Text(localizations.demoSharedZAxisTitle),
+                    Text(
+                      '(${localizations.demoSharedZAxisDemoInstructions})',
+                      style: Theme.of(context).textTheme.titleSmall!.copyWith(color: Colors.white),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            actions: <Widget>[
-              IconButton(
-                icon: const Icon(Icons.settings),
-                onPressed: () {
-                  Navigator.of(context).push<void>(_createSettingsRoute());
-                },
+                actions: <Widget>[
+                  IconButton(
+                    icon: const Icon(Icons.settings),
+                    onPressed: () {
+                      Navigator.of(context).push<void>(_createSettingsRoute());
+                    },
+                  ),
+                ],
               ),
-            ],
-          ),
-          body: const _RecipePage(),
-        );
-      },
-      transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-        return SharedAxisTransition(
-          fillColor: Colors.transparent,
-          transitionType: SharedAxisTransitionType.scaled,
-          animation: animation,
-          secondaryAnimation: secondaryAnimation,
-          child: child,
-        );
-      },
+              body: const _RecipePage(),
+            );
+          },
+      transitionsBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+            Widget child,
+          ) {
+            return SharedAxisTransition(
+              fillColor: Colors.transparent,
+              transitionType: SharedAxisTransitionType.scaled,
+              animation: animation,
+              secondaryAnimation: secondaryAnimation,
+              child: child,
+            );
+          },
     );
   }
 
   Route<void> _createSettingsRoute() {
     return PageRouteBuilder<void>(
-      pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) =>
-          const _SettingsPage(),
-      transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-        return SharedAxisTransition(
-          fillColor: Colors.transparent,
-          transitionType: SharedAxisTransitionType.scaled,
-          animation: animation,
-          secondaryAnimation: secondaryAnimation,
-          child: child,
-        );
-      },
+      pageBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+          ) => const _SettingsPage(),
+      transitionsBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+            Widget child,
+          ) {
+            return SharedAxisTransition(
+              fillColor: Colors.transparent,
+              transitionType: SharedAxisTransitionType.scaled,
+              animation: animation,
+              secondaryAnimation: secondaryAnimation,
+              child: child,
+            );
+          },
     );
   }
 }
@@ -88,31 +106,15 @@ class _SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
-    final List<_SettingsInfo> settingsList = <_SettingsInfo>[
-      _SettingsInfo(
-        Icons.person,
-        localizations.demoSharedZAxisProfileSettingLabel,
-      ),
-      _SettingsInfo(
-        Icons.notifications,
-        localizations.demoSharedZAxisNotificationSettingLabel,
-      ),
-      _SettingsInfo(
-        Icons.security,
-        localizations.demoSharedZAxisPrivacySettingLabel,
-      ),
-      _SettingsInfo(
-        Icons.help,
-        localizations.demoSharedZAxisHelpSettingLabel,
-      ),
+    final settingsList = <_SettingsInfo>[
+      _SettingsInfo(Icons.person, localizations.demoSharedZAxisProfileSettingLabel),
+      _SettingsInfo(Icons.notifications, localizations.demoSharedZAxisNotificationSettingLabel),
+      _SettingsInfo(Icons.security, localizations.demoSharedZAxisPrivacySettingLabel),
+      _SettingsInfo(Icons.help, localizations.demoSharedZAxisHelpSettingLabel),
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          localizations.demoSharedZAxisSettingsPageTitle,
-        ),
-      ),
+      appBar: AppBar(title: Text(localizations.demoSharedZAxisSettingsPageTitle)),
       body: ListView(
         children: <Widget>[
           for (final _SettingsInfo setting in settingsList) _SettingsTile(setting),
@@ -130,10 +132,7 @@ class _SettingsTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        ListTile(
-          leading: Icon(settingData.settingIcon),
-          title: Text(settingData.settingsLabel),
-        ),
+        ListTile(leading: Icon(settingData.settingIcon), title: Text(settingData.settingsLabel)),
         const Divider(thickness: 2),
       ],
     );
@@ -154,7 +153,7 @@ class _RecipePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
-    final List<_RecipeInfo> savedRecipes = <_RecipeInfo>[
+    final savedRecipes = <_RecipeInfo>[
       _RecipeInfo(
         localizations.demoSharedZAxisBurgerRecipeTitle,
         localizations.demoSharedZAxisBurgerRecipeDescription,
@@ -201,7 +200,7 @@ class _RecipePage extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             children: <Widget>[
               for (final _RecipeInfo recipe in savedRecipes)
-                _RecipeTile(recipe, savedRecipes.indexOf(recipe))
+                _RecipeTile(recipe, savedRecipes.indexOf(recipe)),
             ],
           ),
         ),

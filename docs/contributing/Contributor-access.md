@@ -24,13 +24,11 @@ Our code of conduct is much, much stricter than most. We do not wait until someo
 
 When you see something that might be described as unwelcoming or is in some other way a violation of our code of conduct, promptly contact the offender and ask them to read the code of conduct and consider how they might more effectively espouse its philosophy. Most people react very positively to this.
 
-If they react negatively, or if they continue to make the environment unpleasant, they should be removed from the environment. On Discord, this would be kicking them from the channel. Repeat offenders should be banned. On GitHub, they can be blocked from our organisation (you may need to ask @Hixie or another admin of our GitHub org to do this). Please let the #server-support [Chat](Chat.md) channel know when you do anything like this, so that we can keep an eye on how common it is.
+If they react negatively, or if they continue to make the environment unpleasant, they should be removed from the environment. On Discord, this would be kicking them from the channel. Repeat offenders should be banned. On GitHub, they can be blocked from our organization (you can ask @github-admin on Discord to do this). Please let the #server-support [Chat](Chat.md) channel know when you do anything like this, so that we can keep an eye on how common it is.
 
 #### Maintaining documentation
 
 Part of being a contributor is making sure our documentation is up to date, including our internal (team-facing) documentation such as this wiki. If you spot something wrong, please fix it! As a contributor, you have access to the wiki.
-
-For the wiki specifically, since there's no code review, it's good to mention on Discord that you've made a change when you make one.
 
 ### Privileges
 
@@ -120,20 +118,21 @@ To add a fcontrib.org participant:
 
 Some parts of the codebase have teams specified so that PRs get round-robin assigned for review.
 
-To join one of these teams, request members be added/deleted, or change any settings, ping @Hixie on Discord. Members must be a member of the Flutter Hackers group (as documented at the top of this page).
+To join one of these teams, request members be added/deleted, or change any settings, ping @github-admin on Discord. Members must be a member of the Flutter Hackers group (as documented at the top of this page).
 
 We currently have the following review teams:
 
 * [`android-reviewers`](https://github.com/orgs/flutter/teams/android-reviewers): for folks working on the Android port of Flutter; use `#hackers-android` for discussions.
 * [`devtools-reviewers`](https://github.com/orgs/flutter/teams/devtools-reviewers): for the [devtools](https://github.com/flutter/devtools) repo; use `#hackers-devexp` for discussions.
+* [`ios-reviewers`](https://github.com/orgs/flutter/teams/ios-reviewers): for folks working on the iOS port of Flutter; use `#hackers-ios` for discussions.
 * [`website-reviewers`](https://github.com/orgs/flutter/teams/website-reviewers): for folks working on www.flutter.dev and docs.flutter.dev; use `#hackers-devrel` for discussions.
 
-To create a new team, contact @Hixie. You will also need to create a `CODEOWNERS` file to actually trigger the review assignment.
+To create a new team, contact @github-admin on Discord. You will also need to create a `CODEOWNERS` file to actually trigger the review assignment.
 
 # Pusher permissions
 
 Some branches are protected to avoid accidents. Only people in the specific branches can push to them. Anyone can ask to be added or removed from these groups, they exist only to reduce accidents, not for security.
 
-To join one of these teams, request members be added/deleted, or change any settings, ping @Hixie on Discord. Members must be a member of the Flutter Hackers group (as documented at the top of this page).
+To join one of these teams, request members be added/deleted, or change any settings, ping @github-admin on Discord. Members must be a member of the Flutter Hackers group (as documented at the top of this page).
 
 The following groups have been defined for these purposes: pushers-beta, pushers-fuchsia

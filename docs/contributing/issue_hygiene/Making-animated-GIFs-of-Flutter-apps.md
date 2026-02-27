@@ -1,4 +1,4 @@
-Animated GIFs are useful for documentating animations. Here’s how to make them:
+Animated GIFs are useful for documenting animations. Here's how to make them:
 
 ## Capturing video of an Android device
 

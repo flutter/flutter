@@ -58,17 +58,15 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
     destinationFaders[selectedIndex].value = 1.0;
 
     final CurveTween tween = CurveTween(curve: Curves.fastOutSlowIn);
-    destinationViews = allDestinations.map<Widget>(
-      (Destination destination) {
-        return FadeTransition(
-          opacity: destinationFaders[destination.index].drive(tween),
-          child: DestinationView(
-            destination: destination,
-            navigatorKey: navigatorKeys[destination.index],
-          ),
-        );
-      },
-    ).toList();
+    destinationViews = allDestinations.map<Widget>((Destination destination) {
+      return FadeTransition(
+        opacity: destinationFaders[destination.index].drive(tween),
+        child: DestinationView(
+          destination: destination,
+          navigatorKey: navigatorKeys[destination.index],
+        ),
+      );
+    }).toList();
   }
 
   @override
@@ -82,8 +80,9 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
   @override
   Widget build(BuildContext context) {
     return NavigatorPopHandler(
-      onPop: () {
-        final NavigatorState navigator = navigatorKeys[selectedIndex].currentState!;
+      onPopWithResult: (void result) {
+        final NavigatorState navigator =
+            navigatorKeys[selectedIndex].currentState!;
         navigator.pop();
       },
       child: Scaffold(
@@ -91,22 +90,20 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
           top: false,
           child: Stack(
             fit: StackFit.expand,
-            children: allDestinations.map(
-              (Destination destination) {
-                final int index = destination.index;
-                final Widget view = destinationViews[index];
-                if (index == selectedIndex) {
-                  destinationFaders[index].forward();
-                  return Offstage(offstage: false, child: view);
-                } else {
-                  destinationFaders[index].reverse();
-                  if (destinationFaders[index].isAnimating) {
-                    return IgnorePointer(child: view);
-                  }
-                  return Offstage(child: view);
+            children: allDestinations.map((Destination destination) {
+              final int index = destination.index;
+              final Widget view = destinationViews[index];
+              if (index == selectedIndex) {
+                destinationFaders[index].forward();
+                return Offstage(offstage: false, child: view);
+              } else {
+                destinationFaders[index].reverse();
+                if (destinationFaders[index].isAnimating) {
+                  return IgnorePointer(child: view);
                 }
-              },
-            ).toList(),
+                return Offstage(child: view);
+              }
+            }).toList(),
           ),
         ),
         bottomNavigationBar: NavigationBar(
@@ -116,14 +113,14 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
               selectedIndex = index;
             });
           },
-          destinations: allDestinations.map<NavigationDestination>(
-            (Destination destination) {
-              return NavigationDestination(
-                icon: Icon(destination.icon, color: destination.color),
-                label: destination.title,
-              );
-            },
-          ).toList(),
+          destinations: allDestinations.map<NavigationDestination>((
+            Destination destination,
+          ) {
+            return NavigationDestination(
+              icon: Icon(destination.icon, color: destination.color),
+              label: destination.title,
+            );
+          }).toList(),
         ),
       ),
     );
@@ -204,7 +201,8 @@ class RootPage extends StatelessWidget {
               onPressed: () {
                 showDialog<void>(
                   context: context,
-                  useRootNavigator: true, // ignore: avoid_redundant_argument_values
+                  useRootNavigator:
+                      true, // ignore: avoid_redundant_argument_values
                   builder: _buildDialog,
                 );
               },
@@ -256,9 +254,7 @@ class ListPage extends StatelessWidget {
     final ButtonStyle buttonStyle = OutlinedButton.styleFrom(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
-        side: BorderSide(
-          color: colorScheme.onSurface.withOpacity(0.12),
-        ),
+        side: BorderSide(color: colorScheme.onSurface.withValues(alpha: 0.12)),
       ),
       foregroundColor: destination.color,
       fixedSize: const Size.fromHeight(64),
@@ -279,11 +275,11 @@ class ListPage extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
               child: OutlinedButton(
                 style: buttonStyle.copyWith(
-                  backgroundColor: MaterialStatePropertyAll<Color>(
+                  backgroundColor: WidgetStatePropertyAll<Color>(
                     Color.lerp(
                       destination.color[100],
                       Colors.white,
-                      index / itemCount
+                      index / itemCount,
                     )!,
                   ),
                 ),

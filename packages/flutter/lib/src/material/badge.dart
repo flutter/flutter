@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'icon_button.dart';
+/// @docImport 'navigation_rail.dart';
+/// @docImport 'text_button.dart';
+/// @docImport 'text_theme.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
@@ -51,11 +57,13 @@ class Badge extends StatelessWidget {
     this.child,
   });
 
-  /// Convenience constructor for creating a badge with a numeric
-  /// label with 1-3 digits based on [count].
+  /// Convenience constructor for creating a badge with a numeric label based on [count].
   ///
-  /// Initializes [label] with a [Text] widget that contains [count].
-  /// If [count] is greater than 999, then the label is '999+'.
+  /// Initializes [label] with a [Text] widget that shows:
+  /// - the [count] value if it is less than or equal to [maxCount],
+  /// - otherwise, shows '[maxCount]+'.
+  ///
+  /// For example, if [count] is 1000 and [maxCount] is 99, the label will display '99+'.
   Badge.count({
     super.key,
     this.backgroundColor,
@@ -67,9 +75,12 @@ class Badge extends StatelessWidget {
     this.alignment,
     this.offset,
     required int count,
+    int maxCount = 999,
     this.isLabelVisible = true,
     this.child,
-  }) : label = Text(count > 999 ? '999+' : '$count');
+  }) : assert(count >= 0, 'count must be non-negative'),
+       assert(maxCount > 0, 'maxCount must be positive'),
+       label = Text(count > maxCount ? '$maxCount+' : '$count');
 
   /// The badge's fill color.
   ///
@@ -176,9 +187,10 @@ class Badge extends StatelessWidget {
     );
     final double effectiveWidthOffset;
     final Widget badge;
-    final bool hasLabel = label != null;
+    final hasLabel = label != null;
     if (hasLabel) {
-      final double minSize = effectiveWidthOffset = largeSize ?? badgeTheme.largeSize ?? defaults.largeSize!;
+      final double minSize = effectiveWidthOffset =
+          largeSize ?? badgeTheme.largeSize ?? defaults.largeSize!;
       badge = DefaultTextStyle(
         style: (textStyle ?? badgeTheme.textStyle ?? defaults.textStyle!).copyWith(
           color: textColor ?? badgeTheme.textColor ?? defaults.textColor!,
@@ -195,7 +207,8 @@ class Badge extends StatelessWidget {
         ),
       );
     } else {
-      final double effectiveSmallSize = effectiveWidthOffset = smallSize ?? badgeTheme.smallSize ?? defaults.smallSize!;
+      final double effectiveSmallSize = effectiveWidthOffset =
+          smallSize ?? badgeTheme.smallSize ?? defaults.smallSize!;
       badge = Container(
         width: effectiveSmallSize,
         height: effectiveSmallSize,
@@ -208,31 +221,34 @@ class Badge extends StatelessWidget {
       return badge;
     }
 
-    final AlignmentGeometry effectiveAlignment = alignment ?? badgeTheme.alignment ?? defaults.alignment!;
+    final AlignmentGeometry effectiveAlignment =
+        alignment ?? badgeTheme.alignment ?? defaults.alignment!;
     final TextDirection textDirection = Directionality.of(context);
-    final Offset defaultOffset = textDirection == TextDirection.ltr ? const Offset(4, -4) : const Offset(-4, -4);
+    final defaultOffset = textDirection == TextDirection.ltr
+        ? const Offset(4, -4)
+        : const Offset(-4, -4);
     // Adds a offset const Offset(0, 8) to avoiding breaking customers after
     // the offset calculation changes.
     // See https://github.com/flutter/flutter/pull/146853.
-    final Offset effectiveOffset = (offset ?? badgeTheme.offset ?? defaultOffset) + const Offset(0, 8);
+    final Offset effectiveOffset =
+        (offset ?? badgeTheme.offset ?? defaultOffset) + const Offset(0, 8);
 
-    return
-      Stack(
-        clipBehavior: Clip.none,
-        children: <Widget>[
-          child!,
-          Positioned.fill(
-            child: _Badge(
-              alignment: effectiveAlignment,
-              offset: hasLabel ? effectiveOffset : Offset.zero,
-              hasLabel: hasLabel,
-              widthOffset: effectiveWidthOffset,
-              textDirection: textDirection,
-              child: badge,
-            ),
+    return Stack(
+      clipBehavior: Clip.none,
+      children: <Widget>[
+        child!,
+        Positioned.fill(
+          child: _Badge(
+            alignment: effectiveAlignment,
+            offset: hasLabel ? effectiveOffset : Offset.zero,
+            hasLabel: hasLabel,
+            widthOffset: effectiveWidthOffset,
+            textDirection: textDirection,
+            child: badge,
           ),
-        ],
-      );
+        ),
+      ],
+    );
   }
 }
 
@@ -332,13 +348,52 @@ class _RenderBadge extends RenderAligningShiftedBox {
     child!.layout(const BoxConstraints(), parentUsesSize: true);
     final double badgeSize = child!.size.height;
     final Alignment resolvedAlignment = alignment.resolve(textDirection);
-    final BoxParentData childParentData = child!.parentData! as BoxParentData;
-    Offset badgeLocation = offset + resolvedAlignment.alongOffset(Offset(size.width - widthOffset, size.height));
+    final childParentData = child!.parentData! as BoxParentData;
+    Offset badgeLocation =
+        offset + resolvedAlignment.alongOffset(Offset(size.width - widthOffset, size.height));
     if (hasLabel) {
       // Adjust for label height.
       badgeLocation = badgeLocation - Offset(0, badgeSize / 2);
     }
     childParentData.offset = badgeLocation;
+  }
+
+  @override
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
+    // Mirrors performLayout: size is the tightest allowed (biggest) under bounded constraints.
+    // Callers (e.g., Stack) pass in tight constraints for Positioned.fill; otherwise, this
+    // is still consistent with performLayout which asserts bounded constraints.
+    return constraints.biggest;
+  }
+
+  @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+
+    // Child is laid out with unconstrained BoxConstraints in performLayout.
+    const childConstraints = BoxConstraints();
+    final double? childBaseline = child.getDryBaseline(childConstraints, baseline);
+    if (childBaseline == null) {
+      return null;
+    }
+
+    // Mirror the paint offset logic from performLayout using dry sizes only.
+    final Size mySize = getDryLayout(constraints);
+    final Alignment resolvedAlignment = alignment.resolve(textDirection);
+    final Size childSize = child.getDryLayout(childConstraints);
+
+    Offset badgeLocation =
+        offset + resolvedAlignment.alongOffset(Offset(mySize.width - widthOffset, mySize.height));
+    if (hasLabel) {
+      // Subtract half of the badge height when we have a label (as in performLayout).
+      badgeLocation -= Offset(0, childSize.height / 2);
+    }
+
+    return childBaseline + badgeLocation.dy;
   }
 }
 
@@ -359,11 +414,9 @@ class _IntrinsicHorizontalStadium extends SingleChildRenderObjectWidget {
 }
 
 class _RenderIntrinsicHorizontalStadium extends RenderProxyBox {
-  _RenderIntrinsicHorizontalStadium({
-    RenderBox? child,
-    required double minSize,
-  }) : _minSize = minSize,
-       super(child);
+  _RenderIntrinsicHorizontalStadium({RenderBox? child, required double minSize})
+    : _minSize = minSize,
+      super(child);
 
   double get minSize => _minSize;
   double _minSize;
@@ -413,10 +466,7 @@ class _RenderIntrinsicHorizontalStadium extends RenderProxyBox {
   @override
   @protected
   Size computeDryLayout(covariant BoxConstraints constraints) {
-    return _computeSize(
-      layoutChild: ChildLayoutHelper.dryLayoutChild,
-      constraints: constraints,
-    );
+    return _computeSize(layoutChild: ChildLayoutHelper.dryLayoutChild, constraints: constraints);
   }
 
   @override
@@ -427,13 +477,9 @@ class _RenderIntrinsicHorizontalStadium extends RenderProxyBox {
 
   @override
   void performLayout() {
-    size = _computeSize(
-      layoutChild: ChildLayoutHelper.layoutChild,
-      constraints: constraints,
-    );
+    size = _computeSize(layoutChild: ChildLayoutHelper.layoutChild, constraints: constraints);
   }
 }
-
 
 // BEGIN GENERATED TOKEN PROPERTIES - Badge
 
@@ -442,6 +488,7 @@ class _RenderIntrinsicHorizontalStadium extends RenderProxyBox {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _BadgeDefaultsM3 extends BadgeThemeData {
   _BadgeDefaultsM3(this.context) : super(
     smallSize: 6.0,
@@ -463,5 +510,6 @@ class _BadgeDefaultsM3 extends BadgeThemeData {
   @override
   TextStyle? get textStyle => Theme.of(context).textTheme.labelSmall;
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - Badge

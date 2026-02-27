@@ -16,13 +16,7 @@ class SystemOverlayStyleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.light,
-      ),
-      home: const SystemOverlayStyleExample(),
-    );
+    return const MaterialApp(home: SystemOverlayStyleExample());
   }
 }
 
@@ -30,7 +24,8 @@ class SystemOverlayStyleExample extends StatefulWidget {
   const SystemOverlayStyleExample({super.key});
 
   @override
-  State<SystemOverlayStyleExample> createState() => _SystemOverlayStyleExampleState();
+  State<SystemOverlayStyleExample> createState() =>
+      _SystemOverlayStyleExampleState();
 }
 
 class _SystemOverlayStyleExampleState extends State<SystemOverlayStyleExample> {

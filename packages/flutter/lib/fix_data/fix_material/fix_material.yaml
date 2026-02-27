@@ -289,208 +289,6 @@ transforms:
       - kind: 'removeParameter'
         name: 'disabledThumbGapWidth'
 
-  # Changes made in https://github.com/flutter/flutter/pull/46115
-  - title: "Migrate to 'floatingLabelBehavior'"
-    date: 2020-01-15
-    element:
-      uris: [ 'material.dart' ]
-      field: 'hasFloatingPlaceholder'
-      inClass: 'InputDecorationTheme'
-    changes:
-      - kind: 'rename'
-        newName: 'floatingLabelBehavior'
-
-  # Changes made in https://github.com/flutter/flutter/pull/46115
-  - title: "Migrate to 'floatingLabelBehavior'"
-    date: 2020-01-15
-    element:
-      uris: [ 'material.dart' ]
-      constructor: ''
-      inClass: 'InputDecorationTheme'
-    oneOf:
-      - if: "hasFloatingPlaceholder == 'true'"
-        changes:
-          - kind: 'addParameter'
-            index: 14
-            name: 'floatingLabelBehavior'
-            style: optional_named
-            argumentValue:
-              expression: '{% FloatingLabelBehavior %}.auto'
-              requiredIf: "hasFloatingPlaceholder == 'true'"
-              variables:
-                FloatingLabelBehavior:
-                  kind: 'import'
-                  uris: [ 'material.dart' ]
-                  name: 'FloatingLabelBehavior'
-          - kind: 'removeParameter'
-            name: 'hasFloatingPlaceholder'
-      - if: "hasFloatingPlaceholder == 'false'"
-        changes:
-          - kind: 'addParameter'
-            index: 14
-            name: 'floatingLabelBehavior'
-            style: optional_named
-            argumentValue:
-              expression: '{% FloatingLabelBehavior %}.never'
-              requiredIf: "hasFloatingPlaceholder == 'false'"
-              variables:
-                FloatingLabelBehavior:
-                  kind: 'import'
-                  uris: [ 'material.dart' ]
-                  name: 'FloatingLabelBehavior'
-          - kind: 'removeParameter'
-            name: 'hasFloatingPlaceholder'
-    variables:
-      hasFloatingPlaceholder:
-        kind: 'fragment'
-        value: 'arguments[hasFloatingPlaceholder]'
-
-  # Changes made in https://github.com/flutter/flutter/pull/46115
-  - title: "Migrate to 'floatingLabelBehavior'"
-    date: 2020-01-15
-    element:
-      uris: [ 'material.dart' ]
-      method: 'copyWith'
-      inClass: 'InputDecorationTheme'
-    oneOf:
-      - if: "hasFloatingPlaceholder == 'true'"
-        changes:
-          - kind: 'addParameter'
-            index: 14
-            name: 'floatingLabelBehavior'
-            style: optional_named
-            argumentValue:
-              expression: '{% FloatingLabelBehavior %}.auto'
-              requiredIf: "hasFloatingPlaceholder == 'true'"
-              variables:
-                FloatingLabelBehavior:
-                  kind: 'import'
-                  uris: [ 'material.dart' ]
-                  name: 'FloatingLabelBehavior'
-          - kind: 'removeParameter'
-            name: 'hasFloatingPlaceholder'
-      - if: "hasFloatingPlaceholder == 'false'"
-        changes:
-          - kind: 'addParameter'
-            index: 14
-            name: 'floatingLabelBehavior'
-            style: optional_named
-            argumentValue:
-              expression: '{% FloatingLabelBehavior %}.never'
-              requiredIf: "hasFloatingPlaceholder == 'false'"
-              variables:
-                FloatingLabelBehavior:
-                  kind: 'import'
-                  uris: [ 'material.dart' ]
-                  name: 'FloatingLabelBehavior'
-          - kind: 'removeParameter'
-            name: 'hasFloatingPlaceholder'
-    variables:
-      hasFloatingPlaceholder:
-        kind: 'fragment'
-        value: 'arguments[hasFloatingPlaceholder]'
-
-  # Changes made in https://github.com/flutter/flutter/pull/46115
-  - title: "Migrate to 'floatingLabelBehavior'"
-    date: 2020-01-15
-    element:
-      uris: [ 'material.dart' ]
-      field: 'hasFloatingPlaceholder'
-      inClass: 'InputDecoration'
-    changes:
-      - kind: 'rename'
-        newName: 'floatingLabelBehavior'
-
-  # Changes made in https://github.com/flutter/flutter/pull/46115
-  - title: "Rename to 'floatingLabelBehavior'"
-    date: 2020-01-15
-    element:
-      uris: [ 'material.dart' ]
-      constructor: 'collapsed'
-      inClass: 'InputDecoration'
-    oneOf:
-      - if: "hasFloatingPlaceholder == 'true'"
-        changes:
-          - kind: 'addParameter'
-            index: 14
-            name: 'floatingLabelBehavior'
-            style: optional_named
-            argumentValue:
-              expression: '{% FloatingLabelBehavior %}.auto'
-              requiredIf: "hasFloatingPlaceholder == 'true'"
-              variables:
-                FloatingLabelBehavior:
-                  kind: 'import'
-                  uris: [ 'material.dart' ]
-                  name: 'FloatingLabelBehavior'
-          - kind: 'removeParameter'
-            name: 'hasFloatingPlaceholder'
-      - if: "hasFloatingPlaceholder == 'false'"
-        changes:
-          - kind: 'addParameter'
-            index: 14
-            name: 'floatingLabelBehavior'
-            style: optional_named
-            argumentValue:
-              expression: '{% FloatingLabelBehavior %}.never'
-              requiredIf: "hasFloatingPlaceholder == 'false'"
-              variables:
-                FloatingLabelBehavior:
-                  kind: 'import'
-                  uris: [ 'material.dart' ]
-                  name: 'FloatingLabelBehavior'
-          - kind: 'removeParameter'
-            name: 'hasFloatingPlaceholder'
-    variables:
-      hasFloatingPlaceholder:
-        kind: 'fragment'
-        value: 'arguments[hasFloatingPlaceholder]'
-
-  # Changes made in https://github.com/flutter/flutter/pull/46115
-  - title: "Rename to 'floatingLabelBehavior'"
-    date: 2020-01-15
-    element:
-      uris: [ 'material.dart' ]
-      constructor: ''
-      inClass: 'InputDecoration'
-    oneOf:
-      - if: "hasFloatingPlaceholder == 'true'"
-        changes:
-          - kind: 'addParameter'
-            index: 14
-            name: 'floatingLabelBehavior'
-            style: optional_named
-            argumentValue:
-              expression: '{% FloatingLabelBehavior %}.auto'
-              requiredIf: "hasFloatingPlaceholder == 'true'"
-              variables:
-                FloatingLabelBehavior:
-                  kind: 'import'
-                  uris: [ 'material.dart' ]
-                  name: 'FloatingLabelBehavior'
-          - kind: 'removeParameter'
-            name: 'hasFloatingPlaceholder'
-      - if: "hasFloatingPlaceholder == 'false'"
-        changes:
-          - kind: 'addParameter'
-            index: 14
-            name: 'floatingLabelBehavior'
-            style: optional_named
-            argumentValue:
-              expression: '{% FloatingLabelBehavior %}.never'
-              requiredIf: "hasFloatingPlaceholder == 'false'"
-              variables:
-                FloatingLabelBehavior:
-                  kind: 'import'
-                  uris: [ 'material.dart' ]
-                  name: 'FloatingLabelBehavior'
-          - kind: 'removeParameter'
-            name: 'hasFloatingPlaceholder'
-    variables:
-      hasFloatingPlaceholder:
-        kind: 'fragment'
-        value: 'arguments[hasFloatingPlaceholder]'
-
   # Changes made in https://github.com/flutter/flutter/pull/96115
   - title: "Migrate 'Icons.pie_chart_outlined' to 'Icons.pie_chart_outline'"
     date: 2022-01-04
@@ -940,4 +738,41 @@ transforms:
           field: legacyDecelerate
           inClass: Easing
 
+  # Change made in https://github.com/flutter/flutter/pull/162223
+  - title: "Migrate 'ShowValueIndicator.always' to 'ShowValueIndicator.onDrag'"
+    date: 2025-03-18
+    element:
+      uris: [ 'material.dart' ]
+      constant: 'always'
+      inEnum: 'ShowValueIndicator'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: ['material.dart']
+          constant: 'onDrag'
+          inEnum: 'ShowValueIndicator'
+
+  # Changes made in https://github.com/flutter/flutter/pull/166382
+  - title: "Migrate to 'activeThumbColor'"
+    date: 2025-04-03
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'Switch'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'activeColor'
+        newName: 'activeThumbColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/166382
+  - title: "Migrate to 'activeThumbColor'"
+    date: 2025-04-03
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'SwitchListTile'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'activeColor'
+        newName: 'activeThumbColor'
 # Before adding a new fix: read instructions at the top of this file.

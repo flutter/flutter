@@ -1,6 +1,6 @@
 ## Things you will need
 
- * A working [Flutter](https://flutter.dev/docs/get-started/install) installation.
+ * A working [Flutter](https://docs.flutter.dev/get-started) installation.
  * git (used for source version control).
  * An ssh client (used to authenticate with GitHub).
 
@@ -11,7 +11,7 @@
    you already have a fork, and are now installing a development environment on
    a new machine, make sure you've updated your fork so that you don't use stale
    configuration options from long ago.
- * If you haven't configured your machine with an SSH key that's known to github, then
+ * If you haven't configured your machine with an SSH key that's known to GitHub, then
    follow [GitHub's directions](https://help.github.com/articles/generating-ssh-keys/)
    to generate an SSH key.
  * `git clone git@github.com:<your_name_here>/packages.git`

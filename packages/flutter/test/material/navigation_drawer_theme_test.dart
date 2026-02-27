@@ -9,17 +9,20 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('NavigationDrawerThemeData copyWith, ==, hashCode, basics', () {
     expect(const NavigationDrawerThemeData(), const NavigationDrawerThemeData().copyWith());
-    expect(const NavigationDrawerThemeData().hashCode, const NavigationDrawerThemeData().copyWith().hashCode);
+    expect(
+      const NavigationDrawerThemeData().hashCode,
+      const NavigationDrawerThemeData().copyWith().hashCode,
+    );
   });
 
   test('NavigationDrawerThemeData lerp special cases', () {
     expect(NavigationDrawerThemeData.lerp(null, null, 0), null);
-    const NavigationDrawerThemeData data = NavigationDrawerThemeData();
+    const data = NavigationDrawerThemeData();
     expect(identical(NavigationDrawerThemeData.lerp(data, data, 0.5), data), true);
   });
 
   testWidgets('Default debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const NavigationDrawerThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -30,8 +33,10 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('NavigationDrawerThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+  testWidgets('NavigationDrawerThemeData implements debugFillProperties', (
+    WidgetTester tester,
+  ) async {
+    final builder = DiagnosticPropertiesBuilder();
     const NavigationDrawerThemeData(
       tileHeight: 50,
       backgroundColor: Color(0x00000099),
@@ -50,34 +55,37 @@ void main() {
         .map((DiagnosticsNode node) => node.toString())
         .toList();
 
-    expect(description, equalsIgnoringHashCodes(
-      <String>[
+    expect(
+      description,
+      equalsIgnoringHashCodes(<String>[
         'tileHeight: 50.0',
-        'backgroundColor: Color(0x00000099)',
+        'backgroundColor: ${const Color(0x00000099)}',
         'elevation: 5.0',
-        'shadowColor: Color(0x00000098)',
-        'surfaceTintColor: Color(0x00000097)',
-        'indicatorColor: Color(0x00000096)',
+        'shadowColor: ${const Color(0x00000098)}',
+        'surfaceTintColor: ${const Color(0x00000097)}',
+        'indicatorColor: ${const Color(0x00000096)}',
         'indicatorShape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(2.0))',
         'indicatorSize: Size(10.0, 10.0)',
         'labelTextStyle: WidgetStatePropertyAll(TextStyle(inherit: true, size: 7.0))',
-        'iconTheme: WidgetStatePropertyAll(IconThemeData#00000(color: Color(0x00000095)))'
-      ],
-    ));
+        'iconTheme: WidgetStatePropertyAll(IconThemeData#00000(color: ${const Color(0x00000095)}))',
+      ]),
+    );
   });
 
   testWidgets(
     'NavigationDrawerThemeData values are used when no NavigationDrawer properties are specified',
     (WidgetTester tester) async {
-      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-      const NavigationDrawerThemeData navigationDrawerTheme = NavigationDrawerThemeData(
+      final scaffoldKey = GlobalKey<ScaffoldState>();
+      const navigationDrawerTheme = NavigationDrawerThemeData(
         backgroundColor: Color(0x00000001),
         elevation: 7.0,
         shadowColor: Color(0x00000002),
         surfaceTintColor: Color(0x00000003),
         indicatorColor: Color(0x00000004),
-        indicatorShape: RoundedRectangleBorder(borderRadius: BorderRadius.only(topRight: Radius.circular(16.0))),
-        labelTextStyle:MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
+        indicatorShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(topRight: Radius.circular(16.0)),
+        ),
+        labelTextStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
         iconTheme: MaterialStatePropertyAll<IconThemeData>(IconThemeData(color: Color(0x00000005))),
       );
 
@@ -87,20 +95,12 @@ void main() {
           NavigationDrawer(
             children: const <Widget>[
               Text('Headline'),
-              NavigationDrawerDestination(
-                icon: Icon(Icons.ac_unit),
-                label: Text('AC'),
-              ),
-              NavigationDrawerDestination(
-                icon: Icon(Icons.access_alarm),
-                label: Text('Alarm'),
-              ),
+              NavigationDrawerDestination(icon: Icon(Icons.ac_unit), label: Text('AC')),
+              NavigationDrawerDestination(icon: Icon(Icons.access_alarm), label: Text('Alarm')),
             ],
             onDestinationSelected: (int i) {},
           ),
-          theme: ThemeData(
-            navigationDrawerTheme: navigationDrawerTheme,
-          ),
+          theme: ThemeData(navigationDrawerTheme: navigationDrawerTheme),
         ),
       );
       scaffoldKey.currentState!.openDrawer();
@@ -117,43 +117,48 @@ void main() {
       // Test icon.
       expect(
         _iconStyle(tester, Icons.ac_unit)?.color,
-        navigationDrawerTheme.iconTheme?.resolve(<MaterialState>{})?.color,
+        navigationDrawerTheme.iconTheme?.resolve(<WidgetState>{})?.color,
       );
       expect(
         _iconStyle(tester, Icons.access_alarm)?.color,
-        navigationDrawerTheme.iconTheme?.resolve(<MaterialState>{})?.color,
+        navigationDrawerTheme.iconTheme?.resolve(<WidgetState>{})?.color,
       );
       // Test label.
       expect(
         _labelStyle(tester, 'AC'),
-        navigationDrawerTheme.labelTextStyle?.resolve(<MaterialState>{})
+        navigationDrawerTheme.labelTextStyle?.resolve(<WidgetState>{}),
       );
       expect(
         _labelStyle(tester, 'Alarm'),
-        navigationDrawerTheme.labelTextStyle?.resolve(<MaterialState>{})
+        navigationDrawerTheme.labelTextStyle?.resolve(<WidgetState>{}),
       );
-  });
+    },
+  );
 
   testWidgets(
     'NavigationDrawer values take priority over NavigationDrawerThemeData values when both properties are specified',
     (WidgetTester tester) async {
-      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-      const NavigationDrawerThemeData navigationDrawerTheme = NavigationDrawerThemeData(
+      final scaffoldKey = GlobalKey<ScaffoldState>();
+      const navigationDrawerTheme = NavigationDrawerThemeData(
         backgroundColor: Color(0x00000001),
         elevation: 7.0,
         shadowColor: Color(0x00000002),
         surfaceTintColor: Color(0x00000003),
         indicatorColor: Color(0x00000004),
-        indicatorShape: RoundedRectangleBorder(borderRadius: BorderRadius.only(topRight: Radius.circular(16.0))),
-        labelTextStyle:MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
+        indicatorShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(topRight: Radius.circular(16.0)),
+        ),
+        labelTextStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
         iconTheme: MaterialStatePropertyAll<IconThemeData>(IconThemeData(color: Color(0x00000005))),
       );
-      const Color backgroundColor = Color(0x00000009);
-      const double elevation = 14.0;
-      const Color shadowColor = Color(0x00000008);
-      const Color surfaceTintColor = Color(0x00000007);
-      const RoundedRectangleBorder indicatorShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(32.0)));
-      const Color indicatorColor = Color(0x00000006);
+      const backgroundColor = Color(0x00000009);
+      const elevation = 14.0;
+      const shadowColor = Color(0x00000008);
+      const surfaceTintColor = Color(0x00000007);
+      const indicatorShape = RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(32.0)),
+      );
+      const indicatorColor = Color(0x00000006);
 
       await tester.pumpWidget(
         _buildWidget(
@@ -167,20 +172,12 @@ void main() {
             indicatorColor: indicatorColor,
             children: const <Widget>[
               Text('Headline'),
-              NavigationDrawerDestination(
-                icon: Icon(Icons.ac_unit),
-                label: Text('AC'),
-              ),
-              NavigationDrawerDestination(
-                icon: Icon(Icons.access_alarm),
-                label: Text('Alarm'),
-              ),
+              NavigationDrawerDestination(icon: Icon(Icons.ac_unit), label: Text('AC')),
+              NavigationDrawerDestination(icon: Icon(Icons.access_alarm), label: Text('Alarm')),
             ],
             onDestinationSelected: (int i) {},
           ),
-          theme: ThemeData(
-            navigationDrawerTheme: navigationDrawerTheme,
-          ),
+          theme: ThemeData(navigationDrawerTheme: navigationDrawerTheme),
         ),
       );
       scaffoldKey.currentState!.openDrawer();
@@ -194,18 +191,21 @@ void main() {
       // Test indicator decoration.
       expect(_getIndicatorDecoration(tester)?.color, indicatorColor);
       expect(_getIndicatorDecoration(tester)?.shape, indicatorShape);
-  });
+    },
+  );
 
-  testWidgets('Local NavigationDrawerTheme takes priority over ThemeData.navigationDrawerTheme', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    const Color backgroundColor = Color(0x00000009);
-    const double elevation = 7.0;
-    const Color shadowColor = Color(0x00000008);
-    const Color surfaceTintColor = Color(0x00000007);
-    const Color iconColor = Color(0x00000006);
-    const TextStyle labelStyle = TextStyle(fontSize: 7.0);
+  testWidgets('Local NavigationDrawerTheme takes priority over ThemeData.navigationDrawerTheme', (
+    WidgetTester tester,
+  ) async {
+    final scaffoldKey = GlobalKey<ScaffoldState>();
+    const backgroundColor = Color(0x00000009);
+    const elevation = 7.0;
+    const shadowColor = Color(0x00000008);
+    const surfaceTintColor = Color(0x00000007);
+    const iconColor = Color(0x00000006);
+    const labelStyle = TextStyle(fontSize: 7.0);
     const ShapeBorder indicatorShape = CircleBorder();
-    const Color indicatorColor = Color(0x00000005);
+    const indicatorColor = Color(0x00000005);
 
     await tester.pumpWidget(
       _buildWidget(
@@ -218,20 +218,14 @@ void main() {
             surfaceTintColor: surfaceTintColor,
             indicatorShape: indicatorShape,
             indicatorColor: indicatorColor,
-            labelTextStyle:MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
+            labelTextStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
             iconTheme: MaterialStatePropertyAll<IconThemeData>(IconThemeData(color: iconColor)),
           ),
           child: NavigationDrawer(
             children: const <Widget>[
               Text('Headline'),
-              NavigationDrawerDestination(
-                icon: Icon(Icons.ac_unit),
-                label: Text('AC'),
-              ),
-              NavigationDrawerDestination(
-                icon: Icon(Icons.access_alarm),
-                label: Text('Alarm'),
-              ),
+              NavigationDrawerDestination(icon: Icon(Icons.ac_unit), label: Text('AC')),
+              NavigationDrawerDestination(icon: Icon(Icons.access_alarm), label: Text('Alarm')),
             ],
             onDestinationSelected: (int i) {},
           ),
@@ -243,9 +237,13 @@ void main() {
             shadowColor: Color(0x00000002),
             surfaceTintColor: Color(0x00000003),
             indicatorColor: Color(0x00000004),
-            indicatorShape: RoundedRectangleBorder(borderRadius: BorderRadius.only(topRight: Radius.circular(16.0))),
-            labelTextStyle:MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
-            iconTheme: MaterialStatePropertyAll<IconThemeData>(IconThemeData(color: Color(0x00000005))),
+            indicatorShape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(topRight: Radius.circular(16.0)),
+            ),
+            labelTextStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
+            iconTheme: MaterialStatePropertyAll<IconThemeData>(
+              IconThemeData(color: Color(0x00000005)),
+            ),
           ),
         ),
       ),
@@ -270,41 +268,38 @@ void main() {
   });
 }
 
-Widget _buildWidget(GlobalKey<ScaffoldState> scaffoldKey, Widget child, { ThemeData? theme }) {
+Widget _buildWidget(GlobalKey<ScaffoldState> scaffoldKey, Widget child, {ThemeData? theme}) {
   return MaterialApp(
     theme: theme,
-    home: Scaffold(
-      key: scaffoldKey,
-      drawer: child,
-      body: Container(),
-    ),
+    home: Scaffold(key: scaffoldKey, drawer: child, body: Container()),
   );
 }
 
 Material _getMaterial(WidgetTester tester) {
-  return tester.firstWidget<Material>(find.descendant(
-    of: find.byType(NavigationDrawer),
-    matching: find.byType(Material),
-  ));
+  return tester.firstWidget<Material>(
+    find.descendant(of: find.byType(NavigationDrawer), matching: find.byType(Material)),
+  );
 }
 
 ShapeDecoration? _getIndicatorDecoration(WidgetTester tester) {
-  return tester.firstWidget<Container>(find.descendant(
-    of: find.byType(FadeTransition),
-    matching: find.byType(Container),
-  )).decoration as ShapeDecoration?;
+  return tester
+          .firstWidget<Ink>(
+            find.descendant(of: find.byType(NavigationIndicator), matching: find.byType(Ink)),
+          )
+          .decoration
+      as ShapeDecoration?;
 }
 
 TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
-  return tester.widget<RichText>(
-    find.descendant(of: find.byIcon(icon),
-    matching: find.byType(RichText)),
-  ).text.style;
+  return tester
+      .widget<RichText>(find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)))
+      .text
+      .style;
 }
 
 TextStyle? _labelStyle(WidgetTester tester, String label) {
-  return tester.widget<RichText>(find.descendant(
-    of: find.text(label),
-    matching: find.byType(RichText),
-  )).text.style;
+  return tester
+      .widget<RichText>(find.descendant(of: find.text(label), matching: find.byType(RichText)))
+      .text
+      .style;
 }

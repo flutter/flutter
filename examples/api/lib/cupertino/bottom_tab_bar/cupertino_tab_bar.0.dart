@@ -49,9 +49,7 @@ class CupertinoTabBarExample extends StatelessWidget {
       tabBuilder: (BuildContext context, int index) {
         return CupertinoTabView(
           builder: (BuildContext context) {
-            return Center(
-              child: Text('Content of tab $index'),
-            );
+            return Center(child: Text('Content of tab $index'));
           },
         );
       },

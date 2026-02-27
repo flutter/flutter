@@ -9,7 +9,7 @@ import 'package:path/path.dart' as path;
 import '../utils.dart';
 
 Future<void> frameworkCoverageRunner() async {
-  final File coverageFile = File(path.join(flutterRoot, 'packages', 'flutter', 'coverage', 'lcov.info'));
+  final coverageFile = File(path.join(flutterRoot, 'packages', 'flutter', 'coverage', 'lcov.info'));
   if (!coverageFile.existsSync()) {
     foundError(<String>[
       '${red}Coverage file not found.$reset',
@@ -19,7 +19,8 @@ Future<void> frameworkCoverageRunner() async {
     return;
   }
   coverageFile.deleteSync();
-  await runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'),
+  await runFlutterTest(
+    path.join(flutterRoot, 'packages', 'flutter'),
     options: const <String>['--coverage'],
   );
   if (!coverageFile.existsSync()) {

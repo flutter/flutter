@@ -13,6 +13,17 @@ REM --------------------------------------------------------------------------
 
 SETLOCAL
 
+REM Ensure we are running on 64-bit Windows (32-bit is not supported).
+REM If this is a 32-bit process emulated by WOW64,
+REM PROCESSOR_ARCHITECTURE is the process architecture and
+REM PROCESSOR_ARCHITEW6432 is the processor architecture.
+IF "%PROCESSOR_ARCHITECTURE%"=="x86" (
+  IF "%PROCESSOR_ARCHITEW6432%"=="" (
+    ECHO Flutter requires 64-bit versions of Windows
+    EXIT 1
+  )
+)
+
 SET flutter_tools_dir=%FLUTTER_ROOT%\packages\flutter_tools
 SET cache_dir=%FLUTTER_ROOT%\bin\cache
 SET snapshot_path=%cache_dir%\flutter_tools.snapshot
@@ -21,7 +32,7 @@ SET stamp_path=%cache_dir%\flutter_tools.stamp
 SET script_path=%flutter_tools_dir%\bin\flutter_tools.dart
 SET dart_sdk_path=%cache_dir%\dart-sdk
 SET engine_stamp=%cache_dir%\engine-dart-sdk.stamp
-SET engine_version_path=%FLUTTER_ROOT%\bin\internal\engine.version
+SET engine_version_path=%cache_dir%\engine.stamp
 SET dart=%dart_sdk_path%\bin\dart.exe
 
 REM Ensure that bin/cache exists.
@@ -52,18 +63,19 @@ GOTO :after_subroutine
     CALL "%bootstrap_path%"
   )
 
-  REM Check that git exists and get the revision
-  SET git_exists=false
+  REM Get the Git revision.
   2>NUL (
-    PUSHD "%flutter_root%"
-    FOR /f %%r IN ('git rev-parse HEAD') DO (
-      SET git_exists=true
+    REM 'FOR /f' spawns a new terminal instance to run the command. If an
+    REM 'AutoRun' command is defined in the user's registry, that command could
+    REM change the working directory, and then we wouldn't be in the directory
+    REM we expect to be in. To prevent this, we need to 'PUSHD %FLUTTER_ROOT%'
+    REM before getting the git revision.
+    REM
+    REM See https://github.com/flutter/flutter/issues/159018
+    FOR /f %%r IN ('PUSHD %FLUTTER_ROOT% ^& $git rev-parse HEAD') DO (
       SET revision=%%r
     )
-    POPD
   )
-  REM If git didn't execute we don't have git. Exit without /B to avoid retrying.
-  if %git_exists% == false echo Error: Unable to find git in your PATH. && EXIT 1
   SET compilekey="%revision%:%FLUTTER_TOOL_ARGS%"
 
   REM Invalidate cache if:
@@ -76,6 +88,7 @@ GOTO :after_subroutine
   REM The following IF conditions are all linked with a logical OR. However,
   REM there is no OR operator in batch and a GOTO construct is used as replacement.
 
+  CALL :do_ensure_engine_version
   IF NOT EXIST "%engine_stamp%" GOTO do_sdk_update_and_snapshot
   SET /P dart_required_version=<"%engine_version_path%"
   SET /P dart_installed_version=<"%engine_stamp%"
@@ -95,19 +108,26 @@ GOTO :after_subroutine
   REM Everything is up-to-date - exit subroutine
   EXIT /B
 
-  :do_sdk_update_and_snapshot
-    REM Detect which PowerShell executable is available on the Host
-    REM PowerShell version <= 5: PowerShell.exe
-    REM PowerShell version >= 6: pwsh.exe
-    WHERE /Q pwsh.exe && (
-        SET powershell_executable=pwsh.exe
-    ) || WHERE /Q PowerShell.exe && (
-        SET powershell_executable=PowerShell.exe
-    ) || (
-        ECHO Error: PowerShell executable not found.                        1>&2
-        ECHO        Either pwsh.exe or PowerShell.exe must be in your PATH. 1>&2
-        EXIT 1
+  :do_ensure_engine_version
+    SET update_engine_bin=%FLUTTER_ROOT%\bin\internal\update_engine_version.ps1
+    REM Escape apostrophes from the executable path
+    SET "update_engine_bin=%update_engine_bin:'=''%"
+    REM PowerShell command must have exit code set in order to prevent all non-zero exit codes from being translated
+    REM into 1. The exit code 2 is used to detect the case where the major version is incorrect and there should be
+    REM no subsequent retries.
+    %powershell_executable% -ExecutionPolicy Bypass -NoProfile -Command "Unblock-File -Path '%update_engine_bin%'; & '%update_engine_bin%'; exit $LASTEXITCODE;"
+    IF "%ERRORLEVEL%" EQU "2" (
+      EXIT 1
     )
+    IF "%ERRORLEVEL%" NEQ "0" (
+      ECHO Error: Unable to determine engine version... 1>&2
+      EXIT 1
+    )
+    REM Do not fall through - return from subroutine
+    EXIT /B
+
+  :do_sdk_update_and_snapshot
+    SET /A dart_sdk_retries+=1
     ECHO Checking Dart SDK version... 1>&2
     SET update_dart_bin=%FLUTTER_ROOT%\bin\internal\update_dart_sdk.ps1
     REM Escape apostrophes from the executable path
@@ -120,7 +140,13 @@ GOTO :after_subroutine
     IF "%ERRORLEVEL%" EQU "2" (
       EXIT 1
     )
+    SET max_dart_sdk_retries=3
     IF "%ERRORLEVEL%" NEQ "0" (
+      IF "%dart_sdk_retries%" EQU "%max_dart_sdk_retries%" (
+        ECHO Error: Unable to update Dart SDK after %max_dart_sdk_retries% retries. 1>&2
+        DEL "%engine_stamp%"
+        EXIT 1
+      )
       ECHO Error: Unable to update Dart SDK. Retrying... 1>&2
       timeout /t 5 /nobreak
       GOTO :do_sdk_update_and_snapshot
@@ -166,6 +192,11 @@ GOTO :after_subroutine
         ECHO Error: 'pub upgrade' still failing after %total_tries% tries. 1>&2
         GOTO final_exit
       :upgrade_succeeded
+        REM Ensure that pubspec.lock has a >= MTIME to pubspec.yaml at this point
+        REM https://github.com/flutter/flutter/issues/171024
+        SET "PUBSPEC_LOCK_FILE=%FLUTTER_TOOLS_DIR%\pubspec.lock"
+        COPY /B "%PUBSPEC_LOCK_FILE%"+,, "%PUBSPEC_LOCK_FILE%" >NUL
+
     ENDLOCAL
 
     POPD

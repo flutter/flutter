@@ -15,9 +15,7 @@ class TextEditingControllerExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: TextEditingControllerExample(),
-    );
+    return const MaterialApp(home: TextEditingControllerExample());
   }
 }
 
@@ -25,10 +23,12 @@ class TextEditingControllerExample extends StatefulWidget {
   const TextEditingControllerExample({super.key});
 
   @override
-  State<TextEditingControllerExample> createState() => _TextEditingControllerExampleState();
+  State<TextEditingControllerExample> createState() =>
+      _TextEditingControllerExampleState();
 }
 
-class _TextEditingControllerExampleState extends State<TextEditingControllerExample> {
+class _TextEditingControllerExampleState
+    extends State<TextEditingControllerExample> {
   // Create a controller whose initial selection is empty (collapsed) and positioned
   // before the text (offset is 0).
   final TextEditingController _controller = TextEditingController.fromValue(

@@ -13,9 +13,7 @@ class SingleChildScrollViewExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: SingleChildScrollViewExample(),
-    );
+    return const MaterialApp(home: SingleChildScrollViewExample());
   }
 }
 

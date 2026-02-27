@@ -146,7 +146,7 @@
   "menuDismissLabel": "Мәзірді жабу",
   "lookUpButtonLabel": "Іздеу",
   "searchWebButtonLabel": "Интернеттен іздеу",
-  "shareButtonLabel": "Бөлісу…",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "Бөлісу",
+  "clearButtonTooltip": "Мәтінді тазалау",
+  "selectedDateLabel": "Таңдалды."
 }

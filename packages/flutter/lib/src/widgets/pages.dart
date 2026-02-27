@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'navigator.dart';
+library;
+
 import 'basic.dart';
 import 'framework.dart';
 import 'routes.dart';
@@ -21,6 +24,9 @@ abstract class PageRoute<T> extends ModalRoute<T> {
   /// Creates a modal route that replaces the entire screen.
   PageRoute({
     super.settings,
+    super.requestFocus,
+    super.traversalEdgeBehavior,
+    super.directionalTraversalEdgeBehavior,
     this.fullscreenDialog = false,
     this.allowSnapshotting = true,
     bool barrierDismissible = false,
@@ -34,6 +40,7 @@ abstract class PageRoute<T> extends ModalRoute<T> {
   /// iOS, dialogs transitions animate differently and are also not closeable
   /// with the back swipe gesture.
   /// {@endtemplate}
+  @override
   final bool fullscreenDialog;
 
   @override
@@ -59,7 +66,12 @@ abstract class PageRoute<T> extends ModalRoute<T> {
   }
 }
 
-Widget _defaultTransitionsBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+Widget _defaultTransitionsBuilder(
+  BuildContext context,
+  Animation<double> animation,
+  Animation<double> secondaryAnimation,
+  Widget child,
+) {
   return child;
 }
 
@@ -78,6 +90,7 @@ class PageRouteBuilder<T> extends PageRoute<T> {
   /// Creates a route that delegates to builder callbacks.
   PageRouteBuilder({
     super.settings,
+    super.requestFocus,
     required this.pageBuilder,
     this.transitionsBuilder = _defaultTransitionsBuilder,
     this.transitionDuration = const Duration(milliseconds: 300),
@@ -92,7 +105,7 @@ class PageRouteBuilder<T> extends PageRoute<T> {
   });
 
   /// {@template flutter.widgets.pageRouteBuilder.pageBuilder}
-  /// Used build the route's primary contents.
+  /// Used to build the route's primary contents.
   ///
   /// See [ModalRoute.buildPage] for complete definition of the parameters.
   /// {@endtemplate}
@@ -129,12 +142,21 @@ class PageRouteBuilder<T> extends PageRoute<T> {
   final bool maintainState;
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
     return pageBuilder(context, animation, secondaryAnimation);
   }
 
   @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
     return transitionsBuilder(context, animation, secondaryAnimation, child);
   }
 }

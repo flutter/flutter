@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('IconTheme.of works', (WidgetTester tester) async {
-    const IconThemeData data = IconThemeData(
+    const data = IconThemeData(
       size: 16.0,
       fill: 0.0,
       weight: 400.0,
@@ -20,10 +20,15 @@ void main() {
 
     late IconThemeData retrieved;
     await tester.pumpWidget(
-      IconTheme(data: data, child: Builder(builder: (BuildContext context) {
-        retrieved = IconTheme.of(context);
-        return const SizedBox();
-      })),
+      IconTheme(
+        data: data,
+        child: Builder(
+          builder: (BuildContext context) {
+            retrieved = IconTheme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
     );
 
     expect(retrieved, data);
@@ -33,7 +38,8 @@ void main() {
         data: const CupertinoIconThemeData(color: CupertinoColors.systemBlue),
         child: MediaQuery(
           data: const MediaQueryData(platformBrightness: Brightness.dark),
-          child: Builder(builder: (BuildContext context) {
+          child: Builder(
+            builder: (BuildContext context) {
               retrieved = IconTheme.of(context);
               return const SizedBox();
             },

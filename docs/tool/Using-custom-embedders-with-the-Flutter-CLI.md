@@ -21,6 +21,7 @@ The config file contains all the configured custom devices. To see documentation
 If your device is reachable via ssh, you can add it to the config with a guided setup using `flutter custom-devices add`.
 
 The setup really is self-explanatory, but for example for my Raspberry Pi, the setup looks like this:
+
 ```
 hannes@pop-os:~/devel$ flutter custom-devices add
 Please enter the id you want to device to have. Must contain only alphanumeric
@@ -45,7 +46,7 @@ Please enter the command executed on the remote device for starting the app.
 flutter-pi /tmp/${appName}
 Should the device use port forwarding? Using port forwarding is the default
 because it works in all cases, however if your remote device has a static IP
-address and you have a way of specifying the "--observatory-host=<ip>" engine
+address and you have a way of specifying the "--vm-service-host=<ip>" engine
 option, you might prefer not using port forwarding. [Y/n] (empty for default)
 
 Enter the command executed on the remote device for taking a screenshot.
@@ -59,7 +60,7 @@ Successfully added custom device to config file at
 "/home/hannes/.config/flutter/custom_devices.json".
 ```
 
-If your device is a little more complicated to setup, for example if your device is the one the flutter SDK is running on, you can configure it by editing the config file directly. (As mentioned above, I heavily recommend VS Code for that)
+If your device is a little more complicated to set up, for example if your device is the one the flutter SDK is running on, you can configure it by editing the config file directly. (As mentioned above, I heavily recommend VS Code for that)
 
 ### That's it
 

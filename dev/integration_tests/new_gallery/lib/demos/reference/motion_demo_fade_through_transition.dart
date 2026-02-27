@@ -12,18 +12,13 @@ class FadeThroughTransitionDemo extends StatefulWidget {
   const FadeThroughTransitionDemo({super.key});
 
   @override
-  State<FadeThroughTransitionDemo> createState() =>
-      _FadeThroughTransitionDemoState();
+  State<FadeThroughTransitionDemo> createState() => _FadeThroughTransitionDemoState();
 }
 
 class _FadeThroughTransitionDemoState extends State<FadeThroughTransitionDemo> {
   int _pageIndex = 0;
 
-  final List<Widget> _pageList = <Widget>[
-    _AlbumsPage(),
-    _PhotosPage(),
-    _SearchPage(),
-  ];
+  final List<Widget> _pageList = <Widget>[_AlbumsPage(), _PhotosPage(), _SearchPage()];
 
   @override
   Widget build(BuildContext context) {
@@ -37,26 +32,20 @@ class _FadeThroughTransitionDemoState extends State<FadeThroughTransitionDemo> {
             Text(localizations.demoFadeThroughTitle),
             Text(
               '(${localizations.demoFadeThroughDemoInstructions})',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleSmall!
-                  .copyWith(color: Colors.white),
+              style: Theme.of(context).textTheme.titleSmall!.copyWith(color: Colors.white),
             ),
           ],
         ),
       ),
       body: PageTransitionSwitcher(
-        transitionBuilder: (
-          Widget child,
-          Animation<double> animation,
-          Animation<double> secondaryAnimation,
-        ) {
-          return FadeThroughTransition(
-            animation: animation,
-            secondaryAnimation: secondaryAnimation,
-            child: child,
-          );
-        },
+        transitionBuilder:
+            (Widget child, Animation<double> animation, Animation<double> secondaryAnimation) {
+              return FadeThroughTransition(
+                animation: animation,
+                secondaryAnimation: secondaryAnimation,
+                child: child,
+              );
+            },
         child: _pageList[_pageIndex],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -130,10 +119,7 @@ class _ExampleCard extends StatelessWidget {
                 ),
               ],
             ),
-            InkWell(
-              splashColor: Colors.black38,
-              onTap: () {},
-            ),
+            InkWell(splashColor: Colors.black38, onTap: () {}),
           ],
         ),
       ),
@@ -151,10 +137,7 @@ class _AlbumsPage extends StatelessWidget {
           (int index) => Expanded(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                _ExampleCard(),
-                _ExampleCard(),
-              ],
+              children: <Widget>[_ExampleCard(), _ExampleCard()],
             ),
           ),
         ),
@@ -166,12 +149,7 @@ class _AlbumsPage extends StatelessWidget {
 class _PhotosPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        _ExampleCard(),
-        _ExampleCard(),
-      ],
-    );
+    return Column(children: <Widget>[_ExampleCard(), _ExampleCard()]);
   }
 }
 

@@ -2,6 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:developer';
+///
+/// @docImport 'package:flutter/scheduler.dart';
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'binding.dart';
+/// @docImport 'layer.dart';
+/// @docImport 'proxy_box.dart';
+/// @docImport 'shifted_box.dart';
+/// @docImport 'view.dart';
+library;
+
 import 'box.dart';
 import 'object.dart';
 
@@ -25,6 +37,15 @@ bool debugPaintSizeEnabled = false;
 
 /// Causes each RenderBox to paint a line at each of its baselines.
 bool debugPaintBaselinesEnabled = false;
+
+/// Causes each RenderParagraph to paint the layout boxes of its text.
+///
+/// {@macro flutter.painting.textPainter.debugPaintTextLayoutBoxes}
+///
+/// See also:
+///
+///  * [debugPaintBaselinesEnabled] which helps debug text alignment.
+bool debugPaintTextLayoutBoxes = false;
 
 /// Causes each Layer to paint a box around its bounds.
 bool debugPaintLayerBordersEnabled = false;
@@ -249,12 +270,11 @@ bool debugDisablePhysicalShapeLayers = false;
 bool debugDisableOpacityLayers = false;
 
 void _debugDrawDoubleRect(Canvas canvas, Rect outerRect, Rect innerRect, Color color) {
-  final Path path = Path()
+  final path = Path()
     ..fillType = PathFillType.evenOdd
     ..addRect(outerRect)
     ..addRect(innerRect);
-  final Paint paint = Paint()
-    ..color = color;
+  final paint = Paint()..color = color;
   canvas.drawPath(path, paint);
 }
 
@@ -271,14 +291,23 @@ void _debugDrawDoubleRect(Canvas canvas, Rect outerRect, Rect innerRect, Color c
 ///
 /// This method is used by [RenderPadding.debugPaintSize] when
 /// [debugPaintSizeEnabled] is true.
-void debugPaintPadding(Canvas canvas, Rect outerRect, Rect? innerRect, { double outlineWidth = 2.0 }) {
+void debugPaintPadding(
+  Canvas canvas,
+  Rect outerRect,
+  Rect? innerRect, {
+  double outlineWidth = 2.0,
+}) {
   assert(() {
     if (innerRect != null && !innerRect.isEmpty) {
       _debugDrawDoubleRect(canvas, outerRect, innerRect, const Color(0x900090FF));
-      _debugDrawDoubleRect(canvas, innerRect.inflate(outlineWidth).intersect(outerRect), innerRect, const Color(0xFF0090FF));
+      _debugDrawDoubleRect(
+        canvas,
+        innerRect.inflate(outlineWidth).intersect(outerRect),
+        innerRect,
+        const Color(0xFF0090FF),
+      );
     } else {
-      final Paint paint = Paint()
-        ..color = const Color(0x90909090);
+      final paint = Paint()..color = const Color(0x90909090);
       canvas.drawRect(outerRect, paint);
     }
     return true;
@@ -296,11 +325,12 @@ void debugPaintPadding(Canvas canvas, Rect outerRect, Rect? innerRect, { double 
 /// The `debugCheckIntrinsicSizesOverride` argument can be provided to override
 /// the expected value for [debugCheckIntrinsicSizes]. (This exists because the
 /// test framework itself overrides this value in some cases.)
-bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSizesOverride = false }) {
+bool debugAssertAllRenderVarsUnset(String reason, {bool debugCheckIntrinsicSizesOverride = false}) {
   assert(() {
     if (debugPaintSizeEnabled ||
         debugPaintBaselinesEnabled ||
         debugPaintLayerBordersEnabled ||
+        debugPaintTextLayoutBoxes ||
         debugPaintPointersEnabled ||
         debugRepaintRainbowEnabled ||
         debugRepaintTextRainbowEnabled ||

@@ -16,9 +16,7 @@ class AlertDialogExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('AlertDialog Sample')),
-        body: const Center(
-          child: DialogExample(),
-        ),
+        body: const Center(child: DialogExample()),
       ),
     );
   }

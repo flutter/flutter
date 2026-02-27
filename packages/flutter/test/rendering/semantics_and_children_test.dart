@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 int countSemanticsChildren(RenderObject object) {
-  int count = 0;
+  var count = 0;
   object.visitChildrenForSemantics((RenderObject child) {
     count += 1;
   });
@@ -20,11 +20,8 @@ void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
   test('RenderOpacity and children and semantics', () {
-    final RenderOpacity box = RenderOpacity(
-      child: RenderParagraph(
-        const TextSpan(),
-        textDirection: TextDirection.ltr,
-      ),
+    final box = RenderOpacity(
+      child: RenderParagraph(const TextSpan(), textDirection: TextDirection.ltr),
     );
     expect(countSemanticsChildren(box), 1);
     box.opacity = 0.5;
@@ -42,13 +39,10 @@ void main() {
   });
 
   test('RenderOpacity and children and semantics', () {
-    final AnimationController controller = AnimationController(vsync: const TestVSync());
-    final RenderAnimatedOpacity box = RenderAnimatedOpacity(
+    final controller = AnimationController(vsync: const TestVSync());
+    final box = RenderAnimatedOpacity(
       opacity: controller,
-      child: RenderParagraph(
-        const TextSpan(),
-        textDirection: TextDirection.ltr,
-      ),
+      child: RenderParagraph(const TextSpan(), textDirection: TextDirection.ltr),
     );
     expect(countSemanticsChildren(box), 0); // controller defaults to 0.0
     controller.value = 0.2; // has no effect, box isn't subscribed yet

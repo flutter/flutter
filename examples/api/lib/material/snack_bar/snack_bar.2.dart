@@ -15,10 +15,7 @@ class SnackBarExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(useMaterial3: true),
-      home: const SnackBarExample(),
-    );
+    return const MaterialApp(home: SnackBarExample());
   }
 }
 
@@ -50,31 +47,27 @@ class _SnackBarExampleState extends State<SnackBarExample> {
       ),
       body: ListView(
         children: <Widget>[
-          ExpansionTile(
-            title: const Text('Behavior'),
-            initiallyExpanded: true,
-            children: <Widget>[
-              RadioListTile<SnackBarBehavior>(
-                title: const Text('Fixed'),
-                value: SnackBarBehavior.fixed,
-                groupValue: _snackBarBehavior,
-                onChanged: (SnackBarBehavior? value) {
-                  setState(() {
-                    _snackBarBehavior = value;
-                  });
-                },
-              ),
-              RadioListTile<SnackBarBehavior>(
-                title: const Text('Floating'),
-                value: SnackBarBehavior.floating,
-                groupValue: _snackBarBehavior,
-                onChanged: (SnackBarBehavior? value) {
-                  setState(() {
-                    _snackBarBehavior = value;
-                  });
-                },
-              ),
-            ],
+          RadioGroup<SnackBarBehavior>(
+            groupValue: _snackBarBehavior,
+            onChanged: (SnackBarBehavior? value) {
+              setState(() {
+                _snackBarBehavior = value;
+              });
+            },
+            child: const ExpansionTile(
+              title: Text('Behavior'),
+              initiallyExpanded: true,
+              children: <Widget>[
+                RadioListTile<SnackBarBehavior>(
+                  title: Text('Fixed'),
+                  value: SnackBarBehavior.fixed,
+                ),
+                RadioListTile<SnackBarBehavior>(
+                  title: Text('Floating'),
+                  value: SnackBarBehavior.floating,
+                ),
+              ],
+            ),
           ),
           ExpansionTile(
             title: const Text('Content'),
@@ -113,11 +106,10 @@ class _SnackBarExampleState extends State<SnackBarExample> {
                 onChanged: !_withAction
                     ? null
                     : (bool value) => setState(() {
-                  _longActionLabel = value;
-                }),
+                        _longActionLabel = value;
+                      }),
               ),
             ],
-
           ),
           ExpansionTile(
             title: const Text('Action new-line overflow threshold'),
@@ -134,7 +126,7 @@ class _SnackBarExampleState extends State<SnackBarExample> {
             ],
           ),
           // Avoid hiding content behind the floating action button
-          const SizedBox(height: 100,),
+          const SizedBox(height: 100),
         ],
       ),
     );
@@ -154,8 +146,8 @@ class _SnackBarExampleState extends State<SnackBarExample> {
         : null;
     final String label = _multiLine
         ? 'A Snack Bar with quite a lot of text which spans across multiple '
-        'lines. You can look at how the Action Label moves around when trying '
-        'to layout this text.'
+              'lines. You can look at how the Action Label moves around when trying '
+              'to layout this text.'
         : 'Single Line Snack Bar';
     return SnackBar(
       content: Text(label),

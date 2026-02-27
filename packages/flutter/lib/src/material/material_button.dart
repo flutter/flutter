@@ -2,7 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
+/// @docImport 'elevated_button.dart';
+/// @docImport 'elevated_button_theme.dart';
+/// @docImport 'icon_button.dart';
+/// @docImport 'outlined_button.dart';
+/// @docImport 'outlined_button_theme.dart';
+/// @docImport 'text_button.dart';
+/// @docImport 'text_button_theme.dart';
+/// @docImport 'text_theme.dart';
+library;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -23,7 +31,8 @@ import 'theme_data.dart';
 ///
 ///  * [TextButton], [TextButtonTheme], [TextButtonThemeData],
 ///  * [ElevatedButton], [ElevatedButtonTheme], [ElevatedButtonThemeData],
-///  * [OutlinedButton], [OutlinedButtonTheme], [OutlinedButtonThemeData]
+///  * [OutlinedButton], [OutlinedButtonTheme], [OutlinedButtonThemeData],
+///  * [FilledButton], [FilledButtonTheme], [FilledButtonThemeData]
 ///
 /// The button's size will expand to fit the child widget, if necessary.
 ///
@@ -114,7 +123,7 @@ class MaterialButton extends StatelessWidget {
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   ///
-  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  /// If this property is null, [WidgetStateMouseCursor.adaptiveClickable] will be used.
   final MouseCursor? mouseCursor;
 
   /// Defines the button's base colors, and the defaults for the button's minimum
@@ -132,7 +141,7 @@ class MaterialButton extends StatelessWidget {
   /// The default text color depends on the button theme's text theme,
   /// [ButtonThemeData.textTheme].
   ///
-  /// If [textColor] is a [MaterialStateProperty<Color>], [disabledTextColor]
+  /// If [textColor] is a [WidgetStateProperty<Color>], [disabledTextColor]
   /// will be ignored.
   ///
   /// See also:
@@ -150,7 +159,7 @@ class MaterialButton extends StatelessWidget {
   /// The default value is the theme's disabled color,
   /// [ThemeData.disabledColor].
   ///
-  /// If [textColor] is a [MaterialStateProperty<Color>], [disabledTextColor]
+  /// If [textColor] is a [WidgetStateProperty<Color>], [disabledTextColor]
   /// will be ignored.
   ///
   /// See also:
@@ -402,10 +411,7 @@ class MaterialButton extends StatelessWidget {
       highlightElevation: buttonTheme.getHighlightElevation(this),
       padding: buttonTheme.getPadding(this),
       visualDensity: visualDensity ?? theme.visualDensity,
-      constraints: buttonTheme.getConstraints(this).copyWith(
-        minWidth: minWidth,
-        minHeight: height,
-      ),
+      constraints: buttonTheme.getConstraints(this).copyWith(minWidth: minWidth, minHeight: height),
       shape: buttonTheme.getShape(this),
       clipBehavior: clipBehavior,
       focusNode: focusNode,
@@ -421,7 +427,9 @@ class MaterialButton extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
-    properties.add(DiagnosticsProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: null),
+    );
     properties.add(ColorProperty('textColor', textColor, defaultValue: null));
     properties.add(ColorProperty('disabledTextColor', disabledTextColor, defaultValue: null));
     properties.add(ColorProperty('color', color, defaultValue: null));
@@ -430,11 +438,21 @@ class MaterialButton extends StatelessWidget {
     properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: null));
     properties.add(ColorProperty('highlightColor', highlightColor, defaultValue: null));
     properties.add(ColorProperty('splashColor', splashColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Brightness>('colorBrightness', colorBrightness, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<Brightness>('colorBrightness', colorBrightness, defaultValue: null),
+    );
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-    properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null),
+    );
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<MaterialTapTargetSize>(
+        'materialTapTargetSize',
+        materialTapTargetSize,
+        defaultValue: null,
+      ),
+    );
   }
 }

@@ -4,5 +4,15 @@
   "reorderItemUp": "Преместете нагоре",
   "reorderItemDown": "Преместете надолу",
   "reorderItemLeft": "Преместете налево",
-  "reorderItemRight": "Преместете надесно"
+  "reorderItemRight": "Преместете надесно",
+  "copyButtonLabel": "Копирај",
+  "cutButtonLabel": "Исечи",
+  "lookUpButtonLabel": "Погледнете нагоре",
+  "searchWebButtonLabel": "Пребарајте на интернет",
+  "shareButtonLabel": "Сподели",
+  "pasteButtonLabel": "Залепи",
+  "selectAllButtonLabel": "Избери ги сите",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found",
+  "radioButtonUnselectedLabel": "Not selected"
 }

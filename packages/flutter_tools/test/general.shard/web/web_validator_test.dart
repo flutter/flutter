@@ -24,10 +24,7 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     fakeProcessManager = FakeProcessManager.empty();
-    platform = FakePlatform(
-      operatingSystem: 'macos',
-      environment: <String, String>{},
-    );
+    platform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
     chromeLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
       platform: platform,
@@ -61,15 +58,19 @@ void main() {
     expect(result.type, ValidationType.missing);
   });
 
-  testWithoutContext('WebValidator does not warn about CHROME_EXECUTABLE unless it cant find chrome ', () async {
-    fakeProcessManager.excludedExecutables.add(kMacOSExecutable);
+  testWithoutContext(
+    'WebValidator does not warn about CHROME_EXECUTABLE unless it cant find chrome ',
+    () async {
+      fakeProcessManager.excludedExecutables.add(kMacOSExecutable);
 
-    final ValidationResult result = await webValidator.validate();
+      final ValidationResult result = await webValidator.validate();
 
-    expect(result.messages, const <ValidationMessage>[
-      ValidationMessage.hint(
-          'Cannot find Chrome. Try setting CHROME_EXECUTABLE to a Chrome executable.'),
-    ]);
-    expect(result.type, ValidationType.missing);
-  });
+      expect(result.messages, const <ValidationMessage>[
+        ValidationMessage.hint(
+          'Cannot find Chrome. Try setting CHROME_EXECUTABLE to a Chrome executable.',
+        ),
+      ]);
+      expect(result.type, ValidationType.missing);
+    },
+  );
 }

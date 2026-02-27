@@ -13,27 +13,33 @@ void main() {
     await tester.pumpWidget(const example.TextInputControlExampleApp());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.descendant(
-      of: find.byType(example.MyVirtualKeyboard),
-      matching: find.widgetWithText(ElevatedButton, 'A'),
-    ));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(example.MyVirtualKeyboard),
+        matching: find.widgetWithText(ElevatedButton, 'A'),
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.widgetWithText(TextField, 'A'), findsOneWidget);
 
-    await tester.tap(find.descendant(
-      of: find.byType(example.MyVirtualKeyboard),
-      matching: find.widgetWithText(ElevatedButton, 'B'),
-    ));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(example.MyVirtualKeyboard),
+        matching: find.widgetWithText(ElevatedButton, 'B'),
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.widgetWithText(TextField, 'AB'), findsOneWidget);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.descendant(
-      of: find.byType(example.MyVirtualKeyboard),
-      matching: find.widgetWithText(ElevatedButton, 'C'),
-    ));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(example.MyVirtualKeyboard),
+        matching: find.widgetWithText(ElevatedButton, 'C'),
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.widgetWithText(TextField, 'ACB'), findsOneWidget);
   });

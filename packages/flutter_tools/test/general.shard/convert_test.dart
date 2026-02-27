@@ -11,7 +11,7 @@ void main() {
   late String passedString;
   late String nonpassString;
 
-  const Utf8Decoder decoder = Utf8Decoder();
+  const decoder = Utf8Decoder();
 
   setUp(() {
     passedString = 'normal string';
@@ -19,12 +19,10 @@ void main() {
   });
 
   testWithoutContext('Decode a normal string', () async {
-
     expect(decoder.convert(passedString.codeUnits), passedString);
   });
 
   testWithoutContext('Decode a malformed string', () async {
-
     expect(
       () => decoder.convert(nonpassString.codeUnits),
       throwsA(

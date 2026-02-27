@@ -39,12 +39,12 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
   /// breakpoints, and resume.
   @override
   Future<void> launchImpl() async {
-    final FlutterLaunchRequestArguments args = this.args as FlutterLaunchRequestArguments;
+    final args = this.args as FlutterLaunchRequestArguments;
 
     final bool debug = enableDebugger;
     final String? program = args.program;
 
-    final List<String> toolArgs = <String>[
+    final toolArgs = <String>[
       'test',
       '--machine',
       if (!enableFlutterDds) '--no-dds',
@@ -52,24 +52,21 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
     ];
 
     // Handle customTool and deletion of any arguments for it.
-    final String executable = args.customTool ?? fileSystem.path.join(Cache.flutterRoot!, 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
+    final String executable =
+        args.customTool ??
+        fileSystem.path.join(
+          Cache.flutterRoot!,
+          'bin',
+          platform.isWindows ? 'flutter.bat' : 'flutter',
+        );
     final int? removeArgs = args.customToolReplacesArgs;
     if (args.customTool != null && removeArgs != null) {
       toolArgs.removeRange(0, math.min(removeArgs, toolArgs.length));
     }
 
-    final List<String> processArgs = <String>[
-      ...toolArgs,
-      ...?args.toolArgs,
-      if (program != null) program,
-      ...?args.args,
-    ];
+    final processArgs = <String>[...toolArgs, ...?args.toolArgs, ?program, ...?args.args];
 
-    await launchAsProcess(
-      executable: executable,
-      processArgs: processArgs,
-      env: args.env,
-    );
+    await launchAsProcess(executable: executable, processArgs: processArgs, env: args.env);
 
     // Delay responding until the debugger is connected.
     if (debug) {
@@ -87,7 +84,7 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
   /// Handles the Flutter process exiting, terminating the debug session if it has not already begun terminating.
   @override
   void handleExitCode(int code) {
-    final String codeSuffix = code == 0 ? '' : ' ($code)';
+    final codeSuffix = code == 0 ? '' : ' ($code)';
     logger?.call('Process exited ($code)');
     handleSessionTerminate(codeSuffix);
   }
@@ -105,9 +102,9 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
   }
 
   @override
-  void handleStderr(List<int> data) {
+  void handleStderr(String data) {
     logger?.call('stderr: $data');
-    sendOutput('stderr', utf8.decode(data));
+    sendOutput('stderr', data);
   }
 
   /// Handles stdout from the `flutter test --machine` process, decoding the JSON and calling the appropriate handlers.
@@ -132,9 +129,8 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
     }
 
     // Check for valid flutter_tools JSON output (1) first.
-    final Map<String, Object?>? flutterPayload = jsonData is List &&
-            jsonData.length == 1 &&
-            jsonData.first is Map<String, Object?>
+    final Map<String, Object?>? flutterPayload =
+        jsonData is List && jsonData.length == 1 && jsonData.first is Map<String, Object?>
         ? jsonData.first as Map<String, Object?>
         : null;
     final Object? event = flutterPayload?['event'];
@@ -153,7 +149,7 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
 
   /// Handles the test.processStarted event from Flutter that provides the VM Service URL.
   void _handleTestStartedProcess(Map<String, Object?> params) {
-    final String? vmServiceUriString = params['vmServiceUri'] as String?;
+    final vmServiceUriString = params['vmServiceUri'] as String?;
     // For no-debug mode, this event may be still sent so ignore it if we know
     // we're not debugging, or its URI is null.
     if (!enableDebugger || vmServiceUriString == null) {

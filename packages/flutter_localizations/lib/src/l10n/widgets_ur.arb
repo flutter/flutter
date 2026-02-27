@@ -4,5 +4,15 @@
   "reorderItemUp": "اوپر منتقل کریں",
   "reorderItemDown": "نیچے منتقل کریں",
   "reorderItemLeft": "بائیں منتقل کریں",
-  "reorderItemRight": "دائیں منتقل کریں"
+  "reorderItemRight": "دائیں منتقل کریں",
+  "copyButtonLabel": "کاپی کریں",
+  "cutButtonLabel": "کٹ کریں",
+  "lookUpButtonLabel": "تفصیل دیکھیں",
+  "searchWebButtonLabel": "ویب تلاش کریں",
+  "shareButtonLabel": "اشتراک کریں",
+  "pasteButtonLabel": "پیسٹ کریں",
+  "selectAllButtonLabel": "سبھی کو منتخب کریں",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found",
+  "radioButtonUnselectedLabel": "Not selected"
 }

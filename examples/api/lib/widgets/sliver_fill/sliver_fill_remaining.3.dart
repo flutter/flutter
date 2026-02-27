@@ -35,13 +35,12 @@ class SliverFillRemainingExample extends StatelessWidget {
       // example, which are provided by default on the iOS platform.
       // BouncingScrollPhysics is combined with AlwaysScrollableScrollPhysics to
       // allow for the overscroll, regardless of the depth of the scrollable.
-      physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+      physics: const BouncingScrollPhysics(
+        parent: AlwaysScrollableScrollPhysics(),
+      ),
       slivers: <Widget>[
         SliverToBoxAdapter(
-          child: Container(
-            color: Colors.tealAccent[700],
-            height: 150.0,
-          ),
+          child: Container(color: Colors.tealAccent[700], height: 150.0),
         ),
         SliverFillRemaining(
           hasScrollBody: false,

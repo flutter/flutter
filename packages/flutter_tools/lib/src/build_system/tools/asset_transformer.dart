@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:typed_data';
 
 import 'package:pool/pool.dart';
@@ -24,12 +23,12 @@ final class AssetTransformer {
     required FileSystem fileSystem,
     required String dartBinaryPath,
     required BuildMode buildMode,
-  })  : _processManager = processManager,
-        _fileSystem = fileSystem,
-        _dartBinaryPath = dartBinaryPath,
-        _buildMode = buildMode;
+  }) : _processManager = processManager,
+       _fileSystem = fileSystem,
+       _dartBinaryPath = dartBinaryPath,
+       _buildMode = buildMode;
 
-  static const String buildModeEnvVar = 'FLUTTER_BUILD_MODE';
+  static const buildModeEnvVar = 'FLUTTER_BUILD_MODE';
 
   final ProcessManager _processManager;
   final FileSystem _fileSystem;
@@ -39,7 +38,7 @@ final class AssetTransformer {
   /// The [Source] inputs that targets using this should depend on.
   ///
   /// See [Target.inputs].
-  static const List<Source> inputs = <Source>[
+  static const inputs = <Source>[
     Source.pattern(
       '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/asset_transformer.dart',
     ),
@@ -54,19 +53,23 @@ final class AssetTransformer {
     required List<AssetTransformerEntry> transformerEntries,
     required Logger logger,
   }) async {
+    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync();
 
-    String getTempFilePath(int transformStep) {
+    var transformStep = 0;
+    File nextTempFile() {
       final String basename = _fileSystem.path.basename(asset.path);
       final String ext = _fileSystem.path.extension(asset.path);
-      return '$basename-transformOutput$transformStep$ext';
+
+      final File result = tempDirectory.childFile('$basename-transformOutput$transformStep$ext');
+      transformStep++;
+      return result;
     }
 
-    File tempInputFile = _fileSystem.systemTempDirectory.childFile(getTempFilePath(0));
+    File tempInputFile = nextTempFile();
     await asset.copy(tempInputFile.path);
-    File tempOutputFile = _fileSystem.systemTempDirectory.childFile(getTempFilePath(1));
-    ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
+    File tempOutputFile = nextTempFile();
 
-    final Stopwatch stopwatch = Stopwatch()..start();
+    final stopwatch = Stopwatch()..start();
     try {
       for (final (int i, AssetTransformerEntry transformer) in transformerEntries.indexed) {
         final AssetTransformationFailure? transformerFailure = await _applyTransformer(
@@ -78,10 +81,7 @@ final class AssetTransformer {
         );
 
         if (transformerFailure != null) {
-          return AssetTransformationFailure(
-            'User-defined transformation of asset "${asset.path}" failed.\n'
-            '${transformerFailure.message}',
-          );
+          return AssetTransformationFailure(transformerFailure.message);
         }
 
         ErrorHandlingFileSystem.deleteIfExists(tempInputFile);
@@ -90,15 +90,15 @@ final class AssetTransformer {
           await tempOutputFile.copy(outputPath);
         } else {
           tempInputFile = tempOutputFile;
-          tempOutputFile = _fileSystem.systemTempDirectory.childFile(getTempFilePath(i+2));
-          ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
+          tempOutputFile = nextTempFile();
         }
       }
 
-      logger.printTrace("Finished transforming asset at path '${asset.path}' (${stopwatch.elapsedMilliseconds}ms)");
+      logger.printTrace(
+        "Finished transforming asset at path '${asset.path}' (${stopwatch.elapsedMilliseconds}ms)",
+      );
     } finally {
-      ErrorHandlingFileSystem.deleteIfExists(tempInputFile);
-      ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
+      ErrorHandlingFileSystem.deleteIfExists(tempDirectory, recursive: true);
     }
 
     return null;
@@ -111,29 +111,27 @@ final class AssetTransformer {
     required String workingDirectory,
     required Logger logger,
   }) async {
-    final List<String> transformerArguments = <String>[
+    final transformerArguments = <String>[
       '--input=${asset.absolute.path}',
       '--output=${output.absolute.path}',
-      ...?transformer.args,
+      ...transformer.args,
     ];
 
-    final List<String> command = <String>[
-      _dartBinaryPath,
-      'run',
-      transformer.package,
-      ...transformerArguments,
-    ];
+    final command = <String>[_dartBinaryPath, 'run', transformer.package, ...transformerArguments];
+
+    // Delete the output file if it already exists for whatever reason.
+    // With this, we can check for the existence of the file after transformation
+    // to make sure the transformer produced an output file.
+    ErrorHandlingFileSystem.deleteIfExists(output);
 
     logger.printTrace("Transforming asset using command '${command.join(' ')}'");
     final ProcessResult result = await _processManager.run(
       command,
       workingDirectory: workingDirectory,
-      environment: <String, String>{
-        AssetTransformer.buildModeEnvVar: _buildMode.cliName,
-      }
+      environment: <String, String>{AssetTransformer.buildModeEnvVar: _buildMode.cliName},
     );
-    final String stdout = result.stdout as String;
-    final String stderr = result.stderr as String;
+    final stdout = result.stdout as String;
+    final stderr = result.stderr as String;
 
     if (result.exitCode != 0) {
       return AssetTransformationFailure(
@@ -141,7 +139,7 @@ final class AssetTransformer {
         'Transformer package: ${transformer.package}\n'
         'Full command: ${command.join(' ')}\n'
         'stdout:\n$stdout\n'
-        'stderr:\n$stderr'
+        'stderr:\n$stderr',
       );
     }
 
@@ -160,20 +158,19 @@ final class AssetTransformer {
   }
 }
 
-
 // A wrapper around [AssetTransformer] to support hot reload of transformed assets.
 final class DevelopmentAssetTransformer {
   DevelopmentAssetTransformer({
     required FileSystem fileSystem,
     required AssetTransformer transformer,
     required Logger logger,
-  })  : _fileSystem = fileSystem,
-        _transformer = transformer,
-        _logger = logger;
+  }) : _fileSystem = fileSystem,
+       _transformer = transformer,
+       _logger = logger;
 
   final AssetTransformer _transformer;
   final FileSystem _fileSystem;
-  final Pool _transformationPool = Pool(4);
+  final _transformationPool = Pool(4);
   final Logger _logger;
 
   /// Re-transforms an asset and returns a [DevFSContent] that should be synced
@@ -186,10 +183,12 @@ final class DevelopmentAssetTransformer {
     required List<AssetTransformerEntry> transformerEntries,
     required String workingDirectory,
   }) async {
-    final File output = _fileSystem.systemTempDirectory.childFile('retransformerInput-$inputAssetKey');
+    final File output = _fileSystem.systemTempDirectory.childFile(
+      'retransformerInput-$inputAssetKey',
+    );
     ErrorHandlingFileSystem.deleteIfExists(output);
     File? inputFile;
-    bool cleanupInput = false;
+    var cleanupInput = false;
     Uint8List result;
     PoolResource? resource;
     try {

@@ -23,7 +23,7 @@
   "cutButtonLabel": "Izreži",
   "copyButtonLabel": "Kopiraj",
   "pasteButtonLabel": "Zalijepi",
-  "clearButtonLabel": "Clear",
+  "clearButtonLabel": "Obriši",
   "selectAllButtonLabel": "Odaberi sve",
   "tabSemanticsLabel": "Kartica $tabIndex od $tabCount",
   "modalBarrierDismissLabel": "Odbaci",
@@ -32,5 +32,13 @@
   "menuDismissLabel": "Odbacivanje menija",
   "lookUpButtonLabel": "Pogled nagore",
   "searchWebButtonLabel": "Pretraži Web",
-  "shareButtonLabel": "Dijeli..."
+  "shareButtonLabel": "Dijeli...",
+  "cancelButtonLabel": "Otkaži",
+  "backButtonLabel": "Nazad",
+  "expansionTileExpandedHint": "sužavanje dvostrukim dodirom",
+  "expansionTileCollapsedHint": "proširivanje dvostrukim dodirom",
+  "expansionTileExpandedTapHint": "Sužavanje",
+  "expansionTileCollapsedTapHint": "Proširivanje za više detalja",
+  "expandedHint": "Suženo",
+  "collapsedHint": "Prošireno"
 }

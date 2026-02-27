@@ -16,9 +16,7 @@ class OverflowBarExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('OverflowBar Sample')),
-        body: const Center(
-          child: OverflowBarExample(),
-        ),
+        body: const Center(child: OverflowBarExample()),
       ),
     );
   }
@@ -32,11 +30,13 @@ class OverflowBarExample extends StatelessWidget {
     return Container(
       alignment: Alignment.center,
       padding: const EdgeInsets.all(16),
-      color: Colors.black.withOpacity(0.15),
+      color: Colors.black.withValues(alpha: 0.15),
       child: Material(
         color: Colors.white,
         elevation: 24,
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(4)),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: SingleChildScrollView(
@@ -52,7 +52,10 @@ class OverflowBarExample extends StatelessWidget {
                     overflowAlignment: OverflowBarAlignment.end,
                     children: <Widget>[
                       TextButton(child: const Text('Cancel'), onPressed: () {}),
-                      TextButton(child: const Text('Really Really Cancel'), onPressed: () {}),
+                      TextButton(
+                        child: const Text('Really Really Cancel'),
+                        onPressed: () {},
+                      ),
                       OutlinedButton(child: const Text('OK'), onPressed: () {}),
                     ],
                   ),

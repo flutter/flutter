@@ -10,19 +10,20 @@ import 'package:web/web.dart' as web;
 
 // Verify that web applications can be run in sound mode.
 void main() async {
-  const bool isWeak = <int?>[] is List<int>;
+  const isWeak = <int?>[] is List<int>;
   String output;
   if (isWeak) {
     output = '--- TEST FAILED ---';
   } else {
     output = '--- TEST SUCCEEDED ---';
   }
-  await web.window.fetch(
-    '/test-result'.toJS,
-    web.RequestInit(
-      method: 'POST',
-      body: output.toJS,
-    )
-  ).toDart;
+  await web.window
+      .fetch(
+          '/test-result'.toJS,
+          web.RequestInit(
+            method: 'POST',
+            body: output.toJS,
+          ))
+      .toDart;
   print(output);
 }

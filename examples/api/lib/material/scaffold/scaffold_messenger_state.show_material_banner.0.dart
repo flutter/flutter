@@ -16,9 +16,7 @@ class ShowMaterialBannerExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('ScaffoldMessengerState Sample')),
-        body: const Center(
-          child: ShowMaterialBannerExample(),
-        ),
+        body: const Center(child: ShowMaterialBannerExample()),
       ),
     );
   }
@@ -35,10 +33,7 @@ class ShowMaterialBannerExample extends StatelessWidget {
           const MaterialBanner(
             content: Text('This is a MaterialBanner'),
             actions: <Widget>[
-              TextButton(
-                onPressed: null,
-                child: Text('DISMISS'),
-              ),
+              TextButton(onPressed: null, child: Text('DISMISS')),
             ],
           ),
         );

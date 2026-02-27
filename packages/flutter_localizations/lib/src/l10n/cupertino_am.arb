@@ -27,5 +27,13 @@
   "lookUpButtonLabel": "ይመልከቱ",
   "searchWebButtonLabel": "ድርን ፈልግ",
   "shareButtonLabel": "አጋራ...",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "አጽዳ",
+  "cancelButtonLabel": "ይቅር",
+  "backButtonLabel": "ተመለስ",
+  "expansionTileExpandedHint": "ለመሰብሰብ ሁለቴ መታ ያድርጉ",
+  "expansionTileCollapsedHint": "ለመዘርጋት ድርብ ሁለቴ መታ ያድርጉ",
+  "expansionTileExpandedTapHint": "ሰብስብ",
+  "expansionTileCollapsedTapHint": "ለተጨማሪ ዝርዝሮች ይዘርጉ",
+  "expandedHint": "ተሰብስቧል",
+  "collapsedHint": "ተዘርግቷል"
 }

@@ -9,11 +9,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final LayerLink link = LayerLink();
+  final link = LayerLink();
 
   testWidgets('Change link during layout', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
-    Widget build({ LayerLink? linkToUse }) {
+    Widget build({LayerLink? linkToUse}) {
       return Directionality(
         textDirection: TextDirection.ltr,
         // The LayoutBuilder forces the CompositedTransformTarget widget to
@@ -22,34 +22,34 @@ void main() {
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             return Stack(
-            children: <Widget>[
-              Positioned(
-                left: 123.0,
-                top: 456.0,
-                child: CompositedTransformTarget(
-                  link: linkToUse ?? link,
-                  child: const SizedBox(height: 10.0, width: 10.0),
+              children: <Widget>[
+                Positioned(
+                  left: 123.0,
+                  top: 456.0,
+                  child: CompositedTransformTarget(
+                    link: linkToUse ?? link,
+                    child: const SizedBox(height: 10.0, width: 10.0),
+                  ),
                 ),
-              ),
-              Positioned(
-                left: 787.0,
-                top: 343.0,
-                child: CompositedTransformFollower(
-                  link: linkToUse ?? link,
-                  targetAnchor: Alignment.center,
-                  followerAnchor: Alignment.center,
-                  child: SizedBox(key: key, height: 20.0, width: 20.0),
+                Positioned(
+                  left: 787.0,
+                  top: 343.0,
+                  child: CompositedTransformFollower(
+                    link: linkToUse ?? link,
+                    targetAnchor: Alignment.center,
+                    followerAnchor: Alignment.center,
+                    child: SizedBox(key: key, height: 20.0, width: 20.0),
+                  ),
                 ),
-              ),
-            ],
-          );
+              ],
+            );
           },
         ),
       );
     }
 
     await tester.pumpWidget(build());
-    final RenderBox box = key.currentContext!.findRenderObject()! as RenderBox;
+    final box = key.currentContext!.findRenderObject()! as RenderBox;
     expect(box.localToGlobal(Offset.zero), const Offset(118.0, 451.0));
 
     await tester.pumpWidget(build(linkToUse: LayerLink()));
@@ -57,7 +57,7 @@ void main() {
   });
 
   testWidgets('LeaderLayer should not cause error', (WidgetTester tester) async {
-    final LayerLink link = LayerLink();
+    final link = LayerLink();
 
     Widget buildWidget({
       required double paddingLeft,
@@ -71,10 +71,14 @@ void main() {
               padding: EdgeInsets.only(left: paddingLeft),
               child: CompositedTransformTarget(
                 link: link,
-                child: RepaintBoundary(child: ClipRect(child: Container(color: const Color(0x00ff0000)))),
+                child: RepaintBoundary(
+                  child: ClipRect(child: Container(color: const Color(0x00ff0000))),
+                ),
               ),
             ),
-            Positioned.fill(child: RepaintBoundary(child: ColoredBox(color: siblingColor))),
+            Positioned.fill(
+              child: RepaintBoundary(child: ColoredBox(color: siblingColor)),
+            ),
           ],
         ),
       );
@@ -88,7 +92,7 @@ void main() {
   group('Composited transforms - only offsets', () {
     final GlobalKey key = GlobalKey();
 
-    Widget build({ required Alignment targetAlignment, required Alignment followerAlignment }) {
+    Widget build({required Alignment targetAlignment, required Alignment followerAlignment}) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
@@ -117,20 +121,26 @@ void main() {
     }
 
     testWidgets('topLeft', (WidgetTester tester) async {
-      await tester.pumpWidget(build(targetAlignment: Alignment.topLeft, followerAlignment: Alignment.topLeft));
-      final RenderBox box = key.currentContext!.findRenderObject()! as RenderBox;
+      await tester.pumpWidget(
+        build(targetAlignment: Alignment.topLeft, followerAlignment: Alignment.topLeft),
+      );
+      final box = key.currentContext!.findRenderObject()! as RenderBox;
       expect(box.localToGlobal(Offset.zero), const Offset(123.0, 456.0));
     });
 
     testWidgets('center', (WidgetTester tester) async {
-      await tester.pumpWidget(build(targetAlignment: Alignment.center, followerAlignment: Alignment.center));
-      final RenderBox box = key.currentContext!.findRenderObject()! as RenderBox;
+      await tester.pumpWidget(
+        build(targetAlignment: Alignment.center, followerAlignment: Alignment.center),
+      );
+      final box = key.currentContext!.findRenderObject()! as RenderBox;
       expect(box.localToGlobal(Offset.zero), const Offset(118.0, 451.0));
     });
 
     testWidgets('bottomRight - topRight', (WidgetTester tester) async {
-      await tester.pumpWidget(build(targetAlignment: Alignment.bottomRight, followerAlignment: Alignment.topRight));
-      final RenderBox box = key.currentContext!.findRenderObject()! as RenderBox;
+      await tester.pumpWidget(
+        build(targetAlignment: Alignment.bottomRight, followerAlignment: Alignment.topRight),
+      );
+      final box = key.currentContext!.findRenderObject()! as RenderBox;
       expect(box.localToGlobal(Offset.zero), const Offset(113.0, 466.0));
     });
   });
@@ -139,7 +149,7 @@ void main() {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
-    Widget build({ required Alignment targetAlignment, required Alignment followerAlignment }) {
+    Widget build({required Alignment targetAlignment, required Alignment followerAlignment}) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
@@ -172,28 +182,35 @@ void main() {
         ),
       );
     }
+
     testWidgets('topLeft', (WidgetTester tester) async {
-      await tester.pumpWidget(build(targetAlignment: Alignment.topLeft, followerAlignment: Alignment.topLeft));
-      final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
-      final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
+      await tester.pumpWidget(
+        build(targetAlignment: Alignment.topLeft, followerAlignment: Alignment.topLeft),
+      );
+      final box1 = key1.currentContext!.findRenderObject()! as RenderBox;
+      final box2 = key2.currentContext!.findRenderObject()! as RenderBox;
       final Offset position1 = box1.localToGlobal(Offset.zero);
       final Offset position2 = box2.localToGlobal(Offset.zero);
       expect(position1, offsetMoreOrLessEquals(position2));
     });
 
     testWidgets('center', (WidgetTester tester) async {
-      await tester.pumpWidget(build(targetAlignment: Alignment.center, followerAlignment: Alignment.center));
-      final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
-      final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
+      await tester.pumpWidget(
+        build(targetAlignment: Alignment.center, followerAlignment: Alignment.center),
+      );
+      final box1 = key1.currentContext!.findRenderObject()! as RenderBox;
+      final box2 = key2.currentContext!.findRenderObject()! as RenderBox;
       final Offset position1 = box1.localToGlobal(const Offset(40, 5));
       final Offset position2 = box2.localToGlobal(const Offset(20, 10));
       expect(position1, offsetMoreOrLessEquals(position2));
     });
 
     testWidgets('bottomRight - topRight', (WidgetTester tester) async {
-      await tester.pumpWidget(build(targetAlignment: Alignment.bottomRight, followerAlignment: Alignment.topRight));
-      final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
-      final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
+      await tester.pumpWidget(
+        build(targetAlignment: Alignment.bottomRight, followerAlignment: Alignment.topRight),
+      );
+      final box1 = key1.currentContext!.findRenderObject()! as RenderBox;
+      final box2 = key2.currentContext!.findRenderObject()! as RenderBox;
       final Offset position1 = box1.localToGlobal(const Offset(80, 10));
       final Offset position2 = box2.localToGlobal(const Offset(40, 0));
       expect(position1, offsetMoreOrLessEquals(position2));
@@ -204,7 +221,7 @@ void main() {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
-    Widget build({ required Alignment targetAlignment, required Alignment followerAlignment }) {
+    Widget build({required Alignment targetAlignment, required Alignment followerAlignment}) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
@@ -249,29 +266,38 @@ void main() {
         ),
       );
     }
+
     testWidgets('topLeft', (WidgetTester tester) async {
-      await tester.pumpWidget(build(targetAlignment: Alignment.topLeft, followerAlignment: Alignment.topLeft));
-      final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
-      final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
+      await tester.pumpWidget(
+        build(targetAlignment: Alignment.topLeft, followerAlignment: Alignment.topLeft),
+      );
+      final box1 = key1.currentContext!.findRenderObject()! as RenderBox;
+      final box2 = key2.currentContext!.findRenderObject()! as RenderBox;
       final Offset position1 = box1.localToGlobal(Offset.zero);
       final Offset position2 = box2.localToGlobal(Offset.zero);
       expect(position1, offsetMoreOrLessEquals(position2));
     });
 
     testWidgets('center', (WidgetTester tester) async {
-      await tester.pumpWidget(build(targetAlignment: Alignment.center, followerAlignment: Alignment.center));
-      final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
-      final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
+      await tester.pumpWidget(
+        build(targetAlignment: Alignment.center, followerAlignment: Alignment.center),
+      );
+      final box1 = key1.currentContext!.findRenderObject()! as RenderBox;
+      final box2 = key2.currentContext!.findRenderObject()! as RenderBox;
       final Offset position1 = box1.localToGlobal(Alignment.center.alongSize(const Size(80, 10)));
       final Offset position2 = box2.localToGlobal(Alignment.center.alongSize(const Size(40, 20)));
       expect(position1, offsetMoreOrLessEquals(position2));
     });
 
     testWidgets('bottomRight - topRight', (WidgetTester tester) async {
-      await tester.pumpWidget(build(targetAlignment: Alignment.bottomRight, followerAlignment: Alignment.topRight));
-      final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
-      final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
-      final Offset position1 = box1.localToGlobal(Alignment.bottomRight.alongSize(const Size(80, 10)));
+      await tester.pumpWidget(
+        build(targetAlignment: Alignment.bottomRight, followerAlignment: Alignment.topRight),
+      );
+      final box1 = key1.currentContext!.findRenderObject()! as RenderBox;
+      final box2 = key2.currentContext!.findRenderObject()! as RenderBox;
+      final Offset position1 = box1.localToGlobal(
+        Alignment.bottomRight.alongSize(const Size(80, 10)),
+      );
       final Offset position2 = box2.localToGlobal(Alignment.topRight.alongSize(const Size(40, 20)));
       expect(position1, offsetMoreOrLessEquals(position2));
     });
@@ -282,9 +308,9 @@ void main() {
     final GlobalKey key2 = GlobalKey();
     final GlobalKey key3 = GlobalKey();
 
-    bool tapped = false;
+    var tapped = false;
 
-    Widget build({ required Alignment targetAlignment, required Alignment followerAlignment }) {
+    Widget build({required Alignment targetAlignment, required Alignment followerAlignment}) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
@@ -302,7 +328,9 @@ void main() {
               child: GestureDetector(
                 key: key2,
                 behavior: HitTestBehavior.opaque,
-                onTap: () { tapped = true; },
+                onTap: () {
+                  tapped = true;
+                },
                 child: SizedBox(key: key3, height: 2.0, width: 2.0),
               ),
             ),
@@ -311,22 +339,31 @@ void main() {
       );
     }
 
-    const List<Alignment> alignments = <Alignment>[
-      Alignment.topLeft, Alignment.topRight,
+    const alignments = <Alignment>[
+      Alignment.topLeft,
+      Alignment.topRight,
       Alignment.center,
-      Alignment.bottomLeft, Alignment.bottomRight,
+      Alignment.bottomLeft,
+      Alignment.bottomRight,
     ];
 
-    setUp(() { tapped = false; });
+    setUp(() {
+      tapped = false;
+    });
 
-    for (final Alignment targetAlignment in alignments) {
-      for (final Alignment followerAlignment in alignments) {
-        testWidgets('$targetAlignment - $followerAlignment', (WidgetTester tester) async{
-          await tester.pumpWidget(build(targetAlignment: targetAlignment, followerAlignment: followerAlignment));
-          final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
+    for (final targetAlignment in alignments) {
+      for (final followerAlignment in alignments) {
+        testWidgets('$targetAlignment - $followerAlignment', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            build(targetAlignment: targetAlignment, followerAlignment: followerAlignment),
+          );
+          final box2 = key2.currentContext!.findRenderObject()! as RenderBox;
           expect(box2.size, const Size(2.0, 2.0));
           expect(tapped, isFalse);
-          await tester.tap(find.byKey(key3), warnIfMissed: false); // the container itself is transparent to hits
+          await tester.tap(
+            find.byKey(key3),
+            warnIfMissed: false,
+          ); // the container itself is transparent to hits
           expect(tapped, isTrue);
         });
       }
@@ -334,14 +371,11 @@ void main() {
   });
 
   testWidgets('Leader after Follower asserts', (WidgetTester tester) async {
-    final LayerLink link = LayerLink();
+    final link = LayerLink();
     await tester.pumpWidget(
       CompositedTransformFollower(
         link: link,
-        child: CompositedTransformTarget(
-          link: link,
-          child: const SizedBox(height: 20, width: 20),
-        ),
+        child: CompositedTransformTarget(link: link, child: const SizedBox(height: 20, width: 20)),
       ),
     );
 
@@ -352,19 +386,17 @@ void main() {
   });
 
   testWidgets(
-      '`FollowerLayer` (`CompositedTransformFollower`) has null pointer error when using with some kinds of `Layer`s',
-      (WidgetTester tester) async {
-    final LayerLink link = LayerLink();
-    await tester.pumpWidget(
-      CompositedTransformTarget(
-        link: link,
-        child: CompositedTransformFollower(
+    '`FollowerLayer` (`CompositedTransformFollower`) has null pointer error when using with some kinds of `Layer`s',
+    (WidgetTester tester) async {
+      final link = LayerLink();
+      await tester.pumpWidget(
+        CompositedTransformTarget(
           link: link,
-          child: const _CustomWidget(),
+          child: CompositedTransformFollower(link: link, child: const _CustomWidget()),
         ),
-      ),
-    );
-  });
+      );
+    },
+  );
 }
 
 class _CustomWidget extends SingleChildRenderObjectWidget {
@@ -383,9 +415,7 @@ class _CustomRenderObject extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (layer == null) {
-      layer = _CustomLayer(
-        computeSomething: _computeSomething,
-      );
+      layer = _CustomLayer(computeSomething: _computeSomething);
     } else {
       (layer as _CustomLayer?)?.computeSomething = _computeSomething;
     }

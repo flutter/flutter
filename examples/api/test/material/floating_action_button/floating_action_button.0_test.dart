@@ -9,9 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('FloatingActionButton', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.FloatingActionButtonExampleApp(),
-    );
+    await tester.pumpWidget(const example.FloatingActionButtonExampleApp());
 
     expect(find.byType(FloatingActionButton), findsOneWidget);
     expect(find.byIcon(Icons.navigation), findsOneWidget);
@@ -22,7 +20,10 @@ void main() {
 
     Color? getIconColor() {
       final RichText iconRichText = tester.widget<RichText>(
-        find.descendant(of: find.byIcon(Icons.navigation), matching: find.byType(RichText)),
+        find.descendant(
+          of: find.byIcon(Icons.navigation),
+          matching: find.byType(RichText),
+        ),
       );
       return iconRichText.text.style?.color;
     }

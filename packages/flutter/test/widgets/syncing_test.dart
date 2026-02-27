@@ -47,18 +47,13 @@ class TestWidgetState extends State<TestWidget> {
 }
 
 void main() {
-
   testWidgets('no change', (WidgetTester tester) async {
     await tester.pumpWidget(
       ColoredBox(
         color: Colors.blue,
         child: ColoredBox(
           color: Colors.blue,
-          child: TestWidget(
-            persistentState: 1,
-            syncedState: 0,
-            child: Container(),
-          ),
+          child: TestWidget(persistentState: 1, syncedState: 0, child: Container()),
         ),
       ),
     );
@@ -73,11 +68,7 @@ void main() {
         color: Colors.blue,
         child: ColoredBox(
           color: Colors.blue,
-          child: TestWidget(
-            persistentState: 2,
-            syncedState: 0,
-            child: Container(),
-          ),
+          child: TestWidget(persistentState: 2, syncedState: 0, child: Container()),
         ),
       ),
     );
@@ -94,11 +85,7 @@ void main() {
         color: Colors.blue,
         child: ColoredBox(
           color: Colors.blue,
-          child: TestWidget(
-            persistentState: 10,
-            syncedState: 0,
-            child: Container(),
-          ),
+          child: TestWidget(persistentState: 10, syncedState: 0, child: Container()),
         ),
       ),
     );
@@ -111,11 +98,7 @@ void main() {
     await tester.pumpWidget(
       ColoredBox(
         color: Colors.green,
-        child: TestWidget(
-          persistentState: 11,
-          syncedState: 0,
-          child: Container(),
-        ),
+        child: TestWidget(persistentState: 11, syncedState: 0, child: Container()),
       ),
     );
 
@@ -128,8 +111,16 @@ void main() {
   });
 
   testWidgets('swap instances around', (WidgetTester tester) async {
-    const Widget a = TestWidget(persistentState: 0x61, syncedState: 0x41, child: Text('apple', textDirection: TextDirection.ltr));
-    const Widget b = TestWidget(persistentState: 0x62, syncedState: 0x42, child: Text('banana', textDirection: TextDirection.ltr));
+    const Widget a = TestWidget(
+      persistentState: 0x61,
+      syncedState: 0x41,
+      child: Text('apple', textDirection: TextDirection.ltr),
+    );
+    const Widget b = TestWidget(
+      persistentState: 0x62,
+      syncedState: 0x42,
+      child: Text('banana', textDirection: TextDirection.ltr),
+    );
     await tester.pumpWidget(const Column());
 
     final GlobalKey keyA = GlobalKey();
@@ -138,14 +129,8 @@ void main() {
     await tester.pumpWidget(
       Column(
         children: <Widget>[
-          Container(
-            key: keyA,
-            child: a,
-          ),
-          Container(
-            key: keyB,
-            child: b,
-          ),
+          Container(key: keyA, child: a),
+          Container(key: keyB, child: b),
         ],
       ),
     );
@@ -165,14 +150,8 @@ void main() {
     await tester.pumpWidget(
       Column(
         children: <Widget>[
-          Container(
-            key: keyA,
-            child: a,
-          ),
-          Container(
-            key: keyB,
-            child: b,
-          ),
+          Container(key: keyA, child: a),
+          Container(key: keyB, child: b),
         ],
       ),
     );
@@ -194,14 +173,8 @@ void main() {
     await tester.pumpWidget(
       Column(
         children: <Widget>[
-          Container(
-            key: keyA,
-            child: b,
-          ),
-          Container(
-            key: keyB,
-            child: a,
-          ),
+          Container(key: keyA, child: b),
+          Container(key: keyB, child: a),
         ],
       ),
     );

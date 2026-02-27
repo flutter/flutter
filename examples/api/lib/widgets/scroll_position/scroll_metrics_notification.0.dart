@@ -22,9 +22,7 @@ class ScrollMetricsDemoState extends State<ScrollMetricsDemo> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('ScrollMetrics Demo'),
-        ),
+        appBar: AppBar(title: const Text('ScrollMetrics Demo')),
         floatingActionButton: FloatingActionButton(
           child: const Icon(Icons.add),
           onPressed: () => setState(() {
@@ -34,9 +32,7 @@ class ScrollMetricsDemoState extends State<ScrollMetricsDemo> {
         body: NotificationListener<ScrollMetricsNotification>(
           onNotification: (ScrollMetricsNotification notification) {
             ScaffoldMessenger.of(notification.context).showSnackBar(
-              const SnackBar(
-                content: Text('Scroll metrics changed!'),
-              ),
+              const SnackBar(content: Text('Scroll metrics changed!')),
             );
             return false;
           },
@@ -47,9 +43,7 @@ class ScrollMetricsDemoState extends State<ScrollMetricsDemo> {
               width: double.infinity,
               child: const SingleChildScrollView(
                 primary: true,
-                child: FlutterLogo(
-                  size: 300.0,
-                ),
+                child: FlutterLogo(size: 300.0),
               ),
             ),
           ),

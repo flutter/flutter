@@ -18,10 +18,7 @@ class ColumnOfTextState extends State<ColumnOfText> with SingleTickerProviderSta
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    )
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 300))
       ..addStatusListener((AnimationStatus status) {
         if (status.isCompleted) {
           setState(() {
@@ -52,9 +49,7 @@ class ColumnOfTextState extends State<ColumnOfText> with SingleTickerProviderSta
             : Column(
                 children: List<Widget>.generate(9, (int index) {
                   return ListTile(
-                    leading: CircleAvatar(
-                      child: Text('G$index'),
-                    ),
+                    leading: CircleAvatar(child: Text('G$index')),
                     title: Text(
                       'Foo contact from $index-th local contact',
                       overflow: TextOverflow.ellipsis,

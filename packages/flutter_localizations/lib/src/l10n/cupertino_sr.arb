@@ -32,5 +32,13 @@
   "lookUpButtonLabel": "Поглед нагоре",
   "searchWebButtonLabel": "Претражи веб",
   "shareButtonLabel": "Дели…",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "Обриши",
+  "cancelButtonLabel": "Откажи",
+  "backButtonLabel": "Назад",
+  "expansionTileExpandedHint": "двапут додирните да бисте скупили",
+  "expansionTileCollapsedHint": "двапут додирните да бисте проширили",
+  "expansionTileExpandedTapHint": "Скупите",
+  "expansionTileCollapsedTapHint": "Проширите за још детаља",
+  "expandedHint": "Скупљено је",
+  "collapsedHint": "Проширено је"
 }

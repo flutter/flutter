@@ -5,7 +5,11 @@
 import 'template.dart';
 
 class CardTemplate extends TokenTemplate {
-  const CardTemplate(this.tokenGroup, super.blockName, super.fileName, super.tokens, {
+  const CardTemplate(
+    this.tokenGroup,
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
   });
 
@@ -25,8 +29,9 @@ class CardTemplate extends TokenTemplate {
   }
 
   @override
-  String generate() => '''
-class _${blockName}DefaultsM3 extends CardTheme {
+  String generate() =>
+      '''
+class _${blockName}DefaultsM3 extends CardThemeData {
   _${blockName}DefaultsM3(this.context)
     : super(
         clipBehavior: Clip.none,

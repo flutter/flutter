@@ -5,14 +5,14 @@
 import 'dart:async';
 import 'dart:io' as io;
 
+import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 void main() {
   group('Signals', () {
@@ -29,7 +29,7 @@ void main() {
     });
 
     testWithoutContext('signal handler runs', () async {
-      final Completer<void> completer = Completer<void>();
+      final completer = Completer<void>();
       signals.addHandler(signalUnderTest, (ProcessSignal s) {
         expect(s, signalUnderTest);
         completer.complete();
@@ -40,9 +40,9 @@ void main() {
     });
 
     testWithoutContext('signal handlers run in order', () async {
-      final Completer<void> completer = Completer<void>();
+      final completer = Completer<void>();
 
-      bool first = false;
+      var first = false;
 
       signals.addHandler(signalUnderTest, (ProcessSignal s) {
         expect(s, signalUnderTest);
@@ -59,35 +59,36 @@ void main() {
       await completer.future;
     });
 
-    testWithoutContext('signal handlers do not cause concurrent modification errors when removing handlers in a signal callback', () async {
-      final Completer<void> completer = Completer<void>();
-      late Object token;
-      Future<void> handle(ProcessSignal s) async {
-        expect(s, signalUnderTest);
-        expect(await signals.removeHandler(signalUnderTest, token), true);
-        completer.complete();
-      }
+    testWithoutContext(
+      'signal handlers do not cause concurrent modification errors when removing handlers in a signal callback',
+      () async {
+        final completer = Completer<void>();
+        late Object token;
+        Future<void> handle(ProcessSignal s) async {
+          expect(s, signalUnderTest);
+          expect(await signals.removeHandler(signalUnderTest, token), true);
+          completer.complete();
+        }
 
-      token = signals.addHandler(signalUnderTest, handle);
+        token = signals.addHandler(signalUnderTest, handle);
 
-      fakeSignal.controller.add(fakeSignal);
-      await completer.future;
-    });
+        fakeSignal.controller.add(fakeSignal);
+        await completer.future;
+      },
+    );
 
     testWithoutContext('signal handler error goes on error stream', () async {
-      final Exception exn = Exception('Error');
+      final exn = Exception('Error');
       signals.addHandler(signalUnderTest, (ProcessSignal s) async {
         throw exn;
       });
 
-      final Completer<void> completer = Completer<void>();
-      final List<Object> errList = <Object>[];
-      final StreamSubscription<Object> errSub = signals.errors.listen(
-        (Object err) {
-          errList.add(err);
-          completer.complete();
-        },
-      );
+      final completer = Completer<void>();
+      final errList = <Object>[];
+      final StreamSubscription<Object> errSub = signals.errors.listen((Object err) {
+        errList.add(err);
+        completer.complete();
+      });
 
       fakeSignal.controller.add(fakeSignal);
       await completer.future;
@@ -96,21 +97,16 @@ void main() {
     });
 
     testWithoutContext('removed signal handler does not run', () async {
-      final Object token = signals.addHandler(
-        signalUnderTest,
-        (ProcessSignal s) async {
-          fail('Signal handler should have been removed.');
-        },
-      );
+      final Object token = signals.addHandler(signalUnderTest, (ProcessSignal s) async {
+        fail('Signal handler should have been removed.');
+      });
 
       await signals.removeHandler(signalUnderTest, token);
 
-      final List<Object> errList = <Object>[];
-      final StreamSubscription<Object> errSub = signals.errors.listen(
-        (Object err) {
-          errList.add(err);
-        },
-      );
+      final errList = <Object>[];
+      final StreamSubscription<Object> errSub = signals.errors.listen((Object err) {
+        errList.add(err);
+      });
 
       fakeSignal.controller.add(fakeSignal);
 
@@ -119,26 +115,21 @@ void main() {
     });
 
     testWithoutContext('non-removed signal handler still runs', () async {
-      final Completer<void> completer = Completer<void>();
+      final completer = Completer<void>();
       signals.addHandler(signalUnderTest, (ProcessSignal s) {
         expect(s, signalUnderTest);
         completer.complete();
       });
 
-      final Object token = signals.addHandler(
-        signalUnderTest,
-        (ProcessSignal s) async {
-          fail('Signal handler should have been removed.');
-        },
-      );
+      final Object token = signals.addHandler(signalUnderTest, (ProcessSignal s) async {
+        fail('Signal handler should have been removed.');
+      });
       await signals.removeHandler(signalUnderTest, token);
 
-      final List<Object> errList = <Object>[];
-      final StreamSubscription<Object> errSub = signals.errors.listen(
-        (Object err) {
-          errList.add(err);
-        },
-      );
+      final errList = <Object>[];
+      final StreamSubscription<Object> errSub = signals.errors.listen((Object err) {
+        errList.add(err);
+      });
 
       fakeSignal.controller.add(fakeSignal);
       await completer.future;
@@ -147,10 +138,10 @@ void main() {
     });
 
     testWithoutContext('only handlers for the correct signal run', () async {
-      final FakeProcessSignal mockSignal2 = FakeProcessSignal();
-      final ProcessSignal otherSignal = ProcessSignal(mockSignal2);
+      final mockSignal2 = FakeProcessSignal();
+      final otherSignal = ProcessSignal(mockSignal2);
 
-      final Completer<void> completer = Completer<void>();
+      final completer = Completer<void>();
       signals.addHandler(signalUnderTest, (ProcessSignal s) {
         expect(s, signalUnderTest);
         completer.complete();
@@ -160,12 +151,10 @@ void main() {
         fail('Wrong signal!.');
       });
 
-      final List<Object> errList = <Object>[];
-      final StreamSubscription<Object> errSub = signals.errors.listen(
-        (Object err) {
-          errList.add(err);
-        },
-      );
+      final errList = <Object>[];
+      final StreamSubscription<Object> errSub = signals.errors.listen((Object err) {
+        errList.add(err);
+      });
 
       fakeSignal.controller.add(fakeSignal);
       await completer.future;
@@ -174,13 +163,13 @@ void main() {
     });
 
     testUsingContext('all handlers for exiting signals are run before exit', () async {
-      final Signals signals = Signals.test(
+      final signals = Signals.test(
         exitSignals: <ProcessSignal>[signalUnderTest],
         shutdownHooks: shutdownHooks,
       );
-      final Completer<void> completer = Completer<void>();
-      bool first = false;
-      bool second = false;
+      final completer = Completer<void>();
+      var first = false;
+      var second = false;
 
       setExitFunctionForTests((int exitCode) {
         // Both handlers have run before exit is called.
@@ -207,15 +196,15 @@ void main() {
 
       fakeSignal.controller.add(fakeSignal);
       await completer.future;
-      expect(shutdownHooks.ranShutdownHooks, isTrue);
+      expect(shutdownHooks.isShuttingDown, isTrue);
     });
 
     testUsingContext('ShutdownHooks run before exiting', () async {
-      final Signals signals = Signals.test(
+      final signals = Signals.test(
         exitSignals: <ProcessSignal>[signalUnderTest],
         shutdownHooks: shutdownHooks,
       );
-      final Completer<void> completer = Completer<void>();
+      final completer = Completer<void>();
 
       setExitFunctionForTests((int exitCode) {
         expect(exitCode, 0);
@@ -227,23 +216,14 @@ void main() {
 
       fakeSignal.controller.add(fakeSignal);
       await completer.future;
-      expect(shutdownHooks.ranShutdownHooks, isTrue);
+      expect(shutdownHooks.isShuttingDown, isTrue);
     });
   });
 }
 
 class FakeProcessSignal extends Fake implements io.ProcessSignal {
-  final StreamController<io.ProcessSignal> controller = StreamController<io.ProcessSignal>();
+  final controller = StreamController<io.ProcessSignal>();
 
   @override
   Stream<io.ProcessSignal> watch() => controller.stream;
-}
-
-class FakeShutdownHooks extends Fake implements ShutdownHooks {
-  bool ranShutdownHooks = false;
-
-  @override
-  Future<void> runShutdownHooks(Logger logger) async {
-    ranShutdownHooks = true;
-  }
 }

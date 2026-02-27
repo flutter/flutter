@@ -12,8 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../impeller_test_helpers.dart';
-
 void main() {
   testWidgets('Color filter - red', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -24,19 +22,15 @@ void main() {
         ),
       ),
     );
-    await expectLater(
-      find.byType(ColorFiltered),
-      matchesGoldenFile('color_filter_red.png'),
-    );
+    await expectLater(find.byType(ColorFiltered), matchesGoldenFile('color_filter_red.png'));
   });
 
   testWidgets('Color filter - sepia', (WidgetTester tester) async {
-
-    const ColorFilter sepia = ColorFilter.matrix(<double>[
-      0.39,  0.769, 0.189, 0, 0, //
+    const sepia = ColorFilter.matrix(<double>[
+      0.39, 0.769, 0.189, 0, 0, //
       0.349, 0.686, 0.168, 0, 0, //
       0.272, 0.534, 0.131, 0, 0, //
-      0,     0,     0,     1, 0, //
+      0, 0, 0, 1, 0, //
     ]);
     await tester.pumpWidget(
       RepaintBoundary(
@@ -47,14 +41,10 @@ void main() {
             title: 'Flutter Demo',
             theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: false),
             home: Scaffold(
-              appBar: AppBar(
-                title: const Text('Sepia ColorFilter Test'),
-              ),
-              body: const Center(
-                child:Text('Hooray!'),
-              ),
+              appBar: AppBar(title: const Text('Sepia ColorFilter Test')),
+              body: const Center(child: Text('Hooray!')),
               floatingActionButton: FloatingActionButton(
-                onPressed: () { },
+                onPressed: () {},
                 tooltip: 'Increment',
                 child: const Icon(Icons.add),
               ),
@@ -63,11 +53,20 @@ void main() {
         ),
       ),
     );
-    await expectLater(
-      find.byType(ColorFiltered),
-      matchesGoldenFile('color_filter_sepia.png'),
+    await expectLater(find.byType(ColorFiltered), matchesGoldenFile('color_filter_sepia.png'));
+  });
+
+  testWidgets('ColorFilter.saturation', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      RepaintBoundary(
+        child: ColorFiltered(
+          colorFilter: ColorFilter.saturation(0),
+          child: const ColoredBox(color: Colors.white, child: FlutterLogo()),
+        ),
+      ),
     );
-  }, skip: impellerEnabled); // https://github.com/flutter/flutter/issues/143616
+    await expectLater(find.byType(ColorFiltered), matchesGoldenFile('color_filter_saturation.png'));
+  });
 
   testWidgets('Color filter - reuses its layer', (WidgetTester tester) async {
     Future<void> pumpWithColor(Color color) async {
@@ -83,11 +82,25 @@ void main() {
 
     await pumpWithColor(Colors.red);
     final RenderObject renderObject = tester.firstRenderObject(find.byType(ColorFiltered));
-    final ColorFilterLayer originalLayer = renderObject.debugLayer! as ColorFilterLayer;
+    final originalLayer = renderObject.debugLayer! as ColorFilterLayer;
     expect(originalLayer, isNotNull);
 
     // Change color to force a repaint.
     await pumpWithColor(Colors.green);
     expect(renderObject.debugLayer, same(originalLayer));
+  });
+
+  testWidgets('ColorFiltered does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: ColorFiltered(colorFilter: ColorFilter.mode(Colors.blue, BlendMode.color)),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(ColorFiltered)), Size.zero);
   });
 }

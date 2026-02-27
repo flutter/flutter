@@ -2,9 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
+/// @docImport 'elevated_button.dart';
+/// @docImport 'material.dart';
+/// @docImport 'outlined_button.dart';
+/// @docImport 'text_button.dart';
+/// @docImport 'theme.dart';
+/// @docImport 'theme_data.dart';
+library;
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+
+import 'theme.dart';
 import 'typography.dart';
 
 /// Material design text theme.
@@ -13,8 +22,9 @@ import 'typography.dart';
 /// (e.g., labelLarge, bodySmall). Rather than creating a [TextTheme] directly,
 /// you can obtain an instance as [Typography.black] or [Typography.white].
 ///
-/// To obtain the current text theme, call [Theme.of] with the current
-/// [BuildContext] and read the [ThemeData.textTheme] property.
+/// To obtain the current text theme, call [TextTheme.of] with the current
+/// [BuildContext]. This is equivalent to calling [Theme.of] and reading
+/// the [ThemeData.textTheme] property.
 ///
 /// The names of the TextTheme properties match this table from the
 /// [Material Design spec](https://m3.material.io/styles/typography/tokens).
@@ -25,6 +35,28 @@ import 'typography.dart';
 /// current (2021) version of the specification
 /// ([https://m3.material.io/styles/typography/tokens](https://m3.material.io/styles/typography/tokens)).
 ///
+/// The **2021** spec has fifteen text styles:
+///
+/// | NAME           | SIZE |  HEIGHT |  WEIGHT |  SPACING |             |
+/// |----------------|------|---------|---------|----------|-------------|
+/// | displayLarge   | 57.0 |   64.0  | regular | -0.25    |             |
+/// | displayMedium  | 45.0 |   52.0  | regular |  0.0     |             |
+/// | displaySmall   | 36.0 |   44.0  | regular |  0.0     |             |
+/// | headlineLarge  | 32.0 |   40.0  | regular |  0.0     |             |
+/// | headlineMedium | 28.0 |   36.0  | regular |  0.0     |             |
+/// | headlineSmall  | 24.0 |   32.0  | regular |  0.0     |             |
+/// | titleLarge     | 22.0 |   28.0  | regular |  0.0     |             |
+/// | titleMedium    | 16.0 |   24.0  | medium  |  0.15    |             |
+/// | titleSmall     | 14.0 |   20.0  | medium  |  0.1     |             |
+/// | bodyLarge      | 16.0 |   24.0  | regular |  0.5     |             |
+/// | bodyMedium     | 14.0 |   20.0  | regular |  0.25    |             |
+/// | bodySmall      | 12.0 |   16.0  | regular |  0.4     |             |
+/// | labelLarge     | 14.0 |   20.0  | medium  |  0.1     |             |
+/// | labelMedium    | 12.0 |   16.0  | medium  |  0.5     |             |
+/// | labelSmall     | 11.0 |   16.0  | medium  |  0.5     |             |
+///
+/// ...where "regular" is `FontWeight.w400` and "medium" is `FontWeight.w500`.
+///
 /// The names of the 2018 TextTheme properties match this table from the
 /// [Material Design spec](https://material.io/design/typography/the-type-system.html#type-scale)
 /// with a few exceptions: the styles called H1-H6 in the spec are
@@ -32,7 +64,7 @@ import 'typography.dart';
 /// bodyLarge and bodyMedium, caption is now bodySmall, button is labelLarge,
 /// and overline is now labelSmall.
 ///
-/// The 2018 spec has thirteen text styles:
+/// The **2018** spec has thirteen text styles:
 ///
 /// | NAME           | SIZE |  WEIGHT |  SPACING |             |
 /// |----------------|------|---------|----------|-------------|
@@ -364,6 +396,12 @@ class TextTheme with Diagnosticable {
     String? package,
     double fontSizeFactor = 1.0,
     double fontSizeDelta = 0.0,
+    double letterSpacingFactor = 1.0,
+    double letterSpacingDelta = 0.0,
+    double wordSpacingFactor = 1.0,
+    double wordSpacingDelta = 0.0,
+    double heightFactor = 1.0,
+    double heightDelta = 0.0,
     Color? displayColor,
     Color? bodyColor,
     TextDecoration? decoration,
@@ -380,6 +418,12 @@ class TextTheme with Diagnosticable {
         fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        letterSpacingDelta: letterSpacingDelta,
+        letterSpacingFactor: letterSpacingFactor,
+        wordSpacingDelta: wordSpacingDelta,
+        wordSpacingFactor: wordSpacingFactor,
+        heightFactor: heightFactor,
+        heightDelta: heightDelta,
         package: package,
       ),
       displayMedium: displayMedium?.apply(
@@ -391,6 +435,12 @@ class TextTheme with Diagnosticable {
         fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        letterSpacingDelta: letterSpacingDelta,
+        letterSpacingFactor: letterSpacingFactor,
+        wordSpacingDelta: wordSpacingDelta,
+        wordSpacingFactor: wordSpacingFactor,
+        heightFactor: heightFactor,
+        heightDelta: heightDelta,
         package: package,
       ),
       displaySmall: displaySmall?.apply(
@@ -402,6 +452,12 @@ class TextTheme with Diagnosticable {
         fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        letterSpacingDelta: letterSpacingDelta,
+        letterSpacingFactor: letterSpacingFactor,
+        wordSpacingDelta: wordSpacingDelta,
+        wordSpacingFactor: wordSpacingFactor,
+        heightFactor: heightFactor,
+        heightDelta: heightDelta,
         package: package,
       ),
       headlineLarge: headlineLarge?.apply(
@@ -413,6 +469,12 @@ class TextTheme with Diagnosticable {
         fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        letterSpacingDelta: letterSpacingDelta,
+        letterSpacingFactor: letterSpacingFactor,
+        wordSpacingDelta: wordSpacingDelta,
+        wordSpacingFactor: wordSpacingFactor,
+        heightFactor: heightFactor,
+        heightDelta: heightDelta,
         package: package,
       ),
       headlineMedium: headlineMedium?.apply(
@@ -424,6 +486,12 @@ class TextTheme with Diagnosticable {
         fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        letterSpacingDelta: letterSpacingDelta,
+        letterSpacingFactor: letterSpacingFactor,
+        wordSpacingDelta: wordSpacingDelta,
+        wordSpacingFactor: wordSpacingFactor,
+        heightFactor: heightFactor,
+        heightDelta: heightDelta,
         package: package,
       ),
       headlineSmall: headlineSmall?.apply(
@@ -435,6 +503,12 @@ class TextTheme with Diagnosticable {
         fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        letterSpacingDelta: letterSpacingDelta,
+        letterSpacingFactor: letterSpacingFactor,
+        wordSpacingDelta: wordSpacingDelta,
+        wordSpacingFactor: wordSpacingFactor,
+        heightFactor: heightFactor,
+        heightDelta: heightDelta,
         package: package,
       ),
       titleLarge: titleLarge?.apply(
@@ -446,6 +520,12 @@ class TextTheme with Diagnosticable {
         fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        letterSpacingDelta: letterSpacingDelta,
+        letterSpacingFactor: letterSpacingFactor,
+        wordSpacingDelta: wordSpacingDelta,
+        wordSpacingFactor: wordSpacingFactor,
+        heightFactor: heightFactor,
+        heightDelta: heightDelta,
         package: package,
       ),
       titleMedium: titleMedium?.apply(
@@ -457,6 +537,12 @@ class TextTheme with Diagnosticable {
         fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        letterSpacingDelta: letterSpacingDelta,
+        letterSpacingFactor: letterSpacingFactor,
+        wordSpacingDelta: wordSpacingDelta,
+        wordSpacingFactor: wordSpacingFactor,
+        heightFactor: heightFactor,
+        heightDelta: heightDelta,
         package: package,
       ),
       titleSmall: titleSmall?.apply(
@@ -468,6 +554,12 @@ class TextTheme with Diagnosticable {
         fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        letterSpacingDelta: letterSpacingDelta,
+        letterSpacingFactor: letterSpacingFactor,
+        wordSpacingDelta: wordSpacingDelta,
+        wordSpacingFactor: wordSpacingFactor,
+        heightFactor: heightFactor,
+        heightDelta: heightDelta,
         package: package,
       ),
       bodyLarge: bodyLarge?.apply(
@@ -479,6 +571,12 @@ class TextTheme with Diagnosticable {
         fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        letterSpacingDelta: letterSpacingDelta,
+        letterSpacingFactor: letterSpacingFactor,
+        wordSpacingDelta: wordSpacingDelta,
+        wordSpacingFactor: wordSpacingFactor,
+        heightFactor: heightFactor,
+        heightDelta: heightDelta,
         package: package,
       ),
       bodyMedium: bodyMedium?.apply(
@@ -490,6 +588,12 @@ class TextTheme with Diagnosticable {
         fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        letterSpacingDelta: letterSpacingDelta,
+        letterSpacingFactor: letterSpacingFactor,
+        wordSpacingDelta: wordSpacingDelta,
+        wordSpacingFactor: wordSpacingFactor,
+        heightFactor: heightFactor,
+        heightDelta: heightDelta,
         package: package,
       ),
       bodySmall: bodySmall?.apply(
@@ -501,6 +605,12 @@ class TextTheme with Diagnosticable {
         fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        letterSpacingDelta: letterSpacingDelta,
+        letterSpacingFactor: letterSpacingFactor,
+        wordSpacingDelta: wordSpacingDelta,
+        wordSpacingFactor: wordSpacingFactor,
+        heightFactor: heightFactor,
+        heightDelta: heightDelta,
         package: package,
       ),
       labelLarge: labelLarge?.apply(
@@ -512,6 +622,12 @@ class TextTheme with Diagnosticable {
         fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        letterSpacingDelta: letterSpacingDelta,
+        letterSpacingFactor: letterSpacingFactor,
+        wordSpacingDelta: wordSpacingDelta,
+        wordSpacingFactor: wordSpacingFactor,
+        heightFactor: heightFactor,
+        heightDelta: heightDelta,
         package: package,
       ),
       labelMedium: labelMedium?.apply(
@@ -523,6 +639,12 @@ class TextTheme with Diagnosticable {
         fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        letterSpacingDelta: letterSpacingDelta,
+        letterSpacingFactor: letterSpacingFactor,
+        wordSpacingDelta: wordSpacingDelta,
+        wordSpacingFactor: wordSpacingFactor,
+        heightFactor: heightFactor,
+        heightDelta: heightDelta,
         package: package,
       ),
       labelSmall: labelSmall?.apply(
@@ -534,6 +656,12 @@ class TextTheme with Diagnosticable {
         fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        letterSpacingDelta: letterSpacingDelta,
+        letterSpacingFactor: letterSpacingFactor,
+        wordSpacingDelta: wordSpacingDelta,
+        wordSpacingFactor: wordSpacingFactor,
+        heightFactor: heightFactor,
+        heightDelta: heightDelta,
         package: package,
       ),
     );
@@ -565,6 +693,25 @@ class TextTheme with Diagnosticable {
     );
   }
 
+  /// The [ThemeData.textTheme] property of the ambient [Theme].
+  ///
+  /// Equivalent to `Theme.of(context).textTheme`.
+  ///
+  /// See also:
+  /// * [TextTheme.primaryOf], which returns the [ThemeData.primaryTextTheme] property of
+  ///   the ambient [Theme] instead.
+  static TextTheme of(BuildContext context) => Theme.of(context).textTheme;
+
+  /// The [ThemeData.primaryTextTheme] property of the ambient [Theme].
+  ///
+  ///
+  /// Equivalent to `Theme.of(context).primaryTextTheme`.
+  ///
+  /// See also:
+  /// * [TextTheme.of], which returns the [ThemeData.textTheme] property of the ambient
+  ///   [Theme] instead.
+  static TextTheme primaryOf(BuildContext context) => Theme.of(context).primaryTextTheme;
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
@@ -573,22 +720,22 @@ class TextTheme with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is TextTheme
-      && displayLarge == other.displayLarge
-      && displayMedium == other.displayMedium
-      && displaySmall == other.displaySmall
-      && headlineLarge == other.headlineLarge
-      && headlineMedium == other.headlineMedium
-      && headlineSmall == other.headlineSmall
-      && titleLarge == other.titleLarge
-      && titleMedium == other.titleMedium
-      && titleSmall == other.titleSmall
-      && bodyLarge == other.bodyLarge
-      && bodyMedium == other.bodyMedium
-      && bodySmall == other.bodySmall
-      && labelLarge == other.labelLarge
-      && labelMedium == other.labelMedium
-      && labelSmall == other.labelSmall;
+    return other is TextTheme &&
+        displayLarge == other.displayLarge &&
+        displayMedium == other.displayMedium &&
+        displaySmall == other.displaySmall &&
+        headlineLarge == other.headlineLarge &&
+        headlineMedium == other.headlineMedium &&
+        headlineSmall == other.headlineSmall &&
+        titleLarge == other.titleLarge &&
+        titleMedium == other.titleMedium &&
+        titleSmall == other.titleSmall &&
+        bodyLarge == other.bodyLarge &&
+        bodyMedium == other.bodyMedium &&
+        bodySmall == other.bodySmall &&
+        labelLarge == other.labelLarge &&
+        labelMedium == other.labelMedium &&
+        labelSmall == other.labelSmall;
   }
 
   @override
@@ -614,20 +761,102 @@ class TextTheme with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     final TextTheme defaultTheme = Typography.material2018(platform: defaultTargetPlatform).black;
-    properties.add(DiagnosticsProperty<TextStyle>('displayLarge', displayLarge, defaultValue: defaultTheme.displayLarge));
-    properties.add(DiagnosticsProperty<TextStyle>('displayMedium', displayMedium, defaultValue: defaultTheme.displayMedium));
-    properties.add(DiagnosticsProperty<TextStyle>('displaySmall', displaySmall, defaultValue: defaultTheme.displaySmall));
-    properties.add(DiagnosticsProperty<TextStyle>('headlineLarge', headlineLarge, defaultValue: defaultTheme.headlineLarge));
-    properties.add(DiagnosticsProperty<TextStyle>('headlineMedium', headlineMedium, defaultValue: defaultTheme.headlineMedium));
-    properties.add(DiagnosticsProperty<TextStyle>('headlineSmall', headlineSmall, defaultValue: defaultTheme.headlineSmall));
-    properties.add(DiagnosticsProperty<TextStyle>('titleLarge', titleLarge, defaultValue: defaultTheme.titleLarge));
-    properties.add(DiagnosticsProperty<TextStyle>('titleMedium', titleMedium, defaultValue: defaultTheme.titleMedium));
-    properties.add(DiagnosticsProperty<TextStyle>('titleSmall', titleSmall, defaultValue: defaultTheme.titleSmall));
-    properties.add(DiagnosticsProperty<TextStyle>('bodyLarge', bodyLarge, defaultValue: defaultTheme.bodyLarge));
-    properties.add(DiagnosticsProperty<TextStyle>('bodyMedium', bodyMedium, defaultValue: defaultTheme.bodyMedium));
-    properties.add(DiagnosticsProperty<TextStyle>('bodySmall', bodySmall, defaultValue: defaultTheme.bodySmall));
-    properties.add(DiagnosticsProperty<TextStyle>('labelLarge', labelLarge, defaultValue: defaultTheme.labelLarge));
-    properties.add(DiagnosticsProperty<TextStyle>('labelMedium', labelMedium, defaultValue: defaultTheme.labelMedium));
-    properties.add(DiagnosticsProperty<TextStyle>('labelSmall', labelSmall, defaultValue: defaultTheme.labelSmall));
+    properties.add(
+      DiagnosticsProperty<TextStyle>(
+        'displayLarge',
+        displayLarge,
+        defaultValue: defaultTheme.displayLarge,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<TextStyle>(
+        'displayMedium',
+        displayMedium,
+        defaultValue: defaultTheme.displayMedium,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<TextStyle>(
+        'displaySmall',
+        displaySmall,
+        defaultValue: defaultTheme.displaySmall,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<TextStyle>(
+        'headlineLarge',
+        headlineLarge,
+        defaultValue: defaultTheme.headlineLarge,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<TextStyle>(
+        'headlineMedium',
+        headlineMedium,
+        defaultValue: defaultTheme.headlineMedium,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<TextStyle>(
+        'headlineSmall',
+        headlineSmall,
+        defaultValue: defaultTheme.headlineSmall,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<TextStyle>(
+        'titleLarge',
+        titleLarge,
+        defaultValue: defaultTheme.titleLarge,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<TextStyle>(
+        'titleMedium',
+        titleMedium,
+        defaultValue: defaultTheme.titleMedium,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<TextStyle>(
+        'titleSmall',
+        titleSmall,
+        defaultValue: defaultTheme.titleSmall,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<TextStyle>('bodyLarge', bodyLarge, defaultValue: defaultTheme.bodyLarge),
+    );
+    properties.add(
+      DiagnosticsProperty<TextStyle>(
+        'bodyMedium',
+        bodyMedium,
+        defaultValue: defaultTheme.bodyMedium,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<TextStyle>('bodySmall', bodySmall, defaultValue: defaultTheme.bodySmall),
+    );
+    properties.add(
+      DiagnosticsProperty<TextStyle>(
+        'labelLarge',
+        labelLarge,
+        defaultValue: defaultTheme.labelLarge,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<TextStyle>(
+        'labelMedium',
+        labelMedium,
+        defaultValue: defaultTheme.labelMedium,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<TextStyle>(
+        'labelSmall',
+        labelSmall,
+        defaultValue: defaultTheme.labelSmall,
+      ),
+    );
   }
 }

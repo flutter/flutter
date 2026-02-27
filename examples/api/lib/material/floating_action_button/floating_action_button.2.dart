@@ -13,10 +13,7 @@ class FloatingActionButtonExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(useMaterial3: true),
-      home: const FloatingActionButtonExample(),
-    );
+    return const MaterialApp(home: FloatingActionButtonExample());
   }
 }
 
@@ -35,15 +32,16 @@ class FloatingActionButtonExample extends StatelessWidget {
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          child: Text(title, style: TextStyle(color: colorScheme.onInverseSurface)),
+          child: Text(
+            title,
+            style: TextStyle(color: colorScheme.onInverseSurface),
+          ),
         ),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('FAB Additional Color Mappings'),
-      ),
+      appBar: AppBar(title: const Text('FAB Additional Color Mappings')),
       body: Center(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,

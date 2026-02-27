@@ -13,9 +13,7 @@ class ShowDialogExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: DialogExample(),
-    );
+    return const MaterialApp(home: DialogExample());
   }
 }
 

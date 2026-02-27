@@ -10,7 +10,7 @@ import '../persistent_tool_state.dart';
 
 /// This message is displayed on the first run of the Flutter tool, or anytime
 /// that the contents of this string change.
-const String _kFlutterFirstRunMessage = '''
+const _kFlutterFirstRunMessage = '''
   ╔════════════════════════════════════════════════════════════════════════════╗
   ║                 Welcome to Flutter! - https://flutter.dev                  ║
   ║                                                                            ║
@@ -44,9 +44,8 @@ const String _kFlutterFirstRunMessage = '''
 /// The first run messenger determines whether the first run license terms
 /// need to be displayed.
 class FirstRunMessenger {
-  FirstRunMessenger({
-    required PersistentToolState persistentToolState
-  }) : _persistentToolState = persistentToolState;
+  FirstRunMessenger({required PersistentToolState persistentToolState})
+    : _persistentToolState = persistentToolState;
 
   final PersistentToolState _persistentToolState;
 
@@ -55,7 +54,7 @@ class FirstRunMessenger {
   /// This is implemented by caching a hash of the previous license terms. This
   /// does not update the cache hash value.
   ///
-  /// The persistent tool state setting [PersistentToolState.redisplayWelcomeMessage]
+  /// The persistent tool state setting [PersistentToolState.shouldRedisplayWelcomeMessage]
   /// can also be used to make this return false. This is primarily used to ensure
   /// that the license terms are not printed during a `flutter upgrade`, until the
   /// user manually runs the tool.
@@ -73,7 +72,7 @@ class FirstRunMessenger {
   }
 
   /// The hash of the current license representation.
-  String get _currentHash =>  hex.encode(md5.convert(utf8.encode(licenseTerms)).bytes);
+  String get _currentHash => hex.encode(md5.convert(utf8.encode(licenseTerms)).bytes);
 
   /// The current license terms.
   String get licenseTerms => _kFlutterFirstRunMessage;

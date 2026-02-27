@@ -3,15 +3,16 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_api_samples/cupertino/dialog/cupertino_alert_dialog.0.dart' as example;
+import 'package:flutter_api_samples/cupertino/dialog/cupertino_alert_dialog.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Perform an action on CupertinoAlertDialog', (WidgetTester tester) async {
+  testWidgets('Perform an action on CupertinoAlertDialog', (
+    WidgetTester tester,
+  ) async {
     const String actionText = 'Yes';
-    await tester.pumpWidget(
-      const example.AlertDialogApp(),
-    );
+    await tester.pumpWidget(const example.AlertDialogApp());
 
     // Launch the CupertinoAlertDialog.
     await tester.tap(find.byType(CupertinoButton));

@@ -6,11 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestStatusTransitionWidget extends StatusTransitionWidget {
-  const TestStatusTransitionWidget({
-    super.key,
-    required this.builder,
-    required super.animation,
-  });
+  const TestStatusTransitionWidget({super.key, required this.builder, required super.animation});
 
   final WidgetBuilder builder;
 
@@ -20,21 +16,23 @@ class TestStatusTransitionWidget extends StatusTransitionWidget {
 
 void main() {
   testWidgets('Status transition control test', (WidgetTester tester) async {
-    bool didBuild = false;
-    final AnimationController controller = AnimationController(
+    var didBuild = false;
+    final controller = AnimationController(
       duration: const Duration(seconds: 1),
       vsync: const TestVSync(),
     );
     addTearDown(controller.dispose);
 
-    await tester.pumpWidget(TestStatusTransitionWidget(
-      animation: controller,
-      builder: (BuildContext context) {
-        expect(didBuild, isFalse);
-        didBuild = true;
-        return Container();
-      },
-    ));
+    await tester.pumpWidget(
+      TestStatusTransitionWidget(
+        animation: controller,
+        builder: (BuildContext context) {
+          expect(didBuild, isFalse);
+          didBuild = true;
+          return Container();
+        },
+      ),
+    );
 
     expect(didBuild, isTrue);
     didBuild = false;
@@ -59,20 +57,22 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     expect(didBuild, isFalse);
 
-    final AnimationController anotherController = AnimationController(
+    final anotherController = AnimationController(
       duration: const Duration(seconds: 1),
       vsync: const TestVSync(),
     );
     addTearDown(anotherController.dispose);
 
-    await tester.pumpWidget(TestStatusTransitionWidget(
-      animation: anotherController,
-      builder: (BuildContext context) {
-        expect(didBuild, isFalse);
-        didBuild = true;
-        return Container();
-      },
-    ));
+    await tester.pumpWidget(
+      TestStatusTransitionWidget(
+        animation: anotherController,
+        builder: (BuildContext context) {
+          expect(didBuild, isFalse);
+          didBuild = true;
+          return Container();
+        },
+      ),
+    );
 
     expect(didBuild, isTrue);
     didBuild = false;

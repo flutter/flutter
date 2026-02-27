@@ -15,10 +15,7 @@ class ListTileApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        listTileTheme: const ListTileThemeData(
-          textColor: Colors.white,
-        ),
-        useMaterial3: true,
+        listTileTheme: const ListTileThemeData(textColor: Colors.white),
       ),
       home: const ListTileExample(),
     );
@@ -32,7 +29,8 @@ class ListTileExample extends StatefulWidget {
   State<ListTileExample> createState() => _ListTileExampleState();
 }
 
-class _ListTileExampleState extends State<ListTileExample> with TickerProviderStateMixin {
+class _ListTileExampleState extends State<ListTileExample>
+    with TickerProviderStateMixin {
   late final AnimationController _fadeController;
   late final AnimationController _sizeController;
   late final Animation<double> _fadeAnimation;
@@ -88,26 +86,28 @@ class _ListTileExampleState extends State<ListTileExample> with TickerProviderSt
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute<Widget>(builder: (BuildContext context) {
-                      return Scaffold(
-                        appBar: AppBar(title: const Text('ListTile Hero')),
-                        body: Center(
-                          child: Hero(
-                            tag: 'ListTile-Hero',
-                            child: Material(
-                              child: ListTile(
-                                title: const Text('ListTile with Hero'),
-                                subtitle: const Text('Tap here to go back'),
-                                tileColor: Colors.blue[700],
-                                onTap: () {
-                                  Navigator.pop(context);
-                                },
+                    MaterialPageRoute<Widget>(
+                      builder: (BuildContext context) {
+                        return Scaffold(
+                          appBar: AppBar(title: const Text('ListTile Hero')),
+                          body: Center(
+                            child: Hero(
+                              tag: 'ListTile-Hero',
+                              child: Material(
+                                child: ListTile(
+                                  title: const Text('ListTile with Hero'),
+                                  subtitle: const Text('Tap here to go back'),
+                                  tileColor: Colors.blue[700],
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                  },
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    }),
+                        );
+                      },
+                    ),
                   );
                 },
               ),

@@ -27,5 +27,13 @@
   "lookUpButtonLabel": "മുകളിലേക്ക് നോക്കുക",
   "searchWebButtonLabel": "വെബിൽ തിരയുക",
   "shareButtonLabel": "പങ്കിടുക...",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "മായ്ക്കുക",
+  "cancelButtonLabel": "റദ്ദാക്കുക",
+  "backButtonLabel": "മടങ്ങുക",
+  "expansionTileExpandedHint": "ചുരുക്കാൻ ഡബിൾ ടാപ്പ് ചെയ്യുക",
+  "expansionTileCollapsedHint": "വികസിപ്പിക്കാൻ ഡബിൾ ടാപ്പ് ചെയ്യുക",
+  "expansionTileExpandedTapHint": "ചുരുക്കുക",
+  "expansionTileCollapsedTapHint": "കൂടുതൽ വിശദാംശങ്ങൾക്ക് വികസിപ്പിക്കുക",
+  "expandedHint": "ചുരുക്കി",
+  "collapsedHint": "വികസിപ്പിച്ചു"
 }

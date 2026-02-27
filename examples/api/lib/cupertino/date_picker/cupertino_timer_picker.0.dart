@@ -46,10 +46,7 @@ class _TimerPickerExampleState extends State<TimerPickerExample> {
         // Provide a background color for the popup.
         color: CupertinoColors.systemBackground.resolveFrom(context),
         // Use a SafeArea widget to avoid system overlaps.
-        child: SafeArea(
-          top: false,
-          child: child,
-        ),
+        child: SafeArea(top: false, child: child),
       ),
     );
   }
@@ -90,9 +87,7 @@ class _TimerPickerExampleState extends State<TimerPickerExample> {
                     // the user's locale settings.
                     child: Text(
                       '$duration',
-                      style: const TextStyle(
-                        fontSize: 22.0,
-                      ),
+                      style: const TextStyle(fontSize: 22.0),
                     ),
                   ),
                 ],
@@ -116,14 +111,8 @@ class _TimerPickerItem extends StatelessWidget {
     return DecoratedBox(
       decoration: const BoxDecoration(
         border: Border(
-          top: BorderSide(
-            color: CupertinoColors.inactiveGray,
-            width: 0.0,
-          ),
-          bottom: BorderSide(
-            color: CupertinoColors.inactiveGray,
-            width: 0.0,
-          ),
+          top: BorderSide(color: CupertinoColors.inactiveGray, width: 0.0),
+          bottom: BorderSide(color: CupertinoColors.inactiveGray, width: 0.0),
         ),
       ),
       child: Padding(

@@ -10,10 +10,8 @@ import '../../xcode_project.dart';
 // Set in https://github.com/flutter/flutter/pull/21901/.
 // Removed in https://github.com/flutter/flutter/pull/33684.
 class XcodeBuildSystemMigration extends ProjectMigrator {
-  XcodeBuildSystemMigration(
-    IosProject project,
-    super.logger,
-  ) : _xcodeWorkspaceSharedSettings = project.xcodeWorkspaceSharedSettings;
+  XcodeBuildSystemMigration(IosProject project, super.logger)
+    : _xcodeWorkspaceSharedSettings = project.xcodeWorkspaceSharedSettings;
 
   final File? _xcodeWorkspaceSharedSettings;
 
@@ -28,13 +26,15 @@ class XcodeBuildSystemMigration extends ProjectMigrator {
     final String contents = xcodeWorkspaceSharedSettings.readAsStringSync();
 
     // Only delete this file when it is pointing to the legacy build system.
-    const String legacyBuildSettingsWorkspace = '''
+    const legacyBuildSettingsWorkspace = '''
 	<key>BuildSystemType</key>
 	<string>Original</string>''';
 
     // contains instead of equals to ignore newline file ending variance.
     if (contents.contains(legacyBuildSettingsWorkspace)) {
-      logger.printStatus('Legacy build system detected, removing ${xcodeWorkspaceSharedSettings.path}');
+      logger.printStatus(
+        'Legacy build system detected, removing ${xcodeWorkspaceSharedSettings.path}',
+      );
       xcodeWorkspaceSharedSettings.deleteSync();
     }
   }

@@ -3,14 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/input_chip/input_chip.0.dart' as example;
+import 'package:flutter_api_samples/material/input_chip/input_chip.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.ChipApp(),
-    );
+    await tester.pumpWidget(const example.ChipApp());
 
     expect(find.byType(InputChip), findsNWidgets(3));
 

@@ -24,9 +24,11 @@ Widget buildFrame({
   List<int> pages = defaultPages,
   required TextDirection textDirection,
 }) {
-  final PageView child = PageView(
+  final child = PageView(
     reverse: reverse,
-    onPageChanged: (int page) { currentPage = page; },
+    onPageChanged: (int page) {
+      currentPage = page;
+    },
     children: pages.map<Widget>(buildPage).toList(),
   );
 
@@ -35,16 +37,14 @@ Widget buildFrame({
   return Directionality(
     textDirection: textDirection,
     child: Center(
-      child: SizedBox(
-        width: pageSize.width, height: pageSize.height, child: child,
-      ),
+      child: SizedBox(width: pageSize.width, height: pageSize.height, child: child),
     ),
   );
 }
 
 Future<void> page(WidgetTester tester, Offset offset) {
   return TestAsyncUtils.guard(() async {
-    final String itemText = currentPage != null ? currentPage.toString() : '0';
+    final itemText = currentPage != null ? currentPage.toString() : '0';
     await tester.drag(find.text(itemText), offset);
     await tester.pumpAndSettle();
   });
@@ -63,9 +63,7 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(
-          child: PageView(),
-        ),
+        child: Center(child: PageView()),
       ),
     );
   });

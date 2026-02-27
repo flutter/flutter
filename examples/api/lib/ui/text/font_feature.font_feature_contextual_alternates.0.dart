@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.contextualAlternates].
+/// Flutter code sample for [FontFeature.contextualAlternates].
 
 void main() => runApp(const ExampleApp());
 
@@ -14,7 +14,8 @@ class ExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return WidgetsApp(
-      builder: (BuildContext context, Widget? navigator) => const ExampleWidget(),
+      builder: (BuildContext context, Widget? navigator) =>
+          const ExampleWidget(),
       color: const Color(0xffffffff),
     );
   }
@@ -31,9 +32,7 @@ class ExampleWidget extends StatelessWidget {
       "Ooohh, we weren't going to tell him that.",
       style: TextStyle(
         fontFamily: 'Barriecito',
-        fontFeatures: <FontFeature>[
-          FontFeature.contextualAlternates(),
-        ],
+        fontFeatures: <FontFeature>[FontFeature.contextualAlternates()],
       ),
     );
   }

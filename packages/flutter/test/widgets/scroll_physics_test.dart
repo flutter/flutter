@@ -7,18 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestScrollPhysics extends ScrollPhysics {
-  const TestScrollPhysics({
-    required this.name,
-    super.parent,
-  });
+  const TestScrollPhysics({required this.name, super.parent});
   final String name;
 
   @override
   TestScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    return TestScrollPhysics(
-      name: name,
-      parent: parent?.applyTo(ancestor) ?? ancestor!,
-    );
+    return TestScrollPhysics(name: name, parent: parent?.applyTo(ancestor) ?? ancestor!);
   }
 
   TestScrollPhysics get namedParent => parent! as TestScrollPhysics;
@@ -33,14 +27,13 @@ class TestScrollPhysics extends ScrollPhysics {
   }
 }
 
-
 void main() {
   test('ScrollPhysics applyTo()', () {
-    const TestScrollPhysics a = TestScrollPhysics(name: 'a');
-    const TestScrollPhysics b = TestScrollPhysics(name: 'b');
-    const TestScrollPhysics c = TestScrollPhysics(name: 'c');
-    const TestScrollPhysics d = TestScrollPhysics(name: 'd');
-    const TestScrollPhysics e = TestScrollPhysics(name: 'e');
+    const a = TestScrollPhysics(name: 'a');
+    const b = TestScrollPhysics(name: 'b');
+    const c = TestScrollPhysics(name: 'c');
+    const d = TestScrollPhysics(name: 'd');
+    const e = TestScrollPhysics(name: 'e');
 
     expect(a.parent, null);
     expect(b.parent, null);
@@ -65,9 +58,13 @@ void main() {
     const ScrollPhysics never = NeverScrollableScrollPhysics();
     const ScrollPhysics always = AlwaysScrollableScrollPhysics();
     const ScrollPhysics page = PageScrollPhysics();
-    const ScrollPhysics bounceDesktop = BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
+    const ScrollPhysics bounceDesktop = BouncingScrollPhysics(
+      decelerationRate: ScrollDecelerationRate.fast,
+    );
 
-    String types(ScrollPhysics? value) => value!.parent == null ? '${value.runtimeType}' : '${value.runtimeType} ${types(value.parent)}';
+    String types(ScrollPhysics? value) => value!.parent == null
+        ? '${value.runtimeType}'
+        : '${value.runtimeType} ${types(value.parent)}';
 
     expect(
       types(bounce.applyTo(clamp.applyTo(never.applyTo(always.applyTo(page))))),
@@ -96,30 +93,33 @@ void main() {
 
     expect(
       bounceDesktop.applyTo(always),
-      (BouncingScrollPhysics x) => x.decelerationRate == ScrollDecelerationRate.fast
+      (BouncingScrollPhysics x) => x.decelerationRate == ScrollDecelerationRate.fast,
     );
   });
 
-  test("ScrollPhysics scrolling subclasses - Creating the simulation doesn't alter the velocity for time 0", () {
-    final ScrollMetrics position = FixedScrollMetrics(
-      minScrollExtent: 0.0,
-      maxScrollExtent: 100.0,
-      pixels: 20.0,
-      viewportDimension: 500.0,
-      axisDirection: AxisDirection.down,
-      devicePixelRatio: 3.0,
-    );
+  test(
+    "ScrollPhysics scrolling subclasses - Creating the simulation doesn't alter the velocity for time 0",
+    () {
+      final ScrollMetrics position = FixedScrollMetrics(
+        minScrollExtent: 0.0,
+        maxScrollExtent: 100.0,
+        pixels: 20.0,
+        viewportDimension: 500.0,
+        axisDirection: AxisDirection.down,
+        devicePixelRatio: 3.0,
+      );
 
-    const BouncingScrollPhysics bounce = BouncingScrollPhysics();
-    const ClampingScrollPhysics clamp = ClampingScrollPhysics();
-    const PageScrollPhysics page = PageScrollPhysics();
+      const bounce = BouncingScrollPhysics();
+      const clamp = ClampingScrollPhysics();
+      const page = PageScrollPhysics();
 
-    // Calls to createBallisticSimulation may happen on every frame (i.e. when the maxScrollExtent changes)
-    // Changing velocity for time 0 may cause a sudden, unwanted damping/speedup effect
-    expect(bounce.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
-    expect(clamp.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
-    expect(page.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
-  });
+      // Calls to createBallisticSimulation may happen on every frame (i.e. when the maxScrollExtent changes)
+      // Changing velocity for time 0 may cause a sudden, unwanted damping/speedup effect
+      expect(bounce.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
+      expect(clamp.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
+      expect(page.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
+    },
+  );
 
   group('BouncingScrollPhysics test', () {
     late BouncingScrollPhysics physicsUnderTest;
@@ -147,11 +147,15 @@ void main() {
         devicePixelRatio: 3.0,
       );
 
-      final double lessOverscrollApplied =
-          physicsUnderTest.applyPhysicsToUserOffset(lessOverscrolledPosition, 10.0);
+      final double lessOverscrollApplied = physicsUnderTest.applyPhysicsToUserOffset(
+        lessOverscrolledPosition,
+        10.0,
+      );
 
-      final double moreOverscrollApplied =
-          physicsUnderTest.applyPhysicsToUserOffset(moreOverscrolledPosition, 10.0);
+      final double moreOverscrollApplied = physicsUnderTest.applyPhysicsToUserOffset(
+        moreOverscrolledPosition,
+        10.0,
+      );
 
       expect(lessOverscrollApplied, greaterThan(1.0));
       expect(lessOverscrollApplied, lessThan(20.0));
@@ -160,10 +164,7 @@ void main() {
       expect(moreOverscrollApplied, lessThan(20.0));
 
       // Scrolling from a more overscrolled position meets more resistance.
-      expect(
-        lessOverscrollApplied.abs(),
-        greaterThan(moreOverscrollApplied.abs()),
-      );
+      expect(lessOverscrollApplied.abs(), greaterThan(moreOverscrollApplied.abs()));
     });
 
     test('easing an overscroll still has resistance', () {
@@ -176,8 +177,10 @@ void main() {
         devicePixelRatio: 3.0,
       );
 
-      final double easingApplied =
-          physicsUnderTest.applyPhysicsToUserOffset(overscrolledPosition, -10.0);
+      final double easingApplied = physicsUnderTest.applyPhysicsToUserOffset(
+        overscrolledPosition,
+        -10.0,
+      );
 
       expect(easingApplied, lessThan(-1.0));
       expect(easingApplied, greaterThan(-10.0));
@@ -193,14 +196,8 @@ void main() {
         devicePixelRatio: 3.0,
       );
 
-      expect(
-        physicsUnderTest.applyPhysicsToUserOffset(scrollPosition, 10.0),
-        10.0,
-      );
-      expect(
-        physicsUnderTest.applyPhysicsToUserOffset(scrollPosition, -10.0),
-        -10.0,
-      );
+      expect(physicsUnderTest.applyPhysicsToUserOffset(scrollPosition, 10.0), 10.0);
+      expect(physicsUnderTest.applyPhysicsToUserOffset(scrollPosition, -10.0), -10.0);
     });
 
     test('easing an overscroll meets less resistance than tensioning', () {
@@ -213,16 +210,20 @@ void main() {
         devicePixelRatio: 3.0,
       );
 
-      final double easingApplied =
-          physicsUnderTest.applyPhysicsToUserOffset(overscrolledPosition, -10.0);
-      final double tensioningApplied =
-          physicsUnderTest.applyPhysicsToUserOffset(overscrolledPosition, 10.0);
+      final double easingApplied = physicsUnderTest.applyPhysicsToUserOffset(
+        overscrolledPosition,
+        -10.0,
+      );
+      final double tensioningApplied = physicsUnderTest.applyPhysicsToUserOffset(
+        overscrolledPosition,
+        10.0,
+      );
 
       expect(easingApplied.abs(), greaterThan(tensioningApplied.abs()));
     });
 
     test('no easing resistance for ScrollDecelerationRate.fast', () {
-      const BouncingScrollPhysics desktop = BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
+      const desktop = BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
       final ScrollMetrics overscrolledPosition = FixedScrollMetrics(
         minScrollExtent: 0.0,
         maxScrollExtent: 1000.0,
@@ -232,10 +233,8 @@ void main() {
         devicePixelRatio: 3.0,
       );
 
-      final double easingApplied =
-          desktop.applyPhysicsToUserOffset(overscrolledPosition, -10.0);
-      final double tensioningApplied =
-          desktop.applyPhysicsToUserOffset(overscrolledPosition, 10.0);
+      final double easingApplied = desktop.applyPhysicsToUserOffset(overscrolledPosition, -10.0);
+      final double tensioningApplied = desktop.applyPhysicsToUserOffset(overscrolledPosition, 10.0);
 
       expect(tensioningApplied.abs(), lessThan(easingApplied.abs()));
       expect(easingApplied, -10);
@@ -260,11 +259,15 @@ void main() {
         devicePixelRatio: 3.0,
       );
 
-      final double smallListOverscrollApplied =
-          physicsUnderTest.applyPhysicsToUserOffset(smallListOverscrolledPosition, 10.0);
+      final double smallListOverscrollApplied = physicsUnderTest.applyPhysicsToUserOffset(
+        smallListOverscrolledPosition,
+        10.0,
+      );
 
-      final double bigListOverscrollApplied =
-          physicsUnderTest.applyPhysicsToUserOffset(bigListOverscrolledPosition, 10.0);
+      final double bigListOverscrollApplied = physicsUnderTest.applyPhysicsToUserOffset(
+        bigListOverscrolledPosition,
+        10.0,
+      );
 
       expect(smallListOverscrollApplied, equals(bigListOverscrollApplied));
 
@@ -273,8 +276,8 @@ void main() {
     });
 
     test('frictionFactor', () {
-      const BouncingScrollPhysics mobile = BouncingScrollPhysics();
-      const BouncingScrollPhysics desktop = BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
+      const mobile = BouncingScrollPhysics();
+      const desktop = BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
 
       expect(desktop.frictionFactor(0), 0.26);
       expect(mobile.frictionFactor(0), 0.52);
@@ -288,7 +291,7 @@ void main() {
   });
 
   test('ClampingScrollPhysics assertion test', () {
-    const ClampingScrollPhysics physics = ClampingScrollPhysics();
+    const physics = ClampingScrollPhysics();
     const double pixels = 500;
     final ScrollMetrics position = FixedScrollMetrics(
       pixels: pixels,
@@ -318,8 +321,8 @@ void main() {
       // in Flutter web 0.0 sometimes just appears as 0. or 0
       expect(
         error.toStringDeep(),
-        matches(RegExp(
-          r'''
+        matches(
+          RegExp(r'''
 FlutterError
    ClampingScrollPhysics\.applyBoundaryConditions\(\) was called
    redundantly\.
@@ -332,34 +335,35 @@ FlutterError
      ClampingScrollPhysics
    The position object in question was\:
      FixedScrollMetrics\(500(\.\d*)?..\[0(\.\d*)?\]..500(\.\d*)?\)
-''',
-          multiLine: true,
-        )),
+''', multiLine: true),
+        ),
       );
     }
   });
 
   testWidgets('PageScrollPhysics work with NestedScrollView', (WidgetTester tester) async {
     // Regression test for: https://github.com/flutter/flutter/issues/47850
-    await tester.pumpWidget(Material(
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: NestedScrollView(
-          physics: const PageScrollPhysics(),
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-            return <Widget>[
-              SliverToBoxAdapter(child: Container(height: 300, color: Colors.blue)),
-            ];
-          },
-          body: ListView.builder(
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Index $index');
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: NestedScrollView(
+            physics: const PageScrollPhysics(),
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                SliverToBoxAdapter(child: Container(height: 300, color: Colors.blue)),
+              ];
             },
-            itemCount: 100,
+            body: ListView.builder(
+              itemBuilder: (BuildContext context, int index) {
+                return Text('Index $index');
+              },
+              itemCount: 100,
+            ),
           ),
         ),
       ),
-    ));
+    );
     await tester.fling(find.text('Index 2'), const Offset(0.0, -300.0), 10000.0);
   });
 }

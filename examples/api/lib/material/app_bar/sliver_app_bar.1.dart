@@ -13,9 +13,7 @@ class AppBarApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: SliverAppBarExample(),
-    );
+    return const MaterialApp(home: SliverAppBarExample());
   }
 }
 
@@ -31,8 +29,8 @@ class _SliverAppBarExampleState extends State<SliverAppBarExample> {
   bool _snap = false;
   bool _floating = false;
 
-// [SliverAppBar]s are typically used in [CustomScrollView.slivers], which in
-// turn can be placed in a [Scaffold.body].
+  // [SliverAppBar]s are typically used in [CustomScrollView.slivers], which in
+  // turn can be placed in a [Scaffold.body].
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,19 +54,17 @@ class _SliverAppBarExampleState extends State<SliverAppBarExample> {
               ),
             ),
           ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
-                return Container(
-                  color: index.isOdd ? Colors.white : Colors.black12,
-                  height: 100.0,
-                  child: Center(
-                    child: Text('$index', textScaler: const TextScaler.linear(5)),
-                  ),
-                );
-              },
-              childCount: 20,
-            ),
+          SliverList.builder(
+            itemCount: 20,
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                color: index.isOdd ? Colors.white : Colors.black12,
+                height: 100.0,
+                child: Center(
+                  child: Text('$index', textScaler: const TextScaler.linear(5)),
+                ),
+              );
+            },
           ),
         ],
       ),

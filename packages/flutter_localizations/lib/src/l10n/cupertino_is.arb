@@ -27,5 +27,13 @@
   "lookUpButtonLabel": "Look Up",
   "searchWebButtonLabel": "Leita á vefnum",
   "shareButtonLabel": "Deila...",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "Hreinsa",
+  "cancelButtonLabel": "Hætta við",
+  "backButtonLabel": "Til baka",
+  "expansionTileExpandedHint": "ýttu tvisvar til að minnka",
+  "expansionTileCollapsedHint": "ýttu tvisvar til að stækka",
+  "expansionTileExpandedTapHint": "Minnka",
+  "expansionTileCollapsedTapHint": "Stækka til að sjá frekari upplýsingar",
+  "expandedHint": "Minnkað",
+  "collapsedHint": "Stækkað"
 }

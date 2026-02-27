@@ -27,5 +27,13 @@
   "lookUpButtonLabel": "Bheka Phezulu",
   "searchWebButtonLabel": "Sesha Iwebhu",
   "shareButtonLabel": "Yabelana...",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "Sula",
+  "cancelButtonLabel": "Khansela",
+  "backButtonLabel": "Emuva",
+  "expansionTileExpandedHint": "thepha kabili ukuze ugoqe",
+  "expansionTileCollapsedHint": "Thepha kabili ukuze unwebe",
+  "expansionTileExpandedTapHint": "Goqa",
+  "expansionTileCollapsedTapHint": "Nweba ukuze uthole imininingwane eyengeziwe",
+  "expandedHint": "Kugoqiwe",
+  "collapsedHint": "Kunwetshiwe"
 }

@@ -3,16 +3,15 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/pop_scope/pop_scope.1.dart' as example;
+import 'package:flutter_api_samples/widgets/pop_scope/pop_scope.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../navigator_utils.dart';
 
 void main() {
   testWidgets('Can choose to stay on page', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.NavigatorPopHandlerApp(),
-    );
+    await tester.pumpWidget(const example.NavigatorPopHandlerApp());
 
     expect(find.text('Page One'), findsOneWidget);
 
@@ -33,10 +32,10 @@ void main() {
     expect(find.text('Page Two'), findsOneWidget);
   });
 
-  testWidgets('Can choose to go back with pop result', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.NavigatorPopHandlerApp(),
-    );
+  testWidgets('Can choose to go back with pop result', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.NavigatorPopHandlerApp());
 
     expect(find.text('Page One'), findsOneWidget);
     expect(find.text('Page Two'), findsNothing);
@@ -62,6 +61,9 @@ void main() {
     expect(find.text('Page One'), findsOneWidget);
     expect(find.text('Page Two'), findsNothing);
     expect(find.text('Are you sure?'), findsNothing);
-    expect(find.text('Hello John, whose favorite food is Apple.'), findsOneWidget);
+    expect(
+      find.text('Hello John, whose favorite food is Apple.'),
+      findsOneWidget,
+    );
   });
 }

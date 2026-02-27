@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Empty GridView', (WidgetTester tester) async {
-    final List<Widget> children = <Widget>[
+    final children = <Widget>[
       const DecoratedBox(decoration: BoxDecoration()),
       const DecoratedBox(decoration: BoxDecoration()),
       const DecoratedBox(decoration: BoxDecoration()),
@@ -20,11 +20,7 @@ void main() {
         child: Center(
           child: SizedBox(
             width: 200.0,
-            child: GridView.extent(
-              maxCrossAxisExtent: 100.0,
-              shrinkWrap: true,
-              children: children,
-            ),
+            child: GridView.extent(maxCrossAxisExtent: 100.0, shrinkWrap: true, children: children),
           ),
         ),
       ),
@@ -49,11 +45,7 @@ void main() {
         child: Center(
           child: SizedBox(
             width: 200.0,
-            child: GridView.extent(
-              maxCrossAxisExtent: 60.0,
-              shrinkWrap: true,
-              children: children,
-            ),
+            child: GridView.extent(maxCrossAxisExtent: 60.0, shrinkWrap: true, children: children),
           ),
         ),
       ),

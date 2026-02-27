@@ -15,9 +15,7 @@ class InheritedModelApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: InheritedModelExample(),
-    );
+    return const MaterialApp(home: InheritedModelExample());
   }
 }
 
@@ -33,21 +31,33 @@ class LogoModel extends InheritedModel<LogoAspect> {
   final bool? large;
 
   static Color? backgroundColorOf(BuildContext context) {
-    return InheritedModel.inheritFrom<LogoModel>(context, aspect: LogoAspect.backgroundColor)?.backgroundColor;
+    return InheritedModel.inheritFrom<LogoModel>(
+      context,
+      aspect: LogoAspect.backgroundColor,
+    )?.backgroundColor;
   }
 
   static bool sizeOf(BuildContext context) {
-    return InheritedModel.inheritFrom<LogoModel>(context, aspect: LogoAspect.large)?.large ?? false;
+    return InheritedModel.inheritFrom<LogoModel>(
+          context,
+          aspect: LogoAspect.large,
+        )?.large ??
+        false;
   }
 
   @override
   bool updateShouldNotify(LogoModel oldWidget) {
-    return backgroundColor != oldWidget.backgroundColor || large != oldWidget.large;
+    return backgroundColor != oldWidget.backgroundColor ||
+        large != oldWidget.large;
   }
 
   @override
-  bool updateShouldNotifyDependent(LogoModel oldWidget, Set<LogoAspect> dependencies) {
-    if (backgroundColor != oldWidget.backgroundColor && dependencies.contains(LogoAspect.backgroundColor)) {
+  bool updateShouldNotifyDependent(
+    LogoModel oldWidget,
+    Set<LogoAspect> dependencies,
+  ) {
+    if (backgroundColor != oldWidget.backgroundColor &&
+        dependencies.contains(LogoAspect.backgroundColor)) {
       return true;
     }
     if (large != oldWidget.large && dependencies.contains(LogoAspect.large)) {
@@ -79,9 +89,7 @@ class _InheritedModelExampleState extends State<InheritedModelExample> {
             child: LogoModel(
               backgroundColor: color,
               large: large,
-              child: const BackgroundWidget(
-                child: LogoWidget(),
-              ),
+              child: const BackgroundWidget(child: LogoWidget()),
             ),
           ),
           Row(
@@ -120,7 +128,7 @@ class _InheritedModelExampleState extends State<InheritedModelExample> {
                 child: const Text('Resize Logo'),
               ),
             ],
-          )
+          ),
         ],
       ),
     );

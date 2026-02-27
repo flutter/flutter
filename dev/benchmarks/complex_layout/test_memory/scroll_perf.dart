@@ -20,17 +20,17 @@ const int maxIterations = 4;
 const Duration pauses = Duration(milliseconds: 500);
 
 Future<void> main() async {
-  final Completer<void> ready = Completer<void>();
-  runApp(GestureDetector(
-    onTap: () {
-      debugPrint('==== MEMORY BENCHMARK ==== TAPPED ====');
-      ready.complete();
-    },
-    behavior: HitTestBehavior.opaque,
-    child: const IgnorePointer(
-      child: ComplexLayoutApp(),
+  final ready = Completer<void>();
+  runApp(
+    GestureDetector(
+      onTap: () {
+        debugPrint('==== MEMORY BENCHMARK ==== TAPPED ====');
+        ready.complete();
+      },
+      behavior: HitTestBehavior.opaque,
+      child: const IgnorePointer(child: ComplexLayoutApp()),
     ),
-  ));
+  );
   await SchedulerBinding.instance.endOfFrame;
   debugPrint('==== MEMORY BENCHMARK ==== READY ====');
 
@@ -41,25 +41,20 @@ Future<void> main() async {
   await Future<void>.delayed(const Duration(milliseconds: 200));
 
   // remove onTap handler, enable pointer events for app
-  runApp(GestureDetector(
-    child: const IgnorePointer(
-      ignoring: false,
-      child: ComplexLayoutApp(),
-    ),
-  ));
+  runApp(GestureDetector(child: const IgnorePointer(ignoring: false, child: ComplexLayoutApp())));
   await SchedulerBinding.instance.endOfFrame;
 
   final WidgetController controller = LiveWidgetController(WidgetsBinding.instance);
 
   // Scroll down
-  for (int iteration = 0; iteration < maxIterations; iteration += 1) {
+  for (var iteration = 0; iteration < maxIterations; iteration += 1) {
     debugPrint('Scroll down... $iteration/$maxIterations');
     await controller.fling(find.byType(ListView), const Offset(0.0, -700.0), speed);
     await Future<void>.delayed(pauses);
   }
 
   // Scroll up
-  for (int iteration = 0; iteration < maxIterations; iteration += 1) {
+  for (var iteration = 0; iteration < maxIterations; iteration += 1) {
     debugPrint('Scroll up... $iteration/$maxIterations');
     await controller.fling(find.byType(ListView), const Offset(0.0, 300.0), speed);
     await Future<void>.delayed(pauses);

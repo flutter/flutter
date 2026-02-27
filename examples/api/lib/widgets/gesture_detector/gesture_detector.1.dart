@@ -13,9 +13,7 @@ class GestureDetectorExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: GestureDetectorExample(),
-    );
+    return const MaterialApp(home: GestureDetectorExample());
   }
 }
 
@@ -38,7 +36,9 @@ class _GestureDetectorExampleState extends State<GestureDetectorExample> {
       child: GestureDetector(
         onTap: () {
           setState(() {
-            _color == Colors.yellow ? _color = Colors.white : _color = Colors.yellow;
+            _color == Colors.yellow
+                ? _color = Colors.white
+                : _color = Colors.yellow;
           });
         },
       ),

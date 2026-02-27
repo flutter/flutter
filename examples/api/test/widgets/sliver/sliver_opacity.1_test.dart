@@ -9,9 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('SliverOpacity example', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.SliverOpacityExampleApp(),
-    );
+    await tester.pumpWidget(const example.SliverOpacityExampleApp());
 
     final Finder button = find.byType(FloatingActionButton);
     final Finder opacity = find.byType(SliverOpacity);

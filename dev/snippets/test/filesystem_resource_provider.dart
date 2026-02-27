@@ -6,15 +6,10 @@ import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:analyzer/file_system/file_system.dart';
-import 'package:analyzer/source/file_source.dart';
-import 'package:analyzer/source/source.dart';
-import 'package:analyzer/src/generated/source.dart';
-import 'package:analyzer/src/source/source_resource.dart';
 import 'package:file/file.dart' as file;
 import 'package:file/local.dart' as file;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart';
-import 'package:watcher/watcher.dart';
 
 /// The name of the directory containing plugin specific subfolders used to
 /// store data across sessions.
@@ -31,20 +26,18 @@ String? _getStandardStateLocation() {
     return env['ANALYZER_STATE_LOCATION_OVERRIDE'];
   }
 
-  final String? home =
-      io.Platform.isWindows ? env['LOCALAPPDATA'] : env['HOME'];
-  return home != null && io.FileSystemEntity.isDirectorySync(home)
-      ? join(home, _SERVER_DIR)
-      : null;
+  final String? home = io.Platform.isWindows ? env['LOCALAPPDATA'] : env['HOME'];
+  return home != null && io.FileSystemEntity.isDirectorySync(home) ? join(home, _SERVER_DIR) : null;
 }
 
 /// A `dart:io` based implementation of [ResourceProvider].
 class FileSystemResourceProvider implements ResourceProvider {
   FileSystemResourceProvider(this.filesystem, {String? stateLocation})
-      : _stateLocation = stateLocation ?? _getStandardStateLocation();
+    : _stateLocation = stateLocation ?? _getStandardStateLocation();
 
-  static final FileSystemResourceProvider instance =
-      FileSystemResourceProvider(const file.LocalFileSystem());
+  static final FileSystemResourceProvider instance = FileSystemResourceProvider(
+    const file.LocalFileSystem(),
+  );
 
   /// The path to the base folder where state is stored.
   final String? _stateLocation;
@@ -79,8 +72,7 @@ class FileSystemResourceProvider implements ResourceProvider {
   @override
   Folder? getStateLocation(String pluginId) {
     if (_stateLocation != null) {
-      final file.Directory directory =
-          filesystem.directory(join(_stateLocation, pluginId));
+      final file.Directory directory = filesystem.directory(join(_stateLocation, pluginId));
       directory.createSync(recursive: true);
       return _PhysicalFolder(directory);
     }
@@ -112,9 +104,6 @@ class _PhysicalFile extends _PhysicalResource implements File {
   const _PhysicalFile(io.File super.file);
 
   @override
-  Stream<WatchEvent> get changes => FileWatcher(_entry.path).events;
-
-  @override
   int get lengthSync {
     try {
       return _file.lengthSync();
@@ -141,11 +130,6 @@ class _PhysicalFile extends _PhysicalResource implements File {
     final File destination = parentFolder.getChildAssumingFile(shortName);
     destination.writeAsBytesSync(readAsBytesSync());
     return destination;
-  }
-
-  @override
-  Source createSource([Uri? uri]) {
-    return FileSource(this, uri ?? pathContext.toUri(path));
   }
 
   @override
@@ -223,16 +207,6 @@ class _PhysicalFolder extends _PhysicalResource implements Folder {
   const _PhysicalFolder(io.Directory super.directory);
 
   @override
-  Stream<WatchEvent> get changes =>
-      DirectoryWatcher(_entry.path).events.handleError((Object error) {},
-          test: (dynamic error) =>
-              error is io.FileSystemException &&
-              // Don't suppress "Directory watcher closed," so the outer
-              // listener can see the interruption & act on it.
-              !error.message
-                  .startsWith('Directory watcher closed unexpectedly'));
-
-  @override
   bool get isRoot {
     final String parentPath = provider.pathContext.dirname(path);
     return parentPath == path;
@@ -276,25 +250,25 @@ class _PhysicalFolder extends _PhysicalResource implements Folder {
   @override
   _PhysicalFile getChildAssumingFile(String relPath) {
     final String canonicalPath = canonicalizePath(relPath);
-    final io.File file = io.File(canonicalPath);
+    final file = io.File(canonicalPath);
     return _PhysicalFile(file);
   }
 
   @override
   _PhysicalFolder getChildAssumingFolder(String relPath) {
     final String canonicalPath = canonicalizePath(relPath);
-    final io.Directory directory = io.Directory(canonicalPath);
+    final directory = io.Directory(canonicalPath);
     return _PhysicalFolder(directory);
   }
 
   @override
   List<Resource> getChildren() {
     try {
-      final List<Resource> children = <Resource>[];
-      final io.Directory directory = _entry as io.Directory;
+      final children = <Resource>[];
+      final directory = _entry as io.Directory;
       final List<io.FileSystemEntity> entries = directory.listSync();
       final int numEntries = entries.length;
-      for (int i = 0; i < numEntries; i++) {
+      for (var i = 0; i < numEntries; i++) {
         final io.FileSystemEntity entity = entries[i];
         if (entity is io.Directory) {
           children.add(_PhysicalFolder(entity));
@@ -319,8 +293,7 @@ class _PhysicalFolder extends _PhysicalResource implements Folder {
   @override
   Folder resolveSymbolicLinksSync() {
     try {
-      return _PhysicalFolder(
-          io.Directory(_directory.resolveSymbolicLinksSync()));
+      return _PhysicalFolder(io.Directory(_directory.resolveSymbolicLinksSync()));
     } on io.FileSystemException catch (exception) {
       throw _wrapException(exception);
     }
@@ -356,12 +329,6 @@ abstract class _PhysicalResource implements Resource {
 
   @override
   Folder get parent {
-    final String parentPath = pathContext.dirname(path);
-    return _PhysicalFolder(io.Directory(parentPath));
-  }
-
-  @override
-  Folder get parent2 {
     final String parentPath = pathContext.dirname(path);
     return _PhysicalFolder(io.Directory(parentPath));
   }
@@ -418,8 +385,7 @@ abstract class _PhysicalResource implements Resource {
           shortName == r'COM2' ||
           shortName == r'COM3' ||
           shortName == r'COM4') {
-        throw FileSystemException(
-            path, 'Windows device drivers cannot be read.');
+        throw FileSystemException(path, 'Windows device drivers cannot be read.');
       }
     }
   }

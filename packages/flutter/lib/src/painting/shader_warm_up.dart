@@ -85,24 +85,22 @@ abstract class ShaderWarmUp {
   ///
   /// Currently, this has no effect when [kIsWeb] is true.
   Future<void> execute() async {
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder);
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder);
     await warmUpOnCanvas(canvas);
     final ui.Picture picture = recorder.endRecording();
     assert(debugCaptureShaderWarmUpPicture(picture));
-    if (!kIsWeb || isSkiaWeb) { // Picture.toImage is not implemented on the html renderer.
-      TimelineTask? debugShaderWarmUpTask;
+    TimelineTask? debugShaderWarmUpTask;
+    if (!kReleaseMode) {
+      debugShaderWarmUpTask = TimelineTask()..start('Warm-up shader');
+    }
+    try {
+      final ui.Image image = await picture.toImage(size.width.ceil(), size.height.ceil());
+      assert(debugCaptureShaderWarmUpImage(image));
+      image.dispose();
+    } finally {
       if (!kReleaseMode) {
-        debugShaderWarmUpTask = TimelineTask()..start('Warm-up shader');
-      }
-      try {
-        final ui.Image image = await picture.toImage(size.width.ceil(), size.height.ceil());
-        assert(debugCaptureShaderWarmUpImage(image));
-        image.dispose();
-      } finally {
-        if (!kReleaseMode) {
-          debugShaderWarmUpTask!.finish();
-        }
+        debugShaderWarmUpTask!.finish();
       }
     }
     picture.dispose();

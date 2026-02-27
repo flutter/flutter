@@ -21,7 +21,7 @@ class _PinnedSearchBarAppState extends State<PinnedSearchBarApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4)),
+      theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4)),
       home: Scaffold(
         body: SafeArea(
           child: CustomScrollView(
@@ -32,19 +32,18 @@ class _PinnedSearchBarAppState extends State<PinnedSearchBarApp> {
                 scrolledUnderElevation: 0.0,
                 titleSpacing: 0.0,
                 backgroundColor: Colors.transparent,
-                floating: true, // We can also uncomment this line and set `pinned` to true to see a pinned search bar.
+                floating:
+                    true, // We can also uncomment this line and set `pinned` to true to see a pinned search bar.
                 title: SearchAnchor.bar(
-                  suggestionsBuilder: (BuildContext context, SearchController controller) {
-                    return List<Widget>.generate(
-                      5,
-                      (int index) {
-                        return ListTile(
-                          titleAlignment: ListTileTitleAlignment.center,
-                          title: Text('Initial list item $index'),
-                        );
+                  suggestionsBuilder:
+                      (BuildContext context, SearchController controller) {
+                        return List<Widget>.generate(5, (int index) {
+                          return ListTile(
+                            titleAlignment: ListTileTitleAlignment.center,
+                            title: Text('Initial list item $index'),
+                          );
+                        });
                       },
-                    );
-                  },
                 ),
               ),
               // The listed items below are just for filling the screen
@@ -74,7 +73,7 @@ class _PinnedSearchBarAppState extends State<PinnedSearchBarApp> {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Container(
                     height: 1000,
-                    color: Colors.deepPurple.withOpacity(0.5),
+                    color: Colors.deepPurple.withValues(alpha: 0.5),
                   ),
                 ),
               ),

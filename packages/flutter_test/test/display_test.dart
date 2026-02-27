@@ -13,7 +13,8 @@ import 'utils/fake_and_mock_utils.dart';
 void main() {
   group('TestDisplay', () {
     Display trueDisplay() => PlatformDispatcher.instance.displays.single;
-    TestDisplay boundDisplay() => WidgetsBinding.instance.platformDispatcher.displays.single as TestDisplay;
+    TestDisplay boundDisplay() =>
+        WidgetsBinding.instance.platformDispatcher.displays.single as TestDisplay;
 
     tearDown(() {
       boundDisplay().reset();
@@ -49,7 +50,9 @@ void main() {
       );
     });
 
-    testWidgets('resetting devicePixelRatio also resets view.devicePixelRatio', (WidgetTester tester) async {
+    testWidgets('resetting devicePixelRatio also resets view.devicePixelRatio', (
+      WidgetTester tester,
+    ) async {
       verifyPropertyReset(
         tester: tester,
         fakeValue: trueDisplay().devicePixelRatio + 1,
@@ -59,7 +62,9 @@ void main() {
       );
     });
 
-    testWidgets('updating devicePixelRatio also updates view.devicePixelRatio', (WidgetTester tester) async {
+    testWidgets('updating devicePixelRatio also updates view.devicePixelRatio', (
+      WidgetTester tester,
+    ) async {
       tester.view.display.devicePixelRatio = tester.view.devicePixelRatio + 1;
 
       expect(tester.view.devicePixelRatio, tester.view.display.devicePixelRatio);
@@ -114,17 +119,17 @@ void main() {
     });
 
     testWidgets('can reset all values', (WidgetTester tester) async {
-      final DisplaySnapshot initial = DisplaySnapshot(tester.view.display);
+      final initial = DisplaySnapshot(tester.view.display);
 
       tester.view.display.devicePixelRatio = 7;
       tester.view.display.refreshRate = 40;
       tester.view.display.size = const Size(476, 823);
 
-      final DisplaySnapshot faked = DisplaySnapshot(tester.view.display);
+      final faked = DisplaySnapshot(tester.view.display);
 
       tester.view.display.reset();
 
-      final DisplaySnapshot reset = DisplaySnapshot(tester.view.display);
+      final reset = DisplaySnapshot(tester.view.display);
 
       expect(initial, isNot(matchesSnapshot(faked)));
       expect(initial, matchesSnapshot(reset));
@@ -133,11 +138,11 @@ void main() {
 }
 
 class DisplaySnapshot {
-  DisplaySnapshot(Display display) :
-    devicePixelRatio = display.devicePixelRatio,
-    refreshRate = display.refreshRate,
-    id = display.id,
-    size = display.size;
+  DisplaySnapshot(Display display)
+    : devicePixelRatio = display.devicePixelRatio,
+      refreshRate = display.refreshRate,
+      id = display.id,
+      size = display.size;
 
   final double devicePixelRatio;
   final double refreshRate;
@@ -159,21 +164,34 @@ class _DisplaySnapshotMatcher extends Matcher {
   }
 
   @override
-  Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
+  Description describeMismatch(
+    dynamic item,
+    Description mismatchDescription,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
+  ) {
     assert(item is DisplaySnapshot, 'Can only match against snapshots of Display.');
-    final DisplaySnapshot actual = item as DisplaySnapshot;
+    final actual = item as DisplaySnapshot;
 
     if (actual.devicePixelRatio != expected.devicePixelRatio) {
-      mismatchDescription.add('actual.devicePixelRatio (${actual.devicePixelRatio}) did not match expected.devicePixelRatio (${expected.devicePixelRatio})');
+      mismatchDescription.add(
+        'actual.devicePixelRatio (${actual.devicePixelRatio}) did not match expected.devicePixelRatio (${expected.devicePixelRatio})',
+      );
     }
     if (actual.refreshRate != expected.refreshRate) {
-      mismatchDescription.add('actual.refreshRate (${actual.refreshRate}) did not match expected.refreshRate (${expected.refreshRate})');
+      mismatchDescription.add(
+        'actual.refreshRate (${actual.refreshRate}) did not match expected.refreshRate (${expected.refreshRate})',
+      );
     }
     if (actual.size != expected.size) {
-      mismatchDescription.add('actual.size (${actual.size}) did not match expected.size (${expected.size})');
+      mismatchDescription.add(
+        'actual.size (${actual.size}) did not match expected.size (${expected.size})',
+      );
     }
     if (actual.id != expected.id) {
-      mismatchDescription.add('actual.id (${actual.id}) did not match expected.id (${expected.id})');
+      mismatchDescription.add(
+        'actual.id (${actual.id}) did not match expected.id (${expected.id})',
+      );
     }
 
     return mismatchDescription;
@@ -182,11 +200,11 @@ class _DisplaySnapshotMatcher extends Matcher {
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
     assert(item is DisplaySnapshot, 'Can only match against snapshots of Display.');
-    final DisplaySnapshot actual = item as DisplaySnapshot;
+    final actual = item as DisplaySnapshot;
 
     return actual.devicePixelRatio == expected.devicePixelRatio &&
-      actual.refreshRate == expected.refreshRate &&
-      actual.size == expected.size &&
-      actual.id == expected.id;
+        actual.refreshRate == expected.refreshRate &&
+        actual.size == expected.size &&
+        actual.id == expected.id;
   }
 }

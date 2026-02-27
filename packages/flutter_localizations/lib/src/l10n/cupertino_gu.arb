@@ -27,5 +27,13 @@
   "lookUpButtonLabel": "શોધો",
   "searchWebButtonLabel": "વેબ પર શોધો",
   "shareButtonLabel": "શેર કરો…",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "સાફ કરો",
+  "cancelButtonLabel": "રદ કરો",
+  "backButtonLabel": "પાછળ",
+  "expansionTileExpandedHint": "નાની કરવા માટે બે વાર ટૅપ કરો",
+  "expansionTileCollapsedHint": "મોટી કરવા માટે બે વાર ટૅપ કરો",
+  "expansionTileExpandedTapHint": "નાની કરો",
+  "expansionTileCollapsedTapHint": "વધુ વિગતો માટે મોટી કરો",
+  "expandedHint": "નાની કરી",
+  "collapsedHint": "મોટી કરી"
 }

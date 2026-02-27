@@ -4,18 +4,22 @@
 
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
+import 'package:meta/meta.dart';
 
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/logger.dart';
+import 'base/utils.dart';
 
 /// Placeholder for base href
-const String kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
+const kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
+const kStaticAssetsUrlPlaceholder = r'$FLUTTER_STATIC_ASSETS_URL';
+
+const _kServiceWorkerDeprecationNotice =
+    "Flutter's service worker is deprecated and will be removed in a future Flutter release.";
 
 class WebTemplateWarning {
-  WebTemplateWarning(
-    this.warningText,
-    this.lineNumber,
-  );
+  WebTemplateWarning(this.warningText, this.lineNumber);
   final String warningText;
   final int lineNumber;
 }
@@ -32,16 +36,12 @@ class WebTemplateWarning {
 /// }
 /// ```
 class WebTemplate {
-  WebTemplate(this._content);
+  const WebTemplate(this._content);
 
-  String get content => _content;
-  String _content;
+  final String _content;
 
-  Document _getDocument() => parse(_content);
-
-  /// Parses the base href from the index.html file.
-  String getBaseHref() {
-    final Element? baseElement = _getDocument().querySelector('base');
+  static String baseHref(String html) {
+    final Element? baseElement = parse(html).querySelector('base');
     final String? baseHref = baseElement?.attributes == null
         ? null
         : baseElement!.attributes['href'];
@@ -51,7 +51,7 @@ class WebTemplate {
     }
 
     if (!baseHref.startsWith('/')) {
-      throw ToolExit(
+      throwToolExit(
         'Error: The base href in "web/index.html" must be absolute (i.e. start '
         'with a "/"), but found: `${baseElement!.outerHtml}`.\n'
         '$_kBasePathExample',
@@ -59,7 +59,7 @@ class WebTemplate {
     }
 
     if (!baseHref.endsWith('/')) {
-      throw ToolExit(
+      throwToolExit(
         'Error: The base href in "web/index.html" must end with a "/", but found: `${baseElement!.outerHtml}`.\n'
         '$_kBasePathExample',
       );
@@ -72,11 +72,11 @@ class WebTemplate {
     return <WebTemplateWarning>[
       ..._getWarningsForPattern(
         RegExp('(const|var) serviceWorkerVersion = null'),
-        'Local variable for "serviceWorkerVersion" is deprecated. Use "{{flutter_service_worker_version}}" template token instead. See https://docs.flutter.dev/platform-integration/web/initialization for more details.',
+        '$_kServiceWorkerDeprecationNotice See https://github.com/flutter/flutter/issues/156910 for more details.',
       ),
       ..._getWarningsForPattern(
         "navigator.serviceWorker.register('flutter_service_worker.js')",
-        'Manual service worker registration deprecated. Use flutter.js service worker bootstrapping instead. See https://docs.flutter.dev/platform-integration/web/initialization for more details.',
+        '$_kServiceWorkerDeprecationNotice See https://github.com/flutter/flutter/issues/156910 for more details.',
       ),
       ..._getWarningsForPattern(
         '_flutter.loader.loadEntrypoint(',
@@ -88,65 +88,123 @@ class WebTemplate {
   List<WebTemplateWarning> _getWarningsForPattern(Pattern pattern, String warningText) {
     return <WebTemplateWarning>[
       for (final Match match in pattern.allMatches(_content))
-        _getWarningForMatch(match, warningText)
+        _getWarningForMatch(match, warningText),
     ];
   }
 
   WebTemplateWarning _getWarningForMatch(Match match, String warningText) {
-    final int lineCount = RegExp(r'(\r\n|\r|\n)').allMatches(_content.substring(0, match.start)).length;
+    final int lineCount = RegExp(
+      r'(\r\n|\r|\n)',
+    ).allMatches(_content.substring(0, match.start)).length;
     return WebTemplateWarning(warningText, lineCount + 1);
   }
 
-  /// Applies substitutions to the content of the index.html file.
-  void applySubstitutions({
+  /// Applies substitutions to the content of the index.html file and returns the result.
+  @useResult
+  String withSubstitutions({
     required String baseHref,
     required String? serviceWorkerVersion,
     required File flutterJsFile,
     String? buildConfig,
     String? flutterBootstrapJs,
+    String? staticAssetsUrl,
+    required Logger logger,
+    Map<String, String> webDefines = const <String, String>{},
   }) {
-    if (_content.contains(kBaseHrefPlaceholder)) {
-      _content = _content.replaceAll(kBaseHrefPlaceholder, baseHref);
+    String newContent = _content;
+
+    if (newContent.contains(kBaseHrefPlaceholder)) {
+      newContent = newContent.replaceAll(kBaseHrefPlaceholder, baseHref);
+    }
+
+    if (newContent.contains(kStaticAssetsUrlPlaceholder) && staticAssetsUrl != null) {
+      newContent = newContent.replaceAll(kStaticAssetsUrlPlaceholder, staticAssetsUrl);
     }
 
     if (serviceWorkerVersion != null) {
-      _content = _content
+      newContent = newContent
           .replaceFirst(
             // Support older `var` syntax as well as new `const` syntax
             RegExp('(const|var) serviceWorkerVersion = null'),
-            'const serviceWorkerVersion = "$serviceWorkerVersion"',
+            'const serviceWorkerVersion = "$serviceWorkerVersion" /* $_kServiceWorkerDeprecationNotice */',
           )
           // This is for legacy index.html that still uses the old service
           // worker loading mechanism.
           .replaceFirst(
             "navigator.serviceWorker.register('flutter_service_worker.js')",
-            "navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion')",
+            "navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion') /* $_kServiceWorkerDeprecationNotice */",
           );
     }
-    _content = _content.replaceAll(
-      '{{flutter_service_worker_version}}',
-      serviceWorkerVersion != null ? '"$serviceWorkerVersion"' : 'null',
+    newContent = _applyVariableSubstitutions(newContent, logger, <String, String>{
+      ...webDefines,
+      if (buildConfig != null) 'flutter_build_config': buildConfig,
+      if (flutterBootstrapJs != null) 'flutter_bootstrap_js': flutterBootstrapJs,
+      'flutter_js': flutterJsFile.readAsStringSync(),
+      'flutter_service_worker_version': serviceWorkerVersion != null
+          ? '"$serviceWorkerVersion" /* $_kServiceWorkerDeprecationNotice */'
+          : 'null /* $_kServiceWorkerDeprecationNotice */',
+    });
+
+    return newContent;
+  }
+
+  /// Applies web-define variable substitutions and validates all variables are provided.
+  ///
+  /// Replaces {{VARIABLE}} placeholders with values from webDefines. Built-in Flutter
+  /// variables are preserved if missing; user-defined variables will log a warning
+  /// and be skipped.
+  String _applyVariableSubstitutions(
+    String content,
+    Logger logger,
+    Map<String, String> webDefines,
+  ) {
+    final variablePattern = RegExp(r'\{\{([A-Za-z_][A-Za-z0-9_]*)\}\}');
+    final missingVariables = <String>{};
+
+    // Framework-provided variables added by withSubstitutions(). These don't trigger
+    // errors if missing, unlike user --web-define variables.
+    // - flutter_js: flutter.js loader content (always added)
+    // - flutter_build_config: build config JSON (optional, build-mode dependent)
+    // - flutter_service_worker_version: SW version hash (optional)
+    // - flutter_bootstrap_js: full bootstrap script (optional)
+    const builtInVariables = <String>{
+      'flutter_js',
+      'flutter_build_config',
+      'flutter_service_worker_version',
+      'flutter_bootstrap_js',
+    };
+
+    final String result = content.replaceAllMapped(variablePattern, (Match match) {
+      final String variableName = match.group(1)!;
+      if (webDefines.containsKey(variableName)) {
+        return webDefines[variableName]!;
+      }
+      // Skip built-in Flutter variables and only validate user-defined web-define variables
+      if (!builtInVariables.contains(variableName)) {
+        missingVariables.add(variableName);
+      }
+      // Return the original match for missing variables.
+      return match.group(0)!;
+    });
+    if (missingVariables.isEmpty) {
+      return result;
+    }
+
+    final String variables = missingVariables.join(', ');
+    final String suggestion = missingVariables
+        .map((String name) => '--web-define=$name=VALUE')
+        .join(' ');
+    final String variablesList = pluralize('variable', missingVariables.length);
+    logger.printWarning(
+      'Warning: Missing web-define $variablesList: $variables\n\n'
+      'You can provide the missing $variablesList using:\n'
+      'flutter run $suggestion\n'
+      'or\n'
+      'flutter build web $suggestion\n'
+      'This variable will be skipped.\n',
     );
-    if (buildConfig != null) {
-      _content = _content.replaceAll(
-        '{{flutter_build_config}}',
-        buildConfig,
-      );
-    }
 
-    if (_content.contains('{{flutter_js}}')) {
-      _content = _content.replaceAll(
-        '{{flutter_js}}',
-        flutterJsFile.readAsStringSync(),
-      );
-    }
-
-    if (flutterBootstrapJs != null) {
-      _content = _content.replaceAll(
-        '{{flutter_bootstrap_js}}',
-        flutterBootstrapJs,
-      );
-    }
+    return result;
   }
 }
 
@@ -166,7 +224,7 @@ String stripTrailingSlash(String path) {
   return path;
 }
 
-const String _kBasePathExample = '''
+const _kBasePathExample = '''
 For example, to serve from the root use:
 
     <base href="/">

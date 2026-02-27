@@ -31,26 +31,17 @@ class DataTableExample extends StatelessWidget {
       columns: const <DataColumn>[
         DataColumn(
           label: Expanded(
-            child: Text(
-              'Name',
-              style: TextStyle(fontStyle: FontStyle.italic),
-            ),
+            child: Text('Name', style: TextStyle(fontStyle: FontStyle.italic)),
           ),
         ),
         DataColumn(
           label: Expanded(
-            child: Text(
-              'Age',
-              style: TextStyle(fontStyle: FontStyle.italic),
-            ),
+            child: Text('Age', style: TextStyle(fontStyle: FontStyle.italic)),
           ),
         ),
         DataColumn(
           label: Expanded(
-            child: Text(
-              'Role',
-              style: TextStyle(fontStyle: FontStyle.italic),
-            ),
+            child: Text('Role', style: TextStyle(fontStyle: FontStyle.italic)),
           ),
         ),
       ],

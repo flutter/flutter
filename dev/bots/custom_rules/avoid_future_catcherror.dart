@@ -45,7 +45,7 @@ class AvoidFutureCatchError extends AnalyzeRule {
 
   @override
   void applyTo(ResolvedUnitResult unit) {
-    final _Visitor visitor = _Visitor();
+    final visitor = _Visitor();
     unit.unit.visitChildren(visitor);
     if (visitor._offendingNodes.isNotEmpty) {
       _errors.putIfAbsent(unit, () => <AstNode>[]).addAll(visitor._offendingNodes);
@@ -77,13 +77,11 @@ class _Visitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitMethodInvocation(MethodInvocation node) {
-    if (node.methodName.name != 'onError' && node.methodName.name != 'catchError') {
-      return;
+    if (node case MethodInvocation(
+      methodName: SimpleIdentifier(name: 'onError' || 'catchError'),
+      realTarget: Expression(staticType: DartType(isDartAsyncFuture: true)),
+    )) {
+      _offendingNodes.add(node);
     }
-    final DartType? targetType = node.realTarget?.staticType;
-    if (targetType == null || !targetType.isDartAsyncFuture) {
-      return;
-    }
-    _offendingNodes.add(node);
   }
 }

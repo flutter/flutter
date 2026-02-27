@@ -14,14 +14,10 @@ void main() {
     late List<Uri> uriConnections;
 
     setUp(() {
-      final List<Map<String, dynamic>> flutterViewCannedResponses =
-          <Map<String, dynamic>>[
+      final flutterViewCannedResponses = <Map<String, dynamic>>[
         <String, dynamic>{
           'views': <Map<String, dynamic>>[
-            <String, dynamic>{
-              'type': 'FlutterView',
-              'id': 'flutterView0',
-            },
+            <String, dynamic>{'type': 'FlutterView', 'id': 'flutterView0'},
           ],
         },
         <String, dynamic>{
@@ -59,12 +55,9 @@ void main() {
       forwardedPorts = <FakePortForwarder>[];
       fakeVmServices = <FakeVmService>[];
       uriConnections = <Uri>[];
-      Future<vms.VmService> fakeVmConnectionFunction(
-        Uri uri, {
-        Duration? timeout,
-      }) {
+      Future<vms.VmService> fakeVmConnectionFunction(Uri uri, {Duration? timeout}) {
         return Future<vms.VmService>(() async {
-          final FakeVmService service = FakeVmService();
+          final service = FakeVmService();
           fakeVmServices.add(service);
           uriConnections.add(uri);
           service.flutterListViews = vms.Response.parse(flutterViewCannedResponses[uri.port]);
@@ -83,7 +76,7 @@ void main() {
     });
 
     test('end-to-end with one vm connection and flutter view query', () async {
-      int port = 0;
+      var port = 0;
       Future<PortForwarder> fakePortForwardingFunction(
         String address,
         int remotePort, [
@@ -91,7 +84,7 @@ void main() {
         String? configFile,
       ]) {
         return Future<PortForwarder>(() {
-          final FakePortForwarder pf = FakePortForwarder();
+          final pf = FakePortForwarder();
           forwardedPorts.add(pf);
           pf.port = port++;
           pf.remotePort = remotePort;
@@ -100,7 +93,7 @@ void main() {
       }
 
       fuchsiaPortForwardingFunction = fakePortForwardingFunction;
-      final FakeSshCommandRunner fakeRunner = FakeSshCommandRunner();
+      final fakeRunner = FakeSshCommandRunner();
       // Adds some extra junk to make sure the strings will be cleaned up.
       fakeRunner.iqueryResponse = <String>[
         '[',
@@ -138,7 +131,7 @@ void main() {
         '     },',
         '     "version": 1',
         '   }',
-        ' ]'
+        ' ]',
       ];
       fakeRunner.address = 'fe80::8eae:4cff:fef4:9247';
       fakeRunner.interface = 'eno1';
@@ -151,8 +144,7 @@ void main() {
 
       // VMs should be accessed via localhost ports given by
       // [fakePortForwardingFunction].
-      expect(uriConnections[0],
-          Uri(scheme: 'ws', host: '[::1]', port: 0, path: '/ws'));
+      expect(uriConnections[0], Uri(scheme: 'ws', host: '[::1]', port: 0, path: '/ws'));
 
       final List<FlutterView> views = await connection.getFlutterViews();
       expect(views, isNot(null));
@@ -168,7 +160,7 @@ void main() {
     });
 
     test('end-to-end with one vm and remote open port', () async {
-      int port = 0;
+      var port = 0;
       Future<PortForwarder> fakePortForwardingFunction(
         String address,
         int remotePort, [
@@ -176,7 +168,7 @@ void main() {
         String? configFile,
       ]) {
         return Future<PortForwarder>(() {
-          final FakePortForwarder pf = FakePortForwarder();
+          final pf = FakePortForwarder();
           forwardedPorts.add(pf);
           pf.port = port++;
           pf.remotePort = remotePort;
@@ -186,7 +178,7 @@ void main() {
       }
 
       fuchsiaPortForwardingFunction = fakePortForwardingFunction;
-      final FakeSshCommandRunner fakeRunner = FakeSshCommandRunner();
+      final fakeRunner = FakeSshCommandRunner();
       // Adds some extra junk to make sure the strings will be cleaned up.
       fakeRunner.iqueryResponse = <String>[
         '[',
@@ -224,7 +216,7 @@ void main() {
         '     },',
         '     "version": 1',
         '   }',
-        ' ]'
+        ' ]',
       ];
       fakeRunner.address = 'fe80::8eae:4cff:fef4:9247';
       fakeRunner.interface = 'eno1';
@@ -236,8 +228,10 @@ void main() {
 
       // VMs should be accessed via the alternate address given by
       // [fakePortForwardingFunction].
-      expect(uriConnections[0],
-          Uri(scheme: 'ws', host: '[fe80::1:2%25eno2]', port: 0, path: '/ws'));
+      expect(
+        uriConnections[0],
+        Uri(scheme: 'ws', host: '[fe80::1:2%25eno2]', port: 0, path: '/ws'),
+      );
 
       final List<FlutterView> views = await connection.getFlutterViews();
       expect(views, isNot(null));
@@ -253,7 +247,7 @@ void main() {
     });
 
     test('end-to-end with one vm and ipv4', () async {
-      int port = 0;
+      var port = 0;
       Future<PortForwarder> fakePortForwardingFunction(
         String address,
         int remotePort, [
@@ -261,7 +255,7 @@ void main() {
         String? configFile,
       ]) {
         return Future<PortForwarder>(() {
-          final FakePortForwarder pf = FakePortForwarder();
+          final pf = FakePortForwarder();
           forwardedPorts.add(pf);
           pf.port = port++;
           pf.remotePort = remotePort;
@@ -270,7 +264,7 @@ void main() {
       }
 
       fuchsiaPortForwardingFunction = fakePortForwardingFunction;
-      final FakeSshCommandRunner fakeRunner = FakeSshCommandRunner();
+      final fakeRunner = FakeSshCommandRunner();
       // Adds some extra junk to make sure the strings will be cleaned up.
       fakeRunner.iqueryResponse = <String>[
         '[',
@@ -308,7 +302,7 @@ void main() {
         '     },',
         '     "version": 1',
         '   }',
-        ' ]'
+        ' ]',
       ];
       fakeRunner.address = '196.168.1.4';
 
@@ -319,8 +313,7 @@ void main() {
       expect(forwardedPorts[0].remotePort, 12345);
 
       // VMs should be accessed via the ipv4 loopback.
-      expect(uriConnections[0],
-          Uri(scheme: 'ws', host: '127.0.0.1', port: 0, path: '/ws'));
+      expect(uriConnections[0], Uri(scheme: 'ws', host: '127.0.0.1', port: 0, path: '/ws'));
 
       final List<FlutterView> views = await connection.getFlutterViews();
       expect(views, isNot(null));
@@ -341,8 +334,7 @@ void main() {
       }
 
       // Should fail as no env variable has been passed.
-      expect(failingFunction,
-          throwsA(isA<FuchsiaRemoteConnectionError>()));
+      expect(failingFunction, throwsA(isA<FuchsiaRemoteConnectionError>()));
     });
   });
 }
@@ -394,7 +386,11 @@ class FakeVmService extends Fake implements vms.VmService {
   }
 
   @override
-  Future<vms.Response> callMethod(String method, {String? isolateId, Map<String, dynamic>? args}) async {
+  Future<vms.Response> callMethod(
+    String method, {
+    String? isolateId,
+    Map<String, dynamic>? args,
+  }) async {
     if (method == '_flutter.listViews') {
       return flutterListViews!;
     }

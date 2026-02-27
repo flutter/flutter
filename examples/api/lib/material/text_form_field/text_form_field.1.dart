@@ -14,9 +14,7 @@ class TextFormFieldExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: TextFormFieldExample(),
-    );
+    return const MaterialApp(home: TextFormFieldExample());
   }
 }
 
@@ -51,7 +49,9 @@ class _TextFormFieldExampleState extends State<TextFormFieldExample> {
                       constraints: BoxConstraints.tight(const Size(200, 50)),
                       child: TextFormField(
                         onSaved: (String? value) {
-                          debugPrint('Value for field $index saved as "$value"');
+                          debugPrint(
+                            'Value for field $index saved as "$value"',
+                          );
                         },
                       ),
                     ),

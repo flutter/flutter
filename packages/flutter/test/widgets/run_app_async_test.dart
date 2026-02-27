@@ -20,7 +20,9 @@ class TestBinding extends WidgetsFlutterBinding {
   }
 
   @override
-  bool debugCheckZone(String entryPoint) { return true; }
+  bool debugCheckZone(String entryPoint) {
+    return true;
+  }
 
   static TestBinding get instance => BindingBase.checkInstance(_instance);
   static TestBinding? _instance;
@@ -40,15 +42,9 @@ void main() {
   });
 
   test('WidgetBinding build rendering tree and warm up frame back to back', () {
-    final FakeAsync fakeAsync = FakeAsync();
+    final fakeAsync = FakeAsync();
     fakeAsync.run((FakeAsync async) {
-      runApp(
-        const MaterialApp(
-          home: Material(
-            child: Text('test'),
-          ),
-        ),
-      );
+      runApp(const MaterialApp(home: Material(child: Text('test'))));
       // Rendering tree is not built synchronously.
       expect(WidgetsBinding.instance.rootElement, isNull);
       fakeAsync.flushTimers();

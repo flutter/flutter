@@ -13,10 +13,7 @@ class ShowDialogExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      restorationScopeId: 'app',
-      home: DialogExample(),
-    );
+    return const MaterialApp(restorationScopeId: 'app', home: DialogExample());
   }
 }
 
@@ -39,7 +36,10 @@ class DialogExample extends StatelessWidget {
   }
 
   @pragma('vm:entry-point')
-  static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
+  static Route<Object?> _dialogBuilder(
+    BuildContext context,
+    Object? arguments,
+  ) {
     return DialogRoute<void>(
       context: context,
       builder: (BuildContext context) {

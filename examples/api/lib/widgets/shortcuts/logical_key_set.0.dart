@@ -17,9 +17,7 @@ class LogicalKeySetExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('LogicalKeySet Sample')),
-        body: const Center(
-          child: LogicalKeySetExample(),
-        ),
+        body: const Center(child: LogicalKeySetExample()),
       ),
     );
   }
@@ -43,7 +41,8 @@ class _LogicalKeySetExampleState extends State<LogicalKeySetExample> {
   Widget build(BuildContext context) {
     return Shortcuts(
       shortcuts: <ShortcutActivator, Intent>{
-        LogicalKeySet(LogicalKeyboardKey.keyC, LogicalKeyboardKey.controlLeft): const IncrementIntent(),
+        LogicalKeySet(LogicalKeyboardKey.keyC, LogicalKeyboardKey.controlLeft):
+            const IncrementIntent(),
       },
       child: Actions(
         actions: <Type, Action<Intent>>{

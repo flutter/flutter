@@ -29,26 +29,20 @@ class SliverFillRemainingExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomScrollView(
       slivers: <Widget>[
-        SliverFixedExtentList(
+        SliverFixedExtentList.builder(
           itemExtent: 130.0,
-          delegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) {
-              return Container(
-                color: index.isEven ? Colors.indigo[200] : Colors.orange[200],
-              );
-            },
-            childCount: 5,
-          ),
+          itemCount: 5,
+          itemBuilder: (BuildContext context, int index) {
+            return Container(
+              color: index.isEven ? Colors.indigo[200] : Colors.orange[200],
+            );
+          },
         ),
         const SliverFillRemaining(
           hasScrollBody: false,
           child: Padding(
             padding: EdgeInsets.all(50.0),
-            child: Icon(
-              Icons.pan_tool,
-              size: 60,
-              color: Colors.blueGrey,
-            ),
+            child: Icon(Icons.pan_tool, size: 60, color: Colors.blueGrey),
           ),
         ),
       ],

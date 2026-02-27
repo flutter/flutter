@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show  File, Platform;
+import 'dart:convert';
+import 'dart:io' show File, Platform;
 
 import 'package:path/path.dart' as path;
 
@@ -19,14 +20,15 @@ String get platformFolderName {
   if (Platform.isLinux) {
     return 'linux-x64';
   }
-  throw UnsupportedError('The platform ${Platform.operatingSystem} is not supported by this script.');
+  throw UnsupportedError(
+    'The platform ${Platform.operatingSystem} is not supported by this script.',
+  );
 }
 
 Future<void> testHarnessTestsRunner() async {
-
   printProgress('${green}Running test harness tests...$reset');
 
-  await _validateEngineHash();
+  await _validateEngineRevision();
 
   // Verify that the tests actually return failure on failure and success on
   // success.
@@ -36,7 +38,7 @@ Future<void> testHarnessTestsRunner() async {
   // to run (e.g. compiling), so we don't want to run them in series, especially
   // on 20-core machines. However, we have a race condition, so for now...
   // Race condition issue: https://github.com/flutter/flutter/issues/90026
-  final List<ShardRunner> tests = <ShardRunner>[
+  final tests = <ShardRunner>[
     () => runFlutterTest(
       automatedTests,
       script: path.join('test_smoke_test', 'pass_test.dart'),
@@ -55,10 +57,10 @@ Future<void> testHarnessTestsRunner() async {
       printOutput: false,
       outputChecker: (CommandResult result) {
         return result.flattenedStdout!.contains('failingPendingTimerTest')
-          ? null
-          : 'Failed to find the stack trace for the pending Timer.\n\n'
-            'stdout:\n${result.flattenedStdout}\n\n'
-            'stderr:\n${result.flattenedStderr}';
+            ? null
+            : 'Failed to find the stack trace for the pending Timer.\n\n'
+                  'stdout:\n${result.flattenedStdout}\n\n'
+                  'stderr:\n${result.flattenedStderr}';
       },
     ),
     () => runFlutterTest(
@@ -67,16 +69,17 @@ Future<void> testHarnessTestsRunner() async {
       expectFailure: true,
       printOutput: false,
       outputChecker: (CommandResult result) {
-        const String expectedError = '══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════\n'
+        const expectedError =
+            '══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════\n'
             'The following StateError was thrown running a test (but after the test had completed):\n'
             'Bad state: Exception thrown after test completed.';
         if (result.flattenedStdout!.contains(expectedError)) {
           return null;
         }
         return 'Failed to find expected output on stdout.\n\n'
-          'Expected output:\n$expectedError\n\n'
-          'Actual stdout:\n${result.flattenedStdout}\n\n'
-          'Actual stderr:\n${result.flattenedStderr}';
+            'Expected output:\n$expectedError\n\n'
+            'Actual stdout:\n${result.flattenedStdout}\n\n'
+            'Actual stderr:\n${result.flattenedStderr}';
       },
     ),
     () => runFlutterTest(
@@ -120,22 +123,29 @@ Future<void> testHarnessTestsRunner() async {
   } else {
     testsToRun = tests;
   }
-  for (final ShardRunner test in testsToRun) {
+  for (final test in testsToRun) {
     await test();
   }
 
   // Verify that we correctly generated the version file.
-  final String? versionError = await verifyVersion(File(path.join(flutterRoot, 'version')));
-  if (versionError != null) {
-    foundError(<String>[versionError]);
+  if (await Version.resolveIn() case final VersionError e) {
+    foundError(<String>[e.error]);
   }
 }
 
-/// Verify the Flutter Engine is the revision in
-/// bin/cache/internal/engine.version.
-Future<void> _validateEngineHash() async {
-  final String flutterTester = path.join(flutterRoot, 'bin', 'cache', 'artifacts', 'engine', platformFolderName, 'flutter_tester$exe');
+/// Verify the Flutter Engine is the revision in `bin/cache/engine_stamp.json` key: git_revision.
+Future<void> _validateEngineRevision() async {
+  final String flutterTester = path.join(
+    flutterRoot,
+    'bin',
+    'cache',
+    'artifacts',
+    'engine',
+    platformFolderName,
+    'flutter_tester$exe',
+  );
 
+  // TODO(matanlurey): Revisit with the Dart team if this is true now that they use FLUTTER_PREBUILT_ENGINE_VERSION=...
   if (runningInDartHHHBot) {
     // The Dart HHH bots intentionally modify the local artifact cache
     // and then use this script to run Flutter's test suites.
@@ -144,8 +154,19 @@ Future<void> _validateEngineHash() async {
     print('${yellow}Skipping Flutter Engine Version Validation for swarming bot $luciBotId.');
     return;
   }
-  final String expectedVersion = File(engineVersionFile).readAsStringSync().trim();
-  final CommandResult result = await runCommand(flutterTester, <String>['--help'], outputMode: OutputMode.capture);
+
+  final String expectedVersion;
+  if (json.decode(File(engineInfoFile).readAsStringSync().trim()) as Map<String, Object?> case {
+    'git_revision': final String parsedVersion,
+  }) {
+    expectedVersion = parsedVersion;
+  } else {
+    throw 'engine_stamp.json missing "git_revision" key';
+  }
+
+  final CommandResult result = await runCommand(flutterTester, <String>[
+    '--help',
+  ], outputMode: OutputMode.capture);
   if (result.flattenedStdout!.isNotEmpty) {
     foundError(<String>[
       '${red}The stdout of `$flutterTester --help` was not empty:$reset',
@@ -165,6 +186,8 @@ Future<void> _validateEngineHash() async {
     return;
   }
   if (!actualVersion.contains(expectedVersion)) {
-    foundError(<String>['${red}Expected "Flutter Engine Version: $expectedVersion", but found "$actualVersion".$reset']);
+    foundError(<String>[
+      '${red}Expected "Flutter Engine Version: $expectedVersion", but found "$actualVersion".$reset',
+    ]);
   }
 }

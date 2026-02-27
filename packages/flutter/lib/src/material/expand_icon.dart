@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'expansion_panel.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
@@ -118,8 +121,10 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   late AnimationController _controller;
   late Animation<double> _iconTurns;
 
-  static final Animatable<double> _iconTurnTween = Tween<double>(begin: 0.0, end: 0.5)
-    .chain(CurveTween(curve: Curves.fastOutSlowIn));
+  static final Animatable<double> _iconTurnTween = Tween<double>(
+    begin: 0.0,
+    end: 0.5,
+  ).chain(CurveTween(curve: Curves.fastOutSlowIn));
 
   @override
   void initState() {
@@ -154,7 +159,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
     widget.onPressed?.call(widget.isExpanded);
   }
 
-  /// Default icon colors and opacities for when [Theme.brightness] is set to
+  /// Default icon colors and opacities for when [ThemeData.brightness] is set to
   /// [Brightness.light] are based on the
   /// [Material Design system icon specifications](https://material.io/design/iconography/system-icons.html#color).
   /// Icon colors and opacities for [Brightness.dark] are based on the
@@ -168,9 +173,9 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
       return widget.color!;
     }
 
-    return switch (Theme.of(context).brightness) {
+    return switch (Theme.brightnessOf(context)) {
       Brightness.light => Colors.black54,
-      Brightness.dark  => Colors.white60,
+      Brightness.dark => Colors.white60,
     };
   }
 
@@ -179,7 +184,9 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final String onTapHint = widget.isExpanded ? localizations.expandedIconTapHint : localizations.collapsedIconTapHint;
+    final String onTapHint = widget.isExpanded
+        ? localizations.expandedIconTapHint
+        : localizations.collapsedIconTapHint;
 
     return Semantics(
       onTapHint: widget.onPressed == null ? null : onTapHint,
@@ -191,10 +198,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
         color: _iconColor,
         disabledColor: widget.disabledColor,
         onPressed: widget.onPressed == null ? null : _handlePressed,
-        icon: RotationTransition(
-          turns: _iconTurns,
-          child: const Icon(Icons.expand_more),
-        ),
+        icon: RotationTransition(turns: _iconTurns, child: const Icon(Icons.expand_more)),
       ),
     );
   }

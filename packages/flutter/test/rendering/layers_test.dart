@@ -15,11 +15,9 @@ void main() {
 
   test('non-painted layers are detached', () {
     RenderObject boundary, inner;
-    final RenderOpacity root = RenderOpacity(
+    final root = RenderOpacity(
       child: boundary = RenderRepaintBoundary(
-        child: inner = RenderDecoratedBox(
-          decoration: const BoxDecoration(),
-        ),
+        child: inner = RenderDecoratedBox(decoration: const BoxDecoration()),
       ),
     );
     layout(root, phase: EnginePhase.paint);
@@ -47,12 +45,12 @@ void main() {
   });
 
   test('updateSubtreeNeedsAddToScene propagates Layer.alwaysNeedsAddToScene up the tree', () {
-    final ContainerLayer a = ContainerLayer();
-    final ContainerLayer b = ContainerLayer();
-    final ContainerLayer c = ContainerLayer();
-    final _TestAlwaysNeedsAddToSceneLayer d = _TestAlwaysNeedsAddToSceneLayer();
-    final ContainerLayer e = ContainerLayer();
-    final ContainerLayer f = ContainerLayer();
+    final a = ContainerLayer();
+    final b = ContainerLayer();
+    final c = ContainerLayer();
+    final d = _TestAlwaysNeedsAddToSceneLayer();
+    final e = ContainerLayer();
+    final f = ContainerLayer();
 
     // Tree structure:
     //        a
@@ -93,14 +91,14 @@ void main() {
   });
 
   test('updateSubtreeNeedsAddToScene propagates Layer._needsAddToScene up the tree', () {
-    final ContainerLayer a = ContainerLayer();
-    final ContainerLayer b = ContainerLayer();
-    final ContainerLayer c = ContainerLayer();
-    final ContainerLayer d = ContainerLayer();
-    final ContainerLayer e = ContainerLayer();
-    final ContainerLayer f = ContainerLayer();
-    final ContainerLayer g = ContainerLayer();
-    final List<ContainerLayer> allLayers = <ContainerLayer>[a, b, c, d, e, f, g];
+    final a = ContainerLayer();
+    final b = ContainerLayer();
+    final c = ContainerLayer();
+    final d = ContainerLayer();
+    final e = ContainerLayer();
+    final f = ContainerLayer();
+    final g = ContainerLayer();
+    final allLayers = <ContainerLayer>[a, b, c, d, e, f, g];
 
     // The tree is like the following where b and j are dirty:
     //        a____
@@ -115,15 +113,15 @@ void main() {
     b.append(f);
     c.append(g);
 
-    for (final ContainerLayer layer in allLayers) {
+    for (final layer in allLayers) {
       expect(layer.debugSubtreeNeedsAddToScene, true);
     }
 
-    for (final ContainerLayer layer in allLayers) {
+    for (final layer in allLayers) {
       layer.debugMarkClean();
     }
 
-    for (final ContainerLayer layer in allLayers) {
+    for (final layer in allLayers) {
       expect(layer.debugSubtreeNeedsAddToScene, false);
     }
 
@@ -150,15 +148,15 @@ void main() {
     expect(g.debugSubtreeNeedsAddToScene, true);
 
     a.buildScene(SceneBuilder());
-    for (final ContainerLayer layer in allLayers) {
+    for (final layer in allLayers) {
       expect(layer.debugSubtreeNeedsAddToScene, false);
     }
   });
 
   test('follower layers are always dirty', () {
-    final LayerLink link = LayerLink();
-    final LeaderLayer leaderLayer = LeaderLayer(link: link);
-    final FollowerLayer followerLayer = FollowerLayer(link: link);
+    final link = LayerLink();
+    final leaderLayer = LeaderLayer(link: link);
+    final followerLayer = FollowerLayer(link: link);
     leaderLayer.debugMarkClean();
     followerLayer.debugMarkClean();
     leaderLayer.updateSubtreeNeedsAddToScene();
@@ -167,12 +165,15 @@ void main() {
   });
 
   test('switching layer link of an attached leader layer should not crash', () {
-    final LayerLink link = LayerLink();
-    final LeaderLayer leaderLayer = LeaderLayer(link: link);
+    final link = LayerLink();
+    final leaderLayer = LeaderLayer(link: link);
     final FlutterView flutterView = RendererBinding.instance.platformDispatcher.views.single;
-    final RenderView view = RenderView(configuration: ViewConfiguration.fromView(flutterView), view: flutterView);
+    final view = RenderView(
+      configuration: ViewConfiguration.fromView(flutterView),
+      view: flutterView,
+    );
     leaderLayer.attach(view);
-    final LayerLink link2 = LayerLink();
+    final link2 = LayerLink();
     leaderLayer.link = link2;
     // This should not crash.
     leaderLayer.detach();
@@ -180,11 +181,14 @@ void main() {
   });
 
   test('layer link attach/detach order should not crash app.', () {
-    final LayerLink link = LayerLink();
-    final LeaderLayer leaderLayer1 = LeaderLayer(link: link);
-    final LeaderLayer leaderLayer2 = LeaderLayer(link: link);
+    final link = LayerLink();
+    final leaderLayer1 = LeaderLayer(link: link);
+    final leaderLayer2 = LeaderLayer(link: link);
     final FlutterView flutterView = RendererBinding.instance.platformDispatcher.views.single;
-    final RenderView view = RenderView(configuration: ViewConfiguration.fromView(flutterView), view: flutterView);
+    final view = RenderView(
+      configuration: ViewConfiguration.fromView(flutterView),
+      view: flutterView,
+    );
     leaderLayer1.attach(view);
     leaderLayer2.attach(view);
     leaderLayer2.detach();
@@ -193,11 +197,11 @@ void main() {
   });
 
   test('leader layers not dirty when connected to follower layer', () {
-    final ContainerLayer root = ContainerLayer()..attach(Object());
+    final root = ContainerLayer()..attach(Object());
 
-    final LayerLink link = LayerLink();
-    final LeaderLayer leaderLayer = LeaderLayer(link: link);
-    final FollowerLayer followerLayer = FollowerLayer(link: link);
+    final link = LayerLink();
+    final leaderLayer = LeaderLayer(link: link);
+    final followerLayer = FollowerLayer(link: link);
 
     root.append(leaderLayer);
     root.append(followerLayer);
@@ -210,9 +214,9 @@ void main() {
   });
 
   test('leader layers are not dirty when all followers disconnects', () {
-    final ContainerLayer root = ContainerLayer()..attach(Object());
-    final LayerLink link = LayerLink();
-    final LeaderLayer leaderLayer = LeaderLayer(link: link);
+    final root = ContainerLayer()..attach(Object());
+    final link = LayerLink();
+    final leaderLayer = LeaderLayer(link: link);
     root.append(leaderLayer);
 
     // Does not need add to scene when nothing is connected to link.
@@ -221,13 +225,13 @@ void main() {
     expect(leaderLayer.debugSubtreeNeedsAddToScene, false);
 
     // Connecting a follower does not require adding to scene
-    final FollowerLayer follower1 = FollowerLayer(link: link);
+    final follower1 = FollowerLayer(link: link);
     root.append(follower1);
     leaderLayer.debugMarkClean();
     leaderLayer.updateSubtreeNeedsAddToScene();
     expect(leaderLayer.debugSubtreeNeedsAddToScene, false);
 
-    final FollowerLayer follower2 = FollowerLayer(link: link);
+    final follower2 = FollowerLayer(link: link);
     root.append(follower2);
     leaderLayer.debugMarkClean();
     leaderLayer.updateSubtreeNeedsAddToScene();
@@ -248,20 +252,17 @@ void main() {
 
   test('LeaderLayer.applyTransform can be called after retained rendering', () {
     void expectTransform(RenderObject leader) {
-      final LeaderLayer leaderLayer = leader.debugLayer! as LeaderLayer;
-      final Matrix4 expected = Matrix4.identity()
-        ..translate(leaderLayer.offset.dx, leaderLayer.offset.dy);
-      final Matrix4 transformed = Matrix4.identity();
+      final leaderLayer = leader.debugLayer! as LeaderLayer;
+      final expected = Matrix4.identity()..translate(leaderLayer.offset.dx, leaderLayer.offset.dy);
+      final transformed = Matrix4.identity();
       leaderLayer.applyTransform(null, transformed);
       expect(transformed, expected);
     }
 
-    final LayerLink link = LayerLink();
+    final link = LayerLink();
     late RenderLeaderLayer leader;
-    final RenderRepaintBoundary root = RenderRepaintBoundary(
-      child:RenderRepaintBoundary(
-        child: leader = RenderLeaderLayer(link: link),
-      ),
+    final root = RenderRepaintBoundary(
+      child: RenderRepaintBoundary(child: leader = RenderLeaderLayer(link: link)),
     );
     layout(root, phase: EnginePhase.composite);
 
@@ -277,17 +278,17 @@ void main() {
   });
 
   test('depthFirstIterateChildren', () {
-    final ContainerLayer a = ContainerLayer();
-    final ContainerLayer b = ContainerLayer();
-    final ContainerLayer c = ContainerLayer();
-    final ContainerLayer d = ContainerLayer();
-    final ContainerLayer e = ContainerLayer();
-    final ContainerLayer f = ContainerLayer();
-    final ContainerLayer g = ContainerLayer();
+    final a = ContainerLayer();
+    final b = ContainerLayer();
+    final c = ContainerLayer();
+    final d = ContainerLayer();
+    final e = ContainerLayer();
+    final f = ContainerLayer();
+    final g = ContainerLayer();
 
-    final PictureLayer h = PictureLayer(Rect.zero);
-    final PictureLayer i = PictureLayer(Rect.zero);
-    final PictureLayer j = PictureLayer(Rect.zero);
+    final h = PictureLayer(Rect.zero);
+    final i = PictureLayer(Rect.zero);
+    final j = PictureLayer(Rect.zero);
 
     // The tree is like the following:
     //        a____
@@ -307,10 +308,7 @@ void main() {
     c.append(g);
     g.append(j);
 
-    expect(
-      a.depthFirstIterateChildren(),
-      <Layer>[b, d, h, i, e, f, c, g, j],
-    );
+    expect(a.depthFirstIterateChildren(), <Layer>[b, d, h, i, e, f, c, g, j]);
 
     d.remove();
     //        a____
@@ -320,10 +318,7 @@ void main() {
     //        e  f  g
     //              |
     //              j
-    expect(
-      a.depthFirstIterateChildren(),
-      <Layer>[b, e, f, c, g, j],
-    );
+    expect(a.depthFirstIterateChildren(), <Layer>[b, e, f, c, g, j]);
   });
 
   void checkNeedsAddToScene(Layer layer, void Function() mutateCallback) {
@@ -336,11 +331,12 @@ void main() {
   }
 
   List<String> getDebugInfo(Layer layer) {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     layer.debugFillProperties(builder);
     return builder.properties
         .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString()).toList();
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
   }
 
   test('ClipRectLayer prints clipBehavior in debug info', () {
@@ -359,6 +355,14 @@ void main() {
     );
   });
 
+  test('ClipRSuperellipseLayer prints clipBehavior in debug info', () {
+    expect(getDebugInfo(ClipRSuperellipseLayer()), contains('clipBehavior: Clip.antiAlias'));
+    expect(
+      getDebugInfo(ClipRSuperellipseLayer(clipBehavior: Clip.antiAliasWithSaveLayer)),
+      contains('clipBehavior: Clip.antiAliasWithSaveLayer'),
+    );
+  });
+
   test('ClipPathLayer prints clipBehavior in debug info', () {
     expect(getDebugInfo(ClipPathLayer()), contains('clipBehavior: Clip.antiAlias'));
     expect(
@@ -368,23 +372,20 @@ void main() {
   });
 
   test('BackdropFilterLayer prints filter and blendMode in debug info', () {
-    final ImageFilter filter = ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0, tileMode: TileMode.repeated);
-    final BackdropFilterLayer layer = BackdropFilterLayer(filter: filter, blendMode: BlendMode.clear);
+    final filter = ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0, tileMode: TileMode.repeated);
+    final layer = BackdropFilterLayer(filter: filter, blendMode: BlendMode.clear);
     final List<String> info = getDebugInfo(layer);
 
-    expect(
-      info,
-      contains('filter: ImageFilter.blur(${1.0}, ${1.0}, repeated)'),
-    );
+    expect(info, contains('filter: ImageFilter.blur(${1.0}, ${1.0}, repeated)'));
     expect(info, contains('blendMode: clear'));
   });
 
   test('PictureLayer prints picture, raster cache hints in debug info', () {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder);
     canvas.drawPaint(Paint());
     final Picture picture = recorder.endRecording();
-    final PictureLayer layer = PictureLayer(const Rect.fromLTRB(0, 0, 1, 1));
+    final layer = PictureLayer(const Rect.fromLTRB(0, 0, 1, 1));
     layer.picture = picture;
     layer.isComplexHint = true;
     layer.willChangeHint = false;
@@ -395,7 +396,7 @@ void main() {
   });
 
   test('Layer prints engineLayer if it is not null in debug info', () {
-    final ConcreteLayer layer = ConcreteLayer();
+    final layer = ConcreteLayer();
     List<String> info = getDebugInfo(layer);
     expect(info, isNot(contains('engine layer: ${describeIdentity(null)}')));
 
@@ -405,9 +406,9 @@ void main() {
   });
 
   test('mutating PictureLayer fields triggers needsAddToScene', () {
-    final PictureLayer pictureLayer = PictureLayer(Rect.zero);
+    final pictureLayer = PictureLayer(Rect.zero);
     checkNeedsAddToScene(pictureLayer, () {
-      final PictureRecorder recorder = PictureRecorder();
+      final recorder = PictureRecorder();
       Canvas(recorder);
       pictureLayer.picture = recorder.endRecording();
     });
@@ -423,27 +424,24 @@ void main() {
     });
   });
 
-  const Rect unitRect = Rect.fromLTRB(0, 0, 1, 1);
+  const unitRect = Rect.fromLTRB(0, 0, 1, 1);
 
   test('mutating PerformanceOverlayLayer fields triggers needsAddToScene', () {
-    final PerformanceOverlayLayer layer = PerformanceOverlayLayer(
-      overlayRect: Rect.zero,
-      optionsMask: 0,
-    );
+    final layer = PerformanceOverlayLayer(overlayRect: Rect.zero, optionsMask: 0);
     checkNeedsAddToScene(layer, () {
       layer.overlayRect = unitRect;
     });
   });
 
   test('mutating OffsetLayer fields triggers needsAddToScene', () {
-    final OffsetLayer layer = OffsetLayer();
+    final layer = OffsetLayer();
     checkNeedsAddToScene(layer, () {
       layer.offset = const Offset(1, 1);
     });
   });
 
   test('mutating ClipRectLayer fields triggers needsAddToScene', () {
-    final ClipRectLayer layer = ClipRectLayer(clipRect: Rect.zero);
+    final layer = ClipRectLayer(clipRect: Rect.zero);
     checkNeedsAddToScene(layer, () {
       layer.clipRect = unitRect;
     });
@@ -453,7 +451,7 @@ void main() {
   });
 
   test('mutating ClipRRectLayer fields triggers needsAddToScene', () {
-    final ClipRRectLayer layer = ClipRRectLayer(clipRRect: RRect.zero);
+    final layer = ClipRRectLayer(clipRRect: RRect.zero);
     checkNeedsAddToScene(layer, () {
       layer.clipRRect = RRect.fromRectAndRadius(unitRect, Radius.zero);
     });
@@ -462,10 +460,20 @@ void main() {
     });
   });
 
-  test('mutating ClipPath fields triggers needsAddToScene', () {
-    final ClipPathLayer layer = ClipPathLayer(clipPath: Path());
+  test('mutating ClipRSuperellipseLayer fields triggers needsAddToScene', () {
+    final layer = ClipRSuperellipseLayer(clipRSuperellipse: RSuperellipse.zero);
     checkNeedsAddToScene(layer, () {
-      final Path newPath = Path();
+      layer.clipRSuperellipse = RSuperellipse.fromRectAndRadius(unitRect, Radius.zero);
+    });
+    checkNeedsAddToScene(layer, () {
+      layer.clipBehavior = Clip.antiAliasWithSaveLayer;
+    });
+  });
+
+  test('mutating ClipPath fields triggers needsAddToScene', () {
+    final layer = ClipPathLayer(clipPath: Path());
+    checkNeedsAddToScene(layer, () {
+      final newPath = Path();
       newPath.addRect(unitRect);
       layer.clipPath = newPath;
     });
@@ -475,7 +483,7 @@ void main() {
   });
 
   test('mutating OpacityLayer fields triggers needsAddToScene', () {
-    final OpacityLayer layer = OpacityLayer(alpha: 0);
+    final layer = OpacityLayer(alpha: 0);
     checkNeedsAddToScene(layer, () {
       layer.alpha = 1;
     });
@@ -485,7 +493,7 @@ void main() {
   });
 
   test('mutating ColorFilterLayer fields triggers needsAddToScene', () {
-    final ColorFilterLayer layer = ColorFilterLayer(
+    final layer = ColorFilterLayer(
       colorFilter: const ColorFilter.mode(Color(0xFFFF0000), BlendMode.color),
     );
     checkNeedsAddToScene(layer, () {
@@ -496,7 +504,7 @@ void main() {
   test('mutating ShaderMaskLayer fields triggers needsAddToScene', () {
     const Gradient gradient = RadialGradient(colors: <Color>[Color(0x00000000), Color(0x00000001)]);
     final Shader shader = gradient.createShader(Rect.zero);
-    final ShaderMaskLayer layer = ShaderMaskLayer(shader: shader, maskRect: Rect.zero, blendMode: BlendMode.clear);
+    final layer = ShaderMaskLayer(shader: shader, maskRect: Rect.zero, blendMode: BlendMode.clear);
     checkNeedsAddToScene(layer, () {
       layer.maskRect = unitRect;
     });
@@ -509,16 +517,16 @@ void main() {
   });
 
   test('mutating BackdropFilterLayer fields triggers needsAddToScene', () {
-    final BackdropFilterLayer layer = BackdropFilterLayer(filter: ImageFilter.blur());
+    final layer = BackdropFilterLayer(filter: ImageFilter.blur());
     checkNeedsAddToScene(layer, () {
       layer.filter = ImageFilter.blur(sigmaX: 1.0);
     });
   });
 
   test('ContainerLayer.toImage can render interior layer', () {
-    final OffsetLayer parent = OffsetLayer();
-    final OffsetLayer child = OffsetLayer();
-    final OffsetLayer grandChild = OffsetLayer();
+    final parent = OffsetLayer();
+    final child = OffsetLayer();
+    final grandChild = OffsetLayer();
     child.append(grandChild);
     parent.append(child);
 
@@ -531,12 +539,12 @@ void main() {
     // Ensure we can render the same scene again after rendering an interior
     // layer.
     parent.buildScene(SceneBuilder());
-  }, skip: isBrowser && !isSkiaWeb); // TODO(yjbanov): `toImage` doesn't work in HTML: https://github.com/flutter/flutter/issues/49857
+  });
 
   test('ContainerLayer.toImageSync can render interior layer', () {
-    final OffsetLayer parent = OffsetLayer();
-    final OffsetLayer child = OffsetLayer();
-    final OffsetLayer grandChild = OffsetLayer();
+    final parent = OffsetLayer();
+    final child = OffsetLayer();
+    final grandChild = OffsetLayer();
     child.append(grandChild);
     parent.append(child);
 
@@ -549,16 +557,16 @@ void main() {
     // Ensure we can render the same scene again after rendering an interior
     // layer.
     parent.buildScene(SceneBuilder());
-  }, skip: isBrowser && !isSkiaWeb); // TODO(yjbanov): `toImage` doesn't work in HTML: https://github.com/flutter/flutter/issues/49857
+  });
 
   test('PictureLayer does not let you call dispose unless refcount is 0', () {
-    PictureLayer layer = PictureLayer(Rect.zero);
+    var layer = PictureLayer(Rect.zero);
     expect(layer.debugHandleCount, 0);
     layer.dispose();
     expect(layer.debugDisposed, true);
 
     layer = PictureLayer(Rect.zero);
-    final LayerHandle<PictureLayer> handle = LayerHandle<PictureLayer>(layer);
+    final handle = LayerHandle<PictureLayer>(layer);
     expect(layer.debugHandleCount, 1);
     expect(() => layer.dispose(), throwsAssertionError);
     handle.layer = null;
@@ -568,8 +576,8 @@ void main() {
   });
 
   test('Layer append/remove increases/decreases handle count', () {
-    final PictureLayer layer = PictureLayer(Rect.zero);
-    final ContainerLayer parent = ContainerLayer();
+    final layer = PictureLayer(Rect.zero);
+    final parent = ContainerLayer();
     expect(layer.debugHandleCount, 0);
     expect(layer.debugDisposed, false);
 
@@ -584,7 +592,7 @@ void main() {
 
   test('Layer.dispose disposes the engineLayer', () {
     final Layer layer = ConcreteLayer();
-    final FakeEngineLayer engineLayer = FakeEngineLayer();
+    final engineLayer = FakeEngineLayer();
     layer.engineLayer = engineLayer;
     expect(engineLayer.disposed, false);
     layer.dispose();
@@ -594,7 +602,7 @@ void main() {
 
   test('Layer.engineLayer (set) disposes the engineLayer', () {
     final Layer layer = ConcreteLayer();
-    final FakeEngineLayer engineLayer = FakeEngineLayer();
+    final engineLayer = FakeEngineLayer();
     layer.engineLayer = engineLayer;
     expect(engineLayer.disposed, false);
     layer.engineLayer = null;
@@ -602,8 +610,8 @@ void main() {
   });
 
   test('PictureLayer.picture (set) disposes the picture', () {
-    final PictureLayer layer = PictureLayer(Rect.zero);
-    final FakePicture picture = FakePicture();
+    final layer = PictureLayer(Rect.zero);
+    final picture = FakePicture();
     layer.picture = picture;
     expect(picture.disposed, false);
     layer.picture = null;
@@ -611,8 +619,8 @@ void main() {
   });
 
   test('PictureLayer disposes the picture', () {
-    final PictureLayer layer = PictureLayer(Rect.zero);
-    final FakePicture picture = FakePicture();
+    final layer = PictureLayer(Rect.zero);
+    final picture = FakePicture();
     layer.picture = picture;
     expect(picture.disposed, false);
     layer.dispose();
@@ -620,13 +628,13 @@ void main() {
   });
 
   test('LayerHandle disposes the layer', () {
-    final ConcreteLayer layer = ConcreteLayer();
-    final ConcreteLayer layer2 = ConcreteLayer();
+    final layer = ConcreteLayer();
+    final layer2 = ConcreteLayer();
 
     expect(layer.debugHandleCount, 0);
     expect(layer2.debugHandleCount, 0);
 
-    final LayerHandle<ConcreteLayer> holder = LayerHandle<ConcreteLayer>(layer);
+    final holder = LayerHandle<ConcreteLayer>(layer);
     expect(layer.debugHandleCount, 1);
     expect(layer.debugDisposed, false);
     expect(layer2.debugHandleCount, 0);
@@ -654,8 +662,8 @@ void main() {
   });
 
   test('OpacityLayer does not push an OffsetLayer if there are no children', () {
-    final OpacityLayer layer = OpacityLayer(alpha: 128);
-    final FakeSceneBuilder builder = FakeSceneBuilder();
+    final layer = OpacityLayer(alpha: 128);
+    final builder = FakeSceneBuilder();
     layer.addToScene(builder);
     expect(builder.pushedOpacity, false);
     expect(builder.pushedOffset, false);
@@ -701,8 +709,8 @@ void main() {
   });
 
   test('OpacityLayer dispose its engineLayer if there are no children', () {
-    final OpacityLayer layer = OpacityLayer(alpha: 128);
-    final FakeSceneBuilder builder = FakeSceneBuilder();
+    final layer = OpacityLayer(alpha: 128);
+    final builder = FakeSceneBuilder();
     layer.addToScene(builder);
     expect(layer.engineLayer, null);
 
@@ -716,33 +724,37 @@ void main() {
   });
 
   test('Layers describe clip bounds', () {
-    ContainerLayer layer = ContainerLayer();
+    var layer = ContainerLayer();
     expect(layer.describeClipBounds(), null);
 
-    const Rect bounds = Rect.fromLTRB(10, 10, 20, 20);
-    final RRect rbounds = RRect.fromRectXY(bounds, 2, 2);
+    const bounds = Rect.fromLTRB(10, 10, 20, 20);
+    final rrBounds = RRect.fromRectXY(bounds, 2, 2);
+    final rseBounds = RSuperellipse.fromRectXY(bounds, 2, 2);
     layer = ClipRectLayer(clipRect: bounds);
     expect(layer.describeClipBounds(), bounds);
 
-    layer = ClipRRectLayer(clipRRect: rbounds);
-    expect(layer.describeClipBounds(), rbounds.outerRect);
+    layer = ClipRRectLayer(clipRRect: rrBounds);
+    expect(layer.describeClipBounds(), rrBounds.outerRect);
+
+    layer = ClipRSuperellipseLayer(clipRSuperellipse: rseBounds);
+    expect(layer.describeClipBounds(), rseBounds.outerRect);
 
     layer = ClipPathLayer(clipPath: Path()..addRect(bounds));
     expect(layer.describeClipBounds(), bounds);
   });
 
   test('Subtree has composition callbacks', () {
-    final ContainerLayer root = ContainerLayer();
+    final root = ContainerLayer();
     expect(root.subtreeHasCompositionCallbacks, false);
 
-    final List<VoidCallback> cancellationCallbacks = <VoidCallback>[];
+    final cancellationCallbacks = <VoidCallback>[];
 
     cancellationCallbacks.add(root.addCompositionCallback((_) {}));
     expect(root.subtreeHasCompositionCallbacks, true);
 
-    final ContainerLayer a1 = ContainerLayer();
-    final ContainerLayer a2 = ContainerLayer();
-    final ContainerLayer b1 = ContainerLayer();
+    final a1 = ContainerLayer();
+    final a2 = ContainerLayer();
+    final b1 = ContainerLayer();
     root.append(a1);
     root.append(a2);
     a1.append(b1);
@@ -774,12 +786,12 @@ void main() {
   });
 
   test('Subtree has composition callbacks - removeChild', () {
-    final ContainerLayer root = ContainerLayer();
+    final root = ContainerLayer();
     expect(root.subtreeHasCompositionCallbacks, false);
 
-    final ContainerLayer a1 = ContainerLayer();
-    final ContainerLayer a2 = ContainerLayer();
-    final ContainerLayer b1 = ContainerLayer();
+    final a1 = ContainerLayer();
+    final a2 = ContainerLayer();
+    final b1 = ContainerLayer();
     root.append(a1);
     root.append(a2);
     a1.append(b1);
@@ -789,7 +801,7 @@ void main() {
     expect(root.subtreeHasCompositionCallbacks, false);
     expect(a2.subtreeHasCompositionCallbacks, false);
 
-    b1.addCompositionCallback((_) { });
+    b1.addCompositionCallback((_) {});
 
     expect(b1.subtreeHasCompositionCallbacks, true);
     expect(a1.subtreeHasCompositionCallbacks, true);
@@ -805,11 +817,11 @@ void main() {
   });
 
   test('No callback if removed', () {
-    final ContainerLayer root = ContainerLayer();
+    final root = ContainerLayer();
 
-    final ContainerLayer a1 = ContainerLayer();
-    final ContainerLayer a2 = ContainerLayer();
-    final ContainerLayer b1 = ContainerLayer();
+    final a1 = ContainerLayer();
+    final a2 = ContainerLayer();
+    final b1 = ContainerLayer();
     root.append(a1);
     root.append(a2);
     a1.append(b1);
@@ -823,16 +835,16 @@ void main() {
   });
 
   test('Observe layer tree composition - not retained', () {
-    final ContainerLayer root = ContainerLayer();
+    final root = ContainerLayer();
 
-    final ContainerLayer a1 = ContainerLayer();
-    final ContainerLayer a2 = ContainerLayer();
-    final ContainerLayer b1 = ContainerLayer();
+    final a1 = ContainerLayer();
+    final a2 = ContainerLayer();
+    final b1 = ContainerLayer();
     root.append(a1);
     root.append(a2);
     a1.append(b1);
 
-    bool compositedB1 = false;
+    var compositedB1 = false;
 
     b1.addCompositionCallback((Layer layer) {
       expect(layer, b1);
@@ -847,18 +859,18 @@ void main() {
   });
 
   test('Observe layer tree composition - retained', () {
-    final ContainerLayer root = ContainerLayer();
+    final root = ContainerLayer();
 
-    final ContainerLayer a1 = ContainerLayer();
-    final ContainerLayer a2 = ContainerLayer();
-    final ContainerLayer b1 = ContainerLayer();
+    final a1 = ContainerLayer();
+    final a2 = ContainerLayer();
+    final b1 = ContainerLayer();
     root.append(a1);
     root.append(a2);
     a1.append(b1);
 
     // Actually build the retained layer so that the engine sees it as real and
     // reusable.
-    SceneBuilder builder = SceneBuilder();
+    var builder = SceneBuilder();
     b1.engineLayer = builder.pushOffset(0, 0);
     builder.build().dispose();
     builder = SceneBuilder();
@@ -869,7 +881,7 @@ void main() {
     b1.debugMarkClean();
     expect(b1.debugSubtreeNeedsAddToScene, false);
 
-    bool compositedB1 = false;
+    var compositedB1 = false;
 
     b1.addCompositionCallback((Layer layer) {
       expect(layer, b1);
@@ -884,16 +896,16 @@ void main() {
   });
 
   test('Observe layer tree composition - asserts on mutation', () {
-    final ContainerLayer root = ContainerLayer();
+    final root = ContainerLayer();
 
-    final ContainerLayer a1 = ContainerLayer();
-    final ContainerLayer a2 = ContainerLayer();
-    final ContainerLayer b1 = ContainerLayer();
+    final a1 = ContainerLayer();
+    final a2 = ContainerLayer();
+    final b1 = ContainerLayer();
     root.append(a1);
     root.append(a2);
     a1.append(b1);
 
-    bool compositedB1 = false;
+    var compositedB1 = false;
 
     b1.addCompositionCallback((Layer layer) {
       expect(layer, b1);
@@ -916,16 +928,16 @@ void main() {
   });
 
   test('Observe layer tree composition - detach triggers callback', () {
-    final ContainerLayer root = ContainerLayer();
+    final root = ContainerLayer();
 
-    final ContainerLayer a1 = ContainerLayer();
-    final ContainerLayer a2 = ContainerLayer();
-    final ContainerLayer b1 = ContainerLayer();
+    final a1 = ContainerLayer();
+    final a2 = ContainerLayer();
+    final b1 = ContainerLayer();
     root.append(a1);
     root.append(a2);
     a1.append(b1);
 
-    bool compositedB1 = false;
+    var compositedB1 = false;
 
     b1.addCompositionCallback((Layer layer) {
       expect(layer, b1);
@@ -939,15 +951,15 @@ void main() {
   });
 
   test('Observe layer tree composition - observer count correctly maintained', () {
-    final ContainerLayer root = ContainerLayer();
-    final ContainerLayer a1 = ContainerLayer();
+    final root = ContainerLayer();
+    final a1 = ContainerLayer();
     root.append(a1);
 
     expect(root.subtreeHasCompositionCallbacks, false);
     expect(a1.subtreeHasCompositionCallbacks, false);
 
-    final VoidCallback remover1 = a1.addCompositionCallback((_) { });
-    final VoidCallback remover2 = a1.addCompositionCallback((_) { });
+    final VoidCallback remover1 = a1.addCompositionCallback((_) {});
+    final VoidCallback remover2 = a1.addCompositionCallback((_) {});
 
     expect(root.subtreeHasCompositionCallbacks, true);
     expect(a1.subtreeHasCompositionCallbacks, true);
@@ -964,35 +976,37 @@ void main() {
   });
 
   test('Double removing a observe callback throws', () {
-    final ContainerLayer root = ContainerLayer();
-    final VoidCallback callback = root.addCompositionCallback((_) { });
+    final root = ContainerLayer();
+    final VoidCallback callback = root.addCompositionCallback((_) {});
     callback();
 
     expect(() => callback(), throwsAssertionError);
   });
 
   test('Removing an observe callback on a disposed layer does not throw', () {
-    final ContainerLayer root = ContainerLayer();
-    final VoidCallback callback = root.addCompositionCallback((_) { });
+    final root = ContainerLayer();
+    final VoidCallback callback = root.addCompositionCallback((_) {});
     root.dispose();
     expect(() => callback(), returnsNormally);
   });
 
   test('Layer types that support rasterization', () {
     // Supported.
-    final OffsetLayer offsetLayer = OffsetLayer();
-    final OpacityLayer opacityLayer = OpacityLayer();
-    final ClipRectLayer clipRectLayer = ClipRectLayer();
-    final ClipRRectLayer clipRRectLayer = ClipRRectLayer();
-    final ImageFilterLayer imageFilterLayer = ImageFilterLayer();
-    final BackdropFilterLayer backdropFilterLayer = BackdropFilterLayer();
-    final ColorFilterLayer colorFilterLayer = ColorFilterLayer();
-    final ShaderMaskLayer shaderMaskLayer = ShaderMaskLayer();
-    final TextureLayer textureLayer = TextureLayer(rect: Rect.zero, textureId: 1);
+    final offsetLayer = OffsetLayer();
+    final opacityLayer = OpacityLayer();
+    final clipRectLayer = ClipRectLayer();
+    final clipRRectLayer = ClipRRectLayer();
+    final clipRSuperellipseLayer = ClipRSuperellipseLayer();
+    final imageFilterLayer = ImageFilterLayer();
+    final backdropFilterLayer = BackdropFilterLayer();
+    final colorFilterLayer = ColorFilterLayer();
+    final shaderMaskLayer = ShaderMaskLayer();
+    final textureLayer = TextureLayer(rect: Rect.zero, textureId: 1);
     expect(offsetLayer.supportsRasterization(), true);
     expect(opacityLayer.supportsRasterization(), true);
     expect(clipRectLayer.supportsRasterization(), true);
     expect(clipRRectLayer.supportsRasterization(), true);
+    expect(clipRSuperellipseLayer.supportsRasterization(), true);
     expect(imageFilterLayer.supportsRasterization(), true);
     expect(backdropFilterLayer.supportsRasterization(), true);
     expect(colorFilterLayer.supportsRasterization(), true);
@@ -1000,7 +1014,7 @@ void main() {
     expect(textureLayer.supportsRasterization(), true);
 
     // Unsupported.
-    final PlatformViewLayer platformViewLayer = PlatformViewLayer(rect: Rect.zero, viewId: 1);
+    final platformViewLayer = PlatformViewLayer(rect: Rect.zero, viewId: 1);
 
     expect(platformViewLayer.supportsRasterization(), false);
   });

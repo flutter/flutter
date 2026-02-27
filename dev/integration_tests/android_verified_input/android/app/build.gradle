@@ -29,7 +29,6 @@ if (flutterVersionName == null) {
 android {
     namespace "io.flutter.integration.android_verified_input"
     compileSdk flutter.compileSdkVersion
-    ndkVersion flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

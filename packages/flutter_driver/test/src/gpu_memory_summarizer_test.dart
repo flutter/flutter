@@ -10,22 +10,18 @@ import '../common.dart';
 TimelineEvent newGPUTraceEvent(double ms) => TimelineEvent(<String, dynamic>{
   'name': 'AllocatorVK',
   'ph': 'b',
-  'args': <String, String>{
-    'MemoryBudgetUsageMB': ms.toString()
-  },
+  'args': <String, String>{'MemoryBudgetUsageMB': ms.toString()},
 });
 
 TimelineEvent newMetalGPUTraceEvent(double ms) => TimelineEvent(<String, dynamic>{
   'name': 'AllocatorMTL',
   'ph': 'b',
-  'args': <String, String>{
-    'MemoryBudgetUsageMB': ms.toString()
-  },
+  'args': <String, String>{'MemoryBudgetUsageMB': ms.toString()},
 });
 
 void main() {
   test('Can process GPU memory usage times.', () {
-    final GPUMemorySumarizer summarizer = GPUMemorySumarizer(<TimelineEvent>[
+    final summarizer = GPUMemorySumarizer(<TimelineEvent>[
       newGPUTraceEvent(1024),
       newGPUTraceEvent(1024),
       newGPUTraceEvent(512),
@@ -38,7 +34,7 @@ void main() {
   });
 
   test('Can process Metal GPU memory usage times.', () {
-    final GPUMemorySumarizer summarizer = GPUMemorySumarizer(<TimelineEvent>[
+    final summarizer = GPUMemorySumarizer(<TimelineEvent>[
       newMetalGPUTraceEvent(1024),
       newMetalGPUTraceEvent(1024),
       newMetalGPUTraceEvent(512),

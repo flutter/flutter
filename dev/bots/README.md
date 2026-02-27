@@ -2,23 +2,21 @@
 
 This directory exists to support building Flutter on our build infrastructure.
 
-Flutter build results are available at:
-* https://flutter-dashboard.appspot.com/#/build
-  - Aggregate dashboard of the separate CI systems used by Flutter.
-* https://cirrus-ci.com/github/flutter/flutter/master
-  - Testing is done on PRs and submitted changes on GitHub.
+Flutter build results are available at: <https://flutter-dashboard.appspot.com>.
 
 Flutter infra requires special permissions to retrigger builds on the
-[build dashboard](https://flutter-dashboard.appspot.com/#/build). File an
-[infra ticket](../../docs/infra/Infra-Ticket-Queue.md) to
-request permission.
+[build dashboard](https://flutter-dashboard.appspot.com/#/build). File a `team-infra`
+issue to request permission.
 
-The [Cirrus](https://cirrus-ci.org)-based bots run the [`test.dart`](test.dart)
-script for each PR and submission. This does testing for the tools, for the
-framework, and (for submitted changes only) rebuilds and updates the main
-branch API docs [staging site](https://main-api.flutter.dev/).
+The [LUCI](https://chromium.googlesource.com/infra/luci/luci-py/+/refs/heads/main/README.md)-based
+bots run the [`test.dart`](test.dart) script for each PR and submission. This
+does testing for the tools, for the framework, and (for submitted changes only)
+rebuilds and updates the main branch API docs [staging site](https://main-api.flutter.dev/).
 For tagged dev and beta builds, it also builds and deploys the gallery app to
-the app stores. It is configured by the [.cirrus.yml](/.cirrus.yml).
+the app stores. It is configured by two `.ci.yaml` files:
+
+- framework: [`.ci.yaml`](../../.ci.yaml)
+- engine: [`engine/src/flutter/.ci.yaml`](../../engine/src/flutter/.ci.yaml)
 
 The build dashboard includes post-commit testing run on physical devices. See
 [//dev/devicelab](../devicelab/README.md) for more information.
@@ -27,8 +25,7 @@ The build dashboard includes post-commit testing run on physical devices. See
 
 A [set of infra scripts](https://flutter.googlesource.com/recipes/)
 run on Windows, Linux, and Mac machines. The configuration for how many
-machines and what kind are managed internally by Google. File an
-[infra ticket](../../docs/infra/Infra-Ticket-Queue.md)
+machines and what kind are managed internally by Google. File a `team-infra` issue
 to request new machine types to be added. Both of these technologies are highly
 specific to the [LUCI](https://github.com/luci) project, which is the successor
 to Chromium's infra and the foundation to Flutter's infrastructure.
@@ -133,7 +130,6 @@ components need to be updated or installed, follow the steps below:
 6. Run upload_android_tools.py -t ndk
    `$ cd ../..`
    `$ dev/bots/upload_android_tools.py -t ndk`
-
 
 ## Flutter codelabs build test
 

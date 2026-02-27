@@ -8,10 +8,10 @@ import 'package:flutter_api_samples/widgets/shortcuts/callback_shortcuts.0.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Verify correct labels are displayed', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.CallbackShortcutsApp(),
-    );
+  testWidgets('Verify correct labels are displayed', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.CallbackShortcutsApp());
 
     expect(find.text('CallbackShortcuts Sample'), findsOneWidget);
     expect(
@@ -25,10 +25,10 @@ void main() {
     expect(find.text('count: 0'), findsOneWidget);
   });
 
-  testWidgets('Up and down arrow press updates counter', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.CallbackShortcutsApp(),
-    );
+  testWidgets('Up and down arrow press updates counter', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.CallbackShortcutsApp());
 
     int counter = 0;
 

@@ -40,9 +40,7 @@ class _FormExampleState extends State<FormExample> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           TextFormField(
-            decoration: const InputDecoration(
-              hintText: 'Enter your email',
-            ),
+            decoration: const InputDecoration(hintText: 'Enter your email'),
             validator: (String? value) {
               if (value == null || value.isEmpty) {
                 return 'Please enter some text';

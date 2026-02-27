@@ -11,11 +11,19 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../services/fake_platform_views.dart';
 import 'rendering_tester.dart';
 
 void main() {
   final TestRenderingFlutterBinding binding = TestRenderingFlutterBinding.ensureInitialized();
+
+  tearDown(() {
+    // Lay out a dummy RenderBox to make sure that anything that was laid out
+    // during the test gets detached.
+    final RenderBox emptyRenderBox = RenderCustomPaint(painter: _EmptyPainter());
+    layout(emptyRenderBox);
+  });
 
   group('PlatformViewRenderBox', () {
     late FakePlatformViewController fakePlatformViewController;
@@ -26,28 +34,29 @@ void main() {
         controller: fakePlatformViewController,
         hitTestBehavior: PlatformViewHitTestBehavior.opaque,
         gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-          Factory<VerticalDragGestureRecognizer>(
-            () {
-              return VerticalDragGestureRecognizer();
-            },
-          ),
+          Factory<VerticalDragGestureRecognizer>(() {
+            return VerticalDragGestureRecognizer();
+          }),
         },
       );
     });
 
     test('layout should size to max constraint', () {
       layout(platformViewRenderBox);
-      platformViewRenderBox.layout(const BoxConstraints(minWidth: 50, minHeight: 50, maxWidth: 100, maxHeight: 100));
+      platformViewRenderBox.layout(
+        const BoxConstraints(minWidth: 50, minHeight: 50, maxWidth: 100, maxHeight: 100),
+      );
       expect(platformViewRenderBox.size, const Size(100, 100));
     });
 
     test('send semantics update if id is changed', () {
-      final RenderConstrainedBox tree = RenderConstrainedBox(
+      final tree = RenderConstrainedBox(
         additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
         child: platformViewRenderBox,
       );
-      int semanticsUpdateCount = 0;
-      final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.ensureSemantics();
+      var semanticsUpdateCount = 0;
+      final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance
+          .ensureSemantics();
       TestRenderingFlutterBinding.instance.pipelineOwner.semanticsOwner!.addListener(() {
         ++semanticsUpdateCount;
       });
@@ -64,7 +73,7 @@ void main() {
 
       semanticsUpdateCount = 0;
 
-      final FakePlatformViewController updatedFakePlatformViewController = FakePlatformViewController(10);
+      final updatedFakePlatformViewController = FakePlatformViewController(10);
       platformViewRenderBox.controller = updatedFakePlatformViewController;
       pumpFrame(phase: EnginePhase.flushSemantics);
       // Update id should update the semantics.
@@ -77,11 +86,15 @@ void main() {
       layout(platformViewRenderBox);
       pumpFrame(phase: EnginePhase.flushSemantics);
 
-      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-        _pointerData(ui.PointerChange.add, Offset.zero),
-        _pointerData(ui.PointerChange.hover, const Offset(10, 10)),
-        _pointerData(ui.PointerChange.remove, const Offset(10, 10)),
-      ]));
+      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(
+        ui.PointerDataPacket(
+          data: <ui.PointerData>[
+            _pointerData(ui.PointerChange.add, Offset.zero),
+            _pointerData(ui.PointerChange.hover, const Offset(10, 10)),
+            _pointerData(ui.PointerChange.remove, const Offset(10, 10)),
+          ],
+        ),
+      );
 
       expect(fakePlatformViewController.dispatchedPointerEvents, isNotEmpty);
     });
@@ -90,60 +103,122 @@ void main() {
       layout(platformViewRenderBox);
       pumpFrame(phase: EnginePhase.flushSemantics);
 
-      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-        _pointerData(ui.PointerChange.add, Offset.zero),
-        _pointerData(ui.PointerChange.hover, const Offset(10, 10)),
-        _pointerData(ui.PointerChange.remove, const Offset(10, 10)),
-      ]));
+      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(
+        ui.PointerDataPacket(
+          data: <ui.PointerData>[
+            _pointerData(ui.PointerChange.add, Offset.zero),
+            _pointerData(ui.PointerChange.hover, const Offset(10, 10)),
+            _pointerData(ui.PointerChange.remove, const Offset(10, 10)),
+          ],
+        ),
+      );
 
       expect(fakePlatformViewController.dispatchedPointerEvents, isNotEmpty);
     });
-
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/69431
   test('multi-finger touch test', () {
-    final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
+    final viewsController = FakeAndroidPlatformViewsController();
     viewsController.registerViewType('webview');
-    final AndroidViewController viewController =
-      PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.rtl);
-    final PlatformViewRenderBox platformViewRenderBox = PlatformViewRenderBox(
+    final AndroidViewController viewController = PlatformViewsService.initAndroidView(
+      id: 0,
+      viewType: 'webview',
+      layoutDirection: TextDirection.rtl,
+    );
+    final platformViewRenderBox = PlatformViewRenderBox(
       controller: viewController,
       hitTestBehavior: PlatformViewHitTestBehavior.opaque,
       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-        Factory<VerticalDragGestureRecognizer>(
-          () => VerticalDragGestureRecognizer(),
-        ),
+        Factory<VerticalDragGestureRecognizer>(() => VerticalDragGestureRecognizer()),
       },
     );
     layout(platformViewRenderBox);
     pumpFrame(phase: EnginePhase.flushSemantics);
 
-    viewController.pointTransformer = (Offset offset) => platformViewRenderBox.globalToLocal(offset);
+    viewController.pointTransformer = (Offset offset) =>
+        platformViewRenderBox.globalToLocal(offset);
 
     FakeAsync().run((FakeAsync async) {
       // Put one pointer down.
-      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-        _pointerData(ui.PointerChange.add, Offset.zero, pointer: 1, kind: PointerDeviceKind.touch),
-        _pointerData(ui.PointerChange.down, const Offset(10, 10), pointer: 1, kind: PointerDeviceKind.touch),
-        _pointerData(ui.PointerChange.remove, const Offset(10, 10), pointer: 1, kind: PointerDeviceKind.touch),
-      ]));
+      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(
+        ui.PointerDataPacket(
+          data: <ui.PointerData>[
+            _pointerData(
+              ui.PointerChange.add,
+              Offset.zero,
+              pointer: 1,
+              kind: PointerDeviceKind.touch,
+            ),
+            _pointerData(
+              ui.PointerChange.down,
+              const Offset(10, 10),
+              pointer: 1,
+              kind: PointerDeviceKind.touch,
+            ),
+            _pointerData(
+              ui.PointerChange.remove,
+              const Offset(10, 10),
+              pointer: 1,
+              kind: PointerDeviceKind.touch,
+            ),
+          ],
+        ),
+      );
       async.flushMicrotasks();
 
       // Put another pointer down and then cancel it.
-      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-        _pointerData(ui.PointerChange.add, Offset.zero, pointer: 2, kind: PointerDeviceKind.touch),
-        _pointerData(ui.PointerChange.down, const Offset(20, 10), pointer: 2, kind: PointerDeviceKind.touch),
-        _pointerData(ui.PointerChange.cancel, const Offset(20, 10), pointer: 2, kind: PointerDeviceKind.touch),
-      ]));
+      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(
+        ui.PointerDataPacket(
+          data: <ui.PointerData>[
+            _pointerData(
+              ui.PointerChange.add,
+              Offset.zero,
+              pointer: 2,
+              kind: PointerDeviceKind.touch,
+            ),
+            _pointerData(
+              ui.PointerChange.down,
+              const Offset(20, 10),
+              pointer: 2,
+              kind: PointerDeviceKind.touch,
+            ),
+            _pointerData(
+              ui.PointerChange.cancel,
+              const Offset(20, 10),
+              pointer: 2,
+              kind: PointerDeviceKind.touch,
+            ),
+          ],
+        ),
+      );
       async.flushMicrotasks();
 
       // The first pointer can still moving without crashing.
-      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-        _pointerData(ui.PointerChange.add, Offset.zero, pointer: 1, kind: PointerDeviceKind.touch),
-        _pointerData(ui.PointerChange.move, const Offset(10, 10), pointer: 1, kind: PointerDeviceKind.touch),
-        _pointerData(ui.PointerChange.remove, const Offset(10, 10), pointer: 1, kind: PointerDeviceKind.touch),
-      ]));
+      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(
+        ui.PointerDataPacket(
+          data: <ui.PointerData>[
+            _pointerData(
+              ui.PointerChange.add,
+              Offset.zero,
+              pointer: 1,
+              kind: PointerDeviceKind.touch,
+            ),
+            _pointerData(
+              ui.PointerChange.move,
+              const Offset(10, 10),
+              pointer: 1,
+              kind: PointerDeviceKind.touch,
+            ),
+            _pointerData(
+              ui.PointerChange.remove,
+              const Offset(10, 10),
+              pointer: 1,
+              kind: PointerDeviceKind.touch,
+            ),
+          ],
+        ),
+      );
       async.flushMicrotasks();
     });
 
@@ -151,14 +226,14 @@ void main() {
   });
 
   test('created callback is reset when controller is changed', () {
-    final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
+    final viewsController = FakeAndroidPlatformViewsController();
     viewsController.registerViewType('webview');
     final AndroidViewController firstController = PlatformViewsService.initAndroidView(
       id: 0,
       viewType: 'webview',
       layoutDirection: TextDirection.rtl,
     );
-    final RenderAndroidView renderBox = RenderAndroidView(
+    final renderBox = RenderAndroidView(
       viewController: firstController,
       hitTestBehavior: PlatformViewHitTestBehavior.opaque,
       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
@@ -184,17 +259,22 @@ void main() {
 
   test('render object changed its visual appearance after texture is created', () {
     FakeAsync().run((FakeAsync async) {
-      final AndroidViewController viewController =
-        PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.rtl);
-      final RenderAndroidView renderBox = RenderAndroidView(
+      final AndroidViewController viewController = PlatformViewsService.initAndroidView(
+        id: 0,
+        viewType: 'webview',
+        layoutDirection: TextDirection.rtl,
+      );
+      final renderBox = RenderAndroidView(
         viewController: viewController,
         hitTestBehavior: PlatformViewHitTestBehavior.opaque,
         gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
       );
 
-      final Completer<void> viewCreation = Completer<void>();
-      const MethodChannel channel = MethodChannel('flutter/platform_views');
-      binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+      final viewCreation = Completer<void>();
+      const channel = MethodChannel('flutter/platform_views');
+      binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (
+        MethodCall methodCall,
+      ) async {
         assert(methodCall.method == 'create', 'Unexpected method call');
         await viewCreation.future;
         return /*textureId=*/ 0;
@@ -223,17 +303,22 @@ void main() {
 
   test('markNeedsPaint does not get called on a disposed RO', () async {
     FakeAsync().run((FakeAsync async) {
-      final AndroidViewController viewController =
-        PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.rtl);
-      final RenderAndroidView renderBox = RenderAndroidView(
+      final AndroidViewController viewController = PlatformViewsService.initAndroidView(
+        id: 0,
+        viewType: 'webview',
+        layoutDirection: TextDirection.rtl,
+      );
+      final renderBox = RenderAndroidView(
         viewController: viewController,
         hitTestBehavior: PlatformViewHitTestBehavior.opaque,
         gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
       );
 
-      final Completer<void> viewCreation = Completer<void>();
-      const MethodChannel channel = MethodChannel('flutter/platform_views');
-      binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+      final viewCreation = Completer<void>();
+      const channel = MethodChannel('flutter/platform_views');
+      binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (
+        MethodCall methodCall,
+      ) async {
         assert(methodCall.method == 'create', 'Unexpected method call');
         await viewCreation.future;
         return /*textureId=*/ 0;
@@ -262,18 +347,24 @@ void main() {
 
   test('markNeedsPaint does not get called when setting the same viewController', () {
     FakeAsync().run((FakeAsync async) {
-      final Completer<void> viewCreation = Completer<void>();
-      const MethodChannel channel = MethodChannel('flutter/platform_views');
-      binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+      final viewCreation = Completer<void>();
+      const channel = MethodChannel('flutter/platform_views');
+      binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (
+        MethodCall methodCall,
+      ) async {
         assert(methodCall.method == 'create', 'Unexpected method call');
         await viewCreation.future;
         return /*textureId=*/ 0;
       });
 
-      bool futureCallbackRan = false;
+      var futureCallbackRan = false;
 
-      PlatformViewsService.initUiKitView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr).then((UiKitViewController viewController) {
-        final RenderUiKitView renderBox = RenderUiKitView(
+      PlatformViewsService.initUiKitView(
+        id: 0,
+        viewType: 'webview',
+        layoutDirection: TextDirection.ltr,
+      ).then((UiKitViewController viewController) {
+        final renderBox = RenderUiKitView(
           viewController: viewController,
           hitTestBehavior: PlatformViewHitTestBehavior.opaque,
           gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
@@ -295,6 +386,193 @@ void main() {
       expect(futureCallbackRan, true);
     });
   });
+
+  group('RenderDarwinPlatformView', () {
+    const channel = MethodChannel('flutter/platform_views');
+    late int gestureRejections;
+    late Completer<void> viewCreation;
+
+    setUp(() {
+      gestureRejections = 0;
+      viewCreation = Completer<void>();
+
+      binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (
+        MethodCall methodCall,
+      ) async {
+        switch (methodCall.method) {
+          case 'create':
+            await viewCreation.future;
+          case 'rejectGesture':
+            gestureRejections++;
+          default:
+            throw UnsupportedError('Unexpected method call ${methodCall.method}.');
+        }
+        return /*textureId=*/ 0;
+      });
+    });
+
+    tearDown(() {
+      binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, null);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/83481.
+    test('RenderUiKitView does not handle pointer events when not laid out', () async {
+      await FakeAsync().run((FakeAsync async) {
+        PlatformViewsService.initUiKitView(
+          id: 0,
+          viewType: 'webview',
+          layoutDirection: TextDirection.ltr,
+        ).then((UiKitViewController viewController) {
+          final renderBox = RenderUiKitView(
+            viewController: viewController,
+            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+          );
+          renderBox.attach(TestRenderingFlutterBinding.instance.pipelineOwner);
+
+          expect(renderBox.debugNeedsLayout, isTrue);
+          expect(gestureRejections, 0);
+
+          const event = PointerDownEvent(position: Offset(10, 10));
+          GestureBinding.instance.pointerRouter.route(event);
+
+          // Didn't receive the gesture because the RenderBox is not laid out,
+          // even though it's attached.
+          expect(gestureRejections, 0);
+
+          renderBox.detach();
+        });
+
+        viewCreation.complete();
+        async.flushMicrotasks();
+      });
+    });
+
+    test('RenderUiKitView handles pointer events when laid out', () async {
+      await FakeAsync().run((FakeAsync async) {
+        PlatformViewsService.initUiKitView(
+          id: 0,
+          viewType: 'webview',
+          layoutDirection: TextDirection.ltr,
+        ).then((UiKitViewController viewController) {
+          final renderBox = RenderUiKitView(
+            viewController: viewController,
+            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+          );
+
+          expect(renderBox.debugNeedsLayout, isTrue);
+          expect(gestureRejections, 0);
+
+          const event = PointerDownEvent(position: Offset(10, 10));
+          GestureBinding.instance.pointerRouter.route(event);
+
+          // Didn't receive the gesture because the RenderBox is not laid out.
+          expect(gestureRejections, 0);
+
+          layout(renderBox);
+          pumpFrame(phase: EnginePhase.flushSemantics);
+          expect(renderBox.debugNeedsLayout, isFalse);
+
+          const event2 = PointerDownEvent(position: Offset(10, 10));
+          GestureBinding.instance.pointerRouter.route(event2);
+
+          // Now that the RenderBox is laid out, received the gesture.
+          expect(gestureRejections, 1);
+        });
+
+        viewCreation.complete();
+        async.flushMicrotasks();
+      });
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/83481.
+    test('RenderAppKitView does not handle pointer events when not laid out', () async {
+      await FakeAsync().run((FakeAsync async) {
+        PlatformViewsService.initAppKitView(
+          id: 0,
+          viewType: 'webview',
+          layoutDirection: TextDirection.ltr,
+        ).then((AppKitViewController viewController) {
+          final renderBox = RenderAppKitView(
+            viewController: viewController,
+            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+          );
+          renderBox.attach(TestRenderingFlutterBinding.instance.pipelineOwner);
+
+          expect(renderBox.debugNeedsLayout, isTrue);
+          expect(gestureRejections, 0);
+
+          const event = PointerDownEvent(position: Offset(10, 10));
+          GestureBinding.instance.pointerRouter.route(event);
+
+          // Didn't receive the gesture because the RenderBox is not laid out.
+          expect(gestureRejections, 0);
+
+          renderBox.detach();
+        });
+
+        viewCreation.complete();
+        async.flushMicrotasks();
+      });
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/83481.
+    test('RenderAppKitView handles pointer events when laid out', () async {
+      await FakeAsync().run((FakeAsync async) {
+        PlatformViewsService.initAppKitView(
+          id: 0,
+          viewType: 'webview',
+          layoutDirection: TextDirection.ltr,
+        ).then((AppKitViewController viewController) {
+          final renderBox = RenderAppKitView(
+            viewController: viewController,
+            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+          );
+
+          expect(renderBox.debugNeedsLayout, isTrue);
+          expect(gestureRejections, 0);
+
+          const event = PointerDownEvent(position: Offset(10, 10));
+          GestureBinding.instance.pointerRouter.route(event);
+
+          // Didn't receive the gesture because the RenderBox is not laid out.
+          expect(gestureRejections, 0);
+
+          layout(renderBox);
+          pumpFrame(phase: EnginePhase.flushSemantics);
+          expect(renderBox.debugNeedsLayout, isFalse);
+
+          const event2 = PointerDownEvent(position: Offset(10, 10));
+          GestureBinding.instance.pointerRouter.route(event2);
+
+          // Now that the RenderBox is laid out, received the gesture.
+          expect(gestureRejections, 1);
+        });
+
+        viewCreation.complete();
+        async.flushMicrotasks();
+      });
+    });
+  });
+
+  test('PlatformViewRenderBox has transparent hitTestBehavior in semantics', () {
+    final controller = FakePlatformViewController(0);
+    final renderBox = PlatformViewRenderBox(
+      controller: controller,
+      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+    );
+
+    final config = SemanticsConfiguration();
+    renderBox.describeSemanticsConfiguration(config);
+
+    expect(config.hitTestBehavior, ui.SemanticsHitTestBehavior.transparent);
+    expect(config.isSemanticBoundary, true);
+    expect(config.platformViewId, 0);
+  });
 }
 
 ui.PointerData _pointerData(
@@ -304,7 +582,8 @@ ui.PointerData _pointerData(
   PointerDeviceKind kind = PointerDeviceKind.mouse,
   int pointer = 0,
 }) {
-  final double devicePixelRatio = RendererBinding.instance.platformDispatcher.implicitView!.devicePixelRatio;
+  final double devicePixelRatio =
+      RendererBinding.instance.platformDispatcher.implicitView!.devicePixelRatio;
   return ui.PointerData(
     pointerIdentifier: pointer,
     embedderId: pointer,
@@ -314,4 +593,15 @@ ui.PointerData _pointerData(
     kind: kind,
     device: device,
   );
+}
+
+class _EmptyPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = const Color(0x00000000);
+    canvas.drawRect(Offset.zero & size, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

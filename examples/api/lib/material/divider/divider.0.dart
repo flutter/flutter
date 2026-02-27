@@ -33,9 +33,7 @@ class DividerExample extends StatelessWidget {
           const Expanded(
             child: ColoredBox(
               color: Colors.amber,
-              child: Center(
-                child: Text('Above'),
-              ),
+              child: Center(child: Text('Above')),
             ),
           ),
           const Divider(
@@ -61,9 +59,7 @@ class DividerExample extends StatelessWidget {
           Expanded(
             child: ColoredBox(
               color: Theme.of(context).colorScheme.primary,
-              child: const Center(
-                child: Text('Below'),
-              ),
+              child: const Center(child: Text('Below')),
             ),
           ),
         ],

@@ -33,47 +33,64 @@ import 'test_utils.dart' show fileSystem;
 import 'transition_test_utils.dart';
 
 void main() {
-  testWithoutContext('flutter run writes and clears pidfile appropriately', () async {
-    final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
-    final String pidFile = fileSystem.path.join(tempDirectory, 'flutter.pid');
-    final String testDirectory = fileSystem.path.join(flutterRoot, 'examples', 'hello_world');
-    bool? existsDuringTest;
-    try {
-      expect(fileSystem.file(pidFile).existsSync(), isFalse);
-      final ProcessTestResult result = await runFlutter(
-        <String>['run', '-dflutter-tester', '--pid-file', pidFile],
-        testDirectory,
-        <Transition>[
-          Barrier('q Quit (terminate the application on the device).', handler: (String line) {
-            existsDuringTest = fileSystem.file(pidFile).existsSync();
-            return 'q';
-          }),
-          const Barrier('Application finished.'),
-        ],
-      );
-      expect(existsDuringTest, isNot(isNull));
-      expect(existsDuringTest, isTrue);
-      expect(result.exitCode, 0, reason: 'subprocess failed; $result');
-      expect(fileSystem.file(pidFile).existsSync(), isFalse);
-      // This first test ignores the stdout and stderr, so that if the
-      // first run outputs "building flutter", or the "there's a new
-      // flutter" banner, or other such first-run messages, they won't
-      // fail the tests. This does mean that running this test first is
-      // actually important in the case where you're running the tests
-      // manually. (On CI, all those messages are expected to be seen
-      // long before we get here, e.g. because we run "flutter doctor".)
-    } finally {
-      tryToDelete(fileSystem.directory(tempDirectory));
-    }
-  }, skip: Platform.isWindows); // [intended] Windows doesn't support sending signals so we don't care if it can store the PID.
+  testWithoutContext(
+    'flutter run writes and clears pidfile appropriately',
+    () async {
+      final String tempDirectory = fileSystem.systemTempDirectory
+          .createTempSync('flutter_overall_experience_test.')
+          .resolveSymbolicLinksSync();
+      final String pidFile = fileSystem.path.join(tempDirectory, 'flutter.pid');
+      final String testDirectory = fileSystem.path.join(flutterRoot, 'examples', 'hello_world');
+      bool? existsDuringTest;
+      try {
+        expect(fileSystem.file(pidFile).existsSync(), isFalse);
+        final ProcessTestResult result = await runFlutter(
+          <String>['run', '-dflutter-tester', '--pid-file', pidFile],
+          testDirectory,
+          <Transition>[
+            Barrier(
+              'q Quit (terminate the application on the device).',
+              handler: (String line) {
+                existsDuringTest = fileSystem.file(pidFile).existsSync();
+                return 'q';
+              },
+            ),
+            Barrier('Application finished.'),
+          ],
+        );
+        expect(existsDuringTest, isNot(isNull));
+        expect(existsDuringTest, isTrue);
+        expect(result.exitCode, 0, reason: 'subprocess failed; $result');
+        expect(fileSystem.file(pidFile).existsSync(), isFalse);
+        // This first test ignores the stdout and stderr, so that if the
+        // first run outputs "building flutter", or the "there's a new
+        // flutter" banner, or other such first-run messages, they won't
+        // fail the tests. This does mean that running this test first is
+        // actually important in the case where you're running the tests
+        // manually. (On CI, all those messages are expected to be seen
+        // long before we get here, e.g. because we run "flutter doctor".)
+      } finally {
+        tryToDelete(fileSystem.directory(tempDirectory));
+      }
+    },
+    // [intended] Windows doesn't support sending signals so we don't care if it can store the PID.
+    skip: Platform.isWindows,
+  );
 
   testWithoutContext('flutter run handle SIGUSR1/2 run', () async {
-    final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
+    final String tempDirectory = fileSystem.systemTempDirectory
+        .createTempSync('flutter_overall_experience_test.')
+        .resolveSymbolicLinksSync();
     final String pidFile = fileSystem.path.join(tempDirectory, 'flutter.pid');
-    final String testDirectory = fileSystem.path.join(flutterRoot, 'dev', 'integration_tests', 'ui');
+    final String testDirectory = fileSystem.path.join(
+      flutterRoot,
+      'dev',
+      'integration_tests',
+      'ui',
+    );
     final String testScript = fileSystem.path.join('lib', 'commands.dart');
     late int pid;
-    final List<String> command = <String>[
+    final command = <String>[
       'run',
       '-dflutter-tester',
       '--report-ready',
@@ -87,24 +104,40 @@ void main() {
         command,
         testDirectory,
         <Transition>[
-          Multiple(<Pattern>['Flutter run key commands.', 'called paint'], handler: (String line) {
-            pid = int.parse(fileSystem.file(pidFile).readAsStringSync());
-            processManager.killPid(pid, ProcessSignal.sigusr1);
-            return null;
-          }),
+          Multiple(
+            <Pattern>['Flutter run key commands.', 'called paint'],
+            handler: (String line) {
+              pid = int.parse(fileSystem.file(pidFile).readAsStringSync());
+              processManager.killPid(pid, ProcessSignal.sigusr1);
+              return null;
+            },
+          ),
           Barrier('Performing hot reload...'.padRight(progressMessageWidth), logging: true),
-          Multiple(<Pattern>[RegExp(r'^Reloaded 0 libraries in [0-9]+ms \(compile: \d+ ms, reload: \d+ ms, reassemble: \d+ ms\)\.$'), 'called reassemble', 'called paint'], handler: (String line) {
-            processManager.killPid(pid, ProcessSignal.sigusr2);
-            return null;
-          }),
+          Multiple(
+            <Pattern>[
+              RegExp(
+                r'^Reloaded 0 libraries in [0-9]+ms \(compile: \d+ ms, reload: \d+ ms, reassemble: \d+ ms\)\.$',
+              ),
+              'called reassemble',
+              'called paint',
+            ],
+            handler: (String line) {
+              processManager.killPid(pid, ProcessSignal.sigusr2);
+              return null;
+            },
+          ),
           Barrier('Performing hot restart...'.padRight(progressMessageWidth)),
           // This could look like 'Restarted application in 1,237ms.'
-          Multiple(<Pattern>[RegExp(r'^Restarted application in .+m?s.$'), 'called main', 'called paint'], handler: (String line) {
-            return 'q';
-          }),
-          const Barrier('Application finished.'),
+          Multiple(
+            <Pattern>[RegExp(r'^Restarted application in .+m?s.$'), 'called main', 'called paint'],
+            handler: (String line) {
+              return 'q';
+            },
+          ),
+          Barrier('Application finished.'),
         ],
-        logging: false, // we ignore leading log lines to avoid making this test sensitive to e.g. the help message text
+        logging:
+            false, // we ignore leading log lines to avoid making this test sensitive to e.g. the help message text
       );
       // We check the output from the app (all starts with "called ...") and the output from the tool
       // (everything else) separately, because their relative timing isn't guaranteed. Their rough timing
@@ -130,9 +163,10 @@ void main() {
           'Application finished.',
           'ready',
         ],
-        reason: 'stdout from command ${command.join(' ')} was unexpected, '
-          'full Stdout:\n\n${result.stdout.join('\n')}\n\n'
-          'Stderr:\n\n${result.stderr.join('\n')}',
+        reason:
+            'stdout from command ${command.join(' ')} was unexpected, '
+            'full Stdout:\n\n${result.stdout.join('\n')}\n\n'
+            'Stderr:\n\n${result.stderr.join('\n')}',
       );
       expect(result.exitCode, 0);
     } finally {
@@ -141,10 +175,17 @@ void main() {
   }, skip: Platform.isWindows); // [intended] Windows doesn't support sending signals.
 
   testWithoutContext('flutter run can hot reload and hot restart, handle "p" key', () async {
-    final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
-    final String testDirectory = fileSystem.path.join(flutterRoot, 'dev', 'integration_tests', 'ui');
+    final String tempDirectory = fileSystem.systemTempDirectory
+        .createTempSync('flutter_overall_experience_test.')
+        .resolveSymbolicLinksSync();
+    final String testDirectory = fileSystem.path.join(
+      flutterRoot,
+      'dev',
+      'integration_tests',
+      'ui',
+    );
     final String testScript = fileSystem.path.join('lib', 'commands.dart');
-    final List<String> command = <String>[
+    final command = <String>[
       'run',
       '-dflutter-tester',
       '--report-ready',
@@ -156,26 +197,42 @@ void main() {
         command,
         testDirectory,
         <Transition>[
-          Multiple(<Pattern>['Flutter run key commands.', 'called main', 'called paint'], handler: (String line) {
-            return 'r';
-          }),
+          Multiple(
+            <Pattern>['Flutter run key commands.', 'called main', 'called paint'],
+            handler: (String line) {
+              return 'r';
+            },
+          ),
           Barrier('Performing hot reload...'.padRight(progressMessageWidth), logging: true),
-          Multiple(<Pattern>['ready', 'called reassemble', 'called paint'], handler: (String line) {
-            return 'R';
-          }),
+          Multiple(
+            <Pattern>['ready', 'called reassemble', 'called paint'],
+            handler: (String line) {
+              return 'R';
+            },
+          ),
           Barrier('Performing hot restart...'.padRight(progressMessageWidth)),
-          Multiple(<Pattern>['ready', 'called main', 'called paint'], handler: (String line) {
-            return 'p';
-          }),
-          Multiple(<Pattern>['ready', 'called paint', 'called debugPaintSize'], handler: (String line) {
-            return 'p';
-          }),
-          Multiple(<Pattern>['ready', 'called paint'], handler: (String line) {
-            return 'q';
-          }),
-          const Barrier('Application finished.'),
+          Multiple(
+            <Pattern>['ready', 'called main', 'called paint'],
+            handler: (String line) {
+              return 'p';
+            },
+          ),
+          Multiple(
+            <Pattern>['ready', 'called paint', 'called debugPaintSize'],
+            handler: (String line) {
+              return 'p';
+            },
+          ),
+          Multiple(
+            <Pattern>['ready', 'called paint'],
+            handler: (String line) {
+              return 'q';
+            },
+          ),
+          Barrier('Application finished.'),
         ],
-        logging: false, // we ignore leading log lines to avoid making this test sensitive to e.g. the help message text
+        logging:
+            false, // we ignore leading log lines to avoid making this test sensitive to e.g. the help message text
       );
       // We check the output from the app (all starts with "called ...") and the output from the tool
       // (everything else) separately, because their relative timing isn't guaranteed. Their rough timing
@@ -195,7 +252,8 @@ void main() {
         'called paint',
       ]);
       expect(
-        result.stdout.where((String line) => !line.startsWith('called ')), <Object>[
+        result.stdout.where((String line) => !line.startsWith('called ')),
+        <Object>[
           // logs start after we receive the response to hitting "r"
           'Performing hot reload...'.padRight(progressMessageWidth),
           startsWith('Reloaded 0 libraries in '),
@@ -212,9 +270,10 @@ void main() {
           'Application finished.',
           'ready',
         ],
-        reason: 'stdout from command ${command.join(' ')} was unexpected, '
-          'full Stdout:\n\n${result.stdout.join('\n')}\n\n'
-          'Stderr:\n\n${result.stderr.join('\n')}',
+        reason:
+            'stdout from command ${command.join(' ')} was unexpected, '
+            'full Stdout:\n\n${result.stdout.join('\n')}\n\n'
+            'Stderr:\n\n${result.stderr.join('\n')}',
       );
       expect(result.exitCode, 0);
     } finally {
@@ -223,8 +282,15 @@ void main() {
   });
 
   testWithoutContext('flutter error messages include a DevTools link', () async {
-    final String testDirectory = fileSystem.path.join(flutterRoot, 'dev', 'integration_tests', 'ui');
-    final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
+    final String testDirectory = fileSystem.path.join(
+      flutterRoot,
+      'dev',
+      'integration_tests',
+      'ui',
+    );
+    final String tempDirectory = fileSystem.systemTempDirectory
+        .createTempSync('flutter_overall_experience_test.')
+        .resolveSymbolicLinksSync();
     final String testScript = fileSystem.path.join('lib', 'overflow.dart');
     try {
       final ProcessTestResult result = await runFlutter(
@@ -232,59 +298,88 @@ void main() {
         testDirectory,
         <Transition>[
           Barrier(RegExp(r'^A Dart VM Service on Flutter test device is available at: ')),
-          Barrier(RegExp(r'^The Flutter DevTools debugger and profiler on Flutter test device is available at: '), handler: (String line) {
-            return 'r';
-          }),
+          Barrier(
+            RegExp(
+              r'^The Flutter DevTools debugger and profiler on Flutter test device is available at: ',
+            ),
+            handler: (String line) {
+              return 'r';
+            },
+          ),
           Barrier('Performing hot reload...'.padRight(progressMessageWidth), logging: true),
-          Barrier(RegExp(r'^Reloaded 0 libraries in [0-9]+ms.'), handler: (String line) {
-            return 'q';
-          }),
+          Barrier(
+            RegExp(r'^Reloaded 0 libraries in [0-9]+ms.'),
+            handler: (String line) {
+              return 'q';
+            },
+          ),
         ],
         logging: false,
       );
       expect(result.exitCode, 0);
-      expect(result.stdout, <Object>[
-        startsWith('Performing hot reload...'),
-        '',
-        '══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════',
-        'The following assertion was thrown during layout:',
-        'A RenderFlex overflowed by 69200 pixels on the right.',
-        '',
-        'The relevant error-causing widget was:',
-        matches(RegExp(r'^  Row.+/dev/integration_tests/ui/lib/overflow\.dart:32:18$')),
-        '',
-        'To inspect this widget in Flutter DevTools, visit:',
-        startsWith('http'),
-        '',
-        'The overflowing RenderFlex has an orientation of Axis.horizontal.',
-        'The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and',
-        'black striped pattern. This is usually caused by the contents being too big for the RenderFlex.',
-        'Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the',
-        'RenderFlex to fit within the available space instead of being sized to their natural size.',
-        'This is considered an error condition because it indicates that there is content that cannot be',
-        'seen. If the content is legitimately bigger than the available space, consider clipping it with a',
-        'ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,',
-        'like a ListView.',
-        matches(RegExp(r'^The specific RenderFlex in question is: RenderFlex#..... OVERFLOWING:$')),
-        startsWith('  creator: Row ← Test ← '),
-        contains(' ← '),
-        endsWith(' ⋯'),
-        '  parentData: <none> (can use size)',
-        '  constraints: BoxConstraints(w=800.0, h=600.0)',
-        '  size: Size(800.0, 600.0)',
-        '  direction: horizontal',
-        '  mainAxisAlignment: start',
-        '  mainAxisSize: max',
-        '  crossAxisAlignment: center',
-        '  textDirection: ltr',
-        '  verticalDirection: down',
-        '◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤',
-        '════════════════════════════════════════════════════════════════════════════════════════════════════',
-        '',
-        startsWith('Reloaded 0 libraries in '),
-        '',
-        'Application finished.',
-      ]);
+
+      List<Object> expectedStdout({required bool wrapRow}) {
+        return <Object>[
+          startsWith('Performing hot reload...'),
+          '',
+          '══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════',
+          'The following assertion was thrown during layout:',
+          'A RenderFlex overflowed by 69200 pixels on the right.',
+          '',
+          'The relevant error-causing widget was:',
+          if (wrapRow) ...[
+            '  Row',
+            matches(RegExp(r'^  Row:.+/dev/integration_tests/ui/lib/overflow\.dart:32:18$')),
+          ] else
+            matches(RegExp(r'^  Row Row:.+/dev/integration_tests/ui/lib/overflow\.dart:32:18$')),
+          '',
+          'To inspect this widget in Flutter DevTools, visit:',
+          startsWith('http'),
+          '',
+          'The overflowing RenderFlex has an orientation of Axis.horizontal.',
+          'The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and',
+          'black striped pattern. This is usually caused by the contents being too big for the RenderFlex.',
+          'Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the',
+          'RenderFlex to fit within the available space instead of being sized to their natural size.',
+          'This is considered an error condition because it indicates that there is content that cannot be',
+          'seen. If the content is legitimately bigger than the available space, consider clipping it with a',
+          'ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,',
+          'like a ListView.',
+          matches(
+            RegExp(r'^The specific RenderFlex in question is: RenderFlex#..... OVERFLOWING:$'),
+          ),
+          startsWith('  creator: Row ← Test ← '),
+          contains(' ← '),
+          endsWith(' ⋯'),
+          '  parentData: <none> (can use size)',
+          '  constraints: BoxConstraints(w=800.0, h=600.0)',
+          '  size: Size(800.0, 600.0)',
+          '  direction: horizontal',
+          '  mainAxisAlignment: start',
+          '  mainAxisSize: max',
+          '  crossAxisAlignment: center',
+          '  textDirection: ltr',
+          '  verticalDirection: down',
+          '  spacing: 0.0',
+          '◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤',
+          '════════════════════════════════════════════════════════════════════════════════════════════════════',
+          '',
+          startsWith('Reloaded 0 libraries in '),
+          '',
+          'Application finished.',
+        ];
+      }
+
+      // Since diagnostics string builder sometimes wraps lines based on their length, it's
+      // possible for lines with file paths to wrap on some systems and not on others. This
+      // checks stdout against the expected output with and without wrapping the line specifying
+      // the location of the overflowing widget.
+      //
+      // See https://github.com/flutter/flutter/issues/174502.
+      expect(
+        result.stdout,
+        anyOf(equals(expectedStdout(wrapRow: true)), equals(expectedStdout(wrapRow: false))),
+      );
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
     }
@@ -295,66 +390,77 @@ void main() {
     // The idea is to verify that we're not outputting spurious messages.
     // WHEN EDITING THIS TEST PLEASE CAREFULLY CONSIDER WHETHER THE NEW OUTPUT IS AN IMPROVEMENT.
     final String testDirectory = fileSystem.path.join(flutterRoot, 'examples', 'hello_world');
-    final RegExp finalLine = RegExp(r'^The Flutter DevTools');
+    final finalLine = RegExp(r'^The Flutter DevTools');
     final ProcessTestResult result = await runFlutter(
       <String>['run', '-dflutter-tester'],
       testDirectory,
       <Transition>[
-        Barrier(finalLine, handler: (String line) {
-          return 'h';
-        }),
-        Barrier(finalLine, handler: (String line) {
-          return 'q';
-        }),
-        const Barrier('Application finished.'),
+        Barrier(
+          finalLine,
+          handler: (String line) {
+            return 'h';
+          },
+        ),
+        Barrier(
+          finalLine,
+          handler: (String line) {
+            return 'q';
+          },
+        ),
+        Barrier('Application finished.'),
       ],
     );
     expect(result.exitCode, 0);
     expect(result.stderr, isEmpty);
-    expect(result.stdout, containsAllInOrder(<Object>[
-      startsWith('Launching '),
-      startsWith('Syncing files to device Flutter test device...'),
-      '',
-      'Flutter run key commands.',
-      startsWith('r Hot reload.'),
-      'R Hot restart.',
-      'h List all available interactive commands.',
-      'd Detach (terminate "flutter run" but leave application running).',
-      'c Clear the screen',
-      'q Quit (terminate the application on the device).',
-      '',
-      startsWith('A Dart VM Service on Flutter test device is available at: http://'),
-      startsWith('The Flutter DevTools debugger and profiler on Flutter test device is available at: http://'),
-      '',
-      'Flutter run key commands.',
-      startsWith('r Hot reload.'),
-      'R Hot restart.',
-      'v Open Flutter DevTools.',
-      'w Dump widget hierarchy to the console.                                               (debugDumpApp)',
-      't Dump rendering tree to the console.                                          (debugDumpRenderTree)',
-      'L Dump layer tree to the console.                                               (debugDumpLayerTree)',
-      'f Dump focus tree to the console.                                               (debugDumpFocusTree)',
-      'S Dump accessibility tree in traversal order.                                   (debugDumpSemantics)',
-      'U Dump accessibility tree in inverse hit test order.                            (debugDumpSemantics)',
-      'i Toggle widget inspector.                                  (WidgetsApp.showWidgetInspectorOverride)',
-      'p Toggle the display of construction lines.                                  (debugPaintSizeEnabled)',
-      'I Toggle oversized image inversion.                                     (debugInvertOversizedImages)',
-      'o Simulate different operating systems.                                      (defaultTargetPlatform)',
-      'b Toggle platform brightness (dark and light mode).                        (debugBrightnessOverride)',
-      'P Toggle performance overlay.                                    (WidgetsApp.showPerformanceOverlay)',
-      'a Toggle timeline events for all widget build methods.                    (debugProfileWidgetBuilds)',
-      'M Write SkSL shaders to a unique file in the project directory.',
-      'g Run source code generators.',
-      'j Dump frame raster stats for the current frame. (Unsupported for web)',
-      'h Repeat this help message.',
-      'd Detach (terminate "flutter run" but leave application running).',
-      'c Clear the screen',
-      'q Quit (terminate the application on the device).',
-      '',
-      startsWith('A Dart VM Service on Flutter test device is available at: http://'),
-      startsWith('The Flutter DevTools debugger and profiler on Flutter test device is available at: http://'),
-      '',
-      'Application finished.',
-    ]));
+    expect(
+      result.stdout,
+      containsAllInOrder(<Object>[
+        startsWith('Launching '),
+        startsWith('Syncing files to device Flutter test device...'),
+        '',
+        'Flutter run key commands.',
+        startsWith('r Hot reload.'),
+        'R Hot restart.',
+        'h List all available interactive commands.',
+        'd Detach (terminate "flutter run" but leave application running).',
+        'c Clear the screen',
+        'q Quit (terminate the application on the device).',
+        '',
+        startsWith('A Dart VM Service on Flutter test device is available at: http://'),
+        startsWith(
+          'The Flutter DevTools debugger and profiler on Flutter test device is available at: http://',
+        ),
+        '',
+        'Flutter run key commands.',
+        startsWith('r Hot reload.'),
+        'R Hot restart.',
+        'v Open Flutter DevTools.',
+        'w Dump widget hierarchy to the console.                                               (debugDumpApp)',
+        't Dump rendering tree to the console.                                          (debugDumpRenderTree)',
+        'L Dump layer tree to the console.                                               (debugDumpLayerTree)',
+        'f Dump focus tree to the console.                                               (debugDumpFocusTree)',
+        'S Dump accessibility tree in traversal order.                                   (debugDumpSemantics)',
+        'U Dump accessibility tree in inverse hit test order.                            (debugDumpSemantics)',
+        'i Toggle widget inspector.                                  (WidgetsApp.showWidgetInspectorOverride)',
+        'p Toggle the display of construction lines.                                  (debugPaintSizeEnabled)',
+        'I Toggle oversized image inversion.                                     (debugInvertOversizedImages)',
+        'o Simulate different operating systems.                                      (defaultTargetPlatform)',
+        'b Toggle platform brightness (dark and light mode).                        (debugBrightnessOverride)',
+        'P Toggle performance overlay.                                    (WidgetsApp.showPerformanceOverlay)',
+        'a Toggle timeline events for all widget build methods.                    (debugProfileWidgetBuilds)',
+        'g Run source code generators.',
+        'h Repeat this help message.',
+        'd Detach (terminate "flutter run" but leave application running).',
+        'c Clear the screen',
+        'q Quit (terminate the application on the device).',
+        '',
+        startsWith('A Dart VM Service on Flutter test device is available at: http://'),
+        startsWith(
+          'The Flutter DevTools debugger and profiler on Flutter test device is available at: http://',
+        ),
+        '',
+        'Application finished.',
+      ]),
+    );
   });
 }

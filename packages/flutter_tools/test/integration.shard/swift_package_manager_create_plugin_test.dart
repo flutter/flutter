@@ -10,33 +10,27 @@ import 'swift_package_manager_utils.dart';
 import 'test_utils.dart';
 
 void main() {
-  final String flutterBin = fileSystem.path.join(
-    getFlutterRoot(),
-    'bin',
-    'flutter',
-  );
-
-  final List<String> platforms = <String>['ios', 'macos'];
-  for (final String platformName in platforms) {
-    final List<String> iosLanguages = <String>[
-      if (platformName == 'ios') 'objc',
-      'swift',
-    ];
-
-    for (final String iosLanguage in iosLanguages) {
-      test('Create $platformName $iosLanguage plugin with Swift Package Manager disabled', () async {
-        final Directory workingDirectory = fileSystem.systemTempDirectory
-            .createTempSync('swift_package_manager_create_plugin_disabled.');
+  final platforms = <String>['ios', 'macos'];
+  for (final platformName in platforms) {
+    test(
+      'Create $platformName plugin with Swift Package Manager disabled',
+      () async {
+        final Directory workingDirectory = fileSystem.systemTempDirectory.createTempSync(
+          'swift_package_manager_create_plugin_disabled.',
+        );
         final String workingDirectoryPath = workingDirectory.path;
         try {
-          await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
-
-          final SwiftPackageManagerPlugin createdCocoaPodsPlugin = await SwiftPackageManagerUtils.createPlugin(
+          await SwiftPackageManagerUtils.disableSwiftPackageManager(
             flutterBin,
             workingDirectoryPath,
-            platform: platformName,
-            iosLanguage: iosLanguage,
           );
+
+          final SwiftPackageManagerPlugin createdCocoaPodsPlugin =
+              await SwiftPackageManagerUtils.createPlugin(
+                flutterBin,
+                workingDirectoryPath,
+                platform: platformName,
+              );
 
           final String appDirectoryPath = createdCocoaPodsPlugin.exampleAppPath;
 
@@ -88,27 +82,36 @@ void main() {
             ),
           );
         } finally {
-          await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
-          ErrorHandlingFileSystem.deleteIfExists(
-            workingDirectory,
-            recursive: true,
-          );
-        }
-      }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
-
-      test('Create $platformName $iosLanguage plugin with Swift Package Manager enabled', () async {
-        final Directory workingDirectory = fileSystem.systemTempDirectory
-            .createTempSync('swift_package_manager_create_plugin_enabled.');
-        final String workingDirectoryPath = workingDirectory.path;
-        try {
-          await SwiftPackageManagerUtils.enableSwiftPackageManager(flutterBin, workingDirectoryPath);
-
-          final SwiftPackageManagerPlugin createdSwiftPackagePlugin = await SwiftPackageManagerUtils.createPlugin(
+          await SwiftPackageManagerUtils.disableSwiftPackageManager(
             flutterBin,
             workingDirectoryPath,
-            platform: platformName,
-            iosLanguage: iosLanguage,
           );
+          ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
+        }
+      },
+      // [intended] Swift Package Manager only works on macos.
+      skip: !platform.isMacOS,
+    );
+
+    test(
+      'Create $platformName plugin with Swift Package Manager enabled',
+      () async {
+        final Directory workingDirectory = fileSystem.systemTempDirectory.createTempSync(
+          'swift_package_manager_create_plugin_enabled.',
+        );
+        final String workingDirectoryPath = workingDirectory.path;
+        try {
+          await SwiftPackageManagerUtils.enableSwiftPackageManager(
+            flutterBin,
+            workingDirectoryPath,
+          );
+
+          final SwiftPackageManagerPlugin createdSwiftPackagePlugin =
+              await SwiftPackageManagerUtils.createPlugin(
+                flutterBin,
+                workingDirectoryPath,
+                platform: platformName,
+              );
 
           final String appDirectoryPath = createdSwiftPackagePlugin.exampleAppPath;
 
@@ -118,10 +121,7 @@ void main() {
               .childDirectory('Runner.xcodeproj')
               .childFile('project.pbxproj');
           expect(pbxprojFile.existsSync(), isTrue);
-          expect(
-            pbxprojFile.readAsStringSync(),
-            contains('FlutterGeneratedPluginSwiftPackage'),
-          );
+          expect(pbxprojFile.readAsStringSync(), contains('FlutterGeneratedPluginSwiftPackage'));
 
           final File xcschemeFile = fileSystem
               .directory(appDirectoryPath)
@@ -131,10 +131,7 @@ void main() {
               .childDirectory('xcschemes')
               .childFile('Runner.xcscheme');
           expect(xcschemeFile.existsSync(), isTrue);
-          expect(
-            xcschemeFile.readAsStringSync(),
-            contains('Run Prepare Flutter Framework Script'),
-          );
+          expect(xcschemeFile.readAsStringSync(), contains('Run Prepare Flutter Framework Script'));
 
           final File podspec = fileSystem
               .directory(createdSwiftPackagePlugin.pluginPath)
@@ -143,6 +140,24 @@ void main() {
           expect(podspec.existsSync(), isTrue);
           expect(podspec.readAsStringSync(), contains('Sources'));
           expect(podspec.readAsStringSync().contains('Classes'), isFalse);
+
+          // Verify that a plugin having a dependency on the FlutterFramework package
+          // builds successfully.
+          final File manifest = fileSystem
+              .directory(createdSwiftPackagePlugin.swiftPackagePlatformPath)
+              .childFile('Package.swift');
+          expect(manifest.existsSync(), isTrue);
+          const packageDependency =
+              '.package(name: "FlutterFramework", path: "../FlutterFramework")';
+          const targetDependency =
+              '.product(name: "FlutterFramework", package: "FlutterFramework")';
+          final String manifestContent = manifest
+              .readAsStringSync()
+              .replaceFirst('dependencies: [],', 'dependencies: [$packageDependency],')
+              .replaceFirst('dependencies: [],', 'dependencies: [$targetDependency],');
+          expect(manifestContent.contains(packageDependency), isTrue);
+          expect(manifestContent.contains(targetDependency), isTrue);
+          manifest.writeAsStringSync(manifestContent);
 
           await SwiftPackageManagerUtils.buildApp(
             flutterBin,
@@ -161,15 +176,16 @@ void main() {
               swiftPackageMangerEnabled: true,
             ),
           );
-
         } finally {
-          await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
-          ErrorHandlingFileSystem.deleteIfExists(
-            workingDirectory,
-            recursive: true,
+          await SwiftPackageManagerUtils.disableSwiftPackageManager(
+            flutterBin,
+            workingDirectoryPath,
           );
+          ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
         }
-      }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
-    }
+      },
+      // [intended] Swift Package Manager only works on macos.
+      skip: !platform.isMacOS,
+    );
   }
 }

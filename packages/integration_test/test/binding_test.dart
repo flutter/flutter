@@ -20,30 +20,25 @@ Future<void> main() async {
   Future<Map<String, dynamic>>? request;
 
   group('Test Integration binding', () {
-    final IntegrationTestWidgetsFlutterBinding binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+    final IntegrationTestWidgetsFlutterBinding binding =
+        IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
     FakeVM? fakeVM;
 
     setUp(() {
-      request = binding.callback(<String, String>{
-        'command': 'request_data',
-      });
-      fakeVM = FakeVM(
-        timeline: _kTimelines,
-      );
+      request = binding.callback(<String, String>{'command': 'request_data'});
+      fakeVM = FakeVM(timeline: _kTimelines);
     });
 
     testWidgets('Run Integration app', (WidgetTester tester) async {
-      runApp(const MaterialApp(
-        home: Text('Test'),
-      ));
+      runApp(const MaterialApp(home: Text('Test')));
       expect(tester.binding, binding);
       binding.reportData = <String, dynamic>{'answer': 42};
       await tester.pump();
     });
 
     testWidgets('hitTesting works when using setSurfaceSize', (WidgetTester tester) async {
-      int invocations = 0;
+      var invocations = 0;
       await tester.pumpWidget(
         MaterialApp(
           home: Center(
@@ -77,9 +72,7 @@ Future<void> main() async {
     testWidgets('setSurfaceSize works', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(home: Center(child: Text('Test'))));
 
-      final Size viewCenter = tester.view.physicalSize /
-          tester.view.devicePixelRatio /
-          2;
+      final Size viewCenter = tester.view.physicalSize / tester.view.devicePixelRatio / 2;
       final double viewCenterX = viewCenter.width;
       final double viewCenterY = viewCenter.height;
 
@@ -105,10 +98,7 @@ Future<void> main() async {
       await binding.traceAction(() async {});
       expect(binding.reportData, isNotNull);
       expect(binding.reportData!.containsKey('timeline'), true);
-      expect(
-        json.encode(binding.reportData!['timeline']),
-        json.encode(_kTimelines),
-      );
+      expect(json.encode(binding.reportData!['timeline']), json.encode(_kTimelines));
     });
 
     group('defaultTestTimeout', () {
@@ -118,17 +108,21 @@ Future<void> main() async {
       });
 
       test('can be configured', () {
-        const Timeout newTimeout = Timeout(Duration(seconds: 17));
+        const newTimeout = Timeout(Duration(seconds: 17));
         binding.defaultTestTimeout = newTimeout;
         expect(binding.defaultTestTimeout, newTimeout);
       });
     });
 
-    // TODO(jiahaog): Remove when https://github.com/flutter/flutter/issues/66006 is fixed.
-    testWidgets('root widgets are wrapped with a RepaintBoundary', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/66006.
+    testWidgets('root view reports correct dimensions', (WidgetTester tester) async {
       await tester.pumpWidget(const Placeholder());
 
-      expect(find.byType(RepaintBoundary), findsOneWidget);
+      expect(tester.binding.renderView.paintBounds, const Rect.fromLTWH(0, 0, 2400, 1800));
+    });
+
+    testWidgets('integration test has no label', (WidgetTester tester) async {
+      expect(binding.label, null);
     });
   });
 
@@ -136,9 +130,8 @@ Future<void> main() async {
     // This part is outside the group so that `request` has been completed as
     // part of the `tearDownAll` registered in the group during
     // `IntegrationTestWidgetsFlutterBinding` initialization.
-    final Map<String, dynamic> response =
-        (await request)!['response'] as Map<String, dynamic>;
-    final String message = response['message'] as String;
+    final response = (await request)!['response'] as Map<String, dynamic>;
+    final message = response['message'] as String;
     final Response result = Response.fromJson(message);
     assert(result.data!['answer'] == 42);
   });

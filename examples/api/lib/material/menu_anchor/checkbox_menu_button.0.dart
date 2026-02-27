@@ -20,7 +20,10 @@ class MyCheckboxMenu extends StatefulWidget {
 
 class _MyCheckboxMenuState extends State<MyCheckboxMenu> {
   final FocusNode _buttonFocusNode = FocusNode(debugLabel: 'Menu Button');
-  static const SingleActivator _showShortcut = SingleActivator(LogicalKeyboardKey.keyS, control: true);
+  static const SingleActivator _showShortcut = SingleActivator(
+    LogicalKeyboardKey.keyS,
+    control: true,
+  );
   bool _showingMessage = false;
 
   @override
@@ -57,19 +60,24 @@ class _MyCheckboxMenuState extends State<MyCheckboxMenu> {
                 child: const Text('Show Message'),
               ),
             ],
-            builder: (BuildContext context, MenuController controller, Widget? child) {
-              return TextButton(
-                focusNode: _buttonFocusNode,
-                onPressed: () {
-                  if (controller.isOpen) {
-                    controller.close();
-                  } else {
-                    controller.open();
-                  }
+            builder:
+                (
+                  BuildContext context,
+                  MenuController controller,
+                  Widget? child,
+                ) {
+                  return TextButton(
+                    focusNode: _buttonFocusNode,
+                    onPressed: () {
+                      if (controller.isOpen) {
+                        controller.close();
+                      } else {
+                        controller.open();
+                      }
+                    },
+                    child: const Text('OPEN MENU'),
+                  );
                 },
-                child: const Text('OPEN MENU'),
-              );
-            },
           ),
           Expanded(
             child: Container(
@@ -101,9 +109,10 @@ class MenuApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(useMaterial3: true),
-      home: const Scaffold(body: SafeArea(child: MyCheckboxMenu(message: kMessage))),
+    return const MaterialApp(
+      home: Scaffold(
+        body: SafeArea(child: MyCheckboxMenu(message: kMessage)),
+      ),
     );
   }
 }

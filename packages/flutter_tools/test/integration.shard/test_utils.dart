@@ -15,6 +15,13 @@ import 'test_driver.dart';
 /// The [FileSystem] for the integration test environment.
 const FileSystem fileSystem = LocalFileSystem();
 
+/// The (real) `flutter` binary (i.e. `{ROOT}/bin/flutter`) to execute in tests.
+final String flutterBin = fileSystem.path.join(
+  getFlutterRoot(),
+  'bin',
+  platform.isWindows ? 'flutter.bat' : 'flutter',
+);
+
 /// The [Platform] for the integration test environment.
 const Platform platform = LocalPlatform();
 
@@ -34,12 +41,12 @@ void writeFile(String path, String content, {bool writeFutureModifiedDate = fals
   final File file = fileSystem.file(path)
     ..createSync(recursive: true)
     ..writeAsStringSync(content, flush: true);
-    // Some integration tests on Windows to not see this file as being modified
-    // recently enough for the hot reload to pick this change up unless the
-    // modified time is written in the future.
-    if (writeFutureModifiedDate) {
-      file.setLastModifiedSync(DateTime.now().add(const Duration(seconds: 5)));
-    }
+  // Some integration tests on Windows to not see this file as being modified
+  // recently enough for the hot reload to pick this change up unless the
+  // modified time is written in the future.
+  if (writeFutureModifiedDate) {
+    file.setLastModifiedSync(DateTime.now().add(const Duration(seconds: 5)));
+  }
 }
 
 void writeBytesFile(String path, List<int> content) {
@@ -48,27 +55,17 @@ void writeBytesFile(String path, List<int> content) {
     ..writeAsBytesSync(content, flush: true);
 }
 
-void writePackages(String folder) {
-  writeFile(fileSystem.path.join(folder, '.packages'), '''
-test:${fileSystem.path.join(fileSystem.currentDirectory.path, 'lib')}/
-''');
-}
-
 Future<void> getPackages(String folder) async {
-  final List<String> command = <String>[
-    fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter'),
-    'pub',
-    'get',
-  ];
+  final command = <String>[fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter'), 'pub', 'get'];
   final ProcessResult result = await processManager.run(command, workingDirectory: folder);
   if (result.exitCode != 0) {
     throw Exception('flutter pub get failed: ${result.stderr}\n${result.stdout}');
   }
 }
 
-const String kLocalEngineEnvironment = 'FLUTTER_LOCAL_ENGINE';
-const String kLocalEngineHostEnvironment = 'FLUTTER_LOCAL_ENGINE_HOST';
-const String kLocalEngineLocation = 'FLUTTER_LOCAL_ENGINE_SRC_PATH';
+const kLocalEngineEnvironment = 'FLUTTER_LOCAL_ENGINE';
+const kLocalEngineHostEnvironment = 'FLUTTER_LOCAL_ENGINE_HOST';
+const kLocalEngineLocation = 'FLUTTER_LOCAL_ENGINE_SRC_PATH';
 
 List<String> getLocalEngineArguments() {
   return <String>[
@@ -88,7 +85,7 @@ Future<void> pollForServiceExtensionValue<T>({
   required Matcher matches,
   String valueKey = 'value',
 }) async {
-  for (int i = 0; i < 10; i++) {
+  for (var i = 0; i < 10; i++) {
     final Response response = await testDriver.callServiceExtension(extension);
     if (response.json?[valueKey] as T == continuePollingValue) {
       await Future<void>.delayed(const Duration(seconds: 1));
@@ -104,25 +101,23 @@ Future<void> pollForServiceExtensionValue<T>({
 }
 
 abstract final class AppleTestUtils {
-  static const List<String> requiredSymbols = <String>[
+  static const requiredSymbols = <String>[
     '_kDartIsolateSnapshotData',
     '_kDartIsolateSnapshotInstructions',
     '_kDartVmSnapshotData',
-    '_kDartVmSnapshotInstructions'
+    '_kDartVmSnapshotInstructions',
   ];
 
   static List<String> getExportedSymbols(String dwarfPath) {
-    final ProcessResult nm = processManager.runSync(
-      <String>[
-        'nm',
-        '--debug-syms',  // nm docs: 'Show all symbols, even debugger only'
-        '--defined-only',
-        '--just-symbol-name',
-        dwarfPath,
-        '-arch',
-        'arm64',
-      ],
-    );
+    final ProcessResult nm = processManager.runSync(<String>[
+      'nm',
+      '--debug-syms', // nm docs: 'Show all symbols, even debugger only'
+      '--defined-only',
+      '--just-symbol-name',
+      dwarfPath,
+      '-arch',
+      'arm64',
+    ]);
     final String nmOutput = (nm.stdout as String).trim();
     return nmOutput.isEmpty ? const <String>[] : nmOutput.split('\n');
   }
@@ -134,11 +129,7 @@ abstract final class AppleTestUtils {
 /// The default for [exitCode] will be 0 while
 /// [stdoutPattern] and [stderrPattern] are both optional
 class ProcessResultMatcher extends Matcher {
-  const ProcessResultMatcher({
-    this.exitCode = 0,
-    this.stdoutPattern,
-    this.stderrPattern,
-  });
+  const ProcessResultMatcher({this.exitCode = 0, this.stdoutPattern, this.stderrPattern});
 
   /// The expected exit code to get returned from a process run
   final int exitCode;
@@ -164,12 +155,12 @@ class ProcessResultMatcher extends Matcher {
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    final ProcessResult result = item as ProcessResult;
-    bool foundStdout = true;
-    bool foundStderr = true;
+    final result = item as ProcessResult;
+    var foundStdout = true;
+    var foundStderr = true;
 
-    final String stdout = result.stdout as String;
-    final String stderr = result.stderr as String;
+    final stdout = result.stdout as String;
+    final stderr = result.stderr as String;
     if (stdoutPattern != null) {
       foundStdout = stdout.contains(stdoutPattern!);
       matchState['stdout'] = stdout;
@@ -195,7 +186,7 @@ class ProcessResultMatcher extends Matcher {
     Map<dynamic, dynamic> matchState,
     bool verbose,
   ) {
-    final ProcessResult result = item! as ProcessResult;
+    final result = item! as ProcessResult;
 
     if (result.exitCode != exitCode) {
       mismatchDescription.add('Actual exitCode was ${result.exitCode}\n');

@@ -13,10 +13,10 @@ import '../framework/utils.dart';
 const int _kRunsPerBenchmark = 10;
 
 Future<TaskResult> flutterToolStartupBenchmarkTask() async {
-  final Directory projectParentDirectory =
-      Directory.systemTemp.createTempSync('flutter_tool_startup_benchmark');
-  final Directory projectDirectory =
-      dir(path.join(projectParentDirectory.path, 'benchmark'));
+  final Directory projectParentDirectory = Directory.systemTemp.createTempSync(
+    'flutter_tool_startup_benchmark',
+  );
+  final Directory projectDirectory = dir(path.join(projectParentDirectory.path, 'benchmark'));
   await inDirectory<void>(flutterDirectory, () async {
     await flutter('update-packages');
     await flutter('create', options: <String>[projectDirectory.path]);
@@ -24,14 +24,13 @@ Future<TaskResult> flutterToolStartupBenchmarkTask() async {
     rmTree(dir(path.join(projectDirectory.path, 'test')));
   });
 
-  final Map<String, dynamic> data = <String, dynamic>{
+  final data = <String, dynamic>{
     // `flutter test` in dir with no `test` folder.
     ...(await _Benchmark(
       projectDirectory,
       'test startup',
       'test',
-    ).run())
-        .asMap('flutter_tool_startup_test'),
+    ).run()).asMap('flutter_tool_startup_test'),
 
     // `flutter test -d foo_device` in dir with no `test` folder.
     ...(await _Benchmark(
@@ -39,8 +38,7 @@ Future<TaskResult> flutterToolStartupBenchmarkTask() async {
       'test startup with specified device',
       'test',
       options: <String>['-d', 'foo_device'],
-    ).run())
-        .asMap('flutter_tool_startup_test_with_specified_device'),
+    ).run()).asMap('flutter_tool_startup_test_with_specified_device'),
 
     // `flutter test -v` where no android sdk will be found (at least currently).
     ...(await _Benchmark(
@@ -53,16 +51,14 @@ Future<TaskResult> flutterToolStartupBenchmarkTask() async {
         'ANDROID_SDK_ROOT': 'dummy value',
         'PATH': pathWithoutWhereHits(<String>['adb', 'aapt']),
       },
-    ).run())
-        .asMap('flutter_tool_startup_test_no_android_sdk'),
+    ).run()).asMap('flutter_tool_startup_test_no_android_sdk'),
 
     // `flutter -h`.
     ...(await _Benchmark(
       projectDirectory,
       'help startup',
       '-h',
-    ).run())
-        .asMap('flutter_tool_startup_help'),
+    ).run()).asMap('flutter_tool_startup_help'),
   };
 
   // Cleanup.
@@ -80,14 +76,14 @@ String pathWithoutWhereHits(List<String> whats) {
     paths = pathEnvironment.split(':');
   }
   // This isn't great but will probably work for our purposes.
-  final List<String> extensions = <String>['', '.exe', '.bat', '.com'];
+  final extensions = <String>['', '.exe', '.bat', '.com'];
 
-  final List<String> notFound = <String>[];
-  for (final String path in paths) {
-    bool found = false;
-    for (final String extension in extensions) {
-      for (final String what in whats) {
-        final File f = File('$path${Platform.pathSeparator}$what$extension');
+  final notFound = <String>[];
+  for (final path in paths) {
+    var found = false;
+    for (final extension in extensions) {
+      for (final what in whats) {
+        final f = File('$path${Platform.pathSeparator}$what$extension');
         if (f.existsSync()) {
           found = true;
           break;
@@ -119,17 +115,18 @@ class _BenchmarkResult {
   final int max; // Milliseconds
 
   Map<String, dynamic> asMap(String name) {
-    return <String, dynamic>{
-      name: mean,
-      '${name}_minimum': min,
-      '${name}_maximum': max,
-    };
+    return <String, dynamic>{name: mean, '${name}_minimum': min, '${name}_maximum': max};
   }
 }
 
 class _Benchmark {
-  _Benchmark(this.directory, this.title, this.command,
-      {this.options = const <String>[], this.environment});
+  _Benchmark(
+    this.directory,
+    this.title,
+    this.command, {
+    this.options = const <String>[],
+    this.environment,
+  });
 
   final Directory directory;
 
@@ -143,13 +140,12 @@ class _Benchmark {
 
   Future<int> execute(int iteration, int targetIterations) async {
     section('Benchmark $title - ${iteration + 1} / $targetIterations');
-    final Stopwatch stopwatch = Stopwatch();
+    final stopwatch = Stopwatch();
     await inDirectory<void>(directory, () async {
       stopwatch.start();
       // canFail is set to true, as e.g. `flutter test` in a dir with no `test`
       // directory sets a non-zero return value.
-      await flutter(command,
-          options: options, canFail: true, environment: environment);
+      await flutter(command, options: options, canFail: true, environment: environment);
       stopwatch.stop();
     });
     return stopwatch.elapsedMilliseconds;
@@ -157,9 +153,9 @@ class _Benchmark {
 
   /// Runs `benchmark` several times and reports the results.
   Future<_BenchmarkResult> run() async {
-    final List<int> results = <int>[];
-    int sum = 0;
-    for (int i = 0; i < _kRunsPerBenchmark; i++) {
+    final results = <int>[];
+    var sum = 0;
+    for (var i = 0; i < _kRunsPerBenchmark; i++) {
       final int thisRuntime = await execute(i, _kRunsPerBenchmark);
       results.add(thisRuntime);
       sum += thisRuntime;

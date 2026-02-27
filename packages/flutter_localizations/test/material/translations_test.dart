@@ -17,11 +17,13 @@ final String rootDirectoryPath = Directory.current.path;
 void main() {
   for (final String language in kMaterialSupportedLanguages) {
     testWidgets('translations exist for $language', (WidgetTester tester) async {
-      final Locale locale = Locale(language);
+      final locale = Locale(language);
 
       expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
 
-      final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
+      final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(
+        locale,
+      );
 
       expect(localizations.openAppDrawerTooltip, isNotNull);
       expect(localizations.backButtonTooltip, isNotNull);
@@ -63,9 +65,18 @@ void main() {
       expect(localizations.remainingTextFieldCharacterCount(0), isNotNull);
       expect(localizations.remainingTextFieldCharacterCount(1), isNotNull);
       expect(localizations.remainingTextFieldCharacterCount(10), isNotNull);
-      expect(localizations.remainingTextFieldCharacterCount(0), isNot(contains(r'$remainingCount')));
-      expect(localizations.remainingTextFieldCharacterCount(1), isNot(contains(r'$remainingCount')));
-      expect(localizations.remainingTextFieldCharacterCount(10), isNot(contains(r'$remainingCount')));
+      expect(
+        localizations.remainingTextFieldCharacterCount(0),
+        isNot(contains(r'$remainingCount')),
+      );
+      expect(
+        localizations.remainingTextFieldCharacterCount(1),
+        isNot(contains(r'$remainingCount')),
+      );
+      expect(
+        localizations.remainingTextFieldCharacterCount(10),
+        isNot(contains(r'$remainingCount')),
+      );
 
       expect(localizations.aboutListTileTitle('FOO'), isNotNull);
       expect(localizations.aboutListTileTitle('FOO'), contains('FOO'));
@@ -108,7 +119,7 @@ void main() {
   }
 
   testWidgets('translations spot check', (WidgetTester tester) async {
-    Locale locale = const Locale.fromSubtags(languageCode: 'zh');
+    var locale = const Locale.fromSubtags(languageCode: 'zh');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
     expect(localizations, isA<MaterialLocalizationZh>());
@@ -123,15 +134,19 @@ void main() {
   });
 
   testWidgets('translations spot check expansionTileExpandedHint', (WidgetTester tester) async {
-    const Locale locale = Locale.fromSubtags(languageCode: 'en');
+    const locale = Locale.fromSubtags(languageCode: 'en');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
-    final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
+    final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(
+      locale,
+    );
     expect(localizations, isA<MaterialLocalizationEn>());
     expect(localizations.expansionTileExpandedHint, 'double tap to collapse');
   });
 
   testWidgets('spot check selectedRowCount translations', (WidgetTester tester) async {
-    MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('en'));
+    MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(
+      const Locale('en'),
+    );
     expect(localizations.selectedRowCountTitle(0), 'No items selected');
     expect(localizations.selectedRowCountTitle(1), '1 item selected');
     expect(localizations.selectedRowCountTitle(2), '2 items selected');
@@ -178,8 +193,12 @@ void main() {
     expect(localizations.selectedRowCountTitle(123456789), 'បាន​ជ្រើស​រើស​ធាតុ 123,456,789');
   });
 
-  testWidgets('spot check formatMediumDate(), formatFullDate() translations', (WidgetTester tester) async {
-    MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('en'));
+  testWidgets('spot check formatMediumDate(), formatFullDate() translations', (
+    WidgetTester tester,
+  ) async {
+    MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(
+      const Locale('en'),
+    );
     expect(localizations.formatMediumDate(DateTime(2015, 7, 23)), 'Thu, Jul 23');
     expect(localizations.formatFullDate(DateTime(2015, 7, 23)), 'Thursday, July 23, 2015');
 
@@ -197,7 +216,7 @@ void main() {
   });
 
   testWidgets('Chinese resolution', (WidgetTester tester) async {
-    Locale locale = const Locale.fromSubtags(languageCode: 'zh');
+    var locale = const Locale.fromSubtags(languageCode: 'zh');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
     expect(localizations, isA<MaterialLocalizationZh>());
@@ -289,7 +308,7 @@ void main() {
   });
 
   testWidgets('Serbian resolution', (WidgetTester tester) async {
-    Locale locale = const Locale.fromSubtags(languageCode: 'sr');
+    var locale = const Locale.fromSubtags(languageCode: 'sr');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
     expect(localizations, isA<MaterialLocalizationSr>());
@@ -336,7 +355,7 @@ void main() {
   });
 
   testWidgets('Misc resolution', (WidgetTester tester) async {
-    Locale locale = const Locale.fromSubtags(languageCode: 'en');
+    var locale = const Locale.fromSubtags(languageCode: 'en');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
     expect(localizations, isA<MaterialLocalizationEn>());
@@ -458,7 +477,7 @@ void main() {
   });
 
   testWidgets('Chinese translations spot check', (WidgetTester tester) async {
-    Locale locale = const Locale.fromSubtags(languageCode: 'zh');
+    var locale = const Locale.fromSubtags(languageCode: 'zh');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
     expect(localizations, isA<MaterialLocalizationZh>());
@@ -489,7 +508,7 @@ void main() {
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
     expect(localizations, isA<MaterialLocalizationZhHantTw>());
-    expect(localizations.alertDialogLabel, '快訊');
+    expect(localizations.alertDialogLabel, '警告');
     expect(localizations.anteMeridiemAbbreviation, '上午');
     expect(localizations.closeButtonLabel, '關閉');
     expect(localizations.okButtonLabel, '確定');
@@ -506,13 +525,9 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/36704.
   testWidgets('kn arb file should be properly Unicode escaped', (WidgetTester tester) async {
-    final File file = File(
-      path.join(rootDirectoryPath, 'lib', 'src', 'l10n', 'material_kn.arb'),
-    );
+    final file = File(path.join(rootDirectoryPath, 'lib', 'src', 'l10n', 'material_kn.arb'));
 
-    final Map<String, dynamic> bundle = json.decode(
-      file.readAsStringSync(),
-    ) as Map<String, dynamic>;
+    final bundle = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
 
     // Encodes the arb resource values if they have not already been
     // encoded.
@@ -535,28 +550,71 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/110451.
   testWidgets('Finnish translation for tab label', (WidgetTester tester) async {
-    const Locale locale = Locale('fi');
+    const locale = Locale('fi');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
-    final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
+    final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(
+      locale,
+    );
     expect(localizations, isA<MaterialLocalizationFi>());
     expect(localizations.tabLabel(tabIndex: 1, tabCount: 2), 'Välilehti 1 kautta 2');
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/138728.
   testWidgets('Share button label on Material', (WidgetTester tester) async {
-    const Locale locale = Locale('en');
+    const locale = Locale('en');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
-    final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
+    final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(
+      locale,
+    );
     expect(localizations, isA<MaterialLocalizationEn>());
     expect(localizations.shareButtonLabel, 'Share');
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/141764
   testWidgets('zh-CN translation for look up label', (WidgetTester tester) async {
-    const Locale locale = Locale('zh');
-    expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
-    final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
+    const locale = Locale('zh');
+    expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
+    final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(
+      locale,
+    );
     expect(localizations, isA<MaterialLocalizationZh>());
     expect(localizations.lookUpButtonLabel, '查询');
+  });
+
+  // Regression test for https://github.com/flutter/flutter/pull/151364
+  testWidgets('ko-KR translation for cut, copy, paste label in ButtonLabel', (
+    WidgetTester tester,
+  ) async {
+    const locale = Locale('ko');
+    expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
+    final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(
+      locale,
+    );
+    expect(localizations, isA<MaterialLocalizationKo>());
+    expect(localizations.cutButtonLabel, '잘라내기');
+    expect(localizations.copyButtonLabel, '복사');
+    expect(localizations.pasteButtonLabel, '붙여넣기');
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/156954
+  testWidgets('Italian translation for dateHelpText', (WidgetTester tester) async {
+    const locale = Locale('it');
+    expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
+    final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(
+      locale,
+    );
+    expect(localizations, isA<MaterialLocalizationIt>());
+    expect(localizations.dateHelpText, 'gg/mm/aaaa');
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/176677
+  testWidgets('Basque translation for timeOfDayFormat', (WidgetTester tester) async {
+    const locale = Locale('eu');
+    expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
+    final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(
+      locale,
+    );
+    expect(localizations, isA<MaterialLocalizationEu>());
+    expect(localizations.timeOfDayFormat(), TimeOfDayFormat.HH_colon_mm);
   });
 }

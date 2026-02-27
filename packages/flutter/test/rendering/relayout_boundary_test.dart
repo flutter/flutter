@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('relayout boundary change does not trigger relayout', (WidgetTester tester) async {
-    final RenderLayoutCount renderLayoutCount = RenderLayoutCount();
+    final renderLayoutCount = RenderLayoutCount();
     final Widget layoutCounter = Center(
       key: GlobalKey(),
       child: WidgetToRenderBoxAdapter(renderBox: renderLayoutCount),
@@ -19,13 +19,7 @@ void main() {
           width: 100,
           height: 100,
           child: Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
-              child: Center(
-                child: layoutCounter,
-              ),
-            ),
+            child: SizedBox(width: 100, height: 100, child: Center(child: layoutCounter)),
           ),
         ),
       ),
@@ -33,15 +27,7 @@ void main() {
 
     expect(renderLayoutCount.layoutCount, 1);
 
-    await tester.pumpWidget(
-      Center(
-        child: SizedBox(
-          width: 100,
-          height: 100,
-          child: layoutCounter,
-        ),
-      ),
-    );
+    await tester.pumpWidget(Center(child: SizedBox(width: 100, height: 100, child: layoutCounter)));
 
     expect(renderLayoutCount.layoutCount, 1);
   });

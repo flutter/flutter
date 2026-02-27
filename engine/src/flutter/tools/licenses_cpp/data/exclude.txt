@@ -1,0 +1,125 @@
+################################################################################
+# This file describes all the files we don't need to do a copyright header
+# check on.
+################################################################################
+.*/CMakeLists\.txt$
+.*/test/.*
+.*/testing/.*
+.*/tests/.*
+.*third_party/googletest/.*
+^build/.*
+^build_overrides/.*
+^fuchsia/.*
+^out/.*
+^tools/.*
+^third_party/fuchsia-sdk/.*
+^flutter/build/.*
+^flutter/buildtools/.*
+^flutter/impeller/fixtures/.*
+^flutter/prebuilts/.*
+^flutter/shell/platform/fuchsia/dart-pkg/zircon_ffi/lib/zircon_ffi.dart
+^flutter/sky/packages/sky_engine/LICENSE
+^flutter/testing/.*
+^flutter/third_party/android_tools/.*
+^flutter/third_party/angle/third_party/.*
+^flutter/third_party/angle/tools/.*
+^flutter/third_party/angle/util/.*
+^flutter/third_party/benchmark/.*
+^flutter/third_party/dart/pkg/.*
+^flutter/third_party/dart/third_party/binary_size/.*
+^flutter/third_party/dart/third_party/binaryen/.*
+^flutter/third_party/dart/third_party/d3/.*
+^flutter/third_party/dart/third_party/devtools/web/.*\.frag$
+^flutter/third_party/dart/third_party/devtools/web/.*\.js$
+^flutter/third_party/dart/third_party/pkg/.*
+^flutter/third_party/dart/third_party/requirejs/.*
+^flutter/third_party/depot_tools/.*
+^flutter/third_party/expat/expat/lib/internal\.h$
+^flutter/third_party/freetype2/docs/[^F].*$
+^flutter/third_party/google_fonts_for_unit_tests/.*
+^flutter/third_party/gradle/.*
+^flutter/third_party/harfbuzz/.*\.py
+^flutter/third_party/harfbuzz/perf/.*
+^flutter/third_party/harfbuzz/src/harfbuzz.cc
+^flutter/third_party/harfbuzz/util/.*
+^flutter/third_party/icu/scripts/.*
+^flutter/third_party/imgui/.*
+^flutter/third_party/inja/third_party/amalgamate/.*
+^flutter/third_party/inja/third_party/include/doctest/.*
+^flutter/third_party/java/.*
+^flutter/third_party/libpng/contrib/.*
+^flutter/third_party/libwebp/.*\.py
+^flutter/third_party/libwebp/examples/.*
+^flutter/third_party/libwebp/extras/webp_quality.c
+^flutter/third_party/libwebp/swig/.*
+^flutter/third_party/llvm-project/.*
+^flutter/third_party/ocmock/.*
+^flutter/third_party/pkg/archive/.*
+^flutter/third_party/pkg/flutter_packages/.*
+^flutter/third_party/pkg/gcloud/.*
+^flutter/third_party/pkg/googleapis/.*
+^flutter/third_party/pkg/process/.*
+^flutter/third_party/pkg/vector_math/.*
+^flutter/third_party/protobuf/.*
+^flutter/third_party/pyyaml/.*
+^flutter/third_party/skia/third_party/freetype2/.*
+^flutter/third_party/skia/third_party/icu/.*
+^flutter/third_party/skia/third_party/libgrapheme/.*
+^flutter/third_party/skia/third_party/libpng/.*
+^flutter/third_party/skia/third_party/vello/.*
+^flutter/third_party/swiftshader/third_party/.*
+^flutter/third_party/swiftshader/third_party/llvm-10.0/.*
+^flutter/third_party/swiftshader/third_party/llvm-16.0/.*
+(?i)^flutter/third_party/vulkan-deps/glslang/src/LICENSE\.txt$
+^flutter/third_party/vulkan-deps/spirv-headers/.*
+^flutter/third_party/vulkan-deps/vulkan-headers/src/LICENSE\.md$
+^flutter/third_party/vulkan-deps/vulkan-loader/.*
+^flutter/third_party/vulkan-deps/vulkan-utility-libraries/src/LICENSE.md$
+^flutter/third_party/vulkan-deps/vulkan-utility-libraries/src/scripts/.*
+^flutter/tools/android_sdk/packages\.txt$
+^flutter/tools/fuchsia/.*
+^flutter/tools/licenses_cpp/data/.*
+################################################################################
+# Instances that don't have a clear resolution yet.
+################################################################################
+# I'm not sure why this LICENSE seems to generate a different package name on
+# ci than locally. It isn't necessary because each vulkan-dep has its own
+# license
+^flutter/third_party/vulkan-deps/LICENSE$
+# This isn't in the sky license, nor excluded.
+^flutter/third_party/expat/expat/lib/siphash.h
+# This directory isn't excluded explicitly but probably should be.
+^flutter/third_party/harfbuzz/.ci/.*
+# These files don't have headers and aren't explicitly excluded.
+^flutter/third_party/harfbuzz/src/test-use-table.cc
+^flutter/third_party/harfbuzz/src/wasm/graphite/shape.cc
+^flutter/third_party/harfbuzz/src/wasm/sample/c/shape-fallback.cc
+^flutter/third_party/harfbuzz/src/wasm/sample/c/shape-ot.cc
+# These files don't have headers and aren't explicitly excluded (but they're scripts).
+^flutter/third_party/libwebp/autogen.sh
+^flutter/third_party/libwebp/iosbuild.sh
+^flutter/third_party/libwebp/xcframeworkbuild.sh
+# This file doesn't have a header and isn't excluded.
+^flutter/third_party/harfbuzz/src/OT/Var/VARC/VARC.cc
+# This file has no header, but it only includes other files.
+^flutter/third_party/harfbuzz/src/harfbuzz-subset.cc
+# These files have no header, but they are generated files.
+^flutter/third_party/harfbuzz/src/hb-ot-shaper-indic-table.cc
+^flutter/third_party/harfbuzz/src/hb-ot-shaper-vowel-constraints.cc
+# These files don't seem to be explicitly excluded but aren't present in the
+# sky license.
+flutter/third_party/freetype2/autogen.sh
+flutter/third_party/freetype2/builds/.*
+flutter/third_party/freetype2/docs/markdown/javascripts/extra.js
+flutter/third_party/freetype2/include/freetype-flutter-config/.*
+flutter/third_party/freetype2/include/freetype/config/ftmodule.h
+flutter/third_party/freetype2/include/freetype/ftchapters.h
+flutter/third_party/freetype2/LICENSE.TXT
+flutter/third_party/freetype2/src/gxvalid/gxvfgen.c
+flutter/third_party/freetype2/src/psaux/.*
+flutter/third_party/freetype2/src/tools/.*
+flutter/third_party/freetype2/src/truetype/ttpload.c
+# This file is a conglomeration of licenses found in files.
+flutter/third_party/vulkan-deps/glslang/src/LICENSE.TXT
+# This file has a copyright but isn't included in legacy tool
+^flutter/third_party/freetype2/meson_options\.txt$

@@ -9,9 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Forces text to be lower case', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.TextEditingControllerExampleApp(),
-    );
+    await tester.pumpWidget(const example.TextEditingControllerExampleApp());
 
     const String input = 'Almost Everything Is a WIDGET! 💙';
 
@@ -25,10 +23,10 @@ void main() {
     expect(controller.text, input.toLowerCase());
   });
 
-  testWidgets('Keeps the caret at the end of the input', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.TextEditingControllerExampleApp(),
-    );
+  testWidgets('Keeps the caret at the end of the input', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.TextEditingControllerExampleApp());
 
     const String input = 'flutter';
 

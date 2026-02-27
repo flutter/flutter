@@ -25,57 +25,51 @@ void main() {
     await tester.drag(finder, offset);
   }
 
-  testWidgets(
-    'ListTiles can be dismissed from right to left',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const example.DismissibleExampleApp(),
+  testWidgets('ListTiles can be dismissed from right to left', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.DismissibleExampleApp());
+
+    for (final int index in <int>[0, 33, 66, 99]) {
+      final ValueKey<int> key = ValueKey<int>(index);
+
+      await tester.scrollUntilVisible(find.byKey(key), 100);
+
+      expect(find.byKey(key), findsOneWidget);
+
+      await dismissHorizontally(
+        tester: tester,
+        finder: find.byKey(key),
+        direction: AxisDirection.left,
       );
 
-      for (final int index in <int>[0, 33, 66, 99]) {
-        final ValueKey<int> key = ValueKey<int>(index);
+      await tester.pumpAndSettle();
 
-        await tester.scrollUntilVisible(find.byKey(key), 100);
+      expect(find.byKey(key), findsNothing);
+    }
+  });
 
-        expect(find.byKey(key), findsOneWidget);
+  testWidgets('ListTiles can be dismissed from left to right', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.DismissibleExampleApp());
 
-        await dismissHorizontally(
-          tester: tester,
-          finder: find.byKey(key),
-          direction: AxisDirection.left,
-        );
+    for (final int index in <int>[0, 33, 66, 99]) {
+      final ValueKey<int> key = ValueKey<int>(index);
 
-        await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(find.byKey(key), 100);
 
-        expect(find.byKey(key), findsNothing);
-      }
-    },
-  );
+      expect(find.byKey(key), findsOneWidget);
 
-  testWidgets(
-    'ListTiles can be dismissed from left to right',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const example.DismissibleExampleApp(),
+      await dismissHorizontally(
+        tester: tester,
+        finder: find.byKey(key),
+        direction: AxisDirection.right,
       );
 
-      for (final int index in <int>[0, 33, 66, 99]) {
-        final ValueKey<int> key = ValueKey<int>(index);
+      await tester.pumpAndSettle();
 
-        await tester.scrollUntilVisible(find.byKey(key), 100);
-
-        expect(find.byKey(key), findsOneWidget);
-
-        await dismissHorizontally(
-          tester: tester,
-          finder: find.byKey(key),
-          direction: AxisDirection.right,
-        );
-
-        await tester.pumpAndSettle();
-
-        expect(find.byKey(key), findsNothing);
-      }
-    },
-  );
+      expect(find.byKey(key), findsNothing);
+    }
+  });
 }

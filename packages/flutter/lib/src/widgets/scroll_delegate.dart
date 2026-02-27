@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'scroll_view.dart';
+/// @docImport 'sliver.dart';
+/// @docImport 'spacer.dart';
+/// @docImport 'two_dimensional_scroll_view.dart';
+/// @docImport 'viewport.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -11,10 +18,11 @@ import 'framework.dart';
 import 'selection_container.dart';
 import 'two_dimensional_viewport.dart';
 
-export 'package:flutter/rendering.dart' show
-  SliverGridDelegate,
-  SliverGridDelegateWithFixedCrossAxisCount,
-  SliverGridDelegateWithMaxCrossAxisExtent;
+export 'package:flutter/rendering.dart'
+    show
+        SliverGridDelegate,
+        SliverGridDelegateWithFixedCrossAxisCount,
+        SliverGridDelegateWithMaxCrossAxisExtent;
 
 // Examples can assume:
 // late SliverGridDelegateWithMaxCrossAxisExtent _gridDelegate;
@@ -176,9 +184,9 @@ abstract class SliverChildDelegate {
   /// included in the current layout. The `lastIndex` argument is the index of
   /// the last child that was included in the current layout.
   ///
-  /// Useful for subclasses that which to track which children are included in
+  /// Useful for subclasses that wish to track which children are included in
   /// the underlying render tree.
-  void didFinishLayout(int firstIndex, int lastIndex) { }
+  void didFinishLayout(int firstIndex, int lastIndex) {}
 
   /// Called whenever a new instance of the child delegate class is
   /// provided to the sliver.
@@ -204,7 +212,7 @@ abstract class SliverChildDelegate {
 
   @override
   String toString() {
-    final List<String> description = <String>[];
+    final description = <String>[];
     debugFillDescription(description);
     return '${describeIdentity(this)}(${description.join(", ")})';
   }
@@ -405,6 +413,60 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// none of the children will ever try to keep themselves alive.
   ///
   /// Defaults to true.
+  ///
+  /// {@tool dartpad}
+  /// This sample demonstrates how to use the [AutomaticKeepAlive] widget in
+  /// combination with the [AutomaticKeepAliveClientMixin] to selectively preserve
+  /// the state of individual items in a scrollable list.
+  ///
+  /// Normally, widgets in a lazily built list like [ListView.builder] are
+  /// disposed of when they leave the visible area to maintain performance. This means
+  /// that any state inside a [StatefulWidget] would be lost unless explicitly
+  /// preserved.
+  ///
+  /// In this example, each list item is a [StatefulWidget] that includes a
+  /// counter and an increment button. To preserve the state of selected items
+  /// (based on their index), the [AutomaticKeepAlive] widget and
+  /// [AutomaticKeepAliveClientMixin] are used:
+  ///
+  /// - The `wantKeepAlive` getter in the item’s state class returns true for
+  ///   even-indexed items, indicating that their state should be preserved.
+  /// - For odd-indexed items, `wantKeepAlive` returns false, so their state is
+  ///   not preserved when scrolled out of view.
+  ///
+  /// ** See code in examples/api/lib/widgets/keep_alive/automatic_keep_alive.0.dart **
+  /// {@end-tool}
+  ///
+  /// {@tool dartpad}
+  /// This sample demonstrates how to use the [KeepAlive] widget
+  /// to preserve the state of individual list items in a [ListView] when they are
+  /// scrolled out of view.
+  ///
+  /// By default, [ListView.builder] only keeps the widgets currently visible in
+  /// the viewport alive. When an item scrolls out of view, it may be disposed to
+  /// free up resources. This can cause the state of [StatefulWidget]s to be lost
+  /// if not explicitly preserved.
+  ///
+  /// In this example, each item in the list is a [StatefulWidget] that maintains
+  /// a counter. Tapping the "+" button increments the counter. To selectively
+  /// preserve the state, each item is wrapped in a [KeepAlive] widget, with the
+  /// keepAlive parameter set based on the item’s index:
+  ///
+  /// - For even-indexed items, `keepAlive: true`, so their state is preserved
+  ///   even when scrolled off-screen.
+  /// - For odd-indexed items, `keepAlive: false`, so their state is discarded
+  ///   when they are no longer visible.
+  ///
+  /// ** See code in examples/api/lib/widgets/keep_alive/keep_alive.0.dart **
+  /// {@end-tool}
+  ///
+  ///  * [AutomaticKeepAlive], which allows subtrees to request to be kept alive
+  ///    in lazy lists.
+  ///  * [AutomaticKeepAliveClientMixin], which is a mixin with convenience
+  ///    methods for clients of [AutomaticKeepAlive]. Used with [State]
+  ///    subclasses.
+  ///  * [KeepAlive] which marks a child as needing to stay alive even when it's
+  ///    in a lazy list that would otherwise remove it.
   /// {@endtemplate}
   final bool addAutomaticKeepAlives;
 
@@ -656,10 +718,10 @@ class SliverChildListDelegate extends SliverChildDelegate {
   /// ```
   final List<Widget> children;
 
-  /// A map to cache key to index lookup for children.
-  ///
-  /// _keyToIndex[null] is used as current index during the lazy loading process
-  /// in [_findChildIndex]. _keyToIndex should never be used for looking up null key.
+  // A map to cache key to index lookup for children.
+  //
+  // _keyToIndex[null] is used as current index during the lazy loading process
+  // in [_findChildIndex]. _keyToIndex should never be used for looking up null key.
   final Map<Key?, int>? _keyToIndex;
 
   bool get _isConstantInstance => _keyToIndex == null;
@@ -708,7 +770,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
       return null;
     }
     Widget child = children[index];
-    final Key? key = child.key != null? _SaltedValueKey(child.key!) : null;
+    final Key? key = child.key != null ? _SaltedValueKey(child.key!) : null;
     if (addRepaintBoundaries) {
       child = RepaintBoundary(child: child);
     }
@@ -737,9 +799,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
 class _SelectionKeepAlive extends StatefulWidget {
   /// Creates a widget that listens to [KeepAliveNotification]s and maintains a
   /// [KeepAlive] widget appropriately.
-  const _SelectionKeepAlive({
-    required this.child,
-  });
+  const _SelectionKeepAlive({required this.child});
 
   /// The widget below this widget in the tree.
   ///
@@ -750,7 +810,9 @@ class _SelectionKeepAlive extends StatefulWidget {
   State<_SelectionKeepAlive> createState() => _SelectionKeepAliveState();
 }
 
-class _SelectionKeepAliveState extends State<_SelectionKeepAlive> with AutomaticKeepAliveClientMixin implements SelectionRegistrar {
+class _SelectionKeepAliveState extends State<_SelectionKeepAlive>
+    with AutomaticKeepAliveClientMixin
+    implements SelectionRegistrar {
   Set<Selectable>? _selectablesWithSelections;
   Map<Selectable, VoidCallback>? _selectableAttachments;
   SelectionRegistrar? _registrar;
@@ -844,16 +906,13 @@ class _SelectionKeepAliveState extends State<_SelectionKeepAlive> with Automatic
     if (_registrar == null) {
       return widget.child;
     }
-    return SelectionRegistrarScope(
-      registrar: this,
-      child: widget.child,
-    );
+    return SelectionRegistrarScope(registrar: this, child: widget.child);
   }
 }
 
 // Return a Widget for the given Exception
 Widget _createErrorWidget(Object exception, StackTrace stackTrace) {
-  final FlutterErrorDetails details = FlutterErrorDetails(
+  final details = FlutterErrorDetails(
     exception: exception,
     stack: stackTrace,
     library: 'widgets library',

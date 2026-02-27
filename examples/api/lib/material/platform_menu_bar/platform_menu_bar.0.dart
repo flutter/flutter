@@ -11,19 +11,14 @@ import 'package:flutter/services.dart';
 
 void main() => runApp(const ExampleApp());
 
-enum MenuSelection {
-  about,
-  showMessage,
-}
+enum MenuSelection { about, showMessage }
 
 class ExampleApp extends StatelessWidget {
   const ExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(body: PlatformMenuBarExample()),
-    );
+    return const MaterialApp(home: Scaffold(body: PlatformMenuBarExample()));
   }
 }
 
@@ -97,7 +92,10 @@ class _PlatformMenuBarExampleState extends State<PlatformMenuBarExample> {
                   menus: <PlatformMenuItem>[
                     PlatformMenuItem(
                       label: 'I am not throwing away my shot.',
-                      shortcut: const SingleActivator(LogicalKeyboardKey.digit1, meta: true),
+                      shortcut: const SingleActivator(
+                        LogicalKeyboardKey.digit1,
+                        meta: true,
+                      ),
                       onSelected: () {
                         setState(() {
                           _message = 'I am not throwing away my shot.';
@@ -105,11 +103,16 @@ class _PlatformMenuBarExampleState extends State<PlatformMenuBarExample> {
                       },
                     ),
                     PlatformMenuItem(
-                      label: "There's a million things I haven't done, but just you wait.",
-                      shortcut: const SingleActivator(LogicalKeyboardKey.digit2, meta: true),
+                      label:
+                          "There's a million things I haven't done, but just you wait.",
+                      shortcut: const SingleActivator(
+                        LogicalKeyboardKey.digit2,
+                        meta: true,
+                      ),
                       onSelected: () {
                         setState(() {
-                          _message = "There's a million things I haven't done, but just you wait.";
+                          _message =
+                              "There's a million things I haven't done, but just you wait.";
                         });
                       },
                     ),
@@ -117,16 +120,22 @@ class _PlatformMenuBarExampleState extends State<PlatformMenuBarExample> {
                 ),
               ],
             ),
-            if (PlatformProvidedMenuItem.hasMenu(PlatformProvidedMenuItemType.quit))
-              const PlatformProvidedMenuItem(type: PlatformProvidedMenuItemType.quit),
+            if (PlatformProvidedMenuItem.hasMenu(
+              PlatformProvidedMenuItemType.quit,
+            ))
+              const PlatformProvidedMenuItem(
+                type: PlatformProvidedMenuItemType.quit,
+              ),
           ],
         ),
       ],
       child: Center(
-        child: Text(_showMessage
-            ? _message
-            : 'This space intentionally left blank.\n'
-                'Show a message here using the menu.'),
+        child: Text(
+          _showMessage
+              ? _message
+              : 'This space intentionally left blank.\n'
+                    'Show a message here using the menu.',
+        ),
       ),
     );
   }

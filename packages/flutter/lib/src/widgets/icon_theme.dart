@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'icon.dart';
+/// @docImport 'image_icon.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
@@ -17,19 +23,11 @@ import 'inherited_theme.dart';
 /// The icon theme is honored by [Icon] and [ImageIcon] widgets.
 class IconTheme extends InheritedTheme {
   /// Creates an icon theme that controls properties of descendant widgets.
-  const IconTheme({
-    super.key,
-    required this.data,
-    required super.child,
-  });
+  const IconTheme({super.key, required this.data, required super.child});
 
   /// Creates an icon theme that controls the properties of
   /// descendant widgets, and merges in the current icon theme, if any.
-  static Widget merge({
-    Key? key,
-    required IconThemeData data,
-    required Widget child,
-  }) {
+  static Widget merge({Key? key, required IconThemeData data, required Widget child}) {
     return Builder(
       builder: (BuildContext context) {
         return IconTheme(
@@ -66,18 +64,19 @@ class IconTheme extends InheritedTheme {
   static IconThemeData of(BuildContext context) {
     final IconThemeData iconThemeData = _getInheritedIconThemeData(context).resolve(context);
     return iconThemeData.isConcrete
-      ? iconThemeData
-      : iconThemeData.copyWith(
-        size: iconThemeData.size ?? const IconThemeData.fallback().size,
-        fill: iconThemeData.fill ?? const IconThemeData.fallback().fill,
-        weight: iconThemeData.weight ?? const IconThemeData.fallback().weight,
-        grade: iconThemeData.grade ?? const IconThemeData.fallback().grade,
-        opticalSize: iconThemeData.opticalSize ?? const IconThemeData.fallback().opticalSize,
-        color: iconThemeData.color ?? const IconThemeData.fallback().color,
-        opacity: iconThemeData.opacity ?? const IconThemeData.fallback().opacity,
-        shadows: iconThemeData.shadows ?? const IconThemeData.fallback().shadows,
-        applyTextScaling: iconThemeData.applyTextScaling ?? const IconThemeData.fallback().applyTextScaling,
-      );
+        ? iconThemeData
+        : iconThemeData.copyWith(
+            size: iconThemeData.size ?? const IconThemeData.fallback().size,
+            fill: iconThemeData.fill ?? const IconThemeData.fallback().fill,
+            weight: iconThemeData.weight ?? const IconThemeData.fallback().weight,
+            grade: iconThemeData.grade ?? const IconThemeData.fallback().grade,
+            opticalSize: iconThemeData.opticalSize ?? const IconThemeData.fallback().opticalSize,
+            color: iconThemeData.color ?? const IconThemeData.fallback().color,
+            opacity: iconThemeData.opacity ?? const IconThemeData.fallback().opacity,
+            shadows: iconThemeData.shadows ?? const IconThemeData.fallback().shadows,
+            applyTextScaling:
+                iconThemeData.applyTextScaling ?? const IconThemeData.fallback().applyTextScaling,
+          );
   }
 
   static IconThemeData _getInheritedIconThemeData(BuildContext context) {

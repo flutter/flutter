@@ -7,18 +7,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'velocity_tracker_data.dart';
 
 bool _withinTolerance(double actual, double expected) {
-  const double kTolerance = 0.001; // Within .1% of expected value
-  final double diff = (actual - expected)/expected;
+  const kTolerance = 0.001; // Within .1% of expected value
+  final double diff = (actual - expected) / expected;
   return diff.abs() < kTolerance;
 }
 
 bool _checkVelocity(Velocity actual, Offset expected) {
-  return _withinTolerance(actual.pixelsPerSecond.dx, expected.dx)
-      && _withinTolerance(actual.pixelsPerSecond.dy, expected.dy);
+  return _withinTolerance(actual.pixelsPerSecond.dx, expected.dx) &&
+      _withinTolerance(actual.pixelsPerSecond.dy, expected.dy);
 }
 
 void main() {
-  const List<Offset> expected = <Offset>[
+  const expected = <Offset>[
     Offset(219.59280094228163, 1304.701682306001),
     Offset(355.71046950050845, 967.2112857054104),
     Offset(12.657970884022308, -36.90447839251946),
@@ -35,8 +35,8 @@ void main() {
   ];
 
   testWidgets('Velocity tracker gives expected results', (WidgetTester tester) async {
-    final VelocityTracker tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
-    int i = 0;
+    final tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
+    var i = 0;
     for (final PointerEvent event in velocityEventData) {
       if (event is PointerDownEvent || event is PointerMoveEvent) {
         tracker.addPosition(event.timeStamp, event.position);
@@ -49,8 +49,8 @@ void main() {
   });
 
   testWidgets('Velocity control test', (WidgetTester tester) async {
-    const Velocity velocity1 = Velocity(pixelsPerSecond: Offset(7.0, 0.0));
-    const Velocity velocity2 = Velocity(pixelsPerSecond: Offset(12.0, 0.0));
+    const velocity1 = Velocity(pixelsPerSecond: Offset(7.0, 0.0));
+    const velocity2 = Velocity(pixelsPerSecond: Offset(12.0, 0.0));
     expect(velocity1, equals(const Velocity(pixelsPerSecond: Offset(7.0, 0.0))));
     expect(velocity1, isNot(equals(velocity2)));
     expect(velocity2 - velocity1, equals(const Velocity(pixelsPerSecond: Offset(5.0, 0.0))));
@@ -62,7 +62,7 @@ void main() {
 
   testWidgets('Interrupted velocity estimation', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/7510
-    final VelocityTracker tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
+    final tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
     for (final PointerEvent event in interruptedVelocityEventData) {
       if (event is PointerDownEvent || event is PointerMoveEvent) {
         tracker.addPosition(event.timeStamp, event.position);
@@ -74,12 +74,14 @@ void main() {
   });
 
   testWidgets('No data velocity estimation', (WidgetTester tester) async {
-    final VelocityTracker tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
+    final tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
     expect(tracker.getVelocity(), Velocity.zero);
   });
 
-  testWidgets('FreeScrollStartVelocityTracker.getVelocity throws when no points', (WidgetTester tester) async {
-    final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
+  testWidgets('FreeScrollStartVelocityTracker.getVelocity throws when no points', (
+    WidgetTester tester,
+  ) async {
+    final tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
     AssertionError? exception;
     try {
       tracker.getVelocity();
@@ -90,30 +92,35 @@ void main() {
     expect(exception?.toString(), contains('at least 1 point'));
   });
 
-  testWidgets('FreeScrollStartVelocityTracker.getVelocity throws when the new point precedes the previous point', (WidgetTester tester) async {
-    final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
-    AssertionError? exception;
+  testWidgets(
+    'FreeScrollStartVelocityTracker.getVelocity throws when the new point precedes the previous point',
+    (WidgetTester tester) async {
+      final tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
+      AssertionError? exception;
 
-    tracker.addPosition(const Duration(hours: 1), Offset.zero);
-    try {
-      tracker.getVelocity();
-      tracker.addPosition(const Duration(seconds: 1), Offset.zero);
-    } on AssertionError catch (e) {
-      exception = e;
-    }
+      tracker.addPosition(const Duration(hours: 1), Offset.zero);
+      try {
+        tracker.getVelocity();
+        tracker.addPosition(const Duration(seconds: 1), Offset.zero);
+      } on AssertionError catch (e) {
+        exception = e;
+      }
 
-    expect(exception?.toString(), contains('has a smaller timestamp'));
-  });
+      expect(exception?.toString(), contains('has a smaller timestamp'));
+    },
+  );
 
-  testWidgets('Estimate does not throw when there are more than 1 point', (WidgetTester tester) async {
-    final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
+  testWidgets('Estimate does not throw when there are more than 1 point', (
+    WidgetTester tester,
+  ) async {
+    final tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
     Offset position = Offset.zero;
     Duration time = Duration.zero;
-    const Offset positionDelta = Offset(0, -1);
-    const Duration durationDelta = Duration(seconds: 1);
+    const positionDelta = Offset(0, -1);
+    const durationDelta = Duration(seconds: 1);
     AssertionError? exception;
 
-    for (int i = 0; i < 5; i+=1) {
+    for (var i = 0; i < 5; i += 1) {
       position += positionDelta;
       time += durationDelta;
       tracker.addPosition(time, position);
@@ -127,14 +134,16 @@ void main() {
     }
   });
 
-  testWidgets('Makes consistent velocity estimates with consistent velocity', (WidgetTester tester) async {
-    final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
+  testWidgets('Makes consistent velocity estimates with consistent velocity', (
+    WidgetTester tester,
+  ) async {
+    final tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
     Offset position = Offset.zero;
     Duration time = Duration.zero;
-    const Offset positionDelta = Offset(0, -1);
-    const Duration durationDelta = Duration(seconds: 1);
+    const positionDelta = Offset(0, -1);
+    const durationDelta = Duration(seconds: 1);
 
-    for (int i = 0; i < 10; i+=1) {
+    for (var i = 0; i < 10; i += 1) {
       position += positionDelta;
       time += durationDelta;
       tracker.addPosition(time, position);
@@ -145,14 +154,16 @@ void main() {
     }
   });
 
-  testWidgets('Assume zero velocity when there are no recent samples - base VelocityTracker', (WidgetTester tester) async {
-    final VelocityTracker tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
+  testWidgets('Assume zero velocity when there are no recent samples - base VelocityTracker', (
+    WidgetTester tester,
+  ) async {
+    final tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
     Offset position = Offset.zero;
     Duration time = Duration.zero;
-    const Offset positionDelta = Offset(0, -1);
-    const Duration durationDelta = Duration(seconds: 1);
+    const positionDelta = Offset(0, -1);
+    const durationDelta = Duration(seconds: 1);
 
-    for (int i = 0; i < 10; i+=1) {
+    for (var i = 0; i < 10; i += 1) {
       position += positionDelta;
       time += durationDelta;
       tracker.addPosition(time, position);
@@ -162,14 +173,16 @@ void main() {
     expect(tracker.getVelocity().pixelsPerSecond, Offset.zero);
   });
 
-  testWidgets('Assume zero velocity when there are no recent samples - IOS', (WidgetTester tester) async {
-    final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
+  testWidgets('Assume zero velocity when there are no recent samples - IOS', (
+    WidgetTester tester,
+  ) async {
+    final tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
     Offset position = Offset.zero;
     Duration time = Duration.zero;
-    const Offset positionDelta = Offset(0, -1);
-    const Duration durationDelta = Duration(seconds: 1);
+    const positionDelta = Offset(0, -1);
+    const durationDelta = Duration(seconds: 1);
 
-    for (int i = 0; i < 10; i+=1) {
+    for (var i = 0; i < 10; i += 1) {
       position += positionDelta;
       time += durationDelta;
       tracker.addPosition(time, position);
@@ -179,14 +192,16 @@ void main() {
     expect(tracker.getVelocity().pixelsPerSecond, Offset.zero);
   });
 
-  testWidgets('Assume zero velocity when there are no recent samples - MacOS', (WidgetTester tester) async {
-    final MacOSScrollViewFlingVelocityTracker tracker = MacOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
+  testWidgets('Assume zero velocity when there are no recent samples - MacOS', (
+    WidgetTester tester,
+  ) async {
+    final tracker = MacOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
     Offset position = Offset.zero;
     Duration time = Duration.zero;
-    const Offset positionDelta = Offset(0, -1);
-    const Duration durationDelta = Duration(seconds: 1);
+    const positionDelta = Offset(0, -1);
+    const durationDelta = Duration(seconds: 1);
 
-    for (int i = 0; i < 10; i+=1) {
+    for (var i = 0; i < 10; i += 1) {
       position += positionDelta;
       time += durationDelta;
       tracker.addPosition(time, position);

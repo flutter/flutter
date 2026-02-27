@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+library;
+
 import 'dart:async';
 
 import 'package:flutter/painting.dart';
@@ -40,6 +43,7 @@ import 'scrollable.dart';
 /// The [Image] widget wraps its incoming providers with this provider to avoid
 /// overutilization of resources for images that would never appear on screen or
 /// only be visible for a very brief period.
+@immutable
 @optionalTypeArgs
 class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
   /// Creates a [ScrollAwareImageProvider].
@@ -50,10 +54,7 @@ class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
   /// The [imageProvider] is used to create a key and load the image. It must
   /// not be null, and is assumed to interact with the cache in the normal way
   /// that [ImageProvider.resolveStreamForKey] does.
-  const ScrollAwareImageProvider({
-    required this.context,
-    required this.imageProvider,
-  });
+  const ScrollAwareImageProvider({required this.context, required this.imageProvider});
 
   /// The context that may or may not be enclosed by a [Scrollable].
   ///
@@ -105,11 +106,29 @@ class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
   }
 
   @override
-  ImageStreamCompleter loadBuffer(T key, DecoderBufferCallback decode) => imageProvider.loadBuffer(key, decode);
+  ImageStreamCompleter loadBuffer(T key, DecoderBufferCallback decode) =>
+      imageProvider.loadBuffer(key, decode);
 
   @override
-  ImageStreamCompleter loadImage(T key, ImageDecoderCallback decode) => imageProvider.loadImage(key, decode);
+  ImageStreamCompleter loadImage(T key, ImageDecoderCallback decode) =>
+      imageProvider.loadImage(key, decode);
 
   @override
   Future<T> obtainKey(ImageConfiguration configuration) => imageProvider.obtainKey(configuration);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is ScrollAwareImageProvider &&
+        context == other.context &&
+        imageProvider == other.imageProvider;
+  }
+
+  @override
+  int get hashCode => Object.hash(context, imageProvider);
 }

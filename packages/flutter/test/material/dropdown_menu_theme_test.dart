@@ -7,11 +7,38 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  Finder findMenuItemButton(String label) {
+    // For each menu items there are two MenuItemButton widgets.
+    // The last one is the real button item in the menu.
+    // The first one is not visible, it is part of _DropdownMenuBody
+    // which is used to compute the dropdown width.
+    return find.widgetWithText(MenuItemButton, label).last;
+  }
+
+  Material getButtonMaterial(WidgetTester tester, String itemLabel) {
+    return tester.widget<Material>(
+      find.descendant(of: findMenuItemButton(itemLabel), matching: find.byType(Material)),
+    );
+  }
+
+  Finder findMenuPanel() {
+    return find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_MenuPanel');
+  }
+
+  Material getMenuMaterial(WidgetTester tester) {
+    return tester.widget<Material>(
+      find.descendant(of: findMenuPanel(), matching: find.byType(Material)).first,
+    );
+  }
+
   test('DropdownMenuThemeData copyWith, ==, hashCode basics', () {
     expect(const DropdownMenuThemeData(), const DropdownMenuThemeData().copyWith());
-    expect(const DropdownMenuThemeData().hashCode, const DropdownMenuThemeData().copyWith().hashCode);
+    expect(
+      const DropdownMenuThemeData().hashCode,
+      const DropdownMenuThemeData().copyWith().hashCode,
+    );
 
-    const DropdownMenuThemeData custom = DropdownMenuThemeData(
+    const custom = DropdownMenuThemeData(
       menuStyle: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.green)),
       inputDecorationTheme: InputDecorationTheme(filled: true),
       textStyle: TextStyle(fontSize: 25.0),
@@ -26,12 +53,12 @@ void main() {
 
   test('DropdownMenuThemeData lerp special cases', () {
     expect(DropdownMenuThemeData.lerp(null, null, 0), const DropdownMenuThemeData());
-    const DropdownMenuThemeData data = DropdownMenuThemeData();
+    const data = DropdownMenuThemeData();
     expect(identical(DropdownMenuThemeData.lerp(data, data, 0.5), data), true);
   });
 
   testWidgets('Default DropdownMenuThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const DropdownMenuThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -43,7 +70,7 @@ void main() {
   });
 
   testWidgets('With no other configuration, defaults are used', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData();
+    final themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
@@ -58,7 +85,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final EditableText editableText = tester.widget(find.byType(EditableText));
@@ -76,23 +103,17 @@ void main() {
     await tester.pump();
     expect(find.byType(MenuAnchor), findsOneWidget);
 
-    final Finder menuMaterial = find.ancestor(
-      of: find.widgetWithText(TextButton, 'Item 0'),
-      matching: find.byType(Material),
-    ).at(1);
-    Material material = tester.widget<Material>(menuMaterial);
+    Material material = getMenuMaterial(tester);
     expect(material.color, themeData.colorScheme.surfaceContainer);
     expect(material.shadowColor, themeData.colorScheme.shadow);
     expect(material.surfaceTintColor, Colors.transparent);
     expect(material.elevation, 3.0);
-    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))));
+    expect(
+      material.shape,
+      const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
+    );
 
-    final Finder buttonMaterial = find.descendant(
-      of: find.widgetWithText(TextButton, 'Item 0'),
-      matching: find.byType(Material),
-    ).last;
-
-    material = tester.widget<Material>(buttonMaterial);
+    material = getButtonMaterial(tester, 'Item 0');
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
     expect(material.shape, const RoundedRectangleBorder());
@@ -100,7 +121,7 @@ void main() {
   });
 
   testWidgets('ThemeData.dropdownMenuTheme overrides defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(
+    final theme = ThemeData(
       dropdownMenuTheme: DropdownMenuThemeData(
         textStyle: TextStyle(
           color: Colors.orange,
@@ -119,8 +140,11 @@ void main() {
             RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
           ),
         ),
-        inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.lightGreen),
-      )
+        inputDecorationTheme: const InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.lightGreen,
+        ),
+      ),
     );
 
     await tester.pumpWidget(
@@ -136,8 +160,8 @@ void main() {
               ],
             ),
           ),
-        )
-      )
+        ),
+      ),
     );
 
     final EditableText editableText = tester.widget(find.byType(EditableText));
@@ -155,23 +179,17 @@ void main() {
     await tester.pump();
     expect(find.byType(MenuAnchor), findsOneWidget);
 
-    final Finder menuMaterial = find.ancestor(
-      of: find.widgetWithText(TextButton, 'Item 0'),
-      matching: find.byType(Material),
-    ).at(1);
-    Material material = tester.widget<Material>(menuMaterial);
+    Material material = getMenuMaterial(tester);
     expect(material.color, Colors.grey);
     expect(material.shadowColor, Colors.brown);
     expect(material.surfaceTintColor, Colors.amberAccent);
     expect(material.elevation, 10.0);
-    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))));
+    expect(
+      material.shape,
+      const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+    );
 
-    final Finder buttonMaterial = find.descendant(
-      of: find.widgetWithText(TextButton, 'Item 0'),
-      matching: find.byType(Material),
-    ).last;
-
-    material = tester.widget<Material>(buttonMaterial);
+    material = getButtonMaterial(tester, 'Item 0');
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
     expect(material.shape, const RoundedRectangleBorder());
@@ -179,7 +197,7 @@ void main() {
   });
 
   testWidgets('DropdownMenuTheme overrides ThemeData and defaults', (WidgetTester tester) async {
-    final DropdownMenuThemeData global = DropdownMenuThemeData(
+    final global = DropdownMenuThemeData(
       textStyle: TextStyle(
         color: Colors.orange,
         backgroundColor: Colors.indigo,
@@ -200,7 +218,7 @@ void main() {
       inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.lightGreen),
     );
 
-    final DropdownMenuThemeData dropdownMenuTheme = DropdownMenuThemeData(
+    final dropdownMenuTheme = DropdownMenuThemeData(
       textStyle: TextStyle(
         color: Colors.red,
         backgroundColor: Colors.orange,
@@ -221,7 +239,7 @@ void main() {
       inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.blue),
     );
 
-    final ThemeData theme = ThemeData(dropdownMenuTheme: global);
+    final theme = ThemeData(dropdownMenuTheme: global);
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -238,8 +256,8 @@ void main() {
               ),
             ),
           ),
-        )
-      )
+        ),
+      ),
     );
 
     final EditableText editableText = tester.widget(find.byType(EditableText));
@@ -258,31 +276,27 @@ void main() {
     await tester.pump();
     expect(find.byType(MenuAnchor), findsOneWidget);
 
-    final Finder menuMaterial = find.ancestor(
-      of: find.widgetWithText(TextButton, 'Item 0'),
-      matching: find.byType(Material),
-    ).at(1);
-    Material material = tester.widget<Material>(menuMaterial);
+    Material material = getMenuMaterial(tester);
     expect(material.color, Colors.yellow);
     expect(material.shadowColor, Colors.green);
     expect(material.surfaceTintColor, Colors.teal);
     expect(material.elevation, 15.0);
-    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))));
+    expect(
+      material.shape,
+      const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
+    );
 
-    final Finder buttonMaterial = find.descendant(
-      of: find.widgetWithText(TextButton, 'Item 0'),
-      matching: find.byType(Material),
-    ).last;
-
-    material = tester.widget<Material>(buttonMaterial);
+    material = getButtonMaterial(tester, 'Item 0');
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
     expect(material.shape, const RoundedRectangleBorder());
     expect(material.textStyle?.color, theme.colorScheme.onSurface);
   });
 
-  testWidgets('Widget parameters overrides DropdownMenuTheme, ThemeData and defaults', (WidgetTester tester) async {
-    final DropdownMenuThemeData global = DropdownMenuThemeData(
+  testWidgets('Widget parameters overrides DropdownMenuTheme, ThemeData and defaults', (
+    WidgetTester tester,
+  ) async {
+    final global = DropdownMenuThemeData(
       textStyle: TextStyle(
         color: Colors.orange,
         backgroundColor: Colors.indigo,
@@ -303,7 +317,7 @@ void main() {
       inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.lightGreen),
     );
 
-    final DropdownMenuThemeData dropdownMenuTheme = DropdownMenuThemeData(
+    final dropdownMenuTheme = DropdownMenuThemeData(
       textStyle: TextStyle(
         color: Colors.red,
         backgroundColor: Colors.orange,
@@ -324,7 +338,7 @@ void main() {
       inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.blue),
     );
 
-    final ThemeData theme = ThemeData(dropdownMenuTheme: global);
+    final theme = ThemeData(dropdownMenuTheme: global);
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -350,7 +364,10 @@ void main() {
                     RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
                   ),
                 ),
-                inputDecorationTheme: const InputDecorationTheme(filled: true, fillColor: Colors.deepPurple),
+                inputDecorationTheme: const InputDecorationTheme(
+                  filled: true,
+                  fillColor: Colors.deepPurple,
+                ),
                 dropdownMenuEntries: const <DropdownMenuEntry<int>>[
                   DropdownMenuEntry<int>(value: 0, label: 'Item 0'),
                   DropdownMenuEntry<int>(value: 1, label: 'Item 1'),
@@ -359,8 +376,8 @@ void main() {
               ),
             ),
           ),
-        )
-      )
+        ),
+      ),
     );
 
     final EditableText editableText = tester.widget(find.byType(EditableText));
@@ -379,26 +396,50 @@ void main() {
     await tester.pump();
     expect(find.byType(MenuAnchor), findsOneWidget);
 
-    final Finder menuMaterial = find.ancestor(
-      of: find.widgetWithText(TextButton, 'Item 0'),
-      matching: find.byType(Material),
-    ).at(1);
-    Material material = tester.widget<Material>(menuMaterial);
+    Material material = getMenuMaterial(tester);
     expect(material.color, Colors.limeAccent);
     expect(material.shadowColor, Colors.deepOrangeAccent);
     expect(material.surfaceTintColor, Colors.lightBlue);
     expect(material.elevation, 21.0);
-    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))));
+    expect(
+      material.shape,
+      const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0))),
+    );
 
-    final Finder buttonMaterial = find.descendant(
-      of: find.widgetWithText(TextButton, 'Item 0'),
-      matching: find.byType(Material),
-    ).last;
-
-    material = tester.widget<Material>(buttonMaterial);
+    material = getButtonMaterial(tester, 'Item 0');
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
     expect(material.shape, const RoundedRectangleBorder());
     expect(material.textStyle?.color, theme.colorScheme.onSurface);
   });
+
+  testWidgets(
+    'DropdownMenuThemeData.menuStyle.disabledColor is being applied when the menu is disabled',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            dropdownMenuTheme: const DropdownMenuThemeData(disabledColor: Colors.grey),
+          ),
+          home: const Scaffold(
+            body: Center(
+              child: DropdownMenu<int>(
+                enabled: false,
+                initialSelection: 0,
+                dropdownMenuEntries: <DropdownMenuEntry<int>>[
+                  DropdownMenuEntry<int>(value: 0, label: 'Item 0'),
+                  DropdownMenuEntry<int>(value: 1, label: 'Item 1'),
+                  DropdownMenuEntry<int>(value: 2, label: 'Item 2'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // make sure the displaying text has grey color
+      final EditableText editableText = tester.widget(find.byType(EditableText));
+      expect(editableText.style.color, Colors.grey);
+    },
+  );
 }

@@ -12,10 +12,9 @@ import '../build_system.dart';
 import '../depfile.dart';
 import 'android.dart';
 
-/// Creates a [DeferredComponentsGenSnapshotValidator], runs the checks, and displays the validator
-/// output to the developer if changes are recommended.
+/// Creates a [DeferredComponentsGenSnapshotValidator], runs the checks, and
+/// displays the validator output to the developer if changes are recommended.
 class DeferredComponentsGenSnapshotValidatorTarget extends Target {
-  /// Create an [AndroidAotDeferredComponentsBundle] implementation for a given [targetPlatform] and [buildMode].
   DeferredComponentsGenSnapshotValidatorTarget({
     required this.deferredComponentsDependencies,
     required this.nonDeferredComponentsDependencies,
@@ -40,7 +39,9 @@ class DeferredComponentsGenSnapshotValidatorTarget extends Target {
     return <String>[
       for (final AndroidAotDeferredComponentsBundle target in deferredComponentsDependencies)
         if (deferredComponentsTargets.contains(target.name))
-          getAndroidArchForName(getNameForTargetPlatform(target.dependency.targetPlatform)).archName,
+          getAndroidArchForName(
+            getNameForTargetPlatform(target.dependency.targetPlatform),
+          ).archName,
     ];
   }
 
@@ -54,13 +55,11 @@ class DeferredComponentsGenSnapshotValidatorTarget extends Target {
   List<Source> get outputs => const <Source>[];
 
   @override
-  List<String> get depfiles => <String>[
-    'flutter_$name.d',
-  ];
+  List<String> get depfiles => <String>['flutter_$name.d'];
 
   @override
   List<Target> get dependencies {
-    final List<Target> deps = <Target>[CompositeTarget(deferredComponentsDependencies)];
+    final deps = <Target>[CompositeTarget(deferredComponentsDependencies)];
     deps.addAll(nonDeferredComponentsDependencies);
     return deps;
   }
@@ -77,15 +76,15 @@ class DeferredComponentsGenSnapshotValidatorTarget extends Target {
     );
 
     final List<LoadingUnit> generatedLoadingUnits = LoadingUnit.parseGeneratedLoadingUnits(
-        environment.outputDir,
-        environment.logger,
-        abis: _abis
+      environment.outputDir,
+      environment.logger,
+      abis: _abis,
     );
 
     validator!
       ..checkAppAndroidManifestComponentLoadingUnitMapping(
-          FlutterProject.current().manifest.deferredComponents ?? <DeferredComponent>[],
-          generatedLoadingUnits,
+        FlutterProject.current().manifest.deferredComponents ?? <DeferredComponent>[],
+        generatedLoadingUnits,
       )
       ..checkAgainstLoadingUnitsCache(generatedLoadingUnits)
       ..writeLoadingUnitsCache(generatedLoadingUnits);

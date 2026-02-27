@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 
 import 'base/async_guard.dart';
@@ -31,34 +33,36 @@ abstract class Workflow {
   bool get canListEmulators;
 }
 
-enum ValidationType {
-  crash,
-  missing,
-  partial,
-  notAvailable,
-  success,
-}
+enum ValidationType { crash, missing, partial, notAvailable, success }
 
-enum ValidationMessageType {
-  error,
-  hint,
-  information,
-}
+enum ValidationMessageType { error, hint, information }
 
 abstract class DoctorValidator {
-  const DoctorValidator(this.title);
+  DoctorValidator(this.title);
 
   /// This is displayed in the CLI.
   final String title;
 
   String get slowWarning => 'This is taking an unexpectedly long time...';
 
-  static const Duration _slowWarningDuration = Duration(seconds: 10);
+  static const _slowWarningDuration = Duration(seconds: 10);
 
   /// Duration before the spinner should display [slowWarning].
   Duration get slowWarningDuration => _slowWarningDuration;
 
-  Future<ValidationResult> validate();
+  /// Performs validation by invoking [validateImpl].
+  ///
+  /// Tracks time taken to execute the validation step.
+  Future<ValidationResult> validate() async {
+    final stopwatch = Stopwatch()..start();
+    final ValidationResult result = await validateImpl();
+    stopwatch.stop();
+    result._executionTime = stopwatch.elapsed;
+    return result;
+  }
+
+  /// Validation implementation.
+  Future<ValidationResult> validateImpl();
 }
 
 /// A validator that runs other [DoctorValidator]s and combines their output
@@ -70,7 +74,7 @@ class GroupedValidator extends DoctorValidator {
 
   final List<DoctorValidator> subValidators;
 
-  List<ValidationResult> _subResults = <ValidationResult>[];
+  var _subResults = <ValidationResult>[];
 
   /// Sub-validator results.
   ///
@@ -81,20 +85,17 @@ class GroupedValidator extends DoctorValidator {
 
   @override
   String get slowWarning => _currentSlowWarning;
-  String _currentSlowWarning = 'Initializing...';
+  var _currentSlowWarning = 'Initializing...';
 
   @override
-  Future<ValidationResult> validate() async {
-    final List<ValidatorTask> tasks = <ValidatorTask>[
+  Future<ValidationResult> validateImpl() async {
+    final tasks = <ValidatorTask>[
       for (final DoctorValidator validator in subValidators)
-        ValidatorTask(
-          validator,
-          asyncGuard<ValidationResult>(() => validator.validate()),
-        ),
+        ValidatorTask(validator, asyncGuard<ValidationResult>(() => validator.validate())),
     ];
 
-    final List<ValidationResult> results = <ValidationResult>[];
-    for (final ValidatorTask subValidator in tasks) {
+    final results = <ValidationResult>[];
+    for (final subValidator in tasks) {
       _currentSlowWarning = subValidator.validator.slowWarning;
       try {
         results.add(await subValidator.result);
@@ -110,10 +111,10 @@ class GroupedValidator extends DoctorValidator {
     assert(results.isNotEmpty, 'Validation results should not be empty');
     _subResults = results;
     ValidationType mergedType = results[0].type;
-    final List<ValidationMessage> mergedMessages = <ValidationMessage>[];
+    final mergedMessages = <ValidationMessage>[];
     String? statusInfo;
 
-    for (final ValidationResult result in results) {
+    for (final result in results) {
       statusInfo ??= result.statusInfo;
       switch (result.type) {
         case ValidationType.success:
@@ -132,27 +133,26 @@ class GroupedValidator extends DoctorValidator {
       mergedMessages.addAll(result.messages);
     }
 
-    return ValidationResult(mergedType, mergedMessages,
-        statusInfo: statusInfo);
+    return ValidationResult(mergedType, mergedMessages, statusInfo: statusInfo);
   }
 }
 
-@immutable
 class ValidationResult {
-  /// [ValidationResult.type] should only equal [ValidationResult.success]
+  /// [ValidationResult.type] should only equal [ValidationType.success]
   /// if no [messages] are hints or errors.
-  const ValidationResult(this.type, this.messages, { this.statusInfo });
+  ValidationResult(this.type, this.messages, {this.statusInfo});
 
   factory ValidationResult.crash(Object error, [StackTrace? stackTrace]) {
     return ValidationResult(ValidationType.crash, <ValidationMessage>[
       const ValidationMessage.error(
-          'Due to an error, the doctor check did not complete. '
-          'If the error message below is not helpful, '
-          'please let us know about this issue at https://github.com/flutter/flutter/issues.'),
+        'Due to an error, the doctor check did not complete. '
+        'If the error message below is not helpful, '
+        'please let us know about this issue at https://github.com/flutter/flutter/issues.',
+      ),
       ValidationMessage.error('$error'),
       if (stackTrace != null)
-          // Stacktrace is informational. Printed in verbose mode only.
-          ValidationMessage('$stackTrace'),
+        // Stacktrace is informational. Printed in verbose mode only.
+        ValidationMessage('$stackTrace'),
     ], statusInfo: 'the doctor check crashed');
   }
 
@@ -161,14 +161,16 @@ class ValidationResult {
   final String? statusInfo;
   final List<ValidationMessage> messages;
 
-  String get leadingBox {
-    return switch (type) {
-      ValidationType.crash   => '[☠]',
-      ValidationType.missing => '[✗]',
-      ValidationType.success => '[✓]',
-      ValidationType.notAvailable || ValidationType.partial => '[!]',
-    };
-  }
+  String get leadingBox => switch (type) {
+    ValidationType.crash => '[☠]',
+    ValidationType.missing => '[✗]',
+    ValidationType.success => '[✓]',
+    ValidationType.notAvailable || ValidationType.partial => '[!]',
+  };
+
+  /// The time taken to perform the validation, set by [DoctorValidator.validate].
+  Duration? get executionTime => _executionTime;
+  Duration? _executionTime;
 
   String get coloredLeadingBox {
     return globals.terminal.color(leadingBox, switch (type) {
@@ -179,15 +181,13 @@ class ValidationResult {
   }
 
   /// The string representation of the type.
-  String get typeStr {
-    return switch (type) {
-      ValidationType.crash        => 'crash',
-      ValidationType.missing      => 'missing',
-      ValidationType.success      => 'installed',
-      ValidationType.notAvailable => 'notAvailable',
-      ValidationType.partial      => 'partial',
-    };
-  }
+  String get typeStr => switch (type) {
+    ValidationType.crash => 'crash',
+    ValidationType.missing => 'missing',
+    ValidationType.success => 'installed',
+    ValidationType.notAvailable => 'notAvailable',
+    ValidationType.partial => 'partial',
+  };
 
   @override
   String toString() {
@@ -209,18 +209,19 @@ class ValidationMessage {
   ///
   /// The [contextUrl] may be supplied to link to external resources. This
   /// is displayed after the informative message in verbose modes.
-  const ValidationMessage(this.message, { this.contextUrl, String? piiStrippedMessage })
-      : type = ValidationMessageType.information, piiStrippedMessage = piiStrippedMessage ?? message;
+  const ValidationMessage(this.message, {this.contextUrl, String? piiStrippedMessage})
+    : type = ValidationMessageType.information,
+      piiStrippedMessage = piiStrippedMessage ?? message;
 
   /// Create a validation message with information for a failing validator.
-  const ValidationMessage.error(this.message, { String? piiStrippedMessage })
+  const ValidationMessage.error(this.message, {String? piiStrippedMessage})
     : type = ValidationMessageType.error,
       piiStrippedMessage = piiStrippedMessage ?? message,
       contextUrl = null;
 
   /// Create a validation message with information for a partially failing
   /// validator.
-  const ValidationMessage.hint(this.message, { String? piiStrippedMessage })
+  const ValidationMessage.hint(this.message, {String? piiStrippedMessage})
     : type = ValidationMessageType.hint,
       piiStrippedMessage = piiStrippedMessage ?? message,
       contextUrl = null;
@@ -228,6 +229,7 @@ class ValidationMessage {
   final ValidationMessageType type;
   final String? contextUrl;
   final String message;
+
   /// Optional message with PII stripped, to show instead of [message].
   final String piiStrippedMessage;
 
@@ -237,18 +239,16 @@ class ValidationMessage {
 
   bool get isInformation => type == ValidationMessageType.information;
 
-  String get indicator {
-    return switch (type) {
-      ValidationMessageType.error => '✗',
-      ValidationMessageType.hint => '!',
-      ValidationMessageType.information => '•',
-    };
-  }
+  String get indicator => switch (type) {
+    ValidationMessageType.error => '✗',
+    ValidationMessageType.hint => '!',
+    ValidationMessageType.information => '•',
+  };
 
   String get coloredIndicator {
     return globals.terminal.color(indicator, switch (type) {
-      ValidationMessageType.error       => TerminalColor.red,
-      ValidationMessageType.hint        => TerminalColor.yellow,
+      ValidationMessageType.error => TerminalColor.red,
+      ValidationMessageType.hint => TerminalColor.yellow,
       ValidationMessageType.information => TerminalColor.green,
     });
   }
@@ -258,10 +258,10 @@ class ValidationMessage {
 
   @override
   bool operator ==(Object other) {
-    return other is ValidationMessage
-        && other.message == message
-        && other.type == type
-        && other.contextUrl == contextUrl;
+    return other is ValidationMessage &&
+        other.message == message &&
+        other.type == type &&
+        other.contextUrl == contextUrl;
   }
 
   @override
@@ -272,11 +272,13 @@ class NoIdeValidator extends DoctorValidator {
   NoIdeValidator() : super('Flutter IDE Support');
 
   @override
-  Future<ValidationResult> validate() async {
+  Future<ValidationResult> validateImpl() async {
     return ValidationResult(
       // Info hint to user they do not have a supported IDE installed
       ValidationType.notAvailable,
-      globals.userMessages.noIdeInstallationInfo.map((String ideInfo) => ValidationMessage(ideInfo)).toList(),
+      globals.userMessages.noIdeInstallationInfo
+          .map((String ideInfo) => ValidationMessage(ideInfo))
+          .toList(),
       statusInfo: globals.userMessages.noIdeStatusInfo,
     );
   }
@@ -288,5 +290,5 @@ class ValidatorWithResult extends DoctorValidator {
   final ValidationResult result;
 
   @override
-  Future<ValidationResult> validate() async => result;
+  Future<ValidationResult> validateImpl() async => result;
 }

@@ -20,7 +20,7 @@ void main() {
   group('logs', () {
     late Platform platform;
     late FakeDeviceManager deviceManager;
-    const String deviceId = 'abc123';
+    const deviceId = 'abc123';
 
     setUp(() {
       Cache.disableLocking();
@@ -33,39 +33,38 @@ void main() {
     });
 
     testUsingContext('fail with a bad device id', () async {
-      final LogsCommand command = LogsCommand(
-        sigterm: FakeProcessSignal(),
-        sigint: FakeProcessSignal(),
-      );
+      final command = LogsCommand(sigterm: FakeProcessSignal(), sigint: FakeProcessSignal());
       await expectLater(
         () => createTestCommandRunner(command).run(<String>['-d', 'abc123', 'logs']),
-        throwsA(isA<ToolExit>().having((ToolExit error) => error.exitCode, 'exitCode', anyOf(isNull, 1))),
+        throwsA(
+          isA<ToolExit>().having((ToolExit error) => error.exitCode, 'exitCode', anyOf(isNull, 1)),
+        ),
       );
     });
 
-    testUsingContext('does not try to complete exitCompleter multiple times', () async {
-      final FakeDevice fakeDevice = FakeDevice('phone', deviceId);
-      deviceManager.attachedDevices.add(fakeDevice);
-      final FakeProcessSignal termSignal = FakeProcessSignal();
-      final FakeProcessSignal intSignal = FakeProcessSignal();
-      final LogsCommand command = LogsCommand(
-        sigterm: termSignal,
-        sigint: intSignal,
-      );
-      final Future<void> commandFuture = createTestCommandRunner(command).run(<String>['-d', deviceId, 'logs']);
-      intSignal.send(1);
-      termSignal.send(1);
-      await pumpEventQueue(times: 5);
-      await commandFuture;
-    }, overrides: <Type, Generator>{
-      Platform: () => platform,
-      DeviceManager: () => deviceManager,
-    });
+    testUsingContext(
+      'does not try to complete exitCompleter multiple times',
+      () async {
+        final fakeDevice = FakeDevice('phone', deviceId);
+        deviceManager.attachedDevices.add(fakeDevice);
+        final termSignal = FakeProcessSignal();
+        final intSignal = FakeProcessSignal();
+        final command = LogsCommand(sigterm: termSignal, sigint: intSignal);
+        final Future<void> commandFuture = createTestCommandRunner(
+          command,
+        ).run(<String>['-d', deviceId, 'logs']);
+        intSignal.send(1);
+        termSignal.send(1);
+        await pumpEventQueue(times: 5);
+        await commandFuture;
+      },
+      overrides: <Type, Generator>{Platform: () => platform, DeviceManager: () => deviceManager},
+    );
   });
 }
 
 class FakeProcessSignal extends Fake implements ProcessSignal {
-  late final StreamController<ProcessSignal> _controller = StreamController<ProcessSignal>();
+  late final _controller = StreamController<ProcessSignal>();
 
   @override
   Stream<ProcessSignal> watch() => _controller.stream;

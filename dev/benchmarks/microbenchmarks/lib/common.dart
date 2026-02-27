@@ -5,18 +5,16 @@
 import 'dart:convert' show json;
 import 'dart:math' as math;
 
-double _doNormal(
-    {required double mean, required double stddev, required double x}) {
+double _doNormal({required double mean, required double stddev, required double x}) {
   return (1.0 / (stddev * math.sqrt(2.0 * math.pi))) *
       math.pow(math.e, -0.5 * math.pow((x - mean) / stddev, 2.0));
 }
 
-double _doMean(List<double> values) =>
-    values.reduce((double x, double y) => x + y) / values.length;
+double _doMean(List<double> values) => values.reduce((double x, double y) => x + y) / values.length;
 
 double _doStddev(List<double> values, double mean) {
-  double stddev = 0.0;
-  for (final double value in values) {
+  var stddev = 0.0;
+  for (final value in values) {
     stddev += (value - mean) * (value - mean);
   }
   return math.sqrt(stddev / values.length);
@@ -28,7 +26,7 @@ double _doIntegral({
   required double stop,
   required double resolution,
 }) {
-  double result = 0.0;
+  var result = 0.0;
   while (start < stop) {
     final double value = func(start);
     result += resolution * value;
@@ -64,7 +62,6 @@ double _doProbability({required double mean, required double stddev, required do
 ///     printer.printToStdout();
 ///
 class BenchmarkResultPrinter {
-
   final List<_BenchmarkResult> _results = <_BenchmarkResult>[];
 
   /// Adds a benchmark result to the list of results.
@@ -73,7 +70,12 @@ class BenchmarkResultPrinter {
   /// result value. [unit] is the unit of measurement, such as "ms", "km", "h".
   /// [name] is a computer-readable name of the result used as a key in the JSON
   /// serialization of the results.
-  void addResult({ required String description, required double value, required String unit, required String name }) {
+  void addResult({
+    required String description,
+    required double value,
+    required String unit,
+    required String name,
+  }) {
     _results.add(_BenchmarkResult(description, value, unit, name));
   }
 
@@ -92,20 +94,26 @@ class BenchmarkResultPrinter {
   }) {
     final double mean = _doMean(values);
     final double stddev = _doStddev(values, mean);
-    const double margin = 0.05;
+    const margin = 0.05;
     final double probability = _doProbability(mean: mean, stddev: stddev, margin: margin);
     _results.add(_BenchmarkResult(description, mean, unit, name));
-    _results.add(_BenchmarkResult('$description - probability margin of error $margin', probability,
-        'percent', '${name}_probability_5pct'));
+    _results.add(
+      _BenchmarkResult(
+        '$description - probability margin of error $margin',
+        probability,
+        'percent',
+        '${name}_probability_5pct',
+      ),
+    );
   }
 
   /// Prints the results added via [addResult] to standard output, once as JSON
   /// for computer consumption and once formatted as plain text for humans.
   void printToStdout() {
     // IMPORTANT: keep these values in sync with dev/devicelab/bin/tasks/microbenchmarks.dart
-    const String jsonStart = '================ RESULTS ================';
-    const String jsonEnd = '================ FORMATTED ==============';
-    const String jsonPrefix = ':::JSON:::';
+    const jsonStart = '================ RESULTS ================';
+    const jsonEnd = '================ FORMATTED ==============';
+    const jsonPrefix = ':::JSON:::';
 
     print(jsonStart);
     print('$jsonPrefix ${_printJson()}');
@@ -114,7 +122,7 @@ class BenchmarkResultPrinter {
   }
 
   String _printJson() {
-    final Map<String, double> results = <String, double>{};
+    final results = <String, double>{};
     for (final _BenchmarkResult result in _results) {
       results[result.name] = result.value;
     }
@@ -122,7 +130,7 @@ class BenchmarkResultPrinter {
   }
 
   String _printPlainText() {
-    final StringBuffer buf = StringBuffer();
+    final buf = StringBuffer();
     for (final _BenchmarkResult result in _results) {
       buf.writeln('${result.description}: ${result.value.toStringAsFixed(1)} ${result.unit}');
     }

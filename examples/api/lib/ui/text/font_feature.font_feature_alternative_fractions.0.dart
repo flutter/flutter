@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.alternativeFractions].
+/// Flutter code sample for [FontFeature.alternativeFractions].
 
 void main() => runApp(const ExampleApp());
 
@@ -14,7 +14,8 @@ class ExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return WidgetsApp(
-      builder: (BuildContext context, Widget? navigator) => const ExampleWidget(),
+      builder: (BuildContext context, Widget? navigator) =>
+          const ExampleWidget(),
       color: const Color(0xffffffff),
     );
   }
@@ -31,9 +32,7 @@ class ExampleWidget extends StatelessWidget {
       'Fractions: 1/2 2/3 3/4 4/5',
       style: TextStyle(
         fontFamily: 'Ubuntu Mono',
-        fontFeatures: <FontFeature>[
-          FontFeature.alternativeFractions(),
-        ],
+        fontFeatures: <FontFeature>[FontFeature.alternativeFractions()],
       ),
     );
   }

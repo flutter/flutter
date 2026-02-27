@@ -13,10 +13,7 @@ class ListTileApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(useMaterial3: true),
-      home: const ListTileExample(),
-    );
+    return const MaterialApp(home: ListTileExample());
   }
 }
 
@@ -45,24 +42,19 @@ class _ListTileExampleState extends State<ListTileExample> {
               _selected = !_selected;
             });
           },
-          // This sets text color and icon color to red when list tile is disabled and
-          // green when list tile is selected, otherwise sets it to black.
-          iconColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-            if (states.contains(MaterialState.disabled)) {
+          iconColor:
+              const WidgetStateColor.fromMap(<WidgetStatesConstraint, Color>{
+                WidgetState.disabled: Colors.red,
+                WidgetState.selected: Colors.green,
+                WidgetState.any: Colors.black,
+              }),
+          // The same can be achieved using the .resolveWith() constructor.
+          // The text color will be identical to the icon color above.
+          textColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
+            if (states.contains(WidgetState.disabled)) {
               return Colors.red;
             }
-            if (states.contains(MaterialState.selected)) {
-              return Colors.green;
-            }
-            return Colors.black;
-          }),
-          // This sets text color and icon color to red when list tile is disabled and
-          // green when list tile is selected, otherwise sets it to black.
-          textColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-            if (states.contains(MaterialState.disabled)) {
-              return Colors.red;
-            }
-            if (states.contains(MaterialState.selected)) {
+            if (states.contains(WidgetState.selected)) {
               return Colors.green;
             }
             return Colors.black;
@@ -71,10 +63,10 @@ class _ListTileExampleState extends State<ListTileExample> {
           title: const Text('Headline'),
           subtitle: Text('Enabled: $_enabled, Selected: $_selected'),
           trailing: Switch(
-            onChanged: (bool? value) {
+            onChanged: (bool value) {
               // This is called when the user toggles the switch.
               setState(() {
-                _enabled = value!;
+                _enabled = value;
               });
             },
             value: _enabled,

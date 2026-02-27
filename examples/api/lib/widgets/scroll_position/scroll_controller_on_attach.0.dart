@@ -21,7 +21,7 @@ class _ScrollControllerDemoState extends State<ScrollControllerDemo> {
 
   void _handleScrollChange() {
     if (isScrolling != _controller.position.isScrollingNotifier.value) {
-      setState((){
+      setState(() {
         isScrolling = _controller.position.isScrollingNotifier.value;
       });
     }
@@ -60,8 +60,8 @@ class _ScrollControllerDemoState extends State<ScrollControllerDemo> {
         appBar: AppBar(
           title: Text(isScrolling ? 'Scrolling' : 'Not Scrolling'),
           backgroundColor: isScrolling
-              ? Colors.green[800]!.withOpacity(.85)
-              : Colors.redAccent[700]!.withOpacity(.85),
+              ? Colors.green[800]!.withValues(alpha: .85)
+              : Colors.redAccent[700]!.withValues(alpha: .85),
         ),
         // ListView.builder works very similarly to this example with
         // CustomScrollView & SliverList.
@@ -85,7 +85,9 @@ class _ScrollControllerDemoState extends State<ScrollControllerDemo> {
                             blurRadius: 5,
                           ),
                         ],
-                        borderRadius: const BorderRadius.all(Radius.circular(10))
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(10),
+                        ),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(

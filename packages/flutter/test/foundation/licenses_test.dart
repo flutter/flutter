@@ -77,7 +77,7 @@ S
 \u0020\u0020\u0020\u0020\u0020\u0020
       Y''').paragraphs.toList();
 
-    int index = 0;
+    var index = 0;
     expect(paragraphs[index].text, 'A A A');
     expect(paragraphs[index].indent, 0);
     index += 1;
@@ -157,8 +157,14 @@ S
   });
 
   test('LicenseEntryWithLineBreaks - leading and trailing whitespace', () {
-    expect(const LicenseEntryWithLineBreaks(<String>[], '    \n\n    ').paragraphs.toList(), isEmpty);
-    expect(const LicenseEntryWithLineBreaks(<String>[], '    \r\n\r\n    ').paragraphs.toList(), isEmpty);
+    expect(
+      const LicenseEntryWithLineBreaks(<String>[], '    \n\n    ').paragraphs.toList(),
+      isEmpty,
+    );
+    expect(
+      const LicenseEntryWithLineBreaks(<String>[], '    \r\n\r\n    ').paragraphs.toList(),
+      isEmpty,
+    );
 
     List<LicenseParagraph> paragraphs;
 

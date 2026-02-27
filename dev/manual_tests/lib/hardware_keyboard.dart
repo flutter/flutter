@@ -6,17 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() {
-  runApp(MaterialApp(
-    title: 'Hardware Key Demo',
-    home: Scaffold(
-      appBar: AppBar(
-        title: const Text('Hardware Key Demo'),
-      ),
-      body: const Center(
-        child: HardwareKeyboardDemo(),
+  runApp(
+    MaterialApp(
+      title: 'Hardware Key Demo',
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Hardware Key Demo')),
+        body: const Center(child: HardwareKeyboardDemo()),
       ),
     ),
-  ));
+  );
 }
 
 class HardwareKeyboardDemo extends StatefulWidget {
@@ -66,26 +64,24 @@ class _HardwareKeyboardDemoState extends State<HardwareKeyboardDemo> {
             return Text('Press a key', style: textTheme.headlineMedium);
           }
 
-          final List<Widget> dataText = <Widget>[
+          final dataText = <Widget>[
             Text('${_event.runtimeType}'),
-            if (_event?.character?.isNotEmpty ?? false) Text('character produced: "${_event?.character}"'),
+            if (_event?.character?.isNotEmpty ?? false)
+              Text('character produced: "${_event?.character}"'),
           ];
           dataText.add(Text('logical: ${_event?.logicalKey}'));
           dataText.add(Text('physical: ${_event?.physicalKey}'));
           if (_event?.character != null) {
             dataText.add(Text('character: ${_event?.character}'));
           }
-          final List<String> pressed = <String>['Pressed:'];
+          final pressed = <String>['Pressed:'];
           for (final LogicalKeyboardKey key in HardwareKeyboard.instance.logicalKeysPressed) {
             pressed.add(key.debugName!);
           }
           dataText.add(Text(pressed.join(' ')));
           return DefaultTextStyle(
             style: textTheme.titleMedium!,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: dataText,
-            ),
+            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: dataText),
           );
         },
       ),

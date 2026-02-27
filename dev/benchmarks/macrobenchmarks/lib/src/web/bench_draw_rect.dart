@@ -47,9 +47,14 @@ class BenchDrawRect extends SceneBuilderRecorder {
 
   Paint makePaint(int row, int col) {
     if (benchmarkPaint) {
-      final Paint paint = Paint();
+      final paint = Paint();
       final double rowRatio = row / kRows;
-      paint.color = Color.fromARGB(255, (255 * rowRatio).floor(), (255 * col / kColumns).floor(), 255);
+      paint.color = Color.fromARGB(
+        255,
+        (255 * rowRatio).floor(),
+        (255 * col / kColumns).floor(),
+        255,
+      );
       paint.filterQuality = FilterQuality.values[(FilterQuality.values.length * rowRatio).floor()];
       paint.strokeCap = StrokeCap.values[(StrokeCap.values.length * rowRatio).floor()];
       paint.strokeJoin = StrokeJoin.values[(StrokeJoin.values.length * rowRatio).floor()];
@@ -65,23 +70,17 @@ class BenchDrawRect extends SceneBuilderRecorder {
 
   @override
   void onDrawFrame(SceneBuilder sceneBuilder) {
-    final PictureRecorder pictureRecorder = PictureRecorder();
-    final Canvas canvas = Canvas(pictureRecorder);
+    final pictureRecorder = PictureRecorder();
+    final canvas = Canvas(pictureRecorder);
     final Size viewSize = view.physicalSize;
 
-    final Size cellSize = Size(
-      viewSize.width / kColumns,
-      viewSize.height / kRows,
-    );
+    final cellSize = Size(viewSize.width / kColumns, viewSize.height / kRows);
     final Size rectSize = cellSize * 0.8;
 
-    for (int row = 0; row < kRows; row++) {
+    for (var row = 0; row < kRows; row++) {
       canvas.save();
-      for (int col = 0; col < kColumns; col++) {
-        canvas.drawRect(
-          Offset((wobbleCounter - 5).abs(), 0) & rectSize,
-          makePaint(row, col),
-        );
+      for (var col = 0; col < kColumns; col++) {
+        canvas.drawRect(Offset((wobbleCounter - 5).abs(), 0) & rectSize, makePaint(row, col));
         canvas.translate(cellSize.width, 0);
       }
       canvas.restore();

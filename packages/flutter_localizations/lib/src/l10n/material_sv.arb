@@ -135,8 +135,8 @@
   "bottomSheetLabel": "Ark på nedre delen av skärmen",
   "scrimOnTapHint": "Stäng $modalRouteContentName",
   "keyboardKeyShift": "Skift",
-  "expansionTileExpandedHint": "tryck snabbt två gånger för att komprimera",
-  "expansionTileCollapsedHint": "tryck snabbt två gånger för att utöka",
+  "expansionTileExpandedHint": "dubbeltryck för att komprimera",
+  "expansionTileCollapsedHint": "dubbeltryck för att utöka",
   "expansionTileExpandedTapHint": "Komprimera",
   "expansionTileCollapsedTapHint": "Utöka för mer information",
   "expandedHint": "Komprimerades",
@@ -144,7 +144,7 @@
   "menuDismissLabel": "Stäng menyn",
   "lookUpButtonLabel": "Titta upp",
   "searchWebButtonLabel": "Sök på webben",
-  "shareButtonLabel": "Dela …",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "Dela",
+  "clearButtonTooltip": "Rensa text",
+  "selectedDateLabel": "Markerat"
 }

@@ -19,9 +19,7 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('Can customize url strategy', (WidgetTester tester) async {
-    final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
-      const TestHistoryEntry('initial state', null, '/'),
-    );
+    final strategy = TestUrlStrategy.fromEntry(const TestHistoryEntry('initial state', null, '/'));
     setUrlStrategy(strategy);
 
     app.appRoutes = <String, WidgetBuilder>{
@@ -52,8 +50,8 @@ class TestUrlStrategy extends UrlStrategy {
   /// Creates an instance of [TestUrlStrategy] and populates it with a list
   /// that has [initialEntry] as the only item.
   TestUrlStrategy.fromEntry(TestHistoryEntry initialEntry)
-      : _currentEntryIndex = 0,
-        history = <TestHistoryEntry>[initialEntry];
+    : _currentEntryIndex = 0,
+      history = <TestHistoryEntry>[initialEntry];
 
   @override
   String getPath() => currentEntry.url;
@@ -137,11 +135,11 @@ class TestUrlStrategy extends UrlStrategy {
   /// like a real browser.
   void _firePopStateEvent() {
     assert(withinAppHistory);
-    final web.PopStateEvent event = web.PopStateEvent(
+    final event = web.PopStateEvent(
       'popstate',
       PopStateEventInit(state: currentEntry.state?.toJSBox),
     );
-    for (int i = 0; i < listeners.length; i++) {
+    for (var i = 0; i < listeners.length; i++) {
       listeners[i](event);
     }
   }
@@ -151,8 +149,8 @@ class TestUrlStrategy extends UrlStrategy {
 
   @override
   String toString() {
-    final List<String> lines = <String>[];
-    for (int i = 0; i < history.length; i++) {
+    final lines = <String>[];
+    for (var i = 0; i < history.length; i++) {
       final TestHistoryEntry entry = history[i];
       lines.add(_currentEntryIndex == i ? '* $entry' : '  $entry');
     }

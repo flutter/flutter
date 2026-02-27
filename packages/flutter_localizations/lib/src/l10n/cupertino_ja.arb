@@ -27,5 +27,13 @@
   "lookUpButtonLabel": "調べる",
   "searchWebButtonLabel": "ウェブを検索",
   "shareButtonLabel": "共有...",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "消去",
+  "cancelButtonLabel": "キャンセル",
+  "backButtonLabel": "戻る",
+  "expansionTileExpandedHint": "ダブルタップすると閉じます",
+  "expansionTileCollapsedHint": "開くにはダブルタップします",
+  "expansionTileExpandedTapHint": "閉じる",
+  "expansionTileCollapsedTapHint": "開いて詳細を表示",
+  "expandedHint": "閉じました",
+  "collapsedHint": "開きました"
 }

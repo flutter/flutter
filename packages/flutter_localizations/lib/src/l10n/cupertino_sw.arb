@@ -27,5 +27,13 @@
   "lookUpButtonLabel": "Tafuta",
   "searchWebButtonLabel": "Tafuta kwenye Wavuti",
   "shareButtonLabel": "Shiriki...",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "Futa",
+  "cancelButtonLabel": "Ghairi",
+  "backButtonLabel": "Nyuma",
+  "expansionTileExpandedHint": "gusa mara mbili ili ukunje",
+  "expansionTileCollapsedHint": "gusa mara mbili ili upanue",
+  "expansionTileExpandedTapHint": "Kunja",
+  "expansionTileCollapsedTapHint": "Panua ili upate maelezo zaidi",
+  "expandedHint": "Imekunjwa",
+  "collapsedHint": "Imepanuliwa"
 }

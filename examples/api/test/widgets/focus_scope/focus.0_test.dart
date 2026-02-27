@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_api_samples/widgets/focus_scope/focus.0.dart'
-  as example;
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -18,8 +18,9 @@ void main() {
     expect(find.text('Focus Sample'), findsOneWidget);
     expect(find.byType(Container), findsOneWidget);
 
-    final Container container =
-        tester.widget<Container>(find.byType(Container));
+    final Container container = tester.widget<Container>(
+      find.byType(Container),
+    );
     expect(container.color, Colors.white);
   });
 
@@ -33,8 +34,9 @@ void main() {
     expect(find.text("I'm in color! Press R,G,B!"), findsOneWidget);
 
     expect(find.byType(Container), findsOneWidget);
-    final Container container =
-    tester.widget<Container>(find.byType(Container));
+    final Container container = tester.widget<Container>(
+      find.byType(Container),
+    );
     expect(container.color, Colors.white);
 
     await tester.tap(find.text("I'm in color! Press R,G,B!"));
@@ -43,31 +45,51 @@ void main() {
     expect(find.text("I'm in color! Press R,G,B!"), findsNothing);
   });
 
-  testWidgets('changes color according to key presses', (WidgetTester tester) async {
+  testWidgets('changes color according to key presses', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.FocusExampleApp());
     expect(find.byType(Container), findsOneWidget);
-    expect(tester.widget<Container>(find.byType(Container)).color, Colors.white);
+    expect(
+      tester.widget<Container>(find.byType(Container)).color,
+      Colors.white,
+    );
     await tester.sendKeyEvent(LogicalKeyboardKey.keyR);
     await tester.pumpAndSettle();
-    expect(tester.widget<Container>(find.byType(Container)).color, Colors.white);
+    expect(
+      tester.widget<Container>(find.byType(Container)).color,
+      Colors.white,
+    );
     await tester.sendKeyEvent(LogicalKeyboardKey.keyG);
     await tester.pumpAndSettle();
-    expect(tester.widget<Container>(find.byType(Container)).color, Colors.white);
+    expect(
+      tester.widget<Container>(find.byType(Container)).color,
+      Colors.white,
+    );
     await tester.sendKeyEvent(LogicalKeyboardKey.keyB);
     await tester.pumpAndSettle();
-    expect(tester.widget<Container>(find.byType(Container)).color, Colors.white);
+    expect(
+      tester.widget<Container>(find.byType(Container)).color,
+      Colors.white,
+    );
 
     expect(find.text('Press to focus'), findsOneWidget);
     await tester.tap(find.text('Press to focus'));
     await tester.pumpAndSettle();
     expect(find.byType(Container), findsOneWidget);
-    expect(tester.widget<Container>(find.byType(Container)).color, Colors.white);
+    expect(
+      tester.widget<Container>(find.byType(Container)).color,
+      Colors.white,
+    );
     await tester.sendKeyEvent(LogicalKeyboardKey.keyR);
     await tester.pumpAndSettle();
     expect(tester.widget<Container>(find.byType(Container)).color, Colors.red);
     await tester.sendKeyEvent(LogicalKeyboardKey.keyG);
     await tester.pumpAndSettle();
-    expect(tester.widget<Container>(find.byType(Container)).color, Colors.green);
+    expect(
+      tester.widget<Container>(find.byType(Container)).color,
+      Colors.green,
+    );
     await tester.sendKeyEvent(LogicalKeyboardKey.keyB);
     await tester.pumpAndSettle();
     expect(tester.widget<Container>(find.byType(Container)).color, Colors.blue);
@@ -75,6 +97,9 @@ void main() {
     expect(find.text("I'm in color! Press R,G,B!"), findsOneWidget);
     await tester.tap(find.text("I'm in color! Press R,G,B!"));
     await tester.pumpAndSettle();
-    expect(tester.widget<Container>(find.byType(Container)).color, Colors.white);
+    expect(
+      tester.widget<Container>(find.byType(Container)).color,
+      Colors.white,
+    );
   });
 }

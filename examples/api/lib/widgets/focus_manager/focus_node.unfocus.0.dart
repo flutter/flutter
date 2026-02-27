@@ -13,9 +13,7 @@ class UnfocusExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: UnfocusExample(),
-    );
+    return const MaterialApp(home: UnfocusExample());
   }
 }
 
@@ -53,12 +51,20 @@ class _UnfocusExampleState extends State<UnfocusExample> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
-                ...List<Widget>.generate(UnfocusDisposition.values.length, (int index) {
+                ...List<Widget>.generate(UnfocusDisposition.values.length, (
+                  int index,
+                ) {
                   return Row(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Radio<UnfocusDisposition>(
+                        // TODO(loic-sharma): Migrate to RadioGroup.
+                        // https://github.com/flutter/flutter/issues/179088
+                        // ignore: deprecated_member_use
                         groupValue: disposition,
+                        // TODO(loic-sharma): Migrate to RadioGroup.
+                        // https://github.com/flutter/flutter/issues/179088
+                        // ignore: deprecated_member_use
                         onChanged: (UnfocusDisposition? value) {
                           setState(() {
                             if (value != null) {

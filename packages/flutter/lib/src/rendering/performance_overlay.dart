@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'box.dart';
@@ -61,9 +64,7 @@ enum PerformanceOverlayOption {
 /// to true.
 class RenderPerformanceOverlay extends RenderBox {
   /// Creates a performance overlay render object.
-  RenderPerformanceOverlay({
-    int optionsMask = 0,
-  }) : _optionsMask = optionsMask;
+  RenderPerformanceOverlay({int optionsMask = 0}) : _optionsMask = optionsMask;
 
   /// The mask is created by shifting 1 by the index of the specific
   /// [PerformanceOverlayOption] to enable.
@@ -94,8 +95,8 @@ class RenderPerformanceOverlay extends RenderBox {
   }
 
   double get _intrinsicHeight {
-    const double kDefaultGraphHeight = 80.0;
-    double result = 0.0;
+    const kDefaultGraphHeight = 80.0;
+    var result = 0.0;
     if ((optionsMask | (1 << PerformanceOverlayOption.displayRasterizerStatistics.index) > 0) ||
         (optionsMask | (1 << PerformanceOverlayOption.visualizeRasterizerStatistics.index) > 0)) {
       result += kDefaultGraphHeight;
@@ -126,9 +127,11 @@ class RenderPerformanceOverlay extends RenderBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     assert(needsCompositing);
-    context.addLayer(PerformanceOverlayLayer(
-      overlayRect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
-      optionsMask: optionsMask,
-    ));
+    context.addLayer(
+      PerformanceOverlayLayer(
+        overlayRect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
+        optionsMask: optionsMask,
+      ),
+    );
   }
 }

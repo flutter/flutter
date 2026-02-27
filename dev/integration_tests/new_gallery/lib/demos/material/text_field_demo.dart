@@ -103,10 +103,8 @@ class _PasswordFieldState extends State<PasswordField> with RestorationMixin {
           icon: Icon(
             _obscureText.value ? Icons.visibility : Icons.visibility_off,
             semanticLabel: _obscureText.value
-                ? GalleryLocalizations.of(context)!
-                    .demoTextFieldShowPasswordLabel
-                : GalleryLocalizations.of(context)!
-                    .demoTextFieldHidePasswordLabel,
+                ? GalleryLocalizations.of(context)!.demoTextFieldShowPasswordLabel
+                : GalleryLocalizations.of(context)!.demoTextFieldHidePasswordLabel,
           ),
         ),
       ),
@@ -114,8 +112,7 @@ class _PasswordFieldState extends State<PasswordField> with RestorationMixin {
   }
 }
 
-class TextFormFieldDemoState extends State<TextFormFieldDemo>
-    with RestorationMixin {
+class TextFormFieldDemoState extends State<TextFormFieldDemo> with RestorationMixin {
   PersonData person = PersonData();
 
   late FocusNode _phoneNumber, _email, _lifeStory, _password, _retypePassword;
@@ -142,9 +139,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo>
 
   void showInSnackBar(String value) {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(value),
-    ));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(value)));
   }
 
   @override
@@ -155,27 +150,25 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo>
     registerForRestoration(_autoValidateModeIndex, 'autovalidate_mode');
   }
 
-  final RestorableInt _autoValidateModeIndex =
-      RestorableInt(AutovalidateMode.disabled.index);
+  final RestorableInt _autoValidateModeIndex = RestorableInt(AutovalidateMode.disabled.index);
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final GlobalKey<FormFieldState<String>> _passwordFieldKey =
-      GlobalKey<FormFieldState<String>>();
-  final _UsNumberTextInputFormatter _phoneNumberFormatter =
-      _UsNumberTextInputFormatter();
+  final GlobalKey<FormFieldState<String>> _passwordFieldKey = GlobalKey<FormFieldState<String>>();
+  final _UsNumberTextInputFormatter _phoneNumberFormatter = _UsNumberTextInputFormatter();
 
   void _handleSubmitted() {
     final FormState form = _formKey.currentState!;
     if (!form.validate()) {
       _autoValidateModeIndex.value =
           AutovalidateMode.always.index; // Start validating on every change.
-      showInSnackBar(
-        GalleryLocalizations.of(context)!.demoTextFieldFormErrors,
-      );
+      showInSnackBar(GalleryLocalizations.of(context)!.demoTextFieldFormErrors);
     } else {
       form.save();
-      showInSnackBar(GalleryLocalizations.of(context)!
-          .demoTextFieldNameHasPhoneNumber(person.name!, person.phoneNumber!));
+      showInSnackBar(
+        GalleryLocalizations.of(
+          context,
+        )!.demoTextFieldNameHasPhoneNumber(person.name!, person.phoneNumber!),
+      );
     }
   }
 
@@ -183,16 +176,15 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo>
     if (value == null || value.isEmpty) {
       return GalleryLocalizations.of(context)!.demoTextFieldNameRequired;
     }
-    final RegExp nameExp = RegExp(r'^[A-Za-z ]+$');
+    final nameExp = RegExp(r'^[A-Za-z ]+$');
     if (!nameExp.hasMatch(value)) {
-      return GalleryLocalizations.of(context)!
-          .demoTextFieldOnlyAlphabeticalChars;
+      return GalleryLocalizations.of(context)!.demoTextFieldOnlyAlphabeticalChars;
     }
     return null;
   }
 
   String? _validatePhoneNumber(String? value) {
-    final RegExp phoneExp = RegExp(r'^\(\d\d\d\) \d\d\d\-\d\d\d\d$');
+    final phoneExp = RegExp(r'^\(\d\d\d\) \d\d\d\-\d\d\d\d$');
     if (!phoneExp.hasMatch(value!)) {
       return GalleryLocalizations.of(context)!.demoTextFieldEnterUSPhoneNumber;
     }
@@ -212,7 +204,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo>
 
   @override
   Widget build(BuildContext context) {
-    const SizedBox sizedBoxSpace = SizedBox(height: 24);
+    const sizedBoxSpace = SizedBox(height: 24);
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
     return Form(
@@ -376,14 +368,11 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo>
 /// Format incoming numeric text to fit the format of (###) ###-#### ##
 class _UsNumberTextInputFormatter extends TextInputFormatter {
   @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
     final int newTextLength = newValue.text.length;
-    final StringBuffer newText = StringBuffer();
+    final newText = StringBuffer();
     int selectionIndex = newValue.selection.end;
-    int usedSubstringIndex = 0;
+    var usedSubstringIndex = 0;
     if (newTextLength >= 1) {
       newText.write('(');
       if (newValue.selection.end >= 1) {

@@ -20,10 +20,7 @@ class AnimatedPositionedExampleApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text('AnimatedPositioned Sample')),
         body: const Center(
-          child: AnimatedPositionedExample(
-            duration: duration,
-            curve: curve,
-          ),
+          child: AnimatedPositionedExample(duration: duration, curve: curve),
         ),
       ),
     );

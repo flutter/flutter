@@ -12,18 +12,15 @@ void main() {
   testWidgets('App tracks lifecycle states', (WidgetTester tester) async {
     Future<String> getCapturedKey() async {
       final Widget textWidget = tester.firstWidget(
-          find.textContaining('is not handled by shortcuts.'));
+        find.textContaining('is not handled by shortcuts.'),
+      );
       expect(textWidget, isA<Text>());
       return (textWidget as Text).data!.split(' ').first;
     }
 
     await tester.pumpWidget(
       const MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: example.FallbackDemo(),
-          )
-        ),
+        home: Scaffold(body: Center(child: example.FallbackDemo())),
       ),
     );
 

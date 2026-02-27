@@ -9,9 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('AnimatedContainer updates on tap', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.AnimatedContainerExampleApp(),
-    );
+    await tester.pumpWidget(const example.AnimatedContainerExampleApp());
 
     Container container = tester.widget(
       find.ancestor(
@@ -19,10 +17,7 @@ void main() {
         matching: find.byType(Container),
       ),
     );
-    expect(
-      (container.decoration! as BoxDecoration).color,
-      equals(Colors.blue),
-    );
+    expect((container.decoration! as BoxDecoration).color, equals(Colors.blue));
     expect(
       container.constraints,
       equals(const BoxConstraints.tightFor(width: 100, height: 200)),
@@ -38,10 +33,7 @@ void main() {
         matching: find.byType(Container),
       ),
     );
-    expect(
-      (container.decoration! as BoxDecoration).color,
-      equals(Colors.blue),
-    );
+    expect((container.decoration! as BoxDecoration).color, equals(Colors.blue));
     expect(
       container.constraints,
       equals(const BoxConstraints.tightFor(width: 100, height: 200)),
@@ -58,10 +50,7 @@ void main() {
         matching: find.byType(Container),
       ),
     );
-    expect(
-      (container.decoration! as BoxDecoration).color,
-      equals(Colors.red),
-    );
+    expect((container.decoration! as BoxDecoration).color, equals(Colors.red));
     expect(
       container.constraints,
       equals(const BoxConstraints.tightFor(width: 200, height: 100)),

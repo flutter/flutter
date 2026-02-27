@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'base/dds.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
@@ -12,7 +13,8 @@ import 'resident_runner.dart';
 import 'tracing.dart';
 import 'vmservice.dart';
 
-const String kFlutterTestOutputsDirEnvName = 'FLUTTER_TEST_OUTPUTS_DIR';
+const kFlutterTestOutputsDirEnvName = 'FLUTTER_TEST_OUTPUTS_DIR';
+
 class ColdRunner extends ResidentRunner {
   ColdRunner(
     super.flutterDevices, {
@@ -21,18 +23,15 @@ class ColdRunner extends ResidentRunner {
     this.traceStartup = false,
     this.awaitFirstFrameWhenTracing = true,
     this.applicationBinary,
-    bool super.ipv6 = false,
     super.stayResident,
     super.machine,
-    super.devtoolsHandler,
-  }) : super(
-          hotMode: false,
-        );
+    super.dartBuilder,
+  }) : super(hotMode: false);
 
   final bool traceStartup;
   final bool awaitFirstFrameWhenTracing;
   final File? applicationBinary;
-  bool _didAttach = false;
+  var _didAttach = false;
 
   @override
   bool get canHotReload => false;
@@ -44,18 +43,17 @@ class ColdRunner extends ResidentRunner {
   FileSystem get fileSystem => globals.fs;
 
   @override
+  bool get supportsDetach => _didAttach;
+
+  @override
   Future<int> run({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
-    bool enableDevTools = false,
     String? route,
   }) async {
     try {
       for (final FlutterDevice? device in flutterDevices) {
-        final int result = await device!.runCold(
-          coldRunner: this,
-          route: route,
-        );
+        final int result = await device!.runCold(coldRunner: this, route: route);
         if (result != 0) {
           appFailedToStart();
           return result;
@@ -70,7 +68,7 @@ class ColdRunner extends ResidentRunner {
     // Connect to the VM Service.
     if (debuggingEnabled) {
       try {
-        await connectToServiceProtocol(allowExistingDdsInstance: false);
+        await connectToServiceProtocol();
       } on Exception catch (exception) {
         globals.printError(exception.toString());
         appFailedToStart();
@@ -78,26 +76,19 @@ class ColdRunner extends ResidentRunner {
       }
     }
 
-    if (debuggingEnabled) {
-      if (enableDevTools) {
-        // The method below is guaranteed never to return a failing future.
-        unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
-          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-          flutterDevices: flutterDevices,
-          isStartPaused: debuggingOptions.startPaused,
-        ));
-      }
-      if (debuggingOptions.serveObservatory) {
-        await enableObservatory();
-      }
-    }
-
-    if (flutterDevices.first.vmServiceUris != null) {
+    final FlutterDevice flutterDevice = flutterDevices.first;
+    if (flutterDevice.vmServiceUris != null) {
+      final FlutterVmService? vmService = flutterDevice.vmService;
+      final DartDevelopmentService dds = flutterDevice.device!.dds;
       // For now, only support one debugger connection.
-      connectionInfoCompleter?.complete(DebugConnectionInfo(
-        httpUri: flutterDevices.first.vmService!.httpAddress,
-        wsUri: flutterDevices.first.vmService!.wsAddress,
-      ));
+      connectionInfoCompleter?.complete(
+        DebugConnectionInfo(
+          httpUri: vmService!.httpAddress,
+          wsUri: vmService.wsAddress,
+          devToolsUri: dds.devToolsUri,
+          dtdUri: dds.dtdUri,
+        ),
+      );
     }
 
     globals.printTrace('Application running.');
@@ -106,16 +97,16 @@ class ColdRunner extends ResidentRunner {
       if (device!.vmService == null) {
         continue;
       }
-      await device.initLogReader();
-      globals.printTrace('Connected to ${device.device!.name}');
+      globals.printTrace('Connected to ${device.device!.displayName}');
     }
 
     if (traceStartup) {
       // Only trace startup for the first device.
       final FlutterDevice device = flutterDevices.first;
       if (device.vmService != null) {
-        globals.printStatus('Tracing startup on ${device.device!.name}.');
-        final String outputPath = globals.platform.environment[kFlutterTestOutputsDirEnvName] ?? getBuildDirectory();
+        globals.printStatus('Tracing startup on ${device.device!.displayName}.');
+        final String outputPath =
+            globals.platform.environment[kFlutterTestOutputsDirEnvName] ?? getBuildDirectory();
         await downloadStartupTrace(
           device.vmService!,
           awaitFirstFrame: awaitFirstFrameWhenTracing,
@@ -141,42 +132,20 @@ class ColdRunner extends ResidentRunner {
   Future<int> attach({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
-    bool allowExistingDdsInstance = false,
-    bool enableDevTools = false,
     bool needsFullRestart = true,
   }) async {
     _didAttach = true;
     try {
-      await connectToServiceProtocol(
-        getSkSLMethod: writeSkSL,
-        allowExistingDdsInstance: allowExistingDdsInstance,
-      );
+      await connectToServiceProtocol();
     } on Exception catch (error) {
       globals.printError('Error connecting to the service protocol: $error');
       return 2;
     }
 
     for (final FlutterDevice? device in flutterDevices) {
-      await device!.initLogReader();
-    }
-    for (final FlutterDevice? device in flutterDevices) {
       final List<FlutterView> views = await device!.vmService!.getFlutterViews();
-      for (final FlutterView view in views) {
+      for (final view in views) {
         globals.printTrace('Connected to $view.');
-      }
-    }
-
-    if (debuggingEnabled) {
-      if (enableDevTools) {
-        // The method below is guaranteed never to return a failing future.
-        unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
-          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-          flutterDevices: flutterDevices,
-          isStartPaused: debuggingOptions.startPaused,
-        ));
-      }
-      if (debuggingOptions.serveObservatory) {
-        await enableObservatory();
       }
     }
 
@@ -202,26 +171,7 @@ class ColdRunner extends ResidentRunner {
     for (final FlutterDevice? flutterDevice in flutterDevices) {
       await flutterDevice!.device!.dispose();
     }
-
-    await residentDevtoolsHandler!.shutdown();
     await stopEchoingDeviceLog();
-  }
-
-  @override
-  void printHelp({ required bool details }) {
-    globals.printStatus('Flutter run key commands.');
-    if (details) {
-      printHelpDetails();
-      commandHelp.hWithDetails.print();
-    } else {
-      commandHelp.hWithoutDetails.print();
-    }
-    if (_didAttach) {
-      commandHelp.d.print();
-    }
-    commandHelp.c.print();
-    commandHelp.q.print();
-    printDebuggerList();
   }
 
   @override

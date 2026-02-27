@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 
 import '../../src/macos/xcode.dart';
 import '../base/common.dart';
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
@@ -15,9 +16,7 @@ import '../project.dart';
 import '../runner/flutter_command.dart';
 
 class CleanCommand extends FlutterCommand {
-  CleanCommand({
-    bool verbose = false,
-  }) : _verbose = verbose {
+  CleanCommand({bool verbose = false}) : _verbose = verbose {
     requiresPubspecYaml();
     argParser.addOption(
       'scheme',
@@ -28,10 +27,10 @@ class CleanCommand extends FlutterCommand {
   final bool _verbose;
 
   @override
-  final String name = 'clean';
+  final name = 'clean';
 
   @override
-  final String description = 'Delete the build/ and .dart_tool/ directories.';
+  final description = 'Delete the build/ and .dart_tool/ directories.';
 
   @override
   String get category => FlutterCommandCategory.project;
@@ -54,7 +53,6 @@ class CleanCommand extends FlutterCommand {
     deleteFile(buildDir);
 
     deleteFile(flutterProject.dartTool);
-    deleteFile(flutterProject.packagesFile);
 
     deleteFile(flutterProject.android.ephemeralDirectory);
 
@@ -70,7 +68,6 @@ class CleanCommand extends FlutterCommand {
     deleteFile(flutterProject.macos.ephemeralDirectory);
     deleteFile(flutterProject.windows.ephemeralDirectory);
     deleteFile(flutterProject.flutterPluginsDependenciesFile);
-    deleteFile(flutterProject.flutterPluginsFile);
 
     return const FlutterCommandResult(ExitStatus.success);
   }
@@ -80,28 +77,36 @@ class CleanCommand extends FlutterCommand {
     if (xcodeWorkspace == null) {
       return;
     }
-    final Status xcodeStatus = globals.logger.startProgress(
-      'Cleaning Xcode workspace...',
-    );
+    final Status xcodeStatus = globals.logger.startProgress('Cleaning Xcode workspace...');
     try {
       final XcodeProjectInterpreter xcodeProjectInterpreter = globals.xcodeProjectInterpreter!;
-      final XcodeProjectInfo projectInfo = (await xcodeProjectInterpreter.getInfo(xcodeWorkspace.parent.path))!;
+      final XcodeProjectInfo projectInfo = (await xcodeProjectInterpreter.getInfo(
+        xcodeWorkspace.parent.path,
+      ))!;
       if (argResults?.wasParsed('scheme') ?? false) {
-        final String scheme = argResults!['scheme'] as String;
+        final scheme = argResults!['scheme'] as String;
         if (scheme.isEmpty) {
           throwToolExit('No scheme was specified for --scheme');
         }
         if (!projectInfo.schemes.contains(scheme)) {
           throwToolExit('Scheme "$scheme" not found in ${projectInfo.schemes}');
         }
-        await xcodeProjectInterpreter.cleanWorkspace(xcodeWorkspace.path, scheme, verbose: _verbose);
+        await xcodeProjectInterpreter.cleanWorkspace(
+          xcodeWorkspace.path,
+          scheme,
+          verbose: _verbose,
+        );
       } else {
         for (final String scheme in projectInfo.schemes) {
-          await xcodeProjectInterpreter.cleanWorkspace(xcodeWorkspace.path, scheme, verbose: _verbose);
+          await xcodeProjectInterpreter.cleanWorkspace(
+            xcodeWorkspace.path,
+            scheme,
+            verbose: _verbose,
+          );
         }
       }
     } on Exception catch (error) {
-      final String message = 'Could not clean Xcode workspace: $error';
+      final message = 'Could not clean Xcode workspace: $error';
       if (argResults?.wasParsed('scheme') ?? false) {
         throwToolExit(message);
       } else {
@@ -114,6 +119,16 @@ class CleanCommand extends FlutterCommand {
 
   @visibleForTesting
   void deleteFile(FileSystemEntity file) {
+    try {
+      ErrorHandlingFileSystem.noExitOnFailure(() {
+        _deleteFile(file);
+      });
+    } on Exception catch (e) {
+      globals.printError('Failed to remove ${file.path}: $e');
+    }
+  }
+
+  void _deleteFile(FileSystemEntity file) {
     // This will throw a FileSystemException if the directory is missing permissions.
     try {
       if (!file.existsSync()) {
@@ -123,18 +138,18 @@ class CleanCommand extends FlutterCommand {
       globals.printError('Cannot clean ${file.path}.\n$err');
       return;
     }
-    final Status deletionStatus = globals.logger.startProgress(
-      'Deleting ${file.basename}...',
-    );
+    final Status deletionStatus = globals.logger.startProgress('Deleting ${file.basename}...');
     try {
       file.deleteSync(recursive: true);
     } on FileSystemException catch (error) {
       final String path = file.path;
       if (globals.platform.isWindows) {
-        globals.printError('Failed to remove $path. '
-            'A program may still be using a file in the directory or the directory itself. '
-            'To find and stop such a program, see: '
-            'https://superuser.com/questions/1333118/cant-delete-empty-folder-because-it-is-used');
+        globals.printError(
+          'Failed to remove $path. '
+          'A program may still be using a file in the directory or the directory itself. '
+          'To find and stop such a program, see: '
+          'https://superuser.com/questions/1333118/cant-delete-empty-folder-because-it-is-used',
+        );
       } else {
         globals.printError('Failed to remove $path: $error');
       }

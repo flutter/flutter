@@ -56,7 +56,7 @@ void checkForUnresolvedDirectives(Directory dartDocDir) {
   print('Scanning for unresolved dartdoc directives...');
 
   final List<FileSystemEntity> toScan = dartDocDir.listSync();
-  int count = 0;
+  var count = 0;
 
   while (toScan.isNotEmpty) {
     final FileSystemEntity entity = toScan.removeLast();
@@ -75,7 +75,9 @@ void checkForUnresolvedDirectives(Directory dartDocDir) {
   }
 
   if (canaryLibraries.isNotEmpty) {
-    throw Exception('Did not find docs for the following libraries: ${canaryLibraries.join(', ')}.');
+    throw Exception(
+      'Did not find docs for the following libraries: ${canaryLibraries.join(', ')}.',
+    );
   }
   if (canaryFiles.isNotEmpty) {
     throw Exception('Did not find docs for the following files: ${canaryFiles.join(', ')}.');
@@ -88,12 +90,13 @@ void checkForUnresolvedDirectives(Directory dartDocDir) {
 
 int _scanFile(File file) {
   assert(path.extension(file.path) == '.html');
-  final Iterable<String> matches = _pattern.allMatches(file.readAsStringSync())
-      .map((RegExpMatch m ) => m.group(0)!);
+  final Iterable<String> matches = _pattern
+      .allMatches(file.readAsStringSync())
+      .map((RegExpMatch m) => m.group(0)!);
 
   if (matches.isNotEmpty) {
     stderr.writeln('Found unresolved dartdoc directives in ${file.path}:');
-    for (final String match in matches) {
+    for (final match in matches) {
       stderr.writeln('  $match');
     }
   }

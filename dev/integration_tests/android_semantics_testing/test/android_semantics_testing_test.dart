@@ -34,7 +34,7 @@ const String source = r'''
 void main() {
   group(AndroidSemanticsNode, () {
     test('can be parsed from json data', () {
-      final AndroidSemanticsNode node = AndroidSemanticsNode.deserialize(source);
+      final node = AndroidSemanticsNode.deserialize(source);
 
       expect(node.isChecked, false);
       expect(node.isCheckable, false);
@@ -69,28 +69,31 @@ void main() {
 
   group('hasAndroidSemantics', () {
     test('matches all android semantics properties', () {
-      final AndroidSemanticsNode node = AndroidSemanticsNode.deserialize(source);
+      final node = AndroidSemanticsNode.deserialize(source);
 
-      expect(node, hasAndroidSemantics(
-        isChecked: false,
-        isCheckable: false,
-        isEditable: false,
-        isFocusable: false,
-        isFocused: false,
-        isPassword: false,
-        isLongClickable: false,
-        text: 'hello',
-        contentDescription: 'other hello',
-        className: 'android.view.View',
-        id: 23,
-        rect:  const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
-        actions: <AndroidSemanticsAction>[
-          AndroidSemanticsAction.focus,
-          AndroidSemanticsAction.clearFocus,
-          AndroidSemanticsAction.select,
-        ],
-        size: const Size(10.0, 10.0),
-      ));
+      expect(
+        node,
+        hasAndroidSemantics(
+          isChecked: false,
+          isCheckable: false,
+          isEditable: false,
+          isFocusable: false,
+          isFocused: false,
+          isPassword: false,
+          isLongClickable: false,
+          text: 'hello',
+          contentDescription: 'other hello',
+          className: 'android.view.View',
+          id: 23,
+          rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+          actions: <AndroidSemanticsAction>[
+            AndroidSemanticsAction.focus,
+            AndroidSemanticsAction.clearFocus,
+            AndroidSemanticsAction.select,
+          ],
+          size: const Size(10.0, 10.0),
+        ),
+      );
     });
   });
 }

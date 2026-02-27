@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.swash].
+/// Flutter code sample for [FontFeature.swash].
 
 void main() => runApp(const ExampleApp());
 
@@ -14,7 +14,8 @@ class ExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return WidgetsApp(
-      builder: (BuildContext context, Widget? navigator) => const ExampleWidget(),
+      builder: (BuildContext context, Widget? navigator) =>
+          const ExampleWidget(),
       color: const Color(0xffffffff),
     );
   }
@@ -31,9 +32,7 @@ class ExampleWidget extends StatelessWidget {
       'Queer & Romantic',
       style: TextStyle(
         fontFamily: 'BioRhyme Expanded',
-        fontFeatures: <FontFeature>[
-          FontFeature.swash(),
-        ],
+        fontFeatures: <FontFeature>[FontFeature.swash()],
       ),
     );
   }

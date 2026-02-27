@@ -1,0 +1,79 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+assert(is_mac || is_ios)
+
+import("//build/config/darwin/darwin_sdk.gni")
+
+config("compiler") {
+  # swiftc -sdk flag.
+  if (is_ios) {
+    _sdk_root = ios_sdk_path
+    if (create_xcode_symlinks) {
+      _sdk_root = rebase_path(ios_sdk_path, root_build_dir)
+    }
+  } else if (is_mac) {
+    _sdk_root = mac_sdk_path
+    if (create_xcode_symlinks) {
+      _sdk_root = rebase_path(mac_sdk_path, root_build_dir)
+    }
+  } else {
+    assert(false, "unsupported platform")
+  }
+
+  # swiftc -target flag (target triplet).
+  # CPU architecture.
+  if (current_cpu == "x64") {
+    _triplet_cpu = "x86_64"
+  } else if (current_cpu == "arm64") {
+    _triplet_cpu = "arm64"
+  } else {
+    # x86, arm, armv7, etc.
+    assert(false, "unsupported cpu: $current_cpu")
+  }
+
+  # OS and deployment target.
+  if (is_ios) {
+    _triplet_os = "apple-ios"
+    _deployment_target = ios_deployment_target
+  } else if (is_mac) {
+    _triplet_os = "apple-macos"
+    _deployment_target = mac_deployment_target
+  }
+
+  # Environment.
+  if (use_ios_simulator) {
+    _triplet_environment = "-simulator"
+  } else {
+    _triplet_environment = ""
+  }
+  _target_triplet =
+      "$_triplet_cpu-$_triplet_os$_deployment_target$_triplet_environment"
+
+  # swiftc -swift-version flag.
+  #
+  # Swift 6 transition: As of April 2025, no public Flutter framework API is
+  # authored in Swift. Swift 6 is ABI-compatible with Swift 5, but not
+  # source-compatible. If any public API *is* written in Swift, it's possible
+  # we may need to prepare concurrent Swift 5 and 6 builds during a transition
+  # period.
+  _swift_version = "5"
+
+  # TODO(cbracken): https://github.com/flutter/flutter/issues/167592
+  # Look up xcode_version in apple_sdk.gni
+  #
+  # This is here so that all files get recompiled after an Xcode update.
+  # (defines are passed via the command line, and build system rebuild things
+  # when their commandline changes). Nothing should ever read this define.
+  #defines = [ "CR_XCODE_VERSION=$xcode_version" ]
+
+  swiftflags = [
+    "-sdk",
+    _sdk_root,
+    "-target",
+    _target_triplet,
+    "-swift-version",
+    _swift_version,
+  ]
+}

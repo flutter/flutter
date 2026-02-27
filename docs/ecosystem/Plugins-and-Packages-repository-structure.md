@@ -6,7 +6,7 @@ Most packages are located in `packages`. A few which are derived heavily from th
 
 ## Plugins
 
-Plugins in flutter/packages uses the federated plugin model. If you are not familiar with federated plugins, start with reading [the federated plugin overview](https://flutter.dev/docs/development/packages-and-plugins/developing-packages#federated-plugins) to understand the terms below.
+Plugins in flutter/packages uses the federated plugin model. If you are not familiar with federated plugins, start with reading [the federated plugin overview](https://docs.flutter.dev/development/packages-and-plugins/developing-packages#federated-plugins) to understand the terms below.
 
 All plugins are located in the `packages/` directory. Almost all plugins have the following layout:
 - `some_plugin/` - A directory containing the individual packages of the federated plugin:
@@ -29,10 +29,11 @@ Using the specific google hosted cache is not intended for contributors outside 
 
 Googlers can debug locally by setting `ARTIFACT_HUB_REPOSITORY` to the valid artifact hub value and authenticating with GCP. To authenticate run `gcloud auth application-default login`. To find artifact hub url use `<url>` section of go/artifact-hub#maven or inspect the value on CI servers. CI uses a service account for billing. That is defined in go/artifact-hub-service-account (Googler access only).
 
-## Useful links for debuging
-https://github.com/GoogleCloudPlatform/artifact-registry-maven-tools/blob/master/README.md
-https://docs.gradle.org/current/userguide/declaring_repositories.html
-https://docs.gradle.org/current/userguide/viewing_debugging_dependencies.html
+## Useful links for debugging
+
+- https://github.com/GoogleCloudPlatform/artifact-registry-maven-tools/blob/master/README.md
+- https://docs.gradle.org/current/userguide/declaring_repositories.html
+- https://docs.gradle.org/current/userguide/viewing_debugging_dependencies.html
 
 Command to force refresh of dependencies `./gradlew app:dependencies --configuration <SOME_TASK> --refresh-dependencies`
 

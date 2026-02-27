@@ -13,8 +13,8 @@ class TokenLogger {
 
   void init({
     required Map<String, dynamic> allTokens,
-    required Map<String, List<String>> versionMap
-  }){
+    required Map<String, List<String>> versionMap,
+  }) {
     _allTokens = allTokens;
     _versionMap = versionMap;
   }
@@ -49,14 +49,14 @@ class TokenLogger {
 
   /// Prints version usage to the console.
   void printVersionUsage({required bool verbose}) {
-    final String versionsString = 'Versions used: ${_versionMap.keys.join(', ')}';
+    final versionsString = 'Versions used: ${_versionMap.keys.join(', ')}';
     print(versionsString);
     if (verbose) {
       for (final String version in _versionMap.keys) {
         print('  $version:');
-        final List<String> files = List<String>.from(_versionMap[version]!);
+        final files = List<String>.from(_versionMap[version]!);
         files.sort();
-        for (final String file in files) {
+        for (final file in files) {
           print('    $file');
         }
       }
@@ -83,7 +83,11 @@ class TokenLogger {
 
     if (_unavailableTokens.isNotEmpty) {
       print('');
-      print('\x1B[31m' 'Some referenced tokens do not exist: ${_unavailableTokens.length}' '\x1B[0m');
+      print(
+        '\x1B[31m'
+        'Some referenced tokens do not exist: ${_unavailableTokens.length}'
+        '\x1B[0m',
+      );
       for (final String token in _unavailableTokens) {
         print('  $token');
       }
@@ -92,9 +96,9 @@ class TokenLogger {
 
   /// Dumps version and tokens usage to a file.
   void dumpToFile(String path) {
-    final File file = File(path);
+    final file = File(path);
     file.createSync(recursive: true);
-    final String versionsString = 'Versions used, ${_versionMap.keys.join(', ')}';
+    final versionsString = 'Versions used, ${_versionMap.keys.join(', ')}';
     file.writeAsStringSync('$versionsString\n${_usedTokens.join(',\n')}\n');
   }
 }

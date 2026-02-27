@@ -20,10 +20,7 @@ class SliverAnimatedOpacityExampleApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text('SliverAnimatedOpacity Sample')),
         body: const Center(
-          child: SliverAnimatedOpacityExample(
-            duration: duration,
-            curve: curve,
-          ),
+          child: SliverAnimatedOpacityExample(duration: duration, curve: curve),
         ),
       ),
     );
@@ -53,33 +50,34 @@ class _SliverAnimatedOpacityExampleState
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(slivers: <Widget>[
-      SliverAnimatedOpacity(
-        opacity: _visible ? 1.0 : 0.0,
-        duration: widget.duration,
-        curve: widget.curve,
-        sliver: SliverFixedExtentList(
-          itemExtent: 100.0,
-          delegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) {
+    return CustomScrollView(
+      slivers: <Widget>[
+        SliverAnimatedOpacity(
+          opacity: _visible ? 1.0 : 0.0,
+          duration: widget.duration,
+          curve: widget.curve,
+          sliver: SliverFixedExtentList.builder(
+            itemExtent: 100.0,
+            itemCount: 5,
+            itemBuilder: (BuildContext context, int index) {
               return Container(
                 color: index.isEven ? Colors.indigo[200] : Colors.orange[200],
               );
             },
-            childCount: 5,
           ),
         ),
-      ),
-      SliverToBoxAdapter(
+        SliverToBoxAdapter(
           child: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            _visible = !_visible;
-          });
-        },
-        tooltip: 'Toggle opacity',
-        child: const Icon(Icons.flip),
-      )),
-    ]);
+            onPressed: () {
+              setState(() {
+                _visible = !_visible;
+              });
+            },
+            tooltip: 'Toggle opacity',
+            child: const Icon(Icons.flip),
+          ),
+        ),
+      ],
+    );
   }
 }

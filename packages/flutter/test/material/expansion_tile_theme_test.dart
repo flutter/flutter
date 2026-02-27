@@ -27,6 +27,7 @@ class TestIconState extends State<TestIcon> {
     return const Icon(Icons.expand_more);
   }
 }
+
 class TestText extends StatefulWidget {
   const TestText(this.text, {super.key});
 
@@ -48,25 +49,27 @@ class TestTextState extends State<TestText> {
 
 void main() {
   Material getMaterial(WidgetTester tester) {
-    return tester.widget<Material>(find.descendant(
-      of: find.byType(ExpansionTile),
-      matching: find.byType(Material),
-    ));
+    return tester.widget<Material>(
+      find.descendant(of: find.byType(ExpansionTile), matching: find.byType(Material)),
+    );
   }
 
   test('ExpansionTileThemeData copyWith, ==, hashCode basics', () {
     expect(const ExpansionTileThemeData(), const ExpansionTileThemeData().copyWith());
-    expect(const ExpansionTileThemeData().hashCode, const ExpansionTileThemeData().copyWith().hashCode);
+    expect(
+      const ExpansionTileThemeData().hashCode,
+      const ExpansionTileThemeData().copyWith().hashCode,
+    );
   });
 
   test('ExpansionTileThemeData lerp special cases', () {
     expect(ExpansionTileThemeData.lerp(null, null, 0), null);
-    const ExpansionTileThemeData data = ExpansionTileThemeData();
+    const data = ExpansionTileThemeData();
     expect(identical(ExpansionTileThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('ExpansionTileThemeData defaults', () {
-    const ExpansionTileThemeData theme = ExpansionTileThemeData();
+    const theme = ExpansionTileThemeData();
     expect(theme.backgroundColor, null);
     expect(theme.collapsedBackgroundColor, null);
     expect(theme.tilePadding, null);
@@ -83,7 +86,7 @@ void main() {
   });
 
   testWidgets('Default ExpansionTileThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const TooltipThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -95,19 +98,19 @@ void main() {
   });
 
   testWidgets('ExpansionTileThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    ExpansionTileThemeData(
-      backgroundColor: const Color(0xff000000),
-      collapsedBackgroundColor: const Color(0xff6f83fc),
-      tilePadding: const EdgeInsets.all(20.0),
+    final builder = DiagnosticPropertiesBuilder();
+    const ExpansionTileThemeData(
+      backgroundColor: Color(0xff000000),
+      collapsedBackgroundColor: Color(0xff6f83fc),
+      tilePadding: EdgeInsets.all(20.0),
       expandedAlignment: Alignment.bottomCenter,
-      childrenPadding: const EdgeInsets.all(10.0),
-      iconColor: const Color(0xffa7c61c),
-      collapsedIconColor: const Color(0xffdd0b1f),
-      textColor: const Color(0xffffffff),
-      collapsedTextColor: const Color(0xff522bab),
-      shape: const Border(),
-      collapsedShape: const Border(),
+      childrenPadding: EdgeInsets.all(10.0),
+      iconColor: Color(0xffa7c61c),
+      collapsedIconColor: Color(0xffdd0b1f),
+      textColor: Color(0xffffffff),
+      collapsedTextColor: Color(0xff522bab),
+      shape: Border(),
+      collapsedShape: Border(),
       clipBehavior: Clip.antiAlias,
       expansionAnimationStyle: AnimationStyle(curve: Curves.easeInOut),
     ).debugFillProperties(builder);
@@ -117,21 +120,24 @@ void main() {
         .map((DiagnosticsNode node) => node.toString())
         .toList();
 
-    expect(description, equalsIgnoringHashCodes(<String>[
-      'backgroundColor: Color(0xff000000)',
-      'collapsedBackgroundColor: Color(0xff6f83fc)',
-      'tilePadding: EdgeInsets.all(20.0)',
-      'expandedAlignment: Alignment.bottomCenter',
-      'childrenPadding: EdgeInsets.all(10.0)',
-      'iconColor: Color(0xffa7c61c)',
-      'collapsedIconColor: Color(0xffdd0b1f)',
-      'textColor: Color(0xffffffff)',
-      'collapsedTextColor: Color(0xff522bab)',
-      'shape: Border.all(BorderSide(width: 0.0, style: none))',
-      'collapsedShape: Border.all(BorderSide(width: 0.0, style: none))',
-      'clipBehavior: Clip.antiAlias',
-      'expansionAnimationStyle: AnimationStyle#983ac(curve: Cubic(0.42, 0.00, 0.58, 1.00))',
-    ]));
+    expect(
+      description,
+      equalsIgnoringHashCodes(<String>[
+        'backgroundColor: ${const Color(0xff000000)}',
+        'collapsedBackgroundColor: ${const Color(0xff6f83fc)}',
+        'tilePadding: EdgeInsets.all(20.0)',
+        'expandedAlignment: Alignment.bottomCenter',
+        'childrenPadding: EdgeInsets.all(10.0)',
+        'iconColor: ${const Color(0xffa7c61c)}',
+        'collapsedIconColor: ${const Color(0xffdd0b1f)}',
+        'textColor: ${const Color(0xffffffff)}',
+        'collapsedTextColor: ${const Color(0xff522bab)}',
+        'shape: Border.all(BorderSide(width: 0.0, style: none))',
+        'collapsedShape: Border.all(BorderSide(width: 0.0, style: none))',
+        'clipBehavior: Clip.antiAlias',
+        'expansionAnimationStyle: AnimationStyle#983ac(curve: Cubic(0.42, 0.00, 0.58, 1.00))',
+      ]),
+    );
   });
 
   testWidgets('ExpansionTileTheme - collapsed', (WidgetTester tester) async {
@@ -199,7 +205,7 @@ void main() {
     final Rect titleRect = tester.getRect(find.text('Collapsed Tile'));
     final Rect trailingRect = tester.getRect(find.byIcon(Icons.expand_more));
     final Rect listTileRect = tester.getRect(find.byType(ListTile));
-    final Rect tallerWidget = titleRect.height > trailingRect.height ? titleRect : trailingRect;
+    final tallerWidget = titleRect.height > trailingRect.height ? titleRect : trailingRect;
 
     // Check the positions of title and trailing Widgets, after padding is applied.
     expect(listTileRect.left, titleRect.left - 8);
@@ -283,7 +289,7 @@ void main() {
     final Rect titleRect = tester.getRect(find.text('Expanded Tile'));
     final Rect trailingRect = tester.getRect(find.byIcon(Icons.expand_more));
     final Rect listTileRect = tester.getRect(find.byType(ListTile));
-    final Rect tallerWidget = titleRect.height > trailingRect.height ? titleRect : trailingRect;
+    final tallerWidget = titleRect.height > trailingRect.height ? titleRect : trailingRect;
 
     // Check the positions of title and trailing Widgets, after padding is applied.
     expect(listTileRect.left, titleRect.left - 8);
@@ -319,24 +325,22 @@ void main() {
     expect(childRect.bottom, paddingRect.bottom - 20);
   });
 
-  testWidgets('Override ExpansionTile animation using ExpansionTileThemeData.AnimationStyle', (WidgetTester tester) async {
-    const Key expansionTileKey = Key('expansionTileKey');
+  testWidgets('Override ExpansionTile animation using ExpansionTileThemeData.AnimationStyle', (
+    WidgetTester tester,
+  ) async {
+    const expansionTileKey = Key('expansionTileKey');
 
-    Widget buildExpansionTile({ AnimationStyle? animationStyle }) {
+    Widget buildExpansionTile({AnimationStyle? animationStyle}) {
       return MaterialApp(
         theme: ThemeData(
-          expansionTileTheme: ExpansionTileThemeData(
-            expansionAnimationStyle: animationStyle,
-          ),
+          expansionTileTheme: ExpansionTileThemeData(expansionAnimationStyle: animationStyle),
         ),
         home: const Material(
           child: Center(
             child: ExpansionTile(
               key: expansionTileKey,
               title: TestText('title'),
-              children: <Widget>[
-                SizedBox(height: 100, width: 100),
-              ],
+              children: <Widget>[SizedBox(height: 100, width: 100)],
             ),
           ),
         ),
@@ -353,11 +357,15 @@ void main() {
     // Test the default expansion animation.
     await tester.tap(find.text('title'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 1/4 of its duration.
+    await tester.pump(
+      const Duration(milliseconds: 50),
+    ); // Advance the animation by 1/4 of its duration.
 
     expect(getHeight(expansionTileKey), closeTo(67.4, 0.1));
 
-    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 2/4 of its duration.
+    await tester.pump(
+      const Duration(milliseconds: 50),
+    ); // Advance the animation by 2/4 of its duration.
 
     expect(getHeight(expansionTileKey), closeTo(89.6, 0.1));
 
@@ -370,17 +378,25 @@ void main() {
     await tester.pumpAndSettle();
 
     // Override the animation duration.
-    await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle(duration: const Duration(milliseconds: 800))));
+    await tester.pumpWidget(
+      buildExpansionTile(
+        animationStyle: const AnimationStyle(duration: Duration(milliseconds: 800)),
+      ),
+    );
     await tester.pumpAndSettle();
 
     // Test the overridden animation duration.
     await tester.tap(find.text('title'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200)); // Advance the animation by 1/4 of its duration.
+    await tester.pump(
+      const Duration(milliseconds: 200),
+    ); // Advance the animation by 1/4 of its duration.
 
     expect(getHeight(expansionTileKey), closeTo(67.4, 0.1));
 
-    await tester.pump(const Duration(milliseconds: 200)); // Advance the animation by 2/4 of its duration.
+    await tester.pump(
+      const Duration(milliseconds: 200),
+    ); // Advance the animation by 2/4 of its duration.
 
     expect(getHeight(expansionTileKey), closeTo(89.6, 0.1));
 
@@ -393,17 +409,23 @@ void main() {
     await tester.pumpAndSettle();
 
     // Override the animation curve.
-    await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle(curve: Easing.emphasizedDecelerate)));
+    await tester.pumpWidget(
+      buildExpansionTile(animationStyle: const AnimationStyle(curve: Easing.emphasizedDecelerate)),
+    );
     await tester.pumpAndSettle();
 
     // Test the overridden animation curve.
     await tester.tap(find.text('title'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 1/4 of its duration.
+    await tester.pump(
+      const Duration(milliseconds: 50),
+    ); // Advance the animation by 1/4 of its duration.
 
     expect(getHeight(expansionTileKey), closeTo(141.2, 0.1));
 
-    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 2/4 of its duration.
+    await tester.pump(
+      const Duration(milliseconds: 50),
+    ); // Advance the animation by 2/4 of its duration.
 
     expect(getHeight(expansionTileKey), closeTo(153, 0.1));
 

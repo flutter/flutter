@@ -97,8 +97,7 @@ class ValueKey<T> extends LocalKey {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ValueKey<T>
-        && other.value == value;
+    return other is ValueKey<T> && other.value == value;
   }
 
   @override
@@ -106,16 +105,12 @@ class ValueKey<T> extends LocalKey {
 
   @override
   String toString() {
-    final String valueString = T == String ? "<'$value'>" : '<$value>';
-    // The crazy on the next line is a workaround for
-    // https://github.com/dart-lang/sdk/issues/33297
-    if (runtimeType == _TypeLiteral<ValueKey<T>>().type) {
+    final valueString = T == String ? "<'$value'>" : '<$value>';
+    if (runtimeType == _TypeOf<ValueKey<T>>) {
       return '[$valueString]';
     }
     return '[$T $valueString]';
   }
 }
 
-class _TypeLiteral<T> {
-  Type get type => T;
-}
+typedef _TypeOf<T> = T;

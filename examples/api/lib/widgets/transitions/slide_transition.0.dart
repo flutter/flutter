@@ -16,9 +16,7 @@ class SlideTransitionExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('SlideTransition Sample')),
-        body: const Center(
-          child: SlideTransitionExample(),
-        ),
+        body: const Center(child: SlideTransitionExample()),
       ),
     );
   }
@@ -31,7 +29,8 @@ class SlideTransitionExample extends StatefulWidget {
   State<SlideTransitionExample> createState() => _SlideTransitionExampleState();
 }
 
-class _SlideTransitionExampleState extends State<SlideTransitionExample> with SingleTickerProviderStateMixin {
+class _SlideTransitionExampleState extends State<SlideTransitionExample>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     duration: const Duration(seconds: 2),
     vsync: this,
@@ -39,10 +38,7 @@ class _SlideTransitionExampleState extends State<SlideTransitionExample> with Si
   late final Animation<Offset> _offsetAnimation = Tween<Offset>(
     begin: Offset.zero,
     end: const Offset(1.5, 0.0),
-  ).animate(CurvedAnimation(
-    parent: _controller,
-    curve: Curves.elasticIn,
-  ));
+  ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticIn));
 
   @override
   void dispose() {

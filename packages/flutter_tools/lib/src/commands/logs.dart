@@ -12,11 +12,9 @@ import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class LogsCommand extends FlutterCommand {
-  LogsCommand({
-    required this.sigint,
-    required this.sigterm,
-  }) {
-    argParser.addFlag('clear',
+  LogsCommand({required this.sigint, required this.sigterm}) {
+    argParser.addFlag(
+      'clear',
       negatable: false,
       abbr: 'c',
       help: 'Clear log history before reading from logs.',
@@ -26,10 +24,10 @@ class LogsCommand extends FlutterCommand {
   }
 
   @override
-  final String name = 'logs';
+  final name = 'logs';
 
   @override
-  final String description = 'Show log output for running Flutter apps.';
+  final description = 'Show log output for running Flutter apps.';
 
   @override
   final String category = FlutterCommandCategory.tools;
@@ -68,7 +66,7 @@ class LogsCommand extends FlutterCommand {
 
     globals.printStatus('Showing $logReader logs:');
 
-    final Completer<int> exitCompleter = Completer<int>();
+    final exitCompleter = Completer<int>();
 
     // First check if we already completed by another branch before completing
     // with [exitCode].

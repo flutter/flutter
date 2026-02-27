@@ -6,15 +6,15 @@
 # ---------------------------------- NOTE ---------------------------------- #
 #
 # Please keep the logic in this file consistent with the logic in the
-# `flutter.bat` script in the same directory to ensure that Flutter continues
-# to work across all platforms!
+# `flutter.bat` script in the same directory to ensure that Flutter
+# continues to work across all platforms!
 #
 # -------------------------------------------------------------------------- #
 
 set -e
 
 # To debug the tool, you can uncomment the following lines to enable debug
-# mode and set an observatory port:
+# mode and set a VM service port:
 # FLUTTER_TOOL_ARGS="--enable-asserts $FLUTTER_TOOL_ARGS"
 # FLUTTER_TOOL_ARGS="$FLUTTER_TOOL_ARGS --observe=65432"
 

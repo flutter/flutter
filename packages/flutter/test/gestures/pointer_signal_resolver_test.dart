@@ -23,7 +23,7 @@ class PointerSignalTester {
   PointerSignalEvent event = const PointerScrollEvent();
 
   TestPointerSignalListener addListener() {
-    final TestPointerSignalListener listener = TestPointerSignalListener(event);
+    final listener = TestPointerSignalListener(event);
     resolver.register(event, listener.callback);
     return listener;
   }
@@ -38,25 +38,28 @@ class PointerSignalTester {
 
 void main() {
   test('Resolving with no entries should be a no-op', () {
-    final PointerSignalTester tester = PointerSignalTester();
+    final tester = PointerSignalTester();
     tester.resolver.resolve(tester.event);
   });
 
   test('Resolving with no entries should notify engine of no-op', () {
-    bool allowedPlatformDefault = false;
-    final PointerSignalTester tester = PointerSignalTester();
+    var allowedPlatformDefault = false;
+    final tester = PointerSignalTester();
     tester.event = PointerScrollEvent(
       onRespond: ({required bool allowPlatformDefault}) {
         allowedPlatformDefault = allowPlatformDefault;
       },
     );
     tester.resolver.resolve(tester.event);
-    expect(allowedPlatformDefault, isTrue,
-      reason: 'Should have called respond with allowPlatformDefault: true');
+    expect(
+      allowedPlatformDefault,
+      isTrue,
+      reason: 'Should have called respond with allowPlatformDefault: true',
+    );
   });
 
   test('First entry should always win', () {
-    final PointerSignalTester tester = PointerSignalTester();
+    final tester = PointerSignalTester();
     final TestPointerSignalListener first = tester.addListener();
     final TestPointerSignalListener second = tester.addListener();
     tester.resolve();
@@ -65,7 +68,7 @@ void main() {
   });
 
   test('Re-use after resolve should work', () {
-    final PointerSignalTester tester = PointerSignalTester();
+    final tester = PointerSignalTester();
     final TestPointerSignalListener first = tester.addListener();
     final TestPointerSignalListener second = tester.addListener();
     tester.resolve();
@@ -81,12 +84,14 @@ void main() {
   });
 
   test('works with transformed events', () {
-    final PointerSignalResolver resolver = PointerSignalResolver();
-    const PointerScrollEvent originalEvent = PointerScrollEvent();
-    final PointerSignalEvent transformedEvent = originalEvent
-        .transformed(Matrix4.translationValues(10.0, 20.0, 0.0));
-    final PointerSignalEvent anotherTransformedEvent = originalEvent
-        .transformed(Matrix4.translationValues(30.0, 50.0, 0.0));
+    final resolver = PointerSignalResolver();
+    const originalEvent = PointerScrollEvent();
+    final PointerSignalEvent transformedEvent = originalEvent.transformed(
+      Matrix4.translationValues(10.0, 20.0, 0.0),
+    );
+    final PointerSignalEvent anotherTransformedEvent = originalEvent.transformed(
+      Matrix4.translationValues(30.0, 50.0, 0.0),
+    );
 
     expect(originalEvent, isNot(same(transformedEvent)));
     expect(transformedEvent.original, same(originalEvent));
@@ -94,7 +99,7 @@ void main() {
     expect(originalEvent, isNot(same(anotherTransformedEvent)));
     expect(anotherTransformedEvent.original, same(originalEvent));
 
-    final List<PointerSignalEvent> events = <PointerSignalEvent>[];
+    final events = <PointerSignalEvent>[];
     resolver.register(transformedEvent, (PointerSignalEvent event) {
       events.add(event);
     });

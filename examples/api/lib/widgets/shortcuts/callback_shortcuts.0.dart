@@ -17,9 +17,7 @@ class CallbackShortcutsApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('CallbackShortcuts Sample')),
-        body: const Center(
-          child: CallbackShortcutsExample(),
-        ),
+        body: const Center(child: CallbackShortcutsExample()),
       ),
     );
   }
@@ -29,7 +27,8 @@ class CallbackShortcutsExample extends StatefulWidget {
   const CallbackShortcutsExample({super.key});
 
   @override
-  State<CallbackShortcutsExample> createState() => _CallbackShortcutsExampleState();
+  State<CallbackShortcutsExample> createState() =>
+      _CallbackShortcutsExampleState();
 }
 
 class _CallbackShortcutsExampleState extends State<CallbackShortcutsExample> {

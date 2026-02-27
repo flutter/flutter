@@ -54,10 +54,7 @@ class _CupertinoPickerExampleState extends State<CupertinoPickerExample> {
         // Provide a background color for the popup.
         color: CupertinoColors.systemBackground.resolveFrom(context),
         // Use a SafeArea widget to avoid system overlaps.
-        child: SafeArea(
-          top: false,
-          child: child,
-        ),
+        child: SafeArea(top: false, child: child),
       ),
     );
   }
@@ -97,17 +94,16 @@ class _CupertinoPickerExampleState extends State<CupertinoPickerExample> {
                         _selectedFruit = selectedItem;
                       });
                     },
-                    children: List<Widget>.generate(_fruitNames.length, (int index) {
-                      return Center(child: Text(_fruitNames[index]));
-                    }),
+                    children: [
+                      for (final String fruitName in _fruitNames)
+                        Center(child: Text(fruitName)),
+                    ],
                   ),
                 ),
                 // This displays the selected fruit name.
                 child: Text(
                   _fruitNames[_selectedFruit],
-                  style: const TextStyle(
-                    fontSize: 22.0,
-                  ),
+                  style: const TextStyle(fontSize: 22.0),
                 ),
               ),
             ],

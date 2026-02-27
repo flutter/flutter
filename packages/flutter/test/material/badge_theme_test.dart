@@ -14,12 +14,12 @@ void main() {
 
   test('BadgeThemeData lerp special cases', () {
     expect(BadgeThemeData.lerp(null, null, 0), const BadgeThemeData());
-    const BadgeThemeData data = BadgeThemeData();
+    const data = BadgeThemeData();
     expect(identical(BadgeThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('BadgeThemeData defaults', () {
-    const BadgeThemeData themeData = BadgeThemeData();
+    const themeData = BadgeThemeData();
     expect(themeData.backgroundColor, null);
     expect(themeData.textColor, null);
     expect(themeData.smallSize, null);
@@ -31,19 +31,19 @@ void main() {
   });
 
   testWidgets('Default BadgeThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const BadgeThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
 
   testWidgets('BadgeThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const BadgeThemeData(
       backgroundColor: Color(0xfffffff0),
       textColor: Color(0xfffffff1),
@@ -61,21 +61,21 @@ void main() {
         .toList();
 
     expect(description, <String>[
-      'backgroundColor: Color(0xfffffff0)',
-      'textColor: Color(0xfffffff1)',
+      'backgroundColor: ${const Color(0xfffffff0)}',
+      'textColor: ${const Color(0xfffffff1)}',
       'smallSize: 1.0',
       'largeSize: 2.0',
       'textStyle: TextStyle(inherit: true, size: 4.0)',
       'padding: EdgeInsets.all(5.0)',
       'alignment: AlignmentDirectional(6.0, 7.0)',
-      'offset: Offset(0.0, 0.0)'
+      'offset: Offset(0.0, 0.0)',
     ]);
   });
 
   testWidgets('Badge uses ThemeData badge theme', (WidgetTester tester) async {
-    const Color green = Color(0xff00ff00);
-    const Color black = Color(0xff000000);
-    const BadgeThemeData badgeTheme = BadgeThemeData(
+    const green = Color(0xff00ff00);
+    const black = Color(0xff000000);
+    const badgeTheme = BadgeThemeData(
       backgroundColor: green,
       textColor: black,
       smallSize: 5,
@@ -88,14 +88,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light(useMaterial3: true).copyWith(
-          badgeTheme: badgeTheme,
-        ),
+        theme: ThemeData(badgeTheme: badgeTheme),
         home: const Scaffold(
-          body: Badge(
-            label: Text('1234'),
-            child: Icon(Icons.add),
-          ),
+          body: Badge(label: Text('1234'), child: Icon(Icons.add)),
         ),
       ),
     );
@@ -105,7 +100,6 @@ void main() {
 
     expect(tester.getTopLeft(find.text('1234')), const Offset(33, 2));
 
-
     expect(tester.getSize(find.byType(Badge)), const Size(24, 24)); // default Icon size
     expect(tester.getTopLeft(find.byType(Badge)), Offset.zero);
 
@@ -114,17 +108,20 @@ void main() {
     expect(textStyle.color, black);
 
     final RenderBox box = tester.renderObject(find.byType(Badge));
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(28, -2, 86, 18, const Radius.circular(10)), color: green));
+    expect(
+      box,
+      paints
+        ..rrect(rrect: RRect.fromLTRBR(28, -2, 86, 18, const Radius.circular(10)), color: green),
+    );
   });
-
 
   // This test is essentially the same as 'Badge uses ThemeData badge theme'. In
   // this case the theme is introduced with the BadgeTheme widget instead of
   // ThemeData.badgeTheme.
   testWidgets('Badge uses BadgeTheme', (WidgetTester tester) async {
-    const Color green = Color(0xff00ff00);
-    const Color black = Color(0xff000000);
-    const BadgeThemeData badgeTheme = BadgeThemeData(
+    const green = Color(0xff00ff00);
+    const black = Color(0xff000000);
+    const badgeTheme = BadgeThemeData(
       backgroundColor: green,
       textColor: black,
       smallSize: 5,
@@ -140,10 +137,7 @@ void main() {
         home: BadgeTheme(
           data: badgeTheme,
           child: Scaffold(
-            body: Badge(
-              label: Text('1234'),
-              child: Icon(Icons.add),
-            ),
+            body: Badge(label: Text('1234'), child: Icon(Icons.add)),
           ),
         ),
       ),
@@ -157,6 +151,10 @@ void main() {
     expect(textStyle.fontSize, 12);
     expect(textStyle.color, black);
     final RenderBox box = tester.renderObject(find.byType(Badge));
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(28, -2, 86, 18, const Radius.circular(10)), color: green));
+    expect(
+      box,
+      paints
+        ..rrect(rrect: RRect.fromLTRBR(28, -2, 86, 18, const Radius.circular(10)), color: green),
+    );
   });
 }

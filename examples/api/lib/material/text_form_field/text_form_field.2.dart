@@ -15,9 +15,7 @@ class TextFormFieldExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: TextFormFieldExample(),
-    );
+    return const MaterialApp(home: TextFormFieldExample());
   }
 }
 
@@ -111,10 +109,7 @@ class _TextFormFieldExampleState extends State<TextFormFieldExample> {
                 if (isLoading)
                   const CircularProgressIndicator()
                 else
-                  TextButton(
-                    onPressed: onSave,
-                    child: const Text('Save'),
-                  ),
+                  TextButton(onPressed: onSave, child: const Text('Save')),
               ],
             ),
           ),

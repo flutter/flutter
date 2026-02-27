@@ -5,7 +5,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-
 void main() {
   test('WidgetStateProperty.resolveWith()', () {
     final WidgetStateProperty<WidgetState> value = WidgetStateProperty.resolveWith<WidgetState>(
@@ -20,6 +19,22 @@ void main() {
     expect(value.resolve(<WidgetState>{WidgetState.error}), WidgetState.error);
   });
 
+  test('WidgetStateProperty.map()', () {
+    final WidgetStatesConstraint active =
+        WidgetState.hovered | WidgetState.focused | WidgetState.pressed;
+    final value = WidgetStateProperty<String?>.fromMap(<WidgetStatesConstraint, String?>{
+      active & WidgetState.error: 'active error',
+      WidgetState.disabled | WidgetState.error: 'kinda sus',
+      ~(WidgetState.dragged | WidgetState.selected) & ~active: 'this is boring',
+      active: 'active',
+    });
+    expect(value.resolve(<WidgetState>{WidgetState.focused, WidgetState.error}), 'active error');
+    expect(value.resolve(<WidgetState>{WidgetState.scrolledUnder}), 'this is boring');
+    expect(value.resolve(<WidgetState>{WidgetState.disabled}), 'kinda sus');
+    expect(value.resolve(<WidgetState>{WidgetState.hovered}), 'active');
+    expect(value.resolve(<WidgetState>{WidgetState.dragged}), null);
+  });
+
   test('WidgetStateProperty.all()', () {
     final WidgetStateProperty<int> value = WidgetStateProperty.all<int>(123);
     expect(value.resolve(<WidgetState>{WidgetState.hovered}), 123);
@@ -32,7 +47,7 @@ void main() {
   });
 
   test('WidgetStatePropertyAll', () {
-    const WidgetStatePropertyAll<int> value = WidgetStatePropertyAll<int>(123);
+    const value = WidgetStatePropertyAll<int>(123);
     expect(value.resolve(<WidgetState>{}), 123);
     expect(value.resolve(<WidgetState>{WidgetState.hovered}), 123);
     expect(value.resolve(<WidgetState>{WidgetState.focused}), 123);
@@ -44,15 +59,17 @@ void main() {
   });
 
   test('toString formats correctly', () {
-    const WidgetStateProperty<Color?> colorProperty = WidgetStatePropertyAll<Color?>(Color(0xFFFFFFFF));
-    expect(colorProperty.toString(), equals('WidgetStatePropertyAll(Color(0xffffffff))'));
+    const WidgetStateProperty<Color?> colorProperty = WidgetStatePropertyAll<Color?>(
+      Color(0xFFFFFFFF),
+    );
+    expect(colorProperty.toString(), equals('WidgetStatePropertyAll(${const Color(0xffffffff)})'));
 
-    const WidgetStateProperty<double?> doubleProperty = WidgetStatePropertyAll<double?>(33 + 1/3);
+    const WidgetStateProperty<double?> doubleProperty = WidgetStatePropertyAll<double?>(33 + 1 / 3);
     expect(doubleProperty.toString(), equals('WidgetStatePropertyAll(33.3)'));
   });
 
   test("Can interpolate between two WidgetStateProperty's", () {
-    const WidgetStateProperty<TextStyle?> textStyle1 =  WidgetStatePropertyAll<TextStyle?>(
+    const WidgetStateProperty<TextStyle?> textStyle1 = WidgetStatePropertyAll<TextStyle?>(
       TextStyle(fontSize: 14.0),
     );
     const WidgetStateProperty<TextStyle?> textStyle2 = WidgetStatePropertyAll<TextStyle?>(
@@ -88,17 +105,11 @@ void main() {
   });
 
   test('WidgetStateBorderSide.lerp()', () {
-    const WidgetStateProperty<BorderSide?> borderSide1 =  WidgetStatePropertyAll<BorderSide?>(
-      BorderSide(
-        color: Color(0xffff0000),
-        width: 4.0,
-      ),
+    const WidgetStateProperty<BorderSide?> borderSide1 = WidgetStatePropertyAll<BorderSide?>(
+      BorderSide(color: Color(0xffff0000), width: 4.0),
     );
     const WidgetStateProperty<BorderSide?> borderSide2 = WidgetStatePropertyAll<BorderSide?>(
-      BorderSide(
-        color: Color(0xff0000ff),
-        width: 12.0,
-      ),
+      BorderSide(color: Color(0xff0000ff), width: 12.0),
     );
 
     // Using `0.0` interpolation value.
@@ -107,27 +118,104 @@ void main() {
       borderSide2,
       0.0,
     )!.resolve(enabled)!;
-    expect(borderSide.color, const Color(0xffff0000));
+    expect(borderSide.color, isSameColorAs(const Color(0xffff0000)));
     expect(borderSide.width, 4.0);
 
     // Using `0.5` interpolation value.
-    borderSide = WidgetStateBorderSide.lerp(
-      borderSide1,
-      borderSide2,
-      0.5,
-    )!.resolve(enabled)!;
-    expect(borderSide.color, const Color(0xff7f007f));
+    borderSide = WidgetStateBorderSide.lerp(borderSide1, borderSide2, 0.5)!.resolve(enabled)!;
+    expect(borderSide.color, isSameColorAs(const Color(0xff7f007f)));
     expect(borderSide.width, 8.0);
 
     // Using `1.0` interpolation value.
-    borderSide = WidgetStateBorderSide.lerp(
-      borderSide1,
-      borderSide2,
-      1.0,
-    )!.resolve(enabled)!;
-    expect(borderSide.color, const Color(0xff0000ff));
+    borderSide = WidgetStateBorderSide.lerp(borderSide1, borderSide2, 1.0)!.resolve(enabled)!;
+    expect(borderSide.color, isSameColorAs(const Color(0xff0000ff)));
     expect(borderSide.width, 12.0);
+  });
+
+  test('.fromMap() constructors perform accurate equality checks', () {
+    const white = Color(0xFFFFFFFF);
+    const black = Color(0xFF000000);
+    final color1 = WidgetStateColor.fromMap(<WidgetStatesConstraint, Color>{
+      WidgetState.focused | WidgetState.hovered: white,
+      WidgetState.any: black,
+    });
+    final color2 = WidgetStateColor.fromMap(<WidgetStatesConstraint, Color>{
+      WidgetState.focused | WidgetState.hovered: white,
+      WidgetState.any: black,
+    });
+    final color3 = WidgetStateColor.fromMap(<WidgetStatesConstraint, Color>{
+      WidgetState.focused | WidgetState.hovered: black,
+      WidgetState.any: white,
+    });
+    expect(color1 == color2, isTrue);
+    expect(color1 == color3, isFalse);
+
+    const whiteBorder = BorderSide(color: white);
+    const blackBorder = BorderSide();
+    final side1 = WidgetStateBorderSide.fromMap(<WidgetStatesConstraint, BorderSide>{
+      WidgetState.focused | WidgetState.hovered: whiteBorder,
+      WidgetState.any: blackBorder,
+    });
+    final side2 = WidgetStateBorderSide.fromMap(<WidgetStatesConstraint, BorderSide>{
+      WidgetState.focused | WidgetState.hovered: whiteBorder,
+      WidgetState.any: blackBorder,
+    });
+    final side3 = WidgetStateBorderSide.fromMap(<WidgetStatesConstraint, BorderSide>{
+      WidgetState.focused | WidgetState.hovered: blackBorder,
+      WidgetState.any: whiteBorder,
+    });
+    expect(side1 == side2, isTrue);
+    expect(side1 == side3, isFalse);
+
+    const OutlinedBorder whiteRRect = RoundedRectangleBorder(side: whiteBorder);
+    const OutlinedBorder blackRRect = RoundedRectangleBorder(side: blackBorder);
+    final border1 = WidgetStateOutlinedBorder.fromMap(<WidgetStatesConstraint, OutlinedBorder>{
+      WidgetState.focused | WidgetState.hovered: whiteRRect,
+      WidgetState.any: blackRRect,
+    });
+    final border2 = WidgetStateOutlinedBorder.fromMap(<WidgetStatesConstraint, OutlinedBorder>{
+      WidgetState.focused | WidgetState.hovered: whiteRRect,
+      WidgetState.any: blackRRect,
+    });
+    final border3 = WidgetStateOutlinedBorder.fromMap(<WidgetStatesConstraint, OutlinedBorder>{
+      WidgetState.focused | WidgetState.hovered: blackRRect,
+      WidgetState.any: whiteRRect,
+    });
+    expect(border1 == border2, isTrue);
+    expect(border1 == border3, isFalse);
+
+    final cursor1 = WidgetStateMouseCursor.fromMap(<WidgetStatesConstraint, MouseCursor>{
+      WidgetState.focused | WidgetState.hovered: MouseCursor.defer,
+      WidgetState.any: MouseCursor.uncontrolled,
+    });
+    final cursor2 = WidgetStateMouseCursor.fromMap(<WidgetStatesConstraint, MouseCursor>{
+      WidgetState.focused | WidgetState.hovered: MouseCursor.defer,
+      WidgetState.any: MouseCursor.uncontrolled,
+    });
+    final cursor3 = WidgetStateMouseCursor.fromMap(<WidgetStatesConstraint, MouseCursor>{
+      WidgetState.focused | WidgetState.hovered: MouseCursor.uncontrolled,
+      WidgetState.any: MouseCursor.defer,
+    });
+    expect(cursor1 == cursor2, isTrue);
+    expect(cursor1 == cursor3, isFalse);
+
+    const whiteText = TextStyle(color: white);
+    const blackText = TextStyle(color: black);
+    final style1 = WidgetStateTextStyle.fromMap(<WidgetStatesConstraint, TextStyle>{
+      WidgetState.focused | WidgetState.hovered: whiteText,
+      WidgetState.any: blackText,
+    });
+    final style2 = WidgetStateTextStyle.fromMap(<WidgetStatesConstraint, TextStyle>{
+      WidgetState.focused | WidgetState.hovered: whiteText,
+      WidgetState.any: blackText,
+    });
+    final style3 = WidgetStateTextStyle.fromMap(<WidgetStatesConstraint, TextStyle>{
+      WidgetState.focused | WidgetState.hovered: blackText,
+      WidgetState.any: whiteText,
+    });
+    expect(style1 == style2, isTrue);
+    expect(style1 == style3, isFalse);
   });
 }
 
-Set<WidgetState> enabled = <WidgetState>{};
+const Set<WidgetState> enabled = <WidgetState>{};

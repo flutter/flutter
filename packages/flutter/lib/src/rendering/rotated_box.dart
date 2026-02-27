@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'proxy_box.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:vector_math/vector_math_64.dart';
+import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'box.dart';
 import 'layer.dart';
@@ -20,10 +23,7 @@ const double _kQuarterTurnsInRadians = math.pi / 2.0;
 /// rotated box consumes only as much space as required by the rotated child.
 class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
   /// Creates a rotated render box.
-  RenderRotatedBox({
-    required int quarterTurns,
-    RenderBox? child,
-  }) : _quarterTurns = quarterTurns {
+  RenderRotatedBox({required int quarterTurns, RenderBox? child}) : _quarterTurns = quarterTurns {
     this.child = child;
   }
 
@@ -91,16 +91,16 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
       child!.layout(_isVertical ? constraints.flipped : constraints, parentUsesSize: true);
       size = _isVertical ? Size(child!.size.height, child!.size.width) : child!.size;
       _paintTransform = Matrix4.identity()
-        ..translate(size.width / 2.0, size.height / 2.0)
+        ..translateByDouble(size.width / 2.0, size.height / 2.0, 0, 1)
         ..rotateZ(_kQuarterTurnsInRadians * (quarterTurns % 4))
-        ..translate(-child!.size.width / 2.0, -child!.size.height / 2.0);
+        ..translateByDouble(-child!.size.width / 2.0, -child!.size.height / 2.0, 0, 1);
     } else {
       size = constraints.smallest;
     }
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     assert(_paintTransform != null || debugNeedsLayout || child == null);
     if (child == null || _paintTransform == null) {
       return false;

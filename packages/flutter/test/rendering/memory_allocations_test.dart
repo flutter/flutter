@@ -21,7 +21,7 @@ void main() {
   });
 
   test('Publishers dispatch events in debug mode', () async {
-    int eventCount = 0;
+    var eventCount = 0;
     void listener(ObjectEvent event) => eventCount++;
     ma.addListener(listener);
 
@@ -50,20 +50,24 @@ class _TestRenderObject extends RenderObject {
   Rect get semanticBounds => throw UnimplementedError();
 }
 
-class _TestLayer extends Layer{
+class _TestLayer extends Layer {
   @override
   void addToScene(ui.SceneBuilder builder) {}
 }
 
 /// Create and dispose Flutter objects to fire memory allocation events.
 Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
-  int count = 0;
+  var count = 0;
 
-  final RenderObject renderObject = _TestRenderObject(); count++;
-  final Layer layer = _TestLayer(); count++;
+  final RenderObject renderObject = _TestRenderObject();
+  count++;
+  final Layer layer = _TestLayer();
+  count++;
 
-  renderObject.dispose(); count++;
-  layer.dispose(); count++;
+  renderObject.dispose();
+  count++;
+  layer.dispose();
+  count++;
 
   return count;
 }

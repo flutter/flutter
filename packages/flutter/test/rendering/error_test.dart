@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// Unit tests error.dart's usage via ErrorWidget.
 void main() {
-  const String errorMessage = 'Some error message';
+  const errorMessage = 'Some error message';
 
   testWidgets('test draw error paragraph', (WidgetTester tester) async {
     await tester.pumpWidget(ErrorWidget(Exception(errorMessage)));
@@ -33,7 +33,11 @@ void main() {
     await tester.pumpWidget(Center(child: SizedBox(height: 100.0, child: error)));
     expect(tester.takeException(), null);
 
-    await tester.pumpWidget(Center(child: SizedBox(key: UniqueKey(), height: 100.0, child: error)));
+    await tester.pumpWidget(
+      Center(
+        child: SizedBox(key: UniqueKey(), height: 100.0, child: error),
+      ),
+    );
     expect(tester.takeException(), 'pillow');
     expect(
       find.byType(ErrorWidget),

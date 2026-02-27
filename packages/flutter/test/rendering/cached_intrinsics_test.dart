@@ -15,6 +15,7 @@ class RenderTestBox extends RenderBox {
     value += 1.0;
     return value;
   }
+
   @override
   double computeMinIntrinsicWidth(double height) => next();
   @override
@@ -116,28 +117,25 @@ void main() {
     expect(test.getMinIntrinsicWidth(200.0), equals(3.0));
     expect(test.getMinIntrinsicWidth(100.0), equals(2.0));
     expect(test.getMinIntrinsicWidth(0.0), equals(1.0));
-
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/101179
   test('Cached baselines should be cleared if its parent re-layout', () {
-    double viewHeight =  200.0;
-    final RenderTestBox test = RenderTestBox();
+    var viewHeight = 200.0;
+    final test = RenderTestBox();
     final RenderBox baseline = RenderBaseline(
       baseline: 0.0,
       baselineType: TextBaseline.alphabetic,
       child: test,
     );
-    final RenderConstrainedBox root = RenderConstrainedBox(
+    final root = RenderConstrainedBox(
       additionalConstraints: BoxConstraints.tightFor(width: 200.0, height: viewHeight),
       child: baseline,
     );
 
-    layout(RenderPositionedBox(
-      child: root,
-    ));
+    layout(RenderPositionedBox(child: root));
 
-    BoxParentData? parentData = test.parentData as BoxParentData?;
+    var parentData = test.parentData as BoxParentData?;
     expect(parentData!.offset.dy, -(viewHeight / 2.0));
     expect(test.calls, 1);
 
@@ -168,82 +166,113 @@ void main() {
   });
 
   group('Dry baseline', () {
-    test('computeDryBaseline results are cached and shared with computeDistanceToActualBaseline', () {
-      const double viewHeight =  200.0;
-      const BoxConstraints constraints = BoxConstraints.tightFor(width: 200.0, height: viewHeight);
-      final RenderDryBaselineTestBox test = RenderDryBaselineTestBox();
-      final RenderBox baseline = RenderBaseline(
-        baseline: 0.0,
-        baselineType: TextBaseline.alphabetic,
-        child: test,
-      );
+    test(
+      'computeDryBaseline results are cached and shared with computeDistanceToActualBaseline',
+      () {
+        const viewHeight = 200.0;
+        const constraints = BoxConstraints.tightFor(width: 200.0, height: viewHeight);
+        final test = RenderDryBaselineTestBox();
+        final RenderBox baseline = RenderBaseline(
+          baseline: 0.0,
+          baselineType: TextBaseline.alphabetic,
+          child: test,
+        );
 
-      final RenderConstrainedBox root = RenderConstrainedBox(
-        additionalConstraints: constraints,
-        child: baseline,
-      );
+        final root = RenderConstrainedBox(additionalConstraints: constraints, child: baseline);
 
-      layout(RenderPositionedBox(child: root));
-      expect(test.calls, 1);
+        layout(RenderPositionedBox(child: root));
+        expect(test.calls, 1);
 
-      // The baseline widget loosens the input constraints when passing on to child.
-      expect(test.getDryBaseline(constraints.loosen(), TextBaseline.alphabetic), test.boxSize.height / 2);
-      // There's cache for the constraints so this should be 1, but we always evaluate
-      // computeDryBaseline in debug mode in case it asserts even if the baseline
-      // cache hits.
-      expect(test.calls, 2);
+        // The baseline widget loosens the input constraints when passing on to child.
+        expect(
+          test.getDryBaseline(constraints.loosen(), TextBaseline.alphabetic),
+          test.boxSize.height / 2,
+        );
+        // There's cache for the constraints so this should be 1, but we always evaluate
+        // computeDryBaseline in debug mode in case it asserts even if the baseline
+        // cache hits.
+        expect(test.calls, 2);
 
-      const BoxConstraints newConstraints = BoxConstraints.tightFor(width: 10.0, height: 10.0);
-      expect(test.getDryBaseline(newConstraints.loosen(), TextBaseline.alphabetic), 5.0);
-      // Should be 3 but there's an additional computeDryBaseline call in getDryBaseline,
-      // in an assert.
-      expect(test.calls, 4);
+        const newConstraints = BoxConstraints.tightFor(width: 10.0, height: 10.0);
+        expect(test.getDryBaseline(newConstraints.loosen(), TextBaseline.alphabetic), 5.0);
+        // Should be 3 but there's an additional computeDryBaseline call in getDryBaseline,
+        // in an assert.
+        expect(test.calls, 4);
 
-      root.additionalConstraints = newConstraints;
-      pumpFrame();
-      expect(test.calls, 4);
-    });
+        root.additionalConstraints = newConstraints;
+        pumpFrame();
+        expect(test.calls, 4);
+      },
+    );
 
     test('Asserts when a RenderBox cannot compute dry baseline', () {
-      final RenderCannotComputeDryBaselineTestBox test = RenderCannotComputeDryBaselineTestBox();
+      final test = RenderCannotComputeDryBaselineTestBox();
       layout(RenderBaseline(baseline: 0.0, baselineType: TextBaseline.alphabetic, child: test));
 
       final BoxConstraints incomingConstraints = test.constraints;
       assert(incomingConstraints != const BoxConstraints());
       expect(
         () => test.getDryBaseline(const BoxConstraints(), TextBaseline.alphabetic),
-        throwsA(isA<AssertionError>().having((AssertionError e) => e.message, 'message', contains('no dry baseline for you'))),
+        throwsA(
+          isA<AssertionError>().having(
+            (AssertionError e) => e.message,
+            'message',
+            contains('no dry baseline for you'),
+          ),
+        ),
       );
 
       // Still throws when there is cache.
       expect(
         () => test.getDryBaseline(incomingConstraints, TextBaseline.alphabetic),
-        throwsA(isA<AssertionError>().having((AssertionError e) => e.message, 'message', contains('no dry baseline for you'))),
+        throwsA(
+          isA<AssertionError>().having(
+            (AssertionError e) => e.message,
+            'message',
+            contains('no dry baseline for you'),
+          ),
+        ),
       );
     });
 
-    test('Catches inconsistencies between computeDryBaseline and computeDistanceToActualBaseline', () {
-      final RenderDryBaselineTestBox test = RenderDryBaselineTestBox();
-      layout(test, phase: EnginePhase.composite);
+    test(
+      'Catches inconsistencies between computeDryBaseline and computeDistanceToActualBaseline',
+      () {
+        final test = RenderDryBaselineTestBox();
+        layout(test, phase: EnginePhase.composite);
 
-      FlutterErrorDetails? error;
-      test.markNeedsLayout();
-      test.baselineOverride = 123;
-      pumpFrame(phase: EnginePhase.composite, onErrors: () {
-        error = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails();
-      });
+        FlutterErrorDetails? error;
+        test.markNeedsLayout();
+        test.baselineOverride = 123;
+        pumpFrame(
+          phase: EnginePhase.composite,
+          onErrors: () {
+            error = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails();
+          },
+        );
 
-      expect(error?.exceptionAsString(), contains('differs from the baseline location computed by computeDryBaseline'));
-    });
+        expect(
+          error?.exceptionAsString(),
+          contains('differs from the baseline location computed by computeDryBaseline'),
+        );
+      },
+    );
 
     test('Accessing RenderBox.size in computeDryBaseline is not allowed', () {
-      final RenderBadDryBaselineTestBox test = RenderBadDryBaselineTestBox();
+      final test = RenderBadDryBaselineTestBox();
       FlutterErrorDetails? error;
-      layout(test, phase: EnginePhase.composite, onErrors: () {
-        error = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails();
-      });
+      layout(
+        test,
+        phase: EnginePhase.composite,
+        onErrors: () {
+          error = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails();
+        },
+      );
 
-      expect(error?.exceptionAsString(), contains('RenderBox.size accessed in RenderBadDryBaselineTestBox.computeDryBaseline.'));
+      expect(
+        error?.exceptionAsString(),
+        contains('RenderBox.size accessed in RenderBadDryBaselineTestBox.computeDryBaseline.'),
+      );
     });
 
     test('debug baseline checks do not freak out when debugCannotComputeDryLayout is called', () {
@@ -251,14 +280,18 @@ void main() {
       void onErrors() {
         error = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails();
       }
-      final RenderCannotComputeDryBaselineTestBox test = RenderCannotComputeDryBaselineTestBox();
+
+      final test = RenderCannotComputeDryBaselineTestBox();
       layout(test, phase: EnginePhase.composite, onErrors: onErrors);
       expect(error, isNull);
 
       test.shouldAssert = false;
       test.markNeedsLayout();
       pumpFrame(phase: EnginePhase.composite, onErrors: onErrors);
-      expect(error?.exceptionAsString(), contains('differs from the baseline location computed by computeDryBaseline'));
+      expect(
+        error?.exceptionAsString(),
+        contains('differs from the baseline location computed by computeDryBaseline'),
+      );
     });
   });
 }

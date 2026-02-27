@@ -14,11 +14,7 @@ class AvatarBoxConstraintsApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: AvatarBoxConstraintsExample(),
-        ),
-      ),
+      home: Scaffold(body: Center(child: AvatarBoxConstraintsExample())),
     );
   }
 }

@@ -12,7 +12,7 @@ When a beta build is announced, switch to the beta channel:
 
 If you get a `git` error, then you probably have a contributor checkout of Flutter. Use git instead:
 
-> `git fetch upstream/beta && git checkout beta`
+> `git fetch upstream && git checkout upstream/beta`
 
 Either way, check that everything is as you expect:
 

@@ -9,9 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('has four containers', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.CustomMultiChildLayoutApp(),
-    );
+    await tester.pumpWidget(const example.CustomMultiChildLayoutApp());
     final Finder containerFinder = find.byType(Container);
     expect(containerFinder, findsNWidgets(4));
   });
@@ -19,9 +17,7 @@ void main() {
   testWidgets('containers are the same size', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: Scaffold(
-          body: example.CustomMultiChildLayoutExample(),
-        ),
+        home: Scaffold(body: example.CustomMultiChildLayoutExample()),
       ),
     );
     final Finder containerFinder = find.byType(Container);
@@ -35,9 +31,7 @@ void main() {
   testWidgets('containers are offset', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: Scaffold(
-          body: example.CustomMultiChildLayoutExample(),
-        ),
+        home: Scaffold(body: example.CustomMultiChildLayoutExample()),
       ),
     );
     final Finder containerFinder = find.byType(Container);

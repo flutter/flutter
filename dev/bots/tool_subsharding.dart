@@ -6,11 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 
 class TestSpecs {
-
-  TestSpecs({
-    required this.path,
-    required this.startTime,
-  });
+  TestSpecs({required this.path, required this.startTime});
 
   final String path;
   int startTime;
@@ -25,9 +21,7 @@ class TestSpecs {
   int get endTime => _endTime ?? 0;
 
   String toJson() {
-    return json.encode(
-      <String, String>{'path': path, 'runtime': milliseconds.toString()}
-    );
+    return json.encode(<String, String>{'path': path, 'runtime': milliseconds.toString()});
   }
 }
 
@@ -44,9 +38,9 @@ class TestFileReporterResults {
       throw Exception('${metrics.path} does not exist');
     }
 
-    final Map<int, TestSpecs> testSpecs = <int, TestSpecs>{};
-    bool hasFailedTests = true;
-    final List<String> errors = <String>[];
+    final testSpecs = <int, TestSpecs>{};
+    var hasFailedTests = true;
+    final errors = <String>[];
 
     for (final String metric in metrics.readAsLinesSync()) {
       /// Using print within a test adds the printed content to the json file report
@@ -56,35 +50,35 @@ class TestFileReporterResults {
       /// first opening curly bracket.
       // TODO(godofredoc): remove when https://github.com/flutter/flutter/issues/145553 is fixed.
       final String sanitizedMetric = metric.replaceAll(RegExp(r'$.*{'), '{');
-      final Map<String, Object?> entry = json.decode(sanitizedMetric) as Map<String, Object?>;
+      final entry = json.decode(sanitizedMetric) as Map<String, Object?>;
       if (entry.containsKey('suite')) {
-        final Map<String, Object?> suite = entry['suite']! as Map<String, Object?>;
+        final suite = entry['suite']! as Map<String, Object?>;
         addTestSpec(suite, entry['time']! as int, testSpecs);
       } else if (isMetricDone(entry, testSpecs)) {
-        final Map<String, Object?> group = entry['group']! as Map<String, Object?>;
-        final int suiteID = group['suiteID']! as int;
+        final group = entry['group']! as Map<String, Object?>;
+        final suiteID = group['suiteID']! as int;
         addMetricDone(suiteID, entry['time']! as int, testSpecs);
       } else if (entry.containsKey('error')) {
-        final String stackTrace = entry.containsKey('stackTrace') ? entry['stackTrace']! as String : '';
+        final stackTrace = entry.containsKey('stackTrace') ? entry['stackTrace']! as String : '';
         errors.add('${entry['error']}\n $stackTrace');
       } else if (entry.containsKey('success') && entry['success'] == true) {
         hasFailedTests = false;
       }
     }
 
-    return TestFileReporterResults._(allTestSpecs: testSpecs, hasFailedTests: hasFailedTests, errors: errors);
+    return TestFileReporterResults._(
+      allTestSpecs: testSpecs,
+      hasFailedTests: hasFailedTests,
+      errors: errors,
+    );
   }
 
   final Map<int, TestSpecs> allTestSpecs;
   final bool hasFailedTests;
   final List<String> errors;
 
-
   static void addTestSpec(Map<String, Object?> suite, int time, Map<int, TestSpecs> allTestSpecs) {
-    allTestSpecs[suite['id']! as int] = TestSpecs(
-      path: suite['path']! as String,
-      startTime: time,
-    );
+    allTestSpecs[suite['id']! as int] = TestSpecs(path: suite['path']! as String, startTime: time);
   }
 
   static void addMetricDone(int suiteID, int time, Map<int, TestSpecs> allTestSpecs) {
@@ -94,7 +88,7 @@ class TestFileReporterResults {
 
   static bool isMetricDone(Map<String, Object?> entry, Map<int, TestSpecs> allTestSpecs) {
     if (entry.containsKey('group') && entry['type']! as String == 'group') {
-      final Map<String, Object?> group = entry['group']! as Map<String, Object?>;
+      final group = entry['group']! as Map<String, Object?>;
       return allTestSpecs.containsKey(group['suiteID']! as int);
     }
     return false;

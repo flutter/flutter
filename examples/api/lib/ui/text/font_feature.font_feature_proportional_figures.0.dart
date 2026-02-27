@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.proportionalFigures].
+/// Flutter code sample for [FontFeature.proportionalFigures].
 
 void main() => runApp(const ExampleApp());
 
@@ -14,7 +14,8 @@ class ExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return WidgetsApp(
-      builder: (BuildContext context, Widget? navigator) => const ExampleWidget(),
+      builder: (BuildContext context, Widget? navigator) =>
+          const ExampleWidget(),
       color: const Color(0xffffffff),
     );
   }
@@ -31,9 +32,7 @@ class ExampleWidget extends StatelessWidget {
       'Call 311-555-2368 now!',
       style: TextStyle(
         fontFamily: 'Kufam',
-        fontFeatures: <FontFeature>[
-          FontFeature.proportionalFigures(),
-        ],
+        fontFeatures: <FontFeature>[FontFeature.proportionalFigures()],
       ),
     );
   }

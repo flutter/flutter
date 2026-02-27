@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/action_buttons/action_icon_theme.0.dart' as example;
+import 'package:flutter_api_samples/material/action_buttons/action_icon_theme.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -34,10 +35,7 @@ void main() {
 
     expect(find.byType(BackButton), findsOneWidget);
     final Icon backButtonIcon = tester.widget(
-      find.descendant(
-        of: find.byType(BackButton),
-        matching: find.byType(Icon),
-      ),
+      find.descendant(of: find.byType(BackButton), matching: find.byType(Icon)),
     );
     expect(backButtonIcon.icon, Icons.arrow_back_ios_new_rounded);
   });

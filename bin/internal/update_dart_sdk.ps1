@@ -20,8 +20,8 @@ $cachePath = "$flutterRoot\bin\cache"
 $dartSdkPath = "$cachePath\dart-sdk"
 $dartSdkLicense = "$cachePath\LICENSE.dart_sdk_archive.md"
 $engineStamp = "$cachePath\engine-dart-sdk.stamp"
-$engineVersion = (Get-Content "$flutterRoot\bin\internal\engine.version")
-$engineRealm = (Get-Content "$flutterRoot\bin\internal\engine.realm")
+$engineVersion = (Get-Content "$flutterRoot\bin\cache\engine.stamp")
+$engineRealm = (Get-Content "$flutterRoot\bin\cache\engine.realm")
 
 $oldDartSdkPrefix = "dart-sdk.old"
 
@@ -30,7 +30,6 @@ $psMajorVersionRequired = 5
 $psMajorVersionLocal = $PSVersionTable.PSVersion.Major
 if ($psMajorVersionLocal -lt $psMajorVersionRequired) {
     Write-Host "Flutter requires PowerShell $psMajorVersionRequired.0 or newer."
-    Write-Host "See https://flutter.dev/docs/get-started/install/windows for more."
     Write-Host "Current version is $psMajorVersionLocal."
     # Use exit code 2 to signal that shared.bat should exit immediately instead of retrying.
     exit 2

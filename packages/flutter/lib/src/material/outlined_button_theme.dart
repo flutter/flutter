@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'outlined_button.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -18,7 +21,7 @@ import 'theme.dart';
 /// The [style]'s properties override [OutlinedButton]'s default style,
 /// i.e. the [ButtonStyle] returned by [OutlinedButton.defaultStyleOf]. Only
 /// the style's non-null property values or resolved non-null
-/// [MaterialStateProperty] values are used.
+/// [WidgetStateProperty] values are used.
 ///
 /// See also:
 ///
@@ -27,8 +30,8 @@ import 'theme.dart';
 ///    for outlined buttons.
 ///  * [OutlinedButton.styleFrom], which converts simple values into a
 ///    [ButtonStyle] that's consistent with [OutlinedButton]'s defaults.
-///  * [MaterialStateProperty.resolve], "resolve" a material state property
-///    to a simple value based on a set of [MaterialState]s.
+///  * [WidgetStateProperty.resolve], "resolve" a material state property
+///    to a simple value based on a set of [WidgetState]s.
 ///  * [ThemeData.outlinedButtonTheme], which can be used to override the default
 ///    [ButtonStyle] for [OutlinedButton]s below the overall [Theme].
 @immutable
@@ -36,11 +39,11 @@ class OutlinedButtonThemeData with Diagnosticable {
   /// Creates a [OutlinedButtonThemeData].
   ///
   /// The [style] may be null.
-  const OutlinedButtonThemeData({ this.style });
+  const OutlinedButtonThemeData({this.style});
 
   /// Overrides for [OutlinedButton]'s default style.
   ///
-  /// Non-null properties or non-null resolved [MaterialStateProperty]
+  /// Non-null properties or non-null resolved [WidgetStateProperty]
   /// values override the [ButtonStyle] returned by
   /// [OutlinedButton.defaultStyleOf].
   ///
@@ -48,13 +51,15 @@ class OutlinedButtonThemeData with Diagnosticable {
   final ButtonStyle? style;
 
   /// Linearly interpolate between two outlined button themes.
-  static OutlinedButtonThemeData? lerp(OutlinedButtonThemeData? a, OutlinedButtonThemeData? b, double t) {
+  static OutlinedButtonThemeData? lerp(
+    OutlinedButtonThemeData? a,
+    OutlinedButtonThemeData? b,
+    double t,
+  ) {
     if (identical(a, b)) {
       return a;
     }
-    return OutlinedButtonThemeData(
-      style: ButtonStyle.lerp(a?.style, b?.style, t),
-    );
+    return OutlinedButtonThemeData(style: ButtonStyle.lerp(a?.style, b?.style, t));
   }
 
   @override
@@ -91,16 +96,12 @@ class OutlinedButtonThemeData with Diagnosticable {
 ///    [ButtonStyle] for [OutlinedButton]s below the overall [Theme].
 class OutlinedButtonTheme extends InheritedTheme {
   /// Create a [OutlinedButtonTheme].
-  const OutlinedButtonTheme({
-    super.key,
-    required this.data,
-    required super.child,
-  });
+  const OutlinedButtonTheme({super.key, required this.data, required super.child});
 
   /// The configuration of this theme.
   final OutlinedButtonThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Retrieves the [OutlinedButtonThemeData] from the closest ancestor [OutlinedButtonTheme].
   ///
   /// If there is no enclosing [OutlinedButtonTheme] widget, then
   /// [ThemeData.outlinedButtonTheme] is used.
@@ -111,7 +112,8 @@ class OutlinedButtonTheme extends InheritedTheme {
   /// OutlinedButtonThemeData theme = OutlinedButtonTheme.of(context);
   /// ```
   static OutlinedButtonThemeData of(BuildContext context) {
-    final OutlinedButtonTheme? buttonTheme = context.dependOnInheritedWidgetOfExactType<OutlinedButtonTheme>();
+    final OutlinedButtonTheme? buttonTheme = context
+        .dependOnInheritedWidgetOfExactType<OutlinedButtonTheme>();
     return buttonTheme?.data ?? Theme.of(context).outlinedButtonTheme;
   }
 

@@ -27,5 +27,13 @@
   "lookUpButtonLabel": "Slå opp",
   "searchWebButtonLabel": "Søk på nettet",
   "shareButtonLabel": "Del…",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "Slett",
+  "cancelButtonLabel": "Avbryt",
+  "backButtonLabel": "Tilbake",
+  "expansionTileExpandedHint": "dobbelttrykk for å skjule",
+  "expansionTileCollapsedHint": "dobbelttrykk for å vise",
+  "expansionTileExpandedTapHint": "Skjul",
+  "expansionTileCollapsedTapHint": "Vis for å se mer informasjon",
+  "expandedHint": "Skjules",
+  "collapsedHint": "Vises"
 }

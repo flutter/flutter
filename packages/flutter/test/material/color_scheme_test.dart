@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,7 +11,7 @@ import '../image_data.dart';
 
 void main() {
   test('ColorScheme lerp special cases', () {
-    const ColorScheme scheme = ColorScheme.light();
+    const scheme = ColorScheme.light();
     expect(identical(ColorScheme.lerp(scheme, scheme, 0.5), scheme), true);
   });
 
@@ -21,7 +20,7 @@ void main() {
     // https://material.io/design/color/dark-theme.html#ui-application
     // with the new Material 3 colors defaulting to values from the M2
     // baseline.
-    const ColorScheme scheme = ColorScheme.light();
+    const scheme = ColorScheme.light();
     expect(scheme.brightness, Brightness.light);
     expect(scheme.primary, const Color(0xff6200ee));
     expect(scheme.onPrimary, const Color(0xffffffff));
@@ -79,7 +78,7 @@ void main() {
     // https://material.io/design/color/dark-theme.html#ui-application
     // with the new Material 3 colors defaulting to values from the M2
     // baseline.
-    const ColorScheme scheme = ColorScheme.dark();
+    const scheme = ColorScheme.dark();
     expect(scheme.brightness, Brightness.dark);
     expect(scheme.primary, const Color(0xffbb86fc));
     expect(scheme.onPrimary, const Color(0xff000000));
@@ -137,7 +136,7 @@ void main() {
     // https://material.io/design/color/dark-theme.html#ui-application
     // with the new Material 3 colors defaulting to values from the M2
     // baseline.
-    const ColorScheme scheme = ColorScheme.highContrastLight();
+    const scheme = ColorScheme.highContrastLight();
     expect(scheme.brightness, Brightness.light);
     expect(scheme.primary, const Color(0xff0000ba));
     expect(scheme.onPrimary, const Color(0xffffffff));
@@ -195,7 +194,7 @@ void main() {
     // https://material.io/design/color/dark-theme.html#ui-application
     // with the new Material 3 colors defaulting to values from the M2
     // baseline.
-    const ColorScheme scheme = ColorScheme.highContrastDark();
+    const scheme = ColorScheme.highContrastDark();
     expect(scheme.brightness, Brightness.dark);
     expect(scheme.primary, const Color(0xffefb7ff));
     expect(scheme.onPrimary, const Color(0xff000000));
@@ -249,11 +248,11 @@ void main() {
   });
 
   test('can generate a light scheme from a seed color', () {
-    final ColorScheme scheme = ColorScheme.fromSeed(seedColor: Colors.blue);
+    final scheme = ColorScheme.fromSeed(seedColor: Colors.blue);
     expect(scheme.primary, const Color(0xff36618e));
     expect(scheme.onPrimary, const Color(0xffffffff));
     expect(scheme.primaryContainer, const Color(0xffd1e4ff));
-    expect(scheme.onPrimaryContainer, const Color(0xff001d36));
+    expect(scheme.onPrimaryContainer, const Color(0xff194975));
     expect(scheme.primaryFixed, const Color(0xffd1e4ff));
     expect(scheme.primaryFixedDim, const Color(0xffa0cafd));
     expect(scheme.onPrimaryFixed, const Color(0xff001d36));
@@ -261,7 +260,7 @@ void main() {
     expect(scheme.secondary, const Color(0xff535f70));
     expect(scheme.onSecondary, const Color(0xffffffff));
     expect(scheme.secondaryContainer, const Color(0xffd7e3f7));
-    expect(scheme.onSecondaryContainer, const Color(0xff101c2b));
+    expect(scheme.onSecondaryContainer, const Color(0xff3b4858));
     expect(scheme.secondaryFixed, const Color(0xffd7e3f7));
     expect(scheme.secondaryFixedDim, const Color(0xffbbc7db));
     expect(scheme.onSecondaryFixed, const Color(0xff101c2b));
@@ -269,7 +268,7 @@ void main() {
     expect(scheme.tertiary, const Color(0xff6b5778));
     expect(scheme.onTertiary, const Color(0xffffffff));
     expect(scheme.tertiaryContainer, const Color(0xfff2daff));
-    expect(scheme.onTertiaryContainer, const Color(0xff251431));
+    expect(scheme.onTertiaryContainer, const Color(0xff523f5f));
     expect(scheme.tertiaryFixed, const Color(0xfff2daff));
     expect(scheme.tertiaryFixedDim, const Color(0xffd6bee4));
     expect(scheme.onTertiaryFixed, const Color(0xff251431));
@@ -277,7 +276,7 @@ void main() {
     expect(scheme.error, const Color(0xffba1a1a));
     expect(scheme.onError, const Color(0xffffffff));
     expect(scheme.errorContainer, const Color(0xffffdad6));
-    expect(scheme.onErrorContainer, const Color(0xff410002));
+    expect(scheme.onErrorContainer, const Color(0xff93000a));
     expect(scheme.outline, const Color(0xff73777f));
     expect(scheme.outlineVariant, const Color(0xffc3c7cf));
     expect(scheme.background, const Color(0xfff8f9ff));
@@ -409,7 +408,7 @@ void main() {
   });
 
   test('can generate a dark scheme from a seed color', () {
-    final ColorScheme scheme = ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.dark);
+    final scheme = ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.dark);
     expect(scheme.primary, const Color(0xffa0cafd));
     expect(scheme.onPrimary, const Color(0xff003258));
     expect(scheme.primaryContainer, const Color(0xff194975));
@@ -463,12 +462,9 @@ void main() {
   });
 
   test('can override specific colors in a generated scheme', () {
-    final ColorScheme baseScheme = ColorScheme.fromSeed(seedColor: Colors.blue);
-    const Color primaryOverride = Color(0xffabcdef);
-    final ColorScheme scheme = ColorScheme.fromSeed(
-      seedColor: Colors.blue,
-      primary: primaryOverride,
-    );
+    final baseScheme = ColorScheme.fromSeed(seedColor: Colors.blue);
+    const primaryOverride = Color(0xffabcdef);
+    final scheme = ColorScheme.fromSeed(seedColor: Colors.blue, primary: primaryOverride);
     expect(scheme.primary, primaryOverride);
     // The rest should be the same.
     expect(scheme.onPrimary, baseScheme.onPrimary);
@@ -522,121 +518,128 @@ void main() {
     expect(scheme.brightness, baseScheme.brightness);
   });
 
-  test('can generate a light scheme from an imageProvider', () async {
-    final Uint8List blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
-    final ImageProvider image = MemoryImage(blueSquareBytes);
+  test(
+    'can generate a light scheme from an imageProvider',
+    () async {
+      final blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
+      final ImageProvider image = MemoryImage(blueSquareBytes);
 
-    final ColorScheme scheme =
-        await ColorScheme.fromImageProvider(provider: image);
+      final ColorScheme scheme = await ColorScheme.fromImageProvider(provider: image);
 
-    expect(scheme.brightness, Brightness.light);
-    expect(scheme.primary, const Color(0xff575992));
-    expect(scheme.onPrimary, const Color(0xffffffff));
-    expect(scheme.primaryContainer, const Color(0xffe1e0ff));
-    expect(scheme.onPrimaryContainer, const Color(0xff13144b));
-    expect(scheme.primaryFixed, const Color(0xffe1e0ff));
-    expect(scheme.primaryFixedDim, const Color(0xffc0c1ff));
-    expect(scheme.onPrimaryFixed, const Color(0xff13144b));
-    expect(scheme.onPrimaryFixedVariant, const Color(0xff3f4178));
-    expect(scheme.secondary, const Color(0xff5d5c72));
-    expect(scheme.onSecondary, const Color(0xffffffff));
-    expect(scheme.secondaryContainer, const Color(0xffe2e0f9));
-    expect(scheme.onSecondaryContainer, const Color(0xff191a2c));
-    expect(scheme.secondaryFixed, const Color(0xffe2e0f9));
-    expect(scheme.secondaryFixedDim, const Color(0xffc6c4dd));
-    expect(scheme.onSecondaryFixed, const Color(0xff191a2c));
-    expect(scheme.onSecondaryFixedVariant, const Color(0xff454559));
-    expect(scheme.tertiary, const Color(0xff79536a));
-    expect(scheme.onTertiary, const Color(0xffffffff));
-    expect(scheme.tertiaryContainer, const Color(0xffffd8ec));
-    expect(scheme.onTertiaryContainer, const Color(0xff2e1125));
-    expect(scheme.tertiaryFixed, const Color(0xffffd8ec));
-    expect(scheme.tertiaryFixedDim, const Color(0xffe9b9d3));
-    expect(scheme.onTertiaryFixed, const Color(0xff2e1125));
-    expect(scheme.onTertiaryFixedVariant, const Color(0xff5f3c51));
-    expect(scheme.error, const Color(0xffba1a1a));
-    expect(scheme.onError, const Color(0xffffffff));
-    expect(scheme.errorContainer, const Color(0xffffdad6));
-    expect(scheme.onErrorContainer, const Color(0xff410002));
-    expect(scheme.background, const Color(0xfffcf8ff));
-    expect(scheme.onBackground, const Color(0xff1b1b21));
-    expect(scheme.surface, const Color(0xfffcf8ff));
-    expect(scheme.surfaceDim, const Color(0xffdcd9e0));
-    expect(scheme.surfaceBright, const Color(0xfffcf8ff));
-    expect(scheme.surfaceContainerLowest, const Color(0xffffffff));
-    expect(scheme.surfaceContainerLow, const Color(0xfff6f2fa));
-    expect(scheme.surfaceContainer, const Color(0xfff0ecf4));
-    expect(scheme.surfaceContainerHigh, const Color(0xffeae7ef));
-    expect(scheme.surfaceContainerHighest, const Color(0xffe4e1e9));
-    expect(scheme.onSurface, const Color(0xff1b1b21));
-    expect(scheme.surfaceVariant, const Color(0xffe4e1ec));
-    expect(scheme.onSurfaceVariant, const Color(0xff46464f));
-    expect(scheme.outline, const Color(0xff777680));
-    expect(scheme.outlineVariant, const Color(0xffc8c5d0));
-    expect(scheme.shadow, const Color(0xff000000));
-    expect(scheme.scrim, const Color(0xff000000));
-    expect(scheme.inverseSurface, const Color(0xff303036));
-    expect(scheme.onInverseSurface, const Color(0xfff3eff7));
-    expect(scheme.inversePrimary, const Color(0xffc0c1ff));
-    expect(scheme.surfaceTint, const Color(0xff575992));
-  }, skip: isBrowser, // [intended] uses dart:typed_data.
-);
+      expect(scheme.brightness, Brightness.light);
+      expect(scheme.primary, const Color(0xff575992));
+      expect(scheme.onPrimary, const Color(0xffffffff));
+      expect(scheme.primaryContainer, const Color(0xffe1e0ff));
+      expect(scheme.onPrimaryContainer, const Color(0xff3f4178));
+      expect(scheme.primaryFixed, const Color(0xffe1e0ff));
+      expect(scheme.primaryFixedDim, const Color(0xffc0c1ff));
+      expect(scheme.onPrimaryFixed, const Color(0xff13144b));
+      expect(scheme.onPrimaryFixedVariant, const Color(0xff3f4178));
+      expect(scheme.secondary, const Color(0xff5d5c72));
+      expect(scheme.onSecondary, const Color(0xffffffff));
+      expect(scheme.secondaryContainer, const Color(0xffe2e0f9));
+      expect(scheme.onSecondaryContainer, const Color(0xff454559));
+      expect(scheme.secondaryFixed, const Color(0xffe2e0f9));
+      expect(scheme.secondaryFixedDim, const Color(0xffc6c4dd));
+      expect(scheme.onSecondaryFixed, const Color(0xff191a2c));
+      expect(scheme.onSecondaryFixedVariant, const Color(0xff454559));
+      expect(scheme.tertiary, const Color(0xff79536a));
+      expect(scheme.onTertiary, const Color(0xffffffff));
+      expect(scheme.tertiaryContainer, const Color(0xffffd8ec));
+      expect(scheme.onTertiaryContainer, const Color(0xff5f3c51));
+      expect(scheme.tertiaryFixed, const Color(0xffffd8ec));
+      expect(scheme.tertiaryFixedDim, const Color(0xffe9b9d3));
+      expect(scheme.onTertiaryFixed, const Color(0xff2e1125));
+      expect(scheme.onTertiaryFixedVariant, const Color(0xff5f3c51));
+      expect(scheme.error, const Color(0xffba1a1a));
+      expect(scheme.onError, const Color(0xffffffff));
+      expect(scheme.errorContainer, const Color(0xffffdad6));
+      expect(scheme.onErrorContainer, const Color(0xff93000a));
+      expect(scheme.background, const Color(0xfffcf8ff));
+      expect(scheme.onBackground, const Color(0xff1b1b21));
+      expect(scheme.surface, const Color(0xfffcf8ff));
+      expect(scheme.surfaceDim, const Color(0xffdcd9e0));
+      expect(scheme.surfaceBright, const Color(0xfffcf8ff));
+      expect(scheme.surfaceContainerLowest, const Color(0xffffffff));
+      expect(scheme.surfaceContainerLow, const Color(0xfff6f2fa));
+      expect(scheme.surfaceContainer, const Color(0xfff0ecf4));
+      expect(scheme.surfaceContainerHigh, const Color(0xffeae7ef));
+      expect(scheme.surfaceContainerHighest, const Color(0xffe4e1e9));
+      expect(scheme.onSurface, const Color(0xff1b1b21));
+      expect(scheme.surfaceVariant, const Color(0xffe4e1ec));
+      expect(scheme.onSurfaceVariant, const Color(0xff46464f));
+      expect(scheme.outline, const Color(0xff777680));
+      expect(scheme.outlineVariant, const Color(0xffc8c5d0));
+      expect(scheme.shadow, const Color(0xff000000));
+      expect(scheme.scrim, const Color(0xff000000));
+      expect(scheme.inverseSurface, const Color(0xff303036));
+      expect(scheme.onInverseSurface, const Color(0xfff3eff7));
+      expect(scheme.inversePrimary, const Color(0xffc0c1ff));
+      expect(scheme.surfaceTint, const Color(0xff575992));
+    },
+    skip: isBrowser, // [intended] uses dart:typed_data.
+  );
 
-  test('can generate a dark scheme from an imageProvider', () async {
-    final Uint8List blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
-    final ImageProvider image = MemoryImage(blueSquareBytes);
+  test(
+    'can generate a dark scheme from an imageProvider',
+    () async {
+      final blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
+      final ImageProvider image = MemoryImage(blueSquareBytes);
 
-    final ColorScheme scheme = await ColorScheme.fromImageProvider(
-        provider: image, brightness: Brightness.dark);
+      final ColorScheme scheme = await ColorScheme.fromImageProvider(
+        provider: image,
+        brightness: Brightness.dark,
+      );
 
-    expect(scheme.primary, const Color(0xffc0c1ff));
-    expect(scheme.onPrimary, const Color(0xff292a60));
-    expect(scheme.primaryContainer, const Color(0xff3f4178));
-    expect(scheme.onPrimaryContainer, const Color(0xffe1e0ff));
-    expect(scheme.primaryFixed, const Color(0xffe1e0ff));
-    expect(scheme.primaryFixedDim, const Color(0xffc0c1ff));
-    expect(scheme.onPrimaryFixed, const Color(0xff13144b));
-    expect(scheme.onPrimaryFixedVariant, const Color(0xff3f4178));
-    expect(scheme.secondary, const Color(0xffc6c4dd));
-    expect(scheme.onSecondary, const Color(0xff2e2f42));
-    expect(scheme.secondaryContainer, const Color(0xff454559));
-    expect(scheme.onSecondaryContainer, const Color(0xffe2e0f9));
-    expect(scheme.secondaryFixed, const Color(0xffe2e0f9));
-    expect(scheme.secondaryFixedDim, const Color(0xffc6c4dd));
-    expect(scheme.onSecondaryFixed, const Color(0xff191a2c));
-    expect(scheme.onSecondaryFixedVariant, const Color(0xff454559));
-    expect(scheme.tertiary, const Color(0xffe9b9d3));
-    expect(scheme.onTertiary, const Color(0xff46263a));
-    expect(scheme.tertiaryContainer, const Color(0xff5f3c51));
-    expect(scheme.onTertiaryContainer, const Color(0xffffd8ec));
-    expect(scheme.tertiaryFixed, const Color(0xffffd8ec));
-    expect(scheme.tertiaryFixedDim, const Color(0xffe9b9d3));
-    expect(scheme.onTertiaryFixed, const Color(0xff2e1125));
-    expect(scheme.onTertiaryFixedVariant, const Color(0xff5f3c51));
-    expect(scheme.error, const Color(0xffffb4ab));
-    expect(scheme.onError, const Color(0xff690005));
-    expect(scheme.errorContainer, const Color(0xff93000a));
-    expect(scheme.onErrorContainer, const Color(0xffffdad6));
-    expect(scheme.background, const Color(0xff131318));
-    expect(scheme.onBackground, const Color(0xffe4e1e9));
-    expect(scheme.surface, const Color(0xff131318));
-    expect(scheme.surfaceDim, const Color(0xff131318));
-    expect(scheme.surfaceBright, const Color(0xff39383f));
-    expect(scheme.surfaceContainerLowest, const Color(0xff0e0e13));
-    expect(scheme.surfaceContainerLow, const Color(0xff1b1b21));
-    expect(scheme.surfaceContainer, const Color(0xff1f1f25));
-    expect(scheme.surfaceContainerHigh, const Color(0xff2a292f));
-    expect(scheme.surfaceContainerHighest, const Color(0xff35343a));
-    expect(scheme.onSurface, const Color(0xffe4e1e9));
-    expect(scheme.surfaceVariant, const Color(0xff46464f));
-    expect(scheme.onSurfaceVariant, const Color(0xffc8c5d0));
-    expect(scheme.outline, const Color(0xff918f9a));
-    expect(scheme.outlineVariant, const Color(0xff46464f));
-    expect(scheme.inverseSurface, const Color(0xffe4e1e9));
-    expect(scheme.onInverseSurface, const Color(0xff303036));
-    expect(scheme.inversePrimary, const Color(0xff575992));
-    expect(scheme.surfaceTint, const Color(0xffc0c1ff));
-  }, skip: isBrowser, // [intended] uses dart:isolate and io.
+      expect(scheme.primary, const Color(0xffc0c1ff));
+      expect(scheme.onPrimary, const Color(0xff292a60));
+      expect(scheme.primaryContainer, const Color(0xff3f4178));
+      expect(scheme.onPrimaryContainer, const Color(0xffe1e0ff));
+      expect(scheme.primaryFixed, const Color(0xffe1e0ff));
+      expect(scheme.primaryFixedDim, const Color(0xffc0c1ff));
+      expect(scheme.onPrimaryFixed, const Color(0xff13144b));
+      expect(scheme.onPrimaryFixedVariant, const Color(0xff3f4178));
+      expect(scheme.secondary, const Color(0xffc6c4dd));
+      expect(scheme.onSecondary, const Color(0xff2e2f42));
+      expect(scheme.secondaryContainer, const Color(0xff454559));
+      expect(scheme.onSecondaryContainer, const Color(0xffe2e0f9));
+      expect(scheme.secondaryFixed, const Color(0xffe2e0f9));
+      expect(scheme.secondaryFixedDim, const Color(0xffc6c4dd));
+      expect(scheme.onSecondaryFixed, const Color(0xff191a2c));
+      expect(scheme.onSecondaryFixedVariant, const Color(0xff454559));
+      expect(scheme.tertiary, const Color(0xffe9b9d3));
+      expect(scheme.onTertiary, const Color(0xff46263a));
+      expect(scheme.tertiaryContainer, const Color(0xff5f3c51));
+      expect(scheme.onTertiaryContainer, const Color(0xffffd8ec));
+      expect(scheme.tertiaryFixed, const Color(0xffffd8ec));
+      expect(scheme.tertiaryFixedDim, const Color(0xffe9b9d3));
+      expect(scheme.onTertiaryFixed, const Color(0xff2e1125));
+      expect(scheme.onTertiaryFixedVariant, const Color(0xff5f3c51));
+      expect(scheme.error, const Color(0xffffb4ab));
+      expect(scheme.onError, const Color(0xff690005));
+      expect(scheme.errorContainer, const Color(0xff93000a));
+      expect(scheme.onErrorContainer, const Color(0xffffdad6));
+      expect(scheme.background, const Color(0xff131318));
+      expect(scheme.onBackground, const Color(0xffe4e1e9));
+      expect(scheme.surface, const Color(0xff131318));
+      expect(scheme.surfaceDim, const Color(0xff131318));
+      expect(scheme.surfaceBright, const Color(0xff39383f));
+      expect(scheme.surfaceContainerLowest, const Color(0xff0e0e13));
+      expect(scheme.surfaceContainerLow, const Color(0xff1b1b21));
+      expect(scheme.surfaceContainer, const Color(0xff1f1f25));
+      expect(scheme.surfaceContainerHigh, const Color(0xff2a292f));
+      expect(scheme.surfaceContainerHighest, const Color(0xff35343a));
+      expect(scheme.onSurface, const Color(0xffe4e1e9));
+      expect(scheme.surfaceVariant, const Color(0xff46464f));
+      expect(scheme.onSurfaceVariant, const Color(0xffc8c5d0));
+      expect(scheme.outline, const Color(0xff918f9a));
+      expect(scheme.outlineVariant, const Color(0xff46464f));
+      expect(scheme.inverseSurface, const Color(0xffe4e1e9));
+      expect(scheme.onInverseSurface, const Color(0xff303036));
+      expect(scheme.inversePrimary, const Color(0xff575992));
+      expect(scheme.surfaceTint, const Color(0xffc0c1ff));
+    },
+    skip: isBrowser, // [intended] uses dart:isolate and io.
   );
 
   test('fromSeed() asserts on invalid contrast levels', () {
@@ -650,193 +653,419 @@ void main() {
   });
 
   test('fromImageProvider() asserts on invalid contrast levels', () async {
-    final Uint8List blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
+    final blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
     final ImageProvider image = MemoryImage(blueSquareBytes);
 
-    expect(() => ColorScheme.fromImageProvider(provider: image, contrastLevel: -1.5), throwsAssertionError);
+    expect(
+      () => ColorScheme.fromImageProvider(provider: image, contrastLevel: -1.5),
+      throwsAssertionError,
+    );
 
-    expect(() => ColorScheme.fromImageProvider(provider: image, contrastLevel: 1.5), throwsAssertionError);
-  });
-
-  test('fromImageProvider() propagates TimeoutException when image cannot be rendered', () async {
-    final Uint8List blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
-
-    // Corrupt the image's bytelist so it cannot be read.
-    final Uint8List corruptImage = blueSquareBytes.sublist(5);
-    final ImageProvider image = MemoryImage(corruptImage);
-
-    expect(() async => ColorScheme.fromImageProvider(provider: image), throwsA(
-      isA<Exception>().having((Exception e) => e.toString(),
-        'Timeout occurred trying to load image', contains('TimeoutException')),
-      ),
+    expect(
+      () => ColorScheme.fromImageProvider(provider: image, contrastLevel: 1.5),
+      throwsAssertionError,
     );
   });
 
-  testWidgets('generated scheme "on" colors meet a11y contrast guidelines', (WidgetTester tester) async {
-    final ColorScheme colors = ColorScheme.fromSeed(seedColor: Colors.teal);
+  test(
+    'fromImageProvider() propagates TimeoutException or Failed to render image when image cannot be rendered',
+    () async {
+      final blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
 
-    Widget label(String text, Color textColor, Color background) {
-      return Container(
-        color: background,
-        padding: const EdgeInsets.all(8),
-        child: Text(text, style: TextStyle(color: textColor)),
-      );
-    }
+      // Corrupt the image's bytelist so it cannot be read.
+      final Uint8List corruptImage = blueSquareBytes.sublist(5);
+      final ImageProvider image = MemoryImage(corruptImage);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData.from(colorScheme: colors),
-        home: Scaffold(
-          body: Column(
-            children: <Widget>[
-              label('primary', colors.onPrimary, colors.primary),
-              label('secondary', colors.onSecondary, colors.secondary),
-              label('tertiary', colors.onTertiary, colors.tertiary),
-              label('error', colors.onError, colors.error),
-              label('background', colors.onBackground, colors.background),
-              label('surface', colors.onSurface, colors.surface),
-            ],
+      expect(
+        () async => ColorScheme.fromImageProvider(provider: image),
+        throwsA(
+          isA<Exception>().having(
+            (Exception e) => e.toString(),
+            'image',
+            anyOf(contains('Failed to render image'), contains('TimeoutException')),
           ),
         ),
-      ),
-    );
-    await expectLater(tester, meetsGuideline(textContrastGuideline));
-  },
+      );
+    },
+  );
+
+  testWidgets(
+    'generated scheme "on" colors meet a11y contrast guidelines',
+    (WidgetTester tester) async {
+      final colors = ColorScheme.fromSeed(seedColor: Colors.teal);
+
+      Widget label(String text, Color textColor, Color background) {
+        return Container(
+          color: background,
+          padding: const EdgeInsets.all(8),
+          child: Text(text, style: TextStyle(color: textColor)),
+        );
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.from(colorScheme: colors),
+          home: Scaffold(
+            body: Column(
+              children: <Widget>[
+                label('primary', colors.onPrimary, colors.primary),
+                label('secondary', colors.onSecondary, colors.secondary),
+                label('tertiary', colors.onTertiary, colors.tertiary),
+                label('error', colors.onError, colors.error),
+                label('background', colors.onBackground, colors.background),
+                label('surface', colors.onSurface, colors.surface),
+              ],
+            ),
+          ),
+        ),
+      );
+      await expectLater(tester, meetsGuideline(textContrastGuideline));
+    },
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
 
-  testWidgets('Color values in ColorScheme.fromSeed with different variants matches values in DynamicScheme', (WidgetTester tester) async {
-    const Color seedColor = Colors.orange;
-    final Hct sourceColor =  Hct.fromInt(seedColor.value);
-    for (final DynamicSchemeVariant schemeVariant in DynamicSchemeVariant.values) {
-      final DynamicScheme dynamicScheme = switch (schemeVariant) {
-        DynamicSchemeVariant.tonalSpot => SchemeTonalSpot(sourceColorHct: sourceColor, isDark: false, contrastLevel: 0.0),
-        DynamicSchemeVariant.fidelity => SchemeFidelity(sourceColorHct: sourceColor, isDark: false, contrastLevel: 0.0),
-        DynamicSchemeVariant.content => SchemeContent(sourceColorHct: sourceColor, isDark: false, contrastLevel: 0.0),
-        DynamicSchemeVariant.monochrome => SchemeMonochrome(sourceColorHct: sourceColor, isDark: false, contrastLevel: 0.0),
-        DynamicSchemeVariant.neutral => SchemeNeutral(sourceColorHct: sourceColor, isDark: false, contrastLevel: 0.0),
-        DynamicSchemeVariant.vibrant => SchemeVibrant(sourceColorHct: sourceColor, isDark: false, contrastLevel: 0.0),
-        DynamicSchemeVariant.expressive => SchemeExpressive(sourceColorHct: sourceColor, isDark: false, contrastLevel: 0.0),
-        DynamicSchemeVariant.rainbow => SchemeRainbow(sourceColorHct: sourceColor, isDark: false, contrastLevel: 0.0),
-        DynamicSchemeVariant.fruitSalad => SchemeFruitSalad(sourceColorHct: sourceColor, isDark: false, contrastLevel: 0.0),
-      };
-      final ColorScheme colorScheme = ColorScheme.fromSeed(
-        seedColor: seedColor,
-        dynamicSchemeVariant: schemeVariant,
-      );
+  testWidgets(
+    'Color values in ColorScheme.fromSeed with different variants matches values in DynamicScheme',
+    (WidgetTester tester) async {
+      const Color seedColor = Colors.orange;
+      final Hct sourceColor = Hct.fromInt(seedColor.value);
+      for (final DynamicSchemeVariant schemeVariant in DynamicSchemeVariant.values) {
+        final DynamicScheme dynamicScheme = switch (schemeVariant) {
+          DynamicSchemeVariant.tonalSpot => SchemeTonalSpot(
+            sourceColorHct: sourceColor,
+            isDark: false,
+            contrastLevel: 0.0,
+          ),
+          DynamicSchemeVariant.fidelity => SchemeFidelity(
+            sourceColorHct: sourceColor,
+            isDark: false,
+            contrastLevel: 0.0,
+          ),
+          DynamicSchemeVariant.content => SchemeContent(
+            sourceColorHct: sourceColor,
+            isDark: false,
+            contrastLevel: 0.0,
+          ),
+          DynamicSchemeVariant.monochrome => SchemeMonochrome(
+            sourceColorHct: sourceColor,
+            isDark: false,
+            contrastLevel: 0.0,
+          ),
+          DynamicSchemeVariant.neutral => SchemeNeutral(
+            sourceColorHct: sourceColor,
+            isDark: false,
+            contrastLevel: 0.0,
+          ),
+          DynamicSchemeVariant.vibrant => SchemeVibrant(
+            sourceColorHct: sourceColor,
+            isDark: false,
+            contrastLevel: 0.0,
+          ),
+          DynamicSchemeVariant.expressive => SchemeExpressive(
+            sourceColorHct: sourceColor,
+            isDark: false,
+            contrastLevel: 0.0,
+          ),
+          DynamicSchemeVariant.rainbow => SchemeRainbow(
+            sourceColorHct: sourceColor,
+            isDark: false,
+            contrastLevel: 0.0,
+          ),
+          DynamicSchemeVariant.fruitSalad => SchemeFruitSalad(
+            sourceColorHct: sourceColor,
+            isDark: false,
+            contrastLevel: 0.0,
+          ),
+        };
+        final colorScheme = ColorScheme.fromSeed(
+          seedColor: seedColor,
+          dynamicSchemeVariant: schemeVariant,
+        );
 
-      expect(colorScheme.primary.value, MaterialDynamicColors.primary.getArgb(dynamicScheme));
-      expect(colorScheme.onPrimary.value, MaterialDynamicColors.onPrimary.getArgb(dynamicScheme));
-      expect(colorScheme.primaryContainer.value, MaterialDynamicColors.primaryContainer.getArgb(dynamicScheme));
-      expect(colorScheme.onPrimaryContainer.value, MaterialDynamicColors.onPrimaryContainer.getArgb(dynamicScheme));
-      expect(colorScheme.primaryFixed.value, MaterialDynamicColors.primaryFixed.getArgb(dynamicScheme));
-      expect(colorScheme.primaryFixedDim.value, MaterialDynamicColors.primaryFixedDim.getArgb(dynamicScheme));
-      expect(colorScheme.onPrimaryFixed.value, MaterialDynamicColors.onPrimaryFixed.getArgb(dynamicScheme));
-      expect(colorScheme.onPrimaryFixedVariant.value, MaterialDynamicColors.onPrimaryFixedVariant.getArgb(dynamicScheme));
-      expect(colorScheme.secondary.value, MaterialDynamicColors.secondary.getArgb(dynamicScheme));
-      expect(colorScheme.onSecondary.value, MaterialDynamicColors.onSecondary.getArgb(dynamicScheme));
-      expect(colorScheme.secondaryContainer.value, MaterialDynamicColors.secondaryContainer.getArgb(dynamicScheme));
-      expect(colorScheme.onSecondaryContainer.value, MaterialDynamicColors.onSecondaryContainer.getArgb(dynamicScheme));
-      expect(colorScheme.secondaryFixed.value, MaterialDynamicColors.secondaryFixed.getArgb(dynamicScheme));
-      expect(colorScheme.secondaryFixedDim.value, MaterialDynamicColors.secondaryFixedDim.getArgb(dynamicScheme));
-      expect(colorScheme.onSecondaryFixed.value, MaterialDynamicColors.onSecondaryFixed.getArgb(dynamicScheme));
-      expect(colorScheme.onSecondaryFixedVariant.value, MaterialDynamicColors.onSecondaryFixedVariant.getArgb(dynamicScheme));
-      expect(colorScheme.tertiary.value, MaterialDynamicColors.tertiary.getArgb(dynamicScheme));
-      expect(colorScheme.onTertiary.value, MaterialDynamicColors.onTertiary.getArgb(dynamicScheme));
-      expect(colorScheme.tertiaryContainer.value, MaterialDynamicColors.tertiaryContainer.getArgb(dynamicScheme));
-      expect(colorScheme.onTertiaryContainer.value, MaterialDynamicColors.onTertiaryContainer.getArgb(dynamicScheme));
-      expect(colorScheme.tertiaryFixed.value, MaterialDynamicColors.tertiaryFixed.getArgb(dynamicScheme));
-      expect(colorScheme.tertiaryFixedDim.value, MaterialDynamicColors.tertiaryFixedDim.getArgb(dynamicScheme));
-      expect(colorScheme.onTertiaryFixed.value, MaterialDynamicColors.onTertiaryFixed.getArgb(dynamicScheme));
-      expect(colorScheme.onTertiaryFixedVariant.value, MaterialDynamicColors.onTertiaryFixedVariant.getArgb(dynamicScheme));
-      expect(colorScheme.error.value, MaterialDynamicColors.error.getArgb(dynamicScheme));
-      expect(colorScheme.onError.value, MaterialDynamicColors.onError.getArgb(dynamicScheme));
-      expect(colorScheme.errorContainer.value, MaterialDynamicColors.errorContainer.getArgb(dynamicScheme));
-      expect(colorScheme.onErrorContainer.value, MaterialDynamicColors.onErrorContainer.getArgb(dynamicScheme));
-      expect(colorScheme.background.value, MaterialDynamicColors.background.getArgb(dynamicScheme));
-      expect(colorScheme.onBackground.value, MaterialDynamicColors.onBackground.getArgb(dynamicScheme));
-      expect(colorScheme.surface.value, MaterialDynamicColors.surface.getArgb(dynamicScheme));
-      expect(colorScheme.surfaceDim.value, MaterialDynamicColors.surfaceDim.getArgb(dynamicScheme));
-      expect(colorScheme.surfaceBright.value, MaterialDynamicColors.surfaceBright.getArgb(dynamicScheme));
-      expect(colorScheme.surfaceContainerLowest.value, MaterialDynamicColors.surfaceContainerLowest.getArgb(dynamicScheme));
-      expect(colorScheme.surfaceContainerLow.value, MaterialDynamicColors.surfaceContainerLow.getArgb(dynamicScheme));
-      expect(colorScheme.surfaceContainer.value, MaterialDynamicColors.surfaceContainer.getArgb(dynamicScheme));
-      expect(colorScheme.surfaceContainerHigh.value, MaterialDynamicColors.surfaceContainerHigh.getArgb(dynamicScheme));
-      expect(colorScheme.surfaceContainerHighest.value, MaterialDynamicColors.surfaceContainerHighest.getArgb(dynamicScheme));
-      expect(colorScheme.onSurface.value, MaterialDynamicColors.onSurface.getArgb(dynamicScheme));
-      expect(colorScheme.surfaceVariant.value, MaterialDynamicColors.surfaceVariant.getArgb(dynamicScheme));
-      expect(colorScheme.onSurfaceVariant.value, MaterialDynamicColors.onSurfaceVariant.getArgb(dynamicScheme));
-      expect(colorScheme.outline.value, MaterialDynamicColors.outline.getArgb(dynamicScheme));
-      expect(colorScheme.outlineVariant.value, MaterialDynamicColors.outlineVariant.getArgb(dynamicScheme));
-      expect(colorScheme.shadow.value, MaterialDynamicColors.shadow.getArgb(dynamicScheme));
-      expect(colorScheme.scrim.value, MaterialDynamicColors.scrim.getArgb(dynamicScheme));
-      expect(colorScheme.inverseSurface.value, MaterialDynamicColors.inverseSurface.getArgb(dynamicScheme));
-      expect(colorScheme.onInverseSurface.value, MaterialDynamicColors.inverseOnSurface.getArgb(dynamicScheme));
-      expect(colorScheme.inversePrimary.value, MaterialDynamicColors.inversePrimary.getArgb(dynamicScheme));
-    }
-  });
+        expect(colorScheme.primary.value, MaterialDynamicColors.primary.getArgb(dynamicScheme));
+        expect(colorScheme.onPrimary.value, MaterialDynamicColors.onPrimary.getArgb(dynamicScheme));
+        expect(
+          colorScheme.primaryContainer.value,
+          MaterialDynamicColors.primaryContainer.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.onPrimaryContainer.value,
+          MaterialDynamicColors.onPrimaryContainer.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.primaryFixed.value,
+          MaterialDynamicColors.primaryFixed.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.primaryFixedDim.value,
+          MaterialDynamicColors.primaryFixedDim.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.onPrimaryFixed.value,
+          MaterialDynamicColors.onPrimaryFixed.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.onPrimaryFixedVariant.value,
+          MaterialDynamicColors.onPrimaryFixedVariant.getArgb(dynamicScheme),
+        );
+        expect(colorScheme.secondary.value, MaterialDynamicColors.secondary.getArgb(dynamicScheme));
+        expect(
+          colorScheme.onSecondary.value,
+          MaterialDynamicColors.onSecondary.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.secondaryContainer.value,
+          MaterialDynamicColors.secondaryContainer.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.onSecondaryContainer.value,
+          MaterialDynamicColors.onSecondaryContainer.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.secondaryFixed.value,
+          MaterialDynamicColors.secondaryFixed.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.secondaryFixedDim.value,
+          MaterialDynamicColors.secondaryFixedDim.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.onSecondaryFixed.value,
+          MaterialDynamicColors.onSecondaryFixed.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.onSecondaryFixedVariant.value,
+          MaterialDynamicColors.onSecondaryFixedVariant.getArgb(dynamicScheme),
+        );
+        expect(colorScheme.tertiary.value, MaterialDynamicColors.tertiary.getArgb(dynamicScheme));
+        expect(
+          colorScheme.onTertiary.value,
+          MaterialDynamicColors.onTertiary.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.tertiaryContainer.value,
+          MaterialDynamicColors.tertiaryContainer.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.onTertiaryContainer.value,
+          MaterialDynamicColors.onTertiaryContainer.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.tertiaryFixed.value,
+          MaterialDynamicColors.tertiaryFixed.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.tertiaryFixedDim.value,
+          MaterialDynamicColors.tertiaryFixedDim.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.onTertiaryFixed.value,
+          MaterialDynamicColors.onTertiaryFixed.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.onTertiaryFixedVariant.value,
+          MaterialDynamicColors.onTertiaryFixedVariant.getArgb(dynamicScheme),
+        );
+        expect(colorScheme.error.value, MaterialDynamicColors.error.getArgb(dynamicScheme));
+        expect(colorScheme.onError.value, MaterialDynamicColors.onError.getArgb(dynamicScheme));
+        expect(
+          colorScheme.errorContainer.value,
+          MaterialDynamicColors.errorContainer.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.onErrorContainer.value,
+          MaterialDynamicColors.onErrorContainer.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.background.value,
+          MaterialDynamicColors.background.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.onBackground.value,
+          MaterialDynamicColors.onBackground.getArgb(dynamicScheme),
+        );
+        expect(colorScheme.surface.value, MaterialDynamicColors.surface.getArgb(dynamicScheme));
+        expect(
+          colorScheme.surfaceDim.value,
+          MaterialDynamicColors.surfaceDim.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.surfaceBright.value,
+          MaterialDynamicColors.surfaceBright.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.surfaceContainerLowest.value,
+          MaterialDynamicColors.surfaceContainerLowest.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.surfaceContainerLow.value,
+          MaterialDynamicColors.surfaceContainerLow.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.surfaceContainer.value,
+          MaterialDynamicColors.surfaceContainer.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.surfaceContainerHigh.value,
+          MaterialDynamicColors.surfaceContainerHigh.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.surfaceContainerHighest.value,
+          MaterialDynamicColors.surfaceContainerHighest.getArgb(dynamicScheme),
+        );
+        expect(colorScheme.onSurface.value, MaterialDynamicColors.onSurface.getArgb(dynamicScheme));
+        expect(
+          colorScheme.surfaceVariant.value,
+          MaterialDynamicColors.surfaceVariant.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.onSurfaceVariant.value,
+          MaterialDynamicColors.onSurfaceVariant.getArgb(dynamicScheme),
+        );
+        expect(colorScheme.outline.value, MaterialDynamicColors.outline.getArgb(dynamicScheme));
+        expect(
+          colorScheme.outlineVariant.value,
+          MaterialDynamicColors.outlineVariant.getArgb(dynamicScheme),
+        );
+        expect(colorScheme.shadow.value, MaterialDynamicColors.shadow.getArgb(dynamicScheme));
+        expect(colorScheme.scrim.value, MaterialDynamicColors.scrim.getArgb(dynamicScheme));
+        expect(
+          colorScheme.inverseSurface.value,
+          MaterialDynamicColors.inverseSurface.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.onInverseSurface.value,
+          MaterialDynamicColors.inverseOnSurface.getArgb(dynamicScheme),
+        );
+        expect(
+          colorScheme.inversePrimary.value,
+          MaterialDynamicColors.inversePrimary.getArgb(dynamicScheme),
+        );
+      }
+    },
+  );
 
-  testWidgets('ColorScheme.fromSeed with different variants spot checks', (WidgetTester tester) async {
+  testWidgets('ColorScheme.fromSeed with different variants spot checks', (
+    WidgetTester tester,
+  ) async {
     // Default (Variant.tonalSpot).
-    await _testFilledButtonColor(tester, ColorScheme.fromSeed(seedColor: const Color(0xFF000000)), const Color(0xFF8C4A60));
-    await _testFilledButtonColor(tester, ColorScheme.fromSeed(seedColor: const Color(0xFF00FF00)), const Color(0xFF406836));
-    await _testFilledButtonColor(tester, ColorScheme.fromSeed(seedColor: const Color(0xFF6559F5)), const Color(0xFF5B5891));
-    await _testFilledButtonColor(tester, ColorScheme.fromSeed(seedColor: const Color(0xFFFFFFFF)), const Color(0xFF006874));
+    await _testFilledButtonColor(
+      tester,
+      ColorScheme.fromSeed(seedColor: const Color(0xFF000000)),
+      const Color(0xFF8C4A60),
+    );
+    await _testFilledButtonColor(
+      tester,
+      ColorScheme.fromSeed(seedColor: const Color(0xFF00FF00)),
+      const Color(0xFF406836),
+    );
+    await _testFilledButtonColor(
+      tester,
+      ColorScheme.fromSeed(seedColor: const Color(0xFF6559F5)),
+      const Color(0xFF5B5891),
+    );
+    await _testFilledButtonColor(
+      tester,
+      ColorScheme.fromSeed(seedColor: const Color(0xFFFFFFFF)),
+      const Color(0xFF006874),
+    );
 
     // Variant.fidelity.
     await _testFilledButtonColor(
       tester,
       ColorScheme.fromSeed(
         seedColor: const Color(0xFF000000),
-        dynamicSchemeVariant: DynamicSchemeVariant.fidelity
+        dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
       ),
-      const Color(0xFF000000)
+      const Color(0xFF000000),
     );
     await _testFilledButtonColor(
       tester,
       ColorScheme.fromSeed(
         seedColor: const Color(0xFF00FF00),
-        dynamicSchemeVariant: DynamicSchemeVariant.fidelity
+        dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
       ),
-      const Color(0xFF026E00)
+      const Color(0xFF026E00),
     );
     await _testFilledButtonColor(
       tester,
       ColorScheme.fromSeed(
         seedColor: const Color(0xFF6559F5),
-        dynamicSchemeVariant: DynamicSchemeVariant.fidelity
+        dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
       ),
-      const Color(0xFF4C3CDB)
+      const Color(0xFF4C3CDB),
     );
     await _testFilledButtonColor(
       tester,
       ColorScheme.fromSeed(
         seedColor: const Color(0xFFFFFFFF),
-        dynamicSchemeVariant: DynamicSchemeVariant.fidelity
+        dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
       ),
-      const Color(0xFF5D5F5F)
+      const Color(0xFF5D5F5F),
     );
   });
 
-  testWidgets('Colors in high-contrast color scheme matches colors in DynamicScheme', (WidgetTester tester) async {
+  testWidgets('Colors in high-contrast color scheme matches colors in DynamicScheme', (
+    WidgetTester tester,
+  ) async {
     const Color seedColor = Colors.blue;
-    final Hct sourceColor =  Hct.fromInt(seedColor.value);
+    final Hct sourceColor = Hct.fromInt(seedColor.value);
 
-    void colorsMatchDynamicSchemeColors(DynamicSchemeVariant schemeVariant, Brightness brightness, double contrastLevel) {
-      final bool isDark = brightness == Brightness.dark;
+    void colorsMatchDynamicSchemeColors(
+      DynamicSchemeVariant schemeVariant,
+      Brightness brightness,
+      double contrastLevel,
+    ) {
+      final isDark = brightness == Brightness.dark;
       final DynamicScheme dynamicScheme = switch (schemeVariant) {
-        DynamicSchemeVariant.tonalSpot => SchemeTonalSpot(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: contrastLevel),
-        DynamicSchemeVariant.fidelity => SchemeFidelity(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: contrastLevel),
-        DynamicSchemeVariant.content => SchemeContent(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: contrastLevel),
-        DynamicSchemeVariant.monochrome => SchemeMonochrome(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: contrastLevel),
-        DynamicSchemeVariant.neutral => SchemeNeutral(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: contrastLevel),
-        DynamicSchemeVariant.vibrant => SchemeVibrant(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: contrastLevel),
-        DynamicSchemeVariant.expressive => SchemeExpressive(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: contrastLevel),
-        DynamicSchemeVariant.rainbow => SchemeRainbow(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: contrastLevel),
-        DynamicSchemeVariant.fruitSalad => SchemeFruitSalad(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: contrastLevel),
+        DynamicSchemeVariant.tonalSpot => SchemeTonalSpot(
+          sourceColorHct: sourceColor,
+          isDark: isDark,
+          contrastLevel: contrastLevel,
+        ),
+        DynamicSchemeVariant.fidelity => SchemeFidelity(
+          sourceColorHct: sourceColor,
+          isDark: isDark,
+          contrastLevel: contrastLevel,
+        ),
+        DynamicSchemeVariant.content => SchemeContent(
+          sourceColorHct: sourceColor,
+          isDark: isDark,
+          contrastLevel: contrastLevel,
+        ),
+        DynamicSchemeVariant.monochrome => SchemeMonochrome(
+          sourceColorHct: sourceColor,
+          isDark: isDark,
+          contrastLevel: contrastLevel,
+        ),
+        DynamicSchemeVariant.neutral => SchemeNeutral(
+          sourceColorHct: sourceColor,
+          isDark: isDark,
+          contrastLevel: contrastLevel,
+        ),
+        DynamicSchemeVariant.vibrant => SchemeVibrant(
+          sourceColorHct: sourceColor,
+          isDark: isDark,
+          contrastLevel: contrastLevel,
+        ),
+        DynamicSchemeVariant.expressive => SchemeExpressive(
+          sourceColorHct: sourceColor,
+          isDark: isDark,
+          contrastLevel: contrastLevel,
+        ),
+        DynamicSchemeVariant.rainbow => SchemeRainbow(
+          sourceColorHct: sourceColor,
+          isDark: isDark,
+          contrastLevel: contrastLevel,
+        ),
+        DynamicSchemeVariant.fruitSalad => SchemeFruitSalad(
+          sourceColorHct: sourceColor,
+          isDark: isDark,
+          contrastLevel: contrastLevel,
+        ),
       };
 
-      final ColorScheme colorScheme = ColorScheme.fromSeed(
+      final colorScheme = ColorScheme.fromSeed(
         seedColor: seedColor,
         brightness: brightness,
         dynamicSchemeVariant: schemeVariant,
@@ -845,52 +1074,154 @@ void main() {
 
       expect(colorScheme.primary.value, MaterialDynamicColors.primary.getArgb(dynamicScheme));
       expect(colorScheme.onPrimary.value, MaterialDynamicColors.onPrimary.getArgb(dynamicScheme));
-      expect(colorScheme.primaryContainer.value, MaterialDynamicColors.primaryContainer.getArgb(dynamicScheme));
-      expect(colorScheme.onPrimaryContainer.value, MaterialDynamicColors.onPrimaryContainer.getArgb(dynamicScheme));
-      expect(colorScheme.primaryFixed.value, MaterialDynamicColors.primaryFixed.getArgb(dynamicScheme));
-      expect(colorScheme.primaryFixedDim.value, MaterialDynamicColors.primaryFixedDim.getArgb(dynamicScheme));
-      expect(colorScheme.onPrimaryFixed.value, MaterialDynamicColors.onPrimaryFixed.getArgb(dynamicScheme));
-      expect(colorScheme.onPrimaryFixedVariant.value, MaterialDynamicColors.onPrimaryFixedVariant.getArgb(dynamicScheme));
+      expect(
+        colorScheme.primaryContainer.value,
+        MaterialDynamicColors.primaryContainer.getArgb(dynamicScheme),
+      );
+      expect(
+        colorScheme.onPrimaryContainer.value,
+        MaterialDynamicColors.onPrimaryContainer.getArgb(dynamicScheme),
+      );
+      expect(
+        colorScheme.primaryFixed.value,
+        MaterialDynamicColors.primaryFixed.getArgb(dynamicScheme),
+      );
+      expect(
+        colorScheme.primaryFixedDim.value,
+        MaterialDynamicColors.primaryFixedDim.getArgb(dynamicScheme),
+      );
+      expect(
+        colorScheme.onPrimaryFixed.value,
+        MaterialDynamicColors.onPrimaryFixed.getArgb(dynamicScheme),
+      );
+      expect(
+        colorScheme.onPrimaryFixedVariant.value,
+        MaterialDynamicColors.onPrimaryFixedVariant.getArgb(dynamicScheme),
+      );
       expect(colorScheme.secondary.value, MaterialDynamicColors.secondary.getArgb(dynamicScheme));
-      expect(colorScheme.onSecondary.value, MaterialDynamicColors.onSecondary.getArgb(dynamicScheme));
-      expect(colorScheme.secondaryContainer.value, MaterialDynamicColors.secondaryContainer.getArgb(dynamicScheme));
-      expect(colorScheme.onSecondaryContainer.value, MaterialDynamicColors.onSecondaryContainer.getArgb(dynamicScheme));
-      expect(colorScheme.secondaryFixed.value, MaterialDynamicColors.secondaryFixed.getArgb(dynamicScheme));
-      expect(colorScheme.secondaryFixedDim.value, MaterialDynamicColors.secondaryFixedDim.getArgb(dynamicScheme));
-      expect(colorScheme.onSecondaryFixed.value, MaterialDynamicColors.onSecondaryFixed.getArgb(dynamicScheme));
-      expect(colorScheme.onSecondaryFixedVariant.value, MaterialDynamicColors.onSecondaryFixedVariant.getArgb(dynamicScheme));
+      expect(
+        colorScheme.onSecondary.value,
+        MaterialDynamicColors.onSecondary.getArgb(dynamicScheme),
+      );
+      expect(
+        colorScheme.secondaryContainer.value,
+        MaterialDynamicColors.secondaryContainer.getArgb(dynamicScheme),
+      );
+      expect(
+        colorScheme.onSecondaryContainer.value,
+        MaterialDynamicColors.onSecondaryContainer.getArgb(dynamicScheme),
+      );
+      expect(
+        colorScheme.secondaryFixed.value,
+        MaterialDynamicColors.secondaryFixed.getArgb(dynamicScheme),
+      );
+      expect(
+        colorScheme.secondaryFixedDim.value,
+        MaterialDynamicColors.secondaryFixedDim.getArgb(dynamicScheme),
+      );
+      expect(
+        colorScheme.onSecondaryFixed.value,
+        MaterialDynamicColors.onSecondaryFixed.getArgb(dynamicScheme),
+      );
+      expect(
+        colorScheme.onSecondaryFixedVariant.value,
+        MaterialDynamicColors.onSecondaryFixedVariant.getArgb(dynamicScheme),
+      );
       expect(colorScheme.tertiary.value, MaterialDynamicColors.tertiary.getArgb(dynamicScheme));
       expect(colorScheme.onTertiary.value, MaterialDynamicColors.onTertiary.getArgb(dynamicScheme));
-      expect(colorScheme.tertiaryContainer.value, MaterialDynamicColors.tertiaryContainer.getArgb(dynamicScheme));
-      expect(colorScheme.onTertiaryContainer.value, MaterialDynamicColors.onTertiaryContainer.getArgb(dynamicScheme));
-      expect(colorScheme.tertiaryFixed.value, MaterialDynamicColors.tertiaryFixed.getArgb(dynamicScheme));
-      expect(colorScheme.tertiaryFixedDim.value, MaterialDynamicColors.tertiaryFixedDim.getArgb(dynamicScheme));
-      expect(colorScheme.onTertiaryFixed.value, MaterialDynamicColors.onTertiaryFixed.getArgb(dynamicScheme));
-      expect(colorScheme.onTertiaryFixedVariant.value, MaterialDynamicColors.onTertiaryFixedVariant.getArgb(dynamicScheme));
+      expect(
+        colorScheme.tertiaryContainer.value,
+        MaterialDynamicColors.tertiaryContainer.getArgb(dynamicScheme),
+      );
+      expect(
+        colorScheme.onTertiaryContainer.value,
+        MaterialDynamicColors.onTertiaryContainer.getArgb(dynamicScheme),
+      );
+      expect(
+        colorScheme.tertiaryFixed.value,
+        MaterialDynamicColors.tertiaryFixed.getArgb(dynamicScheme),
+      );
+      expect(
+        colorScheme.tertiaryFixedDim.value,
+        MaterialDynamicColors.tertiaryFixedDim.getArgb(dynamicScheme),
+      );
+      expect(
+        colorScheme.onTertiaryFixed.value,
+        MaterialDynamicColors.onTertiaryFixed.getArgb(dynamicScheme),
+      );
+      expect(
+        colorScheme.onTertiaryFixedVariant.value,
+        MaterialDynamicColors.onTertiaryFixedVariant.getArgb(dynamicScheme),
+      );
       expect(colorScheme.error.value, MaterialDynamicColors.error.getArgb(dynamicScheme));
       expect(colorScheme.onError.value, MaterialDynamicColors.onError.getArgb(dynamicScheme));
-      expect(colorScheme.errorContainer.value, MaterialDynamicColors.errorContainer.getArgb(dynamicScheme));
-      expect(colorScheme.onErrorContainer.value, MaterialDynamicColors.onErrorContainer.getArgb(dynamicScheme));
+      expect(
+        colorScheme.errorContainer.value,
+        MaterialDynamicColors.errorContainer.getArgb(dynamicScheme),
+      );
+      expect(
+        colorScheme.onErrorContainer.value,
+        MaterialDynamicColors.onErrorContainer.getArgb(dynamicScheme),
+      );
       expect(colorScheme.background.value, MaterialDynamicColors.background.getArgb(dynamicScheme));
-      expect(colorScheme.onBackground.value, MaterialDynamicColors.onBackground.getArgb(dynamicScheme));
+      expect(
+        colorScheme.onBackground.value,
+        MaterialDynamicColors.onBackground.getArgb(dynamicScheme),
+      );
       expect(colorScheme.surface.value, MaterialDynamicColors.surface.getArgb(dynamicScheme));
       expect(colorScheme.surfaceDim.value, MaterialDynamicColors.surfaceDim.getArgb(dynamicScheme));
-      expect(colorScheme.surfaceBright.value, MaterialDynamicColors.surfaceBright.getArgb(dynamicScheme));
-      expect(colorScheme.surfaceContainerLowest.value, MaterialDynamicColors.surfaceContainerLowest.getArgb(dynamicScheme));
-      expect(colorScheme.surfaceContainerLow.value, MaterialDynamicColors.surfaceContainerLow.getArgb(dynamicScheme));
-      expect(colorScheme.surfaceContainer.value, MaterialDynamicColors.surfaceContainer.getArgb(dynamicScheme));
-      expect(colorScheme.surfaceContainerHigh.value, MaterialDynamicColors.surfaceContainerHigh.getArgb(dynamicScheme));
-      expect(colorScheme.surfaceContainerHighest.value, MaterialDynamicColors.surfaceContainerHighest.getArgb(dynamicScheme));
+      expect(
+        colorScheme.surfaceBright.value,
+        MaterialDynamicColors.surfaceBright.getArgb(dynamicScheme),
+      );
+      expect(
+        colorScheme.surfaceContainerLowest.value,
+        MaterialDynamicColors.surfaceContainerLowest.getArgb(dynamicScheme),
+      );
+      expect(
+        colorScheme.surfaceContainerLow.value,
+        MaterialDynamicColors.surfaceContainerLow.getArgb(dynamicScheme),
+      );
+      expect(
+        colorScheme.surfaceContainer.value,
+        MaterialDynamicColors.surfaceContainer.getArgb(dynamicScheme),
+      );
+      expect(
+        colorScheme.surfaceContainerHigh.value,
+        MaterialDynamicColors.surfaceContainerHigh.getArgb(dynamicScheme),
+      );
+      expect(
+        colorScheme.surfaceContainerHighest.value,
+        MaterialDynamicColors.surfaceContainerHighest.getArgb(dynamicScheme),
+      );
       expect(colorScheme.onSurface.value, MaterialDynamicColors.onSurface.getArgb(dynamicScheme));
-      expect(colorScheme.surfaceVariant.value, MaterialDynamicColors.surfaceVariant.getArgb(dynamicScheme));
-      expect(colorScheme.onSurfaceVariant.value, MaterialDynamicColors.onSurfaceVariant.getArgb(dynamicScheme));
+      expect(
+        colorScheme.surfaceVariant.value,
+        MaterialDynamicColors.surfaceVariant.getArgb(dynamicScheme),
+      );
+      expect(
+        colorScheme.onSurfaceVariant.value,
+        MaterialDynamicColors.onSurfaceVariant.getArgb(dynamicScheme),
+      );
       expect(colorScheme.outline.value, MaterialDynamicColors.outline.getArgb(dynamicScheme));
-      expect(colorScheme.outlineVariant.value, MaterialDynamicColors.outlineVariant.getArgb(dynamicScheme));
+      expect(
+        colorScheme.outlineVariant.value,
+        MaterialDynamicColors.outlineVariant.getArgb(dynamicScheme),
+      );
       expect(colorScheme.shadow.value, MaterialDynamicColors.shadow.getArgb(dynamicScheme));
       expect(colorScheme.scrim.value, MaterialDynamicColors.scrim.getArgb(dynamicScheme));
-      expect(colorScheme.inverseSurface.value, MaterialDynamicColors.inverseSurface.getArgb(dynamicScheme));
-      expect(colorScheme.onInverseSurface.value, MaterialDynamicColors.inverseOnSurface.getArgb(dynamicScheme));
-      expect(colorScheme.inversePrimary.value, MaterialDynamicColors.inversePrimary.getArgb(dynamicScheme));
+      expect(
+        colorScheme.inverseSurface.value,
+        MaterialDynamicColors.inverseSurface.getArgb(dynamicScheme),
+      );
+      expect(
+        colorScheme.onInverseSurface.value,
+        MaterialDynamicColors.inverseOnSurface.getArgb(dynamicScheme),
+      );
+      expect(
+        colorScheme.inversePrimary.value,
+        MaterialDynamicColors.inversePrimary.getArgb(dynamicScheme),
+      );
     }
 
     for (final DynamicSchemeVariant schemeVariant in DynamicSchemeVariant.values) {
@@ -901,24 +1232,68 @@ void main() {
       colorsMatchDynamicSchemeColors(schemeVariant, Brightness.dark, 0.5);
     }
   });
+
+  testWidgets('ColorScheme.of(context) is equivalent to Theme.of(context).colorScheme', (
+    WidgetTester tester,
+  ) async {
+    const sizedBoxKey = Key('sizedBox');
+    final colorScheme = ColorScheme.fromSeed(seedColor: Colors.red);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: colorScheme),
+        home: const SizedBox(key: sizedBoxKey),
+      ),
+    );
+
+    final BuildContext context = tester.element(find.byKey(sizedBoxKey));
+    final ColorScheme colorSchemeOfTheme = Theme.of(context).colorScheme;
+    final ColorScheme colorSchemeFromContext = ColorScheme.of(context);
+
+    expect(colorSchemeOfTheme, colorScheme);
+    expect(colorSchemeFromContext, colorScheme);
+  });
+
+  testWidgets(
+    'ColorScheme from an invalid network image should only throw one error',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/170413
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
+
+      await tester.pumpWidget(
+        const MaterialApp(home: _NetworkImageScheme(imageUrl: 'random_non_exist_image.png')),
+      );
+
+      FlutterError.onError = oldHandler;
+
+      expect(errors.single.exception, isA<Exception>());
+      expect(errors.single.exception.toString(), contains('Failed to render image:'));
+
+      // Skip this test on Web. Testing on Web requires mocking the HTTP request
+      // factory (as in `_network_image_test_web.dart`) so that the HTTP
+      // requests can fail. The target issue is about the number of thrown
+      // errors, which is handled by `ColorScheme`, and testing it only on
+      // non-Web should be fine.
+    },
+    skip: kIsWeb, // [intended]
+  );
 }
 
-Future<void> _testFilledButtonColor(WidgetTester tester, ColorScheme scheme, Color expectation) async {
+Future<void> _testFilledButtonColor(
+  WidgetTester tester,
+  ColorScheme scheme,
+  Color expectation,
+) async {
   final GlobalKey key = GlobalKey();
   await tester.pumpWidget(Container()); // reset
   await tester.pumpWidget(
     MaterialApp(
-      theme: ThemeData(
-        colorScheme: scheme,
-      ),
-      home: FilledButton(
-        key: key,
-        onPressed: () {},
-        child: const SizedBox.square(dimension: 200),
-      ),
+      theme: ThemeData(colorScheme: scheme),
+      home: FilledButton(key: key, onPressed: () {}, child: const SizedBox.square(dimension: 200)),
     ),
   );
-
 
   final Finder buttonMaterial = find.descendant(
     of: find.byType(FilledButton),
@@ -927,4 +1302,47 @@ Future<void> _testFilledButtonColor(WidgetTester tester, ColorScheme scheme, Col
   final Material material = tester.widget<Material>(buttonMaterial);
 
   expect(material.color, expectation);
+}
+
+// This widget fetches a [ColorScheme] from a network image, and displays
+// its content based on the scheme's color.
+class _NetworkImageScheme extends StatefulWidget {
+  const _NetworkImageScheme({required this.imageUrl});
+
+  final String imageUrl;
+
+  @override
+  _NetworkImageSchemeState createState() => _NetworkImageSchemeState();
+}
+
+class _NetworkImageSchemeState extends State<_NetworkImageScheme> {
+  Color? _textColors;
+
+  @override
+  void initState() {
+    super.initState();
+    _init();
+  }
+
+  Future<void> _init() async {
+    try {
+      final ColorScheme dynamicColorScheme = await ColorScheme.fromImageProvider(
+        provider: NetworkImage(widget.imageUrl),
+      );
+      setState(() {
+        _textColors = dynamicColorScheme.primary;
+      });
+    } catch (e) {
+      FlutterError.reportError(FlutterErrorDetails(exception: e));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Text(style: TextStyle(color: _textColors ?? Colors.black), 'Dynamic color text'),
+      ),
+    );
+  }
 }

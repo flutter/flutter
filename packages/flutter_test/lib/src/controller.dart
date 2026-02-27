@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:io';
+///
 /// @docImport 'package:flutter/scheduler.dart';
+/// @docImport 'package:flutter_driver/flutter_driver.dart';
 ///
 /// @docImport 'binding.dart';
 /// @docImport 'finders.dart';
@@ -10,6 +13,7 @@
 /// @docImport 'widget_tester.dart';
 library;
 
+import 'dart:ui' as ui;
 import 'package:clock/clock.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -65,21 +69,11 @@ class SemanticsController {
   SemanticsController._(this._controller);
 
   static final int _scrollingActions =
-    SemanticsAction.scrollUp.index |
-    SemanticsAction.scrollDown.index |
-    SemanticsAction.scrollLeft.index |
-    SemanticsAction.scrollRight.index;
-
-  /// Based on Android's FOCUSABLE_FLAGS. See [flutter/engine/AccessibilityBridge.java](https://github.com/flutter/engine/blob/main/shell/platform/android/io/flutter/view/AccessibilityBridge.java).
-  static final int _importantFlagsForAccessibility =
-    SemanticsFlag.hasCheckedState.index |
-    SemanticsFlag.hasToggledState.index |
-    SemanticsFlag.hasEnabledState.index |
-    SemanticsFlag.isButton.index |
-    SemanticsFlag.isTextField.index |
-    SemanticsFlag.isFocusable.index |
-    SemanticsFlag.isSlider.index |
-    SemanticsFlag.isInMutuallyExclusiveGroup.index;
+      SemanticsAction.scrollUp.index |
+      SemanticsAction.scrollDown.index |
+      SemanticsAction.scrollLeft.index |
+      SemanticsAction.scrollRight.index |
+      SemanticsAction.scrollToOffset.index;
 
   final WidgetController _controller;
 
@@ -153,8 +147,8 @@ class SemanticsController {
   ///   expect(
   ///     tester.semantics.simulatedAccessibilityTraversal(),
   ///     containsAllInOrder(<Matcher>[
-  ///       containsSemantics(label: 'My Widget'),
-  ///       containsSemantics(label: 'is awesome!', isChecked: true),
+  ///       isSemantics(label: 'My Widget'),
+  ///       isSemantics(label: 'is awesome!', isChecked: true),
   ///     ]),
   ///   );
   /// });
@@ -162,7 +156,7 @@ class SemanticsController {
   ///
   /// See also:
   ///
-  /// * [containsSemantics] and [matchesSemantics], which can be used to match
+  /// * [isSemantics] and [matchesSemantics], which can be used to match
   ///   against a single node in the traversal.
   /// * [containsAllInOrder], which can be given an [Iterable<Matcher>] to fuzzy
   ///   match the order allowing extra nodes before after and between matching
@@ -174,14 +168,14 @@ class SemanticsController {
       'Use startNode instead. '
       'This method was originally created before semantics finders were available. '
       'Semantics finders avoid edge cases where some nodes are not discoverable by widget finders and should be preferred for semantics testing. '
-      'This feature was deprecated after v3.15.0-15.2.pre.'
+      'This feature was deprecated after v3.15.0-15.2.pre.',
     )
     finders.FinderBase<Element>? start,
     @Deprecated(
       'Use endNode instead. '
       'This method was originally created before semantics finders were available. '
       'Semantics finders avoid edge cases where some nodes are not discoverable by widget finders and should be preferred for semantics testing. '
-      'This feature was deprecated after v3.15.0-15.2.pre.'
+      'This feature was deprecated after v3.15.0-15.2.pre.',
     )
     finders.FinderBase<Element>? end,
     finders.FinderBase<SemanticsNode>? startNode,
@@ -206,7 +200,7 @@ class SemanticsController {
           'The start node is not part of the provided view.\n'
           'Finder: ${start.toString(describeSelf: true)}\n'
           'View of start node: $startView\n'
-          'Specified view: $view'
+          'Specified view: $view',
         );
       }
     } else if (startNode != null) {
@@ -220,7 +214,7 @@ class SemanticsController {
           'The start node is not part of the provided view.\n'
           'Finder: ${startNode.toString(describeSelf: true)}\n'
           'View of start node: $startView\n'
-          'Specified view: $view'
+          'Specified view: $view',
         );
       }
     }
@@ -233,7 +227,7 @@ class SemanticsController {
           'The end node is not part of the provided view.\n'
           'Finder: ${end.toString(describeSelf: true)}\n'
           'View of end node: $endView\n'
-          'Specified view: $view'
+          'Specified view: $view',
         );
       }
     } else if (endNode != null) {
@@ -247,7 +241,7 @@ class SemanticsController {
           'The end node is not part of the provided view.\n'
           'Finder: ${endNode.toString(describeSelf: true)}\n'
           'View of end node: $endView\n'
-          'Specified view: $view'
+          'Specified view: $view',
         );
       }
     }
@@ -258,18 +252,17 @@ class SemanticsController {
         'Start finder: ${start!.toString(describeSelf: true)}\n'
         'End finder: ${end!.toString(describeSelf: true)}\n'
         'View of start node: $startView\n'
-        'View of end node: $endView'
+        'View of end node: $endView',
       );
     }
 
     final FlutterView actualView = view ?? startView ?? endView ?? _controller.view;
-    final RenderView renderView = _controller.binding.renderViews.firstWhere((RenderView r) => r.flutterView == actualView);
-
-    final List<SemanticsNode> traversal = <SemanticsNode>[];
-    _accessibilityTraversal(
-      renderView.owner!.semanticsOwner!.rootSemanticsNode!,
-      traversal,
+    final RenderView renderView = _controller.binding.renderViews.firstWhere(
+      (RenderView r) => r.flutterView == actualView,
     );
+
+    final traversal = <SemanticsNode>[];
+    _accessibilityTraversal(renderView.owner!.semanticsOwner!.rootSemanticsNode!, traversal);
 
     // Setting the range
     SemanticsNode? node;
@@ -292,7 +285,8 @@ class SemanticsController {
         'The expected starting node was not found.\n'
         'Finder: $errorString\n\n'
         'Expected Start Node: $node\n\n'
-        'Traversal: [\n  ${traversal.join('\n  ')}\n]');
+        'Traversal: [\n  ${traversal.join('\n  ')}\n]',
+      );
     }
 
     int? endIndex;
@@ -310,7 +304,8 @@ class SemanticsController {
         'The expected ending node was not found.\n'
         'Finder: $errorString\n\n'
         'Expected End Node: $node\n\n'
-        'Traversal: [\n  ${traversal.join('\n  ')}\n]');
+        'Traversal: [\n  ${traversal.join('\n  ')}\n]',
+      );
     }
     endIndex ??= traversal.length - 1;
 
@@ -319,13 +314,15 @@ class SemanticsController {
 
   /// Recursive depth first traversal of the specified `node`, adding nodes
   /// that are important for semantics to the `traversal` list.
-  void _accessibilityTraversal(SemanticsNode node, List<SemanticsNode> traversal){
+  void _accessibilityTraversal(SemanticsNode node, List<SemanticsNode> traversal) {
     if (_isImportantForAccessibility(node)) {
       traversal.add(node);
     }
 
-    final List<SemanticsNode> children = node.debugListChildrenInOrder(DebugSemanticsDumpOrder.traversalOrder);
-    for (final SemanticsNode child in children) {
+    final List<SemanticsNode> children = node.debugListChildrenInOrder(
+      DebugSemanticsDumpOrder.traversalOrder,
+    );
+    for (final child in children) {
       _accessibilityTraversal(child, traversal);
     }
   }
@@ -335,8 +332,8 @@ class SemanticsController {
   ///
   /// Based on:
   ///
-  /// * [flutter/engine/AccessibilityBridge.java#SemanticsNode.isFocusable()](https://github.com/flutter/engine/blob/main/shell/platform/android/io/flutter/view/AccessibilityBridge.java#L2641)
-  /// * [flutter/engine/SemanticsObject.mm#SemanticsObject.isAccessibilityElement](https://github.com/flutter/engine/blob/main/shell/platform/darwin/ios/framework/Source/SemanticsObject.mm#L449)
+  /// * [flutter/engine/AccessibilityBridge.java#SemanticsNode.isFocusable()](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java#L2641)
+  /// * [flutter/engine/SemanticsObject.mm#SemanticsObject.isAccessibilityElement](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.mm#L449)
   bool _isImportantForAccessibility(SemanticsNode node) {
     if (node.isMergedIntoParent) {
       // If this node is merged, all its information are present on an ancestor
@@ -346,21 +343,35 @@ class SemanticsController {
     final SemanticsData data = node.getSemanticsData();
     // If the node scopes a route, it doesn't matter what other flags/actions it
     // has, it is _not_ important for accessibility, so we short circuit.
-    if (data.hasFlag(SemanticsFlag.scopesRoute)) {
+    if (data.flagsCollection.scopesRoute) {
       return false;
     }
 
-    final bool hasNonScrollingAction = data.actions & ~_scrollingActions != 0;
+    final hasNonScrollingAction = data.actions & ~_scrollingActions != 0;
     if (hasNonScrollingAction) {
       return true;
     }
 
-    final bool hasImportantFlag = data.flags & _importantFlagsForAccessibility != 0;
+    /// Based on Android's FOCUSABLE_FLAGS. See [flutter/engine/AccessibilityBridge.java](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java).
+    final bool hasImportantFlag =
+        data.flagsCollection.isChecked != ui.CheckedState.none ||
+        data.flagsCollection.isToggled != ui.Tristate.none ||
+        data.flagsCollection.isEnabled != ui.Tristate.none ||
+        data.flagsCollection.isButton ||
+        data.flagsCollection.isTextField ||
+        data.flagsCollection.isFocused != ui.Tristate.none ||
+        data.flagsCollection.isSlider ||
+        data.flagsCollection.isInMutuallyExclusiveGroup;
+
     if (hasImportantFlag) {
       return true;
     }
 
-    final bool hasContent = data.label.isNotEmpty || data.value.isNotEmpty || data.hint.isNotEmpty;
+    final bool hasContent =
+        data.label.isNotEmpty ||
+        data.value.isNotEmpty ||
+        data.hint.isNotEmpty ||
+        data.tooltip.isNotEmpty;
     if (hasContent) {
       return true;
     }
@@ -378,15 +389,15 @@ class SemanticsController {
     finders.FinderBase<SemanticsNode> finder,
     SemanticsAction action, {
     Object? args,
-    bool checkForAction = true
+    bool checkForAction = true,
   }) {
     final SemanticsNode node = finder.evaluate().single;
-    if (checkForAction && !node.getSemanticsData().hasAction(action)){
+    if (checkForAction && !node.getSemanticsData().hasAction(action)) {
       throw StateError(
         'The given node does not support $action. If the action is implicitly '
         'supported or an unsupported action is being tested for this node, '
         'set `checkForAction` to false.\n'
-        'Node: $node'
+        'Node: $node',
       );
     }
 
@@ -493,11 +504,7 @@ class SemanticsController {
   /// * The [SemanticsNode] found with `finder` does not support
   ///   [SemanticsAction.showOnScreen].
   void showOnScreen(finders.FinderBase<SemanticsNode> finder) {
-    performAction(
-      finder,
-      SemanticsAction.showOnScreen,
-      checkForAction: false,
-    );
+    performAction(finder, SemanticsAction.showOnScreen, checkForAction: false);
   }
 
   /// Performs a [SemanticsAction.moveCursorForwardByCharacter] action on the
@@ -512,12 +519,12 @@ class SemanticsController {
   ///   [SemanticsAction.moveCursorForwardByCharacter].
   void moveCursorForwardByCharacter(
     finders.FinderBase<SemanticsNode> finder, {
-    bool shouldModifySelection = false
+    bool shouldModifySelection = false,
   }) {
     performAction(
       finder,
       SemanticsAction.moveCursorForwardByCharacter,
-      args: shouldModifySelection
+      args: shouldModifySelection,
     );
   }
 
@@ -530,13 +537,9 @@ class SemanticsController {
   ///   [SemanticsAction.moveCursorForwardByWord].
   void moveCursorForwardByWord(
     finders.FinderBase<SemanticsNode> finder, {
-    bool shouldModifySelection = false
+    bool shouldModifySelection = false,
   }) {
-    performAction(
-      finder,
-      SemanticsAction.moveCursorForwardByWord,
-      args: shouldModifySelection
-    );
+    performAction(finder, SemanticsAction.moveCursorForwardByWord, args: shouldModifySelection);
   }
 
   /// Performs a [SemanticsAction.moveCursorBackwardByCharacter] action on the
@@ -551,12 +554,12 @@ class SemanticsController {
   ///   [SemanticsAction.moveCursorBackwardByCharacter].
   void moveCursorBackwardByCharacter(
     finders.FinderBase<SemanticsNode> finder, {
-    bool shouldModifySelection = false
+    bool shouldModifySelection = false,
   }) {
     performAction(
       finder,
       SemanticsAction.moveCursorBackwardByCharacter,
-      args: shouldModifySelection
+      args: shouldModifySelection,
     );
   }
 
@@ -569,13 +572,9 @@ class SemanticsController {
   ///   [SemanticsAction.moveCursorBackwardByWord].
   void moveCursorBackwardByWord(
     finders.FinderBase<SemanticsNode> finder, {
-    bool shouldModifySelection = false
+    bool shouldModifySelection = false,
   }) {
-    performAction(
-      finder,
-      SemanticsAction.moveCursorBackwardByWord,
-      args: shouldModifySelection
-    );
+    performAction(finder, SemanticsAction.moveCursorBackwardByWord, args: shouldModifySelection);
   }
 
   /// Performs a [SemanticsAction.setText] action on the [SemanticsNode]
@@ -603,7 +602,7 @@ class SemanticsController {
   void setSelection(
     finders.FinderBase<SemanticsNode> finder, {
     required int base,
-    required int extent
+    required int extent,
   }) {
     performAction(
       finder,
@@ -678,7 +677,7 @@ class SemanticsController {
     performAction(
       finder,
       SemanticsAction.customAction,
-      args: CustomSemanticsAction.getIdentifier(action)
+      args: CustomSemanticsAction.getIdentifier(action),
     );
   }
 
@@ -720,7 +719,8 @@ abstract class WidgetController {
   ///     for testing
   ///   * [view] and [viewOf] which are used to find
   ///     [TestFlutterView]s from the widget tree
-  TestPlatformDispatcher get platformDispatcher => binding.platformDispatcher as TestPlatformDispatcher;
+  TestPlatformDispatcher get platformDispatcher =>
+      binding.platformDispatcher as TestPlatformDispatcher;
 
   /// The [TestFlutterView] provided by default when testing with
   /// [WidgetTester.pumpWidget].
@@ -748,11 +748,13 @@ abstract class WidgetController {
       throw StateError(
         'Semantics are not enabled. Enable them by passing '
         '`semanticsEnabled: true` to `testWidgets`, or by manually creating a '
-        '`SemanticsHandle` with `WidgetController.ensureSemantics()`.');
+        '`SemanticsHandle` with `WidgetController.ensureSemantics()`.',
+      );
     }
 
     return _semantics;
   }
+
   late final SemanticsController _semantics = SemanticsController._(this);
 
   // FINDER API
@@ -774,12 +776,24 @@ abstract class WidgetController {
   }
 
   FlutterView _viewOf(finders.FinderBase<Element> finder) {
-    return firstWidget<View>(
-      finders.find.ancestor(
-        of: finder,
-        matching: finders.find.byType(View),
-      ),
-    ).view;
+    final FlutterView? view = _maybeViewOf(finder);
+    if (view == null) {
+      throw StateError(
+        'No FlutterView ancestor found for finder: '
+        '${finder.toString(describeSelf: true)}',
+      );
+    }
+    return view;
+  }
+
+  FlutterView? _maybeViewOf(finders.FinderBase<Element> finder) {
+    final Iterable<View> views = widgetList<View>(
+      finders.find.ancestor(of: finder, matching: finders.find.byType(View)),
+    );
+    if (views.isEmpty) {
+      return null;
+    }
+    return views.first.view;
   }
 
   /// Checks if `finder` exists in the tree.
@@ -827,7 +841,7 @@ abstract class WidgetController {
   Iterable<T> widgetList<T extends Widget>(finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().map<T>((Element element) {
-      final T result = element.widget as T;
+      final result = element.widget as T;
       return result;
     });
   }
@@ -839,7 +853,7 @@ abstract class WidgetController {
     TestAsyncUtils.guardSync();
     final Element element = finder.evaluate().single;
     final RenderObject object = element.renderObject!;
-    RenderObject current = object;
+    var current = object;
     while (current.debugLayer == null) {
       current = current.parent!;
     }
@@ -896,7 +910,9 @@ abstract class WidgetController {
   /// using [Iterator.moveNext].
   Iterable<State> get allStates {
     TestAsyncUtils.guardSync();
-    return allElements.whereType<StatefulElement>().map<State>((StatefulElement element) => element.state);
+    return allElements.whereType<StatefulElement>().map<State>(
+      (StatefulElement element) => element.state,
+    );
   }
 
   /// The matching state in the widget tree.
@@ -940,7 +956,9 @@ abstract class WidgetController {
     if (element is StatefulElement) {
       return element.state as T;
     }
-    throw StateError('Widget of type ${element.widget.runtimeType}, with ${finder.describeMatch(finders.Plurality.many)}, is not a StatefulWidget.');
+    throw StateError(
+      'Widget of type ${element.widget.runtimeType}, with ${finder.describeMatch(finders.Plurality.many)}, is not a StatefulWidget.',
+    );
   }
 
   /// Render objects of all the widgets currently in the widget tree
@@ -985,7 +1003,7 @@ abstract class WidgetController {
   Iterable<T> renderObjectList<T extends RenderObject>(finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().map<T>((Element element) {
-      final T result = element.renderObject! as T;
+      final result = element.renderObject! as T;
       return result;
     });
   }
@@ -994,9 +1012,10 @@ abstract class WidgetController {
   List<Layer> get layers {
     return <Layer>[
       for (final RenderView renderView in binding.renderViews)
-        ..._walkLayers(renderView.debugLayer!)
+        ..._walkLayers(renderView.debugLayer!),
     ];
   }
+
   Iterable<Layer> _walkLayers(Layer layer) sync* {
     TestAsyncUtils.guardSync();
     yield layer;
@@ -1037,7 +1056,14 @@ abstract class WidgetController {
     bool warnIfMissed = true,
     PointerDeviceKind kind = PointerDeviceKind.touch,
   }) {
-    return tapAt(getCenter(finder, warnIfMissed: warnIfMissed, callee: 'tap'), pointer: pointer, buttons: buttons, kind: kind);
+    final FlutterView? view = _maybeViewOf(finder);
+    return tapAt(
+      getCenter(finder, warnIfMissed: warnIfMissed, callee: 'tap'),
+      pointer: pointer,
+      buttons: buttons,
+      kind: kind,
+      view: view,
+    );
   }
 
   /// Dispatch a pointer down / pointer up sequence at a hit-testable
@@ -1056,7 +1082,11 @@ abstract class WidgetController {
   ///
   /// The `pointer` and `button` arguments specify [PointerEvent.pointer] and
   /// [PointerEvent.buttons] of the tap event.
-  Future<void> tapOnText(finders.FinderBase<finders.TextRangeContext> textRangeFinder, {int? pointer, int buttons = kPrimaryButton }) {
+  Future<void> tapOnText(
+    finders.FinderBase<finders.TextRangeContext> textRangeFinder, {
+    int? pointer,
+    int buttons = kPrimaryButton,
+  }) {
     final Iterable<finders.TextRangeContext> ranges = textRangeFinder.evaluate();
     if (ranges.isEmpty) {
       throw FlutterError(textRangeFinder.toString());
@@ -1070,15 +1100,21 @@ abstract class WidgetController {
     if (tapLocation == null) {
       final finders.TextRangeContext found = textRangeFinder.evaluate().single;
       throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('Finder specifies a TextRange that can not receive pointer events.'),
-          ErrorDescription('The finder used was: ${textRangeFinder.toString(describeSelf: true)}'),
-          ErrorDescription('Found a matching substring in a static text widget, within ${found.textRange}.'),
-          ErrorDescription('But the "tapOnText" method could not find a hit-testable Offset with in that text range.'),
-          found.renderObject.toDiagnosticsNode(name: 'The RenderBox of that static text widget was', style: DiagnosticsTreeStyle.shallow),
-        ]
-      );
+        ErrorSummary('Finder specifies a TextRange that can not receive pointer events.'),
+        ErrorDescription('The finder used was: ${textRangeFinder.toString(describeSelf: true)}'),
+        ErrorDescription(
+          'Found a matching substring in a static text widget, within ${found.textRange}.',
+        ),
+        ErrorDescription(
+          'But the "tapOnText" method could not find a hit-testable Offset with in that text range.',
+        ),
+        found.renderObject.toDiagnosticsNode(
+          name: 'The RenderBox of that static text widget was',
+          style: DiagnosticsTreeStyle.shallow,
+        ),
+      ]);
     }
-    return tapAt(tapLocation, pointer: pointer, buttons: buttons);
+    return tapAt(tapLocation, pointer: pointer, buttons: buttons, view: ranges.single.view.view);
   }
 
   /// Dispatch a pointer down / pointer up sequence at the given location.
@@ -1087,9 +1123,16 @@ abstract class WidgetController {
     int? pointer,
     int buttons = kPrimaryButton,
     PointerDeviceKind kind = PointerDeviceKind.touch,
+    FlutterView? view,
   }) {
     return TestAsyncUtils.guard<void>(() async {
-      final TestGesture gesture = await startGesture(location, pointer: pointer, buttons: buttons, kind: kind);
+      final TestGesture gesture = await startGesture(
+        location,
+        pointer: pointer,
+        buttons: buttons,
+        kind: kind,
+        view: view,
+      );
       await gesture.up();
     });
   }
@@ -1114,12 +1157,14 @@ abstract class WidgetController {
     bool warnIfMissed = true,
     PointerDeviceKind kind = PointerDeviceKind.touch,
   }) {
+    final FlutterView? view = _maybeViewOf(finder);
     return TestAsyncUtils.guard<TestGesture>(() {
       return startGesture(
         getCenter(finder, warnIfMissed: warnIfMissed, callee: 'press'),
         pointer: pointer,
         buttons: buttons,
         kind: kind,
+        view: view,
       );
     });
   }
@@ -1143,11 +1188,13 @@ abstract class WidgetController {
     bool warnIfMissed = true,
     PointerDeviceKind kind = PointerDeviceKind.touch,
   }) {
+    final FlutterView? view = _maybeViewOf(finder);
     return longPressAt(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'longPress'),
       pointer: pointer,
       buttons: buttons,
       kind: kind,
+      view: view,
     );
   }
 
@@ -1158,9 +1205,16 @@ abstract class WidgetController {
     int? pointer,
     int buttons = kPrimaryButton,
     PointerDeviceKind kind = PointerDeviceKind.touch,
+    FlutterView? view,
   }) {
     return TestAsyncUtils.guard<void>(() async {
-      final TestGesture gesture = await startGesture(location, pointer: pointer, buttons: buttons, kind: kind);
+      final TestGesture gesture = await startGesture(
+        location,
+        pointer: pointer,
+        buttons: buttons,
+        kind: kind,
+        view: view,
+      );
       await pump(kLongPressTimeout + kPressTimeout);
       await gesture.up();
     });
@@ -1224,6 +1278,7 @@ abstract class WidgetController {
     bool warnIfMissed = true,
     PointerDeviceKind deviceKind = PointerDeviceKind.touch,
   }) {
+    final FlutterView? view = _maybeViewOf(finder);
     return flingFrom(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'fling'),
       offset,
@@ -1234,6 +1289,7 @@ abstract class WidgetController {
       initialOffset: initialOffset,
       initialOffsetDelay: initialOffsetDelay,
       deviceKind: deviceKind,
+      view: view,
     );
   }
 
@@ -1254,31 +1310,56 @@ abstract class WidgetController {
     Offset initialOffset = Offset.zero,
     Duration initialOffsetDelay = const Duration(seconds: 1),
     PointerDeviceKind deviceKind = PointerDeviceKind.touch,
+    FlutterView? view,
   }) {
     assert(offset.distance > 0.0);
     assert(speed > 0.0); // speed is pixels/second
     return TestAsyncUtils.guard<void>(() async {
-      final TestPointer testPointer = TestPointer(pointer ?? _getNextPointer(), deviceKind, null, buttons);
-      const int kMoveCount = 50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
+      final testPointer = TestPointer(pointer ?? _getNextPointer(), deviceKind, null, buttons);
+      const kMoveCount =
+          50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
       final double timeStampDelta = 1000000.0 * offset.distance / (kMoveCount * speed);
-      double timeStamp = 0.0;
-      double lastTimeStamp = timeStamp;
-      await sendEventToBinding(testPointer.down(startLocation, timeStamp: Duration(microseconds: timeStamp.round())));
+      var timeStamp = 0.0;
+      var lastTimeStamp = timeStamp;
+      await sendEventToBinding(
+        testPointer.down(
+          startLocation,
+          timeStamp: Duration(microseconds: timeStamp.round()),
+          view: view,
+        ),
+      );
       if (initialOffset.distance > 0.0) {
-        await sendEventToBinding(testPointer.move(startLocation + initialOffset, timeStamp: Duration(microseconds: timeStamp.round())));
+        await sendEventToBinding(
+          testPointer.move(
+            startLocation + initialOffset,
+            timeStamp: Duration(microseconds: timeStamp.round()),
+          ),
+        );
         timeStamp += initialOffsetDelay.inMicroseconds;
         await pump(initialOffsetDelay);
       }
-      for (int i = 0; i <= kMoveCount; i += 1) {
-        final Offset location = startLocation + initialOffset + Offset.lerp(Offset.zero, offset, i / kMoveCount)!;
-        await sendEventToBinding(testPointer.move(location, timeStamp: Duration(microseconds: timeStamp.round())));
+      for (var i = 0; i <= kMoveCount; i += 1) {
+        final Offset location =
+            startLocation + initialOffset + Offset.lerp(Offset.zero, offset, i / kMoveCount)!;
+        await sendEventToBinding(
+          testPointer.move(
+            location,
+            timeStamp: Duration(microseconds: timeStamp.round()),
+            view: view,
+          ),
+        );
         timeStamp += timeStampDelta;
         if (timeStamp - lastTimeStamp > frameInterval.inMicroseconds) {
           await pump(Duration(microseconds: (timeStamp - lastTimeStamp).truncate()));
           lastTimeStamp = timeStamp;
         }
       }
-      await sendEventToBinding(testPointer.up(timeStamp: Duration(microseconds: timeStamp.round())));
+      await sendEventToBinding(
+        testPointer.up(
+          timeStamp: Duration(microseconds: timeStamp.round()),
+          view: view,
+        ),
+      );
     });
   }
 
@@ -1303,6 +1384,7 @@ abstract class WidgetController {
     Duration initialOffsetDelay = const Duration(seconds: 1),
     bool warnIfMissed = true,
   }) {
+    final FlutterView? view = _maybeViewOf(finder);
     return trackpadFlingFrom(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'fling'),
       offset,
@@ -1312,6 +1394,7 @@ abstract class WidgetController {
       frameInterval: frameInterval,
       initialOffset: initialOffset,
       initialOffsetDelay: initialOffsetDelay,
+      view: view,
     );
   }
 
@@ -1332,31 +1415,63 @@ abstract class WidgetController {
     Duration frameInterval = const Duration(milliseconds: 16),
     Offset initialOffset = Offset.zero,
     Duration initialOffsetDelay = const Duration(seconds: 1),
+    FlutterView? view,
   }) {
     assert(offset.distance > 0.0);
     assert(speed > 0.0); // speed is pixels/second
     return TestAsyncUtils.guard<void>(() async {
-      final TestPointer testPointer = TestPointer(pointer ?? _getNextPointer(), PointerDeviceKind.trackpad, null, buttons);
-      const int kMoveCount = 50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
+      final testPointer = TestPointer(
+        pointer ?? _getNextPointer(),
+        PointerDeviceKind.trackpad,
+        null,
+        buttons,
+      );
+      const kMoveCount =
+          50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
       final double timeStampDelta = 1000000.0 * offset.distance / (kMoveCount * speed);
-      double timeStamp = 0.0;
-      double lastTimeStamp = timeStamp;
-      await sendEventToBinding(testPointer.panZoomStart(startLocation, timeStamp: Duration(microseconds: timeStamp.round())));
+      var timeStamp = 0.0;
+      var lastTimeStamp = timeStamp;
+      await sendEventToBinding(
+        testPointer.panZoomStart(
+          startLocation,
+          timeStamp: Duration(microseconds: timeStamp.round()),
+          view: view,
+        ),
+      );
       if (initialOffset.distance > 0.0) {
-        await sendEventToBinding(testPointer.panZoomUpdate(startLocation, pan: initialOffset, timeStamp: Duration(microseconds: timeStamp.round())));
+        await sendEventToBinding(
+          testPointer.panZoomUpdate(
+            startLocation,
+            pan: initialOffset,
+            timeStamp: Duration(microseconds: timeStamp.round()),
+            view: view,
+          ),
+        );
         timeStamp += initialOffsetDelay.inMicroseconds;
         await pump(initialOffsetDelay);
       }
-      for (int i = 0; i <= kMoveCount; i += 1) {
+      for (var i = 0; i <= kMoveCount; i += 1) {
         final Offset pan = initialOffset + Offset.lerp(Offset.zero, offset, i / kMoveCount)!;
-        await sendEventToBinding(testPointer.panZoomUpdate(startLocation, pan: pan, timeStamp: Duration(microseconds: timeStamp.round())));
+        await sendEventToBinding(
+          testPointer.panZoomUpdate(
+            startLocation,
+            pan: pan,
+            timeStamp: Duration(microseconds: timeStamp.round()),
+            view: view,
+          ),
+        );
         timeStamp += timeStampDelta;
         if (timeStamp - lastTimeStamp > frameInterval.inMicroseconds) {
           await pump(Duration(microseconds: (timeStamp - lastTimeStamp).truncate()));
           lastTimeStamp = timeStamp;
         }
       }
-      await sendEventToBinding(testPointer.panZoomEnd(timeStamp: Duration(microseconds: timeStamp.round())));
+      await sendEventToBinding(
+        testPointer.panZoomEnd(
+          timeStamp: Duration(microseconds: timeStamp.round()),
+          view: view,
+        ),
+      );
     });
   }
 
@@ -1423,9 +1538,7 @@ abstract class WidgetController {
   ///
   /// Alternatively, one can check that the return value from this function
   /// matches the expected number of pumps.
-  Future<int> pumpAndSettle([
-    Duration duration = const Duration(milliseconds: 100),
-  ]);
+  Future<int> pumpAndSettle([Duration duration = const Duration(milliseconds: 100)]);
 
   /// Attempts to drag the given widget by the given offset, by
   /// starting a drag in the middle of the widget.
@@ -1467,6 +1580,7 @@ abstract class WidgetController {
     bool warnIfMissed = true,
     PointerDeviceKind kind = PointerDeviceKind.touch,
   }) {
+    final FlutterView? view = _maybeViewOf(finder);
     return dragFrom(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'drag'),
       offset,
@@ -1475,6 +1589,7 @@ abstract class WidgetController {
       touchSlopX: touchSlopX,
       touchSlopY: touchSlopY,
       kind: kind,
+      view: view,
     );
   }
 
@@ -1497,10 +1612,17 @@ abstract class WidgetController {
     double touchSlopX = kDragSlopDefault,
     double touchSlopY = kDragSlopDefault,
     PointerDeviceKind kind = PointerDeviceKind.touch,
+    FlutterView? view,
   }) {
     assert(kDragSlopDefault > kTouchSlop);
     return TestAsyncUtils.guard<void>(() async {
-      final TestGesture gesture = await startGesture(startLocation, pointer: pointer, buttons: buttons, kind: kind);
+      final TestGesture gesture = await startGesture(
+        startLocation,
+        pointer: pointer,
+        buttons: buttons,
+        kind: kind,
+        view: view,
+      );
 
       final double xSign = offset.dx.sign;
       final double ySign = offset.dy.sign;
@@ -1527,17 +1649,20 @@ abstract class WidgetController {
             final double diffY = offsetSlope.abs() * touchSlopX * ySign;
 
             // The vector from the origin to the vertical edge.
-            await gesture.moveBy(Offset(signedSlopX, diffY));
+            await gesture.moveBy(Offset(signedSlopX, diffY), view: view);
             if (offsetY.abs() <= touchSlopY) {
               // The drag ends on or before getting to the horizontal extension of the horizontal edge.
-              await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - diffY));
+              await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - diffY), view: view);
             } else {
               final double diffY2 = signedSlopY - diffY;
               final double diffX2 = inverseOffsetSlope * diffY2;
 
               // The vector from the edge of the box to the horizontal extension of the horizontal edge.
-              await gesture.moveBy(Offset(diffX2, diffY2));
-              await gesture.moveBy(Offset(offsetX - diffX2 - signedSlopX, offsetY - signedSlopY));
+              await gesture.moveBy(Offset(diffX2, diffY2), view: view);
+              await gesture.moveBy(
+                Offset(offsetX - diffX2 - signedSlopX, offsetY - signedSlopY),
+                view: view,
+              );
             }
           } else {
             assert(offsetY.abs() > touchSlopY);
@@ -1546,27 +1671,32 @@ abstract class WidgetController {
             final double diffX = inverseOffsetSlope.abs() * touchSlopY * xSign;
 
             // The vector from the origin to the vertical edge.
-            await gesture.moveBy(Offset(diffX, signedSlopY));
+            await gesture.moveBy(Offset(diffX, signedSlopY), view: view);
             if (offsetX.abs() <= touchSlopX) {
               // The drag ends on or before getting to the vertical extension of the vertical edge.
-              await gesture.moveBy(Offset(offsetX - diffX, offsetY - signedSlopY));
+              await gesture.moveBy(Offset(offsetX - diffX, offsetY - signedSlopY), view: view);
             } else {
               final double diffX2 = signedSlopX - diffX;
               final double diffY2 = offsetSlope * diffX2;
 
               // The vector from the edge of the box to the vertical extension of the vertical edge.
-              await gesture.moveBy(Offset(diffX2, diffY2));
-              await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - diffY2 - signedSlopY));
+              await gesture.moveBy(Offset(diffX2, diffY2), view: view);
+              await gesture.moveBy(
+                Offset(offsetX - signedSlopX, offsetY - diffY2 - signedSlopY),
+                view: view,
+              );
             }
           }
-        } else { // The drag goes through the corner of the box.
-          await gesture.moveBy(Offset(signedSlopX, signedSlopY));
-          await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - signedSlopY));
+        } else {
+          // The drag goes through the corner of the box.
+          await gesture.moveBy(Offset(signedSlopX, signedSlopY), view: view);
+          await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - signedSlopY), view: view);
         }
-      } else { // The drag ends inside the box.
-        await gesture.moveBy(offset);
+      } else {
+        // The drag ends inside the box.
+        await gesture.moveBy(offset, view: view);
       }
-      await gesture.up();
+      await gesture.up(view: view);
     });
   }
 
@@ -1598,6 +1728,7 @@ abstract class WidgetController {
     int buttons = kPrimaryButton,
     double frequency = 60.0,
     bool warnIfMissed = true,
+    FlutterView? view,
   }) {
     return timedDragFrom(
       getCenter(finder, warnIfMissed: warnIfMissed, callee: 'timedDrag'),
@@ -1606,6 +1737,7 @@ abstract class WidgetController {
       pointer: pointer,
       buttons: buttons,
       frequency: frequency,
+      view: view,
     );
   }
 
@@ -1624,38 +1756,36 @@ abstract class WidgetController {
     int? pointer,
     int buttons = kPrimaryButton,
     double frequency = 60.0,
+    FlutterView? view,
   }) {
     assert(frequency > 0);
     final int intervals = duration.inMicroseconds * frequency ~/ 1E6;
     assert(intervals > 1);
     pointer ??= _getNextPointer();
-    final List<Duration> timeStamps = <Duration>[
-      for (int t = 0; t <= intervals; t += 1)
-        duration * t ~/ intervals,
+    final timeStamps = <Duration>[
+      for (int t = 0; t <= intervals; t += 1) duration * t ~/ intervals,
     ];
-    final List<Offset> offsets = <Offset>[
+    final offsets = <Offset>[
       startLocation,
-      for (int t = 0; t <= intervals; t += 1)
-        startLocation + offset * (t / intervals),
+      for (int t = 0; t <= intervals; t += 1) startLocation + offset * (t / intervals),
     ];
-    final List<PointerEventRecord> records = <PointerEventRecord>[
+    final records = <PointerEventRecord>[
       PointerEventRecord(Duration.zero, <PointerEvent>[
-          PointerAddedEvent(
-            position: startLocation,
-          ),
-          PointerDownEvent(
-            position: startLocation,
-            pointer: pointer,
-            buttons: buttons,
-          ),
-        ]),
+        PointerAddedEvent(
+          position: startLocation,
+          viewId: view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView!.viewId,
+        ),
+        PointerDownEvent(position: startLocation, pointer: pointer, buttons: buttons),
+      ]),
       ...<PointerEventRecord>[
         for (int t = 0; t <= intervals; t += 1)
           PointerEventRecord(timeStamps[t], <PointerEvent>[
             PointerMoveEvent(
+              viewId:
+                  view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView!.viewId,
               timeStamp: timeStamps[t],
-              position: offsets[t+1],
-              delta: offsets[t+1] - offsets[t],
+              position: offsets[t + 1],
+              delta: offsets[t + 1] - offsets[t],
               pointer: pointer,
               buttons: buttons,
             ),
@@ -1663,6 +1793,7 @@ abstract class WidgetController {
       ],
       PointerEventRecord(duration, <PointerEvent>[
         PointerUpEvent(
+          viewId: view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView!.viewId,
           timeStamp: duration,
           position: offsets.last,
           pointer: pointer,
@@ -1738,20 +1869,21 @@ abstract class WidgetController {
     int? pointer,
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int buttons = kPrimaryButton,
+    FlutterView? view,
   }) async {
     final TestGesture result = _createGesture(pointer: pointer, kind: kind, buttons: buttons);
     if (kind == PointerDeviceKind.trackpad) {
-      await result.panZoomStart(downLocation);
+      await result.panZoomStart(downLocation, view: view);
     } else {
-      await result.down(downLocation);
+      await result.down(downLocation, view: view);
     }
     return result;
   }
 
   /// Forwards the given location to the binding's hitTest logic.
-  HitTestResult hitTestOnBinding(Offset location, { int? viewId }) {
+  HitTestResult hitTestOnBinding(Offset location, {int? viewId}) {
     viewId ??= view.viewId;
-    final HitTestResult result = HitTestResult();
+    final result = HitTestResult();
     binding.hitTestInView(result, location, viewId);
     return result;
   }
@@ -1788,39 +1920,84 @@ abstract class WidgetController {
   /// this method is being called from another that is forwarding its own
   /// `warnIfMissed` parameter (see e.g. the implementation of [tap]).
   /// {@endtemplate}
-  Offset getCenter(finders.FinderBase<Element> finder, { bool warnIfMissed = false, String callee = 'getCenter' }) {
-    return _getElementPoint(finder, (Size size) => size.center(Offset.zero), warnIfMissed: warnIfMissed, callee: callee);
+  Offset getCenter(
+    finders.FinderBase<Element> finder, {
+    bool warnIfMissed = false,
+    String callee = 'getCenter',
+  }) {
+    return _getElementPoint(
+      finder,
+      (Size size) => size.center(Offset.zero),
+      warnIfMissed: warnIfMissed,
+      callee: callee,
+    );
   }
 
   /// Returns the point at the top left of the given widget.
   ///
   /// {@macro flutter.flutter_test.WidgetController.getCenter.warnIfMissed}
-  Offset getTopLeft(finders.FinderBase<Element> finder, { bool warnIfMissed = false, String callee = 'getTopLeft' }) {
-    return _getElementPoint(finder, (Size size) => Offset.zero, warnIfMissed: warnIfMissed, callee: callee);
+  Offset getTopLeft(
+    finders.FinderBase<Element> finder, {
+    bool warnIfMissed = false,
+    String callee = 'getTopLeft',
+  }) {
+    return _getElementPoint(
+      finder,
+      (Size size) => Offset.zero,
+      warnIfMissed: warnIfMissed,
+      callee: callee,
+    );
   }
 
   /// Returns the point at the top right of the given widget. This
   /// point is not inside the object's hit test area.
   ///
   /// {@macro flutter.flutter_test.WidgetController.getCenter.warnIfMissed}
-  Offset getTopRight(finders.FinderBase<Element> finder, { bool warnIfMissed = false, String callee = 'getTopRight' }) {
-    return _getElementPoint(finder, (Size size) => size.topRight(Offset.zero), warnIfMissed: warnIfMissed, callee: callee);
+  Offset getTopRight(
+    finders.FinderBase<Element> finder, {
+    bool warnIfMissed = false,
+    String callee = 'getTopRight',
+  }) {
+    return _getElementPoint(
+      finder,
+      (Size size) => size.topRight(Offset.zero),
+      warnIfMissed: warnIfMissed,
+      callee: callee,
+    );
   }
 
   /// Returns the point at the bottom left of the given widget. This
   /// point is not inside the object's hit test area.
   ///
   /// {@macro flutter.flutter_test.WidgetController.getCenter.warnIfMissed}
-  Offset getBottomLeft(finders.FinderBase<Element> finder, { bool warnIfMissed = false, String callee = 'getBottomLeft' }) {
-    return _getElementPoint(finder, (Size size) => size.bottomLeft(Offset.zero), warnIfMissed: warnIfMissed, callee: callee);
+  Offset getBottomLeft(
+    finders.FinderBase<Element> finder, {
+    bool warnIfMissed = false,
+    String callee = 'getBottomLeft',
+  }) {
+    return _getElementPoint(
+      finder,
+      (Size size) => size.bottomLeft(Offset.zero),
+      warnIfMissed: warnIfMissed,
+      callee: callee,
+    );
   }
 
   /// Returns the point at the bottom right of the given widget. This
   /// point is not inside the object's hit test area.
   ///
   /// {@macro flutter.flutter_test.WidgetController.getCenter.warnIfMissed}
-  Offset getBottomRight(finders.FinderBase<Element> finder, { bool warnIfMissed = false, String callee = 'getBottomRight' }) {
-    return _getElementPoint(finder, (Size size) => size.bottomRight(Offset.zero), warnIfMissed: warnIfMissed, callee: callee);
+  Offset getBottomRight(
+    finders.FinderBase<Element> finder, {
+    bool warnIfMissed = false,
+    String callee = 'getBottomRight',
+  }) {
+    return _getElementPoint(
+      finder,
+      (Size size) => size.bottomRight(Offset.zero),
+      warnIfMissed: warnIfMissed,
+      callee: callee,
+    );
   }
 
   /// Whether warnings relating to hit tests not hitting their mark should be
@@ -1853,7 +2030,9 @@ abstract class WidgetController {
     final TextRange range = textRangeContext.textRange;
     assert(range.isNormalized);
     assert(range.isValid);
-    final Offset renderParagraphPaintOffset = textRangeContext.renderObject.localToGlobal(Offset.zero);
+    final Offset renderParagraphPaintOffset = textRangeContext.renderObject.localToGlobal(
+      Offset.zero,
+    );
     assert(renderParagraphPaintOffset.isFinite);
 
     int spanStart = range.start;
@@ -1863,12 +2042,12 @@ abstract class WidgetController {
           // Uses BoxHeightStyle.tight in getBoxesForSelection to make sure the
           // returned boxes don't extend outside of the hit-testable region.
           final Iterable<Offset> testOffsets = textRangeContext.renderObject
-            .getBoxesForSelection(TextSelection(baseOffset: spanStart, extentOffset: endIndex))
-            // Try hit-testing the center of each TextBox.
-            .map((TextBox textBox) => textBox.toRect().center);
+              .getBoxesForSelection(TextSelection(baseOffset: spanStart, extentOffset: endIndex))
+              // Try hit-testing the center of each TextBox.
+              .map((TextBox textBox) => textBox.toRect().center);
 
-          for (final Offset localOffset in testOffsets) {
-            final HitTestResult result = HitTestResult();
+          for (final localOffset in testOffsets) {
+            final result = HitTestResult();
             final Offset globalOffset = localOffset + renderParagraphPaintOffset;
             binding.hitTestInView(result, globalOffset, textRangeContext.view.view.viewId);
             if (result.path.any((HitTestEntry entry) => entry.target == target)) {
@@ -1885,50 +2064,74 @@ abstract class WidgetController {
     return null;
   }
 
-  Offset _getElementPoint(finders.FinderBase<Element> finder, Offset Function(Size size) sizeToPoint, { required bool warnIfMissed, required String callee }) {
+  Offset _getElementPoint(
+    finders.FinderBase<Element> finder,
+    Offset Function(Size size) sizeToPoint, {
+    required bool warnIfMissed,
+    required String callee,
+  }) {
     TestAsyncUtils.guardSync();
     final Iterable<Element> elements = finder.evaluate();
     if (elements.isEmpty) {
-      throw FlutterError('The finder "$finder" (used in a call to "$callee()") could not find any matching widgets.');
+      throw FlutterError(
+        'The finder "$finder" (used in a call to "$callee()") could not find any matching widgets.',
+      );
     }
     if (elements.length > 1) {
-      throw FlutterError('The finder "$finder" (used in a call to "$callee()") ambiguously found multiple matching widgets. The "$callee()" method needs a single target.');
+      throw FlutterError(
+        'The finder "$finder" (used in a call to "$callee()") ambiguously found multiple matching widgets. The "$callee()" method needs a single target.',
+      );
     }
     final Element element = elements.single;
     final RenderObject? renderObject = element.renderObject;
     if (renderObject == null) {
       throw FlutterError(
         'The finder "$finder" (used in a call to "$callee()") found an element, but it does not have a corresponding render object. '
-        'Maybe the element has not yet been rendered?'
+        'Maybe the element has not yet been rendered?',
       );
     }
     if (renderObject is! RenderBox) {
       throw FlutterError(
         'The finder "$finder" (used in a call to "$callee()") found an element whose corresponding render object is not a RenderBox (it is a ${renderObject.runtimeType}: "$renderObject"). '
-        'Unfortunately "$callee()" only supports targeting widgets that correspond to RenderBox objects in the rendering.'
+        'Unfortunately "$callee()" only supports targeting widgets that correspond to RenderBox objects in the rendering.',
       );
     }
-    final RenderBox box = element.renderObject! as RenderBox;
+    final box = element.renderObject! as RenderBox;
     final Offset location = box.localToGlobal(sizeToPoint(box.size));
     if (warnIfMissed) {
       final FlutterView view = _viewOf(finder);
-      final HitTestResult result = HitTestResult();
+      final result = HitTestResult();
       binding.hitTestInView(result, location, view.viewId);
       final bool found = result.path.any((HitTestEntry entry) => entry.target == box);
       if (!found) {
-        final RenderView renderView = binding.renderViews.firstWhere((RenderView r) => r.flutterView == view);
+        final RenderView renderView = binding.renderViews.firstWhere(
+          (RenderView r) => r.flutterView == view,
+        );
         final bool outOfBounds = !(Offset.zero & renderView.size).contains(location);
         if (hitTestWarningShouldBeFatal) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('Finder specifies a widget that would not receive pointer events.'),
-            ErrorDescription('A call to $callee() with finder "$finder" derived an Offset ($location) that would not hit test on the specified widget.'),
-            ErrorHint('Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.'),
+            ErrorDescription(
+              'A call to $callee() with finder "$finder" derived an Offset ($location) that would not hit test on the specified widget.',
+            ),
+            ErrorHint(
+              'Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.',
+            ),
             if (outOfBounds)
-              ErrorHint('Indeed, $location is outside the bounds of the root of the render tree, ${renderView.size}.'),
-            box.toDiagnosticsNode(name: 'The finder corresponds to this RenderBox', style: DiagnosticsTreeStyle.singleLine),
+              ErrorHint(
+                'Indeed, $location is outside the bounds of the root of the render tree, ${renderView.size}.',
+              ),
+            box.toDiagnosticsNode(
+              name: 'The finder corresponds to this RenderBox',
+              style: DiagnosticsTreeStyle.singleLine,
+            ),
             ErrorDescription('The hit test result at that offset is: $result'),
-            ErrorDescription('If you expected this target not to be able to receive pointer events, pass "warnIfMissed: false" to "$callee()".'),
-            ErrorDescription('To make this error into a non-fatal warning, set WidgetController.hitTestWarningShouldBeFatal to false.'),
+            ErrorDescription(
+              'If you expected this target not to be able to receive pointer events, pass "warnIfMissed: false" to "$callee()".',
+            ),
+            ErrorDescription(
+              'To make this error into a non-fatal warning, set WidgetController.hitTestWarningShouldBeFatal to false.',
+            ),
           ]);
         }
         printToConsole(
@@ -1952,7 +2155,7 @@ abstract class WidgetController {
   Size getSize(finders.FinderBase<Element> finder) {
     TestAsyncUtils.guardSync();
     final Element element = finder.evaluate().single;
-    final RenderBox box = element.renderObject! as RenderBox;
+    final box = element.renderObject! as RenderBox;
     return box.size;
   }
 
@@ -1962,7 +2165,7 @@ abstract class WidgetController {
   /// soft keyboard.
   ///
   /// Specify `platform` as one of the platforms allowed in
-  /// [platform.Platform.operatingSystem] to make the event appear to be from
+  /// [Platform.operatingSystem] to make the event appear to be from
   /// that type of system. If not specified, defaults to "web" on web, and the
   /// operating system name based on [defaultTargetPlatform] everywhere else.
   ///
@@ -1990,9 +2193,14 @@ abstract class WidgetController {
     LogicalKeyboardKey key, {
     String? platform,
     String? character,
-    PhysicalKeyboardKey? physicalKey
+    PhysicalKeyboardKey? physicalKey,
   }) async {
-    final bool handled = await simulateKeyDownEvent(key, platform: platform, character: character, physicalKey: physicalKey);
+    final bool handled = await simulateKeyDownEvent(
+      key,
+      platform: platform,
+      character: character,
+      physicalKey: physicalKey,
+    );
     // Internally wrapped in async guard.
     await simulateKeyUpEvent(key, platform: platform, physicalKey: physicalKey);
     return handled;
@@ -2004,7 +2212,7 @@ abstract class WidgetController {
   /// from a soft keyboard.
   ///
   /// Specify `platform` as one of the platforms allowed in
-  /// [platform.Platform.operatingSystem] to make the event appear to be from
+  /// [Platform.operatingSystem] to make the event appear to be from
   /// that type of system. If not specified, defaults to "web" on web, and the
   /// operating system name based on [defaultTargetPlatform] everywhere else.
   ///
@@ -2029,10 +2237,15 @@ abstract class WidgetController {
     LogicalKeyboardKey key, {
     String? platform,
     String? character,
-    PhysicalKeyboardKey? physicalKey
+    PhysicalKeyboardKey? physicalKey,
   }) async {
     // Internally wrapped in async guard.
-    return simulateKeyDownEvent(key, platform: platform, character: character, physicalKey: physicalKey);
+    return simulateKeyDownEvent(
+      key,
+      platform: platform,
+      character: character,
+      physicalKey: physicalKey,
+    );
   }
 
   /// Simulates sending a physical key up event through the system channel.
@@ -2041,7 +2254,7 @@ abstract class WidgetController {
   /// not from a soft keyboard.
   ///
   /// Specify `platform` as one of the platforms allowed in
-  /// [platform.Platform.operatingSystem] to make the event appear to be from
+  /// [Platform.operatingSystem] to make the event appear to be from
   /// that type of system. If not specified, defaults to "web" on web, and the
   /// operating system name based on [defaultTargetPlatform] everywhere else.
   ///
@@ -2057,10 +2270,10 @@ abstract class WidgetController {
   ///    corresponding key down and repeat event.
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
   Future<bool> sendKeyUpEvent(
-      LogicalKeyboardKey key, {
-        String? platform,
-        PhysicalKeyboardKey? physicalKey
-      }) async {
+    LogicalKeyboardKey key, {
+    String? platform,
+    PhysicalKeyboardKey? physicalKey,
+  }) async {
     // Internally wrapped in async guard.
     return simulateKeyUpEvent(key, platform: platform, physicalKey: physicalKey);
   }
@@ -2071,7 +2284,7 @@ abstract class WidgetController {
   /// from a soft keyboard.
   ///
   /// Specify `platform` as one of the platforms allowed in
-  /// [platform.Platform.operatingSystem] to make the event appear to be from
+  /// [Platform.operatingSystem] to make the event appear to be from
   /// that type of system. If not specified, defaults to "web" on web, and the
   /// operating system name based on [defaultTargetPlatform] everywhere else.
   ///
@@ -2093,18 +2306,24 @@ abstract class WidgetController {
   ///    key down and up event.
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
   Future<bool> sendKeyRepeatEvent(
-      LogicalKeyboardKey key, {
-        String? platform,
-        String? character,
-        PhysicalKeyboardKey? physicalKey
-      }) async {
+    LogicalKeyboardKey key, {
+    String? platform,
+    String? character,
+    PhysicalKeyboardKey? physicalKey,
+  }) async {
     // Internally wrapped in async guard.
-    return simulateKeyRepeatEvent(key, platform: platform, character: character, physicalKey: physicalKey);
+    return simulateKeyRepeatEvent(
+      key,
+      platform: platform,
+      character: character,
+      physicalKey: physicalKey,
+    );
   }
 
   /// Returns the rect of the given widget. This is only valid once
   /// the widget's render object has been laid out at least once.
-  Rect getRect(finders.FinderBase<Element> finder) => Rect.fromPoints(getTopLeft(finder), getBottomRight(finder));
+  Rect getRect(finders.FinderBase<Element> finder) =>
+      Rect.fromPoints(getTopLeft(finder), getBottomRight(finder));
 
   /// Attempts to find the [SemanticsNode] of first result from `finder`.
   ///
@@ -2145,7 +2364,8 @@ abstract class WidgetController {
   ///
   ///  * [Scrollable.ensureVisible], which is the production API used to
   ///    implement this method.
-  Future<void> ensureVisible(finders.FinderBase<Element> finder) => Scrollable.ensureVisible(element(finder));
+  Future<void> ensureVisible(finders.FinderBase<Element> finder) =>
+      Scrollable.ensureVisible(element(finder));
 
   /// Repeatedly scrolls a [Scrollable] by `delta` in the
   /// [Scrollable.axisDirection] direction until a widget matching `finder` is
@@ -2158,6 +2378,10 @@ abstract class WidgetController {
   ///
   /// If `scrollable` is `null`, a [Finder] that looks for a [Scrollable] is
   /// used instead.
+  ///
+  /// If `continuous` is `true`, the gesture will be reused to simulate the effect
+  /// of actual finger scrolling, which is useful when used alongside listeners
+  /// like [GestureDetector.onTap]. The default is `false`.
   ///
   /// Throws a [StateError] if `finder` is not found after `maxScrolls` scrolls.
   ///
@@ -2172,11 +2396,11 @@ abstract class WidgetController {
   Future<void> scrollUntilVisible(
     finders.FinderBase<Element> finder,
     double delta, {
-      finders.FinderBase<Element>? scrollable,
-      int maxScrolls = 50,
-      Duration duration = const Duration(milliseconds: 50),
-    }
-  ) {
+    finders.FinderBase<Element>? scrollable,
+    int maxScrolls = 50,
+    Duration duration = const Duration(milliseconds: 50),
+    bool continuous = false,
+  }) {
     assert(maxScrolls > 0);
     scrollable ??= finders.find.byType(Scrollable);
     return TestAsyncUtils.guard<void>(() async {
@@ -2197,6 +2421,7 @@ abstract class WidgetController {
         moveStep,
         maxIteration: maxScrolls,
         duration: duration,
+        continuous: continuous,
       );
     });
   }
@@ -2216,15 +2441,23 @@ abstract class WidgetController {
     finders.FinderBase<Element> finder,
     finders.FinderBase<Element> view,
     Offset moveStep, {
-      int maxIteration = 50,
-      Duration duration = const Duration(milliseconds: 50),
+    int maxIteration = 50,
+    Duration duration = const Duration(milliseconds: 50),
+    bool continuous = false,
   }) {
     return TestAsyncUtils.guard<void>(() async {
+      TestGesture? gesture;
       while (maxIteration > 0 && finder.evaluate().isEmpty) {
-        await drag(view, moveStep);
+        if (continuous) {
+          gesture ??= await startGesture(getCenter(view, warnIfMissed: true));
+          await gesture.moveBy(moveStep);
+        } else {
+          await drag(view, moveStep);
+        }
         await pump(duration);
         maxIteration -= 1;
       }
+      await gesture?.up();
       await Scrollable.ensureVisible(element(finder));
     });
   }
@@ -2248,12 +2481,10 @@ class LiveWidgetController extends WidgetController {
   }
 
   @override
-  Future<int> pumpAndSettle([
-    Duration duration = const Duration(milliseconds: 100),
-  ]) {
+  Future<int> pumpAndSettle([Duration duration = const Duration(milliseconds: 100)]) {
     assert(duration > Duration.zero);
     return TestAsyncUtils.guard<int>(() async {
-      int count = 0;
+      var count = 0;
       do {
         await pump(duration);
         count += 1;
@@ -2266,9 +2497,9 @@ class LiveWidgetController extends WidgetController {
   Future<List<Duration>> handlePointerEventRecord(List<PointerEventRecord> records) {
     assert(records.isNotEmpty);
     return TestAsyncUtils.guard<List<Duration>>(() async {
-      final List<Duration> handleTimeStampDiff = <Duration>[];
+      final handleTimeStampDiff = <Duration>[];
       DateTime? startTime;
-      for (final PointerEventRecord record in records) {
+      for (final record in records) {
         final DateTime now = clock.now();
         startTime ??= now;
         // So that the first event is promised to receive a zero timeDiff.

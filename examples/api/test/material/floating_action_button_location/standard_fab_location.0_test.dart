@@ -8,10 +8,10 @@ import 'package:flutter_api_samples/material/floating_action_button_location/sta
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('The FloatingActionButton should have a right padding', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.StandardFabLocationExampleApp(),
-    );
+  testWidgets('The FloatingActionButton should have a right padding', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.StandardFabLocationExampleApp());
 
     expect(find.widgetWithIcon(FloatingActionButton, Icons.add), findsOne);
     final double right = tester.getCenter(find.byType(FloatingActionButton)).dx;

@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/date_picker/show_date_picker.0.dart' as example;
+import 'package:flutter_api_samples/material/date_picker/show_date_picker.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -11,9 +12,7 @@ void main() {
     const String datePickerTitle = 'Select date';
     const String initialDate = 'Sun, Jul 25';
 
-    await tester.pumpWidget(
-      const example.DatePickerApp(),
-    );
+    await tester.pumpWidget(const example.DatePickerApp());
 
     // The date picker is not shown initially.
     expect(find.text(datePickerTitle), findsNothing);

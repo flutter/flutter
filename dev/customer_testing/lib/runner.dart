@@ -22,19 +22,21 @@ Future<bool> runTests({
   }
 
   // Best attempt at evenly splitting tests among the shards
-  final List<File> shardedFiles = <File>[];
-  for (int i = shardIndex; i < files.length; i += numberShards) {
+  final shardedFiles = <File>[];
+  for (var i = shardIndex; i < files.length; i += numberShards) {
     shardedFiles.add(files[i]);
   }
 
-  int testCount = 0;
-  int failures = 0;
+  var testCount = 0;
+  var failures = 0;
 
   if (verbose) {
-    final String s = files.length == 1 ? '' : 's';
+    final s = files.length == 1 ? '' : 's';
     if (numberShards > 1) {
-      final String ss = shardedFiles.length == 1 ? '' : 's';
-      print('${files.length} file$s specified. ${shardedFiles.length} test$ss in shard #$shardIndex ($numberShards shards total).');
+      final ss = shardedFiles.length == 1 ? '' : 's';
+      print(
+        '${files.length} file$s specified. ${shardedFiles.length} test$ss in shard #$shardIndex ($numberShards shards total).',
+      );
     } else {
       print('${files.length} file$s specified.');
     }
@@ -47,25 +49,18 @@ Future<bool> runTests({
     } else {
       print('Tests:');
     }
-    for (final File file in shardedFiles) {
+    for (final file in shardedFiles) {
       print(file.path);
     }
   }
   print('');
 
-  for (final File file in shardedFiles) {
-    if (verbose) {
-      print('Processing ${file.path}...');
-    }
-
-    void printHeader() {
-      if (!verbose) {
-        print('Processing ${file.path}...');
-      }
-    }
+  for (final file in shardedFiles) {
+    // Always print name of running task for debugging individual customer test
+    // suites.
+    print('Processing ${file.path}...');
 
     void failure(String message) {
-      printHeader();
       print('ERROR: $message');
       failures += 1;
     }
@@ -83,16 +78,23 @@ Future<bool> runTests({
       continue;
     }
 
-    bool success = true;
+    var success = true;
 
-    final Directory checkout = Directory.systemTemp.createTempSync('flutter_customer_testing.${path.basenameWithoutExtension(file.path)}.');
+    final Directory checkout = Directory.systemTemp.createTempSync(
+      'flutter_customer_testing.${path.basenameWithoutExtension(file.path)}.',
+    );
     if (verbose) {
       print('Created temporary directory: ${checkout.path}');
     }
     try {
       assert(instructions.fetch.isNotEmpty);
       for (final String fetchCommand in instructions.fetch) {
-        success = await shell(fetchCommand, checkout, verbose: verbose, silentFailure: skipOnFetchFailure, failedCallback: printHeader);
+        success = await shell(
+          fetchCommand,
+          checkout,
+          verbose: verbose,
+          silentFailure: skipOnFetchFailure,
+        );
         if (!success) {
           if (skipOnFetchFailure) {
             if (verbose) {
@@ -107,40 +109,43 @@ Future<bool> runTests({
         }
       }
       if (success) {
-        final Directory customerRepo = Directory(path.join(checkout.path, 'tests'));
+        final customerRepo = Directory(path.join(checkout.path, 'tests'));
         for (final String setupCommand in instructions.setup) {
           if (verbose) {
             print('Running setup command: $setupCommand');
           }
-          success = await shell(
-            setupCommand,
-            customerRepo,
-            verbose: verbose,
-            failedCallback: printHeader,
-          );
+          success = await shell(setupCommand, customerRepo, verbose: verbose);
           if (!success) {
             failure('Setup command failed: $setupCommand');
             break;
           }
         }
         for (final Directory updateDirectory in instructions.update) {
-          final Directory resolvedUpdateDirectory = Directory(path.join(customerRepo.path, updateDirectory.path));
+          final resolvedUpdateDirectory = Directory(
+            path.join(customerRepo.path, updateDirectory.path),
+          );
           if (verbose) {
             print('Updating code in ${resolvedUpdateDirectory.path}...');
           }
           if (!File(path.join(resolvedUpdateDirectory.path, 'pubspec.yaml')).existsSync()) {
-            failure('The directory ${updateDirectory.path}, which was specified as an update directory, does not contain a "pubspec.yaml" file.');
+            failure(
+              'The directory ${updateDirectory.path}, which was specified as an update directory, does not contain a "pubspec.yaml" file.',
+            );
             success = false;
             break;
           }
-          success = await shell('flutter packages get', resolvedUpdateDirectory, verbose: verbose, failedCallback: printHeader);
+          success = await shell('flutter packages get', resolvedUpdateDirectory, verbose: verbose);
           if (!success) {
-            failure('Could not run "flutter pub get" in ${updateDirectory.path}, which was specified as an update directory.');
+            failure(
+              'Could not run "flutter pub get" in ${updateDirectory.path}, which was specified as an update directory.',
+            );
             break;
           }
-          success = await shell('dart fix --apply', resolvedUpdateDirectory, verbose: verbose, failedCallback: printHeader);
+          success = await shell('dart fix --apply', resolvedUpdateDirectory, verbose: verbose);
           if (!success) {
-            failure('Could not run "dart fix" in ${updateDirectory.path}, which was specified as an update directory.');
+            failure(
+              'Could not run "dart fix" in ${updateDirectory.path}, which was specified as an update directory.',
+            );
             break;
           }
         }
@@ -150,29 +155,34 @@ Future<bool> runTests({
           }
           if (instructions.iterations != null && instructions.iterations! < repeat) {
             if (verbose) {
-              final String s = instructions.iterations == 1 ? '' : 's';
-              print('Limiting to ${instructions.iterations} round$s rather than $repeat rounds because of "iterations" directive.');
+              final s = instructions.iterations == 1 ? '' : 's';
+              print(
+                'Limiting to ${instructions.iterations} round$s rather than $repeat rounds because of "iterations" directive.',
+              );
             }
             repeat = instructions.iterations!;
           }
-          final Stopwatch stopwatch = Stopwatch()..start();
-          for (int iteration = 0; iteration < repeat; iteration += 1) {
+          final stopwatch = Stopwatch()..start();
+          for (var iteration = 0; iteration < repeat; iteration += 1) {
             if (verbose && repeat > 1) {
               print('Round ${iteration + 1} of $repeat.');
             }
             for (final String testCommand in instructions.tests) {
               testCount += 1;
-              success = await shell(testCommand, customerRepo, verbose: verbose, failedCallback: printHeader);
+              success = await shell(testCommand, customerRepo, verbose: verbose);
               if (!success) {
-                failure('One or more tests from ${path.basenameWithoutExtension(file.path)} failed.');
+                failure(
+                  'One or more tests from ${path.basenameWithoutExtension(file.path)} failed.',
+                );
                 break;
               }
             }
           }
           stopwatch.stop();
-          if (verbose && success) {
-            print('Tests finished in ${(stopwatch.elapsed.inSeconds / repeat).toStringAsFixed(2)} seconds per iteration.');
-          }
+          // Always print test runtime for debugging.
+          print(
+            'Tests finished in ${(stopwatch.elapsed.inSeconds / repeat).toStringAsFixed(2)} seconds per iteration.',
+          );
         }
       }
     } finally {
@@ -186,7 +196,7 @@ Future<bool> runTests({
       }
     }
     if (!success) {
-      final String s = instructions.contacts.length == 1 ? '' : 's';
+      final s = instructions.contacts.length == 1 ? '' : 's';
       print('Contact$s: ${instructions.contacts.join(", ")}');
     }
     if (verbose || !success) {
@@ -194,7 +204,7 @@ Future<bool> runTests({
     }
   }
   if (failures > 0) {
-    final String s = failures == 1 ? '' : 's';
+    final s = failures == 1 ? '' : 's';
     print('$failures failure$s.');
     return false;
   }
@@ -204,21 +214,41 @@ Future<bool> runTests({
 
 final RegExp _spaces = RegExp(r' +');
 
-Future<bool> shell(String command, Directory directory, { bool verbose = false, bool silentFailure = false, void Function()? failedCallback }) async {
+Future<bool> shell(
+  String command,
+  Directory directory, {
+  bool verbose = false,
+  bool silentFailure = false,
+  void Function()? failedCallback,
+}) async {
   if (verbose) {
     print('>> $command');
   }
   Process process;
   if (Platform.isWindows) {
-    process = await Process.start('CMD.EXE', <String>['/S', '/C', command], workingDirectory: directory.path);
+    process = await Process.start('CMD.EXE', <String>[
+      '/S',
+      '/C',
+      command,
+    ], workingDirectory: directory.path);
   } else {
     final List<String> segments = command.trim().split(_spaces);
-    process = await Process.start(segments.first, segments.skip(1).toList(), workingDirectory: directory.path);
+    process = await Process.start(
+      segments.first,
+      segments.skip(1).toList(),
+      workingDirectory: directory.path,
+    );
   }
-  final List<String> output = <String>[];
-  utf8.decoder.bind(process.stdout).transform(const LineSplitter()).listen(verbose ? printLog : output.add);
-  utf8.decoder.bind(process.stderr).transform(const LineSplitter()).listen(verbose ? printLog : output.add);
-  final bool success = await process.exitCode == 0;
+  final output = <String>[];
+  utf8.decoder
+      .bind(process.stdout)
+      .transform(const LineSplitter())
+      .listen(verbose ? printLog : output.add);
+  utf8.decoder
+      .bind(process.stderr)
+      .transform(const LineSplitter())
+      .listen(verbose ? printLog : output.add);
+  final success = await process.exitCode == 0;
   if (success || silentFailure) {
     return success;
   }

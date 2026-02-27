@@ -16,9 +16,7 @@ class OrderedTraversalPolicyExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('OrderedTraversalPolicy Sample')),
-        body: const Center(
-          child: OrderedTraversalPolicyExample(),
-        ),
+        body: const Center(child: OrderedTraversalPolicyExample()),
       ),
     );
   }
@@ -66,9 +64,7 @@ class OrderedTraversalPolicyExample extends StatelessWidget {
         children: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              DemoButton(name: 'Six', order: 6),
-            ],
+            children: <Widget>[DemoButton(name: 'Six', order: 6)],
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,

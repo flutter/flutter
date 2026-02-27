@@ -10,14 +10,14 @@ import 'package:flutter_api_samples/widgets/transitions/fade_transition.0.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Shows FlutterLogo inside a FadeTransition', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.FadeTransitionExampleApp(),
-    );
+  testWidgets('Shows FlutterLogo inside a FadeTransition', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.FadeTransitionExampleApp());
 
     expect(
-      find.ancestor(
-        of: find.byType(FlutterLogo),
+      find.descendant(
+        of: find.byType(example.FadeTransitionExample),
         matching: find.byType(FadeTransition),
       ),
       findsOneWidget,
@@ -25,12 +25,10 @@ void main() {
   });
 
   testWidgets('FadeTransition animates', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.FadeTransitionExampleApp(),
-    );
+    await tester.pumpWidget(const example.FadeTransitionExampleApp());
 
-    final Finder fadeTransitionFinder = find.ancestor(
-      of: find.byType(FlutterLogo),
+    final Finder fadeTransitionFinder = find.descendant(
+      of: find.byType(example.FadeTransitionExample),
       matching: find.byType(FadeTransition),
     );
 
@@ -41,9 +39,7 @@ void main() {
     expect(fadeTransition.opacity.value, equals(beginOpacity));
 
     // Advance animation to the middle.
-    await tester.pump(
-      example.FadeTransitionExampleApp.duration ~/ 2,
-    );
+    await tester.pump(example.FadeTransitionExampleApp.duration ~/ 2);
 
     final double t = example.FadeTransitionExampleApp.curve.transform(0.5);
 
@@ -54,17 +50,13 @@ void main() {
     );
 
     // Advance animation to the end.
-    await tester.pump(
-      example.FadeTransitionExampleApp.duration ~/ 2,
-    );
+    await tester.pump(example.FadeTransitionExampleApp.duration ~/ 2);
 
     fadeTransition = tester.widget(fadeTransitionFinder);
     expect(fadeTransition.opacity.value, equals(endOpacity));
 
     // Advance animation to the middle.
-    await tester.pump(
-      example.FadeTransitionExampleApp.duration ~/ 2,
-    );
+    await tester.pump(example.FadeTransitionExampleApp.duration ~/ 2);
 
     fadeTransition = tester.widget(fadeTransitionFinder);
     expect(
@@ -73,9 +65,7 @@ void main() {
     );
 
     // Advance animation to the end.
-    await tester.pump(
-      example.FadeTransitionExampleApp.duration ~/ 2,
-    );
+    await tester.pump(example.FadeTransitionExampleApp.duration ~/ 2);
 
     fadeTransition = tester.widget(fadeTransitionFinder);
     expect(fadeTransition.opacity.value, equals(beginOpacity));

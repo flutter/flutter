@@ -30,17 +30,23 @@ class VeryLongPictureScrollingPerfState extends State<VeryLongPictureScrollingPe
           Row(
             children: <Widget>[
               const Text('list:'),
-              Checkbox(value: useList, onChanged: (bool? value) => setState(() {
-                useList = value!;
-              }),),
+              Checkbox(
+                value: useList,
+                onChanged: (bool? value) => setState(() {
+                  useList = value!;
+                }),
+              ),
             ],
           ),
           Row(
             children: <Widget>[
               const Text('consolidate:'),
-              Checkbox(value: consolidate, onChanged: (bool? value) => setState(() {
-                consolidate = value!;
-              }),),
+              Checkbox(
+                value: consolidate,
+                onChanged: (bool? value) => setState(() {
+                  consolidate = value!;
+                }),
+              ),
             ],
           ),
         ],
@@ -51,46 +57,40 @@ class VeryLongPictureScrollingPerfState extends State<VeryLongPictureScrollingPe
         height: MediaQuery.of(context).size.height,
         child: useList
             ? ListView.builder(
-          key: const ValueKey<String>('vlp_list_view_scrollable'),
-          scrollDirection: Axis.horizontal,
-          clipBehavior: Clip.none,
-          itemCount: (waveData.length / 200).ceil(),
-          itemExtent: 100,
-          itemBuilder: (BuildContext context, int index) => CustomPaint(
-              painter: PaintSomeTest(
-                waveData: waveData,
-                from: index * 200,
-                to: min((index + 1) * 200, waveData.length - 1),
+                key: const ValueKey<String>('vlp_list_view_scrollable'),
+                scrollDirection: Axis.horizontal,
+                clipBehavior: Clip.none,
+                itemCount: (waveData.length / 200).ceil(),
+                itemExtent: 100,
+                itemBuilder: (BuildContext context, int index) => CustomPaint(
+                  painter: PaintSomeTest(
+                    waveData: waveData,
+                    from: index * 200,
+                    to: min((index + 1) * 200, waveData.length - 1),
+                  ),
+                ),
               )
-          ),
-        )
             : SingleChildScrollView(
-          key: const ValueKey<String>('vlp_single_child_scrollable'),
-          scrollDirection: Axis.horizontal,
-          child: SizedBox(
-            width: MediaQuery.of(context).size.width * 20,
-            height: MediaQuery.of(context).size.height,
-            child: RepaintBoundary(
-              child: CustomPaint(
-                isComplex: true,
-                painter: PaintTest(
-                  consolidate: consolidate,
-                  waveData: waveData,
+                key: const ValueKey<String>('vlp_single_child_scrollable'),
+                scrollDirection: Axis.horizontal,
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width * 20,
+                  height: MediaQuery.of(context).size.height,
+                  child: RepaintBoundary(
+                    child: CustomPaint(
+                      isComplex: true,
+                      painter: PaintTest(consolidate: consolidate, waveData: waveData),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-        ),
       ),
     );
   }
 }
 
 class PaintTest extends CustomPainter {
-  const PaintTest({
-    required this.consolidate,
-    required this.waveData,
-  });
+  const PaintTest({required this.consolidate, required this.waveData});
 
   final bool consolidate;
   final Int16List waveData;
@@ -99,38 +99,38 @@ class PaintTest extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final double halfHeight = size.height / 2;
     double x = 0;
-    const double strokeSize = .5;
-    const double zoomFactor = .5;
+    const strokeSize = .5;
+    const zoomFactor = .5;
 
-    final Paint paintPos = Paint()
+    final paintPos = Paint()
       ..color = Colors.pink
       ..strokeWidth = strokeSize
       ..isAntiAlias = false
       ..style = PaintingStyle.stroke;
 
-    final Paint paintNeg = Paint()
+    final paintNeg = Paint()
       ..color = Colors.pink
       ..strokeWidth = strokeSize
       ..isAntiAlias = false
       ..style = PaintingStyle.stroke;
 
-    final Paint paintZero = Paint()
+    final paintZero = Paint()
       ..color = Colors.green
       ..strokeWidth = strokeSize
       ..isAntiAlias = false
       ..style = PaintingStyle.stroke;
 
-    int index = 0;
+    var index = 0;
     Paint? listPaint;
-    final Float32List offsets = Float32List(consolidate ? waveData.length * 4 : 4);
-    int used = 0;
+    final offsets = Float32List(consolidate ? waveData.length * 4 : 4);
+    var used = 0;
     for (index = 0; index < waveData.length; index++) {
       final (Paint curPaint, Offset p1) = switch (waveData[index]) {
-        < 0 => (paintPos,  Offset(x, halfHeight * (1 - waveData[index] / 32768))),
-        > 0 => (paintNeg,  Offset(x, halfHeight * (1 - waveData[index] / 32767))),
-        _   => (paintZero, Offset(x, halfHeight + 1)),
+        < 0 => (paintPos, Offset(x, halfHeight * (1 - waveData[index] / 32768))),
+        > 0 => (paintNeg, Offset(x, halfHeight * (1 - waveData[index] / 32767))),
+        _ => (paintZero, Offset(x, halfHeight + 1)),
       };
-      final Offset p0 = Offset(x, halfHeight);
+      final p0 = Offset(x, halfHeight);
       if (consolidate) {
         if (listPaint != null && listPaint != curPaint) {
           canvas.drawRawPoints(PointMode.lines, offsets.sublist(0, used), listPaint);
@@ -160,11 +160,9 @@ class PaintTest extends CustomPainter {
 }
 
 class PaintSomeTest extends CustomPainter {
-  const PaintSomeTest({
-    required this.waveData,
-    int? from,
-    int? to,
-  }) : from = from ?? 0, to = to?? waveData.length;
+  const PaintSomeTest({required this.waveData, int? from, int? to})
+    : from = from ?? 0,
+      to = to ?? waveData.length;
 
   final Int16List waveData;
   final int from;
@@ -174,22 +172,22 @@ class PaintSomeTest extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final double halfHeight = size.height / 2;
     double x = 0;
-    const double strokeSize = .5;
-    const double zoomFactor = .5;
+    const strokeSize = .5;
+    const zoomFactor = .5;
 
-    final Paint paintPos = Paint()
+    final paintPos = Paint()
       ..color = Colors.pink
       ..strokeWidth = strokeSize
       ..isAntiAlias = false
       ..style = PaintingStyle.stroke;
 
-    final Paint paintNeg = Paint()
+    final paintNeg = Paint()
       ..color = Colors.pink
       ..strokeWidth = strokeSize
       ..isAntiAlias = false
       ..style = PaintingStyle.stroke;
 
-    final Paint paintZero = Paint()
+    final paintZero = Paint()
       ..color = Colors.green
       ..strokeWidth = strokeSize
       ..isAntiAlias = false
@@ -197,11 +195,11 @@ class PaintSomeTest extends CustomPainter {
 
     for (int index = from; index <= to; index++) {
       final (Paint curPaint, Offset p1) = switch (waveData[index]) {
-        < 0 => (paintPos,  Offset(x, halfHeight * (1 - waveData[index] / 32768))),
-        > 0 => (paintNeg,  Offset(x, halfHeight * (1 - waveData[index] / 32767))),
-        _   => (paintZero, Offset(x, halfHeight + 1)),
+        < 0 => (paintPos, Offset(x, halfHeight * (1 - waveData[index] / 32768))),
+        > 0 => (paintNeg, Offset(x, halfHeight * (1 - waveData[index] / 32767))),
+        _ => (paintZero, Offset(x, halfHeight + 1)),
       };
-      final Offset p0 = Offset(x, halfHeight);
+      final p0 = Offset(x, halfHeight);
       canvas.drawLine(p0, p1, curPaint);
       x += zoomFactor;
     }
@@ -217,9 +215,9 @@ class PaintSomeTest extends CustomPainter {
 }
 
 Int16List loadGraph() {
-  final Int16List waveData = Int16List(350000);
-  final Random r = Random(0x42);
-  for (int i = 0; i < waveData.length; i++) {
+  final waveData = Int16List(350000);
+  final r = Random(0x42);
+  for (var i = 0; i < waveData.length; i++) {
     waveData[i] = r.nextInt(32768) - 16384;
   }
   return waveData;

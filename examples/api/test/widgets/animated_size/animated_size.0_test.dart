@@ -9,9 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('AnimatedSize animates on tap', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.AnimatedSizeExampleApp(),
-    );
+    await tester.pumpWidget(const example.AnimatedSizeExampleApp());
 
     const Size beginSize = Size.square(100.0);
     const Size endSize = Size.square(250.0);
@@ -27,22 +25,15 @@ void main() {
     expect(box.size, equals(beginSize));
 
     // Advance animation to the middle.
-    await tester.pump(
-      example.AnimatedSizeExampleApp.duration ~/ 2,
-    );
+    await tester.pump(example.AnimatedSizeExampleApp.duration ~/ 2);
 
     final double t = example.AnimatedSizeExampleApp.curve.transform(0.5);
 
     box = tester.renderObject(find.byType(AnimatedSize));
-    expect(
-      box.size,
-      equals(Size.lerp(beginSize, endSize, t)),
-    );
+    expect(box.size, equals(Size.lerp(beginSize, endSize, t)));
 
     // Advance animation to the end.
-    await tester.pump(
-      example.AnimatedSizeExampleApp.duration ~/ 2,
-    );
+    await tester.pump(example.AnimatedSizeExampleApp.duration ~/ 2);
 
     box = tester.renderObject(find.byType(AnimatedSize));
     expect(box.size, equals(endSize));
@@ -55,20 +46,13 @@ void main() {
     expect(box.size, equals(endSize));
 
     // Advance animation to the middle.
-    await tester.pump(
-      example.AnimatedSizeExampleApp.duration ~/ 2,
-    );
+    await tester.pump(example.AnimatedSizeExampleApp.duration ~/ 2);
 
     box = tester.renderObject(find.byType(AnimatedSize));
-    expect(
-      box.size,
-      equals(Size.lerp(endSize, beginSize, t)),
-    );
+    expect(box.size, equals(Size.lerp(endSize, beginSize, t)));
 
     // Advance animation to the end.
-    await tester.pump(
-      example.AnimatedSizeExampleApp.duration ~/ 2,
-    );
+    await tester.pump(example.AnimatedSizeExampleApp.duration ~/ 2);
 
     box = tester.renderObject(find.byType(AnimatedSize));
     expect(box.size, equals(beginSize));

@@ -7,29 +7,95 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('CardTheme copyWith, ==, hashCode basics', () {
-    expect(const CardTheme(), const CardTheme().copyWith());
-    expect(const CardTheme().hashCode, const CardTheme().copyWith().hashCode);
+  test('CardThemeData copyWith, ==, hashCode basics', () {
+    expect(const CardThemeData(), const CardThemeData().copyWith());
+    expect(const CardThemeData().hashCode, const CardThemeData().copyWith().hashCode);
   });
 
-  test('CardTheme lerp special cases', () {
-    expect(CardTheme.lerp(null, null, 0), const CardTheme());
-    const CardTheme theme = CardTheme();
-    expect(identical(CardTheme.lerp(theme, theme, 0.5), theme), true);
+  test('CardThemeData lerp special cases', () {
+    expect(CardThemeData.lerp(null, null, 0), const CardThemeData());
+    const theme = CardThemeData();
+    expect(identical(CardThemeData.lerp(theme, theme, 0.5), theme), true);
+  });
+
+  test('CardThemeData defaults', () {
+    const cardThemeData = CardThemeData();
+
+    expect(cardThemeData.clipBehavior, null);
+    expect(cardThemeData.color, null);
+    expect(cardThemeData.elevation, null);
+    expect(cardThemeData.margin, null);
+    expect(cardThemeData.shadowColor, null);
+    expect(cardThemeData.shape, null);
+    expect(cardThemeData.surfaceTintColor, null);
+
+    const cardTheme = CardTheme(data: CardThemeData(), child: SizedBox());
+    expect(cardTheme.clipBehavior, null);
+    expect(cardTheme.color, null);
+    expect(cardTheme.elevation, null);
+    expect(cardTheme.margin, null);
+    expect(cardTheme.shadowColor, null);
+    expect(cardTheme.shape, null);
+    expect(cardTheme.surfaceTintColor, null);
+  });
+
+  testWidgets('Default CardThemeData debugFillProperties', (WidgetTester tester) async {
+    final builder = DiagnosticPropertiesBuilder();
+    const CardThemeData().debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+    expect(description, <String>[]);
+  });
+
+  testWidgets('CardThemeData implements debugFillProperties', (WidgetTester tester) async {
+    final builder = DiagnosticPropertiesBuilder();
+    const CardThemeData(
+      clipBehavior: Clip.antiAlias,
+      color: Colors.amber,
+      elevation: 10.5,
+      margin: EdgeInsets.all(20.5),
+      shadowColor: Colors.green,
+      surfaceTintColor: Colors.purple,
+      shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20.5))),
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+    expect(description[0], 'clipBehavior: Clip.antiAlias');
+    expect(description[1], 'color: MaterialColor(primary value: ${const Color(0xffffc107)})');
+    expect(description[2], 'shadowColor: MaterialColor(primary value: ${const Color(0xff4caf50)})');
+    expect(
+      description[3],
+      'surfaceTintColor: MaterialColor(primary value: ${const Color(0xff9c27b0)})',
+    );
+    expect(description[4], 'elevation: 10.5');
+    expect(description[5], 'margin: EdgeInsets.all(20.5)');
+    expect(
+      description[6],
+      'shape: BeveledRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(20.5))',
+    );
   });
 
   testWidgets('Material3 - Passing no CardTheme returns defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
-    await tester.pumpWidget(MaterialApp(
-      theme: theme,
-      home: const Scaffold(
-        body: Card(),
+    final theme = ThemeData();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: const Scaffold(body: Card()),
       ),
-    ));
+    );
 
     final Padding padding = _getCardPadding(tester);
     final Material material = _getCardMaterial(tester);
@@ -40,20 +106,21 @@ void main() {
     expect(material.surfaceTintColor, Colors.transparent); // Default primary color
     expect(material.elevation, 1.0);
     expect(padding.padding, const EdgeInsets.all(4.0));
-    expect(material.shape, const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(12.0)),
-    ));
+    expect(
+      material.shape,
+      const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+    );
   });
 
   testWidgets('Card uses values from CardTheme', (WidgetTester tester) async {
-    final CardTheme cardTheme = _cardTheme();
+    final CardThemeData cardTheme = _cardTheme();
 
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(cardTheme: cardTheme),
-      home: const Scaffold(
-        body: Card(),
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(cardTheme: cardTheme),
+        home: const Scaffold(body: Card()),
       ),
-    ));
+    );
 
     final Padding padding = _getCardPadding(tester);
     final Material material = _getCardMaterial(tester);
@@ -71,25 +138,27 @@ void main() {
     const Clip clip = Clip.hardEdge;
     const Color color = Colors.orange;
     const Color shadowColor = Colors.pink;
-    const double elevation = 7.0;
-    const EdgeInsets margin = EdgeInsets.all(3.0);
+    const elevation = 7.0;
+    const margin = EdgeInsets.all(3.0);
     const ShapeBorder shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(9.0)),
     );
 
-    await tester.pumpWidget(MaterialApp(
-      theme: _themeData().copyWith(cardTheme: _cardTheme()),
-      home: const Scaffold(
-        body: Card(
-          clipBehavior: clip,
-          color: color,
-          shadowColor: shadowColor,
-          elevation: elevation,
-          margin: margin,
-          shape: shape,
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: _themeData().copyWith(cardTheme: _cardTheme()),
+        home: const Scaffold(
+          body: Card(
+            clipBehavior: clip,
+            color: color,
+            shadowColor: shadowColor,
+            elevation: elevation,
+            margin: margin,
+            shape: shape,
+          ),
         ),
       ),
-    ));
+    );
 
     final Padding padding = _getCardPadding(tester);
     final Material material = _getCardMaterial(tester);
@@ -102,37 +171,41 @@ void main() {
     expect(material.shape, shape);
   });
 
-  testWidgets('CardTheme properties take priority over ThemeData properties', (WidgetTester tester) async {
-    final CardTheme cardTheme = _cardTheme();
+  testWidgets('CardTheme properties take priority over ThemeData properties', (
+    WidgetTester tester,
+  ) async {
+    final CardThemeData cardTheme = _cardTheme();
     final ThemeData themeData = _themeData().copyWith(cardTheme: cardTheme);
 
-    await tester.pumpWidget(MaterialApp(
-      theme: themeData,
-      home: const Scaffold(
-        body: Card(),
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: const Scaffold(body: Card()),
       ),
-    ));
+    );
 
     final Material material = _getCardMaterial(tester);
     expect(material.color, cardTheme.color);
   });
 
-  testWidgets('Material3 - ThemeData properties are used when no CardTheme is set', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData(useMaterial3: true);
+  testWidgets('Material3 - ThemeData properties are used when no CardTheme is set', (
+    WidgetTester tester,
+  ) async {
+    final themeData = ThemeData();
 
-    await tester.pumpWidget(MaterialApp(
-      theme: themeData,
-      home: const Scaffold(
-        body: Card(),
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: const Scaffold(body: Card()),
       ),
-    ));
+    );
 
     final Material material = _getCardMaterial(tester);
     expect(material.color, themeData.colorScheme.surfaceContainerLow);
   });
 
   testWidgets('Material3 - CardTheme customizes shape', (WidgetTester tester) async {
-    const CardTheme cardTheme = CardTheme(
+    const cardTheme = CardThemeData(
       color: Colors.white,
       shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(7))),
       elevation: 1.0,
@@ -140,24 +213,138 @@ void main() {
 
     final Key painterKey = UniqueKey();
 
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(cardTheme: cardTheme, useMaterial3: true),
-      home: Scaffold(
-        body: RepaintBoundary(
-          key: painterKey,
-          child: Center(
-            child: Card(
-              child: SizedBox.fromSize(size: const Size(200, 300)),
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(cardTheme: cardTheme),
+        home: Scaffold(
+          body: RepaintBoundary(
+            key: painterKey,
+            child: Center(
+              child: Card(child: SizedBox.fromSize(size: const Size(200, 300))),
             ),
           ),
         ),
       ),
-    ));
-
-    await expectLater(
-      find.byKey(painterKey),
-      matchesGoldenFile('card_theme.custom_shape.png'),
     );
+
+    await expectLater(find.byKey(painterKey), matchesGoldenFile('card_theme.custom_shape.png'));
+  });
+
+  testWidgets('Card properties are taken over the theme values', (WidgetTester tester) async {
+    const Clip themeClipBehavior = Clip.antiAlias;
+    const Color themeColor = Colors.red;
+    const Color themeShadowColor = Colors.orange;
+    const themeElevation = 10.0;
+    const themeMargin = EdgeInsets.all(12.0);
+    const ShapeBorder themeShape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(15.0)),
+    );
+
+    const Clip clipBehavior = Clip.hardEdge;
+    const Color color = Colors.yellow;
+    const Color shadowColor = Colors.green;
+    const elevation = 20.0;
+    const margin = EdgeInsets.all(18.0);
+    const ShapeBorder shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(25.0)),
+    );
+
+    final themeData = ThemeData(
+      cardTheme: const CardThemeData(
+        clipBehavior: themeClipBehavior,
+        color: themeColor,
+        shadowColor: themeShadowColor,
+        elevation: themeElevation,
+        margin: themeMargin,
+        shape: themeShape,
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: const Scaffold(
+          body: Card(
+            clipBehavior: clipBehavior,
+            color: color,
+            shadowColor: shadowColor,
+            elevation: elevation,
+            margin: margin,
+            shape: shape,
+            child: SizedBox(width: 200, height: 200),
+          ),
+        ),
+      ),
+    );
+
+    final Padding cardMargin = _getCardPadding(tester);
+    final Material material = _getCardMaterial(tester);
+
+    expect(material.clipBehavior, clipBehavior);
+    expect(material.color, color);
+    expect(material.shadowColor, shadowColor);
+    expect(material.elevation, elevation);
+    expect(material.shape, shape);
+    expect(cardMargin.padding, margin);
+  });
+
+  testWidgets('Local CardTheme can override global CardTheme', (WidgetTester tester) async {
+    const Clip globalClipBehavior = Clip.antiAlias;
+    const Color globalColor = Colors.red;
+    const Color globalShadowColor = Colors.orange;
+    const globalElevation = 10.0;
+    const globalMargin = EdgeInsets.all(12.0);
+    const ShapeBorder globalShape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(15.0)),
+    );
+
+    const Clip localClipBehavior = Clip.hardEdge;
+    const Color localColor = Colors.yellow;
+    const Color localShadowColor = Colors.green;
+    const localElevation = 20.0;
+    const localMargin = EdgeInsets.all(18.0);
+    const ShapeBorder localShape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(25.0)),
+    );
+
+    final themeData = ThemeData(
+      cardTheme: const CardThemeData(
+        clipBehavior: globalClipBehavior,
+        color: globalColor,
+        shadowColor: globalShadowColor,
+        elevation: globalElevation,
+        margin: globalMargin,
+        shape: globalShape,
+      ),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: const Scaffold(
+          body: CardTheme(
+            data: CardThemeData(
+              clipBehavior: localClipBehavior,
+              color: localColor,
+              shadowColor: localShadowColor,
+              elevation: localElevation,
+              margin: localMargin,
+              shape: localShape,
+            ),
+            child: Card(child: SizedBox(width: 200, height: 200)),
+          ),
+        ),
+      ),
+    );
+
+    final Padding cardMargin = _getCardPadding(tester);
+    final Material material = _getCardMaterial(tester);
+
+    expect(material.clipBehavior, localClipBehavior);
+    expect(material.color, localColor);
+    expect(material.shadowColor, localShadowColor);
+    expect(material.elevation, localElevation);
+    expect(material.shape, localShape);
+    expect(cardMargin.padding, localMargin);
   });
 
   group('Material 2', () {
@@ -165,27 +352,29 @@ void main() {
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgets('Material2 - ThemeData properties are used when no CardTheme is set', (WidgetTester tester) async {
-      final ThemeData themeData = ThemeData(useMaterial3: false);
+    testWidgets('Material2 - ThemeData properties are used when no CardTheme is set', (
+      WidgetTester tester,
+    ) async {
+      final themeData = ThemeData(useMaterial3: false);
 
-      await tester.pumpWidget(MaterialApp(
-        theme: themeData,
-        home: const Scaffold(
-          body: Card(),
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: const Scaffold(body: Card()),
         ),
-      ));
+      );
 
       final Material material = _getCardMaterial(tester);
       expect(material.color, themeData.cardColor);
     });
 
     testWidgets('Material2 - Passing no CardTheme returns defaults', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(
-        theme: ThemeData(useMaterial3: false),
-        home: const Scaffold(
-          body: Card(),
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: const Scaffold(body: Card()),
         ),
-      ));
+      );
 
       final Padding padding = _getCardPadding(tester);
       final Material material = _getCardMaterial(tester);
@@ -196,13 +385,14 @@ void main() {
       expect(material.surfaceTintColor, null);
       expect(material.elevation, 1.0);
       expect(padding.padding, const EdgeInsets.all(4.0));
-      expect(material.shape, const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(4.0)),
-      ));
+      expect(
+        material.shape,
+        const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
+      );
     });
 
     testWidgets('Material2 - CardTheme customizes shape', (WidgetTester tester) async {
-      const CardTheme cardTheme = CardTheme(
+      const cardTheme = CardThemeData(
         color: Colors.white,
         shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(7))),
         elevation: 1.0,
@@ -210,19 +400,19 @@ void main() {
 
       final Key painterKey = UniqueKey();
 
-      await tester.pumpWidget(MaterialApp(
-        theme: ThemeData(cardTheme: cardTheme, useMaterial3: false),
-        home: Scaffold(
-          body: RepaintBoundary(
-            key: painterKey,
-            child: Center(
-              child: Card(
-                child: SizedBox.fromSize(size: const Size(200, 300)),
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(cardTheme: cardTheme, useMaterial3: false),
+          home: Scaffold(
+            body: RepaintBoundary(
+              key: painterKey,
+              child: Center(
+                child: Card(child: SizedBox.fromSize(size: const Size(200, 300))),
               ),
             ),
           ),
         ),
-      ));
+      );
 
       await expectLater(
         find.byKey(painterKey),
@@ -232,40 +422,30 @@ void main() {
   });
 }
 
-CardTheme _cardTheme() {
-  return const CardTheme(
+CardThemeData _cardTheme() {
+  return const CardThemeData(
     clipBehavior: Clip.antiAlias,
     color: Colors.green,
     shadowColor: Colors.red,
     surfaceTintColor: Colors.purple,
     elevation: 6.0,
     margin: EdgeInsets.all(7.0),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(5.0)),
-    ),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5.0))),
   );
 }
 
 ThemeData _themeData() {
-  return ThemeData(
-    cardColor: Colors.pink,
-  );
+  return ThemeData(cardColor: Colors.pink);
 }
 
 Material _getCardMaterial(WidgetTester tester) {
   return tester.widget<Material>(
-    find.descendant(
-      of: find.byType(Card),
-      matching: find.byType(Material),
-    ),
+    find.descendant(of: find.byType(Card), matching: find.byType(Material)),
   );
 }
 
 Padding _getCardPadding(WidgetTester tester) {
   return tester.widget<Padding>(
-    find.descendant(
-      of: find.byType(Card),
-      matching: find.byType(Padding),
-    ),
+    find.descendant(of: find.byType(Card), matching: find.byType(Padding)),
   );
 }

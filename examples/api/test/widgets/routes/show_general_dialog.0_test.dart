@@ -3,16 +3,15 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/routes/show_general_dialog.0.dart' as example;
+import 'package:flutter_api_samples/widgets/routes/show_general_dialog.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Open and dismiss general dialog', (WidgetTester tester) async {
     const String dialogText = 'Alert!';
 
-    await tester.pumpWidget(
-      const example.GeneralDialogApp(),
-    );
+    await tester.pumpWidget(const example.GeneralDialogApp());
 
     expect(find.text(dialogText), findsNothing);
 

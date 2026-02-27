@@ -22,22 +22,19 @@ class AnalyzeOnce extends AnalyzeBase {
     required super.artifacts,
     required super.suppressAnalytics,
     this.workingDirectory,
-  }) : super(
-        repoPackages: repoPackages,
-      );
+  }) : super(repoPackages: repoPackages);
 
   /// The working directory for testing analysis using dartanalyzer.
   final Directory? workingDirectory;
 
   @override
   Future<void> analyze() async {
-    final String currentDirectory =
-        (workingDirectory ?? fileSystem.currentDirectory).path;
+    final String currentDirectory = (workingDirectory ?? fileSystem.currentDirectory).path;
     final Set<String> items = findDirectories(argResults, fileSystem);
 
     if (isFlutterRepo) {
       // check for conflicting dependencies
-      final PackageDependencyTracker dependencies = PackageDependencyTracker();
+      final dependencies = PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
       items.add(flutterRoot);
       if (argResults.wasParsed('current-package') && (argResults['current-package'] as bool)) {
@@ -53,10 +50,10 @@ class AnalyzeOnce extends AnalyzeBase {
       throwToolExit('Nothing to analyze.', exitCode: 0);
     }
 
-    final Completer<void> analysisCompleter = Completer<void>();
-    final List<AnalysisError> errors = <AnalysisError>[];
+    final analysisCompleter = Completer<void>();
+    final errors = <AnalysisError>[];
 
-    final AnalysisServer server = AnalysisServer(
+    final server = AnalysisServer(
       sdkPath,
       items.toList(),
       fileSystem: fileSystem,
@@ -81,7 +78,9 @@ class AnalyzeOnce extends AnalyzeBase {
         }
       }
 
-      subscription = server.onAnalyzing.listen((bool isAnalyzing) => handleAnalysisStatus(isAnalyzing));
+      subscription = server.onAnalyzing.listen(
+        (bool isAnalyzing) => handleAnalysisStatus(isAnalyzing),
+      );
 
       void handleAnalysisErrors(FileAnalysisErrors fileErrors) {
         fileErrors.errors.removeWhere((AnalysisError error) => error.type == 'TODO');
@@ -93,16 +92,18 @@ class AnalyzeOnce extends AnalyzeBase {
 
       await server.start();
       // Completing the future in the callback can't fail.
-      unawaited(server.onExit.then<void>((int? exitCode) {
-        if (!analysisCompleter.isCompleted) {
-          analysisCompleter.completeError(
-            // Include the last 20 lines of server output in exception message
-            Exception(
-              'analysis server exited with code $exitCode and output:\n${server.getLogs(20)}',
-            ),
-          );
-        }
-      }));
+      unawaited(
+        server.onExit.then<void>((int? exitCode) {
+          if (!analysisCompleter.isCompleted) {
+            analysisCompleter.completeError(
+              // Include the last 20 lines of server output in exception message
+              Exception(
+                'analysis server exited with code $exitCode and output:\n${server.getLogs(20)}',
+              ),
+            );
+          }
+        }),
+      );
 
       // collect results
       timer = Stopwatch()..start();
@@ -110,9 +111,7 @@ class AnalyzeOnce extends AnalyzeBase {
           ? '${items.length} ${items.length == 1 ? 'item' : 'items'}'
           : fileSystem.path.basename(items.first);
       progress = argResults['preamble'] == true
-          ? logger.startProgress(
-            'Analyzing $message...',
-          )
+          ? logger.startProgress('Analyzing $message...')
           : null;
 
       await analysisCompleter.future;
@@ -135,7 +134,7 @@ class AnalyzeOnce extends AnalyzeBase {
       logger.printStatus('');
     }
     errors.sort();
-    for (final AnalysisError error in errors) {
+    for (final error in errors) {
       logger.printStatus(error.toString(), hangingIndent: 7);
     }
 
@@ -161,7 +160,7 @@ class AnalyzeOnce extends AnalyzeBase {
   }
 
   bool _isFatal(List<AnalysisError> errors) {
-    for (final AnalysisError error in errors) {
+    for (final error in errors) {
       final AnalysisSeverity severityLevel = error.writtenError.severityLevel;
       if (severityLevel == AnalysisSeverity.error) {
         return true;

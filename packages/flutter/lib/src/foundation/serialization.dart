@@ -5,7 +5,8 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-export 'dart:typed_data' show ByteData, Endian, Float32List, Float64List, Int32List, Int64List, Uint8List;
+export 'dart:typed_data'
+    show ByteData, Endian, Float32List, Float64List, Int32List, Int64List, Uint8List;
 
 /// Write-only buffer for incrementally building a [ByteData] instance.
 ///
@@ -20,7 +21,7 @@ class WriteBuffer {
   /// performance.
   factory WriteBuffer({int startCapacity = 8}) {
     assert(startCapacity > 0);
-    final ByteData eightBytes = ByteData(8);
+    final eightBytes = ByteData(8);
     final Uint8List eightBytesAsList = eightBytes.buffer.asUint8List();
     return WriteBuffer._(Uint8List(startCapacity), eightBytes, eightBytesAsList);
   }
@@ -64,7 +65,7 @@ class WriteBuffer {
   void _resize([int? requiredLength]) {
     final int doubleLength = _buffer.length * 2;
     final int newLength = math.max(requiredLength ?? 0, doubleLength);
-    final Uint8List newBuffer = Uint8List(newLength);
+    final newBuffer = Uint8List(newLength);
     newBuffer.setRange(0, _buffer.length, _buffer);
     _buffer = newBuffer;
   }

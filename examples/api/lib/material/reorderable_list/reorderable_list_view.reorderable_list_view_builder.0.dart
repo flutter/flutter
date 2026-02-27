@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [ReorderableListView.ReorderableListView.builder].
+/// Flutter code sample for [ReorderableListView.builder].
 
 void main() => runApp(const ReorderableApp());
 
@@ -16,9 +16,7 @@ class ReorderableApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('ReorderableListView Sample')),
-        body: const Center(
-          child: ReorderableExample(),
-        ),
+        body: const Center(child: ReorderableExample()),
       ),
     );
   }
@@ -37,8 +35,8 @@ class _ReorderableExampleState extends State<ReorderableExample> {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
-    final Color evenItemColor = colorScheme.primary.withOpacity(0.15);
+    final Color oddItemColor = colorScheme.primary.withValues(alpha: 0.05);
+    final Color evenItemColor = colorScheme.primary.withValues(alpha: 0.15);
 
     return ReorderableListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 40),

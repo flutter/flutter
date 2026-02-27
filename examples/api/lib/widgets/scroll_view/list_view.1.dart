@@ -73,10 +73,7 @@ class _ListViewExampleState extends State<ListViewExample> {
 }
 
 class KeepAliveItem extends StatefulWidget {
-  const KeepAliveItem({
-    required Key super.key,
-    required this.data,
-  });
+  const KeepAliveItem({required Key super.key, required this.data});
 
   final String data;
 

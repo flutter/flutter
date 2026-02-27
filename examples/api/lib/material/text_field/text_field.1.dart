@@ -13,9 +13,7 @@ class TextFieldExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: TextFieldExample(),
-    );
+    return const MaterialApp(home: TextFieldExample());
   }
 }
 
@@ -53,7 +51,9 @@ class _TextFieldExampleState extends State<TextFieldExample> {
               builder: (BuildContext context) {
                 return AlertDialog(
                   title: const Text('Thanks!'),
-                  content: Text('You typed "$value", which has length ${value.characters.length}.'),
+                  content: Text(
+                    'You typed "$value", which has length ${value.characters.length}.',
+                  ),
                   actions: <Widget>[
                     TextButton(
                       onPressed: () {

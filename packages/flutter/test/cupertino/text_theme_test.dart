@@ -10,7 +10,7 @@ void main() {
     // Check the default cupertino text theme against the style values
     // Values derived from https://developer.apple.com/design/resources/.
 
-    const CupertinoTextThemeData theme = CupertinoTextThemeData();
+    const theme = CupertinoTextThemeData();
     const FontWeight normal = FontWeight.normal;
     const FontWeight regular = FontWeight.w400;
     const FontWeight medium = FontWeight.w500;
@@ -28,6 +28,12 @@ void main() {
     expect(theme.actionTextStyle.fontFamily, 'CupertinoSystemText');
     expect(theme.actionTextStyle.letterSpacing, -0.41);
     expect(theme.actionTextStyle.fontWeight, null);
+
+    // ActionSmallTextStyle 15 -0.23 (aka "Subheadline/Regular")
+    expect(theme.actionSmallTextStyle.fontSize, 15);
+    expect(theme.actionSmallTextStyle.fontFamily, 'CupertinoSystemText');
+    expect(theme.actionSmallTextStyle.letterSpacing, -0.23);
+    expect(theme.actionSmallTextStyle.fontWeight, null);
 
     // TextStyle 17 -0.41
     expect(theme.tabLabelTextStyle.fontSize, 10);

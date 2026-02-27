@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'button_style.dart';
+/// @docImport 'text_selection_toolbar.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
@@ -61,7 +65,7 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
   ///  * [getPadding], which calculates the standard padding based on the
   ///    button's position.
   ///  * [ButtonStyle.padding], which is where this padding is applied.
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   /// The alignment of the button's child.
   ///
@@ -77,26 +81,26 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
   ///
   /// Standard Material [TextSelectionToolbar]s have buttons with different
   /// padding depending on their position in the toolbar.
-  static EdgeInsets getPadding(int index, int total) {
+  static EdgeInsetsGeometry getPadding(int index, int total) {
     assert(total > 0 && index >= 0 && index < total);
     final _TextSelectionToolbarItemPosition position = _getPosition(index, total);
-    return EdgeInsets.only(
-      left: _getLeftPadding(position),
-      right: _getRightPadding(position),
+    return EdgeInsetsDirectional.only(
+      start: _getStartPadding(position),
+      end: _getEndPadding(position),
     );
   }
 
-  static double _getLeftPadding(_TextSelectionToolbarItemPosition position) {
-    if (position == _TextSelectionToolbarItemPosition.first
-        || position == _TextSelectionToolbarItemPosition.only) {
+  static double _getStartPadding(_TextSelectionToolbarItemPosition position) {
+    if (position == _TextSelectionToolbarItemPosition.first ||
+        position == _TextSelectionToolbarItemPosition.only) {
       return _kEndPadding;
     }
     return _kMiddlePadding;
   }
 
-  static double _getRightPadding(_TextSelectionToolbarItemPosition position) {
-    if (position == _TextSelectionToolbarItemPosition.last
-        || position == _TextSelectionToolbarItemPosition.only) {
+  static double _getEndPadding(_TextSelectionToolbarItemPosition position) {
+    if (position == _TextSelectionToolbarItemPosition.last ||
+        position == _TextSelectionToolbarItemPosition.only) {
       return _kEndPadding;
     }
     return _kMiddlePadding;
@@ -119,7 +123,7 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
   TextSelectionToolbarTextButton copyWith({
     Widget? child,
     VoidCallback? onPressed,
-    EdgeInsets? padding,
+    EdgeInsetsGeometry? padding,
     AlignmentGeometry? alignment,
   }) {
     return TextSelectionToolbarTextButton(

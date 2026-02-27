@@ -23,59 +23,20 @@ void main() {
   late FileSystem fileSystem;
 
   group('analyze --suggestions command integration', () {
-
     setUp(() {
       fileSystem = globals.localFileSystem;
     });
 
     testUsingContext('General Info Project Validator', () async {
-      final BufferLogger loggerTest = BufferLogger.test();
-      final AnalyzeCommand command = AnalyzeCommand(
-          artifacts: globals.artifacts!,
-          fileSystem: fileSystem,
-          logger: loggerTest,
-          platform: globals.platform,
-          terminal: globals.terminal,
-          processManager: globals.processManager,
-          allProjectValidators: <ProjectValidator>[GeneralInfoProjectValidator()],
-          suppressAnalytics: true,
-      );
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-
-      await runner.run(<String>[
-        'analyze',
-        '--no-pub',
-        '--no-current-package',
-        '--suggestions',
-        '../../dev/integration_tests/flutter_gallery',
-      ]);
-
-      const String expected = '\n'
-      '┌───────────────────────────────────────────────────────────────────┐\n'
-      '│ General Info                                                      │\n'
-      '│ [✓] App Name: flutter_gallery                                     │\n'
-      '│ [✓] Supported Platforms: android, ios, web, macos, linux, windows │\n'
-      '│ [✓] Is Flutter Package: yes                                       │\n'
-      '│ [✓] Uses Material Design: yes                                     │\n'
-      '│ [✓] Is Plugin: no                                                 │\n'
-      '│ [✓] Java/Gradle/Android Gradle Plugin: ${AndroidProject.validJavaGradleAgpString} │\n'
-      '└───────────────────────────────────────────────────────────────────┘\n';
-
-      expect(loggerTest.statusText, contains(expected));
-    });
-
-    testUsingContext('PubDependenciesProjectValidator success ', () async {
-      final BufferLogger loggerTest = BufferLogger.test();
-      final AnalyzeCommand command = AnalyzeCommand(
+      final loggerTest = BufferLogger.test();
+      final command = AnalyzeCommand(
         artifacts: globals.artifacts!,
         fileSystem: fileSystem,
         logger: loggerTest,
         platform: globals.platform,
         terminal: globals.terminal,
         processManager: globals.processManager,
-        allProjectValidators: <ProjectValidator>[
-          PubDependenciesProjectValidator(globals.processManager),
-        ],
+        allProjectValidators: <ProjectValidator>[GeneralInfoProjectValidator()],
         suppressAnalytics: true,
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -88,11 +49,18 @@ void main() {
         '../../dev/integration_tests/flutter_gallery',
       ]);
 
-      const String expected = '\n'
-        '┌────────────────────────────────────────────────────────────────────────────────────┐\n'
-        '│ Pub dependencies                                                                   │\n'
-        '│ [✓] Dart dependencies: All pub dependencies are hosted on https://pub.dartlang.org │\n'
-        '└────────────────────────────────────────────────────────────────────────────────────┘\n';
+      const expected =
+          '\n'
+          '┌───────────────────────────────────────────────────────────────────────────┐\n'
+          '│ General Info                                                              │\n'
+          '│ [✓] App Name: flutter_gallery                                             │\n'
+          '│ [✓] Supported Platforms: android, ios, web, macos, linux, windows         │\n'
+          '│ [✓] Is Flutter Package: yes                                               │\n'
+          '│ [✓] Uses Material Design: yes                                             │\n'
+          '│ [✓] Is Plugin: no                                                         │\n'
+          '│ [✓] Java/Gradle/KGP/Android Gradle Plugin: ${AndroidProject.validJavaGradleAgpKgpString} │\n'
+          '└───────────────────────────────────────────────────────────────────────────┘\n';
+
       expect(loggerTest.statusText, contains(expected));
     });
   });
@@ -104,7 +72,11 @@ void main() {
     setUpAll(() async {
       platform = const LocalPlatform();
       tempDir = createResolvedTempDirectorySync('run_test.');
-      await globals.processManager.run(<String>['flutter', 'create', 'test_project'], workingDirectory: tempDir.path);
+      await globals.processManager.run(<String>[
+        'flutter',
+        'create',
+        'test_project',
+      ], workingDirectory: tempDir.path);
     });
 
     tearDown(() async {
@@ -112,14 +84,19 @@ void main() {
     });
 
     testUsingContext('analyze --suggestions --machine produces expected values', () async {
-      final ProcessResult result = await globals.processManager.run(<String>['flutter', 'analyze', '--suggestions', '--machine'], workingDirectory: tempDir.childDirectory('test_project').path);
+      final ProcessResult result = await globals.processManager.run(<String>[
+        'flutter',
+        'analyze',
+        '--suggestions',
+        '--machine',
+      ], workingDirectory: tempDir.childDirectory('test_project').path);
 
       expect(result.stdout is String, true);
       expect((result.stdout as String).startsWith('{\n'), true);
       expect(result.stdout, isNot(contains(',\n}'))); // No trailing commas allowed in JSON
       expect((result.stdout as String).endsWith('}\n'), true);
 
-      final Map<String, dynamic> decoded = jsonDecode(result.stdout as String) as Map<String, dynamic>;
+      final decoded = jsonDecode(result.stdout as String) as Map<String, dynamic>;
 
       expect(decoded.containsKey('FlutterProject.android.exists'), true);
       expect(decoded.containsKey('FlutterProject.ios.exists'), true);

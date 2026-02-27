@@ -11,23 +11,24 @@ class _MultiplyPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    const int xDenominator = 2;
-    const int yDenominator = 10;
+    const xDenominator = 2;
+    const yDenominator = 10;
     final double width = size.width / xDenominator;
     final double height = size.height / yDenominator;
 
-    for (int y = 0; y < yDenominator; y++) {
-      for (int x = 0; x < xDenominator; x++) {
+    for (var y = 0; y < yDenominator; y++) {
+      for (var x = 0; x < xDenominator; x++) {
         final Rect rect = Offset(x * width, y * height) & Size(width, height);
-        final Paint basePaint = Paint()
+        final basePaint = Paint()
           ..color = Color.fromARGB(
-              (((x + 1) * width) / size.width * 255.0).floor(),
-              (((y + 1) * height) / size.height * 255.0).floor(),
-              255,
-              127);
+            (((x + 1) * width) / size.width * 255.0).floor(),
+            (((y + 1) * height) / size.height * 255.0).floor(),
+            255,
+            127,
+          );
         canvas.drawRect(rect, basePaint);
 
-        final Paint multiplyPaint = Paint()
+        final multiplyPaint = Paint()
           ..color = _color
           ..blendMode = BlendMode.multiply;
         canvas.drawRect(rect, multiplyPaint);
@@ -48,8 +49,12 @@ class AnimatedAdvancedBlend extends StatefulWidget {
   State<AnimatedAdvancedBlend> createState() => _AnimatedAdvancedBlendState();
 }
 
-class _AnimatedAdvancedBlendState extends State<AnimatedAdvancedBlend> with SingleTickerProviderStateMixin {
-  late final AnimationController controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 5000));
+class _AnimatedAdvancedBlendState extends State<AnimatedAdvancedBlend>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 5000),
+  );
   late final Animation<double> animation = controller.drive(Tween<double>(begin: 0.0, end: 1.0));
   Color _color = const Color.fromARGB(255, 255, 0, 255);
 
@@ -73,11 +78,9 @@ class _AnimatedAdvancedBlendState extends State<AnimatedAdvancedBlend> with Sing
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        home: Scaffold(
-      body: CustomPaint(
-        painter: _MultiplyPainter(_color),
-        child: Container(),
+      home: Scaffold(
+        body: CustomPaint(painter: _MultiplyPainter(_color), child: Container()),
       ),
-    ));
+    );
   }
 }

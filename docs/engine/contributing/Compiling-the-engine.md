@@ -16,6 +16,9 @@ Depending on the platform you are making changes for, you may be interested in a
 
 ## General Compilation Tips
 
+- Instead of compiling manually as described in this file, it's recommended to use `et`,
+  the engine tool, located at
+  https://github.com/flutter/flutter/blob/main/engine/src/flutter/tools/engine_tool.
 - For local development and testing, it's generally preferable to use `--unopt` builds.
   These builds will have additional logging and checks enabled, and generally use build
   and link flags that lead to faster compilation and better debugging symbols.
@@ -32,6 +35,17 @@ Depending on the platform you are making changes for, you may be interested in a
 - Make sure to exclude the `out` directory from any backup scripts, as many large binary
   artifacts are generated. This is also generally true for all of the directories outside
   of the `engine/src/flutter` directory.
+- See [gclient bootstrap](Setting-up-the-Engine-development-environment.md#gclient-bootstrap)
+  section for details on how to setup `gclient`.
+
+## Updating the engine
+Before compiling, you should typically make sure that your engine code is up to date with the latest `master`:
+
+```sh
+git fetch upstream master
+git rebase upstream/master
+gclient sync -D
+```
 
 ## Using a custom Dart SDK
 
@@ -43,13 +57,11 @@ source files, pass the flag `--no-prebuilt-dart-sdk` to `//flutter/tools/gn`.
 
 These steps build the engine used by `flutter run` for Android devices.
 
-Run the following steps, from the `src` directory created in [Setting up the Engine development environment](Setting-up-the-Engine-development-environment.md):
+Run the following steps from the `engine/src` directory in your local checkout. See [Setting up the Engine development environment](Setting-up-the-Engine-development-environment.md).
 
-1. `git pull upstream main` in `src/flutter` to update the Flutter Engine repo.
+1. Make sure your engine code is [up to date](https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Compiling-the-engine.md#updating-the-engine).
 
-2. `gclient sync` to update dependencies.
-
-3. Prepare your build files
+2. Prepare your build files
     * `./flutter/tools/gn --android --unoptimized` for device-side executables.
     * `./flutter/tools/gn --android --android-cpu arm64 --unoptimized` for newer 64-bit Android devices.
     * `./flutter/tools/gn --android --android-cpu x86 --unoptimized` for x86 emulators.
@@ -60,10 +72,10 @@ Run the following steps, from the `src` directory created in [Setting up the Eng
 > 💡 **TIP**: When developing on a Mac with ARM (M CPU), prefer `host_debug_unopt_arm64`.
 >
 > You can continue to use `host_debug_unopt` (required for Intel Macs), but the engine will be run under Rosetta
-> which may be slower. See [Developing with Flutter on Apple Silicon](../../platforms/desktop/macos/Developing-with-Flutter-on-Apple-Silicon.md)
+> which may be slower. See [Developing with Flutter on Apple Silicon](https://github.com/flutter/flutter/blob/main/docs/platforms/desktop/macos/Developing-with-Flutter-on-Apple-Silicon.md)
 > for more information.
 
-4. Build your executables
+3. Build your executables
     * `ninja -C out/android_debug_unopt` for device-side executables.
     * `ninja -C out/android_debug_unopt_arm64` for newer 64-bit Android devices.
     * `ninja -C out/android_debug_unopt_x86` for x86 emulators.
@@ -80,11 +92,11 @@ If you're going to be debugging crashes in the engine, make sure you add
 `android/AndroidManifest.xml` file for the Flutter app you are using
 to test the engine.
 
-See [The flutter tool](../../tool/README.md) for instructions on how to use the `flutter` tool with a local engine.
+See [The flutter tool](https://github.com/flutter/flutter/blob/main/docs/tool/README.md) for instructions on how to use the `flutter` tool with a local engine.
 You will typically use the `android_debug_unopt` build to debug the engine on a device, and
 `android_debug_unopt_x64` to debug in on a simulator. Modifying dart sources in the engine will
 require adding a `dependency_override` section in you app's `pubspec.yaml` as detailed
-[here](../../tool/README.md#using-a-locally-built-engine-with-the-flutter-tool).
+[here](https://github.com/flutter/flutter/blob/main/docs/tool/README.md#using-a-locally-built-engine-with-the-flutter-tool).
 
 Note that if you use particular android or ios engine build, you will need to have corresponding
 host build available next to it: if you use `android_debug_unopt`, you should have built `host_debug_unopt`,
@@ -92,16 +104,17 @@ host build available next to it: if you use `android_debug_unopt`, you should ha
 
 ### Compiling everything that matters on Linux
 
-The following script will update all the builds that matter if you're developing on Linux and testing on Android and created the `.gclient` file in `~/dev/engine`:
+The following script will update all the builds that matter if you're developing on Linux and testing on Android and your `.gclient` file is located at `~/dev/flutter/engine/.gclient`:
 
 ```bash
 set -ex
 
-cd ~/dev/engine/src/flutter
-git fetch upstream
-git rebase upstream/main
-gclient sync
-cd ..
+cd ~/dev/flutter
+git fetch upstream master
+git rebase upstream/master
+cd engine
+gclient sync -D
+cd src
 
 flutter/tools/gn --unoptimized --runtime-mode=debug
 flutter/tools/gn --android --unoptimized --runtime-mode=debug
@@ -117,27 +130,25 @@ For `--runtime-mode=profile` build, please also consider adding `--no-lto` optio
 
 These steps build the engine used by `flutter run` for iOS devices.
 
-Run the following steps, from the `src` directory created in the steps above:
+Run the following steps, from the `engine/src` directory:
 
-1. `git pull upstream main` in `src/flutter` to update the Flutter Engine repo.
+1. Make sure your engine code is [up to date](https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Compiling-the-engine.md#updating-the-engine).
 
-2. `gclient sync` to update dependencies.
-
-3. `./flutter/tools/gn --ios --unoptimized` to prepare build files for device-side executables (or `--ios --simulator --unoptimized` for simulator).
+2. `./flutter/tools/gn --ios --unoptimized` to prepare build files for device-side executables (or `--ios --simulator --unoptimized` for simulator).
    * This also produces an Xcode project for working with the engine source code at `out/ios_debug_unopt/flutter_engine.xcodeproj`
    * For a discussion on the various flags and modes, see [Flutter's modes](../Flutter's-modes.md).
    * Add the `--simulator-cpu=arm64` argument for an arm64 Mac simulator to output to `out/ios_debug_sim_unopt_arm64`.
 
-4. `./flutter/tools/gn --unoptimized` to prepare the build files for host-side executables.
+3. `./flutter/tools/gn --unoptimized` to prepare the build files for host-side executables.
    * On Apple Silicon ("M" chips), add `--mac-cpu arm64` to avoid using emulation. This will generate `host_debug_unopt_arm64`.
 
-5. `ninja -C out/ios_debug_unopt && ninja -C out/host_debug_unopt` to build all artifacts (use `out/ios_debug_sim_unopt` for Simulator).
+4. `ninja -C out/ios_debug_unopt && ninja -C out/host_debug_unopt` to build all artifacts (use `out/ios_debug_sim_unopt` for Simulator).
 
-See [The flutter tool](../../tool/README.md) for instructions on how to use the `flutter` tool with a local engine.
+See [The flutter tool](https://github.com/flutter/flutter/blob/main/docs/tool/README.md) for instructions on how to use the `flutter` tool with a local engine.
 You will typically use the `ios_debug_unopt` build to debug the engine on a device, and
 `ios_debug_sim_unopt` to debug in on a simulator. Modifying dart sources in the engine will
 require adding a `dependency_override` section in you app's `pubspec.yaml` as detailed
-[here](../../tool/README.md#using-a-locally-built-engine-with-the-flutter-tool).
+[here](https://github.com/flutter/flutter/blob/main/docs/tool/README.md#using-a-locally-built-engine-with-the-flutter-tool).
 
 See also [instructions for debugging the engine in a Flutter app in Xcode](../Debugging-the-engine.md#debugging-ios-builds-with-xcode).
 
@@ -145,20 +156,25 @@ See also [instructions for debugging the engine in a Flutter app in Xcode](../De
 
 These steps build the desktop embedding, and the engine used by `flutter test` on a host workstation.
 
-1. `git pull upstream main` in `src/flutter` to update the Flutter Engine repo.
+1. Make sure your engine code is [up to date](https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Compiling-the-engine.md#updating-the-engine).
 
-2. `gclient sync` to update your dependencies.
+2. On macOS install Metal build tools: `xcodebuild -downloadComponent MetalToolchain`
 
 3. `./flutter/tools/gn --unoptimized` to prepare your build files.
    * `--unoptimized` disables C++ compiler optimizations. On macOS, binaries are emitted unstripped; on Linux, unstripped binaries are emitted to an `exe.unstripped` subdirectory of the build.
+   * For Apple Silicon, use `./flutter/tools/gn --unoptimized --mac-cpu=arm64`.
 
 4. `ninja -C out/host_debug_unopt` to build a desktop unoptimized binary.
     * If you skipped `--unoptimized`, use `ninja -C out/host_debug` instead.
+    * For Apple Silicon, use `ninja -C out/host_debug_unopt_arm64`.
 
-See [The flutter tool](../../tool/README.md) for instructions on how to use the `flutter` tool with a local engine.
+See [The flutter tool](https://github.com/flutter/flutter/blob/main/docs/tool/README.md) for instructions on how to use the `flutter` tool with a local engine.
 You will typically use the `host_debug_unopt` build in this setup. Modifying dart sources in the engine will
 require adding a `dependency_override` section in you app's `pubspec.yaml` as detailed
-[here](../../tool/README.md#using-a-locally-built-engine-with-the-flutter-tool).
+[here](https://github.com/flutter/flutter/blob/main/docs/tool/README.md#using-a-locally-built-engine-with-the-flutter-tool).
+
+If you have [ccache](https://ccache.dev/) installed on your system, you can enable this by using `--ccache` on `gn` in step 2 above.
+This can speed up subsequent builds, especially when switching branches.
 
 
 ## Compiling for Windows
@@ -170,7 +186,7 @@ On Windows, ensure that the engine checkout is not deeply nested. This avoid the
 
 1. Make sure you have Visual Studio installed (non-Googlers only). [Debugging Tools for Windows 10](https://docs.microsoft.com/en-us/windows-hardware/drivers/debugger/debugger-download-tools#small-classic-windbg-preview-logo-debugging-tools-for-windows-10-windbg) must be installed.
 
-2. `git pull upstream main` in `src/flutter` to update the Flutter Engine repo.
+2. Make sure your engine code is [up to date](https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Compiling-the-engine.md#updating-the-engine).
 
 3. Ensure long path support is enabled on your machine. Launch PowerShell as an administrator and run:
 ```
@@ -185,14 +201,12 @@ WINDOWSSDKDIR="C:\Program Files (x86)\Windows Kits\10" # (or your location for W
 ```
 Also, be sure that Python27 is before any other python in your Path.
 
-5. `gclient sync` to update your dependencies.
+5. switch to `engine/src/` directory.
 
-6. switch to `src/` directory.
-
-7. `python .\flutter\tools\gn --unoptimized` to prepare your build files.
+6. `python .\flutter\tools\gn --unoptimized` to prepare your build files.
    * If you are only building `gen_snapshot`: `python .\flutter\tools\gn [--unoptimized] --runtime-mode=[debug|profile|release] [--android]`.
 
-8. `ninja -C .\out\<dir created by previous step>` to build.
+7. `ninja -C .\out\<dir created by previous step>` to build.
    * If you used a non-debug configuration, use `ninja -C .\out\<dir created by previous step> gen_snapshot`.
      Release and profile are not yet supported for the desktop shell.
 
@@ -200,18 +214,28 @@ Also, be sure that Python27 is before any other python in your Path.
 
 ### Build components for Fuchsia
 
-1. Building fuchsia is only supported on linux. You need to run `gclient config --custom-var=download_fuchsia_deps=True` then `gclient sync`.
+1. Building fuchsia is only supported on linux. You need to update `engine/.gclient`, or `../.gclient` if current directory is `engine/src`, with `custom_vars`.
 
-It will set `"download_fuchsia_deps": True` in `"custom_vars"` section in `.gclient` file, and download necessary binaries to build fuchsia components.
+```
+solutions = [
+  {
+    # ...
+    "custom_vars": {
+      "download_fuchsia_deps": True,
+      "run_fuchsia_emu": True,
+    },
+  },
+]
+```
 
-2. If you'd like to run tests locally, also run `gclient config --custom-var=run_fuchsia_emu=True` then `gclient sync`.
+> You may ignore `"run_fuchsia_emu": True` if you won't run tests locally.
 
-It will set `"run_fuchsia_emu": True` in `"custom_vars"` section in `.gclient` file, and download necessary binaries and images to run tests on fuchsia emulators.
-You can set both `custom_vars` and run `gclient sync` only once.
+Run `gclient sync -D`.
 
-You will also need kvm enabled, or nested virtualization on the gcloud VMs. Fuchsia and the tests will all be executed on the qemu.
+> [!WARNING]
+> When running tests locally, you will also need kvm enabled, or nested virtualization on the gcloud VMs. Fuchsia and the tests will all be executed on the qemu.
 
-3. Prepare and build
+2. Prepare and build
 
 ```
 ./flutter/tools/gn --fuchsia --no-lto
@@ -238,7 +262,7 @@ fuchsia_tests
   * Use `autoninja` if it's available.
   * `-C out/fuchsia_release_x64` for release build; other configurations are similar with a different folder name in `out/`.
 
-4. Run all tests locally
+3. Run all tests locally
 
 ```
 python3 flutter/tools/fuchsia/with_envs.py flutter/testing/fuchsia/run_tests.py
@@ -247,9 +271,13 @@ python3 flutter/tools/fuchsia/with_envs.py flutter/testing/fuchsia/run_tests.py
   * It runs the tests in `out/fuchsia_debug_x64` by default. According to the configuration, it may take 5 minutes with regular gtest output to the terminal.
   * Add `fuchsia_release_x64` at the end of the command for release build; other configurations are similar with a different folder name in `out/`.
 
+```
+python3 flutter/tools/fuchsia/with_envs.py flutter/testing/fuchsia/run_tests.py fuchsia_release_x64
+```
+
 ## Compiling for the Web
 
-For building the engine for the Web we use the [felt](https://github.com/flutter/engine/blob/main/lib/web_ui/README.md) tool.
+For building the engine for the Web we use the [felt](https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/web_ui/README.md) tool.
 
 To test Flutter with a local build of the Web engine, add `--local-web-sdk=wasm_release` to your `flutter` command, e.g.:
 
@@ -268,8 +296,7 @@ Compiling the web engine might take a few extra steps on Windows. Use cmd.exe an
 2. Make sure, depot_tools, ninja and python are installed and added to the path. Also set the following environment variable for depot tools:
    * `DEPOT_TOOLS_WIN_TOOLCHAIN = 0`
    * Tip: if you get a python error try to use Python 2 instead of 3
-3. `git pull upstream main` in `src/flutter` to update the Flutter Engine repo.
-4. `gclient sync` to update your dependencies.
+3. Make sure your engine code is [up to date](https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Compiling-the-engine.md#updating-the-engine).
    * Tip: If you get a git authentication errors on this step try Git Bash instead
 5. `python .\flutter\tools\gn --unoptimized --full-dart-sdk` to prepare your build files.
 6. `ninja -C .\out\<dir created by previous step>` to build.
@@ -281,7 +308,7 @@ flutter run --local-web-sdk=wasm_release -d chrome
 flutter test --local-web-sdk=wasm_release test/path/to/your_test.dart
 ```
 
-For testing the engine again use [felt](https://github.com/flutter/engine/blob/main/lib/web_ui/README.md) tool
+For testing the engine again use [felt](https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/web_ui/README.md) tool
 this time with felt_windows.bat.
 
 ```

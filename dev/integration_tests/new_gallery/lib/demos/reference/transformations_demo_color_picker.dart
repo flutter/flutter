@@ -40,11 +40,7 @@ class ColorPicker extends StatelessWidget {
 // A single selectable color widget in the ColorPicker.
 @immutable
 class _ColorPickerSwatch extends StatelessWidget {
-  const _ColorPickerSwatch({
-    required this.color,
-    required this.selected,
-    this.onTap,
-  });
+  const _ColorPickerSwatch({required this.color, required this.selected, this.onTap});
 
   final Color color;
   final bool selected;
@@ -63,12 +59,7 @@ class _ColorPickerSwatch extends StatelessWidget {
             onTap!();
           }
         },
-        child: !selected
-            ? null
-            : const Icon(
-                Icons.check,
-                color: Colors.white,
-              ),
+        child: !selected ? null : const Icon(Icons.check, color: Colors.white),
       ),
     );
   }

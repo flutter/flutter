@@ -9,10 +9,10 @@ import 'package:flutter_api_samples/material/tab_controller/tab_controller.1.dar
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Verify first tab is selected by default', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.TabControllerExampleApp(),
-    );
+  testWidgets('Verify first tab is selected by default', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.TabControllerExampleApp());
 
     final Tab firstTab = example.TabControllerExampleApp.tabs.first;
 
@@ -33,9 +33,7 @@ void main() {
       log.add(message);
     };
 
-    await tester.pumpWidget(
-      const example.TabControllerExampleApp(),
-    );
+    await tester.pumpWidget(const example.TabControllerExampleApp());
 
     const List<Tab> tabs = example.TabControllerExampleApp.tabs;
     final List<Tab> tabsTraversalOrder = <Tab>[];
@@ -47,10 +45,12 @@ void main() {
 
     for (final Tab tab in tabsTraversalOrder) {
       // Tap on the TabBar's tab to select it.
-      await tester.tap(find.descendant(
-        of: find.byType(TabBar),
-        matching: find.text(tab.text!),
-      ));
+      await tester.tap(
+        find.descendant(
+          of: find.byType(TabBar),
+          matching: find.text(tab.text!),
+        ),
+      );
       await tester.pumpAndSettle();
 
       expect(
@@ -70,27 +70,30 @@ void main() {
     debugPrint = originalDebugPrint;
   });
 
-  testWidgets('DefaultTabControllerListener throws when no DefaultTabController above', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      example.DefaultTabControllerListener(
-        onTabChanged: (_) {},
-        child: const SizedBox.shrink(),
-      ),
-    );
+  testWidgets(
+    'DefaultTabControllerListener throws when no DefaultTabController above',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        example.DefaultTabControllerListener(
+          onTabChanged: (_) {},
+          child: const SizedBox.shrink(),
+        ),
+      );
 
-    final dynamic exception = tester.takeException();
-    expect(exception, isFlutterError);
+      final dynamic exception = tester.takeException();
+      expect(exception, isFlutterError);
 
-    final FlutterError error = exception as FlutterError;
-    expect(
-      error.toStringDeep(),
-      equalsIgnoringHashCodes(
-        'FlutterError\n'
-        '   No DefaultTabController for DefaultTabControllerListener.\n'
-        '   When creating a DefaultTabControllerListener, you must ensure\n'
-        '   that there is a DefaultTabController above the\n'
-        '   DefaultTabControllerListener.\n',
-      ),
-    );
-  });
+      final FlutterError error = exception as FlutterError;
+      expect(
+        error.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   No DefaultTabController for DefaultTabControllerListener.\n'
+          '   When creating a DefaultTabControllerListener, you must ensure\n'
+          '   that there is a DefaultTabController above the\n'
+          '   DefaultTabControllerListener.\n',
+        ),
+      );
+    },
+  );
 }

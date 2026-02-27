@@ -18,7 +18,7 @@ import 'dart/package_map.dart';
 /// They are escaped in Kotlin files.
 ///
 /// https://kotlinlang.org/docs/keyword-reference.html
-const List<String> kReservedKotlinKeywords = <String>['when', 'in', 'is'];
+const kReservedKotlinKeywords = <String>['when', 'in', 'is'];
 
 /// Provides the path where templates used by flutter_tools are stored.
 class TemplatePathProvider {
@@ -26,8 +26,12 @@ class TemplatePathProvider {
 
   /// Returns the directory containing the 'name' template directory.
   Directory directoryInPackage(String name, FileSystem fileSystem) {
-    final String templatesDir = fileSystem.path.join(Cache.flutterRoot!,
-        'packages', 'flutter_tools', 'templates');
+    final String templatesDir = fileSystem.path.join(
+      Cache.flutterRoot!,
+      'packages',
+      'flutter_tools',
+      'templates',
+    );
     return fileSystem.directory(fileSystem.path.join(templatesDir, name));
   }
 
@@ -36,42 +40,53 @@ class TemplatePathProvider {
   /// if 'name' is null, return the parent template directory.
   Future<Directory> imageDirectory(String? name, FileSystem fileSystem, Logger logger) async {
     final String toolPackagePath = fileSystem.path.join(
-        Cache.flutterRoot!, 'packages', 'flutter_tools');
-    final String packageFilePath = fileSystem.path.join(toolPackagePath, '.dart_tool', 'package_config.json');
+      Cache.flutterRoot!,
+      'packages',
+      'flutter_tools',
+    );
+    final String packageFilePath = fileSystem.path.join(
+      toolPackagePath,
+      '.dart_tool',
+      'package_config.json',
+    );
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       fileSystem.file(packageFilePath),
       logger: logger,
     );
     final Uri? imagePackageLibDir = packageConfig['flutter_template_images']?.packageUriRoot;
-    final Directory templateDirectory = fileSystem.directory(imagePackageLibDir)
+    final Directory templateDirectory = fileSystem
+        .directory(imagePackageLibDir)
         .parent
         .childDirectory('templates');
     return name == null ? templateDirectory : templateDirectory.childDirectory(name);
   }
 }
 
-TemplatePathProvider get templatePathProvider => context.get<TemplatePathProvider>() ?? const TemplatePathProvider();
+TemplatePathProvider get templatePathProvider =>
+    context.get<TemplatePathProvider>() ?? const TemplatePathProvider();
 
 /// Expands templates in a directory to a destination. All files that must
-/// undergo template expansion should end with the '.tmpl' extension. All files
+/// undergo template expansion should end with the `.tmpl` extension. All files
 /// that should be replaced with the corresponding image from
-/// flutter_template_images should end with the '.img.tmpl' extension. All other
+/// `flutter_template_images` should end with the `.img.tmpl` extension. All other
 /// files are ignored. In case the contents of entire directories must be copied
-/// as is, the directory itself can end with '.tmpl' extension. Files within
-/// such a directory may also contain the '.tmpl' or '.img.tmpl' extensions and
+/// as is, the directory itself can end with `.tmpl` extension. Files within
+/// such a directory may also contain the `.tmpl` or `.img.tmpl` extensions and
 /// will be considered for expansion. In case certain files need to be copied
-/// but without template expansion (data files, etc.), the '.copy.tmpl'
+/// but without template expansion (data files, etc.), the `.copy.tmpl`
 /// extension may be used. Furthermore, templates may contain additional
 /// test files intended to run on the CI. Test files must end in `.test.tmpl`
-/// and are only included when the --implementation-tests flag is enabled.
+/// and are only included when the `--implementation-tests` flag is enabled.
 ///
 /// Folders with platform/language-specific content must be named
-/// '<platform>-<language>.tmpl'.
+/// `<platform>-<language>.tmpl`.
 ///
-/// Files in the destination will contain none of the '.tmpl', '.copy.tmpl',
-/// 'img.tmpl', or '-<language>.tmpl' extensions.
+/// Files in the destination will contain none of the `.tmpl`, `.copy.tmpl`,
+/// `img.tmpl`, or `-<language>.tmpl` extensions.
 class Template {
-  factory Template(Directory templateSource, Directory? imageSourceDir, {
+  factory Template(
+    Directory templateSource,
+    Directory? imageSourceDir, {
     required FileSystem fileSystem,
     required Logger logger,
     required TemplateRenderer templateRenderer,
@@ -88,7 +103,8 @@ class Template {
   }
 
   Template._(
-    List<Directory> templateSources, this.imageSourceDirectories, {
+    List<Directory> templateSources,
+    this.imageSourceDirectories, {
     required FileSystem fileSystem,
     required Logger logger,
     required TemplateRenderer templateRenderer,
@@ -97,26 +113,29 @@ class Template {
        _logger = logger,
        _templateRenderer = templateRenderer,
        _templateManifest = templateManifest ?? <Uri>{} {
-    for (final Directory sourceDirectory in templateSources) {
+    for (final sourceDirectory in templateSources) {
       if (!sourceDirectory.existsSync()) {
         throwToolExit('Template source directory does not exist: ${sourceDirectory.absolute.path}');
       }
     }
 
-    final Map<FileSystemEntity, Directory> templateFiles = <FileSystemEntity, Directory>{
+    final templateFiles = <FileSystemEntity, Directory>{
       for (final Directory sourceDirectory in templateSources)
         for (final FileSystemEntity entity in sourceDirectory.listSync(recursive: true))
           entity: sourceDirectory,
     };
     for (final FileSystemEntity entity in templateFiles.keys.whereType<File>()) {
-      if (_templateManifest.isNotEmpty && !_templateManifest.contains(Uri.file(entity.absolute.path))) {
+      if (_templateManifest.isNotEmpty &&
+          !_templateManifest.contains(Uri.file(entity.absolute.path))) {
         _logger.printTrace('Skipping ${entity.absolute.path}, missing from the template manifest.');
         // Skip stale files in the flutter_tools directory.
         continue;
       }
 
-      final String relativePath = fileSystem.path.relative(entity.path,
-          from: templateFiles[entity]!.absolute.path);
+      final String relativePath = fileSystem.path.relative(
+        entity.path,
+        from: templateFiles[entity]!.absolute.path,
+      );
       if (relativePath.contains(templateExtension)) {
         // If '.tmpl' appears anywhere within the path of this entity, it is
         // a candidate for rendering. This catches cases where the folder
@@ -126,7 +145,8 @@ class Template {
     }
   }
 
-  static Future<Template> fromName(String name, {
+  static Future<Template> fromName(
+    String name, {
     required FileSystem fileSystem,
     required Set<Uri>? templateManifest,
     required Logger logger,
@@ -145,7 +165,9 @@ class Template {
     );
   }
 
-  static Future<Template> merged(List<String> names, Directory directory, {
+  static Future<Template> merged(
+    List<String> names,
+    Directory directory, {
     required FileSystem fileSystem,
     required Set<Uri> templateManifest,
     required Logger logger,
@@ -154,8 +176,7 @@ class Template {
     // All named templates are placed in the 'templates' directory
     return Template._(
       <Directory>[
-        for (final String name in names)
-          templatePathProvider.directoryInPackage(name, fileSystem),
+        for (final String name in names) templatePathProvider.directoryInPackage(name, fileSystem),
       ],
       <Directory>[
         for (final String name in names)
@@ -174,16 +195,16 @@ class Template {
   final Set<Uri> _templateManifest;
   final TemplateRenderer _templateRenderer;
 
-  static const String templateExtension = '.tmpl';
-  static const String copyTemplateExtension = '.copy.tmpl';
-  static const String imageTemplateExtension = '.img.tmpl';
-  static const String testTemplateExtension = '.test.tmpl';
+  static const templateExtension = '.tmpl';
+  static const copyTemplateExtension = '.copy.tmpl';
+  static const imageTemplateExtension = '.img.tmpl';
+  static const testTemplateExtension = '.test.tmpl';
   final Pattern _kTemplateLanguageVariant = RegExp(r'(\w+)-(\w+)\.tmpl.*');
   final List<Directory> imageSourceDirectories;
 
-  final Map<String /* relative */, String /* absolute source */> _templateFilePaths = <String, String>{};
+  final _templateFilePaths = <String, String>{};
 
-  /// Render the template into [directory].
+  /// Render the template into the [destination] directory.
   ///
   /// May throw a [ToolExit] if the directory is not writable.
   int render(
@@ -198,7 +219,7 @@ class Template {
       _logger.printError(err.toString());
       throwToolExit('Failed to flutter create at ${destination.path}.');
     }
-    int fileCount = 0;
+    var fileCount = 0;
     final bool implementationTests = (context['implementationTests'] as bool?) ?? false;
 
     /// Returns the resolved destination path corresponding to the specified
@@ -210,11 +231,14 @@ class Template {
       final Match? match = _kTemplateLanguageVariant.matchAsPrefix(relativeDestinationPath);
       if (match != null) {
         final String platform = match.group(1)!;
-        final String? language = context['${platform}Language'] as String?;
+        final language = context['${platform}Language'] as String?;
         if (language != match.group(2)) {
           return null;
         }
-        relativeDestinationPath = relativeDestinationPath.replaceAll('$platform-$language.tmpl', platform);
+        relativeDestinationPath = relativeDestinationPath.replaceAll(
+          '$platform-$language.tmpl',
+          platform,
+        );
       }
 
       final bool android = (context['android'] as bool?) ?? false;
@@ -248,29 +272,34 @@ class Template {
         return null;
       }
 
-      final String? projectName = context['projectName'] as String?;
-      final String? androidIdentifier = context['androidIdentifier'] as String?;
-      final String? pluginClass = context['pluginClass'] as String?;
-      final String? pluginClassSnakeCase = context['pluginClassSnakeCase'] as String?;
+      final projectName = context['projectName'] as String?;
+      final androidIdentifier = context['androidIdentifier'] as String?;
+      final pluginClass = context['pluginClass'] as String?;
+      final pluginClassSnakeCase = context['pluginClassSnakeCase'] as String?;
       final String destinationDirPath = destination.absolute.path;
       final String pathSeparator = _fileSystem.path.separator;
       String finalDestinationPath = _fileSystem.path
-        .join(destinationDirPath, relativeDestinationPath)
-        .replaceAll(copyTemplateExtension, '')
-        .replaceAll(imageTemplateExtension, '')
-        .replaceAll(testTemplateExtension, '')
-        .replaceAll(templateExtension, '');
+          .join(destinationDirPath, relativeDestinationPath)
+          .replaceAll(copyTemplateExtension, '')
+          .replaceAll(imageTemplateExtension, '')
+          .replaceAll(testTemplateExtension, '')
+          .replaceAll(templateExtension, '');
 
       if (android && androidIdentifier != null) {
-        finalDestinationPath = finalDestinationPath
-            .replaceAll('androidIdentifier', androidIdentifier.replaceAll('.', pathSeparator));
+        finalDestinationPath = finalDestinationPath.replaceAll(
+          'androidIdentifier',
+          androidIdentifier.replaceAll('.', pathSeparator),
+        );
       }
       if (projectName != null) {
         finalDestinationPath = finalDestinationPath.replaceAll('projectName', projectName);
       }
       // This must be before the pluginClass replacement step.
       if (pluginClassSnakeCase != null) {
-        finalDestinationPath = finalDestinationPath.replaceAll('pluginClassSnakeCase', pluginClassSnakeCase);
+        finalDestinationPath = finalDestinationPath.replaceAll(
+          'pluginClassSnakeCase',
+          pluginClassSnakeCase,
+        );
       }
       if (pluginClass != null) {
         finalDestinationPath = finalDestinationPath.replaceAll('pluginClass', pluginClass);
@@ -334,10 +363,14 @@ class Template {
       //         to be copied from the template image package.
 
       if (sourceFile.path.endsWith(imageTemplateExtension)) {
-        final List<File> potentials = <File>[
+        final potentials = <File>[
           for (final Directory imageSourceDir in imageSourceDirectories)
-            _fileSystem.file(_fileSystem.path
-                .join(imageSourceDir.path, relativeDestinationPath.replaceAll(imageTemplateExtension, ''))),
+            _fileSystem.file(
+              _fileSystem.path.join(
+                imageSourceDir.path,
+                relativeDestinationPath.replaceAll(imageTemplateExtension, ''),
+              ),
+            ),
         ];
 
         if (potentials.any((File file) => file.existsSync())) {
@@ -356,7 +389,7 @@ class Template {
 
       if (sourceFile.path.endsWith(templateExtension)) {
         final String templateContents = sourceFile.readAsStringSync();
-        final String? androidIdentifier = context['androidIdentifier'] as String?;
+        final androidIdentifier = context['androidIdentifier'] as String?;
         if (finalDestinationFile.path.endsWith('.kt') && androidIdentifier != null) {
           context['androidIdentifier'] = _escapeKotlinKeywords(androidIdentifier);
         }
@@ -364,10 +397,13 @@ class Template {
         // Use a copy of the context,
         // since the original is used in rendering other templates.
         final Map<String, Object?> localContext = finalDestinationFile.path.endsWith('.yaml')
-          ? _createEscapedContextCopy(context)
-          : context;
+            ? _createEscapedContextCopy(context)
+            : context;
 
-        final String renderedContents = _templateRenderer.renderString(templateContents, localContext);
+        final String renderedContents = _templateRenderer.renderString(
+          templateContents,
+          localContext,
+        );
 
         finalDestinationFile.writeAsStringSync(renderedContents);
 
@@ -387,9 +423,9 @@ class Template {
 ///
 /// Returns the copied context.
 Map<String, Object?> _createEscapedContextCopy(Map<String, Object?> context) {
-  final Map<String, Object?> localContext = Map<String, Object?>.of(context);
+  final localContext = Map<String, Object?>.of(context);
 
-  final String? description = localContext['description'] as String?;
+  final description = localContext['description'] as String?;
 
   if (description != null && description.isNotEmpty) {
     localContext['description'] = escapeYamlString(description);
@@ -400,28 +436,26 @@ Map<String, Object?> _createEscapedContextCopy(Map<String, Object?> context) {
 
 String _escapeKotlinKeywords(String androidIdentifier) {
   final List<String> segments = androidIdentifier.split('.');
-  final List<String> correctedSegments = segments.map(
-    (String segment) => kReservedKotlinKeywords.contains(segment) ? '`$segment`' : segment
-  ).toList();
+  final List<String> correctedSegments = segments
+      .map((String segment) => kReservedKotlinKeywords.contains(segment) ? '`$segment`' : segment)
+      .toList();
   return correctedSegments.join('.');
 }
 
 String escapeYamlString(String value) {
-  final StringBuffer result = StringBuffer();
+  final result = StringBuffer();
   result.write('"');
   for (final int rune in value.runes) {
-    result.write(
-      switch (rune) {
-        0x00 => r'\0',
-        0x09 => r'\t',
-        0x0A => r'\n',
-        0x0D => r'\r',
-        0x22 => r'\"',
-        0x5C => r'\\',
-        < 0x20 => '\\x${rune.toRadixString(16).padLeft(2, "0")}',
-        _ => String.fromCharCode(rune),
-      }
-    );
+    result.write(switch (rune) {
+      0x00 => r'\0',
+      0x09 => r'\t',
+      0x0A => r'\n',
+      0x0D => r'\r',
+      0x22 => r'\"',
+      0x5C => r'\\',
+      < 0x20 => '\\x${rune.toRadixString(16).padLeft(2, "0")}',
+      _ => String.fromCharCode(rune),
+    });
   }
   result.write('"');
   return result.toString();

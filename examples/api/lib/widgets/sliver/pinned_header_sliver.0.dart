@@ -11,21 +11,20 @@ void main() {
 }
 
 class PinnedHeaderSliverApp extends StatelessWidget {
-  const PinnedHeaderSliverApp({ super.key });
+  const PinnedHeaderSliverApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: PinnedHeaderSliverExample(),
-    );
+    return const MaterialApp(home: PinnedHeaderSliverExample());
   }
 }
 
 class PinnedHeaderSliverExample extends StatefulWidget {
-  const PinnedHeaderSliverExample({ super.key });
+  const PinnedHeaderSliverExample({super.key});
 
   @override
-  State<PinnedHeaderSliverExample> createState() => _PinnedHeaderSliverExampleState();
+  State<PinnedHeaderSliverExample> createState() =>
+      _PinnedHeaderSliverExampleState();
 }
 
 class _PinnedHeaderSliverExampleState extends State<PinnedHeaderSliverExample> {
@@ -50,22 +49,21 @@ class _PinnedHeaderSliverExampleState extends State<PinnedHeaderSliverExample> {
     final ColorScheme colorScheme = theme.colorScheme;
 
     final Widget header = Container(
-      color: colorScheme.background,
+      color: colorScheme.surface,
       padding: const EdgeInsets.all(4),
       child: Material(
         color: colorScheme.primaryContainer,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
-          side: BorderSide(
-            width: 7,
-            color: colorScheme.outline,
-          ),
+          side: BorderSide(width: 7, color: colorScheme.outline),
         ),
         child: Container(
           alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(vertical: 48),
           child: Text(
-            count.isOdd ? 'Alternative Title\nWith Two Lines' : 'PinnedHeaderSliver',
+            count.isOdd
+                ? 'Alternative Title\nWith Two Lines'
+                : 'PinnedHeaderSliver',
             style: theme.textTheme.headlineMedium!.copyWith(
               color: colorScheme.onPrimaryContainer,
             ),
@@ -101,29 +99,24 @@ class _PinnedHeaderSliverExampleState extends State<PinnedHeaderSliverExample> {
 
 // A placeholder SliverList of 25 items.
 class ItemList extends StatelessWidget {
-  const ItemList({
-    super.key,
-    this.itemCount = 25,
-  });
+  const ItemList({super.key, this.itemCount = 25});
 
   final int itemCount;
 
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (BuildContext context, int index) {
-          return Card(
-            color: colorScheme.onSecondary,
-            child: ListTile(
-              textColor: colorScheme.secondary,
-              title: Text('Item $index'),
-            ),
-          );
-        },
-        childCount: itemCount,
-      ),
+    return SliverList.builder(
+      itemCount: itemCount,
+      itemBuilder: (BuildContext context, int index) {
+        return Card(
+          color: colorScheme.onSecondary,
+          child: ListTile(
+            textColor: colorScheme.secondary,
+            title: Text('Item $index'),
+          ),
+        );
+      },
     );
   }
 }

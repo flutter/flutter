@@ -34,7 +34,7 @@ class FloatToken extends NumberToken {
   FloatToken(String stringRep) : super(stringRep, _parse(stringRep));
 
   static double _parse(String stringRep) {
-    String toParse = stringRep;
+    var toParse = stringRep;
     if (toParse.startsWith('.')) {
       toParse = '0$toParse';
     }
@@ -69,17 +69,16 @@ enum Operation { Addition, Subtraction, Multiplication, Division }
 
 /// A token that represents an arithmetic operation symbol.
 class OperationToken extends ExpressionToken {
-  OperationToken(this.operation)
-   : super(opString(operation));
+  OperationToken(this.operation) : super(opString(operation));
 
   Operation operation;
 
   static String? opString(Operation operation) {
     return switch (operation) {
-      Operation.Addition       => ' + ',
-      Operation.Subtraction    => ' - ',
+      Operation.Addition => ' + ',
+      Operation.Subtraction => ' - ',
       Operation.Multiplication => '  \u00D7  ',
-      Operation.Division       => '  \u00F7  ',
+      Operation.Division => '  \u00F7  ',
     };
   }
 }
@@ -117,8 +116,7 @@ enum ExpressionState {
 class CalcExpression {
   CalcExpression(this._list, this.state);
 
-  CalcExpression.empty()
-    : this(<ExpressionToken>[], ExpressionState.Start);
+  CalcExpression.empty() : this(<ExpressionToken>[], ExpressionState.Start);
 
   CalcExpression.result(FloatToken result)
     : _list = <ExpressionToken?>[result],
@@ -126,6 +124,7 @@ class CalcExpression {
 
   /// The tokens comprising the expression.
   final List<ExpressionToken?> _list;
+
   /// The state of the expression.
   final ExpressionState state;
 
@@ -133,7 +132,7 @@ class CalcExpression {
   /// in the calculator's display panel.
   @override
   String toString() {
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     buffer.writeAll(_list);
     return buffer.toString();
   }
@@ -275,7 +274,7 @@ class CalcExpression {
     // multiplication or division symbols.
     num currentTermValue = removeNextTerm(list);
     while (list.isNotEmpty) {
-      final OperationToken opToken = list.removeAt(0)! as OperationToken;
+      final opToken = list.removeAt(0)! as OperationToken;
       final num nextTermValue = removeNextTerm(list);
       switch (opToken.operation) {
         case Operation.Addition:
@@ -288,9 +287,7 @@ class CalcExpression {
           assert(false);
       }
     }
-    final List<ExpressionToken> outList = <ExpressionToken>[
-      ResultToken(currentTermValue),
-    ];
+    final outList = <ExpressionToken>[ResultToken(currentTermValue)];
     return CalcExpression(outList, ExpressionState.Result);
   }
 
@@ -299,11 +296,11 @@ class CalcExpression {
   /// and division symbols.
   static num removeNextTerm(List<ExpressionToken?> list) {
     assert(list.isNotEmpty);
-    final NumberToken firstNumToken = list.removeAt(0)! as NumberToken;
+    final firstNumToken = list.removeAt(0)! as NumberToken;
     num currentValue = firstNumToken.number;
     while (list.isNotEmpty) {
-      bool isDivision = false;
-      final OperationToken nextOpToken = list.first! as OperationToken;
+      var isDivision = false;
+      final nextOpToken = list.first! as OperationToken;
       switch (nextOpToken.operation) {
         case Operation.Addition:
         case Operation.Subtraction:
@@ -317,7 +314,7 @@ class CalcExpression {
       // Remove the operation token.
       list.removeAt(0);
       // Remove the next number token.
-      final NumberToken nextNumToken = list.removeAt(0)! as NumberToken;
+      final nextNumToken = list.removeAt(0)! as NumberToken;
       final num nextNumber = nextNumToken.number;
       if (isDivision) {
         currentValue /= nextNumber;

@@ -27,5 +27,13 @@
   "lookUpButtonLabel": "Look Up",
   "searchWebButtonLabel": "Otsi veebist",
   "shareButtonLabel": "Jaga …",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "Kustutamine",
+  "cancelButtonLabel": "Tühista",
+  "backButtonLabel": "Tagasi",
+  "expansionTileExpandedHint": "topeltpuudutage ahendamiseks",
+  "expansionTileCollapsedHint": "topeltpuudutage laiendamiseks",
+  "expansionTileExpandedTapHint": "Ahenda",
+  "expansionTileCollapsedTapHint": "Laiendage lisateabe nägemiseks",
+  "expandedHint": "Ahendatud",
+  "collapsedHint": "Laiendatud"
 }

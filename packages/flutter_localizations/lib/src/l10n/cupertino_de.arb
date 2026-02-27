@@ -18,7 +18,7 @@
   "cutButtonLabel": "Ausschneiden",
   "copyButtonLabel": "Kopieren",
   "pasteButtonLabel": "Einsetzen",
-  "clearButtonLabel": "Clear",
+  "clearButtonLabel": "Löschen",
   "selectAllButtonLabel": "Alle auswählen",
   "tabSemanticsLabel": "Tab $tabIndex von $tabCount",
   "modalBarrierDismissLabel": "Schließen",
@@ -27,5 +27,13 @@
   "menuDismissLabel": "Menü schließen",
   "lookUpButtonLabel": "Nachschlagen",
   "searchWebButtonLabel": "Im Web suchen",
-  "shareButtonLabel": "Teilen…"
+  "shareButtonLabel": "Teilen…",
+  "cancelButtonLabel": "Abbrechen",
+  "backButtonLabel": "Zurück",
+  "expansionTileExpandedHint": "Zum Minimieren doppeltippen",
+  "expansionTileCollapsedHint": "Zum Maximieren doppeltippen",
+  "expansionTileExpandedTapHint": "Minimieren",
+  "expansionTileCollapsedTapHint": "Für weitere Details maximieren",
+  "expandedHint": "Minimiert",
+  "collapsedHint": "Maximiert"
 }

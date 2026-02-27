@@ -1,5 +1,6 @@
 _If you've already built the engine and have the configuration set up but merely need a refresher on
-actually compiling the code, see [Compiling the engine](Compiling-the-engine.md)._
+actually compiling the code, see [Compiling the engine](Compiling-the-engine.md) or
+[Engine Tool](https://github.com/flutter/flutter/blob/main/engine/src/flutter/tools/engine_tool)._
 
 _If you are checking these instructions to refresh your memory and your fork of the engine is stale,
 make sure to merge up to HEAD before doing a `gclient sync`._
@@ -26,7 +27,6 @@ Make sure you have the following dependencies available:
  * On macOS:
    - Install the latest Xcode.
    - On Apple Silicon arm64 Macs, install the Rosetta translation environment by running `softwareupdate --install-rosetta`.
-   - Install Oracle's Java JDK, version 1.8 or later.
 
 You do not need to install [Dart](https://www.dartlang.org/downloads/linux.html).
 A Dart toolchain is automatically downloaded as part of the "Getting the source"
@@ -43,47 +43,29 @@ Run the following steps to set up your environment:
 >   * `GYP_MSVS_OVERRIDE_PATH=C:\Program Files\Microsoft Visual Studio\2022\Community`
 >     * Use the path of your installation.
 
-Create a new directory to hold the source code and move into it. Here, we are using the "engine" directory.
-```sh
-mkdir engine; cd engine;
-```
+Clone the Flutter source code. As of late 2024, the engine source is part of the main [flutter/flutter repo](https://github.com/flutter/flutter). The convention is to fork this repo and point `origin` to your fork and `upstream` to `git@github.com:flutter/flutter.git`. See [Setting up the Framework development environment](https://github.com/flutter/flutter/blob/main/docs/contributing/Setting-up-the-Framework-development-environment.md#set-up-your-environment) for more.
 
 > [!IMPORTANT]
 > On Windows, the following must be run as an Administrator due to [a known issue](https://github.com/flutter/flutter/issues/94580).
 
-Fetch the Flutter engine sources. This may take a while on a slow connection. Do **not** interrupt this process. Otherwise, a partial checkout cannot be resumed and you'll have to delete all the files including the hidden files in the engine directory and start over.
-```sh
-fetch flutter
-```
-The [Flutter Engine](https://github.com/flutter/engine) repository resides at `src/flutter`. The convention is to refer to this repository as `upstream`.
+### `gclient` bootstrap
 
-```sh
-git -C src/flutter remote rename origin upstream
-```
+Flutter engine uses `gclient` to manage dependencies.
 
-Optionally, if you are working with a fork of the engine, add that as a Git remote.
+1. Copy one of the `engine/scripts/*.gclient` to the repository root as `.gclient`:
+    1. Googlers: copy `rbe.gclient` to enable faster builds with RBE. Follow [RBE Getting started](https://github.com/flutter/flutter/blob/main/docs/engine/rbe/rbe.md#getting-started) to set up RBE.
+    2. Everyone else: copy `standard.gclient`
+2. Run `gclient sync` from the root folder
 
-```sh
-git -C src/flutter remote add origin <your_git_fork_location>
-```
+### Add `et` to `PATH`
 
-The "Engine Tool" called `et` is useful when working with the engine. It is located in the `flutter/bin` directory in the source checkout. Add this to your `$PATH` in your `.rc`.
+The "Engine Tool" called `et` is useful when working with the engine. It is located in the [`flutter/engine/src/flutter/bin`](https://github.com/flutter/flutter/tree/0c3359df8c8342c8907316488b1404a216f215b6/engine/src/flutter/bin) directory. Add this to your `$PATH` in your `.rc` file: e.g. on UNIX, using `export PATH=/path/to/flutter/engine/src/flutter/bin:$PATH`.
 
 ### Additional Steps for Web Engine
 
-Amend the generated `.gclient` file in the root of the source directory to add the following:
-```
-solutions = [
-  {
-    # Same as above...
-    "custom_vars": {
-      "download_emsdk": True,
-    },
-  },
-]
-```
+Open the `.gclient` file in the repository root. Uncomment the lines indicated for building the web engine.
 
-Now, run
+Now, run:
 
 ```sh
 gclient sync
@@ -91,15 +73,15 @@ gclient sync
 
 ## Next steps:
 
- * [Compiling the engine](Compiling-the-engine.md) explains how to actually get builds, now that you have the code.
- * [The flutter tool](../../tool/README.md) has a section explaining how to use custom engine builds.
- * [Signing commits](../../contributing/Signing-commits.md), to configure your environment to securely sign your commits.
+ * Use `et`, the [Engine Tool](https://github.com/flutter/flutter/blob/main/engine/src/flutter/tools/engine_tool), to actually get builds, now that you have the code.
+ * The docs for the flutter tool have a section on [using a locally built engine with the flutter tool](https://github.com/flutter/flutter/blob/main/docs/tool/README.md#using-a-locally-built-engine-with-the-flutter-tool).
+ * [Signing commits](https://github.com/flutter/flutter/blob/main/docs/contributing/Signing-commits.md), to configure your environment to securely sign your commits.
 
 ## Editor autocomplete support
 
 ### Xcode [Objective-C++]
 
-On Mac, you can simply use Xcode (e.g., `open out/host_debug_unopt/products.xcodeproj`).
+On Mac, you can simply use Xcode (e.g., `open out/host_debug_unopt/flutter_engine.xcodeproj`).
 
 ### VSCode with C/C++ Intellisense [C/C++]
 
@@ -107,15 +89,33 @@ VSCode can provide some IDE features using the [C/C++ extension](https://marketp
 
 Intellisense can also use our `compile_commands.json` for more robust functionality. Either symlink `src/out/compile_commands.json` to the project root at `src` or provide an absolute path to it in the `c_cpp_properties.json` config file. See ["compile commands" in the c_cpp_properties.json reference](https://code.visualstudio.com/docs/cpp/c-cpp-properties-schema-reference). This will likely resolve the basic issues mentioned above.
 
-For example, in `src/.vscode/settings.json`:
+The easiest way to do this is create a [multi-root workspace](https://code.visualstudio.com/docs/editor/workspaces/workspaces#_multiroot-workspaces) that includes the Flutter SDK. For example, something like this:
 
 ```json
+# flutter.code-workspace
 {
-  "clangd.path": "buildtools/mac-arm64/clang/bin/clangd",
-  "clangd.arguments": [
-    "--compile-commands-dir=out/host_debug_unopt_arm64"
-  ],
-  "clang-format.executable": "buildtools/mac-arm64/clang/bin/clang-format"
+	"folders": [
+		{
+			"path": "path/to/the/flutter/sdk"
+		}
+	],
+	"settings": {}
+}
+```
+
+Then, install the [`clangd` extension](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd) and edit the `"settings"` key:
+
+```json
+"settings": {
+    "html.format.enable": false,
+    "githubPullRequests.ignoredPullRequestBranches": [
+        "master"
+    ],
+    "clangd.path": "engine/src/flutter/buildtools/mac-arm64/clang/bin/clangd",
+    "clangd.arguments": [
+        "--compile-commands-dir=engine/src/out/host_debug_unopt_arm64"
+    ],
+    "clang-format.executable": "engine/src/flutter/buildtools/mac-arm64/clang/bin/clang-format"
 }
 ```
 
@@ -123,8 +123,10 @@ For example, in `src/.vscode/settings.json`:
 
 ```shell
 # M1 Mac (host_debug_unopt_arm64)
-./tools/gn --unopt --mac-cpu arm64 --enable-impeller-vulkan --enable-impeller-opengles --enable-unittests
+et build -c host_debug_unopt_arm64
 ```
+
+Some files (such as the Android embedder) will require an Android `clangd` configuration.
 
 For adding IDE support to the Java code in the engine with VSCode, see ["Using VSCode as an IDE for the Android Embedding"](#using-vscode-as-an-ide-for-the-android-embedding-java).
 
@@ -169,8 +171,14 @@ To set up:
 
 1. If you previously had a `shell/platform/android/.classpath`, delete it.
 
+### Using Android Studio as an IDE for the Android Embedding [Java]
+
+Alternatively, Android Studio can be used as an IDE for the Android Embedding Java code. See docs
+at https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/android/README.md#editing-java-code for
+instructions.
+
 ## VSCode Additional Useful Configuration
 
-1. Create [snippets](https://code.visualstudio.com/docs/editor/userdefinedsnippets) for header files with [this configuration](https://github.com/chromium/chromium/blob/master/tools/vscode/settings.json5). This will let you use `hdr` keyboard macro to create the boiler plate header code. Also consider some of [these settings](https://github.com/chromium/chromium/blob/master/tools/vscode/settings.json5) and [more tips](https://chromium.googlesource.com/chromium/src/+show/lkgr/docs/vscode.md).
+1. Create [snippets](https://code.visualstudio.com/docs/editor/userdefinedsnippets) for header files with [this configuration](https://github.com/chromium/chromium/blob/main/tools/vscode/settings.json5). This will let you use `hdr` keyboard macro to create the boiler plate header code. Also consider some of [these settings](https://github.com/chromium/chromium/blob/main/tools/vscode/settings.json5) and [more tips](https://chromium.googlesource.com/chromium/src/+show/lkgr/docs/vscode.md).
 
 2. To format GN files on save, [consider using this extension](https://marketplace.visualstudio.com/items?itemName=persidskiy.vscode-gnformat).

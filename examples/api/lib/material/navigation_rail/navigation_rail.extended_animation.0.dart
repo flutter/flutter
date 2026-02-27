@@ -15,11 +15,7 @@ class ExtendedAnimationExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: MyNavigationRail(),
-      ),
-    );
+    return const MaterialApp(home: Scaffold(body: MyNavigationRail()));
   }
 }
 
@@ -41,11 +37,13 @@ class _MyNavigationRailState extends State<MyNavigationRail> {
         NavigationRail(
           selectedIndex: _selectedIndex,
           extended: _extended,
-          leading: MyNavigationRailFab(onPressed: () {
-            setState(() {
-              _extended = !_extended;
-            });
-          }),
+          leading: MyNavigationRailFab(
+            onPressed: () {
+              setState(() {
+                _extended = !_extended;
+              });
+            },
+          ),
           onDestinationSelected: (int index) {
             setState(() {
               _selectedIndex = index;
@@ -96,7 +94,9 @@ class MyNavigationRailFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Animation<double> animation = NavigationRail.extendedAnimation(context);
+    final Animation<double> animation = NavigationRail.extendedAnimation(
+      context,
+    );
     return AnimatedBuilder(
       animation: animation,
       builder: (BuildContext context, Widget? child) {

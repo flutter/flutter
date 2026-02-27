@@ -17,17 +17,12 @@ class StreamBuilderExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: StreamBuilderExample(delay: delay),
-    );
+    return const MaterialApp(home: StreamBuilderExample(delay: delay));
   }
 }
 
 class StreamBuilderExample extends StatefulWidget {
-  const StreamBuilderExample({
-    required this.delay,
-    super.key,
-  });
+  const StreamBuilderExample({required this.delay, super.key});
 
   final Duration delay;
 
@@ -77,10 +72,7 @@ class _StreamBuilderExampleState extends State<StreamBuilderExample> {
 }
 
 class BidsStatus extends StatelessWidget {
-  const BidsStatus({
-    required this.bids,
-    super.key,
-  });
+  const BidsStatus({required this.bids, super.key});
 
   final Stream<int>? bids;
 
@@ -92,11 +84,7 @@ class BidsStatus extends StatelessWidget {
         List<Widget> children;
         if (snapshot.hasError) {
           children = <Widget>[
-            const Icon(
-              Icons.error_outline,
-              color: Colors.red,
-              size: 60,
-            ),
+            const Icon(Icons.error_outline, color: Colors.red, size: 60),
             Padding(
               padding: const EdgeInsets.only(top: 16),
               child: Text('Error: ${snapshot.error}'),
@@ -114,11 +102,7 @@ class BidsStatus extends StatelessWidget {
           switch (snapshot.connectionState) {
             case ConnectionState.none:
               children = const <Widget>[
-                Icon(
-                  Icons.info,
-                  color: Colors.blue,
-                  size: 60,
-                ),
+                Icon(Icons.info, color: Colors.blue, size: 60),
                 Padding(
                   padding: EdgeInsets.only(top: 16),
                   child: Text('Select a lot'),
@@ -150,11 +134,7 @@ class BidsStatus extends StatelessWidget {
               ];
             case ConnectionState.done:
               children = <Widget>[
-                const Icon(
-                  Icons.info,
-                  color: Colors.blue,
-                  size: 60,
-                ),
+                const Icon(Icons.info, color: Colors.blue, size: 60),
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
                   child: Text(

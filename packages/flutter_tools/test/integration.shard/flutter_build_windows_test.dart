@@ -15,19 +15,15 @@ import 'test_utils.dart';
 void main() {
   late Directory tempDir;
   late Directory projectRoot;
-  late String flutterBin;
   late Directory releaseDir;
   late File exeFile;
 
   group('flutter build windows command', () {
     setUpAll(() {
       tempDir = createResolvedTempDirectorySync('build_windows_test.');
-      flutterBin = fileSystem.path.join(
-        getFlutterRoot(),
-        'bin',
-        'flutter',
-      );
-      ProcessResult result = processManager.runSync(<String>[flutterBin, 'config',
+      ProcessResult result = processManager.runSync(<String>[
+        flutterBin,
+        'config',
         '--enable-windows-desktop',
       ]);
       expect(result, const ProcessResultMatcher());
@@ -49,19 +45,11 @@ void main() {
         arch = 'x64';
       }
 
-      releaseDir = fileSystem.directory(fileSystem.path.join(
-        projectRoot.path,
-        'build',
-        'windows',
-        arch,
-        'runner',
-        'Release',
-      ));
+      releaseDir = fileSystem.directory(
+        fileSystem.path.join(projectRoot.path, 'build', 'windows', arch, 'runner', 'Release'),
+      );
 
-      exeFile = fileSystem.file(fileSystem.path.join(
-        releaseDir.path,
-        'hello.exe',
-      ));
+      exeFile = fileSystem.file(fileSystem.path.join(releaseDir.path, 'hello.exe'));
     });
 
     tearDownAll(() {
@@ -139,25 +127,25 @@ String _getFileVersion(File file) {
     '\$v = [System.Diagnostics.FileVersionInfo]::GetVersionInfo(\\"${file.path}\\"); '
     r'Write-Output \"$($v.FileMajorPart).$($v.FileMinorPart).$($v.FileBuildPart).$($v.FilePrivatePart)\" '
     '"',
-    <String>[]
+    <String>[],
   );
 
   expect(result, const ProcessResultMatcher());
 
   // Trim trailing new line.
-  final String output = result.stdout as String;
+  final output = result.stdout as String;
   return output.trim();
 }
 
 String _getProductVersion(File file) {
   final ProcessResult result = Process.runSync(
     'powershell.exe -command "[System.Diagnostics.FileVersionInfo]::GetVersionInfo(\\"${file.path}\\").ProductVersion"',
-    <String>[]
+    <String>[],
   );
 
   expect(result, const ProcessResultMatcher());
 
   // Trim trailing new line.
-  final String output = result.stdout as String;
+  final output = result.stdout as String;
   return output.trim();
 }

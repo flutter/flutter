@@ -11,11 +11,13 @@ void main() {
 }
 
 enum AnimationStyles { defaultStyle, custom, none }
-const List<(AnimationStyles, String)> animationStyleSegments = <(AnimationStyles, String)>[
-  (AnimationStyles.defaultStyle, 'Default'),
-  (AnimationStyles.custom, 'Custom'),
-  (AnimationStyles.none, 'None'),
-];
+
+const List<(AnimationStyles, String)> animationStyleSegments =
+    <(AnimationStyles, String)>[
+      (AnimationStyles.defaultStyle, 'Default'),
+      (AnimationStyles.custom, 'Custom'),
+      (AnimationStyles.none, 'None'),
+    ];
 
 class MaterialAppExample extends StatefulWidget {
   const MaterialAppExample({super.key});
@@ -25,7 +27,9 @@ class MaterialAppExample extends StatefulWidget {
 }
 
 class _MaterialAppExampleState extends State<MaterialAppExample> {
-  Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{AnimationStyles.defaultStyle};
+  Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{
+    AnimationStyles.defaultStyle,
+  };
   AnimationStyle? _animationStyle;
   bool isDarkTheme = false;
 
@@ -53,9 +57,9 @@ class _MaterialAppExampleState extends State<MaterialAppExample> {
                       case AnimationStyles.defaultStyle:
                         _animationStyle = null;
                       case AnimationStyles.custom:
-                        _animationStyle = AnimationStyle(
+                        _animationStyle = const AnimationStyle(
                           curve: Easing.emphasizedAccelerate,
-                          duration: const Duration(seconds: 1),
+                          duration: Duration(seconds: 1),
                         );
                       case AnimationStyles.none:
                         _animationStyle = AnimationStyle.noAnimation;
@@ -63,10 +67,15 @@ class _MaterialAppExampleState extends State<MaterialAppExample> {
                   });
                 },
                 segments: animationStyleSegments
-                  .map<ButtonSegment<AnimationStyles>>(((AnimationStyles, String) shirt) {
-                    return ButtonSegment<AnimationStyles>(value: shirt.$1, label: Text(shirt.$2));
-                  })
-                  .toList(),
+                    .map<ButtonSegment<AnimationStyles>>((
+                      (AnimationStyles, String) shirt,
+                    ) {
+                      return ButtonSegment<AnimationStyles>(
+                        value: shirt.$1,
+                        label: Text(shirt.$2),
+                      );
+                    })
+                    .toList(),
               ),
               const SizedBox(height: 10),
               OutlinedButton.icon(
@@ -75,7 +84,9 @@ class _MaterialAppExampleState extends State<MaterialAppExample> {
                     isDarkTheme = !isDarkTheme;
                   });
                 },
-                icon: Icon(isDarkTheme ? Icons.wb_sunny : Icons.nightlight_round),
+                icon: Icon(
+                  isDarkTheme ? Icons.wb_sunny : Icons.nightlight_round,
+                ),
                 label: const Text('Switch Theme Mode'),
               ),
             ],

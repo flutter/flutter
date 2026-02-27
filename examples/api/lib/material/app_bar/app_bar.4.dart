@@ -13,9 +13,7 @@ class AppBarExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: AppBarExample(),
-    );
+    return const MaterialApp(home: AppBarExample());
   }
 }
 
@@ -48,13 +46,13 @@ class AppBarExample extends StatelessWidget {
                 fillColor: colorScheme.surface,
                 prefixIcon: Icon(
                   Icons.search_rounded,
-                  color: colorScheme.primary
+                  color: colorScheme.primary,
                 ),
                 suffixIcon: Icon(
                   Icons.tune_rounded,
-                  color: colorScheme.primary
+                  color: colorScheme.primary,
                 ),
-              )
+              ),
             ),
           ),
         ),
@@ -63,9 +61,7 @@ class AppBarExample extends StatelessWidget {
         padding: const EdgeInsets.only(top: 45.0),
         itemCount: 20,
         itemBuilder: (BuildContext context, int index) {
-          return ListTile(
-            title: Text('Item $index'),
-          );
+          return ListTile(title: Text('Item $index'));
         },
       ),
     );
@@ -75,24 +71,29 @@ class AppBarExample extends StatelessWidget {
 class CustomAppBarShape extends OutlinedBorder {
   // Implementing the constructor allows the CustomAppBarShape to be
   // properly compared when calling the `identical` method.
-  const CustomAppBarShape({ super.side });
+  const CustomAppBarShape({super.side});
 
-   Path _getPath(Rect rect) {
+  Path _getPath(Rect rect) {
     final Path path = Path();
-    final Size size = Size(rect.width, rect.height * 1.5) ;
+    final Size size = Size(rect.width, rect.height * 1.5);
 
     final double p0 = size.height * 0.75;
     path.lineTo(0.0, p0);
 
     final Offset controlPoint = Offset(size.width * 0.4, size.height);
     final Offset endPoint = Offset(size.width, size.height / 2);
-    path.quadraticBezierTo(controlPoint.dx, controlPoint.dy, endPoint.dx, endPoint.dy);
+    path.quadraticBezierTo(
+      controlPoint.dx,
+      controlPoint.dy,
+      endPoint.dx,
+      endPoint.dy,
+    );
 
     path.lineTo(size.width, 0.0);
     path.close();
 
     return path;
-   }
+  }
 
   @override
   Path getOuterPath(Rect rect, {TextDirection? textDirection}) {

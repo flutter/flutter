@@ -1,4 +1,4 @@
-The Flutter engine repo runs both pre-submit (before merging) and post-submit (after merging) suites of tests and checks, defined in [`.ci.yaml`](https://github.com/flutter/engine/blob/main/.ci.yaml).
+The Flutter engine repo runs both pre-submit (before merging) and post-submit (after merging) suites of tests and checks, defined in [`.ci.yaml`](https://github.com/flutter/flutter/blob/main/engine/src/flutter/.ci.yaml).
 
 > [!TIP]
 > See [Cocoon Scheduler](https://github.com/flutter/cocoon/blob/main/CI_YAML.md) for details.

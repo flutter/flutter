@@ -16,9 +16,7 @@ class PopupMenuApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: PopupMenuExample(),
-    );
+    return const MaterialApp(home: PopupMenuExample());
   }
 }
 

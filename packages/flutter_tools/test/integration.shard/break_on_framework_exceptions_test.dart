@@ -2,11 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=1000"
-@Tags(<String>['no-shuffle'])
+@Tags(<String>['flutter-test-driver'])
 library;
 
 import 'dart:async';
@@ -35,72 +31,71 @@ void main() {
       work: () => project.setUpIn(tempDir),
     );
 
-    final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
+    final flutter = FlutterTestTestDriver(tempDir);
 
-    await _timeoutAfter(
-      message: 'Timed out launching `flutter test`',
-      work: () => flutter.test(withDebugger: true, pauseOnExceptions: true),
-    );
+    try {
+      await _timeoutAfter(
+        message: 'Timed out launching `flutter test`',
+        work: () => flutter.test(withDebugger: true, pauseOnExceptions: true),
+      );
 
-    await _timeoutAfter(
-      message: 'Timed out waiting for VM service pause debug event',
-      work: flutter.waitForPause,
-    );
+      await _timeoutAfter(
+        message: 'Timed out waiting for VM service pause debug event',
+        work: flutter.waitForPause,
+      );
 
-    int? breakLine;
-    await _timeoutAfter(
-      message: 'Timed out getting source location of top stack frame',
-      work: () async => breakLine = (await flutter.getSourceLocation())?.line,
-    );
+      int? breakLine;
+      await _timeoutAfter(
+        message: 'Timed out getting source location of top stack frame',
+        work: () async => breakLine = (await flutter.getSourceLocation())?.line,
+      );
 
-    expect(breakLine, project.lineContaining(project.test, exceptionMessage));
+      expect(breakLine, project.lineContaining(project.test, exceptionMessage));
+    } finally {
+      // Some of the tests will quit naturally, and others won't.
+      // By this point we don't need the tool anymore, so just force quit.
+      await flutter.quit();
+    }
   }
 
   testWithoutContext('breaks when AnimationController listener throws', () async {
-    final TestProject project = TestProject(
-      r'''
+    final project = TestProject(r'''
       AnimationController(vsync: TestVSync(), duration: Duration.zero)
         ..addListener(() {
           throw 'AnimationController listener';
         })
         ..forward();
-      '''
-    );
+      ''');
 
     await expectException(project, "throw 'AnimationController listener';");
   });
 
   testWithoutContext('breaks when AnimationController status listener throws', () async {
-    final TestProject project = TestProject(
-      r'''
+    final project = TestProject(r'''
       AnimationController(vsync: TestVSync(), duration: Duration.zero)
         ..addStatusListener((AnimationStatus _) {
           throw 'AnimationController status listener';
         })
         ..forward();
-      '''
-    );
+      ''');
 
     await expectException(project, "throw 'AnimationController status listener';");
   });
 
   testWithoutContext('breaks when ChangeNotifier listener throws', () async {
-    final TestProject project = TestProject(
-       r'''
+    final project = TestProject(r'''
        ValueNotifier<int>(0)
          ..addListener(() {
            throw 'ValueNotifier listener';
          })
          ..value = 1;
-       '''
-    );
+       ''');
 
     await expectException(project, "throw 'ValueNotifier listener';");
   });
 
   testWithoutContext('breaks when handling a gesture throws', () async {
-    final TestProject project = TestProject(
-      r'''
+    final project = TestProject(r'''
       await tester.pumpWidget(
         MaterialApp(
           home: Center(
@@ -114,28 +109,24 @@ void main() {
         )
       );
       await tester.tap(find.byType(ElevatedButton));
-      '''
-    );
+      ''');
 
     await expectException(project, "throw 'while handling a gesture';");
   });
 
   testWithoutContext('breaks when platform message callback throws', () async {
-    final TestProject project = TestProject(
-      r'''
+    final project = TestProject(r'''
       BasicMessageChannel<String>('foo', const StringCodec()).setMessageHandler((_) {
         throw 'platform message callback';
       });
       tester.binding.defaultBinaryMessenger.handlePlatformMessage('foo', const StringCodec().encodeMessage('Hello'), (_) {});
-      '''
-    );
+      ''');
 
     await expectException(project, "throw 'platform message callback';");
   });
 
   testWithoutContext('breaks when SliverChildBuilderDelegate.builder throws', () async {
-    final TestProject project = TestProject(
-      r'''
+    final project = TestProject(r'''
       await tester.pumpWidget(MaterialApp(
         home: ListView.builder(
           itemBuilder: (BuildContext context, int index) {
@@ -143,15 +134,13 @@ void main() {
           },
         ),
       ));
-      '''
-    );
+      ''');
 
     await expectException(project, "throw 'cannot build child';");
   });
 
   testWithoutContext('breaks when EditableText.onChanged throws', () async {
-    final TestProject project = TestProject(
-      r'''
+    final project = TestProject(r'''
       await tester.pumpWidget(MaterialApp(
         home: Material(
           child: TextField(
@@ -162,15 +151,13 @@ void main() {
         ),
       ));
       await tester.enterText(find.byType(TextField), 'foo');
-      '''
-    );
+      ''');
 
     await expectException(project, "throw 'onChanged';");
   });
 
   testWithoutContext('breaks when EditableText.onEditingComplete throws', () async {
-    final TestProject project = TestProject(
-      r'''
+    final project = TestProject(r'''
       await tester.pumpWidget(MaterialApp(
         home: Material(
           child: TextField(
@@ -183,15 +170,13 @@ void main() {
       await tester.tap(find.byType(EditableText));
       await tester.pump();
       await tester.testTextInput.receiveAction(TextInputAction.done);
-      '''
-    );
+      ''');
 
     await expectException(project, "throw 'onEditingComplete';");
   });
 
   testWithoutContext('breaks when EditableText.onSelectionChanged throws', () async {
-    final TestProject project = TestProject(
-      r'''
+    final project = TestProject(r'''
       await tester.pumpWidget(MaterialApp(
         home: SelectableText('hello',
           onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
@@ -200,73 +185,63 @@ void main() {
         ),
       ));
       await tester.tap(find.byType(SelectableText));
-      '''
-    );
+      ''');
 
     await expectException(project, "throw 'onSelectionChanged';");
   });
 
   testWithoutContext('breaks when Action listener throws', () async {
-    final TestProject project = TestProject(
-      r'''
+    final project = TestProject(r'''
       CallbackAction<Intent>(onInvoke: (Intent _) { })
         ..addActionListener((_) {
           throw 'action listener';
         })
         ..notifyActionListeners();
-      '''
-    );
+      ''');
 
     await expectException(project, "throw 'action listener';");
   });
 
   testWithoutContext('breaks when pointer route throws', () async {
-    final TestProject project = TestProject(
-      r'''
+    final project = TestProject(r'''
       PointerRouter()
         ..addRoute(2, (PointerEvent event) {
           throw 'pointer route';
         })
         ..route(TestPointer(2).down(Offset.zero));
-      '''
-    );
+      ''');
 
     await expectException(project, "throw 'pointer route';");
   });
 
   testWithoutContext('breaks when PointerSignalResolver callback throws', () async {
-    final TestProject project = TestProject(
-      r'''
+    final project = TestProject(r'''
       const PointerScrollEvent originalEvent = PointerScrollEvent();
       PointerSignalResolver()
         ..register(originalEvent, (PointerSignalEvent event) {
           throw 'PointerSignalResolver callback';
         })
         ..resolve(originalEvent);
-      '''
-    );
+      ''');
 
     await expectException(project, "throw 'PointerSignalResolver callback';");
   });
 
   testWithoutContext('breaks when PointerSignalResolver callback throws', () async {
-    final TestProject project = TestProject(
-      r'''
+    final project = TestProject(r'''
       FocusManager.instance
         ..addHighlightModeListener((_) {
           throw 'highlight mode listener';
         })
         ..highlightStrategy = FocusHighlightStrategy.alwaysTouch
         ..highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-      '''
-    );
+      ''');
 
     await expectException(project, "throw 'highlight mode listener';");
   });
 
   testWithoutContext('breaks when GestureBinding.dispatchEvent throws', () async {
-    final TestProject project = TestProject(
-      r'''
+    final project = TestProject(r'''
       await tester.pumpWidget(
         MouseRegion(
           onHover: (_) {
@@ -280,14 +255,13 @@ void main() {
       await gesture.moveTo(tester.getCenter(find.byType(MouseRegion)));
       await tester.pump();
       gesture.removePointer();
-      '''
-    );
+      ''');
 
     await expectException(project, "throw 'onHover';");
   });
 
   testWithoutContext('breaks when ImageStreamListener.onImage throws', () async {
-    final TestProject project = TestProject(
+    final project = TestProject(
       r'''
       final Completer<ImageInfo> completer = Completer<ImageInfo>();
       OneFrameImageStreamCompleter(completer.future)
@@ -301,15 +275,14 @@ void main() {
         setUp(() async {
           image = await createTestImage();
         });
-      '''
+      ''',
     );
 
     await expectException(project, "throw 'setImage';");
   });
 
   testWithoutContext('breaks when ImageStreamListener.onError throws', () async {
-    final TestProject project = TestProject(
-      r'''
+    final project = TestProject(r'''
       final Completer<ImageInfo> completer = Completer<ImageInfo>();
       OneFrameImageStreamCompleter(completer.future)
         ..addListener(ImageStreamListener(
@@ -319,56 +292,48 @@ void main() {
           },
         ));
       completer.completeError('ERROR');
-      '''
-    );
+      ''');
 
     await expectException(project, "throw 'onError';");
   });
 
   testWithoutContext('breaks when LayoutBuilder.builder throws', () async {
-    final TestProject project = TestProject(
-      r'''
+    final project = TestProject(r'''
       await tester.pumpWidget(LayoutBuilder(
         builder: (_, __) {
           throw 'LayoutBuilder.builder';
         },
       ));
-      '''
-    );
+      ''');
 
     await expectException(project, "throw 'LayoutBuilder.builder';");
   });
 
   testWithoutContext('breaks when _CallbackHookProvider callback throws', () async {
-    final TestProject project = TestProject(
-      r'''
+    final project = TestProject(r'''
       RootBackButtonDispatcher()
         ..addCallback(() {
           throw '_CallbackHookProvider.callback';
         })
         ..invokeCallback(Future.value(false));
-      '''
-    );
+      ''');
 
     await expectException(project, "throw '_CallbackHookProvider.callback';");
   });
 
   testWithoutContext('breaks when TimingsCallback throws', () async {
-    final TestProject project = TestProject(
-      r'''
+    final project = TestProject(r'''
       SchedulerBinding.instance!.addTimingsCallback((List<FrameTiming> timings) {
         throw 'TimingsCallback';
       });
       ui.PlatformDispatcher.instance.onReportTimings!(<FrameTiming>[]);
-      '''
-    );
+      ''');
 
     await expectException(project, "throw 'TimingsCallback';");
   });
 
   testWithoutContext('breaks when TimingsCallback throws', () async {
-    final TestProject project = TestProject(
-      r'''
+    final project = TestProject(r'''
       SchedulerBinding.instance!.scheduleTask(
         () {
           throw 'scheduled task';
@@ -376,27 +341,24 @@ void main() {
         Priority.touch,
       );
       await tester.pumpAndSettle();
-      '''
-    );
+      ''');
 
     await expectException(project, "throw 'scheduled task';");
   });
 
   testWithoutContext('breaks when FrameCallback throws', () async {
-    final TestProject project = TestProject(
-      r'''
+    final project = TestProject(r'''
       SchedulerBinding.instance!.addPostFrameCallback((_) {
         throw 'FrameCallback';
       });
       await tester.pump();
-      '''
-    );
+      ''');
 
     await expectException(project, "throw 'FrameCallback';");
   });
 
   testWithoutContext('breaks when attaching to render tree throws', () async {
-    final TestProject project = TestProject(
+    final project = TestProject(
       r'''
       await tester.pumpWidget(TestWidget());
       ''',
@@ -417,7 +379,7 @@ void main() {
   });
 
   testWithoutContext('breaks when RenderObject.performLayout throws', () async {
-    final TestProject project = TestProject(
+    final project = TestProject(
       r'''
       TestRender().layout(BoxConstraints());
       ''',
@@ -435,7 +397,7 @@ void main() {
   });
 
   testWithoutContext('breaks when RenderObject.performResize throws', () async {
-    final TestProject project = TestProject(
+    final project = TestProject(
       r'''
       TestRender().layout(BoxConstraints());
       ''',
@@ -456,7 +418,7 @@ void main() {
   });
 
   testWithoutContext('breaks when RenderObject.performLayout (without resize) throws', () async {
-    final TestProject project = TestProject(
+    final project = TestProject(
       r'''
       await tester.pumpWidget(TestWidget());
       tester.renderObject<TestRender>(find.byType(TestWidget)).layoutThrows = true;
@@ -494,7 +456,7 @@ void main() {
   });
 
   testWithoutContext('breaks when StatelessWidget.build throws', () async {
-    final TestProject project = TestProject(
+    final project = TestProject(
       r'''
       await tester.pumpWidget(TestWidget());
       ''',
@@ -512,7 +474,7 @@ void main() {
   });
 
   testWithoutContext('breaks when StatefulWidget.build throws', () async {
-    final TestProject project = TestProject(
+    final project = TestProject(
       r'''
       await tester.pumpWidget(TestWidget());
       ''',
@@ -535,7 +497,7 @@ void main() {
   });
 
   testWithoutContext('breaks when finalizing the tree throws', () async {
-    final TestProject project = TestProject(
+    final project = TestProject(
       r'''
       await tester.pumpWidget(TestWidget());
       ''',
@@ -562,7 +524,7 @@ void main() {
   });
 
   testWithoutContext('breaks when rebuilding dirty elements throws', () async {
-    final TestProject project = TestProject(
+    final project = TestProject(
       r'''
       await tester.pumpWidget(TestWidget());
       tester.element<TestElement>(find.byType(TestWidget)).throwOnRebuild = true;
@@ -618,26 +580,23 @@ Future<void> _timeoutAfter({
   Duration duration = const Duration(minutes: 10),
   required Future<void> Function() work,
 }) async {
-  final Timer timer = Timer(
-    duration,
-    () => fail(message),
-  );
+  final timer = Timer(duration, () => fail(message));
   await work();
   timer.cancel();
 }
 
 class TestProject extends Project {
-  TestProject(this.testBody, { this.setup, this.classes });
+  TestProject(this.testBody, {this.setup, this.classes});
 
   final String testBody;
   final String? setup;
   final String? classes;
 
   @override
-  final String pubspec = '''
+  final pubspec = '''
     name: test
     environment:
-      sdk: '>=3.2.0-0 <4.0.0'
+      sdk: ^3.7.0-0
 
     dependencies:
       flutter:
@@ -648,12 +607,15 @@ class TestProject extends Project {
   ''';
 
   @override
-  final String main = '';
+  final main = '';
 
   @override
-  String get test => _test.replaceFirst('// SETUP', setup ?? '').replaceFirst('// TEST_BODY', testBody).replaceFirst('// CLASSES', classes ?? '');
+  String get test => _test
+      .replaceFirst('// SETUP', setup ?? '')
+      .replaceFirst('// TEST_BODY', testBody)
+      .replaceFirst('// CLASSES', classes ?? '');
 
-  final String _test = r'''
+  final _test = r'''
     import 'dart:async';
     import 'dart:ui' as ui;
 

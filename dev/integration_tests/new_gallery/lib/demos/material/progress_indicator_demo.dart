@@ -31,17 +31,18 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo>
       animationBehavior: AnimationBehavior.preserve,
     )..forward();
 
-    _animation = CurvedAnimation(
-      parent: _controller,
-      curve: const Interval(0.0, 0.9, curve: Curves.fastOutSlowIn),
-      reverseCurve: Curves.fastOutSlowIn,
-    )..addStatusListener((AnimationStatus status) {
-        if (status == AnimationStatus.dismissed) {
-          _controller.forward();
-        } else if (status == AnimationStatus.completed) {
-          _controller.reverse();
-        }
-      });
+    _animation =
+        CurvedAnimation(
+          parent: _controller,
+          curve: const Interval(0.0, 0.9, curve: Curves.fastOutSlowIn),
+          reverseCurve: Curves.fastOutSlowIn,
+        )..addStatusListener((AnimationStatus status) {
+          if (status == AnimationStatus.dismissed) {
+            _controller.forward();
+          } else if (status == AnimationStatus.completed) {
+            _controller.reverse();
+          }
+        });
   }
 
   @override
@@ -53,11 +54,9 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo>
   String get _title {
     switch (widget.type) {
       case ProgressIndicatorDemoType.circular:
-        return GalleryLocalizations.of(context)!
-            .demoCircularProgressIndicatorTitle;
+        return GalleryLocalizations.of(context)!.demoCircularProgressIndicatorTitle;
       case ProgressIndicatorDemoType.linear:
-        return GalleryLocalizations.of(context)!
-            .demoLinearProgressIndicatorTitle;
+        return GalleryLocalizations.of(context)!.demoLinearProgressIndicatorTitle;
     }
   }
 
@@ -66,9 +65,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo>
       case ProgressIndicatorDemoType.circular:
         return Column(
           children: <Widget>[
-            CircularProgressIndicator(
-              semanticsLabel: GalleryLocalizations.of(context)!.loading,
-            ),
+            CircularProgressIndicator(semanticsLabel: GalleryLocalizations.of(context)!.loading),
             const SizedBox(height: 32),
             CircularProgressIndicator(value: _animation.value),
           ],
@@ -87,18 +84,12 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Text(_title),
-      ),
+      appBar: AppBar(automaticallyImplyLeading: false, title: Text(_title)),
       body: Center(
         child: SingleChildScrollView(
           child: Container(
             padding: const EdgeInsets.all(8),
-            child: AnimatedBuilder(
-              animation: _animation,
-              builder: _buildIndicators,
-            ),
+            child: AnimatedBuilder(animation: _animation, builder: _buildIndicators),
           ),
         ),
       ),

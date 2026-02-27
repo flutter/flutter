@@ -2,6 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/rendering.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
+///
+/// @docImport 'actions.dart';
+/// @docImport 'focus_manager.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'scrollable.dart';
+/// @docImport 'scrollable_helpers.dart';
+/// @docImport 'shortcuts.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
@@ -56,12 +68,10 @@ class PrimaryScrollController extends InheritedWidget {
   });
 
   /// Creates a subtree without an associated [ScrollController].
-  const PrimaryScrollController.none({
-    super.key,
-    required super.child,
-  }) : automaticallyInheritForPlatforms = const <TargetPlatform>{},
-       scrollDirection = null,
-       controller = null;
+  const PrimaryScrollController.none({super.key, required super.child})
+    : automaticallyInheritForPlatforms = const <TargetPlatform>{},
+      scrollDirection = null,
+      controller = null;
 
   /// The [ScrollController] associated with the subtree.
   ///
@@ -113,7 +123,8 @@ class PrimaryScrollController extends InheritedWidget {
   /// not called by ScrollView as it will have determined whether or not to
   /// inherit the PrimaryScrollController.
   static bool shouldInherit(BuildContext context, Axis scrollDirection) {
-    final PrimaryScrollController? result = context.findAncestorWidgetOfExactType<PrimaryScrollController>();
+    final PrimaryScrollController? result = context
+        .findAncestorWidgetOfExactType<PrimaryScrollController>();
     if (result == null) {
       return false;
     }
@@ -139,7 +150,8 @@ class PrimaryScrollController extends InheritedWidget {
   /// * [PrimaryScrollController.maybeOf], which is similar to this method, but
   ///   asserts if no [PrimaryScrollController] ancestor is found.
   static ScrollController? maybeOf(BuildContext context) {
-    final PrimaryScrollController? result = context.dependOnInheritedWidgetOfExactType<PrimaryScrollController>();
+    final PrimaryScrollController? result = context
+        .dependOnInheritedWidgetOfExactType<PrimaryScrollController>();
     return result?.controller;
   }
 
@@ -182,6 +194,13 @@ class PrimaryScrollController extends InheritedWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ScrollController>('controller', controller, ifNull: 'no controller', showName: false));
+    properties.add(
+      DiagnosticsProperty<ScrollController>(
+        'controller',
+        controller,
+        ifNull: 'no controller',
+        showName: false,
+      ),
+    );
   }
 }

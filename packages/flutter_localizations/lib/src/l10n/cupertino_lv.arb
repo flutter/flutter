@@ -32,5 +32,13 @@
   "lookUpButtonLabel": "Meklēt",
   "searchWebButtonLabel": "Meklēt tīmeklī",
   "shareButtonLabel": "Kopīgot…",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "Notīrīt",
+  "cancelButtonLabel": "Atcelt",
+  "backButtonLabel": "Atpakaļ",
+  "expansionTileExpandedHint": "dubultskāriens, lai sakļautu",
+  "expansionTileCollapsedHint": "dubultskāriens, lai izvērstu",
+  "expansionTileExpandedTapHint": "Sakļaut",
+  "expansionTileCollapsedTapHint": "Izvērst, lai iegūtu plašāku informāciju",
+  "expandedHint": "Sakļauts",
+  "collapsedHint": "Izvērsts"
 }

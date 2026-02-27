@@ -3,32 +3,29 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io' as io;
 
-import 'package:dart_style/dart_style.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
 
 import 'configuration.dart';
 import 'data_types.dart';
-import 'import_sorter.dart';
 import 'util.dart';
 
 /// Generates the snippet HTML, as well as saving the output snippet main to
 /// the output directory.
 class SnippetGenerator {
-  SnippetGenerator(
-      {SnippetConfiguration? configuration,
-      FileSystem filesystem = const LocalFileSystem(),
-      Directory? flutterRoot})
-      : flutterRoot =
-            flutterRoot ?? FlutterInformation.instance.getFlutterRoot(),
-        configuration = configuration ??
-            FlutterRepoSnippetConfiguration(
-                filesystem: filesystem,
-                flutterRoot: flutterRoot ??
-                    FlutterInformation.instance.getFlutterRoot());
+  SnippetGenerator({
+    SnippetConfiguration? configuration,
+    FileSystem filesystem = const LocalFileSystem(),
+    Directory? flutterRoot,
+  }) : flutterRoot = flutterRoot ?? FlutterInformation.instance.getFlutterRoot(),
+       configuration =
+           configuration ??
+           FlutterRepoSnippetConfiguration(
+             filesystem: filesystem,
+             flutterRoot: flutterRoot ?? FlutterInformation.instance.getFlutterRoot(),
+           );
 
   final Directory flutterRoot;
 
@@ -38,23 +35,15 @@ class SnippetGenerator {
 
   static const JsonEncoder jsonEncoder = JsonEncoder.withIndent('    ');
 
-  /// A Dart formatted used to format the snippet code and finished application
-  /// code.
-  static DartFormatter formatter =
-      DartFormatter(pageWidth: 80, fixes: StyleFix.all);
-
   /// Interpolates the [injections] into an HTML skeleton file.
   ///
   /// The order of the injections is important.
   ///
   /// Takes into account the [type] and doesn't substitute in the id and the app
   /// if not a [SnippetType.sample] snippet.
-  String interpolateSkeleton(
-    CodeSample sample,
-    String skeleton,
-  ) {
-    final List<String> codeParts = <String>[];
-    const HtmlEscape htmlEscape = HtmlEscape();
+  String interpolateSkeleton(CodeSample sample, String skeleton) {
+    final codeParts = <String>[];
+    const htmlEscape = HtmlEscape();
     String? language;
     for (final SkeletonInjection injection in sample.parts) {
       if (!injection.name.startsWith('code')) {
@@ -72,17 +61,16 @@ class SnippetGenerator {
     // Only insert a div for the description if there actually is some text there.
     // This means that the {{description}} marker in the skeleton needs to
     // be inside of an {@inject-html} block.
-    final String description = sample.description.trim().isNotEmpty
+    final description = sample.description.trim().isNotEmpty
         ? '<div class="snippet-description">{@end-inject-html}${sample.description.trim()}{@inject-html}</div>'
         : '';
 
     // DartPad only supports stable or main as valid channels. Use main
     // if not on stable so that local runs will work (although they will
     // still take their sample code from the master docs server).
-    final String channel =
-        sample.metadata['channel'] == 'stable' ? 'stable' : 'main';
+    final channel = sample.metadata['channel'] == 'stable' ? 'stable' : 'main';
 
-    final Map<String, String> substitutions = <String, String>{
+    final substitutions = <String, String>{
       'description': description,
       'code': htmlEscape.convert(codeParts.join('\n')),
       'language': language ?? 'dart',
@@ -97,129 +85,21 @@ class SnippetGenerator {
         ..['serial'] = sample.metadata['serial']?.toString() ?? '0'
         ..['app'] = htmlEscape.convert(sample.output);
     }
-    return skeleton.replaceAllMapped(
-        RegExp('{{(${substitutions.keys.join('|')})}}'), (Match match) {
+    return skeleton.replaceAllMapped(RegExp('{{(${substitutions.keys.join('|')})}}'), (
+      Match match,
+    ) {
       return substitutions[match[1]]!;
     });
-  }
-
-  /// Consolidates all of the snippets and the assumptions into one snippet, in
-  /// order to create a compilable result.
-  Iterable<SourceLine> consolidateSnippets(List<CodeSample> samples,
-      {bool addMarkers = false}) {
-    if (samples.isEmpty) {
-      return <SourceLine>[];
-    }
-    final Iterable<SnippetSample> snippets = samples.whereType<SnippetSample>();
-    final List<SourceLine> snippetLines = <SourceLine>[
-      ...snippets.first.assumptions,
-    ];
-    for (final SnippetSample sample in snippets) {
-      parseInput(sample);
-      snippetLines.addAll(_processBlocks(sample));
-    }
-    return snippetLines;
-  }
-
-  /// A RegExp that matches a Dart constructor.
-  static final RegExp _constructorRegExp =
-      RegExp(r'(const\s+)?_*[A-Z][a-zA-Z0-9<>._]*\(');
-
-  /// A serial number so that we can create unique expression names when we
-  /// generate them.
-  int _expressionId = 0;
-
-  List<SourceLine> _surround(
-      String prefix, Iterable<SourceLine> body, String suffix) {
-    return <SourceLine>[
-      if (prefix.isNotEmpty) SourceLine(prefix),
-      ...body,
-      if (suffix.isNotEmpty) SourceLine(suffix),
-    ];
-  }
-
-  /// Process one block of sample code (the part inside of "```" markers).
-  /// Splits any sections denoted by "// ..." into separate blocks to be
-  /// processed separately. Uses a primitive heuristic to make sample blocks
-  /// into valid Dart code.
-  List<SourceLine> _processBlocks(CodeSample sample) {
-    final List<SourceLine> block = sample.parts
-        .expand<SourceLine>((SkeletonInjection injection) => injection.contents)
-        .toList();
-    if (block.isEmpty) {
-      return <SourceLine>[];
-    }
-    return _processBlock(block);
-  }
-
-  List<SourceLine> _processBlock(List<SourceLine> block) {
-    final String firstLine = block.first.text;
-    if (firstLine.startsWith('new ') ||
-        firstLine.startsWith(_constructorRegExp)) {
-      _expressionId += 1;
-      return _surround('dynamic expression$_expressionId = ', block, ';');
-    } else if (firstLine.startsWith('await ')) {
-      _expressionId += 1;
-      return _surround(
-          'Future<void> expression$_expressionId() async { ', block, ' }');
-    } else if (block.first.text.startsWith('class ') ||
-        block.first.text.startsWith('enum ')) {
-      return block;
-    } else if ((block.first.text.startsWith('_') ||
-            block.first.text.startsWith('final ')) &&
-        block.first.text.contains(' = ')) {
-      _expressionId += 1;
-      return _surround(
-          'void expression$_expressionId() { ', block.toList(), ' }');
-    } else {
-      final List<SourceLine> buffer = <SourceLine>[];
-      int blocks = 0;
-      SourceLine? subLine;
-      final List<SourceLine> subsections = <SourceLine>[];
-      for (int index = 0; index < block.length; index += 1) {
-        // Each section of the dart code that is either split by a blank line, or with
-        // '// ...' is treated as a separate code block.
-        if (block[index].text.trim().isEmpty || block[index].text == '// ...') {
-          if (subLine == null) {
-            continue;
-          }
-          blocks += 1;
-          subsections.addAll(_processBlock(buffer));
-          buffer.clear();
-          assert(buffer.isEmpty);
-          subLine = null;
-        } else if (block[index].text.startsWith('// ')) {
-          if (buffer.length > 1) {
-            // don't include leading comments
-            // so that it doesn't start with "// " and get caught in this again
-            buffer.add(SourceLine('/${block[index].text}'));
-          }
-        } else {
-          subLine ??= block[index];
-          buffer.add(block[index]);
-        }
-      }
-      if (blocks > 0) {
-        if (subLine != null) {
-          subsections.addAll(_processBlock(buffer));
-        }
-        // Combine all of the subsections into one section, now that they've been processed.
-        return subsections;
-      } else {
-        return block;
-      }
-    }
   }
 
   /// Parses the input for the various code and description segments, and
   /// returns a set of skeleton injections in the order found.
   List<SkeletonInjection> parseInput(CodeSample sample) {
-    bool inCodeBlock = false;
-    final List<SourceLine> description = <SourceLine>[];
-    final List<SkeletonInjection> components = <SkeletonInjection>[];
+    var inCodeBlock = false;
+    final description = <SourceLine>[];
+    final components = <SkeletonInjection>[];
     String? language;
-    final RegExp codeStartEnd =
-        RegExp(r'^\s*```(?<language>[-\w]+|[-\w]+ (?<section>[-\w]+))?\s*$');
+    final codeStartEnd = RegExp(r'^\s*```(?<language>[-\w]+|[-\w]+ (?<section>[-\w]+))?\s*$');
     for (final SourceLine line in sample.input) {
       final RegExpMatch? match = codeStartEnd.firstMatch(line.text);
       if (match != null) {
@@ -228,12 +108,15 @@ class SnippetGenerator {
         if (match.namedGroup('language') != null) {
           language = match[1];
           if (match.namedGroup('section') != null) {
-            components.add(SkeletonInjection(
-                'code-${match.namedGroup('section')}', <SourceLine>[],
-                language: language!));
-          } else {
             components.add(
-                SkeletonInjection('code', <SourceLine>[], language: language!));
+              SkeletonInjection(
+                'code-${match.namedGroup('section')}',
+                <SourceLine>[],
+                language: language!,
+              ),
+            );
+          } else {
+            components.add(SkeletonInjection('code', <SourceLine>[], language: language!));
           }
         } else {
           language = null;
@@ -247,10 +130,9 @@ class SnippetGenerator {
         components.last.contents.add(line);
       }
     }
-    final List<String> descriptionLines = <String>[];
-    bool lastWasWhitespace = false;
-    for (final String line in description
-        .map<String>((SourceLine line) => line.text.trimRight())) {
+    final descriptionLines = <String>[];
+    var lastWasWhitespace = false;
+    for (final String line in description.map<String>((SourceLine line) => line.text.trimRight())) {
       final bool onlyWhitespace = line.trim().isEmpty;
       if (onlyWhitespace && descriptionLines.isEmpty) {
         // Don't add whitespace lines until we see something without whitespace.
@@ -266,8 +148,7 @@ class SnippetGenerator {
     }
     sample.description = descriptionLines.join('\n').trimRight();
     sample.parts = <SkeletonInjection>[
-      if (sample is SnippetSample)
-        SkeletonInjection('#assumptions', sample.assumptions),
+      if (sample is SnippetSample) SkeletonInjection('#assumptions', sample.assumptions),
       ...components,
     ];
     return sample.parts;
@@ -282,8 +163,7 @@ class SnippetGenerator {
   /// Returns a string with the HTML needed to embed in a web page for showing a
   /// sample on the web page.
   String generateHtml(CodeSample sample) {
-    final String skeleton =
-        _loadFileAsUtf8(configuration.getHtmlSkeletonFile(sample.type));
+    final String skeleton = _loadFileAsUtf8(configuration.getHtmlSkeletonFile(sample.type));
     return interpolateSkeleton(sample, skeleton);
   }
 
@@ -315,7 +195,6 @@ class SnippetGenerator {
     File? output,
     String? copyright,
     String? description,
-    bool formatOutput = true,
     bool includeAssumptions = false,
   }) {
     sample.metadata['copyright'] ??= copyright;
@@ -327,66 +206,49 @@ class SnippetGenerator {
       case ApplicationSample _:
         final String app = sample.sourceFileContents;
         sample.output = app;
-        if (formatOutput) {
-          final DartFormatter formatter =
-              DartFormatter(pageWidth: 80, fixes: StyleFix.all);
-          try {
-            sample.output = formatter.format(sample.output);
-          } on FormatterException catch (exception) {
-            io.stderr
-                .write('Code to format:\n${_addLineNumbers(sample.output)}\n');
-            errorExit('Unable to format sample code: $exception');
-          }
-          sample.output = sortImports(sample.output);
-        }
         if (output != null) {
           output.writeAsStringSync(sample.output);
 
-          final File metadataFile = configuration.filesystem.file(path.join(
+          final File metadataFile = configuration.filesystem.file(
+            path.join(
               path.dirname(output.path),
-              '${path.basenameWithoutExtension(output.path)}.json'));
+              '${path.basenameWithoutExtension(output.path)}.json',
+            ),
+          );
           sample.metadata['file'] = path.basename(output.path);
           final Map<String, Object?> metadata = sample.metadata;
           if (metadata.containsKey('description')) {
-            metadata['description'] = (metadata['description']! as String)
-                .replaceAll(RegExp(r'^// ?', multiLine: true), '');
+            metadata['description'] = (metadata['description']! as String).replaceAll(
+              RegExp(r'^// ?', multiLine: true),
+              '',
+            );
           }
           metadataFile.writeAsStringSync(jsonEncoder.convert(metadata));
         }
       case SnippetSample _:
-          String app;
-          if (sample.sourceFile == null) {
-            String templateContents;
-            if (includeAssumptions) {
-              templateContents =
-                  '${headers.map<String>((SourceLine line) {
-                    return line.text;
-                  }).join('\n')}\n{{#assumptions}}\n{{description}}\n{{code}}';
-            } else {
-              templateContents = '{{description}}\n{{code}}';
-            }
-            app = interpolateTemplate(
-              snippetData,
-              templateContents,
-              sample.metadata,
-              addCopyright: copyright != null,
-            );
+        String app;
+        if (sample.sourceFile == null) {
+          String templateContents;
+          if (includeAssumptions) {
+            templateContents =
+                '${headers.map<String>((SourceLine line) {
+                  return line.text;
+                }).join('\n')}\n{{#assumptions}}\n{{description}}\n{{code}}';
           } else {
-            app = sample.inputAsString;
+            templateContents = '{{description}}\n{{code}}';
           }
-          sample.output = app;
+          app = interpolateTemplate(
+            snippetData,
+            templateContents,
+            sample.metadata,
+            addCopyright: copyright != null,
+          );
+        } else {
+          app = sample.inputAsString;
+        }
+        sample.output = app;
     }
     return sample.output;
-  }
-
-  String _addLineNumbers(String code) {
-    final StringBuffer buffer = StringBuffer();
-    int count = 0;
-    for (final String line in code.split('\n')) {
-      count++;
-      buffer.writeln('${count.toString().padLeft(5)}: $line');
-    }
-    return buffer.toString();
   }
 
   /// Computes the headers needed for each snippet file.
@@ -404,11 +266,13 @@ class SnippetGenerator {
       "import 'dart:typed_data';",
       "import 'dart:ui' as ui;",
       "import 'package:flutter_test/flutter_test.dart';",
-      for (final File file in _listDartFiles(FlutterInformation.instance
-          .getFlutterRoot()
-          .childDirectory('packages')
-          .childDirectory('flutter')
-          .childDirectory('lib'))) ...<String>[
+      for (final File file in _listDartFiles(
+        FlutterInformation.instance
+            .getFlutterRoot()
+            .childDirectory('packages')
+            .childDirectory('flutter')
+            .childDirectory('lib'),
+      )) ...<String>[
         '',
         '// ${file.path}',
         "import 'package:flutter/${path.basename(file.path)}';",
@@ -418,8 +282,7 @@ class SnippetGenerator {
 
   List<SourceLine>? _headers;
 
-  static List<File> _listDartFiles(Directory directory,
-      {bool recursive = false}) {
+  static List<File> _listDartFiles(Directory directory, {bool recursive = false}) {
     return directory
         .listSync(recursive: recursive, followLinks: false)
         .whereType<File>()

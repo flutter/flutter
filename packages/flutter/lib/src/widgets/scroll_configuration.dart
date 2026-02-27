@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'list_wheel_scroll_view.dart';
+/// @docImport 'page_view.dart';
+/// @docImport 'scroll_position.dart';
+/// @docImport 'scroll_view.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -10,6 +18,7 @@ import 'package:flutter/services.dart' show LogicalKeyboardKey;
 import 'framework.dart';
 import 'overscroll_indicator.dart';
 import 'scroll_physics.dart';
+import 'scroll_view.dart';
 import 'scrollable.dart';
 import 'scrollable_helpers.dart';
 import 'scrollbar.dart';
@@ -81,6 +90,7 @@ class ScrollBehavior {
     Set<LogicalKeyboardKey>? pointerAxisModifiers,
     ScrollPhysics? physics,
     TargetPlatform? platform,
+    ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior,
   }) {
     return _WrappedScrollBehavior(
       delegate: this,
@@ -91,6 +101,7 @@ class ScrollBehavior {
       pointerAxisModifiers: pointerAxisModifiers,
       physics: physics,
       platform: platform,
+      keyboardDismissBehavior: keyboardDismissBehavior,
     );
   }
 
@@ -101,10 +112,11 @@ class ScrollBehavior {
 
   /// The device kinds that the scrollable will accept drag gestures from.
   ///
-  /// By default only [PointerDeviceKind.touch], [PointerDeviceKind.stylus], and
-  /// [PointerDeviceKind.invertedStylus] are configured to create drag gestures.
-  /// Enabling this for [PointerDeviceKind.mouse] will make it difficult or
-  /// impossible to select text in scrollable containers and is not recommended.
+  /// By default only [PointerDeviceKind.touch], [PointerDeviceKind.stylus],
+  /// [PointerDeviceKind.invertedStylus], and [PointerDeviceKind.trackpad]
+  /// are configured to create drag gestures. Enabling this for
+  /// [PointerDeviceKind.mouse] will make it difficult or impossible to select
+  /// text in scrollable containers and is not recommended.
   Set<PointerDeviceKind> get dragDevices => _kTouchLikeDeviceTypes;
 
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.multitouchDragStrategy}
@@ -153,10 +165,7 @@ class ScrollBehavior {
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         assert(details.controller != null);
-        return RawScrollbar(
-          controller: details.controller,
-          child: child,
-        );
+        return RawScrollbar(controller: details.controller, child: child);
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
@@ -215,12 +224,16 @@ class ScrollBehavior {
     }
   }
 
-  static const ScrollPhysics _bouncingPhysics = BouncingScrollPhysics(parent: RangeMaintainingScrollPhysics());
+  static const ScrollPhysics _bouncingPhysics = BouncingScrollPhysics(
+    parent: RangeMaintainingScrollPhysics(),
+  );
   static const ScrollPhysics _bouncingDesktopPhysics = BouncingScrollPhysics(
     decelerationRate: ScrollDecelerationRate.fast,
-    parent: RangeMaintainingScrollPhysics()
+    parent: RangeMaintainingScrollPhysics(),
   );
-  static const ScrollPhysics _clampingPhysics = ClampingScrollPhysics(parent: RangeMaintainingScrollPhysics());
+  static const ScrollPhysics _clampingPhysics = ClampingScrollPhysics(
+    parent: RangeMaintainingScrollPhysics(),
+  );
 
   /// The scroll physics to use for the platform given by [getPlatform].
   ///
@@ -255,6 +268,12 @@ class ScrollBehavior {
   /// method returns false, the rebuilds might be optimized away.
   bool shouldNotify(covariant ScrollBehavior oldDelegate) => false;
 
+  /// The default keyboard dismissal behavior for [ScrollView] widgets.
+  ///
+  /// Defaults to [ScrollViewKeyboardDismissBehavior.manual].
+  ScrollViewKeyboardDismissBehavior getKeyboardDismissBehavior(BuildContext context) =>
+      ScrollViewKeyboardDismissBehavior.manual;
+
   @override
   String toString() => objectRuntimeType(this, 'ScrollBehavior');
 }
@@ -269,6 +288,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     Set<LogicalKeyboardKey>? pointerAxisModifiers,
     this.physics,
     this.platform,
+    this.keyboardDismissBehavior,
   }) : _dragDevices = dragDevices,
        _pointerAxisModifiers = pointerAxisModifiers;
 
@@ -277,6 +297,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   final bool overscroll;
   final ScrollPhysics? physics;
   final TargetPlatform? platform;
+  final ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior;
   final Set<PointerDeviceKind>? _dragDevices;
   final MultitouchDragStrategy? multitouchDragStrategy;
   final Set<LogicalKeyboardKey>? _pointerAxisModifiers;
@@ -285,7 +306,8 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   Set<PointerDeviceKind> get dragDevices => _dragDevices ?? delegate.dragDevices;
 
   @override
-  Set<LogicalKeyboardKey> get pointerAxisModifiers => _pointerAxisModifiers ?? delegate.pointerAxisModifiers;
+  Set<LogicalKeyboardKey> get pointerAxisModifiers =>
+      _pointerAxisModifiers ?? delegate.pointerAxisModifiers;
 
   @override
   MultitouchDragStrategy getMultitouchDragStrategy(BuildContext context) {
@@ -317,6 +339,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     Set<LogicalKeyboardKey>? pointerAxisModifiers,
     ScrollPhysics? physics,
     TargetPlatform? platform,
+    ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior,
   }) {
     return delegate.copyWith(
       scrollbars: scrollbars ?? this.scrollbars,
@@ -326,6 +349,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
       pointerAxisModifiers: pointerAxisModifiers ?? this.pointerAxisModifiers,
       physics: physics ?? this.physics,
       platform: platform ?? this.platform,
+      keyboardDismissBehavior: keyboardDismissBehavior ?? this.keyboardDismissBehavior,
     );
   }
 
@@ -340,16 +364,21 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   }
 
   @override
+  ScrollViewKeyboardDismissBehavior getKeyboardDismissBehavior(BuildContext context) {
+    return keyboardDismissBehavior ?? delegate.getKeyboardDismissBehavior(context);
+  }
+
+  @override
   bool shouldNotify(_WrappedScrollBehavior oldDelegate) {
-    return oldDelegate.delegate.runtimeType != delegate.runtimeType
-        || oldDelegate.scrollbars != scrollbars
-        || oldDelegate.overscroll != overscroll
-        || !setEquals<PointerDeviceKind>(oldDelegate.dragDevices, dragDevices)
-        || oldDelegate.multitouchDragStrategy != multitouchDragStrategy
-        || !setEquals<LogicalKeyboardKey>(oldDelegate.pointerAxisModifiers, pointerAxisModifiers)
-        || oldDelegate.physics != physics
-        || oldDelegate.platform != platform
-        || delegate.shouldNotify(oldDelegate.delegate);
+    return oldDelegate.delegate.runtimeType != delegate.runtimeType ||
+        oldDelegate.scrollbars != scrollbars ||
+        oldDelegate.overscroll != overscroll ||
+        !setEquals<PointerDeviceKind>(oldDelegate.dragDevices, dragDevices) ||
+        oldDelegate.multitouchDragStrategy != multitouchDragStrategy ||
+        !setEquals<LogicalKeyboardKey>(oldDelegate.pointerAxisModifiers, pointerAxisModifiers) ||
+        oldDelegate.physics != physics ||
+        oldDelegate.platform != platform ||
+        delegate.shouldNotify(oldDelegate.delegate);
   }
 
   @override
@@ -367,11 +396,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
 /// decorations used by descendants of [child].
 class ScrollConfiguration extends InheritedWidget {
   /// Creates a widget that controls how [Scrollable] widgets behave in a subtree.
-  const ScrollConfiguration({
-    super.key,
-    required this.behavior,
-    required super.child,
-  });
+  const ScrollConfiguration({super.key, required this.behavior, required super.child});
 
   /// How [Scrollable] widgets that are descendants of [child] should behave.
   final ScrollBehavior behavior;
@@ -381,14 +406,15 @@ class ScrollConfiguration extends InheritedWidget {
   /// If no [ScrollConfiguration] widget is in scope of the given `context`,
   /// a default [ScrollBehavior] instance is returned.
   static ScrollBehavior of(BuildContext context) {
-    final ScrollConfiguration? configuration = context.dependOnInheritedWidgetOfExactType<ScrollConfiguration>();
+    final ScrollConfiguration? configuration = context
+        .dependOnInheritedWidgetOfExactType<ScrollConfiguration>();
     return configuration?.behavior ?? const ScrollBehavior();
   }
 
   @override
   bool updateShouldNotify(ScrollConfiguration oldWidget) {
-    return behavior.runtimeType != oldWidget.behavior.runtimeType
-        || (behavior != oldWidget.behavior && behavior.shouldNotify(oldWidget.behavior));
+    return behavior.runtimeType != oldWidget.behavior.runtimeType ||
+        (behavior != oldWidget.behavior && behavior.shouldNotify(oldWidget.behavior));
   }
 
   @override

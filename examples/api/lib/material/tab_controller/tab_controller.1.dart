@@ -19,17 +19,12 @@ class TabControllerExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: TabControllerExample(tabs: tabs),
-    );
+    return const MaterialApp(home: TabControllerExample(tabs: tabs));
   }
 }
 
 class TabControllerExample extends StatelessWidget {
-  const TabControllerExample({
-    required this.tabs,
-    super.key,
-  });
+  const TabControllerExample({required this.tabs, super.key});
 
   final List<Tab> tabs;
 
@@ -42,9 +37,7 @@ class TabControllerExample extends StatelessWidget {
           debugPrint('tab changed: $index');
         },
         child: Scaffold(
-          appBar: AppBar(
-            bottom: TabBar(tabs: tabs),
-          ),
+          appBar: AppBar(bottom: TabBar(tabs: tabs)),
           body: TabBarView(
             children: tabs.map((Tab tab) {
               return Center(
@@ -85,8 +78,9 @@ class _DefaultTabControllerListenerState
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final TabController? defaultTabController =
-        DefaultTabController.maybeOf(context);
+    final TabController? defaultTabController = DefaultTabController.maybeOf(
+      context,
+    );
 
     assert(() {
       if (defaultTabController == null) {

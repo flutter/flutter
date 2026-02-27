@@ -5,12 +5,17 @@
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/tasks/web_benchmarks.dart';
 
+const String buildMode = String.fromEnvironment('buildMode', defaultValue: 'profile');
+
 /// Runs all Web benchmarks using the Skwasm rendering backend.
 Future<void> main() async {
   await task(() async {
     return runWebBenchmark((
-      webRenderer: 'skwasm',
-      useWasm: true
+      useWasm: true,
+      forceSingleThreadedSkwasm: false,
+      useDdc: false,
+      withHotReload: false,
+      buildMode: buildMode,
     ));
   });
 }

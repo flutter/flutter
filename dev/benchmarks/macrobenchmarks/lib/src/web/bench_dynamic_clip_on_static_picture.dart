@@ -43,19 +43,16 @@ class BenchDynamicClipOnStaticPicture extends SceneBuilderRecorder {
         'Bad combination of constant values kRowHeight, kRows, and '
         'kScrollData. With these numbers there is risk that the picture '
         'will scroll out of the clip entirely. To fix the issue reduce '
-        'kScrollDelta, or increase either kRows or kRowHeight.'
+        'kScrollDelta, or increase either kRows or kRowHeight.',
       );
     }
 
     // Create one static picture, then never change it again.
-    const Color black = Color.fromARGB(255, 0, 0, 0);
-    final PictureRecorder pictureRecorder = PictureRecorder();
-    final Canvas canvas = Canvas(pictureRecorder);
+    const black = Color.fromARGB(255, 0, 0, 0);
+    final pictureRecorder = PictureRecorder();
+    final canvas = Canvas(pictureRecorder);
     viewSize = view.physicalSize / view.devicePixelRatio;
-    clipSize = Size(
-      viewSize.width / 2,
-      viewSize.height / 5,
-    );
+    clipSize = Size(viewSize.width / 2, viewSize.height / 5);
     final double cellWidth = viewSize.width / kColumns;
 
     final List<Paragraph> paragraphs = generateLaidOutParagraphs(
@@ -66,18 +63,13 @@ class BenchDynamicClipOnStaticPicture extends SceneBuilderRecorder {
       color: black,
     );
 
-    int paragraphCounter = 0;
-    double yOffset = 0.0;
-    for (int row = 0; row < kRows; row += 1) {
-      for (int column = 0; column < kColumns; column += 1) {
+    var paragraphCounter = 0;
+    var yOffset = 0.0;
+    for (var row = 0; row < kRows; row += 1) {
+      for (var column = 0; column < kColumns; column += 1) {
         final double left = cellWidth * column;
         canvas.save();
-        canvas.clipRect(Rect.fromLTWH(
-          left,
-          yOffset,
-          cellWidth,
-          20.0,
-        ));
+        canvas.clipRect(Rect.fromLTWH(left, yOffset, cellWidth, 20.0));
         canvas.drawParagraph(
           paragraphs[paragraphCounter % paragraphs.length],
           Offset(left, yOffset),
@@ -104,7 +96,7 @@ class BenchDynamicClipOnStaticPicture extends SceneBuilderRecorder {
     // This will move the clip along the Y axis in picture's local coordinates
     // causing a repaint. If we're not efficient at managing clips and/or
     // repaints this will jank (see https://github.com/flutter/flutter/issues/42987).
-    final Rect clip = Rect.fromLTWH(0.0, 0.0, clipSize.width, clipSize.height);
+    final clip = Rect.fromLTWH(0.0, 0.0, clipSize.width, clipSize.height);
     sceneBuilder.pushClipRect(clip);
     sceneBuilder.pushOffset(0.0, pictureVerticalOffset);
     sceneBuilder.addPicture(Offset.zero, picture);

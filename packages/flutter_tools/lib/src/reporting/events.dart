@@ -9,11 +9,7 @@ part of 'reporting.dart';
 /// If sending values for custom dimensions is required, extend this class as
 /// below.
 class UsageEvent {
-  UsageEvent(this.category, this.parameter, {
-    this.label,
-    this.value,
-    required this.flutterUsage,
-  });
+  UsageEvent(this.category, this.parameter, {this.label, this.value, required this.flutterUsage});
 
   final String category;
   final String parameter;
@@ -34,7 +30,8 @@ class UsageEvent {
 /// [invalidatedSourcesCount] to [syncedLibraryCount] should help understand
 /// sync/transfer "overhead" of updating this number of source files.
 class HotEvent extends UsageEvent {
-  HotEvent(String parameter, {
+  HotEvent(
+    String parameter, {
     required this.targetPlatform,
     required this.sdkName,
     required this.emulator,
@@ -78,7 +75,7 @@ class HotEvent extends UsageEvent {
 
   @override
   void send() {
-    final CustomDimensions parameters = CustomDimensions(
+    final parameters = CustomDimensions(
       hotEventTargetPlatform: targetPlatform,
       hotEventSdkName: sdkName,
       hotEventEmulator: emulator,
@@ -104,16 +101,13 @@ class HotEvent extends UsageEvent {
 
 /// An event that reports the result of a [DoctorValidator]
 class DoctorResultEvent extends UsageEvent {
-  DoctorResultEvent({
-    required this.validator,
-    required this.result,
-    Usage? flutterUsage,
-  }) : super(
-    'doctor-result',
-    '${validator.runtimeType}',
-    label: result.typeStr,
-    flutterUsage: flutterUsage ?? globals.flutterUsage,
-  );
+  DoctorResultEvent({required this.validator, required this.result, Usage? flutterUsage})
+    : super(
+        'doctor-result',
+        '${validator.runtimeType}',
+        label: result.typeStr,
+        flutterUsage: flutterUsage ?? globals.flutterUsage,
+      );
 
   final DoctorValidator validator;
   final ValidationResult result;
@@ -124,13 +118,13 @@ class DoctorResultEvent extends UsageEvent {
       flutterUsage.sendEvent(category, parameter, label: label);
       return;
     }
-    final GroupedValidator group = validator as GroupedValidator;
+    final group = validator as GroupedValidator;
     // The validator crashed.
     if (group.subResults.isEmpty) {
       flutterUsage.sendEvent(category, parameter, label: label);
       return;
     }
-    for (int i = 0; i < group.subValidators.length; i++) {
+    for (var i = 0; i < group.subValidators.length; i++) {
       final DoctorValidator v = group.subValidators[i];
       final ValidationResult r = group.subResults[i];
       DoctorResultEvent(validator: v, result: r, flutterUsage: flutterUsage).send();
@@ -140,32 +134,30 @@ class DoctorResultEvent extends UsageEvent {
 
 /// An event that reports on the result of a pub invocation.
 class PubResultEvent extends UsageEvent {
-  PubResultEvent({
-    required String context,
-    required String result,
-    required Usage usage,
-  }) : super('pub-result', context, label: result, flutterUsage: usage);
+  PubResultEvent({required String context, required String result, required Usage usage})
+    : super('pub-result', context, label: result, flutterUsage: usage);
 }
 
 /// An event that reports something about a build.
 class BuildEvent extends UsageEvent {
-  BuildEvent(String label, {
+  BuildEvent(
+    String label, {
     String? command,
     String? settings,
     String? eventError,
     required Usage flutterUsage,
     required String type,
   }) : _command = command,
-  _settings = settings,
-  _eventError = eventError,
-      super(
-    // category
-    'build',
-    // parameter
-    type,
-    label: label,
-    flutterUsage: flutterUsage,
-  );
+       _settings = settings,
+       _eventError = eventError,
+       super(
+         // category
+         'build',
+         // parameter
+         type,
+         label: label,
+         flutterUsage: flutterUsage,
+       );
 
   final String? _command;
   final String? _settings;
@@ -173,50 +165,33 @@ class BuildEvent extends UsageEvent {
 
   @override
   void send() {
-    final CustomDimensions parameters = CustomDimensions(
+    final parameters = CustomDimensions(
       buildEventCommand: _command,
       buildEventSettings: _settings,
       buildEventError: _eventError,
     );
-    flutterUsage.sendEvent(
-      category,
-      parameter,
-      label: label,
-      parameters: parameters,
-    );
+    flutterUsage.sendEvent(category, parameter, label: label, parameters: parameters);
   }
 }
 
 /// An event that reports the result of a top-level command.
 class CommandResultEvent extends UsageEvent {
-  CommandResultEvent(
-    super.commandPath,
-    super.result,
-    int? maxRss,
-  )   : _maxRss = maxRss,
-        super(flutterUsage: globals.flutterUsage);
+  CommandResultEvent(super.commandPath, super.result, int? maxRss)
+    : _maxRss = maxRss,
+      super(flutterUsage: globals.flutterUsage);
 
   final int? _maxRss;
 
   @override
   void send() {
     // An event for the command result.
-    flutterUsage.sendEvent(
-      'tool-command-result',
-      category,
-      label: parameter,
-    );
+    flutterUsage.sendEvent('tool-command-result', category, label: parameter);
 
     // A separate event for the memory highwater mark. This is a separate event
     // so that we can get the command result even if trying to grab maxRss
     // throws an exception.
     if (_maxRss != null) {
-      flutterUsage.sendEvent(
-        'tool-command-max-rss',
-        category,
-        label: parameter,
-        value: _maxRss,
-      );
+      flutterUsage.sendEvent('tool-command-max-rss', category, label: parameter, value: _maxRss);
     }
   }
 }
@@ -227,89 +202,21 @@ class AnalyticsConfigEvent extends UsageEvent {
     /// Whether analytics reporting is being enabled (true) or disabled (false).
     required bool enabled,
   }) : super(
-    'analytics',
-    'enabled',
-    label: enabled ? 'true' : 'false',
-    flutterUsage: globals.flutterUsage,
-  );
+         'analytics',
+         'enabled',
+         label: enabled ? 'true' : 'false',
+         flutterUsage: globals.flutterUsage,
+       );
 }
 
 /// An event that reports when the code size measurement is run via `--analyze-size`.
 class CodeSizeEvent extends UsageEvent {
-  CodeSizeEvent(String platform, {
-    required Usage flutterUsage,
-  }) : super(
-    'code-size-analysis',
-    platform,
-    flutterUsage: flutterUsage
-  );
+  CodeSizeEvent(String platform, {required Usage flutterUsage})
+    : super('code-size-analysis', platform, flutterUsage: flutterUsage);
 }
 
 /// An event for tracking the usage of specific error handling fallbacks.
 class ErrorHandlingEvent extends UsageEvent {
-  ErrorHandlingEvent(String parameter) : super('error-handling', parameter, flutterUsage: globals.flutterUsage);
-}
-
-/// Emit various null safety analytic events.
-///
-/// 1. The current null safety runtime mode.
-/// 2. The number of packages that are migrated, along with the total number of packages
-/// 3. The main packages language version.
-class NullSafetyAnalysisEvent implements UsageEvent {
-  NullSafetyAnalysisEvent(
-    this.packageConfig,
-    this.nullSafetyMode,
-    this.currentPackage,
-    this.flutterUsage,
-  );
-
-  /// The category for analytics events related to null safety.
-  static const String kNullSafetyCategory = 'null-safety';
-
-  final PackageConfig packageConfig;
-  final NullSafetyMode nullSafetyMode;
-  final String currentPackage;
-  @override
-  final Usage flutterUsage;
-
-  @override
-  void send() {
-    if (packageConfig.packages.isEmpty) {
-      return;
-    }
-    int migrated = 0;
-    LanguageVersion? languageVersion;
-    for (final Package package in packageConfig.packages) {
-      final LanguageVersion? packageLanguageVersion = package.languageVersion;
-      if (package.name == currentPackage) {
-        languageVersion = packageLanguageVersion;
-      }
-      if (packageLanguageVersion != null &&
-          packageLanguageVersion.major >= nullSafeVersion.major &&
-          packageLanguageVersion.minor >= nullSafeVersion.minor) {
-        migrated += 1;
-      }
-    }
-    flutterUsage.sendEvent(kNullSafetyCategory, 'runtime-mode', label: nullSafetyMode.toString());
-    flutterUsage.sendEvent(kNullSafetyCategory, 'stats', parameters: CustomDimensions(
-      nullSafeMigratedLibraries: migrated,
-      nullSafeTotalLibraries: packageConfig.packages.length,
-    ));
-    if (languageVersion != null) {
-      final String formattedVersion = '${languageVersion.major}.${languageVersion.minor}';
-      flutterUsage.sendEvent(kNullSafetyCategory, 'language-version', label: formattedVersion);
-    }
-  }
-
-  @override
-  String get category => kNullSafetyCategory;
-
-  @override
-  String get label => throw UnsupportedError('');
-
-  @override
-  String get parameter => throw UnsupportedError('');
-
-  @override
-  int get value => throw UnsupportedError('');
+  ErrorHandlingEvent(String parameter)
+    : super('error-handling', parameter, flutterUsage: globals.flutterUsage);
 }

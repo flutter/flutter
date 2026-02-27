@@ -5,13 +5,17 @@
 import 'template.dart';
 
 class BannerTemplate extends TokenTemplate {
-  const BannerTemplate(super.blockName, super.fileName, super.tokens, {
+  const BannerTemplate(
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
-    super.textThemePrefix = '_textTheme.'
+    super.textThemePrefix = '_textTheme.',
   });
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends MaterialBannerThemeData {
   _${blockName}DefaultsM3(this.context)
     : super(elevation: ${elevation("md.comp.banner.container")});

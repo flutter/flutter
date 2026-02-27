@@ -1,0 +1,762 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#import <Foundation/Foundation.h>
+#import <OCMock/OCMock.h>
+#import <XCTest/XCTest.h>
+
+#import <objc/runtime.h>
+
+#import "flutter/common/settings.h"
+#include "flutter/fml/synchronization/sync_switch.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+#import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Test.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
+#import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
+FLUTTER_ASSERT_ARC
+
+@protocol TestFlutterPluginWithSceneEvents <NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate>
+@end
+
+@interface FlutterEngineSpy : FlutterEngine
+@property(nonatomic) BOOL ensureSemanticsEnabledCalled;
+@end
+
+@implementation FlutterEngineSpy
+
+- (void)ensureSemanticsEnabled {
+  _ensureSemanticsEnabledCalled = YES;
+}
+
+@end
+
+@interface FlutterEngine () <FlutterTextInputDelegate>
+
+@end
+
+/// FlutterBinaryMessengerRelay used for testing that setting FlutterEngine.binaryMessenger to
+/// the current instance doesn't trigger a use-after-free bug.
+///
+/// See: testSetBinaryMessengerToSameBinaryMessenger
+@interface FakeBinaryMessengerRelay : FlutterBinaryMessengerRelay
+@property(nonatomic, assign) BOOL failOnDealloc;
+@end
+
+@implementation FakeBinaryMessengerRelay
+- (void)dealloc {
+  if (_failOnDealloc) {
+    XCTFail("FakeBinaryMessageRelay should not be deallocated");
+  }
+}
+@end
+
+@interface FlutterEngineTest : XCTestCase
+@end
+
+@implementation FlutterEngineTest
+
+- (void)setUp {
+}
+
+- (void)tearDown {
+}
+
+- (void)testCreate {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  XCTAssertNotNil(engine);
+}
+
+- (void)testShellGetters {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  XCTAssertNotNil(engine);
+
+  // Ensure getters don't deref _shell when it's null, and instead return nullptr.
+  XCTAssertEqual(engine.platformTaskRunner.get(), nullptr);
+  XCTAssertEqual(engine.uiTaskRunner.get(), nullptr);
+  XCTAssertEqual(engine.rasterTaskRunner.get(), nullptr);
+}
+
+- (void)testInfoPlist {
+  // Check the embedded Flutter.framework Info.plist, not the linked dylib.
+  NSURL* flutterFrameworkURL =
+      [NSBundle.mainBundle.privateFrameworksURL URLByAppendingPathComponent:@"Flutter.framework"];
+  NSBundle* flutterBundle = [NSBundle bundleWithURL:flutterFrameworkURL];
+  XCTAssertEqualObjects(flutterBundle.bundleIdentifier, @"io.flutter.flutter");
+
+  NSDictionary<NSString*, id>* infoDictionary = flutterBundle.infoDictionary;
+
+  // OS version can have one, two, or three digits: "8", "8.0", "8.0.0"
+  NSError* regexError = NULL;
+  NSRegularExpression* osVersionRegex =
+      [NSRegularExpression regularExpressionWithPattern:@"((0|[1-9]\\d*)\\.)*(0|[1-9]\\d*)"
+                                                options:NSRegularExpressionCaseInsensitive
+                                                  error:&regexError];
+  XCTAssertNil(regexError);
+
+  // Smoke test the test regex.
+  NSString* testString = @"9";
+  NSUInteger versionMatches =
+      [osVersionRegex numberOfMatchesInString:testString
+                                      options:NSMatchingAnchored
+                                        range:NSMakeRange(0, testString.length)];
+  XCTAssertEqual(versionMatches, 1UL);
+  testString = @"9.1";
+  versionMatches = [osVersionRegex numberOfMatchesInString:testString
+                                                   options:NSMatchingAnchored
+                                                     range:NSMakeRange(0, testString.length)];
+  XCTAssertEqual(versionMatches, 1UL);
+  testString = @"9.0.1";
+  versionMatches = [osVersionRegex numberOfMatchesInString:testString
+                                                   options:NSMatchingAnchored
+                                                     range:NSMakeRange(0, testString.length)];
+  XCTAssertEqual(versionMatches, 1UL);
+  testString = @".0.1";
+  versionMatches = [osVersionRegex numberOfMatchesInString:testString
+                                                   options:NSMatchingAnchored
+                                                     range:NSMakeRange(0, testString.length)];
+  XCTAssertEqual(versionMatches, 0UL);
+
+  // Test Info.plist values.
+  NSString* minimumOSVersion = infoDictionary[@"MinimumOSVersion"];
+  versionMatches = [osVersionRegex numberOfMatchesInString:minimumOSVersion
+                                                   options:NSMatchingAnchored
+                                                     range:NSMakeRange(0, minimumOSVersion.length)];
+  XCTAssertEqual(versionMatches, 1UL);
+
+  // SHA length is 40.
+  XCTAssertEqual(((NSString*)infoDictionary[@"FlutterEngine"]).length, 40UL);
+
+  // {clang_version} placeholder is 15 characters. The clang string version
+  // is longer than that, so check if the placeholder has been replaced, without
+  // actually checking a literal string, which could be different on various machines.
+  XCTAssertTrue(((NSString*)infoDictionary[@"ClangVersion"]).length > 15UL);
+}
+
+- (void)testDeallocated {
+  __weak FlutterEngine* weakEngine = nil;
+  @autoreleasepool {
+    FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
+    weakEngine = engine;
+    [engine run];
+    XCTAssertNotNil(weakEngine);
+  }
+  XCTAssertNil(weakEngine);
+}
+
+- (void)testSendMessageBeforeRun {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  XCTAssertNotNil(engine);
+  XCTAssertThrows([engine.binaryMessenger
+      sendOnChannel:@"foo"
+            message:[@"bar" dataUsingEncoding:NSUTF8StringEncoding]
+        binaryReply:nil]);
+}
+
+- (void)testSetMessageHandlerBeforeRun {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  XCTAssertNotNil(engine);
+  XCTAssertThrows([engine.binaryMessenger
+      setMessageHandlerOnChannel:@"foo"
+            binaryMessageHandler:^(NSData* _Nullable message, FlutterBinaryReply _Nonnull reply){
+
+            }]);
+}
+
+- (void)testNilSetMessageHandlerBeforeRun {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  XCTAssertNotNil(engine);
+  XCTAssertNoThrow([engine.binaryMessenger setMessageHandlerOnChannel:@"foo"
+                                                 binaryMessageHandler:nil]);
+}
+
+- (void)testNotifyPluginOfDealloc {
+  id plugin = OCMProtocolMock(@protocol(FlutterPlugin));
+  OCMStub([plugin detachFromEngineForRegistrar:[OCMArg any]]);
+  @autoreleasepool {
+    FlutterDartProject* project = [[FlutterDartProject alloc] init];
+    FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"engine" project:project];
+    NSObject<FlutterPluginRegistrar>* registrar = [engine registrarForPlugin:@"plugin"];
+    [registrar publish:plugin];
+  }
+  OCMVerify([plugin detachFromEngineForRegistrar:[OCMArg any]]);
+}
+
+- (void)testGetViewControllerFromRegistrar {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"engine" project:project];
+  id mockEngine = OCMPartialMock(engine);
+  NSObject<FlutterPluginRegistrar>* registrar = [mockEngine registrarForPlugin:@"plugin"];
+
+  // Verify accessing the viewController getter calls FlutterEngine.viewController.
+  (void)[registrar viewController];
+  OCMVerify(times(1), [mockEngine viewController]);
+}
+
+- (void)testSetBinaryMessengerToSameBinaryMessenger {
+  FakeBinaryMessengerRelay* fakeBinaryMessenger = [[FakeBinaryMessengerRelay alloc] init];
+
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine setBinaryMessenger:fakeBinaryMessenger];
+
+  // Verify that the setter doesn't free the old messenger before setting the new messenger.
+  fakeBinaryMessenger.failOnDealloc = YES;
+  [engine setBinaryMessenger:fakeBinaryMessenger];
+
+  // Don't fail when ARC releases the binary messenger.
+  fakeBinaryMessenger.failOnDealloc = NO;
+}
+
+- (void)testRunningInitialRouteSendsNavigationMessage {
+  id mockBinaryMessenger = OCMClassMock([FlutterBinaryMessengerRelay class]);
+
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine setBinaryMessenger:mockBinaryMessenger];
+
+  // Run with an initial route.
+  [engine runWithEntrypoint:FlutterDefaultDartEntrypoint initialRoute:@"test"];
+
+  // Now check that an encoded method call has been made on the binary messenger to set the
+  // initial route to "test".
+  FlutterMethodCall* setInitialRouteMethodCall =
+      [FlutterMethodCall methodCallWithMethodName:@"setInitialRoute" arguments:@"test"];
+  NSData* encodedSetInitialRouteMethod =
+      [[FlutterJSONMethodCodec sharedInstance] encodeMethodCall:setInitialRouteMethodCall];
+  OCMVerify([mockBinaryMessenger sendOnChannel:@"flutter/navigation"
+                                       message:encodedSetInitialRouteMethod]);
+}
+
+- (void)testInitialRouteSettingsSendsNavigationMessage {
+  id mockBinaryMessenger = OCMClassMock([FlutterBinaryMessengerRelay class]);
+
+  auto settings = FLTDefaultSettingsForBundle();
+  settings.route = "test";
+  FlutterDartProject* project = [[FlutterDartProject alloc] initWithSettings:settings];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  [engine setBinaryMessenger:mockBinaryMessenger];
+  [engine run];
+
+  // Now check that an encoded method call has been made on the binary messenger to set the
+  // initial route to "test".
+  FlutterMethodCall* setInitialRouteMethodCall =
+      [FlutterMethodCall methodCallWithMethodName:@"setInitialRoute" arguments:@"test"];
+  NSData* encodedSetInitialRouteMethod =
+      [[FlutterJSONMethodCodec sharedInstance] encodeMethodCall:setInitialRouteMethodCall];
+  OCMVerify([mockBinaryMessenger sendOnChannel:@"flutter/navigation"
+                                       message:encodedSetInitialRouteMethod]);
+}
+
+- (void)testPlatformViewsControllerRenderingMetalBackend {
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine run];
+  flutter::IOSRenderingAPI renderingApi = [engine platformViewsRenderingAPI];
+
+  XCTAssertEqual(renderingApi, flutter::IOSRenderingAPI::kMetal);
+}
+
+- (void)testWaitForFirstFrameTimeout {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
+  [engine run];
+  XCTestExpectation* timeoutFirstFrame = [self expectationWithDescription:@"timeoutFirstFrame"];
+  [engine waitForFirstFrame:0.1
+                   callback:^(BOOL didTimeout) {
+                     if (timeoutFirstFrame) {
+                       [timeoutFirstFrame fulfill];
+                     }
+                   }];
+  [self waitForExpectations:@[ timeoutFirstFrame ]];
+}
+
+- (void)testSpawn {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
+  [engine run];
+  FlutterEngine* spawn = [engine spawnWithEntrypoint:nil
+                                          libraryURI:nil
+                                        initialRoute:nil
+                                      entrypointArgs:nil];
+  XCTAssertNotNil(spawn);
+}
+
+- (void)testEngineId {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
+  [engine run];
+  int64_t id1 = engine.engineIdentifier;
+  XCTAssertTrue(id1 != 0);
+  FlutterEngine* spawn = [engine spawnWithEntrypoint:nil
+                                          libraryURI:nil
+                                        initialRoute:nil
+                                      entrypointArgs:nil];
+  int64_t id2 = spawn.engineIdentifier;
+  XCTAssertEqual([FlutterEngine engineForIdentifier:id1], engine);
+  XCTAssertEqual([FlutterEngine engineForIdentifier:id2], spawn);
+}
+
+- (void)testSetHandlerAfterRun {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
+  XCTestExpectation* gotMessage = [self expectationWithDescription:@"gotMessage"];
+  dispatch_async(dispatch_get_main_queue(), ^{
+    NSObject<FlutterPluginRegistrar>* registrar = [engine registrarForPlugin:@"foo"];
+    fml::AutoResetWaitableEvent latch;
+    [engine run];
+    flutter::Shell& shell = engine.shell;
+    fml::TaskRunner::RunNowOrPostTask(
+        engine.shell.GetTaskRunners().GetUITaskRunner(), [&latch, &shell] {
+          flutter::Engine::Delegate& delegate = shell;
+          auto message = std::make_unique<flutter::PlatformMessage>("foo", nullptr);
+          delegate.OnEngineHandlePlatformMessage(std::move(message));
+          latch.Signal();
+        });
+    latch.Wait();
+    [registrar.messenger setMessageHandlerOnChannel:@"foo"
+                               binaryMessageHandler:^(NSData* message, FlutterBinaryReply reply) {
+                                 [gotMessage fulfill];
+                               }];
+  });
+  [self waitForExpectations:@[ gotMessage ]];
+}
+
+- (void)testThreadPrioritySetCorrectly {
+  XCTestExpectation* prioritiesSet = [self expectationWithDescription:@"prioritiesSet"];
+  prioritiesSet.expectedFulfillmentCount = 2;
+
+  IMP mockSetThreadPriority =
+      imp_implementationWithBlock(^(NSThread* thread, double threadPriority) {
+        if ([thread.name hasSuffix:@".raster"]) {
+          XCTAssertEqual(threadPriority, 1.0);
+          [prioritiesSet fulfill];
+        } else if ([thread.name hasSuffix:@".io"]) {
+          XCTAssertEqual(threadPriority, 0.5);
+          [prioritiesSet fulfill];
+        }
+      });
+  Method method = class_getInstanceMethod([NSThread class], @selector(setThreadPriority:));
+  IMP originalSetThreadPriority = method_getImplementation(method);
+  method_setImplementation(method, mockSetThreadPriority);
+
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine run];
+  [self waitForExpectations:@[ prioritiesSet ]];
+
+  method_setImplementation(method, originalSetThreadPriority);
+}
+
+- (void)testCanEnableDisableEmbedderAPIThroughInfoPlist {
+  {
+    // Not enable embedder API by default
+    auto settings = FLTDefaultSettingsForBundle();
+    settings.enable_software_rendering = true;
+    FlutterDartProject* project = [[FlutterDartProject alloc] initWithSettings:settings];
+    FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+    XCTAssertFalse(engine.enableEmbedderAPI);
+  }
+  {
+    // Enable embedder api
+    id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
+    OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableIOSEmbedderAPI"])
+        .andReturn(@"YES");
+    auto settings = FLTDefaultSettingsForBundle();
+    settings.enable_software_rendering = true;
+    FlutterDartProject* project = [[FlutterDartProject alloc] initWithSettings:settings];
+    FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+    XCTAssertTrue(engine.enableEmbedderAPI);
+  }
+}
+
+- (void)testFlutterTextInputViewDidResignFirstResponderWillCallTextInputClientConnectionClosed {
+  id mockBinaryMessenger = OCMClassMock([FlutterBinaryMessengerRelay class]);
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine setBinaryMessenger:mockBinaryMessenger];
+  [engine runWithEntrypoint:FlutterDefaultDartEntrypoint initialRoute:@"test"];
+  [engine flutterTextInputView:nil didResignFirstResponderWithTextInputClient:1];
+  FlutterMethodCall* methodCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInputClient.onConnectionClosed"
+                                        arguments:@[ @(1) ]];
+  NSData* encodedMethodCall = [[FlutterJSONMethodCodec sharedInstance] encodeMethodCall:methodCall];
+  OCMVerify([mockBinaryMessenger sendOnChannel:@"flutter/textinput" message:encodedMethodCall]);
+}
+
+- (void)testFlutterEngineUpdatesDisplays {
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  id mockEngine = OCMPartialMock(engine);
+
+  [engine run];
+  OCMVerify(times(1), [mockEngine updateDisplays]);
+  engine.viewController = nil;
+  OCMVerify(times(2), [mockEngine updateDisplays]);
+}
+
+- (void)testLifeCycleNotificationDidEnterBackgroundForApplication {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  [engine run];
+  NSNotification* sceneNotification =
+      [NSNotification notificationWithName:UISceneDidEnterBackgroundNotification
+                                    object:nil
+                                  userInfo:nil];
+  NSNotification* applicationNotification =
+      [NSNotification notificationWithName:UIApplicationDidEnterBackgroundNotification
+                                    object:nil
+                                  userInfo:nil];
+  id mockEngine = OCMPartialMock(engine);
+  [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
+  [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
+  OCMVerify(times(1), [mockEngine applicationDidEnterBackground:[OCMArg any]]);
+  XCTAssertTrue(engine.isGpuDisabled);
+  BOOL gpuDisabled = NO;
+  [engine shell].GetIsGpuDisabledSyncSwitch()->Execute(
+      fml::SyncSwitch::Handlers().SetIfTrue([&] { gpuDisabled = YES; }).SetIfFalse([&] {
+        gpuDisabled = NO;
+      }));
+  XCTAssertTrue(gpuDisabled);
+}
+
+- (void)testLifeCycleNotificationDidEnterBackgroundForScene {
+  id mockBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockBundle objectForInfoDictionaryKey:@"NSExtension"]).andReturn(@{
+    @"NSExtensionPointIdentifier" : @"com.apple.share-services"
+  });
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  [engine run];
+  NSNotification* sceneNotification =
+      [NSNotification notificationWithName:UISceneDidEnterBackgroundNotification
+                                    object:nil
+                                  userInfo:nil];
+  NSNotification* applicationNotification =
+      [NSNotification notificationWithName:UIApplicationDidEnterBackgroundNotification
+                                    object:nil
+                                  userInfo:nil];
+  id mockEngine = OCMPartialMock(engine);
+  [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
+  [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
+  OCMVerify(times(1), [mockEngine sceneDidEnterBackground:[OCMArg any]]);
+  XCTAssertTrue(engine.isGpuDisabled);
+  BOOL gpuDisabled = NO;
+  [engine shell].GetIsGpuDisabledSyncSwitch()->Execute(
+      fml::SyncSwitch::Handlers().SetIfTrue([&] { gpuDisabled = YES; }).SetIfFalse([&] {
+        gpuDisabled = NO;
+      }));
+  XCTAssertTrue(gpuDisabled);
+  [mockBundle stopMocking];
+}
+
+- (void)testLifeCycleNotificationWillEnterForegroundForApplication {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  [engine run];
+  NSNotification* sceneNotification =
+      [NSNotification notificationWithName:UISceneWillEnterForegroundNotification
+                                    object:nil
+                                  userInfo:nil];
+  NSNotification* applicationNotification =
+      [NSNotification notificationWithName:UIApplicationWillEnterForegroundNotification
+                                    object:nil
+                                  userInfo:nil];
+  id mockEngine = OCMPartialMock(engine);
+  [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
+  [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
+  OCMVerify(times(1), [mockEngine applicationWillEnterForeground:[OCMArg any]]);
+  XCTAssertFalse(engine.isGpuDisabled);
+  BOOL gpuDisabled = YES;
+  [engine shell].GetIsGpuDisabledSyncSwitch()->Execute(
+      fml::SyncSwitch::Handlers().SetIfTrue([&] { gpuDisabled = YES; }).SetIfFalse([&] {
+        gpuDisabled = NO;
+      }));
+  XCTAssertFalse(gpuDisabled);
+}
+
+- (void)testLifeCycleNotificationWillEnterForegroundForScene {
+  id mockBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockBundle objectForInfoDictionaryKey:@"NSExtension"]).andReturn(@{
+    @"NSExtensionPointIdentifier" : @"com.apple.share-services"
+  });
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  [engine run];
+  NSNotification* sceneNotification =
+      [NSNotification notificationWithName:UISceneWillEnterForegroundNotification
+                                    object:nil
+                                  userInfo:nil];
+  NSNotification* applicationNotification =
+      [NSNotification notificationWithName:UIApplicationWillEnterForegroundNotification
+                                    object:nil
+                                  userInfo:nil];
+  id mockEngine = OCMPartialMock(engine);
+  [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
+  [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
+  OCMVerify(times(1), [mockEngine sceneWillEnterForeground:[OCMArg any]]);
+  XCTAssertFalse(engine.isGpuDisabled);
+  BOOL gpuDisabled = YES;
+  [engine shell].GetIsGpuDisabledSyncSwitch()->Execute(
+      fml::SyncSwitch::Handlers().SetIfTrue([&] { gpuDisabled = YES; }).SetIfFalse([&] {
+        gpuDisabled = NO;
+      }));
+  XCTAssertFalse(gpuDisabled);
+  [mockBundle stopMocking];
+}
+
+- (void)testLifeCycleNotificationSceneWillConnect {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  [engine run];
+  id mockScene = OCMClassMock([UIWindowScene class]);
+  id mockLifecycleProvider = OCMProtocolMock(@protocol(FlutterSceneLifeCycleProvider));
+  id mockLifecycleDelegate = OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
+  OCMStub([mockScene delegate]).andReturn(mockLifecycleProvider);
+  OCMStub([mockLifecycleProvider sceneLifeCycleDelegate]).andReturn(mockLifecycleDelegate);
+
+  NSNotification* sceneNotification =
+      [NSNotification notificationWithName:UISceneWillConnectNotification
+                                    object:mockScene
+                                  userInfo:nil];
+
+  [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
+  OCMVerify(times(1), [mockLifecycleDelegate engine:engine
+                          receivedConnectNotificationFor:mockScene]);
+}
+
+- (void)testSpawnsShareGpuContext {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
+  [engine run];
+  FlutterEngine* spawn = [engine spawnWithEntrypoint:nil
+                                          libraryURI:nil
+                                        initialRoute:nil
+                                      entrypointArgs:nil];
+  XCTAssertNotNil(spawn);
+  XCTAssertTrue(engine.platformView != nullptr);
+  XCTAssertTrue(spawn.platformView != nullptr);
+  std::shared_ptr<flutter::IOSContext> engine_context = engine.platformView->GetIosContext();
+  std::shared_ptr<flutter::IOSContext> spawn_context = spawn.platformView->GetIosContext();
+  XCTAssertEqual(engine_context, spawn_context);
+}
+
+- (void)testEnableSemanticsWhenFlutterViewAccessibilityDidCall {
+  FlutterEngineSpy* engine = [[FlutterEngineSpy alloc] initWithName:@"foobar"];
+  engine.ensureSemanticsEnabledCalled = NO;
+  [engine flutterViewAccessibilityDidCall];
+  XCTAssertTrue(engine.ensureSemanticsEnabledCalled);
+}
+
+- (void)testCanMergePlatformAndUIThread {
+#if defined(TARGET_IPHONE_SIMULATOR) && TARGET_IPHONE_SIMULATOR
+  auto settings = FLTDefaultSettingsForBundle();
+  FlutterDartProject* project = [[FlutterDartProject alloc] initWithSettings:settings];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  [engine run];
+
+  XCTAssertEqual(engine.shell.GetTaskRunners().GetUITaskRunner(),
+                 engine.shell.GetTaskRunners().GetPlatformTaskRunner());
+#endif  // defined(TARGET_IPHONE_SIMULATOR) && TARGET_IPHONE_SIMULATOR
+}
+
+- (void)testCanUnMergePlatformAndUIThread {
+#if defined(TARGET_IPHONE_SIMULATOR) && TARGET_IPHONE_SIMULATOR
+  auto settings = FLTDefaultSettingsForBundle();
+  settings.merged_platform_ui_thread = flutter::Settings::MergedPlatformUIThread::kDisabled;
+  FlutterDartProject* project = [[FlutterDartProject alloc] initWithSettings:settings];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  [engine run];
+
+  XCTAssertNotEqual(engine.shell.GetTaskRunners().GetUITaskRunner(),
+                    engine.shell.GetTaskRunners().GetPlatformTaskRunner());
+#endif  // defined(TARGET_IPHONE_SIMULATOR) && TARGET_IPHONE_SIMULATOR
+}
+
+- (void)testAddSceneDelegateToRegistrar {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"engine" project:project];
+  id mockEngine = OCMPartialMock(engine);
+  NSObject<FlutterPluginRegistrar>* registrar = [mockEngine registrarForPlugin:@"plugin"];
+  id mockPlugin = OCMProtocolMock(@protocol(TestFlutterPluginWithSceneEvents));
+  [registrar addSceneDelegate:mockPlugin];
+
+  OCMVerify(times(1), [mockEngine addSceneLifeCycleDelegate:[OCMArg any]]);
+}
+
+- (void)testNotifyAppDelegateOfEngineInitialization {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"engine" project:project];
+
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  id mockAppDelegate = OCMProtocolMock(@protocol(FlutterImplicitEngineDelegate));
+  OCMStub([mockApplication delegate]).andReturn(mockAppDelegate);
+
+  [engine performImplicitEngineCallback];
+  OCMVerify(times(1), [mockAppDelegate didInitializeImplicitFlutterEngine:[OCMArg any]]);
+}
+
+- (void)testRegistrarForPlugin {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"engine" project:project];
+  FlutterEngine* mockEngine = OCMPartialMock(engine);
+  id mockViewController = OCMClassMock([FlutterViewController class]);
+  id mockBinaryMessenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  id mockTextureRegistry = OCMProtocolMock(@protocol(FlutterTextureRegistry));
+  id mockPlatformViewController = OCMClassMock([FlutterPlatformViewsController class]);
+  OCMStub([mockEngine viewController]).andReturn(mockViewController);
+  OCMStub([mockEngine binaryMessenger]).andReturn(mockBinaryMessenger);
+  OCMStub([mockEngine textureRegistry]).andReturn(mockTextureRegistry);
+  OCMStub([mockEngine platformViewsController]).andReturn(mockPlatformViewController);
+
+  NSString* pluginKey = @"plugin";
+  NSString* assetKey = @"asset";
+  NSString* factoryKey = @"platform_view_factory";
+
+  NSObject<FlutterPluginRegistrar>* registrar = [mockEngine registrarForPlugin:pluginKey];
+
+  XCTAssertTrue([registrar respondsToSelector:@selector(messenger)]);
+  XCTAssertTrue([registrar respondsToSelector:@selector(textures)]);
+  XCTAssertTrue([registrar respondsToSelector:@selector(registerViewFactory:withId:)]);
+  XCTAssertTrue([registrar
+      respondsToSelector:@selector(registerViewFactory:withId:gestureRecognizersBlockingPolicy:)]);
+  XCTAssertTrue([registrar respondsToSelector:@selector(viewController)]);
+  XCTAssertTrue([registrar respondsToSelector:@selector(publish:)]);
+  XCTAssertTrue([registrar respondsToSelector:@selector(addMethodCallDelegate:channel:)]);
+  XCTAssertTrue([registrar respondsToSelector:@selector(addApplicationDelegate:)]);
+  XCTAssertTrue([registrar respondsToSelector:@selector(lookupKeyForAsset:)]);
+  XCTAssertTrue([registrar respondsToSelector:@selector(lookupKeyForAsset:fromPackage:)]);
+
+  // Verify messenger, textures, and viewController forwards to FlutterEngine
+  XCTAssertEqual(registrar.messenger, mockBinaryMessenger);
+  XCTAssertEqual(registrar.textures, mockTextureRegistry);
+  XCTAssertEqual(registrar.viewController, mockViewController);
+
+  // Verify registerViewFactory:withId:, registerViewFactory:withId:gestureRecognizersBlockingPolicy
+  // forwards to FlutterEngine
+  id mockPlatformViewFactory = OCMProtocolMock(@protocol(FlutterPlatformViewFactory));
+  [registrar registerViewFactory:mockPlatformViewFactory withId:factoryKey];
+  [registrar registerViewFactory:mockPlatformViewFactory
+                                withId:factoryKey
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  OCMVerify(times(2), [mockPlatformViewController registerViewFactory:mockPlatformViewFactory
+                                                               withId:factoryKey
+                                     gestureRecognizersBlockingPolicy:
+                                         FlutterPlatformViewGestureRecognizersBlockingPolicyEager]);
+
+  // Verify publish forwards to FlutterEngine
+  id plugin = OCMProtocolMock(@protocol(FlutterPlugin));
+  [registrar publish:plugin];
+  XCTAssertEqual(mockEngine.pluginPublications[pluginKey], plugin);
+
+  // Verify lookupKeyForAsset:, lookupKeyForAsset:fromPackage forward to engine
+  [registrar lookupKeyForAsset:assetKey];
+  OCMVerify(times(1), [mockEngine lookupKeyForAsset:assetKey]);
+  [registrar lookupKeyForAsset:assetKey fromPackage:pluginKey];
+  OCMVerify(times(1), [mockEngine lookupKeyForAsset:assetKey fromPackage:pluginKey]);
+}
+
+- (void)testRegistrarForApplication {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"engine" project:project];
+  FlutterEngine* mockEngine = OCMPartialMock(engine);
+  id mockViewController = OCMClassMock([FlutterViewController class]);
+  id mockBinaryMessenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  id mockTextureRegistry = OCMProtocolMock(@protocol(FlutterTextureRegistry));
+  id mockPlatformViewController = OCMClassMock([FlutterPlatformViewsController class]);
+  OCMStub([mockEngine viewController]).andReturn(mockViewController);
+  OCMStub([mockEngine binaryMessenger]).andReturn(mockBinaryMessenger);
+  OCMStub([mockEngine textureRegistry]).andReturn(mockTextureRegistry);
+  OCMStub([mockEngine platformViewsController]).andReturn(mockPlatformViewController);
+
+  NSString* pluginKey = @"plugin";
+  NSString* factoryKey = @"platform_view_factory";
+
+  NSObject<FlutterApplicationRegistrar>* registrar = [mockEngine registrarForApplication:pluginKey];
+
+  XCTAssertTrue([registrar respondsToSelector:@selector(messenger)]);
+  XCTAssertTrue([registrar respondsToSelector:@selector(textures)]);
+  XCTAssertTrue([registrar respondsToSelector:@selector(registerViewFactory:withId:)]);
+  XCTAssertTrue([registrar
+      respondsToSelector:@selector(registerViewFactory:withId:gestureRecognizersBlockingPolicy:)]);
+  XCTAssertFalse([registrar respondsToSelector:@selector(viewController)]);
+  XCTAssertFalse([registrar respondsToSelector:@selector(publish:)]);
+  XCTAssertFalse([registrar respondsToSelector:@selector(addMethodCallDelegate:channel:)]);
+  XCTAssertFalse([registrar respondsToSelector:@selector(addApplicationDelegate:)]);
+  XCTAssertFalse([registrar respondsToSelector:@selector(lookupKeyForAsset:)]);
+  XCTAssertFalse([registrar respondsToSelector:@selector(lookupKeyForAsset:fromPackage:)]);
+
+  // Verify messenger and textures forwards to FlutterEngine
+  XCTAssertEqual(registrar.messenger, mockBinaryMessenger);
+  XCTAssertEqual(registrar.textures, mockTextureRegistry);
+
+  // Verify registerViewFactory:withId:, registerViewFactory:withId:gestureRecognizersBlockingPolicy
+  // forwards to FlutterEngine
+  id mockPlatformViewFactory = OCMProtocolMock(@protocol(FlutterPlatformViewFactory));
+  [registrar registerViewFactory:mockPlatformViewFactory withId:factoryKey];
+  [registrar registerViewFactory:mockPlatformViewFactory
+                                withId:factoryKey
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  OCMVerify(times(2), [mockPlatformViewController registerViewFactory:mockPlatformViewFactory
+                                                               withId:factoryKey
+                                     gestureRecognizersBlockingPolicy:
+                                         FlutterPlatformViewGestureRecognizersBlockingPolicyEager]);
+}
+
+- (void)testSendDeepLinkToFrameworkTimesOut {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"engine" project:project];
+  id mockEngine = OCMPartialMock(engine);
+  id mockEngineFirstFrameCallback = [OCMArg invokeBlockWithArgs:@YES, nil];
+  OCMStub([mockEngine waitForFirstFrame:3.0 callback:mockEngineFirstFrameCallback]);
+
+  NSURL* url = [NSURL URLWithString:@"example.com"];
+
+  [mockEngine sendDeepLinkToFramework:url
+                    completionHandler:^(BOOL success) {
+                      XCTAssertFalse(success);
+                    }];
+}
+
+- (void)testSendDeepLinkToFrameworkUsingNavigationChannel {
+  NSString* urlString = @"example.com";
+  NSURL* url = [NSURL URLWithString:urlString];
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"engine" project:project];
+  id mockEngine = OCMPartialMock(engine);
+  id mockEngineFirstFrameCallback = [OCMArg invokeBlockWithArgs:@NO, nil];
+  OCMStub([mockEngine waitForFirstFrame:3.0 callback:mockEngineFirstFrameCallback]);
+  id mockNavigationChannel = OCMClassMock([FlutterMethodChannel class]);
+  OCMStub([mockEngine navigationChannel]).andReturn(mockNavigationChannel);
+  id mockNavigationChannelCallback = [OCMArg invokeBlockWithArgs:@1, nil];
+  OCMStub([mockNavigationChannel invokeMethod:@"pushRouteInformation"
+                                    arguments:@{@"location" : urlString}
+                                       result:mockNavigationChannelCallback]);
+
+  [mockEngine sendDeepLinkToFramework:url
+                    completionHandler:^(BOOL success) {
+                      XCTAssertTrue(success);
+                    }];
+}
+
+- (void)testSendDeepLinkToFrameworkUsingNavigationChannelFails {
+  NSString* urlString = @"example.com";
+  NSURL* url = [NSURL URLWithString:urlString];
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"engine" project:project];
+  id mockEngine = OCMPartialMock(engine);
+  id mockEngineFirstFrameCallback = [OCMArg invokeBlockWithArgs:@NO, nil];
+  OCMStub([mockEngine waitForFirstFrame:3.0 callback:mockEngineFirstFrameCallback]);
+  id mockNavigationChannel = OCMClassMock([FlutterMethodChannel class]);
+  OCMStub([mockEngine navigationChannel]).andReturn(mockNavigationChannel);
+  id mockNavigationChannelCallback = [OCMArg invokeBlockWithArgs:@0, nil];
+  OCMStub([mockNavigationChannel invokeMethod:@"pushRouteInformation"
+                                    arguments:@{@"location" : urlString}
+                                       result:mockNavigationChannelCallback]);
+
+  [mockEngine sendDeepLinkToFramework:url
+                    completionHandler:^(BOOL success) {
+                      XCTAssertFalse(success);
+                    }];
+}
+@end

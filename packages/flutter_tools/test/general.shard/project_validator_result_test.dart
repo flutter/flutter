@@ -10,26 +10,25 @@ import 'package:flutter_tools/src/project_validator_result.dart';
 import '../src/common.dart';
 
 class ProjectValidatorTaskImpl extends ProjectValidator {
-
   @override
   Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
-    const ProjectValidatorResult error = ProjectValidatorResult(
+    const error = ProjectValidatorResult(
       name: 'result_1',
       value: 'this is an error',
       status: StatusProjectValidator.error,
     );
 
-    const ProjectValidatorResult success = ProjectValidatorResult(
+    const success = ProjectValidatorResult(
       name: 'result_2',
       value: 'correct',
       status: StatusProjectValidator.success,
     );
 
-    const ProjectValidatorResult warning = ProjectValidatorResult(
+    const warning = ProjectValidatorResult(
       name: 'result_3',
       value: 'this passed',
       status: StatusProjectValidator.success,
-      warning: 'with a warning'
+      warning: 'with a warning',
     );
 
     return <ProjectValidatorResult>[error, success, warning];
@@ -46,9 +45,8 @@ class ProjectValidatorTaskImpl extends ProjectValidator {
 
 void main() {
   group('ProjectValidatorResult', () {
-
     testWithoutContext('success status', () {
-      const ProjectValidatorResult result = ProjectValidatorResult(
+      const result = ProjectValidatorResult(
         name: 'name',
         value: 'value',
         status: StatusProjectValidator.success,
@@ -58,18 +56,18 @@ void main() {
     });
 
     testWithoutContext('success status with warning', () {
-      const ProjectValidatorResult result = ProjectValidatorResult(
+      const result = ProjectValidatorResult(
         name: 'name',
         value: 'value',
         status: StatusProjectValidator.success,
-        warning: 'my warning'
+        warning: 'my warning',
       );
       expect(result.toString(), 'name: value (warning: my warning)');
       expect(result.status, StatusProjectValidator.success);
     });
 
     testWithoutContext('error status', () {
-      const ProjectValidatorResult result = ProjectValidatorResult(
+      const result = ProjectValidatorResult(
         name: 'name',
         value: 'my error',
         status: StatusProjectValidator.error,
@@ -87,7 +85,7 @@ void main() {
     });
 
     testWithoutContext('error status', () async {
-      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final fs = MemoryFileSystem.test();
       final FlutterProject project = FlutterProject.fromDirectoryTest(fs.currentDirectory);
       final List<ProjectValidatorResult> results = await task.start(project);
       expect(results.length, 3);

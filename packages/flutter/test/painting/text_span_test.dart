@@ -11,12 +11,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('TextSpan equals', () {
-    const TextSpan a1 = TextSpan(text: 'a');
-    const TextSpan a2 = TextSpan(text: 'a');
-    const TextSpan b1 = TextSpan(children: <TextSpan>[ a1 ]);
-    const TextSpan b2 = TextSpan(children: <TextSpan>[ a2 ]);
-    const TextSpan c1 = TextSpan();
-    const TextSpan c2 = TextSpan();
+    const a1 = TextSpan(text: 'a');
+    const a2 = TextSpan(text: 'a');
+    const b1 = TextSpan(children: <TextSpan>[a1]);
+    const b2 = TextSpan(children: <TextSpan>[a2]);
+    const c1 = TextSpan();
+    const c2 = TextSpan();
 
     expect(a1 == a2, isTrue);
     expect(b1 == b2, isTrue);
@@ -33,11 +33,11 @@ void main() {
     void callback1(PointerEnterEvent _) {}
     void callback2(PointerEnterEvent _) {}
 
-    final TextSpan d1 = TextSpan(text: 'a', onEnter: callback1);
-    final TextSpan d2 = TextSpan(text: 'a', onEnter: callback1);
-    final TextSpan d3 = TextSpan(text: 'a', onEnter: callback2);
-    final TextSpan e1 = TextSpan(text: 'a', onEnter: callback2, mouseCursor: SystemMouseCursors.forbidden);
-    final TextSpan e2 = TextSpan(text: 'a', onEnter: callback2, mouseCursor: SystemMouseCursors.forbidden);
+    final d1 = TextSpan(text: 'a', onEnter: callback1);
+    final d2 = TextSpan(text: 'a', onEnter: callback1);
+    final d3 = TextSpan(text: 'a', onEnter: callback2);
+    final e1 = TextSpan(text: 'a', onEnter: callback2, mouseCursor: SystemMouseCursors.forbidden);
+    final e2 = TextSpan(text: 'a', onEnter: callback2, mouseCursor: SystemMouseCursors.forbidden);
 
     expect(a1 == d1, isFalse);
     expect(d1 == d2, isTrue);
@@ -47,63 +47,60 @@ void main() {
   });
 
   test('TextSpan toStringDeep', () {
-    const TextSpan test = TextSpan(
+    const test = TextSpan(
       text: 'a',
-      style: TextStyle(
-        fontSize: 10.0,
-      ),
+      style: TextStyle(fontSize: 10.0),
       children: <TextSpan>[
-        TextSpan(
-          text: 'b',
-          children: <TextSpan>[
-            TextSpan(),
-          ],
-        ),
-        TextSpan(
-          text: 'c',
-        ),
+        TextSpan(text: 'b', children: <TextSpan>[TextSpan()]),
+        TextSpan(text: 'c'),
       ],
     );
-    expect(test.toStringDeep(), equals(
-      'TextSpan:\n'
-      '  inherit: true\n'
-      '  size: 10.0\n'
-      '  "a"\n'
-      '  TextSpan:\n'
-      '    "b"\n'
-      '    TextSpan:\n'
-      '      (empty)\n'
-      '  TextSpan:\n'
-      '    "c"\n',
-    ));
+    expect(
+      test.toStringDeep(),
+      equals(
+        'TextSpan:\n'
+        '  inherit: true\n'
+        '  size: 10.0\n'
+        '  "a"\n'
+        '  TextSpan:\n'
+        '    "b"\n'
+        '    TextSpan:\n'
+        '      (empty)\n'
+        '  TextSpan:\n'
+        '    "c"\n',
+      ),
+    );
   });
 
   test('TextSpan toStringDeep for mouse', () {
-    const TextSpan test1 = TextSpan(
-      text: 'a',
+    const test1 = TextSpan(text: 'a');
+    expect(
+      test1.toStringDeep(),
+      equals(
+        'TextSpan:\n'
+        '  "a"\n',
+      ),
     );
-    expect(test1.toStringDeep(), equals(
-      'TextSpan:\n'
-      '  "a"\n',
-    ));
 
-    final TextSpan test2 = TextSpan(
+    final test2 = TextSpan(
       text: 'a',
       onEnter: (_) {},
       onExit: (_) {},
       mouseCursor: SystemMouseCursors.forbidden,
     );
-    expect(test2.toStringDeep(), equals(
-      'TextSpan:\n'
-      '  "a"\n'
-      '  callbacks: enter, exit\n'
-      '  mouseCursor: SystemMouseCursor(forbidden)\n',
-    ));
+    expect(
+      test2.toStringDeep(),
+      equals(
+        'TextSpan:\n'
+        '  "a"\n'
+        '  callbacks: enter, exit\n'
+        '  mouseCursor: SystemMouseCursor(forbidden)\n',
+      ),
+    );
   });
 
-
   test('TextSpan toPlainText', () {
-    const TextSpan textSpan = TextSpan(
+    const textSpan = TextSpan(
       text: 'a',
       children: <TextSpan>[
         TextSpan(text: 'b'),
@@ -114,7 +111,7 @@ void main() {
   });
 
   test('WidgetSpan toPlainText', () {
-    const TextSpan textSpan = TextSpan(
+    const textSpan = TextSpan(
       text: 'a',
       children: <InlineSpan>[
         TextSpan(text: 'b'),
@@ -126,7 +123,7 @@ void main() {
   });
 
   test('TextSpan toPlainText with semanticsLabel', () {
-    const TextSpan textSpan = TextSpan(
+    const textSpan = TextSpan(
       text: 'a',
       children: <TextSpan>[
         TextSpan(text: 'b', semanticsLabel: 'foo'),
@@ -138,7 +135,7 @@ void main() {
   });
 
   test('TextSpan widget change test', () {
-    const TextSpan textSpan1 = TextSpan(
+    const textSpan1 = TextSpan(
       text: 'a',
       children: <InlineSpan>[
         TextSpan(text: 'b'),
@@ -147,7 +144,7 @@ void main() {
       ],
     );
 
-    const TextSpan textSpan2 = TextSpan(
+    const textSpan2 = TextSpan(
       text: 'a',
       children: <InlineSpan>[
         TextSpan(text: 'b'),
@@ -156,7 +153,7 @@ void main() {
       ],
     );
 
-    const TextSpan textSpan3 = TextSpan(
+    const textSpan3 = TextSpan(
       text: 'a',
       children: <InlineSpan>[
         TextSpan(text: 'b'),
@@ -165,7 +162,7 @@ void main() {
       ],
     );
 
-    const TextSpan textSpan4 = TextSpan(
+    const textSpan4 = TextSpan(
       text: 'a',
       children: <InlineSpan>[
         TextSpan(text: 'b'),
@@ -174,7 +171,7 @@ void main() {
       ],
     );
 
-    const TextSpan textSpan5 = TextSpan(
+    const textSpan5 = TextSpan(
       text: 'a',
       children: <InlineSpan>[
         TextSpan(text: 'b'),
@@ -183,14 +180,11 @@ void main() {
       ],
     );
 
-    const TextSpan textSpan6 = TextSpan(
+    const textSpan6 = TextSpan(
       text: 'a',
       children: <InlineSpan>[
         TextSpan(text: 'b'),
-        WidgetSpan(
-          child: SizedBox(width: 10, height: 10),
-          alignment: PlaceholderAlignment.top,
-        ),
+        WidgetSpan(child: SizedBox(width: 10, height: 10), alignment: PlaceholderAlignment.top),
         TextSpan(text: 'c'),
       ],
     );
@@ -209,7 +203,7 @@ void main() {
   });
 
   test('TextSpan nested widget change test', () {
-    const TextSpan textSpan1 = TextSpan(
+    const textSpan1 = TextSpan(
       text: 'a',
       children: <InlineSpan>[
         TextSpan(text: 'b'),
@@ -227,7 +221,7 @@ void main() {
       ],
     );
 
-    const TextSpan textSpan2 = TextSpan(
+    const textSpan2 = TextSpan(
       text: 'a',
       children: <InlineSpan>[
         TextSpan(text: 'b'),
@@ -251,12 +245,13 @@ void main() {
   });
 
   test('GetSpanForPosition', () {
-    const TextSpan textSpan = TextSpan(
+    const textSpan = TextSpan(
       text: '',
       children: <InlineSpan>[
-        TextSpan(text: '', children: <InlineSpan>[
-          TextSpan(text: 'a'),
-        ]),
+        TextSpan(
+          text: '',
+          children: <InlineSpan>[TextSpan(text: 'a')],
+        ),
         TextSpan(text: 'b'),
         TextSpan(text: 'c'),
       ],
@@ -269,7 +264,7 @@ void main() {
   });
 
   test('GetSpanForPosition with WidgetSpan', () {
-    const TextSpan textSpan = TextSpan(
+    const textSpan = TextSpan(
       text: 'a',
       children: <InlineSpan>[
         TextSpan(text: 'b'),
@@ -294,15 +289,20 @@ void main() {
   });
 
   test('TextSpan computeSemanticsInformation', () {
-    final List<InlineSpanSemanticsInformation> collector = <InlineSpanSemanticsInformation>[];
-    const TextSpan(text: 'aaa', semanticsLabel: 'bbb').computeSemanticsInformation(collector);
+    final collector = <InlineSpanSemanticsInformation>[];
+    const TextSpan(
+      text: 'aaa',
+      semanticsLabel: 'bbb',
+      semanticsIdentifier: 'ccc',
+    ).computeSemanticsInformation(collector);
     expect(collector[0].text, 'aaa');
     expect(collector[0].semanticsLabel, 'bbb');
+    expect(collector[0].semanticsIdentifier, 'ccc');
   });
 
   test('TextSpan visitDirectChildren', () {
     List<InlineSpan> directChildrenOf(InlineSpan root) {
-      final List<InlineSpan> visitOrder = <InlineSpan>[];
+      final visitOrder = <InlineSpan>[];
       root.visitDirectChildren((InlineSpan span) {
         visitOrder.add(span);
         return true;
@@ -310,13 +310,13 @@ void main() {
       return visitOrder;
     }
 
-    const TextSpan leaf1 = TextSpan(text: 'leaf1');
-    const TextSpan leaf2 = TextSpan(text: 'leaf2');
+    const leaf1 = TextSpan(text: 'leaf1');
+    const leaf2 = TextSpan(text: 'leaf2');
 
-    const TextSpan branch1 = TextSpan(children: <InlineSpan>[leaf1, leaf2]);
-    const TextSpan branch2 = TextSpan(text: 'branch2');
+    const branch1 = TextSpan(children: <InlineSpan>[leaf1, leaf2]);
+    const branch2 = TextSpan(text: 'branch2');
 
-    const TextSpan root = TextSpan(children: <InlineSpan>[branch1, branch2]);
+    const root = TextSpan(children: <InlineSpan>[branch1, branch2]);
 
     expect(directChildrenOf(root), <TextSpan>[branch1, branch2]);
     expect(directChildrenOf(branch1), <TextSpan>[leaf1, leaf2]);
@@ -325,7 +325,7 @@ void main() {
     expect(directChildrenOf(leaf2), isEmpty);
 
     int? indexInTree(InlineSpan target) {
-      int index = 0;
+      var index = 0;
       bool findInSubtree(InlineSpan subtreeRoot) {
         if (identical(target, subtreeRoot)) {
           // return false to stop traversal.
@@ -334,6 +334,7 @@ void main() {
         index += 1;
         return subtreeRoot.visitDirectChildren(findInSubtree);
       }
+
       return findInSubtree(root) ? null : index;
     }
 
@@ -354,13 +355,8 @@ void main() {
             TextSpan(
               text: 'xxxxx',
               children: <InlineSpan>[
-                TextSpan(
-                  text: 'yyyyy',
-                  mouseCursor: SystemMouseCursors.forbidden,
-                ),
-                TextSpan(
-                  text: 'xxxxx',
-                ),
+                TextSpan(text: 'yyyyy', mouseCursor: SystemMouseCursors.forbidden),
+                TextSpan(text: 'xxxxx'),
               ],
             ),
             textAlign: TextAlign.center,
@@ -373,17 +369,26 @@ void main() {
     await gesture.addPointer();
 
     await gesture.moveTo(tester.getCenter(find.byType(RichText)) - const Offset(40, 0));
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
 
     await gesture.moveTo(tester.getCenter(find.byType(RichText)));
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.forbidden,
+    );
 
     await gesture.moveTo(tester.getCenter(find.byType(RichText)) + const Offset(40, 0));
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
   });
 
   testWidgets('handles onEnter and onExit', (WidgetTester tester) async {
-    final List<PointerEvent> logEvents = <PointerEvent>[];
+    final logEvents = <PointerEvent>[];
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -401,9 +406,7 @@ void main() {
                     logEvents.add(event);
                   },
                 ),
-                const TextSpan(
-                  text: 'xxxxx',
-                ),
+                const TextSpan(text: 'xxxxx'),
               ],
             ),
             textAlign: TextAlign.center,
@@ -428,7 +431,7 @@ void main() {
   });
 
   testWidgets('TextSpan can compute StringAttributes', (WidgetTester tester) async {
-    const TextSpan span = TextSpan(
+    const span = TextSpan(
       text: 'aaaaa',
       spellOut: true,
       children: <InlineSpan>[
@@ -439,11 +442,11 @@ void main() {
           children: <InlineSpan>[
             TextSpan(text: 'zzzzz'),
             TextSpan(text: 'bbbbb', spellOut: true),
-          ]
+          ],
         ),
       ],
     );
-    final List<InlineSpanSemanticsInformation> collector = <InlineSpanSemanticsInformation>[];
+    final collector = <InlineSpanSemanticsInformation>[];
     span.computeSemanticsInformation(collector);
     expect(collector.length, 5);
     expect(collector[0].stringAttributes.length, 1);
@@ -454,7 +457,7 @@ void main() {
     expect(collector[1].stringAttributes[0].range, const TextRange(start: 0, end: 5));
     expect(collector[1].stringAttributes[1], isA<LocaleStringAttribute>());
     expect(collector[1].stringAttributes[1].range, const TextRange(start: 0, end: 5));
-    final LocaleStringAttribute localeStringAttribute = collector[1].stringAttributes[1] as LocaleStringAttribute;
+    final localeStringAttribute = collector[1].stringAttributes[1] as LocaleStringAttribute;
     expect(localeStringAttribute.locale, const Locale('es', 'MX'));
     expect(collector[2].stringAttributes.length, 0);
     expect(collector[3].stringAttributes.length, 0);
@@ -471,7 +474,7 @@ void main() {
     expect(combined[0].stringAttributes[1].range, const TextRange(start: 5, end: 10));
     expect(combined[0].stringAttributes[2], isA<LocaleStringAttribute>());
     expect(combined[0].stringAttributes[2].range, const TextRange(start: 5, end: 10));
-    final LocaleStringAttribute combinedLocaleStringAttribute = combined[0].stringAttributes[2] as LocaleStringAttribute;
+    final combinedLocaleStringAttribute = combined[0].stringAttributes[2] as LocaleStringAttribute;
     expect(combinedLocaleStringAttribute.locale, const Locale('es', 'MX'));
     expect(combined[0].stringAttributes[3], isA<SpellOutStringAttribute>());
     expect(combined[0].stringAttributes[3].range, const TextRange(start: 20, end: 25));

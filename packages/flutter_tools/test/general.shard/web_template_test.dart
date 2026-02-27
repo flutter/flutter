@@ -4,11 +4,14 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/web_template.dart';
 
 import '../src/common.dart';
+import '../src/context.dart';
 
-const String htmlSample1 = '''
+const htmlSample1 = '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -24,7 +27,8 @@ const String htmlSample1 = '''
 </html>
 ''';
 
-const String htmlSample2 = '''
+const htmlSample2 =
+    '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -46,7 +50,7 @@ const String htmlSample2 = '''
 </html>
 ''';
 
-const String htmlSampleInlineFlutterJsBootstrap = '''
+const htmlSampleInlineFlutterJsBootstrap = '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -70,7 +74,7 @@ const String htmlSampleInlineFlutterJsBootstrap = '''
 </html>
 ''';
 
-const String htmlSampleInlineFlutterJsBootstrapOutput = '''
+const htmlSampleInlineFlutterJsBootstrapOutput = '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -86,7 +90,7 @@ const String htmlSampleInlineFlutterJsBootstrapOutput = '''
     (build config)
     _flutter.loader.load({
       serviceWorker: {
-        serviceWorkerVersion: "(service worker version)",
+        serviceWorkerVersion: "(service worker version)" /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */,
       },
     });
   </script>
@@ -94,7 +98,7 @@ const String htmlSampleInlineFlutterJsBootstrapOutput = '''
 </html>
 ''';
 
-const String htmlSampleFullFlutterBootstrapReplacement = '''
+const htmlSampleFullFlutterBootstrapReplacement = '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -112,7 +116,7 @@ const String htmlSampleFullFlutterBootstrapReplacement = '''
 </html>
 ''';
 
-const String htmlSampleFullFlutterBootstrapReplacementOutput = '''
+const htmlSampleFullFlutterBootstrapReplacementOutput = '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -130,7 +134,8 @@ const String htmlSampleFullFlutterBootstrapReplacementOutput = '''
 </html>
 ''';
 
-const String htmlSampleLegacyVar = '''
+const htmlSampleLegacyVar =
+    '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -152,7 +157,8 @@ const String htmlSampleLegacyVar = '''
 </html>
 ''';
 
-const String htmlSampleLegacyLoadEntrypoint = '''
+const htmlSampleLegacyLoadEntrypoint =
+    '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -178,10 +184,7 @@ const String htmlSampleLegacyLoadEntrypoint = '''
 </html>
 ''';
 
-String htmlSample2Replaced({
-  required String baseHref,
-  required String serviceWorkerVersion,
-}) =>
+String htmlSample2Replaced({required String baseHref, required String serviceWorkerVersion}) =>
     '''
 <!DOCTYPE html>
 <html>
@@ -195,16 +198,16 @@ String htmlSample2Replaced({
   <div></div>
   <script src="main.dart.js"></script>
   <script>
-    const serviceWorkerVersion = "$serviceWorkerVersion";
+    const serviceWorkerVersion = "$serviceWorkerVersion" /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */;
   </script>
   <script>
-    navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion');
+    navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion') /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */;
   </script>
 </body>
 </html>
 ''';
 
-const String htmlSample3 = '''
+const htmlSample3 = '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -219,123 +222,374 @@ const String htmlSample3 = '''
 </html>
 ''';
 
+const htmlSampleStaticAssetsUrl =
+    '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <base href="/">
+  <meta charset="utf-8">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+</head>
+<body>
+  <div></div>
+  <script>
+    {{flutter_js}}
+    {{flutter_build_config}}
+    _flutter.loader.load({
+      config: {
+        entryPointBaseUrl: "$kStaticAssetsUrlPlaceholder",
+      },
+      onEntrypointLoaded: async function (engineInitializer) {
+        const appRunner = await engineInitializer.initializeEngine({
+          assetBase: "$kStaticAssetsUrlPlaceholder",
+        });
+
+        await appRunner.runApp();
+      },
+    });
+  </script>
+</body>
+</html>
+''';
+
+String htmlSampleStaticAssetsUrlReplaced({required String staticAssetsUrl}) =>
+    '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <base href="/">
+  <meta charset="utf-8">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+</head>
+<body>
+  <div></div>
+  <script>
+    (flutter.js content)
+    {{flutter_build_config}}
+    _flutter.loader.load({
+      config: {
+        entryPointBaseUrl: "$staticAssetsUrl",
+      },
+      onEntrypointLoaded: async function (engineInitializer) {
+        const appRunner = await engineInitializer.initializeEngine({
+          assetBase: "$staticAssetsUrl",
+        });
+
+        await appRunner.runApp();
+      },
+    });
+  </script>
+</body>
+</html>
+''';
+
 void main() {
-  final MemoryFileSystem fs = MemoryFileSystem();
+  final fs = MemoryFileSystem();
+  final logger = BufferLogger.test();
   final File flutterJs = fs.file('flutter.js');
   flutterJs.writeAsStringSync('(flutter.js content)');
 
   test('can parse baseHref', () {
-    expect(WebTemplate('<base href="/foo/111/">').getBaseHref(), 'foo/111');
-    expect(WebTemplate(htmlSample1).getBaseHref(), 'foo/222');
-    expect(WebTemplate(htmlSample2).getBaseHref(), ''); // Placeholder base href.
+    expect(WebTemplate.baseHref('<base href="/foo/111/">'), 'foo/111');
+    expect(WebTemplate.baseHref(htmlSample1), 'foo/222');
+    expect(WebTemplate.baseHref(htmlSample2), ''); // Placeholder base href.
   });
 
   test('handles missing baseHref', () {
-    expect(WebTemplate('').getBaseHref(), '');
-    expect(WebTemplate('<base>').getBaseHref(), '');
-    expect(WebTemplate(htmlSample3).getBaseHref(), '');
+    expect(WebTemplate.baseHref(''), '');
+    expect(WebTemplate.baseHref('<base>'), '');
+    expect(WebTemplate.baseHref(htmlSample3), '');
   });
 
   test('throws on invalid baseHref', () {
-    expect(() => WebTemplate('<base href>').getBaseHref(), throwsToolExit());
-    expect(() => WebTemplate('<base href="">').getBaseHref(), throwsToolExit());
-    expect(() => WebTemplate('<base href="foo/111">').getBaseHref(), throwsToolExit());
-    expect(
-      () => WebTemplate('<base href="foo/111/">').getBaseHref(),
-      throwsToolExit(),
-    );
-    expect(
-      () => WebTemplate('<base href="/foo/111">').getBaseHref(),
-      throwsToolExit(),
-    );
+    expect(() => WebTemplate.baseHref('<base href>'), throwsToolExit());
+    expect(() => WebTemplate.baseHref('<base href="">'), throwsToolExit());
+    expect(() => WebTemplate.baseHref('<base href="foo/111">'), throwsToolExit());
+    expect(() => WebTemplate.baseHref('<base href="foo/111/">'), throwsToolExit());
+    expect(() => WebTemplate.baseHref('<base href="/foo/111">'), throwsToolExit());
   });
 
   test('applies substitutions', () {
-    final WebTemplate indexHtml = WebTemplate(htmlSample2);
-    indexHtml.applySubstitutions(
-      baseHref: '/foo/333/',
-      serviceWorkerVersion: 'v123xyz',
-      flutterJsFile: flutterJs,
-    );
+    const indexHtml = WebTemplate(htmlSample2);
+
     expect(
-      indexHtml.content,
-      htmlSample2Replaced(
+      indexHtml.withSubstitutions(
         baseHref: '/foo/333/',
         serviceWorkerVersion: 'v123xyz',
+        flutterJsFile: flutterJs,
+        logger: logger,
       ),
+      htmlSample2Replaced(baseHref: '/foo/333/', serviceWorkerVersion: 'v123xyz'),
     );
   });
 
   test('applies substitutions with legacy var version syntax', () {
-    final WebTemplate indexHtml = WebTemplate(htmlSampleLegacyVar);
-    indexHtml.applySubstitutions(
-      baseHref: '/foo/333/',
-      serviceWorkerVersion: 'v123xyz',
-      flutterJsFile: flutterJs,
-    );
+    const indexHtml = WebTemplate(htmlSampleLegacyVar);
     expect(
-      indexHtml.content,
-      htmlSample2Replaced(
+      indexHtml.withSubstitutions(
         baseHref: '/foo/333/',
         serviceWorkerVersion: 'v123xyz',
+        flutterJsFile: flutterJs,
+        logger: logger,
       ),
+      htmlSample2Replaced(baseHref: '/foo/333/', serviceWorkerVersion: 'v123xyz'),
     );
   });
 
   test('applies substitutions to inline flutter.js bootstrap script', () {
-    final WebTemplate indexHtml = WebTemplate(htmlSampleInlineFlutterJsBootstrap);
+    const indexHtml = WebTemplate(htmlSampleInlineFlutterJsBootstrap);
     expect(indexHtml.getWarnings(), isEmpty);
 
-    indexHtml.applySubstitutions(
-      baseHref: '/',
-      serviceWorkerVersion: '(service worker version)',
-      flutterJsFile: flutterJs,
-      buildConfig: '(build config)',
+    expect(
+      indexHtml.withSubstitutions(
+        baseHref: '/',
+        serviceWorkerVersion: '(service worker version)',
+        flutterJsFile: flutterJs,
+        buildConfig: '(build config)',
+        logger: logger,
+      ),
+      htmlSampleInlineFlutterJsBootstrapOutput,
     );
-    expect(indexHtml.content, htmlSampleInlineFlutterJsBootstrapOutput);
   });
 
   test('applies substitutions to full flutter_bootstrap.js replacement', () {
-    final WebTemplate indexHtml = WebTemplate(htmlSampleFullFlutterBootstrapReplacement);
+    const indexHtml = WebTemplate(htmlSampleFullFlutterBootstrapReplacement);
     expect(indexHtml.getWarnings(), isEmpty);
 
-    indexHtml.applySubstitutions(
-      baseHref: '/',
-      serviceWorkerVersion: '(service worker version)',
-      flutterJsFile: flutterJs,
-      buildConfig: '(build config)',
-      flutterBootstrapJs: '(flutter bootstrap script)',
+    expect(
+      indexHtml.withSubstitutions(
+        baseHref: '/',
+        serviceWorkerVersion: '(service worker version)',
+        flutterJsFile: flutterJs,
+        buildConfig: '(build config)',
+        flutterBootstrapJs: '(flutter bootstrap script)',
+        logger: logger,
+      ),
+      htmlSampleFullFlutterBootstrapReplacementOutput,
     );
-    expect(indexHtml.content, htmlSampleFullFlutterBootstrapReplacementOutput);
+  });
+
+  test('applies substitutions to static assets url', () {
+    const indexHtml = WebTemplate(htmlSampleStaticAssetsUrl);
+    const expectedStaticAssetsUrl = 'https://static.example.com/my-app/';
+
+    expect(
+      indexHtml.withSubstitutions(
+        baseHref: '/',
+        serviceWorkerVersion: 'v123xyz',
+        flutterJsFile: flutterJs,
+        staticAssetsUrl: expectedStaticAssetsUrl,
+        logger: logger,
+      ),
+      htmlSampleStaticAssetsUrlReplaced(staticAssetsUrl: expectedStaticAssetsUrl),
+    );
   });
 
   test('re-parses after substitutions', () {
-    final WebTemplate indexHtml = WebTemplate(htmlSample2);
-    expect(indexHtml.getBaseHref(), ''); // Placeholder base href.
+    const indexHtml = WebTemplate(htmlSample2);
+    expect(WebTemplate.baseHref(htmlSample2), ''); // Placeholder base href.
 
-    indexHtml.applySubstitutions(
+    final String substituted = indexHtml.withSubstitutions(
       baseHref: '/foo/333/',
       serviceWorkerVersion: 'v123xyz',
       flutterJsFile: flutterJs,
+      logger: logger,
     );
     // The parsed base href should be updated after substitutions.
-    expect(indexHtml.getBaseHref(), 'foo/333');
+    expect(WebTemplate.baseHref(substituted), 'foo/333');
   });
 
   test('warns on legacy service worker patterns', () {
-    final WebTemplate indexHtml = WebTemplate(htmlSampleLegacyVar);
+    const indexHtml = WebTemplate(htmlSampleLegacyVar);
     final List<WebTemplateWarning> warnings = indexHtml.getWarnings();
-    expect(warnings.length, 2);
+    expect(warnings, hasLength(2));
 
-    expect(warnings.where((WebTemplateWarning warning) => warning.lineNumber == 13), isNotEmpty);
-    expect(warnings.where((WebTemplateWarning warning) => warning.lineNumber == 16), isNotEmpty);
+    final Iterable<WebTemplateWarning> serviceWorkerWarnings = warnings.where(
+      (WebTemplateWarning warning) => warning.lineNumber == 13 || warning.lineNumber == 16,
+    );
+    expect(serviceWorkerWarnings, hasLength(2));
+    expect(
+      serviceWorkerWarnings,
+      everyElement(
+        isA<WebTemplateWarning>().having(
+          (WebTemplateWarning warning) => warning.warningText,
+          'service worker warning message',
+          contains(
+            "Flutter's service worker is deprecated and will be removed in a future Flutter release.",
+          ),
+        ),
+      ),
+    );
   });
 
   test('warns on legacy FlutterLoader.loadEntrypoint', () {
-    final WebTemplate indexHtml = WebTemplate(htmlSampleLegacyLoadEntrypoint);
+    const indexHtml = WebTemplate(htmlSampleLegacyLoadEntrypoint);
     final List<WebTemplateWarning> warnings = indexHtml.getWarnings();
 
     expect(warnings.length, 1);
     expect(warnings.single.lineNumber, 14);
+  });
+
+  test('applies web-define variable substitutions', () {
+    const htmlWithWebDefines = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test</title>
+  <base href="/">
+</head>
+<body>
+  <script>
+    window.config = {
+      apiUrl: '{{API_URL}}',
+      environment: '{{ENV}}',
+      debugMode: {{DEBUG_MODE}}
+    };
+  </script>
+</body>
+</html>''';
+
+    const indexHtml = WebTemplate(htmlWithWebDefines);
+    final String result = indexHtml.withSubstitutions(
+      baseHref: '/',
+      serviceWorkerVersion: null,
+      flutterJsFile: flutterJs,
+      webDefines: <String, String>{
+        'API_URL': 'https://api.example.com',
+        'ENV': 'production',
+        'DEBUG_MODE': 'false',
+      },
+      logger: logger,
+    );
+
+    expect(result, contains("apiUrl: 'https://api.example.com'"));
+    expect(result, contains("environment: 'production'"));
+    expect(result, contains('debugMode: false'));
+  });
+
+  testUsingContext('logs warning when user defined web-define variable is missing', () {
+    const htmlWithMissingVar = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test</title>
+  <base href="/">
+</head>
+<body>
+  <script>
+    const apiUrl = '{{API_URL}}';
+  </script>
+</body>
+</html>''';
+
+    const indexHtml = WebTemplate(htmlWithMissingVar);
+    final String result = indexHtml.withSubstitutions(
+      baseHref: '/',
+      serviceWorkerVersion: null,
+      flutterJsFile: flutterJs,
+      webDefines: <String, String>{}, // Missing API_URL
+      logger: testLogger,
+    );
+
+    expect(testLogger.warningText, contains('Missing web-define variable: API_URL'));
+    // Verify the placeholder is preserved
+    expect(result, contains("const apiUrl = '{{API_URL}}';"));
+  });
+
+  testUsingContext('logs warning with multiple missing user defined variables', () {
+    const htmlWithMultipleMissingVars = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test</title>
+  <base href="/">
+</head>
+<body>
+  <script>
+    window.config = {
+      api: '{{API_URL}}',
+      env: '{{ENV}}',
+      version: '{{VERSION}}'
+    };
+  </script>
+</body>
+</html>''';
+
+    const indexHtml = WebTemplate(htmlWithMultipleMissingVars);
+    final String result = indexHtml.withSubstitutions(
+      baseHref: '/',
+      serviceWorkerVersion: null,
+      flutterJsFile: flutterJs,
+      webDefines: <String, String>{'API_URL': 'test'}, // Missing ENV, VERSION
+      logger: testLogger,
+    );
+
+    expect(testLogger.warningText, contains('Missing web-define variables: ENV, VERSION'));
+    expect(result, contains("env: '{{ENV}}'"));
+    expect(result, contains("version: '{{VERSION}}'"));
+  });
+
+  testUsingContext(
+    'ignores Flutter built-in variables and logs warning for missing user variables',
+    () {
+      const htmlWithBuiltInVars = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test</title>
+  <base href="/">
+</head>
+<body>
+  <script>
+    {{flutter_js}}
+    {{flutter_build_config}}
+    const customVar = '{{CUSTOM_VAR}}';
+  </script>
+</body>
+</html>''';
+
+      const indexHtml = WebTemplate(htmlWithBuiltInVars);
+      final String result = indexHtml.withSubstitutions(
+        baseHref: '/',
+        serviceWorkerVersion: null,
+        flutterJsFile: flutterJs,
+        buildConfig: 'test config',
+        webDefines: <String, String>{}, // Missing CUSTOM_VAR but built-in vars should be ignored
+        logger: testLogger,
+      );
+
+      expect(testLogger.warningText, contains('Missing web-define variable: CUSTOM_VAR'));
+      expect(result, contains("const customVar = '{{CUSTOM_VAR}}';"));
+    },
+  );
+
+  test('allows empty web-define variables', () {
+    const htmlWithEmptyVar = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test</title>
+  <base href="/">
+</head>
+<body>
+  <script>
+    const value = '{{EMPTY_VAR}}';
+  </script>
+</body>
+</html>''';
+
+    const indexHtml = WebTemplate(htmlWithEmptyVar);
+    final String result = indexHtml.withSubstitutions(
+      baseHref: '/',
+      serviceWorkerVersion: null,
+      flutterJsFile: flutterJs,
+      webDefines: <String, String>{'EMPTY_VAR': ''},
+      logger: logger,
+    );
+
+    expect(result, contains("const value = '';"));
   });
 }

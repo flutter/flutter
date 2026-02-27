@@ -49,12 +49,14 @@ class _HomePageState extends State<_HomePage> {
           children: <Widget>[
             const Text('Page One'),
             if (_formData != null)
-              Text('Hello ${_formData!.name}, whose favorite food is ${_formData!.favoriteFood}.'),
+              Text(
+                'Hello ${_formData!.name}, whose favorite food is ${_formData!.favoriteFood}.',
+              ),
             TextButton(
               onPressed: () async {
                 final FormData formData =
-                    await Navigator.of(context).pushNamed<FormData?>('/two')
-                        ?? const FormData();
+                    await Navigator.of(context).pushNamed<FormData?>('/two') ??
+                    const FormData();
                 if (formData != _formData) {
                   setState(() {
                     _formData = formData;
@@ -81,9 +83,7 @@ class _PopScopeWrapper extends StatelessWidget {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Are you sure?'),
-          content: const Text(
-            'Are you sure you want to leave this page?',
-          ),
+          content: const Text('Are you sure you want to leave this page?'),
           actions: <Widget>[
             TextButton(
               style: TextButton.styleFrom(
@@ -134,11 +134,8 @@ class _PageTwo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const _PopScopeWrapper(
-      child: _PageTwoBody(),
-    );
+    return const _PopScopeWrapper(child: _PageTwoBody());
   }
-
 }
 
 class _PageTwoBody extends StatefulWidget {
@@ -167,9 +164,7 @@ class _PageTwoBodyState extends State<_PageTwoBody> {
                       hintText: 'Enter your name.',
                     ),
                     onChanged: (String value) {
-                      _formData = _formData.copyWith(
-                        name: value,
-                      );
+                      _formData = _formData.copyWith(name: value);
                     },
                   ),
                   TextFormField(
@@ -177,9 +172,7 @@ class _PageTwoBodyState extends State<_PageTwoBody> {
                       hintText: 'Enter your favorite food.',
                     ),
                     onChanged: (String value) {
-                      _formData = _formData.copyWith(
-                        favoriteFood: value,
-                      );
+                      _formData = _formData.copyWith(favoriteFood: value);
                     },
                   ),
                 ],
@@ -200,10 +193,7 @@ class _PageTwoBodyState extends State<_PageTwoBody> {
 
 @immutable
 class FormData {
-  const FormData({
-    this.name = '',
-    this.favoriteFood = '',
-  });
+  const FormData({this.name = '', this.favoriteFood = ''});
 
   final String name;
   final String favoriteFood;
@@ -223,9 +213,9 @@ class FormData {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is FormData
-        && other.name == name
-        && other.favoriteFood == favoriteFood;
+    return other is FormData &&
+        other.name == name &&
+        other.favoriteFood == favoriteFood;
   }
 
   @override

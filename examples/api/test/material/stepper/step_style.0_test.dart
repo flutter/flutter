@@ -3,14 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/stepper/step_style.0.dart' as example;
+import 'package:flutter_api_samples/material/stepper/step_style.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('StepStyle Smoke Test', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.StepStyleExampleApp(),
-    );
+    await tester.pumpWidget(const example.StepStyleExampleApp());
 
     expect(find.widgetWithText(AppBar, 'Step Style Example'), findsOneWidget);
 
@@ -40,12 +39,10 @@ void main() {
     expect(secondStep.isActive, true);
     expect(secondStep.stepStyle?.connectorThickness, 10);
     expect(secondStep.stepStyle?.connectorColor, Colors.orange);
-    expect(secondStep.stepStyle?.gradient, const LinearGradient(
-      colors: <Color>[
-                Colors.white,
-                Colors.black,
-              ],
-    ));
+    expect(
+      secondStep.stepStyle?.gradient,
+      const LinearGradient(colors: <Color>[Colors.white, Colors.black]),
+    );
 
     // Check that the third step has the correct properties.
     final Step thirdStep = stepper.steps[2];

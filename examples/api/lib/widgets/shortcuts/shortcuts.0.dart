@@ -17,9 +17,7 @@ class ShortcutsExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Shortcuts Sample')),
-        body: const Center(
-          child: ShortcutsExample(),
-        ),
+        body: const Center(child: ShortcutsExample()),
       ),
     );
   }
@@ -68,7 +66,9 @@ class _ShortcutsExampleState extends State<ShortcutsExample> {
           child: Column(
             children: <Widget>[
               const Text('Add to the counter by pressing the up arrow key'),
-              const Text('Subtract from the counter by pressing the down arrow key'),
+              const Text(
+                'Subtract from the counter by pressing the down arrow key',
+              ),
               Text('count: $count'),
             ],
           ),

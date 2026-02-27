@@ -30,10 +30,7 @@ class SliverFillRemainingExample extends StatelessWidget {
     return CustomScrollView(
       slivers: <Widget>[
         SliverToBoxAdapter(
-          child: Container(
-            color: Colors.amber[300],
-            height: 150.0,
-          ),
+          child: Container(color: Colors.amber[300], height: 150.0),
         ),
         SliverFillRemaining(
           hasScrollBody: false,

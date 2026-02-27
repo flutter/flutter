@@ -35,8 +35,8 @@ class _ReorderableExampleState extends State<ReorderableExample> {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
-    final Color evenItemColor = colorScheme.primary.withOpacity(0.15);
+    final Color oddItemColor = colorScheme.primary.withValues(alpha: 0.05);
+    final Color evenItemColor = colorScheme.primary.withValues(alpha: 0.15);
 
     return ReorderableListView(
       buildDefaultDragHandles: false,
@@ -53,10 +53,7 @@ class _ReorderableExampleState extends State<ReorderableExample> {
                   padding: const EdgeInsets.all(8),
                   child: ReorderableDragStartListener(
                     index: index,
-                    child: Card(
-                      color: colorScheme.primary,
-                      elevation: 2,
-                    ),
+                    child: Card(color: colorScheme.primary, elevation: 2),
                   ),
                 ),
                 Text('Item ${_items[index]}'),

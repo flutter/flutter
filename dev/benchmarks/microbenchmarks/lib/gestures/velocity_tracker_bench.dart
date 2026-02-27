@@ -11,30 +11,34 @@ import 'data/velocity_tracker_data.dart';
 const int _kNumIters = 10000;
 
 class TrackerBenchmark {
-  TrackerBenchmark({required this.name, required this.tracker });
+  TrackerBenchmark({required this.name, required this.tracker});
 
   final VelocityTracker tracker;
   final String name;
 }
 
-Future<void> main() async {
+Future<void> execute() async {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
-  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
-  final List<TrackerBenchmark> benchmarks = <TrackerBenchmark>[
-    TrackerBenchmark(name: 'velocity_tracker_iteration',
-        tracker: VelocityTracker.withKind(PointerDeviceKind.touch)),
-    TrackerBenchmark(name: 'velocity_tracker_iteration_ios_fling',
-        tracker: IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch)),
+  final printer = BenchmarkResultPrinter();
+  final benchmarks = <TrackerBenchmark>[
+    TrackerBenchmark(
+      name: 'velocity_tracker_iteration',
+      tracker: VelocityTracker.withKind(PointerDeviceKind.touch),
+    ),
+    TrackerBenchmark(
+      name: 'velocity_tracker_iteration_ios_fling',
+      tracker: IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch),
+    ),
   ];
-  final Stopwatch watch = Stopwatch();
+  final watch = Stopwatch();
 
   await benchmarkWidgets((WidgetTester tester) async {
-    for (final TrackerBenchmark benchmark in benchmarks) {
+    for (final benchmark in benchmarks) {
       print('${benchmark.name} benchmark...');
       final VelocityTracker tracker = benchmark.tracker;
       watch.reset();
       watch.start();
-      for (int i = 0; i < _kNumIters; i += 1) {
+      for (var i = 0; i < _kNumIters; i += 1) {
         for (final PointerEvent event in velocityEventData) {
           if (event is PointerDownEvent || event is PointerMoveEvent) {
             tracker.addPosition(event.timeStamp, event.position);
@@ -56,4 +60,11 @@ Future<void> main() async {
   });
 
   printer.printToStdout();
+}
+
+//
+//  Note that the benchmark is normally run by benchmark_collection.dart.
+//
+Future<void> main() async {
+  return execute();
 }

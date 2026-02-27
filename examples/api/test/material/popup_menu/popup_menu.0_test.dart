@@ -3,16 +3,15 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/popup_menu/popup_menu.0.dart' as example;
+import 'package:flutter_api_samples/material/popup_menu/popup_menu.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Can open popup menu', (WidgetTester tester) async {
     const String menuItem = 'Item 1';
 
-    await tester.pumpWidget(
-      const example.PopupMenuApp(),
-    );
+    await tester.pumpWidget(const example.PopupMenuApp());
 
     expect(find.text(menuItem), findsNothing);
 

@@ -76,9 +76,9 @@ Flutter provides multiple functionality through self-service services. Most of t
    </td>
    <td>Flutter contributors
    </td>
-   <td><a href="https://github.com/flutter/engine/blob/main/ci/builders/README.md">Link</a>
+   <td><a href="https://github.com/flutter/flutter/blob/main/engine/src/flutter/ci/builders/README.md">Link</a>
    </td>
-   <td><a href="https://github.com/flutter/engine/tree/main/ci/builders">engine/ci/builders</a> in the <a href="https://github.com/flutter/engine/tree/main">flutter/engine</a> repository contains all the current configuration files.
+   <td><a href="https://github.com/flutter/flutter/tree/main/engine/src/flutter/ci/builders">engine/src/flutter/ci/builders</a> in the <a href="https://github.com/flutter/flutter/tree/main/engine">flutter engine</a> folder contains all the current configuration files.
    </td>
   </tr>
   <tr>
@@ -114,7 +114,7 @@ Flutter provides multiple functionality through self-service services. Most of t
    </td>
    <td>[Link](./engine/release/Code-signing-metadata.md)
    </td>
-   <td>GN files and global generator scripts in the <a href="https://github.com/flutter/engine">flutter/engine</a> repository.
+   <td>GN files and global generator scripts in the <a href="https://github.com/flutter/flutter/tree/main/engine">flutter engine</a> folder.
    </td>
   </tr>
   <tr>
@@ -126,7 +126,7 @@ Flutter provides multiple functionality through self-service services. Most of t
    </td>
    <td>[Link](./platforms/android/Testing-Android-Changes-in-the-Devicelab-on-an-Emulator.md)
    </td>
-   <td>Flutter Github Wiki page under the “Android Development” Section.
+   <td>Flutter GitHub Wiki page under the “Android Development” Section.
    </td>
   </tr>
   <tr>
@@ -283,9 +283,9 @@ Flutter provides multiple functionality through self-service services. Most of t
    </td>
    <td>Flutter organization members
    </td>
-   <td><a href="https://github.com/flutter/engine/security/code-scanning">Link</a>
+   <td><a href="https://github.com/flutter/flutter/security/code-scanning">Link</a>
    </td>
-   <td><a href="https://github.com/flutter/engine/security">Engine github security tab</a>.
+   <td><a href="https://github.com/flutter/flutter/security">Flutter GitHub security tab</a>.
    </td>
   </tr>
   <tr>

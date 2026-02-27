@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'single_child_scroll_view.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
@@ -220,17 +223,30 @@ class OverflowBar extends MultiChildRenderObjectWidget {
     properties.add(DoubleProperty('spacing', spacing, defaultValue: 0));
     properties.add(EnumProperty<MainAxisAlignment>('alignment', alignment, defaultValue: null));
     properties.add(DoubleProperty('overflowSpacing', overflowSpacing, defaultValue: 0));
-    properties.add(EnumProperty<OverflowBarAlignment>('overflowAlignment', overflowAlignment, defaultValue: OverflowBarAlignment.start));
-    properties.add(EnumProperty<VerticalDirection>('overflowDirection', overflowDirection, defaultValue: VerticalDirection.down));
+    properties.add(
+      EnumProperty<OverflowBarAlignment>(
+        'overflowAlignment',
+        overflowAlignment,
+        defaultValue: OverflowBarAlignment.start,
+      ),
+    );
+    properties.add(
+      EnumProperty<VerticalDirection>(
+        'overflowDirection',
+        overflowDirection,
+        defaultValue: VerticalDirection.down,
+      ),
+    );
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }
 
-class _OverflowBarParentData extends ContainerBoxParentData<RenderBox> { }
+class _OverflowBarParentData extends ContainerBoxParentData<RenderBox> {}
 
 class _RenderOverflowBar extends RenderBox
-    with ContainerRenderObjectMixin<RenderBox, _OverflowBarParentData>,
-         RenderBoxContainerDefaultsMixin<RenderBox, _OverflowBarParentData> {
+    with
+        ContainerRenderObjectMixin<RenderBox, _OverflowBarParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, _OverflowBarParentData> {
   _RenderOverflowBar({
     List<RenderBox>? children,
     double spacing = 0.0,
@@ -250,7 +266,7 @@ class _RenderOverflowBar extends RenderBox
 
   double get spacing => _spacing;
   double _spacing;
-  set spacing (double value) {
+  set spacing(double value) {
     if (_spacing == value) {
       return;
     }
@@ -260,7 +276,7 @@ class _RenderOverflowBar extends RenderBox
 
   MainAxisAlignment? get alignment => _alignment;
   MainAxisAlignment? _alignment;
-  set alignment (MainAxisAlignment? value) {
+  set alignment(MainAxisAlignment? value) {
     if (_alignment == value) {
       return;
     }
@@ -270,7 +286,7 @@ class _RenderOverflowBar extends RenderBox
 
   double get overflowSpacing => _overflowSpacing;
   double _overflowSpacing;
-  set overflowSpacing (double value) {
+  set overflowSpacing(double value) {
     if (_overflowSpacing == value) {
       return;
     }
@@ -280,7 +296,7 @@ class _RenderOverflowBar extends RenderBox
 
   OverflowBarAlignment get overflowAlignment => _overflowAlignment;
   OverflowBarAlignment _overflowAlignment;
-  set overflowAlignment (OverflowBarAlignment value) {
+  set overflowAlignment(OverflowBarAlignment value) {
     if (_overflowAlignment == value) {
       return;
     }
@@ -290,7 +306,7 @@ class _RenderOverflowBar extends RenderBox
 
   VerticalDirection get overflowDirection => _overflowDirection;
   VerticalDirection _overflowDirection;
-  set overflowDirection (VerticalDirection value) {
+  set overflowDirection(VerticalDirection value) {
     if (_overflowDirection == value) {
       return;
     }
@@ -321,14 +337,14 @@ class _RenderOverflowBar extends RenderBox
     if (child == null) {
       return 0;
     }
-    double barWidth = 0.0;
+    var barWidth = 0.0;
     while (child != null) {
       barWidth += child.getMinIntrinsicWidth(double.infinity);
       child = childAfter(child);
     }
     barWidth += spacing * (childCount - 1);
 
-    double height = 0.0;
+    var height = 0.0;
     if (barWidth > width) {
       child = firstChild;
       while (child != null) {
@@ -352,14 +368,14 @@ class _RenderOverflowBar extends RenderBox
     if (child == null) {
       return 0;
     }
-    double barWidth = 0.0;
+    var barWidth = 0.0;
     while (child != null) {
       barWidth += child.getMinIntrinsicWidth(double.infinity);
       child = childAfter(child);
     }
     barWidth += spacing * (childCount - 1);
 
-    double height = 0.0;
+    var height = 0.0;
     if (barWidth > width) {
       child = firstChild;
       while (child != null) {
@@ -383,7 +399,7 @@ class _RenderOverflowBar extends RenderBox
     if (child == null) {
       return 0;
     }
-    double width = 0.0;
+    var width = 0.0;
     while (child != null) {
       width += child.getMinIntrinsicWidth(double.infinity);
       child = childAfter(child);
@@ -397,7 +413,7 @@ class _RenderOverflowBar extends RenderBox
     if (child == null) {
       return 0;
     }
-    double width = 0.0;
+    var width = 0.0;
     while (child != null) {
       width += child.getMaxIntrinsicWidth(double.infinity);
       child = childAfter(child);
@@ -414,18 +430,21 @@ class _RenderOverflowBar extends RenderBox
   double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
     final BoxConstraints childConstraints = constraints.loosen();
 
-    final (RenderBox? Function(RenderBox) next, RenderBox? startChild) = switch (overflowDirection) {
+    final (
+      RenderBox? Function(RenderBox) next,
+      RenderBox? startChild,
+    ) = switch (overflowDirection) {
       VerticalDirection.down => (childAfter, firstChild),
       VerticalDirection.up => (childBefore, lastChild),
     };
 
-    double maxChildHeight = 0.0;
-    double y = 0.0;
-    double childrenWidth = 0.0;
+    var maxChildHeight = 0.0;
+    var y = 0.0;
+    var childrenWidth = 0.0;
     BaselineOffset minHorizontalBaseline = BaselineOffset.noBaseline;
     BaselineOffset verticalBaseline = BaselineOffset.noBaseline;
 
-    for (RenderBox? child = startChild; child != null; child = next(child)) {
+    for (var child = startChild; child != null; child = next(child)) {
       final Size childSize = child.getDryLayout(childConstraints);
       final double heightDiff = childSize.height - maxChildHeight;
       if (heightDiff > 0) {
@@ -433,10 +452,12 @@ class _RenderOverflowBar extends RenderBox
         maxChildHeight = childSize.height;
       }
 
-      final BaselineOffset baselineOffset = BaselineOffset(child.getDryBaseline(childConstraints, baseline));
+      final baselineOffset = BaselineOffset(child.getDryBaseline(childConstraints, baseline));
       if (baselineOffset != null) {
         verticalBaseline ??= baselineOffset + y;
-        minHorizontalBaseline = minHorizontalBaseline.minOf(baselineOffset + (maxChildHeight - childSize.height));
+        minHorizontalBaseline = minHorizontalBaseline.minOf(
+          baselineOffset + (maxChildHeight - childSize.height),
+        );
       }
       y += childSize.height + overflowSpacing;
       childrenWidth += childSize.width;
@@ -444,8 +465,8 @@ class _RenderOverflowBar extends RenderBox
 
     assert((verticalBaseline == null) == (minHorizontalBaseline == null));
     return childrenWidth + spacing * (childCount - 1) > constraints.maxWidth
-      ? verticalBaseline.offset
-      : minHorizontalBaseline.offset;
+        ? verticalBaseline.offset
+        : minHorizontalBaseline.offset;
   }
 
   @override
@@ -455,9 +476,9 @@ class _RenderOverflowBar extends RenderBox
       return constraints.smallest;
     }
     final BoxConstraints childConstraints = constraints.loosen();
-    double childrenWidth = 0.0;
-    double maxChildHeight = 0.0;
-    double y = 0.0;
+    var childrenWidth = 0.0;
+    var maxChildHeight = 0.0;
+    var y = 0.0;
     while (child != null) {
       final Size childSize = child.getDryLayout(childConstraints);
       childrenWidth += childSize.width;
@@ -495,20 +516,21 @@ class _RenderOverflowBar extends RenderBox
       child = childAfter(child);
     }
 
-    final bool rtl = textDirection == TextDirection.rtl;
+    final rtl = textDirection == TextDirection.rtl;
     final double actualWidth = childrenWidth + spacing * (childCount - 1);
 
     if (actualWidth > constraints.maxWidth) {
       // Overflow vertical layout
       child = overflowDirection == VerticalDirection.down ? firstChild : lastChild;
-      RenderBox? nextChild() => overflowDirection == VerticalDirection.down ? childAfter(child!) : childBefore(child!);
+      RenderBox? nextChild() =>
+          overflowDirection == VerticalDirection.down ? childAfter(child!) : childBefore(child!);
       double y = 0;
       while (child != null) {
-        final _OverflowBarParentData childParentData = child.parentData! as _OverflowBarParentData;
+        final childParentData = child.parentData! as _OverflowBarParentData;
         final double x = switch (overflowAlignment) {
           OverflowBarAlignment.center => (constraints.maxWidth - child.size.width) / 2,
-          OverflowBarAlignment.start  => rtl ? constraints.maxWidth - child.size.width : 0,
-          OverflowBarAlignment.end    => rtl ? 0 : constraints.maxWidth - child.size.width,
+          OverflowBarAlignment.start => rtl ? constraints.maxWidth - child.size.width : 0,
+          OverflowBarAlignment.end => rtl ? 0 : constraints.maxWidth - child.size.width,
         };
         childParentData.offset = Offset(x, y);
         y += child.size.height + overflowSpacing;
@@ -546,7 +568,7 @@ class _RenderOverflowBar extends RenderBox
       }
 
       while (child != null) {
-        final _OverflowBarParentData childParentData = child.parentData! as _OverflowBarParentData;
+        final childParentData = child.parentData! as _OverflowBarParentData;
         childParentData.offset = Offset(x, (maxChildHeight - child.size.height) / 2);
         // x is the horizontal origin of child. To advance x to the next child's
         // origin for LTR: add the width of the current child. To advance x to
@@ -564,7 +586,7 @@ class _RenderOverflowBar extends RenderBox
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     return defaultHitTestChildren(result, position: position);
   }
 
@@ -578,8 +600,20 @@ class _RenderOverflowBar extends RenderBox
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('spacing', spacing, defaultValue: 0));
     properties.add(DoubleProperty('overflowSpacing', overflowSpacing, defaultValue: 0));
-    properties.add(EnumProperty<OverflowBarAlignment>('overflowAlignment', overflowAlignment, defaultValue: OverflowBarAlignment.start));
-    properties.add(EnumProperty<VerticalDirection>('overflowDirection', overflowDirection, defaultValue: VerticalDirection.down));
+    properties.add(
+      EnumProperty<OverflowBarAlignment>(
+        'overflowAlignment',
+        overflowAlignment,
+        defaultValue: OverflowBarAlignment.start,
+      ),
+    );
+    properties.add(
+      EnumProperty<VerticalDirection>(
+        'overflowDirection',
+        overflowDirection,
+        defaultValue: VerticalDirection.down,
+      ),
+    );
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }

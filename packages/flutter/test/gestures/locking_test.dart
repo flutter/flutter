@@ -15,9 +15,7 @@ class TestGestureFlutterBinding extends BindingBase with GestureBinding {
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
-    if (callback != null) {
-      callback?.call(event);
-    }
+    callback?.call(event);
     super.handleEvent(event, entry);
   }
 
@@ -42,9 +40,9 @@ void main() {
   _binding = TestGestureFlutterBinding();
 
   test('Pointer events are locked during reassemble', () async {
-    final List<PointerEvent> events = <PointerEvent>[];
+    final events = <PointerEvent>[];
     _binding.callback = events.add;
-    bool tested = false;
+    var tested = false;
     await _binding.test(() {
       expect(events.length, 0);
       tested = true;

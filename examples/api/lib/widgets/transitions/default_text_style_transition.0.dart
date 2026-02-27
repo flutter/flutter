@@ -13,9 +13,7 @@ class DefaultTextStyleTransitionExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: DefaultTextStyleTransitionExample(),
-    );
+    return const MaterialApp(home: DefaultTextStyleTransitionExample());
   }
 }
 
@@ -23,12 +21,14 @@ class DefaultTextStyleTransitionExample extends StatefulWidget {
   const DefaultTextStyleTransitionExample({super.key});
 
   @override
-  State<DefaultTextStyleTransitionExample> createState() => _DefaultTextStyleTransitionExampleState();
+  State<DefaultTextStyleTransitionExample> createState() =>
+      _DefaultTextStyleTransitionExampleState();
 }
 
 /// [AnimationController]s can be created with `vsync: this` because of
 /// [TickerProviderStateMixin].
-class _DefaultTextStyleTransitionExampleState extends State<DefaultTextStyleTransitionExample>
+class _DefaultTextStyleTransitionExampleState
+    extends State<DefaultTextStyleTransitionExample>
     with TickerProviderStateMixin {
   late AnimationController _controller;
   late TextStyleTween _styleTween;
@@ -42,8 +42,16 @@ class _DefaultTextStyleTransitionExampleState extends State<DefaultTextStyleTran
       vsync: this,
     )..repeat(reverse: true);
     _styleTween = TextStyleTween(
-      begin: const TextStyle(fontSize: 50, color: Colors.blue, fontWeight: FontWeight.w900),
-      end: const TextStyle(fontSize: 50, color: Colors.red, fontWeight: FontWeight.w100),
+      begin: const TextStyle(
+        fontSize: 50,
+        color: Colors.blue,
+        fontWeight: FontWeight.w900,
+      ),
+      end: const TextStyle(
+        fontSize: 50,
+        color: Colors.red,
+        fontWeight: FontWeight.w100,
+      ),
     );
     _curvedAnimation = CurvedAnimation(
       parent: _controller,

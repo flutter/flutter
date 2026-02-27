@@ -59,10 +59,7 @@ class _SearchTextFieldExampleState extends State<SearchTextFieldExample> {
 }
 
 class SearchTextField extends StatelessWidget {
-  const SearchTextField({
-    super.key,
-    required this.fieldValue,
-  });
+  const SearchTextField({super.key, required this.fieldValue});
 
   final ValueChanged<String> fieldValue;
 

@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'circle_avatar.dart';
+/// @docImport 'text_theme.dart';
+library;
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -28,162 +32,41 @@ const Duration _kExpand = Duration(milliseconds: 200);
 /// tile based on a system event. To do so, create an [ExpansionTile]
 /// with an [ExpansionTileController] that's owned by a stateful widget
 /// or look up the tile's automatically created [ExpansionTileController]
-/// with [ExpansionTileController.of]
+/// with [ExpansibleController.of].
 ///
-/// The controller's [expand] and [collapse] methods cause the
-/// the [ExpansionTile] to rebuild, so they may not be called from
+/// {@tool dartpad}
+/// Typical usage of the [ExpansibleController.of] function is to call it from within the
+/// `build` method of a descendant of an [ExpansionTile].
+///
+/// When the [ExpansionTile] is actually created in the same `build`
+/// function as the callback that refers to the controller, then the
+/// `context` argument to the `build` function can't be used to find
+/// the [ExpansionTileController] (since it's "above" the widget
+/// being returned in the widget tree). In cases like that you can
+/// add a [Builder] widget, which provides a new scope with a
+/// [BuildContext] that is "under" the [ExpansionTile]:
+///
+/// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.1.dart **
+/// {@end-tool}
+///
+/// A more efficient solution is to split your build function into
+/// several widgets. This introduces a new context from which you
+/// can obtain the [ExpansionTileController]. With this approach you
+/// would have an outer widget that creates the [ExpansionTile]
+/// populated by instances of your new inner widgets, and then in
+/// these inner widgets you would use `ExpansionTileController.of`.
+///
+/// The  [ExpansibleController.expand] and [ExpansibleController.collapse]
+/// methods cause the [ExpansionTile] to rebuild, so they may not be called from
 /// a build method.
-class ExpansionTileController {
-  /// Create a controller to be used with [ExpansionTile.controller].
-  ExpansionTileController();
-
-  _ExpansionTileState? _state;
-
-  /// Whether the [ExpansionTile] built with this controller is in expanded state.
-  ///
-  /// This property doesn't take the animation into account. It reports `true`
-  /// even if the expansion animation is not completed.
-  ///
-  /// See also:
-  ///
-  ///  * [expand], which expands the [ExpansionTile].
-  ///  * [collapse], which collapses the [ExpansionTile].
-  ///  * [ExpansionTile.controller] to create an ExpansionTile with a controller.
-  bool get isExpanded {
-    assert(_state != null);
-    return _state!._isExpanded;
-  }
-
-  /// Expands the [ExpansionTile] that was built with this controller;
-  ///
-  /// Normally the tile is expanded automatically when the user taps on the header.
-  /// It is sometimes useful to trigger the expansion programmatically due
-  /// to external changes.
-  ///
-  /// If the tile is already in the expanded state (see [isExpanded]), calling
-  /// this method has no effect.
-  ///
-  /// Calling this method may cause the [ExpansionTile] to rebuild, so it may
-  /// not be called from a build method.
-  ///
-  /// Calling this method will trigger an [ExpansionTile.onExpansionChanged] callback.
-  ///
-  /// See also:
-  ///
-  ///  * [collapse], which collapses the tile.
-  ///  * [isExpanded] to check whether the tile is expanded.
-  ///  * [ExpansionTile.controller] to create an ExpansionTile with a controller.
-  void expand() {
-    assert(_state != null);
-    if (!isExpanded) {
-      _state!._toggleExpansion();
-    }
-  }
-
-  /// Collapses the [ExpansionTile] that was built with this controller.
-  ///
-  /// Normally the tile is collapsed automatically when the user taps on the header.
-  /// It can be useful sometimes to trigger the collapse programmatically due
-  /// to some external changes.
-  ///
-  /// If the tile is already in the collapsed state (see [isExpanded]), calling
-  /// this method has no effect.
-  ///
-  /// Calling this method may cause the [ExpansionTile] to rebuild, so it may
-  /// not be called from a build method.
-  ///
-  /// Calling this method will trigger an [ExpansionTile.onExpansionChanged] callback.
-  ///
-  /// See also:
-  ///
-  ///  * [expand], which expands the tile.
-  ///  * [isExpanded] to check whether the tile is expanded.
-  ///  * [ExpansionTile.controller] to create an ExpansionTile with a controller.
-  void collapse() {
-    assert(_state != null);
-    if (isExpanded) {
-      _state!._toggleExpansion();
-    }
-  }
-
-  /// Finds the [ExpansionTileController] for the closest [ExpansionTile] instance
-  /// that encloses the given context.
-  ///
-  /// If no [ExpansionTile] encloses the given context, calling this
-  /// method will cause an assert in debug mode, and throw an
-  /// exception in release mode.
-  ///
-  /// To return null if there is no [ExpansionTile] use [maybeOf] instead.
-  ///
-  /// {@tool dartpad}
-  /// Typical usage of the [ExpansionTileController.of] function is to call it from within the
-  /// `build` method of a descendant of an [ExpansionTile].
-  ///
-  /// When the [ExpansionTile] is actually created in the same `build`
-  /// function as the callback that refers to the controller, then the
-  /// `context` argument to the `build` function can't be used to find
-  /// the [ExpansionTileController] (since it's "above" the widget
-  /// being returned in the widget tree). In cases like that you can
-  /// add a [Builder] widget, which provides a new scope with a
-  /// [BuildContext] that is "under" the [ExpansionTile]:
-  ///
-  /// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.1.dart **
-  /// {@end-tool}
-  ///
-  /// A more efficient solution is to split your build function into
-  /// several widgets. This introduces a new context from which you
-  /// can obtain the [ExpansionTileController]. With this approach you
-  /// would have an outer widget that creates the [ExpansionTile]
-  /// populated by instances of your new inner widgets, and then in
-  /// these inner widgets you would use [ExpansionTileController.of].
-  static ExpansionTileController of(BuildContext context) {
-    final _ExpansionTileState? result = context.findAncestorStateOfType<_ExpansionTileState>();
-    if (result != null) {
-      return result._tileController;
-    }
-    throw FlutterError.fromParts(<DiagnosticsNode>[
-      ErrorSummary(
-        'ExpansionTileController.of() called with a context that does not contain a ExpansionTile.',
-      ),
-      ErrorDescription(
-        'No ExpansionTile ancestor could be found starting from the context that was passed to ExpansionTileController.of(). '
-        'This usually happens when the context provided is from the same StatefulWidget as that '
-        'whose build function actually creates the ExpansionTile widget being sought.',
-      ),
-      ErrorHint(
-        'There are several ways to avoid this problem. The simplest is to use a Builder to get a '
-        'context that is "under" the ExpansionTile. For an example of this, please see the '
-        'documentation for ExpansionTileController.of():\n'
-        '  https://api.flutter.dev/flutter/material/ExpansionTile/of.html',
-      ),
-      ErrorHint(
-        'A more efficient solution is to split your build function into several widgets. This '
-        'introduces a new context from which you can obtain the ExpansionTile. In this solution, '
-        'you would have an outer widget that creates the ExpansionTile populated by instances of '
-        'your new inner widgets, and then in these inner widgets you would use ExpansionTileController.of().\n'
-        'An other solution is assign a GlobalKey to the ExpansionTile, '
-        'then use the key.currentState property to obtain the ExpansionTile rather than '
-        'using the ExpansionTileController.of() function.',
-      ),
-      context.describeElement('The context used was'),
-    ]);
-  }
-
-  /// Finds the [ExpansionTile] from the closest instance of this class that
-  /// encloses the given context and returns its [ExpansionTileController].
-  ///
-  /// If no [ExpansionTile] encloses the given context then return null.
-  /// To throw an exception instead, use [of] instead of this function.
-  ///
-  /// See also:
-  ///
-  ///  * [of], a similar function to this one that throws if no [ExpansionTile]
-  ///    encloses the given context. Also includes some sample code in its
-  ///    documentation.
-  static ExpansionTileController? maybeOf(BuildContext context) {
-    return context.findAncestorStateOfType<_ExpansionTileState>()?._tileController;
-  }
-}
+///
+/// Remember to dispose of the [ExpansionTileController] when it is no longer
+/// needed. This will ensure we discard any resources used by the object.
+@Deprecated(
+  'Use ExpansibleController instead. '
+  'This feature was deprecated after v3.31.0-0.1.pre.',
+)
+typedef ExpansionTileController = ExpansibleController;
 
 /// A single-line [ListTile] with an expansion arrow icon that expands or collapses
 /// the tile to reveal or hide the [children].
@@ -211,11 +94,19 @@ class ExpansionTileController {
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This example demonstrates how an [ExpansionTileController] can be used to
+/// This example demonstrates how an [ExpansibleController] can be used to
 /// programmatically expand or collapse an [ExpansionTile].
 ///
 /// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.1.dart **
 /// {@end-tool}
+///
+/// ## Accessibility
+///
+/// The accessibility behavior of [ExpansionTile] is platform adaptive, based on
+/// the device's actual platform rather than the theme's platform setting. This
+/// ensures that assistive technologies like VoiceOver on iOS and macOS receive
+/// the correct platform-specific semantics hints, even when the app's theme is
+/// configured to mimic a different platform's appearance.
 ///
 /// See also:
 ///
@@ -254,15 +145,17 @@ class ExpansionTile extends StatefulWidget {
     this.controlAffinity,
     this.controller,
     this.dense,
+    this.splashColor,
     this.visualDensity,
     this.minTileHeight,
     this.enableFeedback = true,
     this.enabled = true,
     this.expansionAnimationStyle,
+    this.internalAddSemanticForOnTap = false,
   }) : assert(
-       expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
-       'CrossAxisAlignment.baseline is not supported since the expanded children '
-           'are aligned in a column, not a row. Try to use another constant.',
+         expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
+         'CrossAxisAlignment.baseline is not supported since the expanded children '
+         'are aligned in a column, not a row. Try to use another constant.',
        );
 
   /// A widget to display before the title.
@@ -288,6 +181,9 @@ class ExpansionTile extends StatefulWidget {
   /// When the tile starts expanding, this function is called with the value
   /// true. When the tile starts collapsing, this function is called with
   /// the value false.
+  ///
+  /// Instead of providing this property, consider adding this callback as a
+  /// listener to a provided [controller].
   final ValueChanged<bool>? onExpansionChanged;
 
   /// The widgets that are displayed when the tile expands.
@@ -326,7 +222,12 @@ class ExpansionTile extends StatefulWidget {
   /// Specifies if the [ExpansionTile] should build a default trailing icon if [trailing] is null.
   final bool showTrailingIcon;
 
-  /// Specifies if the list tile is initially expanded (true) or collapsed (false, the default).
+  /// Specifies if the list tile is initially expanded (true) or collapsed (false).
+  ///
+  /// Alternatively, a provided [controller] can be used to initially expand the
+  /// tile if [ExpansibleController.expand] is called before this widget is built.
+  ///
+  /// Defaults to false.
   final bool initiallyExpanded;
 
   /// Specifies whether the state of the children is maintained when the tile expands and collapses.
@@ -429,7 +330,6 @@ class ExpansionTile extends StatefulWidget {
   ///   [ExpansionTileThemeData].
   final Color? collapsedIconColor;
 
-
   /// The color of the tile's titles when the sublist is expanded.
   ///
   /// Used to override to the [ListTileThemeData.textColor].
@@ -503,13 +403,32 @@ class ExpansionTile extends StatefulWidget {
 
   /// If provided, the controller can be used to expand and collapse tiles.
   ///
-  /// In cases were control over the tile's state is needed from a callback triggered
-  /// by a widget within the tile, [ExpansionTileController.of] may be more convenient
-  /// than supplying a controller.
-  final ExpansionTileController? controller;
+  /// In cases where control over the tile's state is needed from a callback
+  /// triggered by a widget within the tile, [ExpansibleController.of] may be
+  /// more convenient than supplying a controller.
+  final ExpansibleController? controller;
 
   /// {@macro flutter.material.ListTile.dense}
   final bool? dense;
+
+  /// The splash color of the ink response when the tile is tapped.
+  ///
+  /// This color is passed directly to the underlying [ListTile]'s
+  /// `splashColor` property, which controls the ink ripple (splash)
+  /// animation when the tile is tapped. Internally, [ListTile] uses
+  /// an [InkWell] (which handles the actual splash effect), and so the
+  /// provided color will apply to that ripple.
+  ///
+  /// If null, the splash color will default to the current theme’s
+  /// `ThemeData.splashColor`.
+  ///
+  /// See also:
+  ///
+  /// * [ListTile.splashColor], which sets the ink splash for the tile.
+  /// * [InkWell.splashColor], which determines the color of the ripple
+  ///   effect in Material widgets.
+  /// * [ThemeData.splashColor], which provides a fallback color.
+  final Color? splashColor;
 
   /// Defines how compact the expansion tile's layout will be.
   ///
@@ -558,110 +477,94 @@ class ExpansionTile extends StatefulWidget {
   /// {@end-tool}
   final AnimationStyle? expansionAnimationStyle;
 
+  /// Whether to add button:true to the semantics if onTap is provided.
+  /// This is a temporary flag to help changing the behavior of ListTile onTap semantics.
+  ///
+  // TODO(hangyujin): Remove this flag after fixing related g3 tests and flipping
+  // the default value to true.
+  final bool internalAddSemanticForOnTap;
+
   @override
   State<ExpansionTile> createState() => _ExpansionTileState();
 }
 
-class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProviderStateMixin {
-  static final Animatable<double> _easeOutTween = CurveTween(curve: Curves.easeOut);
+class _ExpansionTileState extends State<ExpansionTile> {
   static final Animatable<double> _easeInTween = CurveTween(curve: Curves.easeIn);
+  static final Animatable<double> _easeOutTween = CurveTween(curve: Curves.easeOut);
   static final Animatable<double> _halfTween = Tween<double>(begin: 0.0, end: 0.5);
 
   final ShapeBorderTween _borderTween = ShapeBorderTween();
   final ColorTween _headerColorTween = ColorTween();
   final ColorTween _iconColorTween = ColorTween();
   final ColorTween _backgroundColorTween = ColorTween();
-  final Tween<double> _heightFactorTween = Tween<double>(begin: 0.0, end: 1.0);
 
-  late AnimationController _animationController;
   late Animation<double> _iconTurns;
-  late CurvedAnimation _heightFactor;
   late Animation<ShapeBorder?> _border;
   late Animation<Color?> _headerColor;
   late Animation<Color?> _iconColor;
   late Animation<Color?> _backgroundColor;
 
-  bool _isExpanded = false;
-  late ExpansionTileController _tileController;
+  late ExpansionTileThemeData _expansionTileTheme;
+  late ExpansibleController _tileController;
   Timer? _timer;
+  late Curve _curve;
+  late Curve? _reverseCurve;
+  late Duration _duration;
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(duration: _kExpand, vsync: this);
-    _heightFactor = CurvedAnimation(
-      parent: _animationController.drive(_heightFactorTween),
-      curve: Curves.easeIn,
-    );
-    _iconTurns = _animationController.drive(_halfTween.chain(_easeInTween));
-    _border = _animationController.drive(_borderTween.chain(_easeOutTween));
-    _headerColor = _animationController.drive(_headerColorTween.chain(_easeInTween));
-    _iconColor = _animationController.drive(_iconColorTween.chain(_easeInTween));
-    _backgroundColor = _animationController.drive(_backgroundColorTween.chain(_easeOutTween));
-
-    _isExpanded = PageStorage.maybeOf(context)?.readState(context) as bool? ?? widget.initiallyExpanded;
-    if (_isExpanded) {
-      _animationController.value = 1.0;
+    _curve = Curves.easeIn;
+    _duration = _kExpand;
+    _tileController = widget.controller ?? ExpansibleController();
+    if (widget.initiallyExpanded) {
+      _tileController.expand();
     }
-
-    assert(widget.controller?._state == null);
-    _tileController = widget.controller ?? ExpansionTileController();
-    _tileController._state = this;
+    _tileController.addListener(_onExpansionChanged);
   }
 
   @override
   void dispose() {
-    _tileController._state = null;
-    _animationController.dispose();
-    _heightFactor.dispose();
+    _tileController.removeListener(_onExpansionChanged);
+    if (widget.controller == null) {
+      _tileController.dispose();
+    }
     _timer?.cancel();
     _timer = null;
     super.dispose();
   }
 
-  void _toggleExpansion() {
+  void _onExpansionChanged() {
     final TextDirection textDirection = WidgetsLocalizations.of(context).textDirection;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final String stateHint = _isExpanded ? localizations.expandedHint : localizations.collapsedHint;
-    setState(() {
-      _isExpanded = !_isExpanded;
-      if (_isExpanded) {
-        _animationController.forward();
-      } else {
-        _animationController.reverse().then<void>((void value) {
-          if (!mounted) {
-            return;
-          }
-          setState(() {
-            // Rebuild without widget.children.
-          });
-        });
-      }
-      PageStorage.maybeOf(context)?.writeState(context, _isExpanded);
-    });
-    widget.onExpansionChanged?.call(_isExpanded);
+    final String stateHint = _tileController.isExpanded
+        ? localizations.collapsedHint
+        : localizations.expandedHint;
 
     if (defaultTargetPlatform == TargetPlatform.iOS) {
       // TODO(tahatesser): This is a workaround for VoiceOver interrupting
       // semantic announcements on iOS. https://github.com/flutter/flutter/issues/122101.
       _timer?.cancel();
       _timer = Timer(const Duration(seconds: 1), () {
-        SemanticsService.announce(stateHint, textDirection);
+        SemanticsService.sendAnnouncement(View.of(context), stateHint, textDirection);
         _timer?.cancel();
         _timer = null;
       });
-    } else {
-      SemanticsService.announce(stateHint, textDirection);
     }
-  }
-
-  void _handleTap() {
-    _toggleExpansion();
+    // SemanticsService.sendAnnouncement is deprecated on android.
+    // We use live region to achieve the announcement effect instead.
+    else if (defaultTargetPlatform != TargetPlatform.android) {
+      SemanticsService.sendAnnouncement(View.of(context), stateHint, textDirection);
+    }
+    widget.onExpansionChanged?.call(_tileController.isExpanded);
   }
 
   // Platform or null affinity defaults to trailing.
-  ListTileControlAffinity _effectiveAffinity(ListTileControlAffinity? affinity) {
-    switch (affinity ?? ListTileControlAffinity.trailing) {
+  ListTileControlAffinity _effectiveAffinity() {
+    final ListTileThemeData listTileTheme = ListTileTheme.of(context);
+    final ListTileControlAffinity affinity =
+        widget.controlAffinity ?? listTileTheme.controlAffinity ?? ListTileControlAffinity.trailing;
+    switch (affinity) {
       case ListTileControlAffinity.leading:
         return ListTileControlAffinity.leading;
       case ListTileControlAffinity.trailing:
@@ -670,53 +573,108 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     }
   }
 
-  Widget? _buildIcon(BuildContext context) {
-    return RotationTransition(
-      turns: _iconTurns,
-      child: const Icon(Icons.expand_more),
-    );
+  Widget? _buildIcon(BuildContext context, Animation<double> animation) {
+    _iconTurns = animation.drive(_halfTween.chain(_easeInTween));
+    return RotationTransition(turns: _iconTurns, child: const Icon(Icons.expand_more));
   }
 
-  Widget? _buildLeadingIcon(BuildContext context) {
-    if (_effectiveAffinity(widget.controlAffinity) != ListTileControlAffinity.leading) {
+  Widget? _buildLeadingIcon(BuildContext context, Animation<double> animation) {
+    if (_effectiveAffinity() != ListTileControlAffinity.leading) {
       return null;
     }
-    return _buildIcon(context);
+    return _buildIcon(context, animation);
   }
 
-  Widget? _buildTrailingIcon(BuildContext context) {
-    if (_effectiveAffinity(widget.controlAffinity) != ListTileControlAffinity.trailing) {
+  Widget? _buildTrailingIcon(BuildContext context, Animation<double> animation) {
+    if (_effectiveAffinity() != ListTileControlAffinity.trailing) {
       return null;
     }
-    return _buildIcon(context);
+    return _buildIcon(context, animation);
   }
 
-  Widget _buildChildren(BuildContext context, Widget? child) {
-    final ThemeData theme = Theme.of(context);
-    final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
-    final Color backgroundColor = _backgroundColor.value ?? expansionTileTheme.backgroundColor ?? Colors.transparent;
-    final ShapeBorder expansionTileBorder = _border.value ?? const Border(
-      top: BorderSide(color: Colors.transparent),
-      bottom: BorderSide(color: Colors.transparent),
-    );
-    final Clip clipBehavior = widget.clipBehavior ?? expansionTileTheme.clipBehavior ?? Clip.antiAlias;
+  Widget _buildHeader(BuildContext context, Animation<double> animation) {
+    _iconColor = animation.drive(_iconColorTween.chain(_easeInTween));
+    _headerColor = animation.drive(_headerColorTween.chain(_easeInTween));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final String onTapHint = _isExpanded
-      ? localizations.expansionTileExpandedTapHint
-      : localizations.expansionTileCollapsedTapHint;
-    String? semanticsHint;
-    switch (theme.platform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        semanticsHint = _isExpanded
-          ? '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}'
-          : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}';
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        break;
+    final String onTapHint = _tileController.isExpanded
+        ? localizations.expansionTileExpandedTapHint
+        : localizations.expansionTileCollapsedTapHint;
+    final String semanticsHint = switch (defaultTargetPlatform) {
+      TargetPlatform.iOS || TargetPlatform.macOS =>
+        _tileController.isExpanded
+            ? '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}'
+            : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}',
+      _ => _tileController.isExpanded ? localizations.collapsedHint : localizations.expandedHint,
+    };
+
+    final Widget child = ListTileTheme.merge(
+      iconColor: _iconColor.value ?? _expansionTileTheme.iconColor,
+      textColor: _headerColor.value,
+      child: ListTile(
+        enabled: widget.enabled,
+        onTap: _tileController.isExpanded ? _tileController.collapse : _tileController.expand,
+        dense: widget.dense,
+        splashColor: widget.splashColor,
+        visualDensity: widget.visualDensity,
+        enableFeedback: widget.enableFeedback,
+        contentPadding: widget.tilePadding ?? _expansionTileTheme.tilePadding,
+        leading: widget.leading ?? _buildLeadingIcon(context, animation),
+        title: widget.title,
+        subtitle: widget.subtitle,
+        trailing: widget.showTrailingIcon
+            ? widget.trailing ?? _buildTrailingIcon(context, animation)
+            : null,
+        minTileHeight: widget.minTileHeight,
+        internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
+      ),
+    );
+
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return Semantics(
+        // Live region used to announce state changes (e.g., "expanded" or "collapsed")
+        // without taking focus.
+        // blockNode prevents this node from being part of the focus traversal.
+        label: semanticsHint,
+        liveRegion: true,
+        accessibilityFocusBlockType: AccessibilityFocusBlockType.blockNode,
+        child: Semantics(hint: semanticsHint, onTapHint: onTapHint, child: child),
+      );
     }
+    return Semantics(hint: semanticsHint, onTapHint: onTapHint, child: child);
+  }
+
+  Widget _buildBody(BuildContext context, Animation<double> animation) {
+    return Align(
+      alignment:
+          widget.expandedAlignment ?? _expansionTileTheme.expandedAlignment ?? Alignment.center,
+      child: Padding(
+        padding: widget.childrenPadding ?? _expansionTileTheme.childrenPadding ?? EdgeInsets.zero,
+        child: Column(
+          crossAxisAlignment: widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center,
+          children: widget.children,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExpansible(
+    BuildContext context,
+    Widget header,
+    Widget body,
+    Animation<double> animation,
+  ) {
+    _backgroundColor = animation.drive(_backgroundColorTween.chain(_easeOutTween));
+    _border = animation.drive(_borderTween.chain(_easeOutTween));
+    final Color backgroundColor =
+        _backgroundColor.value ?? _expansionTileTheme.backgroundColor ?? Colors.transparent;
+    final ShapeBorder expansionTileBorder =
+        _border.value ??
+        const Border(
+          top: BorderSide(color: Colors.transparent),
+          bottom: BorderSide(color: Colors.transparent),
+        );
+    final Clip clipBehavior =
+        widget.clipBehavior ?? _expansionTileTheme.clipBehavior ?? Clip.antiAlias;
 
     final Decoration decoration = ShapeDecoration(
       color: backgroundColor,
@@ -725,45 +683,14 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
 
     final Widget tile = Padding(
       padding: decoration.padding,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Semantics(
-            hint: semanticsHint,
-            onTapHint: onTapHint,
-            child: ListTileTheme.merge(
-              iconColor: _iconColor.value ?? expansionTileTheme.iconColor,
-              textColor: _headerColor.value,
-              child: ListTile(
-                enabled: widget.enabled,
-                onTap: _handleTap,
-                dense: widget.dense,
-                visualDensity: widget.visualDensity,
-                enableFeedback: widget.enableFeedback,
-                contentPadding: widget.tilePadding ?? expansionTileTheme.tilePadding,
-                leading: widget.leading ?? _buildLeadingIcon(context),
-                title: widget.title,
-                subtitle: widget.subtitle,
-                trailing: widget.showTrailingIcon ? widget.trailing ?? _buildTrailingIcon(context) : null,
-                minTileHeight: widget.minTileHeight,
-              ),
-            ),
-          ),
-          ClipRect(
-            child: Align(
-              alignment: widget.expandedAlignment
-                ?? expansionTileTheme.expandedAlignment
-                ?? Alignment.center,
-              heightFactor: _heightFactor.value,
-              child: child,
-            ),
-          ),
-        ],
-      ),
+      child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[header, body]),
     );
 
-    final bool isShapeProvided = widget.shape != null || expansionTileTheme.shape != null
-      || widget.collapsedShape != null || expansionTileTheme.collapsedShape != null;
+    final bool isShapeProvided =
+        widget.shape != null ||
+        _expansionTileTheme.shape != null ||
+        widget.collapsedShape != null ||
+        _expansionTileTheme.collapsedShape != null;
 
     if (isShapeProvided) {
       return Material(
@@ -774,134 +701,133 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       );
     }
 
-    return DecoratedBox(
-      decoration: decoration,
-      child: tile,
-    );
+    return DecoratedBox(decoration: decoration, child: tile);
   }
 
   @override
   void didUpdateWidget(covariant ExpansionTile oldWidget) {
     super.didUpdateWidget(oldWidget);
     final ThemeData theme = Theme.of(context);
-    final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
+    _expansionTileTheme = ExpansionTileTheme.of(context);
     final ExpansionTileThemeData defaults = theme.useMaterial3
-      ? _ExpansionTileDefaultsM3(context)
-      : _ExpansionTileDefaultsM2(context);
-    if (widget.collapsedShape != oldWidget.collapsedShape
-      || widget.shape != oldWidget.shape) {
-      _updateShapeBorder(expansionTileTheme, theme);
+        ? _ExpansionTileDefaultsM3(context)
+        : _ExpansionTileDefaultsM2(context);
+    if (widget.collapsedShape != oldWidget.collapsedShape || widget.shape != oldWidget.shape) {
+      _updateShapeBorder(theme);
     }
-    if (widget.collapsedTextColor != oldWidget.collapsedTextColor
-      || widget.textColor != oldWidget.textColor) {
-      _updateHeaderColor(expansionTileTheme, defaults);
+    if (widget.collapsedTextColor != oldWidget.collapsedTextColor ||
+        widget.textColor != oldWidget.textColor) {
+      _updateHeaderColor(defaults);
     }
-    if (widget.collapsedIconColor != oldWidget.collapsedIconColor
-      || widget.iconColor != oldWidget.iconColor) {
-      _updateIconColor(expansionTileTheme, defaults);
+    if (widget.collapsedIconColor != oldWidget.collapsedIconColor ||
+        widget.iconColor != oldWidget.iconColor) {
+      _updateIconColor(defaults);
     }
-    if (widget.backgroundColor != oldWidget.backgroundColor
-      || widget.collapsedBackgroundColor != oldWidget.collapsedBackgroundColor) {
-      _updateBackgroundColor(expansionTileTheme);
+    if (widget.backgroundColor != oldWidget.backgroundColor ||
+        widget.collapsedBackgroundColor != oldWidget.collapsedBackgroundColor) {
+      _updateBackgroundColor();
     }
     if (widget.expansionAnimationStyle != oldWidget.expansionAnimationStyle) {
-      _updateAnimationDuration(expansionTileTheme);
-      _updateHeightFactorCurve(expansionTileTheme);
+      _updateAnimationDuration();
+      _updateHeightFactorCurve();
+    }
+    if (widget.controller != oldWidget.controller) {
+      _tileController.removeListener(_onExpansionChanged);
+      if (oldWidget.controller == null) {
+        _tileController.dispose();
+      }
+
+      _tileController = widget.controller ?? ExpansibleController();
+      _tileController.addListener(_onExpansionChanged);
     }
   }
 
   @override
   void didChangeDependencies() {
     final ThemeData theme = Theme.of(context);
-    final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
+    _expansionTileTheme = ExpansionTileTheme.of(context);
     final ExpansionTileThemeData defaults = theme.useMaterial3
-      ? _ExpansionTileDefaultsM3(context)
-      : _ExpansionTileDefaultsM2(context);
-    _updateAnimationDuration(expansionTileTheme);
-    _updateShapeBorder(expansionTileTheme, theme);
-    _updateHeaderColor(expansionTileTheme, defaults);
-    _updateIconColor(expansionTileTheme, defaults);
-    _updateBackgroundColor(expansionTileTheme);
-    _updateHeightFactorCurve(expansionTileTheme);
+        ? _ExpansionTileDefaultsM3(context)
+        : _ExpansionTileDefaultsM2(context);
+    _updateAnimationDuration();
+    _updateShapeBorder(theme);
+    _updateHeaderColor(defaults);
+    _updateIconColor(defaults);
+    _updateBackgroundColor();
+    _updateHeightFactorCurve();
     super.didChangeDependencies();
   }
 
-  void _updateAnimationDuration(ExpansionTileThemeData expansionTileTheme) {
-    _animationController.duration = widget.expansionAnimationStyle?.duration
-      ?? expansionTileTheme.expansionAnimationStyle?.duration
-      ?? _kExpand;
+  void _updateAnimationDuration() {
+    _duration =
+        widget.expansionAnimationStyle?.duration ??
+        _expansionTileTheme.expansionAnimationStyle?.duration ??
+        const Duration(milliseconds: 200);
   }
 
-  void _updateShapeBorder(ExpansionTileThemeData expansionTileTheme, ThemeData theme) {
+  void _updateShapeBorder(ThemeData theme) {
     _borderTween
-      ..begin = widget.collapsedShape
-        ?? expansionTileTheme.collapsedShape
-        ?? const Border(
-          top: BorderSide(color: Colors.transparent),
-          bottom: BorderSide(color: Colors.transparent),
-        )
-      ..end = widget.shape
-        ?? expansionTileTheme.shape
-        ?? Border(
-          top: BorderSide(color: theme.dividerColor),
-          bottom: BorderSide(color: theme.dividerColor),
-        );
+      ..begin =
+          widget.collapsedShape ??
+          _expansionTileTheme.collapsedShape ??
+          const Border(
+            top: BorderSide(color: Colors.transparent),
+            bottom: BorderSide(color: Colors.transparent),
+          )
+      ..end =
+          widget.shape ??
+          _expansionTileTheme.shape ??
+          Border(
+            top: BorderSide(color: theme.dividerColor),
+            bottom: BorderSide(color: theme.dividerColor),
+          );
   }
 
-  void _updateHeaderColor(ExpansionTileThemeData expansionTileTheme, ExpansionTileThemeData defaults) {
+  void _updateHeaderColor(ExpansionTileThemeData defaults) {
     _headerColorTween
-      ..begin = widget.collapsedTextColor
-        ?? expansionTileTheme.collapsedTextColor
-        ?? defaults.collapsedTextColor
-      ..end = widget.textColor ?? expansionTileTheme.textColor ?? defaults.textColor;
+      ..begin =
+          widget.collapsedTextColor ??
+          _expansionTileTheme.collapsedTextColor ??
+          defaults.collapsedTextColor
+      ..end = widget.textColor ?? _expansionTileTheme.textColor ?? defaults.textColor;
   }
 
-  void _updateIconColor(ExpansionTileThemeData expansionTileTheme, ExpansionTileThemeData defaults) {
+  void _updateIconColor(ExpansionTileThemeData defaults) {
     _iconColorTween
-      ..begin = widget.collapsedIconColor
-        ?? expansionTileTheme.collapsedIconColor
-        ?? defaults.collapsedIconColor
-      ..end = widget.iconColor ?? expansionTileTheme.iconColor ?? defaults.iconColor;
+      ..begin =
+          widget.collapsedIconColor ??
+          _expansionTileTheme.collapsedIconColor ??
+          defaults.collapsedIconColor
+      ..end = widget.iconColor ?? _expansionTileTheme.iconColor ?? defaults.iconColor;
   }
 
-  void _updateBackgroundColor(ExpansionTileThemeData expansionTileTheme) {
+  void _updateBackgroundColor() {
     _backgroundColorTween
-      ..begin = widget.collapsedBackgroundColor ?? expansionTileTheme.collapsedBackgroundColor
-      ..end = widget.backgroundColor ?? expansionTileTheme.backgroundColor;
+      ..begin = widget.collapsedBackgroundColor ?? _expansionTileTheme.collapsedBackgroundColor
+      ..end = widget.backgroundColor ?? _expansionTileTheme.backgroundColor;
   }
 
-  void _updateHeightFactorCurve(ExpansionTileThemeData expansionTileTheme) {
-    _heightFactor.curve = widget.expansionAnimationStyle?.curve
-      ?? expansionTileTheme.expansionAnimationStyle?.curve
-      ?? Curves.easeIn;
-    _heightFactor.reverseCurve = widget.expansionAnimationStyle?.reverseCurve
-      ?? expansionTileTheme.expansionAnimationStyle?.reverseCurve;
+  void _updateHeightFactorCurve() {
+    _curve =
+        widget.expansionAnimationStyle?.curve ??
+        _expansionTileTheme.expansionAnimationStyle?.curve ??
+        Curves.easeIn;
+    _reverseCurve =
+        widget.expansionAnimationStyle?.reverseCurve ??
+        _expansionTileTheme.expansionAnimationStyle?.reverseCurve;
   }
 
   @override
   Widget build(BuildContext context) {
-    final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
-    final bool closed = !_isExpanded && _animationController.isDismissed;
-    final bool shouldRemoveChildren = closed && !widget.maintainState;
-
-    final Widget result = Offstage(
-      offstage: closed,
-      child: TickerMode(
-        enabled: !closed,
-        child: Padding(
-          padding: widget.childrenPadding ?? expansionTileTheme.childrenPadding ?? EdgeInsets.zero,
-          child: Column(
-            crossAxisAlignment: widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center,
-            children: widget.children,
-          ),
-        ),
-      ),
-    );
-
-    return AnimatedBuilder(
-      animation: _animationController.view,
-      builder: _buildChildren,
-      child: shouldRemoveChildren ? null : result,
+    return Expansible(
+      controller: _tileController,
+      curve: _curve,
+      duration: _duration,
+      reverseCurve: _reverseCurve,
+      maintainState: widget.maintainState,
+      headerBuilder: _buildHeader,
+      bodyBuilder: _buildBody,
+      expansibleBuilder: _buildExpansible,
     );
   }
 }
@@ -933,6 +859,7 @@ class _ExpansionTileDefaultsM2 extends ExpansionTileThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _ExpansionTileDefaultsM3 extends ExpansionTileThemeData {
   _ExpansionTileDefaultsM3(this.context);
 
@@ -952,5 +879,6 @@ class _ExpansionTileDefaultsM3 extends ExpansionTileThemeData {
   @override
   Color? get collapsedIconColor => _colors.onSurfaceVariant;
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - ExpansionTile

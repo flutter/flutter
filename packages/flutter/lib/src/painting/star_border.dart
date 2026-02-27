@@ -53,21 +53,22 @@ class StarBorder extends OutlinedBorder {
     this.valleyRounding = 0,
     double rotation = 0,
     this.squash = 0,
-  })  : assert(squash >= 0),
-        assert(squash <= 1),
-        assert(pointRounding >= 0),
-        assert(pointRounding <= 1),
-        assert(valleyRounding >= 0),
-        assert(valleyRounding <= 1),
-        assert(
-            (valleyRounding + pointRounding) <= 1,
-            'The sum of valleyRounding ($valleyRounding) and '
-            'pointRounding ($pointRounding) must not exceed one.'),
-        assert(innerRadiusRatio >= 0),
-        assert(innerRadiusRatio <= 1),
-        assert(points >= 2),
-        _rotationRadians = rotation * _kDegToRad,
-        _innerRadiusRatio = innerRadiusRatio;
+  }) : assert(squash >= 0),
+       assert(squash <= 1),
+       assert(pointRounding >= 0),
+       assert(pointRounding <= 1),
+       assert(valleyRounding >= 0),
+       assert(valleyRounding <= 1),
+       assert(
+         (valleyRounding + pointRounding) <= 1,
+         'The sum of valleyRounding ($valleyRounding) and '
+         'pointRounding ($pointRounding) must not exceed one.',
+       ),
+       assert(innerRadiusRatio >= 0),
+       assert(innerRadiusRatio <= 1),
+       assert(points >= 2),
+       _rotationRadians = rotation * _kDegToRad,
+       _innerRadiusRatio = innerRadiusRatio;
 
   /// Create a const polygon border with the given number of [sides].
   const StarBorder.polygon({
@@ -76,15 +77,15 @@ class StarBorder extends OutlinedBorder {
     this.pointRounding = 0,
     double rotation = 0,
     this.squash = 0,
-  })  : assert(squash >= 0),
-        assert(squash <= 1),
-        assert(pointRounding >= 0),
-        assert(pointRounding <= 1),
-        assert(sides >= 2),
-        points = sides,
-        valleyRounding = 0,
-        _rotationRadians = rotation * _kDegToRad,
-        _innerRadiusRatio = null;
+  }) : assert(squash >= 0),
+       assert(squash <= 1),
+       assert(pointRounding >= 0),
+       assert(pointRounding <= 1),
+       assert(sides >= 2),
+       points = sides,
+       valleyRounding = 0,
+       _rotationRadians = rotation * _kDegToRad,
+       _innerRadiusRatio = null;
 
   /// The number of points in this star, or sides on a polygon.
   ///
@@ -345,7 +346,8 @@ class StarBorder extends OutlinedBorder {
             t,
             0.5,
             (double t) => lerpTo(CircleBorder(side: lerpedSide), t),
-            (double t) => StadiumBorder(side: lerpedSide).lerpFrom(CircleBorder(side: lerpedSide), t),
+            (double t) =>
+                StadiumBorder(side: lerpedSide).lerpFrom(CircleBorder(side: lerpedSide), t),
           );
         },
         (double t) {
@@ -426,14 +428,14 @@ class StarBorder extends OutlinedBorder {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is StarBorder
-        && other.side == side
-        && other.points == points
-        && other._innerRadiusRatio == _innerRadiusRatio
-        && other.pointRounding == pointRounding
-        && other.valleyRounding == valleyRounding
-        && other._rotationRadians == _rotationRadians
-        && other.squash == squash;
+    return other is StarBorder &&
+        other.side == side &&
+        other.points == points &&
+        other._innerRadiusRatio == _innerRadiusRatio &&
+        other.pointRounding == pointRounding &&
+        other.valleyRounding == valleyRounding &&
+        other._rotationRadians == _rotationRadians &&
+        other.squash == squash;
   }
 
   @override
@@ -471,16 +473,16 @@ class _StarGenerator {
     required this.valleyRounding,
     required this.rotation,
     required this.squash,
-  })  : assert(points > 1),
-        assert(innerRadiusRatio <= 1),
-        assert(innerRadiusRatio >= 0),
-        assert(squash >= 0),
-        assert(squash <= 1),
-        assert(pointRounding >= 0),
-        assert(pointRounding <= 1),
-        assert(valleyRounding >= 0),
-        assert(valleyRounding <= 1),
-        assert(pointRounding + valleyRounding <= 1);
+  }) : assert(points > 1),
+       assert(innerRadiusRatio <= 1),
+       assert(innerRadiusRatio >= 0),
+       assert(squash >= 0),
+       assert(squash <= 1),
+       assert(pointRounding >= 0),
+       assert(pointRounding <= 1),
+       assert(valleyRounding >= 0),
+       assert(valleyRounding <= 1),
+       assert(pointRounding + valleyRounding <= 1);
 
   final double points;
   final double innerRadiusRatio;
@@ -495,18 +497,20 @@ class _StarGenerator {
 
     // The minimum allowed inner radius ratio. Numerical instabilities occur near
     // zero, so we just don't allow values in that range.
-    const double minInnerRadiusRatio = .002;
+    const minInnerRadiusRatio = .002;
 
     // Map the innerRadiusRatio so that we don't get values close to zero, since
     // things get a little squirrelly there because the path thinks that the
     // length of the conicTo is small enough that it can render it as a straight
     // line, even though it will be scaled up later. This maps the range from
     // [0, 1] to [minInnerRadiusRatio, 1].
-    final double mappedInnerRadiusRatio = (innerRadiusRatio * (1.0 - minInnerRadiusRatio)) + minInnerRadiusRatio;
+    final double mappedInnerRadiusRatio =
+        (innerRadiusRatio * (1.0 - minInnerRadiusRatio)) + minInnerRadiusRatio;
 
     // First, generate the "points" of the star.
-    final List<_PointInfo> points = <_PointInfo>[];
-    final double maxDiameter = 2.0 *
+    final points = <_PointInfo>[];
+    final double maxDiameter =
+        2.0 *
         _generatePoints(
           pointList: points,
           center: center,
@@ -515,10 +519,10 @@ class _StarGenerator {
         );
 
     // Calculate the endpoints of each of the arcs, then draw the arcs.
-    final Path path = Path();
+    final path = Path();
     _drawPoints(path, points);
 
-    Offset scale = Offset(rect.width / maxDiameter, rect.height / maxDiameter);
+    var scale = Offset(rect.width / maxDiameter, rect.height / maxDiameter);
     if (rect.shortestSide == rect.width) {
       scale = Offset(scale.dx, squash * scale.dy + (1 - squash) * scale.dx);
     } else {
@@ -527,7 +531,7 @@ class _StarGenerator {
     // Scale the border so that it matches the size of the widget rectangle, so
     // that "rotation" of the shape doesn't affect how much of the rectangle it
     // covers.
-    final Matrix4 squashMatrix = Matrix4.translationValues(rect.center.dx, rect.center.dy, 0);
+    final squashMatrix = Matrix4.translationValues(rect.center.dx, rect.center.dy, 0);
     squashMatrix.multiply(Matrix4.diagonal3Values(scale.dx, scale.dy, 1));
     squashMatrix.multiply(Matrix4.rotationZ(rotation));
     squashMatrix.multiply(Matrix4.translationValues(-rect.center.dx, -rect.center.dy, 0));
@@ -543,7 +547,7 @@ class _StarGenerator {
     final double step = math.pi / points;
     // Start initial rotation one step before zero.
     double angle = -math.pi / 2 - step;
-    Offset valley = Offset(
+    var valley = Offset(
       center.dx + math.cos(angle) * innerRadius,
       center.dy + math.sin(angle) * innerRadius,
     );
@@ -565,12 +569,12 @@ class _StarGenerator {
       double pointInnerRadius,
     ) {
       pointAngle += pointStep;
-      final Offset point = Offset(
+      final point = Offset(
         center.dx + math.cos(pointAngle) * pointRadius,
         center.dy + math.sin(pointAngle) * pointRadius,
       );
       pointAngle += pointStep;
-      final Offset nextValley = Offset(
+      final nextValley = Offset(
         center.dx + math.cos(pointAngle) * pointInnerRadius,
         center.dy + math.sin(pointAngle) * pointInnerRadius,
       );
@@ -579,14 +583,16 @@ class _StarGenerator {
       final Offset pointArc2 = point + (nextValley - point) * pointRounding;
       final Offset valleyArc2 = nextValley + (point - nextValley) * valleyRounding;
 
-      pointList.add(_PointInfo(
-        valley: valley,
-        point: point,
-        valleyArc1: valleyArc1,
-        pointArc1: pointArc1,
-        pointArc2: pointArc2,
-        valleyArc2: valleyArc2,
-      ));
+      pointList.add(
+        _PointInfo(
+          valley: valley,
+          point: point,
+          valleyArc1: valleyArc1,
+          pointArc1: pointArc1,
+          pointArc2: pointArc2,
+          valleyArc2: valleyArc2,
+        ),
+      );
       valley = nextValley;
       return pointAngle;
     }
@@ -594,7 +600,7 @@ class _StarGenerator {
     final double remainder = points - points.truncateToDouble();
     final bool hasIntegerSides = remainder < 1e-6;
     final double wholeSides = points - (hasIntegerSides ? 0 : 1);
-    for (int i = 0; i < wholeSides; i += 1) {
+    for (var i = 0; i < wholeSides; i += 1) {
       angle = addPoint(angle, step, radius, innerRadius);
     }
 
@@ -603,10 +609,20 @@ class _StarGenerator {
     final _PointInfo thisPoint = pointList[0];
     final _PointInfo nextPoint = pointList[1];
 
-    final Offset pointMidpoint =
-        getCurveMidpoint(thisPoint.valley, thisPoint.point, nextPoint.valley, thisPoint.pointArc1, thisPoint.pointArc2);
+    final Offset pointMidpoint = getCurveMidpoint(
+      thisPoint.valley,
+      thisPoint.point,
+      nextPoint.valley,
+      thisPoint.pointArc1,
+      thisPoint.pointArc2,
+    );
     final Offset valleyMidpoint = getCurveMidpoint(
-        thisPoint.point, nextPoint.valley, nextPoint.point, thisPoint.valleyArc2, nextPoint.valleyArc1);
+      thisPoint.point,
+      nextPoint.valley,
+      nextPoint.point,
+      thisPoint.valleyArc2,
+      nextPoint.valleyArc1,
+    );
     valleyRadius = (valleyMidpoint - center).distance;
     pointRadius = (pointMidpoint - center).distance;
 
@@ -614,7 +630,8 @@ class _StarGenerator {
     // account for.
     if (!hasIntegerSides) {
       final double effectiveInnerRadius = math.max(valleyRadius, innerRadius);
-      final double endingRadius = effectiveInnerRadius + remainder * (radius - effectiveInnerRadius);
+      final double endingRadius =
+          effectiveInnerRadius + remainder * (radius - effectiveInnerRadius);
       addPoint(angle, step * remainder, endingRadius, innerRadius);
     }
 
@@ -635,19 +652,30 @@ class _StarGenerator {
     final double valleyAngle = _getAngle(points[1].point, points[1].valley, points[0].point);
     final double valleyWeight = _getWeight(valleyAngle);
 
-    for (int i = 0; i < points.length; i += 1) {
+    for (var i = 0; i < points.length; i += 1) {
       final _PointInfo point = points[i];
       final _PointInfo nextPoint = points[(i + 1) % points.length];
       path.lineTo(point.pointArc1.dx, point.pointArc1.dy);
       if (pointAngle != 180 && pointAngle != 0) {
-        path.conicTo(point.point.dx, point.point.dy, point.pointArc2.dx, point.pointArc2.dy, pointWeight);
+        path.conicTo(
+          point.point.dx,
+          point.point.dy,
+          point.pointArc2.dx,
+          point.pointArc2.dy,
+          pointWeight,
+        );
       } else {
         path.lineTo(point.pointArc2.dx, point.pointArc2.dy);
       }
       path.lineTo(point.valleyArc2.dx, point.valleyArc2.dy);
       if (valleyAngle != 180 && valleyAngle != 0) {
         path.conicTo(
-            nextPoint.valley.dx, nextPoint.valley.dy, nextPoint.valleyArc1.dx, nextPoint.valleyArc1.dy, valleyWeight);
+          nextPoint.valley.dx,
+          nextPoint.valley.dy,
+          nextPoint.valleyArc1.dx,
+          nextPoint.valleyArc1.dy,
+          valleyWeight,
+        );
       } else {
         path.lineTo(nextPoint.valleyArc1.dx, nextPoint.valleyArc1.dy);
       }

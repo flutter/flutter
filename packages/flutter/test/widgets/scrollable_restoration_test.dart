@@ -14,16 +14,11 @@ void main() {
           restorationId: 'list',
           cacheExtent: 0,
           slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildListDelegate(
-                List<Widget>.generate(
-                  50,
-                  (int index) => SizedBox(
-                    height: 50,
-                    child: Text('Tile $index'),
-                  ),
-                ),
-              ),
+            SliverList.builder(
+              itemCount: 50,
+              itemBuilder: (BuildContext context, int index) {
+                return SizedBox(height: 50, child: Text('Tile $index'));
+              },
             ),
           ],
         ),
@@ -41,10 +36,7 @@ void main() {
           cacheExtent: 0,
           children: List<Widget>.generate(
             50,
-            (int index) => SizedBox(
-              height: 50,
-              child: Text('Tile $index'),
-            ),
+            (int index) => SizedBox(height: 50, child: Text('Tile $index')),
           ),
         ),
       ),
@@ -59,10 +51,8 @@ void main() {
         child: ListView.builder(
           restorationId: 'list',
           cacheExtent: 0,
-          itemBuilder: (BuildContext context, int index) => SizedBox(
-            height: 50,
-            child: Text('Tile $index'),
-          ),
+          itemBuilder: (BuildContext context, int index) =>
+              SizedBox(height: 50, child: Text('Tile $index')),
         ),
       ),
     );
@@ -78,10 +68,8 @@ void main() {
           cacheExtent: 0,
           itemCount: 50,
           separatorBuilder: (BuildContext context, int index) => const SizedBox.shrink(),
-          itemBuilder: (BuildContext context, int index) => SizedBox(
-            height: 50,
-            child: Text('Tile $index'),
-          ),
+          itemBuilder: (BuildContext context, int index) =>
+              SizedBox(height: 50, child: Text('Tile $index')),
         ),
       ),
     );
@@ -98,10 +86,7 @@ void main() {
           childrenDelegate: SliverChildListDelegate(
             List<Widget>.generate(
               50,
-              (int index) => SizedBox(
-                height: 50,
-                child: Text('Tile $index'),
-              ),
+              (int index) => SizedBox(height: 50, child: Text('Tile $index')),
             ),
           ),
         ),
@@ -120,10 +105,7 @@ void main() {
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 1),
           children: List<Widget>.generate(
             50,
-            (int index) => SizedBox(
-              height: 50,
-              child: Text('Tile $index'),
-            ),
+            (int index) => SizedBox(height: 50, child: Text('Tile $index')),
           ),
         ),
       ),
@@ -139,10 +121,8 @@ void main() {
           restorationId: 'grid',
           cacheExtent: 0,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 1),
-          itemBuilder: (BuildContext context, int index) => SizedBox(
-            height: 50,
-            child: Text('Tile $index'),
-          ),
+          itemBuilder: (BuildContext context, int index) =>
+              SizedBox(height: 50, child: Text('Tile $index')),
         ),
       ),
     );
@@ -160,10 +140,7 @@ void main() {
           childrenDelegate: SliverChildListDelegate(
             List<Widget>.generate(
               50,
-              (int index) => SizedBox(
-                height: 50,
-                child: Text('Tile $index'),
-              ),
+              (int index) => SizedBox(height: 50, child: Text('Tile $index')),
             ),
           ),
         ),
@@ -182,10 +159,7 @@ void main() {
           crossAxisCount: 1,
           children: List<Widget>.generate(
             50,
-            (int index) => SizedBox(
-              height: 50,
-              child: Text('Tile $index'),
-            ),
+            (int index) => SizedBox(height: 50, child: Text('Tile $index')),
           ),
         ),
       ),
@@ -203,10 +177,7 @@ void main() {
           maxCrossAxisExtent: 50,
           children: List<Widget>.generate(
             50,
-            (int index) => SizedBox(
-              height: 50,
-              child: Text('Tile $index'),
-            ),
+            (int index) => SizedBox(height: 50, child: Text('Tile $index')),
           ),
         ),
       ),
@@ -223,10 +194,7 @@ void main() {
           child: Column(
             children: List<Widget>.generate(
               50,
-              (int index) => SizedBox(
-                height: 50,
-                child: Text('Tile $index'),
-              ),
+              (int index) => SizedBox(height: 50, child: Text('Tile $index')),
             ),
           ),
         ),
@@ -262,16 +230,12 @@ void main() {
     expect(tester.getTopLeft(find.text('Tile 1')), const Offset(0, -475));
   });
 
-  testWidgets('PageView restoration',
-  (WidgetTester tester) async {
+  testWidgets('PageView restoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: PageView(
           restorationId: 'pager',
-          children: List<Widget>.generate(
-            50,
-            (int index) => Text('Tile $index'),
-          ),
+          children: List<Widget>.generate(50, (int index) => Text('Tile $index')),
         ),
       ),
     );
@@ -284,10 +248,8 @@ void main() {
       TestHarness(
         child: PageView.builder(
           restorationId: 'pager',
-          itemBuilder: (BuildContext context, int index) => SizedBox(
-            height: 50,
-            child: Text('Tile $index'),
-          ),
+          itemBuilder: (BuildContext context, int index) =>
+              SizedBox(height: 50, child: Text('Tile $index')),
         ),
       ),
     );
@@ -303,10 +265,7 @@ void main() {
           childrenDelegate: SliverChildListDelegate(
             List<Widget>.generate(
               50,
-              (int index) => SizedBox(
-                height: 50,
-                child: Text('Tile $index'),
-              ),
+              (int index) => SizedBox(height: 50, child: Text('Tile $index')),
             ),
           ),
         ),
@@ -322,10 +281,7 @@ void main() {
         child: ListWheelScrollView(
           restorationId: 'wheel',
           itemExtent: 50,
-          children: List<Widget>.generate(
-            50,
-            (int index) => Text('Tile $index'),
-          ),
+          children: List<Widget>.generate(50, (int index) => Text('Tile $index')),
         ),
       ),
     );
@@ -342,10 +298,7 @@ void main() {
           childDelegate: ListWheelChildListDelegate(
             children: List<Widget>.generate(
               50,
-              (int index) => SizedBox(
-                height: 50,
-                child: Text('Tile $index'),
-              ),
+              (int index) => SizedBox(height: 50, child: Text('Tile $index')),
             ),
           ),
         ),
@@ -380,10 +333,7 @@ void main() {
               cacheExtent: 0,
               children: List<Widget>.generate(
                 50,
-                (int index) => SizedBox(
-                  height: 50,
-                  child: Text('Tile $index'),
-                ),
+                (int index) => SizedBox(height: 50, child: Text('Tile $index')),
               ),
             ),
           ),
@@ -423,7 +373,9 @@ void main() {
     expect(find.text('Tile 10'), findsOneWidget);
   });
 
-  testWidgets('RestorationData is flushed even if no frame is scheduled', (WidgetTester tester) async {
+  testWidgets('RestorationData is flushed even if no frame is scheduled', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       TestHarness(
         child: ListView(
@@ -431,10 +383,7 @@ void main() {
           cacheExtent: 0,
           children: List<Widget>.generate(
             50,
-            (int index) => SizedBox(
-              height: 50,
-              child: Text('Tile $index'),
-            ),
+            (int index) => SizedBox(height: 50, child: Text('Tile $index')),
           ),
         ),
       ),
@@ -558,11 +507,7 @@ class TestHarness extends StatelessWidget {
         textDirection: TextDirection.ltr,
         child: Align(
           alignment: Alignment.topLeft,
-          child: SizedBox(
-            height: height,
-            width: 50,
-            child: child,
-          ),
+          child: SizedBox(height: height, width: 50, child: child),
         ),
       ),
     );

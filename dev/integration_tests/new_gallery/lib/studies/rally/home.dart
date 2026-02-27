@@ -25,8 +25,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>
-    with SingleTickerProviderStateMixin, RestorationMixin {
+class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin, RestorationMixin {
   late TabController _tabController;
   RestorableInt tabIndex = RestorableInt(0);
 
@@ -64,13 +63,12 @@ class _HomePageState extends State<HomePage>
     final bool isDesktop = isDisplayDesktop(context);
     Widget tabBarView;
     if (isDesktop) {
-      final bool isTextDirectionRtl =
-          GalleryOptions.of(context).resolvedTextDirection() ==
-              TextDirection.rtl;
-      final int verticalRotation =
-          isTextDirectionRtl ? turnsToRotateLeft : turnsToRotateRight;
-      final int revertVerticalRotation =
-          isTextDirectionRtl ? turnsToRotateRight : turnsToRotateLeft;
+      final isTextDirectionRtl =
+          GalleryOptions.of(context).resolvedTextDirection() == TextDirection.rtl;
+      final int verticalRotation = isTextDirectionRtl ? turnsToRotateLeft : turnsToRotateRight;
+      final int revertVerticalRotation = isTextDirectionRtl
+          ? turnsToRotateRight
+          : turnsToRotateLeft;
       tabBarView = Row(
         children: <Widget>[
           Container(
@@ -83,10 +81,7 @@ class _HomePageState extends State<HomePage>
                 ExcludeSemantics(
                   child: SizedBox(
                     height: 80,
-                    child: Image.asset(
-                      'logo.png',
-                      package: 'rally_assets',
-                    ),
+                    child: Image.asset('logo.png', package: 'rally_assets'),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -94,17 +89,12 @@ class _HomePageState extends State<HomePage>
                 RotatedBox(
                   quarterTurns: verticalRotation,
                   child: _RallyTabBar(
-                    tabs: _buildTabs(
-                            context: context, theme: theme, isVertical: true)
-                        .map(
-                      (Widget widget) {
-                        // Revert the rotation on the tabs.
-                        return RotatedBox(
-                          quarterTurns: revertVerticalRotation,
-                          child: widget,
-                        );
-                      },
-                    ).toList(),
+                    tabs: _buildTabs(context: context, theme: theme, isVertical: true).map((
+                      Widget widget,
+                    ) {
+                      // Revert the rotation on the tabs.
+                      return RotatedBox(quarterTurns: revertVerticalRotation, child: widget);
+                    }).toList(),
                     tabController: _tabController,
                   ),
                 ),
@@ -117,15 +107,10 @@ class _HomePageState extends State<HomePage>
               quarterTurns: verticalRotation,
               child: TabBarView(
                 controller: _tabController,
-                children: _buildTabViews().map(
-                  (Widget widget) {
-                    // Revert the rotation on the tab views.
-                    return RotatedBox(
-                      quarterTurns: revertVerticalRotation,
-                      child: widget,
-                    );
-                  },
-                ).toList(),
+                children: _buildTabViews().map((Widget widget) {
+                  // Revert the rotation on the tab views.
+                  return RotatedBox(quarterTurns: revertVerticalRotation, child: widget);
+                }).toList(),
               ),
             ),
           ),
@@ -139,10 +124,7 @@ class _HomePageState extends State<HomePage>
             tabController: _tabController,
           ),
           Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: _buildTabViews(),
-            ),
+            child: TabBarView(controller: _tabController, children: _buildTabViews()),
           ),
         ],
       );
@@ -162,20 +144,18 @@ class _HomePageState extends State<HomePage>
               splashColor: Colors.transparent,
               highlightColor: Colors.transparent,
             ),
-            child: FocusTraversalGroup(
-              policy: OrderedTraversalPolicy(),
-              child: tabBarView,
-            ),
+            child: FocusTraversalGroup(policy: OrderedTraversalPolicy(), child: tabBarView),
           ),
         ),
       ),
     );
   }
 
-  List<Widget> _buildTabs(
-      {required BuildContext context,
-      required ThemeData theme,
-      bool isVertical = false}) {
+  List<Widget> _buildTabs({
+    required BuildContext context,
+    required ThemeData theme,
+    bool isVertical = false,
+  }) {
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return <Widget>[
       _RallyTab(
@@ -233,10 +213,7 @@ class _HomePageState extends State<HomePage>
 }
 
 class _RallyTabBar extends StatelessWidget {
-  const _RallyTabBar({
-    required this.tabs,
-    this.tabController,
-  });
+  const _RallyTabBar({required this.tabs, this.tabController});
 
   final List<Widget> tabs;
   final TabController? tabController;
@@ -268,9 +245,9 @@ class _RallyTab extends StatefulWidget {
     int? tabIndex,
     required TabController tabController,
     required this.isVertical,
-  })  : titleText = Text(title, style: theme.textTheme.labelLarge),
-        isExpanded = tabController.index == tabIndex,
-        icon = Icon(iconData, semanticLabel: title);
+  }) : titleText = Text(title, style: theme.textTheme.labelLarge),
+       isExpanded = tabController.index == tabIndex,
+       icon = Icon(iconData, semanticLabel: title);
 
   final Text titleText;
   final Icon icon;
@@ -281,8 +258,7 @@ class _RallyTab extends StatefulWidget {
   _RallyTabState createState() => _RallyTabState();
 }
 
-class _RallyTabState extends State<_RallyTab>
-    with SingleTickerProviderStateMixin {
+class _RallyTabState extends State<_RallyTab> with SingleTickerProviderStateMixin {
   late Animation<double> _titleSizeAnimation;
   late Animation<double> _titleFadeAnimation;
   late Animation<double> _iconFadeAnimation;
@@ -291,10 +267,7 @@ class _RallyTabState extends State<_RallyTab>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
-    );
+    _controller = AnimationController(duration: const Duration(milliseconds: 200), vsync: this);
     _titleSizeAnimation = _controller.view;
     _titleFadeAnimation = _controller.drive(CurveTween(curve: Curves.easeOut));
     _iconFadeAnimation = _controller.drive(Tween<double>(begin: 0.6, end: 1));
@@ -319,10 +292,7 @@ class _RallyTabState extends State<_RallyTab>
       return Column(
         children: <Widget>[
           const SizedBox(height: 18),
-          FadeTransition(
-            opacity: _iconFadeAnimation,
-            child: widget.icon,
-          ),
+          FadeTransition(opacity: _iconFadeAnimation, child: widget.icon),
           const SizedBox(height: 12),
           FadeTransition(
             opacity: _titleFadeAnimation,
@@ -342,7 +312,7 @@ class _RallyTabState extends State<_RallyTab>
     // unit, and there is always 1 expanded tab which is 1 unit + any extra
     // space determined by the multiplier.
     final double width = MediaQuery.of(context).size.width;
-    const int expandedTitleWidthMultiplier = 2;
+    const expandedTitleWidthMultiplier = 2;
     final double unitWidth = width / (tabCount + expandedTitleWidthMultiplier);
 
     return ConstrainedBox(
@@ -351,10 +321,7 @@ class _RallyTabState extends State<_RallyTab>
         children: <Widget>[
           FadeTransition(
             opacity: _iconFadeAnimation,
-            child: SizedBox(
-              width: unitWidth,
-              child: widget.icon,
-            ),
+            child: SizedBox(width: unitWidth, child: widget.icon),
           ),
           FadeTransition(
             opacity: _titleFadeAnimation,
@@ -364,9 +331,7 @@ class _RallyTabState extends State<_RallyTab>
               sizeFactor: _titleSizeAnimation,
               child: SizedBox(
                 width: unitWidth * expandedTitleWidthMultiplier,
-                child: Center(
-                  child: ExcludeSemantics(child: widget.titleText),
-                ),
+                child: Center(child: ExcludeSemantics(child: widget.titleText)),
               ),
             ),
           ),

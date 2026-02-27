@@ -9,7 +9,7 @@ int yieldCount = 0;
 
 Iterable<int> range(int start, int end) sync* {
   assert(yieldCount == 0);
-  for (int index = start; index <= end; index += 1) {
+  for (var index = start; index <= end; index += 1) {
     yieldCount += 1;
     yield index;
   }
@@ -106,5 +106,20 @@ void main() {
     expect(yieldCount, equals(5));
     expect(expanded2, equals(<int>[1, 1, 2, 2, 3, 3, 4, 4, 5, 5]));
     expect(yieldCount, equals(5));
+  });
+
+  test('The Caching Iterable: elementAt correctness', () {
+    final Iterable<int> integers = CachingIterable<int>(range(1, 5).iterator);
+    expect(yieldCount, equals(0));
+
+    expect(() => integers.elementAt(-1), throwsRangeError);
+
+    expect(integers.elementAt(1), equals(2));
+    expect(integers.elementAt(0), equals(1));
+    expect(integers.elementAt(2), equals(3));
+    expect(integers.elementAt(4), equals(5));
+    expect(integers.elementAt(3), equals(4));
+
+    expect(() => integers.elementAt(5), throwsRangeError);
   });
 }

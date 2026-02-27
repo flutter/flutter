@@ -1,6 +1,8 @@
 {
+  "clearButtonTooltip": "清除文字",
+  "selectedDateLabel": "已選取",
   "searchWebButtonLabel": "搜尋",
-  "shareButtonLabel": "分享…",
+  "shareButtonLabel": "分享",
   "scanTextButtonLabel": "掃瞄文字",
   "lookUpButtonLabel": "查詢",
   "menuDismissLabel": "閂選單",
@@ -122,7 +124,7 @@
   "cutButtonLabel": "剪下",
   "okButtonLabel": "確定",
   "pasteButtonLabel": "貼上",
-  "selectAllButtonLabel": "全部選取",
+  "selectAllButtonLabel": "全選",
   "viewLicensesButtonLabel": "查看授權",
   "anteMeridiemAbbreviation": "上午",
   "postMeridiemAbbreviation": "下午",

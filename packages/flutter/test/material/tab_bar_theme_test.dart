@@ -7,11 +7,14 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'tabs_utils.dart';
 
 const String _tab1Text = 'tab 1';
 const String _tab2Text = 'tab 2';
@@ -31,48 +34,46 @@ final List<SizedBox> _sizedTabs = <SizedBox>[
 ];
 
 Widget buildTabBar({
-  TabBarTheme? tabBarTheme,
+  TabBarThemeData? localTabBarTheme,
+  TabBarThemeData? tabBarTheme,
   bool secondaryTabBar = false,
   List<Widget> tabs = _tabs,
   bool isScrollable = false,
   bool useMaterial3 = false,
+  String? fontFamily,
+  TextStyle? labelStyle,
+  TextStyle? unselectedLabelStyle,
 }) {
-  final TabController controller = TabController(
-    length: tabs.length,
-    vsync: const TestVSync(),
-  );
+  final controller = TabController(length: tabs.length, vsync: const TestVSync());
   addTearDown(controller.dispose);
 
-  if (secondaryTabBar) {
-    return MaterialApp(
-      theme: ThemeData(tabBarTheme: tabBarTheme, useMaterial3: useMaterial3),
-      home: Scaffold(
-        body: RepaintBoundary(
-          key: _painterKey,
-          child: TabBar.secondary(
-            tabs: tabs,
-            isScrollable: isScrollable,
-            controller: controller,
-          ),
-        ),
-      ),
-    );
-  }
-  return MaterialApp(
-    theme: ThemeData(tabBarTheme: tabBarTheme, useMaterial3: useMaterial3),
-    home: Scaffold(
-      body: RepaintBoundary(
-        key: _painterKey,
-        child: TabBar(
+  Widget tabBar = secondaryTabBar
+      ? TabBar.secondary(
           tabs: tabs,
           isScrollable: isScrollable,
           controller: controller,
-        ),
-      ),
+          labelStyle: labelStyle,
+          unselectedLabelStyle: unselectedLabelStyle,
+        )
+      : TabBar(
+          tabs: tabs,
+          isScrollable: isScrollable,
+          controller: controller,
+          labelStyle: labelStyle,
+          unselectedLabelStyle: unselectedLabelStyle,
+        );
+
+  if (localTabBarTheme != null) {
+    tabBar = TabBarTheme(data: localTabBarTheme, child: tabBar);
+  }
+
+  return MaterialApp(
+    theme: ThemeData(tabBarTheme: tabBarTheme, useMaterial3: useMaterial3, fontFamily: fontFamily),
+    home: Scaffold(
+      body: RepaintBoundary(key: _painterKey, child: tabBar),
     ),
   );
 }
-
 
 RenderParagraph _getIcon(WidgetTester tester, IconData icon) {
   return tester.renderObject<RenderParagraph>(
@@ -81,40 +82,134 @@ RenderParagraph _getIcon(WidgetTester tester, IconData icon) {
 }
 
 RenderParagraph _getText(WidgetTester tester, String text) {
-  return  tester.renderObject<RenderParagraph>(find.text(text));
+  return tester.renderObject<RenderParagraph>(find.text(text));
 }
 
 void main() {
-  test('TabBarTheme copyWith, ==, hashCode, defaults', () {
-    expect(const TabBarTheme(), const TabBarTheme().copyWith());
-    expect(const TabBarTheme().hashCode, const TabBarTheme().copyWith().hashCode);
+  test('TabBarThemeData copyWith, ==, hashCode, defaults', () {
+    expect(const TabBarThemeData(), const TabBarThemeData().copyWith());
+    expect(const TabBarThemeData().hashCode, const TabBarThemeData().copyWith().hashCode);
 
-    expect(const TabBarTheme().indicator, null);
-    expect(const TabBarTheme().indicatorColor, null);
-    expect(const TabBarTheme().indicatorSize, null);
-    expect(const TabBarTheme().dividerColor, null);
-    expect(const TabBarTheme().dividerHeight, null);
-    expect(const TabBarTheme().labelColor, null);
-    expect(const TabBarTheme().labelPadding, null);
-    expect(const TabBarTheme().labelStyle, null);
-    expect(const TabBarTheme().unselectedLabelColor, null);
-    expect(const TabBarTheme().unselectedLabelStyle, null);
-    expect(const TabBarTheme().overlayColor, null);
-    expect(const TabBarTheme().splashFactory, null);
-    expect(const TabBarTheme().mouseCursor, null);
-    expect(const TabBarTheme().tabAlignment, null);
+    expect(const TabBarThemeData().indicator, null);
+    expect(const TabBarThemeData().indicatorColor, null);
+    expect(const TabBarThemeData().indicatorSize, null);
+    expect(const TabBarThemeData().dividerColor, null);
+    expect(const TabBarThemeData().dividerHeight, null);
+    expect(const TabBarThemeData().labelColor, null);
+    expect(const TabBarThemeData().labelPadding, null);
+    expect(const TabBarThemeData().labelStyle, null);
+    expect(const TabBarThemeData().unselectedLabelColor, null);
+    expect(const TabBarThemeData().unselectedLabelStyle, null);
+    expect(const TabBarThemeData().overlayColor, null);
+    expect(const TabBarThemeData().splashFactory, null);
+    expect(const TabBarThemeData().mouseCursor, null);
+    expect(const TabBarThemeData().tabAlignment, null);
+    expect(const TabBarThemeData().textScaler, null);
+    expect(const TabBarThemeData().indicatorAnimation, null);
   });
 
-  test('TabBarTheme lerp special cases', () {
-    const TabBarTheme theme = TabBarTheme();
-    expect(identical(TabBarTheme.lerp(theme, theme, 0.5), theme), true);
+  test('TabBarThemeData lerp special cases', () {
+    const theme = TabBarThemeData();
+    expect(identical(TabBarThemeData.lerp(theme, theme, 0.5), theme), true);
+  });
+
+  testWidgets('Default TabBarThemeData debugFillProperties', (WidgetTester tester) async {
+    final builder = DiagnosticPropertiesBuilder();
+    const TabBarThemeData().debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+    expect(description, <String>[]);
+  });
+
+  testWidgets('TabBarThemeData implements debugFillProperties', (WidgetTester tester) async {
+    final builder = DiagnosticPropertiesBuilder();
+    const TabBarThemeData(
+      indicator: BoxDecoration(color: Color(0xFF00FF00)),
+      indicatorColor: Colors.red,
+      indicatorSize: TabBarIndicatorSize.label,
+      dividerColor: Color(0xff000001),
+      dividerHeight: 20.5,
+      labelColor: Color(0xff000002),
+      labelPadding: EdgeInsets.all(20.0),
+      labelStyle: TextStyle(color: Colors.amber),
+      unselectedLabelColor: Color(0xff654321),
+      unselectedLabelStyle: TextStyle(color: Colors.blue),
+      overlayColor: WidgetStatePropertyAll<Color>(Colors.yellow),
+      mouseCursor: WidgetStatePropertyAll<MouseCursor>(SystemMouseCursors.contextMenu),
+      tabAlignment: TabAlignment.center,
+      textScaler: TextScaler.noScaling,
+      indicatorAnimation: TabIndicatorAnimation.elastic,
+    ).debugFillProperties(builder);
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode n) => n.toString())
+        .toList();
+    expect(description, <String>[
+      'indicator: BoxDecoration(color: ${const Color(0xff00ff00)})',
+      'indicatorColor: MaterialColor(primary value: ${const Color(0xfff44336)})',
+      'indicatorSize: TabBarIndicatorSize.label',
+      'dividerColor: ${const Color(0xff000001)}',
+      'dividerHeight: 20.5',
+      'labelColor: ${const Color(0xff000002)}',
+      'labelPadding: EdgeInsets.all(20.0)',
+      'labelStyle: TextStyle(inherit: true, color: MaterialColor(primary value: ${const Color(0xffffc107)}))',
+      'unselectedLabelColor: ${const Color(0xff654321)}',
+      'unselectedLabelStyle: TextStyle(inherit: true, color: MaterialColor(primary value: ${const Color(0xff2196f3)}))',
+      'overlayColor: WidgetStatePropertyAll(MaterialColor(primary value: ${const Color(0xffffeb3b)}))',
+      'mouseCursor: WidgetStatePropertyAll(SystemMouseCursor(contextMenu))',
+      'tabAlignment: TabAlignment.center',
+      'textScaler: no scaling',
+      'indicatorAnimation: TabIndicatorAnimation.elastic',
+    ]);
+  });
+
+  testWidgets('Local TabBarTheme overrides defaults', (WidgetTester tester) async {
+    const Color indicatorColor = Colors.green;
+    const dividerColor = Color(0xff000001);
+    const dividerHeight = 20.5;
+    const labelColor = Color(0xff000002);
+    const labelStyle = TextStyle(fontSize: 32.0);
+    const unselectedLabelColor = Color(0xff654321);
+    const unselectedLabelStyle = TextStyle(fontWeight: FontWeight.bold);
+
+    const tabBarTheme = TabBarThemeData(
+      indicatorColor: indicatorColor,
+      dividerColor: dividerColor,
+      dividerHeight: dividerHeight,
+      labelColor: labelColor,
+      labelStyle: labelStyle,
+      unselectedLabelColor: unselectedLabelColor,
+      unselectedLabelStyle: unselectedLabelStyle,
+    );
+
+    // Test default label color and label styles.
+    await tester.pumpWidget(buildTabBar(useMaterial3: true, localTabBarTheme: tabBarTheme));
+
+    final RenderParagraph selectedLabel = _getText(tester, _tab1Text);
+    expect(selectedLabel.text.style!.color, labelColor);
+    expect(selectedLabel.text.style!.fontSize, 32.0);
+    final RenderParagraph unselectedLabel = _getText(tester, _tab2Text);
+    expect(unselectedLabel.text.style!.color, unselectedLabelColor);
+    expect(unselectedLabel.text.style!.fontWeight, FontWeight.bold);
+
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    expect(
+      tabBarBox,
+      paints
+        ..line(color: dividerColor, strokeWidth: dividerHeight)
+        ..rrect(color: indicatorColor),
+    );
   });
 
   testWidgets('Tab bar defaults (primary)', (WidgetTester tester) async {
     // Test default label color and label styles.
     await tester.pumpWidget(buildTabBar(useMaterial3: true));
 
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final theme = ThemeData();
     final RenderParagraph selectedLabel = _getText(tester, _tab1Text);
     expect(selectedLabel.text.style!.fontFamily, equals(theme.textTheme.titleSmall!.fontFamily));
     expect(selectedLabel.text.style!.fontSize, equals(14.0));
@@ -127,11 +222,11 @@ void main() {
     // Test default labelPadding.
     await tester.pumpWidget(buildTabBar(tabs: _sizedTabs, isScrollable: true));
 
-    const double indicatorWeight = 2.0;
+    const indicatorWeight = 2.0;
     final Rect tabBar = tester.getRect(find.byType(TabBar));
     final Rect tabOneRect = tester.getRect(find.byKey(_sizedTabs[0].key!));
     final Rect tabTwoRect = tester.getRect(find.byKey(_sizedTabs[1].key!));
-    const double tabStartOffset = 52.0;
+    const tabStartOffset = 52.0;
 
     // Verify tabOne coordinates.
     expect(tabOneRect.left, equals(kTabLabelPadding.left + tabStartOffset));
@@ -139,24 +234,28 @@ void main() {
     expect(tabOneRect.bottom, equals(tabBar.bottom - kTabLabelPadding.bottom - indicatorWeight));
 
     // Verify tabTwo coordinates.
-    final double tabTwoRight = tabStartOffset + kTabLabelPadding.horizontal + tabOneRect.width
-      + kTabLabelPadding.left + tabTwoRect.width;
+    final double tabTwoRight =
+        tabStartOffset +
+        kTabLabelPadding.horizontal +
+        tabOneRect.width +
+        kTabLabelPadding.left +
+        tabTwoRect.width;
     expect(tabTwoRect.right, tabTwoRight);
     expect(tabTwoRect.top, equals(kTabLabelPadding.top));
     expect(tabTwoRect.bottom, equals(tabBar.bottom - kTabLabelPadding.bottom - indicatorWeight));
 
     // Verify tabOne and tabTwo are separated by right padding of tabOne and left padding of tabTwo.
-    expect(tabOneRect.right, equals(tabTwoRect.left - kTabLabelPadding.left - kTabLabelPadding.right));
+    expect(
+      tabOneRect.right,
+      equals(tabTwoRect.left - kTabLabelPadding.left - kTabLabelPadding.right),
+    );
 
     // Test default indicator & divider color.
     final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
     expect(
       tabBarBox,
       paints
-        ..line(
-          color: theme.colorScheme.outlineVariant,
-          strokeWidth: 1.0,
-        )
+        ..line(color: theme.colorScheme.outlineVariant, strokeWidth: 1.0)
         ..rrect(color: theme.colorScheme.primary),
     );
   });
@@ -165,7 +264,7 @@ void main() {
     // Test default label color and label styles.
     await tester.pumpWidget(buildTabBar(secondaryTabBar: true, useMaterial3: true));
 
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final theme = ThemeData();
     final RenderParagraph selectedLabel = _getText(tester, _tab1Text);
     expect(selectedLabel.text.style!.fontFamily, equals(theme.textTheme.titleSmall!.fontFamily));
     expect(selectedLabel.text.style!.fontSize, equals(14.0));
@@ -176,18 +275,15 @@ void main() {
     expect(unselectedLabel.text.style!.color, equals(theme.colorScheme.onSurfaceVariant));
 
     // Test default labelPadding.
-    await tester.pumpWidget(buildTabBar(
-      secondaryTabBar: true,
-      tabs: _sizedTabs,
-      isScrollable: true,
-      useMaterial3: true,
-    ));
+    await tester.pumpWidget(
+      buildTabBar(secondaryTabBar: true, tabs: _sizedTabs, isScrollable: true, useMaterial3: true),
+    );
 
-    const double indicatorWeight = 2.0;
+    const indicatorWeight = 2.0;
     final Rect tabBar = tester.getRect(find.byType(TabBar));
     final Rect tabOneRect = tester.getRect(find.byKey(_sizedTabs[0].key!));
     final Rect tabTwoRect = tester.getRect(find.byKey(_sizedTabs[1].key!));
-    const double tabStartOffset = 52.0;
+    const tabStartOffset = 52.0;
 
     // Verify tabOne coordinates.
     expect(tabOneRect.left, equals(kTabLabelPadding.left + tabStartOffset));
@@ -195,31 +291,35 @@ void main() {
     expect(tabOneRect.bottom, equals(tabBar.bottom - kTabLabelPadding.bottom - indicatorWeight));
 
     // Verify tabTwo coordinates.
-    final double tabTwoRight = tabStartOffset + kTabLabelPadding.horizontal + tabOneRect.width
-      + kTabLabelPadding.left + tabTwoRect.width;
+    final double tabTwoRight =
+        tabStartOffset +
+        kTabLabelPadding.horizontal +
+        tabOneRect.width +
+        kTabLabelPadding.left +
+        tabTwoRect.width;
     expect(tabTwoRect.right, tabTwoRight);
     expect(tabTwoRect.top, equals(kTabLabelPadding.top));
     expect(tabTwoRect.bottom, equals(tabBar.bottom - kTabLabelPadding.bottom - indicatorWeight));
 
     // Verify tabOne and tabTwo are separated by right padding of tabOne and left padding of tabTwo.
-    expect(tabOneRect.right, equals(tabTwoRect.left - kTabLabelPadding.left - kTabLabelPadding.right));
+    expect(
+      tabOneRect.right,
+      equals(tabTwoRect.left - kTabLabelPadding.left - kTabLabelPadding.right),
+    );
 
     // Test default indicator & divider color.
     final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
     expect(
       tabBarBox,
       paints
-        ..line(
-          color: theme.colorScheme.outlineVariant,
-          strokeWidth: 1.0,
-        )
+        ..line(color: theme.colorScheme.outlineVariant, strokeWidth: 1.0)
         ..line(color: theme.colorScheme.primary),
-      );
+    );
   });
 
   testWidgets('Tab bar theme overrides label color (selected)', (WidgetTester tester) async {
     const Color labelColor = Colors.black;
-    const TabBarTheme tabBarTheme = TabBarTheme(labelColor: labelColor);
+    const tabBarTheme = TabBarThemeData(labelColor: labelColor);
 
     await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme));
 
@@ -230,23 +330,24 @@ void main() {
   });
 
   testWidgets('Tab bar theme overrides label padding', (WidgetTester tester) async {
-    const double topPadding = 10.0;
-    const double bottomPadding = 7.0;
-    const double rightPadding = 13.0;
-    const double leftPadding = 16.0;
-    const double indicatorWeight = 2.0; // default value
+    const topPadding = 10.0;
+    const bottomPadding = 7.0;
+    const rightPadding = 13.0;
+    const leftPadding = 16.0;
+    const indicatorWeight = 2.0; // default value
 
     const EdgeInsetsGeometry labelPadding = EdgeInsets.fromLTRB(
-      leftPadding, topPadding, rightPadding, bottomPadding,
+      leftPadding,
+      topPadding,
+      rightPadding,
+      bottomPadding,
     );
 
-    const TabBarTheme tabBarTheme = TabBarTheme(labelPadding: labelPadding);
+    const tabBarTheme = TabBarThemeData(labelPadding: labelPadding);
 
-    await tester.pumpWidget(buildTabBar(
-      tabBarTheme: tabBarTheme,
-      tabs: _sizedTabs,
-      isScrollable: true,
-    ));
+    await tester.pumpWidget(
+      buildTabBar(tabBarTheme: tabBarTheme, tabs: _sizedTabs, isScrollable: true),
+    );
 
     final Rect tabBar = tester.getRect(find.byType(TabBar));
     final Rect tabOneRect = tester.getRect(find.byKey(_sizedTabs[0].key!));
@@ -267,9 +368,9 @@ void main() {
   });
 
   testWidgets('Tab bar theme overrides label styles', (WidgetTester tester) async {
-    const TextStyle labelStyle = TextStyle(fontFamily: 'foobar');
-    const TextStyle unselectedLabelStyle = TextStyle(fontFamily: 'baz');
-    const TabBarTheme tabBarTheme = TabBarTheme(
+    const labelStyle = TextStyle(fontFamily: 'foobar');
+    const unselectedLabelStyle = TextStyle(fontFamily: 'baz');
+    const tabBarTheme = TabBarThemeData(
       labelStyle: labelStyle,
       unselectedLabelStyle: unselectedLabelStyle,
     );
@@ -284,10 +385,8 @@ void main() {
 
   testWidgets('Tab bar theme with just label style specified', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/28784
-    const TextStyle labelStyle = TextStyle(fontFamily: 'foobar');
-    const TabBarTheme tabBarTheme = TabBarTheme(
-      labelStyle: labelStyle,
-    );
+    const labelStyle = TextStyle(fontFamily: 'foobar');
+    const tabBarTheme = TabBarThemeData(labelStyle: labelStyle);
 
     await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme));
 
@@ -300,18 +399,15 @@ void main() {
   });
 
   testWidgets('Tab bar label styles override theme label styles', (WidgetTester tester) async {
-    const TextStyle labelStyle = TextStyle(fontFamily: '1');
-    const TextStyle unselectedLabelStyle = TextStyle(fontFamily: '2');
-    const TextStyle themeLabelStyle = TextStyle(fontFamily: '3');
-    const TextStyle themeUnselectedLabelStyle = TextStyle(fontFamily: '4');
-    const TabBarTheme tabBarTheme = TabBarTheme(
+    const labelStyle = TextStyle(fontFamily: '1');
+    const unselectedLabelStyle = TextStyle(fontFamily: '2');
+    const themeLabelStyle = TextStyle(fontFamily: '3');
+    const themeUnselectedLabelStyle = TextStyle(fontFamily: '4');
+    const tabBarTheme = TabBarThemeData(
       labelStyle: themeLabelStyle,
       unselectedLabelStyle: themeUnselectedLabelStyle,
     );
-    final TabController controller = TabController(
-      length: _tabs.length,
-      vsync: const TestVSync(),
-    );
+    final controller = TabController(length: _tabs.length, vsync: const TestVSync());
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -334,36 +430,35 @@ void main() {
     expect(unselectedLabel.text.style!.fontFamily, equals(unselectedLabelStyle.fontFamily));
   });
 
-  testWidgets('Material2 - Tab bar label padding overrides theme label padding', (WidgetTester tester) async {
-    const double verticalPadding = 10.0;
-    const double horizontalPadding = 10.0;
+  testWidgets('Material2 - Tab bar label padding overrides theme label padding', (
+    WidgetTester tester,
+  ) async {
+    const verticalPadding = 10.0;
+    const horizontalPadding = 10.0;
     const EdgeInsetsGeometry labelPadding = EdgeInsets.symmetric(
       vertical: verticalPadding,
       horizontal: horizontalPadding,
     );
 
-    const double verticalThemePadding = 20.0;
-    const double horizontalThemePadding = 20.0;
+    const verticalThemePadding = 20.0;
+    const horizontalThemePadding = 20.0;
     const EdgeInsetsGeometry themeLabelPadding = EdgeInsets.symmetric(
       vertical: verticalThemePadding,
       horizontal: horizontalThemePadding,
     );
 
-    const double indicatorWeight = 2.0; // default value
+    const indicatorWeight = 2.0; // default value
 
-    const TabBarTheme tabBarTheme = TabBarTheme(labelPadding: themeLabelPadding);
+    const tabBarTheme = TabBarThemeData(labelPadding: themeLabelPadding);
 
-    final TabController controller = TabController(
-      length: _sizedTabs.length,
-      vsync: const TestVSync(),
-    );
+    final controller = TabController(length: _sizedTabs.length, vsync: const TestVSync());
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(tabBarTheme: tabBarTheme, useMaterial3: false),
-        home: Scaffold(body:
-          RepaintBoundary(
+        home: Scaffold(
+          body: RepaintBoundary(
             key: _painterKey,
             child: TabBar(
               tabs: _sizedTabs,
@@ -394,37 +489,36 @@ void main() {
     expect(tabOneRect.right, equals(tabTwoRect.left - (2 * horizontalPadding)));
   });
 
-  testWidgets('Material3 - Tab bar label padding overrides theme label padding', (WidgetTester tester) async {
-    const double tabStartOffset = 52.0;
-    const double verticalPadding = 10.0;
-    const double horizontalPadding = 10.0;
+  testWidgets('Material3 - Tab bar label padding overrides theme label padding', (
+    WidgetTester tester,
+  ) async {
+    const tabStartOffset = 52.0;
+    const verticalPadding = 10.0;
+    const horizontalPadding = 10.0;
     const EdgeInsetsGeometry labelPadding = EdgeInsets.symmetric(
       vertical: verticalPadding,
       horizontal: horizontalPadding,
     );
 
-    const double verticalThemePadding = 20.0;
-    const double horizontalThemePadding = 20.0;
+    const verticalThemePadding = 20.0;
+    const horizontalThemePadding = 20.0;
     const EdgeInsetsGeometry themeLabelPadding = EdgeInsets.symmetric(
       vertical: verticalThemePadding,
       horizontal: horizontalThemePadding,
     );
 
-    const double indicatorWeight = 2.0; // default value
+    const indicatorWeight = 2.0; // default value
 
-    const TabBarTheme tabBarTheme = TabBarTheme(labelPadding: themeLabelPadding);
+    const tabBarTheme = TabBarThemeData(labelPadding: themeLabelPadding);
 
-    final TabController controller = TabController(
-      length: _sizedTabs.length,
-      vsync: const TestVSync(),
-    );
+    final controller = TabController(length: _sizedTabs.length, vsync: const TestVSync());
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(tabBarTheme: tabBarTheme, useMaterial3: true),
-        home: Scaffold(body:
-          RepaintBoundary(
+        theme: ThemeData(tabBarTheme: tabBarTheme),
+        home: Scaffold(
+          body: RepaintBoundary(
             key: _painterKey,
             child: TabBar(
               tabs: _sizedTabs,
@@ -447,7 +541,16 @@ void main() {
     expect(tabOneRect.bottom, equals(tabBar.bottom - verticalPadding - indicatorWeight));
 
     // verify coordinates of tabTwo
-    expect(tabTwoRect.right, equals(tabStartOffset + horizontalThemePadding + tabOneRect.width + tabTwoRect.width + (horizontalThemePadding / 2)));
+    expect(
+      tabTwoRect.right,
+      equals(
+        tabStartOffset +
+            horizontalThemePadding +
+            tabOneRect.width +
+            tabTwoRect.width +
+            (horizontalThemePadding / 2),
+      ),
+    );
     expect(tabTwoRect.top, equals(verticalPadding));
     expect(tabTwoRect.bottom, equals(tabBar.bottom - verticalPadding - indicatorWeight));
 
@@ -457,11 +560,13 @@ void main() {
 
   testWidgets('Tab bar theme overrides label color (unselected)', (WidgetTester tester) async {
     const Color unselectedLabelColor = Colors.black;
-    const TabBarTheme tabBarTheme = TabBarTheme(unselectedLabelColor: unselectedLabelColor);
+    const tabBarTheme = TabBarThemeData(unselectedLabelColor: unselectedLabelColor);
 
     await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme));
 
-    final RenderParagraph textRenderObject = tester.renderObject<RenderParagraph>(find.text(_tab2Text));
+    final RenderParagraph textRenderObject = tester.renderObject<RenderParagraph>(
+      find.text(_tab2Text),
+    );
     expect(textRenderObject.text.style!.color, equals(unselectedLabelColor));
     final RenderParagraph iconRenderObject = _getIcon(tester, Icons.looks_two);
     expect(iconRenderObject.text.style!.color, equals(unselectedLabelColor));
@@ -486,7 +591,7 @@ void main() {
   });
 
   testWidgets('Tab bar theme overrides tab indicator size (tab)', (WidgetTester tester) async {
-    const TabBarTheme tabBarTheme = TabBarTheme(indicatorSize: TabBarIndicatorSize.tab);
+    const tabBarTheme = TabBarThemeData(indicatorSize: TabBarIndicatorSize.tab);
 
     await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme));
 
@@ -497,7 +602,7 @@ void main() {
   });
 
   testWidgets('Tab bar theme overrides tab indicator size (label)', (WidgetTester tester) async {
-    const TabBarTheme tabBarTheme = TabBarTheme(indicatorSize: TabBarIndicatorSize.label);
+    const tabBarTheme = TabBarThemeData(indicatorSize: TabBarIndicatorSize.label);
 
     await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme));
 
@@ -508,26 +613,25 @@ void main() {
   });
 
   testWidgets('Tab bar theme overrides tab mouse cursor', (WidgetTester tester) async {
-    const TabBarTheme tabBarTheme = TabBarTheme(mouseCursor: MaterialStateMouseCursor.textable);
+    const tabBarTheme = TabBarThemeData(mouseCursor: WidgetStateMouseCursor.textable);
 
     await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme));
 
     final Offset tabBar = tester.getCenter(
-      find.ancestor(of: find.text('tab 1'),matching: find.byType(TabBar)),
+      find.ancestor(of: find.text('tab 1'), matching: find.byType(TabBar)),
     );
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     await gesture.moveTo(tabBar);
     await tester.pumpAndSettle();
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.text,
+    );
   });
 
   testWidgets('Tab bar theme - custom tab indicator', (WidgetTester tester) async {
-    final TabBarTheme tabBarTheme = TabBarTheme(
-      indicator: BoxDecoration(
-        border: Border.all(),
-      ),
-    );
+    final tabBarTheme = TabBarThemeData(indicator: BoxDecoration(border: Border.all()));
 
     await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme));
 
@@ -538,7 +642,7 @@ void main() {
   });
 
   testWidgets('Tab bar theme - beveled rect indicator', (WidgetTester tester) async {
-    const TabBarTheme tabBarTheme = TabBarTheme(
+    const tabBarTheme = TabBarThemeData(
       indicator: ShapeDecoration(
         shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20.0))),
         color: Colors.black,
@@ -553,8 +657,10 @@ void main() {
     );
   });
 
-  testWidgets('TabAlignment.fill from TabBarTheme only supports non-scrollable tab bar', (WidgetTester tester) async {
-    const TabBarTheme tabBarTheme = TabBarTheme(tabAlignment: TabAlignment.fill);
+  testWidgets('TabAlignment.fill from TabBarTheme only supports non-scrollable tab bar', (
+    WidgetTester tester,
+  ) async {
+    const tabBarTheme = TabBarThemeData(tabAlignment: TabAlignment.fill);
 
     // Test TabAlignment.fill from TabBarTheme with non-scrollable tab bar.
     await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme));
@@ -570,7 +676,7 @@ void main() {
   testWidgets(
     'TabAlignment.start & TabAlignment.startOffset from TabBarTheme only supports scrollable tab bar',
     (WidgetTester tester) async {
-      TabBarTheme tabBarTheme = const TabBarTheme(tabAlignment: TabAlignment.start);
+      var tabBarTheme = const TabBarThemeData(tabAlignment: TabAlignment.start);
 
       // Test TabAlignment.start from TabBarTheme with scrollable tab bar.
       await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme, isScrollable: true));
@@ -582,7 +688,7 @@ void main() {
 
       expect(tester.takeException(), isAssertionError);
 
-      tabBarTheme = const TabBarTheme(tabAlignment: TabAlignment.startOffset);
+      tabBarTheme = const TabBarThemeData(tabAlignment: TabAlignment.startOffset);
 
       // Test TabAlignment.startOffset from TabBarTheme with scrollable tab bar.
       await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme, isScrollable: true));
@@ -593,21 +699,20 @@ void main() {
       await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme));
 
       expect(tester.takeException(), isAssertionError);
-  });
+    },
+  );
 
-  testWidgets('TabBarTheme.indicatorSize provides correct tab indicator (primary)', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(
-      tabBarTheme: const TabBarTheme(indicatorSize: TabBarIndicatorSize.tab),
-      useMaterial3: true,
+  testWidgets('TabBarTheme.indicatorSize provides correct tab indicator (primary)', (
+    WidgetTester tester,
+  ) async {
+    final theme = ThemeData(
+      tabBarTheme: const TabBarThemeData(indicatorSize: TabBarIndicatorSize.tab),
     );
-    final List<Widget> tabs = List<Widget>.generate(4, (int index) {
+    final tabs = List<Widget>.generate(4, (int index) {
       return Tab(text: 'Tab $index');
     });
 
-    final TabController controller = TabController(
-      vsync: const TestVSync(),
-      length: tabs.length,
-    );
+    final controller = TabController(vsync: const TestVSync(), length: tabs.length);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -616,10 +721,7 @@ void main() {
         home: Scaffold(
           body: Container(
             alignment: Alignment.topLeft,
-            child: TabBar(
-              controller: controller,
-              tabs: tabs,
-            ),
+            child: TabBar(controller: controller, tabs: tabs),
           ),
         ),
       ),
@@ -628,19 +730,16 @@ void main() {
     final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
     expect(tabBarBox.size.height, 48.0);
 
-    const double indicatorWeight = 2.0;
+    const indicatorWeight = 2.0;
     const double indicatorY = 48 - (indicatorWeight / 2.0);
-    const double indicatorLeft =  indicatorWeight / 2.0;
+    const double indicatorLeft = indicatorWeight / 2.0;
     const double indicatorRight = 200.0 - (indicatorWeight / 2.0);
 
     expect(
       tabBarBox,
       paints
         // Divider.
-        ..line(
-          color: theme.colorScheme.outlineVariant,
-          strokeWidth: 1.0,
-        )
+        ..line(color: theme.colorScheme.outlineVariant, strokeWidth: 1.0)
         // Tab indicator.
         ..line(
           color: theme.colorScheme.primary,
@@ -651,19 +750,17 @@ void main() {
     );
   });
 
-  testWidgets('TabBarTheme.indicatorSize provides correct tab indicator (secondary)', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(
-      tabBarTheme: const TabBarTheme(indicatorSize: TabBarIndicatorSize.label),
-      useMaterial3: true,
+  testWidgets('TabBarTheme.indicatorSize provides correct tab indicator (secondary)', (
+    WidgetTester tester,
+  ) async {
+    final theme = ThemeData(
+      tabBarTheme: const TabBarThemeData(indicatorSize: TabBarIndicatorSize.label),
     );
-    final List<Widget> tabs = List<Widget>.generate(4, (int index) {
+    final tabs = List<Widget>.generate(4, (int index) {
       return Tab(text: 'Tab $index');
     });
 
-    final TabController controller = TabController(
-      vsync: const TestVSync(),
-      length: tabs.length,
-    );
+    final controller = TabController(vsync: const TestVSync(), length: tabs.length);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -672,10 +769,7 @@ void main() {
         home: Scaffold(
           body: Container(
             alignment: Alignment.topLeft,
-            child: TabBar.secondary(
-              controller: controller,
-              tabs: tabs,
-            ),
+            child: TabBar.secondary(controller: controller, tabs: tabs),
           ),
         ),
       ),
@@ -684,17 +778,14 @@ void main() {
     final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
     expect(tabBarBox.size.height, 48.0);
 
-    const double indicatorWeight = 2.0;
+    const indicatorWeight = 2.0;
     const double indicatorY = 48 - (indicatorWeight / 2.0);
 
     expect(
       tabBarBox,
       paints
         // Divider.
-        ..line(
-          color: theme.colorScheme.outlineVariant,
-          strokeWidth: 1.0,
-        )
+        ..line(color: theme.colorScheme.outlineVariant, strokeWidth: 1.0)
         // Tab indicator
         ..line(
           color: theme.colorScheme.primary,
@@ -705,24 +796,22 @@ void main() {
     );
   });
 
-  testWidgets('TabBar divider can use TabBarTheme.dividerColor & TabBarTheme.dividerHeight', (WidgetTester tester) async {
-    const Color dividerColor = Color(0xff00ff00);
-    const double dividerHeight = 10.0;
+  testWidgets('TabBar divider can use TabBarTheme.dividerColor & TabBarTheme.dividerHeight', (
+    WidgetTester tester,
+  ) async {
+    const dividerColor = Color(0xff00ff00);
+    const dividerHeight = 10.0;
 
-    final TabController controller = TabController(
-      length: 3,
-      vsync: const TestVSync(),
-    );
+    final controller = TabController(length: 3, vsync: const TestVSync());
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          tabBarTheme: const TabBarTheme(
+          tabBarTheme: const TabBarThemeData(
             dividerColor: dividerColor,
             dividerHeight: dividerHeight,
           ),
-          useMaterial3: true,
         ),
         home: Scaffold(
           appBar: AppBar(
@@ -744,24 +833,19 @@ void main() {
     expect(tabBarBox, paints..line(color: dividerColor, strokeWidth: dividerHeight));
   });
 
-  testWidgets('dividerColor & dividerHeight overrides TabBarTheme.dividerColor', (WidgetTester tester) async {
-    const Color dividerColor = Color(0xff0000ff);
-    const double dividerHeight = 8.0;
+  testWidgets('dividerColor & dividerHeight overrides TabBarTheme.dividerColor', (
+    WidgetTester tester,
+  ) async {
+    const dividerColor = Color(0xff0000ff);
+    const dividerHeight = 8.0;
 
-    final TabController controller = TabController(
-      length: 3,
-      vsync: const TestVSync(),
-    );
+    final controller = TabController(length: 3, vsync: const TestVSync());
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          useMaterial3: true,
-          tabBarTheme: const TabBarTheme(
-            dividerColor: Colors.pink,
-            dividerHeight: 5.0,
-          ),
+          tabBarTheme: const TabBarThemeData(dividerColor: Colors.pink, dividerHeight: 5.0),
         ),
         home: Scaffold(
           appBar: AppBar(
@@ -786,19 +870,13 @@ void main() {
   });
 
   testWidgets('TabBar respects TabBarTheme.tabAlignment', (WidgetTester tester) async {
-    final TabController controller1 = TabController(
-      length: 2,
-      vsync: const TestVSync(),
-    );
+    final controller1 = TabController(length: 2, vsync: const TestVSync());
     addTearDown(controller1.dispose);
 
     // Test non-scrollable tab bar.
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          tabBarTheme: const TabBarTheme(tabAlignment: TabAlignment.center),
-          useMaterial3: true,
-        ),
+        theme: ThemeData(tabBarTheme: const TabBarThemeData(tabAlignment: TabAlignment.center)),
         home: Scaffold(
           appBar: AppBar(
             bottom: TabBar(
@@ -813,7 +891,7 @@ void main() {
       ),
     );
 
-    const double availableWidth = 800.0;
+    const availableWidth = 800.0;
     Rect tabOneRect = tester.getRect(find.byType(Tab).first);
     Rect tabTwoRect = tester.getRect(find.byType(Tab).last);
 
@@ -822,19 +900,13 @@ void main() {
     double tabTwoRight = (availableWidth / 2) + tabTwoRect.width + kTabLabelPadding.right;
     expect(tabTwoRect.right, equals(tabTwoRight));
 
-    final TabController controller2 = TabController(
-      length: 2,
-      vsync: const TestVSync(),
-    );
+    final controller2 = TabController(length: 2, vsync: const TestVSync());
     addTearDown(controller2.dispose);
 
     // Test scrollable tab bar.
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          tabBarTheme: const TabBarTheme(tabAlignment: TabAlignment.start),
-          useMaterial3: true,
-        ),
+        theme: ThemeData(tabBarTheme: const TabBarThemeData(tabAlignment: TabAlignment.start)),
         home: Scaffold(
           appBar: AppBar(
             bottom: TabBar(
@@ -856,24 +928,21 @@ void main() {
 
     tabOneLeft = kTabLabelPadding.left;
     expect(tabOneRect.left, equals(tabOneLeft));
-    tabTwoRight = kTabLabelPadding.horizontal + tabOneRect.width + kTabLabelPadding.left + tabTwoRect.width;
+    tabTwoRight =
+        kTabLabelPadding.horizontal + tabOneRect.width + kTabLabelPadding.left + tabTwoRect.width;
     expect(tabTwoRect.right, equals(tabTwoRight));
   });
 
-  testWidgets('TabBar.tabAlignment overrides TabBarTheme.tabAlignment', (WidgetTester tester) async {
-    final TabController controller1 = TabController(
-      length: 2,
-      vsync: const TestVSync(),
-    );
+  testWidgets('TabBar.tabAlignment overrides TabBarTheme.tabAlignment', (
+    WidgetTester tester,
+  ) async {
+    final controller1 = TabController(length: 2, vsync: const TestVSync());
     addTearDown(controller1.dispose);
 
     /// Test non-scrollable tab bar.
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          tabBarTheme: const TabBarTheme(tabAlignment: TabAlignment.fill),
-          useMaterial3: true,
-        ),
+        theme: ThemeData(tabBarTheme: const TabBarThemeData(tabAlignment: TabAlignment.fill)),
         home: Scaffold(
           appBar: AppBar(
             bottom: TabBar(
@@ -889,7 +958,7 @@ void main() {
       ),
     );
 
-    const double availableWidth = 800.0;
+    const availableWidth = 800.0;
     Rect tabOneRect = tester.getRect(find.byType(Tab).first);
     Rect tabTwoRect = tester.getRect(find.byType(Tab).last);
 
@@ -898,19 +967,13 @@ void main() {
     double tabTwoRight = (availableWidth / 2) + tabTwoRect.width + kTabLabelPadding.right;
     expect(tabTwoRect.right, equals(tabTwoRight));
 
-    final TabController controller2 = TabController(
-      length: 2,
-      vsync: const TestVSync(),
-    );
+    final controller2 = TabController(length: 2, vsync: const TestVSync());
     addTearDown(controller2.dispose);
 
     /// Test scrollable tab bar.
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          tabBarTheme: const TabBarTheme(tabAlignment: TabAlignment.center),
-          useMaterial3: true,
-        ),
+        theme: ThemeData(tabBarTheme: const TabBarThemeData(tabAlignment: TabAlignment.center)),
         home: Scaffold(
           appBar: AppBar(
             bottom: TabBar(
@@ -933,22 +996,17 @@ void main() {
 
     tabOneLeft = kTabLabelPadding.left;
     expect(tabOneRect.left, equals(tabOneLeft));
-    tabTwoRight = kTabLabelPadding.horizontal + tabOneRect.width + kTabLabelPadding.left + tabTwoRect.width;
+    tabTwoRight =
+        kTabLabelPadding.horizontal + tabOneRect.width + kTabLabelPadding.left + tabTwoRect.width;
     expect(tabTwoRect.right, equals(tabTwoRight));
   });
 
   testWidgets(
     'TabBar labels use colors from TabBarTheme.labelStyle & TabBarTheme.unselectedLabelStyle',
     (WidgetTester tester) async {
-      const TextStyle labelStyle = TextStyle(
-        color: Color(0xff0000ff),
-        fontStyle: FontStyle.italic,
-      );
-      const TextStyle unselectedLabelStyle = TextStyle(
-        color: Color(0x950000ff),
-        fontStyle: FontStyle.italic,
-      );
-      const TabBarTheme tabBarTheme = TabBarTheme(
+      const labelStyle = TextStyle(color: Color(0xff0000ff), fontStyle: FontStyle.italic);
+      const unselectedLabelStyle = TextStyle(color: Color(0x950000ff), fontStyle: FontStyle.italic);
+      const tabBarTheme = TabBarThemeData(
         labelStyle: labelStyle,
         unselectedLabelStyle: unselectedLabelStyle,
       );
@@ -958,10 +1016,14 @@ void main() {
 
       final IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(_tab1Text)));
       final IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
-      final TextStyle selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab1Text))
-        .text.style!;
-      final TextStyle unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab2Text))
-        .text.style!;
+      final TextStyle selectedTextStyle = tester
+          .renderObject<RenderParagraph>(find.text(_tab1Text))
+          .text
+          .style!;
+      final TextStyle unselectedTextStyle = tester
+          .renderObject<RenderParagraph>(find.text(_tab2Text))
+          .text
+          .style!;
 
       // Selected tab should use labelStyle color.
       expect(selectedTabIcon.color, labelStyle.color);
@@ -971,21 +1033,17 @@ void main() {
       expect(unselectedTabIcon.color, unselectedLabelStyle.color);
       expect(unselectedTextStyle.color, unselectedLabelStyle.color);
       expect(unselectedTextStyle.fontStyle, unselectedLabelStyle.fontStyle);
-  });
+    },
+  );
 
   testWidgets(
-    "TabBarTheme's labelColor & unselectedLabelColor override labelStyle & unselectedLabelStyle colors", (WidgetTester tester) async {
-      const Color labelColor = Color(0xfff00000);
-      const Color unselectedLabelColor = Color(0x95ff0000);
-      const TextStyle labelStyle = TextStyle(
-        color: Color(0xff0000ff),
-        fontStyle: FontStyle.italic,
-      );
-      const TextStyle unselectedLabelStyle = TextStyle(
-        color: Color(0x950000ff),
-        fontStyle: FontStyle.italic,
-      );
-      TabBarTheme tabBarTheme = const TabBarTheme(
+    "TabBarTheme's labelColor & unselectedLabelColor override labelStyle & unselectedLabelStyle colors",
+    (WidgetTester tester) async {
+      const labelColor = Color(0xfff00000);
+      const unselectedLabelColor = Color(0x95ff0000);
+      const labelStyle = TextStyle(color: Color(0xff0000ff), fontStyle: FontStyle.italic);
+      const unselectedLabelStyle = TextStyle(color: Color(0x950000ff), fontStyle: FontStyle.italic);
+      var tabBarTheme = const TabBarThemeData(
         labelStyle: labelStyle,
         unselectedLabelStyle: unselectedLabelStyle,
       );
@@ -997,10 +1055,14 @@ void main() {
 
       IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(_tab1Text)));
       IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
-      TextStyle selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab1Text))
-        .text.style!;
-      TextStyle unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab2Text))
-        .text.style!;
+      TextStyle selectedTextStyle = tester
+          .renderObject<RenderParagraph>(find.text(_tab1Text))
+          .text
+          .style!;
+      TextStyle unselectedTextStyle = tester
+          .renderObject<RenderParagraph>(find.text(_tab2Text))
+          .text
+          .style!;
 
       // Selected tab should use the labelStyle color.
       expect(selectedTabIcon.color, labelStyle.color);
@@ -1012,7 +1074,7 @@ void main() {
       expect(unselectedTextStyle.fontStyle, unselectedLabelStyle.fontStyle);
 
       // Update the TabBarTheme with labelColor & unselectedLabelColor.
-      tabBarTheme = const TabBarTheme(
+      tabBarTheme = const TabBarThemeData(
         labelColor: labelColor,
         unselectedLabelColor: unselectedLabelColor,
         labelStyle: labelStyle,
@@ -1034,23 +1096,18 @@ void main() {
       expect(unselectedTabIcon.color, unselectedLabelColor);
       expect(unselectedTextStyle.color, unselectedLabelColor);
       expect(unselectedTextStyle.fontStyle, unselectedLabelStyle.fontStyle);
-  });
+    },
+  );
 
   testWidgets(
     "TabBarTheme's labelColor & unselectedLabelColor override TabBar.labelStyle & TabBar.unselectedLabelStyle colors",
     (WidgetTester tester) async {
-      const Color labelColor = Color(0xfff00000);
-      const Color unselectedLabelColor = Color(0x95ff0000);
-      const TextStyle labelStyle = TextStyle(
-        color: Color(0xff0000ff),
-        fontStyle: FontStyle.italic,
-      );
-      const TextStyle unselectedLabelStyle = TextStyle(
-        color: Color(0x950000ff),
-        fontStyle: FontStyle.italic,
-      );
+      const labelColor = Color(0xfff00000);
+      const unselectedLabelColor = Color(0x95ff0000);
+      const labelStyle = TextStyle(color: Color(0xff0000ff), fontStyle: FontStyle.italic);
+      const unselectedLabelStyle = TextStyle(color: Color(0x950000ff), fontStyle: FontStyle.italic);
 
-      Widget buildTabBar({TabBarTheme? tabBarTheme}) {
+      Widget buildTabBar({TabBarThemeData? tabBarTheme}) {
         return MaterialApp(
           theme: ThemeData(tabBarTheme: tabBarTheme),
           home: const Material(
@@ -1074,10 +1131,14 @@ void main() {
 
       IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(_tab1Text)));
       IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
-      TextStyle selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab1Text))
-        .text.style!;
-      TextStyle unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab2Text))
-        .text.style!;
+      TextStyle selectedTextStyle = tester
+          .renderObject<RenderParagraph>(find.text(_tab1Text))
+          .text
+          .style!;
+      TextStyle unselectedTextStyle = tester
+          .renderObject<RenderParagraph>(find.text(_tab2Text))
+          .text
+          .style!;
 
       // Selected tab should use the [TabBar.labelStyle] color.
       expect(selectedTabIcon.color, labelStyle.color);
@@ -1089,10 +1150,14 @@ void main() {
       expect(unselectedTextStyle.fontStyle, unselectedLabelStyle.fontStyle);
 
       // Add TabBarTheme with labelColor & unselectedLabelColor.
-      await tester.pumpWidget(buildTabBar(tabBarTheme: const TabBarTheme(
-        labelColor: labelColor,
-        unselectedLabelColor: unselectedLabelColor,
-      )));
+      await tester.pumpWidget(
+        buildTabBar(
+          tabBarTheme: const TabBarThemeData(
+            labelColor: labelColor,
+            unselectedLabelColor: unselectedLabelColor,
+          ),
+        ),
+      );
       await tester.pumpAndSettle();
 
       selectedTabIcon = IconTheme.of(tester.element(find.text(_tab1Text)));
@@ -1108,7 +1173,8 @@ void main() {
       expect(unselectedTabIcon.color, unselectedLabelColor);
       expect(unselectedTextStyle.color, unselectedLabelColor);
       expect(unselectedTextStyle.fontStyle, unselectedLabelStyle.fontStyle);
-  });
+    },
+  );
 
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
@@ -1116,10 +1182,10 @@ void main() {
     // can be deleted.
 
     testWidgets('Tab bar defaults (primary)', (WidgetTester tester) async {
-    // Test default label color and label styles.
+      // Test default label color and label styles.
       await tester.pumpWidget(buildTabBar());
 
-      final ThemeData theme = ThemeData(useMaterial3: false);
+      final theme = ThemeData(useMaterial3: false);
       final RenderParagraph selectedLabel = _getText(tester, _tab1Text);
       expect(selectedLabel.text.style!.fontFamily, equals('Roboto'));
       expect(selectedLabel.text.style!.fontSize, equals(14.0));
@@ -1132,7 +1198,7 @@ void main() {
       // Test default labelPadding.
       await tester.pumpWidget(buildTabBar(tabs: _sizedTabs, isScrollable: true));
 
-      const double indicatorWeight = 2.0;
+      const indicatorWeight = 2.0;
       final Rect tabBar = tester.getRect(find.byType(TabBar));
       final Rect tabOneRect = tester.getRect(find.byKey(_sizedTabs[0].key!));
       final Rect tabTwoRect = tester.getRect(find.byKey(_sizedTabs[1].key!));
@@ -1148,7 +1214,10 @@ void main() {
       expect(tabTwoRect.bottom, equals(tabBar.bottom - kTabLabelPadding.bottom - indicatorWeight));
 
       // Verify tabOne and tabTwo is separated by right padding of tabOne and left padding of tabTwo.
-      expect(tabOneRect.right, equals(tabTwoRect.left - kTabLabelPadding.left - kTabLabelPadding.right));
+      expect(
+        tabOneRect.right,
+        equals(tabTwoRect.left - kTabLabelPadding.left - kTabLabelPadding.right),
+      );
 
       // Test default indicator color.
       final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
@@ -1159,7 +1228,7 @@ void main() {
       // Test default label color and label styles.
       await tester.pumpWidget(buildTabBar(secondaryTabBar: true));
 
-      final ThemeData theme = ThemeData(useMaterial3: false);
+      final theme = ThemeData(useMaterial3: false);
       final RenderParagraph selectedLabel = _getText(tester, _tab1Text);
       expect(selectedLabel.text.style!.fontFamily, equals('Roboto'));
       expect(selectedLabel.text.style!.fontSize, equals(14.0));
@@ -1172,7 +1241,7 @@ void main() {
       // Test default labelPadding.
       await tester.pumpWidget(buildTabBar(tabs: _sizedTabs, isScrollable: true));
 
-      const double indicatorWeight = 2.0;
+      const indicatorWeight = 2.0;
       final Rect tabBar = tester.getRect(find.byType(TabBar));
       final Rect tabOneRect = tester.getRect(find.byKey(_sizedTabs[0].key!));
       final Rect tabTwoRect = tester.getRect(find.byKey(_sizedTabs[1].key!));
@@ -1188,7 +1257,10 @@ void main() {
       expect(tabTwoRect.bottom, equals(tabBar.bottom - kTabLabelPadding.bottom - indicatorWeight));
 
       // Verify tabOne and tabTwo are separated by right padding of tabOne and left padding of tabTwo.
-      expect(tabOneRect.right, equals(tabTwoRect.left - kTabLabelPadding.left - kTabLabelPadding.right));
+      expect(
+        tabOneRect.right,
+        equals(tabTwoRect.left - kTabLabelPadding.left - kTabLabelPadding.right),
+      );
 
       // Test default indicator color.
       final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
@@ -1204,19 +1276,18 @@ void main() {
       );
     });
 
-    testWidgets('TabBarTheme.indicatorSize provides correct tab indicator (primary)', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(
-        tabBarTheme: const TabBarTheme(indicatorSize: TabBarIndicatorSize.tab),
+    testWidgets('TabBarTheme.indicatorSize provides correct tab indicator (primary)', (
+      WidgetTester tester,
+    ) async {
+      final theme = ThemeData(
+        tabBarTheme: const TabBarThemeData(indicatorSize: TabBarIndicatorSize.tab),
         useMaterial3: false,
       );
-      final List<Widget> tabs = List<Widget>.generate(4, (int index) {
+      final tabs = List<Widget>.generate(4, (int index) {
         return Tab(text: 'Tab $index');
       });
 
-      final TabController controller = TabController(
-        vsync: const TestVSync(),
-        length: tabs.length,
-      );
+      final controller = TabController(vsync: const TestVSync(), length: tabs.length);
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -1225,10 +1296,7 @@ void main() {
           home: Scaffold(
             body: Container(
               alignment: Alignment.topLeft,
-              child: TabBar(
-                controller: controller,
-                tabs: tabs,
-              ),
+              child: TabBar(controller: controller, tabs: tabs),
             ),
           ),
         ),
@@ -1237,9 +1305,9 @@ void main() {
       final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
       expect(tabBarBox.size.height, 48.0);
 
-      const double indicatorWeight = 2.0;
+      const indicatorWeight = 2.0;
       const double indicatorY = 48 - (indicatorWeight / 2.0);
-      const double indicatorLeft =  indicatorWeight / 2.0;
+      const double indicatorLeft = indicatorWeight / 2.0;
       const double indicatorRight = 200.0 - (indicatorWeight / 2.0);
 
       expect(
@@ -1255,19 +1323,18 @@ void main() {
       );
     });
 
-    testWidgets('TabBarTheme.indicatorSize provides correct tab indicator (secondary)', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(
-        tabBarTheme: const TabBarTheme(indicatorSize: TabBarIndicatorSize.label),
+    testWidgets('TabBarTheme.indicatorSize provides correct tab indicator (secondary)', (
+      WidgetTester tester,
+    ) async {
+      final theme = ThemeData(
+        tabBarTheme: const TabBarThemeData(indicatorSize: TabBarIndicatorSize.label),
         useMaterial3: false,
       );
-      final List<Widget> tabs = List<Widget>.generate(4, (int index) {
+      final tabs = List<Widget>.generate(4, (int index) {
         return Tab(text: 'Tab $index');
       });
 
-      final TabController controller = TabController(
-        vsync: const TestVSync(),
-        length: tabs.length,
-      );
+      final controller = TabController(vsync: const TestVSync(), length: tabs.length);
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -1276,10 +1343,7 @@ void main() {
           home: Scaffold(
             body: Container(
               alignment: Alignment.topLeft,
-              child: TabBar.secondary(
-                controller: controller,
-                tabs: tabs,
-              ),
+              child: TabBar.secondary(controller: controller, tabs: tabs),
             ),
           ),
         ),
@@ -1288,7 +1352,7 @@ void main() {
       final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
       expect(tabBarBox.size.height, 48.0);
 
-      const double indicatorWeight = 2.0;
+      const indicatorWeight = 2.0;
       const double indicatorY = 48 - (indicatorWeight / 2.0);
 
       expect(
@@ -1305,17 +1369,14 @@ void main() {
     });
 
     testWidgets('TabBar respects TabBarTheme.tabAlignment', (WidgetTester tester) async {
-      final TabController controller = TabController(
-        length: 2,
-        vsync: const TestVSync(),
-      );
+      final controller = TabController(length: 2, vsync: const TestVSync());
       addTearDown(controller.dispose);
 
       // Test non-scrollable tab bar.
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
-            tabBarTheme: const TabBarTheme(tabAlignment: TabAlignment.center),
+            tabBarTheme: const TabBarThemeData(tabAlignment: TabAlignment.center),
             useMaterial3: false,
           ),
           home: Scaffold(
@@ -1341,18 +1402,17 @@ void main() {
       expect(tabTwoRect.right, equals(tabTwoRight));
     });
 
-    testWidgets('TabBar.tabAlignment overrides TabBarTheme.tabAlignment', (WidgetTester tester) async {
-      final TabController controller = TabController(
-        length: 2,
-        vsync: const TestVSync(),
-      );
+    testWidgets('TabBar.tabAlignment overrides TabBarTheme.tabAlignment', (
+      WidgetTester tester,
+    ) async {
+      final controller = TabController(length: 2, vsync: const TestVSync());
       addTearDown(controller.dispose);
 
       // Test non-scrollable tab bar.
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
-            tabBarTheme: const TabBarTheme(tabAlignment: TabAlignment.fill),
+            tabBarTheme: const TabBarThemeData(tabAlignment: TabAlignment.fill),
             useMaterial3: false,
           ),
           home: Scaffold(
@@ -1380,113 +1440,106 @@ void main() {
     });
   });
 
-  testWidgets('Material3 - TabBar indicator respects TabBarTheme.indicatorColor', (WidgetTester tester) async {
-    final List<Widget> tabs = List<Widget>.generate(4, (int index) {
+  testWidgets('Material3 - TabBar indicator respects TabBarTheme.indicatorColor', (
+    WidgetTester tester,
+  ) async {
+    final tabs = List<Widget>.generate(4, (int index) {
       return Tab(text: 'Tab $index');
     });
 
-    final TabController controller = TabController(
-      vsync: const TestVSync(),
-      length: tabs.length,
-    );
+    final controller = TabController(vsync: const TestVSync(), length: tabs.length);
     addTearDown(controller.dispose);
 
-    const Color tabBarThemeIndicatorColor = Color(0xffff0000);
+    const tabBarThemeIndicatorColor = Color(0xffff0000);
 
-    Widget buildTabBar({ required ThemeData theme }) {
+    Widget buildTabBar({required ThemeData theme}) {
       return MaterialApp(
         theme: theme,
         home: Material(
           child: Container(
             alignment: Alignment.topLeft,
-            child: TabBar(
-              controller: controller,
-              tabs: tabs,
-            ),
+            child: TabBar(controller: controller, tabs: tabs),
           ),
         ),
       );
     }
 
-    await tester.pumpWidget(buildTabBar(theme: ThemeData(useMaterial3: true)));
+    await tester.pumpWidget(buildTabBar(theme: ThemeData()));
 
     RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
-    expect(tabBarBox,paints..rrect(color: ThemeData(useMaterial3: true).colorScheme.primary));
+    expect(tabBarBox, paints..rrect(color: ThemeData().colorScheme.primary));
 
-    await tester.pumpWidget(buildTabBar(theme: ThemeData(
-      useMaterial3: true,
-      tabBarTheme: const TabBarTheme(indicatorColor: tabBarThemeIndicatorColor)
-    )));
+    await tester.pumpWidget(
+      buildTabBar(
+        theme: ThemeData(
+          tabBarTheme: const TabBarThemeData(indicatorColor: tabBarThemeIndicatorColor),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
 
     tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
-    expect(tabBarBox,paints..rrect(color: tabBarThemeIndicatorColor));
+    expect(tabBarBox, paints..rrect(color: tabBarThemeIndicatorColor));
   });
 
-  testWidgets('Material2 - TabBar indicator respects TabBarTheme.indicatorColor', (WidgetTester tester) async {
-    final List<Widget> tabs = List<Widget>.generate(4, (int index) {
+  testWidgets('Material2 - TabBar indicator respects TabBarTheme.indicatorColor', (
+    WidgetTester tester,
+  ) async {
+    final tabs = List<Widget>.generate(4, (int index) {
       return Tab(text: 'Tab $index');
     });
 
-    final TabController controller = TabController(
-      vsync: const TestVSync(),
-      length: tabs.length,
-    );
+    final controller = TabController(vsync: const TestVSync(), length: tabs.length);
     addTearDown(controller.dispose);
 
-    const Color themeIndicatorColor = Color(0xffff0000);
-    const Color tabBarThemeIndicatorColor = Color(0xffffff00);
+    const tabBarThemeIndicatorColor = Color(0xffffff00);
 
-    Widget buildTabBar({ Color? themeIndicatorColor, Color? tabBarThemeIndicatorColor }) {
+    Widget buildTabBar({Color? tabBarThemeIndicatorColor}) {
       return MaterialApp(
         theme: ThemeData(
-          indicatorColor: themeIndicatorColor,
-          tabBarTheme: TabBarTheme(indicatorColor: tabBarThemeIndicatorColor),
+          tabBarTheme: TabBarThemeData(indicatorColor: tabBarThemeIndicatorColor),
           useMaterial3: false,
         ),
         home: Material(
           child: Container(
             alignment: Alignment.topLeft,
-            child: TabBar(
-              controller: controller,
-              tabs: tabs,
-            ),
+            child: TabBar(controller: controller, tabs: tabs),
           ),
         ),
       );
     }
 
-    await tester.pumpWidget(buildTabBar(themeIndicatorColor: themeIndicatorColor));
-
-    RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
-    expect(tabBarBox,paints..line(color: themeIndicatorColor));
-
     await tester.pumpWidget(buildTabBar(tabBarThemeIndicatorColor: tabBarThemeIndicatorColor));
-    await tester.pumpAndSettle();
 
-    tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
-    expect(tabBarBox,paints..line(color: tabBarThemeIndicatorColor));
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    expect(tabBarBox, paints..line(color: tabBarThemeIndicatorColor));
   });
 
-   testWidgets('TabBarTheme.labelColor resolves material states', (WidgetTester tester) async {
-    const Color selectedColor = Color(0xff00ff00);
-    const Color unselectedColor = Color(0xffff0000);
-    final MaterialStateColor labelColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+  testWidgets('TabBarTheme.labelColor resolves material states', (WidgetTester tester) async {
+    const selectedColor = Color(0xff00ff00);
+    const unselectedColor = Color(0xffff0000);
+    final labelColor = WidgetStateColor.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return selectedColor;
       }
       return unselectedColor;
     });
 
-    final TabBarTheme tabBarTheme = TabBarTheme(labelColor: labelColor);
+    final tabBarTheme = TabBarThemeData(labelColor: labelColor);
 
     // Test labelColor correctly resolves material states.
     await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme));
 
     final IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(_tab1Text)));
     final IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
-    final TextStyle selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab1Text)).text.style!;
-    final TextStyle unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab2Text)).text.style!;
+    final TextStyle selectedTextStyle = tester
+        .renderObject<RenderParagraph>(find.text(_tab1Text))
+        .text
+        .style!;
+    final TextStyle unselectedTextStyle = tester
+        .renderObject<RenderParagraph>(find.text(_tab2Text))
+        .text
+        .style!;
 
     expect(selectedTabIcon.color, selectedColor);
     expect(unselectedTabIcon.color, unselectedColor);
@@ -1494,28 +1547,35 @@ void main() {
     expect(unselectedTextStyle.color, unselectedColor);
   });
 
-  testWidgets('TabBarTheme.labelColor & TabBarTheme.unselectedLabelColor override material state TabBarTheme.labelColor',
+  testWidgets(
+    'TabBarTheme.labelColor & TabBarTheme.unselectedLabelColor override material state TabBarTheme.labelColor',
     (WidgetTester tester) async {
-      const Color selectedStateColor = Color(0xff00ff00);
-      const Color unselectedStateColor = Color(0xffff0000);
-      final MaterialStateColor labelColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.selected)) {
+      const selectedStateColor = Color(0xff00ff00);
+      const unselectedStateColor = Color(0xffff0000);
+      final labelColor = WidgetStateColor.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.selected)) {
           return selectedStateColor;
         }
         return unselectedStateColor;
       });
-      const Color selectedColor = Color(0xff00ffff);
-      const Color unselectedColor = Color(0xffff12ff);
+      const selectedColor = Color(0xff00ffff);
+      const unselectedColor = Color(0xffff12ff);
 
-      TabBarTheme tabBarTheme = TabBarTheme(labelColor: labelColor);
+      var tabBarTheme = TabBarThemeData(labelColor: labelColor);
 
       // Test material state label color.
       await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme));
 
       IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(_tab1Text)));
       IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
-      TextStyle selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab1Text)).text.style!;
-      TextStyle unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab2Text)).text.style!;
+      TextStyle selectedTextStyle = tester
+          .renderObject<RenderParagraph>(find.text(_tab1Text))
+          .text
+          .style!;
+      TextStyle unselectedTextStyle = tester
+          .renderObject<RenderParagraph>(find.text(_tab2Text))
+          .text
+          .style!;
 
       expect(selectedTabIcon.color, selectedStateColor);
       expect(unselectedTabIcon.color, unselectedStateColor);
@@ -1523,7 +1583,7 @@ void main() {
       expect(unselectedTextStyle.color, unselectedStateColor);
 
       // Test labelColor & unselectedLabelColor override material state labelColor.
-      tabBarTheme = const TabBarTheme(
+      tabBarTheme = const TabBarThemeData(
         labelColor: selectedColor,
         unselectedLabelColor: unselectedColor,
       );
@@ -1539,49 +1599,259 @@ void main() {
       expect(unselectedTabIcon.color, unselectedColor);
       expect(selectedTextStyle.color, selectedColor);
       expect(unselectedTextStyle.color, unselectedColor);
-  });
+    },
+  );
 
-  testWidgets('TabBarTheme.textScaler overrides tab label text scale, textScaleFactor = noScaling, 1.75, 2.0', (WidgetTester tester) async {
-    final List<String> tabs = <String>['Tab 1', 'Tab 2'];
+  testWidgets(
+    'TabBarTheme.textScaler overrides tab label text scale, textScaleFactor = noScaling, 1.75, 2.0',
+    (WidgetTester tester) async {
+      final tabs = <String>['Tab 1', 'Tab 2'];
 
-    Widget buildTabs({ TextScaler? textScaler }) {
-      return MaterialApp(
-        theme: ThemeData(
-          tabBarTheme: TabBarTheme(
-            textScaler: textScaler,
-          ),
-        ),
-        home: MediaQuery(
-          data: const MediaQueryData(textScaler: TextScaler.linear(3.0)),
-          child: DefaultTabController(
-            length: tabs.length,
-            child: Scaffold(
-              appBar: AppBar(
-                bottom: TabBar(
-                  tabs: tabs.map((String tab) => Tab(text: tab)).toList(),
+      Widget buildTabs({TextScaler? textScaler}) {
+        return MaterialApp(
+          theme: ThemeData(tabBarTheme: TabBarThemeData(textScaler: textScaler)),
+          home: MediaQuery(
+            data: const MediaQueryData(textScaler: TextScaler.linear(3.0)),
+            child: DefaultTabController(
+              length: tabs.length,
+              child: Scaffold(
+                appBar: AppBar(
+                  bottom: TabBar(tabs: tabs.map((String tab) => Tab(text: tab)).toList()),
                 ),
               ),
             ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildTabs(textScaler: TextScaler.noScaling));
+
+      Size labelSize = tester.getSize(find.text('Tab 1'));
+      expect(labelSize, equals(const Size(70.5, 20.0)));
+
+      await tester.pumpWidget(buildTabs(textScaler: const TextScaler.linear(1.75)));
+      await tester.pumpAndSettle();
+
+      labelSize = tester.getSize(find.text('Tab 1'));
+      expect(labelSize, equals(const Size(123.0, 35.0)));
+
+      await tester.pumpWidget(buildTabs(textScaler: const TextScaler.linear(2.0)));
+      await tester.pumpAndSettle();
+
+      labelSize = tester.getSize(find.text('Tab 1'));
+      expect(labelSize, equals(const Size(140.5, 40.0)));
+    },
+  );
+
+  testWidgets('TabBarTheme indicatorAnimation can customize tab indicator animation', (
+    WidgetTester tester,
+  ) async {
+    const indicatorWidth = 50.0;
+    final tabs = List<Widget>.generate(4, (int index) {
+      return Tab(
+        key: ValueKey<int>(index),
+        child: const SizedBox(width: indicatorWidth),
+      );
+    });
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Widget buildTab({TabIndicatorAnimation? indicatorAnimation}) {
+      return MaterialApp(
+        theme: ThemeData(tabBarTheme: TabBarThemeData(indicatorAnimation: indicatorAnimation)),
+        home: Material(
+          child: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar(controller: controller, tabs: tabs),
           ),
         ),
       );
     }
 
-    await tester.pumpWidget(buildTabs(textScaler: TextScaler.noScaling));
+    // Test tab indicator animation with TabIndicatorAnimation.linear.
+    await tester.pumpWidget(buildTab(indicatorAnimation: TabIndicatorAnimation.linear));
 
-    Size labelSize = tester.getSize(find.text('Tab 1'));
-    expect(labelSize, equals(const Size(70.5, 20.0)));
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
 
-    await tester.pumpWidget(buildTabs(textScaler: const TextScaler.linear(1.75)));
+    // Idle at tab 0.
+    expect(
+      tabBarBox,
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          75.0,
+          45.0,
+          125.0,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+
+    // Start moving tab indicator.
+    controller.offset = 0.2;
+    await tester.pump();
+
+    expect(
+      tabBarBox,
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          115.0,
+          45.0,
+          165.0,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+
+    // Reset tab controller offset.
+    controller.offset = 0.0;
+
+    // Test tab indicator animation with TabIndicatorAnimation.elastic.
+    await tester.pumpWidget(buildTab(indicatorAnimation: TabIndicatorAnimation.elastic));
     await tester.pumpAndSettle();
 
-    labelSize = tester.getSize(find.text('Tab 1'));
-    expect(labelSize, equals(const Size(123.0, 35.0)));
+    // Idle at tab 0.
+    const currentRect = Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
+    const fromRect = Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
+    var toRect = const Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
+    expect(
+      tabBarBox,
+      paints..rrect(
+        rrect: tabIndicatorRRectElasticAnimation(tabBarBox, currentRect, fromRect, toRect, 0.0),
+      ),
+    );
 
-    await tester.pumpWidget(buildTabs(textScaler: const TextScaler.linear(2.0)));
+    // Start moving tab indicator.
+    controller.offset = 0.2;
+    await tester.pump();
+    toRect = const Rect.fromLTRB(275.0, 0.0, 325.0, 48.0);
+    expect(
+      tabBarBox,
+      paints..rrect(
+        rrect: tabIndicatorRRectElasticAnimation(tabBarBox, currentRect, fromRect, toRect, 0.2),
+      ),
+    );
+  });
+
+  testWidgets(
+    'Tab bar inherits fontFamily from theme when labelStyle and unselectedLabelStyle are specified',
+    (WidgetTester tester) async {
+      const fontFamily = 'TestFont';
+      await tester.pumpWidget(buildTabBar(fontFamily: fontFamily));
+
+      RenderParagraph selectedLabel = _getText(tester, _tab1Text);
+      expect(selectedLabel.text.style!.fontFamily, equals(fontFamily));
+      RenderParagraph unselectedLabel = _getText(tester, _tab2Text);
+      expect(unselectedLabel.text.style!.fontFamily, equals(fontFamily));
+
+      await tester.pumpWidget(
+        buildTabBar(
+          fontFamily: fontFamily,
+          localTabBarTheme: const TabBarThemeData(
+            labelStyle: TextStyle(),
+            unselectedLabelStyle: TextStyle(),
+          ),
+        ),
+      );
+
+      selectedLabel = _getText(tester, _tab1Text);
+      expect(selectedLabel.text.style!.fontFamily, equals(fontFamily));
+      unselectedLabel = _getText(tester, _tab2Text);
+      expect(unselectedLabel.text.style!.fontFamily, equals(fontFamily));
+
+      await tester.pumpWidget(
+        buildTabBar(
+          fontFamily: fontFamily,
+          labelStyle: const TextStyle(),
+          unselectedLabelStyle: const TextStyle(),
+        ),
+      );
+
+      selectedLabel = _getText(tester, _tab1Text);
+      expect(selectedLabel.text.style!.fontFamily, equals(fontFamily));
+      unselectedLabel = _getText(tester, _tab2Text);
+      expect(unselectedLabel.text.style!.fontFamily, equals(fontFamily));
+
+      // if inherit is false, the fontFamily should not be applied
+      await tester.pumpWidget(
+        buildTabBar(
+          fontFamily: fontFamily,
+          localTabBarTheme: const TabBarThemeData(
+            labelStyle: TextStyle(inherit: false),
+            unselectedLabelStyle: TextStyle(inherit: false),
+          ),
+        ),
+      );
+
+      selectedLabel = _getText(tester, _tab1Text);
+      expect(selectedLabel.text.style!.fontFamily, isNull);
+      unselectedLabel = _getText(tester, _tab2Text);
+      expect(unselectedLabel.text.style!.fontFamily, isNull);
+
+      await tester.pumpWidget(
+        buildTabBar(
+          fontFamily: fontFamily,
+          labelStyle: const TextStyle(inherit: false),
+          unselectedLabelStyle: const TextStyle(inherit: false),
+        ),
+      );
+
+      selectedLabel = _getText(tester, _tab1Text);
+      expect(selectedLabel.text.style!.fontFamily, isNull);
+      unselectedLabel = _getText(tester, _tab2Text);
+      expect(unselectedLabel.text.style!.fontFamily, isNull);
+    },
+  );
+
+  testWidgets('TabBar inherits splashBorderRadius from theme', (WidgetTester tester) async {
+    const hoverColor = Color(0xfff44336);
+    const double radius = 20;
+    await tester.pumpWidget(
+      Material(
+        child: Localizations(
+          locale: const Locale('en', 'US'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultMaterialLocalizations.delegate,
+            DefaultWidgetsLocalizations.delegate,
+          ],
+          child: DefaultTabController(
+            length: 1,
+            child: TabBarTheme(
+              data: TabBarThemeData(splashBorderRadius: BorderRadius.circular(radius)),
+              child: const TabBar(
+                overlayColor: WidgetStateMapper<Color>(<WidgetStatesConstraint, Color>{
+                  WidgetState.hovered: hoverColor,
+                  WidgetState.any: Colors.black54,
+                }),
+                tabs: <Widget>[Tab(child: Text(''))],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    await gesture.moveTo(tester.getCenter(find.byType(Tab)));
     await tester.pumpAndSettle();
+    final Finder findInkWell = find.byType(InkWell);
 
-    labelSize = tester.getSize(find.text('Tab 1'));
-    expect(labelSize, equals(const Size(140.5, 40.0)));
-  }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/87543
+    final BuildContext context = tester.element(findInkWell);
+    expect(
+      Material.of(context),
+      paints..rrect(
+        color: hoverColor,
+        rrect: RRect.fromRectAndRadius(tester.getRect(findInkWell), const Radius.circular(radius)),
+      ),
+    );
+    gesture.removePointer();
+  });
 }

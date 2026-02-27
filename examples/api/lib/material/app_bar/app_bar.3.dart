@@ -6,11 +6,7 @@ import 'package:flutter/material.dart';
 
 /// Flutter code sample for [AppBar].
 
-List<String> titles = <String>[
-  'Cloud',
-  'Beach',
-  'Sunny',
-];
+List<String> titles = <String>['Cloud', 'Beach', 'Sunny'];
 
 void main() => runApp(const AppBarApp());
 
@@ -20,7 +16,7 @@ class AppBarApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
+      theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4)),
       home: const AppBarExample(),
     );
   }
@@ -32,8 +28,8 @@ class AppBarExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
-    final Color evenItemColor = colorScheme.primary.withOpacity(0.15);
+    final Color oddItemColor = colorScheme.primary.withValues(alpha: 0.05);
+    final Color evenItemColor = colorScheme.primary.withValues(alpha: 0.15);
     const int tabsCount = 3;
 
     return DefaultTabController(
@@ -60,18 +56,9 @@ class AppBarExample extends StatelessWidget {
           shadowColor: Theme.of(context).shadowColor,
           bottom: TabBar(
             tabs: <Widget>[
-              Tab(
-                icon: const Icon(Icons.cloud_outlined),
-                text: titles[0],
-              ),
-              Tab(
-                icon: const Icon(Icons.beach_access_sharp),
-                text: titles[1],
-              ),
-              Tab(
-                icon: const Icon(Icons.brightness_5_sharp),
-                text: titles[2],
-              ),
+              Tab(icon: const Icon(Icons.cloud_outlined), text: titles[0]),
+              Tab(icon: const Icon(Icons.beach_access_sharp), text: titles[1]),
+              Tab(icon: const Icon(Icons.brightness_5_sharp), text: titles[2]),
             ],
           ),
         ),

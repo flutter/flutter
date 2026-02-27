@@ -10,10 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() {
-  runApp(const MaterialApp(
-    title: 'Actions Demo',
-    home: FocusDemo(),
-  ));
+  runApp(const MaterialApp(title: 'Actions Demo', home: FocusDemo()));
 }
 
 /// A class that can hold invocation information that an [UndoableAction] can
@@ -22,11 +19,7 @@ void main() {
 /// Instances of this class are returned from [UndoableAction]s and placed on
 /// the undo stack when they are invoked.
 class Memento extends Object with Diagnosticable {
-  const Memento({
-    required this.name,
-    required this.undo,
-    required this.redo,
-  });
+  const Memento({required this.name, required this.undo, required this.redo});
 
   /// Returns true if this Memento can be used to undo.
   ///
@@ -180,7 +173,7 @@ class UndoAction extends Action<UndoIntent> {
     if (buildContext == null) {
       return false;
     }
-    final UndoableActionDispatcher manager = Actions.of(buildContext) as UndoableActionDispatcher;
+    final manager = Actions.of(buildContext) as UndoableActionDispatcher;
     return manager.canUndo;
   }
 
@@ -190,7 +183,9 @@ class UndoAction extends Action<UndoIntent> {
     if (buildContext == null) {
       return;
     }
-    final UndoableActionDispatcher manager = Actions.of(primaryFocus?.context ?? FocusDemo.appKey.currentContext!) as UndoableActionDispatcher;
+    final manager =
+        Actions.of(primaryFocus?.context ?? FocusDemo.appKey.currentContext!)
+            as UndoableActionDispatcher;
     manager.undo();
   }
 }
@@ -206,7 +201,7 @@ class RedoAction extends Action<RedoIntent> {
     if (buildContext == null) {
       return false;
     }
-    final UndoableActionDispatcher manager = Actions.of(buildContext) as UndoableActionDispatcher;
+    final manager = Actions.of(buildContext) as UndoableActionDispatcher;
     return manager.canRedo;
   }
 
@@ -216,25 +211,29 @@ class RedoAction extends Action<RedoIntent> {
     if (buildContext == null) {
       return this;
     }
-    final UndoableActionDispatcher manager = Actions.of(buildContext) as UndoableActionDispatcher;
+    final manager = Actions.of(buildContext) as UndoableActionDispatcher;
     manager.redo();
     return this;
   }
 }
 
 /// An action that can be undone.
-abstract class UndoableAction<T extends Intent> extends Action<T> { }
+abstract class UndoableAction<T extends Intent> extends Action<T> {}
 
 class UndoableFocusActionBase<T extends Intent> extends UndoableAction<T> {
   @override
   @mustCallSuper
   Memento invoke(T intent) {
     final FocusNode? previousFocus = primaryFocus;
-    return Memento(name: previousFocus!.debugLabel!, undo: () {
-      previousFocus.requestFocus();
-    }, redo: () {
-      return invoke(intent);
-    });
+    return Memento(
+      name: previousFocus!.debugLabel!,
+      undo: () {
+        previousFocus.requestFocus();
+      },
+      redo: () {
+        return invoke(intent);
+      },
+    );
   }
 }
 
@@ -308,11 +307,11 @@ class _DemoButtonState extends State<DemoButton> {
       focusNode: _focusNode,
       style: ButtonStyle(
         foregroundColor: const MaterialStatePropertyAll<Color>(Colors.black),
-        overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-          if (states.contains(MaterialState.focused)) {
+        overlayColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+          if (states.contains(WidgetState.focused)) {
             return Colors.red;
           }
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return Colors.blue;
           }
           return Colors.transparent;
@@ -384,8 +383,17 @@ class _FocusDemoState extends State<FocusDemo> {
         policy: ReadingOrderTraversalPolicy(),
         child: Shortcuts(
           shortcuts: <ShortcutActivator, Intent>{
-            SingleActivator(LogicalKeyboardKey.keyZ, meta: Platform.isMacOS, control: !Platform.isMacOS, shift: true): const RedoIntent(),
-            SingleActivator(LogicalKeyboardKey.keyZ, meta: Platform.isMacOS, control: !Platform.isMacOS): const UndoIntent(),
+            SingleActivator(
+              LogicalKeyboardKey.keyZ,
+              meta: Platform.isMacOS,
+              control: !Platform.isMacOS,
+              shift: true,
+            ): const RedoIntent(),
+            SingleActivator(
+              LogicalKeyboardKey.keyZ,
+              meta: Platform.isMacOS,
+              control: !Platform.isMacOS,
+            ): const UndoIntent(),
           },
           child: FocusScope(
             key: FocusDemo.appKey,
@@ -394,68 +402,68 @@ class _FocusDemoState extends State<FocusDemo> {
             child: DefaultTextStyle(
               style: textTheme.headlineMedium!,
               child: Scaffold(
-                appBar: AppBar(
-                  title: const Text('Actions Demo'),
-                ),
+                appBar: AppBar(title: const Text('Actions Demo')),
                 body: Center(
-                  child: Builder(builder: (BuildContext context) {
-                    return Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            DemoButton(name: 'One'),
-                            DemoButton(name: 'Two'),
-                            DemoButton(name: 'Three'),
-                          ],
-                        ),
-                        const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            DemoButton(name: 'Four'),
-                            DemoButton(name: 'Five'),
-                            DemoButton(name: 'Six'),
-                          ],
-                        ),
-                        const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            DemoButton(name: 'Seven'),
-                            DemoButton(name: 'Eight'),
-                            DemoButton(name: 'Nine'),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: ElevatedButton(
-                                onPressed: canUndo
-                                    ? () {
-                                        Actions.invoke(context, const UndoIntent());
-                                      }
-                                    : null,
-                                child: const Text('UNDO'),
+                  child: Builder(
+                    builder: (BuildContext context) {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              DemoButton(name: 'One'),
+                              DemoButton(name: 'Two'),
+                              DemoButton(name: 'Three'),
+                            ],
+                          ),
+                          const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              DemoButton(name: 'Four'),
+                              DemoButton(name: 'Five'),
+                              DemoButton(name: 'Six'),
+                            ],
+                          ),
+                          const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              DemoButton(name: 'Seven'),
+                              DemoButton(name: 'Eight'),
+                              DemoButton(name: 'Nine'),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: ElevatedButton(
+                                  onPressed: canUndo
+                                      ? () {
+                                          Actions.invoke(context, const UndoIntent());
+                                        }
+                                      : null,
+                                  child: const Text('UNDO'),
+                                ),
                               ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: ElevatedButton(
-                                onPressed: canRedo
-                                    ? () {
-                                        Actions.invoke(context, const RedoIntent());
-                                      }
-                                    : null,
-                                child: const Text('REDO'),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: ElevatedButton(
+                                  onPressed: canRedo
+                                      ? () {
+                                          Actions.invoke(context, const RedoIntent());
+                                        }
+                                      : null,
+                                  child: const Text('REDO'),
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    );
-                  }),
+                            ],
+                          ),
+                        ],
+                      );
+                    },
+                  ),
                 ),
               ),
             ),

@@ -9,6 +9,7 @@ import 'dart:math' as math;
 
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
+import 'package:pub_semver/pub_semver.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'devices.dart';
@@ -22,7 +23,7 @@ String cwd = Directory.current.path;
 ///
 /// This is set as an environment variable when running the task, see runTask in runner.dart.
 String? get localEngineFromEnv {
-  const bool isDefined = bool.hasEnvironment('localEngine');
+  const isDefined = bool.hasEnvironment('localEngine');
   return isDefined ? const String.fromEnvironment('localEngine') : null;
 }
 
@@ -30,7 +31,7 @@ String? get localEngineFromEnv {
 ///
 /// This is set as an environment variable when running the task, see runTask in runner.dart.
 String? get localEngineHostFromEnv {
-  const bool isDefined = bool.hasEnvironment('localEngineHost');
+  const isDefined = bool.hasEnvironment('localEngineHost');
   return isDefined ? const String.fromEnvironment('localEngineHost') : null;
 }
 
@@ -39,7 +40,7 @@ String? get localEngineHostFromEnv {
 ///
 /// This is set as an environment variable when running the task, see runTask in runner.dart.
 String? get localEngineSrcPathFromEnv {
-  const bool isDefined = bool.hasEnvironment('localEngineSrcPath');
+  const isDefined = bool.hasEnvironment('localEngineSrcPath');
   return isDefined ? const String.fromEnvironment('localEngineSrcPath') : null;
 }
 
@@ -47,7 +48,7 @@ String? get localEngineSrcPathFromEnv {
 ///
 /// This is set as an environment variable when running the task, see runTask in runner.dart.
 String? get localWebSdkFromEnv {
-  const bool isDefined = bool.hasEnvironment('localWebSdk');
+  const isDefined = bool.hasEnvironment('localWebSdk');
   return isDefined ? const String.fromEnvironment('localWebSdk') : null;
 }
 
@@ -77,15 +78,15 @@ class HealthCheckResult {
   HealthCheckResult.success([this.details]) : succeeded = true;
   HealthCheckResult.failure(this.details) : succeeded = false;
   HealthCheckResult.error(dynamic error, dynamic stackTrace)
-      : succeeded = false,
-        details = 'ERROR: $error${stackTrace != null ? '\n$stackTrace' : ''}';
+    : succeeded = false,
+      details = 'ERROR: $error${stackTrace != null ? '\n$stackTrace' : ''}';
 
   final bool succeeded;
   final String? details;
 
   @override
   String toString() {
-    final StringBuffer buf = StringBuffer(succeeded ? 'succeeded' : 'failed');
+    final buf = StringBuffer(succeeded ? 'succeeded' : 'failed');
     if (details != null && details!.trim().isNotEmpty) {
       buf.writeln();
       // Indent details by 4 spaces
@@ -111,7 +112,7 @@ void fail(String message) {
 }
 
 // Remove the given file or directory.
-void rm(FileSystemEntity entity, { bool recursive = false}) {
+void rm(FileSystemEntity entity, {bool recursive = false}) {
   if (entity.existsSync()) {
     // This should not be necessary, but it turns out that
     // on Windows it's common for deletions to fail due to
@@ -136,8 +137,7 @@ Directory dir(String path) => Directory(path);
 File file(String path) => File(path);
 
 void copy(File sourceFile, Directory targetDirectory, {String? name}) {
-  final File target = file(
-      path.join(targetDirectory.path, name ?? path.basename(sourceFile.path)));
+  final File target = file(path.join(targetDirectory.path, name ?? path.basename(sourceFile.path)));
   target.writeAsBytesSync(sourceFile.readAsBytesSync());
 }
 
@@ -151,7 +151,7 @@ void recursiveCopy(Directory source, Directory target) {
     if (entity is Directory && !entity.path.contains('.dart_tool')) {
       recursiveCopy(entity, Directory(path.join(target.path, name)));
     } else if (entity is File) {
-      final File dest = File(path.join(target.path, name));
+      final dest = File(path.join(target.path, name));
       dest.writeAsBytesSync(entity.readAsBytesSync());
       // Preserve executable bit
       final String modes = entity.statSync().modeString();
@@ -162,10 +162,8 @@ void recursiveCopy(Directory source, Directory target) {
   }
 }
 
-FileSystemEntity move(FileSystemEntity whatToMove,
-    {required Directory to, String? name}) {
-  return whatToMove
-      .renameSync(path.join(to.path, name ?? path.basename(whatToMove.path)));
+FileSystemEntity move(FileSystemEntity whatToMove, {required Directory to, String? name}) {
+  return whatToMove.renameSync(path.join(to.path, name ?? path.basename(whatToMove.path)));
 }
 
 /// Equivalent of `chmod a+x file`
@@ -174,11 +172,7 @@ void makeExecutable(File file) {
   if (Platform.isWindows) {
     return;
   }
-  final ProcessResult result = _processManager.runSync(<String>[
-    'chmod',
-    'a+x',
-    file.path,
-  ]);
+  final ProcessResult result = _processManager.runSync(<String>['chmod', 'a+x', file.path]);
 
   if (result.exitCode != 0) {
     throw FileSystemException(
@@ -250,12 +244,7 @@ Future<String?> getCurrentFlutterRepoCommit() {
 Future<DateTime> getFlutterRepoCommitTimestamp(String commit) {
   // git show -s --format=%at 4b546df7f0b3858aaaa56c4079e5be1ba91fbb65
   return inDirectory<DateTime>(flutterDirectory, () async {
-    final String unixTimestamp = await eval('git', <String>[
-      'show',
-      '-s',
-      '--format=%at',
-      commit,
-    ]);
+    final String unixTimestamp = await eval('git', <String>['show', '-s', '--format=%at', commit]);
     final int secondsSinceEpoch = int.parse(unixTimestamp);
     return DateTime.fromMillisecondsSinceEpoch(secondsSinceEpoch * 1000);
   });
@@ -289,12 +278,23 @@ Future<Process> startProcess(
   String executable,
   List<String>? arguments, {
   Map<String, String>? environment,
-  bool isBot = true, // set to false to pretend not to be on a bot (e.g. to test user-facing outputs)
+  bool isBot =
+      true, // set to false to pretend not to be on a bot (e.g. to test user-facing outputs)
   String? workingDirectory,
 }) async {
-  final String command = '$executable ${arguments?.join(" ") ?? ""}';
+  final command = '$executable ${arguments?.join(" ") ?? ""}';
   final String finalWorkingDirectory = workingDirectory ?? cwd;
-  final Map<String, String> newEnvironment = Map<String, String>.from(environment ?? <String, String>{});
+  final newEnvironment = <String, String>{
+    ...?environment,
+    'ANDROID_NDK_PATH': ?_discoverBestNdkPath(),
+  };
+  // Override ANDROID_NDK_PATH with a valid discovered path or empty string to clear a potentially bad value.
+  // See also bots/run_command.dart.
+  final String? bestNdkPath = _discoverBestNdkPath();
+  if (bestNdkPath != null) {
+    newEnvironment['ANDROID_NDK_PATH'] = bestNdkPath;
+  }
+
   newEnvironment['BOT'] = isBot ? 'true' : 'false';
   newEnvironment['LANG'] = 'en_US.UTF-8';
   print('Executing "$command" in "$finalWorkingDirectory" with environment $newEnvironment');
@@ -304,12 +304,14 @@ Future<Process> startProcess(
     environment: newEnvironment,
     workingDirectory: finalWorkingDirectory,
   );
-  final ProcessInfo processInfo = ProcessInfo(command, process);
+  final processInfo = ProcessInfo(command, process);
   _runningProcesses.add(processInfo);
 
-  unawaited(process.exitCode.then<void>((int exitCode) {
-    _runningProcesses.remove(processInfo);
-  }));
+  unawaited(
+    process.exitCode.then<void>((int exitCode) {
+      _runningProcesses.remove(processInfo);
+    }),
+  );
 
   return process;
 }
@@ -346,7 +348,7 @@ Future<int> exec(
     executable,
     arguments,
     environment: environment,
-    canFail : canFail,
+    canFail: canFail,
     workingDirectory: workingDirectory,
     output: output,
     stderr: stderr,
@@ -397,32 +399,39 @@ Future<void> forwardStandardStreams(
   StringBuffer? stderr,
   bool printStdout = true,
   bool printStderr = true,
-  }) {
-  final Completer<void> stdoutDone = Completer<void>();
-  final Completer<void> stderrDone = Completer<void>();
+}) {
+  final stdoutDone = Completer<void>();
+  final stderrDone = Completer<void>();
   process.stdout
-    .transform<String>(utf8.decoder)
-    .transform<String>(const LineSplitter())
-    .listen((String line) {
-      if (printStdout) {
-        print('stdout: $line');
-      }
-      output?.writeln(line);
-    }, onDone: () { stdoutDone.complete(); });
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
+      .listen(
+        (String line) {
+          if (printStdout) {
+            print('stdout: $line');
+          }
+          output?.writeln(line);
+        },
+        onDone: () {
+          stdoutDone.complete();
+        },
+      );
   process.stderr
-    .transform<String>(utf8.decoder)
-    .transform<String>(const LineSplitter())
-    .listen((String line) {
-      if (printStderr) {
-        print('stderr: $line');
-      }
-      stderr?.writeln(line);
-    }, onDone: () { stderrDone.complete(); });
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
+      .listen(
+        (String line) {
+          if (printStderr) {
+            print('stderr: $line');
+          }
+          stderr?.writeln(line);
+        },
+        onDone: () {
+          stderrDone.complete();
+        },
+      );
 
-  return Future.wait<void>(<Future<void>>[
-    stdoutDone.future,
-    stderrDone.future,
-  ]);
+  return Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
 }
 
 /// Executes a command and returns its standard output as a String.
@@ -454,9 +463,13 @@ Future<String> eval(
   return output.toString().trimRight();
 }
 
-List<String> _flutterCommandArgs(String command, List<String> options) {
+List<String> _flutterCommandArgs(
+  String command,
+  List<String> options, {
+  bool driveWithDds = false,
+}) {
   // Commands support the --device-timeout flag.
-  final Set<String> supportedDeviceTimeoutCommands = <String>{
+  final supportedDeviceTimeoutCommands = <String>{
     'attach',
     'devices',
     'drive',
@@ -472,11 +485,12 @@ List<String> _flutterCommandArgs(String command, List<String> options) {
   final bool pubOrPackagesCommand = command.startsWith('packages') || command.startsWith('pub');
   return <String>[
     command,
-    if (deviceOperatingSystem == DeviceOperatingSystem.ios && supportedDeviceTimeoutCommands.contains(command))
-      ...<String>[
-        '--device-timeout',
-        '5',
-      ],
+    if (deviceOperatingSystem == DeviceOperatingSystem.ios &&
+        supportedDeviceTimeoutCommands.contains(command)) ...<String>['--device-timeout', '5'],
+
+    // DDS should generally be disabled for flutter drive in CI.
+    // See https://github.com/flutter/flutter/issues/152684.
+    if (command == 'drive' && !driveWithDds) '--no-dds',
 
     if (command == 'drive' && hostAgent.dumpDirectory != null) ...<String>[
       '--screenshot',
@@ -492,21 +506,34 @@ List<String> _flutterCommandArgs(String command, List<String> options) {
     // the same allowed args.
     if (!pubOrPackagesCommand) '--ci',
     if (!pubOrPackagesCommand && hostAgent.dumpDirectory != null)
-      '--debug-logs-dir=${hostAgent.dumpDirectory!.path}'
+      '--debug-logs-dir=${hostAgent.dumpDirectory!.path}',
   ];
 }
 
 /// Runs the flutter `command`, and returns the exit code.
 /// If `canFail` is `false`, the future completes with an error.
-Future<int> flutter(String command, {
+Future<int> flutter(
+  String command, {
   List<String> options = const <String>[],
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
+  bool driveWithDds = false, // `flutter drive` tests should generally have dds disabled.
+  // The exception is tests that also exercise DevTools, such as
+  // DevToolsMemoryTest in perf_tests.dart.
   Map<String, String>? environment,
   String? workingDirectory,
+  StringBuffer? output, // if not null, the stdout will be written here
+  StringBuffer? stderr, // if not null, the stderr will be written here
 }) async {
-  final List<String> args = _flutterCommandArgs(command, options);
-  final int exitCode = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
-    canFail: canFail, environment: environment, workingDirectory: workingDirectory);
+  final List<String> args = _flutterCommandArgs(command, options, driveWithDds: driveWithDds);
+  final int exitCode = await exec(
+    path.join(flutterDirectory.path, 'bin', 'flutter'),
+    args,
+    canFail: canFail,
+    environment: environment,
+    workingDirectory: workingDirectory,
+    output: output,
+    stderr: stderr,
+  );
 
   if (exitCode != 0 && !canFail) {
     await _flutterScreenshot(workingDirectory: workingDirectory);
@@ -536,10 +563,12 @@ Future<int> flutter(String command, {
 ///
 /// The actual process executes asynchronously. A handle to the subprocess is
 /// returned in the form of a [Future] that completes to a [Process] object.
-Future<Process> startFlutter(String command, {
+Future<Process> startFlutter(
+  String command, {
   List<String> options = const <String>[],
   Map<String, String> environment = const <String, String>{},
-  bool isBot = true, // set to false to pretend not to be on a bot (e.g. to test user-facing outputs)
+  bool isBot =
+      true, // set to false to pretend not to be on a bot (e.g. to test user-facing outputs)
   String? workingDirectory,
 }) async {
   final List<String> args = _flutterCommandArgs(command, options);
@@ -551,16 +580,19 @@ Future<Process> startFlutter(String command, {
     workingDirectory: workingDirectory,
   );
 
-  unawaited(process.exitCode.then<void>((int exitCode) async {
-    if (exitCode != 0) {
-      await _flutterScreenshot(workingDirectory: workingDirectory);
-    }
-  }));
+  unawaited(
+    process.exitCode.then<void>((int exitCode) async {
+      if (exitCode != 0) {
+        await _flutterScreenshot(workingDirectory: workingDirectory);
+      }
+    }),
+  );
   return process;
 }
 
 /// Runs a `flutter` command and returns the standard output as a string.
-Future<String> evalFlutter(String command, {
+Future<String> evalFlutter(
+  String command, {
   List<String> options = const <String>[],
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   Map<String, String>? environment,
@@ -568,19 +600,26 @@ Future<String> evalFlutter(String command, {
   String? workingDirectory,
 }) {
   final List<String> args = _flutterCommandArgs(command, options);
-  return eval(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
-      canFail: canFail, environment: environment, stderr: stderr, workingDirectory: workingDirectory);
+  return eval(
+    path.join(flutterDirectory.path, 'bin', 'flutter'),
+    args,
+    canFail: canFail,
+    environment: environment,
+    stderr: stderr,
+    workingDirectory: workingDirectory,
+  );
 }
 
-Future<ProcessResult> executeFlutter(String command, {
+Future<ProcessResult> executeFlutter(
+  String command, {
   List<String> options = const <String>[],
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
 }) async {
   final List<String> args = _flutterCommandArgs(command, options);
-  final ProcessResult processResult = await _processManager.run(
-    <String>[path.join(flutterDirectory.path, 'bin', 'flutter'), ...args],
-    workingDirectory: cwd,
-  );
+  final ProcessResult processResult = await _processManager.run(<String>[
+    path.join(flutterDirectory.path, 'bin', 'flutter'),
+    ...args,
+  ], workingDirectory: cwd);
 
   if (processResult.exitCode != 0 && !canFail) {
     await _flutterScreenshot();
@@ -588,7 +627,7 @@ Future<ProcessResult> executeFlutter(String command, {
   return processResult;
 }
 
-Future<void> _flutterScreenshot({ String? workingDirectory }) async {
+Future<void> _flutterScreenshot({String? workingDirectory}) async {
   try {
     final Directory? dumpDirectory = hostAgent.dumpDirectory;
     if (dumpDirectory == null) {
@@ -602,18 +641,16 @@ Future<void> _flutterScreenshot({ String? workingDirectory }) async {
 
     final String deviceId = (await devices.workingDevice).deviceId;
     print('Taking screenshot of working device $deviceId at $screenshotPath');
-    final List<String> args = _flutterCommandArgs(
-      'screenshot',
-      <String>[
-        '--out',
-        screenshotPath,
-        '-d', deviceId,
-      ],
-    );
-    final ProcessResult screenshot = await _processManager.run(
-      <String>[path.join(flutterDirectory.path, 'bin', 'flutter'), ...args],
-      workingDirectory: workingDirectory ?? cwd,
-    );
+    final List<String> args = _flutterCommandArgs('screenshot', <String>[
+      '--out',
+      screenshotPath,
+      '-d',
+      deviceId,
+    ]);
+    final ProcessResult screenshot = await _processManager.run(<String>[
+      path.join(flutterDirectory.path, 'bin', 'flutter'),
+      ...args,
+    ], workingDirectory: workingDirectory ?? cwd);
 
     if (screenshot.exitCode != 0) {
       print('Failed to take screenshot. Continuing.');
@@ -623,13 +660,11 @@ Future<void> _flutterScreenshot({ String? workingDirectory }) async {
   }
 }
 
-String get dartBin =>
-    path.join(flutterDirectory.path, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
+String get dartBin => path.join(flutterDirectory.path, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
 
-String get pubBin =>
-    path.join(flutterDirectory.path, 'bin', 'cache', 'dart-sdk', 'bin', 'pub');
+String get pubBin => path.join(flutterDirectory.path, 'bin', 'cache', 'dart-sdk', 'bin', 'pub');
 
-Future<int> dart(List<String> args) => exec(dartBin, <String>['--disable-dart-dev', ...args]);
+Future<int> dart(List<String> args) => exec(dartBin, args);
 
 /// Returns a future that completes with a path suitable for JAVA_HOME
 /// or with null, if Java cannot be found.
@@ -642,14 +677,13 @@ Future<String?> findJavaHome() async {
     if (hits.isEmpty) {
       return null;
     }
-    final String javaBinary = hits.first
-        .split(': ')
-        .last;
+    final String javaBinary = hits.first.split(': ').last;
     // javaBinary == /some/path/to/java/home/bin/java
     _javaHome = path.dirname(path.dirname(javaBinary));
   }
   return _javaHome;
 }
+
 String? _javaHome;
 
 Future<T> inDirectory<T>(dynamic directory, Future<T> Function() action) async {
@@ -671,7 +705,10 @@ void cd(dynamic directory) {
     cwd = directory.path;
     d = directory;
   } else {
-    throw FileSystemException('Unsupported directory type ${directory.runtimeType}', directory.toString());
+    throw FileSystemException(
+      'Unsupported directory type ${directory.runtimeType}',
+      directory.toString(),
+    );
   }
 
   if (!d.existsSync()) {
@@ -697,7 +734,7 @@ T requireConfigProperty<T>(Map<String, dynamic> map, String propertyName) {
   if (!map.containsKey(propertyName)) {
     fail('Configuration property not found: $propertyName');
   }
-  final T result = map[propertyName] as T;
+  final result = map[propertyName] as T;
   return result;
 }
 
@@ -726,7 +763,7 @@ Iterable<String> grep(Pattern pattern, {required String from}) {
 ///
 ///     }
 Future<void> runAndCaptureAsyncStacks(Future<void> Function() callback) {
-  final Completer<void> completer = Completer<void>();
+  final completer = Completer<void>();
   Chain.capture(() async {
     await callback();
     completer.complete();
@@ -736,8 +773,7 @@ Future<void> runAndCaptureAsyncStacks(Future<void> Function() callback) {
 
 bool canRun(String path) => _processManager.canRun(path);
 
-final RegExp _obsRegExp =
-  RegExp('A Dart VM Service .* is available at: ');
+final RegExp _obsRegExp = RegExp('A Dart VM Service .* is available at: ');
 final RegExp _obsPortRegExp = RegExp(r'(\S+:(\d+)/\S*)$');
 final RegExp _obsUriRegExp = RegExp(r'((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
 
@@ -745,17 +781,14 @@ final RegExp _obsUriRegExp = RegExp(r'((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
 ///
 /// The `prefix`, if specified, is a regular expression pattern and must not contain groups.
 /// `prefix` defaults to the RegExp: `A Dart VM Service .* is available at: `.
-int? parseServicePort(String line, {
-  Pattern? prefix,
-}) {
+int? parseServicePort(String line, {Pattern? prefix}) {
   prefix ??= _obsRegExp;
   final Iterable<Match> matchesIter = prefix.allMatches(line);
   if (matchesIter.isEmpty) {
     return null;
   }
   final Match prefixMatch = matchesIter.first;
-  final List<Match> matches =
-    _obsPortRegExp.allMatches(line, prefixMatch.end).toList();
+  final List<Match> matches = _obsPortRegExp.allMatches(line, prefixMatch.end).toList();
   return matches.isEmpty ? null : int.parse(matches[0].group(2)!);
 }
 
@@ -763,25 +796,75 @@ int? parseServicePort(String line, {
 ///
 /// The `prefix`, if specified, is a regular expression pattern and must not contain groups.
 /// `prefix` defaults to the RegExp: `A Dart VM Service .* is available at: `.
-Uri? parseServiceUri(String line, {
-  Pattern? prefix,
-}) {
+Uri? parseServiceUri(String line, {Pattern? prefix}) {
   prefix ??= _obsRegExp;
   final Iterable<Match> matchesIter = prefix.allMatches(line);
   if (matchesIter.isEmpty) {
     return null;
   }
   final Match prefixMatch = matchesIter.first;
-  final List<Match> matches =
-    _obsUriRegExp.allMatches(line, prefixMatch.end).toList();
+  final List<Match> matches = _obsUriRegExp.allMatches(line, prefixMatch.end).toList();
   return matches.isEmpty ? null : Uri.parse(matches[0].group(0)!);
 }
 
-/// Checks that the file exists, otherwise throws a [FileSystemException].
 void checkFileExists(String file) {
   if (!exists(File(file))) {
-    throw FileSystemException('Expected file to exist.', file);
+    fail('File not found: $file');
   }
+}
+
+String? _bestNdkPath;
+String? _discoverBestNdkPath() {
+  if (_bestNdkPath != null) {
+    return _bestNdkPath;
+  }
+  // If we found a valid NDK, return it.
+  // Otherwise return empty string to clear any bad inherited value.
+  final Map<String, String> env = Platform.environment;
+  String? androidHome = env['ANDROID_HOME'] ?? env['ANDROID_SDK_ROOT'];
+  if (androidHome == null) {
+    // Try to find it in common default locations.
+    if (Platform.isMacOS) {
+      final String? home = env['HOME'];
+      if (home != null) {
+        androidHome = path.join(home, 'Library', 'Android', 'sdk');
+      }
+    } else if (Platform.isLinux) {
+      final String? home = env['HOME'];
+      if (home != null) {
+        androidHome = path.join(home, 'Android', 'Sdk');
+      }
+    } else if (Platform.isWindows) {
+      final String? homeDrive = env['HOMEDRIVE'];
+      final String? homePath = env['HOMEPATH'];
+      if (homeDrive != null && homePath != null) {
+        androidHome = path.join(homeDrive + homePath, 'AppData', 'Local', 'Android', 'sdk');
+      }
+    }
+  }
+
+  if (androidHome == null) {
+    return _bestNdkPath = null;
+  }
+  final ndkDir = Directory(path.join(androidHome, 'ndk'));
+  if (!ndkDir.existsSync()) {
+    return _bestNdkPath = null;
+  }
+  final versions = <Version>[];
+  for (final FileSystemEntity entity in ndkDir.listSync()) {
+    if (entity is Directory) {
+      try {
+        versions.add(Version.parse(path.basename(entity.path)));
+      } on FormatException {
+        // Ignore non-version directories.
+      }
+    }
+  }
+  if (versions.isEmpty) {
+    return _bestNdkPath = null;
+  }
+  versions.sort();
+  return _bestNdkPath = path.join(ndkDir.path, versions.last.toString());
 }
 
 /// Checks that the file does not exists, otherwise throws a [FileSystemException].
@@ -814,7 +897,7 @@ void checkSymlinkExists(String file) {
 
 /// Check that `collection` contains all entries in `values`.
 void checkCollectionContains<T>(Iterable<T> values, Iterable<T> collection) {
-  for (final T value in values) {
+  for (final value in values) {
     if (!collection.contains(value)) {
       throw TaskResult.failure('Expected to find `$value` in `$collection`.');
     }
@@ -823,7 +906,7 @@ void checkCollectionContains<T>(Iterable<T> values, Iterable<T> collection) {
 
 /// Check that `collection` does not contain any entries in `values`
 void checkCollectionDoesNotContain<T>(Iterable<T> values, Iterable<T> collection) {
-  for (final T value in values) {
+  for (final value in values) {
     if (collection.contains(value)) {
       throw TaskResult.failure('Did not expect to find `$value` in `$collection`.');
     }
@@ -834,11 +917,11 @@ void checkCollectionDoesNotContain<T>(Iterable<T> values, Iterable<T> collection
 /// [Pattern]s, otherwise throws a [TaskResult].
 void checkFileContains(List<Pattern> patterns, String filePath) {
   final String fileContent = File(filePath).readAsStringSync();
-  for (final Pattern pattern in patterns) {
+  for (final pattern in patterns) {
     if (!fileContent.contains(pattern)) {
       throw TaskResult.failure(
         'Expected to find `$pattern` in `$filePath` '
-        'instead it found:\n$fileContent'
+        'instead it found:\n$fileContent',
       );
     }
   }
@@ -853,10 +936,7 @@ Future<int> gitClone({required String path, required String repo}) async {
 
   await Directory(path).create(recursive: true);
 
-  return inDirectory<int>(
-    path,
-        () => exec('git', <String>['clone', repo]),
-  );
+  return inDirectory<int>(path, () => exec('git', <String>['clone', repo]));
 }
 
 /// Call [fn] retrying so long as [retryIf] return `true` for the exception
@@ -873,14 +953,13 @@ Future<T> retry<T>(
   int maxAttempts = 5,
   Duration delayDuration = const Duration(seconds: 3),
 }) async {
-  int attempt = 0;
+  var attempt = 0;
   while (true) {
     attempt++; // first invocation is the first attempt
     try {
       return await fn();
     } on Exception catch (e) {
-      if (attempt >= maxAttempts ||
-          (retryIf != null && !(await retryIf(e)))) {
+      if (attempt >= maxAttempts || (retryIf != null && !(await retryIf(e)))) {
         rethrow;
       }
     }
@@ -902,12 +981,8 @@ Future<void> createFfiPackage(String name, Directory parent) async {
         name,
       ],
     );
-    await _pinDependencies(
-      File(path.join(parent.path, name, 'pubspec.yaml')),
-    );
-    await _pinDependencies(
-      File(path.join(parent.path, name, 'example', 'pubspec.yaml')),
-    );
+    await _pinDependencies(File(path.join(parent.path, name, 'pubspec.yaml')));
+    await _pinDependencies(File(path.join(parent.path, name, 'example', 'pubspec.yaml')));
   });
 }
 

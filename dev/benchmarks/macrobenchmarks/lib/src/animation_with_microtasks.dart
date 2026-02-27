@@ -30,13 +30,7 @@ class _AnimationWithMicrotasksState extends State<AnimationWithMicrotasks> {
   Widget build(BuildContext context) {
     return const Scaffold(
       backgroundColor: Colors.grey,
-      body: Center(
-        child: SizedBox(
-          width: 200,
-          height: 100,
-          child: LinearProgressIndicator(),
-        ),
-      ),
+      body: Center(child: SizedBox(width: 200, height: 100, child: LinearProgressIndicator())),
     );
   }
 }
@@ -47,7 +41,7 @@ class _ChunkedWork {
   Future<void> start() async {
     // Run 100 pieces of synchronous work.
     // Chunked up to allow frames to be drawn.
-    for (int i = 0; i < 100; ++i) {
+    for (var i = 0; i < 100; ++i) {
       _chunkedSynchronousWork();
     }
   }
@@ -67,7 +61,7 @@ class _ChunkedWork {
   }
 
   void _syncComputationFor(Duration duration) {
-    final Stopwatch sw = Stopwatch()..start();
+    final sw = Stopwatch()..start();
     while (!_canceled && sw.elapsed < duration) {}
   }
 }

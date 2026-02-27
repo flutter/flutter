@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'basic.dart';
+/// @docImport 'icon.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 /// A description of an icon fulfilled by a font glyph.
@@ -18,6 +25,17 @@ class IconData {
   ///
   /// Rarely used directly. Instead, consider using one of the predefined icons
   /// like the [Icons] collection.
+  ///
+  /// The [fontFamily] argument is normally required when using custom icons.
+  ///
+  /// e.g. When using a [codePoint] from a `CustomIcons` font
+  /// ```yaml
+  /// fonts:
+  ///   - family: CustomIcons
+  ///     fonts:
+  ///       - asset: assets/fonts/CustomIcons.ttf
+  /// ```
+  /// `IconData` usages should specify `fontFamily: 'CustomIcons'`.
   ///
   /// The [fontPackage] argument must be non-null when using a font family that
   /// is included in a package. This is used when selecting the font.
@@ -67,12 +85,12 @@ class IconData {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is IconData
-        && other.codePoint == codePoint
-        && other.fontFamily == fontFamily
-        && other.fontPackage == fontPackage
-        && other.matchTextDirection == matchTextDirection
-        && listEquals(other.fontFamilyFallback, fontFamilyFallback);
+    return other is IconData &&
+        other.codePoint == codePoint &&
+        other.fontFamily == fontFamily &&
+        other.fontPackage == fontPackage &&
+        other.matchTextDirection == matchTextDirection &&
+        listEquals(other.fontFamilyFallback, fontFamilyFallback);
   }
 
   @override
@@ -106,9 +124,7 @@ class IconDataProperty extends DiagnosticsProperty<IconData> {
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
     final Map<String, Object?> json = super.toJsonMap(delegate);
     if (value != null) {
-      json['valueProperties'] = <String, Object>{
-        'codePoint': value!.codePoint,
-      };
+      json['valueProperties'] = <String, Object>{'codePoint': value!.codePoint};
     }
     return json;
   }

@@ -12,16 +12,16 @@ import '../common.dart';
 
 const Duration kBenchmarkTime = Duration(seconds: 15);
 
-Future<void> main() async {
+Future<void> execute() async {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
   stock_data.StockData.actuallyFetchData = false;
 
   // We control the framePolicy below to prevent us from scheduling frames in
   // the engine, so that the engine does not interfere with our timings.
-  final LiveTestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as LiveTestWidgetsFlutterBinding;
+  final binding = TestWidgetsFlutterBinding.ensureInitialized() as LiveTestWidgetsFlutterBinding;
 
-  final Stopwatch watch = Stopwatch();
-  int iterations = 0;
+  final watch = Stopwatch();
+  var iterations = 0;
 
   await benchmarkWidgets((WidgetTester tester) async {
     stocks.main();
@@ -31,14 +31,8 @@ Future<void> main() async {
     await tester.pump(); // Start drawer animation
     await tester.pump(const Duration(seconds: 1)); // Complete drawer animation
 
-    final TestViewConfiguration big = TestViewConfiguration.fromView(
-      size: const Size(360.0, 640.0),
-      view: tester.view,
-    );
-    final TestViewConfiguration small = TestViewConfiguration.fromView(
-      size: const Size(355.0, 635.0),
-      view: tester.view,
-    );
+    final big = TestViewConfiguration.fromView(size: const Size(360.0, 640.0), view: tester.view);
+    final small = TestViewConfiguration.fromView(size: const Size(355.0, 635.0), view: tester.view);
     final RenderView renderView = WidgetsBinding.instance.renderViews.single;
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
 
@@ -51,7 +45,7 @@ Future<void> main() async {
     watch.stop();
   });
 
-  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
+  final printer = BenchmarkResultPrinter();
   printer.addResult(
     description: 'Stock layout',
     value: watch.elapsedMicroseconds / iterations,
@@ -59,4 +53,11 @@ Future<void> main() async {
     name: 'stock_layout_iteration',
   );
   printer.printToStdout();
+}
+
+//
+//  Note that the benchmark is normally run by benchmark_collection.dart.
+//
+Future<void> main() async {
+  return execute();
 }

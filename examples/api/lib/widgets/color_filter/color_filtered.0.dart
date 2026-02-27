@@ -31,10 +31,7 @@ class ColorFilteredExample extends StatelessWidget {
       child: Column(
         children: <Widget>[
           ColorFiltered(
-            colorFilter: const ColorFilter.mode(
-              Colors.red,
-              BlendMode.modulate,
-            ),
+            colorFilter: const ColorFilter.mode(Colors.red, BlendMode.modulate),
             child: Image.network(
               'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
             ),

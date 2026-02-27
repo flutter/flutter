@@ -16,9 +16,7 @@ class DialogExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Dialog Sample')),
-        body: const Center(
-          child: DialogExample(),
-        ),
+        body: const Center(child: DialogExample()),
       ),
     );
   }

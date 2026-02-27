@@ -14,8 +14,10 @@ class SwitchListTileApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(useMaterial3: true),
-      home: Scaffold(appBar: AppBar(title: const Text('SwitchListTile Sample')), body: const SwitchListTileExample()),
+      home: Scaffold(
+        appBar: AppBar(title: const Text('SwitchListTile Sample')),
+        body: const SwitchListTileExample(),
+      ),
     );
   }
 }
@@ -39,9 +41,9 @@ class _SwitchListTileExampleState extends State<SwitchListTileExample> {
         children: <Widget>[
           SwitchListTile(
             value: switchValue1,
-            onChanged: (bool? value) {
+            onChanged: (bool value) {
               setState(() {
-                switchValue1 = value!;
+                switchValue1 = value;
               });
             },
             title: const Text('Headline'),
@@ -50,26 +52,28 @@ class _SwitchListTileExampleState extends State<SwitchListTileExample> {
           const Divider(height: 0),
           SwitchListTile(
             value: switchValue2,
-            onChanged: (bool? value) {
+            onChanged: (bool value) {
               setState(() {
-                switchValue2 = value!;
+                switchValue2 = value;
               });
             },
             title: const Text('Headline'),
             subtitle: const Text(
-                'Longer supporting text to demonstrate how the text wraps and the switch is centered vertically with the text.'),
+              'Longer supporting text to demonstrate how the text wraps and the switch is centered vertically with the text.',
+            ),
           ),
           const Divider(height: 0),
           SwitchListTile(
             value: switchValue3,
-            onChanged: (bool? value) {
+            onChanged: (bool value) {
               setState(() {
-                switchValue3 = value!;
+                switchValue3 = value;
               });
             },
             title: const Text('Headline'),
             subtitle: const Text(
-                "Longer supporting text to demonstrate how the text wraps and how setting 'SwitchListTile.isThreeLine = true' aligns the switch to the top vertically with the text."),
+              "Longer supporting text to demonstrate how the text wraps and how setting 'SwitchListTile.isThreeLine = true' aligns the switch to the top vertically with the text.",
+            ),
             isThreeLine: true,
           ),
           const Divider(height: 0),

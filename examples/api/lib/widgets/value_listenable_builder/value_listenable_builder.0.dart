@@ -13,9 +13,7 @@ class ValueListenableBuilderExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: ValueListenableBuilderExample(),
-    );
+    return const MaterialApp(home: ValueListenableBuilderExample());
   }
 }
 
@@ -23,18 +21,18 @@ class ValueListenableBuilderExample extends StatefulWidget {
   const ValueListenableBuilderExample({super.key});
 
   @override
-  State<ValueListenableBuilderExample> createState() => _ValueListenableBuilderExampleState();
+  State<ValueListenableBuilderExample> createState() =>
+      _ValueListenableBuilderExampleState();
 }
 
-class _ValueListenableBuilderExampleState extends State<ValueListenableBuilderExample> {
+class _ValueListenableBuilderExampleState
+    extends State<ValueListenableBuilderExample> {
   final ValueNotifier<int> _counter = ValueNotifier<int>(0);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('ValueListenableBuilder Sample'),
-      ),
+      appBar: AppBar(title: const Text('ValueListenableBuilder Sample')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

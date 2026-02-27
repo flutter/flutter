@@ -8,10 +8,10 @@ import 'package:flutter_api_samples/widgets/editable_text/editable_text.on_chang
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Verify correct labels are displayed', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.OnChangedExampleApp(),
-    );
+  testWidgets('Verify correct labels are displayed', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.OnChangedExampleApp());
 
     expect(
       find.text('What number comes next in the sequence?'),
@@ -20,10 +20,10 @@ void main() {
     expect(find.text('1, 1, 2, 3, 5, 8...?'), findsOneWidget);
   });
 
-  testWidgets('Does not show dialog when answer is not correct', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.OnChangedExampleApp(),
-    );
+  testWidgets('Does not show dialog when answer is not correct', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.OnChangedExampleApp());
 
     await tester.enterText(find.byType(TextField), '33');
     await tester.pumpAndSettle();
@@ -31,10 +31,10 @@ void main() {
     expect(find.byType(AlertDialog), findsNothing);
   });
 
-  testWidgets('Shows dialog when answer is correct', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.OnChangedExampleApp(),
-    );
+  testWidgets('Shows dialog when answer is correct', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.OnChangedExampleApp());
 
     await tester.enterText(find.byType(TextField), '13');
     await tester.pumpAndSettle();
@@ -46,9 +46,7 @@ void main() {
   });
 
   testWidgets('Closes dialog on OK button tap', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.OnChangedExampleApp(),
-    );
+    await tester.pumpWidget(const example.OnChangedExampleApp());
 
     await tester.enterText(find.byType(TextField), '13');
     await tester.pumpAndSettle();
@@ -56,10 +54,7 @@ void main() {
     expect(find.byType(AlertDialog), findsOneWidget);
 
     await tester.tap(
-      find.ancestor(
-        of: find.text('OK'),
-        matching: find.byType(TextButton),
-      ),
+      find.ancestor(of: find.text('OK'), matching: find.byType(TextButton)),
     );
     await tester.pumpAndSettle();
 

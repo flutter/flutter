@@ -2,43 +2,36 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 RenderBox getMaterialBox(WidgetTester tester, Finder type) {
   return tester.firstRenderObject<RenderBox>(
-    find.descendant(
-      of: type,
-      matching: find.byType(CustomPaint),
-    ),
+    find.descendant(of: type, matching: find.byType(CustomPaint)),
   );
 }
 
 Material getMaterial(WidgetTester tester) {
   return tester.widget<Material>(
-    find.descendant(
-      of: find.byType(ChoiceChip),
-      matching: find.byType(Material),
-    ),
+    find.descendant(of: find.byType(ChoiceChip), matching: find.byType(Material)),
   );
 }
 
 IconThemeData getIconData(WidgetTester tester) {
   final IconTheme iconTheme = tester.firstWidget(
-    find.descendant(
-      of: find.byType(RawChip),
-      matching: find.byType(IconTheme),
-    ),
+    find.descendant(of: find.byType(RawChip), matching: find.byType(IconTheme)),
   );
   return iconTheme.data;
 }
 
 DefaultTextStyle getLabelStyle(WidgetTester tester, String labelText) {
   return tester.widget(
-    find.ancestor(
-      of: find.text(labelText),
-      matching: find.byType(DefaultTextStyle),
-    ).first,
+    find.ancestor(of: find.text(labelText), matching: find.byType(DefaultTextStyle)).first,
   );
 }
 
@@ -73,8 +66,8 @@ void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
 
 void main() {
   testWidgets('Material2 - ChoiceChip defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: false);
-    const String label = 'choice chip';
+    final theme = ThemeData(useMaterial3: false);
+    const label = 'choice chip';
 
     // Test enabled ChoiceChip defaults.
     await tester.pumpWidget(
@@ -84,7 +77,7 @@ void main() {
           child: Center(
             child: ChoiceChip(
               selected: false,
-              onSelected: (bool valueChanged) { },
+              onSelected: (bool valueChanged) {},
               label: const Text(label),
             ),
           ),
@@ -105,19 +98,14 @@ void main() {
     expect(chipMaterial.shadowColor, Colors.black);
     expect(chipMaterial.shape, const StadiumBorder());
 
-    ShapeDecoration decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    var decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, Colors.black.withAlpha(0x1f));
 
     // Test disabled ChoiceChip defaults.
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: const Material(
-          child: ChoiceChip(
-            selected: false,
-            label: Text(label),
-          ),
-        ),
+        home: const Material(child: ChoiceChip(selected: false, label: Text(label))),
       ),
     );
     await tester.pumpAndSettle();
@@ -137,7 +125,7 @@ void main() {
         home: Material(
           child: ChoiceChip(
             selected: true,
-            onSelected: (bool valueChanged) { },
+            onSelected: (bool valueChanged) {},
             label: const Text(label),
           ),
         ),
@@ -157,12 +145,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: const Material(
-          child: ChoiceChip(
-            selected: true,
-            label: Text(label),
-          ),
-        ),
+        home: const Material(child: ChoiceChip(selected: true, label: Text(label))),
       ),
     );
     await tester.pumpAndSettle();
@@ -177,8 +160,8 @@ void main() {
   });
 
   testWidgets('Material3 - ChoiceChip defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
-    const String label = 'choice chip';
+    final theme = ThemeData();
+    const label = 'choice chip';
 
     // Test enabled ChoiceChip defaults.
     await tester.pumpWidget(
@@ -188,7 +171,7 @@ void main() {
           child: Center(
             child: ChoiceChip(
               selected: false,
-              onSelected: (bool valueChanged) { },
+              onSelected: (bool valueChanged) {},
               label: const Text(label),
             ),
           ),
@@ -215,23 +198,18 @@ void main() {
       chipMaterial.shape,
       RoundedRectangleBorder(
         borderRadius: const BorderRadius.all(Radius.circular(8.0)),
-        side: BorderSide(color: theme.colorScheme.outline),
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
       ),
     );
 
-    ShapeDecoration decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    var decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, null);
 
     // Test disabled ChoiceChip defaults.
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: const Material(
-          child: ChoiceChip(
-            selected: false,
-            label: Text(label),
-          ),
-        ),
+        home: const Material(child: ChoiceChip(selected: false, label: Text(label))),
       ),
     );
     await tester.pumpAndSettle();
@@ -258,7 +236,7 @@ void main() {
         home: Material(
           child: ChoiceChip(
             selected: true,
-            onSelected: (bool valueChanged) { },
+            onSelected: (bool valueChanged) {},
             label: const Text(label),
           ),
         ),
@@ -285,12 +263,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: const Material(
-          child: ChoiceChip(
-            selected: true,
-            label: Text(label),
-          ),
-        ),
+        home: const Material(child: ChoiceChip(selected: true, label: Text(label))),
       ),
     );
     await tester.pumpAndSettle();
@@ -312,8 +285,8 @@ void main() {
   });
 
   testWidgets('Material3 - ChoiceChip.elevated defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
-    const String label = 'choice chip';
+    final theme = ThemeData();
+    const label = 'choice chip';
 
     // Test enabled ChoiceChip.elevated defaults.
     await tester.pumpWidget(
@@ -323,7 +296,7 @@ void main() {
           child: Center(
             child: ChoiceChip.elevated(
               selected: false,
-              onSelected: (bool valueChanged) { },
+              onSelected: (bool valueChanged) {},
               label: const Text(label),
             ),
           ),
@@ -354,19 +327,14 @@ void main() {
       ),
     );
 
-    ShapeDecoration decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    var decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, theme.colorScheme.surfaceContainerLow);
 
     // Test disabled ChoiceChip.elevated defaults.
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: const Material(
-          child: ChoiceChip.elevated(
-            selected: false,
-            label: Text(label),
-          ),
-        ),
+        home: const Material(child: ChoiceChip.elevated(selected: false, label: Text(label))),
       ),
     );
     await tester.pumpAndSettle();
@@ -393,7 +361,7 @@ void main() {
         home: Material(
           child: ChoiceChip.elevated(
             selected: true,
-            onSelected: (bool valueChanged) { },
+            onSelected: (bool valueChanged) {},
             label: const Text(label),
           ),
         ),
@@ -420,12 +388,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: const Material(
-          child: ChoiceChip.elevated(
-            selected: false,
-            label: Text(label),
-          ),
-        ),
+        home: const Material(child: ChoiceChip.elevated(selected: false, label: Text(label))),
       ),
     );
     await tester.pumpAndSettle();
@@ -447,35 +410,36 @@ void main() {
   });
 
   testWidgets('ChoiceChip.color resolves material states', (WidgetTester tester) async {
-    const Color disabledSelectedColor = Color(0xffffff00);
-    const Color disabledColor = Color(0xff00ff00);
-    const Color backgroundColor = Color(0xff0000ff);
-    const Color selectedColor = Color(0xffff0000);
-    final MaterialStateProperty<Color?> color = MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled) && states.contains(MaterialState.selected)) {
+    const disabledSelectedColor = Color(0xffffff00);
+    const disabledColor = Color(0xff00ff00);
+    const backgroundColor = Color(0xff0000ff);
+    const selectedColor = Color(0xffff0000);
+    final WidgetStateProperty<Color?> color = WidgetStateProperty.resolveWith((
+      Set<WidgetState> states,
+    ) {
+      if (states.contains(WidgetState.disabled) && states.contains(WidgetState.selected)) {
         return disabledSelectedColor;
       }
-      if (states.contains(MaterialState.disabled)) {
+      if (states.contains(WidgetState.disabled)) {
         return disabledColor;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return selectedColor;
       }
       return backgroundColor;
     });
-    Widget buildApp({ required bool enabled, required bool selected }) {
+    Widget buildApp({required bool enabled, required bool selected}) {
       return wrapForChip(
-        useMaterial3: true,
         child: Column(
           children: <Widget>[
             ChoiceChip(
-              onSelected: enabled ? (bool value) { } : null,
+              onSelected: enabled ? (bool value) {} : null,
               selected: selected,
               color: color,
               label: const Text('ChoiceChip'),
             ),
             ChoiceChip.elevated(
-              onSelected: enabled ? (bool value) { } : null,
+              onSelected: enabled ? (bool value) {} : null,
               selected: selected,
               color: color,
               label: const Text('ChoiceChip.elevated'),
@@ -504,30 +468,18 @@ void main() {
     await tester.pumpAndSettle();
 
     // Disabled ChoiceChip should have the provided disabledColor.
-    expect(
-      getMaterialBox(tester, find.byType(RawChip).first),
-      paints..rrect(color: disabledColor),
-    );
+    expect(getMaterialBox(tester, find.byType(RawChip).first), paints..rrect(color: disabledColor));
     // Disabled elevated ChoiceChip should have the provided disabledColor.
-    expect(
-      getMaterialBox(tester, find.byType(RawChip).last),
-      paints..rrect(color: disabledColor),
-    );
+    expect(getMaterialBox(tester, find.byType(RawChip).last), paints..rrect(color: disabledColor));
 
     // Test enabled & selected state.
     await tester.pumpWidget(buildApp(enabled: true, selected: true));
     await tester.pumpAndSettle();
 
     // Enabled & selected ChoiceChip should have the provided selectedColor.
-    expect(
-      getMaterialBox(tester, find.byType(RawChip).first),
-      paints..rrect(color: selectedColor),
-    );
+    expect(getMaterialBox(tester, find.byType(RawChip).first), paints..rrect(color: selectedColor));
     // Enabled & selected elevated ChoiceChip should have the provided selectedColor.
-    expect(
-      getMaterialBox(tester, find.byType(RawChip).last),
-      paints..rrect(color: selectedColor),
-    );
+    expect(getMaterialBox(tester, find.byType(RawChip).last), paints..rrect(color: selectedColor));
 
     // Test disabled & selected state.
     await tester.pumpWidget(buildApp(enabled: false, selected: true));
@@ -546,16 +498,15 @@ void main() {
   });
 
   testWidgets('ChoiceChip uses provided state color properties', (WidgetTester tester) async {
-    const Color disabledColor = Color(0xff00ff00);
-    const Color backgroundColor = Color(0xff0000ff);
-    const Color selectedColor = Color(0xffff0000);
-    Widget buildApp({ required bool enabled, required bool selected }) {
+    const disabledColor = Color(0xff00ff00);
+    const backgroundColor = Color(0xff0000ff);
+    const selectedColor = Color(0xffff0000);
+    Widget buildApp({required bool enabled, required bool selected}) {
       return wrapForChip(
-        useMaterial3: true,
         child: Column(
           children: <Widget>[
             ChoiceChip(
-              onSelected: enabled ? (bool value) { } : null,
+              onSelected: enabled ? (bool value) {} : null,
               selected: selected,
               disabledColor: disabledColor,
               backgroundColor: backgroundColor,
@@ -563,7 +514,7 @@ void main() {
               label: const Text('ChoiceChip'),
             ),
             ChoiceChip.elevated(
-              onSelected: enabled ? (bool value) { } : null,
+              onSelected: enabled ? (bool value) {} : null,
               selected: selected,
               disabledColor: disabledColor,
               backgroundColor: backgroundColor,
@@ -594,41 +545,24 @@ void main() {
     await tester.pumpAndSettle();
 
     // Disabled ChoiceChip should have the provided disabledColor.
-    expect(
-      getMaterialBox(tester, find.byType(RawChip).first),
-      paints..rrect(color: disabledColor),
-    );
+    expect(getMaterialBox(tester, find.byType(RawChip).first), paints..rrect(color: disabledColor));
     // Disabled elevated ChoiceChip should have the provided disabledColor.
-    expect(
-      getMaterialBox(tester, find.byType(RawChip).last),
-      paints..rrect(color: disabledColor),
-    );
+    expect(getMaterialBox(tester, find.byType(RawChip).last), paints..rrect(color: disabledColor));
 
     // Test enabled & selected chips.
     await tester.pumpWidget(buildApp(enabled: true, selected: true));
     await tester.pumpAndSettle();
 
     // Enabled & selected ChoiceChip should have the provided selectedColor.
-    expect(
-      getMaterialBox(tester, find.byType(RawChip).first),
-      paints..rrect(color: selectedColor),
-    );
+    expect(getMaterialBox(tester, find.byType(RawChip).first), paints..rrect(color: selectedColor));
     // Enabled & selected elevated ChoiceChip should have the provided selectedColor.
-    expect(
-      getMaterialBox(tester, find.byType(RawChip).last),
-      paints..rrect(color: selectedColor),
-    );
+    expect(getMaterialBox(tester, find.byType(RawChip).last), paints..rrect(color: selectedColor));
   });
 
   testWidgets('ChoiceChip can be tapped', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: Material(
-          child: ChoiceChip(
-            selected: false,
-            label: Text('choice chip'),
-          ),
-        ),
+        home: Material(child: ChoiceChip(selected: false, label: Text('choice chip'))),
       ),
     );
 
@@ -636,64 +570,70 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('ChoiceChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
-    const Text label = Text('label');
+  testWidgets('ChoiceChip clipBehavior properly passes through to the Material', (
+    WidgetTester tester,
+  ) async {
+    const label = Text('label');
     await tester.pumpWidget(wrapForChip(child: const ChoiceChip(label: label, selected: false)));
     checkChipMaterialClipBehavior(tester, Clip.none);
 
-    await tester.pumpWidget(wrapForChip(child: const ChoiceChip(label: label, selected: false, clipBehavior: Clip.antiAlias)));
+    await tester.pumpWidget(
+      wrapForChip(
+        child: const ChoiceChip(label: label, selected: false, clipBehavior: Clip.antiAlias),
+      ),
+    );
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 
   testWidgets('ChoiceChip passes iconTheme property to RawChip', (WidgetTester tester) async {
-    const IconThemeData iconTheme = IconThemeData(color: Colors.red);
-    await tester.pumpWidget(wrapForChip(
-      child: const ChoiceChip(
-      label: Text('Test'),
-      selected: true,
-      iconTheme: iconTheme,
-    )));
+    const iconTheme = IconThemeData(color: Colors.red);
+    await tester.pumpWidget(
+      wrapForChip(
+        child: const ChoiceChip(label: Text('Test'), selected: true, iconTheme: iconTheme),
+      ),
+    );
     final RawChip rawChip = tester.widget(find.byType(RawChip));
     expect(rawChip.iconTheme, iconTheme);
   });
 
-  testWidgets('ChoiceChip passes showCheckmark from ChipTheme to RawChip', (WidgetTester tester) async {
-    const bool showCheckmark = false;
-    await tester.pumpWidget(wrapForChip(
-      child: const ChipTheme(
-        data: ChipThemeData(
-          showCheckmark: showCheckmark,
-        ),
-        child: ChoiceChip(
-          label: Text('Test'),
-          selected: true,
+  testWidgets('ChoiceChip passes showCheckmark from ChipTheme to RawChip', (
+    WidgetTester tester,
+  ) async {
+    const showCheckmark = false;
+    await tester.pumpWidget(
+      wrapForChip(
+        child: const ChipTheme(
+          data: ChipThemeData(showCheckmark: showCheckmark),
+          child: ChoiceChip(label: Text('Test'), selected: true),
         ),
       ),
-    ));
+    );
     final RawChip rawChip = tester.widget(find.byType(RawChip));
     expect(rawChip.showCheckmark, showCheckmark);
   });
 
   testWidgets('ChoiceChip passes checkmark properties to RawChip', (WidgetTester tester) async {
-    const bool showCheckmark = false;
-    const Color checkmarkColor = Color(0xff0000ff);
-    await tester.pumpWidget(wrapForChip(
-      child: const ChoiceChip(
-        label: Text('Test'),
-        selected: true,
-        showCheckmark: showCheckmark,
-        checkmarkColor: checkmarkColor,
+    const showCheckmark = false;
+    const checkmarkColor = Color(0xff0000ff);
+    await tester.pumpWidget(
+      wrapForChip(
+        child: const ChoiceChip(
+          label: Text('Test'),
+          selected: true,
+          showCheckmark: showCheckmark,
+          checkmarkColor: checkmarkColor,
+        ),
       ),
-    ));
+    );
     final RawChip rawChip = tester.widget(find.byType(RawChip));
     expect(rawChip.showCheckmark, showCheckmark);
     expect(rawChip.checkmarkColor, checkmarkColor);
   });
 
   testWidgets('ChoiceChip uses provided iconTheme', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
 
-    Widget buildChip({ IconThemeData? iconTheme }) {
+    Widget buildChip({IconThemeData? iconTheme}) {
       return MaterialApp(
         theme: theme,
         home: Material(
@@ -719,12 +659,14 @@ void main() {
     expect(getIconData(tester).color, const Color(0xff00ff00));
   });
 
-  testWidgets('ChoiceChip avatar layout constraints can be customized', (WidgetTester tester) async {
-    const double border = 1.0;
-    const double iconSize = 18.0;
-    const double labelPadding = 8.0;
-    const double padding = 8.0;
-    const Size labelSize = Size(100, 100);
+  testWidgets('ChoiceChip avatar layout constraints can be customized', (
+    WidgetTester tester,
+  ) async {
+    const border = 1.0;
+    const iconSize = 18.0;
+    const labelPadding = 8.0;
+    const padding = 8.0;
+    const labelSize = Size(100, 100);
 
     Widget buildChip({BoxConstraints? avatarBoxConstraints}) {
       return wrapForChip(
@@ -777,40 +719,176 @@ void main() {
   });
 
   testWidgets('ChoiceChip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
-    final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
-      enableAnimation: AnimationStyle(duration: Durations.extralong4),
+    final chipAnimationStyle = ChipAnimationStyle(
+      enableAnimation: const AnimationStyle(duration: Durations.extralong4),
       selectAnimation: AnimationStyle.noAnimation,
     );
 
-    await tester.pumpWidget(wrapForChip(
-      child: Center(
-        child: ChoiceChip(
-          chipAnimationStyle: chipAnimationStyle,
-          selected: true,
-          label: const Text('ChoiceChip'),
+    await tester.pumpWidget(
+      wrapForChip(
+        child: Center(
+          child: ChoiceChip(
+            chipAnimationStyle: chipAnimationStyle,
+            selected: true,
+            label: const Text('ChoiceChip'),
+          ),
         ),
       ),
-    ));
+    );
 
     expect(tester.widget<RawChip>(find.byType(RawChip)).chipAnimationStyle, chipAnimationStyle);
   });
 
-  testWidgets('Elevated ChoiceChip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
-    final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
-      enableAnimation: AnimationStyle(duration: Durations.extralong4),
+  testWidgets('Elevated ChoiceChip.chipAnimationStyle is passed to RawChip', (
+    WidgetTester tester,
+  ) async {
+    final chipAnimationStyle = ChipAnimationStyle(
+      enableAnimation: const AnimationStyle(duration: Durations.extralong4),
       selectAnimation: AnimationStyle.noAnimation,
     );
 
-    await tester.pumpWidget(wrapForChip(
-      child: Center(
-        child: ChoiceChip.elevated(
-          chipAnimationStyle: chipAnimationStyle,
-          selected: true,
-          label: const Text('ChoiceChip'),
+    await tester.pumpWidget(
+      wrapForChip(
+        child: Center(
+          child: ChoiceChip.elevated(
+            chipAnimationStyle: chipAnimationStyle,
+            selected: true,
+            label: const Text('ChoiceChip'),
+          ),
         ),
       ),
-    ));
+    );
 
     expect(tester.widget<RawChip>(find.byType(RawChip)).chipAnimationStyle, chipAnimationStyle);
+  });
+
+  testWidgets('ChoiceChip has expected default mouse cursor on hover', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrapForChip(
+        child: Center(
+          child: ChoiceChip(
+            selected: false,
+            label: const Text('Chip'),
+            onSelected: (bool value) {},
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(10, 10));
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
+
+    final Offset chip = tester.getCenter(find.byType(ChoiceChip));
+    await gesture.moveTo(chip);
+    await tester.pump();
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
+  });
+
+  testWidgets('ChoiceChip mouse cursor behavior', (WidgetTester tester) async {
+    const SystemMouseCursor customCursor = SystemMouseCursors.grab;
+
+    await tester.pumpWidget(
+      wrapForChip(
+        child: const Center(
+          child: ChoiceChip(selected: false, mouseCursor: customCursor, label: Text('Chip')),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    await gesture.addPointer(location: const Offset(10, 10));
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
+
+    final Offset chip = tester.getCenter(find.text('Chip'));
+    await gesture.moveTo(chip);
+    await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), customCursor);
+  });
+
+  testWidgets('Mouse cursor resolves in focused/unfocused/disabled states', (
+    WidgetTester tester,
+  ) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final focusNode = FocusNode(debugLabel: 'Chip');
+    addTearDown(focusNode.dispose);
+
+    Widget buildChip({required bool enabled}) {
+      return wrapForChip(
+        child: Center(
+          child: ChoiceChip(
+            mouseCursor: const WidgetStateMouseCursor.fromMap(<WidgetStatesConstraint, MouseCursor>{
+              WidgetState.disabled: SystemMouseCursors.forbidden,
+              WidgetState.focused: SystemMouseCursors.grab,
+              WidgetState.selected: SystemMouseCursors.click,
+              WidgetState.any: SystemMouseCursors.basic,
+            }),
+            focusNode: focusNode,
+            label: const Text('Chip'),
+            onSelected: enabled ? (bool value) {} : null,
+            selected: false,
+          ),
+        ),
+      );
+    }
+
+    // Unfocused case.
+    await tester.pumpWidget(buildChip(enabled: true));
+    final TestGesture gesture1 = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    addTearDown(gesture1.removePointer);
+    await gesture1.addPointer(location: tester.getCenter(find.text('Chip')));
+    await tester.pump();
+    await gesture1.moveTo(tester.getCenter(find.text('Chip')));
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
+
+    // Focused case.
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grab,
+    );
+
+    // Disabled case.
+    await tester.pumpWidget(buildChip(enabled: false));
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.forbidden,
+    );
+  });
+
+  testWidgets('ChoiceChip renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(body: ChoiceChip(label: Text('X'), selected: true)),
+          ),
+        ),
+      ),
+    );
+    final Finder xText = find.text('X');
+    expect(tester.getSize(xText).isEmpty, isTrue);
   });
 }

@@ -4,14 +4,15 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_api_samples/material/list_tile/list_tile.3.dart' as example;
+import 'package:flutter_api_samples/material/list_tile/list_tile.3.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('ListTile color properties respect Material state color', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.ListTileApp(),
-    );
+  testWidgets('ListTile color properties respect Material state color', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.ListTileApp());
     ListTile listTile = tester.widget(find.byType(ListTile));
 
     // Enabled list tile uses black color for icon and headline.
@@ -51,8 +52,7 @@ void main() {
 }
 
 RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {
-  return tester.renderObject(find.descendant(
-    of: find.byType(ListTile),
-    matching: find.text(text),
-  ));
+  return tester.renderObject(
+    find.descendant(of: find.byType(ListTile), matching: find.text(text)),
+  );
 }

@@ -15,16 +15,14 @@ import '../painting/fake_image_provider.dart';
 
 Future<void> main() async {
   final FakeCodec fakeCodec = await FakeCodec.fromData(Uint8List.fromList(kAnimatedGif));
-  final FakeImageProvider fakeImageProvider = FakeImageProvider(fakeCodec);
+  final fakeImageProvider = FakeImageProvider(fakeCodec);
 
   testWidgets('Obscured image does not animate', (WidgetTester tester) async {
     final GlobalKey imageKey = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
         home: Image(image: fakeImageProvider, excludeFromSemantics: true, key: imageKey),
-        routes: <String, WidgetBuilder>{
-          '/page': (BuildContext context) => Container(),
-        },
+        routes: <String, WidgetBuilder>{'/page': (BuildContext context) => Container()},
       ),
     );
     final RenderImage renderImage = tester.renderObject(find.byType(Image));

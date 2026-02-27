@@ -27,5 +27,13 @@
   "lookUpButtonLabel": "Tepaga qarang",
   "searchWebButtonLabel": "Internetdan qidirish",
   "shareButtonLabel": "Ulashish…",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "Tozalash",
+  "cancelButtonLabel": "Bekor qilish",
+  "backButtonLabel": "Orqaga",
+  "expansionTileExpandedHint": "yigʻish uchun ikki marta bosing",
+  "expansionTileCollapsedHint": "yoyish uchun ikki marta bosing",
+  "expansionTileExpandedTapHint": "Yigʻish",
+  "expansionTileCollapsedTapHint": "Batafsil koʻrish uchun yoying",
+  "expandedHint": "Yigʻilgan",
+  "collapsedHint": "Yoyilgan"
 }

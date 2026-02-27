@@ -13,10 +13,7 @@ class SuffixIconExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(useMaterial3: true),
-      home: const Scaffold(body: InputDecoratorExample()),
-    );
+    return const MaterialApp(home: Scaffold(body: InputDecoratorExample()));
   }
 }
 
@@ -32,9 +29,7 @@ class InputDecoratorExample extends StatelessWidget {
         suffixIcon: Align(
           widthFactor: 1.0,
           heightFactor: 1.0,
-          child: Icon(
-            Icons.remove_red_eye,
-          ),
+          child: Icon(Icons.remove_red_eye),
         ),
       ),
     );

@@ -23,14 +23,14 @@ void main() {
   // affect the layout.
 
   test('A Banner with a location of topStart paints in the top left (LTR)', () {
-    final BannerPainter bannerPainter = BannerPainter(
+    final bannerPainter = BannerPainter(
       message: 'foo',
       textDirection: TextDirection.rtl,
       location: BannerLocation.topStart,
       layoutDirection: TextDirection.ltr,
     );
 
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
@@ -51,14 +51,14 @@ void main() {
   });
 
   test('A Banner with a location of topStart paints in the top right (RTL)', () {
-    final BannerPainter bannerPainter = BannerPainter(
+    final bannerPainter = BannerPainter(
       message: 'foo',
       textDirection: TextDirection.ltr,
       location: BannerLocation.topStart,
       layoutDirection: TextDirection.rtl,
     );
 
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
@@ -79,14 +79,14 @@ void main() {
   });
 
   test('A Banner with a location of topEnd paints in the top right (LTR)', () {
-    final BannerPainter bannerPainter = BannerPainter(
+    final bannerPainter = BannerPainter(
       message: 'foo',
       textDirection: TextDirection.ltr,
       location: BannerLocation.topEnd,
       layoutDirection: TextDirection.ltr,
     );
 
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
@@ -107,14 +107,14 @@ void main() {
   });
 
   test('A Banner with a location of topEnd paints in the top left (RTL)', () {
-    final BannerPainter bannerPainter = BannerPainter(
+    final bannerPainter = BannerPainter(
       message: 'foo',
       textDirection: TextDirection.rtl,
       location: BannerLocation.topEnd,
       layoutDirection: TextDirection.rtl,
     );
 
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
@@ -135,14 +135,14 @@ void main() {
   });
 
   test('A Banner with a location of bottomStart paints in the bottom left (LTR)', () {
-    final BannerPainter bannerPainter = BannerPainter(
+    final bannerPainter = BannerPainter(
       message: 'foo',
       textDirection: TextDirection.ltr,
       location: BannerLocation.bottomStart,
       layoutDirection: TextDirection.ltr,
     );
 
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
@@ -163,14 +163,14 @@ void main() {
   });
 
   test('A Banner with a location of bottomStart paints in the bottom right (RTL)', () {
-    final BannerPainter bannerPainter = BannerPainter(
+    final bannerPainter = BannerPainter(
       message: 'foo',
       textDirection: TextDirection.rtl,
       location: BannerLocation.bottomStart,
       layoutDirection: TextDirection.rtl,
     );
 
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
@@ -191,14 +191,14 @@ void main() {
   });
 
   test('A Banner with a location of bottomEnd paints in the bottom right (LTR)', () {
-    final BannerPainter bannerPainter = BannerPainter(
+    final bannerPainter = BannerPainter(
       message: 'foo',
       textDirection: TextDirection.rtl,
       location: BannerLocation.bottomEnd,
       layoutDirection: TextDirection.ltr,
     );
 
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
@@ -219,14 +219,14 @@ void main() {
   });
 
   test('A Banner with a location of bottomEnd paints in the bottom left (RTL)', () {
-    final BannerPainter bannerPainter = BannerPainter(
+    final bannerPainter = BannerPainter(
       message: 'foo',
       textDirection: TextDirection.ltr,
       location: BannerLocation.bottomEnd,
       layoutDirection: TextDirection.rtl,
     );
 
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
@@ -254,14 +254,24 @@ void main() {
         child: Banner(message: 'Hello', location: BannerLocation.topEnd),
       ),
     );
-    expect(find.byType(CustomPaint), paints
-      ..save()
-      ..translate(x: 800.0, y: 0.0)
-      ..rotate(angle: math.pi / 4.0)
-      ..rect(rect: const Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0), color: const Color(0x7f000000), hasMaskFilter: true)
-      ..rect(rect: const Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0), color: const Color(0xa0b71c1c), hasMaskFilter: false)
-      ..paragraph(offset: const Offset(-40.0, 29.0))
-      ..restore(),
+    expect(
+      find.byType(CustomPaint),
+      paints
+        ..save()
+        ..translate(x: 800.0, y: 0.0)
+        ..rotate(angle: math.pi / 4.0)
+        ..rect(
+          rect: const Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0),
+          color: const Color(0x7f000000),
+          hasMaskFilter: true,
+        )
+        ..rect(
+          rect: const Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0),
+          color: const Color(0xa0b71c1c),
+          hasMaskFilter: false,
+        )
+        ..paragraph(offset: const Offset(-40.0, 29.0))
+        ..restore(),
     );
     debugDisableShadows = true;
   });
@@ -269,14 +279,24 @@ void main() {
   testWidgets('Banner widget in MaterialApp', (WidgetTester tester) async {
     debugDisableShadows = false;
     await tester.pumpWidget(const MaterialApp(home: Placeholder()));
-    expect(find.byType(CheckedModeBanner), paints
-      ..save()
-      ..translate(x: 800.0, y: 0.0)
-      ..rotate(angle: math.pi / 4.0)
-      ..rect(rect: const Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0), color: const Color(0x7f000000), hasMaskFilter: true)
-      ..rect(rect: const Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0), color: const Color(0xa0b71c1c), hasMaskFilter: false)
-      ..paragraph(offset: const Offset(-40.0, 29.0))
-      ..restore(),
+    expect(
+      find.byType(CheckedModeBanner),
+      paints
+        ..save()
+        ..translate(x: 800.0, y: 0.0)
+        ..rotate(angle: math.pi / 4.0)
+        ..rect(
+          rect: const Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0),
+          color: const Color(0x7f000000),
+          hasMaskFilter: true,
+        )
+        ..rect(
+          rect: const Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0),
+          color: const Color(0xa0b71c1c),
+          hasMaskFilter: false,
+        )
+        ..paragraph(offset: const Offset(-40.0, 29.0))
+        ..restore(),
     );
     debugDisableShadows = true;
   });
@@ -294,5 +314,41 @@ void main() {
       ),
       areCreateAndDispose,
     );
+  });
+
+  testWidgets('Can configure shadow for Banner widget', (WidgetTester tester) async {
+    debugDisableShadows = false;
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Banner(
+          message: 'Shadow banner',
+          location: BannerLocation.topEnd,
+          shadow: BoxShadow(color: Color(0xFF008000), blurRadius: 8.0),
+        ),
+      ),
+    );
+    final Finder customPaint = find.byType(CustomPaint);
+
+    expect(customPaint, findsOneWidget);
+
+    final CustomPaint paintWidget = tester.widget(customPaint);
+    final painter = paintWidget.foregroundPainter! as BannerPainter;
+
+    expect(painter.shadow.color, const Color(0xFF008000));
+    expect(painter.shadow.blurRadius, 8.0);
+    debugDisableShadows = true;
+  });
+
+  testWidgets('CheckedModeBanner does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: CheckedModeBanner(child: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CheckedModeBanner)), Size.zero);
   });
 }

@@ -4,5 +4,15 @@
   "reorderItemUp": "Yuxarı köçürün",
   "reorderItemDown": "Aşağı köçürün",
   "reorderItemLeft": "Sola köçürün",
-  "reorderItemRight": "Sağa köçürün"
+  "reorderItemRight": "Sağa köçürün",
+  "copyButtonLabel": "Kopyalayın",
+  "cutButtonLabel": "Kəsin",
+  "lookUpButtonLabel": "Axtarın",
+  "searchWebButtonLabel": "Vebdə axtarın",
+  "shareButtonLabel": "Paylaşın",
+  "pasteButtonLabel": "Yerləşdirin",
+  "selectAllButtonLabel": "Hamısını seçin",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found",
+  "radioButtonUnselectedLabel": "Not selected"
 }

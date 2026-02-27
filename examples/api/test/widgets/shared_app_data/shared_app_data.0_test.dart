@@ -8,10 +8,10 @@ import 'package:flutter_api_samples/widgets/shared_app_data/shared_app_data.0.da
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Verify correct labels are displayed', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.SharedAppDataExampleApp(),
-    );
+  testWidgets('Verify correct labels are displayed', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.SharedAppDataExampleApp());
 
     expect(find.text('SharedAppData Sample'), findsOneWidget);
     expect(find.text('foo: initial'), findsOneWidget);
@@ -21,19 +21,19 @@ void main() {
   });
 
   testWidgets('foo value can be updated', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.SharedAppDataExampleApp(),
-    );
+    await tester.pumpWidget(const example.SharedAppDataExampleApp());
 
     int counter = 0;
 
     while (counter < 10) {
       counter++;
 
-      await tester.tap(find.ancestor(
-        of: find.text('change foo'),
-        matching: find.byType(ElevatedButton),
-      ));
+      await tester.tap(
+        find.ancestor(
+          of: find.text('change foo'),
+          matching: find.byType(ElevatedButton),
+        ),
+      );
       await tester.pump();
 
       expect(find.text('foo: FOO $counter'), findsOneWidget);
@@ -41,29 +41,29 @@ void main() {
   });
 
   testWidgets('bar value can be updated', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.SharedAppDataExampleApp(),
-    );
+    await tester.pumpWidget(const example.SharedAppDataExampleApp());
 
     int counter = 0;
 
     while (counter < 10) {
       counter++;
 
-      await tester.tap(find.ancestor(
-        of: find.text('change bar'),
-        matching: find.byType(ElevatedButton),
-      ));
+      await tester.tap(
+        find.ancestor(
+          of: find.text('change bar'),
+          matching: find.byType(ElevatedButton),
+        ),
+      );
       await tester.pump();
 
       expect(find.text('bar: BAR $counter'), findsOneWidget);
     }
   });
 
-  testWidgets('foo and bar values update independently of one another', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.SharedAppDataExampleApp(),
-    );
+  testWidgets('foo and bar values update independently of one another', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.SharedAppDataExampleApp());
 
     int fooCounter = 0;
     int barCounter = 0;
@@ -84,15 +84,11 @@ void main() {
       await tester.pump();
 
       expect(
-        find.text(
-          'foo: ${fooCounter == 0 ? 'initial' : 'FOO $fooCounter'}',
-        ),
+        find.text('foo: ${fooCounter == 0 ? 'initial' : 'FOO $fooCounter'}'),
         findsOneWidget,
       );
       expect(
-        find.text(
-          'bar: ${barCounter == 0 ? 'initial' : 'BAR $barCounter'}',
-        ),
+        find.text('bar: ${barCounter == 0 ? 'initial' : 'BAR $barCounter'}'),
         findsOneWidget,
       );
     }

@@ -27,5 +27,13 @@
   "lookUpButtonLabel": "Cerca",
   "searchWebButtonLabel": "Cerca sul web",
   "shareButtonLabel": "Condividi…",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "Cancella",
+  "cancelButtonLabel": "Annulla",
+  "backButtonLabel": "Indietro",
+  "expansionTileExpandedHint": "tocca due volte per comprimere",
+  "expansionTileCollapsedHint": "Tocca due volte per espandere",
+  "expansionTileExpandedTapHint": "comprimere",
+  "expansionTileCollapsedTapHint": "espandere e visualizzare altri dettagli",
+  "expandedHint": "Compresso",
+  "collapsedHint": "Espanso"
 }

@@ -7,6 +7,7 @@ $ sudo softwareupdate --install-rosetta --agree-to-license
 ```
 
 If you see CocoaPods crashes related to `ffi`, try reinstalling the Ruby gem with the `--enable-libffi-alloc` flag:
+
 ```
 sudo gem uninstall ffi && sudo gem install ffi -- --enable-libffi-alloc
 ```
@@ -15,7 +16,7 @@ sudo gem uninstall ffi && sudo gem install ffi -- --enable-libffi-alloc
 
 You can use Apple Silicon-based Mac devices as a developer workstation (host) for building Flutter apps. While some tools still use Rosetta, Apple Silicon-based Macs are fully supported as a host.
 
-As we build more Apple Silicon support into the tooling, and depending on your tolerance for risk, [you may want to experiment with the `beta` channel](https://flutter.dev/docs/development/tools/sdk/upgrading#switching-flutter-channels). (This was previously also available on the dev channel, but [it has been retired](https://medium.com/flutter/whats-new-in-flutter-2-8-d085b763d181#34c4).)
+As we build more Apple Silicon support into the tooling, and depending on your tolerance for risk, [you may want to experiment with the `beta` channel](https://docs.flutter.dev/install/upgrade#switching-flutter-channels). (This was previously also available on the dev channel, but [it has been retired](https://blog.flutter.dev/whats-new-in-flutter-2-8-d085b763d181#34c4).)
 
 [Issue 60118](https://github.com/flutter/flutter/issues/60118) tracks the full set of work to support this feature.
 
@@ -29,4 +30,4 @@ We also plan to offer support for compilation directly to ARM64, as well as univ
 
 ## Filing Issues
 
-If you experience a problem relating to using Flutter on Apple Silicon hardware, please [file an issue on GitHub](https://github.com/flutter/flutter/issues/new?template=1_activation.yml) with specific repro steps and information about your hardware and software configuration (paste the results of `flutter doctor -v`). Thank you!
+If you experience a problem relating to using Flutter on Apple Silicon hardware, please [file an issue on GitHub](https://github.com/flutter/flutter/issues/new?template=01_activation.yml) with specific repro steps and information about your hardware and software configuration (paste the results of `flutter doctor -v`). Thank you!

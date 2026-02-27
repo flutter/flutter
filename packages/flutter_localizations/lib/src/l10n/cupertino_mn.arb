@@ -27,5 +27,13 @@
   "lookUpButtonLabel": "Дээшээ харах",
   "searchWebButtonLabel": "Вебээс хайх",
   "shareButtonLabel": "Хуваалцах...",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "Арилгах",
+  "cancelButtonLabel": "Цуцлах",
+  "backButtonLabel": "Буцах",
+  "expansionTileExpandedHint": "хураахын тулд хоёр товшино уу",
+  "expansionTileCollapsedHint": "дэлгэхийн тулд хоёр товшино уу",
+  "expansionTileExpandedTapHint": "Хураах",
+  "expansionTileCollapsedTapHint": "Илүү дэлгэрэнгүй авах бол дэлгэнэ үү",
+  "expandedHint": "Хураасан",
+  "collapsedHint": "Дэлгэсэн"
 }

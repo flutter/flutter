@@ -32,21 +32,15 @@ import '../doctor_validator.dart';
 ///
 /// Intellij Flutter plugin's files can be found here:
 ///   https://plugins.jetbrains.com/plugin/9212-flutter/versions/stable
-///
-/// See also:
-///   * [IntellijValidator], the validator base class that uses this to check
-///     plugin versions.
 class IntelliJPlugins {
-  IntelliJPlugins(this.pluginsPath, {
-    required FileSystem fileSystem
-  }) : _fileSystem = fileSystem;
+  IntelliJPlugins(this.pluginsPath, {required FileSystem fileSystem}) : _fileSystem = fileSystem;
 
   final FileSystem _fileSystem;
   final String pluginsPath;
 
-  static final Version kMinFlutterPluginVersion = Version(16, 0, 0);
-  static const String kIntellijDartPluginUrl = 'https://plugins.jetbrains.com/plugin/6351-dart';
-  static const String kIntellijFlutterPluginUrl = 'https://plugins.jetbrains.com/plugin/9212-flutter';
+  static final kMinFlutterPluginVersion = Version(16, 0, 0);
+  static const kIntellijDartPluginUrl = 'https://plugins.jetbrains.com/plugin/6351-dart';
+  static const kIntellijFlutterPluginUrl = 'https://plugins.jetbrains.com/plugin/9212-flutter';
 
   void validatePackage(
     List<ValidationMessage> messages,
@@ -55,7 +49,7 @@ class IntelliJPlugins {
     String url, {
     Version? minVersion,
   }) {
-    for (final String packageName in packageNames) {
+    for (final packageName in packageNames) {
       if (!_hasPackage(packageName)) {
         continue;
       }
@@ -63,20 +57,19 @@ class IntelliJPlugins {
       final String? versionText = _readPackageVersion(packageName);
       final Version? version = Version.parse(versionText);
       if (version != null && minVersion != null && version < minVersion) {
-        messages.add(ValidationMessage.error(
-          '$title plugin version $versionText - the recommended minimum version is $minVersion'),
+        messages.add(
+          ValidationMessage.error(
+            '$title plugin version $versionText - the recommended minimum version is $minVersion',
+          ),
         );
       } else {
-        messages.add(ValidationMessage(
-          '$title plugin ${version != null ? "version $version" : "installed"}'),
+        messages.add(
+          ValidationMessage('$title plugin ${version != null ? "version $version" : "installed"}'),
         );
       }
       return;
     }
-    messages.add(ValidationMessage(
-      '$title plugin can be installed from:',
-      contextUrl: url,
-    ));
+    messages.add(ValidationMessage('$title plugin can be installed from:', contextUrl: url));
   }
 
   bool _hasPackage(String packageName) {
@@ -88,13 +81,12 @@ class IntelliJPlugins {
   }
 
   ArchiveFile? _findPluginXml(String packageName) {
-    final List<File> mainJarFileList = <File>[];
+    final mainJarFileList = <File>[];
     if (packageName.endsWith('.jar')) {
       // package exists (checked in _hasPackage)
       mainJarFileList.add(_fileSystem.file(_fileSystem.path.join(pluginsPath, packageName)));
     } else {
-      final String packageLibPath =
-          _fileSystem.path.join(pluginsPath, packageName, 'lib');
+      final String packageLibPath = _fileSystem.path.join(pluginsPath, packageName, 'lib');
       if (!_fileSystem.isDirectorySync(packageLibPath)) {
         return null;
       }
@@ -104,7 +96,7 @@ class IntelliJPlugins {
           .listSync()
           .whereType<File>()
           .where((File file) {
-            final String fileExt= _fileSystem.path.extension(file.path);
+            final String fileExt = _fileSystem.path.extension(file.path);
             return fileExt == '.jar' || fileExt == '.zip';
           })
           .toList();
@@ -114,10 +106,12 @@ class IntelliJPlugins {
       }
       // Prefer file with the same suffix as the package name
       pluginJarFiles.sort((File a, File b) {
-        final bool aStartWithPackageName =
-            a.basename.toLowerCase().startsWith(packageName.toLowerCase());
-        final bool bStartWithPackageName =
-            b.basename.toLowerCase().startsWith(packageName.toLowerCase());
+        final bool aStartWithPackageName = a.basename.toLowerCase().startsWith(
+          packageName.toLowerCase(),
+        );
+        final bool bStartWithPackageName = b.basename.toLowerCase().startsWith(
+          packageName.toLowerCase(),
+        );
         if (bStartWithPackageName != aStartWithPackageName) {
           return bStartWithPackageName ? 1 : -1;
         }
@@ -126,7 +120,7 @@ class IntelliJPlugins {
       mainJarFileList.addAll(pluginJarFiles);
     }
 
-    for (final File file in mainJarFileList) {
+    for (final file in mainJarFileList) {
       final Archive archive = ZipDecoder().decodeBytes(file.readAsBytesSync());
       final ArchiveFile? archiveFile = archive.findFile('META-INF/plugin.xml');
       if (archiveFile != null) {
@@ -143,7 +137,7 @@ class IntelliJPlugins {
         return null;
       }
       final String content = utf8.decode(archiveFile.content as List<int>);
-      const String versionStartTag = '<version>';
+      const versionStartTag = '<version>';
       final int start = content.indexOf(versionStartTag);
       final int end = content.indexOf('</version>', start);
       return content.substring(start + versionStartTag.length, end);

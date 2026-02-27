@@ -19,25 +19,24 @@ void main() {
     expect(kFlutterMemoryAllocationsEnabled, isFalse);
   });
 
-  testWidgets(
-    '$FlutterMemoryAllocations is noop when kFlutterMemoryAllocationsEnabled is false.',
-    (WidgetTester tester) async {
-      ObjectEvent? receivedEvent;
-      ObjectEvent listener(ObjectEvent event) => receivedEvent = event;
+  testWidgets('$FlutterMemoryAllocations is noop when kFlutterMemoryAllocationsEnabled is false.', (
+    WidgetTester tester,
+  ) async {
+    ObjectEvent? receivedEvent;
+    ObjectEvent listener(ObjectEvent event) => receivedEvent = event;
 
-      ma.addListener(listener);
-      _checkSdkHandlersNotSet();
-      expect(ma.hasListeners, isFalse);
+    ma.addListener(listener);
+    _checkSdkHandlersNotSet();
+    expect(ma.hasListeners, isFalse);
 
-      await _activateFlutterObjects(tester);
-      _checkSdkHandlersNotSet();
-      expect(receivedEvent, isNull);
-      expect(ma.hasListeners, isFalse);
+    await _activateFlutterObjects(tester);
+    _checkSdkHandlersNotSet();
+    expect(receivedEvent, isNull);
+    expect(ma.hasListeners, isFalse);
 
-      ma.removeListener(listener);
-      _checkSdkHandlersNotSet();
-    },
-  );
+    ma.removeListener(listener);
+    _checkSdkHandlersNotSet();
+  });
 }
 
 void _checkSdkHandlersNotSet() {
@@ -49,8 +48,8 @@ void _checkSdkHandlersNotSet() {
 
 /// Create and dispose Flutter objects to fire memory allocation events.
 Future<void> _activateFlutterObjects(WidgetTester tester) async {
-  final ValueNotifier<bool> valueNotifier = ValueNotifier<bool>(true);
-  final ChangeNotifier changeNotifier = ChangeNotifier()..addListener(() {});
+  final valueNotifier = ValueNotifier<bool>(true);
+  final changeNotifier = ChangeNotifier()..addListener(() {});
   final Picture picture = _createPicture();
 
   valueNotifier.dispose();
@@ -69,9 +68,9 @@ Future<Image> _createImage() async {
 }
 
 Picture _createPicture() {
-  final PictureRecorder recorder = PictureRecorder();
-  final Canvas canvas = Canvas(recorder);
-  const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+  final recorder = PictureRecorder();
+  final canvas = Canvas(recorder);
+  const rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
   canvas.clipRect(rect);
   return recorder.endRecording();
 }

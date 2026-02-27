@@ -9,10 +9,7 @@ import 'package:flutter/material.dart';
 import '../rendering/src/sector_layout.dart';
 
 RenderBoxToRenderSectorAdapter initCircle() {
-  return RenderBoxToRenderSectorAdapter(
-    innerRadius: 25.0,
-    child: RenderSectorRing(),
-  );
+  return RenderBoxToRenderSectorAdapter(innerRadius: 25.0, child: RenderSectorRing());
 }
 
 class SectorApp extends StatefulWidget {
@@ -23,13 +20,13 @@ class SectorApp extends StatefulWidget {
 }
 
 class SectorAppState extends State<SectorApp> {
-
   final RenderBoxToRenderSectorAdapter sectors = initCircle();
   final math.Random rand = math.Random(1);
 
   List<double> wantedSectorSizes = <double>[];
   List<double> actualSectorSizes = <double>[];
-  double get currentTheta => wantedSectorSizes.fold<double>(0.0, (double total, double value) => total + value);
+  double get currentTheta =>
+      wantedSectorSizes.fold<double>(0.0, (double total, double value) => total + value);
 
   void addSector() {
     final double currentTheta = this.currentTheta;
@@ -53,17 +50,19 @@ class SectorAppState extends State<SectorApp> {
   }
 
   void doUpdates() {
-    int index = 0;
-    while (index < actualSectorSizes.length && index < wantedSectorSizes.length && actualSectorSizes[index] == wantedSectorSizes[index]) {
+    var index = 0;
+    while (index < actualSectorSizes.length &&
+        index < wantedSectorSizes.length &&
+        actualSectorSizes[index] == wantedSectorSizes[index]) {
       index += 1;
     }
-    final RenderSectorRing ring = sectors.child! as RenderSectorRing;
+    final ring = sectors.child! as RenderSectorRing;
     while (index < actualSectorSizes.length) {
       ring.remove(ring.lastChild!);
       actualSectorSizes.removeLast();
     }
     while (index < wantedSectorSizes.length) {
-      final Color color = Color(((0xFF << 24) + rand.nextInt(0xFFFFFF)) | 0x808080);
+      final color = Color(((0xFF << 24) + rand.nextInt(0xFFFFFF)) | 0x808080);
       ring.add(RenderSolidColor(color, desiredDeltaTheta: wantedSectorSizes[index]));
       actualSectorSizes.add(wantedSectorSizes[index]);
       index += 1;
@@ -71,15 +70,13 @@ class SectorAppState extends State<SectorApp> {
   }
 
   static RenderBoxToRenderSectorAdapter initSector(Color color) {
-    final RenderSectorRing ring = RenderSectorRing(padding: 1.0);
+    final ring = RenderSectorRing(padding: 1.0);
     ring.add(RenderSolidColor(const Color(0xFF909090), desiredDeltaTheta: kTwoPi * 0.15));
     ring.add(RenderSolidColor(const Color(0xFF909090), desiredDeltaTheta: kTwoPi * 0.15));
     ring.add(RenderSolidColor(color, desiredDeltaTheta: kTwoPi * 0.2));
-    return RenderBoxToRenderSectorAdapter(
-      innerRadius: 5.0,
-      child: ring,
-    );
+    return RenderBoxToRenderSectorAdapter(innerRadius: 5.0, child: ring);
   }
+
   RenderBoxToRenderSectorAdapter sectorAddIcon = initSector(const Color(0xFF00DD00));
   RenderBoxToRenderSectorAdapter sectorRemoveIcon = initSector(const Color(0xFFDD0000));
 
@@ -154,9 +151,7 @@ class SectorAppState extends State<SectorApp> {
         Expanded(
           child: Container(
             margin: const EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-              border: Border.all(),
-            ),
+            decoration: BoxDecoration(border: Border.all()),
             padding: const EdgeInsets.all(8.0),
             child: WidgetToRenderBoxAdapter(
               renderBox: sectors,
@@ -174,12 +169,9 @@ class SectorAppState extends State<SectorApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData.light(),
       title: 'Sector Layout',
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Sector Layout in a Widget Tree'),
-        ),
+        appBar: AppBar(title: const Text('Sector Layout in a Widget Tree')),
         body: buildBody(),
       ),
     );

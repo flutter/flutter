@@ -17,6 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     # Source available at https://github.com/actions/labeler/blob/main/README.md
-    - uses: actions/labeler@8558fd74291d67161a8a78ce36a881fa63b766a9
+    - uses: actions/labeler@634933edcd8ababfe52f92936142cc22ac488b1b
       with:
         sync-labels: true

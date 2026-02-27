@@ -23,18 +23,22 @@ const FileSystem fs = LocalFileSystem();
 /// Archives contain the executables and customizations for the platform that
 /// they are created on.
 Future<void> main(List<String> rawArguments) async {
-  final ArgParser argParser = ArgParser();
+  final argParser = ArgParser();
   argParser.addOption(
     'temp_dir',
-    help: 'A location where temporary files may be written. Defaults to a '
+    help:
+        'A location where temporary files may be written. Defaults to a '
         'directory in the system temp folder. Will write a few GiB of data, '
         'so it should have sufficient free space. If a temp_dir is not '
         'specified, then the default temp_dir will be created, used, and '
         'removed automatically.',
   );
-  argParser.addOption('revision',
-      help: 'The Flutter git repo revision to build the '
-          'archive with. Must be the full 40-character hash. Required.');
+  argParser.addOption(
+    'revision',
+    help:
+        'The Flutter git repo revision to build the '
+        'archive with. Must be the full 40-character hash. Required.',
+  );
   argParser.addOption(
     'branch',
     allowed: Branch.values.map<String>((Branch branch) => branch.name),
@@ -42,32 +46,26 @@ Future<void> main(List<String> rawArguments) async {
   );
   argParser.addOption(
     'output',
-    help: 'The path to the directory where the output archive should be '
+    help:
+        'The path to the directory where the output archive should be '
         'written. If --output is not specified, the archive will be written to '
         "the current directory. If the output directory doesn't exist, it, and "
         'the path to it, will be created.',
   );
   argParser.addFlag(
     'publish',
-    help: 'If set, will publish the archive to Google Cloud Storage upon '
+    help:
+        'If set, will publish the archive to Google Cloud Storage upon '
         'successful creation of the archive. Will publish under this '
         'directory: $baseUrl$releaseFolder',
   );
-  argParser.addFlag(
-    'force',
-    abbr: 'f',
-    help: 'Overwrite a previously uploaded package.',
-  );
+  argParser.addFlag('force', abbr: 'f', help: 'Overwrite a previously uploaded package.');
   argParser.addFlag(
     'dry_run',
     negatable: false,
     help: 'Prints gsutil commands instead of executing them.',
   );
-  argParser.addFlag(
-    'help',
-    negatable: false,
-    help: 'Print help for this command.',
-  );
+  argParser.addFlag('help', negatable: false, help: 'Print help for this command.');
 
   final ArgResults parsedArguments = argParser.parse(rawArguments);
 
@@ -85,7 +83,7 @@ Future<void> main(List<String> rawArguments) async {
   if (!parsedArguments.wasParsed('revision')) {
     errorExit('Invalid argument: --revision must be specified.');
   }
-  final String revision = parsedArguments['revision'] as String;
+  final revision = parsedArguments['revision'] as String;
   if (revision.length != 40) {
     errorExit('Invalid argument: --revision must be the entire hash, not just a prefix.');
   }
@@ -94,9 +92,9 @@ Future<void> main(List<String> rawArguments) async {
     errorExit('Invalid argument: --branch must be specified.');
   }
 
-  final String? tempDirArg = parsedArguments['temp_dir'] as String?;
+  final tempDirArg = parsedArguments['temp_dir'] as String?;
   final Directory tempDir;
-  bool removeTempDir = false;
+  var removeTempDir = false;
   if (tempDirArg == null || tempDirArg.isEmpty) {
     tempDir = fs.systemTempDirectory.createTempSync('flutter_package.');
     removeTempDir = true;
@@ -117,10 +115,10 @@ Future<void> main(List<String> rawArguments) async {
     }
   }
 
-  final bool publish = parsedArguments['publish'] as bool;
-  final bool dryRun = parsedArguments['dry_run'] as bool;
+  final publish = parsedArguments['publish'] as bool;
+  final dryRun = parsedArguments['dry_run'] as bool;
   final Branch branch = Branch.values.byName(parsedArguments['branch'] as String);
-  final ArchiveCreator creator = ArchiveCreator(
+  final creator = ArchiveCreator(
     tempDir,
     outputDir,
     revision,
@@ -128,12 +126,12 @@ Future<void> main(List<String> rawArguments) async {
     fs: fs,
     strict: publish && !dryRun,
   );
-  int exitCode = 0;
+  var exitCode = 0;
   late String message;
   try {
     final Map<String, String> version = await creator.initializeRepo();
     final File outputFile = await creator.createArchive();
-    final ArchivePublisher publisher = ArchivePublisher(
+    final publisher = ArchivePublisher(
       tempDir,
       revision,
       branch,

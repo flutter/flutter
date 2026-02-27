@@ -16,9 +16,7 @@ class CharacterActivatorExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('CharacterActivator Sample')),
-        body: const Center(
-          child: CharacterActivatorExample(),
-        ),
+        body: const Center(child: CharacterActivatorExample()),
       ),
     );
   }
@@ -32,7 +30,8 @@ class CharacterActivatorExample extends StatefulWidget {
   const CharacterActivatorExample({super.key});
 
   @override
-  State<CharacterActivatorExample> createState() => _CharacterActivatorExampleState();
+  State<CharacterActivatorExample> createState() =>
+      _CharacterActivatorExampleState();
 }
 
 class _CharacterActivatorExampleState extends State<CharacterActivatorExample> {
@@ -56,9 +55,7 @@ class _CharacterActivatorExampleState extends State<CharacterActivatorExample> {
         child: const Focus(
           autofocus: true,
           child: Column(
-            children: <Widget>[
-              Text('Press question mark for help'),
-            ],
+            children: <Widget>[Text('Press question mark for help')],
           ),
         ),
       ),

@@ -113,7 +113,7 @@ function build_snippets_tool() (
   echo "Building snippets tool executable."
   command cd "$snippets_dir"
   mkdir -p "$output_dir"
-  dart pub get
+  "$FLUTTER" pub get
   dart compile exe -o "$output_dir/snippets" bin/snippets.dart
 )
 
@@ -121,7 +121,7 @@ function generate_docs() {
     # Install and activate dartdoc.
     # When updating to a new dartdoc version, please also update
     # `dartdoc_options.yaml` to include newly introduced error and warning types.
-    "$DART" pub global activate dartdoc 8.0.10
+    "$DART" pub global activate dartdoc 9.0.0
 
     # Build and install the snippets tool, which resides in
     # the dev/docs/snippets directory.
@@ -132,7 +132,7 @@ function generate_docs() {
 
     # Make sure that create_api_docs.dart has all the dependencies it needs.
     (cd "$FLUTTER_ROOT/dev/tools" && "$FLUTTER" pub get)
-    (cd "$FLUTTER_ROOT" && "$DART" --disable-dart-dev --enable-asserts "$FLUTTER_ROOT/dev/tools/create_api_docs.dart" --output-dir="$DOC_DIR")
+    (cd "$FLUTTER_ROOT" && "$DART" --enable-asserts "$FLUTTER_ROOT/dev/tools/create_api_docs.dart" --output-dir="$DOC_DIR")
 }
 
 function main() {

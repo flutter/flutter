@@ -8,8 +8,9 @@ import 'package:flutter_api_samples/cupertino/dialog/cupertino_popup_surface.0.d
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('CupertinoPopupSurface displays expected widgets in init state',
-      (WidgetTester tester) async {
+  testWidgets('CupertinoPopupSurface displays expected widgets in init state', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.PopupSurfaceApp());
 
     final Finder cupertinoButton = find.byType(CupertinoButton);
@@ -19,12 +20,16 @@ void main() {
     expect(cupertinoSwitch, findsOneWidget);
   });
 
-  testWidgets('CupertinoPopupSurface is displayed with painted surface',
-      (WidgetTester tester) async {
+  testWidgets('CupertinoPopupSurface is displayed with painted surface', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.PopupSurfaceApp());
 
     // CupertinoSwitch is toggled on by default.
-    expect(tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch)).value, isTrue);
+    expect(
+      tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch)).value,
+      isTrue,
+    );
 
     // Tap on the CupertinoButton to show the CupertinoPopupSurface.
     await tester.tap(find.byType(CupertinoButton));
@@ -42,8 +47,9 @@ void main() {
     expect(coloredBox, findsOneWidget);
   });
 
-  testWidgets('CupertinoPopupSurface is displayed without painted surface',
-      (WidgetTester tester) async {
+  testWidgets('CupertinoPopupSurface is displayed without painted surface', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.PopupSurfaceApp());
 
     // Toggling off CupertinoSwitch and confirm its state.

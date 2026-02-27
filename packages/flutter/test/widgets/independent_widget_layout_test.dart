@@ -4,12 +4,12 @@
 
 import 'dart:ui' show FlutterView;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class ScheduledFrameTrackingPlatformDispatcher extends TestPlatformDispatcher {
-  ScheduledFrameTrackingPlatformDispatcher({ required super.platformDispatcher });
+  ScheduledFrameTrackingPlatformDispatcher({required super.platformDispatcher});
 
   int _scheduledFrameCount = 0;
   int get scheduledFrameCount => _scheduledFrameCount;
@@ -26,16 +26,16 @@ class ScheduledFrameTrackingPlatformDispatcher extends TestPlatformDispatcher {
 }
 
 class ScheduledFrameTrackingBindings extends AutomatedTestWidgetsFlutterBinding {
-  late final ScheduledFrameTrackingPlatformDispatcher _platformDispatcher = ScheduledFrameTrackingPlatformDispatcher(platformDispatcher: super.platformDispatcher);
+  late final ScheduledFrameTrackingPlatformDispatcher _platformDispatcher =
+      ScheduledFrameTrackingPlatformDispatcher(platformDispatcher: super.platformDispatcher);
 
   @override
   ScheduledFrameTrackingPlatformDispatcher get platformDispatcher => _platformDispatcher;
 }
 
 class OffscreenRenderView extends RenderView {
-  OffscreenRenderView({required super.view}) : super(
-    configuration: TestViewConfiguration.fromView(view: view),
-  );
+  OffscreenRenderView({required super.view})
+    : super(configuration: TestViewConfiguration.fromView(view: view));
 
   @override
   void compositeFrame() {
@@ -74,7 +74,6 @@ class OffscreenWidgetTree {
     pipelineOwner.flushSemantics();
     buildOwner.finalizeTree();
   }
-
 }
 
 class Counter {
@@ -89,11 +88,7 @@ class Trigger {
 }
 
 class TriggerableWidget extends StatefulWidget {
-  const TriggerableWidget({
-    super.key,
-    required this.trigger,
-    required this.counter,
-  });
+  const TriggerableWidget({super.key, required this.trigger, required this.counter});
 
   final Trigger trigger;
   final Counter counter;
@@ -130,11 +125,7 @@ class TriggerableState extends State<TriggerableWidget> {
 }
 
 class TestFocusable extends StatefulWidget {
-  const TestFocusable({
-    super.key,
-    required this.focusNode,
-    this.autofocus = true,
-  });
+  const TestFocusable({super.key, required this.focusNode, this.autofocus = true});
 
   final bool autofocus;
   final FocusNode focusNode;
@@ -166,22 +157,25 @@ void main() {
   // of times a frame has been scheduled.
   ScheduledFrameTrackingBindings();
 
-  testWidgets('RenderObjectToWidgetAdapter.attachToRenderTree does not schedule frame', (WidgetTester tester) async {
+  testWidgets('RenderObjectToWidgetAdapter.attachToRenderTree does not schedule frame', (
+    WidgetTester tester,
+  ) async {
     expect(WidgetsBinding.instance, isA<ScheduledFrameTrackingBindings>());
-    final ScheduledFrameTrackingPlatformDispatcher platformDispatcher = tester.platformDispatcher as ScheduledFrameTrackingPlatformDispatcher;
+    final platformDispatcher =
+        tester.platformDispatcher as ScheduledFrameTrackingPlatformDispatcher;
     platformDispatcher.resetScheduledFrameCount();
     expect(platformDispatcher.scheduledFrameCount, isZero);
-    final OffscreenWidgetTree tree = OffscreenWidgetTree(tester.view);
+    final tree = OffscreenWidgetTree(tester.view);
     tree.pumpWidget(const SizedBox.shrink());
     expect(platformDispatcher.scheduledFrameCount, isZero);
   });
 
   testWidgets('no crosstalk between widget build owners', (WidgetTester tester) async {
-    final Trigger trigger1 = Trigger();
-    final Counter counter1 = Counter();
-    final Trigger trigger2 = Trigger();
-    final Counter counter2 = Counter();
-    final OffscreenWidgetTree tree = OffscreenWidgetTree(tester.view);
+    final trigger1 = Trigger();
+    final counter1 = Counter();
+    final trigger2 = Trigger();
+    final counter2 = Counter();
+    final tree = OffscreenWidgetTree(tester.view);
     // Both counts should start at zero
     expect(counter1.count, equals(0));
     expect(counter2.count, equals(0));
@@ -227,22 +221,14 @@ void main() {
   });
 
   testWidgets('no crosstalk between focus nodes', (WidgetTester tester) async {
-    final OffscreenWidgetTree tree = OffscreenWidgetTree(tester.view);
-    final FocusNode onscreenFocus = FocusNode();
+    final tree = OffscreenWidgetTree(tester.view);
+    final onscreenFocus = FocusNode();
     addTearDown(onscreenFocus.dispose);
-    final FocusNode offscreenFocus = FocusNode();
+    final offscreenFocus = FocusNode();
     addTearDown(offscreenFocus.dispose);
 
-    await tester.pumpWidget(
-      TestFocusable(
-        focusNode: onscreenFocus,
-      ),
-    );
-    tree.pumpWidget(
-      TestFocusable(
-        focusNode: offscreenFocus,
-      ),
-    );
+    await tester.pumpWidget(TestFocusable(focusNode: onscreenFocus));
+    tree.pumpWidget(TestFocusable(focusNode: offscreenFocus));
 
     // Autofocus is delayed one frame.
     await tester.pump();
@@ -253,8 +239,8 @@ void main() {
   });
 
   testWidgets('able to tear down offscreen tree', (WidgetTester tester) async {
-    final OffscreenWidgetTree tree = OffscreenWidgetTree(tester.view);
-    final List<WidgetState> states = <WidgetState>[];
+    final tree = OffscreenWidgetTree(tester.view);
+    final states = <WidgetState>[];
     tree.pumpWidget(SizedBox(child: TestStates(states: states)));
     expect(states, <WidgetState>[WidgetState.initialized]);
     expect(tree.renderView.child, isNotNull);
@@ -264,10 +250,7 @@ void main() {
   });
 }
 
-enum WidgetState {
-  initialized,
-  disposed,
-}
+enum WidgetState { initialized, disposed }
 
 class TestStates extends StatefulWidget {
   const TestStates({super.key, required this.states});

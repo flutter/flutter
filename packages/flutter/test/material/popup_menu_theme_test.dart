@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -13,8 +14,8 @@ PopupMenuThemeData _popupMenuThemeM2() {
     shape: const BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
     elevation: 12.0,
     textStyle: const TextStyle(color: Color(0xffffffff), textBaseline: TextBaseline.alphabetic),
-    mouseCursor: MaterialStateProperty.resolveWith<MouseCursor?>((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    mouseCursor: WidgetStateProperty.resolveWith<MouseCursor?>((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return SystemMouseCursors.contextMenu;
       }
       return SystemMouseCursors.alias;
@@ -30,14 +31,14 @@ PopupMenuThemeData _popupMenuThemeM3() {
     elevation: 12.0,
     shadowColor: const Color(0xff00ff00),
     surfaceTintColor: const Color(0xff00ff00),
-    labelTextStyle: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    labelTextStyle: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return const TextStyle(color: Color(0xfff99ff0), fontSize: 12.0);
       }
       return const TextStyle(color: Color(0xfff12099), fontSize: 17.0);
     }),
-    mouseCursor: MaterialStateProperty.resolveWith<MouseCursor?>((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    mouseCursor: WidgetStateProperty.resolveWith<MouseCursor?>((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return SystemMouseCursors.contextMenu;
       }
       return SystemMouseCursors.alias;
@@ -55,12 +56,12 @@ void main() {
 
   test('PopupMenuThemeData lerp special cases', () {
     expect(PopupMenuThemeData.lerp(null, null, 0), null);
-    const PopupMenuThemeData data = PopupMenuThemeData();
+    const data = PopupMenuThemeData();
     expect(identical(PopupMenuThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('PopupMenuThemeData null fields by default', () {
-    const PopupMenuThemeData popupMenuTheme = PopupMenuThemeData();
+    const popupMenuTheme = PopupMenuThemeData();
     expect(popupMenuTheme.color, null);
     expect(popupMenuTheme.shape, null);
     expect(popupMenuTheme.menuPadding, null);
@@ -74,7 +75,7 @@ void main() {
   });
 
   testWidgets('Default PopupMenuThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const PopupMenuThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -86,8 +87,8 @@ void main() {
   });
 
   testWidgets('PopupMenuThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-     PopupMenuThemeData(
+    final builder = DiagnosticPropertiesBuilder();
+    PopupMenuThemeData(
       color: const Color(0xfffffff1),
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))),
       menuPadding: const EdgeInsets.symmetric(vertical: 12.0),
@@ -95,14 +96,14 @@ void main() {
       shadowColor: const Color(0xfffffff2),
       surfaceTintColor: const Color(0xfffffff3),
       textStyle: const TextStyle(color: Color(0xfffffff4)),
-      labelTextStyle: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      labelTextStyle: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return const TextStyle(color: Color(0xfffffff5), fontSize: 12.0);
         }
         return const TextStyle(color: Color(0xfffffff6), fontSize: 17.0);
       }),
       enableFeedback: false,
-      mouseCursor: MaterialStateMouseCursor.clickable,
+      mouseCursor: WidgetStateMouseCursor.clickable,
       position: PopupMenuPosition.over,
       iconColor: const Color(0xfffffff8),
       iconSize: 31.0,
@@ -114,19 +115,19 @@ void main() {
         .toList();
 
     expect(description, <String>[
-      'color: Color(0xfffffff1)',
+      'color: ${const Color(0xfffffff1)}',
       'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(2.0))',
       'menuPadding: EdgeInsets(0.0, 12.0, 0.0, 12.0)',
       'elevation: 2.0',
-      'shadowColor: Color(0xfffffff2)',
-      'surfaceTintColor: Color(0xfffffff3)',
-      'text style: TextStyle(inherit: true, color: Color(0xfffffff4))',
+      'shadowColor: ${const Color(0xfffffff2)}',
+      'surfaceTintColor: ${const Color(0xfffffff3)}',
+      'text style: TextStyle(inherit: true, color: ${const Color(0xfffffff4)})',
       "labelTextStyle: Instance of '_WidgetStatePropertyWith<TextStyle?>'",
       'enableFeedback: false',
       'mouseCursor: WidgetStateMouseCursor(clickable)',
       'position: over',
-      'iconColor: Color(0xfffffff8)',
-      'iconSize: 31.0'
+      'iconColor: ${const Color(0xfffffff8)}',
+      'iconSize: 31.0',
     ]);
   });
 
@@ -135,47 +136,44 @@ void main() {
     final Key popupButtonApp = UniqueKey();
     final Key enabledPopupItemKey = UniqueKey();
     final Key disabledPopupItemKey = UniqueKey();
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final theme = ThemeData();
 
-    await tester.pumpWidget(MaterialApp(
-      theme: theme,
-      key: popupButtonApp,
-      home: Material(
-        child: Column(
-          children: <Widget>[
-            Padding(
-              // The padding makes sure the menu has enough space around it to
-              // get properly aligned when displayed (`_kMenuScreenPadding`).
-              padding: const EdgeInsets.all(8.0),
-              child: PopupMenuButton<void>(
-                key: popupButtonKey,
-                itemBuilder: (BuildContext context) {
-                  return <PopupMenuEntry<void>>[
-                    PopupMenuItem<void>(
-                      key: enabledPopupItemKey,
-                      child: const Text('Enabled PopupMenuItem'),
-                    ),
-                    const PopupMenuDivider(),
-                    PopupMenuItem<void>(
-                      key: disabledPopupItemKey,
-                      enabled: false,
-                      child: const Text('Disabled PopupMenuItem'),
-                    ),
-                    const CheckedPopupMenuItem<void>(
-                      child: Text('Unchecked item'),
-                    ),
-                    const CheckedPopupMenuItem<void>(
-                      checked: true,
-                      child: Text('Checked item'),
-                    ),
-                  ];
-                },
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        key: popupButtonApp,
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              Padding(
+                // The padding makes sure the menu has enough space around it to
+                // get properly aligned when displayed (`_kMenuScreenPadding`).
+                padding: const EdgeInsets.all(8.0),
+                child: PopupMenuButton<void>(
+                  key: popupButtonKey,
+                  itemBuilder: (BuildContext context) {
+                    return <PopupMenuEntry<void>>[
+                      PopupMenuItem<void>(
+                        key: enabledPopupItemKey,
+                        child: const Text('Enabled PopupMenuItem'),
+                      ),
+                      const PopupMenuDivider(),
+                      PopupMenuItem<void>(
+                        key: disabledPopupItemKey,
+                        enabled: false,
+                        child: const Text('Disabled PopupMenuItem'),
+                      ),
+                      const CheckedPopupMenuItem<void>(child: Text('Unchecked item')),
+                      const CheckedPopupMenuItem<void>(checked: true, child: Text('Checked item')),
+                    ];
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ));
+    );
 
     // Test default button icon color.
     expect(_iconStyle(tester, Icons.adaptive.more)?.color, theme.iconTheme.color);
@@ -188,10 +186,7 @@ void main() {
     /// that is of type Material, this code retrieves the built
     /// [PopupMenuButton].
     final Material button = tester.widget<Material>(
-      find.descendant(
-        of: find.byKey(popupButtonApp),
-        matching: find.byType(Material),
-      ).last,
+      find.descendant(of: find.byKey(popupButtonApp), matching: find.byType(Material)).last,
     );
     expect(button.color, theme.colorScheme.surfaceContainer);
     expect(button.shadowColor, theme.colorScheme.shadow);
@@ -204,20 +199,18 @@ void main() {
     /// popupItemKey that is of type DefaultTextStyle, this code retrieves the
     /// built [PopupMenuItem].
     DefaultTextStyle popupMenuItemLabel = tester.widget<DefaultTextStyle>(
-      find.descendant(
-        of: find.byKey(enabledPopupItemKey),
-        matching: find.byType(DefaultTextStyle),
-      ).last,
+      find
+          .descendant(of: find.byKey(enabledPopupItemKey), matching: find.byType(DefaultTextStyle))
+          .last,
     );
     expect(popupMenuItemLabel.style.fontFamily, 'Roboto');
     expect(popupMenuItemLabel.style.color, theme.colorScheme.onSurface);
 
     /// Test disabled text color
     popupMenuItemLabel = tester.widget<DefaultTextStyle>(
-      find.descendant(
-        of: find.byKey(disabledPopupItemKey),
-        matching: find.byType(DefaultTextStyle),
-      ).last,
+      find
+          .descendant(of: find.byKey(disabledPopupItemKey), matching: find.byType(DefaultTextStyle))
+          .last,
     );
     expect(popupMenuItemLabel.style.color, theme.colorScheme.onSurface.withOpacity(0.38));
 
@@ -238,7 +231,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     // Test unchecked CheckedPopupMenuItem label.
@@ -250,7 +243,9 @@ void main() {
     expect(listTile.titleTextStyle?.color, theme.colorScheme.onSurface);
 
     // Check popup menu padding.
-    final SingleChildScrollView popupMenu = tester.widget<SingleChildScrollView>(find.byType(SingleChildScrollView));
+    final SingleChildScrollView popupMenu = tester.widget<SingleChildScrollView>(
+      find.byType(SingleChildScrollView),
+    );
     expect(popupMenu.padding, const EdgeInsets.symmetric(vertical: 8.0));
   });
 
@@ -261,48 +256,48 @@ void main() {
     final Key enabledPopupItemKey = UniqueKey();
     final Key disabledPopupItemKey = UniqueKey();
 
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(useMaterial3: true, popupMenuTheme: popupMenuTheme),
-      key: popupButtonApp,
-      home: Material(
-        child: Column(
-          children: <Widget>[
-            PopupMenuButton<void>(
-              // The padding is used in the positioning of the menu when the
-              // position is `PopupMenuPosition.under`. Setting it to zero makes
-              // it easier to test.
-              padding: EdgeInsets.zero,
-              key: popupButtonKey,
-              itemBuilder: (BuildContext context) {
-                return <PopupMenuEntry<Object>>[
-                  PopupMenuItem<Object>(
-                    key: disabledPopupItemKey,
-                    enabled: false,
-                    child: const Text('disabled'),
-                  ),
-                  const PopupMenuDivider(),
-                  PopupMenuItem<Object>(
-                    key: enabledPopupItemKey,
-                    onTap: () { },
-                    child: const Text('enabled'),
-                  ),
-                  const CheckedPopupMenuItem<Object>(
-                    child: Text('Unchecked item'),
-                  ),
-                  const CheckedPopupMenuItem<Object>(
-                    checked: true,
-                    child: Text('Checked item'),
-                  ),
-                ];
-              },
-            ),
-          ],
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(popupMenuTheme: popupMenuTheme),
+        key: popupButtonApp,
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              PopupMenuButton<void>(
+                // The padding is used in the positioning of the menu when the
+                // position is `PopupMenuPosition.under`. Setting it to zero makes
+                // it easier to test.
+                padding: EdgeInsets.zero,
+                key: popupButtonKey,
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<Object>>[
+                    PopupMenuItem<Object>(
+                      key: disabledPopupItemKey,
+                      enabled: false,
+                      child: const Text('disabled'),
+                    ),
+                    const PopupMenuDivider(),
+                    PopupMenuItem<Object>(
+                      key: enabledPopupItemKey,
+                      onTap: () {},
+                      child: const Text('enabled'),
+                    ),
+                    const CheckedPopupMenuItem<Object>(child: Text('Unchecked item')),
+                    const CheckedPopupMenuItem<Object>(checked: true, child: Text('Checked item')),
+                  ];
+                },
+              ),
+            ],
+          ),
         ),
       ),
-    ));
+    );
 
     expect(_iconStyle(tester, Icons.adaptive.more)?.color, popupMenuTheme.iconColor);
-    expect(tester.getSize(find.byIcon(Icons.adaptive.more)), Size(popupMenuTheme.iconSize!, popupMenuTheme.iconSize!));
+    expect(
+      tester.getSize(find.byIcon(Icons.adaptive.more)),
+      Size(popupMenuTheme.iconSize!, popupMenuTheme.iconSize!),
+    );
 
     await tester.tap(find.byKey(popupButtonKey));
     await tester.pumpAndSettle();
@@ -312,38 +307,31 @@ void main() {
     /// that is of type Material, this code retrieves the built
     /// [PopupMenuButton].
     final Material button = tester.widget<Material>(
-      find.descendant(
-        of: find.byKey(popupButtonApp),
-        matching: find.byType(Material),
-      ).last,
+      find.descendant(of: find.byKey(popupButtonApp), matching: find.byType(Material)).last,
     );
     expect(button.color, Colors.orange);
     expect(button.surfaceTintColor, const Color(0xff00ff00));
     expect(button.shadowColor, const Color(0xff00ff00));
-    expect(button.shape, const BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))));
+    expect(
+      button.shape,
+      const BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+    );
     expect(button.elevation, 12.0);
 
     DefaultTextStyle popupMenuItemLabel = tester.widget<DefaultTextStyle>(
-      find.descendant(
-        of: find.byKey(enabledPopupItemKey),
-        matching: find.byType(DefaultTextStyle),
-      ).last,
+      find
+          .descendant(of: find.byKey(enabledPopupItemKey), matching: find.byType(DefaultTextStyle))
+          .last,
     );
-    expect(
-      popupMenuItemLabel.style,
-      popupMenuTheme.labelTextStyle?.resolve(enabled),
-    );
+    expect(popupMenuItemLabel.style, popupMenuTheme.labelTextStyle?.resolve(enabled));
+
     /// Test disabled text color
     popupMenuItemLabel = tester.widget<DefaultTextStyle>(
-      find.descendant(
-        of: find.byKey(disabledPopupItemKey),
-        matching: find.byType(DefaultTextStyle),
-      ).last,
+      find
+          .descendant(of: find.byKey(disabledPopupItemKey), matching: find.byType(DefaultTextStyle))
+          .last,
     );
-    expect(
-      popupMenuItemLabel.style,
-      popupMenuTheme.labelTextStyle?.resolve(disabled),
-    );
+    expect(popupMenuItemLabel.style, popupMenuTheme.labelTextStyle?.resolve(disabled));
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
@@ -370,7 +358,9 @@ void main() {
     expect(listTile.titleTextStyle, popupMenuTheme.labelTextStyle?.resolve(enabled));
 
     // Check popup menu padding.
-    final SingleChildScrollView popupMenu = tester.widget<SingleChildScrollView>(find.byType(SingleChildScrollView));
+    final SingleChildScrollView popupMenu = tester.widget<SingleChildScrollView>(
+      find.byType(SingleChildScrollView),
+    );
     expect(popupMenu.padding, popupMenuTheme.menuPadding);
   });
 
@@ -380,55 +370,57 @@ void main() {
     final Key popupButtonApp = UniqueKey();
     final Key popupItemKey = UniqueKey();
 
-    const Color color = Color(0xfff11fff);
-    const Color surfaceTintColor = Color(0xfff12fff);
-    const Color shadowColor = Color(0xfff13fff);
+    const color = Color(0xfff11fff);
+    const surfaceTintColor = Color(0xfff12fff);
+    const shadowColor = Color(0xfff13fff);
     const ShapeBorder shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(9.0)),
     );
     const EdgeInsets menuPadding = EdgeInsets.zero;
-    const double elevation = 7.0;
-    const TextStyle textStyle = TextStyle(color: Color(0xfff14fff), fontSize: 19.0);
-    const MouseCursor cursor =  SystemMouseCursors.forbidden;
-    const Color iconColor = Color(0xfff15fff);
-    const double iconSize = 21.5;
+    const elevation = 7.0;
+    const textStyle = TextStyle(color: Color(0xfff14fff), fontSize: 19.0);
+    const MouseCursor cursor = SystemMouseCursors.forbidden;
+    const iconColor = Color(0xfff15fff);
+    const iconSize = 21.5;
 
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(useMaterial3: true, popupMenuTheme: popupMenuTheme),
-      key: popupButtonApp,
-      home: Material(
-        child: Column(
-          children: <Widget>[
-            PopupMenuButton<void>(
-              key: popupButtonKey,
-              elevation: elevation,
-              shadowColor: shadowColor,
-              surfaceTintColor: surfaceTintColor,
-              color: color,
-              shape: shape,
-              menuPadding: menuPadding,
-              iconColor: iconColor,
-              iconSize: iconSize,
-              itemBuilder: (BuildContext context) {
-                return <PopupMenuEntry<void>>[
-                  PopupMenuItem<void>(
-                    key: popupItemKey,
-                    labelTextStyle: MaterialStateProperty.all<TextStyle>(textStyle),
-                    mouseCursor: cursor,
-                    child: const Text('Example'),
-                  ),
-                  CheckedPopupMenuItem<void>(
-                    checked: true,
-                    labelTextStyle: MaterialStateProperty.all<TextStyle>(textStyle),
-                    child: const Text('Checked item'),
-                  )
-                ];
-              },
-            ),
-          ],
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(popupMenuTheme: popupMenuTheme),
+        key: popupButtonApp,
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              PopupMenuButton<void>(
+                key: popupButtonKey,
+                elevation: elevation,
+                shadowColor: shadowColor,
+                surfaceTintColor: surfaceTintColor,
+                color: color,
+                shape: shape,
+                menuPadding: menuPadding,
+                iconColor: iconColor,
+                iconSize: iconSize,
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<void>>[
+                    PopupMenuItem<void>(
+                      key: popupItemKey,
+                      labelTextStyle: WidgetStateProperty.all<TextStyle>(textStyle),
+                      mouseCursor: cursor,
+                      child: const Text('Example'),
+                    ),
+                    CheckedPopupMenuItem<void>(
+                      checked: true,
+                      labelTextStyle: WidgetStateProperty.all<TextStyle>(textStyle),
+                      child: const Text('Checked item'),
+                    ),
+                  ];
+                },
+              ),
+            ],
+          ),
         ),
       ),
-    ));
+    );
 
     expect(_iconStyle(tester, Icons.adaptive.more)?.color, iconColor);
     expect(tester.getSize(find.byIcon(Icons.adaptive.more)), const Size(iconSize, iconSize));
@@ -441,10 +433,7 @@ void main() {
     /// that is of type Material, this code retrieves the built
     /// [PopupMenuButton].
     final Material button = tester.widget<Material>(
-      find.descendant(
-        of: find.byKey(popupButtonApp),
-        matching: find.byType(Material),
-      ).last,
+      find.descendant(of: find.byKey(popupButtonApp), matching: find.byType(Material)).last,
     );
     expect(button.color, color);
     expect(button.shape, shape);
@@ -457,10 +446,7 @@ void main() {
     /// popupItemKey that is of type DefaultTextStyle, this code retrieves the
     /// built [PopupMenuItem].
     final DefaultTextStyle text = tester.widget<DefaultTextStyle>(
-      find.descendant(
-        of: find.byKey(popupItemKey),
-        matching: find.byType(DefaultTextStyle),
-      ).last,
+      find.descendant(of: find.byKey(popupItemKey), matching: find.byType(DefaultTextStyle)).last,
     );
     expect(text.style, textStyle);
 
@@ -476,7 +462,9 @@ void main() {
     expect(listTile.titleTextStyle, textStyle);
 
     // Check popup menu padding.
-    final SingleChildScrollView popupMenu = tester.widget<SingleChildScrollView>(find.byType(SingleChildScrollView));
+    final SingleChildScrollView popupMenu = tester.widget<SingleChildScrollView>(
+      find.byType(SingleChildScrollView),
+    );
     expect(popupMenu.padding, EdgeInsets.zero);
   });
 
@@ -486,44 +474,46 @@ void main() {
     // can be deleted.
 
     testWidgets('Passing no PopupMenuThemeData returns defaults', (WidgetTester tester) async {
-     final Key popupButtonKey = UniqueKey();
+      final Key popupButtonKey = UniqueKey();
       final Key popupButtonApp = UniqueKey();
       final Key enabledPopupItemKey = UniqueKey();
       final Key disabledPopupItemKey = UniqueKey();
-      final ThemeData theme = ThemeData(useMaterial3: false);
+      final theme = ThemeData(useMaterial3: false);
 
-      await tester.pumpWidget(MaterialApp(
-        theme: theme,
-        key: popupButtonApp,
-        home: Material(
-          child: Column(
-            children: <Widget>[
-              Padding(
-              // The padding makes sure the menu has enough space around it to
-              // get properly aligned when displayed (`_kMenuScreenPadding`).
-              padding: const EdgeInsets.all(8.0),
-                child: PopupMenuButton<void>(
-                  key: popupButtonKey,
-                  itemBuilder: (BuildContext context) {
-                    return <PopupMenuEntry<void>>[
-                      PopupMenuItem<void>(
-                        key: enabledPopupItemKey,
-                        child: const Text('Enabled PopupMenuItem'),
-                      ),
-                      const PopupMenuDivider(),
-                      PopupMenuItem<void>(
-                        key: disabledPopupItemKey,
-                        enabled: false,
-                        child: const Text('Disabled PopupMenuItem'),
-                      ),
-                    ];
-                  },
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          key: popupButtonApp,
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                Padding(
+                  // The padding makes sure the menu has enough space around it to
+                  // get properly aligned when displayed (`_kMenuScreenPadding`).
+                  padding: const EdgeInsets.all(8.0),
+                  child: PopupMenuButton<void>(
+                    key: popupButtonKey,
+                    itemBuilder: (BuildContext context) {
+                      return <PopupMenuEntry<void>>[
+                        PopupMenuItem<void>(
+                          key: enabledPopupItemKey,
+                          child: const Text('Enabled PopupMenuItem'),
+                        ),
+                        const PopupMenuDivider(),
+                        PopupMenuItem<void>(
+                          key: disabledPopupItemKey,
+                          enabled: false,
+                          child: const Text('Disabled PopupMenuItem'),
+                        ),
+                      ];
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ));
+      );
 
       await tester.tap(find.byKey(popupButtonKey));
       await tester.pumpAndSettle();
@@ -533,10 +523,7 @@ void main() {
       /// that is of type Material, this code retrieves the built
       /// [PopupMenuButton].
       final Material button = tester.widget<Material>(
-        find.descendant(
-          of: find.byKey(popupButtonApp),
-          matching: find.byType(Material),
-        ).last,
+        find.descendant(of: find.byKey(popupButtonApp), matching: find.byType(Material)).last,
       );
       expect(button.color, null);
       expect(button.shape, null);
@@ -547,19 +534,24 @@ void main() {
       /// popupItemKey that is of type DefaultTextStyle, this code retrieves the
       /// built [PopupMenuItem].
       final DefaultTextStyle enabledText = tester.widget<DefaultTextStyle>(
-        find.descendant(
-          of: find.byKey(enabledPopupItemKey),
-          matching: find.byType(DefaultTextStyle),
-        ).last,
+        find
+            .descendant(
+              of: find.byKey(enabledPopupItemKey),
+              matching: find.byType(DefaultTextStyle),
+            )
+            .last,
       );
       expect(enabledText.style.fontFamily, 'Roboto');
       expect(enabledText.style.color, const Color(0xdd000000));
+
       /// Test disabled text color
       final DefaultTextStyle disabledText = tester.widget<DefaultTextStyle>(
-        find.descendant(
-          of: find.byKey(disabledPopupItemKey),
-          matching: find.byType(DefaultTextStyle),
-        ).last,
+        find
+            .descendant(
+              of: find.byKey(disabledPopupItemKey),
+              matching: find.byType(DefaultTextStyle),
+            )
+            .last,
       );
       expect(disabledText.style.color, theme.disabledColor);
 
@@ -580,11 +572,13 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        SystemMouseCursors.click,
+        kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
       );
 
       // Check popup menu padding.
-      final SingleChildScrollView popupMenu = tester.widget<SingleChildScrollView>(find.byType(SingleChildScrollView));
+      final SingleChildScrollView popupMenu = tester.widget<SingleChildScrollView>(
+        find.byType(SingleChildScrollView),
+      );
       expect(popupMenu.padding, const EdgeInsets.symmetric(vertical: 8.0));
     });
 
@@ -595,38 +589,40 @@ void main() {
       final Key enabledPopupItemKey = UniqueKey();
       final Key disabledPopupItemKey = UniqueKey();
 
-      await tester.pumpWidget(MaterialApp(
-        theme: ThemeData(popupMenuTheme: popupMenuTheme, useMaterial3: false),
-        key: popupButtonApp,
-        home: Material(
-          child: Column(
-            children: <Widget>[
-              PopupMenuButton<void>(
-                // The padding is used in the positioning of the menu when the
-                // position is `PopupMenuPosition.under`. Setting it to zero makes
-                // it easier to test.
-                padding: EdgeInsets.zero,
-                key: popupButtonKey,
-                itemBuilder: (BuildContext context) {
-                  return <PopupMenuEntry<Object>>[
-                    PopupMenuItem<Object>(
-                      key: disabledPopupItemKey,
-                      enabled: false,
-                      child: const Text('disabled'),
-                    ),
-                    const PopupMenuDivider(),
-                    PopupMenuItem<Object>(
-                      key: enabledPopupItemKey,
-                      onTap: () { },
-                      child: const Text('enabled'),
-                    ),
-                  ];
-                },
-              ),
-            ],
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(popupMenuTheme: popupMenuTheme, useMaterial3: false),
+          key: popupButtonApp,
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                PopupMenuButton<void>(
+                  // The padding is used in the positioning of the menu when the
+                  // position is `PopupMenuPosition.under`. Setting it to zero makes
+                  // it easier to test.
+                  padding: EdgeInsets.zero,
+                  key: popupButtonKey,
+                  itemBuilder: (BuildContext context) {
+                    return <PopupMenuEntry<Object>>[
+                      PopupMenuItem<Object>(
+                        key: disabledPopupItemKey,
+                        enabled: false,
+                        child: const Text('disabled'),
+                      ),
+                      const PopupMenuDivider(),
+                      PopupMenuItem<Object>(
+                        key: enabledPopupItemKey,
+                        onTap: () {},
+                        child: const Text('enabled'),
+                      ),
+                    ];
+                  },
+                ),
+              ],
+            ),
           ),
         ),
-      ));
+      );
 
       await tester.tap(find.byKey(popupButtonKey));
       await tester.pumpAndSettle();
@@ -636,10 +632,7 @@ void main() {
       /// that is of type Material, this code retrieves the built
       /// [PopupMenuButton].
       final Material button = tester.widget<Material>(
-        find.descendant(
-          of: find.byKey(popupButtonApp),
-          matching: find.byType(Material),
-        ).last,
+        find.descendant(of: find.byKey(popupButtonApp), matching: find.byType(Material)).last,
       );
       expect(button.color, popupMenuTheme.color);
       expect(button.shape, popupMenuTheme.shape);
@@ -650,10 +643,12 @@ void main() {
       /// popupItemKey that is of type DefaultTextStyle, this code retrieves the
       /// built [PopupMenuItem].
       final DefaultTextStyle text = tester.widget<DefaultTextStyle>(
-        find.descendant(
-          of: find.byKey(enabledPopupItemKey),
-          matching: find.byType(DefaultTextStyle),
-        ).last,
+        find
+            .descendant(
+              of: find.byKey(enabledPopupItemKey),
+              matching: find.byType(DefaultTextStyle),
+            )
+            .last,
       );
       expect(text.style, popupMenuTheme.textStyle);
 
@@ -674,7 +669,9 @@ void main() {
       );
     });
 
-    testWidgets('Popup menu widget properties take priority over theme', (WidgetTester tester) async {
+    testWidgets('Popup menu widget properties take priority over theme', (
+      WidgetTester tester,
+    ) async {
       final PopupMenuThemeData popupMenuTheme = _popupMenuThemeM2();
       final Key popupButtonKey = UniqueKey();
       final Key popupButtonApp = UniqueKey();
@@ -686,38 +683,40 @@ void main() {
       const ShapeBorder shape = RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(9.0)),
       );
-      const double elevation = 7.0;
-      const TextStyle textStyle = TextStyle(color: Color(0xffffffef), fontSize: 19.0);
-      const MouseCursor cursor =  SystemMouseCursors.forbidden;
+      const elevation = 7.0;
+      const textStyle = TextStyle(color: Color(0xffffffef), fontSize: 19.0);
+      const MouseCursor cursor = SystemMouseCursors.forbidden;
 
-      await tester.pumpWidget(MaterialApp(
-        theme: ThemeData(useMaterial3: true, popupMenuTheme: popupMenuTheme),
-        key: popupButtonApp,
-        home: Material(
-          child: Column(
-            children: <Widget>[
-              PopupMenuButton<void>(
-                key: popupButtonKey,
-                elevation: elevation,
-                shadowColor: shadowColor,
-                surfaceTintColor: surfaceTintColor,
-                color: color,
-                shape: shape,
-                itemBuilder: (BuildContext context) {
-                  return <PopupMenuEntry<void>>[
-                    PopupMenuItem<void>(
-                      key: popupItemKey,
-                      labelTextStyle: MaterialStateProperty.all<TextStyle>(textStyle),
-                      mouseCursor: cursor,
-                      child: const Text('Example'),
-                    ),
-                  ];
-                },
-              ),
-            ],
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(popupMenuTheme: popupMenuTheme),
+          key: popupButtonApp,
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                PopupMenuButton<void>(
+                  key: popupButtonKey,
+                  elevation: elevation,
+                  shadowColor: shadowColor,
+                  surfaceTintColor: surfaceTintColor,
+                  color: color,
+                  shape: shape,
+                  itemBuilder: (BuildContext context) {
+                    return <PopupMenuEntry<void>>[
+                      PopupMenuItem<void>(
+                        key: popupItemKey,
+                        labelTextStyle: WidgetStateProperty.all<TextStyle>(textStyle),
+                        mouseCursor: cursor,
+                        child: const Text('Example'),
+                      ),
+                    ];
+                  },
+                ),
+              ],
+            ),
           ),
         ),
-      ));
+      );
 
       await tester.tap(find.byKey(popupButtonKey));
       await tester.pumpAndSettle();
@@ -727,10 +726,7 @@ void main() {
       /// that is of type Material, this code retrieves the built
       /// [PopupMenuButton].
       final Material button = tester.widget<Material>(
-        find.descendant(
-          of: find.byKey(popupButtonApp),
-          matching: find.byType(Material),
-        ).last,
+        find.descendant(of: find.byKey(popupButtonApp), matching: find.byType(Material)).last,
       );
       expect(button.color, color);
       expect(button.shape, shape);
@@ -743,10 +739,7 @@ void main() {
       /// popupItemKey that is of type DefaultTextStyle, this code retrieves the
       /// built [PopupMenuItem].
       final DefaultTextStyle text = tester.widget<DefaultTextStyle>(
-        find.descendant(
-          of: find.byKey(popupItemKey),
-          matching: find.byType(DefaultTextStyle),
-        ).last,
+        find.descendant(of: find.byKey(popupItemKey), matching: find.byType(DefaultTextStyle)).last,
       );
       expect(text.style, textStyle);
 
@@ -760,12 +753,12 @@ void main() {
   });
 }
 
-Set<MaterialState> enabled = <MaterialState>{};
-Set<MaterialState> disabled = <MaterialState>{MaterialState.disabled};
+Set<WidgetState> enabled = <WidgetState>{};
+Set<WidgetState> disabled = <WidgetState>{WidgetState.disabled};
 
 TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
-  return tester.widget<RichText>(find.descendant(
-    of: find.byIcon(icon),
-    matching: find.byType(RichText),
-  )).text.style;
+  return tester
+      .widget<RichText>(find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)))
+      .text
+      .style;
 }

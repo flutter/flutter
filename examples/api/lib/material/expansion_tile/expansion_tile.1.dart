@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [ExpansionTile] and [ExpansionTileController].
+/// Flutter code sample for [ExpansionTile] and [ExpansibleController].
 
 void main() {
   runApp(const ExpansionTileControllerApp());
@@ -14,16 +14,17 @@ class ExpansionTileControllerApp extends StatefulWidget {
   const ExpansionTileControllerApp({super.key});
 
   @override
-  State<ExpansionTileControllerApp> createState() => _ExpansionTileControllerAppState();
+  State<ExpansionTileControllerApp> createState() =>
+      _ExpansionTileControllerAppState();
 }
 
-class _ExpansionTileControllerAppState extends State<ExpansionTileControllerApp> {
-  final ExpansionTileController controller = ExpansionTileController();
+class _ExpansionTileControllerAppState
+    extends State<ExpansionTileControllerApp> {
+  final ExpansibleController controller = ExpansibleController();
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(useMaterial3: true),
       home: Scaffold(
         appBar: AppBar(title: const Text('ExpansionTileController Sample')),
         body: Column(
@@ -67,7 +68,7 @@ class _ExpansionTileControllerAppState extends State<ExpansionTileControllerApp>
                       child: ElevatedButton(
                         child: const Text('Collapse This Tile'),
                         onPressed: () {
-                          return ExpansionTileController.of(context).collapse();
+                          return ExpansibleController.of(context).collapse();
                         },
                       ),
                     );

@@ -13,9 +13,7 @@ class DrawerExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: DrawerExample(),
-    );
+    return const MaterialApp(home: DrawerExample());
   }
 }
 
