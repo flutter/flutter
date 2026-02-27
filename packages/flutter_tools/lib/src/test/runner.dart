@@ -556,7 +556,7 @@ class SpawnPlugin extends PlatformPlugin {
     final compilerTime = Stopwatch()..start();
     final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Compile);
 
-    final residentCompiler = ResidentCompiler(
+    final ResidentCompiler residentCompiler = residentCompilerFactory.create(
       targetPlatform: .tester,
       artifacts: globals.artifacts!,
       logger: globals.logger,
