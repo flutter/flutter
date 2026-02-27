@@ -12,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
-import 'list_tile_test_utils.dart';
+import 'list_tile_tester.dart';
 
 class _CustomPhysics extends ClampingScrollPhysics {
   const _CustomPhysics({super.parent});

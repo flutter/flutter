@@ -254,6 +254,7 @@ test_fixtures("fixtures") {
     "fixtures/vk_dpr_noxform.png",
     "fixtures/vk_gradient.png",
     "fixtures/gradient_metal.png",
+    "fixtures/external_texture_impeller.png",
     "fixtures/external_texture_metal.png",
     "fixtures/gradient_xform.png",
     "fixtures/scene_without_custom_compositor.png",
