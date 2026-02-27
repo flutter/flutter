@@ -3783,4 +3783,50 @@ void main() {
     // The options view has shrunk to the available height.
     expect(tester.getSize(find.byType(Placeholder)).height, closeTo(initialSize - padding, 0.1));
   });
+
+  testWidgets('RawAutocomplete does not crash when hiding non-displayed overlay', (
+    WidgetTester tester,
+  ) async {
+    final controller = TextEditingController();
+    final focusNode = FocusNode();
+
+    addTearDown(controller.dispose);
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: RawAutocomplete<String>(
+          key: const ValueKey('initial'),
+          textEditingController: controller,
+          focusNode: focusNode,
+          optionsBuilder: (TextEditingValue value) => [],
+          fieldViewBuilder: (context, ctrl, node, onFieldSubmitted) {
+            return TestTextField(controller: ctrl, focusNode: node);
+          },
+          optionsViewBuilder: (context, onSelected, options) => const SizedBox(),
+        ),
+      ),
+    );
+
+    // Change the key to force the RawAutocomplete to dispose and re-initialize.
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: RawAutocomplete<String>(
+          key: const ValueKey('new-key'),
+          textEditingController: controller,
+          focusNode: focusNode,
+          optionsBuilder: (TextEditingValue value) => [],
+          fieldViewBuilder: (context, ctrl, node, onFieldSubmitted) {
+            return TestTextField(controller: ctrl, focusNode: node);
+          },
+          optionsViewBuilder: (context, onSelected, options) => const SizedBox(),
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TestTextField), 'trigger');
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+  });
 }
