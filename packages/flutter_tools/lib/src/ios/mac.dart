@@ -613,6 +613,8 @@ Future<XcodeBuildResult> buildXcodeProject({
           XcodeSdk.IPhoneSimulator.platformName,
         );
       }
+
+      ensureTargetBuildDirAttribute(targetBuildDir);
       final String? appBundle = buildSettings['WRAPPER_NAME'];
       final String expectedOutputDirectory = globals.fs.path.join(targetBuildDir, appBundle);
       if (globals.fs.directory(expectedOutputDirectory).existsSync()) {
@@ -656,6 +658,18 @@ Future<XcodeBuildResult> buildXcodeProject({
       xcResult: xcResult,
     );
   }
+}
+
+/// Ensure the TARGET_BUILD_DIR has the `com.apple.xcode.CreatedByBuildSystem` extended attribute.
+/// When using SwiftPM, this attribute is missing. This is required for `xcodebuild clean`.
+void ensureTargetBuildDirAttribute(String targetBuildDirPath) {
+  globals.processUtils.runSync(<String>[
+    'xattr',
+    '-w',
+    'com.apple.xcode.CreatedByBuildSystem',
+    'true',
+    targetBuildDirPath,
+  ]);
 }
 
 /// Check if the Flutter framework's public headers have changed since last built.
