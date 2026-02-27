@@ -364,7 +364,7 @@ Future<Uint8List> fetchImage(String url, ui_web.ImageCodecChunkCallback? chunkCa
     }
 
     if (chunkCallback != null && contentLength != null) {
-      return readChunked(response.payload, contentLength, chunkCallback);
+      return await readChunked(response.payload, contentLength, chunkCallback);
     } else {
       return await response.asUint8List();
     }

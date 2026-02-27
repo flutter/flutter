@@ -80,6 +80,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     addEnableImpellerFlag(verboseHelp: verboseHelp);
     addMachineOutputFlag(verboseHelp: verboseHelp);
     addEnableFlutterGpuFlag(verboseHelp: verboseHelp);
+    addEnableSurfaceControlFlag(verboseHelp: verboseHelp);
 
     argParser
       ..addFlag(
@@ -295,6 +296,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
             'and this flag can be used to override the default. To disable this for the '
             'skwasm renderer, use "--no-cross-origin-isolation".',
         hide: !verboseHelp,
+      )
+      ..addFlag(
+        'uninstall',
+        defaultsTo: true,
+        help:
+            'Whether to uninstall the app after running integration tests. '
+            'Set "--no-uninstall" to keep the app installed on the device.',
       );
 
     addDdsOptions(verboseHelp: verboseHelp);
@@ -477,6 +485,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
           : null,
       printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
       webUseWasm: useWasm,
+      uninstallApp: boolArg('uninstall'),
     );
 
     final Uri? nativeAssetsJson = _isIntegrationTest
