@@ -1559,15 +1559,20 @@ class _NavigatorShim extends StatelessWidget {
   Widget build(BuildContext context) {
     // Create a Navigator with a single page that contains the child
     // This allows Navigator.pop(context) calls from within the dialog to work.
-    return Navigator(
-      pages: <Page<void>>[_DialogContentPage(child: child)],
-      onPopPage: (Route<dynamic> route, dynamic result) {
-        // When the page is popped, call our onPop callback
-        onPop?.call(result);
-        // Return false to prevent the route from being removed from the Navigator
-        // (since we're handling the pop externally by closing the dialog window).
-        return false;
-      },
+    // Wrap in HeroControllerScope.none() to prevent this Navigator from
+    // inheriting the outer HeroController, which would cause a "HeroController
+    // can not be shared by multiple Navigators" assertion.
+    return HeroControllerScope.none(
+      child: Navigator(
+        pages: <Page<void>>[_DialogContentPage(child: child)],
+        onPopPage: (Route<dynamic> route, dynamic result) {
+          // When the page is popped, call our onPop callback
+          onPop?.call(result);
+          // Return false to prevent the route from being removed from the Navigator
+          // (since we're handling the pop externally by closing the dialog window).
+          return false;
+        },
+      ),
     );
   }
 }
