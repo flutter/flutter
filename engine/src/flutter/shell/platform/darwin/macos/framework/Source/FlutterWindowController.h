@@ -50,6 +50,18 @@ struct FlutterWindowSize {
   }
 };
 
+struct FlutterWindowOffset {
+  double x;
+  double y;
+
+  static FlutterWindowOffset fromNSPoint(const NSPoint& point) {
+    return {
+        point.x,
+        point.y,
+    };
+  }
+};
+
 struct FlutterWindowConstraints {
   double min_width;
   double min_height;
@@ -148,6 +160,9 @@ bool InternalFlutter_Window_IsActivated(void* window);
 
 FLUTTER_DARWIN_EXPORT
 void InternalFlutter_Window_UpdatePosition(void* window);
+
+FLUTTER_DARWIN_EXPORT
+FlutterWindowOffset InternalFlutter_Window_GetOffsetInParent(void* window);
 
 // NOLINTEND(google-objc-function-naming)
 }

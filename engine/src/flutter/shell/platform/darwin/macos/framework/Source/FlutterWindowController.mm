@@ -658,4 +658,24 @@ void InternalFlutter_Window_UpdatePosition(void* window) {
   [owner updatePosition];
 }
 
+FlutterWindowOffset InternalFlutter_Window_GetOffsetInParent(void* window) {
+  NSWindow* w = (__bridge NSWindow*)window;
+  NSWindow* parent = w.parentWindow;
+  if (!parent) {
+    return {0, 0};
+  }
+  NSRect globalScreenFrame = ComputeGlobalScreenFrame();
+
+  NSRect parentRect = [parent contentRectForFrameRect:parent.frame];
+  FlipRect(parentRect, globalScreenFrame);
+
+  NSRect childRect = w.frame;
+  FlipRect(childRect, globalScreenFrame);
+
+  return {
+      .x = childRect.origin.x - parentRect.origin.x,
+      .y = childRect.origin.y - parentRect.origin.y,
+  };
+}
+
 // NOLINTEND(google-objc-function-naming)

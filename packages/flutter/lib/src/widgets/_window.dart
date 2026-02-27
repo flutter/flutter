@@ -892,6 +892,14 @@ abstract class PopupWindowController extends BaseWindowController {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void updatePosition({Rect? anchorRect, WindowPositioner? positioner});
+
+  /// Returns the offset of popup's top left corner in parent window client area.
+  ///
+  /// The offset is in logical coordinates with top left origin.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  Offset get offsetInParent;
 }
 
 /// Delegate class for satellite window controller.

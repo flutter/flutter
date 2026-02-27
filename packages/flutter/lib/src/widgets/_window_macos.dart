@@ -420,6 +420,11 @@ class PopupWindowControllerMacOS extends PopupWindowController with _WindowContr
   }
 
   @override
+  Offset get offsetInParent {
+    return _MacOSPlatformInterface.getOffsetInParent(getWindowHandle()).toOffset();
+  }
+
+  @override
   void _handleOnShouldClose() {
     destroy();
   }
@@ -778,6 +783,23 @@ final class _Size extends Struct {
   }
 }
 
+final class _Offset extends Struct {
+  @Double()
+  external double x;
+
+  @Double()
+  external double y;
+
+  @override
+  String toString() {
+    return 'Offset(x: $x, y: $y)';
+  }
+
+  Offset toOffset() {
+    return Offset(x, y);
+  }
+}
+
 final class _Rect extends Struct {
   @Double()
   external double left;
@@ -1087,6 +1109,9 @@ class _MacOSPlatformInterface {
 
   @Native<Void Function(Pointer<Void>)>(symbol: 'InternalFlutter_Window_UpdatePosition')
   external static void updateWindowPosition(Pointer<Void> windowHandle);
+
+  @Native<_Offset Function(Pointer<Void>)>(symbol: 'InternalFlutter_Window_GetOffsetInParent')
+  external static _Offset getOffsetInParent(Pointer<Void> windowHandle);
 }
 
 // FFI utilities.
