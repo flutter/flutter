@@ -392,4 +392,40 @@ TEST_F(FlutterWindowControllerTest, ViewMetricsRespectPositionCallbackConstraint
   EXPECT_LE(maxSize.width, 500);
   EXPECT_LE(maxSize.height, 400);
 }
+
+TEST_F(FlutterWindowControllerTest, GetOffsetInParent) {
+  NSWindow* parentWindow = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
+                                                       styleMask:NSWindowStyleMaskTitled
+                                                         backing:NSBackingStoreBuffered
+                                                           defer:NO];
+  [parentWindow setReleasedWhenClosed:NO];
+  NSWindow* childWindow = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 100, 100)
+                                                      styleMask:NSWindowStyleMaskBorderless
+                                                        backing:NSBackingStoreBuffered
+                                                          defer:NO];
+  [childWindow setReleasedWhenClosed:NO];
+
+  // Bottom left origin.
+  [parentWindow setFrame:NSMakeRect(100, 100, 800, 600) display:NO];
+  [childWindow setFrame:NSMakeRect(150, 150, 100, 100) display:NO];
+
+  // Establish the parent-child relationship required by GetOffsetInParent.
+  [parentWindow addChildWindow:childWindow ordered:NSWindowAbove];
+
+  FlutterWindowOffset offset =
+      InternalFlutter_Window_GetOffsetInParent((__bridge void*)childWindow);
+
+  // GetOffsetInParent has relative coordinates with top left origin.
+  NSRect parentContentRect = [parentWindow contentRectForFrameRect:parentWindow.frame];
+
+  double expectedX = 150 - parentContentRect.origin.x;
+  double expectedY = (parentContentRect.origin.y + parentContentRect.size.height) - (150 + 100);
+
+  EXPECT_NEAR(offset.x, expectedX, 0.001);
+  EXPECT_NEAR(offset.y, expectedY, 0.001);
+
+  [parentWindow removeChildWindow:childWindow];
+  [childWindow close];
+  [parentWindow close];
+}
 }  // namespace flutter::testing
