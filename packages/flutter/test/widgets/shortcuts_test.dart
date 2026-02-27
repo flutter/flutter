@@ -1211,6 +1211,20 @@ void main() {
       );
     });
 
+    testWidgets('Shortcuts pass debug label to focus node.', (WidgetTester tester) async {
+      const debugLabel = '<My Shortcuts Debug Label>';
+      await tester.pumpWidget(
+        const Shortcuts(
+          debugLabel: debugLabel,
+          shortcuts: <LogicalKeySet, Intent>{},
+          child: SizedBox(),
+        ),
+      );
+
+      final FocusNode focusNode = Focus.of(tester.element(find.byType(SizedBox)));
+      expect(focusNode.debugLabel, 'Shortcuts: <My Shortcuts Debug Label>');
+    });
+
     testWidgets('Shortcuts support multiple intents', (WidgetTester tester) async {
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       bool? value = true;
@@ -2120,6 +2134,12 @@ void main() {
         await memoryEvents(() => ShortcutRegistry().dispose(), ShortcutRegistry),
         areCreateAndDispose,
       );
+    });
+
+    testWidgets('sets debug label on focus node', (WidgetTester tester) async {
+      await tester.pumpWidget(const ShortcutRegistrar(child: SizedBox()));
+      final FocusNode focusNode = Focus.of(tester.element(find.byType(SizedBox)));
+      expect(focusNode.debugLabel, 'Shortcuts: <Shortcut Registrar>');
     });
   });
 }
