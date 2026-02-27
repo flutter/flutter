@@ -6,11 +6,18 @@ REM found in the LICENSE file.
 REM ---------------------------------- NOTE ----------------------------------
 REM
 REM Please keep the logic in this file consistent with the logic in the
-REM `yapf.sh` script in the same directory to ensure that it continues to
+REM `black.sh` script in the same directory to ensure that it continues to
 REM work across all platforms!
 REM
 REM --------------------------------------------------------------------------
 
-SET yapf_path=%~dp0\..\..\flutter\third_party\yapf
+SET black_path=%~dp0\..\..\flutter\third_party\black
 
-cmd /V /C "SET PYTHONPATH=%yapf_path%&& vpython3 %yapf_path%\yapf %*"
+IF NOT EXIST "%black_path%" (
+  ECHO Error: black directory not found at %black_path%. Did you run gclient sync? >&2
+  EXIT /B 1
+)
+
+REM Use the black binary from our third_party directory.
+"%black_path%\black" %*
+

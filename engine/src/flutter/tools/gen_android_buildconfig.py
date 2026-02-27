@@ -30,28 +30,28 @@ public final class BuildConfig {{
 
 
 def main():
-  parser = argparse.ArgumentParser(description='Generate BuildConfig.java for Android')
-  parser.add_argument('--runtime-mode', type=str, required=True)
-  parser.add_argument('--out', type=str, required=True)
+    parser = argparse.ArgumentParser(description="Generate BuildConfig.java for Android")
+    parser.add_argument("--runtime-mode", type=str, required=True)
+    parser.add_argument("--out", type=str, required=True)
 
-  args = parser.parse_args()
+    args = parser.parse_args()
 
-  jit_release = 'jit_release' in args.runtime_mode.lower()
-  release = not jit_release and 'release' in args.runtime_mode.lower()
-  profile = 'profile' in args.runtime_mode.lower()
-  debug = 'debug' in args.runtime_mode.lower()
-  assert debug or profile or release or jit_release
+    jit_release = "jit_release" in args.runtime_mode.lower()
+    release = not jit_release and "release" in args.runtime_mode.lower()
+    profile = "profile" in args.runtime_mode.lower()
+    debug = "debug" in args.runtime_mode.lower()
+    assert debug or profile or release or jit_release
 
-  with open(os.path.abspath(args.out), 'w+') as output_file:
-    output_file.write(
-        BUILD_CONFIG_TEMPLATE.format(
-            str(debug).lower(),
-            str(profile).lower(),
-            str(release).lower(),
-            str(jit_release).lower()
+    with open(os.path.abspath(args.out), "w+") as output_file:
+        output_file.write(
+            BUILD_CONFIG_TEMPLATE.format(
+                str(debug).lower(),
+                str(profile).lower(),
+                str(release).lower(),
+                str(jit_release).lower(),
+            )
         )
-    )
 
 
-if __name__ == '__main__':
-  sys.exit(main())
+if __name__ == "__main__":
+    sys.exit(main())
