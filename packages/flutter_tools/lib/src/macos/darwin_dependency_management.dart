@@ -204,7 +204,7 @@ class DarwinDependencyManagement {
       _logger.printWarning(
         'The following plugins do not support Swift Package Manager for ${platform.name}:\n'
         '  - ${cocoapodOnlyPlugins.join('\n  - ')}\n'
-        'This will not be supported in a future version of Flutter. Please contact the plugin '
+        'This will become an error in a future version of Flutter. Please contact the plugin '
         'maintainers to request Swift Package Manager adoption.',
       );
     }

@@ -72,7 +72,7 @@ void main() {
                   'The following plugins do not support Swift Package Manager for '
                   '${platform.name}:\n'
                   '  - cocoapod_plugin_1\n'
-                  'This will not be supported in a future version of Flutter. Please contact the '
+                  'This will become an error in a future version of Flutter. Please contact the '
                   'plugin maintainers to request Swift Package Manager adoption.\n',
                 ),
               );
