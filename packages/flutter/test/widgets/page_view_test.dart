@@ -102,6 +102,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/88956
+    // and https://github.com/flutter/flutter/issues/6537
     final controller = PageController(initialPage: 1);
     addTearDown(controller.dispose);
 
@@ -123,6 +124,7 @@ void main() {
 
     // The pageView have a zero viewport, so nothing display.
     await tester.pumpWidget(build(Size.zero));
+    expect(tester.getSize(find.byType(PageView)), Size.zero);
     expect(find.text('Alabama'), findsNothing);
     expect(find.text('Alabama', skipOffstage: false), findsOneWidget);
 
