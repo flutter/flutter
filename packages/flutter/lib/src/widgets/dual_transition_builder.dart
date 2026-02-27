@@ -11,10 +11,10 @@ import 'framework.dart';
 /// `animation` and wrapping the provided `child`.
 ///
 /// The `animation` provided to the builder always runs forward from 0.0 to 1.0.
-/// 
+///
 /// The `child` is the widget which is to be animated. It is optional, but
 /// passing it here and using it in the builder is more efficient than building
-/// it directly in the builder, because it allows the framework to avoid 
+/// it directly in the builder, because it allows the framework to avoid
 /// rebuilding that widget tree for every frame of the animation.
 typedef AnimatedTransitionBuilder =
     Widget Function(BuildContext context, Animation<double> animation, Widget? child);
