@@ -206,15 +206,8 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
 
   /// Return true if the Swift Package Manager feature is enabled and the project is
   /// [compatibleWithSwiftPackageManager].
-  bool get usesSwiftPackageManager {
-    if (!featureFlags.isSwiftPackageManagerEnabled) {
-      return false;
-    }
-    if (!compatibleWithSwiftPackageManager) {
-      return false;
-    }
-    return true;
-  }
+  bool get usesSwiftPackageManager =>
+      featureFlags.isSwiftPackageManagerEnabled && compatibleWithSwiftPackageManager;
 
   Future<XcodeProjectInfo?> projectInfo() async {
     final XcodeProjectInterpreter? xcodeProjectInterpreter = globals.xcodeProjectInterpreter;
