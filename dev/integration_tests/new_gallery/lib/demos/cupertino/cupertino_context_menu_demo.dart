@@ -23,9 +23,8 @@ class CupertinoContextMenuDemo extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
+            child: SizedBox.square(
+              dimension: 100.0,
               child: CupertinoContextMenu(
                 actions: <Widget>[
                   CupertinoContextMenuAction(
