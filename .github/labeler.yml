@@ -173,7 +173,6 @@ platform-linux:
       - engine/src/flutter/shell/platform/linux/**/*
       - packages/flutter_tools/lib/src/linux/**/*
 
-
 platform-macos:
   - changed-files:
     - any-glob-to-any-file:
