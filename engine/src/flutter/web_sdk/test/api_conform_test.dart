@@ -364,10 +364,10 @@ void _collectPublicClasses(
         continue;
       }
       final ClassDeclaration classDeclaration = member;
-      if (classDeclaration.name.lexeme.startsWith('_')) {
+      if (classDeclaration.namePart.typeName.lexeme.startsWith('_')) {
         continue;
       }
-      destination[classDeclaration.name.lexeme] = classDeclaration;
+      destination[classDeclaration.namePart.typeName.lexeme] = classDeclaration;
     }
   }
 }
@@ -376,7 +376,12 @@ void _collectPublicConstructors(
   ClassDeclaration classDeclaration,
   Map<String, ConstructorDeclaration> destination,
 ) {
-  for (final ClassMember member in classDeclaration.members) {
+  final ClassBody classBody = classDeclaration.body;
+  if (classBody is! BlockClassBody) {
+    return;
+  }
+
+  for (final ClassMember member in classBody.members) {
     if (member is! ConstructorDeclaration) {
       continue;
     }
@@ -396,7 +401,12 @@ void _collectPublicMethods(
   ClassDeclaration classDeclaration,
   Map<String, MethodDeclaration> destination,
 ) {
-  for (final ClassMember member in classDeclaration.members) {
+  final ClassBody classBody = classDeclaration.body;
+  if (classBody is! BlockClassBody) {
+    return;
+  }
+
+  for (final ClassMember member in classBody.members) {
     if (member is! MethodDeclaration) {
       continue;
     }
