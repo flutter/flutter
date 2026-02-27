@@ -24,9 +24,8 @@ void main() {
               maxXIndex: 0,
               maxYIndex: 0,
               builder: (BuildContext context, ChildVicinity vicinity) {
-                return SizedBox(
-                  height: 200,
-                  width: 200,
+                return SizedBox.square(
+                  dimension: 200,
                   child: Center(child: Text('C${vicinity.xIndex}:R${vicinity.yIndex}')),
                 );
               },
@@ -57,9 +56,8 @@ void main() {
               maxYIndex: 0,
               addRepaintBoundaries: false,
               builder: (BuildContext context, ChildVicinity vicinity) {
-                return SizedBox(
-                  height: 200,
-                  width: 200,
+                return SizedBox.square(
+                  dimension: 200,
                   child: Center(child: Text('C${vicinity.xIndex}:R${vicinity.yIndex}')),
                 );
               },
@@ -91,9 +89,8 @@ void main() {
             addRepaintBoundaries: false,
             builder: (BuildContext context, ChildVicinity vicinity) {
               capturedContext = context;
-              return SizedBox(
-                height: 200,
-                width: 200,
+              return SizedBox.square(
+                dimension: 200,
                 child: Center(child: Text('C${vicinity.xIndex}:R${vicinity.yIndex}')),
               );
             },

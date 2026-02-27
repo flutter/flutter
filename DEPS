@@ -15,7 +15,7 @@ vars = {
   'flutter_git': 'https://flutter.googlesource.com',
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
-  'skia_revision': 'f44d7db6880544566100ea50805fd7bcddfa0f4e',
+  'skia_revision': 'e5aa1ab5c59c492302052657ff4f2334b28a8f36',
 
   # WARNING: DO NOT EDIT canvaskit_cipd_instance MANUALLY
   # See `lib/web_ui/README.md` for how to roll CanvasKit to a new version.
@@ -262,7 +262,7 @@ deps = {
    Var('chromium_git') + '/external/github.com/google/flatbuffers' + '@' + '067bfdbde9b10c1beb5d6b02d67ae9db8b96f736',
 
   'engine/src/flutter/third_party/icu':
-   Var('chromium_git') + '/chromium/deps/icu.git' + '@' + 'a86a32e67b8d1384b33f8fa48c83a6079b86f8cd',
+   Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '7971660ba6306a4cc8e6f872905138f59de5bc1d',
 
    'engine/src/flutter/third_party/gtest-parallel':
    Var('chromium_git') + '/external/github.com/google/gtest-parallel' + '@' + '38191e2733d7cbaeaef6a3f1a942ddeb38a2ad14',
@@ -504,7 +504,7 @@ deps = {
    Var('skia_git') + '/external/github.com/google/wuffs-mirror-release-c.git' + '@' + '600cd96cf47788ee3a74b40a6028b035c9fd6a61',
 
   'engine/src/flutter/third_party/zlib':
-   Var('chromium_git') + '/chromium/src/third_party/zlib.git' + '@' + '7d77fb7fd66d8a5640618ad32c71fdeb7d3e02df',
+   Var('chromium_git') + '/chromium/src/third_party/zlib.git' + '@' + '7eda07b1e067ef3fd7eea0419c88b5af45c9a776',
 
   'engine/src/flutter/third_party/cpu_features/src':
    Var('chromium_git') + '/external/github.com/google/cpu_features.git' + '@' + '936b9ab5515dead115606559502e3864958f7f6e',
