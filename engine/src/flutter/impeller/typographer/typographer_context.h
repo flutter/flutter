@@ -34,7 +34,7 @@ class TypographerContext {
       GlyphAtlas::Type type,
       HostBuffer& host_buffer,
       const std::shared_ptr<GlyphAtlasContext>& atlas_context,
-      const std::vector<std::shared_ptr<TextFrame>>& text_frames) const = 0;
+      const std::vector<RenderableText>& text_frames) const = 0;
 
  protected:
   //----------------------------------------------------------------------------
