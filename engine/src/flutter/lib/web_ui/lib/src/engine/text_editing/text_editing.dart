@@ -418,8 +418,13 @@ class EngineAutofillForm {
     for (final String key in elements.keys) {
       final DomHTMLElement element = elements[key]!;
       final AutofillInfo autofill = items[key]!.autofillInfo;
-      // Maybe only apply text but not selection?
-      autofill.editingState.applyToDomElement(element);
+      if (key == focusedElementId) {
+        autofill.editingState.applyToDomElement(element);
+      } else {
+        // Non-focused elements do not have selection, and applying selection on them may cause them
+        // to gain focus unexpectedly.
+        autofill.editingState.applyTextToDomElement(element);
+      }
     }
   }
 
@@ -1016,6 +1021,10 @@ class EditingState {
   /// This should only be used by focused elements only, because only focused
   /// elements can have their text selection range set. Attempting to set
   /// selection range on a non-focused element will cause it to request focus.
+  ///
+  /// See also:
+  ///
+  ///  * [applyTextToDomElement], which is used for non-focused elements.
   void applyToDomElement(DomHTMLElement? domElement) {
     if (domElement != null && domElement.isA<DomHTMLInputElement>()) {
       final element = domElement as DomHTMLInputElement;
@@ -1029,6 +1038,25 @@ class EditingState {
       throw UnsupportedError(
         'Unsupported DOM element type: <${domElement?.tagName}> (${domElement.runtimeType})',
       );
+    }
+  }
+
+  /// Applies the [text] to the [domElement].
+  ///
+  /// This is used by non-focused elements.
+  ///
+  /// See also:
+  ///
+  ///  * [applyToDomElement], which is used for focused elements.
+  void applyTextToDomElement(DomHTMLElement? domElement) {
+    if (domElement != null && domElement.isA<DomHTMLInputElement>()) {
+      final element = domElement as DomHTMLInputElement;
+      element.value = text;
+    } else if (domElement != null && domElement.isA<DomHTMLTextAreaElement>()) {
+      final element = domElement as DomHTMLTextAreaElement;
+      element.value = text;
+    } else {
+      throw UnsupportedError('Unsupported DOM element type');
     }
   }
 }
