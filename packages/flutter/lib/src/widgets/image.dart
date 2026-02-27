@@ -1233,6 +1233,8 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
                 }());
               }
             : null,
+        // Only prevent error reporting when errorBuilder is provided.
+        preventErrorReporting: widget.errorBuilder != null,
       );
     }
     return _imageStreamListener!;
