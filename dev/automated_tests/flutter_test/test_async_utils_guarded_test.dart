@@ -25,7 +25,7 @@ void main() {
   testWidgets('TestAsyncUtils - custom guarded sections', (WidgetTester tester) async {
     await tester.pumpWidget(Container());
     expect(find.byElementType(Container), isNotNull);
-    guardedHelper(tester);
+    guardedHelper(tester); // ignore: unawaited_futures
     expect(find.byElementType(Container), isNull);
     // this should fail
   });
