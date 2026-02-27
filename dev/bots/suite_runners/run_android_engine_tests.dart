@@ -57,7 +57,7 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
     // TODO(matanlurey): Enable once `flutter drive` retains error logs.
     // final RegExp impellerStdoutPattern = RegExp('Using the Imepller rendering backend (.*)');
 
-    Future<void> runTest(FileSystemEntity file) async {
+    Future<void> runTest(FileSystemEntity file, {bool useHCPPFlag = false}) async {
       final CommandResult result = await runCommand(
         'flutter',
         <String>[
@@ -68,6 +68,7 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
           // make less things start up unnecessarily.
           '--no-dds',
           '--no-enable-dart-profiling',
+          if (useHCPPFlag) '--enable-surface-control',
           '--test-arguments=test',
           '--test-arguments=--reporter=expanded',
         ],
@@ -107,6 +108,18 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
 
     // Test HCPP Platform Views on Vulkan.
     if (impellerBackend == ImpellerBackend.vulkan) {
+      final runFirstTests = <String>[
+        // Run upgrade_legacy_pv_types first, as it is testing the flag and not the manifest
+        'upgrade_legacy_pv_types',
+      ];
+
+      for (final testName in runFirstTests) {
+        await runTest(
+          mains.firstWhere((FileSystemEntity file) => file.path.contains(testName)),
+          useHCPPFlag: true,
+        );
+      }
+
       androidManifestXml.writeAsStringSync(
         androidManifestXml.readAsStringSync().replaceFirst(
           kSurfaceControlMetadataDisabled,
@@ -116,8 +129,9 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
       for (final file in mains) {
         // This statement is attempting to catch all tests inside of the
         // dev/integration_tests/android_engine_test/lib/hcpp
-        // directory.
-        if (!file.path.contains('hcpp')) {
+        // directory, except for upgrade_legacy_pv_types which we already ran.
+        if (!file.path.contains('hcpp') ||
+            runFirstTests.any((String name) => file.path.contains(name))) {
           continue;
         }
         await runTest(file);

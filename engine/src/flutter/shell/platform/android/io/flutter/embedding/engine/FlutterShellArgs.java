@@ -53,6 +53,9 @@ public class FlutterShellArgs {
   public static final String ARG_DISABLE_IMPELLER = "--enable-impeller=false";
   public static final String ARG_KEY_ENABLE_VULKAN_VALIDATION = "enable-vulkan-validation";
   public static final String ARG_ENABLE_VULKAN_VALIDATION = "--enable-vulkan-validation";
+  public static final String ARG_KEY_TOGGLE_SURFACE_CONTROL = "enable-surface-control";
+  public static final String ARG_ENABLE_SURFACE_CONTROL = "--enable-surface-control=true";
+  public static final String ARG_DISABLE_SURFACE_CONTROL = "--enable-surface-control=false";
   public static final String ARG_KEY_DUMP_SHADER_SKP_ON_SHADER_COMPILATION =
       "dump-skp-on-shader-compilation";
   public static final String ARG_DUMP_SHADER_SKP_ON_SHADER_COMPILATION =
@@ -132,6 +135,14 @@ public class FlutterShellArgs {
     if (intent.getBooleanExtra(ARG_KEY_ENABLE_VULKAN_VALIDATION, false)) {
       args.add(ARG_ENABLE_VULKAN_VALIDATION);
     }
+    if (intent.hasExtra(ARG_KEY_TOGGLE_SURFACE_CONTROL)) {
+      if (intent.getBooleanExtra(ARG_KEY_TOGGLE_SURFACE_CONTROL, false)) {
+        args.add(ARG_ENABLE_SURFACE_CONTROL);
+      } else {
+        args.add(ARG_DISABLE_SURFACE_CONTROL);
+      }
+    }
+
     if (intent.getBooleanExtra(ARG_KEY_DUMP_SHADER_SKP_ON_SHADER_COMPILATION, false)) {
       args.add(ARG_DUMP_SHADER_SKP_ON_SHADER_COMPILATION);
     }
