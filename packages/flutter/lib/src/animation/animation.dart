@@ -7,6 +7,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/src/foundation/data_primitives.dart';
 
 import 'tween.dart';
 
