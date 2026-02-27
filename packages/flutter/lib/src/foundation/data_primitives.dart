@@ -88,9 +88,8 @@ abstract class ValueListenable<T> extends Listenable {
   T get value;
 }
 
-
 // TODO: implement
-abstract class ListenableModifier<T> extends ValueListenable<T> {
+final class ValueModifier<T> extends ValueListenable<T> {
   /// Sets the value of the observable and notifies its listeners.
   // ignore: avoid_setters_without_getters, there is getter in the parent class
   set value(T value);
