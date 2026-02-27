@@ -1159,7 +1159,7 @@ void main() {
 
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
-      gesture?.removePointer();
+      await gesture?.removePointer();
     });
 
     // Both the inner and outer containers have tooltips associated with them, but only

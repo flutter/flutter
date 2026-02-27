@@ -6639,7 +6639,7 @@ void main() {
         ),
       ),
     );
-    gesture.removePointer();
+    await gesture.removePointer();
   });
 
   testWidgets('No crash if TabBar build called before didUpdateWidget with SliverAppBar', (

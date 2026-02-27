@@ -320,7 +320,9 @@ void main() {
 
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: const Offset(400, 300));
-    addTearDown(() => gesture?.removePointer);
+    addTearDown(() async {
+      await gesture?.removePointer();
+    });
     await tester.pump();
     move = null;
     enter = null;
@@ -1006,7 +1008,7 @@ void main() {
     // Plug-in a mouse and move it to the center of the container.
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: Offset.zero);
-    addTearDown(() => gesture?.removePointer());
+    addTearDown(gesture.removePointer);
     await tester.pumpAndSettle();
     await gesture.moveTo(tester.getCenter(find.byType(SizedBox)));
 
