@@ -1888,17 +1888,16 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
 
   auto text_contents = std::make_shared<TextContents>();
   text_contents->SetTextFrame(text_frame);
+  text_contents->SetPosition(position);
+  text_contents->SetScreenTransform(GetCurrentTransform());
   text_contents->SetForceTextColor(paint.mask_blur_descriptor.has_value());
-  text_contents->SetScale(max_scale);
   text_contents->SetColor(paint.color);
-  text_contents->SetOffset(position);
   text_contents->SetTextProperties(paint.color,
                                    paint.style == Paint::Style::kStroke
                                        ? std::optional(paint.stroke)
                                        : std::nullopt);
 
-  entity.SetTransform(GetCurrentTransform() *
-                      Matrix::MakeTranslation(position));
+  entity.SetTransform(GetCurrentTransform());
 
   if (AttemptBlurredTextOptimization(text_frame, text_contents, entity,
                                      paint)) {

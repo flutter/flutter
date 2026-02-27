@@ -732,13 +732,8 @@ TEST_P(AiksTest, TextContentsMismatchedTransformTest) {
       Matrix::MakeTranslateScale({1.5, 1.5, 1}, {100, 50, 0});
   Point preroll_point = Point{23, 45};
   {
-    auto scale = TextFrame::RoundScaledFontSize(
-        (preroll_matrix * Matrix::MakeTranslation(preroll_point))
-            .GetMaxBasisLengthXY());
-
     aiks_context.GetContentContext().GetLazyGlyphAtlas()->AddTextFrame(
         text_frame,     //
-        scale,          //
         preroll_point,  //
         preroll_matrix,
         std::nullopt  //
@@ -753,12 +748,12 @@ TEST_P(AiksTest, TextContentsMismatchedTransformTest) {
 
   TextContents text_contents;
   text_contents.SetTextFrame(text_frame);
-  text_contents.SetOffset(preroll_point);
-  text_contents.SetScale(1.6);
+  text_contents.SetPosition(preroll_point);
+  text_contents.SetScreenTransform(preroll_matrix);
   text_contents.SetColor(Color::Aqua());
 
   Matrix not_preroll_matrix =
-      Matrix::MakeTranslateScale({1.5, 1.5, 1}, {100, 50, 0});
+      preroll_matrix * Matrix::MakeScale({2.0f, 2.0f, 1.0f});
 
   Entity entity;
   entity.SetTransform(not_preroll_matrix);
@@ -938,6 +933,81 @@ TEST_P(AiksTest, VarietyOfTextScalesShowingRasterAndPath) {
     builder.Restore();
   }
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+namespace {
+std::shared_ptr<TextFrame> MakeDefaultTextFrame(const std::string& text,
+                                                Scalar font_size) {
+  // Construct the text blob.
+  auto mapping = flutter::testing::OpenFixtureAsSkData("Roboto-Regular.ttf");
+  if (mapping == nullptr) {
+    return nullptr;
+  }
+
+  sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
+  SkFont sk_font(font_mgr->makeFromData(mapping), font_size);
+  sk_sp<SkTextBlob> blob = SkTextBlob::MakeFromString("Hi", sk_font);
+
+  std::shared_ptr<TextFrame> text_frame = MakeTextFrameFromTextBlobSkia(blob);
+  return text_frame;
+}
+
+void DrawTextFramesMultipleScalesWithReuse(AiksTest* test,
+                                           Scalar first_scale,
+                                           Scalar second_scale) {
+  DisplayListBuilder builder;
+  builder.Scale(test->GetContentScale().x, test->GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  std::shared_ptr<TextFrame> reuse_frame = MakeDefaultTextFrame("Hi", 20.0f);
+  ASSERT_NE(reuse_frame, nullptr);
+
+  builder.Save();
+  builder.Translate(100, 100);
+  builder.Scale(first_scale, first_scale);
+  builder.DrawText(DlTextImpeller::Make(reuse_frame), 0, 0,
+                   DlPaint(DlColor::kBlue()));
+  builder.Restore();
+
+  builder.Save();
+  builder.Translate(400, 100);
+  builder.Scale(second_scale, second_scale);
+  builder.DrawText(DlTextImpeller::Make(reuse_frame), 0, 0,
+                   DlPaint(DlColor::kPurple()));
+  builder.Restore();
+
+  builder.Save();
+  builder.Translate(100, 400);
+  builder.Scale(first_scale, first_scale);
+  std::shared_ptr<TextFrame> single_use_frame1 =
+      MakeDefaultTextFrame("Hi", 20.0f);
+  builder.DrawText(DlTextImpeller::Make(single_use_frame1), 0, 0,
+                   DlPaint(DlColor::kBlue()));
+  builder.Restore();
+
+  builder.Save();
+  builder.Translate(400, 400);
+  builder.Scale(second_scale, second_scale);
+  std::shared_ptr<TextFrame> single_use_frame2 =
+      MakeDefaultTextFrame("Hi", 20.0f);
+  builder.DrawText(DlTextImpeller::Make(single_use_frame2), 0, 0,
+                   DlPaint(DlColor::kPurple()));
+  builder.Restore();
+
+  ASSERT_TRUE(test->OpenPlaygroundHere(builder.Build()));
+}
+}  // namespace
+
+TEST_P(AiksTest, TextFramesDoNotShareRenderDataBigSmall) {
+  DrawTextFramesMultipleScalesWithReuse(this,                  //
+                                        /*first_scale=*/4.0f,  //
+                                        /*second_scale=*/0.5f);
+}
+
+TEST_P(AiksTest, TextFramesDoNotShareRenderDataSmallBig) {
+  DrawTextFramesMultipleScalesWithReuse(this,                  //
+                                        /*first_scale=*/0.5f,  //
+                                        /*second_scale=*/4.0f);
 }
 
 // Verifies that non-uniform (anisotropic) scaling uses bilinear filtering
