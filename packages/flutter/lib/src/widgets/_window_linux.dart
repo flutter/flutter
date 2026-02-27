@@ -14,6 +14,8 @@
 //
 // See: https://github.com/flutter/flutter/issues/30701.
 
+import 'dart:convert';
+import 'dart:ffi' as ffi;
 import 'dart:io';
 import 'dart:ui' show Display, FlutterView;
 import 'package:flutter/foundation.dart';
@@ -21,9 +23,48 @@ import 'package:flutter/rendering.dart';
 
 import '../foundation/_features.dart';
 import '_window.dart';
-import '_window_linux_ffi.dart';
 import '_window_positioner.dart';
 import 'binding.dart';
+
+// Maximum width and height a window can be.
+// In C this would be INT_MAX, but since we can't determine that from Dart let's assume it's 32 bit signed. In any case this is far beyond any reasonable window size.
+const int _kMaxWindowDimensions = 0x7fffffff;
+
+const int _GTK_WINDOW_TOPLEVEL = 0;
+const int _GTK_WINDOW_POPUP = 1;
+
+const int _GDK_GRAVITY_NORTH_WEST = 1;
+const int _GDK_GRAVITY_NORTH = 2;
+const int _GDK_GRAVITY_NORTH_EAST = 3;
+const int _GDK_GRAVITY_WEST = 4;
+const int _GDK_GRAVITY_CENTER = 5;
+const int _GDK_GRAVITY_EAST = 6;
+const int _GDK_GRAVITY_SOUTH_WEST = 7;
+const int _GDK_GRAVITY_SOUTH = 8;
+const int _GDK_GRAVITY_SOUTH_EAST = 9;
+const int _GDK_GRAVITY_STATIC = 10;
+
+const int _GDK_ANCHOR_FLIP_X = 1;
+const int _GDK_ANCHOR_FLIP_Y = 2;
+const int _GDK_ANCHOR_SLIDE_X = 4;
+const int _GDK_ANCHOR_SLIDE_Y = 8;
+const int _GDK_ANCHOR_RESIZE_X = 16;
+const int _GDK_ANCHOR_RESIZE_Y = 32;
+
+/// Flag to indicated if a window is iconified.
+const int _GDK_WINDOW_STATE_ICONIFIED = 1 << 1;
+
+/// Flag to indicated if a window is maximized.
+const int _GDK_WINDOW_STATE_MAXIMIZED = 1 << 2;
+
+/// Flag to indicated if a window is fullscreen.
+const int _GDK_WINDOW_STATE_FULLSCREEN = 1 << 4;
+
+/// Window hint for dialogs.
+const int _GDK_WINDOW_TYPE_HINT_DIALOG = 1;
+
+/// Window hint for tooltips.
+const int _GDK_WINDOW_TYPE_HINT_TOOLTIP = 10;
 
 const String _kWindowingDisabledErrorMessage = '''
 Windowing APIs are not enabled.
@@ -37,6 +78,614 @@ To try experimental windowing APIs:
 
 See: https://github.com/flutter/flutter/issues/30701.
 ''';
+
+@ffi.Native<ffi.Pointer<ffi.NativeType> Function(ffi.Int)>(symbol: 'g_malloc0')
+external ffi.Pointer<ffi.NativeType> _gMalloc0(int count);
+
+@ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'g_free')
+external void _gFree(ffi.Pointer<ffi.NativeType> value);
+
+ffi.Pointer<ffi.Uint8> _stringToNative(String value) {
+  final Uint8List units = utf8.encode(value);
+  final ffi.Pointer<ffi.Uint8> buffer = _gMalloc0(units.length + 1).cast<ffi.Uint8>();
+  final Uint8List nativeString = buffer.asTypedList(units.length + 1);
+  nativeString.setAll(0, units);
+  nativeString[units.length] = 0;
+  return buffer;
+}
+
+String _nativeToString(ffi.Pointer<ffi.Uint8> value) {
+  var length = 0;
+  while (value[length] != 0) {
+    length++;
+  }
+  return utf8.decode(value.asTypedList(length));
+}
+
+/// Wraps GObject
+class _GObject {
+  /// Creates a wrapper to an existing [GObject] in [instance].
+  const _GObject(this.instance);
+
+  /// The pointer to the underlying [GObject].
+  final ffi.Pointer<ffi.NativeType> instance;
+
+  /// Drop reference to this object.
+  void unref() {
+    _unref(instance);
+  }
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'g_object_unref')
+  external static void _unref(ffi.Pointer<ffi.NativeType> widget);
+}
+
+/// Wraps GtkContainer
+class _GtkContainer extends _GtkWidget {
+  /// Creates a wrapper to an existing [GtkContainer] in [instance].
+  const _GtkContainer(super.instance);
+
+  /// Adds [child] widget to this container.
+  void add(_GtkWidget child) {
+    _gtkContainerAdd(instance, child.instance);
+  }
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>, ffi.Pointer<ffi.NativeType>)>(
+    symbol: 'gtk_container_add',
+  )
+  external static void _gtkContainerAdd(
+    ffi.Pointer<ffi.NativeType> container,
+    ffi.Pointer<ffi.NativeType> child,
+  );
+}
+
+/// Wraps GtkWidget
+class _GtkWidget extends _GObject {
+  /// Creates a wrapper to an existing [GtkWidget] in [instance].
+  const _GtkWidget(super.instance);
+
+  /// Creates the GDK resources associated with a widget.
+  void realize() {
+    _gtkWidgetRealize(instance);
+  }
+
+  /// Show the widget (defaults to hidden).
+  void show() {
+    _gtkWidgetShow(instance);
+  }
+
+  /// Get the low level window backing this widget.
+  _GdkWindow getWindow() {
+    return _GdkWindow(_gtkWidgetGetWindow(instance));
+  }
+
+  /// Get the scale factor that maps window coordinates to device pixels.
+  int getScaleFactor() {
+    return _gtkWidgetGetScaleFactor(instance);
+  }
+
+  (int, int)? translateCoordinates(_GtkWidget destWidget, (int, int) src) {
+    final ffi.Pointer<ffi.Int> destX = _gMalloc0(ffi.sizeOf<ffi.Int>()).cast<ffi.Int>();
+    final ffi.Pointer<ffi.Int> destY = _gMalloc0(ffi.sizeOf<ffi.Int>()).cast<ffi.Int>();
+    final bool translated = _gtkWidgetTranslateCoordinates(
+      instance,
+      destWidget.instance,
+      src.$1,
+      src.$2,
+      destX,
+      destY,
+    );
+    final (int, int)? result = translated ? (destX.value, destY.value) : null;
+    _gFree(destX);
+    _gFree(destY);
+    return result;
+  }
+
+  /// Destroy the widget.
+  void destroy() {
+    _gtkWindowDestroy(instance);
+  }
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_widget_realize')
+  external static void _gtkWidgetRealize(ffi.Pointer<ffi.NativeType> widget);
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_widget_show')
+  external static void _gtkWidgetShow(ffi.Pointer<ffi.NativeType> widget);
+
+  @ffi.Native<ffi.Pointer<ffi.NativeType> Function(ffi.Pointer<ffi.NativeType>)>(
+    symbol: 'gtk_widget_get_window',
+  )
+  external static ffi.Pointer<ffi.NativeType> _gtkWidgetGetWindow(
+    ffi.Pointer<ffi.NativeType> widget,
+  );
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_widget_destroy')
+  external static void _gtkWindowDestroy(ffi.Pointer<ffi.NativeType> widget);
+
+  @ffi.Native<ffi.Int Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_widget_get_scale_factor')
+  external static int _gtkWidgetGetScaleFactor(ffi.Pointer<ffi.NativeType> widget);
+
+  @ffi.Native<
+    ffi.Bool Function(
+      ffi.Pointer<ffi.NativeType>,
+      ffi.Pointer<ffi.NativeType>,
+      ffi.Int,
+      ffi.Int,
+      ffi.Pointer<ffi.Int>,
+      ffi.Pointer<ffi.Int>,
+    )
+  >(symbol: 'gtk_widget_translate_coordinates')
+  external static bool _gtkWidgetTranslateCoordinates(
+    ffi.Pointer<ffi.NativeType> widget,
+    ffi.Pointer<ffi.NativeType> destWidget,
+    int srcX,
+    int srcY,
+    ffi.Pointer<ffi.Int> destX,
+    ffi.Pointer<ffi.Int> destY,
+  );
+}
+
+/// Wraps GdkWindow
+class _GdkWindow extends _GObject {
+  /// Creates a wrapper to an existing [GdkWindow] in [instance].
+  const _GdkWindow(super.instance);
+
+  /// Gets the window state bitfield (_GDK_WINDOW_STATE_*).
+  int getState() {
+    return _gdkWindowGetState(instance);
+  }
+
+  /// FIXME
+  void moveToRect({
+    required int x,
+    required int y,
+    required int width,
+    required int height,
+    required int rectAnchor,
+    required int windowAnchor,
+    required int anchorHints,
+    int rectAnchorDx = 0,
+    int rectAnchorDy = 0,
+  }) {
+    final ffi.Pointer<_GdkRectangle> rect = _gMalloc0(
+      ffi.sizeOf<_GdkRectangle>(),
+    ).cast<_GdkRectangle>();
+    final _GdkRectangle r = rect.ref;
+    r.x = x;
+    r.y = y;
+    r.width = width;
+    r.height = height;
+    _gdkWindowMoveToRect(
+      instance,
+      rect,
+      rectAnchor,
+      windowAnchor,
+      anchorHints,
+      rectAnchorDx,
+      rectAnchorDy,
+    );
+    _gFree(rect);
+  }
+
+  @ffi.Native<ffi.Int Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gdk_window_get_state')
+  external static int _gdkWindowGetState(ffi.Pointer<ffi.NativeType> window);
+
+  @ffi.Native<
+    ffi.Void Function(
+      ffi.Pointer<ffi.NativeType>,
+      ffi.Pointer<ffi.NativeType>,
+      ffi.Int,
+      ffi.Int,
+      ffi.Int,
+      ffi.Int,
+      ffi.Int,
+    )
+  >(symbol: 'gdk_window_move_to_rect')
+  external static void _gdkWindowMoveToRect(
+    ffi.Pointer<ffi.NativeType> window,
+    ffi.Pointer<ffi.NativeType> rect,
+    int rectAnchor,
+    int windowAnchor,
+    int anchorHints,
+    int rectAnchorDx,
+    int rectAnchorDy,
+  );
+}
+
+/// Wraps GdkRectangle.
+final class _GdkRectangle extends ffi.Struct {
+  factory _GdkRectangle() {
+    return ffi.Struct.create();
+  }
+
+  @ffi.Int()
+  external int x;
+
+  @ffi.Int()
+  external int y;
+
+  @ffi.Int()
+  external int width;
+
+  @ffi.Int()
+  external int height;
+}
+
+/// Wraps GdkGeometry.
+final class _GdkGeometry extends ffi.Struct {
+  factory _GdkGeometry() {
+    return ffi.Struct.create();
+  }
+
+  @ffi.Int()
+  external int minWidth;
+
+  @ffi.Int()
+  external int minHeight;
+
+  @ffi.Int()
+  external int maxWidth;
+
+  @ffi.Int()
+  external int maxHeight;
+
+  @ffi.Int()
+  external int baseWidth;
+
+  @ffi.Int()
+  external int baseHeight;
+
+  @ffi.Int()
+  external int widthInc;
+
+  @ffi.Int()
+  external int heightInc;
+
+  @ffi.Double()
+  external double minAspect;
+
+  @ffi.Double()
+  external double maxAspect;
+
+  @ffi.Int()
+  external int winGravity;
+}
+
+/// Wraps GtkWindow
+class _GtkWindow extends _GtkContainer {
+  /// Create a new GtkWindow
+  _GtkWindow(int type) : super(_gtkWindowNew(type));
+
+  /// Make window visible and grab focus.
+  void present() {
+    _gtkWindowPresent(instance);
+  }
+
+  /// Sets the parent window.
+  void setTransientFor(_GtkWindow parent) {
+    _gtkWindowSetTransientFor(instance, parent.instance);
+  }
+
+  /// Set if this window is modal to its parent.
+  void setModal(bool modal) {
+    _gtkWindowSetModal(instance, modal);
+  }
+
+  /// Set the type of this window.
+  void setTypeHint(int hint) {
+    _gtkWindowSetTypeHint(instance, hint);
+  }
+
+  /// Sets if this window has decorations (titlebar, borders, shadow).
+  void setDecorated(bool decorated) {
+    _gtkWindowSetDecorated(instance, decorated);
+  }
+
+  /// Sets the title of the window.
+  void setTitle(String title) {
+    final ffi.Pointer<ffi.Uint8> titleBuffer = _stringToNative(title);
+    _gtkWindowSetTitle(instance, titleBuffer);
+    _gFree(titleBuffer);
+  }
+
+  /// Gets the current title of the window.
+  String getTitle() {
+    return _nativeToString(_gtkWindowGetTitle(instance));
+  }
+
+  /// Set the default size of the window.
+  void setDefaultSize(int width, int height) {
+    _gtkWindowSetDefaultSize(instance, width, height);
+  }
+
+  /// Set minimum and maximum size of the window.
+  void setGeometryHints({int? minWidth, int? minHeight, int? maxWidth, int? maxHeight}) {
+    final ffi.Pointer<_GdkGeometry> geometry = _gMalloc0(
+      ffi.sizeOf<_GdkGeometry>(),
+    ).cast<_GdkGeometry>();
+    final _GdkGeometry g = geometry.ref;
+    var geometryMask = 0;
+    if (minWidth != null || minHeight != null) {
+      g.minWidth = minWidth ?? 0;
+      g.minHeight = minHeight ?? 0;
+      geometryMask |= 2; // GDK_HINT_MIN_SIZE
+    }
+    if (maxWidth != null || maxHeight != null) {
+      g.maxWidth = maxWidth ?? _kMaxWindowDimensions;
+      g.maxHeight = maxHeight ?? _kMaxWindowDimensions;
+      geometryMask |= 4; // GDK_HINT_MAX_SIZE
+    }
+    _gtkWindowSetGeometryHints(instance, ffi.nullptr, geometry, geometryMask);
+    _gFree(geometry);
+  }
+
+  /// Resize to [width]x[height].
+  void resize(int width, int height) {
+    _gtkWindowResize(instance, width, height);
+  }
+
+  /// Maximize window.
+  void maximize() {
+    _gtkWindowMaximize(instance);
+  }
+
+  /// Unaximize window.
+  void unmaximize() {
+    _gtkWindowUnmaximize(instance);
+  }
+
+  /// Iconify (minimize) window.
+  void iconify() {
+    _gtkWindowIconify(instance);
+  }
+
+  /// Deconify (unminimize) window.
+  void deiconify() {
+    _gtkWindowDeiconify(instance);
+  }
+
+  /// Make window fullscreen.
+  void fullscreen() {
+    _gtkWindowFullscreen(instance);
+  }
+
+  /// Leave fullscreen.
+  void unfullscreen() {
+    _gtkWindowUnfullscreen(instance);
+  }
+
+  /// Get the current size of the window.
+  Size getSize() {
+    final ffi.Pointer<ffi.Int> width = _gMalloc0(ffi.sizeOf<ffi.Int>()).cast<ffi.Int>();
+    final ffi.Pointer<ffi.Int> height = _gMalloc0(ffi.sizeOf<ffi.Int>()).cast<ffi.Int>();
+    _gtkWindowGetSize(instance, width, height);
+    final result = Size(width.value.toDouble(), height.value.toDouble());
+    _gFree(width);
+    _gFree(height);
+    return result;
+  }
+
+  /// true if this window has keyboard focus.
+  bool isActive() {
+    return _gtkWindowIsActive(instance);
+  }
+
+  @ffi.Native<ffi.Pointer<ffi.NativeType> Function(ffi.Int)>(symbol: 'gtk_window_new')
+  external static ffi.Pointer<ffi.NativeType> _gtkWindowNew(int type);
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_window_present')
+  external static void _gtkWindowPresent(ffi.Pointer<ffi.NativeType> window);
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>, ffi.Bool)>(
+    symbol: 'gtk_window_set_modal',
+  )
+  external static void _gtkWindowSetModal(ffi.Pointer<ffi.NativeType> window, bool modal);
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>, ffi.Int)>(
+    symbol: 'gtk_window_set_type_hint',
+  )
+  external static void _gtkWindowSetTypeHint(ffi.Pointer<ffi.NativeType> window, int hint);
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>, ffi.Pointer<ffi.NativeType>)>(
+    symbol: 'gtk_window_set_transient_for',
+  )
+  external static void _gtkWindowSetTransientFor(
+    ffi.Pointer<ffi.NativeType> window,
+    ffi.Pointer<ffi.NativeType> parent,
+  );
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>, ffi.Pointer<ffi.Uint8>)>(
+    symbol: 'gtk_window_set_title',
+  )
+  external static void _gtkWindowSetTitle(
+    ffi.Pointer<ffi.NativeType> window,
+    ffi.Pointer<ffi.Uint8> title,
+  );
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>, ffi.Bool)>(
+    symbol: 'gtk_window_set_decorated',
+  )
+  external static void _gtkWindowSetDecorated(ffi.Pointer<ffi.NativeType> window, bool decorated);
+
+  @ffi.Native<ffi.Pointer<ffi.Uint8> Function(ffi.Pointer<ffi.NativeType>)>(
+    symbol: 'gtk_window_get_title',
+  )
+  external static ffi.Pointer<ffi.Uint8> _gtkWindowGetTitle(ffi.Pointer<ffi.NativeType> window);
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>, ffi.Int, ffi.Int)>(
+    symbol: 'gtk_window_set_default_size',
+  )
+  external static void _gtkWindowSetDefaultSize(
+    ffi.Pointer<ffi.NativeType> window,
+    int width,
+    int height,
+  );
+
+  @ffi.Native<
+    ffi.Void Function(
+      ffi.Pointer<ffi.NativeType>,
+      ffi.Pointer<ffi.NativeType>,
+      ffi.Pointer<_GdkGeometry>,
+      ffi.Int,
+    )
+  >(symbol: 'gtk_window_set_geometry_hints')
+  external static void _gtkWindowSetGeometryHints(
+    ffi.Pointer<ffi.NativeType> window,
+    ffi.Pointer<ffi.NativeType> geometryWidget,
+    ffi.Pointer<_GdkGeometry> geometry,
+    int geometryMask,
+  );
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>, ffi.Int, ffi.Int)>(
+    symbol: 'gtk_window_resize',
+  )
+  external static void _gtkWindowResize(ffi.Pointer<ffi.NativeType> window, int width, int height);
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_window_maximize')
+  external static void _gtkWindowMaximize(ffi.Pointer<ffi.NativeType> window);
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_window_unmaximize')
+  external static void _gtkWindowUnmaximize(ffi.Pointer<ffi.NativeType> window);
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_window_iconify')
+  external static void _gtkWindowIconify(ffi.Pointer<ffi.NativeType> window);
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_window_deiconify')
+  external static void _gtkWindowDeiconify(ffi.Pointer<ffi.NativeType> window);
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_window_fullscreen')
+  external static void _gtkWindowFullscreen(ffi.Pointer<ffi.NativeType> window);
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_window_unfullscreen')
+  external static void _gtkWindowUnfullscreen(ffi.Pointer<ffi.NativeType> window);
+
+  @ffi.Native<
+    ffi.Void Function(ffi.Pointer<ffi.NativeType>, ffi.Pointer<ffi.Int>, ffi.Pointer<ffi.Int>)
+  >(symbol: 'gtk_window_get_size')
+  external static void _gtkWindowGetSize(
+    ffi.Pointer<ffi.NativeType> window,
+    ffi.Pointer<ffi.Int> width,
+    ffi.Pointer<ffi.Int> height,
+  );
+
+  @ffi.Native<ffi.Bool Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_window_is_active')
+  external static bool _gtkWindowIsActive(ffi.Pointer<ffi.NativeType> widget);
+}
+
+/// Wraps FlView
+class _FlView extends _GtkWidget {
+  /// Create a new FlView widget.
+  _FlView(int engineId, {bool isSizedToContent = false})
+    : super(
+        isSizedToContent
+            ? _flViewNewSizedToContent(ffi.Pointer<ffi.NativeType>.fromAddress(engineId))
+            : _flViewNewForEngine(ffi.Pointer<ffi.NativeType>.fromAddress(engineId)),
+      );
+
+  /// Get the ID for the Flutter view being shown in this widget.
+  int getId() {
+    return _flViewGetId(instance);
+  }
+
+  @ffi.Native<ffi.Pointer<ffi.NativeType> Function(ffi.Pointer<ffi.NativeType>)>(
+    symbol: 'fl_view_new_for_engine',
+  )
+  external static ffi.Pointer<ffi.NativeType> _flViewNewForEngine(
+    ffi.Pointer<ffi.NativeType> engine,
+  );
+
+  @ffi.Native<ffi.Pointer<ffi.NativeType> Function(ffi.Pointer<ffi.NativeType>)>(
+    symbol: 'fl_view_new_sized_to_content',
+  )
+  external static ffi.Pointer<ffi.NativeType> _flViewNewSizedToContent(
+    ffi.Pointer<ffi.NativeType> engine,
+  );
+
+  @ffi.Native<ffi.Int64 Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'fl_view_get_id')
+  external static int _flViewGetId(ffi.Pointer<ffi.NativeType> view);
+}
+
+/// Wraps FlWindowMonitor (helper object for handling signals from GtkWindow).
+class _FlWindowMonitor extends _GObject {
+  /// Create a new FlWindowMonitor.
+  factory _FlWindowMonitor(
+    _GtkWindow window, {
+    VoidCallback? onConfigure,
+    VoidCallback? onStateChanged,
+    VoidCallback? onIsActiveNotify,
+    VoidCallback? onTitleNotify,
+    VoidCallback? onClose,
+    VoidCallback? onDestroy,
+  }) {
+    void noop() {}
+    return _FlWindowMonitor._internal(
+      window.instance,
+      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onConfigure ?? noop),
+      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onStateChanged ?? noop),
+      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onIsActiveNotify ?? noop),
+      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onTitleNotify ?? noop),
+      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onClose ?? noop),
+      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onDestroy ?? noop),
+    );
+  }
+
+  _FlWindowMonitor._internal(
+    ffi.Pointer<ffi.NativeType> window,
+    this._onConfigureFunction,
+    this._onStateChangedFunction,
+    this._onIsActiveNotifyFunction,
+    this._onTitleNotifyFunction,
+    this._onCloseFunction,
+    this._onDestroyFunction,
+  ) : super(
+        _flWindowMonitorNew(
+          window,
+          _onConfigureFunction.nativeFunction,
+          _onStateChangedFunction.nativeFunction,
+          _onIsActiveNotifyFunction.nativeFunction,
+          _onTitleNotifyFunction.nativeFunction,
+          _onCloseFunction.nativeFunction,
+          _onDestroyFunction.nativeFunction,
+        ),
+      );
+
+  final ffi.NativeCallable<ffi.Void Function()> _onConfigureFunction;
+  final ffi.NativeCallable<ffi.Void Function()> _onStateChangedFunction;
+  final ffi.NativeCallable<ffi.Void Function()> _onIsActiveNotifyFunction;
+  final ffi.NativeCallable<ffi.Void Function()> _onTitleNotifyFunction;
+  final ffi.NativeCallable<ffi.Void Function()> _onCloseFunction;
+  final ffi.NativeCallable<ffi.Void Function()> _onDestroyFunction;
+
+  /// Close all FFI resources used in the monitor.
+  void close() {
+    _onConfigureFunction.close();
+    _onStateChangedFunction.close();
+    _onIsActiveNotifyFunction.close();
+    _onTitleNotifyFunction.close();
+    _onCloseFunction.close();
+    _onDestroyFunction.close();
+  }
+
+  @ffi.Native<
+    ffi.Pointer<ffi.NativeType> Function(
+      ffi.Pointer<ffi.NativeType>,
+      ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>>,
+      ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>>,
+      ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>>,
+      ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>>,
+      ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>>,
+      ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>>,
+    )
+  >(symbol: 'fl_window_monitor_new')
+  external static ffi.Pointer<ffi.NativeType> _flWindowMonitorNew(
+    ffi.Pointer<ffi.NativeType> window,
+    ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>> onConfigure,
+    ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>> onStateChanged,
+    ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>> onIsActiveNotify,
+    ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>> onTitleNotify,
+    ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>> onClose,
+    ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>> onDestroy,
+  );
+}
 
 /// [WindowingOwner] implementation for Linux.
 ///
@@ -77,10 +726,10 @@ class WindowingOwnerLinux extends WindowingOwner {
   }
 
   /// GTK windows keyed by view ID.
-  final Map<int, GtkWindow> _windows = <int, GtkWindow>{};
+  final Map<int, _GtkWindow> _windows = <int, _GtkWindow>{};
 
   /// View windows keyed by view ID.
-  final Map<int, FlView> _views = <int, FlView>{};
+  final Map<int, _FlView> _views = <int, _FlView>{};
 
   @internal
   @override
@@ -188,13 +837,13 @@ class RegularWindowControllerLinux extends RegularWindowController {
     String? title,
   }) : _owner = owner,
        _delegate = delegate,
-       _window = GtkWindow(GTK_WINDOW_TOPLEVEL),
+       _window = _GtkWindow(_GTK_WINDOW_TOPLEVEL),
        super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
 
-    _windowMonitor = FlWindowMonitor(
+    _windowMonitor = _FlWindowMonitor(
       _window,
       onConfigure: notifyListeners,
       onStateChanged: notifyListeners,
@@ -214,7 +863,7 @@ class RegularWindowControllerLinux extends RegularWindowController {
     if (title != null) {
       setTitle(title);
     }
-    _view = FlView(WidgetsBinding.instance.platformDispatcher.engineId!);
+    _view = _FlView(WidgetsBinding.instance.platformDispatcher.engineId!);
     final int viewId = _view.getId();
     rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
@@ -226,9 +875,9 @@ class RegularWindowControllerLinux extends RegularWindowController {
 
   final WindowingOwnerLinux _owner;
   final RegularWindowControllerDelegate _delegate;
-  final GtkWindow _window;
-  late final FlView _view;
-  late final FlWindowMonitor _windowMonitor;
+  final _GtkWindow _window;
+  late final _FlView _view;
+  late final _FlWindowMonitor _windowMonitor;
   bool _destroyed = false;
 
   @override
@@ -258,16 +907,16 @@ class RegularWindowControllerLinux extends RegularWindowController {
 
   @override
   @internal
-  bool get isMaximized => (_window.getWindow().getState() & GDK_WINDOW_STATE_MAXIMIZED) != 0;
+  bool get isMaximized => (_window.getWindow().getState() & _GDK_WINDOW_STATE_MAXIMIZED) != 0;
 
   @override
   @internal
   // NOTE: On Wayland this is never set, see https://gitlab.gnome.org/GNOME/gtk/-/issues/67
-  bool get isMinimized => (_window.getWindow().getState() & GDK_WINDOW_STATE_ICONIFIED) != 0;
+  bool get isMinimized => (_window.getWindow().getState() & _GDK_WINDOW_STATE_ICONIFIED) != 0;
 
   @override
   @internal
-  bool get isFullscreen => (_window.getWindow().getState() & GDK_WINDOW_STATE_FULLSCREEN) != 0;
+  bool get isFullscreen => (_window.getWindow().getState() & _GDK_WINDOW_STATE_FULLSCREEN) != 0;
 
   @override
   @internal
@@ -359,22 +1008,22 @@ class DialogWindowControllerLinux extends DialogWindowController {
   }) : _owner = owner,
        _delegate = delegate,
        _parent = parent,
-       _window = GtkWindow(GTK_WINDOW_TOPLEVEL),
+       _window = _GtkWindow(_GTK_WINDOW_TOPLEVEL),
        super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
 
-    _window.setTypeHint(GDK_WINDOW_TYPE_HINT_DIALOG);
+    _window.setTypeHint(_GDK_WINDOW_TYPE_HINT_DIALOG);
     if (parent != null) {
-      final GtkWindow? parentWindow = owner._windows[parent.rootView.viewId];
+      final _GtkWindow? parentWindow = owner._windows[parent.rootView.viewId];
       if (parentWindow != null) {
         _window.setTransientFor(parentWindow);
         _window.setModal(true);
       }
     }
 
-    _windowMonitor = FlWindowMonitor(
+    _windowMonitor = _FlWindowMonitor(
       _window,
       onConfigure: notifyListeners,
       onStateChanged: notifyListeners,
@@ -394,7 +1043,7 @@ class DialogWindowControllerLinux extends DialogWindowController {
     if (title != null) {
       setTitle(title);
     }
-    _view = FlView(WidgetsBinding.instance.platformDispatcher.engineId!);
+    _view = _FlView(WidgetsBinding.instance.platformDispatcher.engineId!);
     final int viewId = _view.getId();
     rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
@@ -406,10 +1055,10 @@ class DialogWindowControllerLinux extends DialogWindowController {
 
   final WindowingOwnerLinux _owner;
   final DialogWindowControllerDelegate _delegate;
-  final GtkWindow _window;
+  final _GtkWindow _window;
   final BaseWindowController? _parent;
-  late final FlView _view;
-  late final FlWindowMonitor _windowMonitor;
+  late final _FlView _view;
+  late final _FlWindowMonitor _windowMonitor;
   bool _destroyed = false;
 
   @override
@@ -444,7 +1093,7 @@ class DialogWindowControllerLinux extends DialogWindowController {
   @override
   @internal
   // NOTE: On Wayland this is never set, see https://gitlab.gnome.org/GNOME/gtk/-/issues/67
-  bool get isMinimized => (_window.getWindow().getState() & GDK_WINDOW_STATE_ICONIFIED) != 0;
+  bool get isMinimized => (_window.getWindow().getState() & _GDK_WINDOW_STATE_ICONIFIED) != 0;
 
   @override
   @internal
@@ -516,7 +1165,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
   }) : _owner = owner,
        _delegate = delegate,
        _parent = parent,
-       _window = GtkWindow(GTK_WINDOW_POPUP),
+       _window = _GtkWindow(_GTK_WINDOW_POPUP),
        super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
@@ -526,13 +1175,13 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
     _window.setDecorated(false);
     _window.realize();
 
-    _windowMonitor = FlWindowMonitor(
+    _windowMonitor = _FlWindowMonitor(
       _window,
       onConfigure: notifyListeners,
       onDestroy: _delegate.onWindowDestroyed,
     );
     setConstraints(preferredConstraints);
-    _view = FlView(
+    _view = _FlView(
       WidgetsBinding.instance.platformDispatcher.engineId!,
       isSizedToContent: isSizedToContent,
     );
@@ -543,7 +1192,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
     _view.show();
     _window.add(_view);
 
-    final GtkWindow? parentWindow = _owner._windows[_parent.rootView.viewId];
+    final _GtkWindow? parentWindow = _owner._windows[_parent.rootView.viewId];
     if (parentWindow != null) {
       _window.setTransientFor(parentWindow);
     }
@@ -554,12 +1203,12 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
 
   final WindowingOwnerLinux _owner;
   final TooltipWindowControllerDelegate _delegate;
-  final GtkWindow _window;
+  final _GtkWindow _window;
   late Rect _anchorRect;
   late WindowPositioner _positioner;
   final BaseWindowController _parent;
-  late final FlView _view;
-  late final FlWindowMonitor _windowMonitor;
+  late final _FlView _view;
+  late final _FlWindowMonitor _windowMonitor;
   bool _destroyed = false;
 
   @override
@@ -588,8 +1237,8 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
       _positioner = positioner;
     }
 
-    final GtkWindow? parentWindow = _owner._windows[_parent.rootView.viewId];
-    final FlView? view = _owner._views[_parent.rootView.viewId];
+    final _GtkWindow? parentWindow = _owner._windows[_parent.rootView.viewId];
+    final _FlView? view = _owner._views[_parent.rootView.viewId];
     var offset = (0, 0);
     if (parentWindow != null && view != null) {
       offset = view.translateCoordinates(parentWindow, (0, 0)) ?? (0, 0);
@@ -610,45 +1259,45 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
   int _anchorToGravity(WindowPositionerAnchor anchor) {
     switch (anchor) {
       case WindowPositionerAnchor.center:
-        return GDK_GRAVITY_CENTER;
+        return _GDK_GRAVITY_CENTER;
       case WindowPositionerAnchor.top:
-        return GDK_GRAVITY_NORTH;
+        return _GDK_GRAVITY_NORTH;
       case WindowPositionerAnchor.bottom:
-        return GDK_GRAVITY_SOUTH;
+        return _GDK_GRAVITY_SOUTH;
       case WindowPositionerAnchor.left:
-        return GDK_GRAVITY_WEST;
+        return _GDK_GRAVITY_WEST;
       case WindowPositionerAnchor.right:
-        return GDK_GRAVITY_EAST;
+        return _GDK_GRAVITY_EAST;
       case WindowPositionerAnchor.topLeft:
-        return GDK_GRAVITY_NORTH_WEST;
+        return _GDK_GRAVITY_NORTH_WEST;
       case WindowPositionerAnchor.bottomLeft:
-        return GDK_GRAVITY_SOUTH_WEST;
+        return _GDK_GRAVITY_SOUTH_WEST;
       case WindowPositionerAnchor.topRight:
-        return GDK_GRAVITY_NORTH_EAST;
+        return _GDK_GRAVITY_NORTH_EAST;
       case WindowPositionerAnchor.bottomRight:
-        return GDK_GRAVITY_SOUTH_EAST;
+        return _GDK_GRAVITY_SOUTH_EAST;
     }
   }
 
   int _constraintAdjustmentToHints(WindowPositionerConstraintAdjustment adjustment) {
     var hints = 0;
     if (adjustment.flipX) {
-      hints |= GDK_ANCHOR_FLIP_X;
+      hints |= _GDK_ANCHOR_FLIP_X;
     }
     if (adjustment.flipY) {
-      hints |= GDK_ANCHOR_FLIP_Y;
+      hints |= _GDK_ANCHOR_FLIP_Y;
     }
     if (adjustment.slideX) {
-      hints |= GDK_ANCHOR_SLIDE_X;
+      hints |= _GDK_ANCHOR_SLIDE_X;
     }
     if (adjustment.slideY) {
-      hints |= GDK_ANCHOR_SLIDE_Y;
+      hints |= _GDK_ANCHOR_SLIDE_Y;
     }
     if (adjustment.resizeX) {
-      hints |= GDK_ANCHOR_RESIZE_X;
+      hints |= _GDK_ANCHOR_RESIZE_X;
     }
     if (adjustment.resizeY) {
-      hints |= GDK_ANCHOR_RESIZE_Y;
+      hints |= _GDK_ANCHOR_RESIZE_Y;
     }
     return hints;
   }
