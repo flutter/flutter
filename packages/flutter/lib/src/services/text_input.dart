@@ -1370,7 +1370,10 @@ mixin TextInputClient {
   void showAutocorrectionPromptRect(int start, int end);
 
   /// Requests that this client refocus the text input control.
-  void refocus();
+  ///
+  /// This is necessary to support autofill on some browsers (e.g. iOS Safari) that blur the text
+  /// field and refocus it before autofilling.
+  void refocus() {}
 
   /// Platform notified framework of closed connection.
   ///
