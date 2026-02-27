@@ -15,6 +15,8 @@ import 'dart:collection' show HashMap;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import '../foundation/_features.dart' show isWindowingEnabled;
+import '_window.dart' show WindowManager;
 
 import 'actions.dart';
 import 'banner.dart';
@@ -1783,6 +1785,10 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       },
       child: result,
     );
+
+    if (isWindowingEnabled) {
+      result = WindowManager(child: result);
+    }
 
     final Widget? title;
     if (widget.onGenerateTitle != null) {
