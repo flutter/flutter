@@ -4824,17 +4824,14 @@ void main() {
       ),
     );
     final TestGesture gesture = await tester.startGesture(
-      tester.getCenter(find.byType(ListView).first)
+      tester.getCenter(find.byType(ListView).first),
     );
     await tester.pumpAndSettle();
     for (var i = 0; i < 5; i++) {
       await gesture.moveBy(const Offset(0, 200));
       await tester.pumpAndSettle();
     }
-    await expectLater(
-      find.byType(MaterialApp),
-      matchesGoldenFile('list_tile.overscroll.png'),
-    );
+    await expectLater(find.byType(MaterialApp), matchesGoldenFile('list_tile.overscroll.png'));
   });
 }
 
