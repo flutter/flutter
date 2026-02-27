@@ -1709,7 +1709,12 @@ void main() {
       expect((innerMaterial as dynamic).debugInkFeatures, hasLength(31));
     });
   });
-  group('live region announcements', () {
+
+    group('when supportsAnnounce is true, check announcement ', () {
+    ... add test
+  });
+
+  group('when supportsAnnounce is false, use live region to announce', () {
     testWidgets('Initial date announcement', (WidgetTester tester) async {
       final SemanticsHandle semantics = tester.ensureSemantics();
       const localizations = DefaultMaterialLocalizations();
