@@ -663,13 +663,21 @@ Future<XcodeBuildResult> buildXcodeProject({
 /// Ensure the TARGET_BUILD_DIR has the `com.apple.xcode.CreatedByBuildSystem` extended attribute.
 /// When using SwiftPM, this attribute is missing. This is required for `xcodebuild clean`.
 void ensureTargetBuildDirAttribute(String targetBuildDirPath) {
-  globals.processUtils.runSync(<String>[
+  final RunResult result = globals.processUtils.runSync(<String>[
     'xattr',
     '-w',
     'com.apple.xcode.CreatedByBuildSystem',
     'true',
     targetBuildDirPath,
   ]);
+  if (result.exitCode != 0) {
+    globals.logger.printTrace(
+      'Failed to add xattr com.apple.xcode.CreatedByBuildSystem to $targetBuildDirPath.\n'
+      'Exit code: ${result.exitCode}\n'
+      'Stdout: ${result.stdout}\n'
+      'Stderr: ${result.stderr}',
+    );
+  }
 }
 
 /// Check if the Flutter framework's public headers have changed since last built.
