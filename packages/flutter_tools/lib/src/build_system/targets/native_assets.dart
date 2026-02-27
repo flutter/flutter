@@ -59,7 +59,7 @@ class DartBuild extends Target {
       targetPlatform: targetPlatform,
       projectUri: projectUri,
       fileSystem: fileSystem,
-      buildCodeAssets: true,
+      buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
       buildDataAssets: true,
     );
     final File dartHookResultJsonFile = environment.buildDir.childFile(dartHookResultFilename);
