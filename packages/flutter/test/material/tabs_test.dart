@@ -783,13 +783,7 @@ void main() {
     ];
     const tabBarKey = Key('TabBar');
     await tester.pumpWidget(
-      buildFrame(
-        tabs: tabs,
-        value: 'AAAAAA',
-        isScrollable: true,
-        tabBarKey: tabBarKey,
-        useMaterial3: true,
-      ),
+      buildFrame(tabs: tabs, value: 'AAAAAA', isScrollable: true, tabBarKey: tabBarKey),
     );
     final TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')));
     expect(controller, isNotNull);
@@ -878,7 +872,6 @@ void main() {
         isScrollable: true,
         tabBarKey: tabBarKey,
         padding: padding,
-        useMaterial3: true,
       ),
     );
     final TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')));
@@ -971,7 +964,6 @@ void main() {
           tabBarKey: tabBarKey,
           padding: padding,
           textDirection: TextDirection.rtl,
-          useMaterial3: true,
         ),
       );
       final TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')));
@@ -1051,13 +1043,7 @@ void main() {
     ];
     const tabBarKey = Key('TabBar');
     await tester.pumpWidget(
-      buildFrame(
-        tabs: tabs,
-        value: 'AAAA',
-        isScrollable: true,
-        tabBarKey: tabBarKey,
-        useMaterial3: true,
-      ),
+      buildFrame(tabs: tabs, value: 'AAAA', isScrollable: true, tabBarKey: tabBarKey),
     );
     final TabController controller = DefaultTabController.of(tester.element(find.text('AAAA')));
     expect(controller, isNotNull);
@@ -2737,6 +2723,279 @@ void main() {
     expect(position, equals(20));
   });
 
+  testWidgets('TabBar accepts external TabBarScrollController', (WidgetTester tester) async {
+    final tabs = List<Tab>.generate(6, (int index) {
+      return Tab(text: 'TAB #$index');
+    });
+
+    final TabController tabBarController = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      initialIndex: tabs.length - 1,
+    );
+    final tabScrollController = TabBarScrollController();
+    addTearDown(tabScrollController.dispose);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: TabBar(
+          isScrollable: true,
+          controller: tabBarController,
+          scrollController: tabScrollController,
+          tabs: tabs,
+        ),
+      ),
+    );
+
+    final ScrollableState scrollableState = tester.state<ScrollableState>(find.byType(Scrollable));
+
+    tabScrollController.jumpTo(50);
+    await tester.pump();
+
+    expect(scrollableState.position.pixels, 50);
+  });
+
+  testWidgets('TabBar attaches state to internal TabBarScrollController in didUpdateWidget', (
+    WidgetTester tester,
+  ) async {
+    final tabs = List<Tab>.generate(6, (int index) {
+      return Tab(text: 'TAB #$index');
+    });
+
+    final TabController tabBarController = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      initialIndex: tabs.length - 1,
+    );
+    final tabScrollController = TabBarScrollController();
+    addTearDown(tabScrollController.dispose);
+
+    // Attach to the external controller.
+    await tester.pumpWidget(
+      boilerplate(
+        child: TabBar(
+          isScrollable: true,
+          controller: tabBarController,
+          scrollController: tabScrollController,
+          tabs: tabs,
+        ),
+      ),
+    );
+
+    final double oldPixels = tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels;
+
+    // Trigger didUpdateWidget for the change to the internal controller.
+    await tester.pumpWidget(
+      boilerplate(
+        child: TabBar(isScrollable: true, controller: tabBarController, tabs: tabs),
+      ),
+    );
+
+    // Creating the new scroll position should not throw.
+    expect(tester.takeException(), isNull);
+    final ScrollableState scrollableState = tester.state<ScrollableState>(find.byType(Scrollable));
+
+    // The pixels of the new position should be the same as before the update.
+    expect(scrollableState.position.pixels, oldPixels);
+    expect(tabScrollController.debugCheckHasTabBarState, throwsAssertionError);
+  });
+
+  testWidgets('TabBar attaches state to external TabBarScrollController in didUpdateWidget', (
+    WidgetTester tester,
+  ) async {
+    final tabs = List<Tab>.generate(6, (int index) {
+      return Tab(text: 'TAB #$index');
+    });
+
+    final TabController tabBarController = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      initialIndex: tabs.length - 1,
+    );
+    final tabScrollController = TabBarScrollController();
+    addTearDown(tabScrollController.dispose);
+
+    // Attach to the internal controller.
+    await tester.pumpWidget(
+      boilerplate(
+        child: TabBar(isScrollable: true, controller: tabBarController, tabs: tabs),
+      ),
+    );
+
+    final double oldPixels = tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels;
+
+    // Trigger didUpdateWidget for the change to the external controller.
+    await tester.pumpWidget(
+      boilerplate(
+        child: TabBar(
+          isScrollable: true,
+          controller: tabBarController,
+          scrollController: tabScrollController,
+          tabs: tabs,
+        ),
+      ),
+    );
+
+    // Creating the new scroll position should not throw.
+    expect(tester.takeException(), isNull);
+    final ScrollableState scrollableState = tester.state<ScrollableState>(find.byType(Scrollable));
+
+    // The pixels of the new position should be the same as before the update.
+    expect(scrollableState.position.pixels, oldPixels);
+
+    // This should not throw, since the tab bar is attached to the external controller.
+    expect(tabScrollController.debugCheckHasTabBarState(), isTrue);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'TabBar correctly detaches old external TabBarScrollController when switched to a new one',
+    (WidgetTester tester) async {
+      final tabs = <Tab>[for (int i = 0; i < 10; i++) Tab(text: 'Tab $i')];
+
+      final tabController = TabController(length: tabs.length, vsync: const TestVSync());
+      addTearDown(tabController.dispose);
+
+      final controllerA = TabBarScrollController();
+      final controllerB = TabBarScrollController();
+      addTearDown(controllerA.dispose);
+      addTearDown(controllerB.dispose);
+
+      await tester.pumpWidget(
+        boilerplate(
+          child: TabBar(
+            isScrollable: true,
+            controller: tabController,
+            scrollController: controllerA,
+            tabs: tabs,
+          ),
+        ),
+      );
+
+      expect(controllerA.debugCheckHasTabBarState(), isTrue);
+      expect(() => controllerB.debugCheckHasTabBarState(), throwsAssertionError);
+
+      // Switch to controllerB
+      await tester.pumpWidget(
+        boilerplate(
+          child: TabBar(
+            isScrollable: true,
+            controller: tabController,
+            scrollController: controllerB,
+            tabs: tabs,
+          ),
+        ),
+      );
+
+      expect(controllerB.debugCheckHasTabBarState(), isTrue);
+      expect(() => controllerA.debugCheckHasTabBarState(), throwsAssertionError);
+    },
+  );
+
+  testWidgets('TabBar correctly detaches external TabBarScrollController when disposed', (
+    WidgetTester tester,
+  ) async {
+    final tabs = <Tab>[for (int i = 0; i < 10; i++) Tab(text: 'Tab $i')];
+
+    final tabController = TabController(length: tabs.length, vsync: const TestVSync());
+    addTearDown(tabController.dispose);
+    final controller = TabBarScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: TabBar(
+          isScrollable: true,
+          controller: tabController,
+          scrollController: controller,
+          tabs: tabs,
+        ),
+      ),
+    );
+
+    expect(controller.debugCheckHasTabBarState(), isTrue);
+
+    // Dispose the TabBar by pumping a different widget
+    await tester.pumpWidget(boilerplate(child: const SizedBox.shrink()));
+
+    expect(() => controller.debugCheckHasTabBarState(), throwsAssertionError);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/124608
+  testWidgets('TabBar can be wrapped with RawScrollbar', (WidgetTester tester) async {
+    final tabs = List<Tab>.generate(6, (int index) {
+      return Tab(text: 'TAB #$index');
+    });
+
+    final TabController tabBarController = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      initialIndex: tabs.length - 1,
+    );
+    final tabScrollController = TabBarScrollController();
+    addTearDown(tabScrollController.dispose);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: RawScrollbar(
+          controller: tabScrollController,
+          child: TabBar(
+            isScrollable: true,
+            controller: tabBarController,
+            scrollController: tabScrollController,
+            tabs: tabs,
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/124608
+  testWidgets('TabBar can show scrollbar on hover', (WidgetTester tester) async {
+    final tabs = List<Tab>.generate(6, (int index) {
+      return Tab(text: 'TAB #$index');
+    });
+
+    final TabController tabBarController = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      initialIndex: tabs.length - 1,
+    );
+    final tabScrollController = TabBarScrollController();
+    addTearDown(tabScrollController.dispose);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: RawScrollbar(
+          controller: tabScrollController,
+          child: TabBar(
+            isScrollable: true,
+            controller: tabBarController,
+            scrollController: tabScrollController,
+            tabs: tabs,
+          ),
+        ),
+      ),
+    );
+
+    final Finder tab1 = find.text('TAB #1');
+    expect(tab1, findsOneWidget);
+
+    // Hover over the tab bar and verify that the scrollbar is shown.
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(tab1));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(RawScrollbar), paints..rect());
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Scrollable TabBar with a non-zero TabController initialIndex', (
     WidgetTester tester,
   ) async {
@@ -3575,7 +3834,6 @@ void main() {
             tabs: tabs,
           ),
         ),
-        useMaterial3: true,
       ),
     );
 
@@ -6641,7 +6899,7 @@ void main() {
     const tabStartOffset = 52.0;
 
     // Test default TabAlignment when isScrollable is false.
-    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'B', useMaterial3: true));
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'B'));
 
     final Rect tabBar = tester.getRect(find.byType(TabBar));
     Rect tabOneRect = tester.getRect(find.byType(Tab).first);
@@ -6654,9 +6912,7 @@ void main() {
     expect(tabTwoRect.right, moreOrLessEquals(tabTwoRight));
 
     // Test default TabAlignment when isScrollable is true.
-    await tester.pumpWidget(
-      buildFrame(tabs: tabs, value: 'B', isScrollable: true, useMaterial3: true),
-    );
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'B', isScrollable: true));
 
     tabOneRect = tester.getRect(find.byType(Tab).first);
     tabTwoRect = tester.getRect(find.byType(Tab).last);
@@ -6768,7 +7024,7 @@ void main() {
     final tabs = <String>['A', 'B'];
 
     // Test TabAlignment.fill (default) when isScrollable is false.
-    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'B', useMaterial3: true));
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'B'));
 
     const availableWidth = 800.0;
     Rect tabOneRect = tester.getRect(find.byType(Tab).first);
@@ -6781,9 +7037,7 @@ void main() {
     expect(tabTwoRect.right, moreOrLessEquals(tabTwoRight));
 
     // Test TabAlignment.center when isScrollable is false.
-    await tester.pumpWidget(
-      buildFrame(tabs: tabs, value: 'B', tabAlignment: TabAlignment.center, useMaterial3: true),
-    );
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'B', tabAlignment: TabAlignment.center));
     await tester.pumpAndSettle();
 
     tabOneRect = tester.getRect(find.byType(Tab).first);
@@ -6804,9 +7058,7 @@ void main() {
     const tabStartOffset = 52.0;
 
     // Test TabAlignment.startOffset (default) when isScrollable is true.
-    await tester.pumpWidget(
-      buildFrame(tabs: tabs, value: 'B', isScrollable: true, useMaterial3: true),
-    );
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'B', isScrollable: true));
 
     final Rect tabBar = tester.getRect(find.byType(TabBar));
     Rect tabOneRect = tester.getRect(find.byType(Tab).first);
@@ -6826,13 +7078,7 @@ void main() {
 
     // Test TabAlignment.start when isScrollable is true.
     await tester.pumpWidget(
-      buildFrame(
-        tabs: tabs,
-        value: 'B',
-        isScrollable: true,
-        tabAlignment: TabAlignment.start,
-        useMaterial3: true,
-      ),
+      buildFrame(tabs: tabs, value: 'B', isScrollable: true, tabAlignment: TabAlignment.start),
     );
     await tester.pumpAndSettle();
 
@@ -6848,13 +7094,7 @@ void main() {
 
     // Test TabAlignment.center when isScrollable is true.
     await tester.pumpWidget(
-      buildFrame(
-        tabs: tabs,
-        value: 'B',
-        isScrollable: true,
-        tabAlignment: TabAlignment.center,
-        useMaterial3: true,
-      ),
+      buildFrame(tabs: tabs, value: 'B', isScrollable: true, tabAlignment: TabAlignment.center),
     );
     await tester.pumpAndSettle();
 
@@ -6874,7 +7114,6 @@ void main() {
         value: 'B',
         isScrollable: true,
         tabAlignment: TabAlignment.startOffset,
-        useMaterial3: true,
       ),
     );
     await tester.pumpAndSettle();
@@ -6903,13 +7142,7 @@ void main() {
 
       // Test TabAlignment.startOffset (default) when isScrollable is true.
       await tester.pumpWidget(
-        buildFrame(
-          tabs: tabs,
-          value: 'B',
-          isScrollable: true,
-          textDirection: TextDirection.rtl,
-          useMaterial3: true,
-        ),
+        buildFrame(tabs: tabs, value: 'B', isScrollable: true, textDirection: TextDirection.rtl),
       );
 
       final Rect tabBar = tester.getRect(find.byType(TabBar));
@@ -6937,7 +7170,6 @@ void main() {
           isScrollable: true,
           tabAlignment: TabAlignment.start,
           textDirection: TextDirection.rtl,
-          useMaterial3: true,
         ),
       );
       await tester.pumpAndSettle();
@@ -6964,7 +7196,6 @@ void main() {
           isScrollable: true,
           tabAlignment: TabAlignment.startOffset,
           textDirection: TextDirection.rtl,
-          useMaterial3: true,
         ),
       );
       await tester.pumpAndSettle();

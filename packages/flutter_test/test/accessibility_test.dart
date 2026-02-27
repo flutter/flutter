@@ -287,7 +287,6 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _boilerplate(
-          useMaterial3: true,
           Container(
             width: 200.0,
             height: 200.0,
@@ -359,7 +358,6 @@ void main() {
 
       await tester.pumpWidget(
         _boilerplate(
-          useMaterial3: true,
           Container(
             width: 200.0,
             height: 200.0,

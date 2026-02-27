@@ -20,21 +20,13 @@ import 'linux_workflow.dart';
 /// A device that represents a desktop Linux target.
 class LinuxDevice extends DesktopDevice {
   LinuxDevice({
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
+    required super.processManager,
+    required super.logger,
+    required super.fileSystem,
+    required super.operatingSystemUtils,
   }) : _operatingSystemUtils = operatingSystemUtils,
        _logger = logger,
-       super(
-         'linux',
-         platformType: PlatformType.linux,
-         ephemeral: false,
-         logger: logger,
-         processManager: processManager,
-         fileSystem: fileSystem,
-         operatingSystemUtils: operatingSystemUtils,
-       );
+       super('linux', platformType: PlatformType.linux, ephemeral: false);
 
   final OperatingSystemUtils _operatingSystemUtils;
   final Logger _logger;
