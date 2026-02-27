@@ -359,7 +359,7 @@ class FormState extends State<Form> {
   bool validate() {
     _hasInteractedByUser = true;
     _forceRebuild();
-    return _validate(View.of(context), useFieldAutovalidateMode: true);
+    return _validate(View.of(context), triggeredByUser: true);
   }
 
   /// Validates every [FormField] that is a descendant of this [Form], and
@@ -376,20 +376,20 @@ class FormState extends State<Form> {
     final invalidFields = <FormFieldState<Object?>>{};
     _hasInteractedByUser = true;
     _forceRebuild();
-    _validate(View.of(context), useFieldAutovalidateMode: true, invalidFields: invalidFields);
+    _validate(View.of(context), triggeredByUser: true, invalidFields: invalidFields);
     return invalidFields;
   }
 
   bool _validate(
     FlutterView view, {
-    bool useFieldAutovalidateMode = false,
+    bool triggeredByUser = false,
     Set<FormFieldState<Object?>>? invalidFields,
   }) {
     var hasError = false;
     var errorMessage = '';
 
     for (final FormFieldState<dynamic> field in _fields) {
-      if (!useFieldAutovalidateMode && !field._shouldValidate) {
+      if (!triggeredByUser && !field._shouldValidate) {
         continue;
       }
 
