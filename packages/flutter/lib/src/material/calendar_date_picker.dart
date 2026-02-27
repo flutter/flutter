@@ -199,25 +199,9 @@ class CalendarDatePicker extends StatefulWidget {
   State<CalendarDatePicker> createState() => _CalendarDatePickerState();
 }
 
-mixin _LiveRegionAnnouncementMixin<T extends StatefulWidget> on State<T> {
-  String _announcementText = '';
-
-  // Auxiliary method for handling the difference between platforms
-  void _announce(String message) {
-    // SemanticsService.sendAnnouncement is deprecated on android.
-    // We use live region to achieve the announcement effect instead.
-    if (Theme.of(context).platform == TargetPlatform.android) {
-      _announcementText = message;
-    } else {
-      // Maintains the mandatory announcement for other platforms
-      SemanticsService.sendAnnouncement(View.of(context), message, Directionality.of(context));
-    }
-  }
-}
-
-class _CalendarDatePickerState extends State<CalendarDatePicker>
-    with _LiveRegionAnnouncementMixin<CalendarDatePicker> {
+class _CalendarDatePickerState extends State<CalendarDatePicker> {
   bool _announcedInitialDate = false;
+  String _announcementText = '';
   late DatePickerMode _mode;
   late DateTime _currentDisplayedMonthDate;
   DateTime? _selectedDate;
@@ -254,6 +238,18 @@ class _CalendarDatePickerState extends State<CalendarDatePicker>
       final bool isToday = widget.calendarDelegate.isSameDay(widget.currentDate, _selectedDate);
       final semanticLabelSuffix = isToday ? ', ${_localizations.currentDateLabel}' : '';
       _announce('${_localizations.formatFullDate(_selectedDate!)}$semanticLabelSuffix');
+    }
+  }
+
+  // Auxiliary method for handling the difference between platforms
+  void _announce(String message) {
+    // SemanticsService.sendAnnouncement is deprecated on android.
+    // We use live region to achieve the announcement effect instead.
+    if (Theme.of(context).platform == TargetPlatform.android) {
+      _announcementText = message;
+    } else {
+      // Maintains the mandatory announcement for other platforms
+      SemanticsService.sendAnnouncement(View.of(context), message, Directionality.of(context));
     }
   }
 
@@ -618,9 +614,9 @@ class _MonthPicker extends StatefulWidget {
   _MonthPickerState createState() => _MonthPickerState();
 }
 
-class _MonthPickerState extends State<_MonthPicker>
-    with _LiveRegionAnnouncementMixin<_MonthPicker> {
+class _MonthPickerState extends State<_MonthPicker> {
   final GlobalKey _pageViewKey = GlobalKey();
+  String _announcementText = '';
   late DateTime _currentMonth;
   late PageController _pageController;
   late MaterialLocalizations _localizations;
@@ -676,6 +672,18 @@ class _MonthPickerState extends State<_MonthPicker>
   void _handleDateSelected(DateTime selectedDate) {
     _focusedDay = selectedDate;
     widget.onChanged(selectedDate);
+  }
+
+  // Auxiliary method for handling the difference between platforms
+  void _announce(String message) {
+    // SemanticsService.sendAnnouncement is deprecated on android.
+    // We use live region to achieve the announcement effect instead.
+    if (Theme.of(context).platform == TargetPlatform.android) {
+      _announcementText = message;
+    } else {
+      // Maintains the mandatory announcement for other platforms
+      SemanticsService.sendAnnouncement(View.of(context), message, Directionality.of(context));
+    }
   }
 
   void _handleMonthPageChanged(int monthPage) {
@@ -877,15 +885,13 @@ class _MonthPickerState extends State<_MonthPicker>
     final Color? subHeaderForegroundColor =
         DatePickerTheme.of(context).subHeaderForegroundColor ??
         DatePickerTheme.defaults(context).subHeaderForegroundColor;
-    final bool isAndroid = Theme.of(context).platform == TargetPlatform.android;
+
     return Semantics(
       container: true,
       explicitChildNodes: true,
-      liveRegion: isAndroid,
-      accessibilityFocusBlockType: isAndroid
-          ? AccessibilityFocusBlockType.blockNode
-          : AccessibilityFocusBlockType.none,
-      label: isAndroid ? _announcementText : null,
+      liveRegion: Theme.of(context).platform == TargetPlatform.android,
+      accessibilityFocusBlockType: AccessibilityFocusBlockType.blockNode,
+      label: Theme.of(context).platform == TargetPlatform.android ? _announcementText : null,
       child: Column(
         children: <Widget>[
           SizedBox(
