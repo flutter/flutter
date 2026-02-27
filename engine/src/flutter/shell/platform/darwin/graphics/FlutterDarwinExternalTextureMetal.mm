@@ -56,24 +56,30 @@ FLUTTER_ASSERT_ARC
   }
 }
 
-- (void)paintContext:(flutter::Texture::PaintContext&)context
-              bounds:(const SkRect&)bounds
-              freeze:(BOOL)freeze
-            sampling:(const flutter::DlImageSampling)sampling {
+- (sk_sp<flutter::DlImage>)getTextureImageContext:(flutter::Texture::PaintContext&)context
+                                           bounds:(const SkRect&)bounds
+                                           freeze:(BOOL)freeze {
   const bool needsUpdatedTexture = (!freeze && _textureFrameAvailable) || !_externalImage;
 
   if (needsUpdatedTexture) {
     [self onNeedsUpdatedTexture:context];
   }
+  return _externalImage;
+}
 
-  if (_externalImage) {
-    context.canvas->DrawImageRect(
-        _externalImage,                                      // image
-        flutter::DlRect::Make(_externalImage->GetBounds()),  // source rect
-        flutter::ToDlRect(bounds),                           // destination rect
-        sampling,                                            // sampling
-        context.paint,                                       // paint
-        flutter::DlSrcRectConstraint::kStrict                // enforce edges
+- (void)paintContext:(flutter::Texture::PaintContext&)context
+              bounds:(const SkRect&)bounds
+              freeze:(BOOL)freeze
+            sampling:(const flutter::DlImageSampling)sampling {
+  sk_sp<flutter::DlImage> image = [self getTextureImageContext:context bounds:bounds freeze:freeze];
+
+  if (image) {
+    context.canvas->DrawImageRect(image,                                      // image
+                                  flutter::DlRect::Make(image->GetBounds()),  // source rect
+                                  flutter::ToDlRect(bounds),                  // destination rect
+                                  sampling,                                   // sampling
+                                  context.paint,                              // paint
+                                  flutter::DlSrcRectConstraint::kStrict       // enforce edges
     );
   }
 }

@@ -54,6 +54,10 @@
               freeze:(BOOL)freeze
             sampling:(const flutter::DlImageSampling)sampling;
 
+- (sk_sp<flutter::DlImage>)getTextureImageContext:(flutter::Texture::PaintContext&)context
+                                           bounds:(const SkRect&)bounds
+                                           freeze:(BOOL)freeze;
+
 - (void)onGrContextCreated;
 
 - (void)onGrContextDestroyed;

@@ -86,6 +86,7 @@ typedef CanvasPath Path;
   V(FontCollection::LoadFontFromList)                              \
   V(ImageDescriptor::initEncoded)                                  \
   V(Image::decodeImageFromPixelsSync)                              \
+  V(Image::CreateFromTexture)                                      \
   V(ImageFilter::equals)                                           \
   V(ImmutableBuffer::init)                                         \
   V(ImmutableBuffer::initFromAsset)                                \

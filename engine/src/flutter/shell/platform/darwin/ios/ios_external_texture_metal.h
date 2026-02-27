@@ -29,6 +29,11 @@ class IOSExternalTextureMetal final : public Texture {
              const DlImageSampling sampling) override;
 
   // |Texture|
+  sk_sp<DlImage> GetTextureImage(PaintContext& context,
+                                 const DlRect& bounds,
+                                 bool freeze) override;
+
+  // |Texture|
   void OnGrContextCreated() override;
 
   // |Texture|

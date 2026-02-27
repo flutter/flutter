@@ -26,6 +26,14 @@ void IOSExternalTextureMetal::Paint(PaintContext& context,
                                       sampling:sampling];
 }
 
+sk_sp<DlImage> IOSExternalTextureMetal::GetTextureImage(PaintContext& context,
+                                                        const DlRect& bounds,
+                                                        bool freeze) {
+  return [darwin_external_texture_metal_ getTextureImageContext:context
+                                                         bounds:ToSkRect(bounds)
+                                                         freeze:freeze];
+}
+
 void IOSExternalTextureMetal::OnGrContextCreated() {
   [darwin_external_texture_metal_ onGrContextCreated];
 }

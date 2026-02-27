@@ -115,6 +115,11 @@ class SurfaceTextureExternalTexture : public flutter::Texture {
   SkM44 transform_;
 
   // |Texture|
+  sk_sp<DlImage> GetTextureImage(PaintContext& context,
+                                 const DlRect& bounds,
+                                 bool freeze) override;
+
+  // |Texture|
   void Paint(PaintContext& context,
              const DlRect& bounds,
              bool freeze,

@@ -55,10 +55,11 @@ int CanvasImage::colorSpace() {
 
 }  // namespace flutter
 
+#include "flutter/lib/ui/painting/dl_image_texture_registry.h"
+
 namespace flutter {
 
 namespace {
-
 int BytesPerPixel(PixelFormat pixel_format) {
   switch (pixel_format) {
     case PixelFormat::kRgba8888:
@@ -167,6 +168,16 @@ void CanvasImage::decodeImageFromPixelsSync(Dart_Handle pixels_handle,
   if (error) {
     Dart_ThrowException(tonic::ToDart(error));
   }
+}
+
+void CanvasImage::CreateFromTexture(Dart_Handle wrapper,
+                                    int64_t texture_id,
+                                    int width,
+                                    int height) {
+  auto image = CanvasImage::Create();
+  image->set_image(
+      sk_make_sp<DlImageTextureRegistry>(texture_id, width, height));
+  image->AssociateWithDartWrapper(wrapper);
 }
 
 }  // namespace flutter

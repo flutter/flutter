@@ -783,11 +783,15 @@ DrawSurfaceStatus Rasterizer::DrawToSurfaceUnsafe(
       ignore_raster_cache = false;
     }
 
+    TextureRegistry::SetCurrent(GetTextureRegistry());
+    TextureRegistry::SetCurrentContexts(surface_->GetAiksContext().get(),
+                                        surface_->GetContext());
     RasterStatus frame_status =
         compositor_frame->Raster(layer_tree,           // layer tree
                                  ignore_raster_cache,  // ignore raster cache
                                  damage.get()          // frame damage
         );
+    TextureRegistry::SetCurrent({});
     if (frame_status == RasterStatus::kSkipAndRetry) {
       return DrawSurfaceStatus::kRetry;
     }

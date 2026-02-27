@@ -8,6 +8,7 @@
 #include <map>
 
 #include "flutter/display_list/dl_canvas.h"
+#include "flutter/display_list/image/dl_image.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 
@@ -52,6 +53,13 @@ class Texture : public ContextListener {
                      bool freeze,
                      const DlImageSampling sampling) = 0;
 
+  // Called from raster thread.
+  virtual sk_sp<DlImage> GetTextureImage(PaintContext& context,
+                                         const DlRect& bounds,
+                                         bool freeze) {
+    return nullptr;
+  }
+
   // Called on raster thread.
   virtual void MarkNewFrameAvailable() = 0;
 
@@ -68,6 +76,19 @@ class Texture : public ContextListener {
 class TextureRegistry {
  public:
   TextureRegistry();
+
+  // Retrieves the thread-local TextureRegistry for the current thread.
+  // This is used by DlImageTextureRegistry to resolve textures during
+  // rasterization.
+  static std::weak_ptr<TextureRegistry> GetCurrent();
+
+  // Sets the thread-local TextureRegistry for the current thread.
+  static void SetCurrent(std::weak_ptr<TextureRegistry> registry);
+
+  static impeller::AiksContext* GetCurrentAiksContext();
+  static GrDirectContext* GetCurrentGrContext();
+  static void SetCurrentContexts(impeller::AiksContext* aiks_context,
+                                 GrDirectContext* gr_context);
 
   // Called from raster thread.
   void RegisterTexture(const std::shared_ptr<Texture>& texture);

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/foundation.dart';
 
 import 'box.dart';
@@ -74,6 +76,15 @@ class TextureBox extends RenderBox {
       _filterQuality = value;
       markNeedsPaint();
     }
+  }
+
+  /// Retrieves the backend texture as a [dart:ui.Image].
+  ///
+  /// The image dimensions will match the current logical size of the layout
+  /// box. Since texture sizes determine the rendered resolution, this might
+  /// differ from the true pixel resolution of the underlying backend texture.
+  ui.Image getImage() {
+    return ui.getImageFromTexture(textureId, size.width.ceil(), size.height.ceil());
   }
 
   @override

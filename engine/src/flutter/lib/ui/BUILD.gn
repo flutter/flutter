@@ -53,6 +53,8 @@ source_set("ui") {
     "painting/display_list_deferred_image_gpu_skia.h",
     "painting/display_list_image_gpu.cc",
     "painting/display_list_image_gpu.h",
+    "painting/dl_image_texture_registry.cc",
+    "painting/dl_image_texture_registry.h",
     "painting/engine_layer.cc",
     "painting/engine_layer.h",
     "painting/fragment_program.cc",
@@ -265,6 +267,7 @@ if (enable_unittests) {
     sources = [
       "compositing/scene_builder_unittests.cc",
       "hooks_unittests.cc",
+      "painting/dl_image_texture_registry_unittests.cc",
       "painting/image_decoder_no_gl_unittests.cc",
       "painting/image_decoder_no_gl_unittests.h",
       "painting/image_dispose_unittests.cc",

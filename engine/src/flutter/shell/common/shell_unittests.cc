@@ -2006,6 +2006,12 @@ class MockTexture : public Texture {
   ~MockTexture() override = default;
 
   // Called from raster thread.
+  sk_sp<DlImage> GetTextureImage(PaintContext& context,
+                                 const DlRect& bounds,
+                                 bool freeze) override {
+    return nullptr;
+  }
+
   void Paint(PaintContext& context,
              const DlRect& bounds,
              bool freeze,

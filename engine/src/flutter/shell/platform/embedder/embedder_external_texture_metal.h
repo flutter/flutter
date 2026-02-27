@@ -34,6 +34,11 @@ class EmbedderExternalTextureMetal : public flutter::Texture {
                                 const SkISize& size);
 
   // |flutter::Texture|
+  sk_sp<DlImage> GetTextureImage(PaintContext& context,
+                                 const DlRect& bounds,
+                                 bool freeze) override;
+
+  // |flutter::Texture|
   void Paint(PaintContext& context,
              const DlRect& bounds,
              bool freeze,

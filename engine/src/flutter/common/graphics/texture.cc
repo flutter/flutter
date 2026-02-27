@@ -16,6 +16,32 @@ Texture::~Texture() = default;
 
 TextureRegistry::TextureRegistry() = default;
 
+static thread_local std::weak_ptr<TextureRegistry> g_current_texture_registry;
+static thread_local impeller::AiksContext* g_current_aiks_context = nullptr;
+static thread_local GrDirectContext* g_current_gr_context = nullptr;
+
+std::weak_ptr<TextureRegistry> TextureRegistry::GetCurrent() {
+  return g_current_texture_registry;
+}
+
+void TextureRegistry::SetCurrent(std::weak_ptr<TextureRegistry> registry) {
+  g_current_texture_registry = std::move(registry);
+}
+
+impeller::AiksContext* TextureRegistry::GetCurrentAiksContext() {
+  return g_current_aiks_context;
+}
+
+GrDirectContext* TextureRegistry::GetCurrentGrContext() {
+  return g_current_gr_context;
+}
+
+void TextureRegistry::SetCurrentContexts(impeller::AiksContext* aiks_context,
+                                         GrDirectContext* gr_context) {
+  g_current_aiks_context = aiks_context;
+  g_current_gr_context = gr_context;
+}
+
 void TextureRegistry::RegisterTexture(const std::shared_ptr<Texture>& texture) {
   if (!texture) {
     return;

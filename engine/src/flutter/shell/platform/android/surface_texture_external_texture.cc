@@ -35,12 +35,12 @@ void SurfaceTextureExternalTexture::MarkNewFrameAvailable() {
   // NOOP.
 }
 
-void SurfaceTextureExternalTexture::Paint(PaintContext& context,
-                                          const DlRect& bounds,
-                                          bool freeze,
-                                          const DlImageSampling sampling) {
+sk_sp<DlImage> SurfaceTextureExternalTexture::GetTextureImage(
+    PaintContext& context,
+    const DlRect& bounds,
+    bool freeze) {
   if (state_ == AttachmentState::kDetached) {
-    return;
+    return nullptr;
   }
   const bool should_process_frame =
       !freeze || ShouldUpdate() || dl_image_ == nullptr;
@@ -49,10 +49,17 @@ void SurfaceTextureExternalTexture::Paint(PaintContext& context,
   }
   // If process frame failed, this may not be in attached state.
   if (state_ != AttachmentState::kAttached) {
-    return;
+    return nullptr;
   }
+  return dl_image_;
+}
 
-  if (!dl_image_) {
+void SurfaceTextureExternalTexture::Paint(PaintContext& context,
+                                          const DlRect& bounds,
+                                          bool freeze,
+                                          const DlImageSampling sampling) {
+  auto image = GetTextureImage(context, bounds, freeze);
+  if (!image) {
     FML_LOG(WARNING)
         << "No DlImage available for SurfaceTextureExternalTexture to paint.";
     return;

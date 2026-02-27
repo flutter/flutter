@@ -116,4 +116,18 @@ void main() {
     expect(textureLayer.textureId, 1);
     expect(textureLayer.filterQuality, FilterQuality.low);
   });
+
+  testWidgets('TextureBox getImage returns an Image', (WidgetTester tester) async {
+    await tester.pumpWidget(const Center(child: Texture(textureId: 1)));
+
+    final RenderObject renderObject = tester.firstRenderObject(find.byType(Texture));
+    final textureBox = renderObject as TextureBox;
+
+    final image = textureBox.getImage();
+    expect(image, isNotNull);
+    expect(image.width, 800);
+    expect(image.height, 600);
+
+    image.dispose();
+  });
 }
