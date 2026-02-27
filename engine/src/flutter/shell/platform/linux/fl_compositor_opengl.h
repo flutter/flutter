@@ -42,18 +42,6 @@ FlCompositorOpenGL* fl_compositor_opengl_new(FlTaskRunner* task_runner,
                                              FlOpenGLManager* opengl_manager,
                                              gboolean shareable);
 
-/**
- * fl_compositor_opengl_render:
- * @compositor: an #FlCompositorOpenGL.
- * @width: output width in pixels.
- * @height: output height in pixels.
- *
- * Renders the current frame.
- */
-void fl_compositor_opengl_render(FlCompositorOpenGL* compositor,
-                                 size_t width,
-                                 size_t height);
-
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_COMPOSITOR_OPENGL_H_
