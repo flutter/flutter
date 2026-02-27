@@ -262,9 +262,8 @@ void main() {
     Future<void> pumpSliverGrid(bool replace) async {
       await tester.pumpWidget(
         Center(
-          child: SizedBox(
-            width: 200,
-            height: 200,
+          child: SizedBox.square(
+            dimension: 200,
             child: Directionality(
               textDirection: TextDirection.ltr,
               child: CustomScrollView(
@@ -446,9 +445,8 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: SizedBox(
-            width: 4,
-            height: 4,
+          child: SizedBox.square(
+            dimension: 4,
             child: CustomScrollView(
               slivers: <Widget>[
                 SliverGrid(

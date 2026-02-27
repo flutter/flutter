@@ -118,9 +118,8 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: widget.radius * 2,
-      width: widget.radius * 2,
+    return SizedBox.square(
+      dimension: widget.radius * 2,
       child: CustomPaint(
         painter: _CupertinoActivityIndicatorPainter(
           position: _controller,

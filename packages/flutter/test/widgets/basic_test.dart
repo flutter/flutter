@@ -266,11 +266,7 @@ void main() {
                           offset = const Offset(0.8, 0.8);
                         });
                       },
-                      child: SizedBox(
-                        width: 100.0,
-                        height: 100.0,
-                        child: Text('foo', key: textKey),
-                      ),
+                      child: SizedBox.square(dimension: 100.0, child: Text('foo', key: textKey)),
                     ),
                   ),
                 ),
@@ -1381,9 +1377,8 @@ void main() {
       alignment: Alignment.topLeft,
       child: Directionality(
         textDirection: TextDirection.ltr,
-        child: SizedBox(
-          width: 100,
-          height: 100,
+        child: SizedBox.square(
+          dimension: 100.0,
           child: Listener(
             onPointerDown: (_) {
               logs.add('down1');
@@ -1619,9 +1614,8 @@ void main() {
       alignment: Alignment.topLeft,
       child: Directionality(
         textDirection: TextDirection.ltr,
-        child: SizedBox(
-          width: 100,
-          height: 100,
+        child: SizedBox.square(
+          dimension: 100.0,
           child: Listener(
             onPointerDown: (_) {
               logs.add('down1');

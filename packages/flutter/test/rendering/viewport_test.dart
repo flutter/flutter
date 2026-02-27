@@ -55,9 +55,8 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: SizedBox(
-            height: 100.0,
-            width: 100.0,
+          child: SizedBox.square(
+            dimension: 100.0,
             child: SingleChildScrollView(
               controller: controller,
               scrollDirection: axis,
@@ -658,9 +657,8 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: SizedBox(
-            height: 200.0,
-            width: 200.0,
+          child: SizedBox.square(
+            dimension: 200.0,
             child: ListView(
               controller: controllerY,
               children: List<Widget>.generate(10, (int y) {
@@ -966,9 +964,8 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: SizedBox(
-              height: 200.0,
-              width: 200.0,
+            child: SizedBox.square(
+              dimension: 200.0,
               child: ListView(
                 controller: controllerY,
                 children: <Widget>[
@@ -1013,9 +1010,8 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: SizedBox(
-              height: 200.0,
-              width: 200.0,
+            child: SizedBox.square(
+              dimension: 200.0,
               child: ListView(
                 controller: controllerY,
                 children: <Widget>[
@@ -1189,9 +1185,8 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: SizedBox(
-            height: 400.0,
-            width: 400.0,
+          child: SizedBox.square(
+            dimension: 400.0,
             child: CustomScrollView(
               scrollDirection: axis,
               center: reversed ? const Key('19') : null,
@@ -1571,9 +1566,8 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: SizedBox(
-            height: 400.0,
-            width: 400.0,
+          child: SizedBox.square(
+            dimension: 400.0,
             child: CustomScrollView(
               scrollDirection: axis,
               reverse: reverse,

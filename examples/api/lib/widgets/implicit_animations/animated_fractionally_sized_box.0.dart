@@ -59,9 +59,8 @@ class _AnimatedFractionallySizedBoxExampleState
         });
       },
       child: Center(
-        child: SizedBox(
-          width: 200,
-          height: 200,
+        child: SizedBox.square(
+          dimension: 200,
           child: ColoredBox(
             color: Colors.red,
             child: AnimatedFractionallySizedBox(

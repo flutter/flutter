@@ -1084,9 +1084,8 @@ class _ReplyFabState extends State<_ReplyFab> with SingleTickerProviderStateMixi
                   key: const ValueKey<String>('ReplyFab'),
                   customBorder: circleFabBorder,
                   onTap: openContainer,
-                  child: SizedBox(
-                    height: _mobileFabDimension,
-                    width: _mobileFabDimension,
+                  child: SizedBox.square(
+                    dimension: _mobileFabDimension,
                     child: Center(child: fabSwitcher),
                   ),
                 ),

@@ -58,9 +58,8 @@ class _MyTimedButton extends State<MyTimedButton> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 100,
-      height: 100,
+    return SizedBox.square(
+      dimension: 100,
       child: MouseRegion(
         child: regionIsHidden
             ? null

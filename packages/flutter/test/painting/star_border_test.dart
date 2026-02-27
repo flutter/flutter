@@ -225,9 +225,8 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: SizedBox(
-            width: 100,
-            height: 100,
+          child: SizedBox.square(
+            dimension: 100,
             child: Stack(
               children: <Widget>[
                 Positioned.fromRelativeRect(

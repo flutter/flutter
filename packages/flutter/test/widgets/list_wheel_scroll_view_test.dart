@@ -1722,9 +1722,8 @@ void main() {
               itemExtent: 100.0,
               children: outerChildren = List<Widget>.generate(10, (int i) {
                 return Center(
-                  child: innerChildren[i] = SizedBox(
-                    height: 50.0,
-                    width: 50.0,
+                  child: innerChildren[i] = SizedBox.square(
+                    dimension: 50.0,
                     child: Text('Item $i'),
                   ),
                 );
@@ -1840,9 +1839,8 @@ void main() {
               itemExtent: 100.0,
               children: outerChildren = List<Widget>.generate(10, (int i) {
                 return Center(
-                  child: innerChildren[i] = SizedBox(
-                    height: 50.0,
-                    width: 50.0,
+                  child: innerChildren[i] = SizedBox.square(
+                    dimension: 50.0,
                     child: Text('Item $i'),
                   ),
                 );
@@ -1900,9 +1898,8 @@ void main() {
                     onTap: () {
                       tappedChildren.add(index);
                     },
-                    child: SizedBox(
-                      width: 100,
-                      height: 100,
+                    child: SizedBox.square(
+                      dimension: 100.0,
                       child: CustomPaint(
                         painter: TestCallbackPainter(
                           onPaint: () {
@@ -1989,9 +1986,8 @@ void main() {
                             onTap: () {
                               tappedChildren.add(index);
                             },
-                            child: SizedBox(
-                              width: 55,
-                              height: 55,
+                            child: SizedBox.square(
+                              dimension: 55,
                               child: CustomPaint(
                                 painter: TestCallbackPainter(
                                   onPaint: () {

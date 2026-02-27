@@ -795,14 +795,13 @@ void main() {
           MergeSemantics(
             child: Semantics(
               container: true,
-              child: SizedBox(
-                width: 50.0,
-                height: 50.0,
+              child: SizedBox.square(
+                dimension: 50.0,
                 child: Semantics(
                   container: true,
                   child: GestureDetector(
                     onTap: () {},
-                    child: const SizedBox(width: 4.0, height: 4.0),
+                    child: const SizedBox.square(dimension: 4.0),
                   ),
                 ),
               ),
@@ -853,9 +852,8 @@ void main() {
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.only(left: 10, right: 10),
-                  child: SizedBox(
-                    width: 100,
-                    height: 100,
+                  child: SizedBox.square(
+                    dimension: 100,
                     child: Semantics(container: true, onTap: () {}, child: const Text('hello')),
                   ),
                 ),

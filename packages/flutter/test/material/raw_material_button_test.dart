@@ -260,9 +260,8 @@ void main() {
             RawMaterialButton(
               materialTapTargetSize: MaterialTapTargetSize.padded,
               onPressed: () {},
-              child: const SizedBox(
-                width: 400.0,
-                height: 400.0,
+              child: const SizedBox.square(
+                dimension: 400.0,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[SizedBox(height: 50.0, width: 400.0, child: Text('Material'))],
