@@ -1,6 +1,5 @@
 typedef VoidCallback = void Function();
 
-
 /// An object that maintains a list of listeners.
 ///
 /// The listeners are typically used to notify clients that the object has been
@@ -65,6 +64,31 @@ abstract class Listenable {
   void removeListener(VoidCallback listener);
 }
 
+class _MergingListenable extends Listenable {
+  _MergingListenable(this._children);
+
+  final Iterable<Listenable?> _children;
+
+  @override
+  void addListener(VoidCallback listener) {
+    for (final Listenable? child in _children) {
+      child?.addListener(listener);
+    }
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    for (final Listenable? child in _children) {
+      child?.removeListener(listener);
+    }
+  }
+
+  @override
+  String toString() {
+    return 'Listenable.merge([${_children.join(", ")}])';
+  }
+}
+
 /// An interface for subclasses of [Listenable] that expose a [value].
 ///
 /// This interface is implemented by [ValueNotifier<T>] and [Animation<T>], and
@@ -88,9 +112,18 @@ abstract class ValueListenable<T> extends Listenable {
   T get value;
 }
 
-// TODO: implement
-final class ValueModifier<T> extends ValueListenable<T> {
+/// A [ValueListenable] that can be modified.
+class ListenableModifier<T> extends ValueListenable<T> {
   /// Sets the value of the observable and notifies its listeners.
   // ignore: avoid_setters_without_getters, there is getter in the parent class
-  set value(T value);
+  set value(T value) => throw UnimplementedError();
+
+  @override
+  T get value => throw UnimplementedError();
+
+  @override
+  void addListener(VoidCallback listener) => throw UnimplementedError();
+
+  @override
+  void removeListener(VoidCallback listener) => throw UnimplementedError();
 }

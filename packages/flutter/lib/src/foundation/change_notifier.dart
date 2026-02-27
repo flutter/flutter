@@ -6,9 +6,7 @@
 /// @docImport 'package:flutter/widgets.dart';
 library;
 
-import 'dart:ui' show VoidCallback;
-
-import 'package:flutter/src/foundation/pure_dart_data_primitives.dart';
+import 'package:flutter/src/foundation/data_primitives.dart';
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
@@ -17,7 +15,6 @@ import 'diagnostics.dart';
 import 'memory_allocations.dart';
 
 export 'dart:ui' show VoidCallback;
-
 
 /// A class that can be extended or mixed in that provides a change notification
 /// API using [VoidCallback] for notifications.
@@ -408,31 +405,6 @@ mixin class ChangeNotifier implements Listenable {
   }
 }
 
-class _MergingListenable extends Listenable {
-  _MergingListenable(this._children);
-
-  final Iterable<Listenable?> _children;
-
-  @override
-  void addListener(VoidCallback listener) {
-    for (final Listenable? child in _children) {
-      child?.addListener(listener);
-    }
-  }
-
-  @override
-  void removeListener(VoidCallback listener) {
-    for (final Listenable? child in _children) {
-      child?.removeListener(listener);
-    }
-  }
-
-  @override
-  String toString() {
-    return 'Listenable.merge([${_children.join(", ")}])';
-  }
-}
-
 /// A [ChangeNotifier] that holds a single value.
 ///
 /// When [value] is replaced with a new value that is **not equal** to the old
@@ -455,7 +427,7 @@ class _MergingListenable extends Listenable {
 ///
 /// For mutable data types, consider extending [ChangeNotifier] directly and
 /// calling [notifyListeners] manually when changes occur.
-class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> implements ListenableModifier<T>{
+class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T>, ListenableModifier<T> {
   /// Creates a [ChangeNotifier] that wraps this value.
   ValueNotifier(this._value) {
     if (kFlutterMemoryAllocationsEnabled) {

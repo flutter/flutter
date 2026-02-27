@@ -9,6 +9,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
+import '../foundation/data_primitives.dart';
 import 'theme.dart';
 
 /// A [CupertinoMagnifier] used for magnifying text in cases where a user's
@@ -76,7 +77,7 @@ class CupertinoTextMagnifier extends StatefulWidget {
 
   /// [CupertinoTextMagnifier] will determine its own positioning
   /// based on the [MagnifierInfo] of this notifier.
-  final ValueNotifier<MagnifierInfo> magnifierInfo;
+  final ListenableModifier<MagnifierInfo> magnifierInfo;
 
   /// The duration that the magnifier drags behind its final position.
   static const Duration _kDragAnimationDuration = Duration(milliseconds: 45);

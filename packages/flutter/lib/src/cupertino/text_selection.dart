@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart' show ValueListenable, clampDouble;
 import 'package:flutter/widgets.dart';
 
+import '../foundation/data_primitives.dart';
 import 'localizations.dart';
 import 'text_selection_toolbar.dart';
 import 'text_selection_toolbar_button.dart';

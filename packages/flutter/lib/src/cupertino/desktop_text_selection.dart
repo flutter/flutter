@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart' show ValueListenable, clampDouble;
 import 'package:flutter/widgets.dart';
 
+import '../foundation/data_primitives.dart';
 import 'desktop_text_selection_toolbar.dart';
 import 'desktop_text_selection_toolbar_button.dart';
 import 'localizations.dart';
