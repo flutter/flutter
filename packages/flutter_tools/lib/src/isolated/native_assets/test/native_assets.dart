@@ -77,7 +77,10 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
     targetPlatform: TargetPlatform.tester,
     projectUri: projectUri,
     fileSystem: globals.fs,
-    buildCodeAssets: true,
+    buildCodeAssets: const BuildCodeAssetsOptions(
+      // We're in tests, so there is no app build directory
+      appBuildDirectory: null,
+    ),
     buildDataAssets: true,
   );
 

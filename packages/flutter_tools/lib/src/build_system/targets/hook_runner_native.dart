@@ -43,7 +43,7 @@ class FlutterHookRunnerNative implements FlutterHookRunner {
       targetPlatform: targetPlatform,
       projectUri: environment.projectDir.uri,
       fileSystem: environment.fileSystem,
-      buildCodeAssets: false,
+      buildCodeAssets: null,
       buildDataAssets: true,
     );
 

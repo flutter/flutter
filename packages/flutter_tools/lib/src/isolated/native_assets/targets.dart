@@ -4,13 +4,14 @@
 
 import 'package:code_assets/code_assets.dart';
 import 'package:data_assets/data_assets.dart';
-import 'package:file/file.dart' show FileSystem;
+import 'package:file/file.dart' show Directory, FileSystem;
 import 'package:hooks/hooks.dart';
 
 import '../../base/common.dart' show throwToolExit;
 import '../../build_info.dart'
     show
         AndroidArch,
+        BuildMode,
         DarwinArch,
         EnvironmentType,
         TargetPlatform,
@@ -56,21 +57,27 @@ sealed class AssetBuildTarget {
   ///
   /// It needs access to other parameters such as the [fileSystem] or
   /// [environmentDefines] to retrieve options for some of the targets.
+  ///
+  /// When building for Linux, [buildDirectory] should point to the build
+  /// directory of the app (e.g. `build/`). It is used to infer configured
+  /// compilers by reading `CMakeCache.txt`.
   static List<AssetBuildTarget> targetsFor({
     required TargetPlatform targetPlatform,
+    required BuildMode buildMode,
     required Map<String, String> environmentDefines,
     required FileSystem fileSystem,
     required List<SupportedAssetTypes> supportedAssetTypes,
+    required Directory? buildDirectory,
   }) {
     switch (targetPlatform) {
       case TargetPlatform.windows_x64:
         return _windowsTarget(supportedAssetTypes, Architecture.x64);
       case TargetPlatform.linux_x64:
-        return _linuxTarget(supportedAssetTypes, Architecture.x64);
+        return _linuxTarget(supportedAssetTypes, Architecture.x64, buildMode, buildDirectory);
       case TargetPlatform.linux_arm64:
-        return _linuxTarget(supportedAssetTypes, Architecture.arm64);
+        return _linuxTarget(supportedAssetTypes, Architecture.arm64, buildMode, buildDirectory);
       case TargetPlatform.linux_riscv64:
-        return _linuxTarget(supportedAssetTypes, Architecture.riscv64);
+        return _linuxTarget(supportedAssetTypes, Architecture.riscv64, buildMode, buildDirectory);
       case TargetPlatform.windows_arm64:
         return _windowsTarget(supportedAssetTypes, Architecture.arm64);
       case TargetPlatform.darwin:
@@ -96,9 +103,23 @@ sealed class AssetBuildTarget {
   static List<AssetBuildTarget> _linuxTarget(
     List<SupportedAssetTypes> supportedAssetTypes,
     Architecture architecture,
+    BuildMode buildMode,
+    Directory? buildDirectory,
   ) {
+    Directory? cmakeBuildDirectory;
+    if (buildDirectory != null) {
+      cmakeBuildDirectory = buildDirectory
+          .childDirectory('linux')
+          .childDirectory(architecture.name)
+          .childDirectory(buildMode.cliName);
+    }
+
     return <AssetBuildTarget>[
-      LinuxAssetTarget(architecture: architecture, supportedAssetTypes: supportedAssetTypes),
+      LinuxAssetTarget(
+        architecture: architecture,
+        supportedAssetTypes: supportedAssetTypes,
+        cmakeBuildDirectory: cmakeBuildDirectory,
+      ),
     ];
   }
 
@@ -243,12 +264,26 @@ class WindowsAssetTarget extends CodeAssetTarget {
 }
 
 final class LinuxAssetTarget extends CodeAssetTarget {
-  LinuxAssetTarget({required super.supportedAssetTypes, required super.architecture})
-    : super(os: OS.linux);
+  LinuxAssetTarget({
+    required super.supportedAssetTypes,
+    required super.architecture,
+    required this.cmakeBuildDirectory,
+  }) : super(os: OS.linux);
+
+  /// Null if this target is used for widget tests where we run code assets
+  /// without an app to build.
+  final Directory? cmakeBuildDirectory;
 
   @override
-  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
-      cCompilerConfigSync = await cCompilerConfigLinux(throwIfNotFound: mustMatchAppBuild);
+  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async {
+    if (cmakeBuildDirectory == null && mustMatchAppBuild) {
+      throw StateError('Missing CMake build directory on LinuxAssetTarget');
+    }
+
+    cCompilerConfigSync = await cCompilerConfigLinux(
+      cmakeDirectory: mustMatchAppBuild ? cmakeBuildDirectory! : null,
+    );
+  }
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
@@ -358,6 +393,7 @@ final class FlutterTesterAssetTarget extends CodeAssetTarget {
       OS.linux => LinuxAssetTarget(
         supportedAssetTypes: supportedAssetTypes,
         architecture: architecture,
+        cmakeBuildDirectory: null,
       ),
       OS.windows => WindowsAssetTarget(
         supportedAssetTypes: supportedAssetTypes,
