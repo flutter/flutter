@@ -2461,12 +2461,12 @@ class TextEditingChannel {
     );
   }
 
-  /// Sends the 'TextInput.refocus' message to the framework.
+  /// Sends the 'TextInputClient.refocus' message to the framework.
   void refocus(int? clientId) {
     EnginePlatformDispatcher.instance.invokeOnPlatformMessage(
       'flutter/textinput',
       const JSONMethodCodec().encodeMethodCall(
-        MethodCall('TextInput.refocus', <dynamic>[clientId]),
+        MethodCall('TextInputClient.refocus', <dynamic>[clientId]),
       ),
       _emptyCallback,
     );

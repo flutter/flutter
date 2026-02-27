@@ -2155,7 +2155,7 @@ class TextInput {
       case 'TextInputClient.scribbleInteractionFinished':
         _scribbleInProgress = false;
         return;
-      case 'TextInput.refocus':
+      case 'TextInputClient.refocus':
         final args = methodCall.arguments as List<dynamic>;
         final clientId = args[0] as int;
         if (_currentConnection == null &&
