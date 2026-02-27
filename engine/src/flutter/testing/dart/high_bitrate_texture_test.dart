@@ -68,6 +68,33 @@ void main() async {
     image.dispose();
   });
 
+  test('decodeImageFromPixels with rgbaFloat32, toByteData rgbaFloat32', () async {
+    const dimension = 1;
+    final floats = <double>[1.0, 0.66, 0.33, 1.0];
+    final floatList = Float32List.fromList(floats);
+    final intList = Uint8List.view(floatList.buffer);
+    final completer = Completer<Image>();
+    decodeImageFromPixels(
+      intList,
+      dimension,
+      dimension,
+      PixelFormat.rgbaFloat32,
+      targetFormat: TargetPixelFormat.rgbaFloat32,
+      (Image image) {
+        completer.complete(image);
+      },
+    );
+    final Image image = await completer.future;
+    final ByteData data = (await image.toByteData(format: ImageByteFormat.rawExtendedRgba128))!;
+    final Float32List pixels = data.buffer.asFloat32List();
+    expect(pixels.length, 4);
+    expect(pixels[0], closeTo(1.0, 0.001));
+    expect(pixels[1], closeTo(0.66, 0.001));
+    expect(pixels[2], closeTo(0.33, 0.001));
+    expect(pixels[3], closeTo(1.0, 0.001));
+    image.dispose();
+  });
+
   test('Picture.toImageSync with rgbaFloat32', () async {
     const dimension = 1024;
     final Image image = await _drawWithCircleShader(
