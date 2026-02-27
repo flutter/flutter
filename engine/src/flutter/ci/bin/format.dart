@@ -983,10 +983,14 @@ class PythonFormatChecker extends FormatChecker {
   }
 
   Future<int> _runYapfCheck({required bool fixing}) async {
-    final filesToCheck = await getFileList(<String>[
+    final List<String> filesToCheck = await getFileList(<String>[
       '*.py',
       path.join(engineSubPath, 'tools', 'gn'),
     ]);
+    if (filesToCheck.isEmpty) {
+      message('No Python files with changes, skipping Python format check.');
+      return 0;
+    }
 
     final cmd = <String>[
       yapfBin.path,
