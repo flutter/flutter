@@ -613,6 +613,8 @@ Future<XcodeBuildResult> buildXcodeProject({
           XcodeSdk.IPhoneSimulator.platformName,
         );
       }
+
+      await ensureTargetBuildDirAttribute(targetBuildDir);
       final String? appBundle = buildSettings['WRAPPER_NAME'];
       final String expectedOutputDirectory = globals.fs.path.join(targetBuildDir, appBundle);
       if (globals.fs.directory(expectedOutputDirectory).existsSync()) {
@@ -654,6 +656,26 @@ Future<XcodeBuildResult> buildXcodeProject({
         buildSettings: buildSettings,
       ),
       xcResult: xcResult,
+    );
+  }
+}
+
+/// Ensure the TARGET_BUILD_DIR has the `com.apple.xcode.CreatedByBuildSystem` extended attribute.
+/// When using SwiftPM, this attribute is missing. This is required for `xcodebuild clean`.
+Future<void> ensureTargetBuildDirAttribute(String targetBuildDirPath) async {
+  final RunResult result = await globals.processUtils.run(<String>[
+    'xattr',
+    '-w',
+    'com.apple.xcode.CreatedByBuildSystem',
+    'true',
+    targetBuildDirPath,
+  ]);
+  if (result.exitCode != 0) {
+    globals.logger.printTrace(
+      'Failed to add xattr com.apple.xcode.CreatedByBuildSystem to $targetBuildDirPath.\n'
+      'Exit code: ${result.exitCode}\n'
+      'Stdout: ${result.stdout}\n'
+      'Stderr: ${result.stderr}',
     );
   }
 }
