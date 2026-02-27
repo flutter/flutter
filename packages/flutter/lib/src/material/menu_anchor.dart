@@ -362,14 +362,10 @@ class MenuAnchor extends StatefulWidget {
   /// Defaults to false.
   final bool consumeOutsideTap;
 
-  /// A callback that is invoked when the menu begins opening.
-  ///
-  /// Defaults to null.
+  /// A callback that is invoked when the menu is opened.
   final VoidCallback? onOpen;
 
-  /// A callback that is invoked when the menu finishes closing.
-  ///
-  /// Defaults to null.
+  /// A callback that is invoked when the menu is closed.
   final VoidCallback? onClose;
 
   /// Determine if the menu panel can be wrapped by a [UnconstrainedBox] which allows
