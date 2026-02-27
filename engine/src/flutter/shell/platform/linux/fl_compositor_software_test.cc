@@ -40,6 +40,12 @@ TEST(FlCompositorSoftwareTest, Render) {
     fl_compositor_present_layers(FL_COMPOSITOR(compositor), layers, 1);
   }).join();
 
+  size_t frame_width, frame_height;
+  fl_compositor_get_frame_size(FL_COMPOSITOR(compositor), &frame_width,
+                               &frame_height);
+  EXPECT_EQ(frame_width, width);
+  EXPECT_EQ(frame_height, height);
+
   // Render presented layer.
   int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
   g_autofree unsigned char* image_data =
@@ -47,7 +53,7 @@ TEST(FlCompositorSoftwareTest, Render) {
   cairo_surface_t* surface = cairo_image_surface_create_for_data(
       image_data, CAIRO_FORMAT_ARGB32, width, height, stride);
   cairo_t* cr = cairo_create(surface);
-  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr);
+  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr, TRUE);
   cairo_surface_destroy(surface);
   cairo_destroy(cr);
 }
@@ -109,7 +115,7 @@ TEST(FlCompositorSoftwareTest, Resize) {
   cairo_surface_t* surface = cairo_image_surface_create_for_data(
       image_data, CAIRO_FORMAT_ARGB32, width2, height2, stride2);
   cairo_t* cr = cairo_create(surface);
-  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr);
+  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr, TRUE);
   cairo_surface_destroy(surface);
   cairo_destroy(cr);
 

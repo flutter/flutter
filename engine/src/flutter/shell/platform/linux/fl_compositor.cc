@@ -20,9 +20,18 @@ gboolean fl_compositor_present_layers(FlCompositor* self,
                                                        layers_count);
 }
 
+void fl_compositor_get_frame_size(FlCompositor* self,
+                                  size_t* width,
+                                  size_t* height) {
+  g_return_if_fail(FL_IS_COMPOSITOR(self));
+  return FL_COMPOSITOR_GET_CLASS(self)->get_frame_size(self, width, height);
+}
+
 gboolean fl_compositor_render(FlCompositor* self,
                               cairo_t* cr,
-                              GdkWindow* window) {
+                              GdkWindow* window,
+                              gboolean wait_for_frame) {
   g_return_val_if_fail(FL_IS_COMPOSITOR(self), FALSE);
-  return FL_COMPOSITOR_GET_CLASS(self)->render(self, cr, window);
+  return FL_COMPOSITOR_GET_CLASS(self)->render(self, cr, window,
+                                               wait_for_frame);
 }

@@ -79,6 +79,9 @@ struct _FlView {
   // Signal subscripton for cursor changes.
   guint cursor_changed_cb_id;
 
+  // TRUE if the view size should be controlled by Flutter.
+  gboolean sized_to_content;
+
   GCancellable* cancellable;
 };
 
@@ -103,12 +106,37 @@ G_DEFINE_TYPE_WITH_CODE(
 static gboolean redraw_cb(gpointer user_data) {
   FlView* self = FL_VIEW(user_data);
 
-  gtk_widget_queue_draw(GTK_WIDGET(self->render_area));
-
   if (!self->have_first_frame) {
     self->have_first_frame = TRUE;
     g_signal_emit(self, fl_view_signals[SIGNAL_FIRST_FRAME], 0);
   }
+
+  // If Flutter is controlling the window size, then resize the view if
+  // necessary.
+  GtkAllocation allocation;
+  gtk_widget_get_allocation(GTK_WIDGET(self->render_area), &allocation);
+  gint scale_factor =
+      gtk_widget_get_scale_factor(GTK_WIDGET(self->render_area));
+  size_t width = allocation.width * scale_factor;
+  size_t height = allocation.height * scale_factor;
+  size_t frame_width, frame_height;
+  fl_compositor_get_frame_size(self->compositor, &frame_width, &frame_height);
+  gboolean frame_size_matches = width == frame_width && height == frame_height;
+  if (self->sized_to_content && !frame_size_matches) {
+    gtk_widget_set_size_request(GTK_WIDGET(self->render_area),
+                                frame_width / scale_factor,
+                                frame_height / scale_factor);
+    GtkWidget* toplevel =
+        gtk_widget_get_toplevel(GTK_WIDGET(self->render_area));
+    if (GTK_IS_WINDOW(toplevel)) {
+      // Resize to smallest size, so that the window will shrink to fit the new
+      // size of the render area.
+      gtk_window_resize(GTK_WINDOW(toplevel), 1, 1);
+    }
+    return FALSE;
+  }
+
+  gtk_widget_queue_draw(GTK_WIDGET(self->render_area));
 
   return FALSE;
 }
@@ -174,6 +202,11 @@ static void setup_cursor(FlView* self) {
 
 // Updates the engine with the current window metrics.
 static void handle_geometry_changed(FlView* self) {
+  // No updates required when size controlled by Flutter.
+  if (self->sized_to_content) {
+    return;
+  }
+
   GtkAllocation allocation;
   gtk_widget_get_allocation(GTK_WIDGET(self), &allocation);
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
@@ -211,8 +244,6 @@ static void handle_geometry_changed(FlView* self) {
 static void view_added_cb(GObject* object,
                           GAsyncResult* result,
                           gpointer user_data) {
-  FlView* self = FL_VIEW(user_data);
-
   g_autoptr(GError) error = nullptr;
   if (!fl_engine_add_view_finish(FL_ENGINE(object), result, &error)) {
     if (g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
@@ -223,8 +254,6 @@ static void view_added_cb(GObject* object,
     // FIXME: Show on the GLArea
     return;
   }
-
-  handle_geometry_changed(self);
 }
 
 // Called when the engine updates accessibility.
@@ -530,9 +559,10 @@ static gboolean draw_cb(FlView* self, cairo_t* cr) {
     gdk_gl_context_make_current(self->render_context);
   }
 
+  gboolean wait_for_frame = !self->sized_to_content;
   gboolean result = fl_compositor_render(
       self->compositor, cr,
-      gtk_widget_get_window(GTK_WIDGET(self->render_area)));
+      gtk_widget_get_window(GTK_WIDGET(self->render_area)), wait_for_frame);
 
   if (self->render_context) {
     gdk_gl_context_clear_current();
@@ -783,6 +813,23 @@ G_MODULE_EXPORT FlView* fl_view_new_for_engine(FlEngine* engine) {
 
   self->engine = FL_ENGINE(g_object_ref(engine));
 
+  size_t min_width = 1, min_height = 1, max_width = 1, max_height = 1;
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  self->view_id = fl_engine_add_view(
+      engine, FL_RENDERABLE(self), min_width, min_height, max_width, max_height,
+      scale_factor, self->cancellable, view_added_cb, self);
+
+  setup_engine(self);
+
+  return self;
+}
+
+G_MODULE_EXPORT FlView* fl_view_new_sized_to_content(FlEngine* engine) {
+  FlView* self = FL_VIEW(g_object_new(fl_view_get_type(), nullptr));
+
+  self->engine = FL_ENGINE(g_object_ref(engine));
+
+  self->sized_to_content = TRUE;
   size_t min_width = 1, min_height = 1, max_width = 1, max_height = 1;
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   self->view_id = fl_engine_add_view(

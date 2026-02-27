@@ -68,9 +68,25 @@ static gboolean fl_compositor_software_present_layers(
   return TRUE;
 }
 
+static void fl_compositor_software_get_frame_size(FlCompositor* compositor,
+                                                  size_t* width,
+                                                  size_t* height) {
+  FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(compositor);
+
+  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
+
+  if (width != nullptr) {
+    *width = self->width;
+  }
+  if (height != nullptr) {
+    *height = self->height;
+  }
+}
+
 static gboolean fl_compositor_software_render(FlCompositor* compositor,
                                               cairo_t* cr,
-                                              GdkWindow* window) {
+                                              GdkWindow* window,
+                                              gboolean wait_for_frame) {
   FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(compositor);
 
   g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
@@ -81,12 +97,17 @@ static gboolean fl_compositor_software_render(FlCompositor* compositor,
 
   // If frame not ready, then wait for it.
   gint scale_factor = gdk_window_get_scale_factor(window);
-  size_t width = gdk_window_get_width(window) * scale_factor;
-  size_t height = gdk_window_get_height(window) * scale_factor;
-  while (self->width != width || self->height != height) {
-    g_mutex_unlock(&self->frame_mutex);
-    fl_task_runner_wait(self->task_runner);
-    g_mutex_lock(&self->frame_mutex);
+  if (wait_for_frame) {
+    while (true) {
+      size_t width = gdk_window_get_width(window) * scale_factor;
+      size_t height = gdk_window_get_height(window) * scale_factor;
+      if (self->width == width && self->height == height) {
+        break;
+      }
+      g_mutex_unlock(&self->frame_mutex);
+      fl_task_runner_wait(self->task_runner);
+      g_mutex_lock(&self->frame_mutex);
+    }
   }
 
   cairo_surface_set_device_scale(self->surface, scale_factor, scale_factor);
@@ -113,6 +134,8 @@ static void fl_compositor_software_class_init(
     FlCompositorSoftwareClass* klass) {
   FL_COMPOSITOR_CLASS(klass)->present_layers =
       fl_compositor_software_present_layers;
+  FL_COMPOSITOR_CLASS(klass)->get_frame_size =
+      fl_compositor_software_get_frame_size;
   FL_COMPOSITOR_CLASS(klass)->render = fl_compositor_software_render;
 
   G_OBJECT_CLASS(klass)->dispose = fl_compositor_software_dispose;
