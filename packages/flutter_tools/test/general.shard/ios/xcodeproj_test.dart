@@ -1188,69 +1188,6 @@ Information about project "Runner":
       }
 
       testUsingContext(
-        'excludes arm64 simulator when build setting fetch fails',
-        () async {
-          const BuildInfo buildInfo = BuildInfo.debug;
-
-          final Directory projectDir = fs.directory('path/to/project')..createSync(recursive: true);
-          projectDir.childFile('pubspec.yaml')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('name: my_app\n');
-
-          final FlutterProject project = FlutterProject.fromDirectoryTest(projectDir);
-
-          final Directory podXcodeProject =
-              project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
-                ..createSync(recursive: true);
-          project.ios.podManifestLock.createSync(recursive: true);
-
-          final String buildDirectory = fs.path.absolute('build', 'ios');
-
-          fakeProcessManager.addCommands(<FakeCommand>[
-            kWhichSysctlCommand,
-            kARMCheckCommand,
-            FakeCommand(
-              command: <String>[
-                '/usr/bin/arch',
-                '-arm64e',
-                'xcrun',
-                'xcodebuild',
-                '-alltargets',
-                '-sdk',
-                'iphonesimulator',
-                '-project',
-                podXcodeProject.path,
-                '-showBuildSettings',
-                'BUILD_DIR=$buildDirectory',
-                'OBJROOT=$buildDirectory',
-              ],
-              exitCode: 1,
-            ),
-          ]);
-
-          await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
-
-          expect(fakeProcessManager, hasNoRemainingExpectations);
-
-          final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
-          expect(
-            config.readAsStringSync(),
-            contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386 arm64'),
-          );
-          expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7'));
-        },
-        overrides: <Type, Generator>{
-          Artifacts: () => localIosArtifacts,
-          Platform: () => macOS,
-          FileSystem: () => fs,
-          ProcessManager: () => fakeProcessManager,
-          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
-          Xcode: () => xcode,
-          Logger: () => logger,
-        },
-      );
-
-      testUsingContext(
         'prints Warning when a plugin or transitive dependency excludes arm64 on Xcode 26+',
         () async {
           const BuildInfo buildInfo = BuildInfo.debug;
@@ -1325,7 +1262,11 @@ PODS:
   - ThirdPodDependency (1.0.0):
   - FourthPodDependency (1.0.0):
 ''');
-          await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+          await updateGeneratedXcodeProperties(
+            project: project,
+            buildInfo: buildInfo,
+            printWarnings: true,
+          );
 
           expect(
             logger.warningText,
@@ -1403,7 +1344,11 @@ Build settings for action build and target good_plugin:
             ),
           ]);
 
-          await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+          await updateGeneratedXcodeProperties(
+            project: project,
+            buildInfo: buildInfo,
+            printWarnings: true,
+          );
 
           final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
           expect(logger.warningText, isEmpty);
@@ -1467,7 +1412,11 @@ Build settings for action build and target good_plugin:
             ),
           ]);
 
-          await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+          await updateGeneratedXcodeProperties(
+            project: project,
+            buildInfo: buildInfo,
+            printWarnings: true,
+          );
 
           final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
           expect(logger.warningText, isEmpty);
@@ -1532,7 +1481,11 @@ Build settings for action build and target bad_plugin:
             ),
           ]);
 
-          await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+          await updateGeneratedXcodeProperties(
+            project: project,
+            buildInfo: buildInfo,
+            printWarnings: true,
+          );
 
           expect(
             logger.warningText,
@@ -1641,7 +1594,11 @@ PODS:
   - ThirdPodDependency (1.0.0):
   - FourthPodDependency (1.0.0):
 ''');
-          await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+          await updateGeneratedXcodeProperties(
+            project: project,
+            buildInfo: buildInfo,
+            printWarnings: true,
+          );
 
           expect(logger.warningText, isEmpty);
           expect(fakeProcessManager, hasNoRemainingExpectations);

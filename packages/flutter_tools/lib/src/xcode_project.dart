@@ -491,13 +491,11 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   /// True if the app project uses Swift.
   bool get isSwift => appDelegateSwift.existsSync();
 
-  bool _warnedAboutExcludingArm = false;
-
   /// Returns true if all plugins and their dependencies support arm64.
   ///
   /// When using Xcode 26+, print a warning if a plugin or its dependencies does not support
   /// arm64.
-  Future<bool> pluginsSupportArmSimulator() async {
+  Future<bool> pluginsSupportArmSimulator({required bool printWarnings}) async {
     final Version? xcodeVersion = globals.xcode?.currentVersion;
     final Directory podXcodeProject = hostAppRoot
         .childDirectory('Pods')
@@ -515,11 +513,12 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       podXcodeProject,
     );
     if (buildSettings == null || buildSettings.isEmpty) {
-      return false;
+      globals.logger.printTrace('Unable to get build settings for Pods.');
+      return true;
     }
 
     // When using Xcode 26, print a warning if a target does not support arm.
-    if (xcodeVersion != null && xcodeVersion.major >= 26 && !_warnedAboutExcludingArm) {
+    if (xcodeVersion != null && xcodeVersion.major >= 26 && printWarnings) {
       final List<({String target, String? plugin})> targetsExcludingArm =
           await _targetsExcludingArm(buildSettings);
       if (targetsExcludingArm.isNotEmpty) {
@@ -542,7 +541,6 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
           'Please contact plugin maintainers to request arm64 support to continue to be able to '
           'use the plugin on a simulator.',
         );
-        _warnedAboutExcludingArm = true;
       }
     }
 
@@ -551,7 +549,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
 
   /// Returns a list of targets and their associated plugin (if found) that exclude arm64 architecture.
   Future<List<({String target, String? plugin})>> _targetsExcludingArm(String buildSettings) async {
-    final Map<String, List<String>> cocoapodsTree = _cocoapodTree();
+    final Map<String, List<String>> cocoapodsDependencyGraph = _cocoapodsDependencyGraph();
     final List<Plugin> allPlugins = await findPlugins(parent);
     final pluginNames = <String>{
       for (final Plugin plugin in allPlugins)
@@ -583,15 +581,16 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       if (pluginNames.contains(currentTarget)) {
         foundTargets.add((target: currentTarget, plugin: currentTarget));
       } else {
-        // If it's not a plugin, it may de a transitive dependency of a plugin
+        // If it's not a plugin, it may be a transitive dependency of a plugin
         final String? parentPlugin = _pluginUsingDependency(
           targetName: currentTarget,
           pluginNames: pluginNames.toList(),
-          cocoapodsTree: cocoapodsTree,
+          cocoapodsDependencyGraph: cocoapodsDependencyGraph,
         );
         if (parentPlugin != null) {
           foundTargets.add((target: currentTarget, plugin: parentPlugin));
         } else if (currentTarget.startsWith('Pods-')) {
+          // Skip Pods- targets since they are not actual dependencies.
           continue;
         } else {
           foundTargets.add((target: currentTarget, plugin: null));
@@ -605,22 +604,38 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   String? _pluginUsingDependency({
     required String targetName,
     required List<String> pluginNames,
-    required Map<String, List<String>> cocoapodsTree,
+    required Map<String, List<String>> cocoapodsDependencyGraph,
   }) {
-    final String? pluginName = _findPluginForDependency(targetName, cocoapodsTree, pluginNames);
+    final String? pluginName = _findPluginForDependency(
+      targetName,
+      cocoapodsDependencyGraph,
+      pluginNames,
+    );
     if (pluginName != null) {
       return pluginName;
     }
     if (targetName.contains('-')) {
-      // If the target has a - in the name, the first part is often the pod name
-      return _findPluginForDependency(targetName.split('-').first, cocoapodsTree, pluginNames);
+      // Resource bundle targets are prefixed with the name of the pod and then the name of the
+      // resource. Strip the resource name to get the pod name.
+      return _findPluginForDependency(
+        targetName.split('-').first,
+        cocoapodsDependencyGraph,
+        pluginNames,
+      );
     } else {
-      return _findPluginForDependency(targetName, cocoapodsTree, pluginNames, searchByPrefix: true);
+      // Sometimes the target name is a prefix of pod name.
+      // Example: target name "GoogleMLKit" and pod name "GoogleMLKit/Translate".
+      return _findPluginForDependency(
+        targetName,
+        cocoapodsDependencyGraph,
+        pluginNames,
+        searchByPrefix: true,
+      );
     }
   }
 
   /// Returns a map of pods and their dependencies.
-  Map<String, List<String>> _cocoapodTree() {
+  Map<String, List<String>> _cocoapodsDependencyGraph() {
     final Map<String, List<String>> podDependencies = {};
     try {
       if (podfileLock.existsSync()) {
@@ -644,15 +659,16 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
           }
         }
       }
-    } on Exception {
-      globals.logger.printTrace('Failed to parse podfile.lock');
+    } on Exception catch (e) {
+      globals.logger.printTrace('Failed to parse podfile.lock: $e');
     }
 
     return podDependencies;
   }
 
+  /// Recursively searches the pod dependency graph for a Flutter plugin that uses the given target.
   String? _findPluginForDependency(
-    String transitiveDependency,
+    String targetName,
     Map<String, List<String>> cocoapodTree,
     List<String> pluginNames, {
     bool searchByPrefix = false,
@@ -660,15 +676,13 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     for (final MapEntry<String, List<String>> pod in cocoapodTree.entries) {
       final String podName = pod.key;
       final List<String> podDependencies = pod.value;
-      bool podHasTransitiveDependency;
+      bool podHasTargetAsDependency;
       if (searchByPrefix) {
-        podHasTransitiveDependency = podDependencies.any(
-          (dep) => dep.startsWith('$transitiveDependency/'),
-        );
+        podHasTargetAsDependency = podDependencies.any((dep) => dep.startsWith('$targetName/'));
       } else {
-        podHasTransitiveDependency = podDependencies.contains(transitiveDependency);
+        podHasTargetAsDependency = podDependencies.contains(targetName);
       }
-      if (podHasTransitiveDependency) {
+      if (podHasTargetAsDependency) {
         if (pluginNames.contains(podName)) {
           return podName;
         }

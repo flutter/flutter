@@ -336,6 +336,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     project: project,
     targetOverride: targetOverride,
     buildInfo: buildInfo,
+    printWarnings: true,
   );
   if (app.project.usesSwiftPackageManager) {
     final String? iosDeploymentTarget = buildSettings['IPHONEOS_DEPLOYMENT_TARGET'];
@@ -1019,6 +1020,7 @@ _XCResultIssueHandlingResult _handleXCResultIssue({
         'Unable to find a destination matching the provided destination specifier',
       ) &&
       message.contains('platform:iOS Simulator, arch:x86_64,') &&
+      !message.contains('platform:iOS Simulator, arch:arm64,') &&
       !message.contains(
         'The requested device could not be found because no available devices matched the request.',
       )) {
@@ -1175,7 +1177,7 @@ Future<bool> _simulatorSupportsIntel(Device device) async {
     return true;
   }
   final String runtime = await device.sdkNameAndVersion;
-  final RunResult result = globals.processUtils.runSync([
+  final RunResult result = await globals.processUtils.run([
     ...globals.xcode!.xcrunCommand(),
     'simctl',
     'list',
