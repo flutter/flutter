@@ -871,9 +871,8 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: SizedBox(
-          width: 100,
-          height: 100,
+        child: SizedBox.square(
+          dimension: 100,
           child: FilledButton(
             autofocus: true,
             onPressed: () {},
@@ -898,9 +897,8 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: SizedBox(
-          width: 100,
-          height: 100,
+        child: SizedBox.square(
+          dimension: 100,
           child: FilledButton(
             focusNode: focusNode,
             onHover: (bool value) {
@@ -928,9 +926,8 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: SizedBox(
-            width: 100,
-            height: 100,
+          child: SizedBox.square(
+            dimension: 100,
             child: FilledButton(
               onPressed: enabled ? () {} : null,
               onHover: (bool value) {

@@ -97,12 +97,17 @@ static gboolean fl_compositor_software_render(FlCompositor* compositor,
 
   // If frame not ready, then wait for it.
   gint scale_factor = gdk_window_get_scale_factor(window);
-  size_t width = gdk_window_get_width(window) * scale_factor;
-  size_t height = gdk_window_get_height(window) * scale_factor;
-  while (wait_for_frame && (self->width != width || self->height != height)) {
-    g_mutex_unlock(&self->frame_mutex);
-    fl_task_runner_wait(self->task_runner);
-    g_mutex_lock(&self->frame_mutex);
+  if (wait_for_frame) {
+    while (true) {
+      size_t width = gdk_window_get_width(window) * scale_factor;
+      size_t height = gdk_window_get_height(window) * scale_factor;
+      if (self->width == width && self->height == height) {
+        break;
+      }
+      g_mutex_unlock(&self->frame_mutex);
+      fl_task_runner_wait(self->task_runner);
+      g_mutex_lock(&self->frame_mutex);
+    }
   }
 
   cairo_surface_set_device_scale(self->surface, scale_factor, scale_factor);
