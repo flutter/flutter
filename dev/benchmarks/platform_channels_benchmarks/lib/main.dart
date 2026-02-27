@@ -53,7 +53,7 @@ Future<void> _runBasicStandardParallelRecurse(
     completer.complete(counter.count);
   } else if (counter.count < count) {
     await basicStandard.send(payload);
-    _runBasicStandardParallelRecurse(basicStandard, counter, count, completer, payload);
+    await _runBasicStandardParallelRecurse(basicStandard, counter, count, completer, payload);
   }
 }
 
