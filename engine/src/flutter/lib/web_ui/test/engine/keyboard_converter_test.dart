@@ -32,6 +32,7 @@ final int kPhysicalBracketLeft = kWebToPhysicalKey['BracketLeft']!;
 const int kPhysicalEmptyCode = 0x1700000000;
 
 const int kLogicalKeyA = 0x00000000061;
+const int kLogicalKeyE = 0x00000000065;
 const int kLogicalKeyL = 0x0000000006C;
 const int kLogicalKeyU = 0x00000000075;
 const int kLogicalDigit1 = 0x00000000031;
@@ -822,81 +823,300 @@ void testMain() {
     ui_web.OperatingSystem.macOs,
     ui_web.OperatingSystem.iOs,
   ]) {
-    testFakeAsync('Key guards: key down events are guarded on $system', (FakeAsync async) {
-      final keyDataList = <ui.KeyData>[];
-      final converter = KeyboardConverter((ui.KeyData key) {
-        keyDataList.add(key);
-        return true;
-      }, system);
+    final metaModifiers = <String, Map<String, dynamic>>{
+      'MetaLeft': <String, dynamic>{
+        'code': 'MetaLeft',
+        'key': 'Meta',
+        'location': kLocationLeft,
+        'physical': kPhysicalMetaLeft,
+        'logical': kLogicalMetaLeft,
+      },
+      'MetaRight': <String, dynamic>{
+        'code': 'MetaRight',
+        'key': 'Meta',
+        'location': kLocationRight,
+        'physical': kWebToPhysicalKey['MetaRight'],
+        'logical': kWebLogicalLocationMap['Meta']![kLocationRight],
+      },
+    };
 
-      converter.handleEvent(
-        keyDownEvent('MetaLeft', 'Meta', kMeta, kLocationLeft)..timeStamp = 100,
+    for (final MapEntry<String, Map<String, dynamic>> entry in metaModifiers.entries) {
+      final String name = entry.key;
+      final Map<String, dynamic> info = entry.value;
+
+      testFakeAsync('Key guards: key down events while $name is pressed are guarded on $system', (
+        FakeAsync async,
+      ) {
+        final physical = info['physical'] as int;
+        final logical = info['logical'] as int;
+        final location = info['location'] as int;
+
+        final keyDataList = <ui.KeyData>[];
+        final converter = KeyboardConverter((ui.KeyData key) {
+          keyDataList.add(key);
+          return true;
+        }, system);
+
+        converter.handleEvent(
+          keyDownEvent(info['code'] as String, info['key'] as String, kMeta, location)
+            ..timeStamp = 100,
+        );
+        async.elapse(const Duration(milliseconds: 100));
+
+        converter.handleEvent(keyDownEvent('KeyA', 'a', kMeta)..timeStamp = 200);
+        expectKeyData(
+          keyDataList.last,
+          timeStamp: const Duration(milliseconds: 200),
+          type: ui.KeyEventType.down,
+          deviceType: ui.KeyEventDeviceType.keyboard,
+          physical: kPhysicalKeyA,
+          logical: kLogicalKeyA,
+          character: 'a',
+        );
+        keyDataList.clear();
+
+        // Key Up of KeyA is omitted due to being a shortcut.
+
+        async.elapse(const Duration(milliseconds: 2500));
+        expectKeyData(
+          keyDataList.last,
+          timeStamp: const Duration(milliseconds: 2200),
+          type: ui.KeyEventType.up,
+          deviceType: ui.KeyEventDeviceType.keyboard,
+          physical: kPhysicalKeyA,
+          logical: kLogicalKeyA,
+          character: null,
+          synthesized: true,
+        );
+        keyDataList.clear();
+
+        converter.handleEvent(
+          keyUpEvent(info['code'] as String, info['key'] as String, 0, location)..timeStamp = 2700,
+        );
+        expectKeyData(
+          keyDataList.last,
+          timeStamp: const Duration(milliseconds: 2700),
+          type: ui.KeyEventType.up,
+          deviceType: ui.KeyEventDeviceType.keyboard,
+          physical: physical,
+          logical: logical,
+          character: null,
+        );
+        async.elapse(const Duration(milliseconds: 100));
+
+        // Key A states are cleared
+        converter.handleEvent(keyDownEvent('KeyA', 'a')..timeStamp = 2800);
+        expectKeyData(
+          keyDataList.last,
+          timeStamp: const Duration(milliseconds: 2800),
+          type: ui.KeyEventType.down,
+          deviceType: ui.KeyEventDeviceType.keyboard,
+          physical: kPhysicalKeyA,
+          logical: kLogicalKeyA,
+          character: 'a',
+        );
+        async.elapse(const Duration(milliseconds: 100));
+
+        converter.handleEvent(keyUpEvent('KeyA', 'a')..timeStamp = 2900);
+        expectKeyData(
+          keyDataList.last,
+          timeStamp: const Duration(milliseconds: 2900),
+          type: ui.KeyEventType.up,
+          deviceType: ui.KeyEventDeviceType.keyboard,
+          physical: kPhysicalKeyA,
+          logical: kLogicalKeyA,
+          character: null,
+        );
+        converter.dispose();
+      });
+    }
+
+    testFakeAsync(
+      'Key guards: key down events while a modifier is not pressed are not guarded on $system',
+      (FakeAsync async) {
+        // Regression test for https://github.com/flutter/flutter/issues/162305
+
+        final keyDataList = <ui.KeyData>[];
+        final converter = KeyboardConverter((ui.KeyData key) {
+          keyDataList.add(key);
+          return true;
+        }, system);
+
+        converter.handleEvent(keyDownEvent('KeyA', 'a')..timeStamp = 100);
+        async.elapse(const Duration(milliseconds: 100));
+        expectKeyData(
+          keyDataList.first,
+          timeStamp: const Duration(milliseconds: 100),
+          type: ui.KeyEventType.down,
+          deviceType: ui.KeyEventDeviceType.keyboard,
+          physical: kPhysicalKeyA,
+          logical: kLogicalKeyA,
+          character: 'a',
+        );
+
+        converter.handleEvent(keyDownEvent('KeyE', 'e')..timeStamp = 200);
+        expectKeyData(
+          keyDataList.last,
+          timeStamp: const Duration(milliseconds: 200),
+          type: ui.KeyEventType.down,
+          deviceType: ui.KeyEventDeviceType.keyboard,
+          physical: kPhysicalKeyE,
+          logical: kLogicalKeyE,
+          character: 'e',
+        );
+
+        // Key Up of KeyA is not omitted after debounce delay as no modifier is involved.
+        expect(keyDataList, hasLength(2));
+        async.elapse(const Duration(milliseconds: 2500));
+        expect(
+          keyDataList,
+          hasLength(2),
+          reason:
+              'No synthetic key up should be generated after debounce delay if no modifier is involved.',
+        );
+
+        keyDataList.clear();
+
+        converter.handleEvent(keyUpEvent('KeyE', 'e')..timeStamp = 2700);
+        async.elapse(const Duration(milliseconds: 100));
+
+        expectKeyData(
+          keyDataList.first,
+          timeStamp: const Duration(milliseconds: 2700),
+          type: ui.KeyEventType.up,
+          deviceType: ui.KeyEventDeviceType.keyboard,
+          physical: kPhysicalKeyE,
+          logical: kLogicalKeyE,
+          character: null,
+        );
+
+        converter.handleEvent(keyUpEvent('KeyA', 'a')..timeStamp = 2800);
+        async.elapse(const Duration(milliseconds: 100));
+
+        expectKeyData(
+          keyDataList.last,
+          timeStamp: const Duration(milliseconds: 2800),
+          type: ui.KeyEventType.up,
+          deviceType: ui.KeyEventDeviceType.keyboard,
+          physical: kPhysicalKeyA,
+          logical: kLogicalKeyA,
+          character: null,
+        );
+
+        expect(keyDataList, hasLength(2));
+      },
+    );
+
+    final nonMetaModifiers = <String, Map<String, dynamic>>{
+      'ShiftLeft': <String, dynamic>{
+        'code': 'ShiftLeft',
+        'key': 'Shift',
+        'mask': kShift,
+        'location': kLocationLeft,
+        'physical': kPhysicalShiftLeft,
+        'logical': kLogicalShiftLeft,
+      },
+      'ShiftRight': <String, dynamic>{
+        'code': 'ShiftRight',
+        'key': 'Shift',
+        'mask': kShift,
+        'location': kLocationRight,
+        'physical': kPhysicalShiftRight,
+        'logical': kLogicalShiftRight,
+      },
+      'ControlLeft': <String, dynamic>{
+        'code': 'ControlLeft',
+        'key': 'Control',
+        'mask': kCtrl,
+        'location': kLocationLeft,
+        'physical': kWebToPhysicalKey['ControlLeft'],
+        'logical': kLogicalCtrlLeft,
+      },
+      'ControlRight': <String, dynamic>{
+        'code': 'ControlRight',
+        'key': 'Control',
+        'mask': kCtrl,
+        'location': kLocationRight,
+        'physical': kWebToPhysicalKey['ControlRight'],
+        'logical': kWebLogicalLocationMap['Control']![kLocationRight],
+      },
+      'AltLeft': <String, dynamic>{
+        'code': 'AltLeft',
+        'key': 'Alt',
+        'mask': kAlt,
+        'location': kLocationLeft,
+        'physical': kWebToPhysicalKey['AltLeft'],
+        'logical': kLogicalAltLeft,
+      },
+      'AltRight': <String, dynamic>{
+        'code': 'AltRight',
+        'key': 'Alt',
+        'mask': kAlt,
+        'location': kLocationRight,
+        'physical': kWebToPhysicalKey['AltRight'],
+        'logical': kWebLogicalLocationMap['Alt']![kLocationRight],
+      },
+    };
+
+    for (final MapEntry<String, Map<String, dynamic>> entry in nonMetaModifiers.entries) {
+      final String name = entry.key;
+      final Map<String, dynamic> info = entry.value;
+      testFakeAsync(
+        'Key guards: key down events while $name is pressed are not guarded on $system',
+        (FakeAsync async) {
+          final mask = info['mask'] as int;
+          final location = info['location'] as int;
+          final physical = info['physical'] as int;
+          final logical = info['logical'] as int;
+
+          final keyDataList = <ui.KeyData>[];
+          final converter = KeyboardConverter((ui.KeyData key) {
+            keyDataList.add(key);
+            return true;
+          }, system);
+
+          // Press Modifier
+          converter.handleEvent(
+            keyDownEvent(info['code'] as String, info['key'] as String, mask, location)
+              ..timeStamp = 100,
+          );
+          async.elapse(const Duration(milliseconds: 100));
+
+          expectKeyData(
+            keyDataList.last,
+            timeStamp: const Duration(milliseconds: 100),
+            type: ui.KeyEventType.down,
+            deviceType: ui.KeyEventDeviceType.keyboard,
+            physical: physical,
+            logical: logical,
+            character: null,
+          );
+          keyDataList.clear();
+
+          // Press A with Modifier
+          converter.handleEvent(keyDownEvent('KeyA', 'a', mask)..timeStamp = 200);
+          expectKeyData(
+            keyDataList.last,
+            timeStamp: const Duration(milliseconds: 200),
+            type: ui.KeyEventType.down,
+            deviceType: ui.KeyEventDeviceType.keyboard,
+            physical: kPhysicalKeyA,
+            logical: kLogicalKeyA,
+            character: 'a',
+          );
+
+          // Check that NO synthesized key up event happens
+          async.elapse(const Duration(milliseconds: 2500));
+          expect(
+            keyDataList,
+            hasLength(1),
+            reason: 'Failed for modifier $name: No synthetic key up should be generated.',
+          );
+
+          converter.dispose();
+        },
       );
-      async.elapse(const Duration(milliseconds: 100));
-
-      converter.handleEvent(keyDownEvent('KeyA', 'a', kMeta)..timeStamp = 200);
-      expectKeyData(
-        keyDataList.last,
-        timeStamp: const Duration(milliseconds: 200),
-        type: ui.KeyEventType.down,
-        deviceType: ui.KeyEventDeviceType.keyboard,
-        physical: kPhysicalKeyA,
-        logical: kLogicalKeyA,
-        character: 'a',
-      );
-      keyDataList.clear();
-
-      // Key Up of KeyA is omitted due to being a shortcut.
-
-      async.elapse(const Duration(milliseconds: 2500));
-      expectKeyData(
-        keyDataList.last,
-        timeStamp: const Duration(milliseconds: 2200),
-        type: ui.KeyEventType.up,
-        deviceType: ui.KeyEventDeviceType.keyboard,
-        physical: kPhysicalKeyA,
-        logical: kLogicalKeyA,
-        character: null,
-        synthesized: true,
-      );
-      keyDataList.clear();
-
-      converter.handleEvent(keyUpEvent('MetaLeft', 'Meta', 0, kLocationLeft)..timeStamp = 2700);
-      expectKeyData(
-        keyDataList.last,
-        timeStamp: const Duration(milliseconds: 2700),
-        type: ui.KeyEventType.up,
-        deviceType: ui.KeyEventDeviceType.keyboard,
-        physical: kPhysicalMetaLeft,
-        logical: kLogicalMetaLeft,
-        character: null,
-      );
-      async.elapse(const Duration(milliseconds: 100));
-
-      // Key A states are cleared
-      converter.handleEvent(keyDownEvent('KeyA', 'a')..timeStamp = 2800);
-      expectKeyData(
-        keyDataList.last,
-        timeStamp: const Duration(milliseconds: 2800),
-        type: ui.KeyEventType.down,
-        deviceType: ui.KeyEventDeviceType.keyboard,
-        physical: kPhysicalKeyA,
-        logical: kLogicalKeyA,
-        character: 'a',
-      );
-      async.elapse(const Duration(milliseconds: 100));
-
-      converter.handleEvent(keyUpEvent('KeyA', 'a')..timeStamp = 2900);
-      expectKeyData(
-        keyDataList.last,
-        timeStamp: const Duration(milliseconds: 2900),
-        type: ui.KeyEventType.up,
-        deviceType: ui.KeyEventDeviceType.keyboard,
-        physical: kPhysicalKeyA,
-        logical: kLogicalKeyA,
-        character: null,
-      );
-    });
+    }
   }
 
   testFakeAsync('Key guards: key repeated down events refreshes guards', (FakeAsync async) {
