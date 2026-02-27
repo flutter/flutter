@@ -701,6 +701,9 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
     windowingOwner.deactivateWindowController(this);
     _removeChildFromParent(parent, this);
   }
+
+  @override
+  ui.Offset get offsetInParent => Offset.zero;
 }
 
 class _TestSatelliteWindowController extends SatelliteWindowController
