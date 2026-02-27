@@ -2824,11 +2824,6 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 - (void)showTextInput {
   _activeView.viewResponder = _viewResponder;
   [self addToInputParentViewIfNeeded:_activeView];
-
-  // Reset pending removal flag to prevent stale flags from a previous
-  // clearTextInputClient call from causing unintended view removal.
-  _pendingInputViewRemoval = NO;
-
   [_activeView becomeFirstResponder];
 }
 
@@ -2891,6 +2886,11 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 - (void)setTextInputClient:(int)client withConfiguration:(NSDictionary*)configuration {
   [self resetAllClientIds];
+
+  // Reset pending removal flags set by the previous clearTextInputClient call.
+  _pendingAutofillRemoval = NO;
+  _pendingInputViewRemoval = NO;
+
   // Hide all input views from autofill, only make those in the new configuration visible
   // to autofill.
   [self changeInputViewsAutofillVisibility:NO];
