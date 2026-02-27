@@ -11,7 +11,6 @@ import com.android.build.gradle.internal.dsl.DefaultConfig
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.PrintKgpTask
-import com.flutter.gradle.tasks.PrintTask
 import com.flutter.gradle.tasks.PrintTaskDeferred
 import io.mockk.called
 import io.mockk.every
@@ -1038,45 +1037,15 @@ class FlutterPluginUtilsTest {
     @Test
     fun `addTaskForKGPVersion adds task for KGP version`() {
         val project = mockk<Project>()
-        val taskContainer = mockk<TaskContainer>()
-        every { project.tasks } returns taskContainer
-        val mockTaskProvider = mockk<TaskProvider<PrintTask>>()
-        val mockPrintTask = mockk<PrintTask>(relaxed = true)
-        val captureSlot = slot<Action<PrintTask>>()
 
         every {
-            project.tasks.register(eq("kgpVersion"), any<Class<PrintTask>>(), capture(captureSlot))
-        } returns mockTaskProvider
-        every {
-            project.tasks.register(any(), any<Class<PrintKgpTask>>())
-        } returns mockk()
-
-        every { project.provider<PrintTask>(any()) } returns mockTaskProvider
-        every { mockTaskProvider.configure(any()).hint(PrintTask::class) }
-
-        FlutterPluginUtils.addTaskForKGPVersion(project)
-        captureSlot.captured.execute(mockPrintTask)
-
-        verify {
-            mockPrintTask.description = "Print the current kgp version used by the project."
-        }
-
-    }
-    @Test
-    fun `addTaskForKGPVersion adds task for KGP version 2`() {
-        val project = mockk<Project>()
-
-        every {
-            project.tasks.register(any(), any<Class<PrintTask>>(), any())
-        } returns mockk()
-        every {
-            project.tasks.register(eq("kgpVersion2"), PrintKgpTask::class.java)
+            project.tasks.register(eq("kgpVersion"), PrintKgpTask::class.java)
         } returns mockk()
 
         FlutterPluginUtils.addTaskForKGPVersion(project)
 
         verify {
-            project.tasks.register(eq("kgpVersion2"), PrintKgpTask::class.java)
+            project.tasks.register(eq("kgpVersion"), PrintKgpTask::class.java)
         }
     }
 

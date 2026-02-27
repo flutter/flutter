@@ -11,7 +11,7 @@ import com.android.build.gradle.internal.core.InternalBaseVariant
 import com.android.build.gradle.tasks.MergeSourceSetFolders
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.flutter.gradle.tasks.FlutterTask
-import com.flutter.gradle.tasks.PrintTask
+import com.flutter.gradle.tasks.PrintKgpTask
 import com.flutter.gradle.tasks.PrintTaskDeferred
 import io.mockk.every
 import io.mockk.mockk
@@ -98,10 +98,10 @@ class FlutterPluginTest {
 
         val registeredPrintTasks = mutableListOf<String>()
         verify {
-            project.tasks.register(capture(registeredPrintTasks), PrintTask::class.java, any())
+            project.tasks.register(capture(registeredPrintTasks), PrintTaskDeferred::class.java, any())
         }
         verify {
-            project.tasks.register(capture(registeredPrintTasks), PrintTaskDeferred::class.java, any())
+            project.tasks.register(capture(registeredPrintTasks), PrintKgpTask::class.java)
         }
 
         assertContains(registeredPrintTasks, "javaVersion")
