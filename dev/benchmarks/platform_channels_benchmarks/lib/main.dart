@@ -41,19 +41,20 @@ class _Counter {
   int count = 0;
 }
 
-Future<void> _runBasicStandardParallelRecurse(
+void _runBasicStandardParallelRecurse(
   BasicMessageChannel<Object?> basicStandard,
   _Counter counter,
   int count,
   Completer<int> completer,
   Object? payload,
-) async {
+) {
   counter.count += 1;
   if (counter.count == count) {
     completer.complete(counter.count);
   } else if (counter.count < count) {
-    await basicStandard.send(payload);
-    await _runBasicStandardParallelRecurse(basicStandard, counter, count, completer, payload);
+    basicStandard.send(payload).then((Object? result) {
+      _runBasicStandardParallelRecurse(basicStandard, counter, count, completer, payload);
+    });
   }
 }
 
@@ -67,12 +68,11 @@ Future<double> _runBasicStandardParallel(
   final completer = Completer<int>();
   final counter = _Counter();
   watch.start();
-  await Future.wait(
-    Iterable.generate(parallel, (_) async {
-      await basicStandard.send(payload);
-      await _runBasicStandardParallelRecurse(basicStandard, counter, count, completer, payload);
-    }),
-  );
+  for (var i = 0; i < parallel; ++i) {
+    basicStandard.send(payload).then((Object? result) {
+      _runBasicStandardParallelRecurse(basicStandard, counter, count, completer, payload);
+    });
+  }
   await completer.future;
   watch.stop();
   return watch.elapsedMicroseconds / count;
@@ -130,7 +130,7 @@ Future<void> _runTest({
   required int numMessages,
 }) async {
   print('running $name');
-  await resetChannel.send(true);
+  resetChannel.send(true);
   // Prime test.
   await test(1);
   printer.addResult(
