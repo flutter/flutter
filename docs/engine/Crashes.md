@@ -122,7 +122,19 @@ app.android-arm64.symbols  →  app-android-arm64.so
 app.android-x64.symbols    →  app-android-x64.so
 ```
 
-Then upload the renamed `.so` files to Play Console under **All app bundles > All app bundles > Native debug symbols**.
+Then zip the renamed files together with the corresponding `libflutter.so` per ABI and upload to Play Console under **All app bundles > All app bundles > Native debug symbols**:
+
+```
+├── arm64-v8a
+│   ├── app-android-arm64.so
+│   └── libflutter.so
+├── armeabi-v7a
+│   ├── app-android-arm.so
+│   └── libflutter.so
+└── x86_64
+    ├── app-android-x64.so
+    └── libflutter.so
+```
 
 ### iOS
 
