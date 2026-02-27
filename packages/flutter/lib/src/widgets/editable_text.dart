@@ -3299,6 +3299,14 @@ class EditableTextState extends State<EditableText>
       if (newViewId != _viewId) {
         _textInputConnection!.updateConfig(_effectiveAutofillClient.textInputConfiguration);
       }
+      // The style may have changed due to dependency changes
+      // (e.g. MediaQuery.boldTextOf, MediaQuery.textScalerOf, etc.).
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+        if (!mounted || !_hasInputConnection) {
+          return;
+        }
+        _textInputConnection!.updateStyle(_getTextInputStyle(context));
+      }, debugLabel: 'EditableText.updateStyle');
     }
 
     if (defaultTargetPlatform != TargetPlatform.iOS &&
@@ -3409,13 +3417,14 @@ class EditableTextState extends State<EditableText>
           ? widget.style.merge(const TextStyle(fontWeight: FontWeight.bold))
           : widget.style;
       if (_hasInputConnection) {
-        _textInputConnection!.setStyle(
-          fontFamily: _style.fontFamily,
-          fontSize: _style.fontSize,
-          fontWeight: _style.fontWeight,
-          textDirection: _textDirection,
-          textAlign: widget.textAlign,
-        );
+        // Schedule the style update after layout to ensure preferredLineHeight
+        // is computed with the new style.
+        SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+          if (!mounted || !_hasInputConnection) {
+            return;
+          }
+          _textInputConnection!.updateStyle(_getTextInputStyle(context));
+        }, debugLabel: 'EditableText.updateStyle');
       }
     }
 
@@ -3436,6 +3445,24 @@ class EditableTextState extends State<EditableText>
       _scrollNotificationObserver!.removeListener(_handleContextMenuOnParentScroll);
       _scrollNotificationObserver = null;
     }
+  }
+
+  TextInputStyle _getTextInputStyle(BuildContext context) {
+    final double? letterSpacingOverride = MediaQuery.maybeLetterSpacingOverrideOf(context);
+    final double? wordSpacingOverride = MediaQuery.maybeWordSpacingOverrideOf(context);
+
+    return TextInputStyle(
+      fontFamily: _style.fontFamily,
+      fontSize: _style.fontSize,
+      fontWeight: _style.fontWeight,
+      textDirection: _textDirection,
+      textAlign: widget.textAlign,
+      letterSpacing: letterSpacingOverride ?? _style.letterSpacing,
+      wordSpacing: wordSpacingOverride ?? _style.wordSpacing,
+      // preferredLineHeight already includes lineHeightScaleFactor from
+      // _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides.
+      lineHeight: renderEditable.preferredLineHeight,
+    );
   }
 
   @protected
@@ -3959,13 +3986,7 @@ class EditableTextState extends State<EditableText>
       _updateSizeAndTransform();
       _schedulePeriodicPostFrameCallbacks();
       _textInputConnection!
-        ..setStyle(
-          fontFamily: _style.fontFamily,
-          fontSize: _style.fontSize,
-          fontWeight: _style.fontWeight,
-          textDirection: _textDirection,
-          textAlign: widget.textAlign,
-        )
+        ..updateStyle(_getTextInputStyle(context))
         ..setEditingState(localValue)
         ..show();
       if (_needsAutofill) {
@@ -4029,13 +4050,7 @@ class EditableTextState extends State<EditableText>
 
     newConnection
       ..show()
-      ..setStyle(
-        fontFamily: _style.fontFamily,
-        fontSize: _style.fontSize,
-        fontWeight: _style.fontWeight,
-        textDirection: _textDirection,
-        textAlign: widget.textAlign,
-      )
+      ..updateStyle(_getTextInputStyle(context))
       ..setEditingState(_value);
     _lastKnownRemoteTextEditingValue = _value;
   }
@@ -5436,52 +5451,6 @@ class EditableTextState extends State<EditableText>
     _scrollController.jumpTo(destination);
   }
 
-  /// Extend the selection down by page if the `forward` parameter is true, or
-  /// up by page otherwise.
-  void _extendSelectionByPage(ExtendSelectionByPageIntent intent) {
-    if (widget.maxLines == 1) {
-      return;
-    }
-
-    final TextSelection nextSelection;
-    final Rect extentRect = renderEditable.getLocalRectForCaret(_value.selection.extent);
-    final state = _scrollableKey.currentState as ScrollableState?;
-    final double increment = ScrollAction.getDirectionalIncrement(
-      state!,
-      ScrollIntent(
-        direction: intent.forward ? AxisDirection.down : AxisDirection.up,
-        type: ScrollIncrementType.page,
-      ),
-    );
-    final ScrollPosition position = _scrollController.position;
-    if (intent.forward) {
-      if (_value.selection.extentOffset >= _value.text.length) {
-        return;
-      }
-      final nextExtentOffset = Offset(extentRect.left, extentRect.top + increment);
-      final double height = position.maxScrollExtent + renderEditable.size.height;
-      final TextPosition nextExtent = nextExtentOffset.dy + position.pixels >= height
-          ? TextPosition(offset: _value.text.length)
-          : renderEditable.getPositionForPoint(renderEditable.localToGlobal(nextExtentOffset));
-      nextSelection = _value.selection.copyWith(extentOffset: nextExtent.offset);
-    } else {
-      if (_value.selection.extentOffset <= 0) {
-        return;
-      }
-      final nextExtentOffset = Offset(extentRect.left, extentRect.top + increment);
-      final TextPosition nextExtent = nextExtentOffset.dy + position.pixels <= 0
-          ? const TextPosition(offset: 0)
-          : renderEditable.getPositionForPoint(renderEditable.localToGlobal(nextExtentOffset));
-      nextSelection = _value.selection.copyWith(extentOffset: nextExtent.offset);
-    }
-
-    bringIntoView(nextSelection.extent);
-    userUpdateTextEditingValue(
-      _value.copyWith(selection: nextSelection),
-      SelectionChangedCause.keyboard,
-    );
-  }
-
   void _updateSelection(UpdateSelectionIntent intent) {
     assert(
       intent.newSelection.start <= intent.currentTextEditingValue.text.length,
@@ -5589,9 +5558,6 @@ class EditableTextState extends State<EditableText>
         _moveBeyondTextBoundary,
         ignoreNonCollapsedSelection: false,
       ),
-    ),
-    ExtendSelectionByPageIntent: _makeOverridable(
-      CallbackAction<ExtendSelectionByPageIntent>(onInvoke: _extendSelectionByPage),
     ),
     ExtendSelectionToNextWordBoundaryIntent: _makeOverridable(
       _UpdateTextSelectionAction<ExtendSelectionToNextWordBoundaryIntent>(

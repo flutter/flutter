@@ -74,6 +74,25 @@ Future<void> testMain() async {
     await waitForTextStrategyStopPropagation();
   });
 
+  group('EditableTextStyle', () {
+    test('applies lineHeight (px) if provided', () {
+      final style = <String, dynamic>{
+        'fontFamily': 'Roboto',
+        'fontSize': 10.0,
+        'fontWeightIndex': 0,
+        'textAlignIndex': 0,
+        'textDirectionIndex': 0,
+        'lineHeight': 20.0,
+      };
+
+      final editableTextStyle = EditableTextStyle.fromFrameworkMessage(style);
+      final DomHTMLInputElement element = createDomHTMLInputElement();
+      editableTextStyle.applyToDomElement(element);
+
+      expect(element.style.lineHeight, '20px');
+    });
+  });
+
   group('$GloballyPositionedTextEditingStrategy', () {
     late HybridTextEditing testTextEditing;
 
@@ -698,6 +717,209 @@ Future<void> testMain() async {
         spy.tearDown();
       },
     );
+  });
+
+  group('IOSTextEditingStrategy scrollIntoView for embedded scenarios', () {
+    late HybridTextEditing testTextEditing;
+    late IOSTextEditingStrategySpy editingStrategySpy;
+    late bool originalMultiViewEnabled;
+
+    setUp(() {
+      testTextEditing = HybridTextEditing();
+      editingStrategySpy = IOSTextEditingStrategySpy(testTextEditing);
+      testTextEditing.debugTextEditingStrategyOverride = editingStrategySpy;
+      testTextEditing.configuration = multilineConfig;
+      originalMultiViewEnabled = configuration.multiViewEnabled;
+    });
+
+    tearDown(() {
+      editingStrategySpy.disable();
+      debugResetIframeDetectionCache();
+      debugOverrideJsConfiguration(
+        JsFlutterConfiguration(multiViewEnabled: originalMultiViewEnabled),
+      );
+    });
+
+    test('scrollIntoView is called in placeElement when in iframe', () async {
+      // Simulate being in an iframe
+      editingStrategySpy.debugIsInIframeOverride = true;
+      debugOverrideJsConfiguration(JsFlutterConfiguration(multiViewEnabled: false));
+
+      editingStrategySpy.enable(
+        multilineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+
+      expect(editingStrategySpy.isEnabled, isTrue);
+
+      // IOSTextEditingStrategy overrides initializeElementPlacement() and does
+      // not place the element immediately on enable. Call placeElement()
+      // directly to verify the scrollIntoView behavior.
+      editingStrategySpy.placeElement();
+
+      expect(
+        editingStrategySpy.scrollIntoViewCallCount,
+        greaterThan(0),
+        reason: 'scrollIntoView should be called when in iframe',
+      );
+    });
+
+    test('scrollIntoView is called in placeElement when in multi-view mode', () async {
+      editingStrategySpy.debugIsInIframeOverride = false;
+      debugOverrideJsConfiguration(JsFlutterConfiguration(multiViewEnabled: true));
+
+      editingStrategySpy.enable(
+        multilineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+
+      expect(editingStrategySpy.isEnabled, isTrue);
+
+      editingStrategySpy.placeElement();
+
+      expect(
+        editingStrategySpy.scrollIntoViewCallCount,
+        greaterThan(0),
+        reason: 'scrollIntoView should be called when in multi-view mode',
+      );
+    });
+
+    test('scrollIntoView is called when both iframe and multi-view are true', () async {
+      editingStrategySpy.debugIsInIframeOverride = true;
+      debugOverrideJsConfiguration(JsFlutterConfiguration(multiViewEnabled: true));
+
+      editingStrategySpy.enable(
+        multilineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+
+      expect(editingStrategySpy.isEnabled, isTrue);
+
+      editingStrategySpy.placeElement();
+
+      expect(
+        editingStrategySpy.scrollIntoViewCallCount,
+        greaterThan(0),
+        reason: 'scrollIntoView should be called when both iframe and multi-view are true',
+      );
+    });
+
+    test('scrollIntoView is NOT called when not embedded', () async {
+      editingStrategySpy.debugIsInIframeOverride = false;
+      debugOverrideJsConfiguration(JsFlutterConfiguration(multiViewEnabled: false));
+
+      editingStrategySpy.enable(
+        multilineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+
+      expect(editingStrategySpy.isEnabled, isTrue);
+
+      // See comment in the previous test.
+      editingStrategySpy.placeElement();
+
+      expect(
+        editingStrategySpy.scrollIntoViewCallCount,
+        equals(0),
+        reason: 'scrollIntoView should NOT be called when not embedded',
+      );
+    });
+
+    test('placeElement applies geometry before scrollIntoView', () async {
+      editingStrategySpy.debugIsInIframeOverride = true;
+      debugOverrideJsConfiguration(JsFlutterConfiguration(multiViewEnabled: false));
+
+      editingStrategySpy.enable(
+        multilineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+
+      // Set geometry
+      testTextEditing.acceptCommand(
+        TextInputSetEditableSizeAndTransform(
+          geometry: EditableTextGeometry(
+            width: 200,
+            height: 100,
+            globalTransform: Matrix4.translationValues(50, 60, 0).storage,
+          ),
+        ),
+        () {},
+      );
+
+      // IOSTextEditingStrategy does not apply geometry until placeElement is
+      // called (it delays placement on iOS).
+      editingStrategySpy.placeElement();
+
+      // Verify geometry was applied.
+      expect(editingStrategySpy.domElement!.style.width, '200px');
+      expect(editingStrategySpy.domElement!.style.height, '100px');
+
+      expect(
+        editingStrategySpy.scrollIntoViewCallCount,
+        greaterThan(0),
+        reason: 'scrollIntoView should be called after geometry is applied',
+      );
+    });
+  });
+
+  group('Iframe detection utilities', () {
+    tearDown(() {
+      debugResetIframeDetectionCache();
+    });
+
+    test('DomWindow.parent property is accessible', () {
+      // Test harness may run in an iframe; just verify the API is accessible.
+      final DomWindow? parent = domWindow.parent;
+      // parent is always a valid window (itself for top-level, parent for iframes)
+      expect(parent, isNotNull);
+    });
+
+    test('isEmbeddedInIframe() returns consistent results', () {
+      // Just verify the function works without throwing
+      final bool result1 = isEmbeddedInIframe();
+      final bool result2 = isEmbeddedInIframe();
+      expect(result1, equals(result2), reason: 'Results should be cached');
+    });
+
+    test('debugSetIframeEmbeddingForTests overrides detection', () {
+      debugSetIframeEmbeddingForTests(true);
+      expect(isEmbeddedInIframe(), isTrue);
+
+      debugSetIframeEmbeddingForTests(false);
+      expect(isEmbeddedInIframe(), isFalse);
+
+      debugResetIframeDetectionCache();
+    });
+  });
+
+  group('DomElement.scrollIntoView', () {
+    test('scrollIntoView can be called without options', () {
+      final DomElement element = createDomElement('div');
+      domDocument.body!.append(element);
+
+      // Should not throw
+      expect(() => element.scrollIntoView(), returnsNormally);
+
+      element.remove();
+    });
+
+    test('scrollIntoView can be called with options', () {
+      final DomElement element = createDomElement('div');
+      domDocument.body!.append(element);
+
+      // Should not throw
+      expect(
+        () => element.scrollIntoView(<String, dynamic>{'block': 'center', 'inline': 'nearest'}),
+        returnsNormally,
+      );
+
+      element.remove();
+    });
   });
 
   group('$HybridTextEditing', () {
@@ -1953,6 +2175,41 @@ Future<void> testMain() async {
       setStyle = configureSetStyleMethodCall(12, 'foo bar baz', 4, 4, 1);
       sendFrameworkMessage(codec.encodeMethodCall(setStyle));
       expect(input.style.fontFamily, canonicalizeFontFamily('foo bar baz'));
+
+      hideKeyboard();
+    });
+
+    test('Applies lineHeight, letterSpacing, and wordSpacing', () {
+      showKeyboard(inputType: 'multiline', isMultiline: true);
+      final DomHTMLElement input = textEditing!.strategy.domElement!;
+
+      const setStyle = MethodCall('TextInput.setStyle', <String, dynamic>{
+        'fontSize': 12.0,
+        'fontFamily': 'sans-serif',
+        'textAlignIndex': 0,
+        'textDirectionIndex': 0,
+        'letterSpacing': 1.5,
+        'wordSpacing': 2.5,
+        'lineHeight': 16.0,
+      });
+      sendFrameworkMessage(codec.encodeMethodCall(setStyle));
+
+      expect(input.style.letterSpacing, '1.5px');
+      expect(input.style.wordSpacing, '2.5px');
+      expect(input.style.lineHeight, '16px');
+
+      const setStyleDefault = MethodCall('TextInput.setStyle', <String, dynamic>{
+        'fontSize': 12.0,
+        'fontFamily': 'sans-serif',
+        'textAlignIndex': 0,
+        'textDirectionIndex': 0,
+        // letterSpacing, wordSpacing, lineHeight missing/null
+      });
+      sendFrameworkMessage(codec.encodeMethodCall(setStyleDefault));
+
+      expect(input.style.letterSpacing, '');
+      expect(input.style.wordSpacing, '');
+      expect(input.style.lineHeight, 'normal');
 
       hideKeyboard();
     });
@@ -4009,5 +4266,27 @@ class GlobalTextEditingStrategySpy extends GloballyPositionedTextEditingStrategy
   void placeElement() {
     placeElementCount++;
     super.placeElement();
+  }
+}
+
+/// Spy class for testing IOSTextEditingStrategy iframe scrollIntoView behavior.
+class IOSTextEditingStrategySpy extends IOSTextEditingStrategy {
+  IOSTextEditingStrategySpy(super.owner);
+
+  /// Set this to simulate iframe context for testing.
+  /// Uses the shared debugSetIframeEmbeddingForTests() from dom.dart.
+  set debugIsInIframeOverride(bool? value) {
+    debugSetIframeEmbeddingForTests(value);
+  }
+
+  /// Count of how many times scrollIntoView was called.
+  int scrollIntoViewCallCount = 0;
+
+  @override
+  void scrollIntoViewIfEmbedded() {
+    if (isEmbeddedInIframe() || configuration.multiViewEnabled) {
+      activeDomElement.scrollIntoView(<String, dynamic>{'block': 'center', 'inline': 'nearest'});
+      scrollIntoViewCallCount++;
+    }
   }
 }

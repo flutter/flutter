@@ -12,6 +12,7 @@ import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
+import '../configuration.dart';
 import '../dom.dart';
 import '../mouse/prevent_default.dart';
 import '../platform_dispatcher.dart';
@@ -67,6 +68,7 @@ void _setStaticStyleAttributes(DomHTMLElement domElement) {
     ..position = 'absolute'
     ..top = '0'
     ..left = '0'
+    ..margin = '0'
     ..padding = '0'
     ..opacity = '1'
     ..color = 'transparent'
@@ -107,6 +109,7 @@ void _styleAutofillElements(
   final DomCSSStyleDeclaration elementStyle = domElement.style;
   elementStyle
     ..whiteSpace = 'pre-wrap'
+    ..margin = '0'
     ..padding = '0'
     ..opacity = '1'
     ..color = 'transparent'
@@ -1200,7 +1203,11 @@ class GloballyPositionedTextEditingStrategy extends DefaultTextEditingStrategy {
       // only after placing it to the correct position. Hence autofill menu
       // does not appear on top-left of the page.
       // Refocus on the elements after applying the geometry.
-      focusedFormElement!.focusWithoutScroll();
+      // placeForm() involves DOM manipulation which can trigger synchronous
+      // events (like blur). These events might invalidate the current
+      // inputConfiguration or disable the strategy before placeForm() returns.
+      // Therefore, we must defensively check if the element is still valid/present.
+      focusedFormElement?.focusWithoutScroll();
       moveFocusToActiveDomElement();
     }
   }
@@ -1319,6 +1326,9 @@ abstract class DefaultTextEditingStrategy
   /// Size and transform of the editable text on the page.
   EditableTextGeometry? geometry;
 
+  /// The scroll top of the editable text on the page.
+  final Map<String, double> _preservedScrollTops = <String, double>{};
+
   OnChangeCallback? onChange;
   OnActionCallback? onAction;
 
@@ -1331,6 +1341,21 @@ abstract class DefaultTextEditingStrategy
   bool _appendedToForm = false;
 
   DomHTMLFormElement? get focusedFormElement => inputConfiguration.autofillGroup?.formElement;
+
+  /// Scrolls the active DOM element into view if running inside an iframe
+  /// or in multi-view mode.
+  ///
+  /// This handles two cases where iOS browsers don't automatically scroll
+  /// text fields into view when the keyboard appears:
+  /// 1. Flutter embedded in an iframe
+  /// 2. Flutter in multi-view mode (embedded as a component)
+  ///
+  /// See: https://github.com/flutter/flutter/issues/178743
+  void scrollIntoViewIfEmbedded() {
+    if (isEmbeddedInIframe() || configuration.multiViewEnabled) {
+      activeDomElement.scrollIntoView(<String, dynamic>{'block': 'center', 'inline': 'nearest'});
+    }
+  }
 
   @override
   void initializeTextEditing(
@@ -1474,6 +1499,11 @@ abstract class DefaultTextEditingStrategy
   @override
   void disable() {
     assert(isEnabled);
+    // Preserve the internal scroll position.
+    if (geometry != null && lastEditingState != null) {
+      final key = '${geometry!.hashCode}_${lastEditingState!.text.hashCode}';
+      _preservedScrollTops[key] = activeDomElement.scrollTop;
+    }
 
     isEnabled = false;
     lastEditingState = null;
@@ -1681,6 +1711,12 @@ abstract class DefaultTextEditingStrategy
 
     // Re-focuses after setting editing state.
     moveFocusToActiveDomElement();
+
+    // Restore the internal scroll position.
+    if (geometry != null && lastEditingState != null) {
+      final key = '${geometry!.hashCode}_${lastEditingState!.text.hashCode}';
+      activeDomElement.scrollTop = _preservedScrollTops.remove(key) ?? 0.0;
+    }
   }
 
   /// Prevent default behavior for mouse down, up and move.
@@ -1914,6 +1950,7 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
   void placeElement() {
     moveFocusToActiveDomElement();
     geometry?.applyToDomElement(activeDomElement);
+    scrollIntoViewIfEmbedded();
   }
 }
 
@@ -2564,6 +2601,9 @@ class EditableTextStyle {
     required this.textAlign,
     required this.fontFamily,
     required this.fontWeight,
+    required this.letterSpacing,
+    required this.wordSpacing,
+    required this.lineHeight,
   });
 
   factory EditableTextStyle.fromFrameworkMessage(Map<String, dynamic> flutterStyle) {
@@ -2590,6 +2630,9 @@ class EditableTextStyle {
       textAlign: ui.TextAlign.values[textAlignIndex],
       textDirection: ui.TextDirection.values[textDirectionIndex],
       fontWeight: fontWeight,
+      letterSpacing: flutterStyle.tryDouble('letterSpacing'),
+      wordSpacing: flutterStyle.tryDouble('wordSpacing'),
+      lineHeight: flutterStyle.tryDouble('lineHeight'),
     );
   }
 
@@ -2600,6 +2643,9 @@ class EditableTextStyle {
   final String? fontFamily;
   final ui.TextAlign textAlign;
   final ui.TextDirection textDirection;
+  final double? letterSpacing;
+  final double? wordSpacing;
+  final double? lineHeight;
 
   String? get align => textAlignToCssValue(textAlign, textDirection);
 
@@ -2608,7 +2654,10 @@ class EditableTextStyle {
   void applyToDomElement(DomHTMLElement domElement) {
     domElement.style
       ..textAlign = align!
-      ..font = cssFont;
+      ..font = cssFont
+      ..letterSpacing = letterSpacing != null ? '${letterSpacing}px' : ''
+      ..wordSpacing = wordSpacing != null ? '${wordSpacing}px' : ''
+      ..lineHeight = lineHeight != null ? '${lineHeight}px' : 'normal';
   }
 }
 
@@ -2668,4 +2717,18 @@ class EditableTextGeometry {
       ..height = '${height}px'
       ..transform = cssTransform;
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is EditableTextGeometry &&
+        other.width == width &&
+        other.height == height &&
+        listEquals<double>(other.globalTransform, globalTransform);
+  }
+
+  @override
+  int get hashCode => Object.hash(width, height, Object.hashAll(globalTransform));
 }
