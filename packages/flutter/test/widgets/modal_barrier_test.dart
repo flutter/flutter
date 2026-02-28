@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async' show unawaited;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind, kSecondaryButton;
 import 'package:flutter/rendering.dart';
@@ -1072,18 +1070,27 @@ void main() {
     );
 
     // Set up two stacked modal barriers: lower route is dismissible, upper route is not.
-    unawaited(pushDialog(routeName: 'bottom-route', dismissible: true));
+    final Future<void> bottomRoutePopped = pushDialog(
+      routeName: 'bottom-route',
+      dismissible: true,
+    );
     await tester.pumpAndSettle();
     expect(find.byKey(bottomRouteKey), findsOneWidget);
 
-    unawaited(pushDialog(routeName: 'top-route', dismissible: false));
+    final Future<void> topRoutePopped = pushDialog(routeName: 'top-route', dismissible: false);
     await tester.pumpAndSettle();
     expect(find.byKey(topRouteKey), findsOneWidget);
 
     // Simulate an iOS-style interactive pop while the top barrier reverses.
     final NavigatorState navigator = navigatorKey.currentState!;
+    var userGestureInProgress = false;
     navigator.didStartUserGesture();
-    addTearDown(navigator.didStopUserGesture);
+    userGestureInProgress = true;
+    addTearDown(() {
+      if (userGestureInProgress) {
+        navigator.didStopUserGesture();
+      }
+    });
     navigator.pop();
     await tester.pump();
     expect(find.byKey(topRouteKey), findsOneWidget);
@@ -1101,9 +1108,15 @@ void main() {
 
     // Finish the interactive pop and verify only the top route is closed.
     navigator.didStopUserGesture();
+    userGestureInProgress = false;
     await tester.pumpAndSettle();
     expect(find.byKey(topRouteKey), findsNothing);
     expect(find.byKey(bottomRouteKey), findsOneWidget);
+
+    navigator.pop();
+    await tester.pumpAndSettle();
+    await topRoutePopped;
+    await bottomRoutePopped;
   });
 }
 
