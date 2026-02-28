@@ -817,6 +817,9 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         final buildResult = XcodeBuildResult(
           success: false,
           stdout:
+              "error: The package product 'some-low-requirement-plugin' requires minimum platform version 14.0 "
+              'for the iOS platform, but this target supports 13.0 '
+              "(in target 'FlutterGeneratedPluginSwiftPackage' from project 'FlutterGeneratedPluginSwiftPackage')\n"
               "error: The package product 'cloud-firestore' requires minimum platform version 15.0 "
               'for the iOS platform, but this target supports 13.0 '
               "(in target 'FlutterGeneratedPluginSwiftPackage' from project 'FlutterGeneratedPluginSwiftPackage')",
@@ -854,8 +857,13 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
             "To fix this error, increase your app's minimum platform version from 13.0 to at least 15.0",
           ),
         );
-        expect(logger.errorText, contains('flutter build ios --config-only'));
-        expect(logger.errorText, isNot(contains('flutter build macos --config-only')));
+        expect(logger.errorText, contains('or remove the cloud-firestore dependency.'));
+        expect(
+          logger.errorText,
+          contains(
+            'https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#how-to-use-a-swift-package-manager-flutter-plugin-that-requires-a-higher-os-version',
+          ),
+        );
       },
     );
 

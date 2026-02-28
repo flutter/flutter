@@ -1107,10 +1107,8 @@ Future<bool> _handleIssues(
   }
 
   final XcodeBasedProject xcodeProject = platform.xcodeProject(project);
-  final List<_SwiftPackageManagerMinPlatformMismatch> swiftPackageManagerMinPlatformMismatches =
-      _parseSwiftPackageManagerMinPlatformMismatches(result.stdout)
-          .where((mismatch) => mismatch.targetName == _flutterGeneratedPluginSwiftPackageTarget)
-          .toList();
+  final String? swiftPackageManagerMinPlatformMismatchMessage =
+      _swiftPackageManagerMinPlatformMismatchMessageFromStdout(result.stdout);
 
   if (requiresProvisioningProfile) {
     logger.printError(noProvisioningProfileInstruction, emphasis: true);
@@ -1132,21 +1130,8 @@ Future<bool> _handleIssues(
     logger.printError("Also try selecting 'Product > Build' to fix the problem.");
   } else if (missingPlatform != null) {
     logger.printError(missingPlatformInstructions(missingPlatform), emphasis: true);
-  } else if (swiftPackageManagerMinPlatformMismatches.isNotEmpty) {
-    final Version requiredMinVersion = swiftPackageManagerMinPlatformMismatches
-        .map((e) => e.requiredMinVersion)
-        .reduce((a, b) => a > b ? a : b);
-    final Version supportedVersion = swiftPackageManagerMinPlatformMismatches
-        .map((e) => e.targetSupportedVersion)
-        .reduce((a, b) => a < b ? a : b);
-
-    logger.printError(
-      _swiftPackageManagerMinPlatformMismatchInstructions(
-        requiredMinVersion: requiredMinVersion,
-        supportedVersion: supportedVersion,
-      ),
-      emphasis: true,
-    );
+  } else if (swiftPackageManagerMinPlatformMismatchMessage != null) {
+    logger.printError(swiftPackageManagerMinPlatformMismatchMessage, emphasis: true);
     issueDetected = true;
   } else if (duplicateModules.isNotEmpty) {
     final bool usesCocoapods = xcodeProject.podfile.existsSync();
@@ -1318,25 +1303,9 @@ String? _parseMissingPlatform(String message) {
   return pattern.firstMatch(message)?.group(1);
 }
 
-const _flutterGeneratedPluginSwiftPackageTarget = 'FlutterGeneratedPluginSwiftPackage';
-
-class _SwiftPackageManagerMinPlatformMismatch {
-  _SwiftPackageManagerMinPlatformMismatch({
-    required this.requiredMinVersion,
-    required this.targetSupportedVersion,
-    required this.targetName,
-  });
-
-  final Version requiredMinVersion;
-  final Version targetSupportedVersion;
-  final String? targetName;
-}
-
-List<_SwiftPackageManagerMinPlatformMismatch> _parseSwiftPackageManagerMinPlatformMismatches(
-  String? stdout,
-) {
+String? _swiftPackageManagerMinPlatformMismatchMessageFromStdout(String? stdout) {
   if (stdout == null || stdout.isEmpty) {
-    return const <_SwiftPackageManagerMinPlatformMismatch>[];
+    return null;
   }
 
   final pattern = RegExp(
@@ -1346,38 +1315,38 @@ List<_SwiftPackageManagerMinPlatformMismatch> _parseSwiftPackageManagerMinPlatfo
     caseSensitive: false,
   );
 
-  final mismatches = <_SwiftPackageManagerMinPlatformMismatch>[];
+  String? highestRequiredByProduct;
+  Version? highestRequiredVersion;
+  Version? highestSupportedVersion;
   for (final RegExpMatch match in pattern.allMatches(stdout)) {
-    final Version? requiredMinVersion = Version.parse(match.group(1));
-    final Version? targetSupportedVersion = Version.parse(match.group(3));
-    if (requiredMinVersion == null || targetSupportedVersion == null) {
+    final String? requiredByProduct = match.group(1);
+    final Version? requiredMinVersion = Version.parse(match.group(2));
+    final Version? targetSupportedVersion = Version.parse(match.group(4));
+    final String? targetName = match.group(5);
+    if (targetName != kFlutterGeneratedPluginSwiftPackageName) {
       continue;
     }
-
-    mismatches.add(
-      _SwiftPackageManagerMinPlatformMismatch(
-        requiredMinVersion: requiredMinVersion,
-        targetSupportedVersion: targetSupportedVersion,
-        targetName: match.group(4),
-      ),
-    );
+    if (requiredByProduct == null || requiredMinVersion == null || targetSupportedVersion == null) {
+      continue;
+    }
+    if (highestRequiredVersion == null || requiredMinVersion > highestRequiredVersion) {
+      highestRequiredByProduct = requiredByProduct;
+      highestRequiredVersion = requiredMinVersion;
+      highestSupportedVersion = targetSupportedVersion;
+    }
   }
 
-  return mismatches;
-}
+  if (highestRequiredByProduct == null ||
+      highestRequiredVersion == null ||
+      highestSupportedVersion == null) {
+    return null;
+  }
 
-String _swiftPackageManagerMinPlatformMismatchInstructions({
-  required Version requiredMinVersion,
-  required Version supportedVersion,
-}) {
   return '''
-To fix this error, increase your app's minimum platform version from $supportedVersion to at least $requiredMinVersion or remove this dependency.
-To increase your app's minimum platform version:
-1. Open your app (ios/Runner.xcworkspace) in Xcode.
-2. In the Project Navigator, select the Runner project > Runner target > General tab.
-3. Increase your app's target Minimum Deployments setting.
-4. Regenerate the iOS project's configuration files:
-    flutter build ios --config-only
+To fix this error, increase your app's minimum platform version from $highestSupportedVersion to at least $highestRequiredVersion or remove the $highestRequiredByProduct dependency.
+
+To increase your app's minimum platform version, follow these instructions:
+  https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#how-to-use-a-swift-package-manager-flutter-plugin-that-requires-a-higher-os-version
 ''';
 }
 
