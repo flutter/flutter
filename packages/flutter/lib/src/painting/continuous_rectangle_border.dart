@@ -22,7 +22,7 @@ import 'edge_insets.dart';
 /// Widget build(BuildContext context) {
 ///   return Material(
 ///     shape: ContinuousRectangleBorder(
-///       borderRadius: BorderRadius.circular(28.0),
+///       borderRadius: const BorderRadius.all(Radius.circular(28.0)),
 ///     ),
 ///   );
 /// }

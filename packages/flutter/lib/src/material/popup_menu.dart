@@ -1469,7 +1469,7 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// If this property is null, then [PopupMenuThemeData.shape] is used.
   /// If [PopupMenuThemeData.shape] is also null, then the default shape for
   /// [MaterialType.card] is used. This default shape is a rectangle with
-  /// rounded edges of BorderRadius.circular(2.0).
+  /// rounded edges of BorderRadius.all(Radius.circular(2.0)).
   final ShapeBorder? shape;
 
   /// If provided, the background color used for the menu.

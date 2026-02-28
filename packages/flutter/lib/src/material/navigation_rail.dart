@@ -1038,7 +1038,7 @@ class _AddIndicator extends StatelessWidget {
         animation: indicatorAnimation,
         height: _kCircularIndicatorDiameter,
         width: _kCircularIndicatorDiameter,
-        borderRadius: BorderRadius.circular(_kCircularIndicatorDiameter / 2),
+        borderRadius: const BorderRadius.all(Radius.circular(_kCircularIndicatorDiameter / 2)),
         color: indicatorColor,
       );
     } else {

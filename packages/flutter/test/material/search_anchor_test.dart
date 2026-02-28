@@ -1668,7 +1668,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       getSearchViewMaterial(tester).shape,
-      RoundedRectangleBorder(side: side, borderRadius: BorderRadius.circular(28.0)),
+      const RoundedRectangleBorder(
+        side: side,
+        borderRadius: BorderRadius.all(Radius.circular(28.0)),
+      ),
     );
   });
 

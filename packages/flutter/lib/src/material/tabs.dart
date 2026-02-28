@@ -1434,9 +1434,9 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// ```dart
   /// TabBar(
   ///   indicator: BoxDecoration(
-  ///     borderRadius: BorderRadius.circular(40),
+  ///     borderRadius: const BorderRadius.all(Radius.circular(40)),
   ///   ),
-  ///   splashBorderRadius: BorderRadius.circular(40),
+  ///   splashBorderRadius: const BorderRadius.all(Radius.circular(40)),
   ///   tabs: const <Widget>[
   ///     // ...
   ///   ],

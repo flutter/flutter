@@ -700,8 +700,8 @@ class _PredictiveBackFullscreenPageTransitionState
         animation: widget.animation,
         builder: _primaryAnimatedBuilder,
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(
-            _PredictiveBackSharedElementPageTransitionState._kDeviceBorderRadius,
+          borderRadius: const BorderRadius.all(
+            Radius.circular(_PredictiveBackSharedElementPageTransitionState._kDeviceBorderRadius),
           ),
           child: widget.child,
         ),

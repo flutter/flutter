@@ -57,7 +57,7 @@ import 'image_provider.dart';
 ///     border: Border.all(
 ///       width: 8,
 ///     ),
-///     borderRadius: BorderRadius.circular(12),
+///     borderRadius: const BorderRadius.all(Radius.circular(12)),
 ///   ),
 /// )
 /// ```

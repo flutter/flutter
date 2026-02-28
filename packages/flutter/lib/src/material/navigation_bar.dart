@@ -824,7 +824,7 @@ class NavigationIndicator extends StatelessWidget {
   /// This is used to create a [RoundedRectangleBorder] shape for the indicator.
   /// This is ignored if [shape] is non-null.
   ///
-  /// Defaults to `BorderRadius.circular(16)`.
+  /// Defaults to `BorderRadius.all(Radius.circular(16))`.
   final BorderRadius borderRadius;
 
   /// The shape of the indicator.

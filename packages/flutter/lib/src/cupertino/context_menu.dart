@@ -157,8 +157,8 @@ class CupertinoContextMenu extends StatefulWidget {
   ///   ],
   ///   builder:(BuildContext context, Animation<double> animation) {
   ///     final Animation<BorderRadius?> borderRadiusAnimation = BorderRadiusTween(
-  ///       begin: BorderRadius.circular(0.0),
-  ///       end: BorderRadius.circular(CupertinoContextMenu.kOpenBorderRadius),
+  ///       begin: BorderRadius.zero,
+  ///       end: const BorderRadius.all(Radius.circular(CupertinoContextMenu.kOpenBorderRadius)),
   ///     ).animate(
   ///       CurvedAnimation(
   ///         parent: animation,
@@ -192,7 +192,7 @@ class CupertinoContextMenu extends StatefulWidget {
   ///       child: FittedBox(
   ///         fit: BoxFit.cover,
   ///         child: ClipRSuperellipse(
-  ///           borderRadius: borderRadiusAnimation.value ?? BorderRadius.circular(0.0),
+  ///           borderRadius: borderRadiusAnimation.value ?? BorderRadius.zero,
   ///           child: SizedBox(
   ///             height: 150,
   ///             width: 150,
@@ -266,8 +266,8 @@ class CupertinoContextMenu extends StatefulWidget {
   ///   ],
   ///   builder:(BuildContext context, Animation<double> animation) {
   ///     final Animation<BorderRadius?> borderRadiusAnimation = BorderRadiusTween(
-  ///       begin: BorderRadius.circular(0.0),
-  ///       end: BorderRadius.circular(CupertinoContextMenu.kOpenBorderRadius),
+  ///       begin: BorderRadius.zero,
+  ///       end: const BorderRadius.all(Radius.circular(CupertinoContextMenu.kOpenBorderRadius)),
   ///     ).animate(
   ///       CurvedAnimation(
   ///         parent: animation,
@@ -301,7 +301,7 @@ class CupertinoContextMenu extends StatefulWidget {
   ///       child: FittedBox(
   ///         fit: BoxFit.cover,
   ///         child: ClipRSuperellipse(
-  ///           borderRadius: borderRadiusAnimation.value ?? BorderRadius.circular(0.0),
+  ///           borderRadius: borderRadiusAnimation.value ?? BorderRadius.zero,
   ///           child: SizedBox(
   ///             height: 150,
   ///             width: 150,
