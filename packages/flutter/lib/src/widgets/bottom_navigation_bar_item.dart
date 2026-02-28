@@ -38,6 +38,7 @@ class BottomNavigationBarItem {
     Widget? activeIcon,
     this.backgroundColor,
     this.tooltip,
+    this.semanticsLabel,
   }) : activeIcon = activeIcon ?? icon;
 
   /// A key to be passed through to the resultant widget.
@@ -104,4 +105,16 @@ class BottomNavigationBarItem {
   ///
   /// Defaults to null, in which case the tooltip is not shown.
   final String? tooltip;
+
+  /// The semantic label for this [BottomNavigationBarItem].
+  ///
+  /// This is used by accessibility tools to describe the item. When provided,
+  /// it overrides the default [label] String when read by accessibility tools.
+  ///
+  /// This is useful when the visual label does not fully describe the action
+  /// or destination, or when you want to provide additional context for
+  /// screen reader users.
+  ///
+  /// If null, the default semantic description is used.
+  final String? semanticsLabel;
 }

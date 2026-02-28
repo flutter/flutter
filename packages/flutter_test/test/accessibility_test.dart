@@ -189,6 +189,8 @@ void main() {
 
     testWidgets('Material text field - amber on amber', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
+      final controller = TextEditingController(text: 'this is a test');
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         _boilerplate(
           Container(
@@ -197,7 +199,7 @@ void main() {
             color: Colors.amberAccent,
             child: TextField(
               style: const TextStyle(color: Colors.amber),
-              controller: TextEditingController(text: 'this is a test'),
+              controller: controller,
             ),
           ),
         ),
@@ -236,13 +238,10 @@ void main() {
 
     testWidgets('Material text field - default style', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
+      final controller = TextEditingController(text: 'this is a test');
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
-        _boilerplate(
-          SizedBox(
-            width: 100,
-            child: TextField(controller: TextEditingController(text: 'this is a test')),
-          ),
-        ),
+        _boilerplate(SizedBox(width: 100, child: TextField(controller: controller))),
       );
       await tester.idle();
       await expectLater(tester, meetsGuideline(textContrastGuideline));
@@ -288,7 +287,6 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _boilerplate(
-          useMaterial3: true,
           Container(
             width: 200.0,
             height: 200.0,
@@ -360,7 +358,6 @@ void main() {
 
       await tester.pumpWidget(
         _boilerplate(
-          useMaterial3: true,
           Container(
             width: 200.0,
             height: 200.0,
@@ -798,14 +795,13 @@ void main() {
           MergeSemantics(
             child: Semantics(
               container: true,
-              child: SizedBox(
-                width: 50.0,
-                height: 50.0,
+              child: SizedBox.square(
+                dimension: 50.0,
                 child: Semantics(
                   container: true,
                   child: GestureDetector(
                     onTap: () {},
-                    child: const SizedBox(width: 4.0, height: 4.0),
+                    child: const SizedBox.square(dimension: 4.0),
                   ),
                 ),
               ),
@@ -820,6 +816,8 @@ void main() {
     });
 
     testWidgets('Does not fail on links', (WidgetTester tester) async {
+      final recognizer = TapGestureRecognizer()..onTap = () {};
+      addTearDown(recognizer.dispose);
       Widget textWithLink() {
         return Builder(
           builder: (BuildContext context) {
@@ -827,7 +825,7 @@ void main() {
               text: TextSpan(
                 children: <InlineSpan>[
                   const TextSpan(text: 'See examples at '),
-                  TextSpan(text: 'flutter repo', recognizer: TapGestureRecognizer()..onTap = () {}),
+                  TextSpan(text: 'flutter repo', recognizer: recognizer),
                 ],
               ),
             );
@@ -844,6 +842,7 @@ void main() {
 
     testWidgets('Tap size test can handle partially off-screen items', (WidgetTester tester) async {
       final controller = ScrollController();
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -853,9 +852,8 @@ void main() {
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.only(left: 10, right: 10),
-                  child: SizedBox(
-                    width: 100,
-                    height: 100,
+                  child: SizedBox.square(
+                    dimension: 100,
                     child: Semantics(container: true, onTap: () {}, child: const Text('hello')),
                   ),
                 ),

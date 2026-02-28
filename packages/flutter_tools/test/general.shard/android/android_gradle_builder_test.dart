@@ -863,6 +863,7 @@ void main() {
 /BUNDLE-METADATA/com.android.tools.build.debugsymbols/
 /BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/
 /BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libflutter.so.sym
+/BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libapp.so.sym
 ''';
 
       // Output from `<android_sdk_root>/tools/bin/apkanalyzer files list <aab>`
@@ -873,6 +874,7 @@ void main() {
 /BUNDLE-METADATA/com.android.tools.build.debugsymbols/
 /BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/
 /BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libflutter.so.dbg
+/BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libapp.so.dbg
 ''';
 
       void createSharedGradleFiles() {

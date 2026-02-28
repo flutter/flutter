@@ -2,18 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "service_isolate.h"
+#include "flutter/shell/platform/fuchsia/dart_runner/service_isolate.h"
 
 #include "flutter/fml/logging.h"
+#include "flutter/shell/platform/fuchsia/dart_runner/builtin_libraries.h"
+#include "flutter/shell/platform/fuchsia/dart_runner/dart_component_controller.h"
 #include "third_party/dart/runtime/include/bin/dart_io_api.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_library_natives.h"
 #include "third_party/tonic/dart_microtask_queue.h"
 #include "third_party/tonic/dart_state.h"
 #include "third_party/tonic/typed_data/typed_list.h"
-
-#include "builtin_libraries.h"
-#include "dart_component_controller.h"
 
 namespace dart_runner {
 namespace {

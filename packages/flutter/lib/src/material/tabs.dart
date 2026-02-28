@@ -877,12 +877,23 @@ class _TabBarScrollPosition extends ScrollPositionWithSingleContext {
   }
 }
 
-// This class, and TabBarScrollPosition, only exist to handle the case
-// where a scrollable TabBar has a non-zero initialIndex.
-class _TabBarScrollController extends ScrollController {
-  _TabBarScrollController(this.tabBar);
+/// The [ScrollController] for a [TabBar] widget.
+final class TabBarScrollController extends ScrollController {
+  /// The state of the [TabBar] widget to which this controller is attached.
+  ///
+  /// Is null if this controller is not attached to a [TabBar].
+  _TabBarState? _tabBarState;
 
-  final _TabBarState tabBar;
+  /// Asserts that this controller is currently attached to a [TabBar]'s [State].
+  ///
+  /// To invoke this function, wrap it in an assert: `assert(debugCheckHasTabBarState());`
+  ///
+  /// Does nothing if asserts are disabled. Always returns true.
+  bool debugCheckHasTabBarState() {
+    assert(_tabBarState != null, 'This TabBarScrollController is not attached to any TabBar.');
+
+    return true;
+  }
 
   @override
   ScrollPosition createScrollPosition(
@@ -890,12 +901,20 @@ class _TabBarScrollController extends ScrollController {
     ScrollContext context,
     ScrollPosition? oldPosition,
   ) {
+    assert(debugCheckHasTabBarState());
+
     return _TabBarScrollPosition(
       physics: physics,
       context: context,
       oldPosition: oldPosition,
-      tabBar: tabBar,
+      tabBar: _tabBarState!,
     );
+  }
+
+  @override
+  void dispose() {
+    _tabBarState = null;
+    super.dispose();
   }
 }
 
@@ -986,6 +1005,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     super.key,
     required this.tabs,
     this.controller,
+    this.scrollController,
     this.isScrollable = false,
     this.padding,
     this.indicatorColor,
@@ -1041,6 +1061,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     super.key,
     required this.tabs,
     this.controller,
+    this.scrollController,
     this.isScrollable = false,
     this.padding,
     this.indicatorColor,
@@ -1083,6 +1104,11 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// If [TabController] is not provided, then the value of [DefaultTabController.of]
   /// will be used.
   final TabController? controller;
+
+  /// The [TabBarScrollController] for this [TabBar].
+  ///
+  /// This controller can be used to manipulate the scroll position of the [TabBar].
+  final TabBarScrollController? scrollController;
 
   /// Whether this tab bar can be scrolled horizontally.
   ///
@@ -1509,7 +1535,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _TabBarState extends State<TabBar> {
-  ScrollController? _scrollController;
+  TabBarScrollController? _internalScrollController;
   TabController? _controller;
   _IndicatorPainter? _indicatorPainter;
   int? _currentIndex;
@@ -1539,6 +1565,17 @@ class _TabBarState extends State<TabBar> {
     } else {
       return _TabsDefaultsM2(context, widget.isScrollable);
     }
+  }
+
+  TabBarScrollController get _effectiveScrollController {
+    if (widget.scrollController != null) {
+      _internalScrollController?.dispose();
+      _internalScrollController = null;
+
+      return widget.scrollController!;
+    }
+
+    return _internalScrollController ??= TabBarScrollController();
   }
 
   Decoration _getIndicator(TabBarIndicatorSize indicatorSize) {
@@ -1638,6 +1675,19 @@ class _TabBarState extends State<TabBar> {
     }
   }
 
+  void _updateScrollController({TabBarScrollController? oldScrollController}) {
+    if (oldScrollController != widget.scrollController) {
+      oldScrollController?._tabBarState = null;
+    }
+    if (widget.scrollController != null) {
+      _internalScrollController?._tabBarState = null;
+      widget.scrollController?._tabBarState = this;
+    } else {
+      _internalScrollController ??= TabBarScrollController();
+      _internalScrollController?._tabBarState = this;
+    }
+  }
+
   void _initIndicatorPainter() {
     final ThemeData theme = Theme.of(context);
     final TabBarThemeData tabBarTheme = TabBarTheme.of(context);
@@ -1680,6 +1730,7 @@ class _TabBarState extends State<TabBar> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _updateScrollController();
     _updateTabController();
     _initIndicatorPainter();
   }
@@ -1687,12 +1738,15 @@ class _TabBarState extends State<TabBar> {
   @override
   void didUpdateWidget(TabBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.controller != oldWidget.controller) {
+    if (widget.controller != oldWidget.controller ||
+        widget.scrollController != oldWidget.scrollController) {
+      _updateScrollController(oldScrollController: oldWidget.scrollController);
       _updateTabController();
       _initIndicatorPainter();
+
       // Adjust scroll position.
-      if (_scrollController != null && _scrollController!.hasClients) {
-        final ScrollPosition position = _scrollController!.position;
+      if (_effectiveScrollController.hasClients) {
+        final ScrollPosition position = _effectiveScrollController.position;
         if (position is _TabBarScrollPosition) {
           position.markNeedsPixelsCorrection();
         }
@@ -1726,7 +1780,8 @@ class _TabBarState extends State<TabBar> {
       _controller!.removeListener(_handleTabControllerTick);
     }
     _controller = null;
-    _scrollController?.dispose();
+    _internalScrollController?.dispose();
+    widget.scrollController?._tabBarState = null;
     // We don't own the _controller Animation, so it's not disposed here.
     super.dispose();
   }
@@ -1751,7 +1806,8 @@ class _TabBarState extends State<TabBar> {
   }
 
   double _tabCenteredScrollOffset(int index) {
-    final ScrollPosition position = _scrollController!.position;
+    final ScrollPosition position = _effectiveScrollController.position;
+
     return _tabScrollOffset(
       index,
       position.viewportDimension,
@@ -1766,7 +1822,8 @@ class _TabBarState extends State<TabBar> {
 
   void _scrollToCurrentIndex() {
     final double offset = _tabCenteredScrollOffset(_currentIndex!);
-    _scrollController!.animateTo(offset, duration: kTabScrollDuration, curve: Curves.ease);
+
+    _effectiveScrollController.animateTo(offset, duration: kTabScrollDuration, curve: Curves.ease);
   }
 
   void _scrollToControllerValue() {
@@ -1794,7 +1851,7 @@ class _TabBarState extends State<TabBar> {
             : lerpDouble(middlePosition, trailingPosition, value - index)!,
     };
 
-    _scrollController!.jumpTo(offset);
+    _effectiveScrollController.jumpTo(offset);
   }
 
   void _handleTabControllerAnimationTick() {
@@ -2079,14 +2136,14 @@ class _TabBarState extends State<TabBar> {
               start: _kStartOffset,
             ).add(widget.padding ?? EdgeInsets.zero)
           : widget.padding;
-      _scrollController ??= _TabBarScrollController(this);
+
       tabBar = ScrollConfiguration(
         // The scrolling tabs should not show an overscroll indicator.
         behavior: ScrollConfiguration.of(context).copyWith(overscroll: false),
         child: SingleChildScrollView(
           dragStartBehavior: widget.dragStartBehavior,
           scrollDirection: Axis.horizontal,
-          controller: _scrollController,
+          controller: _effectiveScrollController,
           padding: effectivePadding,
           physics: widget.physics,
           child: tabBar,

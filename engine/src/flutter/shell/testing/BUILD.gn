@@ -9,65 +9,121 @@ if (is_fuchsia) {
   import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
 }
 
+group("testing") {
+  public_deps = [ ":flutter_tester" ]
+  if (current_toolchain == host_toolchain) {
+    public_deps += [ ":flutter_tester_opengles" ]
+  }
+}
+
 shell_gpu_configuration("tester_gpu_configuration") {
   enable_software = true
-  enable_gl = true
+  enable_gl = false
   enable_vulkan = true
   enable_metal = shell_enable_metal
 }
 
-executable("testing") {
+shell_gpu_configuration("tester_opengles_gpu_configuration") {
+  enable_software = false
+  enable_gl = true
+  enable_vulkan = false
+  enable_metal = false
+}
+
+template("tester") {
+  executable(target_name) {
+    output_name = invoker.output_name
+
+    public_configs = [
+      "//flutter:config",
+      "//flutter:export_dynamic_test_symbols",
+    ]
+
+    if (defined(invoker.configs)) {
+      configs += invoker.configs
+    }
+
+    sources = [
+      "tester_context.h",
+      "tester_context_gles_factory.h",
+      "tester_context_mtl_factory.h",
+      "tester_context_vk_factory.h",
+      "tester_main.cc",
+    ]
+    if (defined(invoker.sources)) {
+      sources += invoker.sources
+    }
+
+    libs = []
+    if (is_win) {
+      libs += [
+        "psapi.lib",
+        "user32.lib",
+        "FontSub.lib",
+        "shlwapi.lib",
+      ]
+    }
+
+    deps = [
+      "$dart_src/runtime:libdart_jit",
+      "$dart_src/runtime/bin:common_embedder_dart_io",
+      "//flutter/assets",
+      "//flutter/common",
+      "//flutter/flow",
+      "//flutter/fml",
+      "//flutter/lib/snapshot",
+      "//flutter/shell/common",
+      "//flutter/shell/gpu:gpu_surface_software",
+      "//flutter/skia",
+      "//flutter/third_party/tonic",
+      "//third_party/abseil-cpp/absl/base:no_destructor",
+    ]
+    if (impeller_supports_rendering) {
+      deps += [ "//flutter/impeller" ]
+    }
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+
+    if (defined(invoker.metadata)) {
+      metadata = invoker.metadata
+    }
+  }
+}
+
+tester("flutter_tester") {
   output_name = "flutter_tester"
 
-  public_configs = [
-    "//flutter:config",
-    "//flutter:export_dynamic_test_symbols",
-  ]
-
-  sources = [
-    "tester_context.h",
-    "tester_context_mtl_factory.h",
-    "tester_context_vk_factory.h",
-    "tester_main.cc",
-  ]
-  libs = []
-  if (is_win) {
-    libs += [
-      "psapi.lib",
-      "user32.lib",
-      "FontSub.lib",
-      "shlwapi.lib",
-    ]
-  }
-
-  deps = [
-    "$dart_src/runtime:libdart_jit",
-    "$dart_src/runtime/bin:common_embedder_dart_io",
-    "//flutter/assets",
-    "//flutter/common",
-    "//flutter/flow",
-    "//flutter/fml",
-    "//flutter/lib/snapshot",
-    "//flutter/shell/common",
-    "//flutter/shell/gpu:gpu_surface_software",
-    "//flutter/skia",
-    "//flutter/third_party/tonic",
-    "//third_party/abseil-cpp/absl/base:no_destructor",
-  ]
-
   if (impeller_supports_rendering) {
-    deps += [
-      ":tester_gpu_configuration",
-      "//flutter/impeller",
-      "//flutter/third_party/swiftshader/src/Vulkan:swiftshader_libvulkan_static",
-    ]
-    sources += [ "tester_context_vk_factory.cc" ]
+    configs = [ ":tester_gpu_configuration_config" ]
+    sources = [ "tester_context_vk_factory.cc" ]
     if (shell_enable_metal) {
       sources += [ "tester_context_mtl_factory.mm" ]
     }
+    deps = [
+      ":tester_gpu_configuration",
+      "//flutter/third_party/swiftshader/src/Vulkan:swiftshader_libvulkan_static",
+    ]
   }
 
   metadata = {
     entitlement_file_path = [ "flutter_tester" ]
+  }
+}
+
+if (current_toolchain == host_toolchain) {
+  tester("flutter_tester_opengles") {
+    output_name = "flutter_tester_opengles"
+
+    if (impeller_supports_rendering) {
+      configs = [ ":tester_opengles_gpu_configuration_config" ]
+      sources = [ "tester_context_gles_factory.cc" ]
+      deps = [
+        ":tester_opengles_gpu_configuration",
+        "//flutter/testing:test_swangle_utils",
+        "//flutter/testing:test_swiftshader_utils",
+        "//third_party/abseil-cpp/absl/status:statusor",
+      ]
+    }
   }
 }

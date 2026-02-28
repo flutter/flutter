@@ -39,6 +39,8 @@ public class FlutterTextureView extends TextureView implements RenderSurface {
   @Nullable private FlutterRenderer flutterRenderer;
   @Nullable private Surface renderSurface;
 
+  private boolean isContentSizingEnabled = false;
+
   private boolean shouldNotify() {
     return flutterRenderer != null && !isPaused;
   }
@@ -116,11 +118,17 @@ public class FlutterTextureView extends TextureView implements RenderSurface {
     // Listen for when our underlying SurfaceTexture becomes available, changes size, or
     // gets destroyed, and take the appropriate actions.
     setSurfaceTextureListener(surfaceTextureListener);
+
+    isContentSizingEnabled = ContentSizingFlag.isEnabled(getContext());
   }
 
   @Override
   protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-    FlutterMeasureSpec.onMeasure(widthMeasureSpec, heightMeasureSpec, this::setMeasuredDimension);
+    if (isContentSizingEnabled) {
+      FlutterMeasureSpec.onMeasure(widthMeasureSpec, heightMeasureSpec, this::setMeasuredDimension);
+    } else {
+      super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
   }
 
   @Nullable

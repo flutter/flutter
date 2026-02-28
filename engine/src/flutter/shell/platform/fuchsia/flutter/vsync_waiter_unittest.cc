@@ -6,14 +6,14 @@
 
 #include <string>
 
+#include "flutter/fml/make_copyable.h"
+#include "flutter/fml/message_loop.h"
+#include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/task_runner.h"
+#include "flutter/fml/time/time_delta.h"
+#include "flutter/fml/time/time_point.h"
 #include "flutter/shell/common/thread_host.h"
-#include "fml/make_copyable.h"
-#include "fml/message_loop.h"
-#include "fml/synchronization/waitable_event.h"
-#include "fml/time/time_delta.h"
-#include "fml/time/time_point.h"
-#include "vsync_waiter.h"
+#include "flutter/shell/platform/fuchsia/flutter/vsync_waiter.h"
 
 namespace flutter_runner {
 
