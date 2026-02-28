@@ -585,6 +585,65 @@ Iterable<Element> _collectElementsByText(Element root, String text) {
   return result;
 }
 
+final int _scrollingActions =
+    SemanticsAction.scrollUp.index |
+    SemanticsAction.scrollDown.index |
+    SemanticsAction.scrollLeft.index |
+    SemanticsAction.scrollRight.index |
+    SemanticsAction.scrollToOffset.index;
+
+/// Whether or not the node is important for accessibility. Should match most cases
+/// on the platforms, but certain edge cases will be inconsistent.
+///
+/// Based on:
+///
+/// * [flutter/engine/AccessibilityBridge.java#SemanticsNode.isFocusable()](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java#L2641)
+/// * [flutter/engine/SemanticsObject.mm#SemanticsObject.isAccessibilityElement](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.mm#L449)
+bool _isImportantForAccessibility(SemanticsNode node) {
+  if (node.isMergedIntoParent) {
+    // If this node is merged, all its information are present on an ancestor
+    // node.
+    return false;
+  }
+  final SemanticsData data = node.getSemanticsData();
+  // If the node scopes a route, it doesn't matter what other flags/actions it
+  // has, it is _not_ important for accessibility, so we short circuit.
+  if (data.flagsCollection.scopesRoute) {
+    return false;
+  }
+
+  final bool hasNonScrollingAction = data.actions & ~_scrollingActions != 0;
+  if (hasNonScrollingAction) {
+    return true;
+  }
+
+  /// Based on Android's FOCUSABLE_FLAGS. See [flutter/engine/AccessibilityBridge.java](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java).
+  final bool hasImportantFlag =
+      data.flagsCollection.isChecked != ui.CheckedState.none ||
+      data.flagsCollection.isToggled != ui.Tristate.none ||
+      data.flagsCollection.isEnabled != ui.Tristate.none ||
+      data.flagsCollection.isButton ||
+      data.flagsCollection.isTextField ||
+      data.flagsCollection.isFocused != ui.Tristate.none ||
+      data.flagsCollection.isSlider ||
+      data.flagsCollection.isInMutuallyExclusiveGroup;
+
+  if (hasImportantFlag) {
+    return true;
+  }
+
+  final bool hasContent =
+      data.label.isNotEmpty ||
+      data.value.isNotEmpty ||
+      data.hint.isNotEmpty ||
+      data.tooltip.isNotEmpty;
+  if (hasContent) {
+    return true;
+  }
+
+  return false;
+}
+
 /// {@macro flutter.widgets.accessibility_evaluations.internal}
 ///
 /// An evaluation which enforces that all leaf semantics nodes have a label,
@@ -611,12 +670,16 @@ class UnlabeledLeafNodeEvaluation extends AccessibilityEvaluation {
       return true;
     });
 
-    if (node.isMergedIntoParent || node.isInvisible || node.flagsCollection.isHidden) {
+    if (node.isInvisible || node.flagsCollection.isHidden) {
       return violations;
     }
 
     // If not merging descendants and has children, it's not a leaf.
     if (hasChildren && !node.mergeAllDescendantsIntoThisNode) {
+      return violations;
+    }
+
+    if (!_isImportantForAccessibility(node)) {
       return violations;
     }
 
