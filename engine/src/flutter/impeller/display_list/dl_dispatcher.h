@@ -339,7 +339,7 @@ class CanvasDlDispatcher : public DlDispatcherBase {
   Canvas& GetCanvas() override;
 };
 
-/// Performs a first pass over the display list to collect infomation
+/// Performs a first pass over the display list to collect information
 /// that will be useful in a second pass by the CanvasDlDispatcher.
 /// This class collects things like text frames and backdrop filters.
 class FirstPassDispatcher : public flutter::IgnoreAttributeDispatchHelper,
