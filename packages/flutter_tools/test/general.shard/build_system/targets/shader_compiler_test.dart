@@ -234,8 +234,13 @@ void main() {
       );
       fail('unreachable');
     } on ShaderCompilerException catch (e) {
-      expect(e.toString(), contains('impellerc stdout:\nimpellerc stdout'));
-      expect(e.toString(), contains('impellerc stderr:\nimpellerc stderr'));
+      expect(
+        e.toString(),
+        contains(
+          'ShaderCompilerException: Shader compilation of "/shaders/not_a_frag.file" to '
+          '"/output/shaders/my_shader.frag" failed with exit code 1.',
+        ),
+      );
     }
 
     expect(fileSystem.file(outputPath).existsSync(), false);
