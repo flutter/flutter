@@ -24,7 +24,6 @@ G_DECLARE_DERIVABLE_TYPE(FlTextureGL, fl_texture_gl, FL, TEXTURE_GL, GObject)
  *
  * #FlTextureGL is an abstract class that represents an OpenGL texture.
  *
- *
  * The following example shows how to implement an #FlTextureGL.
  * ![<!-- language="C" -->
  *   #include <epoxy/gl.h>
