@@ -2,12 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library;
-
-import 'dart:ui' show SemanticsHitTestBehavior, SemanticsRole, clampDouble, lerpDouble;
-
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
 
 import 'package:flutter/src/widgets/_window.dart'
@@ -19,60 +14,20 @@ import 'package:flutter/src/widgets/_window.dart'
         WindowRegistry,
         WindowScope;
 
-import 'localizations.dart';
-
-typedef RouteBuilder<T> =
-    Route<T> Function({
-      required BuildContext context,
-      required RoutePageBuilder pageBuilder,
-      bool barrierDismissible,
-      Color? barrierColor,
-      String? barrierLabel,
-      bool useSafeArea,
-      bool useRootNavigator,
-      RouteSettings? routeSettings,
-      Offset? anchorPoint,
-      TraversalEdgeBehavior? traversalEdgeBehavior,
-      bool fullscreenDialog,
-      bool? requestFocus,
-      AnimationStyle? animationStyle,
-    });
-
-Route<T> _defaultRouteBuilder<T>({
-  required BuildContext context,
-  required RoutePageBuilder pageBuilder,
-  bool barrierDismissible = true,
-  Color? barrierColor,
-  String? barrierLabel,
-  bool useSafeArea = true,
-  bool useRootNavigator = true,
-  RouteSettings? routeSettings,
-  Offset? anchorPoint,
-  TraversalEdgeBehavior? traversalEdgeBehavior,
-  bool fullscreenDialog = false,
-  bool? requestFocus,
-  AnimationStyle? animationStyle,
-}) {
-  return RawDialogRoute<T>(
-    pageBuilder: pageBuilder,
-    barrierColor: barrierColor,
-    barrierDismissible: barrierDismissible,
-    barrierLabel: barrierLabel,
-    settings: routeSettings,
-    anchorPoint: anchorPoint,
-    traversalEdgeBehavior: traversalEdgeBehavior ?? TraversalEdgeBehavior.closedLoop,
-    requestFocus: requestFocus,
-    fullscreenDialog: fullscreenDialog,
-  );
-}
+typedef RouteBuilder<T> = Route<T> Function(BuildContext context, WidgetBuilder builder);
 
 /// Displays a dialog over the contents of the app.
 ///
 /// When windowing is available, the dialog is a separate window.
+///
+/// The parameter `routeBuilder` builds the [Route] that will be pushed to the
+/// [Navigator]. Defaults to building a [RawDialogRoute]. When windowing is
+/// available, this parameter will be silently ignored.
+///
+/// The parameter `builder` builds the content of the dialog.
 Future<T?> showRawDialog<T>({
   required BuildContext context,
   required WidgetBuilder builder,
-  // TODO(justinmc): Document that routeBuilder is used only when not in windowed mode.
   RouteBuilder<T>? routeBuilder,
   Color? barrierColor,
   bool barrierDismissible = true,
@@ -110,22 +65,24 @@ Future<T?> showRawDialog<T>({
     }
   }
 
-  final Route<T> route = (routeBuilder ?? _defaultRouteBuilder<T>).call(
-    context: context,
-    barrierDismissible: barrierDismissible,
-    barrierColor: barrierColor,
-    barrierLabel: barrierLabel,
-    pageBuilder:
-        (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-          return builder(context);
-        },
-    useRootNavigator: useRootNavigator,
-    routeSettings: routeSettings,
-    anchorPoint: anchorPoint,
-    traversalEdgeBehavior: traversalEdgeBehavior,
-    fullscreenDialog: fullscreenDialog,
-    requestFocus: requestFocus,
-  );
+  final Route<T> route =
+      routeBuilder?.call(context, builder) ??
+      RawDialogRoute<T>(
+        pageBuilder:
+            (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
+        barrierColor: barrierColor,
+        barrierDismissible: barrierDismissible,
+        barrierLabel: barrierLabel,
+        settings: routeSettings,
+        anchorPoint: anchorPoint,
+        traversalEdgeBehavior: traversalEdgeBehavior ?? TraversalEdgeBehavior.closedLoop,
+        requestFocus: requestFocus,
+        fullscreenDialog: fullscreenDialog,
+      );
 
   return navigator.push<T>(route);
 }
