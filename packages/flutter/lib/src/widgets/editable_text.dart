@@ -5444,52 +5444,6 @@ class EditableTextState extends State<EditableText>
     _scrollController.jumpTo(destination);
   }
 
-  /// Extend the selection down by page if the `forward` parameter is true, or
-  /// up by page otherwise.
-  void _extendSelectionByPage(ExtendSelectionByPageIntent intent) {
-    if (widget.maxLines == 1) {
-      return;
-    }
-
-    final TextSelection nextSelection;
-    final Rect extentRect = renderEditable.getLocalRectForCaret(_value.selection.extent);
-    final state = _scrollableKey.currentState as ScrollableState?;
-    final double increment = ScrollAction.getDirectionalIncrement(
-      state!,
-      ScrollIntent(
-        direction: intent.forward ? AxisDirection.down : AxisDirection.up,
-        type: ScrollIncrementType.page,
-      ),
-    );
-    final ScrollPosition position = _scrollController.position;
-    if (intent.forward) {
-      if (_value.selection.extentOffset >= _value.text.length) {
-        return;
-      }
-      final nextExtentOffset = Offset(extentRect.left, extentRect.top + increment);
-      final double height = position.maxScrollExtent + renderEditable.size.height;
-      final TextPosition nextExtent = nextExtentOffset.dy + position.pixels >= height
-          ? TextPosition(offset: _value.text.length)
-          : renderEditable.getPositionForPoint(renderEditable.localToGlobal(nextExtentOffset));
-      nextSelection = _value.selection.copyWith(extentOffset: nextExtent.offset);
-    } else {
-      if (_value.selection.extentOffset <= 0) {
-        return;
-      }
-      final nextExtentOffset = Offset(extentRect.left, extentRect.top + increment);
-      final TextPosition nextExtent = nextExtentOffset.dy + position.pixels <= 0
-          ? const TextPosition(offset: 0)
-          : renderEditable.getPositionForPoint(renderEditable.localToGlobal(nextExtentOffset));
-      nextSelection = _value.selection.copyWith(extentOffset: nextExtent.offset);
-    }
-
-    bringIntoView(nextSelection.extent);
-    userUpdateTextEditingValue(
-      _value.copyWith(selection: nextSelection),
-      SelectionChangedCause.keyboard,
-    );
-  }
-
   void _updateSelection(UpdateSelectionIntent intent) {
     assert(
       intent.newSelection.start <= intent.currentTextEditingValue.text.length,
@@ -5597,9 +5551,6 @@ class EditableTextState extends State<EditableText>
         _moveBeyondTextBoundary,
         ignoreNonCollapsedSelection: false,
       ),
-    ),
-    ExtendSelectionByPageIntent: _makeOverridable(
-      CallbackAction<ExtendSelectionByPageIntent>(onInvoke: _extendSelectionByPage),
     ),
     ExtendSelectionToNextWordBoundaryIntent: _makeOverridable(
       _UpdateTextSelectionAction<ExtendSelectionToNextWordBoundaryIntent>(

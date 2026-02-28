@@ -32,7 +32,7 @@ dependencies:
 
 - [Project dashboard](https://github.com/orgs/flutter/projects/134/views/1)
 - [Original design doc](https://flutter.dev/go/impeller-dart) (now outdated!)
-- [flutter_gpu package source](https://github.com/flutter/engine/tree/main/lib/gpu)
+- [flutter_gpu package source](https://github.com/flutter/flutter/tree/main/engine/src/flutter/lib/gpu)
 
 ## Dart FFI
 
