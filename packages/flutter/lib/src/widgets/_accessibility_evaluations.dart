@@ -612,7 +612,7 @@ bool _isImportantForAccessibility(SemanticsNode node) {
     return false;
   }
 
-  final bool hasNonScrollingAction = data.actions & ~_scrollingActions != 0;
+  final hasNonScrollingAction = data.actions & ~_scrollingActions != 0;
   if (hasNonScrollingAction) {
     return true;
   }
