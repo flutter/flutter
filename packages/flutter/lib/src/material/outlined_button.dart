@@ -297,7 +297,7 @@ class OutlinedButton extends ButtonStyleButton {
   /// * `fixedSize` - null
   /// * `maximumSize` - Size.infinite
   /// * `side` - BorderSide(width: 1, color: Theme.colorScheme.onSurface(0.12))
-  /// * `shape` - RoundedRectangleBorder(borderRadius: const BorderRadius.radius(Radius.circular(4)))
+  /// * `shape` - RoundedRectangleBorder(borderRadius: const BorderRadius.all(Radius.circular(4)))
   /// * `mouseCursor` - WidgetStateMouseCursor.adaptiveClickable
   /// * `visualDensity` - theme.visualDensity
   /// * `tapTargetSize` - theme.materialTapTargetSize
