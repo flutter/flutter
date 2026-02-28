@@ -27,6 +27,19 @@
 
 namespace flutter {
 
+constexpr std::optional<impeller::TextureType> ToImpellerTextureType(
+    GLenum type) {
+  switch (type) {
+    case GL_TEXTURE_2D:
+      return impeller::TextureType::kTexture2D;
+    case GL_TEXTURE_CUBE_MAP:
+      return impeller::TextureType::kTextureCube;
+    case GL_TEXTURE_EXTERNAL_OES:
+      return impeller::TextureType::kTextureExternalOES;
+  }
+  FML_UNREACHABLE();
+}
+
 EmbedderExternalTextureGL::EmbedderExternalTextureGL(
     int64_t texture_identifier,
     const ExternalTextureCallback& callback)
@@ -143,9 +156,29 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
     return nullptr;
   }
 
+  if (texture_gles_) {
+    texture_gles_->Leak();
+    texture_gles_ = nullptr;
+  }
+
+  texture_gles_ = CreateTextureGLES(aiks_context, texture.get());
+
+  if (!texture_gles_) {
+    return nullptr;
+  }
+
+  return impeller::DlImageImpeller::Make(texture_gles_);
+}
+
+std::shared_ptr<impeller::TextureGLES>
+EmbedderExternalTextureGL::CreateTextureGLES(
+    impeller::AiksContext* aiks_context,
+    FlutterOpenGLTexture* texture) {
   impeller::TextureDescriptor desc;
   desc.size = impeller::ISize(texture->width, texture->height);
+  desc.storage_mode = impeller::StorageMode::kDevicePrivate;
   desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
+  desc.type = ToImpellerTextureType(texture->target).value();
 
   impeller::ContextGLES& context =
       impeller::ContextGLES::Cast(*aiks_context->GetContext());
@@ -174,7 +207,7 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
   image->SetCoordinateSystem(
       impeller::TextureCoordinateSystem::kUploadFromHost);
 
-  return impeller::DlImageImpeller::Make(image);
+  return image;
 }
 
 // |flutter::Texture|

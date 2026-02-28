@@ -8,6 +8,7 @@
 #include "flutter/common/graphics/texture.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "impeller/renderer/backend/gles/texture_gles.h"
 #include "third_party/skia/include/core/SkSize.h"
 
 namespace flutter {
@@ -25,6 +26,7 @@ class EmbedderExternalTextureGL : public flutter::Texture {
  private:
   const ExternalTextureCallback& external_texture_callback_;
   sk_sp<DlImage> last_image_;
+  std::shared_ptr<impeller::TextureGLES> texture_gles_;
 
   sk_sp<DlImage> ResolveTexture(int64_t texture_id,
                                 GrDirectContext* context,
@@ -38,6 +40,10 @@ class EmbedderExternalTextureGL : public flutter::Texture {
   sk_sp<DlImage> ResolveTextureImpeller(int64_t texture_id,
                                         impeller::AiksContext* aiks_context,
                                         const SkISize& size);
+
+  std::shared_ptr<impeller::TextureGLES> CreateTextureGLES(
+      impeller::AiksContext* aiks_context,
+      FlutterOpenGLTexture* texture);
 
   // |flutter::Texture|
   void Paint(PaintContext& context,
