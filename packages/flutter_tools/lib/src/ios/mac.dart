@@ -1340,9 +1340,9 @@ List<_SwiftPackageManagerMinPlatformMismatch> _parseSwiftPackageManagerMinPlatfo
   }
 
   final pattern = RegExp(
-    r"(?:error:\s*)?The package product '[^']+' requires minimum platform version "
-    r'([0-9]+(?:\.[0-9]+)*) for the (iOS|macOS) platform, but this target supports '
-    r"([0-9]+(?:\.[0-9]+)*)(?: \(in target '([^']+)' from project '[^']+'\))?",
+    r"The package product '([^']+)' requires minimum platform version "
+    r'([0-9\.]+) for the (iOS|macOS) platform, but this target supports '
+    r"([0-9\.]+)(?: \(in target '([^']+)' from project '[^']+'\))?",
     caseSensitive: false,
   );
 
