@@ -95,4 +95,32 @@ static const CGFloat kStandardTimeOut = 60.0;
   }
 }
 
+- (void)testPlatformViewWebViewLinkTappableForContextMenuScenario {
+  XCUIElement *entranceButton = self.app.buttons[@"web view behind context menu test"];
+  XCTAssertTrue([entranceButton waitForExistenceWithTimeout:kStandardTimeOut]);
+  [entranceButton tap];
+
+  XCUIElement *platformView = self.app.webViews[@"platform_view[0]"];
+  XCTAssertTrue([platformView waitForExistenceWithTimeout:kStandardTimeOut]);
+
+  // expand the context menu.
+  XCUIElement *showMenuButton = self.app.buttons[@"Show menu"];
+  XCTAssertTrue([showMenuButton waitForExistenceWithTimeout:kStandardTimeOut]);
+  [showMenuButton tap];
+
+  // tap to dismiss the context menu.
+  XCUIElement *menuItem = self.app.buttons[@"menu button 1"];
+  XCTAssertTrue([menuItem waitForExistenceWithTimeout:kStandardTimeOut]);
+  XCUICoordinate *center = [self.app coordinateWithNormalizedOffset:CGVectorMake(0.5, 0.5)];
+  [center tap];
+  XCTAssertTrue([menuItem waitForNonExistenceWithTimeout:kStandardTimeOut]);
+
+  // Verify that the web view link is still tappable.
+  XCUIElement *link = self.app.links[@"Target Link"];
+  XCTAssertTrue([link waitForExistenceWithTimeout:kStandardTimeOut]);
+  [link tap];
+  XCUIElement *successText = self.app.staticTexts[@"Navigation Successful"];
+  XCTAssertTrue([successText waitForExistenceWithTimeout:60]);
+}
+
 @end

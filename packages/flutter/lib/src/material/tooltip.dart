@@ -403,6 +403,11 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   late bool _visible;
   late TooltipThemeData _tooltipTheme;
 
+  /// The plain text message for this tooltip.
+  ///
+  /// This value will either come from [widget.message] or [widget.richMessage].
+  String get _tooltipMessage => widget.message ?? widget.richMessage!.toPlainText();
+
   /// {@macro flutter.widgets.RawTooltipState.ensureTooltipVisible}
   bool ensureTooltipVisible() {
     return _tooltipKey.currentState?.ensureTooltipVisible() ?? false;
@@ -467,6 +472,12 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    // If no message is provided, there is no need to create a tooltip overlay
+    // to show an empty container. In this case, just return the wrapped child
+    // as is, or SizedBox.shrink if a child is not provided.
+    if (_tooltipMessage.isEmpty) {
+      return widget.child ?? const SizedBox.shrink();
+    }
     final (TextStyle defaultTextStyle, BoxDecoration defaultDecoration) = switch (Theme.of(
       context,
     )) {
@@ -528,13 +539,9 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     if (_visible) {
       effectiveChild = RawTooltip(
         key: _tooltipKey,
-        semanticsTooltip: excludeFromSemantics
-            ? null
-            : widget.message ?? widget.richMessage?.toPlainText() ?? '',
-        tooltipBuilder: (BuildContext context, Animation<double> animation) => IgnorePointer(
-          ignoring: widget.ignorePointer ?? widget.message != null,
-          child: FadeTransition(opacity: animation, child: tooltipBox),
-        ),
+        semanticsTooltip: excludeFromSemantics ? null : _tooltipMessage,
+        tooltipBuilder: (BuildContext context, Animation<double> animation) =>
+            FadeTransition(opacity: animation, child: tooltipBox),
         touchDelay: widget.showDuration ?? _tooltipTheme.showDuration ?? _defaultShowDuration,
         triggerMode: widget.triggerMode ?? _tooltipTheme.triggerMode ?? _defaultTriggerMode,
         enableFeedback:
@@ -544,6 +551,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         onTriggered: widget.onTriggered,
         dismissDelay: widget.exitDuration ?? _tooltipTheme.exitDuration ?? _defaultExitDuration,
         positionDelegate: _getDefaultPositionDelegate,
+        ignorePointer: widget.ignorePointer ?? widget.message != null,
         child: effectiveChild,
       );
     }

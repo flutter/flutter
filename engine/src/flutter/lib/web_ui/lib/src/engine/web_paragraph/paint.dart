@@ -2,250 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
-
 import '../../engine.dart';
+
+// TODO(jlavrova): We use it to paint shadows (with vertical shifts) so we need to make it tall enough as well.
+double? currentDevicePixelRatio;
+//final DomOffscreenCanvas paintCanvas = createDomOffscreenCanvas(0, 0);
+//final paintContext =
+//    paintCanvas.getContext('2d', {'willReadFrequently': true})! as DomCanvasRenderingContext2D;
+
+final DomHTMLCanvasElement paintCanvas =
+    domDocument.createElement('canvas') as DomHTMLCanvasElement;
+final paintContext =
+    paintCanvas.getContext('2d', {'willReadFrequently': true})! as DomCanvasRenderingContext2D;
 
 /// Paints on a [WebParagraph].
 ///
 /// It uses a [DomCanvasElement] to get text information
-class TextPaint {
-  TextPaint(this.paragraph, this.painter);
+abstract class TextPaint {
+  TextPaint(this.paragraph);
 
   final WebParagraph paragraph;
-  final Painter painter;
 
-  // TODO(jlavrova): painting the entire block could require a really big canvas
-  // Answer: we only do blocks for background and decorations which we do not draw on canvas
-  // but rather implement ourselves via CanvasKit API
-  void _paintByBlocks(
-    StyleElements styleElement,
-    ui.Canvas canvas,
-    TextLayout layout,
-    TextLine line,
-    double x,
-    double y,
-  ) {
-    // We traverse text in visual blocks order (broken by text styles and bidi runs, then reordered)
-    for (final LineBlock block in line.visualBlocks) {
-      if (!block.style.hasElement(styleElement)) {
-        continue;
-      }
-      // Placeholders do not need painting, just reserving the space
-      if (block is PlaceholderBlock) {
-        continue;
-      }
-
-      // Let's calculate the sizes
-      final (ui.Rect sourceRect, ui.Rect targetRect) = calculateBlock(
-        layout,
-        block as TextBlock,
-        ui.Offset(
-          line.advance.left + line.formattingShift + block.shiftFromLineStart,
-          line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
-        ),
-        ui.Offset(x, y),
-        ui.window.devicePixelRatio,
-      );
-
-      WebParagraphDebug.log(
-        '+_paintByBlocks: ${block.textRange} ${block.spanShiftFromLineStart} ${block.shiftFromLineStart} '
-        '${line.advance} + ${line.formattingShift} '
-        '\nsourceRect: $sourceRect targetRect: $targetRect',
-      );
-      // Let's draw whatever has to be drawn
-      switch (styleElement) {
-        case StyleElements.background:
-          painter.paintBackground(canvas, block, sourceRect, targetRect);
-        case StyleElements.decorations:
-          painter.fillDecorations(block, sourceRect);
-          painter.paintDecorations(canvas, sourceRect, targetRect);
-        default:
-          assert(false);
-      }
-    }
-  }
-
-  void _paintByClusters(
-    StyleElements styleElement,
-    ui.Canvas canvas,
-    TextLayout layout,
-    TextLine line,
-    double x,
-    double y,
-  ) {
-    // We traverse clusters in the order of visual blocks (broken by text styles and bidi runs, then reordered)
-    // and then in visual order inside blocks
-    for (final LineBlock block in line.visualBlocks) {
-      if (!block.style.hasElement(styleElement)) {
-        continue;
-      }
-      // Placeholders do not need painting, just reserving the space
-      if (block.clusterRange.size == 1 &&
-          layout.allClusters[block.clusterRange.start] is PlaceholderCluster) {
-        continue;
-      }
-
-      WebParagraphDebug.log(
-        '+paintByClusters: ${block.textRange} ${block.clusterRange} ${(block as TextBlock).clusterRangeWithoutWhitespaces} ${block.whitespacesWidth} ${block.isLtr} ${line.advance.left} + ${line.formattingShift} + ${block.shiftFromLineStart}',
-      );
-
-      // We are painting clusters in visual order so that if they step on each other, the paint
-      // order is correct.
-      final int start = block.isLtr
-          ? block.clusterRangeWithoutWhitespaces.start
-          : block.clusterRangeWithoutWhitespaces.end - 1;
-      final int end = block.isLtr
-          ? block.clusterRangeWithoutWhitespaces.end
-          : block.clusterRangeWithoutWhitespaces.start - 1;
-      final step = block.isLtr ? 1 : -1;
-      for (var i = start; i != end; i += step) {
-        final WebCluster clusterText = block is EllipsisBlock
-            ? layout.ellipsisClusters[i]
-            : layout.allClusters[i];
-        // We need to adjust the canvas size to fit the block in case there is scaling or zoom involved
-        final (ui.Rect sourceRect, ui.Rect targetRect) = calculateCluster(
-          layout,
-          block,
-          clusterText,
-          ui.Offset(
-            // TODO(mdebbar): Avoid use of `block.spanShiftFromLineStart` (similar to `getPositionForOffset`)
-            line.advance.left + line.formattingShift + block.spanShiftFromLineStart,
-            line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
-          ),
-          ui.Offset(x, y),
-          ui.window.devicePixelRatio,
-        );
-
-        if (sourceRect.isEmpty) {
-          // Let's skip empty clusters
-          continue;
-        }
-        switch (styleElement) {
-          case StyleElements.shadows:
-            paintContext.save();
-            for (final ui.Shadow shadow in clusterText.style.shadows!) {
-              painter.fillShadow(
-                clusterText,
-                shadow,
-                // We shape ellipsis with default direction coming from the attaching block
-                // and all the other blocks with the default paragraph direction
-                block is EllipsisBlock
-                    ? block.isLtr
-                    : layout.paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr,
-              );
-              painter.paintShadow(canvas, sourceRect, targetRect);
-            }
-            paintContext.restore();
-          case StyleElements.text:
-            painter.fillTextCluster(
-              clusterText,
-              // We shape ellipsis with default direction coming from the attaching block
-              // and all the other blocks with the default paragraph direction.
-              // The reason for shaping ellipsis this way is that we literally attach it to the block
-              // that overflows and we want to keep all the styling attributes (including text direction) consistent.
-              block is EllipsisBlock
-                  ? block.isLtr
-                  : layout.paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr,
-            );
-            painter.paintTextCluster(canvas, sourceRect, targetRect);
-          default:
-            assert(false);
-        }
-      }
-    }
-  }
-
-  void _paintByClustersOnCanvas2D(
-    StyleElements styleElement,
-    DomHTMLCanvasElement canvas,
-    TextLayout layout,
-    TextLine line,
-    double x,
-    double y,
-  ) {
-    // We traverse clusters in the order of visual blocks (broken by text styles and bidi runs, then reordered)
-    // and then in visual order inside blocks
-    for (final LineBlock block in line.visualBlocks) {
-      if (!block.style.hasElement(styleElement)) {
-        continue;
-      }
-      // Placeholders do not need painting, just reserving the space
-      if (block.clusterRange.size == 1 &&
-          layout.allClusters[block.clusterRange.start] is PlaceholderCluster) {
-        continue;
-      }
-
-      WebParagraphDebug.log(
-        '+paintByClusters: ${block.textRange} ${block.clusterRange} ${(block as TextBlock).clusterRangeWithoutWhitespaces} ${block.whitespacesWidth} ${block.isLtr} ${line.advance.left} + ${line.formattingShift} + ${block.shiftFromLineStart}',
-      );
-
-      // We are painting clusters in visual order so that if they step on each other, the paint
-      // order is correct.
-      final int start = block.isLtr
-          ? block.clusterRangeWithoutWhitespaces.start
-          : block.clusterRangeWithoutWhitespaces.end - 1;
-      final int end = block.isLtr
-          ? block.clusterRangeWithoutWhitespaces.end
-          : block.clusterRangeWithoutWhitespaces.start - 1;
-      final step = block.isLtr ? 1 : -1;
-      for (var i = start; i != end; i += step) {
-        final WebCluster clusterText = block is EllipsisBlock
-            ? layout.ellipsisClusters[i]
-            : layout.allClusters[i];
-        // We need to adjust the canvas size to fit the block in case there is scaling or zoom involved
-        // We need to adjust the canvas size to fit the block in case there is scaling or zoom involved
-        final (ui.Rect sourceRect, ui.Rect targetRect) = calculateCluster(
-          layout,
-          block,
-          clusterText,
-          ui.Offset(
-            // TODO(mdebbar): Avoid use of `block.spanShiftFromLineStart` (similar to `getPositionForOffset`)
-            line.advance.left + line.formattingShift + block.spanShiftFromLineStart,
-            line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
-          ),
-          ui.Offset(x, y),
-          ui.window.devicePixelRatio,
-        );
-
-        if (sourceRect.isEmpty) {
-          // Let's skip empty clusters
-          continue;
-        }
-        switch (styleElement) {
-          case StyleElements.text:
-            final WebTextStyle style = clusterText.style;
-            paintContext.fillStyle = style.getForegroundColor().toCssString();
-            // We fill the text cluster into a rectange [0,0,w,h]
-            // but we need to shift the y coordinate by the font ascent
-            // becase the text is drawn at the ascent, not at 0
-            clusterText.fillOnContext(
-              paintContext,
-              /*ignore the text cluster shift from the text run*/
-              x: (block.isLtr ? 0 : clusterText.advance.width),
-              y: 0,
-            );
-
-            final DomImageBitmap bitmap = paintCanvas.transferToImageBitmap();
-            canvas.context2D.drawImage(
-              bitmap,
-              sourceRect.left,
-              sourceRect.top,
-              sourceRect.width,
-              sourceRect.height,
-              targetRect.left,
-              targetRect.top,
-              targetRect.width,
-              targetRect.height,
-            );
-
-          default:
-            assert(false);
-        }
-      }
-    }
-  }
-
+  /// Calculates the source (on Canvas2D) and target (on the output canvas) rectangles for a text cluster
   (ui.Rect sourceRect, ui.Rect targetRect) calculateCluster(
     TextLayout layout,
     LineBlock block,
@@ -298,6 +78,7 @@ class TextPaint {
     return (sourceRect, targetRect);
   }
 
+  /// Calculates the source (on Canvas2D) and target (on the output canvas) rectangles for a text block
   (ui.Rect sourceRect, ui.Rect targetRect) calculateBlock(
     TextLayout layout,
     TextBlock block,
@@ -328,37 +109,197 @@ class TextPaint {
         .translate(blockOffset.dx, blockOffset.dy)
         .translate(paragraphOffset.dx, paragraphOffset.dy);
 
-    WebParagraphDebug.log(
-      'calculateBlock "${block.span.text}" ${block.textRange}-${block.span.start} ${block.clusterRange} '
-      'source: ${sourceRect.left}:${sourceRect.right}x${sourceRect.top}:${sourceRect.bottom} => '
-      'target: ${targetRect.left}:${targetRect.right}x${targetRect.top}:${targetRect.bottom}',
-    );
+    if (WebParagraphDebug.logging) {
+      WebParagraphDebug.log(
+        'calculateBlock "${block.span.text}" ${block.textRange}-${block.span.start} ${block.clusterRange} '
+        'source: ${sourceRect.left}:${sourceRect.right}x${sourceRect.top}:${sourceRect.bottom} => '
+        'target: ${targetRect.left}:${targetRect.right}x${targetRect.top}:${targetRect.bottom}',
+      );
+    }
 
     return (sourceRect, targetRect);
   }
 
-  void paintLine(ui.Canvas canvas, TextLayout layout, TextLine line, double x, double y) {
-    WebParagraphDebug.log('paintLineOnCanvasKit.Background: ${line.textRange}');
-    _paintByBlocks(StyleElements.background, canvas, layout, line, x, y);
+  /// Calculates the source (on Canvas2D) and target (on the output canvas) rectangles for the entire paragraph
+  (ui.Rect sourceRect, ui.Rect targetRect) calculateParagraph(
+    TextLayout layout,
+    ui.Offset offset,
+    double devicePixelRatio,
+  ) {
+    // Calculate the longest line taking in account the formatting shifts
+    double maxWidth = 0;
+    for (final TextLine line in layout.lines) {
+      final double lineWidth = line.advance.width + line.formattingShift + line.trailingSpacesWidth;
+      if (lineWidth > maxWidth) {
+        maxWidth = lineWidth;
+      }
+    }
 
-    WebParagraphDebug.log('paintLineOnCanvasKit.Shadows: ${line.textRange}');
-    _paintByClusters(StyleElements.shadows, canvas, layout, line, x, y);
+    // Define the paragraph rect (using advances, not selected rects)
+    // Source rect must take in account the scaling
+    final sourceRect = ui.Rect.fromLTWH(
+      0,
+      0,
+      (maxWidth * devicePixelRatio).ceilToDouble(),
+      (layout.paragraph.height * devicePixelRatio).ceilToDouble(),
+    );
+    // Target rect will be scaled by the canvas transform, so we don't scale it here
+    final zeroRect = ui.Rect.fromLTWH(
+      0,
+      0,
+      maxWidth.ceilToDouble(),
+      layout.paragraph.height.ceilToDouble(),
+    );
+    final ui.Rect targetRect = zeroRect.translate(offset.dx, offset.dy);
 
-    WebParagraphDebug.log('paintLineOnCanvasKit.Text: ${line.textRange}');
-    _paintByClusters(StyleElements.text, canvas, layout, line, x, y);
+    if (WebParagraphDebug.logging) {
+      WebParagraphDebug.log(
+        'calculateParagraph source: ${sourceRect.left}:${sourceRect.right}x${sourceRect.top}:${sourceRect.bottom} => '
+        'target: ${targetRect.left}:${targetRect.right}x${targetRect.top}:${targetRect.bottom}',
+      );
+    }
 
-    WebParagraphDebug.log('paintLineOnCanvasKit.Decorations: ${line.textRange}');
-    _paintByBlocks(StyleElements.decorations, canvas, layout, line, x, y);
+    return (sourceRect, targetRect);
   }
 
-  void paintLineOnCanvas2D(
-    DomHTMLCanvasElement canvas,
-    TextLayout layout,
-    TextLine line,
+  /// Calculates the thickness of the decoration line
+  double calculateThickness(WebTextStyle textStyle) {
+    return (textStyle.fontSize! / 14.0) * (textStyle.decorationThickness ?? 1.0);
+  }
+
+  /// Calculates the position of the decoration line
+  double calculatePosition(
+    ui.TextDecoration decoration,
+    double thickness,
+    double height,
+    double ascent,
+  ) {
+    switch (decoration) {
+      case ui.TextDecoration.underline:
+        return thickness + ascent;
+      case ui.TextDecoration.overline:
+        return thickness / 2;
+      case ui.TextDecoration.lineThrough:
+        return height / 2;
+    }
+    return 0;
+  }
+
+  /// Calculates and the position of the decoration line and paints it on Canvas2D
+  void calculateWaves(
     double x,
     double y,
+    WebTextStyle textStyle,
+    ui.Rect textBounds,
+    double thickness,
   ) {
-    WebParagraphDebug.log('paintLineOnCanvasKit.Text: ${line.textRange}');
-    _paintByClustersOnCanvas2D(StyleElements.text, canvas, layout, line, x, y);
+    final quarterWave = thickness;
+
+    var waveCount = 0;
+    double xStart = 0;
+    final double yStart = y + quarterWave;
+
+    paintContext.beginPath();
+    paintContext.moveTo(x, yStart);
+    while (xStart + quarterWave * 2 < textBounds.width) {
+      final x1 = xStart;
+      final double y1 = yStart + quarterWave * (waveCount.isEven ? 1 : -1);
+      final double x2 = xStart + quarterWave * 2;
+      final y2 = yStart;
+      paintContext.quadraticCurveTo(x1, y1, x2, y2);
+      xStart += quarterWave * 2;
+      ++waveCount;
+    }
+
+    // The rest of the wave
+    final double remaining = textBounds.width - xStart;
+    if (remaining > 0) {
+      final x1 = xStart;
+      final double y1 = yStart + quarterWave * (waveCount.isEven ? 1 : -1);
+      final double x2 = xStart + remaining;
+      final y2 = yStart;
+      paintContext.quadraticCurveTo(x1, y1, x2, y2);
+    }
+    paintContext.stroke();
   }
+
+  // TODO(jlavrova): implement decorations entirely on the resulting Canvas
+  /// Paints text decorations on Canvas2D
+  void fillDecorations(TextBlock block, ui.Rect sourceRect) {
+    if (!block.style.hasElement(StyleElements.decorations) || block.style.decoration == null) {
+      return;
+    }
+    paintContext.fillStyle = block.style.getForegroundColor().toCssString();
+
+    final double thickness = calculateThickness(block.style);
+
+    const DoubleDecorationSpacing = 3.0;
+
+    for (final ui.TextDecoration decoration in [
+      ui.TextDecoration.lineThrough,
+      ui.TextDecoration.underline,
+      ui.TextDecoration.overline,
+    ]) {
+      if (!block.style.decoration!.contains(decoration)) {
+        continue;
+      }
+
+      final double height =
+          block.multipliedFontBoundingBoxAscent + block.multipliedFontBoundingBoxDescent;
+      final double ascent = block.multipliedFontBoundingBoxAscent;
+      final double position = calculatePosition(decoration, thickness, height, ascent);
+
+      final double width = sourceRect.width;
+      final double x = sourceRect.left;
+      final double y = sourceRect.top + position;
+
+      paintContext.save();
+      paintContext.lineWidth = thickness;
+      paintContext.strokeStyle = block.style.decorationColor!.toCssString();
+
+      switch (block.style.decorationStyle!) {
+        case ui.TextDecorationStyle.wavy:
+          calculateWaves(x, y, block.style, sourceRect, thickness);
+
+        case ui.TextDecorationStyle.double:
+          final double bottom = y + DoubleDecorationSpacing + thickness;
+          paintContext.beginPath();
+          paintContext.moveTo(x, y);
+          paintContext.lineTo(x + width, y);
+          paintContext.moveTo(x, bottom);
+          paintContext.lineTo(x + width, bottom);
+          paintContext.stroke();
+
+        case ui.TextDecorationStyle.dashed:
+        case ui.TextDecorationStyle.dotted:
+          final dashes = Float32List(2)
+            ..[0] =
+                thickness * (block.style.decorationStyle! == ui.TextDecorationStyle.dotted ? 1 : 4)
+            ..[1] = thickness;
+
+          paintContext.setLineDash(dashes);
+          paintContext.beginPath();
+          paintContext.moveTo(x, y);
+          paintContext.lineTo(x + width, y);
+          paintContext.stroke();
+
+        case ui.TextDecorationStyle.solid:
+          paintContext.beginPath();
+          paintContext.moveTo(x, y);
+          paintContext.lineTo(x + width, y);
+          paintContext.stroke();
+      }
+
+      paintContext.restore();
+    }
+  }
+
+  /// Paints shadows of a text cluster on Canvas2D
+  void fillTextCluster(WebCluster webTextCluster, bool isDefaultLtr);
+
+  /// Paints shadows of a text cluster on Canvas2D
+  void fillShadowCluster(WebCluster webTextCluster, ui.Shadow shadow, bool isDefaultLtr);
+
+  /// Paints the entire paragraph on Canvas2D
+  void paint(ui.Canvas canvas, TextLayout layout, Painter painter, double x, double y);
 }

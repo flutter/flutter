@@ -676,9 +676,8 @@ void main() {
         child: Center(
           child: Transform.scale(
             scale: 0.5,
-            child: SizedBox(
-              width: 400,
-              height: 400,
+            child: SizedBox.square(
+              dimension: 400.0,
               child: ListView.builder(
                 controller: controller,
                 itemCount: 20,
