@@ -1741,6 +1741,80 @@ Future<T?> showDialog<T>({
     to: Navigator.of(context, rootNavigator: useRootNavigator).context,
   );
 
+  final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
+
+  return showRawDialog(
+    context: context,
+    barrierDismissible: barrierDismissible,
+    barrierColor: barrierColor,
+    barrierLabel: barrierLabel,
+    useRootNavigator: useRootNavigator,
+    routeSettings: routeSettings,
+    anchorPoint: anchorPoint,
+    traversalEdgeBehavior: traversalEdgeBehavior,
+    fullscreenDialog: fullscreenDialog,
+    requestFocus: requestFocus,
+    routeBuilder:
+        ({
+          required BuildContext context,
+          required RoutePageBuilder pageBuilder,
+          bool barrierDismissible = true,
+          Color? barrierColor,
+          String? barrierLabel,
+          bool useSafeArea = true,
+          bool useRootNavigator = true,
+          RouteSettings? routeSettings,
+          Offset? anchorPoint,
+          TraversalEdgeBehavior? traversalEdgeBehavior,
+          bool fullscreenDialog = false,
+          bool? requestFocus,
+          AnimationStyle? animationStyle,
+        }) {
+          return DialogRoute<T>(
+            context: context,
+            builder: builder,
+            barrierColor:
+                barrierColor ??
+                DialogTheme.of(context).barrierColor ??
+                Theme.of(context).dialogTheme.barrierColor ??
+                Colors.black54,
+            barrierDismissible: barrierDismissible,
+            barrierLabel: barrierLabel,
+            useSafeArea: useSafeArea,
+            settings: routeSettings,
+            themes: themes,
+            anchorPoint: anchorPoint,
+            traversalEdgeBehavior: traversalEdgeBehavior ?? TraversalEdgeBehavior.closedLoop,
+            requestFocus: requestFocus,
+            animationStyle: animationStyle,
+            fullscreenDialog: fullscreenDialog,
+          );
+        },
+    builder: (BuildContext context) {
+      // Wrap the build dialog with the theme, text direcction, and media
+      // query data from the parent context.
+      final TextDirection textDirection = Directionality.of(navigator.context);
+      final ThemeData themeData = Theme.of(navigator.context);
+      final MediaQueryData mediaQuery = MediaQuery.of(navigator.context);
+      final Widget dialogContent = _DialogPopScope(
+        onPop: Navigator.of(navigator.context).pop,
+        child: Builder(
+          builder: (BuildContext innerContext) {
+            return _FullWindowDialogWrapper(child: builder(innerContext));
+          },
+        ),
+      );
+
+      return Directionality(
+        textDirection: textDirection,
+        child: Theme(
+          data: themeData,
+          child: MediaQuery(data: mediaQuery, child: dialogContent),
+        ),
+      );
+    },
+  );
+  /*
   final WindowRegistry? windowingConfiguration = WindowRegistry.maybeOf(context);
   if (windowingConfiguration != null && isWindowingEnabled) {
     try {
@@ -1806,6 +1880,7 @@ Future<T?> showDialog<T>({
       fullscreenDialog: fullscreenDialog,
     ),
   );
+  */
 }
 
 /// Displays either a Material or Cupertino dialog depending on platform.
