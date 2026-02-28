@@ -1990,6 +1990,11 @@ class SemanticsProperties extends DiagnosticableTree {
   /// native accessibility, like UIAutomator, XCUITest, or Appium. It can be
   /// matched with [CommonFinders.bySemanticsIdentifier].
   ///
+  /// When set, this property implicitly forces the creation of a new
+  /// [SemanticsNode] (equivalent to setting `container` to true in
+  /// [Semantics]). This ensures the identifier is always attached to its
+  /// own node and is not merged into an ancestor.
+  ///
   /// On Android, this is used for `AccessibilityNodeInfo.setViewIdResourceName`.
   /// It'll be appear in accessibility hierarchy as `resource-id`.
   ///
