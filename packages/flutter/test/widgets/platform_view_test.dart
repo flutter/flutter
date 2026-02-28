@@ -3694,6 +3694,90 @@ void main() {
       expect(() => creationParams.onPlatformViewCreated(creationParams.id), returnsNormally);
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/122680
+    //
+    // When _PlatformViewPlaceholderBox.performLayout() runs, it schedules a
+    // postFrameCallback that calls localToGlobal(). During fast scrolling in a
+    // viewport, the render object can be detached from the tree before the
+    // callback executes, causing an assertion failure in getTransformTo().
+    // The attached guard prevents this crash.
+    testWidgets('PlatformViewLink placeholder does not crash when removed before postFrameCallback',
+        (WidgetTester tester) async {
+      late FakeAndroidViewController controller;
+
+      final Widget platformViewLink = Center(
+        child: SizedBox(
+          width: 200,
+          height: 200,
+          child: PlatformViewLink(
+            viewType: 'webview',
+            onCreatePlatformView: (PlatformViewCreationParams params) {
+              controller = FakeAndroidViewController(params.id, requiresSize: true);
+              controller.create();
+              return controller;
+            },
+            surfaceFactory: (BuildContext context, PlatformViewController controller) {
+              return PlatformViewSurface(
+                gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+                controller: controller,
+                hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+              );
+            },
+          ),
+        ),
+      );
+
+      // Render the widget; the placeholder's performLayout schedules a
+      // postFrameCallback that calls onLayout (and thus localToGlobal).
+      await tester.pumpWidget(platformViewLink);
+
+      // The placeholder should have laid out and triggered create with position.
+      expect(controller.awaitingCreation, false);
+      expect(controller.createPosition, isNotNull);
+
+      // Immediately remove the widget from the tree.  In production, this
+      // happens when a viewport garbage-collects a child during fast scrolling.
+      await tester.pumpWidget(const SizedBox.expand());
+
+      // The controller should have been disposed without any assertion errors.
+      expect(controller.disposed, true);
+      expect(tester.takeException(), isNull);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/122680
+    testWidgets('PlatformViewLink placeholder still calls onLayout when attached',
+        (WidgetTester tester) async {
+      late FakeAndroidViewController controller;
+
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 300,
+            height: 150,
+            child: PlatformViewLink(
+              viewType: 'webview',
+              onCreatePlatformView: (PlatformViewCreationParams params) {
+                controller = FakeAndroidViewController(params.id, requiresSize: true);
+                controller.create();
+                return controller;
+              },
+              surfaceFactory: (BuildContext context, PlatformViewController controller) {
+                return PlatformViewSurface(
+                  gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+                  controller: controller,
+                  hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // The attached guard should allow onLayout to proceed normally.
+      expect(controller.awaitingCreation, false);
+      expect(controller.createPosition, isNotNull);
+    });
+
     testWidgets('PlatformViewLink widget survives widget tree change', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();

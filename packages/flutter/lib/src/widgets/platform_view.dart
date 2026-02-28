@@ -1553,7 +1553,12 @@ class _PlatformViewPlaceholderBox extends RenderConstrainedBox {
     super.performLayout();
     // A call to `localToGlobal` requires waiting for a frame to render first.
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      onLayout(size, localToGlobal(Offset.zero));
+      // The render object may have been detached before this callback executes
+      // (e.g., during fast scrolling). Calling localToGlobal on a detached
+      // render object triggers an assertion failure in getTransformTo.
+      if (attached) {
+        onLayout(size, localToGlobal(Offset.zero));
+      }
     }, debugLabel: 'PlatformViewPlaceholderBox.onLayout');
   }
 }
