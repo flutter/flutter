@@ -186,31 +186,34 @@ void main() {
       );
     });
 
-    testWithoutContext('getArtifactPath resolves gen_snapshot to linux-arm64 on arm64 Linux host', () {
-      final arm64Artifacts = CachedArtifacts(
-        fileSystem: fileSystem,
-        cache: cache,
-        platform: platform,
-        operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
-      );
-      expect(
-        arm64Artifacts.getArtifactPath(
-          Artifact.genSnapshot,
-          platform: TargetPlatform.android_arm64,
-          mode: BuildMode.release,
-        ),
-        fileSystem.path.join(
-          'root',
-          'bin',
-          'cache',
-          'artifacts',
-          'engine',
-          'android-arm64-release',
-          'linux-arm64',
-          'gen_snapshot',
-        ),
-      );
-    });
+    testWithoutContext(
+      'getArtifactPath resolves gen_snapshot to linux-arm64 on arm64 Linux host',
+      () {
+        final arm64Artifacts = CachedArtifacts(
+          fileSystem: fileSystem,
+          cache: cache,
+          platform: platform,
+          operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
+        );
+        expect(
+          arm64Artifacts.getArtifactPath(
+            Artifact.genSnapshot,
+            platform: TargetPlatform.android_arm64,
+            mode: BuildMode.release,
+          ),
+          fileSystem.path.join(
+            'root',
+            'bin',
+            'cache',
+            'artifacts',
+            'engine',
+            'android-arm64-release',
+            'linux-arm64',
+            'gen_snapshot',
+          ),
+        );
+      },
+    );
 
     testWithoutContext(
       'getArtifactPath for FlutterMacOS.framework and FlutterMacOS.xcframework',

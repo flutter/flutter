@@ -881,37 +881,43 @@ void main() {
     ]);
   });
 
-  testWithoutContext('Android gen_snapshot artifacts on x64 linux host include linux-x64 archives', () {
-    fakeProcessManager.addCommand(unameCommandForX64);
+  testWithoutContext(
+    'Android gen_snapshot artifacts on x64 linux host include linux-x64 archives',
+    () {
+      fakeProcessManager.addCommand(unameCommandForX64);
 
-    final Cache cache = createCache(FakePlatform());
-    final artifacts = AndroidGenSnapshotArtifacts(cache, platform: FakePlatform());
+      final Cache cache = createCache(FakePlatform());
+      final artifacts = AndroidGenSnapshotArtifacts(cache, platform: FakePlatform());
 
-    expect(artifacts.getBinaryDirs(), <List<String>>[
-      <String>['android-arm-profile/linux-x64', 'android-arm-profile/linux-x64.zip'],
-      <String>['android-arm-release/linux-x64', 'android-arm-release/linux-x64.zip'],
-      <String>['android-arm64-profile/linux-x64', 'android-arm64-profile/linux-x64.zip'],
-      <String>['android-arm64-release/linux-x64', 'android-arm64-release/linux-x64.zip'],
-      <String>['android-x64-profile/linux-x64', 'android-x64-profile/linux-x64.zip'],
-      <String>['android-x64-release/linux-x64', 'android-x64-release/linux-x64.zip'],
-    ]);
-  });
+      expect(artifacts.getBinaryDirs(), <List<String>>[
+        <String>['android-arm-profile/linux-x64', 'android-arm-profile/linux-x64.zip'],
+        <String>['android-arm-release/linux-x64', 'android-arm-release/linux-x64.zip'],
+        <String>['android-arm64-profile/linux-x64', 'android-arm64-profile/linux-x64.zip'],
+        <String>['android-arm64-release/linux-x64', 'android-arm64-release/linux-x64.zip'],
+        <String>['android-x64-profile/linux-x64', 'android-x64-profile/linux-x64.zip'],
+        <String>['android-x64-release/linux-x64', 'android-x64-release/linux-x64.zip'],
+      ]);
+    },
+  );
 
-  testWithoutContext('Android gen_snapshot artifacts on arm64 linux host include linux-arm64 archives', () {
-    fakeProcessManager.addCommand(unameCommandForArm64);
+  testWithoutContext(
+    'Android gen_snapshot artifacts on arm64 linux host include linux-arm64 archives',
+    () {
+      fakeProcessManager.addCommand(unameCommandForArm64);
 
-    final Cache cache = createCache(FakePlatform());
-    final artifacts = AndroidGenSnapshotArtifacts(cache, platform: FakePlatform());
+      final Cache cache = createCache(FakePlatform());
+      final artifacts = AndroidGenSnapshotArtifacts(cache, platform: FakePlatform());
 
-    expect(artifacts.getBinaryDirs(), <List<String>>[
-      <String>['android-arm-profile/linux-arm64', 'android-arm-profile/linux-arm64.zip'],
-      <String>['android-arm-release/linux-arm64', 'android-arm-release/linux-arm64.zip'],
-      <String>['android-arm64-profile/linux-arm64', 'android-arm64-profile/linux-arm64.zip'],
-      <String>['android-arm64-release/linux-arm64', 'android-arm64-release/linux-arm64.zip'],
-      <String>['android-x64-profile/linux-arm64', 'android-x64-profile/linux-arm64.zip'],
-      <String>['android-x64-release/linux-arm64', 'android-x64-release/linux-arm64.zip'],
-    ]);
-  });
+      expect(artifacts.getBinaryDirs(), <List<String>>[
+        <String>['android-arm-profile/linux-arm64', 'android-arm-profile/linux-arm64.zip'],
+        <String>['android-arm-release/linux-arm64', 'android-arm-release/linux-arm64.zip'],
+        <String>['android-arm64-profile/linux-arm64', 'android-arm64-profile/linux-arm64.zip'],
+        <String>['android-arm64-release/linux-arm64', 'android-arm64-release/linux-arm64.zip'],
+        <String>['android-x64-profile/linux-arm64', 'android-x64-profile/linux-arm64.zip'],
+        <String>['android-x64-release/linux-arm64', 'android-x64-release/linux-arm64.zip'],
+      ]);
+    },
+  );
 
   testWithoutContext('Cache can delete stampfiles of artifacts', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
