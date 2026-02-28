@@ -41,7 +41,7 @@ using DlPath = flutter::DlPath;
 /// The second pass is conducted using CanvasDlDispatcher to perform the
 /// actual rendering using a Canvas and data provided by the first pass.
 ///
-/// \\important It is important to note that the 2 passes perform slightly
+/// @important It is important to note that the 2 passes perform slightly
 /// different DisplayList culling and may process different subsets of the
 /// frame's operations.
 /// See https://github.com/flutter/flutter/issues/182639
