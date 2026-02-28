@@ -45,7 +45,7 @@ public class PlatformPlugin {
   @Nullable private final PlatformPluginDelegate platformPluginDelegate;
   private PlatformChannel.SystemChromeStyle currentTheme;
   private int mEnabledOverlays;
-  private boolean mIsEdgeToEdge = false;
+  private boolean isEdgeToEdge = false;
   private static final String TAG = "PlatformPlugin";
 
   /**
@@ -374,7 +374,7 @@ public class PlatformPlugin {
       // SDK 29 and up will apply a translucent body scrim behind 2/3 button navigation bars
       // to ensure contrast with buttons on the nav and status bars, unless the contrast is not
       // enforced in the overlay styling.
-      mIsEdgeToEdge = true;
+      isEdgeToEdge = true;
       enableEdgeToEdge();
       if (currentTheme != null) {
         setSystemChromeSystemUIOverlayStyle(currentTheme);
@@ -434,7 +434,7 @@ public class PlatformPlugin {
    * PlatformPlugin}.
    */
   public void updateSystemUiOverlays() {
-    if (mIsEdgeToEdge) {
+    if (isEdgeToEdge) {
       // In edge-to-edge mode, re-apply the modern API instead of using deprecated
       // setSystemUiVisibility(), which could interfere with WindowCompat on API < 30.
       enableEdgeToEdge();
@@ -470,8 +470,8 @@ public class PlatformPlugin {
    * PlatformChannel.SystemUiMode}. Restores the default decor-fits-system-windows behavior.
    */
   private void disableEdgeToEdge() {
-    if (mIsEdgeToEdge) {
-      mIsEdgeToEdge = false;
+    if (isEdgeToEdge) {
+      isEdgeToEdge = false;
       WindowCompat.setDecorFitsSystemWindows(activity.getWindow(), true);
     }
   }
