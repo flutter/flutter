@@ -21,10 +21,13 @@ import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import androidx.activity.ComponentActivity;
+import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedDispatcherOwner;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import io.flutter.Log;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel;
@@ -42,6 +45,7 @@ public class PlatformPlugin {
   @Nullable private final PlatformPluginDelegate platformPluginDelegate;
   private PlatformChannel.SystemChromeStyle currentTheme;
   private int mEnabledOverlays;
+  private boolean mIsEdgeToEdge = false;
   private static final String TAG = "PlatformPlugin";
 
   /**
@@ -279,6 +283,12 @@ public class PlatformPlugin {
   private void setSystemChromeEnabledSystemUIMode(PlatformChannel.SystemUiMode systemUiMode) {
     int enabledOverlays;
 
+    // If we were previously in edge-to-edge mode and are switching to a different mode,
+    // restore the default window inset behavior.
+    if (systemUiMode != PlatformChannel.SystemUiMode.EDGE_TO_EDGE) {
+      disableEdgeToEdge();
+    }
+
     if (systemUiMode == PlatformChannel.SystemUiMode.LEAN_BACK) {
       // LEAN BACK
       // Available starting at Android SDK 4.1 (API 16).
@@ -358,13 +368,18 @@ public class PlatformPlugin {
       // If the Flutter app targets Android SDK 15 (API 35) or later (Flutter does this by default),
       // then this mode is used by default.
       //
+      // Uses modern AndroidX APIs (EdgeToEdge.enable or WindowCompat.setDecorFitsSystemWindows)
+      // instead of deprecated View.SYSTEM_UI_FLAG_LAYOUT_* flags.
+      //
       // SDK 29 and up will apply a translucent body scrim behind 2/3 button navigation bars
       // to ensure contrast with buttons on the nav and status bars, unless the contrast is not
       // enforced in the overlay styling.
-      enabledOverlays =
-          View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-              | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-              | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+      mIsEdgeToEdge = true;
+      enableEdgeToEdge();
+      if (currentTheme != null) {
+        setSystemChromeSystemUIOverlayStyle(currentTheme);
+      }
+      return;
     } else {
       // When none of the conditions are matched, return without updating the system UI overlays.
       return;
@@ -376,6 +391,10 @@ public class PlatformPlugin {
 
   private void setSystemChromeEnabledSystemUIOverlays(
       List<PlatformChannel.SystemUiOverlay> overlaysToShow) {
+    // If we were in edge-to-edge mode, restore normal inset behavior since this
+    // older API sets specific overlay flags that are incompatible with edge-to-edge.
+    disableEdgeToEdge();
+
     // Start by assuming we want to hide all system overlays (like an immersive
     // game).
     int enabledOverlays =
@@ -415,7 +434,13 @@ public class PlatformPlugin {
    * PlatformPlugin}.
    */
   public void updateSystemUiOverlays() {
-    activity.getWindow().getDecorView().setSystemUiVisibility(mEnabledOverlays);
+    if (mIsEdgeToEdge) {
+      // In edge-to-edge mode, re-apply the modern API instead of using deprecated
+      // setSystemUiVisibility(), which could interfere with WindowCompat on API < 30.
+      enableEdgeToEdge();
+    } else {
+      activity.getWindow().getDecorView().setSystemUiVisibility(mEnabledOverlays);
+    }
     if (currentTheme != null) {
       setSystemChromeSystemUIOverlayStyle(currentTheme);
     }
@@ -423,6 +448,32 @@ public class PlatformPlugin {
 
   private void restoreSystemChromeSystemUIOverlays() {
     updateSystemUiOverlays();
+  }
+
+  /**
+   * Enables edge-to-edge mode using modern AndroidX APIs. Uses {@link EdgeToEdge#enable} when the
+   * activity is a {@link ComponentActivity} (e.g., {@link
+   * io.flutter.embedding.android.FlutterFragmentActivity}), which also suppresses the Android 15
+   * edge-to-edge warning. Falls back to {@link WindowCompat#setDecorFitsSystemWindows} for plain
+   * {@link Activity} instances (e.g., {@link io.flutter.embedding.android.FlutterActivity}).
+   */
+  private void enableEdgeToEdge() {
+    if (activity instanceof ComponentActivity) {
+      EdgeToEdge.enable((ComponentActivity) activity);
+    } else {
+      WindowCompat.setDecorFitsSystemWindows(activity.getWindow(), false);
+    }
+  }
+
+  /**
+   * Disables edge-to-edge mode when switching to a different {@link
+   * PlatformChannel.SystemUiMode}. Restores the default decor-fits-system-windows behavior.
+   */
+  private void disableEdgeToEdge() {
+    if (mIsEdgeToEdge) {
+      mIsEdgeToEdge = false;
+      WindowCompat.setDecorFitsSystemWindows(activity.getWindow(), true);
+    }
   }
 
   /**
