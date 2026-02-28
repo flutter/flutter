@@ -49,7 +49,7 @@ body:
         the output of running `flutter --verbose create foo`.
 
         If the logs are too large to be uploaded to GitHub, you may upload
-        them as a `.txt` file or use online tools like [Pastebin](https://pastebin.com)
+        them as a `.txt` file or use an online paste service like [GitHub Gist](https://gist.github.com)
         to share them.
 
         Note: Please do not upload screenshots of text. Instead, use code blocks
