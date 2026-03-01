@@ -1303,7 +1303,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       _autoScroller.stopAutoScroll();
       return result;
     }
-    if (_selectionStartsInScrollable) {
+    if (_selectionStartsInScrollable && event.globalPosition.isFinite) {
       _autoScroller.startAutoScrollIfNecessary(_dragTargetFromEvent(event));
       if (_autoScroller.scrolling) {
         return SelectionResult.pending;
