@@ -439,7 +439,7 @@ void main() {
           130.0,
           740.0,
           100.0,
-        ), // SizedBox is pushed 10px down internally by inner SafeArea
+        ), // y-position is 130: 100(before) + 20(outer padding) + 10(inner padding).
         const Rect.fromLTWH(
           0.0,
           260.0,
