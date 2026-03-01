@@ -286,7 +286,13 @@ class ClickDebouncer {
   /// Forwards the event to the framework, unless it is deduplicated because
   /// the corresponding pointer down/up events were recently flushed to the
   /// framework already.
-  void onClick(DomEvent click, int viewId, int semanticsNodeId, bool isListening) {
+  void onClick(
+    DomEvent click,
+    int viewId,
+    int semanticsNodeId,
+    bool isListening, {
+    bool isMergedNode = false,
+  }) {
     assert(click.type == 'click');
 
     if (!isDebouncing) {
@@ -300,18 +306,30 @@ class ClickDebouncer {
       return;
     }
 
-    if (isListening) {
-      // There's a pending queue of pointer events. Prefer sending the tap action
-      // instead of pointer events, because the pointer events may not land on the
-      // combined semantic node and miss the click/tap.
+    if (isMergedNode && isListening) {
+      // For merged semantics nodes (e.g. CheckboxListTile with
+      // MergeSemantics), the DOM element covers a larger area than the
+      // underlying tappable widget. Pointer coordinates may land outside the
+      // tappable render object, causing the framework's gesture arena to miss
+      // the tap (https://github.com/flutter/flutter/issues/130162).
+      //
+      // Send SemanticsAction.tap instead, which bypasses spatial hit-testing
+      // and walks merged descendants to find the correct onTap handler.
       final DebounceState state = _state!;
       _state = null;
       state.timer.cancel();
       _sendSemanticsTapToFramework(click, viewId, semanticsNodeId);
     } else {
-      // The semantic node is not listening to taps. Flush the pointer events
-      // for the framework to figure out what to do with them. It's possible
-      // the framework is interested in gestures other than taps.
+      // For non-merged nodes, flush the queued pointer events so that both
+      // GestureDetector and TapRegionSurface can process them. This is safe
+      // because the pointer events carry correct coordinates that match the
+      // tappable render object's bounds.
+      //
+      // Previously, ALL nodes used SemanticsAction.tap here, which dropped
+      // pointer events. That caused TapRegionSurface to never see them,
+      // so TapRegion.onTapOutside was never called — breaking MenuAnchor
+      // dismiss behavior (https://github.com/flutter/flutter/issues/167487).
+      click.stopPropagation();
       _flush();
     }
   }

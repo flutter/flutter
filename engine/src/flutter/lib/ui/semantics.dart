@@ -1977,6 +1977,7 @@ abstract class SemanticsUpdateBuilder {
     required Locale? locale,
     required String minValue,
     required String maxValue,
+    bool mergesDescendants = false,
   });
 
   /// Update the custom semantics action associated with the given `id`.
@@ -2060,6 +2061,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     required Locale? locale,
     required String minValue,
     required String maxValue,
+    bool mergesDescendants = false,
   }) {
     assert(_matrix4IsValid(transform));
     assert(

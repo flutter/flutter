@@ -4128,6 +4128,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       locale: data.locale,
       minValue: data.minValue ?? '',
       maxValue: data.maxValue ?? '',
+      mergesDescendants: _mergeAllDescendantsIntoThisNode,
     );
     _dirty = false;
   }

@@ -337,6 +337,7 @@ class SemanticsNodeUpdate {
     required this.locale,
     required this.minValue,
     required this.maxValue,
+    this.mergesDescendants = false,
   });
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
@@ -467,6 +468,13 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final String maxValue;
+
+  /// Whether this node merges all descendant semantics into itself.
+  ///
+  /// When true, the framework has absorbed the semantics of all descendants
+  /// into this single node. The node's rect may cover a larger area than the
+  /// individual tappable widget within it.
+  final bool mergesDescendants;
 }
 
 /// Identifies [SemanticRole] implementations.
@@ -1767,6 +1775,14 @@ class SemanticsObject {
   bool get hasChildren =>
       _childrenInTraversalOrder != null && _childrenInTraversalOrder!.isNotEmpty;
 
+  /// Whether this node merges all descendant semantics into itself.
+  ///
+  /// When true, this node's rect may cover a larger area than the individual
+  /// tappable widget within it. Pointer events at arbitrary coordinates within
+  /// the rect may not hit the underlying tappable render object.
+  bool get mergesDescendants => _mergesDescendants;
+  bool _mergesDescendants = false;
+
   /// Whether this object represents an editable text field.
   bool get isTextField => flags.isTextField;
 
@@ -2002,6 +2018,8 @@ class SemanticsObject {
       locale = update.locale;
       _markLocaleDirty();
     }
+
+    _mergesDescendants = update.mergesDescendants;
 
     // Apply updates to the DOM.
     _updateRole();
