@@ -223,9 +223,9 @@ class _SafeAreaPadding extends InheritedWidget {
 ///
 /// When a [baseMinimum] padding is specified, the padding already applied by
 /// ancestor [SafeArea] widgets is taken into account. The greater of the
-/// [baseMinimum] padding (minus any ancestor padding) or the safe area padding
-/// will be applied. This prevents padding duplication when [SafeArea]
-/// widgets are nested.
+/// [minimum] padding, the [baseMinimum] padding (minus any ancestor padding),
+/// or the safe area padding will be applied. This prevents padding duplication
+/// when [SafeArea] widgets are nested.
 ///
 /// See also:
 ///
