@@ -256,7 +256,7 @@ void main() {
       );
 
       // Outer safe area applies 20 padding -> 760x560 space remaining.
-      // Inner safe area applies max(30, 30-20) = 30 total padding from edges -> 740x540
+      // Inner safe area adds 10 padding to meet its baseMinimum of 30. Total padding from edges is 30 -> 740x540
       expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(30.0, 30.0));
       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(770.0, 570.0));
     });
