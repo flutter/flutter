@@ -6,7 +6,11 @@ To learn more about code review, see our documentation on Tree Hygiene: https://
 
 *Replace this paragraph with a description of what this PR is changing or adding, and why. Consider including before/after screenshots.*
 
+## Related Issues
+
 *List which issues are fixed by this PR. You must list at least one issue. An issue is not required if the PR fixes something trivial like a typo.*
+
+Fixes #
 
 *If you had to change anything in the [flutter/tests] repo, include a link to the migration guide as per the [breaking change policy].*
 
@@ -16,7 +20,7 @@ To learn more about code review, see our documentation on Tree Hygiene: https://
 - [ ] I read the [Tree Hygiene] wiki page, which explains my responsibilities.
 - [ ] I read and followed the [Flutter Style Guide], including [Features we expect every widget to implement].
 - [ ] I signed the [CLA].
-- [ ] I listed at least one issue that this PR fixes in the description above.
+- [ ] I used GitHub auto-closing keyword(s) (e.g., `Fixes #123`) in the **Related Issues** section, as described in [Linking a pull request to an issue].
 - [ ] I updated/added relevant documentation (doc comments with `///`).
 - [ ] I added new tests to check the change I am making, or this PR is [test-exempt].
 - [ ] I followed the [breaking change policy] and added [Data Driven Fixes] where supported.
@@ -37,3 +41,4 @@ If you need help, consider asking for advice on the #hackers-new channel on [Dis
 [breaking change policy]: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#handling-breaking-changes
 [Discord]: https://github.com/flutter/flutter/blob/main/docs/contributing/Chat.md
 [Data Driven Fixes]: https://github.com/flutter/flutter/blob/main/docs/contributing/Data-driven-Fixes.md
+[Linking a pull request to an issue]: https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue
