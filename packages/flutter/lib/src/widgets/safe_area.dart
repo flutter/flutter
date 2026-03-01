@@ -19,6 +19,12 @@ import 'media_query.dart';
 /// When a [minimum] padding is specified, the greater of the minimum padding
 /// or the safe area padding will be applied.
 ///
+/// When a [baseMinimum] padding is specified, the padding already applied by
+/// ancestor [SafeArea] widgets is taken into account. The greater of the
+/// [baseMinimum] padding (minus any ancestor padding) or the safe area padding
+/// will be applied. This prevents padding duplication when [SafeArea]
+/// widgets are nested.
+///
 /// {@tool dartpad}
 /// This example shows how `SafeArea` can apply padding within a mobile device's
 /// screen to make the relevant content completely visible.
@@ -67,6 +73,7 @@ class SafeArea extends StatelessWidget {
     this.right = true,
     this.bottom = true,
     this.minimum = EdgeInsets.zero,
+    this.baseMinimum = EdgeInsets.zero,
     this.maintainBottomViewPadding = false,
     required this.child,
   });
@@ -88,6 +95,17 @@ class SafeArea extends StatelessWidget {
   ///
   /// The greater of the minimum insets and the media padding will be applied.
   final EdgeInsets minimum;
+
+  /// This minimum padding to apply, taking into account the padding already
+  /// applied by ancestor [SafeArea] widgets.
+  ///
+  /// If an ancestor [SafeArea] has already applied padding that is greater
+  /// than or equal to this [baseMinimum], no additional padding will be
+  /// applied. Otherwise, the padding will be increased to satisfy this
+  /// [baseMinimum].
+  ///
+  /// This helps prevent padding duplication when [SafeArea] widgets are nested.
+  final EdgeInsets baseMinimum;
 
   /// Specifies whether the [SafeArea] should maintain the bottom
   /// [MediaQueryData.viewPadding] instead of the bottom [MediaQueryData.padding],
@@ -118,20 +136,42 @@ class SafeArea extends StatelessWidget {
       padding = padding.copyWith(bottom: MediaQuery.viewPaddingOf(context).bottom);
     }
 
+    final EdgeInsets ancestorPadding = _SafeAreaPadding.of(context);
+
+    final double padLeft = math.max(
+      left ? padding.left : 0.0,
+      math.max(minimum.left, baseMinimum.left - ancestorPadding.left),
+    );
+    final double padTop = math.max(
+      top ? padding.top : 0.0,
+      math.max(minimum.top, baseMinimum.top - ancestorPadding.top),
+    );
+    final double padRight = math.max(
+      right ? padding.right : 0.0,
+      math.max(minimum.right, baseMinimum.right - ancestorPadding.right),
+    );
+    final double padBottom = math.max(
+      bottom ? padding.bottom : 0.0,
+      math.max(minimum.bottom, baseMinimum.bottom - ancestorPadding.bottom),
+    );
+
     return Padding(
-      padding: EdgeInsets.only(
-        left: math.max(left ? padding.left : 0.0, minimum.left),
-        top: math.max(top ? padding.top : 0.0, minimum.top),
-        right: math.max(right ? padding.right : 0.0, minimum.right),
-        bottom: math.max(bottom ? padding.bottom : 0.0, minimum.bottom),
-      ),
+      padding: EdgeInsets.only(left: padLeft, top: padTop, right: padRight, bottom: padBottom),
       child: MediaQuery.removePadding(
         context: context,
         removeLeft: left,
         removeTop: top,
         removeRight: right,
         removeBottom: bottom,
-        child: child,
+        child: _SafeAreaPadding(
+          padding: EdgeInsets.only(
+            left: ancestorPadding.left + padLeft,
+            top: ancestorPadding.top + padTop,
+            right: ancestorPadding.right + padRight,
+            bottom: ancestorPadding.bottom + padBottom,
+          ),
+          child: child,
+        ),
       ),
     );
   }
@@ -143,6 +183,28 @@ class SafeArea extends StatelessWidget {
     properties.add(FlagProperty('top', value: top, ifTrue: 'avoid top padding'));
     properties.add(FlagProperty('right', value: right, ifTrue: 'avoid right padding'));
     properties.add(FlagProperty('bottom', value: bottom, ifTrue: 'avoid bottom padding'));
+    properties.add(
+      DiagnosticsProperty<EdgeInsets>('minimum', minimum, defaultValue: EdgeInsets.zero),
+    );
+    properties.add(
+      DiagnosticsProperty<EdgeInsets>('baseMinimum', baseMinimum, defaultValue: EdgeInsets.zero),
+    );
+  }
+}
+
+class _SafeAreaPadding extends InheritedWidget {
+  const _SafeAreaPadding({required this.padding, required super.child});
+
+  final EdgeInsets padding;
+
+  static EdgeInsets of(BuildContext context) {
+    final _SafeAreaPadding? result = context.dependOnInheritedWidgetOfExactType<_SafeAreaPadding>();
+    return result?.padding ?? EdgeInsets.zero;
+  }
+
+  @override
+  bool updateShouldNotify(_SafeAreaPadding oldWidget) {
+    return padding != oldWidget.padding;
   }
 }
 
@@ -158,6 +220,12 @@ class SafeArea extends StatelessWidget {
 ///
 /// When a [minimum] padding is specified, the greater of the minimum padding
 /// or the safe area padding will be applied.
+///
+/// When a [baseMinimum] padding is specified, the padding already applied by
+/// ancestor [SafeArea] widgets is taken into account. The greater of the
+/// [baseMinimum] padding (minus any ancestor padding) or the safe area padding
+/// will be applied. This prevents padding duplication when [SafeArea]
+/// widgets are nested.
 ///
 /// See also:
 ///
@@ -175,6 +243,7 @@ class SliverSafeArea extends StatelessWidget {
     this.right = true,
     this.bottom = true,
     this.minimum = EdgeInsets.zero,
+    this.baseMinimum = EdgeInsets.zero,
     required this.sliver,
   });
 
@@ -196,6 +265,17 @@ class SliverSafeArea extends StatelessWidget {
   /// The greater of the minimum padding and the media padding is be applied.
   final EdgeInsets minimum;
 
+  /// This minimum padding to apply, taking into account the padding already
+  /// applied by ancestor [SafeArea] widgets.
+  ///
+  /// If an ancestor [SafeArea] has already applied padding that is greater
+  /// than or equal to this [baseMinimum], no additional padding will be
+  /// applied. Otherwise, the padding will be increased to satisfy this
+  /// [baseMinimum].
+  ///
+  /// This helps prevent padding duplication when [SafeArea] widgets are nested.
+  final EdgeInsets baseMinimum;
+
   /// The sliver below this sliver in the tree.
   ///
   /// The padding on the [MediaQuery] for the [sliver] will be suitably adjusted
@@ -206,20 +286,42 @@ class SliverSafeArea extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     final EdgeInsets padding = MediaQuery.paddingOf(context);
+    final EdgeInsets ancestorPadding = _SafeAreaPadding.of(context);
+
+    final double padLeft = math.max(
+      left ? padding.left : 0.0,
+      math.max(minimum.left, baseMinimum.left - ancestorPadding.left),
+    );
+    final double padTop = math.max(
+      top ? padding.top : 0.0,
+      math.max(minimum.top, baseMinimum.top - ancestorPadding.top),
+    );
+    final double padRight = math.max(
+      right ? padding.right : 0.0,
+      math.max(minimum.right, baseMinimum.right - ancestorPadding.right),
+    );
+    final double padBottom = math.max(
+      bottom ? padding.bottom : 0.0,
+      math.max(minimum.bottom, baseMinimum.bottom - ancestorPadding.bottom),
+    );
+
     return SliverPadding(
-      padding: EdgeInsets.only(
-        left: math.max(left ? padding.left : 0.0, minimum.left),
-        top: math.max(top ? padding.top : 0.0, minimum.top),
-        right: math.max(right ? padding.right : 0.0, minimum.right),
-        bottom: math.max(bottom ? padding.bottom : 0.0, minimum.bottom),
-      ),
+      padding: EdgeInsets.only(left: padLeft, top: padTop, right: padRight, bottom: padBottom),
       sliver: MediaQuery.removePadding(
         context: context,
         removeLeft: left,
         removeTop: top,
         removeRight: right,
         removeBottom: bottom,
-        child: sliver,
+        child: _SafeAreaPadding(
+          padding: EdgeInsets.only(
+            left: ancestorPadding.left + padLeft,
+            top: ancestorPadding.top + padTop,
+            right: ancestorPadding.right + padRight,
+            bottom: ancestorPadding.bottom + padBottom,
+          ),
+          child: sliver,
+        ),
       ),
     );
   }
@@ -231,5 +333,11 @@ class SliverSafeArea extends StatelessWidget {
     properties.add(FlagProperty('top', value: top, ifTrue: 'avoid top padding'));
     properties.add(FlagProperty('right', value: right, ifTrue: 'avoid right padding'));
     properties.add(FlagProperty('bottom', value: bottom, ifTrue: 'avoid bottom padding'));
+    properties.add(
+      DiagnosticsProperty<EdgeInsets>('minimum', minimum, defaultValue: EdgeInsets.zero),
+    );
+    properties.add(
+      DiagnosticsProperty<EdgeInsets>('baseMinimum', baseMinimum, defaultValue: EdgeInsets.zero),
+    );
   }
 }
