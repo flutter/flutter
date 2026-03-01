@@ -406,7 +406,7 @@ void main() {
         ),
       );
 
-      // Top padding total will be max(30, 30) = 30.
+      // Outer SliverSafeArea provides 20 padding. Inner one needs 30 total, so it adds 10. Total top padding is 30.
       verify(tester, <Rect>[
         const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
         const Rect.fromLTWH(30.0, 130.0, 740.0, 100.0),
