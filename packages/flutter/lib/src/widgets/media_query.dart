@@ -606,7 +606,7 @@ class MediaQueryData {
   /// content on iOS, via Settings -> Accessibility -> Increase Contrast.
   ///
   /// This flag is currently only updated on iOS devices that are running iOS 13
-  /// or above.
+  /// or above and Android devices that are running Android API 34 or above.
   final bool highContrast;
 
   /// Whether the user requested to show on/off labels inside switches on iOS,
