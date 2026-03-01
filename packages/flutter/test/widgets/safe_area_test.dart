@@ -445,7 +445,7 @@ void main() {
           260.0,
           800.0,
           100.0,
-        ), // Inner SafeArea's box consumes space. Height 100 + 20 top padding (Sliver) + 10 top padding (inner) + 10 bottom padding (inner) + 20 bottom padding (Sliver)= 160 space. 100(before) + 160 = 260
+        ), // The sliver's total extent is 160px (20 outer padding + 120 for SafeArea + 20 outer padding). Next sliver starts at 100(before) + 160 = 260.
       ]);
     });
 
