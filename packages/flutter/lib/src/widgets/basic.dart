@@ -7792,7 +7792,7 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 /// The following sample has an [AbsorbPointer] widget in a dynamic toggle
 /// scenario. By using a [Switch], the [AbsorbPointer] can be enabled or
 /// disabled. When active (absorbing is true), it prevents its child [Column]
-/// which containing two buttons from receiving pointer events, effectively
+/// which contains two buttons from receiving pointer events, effectively
 /// disabling user interaction for that entire subtree.
 ///
 /// ** See code in examples/api/lib/widgets/basic/absorb_pointer.0.dart **
