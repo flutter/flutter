@@ -22,30 +22,58 @@ class AbsorbPointerApp extends StatelessWidget {
   }
 }
 
-class AbsorbPointerExample extends StatelessWidget {
+class AbsorbPointerExample extends StatefulWidget {
   const AbsorbPointerExample({super.key});
 
   @override
+  State<AbsorbPointerExample> createState() => _AbsorbPointerExampleState();
+}
+
+class _AbsorbPointerExampleState extends State<AbsorbPointerExample> {
+  bool isAbsorbing = true;
+
+  @override
   Widget build(BuildContext context) {
-    return Stack(
-      alignment: AlignmentDirectional.center,
-      children: <Widget>[
-        SizedBox(
-          width: 200.0,
-          height: 100.0,
-          child: ElevatedButton(onPressed: () {}, child: null),
-        ),
-        SizedBox(
-          width: 100.0,
-          height: 200.0,
-          child: AbsorbPointer(
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue.shade200,
-              ),
-              onPressed: () {},
-              child: null,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      spacing: 40,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text("Enable Buttons"),
+            Switch(
+              value: isAbsorbing,
+              onChanged: (value) {
+                setState(() {
+                  isAbsorbing = value;
+                });
+              },
             ),
+          ],
+        ),
+        AbsorbPointer(
+          absorbing: !isAbsorbing,
+          child: Column(
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Button 1 Pressed")),
+                  );
+                },
+                child: const Text("Button 1"),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Button 2 Pressed")),
+                  );
+                },
+                child: const Text("Button 2"),
+              ),
+            ],
           ),
         ),
       ],

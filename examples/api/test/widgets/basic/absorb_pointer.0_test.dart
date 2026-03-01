@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_api_samples/widgets/basic/absorb_pointer.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
@@ -16,25 +13,33 @@ void main() {
   ) async {
     await tester.pumpWidget(const example.AbsorbPointerApp());
 
-    // Get the center of the stack.
-    final Offset center = tester.getCenter(find.byType(Stack).first);
+    // Verify initial state: Switch is ON by default (isAbsorbing = true)
+    final Finder switchFinder = find.byType(Switch);
+    expect(tester.widget<Switch>(switchFinder).value, isTrue);
 
-    final TestGesture gesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-      pointer: 1,
-    );
-    // Add the point to the center of the stack where the AbsorbPointer is.
-    await gesture.addPointer(location: center);
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
-    );
+    // Buttons should be clickable when Switch is ON
+    await tester.tap(find.text('Button 1'));
+    await tester.pumpAndSettle(); // Wait for SnackBar animation
 
-    // Move the pointer to the left of the stack where the AbsorbPointer is not.
-    await gesture.moveTo(center + const Offset(-100, 0));
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.basic,
-    );
+    expect(find.text('Button 1 Pressed'), findsOneWidget);
+
+    // Dismiss SnackBar for next test
+    ScaffoldMessenger.of(
+      tester.element(find.text('Button 1')),
+    ).clearSnackBars();
+    await tester.pumpAndSettle();
+
+    // Toggle the Switch to OFF (isAbsorbing = false)
+    await tester.tap(switchFinder);
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<Switch>(switchFinder).value, isFalse);
+
+    // Buttons should NOT be clickable when Switch is OFF
+    await tester.tap(find.text('Button 2'), warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    // Verify that NO SnackBar appeared
+    expect(find.text('Button 2 Pressed'), findsNothing);
   });
 }
