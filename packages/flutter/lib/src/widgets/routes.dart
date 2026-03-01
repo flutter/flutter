@@ -2525,8 +2525,13 @@ abstract mixin class RouteAware {
   /// Called when the current route has been popped off.
   void didPop() {}
 
-  /// Called when a new route has been pushed, and the current route is no
-  /// longer visible.
+  /// Called when a new route has been pushed.
+  ///
+  /// Note that this is called during the push operation, before the transition
+  /// animation completes. At this point the current route may still be
+  /// partially visible as it animates out. To perform actions after the route
+  /// is fully obscured, consider using [ModalRoute.animation] to listen for
+  /// animation completion.
   void didPushNext() {}
 }
 
