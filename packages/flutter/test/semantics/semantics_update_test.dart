@@ -324,6 +324,7 @@ class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilde
     required ui.Locale? locale,
     required String minValue,
     required String maxValue,
+    bool mergesDescendants = false,
   }) {
     // Makes sure we don't send the same id twice.
     assert(!observations.containsKey(id));
