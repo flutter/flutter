@@ -14,7 +14,7 @@ library;
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'dart:ui' show FlutterView, FontWeight, Locale, Offset, Rect, Size, TextAlign, TextDirection;
-
+import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
@@ -1067,27 +1067,70 @@ class TextEditingValue {
     if (!replacementRange.isValid) {
       return this;
     }
-    final String newText = text.replaceRange(
-      replacementRange.start,
-      replacementRange.end,
-      replacementString,
-    );
 
-    if (replacementRange.end - replacementRange.start == replacementString.length) {
+    // Use grapheme-aware replacement to handle multi-code-unit characters correctly.
+    // This ensures that characters like emojis (which use UTF-16 surrogate pairs)
+    // are treated as single units rather than being split.
+    final Characters characters = text.characters;
+
+    // Find grapheme boundaries for the replacement range.
+    var graphemeStart = 0;
+    var codeUnitCount = 0;
+
+    for (final char in characters) {
+      if (codeUnitCount >= replacementRange.start) {
+        break;
+      }
+      codeUnitCount += char.length;
+      graphemeStart++;
+    }
+
+    // Find the grapheme that contains replacementRange.end
+    var graphemeEnd = graphemeStart;
+    while (codeUnitCount < replacementRange.end && graphemeEnd < characters.length) {
+      codeUnitCount += characters.elementAt(graphemeEnd).length;
+      graphemeEnd++;
+    }
+
+    final String newText =
+        characters.take(graphemeStart).string +
+        replacementString +
+        characters.skip(graphemeEnd).string;
+
+    // If the replacement doesn't change the length, just update text
+    final int oldLength = characters
+        .skip(graphemeStart)
+        .take(graphemeEnd - graphemeStart)
+        .string
+        .length;
+    if (oldLength == replacementString.length) {
       return copyWith(text: newText);
     }
 
     int adjustIndex(int originalIndex) {
-      // The length added by adding the replacementString.
-      final int replacedLength =
-          originalIndex <= replacementRange.start && originalIndex < replacementRange.end
-          ? 0
-          : replacementString.length;
-      // The length removed by removing the replacementRange.
-      final int removedLength =
-          originalIndex.clamp(replacementRange.start, replacementRange.end) -
-          replacementRange.start;
-      return originalIndex + replacedLength - removedLength;
+      // Convert originalIndex to grapheme offset
+      var graphemeIndex = 0;
+      var codeUnits = 0;
+      for (final char in characters) {
+        if (codeUnits >= originalIndex) {
+          break;
+        }
+        codeUnits += char.length;
+        graphemeIndex++;
+      }
+
+      // Adjust based on replacement
+      if (graphemeIndex <= graphemeStart) {
+        // Before replacement: no change
+        return originalIndex;
+      } else if (graphemeIndex >= graphemeEnd) {
+        // After replacement: adjust by the difference
+        final int diff = replacementString.length - oldLength;
+        return originalIndex + diff;
+      } else {
+        // Inside replacement range: move to end of replacement
+        return characters.take(graphemeStart).string.length + replacementString.length;
+      }
     }
 
     final adjustedSelection = TextSelection(
@@ -1098,8 +1141,10 @@ class TextEditingValue {
       start: adjustIndex(composing.start),
       end: adjustIndex(composing.end),
     );
+
     assert(_textRangeIsValid(adjustedSelection, newText));
     assert(_textRangeIsValid(adjustedComposing, newText));
+
     return TextEditingValue(
       text: newText,
       selection: adjustedSelection,
@@ -2208,8 +2253,18 @@ class TextInput {
 
     switch (method) {
       case 'TextInputClient.updateEditingState':
-        final value = TextEditingValue.fromJSON(args[1] as Map<String, dynamic>);
-        TextInput._instance._updateEditingValue(value, exclude: _PlatformTextInputControl.instance);
+        final rawValue = TextEditingValue.fromJSON(args[1] as Map<String, dynamic>);
+
+        // Validate and correct text that may contain broken surrogate pairs from the platform.
+        // This can occur when the Android IME inserts multi-code-unit characters (like emojis)
+        // at positions that split existing surrogate pairs.
+        final TextEditingValue correctedValue = _validateAndCorrectTextEditingValue(rawValue);
+
+        TextInput._instance._updateEditingValue(
+          correctedValue,
+          exclude: _PlatformTextInputControl.instance,
+        );
+
       case 'TextInputClient.updateEditingStateWithDeltas':
         assert(
           _currentConnection!._client is DeltaTextInputClient,
@@ -2257,6 +2312,94 @@ class TextInput {
       default:
         throw MissingPluginException();
     }
+  }
+
+  /// Validates and corrects a [TextEditingValue] that may contain broken
+  /// surrogate pairs from the platform.
+  ///
+  /// This method addresses an issue where the Android IME may send text with
+  /// broken UTF-16 surrogate pairs when inserting multi-code-unit characters
+  /// (such as emojis) at positions that split existing surrogate pairs.
+  ///
+  /// When the platform sends text containing replacement characters ('?' or '\uFFFD'),
+  /// this method attempts to reconstruct the correct text by:
+  /// 1. Comparing with the previous [TextEditingValue]
+  /// 2. Identifying the newly inserted character
+  /// 3. Determining the correct insertion position at grapheme boundaries
+  /// 4. Reconstructing the text with proper character boundaries
+  ///
+  /// Returns the corrected [TextEditingValue] if broken surrogate pairs are detected,
+  /// otherwise returns the original value unchanged.
+  ///
+  /// See also:
+  ///  * [TextEditingValue.replaced], which handles text replacement at grapheme boundaries.
+  ///  * https://github.com/flutter/flutter/issues/181759 (the issue number for this bug)
+  static TextEditingValue _validateAndCorrectTextEditingValue(TextEditingValue value) {
+    if (value.text.isEmpty) {
+      return value;
+    }
+
+    // Check if the text contains replacement characters which indicate broken surrogate pairs.
+    if (!value.text.contains('?') && !value.text.contains('\uFFFD')) {
+      return value;
+    }
+
+    // Attempt to reconstruct the original text using the previous value.
+    final TextEditingValue? previousValue =
+        _instance._currentConnection?._client.currentTextEditingValue;
+
+    if (previousValue == null || previousValue.text.isEmpty) {
+      return value;
+    }
+
+    // If the new text is longer, it means text was inserted.
+    if (value.text.length > previousValue.text.length) {
+      final Characters previousChars = previousValue.text.characters;
+      final Characters currentChars = value.text.characters;
+
+      // Find the newly inserted character.
+      var insertedText = '';
+      for (final char in currentChars) {
+        if (char != '?' && char != '\uFFFD' && !previousChars.contains(char)) {
+          insertedText = char;
+          break;
+        }
+      }
+
+      if (insertedText.isEmpty) {
+        return value;
+      }
+
+      // Determine the insertion position at grapheme boundaries.
+      var graphemePos = 0;
+      var codeUnitPos = 0;
+
+      for (final char in previousChars) {
+        if (codeUnitPos >= previousValue.selection.start) {
+          break;
+        }
+        codeUnitPos += char.length;
+        graphemePos++;
+      }
+
+      // If the cursor was in the middle of a surrogate pair, move to the next boundary.
+      if (codeUnitPos < previousValue.selection.start) {
+        graphemePos++;
+      }
+
+      // Reconstruct the text at the correct grapheme boundary.
+      final String before = previousChars.take(graphemePos).string;
+      final String after = previousChars.skip(graphemePos).string;
+      final String reconstructedText = before + insertedText + after;
+      final int newSelectionPos = (before + insertedText).length;
+
+      return TextEditingValue(
+        text: reconstructedText,
+        selection: TextSelection.collapsed(offset: newSelectionPos),
+      );
+    }
+
+    return value;
   }
 
   bool _hidePending = false;

@@ -187,6 +187,220 @@ void main() {
         );
       });
     });
+    test('insert emoji into emoji-only text', () {
+      // "😏🙂" → insert "🥺" at position 2 (after first emoji)
+      const emojiText = '😏🙂';
+      const selection = TextSelection.collapsed(offset: 2); // after 😏
+      expect(
+        const TextEditingValue(text: emojiText, selection: selection).replaced(selection, '🥺'),
+        const TextEditingValue(
+          text: '😏🥺🙂',
+          selection: TextSelection.collapsed(offset: 4), // after 🥺
+        ),
+      );
+    });
+    test('insert emoji at beginning of emoji text', () {
+      const emojiText = '😏🙂';
+      const selection = TextSelection.collapsed(offset: 0);
+      expect(
+        const TextEditingValue(text: emojiText, selection: selection).replaced(selection, '🥺'),
+        const TextEditingValue(text: '🥺😏🙂', selection: TextSelection.collapsed(offset: 2)),
+      );
+    });
+
+    test('insert emoji at end of emoji text', () {
+      const emojiText = '😏🙂';
+      const selection = TextSelection.collapsed(offset: 4); // end of text
+      expect(
+        const TextEditingValue(text: emojiText, selection: selection).replaced(selection, '🥺'),
+        const TextEditingValue(text: '😏🙂🥺', selection: TextSelection.collapsed(offset: 6)),
+      );
+    });
+
+    test('replace emoji with emoji', () {
+      const emojiText = '😏🙂😆';
+      // Replace middle emoji 🙂 (code units 2-4) with 🥺
+      expect(
+        const TextEditingValue(text: emojiText).replaced(const TextRange(start: 2, end: 4), '🥺'),
+        const TextEditingValue(text: '😏🥺😆'),
+      );
+    });
+
+    test('delete emoji from emoji-only text', () {
+      const emojiText = '😏🙂😆';
+      // Delete middle emoji 🙂 (code units 2-4)
+      expect(
+        const TextEditingValue(text: emojiText).replaced(const TextRange(start: 2, end: 4), ''),
+        const TextEditingValue(text: '😏😆'),
+      );
+    });
+
+    test('insert emoji into mixed text', () {
+      // Text with both ASCII and emoji
+      const mixedText = 'Hi 😏 there';
+      const selection = TextSelection.collapsed(offset: 5); // after 😏
+      expect(
+        const TextEditingValue(text: mixedText, selection: selection).replaced(selection, '🥺'),
+        const TextEditingValue(
+          text: 'Hi 😏🥺 there',
+          selection: TextSelection.collapsed(offset: 7),
+        ),
+      );
+    });
+
+    test('insert emoji with variation selector', () {
+      // ✔️ uses variation selector (3 code units)
+      const text = '✔️😏';
+      const selection = TextSelection.collapsed(offset: 3); // after ✔️
+      expect(
+        const TextEditingValue(text: text, selection: selection).replaced(selection, '🥺'),
+        const TextEditingValue(text: '✔️🥺😏', selection: TextSelection.collapsed(offset: 5)),
+      );
+    });
+  });
+  group('surrogate pair correction', () {
+    late FakeTextChannel fakeTextChannel;
+
+    setUp(() {
+      fakeTextChannel = FakeTextChannel((MethodCall call) async {});
+      TextInput.setChannel(fakeTextChannel);
+    });
+
+    tearDown(() {
+      TextInputConnection.debugResetId();
+      TextInput.setChannel(SystemChannels.textInput);
+    });
+
+    test('corrects broken surrogate pairs when inserting emoji between emojis', () async {
+      // Simulate: user has "😏🙂", cursor after 😏 (position 2),
+      // then Android IME sends broken "?🥺?" instead of "😏🥺🙂"
+      final client = FakeTextInputClient(
+        const TextEditingValue(text: '😏🙂', selection: TextSelection.collapsed(offset: 2)),
+      );
+      const configuration = TextInputConfiguration();
+      TextInput.attach(client, configuration);
+
+      // Simulate Android sending broken text with surrogate pairs split
+      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'method': 'TextInputClient.updateEditingState',
+        'args': <dynamic>[
+          1,
+          <String, dynamic>{
+            'text': '?🥺?', // broken surrogate pairs
+            'selectionBase': 3,
+            'selectionExtent': 3,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
+        ],
+      });
+
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        messageBytes,
+        (ByteData? _) {},
+      );
+
+      // The client should receive corrected text, not broken text
+      expect(client.latestMethodCall, 'updateEditingValue');
+      expect(client.currentTextEditingValue.text, '😏🥺🙂');
+    });
+
+    test('does not modify clean text without broken surrogate pairs', () async {
+      // Normal emoji text without corruption should pass through unchanged
+      final client = FakeTextInputClient(
+        const TextEditingValue(text: '😏', selection: TextSelection.collapsed(offset: 2)),
+      );
+      const configuration = TextInputConfiguration();
+      TextInput.attach(client, configuration);
+
+      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'method': 'TextInputClient.updateEditingState',
+        'args': <dynamic>[
+          1,
+          <String, dynamic>{
+            'text': '😏🙂', // clean text, no corruption
+            'selectionBase': 4,
+            'selectionExtent': 4,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
+        ],
+      });
+
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        messageBytes,
+        (ByteData? _) {},
+      );
+
+      expect(client.latestMethodCall, 'updateEditingValue');
+      expect(client.currentTextEditingValue.text, '😏🙂'); // unchanged
+    });
+
+    test('does not modify plain ASCII text', () async {
+      final client = FakeTextInputClient(
+        const TextEditingValue(text: 'hello', selection: TextSelection.collapsed(offset: 5)),
+      );
+      const configuration = TextInputConfiguration();
+      TextInput.attach(client, configuration);
+
+      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'method': 'TextInputClient.updateEditingState',
+        'args': <dynamic>[
+          1,
+          <String, dynamic>{
+            'text': 'hello world',
+            'selectionBase': 11,
+            'selectionExtent': 11,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
+        ],
+      });
+
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        messageBytes,
+        (ByteData? _) {},
+      );
+
+      expect(client.latestMethodCall, 'updateEditingValue');
+      expect(client.currentTextEditingValue.text, 'hello world'); // unchanged
+    });
+
+    test('corrects broken surrogate pairs with multiple emojis', () async {
+      // "🙂🙂🙂🥺🙂" with cursor after 4th emoji (position 8)
+      // Android sends "🙂🙂🙂🥺?😆?🙂" (broken)
+      final client = FakeTextInputClient(
+        const TextEditingValue(text: '🙂🙂🙂🥺🙂🙂', selection: TextSelection.collapsed(offset: 8)),
+      );
+      const configuration = TextInputConfiguration();
+      TextInput.attach(client, configuration);
+
+      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'method': 'TextInputClient.updateEditingState',
+        'args': <dynamic>[
+          1,
+          <String, dynamic>{
+            'text': '🙂🙂🙂🥺?😆?🙂', // broken surrogate pairs
+            'selectionBase': 10,
+            'selectionExtent': 10,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
+        ],
+      });
+
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        messageBytes,
+        (ByteData? _) {},
+      );
+
+      expect(client.latestMethodCall, 'updateEditingValue');
+      expect(client.currentTextEditingValue.text, '🙂🙂🙂🥺🙂😆🙂');
+    });
   });
 
   group('TextInput message channels', () {
@@ -1580,6 +1794,7 @@ class FakeTextInputClient with TextInputClient {
   @override
   void updateEditingValue(TextEditingValue value) {
     latestMethodCall = 'updateEditingValue';
+    currentTextEditingValue = value;
   }
 
   @override
