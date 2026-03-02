@@ -30,41 +30,84 @@ import 'binding.dart';
 // In C this would be INT_MAX, but since we can't determine that from Dart let's assume it's 32 bit signed. In any case this is far beyond any reasonable window size.
 const int _kMaxWindowDimensions = 0x7fffffff;
 
-const int _GTK_WINDOW_TOPLEVEL = 0;
-const int _GTK_WINDOW_POPUP = 1;
+/// The type of a GtkWindow.
+enum _GtkWindowType {
+  toplevel,
+  // ignore: unused_field
+  popup,
+}
 
-const int _GDK_GRAVITY_NORTH_WEST = 1;
-const int _GDK_GRAVITY_NORTH = 2;
-const int _GDK_GRAVITY_NORTH_EAST = 3;
-const int _GDK_GRAVITY_WEST = 4;
-const int _GDK_GRAVITY_CENTER = 5;
-const int _GDK_GRAVITY_EAST = 6;
-const int _GDK_GRAVITY_SOUTH_WEST = 7;
-const int _GDK_GRAVITY_SOUTH = 8;
-const int _GDK_GRAVITY_SOUTH_EAST = 9;
-const int _GDK_GRAVITY_STATIC = 10;
+/// States a toplevel window can be in.
+enum _GdkWindowState {
+  withdrawn,
+  iconified,
+  maximized,
+  sticky,
+  fullscreen,
+  above,
+  below,
+  focused,
+  tiled,
+  topTiled,
+  topResizable,
+  rightTiled,
+  rightResizable,
+  bottomTiled,
+  bottomResizable,
+  leftTiled,
+  leftResizable,
+}
 
-const int _GDK_ANCHOR_FLIP_X = 1;
-const int _GDK_ANCHOR_FLIP_Y = 2;
-const int _GDK_ANCHOR_SLIDE_X = 4;
-const int _GDK_ANCHOR_SLIDE_Y = 8;
-const int _GDK_ANCHOR_RESIZE_X = 16;
-const int _GDK_ANCHOR_RESIZE_Y = 32;
+/// Hints for the window manager on how to treat a window.
+enum _GdkWindowTypeHint {
+  // ignore: unused_field
+  normal,
+  dialog,
+  // ignore: unused_field
+  menu,
+  // ignore: unused_field
+  toolbar,
+  // ignore: unused_field
+  splashscreen,
+  // ignore: unused_field
+  utility,
+  // ignore: unused_field
+  dock,
+  // ignore: unused_field
+  desktop,
+  // ignore: unused_field
+  dropdown_menu,
+  // ignore: unused_field
+  popup_menu,
+  // ignore: unused_field
+  tooltip,
+  // ignore: unused_field
+  notification,
+  // ignore: unused_field
+  combo,
+  // ignore: unused_field
+  dnd,
+}
 
-/// Flag to indicated if a window is iconified.
-const int _GDK_WINDOW_STATE_ICONIFIED = 1 << 1;
+/// FIXME
+enum _GdkGravity {
+  // ignore: unused_field
+  none,
+  northWest,
+  north,
+  northEast,
+  west,
+  center,
+  east,
+  southWest,
+  south,
+  southEast,
+  // ignore: unused_field
+  static_,
+}
 
-/// Flag to indicated if a window is maximized.
-const int _GDK_WINDOW_STATE_MAXIMIZED = 1 << 2;
-
-/// Flag to indicated if a window is fullscreen.
-const int _GDK_WINDOW_STATE_FULLSCREEN = 1 << 4;
-
-/// Window hint for dialogs.
-const int _GDK_WINDOW_TYPE_HINT_DIALOG = 1;
-
-/// Window hint for tooltips.
-const int _GDK_WINDOW_TYPE_HINT_TOOLTIP = 10;
+/// FIXME
+enum _GdkAnchorHint { flipX, flipY, slideX, slideY, resizeX, resizeY }
 
 const String _kWindowingDisabledErrorMessage = '''
 Windowing APIs are not enabled.
@@ -102,7 +145,7 @@ String _nativeToString(ffi.Pointer<ffi.Uint8> value) {
   return utf8.decode(value.asTypedList(length));
 }
 
-/// Wraps GObject
+/// Wraps GObject.
 class _GObject {
   /// Creates a wrapper to an existing [GObject] in [instance].
   const _GObject(this.instance);
@@ -119,7 +162,7 @@ class _GObject {
   external static void _unref(ffi.Pointer<ffi.NativeType> widget);
 }
 
-/// Wraps GtkContainer
+/// Wraps GtkContainer.
 class _GtkContainer extends _GtkWidget {
   /// Creates a wrapper to an existing [GtkContainer] in [instance].
   const _GtkContainer(super.instance);
@@ -138,7 +181,7 @@ class _GtkContainer extends _GtkWidget {
   );
 }
 
-/// Wraps GtkWidget
+/// Wraps GtkWidget.
 class _GtkWidget extends _GObject {
   /// Creates a wrapper to an existing [GtkWidget] in [instance].
   const _GtkWidget(super.instance);
@@ -224,14 +267,22 @@ class _GtkWidget extends _GObject {
   );
 }
 
-/// Wraps GdkWindow
+/// Wraps GdkWindow.
 class _GdkWindow extends _GObject {
   /// Creates a wrapper to an existing [GdkWindow] in [instance].
   const _GdkWindow(super.instance);
 
-  /// Gets the window state bitfield (_GDK_WINDOW_STATE_*).
-  int getState() {
-    return _gdkWindowGetState(instance);
+  /// Gets the window state.
+  Set<_GdkWindowState> getState() {
+    final int stateBits = _gdkWindowGetState(instance);
+    final states = <_GdkWindowState>{};
+    for (final _GdkWindowState state in _GdkWindowState.values) {
+      if ((stateBits & (1 << state.index)) != 0) {
+        states.add(state);
+      }
+    }
+
+    return states;
   }
 
   /// FIXME
@@ -240,9 +291,9 @@ class _GdkWindow extends _GObject {
     required int y,
     required int width,
     required int height,
-    required int rectAnchor,
-    required int windowAnchor,
-    required int anchorHints,
+    required _GdkGravity rectAnchor,
+    required _GdkGravity windowAnchor,
+    required Set<_GdkAnchorHint> anchorHints,
     int rectAnchorDx = 0,
     int rectAnchorDy = 0,
   }) {
@@ -254,12 +305,16 @@ class _GdkWindow extends _GObject {
     r.y = y;
     r.width = width;
     r.height = height;
+    var anchorHintsBits = 0;
+    for (final anchor in anchorHints) {
+      anchorHintsBits |= 1 << anchor.index;
+    }
     _gdkWindowMoveToRect(
       instance,
       rect,
-      rectAnchor,
-      windowAnchor,
-      anchorHints,
+      rectAnchor.index,
+      windowAnchor.index,
+      anchorHintsBits,
       rectAnchorDx,
       rectAnchorDy,
     );
@@ -350,10 +405,10 @@ final class _GdkGeometry extends ffi.Struct {
   external int winGravity;
 }
 
-/// Wraps GtkWindow
+/// Wraps GtkWindow.
 class _GtkWindow extends _GtkContainer {
   /// Create a new GtkWindow
-  _GtkWindow(int type) : super(_gtkWindowNew(type));
+  _GtkWindow(_GtkWindowType type) : super(_gtkWindowNew(type.index));
 
   /// Make window visible and grab focus.
   void present() {
@@ -371,8 +426,8 @@ class _GtkWindow extends _GtkContainer {
   }
 
   /// Set the type of this window.
-  void setTypeHint(int hint) {
-    _gtkWindowSetTypeHint(instance, hint);
+  void setTypeHint(_GdkWindowTypeHint hint) {
+    _gtkWindowSetTypeHint(instance, hint.index);
   }
 
   /// Sets if this window has decorations (titlebar, borders, shadow).
@@ -571,14 +626,23 @@ class _GtkWindow extends _GtkContainer {
   external static bool _gtkWindowIsActive(ffi.Pointer<ffi.NativeType> widget);
 }
 
-/// Wraps FlView
+/// Wraps FlEngine.
+class _FlEngine extends _GObject {
+  /// Gets the FlEngine object for the engine with the given ID.
+  _FlEngine(int engineId) : super(ffi.Pointer<ffi.NativeType>.fromAddress(engineId));
+
+  /// Gets the engine object running in the current isolate.
+  factory _FlEngine.current() => _FlEngine(WidgetsBinding.instance.platformDispatcher.engineId!);
+}
+
+/// Wraps FlView.
 class _FlView extends _GtkWidget {
   /// Create a new FlView widget.
-  _FlView(int engineId, {bool isSizedToContent = false})
+  _FlView(_FlEngine engine, {bool isSizedToContent = false})
     : super(
         isSizedToContent
-            ? _flViewNewSizedToContent(ffi.Pointer<ffi.NativeType>.fromAddress(engineId))
-            : _flViewNewForEngine(ffi.Pointer<ffi.NativeType>.fromAddress(engineId)),
+            ? _flViewNewSizedToContent(engine.instance)
+            : _flViewNewForEngine(engine.instance),
       );
 
   /// Get the ID for the Flutter view being shown in this widget.
@@ -837,7 +901,7 @@ class RegularWindowControllerLinux extends RegularWindowController {
     String? title,
   }) : _owner = owner,
        _delegate = delegate,
-       _window = _GtkWindow(_GTK_WINDOW_TOPLEVEL),
+       _window = _GtkWindow(_GtkWindowType.toplevel),
        super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
@@ -863,7 +927,8 @@ class RegularWindowControllerLinux extends RegularWindowController {
     if (title != null) {
       setTitle(title);
     }
-    _view = _FlView(WidgetsBinding.instance.platformDispatcher.engineId!);
+    final engine = _FlEngine.current();
+    _view = _FlView(engine);
     final int viewId = _view.getId();
     rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
@@ -907,16 +972,16 @@ class RegularWindowControllerLinux extends RegularWindowController {
 
   @override
   @internal
-  bool get isMaximized => (_window.getWindow().getState() & _GDK_WINDOW_STATE_MAXIMIZED) != 0;
+  bool get isMaximized => _window.getWindow().getState().contains(_GdkWindowState.maximized);
 
   @override
   @internal
   // NOTE: On Wayland this is never set, see https://gitlab.gnome.org/GNOME/gtk/-/issues/67
-  bool get isMinimized => (_window.getWindow().getState() & _GDK_WINDOW_STATE_ICONIFIED) != 0;
+  bool get isMinimized => _window.getWindow().getState().contains(_GdkWindowState.iconified);
 
   @override
   @internal
-  bool get isFullscreen => (_window.getWindow().getState() & _GDK_WINDOW_STATE_FULLSCREEN) != 0;
+  bool get isFullscreen => _window.getWindow().getState().contains(_GdkWindowState.fullscreen);
 
   @override
   @internal
@@ -1008,13 +1073,13 @@ class DialogWindowControllerLinux extends DialogWindowController {
   }) : _owner = owner,
        _delegate = delegate,
        _parent = parent,
-       _window = _GtkWindow(_GTK_WINDOW_TOPLEVEL),
+       _window = _GtkWindow(_GtkWindowType.toplevel),
        super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
 
-    _window.setTypeHint(_GDK_WINDOW_TYPE_HINT_DIALOG);
+    _window.setTypeHint(_GdkWindowTypeHint.dialog);
     if (parent != null) {
       final _GtkWindow? parentWindow = owner._windows[parent.rootView.viewId];
       if (parentWindow != null) {
@@ -1043,7 +1108,8 @@ class DialogWindowControllerLinux extends DialogWindowController {
     if (title != null) {
       setTitle(title);
     }
-    _view = _FlView(WidgetsBinding.instance.platformDispatcher.engineId!);
+    final engine = _FlEngine.current();
+    _view = _FlView(engine);
     final int viewId = _view.getId();
     rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
@@ -1093,7 +1159,7 @@ class DialogWindowControllerLinux extends DialogWindowController {
   @override
   @internal
   // NOTE: On Wayland this is never set, see https://gitlab.gnome.org/GNOME/gtk/-/issues/67
-  bool get isMinimized => (_window.getWindow().getState() & _GDK_WINDOW_STATE_ICONIFIED) != 0;
+  bool get isMinimized => _window.getWindow().getState().contains(_GdkWindowState.iconified);
 
   @override
   @internal
@@ -1165,7 +1231,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
   }) : _owner = owner,
        _delegate = delegate,
        _parent = parent,
-       _window = _GtkWindow(_GTK_WINDOW_POPUP),
+       _window = _GtkWindow(_GtkWindowType.popup),
        super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
@@ -1181,10 +1247,8 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
       onDestroy: _delegate.onWindowDestroyed,
     );
     setConstraints(preferredConstraints);
-    _view = _FlView(
-      WidgetsBinding.instance.platformDispatcher.engineId!,
-      isSizedToContent: isSizedToContent,
-    );
+    final engine = _FlEngine.current();
+    _view = _FlView(engine, isSizedToContent: isSizedToContent);
     final int viewId = _view.getId();
     rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
@@ -1256,48 +1320,50 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
     );
   }
 
-  int _anchorToGravity(WindowPositionerAnchor anchor) {
+  _GdkGravity _anchorToGravity(WindowPositionerAnchor anchor) {
     switch (anchor) {
       case WindowPositionerAnchor.center:
-        return _GDK_GRAVITY_CENTER;
+        return _GdkGravity.center;
       case WindowPositionerAnchor.top:
-        return _GDK_GRAVITY_NORTH;
+        return _GdkGravity.north;
       case WindowPositionerAnchor.bottom:
-        return _GDK_GRAVITY_SOUTH;
+        return _GdkGravity.south;
       case WindowPositionerAnchor.left:
-        return _GDK_GRAVITY_WEST;
+        return _GdkGravity.west;
       case WindowPositionerAnchor.right:
-        return _GDK_GRAVITY_EAST;
+        return _GdkGravity.east;
       case WindowPositionerAnchor.topLeft:
-        return _GDK_GRAVITY_NORTH_WEST;
+        return _GdkGravity.northWest;
       case WindowPositionerAnchor.bottomLeft:
-        return _GDK_GRAVITY_SOUTH_WEST;
+        return _GdkGravity.southWest;
       case WindowPositionerAnchor.topRight:
-        return _GDK_GRAVITY_NORTH_EAST;
+        return _GdkGravity.northEast;
       case WindowPositionerAnchor.bottomRight:
-        return _GDK_GRAVITY_SOUTH_EAST;
+        return _GdkGravity.southEast;
     }
   }
 
-  int _constraintAdjustmentToHints(WindowPositionerConstraintAdjustment adjustment) {
-    var hints = 0;
+  Set<_GdkAnchorHint> _constraintAdjustmentToHints(
+    WindowPositionerConstraintAdjustment adjustment,
+  ) {
+    final hints = <_GdkAnchorHint>{};
     if (adjustment.flipX) {
-      hints |= _GDK_ANCHOR_FLIP_X;
+      hints.add(_GdkAnchorHint.flipX);
     }
     if (adjustment.flipY) {
-      hints |= _GDK_ANCHOR_FLIP_Y;
+      hints.add(_GdkAnchorHint.flipY);
     }
     if (adjustment.slideX) {
-      hints |= _GDK_ANCHOR_SLIDE_X;
+      hints.add(_GdkAnchorHint.slideX);
     }
     if (adjustment.slideY) {
-      hints |= _GDK_ANCHOR_SLIDE_Y;
+      hints.add(_GdkAnchorHint.slideY);
     }
     if (adjustment.resizeX) {
-      hints |= _GDK_ANCHOR_RESIZE_X;
+      hints.add(_GdkAnchorHint.resizeX);
     }
     if (adjustment.resizeY) {
-      hints |= _GDK_ANCHOR_RESIZE_Y;
+      hints.add(_GdkAnchorHint.resizeY);
     }
     return hints;
   }
