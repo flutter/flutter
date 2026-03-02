@@ -53,6 +53,44 @@ void main() {
     expect(controller.position.pixels, 100.0);
   });
 
+  testWidgets('keyboardDismissBehavior.OnDrag with drawer tests', (WidgetTester tester) async {
+    final scaffoldKey = GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          drawer: Container(),
+          body: Column(
+            children: <Widget>[
+              const TextField(),
+              Expanded(
+                child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                  child: Container(height: 1000),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.testTextInput.isVisible, isFalse);
+    final Finder finder = find.byType(TextField).first;
+    await tester.tap(finder);
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    await tester.drag(find.byType(SingleChildScrollView).first, const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+
+    expect(tester.testTextInput.isVisible, isFalse);
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+
+    expect(tester.testTextInput.isVisible, isFalse);
+  });
+
   testWidgets('Scaffold drawer callback test', (WidgetTester tester) async {
     var isDrawerOpen = false;
     var isEndDrawerOpen = false;
@@ -122,6 +160,51 @@ void main() {
     await tester.flingFrom(Offset(width - 1, 0.0), const Offset(-10.0, 0.0), 10.0);
     await tester.pumpAndSettle();
     expect(onEndDrawerChangedCalled, false);
+  });
+
+  testWidgets('ListView dismiss keyboard onDrag and keep dismissed on drawer opened test', (
+    WidgetTester tester,
+  ) async {
+    final list = List<int>.generate(50, (int i) => i);
+    final scaffoldKey = GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Scaffold(
+            key: scaffoldKey,
+            drawer: Container(),
+            body: Column(
+              children: <Widget>[
+                const TextField(),
+                Expanded(
+                  child: ListView(
+                    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                    children: list.map((int i) {
+                      return Container(height: 50);
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.testTextInput.isVisible, isFalse);
+    final Finder finder = find.byType(EditableText).first;
+    await tester.tap(finder);
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    await tester.drag(find.byType(ListView).first, const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+
+    expect(tester.testTextInput.isVisible, isFalse);
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+
+    expect(tester.testTextInput.isVisible, isFalse);
   });
 
   testWidgets('Scaffold control test', (WidgetTester tester) async {
@@ -574,9 +657,8 @@ void main() {
     expect(renderBox.size.height, equals(appBarHeight));
   });
 
-  Widget buildStatusBarTestApp(TargetPlatform? platform) {
+  Widget buildStatusBarTestApp() {
     return MaterialApp(
-      theme: ThemeData(platform: platform),
       home: MediaQuery(
         data: const MediaQueryData(padding: EdgeInsets.only(top: 25.0)), // status bar
         child: Scaffold(
@@ -675,43 +757,73 @@ void main() {
     }),
   );
 
-  testWidgets('Tapping the status bar scrolls to top with ease out curve animation', (
-    WidgetTester tester,
-  ) async {
-    const duration = 1000;
-    final stops = <double>[0.842, 0.959, 0.993, 1.0];
-    const double scrollOffset = 1000;
+  testWidgets(
+    'Tapping the status bar scrolls to top with ease out curve animation',
+    (WidgetTester tester) async {
+      const duration = 1000;
+      final stops = <double>[0.842, 0.959, 0.993, 1.0];
+      const double scrollOffset = 1000;
 
-    await tester.pumpWidget(buildStatusBarTestApp(null));
-    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
-    scrollable.position.jumpTo(scrollOffset);
+      await tester.pumpWidget(buildStatusBarTestApp());
+      final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+      scrollable.position.jumpTo(scrollOffset);
 
-    final ByteData message = const JSONMethodCodec().encodeMethodCall(
-      const MethodCall('handleScrollToTop'),
-    );
-    tester.binding.defaultBinaryMessenger.handlePlatformMessage(
-      SystemChannels.statusBar.name,
-      message,
-      (ByteData? data) {},
-    );
+      tester.simulateStatusBarTap();
+      await tester.pump(Duration.zero);
+      expect(scrollable.position.pixels, equals(scrollOffset));
 
-    await tester.pump(Duration.zero);
-    expect(scrollable.position.pixels, equals(scrollOffset));
+      for (var i = 0; i < stops.length; i++) {
+        await tester.pump(Duration(milliseconds: duration ~/ stops.length));
+        // Scroll pixel position is very long double, compare with floored int
+        // pixel position
+        expect(
+          scrollable.position.pixels.toInt(),
+          equals((scrollOffset * (1 - stops[i])).toInt()),
+          reason: 'stop $i',
+        );
+      }
 
-    for (var i = 0; i < stops.length; i++) {
-      await tester.pump(Duration(milliseconds: duration ~/ stops.length));
-      // Scroll pixel position is very long double, compare with floored int
-      // pixel position
-      expect(
-        scrollable.position.pixels.toInt(),
-        equals((scrollOffset * (1 - stops[i])).toInt()),
-        reason: 'stop $i',
+      // Finally stops at the top.
+      expect(scrollable.position.pixels, equals(0.0));
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
+  testWidgets(
+    'status bar tap only scrolls the foregrounded primary controller',
+    (WidgetTester tester) async {
+      final app = MaterialApp(
+        initialRoute: 'a',
+        onGenerateInitialRoutes: (initialRoute) {
+          return [
+            MaterialPageRoute(builder: (context) => _ScaffoldWithPrimaryScrollView()),
+            MaterialPageRoute(builder: (context) => _ScaffoldWithPrimaryScrollView()),
+          ];
+        },
+        onGenerateRoute: (_) => throw UnimplementedError(),
       );
-    }
+      await tester.pumpWidget(app);
 
-    // Finally stops at the top.
-    expect(scrollable.position.pixels, equals(0.0));
-  });
+      final Iterable<ScrollableState> scrollables = tester.stateList<ScrollableState>(
+        find.descendant(
+          of: find.byType(_ScaffoldWithPrimaryScrollView, skipOffstage: false),
+          matching: find.byType(Scrollable, skipOffstage: false),
+          skipOffstage: false,
+        ),
+      );
+
+      final [ScrollableState scrollable1, ScrollableState scrollable2] = scrollables.toList();
+      expect(scrollable1.position.pixels, 1000);
+      expect(scrollable2.position.pixels, 1000);
+
+      tester.simulateStatusBarTap();
+      await tester.pumpAndSettle();
+
+      expect(scrollable1.position.pixels, 1000);
+      expect(scrollable2.position.pixels, 0);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
 
   testWidgets('Bottom sheet cannot overlap app bar', (WidgetTester tester) async {
     final Key sheetKey = UniqueKey();
@@ -3759,5 +3871,26 @@ class _CustomPageRoute<T> extends PageRoute<T> {
     Widget child,
   ) {
     return child;
+  }
+}
+
+class _ScaffoldWithPrimaryScrollView extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => _ScaffoldWithPrimaryScrollViewState();
+}
+
+class _ScaffoldWithPrimaryScrollViewState extends State<_ScaffoldWithPrimaryScrollView> {
+  final ScrollController controller = ScrollController(initialScrollOffset: 1000);
+  @override
+  Widget build(BuildContext context) {
+    return MediaQuery(
+      data: const MediaQueryData(padding: EdgeInsets.only(top: 25.0)), // status bar
+      child: PrimaryScrollController(
+        controller: controller,
+        child: const Scaffold(
+          body: SingleChildScrollView(primary: true, child: SizedBox(height: 2000)),
+        ),
+      ),
+    );
   }
 }

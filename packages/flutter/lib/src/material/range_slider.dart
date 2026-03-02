@@ -1353,6 +1353,13 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     );
 
     if (_lastThumbSelection != null) {
+      switch (_lastThumbSelection!) {
+        case Thumb.start:
+          _state.startFocusNode.requestFocus();
+        case Thumb.end:
+          _state.endFocusNode.requestFocus();
+      }
+
       _active = true;
       // We supply the *current* values as the start locations, so that if we have
       // a tap, it consists of a call to onChangeStart with the previous value and
