@@ -173,9 +173,8 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
               container: true,
               button: true,
               onTap: widget.onTap,
-              child: SizedBox(
-                height: _kAccountDetailsHeight,
-                width: _kAccountDetailsHeight,
+              child: SizedBox.square(
+                dimension: _kAccountDetailsHeight,
                 child: Center(
                   child: Transform.rotate(
                     angle: _animation.value * math.pi,

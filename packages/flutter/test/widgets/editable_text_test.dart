@@ -9115,9 +9115,8 @@ void main() {
                     builder: (BuildContext innerContext) {
                       return Align(
                         alignment: Alignment.topLeft,
-                        child: SizedBox(
-                          width: 200,
-                          height: 200,
+                        child: SizedBox.square(
+                          dimension: 200.0,
                           child: EditableText(
                             maxLines: null,
                             controller: controller,
@@ -9192,9 +9191,8 @@ void main() {
       MaterialApp(
         home: Align(
           alignment: Alignment.topLeft,
-          child: SizedBox(
-            width: 200,
-            height: 200,
+          child: SizedBox.square(
+            dimension: 200,
             child: SingleChildScrollView(
               controller: outerController,
               child: EditableText(
@@ -9237,9 +9235,8 @@ void main() {
         MaterialApp(
           home: Align(
             alignment: Alignment.topLeft,
-            child: SizedBox(
-              width: 200,
-              height: 200,
+            child: SizedBox.square(
+              dimension: 200,
               child: EditableText(
                 maxLines: null,
                 controller: controller,
@@ -13049,9 +13046,8 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
-          child: SizedBox(
-            height: 600.0,
-            width: 600.0,
+          child: SizedBox.square(
+            dimension: 600.0,
             child: EditableText(
               controller: controller,
               scrollController: scrollController,
