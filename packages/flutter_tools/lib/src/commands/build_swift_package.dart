@@ -861,12 +861,10 @@ class AppFrameworkAndNativeAssetsDependencies {
 
   static const String _appBinaryName = 'App';
 
-  /// Builds an App.framework and any native assets for every sdk and then combines them into a
-  /// single xcframework.
+  /// Builds an App.framework for every sdk and then combines them into a single XCFramework.
+  /// Also, builds any native assets for each sdk and bundles them into XCFrameworks.
   ///
-  /// Also, builds any native assets for each sdk and bundles them into xcframeworks.
-  ///
-  /// Intermediate build files are put in the [cacheDirectory]. The final xcframeworks are copied
+  /// Intermediate build files are put in the [cacheDirectory]. The final XCFrameworks are copied
   /// to the [xcframeworkOutput].
   Future<void> generateArtifacts({
     required BuildInfo buildInfo,
@@ -875,21 +873,21 @@ class AppFrameworkAndNativeAssetsDependencies {
     required String packageConfigPath,
     required String targetFile,
   }) async {
-    const appFrameworkName = '$_appBinaryName.framework';
     final String xcodeBuildConfiguration = buildInfo.mode.uppercaseName;
     final appFrameworks = <Directory>[];
     final Map<String, List<({XcodeSdk sdk, String path})>> nativeAssetFrameworks = {};
+    final List<String> warnings = [];
+
     final Status status = _utils.logger.startProgress(
       '   ├─Building $_appBinaryName.xcframework and native assets...',
     );
-    final List<String> warnings = [];
     try {
       // Create App.framework (and .frameworks for native assets) for each sdk.
       for (final XcodeSdk sdk in _targetPlatform.sdks) {
         final Directory outputBuildDirectory = cacheDirectory
             .childDirectory(xcodeBuildConfiguration)
             .childDirectory(sdk.platformName);
-        await _buildFlutterTarget(
+        await _buildFlutterGeneratedFrameworks(
           buildInfo: buildInfo,
           outputBuildDirectory: outputBuildDirectory,
           packageConfigPath: packageConfigPath,
@@ -897,7 +895,9 @@ class AppFrameworkAndNativeAssetsDependencies {
           platform: _targetPlatform,
           sdk: sdk,
         );
-        final Directory appFramework = outputBuildDirectory.childDirectory(appFrameworkName);
+        final Directory appFramework = outputBuildDirectory.childDirectory(
+          '$_appBinaryName.framework',
+        );
         appFrameworks.add(appFramework);
         _findNativeAssetFrameworks(outputBuildDirectory, nativeAssetFrameworks, sdk: sdk);
       }
@@ -910,7 +910,7 @@ class AppFrameworkAndNativeAssetsDependencies {
         processManager: _utils.processManager,
       );
 
-      // Create native assets xcframeworks
+      // Create native assets XCFrameworks
       final Directory nativeAssetOuput = xcframeworkOutput.childDirectory(_kNativeAssets);
       ErrorHandlingFileSystem.deleteIfExists(nativeAssetOuput, recursive: true);
       if (nativeAssetFrameworks.isNotEmpty) {
@@ -928,8 +928,9 @@ class AppFrameworkAndNativeAssetsDependencies {
     }
   }
 
-  /// Build the flutter target for the given platform and sdk.
-  Future<void> _buildFlutterTarget({
+  /// Use the Flutter build system to build Flutter generated frameworks for the given [platform]
+  /// and [sdk].
+  Future<void> _buildFlutterGeneratedFrameworks({
     required BuildInfo buildInfo,
     required Directory outputBuildDirectory,
     required String packageConfigPath,
@@ -973,7 +974,8 @@ class AppFrameworkAndNativeAssetsDependencies {
     }
   }
 
-  /// Find all native assets in the [outputDirectory] and add them to the [nativeAssetFrameworks] map.
+  /// Find all native assets in the [outputDirectory] and add them to the [nativeAssetFrameworks]
+  /// map, which maps the native asset key to a list of (sdk, path) pairs.
   void _findNativeAssetFrameworks(
     Directory outputDirectory,
     Map<String, List<({XcodeSdk sdk, String path})>> nativeAssetFrameworks, {
@@ -998,18 +1000,17 @@ class AppFrameworkAndNativeAssetsDependencies {
 
   /// Create XCFrameworks for native assets.
   ///
-  /// Returns a list of warnings for assets that do not support all sdks to be printed after the
-  /// status is stopped.
+  /// Iterates through [nativeAssetFrameworks] and verifies that all assets support all sdks with
+  /// the same framework name. Then creates an XCFramework for each asset.
   ///
-  /// Throws if a native asset has a different framework name for different SDKs.
+  /// Returns a list of warnings for assets that do not support all sdks to be printed after the
+  /// status is stopped. Throws if a native asset has a different framework name for different SDKs.
   Future<List<String>> _createXCFrameworksForNativeAssets(
     Map<String, List<({XcodeSdk sdk, String path})>> nativeAssetFrameworks,
     Directory xcframeworkOutput,
   ) async {
     final List<String> warnings = [];
-    for (final MapEntry<String, List<({XcodeSdk sdk, String path})>> asset
-        in nativeAssetFrameworks.entries) {
-      final List<({XcodeSdk sdk, String path})> assetPaths = asset.value;
+    for (final List<({XcodeSdk sdk, String path})> assetPaths in nativeAssetFrameworks.values) {
       final String binaryName = _utils.fileSystem.file(assetPaths.first.path).basename;
 
       // Add a warning if the asset does not support all sdks.
@@ -1025,19 +1026,20 @@ class AppFrameworkAndNativeAssetsDependencies {
 
       final List<Directory> frameworks = [];
       var invalidAsset = false;
-      var pathPerPlatform = '';
+      var pathPerPlatformMessage = '';
       final String frameworkName = _utils.fileSystem.file(assetPaths.first.path).parent.basename;
 
       for (final assetPath in assetPaths) {
         final File binaryAsset = _utils.fileSystem.file(assetPath.path);
-        if (binaryAsset.parent.basename != frameworkName) {
+        // The parent of the binary is the framework directory.
+        final Directory frameworkDir = binaryAsset.parent;
+        if (frameworkDir.basename != frameworkName) {
           invalidAsset = true;
         }
-        // The parent of the binary is the framework directory.
-        frameworks.add(binaryAsset.parent);
-        pathPerPlatform +=
+        frameworks.add(frameworkDir);
+        pathPerPlatformMessage +=
             '  - ${assetPath.sdk.platformName}: '
-            '${binaryAsset.parent.basename}/${binaryAsset.basename}\n';
+            '${frameworkDir.basename}/${binaryAsset.basename}\n';
       }
 
       // Throw an error if the asset has different framework names across sdks.
@@ -1047,7 +1049,7 @@ class AppFrameworkAndNativeAssetsDependencies {
           'XCFramework creation.\n'
           'The asset "$binaryName" has different framework paths across '
           'platforms:\n'
-          '$pathPerPlatform'
+          '$pathPerPlatformMessage'
           'This is likely an issue in the package providing the asset. '
           'Please report this to the package maintainers and ensure the '
           '"build.dart" hook produces consistent filenames.',
@@ -1088,7 +1090,7 @@ class AppFrameworkAndNativeAssetsDependencies {
     }
   }
 
-  /// Platform-specific defines.
+  /// Defines specific to the platform.
   Future<Map<String, String>> _platformDefines(FlutterDarwinPlatform platform, XcodeSdk sdk) async {
     switch (platform) {
       case FlutterDarwinPlatform.ios:
@@ -1124,7 +1126,7 @@ class AppFrameworkAndNativeAssetsDependencies {
   /// ```swift
   ///   .binaryTarget(
   ///     name: "App",
-  ///     path: "Frameworks/App.xcframework"
+  ///     path: "Sources/Frameworks/App.xcframework"
   ///   )
   /// ```
   SwiftPackageTarget get appBinaryTarget => SwiftPackageTarget.binaryTarget(
@@ -1151,7 +1153,7 @@ class AppFrameworkAndNativeAssetsDependencies {
   }
 }
 
-/// Create an xcframework from a list of frameworks.
+/// Create an XCFramework from a list of frameworks.
 Future<void> _produceXCFramework({
   required Iterable<Directory> frameworks,
   required String frameworkBinaryName,
@@ -1193,7 +1195,7 @@ Future<void> _produceXCFramework({
   }
 }
 
-/// Generate target dependencies and binary targets from a directory of xcframeworks.
+/// Generate target dependencies and binary targets from a directory of XCFrameworks.
 (List<SwiftPackageTargetDependency>, List<SwiftPackageTarget>) generateDependenciesFromDirectory({
   required Directory xcframeworkDirectory,
   required FileSystem fileSystem,
