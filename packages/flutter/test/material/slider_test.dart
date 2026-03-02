@@ -2870,7 +2870,7 @@ void main() {
     skip: kIsWeb, // [intended] the web traversal order by using ARIA-OWNS.
   );
 
-  testWidgets('Value indicator appears when it should', (WidgetTester tester) async {
+  group('Value indicator appears when it should:', () {
     final baseTheme = ThemeData(platform: TargetPlatform.android, primarySwatch: Colors.blue);
     SliderThemeData theme = baseTheme.sliderTheme.copyWith(valueIndicatorColor: Colors.red);
     var value = 0.45;
@@ -2899,125 +2899,204 @@ void main() {
       );
     }
 
-    Future<void> expectValueIndicator({
-      required bool isVisible,
+    Future<void> expectValueIndicator(
+      WidgetTester tester, {
+      required bool visibleWhenDragged,
+      required bool visibleWhenReleased,
       required SliderThemeData theme,
       int? divisions,
       bool enabled = true,
-      bool dragged = true,
     }) async {
-      // Discrete enabled widget.
-      await tester.pumpWidget(buildApp(sliderTheme: theme, divisions: divisions, enabled: enabled));
-      final Offset center = tester.getCenter(find.byType(Slider));
-      TestGesture? gesture;
-      if (dragged) {
-        gesture = await tester.startGesture(center);
-      }
-      // Wait for value indicator animation to finish.
-      await tester.pumpAndSettle();
-
-      // _RenderValueIndicator is the last render object in the tree.
-      final RenderObject valueIndicatorBox = tester.allRenderObjects.last;
-      expect(
-        valueIndicatorBox,
-        isVisible
-            ? (paints
-                ..path(color: theme.valueIndicatorColor)
-                ..paragraph())
-            : isNot(
-                paints
+      void expectIndicatorVisible(bool isVisible) {
+        // _RenderValueIndicator is the last render object in the tree.
+        final RenderObject valueIndicatorBox = tester.allRenderObjects.last;
+        expect(
+          valueIndicatorBox,
+          isVisible
+              ? (paints
                   ..path(color: theme.valueIndicatorColor)
-                  ..paragraph(),
-              ),
-      );
-      if (dragged) {
-        await gesture!.up();
+                  ..paragraph())
+              : isNot(
+                  paints
+                    ..path(color: theme.valueIndicatorColor)
+                    ..paragraph(),
+                ),
+        );
       }
+
+      await tester.pumpWidget(buildApp(sliderTheme: theme, divisions: divisions, enabled: enabled));
+      expectIndicatorVisible(visibleWhenReleased);
+
+      final Offset center = tester.getCenter(find.byType(Slider));
+      final TestGesture gesture = await tester.startGesture(center);
+      await tester.pumpAndSettle();
+      expectIndicatorVisible(visibleWhenDragged);
+
+      await gesture.up();
+
+      // Reset state to avoid state leak.
+      await tester.pumpWidget(Container());
     }
 
-    // Default (showValueIndicator set to onlyForDiscrete).
-    await expectValueIndicator(isVisible: true, theme: theme, divisions: 3);
-    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: false);
-    await expectValueIndicator(isVisible: false, theme: theme);
-    await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
-    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, dragged: false);
-    await expectValueIndicator(
-      isVisible: false,
-      theme: theme,
-      divisions: 3,
-      enabled: false,
-      dragged: false,
-    );
-    await expectValueIndicator(isVisible: false, theme: theme, dragged: false);
-    await expectValueIndicator(isVisible: false, theme: theme, enabled: false, dragged: false);
+    testWidgets('showValueIndicator set to onlyForDiscrete', (WidgetTester tester) async {
+      // Default value is onlyForDiscrete.
+      await expectValueIndicator(
+        tester,
+        visibleWhenDragged: true,
+        visibleWhenReleased: false,
+        theme: theme,
+        divisions: 3,
+      );
+      await expectValueIndicator(
+        tester,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+        theme: theme,
+        divisions: 3,
+        enabled: false,
+      );
+      await expectValueIndicator(
+        tester,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+        theme: theme,
+      );
+      await expectValueIndicator(
+        tester,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+        theme: theme,
+        enabled: false,
+      );
+    });
 
-    // With showValueIndicator set to onlyForContinuous.
-    theme = theme.copyWith(showValueIndicator: ShowValueIndicator.onlyForContinuous);
-    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3);
-    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: false);
-    await expectValueIndicator(isVisible: true, theme: theme);
-    await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
-    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, dragged: false);
-    await expectValueIndicator(
-      isVisible: false,
-      theme: theme,
-      divisions: 3,
-      enabled: false,
-      dragged: false,
-    );
-    await expectValueIndicator(isVisible: false, theme: theme, dragged: false);
-    await expectValueIndicator(isVisible: false, theme: theme, enabled: false, dragged: false);
+    testWidgets('showValueIndicator set to onlyForContinuous', (WidgetTester tester) async {
+      theme = theme.copyWith(showValueIndicator: ShowValueIndicator.onlyForContinuous);
+      await expectValueIndicator(
+        tester,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+        theme: theme,
+        divisions: 3,
+      );
+      await expectValueIndicator(
+        tester,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+        theme: theme,
+        divisions: 3,
+        enabled: false,
+      );
+      await expectValueIndicator(
+        tester,
+        visibleWhenDragged: true,
+        visibleWhenReleased: false,
+        theme: theme,
+      );
+      await expectValueIndicator(
+        tester,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+        theme: theme,
+        enabled: false,
+      );
+    });
 
-    // discrete enabled widget with showValueIndicator set to onDrag.
-    theme = theme.copyWith(showValueIndicator: ShowValueIndicator.onDrag);
-    await expectValueIndicator(isVisible: true, theme: theme, divisions: 3);
-    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: false);
-    await expectValueIndicator(isVisible: true, theme: theme);
-    await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
-    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, dragged: false);
-    await expectValueIndicator(
-      isVisible: false,
-      theme: theme,
-      divisions: 3,
-      enabled: false,
-      dragged: false,
-    );
-    await expectValueIndicator(isVisible: false, theme: theme, dragged: false);
-    await expectValueIndicator(isVisible: false, theme: theme, enabled: false, dragged: false);
+    testWidgets('showValueIndicator set to onDrag', (WidgetTester tester) async {
+      theme = theme.copyWith(showValueIndicator: ShowValueIndicator.onDrag);
+      await expectValueIndicator(
+        tester,
+        visibleWhenDragged: true,
+        visibleWhenReleased: false,
+        theme: theme,
+        divisions: 3,
+      );
+      await expectValueIndicator(
+        tester,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+        theme: theme,
+        divisions: 3,
+        enabled: false,
+      );
+      await expectValueIndicator(
+        tester,
+        visibleWhenDragged: true,
+        visibleWhenReleased: false,
+        theme: theme,
+      );
+      await expectValueIndicator(
+        tester,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+        theme: theme,
+        enabled: false,
+      );
+    });
 
-    // discrete enabled widget with showValueIndicator set to never.
-    theme = theme.copyWith(showValueIndicator: ShowValueIndicator.never);
-    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3);
-    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: false);
-    await expectValueIndicator(isVisible: false, theme: theme);
-    await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
-    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, dragged: false);
-    await expectValueIndicator(
-      isVisible: false,
-      theme: theme,
-      divisions: 3,
-      enabled: false,
-      dragged: false,
-    );
-    await expectValueIndicator(isVisible: false, theme: theme, dragged: false);
-    await expectValueIndicator(isVisible: false, theme: theme, enabled: false, dragged: false);
+    testWidgets('showValueIndicator set to never', (WidgetTester tester) async {
+      theme = theme.copyWith(showValueIndicator: ShowValueIndicator.never);
+      await expectValueIndicator(
+        tester,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+        theme: theme,
+        divisions: 3,
+      );
+      await expectValueIndicator(
+        tester,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+        theme: theme,
+        divisions: 3,
+        enabled: false,
+      );
+      await expectValueIndicator(
+        tester,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+        theme: theme,
+      );
+      await expectValueIndicator(
+        tester,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+        theme: theme,
+        enabled: false,
+      );
+    });
 
-    // discrete enabled widget with showValueIndicator set to alwaysVisible.
-    theme = theme.copyWith(showValueIndicator: ShowValueIndicator.alwaysVisible);
-    await expectValueIndicator(isVisible: true, theme: theme, divisions: 3);
-    await expectValueIndicator(isVisible: true, theme: theme, divisions: 3, enabled: false);
-    await expectValueIndicator(isVisible: true, theme: theme);
-    await expectValueIndicator(isVisible: true, theme: theme, enabled: false);
-    await expectValueIndicator(isVisible: true, theme: theme, divisions: 3, dragged: false);
-    await expectValueIndicator(
-      isVisible: true,
-      theme: theme,
-      divisions: 3,
-      enabled: false,
-      dragged: false,
-    );
-    await expectValueIndicator(isVisible: true, theme: theme, dragged: false);
-    await expectValueIndicator(isVisible: true, theme: theme, enabled: false, dragged: false);
+    testWidgets('showValueIndicator set to alwaysVisible', (WidgetTester tester) async {
+      theme = theme.copyWith(showValueIndicator: ShowValueIndicator.alwaysVisible);
+      await expectValueIndicator(
+        tester,
+        visibleWhenDragged: true,
+        visibleWhenReleased: true,
+        theme: theme,
+        divisions: 3,
+      );
+      await expectValueIndicator(
+        tester,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+        theme: theme,
+        divisions: 3,
+        enabled: false,
+      );
+      await expectValueIndicator(
+        tester,
+        visibleWhenDragged: true,
+        visibleWhenReleased: true,
+        theme: theme,
+      );
+      await expectValueIndicator(
+        tester,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+        theme: theme,
+        enabled: false,
+      );
+    });
   });
 
   testWidgets("Slider doesn't start any animations after dispose", (WidgetTester tester) async {
