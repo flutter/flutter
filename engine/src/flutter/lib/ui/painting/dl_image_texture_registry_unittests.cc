@@ -28,7 +28,7 @@ class MockTexture : public Texture {
 };
 
 TEST(DlImageTextureRegistryTest, BasicInfo) {
-  DlImageTextureRegistry dl_image(1234, 100, 200);
+  DlImageTextureRegistry dl_image(nullptr, nullptr, nullptr, 1234, 100, 200);
 
   EXPECT_EQ(dl_image.GetSize().width, 100);
   EXPECT_EQ(dl_image.GetSize().height, 200);
@@ -39,8 +39,7 @@ TEST(DlImageTextureRegistryTest, BasicInfo) {
 }
 
 TEST(DlImageTextureRegistryTest, ResolvesToNullWhenNoRegistry) {
-  TextureRegistry::SetCurrent({});  // Ensure it's null
-  DlImageTextureRegistry dl_image(1234, 100, 200);
+  DlImageTextureRegistry dl_image(nullptr, nullptr, nullptr, 1234, 100, 200);
 
   EXPECT_EQ(dl_image.skia_image(), nullptr);
   EXPECT_EQ(dl_image.impeller_texture(), nullptr);
@@ -48,30 +47,24 @@ TEST(DlImageTextureRegistryTest, ResolvesToNullWhenNoRegistry) {
 
 TEST(DlImageTextureRegistryTest, ResolvesToNullWhenTextureNotFound) {
   auto registry = std::make_shared<TextureRegistry>();
-  TextureRegistry::SetCurrent(registry);
-  DlImageTextureRegistry dl_image(1234, 100, 200);
+  DlImageTextureRegistry dl_image(registry, nullptr, nullptr, 1234, 100, 200);
 
   EXPECT_EQ(dl_image.skia_image(), nullptr);
   EXPECT_EQ(dl_image.impeller_texture(), nullptr);
-
-  TextureRegistry::SetCurrent({});
 }
 
 TEST(DlImageTextureRegistryTest, ResolvesWhenTextureFound) {
   auto registry = std::make_shared<TextureRegistry>();
-  TextureRegistry::SetCurrent(registry);
 
   auto texture = std::shared_ptr<MockTexture>(new MockTexture(1234));
   registry->RegisterTexture(texture);
 
-  DlImageTextureRegistry dl_image(1234, 100, 200);
+  DlImageTextureRegistry dl_image(registry, nullptr, nullptr, 1234, 100, 200);
 
   // Still null because our MockTexture returns null, but it proves it didn't
   // crash.
   EXPECT_EQ(dl_image.skia_image(), nullptr);
   EXPECT_EQ(dl_image.impeller_texture(), nullptr);
-
-  TextureRegistry::SetCurrent({});
 }
 
 }  // namespace testing

@@ -174,9 +174,20 @@ void CanvasImage::CreateFromTexture(Dart_Handle wrapper,
                                     int64_t texture_id,
                                     int width,
                                     int height) {
+  auto* dart_state = UIDartState::Current();
+  if (!dart_state) {
+    return;
+  }
+  auto snapshot_delegate = dart_state->GetSnapshotDelegate();
+  if (!snapshot_delegate) {
+    return;
+  }
+
   auto image = CanvasImage::Create();
-  image->set_image(
-      sk_make_sp<DlImageTextureRegistry>(texture_id, width, height));
+  image->set_image(sk_make_sp<DlImageTextureRegistry>(
+      snapshot_delegate->GetTextureRegistry(),
+      snapshot_delegate->GetSnapshotDelegateAiksContext(),
+      snapshot_delegate->GetGrContext(), texture_id, width, height));
   image->AssociateWithDartWrapper(wrapper);
 }
 

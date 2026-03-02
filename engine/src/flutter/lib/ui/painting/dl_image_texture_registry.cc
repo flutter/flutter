@@ -2,22 +2,29 @@
 
 namespace flutter {
 
-DlImageTextureRegistry::DlImageTextureRegistry(int64_t texture_id,
-                                               int width,
-                                               int height)
-    : texture_id_(texture_id), size_(DlISize(width, height)) {}
+DlImageTextureRegistry::DlImageTextureRegistry(
+    std::shared_ptr<flutter::TextureRegistry> registry,
+    impeller::AiksContext* aiks_context,
+    GrDirectContext* gr_context,
+    int64_t texture_id,
+    int width,
+    int height)
+    : registry_(std::move(registry)),
+      aiks_context_(aiks_context),
+      gr_context_(gr_context),
+      texture_id_(texture_id),
+      size_(DlISize(width, height)) {}
 
 sk_sp<SkImage> DlImageTextureRegistry::skia_image() const {
-  auto texture_registry = TextureRegistry::GetCurrent().lock();
-  if (!texture_registry) {
+  if (!registry_) {
     return nullptr;
   }
-  auto texture = texture_registry->GetTexture(texture_id_);
+  auto texture = registry_->GetTexture(texture_id_);
   if (!texture) {
     return nullptr;
   }
   Texture::PaintContext ctx;
-  ctx.gr_context = TextureRegistry::GetCurrentGrContext();
+  ctx.gr_context = gr_context_;
   auto dl_image =
       texture->GetTextureImage(ctx, DlRect::MakeSize(GetSize()), false);
   return dl_image ? dl_image->skia_image() : nullptr;
@@ -25,17 +32,16 @@ sk_sp<SkImage> DlImageTextureRegistry::skia_image() const {
 
 std::shared_ptr<impeller::Texture> DlImageTextureRegistry::impeller_texture()
     const {
-  auto texture_registry = TextureRegistry::GetCurrent().lock();
-  if (!texture_registry) {
+  if (!registry_) {
     return nullptr;
   }
-  auto texture = texture_registry->GetTexture(texture_id_);
+  auto texture = registry_->GetTexture(texture_id_);
   if (!texture) {
     return nullptr;
   }
   Texture::PaintContext ctx;
-  ctx.aiks_context = TextureRegistry::GetCurrentAiksContext();
-  ctx.gr_context = TextureRegistry::GetCurrentGrContext();
+  ctx.aiks_context = aiks_context_;
+  ctx.gr_context = gr_context_;
   auto dl_image =
       texture->GetTextureImage(ctx, DlRect::MakeSize(GetSize()), false);
   return dl_image ? dl_image->impeller_texture() : nullptr;

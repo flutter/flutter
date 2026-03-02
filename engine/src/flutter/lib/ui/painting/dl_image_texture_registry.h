@@ -8,7 +8,12 @@ namespace flutter {
 
 class DlImageTextureRegistry : public DlImage {
  public:
-  DlImageTextureRegistry(int64_t texture_id, int width, int height);
+  DlImageTextureRegistry(std::shared_ptr<flutter::TextureRegistry> registry,
+                         impeller::AiksContext* aiks_context,
+                         GrDirectContext* gr_context,
+                         int64_t texture_id,
+                         int width,
+                         int height);
 
   ~DlImageTextureRegistry() override = default;
 
@@ -25,6 +30,9 @@ class DlImageTextureRegistry : public DlImage {
   }
 
  private:
+  std::shared_ptr<flutter::TextureRegistry> registry_;
+  impeller::AiksContext* aiks_context_;
+  GrDirectContext* gr_context_;
   int64_t texture_id_;
   DlISize size_;
 };

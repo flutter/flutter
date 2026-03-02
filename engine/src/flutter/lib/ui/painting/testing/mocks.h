@@ -29,11 +29,15 @@ class MockSnapshotDelegate : public SnapshotDelegate {
               MakeSkiaGpuImage,
               (sk_sp<DisplayList>, const SkImageInfo&),
               (override));
-  MOCK_METHOD(std::shared_ptr<TextureRegistry>,
+  MOCK_METHOD(std::shared_ptr<flutter::TextureRegistry>,
               GetTextureRegistry,
               (),
               (override));
   MOCK_METHOD(GrDirectContext*, GetGrContext, (), (override));
+  MOCK_METHOD(impeller::AiksContext*,
+              GetSnapshotDelegateAiksContext,
+              (),
+              (override));
   MOCK_METHOD(void,
               MakeRasterSnapshot,
               (sk_sp<DisplayList>,

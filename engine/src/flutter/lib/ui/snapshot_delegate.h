@@ -77,6 +77,8 @@ class SnapshotDelegate {
 
   virtual GrDirectContext* GetGrContext() = 0;
 
+  virtual impeller::AiksContext* GetSnapshotDelegateAiksContext() = 0;
+
   virtual void MakeRasterSnapshot(sk_sp<DisplayList> display_list,
                                   DlISize picture_size,
                                   std::function<void(sk_sp<DlImage>)> callback,

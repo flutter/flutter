@@ -76,19 +76,12 @@ class Texture : public ContextListener {
 class TextureRegistry {
  public:
   TextureRegistry();
+  virtual ~TextureRegistry() = default;
 
   // Retrieves the thread-local TextureRegistry for the current thread.
   // This is used by DlImageTextureRegistry to resolve textures during
   // rasterization.
   static std::weak_ptr<TextureRegistry> GetCurrent();
-
-  // Sets the thread-local TextureRegistry for the current thread.
-  static void SetCurrent(std::weak_ptr<TextureRegistry> registry);
-
-  static impeller::AiksContext* GetCurrentAiksContext();
-  static GrDirectContext* GetCurrentGrContext();
-  static void SetCurrentContexts(impeller::AiksContext* aiks_context,
-                                 GrDirectContext* gr_context);
 
   // Called from raster thread.
   void RegisterTexture(const std::shared_ptr<Texture>& texture);
