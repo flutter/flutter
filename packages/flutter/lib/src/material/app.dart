@@ -1158,11 +1158,9 @@ class _MaterialAppState extends State<MaterialApp> {
       return true;
     }());
 
-    final Widget child = HeroControllerScope(controller: _heroController, child: result);
-
     return ScrollConfiguration(
       behavior: widget.scrollBehavior ?? const MaterialScrollBehavior(),
-      child: child,
+      child: HeroControllerScope(controller: _heroController, child: result),
     );
   }
 }
