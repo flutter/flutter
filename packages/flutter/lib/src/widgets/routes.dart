@@ -2531,7 +2531,15 @@ abstract mixin class RouteAware {
   /// animation completes. At this point the current route may still be
   /// partially visible as it animates out. To perform actions after the route
   /// is fully obscured, consider using [ModalRoute.animation] to listen for
-  /// animation completion.
+  /// animation completion, for example:
+  ///
+  /// ```dart
+  /// ModalRoute.of(context)?.animation?.addStatusListener((AnimationStatus status) {
+  ///   if (status == AnimationStatus.completed) {
+  ///     // The new route is now fully visible and the old route is fully obscured.
+  ///   }
+  /// });
+  /// ```
   void didPushNext() {}
 }
 
