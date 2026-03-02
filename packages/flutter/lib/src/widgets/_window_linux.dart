@@ -676,14 +676,21 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
   }
 }
 
-/// The type of a GtkWindow.
+// The following classes are thin wrappers around the corresponding GTK/GDK
+// objects, with only the methods we need implemented. The method signatures
+// and enum values are designed to match the corresponding C APIs as closely
+// as possible, to minimize the amount of translation needed in the method
+// implementations.
+
+/// The type of a GtkWindow. Matches the GtkWindowType enum in gtk/gtktypes.h.
 enum _GtkWindowType {
   toplevel,
   // ignore: unused_field
   popup,
 }
 
-/// States a toplevel window can be in.
+/// States a toplevel window can be in. Matches the order of the GdkWindowState
+/// enum in gdk/gdkwindow.h, except these are bit positions when passed to GTK.
 enum _GdkWindowState {
   withdrawn,
   iconified,
@@ -704,7 +711,8 @@ enum _GdkWindowState {
   leftResizable,
 }
 
-/// Hints for the window manager on how to treat a window.
+/// Hints for the window manager on how to treat a window. Matches the
+/// GdkWindowTypeHint enum in gdk/gdkwindow.h.
 enum _GdkWindowTypeHint {
   // ignore: unused_field
   normal,
