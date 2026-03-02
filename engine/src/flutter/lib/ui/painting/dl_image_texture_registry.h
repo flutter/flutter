@@ -8,12 +8,13 @@ namespace flutter {
 
 class DlImageTextureRegistry : public DlImage {
  public:
-  DlImageTextureRegistry(std::shared_ptr<flutter::TextureRegistry> registry,
-                         std::shared_ptr<impeller::AiksContext> aiks_context,
-                         GrDirectContext* gr_context,
-                         int64_t texture_id,
-                         int width,
-                         int height);
+  DlImageTextureRegistry(
+      const std::shared_ptr<flutter::TextureRegistry>& registry,
+      const std::shared_ptr<impeller::AiksContext>& aiks_context,
+      GrDirectContext* gr_context,
+      int64_t texture_id,
+      int width,
+      int height);
 
   ~DlImageTextureRegistry() override = default;
 
@@ -30,7 +31,7 @@ class DlImageTextureRegistry : public DlImage {
   }
 
  private:
-  std::shared_ptr<flutter::TextureRegistry> registry_;
+  std::weak_ptr<flutter::TextureRegistry> registry_;
   std::weak_ptr<impeller::AiksContext> aiks_context_;
   GrDirectContext* gr_context_;
   int64_t texture_id_;

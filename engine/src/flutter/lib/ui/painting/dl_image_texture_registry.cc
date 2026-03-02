@@ -3,23 +3,24 @@
 namespace flutter {
 
 DlImageTextureRegistry::DlImageTextureRegistry(
-    std::shared_ptr<flutter::TextureRegistry> registry,
-    std::shared_ptr<impeller::AiksContext> aiks_context,
+    const std::shared_ptr<flutter::TextureRegistry>& registry,
+    const std::shared_ptr<impeller::AiksContext>& aiks_context,
     GrDirectContext* gr_context,
     int64_t texture_id,
     int width,
     int height)
-    : registry_(std::move(registry)),
-      aiks_context_(std::move(aiks_context)),
+    : registry_(registry),
+      aiks_context_(aiks_context),
       gr_context_(gr_context),
       texture_id_(texture_id),
       size_(DlISize(width, height)) {}
 
 sk_sp<SkImage> DlImageTextureRegistry::skia_image() const {
-  if (!registry_) {
+  auto registry = registry_.lock();
+  if (!registry) {
     return nullptr;
   }
-  auto texture = registry_->GetTexture(texture_id_);
+  auto texture = registry->GetTexture(texture_id_);
   if (!texture) {
     return nullptr;
   }
@@ -32,10 +33,11 @@ sk_sp<SkImage> DlImageTextureRegistry::skia_image() const {
 
 std::shared_ptr<impeller::Texture> DlImageTextureRegistry::impeller_texture()
     const {
-  if (!registry_) {
+  auto registry = registry_.lock();
+  if (!registry) {
     return nullptr;
   }
-  auto texture = registry_->GetTexture(texture_id_);
+  auto texture = registry->GetTexture(texture_id_);
   if (!texture) {
     return nullptr;
   }
