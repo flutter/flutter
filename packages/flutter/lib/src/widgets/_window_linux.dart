@@ -30,14 +30,14 @@ import 'binding.dart';
 // In C this would be INT_MAX, but since we can't determine that from Dart let's assume it's 32 bit signed. In any case this is far beyond any reasonable window size.
 const int _kMaxWindowDimensions = 0x7fffffff;
 
-/// The type of a GtkWindow.
+/// The type of a GtkWindow. Matches the GtkWindowType enum in gtk/gtktypes.h.
 enum _GtkWindowType {
   toplevel,
   // ignore: unused_field
   popup,
 }
 
-/// States a toplevel window can be in.
+/// States a toplevel window can be in. Matches the order of the GdkWindowState enum in gdk/gdkwindow.h, except these are bit positions when passed to GTK.
 enum _GdkWindowState {
   withdrawn,
   iconified,
@@ -58,7 +58,7 @@ enum _GdkWindowState {
   leftResizable,
 }
 
-/// Hints for the window manager on how to treat a window.
+/// Hints for the window manager on how to treat a window. Matches the GdkWindowTypeHint enum in gdk/gdkwindow.h.
 enum _GdkWindowTypeHint {
   // ignore: unused_field
   normal,
