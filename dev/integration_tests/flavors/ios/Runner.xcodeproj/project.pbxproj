@@ -10,6 +10,8 @@
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		37337CDEB7181B925B4C497F /* libPods-Free App.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4339F130EFF29582E670E34E /* libPods-Free App.a */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
+		78C550452F50D7A20089E318 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78C550442F50D7A20089E318 /* FlutterGeneratedPluginSwiftPackage */; };
+		78C550472F50D7BF0089E318 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78C550462F50D7BF0089E318 /* FlutterGeneratedPluginSwiftPackage */; };
 		978B8F6F1D3862AE00F588F7 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 7AFFD8EE1D35381100E5BB4D /* AppDelegate.m */; };
 		97C146F31CF9000F007C117D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 97C146F21CF9000F007C117D /* main.m */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
@@ -75,6 +77,7 @@
 		F41C8FBAFCC90375E6D82338 /* Pods-Free App.debug paid.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Free App.debug paid.xcconfig"; path = "Target Support Files/Pods-Free App/Pods-Free App.debug paid.xcconfig"; sourceTree = "<group>"; };
 		F723D2412464E1C10004F0E0 /* Paid App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Paid App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F723D2682464E2860004F0E0 /* Info-Paid.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info-Paid.plist"; sourceTree = "<group>"; };
+		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,6 +86,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				37337CDEB7181B925B4C497F /* libPods-Free App.a in Frameworks */,
+				78C550452F50D7A20089E318 /* FlutterGeneratedPluginSwiftPackage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -91,6 +95,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A2AF7BD41FD4BC12FD4CA78F /* libPods-Paid App.a in Frameworks */,
+				78C550472F50D7BF0089E318 /* FlutterGeneratedPluginSwiftPackage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -124,6 +129,7 @@
 		9740EEB11CF90186004384FC /* Flutter */ = {
 			isa = PBXGroup;
 			children = (
+				78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */,
 				3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */,
 				9740EEB21CF90195004384FC /* Debug.xcconfig */,
 				7AFA3C8E1D35360C0083082E /* Release.xcconfig */,
@@ -245,6 +251,9 @@
 				Base,
 			);
 			mainGroup = 97C146E51CF9000F007C117D;
+			packageReferences = (
+				78C550432F50D7A20089E318 /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */,
+			);
 			productRefGroup = 97C146EF1CF9000F007C117D /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -484,7 +493,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Runner/Info-Free.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.flavors.free;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -539,7 +551,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Runner/Info-Free.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.flavors.free;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -642,7 +657,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Runner/Info-Free.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.flavors.free;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -655,7 +673,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Runner/Info-Free.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.flavors.free;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -668,7 +689,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Runner/Info-Paid.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.flavors.paid;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -681,7 +705,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Runner/Info-Paid.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.flavors.paid;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -694,7 +721,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Runner/Info-Paid.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.flavors.paid;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -707,7 +737,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Runner/Info-Paid.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.flavors.paid;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -750,6 +783,25 @@
 			defaultConfigurationName = "Release Free";
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		78C550432F50D7A20089E318 /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		78C550442F50D7A20089E318 /* FlutterGeneratedPluginSwiftPackage */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = FlutterGeneratedPluginSwiftPackage;
+		};
+		78C550462F50D7BF0089E318 /* FlutterGeneratedPluginSwiftPackage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 78C550432F50D7A20089E318 /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */;
+			productName = FlutterGeneratedPluginSwiftPackage;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 97C146E61CF9000F007C117D /* Project object */;
 }
