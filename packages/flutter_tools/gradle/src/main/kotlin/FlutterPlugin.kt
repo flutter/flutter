@@ -310,12 +310,12 @@ class FlutterPlugin : Plugin<Project> {
         if (FlutterPluginUtils.isFlutterAppProject(projectToAddTasksTo)) {
             FlutterPluginUtils.addTaskForPrintBuildVariants(projectToAddTasksTo)
             FlutterPluginUtils.addTasksForOutputsAppLinkSettings(projectToAddTasksTo)
-        }
 
-        // TODO(camsim99): Should I check if this is an app? Wb modules?
-        if (projectToAddTasksTo.hasProperty("androidShellArguments")) {
-             val androidShellArguments: String = projectToAddTasksTo.properties["androidShellArguments"].toString()
-             FlutterPluginUtils.addTaskForEngineShellArgumentManifestInjection(projectToAddTasksTo, androidShellArguments)
+            // Task required for Flutter apps that need to pass engine shell arguments to the embedding. 
+            if (projectToAddTasksTo.hasProperty("androidShellArguments")) {
+                val androidShellArguments: String = projectToAddTasksTo.properties["androidShellArguments"].toString()
+                FlutterPluginUtils.addTaskForEngineShellArgumentManifestInjection(projectToAddTasksTo, androidShellArguments)
+            }
         }
 
         val targetPlatforms: List<String> =

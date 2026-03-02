@@ -96,6 +96,8 @@ class FlutterPluginTest {
         verify { project.tasks.register("printBuildVariants", any()) }
     }
 
+    // TODO(camsim99): Add test for FlutterPluginUtils.addTaskForEngineShellArgumentManifestInjection call
+
     @Test
     fun `copyFlutterAssets task sets filePermissions correctly`(
         @TempDir tempDir: Path
