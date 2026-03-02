@@ -179,9 +179,6 @@ void CanvasImage::CreateFromTexture(Dart_Handle wrapper,
     return;
   }
   auto snapshot_delegate = dart_state->GetSnapshotDelegate();
-  if (!snapshot_delegate) {
-    return;
-  }
 
   auto image = CanvasImage::Create();
   image->set_image(sk_make_sp<DlImageTextureRegistry>(
