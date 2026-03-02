@@ -1228,7 +1228,7 @@ _flutter.loader.load();
       );
 
       await Dart2JSTarget(
-        const JsCompilerConfig(noFrequencyBasedMinification: true, sourceMaps: false),
+        const JsCompilerConfig(useFrequencyBasedMinification: false, sourceMaps: false),
       ).build(environment);
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
@@ -1334,7 +1334,7 @@ _flutter.loader.load();
       JsCompilerConfig(dumpInfo: true),
       JsCompilerConfig(nativeNullAssertions: true),
       JsCompilerConfig(optimizationLevel: 0),
-      JsCompilerConfig(noFrequencyBasedMinification: true),
+      JsCompilerConfig(useFrequencyBasedMinification: false),
       JsCompilerConfig(sourceMaps: false),
       JsCompilerConfig(minify: false),
 
@@ -1344,7 +1344,7 @@ _flutter.loader.load();
         dumpInfo: true,
         nativeNullAssertions: true,
         optimizationLevel: 0,
-        noFrequencyBasedMinification: true,
+        useFrequencyBasedMinification: false,
         sourceMaps: false,
       ),
     ];

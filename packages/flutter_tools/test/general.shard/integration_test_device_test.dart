@@ -240,6 +240,76 @@ void main() {
   );
 
   testUsingContext(
+    'kill() calls uninstallApp when uninstallApp is true',
+    () async {
+      final trackingDevice = FakeDeviceTrackingUninstall();
+      final testDeviceWithUninstall = IntegrationTestTestDevice(
+        id: 1,
+        device: trackingDevice,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        userIdentifier: '',
+        compileExpression: null,
+      );
+
+      await testDeviceWithUninstall.start('entrypointPath');
+      await testDeviceWithUninstall.kill();
+
+      expect(trackingDevice.uninstallAppCalled, isTrue);
+      expect(testDeviceWithUninstall.finished, completes);
+    },
+    overrides: <Type, Generator>{
+      ApplicationPackageFactory: () => FakeApplicationPackageFactory(),
+      VMServiceConnector: () =>
+          (
+            Uri httpUri, {
+            ReloadSources? reloadSources,
+            Restart? restart,
+            CompileExpression? compileExpression,
+            FlutterProject? flutterProject,
+            PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+            io.CompressionOptions? compression,
+            Device? device,
+            Logger? logger,
+          }) async => fakeVmServiceHost.vmService,
+    },
+  );
+
+  testUsingContext(
+    'kill() does not call uninstallApp when uninstallApp is false',
+    () async {
+      final trackingDevice = FakeDeviceTrackingUninstall();
+      final testDeviceWithoutUninstall = IntegrationTestTestDevice(
+        id: 1,
+        device: trackingDevice,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, uninstallApp: false),
+        userIdentifier: '',
+        compileExpression: null,
+      );
+
+      await testDeviceWithoutUninstall.start('entrypointPath');
+      await testDeviceWithoutUninstall.kill();
+
+      expect(trackingDevice.uninstallAppCalled, isFalse);
+      expect(testDeviceWithoutUninstall.finished, completes);
+    },
+    overrides: <Type, Generator>{
+      ApplicationPackageFactory: () => FakeApplicationPackageFactory(),
+      VMServiceConnector: () =>
+          (
+            Uri httpUri, {
+            ReloadSources? reloadSources,
+            Restart? restart,
+            CompileExpression? compileExpression,
+            FlutterProject? flutterProject,
+            PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+            io.CompressionOptions? compression,
+            Device? device,
+            Logger? logger,
+          }) async => fakeVmServiceHost.vmService,
+    },
+  );
+
+  testUsingContext(
     'Can handle closing of the VM service',
     () async {
       final StreamChannel<String> channel = await testDevice.start('entrypointPath');
@@ -274,3 +344,21 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
 }
 
 class FakeApplicationPackage extends Fake implements ApplicationPackage {}
+
+class FakeDeviceTrackingUninstall extends FakeDevice {
+  FakeDeviceTrackingUninstall()
+    : super(
+        'ephemeral',
+        'ephemeral',
+        type: PlatformType.android,
+        launchResult: LaunchResult.succeeded(vmServiceUri: vmServiceUri),
+      );
+
+  bool uninstallAppCalled = false;
+
+  @override
+  Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async {
+    uninstallAppCalled = true;
+    return true;
+  }
+}

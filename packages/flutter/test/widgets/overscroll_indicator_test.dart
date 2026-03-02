@@ -731,6 +731,18 @@ void main() {
       );
     });
   });
+
+  testWidgets('StretchingOverscrollIndicator does not crash when child is null', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: StretchingOverscrollIndicator(axisDirection: AxisDirection.down),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+  });
 }
 
 class TestScrollBehavior1 extends ScrollBehavior {
