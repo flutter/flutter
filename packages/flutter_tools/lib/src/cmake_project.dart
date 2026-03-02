@@ -47,7 +47,7 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   String get _childDirectory => 'windows';
 
   @override
-  bool existsSync() => _editableDirectory.existsSync() && cmakeFile.existsSync();
+  bool existsSync() => _editableDirectory.existsSync();
 
   @override
   File get cmakeFile => _editableDirectory.childFile('CMakeLists.txt');

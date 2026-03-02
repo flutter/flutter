@@ -28,6 +28,8 @@ import 'visual_studio.dart';
 
 // These characters appear to be fine: @%()-+_{}[]`~
 const _kBadCharacters = r"'#!$^&*=|,;<>?";
+const String _kWindowsBuildBackendEnv = 'FLUTTER_WINDOWS_BUILD_BACKEND';
+const String _kExternalWindowsBuildBackend = 'external';
 
 /// Builds the Windows project using msbuild.
 Future<void> buildWindows(
@@ -54,7 +56,7 @@ Future<void> buildWindows(
     );
   }
 
-  if (!windowsProject.cmakeFile.existsSync()) {
+  if (!windowsProject.existsSync()) {
     throwToolExit(
       'No Windows desktop project configured. See '
       'https://flutter.dev/to/add-desktop-support '
@@ -66,65 +68,95 @@ Future<void> buildWindows(
     globals.fs.path.join(projectPath, getWindowsBuildDirectory(targetPlatform)),
   );
 
-  final migrators = <ProjectMigrator>[
-    CmakeCustomCommandMigration(windowsProject, globals.logger),
-    CmakeNativeAssetsMigration(windowsProject, 'windows', globals.logger),
-    VersionMigration(windowsProject, globals.logger),
-    ShowWindowMigration(windowsProject, globals.logger),
-    BuildArchitectureMigration(windowsProject, buildDirectory, globals.logger),
-  ];
+  if (!_useExternalWindowsBuildBackend()) {
+    final migrators = <ProjectMigrator>[
+      CmakeCustomCommandMigration(windowsProject, globals.logger),
+      CmakeNativeAssetsMigration(windowsProject, 'windows', globals.logger),
+      VersionMigration(windowsProject, globals.logger),
+      ShowWindowMigration(windowsProject, globals.logger),
+      BuildArchitectureMigration(windowsProject, buildDirectory, globals.logger),
+    ];
 
-  final migration = ProjectMigration(migrators);
-  await migration.run();
+    final migration = ProjectMigration(migrators);
+    await migration.run();
+  }
 
   // Ensure that necessary ephemeral files are generated and up to date.
-  _writeGeneratedFlutterConfig(windowsProject, buildInfo, target);
+  final Map<String, String> flutterToolEnvironment = _createFlutterToolEnvironment(
+    windowsProject,
+    buildInfo,
+    target,
+  );
+  _writeGeneratedFlutterConfig(windowsProject, buildInfo, flutterToolEnvironment);
   createPluginSymlinks(windowsProject.parent);
 
-  final VisualStudio visualStudio =
-      visualStudioOverride ??
-      VisualStudio(
-        fileSystem: globals.fs,
-        platform: globals.platform,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        osUtils: globals.os,
-      );
-  final String? cmakePath = visualStudio.cmakePath;
-  final String? cmakeGenerator = visualStudio.cmakeGenerator;
-  if (cmakePath == null || cmakeGenerator == null) {
-    throwToolExit(
-      'Unable to find suitable Visual Studio toolchain. '
-      'Please run `flutter doctor` for more details.',
-    );
-  }
-
   final String buildModeName = buildInfo.mode.cliName;
-  final Status status = globals.logger.startProgress('Building Windows application...');
-  try {
-    await _runCmakeGeneration(
-      cmakePath: cmakePath,
-      generator: cmakeGenerator,
-      targetPlatform: targetPlatform,
-      buildDir: buildDirectory,
-      sourceDir: windowsProject.cmakeFile.parent,
+  if (_useExternalWindowsBuildBackend()) {
+    final Status status = globals.logger.startProgress(
+      'Building Windows application (Dart assets only)...',
     );
-    if (visualStudio.displayVersion == '17.1.0') {
-      _fixBrokenCmakeGeneration(buildDirectory);
+    try {
+      await _runFlutterToolBackend(
+        buildModeName: buildModeName,
+        targetPlatform: targetPlatform,
+        environment: flutterToolEnvironment,
+      );
+      if (configOnly) {
+        return;
+      }
+      _validateExternalBuildOutput(
+        windowsProject: windowsProject,
+        targetPlatform: targetPlatform,
+        buildModeName: buildModeName,
+      );
+    } finally {
+      status.stop();
     }
-    if (configOnly) {
-      return;
+  } else {
+    final VisualStudio visualStudio =
+        visualStudioOverride ??
+        VisualStudio(
+          fileSystem: globals.fs,
+          platform: globals.platform,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          osUtils: globals.os,
+        );
+    final String? cmakePath = visualStudio.cmakePath;
+    final String? cmakeGenerator = visualStudio.cmakeGenerator;
+    if (cmakePath == null || cmakeGenerator == null) {
+      throwToolExit(
+        'Unable to find suitable Visual Studio toolchain. '
+        'Please run `flutter doctor` for more details.',
+      );
     }
-    await _runBuild(cmakePath, buildDirectory, buildModeName);
-  } finally {
-    status.stop();
+
+    final Status status = globals.logger.startProgress('Building Windows application...');
+    try {
+      await _runCmakeGeneration(
+        cmakePath: cmakePath,
+        generator: cmakeGenerator,
+        targetPlatform: targetPlatform,
+        buildDir: buildDirectory,
+        sourceDir: windowsProject.cmakeFile.parent,
+      );
+      if (visualStudio.displayVersion == '17.1.0') {
+        _fixBrokenCmakeGeneration(buildDirectory);
+      }
+      if (configOnly) {
+        return;
+      }
+      await _runBuild(cmakePath, buildDirectory, buildModeName);
+    } finally {
+      status.stop();
+    }
   }
 
-  final String? binaryName = getCmakeExecutableName(windowsProject);
+  final String binaryName = getCmakeExecutableName(windowsProject) ?? 'src';
   final File binaryFile = buildDirectory
       .childDirectory('runner')
       .childDirectory(sentenceCase(buildModeName))
-      .childFile('$binaryName.exe');
+      .childFile('${binaryName}.exe');
   final FileSystemEntity buildOutput = binaryFile.existsSync() ? binaryFile : binaryFile.parent;
   // We don't print a size because the output directory can contain
   // optional files not needed by the user and because the binary is not
@@ -167,6 +199,14 @@ Future<void> buildWindows(
       'dart devtools --appSizeBase=${outputFile.path}',
     );
   }
+}
+
+bool _useExternalWindowsBuildBackend() {
+  final String? backend = globals.platform.environment[_kWindowsBuildBackendEnv];
+  if (backend == null) {
+    return false;
+  }
+  return backend.toLowerCase() == _kExternalWindowsBuildBackend;
 }
 
 String getCmakeWindowsArch(TargetPlatform targetPlatform) {
@@ -271,17 +311,62 @@ Future<void> _runBuild(
   );
 }
 
-/// Writes the generated CMake file with the configuration for the given build.
-void _writeGeneratedFlutterConfig(
+Future<void> _runFlutterToolBackend({
+  required String buildModeName,
+  required TargetPlatform targetPlatform,
+  required Map<String, String> environment,
+}) async {
+  final String flutterRoot = Cache.flutterRoot!;
+  final String toolBackend = globals.fs.path.join(
+    flutterRoot,
+    'packages',
+    'flutter_tools',
+    'bin',
+    'tool_backend.bat',
+  );
+
+  final int result = await globals.processUtils.stream(
+    <String>[toolBackend, getNameForTargetPlatform(targetPlatform), sentenceCase(buildModeName)],
+    environment: <String, String>{...globals.platform.environment, ...environment},
+    trace: true,
+  );
+  if (result != 0) {
+    throwToolExit('Flutter asset generation failed.');
+  }
+}
+
+void _validateExternalBuildOutput({
+  required WindowsProject windowsProject,
+  required TargetPlatform targetPlatform,
+  required String buildModeName,
+}) {
+  final String binaryName = getCmakeExecutableName(windowsProject) ?? 'src';
+  final File binaryFile = windowsProject.parent.directory
+      .childDirectory(getWindowsBuildDirectory(targetPlatform))
+      .childDirectory('runner')
+      .childDirectory(sentenceCase(buildModeName))
+      .childFile('${binaryName}.exe');
+
+  if (!binaryFile.existsSync()) {
+    throwToolExit(
+      'External Windows build backend is enabled '
+      '($_kWindowsBuildBackendEnv=$_kExternalWindowsBuildBackend), '
+      'but native runner was not found at ${binaryFile.path}.\n'
+      'Build native artifacts from Telegram build system first, then rerun flutter.',
+    );
+  }
+}
+
+Map<String, String> _createFlutterToolEnvironment(
   WindowsProject windowsProject,
   BuildInfo buildInfo,
   String? target,
 ) {
-  final environment = <String, String>{
+  final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': Cache.flutterRoot!,
     'FLUTTER_EPHEMERAL_DIR': windowsProject.ephemeralDirectory.path,
     'PROJECT_DIR': windowsProject.parent.directory.path,
-    'FLUTTER_TARGET': ?target,
+    if (target != null) 'FLUTTER_TARGET': target,
     ...buildInfo.toEnvironmentConfig(),
   };
   final LocalEngineInfo? localEngineInfo = globals.artifacts?.localEngineInfo;
@@ -292,6 +377,15 @@ void _writeGeneratedFlutterConfig(
     environment['LOCAL_ENGINE'] = localEngineInfo.localTargetName;
     environment['LOCAL_ENGINE_HOST'] = localEngineInfo.localHostName;
   }
+  return environment;
+}
+
+/// Writes the generated CMake file with the configuration for the given build.
+void _writeGeneratedFlutterConfig(
+  WindowsProject windowsProject,
+  BuildInfo buildInfo,
+  Map<String, String> environment,
+) {
   writeGeneratedCmakeConfig(
     Cache.flutterRoot!,
     windowsProject,
