@@ -318,12 +318,6 @@ class FlutterPlugin : Plugin<Project> {
             }
         }
 
-        // TODO(camsim99): Should I check if this is an app? Wb modules?
-        if (projectToAddTasksTo.hasProperty("androidShellArguments")) {
-             val androidShellArguments: String = projectToAddTasksTo.properties["androidShellArguments"].toString()
-             FlutterPluginUtils.addTaskForEngineShellArgumentManifestInjection(projectToAddTasksTo, androidShellArguments)
-        }
-
         val targetPlatforms: List<String> =
             FlutterPluginUtils.getTargetPlatforms(projectToAddTasksTo)
 
