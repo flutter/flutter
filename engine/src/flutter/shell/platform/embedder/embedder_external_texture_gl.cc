@@ -36,8 +36,9 @@ constexpr std::optional<impeller::TextureType> ToImpellerTextureType(
       return impeller::TextureType::kTextureCube;
     case GL_TEXTURE_EXTERNAL_OES:
       return impeller::TextureType::kTextureExternalOES;
+    default:
+      return std::nullopt;
   }
-  FML_UNREACHABLE();
 }
 
 EmbedderExternalTextureGL::EmbedderExternalTextureGL(
@@ -178,8 +179,15 @@ EmbedderExternalTextureGL::CreateTextureGLES(
   desc.size = impeller::ISize(texture->width, texture->height);
   desc.storage_mode = impeller::StorageMode::kDevicePrivate;
   desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
-  desc.type = ToImpellerTextureType(texture->target).value();
 
+  auto type = ToImpellerTextureType(texture->target);
+  if (!type.has_value()) {
+    if (texture->destruction_callback) {
+      texture->destruction_callback(texture->user_data);
+    }
+    return nullptr;
+  }
+  desc.type = type.value();
   impeller::ContextGLES& context =
       impeller::ContextGLES::Cast(*aiks_context->GetContext());
   impeller::HandleGLES handle = context.GetReactor()->CreateHandle(
