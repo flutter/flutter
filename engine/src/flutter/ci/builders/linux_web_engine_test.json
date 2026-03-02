@@ -225,7 +225,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "141.0.7390.76"
+          "version": "145.0.7632.117"
         }
       ],
       "tasks": [
