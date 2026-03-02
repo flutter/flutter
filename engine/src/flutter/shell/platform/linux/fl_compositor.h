@@ -12,6 +12,9 @@
 
 G_BEGIN_DECLS
 
+// Maximum time to wait for a frame to be ready before giving up and rendering.
+constexpr gint64 kCompositorRenderTimeoutMicroseconds = 100000;  // 100ms
+
 G_DECLARE_DERIVABLE_TYPE(FlCompositor, fl_compositor, FL, COMPOSITOR, GObject)
 
 struct _FlCompositorClass {
