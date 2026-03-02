@@ -485,10 +485,14 @@ class EngineAutofillForm {
   }
 }
 
+/// Holds information about a single field in an autofill group.
 class FieldItem {
   FieldItem({required this.inputType, required this.autofillInfo});
 
+  /// The input type of the field.
   final EngineInputType inputType;
+
+  /// The autofill information for the field.
   final AutofillInfo autofillInfo;
 }
 
