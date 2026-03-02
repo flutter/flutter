@@ -45,8 +45,12 @@ void TextContents::SetInheritedOpacity(Scalar opacity) {
   inherited_opacity_ = opacity;
 }
 
-void TextContents::SetOffset(Vector2 offset) {
-  offset_ = offset;
+void TextContents::SetPosition(Point position) {
+  position_ = position;
+}
+
+void TextContents::SetScreenTransform(const Matrix& transform) {
+  screen_transform_ = transform;
 }
 
 void TextContents::SetForceTextColor(bool value) {
@@ -54,7 +58,9 @@ void TextContents::SetForceTextColor(bool value) {
 }
 
 std::optional<Rect> TextContents::GetCoverage(const Entity& entity) const {
-  return frame_->GetBounds().TransformBounds(entity.GetTransform());
+  const Matrix entity_offset_transform =
+      entity.GetTransform() * Matrix::MakeTranslation(position_);
+  return frame_->GetBounds().TransformBounds(entity_offset_transform);
 }
 
 void TextContents::SetTextProperties(
@@ -86,10 +92,10 @@ Scalar AttractToOne(Scalar x) {
 
 void TextContents::ComputeVertexData(
     VS::PerVertexData* vtx_contents,
-    const std::shared_ptr<TextFrame>& frame,
-    Scalar scale,
     const Matrix& entity_transform,
-    Vector2 offset,
+    const std::shared_ptr<TextFrame>& frame,
+    Point position,
+    const Matrix& screen_transform,
     std::optional<GlyphProperties> glyph_properties,
     const std::shared_ptr<GlyphAtlas>& atlas) {
   // Common vertex information for all glyphs.
@@ -102,14 +108,20 @@ void TextContents::ComputeVertexData(
   constexpr std::array<Point, 4> unit_points = {Point{0, 0}, Point{1, 0},
                                                 Point{0, 1}, Point{1, 1}};
 
+  Matrix entity_offset_transform =
+      entity_transform * Matrix::MakeTranslation(position);
+
   ISize atlas_size = atlas->GetTexture()->GetSize();
-  bool is_translation_scale = entity_transform.IsTranslationScaleOnly();
-  Matrix basis_transform = entity_transform.Basis();
+  bool is_translation_scale = entity_offset_transform.IsTranslationScaleOnly();
+  Matrix basis_transform = entity_offset_transform.Basis();
 
   VS::PerVertexData vtx;
   size_t i = 0u;
-  size_t bounds_offset = 0u;
-  Rational rounded_scale = frame->GetScale();
+
+  const Matrix frame_transform =
+      screen_transform * Matrix::MakeTranslation(position);
+  Rational rounded_scale =
+      TextFrame::RoundScaledFontSize(frame_transform.GetMaxBasisLengthXY());
   Scalar inverted_rounded_scale = static_cast<Scalar>(rounded_scale.Invert());
   Matrix unscaled_basis =
       basis_transform *
@@ -120,13 +132,27 @@ void TextContents::ComputeVertexData(
   unscaled_basis.m[0] = AttractToOne(unscaled_basis.m[0]);
   unscaled_basis.m[5] = AttractToOne(unscaled_basis.m[5]);
 
+  // Compute the device origin of the entire frame.
+  Point screen_offset = (entity_offset_transform * Point(0, 0));
+
   for (const TextRun& run : frame->GetRuns()) {
     const Font& font = run.GetFont();
-    const Matrix transform = frame->GetOffsetTransform();
-    FontGlyphAtlas* font_atlas = nullptr;
+    const ScaledFont scaled_font{.font = font, .scale = rounded_scale};
+    const FontGlyphAtlas* font_atlas = atlas->GetFontGlyphAtlas(scaled_font);
 
-    // Adjust glyph position based on the subpixel rounding
-    // used by the font.
+    if (!font_atlas) {
+      VALIDATION_LOG << "Could not find font in the atlas.";
+      // We will not find glyph bounds data for any characters in this run.
+      break;
+    }
+
+    // Adjust glyph position based on the subpixel rounding used by the font.
+    //
+    // This value is really only used in the is_translation_scale case below,
+    // but that usage appears inside a pair of nested loops so we compute it
+    // once here for the common case for use many times below.
+    // For the other case, this is a fairly quick computation if we are
+    // only doing it just once.
     Point subpixel_adjustment(0.5, 0.5);
     switch (font.GetAxisAlignment()) {
       case AxisAlignment::kNone:
@@ -143,69 +169,54 @@ void TextContents::ComputeVertexData(
         break;
     }
 
-    Point screen_offset = (entity_transform * Point(0, 0));
     for (const TextRun::GlyphPosition& glyph_position :
          run.GetGlyphPositions()) {
-      const FrameBounds& frame_bounds = frame->GetFrameBounds(bounds_offset);
-      bounds_offset++;
-      auto atlas_glyph_bounds = frame_bounds.atlas_bounds;
-      auto glyph_bounds = frame_bounds.glyph_bounds;
+      SubpixelPosition subpixel = TextFrame::ComputeSubpixelPosition(
+          glyph_position, font.GetAxisAlignment(), frame_transform);
+      SubpixelGlyph subpixel_glyph(glyph_position.glyph, subpixel,
+                                   glyph_properties);
+      FrameBounds frame_bounds =
+          font_atlas->FindGlyphBounds(subpixel_glyph).value_or(FrameBounds{});
 
-      // If frame_bounds.is_placeholder is true, this is the first frame
-      // the glyph has been rendered and so its atlas position was not
+      // If frame_bounds.is_placeholder is true, either this set of attributes
+      // were not captured by the FirstPass dispatcher or this is the first
+      // frame the glyph has been rendered and so its atlas position was not
       // known when the glyph was recorded. Perform a slow lookup into the
       // glyph atlas hash table.
       if (frame_bounds.is_placeholder) {
-        if (!font_atlas) {
-          font_atlas =
-              atlas->GetOrCreateFontGlyphAtlas(ScaledFont{font, rounded_scale});
-        }
-
-        if (!font_atlas) {
-          VALIDATION_LOG << "Could not find font in the atlas.";
-          continue;
-        }
-        SubpixelPosition subpixel = TextFrame::ComputeSubpixelPosition(
-            glyph_position, font.GetAxisAlignment(), transform);
-
-        std::optional<FrameBounds> maybe_atlas_glyph_bounds =
-            font_atlas->FindGlyphBounds(SubpixelGlyph{
-                glyph_position.glyph,  //
-                subpixel,              //
-                glyph_properties       //
-            });
-        if (!maybe_atlas_glyph_bounds.has_value()) {
-          VALIDATION_LOG << "Could not find glyph position in the atlas.";
-          continue;
-        }
-        atlas_glyph_bounds = maybe_atlas_glyph_bounds.value().atlas_bounds;
+        VALIDATION_LOG << "Frame bounds are not present in the atlas "
+                       << font_atlas;
+        continue;
       }
 
-      Rect scaled_bounds = glyph_bounds.Scale(inverted_rounded_scale);
       // For each glyph, we compute two rectangles. One for the vertex
       // positions and one for the texture coordinates (UVs). The atlas
       // glyph bounds are used to compute UVs in cases where the
       // destination and source sizes may differ due to clamping the sizes
       // of large glyphs.
-      Point uv_origin = atlas_glyph_bounds.GetLeftTop() / atlas_size;
-      Point uv_size = SizeToPoint(atlas_glyph_bounds.GetSize()) / atlas_size;
+      Point uv_origin = frame_bounds.atlas_bounds.GetLeftTop() / atlas_size;
+      Point uv_size =
+          SizeToPoint(frame_bounds.atlas_bounds.GetSize()) / atlas_size;
 
-      Point unrounded_glyph_position =
-          // This is for RTL text.
-          unscaled_basis * glyph_bounds.GetLeftTop() +
-          (basis_transform * glyph_position.position);
-
-      Point screen_glyph_position =
-          (screen_offset + unrounded_glyph_position + subpixel_adjustment)
-              .Floor();
       for (const Point& point : unit_points) {
         Point position;
         if (is_translation_scale) {
-          position = (screen_glyph_position +
-                      (unscaled_basis * point * glyph_bounds.GetSize()))
-                         .Round();
+          Point unrounded_glyph_position =
+              // This is for RTL text.
+              unscaled_basis * frame_bounds.glyph_bounds.GetLeftTop() +
+              (basis_transform * glyph_position.position);
+
+          Point screen_glyph_position =
+              (screen_offset + unrounded_glyph_position + subpixel_adjustment)
+                  .Floor();
+          position =
+              (screen_glyph_position +
+               (unscaled_basis * point * frame_bounds.glyph_bounds.GetSize()))
+                  .Round();
         } else {
-          position = entity_transform *
+          Rect scaled_bounds =
+              frame_bounds.glyph_bounds.Scale(inverted_rounded_scale);
+          position = entity_offset_transform *
                      (glyph_position.position + scaled_bounds.GetLeftTop() +
                       point * scaled_bounds.GetSize());
         }
@@ -234,10 +245,6 @@ bool TextContents::Render(const ContentContext& renderer,
     VALIDATION_LOG << "Cannot render glyphs without prepared atlas.";
     return false;
   }
-  if (!frame_->IsFrameComplete()) {
-    VALIDATION_LOG << "Failed to find font glyph bounds.";
-    return false;
-  }
 
   // Information shared by all glyph draw calls.
   pass.SetCommandLabel("TextFrame");
@@ -249,8 +256,8 @@ bool TextContents::Render(const ContentContext& renderer,
   VS::FrameInfo frame_info;
   frame_info.mvp =
       Entity::GetShaderTransform(entity.GetShaderClipDepth(), pass, Matrix());
-  bool is_translation_scale = entity.GetTransform().IsTranslationScaleOnly();
-  Matrix entity_transform = entity.GetTransform();
+  const Matrix& entity_transform = entity.GetTransform();
+  bool is_translation_scale = entity_transform.IsTranslationScaleOnly();
 
   VS::BindFrameInfo(
       pass, renderer.GetTransientsDataBuffer().EmplaceUniform(frame_info));
@@ -323,10 +330,10 @@ bool TextContents::Render(const ContentContext& renderer,
         VS::PerVertexData* vtx_contents =
             reinterpret_cast<VS::PerVertexData*>(data);
         ComputeVertexData(/*vtx_contents=*/vtx_contents,
+                          /*entity_transform=*/entity.GetTransform(),
                           /*frame=*/frame_,
-                          /*scale=*/scale_,
-                          /*entity_transform=*/entity_transform,
-                          /*offset=*/offset_,
+                          /*position=*/position_,
+                          /*screen_transform=*/screen_transform_,
                           /*glyph_properties=*/GetGlyphProperties(),
                           /*atlas=*/atlas);
       });
