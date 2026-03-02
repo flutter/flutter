@@ -80,8 +80,9 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
       return;
     }
     // SelectableText is read-only, so right-clicking should not select a word.
-    // Only show the toolbar if text is already selected.
-    if (shouldShowSelectionToolbar) {
+    // Only show the toolbar if there is an existing non-collapsed selection.
+    final TextSelection selection = editableText.textEditingValue.selection;
+    if (selection.isValid && !selection.isCollapsed) {
       editableText.showToolbar();
     }
   }

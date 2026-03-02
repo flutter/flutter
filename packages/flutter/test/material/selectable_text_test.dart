@@ -5808,6 +5808,9 @@ void main() {
       // The selection should remain unchanged.
       expect(state.textEditingValue.selection.baseOffset, 4);
       expect(state.textEditingValue.selection.extentOffset, 7);
+
+      // The toolbar should be visible after right-clicking on selected text.
+      expect(find.text('Copy'), findsOneWidget);
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.macOS,
