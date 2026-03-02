@@ -2768,6 +2768,9 @@ external void _decodeImageFromPixelsSync(
 );
 
 /// Creates an [Image] from a backend texture.
+///
+/// The [textureId] is the ID of the texture to use.
+/// The [width] and [height] arguments specify the dimensions of the image.
 Image getImageFromTexture(int textureId, int width, int height) {
   final image = Image._(_Image._(), width, height);
   _CreateFromTexture(image._image, textureId, width, height);
