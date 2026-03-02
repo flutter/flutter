@@ -594,7 +594,8 @@ class _NavigationDestinationBuilderState extends State<_NavigationDestinationBui
     final NavigationBarThemeData defaults = _defaultsFor(context);
 
     // When tooltip is an empty string, no tooltip should be shown.
-    final String? effectiveTooltip = widget.tooltip == '' ? null : (widget.tooltip ?? widget.label);
+    final String? tooltip = widget.tooltip ?? widget.label;
+    final String? effectiveTooltip = (tooltip?.isEmpty ?? true) ? null : tooltip;
 
     Widget content = _IndicatorInkWell(
       iconKey: iconKey,
