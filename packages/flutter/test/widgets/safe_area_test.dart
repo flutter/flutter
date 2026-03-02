@@ -241,6 +241,18 @@ void main() {
         },
       );
     });
+
+    testWidgets('SafeArea does not crash at zero area', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox.shrink(child: SafeArea(child: Placeholder())),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(SafeArea)), Size.zero);
+    });
   });
 
   group('SliverSafeArea', () {
