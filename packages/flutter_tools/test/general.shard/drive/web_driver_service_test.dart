@@ -36,6 +36,8 @@ const kChromeArgs = <String>[
   '--no-default-browser-check',
   '--no-sandbox',
   '--no-first-run',
+  '--password-store=basic',
+  '--use-mock-keychain',
 ];
 
 void main() {
