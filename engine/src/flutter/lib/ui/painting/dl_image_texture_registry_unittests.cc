@@ -1,5 +1,6 @@
 #include "flutter/common/graphics/texture.h"
 #include "flutter/lib/ui/painting/dl_image_texture_registry.h"
+#include "flutter/lib/ui/painting/testing/mocks.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
@@ -28,7 +29,8 @@ class MockTexture : public Texture {
 };
 
 TEST(DlImageTextureRegistryTest, BasicInfo) {
-  DlImageTextureRegistry dl_image(nullptr, nullptr, nullptr, 1234, 100, 200);
+  MockSnapshotDelegate delegate;
+  DlImageTextureRegistry dl_image(delegate.GetWeakPtr(), 1234, 100, 200);
 
   EXPECT_EQ(dl_image.GetSize().width, 100);
   EXPECT_EQ(dl_image.GetSize().height, 200);
@@ -39,27 +41,42 @@ TEST(DlImageTextureRegistryTest, BasicInfo) {
 }
 
 TEST(DlImageTextureRegistryTest, ResolvesToNullWhenNoRegistry) {
-  DlImageTextureRegistry dl_image(nullptr, nullptr, nullptr, 1234, 100, 200);
+  MockSnapshotDelegate delegate;
+  EXPECT_CALL(delegate, GetTextureRegistry())
+      .WillRepeatedly(::testing::Return(nullptr));
+  DlImageTextureRegistry dl_image(delegate.GetWeakPtr(), 1234, 100, 200);
 
   EXPECT_EQ(dl_image.skia_image(), nullptr);
   EXPECT_EQ(dl_image.impeller_texture(), nullptr);
 }
 
 TEST(DlImageTextureRegistryTest, ResolvesToNullWhenTextureNotFound) {
+  MockSnapshotDelegate delegate;
   auto registry = std::make_shared<TextureRegistry>();
-  DlImageTextureRegistry dl_image(registry, nullptr, nullptr, 1234, 100, 200);
+  EXPECT_CALL(delegate, GetTextureRegistry())
+      .WillRepeatedly(::testing::Return(registry));
+
+  DlImageTextureRegistry dl_image(delegate.GetWeakPtr(), 1234, 100, 200);
 
   EXPECT_EQ(dl_image.skia_image(), nullptr);
   EXPECT_EQ(dl_image.impeller_texture(), nullptr);
 }
 
 TEST(DlImageTextureRegistryTest, ResolvesWhenTextureFound) {
+  MockSnapshotDelegate delegate;
   auto registry = std::make_shared<TextureRegistry>();
+  EXPECT_CALL(delegate, GetTextureRegistry())
+      .WillRepeatedly(::testing::Return(registry));
 
   auto texture = std::shared_ptr<MockTexture>(new MockTexture(1234));
   registry->RegisterTexture(texture);
 
-  DlImageTextureRegistry dl_image(registry, nullptr, nullptr, 1234, 100, 200);
+  EXPECT_CALL(delegate, GetGrContext())
+      .WillRepeatedly(::testing::Return(nullptr));
+  EXPECT_CALL(delegate, GetSnapshotDelegateAiksContext())
+      .WillRepeatedly(::testing::Return(nullptr));
+
+  DlImageTextureRegistry dl_image(delegate.GetWeakPtr(), 1234, 100, 200);
 
   // Still null because our MockTexture returns null, but it proves it didn't
   // crash.

@@ -3,15 +3,15 @@
 
 #include "flutter/common/graphics/texture.h"
 #include "flutter/display_list/image/dl_image.h"
+#include "flutter/fml/memory/weak_ptr.h"
+#include "flutter/lib/ui/snapshot_delegate.h"
 
 namespace flutter {
 
 class DlImageTextureRegistry : public DlImage {
  public:
   DlImageTextureRegistry(
-      const std::shared_ptr<flutter::TextureRegistry>& registry,
-      const std::shared_ptr<impeller::AiksContext>& aiks_context,
-      GrDirectContext* gr_context,
+      fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
       int64_t texture_id,
       int width,
       int height);
@@ -31,9 +31,7 @@ class DlImageTextureRegistry : public DlImage {
   }
 
  private:
-  std::weak_ptr<flutter::TextureRegistry> registry_;
-  std::weak_ptr<impeller::AiksContext> aiks_context_;
-  GrDirectContext* gr_context_;
+  fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate_;
   int64_t texture_id_;
   DlISize size_;
 };
