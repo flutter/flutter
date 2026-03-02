@@ -1137,7 +1137,7 @@ class _ShortcutsState extends State<Shortcuts> {
   @override
   Widget build(BuildContext context) {
     return Focus(
-      debugLabel: '$Shortcuts',
+      debugLabel: widget.debugLabel != null ? '$Shortcuts: ${widget.debugLabel}' : '$Shortcuts',
       canRequestFocus: false,
       onKeyEvent: _handleOnKeyEvent,
       includeSemantics: widget.includeSemantics,
@@ -1547,7 +1547,11 @@ class _ShortcutRegistrarState extends State<ShortcutRegistrar> {
   Widget build(BuildContext context) {
     return _ShortcutRegistrarScope(
       registry: registry,
-      child: Shortcuts.manager(manager: manager, child: widget.child),
+      child: Shortcuts.manager(
+        manager: manager,
+        debugLabel: '<Shortcut Registrar>',
+        child: widget.child,
+      ),
     );
   }
 }

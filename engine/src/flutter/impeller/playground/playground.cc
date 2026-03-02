@@ -270,7 +270,7 @@ bool Playground::OpenPlaygroundHere(
     RenderTarget render_target = surface->GetRenderTarget();
 
     ImGui::NewFrame();
-    ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(),
+    ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(),
                                  ImGuiDockNodeFlags_PassthruCentralNode);
     bool result = render_callback(render_target);
     ImGui::Render();

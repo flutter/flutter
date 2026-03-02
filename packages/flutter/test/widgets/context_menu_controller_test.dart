@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'clipboard_utils.dart';
+import 'editable_text_tester.dart';
 import 'editable_text_utils.dart';
 import 'widgets_app_tester.dart';
 

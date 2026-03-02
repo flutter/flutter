@@ -169,12 +169,17 @@ void fl_task_runner_post_flutter_task(FlTaskRunner* self,
   g_cond_signal(&self->cond);
 }
 
-void fl_task_runner_wait(FlTaskRunner* self) {
+void fl_task_runner_wait(FlTaskRunner* self, gint64 expiry_time) {
   g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->mutex);
   (void)locker;  // unused variable
 
-  g_cond_wait_until(&self->cond, &self->mutex,
-                    fl_task_runner_next_task_expiration_time_locked(self));
+  gint64 task_expiry_time =
+      fl_task_runner_next_task_expiration_time_locked(self);
+  if (task_expiry_time < expiry_time) {
+    expiry_time = task_expiry_time;
+  }
+
+  g_cond_wait_until(&self->cond, &self->mutex, expiry_time);
   fl_task_runner_process_expired_tasks_locked(self);
   fl_task_runner_tasks_did_change_locked(self);
 }
