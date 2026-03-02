@@ -204,8 +204,9 @@ GrDirectContext* Rasterizer::GetGrContext() {
   return surface_ ? surface_->GetContext() : nullptr;
 }
 
-impeller::AiksContext* Rasterizer::GetSnapshotDelegateAiksContext() {
-  return surface_ ? surface_->GetAiksContext().get() : nullptr;
+std::shared_ptr<impeller::AiksContext>
+Rasterizer::GetSnapshotDelegateAiksContext() {
+  return surface_ ? surface_->GetAiksContext() : nullptr;
 }
 
 flutter::LayerTree* Rasterizer::GetLastLayerTree(int64_t view_id) {

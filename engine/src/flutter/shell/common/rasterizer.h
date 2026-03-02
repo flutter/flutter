@@ -638,7 +638,8 @@ class Rasterizer final : public SnapshotDelegate,
     std::optional<DrawSurfaceStatus> last_draw_status;
   };
   // |SnapshotDelegate|
-  impeller::AiksContext* GetSnapshotDelegateAiksContext() override;
+  std::shared_ptr<impeller::AiksContext> GetSnapshotDelegateAiksContext()
+      override;
 
   // |SnapshotDelegate|
   std::unique_ptr<GpuImageResult> MakeSkiaGpuImage(

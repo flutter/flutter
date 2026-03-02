@@ -4,13 +4,13 @@ namespace flutter {
 
 DlImageTextureRegistry::DlImageTextureRegistry(
     std::shared_ptr<flutter::TextureRegistry> registry,
-    impeller::AiksContext* aiks_context,
+    std::shared_ptr<impeller::AiksContext> aiks_context,
     GrDirectContext* gr_context,
     int64_t texture_id,
     int width,
     int height)
     : registry_(std::move(registry)),
-      aiks_context_(aiks_context),
+      aiks_context_(std::move(aiks_context)),
       gr_context_(gr_context),
       texture_id_(texture_id),
       size_(DlISize(width, height)) {}
@@ -39,8 +39,12 @@ std::shared_ptr<impeller::Texture> DlImageTextureRegistry::impeller_texture()
   if (!texture) {
     return nullptr;
   }
+  auto aiks_context = aiks_context_.lock();
+  if (!aiks_context) {
+    return nullptr;
+  }
   Texture::PaintContext ctx;
-  ctx.aiks_context = aiks_context_;
+  ctx.aiks_context = aiks_context.get();
   ctx.gr_context = gr_context_;
   auto dl_image =
       texture->GetTextureImage(ctx, DlRect::MakeSize(GetSize()), false);

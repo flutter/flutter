@@ -34,7 +34,7 @@ class MockSnapshotDelegate : public SnapshotDelegate {
               (),
               (override));
   MOCK_METHOD(GrDirectContext*, GetGrContext, (), (override));
-  MOCK_METHOD(impeller::AiksContext*,
+  MOCK_METHOD(std::shared_ptr<impeller::AiksContext>,
               GetSnapshotDelegateAiksContext,
               (),
               (override));
