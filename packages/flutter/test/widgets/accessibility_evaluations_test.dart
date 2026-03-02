@@ -342,10 +342,7 @@ void main() {
       // it should not produce a violation because it is not "important".
       await tester.pumpWidget(
         TestWidgetsApp(
-          home: Semantics(
-            container: true,
-            child: const SizedBox(width: 10.0, height: 10.0),
-          ),
+          home: Semantics(container: true, child: const SizedBox(width: 10.0, height: 10.0)),
         ),
       );
       final EvaluationResult result = await evaluation.evaluate(tester.binding);
