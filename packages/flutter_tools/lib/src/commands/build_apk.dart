@@ -133,7 +133,6 @@ class BuildApkCommand extends BuildSubCommand {
       target: targetFile,
       androidBuildInfo: androidBuildInfo,
       configOnly: configOnly,
-      androidShellArguments: <String>[],
     );
 
     // When an app is successfully built, record to analytics whether Impeller

@@ -229,7 +229,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
     required String target,
-    required List<String> androidShellArguments,
+    List<String>? androidShellArguments,
     bool configOnly = false,
   }) async {
     await buildGradleApp(
@@ -250,12 +250,10 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
     required String target,
-    required List<String> androidShellArguments,
     bool validateDeferredComponents = true,
     bool deferredComponentsEnabled = false,
     bool configOnly = false,
   }) async {
-    // TODO(camsim99): Fix this flow.
     await buildGradleApp(
       project: project,
       androidBuildInfo: androidBuildInfo,
@@ -265,7 +263,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
       validateDeferredComponents: validateDeferredComponents,
       deferredComponentsEnabled: deferredComponentsEnabled,
       configOnly: configOnly,
-      androidShellArguments: androidShellArguments,
       maxRetries: 1,
     );
   }
@@ -445,7 +442,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required bool isBuildingBundle,
     required List<GradleHandledError> localGradleErrors,
     required bool configOnly,
-    required List<String> androidShellArguments,
+    List<String>? androidShellArguments,
     bool validateDeferredComponents = true,
     bool deferredComponentsEnabled = false,
     int retry = 0,
@@ -492,8 +489,10 @@ class AndroidGradleBuilder implements AndroidBuilder {
         : getAssembleTaskFor(buildInfo);
 
     // Add engine shell arugments to be injected into the manifest.
-    final String androidShellArgumentsStr = androidShellArguments.join(',');
-    options.add('-PandroidShellArguments=$androidShellArgumentsStr');
+    if (androidShellArguments != null) {
+      final String androidShellArgumentsStr = androidShellArguments.join(',');
+      options.add('-PandroidShellArguments=$androidShellArgumentsStr');
+    }
 
     if (_logger.isVerbose) {
       options.add('--full-stacktrace');

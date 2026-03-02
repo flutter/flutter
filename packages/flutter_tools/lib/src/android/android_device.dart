@@ -574,9 +574,6 @@ class AndroidDevice extends Device {
       androidShellArguments.addAll(<String>[
         if (traceStartup) ...<String>['--ez', 'trace-startup', 'true'],
         if (route != null) ...<String>['--es', 'route', route],
-        if (debuggingOptions.debuggingEnabled) ...<String>[
-          if (userIdentifier != null) ...<String>['--user', userIdentifier],
-        ],
       ]);
 
       await androidBuilder!.buildApk(
@@ -631,6 +628,9 @@ class AndroidDevice extends Device {
       '-a', 'android.intent.action.MAIN',
       '-c', 'android.intent.category.LAUNCHER',
       '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
+      if (debuggingOptions.debuggingEnabled) ...<String>[
+        if (userIdentifier != null) ...<String>['--user', userIdentifier],
+      ],
       builtPackage.launchActivity,
     ];
     final String result = (await runAdbCheckedAsync(cmd)).stdout;
