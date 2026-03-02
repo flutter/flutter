@@ -157,9 +157,9 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
     return nullptr;
   }
 
-  if (texture_gles_) {
-    texture_gles_->Leak();
-    texture_gles_ = nullptr;
+  if (texture_gles_ && texture_gles_->GetGLHandle().has_value() &&
+      texture_gles_->GetGLHandle().value() == texture->name) {
+    return impeller::DlImageImpeller::Make(texture_gles_);
   }
 
   texture_gles_ = CreateTextureGLES(aiks_context, texture.get());
