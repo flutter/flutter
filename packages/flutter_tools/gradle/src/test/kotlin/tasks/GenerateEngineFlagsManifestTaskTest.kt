@@ -37,7 +37,7 @@ class GenerateEngineFlagsManifestTaskTest {
         task = project.tasks.create("generateManifest", GenerateEngineFlagsManifestTask::class.java)
     }
 
-     @Test
+    @Test
     fun generateHandlesOneArgCorrectly() {
         val shellArg = "--verbose-logging"
         val manifestOutputFile = File(testProjectDir, "AndroidManifest.xml")

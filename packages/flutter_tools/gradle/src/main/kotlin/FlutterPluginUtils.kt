@@ -842,15 +842,11 @@ object FlutterPluginUtils {
     @JvmStatic
     @JvmName("addTaskForEngineShellArgumentManifestInjection")
     internal fun addTaskForEngineShellArgumentManifestInjection(project: Project, androidEngineShellArgs: String) {
-        if (androidEngineShellArgs.isBlank()) {
-            // If there are no flags to pass the embedding, skip merging an additional manifest for them.
-            return;
-        }
-
         val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
 
         androidComponents.onVariants { variant ->
             val genTask = project.tasks.register("${variant.name}GenerateEngineFlagsManifestTask", GenerateEngineFlagsManifestTask::class.java) {
+                description = "Generates manifest containing engine shell arguments"
                 shellArgs.set(androidEngineShellArgs)
                 manifestOutputFile.set(
                                 project.layout.buildDirectory.file("intermediates/flutter/extra_manifest/${variant.name}/AndroidManifest.xml")
