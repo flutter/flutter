@@ -1261,7 +1261,6 @@ class DebuggingOptions {
     ];
   }
 
-  // TODO(camsim99): note this is missing some flags but gonna roll with this for the poc
   List<String> getAndroidShellArguments() {
     final androidShellArguments = <String>[
       if (enableDartProfiling) ...<String>['--enable-dart-profiling=true'],
