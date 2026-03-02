@@ -20,17 +20,17 @@ void main() {
     TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics();
     layout(parent, phase: EnginePhase.flushSemantics);
 
-    // Verify initial state
+    // Verify initial state.
     expect(child.size, const Size(100.0, 100.0));
     expect(child.debugSemantics!.rect, const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0));
 
-    // Change size
+    // Change size.
     child.targetSize = const Size(200.0, 200.0);
     child.markNeedsLayout();
 
     pumpFrame(phase: EnginePhase.flushSemantics);
 
-    // Verify updated state
+    // Verify updated state.
     expect(child.size, const Size(200.0, 200.0));
     expect(child.debugSemantics!.rect, const Rect.fromLTWH(0.0, 0.0, 200.0, 200.0));
   });
@@ -47,7 +47,7 @@ void main() {
     TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics();
     layout(parent, phase: EnginePhase.flushSemantics);
 
-    // Verify initial state
+    // Verify initial state.
     expect(child.size, const Size(100.0, 100.0));
     expect(child.debugSemantics!.rect, const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0));
     middle1.markNeedsLayout();
@@ -73,11 +73,11 @@ void main() {
     TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics();
     layout(parent, phase: EnginePhase.flushSemantics);
 
-    // Verify initial state
+    // Verify initial state.
     expect(child.size, const Size(100.0, 100.0));
     expect(child.debugSemantics!.rect, const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0));
 
-    // Change size
+    // Change size.
     child.targetSize = Size.zero;
     child.markNeedsLayout();
 
@@ -101,26 +101,26 @@ void main() {
 
     final SemanticsNode parentSemantics = parent.debugSemantics!;
 
-    // Initial state: exposes originalChild
+    // Initial state: exposes originalChild.
     expect(parentSemantics.childrenCount, 1);
 
-    // Add new child
+    // Add new child.
     final newChild = RenderTestLayoutSemanticsBoundary();
     newChild.isSemanticBoundary = true;
     parent.add(newChild);
 
     pumpFrame(phase: EnginePhase.flushSemantics);
 
-    // This adds originalChild to the dirty list, but shouldn't be updated
+    // This adds originalChild to the dirty list, but shouldn't be updated.
     childOfChild.markNeedsLayout();
     pumpFrame(phase: EnginePhase.flushSemantics);
 
-    // Remove the new child
+    // Remove the new child.
     parent.remove(newChild);
 
     pumpFrame(phase: EnginePhase.flushSemantics);
 
-    // State after removal: exposes originalChild again
+    // State after removal: exposes originalChild again.
     expect(parentSemantics.childrenCount, 1);
   });
 }

@@ -1420,18 +1420,18 @@ base class PipelineOwner with DiagnosticableTreeMixin {
 
   /// Nodes that need semantics update.
   ///
-  /// When [_RenderObjectSemantics.markNeedsUpdate] are called, their closest
-  /// semantics boundary ancestor is added to this set.
+  /// When a [_RenderObjectSemantics.markNeedsUpdate] is called, the [_RenderObjectSemantics]'s
+  /// closest semantics boundary ancestor is added to this set.
   ///
   /// All nodes in this set are guaranteed to be semantics boundaries.
-  final Set<RenderObject> _nodesNeedingSemantics = <RenderObject>{};
+  final Set<RenderObject> _nodesNeedingSemanticsUpdate = <RenderObject>{};
 
   /// Nodes that need semantics geometry update.
   ///
-  /// Nodes are added when their [_RenderObjectSemantics.markNeedsUpdate] are called.
+  /// Nodes are added when their [_RenderObjectSemantics.markNeedsUpdate]s are called.
   ///
   /// This is used to track nodes that need their semantics geometry updated.
-  /// This is different from [_nodesNeedingSemantics] because it only tracks
+  /// This is different from [_nodesNeedingSemanticsUpdate] because it only tracks
   /// nodes that need their semantics geometry updated, not nodes that need
   /// their semantics updated.
   final Set<RenderObject> _nodesNeedingSemanticsGeometryUpdate = <RenderObject>{};
@@ -1465,11 +1465,11 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       // This has to be a top-down order to be more performant. Otherwise, a parent
       // change can invalidate the whole subtree.
       final List<RenderObject> nodesToProcess =
-          _nodesNeedingSemantics
+          _nodesNeedingSemanticsUpdate
               .where((RenderObject object) => !object._needsLayout && object.owner == this)
               .toList()
             ..sort((RenderObject a, RenderObject b) => a.depth - b.depth);
-      _nodesNeedingSemantics.clear();
+      _nodesNeedingSemanticsUpdate.clear();
       if (!kReleaseMode) {
         FlutterTimeline.startSync('Semantics.updateChildren');
       }
@@ -1515,7 +1515,15 @@ base class PipelineOwner with DiagnosticableTreeMixin {
           .toList();
       _nodesNeedingSemanticsGeometryUpdate.clear();
 
-      // Clear geometry for nodes that needs geometry update.
+      // For every node in this list, needs to clear geometry immediate _RenderObjectSemantics
+      // that forms semantics node in the subtree.
+      //
+      // Case 1, this node forms semantics node, then clear the geometry of this node if it is
+      // a relayout boundary. Otherwise, the parent should handle clearing the geometry.
+      //
+      // Case 2, this node does not form semantics node, then clear immediate children's
+      // geometry if they form semantics node because this node's transform and clip may affect
+      // the geometry of the children.
       for (final node in nodesToProcessGeometry) {
         if (node._semantics.shouldFormSemanticsNode && node._semantics.geometryDirty) {
           // This node is already dirty, skip it.
@@ -1538,7 +1546,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
               child.geometry = null;
             } else {
               // Even though this node does not form a semantics node, it still
-              // represents a group of render objects in the subtree, where node that
+              // represents a group of render objects in the subtree, where a node that
               // forms a semantics node is in its _children.
               for (final _RenderObjectSemantics nodeInSubtree in child._children) {
                 assert(nodeInSubtree.shouldFormSemanticsNode);
@@ -1634,7 +1642,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
         child.flushSemantics();
       }
       assert(
-        _nodesNeedingSemantics.isEmpty,
+        _nodesNeedingSemanticsUpdate.isEmpty,
         'Child PipelineOwners must not dirty nodes in their parent.',
       );
       assert(
@@ -1798,7 +1806,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
     _nodesNeedingLayout.clear();
     _nodesNeedingCompositingBitsUpdate.clear();
     _nodesNeedingPaint.clear();
-    _nodesNeedingSemantics.clear();
+    _nodesNeedingSemanticsUpdate.clear();
   }
 }
 
@@ -3773,7 +3781,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(!owner!._debugDoingSemantics);
     assert(_semantics.parentDataDirty || !_semantics.built);
     assert(owner!._semanticsOwner != null);
-    owner!._nodesNeedingSemantics.add(this);
+    owner!._nodesNeedingSemanticsUpdate.add(this);
     owner!._nodesNeedingSemanticsGeometryUpdate.add(this);
     owner!.requestVisualUpdate();
   }
@@ -5603,7 +5611,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// The [treeShapeToken] parameter prevents redundant calculation by verifying
   /// whether the tree shape changed since the previous lookup.
   ///
-  /// This method requires all dirty nodes in [PipelineOwner._nodesNeedingSemantics]
+  /// This method requires all dirty nodes in [PipelineOwner._nodesNeedingSemanticsUpdate]
   /// to have completed their [updateChildren] calls.
   ///
   /// See phase 2 in the [_RenderObjectSemantics] documentation.
@@ -6446,20 +6454,20 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
           node._semantics.configProvider.effective.isSemanticBoundary && node._semantics.built;
     }
     if (node != renderObject && producedSemanticsNode != null && node._semantics.parentDataDirty) {
-      // If `this` node has already been added to [owner._nodesNeedingSemantics]
+      // If `this` node has already been added to [owner._nodesNeedingSemanticsUpdate]
       // remove it as it is no longer guaranteed that its semantics
       // node will continue to be in the tree. If it still is in the tree, the
-      // ancestor `node` added to [owner._nodesNeedingSemantics] at the end of
+      // ancestor `node` added to [owner._nodesNeedingSemanticsUpdate] at the end of
       // this block will ensure that the semantics of `this` node actually gets
       // updated.
       // (See semantics_10_test.dart for an example why this is required).
-      renderObject.owner!._nodesNeedingSemantics.remove(renderObject);
+      renderObject.owner!._nodesNeedingSemanticsUpdate.remove(renderObject);
     }
 
     if (!node._semantics.parentDataDirty || node._semantics.isRoot) {
       if (renderObject.owner != null) {
         assert(node._semantics.configProvider.effective.isSemanticBoundary || node.parent == null);
-        if (renderObject.owner!._nodesNeedingSemantics.add(node)) {
+        if (renderObject.owner!._nodesNeedingSemanticsUpdate.add(node)) {
           renderObject.owner!.requestVisualUpdate();
         }
       }
