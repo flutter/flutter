@@ -5739,7 +5739,7 @@ void main() {
   testWidgets(
     'Right-click does not select word on SelectableText',
     (WidgetTester tester) async {
-      const String text = 'abc def ghi';
+      const text = 'abc def ghi';
       TextSelection? selection;
       await tester.pumpWidget(
         MaterialApp(
@@ -5777,7 +5777,7 @@ void main() {
   testWidgets(
     'Right-click shows toolbar when text is already selected in SelectableText',
     (WidgetTester tester) async {
-      const String text = 'abc def ghi';
+      const text = 'abc def ghi';
       await tester.pumpWidget(const MaterialApp(home: Material(child: SelectableText(text))));
 
       // First, double-tap to select a word.
