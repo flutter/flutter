@@ -26,6 +26,16 @@ FLUTTER_ASSERT_ARC
 @protocol TestFlutterPluginWithSceneEvents <NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate>
 @end
 
+/// A minimal FlutterPlugin that does not implement any lifecycle methods.
+/// Used to verify that plugins not using lifecycle events do not trigger a warning.
+@interface TestMinimalFlutterPlugin : NSObject <FlutterPlugin>
+@end
+
+@implementation TestMinimalFlutterPlugin
++ (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
+}
+@end
+
 @interface FlutterEngineSpy : FlutterEngine
 @property(nonatomic) BOOL ensureSemanticsEnabledCalled;
 @end
@@ -803,6 +813,29 @@ FLUTTER_ASSERT_ARC
   [registrar addApplicationDelegate:mockPlugin];
 
   XCTAssertFalse(writer.didLog, @"No warning should be logged for scene-conforming plugin");
+}
+
+- (void)testAddApplicationDelegateDoesNotLogWarningWhenPluginDoesNotUseLifecycleEvents {
+  FlutterStringOutputWriter* writer = [[FlutterStringOutputWriter alloc] init];
+  FlutterLogger.outputWriter = writer;
+
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"engine" project:nil];
+  id<FlutterPluginRegistrar> registrar = [engine registrarForPlugin:@"MinimalPlugin"];
+
+  // Use a concrete FlutterPlugin that does NOT implement any lifecycle methods.
+  // Even though it does not conform to FlutterSceneLifeCycleDelegate,
+  // no warning should be logged because it doesn't use any lifecycle events.
+  TestMinimalFlutterPlugin* plugin = [[TestMinimalFlutterPlugin alloc] init];
+
+  id mockAppDelegate = OCMProtocolMock(@protocol(FlutterAppLifeCycleProvider));
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  OCMStub([mockApplication delegate]).andReturn(mockAppDelegate);
+
+  [registrar addApplicationDelegate:plugin];
+
+  XCTAssertFalse(writer.didLog,
+                 @"No warning should be logged for a plugin that doesn't use lifecycle events");
 }
 
 @end

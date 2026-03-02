@@ -1686,6 +1686,28 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   }];
 }
 
+/// Returns YES if the Flutter plugin responds to any UIScene-affected lifecycle selectors.
+/// These selectors correspond to UIApplicationDelegate methods that have scene-based
+/// equivalents and require migration to FlutterSceneLifeCycleDelegate.
+static BOOL FLTFlutterPluginRespondsToSceneLifecycleSelectors(NSObject<FlutterPlugin>* delegate) {
+  SEL selectors[] = {
+    @selector(applicationDidBecomeActive:),
+    @selector(applicationWillResignActive:),
+    @selector(applicationWillEnterForeground:),
+    @selector(applicationDidEnterBackground:),
+    @selector(application:continueUserActivity:restorationHandler:),
+    @selector(application:performActionForShortcutItem:completionHandler:),
+    @selector(application:openURL:options:),
+    @selector(application:performFetchWithCompletionHandler:),
+  };
+  for (SEL sel : selectors) {
+    if ([delegate respondsToSelector:sel]) {
+      return YES;
+    }
+  }
+  return NO;
+}
+
 - (void)addApplicationDelegate:(NSObject<FlutterPlugin>*)delegate {
   id<UIApplicationDelegate> appDelegate = FlutterSharedApplication.application.delegate;
   if ([appDelegate conformsToProtocol:@protocol(FlutterAppLifeCycleProvider)]) {
@@ -1693,7 +1715,8 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
         (id<FlutterAppLifeCycleProvider>)appDelegate;
     [lifeCycleProvider addApplicationLifeCycleDelegate:delegate];
   }
-  if (![delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleDelegate)]) {
+  if (![delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleDelegate)] &&
+      FLTFlutterPluginRespondsToSceneLifecycleSelectors(delegate)) {
     [FlutterLogger
         logWarning:[NSString
                        stringWithFormat:@"Plugin %@ uses application lifecycle events but has not "
