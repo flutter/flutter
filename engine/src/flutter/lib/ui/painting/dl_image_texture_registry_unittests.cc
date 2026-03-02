@@ -30,7 +30,8 @@ class MockTexture : public Texture {
 
 TEST(DlImageTextureRegistryTest, BasicInfo) {
   MockSnapshotDelegate delegate;
-  DlImageTextureRegistry dl_image(delegate.GetWeakPtr(), 1234, 100, 200);
+  DlImageTextureRegistry dl_image(delegate.GetWeakPtr(), /*texture_id=*/1234,
+                                  /*width=*/100, /*height=*/200);
 
   EXPECT_EQ(dl_image.GetSize().width, 100);
   EXPECT_EQ(dl_image.GetSize().height, 200);
@@ -44,7 +45,8 @@ TEST(DlImageTextureRegistryTest, ResolvesToNullWhenNoRegistry) {
   MockSnapshotDelegate delegate;
   EXPECT_CALL(delegate, GetTextureRegistry())
       .WillRepeatedly(::testing::Return(nullptr));
-  DlImageTextureRegistry dl_image(delegate.GetWeakPtr(), 1234, 100, 200);
+  DlImageTextureRegistry dl_image(delegate.GetWeakPtr(), /*texture_id=*/1234,
+                                  /*width=*/100, /*height=*/200);
 
   EXPECT_EQ(dl_image.skia_image(), nullptr);
   EXPECT_EQ(dl_image.impeller_texture(), nullptr);
@@ -56,7 +58,8 @@ TEST(DlImageTextureRegistryTest, ResolvesToNullWhenTextureNotFound) {
   EXPECT_CALL(delegate, GetTextureRegistry())
       .WillRepeatedly(::testing::Return(registry));
 
-  DlImageTextureRegistry dl_image(delegate.GetWeakPtr(), 1234, 100, 200);
+  DlImageTextureRegistry dl_image(delegate.GetWeakPtr(), /*texture_id=*/1234,
+                                  /*width=*/100, /*height=*/200);
 
   EXPECT_EQ(dl_image.skia_image(), nullptr);
   EXPECT_EQ(dl_image.impeller_texture(), nullptr);
@@ -76,7 +79,8 @@ TEST(DlImageTextureRegistryTest, ResolvesWhenTextureFound) {
   EXPECT_CALL(delegate, GetSnapshotDelegateAiksContext())
       .WillRepeatedly(::testing::Return(nullptr));
 
-  DlImageTextureRegistry dl_image(delegate.GetWeakPtr(), 1234, 100, 200);
+  DlImageTextureRegistry dl_image(delegate.GetWeakPtr(), /*texture_id=*/1234,
+                                  /*width=*/100, /*height=*/200);
 
   // Still null because our MockTexture returns null, but it proves it didn't
   // crash.
