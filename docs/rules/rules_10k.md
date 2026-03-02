@@ -121,7 +121,6 @@ final ThemeData lightTheme = ThemeData(
     brightness: Brightness.light,
   ),
   textTheme: GoogleFonts.outfitTextTheme(),
-  useMaterial3: true,
 );
 ```
 

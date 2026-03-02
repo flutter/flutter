@@ -117,9 +117,8 @@ void main() {
         const MaterialApp(
           home: Scaffold(
             body: Center(
-              child: SizedBox(
-                width: 100,
-                height: 100,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: TextField(decoration: InputDecoration(hintText: 'Placeholder')),
               ),
             ),
@@ -1061,9 +1060,8 @@ void main() {
       child: overlay(
         child: RepaintBoundary(
           key: const ValueKey<int>(1),
-          child: SizedBox(
-            height: 200,
-            width: 200,
+          child: SizedBox.square(
+            dimension: 200,
             child: Center(
               child: SizedBox(
                 // Make sure the input field is not high enough for the WidgetSpan.
@@ -1208,9 +1206,8 @@ void main() {
           theme: ThemeData(useMaterial3: false),
           home: const Scaffold(
             body: Center(
-              child: SizedBox(
-                width: 100,
-                height: 100,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: Opacity(
                   opacity: 0.5,
                   child: TextField(decoration: InputDecoration(hintText: 'Placeholder')),
@@ -17993,9 +17990,8 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Center(
-              child: SizedBox(
-                width: 100,
-                height: 100,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: Opacity(
                   opacity: 0.5,
                   child: TextField(
@@ -18028,9 +18024,8 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Center(
-              child: SizedBox(
-                width: 100,
-                height: 100,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: Opacity(
                   opacity: 0.5,
                   child: TextField(
@@ -18067,9 +18062,8 @@ void main() {
           MaterialApp(
             home: Scaffold(
               body: Center(
-                child: SizedBox(
-                  width: 100,
-                  height: 100,
+                child: SizedBox.square(
+                  dimension: 100.0,
                   child: Opacity(
                     opacity: 0.5,
                     child: TextField(
@@ -18124,9 +18118,8 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Center(
-              child: SizedBox(
-                width: 100,
-                height: 100,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: Opacity(
                   opacity: 0.5,
                   child: TextField(

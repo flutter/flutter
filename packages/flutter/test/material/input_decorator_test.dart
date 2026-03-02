@@ -3275,9 +3275,8 @@ void main() {
 
       await tester.pumpWidget(
         Center(
-          child: SizedBox(
-            width: 100,
-            height: 100,
+          child: SizedBox.square(
+            dimension: 100,
             child: buildInputDecorator(
               isEmpty: true,
               decoration: InputDecoration(labelText: longStringA),
@@ -3293,9 +3292,8 @@ void main() {
 
       await tester.pumpWidget(
         Center(
-          child: SizedBox(
-            width: 100,
-            height: 100,
+          child: SizedBox.square(
+            dimension: 100,
             child: buildInputDecorator(
               isFocused: true,
               isEmpty: true,
@@ -15503,9 +15501,8 @@ void main() {
 
       await tester.pumpWidget(
         Center(
-          child: SizedBox(
-            width: 100,
-            height: 100,
+          child: SizedBox.square(
+            dimension: 100,
             child: buildInputDecoratorM2(
               // isFocused: false (default)
               isEmpty: true,
@@ -15524,9 +15521,8 @@ void main() {
 
       await tester.pumpWidget(
         Center(
-          child: SizedBox(
-            width: 100,
-            height: 100,
+          child: SizedBox.square(
+            dimension: 100,
             child: buildInputDecoratorM2(
               isFocused: true,
               isEmpty: true,
