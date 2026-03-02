@@ -108,6 +108,11 @@ Future<Depfile> copyAssets(
     }),
   };
 
+  var quiet = false;
+  if (environment.defines[kBuildSwiftPackage] == 'true') {
+    quiet = true;
+  }
+
   await Future.wait<void>(
     assetEntries.entries.map<Future<void>>((MapEntry<String, AssetBundleEntry> entry) async {
       final PoolResource copyResource = await copyFilesPool.request();
@@ -152,6 +157,7 @@ Future<Depfile> copyAssets(
                 input: content.file as File,
                 outputPath: file.path,
                 relativePath: entry.key,
+                quiet: quiet,
               );
             case AssetKind.shader:
               doCopy = !await shaderCompiler.compileShader(
@@ -221,6 +227,7 @@ Future<Depfile> copyAssets(
                   input: content.file as File,
                   outputPath: file.path,
                   relativePath: entry.key,
+                  quiet: quiet,
                 )) {
                   await (content.file as File).copy(file.path);
                 }
