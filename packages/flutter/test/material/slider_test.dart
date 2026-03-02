@@ -2872,7 +2872,9 @@ void main() {
 
   group('Value indicator appears when it should:', () {
     final baseTheme = ThemeData(platform: TargetPlatform.android, primarySwatch: Colors.blue);
-    SliderThemeData theme = baseTheme.sliderTheme.copyWith(valueIndicatorColor: Colors.red);
+    final SliderThemeData baseSliderTheme = baseTheme.sliderTheme.copyWith(
+      valueIndicatorColor: Colors.red,
+    );
     var value = 0.45;
     Widget buildApp({required SliderThemeData sliderTheme, int? divisions, bool enabled = true}) {
       final ValueChanged<double>? onChanged = enabled ? (double d) => value = d : null;
@@ -2939,162 +2941,171 @@ void main() {
     }
 
     testWidgets('showValueIndicator set to onlyForDiscrete', (WidgetTester tester) async {
+      final sliderTheme = baseSliderTheme;
       // Default value is onlyForDiscrete.
       await expectValueIndicator(
         tester,
+        theme: sliderTheme,
+        divisions: 3,
         visibleWhenDragged: true,
         visibleWhenReleased: false,
-        theme: theme,
-        divisions: 3,
       );
       await expectValueIndicator(
         tester,
-        visibleWhenDragged: false,
-        visibleWhenReleased: false,
-        theme: theme,
+        theme: sliderTheme,
         divisions: 3,
         enabled: false,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
       );
       await expectValueIndicator(
         tester,
+        theme: sliderTheme,
         visibleWhenDragged: false,
         visibleWhenReleased: false,
-        theme: theme,
       );
       await expectValueIndicator(
         tester,
-        visibleWhenDragged: false,
-        visibleWhenReleased: false,
-        theme: theme,
+        theme: sliderTheme,
         enabled: false,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
       );
     });
 
     testWidgets('showValueIndicator set to onlyForContinuous', (WidgetTester tester) async {
-      theme = theme.copyWith(showValueIndicator: ShowValueIndicator.onlyForContinuous);
-      await expectValueIndicator(
-        tester,
-        visibleWhenDragged: false,
-        visibleWhenReleased: false,
-        theme: theme,
-        divisions: 3,
+      final SliderThemeData sliderTheme = baseSliderTheme.copyWith(
+        showValueIndicator: ShowValueIndicator.onlyForContinuous,
       );
       await expectValueIndicator(
         tester,
+        theme: sliderTheme,
+        divisions: 3,
         visibleWhenDragged: false,
         visibleWhenReleased: false,
-        theme: theme,
+      );
+      await expectValueIndicator(
+        tester,
+        theme: sliderTheme,
         divisions: 3,
         enabled: false,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
       );
       await expectValueIndicator(
         tester,
+        theme: sliderTheme,
         visibleWhenDragged: true,
         visibleWhenReleased: false,
-        theme: theme,
       );
       await expectValueIndicator(
         tester,
+        theme: sliderTheme,
+        enabled: false,
         visibleWhenDragged: false,
         visibleWhenReleased: false,
-        theme: theme,
-        enabled: false,
       );
     });
 
     testWidgets('showValueIndicator set to onDrag', (WidgetTester tester) async {
-      theme = theme.copyWith(showValueIndicator: ShowValueIndicator.onDrag);
+      final SliderThemeData sliderTheme = baseSliderTheme.copyWith(
+        showValueIndicator: ShowValueIndicator.onDrag,
+      );
       await expectValueIndicator(
         tester,
+        theme: sliderTheme,
+        divisions: 3,
         visibleWhenDragged: true,
         visibleWhenReleased: false,
-        theme: theme,
-        divisions: 3,
       );
       await expectValueIndicator(
         tester,
         visibleWhenDragged: false,
         visibleWhenReleased: false,
-        theme: theme,
+        theme: sliderTheme,
         divisions: 3,
         enabled: false,
       );
       await expectValueIndicator(
         tester,
+        theme: sliderTheme,
         visibleWhenDragged: true,
         visibleWhenReleased: false,
-        theme: theme,
       );
       await expectValueIndicator(
         tester,
+        theme: sliderTheme,
+        enabled: false,
         visibleWhenDragged: false,
         visibleWhenReleased: false,
-        theme: theme,
-        enabled: false,
       );
     });
 
     testWidgets('showValueIndicator set to never', (WidgetTester tester) async {
-      theme = theme.copyWith(showValueIndicator: ShowValueIndicator.never);
-      await expectValueIndicator(
-        tester,
-        visibleWhenDragged: false,
-        visibleWhenReleased: false,
-        theme: theme,
-        divisions: 3,
+      final SliderThemeData sliderTheme = baseSliderTheme.copyWith(
+        showValueIndicator: ShowValueIndicator.never,
       );
       await expectValueIndicator(
         tester,
+        theme: sliderTheme,
+        divisions: 3,
         visibleWhenDragged: false,
         visibleWhenReleased: false,
-        theme: theme,
+      );
+      await expectValueIndicator(
+        tester,
+        theme: sliderTheme,
         divisions: 3,
         enabled: false,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
       );
       await expectValueIndicator(
         tester,
+        theme: sliderTheme,
         visibleWhenDragged: false,
         visibleWhenReleased: false,
-        theme: theme,
       );
       await expectValueIndicator(
         tester,
-        visibleWhenDragged: false,
-        visibleWhenReleased: false,
-        theme: theme,
+        theme: sliderTheme,
         enabled: false,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
       );
     });
 
     testWidgets('showValueIndicator set to alwaysVisible', (WidgetTester tester) async {
-      theme = theme.copyWith(showValueIndicator: ShowValueIndicator.alwaysVisible);
+      final SliderThemeData sliderTheme = baseSliderTheme.copyWith(
+        showValueIndicator: ShowValueIndicator.alwaysVisible,
+      );
       await expectValueIndicator(
         tester,
+        theme: sliderTheme,
+        divisions: 3,
         visibleWhenDragged: true,
         visibleWhenReleased: true,
-        theme: theme,
-        divisions: 3,
       );
       await expectValueIndicator(
         tester,
-        visibleWhenDragged: false,
-        visibleWhenReleased: false,
-        theme: theme,
+        theme: sliderTheme,
         divisions: 3,
         enabled: false,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
       );
       await expectValueIndicator(
         tester,
+        theme: sliderTheme,
         visibleWhenDragged: true,
         visibleWhenReleased: true,
-        theme: theme,
       );
       await expectValueIndicator(
         tester,
+        theme: sliderTheme,
+        enabled: false,
         visibleWhenDragged: false,
         visibleWhenReleased: false,
-        theme: theme,
-        enabled: false,
       );
     });
   });
