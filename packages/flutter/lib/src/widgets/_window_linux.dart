@@ -31,7 +31,11 @@ import 'binding.dart';
 const int _kMaxWindowDimensions = 0x7fffffff;
 
 /// The type of a GtkWindow.
-enum _GtkWindowType { toplevel, popup }
+enum _GtkWindowType {
+  toplevel,
+  // ignore: unused_field
+  popup,
+}
 
 /// States a toplevel window can be in.
 enum _GdkWindowState {
@@ -56,19 +60,32 @@ enum _GdkWindowState {
 
 /// Hints for the window manager on how to treat a window.
 enum _GdkWindowTypeHint {
+  // ignore: unused_field
   normal,
   dialog,
+  // ignore: unused_field
   menu,
+  // ignore: unused_field
   toolbar,
+  // ignore: unused_field
   splashscreen,
+  // ignore: unused_field
   utility,
+  // ignore: unused_field
   dock,
+  // ignore: unused_field
   desktop,
+  // ignore: unused_field
   dropdown_menu,
+  // ignore: unused_field
   popup_menu,
+  // ignore: unused_field
   tooltip,
+  // ignore: unused_field
   notification,
+  // ignore: unused_field
   combo,
+  // ignore: unused_field
   dnd,
 }
 
@@ -185,9 +202,9 @@ class _GdkWindow extends _GObject {
 
   /// Gets the window state.
   Set<_GdkWindowState> getState() {
-    final stateBits = _gdkWindowGetState(instance);
+    final int stateBits = _gdkWindowGetState(instance);
     final states = <_GdkWindowState>{};
-    for (final state in _GdkWindowState.values) {
+    for (final _GdkWindowState state in _GdkWindowState.values) {
       if ((stateBits & (1 << state.index)) != 0) {
         states.add(state);
       }
