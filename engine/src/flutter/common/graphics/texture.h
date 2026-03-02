@@ -76,12 +76,6 @@ class Texture : public ContextListener {
 class TextureRegistry {
  public:
   TextureRegistry();
-  virtual ~TextureRegistry() = default;
-
-  // Retrieves the thread-local TextureRegistry for the current thread.
-  // This is used by DlImageTextureRegistry to resolve textures during
-  // rasterization.
-  static std::weak_ptr<TextureRegistry> GetCurrent();
 
   // Called from raster thread.
   void RegisterTexture(const std::shared_ptr<Texture>& texture);
