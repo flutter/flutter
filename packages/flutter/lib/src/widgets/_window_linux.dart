@@ -108,7 +108,7 @@ String _nativeToString(ffi.Pointer<ffi.Uint8> value) {
   return utf8.decode(value.asTypedList(length));
 }
 
-/// Wraps GObject
+/// Wraps GObject.
 class _GObject {
   /// Creates a wrapper to an existing [GObject] in [instance].
   const _GObject(this.instance);
@@ -125,7 +125,7 @@ class _GObject {
   external static void _unref(ffi.Pointer<ffi.NativeType> widget);
 }
 
-/// Wraps GtkContainer
+/// Wraps GtkContainer.
 class _GtkContainer extends _GtkWidget {
   /// Creates a wrapper to an existing [GtkContainer] in [instance].
   const _GtkContainer(super.instance);
@@ -144,7 +144,7 @@ class _GtkContainer extends _GtkWidget {
   );
 }
 
-/// Wraps GtkWidget
+/// Wraps GtkWidget.
 class _GtkWidget extends _GObject {
   /// Creates a wrapper to an existing [GtkWidget] in [instance].
   const _GtkWidget(super.instance);
@@ -178,7 +178,7 @@ class _GtkWidget extends _GObject {
   external static void _gtkWindowDestroy(ffi.Pointer<ffi.NativeType> widget);
 }
 
-/// Wraps GdkWindow
+/// Wraps GdkWindow.
 class _GdkWindow extends _GObject {
   /// Creates a wrapper to an existing [GdkWindow] in [instance].
   const _GdkWindow(super.instance);
@@ -240,7 +240,7 @@ final class _GdkGeometry extends ffi.Struct {
   external int winGravity;
 }
 
-/// Wraps GtkWindow
+/// Wraps GtkWindow.
 class _GtkWindow extends _GtkContainer {
   /// Create a new GtkWindow
   _GtkWindow(_GtkWindowType type) : super(_gtkWindowNew(type.index));
