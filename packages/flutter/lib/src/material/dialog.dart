@@ -14,16 +14,6 @@ import 'dart:ui' show SemanticsHitTestBehavior, SemanticsRole, clampDouble, lerp
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
-
-import 'package:flutter/src/widgets/_window.dart'
-    show
-        BaseWindowController,
-        DialogWindowController,
-        DialogWindowControllerDelegate,
-        WindowEntry,
-        WindowRegistry,
-        WindowScope;
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
@@ -1402,86 +1392,6 @@ Widget _buildMaterialDialogTransitions(
   return child;
 }
 
-class _DialogWindowDelegate extends DialogWindowControllerDelegate {
-  _DialogWindowDelegate(this.route);
-
-  final _DialogWindowRoute<dynamic> route;
-
-  @override
-  void onWindowCloseRequested(DialogWindowController controller) {
-    route.navigator?.pop();
-  }
-}
-
-class _DialogWindowRoute<T> extends Route<T> {
-  _DialogWindowRoute({
-    required this.builder,
-    required this.parentController,
-    required BuildContext context,
-    super.settings,
-    Size? preferredSize,
-  }) : _registry = WindowRegistry.maybeOf(context) {
-    _controller = DialogWindowController(
-      parent: parentController,
-      title: 'Dialog',
-      delegate: _DialogWindowDelegate(this),
-      preferredSize: preferredSize,
-    );
-  }
-
-  final WidgetBuilder builder;
-  final BaseWindowController? parentController;
-  final WindowRegistry? _registry;
-  DialogWindowController? _controller;
-  WindowEntry? _entry;
-  late final List<OverlayEntry> _overlayEntries;
-
-  @override
-  List<OverlayEntry> get overlayEntries => _overlayEntries;
-
-  @override
-  void install() {
-    super.install();
-
-    // Create a minimal transparent overlay entry to satisfy Navigator requirements.
-    // The actual dialog content is rendered through ViewAnchor, not through this overlay.
-    _overlayEntries = <OverlayEntry>[
-      OverlayEntry(builder: (BuildContext context) => const SizedBox.shrink()),
-    ];
-
-    final NavigatorState? nav = navigator;
-    final BuildContext? routeContext = nav?.context;
-    if (routeContext != null && nav != null) {
-      _entry = WindowEntry(controller: _controller!, builder: builder);
-      _registry?.register(_entry!);
-    }
-  }
-
-  @override
-  TickerFuture didPush() {
-    super.didPush();
-    // No animation is needed since the window appears instantly.
-    return TickerFuture.complete();
-  }
-
-  @override
-  bool didPop(T? result) {
-    _controller?.destroy();
-    return super.didPop(result);
-  }
-
-  @override
-  void dispose() {
-    // Unregister from the registry.
-    if (_entry != null) {
-      _registry?.unregister(_entry!);
-    }
-    _controller?.dispose();
-    _controller = null;
-    super.dispose();
-  }
-}
-
 // Wrapper that makes dialogs fill the entire window without insets or rounded corners.
 class _FullWindowDialogWrapper extends StatelessWidget {
   const _FullWindowDialogWrapper({required this.child});
@@ -1740,71 +1650,63 @@ Future<T?> showDialog<T>({
     from: context,
     to: Navigator.of(context, rootNavigator: useRootNavigator).context,
   );
+  final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
 
-  final WindowRegistry? windowingConfiguration = WindowRegistry.maybeOf(context);
-  if (windowingConfiguration != null && isWindowingEnabled) {
-    try {
-      final Size? parentSize = WindowScope.maybeContentSizeOf(context);
-      final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
-      return navigator.push<T>(
-        _DialogWindowRoute<T>(
-          builder: (BuildContext context) {
-            // Wrap the build dialog with the theme, text direcction, and media
-            // query data from the parent context.
-            final TextDirection textDirection = Directionality.of(navigator.context);
-            final ThemeData themeData = Theme.of(navigator.context);
-            final MediaQueryData mediaQuery = MediaQuery.of(navigator.context);
-            final Widget dialogContent = _DialogPopScope(
-              onPop: Navigator.of(navigator.context).pop,
-              child: Builder(
-                builder: (BuildContext innerContext) {
-                  return _FullWindowDialogWrapper(child: builder(innerContext));
-                },
-              ),
-            );
-
-            return Directionality(
-              textDirection: textDirection,
-              child: Theme(
-                data: themeData,
-                child: MediaQuery(data: mediaQuery, child: dialogContent),
-              ),
-            );
+  return showRawDialog(
+    context: context,
+    barrierDismissible: barrierDismissible,
+    barrierColor: barrierColor,
+    barrierLabel: barrierLabel,
+    useRootNavigator: useRootNavigator,
+    routeSettings: routeSettings,
+    anchorPoint: anchorPoint,
+    traversalEdgeBehavior: traversalEdgeBehavior,
+    fullscreenDialog: fullscreenDialog,
+    requestFocus: requestFocus,
+    routeBuilder: (BuildContext context, WidgetBuilder builder) {
+      return DialogRoute<T>(
+        context: context,
+        builder: builder,
+        barrierColor:
+            barrierColor ??
+            DialogTheme.of(context).barrierColor ??
+            Theme.of(context).dialogTheme.barrierColor ??
+            Colors.black54,
+        barrierDismissible: barrierDismissible,
+        barrierLabel: barrierLabel,
+        useSafeArea: useSafeArea,
+        settings: routeSettings,
+        themes: themes,
+        anchorPoint: anchorPoint,
+        traversalEdgeBehavior: traversalEdgeBehavior ?? TraversalEdgeBehavior.closedLoop,
+        requestFocus: requestFocus,
+        animationStyle: animationStyle,
+        fullscreenDialog: fullscreenDialog,
+      );
+    },
+    builder: (BuildContext context) {
+      // Wrap the build dialog with the theme, text direcction, and media
+      // query data from the parent context.
+      final TextDirection textDirection = Directionality.of(navigator.context);
+      final ThemeData themeData = Theme.of(navigator.context);
+      final MediaQueryData mediaQuery = MediaQuery.of(navigator.context);
+      final Widget dialogContent = _DialogPopScope(
+        onPop: Navigator.of(navigator.context).pop,
+        child: Builder(
+          builder: (BuildContext innerContext) {
+            return _FullWindowDialogWrapper(child: builder(innerContext));
           },
-          parentController: WindowScope.maybeOf(context),
-          context: context,
-          settings: routeSettings,
-          preferredSize: fullscreenDialog ? parentSize : null,
         ),
       );
-    } on UnsupportedError catch (error, stacktrace) {
-      // Fallback to normal dialog route if windowing is not supported
-      FlutterError.reportError(
-        FlutterErrorDetails(exception: error, library: 'material library', stack: stacktrace),
-      );
-    }
-  }
 
-  return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(
-    DialogRoute<T>(
-      context: context,
-      builder: builder,
-      barrierColor:
-          barrierColor ??
-          DialogTheme.of(context).barrierColor ??
-          Theme.of(context).dialogTheme.barrierColor ??
-          Colors.black54,
-      barrierDismissible: barrierDismissible,
-      barrierLabel: barrierLabel,
-      useSafeArea: useSafeArea,
-      settings: routeSettings,
-      themes: themes,
-      anchorPoint: anchorPoint,
-      traversalEdgeBehavior: traversalEdgeBehavior ?? TraversalEdgeBehavior.closedLoop,
-      requestFocus: requestFocus,
-      animationStyle: animationStyle,
-      fullscreenDialog: fullscreenDialog,
-    ),
+      return Directionality(
+        textDirection: textDirection,
+        child: Theme(
+          data: themeData,
+          child: MediaQuery(data: mediaQuery, child: dialogContent),
+        ),
+      );
+    },
   );
 }
 
