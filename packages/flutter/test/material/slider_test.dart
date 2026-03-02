@@ -2939,6 +2939,9 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
       expectIndicatorVisible(visibleWhenReleased);
+
+      // Reset state to clear state to be extra sure.
+      await tester.pumpWidget(Container());
     }
 
     testWidgets('showValueIndicator set to onlyForDiscrete', (WidgetTester tester) async {
@@ -3071,17 +3074,17 @@ void main() {
 
     testWidgets('showValueIndicator set to alwaysVisible', (WidgetTester tester) async {
       theme = theme.copyWith(showValueIndicator: ShowValueIndicator.alwaysVisible);
-      // await expectValueIndicator(
-      //   tester,
-      //   visibleWhenDragged: true,
-      //   visibleWhenReleased: true,
-      //   theme: theme,
-      //   divisions: 3,
-      // );
       await expectValueIndicator(
         tester,
         visibleWhenDragged: true,
         visibleWhenReleased: true,
+        theme: theme,
+        divisions: 3,
+      );
+      await expectValueIndicator(
+        tester,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
         theme: theme,
         divisions: 3,
         enabled: false,
@@ -3094,8 +3097,8 @@ void main() {
       );
       await expectValueIndicator(
         tester,
-        visibleWhenDragged: true,
-        visibleWhenReleased: true,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
         theme: theme,
         enabled: false,
       );
