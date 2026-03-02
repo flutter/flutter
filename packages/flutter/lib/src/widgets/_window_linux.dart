@@ -33,7 +33,7 @@ const int _kMaxWindowDimensions = 0x7fffffff;
 /// The type of a GtkWindow.
 enum _GtkWindowType { toplevel, popup }
 
-/// State of a tolevel window.
+/// States a toplevel window can be in.
 enum _GdkWindowState {
   withdrawn,
   iconified,
