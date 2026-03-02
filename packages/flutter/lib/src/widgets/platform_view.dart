@@ -801,12 +801,12 @@ class _AndroidViewState extends State<AndroidView> {
     }
   }
 
-  Future<void> _onFocusChange(bool isFocused) async {
+  void _onFocusChange(bool isFocused) {
     if (!_controller.isCreated) {
       return;
     }
     if (!isFocused) {
-      await _controller.clearFocus().catchError((dynamic e) {
+      _controller.clearFocus().catchError((dynamic e) {
         if (e is MissingPluginException) {
           // We land the framework part of Android platform views keyboard
           // support before the engine part. There will be a commit range where
@@ -819,7 +819,7 @@ class _AndroidViewState extends State<AndroidView> {
       });
       return;
     }
-    await SystemChannels.textInput
+    SystemChannels.textInput
         .invokeMethod<void>('TextInput.setPlatformViewClient', <String, dynamic>{
           'platformViewId': _id,
         })
