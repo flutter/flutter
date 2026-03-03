@@ -4727,7 +4727,7 @@ void main() {
   testWidgets('DropdownMenu.scrollPadding is passed through to EditableText', (
     WidgetTester tester,
   ) async {
-    const EdgeInsets scrollPadding = EdgeInsets.all(30.0);
+    const scrollPadding = EdgeInsets.all(30.0);
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
