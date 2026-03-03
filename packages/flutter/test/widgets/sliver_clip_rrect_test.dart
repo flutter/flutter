@@ -237,6 +237,7 @@ void main() {
                 pinned: true,
               ),
               SliverClipRRect(
+                clipOverlap: false,
                 borderRadius: const BorderRadius.all(Radius.circular(50)),
                 sliver: SliverToBoxAdapter(
                   child: Container(
@@ -355,11 +356,19 @@ void main() {
     // If it's -30, it definitely clips less than 50.
     // So it's even worse.
 
+    final RenderSliverClipRRect renderSliver = tester.renderObject(find.byType(SliverClipRRect));
+    final result = SliverHitTestResult();
+    final bool hitSuccess = renderSliver.hitTest(
+      result,
+      mainAxisPosition: 15.0,
+      crossAxisPosition: 400.0,
+    );
+    expect(hitSuccess, isTrue);
+
     // Let's see what happens with current implementation.
     controller.jumpTo(50);
     await tester.pump();
 
-    final RenderSliverClipRRect renderSliver = tester.renderObject(find.byType(SliverClipRRect));
     // If middleRect.height was used, clipExtent is 20.
     // clipOrigin = 100 - max(50+100-20, 0) = -30.
     // AxisDirection.down => newClip.copyWith(top: -30).
@@ -373,14 +382,16 @@ void main() {
     // Viewport 0 to 100 is covered by header.
     // So local 50 to 100 are covered by header.
     // We should NOT be able to hit at local 75.
-    final result = SliverHitTestResult();
-    final bool hit = renderSliver.hitTest(result, mainAxisPosition: 75.0, crossAxisPosition: 400.0);
+    final bool hitFailure = renderSliver.hitTest(
+      result,
+      mainAxisPosition: 15.0,
+      crossAxisPosition: 400.0,
+    );
 
     expect(
-      hit,
+      hitFailure,
       isFalse,
-      reason:
-          'Should NOT hit at local 75 because it is under the 100px header (sliver starts at -50)',
+      reason: 'Should NOT hit at local 15 because it is below the 80px header (clip start at 20)',
     );
   });
 }
