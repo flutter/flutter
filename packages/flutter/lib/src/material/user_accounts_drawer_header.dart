@@ -173,9 +173,8 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
               container: true,
               button: true,
               onTap: widget.onTap,
-              child: SizedBox(
-                height: _kAccountDetailsHeight,
-                width: _kAccountDetailsHeight,
+              child: SizedBox.square(
+                dimension: _kAccountDetailsHeight,
                 child: Center(
                   child: Transform.rotate(
                     angle: _animation.value * math.pi,
@@ -231,7 +230,7 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
         : (hasChild(accountName) ? accountName : null);
 
     if (bottomLine != null) {
-      final Size constraintSize = iconSize == null
+      final constraintSize = iconSize == null
           ? size
           : Size(size.width - iconSize.width, size.height);
       iconSize ??= const Size(_kAccountDetailsHeight, _kAccountDetailsHeight);

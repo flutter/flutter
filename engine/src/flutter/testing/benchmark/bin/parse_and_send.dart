@@ -39,8 +39,8 @@ Future<PointsAndDate> parse(String jsonFileName) async {
   final String gitRevision = gitLog[0];
   final String gitCommitDate = gitLog[1];
   final List<MetricPoint> rawPoints = await GoogleBenchmarkParser.parse(jsonFileName);
-  final List<FlutterEngineMetricPoint> points = <FlutterEngineMetricPoint>[];
-  for (final MetricPoint rawPoint in rawPoints) {
+  final points = <FlutterEngineMetricPoint>[];
+  for (final rawPoint in rawPoints) {
     points.add(
       FlutterEngineMetricPoint(
         rawPoint.tags[kNameKey]!,
@@ -54,10 +54,10 @@ Future<PointsAndDate> parse(String jsonFileName) async {
 }
 
 Future<FlutterDestination> connectFlutterDestination() async {
-  const String kTokenPath = 'TOKEN_PATH';
-  const String kGcpProject = 'GCP_PROJECT';
+  const kTokenPath = 'TOKEN_PATH';
+  const kGcpProject = 'GCP_PROJECT';
   final Map<String, String> env = Platform.environment;
-  final bool isTesting = env['IS_TESTING'] == 'true';
+  final isTesting = env['IS_TESTING'] == 'true';
   if (env.containsKey(kTokenPath) && env.containsKey(kGcpProject)) {
     return FlutterDestination.makeFromAccessToken(
       File(env[kTokenPath]!).readAsStringSync(),
@@ -72,7 +72,7 @@ Future<FlutterDestination> connectFlutterDestination() async {
 }
 
 ArgParser _serupOptions() {
-  final ArgParser parser = ArgParser();
+  final parser = ArgParser();
   parser.addOption('json', mandatory: true, help: 'Path to the benchmarks json file.');
   parser.addFlag('no-upload', help: 'Upload the parsed benchmarks.');
   return parser;
@@ -82,10 +82,10 @@ Future<void> main(List<String> args) async {
   final ArgParser parser = _serupOptions();
   final ArgResults options = parser.parse(args);
 
-  final String json = options['json'] as String;
+  final json = options['json'] as String;
   final PointsAndDate pointsAndDate = await parse(json);
 
-  final bool noUpload = options['no-upload'] as bool;
+  final noUpload = options['no-upload'] as bool;
   if (noUpload) {
     return;
   }

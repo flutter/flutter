@@ -7,7 +7,7 @@ import 'package:test/test.dart';
 
 void main() {
   test('invoke native function', () {
-    const int magicValue = 1000;
+    const magicValue = 1000;
     expect(sum(24, 18), 42 + magicValue);
   });
 }

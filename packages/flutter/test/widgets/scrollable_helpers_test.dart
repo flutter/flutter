@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'widgets_app_tester.dart';
 
 final LogicalKeyboardKey modifierKey = defaultTargetPlatform == TargetPlatform.macOS
     ? LogicalKeyboardKey.metaLeft
@@ -27,9 +29,9 @@ class _NoNotificationContextScrollableState extends ScrollableState {
 void main() {
   group('ScrollableDetails', () {
     test('copyWith / == / hashCode', () {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
-      final ScrollableDetails details = ScrollableDetails(
+      final details = ScrollableDetails(
         direction: AxisDirection.down,
         controller: controller,
         physics: const AlwaysScrollableScrollPhysics(),
@@ -56,14 +58,14 @@ void main() {
     });
 
     test('toString', () {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
-      const ScrollableDetails bareDetails = ScrollableDetails(direction: AxisDirection.right);
+      const bareDetails = ScrollableDetails(direction: AxisDirection.right);
       expect(
         bareDetails.toString(),
         equalsIgnoringHashCodes('ScrollableDetails#00000(axisDirection: AxisDirection.right)'),
       );
-      final ScrollableDetails fullDetails = ScrollableDetails(
+      final fullDetails = ScrollableDetails(
         direction: AxisDirection.down,
         controller: controller,
         physics: const AlwaysScrollableScrollPhysics(),
@@ -82,14 +84,14 @@ void main() {
     });
 
     test('deprecated clipBehavior is backwards compatible', () {
-      const ScrollableDetails deprecatedClip = ScrollableDetails(
+      const deprecatedClip = ScrollableDetails(
         direction: AxisDirection.right,
         clipBehavior: Clip.hardEdge,
       );
       expect(deprecatedClip.clipBehavior, Clip.hardEdge);
       expect(deprecatedClip.decorationClipBehavior, Clip.hardEdge);
 
-      const ScrollableDetails newClip = ScrollableDetails(
+      const newClip = ScrollableDetails(
         direction: AxisDirection.right,
         decorationClipBehavior: Clip.hardEdge,
       );
@@ -101,12 +103,12 @@ void main() {
   testWidgets(
     "Keyboard scrolling doesn't happen if scroll physics are set to NeverScrollableScrollPhysics",
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.fuchsia),
-          home: CustomScrollView(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
             controller: controller,
             physics: const NeverScrollableScrollPhysics(),
             slivers: List<Widget>.generate(20, (int index) {
@@ -166,11 +168,10 @@ void main() {
   testWidgets(
     'Vertical scrollables are scrolled when activated via keyboard.',
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.fuchsia),
+        TestWidgetsApp(
           home: CustomScrollView(
             controller: controller,
             slivers: List<Widget>.generate(20, (int index) {
@@ -236,11 +237,10 @@ void main() {
   testWidgets(
     'Horizontal scrollables are scrolled when activated via keyboard.',
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.fuchsia),
+        TestWidgetsApp(
           home: CustomScrollView(
             controller: controller,
             scrollDirection: Axis.horizontal,
@@ -295,11 +295,10 @@ void main() {
   testWidgets(
     'Horizontal scrollables are scrolled the correct direction in RTL locales.',
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.fuchsia),
+        TestWidgetsApp(
           home: Directionality(
             textDirection: TextDirection.rtl,
             child: CustomScrollView(
@@ -357,13 +356,12 @@ void main() {
   testWidgets(
     'Reversed vertical scrollables are scrolled when activated via keyboard.',
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
-      final FocusNode focusNode = FocusNode(debugLabel: 'SizedBox');
+      final focusNode = FocusNode(debugLabel: 'SizedBox');
       addTearDown(focusNode.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.fuchsia),
+        TestWidgetsApp(
           home: CustomScrollView(
             controller: controller,
             reverse: true,
@@ -431,13 +429,12 @@ void main() {
   testWidgets(
     'Reversed horizontal scrollables are scrolled when activated via keyboard.',
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
-      final FocusNode focusNode = FocusNode(debugLabel: 'SizedBox');
+      final focusNode = FocusNode(debugLabel: 'SizedBox');
       addTearDown(focusNode.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.fuchsia),
+        TestWidgetsApp(
           home: CustomScrollView(
             controller: controller,
             scrollDirection: Axis.horizontal,
@@ -490,12 +487,11 @@ void main() {
   testWidgets(
     'Custom scrollables with a center sliver are scrolled when activated via keyboard.',
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
-      final List<String> items = List<String>.generate(20, (int index) => 'Item $index');
+      final items = List<String>.generate(20, (int index) => 'Item $index');
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.fuchsia),
+        TestWidgetsApp(
           home: CustomScrollView(
             controller: controller,
             center: const ValueKey<String>('Center'),
@@ -523,7 +519,7 @@ void main() {
         tester.getRect(find.byKey(const ValueKey<String>('Item 10'), skipOffstage: false)),
         equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 100.0)),
       );
-      for (int i = 0; i < 10; ++i) {
+      for (var i = 0; i < 10; ++i) {
         // We exclude the modifier keys here for web testing since default web shortcuts
         // do not use a modifier key with arrow keys for ScrollActions.
         if (!kIsWeb) {
@@ -541,7 +537,7 @@ void main() {
         tester.getRect(find.byKey(const ValueKey<String>('Item 10'), skipOffstage: false)),
         equals(const Rect.fromLTRB(0.0, -400.0, 800.0, -300.0)),
       );
-      for (int i = 0; i < 10; ++i) {
+      for (var i = 0; i < 10; ++i) {
         if (!kIsWeb) {
           await tester.sendKeyDownEvent(modifierKey);
         }
@@ -563,7 +559,7 @@ void main() {
 
   testWidgets('Can scroll using intents only', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: ListView(
           children: const <Widget>[
             SizedBox(height: 600.0, child: Text('The cow as white as milk')),
@@ -600,21 +596,21 @@ void main() {
   testWidgets(
     'Invoking a ScrollAction when notificationContext is null does not cause an exception.',
     (WidgetTester tester) async {
-      const List<LogicalKeyboardKey> keysWithModifier = <LogicalKeyboardKey>[
+      const keysWithModifier = <LogicalKeyboardKey>[
         LogicalKeyboardKey.arrowDown,
         LogicalKeyboardKey.arrowUp,
       ];
-      const List<LogicalKeyboardKey> keys = <LogicalKeyboardKey>[
+      const keys = <LogicalKeyboardKey>[
         ...keysWithModifier,
         LogicalKeyboardKey.pageDown,
         LogicalKeyboardKey.pageUp,
       ];
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.fuchsia),
-          home: PrimaryScrollController(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: PrimaryScrollController(
             controller: controller,
             child: Focus(
               autofocus: true,
@@ -643,7 +639,7 @@ void main() {
         equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)),
       );
 
-      for (final LogicalKeyboardKey key in keys) {
+      for (final key in keys) {
         // The default web shortcuts do not use a modifier key for ScrollActions.
         if (!kIsWeb && keysWithModifier.contains(key)) {
           await tester.sendKeyDownEvent(modifierKey);
@@ -671,25 +667,23 @@ void main() {
   testWidgets('EdgeDraggingAutoScroller handles drag target size correctly with Transform.scale', (
     WidgetTester tester,
   ) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: Transform.scale(
-              scale: 0.5,
-              child: SizedBox(
-                width: 400,
-                height: 400,
-                child: ListView.builder(
-                  controller: controller,
-                  itemCount: 20,
-                  itemBuilder: (BuildContext context, int index) {
-                    return SizedBox(height: 100, child: Center(child: Text('Item $index')));
-                  },
-                ),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Transform.scale(
+            scale: 0.5,
+            child: SizedBox.square(
+              dimension: 400.0,
+              child: ListView.builder(
+                controller: controller,
+                itemCount: 20,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(height: 100, child: Center(child: Text('Item $index')));
+                },
               ),
             ),
           ),
@@ -699,17 +693,9 @@ void main() {
     await tester.pumpAndSettle();
 
     final ScrollableState scrollableState = tester.state(find.byType(Scrollable));
-    final EdgeDraggingAutoScroller scroller = EdgeDraggingAutoScroller(
-      scrollableState,
-      velocityScalar: 1.0,
-    );
-    final RenderBox scrollRenderBox = scrollableState.context.findRenderObject()! as RenderBox;
-    final Rect dragTarget = Rect.fromLTWH(
-      0,
-      0,
-      scrollRenderBox.size.width,
-      scrollRenderBox.size.height,
-    );
+    final scroller = EdgeDraggingAutoScroller(scrollableState, velocityScalar: 1.0);
+    final scrollRenderBox = scrollableState.context.findRenderObject()! as RenderBox;
+    final dragTarget = Rect.fromLTWH(0, 0, scrollRenderBox.size.width, scrollRenderBox.size.height);
 
     scroller.startAutoScrollIfNecessary(dragTarget);
     await tester.pump();
@@ -719,54 +705,4 @@ void main() {
     scroller.stopAutoScroll();
     await tester.pumpAndSettle();
   });
-
-  testWidgets(
-    'ReorderableListView in Flexible with one item does not assert when dragged to edge',
-    (WidgetTester tester) async {
-      final List<String> items = <String>['Item 1'];
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Column(
-              children: <Widget>[
-                Flexible(
-                  child: StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setState) {
-                      return ReorderableListView(
-                        onReorder: (int oldIndex, int newIndex) {
-                          setState(() {
-                            if (newIndex > oldIndex) {
-                              newIndex -= 1;
-                            }
-                            final String item = items.removeAt(oldIndex);
-                            items.insert(newIndex, item);
-                          });
-                        },
-                        children: <Widget>[
-                          ListTile(key: const ValueKey<String>('Item 1'), title: Text(items.first)),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      final Offset startLocation = tester.getCenter(find.byKey(const ValueKey<String>('Item 1')));
-      final TestGesture gesture = await tester.startGesture(startLocation);
-      await tester.pump();
-      await gesture.moveTo(tester.getBottomRight(find.byType(Scaffold)) - const Offset(10, 10));
-      await tester.pump(const Duration(seconds: 1));
-
-      expect(tester.takeException(), isNull);
-
-      await gesture.up();
-      await tester.pumpAndSettle();
-    },
-  );
 }

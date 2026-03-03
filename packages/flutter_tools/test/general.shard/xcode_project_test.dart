@@ -62,6 +62,15 @@ void main() {
       );
     });
 
+    testWithoutContext('flutterFrameworkSwiftPackageDirectory', () {
+      final fs = MemoryFileSystem.test();
+      final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+      expect(
+        project.flutterFrameworkSwiftPackageDirectory.path,
+        'app_name/ios/Flutter/ephemeral/Packages/.packages/FlutterFramework',
+      );
+    });
+
     testWithoutContext('flutterPluginSwiftPackageDirectory', () {
       final fs = MemoryFileSystem.test();
       final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
@@ -586,7 +595,7 @@ class FakeFlutterProject extends Fake implements FlutterProject {
   late final Directory directory = fileSystem.directory('app_name');
 
   @override
-  var isModule = false;
+  bool isModule = false;
 
   @override
   FlutterManifest get manifest => FakeFlutterManifest();
@@ -630,13 +639,19 @@ class FakeFlutterManifest extends Fake implements FlutterManifest {
 
   @override
   String get appName => '';
+
+  @override
+  PluginPlatformConfig? get ios => null;
+
+  @override
+  PluginPlatformConfig? get macos => null;
 }
 
 class FakeCache extends Fake implements Cache {
   FakeCache({this.olderThanToolsStamp = false});
 
   bool olderThanToolsStamp;
-  var filesOlderThanToolsStamp = <String, bool>{};
+  Map<String, bool> filesOlderThanToolsStamp = <String, bool>{};
 
   @override
   bool isOlderThanToolsStamp(FileSystemEntity entity) {

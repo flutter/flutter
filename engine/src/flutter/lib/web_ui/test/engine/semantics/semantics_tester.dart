@@ -62,6 +62,7 @@ class SemanticsTester {
     int? platformViewId,
     int? scrollChildren,
     int? scrollIndex,
+    int? traversalParent,
     double? scrollPosition,
     double? scrollExtentMax,
     double? scrollExtentMin,
@@ -80,6 +81,7 @@ class SemanticsTester {
     String? tooltip,
     ui.TextDirection? textDirection,
     Float64List? transform,
+    Float64List? hitTestTransform,
     Int32List? additionalActions,
     List<SemanticsNodeUpdate>? children,
     int? headingLevel,
@@ -87,8 +89,11 @@ class SemanticsTester {
     ui.SemanticsRole? role,
     List<String>? controlsNodes,
     ui.SemanticsValidationResult validationResult = ui.SemanticsValidationResult.none,
+    ui.SemanticsHitTestBehavior hitTestBehavior = ui.SemanticsHitTestBehavior.defer,
     ui.SemanticsInputType inputType = ui.SemanticsInputType.none,
     ui.Locale? locale,
+    String? minValue,
+    String? maxValue,
   }) {
     // Actions
     if (hasTap ?? false) {
@@ -175,14 +180,14 @@ class SemanticsTester {
       }
     }
 
-    final Int32List childIds = Int32List(children?.length ?? 0);
+    final childIds = Int32List(children?.length ?? 0);
     if (children != null) {
-      for (int i = 0; i < children.length; i++) {
+      for (var i = 0; i < children.length; i++) {
         childIds[i] = children[i].id;
       }
     }
 
-    final SemanticsNodeUpdate update = SemanticsNodeUpdate(
+    final update = SemanticsNodeUpdate(
       id: id,
       flags: flags ?? ui.SemanticsFlags.none,
       actions: actions,
@@ -193,6 +198,7 @@ class SemanticsTester {
       platformViewId: platformViewId ?? -1,
       scrollChildren: scrollChildren ?? 0,
       scrollIndex: scrollIndex ?? 0,
+      traversalParent: traversalParent ?? -1,
       scrollPosition: scrollPosition ?? 0,
       scrollExtentMax: scrollExtentMax ?? 0,
       scrollExtentMin: scrollExtentMin ?? 0,
@@ -210,6 +216,9 @@ class SemanticsTester {
       decreasedValueAttributes: decreasedValueAttributes ?? const <ui.StringAttribute>[],
       tooltip: tooltip ?? '',
       transform: transform != null ? toMatrix32(transform) : Matrix4.identity().storage,
+      hitTestTransform: hitTestTransform != null
+          ? toMatrix32(hitTestTransform)
+          : Matrix4.identity().storage,
       childrenInTraversalOrder: childIds,
       childrenInHitTestOrder: childIds,
       additionalActions: additionalActions ?? Int32List(0),
@@ -218,8 +227,11 @@ class SemanticsTester {
       role: role ?? ui.SemanticsRole.none,
       controlsNodes: controlsNodes,
       validationResult: validationResult,
+      hitTestBehavior: hitTestBehavior,
       inputType: inputType,
       locale: locale,
+      minValue: minValue ?? '0',
+      maxValue: maxValue ?? '0',
     );
     _nodeUpdates.add(update);
     return update;

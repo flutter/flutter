@@ -115,7 +115,7 @@ class PackagesTestCommand extends FlutterCommand {
         'flutter environment it hosts the tests in a pure Dart environment. The main '
         'differences are that the "dart:ui" library is not available and that tests '
         'run faster. This is helpful for testing libraries that do not depend on any '
-        'packages from the Flutter SDK. It is equivalent to "pub run test".';
+        'packages from the Flutter SDK. It is equivalent to "dart test".';
   }
 
   @override
@@ -140,7 +140,7 @@ class PackagesForwardCommand extends FlutterCommand {
   PubContext context = PubContext.pubForward;
 
   @override
-  var argParser = ArgParser.allowAnything();
+  ArgParser argParser = ArgParser.allowAnything();
 
   final String _commandName;
   final String _description;
@@ -174,7 +174,7 @@ class PackagesForwardCommand extends FlutterCommand {
 
 class PackagesPassthroughCommand extends FlutterCommand {
   @override
-  var argParser = ArgParser.allowAnything();
+  ArgParser argParser = ArgParser.allowAnything();
 
   @override
   String get name => 'pub';
@@ -204,7 +204,7 @@ class PackagesGetCommand extends FlutterCommand {
   PackagesGetCommand(this._commandName, this._description, this._context);
 
   @override
-  var argParser = ArgParser.allowAnything();
+  ArgParser argParser = ArgParser.allowAnything();
 
   final String _commandName;
   final String _description;

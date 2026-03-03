@@ -12,20 +12,21 @@ void main() {
     final List<String> log = captureOutput(() {
       debugPrintStack(label: 'Example label', maxFrames: 7);
     });
+    expect(log, hasLength(greaterThanOrEqualTo(2)));
     expect(log[0], contains('Example label'));
     expect(log[1], contains('debugPrintStack'));
   });
 
   test('should show message of ErrorDescription', () {
-    const String descriptionMessage = 'This is the message';
-    final ErrorDescription errorDescription = ErrorDescription(descriptionMessage);
+    const descriptionMessage = 'This is the message';
+    final errorDescription = ErrorDescription(descriptionMessage);
 
     expect(errorDescription.toString(), descriptionMessage);
   });
 
   test('debugPrintStack', () {
     final List<String> log = captureOutput(() {
-      final FlutterErrorDetails details = FlutterErrorDetails(
+      final details = FlutterErrorDetails(
         exception: 'Example exception',
         stack: StackTrace.current,
         library: 'Example library',
@@ -38,6 +39,7 @@ void main() {
       FlutterError.dumpErrorToConsole(details);
     });
 
+    expect(log, hasLength(greaterThan(3)));
     expect(log[0], contains('EXAMPLE LIBRARY'));
     expect(log[1], contains('Example context'));
     expect(log[2], contains('Example exception'));
@@ -119,7 +121,7 @@ void main() {
   });
 
   test('FlutterError default constructor', () {
-    FlutterError error = FlutterError(
+    var error = FlutterError(
       'My Error Summary.\n'
       'My first description.\n'
       'My second description.',
@@ -338,7 +340,7 @@ void main() {
 
   test('Identifies user fault', () {
     // User fault because they called `new Text(null)` from their own code.
-    final StackTrace stack = StackTrace.fromString('''
+    final stack = StackTrace.fromString('''
 #0      _AssertionError._doThrowNew (dart:core-patch/errors_patch.dart:42:39)
 #1      _AssertionError._throwNew (dart:core-patch/errors_patch.dart:38:5)
 #2      new Text (package:flutter/src/widgets/text.dart:287:10)
@@ -353,19 +355,16 @@ void main() {
 #11     Element.updateChild (package:flutter/src/widgets/framework.dart:3070:12)
 #12     SingleChildRenderObjectElement.mount (package:flutter/blah.dart:999:9)''');
 
-    final FlutterErrorDetails details = FlutterErrorDetails(
-      exception: AssertionError('Test assertion'),
-      stack: stack,
-    );
+    final details = FlutterErrorDetails(exception: AssertionError('Test assertion'), stack: stack);
 
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     details.debugFillProperties(builder);
 
     expect(builder.properties.length, 4);
     expect(builder.properties[0].toString(), 'The following assertion was thrown:');
     expect(builder.properties[1].toString(), contains('Assertion failed'));
     expect(builder.properties[2] is ErrorSpacer, true);
-    final DiagnosticsStackTrace trace = builder.properties[3] as DiagnosticsStackTrace;
+    final trace = builder.properties[3] as DiagnosticsStackTrace;
     expect(trace, isNotNull);
     expect(trace.value, stack);
   });
@@ -373,7 +372,7 @@ void main() {
   test('Identifies our fault', () {
     // Our fault because we should either have an assertion in `text_helper.dart`
     // or we should make sure not to pass bad values into new Text.
-    final StackTrace stack = StackTrace.fromString('''
+    final stack = StackTrace.fromString('''
 #0      _AssertionError._doThrowNew (dart:core-patch/errors_patch.dart:42:39)
 #1      _AssertionError._throwNew (dart:core-patch/errors_patch.dart:38:5)
 #2      new Text (package:flutter/src/widgets/text.dart:287:10)
@@ -389,12 +388,9 @@ void main() {
 #12     Element.updateChild (package:flutter/src/widgets/framework.dart:3070:12)
 #13     SingleChildRenderObjectElement.mount (package:flutter/blah.dart:999:9)''');
 
-    final FlutterErrorDetails details = FlutterErrorDetails(
-      exception: AssertionError('Test assertion'),
-      stack: stack,
-    );
+    final details = FlutterErrorDetails(exception: AssertionError('Test assertion'), stack: stack);
 
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     details.debugFillProperties(builder);
     expect(builder.properties.length, 6);
     expect(builder.properties[0].toString(), 'The following assertion was thrown:');
@@ -409,13 +405,13 @@ void main() {
       '  https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
     );
     expect(builder.properties[4] is ErrorSpacer, true);
-    final DiagnosticsStackTrace trace = builder.properties[5] as DiagnosticsStackTrace;
+    final trace = builder.properties[5] as DiagnosticsStackTrace;
     expect(trace, isNotNull);
     expect(trace.value, stack);
   });
 
   test('RepetitiveStackFrameFilter does not go out of range', () {
-    const RepetitiveStackFrameFilter filter = RepetitiveStackFrameFilter(
+    const filter = RepetitiveStackFrameFilter(
       frames: <PartialStackFrame>[
         PartialStackFrame(
           className: 'TestClass',
@@ -435,7 +431,7 @@ void main() {
       ],
       replacement: 'test',
     );
-    final List<String?> reasons = List<String?>.filled(2, null);
+    final reasons = List<String?>.filled(2, null);
     filter.filter(const <StackFrame>[
       StackFrame(
         className: 'TestClass',

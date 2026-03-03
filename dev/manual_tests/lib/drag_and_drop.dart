@@ -161,13 +161,13 @@ class DashOutlineCirclePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final double radius = size.shortestSide / 2.0;
-    final Paint paint = Paint()
+    final paint = Paint()
       ..color = const Color(0xFF000000)
       ..style = PaintingStyle.stroke
       ..strokeWidth = radius / 10.0;
-    final Path path = Path();
+    final path = Path();
     final Rect box = Offset.zero & size;
-    for (double theta = 0.0; theta < math.pi * 2.0; theta += deltaTheta) {
+    for (var theta = 0.0; theta < math.pi * 2.0; theta += deltaTheta) {
       path.addArc(box, theta + startOffset, segmentArc);
     }
     canvas.drawPath(path, paint);
@@ -200,9 +200,8 @@ class MovableBall extends StatelessWidget {
         child: const Center(child: Text('BALL')),
       ),
     );
-    const Widget dashedBall = SizedBox(
-      width: kBallSize,
-      height: kBallSize,
+    const Widget dashedBall = SizedBox.square(
+      dimension: kBallSize,
       child: CustomPaint(painter: DashOutlineCirclePainter()),
     );
     if (position == ballPosition) {

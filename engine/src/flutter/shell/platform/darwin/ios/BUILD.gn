@@ -54,6 +54,7 @@ source_set("InternalFlutterSwift") {
   ]
   bridge_header = "InternalFlutterSwift-Bridging-Header.h"
   sources = [
+    "framework/Source/AccessibilityFeatures.swift",
     "framework/Source/ConnectionCollection.swift",
     "framework/Source/UIPressProxy.swift",
   ]
@@ -218,6 +219,7 @@ if (enable_ios_unittests) {
     visibility = [ ":*" ]
     configs += [ "//flutter/shell/platform/darwin/common:test_config" ]
     sources = [
+      "framework/Source/AccessibilityFeaturesTests.swift",
       "framework/Source/ConnectionCollectionTest.swift",
       "framework/Source/FakeUIPressProxy.swift",
     ]

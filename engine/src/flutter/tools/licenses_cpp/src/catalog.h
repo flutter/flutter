@@ -5,10 +5,10 @@
 #ifndef FLUTTER_TOOLS_LICENSES_CPP_SRC_CATALOG_H_
 #define FLUTTER_TOOLS_LICENSES_CPP_SRC_CATALOG_H_
 
-#include "flutter/third_party/abseil-cpp/absl/container/flat_hash_map.h"
-#include "flutter/third_party/abseil-cpp/absl/status/statusor.h"
 #include "flutter/third_party/re2/re2/re2.h"
 #include "flutter/third_party/re2/re2/set.h"
+#include "third_party/abseil-cpp/absl/container/flat_hash_map.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 #include <iosfwd>
 #include <optional>

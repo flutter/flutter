@@ -176,7 +176,7 @@ class PointerEventResampler {
     Duration nextSampleTime,
     HandleEventCallback callback,
   ) {
-    Duration endTime = sampleTime;
+    var endTime = sampleTime;
     // Scan queued events to determine end time.
     final Iterator<PointerEvent> it = _queuedEvents.iterator;
     while (it.moveNext()) {

@@ -13,12 +13,14 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyPrimaryResponder.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyboardManager.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputSemanticsObject.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView_Internal.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
 #pragma mark - Static types and data.
@@ -795,10 +797,25 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
 
 - (nonnull FlutterView*)createFlutterViewWithMTLDevice:(id<MTLDevice>)device
                                           commandQueue:(id<MTLCommandQueue>)commandQueue {
+  FlutterDartProject* project = _project ?: self.engine.project;
   return [[FlutterView alloc] initWithMTLDevice:device
                                    commandQueue:commandQueue
                                        delegate:self
-                                 viewIdentifier:_viewIdentifier];
+                                 viewIdentifier:_viewIdentifier
+                                enableWideGamut:project.enableWideGamut];
+}
+
+- (void)updateWideGamutForScreen {
+  FlutterDartProject* project = _project ?: self.engine.project;
+  if (!project.enableWideGamut) {
+    return;
+  }
+  NSScreen* screen = self.view.window.screen;
+  if (screen == nil) {
+    return;
+  }
+  BOOL screenSupportsP3 = [screen canRepresentDisplayGamut:NSDisplayGamutP3];
+  [self.flutterView setEnableWideGamut:screenSupportsP3];
 }
 
 - (NSString*)lookupKeyForAsset:(NSString*)asset {

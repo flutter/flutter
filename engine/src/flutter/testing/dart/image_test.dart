@@ -18,9 +18,9 @@ void main() {
 Future<Image> _createImage() => _createPicture().toImage(10, 10);
 
 Picture _createPicture() {
-  final PictureRecorder recorder = PictureRecorder();
-  final Canvas canvas = Canvas(recorder);
-  const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+  final recorder = PictureRecorder();
+  final canvas = Canvas(recorder);
+  const rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
   canvas.clipRect(rect);
   return recorder.endRecording();
 }

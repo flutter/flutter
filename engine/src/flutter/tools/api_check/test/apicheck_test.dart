@@ -31,9 +31,9 @@ void main() {
 /// never done. See the note at the top of `shell/platform/embedder/embedder.h`
 /// for further details.
 void checkApiConsistency(String flutterRoot) {
-  test('AccessibilityFeatures enums match', () {
+  test('AccessibilityFeatures enums match', () async {
     // Dart values: _kFooBarIndex = 1 << N
-    final List<String> uiFields = getDartClassFields(
+    final List<String> uiFields = await getDartClassFields(
       sourcePath: path.join(flutterRoot, 'lib', 'ui', 'window.dart'),
       className: 'AccessibilityFeatures',
     );
@@ -60,20 +60,35 @@ void checkApiConsistency(String flutterRoot) {
         'AccessibilityBridge.java',
       ),
       enumName: 'AccessibilityFeature',
-    ).map(allCapsToCamelCase).toList();
+    ).map(upperSnakeCaseToPascalCase).toList();
+    // Swift values: static let fooBar = AccessibilityFeatureFlag(rawValue: 1 << N).
+    final List<String> swiftOptionSetProperties = getSwiftOptionSetProperties(
+      sourcePath: path.join(
+        flutterRoot,
+        'shell',
+        'platform',
+        'darwin',
+        'ios',
+        'framework',
+        'Source',
+        'AccessibilityFeatures.swift',
+      ),
+      optionSetName: 'AccessibilityFeatureFlag',
+    ).map(camelCaseToPascalCase).toList();
 
     expect(embedderEnumValues, uiFields);
     expect(internalEnumValues, uiFields);
     expect(javaEnumValues, uiFields);
+    expect(swiftOptionSetProperties, uiFields);
   });
 
-  test('SemanticsAction enums match', () {
+  test('SemanticsAction enums match', () async {
     // Dart values: _kFooBarIndex = 1 << N.
-    final List<String> uiFields = getDartClassFields(
+    final List<String> uiFields = await getDartClassFields(
       sourcePath: path.join(flutterRoot, 'lib', 'ui', 'semantics.dart'),
       className: 'SemanticsAction',
     );
-    final List<String> webuiFields = getDartClassFields(
+    final List<String> webuiFields = await getDartClassFields(
       sourcePath: path.join(flutterRoot, 'lib', 'web_ui', 'lib', 'semantics.dart'),
       className: 'SemanticsAction',
     );
@@ -100,7 +115,7 @@ void checkApiConsistency(String flutterRoot) {
         'AccessibilityBridge.java',
       ),
       enumName: 'Action',
-    ).map(allCapsToCamelCase).toList();
+    ).map(upperSnakeCaseToPascalCase).toList();
 
     expect(webuiFields, uiFields);
     expect(embedderEnumValues, uiFields);
@@ -108,13 +123,13 @@ void checkApiConsistency(String flutterRoot) {
     expect(javaEnumValues, uiFields);
   });
 
-  test('AppLifecycleState enums match', () {
+  test('AppLifecycleState enums match', () async {
     // Dart values: _kFooBarIndex = 1 << N.
-    final List<String> uiFields = getDartClassFields(
+    final List<String> uiFields = await getDartClassFields(
       sourcePath: path.join(flutterRoot, 'lib', 'ui', 'platform_dispatcher.dart'),
       className: 'AppLifecycleState',
     );
-    final List<String> webuiFields = getDartClassFields(
+    final List<String> webuiFields = await getDartClassFields(
       sourcePath: path.join(flutterRoot, 'lib', 'web_ui', 'lib', 'platform_dispatcher.dart'),
       className: 'AppLifecycleState',
     );
@@ -138,7 +153,7 @@ void checkApiConsistency(String flutterRoot) {
         'LifecycleChannel.java',
       ),
       enumName: 'AppLifecycleState',
-    ).map(allCapsToCamelCase).toList();
+    ).map(upperSnakeCaseToPascalCase).toList();
 
     expect(webuiFields, uiFields);
     expect(internalEnumValues, uiFields);
@@ -147,13 +162,13 @@ void checkApiConsistency(String flutterRoot) {
 
   // TODO(hangyujin): Add this test back after fixing https://github.com/flutter/flutter/issues/166101
 
-  // test('SemanticsFlag enums match', () {
+  // test('SemanticsFlag enums match', () async {
   //   // Dart values: _kFooBarIndex = 1 << N.
-  //   final List<String> uiFields = getDartClassFields(
+  //   final List<String> uiFields = await getDartClassFields(
   //     sourcePath: path.join(flutterRoot, 'lib', 'ui', 'semantics.dart'),
   //     className: 'SemanticsFlag',
   //   );
-  //   final List<String> webuiFields = getDartClassFields(
+  //   final List<String> webuiFields = await getDartClassFields(
   //     sourcePath: path.join(flutterRoot, 'lib', 'ui', 'semantics.dart'),
   //     className: 'SemanticsFlag',
   //   );
@@ -190,9 +205,9 @@ void checkApiConsistency(String flutterRoot) {
   // });
 }
 
-/// Returns the CamelCase equivalent of an ALL_CAPS identifier.
-String allCapsToCamelCase(String identifier) {
-  final StringBuffer buffer = StringBuffer();
+/// Returns the PascalCase equivalent of an UPPER_SNAKE_CASE identifier.
+String upperSnakeCaseToPascalCase(String identifier) {
+  final buffer = StringBuffer();
   for (final String word in identifier.split('_')) {
     if (word.isNotEmpty) {
       buffer.write(word[0]);
@@ -202,6 +217,14 @@ String allCapsToCamelCase(String identifier) {
     }
   }
   return buffer.toString();
+}
+
+/// Returns the PascalCase equivalent of an camelCase identifier.
+String camelCaseToPascalCase(String identifier) {
+  if (identifier.isEmpty) {
+    return identifier;
+  }
+  return identifier[0].toUpperCase() + identifier.substring(1);
 }
 
 /// Verify that the native functions in the dart:ui package do not use nullable
@@ -245,7 +268,7 @@ class NativeFunctionVisitor extends RecursiveAstVisitor<void> {
         type = (parameter.parameter as SimpleFormalParameter).type;
       }
       if (type! is NamedType) {
-        final String name = (type as NamedType).name2.lexeme;
+        final String name = (type as NamedType).name.lexeme;
         if (type.question != null && simpleTypes.contains(name)) {
           errors.add(description);
           return;
@@ -257,7 +280,7 @@ class NativeFunctionVisitor extends RecursiveAstVisitor<void> {
 
 void checkNativeApi(String flutterRoot) {
   test('Native API does not pass nullable parameters of simple types', () {
-    final NativeFunctionVisitor visitor = NativeFunctionVisitor();
+    final visitor = NativeFunctionVisitor();
     visitUIUnits(flutterRoot, visitor);
     expect(visitor.errors, isEmpty);
   });

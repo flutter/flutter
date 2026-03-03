@@ -228,8 +228,22 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
   glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &saved_vao_binding);
   GLint saved_array_buffer_binding;
   glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &saved_array_buffer_binding);
-  GLint saved_framebuffer_binding;
-  glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &saved_framebuffer_binding);
+  GLint saved_draw_framebuffer_binding;
+  glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &saved_draw_framebuffer_binding);
+  GLint saved_read_framebuffer_binding;
+  glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &saved_read_framebuffer_binding);
+  GLint saved_current_program;
+  glGetIntegerv(GL_CURRENT_PROGRAM, &saved_current_program);
+  GLboolean saved_scissor_test = glIsEnabled(GL_SCISSOR_TEST);
+  GLboolean saved_blend = glIsEnabled(GL_BLEND);
+  GLint saved_src_rgb;
+  glGetIntegerv(GL_BLEND_SRC_RGB, &saved_src_rgb);
+  GLint saved_src_alpha;
+  glGetIntegerv(GL_BLEND_SRC_ALPHA, &saved_src_alpha);
+  GLint saved_dst_rgb;
+  glGetIntegerv(GL_BLEND_DST_RGB, &saved_dst_rgb);
+  GLint saved_dst_alpha;
+  glGetIntegerv(GL_BLEND_DST_ALPHA, &saved_dst_alpha);
 
   // Update framebuffer to write into.
   size_t width = layers[0]->size.width;
@@ -313,12 +327,24 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
 
   glDeleteVertexArrays(1, &vao);
 
-  glDisable(GL_BLEND);
+  if (saved_blend) {
+    glEnable(GL_BLEND);
+  } else {
+    glDisable(GL_BLEND);
+  }
+  if (saved_scissor_test) {
+    glEnable(GL_SCISSOR_TEST);
+  } else {
+    glDisable(GL_SCISSOR_TEST);
+  }
 
   glBindTexture(GL_TEXTURE_2D, saved_texture_binding);
   glBindVertexArray(saved_vao_binding);
   glBindBuffer(GL_ARRAY_BUFFER, saved_array_buffer_binding);
-  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, saved_framebuffer_binding);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, saved_draw_framebuffer_binding);
+  glUseProgram(saved_current_program);
+  glBlendFuncSeparate(saved_src_rgb, saved_dst_rgb, saved_src_alpha,
+                      saved_dst_alpha);
 
   if (!self->shareable) {
     glBindFramebuffer(GL_READ_FRAMEBUFFER,
@@ -326,6 +352,7 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
     glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, self->pixels);
     glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
   }
+  glBindFramebuffer(GL_READ_FRAMEBUFFER, saved_read_framebuffer_binding);
 
   g_mutex_unlock(&self->frame_mutex);
 
@@ -334,9 +361,29 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
   return TRUE;
 }
 
+static void fl_compositor_opengl_get_frame_size(FlCompositor* compositor,
+                                                size_t* width,
+                                                size_t* height) {
+  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
+
+  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
+
+  if (width != nullptr) {
+    *width = self->framebuffer != nullptr
+                 ? fl_framebuffer_get_width(self->framebuffer)
+                 : 0;
+  }
+  if (height != nullptr) {
+    *height = self->framebuffer != nullptr
+                  ? fl_framebuffer_get_height(self->framebuffer)
+                  : 0;
+  }
+}
+
 static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
                                             cairo_t* cr,
-                                            GdkWindow* window) {
+                                            GdkWindow* window,
+                                            gboolean wait_for_frame) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
 
   g_mutex_lock(&self->frame_mutex);
@@ -347,12 +394,31 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
 
   // If frame not ready, then wait for it.
   gint scale_factor = gdk_window_get_scale_factor(window);
-  size_t width = gdk_window_get_width(window) * scale_factor;
-  size_t height = gdk_window_get_height(window) * scale_factor;
-  while (fl_framebuffer_get_width(self->framebuffer) != width ||
-         fl_framebuffer_get_height(self->framebuffer) != height) {
+  size_t width, height;
+  gint64 expiry_time =
+      g_get_monotonic_time() + kCompositorRenderTimeoutMicroseconds;
+  while (true) {
+    width = gdk_window_get_width(window) * scale_factor;
+    height = gdk_window_get_height(window) * scale_factor;
+    if (!wait_for_frame) {
+      break;
+    }
+
+    size_t framebuffer_width = fl_framebuffer_get_width(self->framebuffer);
+    size_t framebuffer_height = fl_framebuffer_get_height(self->framebuffer);
+    if (framebuffer_width == width && framebuffer_height == height) {
+      break;
+    }
+
+    if (g_get_monotonic_time() > expiry_time) {
+      g_warning(
+          "Timed out waiting for OpenGL frame of size %zdx%zd (have %zdx%zd)",
+          width, height, framebuffer_width, framebuffer_height);
+      break;
+    }
+
     g_mutex_unlock(&self->frame_mutex);
-    fl_task_runner_wait(self->task_runner);
+    fl_task_runner_wait(self->task_runner, expiry_time);
     g_mutex_lock(&self->frame_mutex);
   }
 
@@ -403,6 +469,8 @@ static void fl_compositor_opengl_dispose(GObject* object) {
 static void fl_compositor_opengl_class_init(FlCompositorOpenGLClass* klass) {
   FL_COMPOSITOR_CLASS(klass)->present_layers =
       fl_compositor_opengl_present_layers;
+  FL_COMPOSITOR_CLASS(klass)->get_frame_size =
+      fl_compositor_opengl_get_frame_size;
   FL_COMPOSITOR_CLASS(klass)->render = fl_compositor_opengl_render;
 
   G_OBJECT_CLASS(klass)->dispose = fl_compositor_opengl_dispose;

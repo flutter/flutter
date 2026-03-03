@@ -112,7 +112,7 @@ FLUTTER_ASSERT_ARC
                           "as hot reload and DevTools. To make your Flutter app or module "
                           "attachable and debuggable, add a '%s' value to the 'NSBonjourServices' "
                           "key in your Info.plist for the Debug/Profile configurations. For more "
-                          "information, see https://flutter.dev/docs/development/add-to-app/ios/"
+                          "information, see https://docs.flutter.dev/development/add-to-app/ios/"
                           "project-setup#local-network-privacy-permissions",
                          registrationType];
     [FlutterLogger logError:errorMessage];

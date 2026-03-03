@@ -92,9 +92,9 @@ dependencies:
         final yaml =
             loadYaml(rootProject.widgetPreviewScaffoldProject.pubspecFile.readAsStringSync())
                 as YamlMap;
-        const expectedDependencies = <String, Object?>{
-          'abcd': {'path': '../../packages/$kPackageProjectName'},
-          'example': {'path': '../../packages/$kExampleProjectName'},
+        final expectedDependencies = <String, Object?>{
+          'abcd': {'path': packageProject.projectRoot.path},
+          'example': {'path': exampleProject.projectRoot.path},
         };
 
         // The generated pubspec.yaml should have path dependencies on both the package and example

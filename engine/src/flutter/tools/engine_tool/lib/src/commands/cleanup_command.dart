@@ -26,7 +26,7 @@ final class CleanupCommand extends CommandBase {
       'untouched-since',
       defaultsTo: () {
         const thirtyDays = Duration(days: 30);
-        final dateTime = environment.now().subtract(thirtyDays);
+        final DateTime dateTime = environment.now().subtract(thirtyDays);
         return _toDateString(dateTime);
       }(),
       help: 'What date to consider artifacts old enough to safely remove.',
@@ -47,10 +47,10 @@ final class CleanupCommand extends CommandBase {
 
   @override
   Future<int> run() async {
-    final dryRun = argResults!.flag('dry-run');
-    final since = () {
-      final yyyyMmDd = argResults!.option('untouched-since')!;
-      final dateMatch = _dateString.matchAsPrefix(yyyyMmDd);
+    final bool dryRun = argResults!.flag('dry-run');
+    final DateTime since = () {
+      final String yyyyMmDd = argResults!.option('untouched-since')!;
+      final Match? dateMatch = _dateString.matchAsPrefix(yyyyMmDd);
       if (dateMatch == null) {
         throw FatalError('Invalid --untouched-since: $yyyyMmDd');
       }
@@ -63,7 +63,7 @@ final class CleanupCommand extends CommandBase {
 
     // Look at the directories in "out" for ones older than "since".
     environment.logger.status('Checking ${environment.engine.outDir.path}...');
-    final toDelete = [
+    final List<Directory> toDelete = [
       await for (final entity in environment.engine.outDir.list())
         if (entity is Directory && _shouldDelete(entity, ifAccessedLaterThan: since)) entity,
     ]..sort((a, b) => a.path.compareTo(b.path));
@@ -73,7 +73,7 @@ final class CleanupCommand extends CommandBase {
       return 0;
     }
 
-    final totalSize = toDelete.fold(0, (p, n) => p + _getSizeRecursive(n));
+    final int totalSize = toDelete.fold(0, (p, n) => p + _getSizeRecursive(n));
 
     if (dryRun) {
       environment.logger.status(
@@ -89,7 +89,7 @@ final class CleanupCommand extends CommandBase {
       return 0;
     }
 
-    final spinner = environment.logger.startSpinner();
+    final Spinner spinner = environment.logger.startSpinner();
     for (final e in toDelete) {
       try {
         await e.delete(recursive: true);
@@ -108,7 +108,7 @@ final class CleanupCommand extends CommandBase {
   }
 
   static bool _shouldDelete(Directory entity, {required DateTime ifAccessedLaterThan}) {
-    final accessed = entity.statSync().accessed;
+    final DateTime accessed = entity.statSync().accessed;
     return accessed.isBefore(ifAccessedLaterThan);
   }
 }
@@ -126,7 +126,7 @@ String _toDateString(DateTime dateTime) {
 }
 
 String _toReadableBytes(double bytes) {
-  var type = _FileSize.bytes;
+  _FileSize type = _FileSize.bytes;
   if (bytes >= 1024) {
     type = _FileSize.kilobytes;
     bytes = bytes / 1024;

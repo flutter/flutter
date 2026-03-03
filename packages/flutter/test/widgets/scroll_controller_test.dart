@@ -12,7 +12,7 @@ import 'states.dart';
 
 void main() {
   testWidgets('ScrollController control test', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -71,7 +71,7 @@ void main() {
     expect(controller.offset, equals(653.0));
     expect(realOffset(), equals(controller.offset));
 
-    final ScrollController controller2 = ScrollController();
+    final controller2 = ScrollController();
     addTearDown(controller2.dispose);
 
     await tester.pumpWidget(
@@ -130,7 +130,7 @@ void main() {
   });
 
   testWidgets('ScrollController control test', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController(initialScrollOffset: 209.0);
+    final controller = ScrollController(initialScrollOffset: 209.0);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -174,7 +174,7 @@ void main() {
   });
 
   testWidgets('DrivenScrollActivity ending after dispose', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -195,7 +195,7 @@ void main() {
   testWidgets('Read operations on ScrollControllers with no positions fail', (
     WidgetTester tester,
   ) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
     expect(() => controller.offset, throwsAssertionError);
     expect(() => controller.position, throwsAssertionError);
@@ -204,7 +204,7 @@ void main() {
   testWidgets('Read operations on ScrollControllers with more than one position fail', (
     WidgetTester tester,
   ) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -242,7 +242,7 @@ void main() {
   testWidgets('Write operations on ScrollControllers with no positions fail', (
     WidgetTester tester,
   ) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
     expect(
       () => controller.animateTo(1.0, duration: const Duration(seconds: 1), curve: Curves.linear),
@@ -254,7 +254,7 @@ void main() {
   testWidgets('Write operations on ScrollControllers with more than one position do not throw', (
     WidgetTester tester,
   ) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -291,9 +291,9 @@ void main() {
   });
 
   testWidgets('Scroll controllers notify when the position changes', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
 
-    final List<double> log = <double>[];
+    final log = <double>[];
 
     controller.addListener(() {
       log.add(controller.offset);
@@ -325,7 +325,7 @@ void main() {
   });
 
   testWidgets('keepScrollOffset', (WidgetTester tester) async {
-    final PageStorageBucket bucket = PageStorageBucket();
+    final bucket = PageStorageBucket();
 
     Widget buildFrame(ScrollController controller) {
       return Directionality(
@@ -351,7 +351,7 @@ void main() {
 
     // The initialScrollOffset is used in this case, because there's no saved
     // scroll offset.
-    ScrollController controller = ScrollController(initialScrollOffset: 200.0);
+    var controller = ScrollController(initialScrollOffset: 200.0);
     addTearDown(controller.dispose);
     await tester.pumpWidget(buildFrame(controller));
     expect(tester.getTopLeft(find.widgetWithText(SizedBox, 'Item 2')), Offset.zero);
@@ -392,15 +392,15 @@ void main() {
       );
     }
 
-    bool isScrolling = false;
-    final ScrollController controller = ScrollController();
+    var isScrolling = false;
+    final controller = ScrollController();
     addTearDown(controller.dispose);
     controller.addListener(() {
       isScrolling = controller.position.isScrollingNotifier.value;
     });
     await tester.pumpWidget(buildFrame(controller));
     final Offset scrollEventLocation = tester.getCenter(find.byType(ListView));
-    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     // Create a hover event so that |testPointer| has a location when generating the scroll.
     testPointer.hover(scrollEventLocation);
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 300.0)));

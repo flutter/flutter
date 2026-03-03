@@ -89,14 +89,30 @@ const double _kSheetScaleFactor = 0.0835;
 
 final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kSheetScaleFactor);
 
+// The signature for a method called on the start of a drag.
+typedef _DragStartCallback = void Function();
+
+// The signature for a method called to trigger a change based on a moving drag gesture.
+typedef _DragUpdateCallback = void Function(double delta);
+
+// The signature for a method called on the end of a drag, passing the velocity at
+// the end of the drag along.
+typedef _DragEndCallback = void Function(double velocity);
+
+// The signature for a method that checks if the sheet is currently dragged downwards.
+typedef _GetSheetDragged = bool Function();
+
 /// Shows a Cupertino-style sheet widget that slides up from the bottom of the
 /// screen and stacks the previous route behind the new sheet.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=5H-WvH5O29I}
 ///
-/// This is a convenience method for displaying [CupertinoSheetRoute] for common,
-/// straightforward use cases. The Widget returned from `pageBuilder` will be
-/// used to display the content on the [CupertinoSheetRoute].
+/// This is a convenience method for displaying [CupertinoSheetRoute] for most
+/// use cases. The Widget returned from `scrollableBuilder` will be used to display
+/// the content on the [CupertinoSheetRoute]. If the content of the sheet has a
+/// scrollable view, the [ScrollController] provided by `scrollableBuilder` can be
+/// used to enable the drag-to-dimiss gesture to work with the scrolling of the
+/// content. See [CupertinoSheetRoute.scrollableBuilder] for an example.
 ///
 /// `useNestedNavigation` allows new routes to be pushed inside of a [CupertinoSheetRoute]
 /// by adding a new [Navigator] inside of the [CupertinoSheetRoute].
@@ -117,6 +133,15 @@ final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kS
 /// by dragging it down or by calling [CupertinoSheetRoute.popSheet]. When
 /// `enableDrag` is `false`, users cannot dismiss the sheet by dragging, and it
 /// can only be closed by calling [CupertinoSheetRoute.popSheet].
+///
+/// The `topGap` parameter can be used to customize the gap between the top of
+/// the screen and the top of the sheet as a ratio of the screen height.
+/// It should be a value between 0.0 and 0.9, where 0.0 means no gap and 0.9
+/// means the sheet takes up only the bottom 10% of the screen. If not provided, defaults
+/// to 0.08 (8% of screen height).
+///
+/// When `showDragHandle` is set to `true`, then a drag handle will be placed at
+/// the top of the sheet. This flag will default to false.
 ///
 /// iOS sheet widgets are generally designed to be tightly coupled to the context
 /// of the widget that opened the sheet. As such, it is not recommended to push
@@ -148,23 +173,43 @@ final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kS
 Future<T?> showCupertinoSheet<T>({
   required BuildContext context,
   @Deprecated(
-    'Use builder instead. '
+    'Use scrollableBuilder instead. '
     'This feature was deprecated after v3.33.0-0.2.pre.',
   )
   WidgetBuilder? pageBuilder,
+  @Deprecated(
+    'Use scrollableBuilder instead. '
+    'This feature was deprecated after v3.40.0-0.2.pre.',
+  )
   WidgetBuilder? builder,
+  ScrollableWidgetBuilder? scrollableBuilder,
   bool useNestedNavigation = false,
   bool enableDrag = true,
+  RouteSettings? settings,
+  double? topGap,
+  bool showDragHandle = false,
 }) {
-  assert(pageBuilder != null || builder != null);
+  assert(topGap == null || (topGap >= 0.0 && topGap <= 0.9), 'topGap must be between 0.0 and 0.9');
+  assert(pageBuilder != null || builder != null || scrollableBuilder != null);
+  assert(
+    (pageBuilder == null && builder == null && scrollableBuilder != null) ||
+        scrollableBuilder == null,
+  );
 
-  final WidgetBuilder? effectivePageBuilder = builder ?? pageBuilder;
-  final WidgetBuilder widgetBuilder;
-  final GlobalKey<NavigatorState> nestedNavigatorKey = GlobalKey<NavigatorState>();
+  final WidgetBuilder? effectiveBuilder = builder ?? pageBuilder;
+  final nestedNavigatorKey = GlobalKey<NavigatorState>();
   if (!useNestedNavigation) {
-    widgetBuilder = effectivePageBuilder!;
+    final PageRoute<T> route = CupertinoSheetRoute<T>(
+      builder: effectiveBuilder,
+      scrollableBuilder: scrollableBuilder,
+      settings: settings,
+      enableDrag: enableDrag,
+      topGap: topGap,
+    );
+
+    return Navigator.of(context, rootNavigator: true).push<T>(route);
   } else {
-    widgetBuilder = (BuildContext context) {
+    Widget nestedNavigationContent(WidgetBuilder builder) {
       return NavigatorPopHandler(
         onPopWithResult: (T? result) {
           nestedNavigatorKey.currentState!.maybePop();
@@ -184,7 +229,7 @@ Future<T?> showCupertinoSheet<T>({
                       }
                       Navigator.of(context, rootNavigator: true).pop(result);
                     },
-                    child: effectivePageBuilder!(context),
+                    child: builder(context),
                   );
                 },
               ),
@@ -192,13 +237,21 @@ Future<T?> showCupertinoSheet<T>({
           },
         ),
       );
-    };
-  }
+    }
 
-  return Navigator.of(
-    context,
-    rootNavigator: true,
-  ).push<T>(CupertinoSheetRoute<T>(builder: widgetBuilder, enableDrag: enableDrag));
+    final route = CupertinoSheetRoute<T>(
+      scrollableBuilder: (BuildContext context, ScrollController controller) =>
+          nestedNavigationContent(
+            scrollableBuilder != null
+                ? (BuildContext context) => scrollableBuilder(context, controller)
+                : effectiveBuilder!,
+          ),
+      settings: settings,
+      enableDrag: enableDrag,
+      topGap: topGap,
+    );
+    return Navigator.of(context, rootNavigator: true).push<T>(route);
+  }
 }
 
 /// Provides an iOS-style sheet transition.
@@ -214,6 +267,7 @@ class CupertinoSheetTransition extends StatefulWidget {
     required this.secondaryRouteAnimation,
     required this.child,
     required this.linearTransition,
+    this.topGap = _kTopGapRatio,
   });
 
   /// `primaryRouteAnimation` is a linear route animation from 0.0 to 1.0 when
@@ -231,6 +285,18 @@ class CupertinoSheetTransition extends StatefulWidget {
   ///
   /// Used to respond to a drag gesture.
   final bool linearTransition;
+
+  /// The gap between the top of the screen and the top of the sheet as a ratio
+  /// of the screen height.
+  ///
+  ///{@template flutter.cupertino.CupertinoSheetTransition.topGap}
+  /// This value should be between 0.0 and 0.9, where 0.0 means no gap (sheet
+  /// extends to the top of the screen) and 0.9 means the sheet covers only the
+  /// bottom 10% of the screen. A value of 0.08 represents 8% of the screen height.
+  ///
+  /// If not provided, defaults to a value of 0.08.
+  /// {@endtemplate}
+  final double topGap;
 
   /// The primary delegated transition. Will slide a non [CupertinoSheetRoute] page down.
   ///
@@ -252,7 +318,7 @@ class CupertinoSheetTransition extends StatefulWidget {
 
     final Curve curve = linear ? Curves.linear : Curves.linearToEaseOut;
     final Curve reverseCurve = linear ? Curves.linear : Curves.easeInToLinear;
-    final CurvedAnimation curvedAnimation = CurvedAnimation(
+    final curvedAnimation = CurvedAnimation(
       curve: curve,
       reverseCurve: reverseCurve,
       parent: secondaryAnimation,
@@ -275,8 +341,8 @@ class CupertinoSheetTransition extends StatefulWidget {
     final Animation<double> scaleAnimation = curvedAnimation.drive(_kScaleTween);
     curvedAnimation.dispose();
 
-    final bool isDarkMode = CupertinoTheme.brightnessOf(context) == Brightness.dark;
-    final Color overlayColor = isDarkMode ? const Color(0xFFc8c8c8) : const Color(0xFF000000);
+    final isDarkMode = CupertinoTheme.brightnessOf(context) == Brightness.dark;
+    final overlayColor = isDarkMode ? const Color(0xFFc8c8c8) : const Color(0xFF000000);
 
     final Widget? contrastedChild = child != null && !secondaryAnimation.isDismissed
         ? Stack(
@@ -331,7 +397,7 @@ class CupertinoSheetTransition extends StatefulWidget {
   ) {
     const Curve curve = Curves.linearToEaseOut;
     const Curve reverseCurve = Curves.easeInToLinear;
-    final CurvedAnimation curvedAnimation = CurvedAnimation(
+    final curvedAnimation = CurvedAnimation(
       curve: curve,
       reverseCurve: reverseCurve,
       parent: secondaryAnimation,
@@ -384,6 +450,10 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
   void initState() {
     super.initState();
 
+    _stretchDragController = AnimationController(
+      duration: const Duration(microseconds: 1),
+      vsync: this,
+    );
     _setupAnimation();
   }
 
@@ -400,6 +470,7 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
   @override
   void dispose() {
     _disposeCurve();
+    _stretchDragController.dispose();
     super.dispose();
   }
 
@@ -414,19 +485,17 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
       reverseCurve: Curves.easeInToLinear,
       parent: widget.secondaryRouteAnimation,
     );
-    _stretchDragController = AnimationController(
-      duration: const Duration(microseconds: 1),
-      vsync: this,
-    );
+    // Maintain the same stretch distance (0.008 of screen height) regardless of custom topGap.
+    const double stretchDistance = _kTopGapRatio - _kStretchedTopGapRatio;
+    final double stretchedTopGap = widget.topGap - stretchDistance;
     _stretchDragAnimation = _stretchDragController.drive(
-      Tween<double>(begin: _kTopGapRatio, end: _kStretchedTopGapRatio),
+      Tween<double>(begin: widget.topGap, end: stretchedTopGap),
     );
     _secondaryPositionAnimation = _secondaryPositionCurve!.drive(_kMidUpTween);
     _secondaryScaleAnimation = _secondaryPositionCurve!.drive(_kScaleTween);
   }
 
   void _disposeCurve() {
-    _stretchDragController.dispose();
     _primaryPositionCurve?.dispose();
     _secondaryPositionCurve?.dispose();
     _primaryPositionCurve = null;
@@ -443,7 +512,7 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
         ? _kBottomUpTweenWhenCoveringOtherSheet
         : _kBottomUpTween;
 
-    final CurvedAnimation curvedAnimation = CurvedAnimation(
+    final curvedAnimation = CurvedAnimation(
       parent: animation,
       curve: linearTransition ? Curves.linear : Curves.fastEaseInToSlowEaseOut,
       reverseCurve: linearTransition ? Curves.linear : Curves.fastEaseInToSlowEaseOut.flipped,
@@ -531,6 +600,14 @@ class _StretchDragControllerProvider extends InheritedWidget {
 /// The sheet will be dismissed by dragging downwards on the screen, or a call to
 /// [CupertinoSheetRoute.popSheet].
 ///
+/// Any time a CupertinoSheetRoute contains a large scrollable that might conflict
+/// with the dismiss drag gesture, pass the provided [ScrollController] from `scrollableBuilder`
+/// to the scrollable. A scrollable widget used within the sheet that does not use
+/// this [ScrollController] will still scroll in response to user gestures, but
+/// the drag to dismiss behavior of the sheet will not trigger. If there is no
+/// scrollable area within the sheet, this parameter can be ignored. See below
+/// for an example.
+///
 /// {@tool dartpad}
 /// This example shows how to navigate to [CupertinoSheetRoute] by using it the
 /// same as a regular route.
@@ -545,18 +622,118 @@ class _StretchDragControllerProvider extends InheritedWidget {
 /// ** See code in examples/api/lib/cupertino/sheet/cupertino_sheet.2.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows how to show a Cupertino Sheet with scrollable content.
+///
+/// ** See code in examples/api/lib/cupertino/sheet/cupertino_sheet.3.dart **
+/// {@end-tool}
+///
 /// See also:
 ///   * [showCupertinoSheet], which is a convenience method for pushing a
 ///     `CupertinoSheetRoute`, with optional nested navigation built in.
 class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTransitionMixin<T> {
   /// Creates a page route that displays an iOS styled sheet.
-  CupertinoSheetRoute({super.settings, required this.builder, this.enableDrag = true});
+  CupertinoSheetRoute({
+    super.settings,
+    @Deprecated(
+      'Use scrollableBuilder instead. '
+      'This feature was deprecated after v3.40.0-0.2.pre.',
+    )
+    this.builder,
+    this.scrollableBuilder,
+    this.enableDrag = true,
+    this.showDragHandle = false,
+    double? topGap,
+  }) : assert(
+         topGap == null || (topGap >= 0.0 && topGap <= 0.9),
+         'topGap must be between 0.0 and 0.9',
+       ),
+       assert(
+         builder != null || scrollableBuilder != null,
+         'Either scrollableBuilder or builder must not be null',
+       ),
+       _topGap = topGap;
 
   /// Builds the primary contents of the sheet route.
-  final WidgetBuilder builder;
+  @Deprecated(
+    'Use scrollableBuilder instead. '
+    'This feature was deprecated after v3.40.0-0.2.pre.',
+  )
+  final WidgetBuilder? builder;
+
+  /// Builds the primary contents of the sheet route with a provided [ScrollController].
+  ///
+  /// If the scrollable content built by this builder uses the provided [ScrollController],
+  /// then when a downward drag is applied to the scrollable area while the content
+  /// is scrolled to the top, the drag to dismiss behavior of the sheet will be triggered.
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to show a Cupertino Sheet with scrollable content.
+  ///
+  /// ** See code in examples/api/lib/cupertino/sheet/cupertino_sheet.3.dart **
+  /// {@end-tool}
+  final ScrollableWidgetBuilder? scrollableBuilder;
+
+  ScrollableWidgetBuilder get _effectiveBuilder {
+    return scrollableBuilder ??
+        (BuildContext context, ScrollController controller) => builder!(context);
+  }
 
   @override
   final bool enableDrag;
+
+  // The gap between the top of the screen and the top of the sheet.
+  final double? _topGap;
+
+  @override
+  double get topGap => _topGap ?? _kTopGapRatio;
+
+  @override
+  bool get _hasCustomTopGap => _topGap != null;
+
+  /// Shows a drag handle at the top of the sheet.
+  ///
+  /// Defaults to false.
+  final bool showDragHandle;
+
+  Widget _sheetWithDragHandle(BuildContext context, ScrollController controller) {
+    if (!showDragHandle) {
+      return _effectiveBuilder(context, controller);
+    }
+
+    // Values derived from Apple's Figma files and a simulator running iOS 18.2.
+    const dragHandleTopPadding = 5.0;
+    const dragHandleHeight = 5.0;
+    const dragHandleWidth = 36.0;
+    const dragHandlePadding = 15.0;
+
+    return Stack(
+      fit: StackFit.expand,
+      children: <Widget>[
+        MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(padding: const EdgeInsets.only(top: dragHandlePadding)),
+          child: _effectiveBuilder(context, controller),
+        ),
+        const Align(
+          alignment: Alignment.topCenter,
+          child: Padding(
+            padding: EdgeInsetsGeometry.only(top: dragHandleTopPadding),
+            child: DecoratedBox(
+              decoration: ShapeDecoration(
+                shape: RoundedSuperellipseBorder(
+                  borderRadius: BorderRadiusGeometry.all(Radius.circular(dragHandleWidth / 2)),
+                ),
+                color: CupertinoColors.tertiaryLabel,
+              ),
+              child: SizedBox(height: dragHandleHeight, width: dragHandleWidth),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 
   @override
   Widget buildContent(BuildContext context) {
@@ -567,7 +744,14 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
         borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
         child: CupertinoUserInterfaceLevel(
           data: CupertinoUserInterfaceLevelData.elevated,
-          child: _CupertinoSheetScope(child: builder(context)),
+          child: _CupertinoSheetScope(
+            child: _CupertinoDraggableScrollableSheet<T>(
+              enabledCallback: () => enableDrag,
+              onStartPopGesture: () =>
+                  _CupertinoSheetRouteTransitionMixin._startPopGesture<T>(this, topGap),
+              builder: _sheetWithDragHandle,
+            ),
+          ),
         ),
       ),
     );
@@ -632,13 +816,26 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
   Duration get transitionDuration => const Duration(milliseconds: 500);
 
   @override
-  DelegatedTransitionBuilder? get delegatedTransition =>
-      CupertinoSheetTransition.delegateTransition;
+  DelegatedTransitionBuilder? get delegatedTransition {
+    if (_hasCustomTopGap) {
+      return null;
+    }
+    return CupertinoSheetTransition.delegateTransition;
+  }
 
   /// Determines whether the content can be dragged.
   ///
   /// If `true`, dragging is enabled; otherwise, it remains fixed.
   bool get enableDrag;
+
+  /// The gap between the top of the screen and the top of the sheet as a ratio
+  /// of the screen height.
+  ///
+  /// {@macro flutter.cupertino.CupertinoSheetTransition.topGap}
+  double get topGap;
+
+  /// Whether a custom top gap has been set.
+  bool get _hasCustomTopGap;
 
   @override
   Widget buildPage(
@@ -649,8 +846,12 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
     return buildContent(context);
   }
 
-  static _CupertinoDragGestureController<T> _startPopGesture<T>(ModalRoute<T> route) {
+  static _CupertinoDragGestureController<T> _startPopGesture<T>(
+    ModalRoute<T> route,
+    double topGap,
+  ) {
     return _CupertinoDragGestureController<T>(
+      topGap: topGap,
       navigator: route.navigator!,
       getIsCurrent: () => route.isCurrent,
       getIsActive: () => route.isActive,
@@ -666,22 +867,32 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
     Animation<double> secondaryAnimation,
     Widget child,
     bool enableDrag,
+    double topGap,
   ) {
     final bool linearTransition = route.popGestureInProgress;
     return CupertinoSheetTransition(
       primaryRouteAnimation: animation,
       secondaryRouteAnimation: secondaryAnimation,
       linearTransition: linearTransition,
+      topGap: topGap,
       child: _CupertinoDragGestureDetector<T>(
         enabledCallback: () => enableDrag,
-        onStartPopGesture: () => _startPopGesture<T>(route),
+        onStartPopGesture: () => _startPopGesture<T>(route, topGap),
         child: child,
       ),
     );
   }
 
   @override
+  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
+    return !_hasCustomTopGap;
+  }
+
+  @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
+    if (this is CupertinoSheetRoute<dynamic> && _hasCustomTopGap) {
+      return false;
+    }
     return nextRoute is _CupertinoSheetRouteTransitionMixin;
   }
 
@@ -692,7 +903,15 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    return buildPageTransitions<T>(this, context, animation, secondaryAnimation, child, enableDrag);
+    return buildPageTransitions<T>(
+      this,
+      context,
+      animation,
+      secondaryAnimation,
+      child,
+      enableDrag,
+      topGap,
+    );
   }
 }
 
@@ -720,12 +939,18 @@ class _CupertinoDragGestureDetectorState<T> extends State<_CupertinoDragGestureD
   late VerticalDragGestureRecognizer _recognizer;
   _StretchDragControllerProvider? _stretchDragController;
 
+  static VelocityTracker _cupertinoVelocityBuilder(PointerEvent event) =>
+      IOSScrollViewFlingVelocityTracker(event.kind);
+
+  double get sheetHeight => context.size!.height;
+
   @override
   void initState() {
     super.initState();
     assert(_stretchDragController == null);
     _stretchDragController = _StretchDragControllerProvider.maybeOf(context);
     _recognizer = VerticalDragGestureRecognizer(debugOwner: this)
+      ..velocityTrackerBuilder = _cupertinoVelocityBuilder
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd
@@ -766,7 +991,12 @@ class _CupertinoDragGestureDetectorState<T> extends State<_CupertinoDragGestureD
     if (_stretchDragController == null) {
       return;
     }
-    _dragGestureController!.dragUpdate(details.primaryDelta!, _stretchDragController!.controller);
+    final double delta = sheetHeight > 0 ? details.primaryDelta! / sheetHeight : 0.0;
+    _dragGestureController!.dragUpdate(
+      // Divide by size of the sheet.
+      delta,
+      _stretchDragController!.controller,
+    );
   }
 
   void _handleDragEnd(DragEndDetails details) {
@@ -776,10 +1006,10 @@ class _CupertinoDragGestureDetectorState<T> extends State<_CupertinoDragGestureD
       _dragGestureController = null;
       return;
     }
-    _dragGestureController!.dragEnd(
-      details.velocity.pixelsPerSecond.dy / context.size!.height,
-      _stretchDragController!.controller,
-    );
+    final double velocity = sheetHeight > 0
+        ? details.velocity.pixelsPerSecond.dy / sheetHeight
+        : 0.0;
+    _dragGestureController!.dragEnd(velocity, _stretchDragController!.controller);
     _dragGestureController = null;
   }
 
@@ -818,6 +1048,7 @@ class _CupertinoDragGestureController<T> {
     required this.popDragController,
     required this.getIsActive,
     required this.getIsCurrent,
+    required this.topGap,
   }) {
     navigator.didStartUserGesture();
   }
@@ -826,28 +1057,33 @@ class _CupertinoDragGestureController<T> {
   final NavigatorState navigator;
   final ValueGetter<bool> getIsActive;
   final ValueGetter<bool> getIsCurrent;
+  final double topGap;
 
   /// The drag gesture has changed by [delta]. The total range of the drag
   /// should be 0.0 to 1.0.
-  void dragUpdate(double delta, AnimationController upController) {
-    if (popDragController.value == 1.0 && delta < 0) {
+  void dragUpdate(double delta, AnimationController? upController) {
+    if (upController != null &&
+        popDragController.value == 1.0 &&
+        (upController.value > 0 || delta < 0)) {
       // Divide by stretchable range (when dragging upward at max extent).
-      upController.value -=
-          delta / (navigator.context.size!.height * (_kTopGapRatio - _kStretchedTopGapRatio));
+      // Maintain the same stretch distance regardless of custom topGap.
+      const double stretchDistance = _kTopGapRatio - _kStretchedTopGapRatio;
+      upController.value -= delta / stretchDistance;
     } else {
-      // Divide by size of the sheet.
-      popDragController.value -=
-          delta /
-          (navigator.context.size!.height - (navigator.context.size!.height * _kTopGapRatio));
+      popDragController.value -= delta;
     }
+  }
+
+  bool isDragged() {
+    return popDragController.value != 1.0;
   }
 
   /// The drag gesture has ended with a vertical motion of [velocity] as a
   /// fraction of screen height per second.
-  void dragEnd(double velocity, AnimationController upController) {
+  void dragEnd(double velocity, AnimationController? upController) {
     // If the sheet is in a stretched state (dragged upward beyond max size),
     // reverse the stretch to return to the normal max height.
-    if (upController.value > 0) {
+    if (upController != null && upController.value > 0) {
       upController.animateBack(
         0.0,
         duration: const Duration(milliseconds: 180),
@@ -920,5 +1156,220 @@ class _CupertinoDragGestureController<T> {
     } else {
       navigator.didStopUserGesture();
     }
+  }
+}
+
+class _CupertinoSheetScrollController extends ScrollController {
+  _CupertinoSheetScrollController({
+    required this.onDragStart,
+    required this.onDragUpdate,
+    required this.onDragEnd,
+    required this.sheetIsDraggedDown,
+  });
+
+  final _DragStartCallback onDragStart;
+  final _DragEndCallback onDragUpdate;
+  final _DragUpdateCallback onDragEnd;
+  final _GetSheetDragged sheetIsDraggedDown;
+
+  @override
+  _CupertinoSheetScrollPosition createScrollPosition(
+    ScrollPhysics physics,
+    ScrollContext context,
+    ScrollPosition? oldPosition,
+  ) {
+    return _CupertinoSheetScrollPosition(
+      physics: physics.applyTo(const AlwaysScrollableScrollPhysics()),
+      context: context,
+      oldPosition: oldPosition,
+      onDragStart: onDragStart,
+      onDragUpdate: onDragUpdate,
+      onDragEnd: onDragEnd,
+      sheetIsDraggedDown: sheetIsDraggedDown,
+    );
+  }
+}
+
+/// A scroll position that manages scroll activities for
+/// [_CupertinoSheetScrollController].
+///
+/// This class is a concrete subclass of [ScrollPosition] logic that handles a
+/// single [ScrollContext], such as a [Scrollable]. An instance of this class
+/// manages [ScrollActivity] instances, which in response to user gestures either
+/// changes the visible content offset in the [Scrollable]'s [Viewport], or reports
+/// the delta change or velocity of the user's gestures back to
+/// [_CupertinoDragGestureController] through [_CupertinoSheetScrollController].
+class _CupertinoSheetScrollPosition extends ScrollPositionWithSingleContext {
+  // This class is modified version of _DraggableScrollableSheetScrollPosition
+  // from DraggableScrollableSheet. If a change needs to be made to this, check and
+  // see if the original class needs the change as well.
+  _CupertinoSheetScrollPosition({
+    required super.physics,
+    required super.context,
+    super.oldPosition,
+    required this.onDragStart,
+    required this.onDragUpdate,
+    required this.onDragEnd,
+    required this.sheetIsDraggedDown,
+  });
+
+  VoidCallback? _dragCancelCallback;
+  final Set<AnimationController> _ballisticControllers = <AnimationController>{};
+  bool get listShouldScroll => pixels > 0.0;
+
+  final _DragStartCallback onDragStart;
+  final _DragEndCallback onDragUpdate;
+  final _DragUpdateCallback onDragEnd;
+
+  final _GetSheetDragged sheetIsDraggedDown;
+
+  @override
+  void absorb(ScrollPosition other) {
+    super.absorb(other);
+    assert(_dragCancelCallback == null);
+
+    if (other is! _CupertinoSheetScrollPosition) {
+      return;
+    }
+
+    if (other._dragCancelCallback != null) {
+      _dragCancelCallback = other._dragCancelCallback;
+      other._dragCancelCallback = null;
+    }
+  }
+
+  @override
+  void beginActivity(ScrollActivity? newActivity) {
+    // Cancel the running ballistic simulations
+    for (final AnimationController ballisticController in _ballisticControllers) {
+      ballisticController.stop();
+    }
+    super.beginActivity(newActivity);
+  }
+
+  @override
+  void dispose() {
+    for (final AnimationController ballisticController in _ballisticControllers) {
+      ballisticController.dispose();
+    }
+    _ballisticControllers.clear();
+    super.dispose();
+  }
+
+  @override
+  void applyUserOffset(double delta) {
+    onDragStart();
+    if (!listShouldScroll && (delta > 0 || sheetIsDraggedDown())) {
+      onDragUpdate(delta);
+    } else {
+      super.applyUserOffset(delta);
+    }
+  }
+
+  @override
+  void goBallistic(double velocity) {
+    // End drag gesture.
+    if ((velocity == 0.0) ||
+        (velocity < 0.0 && listShouldScroll) ||
+        (velocity > 0.0 && pixels != maxScrollExtent)) {
+      onDragEnd(0.0);
+      super.goBallistic(velocity);
+      return;
+    }
+    _dragCancelCallback?.call();
+    _dragCancelCallback = null;
+    if (velocity < 0.0 && !listShouldScroll) {
+      onDragEnd(velocity);
+      super.goBallistic(0);
+      return;
+    }
+    onDragEnd(0.0);
+    super.goBallistic(velocity);
+  }
+
+  @override
+  Drag drag(DragStartDetails details, VoidCallback dragCancelCallback) {
+    // Save this so we can call it later if we have to [goBallistic] on our own.
+    _dragCancelCallback = dragCancelCallback;
+    return super.drag(details, dragCancelCallback);
+  }
+}
+
+class _CupertinoDraggableScrollableSheet<T> extends StatefulWidget {
+  const _CupertinoDraggableScrollableSheet({
+    super.key,
+    required this.enabledCallback,
+    required this.onStartPopGesture,
+    required this.builder,
+  });
+
+  final ScrollableWidgetBuilder builder;
+
+  final ValueGetter<bool> enabledCallback;
+
+  final ValueGetter<_CupertinoDragGestureController<T>> onStartPopGesture;
+
+  @override
+  _CupertinoDraggableScrollableSheetState<T> createState() =>
+      _CupertinoDraggableScrollableSheetState<T>();
+}
+
+class _CupertinoDraggableScrollableSheetState<T>
+    extends State<_CupertinoDraggableScrollableSheet<T>> {
+  late _CupertinoSheetScrollController _scrollController;
+  _CupertinoDragGestureController<T>? _dragGestureController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = _CupertinoSheetScrollController(
+      onDragStart: _dragStart,
+      onDragUpdate: _dragUpdate,
+      onDragEnd: _handleDragEnd,
+      sheetIsDraggedDown: () => _dragGestureController?.isDragged() ?? false,
+    );
+  }
+
+  @override
+  void dispose() {
+    // If this is disposed during a drag, call navigator.didStopUserGesture.
+    if (_dragGestureController != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_dragGestureController?.navigator.mounted ?? false) {
+          _dragGestureController?.navigator.didStopUserGesture();
+        }
+        _dragGestureController = null;
+      });
+    }
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _dragStart() {
+    assert(mounted);
+    _dragGestureController ??= widget.onStartPopGesture();
+  }
+
+  void _dragUpdate(double delta) {
+    assert(mounted);
+    if (_dragGestureController != null) {
+      _dragGestureController!.dragUpdate(
+        delta / (context.size!.height - (context.size!.height * _kTopGapRatio)),
+        null,
+      );
+    }
+  }
+
+  void _handleDragEnd(double velocity) {
+    assert(mounted);
+    if (_dragGestureController != null) {
+      _dragGestureController!.dragEnd(-velocity / context.size!.height, null);
+      _dragGestureController = null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.builder(context, _scrollController);
   }
 }

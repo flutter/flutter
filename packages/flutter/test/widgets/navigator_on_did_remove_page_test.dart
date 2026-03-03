@@ -24,36 +24,15 @@ void main() {
   }
 
   testWidgets('Page API will not call onDidRemovePage', (WidgetTester tester) async {
-    final List<Page<void>> removedPages = <Page<void>>[];
+    final removedPages = <Page<void>>[];
 
-    const MaterialPage<void> page = MaterialPage<void>(
-      key: ValueKey<String>('page'),
-      child: Text('page'),
-    );
-    const MaterialPage<void> page1 = MaterialPage<void>(
-      key: ValueKey<String>('page1'),
-      child: Text('page1'),
-    );
-    const MaterialPage<void> page2 = MaterialPage<void>(
-      key: ValueKey<String>('page2'),
-      child: Text('page2'),
-    );
-    const MaterialPage<void> page3 = MaterialPage<void>(
-      key: ValueKey<String>('page3'),
-      child: Text('page3'),
-    );
-    const MaterialPage<void> page4 = MaterialPage<void>(
-      key: ValueKey<String>('page4'),
-      child: Text('page4'),
-    );
-    const MaterialPage<void> page5 = MaterialPage<void>(
-      key: ValueKey<String>('page5'),
-      child: Text('page5'),
-    );
-    const MaterialPage<void> page6 = MaterialPage<void>(
-      key: ValueKey<String>('page6'),
-      child: Text('page6'),
-    );
+    const page = MaterialPage<void>(key: ValueKey<String>('page'), child: Text('page'));
+    const page1 = MaterialPage<void>(key: ValueKey<String>('page1'), child: Text('page1'));
+    const page2 = MaterialPage<void>(key: ValueKey<String>('page2'), child: Text('page2'));
+    const page3 = MaterialPage<void>(key: ValueKey<String>('page3'), child: Text('page3'));
+    const page4 = MaterialPage<void>(key: ValueKey<String>('page4'), child: Text('page4'));
+    const page5 = MaterialPage<void>(key: ValueKey<String>('page5'), child: Text('page5'));
+    const page6 = MaterialPage<void>(key: ValueKey<String>('page6'), child: Text('page6'));
     await buildPages(<Page<void>>[page], tester, removedPage: removedPages);
 
     expect(find.text('page'), findsOneWidget);
@@ -76,39 +55,34 @@ void main() {
   });
 
   testWidgets('pop calls onDidRemovePage', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
-    final List<Page<void>> removedPage = <Page<void>>[];
+    final key = GlobalKey<NavigatorState>();
+    final removedPage = <Page<void>>[];
 
-    const MaterialPage<void> page = MaterialPage<void>(
-      key: ValueKey<String>('page'),
-      child: Text('page'),
-    );
-    const MaterialPage<void> page1 = MaterialPage<void>(
-      key: ValueKey<String>('page1'),
-      child: Text('page1'),
-    );
+    const page = MaterialPage<void>(key: ValueKey<String>('page'), child: Text('page'));
+    const page1 = MaterialPage<void>(key: ValueKey<String>('page1'), child: Text('page1'));
     await buildPages(<Page<void>>[page, page1], tester, removedPage: removedPage, navKey: key);
 
     expect(find.text('page1'), findsOneWidget);
 
     key.currentState!.pop();
+
+    // The page is removed from the pages list immediately to stop the pages
+    // list from going out-of-sync if the widget is rebuilt during the
+    // animation.
+    await tester.pump();
+    expect(removedPage, <Page<void>>[page1]);
+
     await tester.pumpAndSettle();
     expect(find.text('page'), findsOneWidget);
     expect(removedPage, <Page<void>>[page1]);
   });
 
   testWidgets('pushReplacement calls onDidRemovePage', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
-    final List<Page<void>> removedPage = <Page<void>>[];
+    final key = GlobalKey<NavigatorState>();
+    final removedPage = <Page<void>>[];
 
-    const MaterialPage<void> page = MaterialPage<void>(
-      key: ValueKey<String>('page'),
-      child: Text('page'),
-    );
-    const MaterialPage<void> page1 = MaterialPage<void>(
-      key: ValueKey<String>('page1'),
-      child: Text('page1'),
-    );
+    const page = MaterialPage<void>(key: ValueKey<String>('page'), child: Text('page'));
+    const page1 = MaterialPage<void>(key: ValueKey<String>('page1'), child: Text('page1'));
     await buildPages(<Page<void>>[page, page1], tester, removedPage: removedPage, navKey: key);
 
     expect(find.text('page1'), findsOneWidget);
@@ -120,6 +94,13 @@ void main() {
         },
       ),
     );
+
+    // The page is removed from the pages list immediately to stop the pages
+    // list from going out-of-sync if the widget is rebuilt during the
+    // animation.
+    await tester.pump();
+    expect(removedPage, <Page<void>>[page1]);
+
     await tester.pumpAndSettle();
     expect(find.text('new page'), findsOneWidget);
     expect(removedPage, <Page<void>>[page1]);

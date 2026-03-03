@@ -25,7 +25,7 @@ Future<void> _parseExampleCode(AssetBundle bundle) async {
   List<String>? codeBlock;
   String? codeTag;
 
-  for (final String line in lines) {
+  for (final line in lines) {
     if (codeBlock == null) {
       // Outside a block.
       if (line.startsWith(_kStartTag)) {

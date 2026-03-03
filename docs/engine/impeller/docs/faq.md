@@ -63,6 +63,21 @@ querying the system supplied image formats. So, while Impeller does not use nor
 is a wrapper for Skia, some Skia components are still used by Flutter when
 rendering using Impeller.
 
+### Can Skia-wrapped image codecs be removed in favor of using system supplied image codecs?
+
+The team investigated removing codecs from Skia in favor of relying on the
+system supplied decoders for supported image formats. This would have the
+benefit of reducing the binary size of the engine.
+
+Our investigations found that using the system decoders had more complications
+than initially expected. It would take a significant amount of work to achieve
+parity with the Skia codecs in terms of performance and reliability.
+
+The results of our investigation are documented in
+https://github.com/flutter/flutter/issues/144438 for removing codecs on iOS and
+in https://github.com/flutter/flutter/issues/177863 for removing codecs on
+Android.
+
 ### Is Impeller going to be supported on the Web?
 
 The current priority for Impeller is to be amazing on all platforms targeted by
@@ -237,7 +252,7 @@ migrate away from using those sub-components. We wholeheartedly recommend Skia
 for most rendering needs.
 
 All of Impellers shaders are [manually authored and
-compiled](https://github.com/flutter/engine/tree/0a8de3dd3285c0b64de47630a8218ae38b8e04e1/impeller#the-offline-shader-compilation-pipeline)
+compiled](https://github.com/flutter/flutter/tree/main/engine/src/flutter/impeller#the-offline-shader-compilation-pipeline)
 during build time and packaged with the Flutter engine. There is no runtime
 shader generation, reflection, or compilation. Skia can and does generate and
 compile shaders at runtime.

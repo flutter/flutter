@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "portable_ui_test.h"
+#include "flutter/shell/platform/fuchsia/flutter/tests/integration/utils/portable_ui_test.h"
 
 #include <fuchsia/inspect/cpp/fidl.h>
 #include <fuchsia/logger/cpp/fidl.h>
@@ -14,8 +14,8 @@
 #include <lib/sys/component/cpp/testing/realm_builder.h>
 #include <lib/sys/component/cpp/testing/realm_builder_types.h>
 
-#include "check_view.h"
 #include "flutter/fml/logging.h"
+#include "flutter/shell/platform/fuchsia/flutter/tests/integration/utils/check_view.h"
 
 namespace fuchsia_test_utils {
 namespace {
@@ -27,6 +27,7 @@ using component_testing::ParentRef;
 using component_testing::Protocol;
 using component_testing::RealmRoot;
 using component_testing::Route;
+using component_testing::Storage;
 
 using fuchsia_test_utils::CheckViewExistsInSnapshot;
 
@@ -101,6 +102,11 @@ void PortableUITest::SetUpRealmBase() {
                        Protocol{kPointerInjectorRegistryName}},
       .source = kTestUIStackRef,
       .targets = {ParentRef(), kFlutterJitRunnerRef}});
+
+  // Route "tmp" to Flutter runner
+  realm_builder_.AddRoute(Route{.capabilities = {Storage{"tmp"}},
+                                .source = ParentRef(),
+                                .targets = {kFlutterJitRunnerRef}});
 }
 
 void PortableUITest::ProcessViewGeometryResponse(

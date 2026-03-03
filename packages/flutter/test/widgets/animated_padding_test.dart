@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('AnimatedPadding.debugFillProperties', (WidgetTester tester) async {
-    final AnimatedPadding padding = AnimatedPadding(
+    final padding = AnimatedPadding(
       padding: const EdgeInsets.all(7.0),
       curve: Curves.ease,
       duration: const Duration(milliseconds: 200),
@@ -99,5 +99,25 @@ void main() {
     // Curve would have made the padding negative a this point if it is not clamped.
     expect(tester.getSize(find.byKey(target)), const Size(800.0, 600.0));
     expect(tester.getTopRight(find.byKey(target)), const Offset(800.0, 0.0));
+  });
+
+  testWidgets('AnimatedPadding does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: AnimatedPadding(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.all(1),
+              child: const Text('X'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(AnimatedPadding)), Size.zero);
   });
 }

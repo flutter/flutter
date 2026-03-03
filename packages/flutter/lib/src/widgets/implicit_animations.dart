@@ -185,12 +185,12 @@ class Matrix4Tween extends Tween<Matrix4> {
   Matrix4 lerp(double t) {
     assert(begin != null);
     assert(end != null);
-    final Vector3 beginTranslation = Vector3.zero();
-    final Vector3 endTranslation = Vector3.zero();
-    final Quaternion beginRotation = Quaternion.identity();
-    final Quaternion endRotation = Quaternion.identity();
-    final Vector3 beginScale = Vector3.zero();
-    final Vector3 endScale = Vector3.zero();
+    final beginTranslation = Vector3.zero();
+    final endTranslation = Vector3.zero();
+    final beginRotation = Quaternion.identity();
+    final endRotation = Quaternion.identity();
+    final beginScale = Vector3.zero();
+    final endScale = Vector3.zero();
     begin!.decompose(beginTranslation, beginRotation, beginScale);
     end!.decompose(endTranslation, endRotation, endScale);
     final Vector3 lerpTranslation = beginTranslation * (1.0 - t) + endTranslation * t;
@@ -419,7 +419,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   }
 
   bool _constructTweens() {
-    bool shouldStartAnimation = false;
+    var shouldStartAnimation = false;
     forEachTween((
       Tween<dynamic>? tween,
       dynamic targetValue,

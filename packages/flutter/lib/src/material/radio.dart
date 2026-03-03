@@ -216,7 +216,9 @@ class Radio<T> extends StatefulWidget {
   /// ```dart
   /// Radio<SingingCharacter>(
   ///   value: SingingCharacter.lafayette,
+  ///   // ignore: deprecated_member_use
   ///   groupValue: _character,
+  ///   // ignore: deprecated_member_use
   ///   onChanged: (SingingCharacter? newValue) {
   ///     setState(() {
   ///       _character = newValue;
@@ -234,8 +236,8 @@ class Radio<T> extends StatefulWidget {
 
   /// {@macro flutter.widget.RawRadio.mouseCursor}
   ///
-  /// If null, then the value of [RadioThemeData.mouseCursor] is used.
-  /// If that is also null, then [WidgetStateMouseCursor.clickable] is used.
+  /// If null, the value of [RadioThemeData.mouseCursor] is used. If that is
+  /// also null, [WidgetStateMouseCursor.adaptiveClickable] is used.
   final MouseCursor? mouseCursor;
 
   /// {@macro flutter.widget.RawRadio.toggleable}
@@ -275,7 +277,7 @@ class Radio<T> extends StatefulWidget {
   ///   value: 1,
   ///   fillColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.disabled)) {
-  ///       return Colors.orange.withOpacity(.32);
+  ///       return Colors.orange.withValues(alpha: .32);
   ///     }
   ///     return Colors.orange;
   ///   })
@@ -427,9 +429,8 @@ class Radio<T> extends StatefulWidget {
   ///  * [WidgetState.disabled].
   /// {@endtemplate}
   ///
-  /// If null, then [RadioThemeData.backgroundColor] of [ThemeData.radioTheme]
-  /// is used. If that is also null the default value is transparent in all
-  /// states.
+  /// If null, then the ambient [RadioThemeData.backgroundColor] is used.
+  /// If that is also null the default value is transparent in all states.
   final WidgetStateProperty<Color?>? backgroundColor;
 
   /// {@template flutter.material.Radio.side}
@@ -446,8 +447,8 @@ class Radio<T> extends StatefulWidget {
   ///  * [WidgetState.disabled].
   /// {@endtemplate}
   ///
-  /// If null, then [RadioThemeData.side] of [ThemeData.radioTheme] is used. If
-  /// that is also null, the default value is a border using the fill color.
+  /// If null, then the ambient [RadioThemeData.side] is used. If that is
+  /// also null, the default value is a border using the fill color.
   final BorderSide? side;
 
   /// {@template flutter.material.Radio.innerRadius}
@@ -459,8 +460,8 @@ class Radio<T> extends StatefulWidget {
   ///  * [WidgetState.disabled].
   /// {@endtemplate}
   ///
-  /// If null, then [RadioThemeData.innerRadius] of [ThemeData.radioTheme] is
-  /// used. If that is also null, the default value is `4.5` in all states.
+  /// If null, then the ambient [RadioThemeData.innerRadius] is used.
+  /// If that is also null, the default value is `4.5` in all states.
   final WidgetStateProperty<double?>? innerRadius;
 
   @override
@@ -544,7 +545,10 @@ class _RadioState<T> extends State<Radio<T>> {
         WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
           return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
               radioTheme.mouseCursor?.resolve(states) ??
-              WidgetStateProperty.resolveAs<MouseCursor>(WidgetStateMouseCursor.clickable, states);
+              WidgetStateProperty.resolveAs<MouseCursor>(
+                WidgetStateMouseCursor.adaptiveClickable,
+                states,
+              );
         });
     return RawRadio<T>(
       value: widget.value,
@@ -702,14 +706,14 @@ class _RadioPaintState extends State<_RadioPaint> {
         radioTheme.overlayColor?.resolve(hoveredStates) ??
         defaults.overlayColor!.resolve(hoveredStates)!;
 
-    final Set<WidgetState> activePressedStates = activeStates..add(WidgetState.pressed);
+    final activePressedStates = activeStates..add(WidgetState.pressed);
     final Color effectiveActivePressedOverlayColor =
         widget.overlayColor?.resolve(activePressedStates) ??
         radioTheme.overlayColor?.resolve(activePressedStates) ??
         activeColor?.withAlpha(kRadialReactionAlpha) ??
         defaults.overlayColor!.resolve(activePressedStates)!;
 
-    final Set<WidgetState> inactivePressedStates = inactiveStates..add(WidgetState.pressed);
+    final inactivePressedStates = inactiveStates..add(WidgetState.pressed);
     final Color effectiveInactivePressedOverlayColor =
         widget.overlayColor?.resolve(inactivePressedStates) ??
         radioTheme.overlayColor?.resolve(inactivePressedStates) ??
@@ -853,7 +857,7 @@ class _RadioPainter extends ToggleablePainter {
     );
 
     // Background
-    final Paint backgroundPaint = Paint()
+    final backgroundPaint = Paint()
       ..color = Color.lerp(inactiveBackgroundColor, activeBackgroundColor, position.value)!
       ..style = PaintingStyle.fill;
     canvas.drawCircle(center, _kOuterRadius, backgroundPaint);
@@ -864,7 +868,7 @@ class _RadioPainter extends ToggleablePainter {
 
     // Inner circle
     if (!position.isDismissed) {
-      final Paint innerCirclePaint = Paint()
+      final innerCirclePaint = Paint()
         ..style = PaintingStyle.fill
         ..color = Color.lerp(inactiveColor, activeColor, position.value)!;
       canvas.drawCircle(center, innerRadius * position.value, innerCirclePaint);

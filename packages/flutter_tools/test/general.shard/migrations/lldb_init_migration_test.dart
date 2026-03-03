@@ -703,7 +703,7 @@ class FakeXcodeProject extends Fake implements IosProject {
   late Directory? xcodeWorkspace = hostAppRoot.childDirectory('$hostAppProjectName.xcworkspace');
 
   @override
-  var hostAppProjectName = 'Runner';
+  String hostAppProjectName = 'Runner';
 
   @override
   File get lldbInitFile => hostAppRoot

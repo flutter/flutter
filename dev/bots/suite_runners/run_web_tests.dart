@@ -78,15 +78,6 @@ class WebTestsSuite {
     ],
   };
 
-  /// The number of jobs that run Web tests in parallel.
-  ///
-  /// This used to use the `WEB_SHARD_COUNT` environment variable, but that
-  /// was never re-added in the migration to LUCI, so instead the count is
-  /// hardcoded below.
-  ///
-  /// The last shard also runs the Web plugin tests.
-  int get webShardCount => 8;
-
   static const List<String> _kAllBuildModes = <String>['debug', 'profile', 'release'];
 
   final List<String> flutterTestArgs;
@@ -98,7 +89,7 @@ class WebTestsSuite {
     // the Web framework which content-hash to download.
     final String engineVersion = File(engineVersionFile).readAsStringSync().trim();
     final String engineRealm = File(engineRealmFile).readAsStringSync().trim();
-    final List<ShardRunner> tests = <ShardRunner>[
+    final tests = <ShardRunner>[
       for (final String buildMode in _kAllBuildModes) ...<ShardRunner>[
         () => _runFlutterDriverWebTest(
           testAppDirectory: path.join('packages', 'integration_test', 'example'),
@@ -197,48 +188,8 @@ class WebTestsSuite {
       () => _runGalleryE2eWebTest('debug'),
       () => _runGalleryE2eWebTest('profile'),
       () => _runGalleryE2eWebTest('release'),
-      () =>
-          runWebServiceWorkerTest(headless: true, testType: ServiceWorkerTestType.withoutFlutterJs),
-      () => runWebServiceWorkerTest(headless: true, testType: ServiceWorkerTestType.withFlutterJs),
-      () => runWebServiceWorkerTest(
-        headless: true,
-        testType: ServiceWorkerTestType.withFlutterJsShort,
-      ),
-      () => runWebServiceWorkerTest(
-        headless: true,
-        testType: ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent,
-      ),
-      () => runWebServiceWorkerTest(
-        headless: true,
-        testType: ServiceWorkerTestType.withFlutterJsTrustedTypesOn,
-      ),
-      () => runWebServiceWorkerTest(
-        headless: true,
-        testType: ServiceWorkerTestType.withFlutterJsNonceOn,
-      ),
-      () => runWebServiceWorkerTestWithCachingResources(
-        headless: true,
-        testType: ServiceWorkerTestType.withoutFlutterJs,
-      ),
-      () => runWebServiceWorkerTestWithCachingResources(
-        headless: true,
-        testType: ServiceWorkerTestType.withFlutterJs,
-      ),
-      () => runWebServiceWorkerTestWithCachingResources(
-        headless: true,
-        testType: ServiceWorkerTestType.withFlutterJsShort,
-      ),
-      () => runWebServiceWorkerTestWithCachingResources(
-        headless: true,
-        testType: ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent,
-      ),
-      () => runWebServiceWorkerTestWithCachingResources(
-        headless: true,
-        testType: ServiceWorkerTestType.withFlutterJsTrustedTypesOn,
-      ),
-      () => runWebServiceWorkerTestWithGeneratedEntrypoint(headless: true),
-      () => runWebServiceWorkerTestWithBlockedServiceWorkers(headless: true),
-      () => runWebServiceWorkerTestWithCustomServiceWorkerVersion(headless: true),
+      // TODO(mdebbar): This test is flaky: https://github.com/flutter/flutter/issues/178032
+      // () => runServiceWorkerCleanupTest(headless: true),
       () => _runWebStackTraceTest('profile', 'lib/stack_trace.dart'),
       () => _runWebStackTraceTest('release', 'lib/stack_trace.dart'),
       () => _runWebStackTraceTest('profile', 'lib/framework_stack_trace.dart'),
@@ -291,11 +242,11 @@ class WebTestsSuite {
   }
 
   Future<void> runWebCanvasKitUnitTests() {
-    return _runWebUnitTests(useWasm: false);
+    return _runWebUnitTests(useWasm: false, webShardCount: 8);
   }
 
   Future<void> runWebSkwasmUnitTests() {
-    return _runWebUnitTests(useWasm: true);
+    return _runWebUnitTests(useWasm: true, webShardCount: 2);
   }
 
   /// Runs one of the `dev/integration_tests/web_e2e_tests` tests.
@@ -394,14 +345,14 @@ class WebTestsSuite {
       environment: <String, String>{'FLUTTER_WEB': 'true'},
     );
 
-    final File mainDartJs = File(path.join(testAppDirectory, 'build', 'web', 'main.dart.js'));
+    final mainDartJs = File(path.join(testAppDirectory, 'build', 'web', 'main.dart.js'));
     final String javaScript = mainDartJs.readAsStringSync();
 
     // Check that we're not looking at minified JS. Otherwise this test would result in false positive.
     expect(javaScript.contains('RootElement'), true);
 
-    const String word = 'debugFillProperties';
-    int count = 0;
+    const word = 'debugFillProperties';
+    var count = 0;
     int pos = javaScript.indexOf(word);
     final int contentLength = javaScript.length;
     while (pos != -1) {
@@ -421,7 +372,7 @@ class WebTestsSuite {
     expect(javaScript.contains('_StringListChain'), false);
     expect(javaScript.contains('_Float64ListChain'), false);
 
-    const int kMaxExpectedDebugFillProperties = 11;
+    const kMaxExpectedDebugFillProperties = 11;
     if (count > kMaxExpectedDebugFillProperties) {
       throw Exception(
         'Too many occurrences of "$word" in compiled JavaScript.\n'
@@ -503,8 +454,8 @@ class WebTestsSuite {
     List<String> additionalArguments = const <String>[],
   }) async {
     final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
-    bool success = false;
-    final Map<String, String> environment = <String, String>{'FLUTTER_WEB': 'true'};
+    var success = false;
+    final environment = <String, String>{'FLUTTER_WEB': 'true'};
     adjustEnvironmentToEnableFlutterAsserts(environment);
     final CommandResult result = await runCommand(
       flutter,
@@ -522,7 +473,7 @@ class WebTestsSuite {
       ],
       outputMode: OutputMode.capture,
       outputListener: (String line, Process process) {
-        bool shutdownFlutterTool = false;
+        var shutdownFlutterTool = false;
         if (line.contains('--- TEST SUCCEEDED ---')) {
           success = true;
           shutdownFlutterTool = true;
@@ -588,15 +539,11 @@ class WebTestsSuite {
     }
   }
 
-  Future<void> _runWebUnitTests({required bool useWasm}) async {
-    final Map<String, ShardRunner> subshards = <String, ShardRunner>{};
+  Future<void> _runWebUnitTests({required bool useWasm, required int webShardCount}) async {
+    final subshards = <String, ShardRunner>{};
 
-    final Directory flutterPackageDirectory = Directory(
-      path.join(flutterRoot, 'packages', 'flutter'),
-    );
-    final Directory flutterPackageTestDirectory = Directory(
-      path.join(flutterPackageDirectory.path, 'test'),
-    );
+    final flutterPackageDirectory = Directory(path.join(flutterRoot, 'packages', 'flutter'));
+    final flutterPackageTestDirectory = Directory(path.join(flutterPackageDirectory.path, 'test'));
 
     final List<String> allTests =
         flutterPackageTestDirectory
@@ -627,7 +574,7 @@ class WebTestsSuite {
     assert(testsPerShard * webShardCount >= allTests.length);
 
     // This for loop computes all but the last shard.
-    for (int index = 0; index < webShardCount - 1; index += 1) {
+    for (var index = 0; index < webShardCount - 1; index += 1) {
       subshards['$index'] = () => _runFlutterWebTest(
         flutterPackageDirectory.path,
         allTests.sublist(index * testsPerShard, (index + 1) * testsPerShard),
@@ -657,8 +604,8 @@ class WebTestsSuite {
   }
 
   Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests, bool useWasm) async {
-    const LocalFileSystem fileSystem = LocalFileSystem();
-    final String suffix = DateTime.now().microsecondsSinceEpoch.toString();
+    const fileSystem = LocalFileSystem();
+    final suffix = DateTime.now().microsecondsSinceEpoch.toString();
     final File metricFile = fileSystem.systemTempDirectory.childFile('metrics_$suffix.json');
     await runCommand(
       flutter,
@@ -727,15 +674,14 @@ class WebTestsSuite {
       }
     }
 
-    final HttpClient client = HttpClient();
+    final client = HttpClient();
     final Uri chromeDriverUrl = Uri.parse('http://localhost:4444/status');
     final HttpClientRequest request = await client.getUrl(chromeDriverUrl);
     final HttpClientResponse response = await request.close();
     final String responseString = await response.transform(utf8.decoder).join();
-    final Map<String, dynamic> webDriverStatus =
-        json.decode(responseString) as Map<String, dynamic>;
+    final webDriverStatus = json.decode(responseString) as Map<String, dynamic>;
     client.close();
-    final bool webDriverReady = (webDriverStatus['value'] as Map<String, dynamic>)['ready'] as bool;
+    final webDriverReady = (webDriverStatus['value'] as Map<String, dynamic>)['ready'] as bool;
     if (!webDriverReady) {
       throw Exception('WebDriver not available.');
     }

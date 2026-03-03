@@ -21,17 +21,23 @@ class SystemGestureInsetsExample extends StatefulWidget {
   const SystemGestureInsetsExample({super.key});
 
   @override
-  State<SystemGestureInsetsExample> createState() => _SystemGestureInsetsExampleState();
+  State<SystemGestureInsetsExample> createState() =>
+      _SystemGestureInsetsExampleState();
 }
 
-class _SystemGestureInsetsExampleState extends State<SystemGestureInsetsExample> {
+class _SystemGestureInsetsExampleState
+    extends State<SystemGestureInsetsExample> {
   double _currentValue = 0.2;
 
   @override
   Widget build(BuildContext context) {
-    final EdgeInsets systemGestureInsets = MediaQuery.of(context).systemGestureInsets;
+    final EdgeInsets systemGestureInsets = MediaQuery.of(
+      context,
+    ).systemGestureInsets;
     return Scaffold(
-      appBar: AppBar(title: const Text('Pad Slider to avoid systemGestureInsets')),
+      appBar: AppBar(
+        title: const Text('Pad Slider to avoid systemGestureInsets'),
+      ),
       body: Padding(
         padding: EdgeInsets.only(
           // only left and right padding are needed here

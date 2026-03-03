@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../dom.dart';
+import 'focusable.dart';
 import 'label_and_value.dart';
 import 'semantics.dart';
 
@@ -20,7 +21,7 @@ class SemanticHeading extends SemanticRole {
 
   @override
   DomElement createElement() {
-    final element = createDomElement('h${semanticsObject.effectiveHeadingLevel}');
+    final DomElement element = createDomElement('h${semanticsObject.effectiveHeadingLevel}');
     element.style
       // Browser adds default non-zero margins/paddings to <h*> tags, which
       // affects the size of the element. As the element size is fully defined
@@ -52,7 +53,7 @@ class SemanticHeading extends SemanticRole {
   @override
   bool focusAsRouteDefault() {
     if (semanticsObject.isFocusable) {
-      final focusable = this.focusable;
+      final Focusable? focusable = this.focusable;
       if (focusable != null) {
         return focusable.focusAsRouteDefault();
       }

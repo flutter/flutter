@@ -8,8 +8,7 @@ import UIKit
 class SceneDelegate: UIResponder, UIWindowSceneDelegate,
   FlutterSceneLifeCycleProvider
 {
-  var sceneLifeCycleDelegate: FlutterPluginSceneLifeCycleDelegate =
-    FlutterPluginSceneLifeCycleDelegate()
+  let sceneLifeCycleDelegate = FlutterPluginSceneLifeCycleDelegate()
 
   var window: UIWindow?
 

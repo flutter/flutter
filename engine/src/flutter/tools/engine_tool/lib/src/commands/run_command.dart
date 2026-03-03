@@ -7,6 +7,7 @@ import 'dart:io' show ProcessStartMode;
 import 'package:collection/collection.dart';
 import 'package:engine_build_configs/engine_build_configs.dart';
 import 'package:meta/meta.dart';
+import 'package:process_runner/process_runner.dart';
 
 import '../build_plan.dart';
 import '../build_utils.dart';
@@ -50,7 +51,7 @@ See `flutter run --help` for a listing
 ''';
 
   Build? _findTargetBuild(String configName) {
-    final demangledName = demangleConfigName(environment, configName);
+    final String demangledName = demangleConfigName(environment, configName);
     return builds.firstWhereOrNull((build) => build.name == demangledName);
   }
 
@@ -58,7 +59,7 @@ See `flutter run --help` for a listing
     if (targetBuild == null) {
       return null;
     }
-    final mangledName = mangleConfigName(environment, targetBuild.name);
+    final String mangledName = mangleConfigName(environment, targetBuild.name);
     if (mangledName.contains('host_')) {
       return targetBuild;
     }
@@ -77,13 +78,13 @@ See `flutter run --help` for a listing
 
   String _getDeviceId() {
     if (argResults!.rest.contains('-d')) {
-      final index = argResults!.rest.indexOf('-d') + 1;
+      final int index = argResults!.rest.indexOf('-d') + 1;
       if (index < argResults!.rest.length) {
         return argResults!.rest[index];
       }
     }
     if (argResults!.rest.contains('--device-id')) {
-      final index = argResults!.rest.indexOf('--device-id') + 1;
+      final int index = argResults!.rest.indexOf('--device-id') + 1;
       if (index < argResults!.rest.length) {
         return argResults!.rest[index];
       }
@@ -103,7 +104,7 @@ See `flutter run --help` for a listing
   }
 
   late final Future<RunTarget?> _runTarget = (() async {
-    final devices = await _flutterTool.devices();
+    final List<Device> devices = await _flutterTool.devices();
     return RunTarget.detectAndSelect(devices, idPrefix: _getDeviceId());
   })();
 
@@ -113,7 +114,7 @@ See `flutter run --help` for a listing
       throw FatalError('Cannot find the "flutter" command in your PATH');
     }
 
-    final target = await _runTarget;
+    final RunTarget? target = await _runTarget;
     final plan = BuildPlan.fromArgResults(
       argResults!,
       environment,
@@ -121,15 +122,15 @@ See `flutter run --help` for a listing
       defaultBuild: () => target?.buildConfigFor(_getMode()),
     );
 
-    final hostBuild = _findHostBuild(plan.build);
+    final Build? hostBuild = _findHostBuild(plan.build);
     if (hostBuild == null) {
       throw FatalError('Could not find host build for ${plan.build.name}');
     }
 
-    final buildTargetsForShell = target?.buildTargetsForShell ?? [];
+    final List<Label> buildTargetsForShell = target?.buildTargetsForShell ?? [];
 
     // First build the host.
-    var r = await runBuild(
+    int r = await runBuild(
       environment,
       hostBuild,
       concurrency: plan.concurrency ?? 0,
@@ -157,8 +158,8 @@ See `flutter run --help` for a listing
       }
     }
 
-    final mangledBuildName = mangleConfigName(environment, plan.build.name);
-    final mangledHostBuildName = mangleConfigName(environment, hostBuild.name);
+    final String mangledBuildName = mangleConfigName(environment, plan.build.name);
+    final String mangledHostBuildName = mangleConfigName(environment, hostBuild.name);
     final command = <String>[
       'flutter',
       'run',
@@ -173,7 +174,7 @@ See `flutter run --help` for a listing
 
     // TODO(johnmccutchan): Be smart and if the user requested a profile
     // config, add the '--profile' flag when invoking flutter run.
-    final result = await environment.processRunner.runProcess(
+    final ProcessRunnerResult result = await environment.processRunner.runProcess(
       command,
       runInShell: true,
       startMode: ProcessStartMode.inheritStdio,

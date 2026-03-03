@@ -51,7 +51,7 @@ class WebSocketDwdsTestUtils {
     required List<String> additionalCommandArgs,
     WebSocketDwdsTestConfig config = const WebSocketDwdsTestConfig(),
   }) async {
-    debugPrint('Step 1: Starting WebSocket DWDS connection setup...');
+    debugPrint('Starting WebSocket DWDS connection setup...');
 
     // Set up listening for app output before starting
     final stdout = StringBuffer();
@@ -72,15 +72,15 @@ class WebSocketDwdsTestUtils {
 
     io.Process? chromeProcess;
     try {
-      // Step 1: Start Flutter app with web-server device (will wait for debug connection)
-      debugPrint('Step 2: Starting Flutter app with web-server device...');
+      // Start Flutter app with web-server device (will wait for debug connection)
+      debugPrint('Starting Flutter app with web-server device...');
       final Future<void> appStartFuture = runFlutterWithWebServerDevice(
         flutter,
         additionalCommandArgs: [...additionalCommandArgs, '--no-web-resources-cdn'],
       );
 
-      // Step 2: Wait for DWDS debug URL to be available
-      debugPrint('Step 3: Waiting for DWDS debug service URL...');
+      // Wait for DWDS debug URL to be available
+      debugPrint('Waiting for DWDS debug service URL...');
       final String debugUrl = await sawDebugUrl.future.timeout(
         config.debugUrlTimeout,
         onTimeout: () {
@@ -89,13 +89,13 @@ class WebSocketDwdsTestUtils {
       );
       debugPrint('✓ DWDS debug service available at: $debugUrl');
 
-      // Step 3: Launch headless Chrome to connect to DWDS
-      debugPrint('Step 4: Launching headless Chrome to connect to DWDS...');
+      // Launch headless Chrome to connect to DWDS
+      debugPrint('Launching headless Chrome to connect to DWDS...');
       chromeProcess = await launchHeadlessChrome(debugUrl);
       debugPrint('✓ Headless Chrome launched and connecting to DWDS');
 
-      // Step 4: Wait for app to start (Chrome connection established)
-      debugPrint('Step 5: Waiting for Flutter app to start after Chrome connection...');
+      // Wait for app to start (Chrome connection established)
+      debugPrint('Waiting for Flutter app to start after Chrome connection...');
       await appStartFuture.timeout(
         config.appStartTimeout,
         onTimeout: () {

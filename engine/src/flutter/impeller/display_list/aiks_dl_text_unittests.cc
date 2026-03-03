@@ -11,6 +11,7 @@
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/effects/dl_mask_filter.h"
 #include "flutter/display_list/geometry/dl_path_builder.h"
+#include "flutter/display_list/testing/dl_test_snippets.h"
 #include "flutter/fml/build_config.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
 #include "flutter/testing/testing.h"
@@ -731,13 +732,8 @@ TEST_P(AiksTest, TextContentsMismatchedTransformTest) {
       Matrix::MakeTranslateScale({1.5, 1.5, 1}, {100, 50, 0});
   Point preroll_point = Point{23, 45};
   {
-    auto scale = TextFrame::RoundScaledFontSize(
-        (preroll_matrix * Matrix::MakeTranslation(preroll_point))
-            .GetMaxBasisLengthXY());
-
     aiks_context.GetContentContext().GetLazyGlyphAtlas()->AddTextFrame(
         text_frame,     //
-        scale,          //
         preroll_point,  //
         preroll_matrix,
         std::nullopt  //
@@ -752,12 +748,12 @@ TEST_P(AiksTest, TextContentsMismatchedTransformTest) {
 
   TextContents text_contents;
   text_contents.SetTextFrame(text_frame);
-  text_contents.SetOffset(preroll_point);
-  text_contents.SetScale(1.6);
+  text_contents.SetPosition(preroll_point);
+  text_contents.SetScreenTransform(preroll_matrix);
   text_contents.SetColor(Color::Aqua());
 
   Matrix not_preroll_matrix =
-      Matrix::MakeTranslateScale({1.5, 1.5, 1}, {100, 50, 0});
+      preroll_matrix * Matrix::MakeScale({2.0f, 2.0f, 1.0f});
 
   Entity entity;
   entity.SetTransform(not_preroll_matrix);
@@ -834,6 +830,44 @@ TEST_P(AiksTest, MultipleTextWithShadowCache) {
             5u);
 }
 
+TEST_P(AiksTest, MultipleColorWithShadowCache) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  DlPaint paint;
+  paint.setColor(DlColor::kWhite());
+  builder.DrawPaint(paint);
+
+  AiksContext aiks_context(GetContext(),
+                           std::make_shared<TypographerContextSkia>());
+  // Cache empty
+  EXPECT_EQ(aiks_context.GetContentContext()
+                .GetTextShadowCache()
+                .GetCacheSizeForTesting(),
+            0u);
+
+  SkFont sk_font = flutter::testing::CreateTestFontOfSize(12);
+
+  std::array<DlColor, 4> colors{DlColor::kRed(), DlColor::kGreen(),
+                                DlColor::kBlue(), DlColor::kRed()};
+  for (const auto& color : colors) {
+    ASSERT_TRUE(RenderTextInCanvasSkia(
+        GetContext(), builder, "A", kFontFixture,
+        TextRenderOptions{
+            .color = color,
+            .filter = DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 4)},
+        sk_font));
+  }
+
+  DisplayListToTexture(builder.Build(), {400, 400}, aiks_context);
+
+  // The count of cache entries should match the number of distinct colors
+  // in the list.  Repeated usage of a color should not add to the cache.
+  EXPECT_EQ(aiks_context.GetContentContext()
+                .GetTextShadowCache()
+                .GetCacheSizeForTesting(),
+            3u);
+}
+
 TEST_P(AiksTest, SingleIconShadowTest) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
@@ -898,6 +932,126 @@ TEST_P(AiksTest, VarietyOfTextScalesShowingRasterAndPath) {
     }
     builder.Restore();
   }
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+namespace {
+std::shared_ptr<TextFrame> MakeDefaultTextFrame(const std::string& text,
+                                                Scalar font_size) {
+  // Construct the text blob.
+  auto mapping = flutter::testing::OpenFixtureAsSkData("Roboto-Regular.ttf");
+  if (mapping == nullptr) {
+    return nullptr;
+  }
+
+  sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
+  SkFont sk_font(font_mgr->makeFromData(mapping), font_size);
+  sk_sp<SkTextBlob> blob = SkTextBlob::MakeFromString("Hi", sk_font);
+
+  std::shared_ptr<TextFrame> text_frame = MakeTextFrameFromTextBlobSkia(blob);
+  return text_frame;
+}
+
+void DrawTextFramesMultipleScalesWithReuse(AiksTest* test,
+                                           Scalar first_scale,
+                                           Scalar second_scale) {
+  DisplayListBuilder builder;
+  builder.Scale(test->GetContentScale().x, test->GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  std::shared_ptr<TextFrame> reuse_frame = MakeDefaultTextFrame("Hi", 20.0f);
+  ASSERT_NE(reuse_frame, nullptr);
+
+  builder.Save();
+  builder.Translate(100, 100);
+  builder.Scale(first_scale, first_scale);
+  builder.DrawText(DlTextImpeller::Make(reuse_frame), 0, 0,
+                   DlPaint(DlColor::kBlue()));
+  builder.Restore();
+
+  builder.Save();
+  builder.Translate(400, 100);
+  builder.Scale(second_scale, second_scale);
+  builder.DrawText(DlTextImpeller::Make(reuse_frame), 0, 0,
+                   DlPaint(DlColor::kPurple()));
+  builder.Restore();
+
+  builder.Save();
+  builder.Translate(100, 400);
+  builder.Scale(first_scale, first_scale);
+  std::shared_ptr<TextFrame> single_use_frame1 =
+      MakeDefaultTextFrame("Hi", 20.0f);
+  builder.DrawText(DlTextImpeller::Make(single_use_frame1), 0, 0,
+                   DlPaint(DlColor::kBlue()));
+  builder.Restore();
+
+  builder.Save();
+  builder.Translate(400, 400);
+  builder.Scale(second_scale, second_scale);
+  std::shared_ptr<TextFrame> single_use_frame2 =
+      MakeDefaultTextFrame("Hi", 20.0f);
+  builder.DrawText(DlTextImpeller::Make(single_use_frame2), 0, 0,
+                   DlPaint(DlColor::kPurple()));
+  builder.Restore();
+
+  ASSERT_TRUE(test->OpenPlaygroundHere(builder.Build()));
+}
+}  // namespace
+
+TEST_P(AiksTest, TextFramesDoNotShareRenderDataBigSmall) {
+  DrawTextFramesMultipleScalesWithReuse(this,                  //
+                                        /*first_scale=*/4.0f,  //
+                                        /*second_scale=*/0.5f);
+}
+
+TEST_P(AiksTest, TextFramesDoNotShareRenderDataSmallBig) {
+  DrawTextFramesMultipleScalesWithReuse(this,                  //
+                                        /*first_scale=*/0.5f,  //
+                                        /*second_scale=*/4.0f);
+}
+
+// Verifies that non-uniform (anisotropic) scaling uses bilinear filtering
+// to avoid jagged/aliased text, while uniform scaling remains pixel-perfect.
+// Regression test for https://github.com/flutter/flutter/issues/182143
+TEST_P(AiksTest, TextWithNonUniformScale) {
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
+  builder.DrawPaint(paint);
+
+  // Row 1: Uniform scale (should use nearest-neighbor, pixel-perfect).
+  builder.Save();
+  builder.Scale(2, 2);
+  ASSERT_TRUE(RenderTextInCanvasSkia(
+      GetContext(), builder, "Uniform 2x2", "Roboto-Regular.ttf",
+      TextRenderOptions{.font_size = 30, .position = DlPoint(20, 40)}));
+  builder.Restore();
+
+  // Row 2: Non-uniform scale Y-only (ratio 2.0, triggers bilinear).
+  builder.Save();
+  builder.Scale(1, 2);
+  ASSERT_TRUE(RenderTextInCanvasSkia(
+      GetContext(), builder, "ScaleY 1x2", "Roboto-Regular.ttf",
+      TextRenderOptions{.font_size = 30, .position = DlPoint(20, 140)}));
+  builder.Restore();
+
+  // Row 3: Non-uniform scale X-only (ratio 3.0, triggers bilinear).
+  builder.Save();
+  builder.Scale(3, 1);
+  ASSERT_TRUE(RenderTextInCanvasSkia(
+      GetContext(), builder, "ScaleX 3x1", "Roboto-Regular.ttf",
+      TextRenderOptions{.font_size = 30, .position = DlPoint(20, 300)}));
+  builder.Restore();
+
+  // Row 4: Slightly non-uniform (ratio 1.1, below threshold, nearest).
+  builder.Save();
+  builder.Scale(2, 2.2);
+  ASSERT_TRUE(RenderTextInCanvasSkia(
+      GetContext(), builder, "Near-uniform 2x2.2", "Roboto-Regular.ttf",
+      TextRenderOptions{.font_size = 30, .position = DlPoint(20, 200)}));
+  builder.Restore();
+
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 

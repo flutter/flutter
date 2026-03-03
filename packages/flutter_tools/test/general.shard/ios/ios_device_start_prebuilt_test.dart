@@ -11,7 +11,9 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/template.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -27,6 +29,7 @@ import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcode_debug.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -538,7 +541,7 @@ void main() {
     },
   );
 
-  testWithoutContext('IOSDevice.startApp succeeds in release mode', () async {
+  testUsingContext('IOSDevice.startApp succeeds in release mode', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final processManager = FakeProcessManager.list(<FakeCommand>[kLaunchReleaseCommand]);
     final fakeAnalytics = FakeAnalytics();
@@ -1566,15 +1569,10 @@ void main() {
             uncompressedBundle: bundleLocation,
             applicationPackage: bundleLocation,
           );
-          final deviceLogReader = FakeDeviceLogReader();
+          final deviceLogReader = FakeSharedIOSDeviceLogReader();
 
           device.portForwarder = const NoOpDevicePortForwarder();
           device.setLogReader(iosApp, deviceLogReader);
-
-          // Start writing messages to the log reader.
-          Timer.run(() {
-            deviceLogReader.addLine(kJITCrashFailureMessage);
-          });
 
           final completer = Completer<void>();
           // device.startApp() asynchronously calls throwToolExit, so we
@@ -1582,6 +1580,10 @@ void main() {
           unawaited(
             runZonedGuarded<Future<void>?>(
               () {
+                // Start writing messages to the log reader.
+                Timer.run(() {
+                  deviceLogReader.addLine(kJITCrashFailureMessage);
+                });
                 unawaited(
                   device.startApp(
                     iosApp,
@@ -1593,7 +1595,7 @@ void main() {
                 return null;
               },
               (Object error, StackTrace stack) {
-                expect(error.toString(), contains(jITCrashFailureInstructions('iOS 18.4')));
+                expect(error.toString(), contains(jitCrashFailureInstructions('iOS 18.4')));
                 completer.complete();
               },
             ),
@@ -1601,6 +1603,73 @@ void main() {
           await completer.future;
         },
       );
+
+      group('with overriden UserMessage', () {
+        late BufferLogger testLogger;
+        setUp(() {
+          testLogger = BufferLogger.test();
+        });
+
+        testUsingContext(
+          'IOSDevice.startApp prints guided message when UIScene error message',
+          () async {
+            final FileSystem fileSystem = MemoryFileSystem.test();
+            final processManager = FakeProcessManager.empty();
+
+            final Directory temporaryXcodeProjectDirectory = fileSystem.systemTempDirectory
+                .childDirectory('flutter_empty_xcode.rand0');
+            final Directory bundleLocation = fileSystem.currentDirectory;
+            final IOSDevice device = setUpIOSDevice(
+              processManager: processManager,
+              fileSystem: fileSystem,
+              isCoreDevice: true,
+              coreDeviceControl: FakeIOSCoreDeviceControl(),
+              xcodeDebug: FakeXcodeDebug(
+                expectedProject: XcodeDebugProject(
+                  scheme: 'Runner',
+                  xcodeWorkspace: temporaryXcodeProjectDirectory.childDirectory(
+                    'Runner.xcworkspace',
+                  ),
+                  xcodeProject: temporaryXcodeProjectDirectory.childDirectory('Runner.xcodeproj'),
+                  hostAppProjectName: 'Runner',
+                ),
+                expectedDeviceId: '123',
+                expectedLaunchArguments: <String>['--enable-dart-profiling'],
+                expectedBundlePath: bundleLocation.path,
+              ),
+            );
+            final IOSApp iosApp = PrebuiltIOSApp(
+              projectBundleId: 'app',
+              bundleName: 'Runner',
+              uncompressedBundle: bundleLocation,
+              applicationPackage: bundleLocation,
+            );
+            final deviceLogReader = FakeSharedIOSDeviceLogReader();
+
+            device.portForwarder = const NoOpDevicePortForwarder();
+            device.setLogReader(iosApp, deviceLogReader);
+
+            Timer.run(() {
+              deviceLogReader.addLine(
+                '`UIScene` lifecycle will soon be required. Failure to adopt will result in an assert in the future.',
+              );
+              deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
+            });
+
+            await device.startApp(
+              iosApp,
+              prebuiltApplication: true,
+              debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+              platformArgs: <String, dynamic>{},
+            );
+            expect(testLogger.warningText, contains('override message'));
+          },
+          overrides: <Type, Generator>{
+            Logger: () => testLogger,
+            UserMessages: () => OverrideUserMessages(),
+          },
+        );
+      });
     });
   });
 }
@@ -1666,7 +1735,7 @@ IOSDevice setUpIOSDevice({
 }
 
 class FakeDevicePortForwarder extends Fake implements DevicePortForwarder {
-  var disposed = false;
+  bool disposed = false;
 
   @override
   Future<void> dispose() async {
@@ -1682,7 +1751,7 @@ class FakeMDnsVmServiceDiscovery extends Fake implements MDnsVmServiceDiscovery 
   bool returnsNull;
   bool allowthrowOnMissingLocalNetworkPermissionsError;
 
-  var completer = Completer<void>();
+  Completer<void> completer = Completer<void>();
   @override
   Future<Uri?> getVMServiceUriForLaunch(
     String applicationId,
@@ -1725,7 +1794,7 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
   final Completer<void>? completer;
 
   @override
-  var debugStarted = false;
+  bool debugStarted = false;
 
   @override
   Future<XcodeDebugProject> createXcodeProjectWithCustomBundle(
@@ -1785,8 +1854,8 @@ class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {
   FakeIOSCoreDeviceLauncher({this.lldbLaunchResult = true, this.xcodeLaunchResult = true});
   bool lldbLaunchResult;
   bool xcodeLaunchResult;
-  var launchedWithLLDB = false;
-  var launchedWithXcode = false;
+  bool launchedWithLLDB = false;
+  bool launchedWithXcode = false;
 
   Completer<void>? xcodeCompleter;
 
@@ -1802,6 +1871,7 @@ class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {
     required String bundlePath,
     required String bundleId,
     required List<String> launchArguments,
+    required ShutdownHooks shutdownHooks,
   }) async {
     launchedWithLLDB = true;
     return lldbLaunchResult;
@@ -1840,3 +1910,47 @@ class FakeAnalytics extends Fake implements Analytics {
 }
 
 class FakeIMobileDevice extends Fake implements IMobileDevice {}
+
+class FakeSharedIOSDeviceLogReader extends SharedIOSDeviceLogReader {
+  @override
+  String get name => 'FakeLogReader';
+
+  bool disposed = false;
+
+  final _lineQueue = <String>[];
+  late final _linesController = StreamController<String>.broadcast(onListen: _onListen);
+
+  @override
+  Stream<String> get logLines => _linesController.stream;
+
+  @override
+  StreamController<String> get linesController => _linesController;
+
+  void _onListen() {
+    _lineQueue.forEach(_linesController.add);
+    _lineQueue.clear();
+  }
+
+  void addLine(String line) {
+    if (_linesController.hasListener) {
+      addLogToStream(line);
+    } else {
+      _lineQueue.add(line);
+    }
+  }
+
+  @override
+  Future<void> dispose() async {
+    _lineQueue.clear();
+    await _linesController.close();
+    disposed = true;
+  }
+
+  @override
+  Future<void> provideVmService(FlutterVmService? connectedVmService) async {}
+}
+
+class OverrideUserMessages extends UserMessages {
+  @override
+  String get uiSceneMigrationWarning => 'override message';
+}

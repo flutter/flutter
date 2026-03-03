@@ -12,7 +12,7 @@
   "shareButtonLabel": "Сподели",
   "pasteButtonLabel": "Залепи",
   "selectAllButtonLabel": "Избери ги сите",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "Најдени се резултати од пребарувањето",
+  "noResultsFound": "Не се најдени резултати",
+  "radioButtonUnselectedLabel": "Не е избрано"
 }

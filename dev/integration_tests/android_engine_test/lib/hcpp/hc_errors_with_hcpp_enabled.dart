@@ -33,8 +33,8 @@ void main() async {
   // Set up a global error handler for unhandled platform messages
   // & other async errors.
   PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
-    final String currentErrorString = error.toString();
-    bool handledByThisCallback = false;
+    final currentErrorString = error.toString();
+    var handledByThisCallback = false;
 
     if (error is PlatformException) {
       if (currentErrorString.contains('HC++')) {

@@ -44,9 +44,8 @@ void main() {
 
     await tester.pumpWidget(
       Center(
-        child: SizedBox(
-          width: 200.0,
-          height: 200.0,
+        child: SizedBox.square(
+          dimension: 200.0,
           child: FittedBox(
             key: outside,
             child: SizedBox(key: inside, width: 100.0, height: 50.0),
@@ -75,9 +74,8 @@ void main() {
 
     await tester.pumpWidget(
       Center(
-        child: SizedBox(
-          width: 200.0,
-          height: 200.0,
+        child: SizedBox.square(
+          dimension: 200.0,
           child: FittedBox(
             key: outside,
             fit: BoxFit.cover,
@@ -125,9 +123,8 @@ void main() {
         Directionality(
           textDirection: TextDirection.rtl,
           child: Center(
-            child: SizedBox(
-              width: 100.0,
-              height: 100.0,
+            child: SizedBox.square(
+              dimension: 100.0,
               child: FittedBox(
                 key: outside,
                 fit: BoxFit.scaleDown,
@@ -163,9 +160,8 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: SizedBox(
-              width: 100.0,
-              height: 100.0,
+            child: SizedBox.square(
+              dimension: 100.0,
               child: FittedBox(
                 key: outside,
                 fit: BoxFit.scaleDown,
@@ -201,9 +197,8 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: SizedBox(
-              width: 100.0,
-              height: 100.0,
+            child: SizedBox.square(
+              dimension: 100.0,
               child: FittedBox(
                 key: outside,
                 fit: BoxFit.scaleDown,
@@ -239,9 +234,8 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: SizedBox(
-              width: 100.0,
-              height: 100.0,
+            child: SizedBox.square(
+              dimension: 100.0,
               child: FittedBox(
                 key: outside,
                 fit: BoxFit.scaleDown,
@@ -277,9 +271,8 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: SizedBox(
-              width: 100.0,
-              height: 100.0,
+            child: SizedBox.square(
+              dimension: 100.0,
               child: FittedBox(
                 key: outside,
                 fit: BoxFit.fill,
@@ -316,11 +309,7 @@ void main() {
           width: 100.0,
           height: 10.0,
           child: FittedBox(
-            child: SizedBox(
-              width: 50.0,
-              height: 50.0,
-              child: RepaintBoundary(child: Placeholder()),
-            ),
+            child: SizedBox.square(dimension: 50.0, child: RepaintBoundary(child: Placeholder())),
           ),
         ),
       ),
@@ -371,11 +360,11 @@ void main() {
   });
 
   testWidgets('FittedBox layers - none - clip', (WidgetTester tester) async {
-    final List<double> values = <double>[10.0, 50.0, 100.0];
-    for (final double a in values) {
-      for (final double b in values) {
-        for (final double c in values) {
-          for (final double d in values) {
+    final values = <double>[10.0, 50.0, 100.0];
+    for (final a in values) {
+      for (final b in values) {
+        for (final c in values) {
+          for (final d in values) {
             await tester.pumpWidget(
               Center(
                 child: SizedBox(
@@ -406,17 +395,15 @@ void main() {
 
   testWidgets('Big child into small fitted box - hit testing', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
-    bool pointerDown = false;
+    var pointerDown = false;
     await tester.pumpWidget(
       Center(
-        child: SizedBox(
-          width: 100.0,
-          height: 100.0,
+        child: SizedBox.square(
+          dimension: 100.0,
           child: FittedBox(
             alignment: FractionalOffset.center,
-            child: SizedBox(
-              width: 1000.0,
-              height: 1000.0,
+            child: SizedBox.square(
+              dimension: 1000.0,
               child: Listener(
                 onPointerDown: (PointerDownEvent event) {
                   pointerDown = true;
@@ -550,9 +537,8 @@ void main() {
   testWidgets('FittedBox with zero size child does not throw', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
-        child: SizedBox(
-          height: 200.0,
-          width: 200.0,
+        child: SizedBox.square(
+          dimension: 200.0,
           child: FittedBox(fit: BoxFit.scaleDown, child: SizedBox.shrink()),
         ),
       ),
@@ -572,7 +558,7 @@ void main() {
 }
 
 List<Type> getLayers() {
-  final List<Type> layers = <Type>[];
+  final layers = <Type>[];
   Layer? container = RendererBinding.instance.renderView.debugLayer;
   while (container is ContainerLayer) {
     layers.add(container.runtimeType);

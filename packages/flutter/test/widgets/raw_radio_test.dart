@@ -8,16 +8,18 @@
 library;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('RawRadio control test', (WidgetTester tester) async {
-    final FocusNode node = FocusNode();
+    final node = FocusNode();
     addTearDown(node.dispose);
     ToggleableStateMixin? actualState;
-    final TestRegistry<int> registry = TestRegistry<int>();
+    final registry = TestRegistry<int>();
 
     Widget buildWidget() {
       return RawRadio<int>(
@@ -52,9 +54,9 @@ void main() {
   });
 
   testWidgets('RawRadio disabled', (WidgetTester tester) async {
-    final FocusNode node = FocusNode();
+    final node = FocusNode();
     addTearDown(node.dispose);
-    final TestRegistry<int> registry = TestRegistry<int>();
+    final registry = TestRegistry<int>();
 
     Widget buildWidget() {
       return RawRadio<int>(
@@ -78,7 +80,7 @@ void main() {
   });
 
   testWidgets('RawRadio enabled without registry throws', (WidgetTester tester) async {
-    final FocusNode node = FocusNode();
+    final node = FocusNode();
     addTearDown(node.dispose);
 
     Widget buildWidget() {
@@ -104,14 +106,14 @@ void main() {
     testWidgets('Unselected radio should be vocalized via hint on iOS/macOS platform', (
       WidgetTester tester,
     ) async {
-      final TestRegistry<int> registry = TestRegistry<int>();
+      final registry = TestRegistry<int>();
       registry.groupValue = 2; // To mark radio as unselected.
       const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
-      final FocusNode node = FocusNode();
+      final node = FocusNode();
       addTearDown(node.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: RawRadio<int>(
             value: 1,
             mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.click),
@@ -140,13 +142,13 @@ void main() {
     testWidgets('Selected radio should be vocalized via the selected flag on all platforms', (
       WidgetTester tester,
     ) async {
-      final TestRegistry<int> registry = TestRegistry<int>();
+      final registry = TestRegistry<int>();
       registry.groupValue = 1; // To mark radio as selected.
-      final FocusNode node = FocusNode();
+      final node = FocusNode();
       addTearDown(node.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: RawRadio<int>(
             value: 1,
             mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.click),

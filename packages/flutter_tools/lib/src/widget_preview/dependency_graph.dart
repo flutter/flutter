@@ -124,7 +124,7 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
         }
       }
     } else if (_currentConstructor != null && !hasRequiredParams(_currentConstructor!.parameters)) {
-      final returnType = _currentConstructor!.returnType as SimpleIdentifier;
+      final SimpleIdentifier returnType = _currentConstructor!.typeName!;
       final Token? name = _currentConstructor!.name;
       previewEntries.add(
         PreviewDetails(
@@ -143,14 +143,14 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
       if (returnTypeAnnotation is NamedType) {
         final Token returnType = returnTypeAnnotation.name;
         if (returnType.isWidget || returnType.isWidgetBuilder) {
-          final parentClass = _currentMethod!.parent! as ClassDeclaration;
+          final parentClass = _currentMethod!.parent!.parent! as ClassDeclaration;
           previewEntries.add(
             PreviewDetails(
               scriptUri: _currentScriptUri,
               line: line,
               column: column,
               packageName: packageName,
-              functionName: '${parentClass.name}.${_currentMethod!.name}',
+              functionName: '${parentClass.namePart.typeName}.${_currentMethod!.name}',
               isBuilder: returnType.isWidgetBuilder,
               previewAnnotation: preview,
               isMultiPreview: isMultiPreview,
@@ -201,7 +201,7 @@ final class LibraryPreviewNode {
   /// transitive dependency outside the previewed project (e.g., in a path or Git dependency, or
   /// a modified package).
   // TODO(bkonyi): determine how to best handle compile time errors in non-analyzed dependencies.
-  var dependencyHasErrors = false;
+  bool dependencyHasErrors = false;
 
   /// `true` if this library contains compile time errors.
   bool get hasErrors => errors.isNotEmpty;
@@ -215,11 +215,14 @@ final class LibraryPreviewNode {
   Future<void> populateErrors({required AnalysisContext context}) async {
     errors.clear();
     for (final String file in files) {
-      errors.addAll(
-        ((await context.currentSession.getErrors(file)) as ErrorsResult).diagnostics
-            .where((error) => error.severity == Severity.error)
-            .toList(),
-      );
+      final SomeErrorsResult errorsResult = await context.currentSession.getErrors(file);
+      // If errorsResult isn't an ErrorsResult, the analysis context has likely been disposed and
+      // we're in the process of shutting down. Ignore those results.
+      if (errorsResult is ErrorsResult) {
+        errors.addAll(
+          errorsResult.diagnostics.where((error) => error.severity == Severity.error).toList(),
+        );
+      }
     }
   }
 
@@ -227,6 +230,10 @@ final class LibraryPreviewNode {
   void findPreviews({required ResolvedLibraryResult lib}) {
     // Iterate over the compilation unit's AST to find previews.
     final visitor = _PreviewVisitor(lib: lib.element);
+    // Previews can only be defined under the lib/ directory.
+    if (visitor.packageName == null) {
+      return;
+    }
     lib.units.forEach(visitor.findPreviewsInResolvedUnitResult);
     previews
       ..clear()

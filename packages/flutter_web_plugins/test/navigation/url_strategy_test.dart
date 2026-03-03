@@ -20,7 +20,7 @@ void main() {
     });
 
     test('allows null state', () {
-      final PathUrlStrategy strategy = PathUrlStrategy(location);
+      final strategy = PathUrlStrategy(location);
       expect(() => strategy.pushState(null, '', '/'), returnsNormally);
       expect(() => strategy.replaceState(null, '', '/'), returnsNormally);
     });
@@ -42,7 +42,7 @@ void main() {
     });
 
     test('leading slash is always prepended', () {
-      final PathUrlStrategy strategy = PathUrlStrategy(location);
+      final strategy = PathUrlStrategy(location);
 
       location.pathname = '';
       expect(strategy.getPath(), '/');
@@ -53,7 +53,7 @@ void main() {
 
     test('gets path correctly in the presence of basePath', () {
       location.baseHref = 'https://example.com/foo/';
-      final PathUrlStrategy strategy = PathUrlStrategy(location);
+      final strategy = PathUrlStrategy(location);
 
       location.pathname = '/foo/';
       expect(strategy.getPath(), '/');
@@ -70,7 +70,7 @@ void main() {
       () {
         location.baseHref = 'https://example.com/foo/';
         location.pathname = '/foo/bar';
-        final PathUrlStrategy strategy = PathUrlStrategy(location);
+        final strategy = PathUrlStrategy(location);
 
         location.search = '?q=1';
         expect(strategy.getPath(), '/bar?q=1');
@@ -86,7 +86,7 @@ void main() {
     test('gets path correctly in the presence of query params and fragment', () {
       location.baseHref = 'https://example.com/foo/';
       location.pathname = '/foo/bar';
-      final PathUrlStrategy strategy = PathUrlStrategy(location, true);
+      final strategy = PathUrlStrategy(location, true);
 
       location.search = '?q=1';
       expect(strategy.getPath(), '/bar?q=1');
@@ -99,14 +99,14 @@ void main() {
     });
 
     test('empty route name is ok', () {
-      final PathUrlStrategy strategy = PathUrlStrategy(location);
+      final strategy = PathUrlStrategy(location);
       expect(strategy.prepareExternalUrl(''), '/');
       expect(() => strategy.pushState(null, '', ''), returnsNormally);
       expect(() => strategy.replaceState(null, '', ''), returnsNormally);
     });
 
     test('route names must start with /', () {
-      final PathUrlStrategy strategy = PathUrlStrategy(location);
+      final strategy = PathUrlStrategy(location);
 
       expect(() => strategy.prepareExternalUrl('foo'), throwsAssertionError);
       expect(() => strategy.prepareExternalUrl('foo/'), throwsAssertionError);
@@ -123,7 +123,7 @@ void main() {
 
     test('generates external path correctly in the presence of basePath', () {
       location.baseHref = 'https://example.com/foo/';
-      final PathUrlStrategy strategy = PathUrlStrategy(location);
+      final strategy = PathUrlStrategy(location);
 
       expect(strategy.prepareExternalUrl(''), '/foo/');
       expect(strategy.prepareExternalUrl('/'), '/foo/');

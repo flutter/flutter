@@ -139,7 +139,7 @@ class UpgradeCommandRunner {
   String? workingDirectory; // set in runCommand() above
 
   @visibleForTesting
-  var clock = const SystemClock();
+  SystemClock clock = const SystemClock();
 
   Future<FlutterCommandResult> runCommand(
     UpgradePhase phase, {
@@ -239,6 +239,10 @@ class UpgradeCommandRunner {
       'Upgrading Flutter to ${upstreamVersion.frameworkVersion} from ${flutterVersion.frameworkVersion} in $workingDirectory...',
     );
     await attemptReset(upstreamVersion.frameworkRevision);
+
+    // Regenerate the version file based on the latest branch state during the second half.
+    flutterVersion.deleteVersionFile();
+
     if (!testFlow) {
       await flutterUpgradeContinue(startedAt: startedAt);
     }

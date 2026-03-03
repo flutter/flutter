@@ -15,6 +15,7 @@ import android.annotation.TargetApi;
 import android.util.DisplayMetrics;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.dart.DartExecutor;
+import io.flutter.embedding.engine.systemchannels.SettingsChannel.ConfigurationQueue.SentConfiguration;
 import io.flutter.plugin.common.BasicMessageChannel;
 import java.nio.ByteBuffer;
 import org.junit.Test;
@@ -42,36 +43,74 @@ public class SettingsChannelTest {
   }
 
   @Test
+  @TargetApi(API_LEVELS.API_34)
+  @Config(minSdk = API_LEVELS.API_34)
+  public void twoDifferentSettingsChannelDoNotShareState() {
+    final DartExecutor executor = mock(DartExecutor.class);
+    executor.onAttachedToJNI();
+    final SettingsChannel settingsChannel1 = new SettingsChannel(executor);
+    final SettingsChannel settingsChannel2 = new SettingsChannel(executor);
+
+    DisplayMetrics metrics1 = mock(DisplayMetrics.class);
+    DisplayMetrics metrics2 = mock(DisplayMetrics.class);
+
+    settingsChannel1.startMessage().setTextScaleFactor(1.0f).setDisplayMetrics(metrics1).send();
+    settingsChannel2.startMessage().setTextScaleFactor(2.0f).setDisplayMetrics(metrics2).send();
+
+    int configId1 = settingsChannel1.configurationQueue.sentQueue.peek().generationNumber;
+    int configId2 = settingsChannel2.configurationQueue.sentQueue.peek().generationNumber;
+
+    assertEquals(metrics1, settingsChannel1.getPastDisplayMetrics(configId1));
+    assertEquals(metrics2, settingsChannel2.getPastDisplayMetrics(configId2));
+  }
+
+  @Test
   public void configurationQueueWorks() {
     final SettingsChannel.ConfigurationQueue queue = new SettingsChannel.ConfigurationQueue();
-    final int baseId = Integer.MIN_VALUE;
 
-    queue.enqueueConfiguration(
-        new SettingsChannel.ConfigurationQueue.SentConfiguration(mock(DisplayMetrics.class)));
-    queue.enqueueConfiguration(
-        new SettingsChannel.ConfigurationQueue.SentConfiguration(mock(DisplayMetrics.class)));
-    assertEquals(baseId + 0, queue.getConfiguration(baseId + 0).generationNumber);
-    assertEquals(baseId + 1, queue.getConfiguration(baseId + 1).generationNumber);
-    assertEquals(baseId + 1, queue.getConfiguration(baseId + 1).generationNumber);
+    SentConfiguration config1 = new SentConfiguration(mock(DisplayMetrics.class));
+    SentConfiguration config2 = new SentConfiguration(mock(DisplayMetrics.class));
 
-    queue.enqueueConfiguration(
-        new SettingsChannel.ConfigurationQueue.SentConfiguration(mock(DisplayMetrics.class)));
-    queue.enqueueConfiguration(
-        new SettingsChannel.ConfigurationQueue.SentConfiguration(mock(DisplayMetrics.class)));
-    assertEquals(baseId + 3, queue.getConfiguration(baseId + 3).generationNumber);
+    queue.enqueueConfiguration(config1);
+    queue.enqueueConfiguration(config2);
+
+    assertEquals(
+        config1.generationNumber,
+        queue.getConfiguration(config1.generationNumber).generationNumber);
     // Can get the same configuration more than once.
-    assertEquals(baseId + 3, queue.getConfiguration(baseId + 3).generationNumber);
+    assertEquals(
+        config2.generationNumber,
+        queue.getConfiguration(config2.generationNumber).generationNumber);
+    assertEquals(
+        config2.generationNumber,
+        queue.getConfiguration(config2.generationNumber).generationNumber);
 
-    final BasicMessageChannel.Reply replyFor4 =
-        queue.enqueueConfiguration(
-            new SettingsChannel.ConfigurationQueue.SentConfiguration(mock(DisplayMetrics.class)));
+    SentConfiguration config3 = new SentConfiguration(mock(DisplayMetrics.class));
+    SentConfiguration config4 = new SentConfiguration(mock(DisplayMetrics.class));
+
+    queue.enqueueConfiguration(config3);
+    queue.enqueueConfiguration(config4);
+
+    assertEquals(
+        config4.generationNumber,
+        queue.getConfiguration(config4.generationNumber).generationNumber);
+    // Can get the same configuration more than once.
+    assertEquals(
+        config4.generationNumber,
+        queue.getConfiguration(config4.generationNumber).generationNumber);
+
     final BasicMessageChannel.Reply replyFor5 =
-        queue.enqueueConfiguration(
-            new SettingsChannel.ConfigurationQueue.SentConfiguration(mock(DisplayMetrics.class)));
-    replyFor4.reply(null);
+        queue.enqueueConfiguration(new SentConfiguration(mock(DisplayMetrics.class)));
+    final SentConfiguration config6 = new SentConfiguration(mock(DisplayMetrics.class));
+    final BasicMessageChannel.Reply replyFor6 = queue.enqueueConfiguration(config6);
     replyFor5.reply(null);
-    assertEquals(baseId + 5, queue.getConfiguration(baseId + 5).generationNumber);
-    assertEquals(baseId + 5, queue.getConfiguration(baseId + 5).generationNumber);
+    replyFor6.reply(null);
+    assertEquals(
+        config6.generationNumber,
+        queue.getConfiguration(config6.generationNumber).generationNumber);
+    assertEquals(
+        config6.generationNumber,
+        queue.getConfiguration(config6.generationNumber).generationNumber);
   }
 
   // TODO(LongCatIsLooong): add tests for API 34 code path.

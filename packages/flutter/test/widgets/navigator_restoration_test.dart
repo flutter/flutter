@@ -543,7 +543,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final ModalRoute<Object> route1 = ModalRoute.of(tester.element(find.text('Route: Foo')))!;
-    int notifyCount = 0;
+    var notifyCount = 0;
     route1.restorationScopeId.addListener(() {
       notifyCount++;
     });
@@ -1374,7 +1374,7 @@ class _RouteFinder extends MatchFinder {
 
   @override
   String get description {
-    String result = 'Route(name: $name';
+    var result = 'Route(name: $name';
     if (arguments != null) {
       result += ', arguments: $arguments';
     }
@@ -1394,7 +1394,7 @@ class _RouteFinder extends MatchFinder {
       if (arguments != null && widget.arguments != arguments) {
         return false;
       }
-      final RouteWidgetState state = (candidate as StatefulElement).state as RouteWidgetState;
+      final state = (candidate as StatefulElement).state as RouteWidgetState;
       if (count != null && state.counter.value != count) {
         return false;
       }

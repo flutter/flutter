@@ -13,7 +13,7 @@ import 'common.dart';
 
 void main() {
   test('Parse PowerShell result', () {
-    const String powershellOutput = r'''
+    const powershellOutput = r'''
 
 ProcessId CreationDate         CommandLine
 --------- ------------         -----------
@@ -48,7 +48,7 @@ ProcessId CreationDate         CommandLine
   });
 
   test('Parse Posix output', () {
-    const String psOutput = r'''
+    const psOutput = r'''
 STARTED                        PID COMMAND
 Sat Mar  9 20:12:47 2019         1 /sbin/launchd
 Sat Mar  9 20:13:00 2019        49 /usr/sbin/syslogd
@@ -66,8 +66,8 @@ Sat Mar  9 20:13:00 2019        49 /usr/sbin/syslogd
   });
 
   test('RunningProcessInfo.terminate', () {
-    final RunningProcessInfo process = RunningProcessInfo(123, 'test', DateTime(456));
-    final FakeProcessManager fakeProcessManager = FakeProcessManager();
+    final process = RunningProcessInfo(123, 'test', DateTime(456));
+    final fakeProcessManager = FakeProcessManager();
     process.terminate(processManager: fakeProcessManager);
     if (Platform.isWindows) {
       expect(fakeProcessManager.log, <String>[

@@ -12,7 +12,7 @@
   "shareButtonLabel": "Trimiteți",
   "pasteButtonLabel": "Inserați",
   "selectAllButtonLabel": "Selectați tot",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "Am găsit rezultate ale căutării",
+  "noResultsFound": "Niciun rezultat",
+  "radioButtonUnselectedLabel": "Neselectat"
 }

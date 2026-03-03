@@ -663,7 +663,7 @@ class TextPainter {
       textScaleFactor == 1.0 || identical(textScaler, TextScaler.noScaling),
       'Use textScaler instead.',
     );
-    final TextPainter painter = TextPainter(
+    final painter = TextPainter(
       text: text,
       textAlign: textAlign,
       textDirection: textDirection,
@@ -717,7 +717,7 @@ class TextPainter {
       textScaleFactor == 1.0 || identical(textScaler, TextScaler.noScaling),
       'Use textScaler instead.',
     );
-    final TextPainter painter = TextPainter(
+    final painter = TextPainter(
       text: text,
       textAlign: textAlign,
       textDirection: textDirection,
@@ -1066,7 +1066,7 @@ class TextPainter {
       return;
     }
     assert(() {
-      int placeholderCount = 0;
+      var placeholderCount = 0;
       text!.visitChildren((InlineSpan span) {
         if (span is PlaceholderSpan) {
           placeholderCount += 1;
@@ -1101,7 +1101,7 @@ class TextPainter {
 
   ui.Paragraph? _layoutTemplate;
   ui.Paragraph _createLayoutTemplate() {
-    final ui.ParagraphBuilder builder = ui.ParagraphBuilder(
+    final builder = ui.ParagraphBuilder(
       _createParagraphStyle(TextAlign.left),
     ); // direction doesn't matter, text is just a space
     final ui.TextStyle? textStyle = text?.style?.getTextStyle(textScaler: textScaler);
@@ -1199,7 +1199,7 @@ class TextPainter {
   // Creates a ui.Paragraph using the current configurations in this class and
   // assign it to _paragraph.
   ui.Paragraph _createParagraph(InlineSpan text) {
-    final ui.ParagraphBuilder builder = ui.ParagraphBuilder(_createParagraphStyle());
+    final builder = ui.ParagraphBuilder(_createParagraphStyle());
     text.build(builder, textScaler: textScaler, dimensions: _placeholderDimensions);
     assert(() {
       _debugMarkNeedsLayoutCallStack = null;
@@ -1263,7 +1263,7 @@ class TextPainter {
     //    called.
     final ui.Paragraph paragraph = (cachedLayout?.paragraph ?? _createParagraph(text))
       ..layout(ui.ParagraphConstraints(width: layoutMaxWidth));
-    final _TextLayout layout = _TextLayout._(paragraph, textDirection, this);
+    final layout = _TextLayout._(paragraph, textDirection, this);
     final double contentWidth = layout._contentWidthFor(minWidth, maxWidth, textWidthBasis);
 
     final _TextPainterLayoutCacheWithOffset newLayoutCache;
@@ -1363,14 +1363,14 @@ class TextPainter {
     _TextPainterLayoutCacheWithOffset layout,
     Offset offset,
   ) {
-    final Paint paint = Paint()
+    final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0
       ..color = const Color(0xFF00FFFF);
     final List<TextBox> textBoxes = getBoxesForSelection(
       TextSelection(baseOffset: 0, extentOffset: plainText.length),
     );
-    for (final TextBox textBox in textBoxes) {
+    for (final textBox in textBoxes) {
       canvas.drawRect(textBox.toRect().shift(offset), paint);
     }
     return true;
@@ -1482,7 +1482,7 @@ class TextPainter {
   // The condition is derived from
   // https://github.com/google/skia/blob/0086a17e0d4cc676cf88cae671ba5ee967eb7241/modules/skparagraph/src/TextLine.cpp#L1244-L1246
   // which is set here:
-  // https://github.com/flutter/engine/blob/a821b8790c9fd0e095013cd5bd1f20273bc1ee47/third_party/txt/src/skia/paragraph_builder_skia.cc#L134
+  // https://github.com/flutter/flutter/blob/230240c56880f2c19bf92d2c32203b064054f173/engine/src/flutter/txt/src/skia/paragraph_builder_skia.cc#L129
   bool get _strutDisabled => switch (strutStyle) {
     null || StrutStyle.disabled => true,
     StrutStyle(:final double? fontSize) => fontSize == 0.0,

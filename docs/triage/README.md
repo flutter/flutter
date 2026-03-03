@@ -1,6 +1,14 @@
+# Triage Overview
+
+Issues generally go through two triage steps:
+- Primary triage ensures that the bug is clear and actionable, then routes it to a team for secondary triage. This usually happens within 1–2 working days.
+- Secondary triage by the relevant team determines a priority, and may add more labels and information. This usually happens once per week.
+
+PRs are triaged directly by teams during secondary triage, and assigned reviewers. This usually happens once per week.
+
 # Primary issue triage process
 
-The process of triaging new incoming bugs consists of processing the list of [issues without team-* labels, with no assignees, and not labeled `will need additional triage`](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20no%3Aassignee%20-label%3A%22will%20need%20additional%20triage%22%20-label%3Ateam-codelabs%2Cteam-ecosystem%2Cteam-infra%2Cteam-engine%2Cteam-framework%2Cteam-news%2Cteam-ios%2Cteam-tool%2Cteam-web%2Cteam-linux%2Cteam-macos%2Cteam-windows%2Cteam-design%2Cteam-android%2Cteam-go_router%2Cteam-games%2Cteam-text-input) as described in this section, so as to make that list empty.
+The process of triaging new incoming bugs consists of processing the list of [issues without team-* labels, with no assignees, and not labeled `will need additional triage`](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20no%3Aassignee%20-label%3A%22will%20need%20additional%20triage%22%20-label%3Ateam-devexp%2Cteam-accessibility%2Cteam-codelabs%2Cteam-ecosystem%2Cteam-infra%2Cteam-engine%2Cteam-framework%2Cteam-ios%2Cteam-tool%2Cteam-web%2Cteam-linux%2Cteam-macos%2Cteam-windows%2Cteam-design%2Cteam-android%2Cteam-text-input) as described in this section, so as to make that list empty.
 
 _See also: [Issue triage reports](https://github.com/flutter/flutter/wiki/Issue-triage-reports)_
 
@@ -38,17 +46,23 @@ As discussed above, if a filed issue is unactionable due to vagueness or a lack 
 
 In the specific case of a bug with unclear steps to reproduce but very specific symptoms, we like to leave the issue open so that other people having the same problem can congregate together and maybe together we can figure out the underlying cause. This only applies to issues that have very specific symptoms like a specific and unusual crash signature, a specific and unusual error message, or other unusual and recognizable symptoms, and where some effort was made on the part of the bug reporter to determine the cause (even if that effort was ultimately futile).
 
-### Duplicates
+#### Duplicates
 
-If you recognize that this bug is a duplicate of an existing bug, add a reference to that bug in a comment, then close the bug. Skip the remaining steps. As you triage more and more bugs you will become more and more familiar with the existing bugs and so you will get better and better at marking duplicates in this way.
+If you recognize that this bug is a duplicate of an existing bug, add a reference to that bug in a comment, close the bug using the "Close as duplicate" option, and add `r: duplicate`. Skip the remaining steps. As you triage more and more bugs you will become more and more familiar with the existing bugs and so you will get better and better at marking duplicates in this way.
 
 When closing the duplicate bug, the GitHub issue tracker does not copy the list of people being notified on the closed bug into the original bug. This can matter, especially when asking on the original bug for things like reproduction steps. Consider cc'ing the author of the duplicate issue into the original issue, especially if we're still trying to determine reproduction steps for the issue.
 
-### Requests for help (documentation issues)
+#### Requests for help (documentation issues)
 
 If the bug report is a question, then it probably belongs in Stack Overflow or on our #help channel or some other forum for getting help. However, if it appears that the reporter did try to read our documentation to find the answer, and failed, or, if you look in our documentation and find it is inadequate here, then please consider it a documentation bug (and update the summary accordingly).
 
 If you are confident our official documentation (on flutter.dev or api.flutter.dev) fully answers their question, then provide a link to the relevant page and close the issue, being very polite and asking them to reopen if the documentation is not sufficiently clear for them.
+
+When closing an issue because it is a help request rather than an actionable issue, mark it `r: invalid`.
+
+#### Issues in other products.
+
+If an issue is in a product that is not part of the Flutter project, such as a third-party package, close the issue with a comment suggesting that the reporter file the issue with the authors of that product, and add `r: invalid`. However, if there's a reason to believe that an issue involving a third-party product is *caused* by Flutter (for exmaple, a tool or engine change that unexpectedly breaks a third-party plugin), don't close it, and triage it based on the potential Flutter cause.
 
 ### Labels
 
@@ -67,28 +81,34 @@ Some labels are used to track the flow of issues from the time they're filed unt
 
 In general the flow chart for team assignment is as follows, stopping as soon as the first `team-` label is assigned:
 
-- If it's about the flutter/news_toolkit repository, add `team-news`.
 - If it's about a codelab, add `team-codelab`.
 - If it's about the release process or tooling (e.g., `packages_autoroller`), add `team-infra` and `infra: release`.
 - If it's about the Flutter team's CI or infrastructure, add `team-infra`.
 - If it's about Impeller, add `team-engine`.
-- If it's about accessibility (e.g. `Semantics`, `talkBack`, `voiceOver`), add `team-accessibility`.
-  - If it's specific to a single platform, also add that platform's fyi label.
+- If it's about accessibility (e.g. `Semantics`, `talkBack`, `voiceOver`), add `team-accessibility`. And:
+  - if it's specific to a single platform, also add that platform's `fyi-*` label.
 - If it's about Cupertino or Material Design, add `team-design`.
-- If it's about text fields or other user-facing text input issues, add `team-text-input`.
-  - If it's specific to a single platform, also add that platform's fyi label.
-- If it's specific to a single platform, add that platform's team (`team-android`, `team-ios`, `team-linux`, `team-macos`, `team-web`, or `team-windows`).
-  - If the issue is about a first-party package, also add `fyi-ecosystem`.
-- If it's about one of our games templates, add `team-games`.
+- If it's about text fields or other user-facing text field, text input, or text selection issues, add `team-text-input`. And:
+  - if it's specific to a single platform, also add that platform's `fyi-*` label.
+  - if it's specific to text fields or text input, also add `a: text input`.
+  - if it's specific to text selection or selectable region also add `f: selection`.
+- If it's specific to a single platform, add that platform's team (`team-android`, `team-ios`, `team-linux`, `team-macos`, `team-web`, or `team-windows`). And:
+  - if the issue is about a first-party package, also add `fyi-ecosystem`.
 - If it's about the Flutter engine, add `team-engine`.
 - If it's about the Flutter framework, add `team-framework`.
 - If it's about the Flutter tool, add `team-tool`.
 - If it's about developer tools, add `team-devexp`.
 - If it's about a first-party package:
-  - If it's about `go_router` or `go_router_builder`, add `team-framework`.
-  - If it's about `google_fonts`, add `team-framework`.
-  - If it's about `two_dimensional_scrollables`, add `team-framework`.
-  - If it's about `flutter_svg` or `vector_graphics`, add `team-engine`.
+  - Apply `team-framework` if it's about:
+    - `animations`
+    - `cupertino_icons`
+    - `flutter_lints`
+    - `go_router`, `go_router_builder`
+    - `google_fonts`
+    - `two_dimensional_scrollables`
+  - Apply `team-engine` if it's about:
+    - `flutter_svg`
+    - `vector_graphics`
   - Otherwise, add `team-ecosystem`.
 - If none of the above apply, add `will need additional triage`.
 
@@ -105,9 +125,11 @@ Bugs relating to the website should be moved to the `flutter/website` repo.
 
 Once the main labels above are added, consider what additional labels could be added, in particular:
 
-Add any of the applicable "c: *" labels; typically only one will apply but sometimes `c: regression` will apply in conjunction with one of the others.
-
-Add any of the applicable "a: *" labels. There are many, it's worth browsing the list to get an idea of which ones might apply.
+- Most issues will have a general category label, such as `engine`, `framework`, `tool`, or `package`. An issue with a category-specific label (`e: *` for engine, `f: *` for framework, `t: *` for tool, `p: *` for package) should have the associated category label.
+- Add any of the applicable `c: *` labels; typically only one will apply but sometimes `c: regression` will apply in conjunction with one of the others.
+- Add any of the applicable `a: *` labels. There are many, it's worth browsing the list to get an idea of which ones might apply.
+- If an issue is specific to one or more platforms, add the corresponding `platform-*` label(s). However, don't add platform labels if the issue applies to every relevant platform (e.g., all platforms that a plugin supports).
+- If a `platform-web` issue is specific to one or more browsers, add the corresponding `browser: *` label(s). As with `platform-*`, only do this when it's known to happen on some browsers but not others.
 
 ### Additional comments
 
@@ -233,8 +255,8 @@ For more guidance on reviewing PRs, see [Tree Hygiene](../contributing/Tree-hygi
 
 In addition, consider these issues that fall under another team's triage, but are things the ecosystem team might want to be aware of:
  * [`a: plugins` issues](https://github.com/flutter/flutter/issues?q=is%3Aopen+label%3A%22a%3A+plugins%22+-label%3Ateam-ecosystem+-label%3Atriaged-ecosystem)
- * [`package` issues](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Apackage+-label%3Ateam-ecosystem+-label%3Atriaged-ecosystem+-label%3Ateam-go_router+sort%3Acreated-desc+)
- * [Package regressions](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+-label%3Ateam-go_router+label%3Apackage+label%3A%22c%3A+regression%22+sort%3Acreated-desc)
+ * [`package` issues](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3Apackage%20-label%3Ateam-ecosystem%20-label%3Atriaged-ecosystem%20sort%3Acreated-desc)
+ * [Package regressions](https://github.com/flutter/flutter/issues?q=is%3Aopen%20is%3Aissue%20label%3Apackage%20label%3A%22c%3A%20regression%22%20sort%3Acreated-desc)
 
 
 ### Engine team (`team-engine`)
@@ -248,16 +270,10 @@ In addition, consider these issues that fall under another team's triage, but ar
 
 ### Framework team (`team-framework`)
 
-- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3Ateam-framework%2C%22p%3A%20go_router%22%20label%3AP0%20sort%3Aupdated-desc)
-- [Framework PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aframework%2C%22p%3A+go_router%22+-label%3A%22f%3A+material+design%22+-label%3A%22f%3A+cupertino%22+draft%3Afalse+sort%3Aupdated-desc)
-- [Framework-owned Package PR list](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3A%22p%3A+two_dimensional_scrollables%22%2C%22p%3A+go_router%22%2C%22p%3A+go_router_builder%22%2C%22p%3A+animation%22%2C%22p%3A+animations%22%2C%22p%3A+cupertino_icons%22%2C%22p%3A+flutter_lints%22+)
+- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3Ateam-framework%20label%3AP0%20sort%3Aupdated-desc)
+- [Framework PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aframework+-label%3A%22f%3A+material+design%22+-label%3A%22f%3A+cupertino%22+draft%3Afalse+sort%3Aupdated-desc+)
+- [Framework-owned Package PR list](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3A%22p%3A+two_dimensional_scrollables%22%2C%22p%3A+go_router%22%2C%22p%3A+go_router_builder%22%2C%22p%3A+google_fonts%22%2C%22p%3A+animation%22%2C%22p%3A+animations%22%2C%22p%3A+cupertino_icons%22%2C%22p%3A+flutter_lints%22+)
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3Ateam-framework%2Cfyi-framework%20-label%3Atriaged-framework%20-label%3A%22will%20need%20additional%20triage%22%20-label%3A%22waiting%20for%20customer%20response%22%20sort%3Aupdated-desc)
-
-### Games team (`team-games`)
-
-- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-games%2Cfyi-games+-label%3Atriaged-games+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc)
-- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-games+label%3AP0+sort%3Aupdated-asc)
-- [PRs awaiting review](https://github.com/flutter/games/pulls?q=is%3Apr+is%3Aopen+sort%3Aupdated-asc)
 
 ### Infrastructure team (`team-infra`)
 
@@ -283,16 +299,11 @@ PRs are reviewed weekly across the framework, packages, and engine repositories:
 - [Linux PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+desktop%22+label%3Aplatform-linux+sort%3Aupdated-asc)
 - [Linux PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-linux+sort%3Aupdated-asc)
 
-### News Toolkit team (`team-news`)
-
-- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-news%2Cfyi-news+-label%3Atriaged-news+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc)
-- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-news+label%3AP0+sort%3Aupdated-asc)
-
 ### Text Input team (`team-text-input`)
 
-- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22a%3A+text+input%22%2Cteam-text-input%2Cfyi-text-input+sort%3Aupdated-asc+label%3AP0+)
-- [PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+sort%3Acreated-desc+draft%3Afalse+label%3A%22a%3A+text+input%22%2Cteam-text-input%2Cfyi-text-input+)
-- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aopen%20is%3Aissue%20label%3Ateam-text-input%2Cfyi-text-input%20no%3Aassignee%20-label%3Atriaged-text-input)
+- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3A%22a%3A%20text%20input%22%2C%22f%3A%20selection%22%2Cteam-text-input%2Cfyi-text-input%20sort%3Aupdated-asc%20label%3AP0)
+- [PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+sort%3Acreated-desc+draft%3Afalse+label%3A%22a%3A+text+input%22%2C%22f%3A+selection%22%2Cteam-text-input%2Cfyi-text-input)
+- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aopen%20is%3Aissue%20label%3Ateam-text-input%2Cfyi-text-input%20no%3Aassignee%20-label%3Atriaged-text-input%20-label%3A%22waiting%20for%20customer%20response%22)
 
 ### Flutter Tool team (`team-tool`)
 

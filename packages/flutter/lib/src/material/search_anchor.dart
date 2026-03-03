@@ -153,6 +153,8 @@ class SearchAnchor extends StatefulWidget {
     this.textInputAction,
     this.keyboardType,
     this.enabled = true,
+    this.smartDashesType,
+    this.smartQuotesType,
   });
 
   /// Create a [SearchAnchor] that has a [SearchBar] which opens a search view.
@@ -209,6 +211,8 @@ class SearchAnchor extends StatefulWidget {
     EdgeInsets scrollPadding,
     EditableTextContextMenuBuilder contextMenuBuilder,
     bool enabled,
+    SmartDashesType? smartDashesType,
+    SmartQuotesType? smartQuotesType,
   }) = _SearchAnchorWithSearchBar;
 
   /// Whether the search view grows to fill the entire screen when the
@@ -407,6 +411,32 @@ class SearchAnchor extends StatefulWidget {
   /// Defaults to true.
   final bool enabled;
 
+  /// Configures how smart dashes are handled in the text field
+  /// used by this [SearchAnchor].
+  ///
+  /// For example, when enabled, double hyphens (`--`) may be
+  /// automatically replaced with an em dash (`—`) on iOS.
+  ///
+  /// Defaults to [SmartDashesType.enabled].
+  ///
+  /// See also:
+  ///  * [TextField.smartDashesType], which provides the same
+  ///    configuration option on a standalone [TextField].
+  final SmartDashesType? smartDashesType;
+
+  /// Configures how smart quotes are handled in the text field
+  /// used by this [SearchAnchor].
+  ///
+  /// For example, when enabled, straight quotes (`"`) may be
+  /// automatically replaced with curly quotes (`“ ”`) on iOS.
+  ///
+  /// Defaults to [SmartQuotesType.enabled].
+  ///
+  /// See also:
+  ///  * [TextField.smartQuotesType], which provides the same
+  ///    configuration option on a standalone [TextField].
+  final SmartQuotesType? smartQuotesType;
+
   @override
   State<SearchAnchor> createState() => _SearchAnchorState();
 }
@@ -452,7 +482,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
   void dispose() {
     widget.searchController?._detach(this);
     _internalSearchController?._detach(this);
-    final bool usingExternalController = widget.searchController != null;
+    final usingExternalController = widget.searchController != null;
     if (_route?.navigator != null) {
       _route?._dismiss(disposeController: !usingExternalController);
       if (usingExternalController) {
@@ -498,6 +528,8 @@ class _SearchAnchorState extends State<SearchAnchor> {
       capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
       textInputAction: widget.textInputAction,
       keyboardType: widget.keyboardType,
+      smartDashesType: widget.smartDashesType,
+      smartQuotesType: widget.smartQuotesType,
     );
     navigator.push(_route!);
   }
@@ -578,6 +610,8 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     required this.capturedThemes,
     this.textInputAction,
     this.keyboardType,
+    this.smartDashesType,
+    this.smartQuotesType,
   });
 
   final ValueChanged<String>? viewOnChanged;
@@ -611,6 +645,8 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   final CapturedThemes capturedThemes;
   final TextInputAction? textInputAction;
   final TextInputType? keyboardType;
+  final SmartDashesType? smartDashesType;
+  final SmartQuotesType? smartQuotesType;
   CurvedAnimation? curvedAnimation;
   CurvedAnimation? viewFadeOnIntervalCurve;
   bool willDisposeSearchController = false;
@@ -631,7 +667,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   Rect? getRect() {
     final BuildContext? context = anchorKey.currentContext;
     if (context != null) {
-      final RenderBox searchBarBox = context.findRenderObject()! as RenderBox;
+      final searchBarBox = context.findRenderObject()! as RenderBox;
       final Size boxSize = searchBarBox.size;
       final NavigatorState navigator = Navigator.of(context);
       final Offset boxLocation = searchBarBox.localToGlobal(
@@ -659,6 +695,14 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     updateTweens(anchorKey.currentContext!);
     toggleVisibility?.call();
     viewOnClose?.call();
+    // Unfocus the anchor to prevent the Enter key from triggering unwanted
+    // actions (like route pops) when the view closes and focus returns to
+    // the anchor's search bar.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (anchorKey.currentContext != null) {
+        FocusScope.of(anchorKey.currentContext!).unfocus();
+      }
+    });
     return super.didPop(result);
   }
 
@@ -685,7 +729,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   }
 
   void updateTweens(BuildContext context) {
-    final RenderBox navigator = Navigator.of(context).context.findRenderObject()! as RenderBox;
+    final navigator = Navigator.of(context).context.findRenderObject()! as RenderBox;
     final Size screenSize = navigator.size;
     final Rect anchorRect = getRect() ?? Rect.zero;
 
@@ -719,7 +763,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
         if (viewTopToScreenBottom < viewHeight) {
           topLeft = Offset(topLeft.dx, screenSize.height - math.min(viewHeight, screenSize.height));
         }
-        final Size endSize = Size(viewWidth, viewHeight);
+        final endSize = Size(viewWidth, viewHeight);
         _rectTween.end = showFullScreenView ? Offset.zero & screenSize : (topLeft & endSize);
         return;
       case TextDirection.rtl:
@@ -727,14 +771,14 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
         final double viewTopToScreenBottom = screenSize.height - anchorRect.top;
 
         // Make sure the search view doesn't go off the screen.
-        Offset topLeft = Offset(math.max(anchorRect.right - viewWidth, 0.0), anchorRect.top);
+        var topLeft = Offset(math.max(anchorRect.right - viewWidth, 0.0), anchorRect.top);
         if (viewRightToScreenLeft < viewWidth) {
           topLeft = Offset(0.0, topLeft.dy);
         }
         if (viewTopToScreenBottom < viewHeight) {
           topLeft = Offset(topLeft.dx, screenSize.height - math.min(viewHeight, screenSize.height));
         }
-        final Size endSize = Size(viewWidth, viewHeight);
+        final endSize = Size(viewWidth, viewHeight);
         _rectTween.end = showFullScreenView ? Offset.zero & screenSize : (topLeft & endSize);
     }
   }
@@ -800,6 +844,8 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
                 textCapitalization: textCapitalization,
                 textInputAction: textInputAction,
                 keyboardType: keyboardType,
+                smartDashesType: smartDashesType,
+                smartQuotesType: smartQuotesType,
               ),
             ),
           );
@@ -843,6 +889,8 @@ class _ViewContent extends StatefulWidget {
     required this.suggestionsBuilder,
     this.textInputAction,
     this.keyboardType,
+    this.smartDashesType,
+    this.smartQuotesType,
   });
 
   final ValueChanged<String>? viewOnChanged;
@@ -874,6 +922,8 @@ class _ViewContent extends StatefulWidget {
   final SuggestionsBuilder suggestionsBuilder;
   final TextInputAction? textInputAction;
   final TextInputType? keyboardType;
+  final SmartDashesType? smartDashesType;
+  final SmartQuotesType? smartQuotesType;
 
   @override
   State<_ViewContent> createState() => _ViewContentState();
@@ -991,7 +1041,7 @@ class _ViewContentState extends State<_ViewContent> {
       },
     );
 
-    final List<Widget> defaultTrailing = <Widget>[
+    final defaultTrailing = <Widget>[
       if (_controller.text.isNotEmpty)
         IconButton(
           icon: const Icon(Icons.close),
@@ -1123,6 +1173,8 @@ class _ViewContentState extends State<_ViewContent> {
                             textCapitalization: widget.textCapitalization,
                             textInputAction: widget.textInputAction,
                             keyboardType: widget.keyboardType,
+                            smartDashesType: widget.smartDashesType,
+                            smartQuotesType: widget.smartQuotesType,
                           ),
                         ),
                       ),
@@ -1209,6 +1261,8 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
     EditableTextContextMenuBuilder contextMenuBuilder = SearchBar._defaultContextMenuBuilder,
     super.enabled,
+    super.smartDashesType,
+    super.smartQuotesType,
   }) : super(
          viewHintText: viewHintText ?? barHintText,
          headerHeight: viewHeaderHeight,
@@ -1248,6 +1302,8 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
              keyboardType: keyboardType,
              scrollPadding: scrollPadding,
              contextMenuBuilder: contextMenuBuilder,
+             smartDashesType: smartDashesType,
+             smartQuotesType: smartQuotesType,
            );
          },
        );
@@ -1374,6 +1430,8 @@ class SearchBar extends StatefulWidget {
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.readOnly = false,
+    this.smartDashesType,
+    this.smartQuotesType,
   });
 
   /// Controls the text being edited in the search bar's text field.
@@ -1535,6 +1593,32 @@ class SearchBar extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.readOnly}
   final bool readOnly;
+
+  /// Configures how smart dashes are handled in the text field
+  /// used by this [SearchBar].
+  ///
+  /// For example, when enabled, double hyphens (`--`) may be
+  /// automatically replaced with an em dash (`—`) on iOS.
+  ///
+  /// Defaults to [SmartDashesType.enabled].
+  ///
+  /// See also:
+  ///  * [TextField.smartDashesType], which provides the same
+  ///    configuration option on a standalone [TextField].
+  final SmartDashesType? smartDashesType;
+
+  /// Configures how smart quotes are handled in the text field
+  /// used by this [SearchBar].
+  ///
+  /// For example, when enabled, straight quotes (`"`) may be
+  /// automatically replaced with curly quotes (`“ ”`) on iOS.
+  ///
+  /// Defaults to [SmartQuotesType.enabled].
+  ///
+  /// See also:
+  ///  * [TextField.smartQuotesType], which provides the same
+  ///    configuration option on a standalone [TextField].
+  final SmartQuotesType? smartQuotesType;
 
   static Widget _defaultContextMenuBuilder(
     BuildContext context,
@@ -1734,6 +1818,8 @@ class _SearchBarState extends State<SearchBar> {
                             keyboardType: widget.keyboardType,
                             scrollPadding: widget.scrollPadding,
                             contextMenuBuilder: widget.contextMenuBuilder,
+                            smartDashesType: widget.smartDashesType,
+                            smartQuotesType: widget.smartQuotesType,
                           ),
                         ),
                       ),

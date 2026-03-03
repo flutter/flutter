@@ -179,9 +179,8 @@ class _CupertinoTextSelectionToolbarButtonState extends State<CupertinoTextSelec
       case null:
         return textWidget;
       case ContextMenuButtonType.liveTextInput:
-        return SizedBox(
-          width: 13.0,
-          height: 13.0,
+        return SizedBox.square(
+          dimension: 13.0,
           child: CustomPaint(
             painter: _LiveTextIconPainter(color: _kToolbarTextColor.resolveFrom(context)),
           ),
@@ -207,17 +206,17 @@ class _LiveTextIconPainter extends CustomPainter {
     canvas.save();
     canvas.translate(size.width / 2.0, size.height / 2.0);
 
-    final Offset origin = Offset(-size.width / 2.0, -size.height / 2.0);
+    final origin = Offset(-size.width / 2.0, -size.height / 2.0);
     // Path for the one corner.
-    final Path path = Path()
+    final path = Path()
       ..moveTo(origin.dx, origin.dy + 3.5)
       ..lineTo(origin.dx, origin.dy + 1.0)
       ..arcToPoint(Offset(origin.dx + 1.0, origin.dy), radius: const Radius.circular(1))
       ..lineTo(origin.dx + 3.5, origin.dy);
 
     // Rotate to draw corner four times.
-    final Matrix4 rotationMatrix = Matrix4.identity()..rotateZ(pi / 2.0);
-    for (int i = 0; i < 4; i += 1) {
+    final rotationMatrix = Matrix4.identity()..rotateZ(pi / 2.0);
+    for (var i = 0; i < 4; i += 1) {
       canvas.drawPath(path, _painter);
       canvas.transform(rotationMatrix.storage);
     }

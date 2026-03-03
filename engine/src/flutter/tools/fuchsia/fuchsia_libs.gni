@@ -5,6 +5,7 @@
 import("//flutter/tools/fuchsia/clang.gni")
 import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
 
+fuchsia_sdk_path = "//third_party/fuchsia-sdk/sdk"
 fuchsia_sdk_dist = "$fuchsia_arch_root/dist"
 sysroot_lib = "$fuchsia_arch_root/sysroot/lib"
 sysroot_dist_lib = "$fuchsia_arch_root/sysroot/dist/lib"
@@ -57,6 +58,10 @@ common_libs = [
     name = "libvfs_internal.so"
     path = rebase_path("$fuchsia_sdk_dist")
   },
+  {
+    name = "libbackend_fuchsia_globals.so"
+    path = rebase_path("$fuchsia_sdk_dist")
+  },
 ]
 
 # Note, for clang libs we use the md5 hashes here because of gn limitations of
@@ -85,7 +90,7 @@ if (is_asan) {
   ]
 }
 
-vulkan_dist = "//fuchsia/sdk/$host_os/arch/$target_cpu/dist"
+vulkan_dist = "$fuchsia_sdk_path/arch/$target_cpu/dist"
 
 # Note that the other validation libraries in the Fuchsia SDK seem to have a bug right
 # now causing crashes, so it is only recommended that we use
@@ -98,7 +103,7 @@ vulkan_validation_libs = [
 ]
 
 vulkan_data_dir =
-    "//fuchsia/sdk/$host_os/pkg/vulkan_layers/data/vulkan/explicit_layer.d"
+    "$fuchsia_sdk_path/pkg/vulkan_layers/data/vulkan/explicit_layer.d"
 
 vulkan_icds = [
   {

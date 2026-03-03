@@ -133,7 +133,7 @@ class AnimationSheetBuilder {
   ///
   /// After this method is called, there will be no frames to [collate].
   Future<void> dispose() async {
-    final List<_AsyncImage> targets = <_AsyncImage>[..._recordedFrames, ..._results];
+    final targets = <_AsyncImage>[..._recordedFrames, ..._results];
     _recordedFrames.clear();
     _results.clear();
     for (final ui.Image image in await _AsyncImage.resolveList(targets)) {
@@ -224,7 +224,7 @@ class AnimationSheetBuilder {
       _recordedFrames.isNotEmpty,
       'No frames are collected. Have you forgot to set `recording` to true?',
     );
-    final _AsyncImage result = _AsyncImage(_collateFrames(_recordedFrames, frameSize, cellsPerRow));
+    final result = _AsyncImage(_collateFrames(_recordedFrames, frameSize, cellsPerRow));
     _results.add(result);
     return result.result();
   }
@@ -255,7 +255,7 @@ class _AnimationSheetRecorderState extends State<_AnimationSheetRecorder> {
 
   void _record(Duration duration) {
     assert(widget.handleRecorded != null);
-    final _RenderRootableRepaintBoundary boundary =
+    final boundary =
         boundaryKey.currentContext!.findRenderObject()! as _RenderRootableRepaintBoundary;
     if (widget.allLayers) {
       widget.handleRecorded!(boundary.allLayersToImage());
@@ -343,12 +343,12 @@ Future<ui.Image> _collateFrames(
   final List<ui.Image> frames = await _AsyncImage.resolveList(futureFrames);
   final int rowNum = (frames.length / cellsPerRow).ceil();
 
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final Canvas canvas = Canvas(
+  final recorder = ui.PictureRecorder();
+  final canvas = Canvas(
     recorder,
     Rect.fromLTWH(0, 0, frameSize.width * cellsPerRow, frameSize.height * rowNum),
   );
-  for (int i = 0; i < frames.length; i += 1) {
+  for (var i = 0; i < frames.length; i += 1) {
     canvas.drawImage(
       frames[i],
       Offset(frameSize.width * (i % cellsPerRow), frameSize.height * (i / cellsPerRow).floor()),

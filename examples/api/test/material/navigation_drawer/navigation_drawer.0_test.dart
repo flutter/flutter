@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/navigation_drawer/navigation_drawer.0.dart' as example;
+import 'package:flutter_api_samples/material/navigation_drawer/navigation_drawer.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Navigation bar updates destination on tap', (WidgetTester tester) async {
+  testWidgets('Navigation bar updates destination on tap', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.NavigationDrawerApp());
 
     await tester.tap(find.text('Open Drawer'));
@@ -27,12 +30,16 @@ void main() {
     expect(find.text('Page Index = 0'), findsOneWidget);
 
     /// Switch to second tab
-    await tester.tap(find.ancestor(of: find.text('Profile'), matching: find.byType(InkWell)));
+    await tester.tap(
+      find.ancestor(of: find.text('Profile'), matching: find.byType(InkWell)),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Page Index = 1'), findsOneWidget);
 
     /// Switch to fourth tab
-    await tester.tap(find.ancestor(of: find.text('Settings'), matching: find.byType(InkWell)));
+    await tester.tap(
+      find.ancestor(of: find.text('Settings'), matching: find.byType(InkWell)),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Page Index = 2'), findsOneWidget);
   });

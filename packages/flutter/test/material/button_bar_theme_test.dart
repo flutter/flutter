@@ -9,12 +9,12 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('ButtonBarThemeData lerp special cases', () {
     expect(ButtonBarThemeData.lerp(null, null, 0), null);
-    const ButtonBarThemeData data = ButtonBarThemeData();
+    const data = ButtonBarThemeData();
     expect(identical(ButtonBarThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('ButtonBarThemeData null fields by default', () {
-    const ButtonBarThemeData buttonBarTheme = ButtonBarThemeData();
+    const buttonBarTheme = ButtonBarThemeData();
     expect(buttonBarTheme.alignment, null);
     expect(buttonBarTheme.mainAxisSize, null);
     expect(buttonBarTheme.buttonTextTheme, null);
@@ -36,7 +36,7 @@ void main() {
   });
 
   testWidgets('ButtonBarThemeData lerps correctly', (WidgetTester tester) async {
-    const ButtonBarThemeData barThemePrimary = ButtonBarThemeData(
+    const barThemePrimary = ButtonBarThemeData(
       alignment: MainAxisAlignment.end,
       mainAxisSize: MainAxisSize.min,
       buttonTextTheme: ButtonTextTheme.primary,
@@ -47,7 +47,7 @@ void main() {
       layoutBehavior: ButtonBarLayoutBehavior.padded,
       overflowDirection: VerticalDirection.down,
     );
-    const ButtonBarThemeData barThemeAccent = ButtonBarThemeData(
+    const barThemeAccent = ButtonBarThemeData(
       alignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.max,
       buttonTextTheme: ButtonTextTheme.accent,
@@ -72,7 +72,7 @@ void main() {
   });
 
   testWidgets('Default ButtonBarThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const ButtonBarThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -84,7 +84,7 @@ void main() {
   });
 
   testWidgets('ButtonBarThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const ButtonBarThemeData(
       alignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.max,
@@ -118,7 +118,7 @@ void main() {
   testWidgets('ButtonBarTheme.of falls back to ThemeData.buttonBarTheme', (
     WidgetTester tester,
   ) async {
-    const ButtonBarThemeData buttonBarTheme = ButtonBarThemeData(buttonMinWidth: 42.0);
+    const buttonBarTheme = ButtonBarThemeData(buttonMinWidth: 42.0);
     late BuildContext capturedContext;
     await tester.pumpWidget(
       MaterialApp(
@@ -136,8 +136,8 @@ void main() {
   });
 
   testWidgets('ButtonBarTheme overrides ThemeData.buttonBarTheme', (WidgetTester tester) async {
-    const ButtonBarThemeData defaultBarTheme = ButtonBarThemeData(buttonMinWidth: 42.0);
-    const ButtonBarThemeData buttonBarTheme = ButtonBarThemeData(buttonMinWidth: 84.0);
+    const defaultBarTheme = ButtonBarThemeData(buttonMinWidth: 42.0);
+    const buttonBarTheme = ButtonBarThemeData(buttonMinWidth: 84.0);
     late BuildContext capturedContext;
     await tester.pumpWidget(
       MaterialApp(

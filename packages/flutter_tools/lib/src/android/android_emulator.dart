@@ -11,7 +11,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
-import '../convert.dart';
+import '../base/utils.dart';
 import '../device.dart';
 import '../emulator.dart';
 import 'android_sdk.dart';
@@ -68,16 +68,22 @@ class AndroidEmulators extends EmulatorDiscovery {
     return emulators;
   }
 
+  static final RegExp _emulatorIdRegex = RegExp(r'^[A-Za-z0-9_.-]+$');
+
   /// Parse the given `emulator -list-avds` output in [text], and fill out the given list
   /// of emulators by reading information from the relevant ini files.
   void _extractEmulatorAvdInfo(String text, List<AndroidEmulator> emulators) {
-    for (final String id in text.trim().split('\n').where((String l) => l != '')) {
+    final Iterable<String> ids = text
+        .split('\n')
+        .map((String l) => l.trim())
+        // Strip blank lines and error messages that can appear in the output.
+        .where((String l) => l.isNotEmpty && _emulatorIdRegex.hasMatch(l));
+    for (final id in ids) {
       emulators.add(_loadEmulatorInfo(id));
     }
   }
 
   AndroidEmulator _loadEmulatorInfo(String id) {
-    id = id.trim();
     final String? avdPath = _androidSdk?.getAvdPath();
     final androidEmulatorWithoutProperties = AndroidEmulator(
       id,
@@ -159,12 +165,10 @@ class AndroidEmulator extends Emulator {
     final stdoutList = <String>[];
     final stderrList = <String>[];
     final StreamSubscription<String> stdoutSubscription = process.stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
+        .transform(utf8LineDecoder)
         .listen(stdoutList.add);
     final StreamSubscription<String> stderrSubscription = process.stderr
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
+        .transform(utf8LineDecoder)
         .listen(stderrList.add);
     final Future<void> stdioFuture = Future.wait<void>(<Future<void>>[
       stdoutSubscription.asFuture<void>(),

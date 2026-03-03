@@ -378,15 +378,14 @@ void Canvas::drawArc(double left,
 void Canvas::drawPath(const CanvasPath* path,
                       Dart_Handle paint_objects,
                       Dart_Handle paint_data) {
-  Paint paint(paint_objects, paint_data);
-
-  FML_DCHECK(paint.isNotNull());
   if (!path) {
     Dart_ThrowException(
         ToDart("Canvas.drawPath called with non-genuine Path."));
     return;
   }
   if (display_list_builder_) {
+    Paint paint(paint_objects, paint_data);
+    FML_DCHECK(paint.isNotNull());
     DlPaint dl_paint;
     paint.paint(dl_paint, kDrawPathFlags, DlTileMode::kDecal);
     builder()->DrawPath(path->path(), dl_paint);

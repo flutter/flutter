@@ -90,11 +90,11 @@ void main() {
     addTearDown(testEnv.cleanup);
 
     final gn = Gn.fromEnvironment(testEnv.environment);
-    final targets = await gn.desc('out/Release', TargetPattern('//foo', 'bar'));
+    final List<BuildTarget> targets = await gn.desc('out/Release', TargetPattern('//foo', 'bar'));
     expect(targets, hasLength(3));
 
     // There should be exactly one binary test target and two library targets.
-    final testTarget = targets.whereType<ExecutableBuildTarget>().single;
+    final ExecutableBuildTarget testTarget = targets.whereType<ExecutableBuildTarget>().single;
     expect(
       testTarget,
       ExecutableBuildTarget(
@@ -104,7 +104,9 @@ void main() {
       ),
     );
 
-    final libraryTargets = targets.whereType<LibraryBuildTarget>().toList();
+    final List<LibraryBuildTarget> libraryTargets = targets
+        .whereType<LibraryBuildTarget>()
+        .toList();
     expect(libraryTargets, hasLength(2));
     expect(
       libraryTargets.contains(
@@ -140,10 +142,10 @@ void main() {
     addTearDown(testEnv.cleanup);
 
     final gn = Gn.fromEnvironment(testEnv.environment);
-    final targets = await gn.desc('out/Release', TargetPattern('//foo', 'bar'));
+    final List<BuildTarget> targets = await gn.desc('out/Release', TargetPattern('//foo', 'bar'));
     expect(targets, hasLength(1));
 
-    final groupTarget = targets.single;
+    final BuildTarget groupTarget = targets.single;
     expect(
       groupTarget,
       GroupBuildTarget(
@@ -177,10 +179,10 @@ void main() {
     addTearDown(testEnv.cleanup);
 
     final gn = Gn.fromEnvironment(testEnv.environment);
-    final targets = await gn.desc('out/Release', TargetPattern('//foo', 'bar'));
+    final List<BuildTarget> targets = await gn.desc('out/Release', TargetPattern('//foo', 'bar'));
     expect(targets, hasLength(1));
 
-    final testTarget = targets.single;
+    final BuildTarget testTarget = targets.single;
     expect(
       testTarget,
       ExecutableBuildTarget(

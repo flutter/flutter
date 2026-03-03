@@ -9,21 +9,21 @@ import 'common_matchers.dart';
 
 void main() {
   test('StadiumBorder defaults', () {
-    const StadiumBorder border = StadiumBorder();
+    const border = StadiumBorder();
     expect(border.side, BorderSide.none);
   });
 
   test('StadiumBorder copyWith, ==, hashCode', () {
     expect(const StadiumBorder(), const StadiumBorder().copyWith());
     expect(const StadiumBorder().hashCode, const StadiumBorder().copyWith().hashCode);
-    const BorderSide side = BorderSide(width: 10.0, color: Color(0xff123456));
+    const side = BorderSide(width: 10.0, color: Color(0xff123456));
     expect(const StadiumBorder().copyWith(side: side), const StadiumBorder(side: side));
   });
 
   test('StadiumBorder', () {
-    const StadiumBorder c10 = StadiumBorder(side: BorderSide(width: 10.0));
-    const StadiumBorder c15 = StadiumBorder(side: BorderSide(width: 15.0));
-    const StadiumBorder c20 = StadiumBorder(side: BorderSide(width: 20.0));
+    const c10 = StadiumBorder(side: BorderSide(width: 10.0));
+    const c15 = StadiumBorder(side: BorderSide(width: 15.0));
+    const c20 = StadiumBorder(side: BorderSide(width: 20.0));
     expect(c10.dimensions, const EdgeInsets.all(10.0));
     expect(c10.scale(2.0), c20);
     expect(c20.scale(0.5), c10);
@@ -31,11 +31,11 @@ void main() {
     expect(ShapeBorder.lerp(c10, c20, 0.5), c15);
     expect(ShapeBorder.lerp(c10, c20, 1.0), c20);
 
-    const StadiumBorder c1 = StadiumBorder(side: BorderSide());
+    const c1 = StadiumBorder(side: BorderSide());
     expect(c1.getOuterPath(Rect.fromCircle(center: Offset.zero, radius: 1.0)), isUnitCircle);
-    const StadiumBorder c2 = StadiumBorder(side: BorderSide());
+    const c2 = StadiumBorder(side: BorderSide());
     expect(c2.getInnerPath(Rect.fromCircle(center: Offset.zero, radius: 2.0)), isUnitCircle);
-    const Rect rect = Rect.fromLTRB(10.0, 20.0, 100.0, 200.0);
+    const rect = Rect.fromLTRB(10.0, 20.0, 100.0, 200.0);
     expect(
       (Canvas canvas) => c10.paint(canvas, rect),
       paints..rrect(
@@ -49,16 +49,16 @@ void main() {
   });
 
   test('StadiumBorder with StrokeAlign', () {
-    const StadiumBorder center = StadiumBorder(
+    const center = StadiumBorder(
       side: BorderSide(width: 10.0, strokeAlign: BorderSide.strokeAlignCenter),
     );
-    const StadiumBorder outside = StadiumBorder(
+    const outside = StadiumBorder(
       side: BorderSide(width: 10.0, strokeAlign: BorderSide.strokeAlignOutside),
     );
     expect(center.dimensions, const EdgeInsets.all(5.0));
     expect(outside.dimensions, EdgeInsets.zero);
 
-    const Rect rect = Rect.fromLTRB(10.0, 20.0, 100.0, 200.0);
+    const rect = Rect.fromLTRB(10.0, 20.0, 100.0, 200.0);
 
     expect(
       (Canvas canvas) => center.paint(canvas, rect),
@@ -78,9 +78,9 @@ void main() {
   });
 
   test('StadiumBorder and CircleBorder', () {
-    const StadiumBorder stadium = StadiumBorder();
-    const CircleBorder circle = CircleBorder();
-    const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 20.0);
+    const stadium = StadiumBorder();
+    const circle = CircleBorder();
+    const rect = Rect.fromLTWH(0.0, 0.0, 100.0, 20.0);
     final Matcher looksLikeS = isPathThat(
       includes: const <Offset>[Offset(30.0, 10.0), Offset(50.0, 10.0)],
       excludes: const <Offset>[Offset(1.0, 1.0), Offset(99.0, 19.0)],
@@ -194,9 +194,9 @@ void main() {
   });
 
   test('StadiumBorder and RoundedRectBorder with BorderRadius.zero', () {
-    const StadiumBorder stadium = StadiumBorder();
-    const RoundedRectangleBorder rrect = RoundedRectangleBorder();
-    const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 50.0);
+    const stadium = StadiumBorder();
+    const rrect = RoundedRectangleBorder();
+    const rect = Rect.fromLTWH(0.0, 0.0, 100.0, 50.0);
     final Matcher looksLikeS = isPathThat(
       includes: const <Offset>[Offset(25.0, 25.0), Offset(50.0, 25.0), Offset(7.33, 7.33)],
       excludes: const <Offset>[
@@ -328,11 +328,9 @@ void main() {
   });
 
   test('StadiumBorder and RoundedRectBorder with circular BorderRadius', () {
-    const StadiumBorder stadium = StadiumBorder();
-    const RoundedRectangleBorder rrect = RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(10)),
-    );
-    const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 50.0);
+    const stadium = StadiumBorder();
+    const rrect = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10)));
+    const rect = Rect.fromLTWH(0.0, 0.0, 100.0, 50.0);
     final Matcher looksLikeS = isPathThat(
       includes: const <Offset>[Offset(25.0, 25.0), Offset(50.0, 25.0), Offset(7.33, 7.33)],
       excludes: const <Offset>[
@@ -464,14 +462,14 @@ void main() {
   });
 
   test('StadiumBorder and RoundedRectBorder with BorderRadiusDirectional', () {
-    const StadiumBorder stadium = StadiumBorder();
-    const RoundedRectangleBorder rrect = RoundedRectangleBorder(
+    const stadium = StadiumBorder();
+    const rrect = RoundedRectangleBorder(
       borderRadius: BorderRadiusDirectional.only(
         topStart: Radius.circular(10),
         bottomEnd: Radius.circular(10),
       ),
     );
-    const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 50.0);
+    const rect = Rect.fromLTWH(0.0, 0.0, 100.0, 50.0);
     final Matcher looksLikeS = isPathThat(
       includes: const <Offset>[Offset(25.0, 25.0), Offset(50.0, 25.0), Offset(7.33, 7.33)],
       excludes: const <Offset>[

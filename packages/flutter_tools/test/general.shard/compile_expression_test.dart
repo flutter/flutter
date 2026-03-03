@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -32,16 +33,18 @@ void main() {
     testLogger = BufferLogger.test();
     processManager = FakeProcessManager();
     frontendServerStdIn = MemoryIOSink();
-    fileSystem = MemoryFileSystem.test();
-    generator = ResidentCompiler(
-      'sdkroot',
-      buildMode: BuildMode.debug,
-      artifacts: Artifacts.test(),
+    fileSystem = MemoryFileSystem.test()
+      ..file(Artifact.flutterPatchedSdkPath.toString()).createSync();
+    generator = const ResidentCompilerFactory().create(
+      targetPlatform: .tester,
+      buildInfo: BuildInfo.debug,
+      artifacts: Artifacts.test(fileSystem: fileSystem),
       processManager: processManager,
       logger: testLogger,
       platform: FakePlatform(),
       fileSystem: fileSystem,
       shutdownHooks: FakeShutdownHooks(),
+      config: Config.test(),
     );
 
     stdErrStreamController = StreamController<String>();
@@ -199,13 +202,13 @@ void main() {
 
 class FakeProcess extends Fake implements Process {
   @override
-  var stdout = const Stream<List<int>>.empty();
+  Stream<List<int>> stdout = const Stream<List<int>>.empty();
 
   @override
-  var stderr = const Stream<List<int>>.empty();
+  Stream<List<int>> stderr = const Stream<List<int>>.empty();
 
   @override
-  var stdin = IOSink(StreamController<List<int>>().sink);
+  IOSink stdin = IOSink(StreamController<List<int>>().sink);
 
   @override
   Future<int> get exitCode => Completer<int>().future;

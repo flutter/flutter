@@ -35,6 +35,7 @@ Future<void> updateGeneratedXcodeProperties({
   bool useMacOSConfig = false,
   String? buildDirOverride,
   String? configurationBuildDir,
+  bool printWarnings = false,
 }) async {
   final List<String> xcodeBuildSettings = await _xcodeBuildSettingsLines(
     project: project,
@@ -43,6 +44,7 @@ Future<void> updateGeneratedXcodeProperties({
     useMacOSConfig: useMacOSConfig,
     buildDirOverride: buildDirOverride,
     configurationBuildDir: configurationBuildDir,
+    printWarnings: printWarnings,
   );
 
   _updateGeneratedXcodePropertiesFile(
@@ -149,6 +151,7 @@ Future<List<String>> _xcodeBuildSettingsLines({
   bool useMacOSConfig = false,
   String? buildDirOverride,
   String? configurationBuildDir,
+  required bool printWarnings,
 }) async {
   final xcodeBuildSettings = <String>[];
 
@@ -158,6 +161,13 @@ Future<List<String>> _xcodeBuildSettingsLines({
   // This holds because requiresProjectRoot is true for this command
   xcodeBuildSettings.add(
     'FLUTTER_APPLICATION_PATH=${globals.fs.path.normalize(project.directory.path)}',
+  );
+
+  final String packageDirectory = useMacOSConfig
+      ? project.macos.flutterFrameworkSwiftPackageDirectory.path
+      : project.ios.flutterFrameworkSwiftPackageDirectory.path;
+  xcodeBuildSettings.add(
+    'FLUTTER_FRAMEWORK_SWIFT_PACKAGE_PATH=${globals.fs.path.normalize(packageDirectory)}',
   );
 
   // Tell CocoaPods behavior to codesign in parallel with rest of scripts to speed it up.
@@ -233,7 +243,7 @@ Future<List<String>> _xcodeBuildSettingsLines({
     // (to run natively without Rosetta translation on an ARM Mac),
     // the app will fail to build unless it also excludes arm64 simulators.
     var excludedSimulatorArchs = 'i386';
-    if (!(await project.ios.pluginsSupportArmSimulator())) {
+    if (!(await project.ios.pluginsSupportArmSimulator(printWarnings: printWarnings))) {
       excludedSimulatorArchs += ' arm64';
     }
     xcodeBuildSettings.add(

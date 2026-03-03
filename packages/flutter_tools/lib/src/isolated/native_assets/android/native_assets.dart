@@ -16,17 +16,18 @@ int targetAndroidNdkApi(Map<String, String> environmentDefines) {
   return int.parse(environmentDefines[kMinSdkVersion] ?? minSdkVersion);
 }
 
-Future<void> copyNativeCodeAssetsAndroid(
-  Uri buildUri,
+Future<List<File>> copyNativeCodeAssetsAndroid(
+  Uri targetUri,
   Map<FlutterCodeAsset, KernelAsset> assetTargetLocations,
   FileSystem fileSystem,
 ) async {
   assert(assetTargetLocations.isNotEmpty);
+  final installedFiles = <File>[];
   final jniArchDirs = <String>[
     for (final AndroidArch androidArch in AndroidArch.values) androidArch.archName,
   ];
   for (final jniArchDir in jniArchDirs) {
-    final Uri archUri = buildUri.resolve('jniLibs/lib/$jniArchDir/');
+    final Uri archUri = targetUri.resolve('jniLibs/lib/$jniArchDir/');
     await fileSystem.directory(archUri).create(recursive: true);
   }
   for (final MapEntry<FlutterCodeAsset, KernelAsset> assetMapping in assetTargetLocations.entries) {
@@ -34,11 +35,13 @@ Future<void> copyNativeCodeAssetsAndroid(
     final Uri target = (assetMapping.value.path as KernelAssetAbsolutePath).uri;
     final AndroidArch androidArch = _getAndroidArch(assetMapping.value.target.architecture);
     final String jniArchDir = androidArch.archName;
-    final Uri archUri = buildUri.resolve('jniLibs/lib/$jniArchDir/');
-    final Uri targetUri = archUri.resolveUri(target);
-    final String targetFullPath = targetUri.toFilePath();
-    await fileSystem.file(source).copy(targetFullPath);
+    final Uri archUri = targetUri.resolve('jniLibs/lib/$jniArchDir/');
+    final Uri assetTargetUri = archUri.resolveUri(target);
+    final String targetFullPath = assetTargetUri.toFilePath();
+    final File installedFile = await fileSystem.file(source).copy(targetFullPath);
+    installedFiles.add(installedFile);
   }
+  return installedFiles;
 }
 
 /// Get the [Architecture] for [androidArch].
@@ -92,12 +95,11 @@ KernelAsset _targetLocationAndroid(FlutterCodeAsset asset) {
 
 /// Looks the NDK clang compiler tools.
 ///
-/// Tool-exits if the NDK cannot be found.
+/// Returns `null` if the NDK cannot be found.
 ///
-/// Should only be invoked if a native assets build is performed. If the native
-/// assets feature is disabled, or none of the packages have native assets, a
-/// missing NDK is okay.
-Future<CCompilerConfig> cCompilerConfigAndroid() async {
+/// Typically the Flutter Gradle Plugin will install an NDK. This method will
+/// return the newest NDK if multiple NDKs are found on the system.
+Future<CCompilerConfig?> cCompilerConfigAndroid() async {
   final AndroidSdk? androidSdk = AndroidSdk.locateAndroidSdk();
   if (androidSdk == null) {
     throwToolExit('Android SDK could not be found.');
@@ -106,7 +108,7 @@ Future<CCompilerConfig> cCompilerConfigAndroid() async {
   final Uri? archiver = _toOptionalFileUri(androidSdk.getNdkArPath());
   final Uri? linker = _toOptionalFileUri(androidSdk.getNdkLdPath());
   if (compiler == null || archiver == null || linker == null) {
-    throwToolExit('Android NDK Clang could not be found.');
+    return null;
   }
   final result = CCompilerConfig(compiler: compiler, archiver: archiver, linker: linker);
   return result;

@@ -20,84 +20,64 @@
 namespace impeller {
 namespace compiler {
 
-static Reflector::Options CreateReflectorOptions(const SourceOptions& options,
-                                                 const Switches& switches) {
+namespace {
+
+Reflector::Options CreateReflectorOptions(const SourceOptions& options,
+                                          const Switches& switches) {
   Reflector::Options reflector_options;
   reflector_options.target_platform = options.target_platform;
   reflector_options.entry_point_name = options.entry_point_name;
   reflector_options.shader_name =
       InferShaderNameFromPath(switches.source_file_name);
-  reflector_options.header_file_name = Utf8FromPath(
-      std::filesystem::path{switches.reflection_header_name}.filename());
+  reflector_options.header_file_name =
+      Utf8FromPath(switches.reflection_header_name.filename());
   return reflector_options;
 }
 
-/// Run the shader compiler to geneate SkSL reflection data.
-/// If there is an error, prints error text and returns `nullptr`.
-static std::shared_ptr<RuntimeStageData::Shader> CompileSkSL(
-    std::shared_ptr<fml::Mapping> source_file_mapping,
+std::shared_ptr<Compiler> CreateCompiler(
+    TargetPlatform platform,
+    const std::shared_ptr<const fml::Mapping>& source_file_mapping,
     const Switches& switches) {
-  auto options = switches.CreateSourceOptions(TargetPlatform::kSkSL);
-
-  Reflector::Options sksl_reflector_options =
+  SourceOptions options = switches.CreateSourceOptions();
+  options.target_platform = platform;
+  Reflector::Options reflector_options =
       CreateReflectorOptions(options, switches);
-  sksl_reflector_options.target_platform = TargetPlatform::kSkSL;
-
-  Compiler sksl_compiler =
-      Compiler(std::move(source_file_mapping), options, sksl_reflector_options);
-  if (!sksl_compiler.IsValid()) {
-    std::cerr << "Compilation to SkSL failed." << std::endl;
-    std::cerr << sksl_compiler.GetErrorMessages() << std::endl;
-    return nullptr;
-  }
-  return sksl_compiler.GetReflector()->GetRuntimeStageShaderData();
+  return std::make_shared<Compiler>(source_file_mapping, options,
+                                    reflector_options);
 }
 
-static bool OutputIPLR(
-    const Switches& switches,
-    const std::shared_ptr<fml::Mapping>& source_file_mapping) {
+void OutputVerboseErrorFile(const std::string& verbose_error_messages,
+                            const Switches& switches) {
+  auto error_mapping = std::make_shared<fml::NonOwnedMapping>(
+      reinterpret_cast<const uint8_t*>(verbose_error_messages.data()),
+      verbose_error_messages.size(), [](auto, auto) {});
+  std::filesystem::path output_path =
+      std::filesystem::path(fml::CreateTemporaryDirectory()) /
+      "impellerc_verbose_error.txt";
+
+  if (fml::WriteAtomically(*switches.working_directory,
+                           Utf8FromPath(output_path).c_str(), *error_mapping)) {
+    std::cerr << "Full \"" << InferShaderNameFromPath(switches.source_file_name)
+              << "\" error output written to " << output_path << std::endl;
+  } else {
+    std::cerr << "Failed to write full \""
+              << InferShaderNameFromPath(switches.source_file_name)
+              << "\" error output to " << output_path << std::endl;
+  }
+}
+
+bool OutputIPLR(const std::vector<std::shared_ptr<Compiler>>& compilers,
+                const Switches& switches) {
   FML_DCHECK(switches.iplr);
 
   RuntimeStageData stages;
-  std::shared_ptr<RuntimeStageData::Shader> sksl_shader;
-  if (TargetPlatformBundlesSkSL(switches.SelectDefaultTargetPlatform())) {
-    sksl_shader = CompileSkSL(source_file_mapping, switches);
-    if (!sksl_shader) {
-      return false;
-    }
-    stages.AddShader(sksl_shader);
-  }
-
-  for (const auto& platform : switches.PlatformsToCompile()) {
-    if (platform == TargetPlatform::kSkSL) {
-      // Already handled above.
-      continue;
-    }
-    SourceOptions options = switches.CreateSourceOptions(platform);
-
-    // Invoke the compiler and generate reflection data for a single shader.
-
-    Reflector::Options reflector_options =
-        CreateReflectorOptions(options, switches);
-    Compiler compiler(source_file_mapping, options, reflector_options);
-    if (!compiler.IsValid()) {
-      std::cerr << "Compilation failed." << std::endl;
-      std::cerr << compiler.GetErrorMessages() << std::endl;
-      return false;
-    }
-
-    auto reflector = compiler.GetReflector();
-    if (reflector == nullptr) {
-      std::cerr << "Could not create reflector." << std::endl;
-      return false;
-    }
-
-    auto stage_data = reflector->GetRuntimeStageShaderData();
+  for (const auto& compiler : compilers) {
+    std::shared_ptr<RuntimeStageData::Shader> stage_data =
+        compiler->GetReflector()->GetRuntimeStageShaderData();
     if (!stage_data) {
       std::cerr << "Runtime stage information was nil." << std::endl;
       return false;
     }
-
     stages.AddShader(stage_data);
   }
 
@@ -123,12 +103,7 @@ static bool OutputIPLR(
   return true;
 }
 
-static bool OutputSLFile(const Compiler& compiler, const Switches& switches) {
-  // --------------------------------------------------------------------------
-  /// 2. Output the source file. When in IPLR/RuntimeStage mode, output the
-  ///    serialized IPLR flatbuffer.
-  ///
-
+bool OutputSLFile(const Compiler& compiler, const Switches& switches) {
   auto sl_file_name = std::filesystem::absolute(
       std::filesystem::current_path() / switches.sl_file_name);
   if (!fml::WriteAtomically(*switches.working_directory,
@@ -141,84 +116,70 @@ static bool OutputSLFile(const Compiler& compiler, const Switches& switches) {
   return true;
 }
 
-static bool OutputReflectionData(const Compiler& compiler,
-                                 const Switches& switches,
-                                 const SourceOptions& options) {
-  // --------------------------------------------------------------------------
-  /// 3. Output shader reflection data.
-  ///    May include a JSON file, a C++ header, and/or a C++ TU.
-  ///
+bool OutputSPIRV(const Compiler& compiler, const Switches& switches) {
+  auto spriv_file_name = std::filesystem::absolute(
+      std::filesystem::current_path() / switches.spirv_file_name);
+  if (!fml::WriteAtomically(*switches.working_directory,
+                            Utf8FromPath(spriv_file_name).c_str(),
+                            *compiler.GetSPIRVAssembly())) {
+    std::cerr << "Could not write file to " << switches.spirv_file_name
+              << std::endl;
+    return false;
+  }
+  return true;
+}
 
-  if (TargetPlatformNeedsReflection(options.target_platform)) {
-    if (!switches.reflection_json_name.empty()) {
-      auto reflection_json_name = std::filesystem::absolute(
-          std::filesystem::current_path() / switches.reflection_json_name);
-      if (!fml::WriteAtomically(
-              *switches.working_directory,
-              Utf8FromPath(reflection_json_name).c_str(),
-              *compiler.GetReflector()->GetReflectionJSON())) {
-        std::cerr << "Could not write reflection json to "
-                  << switches.reflection_json_name << std::endl;
-        return false;
-      }
+bool ShouldOutputReflectionData(const Switches& switches) {
+  return !switches.reflection_json_name.empty() ||
+         !switches.reflection_header_name.empty() ||
+         !switches.reflection_cc_name.empty();
+}
+
+bool OutputReflectionData(const Compiler& compiler, const Switches& switches) {
+  if (!switches.reflection_json_name.empty()) {
+    auto reflection_json_name = std::filesystem::absolute(
+        std::filesystem::current_path() / switches.reflection_json_name);
+    if (!fml::WriteAtomically(*switches.working_directory,
+                              Utf8FromPath(reflection_json_name).c_str(),
+                              *compiler.GetReflector()->GetReflectionJSON())) {
+      std::cerr << "Could not write reflection json to "
+                << switches.reflection_json_name << std::endl;
+      return false;
     }
+  }
 
-    if (!switches.reflection_header_name.empty()) {
-      auto reflection_header_name =
-          std::filesystem::absolute(std::filesystem::current_path() /
-                                    switches.reflection_header_name.c_str());
-      if (!fml::WriteAtomically(
-              *switches.working_directory,
-              Utf8FromPath(reflection_header_name).c_str(),
-              *compiler.GetReflector()->GetReflectionHeader())) {
-        std::cerr << "Could not write reflection header to "
-                  << switches.reflection_header_name << std::endl;
-        return false;
-      }
+  if (!switches.reflection_header_name.empty()) {
+    auto reflection_header_name = std::filesystem::absolute(
+        std::filesystem::current_path() / switches.reflection_header_name);
+    if (!fml::WriteAtomically(
+            *switches.working_directory,
+            Utf8FromPath(reflection_header_name).c_str(),
+            *compiler.GetReflector()->GetReflectionHeader())) {
+      std::cerr << "Could not write reflection header to "
+                << switches.reflection_header_name << std::endl;
+      return false;
     }
+  }
 
-    if (!switches.reflection_cc_name.empty()) {
-      auto reflection_cc_name =
-          std::filesystem::absolute(std::filesystem::current_path() /
-                                    switches.reflection_cc_name.c_str());
-      if (!fml::WriteAtomically(*switches.working_directory,
-                                Utf8FromPath(reflection_cc_name).c_str(),
-                                *compiler.GetReflector()->GetReflectionCC())) {
-        std::cerr << "Could not write reflection CC to "
-                  << switches.reflection_cc_name << std::endl;
-        return false;
-      }
+  if (!switches.reflection_cc_name.empty()) {
+    auto reflection_cc_name = std::filesystem::absolute(
+        std::filesystem::current_path() / switches.reflection_cc_name);
+    if (!fml::WriteAtomically(*switches.working_directory,
+                              Utf8FromPath(reflection_cc_name).c_str(),
+                              *compiler.GetReflector()->GetReflectionCC())) {
+      std::cerr << "Could not write reflection CC to "
+                << switches.reflection_cc_name << std::endl;
+      return false;
     }
   }
   return true;
 }
 
-static bool OutputDepfile(const Compiler& compiler, const Switches& switches) {
-  // --------------------------------------------------------------------------
-  /// 4. Output a depfile.
-  ///
-
+bool OutputDepfile(const Compiler& compiler, const Switches& switches) {
   if (!switches.depfile_path.empty()) {
-    std::string result_file;
-    switch (switches.SelectDefaultTargetPlatform()) {
-      case TargetPlatform::kMetalDesktop:
-      case TargetPlatform::kMetalIOS:
-      case TargetPlatform::kOpenGLES:
-      case TargetPlatform::kOpenGLDesktop:
-      case TargetPlatform::kRuntimeStageMetal:
-      case TargetPlatform::kRuntimeStageGLES:
-      case TargetPlatform::kRuntimeStageGLES3:
-      case TargetPlatform::kRuntimeStageVulkan:
-      case TargetPlatform::kSkSL:
-      case TargetPlatform::kVulkan:
-        result_file = switches.sl_file_name;
-        break;
-      case TargetPlatform::kUnknown:
-        result_file = switches.spirv_file_name;
-        break;
-    }
+    std::string result_file = Utf8FromPath(switches.sl_file_name);
     auto depfile_path = std::filesystem::absolute(
-        std::filesystem::current_path() / switches.depfile_path.c_str());
+        std::filesystem::current_path() / switches.depfile_path);
     if (!fml::WriteAtomically(*switches.working_directory,
                               Utf8FromPath(depfile_path).c_str(),
                               *compiler.CreateDepfileContents({result_file}))) {
@@ -230,6 +191,8 @@ static bool OutputDepfile(const Compiler& compiler, const Switches& switches) {
 
   return true;
 }
+
+}  // namespace
 
 bool Main(const fml::CommandLine& command_line) {
   fml::InstallCrashHandler();
@@ -252,52 +215,99 @@ bool Main(const fml::CommandLine& command_line) {
   }
 
   std::shared_ptr<fml::FileMapping> source_file_mapping =
-      fml::FileMapping::CreateReadOnly(switches.source_file_name);
+      fml::FileMapping::CreateReadOnly(Utf8FromPath(switches.source_file_name));
   if (!source_file_mapping) {
     std::cerr << "Could not open input file." << std::endl;
     return false;
   }
 
-  if (switches.iplr && !OutputIPLR(switches, source_file_mapping)) {
+  std::vector<std::shared_ptr<Compiler>> compilers;
+  compilers.reserve(switches.PlatformsToCompile().size());
+  for (const auto& platform : switches.PlatformsToCompile()) {
+    std::shared_ptr<Compiler> compiler =
+        CreateCompiler(platform, source_file_mapping, switches);
+    if (compiler->IsValid()) {
+      compilers.push_back(compiler);
+    } else {
+      std::cerr << "Compilation failed for target: "
+                << TargetPlatformToString(platform) << std::endl;
+
+      std::string verbose_error_messages = compiler->GetVerboseErrorMessages();
+      if (verbose_error_messages.empty()) {
+        // No verbose error messages. Output the regular error messages.
+        std::cerr << compiler->GetErrorMessages();
+      } else {
+        if (switches.verbose) {
+          // Verbose messages are available and the --verbose flag was set.
+          // Directly output the verbose error messages.
+          std::cerr << verbose_error_messages;
+        } else {
+          // Verbose messages are available and the --verbose flag was not set.
+          // Output the regular error messages and write the verbose error
+          // messages to a file.
+          std::cerr << compiler->GetErrorMessages();
+          OutputVerboseErrorFile(verbose_error_messages, switches);
+        }
+      }
+
+      return false;
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  /// 1. Output the source file. When in IPLR/RuntimeStage mode, output the
+  ///    serialized IPLR flatbuffer. Otherwise output the shader source in the
+  ///    target shading language.
+  ///
+
+  if (switches.iplr) {
+    if (!OutputIPLR(compilers, switches)) {
+      return false;
+    }
+  } else {
+    // Non-IPLR mode is supported only for single platform targets. There is
+    // exactly 1 created compiler for this case.
+    FML_DCHECK(compilers.size() == 1);
+    if (!OutputSLFile(*compilers.front(), switches)) {
+      return false;
+    }
+  }
+
+  // Use the first compiler for outputting the SPIRV file, reflection data, and
+  // the depfile. The SPIRV and depfile outputs do not depend on the target
+  // platform, so any valid compiler can be used. Reflection data output is only
+  // supported for single platform targets, so it uses the first (only) valid
+  // compiler as well.
+  auto first_valid_compiler = compilers.front();
+
+  // --------------------------------------------------------------------------
+  /// 2. Output SPIRV file.
+  ///
+
+  if (!OutputSPIRV(*first_valid_compiler, switches)) {
     return false;
   }
 
-  // Create at least one compiler to output the SL file, reflection data, and a
-  // depfile.
+  // --------------------------------------------------------------------------
+  /// 3. Output shader reflection data.
+  ///    May include a JSON file, a C++ header, and/or a C++ TU.
+  ///
 
-  SourceOptions options = switches.CreateSourceOptions();
-
-  // Invoke the compiler and generate reflection data for a single shader.
-
-  Reflector::Options reflector_options =
-      CreateReflectorOptions(options, switches);
-
-  Compiler compiler(source_file_mapping, options, reflector_options);
-  if (!compiler.IsValid()) {
-    std::cerr << "Compilation failed." << std::endl;
-    std::cerr << compiler.GetErrorMessages() << std::endl;
-    return false;
+  if (ShouldOutputReflectionData(switches)) {
+    // Outputting reflection data is supported only for single platform targets.
+    FML_DCHECK(compilers.size() == 1);
+    if (!OutputReflectionData(*first_valid_compiler, switches)) {
+      return false;
+    }
   }
 
-  auto spriv_file_name = std::filesystem::absolute(
-      std::filesystem::current_path() / switches.spirv_file_name);
-  if (!fml::WriteAtomically(*switches.working_directory,
-                            Utf8FromPath(spriv_file_name).c_str(),
-                            *compiler.GetSPIRVAssembly())) {
-    std::cerr << "Could not write file to " << switches.spirv_file_name
-              << std::endl;
-    return false;
-  }
+  // --------------------------------------------------------------------------
+  /// 4. Output a depfile.
+  ///
 
-  if (!switches.iplr && !OutputSLFile(compiler, switches)) {
-    return false;
-  }
-
-  if (!OutputReflectionData(compiler, switches, options)) {
-    return false;
-  }
-
-  if (!OutputDepfile(compiler, switches)) {
+  // Dep file output does not depend on the target platform. Any valid compiler
+  // can be used to output it. Arbitrarily pick the first valid compiler.
+  if (!OutputDepfile(*first_valid_compiler, switches)) {
     return false;
   }
 

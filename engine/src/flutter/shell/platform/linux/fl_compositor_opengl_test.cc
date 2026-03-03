@@ -47,6 +47,12 @@ TEST(FlCompositorOpenGLTest, Render) {
     fl_compositor_present_layers(FL_COMPOSITOR(compositor), layers, 1);
   }).join();
 
+  size_t frame_width, frame_height;
+  fl_compositor_get_frame_size(FL_COMPOSITOR(compositor), &frame_width,
+                               &frame_height);
+  EXPECT_EQ(frame_width, width);
+  EXPECT_EQ(frame_height, height);
+
   // Render presented layer.
   int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
   g_autofree unsigned char* image_data =
@@ -54,7 +60,7 @@ TEST(FlCompositorOpenGLTest, Render) {
   cairo_surface_t* surface = cairo_image_surface_create_for_data(
       image_data, CAIRO_FORMAT_ARGB32, width, height, stride);
   cairo_t* cr = cairo_create(surface);
-  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr);
+  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr, TRUE);
   cairo_surface_destroy(surface);
   cairo_destroy(cr);
 }
@@ -114,7 +120,7 @@ TEST(FlCompositorOpenGLTest, Resize) {
   cairo_surface_t* surface = cairo_image_surface_create_for_data(
       image_data, CAIRO_FORMAT_ARGB32, width2, height2, stride2);
   cairo_t* cr = cairo_create(surface);
-  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr);
+  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr, TRUE);
   cairo_surface_destroy(surface);
   cairo_destroy(cr);
 
@@ -156,6 +162,8 @@ TEST(FlCompositorOpenGLTest, RestoresGLState) {
 
   constexpr GLuint kFakeTextureName = 123;
   glBindTexture(GL_TEXTURE_2D, kFakeTextureName);
+  glDisable(GL_BLEND);
+  glEnable(GL_SCISSOR_TEST);
 
   // Present layer and render.
   std::thread([&]() {
@@ -167,7 +175,7 @@ TEST(FlCompositorOpenGLTest, RestoresGLState) {
   cairo_surface_t* surface = cairo_image_surface_create_for_data(
       image_data, CAIRO_FORMAT_ARGB32, width, height, stride);
   cairo_t* cr = cairo_create(surface);
-  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr);
+  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr, TRUE);
   cairo_surface_destroy(surface);
   cairo_destroy(cr);
 
@@ -175,6 +183,8 @@ TEST(FlCompositorOpenGLTest, RestoresGLState) {
   glGetIntegerv(GL_TEXTURE_BINDING_2D,
                 reinterpret_cast<GLint*>(&texture_2d_binding));
   EXPECT_EQ(texture_2d_binding, kFakeTextureName);
+  EXPECT_EQ(glIsEnabled(GL_BLEND), GL_FALSE);
+  EXPECT_EQ(glIsEnabled(GL_SCISSOR_TEST), GL_TRUE);
 }
 
 TEST(FlCompositorOpenGLTest, BlitFramebuffer) {
@@ -222,7 +232,7 @@ TEST(FlCompositorOpenGLTest, BlitFramebuffer) {
   cairo_surface_t* surface = cairo_image_surface_create_for_data(
       image_data, CAIRO_FORMAT_ARGB32, width, height, stride);
   cairo_t* cr = cairo_create(surface);
-  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr);
+  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr, TRUE);
   cairo_surface_destroy(surface);
   cairo_destroy(cr);
 }
@@ -277,7 +287,7 @@ TEST(FlCompositorOpenGLTest, BlitFramebufferExtension) {
   cairo_surface_t* surface = cairo_image_surface_create_for_data(
       image_data, CAIRO_FORMAT_ARGB32, width, height, stride);
   cairo_t* cr = cairo_create(surface);
-  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr);
+  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr, TRUE);
   cairo_surface_destroy(surface);
   cairo_destroy(cr);
 }
@@ -325,7 +335,7 @@ TEST(FlCompositorOpenGLTest, NoBlitFramebuffer) {
   cairo_surface_t* surface = cairo_image_surface_create_for_data(
       image_data, CAIRO_FORMAT_ARGB32, width, height, stride);
   cairo_t* cr = cairo_create(surface);
-  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr);
+  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr, TRUE);
   cairo_surface_destroy(surface);
   cairo_destroy(cr);
 }
@@ -374,7 +384,7 @@ TEST(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
   cairo_surface_t* surface = cairo_image_surface_create_for_data(
       image_data, CAIRO_FORMAT_ARGB32, width, height, stride);
   cairo_t* cr = cairo_create(surface);
-  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr);
+  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr, TRUE);
   cairo_surface_destroy(surface);
   cairo_destroy(cr);
 }

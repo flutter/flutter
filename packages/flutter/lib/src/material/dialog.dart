@@ -10,9 +10,10 @@
 /// @docImport 'text_button.dart';
 library;
 
-import 'dart:ui' show SemanticsRole, clampDouble, lerpDouble;
+import 'dart:ui' show SemanticsHitTestBehavior, SemanticsRole, clampDouble, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 
 import 'color_scheme.dart';
 import 'colors.dart';
@@ -770,21 +771,17 @@ class AlertDialog extends StatelessWidget {
         ? _DialogDefaultsM3(context)
         : _DialogDefaultsM2(context);
 
-    String? label = semanticLabel;
-    switch (theme.platform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        break;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        label ??= MaterialLocalizations.of(context).alertDialogLabel;
-    }
+    final String? label = switch (defaultTargetPlatform) {
+      TargetPlatform.iOS || TargetPlatform.macOS => semanticLabel,
+      TargetPlatform.android ||
+      TargetPlatform.fuchsia ||
+      TargetPlatform.linux ||
+      TargetPlatform.windows => semanticLabel ?? MaterialLocalizations.of(context).alertDialogLabel,
+    };
 
     // The paddingScaleFactor is used to adjust the padding of Dialog's
     // children.
-    const double fontSizeToScale = 14.0;
+    const fontSizeToScale = 14.0;
     final double effectiveTextScale =
         MediaQuery.textScalerOf(context).scale(fontSizeToScale) / fontSizeToScale;
     final double paddingScaleFactor = _scalePadding(effectiveTextScale);
@@ -796,9 +793,9 @@ class AlertDialog extends StatelessWidget {
     Widget? actionsWidget;
 
     if (icon != null) {
-      final bool belowIsTitle = title != null;
+      final belowIsTitle = title != null;
       final bool belowIsContent = !belowIsTitle && content != null;
-      final EdgeInsets defaultIconPadding = EdgeInsets.only(
+      final defaultIconPadding = EdgeInsets.only(
         left: 24.0,
         top: 24.0,
         right: 24.0,
@@ -825,7 +822,7 @@ class AlertDialog extends StatelessWidget {
     }
 
     if (title != null) {
-      final EdgeInsets defaultTitlePadding = EdgeInsets.only(
+      final defaultTitlePadding = EdgeInsets.only(
         left: 24.0,
         top: icon == null ? 24.0 : 0.0,
         right: 24.0,
@@ -848,7 +845,7 @@ class AlertDialog extends StatelessWidget {
           child: Semantics(
             // For iOS platform, the focus always lands on the title.
             // Set nameRoute to false to avoid title being announce twice.
-            namesRoute: label == null && theme.platform != TargetPlatform.iOS,
+            namesRoute: label == null && defaultTargetPlatform != TargetPlatform.iOS,
             container: true,
             child: title,
           ),
@@ -857,7 +854,7 @@ class AlertDialog extends StatelessWidget {
     }
 
     if (content != null) {
-      final EdgeInsets defaultContentPadding = EdgeInsets.only(
+      final defaultContentPadding = EdgeInsets.only(
         left: 24.0,
         top: theme.useMaterial3 ? 16.0 : 20.0,
         right: 24.0,
@@ -1172,6 +1169,7 @@ class SimpleDialog extends StatelessWidget {
     this.titleTextStyle,
     this.children,
     this.contentPadding = const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 16.0),
+    this.contentTextStyle,
     this.backgroundColor,
     this.elevation,
     this.shadowColor,
@@ -1239,6 +1237,13 @@ class SimpleDialog extends StatelessWidget {
   /// {@macro flutter.material.dialog.surfaceTintColor}
   final Color? surfaceTintColor;
 
+  /// Style for the text in the [children] of this [SimpleDialog].
+  ///
+  /// If null, [DialogThemeData.contentTextStyle] is used. If that is also null,
+  /// defaults to [TextTheme.titleMedium] for Material 2, or [TextTheme.bodyMedium]
+  /// for Material 3.
+  final TextStyle? contentTextStyle;
+
   /// The semantic label of the dialog used by accessibility frameworks to
   /// announce screen transitions when the dialog is opened and closed.
   ///
@@ -1272,8 +1277,13 @@ class SimpleDialog extends StatelessWidget {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
 
+    final DialogThemeData dialogTheme = DialogTheme.of(context);
+    final DialogThemeData defaults = theme.useMaterial3
+        ? _DialogDefaultsM3(context)
+        : _DialogDefaultsM2(context);
+
     String? label = semanticLabel;
-    switch (theme.platform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.macOS:
       case TargetPlatform.iOS:
         break;
@@ -1286,9 +1296,9 @@ class SimpleDialog extends StatelessWidget {
 
     // The paddingScaleFactor is used to adjust the padding of Dialog
     // children.
-    final TextStyle defaultTextStyle =
-        titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.titleLarge!;
-    final double fontSize = defaultTextStyle.fontSize ?? kDefaultFontSize;
+    final TextStyle effectiveTitleTextStyle =
+        titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.titleLarge!;
+    final double fontSize = effectiveTitleTextStyle.fontSize ?? kDefaultFontSize;
     final double fontSizeToScale = fontSize == 0.0 ? kDefaultFontSize : fontSize;
     final double effectiveTextScale =
         MediaQuery.textScalerOf(context).scale(fontSizeToScale) / fontSizeToScale;
@@ -1308,11 +1318,11 @@ class SimpleDialog extends StatelessWidget {
               : effectiveTitlePadding.bottom,
         ),
         child: DefaultTextStyle(
-          style: defaultTextStyle,
+          style: effectiveTitleTextStyle,
           child: Semantics(
             // For iOS platform, the focus always lands on the title.
             // Set nameRoute to false to avoid title being announce twice.
-            namesRoute: label == null && theme.platform != TargetPlatform.iOS,
+            namesRoute: label == null && defaultTargetPlatform != TargetPlatform.iOS,
             container: true,
             child: title,
           ),
@@ -1333,7 +1343,10 @@ class SimpleDialog extends StatelessWidget {
                 : effectiveContentPadding.top,
             bottom: effectiveContentPadding.bottom * paddingScaleFactor,
           ),
-          child: ListBody(children: children!),
+          child: DefaultTextStyle(
+            style: contentTextStyle ?? dialogTheme.contentTextStyle ?? defaults.contentTextStyle!,
+            child: ListBody(children: children!),
+          ),
         ),
       );
     }
@@ -1343,7 +1356,7 @@ class SimpleDialog extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[if (title != null) titleWidget!, if (children != null) contentWidget!],
+        children: <Widget>[?titleWidget, ?contentWidget],
       ),
     );
 
@@ -1675,6 +1688,8 @@ class DialogRoute<T> extends RawDialogRoute<T> {
                if (useSafeArea) {
                  dialog = SafeArea(child: dialog);
                }
+               // Prevent clicks inside the dialog from passing through to the barrier
+               dialog = Semantics(hitTestBehavior: SemanticsHitTestBehavior.opaque, child: dialog);
                return dialog;
              },
          barrierLabel: barrierLabel ?? MaterialLocalizations.of(context).modalBarrierDismissLabel,

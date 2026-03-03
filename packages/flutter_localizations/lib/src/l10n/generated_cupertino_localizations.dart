@@ -1568,7 +1568,7 @@ class CupertinoLocalizationBo extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'སྔ་དྲོ';
 
   @override
-  String get backButtonLabel => 'Back';
+  String get backButtonLabel => 'ཕྱིར་ལོག';
 
   @override
   String get cancelButtonLabel => 'ཕྱིར་འཐེན།';
@@ -2454,40 +2454,40 @@ class CupertinoLocalizationCy extends GlobalCupertinoLocalizations {
   String? get timerPickerHourLabelZero => 'awr';
 
   @override
-  String? get timerPickerMinuteLabelFew => 'mun.';
+  String? get timerPickerMinuteLabelFew => 'mun';
 
   @override
-  String? get timerPickerMinuteLabelMany => 'mun.';
+  String? get timerPickerMinuteLabelMany => 'mun';
 
   @override
-  String? get timerPickerMinuteLabelOne => 'fun.';
+  String? get timerPickerMinuteLabelOne => 'fun';
 
   @override
-  String get timerPickerMinuteLabelOther => 'mun.';
+  String get timerPickerMinuteLabelOther => 'mun';
 
   @override
-  String? get timerPickerMinuteLabelTwo => 'fun.';
+  String? get timerPickerMinuteLabelTwo => 'fun';
 
   @override
-  String? get timerPickerMinuteLabelZero => 'mun.';
+  String? get timerPickerMinuteLabelZero => 'mun';
 
   @override
-  String? get timerPickerSecondLabelFew => 'eil.';
+  String? get timerPickerSecondLabelFew => 'eil';
 
   @override
-  String? get timerPickerSecondLabelMany => 'eil.';
+  String? get timerPickerSecondLabelMany => 'eil';
 
   @override
-  String? get timerPickerSecondLabelOne => 'eil.';
+  String? get timerPickerSecondLabelOne => 'eil';
 
   @override
-  String get timerPickerSecondLabelOther => 'eil.';
+  String get timerPickerSecondLabelOther => 'eil';
 
   @override
-  String? get timerPickerSecondLabelTwo => 'eil.';
+  String? get timerPickerSecondLabelTwo => 'eil';
 
   @override
-  String? get timerPickerSecondLabelZero => 'eil.';
+  String? get timerPickerSecondLabelZero => 'eil';
 
   @override
   String get todayLabel => 'Heddiw';
@@ -5401,7 +5401,7 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   String get menuDismissLabel => 'بستن منو';
 
   @override
-  String get modalBarrierDismissLabel => 'نپذیرفتن';
+  String get modalBarrierDismissLabel => 'بستن';
 
   @override
   String get noSpellCheckReplacementsLabel => 'جایگزینی پیدا نشد';
@@ -6373,10 +6373,10 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String? get datePickerMinuteSemanticsLabelOne => '1 minuto';
+  String? get datePickerMinuteSemanticsLabelOne => '1 minuto';
 
   @override
-  String get datePickerMinuteSemanticsLabelOther => r'$minute minutos';
+  String get datePickerMinuteSemanticsLabelOther => r'$minute minutos';
 
   @override
   String? get datePickerMinuteSemanticsLabelTwo => null;
@@ -7091,7 +7091,7 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   String get cancelButtonLabel => 'रद्द करें';
 
   @override
-  String get clearButtonLabel => 'मिटाएं';
+  String get clearButtonLabel => 'हटाएं';
 
   @override
   String get collapsedHint => 'बड़ा किया गया';
@@ -7151,7 +7151,7 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   String get expansionTileCollapsedHint => 'बड़ा करने के लिए दो बार टैप करें';
 
   @override
-  String get expansionTileCollapsedTapHint => 'ज़्यादा जानकारी के लिए बड़ा करें';
+  String get expansionTileCollapsedTapHint => 'ज़्यादा जानने के लिए बड़ा करें';
 
   @override
   String get expansionTileExpandedHint => 'छोटा करने के लिए दो बार टैप करें';
@@ -11660,7 +11660,7 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   String get copyButtonLabel => 'कपी गर्नुहोस्';
 
   @override
-  String get cutButtonLabel => 'काट्नुहोस्';
+  String get cutButtonLabel => 'कट गर्नुहोस्';
 
   @override
   String get datePickerDateOrderString => 'mdy';
@@ -11732,7 +11732,7 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   String get noSpellCheckReplacementsLabel => 'बदल्नु पर्ने कुनै पनि कुरा भेटिएन';
 
   @override
-  String get pasteButtonLabel => 'टाँस्नुहोस्';
+  String get pasteButtonLabel => 'पेस्ट गर्नुहोस्';
 
   @override
   String get postMeridiemAbbreviation => 'PM';
@@ -15863,7 +15863,7 @@ class CupertinoLocalizationUg extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => 'چۈشتىن بۇرۇن';
 
   @override
-  String get backButtonLabel => 'Back';
+  String get backButtonLabel => 'قايتىش';
 
   @override
   String get cancelButtonLabel => 'بىكار قىلىش';

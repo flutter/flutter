@@ -11,6 +11,7 @@ import 'models.dart';
 import 'rotated_wire_cube.dart';
 import 'dart:math';
 import 'package:flutter/src/widgets/_window.dart';
+import 'tooltip_button.dart';
 
 class RegularWindowContent extends StatelessWidget {
   RegularWindowContent({super.key, required this.window})
@@ -69,6 +70,28 @@ class RegularWindowContent extends StatelessWidget {
                   child: const Text('Create Regular Window'),
                 ),
                 const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    final UniqueKey key = UniqueKey();
+                    windowManager.add(
+                      KeyedWindow(
+                        key: key,
+                        controller: DialogWindowController(
+                          preferredSize: windowSettings.dialogSize,
+                          delegate: CallbackDialogWindowControllerDelegate(
+                            onDestroyed: () => windowManager.remove(key),
+                          ),
+                          parent: window,
+                          title: 'Dialog',
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('Create Modal Dialog'),
+                ),
+                const SizedBox(height: 20),
+                TooltipButton(parentController: window),
+                const SizedBox(height: 20),
                 Text(
                   'View #${window.rootView.viewId}\n'
                   'Size: ${(windowSize.width).toStringAsFixed(1)}\u00D7${(windowSize.height).toStringAsFixed(1)}\n'
@@ -87,17 +110,17 @@ class RegularWindowContent extends StatelessWidget {
         listenable: windowManager,
         builder: (BuildContext context, Widget? child) {
           final List<Widget> childViews = <Widget>[];
-          for (final KeyedWindow window in windowManager.windows) {
-            if (window.parent == window.controller) {
-              childViews.add(
-                WindowContent(
-                  controller: window.controller,
-                  windowKey: window.key,
-                  onDestroyed: () => windowManager.remove(window.key),
-                  onError: () => windowManager.remove(window.key),
-                ),
-              );
-            }
+          for (final KeyedWindow childWindow in windowManager.getWindows(
+            parent: window,
+          )) {
+            childViews.add(
+              WindowContent(
+                controller: childWindow.controller,
+                windowKey: childWindow.key,
+                onDestroyed: () => windowManager.remove(childWindow.key),
+                onError: () => windowManager.remove(childWindow.key),
+              ),
+            );
           }
 
           return ViewCollection(views: childViews);

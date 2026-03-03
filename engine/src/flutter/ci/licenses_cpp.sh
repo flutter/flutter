@@ -55,7 +55,7 @@ fi
 EXECUTABLE="$SCRIPT_DIR/../../out/$HOST_PROFILE_DIR/licenses_cpp"
 
 # The root directory for the license check.
-WORKING_DIR="$SCRIPT_DIR/.."
+WORKING_DIR="$SCRIPT_DIR/../.."
 
 # The data directory required by the license tool.
 DATA_DIR="$SCRIPT_DIR/../tools/licenses_cpp/data"
@@ -81,6 +81,7 @@ fi
   --working_dir "$WORKING_DIR" \
   --data_dir "$DATA_DIR" \
   --licenses_path "$LICENSES_OUTPUT_PATH" \
+  --root_package "flutter" \
   --v $VERBOSITY
 
 if ! git diff \

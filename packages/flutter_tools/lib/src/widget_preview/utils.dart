@@ -125,6 +125,12 @@ class PreviewDetectorMutex {
     _locked = false;
   }
 
+  /// Returns true if the lock is currently held.
+  ///
+  /// WARNING: this should only be used for assertions in functions that expect
+  /// the mutex to already be held.
+  bool get isLocked => _locked;
+
   var _locked = false;
   final _outstandingRequests = Queue<Completer<void>>();
 }

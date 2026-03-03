@@ -25,7 +25,11 @@ class TabBarExample extends StatefulWidget {
 }
 
 class _TabBarExampleState extends State<TabBarExample> {
-  final List<Color> tabColors = <Color>[Colors.purple, Colors.purple, Colors.purple];
+  final List<Color> tabColors = <Color>[
+    Colors.purple,
+    Colors.purple,
+    Colors.purple,
+  ];
 
   @override
   Widget build(BuildContext context) {

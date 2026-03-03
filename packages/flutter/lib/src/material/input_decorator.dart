@@ -362,9 +362,9 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
     final Widget? oldHelper = old.helper;
     final String? oldHelperText = old.helperText;
 
-    final bool errorStateChanged = (newError != null) != (oldError != null);
-    final bool errorTextStateChanged = (newErrorText != null) != (oldErrorText != null);
-    final bool helperStateChanged = (newHelper != null) != (oldHelper != null);
+    final errorStateChanged = (newError != null) != (oldError != null);
+    final errorTextStateChanged = (newErrorText != null) != (oldErrorText != null);
+    final helperStateChanged = (newHelper != null) != (oldHelper != null);
     final bool helperTextStateChanged =
         newErrorText == null && (newHelperText != null) != (oldHelperText != null);
 
@@ -596,6 +596,7 @@ class _Decoration {
     required this.visualDensity,
     required this.inputGap,
     required this.maintainHintSize,
+    required this.maintainLabelSize,
     this.icon,
     this.input,
     this.label,
@@ -622,6 +623,7 @@ class _Decoration {
   final VisualDensity visualDensity;
   final double inputGap;
   final bool maintainHintSize;
+  final bool maintainLabelSize;
   final Widget? icon;
   final Widget? input;
   final Widget? label;
@@ -656,6 +658,7 @@ class _Decoration {
         other.visualDensity == visualDensity &&
         other.inputGap == inputGap &&
         other.maintainHintSize == maintainHintSize &&
+        other.maintainLabelSize == maintainLabelSize &&
         other.icon == icon &&
         other.input == input &&
         other.label == label &&
@@ -683,14 +686,14 @@ class _Decoration {
     visualDensity,
     inputGap,
     maintainHintSize,
+    maintainLabelSize,
     icon,
     input,
     label,
     hint,
     prefix,
     suffix,
-    prefixIcon,
-    Object.hash(suffixIcon, helperError, counter, container),
+    Object.hash(prefixIcon, suffixIcon, helperError, counter, container),
   );
 }
 
@@ -1002,7 +1005,7 @@ class _RenderDecoration extends RenderBox
     final Size prefixSize = prefix == null ? Size.zero : layoutChild(prefix, contentConstraints);
     final Size suffixSize = suffix == null ? Size.zero : layoutChild(suffix, contentConstraints);
 
-    final EdgeInsetsDirectional accessoryHorizontalInsets = EdgeInsetsDirectional.only(
+    final accessoryHorizontalInsets = EdgeInsetsDirectional.only(
       start:
           iconWidth +
           prefixSize.width +
@@ -1167,7 +1170,7 @@ class _RenderDecoration extends RenderBox
       // below center alignments are interpolated independently.
       final double outlineCenterBaseline =
           inputInternalBaseline + baselineAdjustment / 2.0 + (containerHeight - inputHeight) / 2.0;
-      final double outlineTopBaseline = topInputBaseline;
+      final outlineTopBaseline = topInputBaseline;
       final double outlineBottomBaseline = topInputBaseline + maxVerticalOffset;
       baseline = _interpolateThree(
         outlineTopBaseline,
@@ -1212,9 +1215,12 @@ class _RenderDecoration extends RenderBox
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    final double contentWidth = decoration.isEmpty || decoration.maintainHintSize
+    final double inputWidth = decoration.isEmpty || decoration.maintainHintSize
         ? math.max(_minWidth(input, height), _minWidth(hint, height))
         : _minWidth(input, height);
+    final double contentWidth = decoration.maintainLabelSize
+        ? math.max(inputWidth, _minWidth(label, height))
+        : inputWidth;
     return _minWidth(icon, height) +
         (prefixIcon != null ? prefixToInputGap : contentPadding.start + decoration.inputGap) +
         _minWidth(prefixIcon, height) +
@@ -1227,9 +1233,12 @@ class _RenderDecoration extends RenderBox
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    final double contentWidth = decoration.isEmpty || decoration.maintainHintSize
+    final double inputWidth = decoration.isEmpty || decoration.maintainHintSize
         ? math.max(_maxWidth(input, height), _maxWidth(hint, height))
         : _maxWidth(input, height);
+    final double contentWidth = decoration.maintainLabelSize
+        ? math.max(inputWidth, _maxWidth(label, height))
+        : inputWidth;
     return _maxWidth(icon, height) +
         (prefixIcon != null ? prefixToInputGap : contentPadding.start + decoration.inputGap) +
         _maxWidth(prefixIcon, height) +
@@ -1241,8 +1250,8 @@ class _RenderDecoration extends RenderBox
   }
 
   double _lineHeight(double width, List<RenderBox?> boxes) {
-    double height = 0.0;
-    for (final RenderBox? box in boxes) {
+    var height = 0.0;
+    for (final box in boxes) {
       if (box == null) {
         continue;
       }
@@ -1389,7 +1398,7 @@ class _RenderDecoration extends RenderBox
 
     final RenderBox? container = this.container;
     if (container != null) {
-      final BoxConstraints containerConstraints = BoxConstraints.tightFor(
+      final containerConstraints = BoxConstraints.tightFor(
         height: layout.containerHeight,
         width: overallWidth - _boxSize(icon).width,
       );
@@ -1545,7 +1554,7 @@ class _RenderDecoration extends RenderBox
       // _BorderContainer's x and is independent of label's x.
       switch (textDirection) {
         case TextDirection.rtl:
-          double offsetToPrefixIcon = 0.0;
+          var offsetToPrefixIcon = 0.0;
           if (prefixIcon != null && !decoration.alignLabelWithHint) {
             offsetToPrefixIcon = material3 ? _boxSize(prefixIcon).width - contentPadding.end : 0;
           }
@@ -1559,7 +1568,7 @@ class _RenderDecoration extends RenderBox
           // The value of _InputBorderGap.start is relative to the origin of the
           // _BorderContainer which is inset by the icon's width. Although, when
           // floating label is centered, it's already relative to _BorderContainer.
-          double offsetToPrefixIcon = 0.0;
+          var offsetToPrefixIcon = 0.0;
           if (prefixIcon != null && !decoration.alignLabelWithHint) {
             offsetToPrefixIcon = material3
                 ? (-_boxSize(prefixIcon).width + contentPadding.start)
@@ -1599,7 +1608,7 @@ class _RenderDecoration extends RenderBox
       // +1 shifts the range of x from (-1.0, 1.0) to (0.0, 2.0).
       final double floatAlign = decoration.floatingLabelAlignment._x + 1;
       final double floatWidth = labelWidth * _kFinalLabelScale;
-      final double borderWeight = decoration.border.borderSide.width;
+      final BorderSide borderSide = decoration.border.borderSide;
       final double t = decoration.floatingLabelProgress;
       // The center of the outline border label ends up a little below the
       // center of the top border line.
@@ -1607,7 +1616,7 @@ class _RenderDecoration extends RenderBox
       // Temporary opt-in fix for https://github.com/flutter/flutter/issues/54028
       // Center the scaled label relative to the border.
       final double outlinedFloatingY =
-          (-labelHeight * _kFinalLabelScale) / 2.0 + borderWeight / 2.0;
+          (-labelHeight * _kFinalLabelScale) / 2.0 - borderSide.strokeOffset / 2.0;
       final double floatingY = isOutlineBorder
           ? outlinedFloatingY
           : contentPadding.top + _densityOffset.dy / 2;
@@ -1697,19 +1706,17 @@ class _RenderDecoration extends RenderBox
   ChildSemanticsConfigurationsResult _childSemanticsConfigurationDelegate(
     List<SemanticsConfiguration> childConfigs,
   ) {
-    final ChildSemanticsConfigurationsResultBuilder builder =
-        ChildSemanticsConfigurationsResultBuilder();
+    final builder = ChildSemanticsConfigurationsResultBuilder();
 
-    final Map<SemanticsTag, List<SemanticsConfiguration>> mergeGroups =
-        <SemanticsTag, List<SemanticsConfiguration>>{};
-    final Set<SemanticsTag> tags = <SemanticsTag>{
+    final mergeGroups = <SemanticsTag, List<SemanticsConfiguration>>{};
+    final tags = <SemanticsTag>{
       _InputDecoratorState._kPrefixSemanticsTag,
       _InputDecoratorState._kPrefixIconSemanticsTag,
       _InputDecoratorState._kSuffixSemanticsTag,
       _InputDecoratorState._kSuffixIconSemanticsTag,
     };
 
-    for (final SemanticsConfiguration childConfig in childConfigs) {
+    for (final childConfig in childConfigs) {
       final SemanticsTag? tag = tags.firstWhereOrNull(
         (SemanticsTag tag) => childConfig.tagsChildrenWith(tag),
       );
@@ -2075,7 +2082,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       _effectiveDecoration = null;
     }
 
-    final bool floatBehaviorChanged =
+    final floatBehaviorChanged =
         widget.decoration.floatingLabelBehavior != old.decoration.floatingLabelBehavior;
 
     if (widget._labelShouldWithdraw != old._labelShouldWithdraw || floatBehaviorChanged) {
@@ -2436,7 +2443,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     }
 
     final bool decorationIsDense = decoration.isDense ?? false;
-    final double iconSize = decorationIsDense ? 18.0 : 24.0;
+    final iconSize = decorationIsDense ? 18.0 : 24.0;
 
     final Widget? icon = decoration.icon == null
         ? null
@@ -2627,7 +2634,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
               : const EdgeInsetsDirectional.fromSTEB(12.0, 24.0, 12.0, 16.0));
     }
 
-    double inputGap = 0.0;
+    var inputGap = 0.0;
     if (useMaterial3) {
       if (border is OutlineInputBorder) {
         inputGap = border.gapPadding;
@@ -2636,7 +2643,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       }
     }
 
-    final _Decorator decorator = _Decorator(
+    final decorator = _Decorator(
       decoration: _Decoration(
         contentPadding: contentPadding,
         isCollapsed: decoration.isCollapsed!,
@@ -2651,6 +2658,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         isEmpty: isEmpty,
         visualDensity: visualDensity,
         maintainHintSize: maintainHintSize,
+        maintainLabelSize: decoration.maintainLabelSize,
         icon: icon,
         input: input,
         label: label,
@@ -2670,11 +2678,24 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       expands: widget.expands,
     );
 
+    // Pass error text to semantics so screen readers announce it along with
+    // the input field (via aria-description on web). The hintText is already
+    // in the semantics tree via the hint Text widget that merges up through
+    // _RenderDecoration's childSemanticsConfigurationDelegate, so we only
+    // need to add errorText here. Adding hintText would cause duplication.
+    // TODO(flutter-zl): A follow-up using aria-describedby with element IDs
+    // will address complex cases (custom error widgets, errors outside
+    // InputDecoration, custom announcement ordering). See
+    // https://github.com/flutter/flutter/issues/180496#issuecomment-3713178684.
+    final String? semanticsHint = decoration.errorText;
+
+    final Widget result = Semantics(hint: semanticsHint, child: decorator);
+
     final BoxConstraints? constraints = decoration.constraints;
     if (constraints != null) {
-      return ConstrainedBox(constraints: constraints, child: decorator);
+      return ConstrainedBox(constraints: constraints, child: result);
     }
-    return decorator;
+    return result;
   }
 }
 
@@ -2787,6 +2808,7 @@ class InputDecoration {
     )
     this.maintainHintHeight = true,
     this.maintainHintSize = true,
+    this.maintainLabelSize = false,
     this.error,
     this.errorText,
     this.errorStyle,
@@ -2884,6 +2906,7 @@ class InputDecoration {
     )
     this.maintainHintHeight = true,
     this.maintainHintSize = true,
+    this.maintainLabelSize = false,
     this.filled = false,
     this.fillColor,
     this.focusColor,
@@ -3174,13 +3197,22 @@ class InputDecoration {
   final bool maintainHintHeight;
 
   /// Whether the input field's size should always be greater than or equal to
-  /// the size of the [hintText], even if the [hintText] is not visible.
+  /// the size of the [hint] or [hintText], even if the [hint] or [hintText] are not visible.
   ///
-  /// The [InputDecorator] widget ignores [hintText] during layout when
-  /// it's not visible, if this flag is set to false.
+  /// The [InputDecorator] widget ignores [hint] and [hintText] during layout when
+  /// they are not visible, if this flag is set to false.
   ///
   /// Defaults to true.
   final bool maintainHintSize;
+
+  /// Whether the input field's size should always be greater than or equal to
+  /// the size of the [label] or [labelText], even if the [label] or [labelText] are not visible.
+  ///
+  /// The [InputDecorator] widget ignores [label] and [labelText] during layout when
+  /// this flag is set to false.
+  ///
+  /// Defaults to false for compatibility reason.
+  final bool maintainLabelSize;
 
   /// Optional widget that appears below the [InputDecorator.child] and the border.
   ///
@@ -3893,6 +3925,7 @@ class InputDecoration {
     int? hintMaxLines,
     bool? maintainHintHeight,
     bool? maintainHintSize,
+    bool? maintainLabelSize,
     Widget? error,
     String? errorText,
     TextStyle? errorStyle,
@@ -3953,6 +3986,7 @@ class InputDecoration {
       hintFadeDuration: hintFadeDuration ?? this.hintFadeDuration,
       maintainHintHeight: maintainHintHeight ?? this.maintainHintHeight,
       maintainHintSize: maintainHintSize ?? this.maintainHintSize,
+      maintainLabelSize: maintainLabelSize ?? this.maintainLabelSize,
       error: error ?? this.error,
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
@@ -4077,6 +4111,7 @@ class InputDecoration {
         other.hintFadeDuration == hintFadeDuration &&
         other.maintainHintHeight == maintainHintHeight &&
         other.maintainHintSize == maintainHintSize &&
+        other.maintainLabelSize == maintainLabelSize &&
         other.error == error &&
         other.errorText == errorText &&
         other.errorStyle == errorStyle &&
@@ -4120,7 +4155,7 @@ class InputDecoration {
 
   @override
   int get hashCode {
-    final List<Object?> values = <Object?>[
+    final values = <Object?>[
       icon,
       iconColor,
       label,
@@ -4139,6 +4174,7 @@ class InputDecoration {
       hintFadeDuration,
       maintainHintHeight,
       maintainHintSize,
+      maintainLabelSize,
       error,
       errorText,
       errorStyle,
@@ -4184,7 +4220,7 @@ class InputDecoration {
 
   @override
   String toString() {
-    final List<String> description = <String>[
+    final description = <String>[
       if (icon != null) 'icon: $icon',
       if (iconColor != null) 'iconColor: $iconColor',
       if (label != null) 'label: $label',
@@ -4199,6 +4235,7 @@ class InputDecoration {
       if (hintFadeDuration != null) 'hintFadeDuration: "$hintFadeDuration"',
       if (!maintainHintHeight) 'maintainHintHeight: false',
       if (!maintainHintSize) 'maintainHintSize: false',
+      if (maintainLabelSize) 'maintainLabelSize: true',
       if (error != null) 'error: "$error"',
       if (errorText != null) 'errorText: "$errorText"',
       if (errorStyle != null) 'errorStyle: "$errorStyle"',
@@ -5569,7 +5606,7 @@ class InputDecorationThemeData with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    const InputDecorationThemeData defaultTheme = InputDecorationThemeData();
+    const defaultTheme = InputDecorationThemeData();
     properties.add(
       DiagnosticsProperty<TextStyle>(
         'labelStyle',

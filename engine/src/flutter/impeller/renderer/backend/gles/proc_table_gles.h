@@ -9,6 +9,7 @@
 #include <string>
 #include <string_view>
 
+#include "GLES3/gl3.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/mapping.h"
 #include "impeller/renderer/backend/gles/capabilities_gles.h"
@@ -50,9 +51,21 @@ struct AutoErrorCheck {
   }
 };
 
+template <typename Type>
+struct ArgLogger {
+  static void log(std::stringstream& stream, Type arg) { stream << arg; }
+};
+
+template <typename R, typename... Args>
+struct ArgLogger<R (*)(Args...)> {
+  static void log(std::stringstream& stream, R (*val)(Args...)) {
+    stream << reinterpret_cast<void*>(val);
+  }
+};
+
 template <class Type>
 void BuildGLArgumentsStream(std::stringstream& stream, Type arg) {
-  stream << arg;
+  ArgLogger<Type>::log(stream, arg);
 }
 
 constexpr void BuildGLArgumentsStream(std::stringstream& stream) {}
@@ -218,6 +231,8 @@ struct GLProc {
   PROC(Uniform2fv);                          \
   PROC(Uniform3fv);                          \
   PROC(Uniform4fv);                          \
+  PROC(UniformMatrix2fv);                    \
+  PROC(UniformMatrix3fv);                    \
   PROC(UniformMatrix4fv);                    \
   PROC(UseProgram);                          \
   PROC(VertexAttribPointer);                 \
@@ -255,6 +270,7 @@ void(glDepthRange)(GLdouble n, GLdouble f);
 
 #define FOR_EACH_IMPELLER_EXT_PROC(PROC)    \
   PROC(DebugMessageControlKHR);             \
+  PROC(DebugMessageCallbackKHR);            \
   PROC(DiscardFramebufferEXT);              \
   PROC(FramebufferTexture2DMultisampleEXT); \
   PROC(PushDebugGroupKHR);                  \
@@ -316,6 +332,11 @@ class ProcTableGLES {
   std::string DescribeCurrentFramebuffer() const;
 
   std::string GetProgramInfoLogString(GLuint program) const;
+
+  // Only check framebuffer status in debug builds.
+  // Prefer this if possible to direct calls to CheckFramebufferStatus,
+  // which can cause CPU<->GPU round-trips.
+  GLenum CheckFramebufferStatusDebug(GLenum target) const;
 
   bool IsCurrentFramebufferComplete() const;
 

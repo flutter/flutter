@@ -6,7 +6,7 @@
 #define FLUTTER_TOOLS_LICENSES_CPP_SRC_MMAP_FILE_H_
 
 #include <string_view>
-#include "flutter/third_party/abseil-cpp/absl/status/statusor.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 /// A memory mapped file.
 class MMapFile {

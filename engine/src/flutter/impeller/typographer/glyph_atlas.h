@@ -9,11 +9,11 @@
 #include <memory>
 #include <optional>
 
-#include "flutter/third_party/abseil-cpp/absl/container/flat_hash_map.h"
 #include "impeller/core/texture.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/typographer/font_glyph_pair.h"
 #include "impeller/typographer/rectangle_packer.h"
+#include "third_party/abseil-cpp/absl/container/flat_hash_map.h"
 
 namespace impeller {
 
@@ -137,11 +137,26 @@ class GlyphAtlas {
   /// @param[in]  font  The font
   /// @param[in]  scale The scale
   ///
+  /// @return     A pointer to a FontGlyphAtlas, which may be an empty atlas
+  ///             if the font and scale are not yet available in the atlas.
+  ///             The pointer is only valid for the lifetime of the GlyphAtlas.
+  ///
+  FontGlyphAtlas* GetOrCreateFontGlyphAtlas(const ScaledFont& scaled_font);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Obtain an interface for querying the location of glyphs in the
+  ///             atlas for the given font and scale if such a font atlas
+  ///             already exists.  This provides a more efficient way to look
+  ///             up an existing run of glyphs in the same font.
+  ///
+  /// @param[in]  font  The font
+  /// @param[in]  scale The scale
+  ///
   /// @return     A pointer to a FontGlyphAtlas, or nullptr if the font and
   ///             scale are not available in the atlas.  The pointer is only
   ///             valid for the lifetime of the GlyphAtlas.
   ///
-  FontGlyphAtlas* GetOrCreateFontGlyphAtlas(const ScaledFont& scaled_font);
+  const FontGlyphAtlas* GetFontGlyphAtlas(const ScaledFont& scaled_font) const;
 
   //----------------------------------------------------------------------------
   /// @brief      Retrieve the generation id for this glyph atlas.

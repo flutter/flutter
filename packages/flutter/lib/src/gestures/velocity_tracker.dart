@@ -187,11 +187,11 @@ class VelocityTracker {
       );
     }
 
-    final List<double> x = <double>[];
-    final List<double> y = <double>[];
-    final List<double> w = <double>[];
-    final List<double> time = <double>[];
-    int sampleCount = 0;
+    final x = <double>[];
+    final y = <double>[];
+    final w = <double>[];
+    final time = <double>[];
+    var sampleCount = 0;
     int index = _index;
 
     final _PointAtTime? newestSample = _samples[index];
@@ -371,7 +371,7 @@ class IOSScrollViewFlingVelocityTracker extends VelocityTracker {
     final _PointAtTime? newestSample = _touchSamples[_index];
     _PointAtTime? oldestNonNullSample;
 
-    for (int i = 1; i <= _sampleSize; i += 1) {
+    for (var i = 1; i <= _sampleSize; i += 1) {
       oldestNonNullSample = _touchSamples[(_index + i) % _sampleSize];
       if (oldestNonNullSample != null) {
         break;
@@ -441,7 +441,7 @@ class MacOSScrollViewFlingVelocityTracker extends IOSScrollViewFlingVelocityTrac
     final _PointAtTime? newestSample = _touchSamples[_index];
     _PointAtTime? oldestNonNullSample;
 
-    for (int i = 1; i <= IOSScrollViewFlingVelocityTracker._sampleSize; i += 1) {
+    for (var i = 1; i <= IOSScrollViewFlingVelocityTracker._sampleSize; i += 1) {
       oldestNonNullSample =
           _touchSamples[(_index + i) % IOSScrollViewFlingVelocityTracker._sampleSize];
       if (oldestNonNullSample != null) {
