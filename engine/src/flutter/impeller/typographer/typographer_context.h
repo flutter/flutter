@@ -16,7 +16,7 @@ namespace impeller {
 /// The data associated with a single rendering instance of a TextFrame,
 /// used to pre-load the glyph atlas with glyph and bounds information.
 struct RenderableText {
-  /// The TextFrame being rendered
+  /// The TextFrame being rendered.
   const std::shared_ptr<TextFrame> text_frame;
 
   /// The transform that places the origin of the TextFrame within screen
