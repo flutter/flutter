@@ -2941,8 +2941,8 @@ void main() {
     }
 
     testWidgets('showValueIndicator set to onlyForDiscrete', (WidgetTester tester) async {
-      final sliderTheme = baseSliderTheme;
-      // Default value is onlyForDiscrete.
+      // The default value is onlyForDiscrete. No modification is needed.
+      final SliderThemeData sliderTheme = baseSliderTheme.copyWith();
       await expectValueIndicator(
         tester,
         theme: sliderTheme,
