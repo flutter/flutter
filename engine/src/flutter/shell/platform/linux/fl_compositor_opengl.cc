@@ -395,17 +395,30 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
   // If frame not ready, then wait for it.
   gint scale_factor = gdk_window_get_scale_factor(window);
   size_t width, height;
+  gint64 expiry_time =
+      g_get_monotonic_time() + kCompositorRenderTimeoutMicroseconds;
   while (true) {
     width = gdk_window_get_width(window) * scale_factor;
     height = gdk_window_get_height(window) * scale_factor;
-    size_t framebuffer_width = fl_framebuffer_get_width(self->framebuffer);
-    size_t framebuffer_height = fl_framebuffer_get_height(self->framebuffer);
-    if (!wait_for_frame ||
-        (framebuffer_width == width && framebuffer_height == height)) {
+    if (!wait_for_frame) {
       break;
     }
+
+    size_t framebuffer_width = fl_framebuffer_get_width(self->framebuffer);
+    size_t framebuffer_height = fl_framebuffer_get_height(self->framebuffer);
+    if (framebuffer_width == width && framebuffer_height == height) {
+      break;
+    }
+
+    if (g_get_monotonic_time() > expiry_time) {
+      g_warning(
+          "Timed out waiting for OpenGL frame of size %zdx%zd (have %zdx%zd)",
+          width, height, framebuffer_width, framebuffer_height);
+      break;
+    }
+
     g_mutex_unlock(&self->frame_mutex);
-    fl_task_runner_wait(self->task_runner);
+    fl_task_runner_wait(self->task_runner, expiry_time);
     g_mutex_lock(&self->frame_mutex);
   }
 
