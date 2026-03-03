@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "accessibility_bridge.h"
+#include "flutter/shell/platform/fuchsia/flutter/accessibility_bridge.h"
 
 #include <fuchsia/ui/views/cpp/fidl.h>
 #include <lib/async-loop/cpp/loop.h>
@@ -23,7 +23,7 @@
 #include "flutter/lib/ui/semantics/semantics_node.h"
 #include "gtest/gtest.h"
 
-#include "flutter_runner_fakes.h"
+#include "flutter/shell/platform/fuchsia/flutter/flutter_runner_fakes.h"
 
 namespace flutter_runner_test {
 

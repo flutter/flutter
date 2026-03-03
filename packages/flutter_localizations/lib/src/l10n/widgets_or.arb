@@ -1,18 +1,18 @@
 {
-  "reorderItemToStart": "ଆରମ୍ଭକୁ ଯାଆନ୍ତୁ",
-  "reorderItemToEnd": "ଶେଷକୁ ଯାଆନ୍ତୁ",
-  "reorderItemUp": "ଉପରକୁ ନିଅନ୍ତୁ",
-  "reorderItemDown": "ତଳକୁ ଯାଆନ୍ତୁ",
-  "reorderItemLeft": "ବାମକୁ ଯାଆନ୍ତୁ",
-  "reorderItemRight": "ଡାହାଣକୁ ଯାଆନ୍ତୁ",
+  "reorderItemToStart": "ଆରମ୍ଭକୁ ମୁଭ କରନ୍ତୁ",
+  "reorderItemToEnd": "ଶେଷକୁ ମୁଭ କରନ୍ତୁ",
+  "reorderItemUp": "ଉପରକୁ ମୁଭ କରନ୍ତୁ",
+  "reorderItemDown": "ତଳକୁ ମୁଭ କରନ୍ତୁ",
+  "reorderItemLeft": "ବାମକୁ ମୁଭ କରନ୍ତୁ",
+  "reorderItemRight": "ଡାହାଣକୁ ମୁଭ କରନ୍ତୁ",
   "copyButtonLabel": "କପି କରନ୍ତୁ",
-  "cutButtonLabel": "କଟ୍ କରନ୍ତୁ",
+  "cutButtonLabel": "କଟ କରନ୍ତୁ",
   "lookUpButtonLabel": "ଉପରକୁ ଦେଖନ୍ତୁ",
   "searchWebButtonLabel": "ୱେବ ସର୍ଚ୍ଚ କରନ୍ତୁ",
   "shareButtonLabel": "ସେୟାର କରନ୍ତୁ",
   "pasteButtonLabel": "ପେଷ୍ଟ କରନ୍ତୁ",
   "selectAllButtonLabel": "ସବୁ ଚୟନ କରନ୍ତୁ",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "ସର୍ଚ୍ଚ ଫଳାଫଳ ମିଳିଛି",
+  "noResultsFound": "କୌଣସି ଫଳାଫଳ ମିଳିଲା ନାହିଁ",
+  "radioButtonUnselectedLabel": "ଚୟନ କରାଯାଇନାହିଁ"
 }

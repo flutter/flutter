@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <memory>
 
 namespace impeller {
 namespace compiler {
@@ -84,11 +85,10 @@ std::unique_ptr<fml::FileMapping> CompilerTestBase::GetShaderFile(
   return fml::FileMapping::CreateReadOnly(fd);
 }
 
-bool CompilerTestBase::CanCompileAndReflect(
-    const char* fixture_name,
-    SourceType source_type,
-    SourceLanguage source_language,
-    const char* entry_point_name) const {
+bool CompilerTestBase::CanCompileAndReflect(const char* fixture_name,
+                                            SourceType source_type,
+                                            SourceLanguage source_language,
+                                            const char* entry_point_name) {
   std::shared_ptr<fml::Mapping> fixture =
       flutter::testing::OpenFixtureAsMapping(fixture_name);
   if (!fixture || !fixture->GetMapping()) {
@@ -106,16 +106,18 @@ bool CompilerTestBase::CanCompileAndReflect(
       entry_point_name);
 
   Reflector::Options reflector_options;
+  reflector_options.target_platform = GetParam();
   reflector_options.header_file_name = ReflectionHeaderName(fixture_name);
   reflector_options.shader_name = "shader_name";
 
-  Compiler compiler(fixture, source_options, reflector_options);
-  if (!compiler.IsValid()) {
-    VALIDATION_LOG << "Compilation failed: " << compiler.GetErrorMessages();
+  compiler_ =
+      std::make_unique<Compiler>(fixture, source_options, reflector_options);
+  if (!compiler_->IsValid()) {
+    VALIDATION_LOG << "Compilation failed: " << compiler_->GetErrorMessages();
     return false;
   }
 
-  auto spirv_assembly = compiler.GetSPIRVAssembly();
+  auto spirv_assembly = compiler_->GetSPIRVAssembly();
   if (!spirv_assembly) {
     VALIDATION_LOG << "No spirv was generated.";
     return false;
@@ -128,7 +130,7 @@ bool CompilerTestBase::CanCompileAndReflect(
     return false;
   }
 
-  auto sl_source = compiler.GetSLShaderSource();
+  auto sl_source = compiler_->GetSLShaderSource();
   if (!sl_source) {
     VALIDATION_LOG << "No SL source was generated.";
     return false;
@@ -141,55 +143,56 @@ bool CompilerTestBase::CanCompileAndReflect(
     return false;
   }
 
-  if (TargetPlatformNeedsReflection(GetParam())) {
-    auto reflector = compiler.GetReflector();
-    if (!reflector) {
-      VALIDATION_LOG
-          << "No reflector was found for target platform SL compiler.";
-      return false;
-    }
+  auto reflector = compiler_->GetReflector();
+  if (!reflector) {
+    VALIDATION_LOG << "No reflector was found for target platform SL compiler.";
+    return false;
+  }
 
-    auto reflection_json = reflector->GetReflectionJSON();
-    auto reflection_header = reflector->GetReflectionHeader();
-    auto reflection_source = reflector->GetReflectionCC();
+  auto reflection_json = reflector->GetReflectionJSON();
+  auto reflection_header = reflector->GetReflectionHeader();
+  auto reflection_source = reflector->GetReflectionCC();
 
-    if (!reflection_json) {
-      VALIDATION_LOG << "Reflection JSON was not found.";
-      return false;
-    }
+  if (!reflection_json) {
+    VALIDATION_LOG << "Reflection JSON was not found.";
+    return false;
+  }
 
-    if (!reflection_header) {
-      VALIDATION_LOG << "Reflection header was not found.";
-      return false;
-    }
+  if (!reflection_header) {
+    VALIDATION_LOG << "Reflection header was not found.";
+    return false;
+  }
 
-    if (!reflection_source) {
-      VALIDATION_LOG << "Reflection source was not found.";
-      return false;
-    }
+  if (!reflection_source) {
+    VALIDATION_LOG << "Reflection source was not found.";
+    return false;
+  }
 
-    if (!fml::WriteAtomically(intermediates_directory_,
-                              ReflectionHeaderName(fixture_name).c_str(),
-                              *reflection_header)) {
-      VALIDATION_LOG << "Could not write reflection header intermediates.";
-      return false;
-    }
+  if (!fml::WriteAtomically(intermediates_directory_,
+                            ReflectionHeaderName(fixture_name).c_str(),
+                            *reflection_header)) {
+    VALIDATION_LOG << "Could not write reflection header intermediates.";
+    return false;
+  }
 
-    if (!fml::WriteAtomically(intermediates_directory_,
-                              ReflectionCCName(fixture_name).c_str(),
-                              *reflection_source)) {
-      VALIDATION_LOG << "Could not write reflection CC intermediates.";
-      return false;
-    }
+  if (!fml::WriteAtomically(intermediates_directory_,
+                            ReflectionCCName(fixture_name).c_str(),
+                            *reflection_source)) {
+    VALIDATION_LOG << "Could not write reflection CC intermediates.";
+    return false;
+  }
 
-    if (!fml::WriteAtomically(intermediates_directory_,
-                              ReflectionJSONName(fixture_name).c_str(),
-                              *reflection_json)) {
-      VALIDATION_LOG << "Could not write reflection json intermediates.";
-      return false;
-    }
+  if (!fml::WriteAtomically(intermediates_directory_,
+                            ReflectionJSONName(fixture_name).c_str(),
+                            *reflection_json)) {
+    VALIDATION_LOG << "Could not write reflection json intermediates.";
+    return false;
   }
   return true;
+}
+
+const Compiler* CompilerTestBase::GetCompiler() const {
+  return compiler_.get();
 }
 
 }  // namespace testing

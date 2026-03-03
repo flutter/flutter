@@ -228,6 +228,7 @@ class AndroidDevice extends Device {
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.ios:
       case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_riscv64:
       case TargetPlatform.linux_x64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
@@ -551,6 +552,7 @@ class AndroidDevice extends Device {
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.ios:
       case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_riscv64:
       case TargetPlatform.linux_x64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
@@ -684,6 +686,11 @@ class AndroidDevice extends Device {
           '--es',
           'dart-flags',
           debuggingOptions.dartFlags,
+        ],
+        if (debuggingOptions.enableSurfaceControl) ...<String>[
+          '--ez',
+          'enable-surface-control',
+          'true',
         ],
         if (debuggingOptions.useTestFonts) ...<String>['--ez', 'use-test-fonts', 'true'],
         if (debuggingOptions.verboseSystemLogs) ...<String>['--ez', 'verbose-logging', 'true'],

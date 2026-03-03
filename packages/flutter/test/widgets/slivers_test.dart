@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'list_tile_tester.dart';
 import 'semantics_tester.dart';
 
 Future<void> test(WidgetTester tester, double offset, {double anchor = 0.0}) {
@@ -261,9 +262,8 @@ void main() {
     Future<void> pumpSliverGrid(bool replace) async {
       await tester.pumpWidget(
         Center(
-          child: SizedBox(
-            width: 200,
-            height: 200,
+          child: SizedBox.square(
+            dimension: 200,
             child: Directionality(
               textDirection: TextDirection.ltr,
               child: CustomScrollView(
@@ -445,9 +445,8 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: SizedBox(
-            width: 4,
-            height: 4,
+          child: SizedBox.square(
+            dimension: 4,
             child: CustomScrollView(
               slivers: <Widget>[
                 SliverGrid(
@@ -481,7 +480,7 @@ void main() {
     Widget buildItem(BuildContext context, int index) {
       return !skip || index.isEven
           ? Card(
-              child: ListTile(title: Text('item$index', style: const TextStyle(fontSize: 80))),
+              child: TestListTile(title: Text('item$index', style: const TextStyle(fontSize: 80))),
             )
           : Container();
     }

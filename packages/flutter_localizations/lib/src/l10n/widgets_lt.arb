@@ -12,7 +12,7 @@
   "shareButtonLabel": "Bendrinti",
   "pasteButtonLabel": "Įklijuoti",
   "selectAllButtonLabel": "Pasirinkti viską",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "Rasta paieškos rezultatų",
+  "noResultsFound": "Rezultatų nerasta",
+  "radioButtonUnselectedLabel": "Nepasirinkta"
 }

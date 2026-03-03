@@ -628,9 +628,8 @@ void main() {
         Directionality(
           textDirection: TextDirection.rtl,
           child: Center(
-            child: SizedBox(
-              width: 100.0,
-              height: 100.0,
+            child: SizedBox.square(
+              dimension: 100.0,
               child: RepaintBoundary(
                 child: Container(
                   clipBehavior: Clip.hardEdge,
@@ -778,6 +777,20 @@ void main() {
       find.byType(RepaintBoundary),
       matchesGoldenFile('container.clipBehaviour.with.shadow.png'),
     );
+  });
+
+  testWidgets('Container does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: Container(decoration: const BoxDecoration(), child: const Text('X')),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Container)), Size.zero);
   });
 
   testWidgets('DecoratedBox does not crash at zero area', (WidgetTester tester) async {

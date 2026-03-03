@@ -78,6 +78,8 @@ No widgets found at Offset(1.0, 1.0).
   testWidgets('Should print message on pointer events with setSurfaceSize', (
     WidgetTester tester,
   ) async {
+    addTearDown(tester.binding.resetLayers);
+
     final printedMessages = <String?>[];
 
     var invocations = 0;

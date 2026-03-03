@@ -1,5 +1,5 @@
 bsd2 clause android
-^Copyright \(C\) [\d-]+ The Android Open Source Project
+(?s)^Copyright \(C\) [\d-]+ The Android Open Source Project.*Redistributions
 Copyright \(C\) [\d-]+ The Android Open Source Project
 All rights reserved.
 

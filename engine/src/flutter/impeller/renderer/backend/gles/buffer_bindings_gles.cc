@@ -294,9 +294,8 @@ const std::vector<GLint>& BufferBindingsGLES::ComputeUniformLocations(
       continue;
     }
 
-    size_t element_count = member.array_elements.value_or(1);
-    const std::string member_key =
-        CreateUniformMemberKey(metadata->name, member.name, element_count > 1);
+    const std::string member_key = CreateUniformMemberKey(
+        metadata->name, member.name, member.array_elements.has_value());
     const absl::flat_hash_map<std::string, GLint>::iterator computed_location =
         uniform_locations_.find(member_key);
     if (computed_location == uniform_locations_.end()) {
@@ -375,17 +374,7 @@ bool BufferBindingsGLES::BindUniformBufferV2(
       continue;
     }
 
-    // The reflector/runtime stage data is confused as to whether 0 means
-    // no elements or whether it is not an array. Specifically:
-    //   * The built-in generated header files use std::nullopt to mean not
-    //   an array. Setting the array_elements count to 1 generates incorrect
-    //   code that tries to create 1 length arrays.
-    //   * The runtime stage flatbuffer serializes the std::nullopt as 0,
-    //     and thus needs to treat array length of 0 as a scalar element.
     size_t element_count = member.array_elements.value_or(1);
-    if (element_count == 0) {
-      element_count = 1;
-    }
     size_t element_stride = member.byte_length / element_count;
     auto* buffer_data =
         reinterpret_cast<const GLfloat*>(buffer_ptr + member.offset);
@@ -413,41 +402,33 @@ bool BufferBindingsGLES::BindUniformBufferV2(
       return false;
     }
 
-    switch (member.size) {
-      case sizeof(Matrix):
-        gl.UniformMatrix4fv(location,       // location
-                            element_count,  // count
-                            GL_FALSE,       // normalize
-                            buffer_data     // data
-        );
-        continue;
-      case sizeof(Vector4):
-        gl.Uniform4fv(location,       // location
-                      element_count,  // count
-                      buffer_data     // data
-        );
-        continue;
-      case sizeof(Vector3):
-        gl.Uniform3fv(location,       // location
-                      element_count,  // count
-                      buffer_data     // data
-        );
-        continue;
-      case sizeof(Vector2):
-        gl.Uniform2fv(location,       // location
-                      element_count,  // count
-                      buffer_data     // data
-        );
-        continue;
-      case sizeof(Scalar):
-        gl.Uniform1fv(location,       // location
-                      element_count,  // count
-                      buffer_data     // data
-        );
-        continue;
-      default:
-        VALIDATION_LOG << "Invalid member size binding: " << member.size;
-        return false;
+    if (!member.float_type.has_value()) {
+      VALIDATION_LOG << "Float uniform should have a float type.";
+      return false;
+    }
+
+    switch (member.float_type.value()) {
+      case ShaderFloatType::kFloat:
+        gl.Uniform1fv(location, element_count, buffer_data);
+        break;
+      case ShaderFloatType::kVec2:
+        gl.Uniform2fv(location, element_count, buffer_data);
+        break;
+      case ShaderFloatType::kVec3:
+        gl.Uniform3fv(location, element_count, buffer_data);
+        break;
+      case ShaderFloatType::kVec4:
+        gl.Uniform4fv(location, element_count, buffer_data);
+        break;
+      case ShaderFloatType::kMat2:
+        gl.UniformMatrix2fv(location, element_count, GL_FALSE, buffer_data);
+        break;
+      case ShaderFloatType::kMat3:
+        gl.UniformMatrix3fv(location, element_count, GL_FALSE, buffer_data);
+        break;
+      case ShaderFloatType::kMat4:
+        gl.UniformMatrix4fv(location, element_count, GL_FALSE, buffer_data);
+        break;
     }
   }
   return true;

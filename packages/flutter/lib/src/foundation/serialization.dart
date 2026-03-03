@@ -16,6 +16,7 @@ export 'dart:typed_data'
 /// The byte order used is [Endian.host] throughout.
 class WriteBuffer {
   /// Creates an interface for incrementally building a [ByteData] instance.
+  ///
   /// [startCapacity] determines the start size of the [WriteBuffer] in bytes.
   /// The closer that value is to the real size used, the better the
   /// performance.
@@ -246,7 +247,7 @@ class ReadBuffer {
     return list;
   }
 
-  /// Reads the given number of Float32s from the buffer
+  /// Reads the given number of Float32s from the buffer.
   Float32List getFloat32List(int length) {
     _alignTo(4);
     final Float32List list = data.buffer.asFloat32List(data.offsetInBytes + _position, length);

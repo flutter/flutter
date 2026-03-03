@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import 'editable_text_tester.dart';
 import 'semantics_tester.dart';
 
 void main() {
@@ -963,7 +964,7 @@ void main() {
             home: Material(
               child: Shortcuts.manager(
                 manager: testManager,
-                child: TextField(key: textFieldKey, autofocus: true),
+                child: TestTextField(key: textFieldKey, autofocus: true),
               ),
             ),
           ),
@@ -1002,7 +1003,7 @@ void main() {
                     },
                   ),
                 },
-                child: TextField(key: textFieldKey, autofocus: true),
+                child: TestTextField(key: textFieldKey, autofocus: true),
               ),
             ),
           ),
@@ -1044,7 +1045,7 @@ void main() {
                 },
                 child: Actions(
                   actions: <Type, Action<Intent>>{TestIntent: DoNothingAction(consumesKey: false)},
-                  child: TextField(key: textFieldKey, autofocus: true),
+                  child: TestTextField(key: textFieldKey, autofocus: true),
                 ),
               ),
             ),
@@ -1089,7 +1090,7 @@ void main() {
                       LogicalKeySet(LogicalKeyboardKey.keyA):
                           const DoNothingAndStopPropagationIntent(),
                     },
-                    child: TextField(key: textFieldKey, autofocus: true),
+                    child: TestTextField(key: textFieldKey, autofocus: true),
                   ),
                 ),
               ),
@@ -1208,6 +1209,20 @@ void main() {
         description[1],
         equalsIgnoringHashCodes('shortcuts: {{Key A + Key B}: ActivateIntent#00000}'),
       );
+    });
+
+    testWidgets('Shortcuts pass debug label to focus node.', (WidgetTester tester) async {
+      const debugLabel = '<My Shortcuts Debug Label>';
+      await tester.pumpWidget(
+        const Shortcuts(
+          debugLabel: debugLabel,
+          shortcuts: <LogicalKeySet, Intent>{},
+          child: SizedBox(),
+        ),
+      );
+
+      final FocusNode focusNode = Focus.of(tester.element(find.byType(SizedBox)));
+      expect(focusNode.debugLabel, 'Shortcuts: <My Shortcuts Debug Label>');
     });
 
     testWidgets('Shortcuts support multiple intents', (WidgetTester tester) async {
@@ -1843,7 +1858,7 @@ void main() {
                     SelectionChangedCause.keyboard,
                   ),
                 },
-                child: TextField(autofocus: true, controller: controller),
+                child: TestTextField(autofocus: true, controller: controller),
               ),
             ),
           ),
@@ -2119,6 +2134,12 @@ void main() {
         await memoryEvents(() => ShortcutRegistry().dispose(), ShortcutRegistry),
         areCreateAndDispose,
       );
+    });
+
+    testWidgets('sets debug label on focus node', (WidgetTester tester) async {
+      await tester.pumpWidget(const ShortcutRegistrar(child: SizedBox()));
+      final FocusNode focusNode = Focus.of(tester.element(find.byType(SizedBox)));
+      expect(focusNode.debugLabel, 'Shortcuts: <Shortcut Registrar>');
     });
   });
 }

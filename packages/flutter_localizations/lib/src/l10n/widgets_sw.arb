@@ -12,7 +12,7 @@
   "shareButtonLabel": "Tuma",
   "pasteButtonLabel": "Bandika",
   "selectAllButtonLabel": "Chagua vyote",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "Matokeo ya utafutaji yamepatikana",
+  "noResultsFound": "Hakuna matokeo yaliyopatikana",
+  "radioButtonUnselectedLabel": "Hayajachaguliwa"
 }

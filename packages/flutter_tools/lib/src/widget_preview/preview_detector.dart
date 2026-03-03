@@ -37,6 +37,7 @@ class PreviewDetector {
     required this.onChangeDetected,
     required this.onPubspecChangeDetected,
     @visibleForTesting this.watcherBuilder = _defaultWatcherBuilder,
+    @visibleForTesting this.onPackageConfigChangeDetected,
   }) : projectRoot = project.directory;
 
   final Platform platform;
@@ -47,6 +48,8 @@ class PreviewDetector {
   final Logger logger;
   final void Function(PreviewDependencyGraph) onChangeDetected;
   final void Function(String path) onPubspecChangeDetected;
+  @visibleForTesting
+  final void Function(String path)? onPackageConfigChangeDetected;
   final WatcherBuilder watcherBuilder;
 
   @visibleForTesting
@@ -64,20 +67,21 @@ class PreviewDetector {
   PreviewDependencyGraph get dependencyGraph => _dependencyGraph;
   final PreviewDependencyGraph _dependencyGraph = PreviewDependencyGraph();
 
-  late final collection = AnalysisContextCollection(
-    includedPaths: <String>[projectRoot.absolute.path],
-    resourceProvider: PhysicalResourceProvider.INSTANCE,
+  @visibleForTesting
+  AnalysisContextCollection get collection => _collection;
+  late AnalysisContextCollection _collection;
+
+  late final String _packageConfigPath = fs.path.join(
+    projectRoot.absolute.path,
+    '.dart_tool',
+    'package_config.json',
   );
 
   /// Starts listening for changes to Dart sources under [projectRoot] and returns
   /// the initial [PreviewDependencyGraph] for the project.
   Future<PreviewDependencyGraph> initialize() {
     return mutex.runGuarded(() async {
-      // Find the initial set of previews.
-      await findPreviewFunctions(projectRoot);
-
-      // Determine which files have transitive dependencies with compile time errors.
-      _propagateErrors();
+      await _initializeAnalysisContextCollection();
 
       final Watcher watcher = watcherBuilder(projectRoot.path);
       _fileWatcher = watcher.events.listen(
@@ -118,8 +122,21 @@ class PreviewDetector {
     await mutex.runGuarded(() async {
       await _fileWatcher?.cancel();
       _fileWatcher = null;
-      await collection.dispose();
+      await _collection.dispose();
     });
+  }
+
+  Future<void> _initializeAnalysisContextCollection() async {
+    _collection = AnalysisContextCollection(
+      includedPaths: <String>[projectRoot.absolute.path],
+      resourceProvider: PhysicalResourceProvider.INSTANCE,
+    );
+
+    // Find the initial set of previews.
+    await findPreviewFunctions(projectRoot);
+
+    // Determine which files have transitive dependencies with compile time errors.
+    _propagateErrors();
   }
 
   Future<void> _onFileSystemEvent(WatchEvent event) async {
@@ -127,6 +144,16 @@ class PreviewDetector {
     // in use when we call context.changeFile(...).
     await mutex.runGuarded(() async {
       final String eventPath = event.path;
+      final File file = fs.file(eventPath);
+
+      // If the package_config.json for the project has been changed, we need to tear down the
+      // analysis context collection and recreate it to pick up the changes.
+      if (file.absolute.path == _packageConfigPath) {
+        await _collection.dispose();
+        await _initializeAnalysisContextCollection();
+        onPackageConfigChangeDetected?.call(event.path);
+        return;
+      }
       // Ignore any files under .dart_tool or ephemeral directories created by
       // the tool (e.g., build/, plugin directories, etc.).
       if (eventPath.doesContainDartTool ||
@@ -147,7 +174,7 @@ class PreviewDetector {
 
       AnalysisContext context;
       try {
-        context = collection.contextFor(eventPath);
+        context = _collection.contextFor(eventPath);
       } on StateError {
         // The modified file isn't part of the analysis context and is safe to
         // ignore.
@@ -168,7 +195,6 @@ class PreviewDetector {
       // extension which may be worth using here.
 
       // We need to notify the analyzer that this file has changed so it can reanalyze the file.
-      final File file = fs.file(eventPath);
       context.changeFile(file.path);
       final List<String> potentiallyAffectedFiles;
       try {
@@ -243,7 +269,7 @@ class PreviewDetector {
     final PreviewDependencyGraph updatedPreviews = PreviewDependencyGraph();
 
     logger.printStatus('Finding previews in ${entity.path}...');
-    for (final AnalysisContext context in collection.contexts) {
+    for (final AnalysisContext context in _collection.contexts) {
       for (final String filePath in context.contextRoot.analyzedFiles()) {
         logger.printTrace('Checking file: $filePath');
         if (!filePath.isDartFile || !filePath.startsWith(entity.path)) {

@@ -440,9 +440,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Align(
           alignment: Alignment.topLeft,
-          child: SizedBox(
-            width: 200.0,
-            height: 200.0,
+          child: SizedBox.square(
+            dimension: 200.0,
             child: CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {},

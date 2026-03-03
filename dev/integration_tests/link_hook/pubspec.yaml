@@ -3,7 +3,7 @@ description: 'A new Dart FFI package project.'
 version: 0.0.1
 
 environment:
-  sdk: ^3.9.0-0
+  sdk: ^3.10.0-0
 
 resolution: workspace
 
@@ -14,6 +14,7 @@ dependencies:
   native_toolchain_c: any
 
 dev_dependencies:
+  ffigen: any
   test: any
 
-# PUBSPEC CHECKSUM: seumf2
+# PUBSPEC CHECKSUM: vpg0ve

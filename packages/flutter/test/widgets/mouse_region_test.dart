@@ -4,10 +4,12 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'widgets_app_tester.dart';
 
 class HoverClient extends StatefulWidget {
   const HoverClient({super.key, this.onHover, this.child, this.onEnter, this.onExit});
@@ -103,14 +105,12 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Stack(
           children: <Widget>[
-            SizedBox(
-              width: 50.0,
-              height: 50.0,
+            SizedBox.square(
+              dimension: 50.0,
               child: MouseRegion(onEnter: (_) => onEnterRegion1 = true),
             ),
-            SizedBox(
-              width: 50.0,
-              height: 50.0,
+            SizedBox.square(
+              dimension: 50.0,
               child: MouseRegion(
                 opaque: false,
                 hitTestBehavior: HitTestBehavior.deferToChild,
@@ -143,14 +143,12 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Stack(
           children: <Widget>[
-            SizedBox(
-              width: 50.0,
-              height: 50.0,
+            SizedBox.square(
+              dimension: 50.0,
               child: MouseRegion(onEnter: (_) => onEnterRegion1 = true),
             ),
-            SizedBox(
-              width: 50.0,
-              height: 50.0,
+            SizedBox.square(
+              dimension: 50.0,
               child: MouseRegion(
                 hitTestBehavior: HitTestBehavior.translucent,
                 onEnter: (_) => onEnterRegion2 = true,
@@ -798,7 +796,7 @@ void main() {
     final events = <PointerEvent>[];
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Center(
           child: Transform.scale(
             scale: scaleFactor,
@@ -814,7 +812,7 @@ void main() {
               },
               child: Container(
                 key: key,
-                color: Colors.blue,
+                color: const Color(0xFF0000FF),
                 height: localHeight,
                 width: localWidth,
                 child: const Text('Hi'),
@@ -1037,7 +1035,11 @@ void main() {
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     // Move to a position out of MouseRegion
-    await gesture.moveTo(tester.getBottomRight(find.byType(MouseRegion)) + const Offset(10, -10));
+    final Finder mouseRegionFinder = find.ancestor(
+      of: find.text('not hovering'),
+      matching: find.byType(MouseRegion),
+    );
+    await gesture.moveTo(tester.getBottomRight(mouseRegionFinder) + const Offset(10, -10));
     await tester.pumpAndSettle();
     expect(find.text('not hovering'), findsOneWidget);
 
@@ -1221,9 +1223,8 @@ void main() {
                 height: 100,
                 width: 10,
                 alignment: moved ? Alignment.topLeft : Alignment.bottomLeft,
-                child: SizedBox(
-                  height: 10,
-                  width: 10,
+                child: SizedBox.square(
+                  dimension: 10,
                   child: HoverClient(
                     onHover: (bool value) {
                       setState(() {
@@ -1313,9 +1314,8 @@ void main() {
             onExit: (PointerExitEvent e) {
               addLog('exitA');
             },
-            child: SizedBox(
-              width: 150,
-              height: 150,
+            child: SizedBox.square(
+              dimension: 150,
               child: Stack(
                 children: <Widget>[
                   Positioned(
@@ -1523,9 +1523,8 @@ void main() {
 
     await tester.pumpWidget(
       _Scaffold(
-        topLeft: SizedBox(
-          height: 10,
-          width: 10,
+        topLeft: SizedBox.square(
+          dimension: 10,
           child: MouseRegion(
             onEnter: (_) {
               logs.add('enter1');
@@ -1557,9 +1556,8 @@ void main() {
 
     await tester.pumpWidget(
       _Scaffold(
-        topLeft: SizedBox(
-          height: 10,
-          width: 10,
+        topLeft: SizedBox.square(
+          dimension: 10,
           child: MouseRegion(
             onEnter: (_) {
               logs.add('enter2');
@@ -1591,9 +1589,8 @@ void main() {
     // Compare: It repaints if the MouseRegion is deactivated.
     await tester.pumpWidget(
       _Scaffold(
-        topLeft: SizedBox(
-          height: 10,
-          width: 10,
+        topLeft: SizedBox.square(
+          dimension: 10,
           child: MouseRegion(
             opaque: false,
             child: CustomPaint(
@@ -1624,9 +1621,8 @@ void main() {
 
     await tester.pumpWidget(
       _Scaffold(
-        topLeft: SizedBox(
-          height: 10,
-          width: 10,
+        topLeft: SizedBox.square(
+          dimension: 10,
           child: MouseRegion(
             onHover: handleHover,
             child: CustomPaint(painter: _DelegatedPainter(onPaint: handlePaintChild)),
@@ -1647,9 +1643,8 @@ void main() {
 
     await tester.pumpWidget(
       _Scaffold(
-        topLeft: SizedBox(
-          height: 10,
-          width: 10,
+        topLeft: SizedBox.square(
+          dimension: 10,
           child: MouseRegion(
             opaque: false,
             // Dummy callback so that MouseRegion stays affective after opaque
@@ -1682,9 +1677,8 @@ void main() {
 
     await tester.pumpWidget(
       _Scaffold(
-        topLeft: SizedBox(
-          height: 10,
-          width: 10,
+        topLeft: SizedBox.square(
+          dimension: 10,
           child: MouseRegion(
             cursor: SystemMouseCursors.forbidden,
             onEnter: (_) {
@@ -1708,9 +1702,8 @@ void main() {
 
     await tester.pumpWidget(
       _Scaffold(
-        topLeft: SizedBox(
-          height: 10,
-          width: 10,
+        topLeft: SizedBox.square(
+          dimension: 10,
           child: MouseRegion(
             cursor: SystemMouseCursors.text,
             onEnter: (_) {
@@ -1747,9 +1740,8 @@ void main() {
 
     await tester.pumpWidget(
       _Scaffold(
-        topLeft: SizedBox(
-          height: 10,
-          width: 10,
+        topLeft: SizedBox.square(
+          dimension: 10,
           child: MouseRegion(
             cursor: SystemMouseCursors.forbidden,
             child: MouseRegion(
@@ -1776,9 +1768,8 @@ void main() {
 
     await tester.pumpWidget(
       _Scaffold(
-        topLeft: SizedBox(
-          height: 10,
-          width: 10,
+        topLeft: SizedBox.square(
+          dimension: 10,
           child: MouseRegion(
             cursor: SystemMouseCursors.forbidden,
             child: MouseRegion(
@@ -1803,9 +1794,8 @@ void main() {
 
     await tester.pumpWidget(
       _Scaffold(
-        topLeft: SizedBox(
-          height: 10,
-          width: 10,
+        topLeft: SizedBox.square(
+          dimension: 10,
           child: MouseRegion(
             cursor: SystemMouseCursors.forbidden,
             child: MouseRegion(
@@ -1851,9 +1841,8 @@ void main() {
           height: 50,
           child: Row(
             children: <Widget>[
-              SizedBox(
-                width: 50,
-                height: 50,
+              SizedBox.square(
+                dimension: 50.0,
                 child: MouseRegion(
                   key: key,
                   onEnter: (_) {
@@ -2006,12 +1995,15 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Center(
-          child: Draggable<int>(
-            feedback: Container(width: 20, height: 20, color: Colors.blue),
-            childWhenDragging: Container(width: 20, height: 20, color: Colors.yellow),
-            child: ElevatedButton(child: const Text('Drag me'), onPressed: () {}),
+          child: DefaultTextStyle(
+            style: const TextStyle(fontSize: 14),
+            child: Draggable<int>(
+              feedback: Container(width: 20, height: 20, color: const Color(0xFF0000FF)),
+              childWhenDragging: Container(width: 20, height: 20, color: const Color(0xFFFFFF00)),
+              child: GestureDetector(onTap: () {}, child: const Text('Drag me')),
+            ),
           ),
         ),
       ),
@@ -2043,9 +2035,10 @@ void main() {
     var onExit = false;
     var onHover = false;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: MouseRegion(
+      TestWidgetsApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: MouseRegion(
             onEnter: (_) => onEnter = true,
             onExit: (_) => onExit = true,
             onHover: (_) => onHover = true,
