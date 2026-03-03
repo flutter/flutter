@@ -291,16 +291,15 @@ class AdMobBannerInScrollableListTestPage extends StatefulWidget {
   const AdMobBannerInScrollableListTestPage({super.key});
 
   @override
-  State<AdMobBannerInScrollableListTestPage> createState() => _AdMobBannerInScrollableListTestPageState();
+  State<AdMobBannerInScrollableListTestPage> createState() =>
+      _AdMobBannerInScrollableListTestPageState();
 }
 
 class _AdMobBannerInScrollableListTestPageState extends State<AdMobBannerInScrollableListTestPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('AdMob banner in scrollable list'),
-      ),
+      appBar: AppBar(title: const Text('AdMob banner in scrollable list')),
       body: ListView.builder(
         itemCount: 10,
         itemBuilder: (BuildContext context, int index) {
@@ -316,9 +315,7 @@ class _AdMobBannerInScrollableListTestPageState extends State<AdMobBannerInScrol
           return Container(
             height: 300,
             color: Colors.blue,
-            child: Center(
-              child: Text('Regular row $index'),
-            ),
+            child: Center(child: Text('Regular row $index')),
           );
         },
       ),
