@@ -65,15 +65,13 @@ class _OpacityWrappedMainAppState extends State<_OpacityWrappedMainApp> {
               TextButton(
                 key: const ValueKey<String>('ToggleOpacity'),
                 onPressed: _toggleOpacity,
-                child: const SizedBox(
-                  width: 300,
-                  height: 300,
+                child: const SizedBox.square(
+                  dimension: 300,
                   child: ColoredBox(color: Colors.green),
                 ),
               ),
-              const SizedBox(
-                width: 200,
-                height: 200,
+              const SizedBox.square(
+                dimension: 200,
                 child: _HybridCompositionAndroidPlatformView(
                   viewType: 'changing_color_button_platform_view',
                 ),
