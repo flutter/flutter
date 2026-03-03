@@ -11,8 +11,7 @@
 #include <unordered_map>
 
 #include "flutter/fml/macros.h"
-
-#include "software_surface.h"
+#include "flutter/shell/platform/fuchsia/flutter/software_surface.h"
 
 namespace flutter_runner {
 

@@ -475,7 +475,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
     // All automatically created files should exist.
     if (configOnly) {
-      _logger.printStatus('Config complete.');
       return;
     }
 

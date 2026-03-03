@@ -14,3 +14,5 @@ perfetto_build_with_embedder = true
 
 perfetto_root_path = "//flutter/third_party/dart/third_party/perfetto/src/"
 
+perfetto_protobuf_target_prefix = "//flutter/third_party/dart/third_party/perfetto/mock_protobuf"
+perfetto_protobuf_gni = perfetto_protobuf_target_prefix + "/proto_library.gni"
