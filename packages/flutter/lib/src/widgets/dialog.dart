@@ -49,22 +49,6 @@ typedef RouteBuilder<T> = Route<T> Function(BuildContext context, WidgetBuilder 
 /// [Navigator]. Defaults to building a [RawDialogRoute]. When windowing is
 /// available, this parameter will be silently ignored.
 ///
-/// {@template flutter.widgets.showRawDialog.barrier}
-/// The `barrierDismissible` argument is used to indicate whether tapping on the
-/// barrier will dismiss the dialog. It is `true` by default and can not be `null`.
-/// If windowing is enabled via `flutter config --enable-windowing`,then this
-/// argument is ignored as dialogs are displayed in their own windows which do
-/// not have a modal barrier.
-///
-/// The `barrierColor` argument is used to specify the color of the modal
-/// barrier that darkens everything below the dialog. If `null` the `barrierColor`
-/// field from `DialogThemeData` is used. If that is `null` the default color
-/// `Colors.black54` is used. If windowing is enabled via `flutter config
-/// --enable-windowing`, then this  argument is ignored as dialogs are displayed
-/// in their own windows which do not have a modal barrier.
-/// {@endtemplate}
-///
-///
 /// {@template flutter.widgets.showRawDialog.navigator}
 /// The `useRootNavigator` argument is used to determine whether to push the
 /// dialog to the [Navigator] furthest from or nearest to the given `context`.
@@ -77,16 +61,6 @@ typedef RouteBuilder<T> = Route<T> Function(BuildContext context, WidgetBuilder 
 /// see [RouteSettings] for details.
 /// {@endtemplate}
 ///
-/// {@template flutter.widgets.showRawDialog.traversalEdge}
-/// If not null, the `traversalEdgeBehavior` argument specifies the transfer of
-/// focus beyond the first and the last items of the dialog route. By default,
-/// [TraversalEdgeBehavior.closedLoop] is used, because it's typical for dialogs
-/// to allow users to cycle through dialog widgets without leaving the dialog.
-/// If windowing is enabled via `flutter config --enable-windowing`, then this
-/// argument is ignored as dialogs are displayed in their own windows which
-/// manage focus traversal independently.
-/// {@endtemplate}
-///
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the dialog was closed.
 ///
@@ -97,15 +71,9 @@ Future<T?> showRawDialog<T>({
   required BuildContext context,
   required WidgetBuilder builder,
   RouteBuilder<T>? routeBuilder,
-  Color? barrierColor,
-  bool barrierDismissible = true,
-  String? barrierLabel,
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
-  Offset? anchorPoint,
-  TraversalEdgeBehavior? traversalEdgeBehavior,
   bool fullscreenDialog = false,
-  bool? requestFocus,
 }) {
   assert(_debugIsActive(context));
   assert(debugCheckHasWidgetsLocalizations(context));
@@ -142,13 +110,7 @@ Future<T?> showRawDialog<T>({
               Animation<double> animation,
               Animation<double> secondaryAnimation,
             ) => builder(context),
-        barrierColor: barrierColor,
-        barrierDismissible: barrierDismissible,
-        barrierLabel: barrierLabel,
         settings: routeSettings,
-        anchorPoint: anchorPoint,
-        traversalEdgeBehavior: traversalEdgeBehavior ?? TraversalEdgeBehavior.closedLoop,
-        requestFocus: requestFocus,
         fullscreenDialog: fullscreenDialog,
       );
 

@@ -1526,7 +1526,18 @@ class _DialogContentPage extends Page<void> {
 ///
 /// {@macro flutter.widgets.showRawDialog.context}
 ///
-/// {@macro flutter.widgets.showRawDialog.barrier}
+/// The `barrierDismissible` argument is used to indicate whether tapping on the
+/// barrier will dismiss the dialog. It is `true` by default and can not be `null`.
+/// If windowing is enabled via `flutter config --enable-windowing`,then this
+/// argument is ignored as dialogs are displayed in their own windows which do
+/// not have a modal barrier.
+///
+/// The `barrierColor` argument is used to specify the color of the modal
+/// barrier that darkens everything below the dialog. If `null` the `barrierColor`
+/// field from `DialogThemeData` is used. If that is `null` the default color
+/// `Colors.black54` is used. If windowing is enabled via `flutter config
+/// --enable-windowing`, then this  argument is ignored as dialogs are displayed
+/// in their own windows which do not have a modal barrier.
 ///
 /// The `useSafeArea` argument is used to indicate if the dialog should only
 /// display in 'safe' areas of the screen not used by the operating system
@@ -1538,7 +1549,13 @@ class _DialogContentPage extends Page<void> {
 ///
 /// {@macro flutter.widgets.showRawDialog.routeSettings}
 ///
-/// {@macro flutter.widgets.showRawDialog.traversalEdge}
+/// If not null, the `traversalEdgeBehavior` argument specifies the transfer of
+/// focus beyond the first and the last items of the dialog route. By default,
+/// [TraversalEdgeBehavior.closedLoop] is used, because it's typical for dialogs
+/// to allow users to cycle through dialog widgets without leaving the dialog.
+/// If windowing is enabled via `flutter config --enable-windowing`, then this
+/// argument is ignored as dialogs are displayed in their own windows which
+/// manage focus traversal independently.
 ///
 /// {@template flutter.material.dialog.requestFocus}
 /// The `requestFocus` argument is used to specify whether the dialog should
@@ -1627,15 +1644,9 @@ Future<T?> showDialog<T>({
 
   return showRawDialog(
     context: context,
-    barrierDismissible: barrierDismissible,
-    barrierColor: barrierColor,
-    barrierLabel: barrierLabel,
     useRootNavigator: useRootNavigator,
     routeSettings: routeSettings,
-    anchorPoint: anchorPoint,
-    traversalEdgeBehavior: traversalEdgeBehavior,
     fullscreenDialog: fullscreenDialog,
-    requestFocus: requestFocus,
     routeBuilder: (BuildContext context, WidgetBuilder builder) {
       return DialogRoute<T>(
         context: context,
