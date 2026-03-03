@@ -84,6 +84,7 @@ class FadeInImage extends StatefulWidget {
     this.fadeOutCurve = Curves.easeOut,
     this.fadeInDuration = const Duration(milliseconds: 700),
     this.fadeInCurve = Curves.easeIn,
+    this.fadeOutPlaceholder = true,
     this.color,
     this.colorBlendMode,
     this.placeholderColor,
@@ -141,6 +142,7 @@ class FadeInImage extends StatefulWidget {
     this.fadeOutCurve = Curves.easeOut,
     this.fadeInDuration = const Duration(milliseconds: 700),
     this.fadeInCurve = Curves.easeIn,
+    this.fadeOutPlaceholder = true,
     this.width,
     this.height,
     this.fit,
@@ -211,6 +213,7 @@ class FadeInImage extends StatefulWidget {
     this.fadeOutCurve = Curves.easeOut,
     this.fadeInDuration = const Duration(milliseconds: 700),
     this.fadeInCurve = Curves.easeIn,
+    this.fadeOutPlaceholder = true,
     this.width,
     this.height,
     this.fit,
@@ -277,6 +280,18 @@ class FadeInImage extends StatefulWidget {
 
   /// The curve of the fade-in animation for the [image].
   final Curve fadeInCurve;
+
+  /// Whether the [placeholder] is faded out when the [image] loads.
+  ///
+  /// When true (the default), the [placeholder] is faded out before the
+  /// target [image] is faded in, creating a sequential animation.
+  ///
+  /// When false, the [placeholder] is kept at full opacity while the target
+  /// [image] is faded in on top of it. This avoids a visual gap between the
+  /// [placeholder] disappearing and the target [image] appearing. The
+  /// [placeholder] is removed from the widget tree once the target [image]
+  /// is fully opaque.
+  final bool fadeOutPlaceholder;
 
   /// If non-null, require the image to have this width.
   ///
@@ -490,6 +505,7 @@ class _FadeInImageState extends State<FadeInImage> {
           fadeOutDuration: widget.fadeOutDuration,
           fadeInCurve: widget.fadeInCurve,
           fadeOutCurve: widget.fadeOutCurve,
+          fadeOutPlaceholder: widget.fadeOutPlaceholder,
         );
       },
     );
@@ -516,11 +532,12 @@ class _AnimatedFadeOutFadeIn extends ImplicitlyAnimatedWidget {
     required this.isTargetLoaded,
     required this.fadeOutDuration,
     required this.fadeOutCurve,
+    required this.fadeOutPlaceholder,
     required this.fadeInDuration,
     required this.fadeInCurve,
     required this.wasSynchronouslyLoaded,
   }) : assert(!wasSynchronouslyLoaded || isTargetLoaded),
-       super(duration: fadeInDuration + fadeOutDuration);
+       super(duration: fadeOutPlaceholder ? fadeInDuration + fadeOutDuration : fadeInDuration);
 
   final Widget target;
   final ProxyAnimation targetProxyAnimation;
@@ -531,6 +548,7 @@ class _AnimatedFadeOutFadeIn extends ImplicitlyAnimatedWidget {
   final Duration fadeOutDuration;
   final Curve fadeInCurve;
   final Curve fadeOutCurve;
+  final bool fadeOutPlaceholder;
   final bool wasSynchronouslyLoaded;
 
   @override
@@ -568,37 +586,52 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
       return;
     }
 
-    _placeholderOpacityAnimation =
-        animation.drive(
-          TweenSequence<double>(<TweenSequenceItem<double>>[
-            TweenSequenceItem<double>(
-              tween: _placeholderOpacity!.chain(CurveTween(curve: widget.fadeOutCurve)),
-              weight: widget.fadeOutDuration.inMilliseconds.toDouble(),
-            ),
-            TweenSequenceItem<double>(
-              tween: ConstantTween<double>(0),
-              weight: widget.fadeInDuration.inMilliseconds.toDouble(),
-            ),
-          ]),
-        )..addStatusListener((AnimationStatus status) {
+    if (widget.fadeOutPlaceholder) {
+      _placeholderOpacityAnimation =
+          animation.drive(
+            TweenSequence<double>(<TweenSequenceItem<double>>[
+              TweenSequenceItem<double>(
+                tween: _placeholderOpacity!.chain(CurveTween(curve: widget.fadeOutCurve)),
+                weight: widget.fadeOutDuration.inMilliseconds.toDouble(),
+              ),
+              TweenSequenceItem<double>(
+                tween: ConstantTween<double>(0),
+                weight: widget.fadeInDuration.inMilliseconds.toDouble(),
+              ),
+            ]),
+          )..addStatusListener((AnimationStatus status) {
+            if (_placeholderOpacityAnimation!.isCompleted) {
+              // Need to rebuild to remove placeholder now that it is invisible.
+              setState(() {});
+            }
+          });
+
+      _targetOpacityAnimation = animation.drive(
+        TweenSequence<double>(<TweenSequenceItem<double>>[
+          TweenSequenceItem<double>(
+            tween: ConstantTween<double>(0),
+            weight: widget.fadeOutDuration.inMilliseconds.toDouble(),
+          ),
+          TweenSequenceItem<double>(
+            tween: _targetOpacity!.chain(CurveTween(curve: widget.fadeInCurve)),
+            weight: widget.fadeInDuration.inMilliseconds.toDouble(),
+          ),
+        ]),
+      );
+    } else {
+      _placeholderOpacityAnimation = animation.drive(ConstantTween<double>(1.0))
+        ..addStatusListener((AnimationStatus status) {
           if (_placeholderOpacityAnimation!.isCompleted) {
-            // Need to rebuild to remove placeholder now that it is invisible.
+            // Need to rebuild to remove placeholder now that it is fully
+            // behind the loaded target image.
             setState(() {});
           }
         });
 
-    _targetOpacityAnimation = animation.drive(
-      TweenSequence<double>(<TweenSequenceItem<double>>[
-        TweenSequenceItem<double>(
-          tween: ConstantTween<double>(0),
-          weight: widget.fadeOutDuration.inMilliseconds.toDouble(),
-        ),
-        TweenSequenceItem<double>(
-          tween: _targetOpacity!.chain(CurveTween(curve: widget.fadeInCurve)),
-          weight: widget.fadeInDuration.inMilliseconds.toDouble(),
-        ),
-      ]),
-    );
+      _targetOpacityAnimation = animation.drive(
+        _targetOpacity!.chain(CurveTween(curve: widget.fadeInCurve)),
+      );
+    }
 
     widget.targetProxyAnimation.parent = _targetOpacityAnimation;
     widget.placeholderProxyAnimation.parent = _placeholderOpacityAnimation;
