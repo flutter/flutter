@@ -17,6 +17,13 @@ abstract class UnpackDarwin extends Target {
   @visibleForOverriding
   FlutterDarwinPlatform get darwinPlatform;
 
+  @override
+  Future<bool> canSkip(Environment environment) async {
+    // The `build swift-package` command copies the Flutter.xcframework separately and therefore
+    // does not need it to be done by the build system.
+    return environment.defines[kBuildSwiftPackage] == 'true';
+  }
+
   /// Copies the [framework] artifact using `rsync` to the [Environment.outputDir].
   /// Throws an error if copy fails.
   @protected

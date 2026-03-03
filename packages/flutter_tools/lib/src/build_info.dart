@@ -1140,6 +1140,11 @@ const kXcodeBuildScriptValueBuild = 'build';
 /// embedding.
 const kXcodeBuildScriptValueEmbed = 'embed';
 
+/// Whether the build is originating from the `flutter build swift-package` command.
+///
+/// Expects value of "true".
+const kBuildSwiftPackage = 'BuildSwiftPackage';
+
 final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
 final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decoder);
 
