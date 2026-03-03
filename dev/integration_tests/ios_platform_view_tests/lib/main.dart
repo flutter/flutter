@@ -102,6 +102,18 @@ class _MyHomePageState extends State<MyHomePage> {
               );
             },
           ),
+          TextButton(
+            key: const ValueKey<String>('admob_banner_in_scrollable_list_test'),
+            child: const Text('admob banner in scrollable list test'),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute<AdMobBannerInScrollableListTestPage>(
+                  builder: (BuildContext context) => const AdMobBannerInScrollableListTestPage(),
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -265,6 +277,44 @@ class _WebViewBehindContextMenuTestPageState extends State<WebViewBehindContextM
             creationParamsCodec: StandardMessageCodec(),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// A page to test AdMob banners are still tappable in a scrollable list.
+/// See [this issue](https://github.com/flutter/flutter/issues/165787).
+class AdMobBannerInScrollableListTestPage extends StatefulWidget {
+  const AdMobBannerInScrollableListTestPage({super.key});
+
+  @override
+  State<AdMobBannerInScrollableListTestPage> createState() =>
+      _AdMobBannerInScrollableListTestPageState();
+}
+
+class _AdMobBannerInScrollableListTestPageState extends State<AdMobBannerInScrollableListTestPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('AdMob banner in scrollable list')),
+      body: ListView.builder(
+        itemCount: 10,
+        itemBuilder: (BuildContext context, int index) {
+          if (index.isEven) {
+            return const SizedBox(
+              height: 300,
+              child: UiKitView(
+                viewType: 'platform_fake_admob_banner',
+                creationParamsCodec: StandardMessageCodec(),
+              ),
+            );
+          }
+          return Container(
+            height: 300,
+            color: Colors.blue,
+            child: Center(child: Text('Regular row $index')),
+          );
+        },
       ),
     );
   }
