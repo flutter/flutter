@@ -1516,11 +1516,7 @@ class _DialogContentPage extends Page<void> {
 /// Material entrance and exit animations, modal barrier color, and modal
 /// barrier behavior (dialog is dismissible with a tap on the barrier).
 ///
-/// If windowing is enabled via `flutter config --enable-windowing`,
-/// then the dialog is displayed in its own window using the windowing system,
-/// rather than as a modal overlay within the current window. This will only
-/// function on platforms that support the dialog window type. True dialog
-/// windows will lack animations and barriers.
+/// {@macro flutter.widgets.showRawDialog.windowing}
 ///
 /// This function takes a `builder` which typically builds a [Dialog] widget.
 /// Content below the dialog is dimmed with a [ModalBarrier]. The widget
@@ -1528,22 +1524,9 @@ class _DialogContentPage extends Page<void> {
 /// [showDialog] is originally called from. Use a [StatefulBuilder] or a
 /// custom [StatefulWidget] if the dialog needs to update dynamically.
 ///
-/// The `context` argument is used to look up the [Navigator] and [Theme] for
-/// the dialog. It is only used when the method is called. Its corresponding
-/// widget can be safely removed from the tree before the dialog is closed.
+/// {@macro flutter.widgets.showRawDialog.context}
 ///
-/// The `barrierDismissible` argument is used to indicate whether tapping on the
-/// barrier will dismiss the dialog. It is `true` by default and can not be `null`.
-/// If windowing is enabled via `flutter config --enable-windowing`,then this
-/// argument is ignored as dialogs are displayed in their own windows which do
-/// not have a modal barrier.
-///
-/// The `barrierColor` argument is used to specify the color of the modal
-/// barrier that darkens everything below the dialog. If `null` the `barrierColor`
-/// field from `DialogThemeData` is used. If that is `null` the default color
-/// `Colors.black54` is used. If windowing is enabled via `flutter config
-/// --enable-windowing`, then this  argument is ignored as dialogs are displayed
-/// in their own windows which do not have a modal barrier.
+/// {@macro flutter.widgets.showRawDialog.barrier}
 ///
 /// The `useSafeArea` argument is used to indicate if the dialog should only
 /// display in 'safe' areas of the screen not used by the operating system
@@ -1551,21 +1534,11 @@ class _DialogContentPage extends Page<void> {
 /// the dialog will not overlap operating system areas. If it is set to `false`
 /// the dialog will only be constrained by the screen size. It can not be `null`.
 ///
-/// The `useRootNavigator` argument is used to determine whether to push the
-/// dialog to the [Navigator] furthest from or nearest to the given `context`.
-/// By default, `useRootNavigator` is `true` and the dialog route created by
-/// this method is pushed to the root navigator. It can not be `null`.
+/// {@macro flutter.widgets.showRawDialog.navigator}
 ///
-/// The `routeSettings` argument is passed to [showGeneralDialog],
-/// see [RouteSettings] for details.
+/// {@macro flutter.widgets.showRawDialog.routeSettings}
 ///
-/// If not null, the `traversalEdgeBehavior` argument specifies the transfer of
-/// focus beyond the first and the last items of the dialog route. By default,
-/// [TraversalEdgeBehavior.closedLoop] is used, because it's typical for dialogs
-/// to allow users to cycle through dialog widgets without leaving the dialog.
-/// If windowing is enabled via `flutter config --enable-windowing`, then this
-/// argument is ignored as dialogs are displayed in their own windows which
-/// manage focus traversal independently.
+/// {@macro flutter.widgets.showRawDialog.traversalEdge}
 ///
 /// {@template flutter.material.dialog.requestFocus}
 /// The `requestFocus` argument is used to specify whether the dialog should
@@ -1644,7 +1617,6 @@ Future<T?> showDialog<T>({
   bool? requestFocus,
   AnimationStyle? animationStyle,
 }) {
-  assert(_debugIsActive(context));
   assert(debugCheckHasMaterialLocalizations(context));
 
   final CapturedThemes themes = InheritedTheme.capture(
@@ -1686,7 +1658,7 @@ Future<T?> showDialog<T>({
       );
     },
     builder: (BuildContext context) {
-      // Wrap the build dialog with the theme, text direcction, and media
+      // Wrap the build dialog with the theme, text direction, and media
       // query data from the parent context.
       final TextDirection textDirection = Directionality.of(navigator.context);
       final ThemeData themeData = Theme.of(navigator.context);
@@ -1766,23 +1738,6 @@ Future<T?> showAdaptiveDialog<T>({
         requestFocus: requestFocus,
       );
   }
-}
-
-bool _debugIsActive(BuildContext context) {
-  if (context is Element && !context.debugIsActive) {
-    throw FlutterError.fromParts(<DiagnosticsNode>[
-      ErrorSummary('This BuildContext is no longer valid.'),
-      ErrorDescription(
-        'The showDialog function context parameter is a BuildContext that is no longer valid.',
-      ),
-      ErrorHint(
-        'This can commonly occur when the showDialog function is called after awaiting a Future. '
-        'In this situation the BuildContext might refer to a widget that has already been disposed during the await. '
-        'Consider using a parent context instead.',
-      ),
-    ]);
-  }
-  return true;
 }
 
 /// A dialog route with Material entrance and exit animations,

@@ -1883,10 +1883,10 @@ class WindowRegistryScope extends InheritedWidget {
   }
 }
 
-/// Represents an entry for a Material window such as a dialog.
+/// Represents an entry for a window such as a dialog.
 ///
 /// This class holds the necessary information to build and manage
-/// a window within the Material application.
+/// a window within the application.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 ///
@@ -1895,7 +1895,7 @@ class WindowRegistryScope extends InheritedWidget {
 ///  * [WindowRegistry], where window entries can be registered.
 @internal
 class WindowEntry {
-  /// Creates a Material window entry.
+  /// Creates a window entry.
   ///
   /// The [controller] parameter is the controller that manages the window.
   ///
@@ -1936,7 +1936,6 @@ class WindowEntry {
 /// An example usage might look like this, where the window manager wraps
 /// the root of the widget tree so that dialogs can be rendered at the same level
 /// as a [RegularWindow].
-///
 ///
 /// ```dart
 /// // TODO(mattkae): remove invalid_use_of_internal_member ignore comment when this API is stable.
