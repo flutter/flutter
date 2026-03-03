@@ -57,7 +57,8 @@ public class FlutterShellArgs {
   public static final String ARG_KEY_ENABLE_HCPP_AND_SURFACE_CONTROL =
       "enable-hcpp-and-surface-control";
   public static final String ARG_ENABLE_SURFACE_CONTROL = "--enable-hcpp-and-surface-control=true";
-  public static final String ARG_DISABLE_SURFACE_CONTROL = "--enable-hcpp-and-surface-control=false";
+  public static final String ARG_DISABLE_SURFACE_CONTROL =
+      "--enable-hcpp-and-surface-control=false";
   public static final String ARG_KEY_DUMP_SHADER_SKP_ON_SHADER_COMPILATION =
       "dump-skp-on-shader-compilation";
   public static final String ARG_DUMP_SHADER_SKP_ON_SHADER_COMPILATION =
