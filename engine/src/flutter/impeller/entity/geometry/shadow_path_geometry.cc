@@ -494,9 +494,17 @@ PolygonInfo::PolygonInfo(Scalar occluder_height)
 
 const std::shared_ptr<ShadowVertices> PolygonInfo::CalculateConvexShadowMesh(
     const impeller::PathSource& source,
-    const Matrix& matrix,
+    const Matrix& incoming_matrix,
     const Tessellator::Trigs& trigs) {
-  if (!matrix.IsInvertible()) {
+  // We are operating in "2D device space" with respect to scale and there
+  // is no need to involve translations or Z or perspective in the various
+  // calculations, so we extract the incoming matrix's 2D Bases and just
+  // use those measurements to guide our tessellation.
+  Scalar x_scale = incoming_matrix.GetBasisX().GetLength();
+  Scalar y_scale = incoming_matrix.GetBasisY().GetLength();
+  Matrix matrix = Matrix::MakeScale({x_scale, y_scale, 1.0f});
+
+  if (!incoming_matrix.IsInvertible() || !matrix.IsInvertible()) {
     return ShadowVertices::kEmpty;
   }
 
