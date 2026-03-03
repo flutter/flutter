@@ -1848,11 +1848,14 @@ class SelectableRegionState extends State<SelectableRegion>
   ///
   /// Has no effect if no toolbar is currently visible.
   void refreshToolbar() {
+    if (_selectionOverlay == null) {
+      return;
+    }
     _selectionDelegate.layoutDidChange();
     if (_hasSelectionOverlayGeometry) {
       _updateSelectionOverlay();
     }
-    _selectionOverlay?.markNeedsBuild();
+    _selectionOverlay!.markNeedsBuild();
   }
 
   @override
