@@ -530,6 +530,7 @@ class IOSDevice extends Device {
           logger: globals.logger,
           platform: FlutterDarwinPlatform.ios,
           project: package.project.parent,
+          device: this,
         );
         _logger.printError('');
         return LaunchResult.failed();
