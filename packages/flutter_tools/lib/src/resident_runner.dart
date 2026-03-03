@@ -1373,7 +1373,11 @@ abstract class ResidentRunner extends ResidentHandlers {
   bool get reportedDebuggers => _reportedDebuggers;
   var _reportedDebuggers = false;
 
-  void printDebuggerList() {
+  /// Prints connection information for various services and tools.
+  ///
+  /// [connectionInfo] should be provided if the [DartDevelopmentService] for
+  /// the target device if not set (e.g., web targets).
+  void printDebuggerList({DebugConnectionInfo? connectionInfo}) {
     for (final FlutterDevice? device in flutterDevices) {
       if (device!.vmService == null) {
         continue;
@@ -1383,9 +1387,16 @@ abstract class ResidentRunner extends ResidentHandlers {
         'A Dart VM Service on ${device.device!.name} is available at: '
         '${device.vmService!.httpAddress}',
       );
-
-      final DartDevelopmentService dds = device.device!.dds;
-      final Uri? dtdUri = dds.dtdUri;
+      final Uri? dtdUri;
+      // DWDS hosts its own DDS, so the instance associated with the device won't actually be
+      // active for web targets. Use the connectionInfo to get the DTD URI instead.
+      // See https://github.com/flutter/flutter/issues/182052
+      if (connectionInfo != null) {
+        dtdUri = connectionInfo.dtdUri;
+      } else {
+        final DartDevelopmentService dds = device.device!.dds;
+        dtdUri = dds.dtdUri;
+      }
       if (debuggingOptions.printDtd && dtdUri != null) {
         globals.printStatus('The Dart Tooling Daemon is available at: $dtdUri');
       }
