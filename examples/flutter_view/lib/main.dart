@@ -55,7 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _sendFlutterIncrement() {
-    platform.send(_pong);
+    platform.send(_pong); // ignore: unawaited_futures
   }
 
   @override

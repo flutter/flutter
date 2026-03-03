@@ -92,7 +92,9 @@ Future<TaskResult> _testInstallBogusFlavor() async {
   );
 
   final stderrString = stderr.toString();
-  if (!stderrString.contains('The Xcode project defines schemes: free, paid')) {
+  if (!stderrString.contains(
+    'You must specify a --flavor option to select one of the available schemes.',
+  )) {
     print(stderrString);
     return TaskResult.failure('Should not succeed with bogus flavor');
   }
