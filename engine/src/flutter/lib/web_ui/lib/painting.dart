@@ -894,6 +894,9 @@ void decodeImageFromPixels(
 Image decodeImageFromPixelsSync(Uint8List pixels, int width, int height, PixelFormat format) =>
     throw UnimplementedError('`decodeImageFromPixelsSync` is not implemented for web targets.');
 
+Image getImageFromTexture(int textureId, int width, int height) =>
+    throw UnimplementedError('`getImageFromTexture` is not implemented for web targets.');
+
 class Shadow {
   const Shadow({
     this.color = const Color(_kColorDefault),
