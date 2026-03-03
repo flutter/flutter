@@ -82,13 +82,10 @@ abstract class AccessibilityEvaluation {
 @internal
 class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
   /// Create a new [MinimumTapTargetEvaluation].
-  const MinimumTapTargetEvaluation({required this.size, required this.link});
+  const MinimumTapTargetEvaluation({required this.size});
 
   /// The minimum allowed size of a tappable node.
   final Size size;
-
-  /// A link describing the tap target evaluations for a platform.
-  final String link;
 
   /// The gap between targets to their parent scrollables to be considered valid
   /// tap targets.
@@ -151,8 +148,7 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
         Violation(
           node,
           '$node: expected tap target size of at least $size, '
-          'but found $candidateSize\n'
-          'See also: $link',
+          'but found $candidateSize\n',
         ),
       );
     }
@@ -248,7 +244,22 @@ class LabeledTapTargetEvaluation extends AccessibilityEvaluation {
 @internal
 class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
   /// Create a new [MinimumTextContrastEvaluation].
-  const MinimumTextContrastEvaluation();
+  const MinimumTextContrastEvaluation({
+    required this.minNormalTextContrastRatio,
+    required this.minLargeTextContrastRatio,
+  });
+
+  /// The minimum contrast ratio for normal text.
+  ///
+  /// Normal text is text that is smaller than [kLargeTextMinimumSize] (18.0) or
+  /// smaller than [kBoldTextMinimumSize] (14.0) if bold.
+  final double minNormalTextContrastRatio;
+
+  /// The minimum contrast ratio for large text.
+  ///
+  /// Large text is text that is at least [kLargeTextMinimumSize] (18.0) or at
+  /// least [kBoldTextMinimumSize] (14.0) if bold.
+  final double minLargeTextContrastRatio;
 
   /// The minimum text size considered large for contrast checking.
   ///
@@ -464,46 +475,9 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
     final double fontSizeOrDefault = fontSize ?? _kDefaultFontSize;
     if ((bold && fontSizeOrDefault >= kBoldTextMinimumSize) ||
         fontSizeOrDefault >= kLargeTextMinimumSize) {
-      return kMinimumRatioLargeText;
+      return minLargeTextContrastRatio;
     }
-    return kMinimumRatioNormalText;
-  }
-}
-
-/// {@macro flutter.widgets.accessibility_evaluations.internal}
-///
-/// An evaluation which verifies that all nodes that contribute semantics via text
-/// meet **WCAG AAA** contrast levels.
-///
-/// The AAA level is defined by the Web Content Accessibility Guidelines:
-/// https://www.w3.org/WAI/WCAG22/Understanding/contrast-enhanced
-///
-/// This evaluation enforces a stricter contrast ratio:
-///  * Normal text must have a contrast ratio of at least 7.0
-///  * Large or bold text must have a contrast ratio of at least 4.5
-@internal
-class MinimumTextContrastEvaluationAAA extends MinimumTextContrastEvaluation {
-  /// Create a new [MinimumTextContrastEvaluationAAA].
-  const MinimumTextContrastEvaluationAAA();
-
-  /// The minimum contrast ratio for large text (bold ≥14px or ≥18px).
-  ///
-  /// Defined by WCAG AAA standard http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
-  static const double kAAAMinimumRatioLargeText = 4.5;
-
-  /// The minimum contrast ratio for normal text.
-  ///
-  /// Defined by WCAG AAA standard http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
-  static const double kAAAMinimumRatioNormalText = 7.0;
-
-  @override
-  double _targetContrastRatio(double? fontSize, {required bool bold}) {
-    final double fontSizeOrDefault = fontSize ?? MinimumTextContrastEvaluation._kDefaultFontSize;
-    if ((bold && fontSizeOrDefault >= MinimumTextContrastEvaluation.kBoldTextMinimumSize) ||
-        fontSizeOrDefault >= MinimumTextContrastEvaluation.kLargeTextMinimumSize) {
-      return kAAAMinimumRatioLargeText;
-    }
-    return kAAAMinimumRatioNormalText;
+    return minNormalTextContrastRatio;
   }
 }
 

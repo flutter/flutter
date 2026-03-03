@@ -15,8 +15,24 @@
 
 namespace impeller::android::testing {
 
+struct UniqueAHardwareBufferTraits {
+  static AHardwareBuffer* InvalidValue() { return nullptr; }
+  static bool IsValid(AHardwareBuffer* value) { return value != nullptr; }
+  static void Free(AHardwareBuffer* value) { ::AHardwareBuffer_release(value); }
+};
+
+using UniqueAHardwareBuffer =
+    fml::UniqueObject<AHardwareBuffer*, UniqueAHardwareBufferTraits>;
+
+UniqueAHardwareBuffer AllocateAHardwareBuffer(
+    const AHardwareBuffer_Desc& desc) {
+  AHardwareBuffer* buffer = nullptr;
+  EXPECT_EQ(AHardwareBuffer_allocate(&desc, &buffer), 0);
+  return UniqueAHardwareBuffer(buffer);
+}
+
 // Set up context.
-std::shared_ptr<Context> CreateContext() {
+std::shared_ptr<ContextVK> CreateContext() {
   auto vulkan_dylib = fml::NativeLibrary::Create("libvulkan.so");
   auto instance_proc_addr =
       vulkan_dylib->ResolveFunction<PFN_vkGetInstanceProcAddr>(
@@ -80,16 +96,58 @@ TEST(AndroidVulkanTest, CanImportWithYUB) {
 
   EXPECT_EQ(AHardwareBuffer_isSupported(&desc), 1);
 
-  AHardwareBuffer* buffer = nullptr;
-  ASSERT_EQ(AHardwareBuffer_allocate(&desc, &buffer), 0);
+  UniqueAHardwareBuffer buffer = AllocateAHardwareBuffer(desc);
+  ASSERT_TRUE(buffer.is_valid());
 
   auto context_vk = CreateContext();
   ASSERT_TRUE(context_vk);
 
-  AHBTextureSourceVK source(context_vk, buffer, desc);
+  AHBTextureSourceVK source(context_vk, buffer.get(), desc);
 
   EXPECT_TRUE(source.IsValid());
   EXPECT_NE(source.GetYUVConversion(), nullptr);
+
+  context_vk->Shutdown();
+}
+
+TEST(AndroidVulkanTest, CreateImageViewForOpaqueAlpha) {
+  if (!HardwareBuffer::IsAvailableOnPlatform()) {
+    GTEST_SKIP() << "Hardware buffers are not supported on this platform.";
+  }
+
+  AHardwareBuffer_Desc desc;
+  desc.width = 16;
+  desc.height = 16;
+  desc.format = AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM;
+  desc.stride = 0;
+  desc.layers = 1;
+  desc.rfu0 = 0;
+  desc.rfu1 = 0;
+  desc.usage = AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE |
+               AHARDWAREBUFFER_USAGE_CPU_WRITE_MASK |
+               AHARDWAREBUFFER_USAGE_CPU_READ_MASK;
+
+  EXPECT_EQ(AHardwareBuffer_isSupported(&desc), 1);
+
+  UniqueAHardwareBuffer buffer = AllocateAHardwareBuffer(desc);
+  ASSERT_TRUE(buffer.is_valid());
+
+  auto context_vk = CreateContext();
+  ASSERT_TRUE(context_vk);
+
+  AHBTextureSourceVK::AHBProperties ahb_props;
+  ASSERT_EQ(context_vk->GetDevice().getAndroidHardwareBufferPropertiesANDROID(
+                buffer.get(), &ahb_props.get()),
+            vk::Result::eSuccess);
+
+  auto image = AHBTextureSourceVK::CreateVKImageWrapperForAndroidHarwareBuffer(
+      context_vk->GetDevice(), ahb_props, desc);
+  ASSERT_TRUE(image);
+
+  auto image_info = AHBTextureSourceVK::CreateImageViewInfo(
+      image.get(), nullptr, ahb_props, desc);
+
+  EXPECT_EQ(image_info.get().components.a, vk::ComponentSwizzle::eOne);
 
   context_vk->Shutdown();
 }

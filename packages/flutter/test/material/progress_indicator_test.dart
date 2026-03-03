@@ -1944,9 +1944,8 @@ void main() {
       MaterialApp(
         home: Material(
           child: Center(
-            child: SizedBox(
-              width: 200,
-              height: 200,
+            child: SizedBox.square(
+              dimension: 200.0,
               child: AnimatedBuilder(
                 animation: controller,
                 builder: (BuildContext context, Widget? child) {
