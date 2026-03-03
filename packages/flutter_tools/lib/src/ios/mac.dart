@@ -1317,6 +1317,9 @@ String? _swiftPackageManagerMinPlatformMismatchMessageFromStdout(String? stdout)
     caseSensitive: false,
   );
 
+  // We keep only the highest required version because bumping app minimum
+  // version to that value also satisfies lower plugin requirements.
+  // `highestSupportedVersion` is from the same mismatch to report "from X to Y".
   String? highestRequiredByProduct;
   Version? highestRequiredVersion;
   Version? highestSupportedVersion;
