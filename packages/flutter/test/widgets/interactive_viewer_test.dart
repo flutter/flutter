@@ -956,6 +956,7 @@ void main() {
         var calledStart = false;
         var calledUpdate = false;
         var calledEnd = false;
+        const sizedBox = SizedBox(width: 200.0, height: 200.0);
         await tester.pumpWidget(
           Center(
             child: InteractiveViewer(
@@ -970,12 +971,12 @@ void main() {
               onInteractionEnd: (ScaleEndDetails details) {
                 calledEnd = true;
               },
-              child: const SizedBox(width: 200.0, height: 200.0),
+              child: sizedBox,
             ),
           ),
         );
 
-        final Offset childOffset = tester.getTopLeft(find.byType(SizedBox));
+        final Offset childOffset = tester.getTopLeft(find.byWidget(sizedBox));
         final childInterior = Offset(childOffset.dx + 20.0, childOffset.dy + 20.0);
         TestGesture gesture = await tester.startGesture(childOffset);
 
@@ -1027,6 +1028,7 @@ void main() {
         var calledStart = false;
         var calledUpdate = false;
         var calledEnd = false;
+        const sizedBox = SizedBox(width: 200.0, height: 200.0);
         await tester.pumpWidget(
           Center(
             child: InteractiveViewer(
@@ -1041,12 +1043,12 @@ void main() {
               onInteractionEnd: (ScaleEndDetails details) {
                 calledEnd = true;
               },
-              child: const SizedBox(width: 200.0, height: 200.0),
+              child: sizedBox,
             ),
           ),
         );
 
-        final Offset childOffset = tester.getTopLeft(find.byType(SizedBox));
+        final Offset childOffset = tester.getTopLeft(find.byWidget(sizedBox));
         final childInterior = Offset(childOffset.dx + 20.0, childOffset.dy + 20.0);
         final TestGesture gesture = await tester.startGesture(
           childOffset,
@@ -1490,9 +1492,8 @@ void main() {
       final transformationController1 = TransformationController();
       addTearDown(transformationController1.dispose);
       await tester.pumpWidget(
-        SizedBox(
-          width: 200,
-          height: 200,
+        SizedBox.square(
+          dimension: 200.0,
           child: InteractiveViewer(
             constrained: false,
             transformationController: transformationController1,
@@ -1512,9 +1513,8 @@ void main() {
       final transformationController2 = TransformationController();
       addTearDown(transformationController2.dispose);
       await tester.pumpWidget(
-        SizedBox(
-          width: 200,
-          height: 200,
+        SizedBox.square(
+          dimension: 200.0,
           child: InteractiveViewer(
             constrained: false,
             interactionEndFrictionCoefficient: 0.01,

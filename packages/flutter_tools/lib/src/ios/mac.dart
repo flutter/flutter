@@ -196,7 +196,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     return XcodeBuildResult(success: false);
   }
 
-  await removeFinderExtendedAttributes(
+  await removeExtendedAttributes(
     app.project.parent.directory,
     globals.processUtils,
     globals.logger,
@@ -336,14 +336,9 @@ Future<XcodeBuildResult> buildXcodeProject({
     project: project,
     targetOverride: targetOverride,
     buildInfo: buildInfo,
+    printWarnings: true,
   );
   if (app.project.usesSwiftPackageManager) {
-    SwiftPackageManager.updateFlutterFrameworkSymlink(
-      buildMode: buildInfo.mode,
-      fileSystem: globals.fs,
-      platform: FlutterDarwinPlatform.ios,
-      project: app.project,
-    );
     final String? iosDeploymentTarget = buildSettings['IPHONEOS_DEPLOYMENT_TARGET'];
     if (iosDeploymentTarget != null) {
       SwiftPackageManager.updateMinimumDeployment(
@@ -619,6 +614,8 @@ Future<XcodeBuildResult> buildXcodeProject({
           XcodeSdk.IPhoneSimulator.platformName,
         );
       }
+
+      await ensureTargetBuildDirAttribute(targetBuildDir);
       final String? appBundle = buildSettings['WRAPPER_NAME'];
       final String expectedOutputDirectory = globals.fs.path.join(targetBuildDir, appBundle);
       if (globals.fs.directory(expectedOutputDirectory).existsSync()) {
@@ -660,6 +657,26 @@ Future<XcodeBuildResult> buildXcodeProject({
         buildSettings: buildSettings,
       ),
       xcResult: xcResult,
+    );
+  }
+}
+
+/// Ensure the TARGET_BUILD_DIR has the `com.apple.xcode.CreatedByBuildSystem` extended attribute.
+/// When using SwiftPM, this attribute is missing. This is required for `xcodebuild clean`.
+Future<void> ensureTargetBuildDirAttribute(String targetBuildDirPath) async {
+  final RunResult result = await globals.processUtils.run(<String>[
+    'xattr',
+    '-w',
+    'com.apple.xcode.CreatedByBuildSystem',
+    'true',
+    targetBuildDirPath,
+  ]);
+  if (result.exitCode != 0) {
+    globals.logger.printTrace(
+      'Failed to add xattr com.apple.xcode.CreatedByBuildSystem to $targetBuildDirPath.\n'
+      'Exit code: ${result.exitCode}\n'
+      'Stdout: ${result.stdout}\n'
+      'Stderr: ${result.stderr}',
     );
   }
 }
@@ -710,23 +727,36 @@ bool publicHeadersChanged({
   return headersChanged;
 }
 
-/// Extended attributes applied by Finder can cause code signing errors. Remove them.
-/// https://developer.apple.com/library/archive/qa/qa1940/_index.html
-Future<void> removeFinderExtendedAttributes(
+/// Extended attributes can cause code signing errors. Remove them.
+///
+/// Attributes like `com.apple.FinderInfo` and `com.apple.provenance` are added
+/// by Finder, cloud storage services (OneDrive, iCloud, Dropbox), or when files
+/// are downloaded. These must be removed before code signing.
+///
+/// See: https://developer.apple.com/library/archive/qa/qa1940/_index.html
+/// See: https://github.com/flutter/flutter/issues/180351
+Future<void> removeExtendedAttributes(
   FileSystemEntity projectDirectory,
   ProcessUtils processUtils,
   Logger logger,
 ) async {
-  final bool success = await processUtils.exitsHappy(<String>[
-    'xattr',
-    '-r',
-    '-d',
-    'com.apple.FinderInfo',
-    projectDirectory.path,
-  ]);
-  // Ignore all errors, for example if directory is missing.
-  if (!success) {
-    logger.printTrace('Failed to remove xattr com.apple.FinderInfo from ${projectDirectory.path}');
+  // Remove specific extended attributes that cause code signing failures.
+  // We remove com.apple.FinderInfo and com.apple.provenance, but preserve
+  // com.apple.xcode.CreatedByBuildSystem which Xcode uses to manage build directories.
+  const attributesToRemove = <String>{'com.apple.FinderInfo', 'com.apple.provenance'};
+
+  for (final attribute in attributesToRemove) {
+    final bool success = await processUtils.exitsHappy(<String>[
+      'xattr',
+      '-r',
+      '-d',
+      attribute,
+      projectDirectory.path,
+    ]);
+    // Ignore all errors, for example if directory is missing or attribute doesn't exist.
+    if (!success) {
+      logger.printTrace('Failed to remove $attribute from ${projectDirectory.path}');
+    }
   }
 }
 
@@ -789,6 +819,7 @@ Future<void> diagnoseXcodeBuildFailure(
   required FileSystem fileSystem,
   required FlutterDarwinPlatform platform,
   required FlutterProject project,
+  Device? device,
 }) async {
   final XcodeBuildExecution? xcodeBuildExecution = result.xcodeBuildExecution;
   if (xcodeBuildExecution != null &&
@@ -817,6 +848,7 @@ Future<void> diagnoseXcodeBuildFailure(
     platform: platform,
     logger: logger,
     fileSystem: fileSystem,
+    device: device,
   );
 
   if (!issueDetected && xcodeBuildExecution != null) {
@@ -1006,6 +1038,19 @@ _XCResultIssueHandlingResult _handleXCResultIssue({
       hasProvisioningProfileIssue: false,
       modifiedPrecompiledSource: true,
     );
+  } else if (message.contains(
+        'Unable to find a destination matching the provided destination specifier',
+      ) &&
+      message.contains('platform:iOS Simulator, arch:x86_64,') &&
+      !message.contains('platform:iOS Simulator, arch:arm64,') &&
+      !message.contains(
+        'The requested device could not be found because no available devices matched the request.',
+      )) {
+    return _XCResultIssueHandlingResult(
+      requiresProvisioningProfile: false,
+      hasProvisioningProfileIssue: false,
+      unableToFindArmDestination: true,
+    );
   }
   return _XCResultIssueHandlingResult(
     requiresProvisioningProfile: false,
@@ -1021,11 +1066,13 @@ Future<bool> _handleIssues(
   required FlutterDarwinPlatform platform,
   required Logger logger,
   required FileSystem fileSystem,
+  Device? device,
 }) async {
   var requiresProvisioningProfile = false;
   var hasProvisioningProfileIssue = false;
   var issueDetected = false;
   var modifiedPrecompiledSource = false;
+  var unableToFindArmDestination = false;
   String? missingPlatform;
   final duplicateModules = <String>[];
   final missingModules = <String>[];
@@ -1052,6 +1099,7 @@ Future<bool> _handleIssues(
         missingModules.add(handlingResult.missingModule!);
       }
       modifiedPrecompiledSource = handlingResult.modifiedPrecompiledSource;
+      unableToFindArmDestination = handlingResult.unableToFindArmDestination;
       issueDetected = true;
     }
   } else if (xcResult != null) {
@@ -1126,8 +1174,40 @@ Future<bool> _handleIssues(
       'the cache.\n'
       '════════════════════════════════════════════════════════════════════════════════',
     );
+  } else if (unableToFindArmDestination &&
+      xcodeBuildExecution != null &&
+      xcodeBuildExecution.environmentType == EnvironmentType.simulator &&
+      device != null) {
+    final bool simulatorSupportsIntel = await _simulatorSupportsIntel(device);
+    if (!simulatorSupportsIntel) {
+      logger.printError(
+        '════════════════════════════════════════════════════════════════════════════════\n'
+        'The selected simulator is incompatible with the current build settings.\n'
+        'Please use a simulator that supports x86_64, such as a simulator prior to iOS 26 or '
+        'download the universal variant of the iOS 26 simulator using '
+        '"xcodebuild -downloadPlatform iOS -architectureVariant universal".\n'
+        '════════════════════════════════════════════════════════════════════════════════',
+      );
+    }
   }
   return issueDetected;
+}
+
+Future<bool> _simulatorSupportsIntel(Device device) async {
+  final Version? xcodeVersion = globals.xcode?.currentVersion;
+  if (xcodeVersion != null && xcodeVersion.major < 26) {
+    return true;
+  }
+  final String runtime = await device.sdkNameAndVersion;
+  final RunResult result = await globals.processUtils.run([
+    ...globals.xcode!.xcrunCommand(),
+    'simctl',
+    'list',
+    'runtimes',
+    runtime,
+    '--json',
+  ]);
+  return result.stdout.contains('x86_64');
 }
 
 /// Returns true if a Package.swift is found for the plugin and a podspec is not.
@@ -1264,6 +1344,7 @@ class _XCResultIssueHandlingResult {
     this.duplicateModule,
     this.missingModule,
     this.modifiedPrecompiledSource = false,
+    this.unableToFindArmDestination = false,
   });
 
   /// An issue indicates that user didn't provide the provisioning profile.
@@ -1285,6 +1366,8 @@ class _XCResultIssueHandlingResult {
   /// An issue indicates that a source file, such as a header in the Flutter framework, has
   /// changed since last built. This requires "flutter clean" to resolve.
   final bool modifiedPrecompiledSource;
+
+  final bool unableToFindArmDestination;
 }
 
 const _kResultBundlePath = 'temporary_xcresult_bundle';
