@@ -36,7 +36,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 - [flutter/182748](https://github.com/flutter/flutter/issues/182748) When building for an iOS simulator with Xcode 26, the build will fail when there is a CocoaPod dependency that does not support arm.
 - [flutter/182361](https://github.com/flutter/flutter/issues/182361) When iOS plugins register to receive lifecycle events during an event, a crash may occur.
 - [flutter/182367](https://github.com/flutter/flutter/issues/182367) Crash on Flutter Web Skwasm apps.
-- [flutter/182071](https://github.com/flutter/flutter/issues/183071) Updated test package and related dependencies.
+- [flutter/183071](https://github.com/flutter/flutter/issues/183071) Updated test package and related dependencies.
 
 ### [3.41.3](https://github.com/flutter/flutter/releases/tag/3.41.3)
 
