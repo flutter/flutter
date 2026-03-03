@@ -98,7 +98,7 @@ class Curve2DExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: Colors.white,
-      alignment: Alignment.center,
+      alignment: .center,
       child: FollowCurve2D(
         path: path,
         duration: const Duration(seconds: 3),

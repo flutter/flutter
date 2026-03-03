@@ -33,7 +33,7 @@ class ExampleWidget extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             const Spacer(flex: 5),
             Text('regular numbers have their place:', style: titleStyle),

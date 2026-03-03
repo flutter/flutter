@@ -21,7 +21,7 @@ class _PlaceholderDigit extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextStyle textStyle = Theme.of(
       context,
-    ).textTheme.displayLarge!.copyWith(fontWeight: FontWeight.w500);
+    ).textTheme.displayLarge!.copyWith(fontWeight: .w500);
 
     final Iterable<Widget> placeholderDigits =
         <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map<Widget>((int n) {
