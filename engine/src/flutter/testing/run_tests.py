@@ -940,7 +940,6 @@ def gather_dart_tests(
       'codec_test.dart',
       'decode_image_from_pixels_sync_test.dart',
       'encoding_test.dart',
-      'fragment_shader_test.dart',
       'gpu_test.dart',
       'high_bitrate_texture_test.dart',
       'image_dispose_test.dart',
@@ -969,6 +968,11 @@ def gather_dart_tests(
         continue
 
       for multithreaded in [False, True]:
+        # An opengles implementation that is multithreaded would require the
+        # raster thread and the io thread to have their own contexts in a share
+        # group. This isn't currently supported by swangle.
+        if impeller == 'opengles' and multithreaded:
+          continue
         yield gather_dart_test(
             build_dir, dart_test_file,
             FlutterTesterOptions(

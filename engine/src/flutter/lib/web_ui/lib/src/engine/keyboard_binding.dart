@@ -45,6 +45,8 @@ final int _kPhysicalShiftRight = kWebToPhysicalKey['ShiftRight']!;
 final int _kPhysicalMetaLeft = kWebToPhysicalKey['MetaLeft']!;
 final int _kPhysicalMetaRight = kWebToPhysicalKey['MetaRight']!;
 
+final List<int> _kAllPhysicalMetaKeys = <int>[_kPhysicalMetaLeft, _kPhysicalMetaRight];
+
 // Map logical keys for modifier keys to the functions that can get their
 // modifier flag out of an event.
 final Map<int, _ModifierGetter> _kLogicalKeyToModifierGetter = <int, _ModifierGetter>{
@@ -266,18 +268,32 @@ class KeyboardConverter {
     return onDarwin;
   }
 
-  // ## About Key guards
-  //
-  // When the user enters a browser/system shortcut (e.g. `Cmd+Alt+i`) the
-  // browser doesn't send a keyup for it. This puts the framework in a corrupt
-  // state because it thinks the key was never released.
-  //
-  // To avoid this, we rely on the fact that browsers send repeat events
-  // while the key is held down by the user. If we don't receive a repeat
-  // event within a specific duration (_kKeydownCancelDurationMac) we assume
-  // the user has released the key and we synthesize a keyup event.
+  /// ## About Key guards
+  ///
+  /// When the user enters a browser/system shortcut that includes meta key
+  /// (e.g. `Cmd+Alt+i`), the browser doesn't send a keyup for the non-modifier keys.
+  /// This puts the framework in a corrupt state because it thinks the key was never released.
+  ///
+  /// To avoid this, we rely on the fact that browsers send repeat events
+  /// while the key is held down by the user. If we don't receive a repeat
+  /// event within a specific duration [_kKeydownCancelDurationMac] we assume
+  /// the user has released the key and we synthesize a keyup event.
+  ///
+  /// A limitation in this approach is that if meta key + multiple non-modifier keys are
+  /// pressed at the same time, only the last pressed non-modifier key will send repeated
+  /// events. This means that the guard will eventually synthesize keyup events for the other
+  /// keys, even if they are still pressed.
+  ///
+  /// This workaround is only necessary if there is a meta key (Meta left or Meta right) involved.
+  /// If no meta key is pressed, we can trust that the browser will send the keyup event
+  /// normally for all of the pressed keys.
   bool _shouldDoKeyGuard() {
-    return onDarwin;
+    return onDarwin && _isMetaKeyPressed();
+  }
+
+  /// Check if any meta key is currently pressed.
+  bool _isMetaKeyPressed() {
+    return _kAllPhysicalMetaKeys.any(_pressingRecords.containsKey);
   }
 
   /// After a keydown is received, this is the duration we wait for a repeat event
@@ -355,6 +371,7 @@ class KeyboardConverter {
   }
 
   final Map<int, _VoidCallback> _keyGuards = <int, _VoidCallback>{};
+
   // Call this method on the down or repeated event of a non-modifier key.
   void _startGuardingKey(int physicalKey, int logicalKey, Duration currentTimeStamp) {
     if (!_shouldDoKeyGuard()) {
