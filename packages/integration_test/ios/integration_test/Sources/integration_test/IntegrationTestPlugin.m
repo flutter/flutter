@@ -18,7 +18,6 @@ static NSString *const kMethodRevertImage = @"revertFlutterImage";
 @property(nonatomic, weak) NSObject<FlutterPluginRegistrar> *registrar;
 
 - (instancetype)init NS_DESIGNATED_INITIALIZER;
-- (instancetype)initWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar;
 
 @end
 
@@ -27,18 +26,17 @@ static NSString *const kMethodRevertImage = @"revertFlutterImage";
   NSMutableDictionary<NSString *, UIImage *> *_capturedScreenshotsByName;
 }
 
-static IntegrationTestPlugin *sInstance;
-
 + (instancetype)instance {
+  static dispatch_once_t onceToken;
+  static IntegrationTestPlugin *sInstance;
+  dispatch_once(&onceToken, ^{
+    sInstance = [[IntegrationTestPlugin alloc] initForRegistration];
+  });
   return sInstance;
 }
 
-- (instancetype)initWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar {
-  self = [self init];
-  if (self) {
-    _registrar = registrar;
-  }
-  return self;
+- (instancetype)initForRegistration {
+  return [self init];
 }
 
 - (instancetype)init {
@@ -48,14 +46,12 @@ static IntegrationTestPlugin *sInstance;
 }
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar {
-  static dispatch_once_t onceToken;
-  dispatch_once(&onceToken, ^{
-    sInstance = [[IntegrationTestPlugin alloc] initWithRegistrar:registrar];
-  });
+  IntegrationTestPlugin *instance = [self instance];
+  instance.registrar = registrar;
   FlutterMethodChannel *channel = [FlutterMethodChannel methodChannelWithName:kIntegrationTestPluginChannel
                                                               binaryMessenger:registrar.messenger];
-  [registrar addMethodCallDelegate:sInstance channel:channel];
-  [registrar addSceneDelegate:sInstance];
+  [registrar addMethodCallDelegate:instance channel:channel];
+  [registrar addSceneDelegate:instance];
 }
 
 /// Handle method calls from Dart code:
@@ -86,23 +82,9 @@ static IntegrationTestPlugin *sInstance;
 }
 
 - (UIImage *)capturePngScreenshot {
-  // Get all windows from the window scene
-  UIViewController *viewController = self.registrar.viewController;
-  NSArray<UIWindow *> *windows;
-  if (viewController && viewController.view.window.windowScene) {
-    windows = viewController.view.window.windowScene.windows;
-  } else {
-    // Fallback for cases where viewController is not available
-    windows = @[];
-  }
-
-  // Find the overall bounding rect for all windows
-  CGRect screenBounds;
-  if (viewController.view.window.windowScene.screen) {
-    screenBounds = viewController.view.window.windowScene.screen.bounds;
-  } else {
-    screenBounds = [UIScreen mainScreen].bounds;
-  }
+  UIWindowScene *scene = self.registrar.viewController.view.window.windowScene;
+  NSArray<UIWindow *> *windows = scene ? scene.windows : [UIApplication sharedApplication].windows;
+  CGRect screenBounds = scene.screen ? scene.screen.bounds : [UIScreen mainScreen].bounds;
 
   UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithBounds:screenBounds];
   UIImage *screenshot =
