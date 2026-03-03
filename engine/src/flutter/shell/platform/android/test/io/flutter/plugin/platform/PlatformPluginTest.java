@@ -479,7 +479,6 @@ public class PlatformPluginTest {
                   | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                   | View.SYSTEM_UI_FLAG_FULLSCREEN);
     }
-
   }
 
   @SuppressWarnings("deprecation")
@@ -579,8 +578,7 @@ public class PlatformPluginTest {
           PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
 
       // For a plain Activity, should use WindowCompat instead of deprecated setSystemUiVisibility.
-      windowCompatMock.verify(
-          () -> WindowCompat.setDecorFitsSystemWindows(fakeWindow, false));
+      windowCompatMock.verify(() -> WindowCompat.setDecorFitsSystemWindows(fakeWindow, false));
     }
   }
 
@@ -600,16 +598,14 @@ public class PlatformPluginTest {
       // First, enter edge-to-edge mode.
       platformPlugin.mPlatformMessageHandler.showSystemUiMode(
           PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
-      windowCompatMock.verify(
-          () -> WindowCompat.setDecorFitsSystemWindows(fakeWindow, false));
+      windowCompatMock.verify(() -> WindowCompat.setDecorFitsSystemWindows(fakeWindow, false));
 
       // Then switch to immersive.
       platformPlugin.mPlatformMessageHandler.showSystemUiMode(
           PlatformChannel.SystemUiMode.IMMERSIVE);
 
       // Should restore decor fits system windows when leaving edge-to-edge.
-      windowCompatMock.verify(
-          () -> WindowCompat.setDecorFitsSystemWindows(fakeWindow, true));
+      windowCompatMock.verify(() -> WindowCompat.setDecorFitsSystemWindows(fakeWindow, true));
 
       // Should apply immersive flags via setSystemUiVisibility.
       verify(fakeDecorView)
@@ -643,8 +639,7 @@ public class PlatformPluginTest {
       platformPlugin.updateSystemUiOverlays();
 
       // Should re-apply WindowCompat, not setSystemUiVisibility.
-      windowCompatMock.verify(
-          () -> WindowCompat.setDecorFitsSystemWindows(fakeWindow, false));
+      windowCompatMock.verify(() -> WindowCompat.setDecorFitsSystemWindows(fakeWindow, false));
     }
   }
 

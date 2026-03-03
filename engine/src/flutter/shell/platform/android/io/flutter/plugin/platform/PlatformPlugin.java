@@ -460,8 +460,8 @@ public class PlatformPlugin {
   }
 
   /**
-   * Disables edge-to-edge mode when switching to a different {@link
-   * PlatformChannel.SystemUiMode}. Restores the default decor-fits-system-windows behavior.
+   * Disables edge-to-edge mode when switching to a different {@link PlatformChannel.SystemUiMode}.
+   * Restores the default decor-fits-system-windows behavior.
    */
   private void disableEdgeToEdge() {
     if (isEdgeToEdge) {
