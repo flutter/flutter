@@ -54,7 +54,7 @@ class _ColorChangerState extends State<ColorChanger> {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        border: const Border.fromBorderSide(BorderSide()),
+        border: const .fromBorderSide(BorderSide()),
         color: color.toColor(),
       ),
       child: Listener(
@@ -70,7 +70,7 @@ class _ColorChangerState extends State<ColorChanger> {
           }
         },
         child: Stack(
-          fit: StackFit.expand,
+          fit: .expand,
           children: <Widget>[const AbsorbPointer(), ?widget.child],
         ),
       ),
@@ -94,7 +94,7 @@ class _PointerSignalResolverExampleState
   Widget build(BuildContext context) {
     return Material(
       child: Stack(
-        fit: StackFit.expand,
+        fit: .expand,
         children: <Widget>[
           ColorChanger(
             initialColor: const HSVColor.fromAHSV(0.2, 120.0, 1, 1),
@@ -109,7 +109,7 @@ class _PointerSignalResolverExampleState
             ),
           ),
           Align(
-            alignment: Alignment.topLeft,
+            alignment: .topLeft,
             child: Row(
               children: <Widget>[
                 Switch(
@@ -122,7 +122,7 @@ class _PointerSignalResolverExampleState
                 ),
                 const Text(
                   'Use the PointerSignalResolver?',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(fontWeight: .bold),
                 ),
               ],
             ),
