@@ -108,10 +108,8 @@ Future<Depfile> copyAssets(
     }),
   };
 
-  var quiet = false;
-  if (environment.defines[kBuildSwiftPackage] == 'true') {
-    quiet = true;
-  }
+  // Suppress IconTreeShaker summary messages
+  final quiet = environment.defines[kBuildSwiftPackage] == 'true';
 
   await Future.wait<void>(
     assetEntries.entries.map<Future<void>>((MapEntry<String, AssetBundleEntry> entry) async {

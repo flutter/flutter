@@ -849,6 +849,7 @@ class FlutterPluginSwiftDependencies {
 
 /// Class that encapsulates logic needed to build App and native asset frameworks and generate
 /// dependencies for the FlutterPluginRegistrant swift package.
+@visibleForTesting
 class AppFrameworkAndNativeAssetsDependencies {
   AppFrameworkAndNativeAssetsDependencies({
     required FlutterDarwinPlatform targetPlatform,
@@ -911,12 +912,12 @@ class AppFrameworkAndNativeAssetsDependencies {
       );
 
       // Create native assets XCFrameworks
-      final Directory nativeAssetOuput = xcframeworkOutput.childDirectory(_kNativeAssets);
-      ErrorHandlingFileSystem.deleteIfExists(nativeAssetOuput, recursive: true);
+      final Directory nativeAssetOutput = xcframeworkOutput.childDirectory(_kNativeAssets);
+      ErrorHandlingFileSystem.deleteIfExists(nativeAssetOutput, recursive: true);
       if (nativeAssetFrameworks.isNotEmpty) {
         final List<String> nativeAssetWarnings = await _createXCFrameworksForNativeAssets(
           nativeAssetFrameworks,
-          nativeAssetOuput,
+          nativeAssetOutput,
         );
         warnings.addAll(nativeAssetWarnings);
       }
@@ -1172,14 +1173,13 @@ Future<void> _produceXCFramework({
     for (final Directory framework in frameworks) ...<String>[
       '-framework',
       framework.path,
-      ...framework.parent
-          .listSync()
-          .where(
-            (FileSystemEntity entity) =>
-                entity.basename.endsWith('dSYM') && !entity.basename.startsWith('Flutter'),
-          )
-          .map((FileSystemEntity entity) => <String>['-debug-symbols', entity.path])
-          .expand<String>((List<String> parameter) => parameter),
+      // If there is a dSYM for this framework, add it to the XCFramework.
+      if (framework.parent
+          .childDirectory('$frameworkBinaryName.framework.dSYM')
+          .existsSync()) ...<String>[
+        '-debug-symbols',
+        framework.parent.childDirectory('$frameworkBinaryName.framework.dSYM').path,
+      ],
     ],
     '-output',
     xcframeworkOutput.path,

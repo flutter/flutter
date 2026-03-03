@@ -45,6 +45,9 @@ void main() {
   const debugFrameworksDirectoryPath = '$debugModeDirectoryPath/Frameworks';
   const debugNativeAssetsDirectoryPath = '$debugFrameworksDirectoryPath/NativeAssets';
   const debugPackagesDirectoryPath = '$debugModeDirectoryPath/Packages';
+  const releaseModeDirectoryPath = '$pluginRegistrantSwiftPackagePath/Release';
+  const releaseFrameworksDirectoryPath = '$releaseModeDirectoryPath/Frameworks';
+  const releaseNativeAssetsDirectoryPath = '$releaseFrameworksDirectoryPath/NativeAssets';
   const cacheDirectoryPath = 'output/.cache';
   const pluginsDirectoryPath = '$pluginRegistrantSwiftPackagePath/Plugins';
   const flutterCachePath = '/path/to/flutter/bin/cache';
@@ -562,7 +565,7 @@ let package = Package(
     });
 
     group('AppFrameworkAndNativeAssetsDependencies', () {
-      testWithoutContext('generateArtifacts', () async {
+      testWithoutContext('generateArtifacts for Debug', () async {
         final fs = MemoryFileSystem.test();
 
         final logger = BufferLogger.test();
@@ -575,7 +578,7 @@ let package = Package(
         final Directory generatedAppFramework = cacheDirectory.childDirectory(
           'Debug/macosx/App.framework',
         )..createSync(recursive: true);
-        generatedAppFramework.childFile('flutter_assets/NativeAssetsManifest.json')
+        generatedAppFramework.childFile('Resources/flutter_assets/NativeAssetsManifest.json')
           ..createSync(recursive: true)
           ..writeAsStringSync(
             '{"native-assets":{"macos_x64":{"package:my_native_asset/my_native_asset.dylib":["absolute","my_native_asset.framework/my_native_asset"]},"macos_arm64":{"package:my_native_asset/my_native_asset.dylib":["absolute","my_native_asset.framework/my_native_asset"]}}}',
@@ -619,7 +622,7 @@ let package = Package(
                 expectedProjectDirPath: flutterAppPath,
                 expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
                 expectedOutputDirPath: '$cacheDirectoryPath/Debug/macosx',
-                expectedBuildDirPath: '$flutterAppBuildPath/aab1e1e79895329037fb139f716c05d9',
+                expectedBuildDirPath: '$flutterAppBuildPath/',
                 expectedCacheDirPath: flutterCachePath,
                 expectedFlutterRootDirPath: flutterRoot,
                 expectedEngineVersion: _engineVersion,
@@ -655,6 +658,113 @@ let package = Package(
 
         await appAndNativeAssetsDependencies.generateArtifacts(
           buildInfo: BuildInfo.debug,
+          cacheDirectory: cacheDirectory,
+          packageConfigPath: '$flutterAppDartToolPath/package_config.json',
+          targetFile: 'lib/main.dart',
+          xcframeworkOutput: xcframeworkOutput,
+        );
+        expect(processManager.hasRemainingExpectations, isFalse);
+        expect(logger.warningText, isEmpty);
+      });
+
+      testWithoutContext('generateArtifacts for Release', () async {
+        final fs = MemoryFileSystem.test();
+
+        final logger = BufferLogger.test();
+        final Directory xcframeworkOutput = fs.directory(releaseFrameworksDirectoryPath);
+        final Directory cacheDirectory = fs.directory(cacheDirectoryPath);
+        final Directory appDirectory = fs.directory(flutterAppPath)..createSync(recursive: true);
+
+        fs.currentDirectory = appDirectory;
+
+        final Directory generatedAppFramework = cacheDirectory.childDirectory(
+          'Release/macosx/App.framework',
+        )..createSync(recursive: true);
+        generatedAppFramework.childFile('Resources/flutter_assets/NativeAssetsManifest.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(
+            '{"native-assets":{"macos_x64":{"package:my_native_asset/my_native_asset.dylib":["absolute","my_native_asset.framework/my_native_asset"]},"macos_arm64":{"package:my_native_asset/my_native_asset.dylib":["absolute","my_native_asset.framework/my_native_asset"]}}}',
+          );
+        final Directory nativeAssetFramework = cacheDirectory.childDirectory(
+          'Release/macosx/native_assets/my_native_asset.framework',
+        )..createSync(recursive: true);
+        final Directory nativeAssetDsym = cacheDirectory.childDirectory(
+          'Release/macosx/native_assets/my_native_asset.framework.dSYM',
+        )..createSync(recursive: true);
+
+        final processManager = FakeProcessManager.list([
+          FakeCommand(
+            command: [
+              'xcrun',
+              'xcodebuild',
+              '-create-xcframework',
+              '-framework',
+              generatedAppFramework.path,
+              '-output',
+              '$releaseFrameworksDirectoryPath/App.xcframework',
+            ],
+          ),
+          FakeCommand(
+            command: [
+              'xcrun',
+              'xcodebuild',
+              '-create-xcframework',
+              '-framework',
+              nativeAssetFramework.path,
+              '-debug-symbols',
+              nativeAssetDsym.path,
+              '-output',
+              '$releaseNativeAssetsDirectoryPath/my_native_asset.xcframework',
+            ],
+          ),
+        ]);
+        const FlutterDarwinPlatform targetPlatform = .macos;
+        final testUtils = BuildSwiftPackageUtils(
+          analytics: FakeAnalytics(),
+          artifacts: FakeArtifacts(engineArtifactPath),
+          buildSystem: FakeBuildSystem(
+            expectations: [
+              BuildExpectations(
+                expectedTargetName: 'release_macos_bundle_flutter_assets',
+                expectedProjectDirPath: flutterAppPath,
+                expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
+                expectedOutputDirPath: '$cacheDirectoryPath/Release/macosx',
+                expectedBuildDirPath: '$flutterAppBuildPath/',
+                expectedCacheDirPath: flutterCachePath,
+                expectedFlutterRootDirPath: flutterRoot,
+                expectedEngineVersion: _engineVersion,
+                expectedDefines: <String, String>{
+                  'TargetFile': 'lib/main.dart',
+                  'TargetPlatform': 'darwin',
+                  'DarwinArchs': 'x86_64 arm64',
+                  'BuildMode': 'release',
+                  'DartObfuscation': 'false',
+                  'TrackWidgetCreation': 'false',
+                  'TreeShakeIcons': 'true',
+                  'BuildSwiftPackage': 'true',
+                },
+                expectedGenerateDartPluginRegistry: true,
+              ),
+            ],
+          ),
+          cache: FakeCache(fs, flutterRoot),
+          fileSystem: fs,
+          flutterRoot: flutterRoot,
+          flutterVersion: FakeFlutterVersion(),
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: processManager,
+          project: FakeFlutterProject(directory: fs.directory(flutterAppPath)),
+          templateRenderer: const MustacheTemplateRenderer(),
+          xcode: FakeXcode(),
+        );
+        final appAndNativeAssetsDependencies = AppFrameworkAndNativeAssetsDependencies(
+          targetPlatform: targetPlatform,
+          utils: testUtils,
+        );
+
+        await appAndNativeAssetsDependencies.generateArtifacts(
+          buildInfo: BuildInfo.release,
           cacheDirectory: cacheDirectory,
           packageConfigPath: '$flutterAppDartToolPath/package_config.json',
           targetFile: 'lib/main.dart',
@@ -729,7 +839,7 @@ let package = Package(
                 expectedProjectDirPath: flutterAppPath,
                 expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
                 expectedOutputDirPath: '$cacheDirectoryPath/Debug/iphoneos',
-                expectedBuildDirPath: '$flutterAppBuildPath/15e6103fce31e2d210947b29f31f64e1',
+                expectedBuildDirPath: '$flutterAppBuildPath/',
                 expectedCacheDirPath: flutterCachePath,
                 expectedFlutterRootDirPath: flutterRoot,
                 expectedEngineVersion: _engineVersion,
@@ -751,7 +861,7 @@ let package = Package(
                 expectedProjectDirPath: flutterAppPath,
                 expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
                 expectedOutputDirPath: '$cacheDirectoryPath/Debug/iphonesimulator',
-                expectedBuildDirPath: '$flutterAppBuildPath/ade7e99abd06462c3b0f12d93cfb02af',
+                expectedBuildDirPath: '$flutterAppBuildPath/',
                 expectedCacheDirPath: flutterCachePath,
                 expectedFlutterRootDirPath: flutterRoot,
                 expectedEngineVersion: _engineVersion,
@@ -862,7 +972,7 @@ let package = Package(
                   expectedProjectDirPath: flutterAppPath,
                   expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
                   expectedOutputDirPath: '$cacheDirectoryPath/Debug/iphoneos',
-                  expectedBuildDirPath: '$flutterAppBuildPath/15e6103fce31e2d210947b29f31f64e1',
+                  expectedBuildDirPath: '$flutterAppBuildPath/',
                   expectedCacheDirPath: flutterCachePath,
                   expectedFlutterRootDirPath: flutterRoot,
                   expectedEngineVersion: _engineVersion,
@@ -884,7 +994,7 @@ let package = Package(
                   expectedProjectDirPath: flutterAppPath,
                   expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
                   expectedOutputDirPath: '$cacheDirectoryPath/Debug/iphonesimulator',
-                  expectedBuildDirPath: '$flutterAppBuildPath/ade7e99abd06462c3b0f12d93cfb02af',
+                  expectedBuildDirPath: '$flutterAppBuildPath/',
                   expectedCacheDirPath: flutterCachePath,
                   expectedFlutterRootDirPath: flutterRoot,
                   expectedEngineVersion: _engineVersion,
@@ -1480,7 +1590,7 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
                 expectedProjectDirPath: flutterAppPath,
                 expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
                 expectedOutputDirPath: '$cacheDirectoryPath/Debug/iphoneos',
-                expectedBuildDirPath: '$flutterAppBuildPath/15e6103fce31e2d210947b29f31f64e1',
+                expectedBuildDirPath: '$flutterAppBuildPath/',
                 expectedCacheDirPath: flutterCachePath,
                 expectedFlutterRootDirPath: flutterRoot,
                 expectedEngineVersion: _engineVersion,
@@ -1502,7 +1612,7 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
                 expectedProjectDirPath: flutterAppPath,
                 expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
                 expectedOutputDirPath: '$cacheDirectoryPath/Debug/iphonesimulator',
-                expectedBuildDirPath: '$flutterAppBuildPath/ade7e99abd06462c3b0f12d93cfb02af',
+                expectedBuildDirPath: '$flutterAppBuildPath/',
                 expectedCacheDirPath: flutterCachePath,
                 expectedFlutterRootDirPath: flutterRoot,
                 expectedEngineVersion: _engineVersion,
@@ -1738,7 +1848,7 @@ class BuildExpectations {
     expect(environment.projectDir.path, expectedProjectDirPath);
     expect(environment.packageConfigPath, expectedPackageConfigPath);
     expect(environment.outputDir.path, expectedOutputDirPath);
-    expect(environment.buildDir.path, expectedBuildDirPath);
+    expect(environment.buildDir.path, startsWith(expectedBuildDirPath ?? ''));
     expect(environment.cacheDir.path, expectedCacheDirPath);
     expect(environment.flutterRootDir.path, expectedFlutterRootDirPath);
     expect(environment.defines, expectedDefines);
