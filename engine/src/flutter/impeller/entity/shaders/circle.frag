@@ -43,12 +43,6 @@ float distanceFromStrokedCircle(float radius,
 }
 
 void main() {
-  float dist_filled =
-      distanceFromCircle(frag_info.radius, frag_info.center, v_position);
-  float dist_stroked = distanceFromStrokedCircle(
-      frag_info.radius, frag_info.stroke_width, frag_info.center, v_position);
-  float sdf_distance = mix(dist_filled, dist_stroked, frag_info.stroked);
-
   vec2 dpdx = dFdx(v_position);
   vec2 dpdy = dFdy(v_position);
   vec2 p_to_center = v_position - frag_info.center;
@@ -57,14 +51,15 @@ void main() {
   float pixel_derivative_sdf =
       length(vec2(dot(gradient, dpdx), dot(gradient, dpdy)));
 
-  // If the screen space derivative is less than the stroke width,
-  // only one pixel can be covered and shouldn't be faded.
-  if (frag_info.stroked > 0.0 &&
-      pixel_derivative_sdf * 2.0 >= frag_info.stroke_width) {
-    sdf_distance = -frag_info.radius;
-  }
-
   float fade_width = pixel_derivative_sdf * frag_info.aa_pixels;
+  float safe_stroke_width = max(frag_info.stroke_width, fade_width * 2.0);
+
+  float dist_filled =
+      distanceFromCircle(frag_info.radius, frag_info.center, v_position);
+  float dist_stroked = distanceFromStrokedCircle(
+      frag_info.radius, safe_stroke_width, frag_info.center, v_position);
+  float sdf_distance = mix(dist_filled, dist_stroked, frag_info.stroked);
+
   // The sdf_distance will be -pixel_derivative_sdf*N exactly at N pixels away
   // from the edge of the circle
   float alpha = 1.0 - smoothstep(-fade_width, 0.0, sdf_distance);
