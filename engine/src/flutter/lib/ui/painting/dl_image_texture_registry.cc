@@ -19,17 +19,18 @@ sk_sp<SkImage> DlImageTextureRegistry::skia_image() const {
   if (!snapshot_delegate_) {
     return nullptr;
   }
-  auto registry = snapshot_delegate_->GetTextureRegistry();
+  std::shared_ptr<TextureRegistry> registry =
+      snapshot_delegate_->GetTextureRegistry();
   if (!registry) {
     return nullptr;
   }
-  auto texture = registry->GetTexture(texture_id_);
+  std::shared_ptr<Texture> texture = registry->GetTexture(texture_id_);
   if (!texture) {
     return nullptr;
   }
   Texture::PaintContext ctx;
   ctx.gr_context = snapshot_delegate_->GetGrContext();
-  auto dl_image =
+  sk_sp<DlImage> dl_image =
       texture->GetTextureImage(ctx, DlRect::MakeSize(GetSize()), false);
   return dl_image ? dl_image->skia_image() : nullptr;
 }
@@ -39,22 +40,24 @@ std::shared_ptr<impeller::Texture> DlImageTextureRegistry::impeller_texture()
   if (!snapshot_delegate_) {
     return nullptr;
   }
-  auto registry = snapshot_delegate_->GetTextureRegistry();
+  std::shared_ptr<TextureRegistry> registry =
+      snapshot_delegate_->GetTextureRegistry();
   if (!registry) {
     return nullptr;
   }
-  auto texture = registry->GetTexture(texture_id_);
+  std::shared_ptr<Texture> texture = registry->GetTexture(texture_id_);
   if (!texture) {
     return nullptr;
   }
-  auto aiks_context = snapshot_delegate_->GetSnapshotDelegateAiksContext();
+  std::shared_ptr<impeller::AiksContext> aiks_context =
+      snapshot_delegate_->GetSnapshotDelegateAiksContext();
   if (!aiks_context) {
     return nullptr;
   }
   Texture::PaintContext ctx;
   ctx.aiks_context = aiks_context.get();
   ctx.gr_context = snapshot_delegate_->GetGrContext();
-  auto dl_image =
+  sk_sp<DlImage> dl_image =
       texture->GetTextureImage(ctx, DlRect::MakeSize(GetSize()), false);
   return dl_image ? dl_image->impeller_texture() : nullptr;
 }

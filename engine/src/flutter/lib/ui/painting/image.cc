@@ -174,13 +174,14 @@ void CanvasImage::CreateFromTexture(Dart_Handle wrapper,
                                     int64_t texture_id,
                                     int width,
                                     int height) {
-  auto* dart_state = UIDartState::Current();
+  UIDartState* dart_state = UIDartState::Current();
   if (!dart_state) {
     return;
   }
-  auto snapshot_delegate = dart_state->GetSnapshotDelegate();
+  fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate =
+      dart_state->GetSnapshotDelegate();
 
-  auto image = CanvasImage::Create();
+  fml::RefPtr<CanvasImage> image = CanvasImage::Create();
   image->set_image(sk_make_sp<DlImageTextureRegistry>(
       snapshot_delegate, texture_id, width, height));
   image->AssociateWithDartWrapper(wrapper);
