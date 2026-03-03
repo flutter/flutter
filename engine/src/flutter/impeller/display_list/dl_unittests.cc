@@ -1440,7 +1440,7 @@ TEST_P(DisplayListTest, DrawCirclesWithTransformations) {
     static float filled_radius = 100.0;
     static float filled_alpha = 255.0;
     static float filled_scale[2] = {1.0, 1.0};
-    static float stroked_radius = 100.0;
+    static float stroked_radius = 20.0;
     static float stroke_width = 10.0;
     static float stroke_width_fine = 0.0;
     static float stroked_alpha = 255.0;
@@ -1453,7 +1453,7 @@ TEST_P(DisplayListTest, DrawCirclesWithTransformations) {
       ImGui::SliderFloat2("Filled Scale", filled_scale, 0, 10.0);
       ImGui::SliderFloat("Stroked Radius", &stroked_radius, 0, 500);
       ImGui::SliderFloat("Stroked Width", &stroke_width, 0, 500);
-      ImGui::SliderFloat("Stroked Width Fine", &stroke_width_fine, 0, 2.5);
+      ImGui::SliderFloat("Stroked Width Fine", &stroke_width_fine, 0, 5);
       ImGui::SliderFloat("Stroked Alpha", &stroked_alpha, 0, 10.0);
       ImGui::SliderFloat2("Stroked Scale", stroked_scale, 0, 10.0);
     }
