@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -123,7 +124,7 @@ void main() {
     final RenderObject renderObject = tester.firstRenderObject(find.byType(Texture));
     final textureBox = renderObject as TextureBox;
 
-    final image = textureBox.getImage();
+    final ui.Image image = textureBox.getImage();
     expect(image, isNotNull);
     expect(image.width, 800);
     expect(image.height, 600);
