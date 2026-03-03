@@ -487,6 +487,7 @@ class KeepAliveCheckBox extends StatefulWidget {
 
 class KeepAliveCheckBoxState extends State<KeepAliveCheckBox>
     with TickerProviderStateMixin, ToggleableStateMixin, AutomaticKeepAliveClientMixin {
+  final _NoOpToggleablePainter _painter = _NoOpToggleablePainter();
   bool checkValue = false;
 
   @override
@@ -514,12 +515,15 @@ class KeepAliveCheckBoxState extends State<KeepAliveCheckBox>
   bool? get value => checkValue;
 
   @override
+  void dispose() {
+    _painter.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     super.build(context);
-    return buildToggleable(
-      size: const Size(48, 48),
-      painter: _NoOpToggleablePainter()..position = position,
-    );
+    return buildToggleable(size: const Size(48, 48), painter: _painter..position = position);
   }
 }
 

@@ -3062,6 +3062,8 @@ class _TestToggleable extends StatefulWidget {
 
 class _TestToggleableState extends State<_TestToggleable>
     with TickerProviderStateMixin, ToggleableStateMixin {
+  final _NoOpToggleablePainter _painter = _NoOpToggleablePainter();
+
   @override
   ValueChanged<bool?>? get onChanged => null;
 
@@ -3072,11 +3074,14 @@ class _TestToggleableState extends State<_TestToggleable>
   bool? get value => false;
 
   @override
+  void dispose() {
+    _painter.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return buildToggleable(
-      size: const Size(200, 200),
-      painter: _NoOpToggleablePainter()..position = position,
-    );
+    return buildToggleable(size: const Size(200, 200), painter: _painter..position = position);
   }
 }
 
