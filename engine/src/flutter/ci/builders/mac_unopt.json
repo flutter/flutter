@@ -394,7 +394,7 @@
             "properties": {
                 "$flutter/osx_sdk": {
                     "runtime_versions": [
-                        "ios-26-0_17c52"
+                        "ios-26-2_17c52"
                     ],
                     "sdk_version": "17c52"
                 }
