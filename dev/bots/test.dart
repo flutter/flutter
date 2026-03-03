@@ -342,10 +342,7 @@ Future<void> _runBuildTests() async {
           .listSync()
           // API example builds will be tested in a separate shard.
           .where(
-            (FileSystemEntity entity) =>
-                entity is Directory &&
-                path.basename(entity.path) != 'api' &&
-                path.basename(entity.path) != 'api_multiwindow',
+            (FileSystemEntity entity) => entity is Directory && path.basename(entity.path) != 'api',
           )
           .cast<Directory>()
           .toList()
