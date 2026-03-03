@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -4762,6 +4767,71 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(ListTile)), Size.zero);
+  });
+
+  testWidgets('ListTile border is stretched by overscroll', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/180157.
+    // Verifies that the ListTile border stretches in sync with its content in
+    // overscroll. A blue background denotes shader-enabled cases (the primary
+    // focus), while a red background denotes shader-disabled cases (a
+    // complementary check).
+    //
+    // Two ListViews are rendered side-by-side: the left list is dragged downward
+    // to trigger the stretch behavior, while the right list remains static as a
+    // visual reference for comparison.
+
+    await tester.pumpWidget(
+      MaterialApp(
+        scrollBehavior: const MaterialScrollBehavior().copyWith(
+          dragDevices: PointerDeviceKind.values.toSet(),
+        ),
+        home: Scaffold(
+          // Use the background color to indicate whether the test is using
+          // shader.
+          backgroundColor: ImageFilter.isShaderFilterSupported
+              ? Colors.lightBlue
+              : Colors.red.shade100,
+          body: Builder(
+            builder: (BuildContext context) => Theme(
+              data: Theme.of(context).copyWith(platform: TargetPlatform.android),
+              child: Row(
+                children: List.generate(
+                  2,
+                  (_) => Expanded(
+                    child: Padding(
+                      padding: const EdgeInsetsGeometry.all(20.0),
+                      child: ListView.builder(
+                        itemCount: 14,
+                        itemBuilder: (_, index) {
+                          return ListTile(
+                            dense: true,
+                            title: Text('A' * index),
+                            shape: RoundedRectangleBorder(
+                              side: BorderSide(color: Colors.grey.shade400),
+                            ),
+                          );
+                        },
+                        physics: const ClampingScrollPhysics(),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.byType(ListView).first),
+    );
+    await tester.pumpAndSettle();
+    for (var i = 0; i < 5; i++) {
+      await gesture.moveBy(const Offset(0, 200));
+      await tester.pumpAndSettle();
+    }
+    await expectLater(find.byType(MaterialApp), matchesGoldenFile('list_tile.overscroll.png'));
+    await gesture.up();
   });
 }
 
