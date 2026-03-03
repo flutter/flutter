@@ -1523,6 +1523,7 @@ void main() {
         expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
+      skip: kIsWeb, // [intended] web incompatible with Android key events.
     );
 
     testWidgets('Events change focus highlight mode.', (WidgetTester tester) async {
