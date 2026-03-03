@@ -1070,6 +1070,8 @@ Future<bool> _handleIssues(
 }) async {
   var requiresProvisioningProfile = false;
   var hasProvisioningProfileIssue = false;
+  // Tracks whether we already surfaced a targeted issue message and can skip
+  // the less-accurate stdout fallback diagnostics.
   var issueDetected = false;
   var modifiedPrecompiledSource = false;
   var unableToFindArmDestination = false;
