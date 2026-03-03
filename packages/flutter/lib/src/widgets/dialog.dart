@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/cupertino.dart';
 import '../foundation/_features.dart' show isWindowingEnabled;
 
 import '_window.dart'
@@ -80,6 +79,10 @@ typedef RouteBuilder<T> = Route<T> Function(BuildContext context, WidgetBuilder 
 ///
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the dialog was closed.
+///
+/// See also:
+///
+///  * [WindowManager], for more information on how to set up windowing.
 Future<T?> showRawDialog<T>({
   required BuildContext context,
   required WidgetBuilder builder,
