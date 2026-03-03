@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/foundation/constants.dart';
 import 'package:flutter/widgets.dart';
@@ -153,6 +152,129 @@ void main() {
     await tester.pump();
     expect(buildCount, 2);
     expect(directionSeenByOverlayChild, textDirection);
+  });
+
+  testWidgets(
+    'OverlayPortal overlayChild located in root Overlay receives MediaQuery properties from root Overlay context',
+    (WidgetTester tester) async {
+      final controller = OverlayPortalController();
+      const rootPadding = EdgeInsets.all(10);
+      const innerPadding = EdgeInsets.all(20);
+
+      MediaQueryData? overlayChildData;
+      OverlayEntry? outerEntry;
+      OverlayEntry? innerEntry;
+      addTearDown(() {
+        outerEntry?.remove();
+        outerEntry?.dispose();
+        innerEntry?.remove();
+        innerEntry?.dispose();
+      });
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(padding: rootPadding),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Overlay(
+              initialEntries: <OverlayEntry>[
+                outerEntry = OverlayEntry(
+                  builder: (BuildContext context) {
+                    return MediaQuery(
+                      data: const MediaQueryData(padding: innerPadding),
+                      child: Overlay(
+                        initialEntries: <OverlayEntry>[
+                          innerEntry = OverlayEntry(
+                            builder: (BuildContext context) {
+                              return OverlayPortal(
+                                controller: controller,
+                                overlayLocation: OverlayChildLocation.rootOverlay,
+                                overlayChildBuilder: (BuildContext context) {
+                                  overlayChildData = MediaQuery.of(context);
+                                  return const SizedBox();
+                                },
+                                child: const SizedBox(),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      controller.show();
+      await tester.pump();
+
+      expect(overlayChildData?.padding, rootPadding);
+    },
+  );
+
+  testWidgets('OverlayPortal overlayChild receives MediaQuery properties from Overlay context', (
+    WidgetTester tester,
+  ) async {
+    final controller = OverlayPortalController();
+    const expectedPadding = EdgeInsets.all(10);
+    const expectedViewInsets = EdgeInsets.only(bottom: 300);
+    const expectedViewPadding = EdgeInsets.only(top: 50, bottom: 20);
+    const expectedSize = Size(800, 600);
+
+    MediaQueryData? overlayChildData;
+    OverlayEntry? entry;
+    addTearDown(() {
+      entry?.remove();
+      entry?.dispose();
+    });
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: expectedPadding,
+          viewInsets: expectedViewInsets,
+          viewPadding: expectedViewPadding,
+          size: expectedSize,
+        ),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              entry = OverlayEntry(
+                builder: (BuildContext context) {
+                  return MediaQuery(
+                    data: MediaQuery.of(context).copyWith(
+                      padding: EdgeInsets.zero,
+                      viewInsets: EdgeInsets.zero,
+                      viewPadding: EdgeInsets.zero,
+                    ),
+                    child: OverlayPortal(
+                      controller: controller,
+                      overlayChildBuilder: (BuildContext context) {
+                        overlayChildData = MediaQuery.of(context);
+                        return const SizedBox();
+                      },
+                      child: const SizedBox(),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    controller.show();
+    await tester.pump();
+
+    expect(overlayChildData?.padding, expectedPadding);
+    expect(overlayChildData?.viewInsets, expectedViewInsets);
+    expect(overlayChildData?.viewPadding, expectedViewPadding);
+    expect(overlayChildData?.size, expectedSize);
   });
 
   testWidgets('The overlay portal update semantics does not dirty overlay', (
@@ -1340,9 +1462,8 @@ void main() {
     const GlobalObjectKey container = GlobalObjectKey('container');
     final controller1 = OverlayPortalController();
     final overlayPortal = UniqueKey();
-    final Widget overlayBody = SizedBox(
-      width: 100,
-      height: 100,
+    final Widget overlayBody = SizedBox.square(
+      dimension: 100.0,
       child: OverlayPortal(
         controller: controller1,
         overlayChildBuilder: (BuildContext context) => Placeholder(key: overlayPortal),
@@ -1398,9 +1519,8 @@ void main() {
     final oldRoot = GlobalKey<OverlayState>();
     final newRoot = GlobalKey<OverlayState>();
     final overlayPortal = UniqueKey();
-    final Widget overlayBody = SizedBox(
-      width: 100,
-      height: 100,
+    final Widget overlayBody = SizedBox.square(
+      dimension: 100.0,
       child: OverlayPortal(
         controller: controller1,
         overlayLocation: OverlayChildLocation.rootOverlay,
@@ -1472,9 +1592,8 @@ void main() {
     final overlayPortal = UniqueKey();
     final outer = GlobalKey<OverlayState>();
     final inner = GlobalKey<OverlayState>();
-    final Widget overlayBody = SizedBox(
-      width: 100,
-      height: 100,
+    final Widget overlayBody = SizedBox.square(
+      dimension: 100.0,
       child: OverlayPortal(
         controller: controller1,
         overlayLocation: OverlayChildLocation.rootOverlay,

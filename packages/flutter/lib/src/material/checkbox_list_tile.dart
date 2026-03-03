@@ -184,6 +184,7 @@ class CheckboxListTile extends StatelessWidget {
     this.materialTapTargetSize,
     this.visualDensity,
     this.focusNode,
+    this.statesController,
     this.autofocus = false,
     this.shape,
     this.side,
@@ -203,6 +204,10 @@ class CheckboxListTile extends StatelessWidget {
     this.selectedTileColor,
     this.onFocusChange,
     this.enableFeedback,
+    this.horizontalTitleGap,
+    this.minVerticalPadding,
+    this.minLeadingWidth,
+    this.minTileHeight,
     this.checkboxSemanticLabel,
     this.checkboxScaleFactor = 1.0,
     this.titleAlignment,
@@ -231,6 +236,7 @@ class CheckboxListTile extends StatelessWidget {
     this.materialTapTargetSize,
     this.visualDensity,
     this.focusNode,
+    this.statesController,
     this.autofocus = false,
     this.shape,
     this.side,
@@ -250,6 +256,10 @@ class CheckboxListTile extends StatelessWidget {
     this.selectedTileColor,
     this.onFocusChange,
     this.enableFeedback,
+    this.horizontalTitleGap,
+    this.minVerticalPadding,
+    this.minLeadingWidth,
+    this.minTileHeight,
     this.checkboxSemanticLabel,
     this.checkboxScaleFactor = 1.0,
     this.titleAlignment,
@@ -360,6 +370,9 @@ class CheckboxListTile extends StatelessWidget {
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
+  /// Controls the interactive states of the backing [ListTile].
+  final WidgetStatesController? statesController;
+
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
@@ -460,6 +473,18 @@ class CheckboxListTile extends StatelessWidget {
   ///
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
+
+  /// {@macro flutter.material.ListTile.horizontalTitleGap}
+  final double? horizontalTitleGap;
+
+  /// {@macro flutter.material.ListTile.minVerticalPadding}
+  final double? minVerticalPadding;
+
+  /// {@macro flutter.material.ListTile.minLeadingWidth}
+  final double? minLeadingWidth;
+
+  /// {@macro flutter.material.ListTile.minTileHeight}
+  final double? minTileHeight;
 
   /// Whether the CheckboxListTile is interactive.
   ///
@@ -595,8 +620,13 @@ class CheckboxListTile extends StatelessWidget {
         tileColor: tileColor,
         visualDensity: visualDensity,
         focusNode: focusNode,
+        statesController: statesController,
         onFocusChange: onFocusChange,
         enableFeedback: enableFeedback,
+        horizontalTitleGap: horizontalTitleGap,
+        minVerticalPadding: minVerticalPadding,
+        minLeadingWidth: minLeadingWidth,
+        minTileHeight: minTileHeight,
         titleAlignment: titleAlignment,
         internalAddSemanticForOnTap: internalAddSemanticForOnTap,
       ),

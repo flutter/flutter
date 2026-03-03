@@ -183,21 +183,6 @@ class PlatformView {
         std::unique_ptr<PointerDataPacket> packet) = 0;
 
     //--------------------------------------------------------------------------
-    /// @brief      Requests the delegate if an embedded native view should
-    ///             accept touch at a given touch location.
-    ///
-    /// @param[in]  view_id               The identifier of the flutter view
-    ///                                   that hosts the embedded view.
-    /// @param[in]  touch_began_location  The touch began location.
-    ///
-    /// @return     true if the embedded view should accept touch; false
-    /// otherwise.
-    ///
-    virtual bool OnPlatformViewEmbeddedNativeViewShouldAcceptTouch(
-        int64_t view_id,
-        const flutter::PointData touch_began_location) = 0;
-
-    //--------------------------------------------------------------------------
     /// @brief      Notifies the delegate that the platform view has encountered
     ///             an accessibility related action on the specified node. This
     ///             event must be forwarded to the running root isolate hosted
@@ -751,22 +736,6 @@ class PlatformView {
   /// @param[in]  packet  The pointer data packet to dispatch to the framework.
   ///
   void DispatchPointerDataPacket(std::unique_ptr<PointerDataPacket> packet);
-
-  //----------------------------------------------------------------------------
-  /// @brief      Requests from the engine if an embedded view should accept
-  ///             touch at a given touch location.
-  ///
-  ///
-  /// @param[in]  view_id               The identifier of the flutter view that
-  ///                                   hosts the embedded view.
-  /// @param[in]  touch_began_location  The touch began location.
-  ///
-  /// @return     true if the embedded view should accept touch; false
-  /// otherwise.
-  ///
-  bool EmbeddedNativeViewShouldAcceptTouch(
-      int64_t view_id,
-      const flutter::PointData touch_began_location);
 
   //--------------------------------------------------------------------------
   /// @brief      Used by the embedder to specify a texture that it wants the

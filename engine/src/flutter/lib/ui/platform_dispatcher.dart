@@ -43,9 +43,6 @@ typedef KeyDataCallback = bool Function(KeyData data);
 /// Signature for [PlatformDispatcher.onSemanticsActionEvent].
 typedef SemanticsActionEventCallback = void Function(SemanticsActionEvent action);
 
-/// Signature for [PlatformDispatcher.onHitTest].
-typedef HitTestCallback = HitTestResponse Function(HitTestRequest request);
-
 /// Signature for responses to platform messages.
 ///
 /// Used as a parameter to [PlatformDispatcher.sendPlatformMessage] and
@@ -77,6 +74,9 @@ typedef ErrorCallback = bool Function(Object exception, StackTrace stackTrace);
 
 // A gesture setting value that indicates it has not been set by the engine.
 const double _kUnsetGestureSetting = -1.0;
+
+// A display corner radius value that indicates it has not been set by the engine.
+const double _kUnsetDisplayCornerRadius = -1.0;
 
 // A message channel to receive KeyData from the platform.
 //
@@ -1391,18 +1391,6 @@ class PlatformDispatcher {
     _onSemanticsActionEventZone = Zone.current;
   }
 
-  /// A callback invoked when platform wants to hit test a [FlutterView].
-  ///
-  /// For example, this is used by iOS to determine if a gesture hits a
-  /// [UIKitView].
-  HitTestCallback? get onHitTest => _onHitTest;
-  HitTestCallback? _onHitTest;
-  Zone _onHitTestZone = Zone.root;
-  set onHitTest(HitTestCallback? callback) {
-    _onHitTest = callback;
-    _onHitTestZone = Zone.current;
-  }
-
   // Called from the engine via hooks.dart.
   void _updateFrameData(int frameNumber) {
     final FrameData previous = _frameData;
@@ -1438,15 +1426,6 @@ class PlatformDispatcher {
         arguments: args,
       ),
     );
-  }
-
-  HitTestResponse _hitTest(HitTestRequest request) {
-    return _invoke1WithReturn<HitTestRequest, HitTestResponse>(
-          onHitTest,
-          _onHitTestZone,
-          request,
-        ) ??
-        HitTestResponse.empty;
   }
 
   ErrorCallback? _onError;
@@ -1999,6 +1978,7 @@ class _ViewConfiguration {
     this.displayFeatures = const <DisplayFeature>[],
     this.displayId = 0,
     this.viewConstraints = const ViewConstraints(maxWidth: 0, maxHeight: 0),
+    this.displayCornerRadii,
   });
 
   /// The identifier for a display for this view, in
@@ -2079,6 +2059,12 @@ class _ViewConfiguration {
   /// [DisplayFeatureType.fold] also have a [DisplayFeature.state] which can be
   /// used to determine the posture the device is in.
   final List<DisplayFeature> displayFeatures;
+
+  /// The radii of the display corners in physical pixels.
+  ///
+  /// This is currently populated only on Android API 31+. On earlier Android
+  /// versions, iOS, and other platforms, this value is `null`.
+  final DisplayCornerRadii? displayCornerRadii;
 
   @override
   String toString() {
@@ -2773,6 +2759,63 @@ enum DisplayFeatureState {
   postureHalfOpened,
 }
 
+/// A set of radii for the four corners of the display.
+///
+/// This class represents the curvature of the display corners. The radii values
+/// are defined in physical pixels.
+///
+/// If a corner is square (not rounded), the radius is 0.0.
+///
+/// This is currently populated only on Android API 31+.
+class DisplayCornerRadii {
+  /// Creates a [DisplayCornerRadii].
+  const DisplayCornerRadii({
+    required this.topLeft,
+    required this.topRight,
+    required this.bottomRight,
+    required this.bottomLeft,
+  }) : assert(topLeft >= 0),
+       assert(topRight >= 0),
+       assert(bottomRight >= 0),
+       assert(bottomLeft >= 0);
+
+  /// The radius of the top-left corner of the display, in physical pixels.
+  final double topLeft;
+
+  /// The radius of the top-right corner of the display, in physical pixels.
+  final double topRight;
+
+  /// The radius of the bottom-right corner of the display, in physical pixels.
+  final double bottomRight;
+
+  /// The radius of the bottom-left corner of the display, in physical pixels.
+  final double bottomLeft;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is DisplayCornerRadii &&
+        topLeft == other.topLeft &&
+        topRight == other.topRight &&
+        bottomRight == other.bottomRight &&
+        bottomLeft == other.bottomLeft;
+  }
+
+  @override
+  int get hashCode => Object.hash(topLeft, topRight, bottomRight, bottomLeft);
+
+  @override
+  String toString() {
+    return 'DisplayCornerRadii(topLeft: $topLeft, topRight: $topRight, '
+        'bottomRight: $bottomRight, bottomLeft: $bottomLeft)';
+  }
+}
+
 /// An identifier used to select a user's language and formatting preferences.
 ///
 /// This represents a [Unicode Language
@@ -3212,43 +3255,4 @@ enum ViewFocusDirection {
   ///
   /// This is typically result of the user pressing shift + tab.
   backward,
-}
-
-/// A request to evaluate the content of a view at a specific position.
-///
-/// See also:
-///
-/// * [PlatformDispatcher.onHitTest], the callback that the platform
-///   invokes to hit test a view at a specific position.
-/// * [HitTestResponse], the result of a hit test request.
-class HitTestRequest {
-  /// Creates a hit test request.
-  const HitTestRequest({required this.view, required this.offset});
-
-  /// The view that should be hit tested.
-  final FlutterView view;
-
-  /// The position in the [view] that should be hit tested.
-  final Offset offset;
-}
-
-/// The results of hit testing a view at a specific position.
-///
-/// See also:
-///
-/// * [PlatformDispatcher.onHitTest], the callback that the platform
-///   invokes to hit test a view at a specific position.
-/// * [HitTestRequest], the request to hit test a view at a specific position.
-class HitTestResponse {
-  /// Creates a hit test response.
-  const HitTestResponse({required this.isPlatformView});
-
-  /// A response with no hit entries.
-  static const HitTestResponse empty = HitTestResponse(isPlatformView: false);
-
-  /// Whether the first hit test entry is a platform view.
-  ///
-  /// The first hit test entry is typically the child that is
-  /// visually "on top" (i.e., paints later).
-  final bool isPlatformView;
 }

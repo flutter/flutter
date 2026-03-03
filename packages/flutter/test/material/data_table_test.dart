@@ -2347,6 +2347,43 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Semantic nodes do not throw an error after clearSemantics', (
+    WidgetTester tester,
+  ) async {
+    var semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DataTable(
+            columns: const <DataColumn>[
+              DataColumn(label: Text('Column 1')),
+              DataColumn(label: Text('Column 2')),
+            ],
+            rows: const <DataRow>[
+              DataRow(
+                cells: <DataCell>[DataCell(Text('Data Cell 1')), DataCell(Text('Data Cell 2'))],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Dispose the semantics to trigger clearSemantics.
+    semantics.dispose();
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+
+    // Initialize the semantics again.
+    semantics = SemanticsTester(tester);
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+
+    semantics.dispose();
+  }, semanticsEnabled: false);
+
   // Regression test for https://github.com/flutter/flutter/issues/171264
   testWidgets('DataTable cell has correct semantics rect ', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);

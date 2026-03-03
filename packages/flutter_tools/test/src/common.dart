@@ -52,7 +52,7 @@ String getFlutterRoot() {
   }
 
   Error invalidScript() => StateError(
-    'Could not determine flutter_tools/ path from script URL (${globals.platform.script}); consider setting FLUTTER_ROOT explicitly.',
+    'Could not determine flutter_tools/ path from script URL (${platform.script}); consider setting FLUTTER_ROOT explicitly.',
   );
 
   Uri scriptUri;

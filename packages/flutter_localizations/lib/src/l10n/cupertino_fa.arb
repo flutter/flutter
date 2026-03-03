@@ -20,7 +20,7 @@
   "pasteButtonLabel": "جای‌گذاری",
   "selectAllButtonLabel": "انتخاب همه",
   "tabSemanticsLabel": "برگه $tabIndex از $tabCount",
-  "modalBarrierDismissLabel": "نپذیرفتن",
+  "modalBarrierDismissLabel": "بستن",
   "searchTextFieldPlaceholderLabel": "جستجو",
   "noSpellCheckReplacementsLabel": "جایگزینی پیدا نشد",
   "menuDismissLabel": "بستن منو",

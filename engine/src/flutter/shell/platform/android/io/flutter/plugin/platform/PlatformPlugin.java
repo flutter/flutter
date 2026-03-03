@@ -202,9 +202,7 @@ public class PlatformPlugin {
         view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
         break;
       case HEAVY_IMPACT:
-        if (Build.VERSION.SDK_INT >= API_LEVELS.API_23) {
-          view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
-        }
+        view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
         break;
       case SELECTION_CLICK:
         view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
@@ -257,7 +255,7 @@ public class PlatformPlugin {
             // `onSystemUiVisibilityChange` is received though.
             //
             // As such, post `platformChannel.systemChromeChanged` to the view handler to ensure
-            // that downstream callbacks are trigged on the next frame.
+            // that downstream callbacks are triggered on the next frame.
             decorView.post(
                 () -> {
                   if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
@@ -430,8 +428,10 @@ public class PlatformPlugin {
   /**
    * @deprecated This method is outdated because it calls {@code setStatusBarColor}, {@code
    *     setNavigationBarColor} and {@code setNavigationBarDividerColor}, which are deprecated in
-   *     Android 15 and above. Consider using the new WindowInsetsController or other Android 15+
-   *     APIs for system UI styling.
+   *     Android 15 and above, meaning calls to this method will have no effect on those versions.
+   *     Consider using the
+   *     [WindowInsetsController](https://developer.android.com/reference/android/view/WindowInsetsController)
+   *     or other Android 15+ APIs for system UI styling.
    */
   @Deprecated
   private void setSystemChromeSystemUIOverlayStyle(
@@ -463,23 +463,28 @@ public class PlatformPlugin {
     // If transparent, SDK 29 and higher may apply a translucent scrim behind the bar to ensure
     // proper contrast. This can be overridden with
     // SystemChromeStyle.systemStatusBarContrastEnforced.
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_23) {
-      if (systemChromeStyle.statusBarIconBrightness != null) {
-        switch (systemChromeStyle.statusBarIconBrightness) {
-          case DARK:
-            // Dark status bar icon brightness.
-            // Light status bar appearance.
-            windowInsetsControllerCompat.setAppearanceLightStatusBars(true);
-            break;
-          case LIGHT:
-            // Light status bar icon brightness.
-            // Dark status bar appearance.
-            windowInsetsControllerCompat.setAppearanceLightStatusBars(false);
-            break;
-        }
+    if (systemChromeStyle.statusBarIconBrightness != null) {
+      switch (systemChromeStyle.statusBarIconBrightness) {
+        case DARK:
+          // Dark status bar icon brightness.
+          // Light status bar appearance.
+          windowInsetsControllerCompat.setAppearanceLightStatusBars(true);
+          break;
+        case LIGHT:
+          // Light status bar icon brightness.
+          // Dark status bar appearance.
+          windowInsetsControllerCompat.setAppearanceLightStatusBars(false);
+          break;
       }
+    }
 
-      if (systemChromeStyle.statusBarColor != null) {
+    if (systemChromeStyle.statusBarColor != null) {
+      // setStatusBarColor has no effect on Android 15 and above, meaning calls to this method will
+      // have no effect on those versions.
+      // Consider using the
+      // [WindowInsetsController](https://developer.android.com/reference/android/view/WindowInsetsController)
+      // or other Android 15+ APIs for system UI styling.
+      if (Build.VERSION.SDK_INT < API_LEVELS.API_35) {
         window.setStatusBarColor(systemChromeStyle.statusBarColor);
       }
     }
@@ -515,12 +520,26 @@ public class PlatformPlugin {
       }
 
       if (systemChromeStyle.systemNavigationBarColor != null) {
-        window.setNavigationBarColor(systemChromeStyle.systemNavigationBarColor);
+        // setNavigationBarColor has no effect on Android 15 and above, meaning calls to this method
+        // will have no effect on those versions.
+        // Consider using the
+        // [WindowInsetsController](https://developer.android.com/reference/android/view/WindowInsetsController)
+        // or other Android 15+ APIs for system UI styling.
+        if (Build.VERSION.SDK_INT < API_LEVELS.API_35) {
+          window.setNavigationBarColor(systemChromeStyle.systemNavigationBarColor);
+        }
       }
     }
     // You can't change the color of the navigation bar divider color until SDK 28.
+
+    // setNavigationBarDividerColor has no effect on Android 15 and above, meaning calls to this
+    // method will have no effect on those versions.
+    // Consider using the
+    // [WindowInsetsController](https://developer.android.com/reference/android/view/WindowInsetsController)
+    // or other Android 15+ APIs for system UI styling.
     if (systemChromeStyle.systemNavigationBarDividerColor != null
-        && Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
+        && Build.VERSION.SDK_INT >= API_LEVELS.API_28
+        && Build.VERSION.SDK_INT < API_LEVELS.API_35) {
       window.setNavigationBarDividerColor(systemChromeStyle.systemNavigationBarDividerColor);
     }
 

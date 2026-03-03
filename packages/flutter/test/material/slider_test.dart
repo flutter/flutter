@@ -3505,9 +3505,8 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Material(
             child: Center(
-              child: SizedBox(
-                height: 10.0,
-                width: 10.0,
+              child: SizedBox.square(
+                dimension: 10.0,
                 child: Slider(
                   value: sliderValue,
                   label: 'label',
@@ -3546,11 +3545,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Material(
             child: Center(
-              child: SizedBox(
-                height: 10.0,
-                width: 10.0,
-                child: Slider(value: 0.5, onChanged: null),
-              ),
+              child: SizedBox.square(dimension: 10.0, child: Slider(value: 0.5, onChanged: null)),
             ),
           ),
         ),
@@ -4209,6 +4204,62 @@ void main() {
     },
     variant: TargetPlatformVariant.desktop(),
   );
+
+  testWidgets('showValueIndicator takes priority over theme', (WidgetTester tester) async {
+    Widget buildApp({
+      required ShowValueIndicator? themeShowValueIndicator,
+      required ShowValueIndicator? sliderShowValueIndicator,
+    }) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: SliderTheme(
+              data: SliderThemeData(
+                valueIndicatorColor: Colors.red,
+                showValueIndicator: themeShowValueIndicator,
+              ),
+              child: Slider(
+                value: 0.5,
+                label: '0.5',
+                onChanged: (double newValue) {},
+                showValueIndicator: sliderShowValueIndicator,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    void checkValueIndicator({required bool isVisible}) {
+      // _RenderValueIndicator is the last render object in the tree.
+      final RenderObject valueIndicatorBox = tester.allRenderObjects.last;
+      final PaintPattern matcher = paints
+        ..path(color: Colors.red)
+        ..paragraph();
+      expect(valueIndicatorBox, isVisible ? matcher : isNot(matcher));
+    }
+
+    await tester.pumpWidget(
+      buildApp(themeShowValueIndicator: ShowValueIndicator.never, sliderShowValueIndicator: null),
+    );
+    checkValueIndicator(isVisible: false);
+
+    await tester.pumpWidget(
+      buildApp(
+        themeShowValueIndicator: ShowValueIndicator.never,
+        sliderShowValueIndicator: ShowValueIndicator.alwaysVisible,
+      ),
+    );
+    checkValueIndicator(isVisible: true);
+
+    await tester.pumpWidget(
+      buildApp(
+        themeShowValueIndicator: ShowValueIndicator.alwaysVisible,
+        sliderShowValueIndicator: ShowValueIndicator.never,
+      ),
+    );
+    checkValueIndicator(isVisible: false);
+  });
 
   testWidgets('Event on Slider should perform no-op if already unmounted', (
     WidgetTester tester,

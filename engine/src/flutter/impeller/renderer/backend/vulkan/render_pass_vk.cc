@@ -336,9 +336,10 @@ void RenderPassVK::SetPipeline(PipelineRef pipeline) {
   if (!pipeline_) {
     return;
   }
+  context_->GetPipelineLibrary()->LogPipelineUsage(pipeline->GetDescriptor());
 
   pipeline_uses_input_attachments_ =
-      pipeline_->GetDescriptor().GetVertexDescriptor()->UsesInputAttacments();
+      pipeline_->GetDescriptor().GetVertexDescriptor()->UsesInputAttachments();
 
   if (pipeline_uses_input_attachments_) {
     if (bound_image_offset_ >= kMaxBindings) {

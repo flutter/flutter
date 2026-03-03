@@ -1098,10 +1098,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   @override
   void initState() {
     super.initState();
-    final animations = <Listenable>[
-      if (widget.route.animation != null) widget.route.animation!,
-      if (widget.route.secondaryAnimation != null) widget.route.secondaryAnimation!,
-    ];
+    final animations = <Listenable>[?widget.route.animation, ?widget.route.secondaryAnimation];
     _listenable = Listenable.merge(animations);
   }
 
@@ -2276,7 +2273,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   Widget _buildModalBarrier(BuildContext context) {
     Widget barrier = buildModalBarrier();
     if (filter != null) {
-      barrier = BackdropFilter(filter: filter!, child: barrier);
+      barrier = BackdropFilter(filter: filter, child: barrier);
     }
     barrier = IgnorePointer(
       ignoring: !animation!

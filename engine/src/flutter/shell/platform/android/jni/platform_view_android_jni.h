@@ -71,6 +71,13 @@ class PlatformViewAndroidJNI {
   virtual void FlutterViewSetApplicationLocale(std::string locale) = 0;
 
   //----------------------------------------------------------------------------
+  /// @brief      Enables or disables the semantics tree.
+  ///
+  /// @note       Must be called from the platform thread.
+  ///
+  virtual void FlutterViewSetSemanticsTreeEnabled(bool enabled) = 0;
+
+  //----------------------------------------------------------------------------
   /// @brief      Sends new custom accessibility events.
   ///
   /// @note       Must be called from the platform thread.
@@ -269,6 +276,8 @@ class PlatformViewAndroidJNI {
 
   virtual double FlutterViewGetScaledFontSize(double unscaled_font_size,
                                               int configuration_id) const = 0;
+
+  virtual void MaybeResizeSurfaceView(int32_t width, int32_t height) const = 0;
 };
 
 }  // namespace flutter

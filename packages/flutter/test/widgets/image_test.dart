@@ -2314,9 +2314,8 @@ void main() {
           itemBuilder: (_, int index) {
             final provider = _TestImageProvider();
             imageProviders.add(provider);
-            return SizedBox(
-              height: 250,
-              width: 250,
+            return SizedBox.square(
+              dimension: 250,
               child: Image(image: provider, semanticLabel: index.toString()),
             );
           },
@@ -2834,9 +2833,8 @@ void main() {
 
       await tester.pumpWidget(
         Center(
-          child: SizedBox(
-            height: 50,
-            width: 50,
+          child: SizedBox.square(
+            dimension: 50,
             child: Image(
               image: imageProvider,
               excludeFromSemantics: true,

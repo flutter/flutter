@@ -101,7 +101,7 @@ class FilledButton extends ButtonStyleButton {
   /// If [icon] is null, this constructor will create a [FilledButton]
   /// that doesn't display an icon.
   ///
-  /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
+  /// {@macro flutter.material.ButtonStyle.iconAlignment}
   ///
   FilledButton.icon({
     super.key,

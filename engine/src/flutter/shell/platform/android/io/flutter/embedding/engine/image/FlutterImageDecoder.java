@@ -4,6 +4,8 @@
 
 package io.flutter.embedding.engine.image;
 
+import static io.flutter.Build.API_LEVELS;
+
 import android.graphics.Bitmap;
 import android.os.Build;
 import androidx.annotation.NonNull;
@@ -46,9 +48,9 @@ public class FlutterImageDecoder {
     Metadata metadata = Metadata.create(buffer, headerListener);
     ImageDecoder impl = null;
     if (metadata.isHeif()) {
-      if (Build.VERSION.SDK_INT == io.flutter.Build.API_LEVELS.API_36) {
+      if (Build.VERSION.SDK_INT == API_LEVELS.API_36) {
         impl = new ImageDecoderHeifApi36Impl();
-      } else if (Build.VERSION.SDK_INT < io.flutter.Build.API_LEVELS.API_36) {
+      } else if (Build.VERSION.SDK_INT < API_LEVELS.API_36) {
         impl = new ImageDecoderHeifPre36Impl();
       }
     }

@@ -7,8 +7,10 @@
 
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/file.h"
+#include "flutter/fml/string_conversion.h"
 #include "flutter/testing/testing.h"
 #include "impeller/compiler/switches.h"
+#include "impeller/compiler/types.h"
 #include "impeller/compiler/utilities.h"
 
 namespace impeller {
@@ -102,6 +104,14 @@ TEST(SwitchesTest, EntryPointPrefixIsApplied) {
   switches.source_file_name = "test.frag";
   auto options = switches.CreateSourceOptions();
   EXPECT_EQ(options.entry_point_name, "my_prefix_test_fragment_main");
+}
+
+TEST(SwitchesTest, CommandLinePathUtf8) {
+  std::u16string filename = u"test\u1234";
+  std::string input_flag = "--input=" + fml::Utf16ToUtf8(filename);
+  Switches switches = MakeSwitchesDesktopGL({input_flag.c_str()});
+  ASSERT_TRUE(switches.AreValid(std::cout));
+  ASSERT_EQ(switches.source_file_name, filename);
 }
 
 }  // namespace testing

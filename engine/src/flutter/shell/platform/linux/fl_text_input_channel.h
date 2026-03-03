@@ -38,11 +38,13 @@ G_DECLARE_FINAL_TYPE(FlTextInputChannel,
  */
 
 typedef struct {
-  void (*set_client)(int64_t client_id,
-                     const gchar* input_action,
-                     gboolean enable_delta_model,
-                     FlTextInputType input_type,
-                     gpointer user_data);
+  void (*set_client)(int64_t client_id, gpointer user_data);
+  void (*configure)(const gchar* input_action,
+                    gboolean enable_delta_model,
+                    FlTextInputType input_type,
+                    GtkInputPurpose im_purpose,
+                    GtkInputHints im_hints,
+                    gpointer user_data);
   void (*hide)(gpointer user_data);
   void (*show)(gpointer user_data);
   void (*set_editing_state)(const gchar* text,

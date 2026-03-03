@@ -11,7 +11,6 @@ typedef TimingsCallback = void Function(List<FrameTiming> timings);
 typedef PointerDataPacketCallback = void Function(PointerDataPacket packet);
 typedef KeyDataCallback = bool Function(KeyData data);
 typedef SemanticsActionEventCallback = void Function(SemanticsActionEvent action);
-typedef HitTestCallback = HitTestResponse Function(HitTestRequest request);
 typedef PlatformMessageResponseCallback = void Function(ByteData? data);
 typedef PlatformMessageCallback =
     void Function(String name, ByteData? data, PlatformMessageResponseCallback? callback);
@@ -154,9 +153,6 @@ abstract class PlatformDispatcher {
 
   SemanticsActionEventCallback? get onSemanticsActionEvent;
   set onSemanticsActionEvent(SemanticsActionEventCallback? callback);
-
-  HitTestCallback? get onHitTest;
-  set onHitTest(HitTestCallback? callback);
 
   ErrorCallback? get onError;
   set onError(ErrorCallback? callback);
@@ -405,6 +401,50 @@ enum DisplayFeatureType { unknown, fold, hinge, cutout }
 
 enum DisplayFeatureState { unknown, postureFlat, postureHalfOpened, postureFlipped }
 
+class DisplayCornerRadii {
+  const DisplayCornerRadii({
+    required this.topLeft,
+    required this.topRight,
+    required this.bottomRight,
+    required this.bottomLeft,
+  }) : assert(topLeft >= 0),
+       assert(topRight >= 0),
+       assert(bottomRight >= 0),
+       assert(bottomLeft >= 0);
+
+  final double topLeft;
+
+  final double topRight;
+
+  final double bottomRight;
+
+  final double bottomLeft;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is DisplayCornerRadii &&
+        topLeft == other.topLeft &&
+        topRight == other.topRight &&
+        bottomRight == other.bottomRight &&
+        bottomLeft == other.bottomLeft;
+  }
+
+  @override
+  int get hashCode => Object.hash(topLeft, topRight, bottomRight, bottomLeft);
+
+  @override
+  String toString() {
+    return 'DisplayCornerRadii(topLeft: $topLeft, topRight: $topRight, '
+        'bottomRight: $bottomRight, bottomLeft: $bottomLeft)';
+  }
+}
+
 class Locale {
   const Locale(this._languageCode, [this._countryCode])
     : assert(_languageCode != ''),
@@ -605,15 +645,3 @@ final class ViewFocusEvent {
 enum ViewFocusState { unfocused, focused }
 
 enum ViewFocusDirection { undefined, forward, backward }
-
-class HitTestRequest {
-  const HitTestRequest({required this.view, required this.offset});
-  final FlutterView view;
-  final Offset offset;
-}
-
-class HitTestResponse {
-  const HitTestResponse({required this.isPlatformView});
-  static const HitTestResponse empty = HitTestResponse(isPlatformView: false);
-  final bool isPlatformView;
-}

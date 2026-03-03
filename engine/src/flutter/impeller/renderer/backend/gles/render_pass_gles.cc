@@ -196,7 +196,8 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     const std::vector<BufferView>& vertex_buffers,
     const std::vector<TextureAndSampler>& bound_textures,
     const std::vector<BufferResource>& bound_buffers,
-    const std::shared_ptr<GPUTracerGLES>& tracer) {
+    const std::shared_ptr<GPUTracerGLES>& tracer,
+    const std::shared_ptr<const Context>& impeller_context) {
   TRACE_EVENT0("impeller", "RenderPassGLES::EncodeCommandsInReactor");
 
   const auto& gl = reactor.GetProcTable();
@@ -335,9 +336,9 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
       pop_cmd_debug_marker.Release();
     }
 #endif  // IMPELLER_DEBUG
-
     const auto& pipeline = PipelineGLES::Cast(*command.pipeline);
-
+    impeller_context->GetPipelineLibrary()->LogPipelineUsage(
+        pipeline.GetDescriptor());
     const auto* color_attachment =
         pipeline.GetDescriptor().GetLegacyCompatibleColorAttachment();
     if (!color_attachment) {
@@ -686,8 +687,8 @@ bool RenderPassGLES::OnEncodeCommands(const Context& context) const {
             /*vertex_buffers=*/render_pass->vertex_buffers_,  //
             /*bound_textures=*/render_pass->bound_textures_,  //
             /*bound_buffers=*/render_pass->bound_buffers_,    //
-            /*tracer=*/tracer                                 //
-        );
+            /*tracer=*/tracer,                                //
+            /*impeller_context=*/render_pass->context_);
         FML_CHECK(result)
             << "Must be able to encode GL commands without error.";
       },

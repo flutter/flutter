@@ -263,6 +263,9 @@ abstract class UnpackIOS extends UnpackDarwin {
   BuildMode get buildMode;
 
   @override
+  FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.ios;
+
+  @override
   Future<void> build(Environment environment) async {
     final String? sdkRoot = environment.defines[kSdkRoot];
     if (sdkRoot == null) {
@@ -295,6 +298,7 @@ abstract class UnpackIOS extends UnpackDarwin {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
     }
     await thinFramework(environment, frameworkBinaryPath, archs);
+
     await _signFramework(environment, frameworkBinary, buildMode);
   }
 
@@ -516,6 +520,12 @@ class DebugIosLLDBInit extends Target {
   List<Target> get dependencies => <Target>[];
 
   @override
+  Future<bool> canSkip(Environment environment) async {
+    // The `build swift-package` is not run on a device and therefore does not need an LLDB Init File.
+    return environment.defines[kBuildSwiftPackage] == 'true';
+  }
+
+  @override
   Future<void> build(Environment environment) async {
     final String? sdkRoot = environment.defines[kSdkRoot];
     if (sdkRoot == null) {
@@ -619,6 +629,7 @@ abstract class IosAssetBundle extends Target {
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/App.framework/App'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    Source.pattern('{BUILD_DIR}/${DartBuild.dartHookResultFilename}'),
     ...IconTreeShaker.inputs,
     ...ShaderCompiler.inputs,
   ];
@@ -909,7 +920,7 @@ Future<void> _createStubAppFramework(
 }
 
 Future<void> _signFramework(Environment environment, File binary, BuildMode buildMode) async {
-  await removeFinderExtendedAttributes(
+  await removeExtendedAttributes(
     binary,
     ProcessUtils(processManager: environment.processManager, logger: environment.logger),
     environment.logger,

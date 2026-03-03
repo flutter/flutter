@@ -129,12 +129,11 @@ void main() {
     testWidgets('clamps animated size to constraints', (WidgetTester tester) async {
       await tester.pumpWidget(
         const Center(
-          child: SizedBox(
-            width: 100.0,
-            height: 100.0,
+          child: SizedBox.square(
+            dimension: 100.0,
             child: AnimatedSize(
               duration: Duration(milliseconds: 200),
-              child: SizedBox(width: 100.0, height: 100.0),
+              child: SizedBox.square(dimension: 100.0),
             ),
           ),
         ),
@@ -147,12 +146,11 @@ void main() {
       // Attempt to animate beyond the outer SizedBox.
       await tester.pumpWidget(
         const Center(
-          child: SizedBox(
-            width: 100.0,
-            height: 100.0,
+          child: SizedBox.square(
+            dimension: 100.0,
             child: AnimatedSize(
               duration: Duration(milliseconds: 200),
-              child: SizedBox(width: 200.0, height: 200.0),
+              child: SizedBox.square(dimension: 200.0),
             ),
           ),
         ),
@@ -488,5 +486,19 @@ void main() {
         ),
       );
     });
+  });
+
+  testWidgets('AnimatedSize does not crash at zero size', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: AnimatedSize(duration: Duration(milliseconds: 300), child: Text('X')),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(AnimatedSize)), Size.zero);
   });
 }

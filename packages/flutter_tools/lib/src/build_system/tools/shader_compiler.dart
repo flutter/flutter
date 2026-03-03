@@ -112,6 +112,7 @@ class ShaderCompiler {
       case TargetPlatform.android:
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_riscv64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.windows_arm64:
         return <String>[
@@ -195,9 +196,7 @@ class ShaderCompiler {
       if (fatal) {
         throw ShaderCompilerException._(
           'Shader compilation of "${input.path}" to "$outputPath" '
-          'failed with exit code $code.\n'
-          'impellerc stdout:\n$stdout\n'
-          'impellerc stderr:\n$stderr',
+          'failed with exit code $code.',
         );
       }
       return false;

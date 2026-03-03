@@ -7,6 +7,7 @@
 
 #include <windows.h>
 
+#include <atomic>
 #include <chrono>
 #include <functional>
 #include <memory>
@@ -17,6 +18,10 @@
 #include "flutter/fml/macros.h"
 
 namespace flutter {
+
+namespace testing {
+class TestTaskRunnerWindow;
+}
 
 // Background timer thread. Necessary because neither SetTimer nor
 // CreateThreadpoolTimer have good enough accuracy not to affect the
@@ -72,6 +77,7 @@ class TaskRunnerWindow {
   ~TaskRunnerWindow();
 
  private:
+  friend class testing::TestTaskRunnerWindow;
   TaskRunnerWindow();
 
   void ProcessTasks();
@@ -101,6 +107,9 @@ class TaskRunnerWindow {
   std::vector<Delegate*> delegates_;
   DWORD thread_id_ = 0;
   TimerThread timer_thread_;
+
+  // Used to prevent posting wake up message when one is already scheduled.
+  std::atomic_bool wake_up_posted_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(TaskRunnerWindow);
 };

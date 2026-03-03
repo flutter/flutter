@@ -12,7 +12,7 @@
   "shareButtonLabel": "Paylaş",
   "pasteButtonLabel": "Yapıştır",
   "selectAllButtonLabel": "Tümünü seç",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "Arama sonuçları bulundu",
+  "noResultsFound": "Sonuç bulunamadı",
+  "radioButtonUnselectedLabel": "Seçili değil"
 }

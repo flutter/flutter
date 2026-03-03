@@ -4,10 +4,12 @@
 
 import 'dart:math';
 
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../artifacts.dart';
+import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/process.dart';
 import '../../build_info.dart';
@@ -361,7 +363,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
       compilationArgs,
     );
     if (compilerConfig.dryRun) {
-      _handleDryRunResult(environment, runResult);
+      await _handleDryRunResult(environment, runResult);
     }
   }
 
@@ -404,12 +406,15 @@ class Dart2WasmTarget extends Dart2WebTarget {
           if (compilerConfig.sourceMaps) 'main.dart.wasm.map',
         ];
 
-  void _handleDryRunResult(Environment environment, RunResult runResult) {
+  @visibleForTesting
+  Random? dryRunRandom;
+
+  Future<void> _handleDryRunResult(Environment environment, RunResult runResult) async {
     final int exitCode = runResult.exitCode;
     final String stdout = runResult.stdout;
     final String stderr = runResult.stderr;
-    final String result;
-    String? findingsSummary;
+    String? result;
+    final Map<String, String> findingsInfo = {};
 
     if (exitCode != 0 && exitCode != 254) {
       environment.logger.printWarning('Unexpected wasm dry run failure ($exitCode):');
@@ -438,16 +443,98 @@ class Dart2WasmTarget extends Dart2WebTarget {
         'https://docs.flutter.dev/platform-integration/web/wasm\n',
       );
       result = 'findings';
-      findingsSummary = RegExp(
-        r'\(([0-9]+)\)',
-      ).allMatches(stdout).map((RegExpMatch f) => f.group(1)).join(',');
-    } else {
-      result = 'unknown';
+      final Map<String, Set<Uri>> errorCodeToImportUris = {};
+      for (final String line in stdout.split('\n')) {
+        final Uri uri = Uri.parse(line.split(' ')[0]);
+        final String? errorCode = RegExp(r'\(([0-9]+)\)\s*$').firstMatch(line)?.group(1);
+        if (errorCode != null) {
+          (errorCodeToImportUris[errorCode] ??= {}).add(uri);
+        }
+      }
+
+      final PackageConfig packageConfigPackages;
+      try {
+        packageConfigPackages = await loadPackageConfigWithLogging(
+          findPackageConfigFileOrDefault(environment.projectDir),
+          logger: environment.logger,
+        );
+      } on ToolExit {
+        _analytics.send(
+          Event.flutterWasmDryRunPackage(
+            result: result,
+            exitCode: exitCode,
+            findingsInfo: {
+              'error': 'packageConfigNotLoaded',
+              'findings': errorCodeToImportUris.keys.join(','),
+            },
+          ),
+        );
+        return;
+      }
+
+      final Map<String, String> hostedPackages = {};
+      final Set<String> privatePackages = {};
+      for (final Package package in packageConfigPackages.packages) {
+        final String packageName = package.name;
+        if (package.root.toString().contains('hosted/pub.dev')) {
+          final String? packageVersion = RegExp(
+            r'([0-9]+\.[0-9]+\.[0-9]+(?:-[\w\.-]+)?)',
+          ).firstMatch(package.root.toString())?.group(1);
+          hostedPackages[packageName] = packageVersion ?? '?';
+        } else {
+          privatePackages.add(packageName);
+        }
+      }
+
+      errorCodeToImportUris.forEach((String errorCode, Set<Uri> uris) {
+        final Set<String> hostedPackageFindings = {};
+        // Randomize the URI order so that we
+        final urisList = <Uri>[...uris]..shuffle(dryRunRandom);
+        var hostApp = false;
+        var privatePackage = false;
+        for (final uri in urisList) {
+          final String packageName = uri.pathSegments.first;
+          final String? hostedPackageVersion = hostedPackages[packageName];
+          if (uri.scheme == 'package') {
+            if (hostedPackageVersion != null) {
+              hostedPackageFindings.add('$packageName:$hostedPackageVersion');
+              continue;
+            } else if (privatePackages.contains(packageName)) {
+              privatePackage = true;
+              continue;
+            }
+          }
+          hostApp = true;
+        }
+        final String? hpHint = switch ((hostApp, privatePackage)) {
+          (true, true) => '-hp',
+          (true, false) => '-h',
+          (false, true) => '-p',
+          _ => null,
+        };
+
+        final findingsBuffer = StringBuffer(hpHint ?? '');
+        for (final hostedPackageFinding in hostedPackageFindings) {
+          // Try to fit as many findings as we can into the 100 character limit imposed
+          // by google analytics.
+          final pendingString = '${findingsBuffer.isNotEmpty ? ',' : ''}$hostedPackageFinding';
+          if (findingsBuffer.length + pendingString.length <= 100) {
+            findingsBuffer.write(pendingString);
+          }
+        }
+        findingsInfo['E$errorCode'] = findingsBuffer.toString();
+      });
     }
+    result ??= 'unknown';
+
     environment.logger.printWarning('Use --no-wasm-dry-run to disable these warnings.');
 
     _analytics.send(
-      Event.flutterWasmDryRun(result: result, exitCode: exitCode, findingsSummary: findingsSummary),
+      Event.flutterWasmDryRunPackage(
+        result: result,
+        exitCode: exitCode,
+        findingsInfo: findingsInfo,
+      ),
     );
   }
 }
@@ -491,6 +578,7 @@ class WebReleaseBundle extends Target {
   @override
   List<Source> get inputs => <Source>[
     const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    const Source.pattern('{BUILD_DIR}/${DartBuild.dartHookResultFilename}'),
     ...buildPatternStems.map((String file) => Source.pattern('{BUILD_DIR}/$file')),
   ];
 
@@ -639,6 +727,13 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
 
     final String buildConfig = buildConfigString(environment);
 
+    // Extract web-define variables from the environment. These are stored with
+    // the [kWebDefinePrefix] prefix by [WebBuilder.buildWeb].
+    final webDefines = <String, String>{
+      for (final MapEntry(:key, :value) in environment.defines.entries)
+        if (key.startsWith(kWebDefinePrefix)) key.substring(kWebDefinePrefix.length): value,
+    };
+
     // Insert a random hash into the requests for service_worker.js. This is not a content hash,
     // because it would need to be the hash for the entire bundle and not just the resource
     // in question.
@@ -650,6 +745,8 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
       serviceWorkerVersion: serviceWorkerVersion,
       flutterJsFile: flutterJsFile,
       buildConfig: buildConfig,
+      logger: environment.logger,
+      webDefines: webDefines,
     );
 
     final File outputFlutterBootstrapJs = fileSystem.file(
@@ -673,6 +770,8 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
           flutterJsFile: flutterJsFile,
           buildConfig: buildConfig,
           flutterBootstrapJs: bootstrapContent,
+          logger: environment.logger,
+          webDefines: webDefines,
         );
         final File outputIndexHtml = fileSystem.file(
           fileSystem.path.join(environment.outputDir.path, relativePath),

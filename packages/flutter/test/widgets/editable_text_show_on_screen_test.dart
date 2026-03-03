@@ -8,6 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/src/foundation/constants.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'editable_text_tester.dart';
+
 class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   _TestSliverPersistentHeaderDelegate({
     required this.minExtent,
@@ -252,7 +254,7 @@ void main() {
                   Container(color: Colors.red),
                   ColoredBox(
                     color: Colors.green,
-                    child: TextField(controller: controller),
+                    child: TestTextField(controller: controller),
                   ),
                   Container(color: Colors.red),
                 ],
@@ -444,9 +446,8 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Center(
-            child: SizedBox(
-              height: 600.0,
-              width: 600.0,
+            child: SizedBox.square(
+              dimension: 600.0,
               child: CustomScrollView(
                 controller: scrollController,
                 slivers: List<Widget>.generate(50, (int i) {
@@ -500,9 +501,8 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Center(
-            child: SizedBox(
-              height: 600.0,
-              width: 600.0,
+            child: SizedBox.square(
+              dimension: 600.0,
               child: CustomScrollView(
                 controller: scrollController,
                 slivers: List<Widget>.generate(50, (int i) {

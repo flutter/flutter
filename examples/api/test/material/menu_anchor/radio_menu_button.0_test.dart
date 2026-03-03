@@ -64,9 +64,6 @@ void main() {
           .widget<RadioMenuButton<Color>>(
             find.byType(RadioMenuButton<Color>).at(0),
           )
-          // TODO(loic-sharma): Migrate to RadioGroup.
-          // https://github.com/flutter/flutter/issues/179088
-          // ignore: deprecated_member_use
           .groupValue,
       equals(Colors.green),
     );
@@ -86,9 +83,6 @@ void main() {
           .widget<RadioMenuButton<Color>>(
             find.byType(RadioMenuButton<Color>).at(0),
           )
-          // TODO(loic-sharma): Migrate to RadioGroup.
-          // https://github.com/flutter/flutter/issues/179088
-          // ignore: deprecated_member_use
           .groupValue,
       equals(Colors.red),
     );
@@ -108,9 +102,6 @@ void main() {
           .widget<RadioMenuButton<Color>>(
             find.byType(RadioMenuButton<Color>).at(0),
           )
-          // TODO(loic-sharma): Migrate to RadioGroup.
-          // https://github.com/flutter/flutter/issues/179088
-          // ignore: deprecated_member_use
           .groupValue,
       equals(Colors.blue),
     );

@@ -17,4 +17,14 @@ void main() {
 
     await expectLater(find.byKey(logo), matchesGoldenFile('flutter_logo.png'));
   });
+
+  testWidgets('FlutterLogo does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: SizedBox.shrink(child: FlutterLogo())),
+      ),
+    );
+    expect(tester.getSize(find.byType(FlutterLogo)), Size.zero);
+  });
 }

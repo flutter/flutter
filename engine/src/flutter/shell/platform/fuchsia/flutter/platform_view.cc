@@ -4,7 +4,7 @@
 
 #define RAPIDJSON_HAS_STDSTRING 1
 
-#include "platform_view.h"
+#include "flutter/shell/platform/fuchsia/flutter/platform_view.h"
 
 #include <fuchsia/ui/app/cpp/fidl.h>
 #include <zircon/status.h>
@@ -16,7 +16,6 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/make_copyable.h"
-#include "flutter/lib/ui/window/point_data.h"
 #include "flutter/lib/ui/window/pointer_data.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/encodable_value.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/standard_message_codec.h"
@@ -25,11 +24,10 @@
 #include "third_party/rapidjson/include/rapidjson/writer.h"
 
 #include "flutter/fml/make_copyable.h"
-#include "logging.h"
-#include "pointer_injector_delegate.h"
-#include "runtime/dart/utils/inlines.h"
-#include "text_delegate.h"
-#include "vsync_waiter.h"
+#include "flutter/shell/platform/fuchsia/flutter/pointer_injector_delegate.h"
+#include "flutter/shell/platform/fuchsia/flutter/text_delegate.h"
+#include "flutter/shell/platform/fuchsia/flutter/vsync_waiter.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/inlines.h"
 
 namespace {
 // Helper to extract a given member with a given type from a rapidjson object.
@@ -368,6 +366,10 @@ void PlatformView::OnGetLayout(fuchsia::ui::composition::LayoutInfo info) {
       {},                       // p_physical_display_features_type
       {},                       // p_physical_display_features_state
       0,                        // p_display_id
+      -1.0,                     // p_physical_display_corner_radius_top_left
+      -1.0,                     // p_physical_display_corner_radius_top_right
+      -1.0,                     // p_physical_display_corner_radius_bottom_right
+      -1.0,                     // p_physical_display_corner_radius_bottom_left
   };
   SetViewportMetrics(kFlutterImplicitViewId, metrics);
 

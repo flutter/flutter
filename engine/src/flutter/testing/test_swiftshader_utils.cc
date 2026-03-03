@@ -1,0 +1,76 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include "flutter/testing/test_swiftshader_utils.h"
+
+#include <cstdlib>
+#include <mutex>
+
+#include "flutter/fml/build_config.h"
+#include "flutter/fml/file.h"
+#include "flutter/fml/logging.h"
+#include "flutter/fml/paths.h"
+
+#if FML_OS_WIN
+#include <Windows.h>
+#endif  // FML_OS_WIN
+
+namespace flutter::testing {
+
+namespace {
+
+void FindSwiftShaderICDAtKnownPaths() {
+  static constexpr const char* kSwiftShaderICDJSON = "vk_swiftshader_icd.json";
+  static constexpr const char* kVulkanICDFileNamesEnvVariableKey =
+      "VK_ICD_FILENAMES";
+  const auto executable_directory_path =
+      fml::paths::GetExecutableDirectoryPath();
+  FML_CHECK(executable_directory_path.first);
+  auto icd_directory = executable_directory_path.second;
+  if (icd_directory.ends_with("exe.unstripped")) {
+    icd_directory = fml::paths::GetDirectoryName(icd_directory);
+  }
+  const auto icd_directory_fd = fml::OpenDirectory(icd_directory.c_str(), false,
+                                                   fml::FilePermission::kRead);
+  FML_CHECK(icd_directory_fd.is_valid());
+  if (fml::FileExists(icd_directory_fd, kSwiftShaderICDJSON)) {
+    const auto icd_path =
+        fml::paths::JoinPaths({icd_directory, kSwiftShaderICDJSON});
+#if FML_OS_WIN
+    const auto success =
+        ::SetEnvironmentVariableA(kVulkanICDFileNamesEnvVariableKey,  //
+                                  icd_path.c_str()                    //
+                                  ) != 0;
+#else   // FML_OS_WIN
+    const auto success = ::setenv(kVulkanICDFileNamesEnvVariableKey,  //
+                                  icd_path.c_str(),                   //
+                                  1  // overwrite
+                                  ) == 0;
+#endif  // FML_OS_WIN
+    FML_CHECK(success)
+        << "Could not set the environment variable to use SwiftShader.";
+  } else {
+    FML_CHECK(false)
+        << "Was asked to use SwiftShader but could not find the installable "
+           "client driver (ICD) for the locally built SwiftShader.";
+  }
+}
+
+}  // namespace
+
+void SetupSwiftshaderOnce(bool use_swiftshader) {
+  static bool swiftshader_preference = false;
+  static std::once_flag sOnceInitializer;
+  std::call_once(sOnceInitializer, [use_swiftshader]() {
+    if (use_swiftshader) {
+      FindSwiftShaderICDAtKnownPaths();
+      swiftshader_preference = use_swiftshader;
+    }
+  });
+  FML_CHECK(swiftshader_preference == use_swiftshader)
+      << "The option to use SwiftShader in a process can only be set once and "
+         "may not be changed later.";
+}
+
+}  // namespace flutter::testing

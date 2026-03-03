@@ -28,7 +28,7 @@ class VertexDescriptor final : public Comparable<VertexDescriptor> {
   VertexDescriptor();
 
   // |Comparable<PipelineVertexDescriptor>|
-  virtual ~VertexDescriptor();
+  ~VertexDescriptor();
 
   template <size_t Size, size_t LayoutSize>
   void SetStageInputs(
@@ -67,7 +67,7 @@ class VertexDescriptor final : public Comparable<VertexDescriptor> {
   // |Comparable<VertexDescriptor>|
   bool IsEqual(const VertexDescriptor& other) const override;
 
-  bool UsesInputAttacments() const;
+  bool UsesInputAttachments() const;
 
  private:
   std::vector<ShaderStageIOSlot> inputs_;

@@ -673,5 +673,22 @@ void main() {
         expect(findFadeInImage(tester).placeholder!.filterQuality, equals(FilterQuality.high));
       });
     });
+
+    testWidgets('FadeInImage does not crash at zero area', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox.shrink(
+              child: FadeInImage(
+                placeholder: TestImageProvider(placeholderImage),
+                image: TestImageProvider(targetImage),
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(FadeInImage)), Size.zero);
+    });
   });
 }

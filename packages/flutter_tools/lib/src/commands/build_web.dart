@@ -31,6 +31,7 @@ class BuildWebCommand extends BuildSubCommand {
     usesBuildNameOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
     usesDartDefineOption();
+    usesWebDefineOption();
     addEnableExperimentation(hide: !verboseHelp);
     addNativeNullAssertions();
 
@@ -222,7 +223,7 @@ class BuildWebCommand extends BuildSubCommand {
           dumpInfo: boolArg('dump-info'),
           minify: minifyJs,
           nativeNullAssertions: boolArg('native-null-assertions'),
-          noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
+          useFrequencyBasedMinification: !boolArg('no-frequency-based-minification'),
           optimizationLevel: jsOptimizationLevel,
           sourceMaps: sourceMaps,
         ),
@@ -234,7 +235,7 @@ class BuildWebCommand extends BuildSubCommand {
           dumpInfo: boolArg('dump-info'),
           minify: minifyJs,
           nativeNullAssertions: boolArg('native-null-assertions'),
-          noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
+          useFrequencyBasedMinification: !boolArg('no-frequency-based-minification'),
           optimizationLevel: jsOptimizationLevel,
           sourceMaps: sourceMaps,
           renderer: webRenderer,
@@ -287,6 +288,7 @@ class BuildWebCommand extends BuildSubCommand {
     // valid approaches for setting output directory of build artifacts
     final String? outputDirectoryPath = stringArg('output');
 
+    final Map<String, String> webDefines = extractWebDefines();
     final webBuilder = WebBuilder(
       logger: globals.logger,
       processManager: globals.processManager,
@@ -304,6 +306,7 @@ class BuildWebCommand extends BuildSubCommand {
       baseHref: baseHref,
       staticAssetsUrl: staticAssetsUrl,
       outputDirectoryPath: outputDirectoryPath,
+      webDefines: webDefines,
     );
     return FlutterCommandResult.success();
   }

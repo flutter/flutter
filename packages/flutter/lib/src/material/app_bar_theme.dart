@@ -13,6 +13,9 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines default property values for descendant [AppBar] widgets.
 ///
 /// Descendant widgets obtain the current [AppBarThemeData] object with
@@ -311,7 +314,16 @@ class AppBarTheme extends InheritedTheme with Diagnosticable {
     );
   }
 
-  /// Returns the closest [AppBarThemeData] instance given the build context.
+  /// Retrieves the [AppBarThemeData] from the closest ancestor [AppBarTheme].
+  ///
+  /// If there is no enclosing [AppBarTheme] widget, then
+  /// [ThemeData.appBarTheme] is used.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// AppBarThemeData theme = AppBarTheme.of(context);
+  /// ```
   static AppBarThemeData of(BuildContext context) {
     final AppBarTheme? appBarTheme = context.dependOnInheritedWidgetOfExactType<AppBarTheme>();
     return appBarTheme?.data ?? Theme.of(context).appBarTheme;

@@ -323,4 +323,15 @@ void main() {
     // Navigator didn't pop, so first route is still visible
     expect(find.text('first route'), findsOneWidget);
   });
+
+  testWidgets('CupertinoTabView does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(child: CupertinoTabView(builder: (context) => const Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoTabView)), Size.zero);
+  });
 }
