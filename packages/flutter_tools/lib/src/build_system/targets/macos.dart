@@ -313,6 +313,9 @@ class CompileMacOSFramework extends Target {
         extraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
       }
 
+      // Suppress AOTSnapshotter build status logs
+      final quiet = environment.defines[kBuildSwiftPackage] == 'true';
+
       pending.add(
         snapshotter.build(
           buildMode: buildMode,
@@ -323,6 +326,7 @@ class CompileMacOSFramework extends Target {
           splitDebugInfo: splitDebugInfo,
           dartObfuscation: dartObfuscation,
           extraGenSnapshotOptions: extraGenSnapshotOptions,
+          quiet: quiet,
         ),
       );
     }
