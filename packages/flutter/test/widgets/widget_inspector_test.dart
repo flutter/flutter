@@ -1335,6 +1335,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               reason: 'Button "$name" should sit exactly above bottom viewPadding',
             );
           });
+
+          WidgetInspectorService.instance.isSelectMode = false;
         },
       );
     });
