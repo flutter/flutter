@@ -761,7 +761,7 @@ void main() {
       expect(connection.attached, isTrue);
       expect(client.latestMethodCall, isEmpty);
 
-      // Send refocu message to re-establish the connection.
+      // Send refocus message to re-establish the connection.
       final ByteData? messageBytes2 = const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[1],
         'method': 'TextInputClient.refocus',
