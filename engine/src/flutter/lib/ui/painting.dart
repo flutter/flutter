@@ -2774,12 +2774,12 @@ external void _decodeImageFromPixelsSync(
 /// See also: [Texture](https://api.flutter.dev/flutter/widgets/Texture-class.html) widget.
 Image getImageFromTexture(int textureId, int width, int height) {
   final image = Image._(_Image._(), width, height);
-  _CreateFromTexture(image._image, textureId, width, height);
+  _createFromTexture(image._image, textureId, width, height);
   return image;
 }
 
 @Native<Void Function(Handle, Int64, Int32, Int32)>(symbol: 'Image::CreateFromTexture')
-external void _CreateFromTexture(_Image outImage, int textureId, int width, int height);
+external void _createFromTexture(_Image outImage, int textureId, int width, int height);
 
 /// Determines the winding rule that decides how the interior of a [Path] is
 /// calculated.
