@@ -520,6 +520,9 @@ class AndroidDevice extends Device {
 
   AndroidApk? _package;
 
+  // TODO(camsim99): this actually might have to be a map per architecture
+  List<String>? _cachedEngineShellArguments;
+
   @override
   Future<LaunchResult> startApp(
     AndroidApk? package, {
@@ -563,18 +566,38 @@ class AndroidDevice extends Device {
         return LaunchResult.failed();
     }
 
+    var camilleTag = ':::::::::::CAMILLE PRINT:::::::::::: startApp called';
+    print('$camilleTag with a prebuilt application: $prebuiltApplication');
+    print('$camilleTag for app with main path: $mainPath');
+    print('$camilleTag for app with APK path: ${package?.applicationPackage.path}');
+
+    final List<String> androidShellArguments = debuggingOptions.getAndroidShellArguments();
+    // Add additional platform arguments to androidShellArguments.
+    final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
+    androidShellArguments.addAll(<String>[
+      if (traceStartup) ...<String>['--ez', 'trace-startup', 'true'],
+      if (route != null) ...<String>['--es', 'route', route],
+    ]);
+
+    var engineShellArgumentsHaveChangedFromPreviousInvocation = false;
+    if (_cachedEngineShellArguments != null) {
+      engineShellArgumentsHaveChangedFromPreviousInvocation =
+          Set<String>.from(_cachedEngineShellArguments!).containsAll(androidShellArguments) &&
+          Set<String>.from(androidShellArguments).containsAll(_cachedEngineShellArguments!) &&
+          _cachedEngineShellArguments!.length == androidShellArguments.length;
+    }
+    print('$camilleTag with the cached arguments: $_cachedEngineShellArguments');
+    print('$camilleTag with the new arguments: $androidShellArguments');
+    print(
+      '$camilleTag and the arguments have changed? $engineShellArgumentsHaveChangedFromPreviousInvocation',
+    );
+
     if (!prebuiltApplication ||
+        engineShellArgumentsHaveChangedFromPreviousInvocation ||
         _androidSdk.licensesAvailable && _androidSdk.latestVersion == null) {
+      print('$camilleTag and we are rebuilding the APK!');
       _logger.printTrace('Building APK');
       final FlutterProject project = FlutterProject.current();
-      final List<String> androidShellArguments = debuggingOptions.getAndroidShellArguments();
-      final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
-
-      // Add additional platform arguments to androidShellArguments.
-      androidShellArguments.addAll(<String>[
-        if (traceStartup) ...<String>['--ez', 'trace-startup', 'true'],
-        if (route != null) ...<String>['--es', 'route', route],
-      ]);
 
       await androidBuilder!.buildApk(
         project: project,
