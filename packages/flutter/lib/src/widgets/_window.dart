@@ -1932,99 +1932,12 @@ class WindowEntry {
 /// If windowing is not enabled, this widgets renders
 /// [child] and does not provide the [WindowRegistryScope].
 ///
-/// {@tool snippet}
+/// {@tool dartpad}
 /// An example usage might look like this, where the window manager wraps
 /// the root of the widget tree so that dialogs can be rendered at the same level
 /// as a [RegularWindow].
 ///
-/// ```dart
-/// // TODO(mattkae): remove invalid_use_of_internal_member ignore comment when this API is stable.
-/// // ignore_for_file: invalid_use_of_internal_member
-/// // ignore_for_file: implementation_imports
-/// import 'package:flutter/material.dart';
-/// import 'package:flutter/src/widgets/_window.dart';
-///
-/// void main() {
-///   WidgetsFlutterBinding.ensureInitialized();
-///   final RegularWindowController controller = RegularWindowController(
-///     preferredSize: Size(800, 600),
-///   );
-///   runWidget(
-///     WindowManager(
-///       child: RegularWindow(controller: controller, child: MainWindow()),
-///     ),
-///   );
-/// }
-///
-/// class MainWindow extends StatefulWidget {
-///   const MainWindow({super.key});
-///
-///   @override
-///   State<StatefulWidget> createState() => MainWindowState();
-/// }
-///
-/// class MainWindowState extends State<MainWindow> {
-///   WindowEntry? entry;
-///
-///   void _openDialog(BuildContext context) {
-///     final WindowRegistry? registry = WindowRegistry.maybeOf(context);
-///     assert(registry != null);
-///     entry = WindowEntry(
-///       controller: DialogWindowController(
-///         parent: WindowScope.of(context),
-///         preferredSize: const Size(400, 300),
-///         delegate: _DialogWindowControllerDelegate(
-///           mainWindow: this,
-///           registry: registry!,
-///         ),
-///       ),
-///       builder: (BuildContext context) {
-///         return Container();
-///       },
-///     );
-///     registry.register(entry!);
-///   }
-///
-///   void closeDialog(WindowRegistry registry) {
-///     if (entry != null) {
-///       registry.unregister(entry!);
-///       entry = null;
-///     }
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       home: Scaffold(
-///         appBar: AppBar(title: const Text('Example')),
-///         body: Center(
-///           child: OutlinedButton(
-///             onPressed: () => _openDialog(context),
-///             child: Text('Open a dialog'),
-///           ),
-///         ),
-///       ),
-///     );
-///   }
-/// }
-///
-/// class _DialogWindowControllerDelegate extends DialogWindowControllerDelegate {
-///   _DialogWindowControllerDelegate({
-///     required this.mainWindow,
-///     required this.registry,
-///   });
-///
-///   final MainWindowState mainWindow;
-///   final WindowRegistry registry;
-///
-///   @override
-///   void onWindowDestroyed() {
-///     super.onWindowDestroyed();
-///     mainWindow.closeDialog(registry);
-///   }
-/// }
-///
-/// ```
+/// ** See code in examples/api/lib/widgets/windows/window_manager.0.dart **
 /// {@end-tool}
 ///
 /// {@macro flutter.widgets.windowing.experimental}
