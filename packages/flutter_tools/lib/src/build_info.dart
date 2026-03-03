@@ -55,6 +55,7 @@ class BuildInfo {
     this.useLocalCanvasKit = false,
     this.includeUnsupportedPlatformLibraryStubs = false,
     this.webEnableHotReload = false,
+    this.enableHcpp = false,
   }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
        extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
        fileSystemRoots = fileSystemRoots ?? const <String>[],
@@ -70,6 +71,7 @@ class BuildInfo {
     String? initializeFromDill,
     List<String>? dartDefines,
     bool? includeUnsupportedPlatformLibraryStubs,
+    bool? enableHcpp,
   }) {
     return BuildInfo(
       mode,
@@ -102,6 +104,7 @@ class BuildInfo {
           includeUnsupportedPlatformLibraryStubs ?? this.includeUnsupportedPlatformLibraryStubs,
       webEnableHotReload: webEnableHotReload,
       treeShakeIcons: treeShakeIcons,
+      enableHcpp: enableHcpp ?? this.enableHcpp,
     );
   }
 
@@ -236,6 +239,9 @@ class BuildInfo {
 
   /// If set, web builds with DDC will run with support for hot reload.
   final bool webEnableHotReload;
+
+  /// Whether to enable the HCPP platform view mode on the Impeller rendering backend.
+  final bool enableHcpp;
 
   /// Can be used when the actual information is not needed.
   static const dummy = BuildInfo(
