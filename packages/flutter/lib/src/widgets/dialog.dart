@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import '../foundation/_features.dart' show isWindowingEnabled;
 
 import '_window.dart'
@@ -12,6 +14,14 @@ import '_window.dart'
         WindowEntry,
         WindowRegistry,
         WindowScope;
+
+import 'basic.dart';
+import 'debug.dart';
+import 'focus_traversal.dart';
+import 'framework.dart';
+import 'navigator.dart';
+import 'overlay.dart';
+import 'routes.dart';
 
 /// A builder for a route that takes the build context and the widget intended
 /// to go inside the route as a parameter.
