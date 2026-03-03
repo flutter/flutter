@@ -22,7 +22,7 @@ void main() {
       debugEnabledFeatureFlags.addAll(originalFeatureFlags);
     });
 
-    const evaluation = MinimumTapTargetEvaluation(size: Size(48.0, 48.0), link: 'link');
+    const evaluation = MinimumTapTargetEvaluation(size: Size(48.0, 48.0));
 
     testWidgets('passes for valid targets', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
@@ -130,7 +130,10 @@ void main() {
       debugEnabledFeatureFlags.clear();
       debugEnabledFeatureFlags.addAll(originalFeatureFlags);
     });
-    const evaluation = MinimumTextContrastEvaluation();
+    const evaluation = MinimumTextContrastEvaluation(
+      minNormalTextContrastRatio: 4.5,
+      minLargeTextContrastRatio: 3.0,
+    );
 
     testWidgets('passes for high contrast', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
@@ -174,66 +177,6 @@ void main() {
       });
       expect(result!.violations, hasLength(1));
       expect(result.violations.first.reason, contains('Expected contrast ratio of at least 4.5'));
-      handle.dispose();
-    });
-  });
-
-  group('MinimumTextContrastEvaluationAAA', () {
-    late final Set<String> originalFeatureFlags;
-    setUpAll(() {
-      originalFeatureFlags = {...debugEnabledFeatureFlags};
-      debugEnabledFeatureFlags.add('accessibility_evaluations');
-    });
-    tearDownAll(() {
-      debugEnabledFeatureFlags.clear();
-      debugEnabledFeatureFlags.addAll(originalFeatureFlags);
-    });
-    const evaluation = MinimumTextContrastEvaluationAAA();
-
-    testWidgets('passes for very high contrast', (WidgetTester tester) async {
-      final SemanticsHandle handle = tester.ensureSemantics();
-      await tester.pumpWidget(
-        const TestWidgetsApp(
-          home: SizedBox.square(
-            dimension: 100,
-            child: ColoredBox(
-              color: Color(0xFFFFFFFF),
-              child: Center(
-                child: Text('test', style: TextStyle(color: Color(0xFF000000), fontSize: 14)),
-              ),
-            ),
-          ),
-        ),
-      );
-      final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
-        return await evaluation.evaluate(tester.binding);
-      });
-      expect(result!.violations, isEmpty);
-      handle.dispose();
-    });
-
-    testWidgets('fails for normal contrast (AA but not AAA)', (WidgetTester tester) async {
-      // Gray on white: 0xFF777777 on 0xFFFFFFFF
-      // Contrast is ~4.5:1 which passes AA but fails AAA (needs 7:1)
-      final SemanticsHandle handle = tester.ensureSemantics();
-      await tester.pumpWidget(
-        const TestWidgetsApp(
-          home: SizedBox.square(
-            dimension: 100,
-            child: ColoredBox(
-              color: Color(0xFFFFFFFF),
-              child: Center(
-                child: Text('test', style: TextStyle(color: Color(0xFF767676), fontSize: 14)),
-              ),
-            ),
-          ),
-        ),
-      );
-      final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
-        return await evaluation.evaluate(tester.binding);
-      });
-      expect(result!.violations, isNotEmpty);
-      expect(result.violations.first.reason, contains('Expected contrast ratio of at least 7'));
       handle.dispose();
     });
   });

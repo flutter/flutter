@@ -24,7 +24,7 @@ class TestServiceExtensionsBinding extends BindingBase
         RendererBinding,
         WidgetsBinding,
         TestDefaultBinaryMessengerBinding {
-  final Map<String, ServiceExtensionCallback> extensions = <String, ServiceExtensionCallback>{};
+  final Map<String, ServiceExtensionCallback> extensions = .new();
 
   final Map<String, List<Map<String, dynamic>>> eventsDispatched =
       <String, List<Map<String, dynamic>>>{};
@@ -203,7 +203,11 @@ void main() {
     // framework, excluding any that are for the widget inspector (see
     // widget_inspector_test.dart for tests of the ext.flutter.inspector service
     // extensions). Any test counted here must be tested in this file!
-    const serviceExtensionCount = 30;
+    const serviceExtensionCount = 31;
+
+    // The tests are in the widgets/accessibility_evaluations_service_extension_test.dart
+    // They can't be moved here because they need to run in a WidgetTester environment.
+    testedExtensions.add(WidgetsServiceExtensions.accessibilityEvaluations.name);
 
     expect(
       binding.extensions.length,
