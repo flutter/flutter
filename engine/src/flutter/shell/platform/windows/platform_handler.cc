@@ -388,14 +388,14 @@ void PlatformHandler::SystemExitApplication(
   result_doc.SetObject();
   if (exit_type == AppExitType::required) {
     QuitApplication(std::nullopt, std::nullopt, std::nullopt, exit_code);
-    result_doc.GetObjectW().AddMember(kExitResponseKey, kExitResponseExit,
-                                      result_doc.GetAllocator());
+    result_doc.GetObj().AddMember(kExitResponseKey, kExitResponseExit,
+                                  result_doc.GetAllocator());
     result->Success(result_doc);
   } else {
     RequestAppExit(std::nullopt, std::nullopt, std::nullopt, exit_type,
                    exit_code);
-    result_doc.GetObjectW().AddMember(kExitResponseKey, kExitResponseCancel,
-                                      result_doc.GetAllocator());
+    result_doc.GetObj().AddMember(kExitResponseKey, kExitResponseCancel,
+                                  result_doc.GetAllocator());
     result->Success(result_doc);
   }
 }
@@ -418,7 +418,7 @@ void PlatformHandler::RequestAppExit(std::optional<HWND> hwnd,
       nullptr, nullptr);
   auto args = std::make_unique<rapidjson::Document>();
   args->SetObject();
-  args->GetObjectW().AddMember(
+  args->GetObj().AddMember(
       kExitTypeKey, std::string(kExitTypeNames[static_cast<int>(exit_type)]),
       args->GetAllocator());
   channel_->InvokeMethod(kRequestAppExitMethod, std::move(args),

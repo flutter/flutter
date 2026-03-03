@@ -899,11 +899,12 @@ bool PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
       return true;
     }
   } else if (method.rfind("View.focus", 0) == 0) {
-    return focus_delegate_->HandlePlatformMessage(root, message->response());
+    return focus_delegate_->HandlePlatformMessage(document,
+                                                  message->response());
   } else if (method.rfind(PointerInjectorDelegate::kPointerInjectorMethodPrefix,
                           0) == 0) {
     return pointer_injector_delegate_->HandlePlatformMessage(
-        root, message->response());
+        document, message->response());
   } else {
     FML_LOG(ERROR) << "Unknown " << message->channel() << " method " << method;
   }

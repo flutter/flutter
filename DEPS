@@ -233,7 +233,7 @@ deps = {
   Var('chromium_git') + '/chromium/tools/depot_tools.git' + '@' + '580b4ff3f5cd0dcaa2eacda28cefe0f45320e8f7',
 
   'engine/src/flutter/third_party/rapidjson':
-   Var('flutter_git') + '/third_party/rapidjson' + '@' + 'ef3564c5c8824989393b87df25355baf35ff544b',
+   Var('flutter_git') + '/third_party/rapidjson' + '@' + '47253cab97e9cfe99dbd6b90836fc11589d7d802',
 
   'engine/src/flutter/third_party/harfbuzz':
    Var('flutter_git') + '/third_party/harfbuzz' + '@' + 'ea6a172f84f2cbcfed803b5ae71064c7afb6b5c2',

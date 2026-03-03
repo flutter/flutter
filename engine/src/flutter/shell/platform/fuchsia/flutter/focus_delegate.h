@@ -46,7 +46,7 @@ class FocusDelegate {
   ///
   /// Returns false if a malformed/invalid request needs to be completed empty.
   bool HandlePlatformMessage(
-      rapidjson::Value request,
+      const rapidjson::Document& request,
       fml::RefPtr<flutter::PlatformMessageResponse> response);
 
   void OnChildViewViewRef(uint64_t view_id,
