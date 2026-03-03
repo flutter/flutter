@@ -24,7 +24,9 @@ class MainWindow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final WindowManager windowManager = WindowManagerAccessor.of(context);
+    final KeyedWindowManager windowManager = KeyedWindowManagerAccessor.of(
+      context,
+    );
 
     return ViewAnchor(
       view: ListenableBuilder(

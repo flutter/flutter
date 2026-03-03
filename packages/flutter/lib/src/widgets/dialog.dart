@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
+import '../foundation/_features.dart' show isWindowingEnabled;
 
-import 'package:flutter/src/widgets/_window.dart'
+import '_window.dart'
     show
         BaseWindowController,
         DialogWindowController,
@@ -14,6 +14,8 @@ import 'package:flutter/src/widgets/_window.dart'
         WindowRegistry,
         WindowScope;
 
+/// A builder for a route that takes the build context and the widget intended
+/// to go inside the route as a parameter.
 typedef RouteBuilder<T> = Route<T> Function(BuildContext context, WidgetBuilder builder);
 
 /// Displays a dialog over the contents of the app.
