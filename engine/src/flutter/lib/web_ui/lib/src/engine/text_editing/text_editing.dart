@@ -264,12 +264,7 @@ class EngineAutofillForm {
         );
       }
     } else {
-      final autofillInfo = AutofillInfo.fromFrameworkMessage(
-        focusedElementAutofill,
-        textCapitalization: TextCapitalizationConfig.fromInputConfiguration(
-          focusedElementAutofill.readString('textCapitalization'),
-        ),
-      );
+      final autofillInfo = AutofillInfo.fromFrameworkMessage(focusedElementAutofill);
 
       // Any `inputType` is okay here since this will not be used to create the focused element
       // here. The focused element is a special case that is created outside of the
@@ -314,29 +309,30 @@ class EngineAutofillForm {
 
     final EngineAutofillForm? existingForm = dormantForms[formIdentifier];
 
-    if (!identical(this, existingForm)) {
-      assert(formElement == null);
+    final firstWakeUp = formElement == null;
+
+    if (firstWakeUp) {
       assert(elements.isEmpty);
 
       if (existingForm != null) {
         // If the form already has a dormant DOM element, let's use it instead of creating a new one.
         formElement = existingForm.formElement;
         elements.addAll(existingForm.elements);
-
-        // There's a new focused element that needs to be inserted into the existing form.
-        //
-        // Do not cause DOM disturbance unless necessary. Doing superfluous DOM operations may seem
-        // harmless, but it actually causes focus changes that could break things.
-        if (!formElement!.contains(focusedElement)) {
-          // Find the matching element and replace it with the new focused element.
-          final DomElement oldFocusedElement = elements[focusedAutofill.uniqueIdentifier]!;
-          elements[focusedAutofill.uniqueIdentifier] = focusedElement;
-          oldFocusedElement.replaceWith(focusedElement);
-        }
       } else {
         formElement = _createFormElementAndFields(focusedElement, focusedAutofill);
         _insertEditingElementInView(formElement!, viewId);
       }
+    }
+
+    // There's potentially a new focused element that needs to be inserted into the existing form.
+    //
+    // Do not cause DOM disturbance unless necessary. Doing superfluous DOM operations may seem
+    // harmless, but it actually causes focus changes that could break things.
+    if (!formElement!.contains(focusedElement)) {
+      // Find the matching element and replace it with the new focused element.
+      final DomElement oldFocusedElement = elements[focusedAutofill.uniqueIdentifier]!;
+      elements[focusedAutofill.uniqueIdentifier] = focusedElement;
+      oldFocusedElement.replaceWith(focusedElement);
     }
 
     _updateFieldValues();
@@ -418,9 +414,8 @@ class EngineAutofillForm {
     for (final String key in elements.keys) {
       final DomHTMLElement element = elements[key]!;
       final AutofillInfo autofill = items[key]!.autofillInfo;
-      if (key == focusedElementId) {
-        autofill.editingState.applyToDomElement(element);
-      } else {
+      // Focused elements are updated directly through `setEditingState`.
+      if (key != focusedElementId) {
         // Non-focused elements do not have selection, and applying selection on them may cause them
         // to gain focus unexpectedly.
         autofill.editingState.applyTextToDomElement(element);
@@ -1219,12 +1214,12 @@ class GloballyPositionedTextEditingStrategy extends DefaultTextEditingStrategy {
   @override
   void placeElement() {
     geometry?.applyToDomElement(activeDomElement);
+    // Set the last editing state if it exists, this is critical for a
+    // users ongoing work to continue uninterrupted when there is an update to
+    // the transform.
+    lastEditingState?.applyToDomElement(domElement);
     if (hasAutofillGroup) {
       placeForm();
-      // Set the last editing state if it exists, this is critical for a
-      // users ongoing work to continue uninterrupted when there is an update to
-      // the transform.
-      lastEditingState?.applyToDomElement(domElement);
       // On Chrome, when a form is focused, it opens an autofill menu
       // immediately.
       // Flutter framework sends `setEditableSizeAndTransform` for informing
@@ -1274,13 +1269,13 @@ class SafariDesktopTextEditingStrategy extends DefaultTextEditingStrategy {
     geometry?.applyToDomElement(activeDomElement);
     if (hasAutofillGroup) {
       placeForm();
-      // Set the last editing state if it exists, this is critical for a
-      // users ongoing work to continue uninterrupted when there is an update to
-      // the transform.
       // If domElement is not focused cursor location will not be correct.
       moveFocusToActiveDomElement();
-      lastEditingState?.applyToDomElement(activeDomElement);
     }
+    // Set the last editing state if it exists, this is critical for a
+    // users ongoing work to continue uninterrupted when there is an update to
+    // the transform.
+    lastEditingState?.applyToDomElement(activeDomElement);
   }
 
   @override
