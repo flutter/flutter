@@ -2592,92 +2592,221 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void attach(TextInputClient client, TextInputConfiguration configuration) {
-    _channel.invokeMethod<void>('TextInput.setClient', <Object>[
-      // ignore: unawaited_futures
-      TextInput._instance._currentConnection!._id,
-      _configurationToJson(configuration),
-    ]);
+    _channel
+        .invokeMethod<void>('TextInput.setClient', <Object>[
+          TextInput._instance._currentConnection!._id,
+          _configurationToJson(configuration),
+        ])
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) {
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stack,
+                library: 'services library',
+                context: ErrorDescription('while attaching the text input client'),
+              ),
+            );
+          },
+        );
   }
 
   @override
   void detach(TextInputClient client) {
-    _channel.invokeMethod<void>('TextInput.clearClient'); // ignore: unawaited_futures
+    _channel
+        .invokeMethod<void>('TextInput.clearClient')
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) {
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stack,
+                library: 'services library',
+                context: ErrorDescription('while detaching the text input client'),
+              ),
+            );
+          },
+        );
   }
 
   @override
   void updateConfig(TextInputConfiguration configuration) {
-    _channel.invokeMethod<void>(
-      'TextInput.updateConfig',
-      _configurationToJson(configuration),
-    ); // ignore: unawaited_futures
+    _channel
+        .invokeMethod<void>('TextInput.updateConfig', _configurationToJson(configuration))
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) {
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stack,
+                library: 'services library',
+                context: ErrorDescription('while updating text input configuration'),
+              ),
+            );
+          },
+        );
   }
 
   @override
   void setEditingState(TextEditingValue value) {
-    _channel.invokeMethod<void>(
-      'TextInput.setEditingState',
-      value.toJSON(),
-    ); // ignore: unawaited_futures
+    _channel
+        .invokeMethod<void>('TextInput.setEditingState', value.toJSON())
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) {
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stack,
+                library: 'services library',
+                context: ErrorDescription('while setting text input editing state'),
+              ),
+            );
+          },
+        );
   }
 
   @override
   void show() {
-    _channel.invokeMethod<void>('TextInput.show'); // ignore: unawaited_futures
+    _channel
+        .invokeMethod<void>('TextInput.show')
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) {
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stack,
+                library: 'services library',
+                context: ErrorDescription('while showing the text input client'),
+              ),
+            );
+          },
+        );
   }
 
   @override
   void hide() {
-    _channel.invokeMethod<void>('TextInput.hide'); // ignore: unawaited_futures
+    _channel
+        .invokeMethod<void>('TextInput.hide')
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) {
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stack,
+                library: 'services library',
+                context: ErrorDescription('while hiding the text input client'),
+              ),
+            );
+          },
+        );
   }
 
   @override
   void setEditableSizeAndTransform(Size editableBoxSize, Matrix4 transform) {
-    _channel.invokeMethod<void>('TextInput.setEditableSizeAndTransform', <String, dynamic>{
-      // ignore: unawaited_futures
-      'width': editableBoxSize.width,
-      'height': editableBoxSize.height,
-      'transform': transform.storage,
-    });
+    _channel
+        .invokeMethod<void>('TextInput.setEditableSizeAndTransform', <String, dynamic>{
+          'width': editableBoxSize.width,
+          'height': editableBoxSize.height,
+          'transform': transform.storage,
+        })
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) {
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stack,
+                library: 'services library',
+                context: ErrorDescription('while setting text input size and transform'),
+              ),
+            );
+          },
+        );
   }
 
   @override
   void setComposingRect(Rect rect) {
-    _channel.invokeMethod<void>('TextInput.setMarkedTextRect', <String, dynamic>{
-      // ignore: unawaited_futures
-      'width': rect.width,
-      'height': rect.height,
-      'x': rect.left,
-      'y': rect.top,
-    });
+    _channel
+        .invokeMethod<void>('TextInput.setMarkedTextRect', <String, dynamic>{
+          'width': rect.width,
+          'height': rect.height,
+          'x': rect.left,
+          'y': rect.top,
+        })
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) {
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stack,
+                library: 'services library',
+                context: ErrorDescription('while setting text input composing rect'),
+              ),
+            );
+          },
+        );
   }
 
   @override
   void setCaretRect(Rect rect) {
-    _channel.invokeMethod<void>('TextInput.setCaretRect', <String, dynamic>{
-      // ignore: unawaited_futures
-      'width': rect.width,
-      'height': rect.height,
-      'x': rect.left,
-      'y': rect.top,
-    });
+    _channel
+        .invokeMethod<void>('TextInput.setCaretRect', <String, dynamic>{
+          'width': rect.width,
+          'height': rect.height,
+          'x': rect.left,
+          'y': rect.top,
+        })
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) {
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stack,
+                library: 'services library',
+                context: ErrorDescription('while setting text input caret rect'),
+              ),
+            );
+          },
+        );
   }
 
   @override
   void setSelectionRects(List<SelectionRect> selectionRects) {
-    _channel.invokeMethod<void>(
-      // ignore: unawaited_futures
-      'TextInput.setSelectionRects',
-      selectionRects.map((SelectionRect rect) {
-        return <num>[
-          rect.bounds.left,
-          rect.bounds.top,
-          rect.bounds.width,
-          rect.bounds.height,
-          rect.position,
-          rect.direction.index,
-        ];
-      }).toList(),
-    );
+    _channel
+        .invokeMethod<void>(
+          'TextInput.setSelectionRects',
+          selectionRects.map((SelectionRect rect) {
+            return <num>[
+              rect.bounds.left,
+              rect.bounds.top,
+              rect.bounds.width,
+              rect.bounds.height,
+              rect.position,
+              rect.direction.index,
+            ];
+          }).toList(),
+        )
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) {
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stack,
+                library: 'services library',
+                context: ErrorDescription('while setting text input selection rects'),
+              ),
+            );
+          },
+        );
   }
 
   @override
@@ -2701,20 +2830,59 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void updateStyle(TextInputStyle style) {
-    _channel.invokeMethod<void>('TextInput.setStyle', style.toJson()); // ignore: unawaited_futures
+    _channel
+        .invokeMethod<void>('TextInput.setStyle', style.toJson())
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) {
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stack,
+                library: 'services library',
+                context: ErrorDescription('while updating text input style'),
+              ),
+            );
+          },
+        );
   }
 
   @override
   void requestAutofill() {
-    _channel.invokeMethod<void>('TextInput.requestAutofill'); // ignore: unawaited_futures
+    _channel
+        .invokeMethod<void>('TextInput.requestAutofill')
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) {
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stack,
+                library: 'services library',
+                context: ErrorDescription('while requesting autofill'),
+              ),
+            );
+          },
+        );
   }
 
   @override
   void finishAutofillContext({bool shouldSave = true}) {
-    _channel.invokeMethod<void>(
-      'TextInput.finishAutofillContext',
-      shouldSave,
-    ); // ignore: unawaited_futures
+    _channel
+        .invokeMethod<void>('TextInput.finishAutofillContext', shouldSave)
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) {
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stack,
+                library: 'services library',
+                context: ErrorDescription('while finishing autofill context'),
+              ),
+            );
+          },
+        );
   }
 }
 
