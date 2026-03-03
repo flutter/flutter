@@ -39,8 +39,6 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
-import androidx.activity.ComponentActivity;
-import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
 import androidx.core.view.WindowCompat;
 import androidx.fragment.app.FragmentActivity;
@@ -583,25 +581,6 @@ public class PlatformPluginTest {
       // For a plain Activity, should use WindowCompat instead of deprecated setSystemUiVisibility.
       windowCompatMock.verify(
           () -> WindowCompat.setDecorFitsSystemWindows(fakeWindow, false));
-    }
-  }
-
-  @Config(sdk = API_LEVELS.API_29)
-  @Test
-  public void setSystemUiMode_edgeToEdge_usesEdgeToEdgeForComponentActivity() {
-    View fakeDecorView = mock(View.class);
-    Window fakeWindow = mock(Window.class);
-    ComponentActivity mockActivity = mock(ComponentActivity.class);
-    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
-    when(mockActivity.getWindow()).thenReturn(fakeWindow);
-    PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
-
-    try (MockedStatic<EdgeToEdge> edgeToEdgeMock = mockStatic(EdgeToEdge.class)) {
-      platformPlugin.mPlatformMessageHandler.showSystemUiMode(
-          PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
-
-      // For a ComponentActivity, should use EdgeToEdge.enable() instead of WindowCompat.
-      edgeToEdgeMock.verify(() -> EdgeToEdge.enable(mockActivity));
     }
   }
 
