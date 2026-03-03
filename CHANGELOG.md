@@ -32,6 +32,11 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.41 Changes
 
+### [3.41.3](https://github.com/flutter/flutter/releases/tag/3.41.3)
+
+- [flutter/182501](https://github.com/flutter/flutter/issues/182501) Reduce CPU utilization of idle Flutter Windows apps.
+- [flutter/182233](https://github.com/flutter/flutter/issues/182233) Tapping on the status bar may crash the app on iOS when there's a primary scroll view that has never been laid out.
+
 ### [3.41.2](https://github.com/flutter/flutter/releases/tag/3.41.2)
 
 - [flutter/179673](https://github.com/flutter/flutter/issues/179673) When content sizing is not enabled on Android, a race condition can sometimes make platform views not render correctly.
