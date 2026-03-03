@@ -1431,9 +1431,8 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   /// Nodes are added when their [_RenderObjectSemantics.markNeedsUpdate]s are called.
   ///
   /// This is used to track nodes that need their semantics geometry updated.
-  /// This is different from [_nodesNeedingSemanticsUpdate] because it only tracks
-  /// nodes that need their semantics geometry updated, not nodes that need
-  /// their semantics updated.
+  /// Compare to [_nodesNeedingSemanticsUpdate], which tracks semantics boundaries of dirty nodes,
+  /// this set only tracks the dirty nodes that need their semantics geometry updated directly.
   final Set<RenderObject> _nodesNeedingSemanticsGeometryUpdate = <RenderObject>{};
 
   /// Update the semantics for render objects marked as needing a semantics
@@ -1556,9 +1555,10 @@ base class PipelineOwner with DiagnosticableTreeMixin {
           }
           continue;
         }
-        // This node won't form a semantics node, but it has children that form
-        // semantics nodes. We need to clear the geometry for all the semantics
-        // nodes in the subtree.
+        // If we reach here, this node either forms a node but not a relayout boundary,
+        // or it does not form a node but still contributes to the semantics tree.
+        // In both cases, we need to clear the geometry for all the semantics nodes in
+        // the subtree.
         for (final _RenderObjectSemantics child in node._semantics._children) {
           child.geometry = null;
         }
@@ -5606,7 +5606,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// Cached by [computeAncestorInfo] during [PipelineOwner.flushSemantics].
   _RenderObjectSemantics? firstAncestorNodeWithCleanGeometry;
 
-  /// Finds and caches the nearest semantics-forming ancestor with clean geometry.
+  /// Finds and caches the nearest semantics-forming ancestor with up-to-date geometry.
   ///
   /// The [treeShapeToken] parameter prevents redundant calculation by verifying
   /// whether the tree shape changed since the previous lookup.
