@@ -21,8 +21,6 @@ import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import androidx.activity.ComponentActivity;
-import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedDispatcherOwner;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -368,8 +366,8 @@ public class PlatformPlugin {
       // If the Flutter app targets Android SDK 15 (API 35) or later (Flutter does this by default),
       // then this mode is used by default.
       //
-      // Uses modern AndroidX APIs (EdgeToEdge.enable or WindowCompat.setDecorFitsSystemWindows)
-      // instead of deprecated View.SYSTEM_UI_FLAG_LAYOUT_* flags.
+      // Uses WindowCompat.setDecorFitsSystemWindows (from AndroidX core) instead of deprecated
+      // View.SYSTEM_UI_FLAG_LAYOUT_* flags.
       //
       // SDK 29 and up will apply a translucent body scrim behind 2/3 button navigation bars
       // to ensure contrast with buttons on the nav and status bars, unless the contrast is not
@@ -451,18 +449,14 @@ public class PlatformPlugin {
   }
 
   /**
-   * Enables edge-to-edge mode using modern AndroidX APIs. Uses {@link EdgeToEdge#enable} when the
-   * activity is a {@link ComponentActivity} (e.g., {@link
-   * io.flutter.embedding.android.FlutterFragmentActivity}), which also suppresses the Android 15
-   * edge-to-edge warning. Falls back to {@link WindowCompat#setDecorFitsSystemWindows} for plain
-   * {@link Activity} instances (e.g., {@link io.flutter.embedding.android.FlutterActivity}).
+   * Enables edge-to-edge mode using {@link WindowCompat#setDecorFitsSystemWindows}, which is the
+   * modern replacement for the deprecated {@code View.SYSTEM_UI_FLAG_LAYOUT_*} flags. This works
+   * with any {@link Activity} type, including both {@link
+   * io.flutter.embedding.android.FlutterActivity} and {@link
+   * io.flutter.embedding.android.FlutterFragmentActivity}.
    */
   private void enableEdgeToEdge() {
-    if (activity instanceof ComponentActivity) {
-      EdgeToEdge.enable((ComponentActivity) activity);
-    } else {
-      WindowCompat.setDecorFitsSystemWindows(activity.getWindow(), false);
-    }
+    WindowCompat.setDecorFitsSystemWindows(activity.getWindow(), false);
   }
 
   /**
