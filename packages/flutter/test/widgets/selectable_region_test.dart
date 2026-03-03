@@ -841,6 +841,98 @@ void main() {
       expect(renderSelectionSpy.events.length, 0);
     });
 
+    testWidgets(
+      'refreshToolbar updates toolbar position after scroll',
+      (WidgetTester tester) async {
+        final toolbarKey = UniqueKey();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SizedBox(
+              height: 400,
+              child: SingleChildScrollView(
+                child: SizedBox(
+                  height: 1200,
+                  child: SelectableRegion(
+                    selectionControls: materialTextSelectionControls,
+                    contextMenuBuilder:
+                        (BuildContext context, SelectableRegionState state) {
+                      return SizedBox(key: toolbarKey);
+                    },
+                    child: const Align(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        'First line of text.\nSecond line.\nThird line.',
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+          find.descendant(
+            of: find.byType(SelectableRegion),
+            matching: find.byType(RichText),
+          ).first,
+        );
+        final SelectableRegionState state = tester.state<SelectableRegionState>(
+          find.byType(SelectableRegion),
+        );
+
+        // Use touch long press to select text and show the toolbar (mouse drag
+        // does not show the toolbar on most platforms).
+        final TestGesture longPressGesture = await tester.startGesture(
+          textOffsetToPosition(paragraph, 0),
+        );
+        addTearDown(longPressGesture.removePointer);
+        await tester.pump(const Duration(milliseconds: 500));
+        await longPressGesture.up();
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(toolbarKey), findsOneWidget);
+
+        final RenderBox toolbarBeforeScroll = tester.renderObject<RenderBox>(
+          find.byKey(toolbarKey),
+        );
+        final Offset toolbarPositionBeforeScroll =
+            toolbarBeforeScroll.localToGlobal(Offset.zero);
+
+        // Scroll the view so the selection moves up.
+        await tester.drag(
+          find.byType(SingleChildScrollView),
+          const Offset(0, -300),
+        );
+        await tester.pumpAndSettle();
+
+        // refreshToolbar() recalculates geometry and repositions the overlay.
+        state.refreshToolbar();
+        await tester.pump();
+
+        expect(find.byKey(toolbarKey), findsOneWidget);
+
+        final RenderBox toolbarAfterRefresh = tester.renderObject<RenderBox>(
+          find.byKey(toolbarKey),
+        );
+        final Offset toolbarPositionAfterRefresh =
+            toolbarAfterRefresh.localToGlobal(Offset.zero);
+
+        // Toolbar should have moved up with the scrolled content (smaller dy).
+        expect(
+          toolbarPositionAfterRefresh.dy,
+          lessThan(toolbarPositionBeforeScroll.dy),
+          reason: 'refreshToolbar() should reposition the toolbar after scroll.',
+        );
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.android,
+        TargetPlatform.iOS,
+      }),
+      skip: kIsWeb, // Web uses native context menu; Flutter toolbar not shown.
+    );
+
     testWidgets('mouse long press does not send select-word event', (WidgetTester tester) async {
       final spy = UniqueKey();
 

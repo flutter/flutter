@@ -1831,6 +1831,30 @@ class SelectableRegionState extends State<SelectableRegion>
     }
   }
 
+  /// Refreshes the toolbar's position based on the current selection geometry.
+  ///
+  /// Call this when the selection endpoints may have shifted due to scrolling
+  /// or other layout changes. For example, wrap your scroll view in a
+  /// [NotificationListener<ScrollNotification>] and call this method from the
+  /// notification callback.
+  ///
+  /// This triggers the selection delegate's layoutDidChange() so that
+  /// selection geometry is recalculated from the current layout (e.g. after
+  /// scroll). The overlay is then updated and marked for rebuild. We always
+  /// update the overlay and mark it for rebuild after layoutDidChange so the
+  /// toolbar repositions even when the geometry value is unchanged (e.g. it was
+  /// already updated during the scroll pump), in which case the delegate
+  /// would not notify listeners.
+  ///
+  /// Has no effect if no toolbar is currently visible.
+  void refreshToolbar() {
+    _selectionDelegate.layoutDidChange();
+    if (_hasSelectionOverlayGeometry) {
+      _updateSelectionOverlay();
+    }
+    _selectionOverlay?.markNeedsBuild();
+  }
+
   @override
   void selectAll([SelectionChangedCause? cause]) {
     clearSelection();
