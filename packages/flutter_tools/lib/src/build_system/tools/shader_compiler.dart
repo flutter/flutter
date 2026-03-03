@@ -208,7 +208,7 @@ class ShaderCompiler {
     if (retryWithoutSksl) {
       shaderTargets.remove('--sksl');
       final List<String> retryCmd = makeImpellercCommand(shaderTargets);
-      _logger.printTrace('Retrying impellerc command without sksl: $cmd');
+      _logger.printTrace('Retrying impellerc command without sksl: $retryCmd');
       final ProcessResult retryResult = await _processManager.run(retryCmd, stderrEncoding: utf8);
       if (retryResult.exitCode != 0) {
         // Retry failed.
