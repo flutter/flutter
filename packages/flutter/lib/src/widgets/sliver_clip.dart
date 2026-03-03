@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
 
@@ -166,9 +167,7 @@ class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
           needsCompositing,
           offset,
           clipRect,
-          (PaintingContext context, Offset offset) {
-            context.paintChild(child!, offset);
-          },
+          super.paint,
           clipBehavior: clipBehavior,
           oldLayer: layer as ClipRectLayer?,
         );
@@ -320,7 +319,7 @@ class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
         clipper?.getClip(maxPaintRect.size) ??
         borderRadius.resolve(textDirection).toRRect(maxPaintRect);
 
-    if (clipOverlap && constraints.overlap > 0) {
+    if (clipOverlap) {
       final double insideClipExtent = switch (constraints.axis) {
         Axis.horizontal => newClip.middleRect.width,
         Axis.vertical => newClip.middleRect.height,
@@ -359,7 +358,7 @@ class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
           offset,
           clip.outerRect,
           clip,
-          (PaintingContext context, offset) => context.paintChild(child!, offset),
+          super.paint,
           clipBehavior: clipBehavior,
           oldLayer: layer as ClipRRectLayer?,
         );
@@ -535,15 +534,21 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
   }
 
   @protected
-  double getClipOriginForOverlap(double clipExtent) =>
-      constraints.overlap -
-      math.max(
-        constraints.scrollOffset +
-            constraints.overlap +
-            geometry!.maxScrollObstructionExtent -
-            clipExtent,
-        0.0,
-      );
+  double getClipOriginForOverlap(double insideClipExtent) {
+    final double effectiveOverlap = math.max(0.0, constraints.overlap);
+    final double flexibleClipExtent = math.max(
+      0.0,
+      insideClipExtent - geometry!.maxScrollObstructionExtent,
+    );
+    final double minClipOrigin = -math.min(flexibleClipExtent, constraints.scrollOffset);
+
+    // When flexibleClipExtent is scrolled, we can push up the clip.
+    return clampDouble(
+      flexibleClipExtent - constraints.scrollOffset,
+      minClipOrigin,
+      effectiveOverlap,
+    );
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
