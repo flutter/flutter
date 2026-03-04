@@ -40,8 +40,8 @@ final class Git {
     late final ProcessResult result;
     try {
       result = await _run(args, workingDirectory);
-    } on ProcessException {
-      _reportFailureAndExit(args, workingDirectory, result, explanation);
+    } on ProcessException catch (exception) {
+      _reportProcessExceptionAndExit(args, workingDirectory, exception, explanation);
     }
     if (result.exitCode != 0 && !allowNonZeroExitCode) {
       _reportFailureAndExit(args, workingDirectory, result, explanation);
@@ -78,6 +78,21 @@ final class Git {
     if ((result.stderr as String).isNotEmpty) {
       message.writeln('stderr from git:\n${result.stderr}\n');
     }
+    throw GitException(message.toString(), args);
+  }
+
+  Never _reportProcessExceptionAndExit(
+    List<String> args,
+    String workingDirectory,
+    ProcessException exception,
+    String explanation,
+  ) {
+    final message = StringBuffer()
+      ..writeln(
+        'Command "git ${args.join(' ')}" failed in directory "$workingDirectory" to '
+        '$explanation.',
+      )
+      ..writeln('ProcessException from git: $exception');
     throw GitException(message.toString(), args);
   }
 }
