@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/device_vm_service_discovery_for_attach.dart';
 import 'package:flutter_tools/src/macos/application_package.dart';
 import 'package:flutter_tools/src/macos/macos_device.dart';
 import 'package:flutter_tools/src/macos/macos_workflow.dart';
@@ -47,6 +48,27 @@ void main() {
     expect(device.supportsRuntimeMode(BuildMode.profile), true);
     expect(device.supportsRuntimeMode(BuildMode.release), true);
     expect(device.supportsRuntimeMode(BuildMode.jitRelease), false);
+  });
+
+  testWithoutContext('uses mDNS and log scanning discovery when attaching', () async {
+    final device = MacOSDevice(
+      processManager: FakeProcessManager.any(),
+      logger: BufferLogger.test(),
+      fileSystem: MemoryFileSystem.test(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+    );
+
+    final VMServiceDiscoveryForAttach discovery = device.getVMServiceDiscoveryForAttach(
+      ipv6: false,
+      logger: BufferLogger.test(),
+    );
+
+    expect(discovery, isA<DelegateVMServiceDiscoveryForAttach>());
+    final List<VMServiceDiscoveryForAttach> delegates =
+        (discovery as DelegateVMServiceDiscoveryForAttach).delegates;
+    expect(delegates, hasLength(2));
+    expect(delegates.first, isA<MdnsVMServiceDiscoveryForAttach>());
+    expect(delegates.last, isA<LogScanningVMServiceDiscoveryForAttach>());
   });
 
   testWithoutContext('Attaches to log reader when running in release mode', () async {
