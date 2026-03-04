@@ -83,8 +83,11 @@ static NSString *const kMethodRevertImage = @"revertFlutterImage";
 
 - (UIImage *)capturePngScreenshot {
   UIWindowScene *scene = self.registrar.viewController.view.window.windowScene;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
   NSArray<UIWindow *> *windows = scene ? scene.windows : [UIApplication sharedApplication].windows;
   CGRect screenBounds = scene.screen ? scene.screen.bounds : [UIScreen mainScreen].bounds;
+#pragma clang diagnostic pop
 
   UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithBounds:screenBounds];
   UIImage *screenshot =
