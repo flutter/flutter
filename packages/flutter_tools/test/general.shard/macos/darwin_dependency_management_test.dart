@@ -66,7 +66,16 @@ void main() {
               );
               await dependencyManagement.setUp(platform: platform);
               expect(swiftPackageManager.generated, isTrue);
-              expect(testLogger.warningText, isEmpty);
+              expect(
+                testLogger.warningText,
+                contains(
+                  'The following plugins do not support Swift Package Manager for '
+                  '${platform.name}:\n'
+                  '  - cocoapod_plugin_1\n'
+                  'This will become an error in a future version of Flutter. Please contact the '
+                  'plugin maintainers to request Swift Package Manager adoption.\n',
+                ),
+              );
               expect(testLogger.statusText, isEmpty);
               expect(cocoaPods.podfileSetup, isTrue);
               expect(
@@ -459,7 +468,10 @@ void main() {
               );
               await dependencyManagement.setUp(platform: platform);
               expect(swiftPackageManager.generated, isTrue);
-              expect(testLogger.warningText, isEmpty);
+              expect(
+                testLogger.warningText,
+                contains('The following plugins do not support Swift Package Manager'),
+              );
               expect(testLogger.statusText, isEmpty);
               expect(cocoaPods.podfileSetup, isTrue);
               expect(
@@ -526,7 +538,10 @@ void main() {
               );
               await dependencyManagement.setUp(platform: platform);
               expect(swiftPackageManager.generated, isTrue);
-              expect(testLogger.warningText, isEmpty);
+              expect(
+                testLogger.warningText,
+                contains('The following plugins do not support Swift Package Manager'),
+              );
               expect(testLogger.statusText, isEmpty);
               expect(cocoaPods.podfileSetup, isTrue);
               expect(
@@ -580,7 +595,10 @@ void main() {
               );
               await dependencyManagement.setUp(platform: platform);
               expect(swiftPackageManager.generated, isFalse);
-              expect(testLogger.warningText, isEmpty);
+              expect(
+                testLogger.warningText,
+                contains('The following plugins do not support Swift Package Manager'),
+              );
               expect(testLogger.statusText, isEmpty);
               expect(cocoaPods.podfileSetup, isTrue);
               expect(
