@@ -7,15 +7,19 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'widgets_app_tester.dart';
+
+const Color _debugRed = Color(0xFFFF0000);
 
 void main() {
   testWidgets('PhysicalModel updates clipBehavior in updateRenderObject', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const MaterialApp(home: PhysicalModel(color: Colors.red)));
+    await tester.pumpWidget(const TestWidgetsApp(home: PhysicalModel(color: _debugRed)));
 
     final RenderPhysicalModel renderPhysicalModel = tester.allRenderObjects
         .whereType<RenderPhysicalModel>()
@@ -24,8 +28,8 @@ void main() {
     expect(renderPhysicalModel.clipBehavior, equals(Clip.none));
 
     await tester.pumpWidget(
-      const MaterialApp(
-        home: PhysicalModel(clipBehavior: Clip.antiAlias, color: Colors.red),
+      const TestWidgetsApp(
+        home: PhysicalModel(clipBehavior: Clip.antiAlias, color: _debugRed),
       ),
     );
 
@@ -36,9 +40,9 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      const TestWidgetsApp(
         home: PhysicalShape(
-          color: Colors.red,
+          color: _debugRed,
           clipper: ShapeBorderClipper(shape: CircleBorder()),
         ),
       ),
@@ -51,10 +55,10 @@ void main() {
     expect(renderPhysicalShape.clipBehavior, equals(Clip.none));
 
     await tester.pumpWidget(
-      const MaterialApp(
+      const TestWidgetsApp(
         home: PhysicalShape(
           clipBehavior: Clip.antiAlias,
-          color: Colors.red,
+          color: _debugRed,
           clipper: ShapeBorderClipper(shape: CircleBorder()),
         ),
       ),
@@ -68,23 +72,32 @@ void main() {
   ) async {
     const key = Key('test');
     await tester.pumpWidget(
-      Theme(
-        data: ThemeData(useMaterial3: false),
-        child: const MediaQuery(
-          key: key,
-          data: MediaQueryData(),
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Padding(
-              padding: EdgeInsets.all(50),
-              child: Row(
-                children: <Widget>[
-                  Material(child: Text('A long long long long long long long string')),
-                  Material(child: Text('A long long long long long long long string')),
-                  Material(child: Text('A long long long long long long long string')),
-                  Material(child: Text('A long long long long long long long string')),
-                ],
-              ),
+      const MediaQuery(
+        key: key,
+        data: MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Padding(
+            padding: EdgeInsets.all(50),
+            child: Row(
+              children: <Widget>[
+                PhysicalModel(
+                  color: _debugRed,
+                  child: Text('A long long long long long long long string'),
+                ),
+                PhysicalModel(
+                  color: _debugRed,
+                  child: Text('A long long long long long long long string'),
+                ),
+                PhysicalModel(
+                  color: _debugRed,
+                  child: Text('A long long long long long long long string'),
+                ),
+                PhysicalModel(
+                  color: _debugRed,
+                  child: Text('A long long long long long long long string'),
+                ),
+              ],
             ),
           ),
         ),
