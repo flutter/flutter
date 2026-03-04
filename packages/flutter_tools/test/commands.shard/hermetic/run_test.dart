@@ -2068,7 +2068,7 @@ class CapturingAppDomain extends AppDomain {
     String? route,
     DebuggingOptions options,
     bool enableHotReload, {
-    Map<String, String>? webDefines,
+    Map<String, String> webDefines = const <String, String>{},
     File? applicationBinary,
     required bool trackWidgetCreation,
     String? projectRootPath,
