@@ -4,8 +4,8 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'two_dimensional_utils.dart';
@@ -495,28 +495,20 @@ void main() {
 
         // In the tests below the number of RepaintBoundary widgets depends on:
         // ModalRoute - builds 2
-        // GlowingOverscrollIndicator - builds 2
         // TwoDimensionalChildListDelegate - builds 1 unless addRepaintBoundaries is false
 
-        void expectModalRoute() {
-          expect(
-            ModalRoute.of(tester.element(find.byType(SimpleListTableViewport))),
-            isA<MaterialPageRoute<void>>(),
-          );
-        }
-
+        expect(
+          ModalRoute.of(tester.element(find.byType(SimpleListTableViewport))),
+          isA<PageRoute<void>>(),
+        );
         switch (defaultTargetPlatform) {
-          case TargetPlatform.fuchsia:
-            expectModalRoute();
-            expect(find.byType(GlowingOverscrollIndicator), findsNWidgets(2));
-            expect(find.byType(RepaintBoundary), findsNWidgets(7));
-
           case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+            expect(find.byType(RepaintBoundary), findsNWidgets(7));
           case TargetPlatform.iOS:
           case TargetPlatform.linux:
           case TargetPlatform.macOS:
           case TargetPlatform.windows:
-            expectModalRoute();
             expect(find.byType(RepaintBoundary), findsNWidgets(3));
         }
 
@@ -536,18 +528,18 @@ void main() {
         );
         await tester.pumpAndSettle();
 
+        expect(
+          ModalRoute.of(tester.element(find.byType(SimpleListTableViewport))),
+          isA<PageRoute<void>>(),
+        );
         switch (defaultTargetPlatform) {
-          case TargetPlatform.fuchsia:
-            expectModalRoute();
-            expect(find.byType(GlowingOverscrollIndicator), findsNWidgets(2));
-            expect(find.byType(RepaintBoundary), findsNWidgets(6));
-
           case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+            expect(find.byType(RepaintBoundary), findsNWidgets(6));
           case TargetPlatform.iOS:
           case TargetPlatform.linux:
           case TargetPlatform.macOS:
           case TargetPlatform.windows:
-            expectModalRoute();
             expect(find.byType(RepaintBoundary), findsNWidgets(2));
         }
       }, variant: TargetPlatformVariant.all());
@@ -2165,11 +2157,13 @@ void main() {
           return SizedBox.square(
             dimension: 200,
             child: Center(
-              child: FloatingActionButton(
+              child: GestureDetector(
                 key: childKeys[vicinity],
-                onPressed: () {
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
                   taps.add(vicinity);
                 },
+                child: const SizedBox.square(dimension: 56),
               ),
             ),
           );
@@ -2932,7 +2926,7 @@ void main() {
             ChildVicinity(xIndex: 1, yIndex: 1) => const ValueKey<int>(2),
             _ => null,
           };
-          return Checkbox(key: key, value: false, onChanged: (_) {});
+          return _TestToggleable(key: key);
         },
       );
       final delegate2 = TwoDimensionalChildBuilderDelegate(
@@ -2947,7 +2941,7 @@ void main() {
           } else if (vicinity == const ChildVicinity(xIndex: 1, yIndex: 1)) {
             key = const ValueKey<int>(2);
           }
-          return Checkbox(key: key, value: false, onChanged: (_) {});
+          return _TestToggleable(key: key);
         },
       );
       addTearDown(delegate1.dispose);
@@ -3057,6 +3051,43 @@ void main() {
       }
     }, variant: TargetPlatformVariant.all());
   });
+}
+
+class _TestToggleable extends StatefulWidget {
+  const _TestToggleable({super.key});
+
+  @override
+  State<_TestToggleable> createState() => _TestToggleableState();
+}
+
+class _TestToggleableState extends State<_TestToggleable>
+    with TickerProviderStateMixin, ToggleableStateMixin {
+  final _NoOpToggleablePainter _painter = _NoOpToggleablePainter();
+
+  @override
+  ValueChanged<bool?>? get onChanged => null;
+
+  @override
+  bool get tristate => false;
+
+  @override
+  bool? get value => false;
+
+  @override
+  void dispose() {
+    _painter.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return buildToggleable(size: const Size(200, 200), painter: _painter..position = position);
+  }
+}
+
+class _NoOpToggleablePainter extends ToggleablePainter {
+  @override
+  void paint(Canvas canvas, Size size) {}
 }
 
 class _TestVicinity extends ChildVicinity {

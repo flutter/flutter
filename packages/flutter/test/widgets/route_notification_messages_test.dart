@@ -6,9 +6,11 @@
 library;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'widgets_app_tester.dart';
 
 class OnTapPage extends StatelessWidget {
   const OnTapPage({super.key, required this.id, required this.onTap});
@@ -18,18 +20,17 @@ class OnTapPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Page $id')),
-      body: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: Center(child: Text(id, style: Theme.of(context).textTheme.displaySmall)),
-      ),
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Center(child: Text(id)),
     );
   }
 }
 
 void main() {
+  const kWhiteColor = Color(0xFFFFFFFF);
+
   testWidgets('Push and Pop should send platform messages', (WidgetTester tester) async {
     final routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => OnTapPage(
@@ -55,7 +56,7 @@ void main() {
       return null;
     });
 
-    await tester.pumpWidget(MaterialApp(routes: routes));
+    await tester.pumpWidget(TestWidgetsApp(routes: routes));
 
     expect(log, <Object>[
       isMethodCall('selectSingleEntryHistory', arguments: null),
@@ -158,7 +159,7 @@ void main() {
       return null;
     });
 
-    await tester.pumpWidget(MaterialApp(routes: routes));
+    await tester.pumpWidget(TestWidgetsApp(routes: routes));
 
     expect(log, <Object>[
       isMethodCall('selectSingleEntryHistory', arguments: null),
@@ -207,16 +208,22 @@ void main() {
     });
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         initialRoute: '/home',
         routes: <String, WidgetBuilder>{
+          '/': (_) => const SizedBox.shrink(),
           '/home': (BuildContext context) {
             return OnTapPage(
               id: 'Home',
               onTap: () {
                 // Create a route with no name.
-                final Route<void> route = MaterialPageRoute<void>(
-                  builder: (BuildContext context) => const Text('Nameless Route'),
+                final Route<void> route = PageRouteBuilder<void>(
+                  pageBuilder:
+                      (
+                        BuildContext context,
+                        Animation<double> animation,
+                        Animation<double> secondaryAnimation,
+                      ) => const Text('Nameless Route'),
                 );
                 Navigator.push<void>(context, route);
               },
@@ -264,7 +271,8 @@ void main() {
     addTearDown(delegate.dispose);
 
     await tester.pumpWidget(
-      MaterialApp.router(
+      WidgetsApp.router(
+        color: kWhiteColor,
         routeInformationProvider: provider,
         routeInformationParser: SimpleRouteInformationParser(),
         routerDelegate: delegate,

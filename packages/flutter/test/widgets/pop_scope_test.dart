@@ -3,11 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'navigator_utils.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
   bool? lastFrameworkHandlesBack;
@@ -42,25 +43,23 @@ void main() {
     late StateSetter setState;
     late BuildContext context;
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         initialRoute: '/',
         routes: <String, WidgetBuilder>{
-          '/': (BuildContext buildContext) => Scaffold(
-            body: StatefulBuilder(
-              builder: (BuildContext buildContext, StateSetter stateSetter) {
-                context = buildContext;
-                setState = stateSetter;
-                return PopScope<Object?>(
-                  canPop: canPop,
-                  child: const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[Text('Home/PopScope Page')],
-                    ),
+          '/': (BuildContext buildContext) => StatefulBuilder(
+            builder: (BuildContext buildContext, StateSetter stateSetter) {
+              context = buildContext;
+              setState = stateSetter;
+              return PopScope<Object?>(
+                canPop: canPop,
+                child: const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[Text('Home/PopScope Page')],
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
         },
       ),
@@ -83,20 +82,18 @@ void main() {
     final poppedResult = Object();
     final nav = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         initialRoute: '/',
         navigatorKey: nav,
-        home: Scaffold(
-          body: PopScope<Object?>(
-            canPop: false,
-            onPopInvokedWithResult: (bool didPop, Object? result) {
-              receivedResult = result;
-            },
-            child: const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[Text('Home/PopScope Page')],
-              ),
+        home: PopScope<Object?>(
+          canPop: false,
+          onPopInvokedWithResult: (bool didPop, Object? result) {
+            receivedResult = result;
+          },
+          child: const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[Text('Home/PopScope Page')],
             ),
           ),
         ),
@@ -115,20 +112,18 @@ void main() {
       const poppedResult = 13;
       final nav = GlobalKey<NavigatorState>();
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           initialRoute: '/',
           navigatorKey: nav,
-          home: Scaffold(
-            body: PopScope<Object?>(
-              canPop: false,
-              onPopInvokedWithResult: (bool didPop, Object? result) {
-                receivedResult = result;
-              },
-              child: const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[Text('Home/PopScope Page')],
-                ),
+          home: PopScope<Object?>(
+            canPop: false,
+            onPopInvokedWithResult: (bool didPop, Object? result) {
+              receivedResult = result;
+            },
+            child: const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[Text('Home/PopScope Page')],
               ),
             ),
           ),
@@ -136,18 +131,21 @@ void main() {
       );
 
       nav.currentState!.push(
-        MaterialPageRoute<int>(
-          builder: (BuildContext context) {
-            return Scaffold(
-              body: PopScope<Object?>(
-                canPop: false,
-                onPopInvokedWithResult: (bool didPop, Object? result) {
-                  receivedResult = result;
-                },
-                child: const Center(child: Text('new page')),
-              ),
-            );
-          },
+        PageRouteBuilder<int>(
+          pageBuilder:
+              (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+              ) {
+                return PopScope<Object?>(
+                  canPop: false,
+                  onPopInvokedWithResult: (bool didPop, Object? result) {
+                    receivedResult = result;
+                  },
+                  child: const Center(child: Text('new page')),
+                );
+              },
         ),
       );
       await tester.pumpAndSettle();
@@ -170,48 +168,45 @@ void main() {
     late BuildContext oneContext;
     late bool lastPopSuccess;
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         navigatorKey: nav,
         initialRoute: '/',
         routes: <String, WidgetBuilder>{
           '/': (BuildContext context) {
             homeContext = context;
-            return Scaffold(
-              body: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    const Text('Home Page'),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pushNamed('/one');
-                      },
-                      child: const Text('Next'),
-                    ),
-                  ],
-                ),
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  const Text('Home Page'),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).pushNamed('/one');
+                    },
+                    behavior: HitTestBehavior.opaque,
+                    child: const Text('Next'),
+                  ),
+                ],
               ),
             );
           },
-          '/one': (BuildContext context) => Scaffold(
-            body: StatefulBuilder(
-              builder: (BuildContext context, StateSetter stateSetter) {
-                oneContext = context;
-                setState = stateSetter;
-                return PopScope<Object?>(
-                  canPop: canPop,
-                  onPopInvokedWithResult: (bool didPop, Object? result) {
-                    lastPopSuccess = didPop;
-                  },
-                  child: const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[Text('PopScope Page')],
-                    ),
+          '/one': (BuildContext context) => StatefulBuilder(
+            builder: (BuildContext context, StateSetter stateSetter) {
+              oneContext = context;
+              setState = stateSetter;
+              return PopScope<Object?>(
+                canPop: canPop,
+                onPopInvokedWithResult: (bool didPop, Object? result) {
+                  lastPopSuccess = didPop;
+                },
+                child: const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[Text('PopScope Page')],
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
         },
       ),
@@ -333,26 +328,24 @@ void main() {
       late StateSetter setState;
       late BuildContext context;
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           initialRoute: '/',
           routes: <String, WidgetBuilder>{
-            '/': (BuildContext buildContext) => Scaffold(
-              body: StatefulBuilder(
-                builder: (BuildContext buildContext, StateSetter stateSetter) {
-                  context = buildContext;
-                  setState = stateSetter;
-                  const Widget child = Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[Text('Home/PopScope Page')],
-                    ),
-                  );
-                  if (!usePopScope) {
-                    return child;
-                  }
-                  return const PopScope<Object?>(canPop: false, child: child);
-                },
-              ),
+            '/': (BuildContext buildContext) => StatefulBuilder(
+              builder: (BuildContext buildContext, StateSetter stateSetter) {
+                context = buildContext;
+                setState = stateSetter;
+                const Widget child = Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[Text('Home/PopScope Page')],
+                  ),
+                );
+                if (!usePopScope) {
+                  return child;
+                }
+                return const PopScope<Object?>(canPop: false, child: child);
+              },
             ),
           },
         ),
@@ -381,20 +374,18 @@ void main() {
     late StateSetter setState;
     late BuildContext context;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: StatefulBuilder(
-            builder: (BuildContext buildContext, StateSetter stateSetter) {
-              context = buildContext;
-              setState = stateSetter;
-              return Column(
-                children: <Widget>[
-                  if (usePopScope1) const PopScope<Object?>(canPop: false, child: Text('hello')),
-                  if (usePopScope2) const PopScope<Object?>(canPop: false, child: Text('hello')),
-                ],
-              );
-            },
-          ),
+      TestWidgetsApp(
+        home: StatefulBuilder(
+          builder: (BuildContext buildContext, StateSetter stateSetter) {
+            context = buildContext;
+            setState = stateSetter;
+            return Column(
+              children: <Widget>[
+                if (usePopScope1) const PopScope<Object?>(canPop: false, child: Text('hello')),
+                if (usePopScope2) const PopScope<Object?>(canPop: false, child: Text('hello')),
+              ],
+            );
+          },
         ),
       ),
     );
