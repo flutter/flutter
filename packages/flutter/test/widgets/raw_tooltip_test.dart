@@ -1158,9 +1158,7 @@ void main() {
     );
 
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    addTearDown(() async {
-      await gesture?.removePointer();
-    });
+    addTearDown(gesture.removePointer);
 
     // Both the inner and outer containers have tooltips associated with them, but only
     // the currently hovered one should appear, even though the pointer is inside both.
