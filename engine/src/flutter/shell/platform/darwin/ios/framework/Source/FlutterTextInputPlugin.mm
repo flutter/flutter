@@ -1107,10 +1107,10 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
   if (@available(iOS 17.0, *)) {
     // iOS 17+ inline prediction. From TextInputConfiguration.toJson();
-    // deserialized as NSNumber. nil or missing key = use system default;
+    // deserialized as NSNumber. nil, missing key, or NSNull = use system default;
     // YES = enable; NO = disable.
-    NSNumber* enableInlinePrediction = configuration[kEnableInlinePrediction];
-    if (enableInlinePrediction == nil) {
+    id enableInlinePrediction = configuration[kEnableInlinePrediction];
+    if (enableInlinePrediction == nil || enableInlinePrediction == [NSNull null]) {
       self.inlinePredictionType = UITextInlinePredictionTypeDefault;
     } else if ([enableInlinePrediction boolValue]) {
       self.inlinePredictionType = UITextInlinePredictionTypeYes;

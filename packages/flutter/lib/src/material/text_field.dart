@@ -887,13 +887,17 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.hintLocales}
   final List<Locale>? hintLocales;
 
+  /// When null, [InputDecorationThemeData.enableInlinePrediction] from the theme
+  /// is used if set; otherwise the platform default applies.
+  ///
   /// {@macro flutter.services.TextInputConfiguration.enableInlinePrediction}
   final bool? enableInlinePrediction;
 
-  /// Optional style for the composing (and inline prediction) region.
+  /// Optional style for the composing and inline prediction region.
   ///
   /// When set, applied to the composing range (IME and inline predictive text).
-  /// When null, the default is used ([TextDecoration.underline]).
+  /// When null, [InputDecorationThemeData.composingStyle] from the theme is
+  /// used if set; otherwise the default ([TextDecoration.underline]) is used.
   final TextStyle? composingStyle;
 
   static Widget _defaultContextMenuBuilder(
@@ -1539,6 +1543,7 @@ class _TextFieldState extends State<TextField>
     );
 
     final ThemeData theme = Theme.of(context);
+    final InputDecorationThemeData decorationTheme = InputDecorationTheme.of(context);
     final DefaultSelectionStyle selectionStyle = DefaultSelectionStyle.of(context);
     final TextStyle? providedStyle = WidgetStateProperty.resolveAs(
       widget.style,
@@ -1756,8 +1761,8 @@ class _TextFieldState extends State<TextField>
           magnifierConfiguration:
               widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
           hintLocales: widget.hintLocales,
-          enableInlinePrediction: widget.enableInlinePrediction,
-          composingStyle: widget.composingStyle,
+          enableInlinePrediction: widget.enableInlinePrediction ?? decorationTheme.enableInlinePrediction,
+          composingStyle: widget.composingStyle ?? decorationTheme.composingStyle,
         ),
       ),
     );

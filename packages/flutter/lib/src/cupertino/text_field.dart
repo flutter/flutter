@@ -846,7 +846,9 @@ class CupertinoTextField extends StatefulWidget {
   /// Optional style for the composing (and inline prediction) region.
   ///
   /// When set, applied to the composing range (IME and inline predictive text).
-  /// When null, the default is used ([TextDecoration.underline]).
+  /// When null, the default is used ([TextDecoration.underline]). This value is
+  /// not resolved from [Theme] or [InputDecorationTheme]; to apply a theme-wide
+  /// composing style, pass this explicitly or use a Material [TextField].
   final TextStyle? composingStyle;
 
   /// {@macro flutter.widgets.EditableText.spellCheckConfiguration}

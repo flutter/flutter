@@ -15783,6 +15783,50 @@ void main() {
     expect(decorator.decoration, expectedDecoration);
   });
 
+  testWidgets('TextField uses InputDecorationThemeData.composingStyle when widget composingStyle is null', (
+    WidgetTester tester,
+  ) async {
+    const TextStyle themeComposingStyle = TextStyle(
+      color: Colors.grey,
+      decoration: TextDecoration.underline,
+    );
+    const inputDecorationTheme = InputDecorationThemeData(
+      composingStyle: themeComposingStyle,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(inputDecorationTheme: inputDecorationTheme),
+        home: const Scaffold(
+          body: TextField(),
+        ),
+      ),
+    );
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.composingStyle, themeComposingStyle);
+  });
+
+  testWidgets('TextField uses InputDecorationThemeData.enableInlinePrediction when widget enableInlinePrediction is null', (
+    WidgetTester tester,
+  ) async {
+    const inputDecorationTheme = InputDecorationThemeData(
+      enableInlinePrediction: true,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(inputDecorationTheme: inputDecorationTheme),
+        home: const Scaffold(
+          body: TextField(),
+        ),
+      ),
+    );
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.enableInlinePrediction, true);
+  });
+
   group('MaxLengthEnforcement', () {
     const maxLength = 5;
 

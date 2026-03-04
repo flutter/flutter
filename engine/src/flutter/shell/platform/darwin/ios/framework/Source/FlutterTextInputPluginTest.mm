@@ -984,6 +984,11 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   [config removeObjectForKey:@"enableInlinePrediction"];
   [inputView configureWithDictionary:config];
   XCTAssertEqual(inputView.inlinePredictionType, UITextInlinePredictionTypeDefault);
+
+  // Key present with NSNull (e.g. framework sent null) -> system default.
+  [config setValue:[NSNull null] forKey:@"enableInlinePrediction"];
+  [inputView configureWithDictionary:config];
+  XCTAssertEqual(inputView.inlinePredictionType, UITextInlinePredictionTypeDefault);
 }
 
 - (void)testReplaceTestLocalAdjustSelectionAndMarkedTextRange {
