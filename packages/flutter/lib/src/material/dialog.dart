@@ -1647,9 +1647,9 @@ Future<T?> showDialog<T>({
     useRootNavigator: useRootNavigator,
     routeSettings: routeSettings,
     fullscreenDialog: fullscreenDialog,
-    routeBuilder: (BuildContext context, WidgetBuilder builder) {
+    routeBuilder: (BuildContext routeContext, WidgetBuilder _) {
       return DialogRoute<T>(
-        context: context,
+        context: routeContext,
         builder: builder,
         barrierColor:
             barrierColor ??
