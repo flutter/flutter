@@ -1347,8 +1347,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// container, ensuring that the underline and items align properly within
   /// the allocated space.
   ///
-  /// Defaults to true for [DropdownButton] to maintain its standard behavior,
-  /// and false for [DropdownButtonFormField] to ensure the input decorator
+  /// Defaults to false for [DropdownButtonFormField] to ensure the input decorator
   /// handles the vertical constraints correctly by default.
   ///
   /// See also:
@@ -1710,7 +1709,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           minWidth: widget.iconSize + suffixIconEndMargin,
           minHeight: widget.iconSize,
         ),
-
         // suffixIconGap: 0.0,
         suffixIcon: Padding(
           padding: EdgeInsetsGeometry.directional(end: suffixIconEndMargin),
@@ -1777,10 +1775,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     final bool childHasButtonSemantic =
         hintIndex != null || (_selectedIndex != null && widget.selectedItemBuilder == null);
 
-    // // When vertical expansion is disabled, wrap with UnconstrainedBox
-    // // to prevent the widget from stretching to fill the parent's
-    // // available height. Only the horizontal axis remains constrained,
-    // // preserving the width defined by the parent.
+    // When vertical expansion is disabled, wrap with UnconstrainedBox
+    // to prevent the widget from stretching to fill the parent's
+    // available height. Only the horizontal axis remains constrained,
+    // preserving the width defined by the parent.
     if (!widget.isVerticallyExpanded) {
       result = UnconstrainedBox(
         constrainedAxis: Axis.horizontal, // Keep width constrained by parent

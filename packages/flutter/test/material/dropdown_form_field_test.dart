@@ -1056,12 +1056,7 @@ void main() {
     expect(find.text(currentValue), findsOneWidget);
 
     // Tap the DropdownButtonFormField widget
-    await tester.tap(
-      find.descendant(
-        of: find.byType(DropdownButton<String>),
-        matching: find.byType(GestureDetector),
-      ),
-    );
+    await tester.tap(find.text(currentValue));
     await tester.pumpAndSettle();
 
     // Tap the first dropdown menu item.
