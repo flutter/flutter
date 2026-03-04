@@ -30,17 +30,21 @@ void main() {
     originalCacheSize = imageCache.maximumSize;
     imageCache.clear();
     imageCache.clearLiveImages();
-    image10x10 = await createTestImage(width: 10, height: 10);
+    final ui.Image rawImage = await createTestImage(width: 10, height: 10, cache: false);
+    image10x10 = rawImage.clone();
+    rawImage.dispose();
   });
 
   tearDown(() {
     imageCache.maximumSize = originalCacheSize;
+    image10x10.dispose();
   });
 
   testWidgets('Verify Image does not use disposed handles', (WidgetTester tester) async {
     final ui.Image image100x100 = (await tester.runAsync(
-      () async => createTestImage(width: 100, height: 100),
+      () async => createTestImage(width: 100, height: 100, cache: false),
     ))!;
+    addTearDown(image100x100.dispose);
 
     final imageProvider1 = _TestImageProvider();
     final imageProvider2 = _TestImageProvider();
@@ -76,7 +80,7 @@ void main() {
     );
 
     imageLoaded = false;
-    imageProvider1.complete(image10x10);
+    imageProvider1.complete(image10x10.clone());
     await tester.idle();
     await tester.pump();
     expect(imageLoaded, true);
@@ -105,7 +109,7 @@ void main() {
     var renderImage = key.currentContext!.findRenderObject()! as RenderImage;
     expect(renderImage.image, isNull);
 
-    imageProvider1.complete(image10x10);
+    imageProvider1.complete(image10x10.clone());
     await tester.idle(); // resolve the future from the image provider
     await tester.pump(null, EnginePhase.layout);
 
@@ -140,7 +144,7 @@ void main() {
       var renderImage = key.currentContext!.findRenderObject()! as RenderImage;
       expect(renderImage.image, isNull);
 
-      imageProvider1.complete(image10x10);
+      imageProvider1.complete(image10x10.clone());
       await tester.idle(); // resolve the future from the image provider
       await tester.pump(null, EnginePhase.layout);
 
@@ -173,7 +177,7 @@ void main() {
     var renderImage = key.currentContext!.findRenderObject()! as RenderImage;
     expect(renderImage.image, isNull);
 
-    imageProvider1.complete(image10x10);
+    imageProvider1.complete(image10x10.clone());
     await tester.idle(); // resolve the future from the image provider
     await tester.pump(null, EnginePhase.layout);
 
@@ -202,7 +206,7 @@ void main() {
       var renderImage = key.currentContext!.findRenderObject()! as RenderImage;
       expect(renderImage.image, isNull);
 
-      imageProvider1.complete(image10x10);
+      imageProvider1.complete(image10x10.clone());
       await tester.idle(); // resolve the future from the image provider
       await tester.pump(null, EnginePhase.layout);
 
@@ -413,8 +417,9 @@ void main() {
 
   testWidgets('Verify Image stops listening to ImageStream', (WidgetTester tester) async {
     final ui.Image image100x100 = (await tester.runAsync(
-      () async => createTestImage(width: 100, height: 100),
+      () async => createTestImage(width: 100, height: 100, cache: false),
     ))!;
+    addTearDown(image100x100.dispose);
     // Web does not override the toString, whereas VM does
     final imageString = image100x100.toString();
 
@@ -777,7 +782,7 @@ void main() {
         },
       ),
     );
-    provider.complete(image10x10);
+    provider.complete(image10x10.clone());
     await precache;
     expect(provider._lastResolvedConfiguration, isNotNull);
 
@@ -815,7 +820,7 @@ void main() {
       expect(listeners.length, 2);
 
       // Make sure the first listener can be called re-entrantly
-      final imageInfo = ImageInfo(image: image10x10);
+      final imageInfo = ImageInfo(image: image10x10.clone());
 
       listeners[1].onImage(imageInfo.clone(), false);
       listeners[1].onImage(imageInfo.clone(), false);
@@ -937,8 +942,9 @@ void main() {
       final imageProvider1 = _TestImageProvider();
       final imageProvider2 = _TestImageProvider();
       final ui.Image image100x100 = (await tester.runAsync(
-        () async => createTestImage(width: 100, height: 100),
+        () async => createTestImage(width: 100, height: 100, cache: false),
       ))!;
+      addTearDown(image100x100.dispose);
 
       await tester.pumpWidget(
         Container(
@@ -950,7 +956,7 @@ void main() {
       var renderImage = key.currentContext!.findRenderObject()! as RenderImage;
       expect(renderImage.image, isNull);
 
-      imageProvider1.complete(image10x10);
+      imageProvider1.complete(image10x10.clone());
       imageProvider2.complete(image100x100);
       await tester.idle(); // resolve the future from the image provider
       await tester.pump(null, EnginePhase.layout);
@@ -1122,7 +1128,7 @@ void main() {
     expect(lastFrameWasSync, isFalse);
     expect(find.byType(RawImage), findsOneWidget);
 
-    final info = ImageInfo(image: image10x10);
+    final info = ImageInfo(image: image10x10.clone());
     addTearDown(info.dispose);
     streamCompleter.setData(imageInfo: info);
     await tester.pump();
@@ -2104,7 +2110,7 @@ void main() {
     expect(find.text('loading 30 / 100'), findsOneWidget);
     expect(find.byType(RawImage), findsNothing);
 
-    final info = ImageInfo(image: image10x10);
+    final info = ImageInfo(image: image10x10.clone());
     addTearDown(info.dispose);
     streamCompleter.setData(imageInfo: info);
     await tester.pump();
@@ -2127,7 +2133,7 @@ void main() {
       chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100),
     );
     expect(tester.binding.hasScheduledFrame, isFalse);
-    final info = ImageInfo(image: image10x10);
+    final info = ImageInfo(image: image10x10.clone());
     addTearDown(info.dispose);
     streamCompleter.setData(imageInfo: info);
     expect(tester.binding.hasScheduledFrame, isTrue);
@@ -2416,7 +2422,7 @@ void main() {
         },
       ),
     );
-    provider.complete(image10x10);
+    provider.complete(image10x10.clone());
     await precache;
 
     // Should have ended up with only a weak ref, not in cache because cache size is 0
@@ -2475,7 +2481,7 @@ void main() {
           },
         ),
       );
-      provider.complete(image10x10);
+      provider.complete(image10x10.clone());
       await precache;
 
       // Should have ended up in the cache and have a weak reference.
@@ -2710,7 +2716,7 @@ void main() {
       };
 
       final ui.Image image = (await tester.runAsync(
-        () => createTestImage(width: 100, height: 100),
+        () => createTestImage(width: 100, height: 100, cache: false),
       ))!;
       final streamCompleter = _TestImageStreamCompleter(
         ImageInfo(image: image, debugLabel: 'test.png'),
@@ -2739,28 +2745,29 @@ void main() {
 
   testWidgets('Disposes image handle when disposed', (WidgetTester tester) async {
     final ui.Image image = (await tester.runAsync(() => createTestImage(cache: false)))!;
+    addTearDown(image.dispose);
 
     expect(image.debugGetOpenHandleStackTraces()!.length, 1);
 
     final ImageProvider provider = _TestImageProvider(
       streamCompleter: OneFrameImageStreamCompleter(
-        Future<ImageInfo>.value(ImageInfo(image: image, debugLabel: '_TestImage')),
+        Future<ImageInfo>.value(ImageInfo(image: image.clone(), debugLabel: '_TestImage')),
       ),
     );
 
     // creating the provider should not have changed anything, and the provider
     // now owns the handle.
-    expect(image.debugGetOpenHandleStackTraces()!.length, 1);
+    expect(image.debugGetOpenHandleStackTraces()!.length, 2);
 
     await tester.pumpWidget(Image(image: provider));
 
     // Image widget + 1, render object + 1
-    expect(image.debugGetOpenHandleStackTraces()!.length, 3);
+    expect(image.debugGetOpenHandleStackTraces()!.length, 4);
 
     await tester.pumpWidget(const SizedBox());
 
     // Image widget and render object go away
-    expect(image.debugGetOpenHandleStackTraces()!.length, 1);
+    expect(image.debugGetOpenHandleStackTraces()!.length, 2);
 
     await provider.evict();
 
@@ -2768,13 +2775,14 @@ void main() {
     await tester.pump();
 
     // Image cache listener go away and Image stream listeners go away.
-    // Image is now at zero.
-    expect(image.debugGetOpenHandleStackTraces()!.length, 0);
+    // Image is now at 1 (the local `image` handle in the test).
+    expect(image.debugGetOpenHandleStackTraces()!.length, 1);
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
 
   testWidgets('Keeps stream alive when ticker mode is disabled', (WidgetTester tester) async {
     imageCache.maximumSize = 0;
     final ui.Image image = (await tester.runAsync(() => createTestImage(cache: false)))!;
+    addTearDown(image.dispose);
     final provider = _TestImageProvider();
     provider.complete(image);
 
@@ -2791,6 +2799,7 @@ void main() {
   testWidgets('Keeps stream alive when animations are disabled', (WidgetTester tester) async {
     imageCache.maximumSize = 0;
     final ui.Image image = (await tester.runAsync(() => createTestImage(cache: false)))!;
+    addTearDown(image.dispose);
     final provider = _TestImageProvider();
     provider.complete(image);
 
@@ -2868,7 +2877,7 @@ void main() {
       expect(find.byKey(errorKey), findsOneWidget);
 
       // Loading good image shows the image widget instead of the error widget.
-      streamCompleter.setData(imageInfo: ImageInfo(image: image));
+      streamCompleter.setData(imageInfo: ImageInfo(image: image.clone()));
       await tester.pump();
       expect(find.byType(Padding), findsOneWidget);
       expect(tester.widget<Padding>(find.byType(Padding)).child, isA<RawImage>());
@@ -3119,7 +3128,7 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(Image)), Size.zero);
-    final ui.Image testImage = await createTestImage(width: 10, height: 10);
+    final ui.Image testImage = (await tester.runAsync(() => createTestImage(width: 10, height: 10, cache: false)))!;
     addTearDown(testImage.dispose);
     provider.complete(testImage);
     await tester.pump();
@@ -3192,7 +3201,7 @@ class _TestImageProvider extends ImageProvider<Object> {
   }
 
   void complete(ui.Image image) {
-    _completer.complete(ImageInfo(image: image));
+    _completer.complete(ImageInfo(image: image.clone()));
   }
 
   void fail(Object exception, StackTrace? stackTrace) {
