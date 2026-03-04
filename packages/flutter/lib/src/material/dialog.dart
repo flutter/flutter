@@ -1668,12 +1668,13 @@ Future<T?> showDialog<T>({
         fullscreenDialog: fullscreenDialog,
       );
     },
-    builder: (BuildContext context) {
+    builder: (BuildContext routeContext) {
       // Wrap the build dialog with the theme, text direction, and media
-      // query data from the parent context.
-      final TextDirection textDirection = Directionality.of(navigator.context);
-      final ThemeData themeData = Theme.of(navigator.context);
-      final MediaQueryData mediaQuery = MediaQuery.of(navigator.context);
+      // query data from the caller's context (not the navigator's context,
+      // which would resolve to the root app theme and override captured themes).
+      final TextDirection textDirection = Directionality.of(context);
+      final ThemeData themeData = Theme.of(context);
+      final MediaQueryData mediaQuery = MediaQuery.of(context);
       final Widget dialogContent = _DialogPopScope(
         onPop: Navigator.of(navigator.context).pop,
         child: Builder(
