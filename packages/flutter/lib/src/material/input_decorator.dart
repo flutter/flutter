@@ -4611,7 +4611,8 @@ class InputDecorationTheme extends InheritedTheme with Diagnosticable {
   ///
   /// This property is obsolete and will be deprecated in a future release:
   /// please use the [InputDecorationThemeData.enableInlinePrediction] property in [data] instead.
-  bool? get enableInlinePrediction => _data != null ? _data.enableInlinePrediction : _enableInlinePrediction;
+  bool? get enableInlinePrediction =>
+      _data != null ? _data.enableInlinePrediction : _enableInlinePrediction;
 
   /// Overrides the default value for [InputDecoration.filled].
   ///

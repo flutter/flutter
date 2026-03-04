@@ -1761,7 +1761,8 @@ class _TextFieldState extends State<TextField>
           magnifierConfiguration:
               widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
           hintLocales: widget.hintLocales,
-          enableInlinePrediction: widget.enableInlinePrediction ?? decorationTheme.enableInlinePrediction,
+          enableInlinePrediction:
+              widget.enableInlinePrediction ?? decorationTheme.enableInlinePrediction,
           composingStyle: widget.composingStyle ?? decorationTheme.composingStyle,
         ),
       ),
