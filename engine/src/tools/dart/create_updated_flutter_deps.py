@@ -65,6 +65,10 @@ def ParseArgs(args):
       type=str,
       help='Flutter DEPS file.',
       default=FLUTTER_DEPS)
+  parser.add_argument('--dart_revision', '-r',
+      type=str,
+      help='Dart revision to update to.',
+      default=None)
   return parser.parse_args(args)
 
 def PrettifySourcePathForDEPS(flutter_vars, dep_path, source):
@@ -191,8 +195,13 @@ def Main(argv):
   lines = file.readlines()
   i = 0
   while i < len(lines):
-    updatedfile.write(lines[i])
     if lines[i].startswith("  'dart_revision':"):
+      if args.dart_revision is None:
+        # No dart revision supplied. Leave as-is.
+        updatedfile.write(lines[i])
+      else:
+        updatedfile.write("  'dart_revision': '%s',\n" % args.dart_revision)
+
       i = i + 2
       updatedfile.writelines([
         '\n',
@@ -205,6 +214,7 @@ def Main(argv):
       updatedfile.write('\n')
 
     elif lines[i].startswith("  # WARNING: Unused Dart dependencies"):
+      updatedfile.write(lines[i])
       updatedfile.write('\n')
       i = i + 1
       while i < len(lines) and not lines[i].startswith("  # WARNING: end of dart dependencies"):
@@ -213,6 +223,8 @@ def Main(argv):
       for dep_path, dep_source in new_dart_deps.items():
         updatedfile.write(f"  '{dep_path}':\n   {dep_source},\n\n")
 
+      updatedfile.write(lines[i])
+    else:
       updatedfile.write(lines[i])
     i = i + 1
 

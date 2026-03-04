@@ -1,0 +1,65 @@
+name: Cut Release Branch
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version string (format X.Y)'
+        required: true
+        type: string
+      commit_hash:
+        description: 'The hash of the commit to branch off of'
+        required: true
+        type: string
+
+jobs:
+  create-release-branch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required to create branches and push commits
+
+    steps:
+      - name: Validate Version Format
+        run: |
+          if [[ ! "${{ inputs.version }}" =~ ^[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: Version must be in 'X.Y' format (e.g., 3.10)."
+            exit 1
+          fi
+
+      - name: Checkout target commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.commit_hash }}
+
+      - name: Set Environment Variables
+        run: |
+          echo "BRANCH_NAME=flutter-${{ inputs.version }}-candidate.0" >> $GITHUB_ENV
+
+      - name: Check if branch already exists
+        run: |
+          if git ls-remote --exit-code --heads origin ${{ env.BRANCH_NAME }}; then
+            echo "Error: Branch ${{ env.BRANCH_NAME }} already exists on remote."
+            exit 1
+          fi
+
+      - name: Configure Git
+        run: |
+          git config user.name "[bot] Cut Release Branch"
+          git config user.email "<>"
+
+      - name: Create Branch and Version File
+        run: |
+          # Create and switch to the new branch locally
+          git checkout -b ${{ env.BRANCH_NAME }}
+
+          # Create the version file
+          mkdir -p bin/internal/
+          echo "${{ env.BRANCH_NAME }}" > bin/internal/release-candidate-branch.version
+
+          # Commit the change
+          git add bin/internal/release-candidate-branch.version
+          git commit -m "Initialize release branch ${{ env.BRANCH_NAME }}"
+
+      - name: Push new branch
+        run: |
+          git push origin ${{ env.BRANCH_NAME }}
