@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_ios_framework.dart';
 import 'package:flutter_tools/src/commands/build_macos_framework.dart';
+import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/version.dart';
 
@@ -956,7 +957,7 @@ void main() {
       expect(names, isEmpty);
     });
 
-    testWithoutContext('parseNativeAssetsManifest', () {
+    testWithoutContext('parseNativeAssetsManifest for iOS', () {
       final Directory output = fileSystem.directory('output')..createSync();
       final File manifest = output
           .childDirectory('App.framework')
@@ -978,7 +979,43 @@ void main() {
 }
 ''');
 
-      final Map<String, String> assets = BuildFrameworkCommand.parseNativeAssetsManifest(output);
+      final Map<String, String> assets = BuildFrameworkCommand.parseNativeAssetsManifest(
+        output,
+        FlutterDarwinPlatform.ios,
+      );
+      expect(assets, <String, String>{
+        'package:project/asset1': 'Foo.framework/Foo',
+        'package:project/asset2': 'Bar.framework/Bar',
+      });
+    });
+
+    testWithoutContext('parseNativeAssetsManifest for macOS', () {
+      final Directory output = fileSystem.directory('output')..createSync();
+      final File manifest = output
+          .childDirectory('App.framework')
+          .childDirectory('Resources')
+          .childDirectory('flutter_assets')
+          .childFile('NativeAssetsManifest.json');
+      manifest.createSync(recursive: true);
+      manifest.writeAsStringSync('''
+{
+  "format-version": [1, 0, 0],
+  "native-assets": {
+    "macos_x64": {
+      "package:project/asset1": ["absolute", "Foo.framework/Foo"],
+      "package:project/asset2": ["absolute", "Bar.framework/Bar"]
+    },
+    "macos_arm64": {
+      "package:project/asset1": ["absolute", "Foo.framework/Foo"]
+    }
+  }
+}
+''');
+
+      final Map<String, String> assets = BuildFrameworkCommand.parseNativeAssetsManifest(
+        output,
+        FlutterDarwinPlatform.macos,
+      );
       expect(assets, <String, String>{
         'package:project/asset1': 'Foo.framework/Foo',
         'package:project/asset2': 'Bar.framework/Bar',
