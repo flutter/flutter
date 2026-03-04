@@ -861,9 +861,7 @@ void _addMetadataToManifest(String testDirectory, List<(String, String)> keyPair
 }
 
 void _addHcppSupportToManifest(String testDirectory) {
-  final keyPairs = <(String, String)>[
-    ('io.flutter.embedding.android.EnableHcpp', 'true'),
-  ];
+  final keyPairs = <(String, String)>[('io.flutter.embedding.android.EnableHcpp', 'true')];
   _addMetadataToManifest(testDirectory, keyPairs);
 }
 
