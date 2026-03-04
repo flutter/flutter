@@ -576,6 +576,12 @@ abstract class ResidentHandlers {
   /// Whether an application can be detached without being stopped.
   bool get supportsDetach;
 
+  /// Whether a hot reload should be treated as a hot restart.
+  ///
+  /// This is used by platforms like web where hot reload must always perform
+  /// a full restart instead of updating code in-place.
+  bool get reloadIsRestart;
+
   @protected
   Logger get logger;
 
@@ -1754,7 +1760,10 @@ class TerminalHandler {
         await residentRunner.exit();
         return true;
       case 'r':
-        if (!residentRunner.canHotReload) {
+        // Allow hot reload if enabled. Also allow it if reloadIsRestart is true
+        // (e.g., web with --no-hot), since in that case the reload will be
+        // converted to a restart internally.
+        if (!residentRunner.canHotReload && !residentRunner.reloadIsRestart) {
           return false;
         }
         final OperationResult result = await residentRunner.restart();
