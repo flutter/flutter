@@ -1552,7 +1552,6 @@ class FakeResidentRunner extends ResidentHandlers {
   bool supportsServiceProtocol = true;
 
   @override
-  @override
   bool reloadIsRestart = false; // Defaults to false, only true when web --no-hot
 
   @override
