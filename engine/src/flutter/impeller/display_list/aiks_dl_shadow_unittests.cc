@@ -1014,5 +1014,84 @@ TEST_P(AiksTest, CanDrawPerspectiveConvexShadow) {
   ASSERT_TRUE(OpenPlaygroundHere(dl));
 }
 
+TEST_P(AiksTest, CanDrawRotatedConvexShadow) {
+  DisplayListBuilder builder;
+  builder.Clear(DlColor::kWhite());
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(-50, -50));
+  path_builder.LineTo(DlPoint(50, -50));
+  path_builder.LineTo(DlPoint(50, 50));
+  path_builder.LineTo(DlPoint(0, 75));
+  path_builder.LineTo(DlPoint(-50, 50));
+  path_builder.Close();
+  DlPath pentagon_path = path_builder.TakePath();
+
+  DlPaint paint;
+  paint.setColor(DlColor::kGreen().withAlphaF(0.25f));
+
+  DlPaint shadow_paint;
+  shadow_paint.setMaskFilter(
+      DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 10.0f));
+
+  builder.Translate(500, 380);
+
+  for (int degrees = 0; degrees < 360; degrees += 30) {
+    builder.Save();
+    builder.Rotate(degrees);
+    builder.Translate(0, -300);
+    builder.DrawPath(pentagon_path, shadow_paint);
+    builder.DrawPath(pentagon_path, paint);
+    builder.Restore();
+  }
+
+  auto dl = builder.Build();
+  ASSERT_TRUE(OpenPlaygroundHere(dl));
+}
+
+TEST_P(AiksTest, CanDrawNonuniformScaleConvexShadow) {
+  DisplayListBuilder builder;
+  builder.Clear(DlColor::kWhite());
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(-50, -50));
+  path_builder.LineTo(DlPoint(50, -50));
+  path_builder.LineTo(DlPoint(50, 50));
+  path_builder.LineTo(DlPoint(0, 75));
+  path_builder.LineTo(DlPoint(-50, 50));
+  path_builder.Close();
+  DlPath pentagon_path = path_builder.TakePath();
+
+  DlPaint paint;
+  paint.setColor(DlColor::kGreen().withAlphaF(0.25f));
+
+  DlPaint shadow_paint;
+  shadow_paint.setMaskFilter(
+      DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 10.0f));
+
+  // The first row and column will be right at the edge of the screen
+  // but they should not draw anything anyway.
+  builder.Translate(50, 50);
+
+  for (int y = 0; y <= 5; y++) {
+    builder.Save();
+    for (int x = 0; x <= 10; x++) {
+      builder.Save();
+      builder.Scale(x / 10.0f, y / 5.0f);
+      builder.DrawPath(pentagon_path, shadow_paint);
+      builder.DrawPath(pentagon_path, paint);
+      builder.Restore();
+      builder.Translate(x * 100 / 10.0f + 20.0f, 0);
+    }
+    builder.Restore();
+    builder.Translate(0, y * 125.0f / 5.0f + 50.0f);
+  }
+
+  auto dl = builder.Build();
+  ASSERT_TRUE(OpenPlaygroundHere(dl));
+}
+
 }  // namespace testing
 }  // namespace impeller
