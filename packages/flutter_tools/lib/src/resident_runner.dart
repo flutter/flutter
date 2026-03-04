@@ -1764,7 +1764,7 @@ class TerminalHandler {
         // Allow hot reload if enabled. Also allow it if reloadIsRestart is true
         // (e.g., web with --no-hot), since in that case the reload will be
         // converted to a restart internally.
-        if (!residentRunner.canHotReload && !residentRunner.reloadIsRestart) {
+        if (!(residentRunner.canHotReload || residentRunner.reloadIsRestart)) {
           return false;
         }
         final OperationResult result = await residentRunner.restart();
