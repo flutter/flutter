@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
+import 'widgets_app_tester.dart';
 
 Future<void> pumpTest(
   WidgetTester tester,
@@ -1784,6 +1785,17 @@ void main() {
     await gesture.moveBy(const Offset(0.0, -200));
     await tester.pumpAndSettle();
     expect(getScrollOffset(tester), 200);
+  });
+
+  testWidgets('Scrollable does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: SizedBox.shrink(child: Scrollable(viewportBuilder: (_, _) => const Placeholder())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Scrollable)), Size.zero);
   });
 }
 
