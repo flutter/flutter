@@ -711,6 +711,8 @@ class SemanticsUpdateBuilder {
   SemanticsUpdateBuilder();
 
   final List<engine.SemanticsNodeUpdate> _nodeUpdates = <engine.SemanticsNodeUpdate>[];
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
   void updateNode({
     required int id,
     required SemanticsFlags flags,

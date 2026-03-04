@@ -286,6 +286,15 @@ class ClickDebouncer {
   /// Forwards the event to the framework, unless it is deduplicated because
   /// the corresponding pointer down/up events were recently flushed to the
   /// framework already.
+  ///
+  /// [isMergedNode] indicates whether the semantics node merges all descendant
+  /// semantics into itself (e.g. [CheckboxListTile] wrapped in
+  /// [MergeSemantics]). When true, [SemanticsAction.tap] is sent directly
+  /// instead of flushing pointer events, because the node's DOM element covers
+  /// a larger area than the underlying tappable widget and pointer coordinates
+  /// may miss the inner render object. When false, pointer events are flushed
+  /// so that [TapRegionSurface] can detect outside taps (e.g. to dismiss
+  /// [MenuAnchor]).
   void onClick(
     DomEvent click,
     int viewId,

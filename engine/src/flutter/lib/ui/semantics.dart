@@ -1933,6 +1933,13 @@ abstract class SemanticsUpdateBuilder {
   ///  * [SemanticsValidationResult], that describes possible values for the
   ///    `validationResult` argument.
   ///  * [SemanticsHitTestBehavior], which describes how hit testing behaves.
+  ///
+  /// When `mergesDescendants` is true, the framework has absorbed the semantics
+  /// of all descendants into this single node. The node's rect may cover a
+  /// larger area than the individual tappable widget within it. On the web,
+  /// this is used by [ClickDebouncer] to decide whether to flush pointer events
+  /// (non-merged nodes) or send a [SemanticsAction.tap] directly (merged
+  /// nodes), avoiding coordinate miss-hits on the inner tappable widget.
   void updateNode({
     required int id,
     required SemanticsFlags flags,
