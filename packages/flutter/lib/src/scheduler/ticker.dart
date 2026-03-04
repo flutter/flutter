@@ -332,7 +332,7 @@ class Ticker {
     assert(_startTime == null);
     assert(_animationId == null);
     assert(
-      (originalTicker._future == null) == (originalTicker._startTime == null),
+      (originalTicker._future != null) || (originalTicker._startTime == null),
       'Cannot absorb Ticker after it has been disposed.',
     );
     if (originalTicker._future != null) {
