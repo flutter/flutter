@@ -1777,11 +1777,9 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
 
 /// A listenable registry for windows.
 ///
-/// Users should prefer to use the [WindowManager] to access an instance of the
-/// registry instead of declaring one themselves.
+/// The [WindowManager] provides a [WindowRegistry] to its descendents.
 ///
-/// Applications may wrap the root of their application in a [WindowRegistryScope].
-/// Descendents of the scope may then use [WindowRegistry.maybeOf] to access the
+/// Descendents of the manager may then use [WindowRegistry.maybeOf] to access the
 /// registry. With the registry, they may call [WindowRegistry.register] to
 /// add a new window to the registry and [WindowRegistry.unregister] to remove
 /// a window from the registry.
@@ -1795,7 +1793,6 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
 /// See also:
 ///
 ///  * [WindowManager], responsible for listening for new windows and rendering them.
-///  * [WindowRegistryScope], the scope that provides access to the registry
 @internal
 class WindowRegistry extends ChangeNotifier {
   /// Creates a window registry.
@@ -1830,6 +1827,10 @@ class WindowRegistry extends ChangeNotifier {
 
   /// Unregisters a window.
   ///
+  /// The window must be unregistered before it is destroyed. Call
+  /// [BaseWindowController.destroy] to destroy the window or listen
+  /// to the onWindowCloseRequested method of the window's delegate.
+  ///
   /// The [entry] parameter specifies the window to unregister.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
@@ -1853,7 +1854,7 @@ class WindowRegistry extends ChangeNotifier {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   static WindowRegistry? maybeOf(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<WindowRegistryScope>()?._registry;
+    return context.dependOnInheritedWidgetOfExactType<_WindowRegistryScope>()?._registry;
   }
 }
 
@@ -1861,14 +1862,14 @@ class WindowRegistry extends ChangeNotifier {
 ////
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
-class WindowRegistryScope extends InheritedWidget {
+class _WindowRegistryScope extends InheritedWidget {
   /// Creates a Material window registry scope.
   ///
   /// The [registry] parameter specifies the window registry to provide.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  WindowRegistryScope({super.key, required WindowRegistry registry, required super.child})
+  _WindowRegistryScope({super.key, required WindowRegistry registry, required super.child})
     : _registry = registry {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
@@ -1878,7 +1879,7 @@ class WindowRegistryScope extends InheritedWidget {
   final WindowRegistry _registry;
 
   @override
-  bool updateShouldNotify(WindowRegistryScope oldWidget) {
+  bool updateShouldNotify(_WindowRegistryScope oldWidget) {
     return _registry != oldWidget._registry;
   }
 }
@@ -1923,14 +1924,15 @@ class WindowEntry {
 }
 
 /// The window manager provides a convient way to render windows
-/// at the root of an application. Descendents of the [WindowManager] may
-/// access the [WindowRegistry] via [WindowRegistry.maybeOf] in order to
-/// register new windows. [WindowManager] listens on the [WindowRegistry]
-/// and renders the new windows using the appropriate window widget as they are
-/// added or removed.
+/// at the root of an application.
 ///
-/// If windowing is not enabled, this widgets renders
-/// [child] and does not provide the [WindowRegistryScope].
+/// Descendents of the [WindowManager] may access the [WindowRegistry] via
+/// [WindowRegistry.maybeOf] in order to register new windows. [WindowManager]
+/// listens on the [WindowRegistry] and renders the new windows using the
+/// appropriate window widget as they are added or removed.
+///
+/// If windowing is not enabled, this widgets renders [child] directly
+/// and does not provide the [WindowRegistry].
 ///
 /// {@tool dartpad}
 /// An example usage might look like this, where the window manager wraps
@@ -1945,7 +1947,6 @@ class WindowEntry {
 /// See also:
 ///
 ///  * [WindowRegistry], where window entries can be registered.
-///  * [WindowRegistryScope], provides access to the window registry.
 @internal
 class WindowManager extends StatefulWidget {
   /// Creates a window manager.
@@ -1954,9 +1955,7 @@ class WindowManager extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  WindowManager({super.key, required this.child});
-
-  final WindowRegistry _registry = WindowRegistry();
+  const WindowManager({super.key, required this.child});
 
   /// The child widget of the window manager.
   final Widget child;
@@ -1966,18 +1965,26 @@ class WindowManager extends StatefulWidget {
 }
 
 class _WindowManagerState extends State<WindowManager> {
+  late final WindowRegistry _registry;
+
+  @override
+  void initState() {
+    super.initState();
+    _registry = WindowRegistry();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!isWindowingEnabled) {
       return widget.child;
     }
 
-    return WindowRegistryScope(
-      registry: widget._registry,
+    return _WindowRegistryScope(
+      registry: _registry,
       child: ListenableBuilder(
-        listenable: widget._registry,
+        listenable: _registry,
         builder: (BuildContext context, Widget? child) {
-          final List<Widget> subViews = widget._registry.windows.map((WindowEntry entry) {
+          final List<Widget> subViews = _registry.windows.map((WindowEntry entry) {
             return switch (entry.controller) {
               final DialogWindowController dialog => DialogWindow(
                 controller: dialog,
@@ -1998,10 +2005,7 @@ class _WindowManagerState extends State<WindowManager> {
             };
           }).toList();
 
-          return ViewAnchor(
-            view: subViews.isNotEmpty ? ViewCollection(views: subViews) : null,
-            child: child!,
-          );
+          return ViewCollection(views: subViews);
         },
         child: widget.child,
       ),

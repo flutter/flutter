@@ -191,23 +191,15 @@ class _DialogWindowRoute<T> extends Route<T> {
 
   @override
   TickerFuture didPush() {
-    super.didPush();
-    // No animation is needed since the window appears instantly.
-    return TickerFuture.complete();
-  }
-
-  @override
-  bool didPop(T? result) {
-    _controller?.destroy();
-    return super.didPop(result);
+    return super.didPush();
   }
 
   @override
   void dispose() {
-    // Unregister from the registry.
     if (_entry != null) {
       _registry?.unregister(_entry!);
     }
+    _controller?.destroy();
     _controller?.dispose();
     _controller = null;
     super.dispose();
