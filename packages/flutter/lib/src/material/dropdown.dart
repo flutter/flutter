@@ -1019,7 +1019,6 @@ class DropdownButton<T> extends StatefulWidget {
     this.barrierDismissible = true,
     this.mouseCursor,
     this.dropdownMenuItemMouseCursor,
-    this.isVerticallyExpanded = true,
     // When adding new arguments, consider adding similar arguments to
     // DropdownButtonFormField.
   }) : assert(
@@ -1036,6 +1035,7 @@ class DropdownButton<T> extends StatefulWidget {
          'with the same value',
        ),
        assert(itemHeight == null || itemHeight >= kMinInteractiveDimension),
+       isVerticallyExpanded = true,
        _inputDecoration = null,
        _isEmpty = false;
 
