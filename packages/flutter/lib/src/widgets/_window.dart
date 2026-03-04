@@ -1858,17 +1858,7 @@ class WindowRegistry extends ChangeNotifier {
   }
 }
 
-/// An inherited widget that provides access to the [WindowRegistry].
-////
-/// {@macro flutter.widgets.windowing.experimental}
-@internal
 class _WindowRegistryScope extends InheritedWidget {
-  /// Creates a Material window registry scope.
-  ///
-  /// The [registry] parameter specifies the window registry to provide.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
   _WindowRegistryScope({super.key, required WindowRegistry registry, required super.child})
     : _registry = registry {
     if (!isWindowingEnabled) {
