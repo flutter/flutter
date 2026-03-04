@@ -500,7 +500,7 @@ targets:
     # Scheduler will fail to get the platform
     drone_dimensions:
       - os=Mac-15.7
-      - cpu=arm64
+      - cpu=x86
 
   - name: Mac mac_ios_engine_ddm
     recipe: engine_v2/engine_v2
@@ -520,7 +520,7 @@ targets:
     # Scheduler will fail to get the platform
     drone_dimensions:
       - os=Mac-15.7
-      - cpu=arm64
+      - cpu=x86
 
   - name: Linux windows_android_aot_engine
     recipe: engine_v2/engine_v2
