@@ -195,11 +195,16 @@ class _DialogWindowRoute<T> extends Route<T> {
   }
 
   @override
-  void dispose() {
+  bool didPop(T? result) {
     if (_entry != null) {
       _registry?.unregister(_entry!);
     }
     _controller?.destroy();
+    return super.didPop(result);
+  }
+
+  @override
+  void dispose() {
     _controller?.dispose();
     _controller = null;
     super.dispose();

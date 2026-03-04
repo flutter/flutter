@@ -2005,7 +2005,15 @@ class _WindowManagerState extends State<WindowManager> {
             };
           }).toList();
 
-          return ViewCollection(views: subViews);
+          final FlutterView? view = View.maybeOf(context);
+          if (view == null) {
+            return ViewCollection(views: subViews);
+          }
+
+          return ViewAnchor(
+            view: subViews.isNotEmpty ? ViewCollection(views: subViews) : null,
+            child: child!,
+          );
         },
         child: widget.child,
       ),
