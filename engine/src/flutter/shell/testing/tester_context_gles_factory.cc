@@ -22,9 +22,9 @@
 #include "flutter/shell/gpu/gpu_surface_gl_impeller.h"
 #include "flutter/testing/test_swangle_utils.h"
 #include "flutter/testing/test_swiftshader_utils.h"
-#include "impeller/entity/gles/entity_shaders_gles.h"
-#include "impeller/entity/gles/framebuffer_blend_shaders_gles.h"
-#include "impeller/entity/gles/modern_shaders_gles.h"
+#include "impeller/entity/gles3/entity_shaders_gles.h"
+#include "impeller/entity/gles3/framebuffer_blend_shaders_gles.h"
+#include "impeller/entity/gles3/modern_shaders_gles.h"
 #include "impeller/renderer/backend/gles/context_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 #include "third_party/abseil-cpp/absl/status/statusor.h"
@@ -93,7 +93,7 @@ class TesterGLESDelegate : public GPUSurfaceGLDelegate {
       return absl::InternalError("Could not choose EGL config.");
     }
 
-    const EGLint context_attributes[] = {EGL_CONTEXT_CLIENT_VERSION, 2,
+    const EGLint context_attributes[] = {EGL_CONTEXT_CLIENT_VERSION, 3,
                                          EGL_NONE};
 
     EGLContext context =
@@ -249,14 +249,14 @@ class TesterContextGLES : public TesterContext {
 
     std::vector<std::shared_ptr<fml::Mapping>> shader_mappings = {
         std::make_shared<fml::NonOwnedMapping>(
-            impeller_entity_shaders_gles_data,
-            impeller_entity_shaders_gles_length),
+            impeller_entity_shaders_gles3_data,
+            impeller_entity_shaders_gles3_length),
         std::make_shared<fml::NonOwnedMapping>(
-            impeller_modern_shaders_gles_data,
-            impeller_modern_shaders_gles_length),
+            impeller_modern_shaders_gles3_data,
+            impeller_modern_shaders_gles3_length),
         std::make_shared<fml::NonOwnedMapping>(
-            impeller_framebuffer_blend_shaders_gles_data,
-            impeller_framebuffer_blend_shaders_gles_length),
+            impeller_framebuffer_blend_shaders_gles3_data,
+            impeller_framebuffer_blend_shaders_gles3_length),
     };
     context_ = impeller::ContextGLES::Create(impeller::Flags{}, std::move(gl),
                                              shader_mappings, false);

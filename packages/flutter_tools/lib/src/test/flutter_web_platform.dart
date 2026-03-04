@@ -522,6 +522,9 @@ class FlutterWebPlatform extends PlatformPlugin {
     final String path = _fileSystem.path.fromUri(request.url);
     if (path.endsWith('.html')) {
       final test = '${_fileSystem.path.withoutExtension(path)}.dart';
+      // TODO(vegorov): this should probably be part of Wasm bootstrapping
+      // script when compiling for testing (just like it is part of DDC runtime)
+      final bumpStackTraceLimit = useWasm ? 'Error.stackTraceLimit = Infinity;' : '';
       return shelf.Response.ok(
         '''
         <!DOCTYPE html>
@@ -530,6 +533,7 @@ class FlutterWebPlatform extends PlatformPlugin {
           <title>${htmlEscape.convert(test)} Test</title>
           <script src="flutter.js"></script>
           <script>
+            $bumpStackTraceLimit
             _flutter.buildConfig = {
               builds: [
                 ${_makeBuildConfigString()}
