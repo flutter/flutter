@@ -148,6 +148,7 @@ class DarwinDependencyManagement {
     var pluginCount = 0;
     var swiftPackageCount = 0;
     var cocoapodCount = 0;
+    final Set<String> cocoapodOnlyPlugins = {};
     for (final Plugin plugin in _plugins) {
       if (plugin.platforms[platform.name] == null) {
         continue;
@@ -179,6 +180,10 @@ class DarwinDependencyManagement {
         cocoapodCount += 1;
       }
 
+      if (cocoaPodsCompatible && !swiftPackageManagerCompatible) {
+        cocoapodOnlyPlugins.add(plugin.name);
+      }
+
       // If not using Swift Package Manager and plugin does not have podspec
       // but does have a Package.swift, throw an error. Otherwise, it'll error
       // when it builds.
@@ -203,6 +208,15 @@ class DarwinDependencyManagement {
           );
         }
       }
+    }
+
+    if (hostPlatformIsMacOS && cocoapodOnlyPlugins.isNotEmpty) {
+      _logger.printWarning(
+        'The following plugins do not support Swift Package Manager for ${platform.name}:\n'
+        '  - ${cocoapodOnlyPlugins.join('\n  - ')}\n'
+        'This will become an error in a future version of Flutter. Please contact the plugin '
+        'maintainers to request Swift Package Manager adoption.',
+      );
     }
 
     // Only show warnings to remove CocoaPods if the project is using Swift
