@@ -38,6 +38,9 @@ class ColdRunner extends ResidentRunner {
   bool get canHotReload => false;
 
   @override
+  bool get reloadIsRestart => false;
+
+  @override
   Logger get logger => globals.logger;
 
   @override

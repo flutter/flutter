@@ -147,6 +147,9 @@ class HotRunner extends ResidentRunner {
   @override
   bool get supportsDetach => stopAppDuringCleanup;
 
+  @override
+  bool get reloadIsRestart => false;
+
   Future<void> _calculateTargetPlatform() async {
     if (_targetPlatformName != null) {
       return;

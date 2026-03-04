@@ -1111,6 +1111,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   bool get canHotReload => hotMode;
 
   /// Whether the hot reload support is implemented as hot restart.
+  @override
   bool get reloadIsRestart => false;
 
   /// Start the app and keep the process running during its lifetime.
