@@ -622,7 +622,10 @@ void main() {
               final cocoaPods = FakeCocoaPods();
 
               final dependencyManagement = DarwinDependencyManagement(
-                project: FakeFlutterProject(fileSystem: testFileSystem),
+                project: FakeFlutterProject(
+                  fileSystem: testFileSystem,
+                  compatibleWithSwiftPackageManager: true,
+                ),
                 plugins: plugins,
                 cocoapods: cocoaPods,
                 swiftPackageManager: swiftPackageManager,
@@ -636,7 +639,7 @@ void main() {
                 () => dependencyManagement.setUp(platform: platform),
                 throwsToolExit(
                   message:
-                      'Plugin swift_package_plugin_1 is only Swift Package Manager compatible. Try '
+                      'Plugin swift_package_plugin_1 is only compatible with Swift Package Manager. Try '
                       'enabling Swift Package Manager by running '
                       '"flutter config --enable-swift-package-manager" or remove the '
                       'plugin as a dependency.',
@@ -646,6 +649,56 @@ void main() {
               expect(cocoaPods.podfileSetup, isFalse);
               expect(testAnalytics.sentEvents, isEmpty);
             });
+
+            testWithoutContext(
+              'with only Swift Package Manager plugins and project does not support',
+              () async {
+                final testFileSystem = MemoryFileSystem.test();
+                final testLogger = BufferLogger.test();
+                final FakeAnalytics testAnalytics = getInitializedFakeAnalyticsInstance(
+                  fs: testFileSystem,
+                  fakeFlutterVersion: FakeFlutterVersion(),
+                );
+                final File swiftPackagePluginPodspec = testFileSystem.file(
+                  '/path/to/cocoapod_plugin_1/darwin/cocoapod_plugin_1/Package.swift',
+                )..createSync(recursive: true);
+                final plugins = <Plugin>[
+                  FakePlugin(
+                    name: 'swift_package_plugin_1',
+                    platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+                    pluginSwiftPackageManifestPath: swiftPackagePluginPodspec.path,
+                  ),
+                ];
+                final swiftPackageManager = FakeSwiftPackageManager(expectedPlugins: plugins);
+                final cocoaPods = FakeCocoaPods();
+
+                final dependencyManagement = DarwinDependencyManagement(
+                  project: FakeFlutterProject(
+                    fileSystem: testFileSystem,
+                    compatibleWithSwiftPackageManager: false,
+                  ),
+                  plugins: plugins,
+                  cocoapods: cocoaPods,
+                  swiftPackageManager: swiftPackageManager,
+                  fileSystem: testFileSystem,
+                  featureFlags: TestFeatureFlags(),
+                  logger: testLogger,
+                  analytics: testAnalytics,
+                  platform: FakePlatform(operatingSystem: 'macos'),
+                );
+                await expectLater(
+                  () => dependencyManagement.setUp(platform: platform),
+                  throwsToolExit(
+                    message:
+                        'Plugin swift_package_plugin_1 is only compatible with Swift Package '
+                        'Manager, but your project does not currently support it.',
+                  ),
+                );
+                expect(swiftPackageManager.generated, isFalse);
+                expect(cocoaPods.podfileSetup, isFalse);
+                expect(testAnalytics.sentEvents, isEmpty);
+              },
+            );
 
             testWithoutContext(
               'with only Swift Package Manager plugins does not throw error on non-mac',
@@ -771,8 +824,12 @@ void main() {
 }
 
 class FakeIosProject extends Fake implements IosProject {
-  FakeIosProject({required MemoryFileSystem fileSystem, required this.usesSwiftPackageManager})
-    : hostAppRoot = fileSystem.directory('app_name').childDirectory('ios');
+  FakeIosProject({
+    required MemoryFileSystem fileSystem,
+    required this.usesSwiftPackageManager,
+    bool? compatibleWithSwiftPackageManager,
+  }) : _compatibleWithSwiftPackageManager = compatibleWithSwiftPackageManager,
+       hostAppRoot = fileSystem.directory('app_name').childDirectory('ios');
 
   @override
   Directory hostAppRoot;
@@ -797,6 +854,12 @@ class FakeIosProject extends Fake implements IosProject {
 
   @override
   bool usesSwiftPackageManager;
+
+  final bool? _compatibleWithSwiftPackageManager;
+
+  @override
+  bool get compatibleWithSwiftPackageManager =>
+      _compatibleWithSwiftPackageManager ?? usesSwiftPackageManager;
 
   @override
   Directory get managedDirectory => hostAppRoot.childDirectory('Flutter');
@@ -806,8 +869,12 @@ class FakeIosProject extends Fake implements IosProject {
 }
 
 class FakeMacOSProject extends Fake implements MacOSProject {
-  FakeMacOSProject({required MemoryFileSystem fileSystem, required this.usesSwiftPackageManager})
-    : hostAppRoot = fileSystem.directory('app_name').childDirectory('macos');
+  FakeMacOSProject({
+    required MemoryFileSystem fileSystem,
+    required this.usesSwiftPackageManager,
+    bool? compatibleWithSwiftPackageManager,
+  }) : _compatibleWithSwiftPackageManager = compatibleWithSwiftPackageManager,
+       hostAppRoot = fileSystem.directory('app_name').childDirectory('macos');
 
   @override
   Directory hostAppRoot;
@@ -832,6 +899,12 @@ class FakeMacOSProject extends Fake implements MacOSProject {
 
   @override
   bool usesSwiftPackageManager;
+
+  final bool? _compatibleWithSwiftPackageManager;
+
+  @override
+  bool get compatibleWithSwiftPackageManager =>
+      _compatibleWithSwiftPackageManager ?? usesSwiftPackageManager;
 
   @override
   Directory get managedDirectory => hostAppRoot.childDirectory('Flutter');
@@ -851,21 +924,25 @@ class FakeFlutterProject extends Fake implements FlutterProject {
     required this.fileSystem,
     this.usesSwiftPackageManager = false,
     this.isModule = false,
+    this.compatibleWithSwiftPackageManager,
   });
 
   final MemoryFileSystem fileSystem;
   final bool usesSwiftPackageManager;
+  final bool? compatibleWithSwiftPackageManager;
 
   @override
   late final ios = FakeIosProject(
     fileSystem: fileSystem,
     usesSwiftPackageManager: usesSwiftPackageManager,
+    compatibleWithSwiftPackageManager: compatibleWithSwiftPackageManager,
   );
 
   @override
   late final macos = FakeMacOSProject(
     fileSystem: fileSystem,
     usesSwiftPackageManager: usesSwiftPackageManager,
+    compatibleWithSwiftPackageManager: compatibleWithSwiftPackageManager,
   );
 
   @override
