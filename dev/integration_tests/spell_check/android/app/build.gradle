@@ -29,6 +29,7 @@ if (flutterVersionName == null) {
 android {
     namespace = "com.example.spell_check"
     compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
 
 
     compileOptions {

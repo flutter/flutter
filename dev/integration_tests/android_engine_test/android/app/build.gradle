@@ -12,6 +12,7 @@ plugins {
 android {
     namespace = "com.example.android_engine_test"
     compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
 
 
     compileOptions {
