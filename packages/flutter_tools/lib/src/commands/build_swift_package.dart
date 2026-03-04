@@ -27,6 +27,7 @@ import '../features.dart';
 import '../flutter_plugins.dart';
 import '../ios/xcodeproj.dart';
 import '../macos/cocoapod_utils.dart';
+import '../macos/cocoapods.dart';
 import '../macos/swift_package_manager.dart';
 import '../macos/swift_packages.dart';
 import '../macos/xcode.dart';
@@ -98,24 +99,7 @@ class BuildSwiftPackage extends BuildSubCommand {
         allowed: ['debug', 'profile', 'release'],
         defaultsTo: ['debug', 'profile', 'release'],
       )
-      ..addFlag(
-        'static',
-        help:
-            'Build CocoaPods plugins as static frameworks. Consider using with '
-            '--no-cocoapods-as-binary-targets to reduce bundle size.',
-      )
-      ..addFlag(
-        // When an XCFramework binary SwiftPM target has static frameworks, it still embeds the
-        // framework, but with a stub binary. There will be a note in the build logs that says
-        // "Injecting stub binary for codeless framework". Developers can alternatively not include
-        // the CocoaPod XCFrameworks through SwiftPM and link them directly in their Xcode project.
-        'cocoapods-as-binary-targets',
-        defaultsTo: true,
-        help:
-            'Adds CocoaPod generated XCFrameworks as binary targets in the generated Swift package. '
-            'When using the --static flag, consider disabling this and linking the frameworks '
-            'manually to reduce bundle size.',
-      );
+      ..addFlag('static', help: 'Build CocoaPods plugins as static frameworks.');
   }
 
   @override
@@ -384,7 +368,6 @@ class BuildSwiftPackage extends BuildSubCommand {
         flutterFrameworkDependency: flutterFrameworkDependency,
         appAndNativeAssetsDependencies: appAndNativeAssetsDependencies,
         cocoapodDependencies: cocoapodDependencies,
-        includeCocoaPodBinaryTargets: boolArg('cocoapods-as-binary-targets'),
         packagesForConfiguration: packagesForConfiguration,
         xcframeworkOutput: xcframeworkOutput,
       );
@@ -437,7 +420,6 @@ class FlutterPluginRegistrantSwiftPackage {
     required FlutterFrameworkDependency flutterFrameworkDependency,
     required AppFrameworkAndNativeAssetsDependencies appAndNativeAssetsDependencies,
     required CocoaPodPluginDependencies cocoapodDependencies,
-    required bool includeCocoaPodBinaryTargets,
     required Directory xcframeworkOutput,
   }) async {
     final (
@@ -465,7 +447,7 @@ class FlutterPluginRegistrantSwiftPackage {
       flutterFrameworkDependency.targetDependency,
       ...pluginTargetDependencies,
       ...flutterGeneratedDependencies,
-      if (includeCocoaPodBinaryTargets) ...cocoaPodDependencies,
+      ...cocoaPodDependencies,
     ];
     final packageDependencies = <SwiftPackagePackageDependency>[
       flutterFrameworkDependency.packageDependency,
@@ -484,7 +466,7 @@ class FlutterPluginRegistrantSwiftPackage {
     final targets = <SwiftPackageTarget>[
       SwiftPackageTarget.defaultTarget(name: swiftPackageName, dependencies: targetDependencies),
       ...flutterGeneratedTargets,
-      if (includeCocoaPodBinaryTargets) ...cocoaPodTargets,
+      ...cocoaPodTargets,
     ];
 
     final pluginsPackage = SwiftPackage(
@@ -1199,7 +1181,7 @@ class AppFrameworkAndNativeAssetsDependencies {
 }
 
 /// Class that encapsulates the logic for building CocoaPod plugins for every platform and sdk into
-/// frameworks and then combines them into a single xcframework for each.
+/// frameworks and then combines them into a single XCFramework for each.
 @visibleForTesting
 class CocoaPodPluginDependencies {
   CocoaPodPluginDependencies({
@@ -1212,9 +1194,9 @@ class CocoaPodPluginDependencies {
   final BuildSwiftPackageUtils _utils;
 
   /// Builds CocoaPod plugins for every platform and sdk into frameworks and then combines them into
-  /// a single xcframework for each.
+  /// a single XCFramework for each.
   ///
-  /// Intermediate build files are put in the [cacheDirectory]. The final xcframeworks are copied to
+  /// Intermediate build files are put in the [cacheDirectory]. The final XCFramework are copied to
   /// the [xcframeworkOutput].
   Future<void> generateArtifacts({
     required BuildInfo buildInfo,
@@ -1302,33 +1284,11 @@ class CocoaPodPluginDependencies {
     await processPodsIfNeeded(xcodeProject, _targetPlatform.buildDirectory(), buildInfo.mode);
   }
 
-  /// The target dependencies and binary targets for the CocoaPod plugin xcframeworks.
-  ///
-  /// ```swift
-  ///  .target(
-  ///    name: "FlutterPluginRegistrant",
-  ///    dependencies: [
-  ///      .target(name: "cocoapod_plugin_a"),
-  ///
-  ///    ...
-  ///
-  ///   .binaryTarget(
-  ///     name: "cocoapod_plugin_a",
-  ///     path: "Frameworks/CocoaPods/cocoapod_plugin_a.xcframework"
-  ///   )
-  /// ```
-  (List<SwiftPackageTargetDependency>, List<SwiftPackageTarget>) generateDependencies({
-    required Directory xcframeworkOutput,
-  }) {
-    return generateDependenciesFromDirectory(
-      fileSystem: _utils.fileSystem,
-      directoryName: _kCocoaPods,
-      xcframeworkDirectory: xcframeworkOutput.childDirectory(_kCocoaPods),
-    );
-  }
-
   /// Builds CocoaPod plugins into frameworks for the given [xcodeBuildConfiguration], [platform],
   /// and [sdk].
+  ///
+  /// Returns a Map where the key is the name of the plugin and the value is a list of [Directory]s
+  /// containing the plugin's frameworks.
   Future<Map<String, List<Directory>>> _buildCocoaPodsForSdk({
     required XcodeSdk sdk,
     required FlutterDarwinPlatform platform,
@@ -1395,6 +1355,8 @@ class CocoaPodPluginDependencies {
     return frameworks;
   }
 
+  /// Return true if CocoaPod fingerprinter has changed, or if the pod lock files
+  /// are outdated.
   bool _hasDependenciesChanged(
     String cacheDirectoryPath,
     Directory cocoapodXCFrameworkDirectory,
@@ -1411,15 +1373,7 @@ class CocoaPodPluginDependencies {
     if (!fingerprinter.doesFingerprintMatch()) {
       return true;
     }
-
-    final File podfileFile = xcodeProject.podfile;
-    final File podfileLockFile = xcodeProject.podfileLock;
-    final File manifestLockFile = xcodeProject.podManifestLock;
-
-    return !podfileLockFile.existsSync() ||
-        !manifestLockFile.existsSync() ||
-        podfileLockFile.statSync().modified.isBefore(podfileFile.statSync().modified) ||
-        podfileLockFile.readAsStringSync() != manifestLockFile.readAsStringSync();
+    return CocoaPods.podLockFilesOutdated(xcodeProject);
   }
 
   void _writeFingerprint(
@@ -1437,6 +1391,11 @@ class CocoaPodPluginDependencies {
     fingerprinter.writeFingerprint();
   }
 
+  /// Returns a [Fingerprinter] for the CocoaPod plugins.
+  ///
+  /// The [Fingerprinter] is used to check if the CocoaPod output, static status, build
+  /// configuration, this file, Xcode project, Podfile, generated plugin Swift Package, or
+  /// podhelper have changed since the last build.
   Fingerprinter _cocoapodsFingerprinter(
     String cacheDirectoryPath,
     Directory cocoapodXCFrameworkDirectory,
@@ -1513,6 +1472,31 @@ class CocoaPodPluginDependencies {
     } else {
       return configuration;
     }
+  }
+
+  /// The target dependencies and binary targets for the CocoaPod plugin xcframeworks.
+  ///
+  /// ```swift
+  ///  .target(
+  ///    name: "FlutterPluginRegistrant",
+  ///    dependencies: [
+  ///      .target(name: "cocoapod_plugin_a"),
+  ///
+  ///    ...
+  ///
+  ///   .binaryTarget(
+  ///     name: "cocoapod_plugin_a",
+  ///     path: "Frameworks/CocoaPods/cocoapod_plugin_a.xcframework"
+  ///   )
+  /// ```
+  (List<SwiftPackageTargetDependency>, List<SwiftPackageTarget>) generateDependencies({
+    required Directory xcframeworkOutput,
+  }) {
+    return generateDependenciesFromDirectory(
+      fileSystem: _utils.fileSystem,
+      directoryName: _kCocoaPods,
+      xcframeworkDirectory: xcframeworkOutput.childDirectory(_kCocoaPods),
+    );
   }
 }
 

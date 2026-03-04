@@ -163,7 +163,6 @@ void main() {
           flutterFrameworkDependency: flutterFrameworkDependency,
           appAndNativeAssetsDependencies: appAndNativeAssetsDependencies,
           cocoapodDependencies: cocoapodDependencies,
-          includeCocoaPodBinaryTargets: true,
           packagesForConfiguration: fs.directory(debugPackagesDirectoryPath),
           xcframeworkOutput: fs.directory(debugFrameworksDirectoryPath),
         );
@@ -247,157 +246,6 @@ import PluginB
 }
 ''');
       });
-
-      testWithoutContext(
-        'generateSwiftPackage when includeCocoaPodBinaryTargets is false',
-        () async {
-          final fs = MemoryFileSystem.test();
-          final logger = BufferLogger.test();
-          final processManager = FakeProcessManager.list([]);
-          const FlutterDarwinPlatform targetPlatform = .ios;
-          final testUtils = BuildSwiftPackageUtils(
-            analytics: FakeAnalytics(),
-            artifacts: FakeArtifacts(engineArtifactPath),
-            buildSystem: FakeBuildSystem(),
-            cache: FakeCache(fs, _flutterRoot),
-            fileSystem: fs,
-            flutterRoot: _flutterRoot,
-            flutterVersion: FakeFlutterVersion(),
-            logger: logger,
-            platform: FakePlatform(),
-            processManager: processManager,
-            project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
-            templateRenderer: const MustacheTemplateRenderer(),
-            xcode: FakeXcode(),
-          );
-          final package = FlutterPluginRegistrantSwiftPackage(
-            targetPlatform: targetPlatform,
-            utils: testUtils,
-          );
-          final pluginSwiftDependencies = FlutterPluginSwiftDependencies(
-            targetPlatform: targetPlatform,
-            utils: testUtils,
-          );
-          final flutterFrameworkDependency = FlutterFrameworkDependency(
-            targetPlatform: targetPlatform,
-            utils: testUtils,
-          );
-          final appAndNativeAssetsDependencies = AppFrameworkAndNativeAssetsDependencies(
-            targetPlatform: targetPlatform,
-            utils: testUtils,
-          );
-          late final cocoapodDependencies = CocoaPodPluginDependencies(
-            targetPlatform: targetPlatform,
-            utils: testUtils,
-          );
-          // Plugin A represents a SwiftPM plugin
-          final Directory modeDirectory = fs.directory(debugModeDirectoryPath);
-          final pluginA = FakePlugin(name: 'PluginA', darwinPlatform: targetPlatform);
-          pluginSwiftDependencies.copiedPlugins.add((pluginA, '$pluginsDirectoryPath/PluginA'));
-
-          // Plugin B represents a CocoaPod plugin
-          final pluginB = FakePlugin(
-            name: 'PluginB',
-            darwinPlatform: targetPlatform,
-            supportsSwiftPM: false,
-          );
-          fs
-              .directory('$debugCocoaPodsDirectoryPath/PluginB.xcframework')
-              .createSync(recursive: true);
-
-          // Plugin C represents a Native Asset
-          fs
-              .directory('$debugNativeAssetsDirectoryPath/PluginC.xcframework')
-              .createSync(recursive: true);
-
-          await package.generateSwiftPackage(
-            modeDirectory: modeDirectory,
-            plugins: [pluginA, pluginB],
-            xcodeBuildConfiguration: 'Debug',
-            pluginSwiftDependencies: pluginSwiftDependencies,
-            flutterFrameworkDependency: flutterFrameworkDependency,
-            appAndNativeAssetsDependencies: appAndNativeAssetsDependencies,
-            cocoapodDependencies: cocoapodDependencies,
-            includeCocoaPodBinaryTargets: false,
-            packagesForConfiguration: fs.directory(debugPackagesDirectoryPath),
-            xcframeworkOutput: fs.directory(debugFrameworksDirectoryPath),
-          );
-
-          expect(logger.traceText, isEmpty);
-          expect(processManager.hasRemainingExpectations, false);
-          final File generatedPackageManifest = modeDirectory.childFile('Package.swift');
-          expect(generatedPackageManifest, exists);
-          expect(generatedPackageManifest.readAsStringSync(), '''
-// swift-tools-version: 5.9
-// The swift-tools-version declares the minimum version of Swift required to build this package.
-//
-//  Generated file. Do not edit.
-//
-
-import PackageDescription
-
-// Debug
-
-let package = Package(
-    name: "FlutterPluginRegistrant",
-    platforms: [
-        .iOS("13.0")
-    ],
-    products: [
-        .library(name: "FlutterPluginRegistrant", type: .static, targets: ["FlutterPluginRegistrant"])
-    ],
-    dependencies: [
-        .package(name: "FlutterFramework", path: "Sources/Packages/FlutterFramework"),
-        .package(name: "PluginA", path: "Sources/Packages/PluginA")
-    ],
-    targets: [
-        .target(
-            name: "FlutterPluginRegistrant",
-            dependencies: [
-                .product(name: "FlutterFramework", package: "FlutterFramework"),
-                .product(name: "PluginA", package: "PluginA"),
-                .target(name: "PluginC"),
-                .target(name: "App")
-            ]
-        ),
-        .binaryTarget(
-            name: "PluginC",
-            path: "Sources/Frameworks/NativeAssets/PluginC.xcframework"
-        ),
-        .binaryTarget(
-            name: "App",
-            path: "Sources/Frameworks/App.xcframework"
-        )
-    ]
-)
-''');
-          final File generatedSource = modeDirectory
-              .childDirectory('FlutterPluginRegistrant')
-              .childFile('GeneratedPluginRegistrant.swift');
-          expect(generatedSource, exists);
-          expect(generatedSource.readAsStringSync(), '''
-//
-//  Generated file. Do not edit.
-//
-import Flutter
-import UIKit
-
-import PluginA
-import PluginB
-
-@objc public class GeneratedPluginRegistrant: NSObject {
-    @objc public static func register(with registry: FlutterPluginRegistry) {
-        if let pluginAPlugin = registry.registrar(forPlugin: "PluginAPlugin") {
-            PluginAPlugin.register(with: pluginAPlugin)
-        }
-        if let pluginBPlugin = registry.registrar(forPlugin: "PluginBPlugin") {
-            PluginBPlugin.register(with: pluginBPlugin)
-        }
-    }
-}
-''');
-        },
-      );
     });
 
     group('FlutterFrameworkDependency', () {
@@ -1724,7 +1572,6 @@ let package = Package(
           flutterFrameworkDependency: flutterFrameworkDependency,
           appAndNativeAssetsDependencies: appAndNativeAssetsDependencies,
           cocoapodDependencies: cocoapodDependencies,
-          includeCocoaPodBinaryTargets: true,
           packagesForConfiguration: fs.directory(debugPackagesDirectoryPath),
           xcframeworkOutput: fs.directory(debugFrameworksDirectoryPath),
         );

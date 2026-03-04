@@ -327,6 +327,10 @@ class CocoaPods {
       return true;
     }
 
+    return podLockFilesOutdated(xcodeProject);
+  }
+
+  static bool podLockFilesOutdated(XcodeBasedProject xcodeProject) {
     final File podfileFile = xcodeProject.podfile;
     final File podfileLockFile = xcodeProject.podfileLock;
     final File manifestLockFile = xcodeProject.podManifestLock;
