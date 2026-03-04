@@ -12,6 +12,7 @@
 
 import argparse
 import os
+import re
 import sys
 
 DART_SCRIPT_DIR = os.path.dirname(sys.argv[0])
@@ -53,6 +54,17 @@ def ParseDepsFile(deps_file):
 
   return (local_scope.get('vars', {}), local_scope.get('deps', {}))
 
+def GitHashArg(value):
+  """Validates that the string is a 40-character hex string."""
+  # If the argument is not passed, argparse usually handles the 'None'
+  # default, but this check ensures the string matches the pattern.
+  if not re.match(r"^[0-9a-f]{40}$", value):
+      raise argparse.ArgumentTypeError(
+          f"'{value}' is not a valid full git hash. "
+          "Expected a 40-character hexadecimal string."
+      )
+  return value
+
 def ParseArgs(args):
   args = args[1:]
   parser = argparse.ArgumentParser(
@@ -66,9 +78,8 @@ def ParseArgs(args):
       help='Flutter DEPS file.',
       default=FLUTTER_DEPS)
   parser.add_argument('--dart_revision', '-r',
-      type=str,
-      help='Dart revision to update to.',
-      default=None)
+      type=GitHashArg,
+      help='Dart revision to update to.')
   return parser.parse_args(args)
 
 def PrettifySourcePathForDEPS(flutter_vars, dep_path, source):
