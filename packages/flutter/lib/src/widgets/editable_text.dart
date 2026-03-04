@@ -218,7 +218,7 @@ class _RenderCompositionCallback extends RenderProxyBox {
 ///  * [EditableText], which is a raw region of editable text that can be
 ///    controlled with a [TextEditingController].
 ///  * Learn how to use a [TextEditingController] in one of our [cookbook recipes](https://docs.flutter.dev/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller).
-class TextEditingController extends ValueNotifier<TextEditingValue> {
+class TextEditingController extends ValueNotifier<TextEditingValue> with ChangeNotifier {
   /// Creates a controller for an editable text field, with no initial selection.
   ///
   /// This constructor treats a null [text] argument as if it were the empty

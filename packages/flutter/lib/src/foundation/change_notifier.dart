@@ -49,7 +49,7 @@ export 'dart:ui' show VoidCallback;
 /// See also:
 ///
 ///  * [ValueNotifier], which is a [ChangeNotifier] that wraps a single value.
-mixin class ChangeNotifier implements Listenable {
+mixin class ChangeNotifier implements DartChangeNotifier {
   int _count = 0;
   // The _listeners is intentionally set to a fixed-length _GrowableList instead
   // of const [].
@@ -286,6 +286,7 @@ mixin class ChangeNotifier implements Listenable {
   /// it is called. Consumers of this class must decide on whether to notify
   /// listeners or not immediately before disposal.
   @mustCallSuper
+  @override
   void dispose() {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
     assert(
