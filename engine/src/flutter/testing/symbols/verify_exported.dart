@@ -103,18 +103,18 @@ int _checkIos(String outPath, String nmPath, Iterable<String> builds) {
     final Iterable<NmEntry> unexpectedEntries = NmEntry.parse(nmResult.stdout as String).where((
       NmEntry entry,
     ) {
-      final bool cSymbol =
-          (entry.type == '(__DATA,__common)' ||
-              entry.type == '(__DATA,__const)' ||
-              entry.type == '(__DATA_CONST,__const)') &&
-          entry.name.startsWith('_Flutter');
       final bool cInternalSymbol =
           entry.type == '(__TEXT,__text)' && entry.name.startsWith('_InternalFlutter');
-      final bool objcSymbol =
-          (entry.type == '(__DATA,__objc_data)' || entry.type == '(__DATA,__data)') &&
-          (entry.name.startsWith(r'_OBJC_METACLASS_$_Flutter') ||
-              entry.name.startsWith(r'_OBJC_CLASS_$_Flutter'));
-      return !(cSymbol || cInternalSymbol || objcSymbol || entry.isInternalSwiftSymbol);
+      if (cInternalSymbol || entry.isAllowedCSymbol || entry.isAllowedObjCSymbol) {
+        return false;
+      }
+      switch (entry.isAllowedSwiftSymbol) {
+        case null:
+          failures++;
+          return false;
+        case bool allowed:
+          return !allowed;
+      }
     });
     if (unexpectedEntries.isNotEmpty) {
       print('ERROR: $libFlutter exports unexpected symbols:');
@@ -223,71 +223,88 @@ final class NmEntry {
     });
   }
 
-  static (int? parsedToken, String rest) _parseLeadingUnsignedInt(String string) {
-    final String? digits = RegExp(r'^\d+').firstMatch(string)?.group(0);
-    return digits == null ? (null, string) : (int.parse(digits), string.substring(digits.length));
-  }
-
-  /// Extracts the leading mangled Swift identifier in the given string
-  /// and returns it along with the rest of the string, or `(null, originalString)`
-  /// if the given string does not start with a valid identifier.
-  static (String? parsedToken, String rest) _parseLeadingSwiftMangledIdentifier(String string) {
-    final (int? length, String rest) = _parseLeadingUnsignedInt(string);
-    return (length == null || length == 0)
-        ? (null, string)
-        : (rest.substring(0, length), rest.substring(length));
-  }
-
-  // A quick and dirty way to check if the [NmEntry] represents an allowed
-  // swift symbol.
-  //
-  // Only swift symbols introduced in `InternalFlutterSwift` or
-  // `InternalFlutterSwiftCommon` are allowed. See the script documentation.
-  bool get isInternalSwiftSymbol {
-    final bool isTypeValid = switch (type) {
-      '(__TEXT,__text)' ||
-      '(__TEXT,__const)' ||
-      '(__TEXT,__constg_swiftt)' ||
-      '(__DATA_CONST,__const)' ||
-      '(__DATA,__data)' ||
-      '(__DATA,__objc_data)' => true,
-      _ => false,
-    };
-    if (!(isTypeValid && name.startsWith(r'_$s'))) {
+  /// Whether this [NmEntry] is a mangled swift symbol that should be exported.
+  ///
+  /// See the comment at the start of the file for more details about exporting
+  /// Swift symbols.
+  ///
+  /// Returns `null` if `swift demangle` exited with a non-zero exit code.
+  ///
+  /// Common examples:
+  /// - _$s26InternalFlutterSwiftCommon8LogLevelOSYAAMc
+  ///   -> protocol conformance descriptor for InternalFlutterSwiftCommon.LogLevel : Swift.RawRepresentable in InternalFlutterSwiftCommon
+  ///
+  /// - _$sSo23FlutterJSONMessageCodecC08InternalA11SwiftCommonE13decodeMessageyyp10Foundation4DataVKF
+  ///   -> (extension in InternalFlutterSwiftCommon):__C.FlutterJSONMessageCodec.decodeMessage(Foundation.Data) throws -> Any
+  bool? get isAllowedSwiftSymbol {
+    final bool isSwiftSymbol =
+        switch (type) {
+          '(__TEXT,__text)' ||
+          '(__TEXT,__const)' ||
+          '(__TEXT,__constg_swiftt)' ||
+          '(__DATA_CONST,__const)' ||
+          '(__DATA,__data)' ||
+          '(__DATA,__objc_data)' => true,
+          _ => false,
+        } &&
+        name.startsWith(r'_$s');
+    if (!isSwiftSymbol) {
       return false;
     }
-
-    // Check if the mangled symbol is from either allowed module. The swift
-    // mangling rules can be found here: https://github.com/swiftlang/swift/blob/main/docs/ABI/Mangling.rst,
-    // but for identifying the module name we only have to handle 2 cases for now:
-    //  - extension, example: _$sSo19NSJSONSerializationC26InternalFlutterSwiftCommonE10decodeJSONyyp10Foundation4DataVKFZ
-    //  - non-extension, example: _$s26InternalFlutterSwiftCommon8LogLevelOSYAAMc
-    //
-    //  Each identifier only contains ascii characters, and has a numeric prefix
-    //  which represents number of ascii characters in the identifier.
-    const allowedModules = <String>['InternalFlutterSwift', 'InternalFlutterSwiftCommon'];
-
-    String rest = name.substring(3); // Trim the leading '_$s'.
-    if (rest.startsWith('So')) {
-      // The symbol was introduced as an extension in the internal modules on
-      // an out-of-module Objective-C class (an @objc extension has to be on a
-      // class).
-      // example: _$sSo19NSJSONSerializationC26InternalFlutterSwiftCommonE10decodeJSONyyp10Foundation4DataVKFZ
-      rest = rest.substring(2); // Trim the leading 'So'.
-      rest = _parseLeadingSwiftMangledIdentifier(
-        rest,
-      ).$2; // Trim the leading identifier '19NSJSONSerialization'.
-      return rest.startsWith('C') &&
-          switch (_parseLeadingSwiftMangledIdentifier(rest.substring(1))) {
-            (null, _) => false,
-            (final String moduleName, final String tail) =>
-              allowedModules.contains(moduleName) && tail.startsWith('E'),
-          };
+    final ProcessResult demangledResult = Process.runSync('swift', <String>[
+      'demangle',
+      '--tree-only',
+      name,
+    ]);
+    if (demangledResult.exitCode != 0) {
+      print('ERROR: failed to execute "swift demangle":\n${demangledResult.stderr}');
+      return null;
     }
-    // Simple case: the mangled name starts with the correct module name.
-    // exmaple: _$s26InternalFlutterSwiftCommon8LogLevelOSYAAMc
-    final (String? moduleName, _) = _parseLeadingSwiftMangledIdentifier(rest);
-    return moduleName != null && allowedModules.contains(moduleName);
+
+    // Example output:
+    //
+    // Demangling for _$s26InternalFlutterSwiftCommon8LogLevelOSYAAMc
+    // kind=Global
+    //   kind=ProtocolConformanceDescriptor
+    //     kind=ProtocolConformance
+    //       kind=Type
+    //         kind=Enum
+    //           kind=Module, text="InternalFlutterSwiftCommon"
+    //           kind=Identifier, text="LogLevel"
+    //       kind=Type
+    //         kind=Protocol
+    //           kind=Module, text="Swift"
+    //           kind=Identifier, text="RawRepresentable"
+    //       kind=Module, text="InternalFlutterSwiftCommon"
+    final String moduleLine = (demangledResult.stdout as String)
+        .split('\n')
+        .firstWhere(
+          (String line) => line.trimLeft().startsWith('kind=Module,'),
+          orElse: () => 'no module line',
+        )
+        .trimLeft();
+    return switch (moduleLine) {
+      'kind=Module, text="InternalFlutterSwiftCommon"' ||
+      'kind=Module, text="InternalFlutterSwift"' => true,
+      _ => false,
+    };
+  }
+
+  bool get isAllowedCSymbol {
+    return switch (type) {
+          '(__DATA,__common)' || '(__DATA,__const)' || '(__DATA_CONST,__const)' => true,
+          _ => false,
+        } &&
+        name.startsWith('_Flutter');
+  }
+
+  bool get isAllowedObjCSymbol {
+    return switch (type) {
+          '(__DATA,__objc_data)' || '(__DATA,__data)' => true,
+          _ => false,
+        } &&
+        (name.startsWith(r'_OBJC_METACLASS_$_Flutter') ||
+            name.startsWith(r'_OBJC_CLASS_$_Flutter'));
   }
 
   @override
