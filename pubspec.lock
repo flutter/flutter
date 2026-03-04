@@ -458,6 +458,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.0"
+  listen_beta:
+    dependency: transitive
+    description:
+      name: listen_beta
+      sha256: "435ac012ae8073df184b022b65c7d773bd8bcc9f127c916aec03d2acff2fbe21"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.1"
   logging:
     dependency: "direct main"
     description:
@@ -1104,5 +1112,5 @@ packages:
     source: hosted
     version: "2.2.4"
 sdks:
-  dart: ">=3.10.3 <4.0.0"
+  dart: ">=3.11.0 <4.0.0"
   flutter: ">=3.38.4"
