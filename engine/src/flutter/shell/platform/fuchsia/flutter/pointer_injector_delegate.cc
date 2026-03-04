@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "pointer_injector_delegate.h"
+#include "flutter/shell/platform/fuchsia/flutter/pointer_injector_delegate.h"
+
 #include "flutter/fml/logging.h"
 
 namespace flutter_runner {
@@ -33,7 +34,7 @@ namespace {
 }  // namespace
 
 bool PointerInjectorDelegate::HandlePlatformMessage(
-    rapidjson::Value request,
+    const rapidjson::Document& request,
     fml::RefPtr<flutter::PlatformMessageResponse> response) {
   if (!registry_->is_bound()) {
     FML_LOG(WARNING)

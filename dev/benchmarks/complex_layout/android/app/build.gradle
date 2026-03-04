@@ -28,6 +28,7 @@ if (flutterVersionName == null) {
 android {
     namespace = "com.yourcompany.complexLayout"
     compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
 
 
     compileOptions {

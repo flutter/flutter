@@ -14,6 +14,9 @@
 #include "flutter/impeller/display_list/aiks_unittests.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/display_list/dl_runtime_effect_impeller.h"
+#include "imgui.h"
+#include "impeller/geometry/point.h"
+#include "impeller/geometry/vector.h"
 #include "third_party/abseil-cpp/absl/status/status_matchers.h"
 
 namespace impeller {
@@ -324,8 +327,14 @@ TEST_P(AiksTest, ComposeBackdropRuntimeOuterBlurInner) {
     std::vector<std::shared_ptr<DlColorSource>> sampler_inputs = {
         nullptr,
     };
+
+    struct FragUniforms {
+      Vector2 size;
+      Vector2 origin;
+    } frag_uniforms = {.size = Vector2(1, 1), .origin = Vector2(30.f, 30.f)};
     auto uniform_data = std::make_shared<std::vector<uint8_t>>();
-    uniform_data->resize(sizeof(Vector2));
+    uniform_data->resize(sizeof(FragUniforms));
+    memcpy(uniform_data->data(), &frag_uniforms, sizeof(FragUniforms));
 
     auto runtime_filter = DlImageFilter::MakeRuntimeEffect(
         DlRuntimeEffectImpeller::Make(runtime_stage), sampler_inputs,
@@ -383,8 +392,13 @@ TEST_P(AiksTest, ComposeBackdropRuntimeOuterBlurInnerSmallSigma) {
     std::vector<std::shared_ptr<DlColorSource>> sampler_inputs = {
         nullptr,
     };
+    struct FragUniforms {
+      Vector2 size;
+      Vector2 origin;
+    } frag_uniforms = {.size = Vector2(1, 1), .origin = Vector2(30.f, 30.f)};
     auto uniform_data = std::make_shared<std::vector<uint8_t>>();
-    uniform_data->resize(sizeof(Vector2));
+    uniform_data->resize(sizeof(FragUniforms));
+    memcpy(uniform_data->data(), &frag_uniforms, sizeof(FragUniforms));
 
     auto runtime_filter = DlImageFilter::MakeRuntimeEffect(
         DlRuntimeEffectImpeller::Make(runtime_stage), sampler_inputs,
@@ -392,6 +406,82 @@ TEST_P(AiksTest, ComposeBackdropRuntimeOuterBlurInnerSmallSigma) {
 
     auto backdrop_filter = DlImageFilter::MakeCompose(/*outer=*/runtime_filter,
                                                       /*inner=*/blur_filter);
+
+    DlPaint paint;
+    auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
+    builder.DrawImage(image, DlPoint(100.0, 100.0),
+                      DlImageSampling::kNearestNeighbor, &paint);
+
+    DlPaint save_paint;
+    save_paint.setBlendMode(DlBlendMode::kSrc);
+    builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get());
+    builder.Restore();
+
+    DlPaint green;
+    green.setColor(DlColor::kGreen());
+    builder.DrawLine({100, 100}, {200, 100}, green);
+    builder.DrawLine({100, 100}, {100, 200}, green);
+
+    return builder.Build();
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(AiksTest, ClippedComposeBackdropRuntimeOuterBlurInnerSmallSigma) {
+  auto runtime_stages_result =
+      OpenAssetAsRuntimeStage("runtime_stage_filter_circle.frag.iplr");
+  ABSL_ASSERT_OK(runtime_stages_result);
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ASSERT_TRUE(runtime_stage);
+  ASSERT_TRUE(runtime_stage->IsDirty());
+  Scalar sigma = 5.0;
+  Vector2 clip_origin = Vector2(20.f, 20.f);
+  Vector2 clip_size = Vector2(300, 300);
+  Vector2 circle_origin = Vector2(30.f, 30.f);
+
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderFloat("sigma", &sigma, 0, 20);
+      ImGui::SliderFloat("clip_x", &clip_origin.x, 0, 2048.f);
+      ImGui::SliderFloat("clip_y", &clip_origin.y, 0, 1536.f);
+      ImGui::SliderFloat("clip_width", &clip_size.x, 0, 2048.f);
+      ImGui::SliderFloat("clip_height", &clip_size.y, 0, 1536.f);
+      ImGui::SliderFloat("circle_x", &circle_origin.x, 0.f, 2048.f);
+      ImGui::SliderFloat("circle_y", &circle_origin.y, 0.f, 1536.f);
+      ImGui::End();
+    }
+    DisplayListBuilder builder;
+    DlPaint background;
+    background.setColor(DlColor(1.0, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
+    builder.DrawPaint(background);
+
+    auto blur_filter =
+        DlImageFilter::MakeBlur(sigma, sigma, DlTileMode::kClamp);
+
+    std::vector<std::shared_ptr<DlColorSource>> sampler_inputs = {
+        nullptr,
+    };
+    struct FragUniforms {
+      Vector2 size;
+      Vector2 origin;
+    } frag_uniforms = {.size = Vector2(1, 1), .origin = circle_origin};
+    auto uniform_data = std::make_shared<std::vector<uint8_t>>();
+    uniform_data->resize(sizeof(FragUniforms));
+    memcpy(uniform_data->data(), &frag_uniforms, sizeof(FragUniforms));
+
+    auto runtime_filter = DlImageFilter::MakeRuntimeEffect(
+        DlRuntimeEffectImpeller::Make(runtime_stage), sampler_inputs,
+        uniform_data);
+
+    auto backdrop_filter = DlImageFilter::MakeCompose(/*outer=*/runtime_filter,
+                                                      /*inner=*/blur_filter);
+
+    builder.ClipRect(DlRect::MakeXYWH(clip_origin.x, clip_origin.y, clip_size.x,
+                                      clip_size.y));
 
     DlPaint paint;
     auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));

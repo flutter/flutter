@@ -31,6 +31,7 @@
 #include "third_party/skia/include/core/SkSurface.h"
 
 #include "flutter/shell/testing/tester_context.h"
+#include "flutter/shell/testing/tester_context_gles_factory.h"
 #include "flutter/shell/testing/tester_context_mtl_factory.h"
 #include "flutter/shell/testing/tester_context_vk_factory.h"
 
@@ -55,8 +56,16 @@ std::unique_ptr<TesterContext> CreateTesterContext(const Settings& settings) {
     tester_context = TesterContextMTLFactory::Create();
   }
 #endif
+#if TESTER_ENABLE_OPENGLES
+  if (settings.enable_impeller &&
+      settings.requested_rendering_backend == "opengles") {
+    tester_context = TesterContextGLESFactory::Create();
+  }
+#endif
 #if TESTER_ENABLE_VULKAN
-  if (settings.enable_impeller && !tester_context) {
+  if (settings.enable_impeller &&
+      (!settings.requested_rendering_backend.has_value() ||
+       settings.requested_rendering_backend == "vulkan")) {
     tester_context =
         TesterContextVKFactory::Create(settings.enable_vulkan_validation);
   }
@@ -317,6 +326,7 @@ int RunTester(const flutter::Settings& settings,
 
   std::unique_ptr<TesterContext> tester_context = CreateTesterContext(settings);
   if (settings.enable_impeller && !tester_context) {
+    FML_LOG(ERROR) << "Could not create tester context.";
     return EXIT_FAILURE;
   }
 
