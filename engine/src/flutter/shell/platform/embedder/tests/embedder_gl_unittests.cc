@@ -4929,7 +4929,6 @@ TEST_F(EmbedderTest, RenderMultiFramesTextureWithImpellerOpenGL) {
   static glTexImage2DProc glTexImage2D = reinterpret_cast<glTexImage2DProc>(
       context.GLGetProcAddress("glTexImage2D"));
   static GLuint gl_texture = 0;
-  std::future<sk_sp<SkImage>> rendered_scene;
   context.GetRendererConfig().open_gl.gl_external_texture_frame_callback =
       [](void* user_data, int64_t texture_id, size_t width, size_t height,
          FlutterOpenGLTexture* texture) -> bool {
@@ -4971,12 +4970,17 @@ TEST_F(EmbedderTest, RenderMultiFramesTextureWithImpellerOpenGL) {
 
   ASSERT_TRUE(embedder_engine->RegisterTexture(1));
   static int frame_count = 0;
-  fml::CountDownLatch latch(4);
+  static int max_frame_count = 4;
+  fml::CountDownLatch latch(max_frame_count);
+  std::future<sk_sp<SkImage>> rendered_scene = context.GetNextSceneImage();
   context.SetGLPresentCallback([&](FlutterPresentInfo present_info) {
-    ASSERT_TRUE(embedder_engine->MarkTextureFrameAvailable(1));
-    if (frame_count++ == 2) {
+    if (frame_count > 0 && frame_count < max_frame_count) {
+      ASSERT_TRUE(
+          ImageMatchesFixture("external_texture_impeller.png", rendered_scene));
       rendered_scene = context.GetNextSceneImage();
     }
+    frame_count++;
+    ASSERT_TRUE(embedder_engine->MarkTextureFrameAvailable(1));
     latch.CountDown();
   });
   // Send a window metrics events so frames may be scheduled.
