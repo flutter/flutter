@@ -122,17 +122,19 @@ void SurfaceTextureExternalTextureVKImpeller::ProcessFrame(
     VALIDATION_LOG << "Invalid external texture.";
     return;
   }
-  DlMatrix matrix = context.canvas->GetMatrix();
+  DlMatrix matrix = context.canvas ? context.canvas->GetMatrix() : DlMatrix();
   DlRect mapped_bounds = ToDlRect(bounds).TransformAndClipBounds(matrix);
 
   const auto& surface_context =
       SurfaceContextVK::Cast(*context.aiks_context->GetContext());
   const auto& context_vk = ContextVK::Cast(*surface_context.GetParent());
 
-  auto dst_texture = GetCachedTextureSource(
-      surface_context.GetParent(),                                        //
-      ISize::MakeWH(mapped_bounds.GetWidth(), mapped_bounds.GetHeight())  //
-  );
+  ISize dst_size =
+      ISize::MakeWH(mapped_bounds.GetWidth(), mapped_bounds.GetHeight())
+          .Max({1, 1});
+
+  auto dst_texture =
+      GetCachedTextureSource(surface_context.GetParent(), dst_size);
   if (!dst_texture || !dst_texture->IsValid()) {
     VALIDATION_LOG << "Could not fetch trampoline texture target.";
     return;
