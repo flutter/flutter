@@ -108,13 +108,34 @@ int _checkIos(String outPath, String nmPath, Iterable<String> builds) {
       if (cInternalSymbol || entry.isAllowedCSymbol || entry.isAllowedObjCSymbol) {
         return false;
       }
-      switch (entry.isAllowedSwiftSymbol) {
-        case null:
-          failures++;
-          return false;
-        case bool allowed:
-          return !allowed;
+      final bool isSwiftSymbol =
+          switch (entry.type) {
+            '(__TEXT,__text)' ||
+            '(__TEXT,__const)' ||
+            '(__TEXT,__constg_swiftt)' ||
+            '(__DATA_CONST,__const)' ||
+            '(__DATA,__data)' ||
+            '(__DATA,__objc_data)' => true,
+            _ => false,
+          } &&
+          entry.name.startsWith(r'_$s');
+      if (!isSwiftSymbol) {
+        return false;
       }
+      // This assumes `swift` is in `PATH`.
+      final ProcessResult demangledResult = Process.runSync('swift', <String>[
+        'demangle',
+        '--tree-only',
+        entry.name,
+      ]);
+      if (demangledResult.exitCode != 0) {
+        print('ERROR: failed to execute "swift demangle":\n${demangledResult.stderr}');
+        return true;
+      }
+      return switch (_parseModuleName(demangledResult.stdout as String)) {
+        "InternalFlutterSwiftCommon" || "InternalFlutterSwift" => false,
+        _ => true,
+      };
     });
     if (unexpectedEntries.isNotEmpty) {
       print('ERROR: $libFlutter exports unexpected symbols:');
@@ -223,73 +244,6 @@ final class NmEntry {
     });
   }
 
-  /// Whether this [NmEntry] is a mangled swift symbol that should be exported.
-  ///
-  /// See the comment at the start of the file for more details about exporting
-  /// Swift symbols.
-  ///
-  /// Returns `null` if `swift demangle` exited with a non-zero exit code.
-  ///
-  /// Common examples:
-  /// - _$s26InternalFlutterSwiftCommon8LogLevelOSYAAMc
-  ///   -> protocol conformance descriptor for InternalFlutterSwiftCommon.LogLevel : Swift.RawRepresentable in InternalFlutterSwiftCommon
-  ///
-  /// - _$sSo23FlutterJSONMessageCodecC08InternalA11SwiftCommonE13decodeMessageyyp10Foundation4DataVKF
-  ///   -> (extension in InternalFlutterSwiftCommon):__C.FlutterJSONMessageCodec.decodeMessage(Foundation.Data) throws -> Any
-  bool? get isAllowedSwiftSymbol {
-    final bool isSwiftSymbol =
-        switch (type) {
-          '(__TEXT,__text)' ||
-          '(__TEXT,__const)' ||
-          '(__TEXT,__constg_swiftt)' ||
-          '(__DATA_CONST,__const)' ||
-          '(__DATA,__data)' ||
-          '(__DATA,__objc_data)' => true,
-          _ => false,
-        } &&
-        name.startsWith(r'_$s');
-    if (!isSwiftSymbol) {
-      return false;
-    }
-    final ProcessResult demangledResult = Process.runSync('swift', <String>[
-      'demangle',
-      '--tree-only',
-      name,
-    ]);
-    if (demangledResult.exitCode != 0) {
-      print('ERROR: failed to execute "swift demangle":\n${demangledResult.stderr}');
-      return null;
-    }
-
-    // Example output:
-    //
-    // Demangling for _$s26InternalFlutterSwiftCommon8LogLevelOSYAAMc
-    // kind=Global
-    //   kind=ProtocolConformanceDescriptor
-    //     kind=ProtocolConformance
-    //       kind=Type
-    //         kind=Enum
-    //           kind=Module, text="InternalFlutterSwiftCommon"
-    //           kind=Identifier, text="LogLevel"
-    //       kind=Type
-    //         kind=Protocol
-    //           kind=Module, text="Swift"
-    //           kind=Identifier, text="RawRepresentable"
-    //       kind=Module, text="InternalFlutterSwiftCommon"
-    final String moduleLine = (demangledResult.stdout as String)
-        .split('\n')
-        .firstWhere(
-          (String line) => line.trimLeft().startsWith('kind=Module,'),
-          orElse: () => 'no module line',
-        )
-        .trimLeft();
-    return switch (moduleLine) {
-      'kind=Module, text="InternalFlutterSwiftCommon"' ||
-      'kind=Module, text="InternalFlutterSwift"' => true,
-      _ => false,
-    };
-  }
-
   bool get isAllowedCSymbol {
     return switch (type) {
           '(__DATA,__common)' || '(__DATA,__const)' || '(__DATA_CONST,__const)' => true,
@@ -309,4 +263,27 @@ final class NmEntry {
 
   @override
   String toString() => '$name: $type';
+}
+
+final moduleLinePattern = RegExp(r'kind=Module, text="(.+)"');
+
+/// Parses the output from `swift demangle --tree-only` and returns the module
+/// name of the symbol.
+String? _parseModuleName(String demangleOutput) {
+  // Example output:
+  //
+  // Demangling for _$s26InternalFlutterSwiftCommon8LogLevelOSYAAMc
+  // kind=Global
+  //   kind=ProtocolConformanceDescriptor
+  //     kind=ProtocolConformance
+  //       kind=Type
+  //         kind=Enum
+  //           kind=Module, text="InternalFlutterSwiftCommon"
+  //           kind=Identifier, text="LogLevel"
+  //       kind=Type
+  //         kind=Protocol
+  //           kind=Module, text="Swift"
+  //           kind=Identifier, text="RawRepresentable"
+  //       kind=Module, text="InternalFlutterSwiftCommon"
+  return moduleLinePattern.firstMatch(demangleOutput)?.group(1);
 }
