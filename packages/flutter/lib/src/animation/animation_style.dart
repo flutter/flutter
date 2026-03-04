@@ -173,4 +173,7 @@ class _LerpedCurve extends Curve {
 
   @override
   int get hashCode => Object.hash(first, second, _t);
+
+  @override
+  String toString() => 'interpolated curve ($first, $second, t: $_t)';
 }
