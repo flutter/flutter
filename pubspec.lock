@@ -462,10 +462,10 @@ packages:
     dependency: transitive
     description:
       name: listen_beta
-      sha256: "435ac012ae8073df184b022b65c7d773bd8bcc9f127c916aec03d2acff2fbe21"
+      sha256: c1913a00e7c73405246185378e3bc9bab51fa12a4f48b5d1cdd7c5604f1d1b07
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1"
+    version: "0.2.1"
   logging:
     dependency: "direct main"
     description:
