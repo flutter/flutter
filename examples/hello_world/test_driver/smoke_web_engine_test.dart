@@ -29,7 +29,7 @@ void main() {
     });
 
     test('title is correct', () async {
-      expect(await driver.getText(titleFinder), 'Hello, world!');
+      expect(await driver.getText(titleFinder), 'TrainFlow');
     });
 
     test('enable accessibility', () async {

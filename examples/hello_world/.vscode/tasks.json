@@ -1,0 +1,45 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Flutter: List devices",
+      "type": "shell",
+      "command": "../../bin/flutter",
+      "args": ["devices"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build"
+    },
+    {
+      "label": "Flutter: Precache iOS + Android",
+      "type": "shell",
+      "command": "../../bin/flutter",
+      "args": ["precache", "--ios", "--android"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build"
+    },
+    {
+      "label": "Flutter: Run iOS (smart)",
+      "type": "shell",
+      "command": "bash",
+      "args": ["tool/run_ios.sh"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "test"
+    },
+    {
+      "label": "Flutter: Run Android (smart)",
+      "type": "shell",
+      "command": "bash",
+      "args": ["tool/run_android.sh"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "test"
+    }
+  ]
+}

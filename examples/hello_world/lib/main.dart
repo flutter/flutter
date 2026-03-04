@@ -3,9 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+import 'app.dart';
 
-void main() => runApp(
-  const Center(
-    child: Text('Hello, world!', key: Key('title'), textDirection: TextDirection.ltr),
-  ),
-);
+void main() => runApp(const TrainingApp());

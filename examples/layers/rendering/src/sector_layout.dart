@@ -217,6 +217,13 @@ class RenderSectorWithChildren extends RenderDecoratedSector
   RenderSectorWithChildren(super.decoration);
 
   @override
+  void setupParentData(RenderObject child) {
+    if (child.parentData is! SectorChildListParentData) {
+      child.parentData = SectorChildListParentData();
+    }
+  }
+
+  @override
   void hitTestChildren(
     SectorHitTestResult result, {
     required double radius,
@@ -239,6 +246,17 @@ class RenderSectorWithChildren extends RenderDecoratedSector
       visitor(child);
       final childParentData = child.parentData! as SectorChildListParentData;
       child = childParentData.previousSibling;
+    }
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    super.paint(context, offset);
+    RenderSector? child = firstChild;
+    while (child != null) {
+      context.paintChild(child, offset);
+      final childParentData = child.parentData! as SectorChildListParentData;
+      child = childParentData.nextSibling;
     }
   }
 }
@@ -268,18 +286,9 @@ class RenderSectorRing extends RenderSectorWithChildren {
   double _padding;
   double get padding => _padding;
   set padding(double value) {
-    // TODO(ianh): avoid code duplication
     if (_padding != value) {
       _padding = value;
       markNeedsLayout();
-    }
-  }
-
-  @override
-  void setupParentData(RenderObject child) {
-    // TODO(ianh): avoid code duplication
-    if (child.parentData is! SectorChildListParentData) {
-      child.parentData = SectorChildListParentData();
     }
   }
 
@@ -352,19 +361,6 @@ class RenderSectorRing extends RenderSectorWithChildren {
     deltaTheta = innerTheta;
   }
 
-  // offset must point to the center of our circle
-  // each sector then knows how to paint itself at its location
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    // TODO(ianh): avoid code duplication
-    super.paint(context, offset);
-    RenderSector? child = firstChild;
-    while (child != null) {
-      context.paintChild(child, offset);
-      final childParentData = child.parentData! as SectorChildListParentData;
-      child = childParentData.nextSibling;
-    }
-  }
 }
 
 class RenderSectorSlice extends RenderSectorWithChildren {
@@ -387,18 +383,9 @@ class RenderSectorSlice extends RenderSectorWithChildren {
   double _padding;
   double get padding => _padding;
   set padding(double value) {
-    // TODO(ianh): avoid code duplication
     if (_padding != value) {
       _padding = value;
       markNeedsLayout();
-    }
-  }
-
-  @override
-  void setupParentData(RenderObject child) {
-    // TODO(ianh): avoid code duplication
-    if (child.parentData is! SectorChildListParentData) {
-      child.parentData = SectorChildListParentData();
     }
   }
 
@@ -463,20 +450,6 @@ class RenderSectorSlice extends RenderSectorWithChildren {
     deltaRadius = childRadius - parentData!.radius;
   }
 
-  // offset must point to the center of our circle
-  // each sector then knows how to paint itself at its location
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    // TODO(ianh): avoid code duplication
-    super.paint(context, offset);
-    RenderSector? child = firstChild;
-    while (child != null) {
-      assert(child.parentData is SectorChildListParentData);
-      context.paintChild(child, offset);
-      final childParentData = child.parentData! as SectorChildListParentData;
-      child = childParentData.nextSibling;
-    }
-  }
 }
 
 class RenderBoxToRenderSectorAdapter extends RenderBox

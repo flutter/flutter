@@ -1,0 +1,30 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Flutter: iOS (iPhone 17 Pro)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "deviceId": "FFF85122-9911-43A6-B2E7-42598FE24685",
+      "flutterMode": "debug",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Flutter: Android (select device)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "flutterMode": "debug",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Flutter: Profile (selected device)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "flutterMode": "profile",
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}

@@ -201,8 +201,8 @@ def make_fake_dsym(macho, dsym):
   dwarf_file = os.path.join(dwarf_dir, os.path.basename(macho))
   try:
     os.makedirs(dwarf_dir)
-  except OSError as xxx_todo_changeme:
-    (err, error_string) = xxx_todo_changeme.args
+  except OSError as error:
+    err = error.errno if hasattr(error, 'errno') else error.args[0]
     if err != errno.EEXIST:
       raise
   shutil.copyfile(macho, dwarf_file)
@@ -265,8 +265,8 @@ def strip_and_make_fake_dsym(macho):
   dsym_stat = None
   try:
     dsym_stat = os.stat(dsym)
-  except OSError as xxx_todo_changeme1:
-    (err, error_string) = xxx_todo_changeme1.args
+  except OSError as error:
+    err = error.errno if hasattr(error, 'errno') else error.args[0]
     if err != errno.ENOENT:
       raise
 

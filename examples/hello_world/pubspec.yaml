@@ -1,4 +1,5 @@
 name: hello_world
+version: 1.0.0+1
 
 environment:
   sdk: ^3.9.0-0
@@ -8,6 +9,10 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
+
+flutter:
+  assets:
+    - assets/data/styrketraening_oevelser.json
 
 
 dev_dependencies:
