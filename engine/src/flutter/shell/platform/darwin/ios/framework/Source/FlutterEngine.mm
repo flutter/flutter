@@ -1686,10 +1686,10 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   }];
 }
 
-/// Returns YES if the Flutter plugin responds to any UIScene-affected lifecycle selectors.
+/// Returns YES if the Flutter plugin responds to any legacy app lifecycle selectors.
 /// These selectors correspond to UIApplicationDelegate methods that have scene-based
 /// equivalents and require migration to FlutterSceneLifeCycleDelegate.
-static BOOL FLTFlutterPluginRespondsToSceneLifecycleSelectors(NSObject<FlutterPlugin>* delegate) {
+static BOOL FLTFlutterPluginRespondsToLegacyAppLifecycleSelectors(NSObject<FlutterPlugin>* delegate) {
   SEL selectors[] = {
     @selector(applicationDidBecomeActive:),
     @selector(applicationWillResignActive:),
@@ -1716,15 +1716,17 @@ static BOOL FLTFlutterPluginRespondsToSceneLifecycleSelectors(NSObject<FlutterPl
     [lifeCycleProvider addApplicationLifeCycleDelegate:delegate];
   }
   if (![delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleDelegate)] &&
-      FLTFlutterPluginRespondsToSceneLifecycleSelectors(delegate)) {
+      FLTFlutterPluginRespondsToLegacyAppLifecycleSelectors(delegate)) {
     [FlutterLogger
-        logWarning:[NSString
-                       stringWithFormat:@"Plugin %@ uses application lifecycle events but has not "
-                                        @"adopted scenes. "
-                                        @"See migration guide: "
-                                        @"https://docs.flutter.dev/release/breaking-changes/"
-                                        @"uiscenedelegate#migration-guide-for-flutter-plugins",
-                                        self.key]];
+        logWarning:
+            [NSString
+                stringWithFormat:
+                    @"Plugin %@ uses deprecated application lifecycle events. Please contact "
+                    @"plugin maintainers and request UIScene lifecycle support. This will be "
+                    @"required in a future version of Flutter. See "
+                    @"https://docs.flutter.dev/release/breaking-changes/"
+                    @"uiscenedelegate#migration-guide-for-flutter-plugins",
+                    self.key]];
   }
 }
 

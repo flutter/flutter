@@ -776,7 +776,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)testAddApplicationDelegateLogsWarningWhenPluginDoesNotConformToSceneDelegate {
   FlutterStringOutputWriter* writer = [[FlutterStringOutputWriter alloc] init];
-  writer.expectedOutput = @"has not adopted scenes";
+  writer.expectedOutput = @"uses deprecated application lifecycle events";
   FlutterLogger.outputWriter = writer;
 
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"engine" project:nil];
