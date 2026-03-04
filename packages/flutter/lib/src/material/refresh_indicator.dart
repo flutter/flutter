@@ -24,6 +24,9 @@ const double _kDragContainerExtentPercentage = 0.25;
 // displacement; max displacement = _kDragSizeFactorLimit * displacement.
 const double _kDragSizeFactorLimit = 1.5;
 
+// The threshold at which the indicator is "armed" and ready to trigger a refresh when released.
+const double _kArmedThreshold = 1.0 / _kDragSizeFactorLimit; // ~0.66
+
 // When the scroll ends, the duration of the refresh indicator's animation
 // to the RefreshIndicator's displacement.
 const Duration _kIndicatorSnapDuration = Duration(milliseconds: 150);
@@ -398,7 +401,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
         ColorTween(
           begin: color.withAlpha(0),
           end: color.withAlpha(color.alpha),
-        ).chain(CurveTween(curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit))),
+        ).chain(CurveTween(curve: const Interval(0.0, _kArmedThreshold))),
       );
     }
   }
@@ -448,8 +451,9 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   void _handleScrollUpdateNotification(ScrollUpdateNotification notification) {
     if (_status == RefreshIndicatorStatus.drag || _status == RefreshIndicatorStatus.armed) {
       _updateDragOffset(notification.metrics.axisDirection, notification.scrollDelta!);
-      _checkDragOffset(notification.metrics.viewportDimension);
+      _checkDragOffset(notification.metrics.viewportDimension, canBeDisarmed: false);
     }
+
     if (_status == RefreshIndicatorStatus.armed && notification.dragDetails == null) {
       // On iOS start the refresh when the Scrollable bounces back from the
       // overscroll (ScrollNotification indicating this don't have dragDetails
@@ -458,7 +462,9 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     }
   }
 
-  /// Handles drag offset changes for overscroll notifications.
+  /// Handles drag offset changes for overscroll notifications. Only Android sends these notifications,
+  /// so this is only called on Android. On iOS, the refresh is triggered in response to a ScrollUpdateNotification
+  /// when the scroll activity changes from a drag to a ballistic scroll.
   void _handleOverscrollNotification(OverscrollNotification notification) {
     if (_status == RefreshIndicatorStatus.drag || _status == RefreshIndicatorStatus.armed) {
       _updateDragOffset(notification.metrics.axisDirection, notification.overscroll);
@@ -565,20 +571,24 @@ class RefreshIndicatorState extends State<RefreshIndicator>
 
   /// Calculates the visual position of the indicator based on the drag offset.
   /// Also transitions status from `drag` to `armed` if pulled far enough.
-  void _checkDragOffset(double containerExtent) {
+  void _checkDragOffset(double containerExtent, {bool canBeDisarmed = true}) {
     assert(_status == RefreshIndicatorStatus.drag || _status == RefreshIndicatorStatus.armed);
 
     double newValue = _dragOffset! / (containerExtent * _kDragContainerExtentPercentage);
-    if (_status == RefreshIndicatorStatus.armed) {
-      newValue = math.max(newValue, 1.0 / _kDragSizeFactorLimit);
+
+    if (_status == RefreshIndicatorStatus.armed && !canBeDisarmed) {
+      newValue = math.max(newValue, _kArmedThreshold);
     }
 
     _positionController.value = clampDouble(newValue, 0.0, 1.0); // This triggers various rebuilds.
 
-    // Once the visual indicator color becomes fully opaque, the indicator is considered "armed".
-    if (_status == RefreshIndicatorStatus.drag &&
-        _valueColor.value!.alpha == _effectiveValueColor.alpha) {
+    // Transition from `drag` to `armed` if the drag offset exceeds the armed threshold, and back to `drag` if it goes below.
+    if (_status == RefreshIndicatorStatus.drag && _positionController.value >= _kArmedThreshold) {
       _status = RefreshIndicatorStatus.armed;
+      widget.onStatusChange?.call(_status);
+    } else if (_status == RefreshIndicatorStatus.armed &&
+        _positionController.value < _kArmedThreshold) {
+      _status = RefreshIndicatorStatus.drag;
       widget.onStatusChange?.call(_status);
     }
   }
@@ -628,24 +638,24 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     _status = RefreshIndicatorStatus.snap;
     widget.onStatusChange?.call(_status);
 
-    _positionController
-        .animateTo(1.0 / _kDragSizeFactorLimit, duration: _kIndicatorSnapDuration)
-        .then<void>((void value) {
-          if (mounted && _status == RefreshIndicatorStatus.snap) {
-            setState(() {
-              // Show the indeterminate progress indicator.
-              _status = RefreshIndicatorStatus.refresh;
-            });
+    _positionController.animateTo(_kArmedThreshold, duration: _kIndicatorSnapDuration).then<void>((
+      void value,
+    ) {
+      if (mounted && _status == RefreshIndicatorStatus.snap) {
+        setState(() {
+          // Show the indeterminate progress indicator.
+          _status = RefreshIndicatorStatus.refresh;
+        });
 
-            final Future<void> refreshResult = widget.onRefresh();
-            refreshResult.whenComplete(() {
-              if (mounted && _status == RefreshIndicatorStatus.refresh) {
-                completer.complete();
-                _dismiss(RefreshIndicatorStatus.done);
-              }
-            });
+        final Future<void> refreshResult = widget.onRefresh();
+        refreshResult.whenComplete(() {
+          if (mounted && _status == RefreshIndicatorStatus.refresh) {
+            completer.complete();
+            _dismiss(RefreshIndicatorStatus.done);
           }
         });
+      }
+    });
   }
 
   /// Show the refresh indicator and run the refresh callback as if it had

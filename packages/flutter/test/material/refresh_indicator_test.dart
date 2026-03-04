@@ -287,7 +287,7 @@ void main() {
     await tester.sendEventToBinding(testPointer.down(startLocation));
     await tester.sendEventToBinding(testPointer.move(startLocation + const Offset(0.0, 175)));
     await tester.pump();
-    await tester.sendEventToBinding(testPointer.move(startLocation + const Offset(0.0, 149)));
+    await tester.sendEventToBinding(testPointer.move(startLocation + const Offset(0.0, 99)));
     await tester.pump();
     await tester.sendEventToBinding(testPointer.up());
     await tester.pump();
