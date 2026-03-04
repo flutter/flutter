@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('ScrollMetricsNotification test', (WidgetTester tester) async {
@@ -169,28 +171,26 @@ void main() {
     expect(depth1Values, equals(<int>[1, 1, 1, 1, 1]));
   });
 
-  testWidgets('ScrollNotifications bubble past Scaffold Material', (WidgetTester tester) async {
+  testWidgets('ScrollNotifications bubble past app widget tree', (WidgetTester tester) async {
     final notificationTypes = <Type>[];
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: NotificationListener<ScrollNotification>(
           onNotification: (ScrollNotification value) {
             notificationTypes.add(value.runtimeType);
             return false;
           },
-          child: Scaffold(
-            body: SizedBox.expand(
-              child: SingleChildScrollView(
-                dragStartBehavior: DragStartBehavior.down,
-                child: SizedBox(
-                  height: 1200.0,
-                  child: Container(
-                    padding: const EdgeInsets.all(50.0),
-                    child: const SingleChildScrollView(
-                      dragStartBehavior: DragStartBehavior.down,
-                      child: SizedBox(height: 1200.0),
-                    ),
+          child: SizedBox.expand(
+            child: SingleChildScrollView(
+              dragStartBehavior: DragStartBehavior.down,
+              child: SizedBox(
+                height: 1200.0,
+                child: Container(
+                  padding: const EdgeInsets.all(50.0),
+                  child: const SingleChildScrollView(
+                    dragStartBehavior: DragStartBehavior.down,
+                    child: SizedBox(height: 1200.0),
                   ),
                 ),
               ),
@@ -302,18 +302,16 @@ void main() {
     }
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: SizedBox.expand(
-            child: Scrollbar(
-              thumbVisibility: true,
-              controller: scrollController,
-              child: NotificationListener<ScrollNotification>(
-                onNotification: handleScrollNotification,
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  child: const SizedBox(height: 1200.0),
-                ),
+      TestWidgetsApp(
+        home: SizedBox.expand(
+          child: RawScrollbar(
+            thumbVisibility: true,
+            controller: scrollController,
+            child: NotificationListener<ScrollNotification>(
+              onNotification: handleScrollNotification,
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: const SizedBox(height: 1200.0),
               ),
             ),
           ),
@@ -325,16 +323,16 @@ void main() {
     expect(scrollController.offset, 0);
     expect(notification, isNull);
 
-    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(790, 45));
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797, 45));
     await tester.pumpAndSettle();
     expect(notification, isA<ScrollStartNotification>());
 
-    await dragScrollbarGesture.moveBy(const Offset(0, -20));
+    await dragScrollbarGesture.moveBy(const Offset(0, 10));
     await tester.pumpAndSettle();
     expect(notification, isA<ScrollUpdateNotification>());
     expect(scrollController.offset, 20);
 
-    await dragScrollbarGesture.moveBy(const Offset(0, -20));
+    await dragScrollbarGesture.moveBy(const Offset(0, 10));
     await tester.pumpAndSettle();
     expect(notification, isA<ScrollUpdateNotification>());
     expect(scrollController.offset, 40);
