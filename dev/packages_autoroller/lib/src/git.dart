@@ -16,6 +16,12 @@ import 'package:process/process.dart';
 final class Git {
   const Git(this.processManager);
 
+  static final RegExp _urlCredentialPattern = RegExp(r'([a-zA-Z][a-zA-Z0-9+.-]*:\/\/)([^\/@\s]+)@');
+
+  static final RegExp _githubTokenPattern = RegExp(
+    r'\b(?:ghp|gho|ghu|ghs|ghr|github_pat)_[A-Za-z0-9_]+\b',
+  );
+
   final ProcessManager processManager;
 
   Future<String> getOutput(
@@ -63,37 +69,49 @@ final class Git {
     ProcessResult result,
     String explanation,
   ) {
+    final String redactedCommand = _redactPotentialSecrets(args.join(' '));
     final message = StringBuffer();
     if (result.exitCode != 0) {
       message.writeln(
-        'Command "git ${args.join(' ')}" failed in directory "$workingDirectory" to '
+        'Command "git $redactedCommand" failed in directory "$workingDirectory" to '
         '$explanation. Git exited with error code ${result.exitCode}.',
       );
     } else {
-      message.writeln('Command "git ${args.join(' ')}" failed to $explanation.');
+      message.writeln('Command "git $redactedCommand" failed to $explanation.');
     }
     if ((result.stdout as String).isNotEmpty) {
-      message.writeln('stdout from git:\n${result.stdout}\n');
+      message.writeln('stdout from git:\n${_redactPotentialSecrets(result.stdout as String)}\n');
     }
     if ((result.stderr as String).isNotEmpty) {
-      message.writeln('stderr from git:\n${result.stderr}\n');
+      message.writeln('stderr from git:\n${_redactPotentialSecrets(result.stderr as String)}\n');
     }
     throw GitException(message.toString(), args);
   }
 
+  /// Throw a [GitException] when spawning `git` fails before command execution.
   Never _reportProcessExceptionAndExit(
     List<String> args,
     String workingDirectory,
     ProcessException exception,
     String explanation,
   ) {
+    final String redactedCommand = _redactPotentialSecrets(args.join(' '));
     final message = StringBuffer()
       ..writeln(
-        'Command "git ${args.join(' ')}" failed in directory "$workingDirectory" to '
+        'Command "git $redactedCommand" failed in directory "$workingDirectory" to '
         '$explanation.',
       )
-      ..writeln('ProcessException from git: $exception');
+      ..writeln('ProcessException from git: ${_redactPotentialSecrets(exception.toString())}');
     throw GitException(message.toString(), args);
+  }
+
+  static String _redactPotentialSecrets(String text) {
+    final String redactedUrlCredentials = text.replaceAllMapped(_urlCredentialPattern, (
+      Match match,
+    ) {
+      return '${match.group(1)}[REDACTED]@';
+    });
+    return redactedUrlCredentials.replaceAll(_githubTokenPattern, '[REDACTED]');
   }
 }
 
