@@ -1335,7 +1335,7 @@ class PerfTest {
   /// Whether the UI thread should be the platform thread.
   final bool enableMergedPlatformThread;
 
-  /// Whether to enable HCPP swapchain.
+  /// Whether to enable SurfaceControl swapchain and the HCPP platform view backend.
   final bool enableHcpp;
 
   /// Whether to defer construction of all PSO objects in the Impeller backend.
@@ -1432,9 +1432,6 @@ class PerfTest {
           _addVulkanGPUTracingToManifest(testDirectory);
           if (forceOpenGLES ?? false) {
             _addOpenGLESToManifest(testDirectory);
-          }
-          if (enableMergedPlatformThread) {
-            _addMergedPlatformThreadSupportToManifest(testDirectory);
           }
           if (enableMergedPlatformThread) {
             _addMergedPlatformThreadSupportToManifest(testDirectory);
