@@ -73,6 +73,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
           androidSdk: _androidSdk!,
           userMessages: _userMessages,
           processUtils: _processUtils,
+          buildMode: buildInfo?.mode,
         );
       case TargetPlatform.ios:
         return applicationBinary == null

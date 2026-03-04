@@ -520,9 +520,6 @@ class AndroidDevice extends Device {
 
   AndroidApk? _package;
 
-  // TODO(camsim99): this actually might have to be a map per architecture
-  List<String>? _cachedEngineShellArguments;
-
   @override
   Future<LaunchResult> startApp(
     AndroidApk? package, {
@@ -579,21 +576,22 @@ class AndroidDevice extends Device {
       if (route != null) ...<String>['--es', 'route', route],
     ]);
 
-    var engineShellArgumentsHaveChangedFromPreviousInvocation = false;
-    if (_cachedEngineShellArguments != null) {
-      engineShellArgumentsHaveChangedFromPreviousInvocation =
-          Set<String>.from(_cachedEngineShellArguments!).containsAll(androidShellArguments) &&
-          Set<String>.from(androidShellArguments).containsAll(_cachedEngineShellArguments!) &&
-          _cachedEngineShellArguments!.length == androidShellArguments.length;
+    var engineShellArgumentsHaveNotChangedFromPreviousInvocation = true;
+    final Set<String>? previousEngineShellArguments = package?.engineShellArgs;
+    if (previousEngineShellArguments != null) {
+      engineShellArgumentsHaveNotChangedFromPreviousInvocation =
+          Set<String>.from(previousEngineShellArguments!).containsAll(androidShellArguments) &&
+          Set<String>.from(androidShellArguments).containsAll(previousEngineShellArguments!) &&
+          previousEngineShellArguments.length == androidShellArguments.length;
     }
-    print('$camilleTag with the cached arguments: $_cachedEngineShellArguments');
+    print('$camilleTag with the cached arguments: $previousEngineShellArguments');
     print('$camilleTag with the new arguments: $androidShellArguments');
     print(
-      '$camilleTag and the arguments have changed? $engineShellArgumentsHaveChangedFromPreviousInvocation',
+      '$camilleTag and the arguments have not changed? $engineShellArgumentsHaveNotChangedFromPreviousInvocation',
     );
 
     if (!prebuiltApplication ||
-        engineShellArgumentsHaveChangedFromPreviousInvocation ||
+        !engineShellArgumentsHaveNotChangedFromPreviousInvocation ||
         _androidSdk.licensesAvailable && _androidSdk.latestVersion == null) {
       print('$camilleTag and we are rebuilding the APK!');
       _logger.printTrace('Building APK');

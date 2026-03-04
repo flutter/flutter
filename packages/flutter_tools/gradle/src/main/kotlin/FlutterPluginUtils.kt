@@ -843,6 +843,7 @@ object FlutterPluginUtils {
     @JvmName("addTaskForEngineShellArgumentManifestInjection")
     internal fun addTaskForEngineShellArgumentManifestInjection(project: Project, androidEngineShellArgs: String) {
         val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
+        print("&&&&&&&&&&&&&&&&&&&&CAMILLE&&&&&&&&&&&&&&& in FlutterPluginUtils writing to " + project.layout.buildDirectory);
 
         androidComponents.onVariants { variant ->
             val genTask = project.tasks.register("${variant.name}GenerateEngineFlagsManifestTask", GenerateEngineFlagsManifestTask::class.java) {

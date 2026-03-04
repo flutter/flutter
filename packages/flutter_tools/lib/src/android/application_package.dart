@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:collection';
+import 'dart:io' as io;
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -27,6 +28,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     required this.applicationPackage,
     required this.versionCode,
     required this.launchActivity,
+    this.engineShellArgs,
   });
 
   static String get _aaptNotFound =>
@@ -42,6 +44,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     required UserMessages userMessages,
     required Logger logger,
     required ProcessUtils processUtils,
+    required BuildMode? buildMode,
   }) {
     final String? aaptPath = androidSdk.latestVersion?.aaptPath;
     if (aaptPath == null || !processManager.canRun(aaptPath)) {
@@ -79,11 +82,62 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
       return null;
     }
 
+    Set<String>? androidEngineShellArgs;
+    if (buildMode != null) {
+      final relativeGeneratedEngineFlagsManifestFilePath =
+          'intermediates/flutter/extra_manifest/${buildMode.cliName}/AndroidManifest.xml';
+      var camilleTag = '###################CAMILLE##################### in fromApk:';
+      print(
+        '$camilleTag with relativeGeneratedEngineFlagsManifestFilePath: $relativeGeneratedEngineFlagsManifestFilePath',
+      );
+      print('$camilleTag with getAndroidBuildDirectory(): ${getAndroidBuildDirectory()}');
+
+      io.Directory dir = io.Directory(getAndroidBuildDirectory());
+      List<io.FileSystemEntity> entities = dir.listSync(recursive: true);
+      // print('$camilleTag ${entities.length}');
+
+      // for (var entity in entities) {
+      //   // if (entity is File) {
+      //   print(entity.path);
+      //   // }
+      // }
+      final generatedEngineFlagsManifestFile = io.File(
+        'build/app/generated/manifests/debugGenerateEngineFlagsManifestTask/AndroidManifest.xml',
+        // getAndroidBuildDirectory() + "/" + relativeGeneratedEngineFlagsManifestFilePath,
+      );
+
+      // if (generatedEngineFlagsManifestFile.existsSync()) {
+      // print('$camilleTag manifest does exist!');
+      final String generatedEngineFlagsManifestFileStr = generatedEngineFlagsManifestFile
+          .readAsStringSync();
+      print(
+        '$camilleTag generatedEngineFlagsManifestFileStr: $generatedEngineFlagsManifestFileStr',
+      );
+      final document = XmlDocument.parse(generatedEngineFlagsManifestFileStr);
+
+      // Find the one expected activity element and one expected androidEngineShellArgs metadata.
+      final XmlElement applicationElement = document.findAllElements('application').first;
+      final XmlElement androidEngineShellArgsMetadataElement = applicationElement
+          .findElements('meta-data')
+          .first;
+      final String? androidEngineShellArgsList = androidEngineShellArgsMetadataElement.getAttribute(
+        'android:value',
+      );
+      print('$camilleTag androidEngineShellArgsList: $androidEngineShellArgsList');
+      // TODO(camsim99): Stop using comma as a separator bc it's terrible for parsing.
+      androidEngineShellArgs =
+          (androidEngineShellArgsList == null || androidEngineShellArgsList.isEmpty)
+          ? <String>{}
+          : androidEngineShellArgsList.split(',').map((String arg) => arg.trim()).toSet();
+    }
+    // }
+
     return AndroidApk(
       id: packageName,
       applicationPackage: apk,
       versionCode: data.versionCode == null ? null : int.tryParse(data.versionCode!),
       launchActivity: '${data.packageName}/${data.launchableActivityName}',
+      engineShellArgs: androidEngineShellArgs,
     );
   }
 
@@ -95,6 +149,9 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
 
   /// The version code of the APK.
   final int? versionCode;
+
+  /// The engine shell arguments, read from the generated engine shell arguments manifest in the APK.
+  final Set<String>? engineShellArgs;
 
   /// Creates a new AndroidApk based on the information in the Android manifest.
   static Future<AndroidApk?> fromAndroidProject(
@@ -135,6 +192,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
           logger: logger,
           userMessages: userMessages,
           processUtils: processUtils,
+          buildMode: buildInfo?.mode,
         );
       }
       // The .apk hasn't been built yet, so we work with what we have. The run
