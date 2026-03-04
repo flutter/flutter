@@ -581,7 +581,7 @@ class AndroidDevice extends Device {
     if (previousEngineShellArguments != null) {
       engineShellArgumentsHaveNotChangedFromPreviousInvocation =
           Set<String>.from(previousEngineShellArguments!).containsAll(androidShellArguments) &&
-          Set<String>.from(androidShellArguments).containsAll(previousEngineShellArguments!) &&
+          Set<String>.from(androidShellArguments).containsAll(previousEngineShellArguments) &&
           previousEngineShellArguments.length == androidShellArguments.length;
     }
     print('$camilleTag with the cached arguments: $previousEngineShellArguments');

@@ -92,45 +92,34 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
       );
       print('$camilleTag with getAndroidBuildDirectory(): ${getAndroidBuildDirectory()}');
 
-      io.Directory dir = io.Directory(getAndroidBuildDirectory());
-      List<io.FileSystemEntity> entities = dir.listSync(recursive: true);
-      // print('$camilleTag ${entities.length}');
-
-      // for (var entity in entities) {
-      //   // if (entity is File) {
-      //   print(entity.path);
-      //   // }
-      // }
       final generatedEngineFlagsManifestFile = io.File(
-        'build/app/generated/manifests/debugGenerateEngineFlagsManifestTask/AndroidManifest.xml',
-        // getAndroidBuildDirectory() + "/" + relativeGeneratedEngineFlagsManifestFilePath,
+        '${getAndroidBuildDirectory()}/app/generated/manifests/debugGenerateEngineFlagsManifestTask/AndroidManifest.xml',
       );
 
-      // if (generatedEngineFlagsManifestFile.existsSync()) {
-      // print('$camilleTag manifest does exist!');
-      final String generatedEngineFlagsManifestFileStr = generatedEngineFlagsManifestFile
-          .readAsStringSync();
-      print(
-        '$camilleTag generatedEngineFlagsManifestFileStr: $generatedEngineFlagsManifestFileStr',
-      );
-      final document = XmlDocument.parse(generatedEngineFlagsManifestFileStr);
+      if (generatedEngineFlagsManifestFile.existsSync()) {
+        print('$camilleTag manifest does exist!');
+        final String generatedEngineFlagsManifestFileStr = generatedEngineFlagsManifestFile
+            .readAsStringSync();
+        print(
+          '$camilleTag generatedEngineFlagsManifestFileStr: $generatedEngineFlagsManifestFileStr',
+        );
+        final document = XmlDocument.parse(generatedEngineFlagsManifestFileStr);
 
-      // Find the one expected activity element and one expected androidEngineShellArgs metadata.
-      final XmlElement applicationElement = document.findAllElements('application').first;
-      final XmlElement androidEngineShellArgsMetadataElement = applicationElement
-          .findElements('meta-data')
-          .first;
-      final String? androidEngineShellArgsList = androidEngineShellArgsMetadataElement.getAttribute(
-        'android:value',
-      );
-      print('$camilleTag androidEngineShellArgsList: $androidEngineShellArgsList');
-      // TODO(camsim99): Stop using comma as a separator bc it's terrible for parsing.
-      androidEngineShellArgs =
-          (androidEngineShellArgsList == null || androidEngineShellArgsList.isEmpty)
-          ? <String>{}
-          : androidEngineShellArgsList.split(',').map((String arg) => arg.trim()).toSet();
+        // Find the one expected activity element and one expected androidEngineShellArgs metadata.
+        final XmlElement applicationElement = document.findAllElements('application').first;
+        final XmlElement androidEngineShellArgsMetadataElement = applicationElement
+            .findElements('meta-data')
+            .first;
+        final String? androidEngineShellArgsList = androidEngineShellArgsMetadataElement
+            .getAttribute('android:value');
+        print('$camilleTag androidEngineShellArgsList: $androidEngineShellArgsList');
+        // TODO(camsim99): Stop using comma as a separator bc it's terrible for parsing.
+        androidEngineShellArgs =
+            (androidEngineShellArgsList == null || androidEngineShellArgsList.isEmpty)
+            ? <String>{}
+            : androidEngineShellArgsList.split(',').map((String arg) => arg.trim()).toSet();
+      }
     }
-    // }
 
     return AndroidApk(
       id: packageName,
