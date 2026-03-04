@@ -415,12 +415,7 @@ void main() {
         false,
       );
       // null means use system default on platforms that support it (e.g. iOS 17+).
-      expect(
-        const TextInputConfiguration(
-          enableInlinePrediction: null,
-        ).toJson()['enableInlinePrediction'],
-        null,
-      );
+      expect(const TextInputConfiguration().toJson()['enableInlinePrediction'], null);
     });
 
     test('copyWith method works correctly', () {

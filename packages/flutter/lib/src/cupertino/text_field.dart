@@ -309,7 +309,7 @@ class CupertinoTextField extends StatefulWidget {
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
-    this.enableInlinePrediction = null,
+    this.enableInlinePrediction,
     this.composingStyle,
   }) : assert(obscuringCharacter.length == 1),
        smartDashesType =
@@ -450,7 +450,7 @@ class CupertinoTextField extends StatefulWidget {
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
-    this.enableInlinePrediction = null,
+    this.enableInlinePrediction,
     this.composingStyle,
   }) : assert(obscuringCharacter.length == 1),
        smartDashesType =

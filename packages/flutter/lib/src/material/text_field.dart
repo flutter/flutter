@@ -327,7 +327,7 @@ class TextField extends StatefulWidget {
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
     this.hintLocales,
-    this.enableInlinePrediction = null,
+    this.enableInlinePrediction,
     this.composingStyle,
   }) : assert(obscuringCharacter.length == 1),
        smartDashesType =

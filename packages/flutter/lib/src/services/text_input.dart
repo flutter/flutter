@@ -531,7 +531,7 @@ class TextInputConfiguration {
     this.allowedMimeTypes = const <String>[],
     this.enableDeltaModel = false,
     this.hintLocales = const <Locale>[],
-    this.enableInlinePrediction = null,
+    this.enableInlinePrediction,
   }) : smartDashesType =
            smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType =

@@ -15786,7 +15786,7 @@ void main() {
   testWidgets('TextField uses InputDecorationThemeData.composingStyle when widget composingStyle is null', (
     WidgetTester tester,
   ) async {
-    const TextStyle themeComposingStyle = TextStyle(
+    const themeComposingStyle = TextStyle(
       color: Colors.grey,
       decoration: TextDecoration.underline,
     );
