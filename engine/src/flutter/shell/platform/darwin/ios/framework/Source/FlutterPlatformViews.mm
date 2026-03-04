@@ -821,7 +821,7 @@ static BOOL _preparedOnce = NO;
   // Apple fixed the bug where the gesture recognizer gets stuck at "failed" state in iOS 26.
   // The workaround is no longer needed on iOS 26+.
   // See: https://github.com/flutter/flutter/issues/179907
-  if (@available(iOS 26, *)) {
+  if (@available(iOS 26.0, *)) {
     return;
   }
   __weak ForwardingGestureRecognizer* weakSelf = self;

@@ -3163,7 +3163,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   // recognizer gets stuck at UIGestureRecognizerStateFailed. Apple fixed this bug in iOS 26,
   // so the workaround (and this test) is no longer needed on iOS 26+.
   // See: https://github.com/flutter/flutter/issues/179907
-  if (@available(iOS 26, *)) {
+  if (@available(iOS 26.0, *)) {
     return;
   }
 
