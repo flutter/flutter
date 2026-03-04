@@ -6,7 +6,7 @@
 /// @docImport 'package:flutter/widgets.dart';
 library;
 
-import 'package:listen_beta/listen_beta.dart';
+import 'package:listen/listen.dart';
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';

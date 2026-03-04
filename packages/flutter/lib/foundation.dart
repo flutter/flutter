@@ -9,7 +9,7 @@
 /// framework.
 library foundation;
 
-export 'package:listen_beta/listen_beta.dart'
+export 'package:listen/listen.dart'
     show DartChangeNotifier, Listenable, ValueListenable, ValueNotifier;
 
 export 'package:meta/meta.dart'
