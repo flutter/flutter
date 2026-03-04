@@ -1616,7 +1616,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 // iOS 17+ inline predictive text uses setAttributedMarkedText:selectedRange:.
 // Forward to the existing setMarkedText implementation by extracting the plain string.
 - (void)setAttributedMarkedText:(NSAttributedString*)attributedString
-                 selectedRange:(NSRange)selectedRange API_AVAILABLE(ios(17.0)) {
+                  selectedRange:(NSRange)selectedRange API_AVAILABLE(ios(17.0)) {
   NSString* markedText = attributedString ? [attributedString string] : @"";
   [self setMarkedText:markedText selectedRange:selectedRange];
 }
