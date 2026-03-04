@@ -1859,7 +1859,7 @@ class WindowRegistry extends ChangeNotifier {
 }
 
 class _WindowRegistryScope extends InheritedWidget {
-  _WindowRegistryScope({super.key, required WindowRegistry registry, required super.child})
+  _WindowRegistryScope({required WindowRegistry registry, required super.child})
     : _registry = registry {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
