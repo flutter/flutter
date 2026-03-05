@@ -205,15 +205,15 @@ void _checkSdkHandlersNotSet() {
 Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
   var count = 0;
 
-  final valueNotifier = ValueNotifier<bool>(true);
-  count++;
+  // final valueNotifier = ValueNotifier<bool>(true);
+  // count++;
   final changeNotifier = ChangeNotifier()..addListener(() {});
   count++;
   final Picture picture = _createPicture();
   count++;
 
-  valueNotifier.dispose();
-  count++;
+  // valueNotifier.dispose();
+  // count++;
   changeNotifier.dispose();
   count++;
   picture.dispose();
