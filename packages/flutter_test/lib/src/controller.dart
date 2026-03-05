@@ -334,6 +334,11 @@ class SemanticsController {
   ///
   /// * [flutter/engine/AccessibilityBridge.java#SemanticsNode.isFocusable()](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java#L2641)
   /// * [flutter/engine/SemanticsObject.mm#SemanticsObject.isAccessibilityElement](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.mm#L449)
+  //
+  // TODO(quncheng): If this method is modified, please also update the copy of
+  // this method located in `packages/flutter/lib/src/widgets/_accessibility_evaluations.dart`.
+  // This private method will be removed once the feature flag
+  // `isAccessibilityEvaluationsEnabled` is turned on.
   bool _isImportantForAccessibility(SemanticsNode node) {
     if (node.isMergedIntoParent) {
       // If this node is merged, all its information are present on an ancestor
