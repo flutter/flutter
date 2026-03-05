@@ -835,6 +835,11 @@ class PageView extends StatefulWidget {
   /// [ScrollCacheExtent.pixels] can also be used to specify the cache extent
   /// in logical pixels instead of viewport sizes.
   ///
+  /// If [scrollCacheExtent] is specified, its value must be consistent with
+  /// [allowImplicitScrolling]: the value must be greater than 0.0 when
+  /// [allowImplicitScrolling] is true, and must be 0.0 when
+  /// [allowImplicitScrolling] is false.
+  ///
   /// Defaults to `ScrollCacheExtent.viewport(1.0)` if
   /// [allowImplicitScrolling] is true, and `ScrollCacheExtent.viewport(0.0)` if
   /// [allowImplicitScrolling] is false.
