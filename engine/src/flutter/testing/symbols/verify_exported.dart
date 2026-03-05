@@ -133,7 +133,7 @@ int _checkIos(String outPath, String nmPath, Iterable<String> builds) {
         return true;
       }
       return switch (_parseModuleName(demangledResult.stdout as String)) {
-        "InternalFlutterSwiftCommon" || "InternalFlutterSwift" => false,
+        'InternalFlutterSwiftCommon' || 'InternalFlutterSwift' => false,
         _ => true,
       };
     });
