@@ -177,7 +177,6 @@ EmbedderExternalTextureGL::CreateTextureGLES(
     FlutterOpenGLTexture* texture) {
   impeller::TextureDescriptor desc;
   desc.size = impeller::ISize(texture->width, texture->height);
-  desc.storage_mode = impeller::StorageMode::kDevicePrivate;
   desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
 
   auto type = ToImpellerTextureType(texture->target);
