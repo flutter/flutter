@@ -1690,9 +1690,13 @@ void main() {
       // _selectionStartsInScrollable=false, while the inner ListView delegate
       // receives the remapped origin (top of the outer list) as its first event
       // and sets _selectionStartsInScrollable=true.
-      final RenderParagraph headerParagraph = tester.renderObject<RenderParagraph>(
-        find.descendant(of: find.text('Header'), matching: find.byType(RichText)),
-      );
+      final RenderParagraph headerParagraph = tester
+          .renderObject<RenderParagraph>(
+            find.descendant(
+              of: find.text('Header'),
+              matching: find.byType(RichText),
+            ),
+          );
       final TestGesture gesture = await tester.startGesture(
         textOffsetToPosition(headerParagraph, 0),
         kind: ui.PointerDeviceKind.mouse,
@@ -1706,7 +1710,8 @@ void main() {
       // the inner delegate would pass Offset.infinite to startAutoScrollIfNecessary,
       // causing an assertion error in EdgeDraggingAutoScroller.
       final Offset pastBottom =
-          tester.getBottomRight(find.byType(MaterialApp)) + const Offset(0, 200);
+          tester.getBottomRight(find.byType(MaterialApp)) +
+          const Offset(0, 200);
       await gesture.moveTo(pastBottom);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
