@@ -125,6 +125,7 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     bool enableRenderTargetUsage = true,
     bool enableShaderReadUsage = true,
     bool enableShaderWriteUsage = false,
+    bool enableMipmap = false,
   }) {
     final resolvedTextureType =
         textureType ??
@@ -143,6 +144,7 @@ base class GpuContext extends NativeFieldWrapperClass1 {
       enableRenderTargetUsage,
       enableShaderReadUsage,
       enableShaderWriteUsage,
+      enableMipmap,
     );
     if (!result.isValid) {
       throw Exception('Texture creation failed');

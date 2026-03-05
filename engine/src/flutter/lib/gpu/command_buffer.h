@@ -8,11 +8,14 @@
 #include "flutter/lib/gpu/context.h"
 #include "flutter/lib/gpu/export.h"
 #include "flutter/lib/ui/dart_wrapper.h"
-#include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/context.h"
+
+#include <functional>
 
 namespace flutter {
 namespace gpu {
+
+class Texture;
 
 class CommandBuffer : public RefCountedDartWrappable<CommandBuffer> {
   DEFINE_WRAPPERTYPEINFO();
@@ -26,6 +29,8 @@ class CommandBuffer : public RefCountedDartWrappable<CommandBuffer> {
 
   void AddRenderPass(std::shared_ptr<impeller::RenderPass> render_pass);
 
+  bool GenerateMipmap(const std::shared_ptr<impeller::Texture>& texture);
+
   bool Submit();
   bool Submit(
       const impeller::CommandBuffer::CompletionCallback& completion_callback);
@@ -35,7 +40,7 @@ class CommandBuffer : public RefCountedDartWrappable<CommandBuffer> {
  private:
   std::shared_ptr<impeller::Context> context_;
   std::shared_ptr<impeller::CommandBuffer> command_buffer_;
-  std::vector<std::shared_ptr<impeller::RenderPass>> encodables_;
+  std::vector<std::function<bool()>> encodables_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(CommandBuffer);
 };
@@ -58,6 +63,11 @@ FLUTTER_GPU_EXPORT
 extern Dart_Handle InternalFlutterGpu_CommandBuffer_Submit(
     flutter::gpu::CommandBuffer* wrapper,
     Dart_Handle completion_callback);
+
+FLUTTER_GPU_EXPORT
+extern Dart_Handle InternalFlutterGpu_CommandBuffer_GenerateMipmap(
+    flutter::gpu::CommandBuffer* wrapper,
+    flutter::gpu::Texture* texture);
 
 }  // extern "C"
 

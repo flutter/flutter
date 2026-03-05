@@ -105,7 +105,8 @@ bool InternalFlutterGpu_Texture_Initialize(Dart_Handle wrapper,
                                            int texture_type,
                                            bool enable_render_target_usage,
                                            bool enable_shader_read_usage,
-                                           bool enable_shader_write_usage) {
+                                           bool enable_shader_write_usage,
+                                           bool enable_mipmap) {
   impeller::TextureDescriptor desc;
   desc.storage_mode = flutter::gpu::ToImpellerStorageMode(storage_mode);
   desc.size = {width, height};
@@ -119,6 +120,9 @@ bool InternalFlutterGpu_Texture_Initialize(Dart_Handle wrapper,
   }
   if (enable_shader_write_usage) {
     desc.usage |= impeller::TextureUsage::kShaderWrite;
+  }
+  if (enable_mipmap) {
+    desc.mip_count = desc.size.MipCount();
   }
   switch (sample_count) {
     case 1:

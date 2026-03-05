@@ -25,6 +25,8 @@ class ShaderBundleData {
     size_t element_size_in_bytes = 0u;
     size_t total_size_in_bytes = 0u;
     std::optional<size_t> array_elements = std::nullopt;
+    fb::shaderbundle::ShaderFloatType float_type =
+        fb::shaderbundle::ShaderFloatType::kUnknown;
   };
 
   struct ShaderUniformStruct {

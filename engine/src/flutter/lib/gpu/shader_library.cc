@@ -124,6 +124,28 @@ static impeller::ShaderType FromUniformType(
   }
 }
 
+static std::optional<impeller::ShaderFloatType> FromFloatType(
+    impeller::fb::shaderbundle::ShaderFloatType float_type) {
+  switch (float_type) {
+    case impeller::fb::shaderbundle::ShaderFloatType::kFloat:
+      return impeller::ShaderFloatType::kFloat;
+    case impeller::fb::shaderbundle::ShaderFloatType::kVec2:
+      return impeller::ShaderFloatType::kVec2;
+    case impeller::fb::shaderbundle::ShaderFloatType::kVec3:
+      return impeller::ShaderFloatType::kVec3;
+    case impeller::fb::shaderbundle::ShaderFloatType::kVec4:
+      return impeller::ShaderFloatType::kVec4;
+    case impeller::fb::shaderbundle::ShaderFloatType::kMat2:
+      return impeller::ShaderFloatType::kMat2;
+    case impeller::fb::shaderbundle::ShaderFloatType::kMat3:
+      return impeller::ShaderFloatType::kMat3;
+    case impeller::fb::shaderbundle::ShaderFloatType::kMat4:
+      return impeller::ShaderFloatType::kMat4;
+    case impeller::fb::shaderbundle::ShaderFloatType::kUnknown:
+      return std::nullopt;
+  }
+}
+
 static size_t SizeOfInputType(
     impeller::fb::shaderbundle::InputDataType input_type) {
   switch (input_type) {
@@ -231,6 +253,7 @@ fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromFlatbuffer(
                     struct_member->array_elements() == 0
                         ? std::optional<size_t>(std::nullopt)
                         : static_cast<size_t>(struct_member->array_elements()),
+                .float_type = FromFloatType(struct_member->float_type()),
             });
           }
         }
