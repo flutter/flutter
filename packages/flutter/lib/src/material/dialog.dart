@@ -1393,9 +1393,130 @@ Widget _buildMaterialDialogTransitions(
   return child;
 }
 
+// Wrapper that makes dialogs fill the entire window without insets or rounded corners.
+class _FullWindowDialogWrapper extends StatelessWidget {
+  const _FullWindowDialogWrapper({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final DialogThemeData windowDialogTheme = DialogTheme.of(context).copyWith(
+      insetPadding: EdgeInsets.zero,
+      shape: const RoundedRectangleBorder(), // No rounded corners.
+      alignment: Alignment.topLeft, // Align to top-left so it fills from corner.
+      constraints:
+          const BoxConstraints.expand(), // Remove default constraints so dialog can expand to fill available space.
+    );
+
+    return DialogTheme(
+      data: windowDialogTheme,
+      child: MediaQuery.removeViewInsets(
+        removeLeft: true,
+        removeTop: true,
+        removeRight: true,
+        removeBottom: true,
+        context: context,
+        child: MediaQuery.removeViewPadding(
+          removeLeft: true,
+          removeTop: true,
+          removeRight: true,
+          removeBottom: true,
+          context: context,
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+// Provides a pop callback that dialog content can use.
+// Wraps content to provide a Navigator-like interface for popping.
+class _DialogPopScope extends StatelessWidget {
+  const _DialogPopScope({required this.child, this.onPop});
+
+  final Widget child;
+  final void Function(Object?)? onPop;
+
+  @override
+  Widget build(BuildContext context) {
+    // Wrap with PopupScope to handle back button and provide popNavigator function.
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, Object? result) {
+        if (!didPop) {
+          onPop?.call(result);
+        }
+      },
+      child: Builder(
+        builder: (BuildContext context) {
+          // Provide a way for child widgets to pop using Navigator.maybePop(context)
+          // by wrapping in a minimal Navigator.
+          return _NavigatorShim(onPop: onPop, child: child);
+        },
+      ),
+    );
+  }
+}
+
+// Creates a minimal Navigator that intercepts pop calls.
+class _NavigatorShim extends StatelessWidget {
+  const _NavigatorShim({required this.child, this.onPop});
+
+  final void Function(Object?)? onPop;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    // Create a Navigator with a single page that contains the child
+    // This allows Navigator.pop(context) calls from within the dialog to work.
+    // Wrap in HeroControllerScope.none() to prevent this Navigator from
+    // inheriting the outer HeroController, which would cause a "HeroController
+    // can not be shared by multiple Navigators" assertion.
+    return HeroControllerScope.none(
+      child: Navigator(
+        pages: <Page<void>>[_DialogContentPage(child: child)],
+        onPopPage: (Route<dynamic> route, dynamic result) {
+          // When the page is popped, call our onPop callback
+          onPop?.call(result);
+          // Return false to prevent the route from being removed from the Navigator
+          // (since we're handling the pop externally by closing the dialog window).
+          return false;
+        },
+      ),
+    );
+  }
+}
+
+// A simple page for the dialog content.
+class _DialogContentPage extends Page<void> {
+  const _DialogContentPage({required this.child});
+
+  final Widget child;
+
+  @override
+  Route<void> createRoute(BuildContext context) {
+    return PageRouteBuilder<void>(
+      settings: this,
+      pageBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+          ) {
+            return child;
+          },
+      transitionDuration: Duration.zero,
+      reverseTransitionDuration: Duration.zero,
+    );
+  }
+}
+
 /// Displays a Material dialog above the current contents of the app, with
 /// Material entrance and exit animations, modal barrier color, and modal
 /// barrier behavior (dialog is dismissible with a tap on the barrier).
+///
+/// {@macro flutter.widgets.showRawDialog.windowing}
 ///
 /// This function takes a `builder` which typically builds a [Dialog] widget.
 /// Content below the dialog is dimmed with a [ModalBarrier]. The widget
@@ -1403,17 +1524,20 @@ Widget _buildMaterialDialogTransitions(
 /// [showDialog] is originally called from. Use a [StatefulBuilder] or a
 /// custom [StatefulWidget] if the dialog needs to update dynamically.
 ///
-/// The `context` argument is used to look up the [Navigator] and [Theme] for
-/// the dialog. It is only used when the method is called. Its corresponding
-/// widget can be safely removed from the tree before the dialog is closed.
+/// {@macro flutter.widgets.showRawDialog.context}
 ///
 /// The `barrierDismissible` argument is used to indicate whether tapping on the
 /// barrier will dismiss the dialog. It is `true` by default and can not be `null`.
+/// If windowing is enabled via `flutter config --enable-windowing`,then this
+/// argument is ignored as dialogs are displayed in their own windows which do
+/// not have a modal barrier.
 ///
 /// The `barrierColor` argument is used to specify the color of the modal
 /// barrier that darkens everything below the dialog. If `null` the `barrierColor`
 /// field from `DialogThemeData` is used. If that is `null` the default color
-/// `Colors.black54` is used.
+/// `Colors.black54` is used. If windowing is enabled via `flutter config
+/// --enable-windowing`, then this  argument is ignored as dialogs are displayed
+/// in their own windows which do not have a modal barrier.
 ///
 /// The `useSafeArea` argument is used to indicate if the dialog should only
 /// display in 'safe' areas of the screen not used by the operating system
@@ -1421,24 +1545,26 @@ Widget _buildMaterialDialogTransitions(
 /// the dialog will not overlap operating system areas. If it is set to `false`
 /// the dialog will only be constrained by the screen size. It can not be `null`.
 ///
-/// The `useRootNavigator` argument is used to determine whether to push the
-/// dialog to the [Navigator] furthest from or nearest to the given `context`.
-/// By default, `useRootNavigator` is `true` and the dialog route created by
-/// this method is pushed to the root navigator. It can not be `null`.
+/// {@macro flutter.widgets.showRawDialog.navigator}
 ///
-/// The `routeSettings` argument is passed to [showGeneralDialog],
-/// see [RouteSettings] for details.
+/// {@macro flutter.widgets.showRawDialog.routeSettings}
 ///
 /// If not null, the `traversalEdgeBehavior` argument specifies the transfer of
 /// focus beyond the first and the last items of the dialog route. By default,
 /// [TraversalEdgeBehavior.closedLoop] is used, because it's typical for dialogs
 /// to allow users to cycle through dialog widgets without leaving the dialog.
+/// If windowing is enabled via `flutter config --enable-windowing`, then this
+/// argument is ignored as dialogs are displayed in their own windows which
+/// manage focus traversal independently.
 ///
 /// {@template flutter.material.dialog.requestFocus}
 /// The `requestFocus` argument is used to specify whether the dialog should
 /// request focus when shown.
 /// {@endtemplate}
 /// {@macro flutter.widgets.navigator.Route.requestFocus}
+/// If windowing is enabled via `flutter config --enable-windowing`, then this
+/// argument is ignored as dialogs are displayed in their own windows which are
+/// focused by the windowing system.
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
@@ -1515,27 +1641,58 @@ Future<T?> showDialog<T>({
     from: context,
     to: Navigator.of(context, rootNavigator: useRootNavigator).context,
   );
+  final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
 
-  return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(
-    DialogRoute<T>(
-      context: context,
-      builder: builder,
-      barrierColor:
-          barrierColor ??
-          DialogTheme.of(context).barrierColor ??
-          Theme.of(context).dialogTheme.barrierColor ??
-          Colors.black54,
-      barrierDismissible: barrierDismissible,
-      barrierLabel: barrierLabel,
-      useSafeArea: useSafeArea,
-      settings: routeSettings,
-      themes: themes,
-      anchorPoint: anchorPoint,
-      traversalEdgeBehavior: traversalEdgeBehavior ?? TraversalEdgeBehavior.closedLoop,
-      requestFocus: requestFocus,
-      animationStyle: animationStyle,
-      fullscreenDialog: fullscreenDialog,
-    ),
+  return showRawDialog(
+    context: context,
+    useRootNavigator: useRootNavigator,
+    routeSettings: routeSettings,
+    fullscreenDialog: fullscreenDialog,
+    routeBuilder: (BuildContext routeContext, WidgetBuilder _) {
+      return DialogRoute<T>(
+        context: routeContext,
+        builder: builder,
+        barrierColor:
+            barrierColor ??
+            DialogTheme.of(context).barrierColor ??
+            Theme.of(context).dialogTheme.barrierColor ??
+            Colors.black54,
+        barrierDismissible: barrierDismissible,
+        barrierLabel: barrierLabel,
+        useSafeArea: useSafeArea,
+        settings: routeSettings,
+        themes: themes,
+        anchorPoint: anchorPoint,
+        traversalEdgeBehavior: traversalEdgeBehavior ?? TraversalEdgeBehavior.closedLoop,
+        requestFocus: requestFocus,
+        animationStyle: animationStyle,
+        fullscreenDialog: fullscreenDialog,
+      );
+    },
+    builder: (BuildContext routeContext) {
+      // Wrap the build dialog with the theme, text direction, and media
+      // query data from the caller's context (not the navigator's context,
+      // which would resolve to the root app theme and override captured themes).
+      final TextDirection textDirection = Directionality.of(context);
+      final ThemeData themeData = Theme.of(context);
+      final MediaQueryData mediaQuery = MediaQuery.of(context);
+      final Widget dialogContent = _DialogPopScope(
+        onPop: Navigator.of(navigator.context).pop,
+        child: Builder(
+          builder: (BuildContext innerContext) {
+            return _FullWindowDialogWrapper(child: builder(innerContext));
+          },
+        ),
+      );
+
+      return Directionality(
+        textDirection: textDirection,
+        child: Theme(
+          data: themeData,
+          child: MediaQuery(data: mediaQuery, child: dialogContent),
+        ),
+      );
+    },
   );
 }
 
