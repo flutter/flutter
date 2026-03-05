@@ -698,9 +698,10 @@ class PageView extends StatefulWidget {
     this.scrollBehavior,
     this.padEnds = true,
   }) : assert(
-         !allowImplicitScrolling || scrollCacheExtent == null || scrollCacheExtent.value > 0.0,
-         'If allowImplicitScrolling is true, scrollCacheExtent must be greater than 0.0 '
-         'to ensure that the next page is cached and available for accessibility scrolling.',
+         scrollCacheExtent == null || (scrollCacheExtent.value > 0.0) == allowImplicitScrolling,
+         'scrollCacheExtent and allowImplicitScrolling must be consistent: '
+         'scrollCacheExtent must be greater than 0.0 when allowImplicitScrolling is true, '
+         'and must be 0.0 when allowImplicitScrolling is false.',
        ),
        scrollCacheExtent =
            scrollCacheExtent ?? ScrollCacheExtent.viewport(allowImplicitScrolling ? 1.0 : 0.0),
@@ -751,9 +752,10 @@ class PageView extends StatefulWidget {
     this.scrollBehavior,
     this.padEnds = true,
   }) : assert(
-         !allowImplicitScrolling || scrollCacheExtent == null || scrollCacheExtent.value > 0.0,
-         'If allowImplicitScrolling is true, scrollCacheExtent must be greater than 0.0 '
-         'to ensure that the next page is cached and available for accessibility scrolling.',
+         scrollCacheExtent == null || (scrollCacheExtent.value > 0.0) == allowImplicitScrolling,
+         'scrollCacheExtent and allowImplicitScrolling must be consistent: '
+         'scrollCacheExtent must be greater than 0.0 when allowImplicitScrolling is true, '
+         'and must be 0.0 when allowImplicitScrolling is false.',
        ),
        scrollCacheExtent =
            scrollCacheExtent ?? ScrollCacheExtent.viewport(allowImplicitScrolling ? 1.0 : 0.0),
@@ -792,9 +794,10 @@ class PageView extends StatefulWidget {
     this.scrollBehavior,
     this.padEnds = true,
   }) : assert(
-         !allowImplicitScrolling || scrollCacheExtent == null || scrollCacheExtent.value > 0.0,
-         'If allowImplicitScrolling is true, scrollCacheExtent must be greater than 0.0 '
-         'to ensure that the next page is cached and available for accessibility scrolling.',
+         scrollCacheExtent == null || (scrollCacheExtent.value > 0.0) == allowImplicitScrolling,
+         'scrollCacheExtent and allowImplicitScrolling must be consistent: '
+         'scrollCacheExtent must be greater than 0.0 when allowImplicitScrolling is true, '
+         'and must be 0.0 when allowImplicitScrolling is false.',
        ),
        scrollCacheExtent =
            scrollCacheExtent ?? ScrollCacheExtent.viewport(allowImplicitScrolling ? 1.0 : 0.0);
