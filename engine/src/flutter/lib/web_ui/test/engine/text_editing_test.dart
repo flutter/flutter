@@ -72,6 +72,7 @@ Future<void> testMain() async {
     cleanTestFlags();
     clearBackUpDomElementIfExists();
     await waitForTextStrategyStopPropagation();
+    dormantForms.clear();
   });
 
   group('EditableTextStyle', () {
@@ -3200,15 +3201,28 @@ Future<void> testMain() async {
 
   group('EngineAutofillForm', () {
     test('validate multi element form', () {
-      final List<dynamic> fields = createFieldValues(
+      final List<Map<String, Object?>> fields = createFieldValues(
         <String>['username', 'password', 'newPassword'],
         <String>['field1', 'field2', 'field3'],
       );
+      final focusedAutofillMap = fields.first['autofill'] as Map<String, Object?>;
       final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
         kImplicitViewId,
-        createAutofillInfo('username', 'field1'),
+        focusedAutofillMap,
         fields,
       )!;
+
+      expect(autofillForm.formIdentifier, 'field1*field2*field3');
+
+      // Elements are not created yet, until the form is woken up.
+      expect(autofillForm.elements, isEmpty);
+      expect(autofillForm.items, hasLength(3));
+      expect(autofillForm.formElement, isNull);
+
+      final focusedAutofill = AutofillInfo.fromFrameworkMessage(focusedAutofillMap);
+      final focusedElement = createDomElement('input') as DomHTMLInputElement;
+
+      autofillForm.wakeUp(focusedElement, focusedAutofill);
 
       // Number of elements if number of fields sent to the constructor minus
       // one (for the focused text element).
@@ -3216,44 +3230,46 @@ Future<void> testMain() async {
       expect(autofillForm.items, hasLength(3));
       expect(autofillForm.formElement, isNotNull);
 
-      expect(autofillForm.formIdentifier, 'field1*field2*field3');
-
-      // TODO(mdebbar): Things are different now. DOM elements aren't created immediately like they used to.
       final DomHTMLFormElement form = autofillForm.formElement!;
       // Note that we also add a submit button. Therefore the form element has
-      // 3 child nodes.
-      expect(form.childNodes, hasLength(3));
+      // 4 child nodes.
+      expect(form.childNodes, hasLength(4));
 
-      final firstElement = form.childNodes.toList()[0] as DomHTMLInputElement;
+      final usernameElement = form.childNodes.toList()[0] as DomHTMLInputElement;
+      expect(usernameElement, focusedElement);
+
+      final passwordElement = form.childNodes.toList()[1] as DomHTMLInputElement;
       // Autofill value is applied to the element.
-      expect(firstElement.name, BrowserAutofillHints.instance.flutterToEngine('password'));
-      expect(firstElement.id, BrowserAutofillHints.instance.flutterToEngine('password'));
-      expect(firstElement.type, 'password');
+      expect(passwordElement.name, BrowserAutofillHints.instance.flutterToEngine('password'));
+      expect(passwordElement.id, BrowserAutofillHints.instance.flutterToEngine('password'));
+      expect(passwordElement.type, 'password');
       if (ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox) {
-        expect(firstElement.name, BrowserAutofillHints.instance.flutterToEngine('password'));
+        expect(passwordElement.name, BrowserAutofillHints.instance.flutterToEngine('password'));
       } else {
         expect(
-          firstElement.autocomplete,
+          passwordElement.autocomplete,
           BrowserAutofillHints.instance.flutterToEngine('password'),
         );
       }
 
       // Editing state is applied to the element.
-      expect(firstElement.value, 'Test');
-      expect(firstElement.selectionStart, 0);
-      expect(firstElement.selectionEnd, 0);
+      expect(passwordElement.value, 'Test');
+      // When we only set the `value` without changing selection, the browser
+      // automatically sets the selection to the end of the value.
+      expect(passwordElement.selectionStart, 4);
+      expect(passwordElement.selectionEnd, 4);
 
       // Element is hidden.
-      final DomCSSStyleDeclaration css = firstElement.style;
+      final DomCSSStyleDeclaration css = passwordElement.style;
       expect(css.color, 'transparent');
       expect(css.backgroundColor, 'transparent');
 
       // For `blink` and `webkit` browser engines the overlay would be hidden.
       if (ui_web.browser.browserEngine == ui_web.BrowserEngine.blink ||
           ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit) {
-        expect(firstElement.classList.contains('transparentTextEditing'), isTrue);
+        expect(passwordElement.classList.contains('transparentTextEditing'), isTrue);
       } else {
-        expect(firstElement.classList.contains('transparentTextEditing'), isFalse);
+        expect(passwordElement.classList.contains('transparentTextEditing'), isFalse);
       }
     });
 
@@ -3271,14 +3287,15 @@ Future<void> testMain() async {
       expect(autofillForm.formIdentifier, 'aabbcc*jjkkll*zzyyxx');
     });
 
-    test('place and store form', () {
+    test('form wakeUp and goDormant', () {
       expect(defaultTextEditingRoot.querySelectorAll('form'), isEmpty);
 
       final List<dynamic> fields = createFieldValues(
         <String>['username', 'password', 'newPassword'],
         <String>['field1', 'fields2', 'field3'],
       );
-      final Map<String, dynamic> focusedAutofillMap = createAutofillInfo('username', 'field1');
+      final Map<String, dynamic> focusedAutofillMap =
+          fields.first['autofill'] as Map<String, dynamic>;
       final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
         kImplicitViewId,
         focusedAutofillMap,
@@ -3289,28 +3306,58 @@ Future<void> testMain() async {
       final focusedAutofill = AutofillInfo.fromFrameworkMessage(focusedAutofillMap);
       autofillForm.wakeUp(testInputElement, focusedAutofill);
 
-      // The focused element is appended to the form, form also has the button
-      // so in total it shoould have 4 elements.
+      // The focused element is appended to the form. The form also has the submit button
+      // so in total it should have 4 elements.
       final DomHTMLFormElement form = autofillForm.formElement!;
       expect(form.childNodes, hasLength(4));
 
       final formOnDom = defaultTextEditingRoot.querySelector('form')! as DomHTMLFormElement;
       // Form is attached to the DOM.
-      expect(form, equals(formOnDom));
+      expect(form, formOnDom);
 
       autofillForm.goDormant();
       expect(defaultTextEditingRoot.querySelectorAll('form'), isNotEmpty);
       expect(dormantForms, hasLength(1));
       expect(dormantForms, {autofillForm.formIdentifier: autofillForm});
+
+      final EngineAutofillForm autofillForm2 = EngineAutofillForm.fromFrameworkMessage(
+        kImplicitViewId,
+        focusedAutofillMap,
+        fields,
+      )!;
+
+      expect(autofillForm2.formElement, isNull);
+      expect(autofillForm2.elements, isEmpty);
+
+      // The form identifier should be the same.
+      expect(autofillForm2.formIdentifier, autofillForm.formIdentifier);
+
+      // Waking up should reuse elements from the dormant form.
+      autofillForm2.wakeUp(testInputElement, focusedAutofill);
+      expect(autofillForm2.formElement, autofillForm.formElement);
+      expect(autofillForm2.elements, autofillForm.elements);
     });
 
     test('Validate single element form', () {
       final List<dynamic> fields = createFieldValues(<String>['username'], <String>['field1']);
+      final Map<String, dynamic> focusedAutofillMap =
+          fields.first['autofill'] as Map<String, dynamic>;
+
       final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
         kImplicitViewId,
-        createAutofillInfo('username', 'field1'),
+        focusedAutofillMap,
         fields,
       )!;
+
+      expect(autofillForm.elements, isEmpty);
+      expect(autofillForm.items, hasLength(1));
+      expect(autofillForm.items, contains('field1'));
+      expect(autofillForm.items['field1']!.autofillInfo.autofillHint, 'username');
+      expect(autofillForm.formElement, isNull);
+
+      final DomHTMLInputElement testInputElement = createDomHTMLInputElement();
+      final focusedAutofill = AutofillInfo.fromFrameworkMessage(focusedAutofillMap);
+      autofillForm.wakeUp(testInputElement, focusedAutofill);
 
       // The focused element is the only field. Form should have a single element after
       // the initialization.
@@ -3321,10 +3368,9 @@ Future<void> testMain() async {
       expect(autofillForm.items['field1']!.autofillInfo.autofillHint, 'username');
       expect(autofillForm.formElement, isNotNull);
 
-      // TODO(mdebbar): Things are different now. DOM elements aren't created immediately like they used to.
       final DomHTMLFormElement form = autofillForm.formElement!;
       // Submit button is added to the form.
-      expect(form.childNodes, isNotEmpty);
+      expect(form.childNodes, hasLength(2));
       final inputElement = form.childNodes.toList().last as DomHTMLInputElement;
       expect(inputElement.type, 'submit');
       expect(inputElement.tabIndex, -1, reason: 'The input should not be reachable by keyboard');
@@ -3344,7 +3390,7 @@ Future<void> testMain() async {
       expect(autofillForm, isNull);
     });
 
-    test('placeForm() should place element in correct position', () {
+    test('wakeUp() should place element in correct position', () {
       final Map<String, dynamic> focusedAutofillMap = createAutofillInfo('email', 'field1');
       final List<dynamic> fields = createFieldValues(
         <String>['email', 'username', 'password'],
@@ -3356,17 +3402,8 @@ Future<void> testMain() async {
         fields,
       )!;
 
-      expect(autofillForm.elements, hasLength(2));
-
-      // TODO(mdebbar): Things are different now. DOM elements aren't created immediately like they used to.
-      var formChildNodes =
-          autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
-
-      // Only username, password, submit nodes are created
-      expect(formChildNodes, hasLength(3));
-      expect(formChildNodes[0].name, 'username');
-      expect(formChildNodes[1].name, 'current-password');
-      expect(formChildNodes[2].type, 'submit');
+      expect(autofillForm.formElement, isNull);
+      expect(autofillForm.elements, isEmpty);
 
       final DomHTMLInputElement testInputElement = createDomHTMLInputElement();
       testInputElement.name = 'email';
@@ -3374,19 +3411,73 @@ Future<void> testMain() async {
       autofillForm.wakeUp(testInputElement, focusedAutofill);
 
       expect(autofillForm.elements['field1'], testInputElement);
-      expect(autofillForm.items['field1'], focusedAutofill);
+      expect(autofillForm.items['field1']!.autofillInfo.autofillHint, focusedAutofill.autofillHint);
+      expect(
+        autofillForm.items['field1']!.autofillInfo.uniqueIdentifier,
+        focusedAutofill.uniqueIdentifier,
+      );
 
-      formChildNodes = autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
+      final formChildNodes =
+          autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
 
       // email node should be placed before username
       expect(formChildNodes, hasLength(4));
-
       expect(formChildNodes[0].name, 'email');
       expect(formChildNodes[0], testInputElement);
-
       expect(formChildNodes[1].name, 'username');
       expect(formChildNodes[2].name, 'current-password');
       expect(formChildNodes[3].type, 'submit');
+    });
+
+    test('multiple wakeUp() calls', () {
+      final List<dynamic> fields = createFieldValues(
+        <String>['email', 'password'],
+        <String>['field1', 'field2'],
+      );
+      final Map<String, dynamic> emailAutofillMap = createAutofillInfo('email', 'field1');
+      final Map<String, dynamic> passwordAutofillMap = createAutofillInfo('password', 'field2');
+      final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+        kImplicitViewId,
+        emailAutofillMap,
+        fields,
+      )!;
+
+      expect(autofillForm.formElement, isNull);
+      expect(autofillForm.elements, isEmpty);
+
+      final emailFocusedElement = createDomElement('input') as DomHTMLInputElement;
+      final emailAutofill = AutofillInfo.fromFrameworkMessage(emailAutofillMap);
+      autofillForm.wakeUp(emailFocusedElement, emailAutofill);
+
+      expect(autofillForm.formElement, isNotNull);
+      expect(autofillForm.elements, hasLength(2));
+
+      expect(autofillForm.elements['field1'], emailFocusedElement);
+      expect(autofillForm.items['field1']!.autofillInfo.autofillHint, emailAutofill.autofillHint);
+      expect(
+        autofillForm.items['field1']!.autofillInfo.uniqueIdentifier,
+        emailAutofill.uniqueIdentifier,
+      );
+
+      final formElement = autofillForm.formElement;
+
+      final passwordFocusedElement = createDomElement('input') as DomHTMLInputElement;
+      final passwordAutofill = AutofillInfo.fromFrameworkMessage(passwordAutofillMap);
+      autofillForm.wakeUp(passwordFocusedElement, passwordAutofill);
+
+      // The form element should be the same as before.
+      expect(autofillForm.formElement, formElement);
+
+      expect(autofillForm.elements, hasLength(2));
+      expect(autofillForm.elements['field2'], passwordFocusedElement);
+      expect(
+        autofillForm.items['field2']!.autofillInfo.autofillHint,
+        passwordAutofill.autofillHint,
+      );
+      expect(
+        autofillForm.items['field2']!.autofillInfo.uniqueIdentifier,
+        passwordAutofill.uniqueIdentifier,
+      );
     });
 
     test(
@@ -3396,16 +3487,22 @@ Future<void> testMain() async {
           <String>['email', 'username', 'password'],
           <String>['field1', 'field2', 'field3'],
         );
+        final emailAutofillMap = fields.first['autofill'] as Map<String, Object?>;
         final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
           kImplicitViewId,
-          createAutofillInfo('email', 'field1'),
+          emailAutofillMap,
           fields,
         )!;
-        // TODO(mdebbar): Things are different now. DOM elements aren't created immediately like they used to.
+
+        final emailFocusedElement = createDomElement('input') as DomHTMLInputElement;
+        final emailAutofill = AutofillInfo.fromFrameworkMessage(emailAutofillMap);
+        autofillForm.wakeUp(emailFocusedElement, emailAutofill);
+
+        final formElement = autofillForm.formElement;
         final formChildNodes =
             autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
-        final DomHTMLInputElement username = formChildNodes[0];
-        final DomHTMLInputElement password = formChildNodes[1];
+        final DomHTMLInputElement username = formChildNodes[1];
+        final DomHTMLInputElement password = formChildNodes[2];
 
         expect(username.name, 'username');
         expect(password.name, 'current-password');
@@ -4226,8 +4323,8 @@ Map<String, dynamic> createAutofillInfo(String? hint, String uniqueId, {String? 
       },
     };
 
-List<dynamic> createFieldValues(List<String> hints, List<String> uniqueIds) {
-  final testFields = <dynamic>[];
+List<Map<String, Object?>> createFieldValues(List<String> hints, List<String> uniqueIds) {
+  final testFields = <Map<String, Object?>>[];
 
   expect(hints.length, equals(uniqueIds.length));
 
@@ -4238,8 +4335,8 @@ List<dynamic> createFieldValues(List<String> hints, List<String> uniqueIds) {
   return testFields;
 }
 
-Map<String, dynamic> createOneFieldValue(String hint, String uniqueId) => <String, dynamic>{
-  'inputType': <String, dynamic>{'name': 'TextInputType.text', 'signed': null, 'decimal': null},
+Map<String, Object?> createOneFieldValue(String hint, String uniqueId) => <String, Object?>{
+  'inputType': <String, Object?>{'name': 'TextInputType.text', 'signed': null, 'decimal': null},
   'textCapitalization': 'TextCapitalization.none',
   'autofill': createAutofillInfo(hint, uniqueId),
 };
