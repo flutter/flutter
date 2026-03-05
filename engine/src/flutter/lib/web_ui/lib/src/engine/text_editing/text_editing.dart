@@ -366,7 +366,7 @@ class EngineAutofillForm {
     formElement.action = '#';
     formElement.addEventListener('submit', preventDefaultListener);
 
-    // We need to explicitly disable pointer events on the form in Safari Desktop,
+    // We need to explicitly disable pointer events on the form in Safari Desktop and iOS,
     // so that we don't have pointer event collisions if users hover over or click
     // into the invisible autofill elements within the form.
     _styleAutofillElements(formElement, shouldDisablePointerEvents: _isSafariStrategy);
