@@ -37,6 +37,8 @@ SurfaceTextureExternalTextureGLImpeller::GetTextureImage(PaintContext& context,
   // null), we must rasterize the OES texture into a standard 2D texture because
   // OES textures report a 1x1 size and lack UV matrix support in standard
   // Impeller shaders.
+  // See also:
+  // https://registry.khronos.org/OpenGL/extensions/OES/OES_EGL_image_external.txt
   if (context.canvas == nullptr && context.aiks_context != nullptr) {
     auto texture = image->impeller_texture();
     if (!texture) {
