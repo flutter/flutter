@@ -944,17 +944,31 @@ abstract class _DarwinViewState<
 
   Future<ControllerT> createNewViewController(int id);
 
-  Future<void> _onFocusChange(bool isFocused, ControllerT controller) async {
+  void _onFocusChange(bool isFocused, ControllerT controller) {
     if (!isFocused) {
       // Unlike Android, we do not need to send "clearFocus" channel message
       // to the engine, because focusing on another view will automatically
       // cancel the focus on the previously focused platform view.
       return;
     }
-    await SystemChannels.textInput.invokeMethod<void>(
+    SystemChannels.textInput
+        .invokeMethod<void>(
       'TextInput.setPlatformViewClient',
       <String, dynamic>{'platformViewId': controller.id},
-    );
+    )
+        .then(
+          (_) {},
+          onError: (Object error, StackTrace stack) {
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stack,
+                library: 'widgets library',
+                context: ErrorDescription('while setting the platform view client'),
+              ),
+            );
+          },
+        );
   }
 }
 

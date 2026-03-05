@@ -47,6 +47,63 @@ void main() {
       );
     });
 
+    testWidgets('Focus change reports error when channel fails', (WidgetTester tester) async {
+      final viewsController = FakeIosPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      final FlutterExceptionHandler? oldOnError = FlutterError.onError;
+      final errors = <FlutterErrorDetails>[];
+      FlutterError.onError = (FlutterErrorDetails details) {
+        errors.add(details);
+      };
+
+      try {
+        await tester.pumpWidget(
+          const Center(
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final Focus focusWidget = tester.widget<Focus>(
+          find.descendant(of: find.byType(UiKitView), matching: find.byType(Focus)),
+        );
+        final FocusNode focusNode = focusWidget.focusNode!;
+
+        // Mock TextInput.setPlatformViewClient failure
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.textInput,
+          (MethodCall methodCall) async {
+            if (methodCall.method == 'TextInput.setPlatformViewClient') {
+              throw Exception('Channel failed');
+            }
+            return null;
+          },
+        );
+
+        focusNode.requestFocus();
+        await tester.pump();
+
+        expect(errors, hasLength(1));
+        expect(errors.single.exception, isA<Exception>());
+        expect(errors.single.exception.toString(), contains('Channel failed'));
+        expect(
+          errors.single.context.toString(),
+          contains('while setting the platform view client'),
+        );
+      } finally {
+        FlutterError.onError = oldOnError;
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.textInput,
+          null,
+        );
+      }
+    });
+
     testWidgets('Create Android view with params', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final viewsController = FakeAndroidPlatformViewsController();
