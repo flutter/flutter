@@ -1637,4 +1637,84 @@ void main() {
       }),
     );
   });
+
+  testWidgets(
+    'does not crash when selection starting above a nested scrollable is dragged past the boundary',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/181169.
+      //
+      // When selection starts above an outer scrollable (so the outer
+      // _ScrollableSelectionContainerDelegate sets _selectionStartsInScrollable=false),
+      // the outer maps positions below its boundary to Offset.infinite via
+      // _inferPositionRelatedToOrigin. That Offset.infinite event is then
+      // forwarded to the inner scrollable's delegate, which has
+      // _selectionStartsInScrollable=true (it received the outer's remapped
+      // origin as its first event). The inner delegate used to call
+      // startAutoScrollIfNecessary with an Offset.infinite drag rect, triggering
+      // an assertion failure inside EdgeDraggingAutoScroller.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectionArea(
+            selectionControls: materialTextSelectionControls,
+            child: Column(
+              children: <Widget>[
+                const Text('Header'),
+                Expanded(
+                  child: ListView(
+                    children: <Widget>[
+                      SizedBox(
+                        height: 300,
+                        child: ListView.builder(
+                          itemCount: 20,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Text('Inner item $index');
+                          },
+                        ),
+                      ),
+                      ...List<Widget>.generate(
+                        30,
+                        (int index) => Text('Outer item $index'),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Start selection on the Header text, which is above both scrollables.
+      // This causes the outer ListView delegate to set
+      // _selectionStartsInScrollable=false, while the inner ListView delegate
+      // receives the remapped origin (top of the outer list) as its first event
+      // and sets _selectionStartsInScrollable=true.
+      final RenderParagraph headerParagraph = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('Header'), matching: find.byType(RichText)),
+      );
+      final TestGesture gesture = await tester.startGesture(
+        textOffsetToPosition(headerParagraph, 0),
+        kind: ui.PointerDeviceKind.mouse,
+      );
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+
+      // Drag well past the bottom of the outer ListView. This triggers
+      // _inferPositionRelatedToOrigin to return Offset.infinite for the outer
+      // delegate, which is then forwarded to the inner delegate. Before the fix,
+      // the inner delegate would pass Offset.infinite to startAutoScrollIfNecessary,
+      // causing an assertion error in EdgeDraggingAutoScroller.
+      final Offset pastBottom =
+          tester.getBottomRight(find.byType(MaterialApp)) + const Offset(0, 200);
+      await gesture.moveTo(pastBottom);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(tester.takeException(), isNull);
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    },
+  );
 }
