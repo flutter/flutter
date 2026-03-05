@@ -302,8 +302,7 @@ TEST(MatrixTest, GetBasisXYScale2D) {
   );
   EXPECT_POINT_NEAR(m2.GetBasisX2D(), Vector2(2.0f, 3.0f));
   EXPECT_POINT_NEAR(m2.GetBasisY2D(), Vector2(5.0f, 7.0f));
-  // == (sqrt(13), sqrt(74))
-  EXPECT_POINT_NEAR(m2.GetBasisScaleXY(), Vector2(3.60555, 8.60233));
+  EXPECT_POINT_NEAR(m2.GetBasisScaleXY(), Vector2(sqrt(13.0f), sqrt(74.0f)));
 
   Matrix m3 = Matrix::MakeColumn(
       // clang-format off
@@ -315,8 +314,7 @@ TEST(MatrixTest, GetBasisXYScale2D) {
   );
   EXPECT_POINT_NEAR(m3.GetBasisX2D(), Vector2(2.0f, 3.0f));
   EXPECT_POINT_NEAR(m3.GetBasisY2D(), Vector2(5.0f, 7.0f));
-  // == (sqrt(13), sqrt(74))
-  EXPECT_POINT_NEAR(m3.GetBasisScaleXY(), Vector2(3.60555, 8.60233));
+  EXPECT_POINT_NEAR(m2.GetBasisScaleXY(), Vector2(sqrt(13.0f), sqrt(74.0f)));
 }
 
 TEST(MatrixTest, TranslateWithPerspective) {
