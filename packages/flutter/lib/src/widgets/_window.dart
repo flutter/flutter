@@ -1775,18 +1775,17 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   }
 }
 
-/// A listenable registry for windows.
+/// A registry used to render top-level windows.
+///
+/// The registry is often used to render top-level windows
+/// that are logically nested under a widget deep in the tree.
 ///
 /// The [WindowManager] provides a [WindowRegistry] to its descendents.
 ///
-/// Descendents of the manager may then use [WindowRegistry.maybeOf] to access the
-/// registry. With the registry, they may call [WindowRegistry.register] to
+/// Descendents of the manager can use [WindowRegistry.maybeOf] to access the
+/// registry. With the registry, they can call [WindowRegistry.register] to
 /// add a new window to the registry and [WindowRegistry.unregister] to remove
 /// a window from the registry.
-///
-/// The registry is particularly useful when deep descendents of the widget
-/// tree create windows which are logically nested under a particular widget
-/// while at the same time need to be rendered at the root of the widget tree.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 ///
@@ -1808,6 +1807,9 @@ class WindowRegistry extends ChangeNotifier {
   final List<WindowEntry> _windows = <WindowEntry>[];
 
   /// The list of registered windows.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
   List<WindowEntry> get windows => List<WindowEntry>.unmodifiable(_windows);
 
   /// Registers a window.
@@ -1913,7 +1915,7 @@ class WindowEntry {
   final WidgetBuilder builder;
 }
 
-/// The window manager provides a convient way to render windows
+/// The window manager provides a convenient way to render windows
 /// at the root of an application.
 ///
 /// Descendents of the [WindowManager] may access the [WindowRegistry] via
@@ -1955,13 +1957,7 @@ class WindowManager extends StatefulWidget {
 }
 
 class _WindowManagerState extends State<WindowManager> {
-  late final WindowRegistry _registry;
-
-  @override
-  void initState() {
-    super.initState();
-    _registry = WindowRegistry();
-  }
+  final WindowRegistry _registry = WindowRegistry();
 
   @override
   Widget build(BuildContext context) {

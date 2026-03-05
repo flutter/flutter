@@ -74,7 +74,6 @@ Future<T?> showRawDialog<T>({
   RouteSettings? routeSettings,
   bool fullscreenDialog = false,
 }) {
-  assert(_debugIsActive(context));
   assert(debugCheckHasWidgetsLocalizations(context));
 
   final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
@@ -114,24 +113,6 @@ Future<T?> showRawDialog<T>({
       );
 
   return navigator.push<T>(route);
-}
-
-// TODO(justinmc): This was copied from Material, is it needed?
-bool _debugIsActive(BuildContext context) {
-  if (context is Element && !context.debugIsActive) {
-    throw FlutterError.fromParts(<DiagnosticsNode>[
-      ErrorSummary('This BuildContext is no longer valid.'),
-      ErrorDescription(
-        'The showRawDialog function context parameter is a BuildContext that is no longer valid.',
-      ),
-      ErrorHint(
-        'This can commonly occur when the showRawDialog function is called after awaiting a Future. '
-        'In this situation the BuildContext might refer to a widget that has already been disposed during the await. '
-        'Consider using a parent context instead.',
-      ),
-    ]);
-  }
-  return true;
 }
 
 class _DialogWindowDelegate extends DialogWindowControllerDelegate {
