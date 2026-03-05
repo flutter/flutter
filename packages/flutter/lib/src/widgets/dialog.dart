@@ -65,7 +65,7 @@ typedef RouteBuilder<T> = Route<T> Function(BuildContext context, WidgetBuilder 
 ///
 /// See also:
 ///
-///  * [WindowManager], for more information on how to set up windowing.
+///  * `WindowManager`, for more information on how to set up windowing.
 Future<T?> showRawDialog<T>({
   required BuildContext context,
   required WidgetBuilder builder,
