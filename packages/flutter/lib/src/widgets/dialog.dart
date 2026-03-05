@@ -24,7 +24,7 @@ import 'routes.dart';
 
 /// A builder for a route that takes the build context and the widget intended
 /// to go inside the route as a parameter.
-typedef RouteBuilder<T> = Route<T> Function(BuildContext context, WidgetBuilder builder);
+typedef DialogRouteBuilder<T> = Route<T> Function(BuildContext context, WidgetBuilder builder);
 
 /// Displays a dialog over the contents of the app.
 ///
@@ -69,7 +69,7 @@ typedef RouteBuilder<T> = Route<T> Function(BuildContext context, WidgetBuilder 
 Future<T?> showRawDialog<T>({
   required BuildContext context,
   required WidgetBuilder builder,
-  RouteBuilder<T>? routeBuilder,
+  DialogRouteBuilder<T>? routeBuilder,
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
   bool fullscreenDialog = false,
