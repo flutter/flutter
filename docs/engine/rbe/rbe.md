@@ -248,7 +248,7 @@ This can be debugged by doing a local build with RBE turned off.
   (Mostly focused on Chrome and Android, so not all parts are relevant to
   Flutter.)
 * The version of RBE for local development is set in the DEPS file
-  [here](https://github.com/flutter/engine/blob/8578edf9c9393471ca9eab18e9154f0e6066dcb6/DEPS#L53).
+  [here](https://github.com/flutter/flutter/blob/e3852df571a4e313bdab85777ac13affcd089d8c/DEPS#L48).
   It needs to be manually rolled occasionally.
 * The version of RBE used by CI is set in a LUCI recipe
   [here](https://flutter.googlesource.com/recipes/+/be12675150183af68223f5fbc6e0f888a1139e79/recipe_modules/rbe/api.py#16).
