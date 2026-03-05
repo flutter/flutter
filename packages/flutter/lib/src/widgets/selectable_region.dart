@@ -36,6 +36,8 @@ import 'tap_region.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
 import 'text_selection_toolbar_anchors.dart';
+import 'notification_listener.dart';
+import 'scroll_notification.dart';
 
 // Examples can assume:
 // late GlobalKey key;
@@ -1775,12 +1777,12 @@ class SelectableRegionState extends State<SelectableRegion>
 
   /// The line height at the start of the current selection.
   double get startGlyphHeight {
-    return _selectionDelegate.value.startSelectionPoint!.lineHeight;
+    return _selectionDelegate.value.startSelectionPoint?.lineHeight ?? 0;
   }
 
   /// The line height at the end of the current selection.
   double get endGlyphHeight {
-    return _selectionDelegate.value.endSelectionPoint!.lineHeight;
+    return _selectionDelegate.value.endSelectionPoint?.lineHeight ?? 0;
   }
 
   /// Returns the local coordinates of the endpoints of the current selection.
@@ -1946,7 +1948,7 @@ class SelectableRegionState extends State<SelectableRegion>
     if (_webContextMenuEnabled) {
       result = PlatformSelectableRegionContextMenu(child: result);
     }
-    return TapRegion(
+    final tapRegion = TapRegion(
       groupId: SelectableRegion,
       onTapOutside: (PointerDownEvent event) {
         // To match the native web behavior, this selectable region is
@@ -1975,6 +1977,23 @@ class SelectableRegionState extends State<SelectableRegion>
           ),
         ),
       ),
+    );
+    return NotificationListener<ScrollEndNotification>(
+      onNotification: (notification) {
+        _updateSelectedContentIfNeeded();
+        _updateSelectionStatus();
+        final lastSelection = _lastSelectedContent;
+        if (lastSelection != null && lastSelection.plainText.isNotEmpty) {
+          _showHandles();
+          final selectionOverlay = _selectionOverlay;
+          if (selectionOverlay == null ||
+              !selectionOverlay.toolbarIsVisible) {
+            _showToolbar();
+          }
+        }
+        return false;
+      },
+      child: tapRegion,
     );
   }
 }
