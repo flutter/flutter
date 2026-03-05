@@ -327,6 +327,16 @@ class CocoaPods {
       return true;
     }
 
+    return podLockFilesOutdated(xcodeProject);
+  }
+
+  /// Return true if the pod lock files are outdated.
+  ///
+  /// This is true if:
+  ///  - Podfile.lock doesn't exist or is older than Podfile
+  ///  - Pods/Manifest.lock doesn't exist
+  ///  - Podfile.lock doesn't match Pods/Manifest.lock
+  static bool podLockFilesOutdated(XcodeBasedProject xcodeProject) {
     final File podfileFile = xcodeProject.podfile;
     final File podfileLockFile = xcodeProject.podfileLock;
     final File manifestLockFile = xcodeProject.podManifestLock;
