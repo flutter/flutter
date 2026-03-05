@@ -3159,6 +3159,14 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 }
 
 - (void)testFlutterPlatformViewTouchesEndedOrTouchesCancelledEventDoesNotFailTheGestureRecognizer {
+  // This test verifies a workaround for an Apple bug (flutter/flutter#136244) where the gesture
+  // recognizer gets stuck at UIGestureRecognizerStateFailed. Apple fixed this bug in iOS 26,
+  // so the workaround (and this test) is no longer needed on iOS 26+.
+  // See: https://github.com/flutter/flutter/issues/179907
+  if (@available(iOS 26.0, *)) {
+    return;
+  }
+
   flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
 
   flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
