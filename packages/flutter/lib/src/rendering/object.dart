@@ -6226,6 +6226,14 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
     final SemanticsNode node = cachedSemanticsNode!;
     children.removeWhere(shouldDrop);
+    final bool isSemanticsHidden =
+        configProvider.original.isHidden ||
+        (!(parentData?.mergeIntoParent ?? false) && geometry!.hidden);
+    if (configProvider.effective.isHidden != isSemanticsHidden) {
+      configProvider.updateConfig((SemanticsConfiguration config) {
+        config.isHidden = isSemanticsHidden;
+      });
+    }
     if (configProvider.effective.isSemanticBoundary) {
       renderObject.assembleSemanticsNode(node, configProvider.effective, children);
     } else {
@@ -6332,19 +6340,11 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   void _updateSemanticsNodeGeometry() {
     final SemanticsNode node = cachedSemanticsNode!;
     final _SemanticsGeometry nodeGeometry = geometry!;
-    final bool isSemanticsHidden =
-        configProvider.original.isHidden ||
-        (!(parentData?.mergeIntoParent ?? false) && nodeGeometry.hidden);
     node
       ..rect = nodeGeometry.rect
       ..transform = nodeGeometry.transform
       ..parentSemanticsClipRect = nodeGeometry.semanticsClipRect
       ..parentPaintClipRect = nodeGeometry.paintClipRect;
-    if (configProvider.effective.isHidden != isSemanticsHidden) {
-      configProvider.updateConfig((SemanticsConfiguration config) {
-        config.isHidden = isSemanticsHidden;
-      });
-    }
   }
 
   void _updateSiblingNodesGeometries() {
