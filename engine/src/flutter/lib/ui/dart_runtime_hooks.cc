@@ -64,10 +64,6 @@ static void InitDartInternal(Dart_Handle builtin_library, bool is_ui_isolate) {
 
   Dart_Handle setup_hooks = Dart_NewStringFromCString("_setupHooks");
 
-  Dart_Handle io_lib = Dart_LookupLibrary(ToDart("dart:io"));
-  result = Dart_Invoke(io_lib, setup_hooks, 0, NULL);
-  PropagateIfError(result);
-
   Dart_Handle isolate_lib = Dart_LookupLibrary(ToDart("dart:isolate"));
   result = Dart_Invoke(isolate_lib, setup_hooks, 0, NULL);
   PropagateIfError(result);
@@ -126,36 +122,6 @@ static void InitDartAsync(Dart_Handle builtin_library,
 #endif  // !FLUTTER_RELEASE
 }
 
-static void InitDartIO(Dart_Handle builtin_library,
-                       const std::string& script_uri) {
-  Dart_Handle io_lib = Dart_LookupLibrary(ToDart("dart:io"));
-  Dart_Handle platform_type =
-      Dart_GetNonNullableType(io_lib, ToDart("_Platform"), 0, nullptr);
-  if (!script_uri.empty()) {
-    Dart_Handle result = Dart_SetField(platform_type, ToDart("_nativeScript"),
-                                       ToDart(script_uri));
-    PropagateIfError(result);
-  }
-  // typedef _LocaleClosure = String Function();
-  Dart_Handle /* _LocaleClosure? */ locale_closure =
-      InvokeFunction(builtin_library, "_getLocaleClosure");
-  PropagateIfError(locale_closure);
-  //   static String Function()? _localeClosure;
-  Dart_Handle result =
-      Dart_SetField(platform_type, ToDart("_localeClosure"), locale_closure);
-  PropagateIfError(result);
-
-#if !FLUTTER_RELEASE
-  // Register dart:io service extensions used for network profiling.
-  Dart_Handle network_profiling_type =
-      Dart_GetNonNullableType(io_lib, ToDart("_NetworkProfiling"), 0, nullptr);
-  PropagateIfError(network_profiling_type);
-  result = Dart_Invoke(network_profiling_type,
-                       ToDart("_registerServiceExtension"), 0, nullptr);
-  PropagateIfError(result);
-#endif  // !FLUTTER_RELEASE
-}
-
 void DartRuntimeHooks::Install(bool is_ui_isolate,
                                bool enable_microtask_profiling,
                                const std::string& script_uri) {
@@ -163,7 +129,6 @@ void DartRuntimeHooks::Install(bool is_ui_isolate,
   InitDartInternal(builtin, is_ui_isolate);
   InitDartCore(builtin, script_uri);
   InitDartAsync(builtin, is_ui_isolate, enable_microtask_profiling);
-  InitDartIO(builtin, script_uri);
 }
 
 void DartRuntimeHooks::Logger_PrintDebugString(const std::string& message) {
