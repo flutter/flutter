@@ -447,11 +447,47 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     };
   }
 
+  double? _scrollDelta = 0.0;
+  double? _overscroll = 0.0;
+
   /// Handles drag offset changes for scroll update notifications.
   void _handleScrollUpdateNotification(ScrollUpdateNotification notification) {
+    final double delta = notification.scrollDelta ?? 0.0;
+    _scrollDelta = delta;
+
+    debugPrint(
+      'dragOffset: $_dragOffset, ScrollUpdateNotification: overscroll=$_overscroll, scrollDelta=$delta',
+    );
     if (_status == RefreshIndicatorStatus.drag || _status == RefreshIndicatorStatus.armed) {
-      _updateDragOffset(notification.metrics.axisDirection, notification.scrollDelta!);
-      _checkDragOffset(notification.metrics.viewportDimension, canBeDisarmed: false);
+      final ScrollPosition position = Scrollable.of(notification.context!).position;
+
+      if (delta != 0.0 && _overscroll != null && _overscroll!.abs() > 0.0) {
+        final bool isCanceling =
+            (notification.metrics.axisDirection == AxisDirection.down && delta > 0.0) ||
+            (notification.metrics.axisDirection == AxisDirection.up && delta < 0.0);
+
+        debugPrint('isCanceling: $isCanceling');
+
+        if (isCanceling && _dragOffset! > 0.0) {
+          final double consumedDelta = math.min(delta.abs(), _dragOffset!);
+          final double correction = delta > 0.0 ? consumedDelta : -consumedDelta;
+
+          debugPrint(
+            'dragOffset: $_dragOffset, delta: $delta, correction: $correction, consumedDelta: $consumedDelta',
+          );
+
+          position.correctBy(-correction);
+
+          _updateDragOffset(notification.metrics.axisDirection, correction);
+        } else {
+          _updateDragOffset(notification.metrics.axisDirection, delta);
+        }
+
+        _checkDragOffset(notification.metrics.viewportDimension, canBeDisarmed: true);
+      } else {
+        _updateDragOffset(notification.metrics.axisDirection, notification.scrollDelta!);
+        _checkDragOffset(notification.metrics.viewportDimension, canBeDisarmed: false);
+      }
     }
 
     if (_status == RefreshIndicatorStatus.armed && notification.dragDetails == null) {
@@ -466,6 +502,10 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   /// so this is only called on Android. On iOS, the refresh is triggered in response to a ScrollUpdateNotification
   /// when the scroll activity changes from a drag to a ballistic scroll.
   void _handleOverscrollNotification(OverscrollNotification notification) {
+    final double overscroll = notification.overscroll;
+    _overscroll = overscroll;
+    debugPrint('OverscrollNotification: overscroll=$overscroll, scrollDelta=$_scrollDelta');
+
     if (_status == RefreshIndicatorStatus.drag || _status == RefreshIndicatorStatus.armed) {
       _updateDragOffset(notification.metrics.axisDirection, notification.overscroll);
       _checkDragOffset(notification.metrics.viewportDimension);
@@ -474,13 +514,12 @@ class RefreshIndicatorState extends State<RefreshIndicator>
 
   /// Handles completion or cancellation of the drag gesture when scrolling ends.
   void _handleScrollEndNotification(ScrollEndNotification notification) {
+    _overscroll = null;
+    _scrollDelta = null;
     switch (_status) {
       case RefreshIndicatorStatus.armed:
-        if (_positionController.value < 1.0) {
-          _dismiss(RefreshIndicatorStatus.canceled);
-        } else {
-          _show();
-        }
+        _show();
+
       case RefreshIndicatorStatus.drag:
         _dismiss(RefreshIndicatorStatus.canceled);
       case RefreshIndicatorStatus.canceled:
@@ -539,7 +578,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     if (notification.depth != 0 || !notification.leading) {
       return false;
     }
-    if (_status == RefreshIndicatorStatus.drag) {
+    if (_status == RefreshIndicatorStatus.drag || _status == RefreshIndicatorStatus.armed) {
       notification.disallowIndicator();
       return true;
     }
@@ -583,6 +622,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     _positionController.value = clampDouble(newValue, 0.0, 1.0); // This triggers various rebuilds.
 
     // Transition from `drag` to `armed` if the drag offset exceeds the armed threshold, and back to `drag` if it goes below.
+    debugPrint('positionController.value: ${_positionController.value}, status: $_status');
     if (_status == RefreshIndicatorStatus.drag && _positionController.value >= _kArmedThreshold) {
       _status = RefreshIndicatorStatus.armed;
       widget.onStatusChange?.call(_status);
@@ -623,6 +663,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
       _isIndicatorAtTop = null;
       setState(() {
         _status = null;
+        widget.onStatusChange?.call(_status);
       });
     }
   }
@@ -645,6 +686,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
         setState(() {
           // Show the indeterminate progress indicator.
           _status = RefreshIndicatorStatus.refresh;
+          widget.onStatusChange?.call(_status);
         });
 
         final Future<void> refreshResult = widget.onRefresh();
