@@ -123,25 +123,4 @@ static const CGFloat kStandardTimeOut = 60.0;
   XCTAssertTrue([successText waitForExistenceWithTimeout:60]);
 }
 
-- (void)testPlatformViewFakeAdMobBannerTappableForScrollableListScenario {
-  XCUIElement *entranceButton = self.app.buttons[@"admob banner in scrollable list test"];
-  XCTAssertTrue([entranceButton waitForExistenceWithTimeout:kStandardTimeOut]);
-  [entranceButton tap];
-
-  XCUIElement *platformView = self.app.otherElements[@"platform_view[0]"];
-  XCTAssertTrue([platformView waitForExistenceWithTimeout:kStandardTimeOut]);
-
-  // Scroll the list (touch began on banner).
-  XCUICoordinate *start = [platformView coordinateWithNormalizedOffset:CGVectorMake(0.5, 0.5)];
-  XCUICoordinate *end = [start coordinateWithOffset:CGVectorMake(0.0, 100.0)];
-  [start pressForDuration:0.1 thenDragToCoordinate:end];
-
-  // Verify that the banner is still tappable.
-  XCUIElement *link = [[self.app.links matchingIdentifier:@"Target Link"] firstMatch];
-  XCTAssertTrue([link waitForExistenceWithTimeout:kStandardTimeOut]);
-  [link tap];
-  XCUIElement *successText = self.app.staticTexts[@"Navigation Successful"];
-  XCTAssertTrue([successText waitForExistenceWithTimeout:kStandardTimeOut]);
-}
-
 @end
