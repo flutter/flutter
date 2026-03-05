@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version'
+        description: 'Version (format X.Y.Z for stable or X.Y.0-0.Z.pre for beta)'
         required: true
         type: string
       release_channel:

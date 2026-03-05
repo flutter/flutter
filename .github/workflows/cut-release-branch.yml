@@ -13,7 +13,27 @@ on:
         type: string
 
 jobs:
+  check-membership:
+    runs-on: ubuntu-latest
+    outputs:
+      is_member: ${{ steps.check.outputs.is_member }}
+    steps:
+      - name: Check if user is in the required team
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.TEAM_CHECK_TOKEN }}
+        run: |
+          # Use the GitHub CLI to check team membership
+          # Returns 204 if member, 404 if not
+          if gh api orgs/flutter/teams/flutter-release-eng/memberships/${{ github.actor }} --silent; then
+            echo "is_member=true" >> $GITHUB_OUTPUT
+          else
+            echo "::error::User ${{ github.actor }} is not a member of flutter-release-eng."
+            exit 1
+          fi
+
   create-release-branch:
+    needs: check-membership
     runs-on: ubuntu-latest
     permissions:
       contents: write # Required to create branches and push commits
@@ -54,7 +74,7 @@ jobs:
 
           # Create the version file
           mkdir -p bin/internal/
-          echo "${{ env.BRANCH_NAME }}" > bin/internal/release-candidate-branch.version
+          echo -n "${{ env.BRANCH_NAME }}" > bin/internal/release-candidate-branch.version
 
           # Commit the change
           git add bin/internal/release-candidate-branch.version
