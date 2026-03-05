@@ -1713,14 +1713,6 @@ void main() {
     await tester.pumpWidget(build(allowImplicitScrolling: true));
     expect(find.text('Page 1', skipOffstage: false), findsOneWidget);
 
-    // Invalid configuration: allowImplicitScrolling: true && scrollCacheExtent: viewport(0.0)
-    expect(
-      () => build(
-        allowImplicitScrolling: true,
-        scrollCacheExtent: const ScrollCacheExtent.viewport(0.0),
-      ),
-      throwsAssertionError,
-    );
   });
 
   testWidgets('PageView updates scrollCacheExtent dynamically', (WidgetTester tester) async {
@@ -1787,10 +1779,20 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('PageView asserts when allowImplicitScrolling is false with scrollCacheExtent > 0', (
+  testWidgets('PageView asserts when scrollCacheExtent and allowImplicitScrolling are inconsistent', (
     WidgetTester tester,
   ) async {
-    // Invalid configuration: allowImplicitScrolling: false && scrollCacheExtent > 0
+    // allowImplicitScrolling: true && scrollCacheExtent: 0.0
+    expect(
+      () => PageView(
+        allowImplicitScrolling: true,
+        scrollCacheExtent: const ScrollCacheExtent.viewport(0.0),
+        children: const <Widget>[Text('Page 1'), Text('Page 2')],
+      ),
+      throwsAssertionError,
+    );
+
+    // allowImplicitScrolling: false && scrollCacheExtent > 0
     expect(
       () => PageView(
         scrollCacheExtent: const ScrollCacheExtent.viewport(2.0),
