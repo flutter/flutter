@@ -1758,6 +1758,13 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           ),
         ),
       );
+
+      // When vertical expansion is disabled, wrap with Align
+      // to prevent the widget from stretching to fill the parent's
+      // available height.
+      if (!widget.isVerticallyExpanded) {
+        result = Align(alignment: Alignment.topCenter, heightFactor: 1.0, child: result);
+      }
     } else {
       result = InkWell(
         mouseCursor: effectiveMouseCursor,
@@ -1774,18 +1781,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     final bool childHasButtonSemantic =
         hintIndex != null || (_selectedIndex != null && widget.selectedItemBuilder == null);
-
-    // When vertical expansion is disabled, wrap with UnconstrainedBox
-    // to prevent the widget from stretching to fill the parent's
-    // available height. Only the horizontal axis remains constrained,
-    // preserving the width defined by the parent.
-    if (!widget.isVerticallyExpanded) {
-      result = UnconstrainedBox(
-        constrainedAxis: Axis.horizontal, // Keep width constrained by parent
-        alignment: Alignment.topCenter,
-        child: result,
-      );
-    }
 
     return Semantics(
       button: !childHasButtonSemantic,
