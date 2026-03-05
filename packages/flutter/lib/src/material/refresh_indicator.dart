@@ -162,9 +162,9 @@ class RefreshIndicator extends StatefulWidget {
     this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
     this.elevation = 2.0,
+    this.onStatusChange,
     required this.child,
   }) : _indicatorType = _IndicatorType.material,
-       onStatusChange = null,
        assert(elevation >= 0.0);
 
   /// Creates an adaptive [RefreshIndicator] based on whether the target
@@ -196,9 +196,9 @@ class RefreshIndicator extends StatefulWidget {
     this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
     this.elevation = 2.0,
+    this.onStatusChange,
     required this.child,
   }) : _indicatorType = _IndicatorType.adaptive,
-       onStatusChange = null,
        assert(elevation >= 0.0);
 
   /// Creates a [RefreshIndicator] with no spinner and calls `onRefresh` when
@@ -349,6 +349,8 @@ class RefreshIndicatorState extends State<RefreshIndicator>
 
   static final Animatable<double> _oneToZeroTween = Tween<double>(begin: 1.0, end: 0.0);
 
+  double _lastOverscroll = 0.0;
+
   @protected
   @override
   void initState() {
@@ -447,34 +449,21 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     };
   }
 
-  double? _scrollDelta = 0.0;
-  double? _overscroll = 0.0;
-
   /// Handles drag offset changes for scroll update notifications.
   void _handleScrollUpdateNotification(ScrollUpdateNotification notification) {
     final double delta = notification.scrollDelta ?? 0.0;
-    _scrollDelta = delta;
 
-    debugPrint(
-      'dragOffset: $_dragOffset, ScrollUpdateNotification: overscroll=$_overscroll, scrollDelta=$delta',
-    );
     if (_status == RefreshIndicatorStatus.drag || _status == RefreshIndicatorStatus.armed) {
       final ScrollPosition position = Scrollable.of(notification.context!).position;
 
-      if (delta != 0.0 && _overscroll != null && _overscroll!.abs() > 0.0) {
+      if (delta != 0.0 && _lastOverscroll.abs() > 0.0) {
         final bool isCanceling =
             (notification.metrics.axisDirection == AxisDirection.down && delta > 0.0) ||
             (notification.metrics.axisDirection == AxisDirection.up && delta < 0.0);
 
-        debugPrint('isCanceling: $isCanceling');
-
         if (isCanceling && _dragOffset! > 0.0) {
           final double consumedDelta = math.min(delta.abs(), _dragOffset!);
           final double correction = delta > 0.0 ? consumedDelta : -consumedDelta;
-
-          debugPrint(
-            'dragOffset: $_dragOffset, delta: $delta, correction: $correction, consumedDelta: $consumedDelta',
-          );
 
           position.correctBy(-correction);
 
@@ -483,7 +472,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
           _updateDragOffset(notification.metrics.axisDirection, delta);
         }
 
-        _checkDragOffset(notification.metrics.viewportDimension, canBeDisarmed: true);
+        _checkDragOffset(notification.metrics.viewportDimension);
       } else {
         _updateDragOffset(notification.metrics.axisDirection, notification.scrollDelta!);
         _checkDragOffset(notification.metrics.viewportDimension, canBeDisarmed: false);
@@ -503,8 +492,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   /// when the scroll activity changes from a drag to a ballistic scroll.
   void _handleOverscrollNotification(OverscrollNotification notification) {
     final double overscroll = notification.overscroll;
-    _overscroll = overscroll;
-    debugPrint('OverscrollNotification: overscroll=$overscroll, scrollDelta=$_scrollDelta');
+    _lastOverscroll = overscroll;
 
     if (_status == RefreshIndicatorStatus.drag || _status == RefreshIndicatorStatus.armed) {
       _updateDragOffset(notification.metrics.axisDirection, notification.overscroll);
@@ -514,8 +502,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
 
   /// Handles completion or cancellation of the drag gesture when scrolling ends.
   void _handleScrollEndNotification(ScrollEndNotification notification) {
-    _overscroll = null;
-    _scrollDelta = null;
+    _lastOverscroll = 0.0;
     switch (_status) {
       case RefreshIndicatorStatus.armed:
         _show();
@@ -638,8 +625,8 @@ class RefreshIndicatorState extends State<RefreshIndicator>
 
     setState(() {
       _status = newMode;
-      widget.onStatusChange?.call(_status);
     });
+    widget.onStatusChange?.call(_status);
 
     switch (_status!) {
       case RefreshIndicatorStatus.done:
@@ -658,8 +645,8 @@ class RefreshIndicatorState extends State<RefreshIndicator>
       _isIndicatorAtTop = null;
       setState(() {
         _status = null;
-        widget.onStatusChange?.call(_status);
       });
+      widget.onStatusChange?.call(_status);
     }
   }
 
@@ -681,8 +668,8 @@ class RefreshIndicatorState extends State<RefreshIndicator>
         setState(() {
           // Show the indeterminate progress indicator.
           _status = RefreshIndicatorStatus.refresh;
-          widget.onStatusChange?.call(_status);
         });
+        widget.onStatusChange?.call(_status);
 
         final Future<void> refreshResult = widget.onRefresh();
         refreshResult.whenComplete(() {
