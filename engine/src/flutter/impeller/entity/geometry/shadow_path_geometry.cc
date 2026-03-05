@@ -172,7 +172,7 @@ class UmbraPinAccumulator : public PathTessellator::VertexWriter {
     kMultipleContours,
   };
 
-  explicit UmbraPinAccumulator(Point device_scale);
+  explicit UmbraPinAccumulator(Vector2 device_scale);
 
   ~UmbraPinAccumulator() = default;
 
@@ -497,14 +497,13 @@ PolygonInfo::PolygonInfo(Scalar occluder_height)
 
 const std::shared_ptr<ShadowVertices> PolygonInfo::CalculateConvexShadowMesh(
     const impeller::PathSource& source,
-    const Matrix& incoming_matrix,
+    const Matrix& matrix,
     const Tessellator::Trigs& trigs) {
   // We are operating in "2D device space" with respect to scale and there
   // is no need to involve translations or Z or perspective in the various
-  // calculations, so we extract the incoming matrix's 2D Bases and just
-  // use those measurements to guide our tessellation.
-  Point scale_2d = Point(incoming_matrix.GetBasisX().GetLength(),
-                         incoming_matrix.GetBasisY().GetLength());
+  // calculations, so we extract the incoming matrix's 2D scales on X and Y
+  // and just use those measurements to guide our tessellation.
+  Vector2 scale_2d = matrix.GetBasisScaleXY();
 
   FML_DCHECK(scale_2d.x >= 0.0f && scale_2d.y >= 0.0f);
   if (!(scale_2d.x * scale_2d.y > 0.0f)) {
@@ -514,7 +513,7 @@ const std::shared_ptr<ShadowVertices> PolygonInfo::CalculateConvexShadowMesh(
 
   UmbraPinAccumulator pin_accumulator(scale_2d);
 
-  Scalar scale = scale_2d.GetLength();
+  Scalar scale = std::max(scale_2d.x, scale_2d.y);
   auto [point_count, contour_count] =
       impeller::PathTessellator::CountFillStorage(source, scale);
   pin_accumulator.Reserve(point_count);
@@ -552,15 +551,18 @@ const std::shared_ptr<ShadowVertices> PolygonInfo::CalculateConvexShadowMesh(
 
   ComputeMesh(pins, centroid, list, trigs, direction);
 
-  Point inverted_scale_2d = 1.0f / scale_2d;
+  // Finally, we were working in a device space scaled by scale_2d
+  // so we need to un-scale the outgoing vertices by the same amount.
+  Vector2 inverted_scale_2d = 1.0f / scale_2d;
   for (Point& vertex : vertices_) {
     vertex = vertex * inverted_scale_2d;
   }
+
   return ShadowVertices::Make(std::move(vertices_), std::move(indices_),
                               std::move(gaussians_));
 }
 
-UmbraPinAccumulator::UmbraPinAccumulator(Point device_scale)
+UmbraPinAccumulator::UmbraPinAccumulator(Vector2 device_scale)
     : device_scale_(device_scale * kSubPixelCount) {}
 
 // Enter a new point for the polygon approximation of the shape. Points are

@@ -1076,17 +1076,19 @@ TEST_P(AiksTest, CanDrawNonuniformScaleConvexShadow) {
   builder.Translate(50, 50);
 
   for (int y = 0; y <= 5; y++) {
+    Scalar y_scale = y / 5.0f;
     builder.Save();
     for (int x = 0; x <= 10; x++) {
+      Scalar x_scale = x / 10.0f;
       builder.Save();
-      builder.Scale(x / 10.0f, y / 5.0f);
+      builder.Scale(x_scale, y_scale);
       builder.DrawPath(pentagon_path, shadow_paint);
       builder.DrawPath(pentagon_path, paint);
       builder.Restore();
-      builder.Translate(x * 100 / 10.0f + 20.0f, 0);
+      builder.Translate(100 * x_scale + 20, 0);
     }
     builder.Restore();
-    builder.Translate(0, y * 125.0f / 5.0f + 50.0f);
+    builder.Translate(0, 125 * y_scale + 50);
   }
 
   auto dl = builder.Build();
