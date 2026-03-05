@@ -481,6 +481,15 @@ void EmbedderExternalViewEmbedder::SubmitFlutterView(
 
   builder.Render();
 
+  // Dispose thread-local cached Vulkan resources (command pools, descriptor
+  // pools) that would otherwise grow unbounded. The Impeller Vulkan backend
+  // caches these in thread-local storage and they must be explicitly disposed
+  // each frame to recycle VkCommandBuffers and VkDescriptorPools.
+  // On non-Vulkan backends this is a no-op.
+  if (aiks_context) {
+    aiks_context->GetContext()->DisposeThreadLocalCachedResources();
+  }
+
 #if !SLIMPELLER
   // We are going to be transferring control back over to the embedder there
   // the context may be trampled upon again. Flush all operations to the
