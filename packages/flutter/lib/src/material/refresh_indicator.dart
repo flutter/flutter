@@ -550,8 +550,8 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     if (_shouldStart(notification)) {
       setState(() {
         _status = RefreshIndicatorStatus.drag;
-        widget.onStatusChange?.call(_status);
       });
+      widget.onStatusChange?.call(_status);
       return false;
     }
 
@@ -591,17 +591,13 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     assert(_isIndicatorAtTop == null);
     assert(_dragOffset == null);
 
-    switch (direction) {
-      case AxisDirection.down:
-      case AxisDirection.up:
-        _isIndicatorAtTop = true;
-      case AxisDirection.left:
-      case AxisDirection.right:
-        _isIndicatorAtTop = null;
-        // we do not support horizontal scroll views.
-        return false;
+    final bool? atTop = _getIndicatorAtTop(direction);
+    if (atTop == null) {
+      // we dont support horizontal refresh indicator
+      return false;
     }
 
+    _isIndicatorAtTop = atTop;
     _dragOffset = 0.0;
     _scaleController.value = 0.0;
     _positionController.value = 0.0;
@@ -622,7 +618,6 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     _positionController.value = clampDouble(newValue, 0.0, 1.0); // This triggers various rebuilds.
 
     // Transition from `drag` to `armed` if the drag offset exceeds the armed threshold, and back to `drag` if it goes below.
-    debugPrint('positionController.value: ${_positionController.value}, status: $_status');
     if (_status == RefreshIndicatorStatus.drag && _positionController.value >= _kArmedThreshold) {
       _status = RefreshIndicatorStatus.armed;
       widget.onStatusChange?.call(_status);

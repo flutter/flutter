@@ -1317,9 +1317,7 @@ void main() {
     );
 
     await tester.fling(find.text('X'), const Offset(0.0, 300.0), 1000.0);
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
 
     expect(refreshCalled, false);
     expect(find.byType(RefreshProgressIndicator), findsNothing);
@@ -1343,9 +1341,7 @@ void main() {
     );
 
     refreshKey.currentState!.show();
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
 
     expect(refreshCalled, true);
   });
@@ -1354,7 +1350,7 @@ void main() {
     WidgetTester tester,
   ) async {
     refreshCalled = false;
-    final Completer<void> refreshCompleter = Completer<void>();
+    final refreshCompleter = Completer<void>();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1387,7 +1383,7 @@ void main() {
   });
 
   testWidgets('RefreshIndicator respects exact displacement property', (WidgetTester tester) async {
-    const double customDisplacement = 120.0;
+    const customDisplacement = 120.0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1459,7 +1455,7 @@ void main() {
     WidgetTester tester,
   ) async {
     refreshCalled = false;
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1490,7 +1486,7 @@ void main() {
   testWidgets('ListView can still be scrolled while RefreshIndicator is spinning', (
     WidgetTester tester,
   ) async {
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1527,7 +1523,7 @@ void main() {
   testWidgets(
     'Correct status sequence for complete refresh (drag -> armed -> snap -> refresh -> done)',
     (WidgetTester tester) async {
-      final List<String> statusLog = <String>[];
+      final statusLog = <String>[];
 
       await tester.pumpWidget(
         MaterialApp(
