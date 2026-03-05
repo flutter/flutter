@@ -167,6 +167,8 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
 @property(nonatomic, strong) NSMapTable<NSNumber*, FlutterViewController*>* flutterViewControllers;
 
+@property(nonatomic, strong) NSMapTable<NSNumber*, UIView*>* flutterViews;
+
 /// Populate any missing overlay layers.
 ///
 /// This requires posting a task to the platform thread and blocking on its completion.
@@ -264,6 +266,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 - (id)init {
   if (self = [super init]) {
     _flutterViewControllers = [NSMapTable strongToWeakObjectsMapTable];
+    _flutterViews = [NSMapTable strongToWeakObjectsMapTable];
     _layerPool = std::make_unique<flutter::OverlayLayerPool>();
     _maskViewPool =
         [[FlutterClippingMaskViewPool alloc] initWithCapacity:kFlutterClippingMaskViewPoolCapacity];
@@ -430,7 +433,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 - (void)beginFrameWithSize:(DlISize)frameSize flutterViewId:(int64_t)flutterViewId {
   [self resetFrameState];
   self.frameSize = frameSize;
-  self.flutterView = [self.flutterViewControllers objectForKey:@(flutterViewId)].view;
+  self.flutterView = [self.flutterViews objectForKey:@(flutterViewId)];
 }
 
 - (void)cancelFrame {
@@ -752,9 +755,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
     withFlutterViewId:(int64_t)flutterViewId {
   TRACE_EVENT0("flutter", "PlatformViewsController::SubmitFrame");
 
-  FlutterViewController* flutterViewController =
-      [self.flutterViewControllers objectForKey:@(flutterViewId)];
-  UIView* flutterView = flutterViewController.view;
+  BOOL hasFlutterViewId = [self.flutterViewControllers objectForKey:@(flutterViewId)] != nil;
 
   BOOL hadPlatformViews = NO;
   auto it = self.flutterViewHadPlatformViews.find(flutterViewId);
@@ -763,10 +764,10 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   }
 
   // No platform views to render.
-  if (flutterView == nil || (self.compositionOrder.empty() && !hadPlatformViews)) {
+  if (!hasFlutterViewId || (self.compositionOrder.empty() && !hadPlatformViews)) {
     // No platform views to render but the FlutterView may need to be resized.
     __weak FlutterPlatformViewsController* weakSelf = self;
-    if (flutterView != nil) {
+    if (hasFlutterViewId) {
       fml::TaskRunner::RunNowOrPostTask(
           weakSelf.platformTaskRunner,
           fml::MakeCopyable([weakSelf, frameSize = weakSelf.frameSize, flutterViewId]() {
@@ -942,7 +943,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   TRACE_EVENT0("flutter", "PlatformViewsController::PerformSubmit");
   FML_DCHECK([[NSThread currentThread] isMainThread]);
 
-  // self.flutterView = [self.flutterViewControllers objectForKey:@(currentFlutterViewId)].view;
   if (self.flutterView == nil) {
     return;
   }
@@ -1162,10 +1162,13 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
 - (void)attachToFlutterViewController:(__weak FlutterViewController*)controller {
   [self.flutterViewControllers setObject:controller forKey:@(controller.viewIdentifier)];
+  UIView* flutterView = controller.view;
+  [self.flutterViews setObject:flutterView forKey:@(controller.viewIdentifier)];
 }
 
 - (void)detachFromFlutterViewController:(int64_t)flutterViewId {
   [self.flutterViewControllers removeObjectForKey:@(flutterViewId)];
+  [self.flutterViews removeObjectForKey:@(flutterViewId)];
 }
 
 - (UIViewController<FlutterViewResponder>* _Nullable)flutterViewControllerForIdentifier:
