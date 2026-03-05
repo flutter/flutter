@@ -1980,8 +1980,8 @@ class SelectableRegionState extends State<SelectableRegion>
     );
     return NotificationListener<ScrollEndNotification>(
       onNotification: (notification) {
+        _selectionDelegate.layoutDidChange();
         _updateSelectedContentIfNeeded();
-        _updateSelectionStatus();
         final lastSelection = _lastSelectedContent;
         if (lastSelection != null && lastSelection.plainText.isNotEmpty) {
           _showHandles();
