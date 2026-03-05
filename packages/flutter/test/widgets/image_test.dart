@@ -80,7 +80,9 @@ void main() {
     );
 
     imageLoaded = false;
-    imageProvider1.complete(image10x10.clone());
+    final ui.Image image = image10x10.clone();
+    addTearDown(image.dispose);
+    imageProvider1.complete(image);
     await tester.idle();
     await tester.pump();
     expect(imageLoaded, true);
@@ -109,7 +111,9 @@ void main() {
     var renderImage = key.currentContext!.findRenderObject()! as RenderImage;
     expect(renderImage.image, isNull);
 
-    imageProvider1.complete(image10x10.clone());
+    final ui.Image image = image10x10.clone();
+    addTearDown(image.dispose);
+    imageProvider1.complete(image);
     await tester.idle(); // resolve the future from the image provider
     await tester.pump(null, EnginePhase.layout);
 
@@ -144,7 +148,9 @@ void main() {
       var renderImage = key.currentContext!.findRenderObject()! as RenderImage;
       expect(renderImage.image, isNull);
 
-      imageProvider1.complete(image10x10.clone());
+      final ui.Image image = image10x10.clone();
+      addTearDown(image.dispose);
+      imageProvider1.complete(image);
       await tester.idle(); // resolve the future from the image provider
       await tester.pump(null, EnginePhase.layout);
 
@@ -177,7 +183,9 @@ void main() {
     var renderImage = key.currentContext!.findRenderObject()! as RenderImage;
     expect(renderImage.image, isNull);
 
-    imageProvider1.complete(image10x10.clone());
+    final ui.Image image = image10x10.clone();
+    addTearDown(image.dispose);
+    imageProvider1.complete(image);
     await tester.idle(); // resolve the future from the image provider
     await tester.pump(null, EnginePhase.layout);
 
@@ -206,7 +214,9 @@ void main() {
       var renderImage = key.currentContext!.findRenderObject()! as RenderImage;
       expect(renderImage.image, isNull);
 
-      imageProvider1.complete(image10x10.clone());
+      final ui.Image image = image10x10.clone();
+      addTearDown(image.dispose);
+      imageProvider1.complete(image);
       await tester.idle(); // resolve the future from the image provider
       await tester.pump(null, EnginePhase.layout);
 
@@ -782,7 +792,9 @@ void main() {
         },
       ),
     );
-    provider.complete(image10x10.clone());
+    final ui.Image image = image10x10.clone();
+    addTearDown(image.dispose);
+    provider.complete(image);
     await precache;
     expect(provider._lastResolvedConfiguration, isNotNull);
 
@@ -956,7 +968,9 @@ void main() {
       var renderImage = key.currentContext!.findRenderObject()! as RenderImage;
       expect(renderImage.image, isNull);
 
-      imageProvider1.complete(image10x10.clone());
+      final ui.Image image = image10x10.clone();
+      addTearDown(image.dispose);
+      imageProvider1.complete(image);
       imageProvider2.complete(image100x100);
       await tester.idle(); // resolve the future from the image provider
       await tester.pump(null, EnginePhase.layout);
@@ -981,13 +995,17 @@ void main() {
   );
 
   testWidgets('Image State can be reconfigured to use another image', (WidgetTester tester) async {
+    final ui.Image imageClone1 = image10x10.clone();
+    addTearDown(imageClone1.dispose);
     final image1 = Image(
-      image: _TestImageProvider()..complete(image10x10.clone()),
+      image: _TestImageProvider()..complete(imageClone1),
       width: 10.0,
       excludeFromSemantics: true,
     );
+    final ui.Image imageClone2 = image10x10.clone();
+    addTearDown(imageClone2.dispose);
     final image2 = Image(
-      image: _TestImageProvider()..complete(image10x10.clone()),
+      image: _TestImageProvider()..complete(imageClone2),
       width: 20.0,
       excludeFromSemantics: true,
     );
@@ -1162,7 +1180,9 @@ void main() {
       expect(lastFrame, 0);
       expect(lastFrameWasSync, isTrue);
       expect(find.byType(RawImage), findsOneWidget);
-      streamCompleter.setData(imageInfo: ImageInfo(image: image10x10.clone()));
+      final ui.Image image2 = image10x10.clone();
+      addTearDown(image2.dispose);
+      streamCompleter.setData(imageInfo: ImageInfo(image: image2));
       await tester.pump();
       expect(lastFrame, 1);
       expect(lastFrameWasSync, isTrue);
@@ -2383,10 +2403,14 @@ void main() {
     expect(provider1.loadCallCount, 1);
     expect(provider2.loadCallCount, 1);
 
-    provider1.complete(image10x10.clone());
+    final ui.Image image1 = image10x10.clone();
+    addTearDown(image1.dispose);
+    provider1.complete(image1);
     await tester.idle();
 
-    provider2.complete(image10x10.clone());
+    final ui.Image image2 = image10x10.clone();
+    addTearDown(image2.dispose);
+    provider2.complete(image2);
     await tester.idle();
 
     expect(imageCache.liveImageCount, 2);
@@ -2421,7 +2445,9 @@ void main() {
         },
       ),
     );
-    provider.complete(image10x10.clone());
+    final ui.Image image = image10x10.clone();
+    addTearDown(image.dispose);
+    provider.complete(image);
     await precache;
 
     // Should have ended up with only a weak ref, not in cache because cache size is 0
@@ -2480,7 +2506,9 @@ void main() {
           },
         ),
       );
-      provider.complete(image10x10.clone());
+      final ui.Image image = image10x10.clone();
+      addTearDown(image.dispose);
+      provider.complete(image);
       await precache;
 
       // Should have ended up in the cache and have a weak reference.
