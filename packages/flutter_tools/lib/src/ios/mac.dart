@@ -336,6 +336,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     project: project,
     targetOverride: targetOverride,
     buildInfo: buildInfo,
+    printWarnings: true,
   );
   if (app.project.usesSwiftPackageManager) {
     final String? iosDeploymentTarget = buildSettings['IPHONEOS_DEPLOYMENT_TARGET'];
@@ -818,6 +819,7 @@ Future<void> diagnoseXcodeBuildFailure(
   required FileSystem fileSystem,
   required FlutterDarwinPlatform platform,
   required FlutterProject project,
+  Device? device,
 }) async {
   final XcodeBuildExecution? xcodeBuildExecution = result.xcodeBuildExecution;
   if (xcodeBuildExecution != null &&
@@ -846,6 +848,7 @@ Future<void> diagnoseXcodeBuildFailure(
     platform: platform,
     logger: logger,
     fileSystem: fileSystem,
+    device: device,
   );
 
   if (!issueDetected && xcodeBuildExecution != null) {
@@ -1035,6 +1038,19 @@ _XCResultIssueHandlingResult _handleXCResultIssue({
       hasProvisioningProfileIssue: false,
       modifiedPrecompiledSource: true,
     );
+  } else if (message.contains(
+        'Unable to find a destination matching the provided destination specifier',
+      ) &&
+      message.contains('platform:iOS Simulator, arch:x86_64,') &&
+      !message.contains('platform:iOS Simulator, arch:arm64,') &&
+      !message.contains(
+        'The requested device could not be found because no available devices matched the request.',
+      )) {
+    return _XCResultIssueHandlingResult(
+      requiresProvisioningProfile: false,
+      hasProvisioningProfileIssue: false,
+      unableToFindArmDestination: true,
+    );
   }
   return _XCResultIssueHandlingResult(
     requiresProvisioningProfile: false,
@@ -1050,11 +1066,15 @@ Future<bool> _handleIssues(
   required FlutterDarwinPlatform platform,
   required Logger logger,
   required FileSystem fileSystem,
+  Device? device,
 }) async {
   var requiresProvisioningProfile = false;
   var hasProvisioningProfileIssue = false;
+  // Tracks whether we already surfaced a targeted issue message and can skip
+  // the less-accurate stdout fallback diagnostics.
   var issueDetected = false;
   var modifiedPrecompiledSource = false;
+  var unableToFindArmDestination = false;
   String? missingPlatform;
   final duplicateModules = <String>[];
   final missingModules = <String>[];
@@ -1081,6 +1101,7 @@ Future<bool> _handleIssues(
         missingModules.add(handlingResult.missingModule!);
       }
       modifiedPrecompiledSource = handlingResult.modifiedPrecompiledSource;
+      unableToFindArmDestination = handlingResult.unableToFindArmDestination;
       issueDetected = true;
     }
   } else if (xcResult != null) {
@@ -1088,6 +1109,8 @@ Future<bool> _handleIssues(
   }
 
   final XcodeBasedProject xcodeProject = platform.xcodeProject(project);
+  final String? swiftPackageManagerMinPlatformMismatchMessage =
+      _swiftPackageManagerMinPlatformMismatchMessageFromStdout(result.stdout);
 
   if (requiresProvisioningProfile) {
     logger.printError(noProvisioningProfileInstruction, emphasis: true);
@@ -1109,6 +1132,9 @@ Future<bool> _handleIssues(
     logger.printError("Also try selecting 'Product > Build' to fix the problem.");
   } else if (missingPlatform != null) {
     logger.printError(missingPlatformInstructions(missingPlatform), emphasis: true);
+  } else if (swiftPackageManagerMinPlatformMismatchMessage != null) {
+    logger.printError(swiftPackageManagerMinPlatformMismatchMessage, emphasis: true);
+    issueDetected = true;
   } else if (duplicateModules.isNotEmpty) {
     final bool usesCocoapods = xcodeProject.podfile.existsSync();
     final bool usesSwiftPackageManager = xcodeProject.usesSwiftPackageManager;
@@ -1155,8 +1181,40 @@ Future<bool> _handleIssues(
       'the cache.\n'
       '════════════════════════════════════════════════════════════════════════════════',
     );
+  } else if (unableToFindArmDestination &&
+      xcodeBuildExecution != null &&
+      xcodeBuildExecution.environmentType == EnvironmentType.simulator &&
+      device != null) {
+    final bool simulatorSupportsIntel = await _simulatorSupportsIntel(device);
+    if (!simulatorSupportsIntel) {
+      logger.printError(
+        '════════════════════════════════════════════════════════════════════════════════\n'
+        'The selected simulator is incompatible with the current build settings.\n'
+        'Please use a simulator that supports x86_64, such as a simulator prior to iOS 26 or '
+        'download the universal variant of the iOS 26 simulator using '
+        '"xcodebuild -downloadPlatform iOS -architectureVariant universal".\n'
+        '════════════════════════════════════════════════════════════════════════════════',
+      );
+    }
   }
   return issueDetected;
+}
+
+Future<bool> _simulatorSupportsIntel(Device device) async {
+  final Version? xcodeVersion = globals.xcode?.currentVersion;
+  if (xcodeVersion != null && xcodeVersion.major < 26) {
+    return true;
+  }
+  final String runtime = await device.sdkNameAndVersion;
+  final RunResult result = await globals.processUtils.run([
+    ...globals.xcode!.xcrunCommand(),
+    'simctl',
+    'list',
+    'runtimes',
+    runtime,
+    '--json',
+  ]);
+  return result.stdout.contains('x86_64');
 }
 
 /// Returns true if a Package.swift is found for the plugin and a podspec is not.
@@ -1247,6 +1305,56 @@ String? _parseMissingPlatform(String message) {
   return pattern.firstMatch(message)?.group(1);
 }
 
+String? _swiftPackageManagerMinPlatformMismatchMessageFromStdout(String? stdout) {
+  if (stdout == null || stdout.isEmpty) {
+    return null;
+  }
+
+  final pattern = RegExp(
+    r"The package product '([^']+)' requires minimum platform version "
+    r'([0-9\.]+) for the (iOS|macOS) platform, but this target supports '
+    r"([0-9\.]+)(?: \(in target '([^']+)' from project '[^']+'\))?",
+    caseSensitive: false,
+  );
+
+  // We keep only the highest required version because bumping app minimum
+  // version to that value also satisfies lower plugin requirements.
+  // `highestSupportedVersion` is from the same mismatch to report "from X to Y".
+  String? highestRequiredByProduct;
+  Version? highestRequiredVersion;
+  Version? highestSupportedVersion;
+  for (final RegExpMatch match in pattern.allMatches(stdout)) {
+    final String? requiredByProduct = match.group(1);
+    final Version? requiredMinVersion = Version.parse(match.group(2));
+    final Version? targetSupportedVersion = Version.parse(match.group(4));
+    final String? targetName = match.group(5);
+    if (targetName != kFlutterGeneratedPluginSwiftPackageName) {
+      continue;
+    }
+    if (requiredByProduct == null || requiredMinVersion == null || targetSupportedVersion == null) {
+      continue;
+    }
+    if (highestRequiredVersion == null || requiredMinVersion > highestRequiredVersion) {
+      highestRequiredByProduct = requiredByProduct;
+      highestRequiredVersion = requiredMinVersion;
+      highestSupportedVersion = targetSupportedVersion;
+    }
+  }
+
+  if (highestRequiredByProduct == null ||
+      highestRequiredVersion == null ||
+      highestSupportedVersion == null) {
+    return null;
+  }
+
+  return '''
+To fix this error, increase your app's minimum platform version from $highestSupportedVersion to at least $highestRequiredVersion or remove the $highestRequiredByProduct dependency.
+
+To increase your app's minimum platform version, follow these instructions:
+  https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#how-to-use-a-swift-package-manager-flutter-plugin-that-requires-a-higher-os-version
+''';
+}
+
 String? _parseModuleRedefinition(String message) {
   // Example: "Redefinition of module 'plugin_1_name'"
   final pattern = RegExp(r"Redefinition of module '(.*?)'");
@@ -1293,6 +1401,7 @@ class _XCResultIssueHandlingResult {
     this.duplicateModule,
     this.missingModule,
     this.modifiedPrecompiledSource = false,
+    this.unableToFindArmDestination = false,
   });
 
   /// An issue indicates that user didn't provide the provisioning profile.
@@ -1314,6 +1423,8 @@ class _XCResultIssueHandlingResult {
   /// An issue indicates that a source file, such as a header in the Flutter framework, has
   /// changed since last built. This requires "flutter clean" to resolve.
   final bool modifiedPrecompiledSource;
+
+  final bool unableToFindArmDestination;
 }
 
 const _kResultBundlePath = 'temporary_xcresult_bundle';
