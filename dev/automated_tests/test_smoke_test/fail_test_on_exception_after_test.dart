@@ -14,6 +14,7 @@ void main() {
   final complete = Completer<void>();
 
   testWidgets('test smoke test -- this test SHOULD FAIL', (WidgetTester tester) async {
+    // ignore: unawaited_futures
     tester.runAsync(() async {
       Timer.run(() {
         complete.complete();

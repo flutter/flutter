@@ -218,10 +218,25 @@ mixin RenderInlineChildrenContainerDefaults
     RenderBox? child = firstChild;
     for (final box in boxes) {
       if (child == null) {
-        assert(
-          false,
-          'The length of boxes (${boxes.length}) should be greater than childCount ($childCount)',
-        );
+        assert(() {
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('Invalid number of boxes provided to positionInlineChildren.'),
+            ErrorDescription(
+              'The number of boxes (${boxes.length}) exceeds the number of child render objects ($childCount). '
+              'Each box corresponds to a child, but there are not enough children to position all boxes.',
+            ),
+            ErrorHint(
+              'This error typically occurs when a custom InlineSpan implementation returns a list of boxes '
+              'that is longer than the number of inline children. Ensure that the number of boxes returned '
+              'by `computeLineMetrics` or similar methods does not exceed the number of children.',
+            ),
+            DiagnosticsProperty<RenderObject>(
+              'The RenderParagraph receiving the boxes',
+              this,
+              style: DiagnosticsTreeStyle.errorProperty,
+            ),
+          ]);
+        }());
         return;
       }
       final textParentData = child.parentData! as TextParentData;
@@ -299,6 +314,7 @@ mixin RenderInlineChildrenContainerDefaults
 
 class _UnspecifiedTextScaler extends TextScaler {
   const _UnspecifiedTextScaler();
+
   @override
   Never get textScaleFactor => throw UnimplementedError();
 
@@ -377,6 +393,7 @@ class RenderParagraph extends RenderBox
   // TODO(abarth): Make computing the min/max intrinsic width/height a
   //  non-destructive operation.
   TextPainter? _textIntrinsicsCache;
+
   TextPainter get _textIntrinsics {
     return (_textIntrinsicsCache ??= TextPainter())
       ..text = _textPainter.text
@@ -397,6 +414,7 @@ class RenderParagraph extends RenderBox
 
   /// The text to display.
   InlineSpan get text => _textPainter.text!;
+
   set text(InlineSpan value) {
     switch (_textPainter.text!.compareTo(value)) {
       case RenderComparison.identical:
@@ -454,6 +472,7 @@ class RenderParagraph extends RenderBox
   /// The [SelectionRegistrar] this paragraph will be, or is, registered to.
   SelectionRegistrar? get registrar => _registrar;
   SelectionRegistrar? _registrar;
+
   set registrar(SelectionRegistrar? value) {
     if (value == _registrar) {
       return;
@@ -550,6 +569,7 @@ class RenderParagraph extends RenderBox
 
   /// How the text should be aligned horizontally.
   TextAlign get textAlign => _textPainter.textAlign;
+
   set textAlign(TextAlign value) {
     if (_textPainter.textAlign == value) {
       return;
@@ -570,6 +590,7 @@ class RenderParagraph extends RenderBox
   /// context, the English phrase will be on the right and the Hebrew phrase on
   /// its left.
   TextDirection get textDirection => _textPainter.textDirection!;
+
   set textDirection(TextDirection value) {
     if (_textPainter.textDirection == value) {
       return;
@@ -587,6 +608,7 @@ class RenderParagraph extends RenderBox
   /// effects.
   bool get softWrap => _softWrap;
   bool _softWrap;
+
   set softWrap(bool value) {
     if (_softWrap == value) {
       return;
@@ -598,6 +620,7 @@ class RenderParagraph extends RenderBox
   /// How visual overflow should be handled.
   TextOverflow get overflow => _overflow;
   TextOverflow _overflow;
+
   set overflow(TextOverflow value) {
     if (_overflow == value) {
       return;
@@ -620,6 +643,7 @@ class RenderParagraph extends RenderBox
     'This feature was deprecated after v3.12.0-2.0.pre.',
   )
   double get textScaleFactor => _textPainter.textScaleFactor;
+
   @Deprecated(
     'Use textScaler instead. '
     'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
@@ -631,6 +655,7 @@ class RenderParagraph extends RenderBox
 
   /// {@macro flutter.painting.textPainter.textScaler}
   TextScaler get textScaler => _textPainter.textScaler;
+
   set textScaler(TextScaler value) {
     if (_textPainter.textScaler == value) {
       return;
@@ -691,6 +716,7 @@ class RenderParagraph extends RenderBox
 
   /// {@macro flutter.painting.textPainter.textWidthBasis}
   TextWidthBasis get textWidthBasis => _textPainter.textWidthBasis;
+
   set textWidthBasis(TextWidthBasis value) {
     if (_textPainter.textWidthBasis == value) {
       return;
@@ -702,6 +728,7 @@ class RenderParagraph extends RenderBox
 
   /// {@macro dart.ui.textHeightBehavior}
   ui.TextHeightBehavior? get textHeightBehavior => _textPainter.textHeightBehavior;
+
   set textHeightBehavior(ui.TextHeightBehavior? value) {
     if (_textPainter.textHeightBehavior == value) {
       return;
@@ -716,6 +743,7 @@ class RenderParagraph extends RenderBox
   /// Ignored if the text is not selectable (e.g. if [registrar] is null).
   Color? get selectionColor => _selectionColor;
   Color? _selectionColor;
+
   set selectionColor(Color? value) {
     if (_selectionColor == value) {
       return;
@@ -1462,6 +1490,7 @@ class _SelectableFragment
   @override
   SelectionGeometry get value => _selectionGeometry;
   late SelectionGeometry _selectionGeometry;
+
   void _updateSelectionGeometry() {
     final SelectionGeometry newValue = _getSelectionGeometry();
 
@@ -2283,6 +2312,7 @@ class _SelectableFragment
     PlaceholderSpan.placeholderCodeUnit,
   );
   static final int _placeholderLength = _placeholderCharacter.length;
+
   // This method handles updating the start edge by a text boundary that may
   // not be contained within this selectable fragment. It is possible
   // that a boundary spans multiple selectable fragments when the text contains
@@ -3463,6 +3493,7 @@ class _SelectableFragment
   }
 
   List<Rect>? _cachedBoundingBoxes;
+
   @override
   List<Rect> get boundingBoxes {
     if (_cachedBoundingBoxes == null) {
@@ -3488,6 +3519,7 @@ class _SelectableFragment
   }
 
   Rect? _cachedRect;
+
   Rect get _rect {
     if (_cachedRect == null) {
       final List<TextBox> boxes = paragraph.getBoxesForSelection(

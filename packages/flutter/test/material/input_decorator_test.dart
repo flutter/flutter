@@ -3275,9 +3275,8 @@ void main() {
 
       await tester.pumpWidget(
         Center(
-          child: SizedBox(
-            width: 100,
-            height: 100,
+          child: SizedBox.square(
+            dimension: 100,
             child: buildInputDecorator(
               isEmpty: true,
               decoration: InputDecoration(labelText: longStringA),
@@ -3293,9 +3292,8 @@ void main() {
 
       await tester.pumpWidget(
         Center(
-          child: SizedBox(
-            width: 100,
-            height: 100,
+          child: SizedBox.square(
+            dimension: 100,
             child: buildInputDecorator(
               isFocused: true,
               isEmpty: true,
@@ -8209,7 +8207,13 @@ void main() {
       ),
     );
 
-    final RenderObject renderer = tester.renderObject(find.byType(InputDecorator));
+    // Find the _RenderDecoration render object (which may be wrapped by Semantics)
+    RenderObject renderer = tester.renderObject(find.byType(InputDecorator));
+    // If wrapped by Semantics, walk down to find the actual _RenderDecoration
+    while (renderer.debugDescribeChildren().length == 1 &&
+        renderer.debugDescribeChildren().first.name == 'child') {
+      renderer = renderer.debugDescribeChildren().first.value! as RenderObject;
+    }
     final Iterable<String> nodeNames = renderer.debugDescribeChildren().map(
       (DiagnosticsNode node) => node.name!,
     );
@@ -14470,7 +14474,13 @@ void main() {
         ),
       );
 
-      final RenderObject renderer = tester.renderObject(find.byType(InputDecorator));
+      // Find the _RenderDecoration render object (which may be wrapped by Semantics)
+      RenderObject renderer = tester.renderObject(find.byType(InputDecorator));
+      // If wrapped by Semantics, walk down to find the actual _RenderDecoration
+      while (renderer.debugDescribeChildren().length == 1 &&
+          renderer.debugDescribeChildren().first.name == 'child') {
+        renderer = renderer.debugDescribeChildren().first.value! as RenderObject;
+      }
       final Iterable<String> nodeNames = renderer.debugDescribeChildren().map(
         (DiagnosticsNode node) => node.name!,
       );
@@ -15491,9 +15501,8 @@ void main() {
 
       await tester.pumpWidget(
         Center(
-          child: SizedBox(
-            width: 100,
-            height: 100,
+          child: SizedBox.square(
+            dimension: 100,
             child: buildInputDecoratorM2(
               // isFocused: false (default)
               isEmpty: true,
@@ -15512,9 +15521,8 @@ void main() {
 
       await tester.pumpWidget(
         Center(
-          child: SizedBox(
-            width: 100,
-            height: 100,
+          child: SizedBox.square(
+            dimension: 100,
             child: buildInputDecoratorM2(
               isFocused: true,
               isEmpty: true,

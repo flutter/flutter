@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 import 'package:multicast_dns/multicast_dns.dart';
@@ -108,7 +107,10 @@ class RunningAppsCommand extends FlutterCommand {
       final String deviceId = app.deviceId;
       final String platform = app.targetPlatform;
       final String vmServiceUri = app.wsUri;
-      final String age = processAge(app.epoch, _systemClock);
+      final String age = _systemClock
+          .now()
+          .difference(DateTime.fromMillisecondsSinceEpoch(app.epoch))
+          .ago();
 
       // If the device name and ID are effectively the same (e.g., "macos" and "macos"),
       // only show the name to avoid redundancy like "macos (macos)".
@@ -118,23 +120,8 @@ class RunningAppsCommand extends FlutterCommand {
       table.add(<String>['$projectName ($mode)', deviceString, platform, vmServiceUri, age]);
     }
 
-    // TODO(jwren): consider combining this logic with the logic in `flutter devices`,
-    // see https://github.com/flutter/flutter/issues/180949
-    // Calculate column widths
-    final indices = List<int>.generate(table[0].length - 1, (int i) => i);
-    List<int> widths = indices.map<int>((int i) => 0).toList();
-    for (final row in table) {
-      widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
-    }
-
     // Join columns into lines of text
-    for (final row in table) {
-      final String rowString = indices
-          .map<String>((int i) => row[i].padRight(widths[i]))
-          .followedBy(<String>[row.last])
-          .join(' • ');
-      _logger.printStatus('  $rowString');
-    }
+    _logger.printStatus(formatTable(table, indent: 2).join('\n'));
     return FlutterCommandResult.success();
   }
 
@@ -165,26 +152,5 @@ class RunningAppsCommand extends FlutterCommand {
     } on Exception {
       // Ignore errors for individual lookups
     }
-  }
-}
-
-/// Formats the elapsed time since the given epoch.
-@visibleForTesting
-String processAge(int? epoch, SystemClock systemClock) {
-  // TODO(jwren): Consider using [DurationAgo] from `lib/src/base/utils.dart`.
-  // We need to decide on the width and precision, possibly modifying the utility
-  // to support a shorter form (e.g. "5m" versus "5 minutes ago").
-  if (epoch == null) {
-    return 'unknown age';
-  }
-  final Duration elapsed = systemClock.now().difference(DateTime.fromMillisecondsSinceEpoch(epoch));
-  if (elapsed.inDays > 0) {
-    return '${elapsed.inDays}d';
-  } else if (elapsed.inHours > 0) {
-    return '${elapsed.inHours}h';
-  } else if (elapsed.inMinutes > 0) {
-    return '${elapsed.inMinutes}m';
-  } else {
-    return '${elapsed.inSeconds}s';
   }
 }
