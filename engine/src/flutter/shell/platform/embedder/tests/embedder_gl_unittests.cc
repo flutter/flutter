@@ -4854,6 +4854,7 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerOpenGL) {
   static glTexImage2DProc glTexImage2D = reinterpret_cast<glTexImage2DProc>(
       context.GLGetProcAddress("glTexImage2D"));
 
+  static GLuint gl_texture = 0;
   auto rendered_scene = context.GetNextSceneImage();
   context.GetRendererConfig().open_gl.gl_external_texture_frame_callback =
       [](void* user_data, int64_t texture_id, size_t width, size_t height,
@@ -4873,79 +4874,6 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerOpenGL) {
       buffer[i * 4 + 3] = 255;  // Alpha channel (fully opaque)
     }
 
-    GLuint gl_texture;
-    glGenTextures(1, &gl_texture);
-    glBindTexture(GL_TEXTURE_2D, gl_texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 800, 600, 0, GL_RGBA,
-                 GL_UNSIGNED_BYTE, buffer.data());
-    texture->target = GL_TEXTURE_2D;
-    texture->name = gl_texture;
-    texture->format = GL_RGBA8;
-    texture->destruction_callback = nullptr;
-    texture->user_data = nullptr;
-    texture->width = width;
-    texture->height = height;
-    return true;
-  };
-
-  auto engine = builder.LaunchEngine();
-
-  ASSERT_TRUE(engine.is_valid());
-
-  flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
-
-  ASSERT_TRUE(embedder_engine->RegisterTexture(1));
-  ASSERT_TRUE(embedder_engine->MarkTextureFrameAvailable(1));
-
-  // Send a window metrics events so frames may be scheduled.
-  FlutterWindowMetricsEvent event = {};
-  event.struct_size = sizeof(event);
-  event.width = 800;
-  event.height = 600;
-  event.pixel_ratio = 1.0;
-  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
-            kSuccess);
-  latch.Wait();
-  ASSERT_TRUE(
-      ImageMatchesFixture("external_texture_impeller.png", rendered_scene));
-}
-
-TEST_F(EmbedderTest, RenderMultiFramesTextureWithImpellerOpenGL) {
-  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
-  EmbedderConfigBuilder builder(context);
-  builder.AddCommandLineArgument("--enable-impeller");
-  builder.SetDartEntrypoint("render_texture_impeller_test");
-  builder.SetSurface(DlISize(800, 600));
-  typedef void (*glGenTexturesProc)(GLsizei n, GLuint* textures);
-  typedef void (*glBindTextureProc)(GLenum n, GLuint texture);
-  typedef void (*glTexImage2DProc)(GLenum target, GLint level,
-                                   GLint internalformat, GLsizei width,
-                                   GLsizei height, GLint border, GLenum format,
-                                   GLenum type, const void* pixels);
-  static glGenTexturesProc glGenTextures = reinterpret_cast<glGenTexturesProc>(
-      context.GLGetProcAddress("glGenTextures"));
-  static glBindTextureProc glBindTexture = reinterpret_cast<glBindTextureProc>(
-      context.GLGetProcAddress("glBindTexture"));
-  static glTexImage2DProc glTexImage2D = reinterpret_cast<glTexImage2DProc>(
-      context.GLGetProcAddress("glTexImage2D"));
-  static GLuint gl_texture = 0;
-  context.GetRendererConfig().open_gl.gl_external_texture_frame_callback =
-      [](void* user_data, int64_t texture_id, size_t width, size_t height,
-         FlutterOpenGLTexture* texture) -> bool {
-    std::vector<uint8_t> buffer(800 * 600 * 4);
-    for (int i = 0; i < 800 * 300; ++i) {
-      buffer[i * 4 + 0] = 255;  // Red channel
-      buffer[i * 4 + 1] = 0;    // Green channel
-      buffer[i * 4 + 2] = 0;    // Blue channel
-      buffer[i * 4 + 3] = 255;  // Alpha channel (fully opaque)
-    }
-
-    for (int i = 800 * 300; i < 800 * 600; ++i) {
-      buffer[i * 4 + 0] = 0;    // Red channel
-      buffer[i * 4 + 1] = 0;    // Green channel
-      buffer[i * 4 + 2] = 255;  // Blue channel
-      buffer[i * 4 + 3] = 255;  // Alpha channel (fully opaque)
-    }
     if (gl_texture == 0) {
       glGenTextures(1, &gl_texture);
     }
@@ -4969,20 +4897,7 @@ TEST_F(EmbedderTest, RenderMultiFramesTextureWithImpellerOpenGL) {
   flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
 
   ASSERT_TRUE(embedder_engine->RegisterTexture(1));
-  static int frame_count = 0;
-  static int max_frame_count = 4;
-  fml::CountDownLatch latch(max_frame_count);
-  std::future<sk_sp<SkImage>> rendered_scene = context.GetNextSceneImage();
-  context.SetGLPresentCallback([&](FlutterPresentInfo present_info) {
-    if (frame_count > 0 && frame_count < max_frame_count) {
-      ASSERT_TRUE(
-          ImageMatchesFixture("external_texture_impeller.png", rendered_scene));
-      rendered_scene = context.GetNextSceneImage();
-    }
-    frame_count++;
-    ASSERT_TRUE(embedder_engine->MarkTextureFrameAvailable(1));
-    latch.CountDown();
-  });
+
   // Send a window metrics events so frames may be scheduled.
   FlutterWindowMetricsEvent event = {};
   event.struct_size = sizeof(event);
@@ -4994,6 +4909,13 @@ TEST_F(EmbedderTest, RenderMultiFramesTextureWithImpellerOpenGL) {
   latch.Wait();
   ASSERT_TRUE(
       ImageMatchesFixture("external_texture_impeller.png", rendered_scene));
+  for (int i = 0; i < 5; i++) {
+    rendered_scene = context.GetNextSceneImage();
+    ASSERT_TRUE(embedder_engine->MarkTextureFrameAvailable(1));
+    latch.Wait();
+    ASSERT_TRUE(
+        ImageMatchesFixture("external_texture_impeller.png", rendered_scene));
+  }
 }
 
 TEST_F(EmbedderTest, ImpellerOpenGLImageSnapshot) {
