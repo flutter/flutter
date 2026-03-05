@@ -1136,11 +1136,14 @@ class RenderParagraph extends RenderBox
     return _textPainter.size;
   }
 
-  /// Returns the line metrics for the laid out text.
+  /// Returns a list of [ui.LineMetrics] objects describing the
+  /// metrics of each line in the paragraph.
   ///
-  /// This exposes [TextPainter.computeLineMetrics].
+  /// This method must be called after [layout].
   ///
-  /// Valid only after [layout].
+  /// See also:
+  ///
+  ///  * [TextPainter.computeLineMetrics], which this method delegates to.
   List<ui.LineMetrics> computeLineMetrics() {
     assert(!debugNeedsLayout);
     _layoutTextWithConstraints(constraints);
