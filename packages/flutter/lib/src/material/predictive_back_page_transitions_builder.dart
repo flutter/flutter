@@ -46,7 +46,14 @@ import 'page_transitions_theme.dart';
 class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Creates an instance of a [PageTransitionsBuilder] that matches Android U's
   /// predictive back transition.
-  const PredictiveBackPageTransitionsBuilder();
+  const PredictiveBackPageTransitionsBuilder({this.fallbackColor});
+
+  /// The color of the scrim (background) when the predictive back transition is
+  /// not supported.
+  ///
+  /// If not provided, the background color of a default
+  /// [FadeForwardsPageTransitionsBuilder] will be used.
+  final Color? fallbackColor;
 
   @override
   Duration get transitionDuration =>
@@ -85,13 +92,9 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
               );
             }
 
-            return const FadeForwardsPageTransitionsBuilder().buildTransitions(
-              route,
-              context,
-              animation,
-              secondaryAnimation,
-              child,
-            );
+            return FadeForwardsPageTransitionsBuilder(
+              backgroundColor: fallbackColor,
+            ).buildTransitions(route, context, animation, secondaryAnimation, child);
           },
     );
   }
@@ -127,7 +130,14 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
 class PredictiveBackFullscreenPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Creates an instance of a [PageTransitionsBuilder] that matches Android U's
   /// full screen predictive back transition.
-  const PredictiveBackFullscreenPageTransitionsBuilder();
+  const PredictiveBackFullscreenPageTransitionsBuilder({this.fallbackColor});
+
+  /// The color of the scrim (background) when the predictive back transition is
+  /// not supported.
+  ///
+  /// If not provided, the background color of a default
+  /// [ZoomPageTransitionsBuilder] will be used.
+  final Color? fallbackColor;
 
   @override
   Widget buildTransitions<T>(
@@ -159,13 +169,9 @@ class PredictiveBackFullscreenPageTransitionsBuilder extends PageTransitionsBuil
               );
             }
 
-            return const ZoomPageTransitionsBuilder().buildTransitions(
-              route,
-              context,
-              animation,
-              secondaryAnimation,
-              child,
-            );
+            return ZoomPageTransitionsBuilder(
+              backgroundColor: fallbackColor,
+            ).buildTransitions(route, context, animation, secondaryAnimation, child);
           },
     );
   }
