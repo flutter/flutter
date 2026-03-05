@@ -458,14 +458,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.0"
-  listen:
+  listen_beta:
     dependency: transitive
     description:
-      name: listen
-      sha256: "703154e58da344e9896a509a738b0fa2059498fcb87122866d92b8b13ac57131"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0"
+      path: "../spikes/listen_beta"
+      relative: true
+    source: path
+    version: "0.2.6"
   logging:
     dependency: "direct main"
     description:
