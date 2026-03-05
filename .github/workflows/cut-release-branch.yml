@@ -21,7 +21,7 @@ jobs:
       - name: Check if user is in the required team
         id: check
         env:
-          GH_TOKEN: ${{ secrets.TEAM_CHECK_TOKEN }}
+          GH_TOKEN: ${{ secrets.FLUTTER_READ_ORG }}
         run: |
           # Use the GitHub CLI to check team membership
           # Returns 204 if member, 404 if not
