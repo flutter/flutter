@@ -1218,7 +1218,7 @@ class CocoaPodPluginDependencies {
     final Status status = _utils.logger.startProgress('   ├─Building CocoaPod frameworks...');
     var skipped = false;
     try {
-      final bool dependenciesChanged = _hasDependenciesChanged(
+      final bool dependenciesChanged = _haveDependenciesChanged(
         cacheDirectory.path,
         cocoapodXCFrameworkOutput,
         buildInfo.mode.cliName,
@@ -1357,7 +1357,7 @@ class CocoaPodPluginDependencies {
 
   /// Return true if CocoaPod fingerprinter has changed, or if the pod lock files
   /// are outdated.
-  bool _hasDependenciesChanged(
+  bool _haveDependenciesChanged(
     String cacheDirectoryPath,
     Directory cocoapodXCFrameworkDirectory,
     String xcodeBuildConfiguration,
