@@ -299,6 +299,10 @@ void mockDiscardFramebufferEXT(GLenum target,
                         numAttachments, attachments);
 }
 
+void mockViewport(GLint x, GLint y, GLsizei width, GLsizei height) {
+  return CallMockMethod(&IMockGLESImpl::Viewport, x, y, width, height);
+}
+
 static_assert(CheckSameSignature<decltype(mockDiscardFramebufferEXT),  //
                                  decltype(glDiscardFramebufferEXT)>::value);
 
@@ -389,6 +393,8 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(mockBindFramebuffer);
   } else if (strcmp(name, "glDiscardFramebufferEXT") == 0) {
     return reinterpret_cast<void*>(mockDiscardFramebufferEXT);
+  } else if (strcmp(name, "glViewport") == 0) {
+    return reinterpret_cast<void*>(mockViewport);
   } else {
     return reinterpret_cast<void*>(&doNothing);
   }
