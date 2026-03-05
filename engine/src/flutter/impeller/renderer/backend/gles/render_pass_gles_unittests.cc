@@ -116,48 +116,75 @@ INSTANTIATE_TEST_SUITE_P(
       return (info.param.frame_buffer_id == 0) ? "Default" : "NonDefault";
     });
 
-TEST(RenderPassGLESTest, ViewportCachedAcrossCommands) {
-  std::unique_ptr<NiceMock<MockGLESImpl>> mock_gl_impl =
-      std::make_unique<NiceMock<MockGLESImpl>>();
-  testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = *mock_gl_impl;
-  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gl_impl));
+class RenderPassGLESViewportTest : public ::testing::Test {
+ protected:
+  struct RenderPassGLESContext {
+    std::shared_ptr<MockGLES> mock_gl;
+    testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref;
+    std::shared_ptr<ContextGLES> context;
+    std::shared_ptr<MockWorker> dummy_worker;
+    std::shared_ptr<ReactorGLES> reactor;
+    std::shared_ptr<CommandBuffer> command_buffer;
+    std::shared_ptr<RenderPass> render_pass;
+    std::shared_ptr<PipelineGLES> pipeline;
+  };
 
-  std::shared_ptr<ContextGLES> context = CreateFakeGLESContext();
-  std::shared_ptr<MockWorker> dummy_worker = std::make_shared<MockWorker>();
-  context->AddReactorWorker(dummy_worker);
-  std::shared_ptr<ReactorGLES> reactor = context->GetReactor();
+  RenderPassGLESContext CreateRenderPassGLESContext() {
+    std::unique_ptr<NiceMock<MockGLESImpl>> mock_gl_impl =
+        std::make_unique<NiceMock<MockGLESImpl>>();
+    testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = *mock_gl_impl;
+    std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gl_impl));
 
-  TextureDescriptor tex_desc;
-  tex_desc.size = {100, 100};
-  tex_desc.format = PixelFormat::kR8G8B8A8UNormInt;
-  auto texture = std::make_shared<TextureGLES>(reactor, tex_desc, false);
+    std::shared_ptr<ContextGLES> context = CreateFakeGLESContext();
+    std::shared_ptr<MockWorker> dummy_worker = std::make_shared<MockWorker>();
+    context->AddReactorWorker(dummy_worker);
+    std::shared_ptr<ReactorGLES> reactor = context->GetReactor();
 
-  RenderTarget target;
-  ColorAttachment color0;
-  color0.texture = texture;
-  color0.store_action = StoreAction::kDontCare;
-  color0.load_action = LoadAction::kClear;
-  target.SetColorAttachment(color0, 0);
+    TextureDescriptor tex_desc;
+    tex_desc.size = {100, 100};
+    tex_desc.format = PixelFormat::kR8G8B8A8UNormInt;
+    auto texture = std::make_shared<TextureGLES>(reactor, tex_desc, false);
 
-  std::shared_ptr<CommandBuffer> command_buffer =
-      std::static_pointer_cast<Context>(context)->CreateCommandBuffer();
-  std::shared_ptr<RenderPass> render_pass =
-      command_buffer->CreateRenderPass(target);
+    RenderTarget target;
+    ColorAttachment color0;
+    color0.texture = texture;
+    color0.store_action = StoreAction::kDontCare;
+    color0.load_action = LoadAction::kClear;
+    target.SetColorAttachment(color0, 0);
 
-  EXPECT_CALL(mock_gl_impl_ref, CheckFramebufferStatus(_))
-      .WillRepeatedly(Return(GL_FRAMEBUFFER_COMPLETE));
+    std::shared_ptr<CommandBuffer> command_buffer =
+        std::static_pointer_cast<Context>(context)->CreateCommandBuffer();
+    std::shared_ptr<RenderPass> render_pass =
+        command_buffer->CreateRenderPass(target);
 
-  PipelineDescriptor desc;
-  ColorAttachmentDescriptor color0_desc;
-  color0_desc.format = PixelFormat::kR8G8B8A8UNormInt;
-  desc.SetColorAttachmentDescriptor(0, color0_desc);
+    EXPECT_CALL(mock_gl_impl_ref, CheckFramebufferStatus(_))
+        .WillRepeatedly(Return(GL_FRAMEBUFFER_COMPLETE));
 
-  HandleGLES pipeline_handle = reactor->CreateHandle(HandleType::kProgram);
-  std::shared_ptr<PipelineGLES> pipeline =
-      std::shared_ptr<PipelineGLES>(new PipelineGLES(
-          reactor, std::weak_ptr<PipelineLibrary>(), desc,
-          std::make_shared<UniqueHandleGLES>(reactor, pipeline_handle)));
-  pipeline->buffer_bindings_ = std::make_unique<BufferBindingsGLES>();
+    PipelineDescriptor desc;
+    ColorAttachmentDescriptor color0_desc;
+    color0_desc.format = PixelFormat::kR8G8B8A8UNormInt;
+    desc.SetColorAttachmentDescriptor(0, color0_desc);
+
+    HandleGLES pipeline_handle = reactor->CreateHandle(HandleType::kProgram);
+    std::shared_ptr<PipelineGLES> pipeline =
+        std::shared_ptr<PipelineGLES>(new PipelineGLES(
+            reactor, std::weak_ptr<PipelineLibrary>(), desc,
+            std::make_shared<UniqueHandleGLES>(reactor, pipeline_handle)));
+    pipeline->buffer_bindings_ = std::make_unique<BufferBindingsGLES>();
+
+    return {std::move(mock_gl),     mock_gl_impl_ref,
+            std::move(context),     std::move(dummy_worker),
+            std::move(reactor),     std::move(command_buffer),
+            std::move(render_pass), std::move(pipeline)};
+  }
+};
+
+TEST_F(RenderPassGLESViewportTest, ViewportCachedAcrossCommands) {
+  auto ctx = CreateRenderPassGLESContext();
+  testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = ctx.mock_gl_impl_ref;
+  std::shared_ptr<RenderPass>& render_pass = ctx.render_pass;
+  std::shared_ptr<PipelineGLES>& pipeline = ctx.pipeline;
+  std::shared_ptr<ReactorGLES>& reactor = ctx.reactor;
 
   render_pass->SetPipeline(PipelineRef(pipeline));
   render_pass->SetElementCount(1);
@@ -188,48 +215,13 @@ TEST(RenderPassGLESTest, ViewportCachedAcrossCommands) {
   EXPECT_TRUE(reactor->React());
 }
 
-TEST(RenderPassGLESTest, CommandsWithoutViewportGetRenderPassViewport) {
-  std::unique_ptr<NiceMock<MockGLESImpl>> mock_gl_impl =
-      std::make_unique<NiceMock<MockGLESImpl>>();
-  testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = *mock_gl_impl;
-  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gl_impl));
-
-  std::shared_ptr<ContextGLES> context = CreateFakeGLESContext();
-  std::shared_ptr<MockWorker> dummy_worker = std::make_shared<MockWorker>();
-  context->AddReactorWorker(dummy_worker);
-  std::shared_ptr<ReactorGLES> reactor = context->GetReactor();
-
-  TextureDescriptor tex_desc;
-  tex_desc.size = {100, 100};
-  tex_desc.format = PixelFormat::kR8G8B8A8UNormInt;
-  auto texture = std::make_shared<TextureGLES>(reactor, tex_desc, false);
-
-  RenderTarget target;
-  ColorAttachment color0;
-  color0.texture = texture;
-  color0.store_action = StoreAction::kDontCare;
-  color0.load_action = LoadAction::kClear;
-  target.SetColorAttachment(color0, 0);
-
-  std::shared_ptr<CommandBuffer> command_buffer =
-      std::static_pointer_cast<Context>(context)->CreateCommandBuffer();
-  std::shared_ptr<RenderPass> render_pass =
-      command_buffer->CreateRenderPass(target);
-
-  EXPECT_CALL(mock_gl_impl_ref, CheckFramebufferStatus(_))
-      .WillRepeatedly(Return(GL_FRAMEBUFFER_COMPLETE));
-
-  PipelineDescriptor desc;
-  ColorAttachmentDescriptor color0_desc;
-  color0_desc.format = PixelFormat::kR8G8B8A8UNormInt;
-  desc.SetColorAttachmentDescriptor(0, color0_desc);
-
-  HandleGLES pipeline_handle = reactor->CreateHandle(HandleType::kProgram);
-  std::shared_ptr<PipelineGLES> pipeline =
-      std::shared_ptr<PipelineGLES>(new PipelineGLES(
-          reactor, std::weak_ptr<PipelineLibrary>(), desc,
-          std::make_shared<UniqueHandleGLES>(reactor, pipeline_handle)));
-  pipeline->buffer_bindings_ = std::make_unique<BufferBindingsGLES>();
+TEST_F(RenderPassGLESViewportTest,
+       CommandsWithoutViewportGetRenderPassViewport) {
+  auto ctx = CreateRenderPassGLESContext();
+  testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = ctx.mock_gl_impl_ref;
+  std::shared_ptr<RenderPass>& render_pass = ctx.render_pass;
+  std::shared_ptr<PipelineGLES>& pipeline = ctx.pipeline;
+  std::shared_ptr<ReactorGLES>& reactor = ctx.reactor;
 
   render_pass->SetPipeline(PipelineRef(pipeline));
   render_pass->SetElementCount(1);

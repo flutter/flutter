@@ -16,8 +16,7 @@ namespace impeller {
 class PipelineLibraryGLES;
 
 namespace testing {
-class RenderPassGLESTest_ViewportCachedAcrossCommands_Test;
-class RenderPassGLESTest_CommandsWithoutViewportGetRenderPassViewport_Test;
+class RenderPassGLESViewportTest;
 }  // namespace testing
 
 class PipelineGLES final
@@ -42,9 +41,7 @@ class PipelineGLES final
 
  private:
   friend PipelineLibraryGLES;
-  friend class testing::RenderPassGLESTest_ViewportCachedAcrossCommands_Test;
-  friend class testing::
-      RenderPassGLESTest_CommandsWithoutViewportGetRenderPassViewport_Test;
+  friend class testing::RenderPassGLESViewportTest;
 
   std::shared_ptr<ReactorGLES> reactor_;
   std::shared_ptr<UniqueHandleGLES> handle_;
