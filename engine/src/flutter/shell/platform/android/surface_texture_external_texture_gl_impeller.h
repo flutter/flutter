@@ -29,6 +29,12 @@ class SurfaceTextureExternalTextureGLImpeller
   // |SurfaceTextureExternalTexture|
   ~SurfaceTextureExternalTextureGLImpeller() override;
 
+ protected:
+  // |SurfaceTextureExternalTexture|
+  sk_sp<flutter::DlImage> GetTextureImage(PaintContext& context,
+                                          const DlRect& bounds,
+                                          bool freeze) override;
+
  private:
   // |SurfaceTextureExternalTexture|
   virtual void ProcessFrame(PaintContext& context,

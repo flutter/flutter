@@ -111,7 +111,7 @@ class SurfaceTextureExternalTexture : public flutter::Texture {
   AttachmentState state_ = AttachmentState::kUninitialized;
   sk_sp<flutter::DlImage> dl_image_;
 
- private:
+ protected:
   SkM44 transform_;
 
   // |Texture|
@@ -119,6 +119,7 @@ class SurfaceTextureExternalTexture : public flutter::Texture {
                                  const DlRect& bounds,
                                  bool freeze) override;
 
+ private:
   // |Texture|
   void Paint(PaintContext& context,
              const DlRect& bounds,

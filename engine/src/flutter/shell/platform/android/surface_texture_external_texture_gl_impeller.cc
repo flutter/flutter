@@ -5,6 +5,9 @@
 #include "flutter/shell/platform/android/surface_texture_external_texture_gl_impeller.h"
 
 #include "flutter/impeller/display_list/dl_image_impeller.h"
+#include "flutter/impeller/entity/contents/tiled_texture_contents.h"
+#include "flutter/impeller/entity/entity.h"
+#include "flutter/impeller/entity/geometry/geometry.h"
 
 namespace flutter {
 
@@ -19,6 +22,66 @@ SurfaceTextureExternalTextureGLImpeller::
 
 SurfaceTextureExternalTextureGLImpeller::
     ~SurfaceTextureExternalTextureGLImpeller() = default;
+
+sk_sp<flutter::DlImage>
+SurfaceTextureExternalTextureGLImpeller::GetTextureImage(PaintContext& context,
+                                                         const DlRect& bounds,
+                                                         bool freeze) {
+  sk_sp<DlImage> image =
+      SurfaceTextureExternalTexture::GetTextureImage(context, bounds, freeze);
+  if (!image) {
+    return nullptr;
+  }
+
+  // When snapshotted (e.g., via getImageFromTexture where context.canvas is
+  // null), we must rasterize the OES texture into a standard 2D texture because
+  // OES textures report a 1x1 size and lack UV matrix support in standard
+  // Impeller shaders.
+  if (context.canvas == nullptr && context.aiks_context != nullptr) {
+    auto texture = image->impeller_texture();
+    if (!texture) {
+      return image;
+    }
+
+    auto contents = std::make_shared<impeller::TiledTextureContents>();
+    contents->SetTexture(texture);
+
+    auto geometry = impeller::Geometry::MakeRect(
+        impeller::Rect::MakeXYWH(0, 0, bounds.GetWidth(), bounds.GetHeight()));
+
+    contents->SetGeometry(geometry.get());
+
+    impeller::Matrix dl_transform;
+    GetCurrentUVTransformation().getColMajor(
+        reinterpret_cast<SkScalar*>(&dl_transform));
+    dl_transform = dl_transform.Invert();
+
+    impeller::Matrix effect_transform =
+        impeller::Matrix::MakeTranslation(
+            {0.0f, static_cast<float>(bounds.GetHeight()), 0.0f}) *
+        impeller::Matrix::MakeScale({static_cast<float>(bounds.GetWidth()),
+                                     -static_cast<float>(bounds.GetHeight()),
+                                     1.0f}) *
+        dl_transform;
+
+    contents->SetEffectTransform(effect_transform);
+
+    impeller::Entity entity;
+    entity.SetBlendMode(impeller::BlendMode::kSrc);
+
+    auto snapshot = contents->RenderToSnapshot(
+        context.aiks_context->GetContentContext(), entity,
+        impeller::Contents::SnapshotOptions{
+            .label = "OES Rasterization Snapshot",
+        });
+
+    if (snapshot.has_value()) {
+      return impeller::DlImageImpeller::Make(snapshot.value().texture);
+    }
+  }
+
+  return image;
+}
 
 void SurfaceTextureExternalTextureGLImpeller::ProcessFrame(
     PaintContext& context,
