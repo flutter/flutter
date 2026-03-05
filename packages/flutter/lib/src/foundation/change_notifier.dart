@@ -323,6 +323,7 @@ mixin class ChangeNotifier implements DartChangeNotifier {
   /// See the discussion at [removeListener].
   @protected
   @visibleForTesting
+  @override
   @pragma('vm:notify-debugger-on-exception')
   void notifyListeners() {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
