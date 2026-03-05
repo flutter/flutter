@@ -13,13 +13,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'widgets_app_tester.dart';
 
-const Color _debugRed = Color(0xFFFF0000);
+const Color _debugBlack = Color(0xFF000000);
 
 void main() {
   testWidgets('PhysicalModel updates clipBehavior in updateRenderObject', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const TestWidgetsApp(home: PhysicalModel(color: _debugRed)));
+    await tester.pumpWidget(const TestWidgetsApp(home: PhysicalModel(color: _debugBlack)));
 
     final RenderPhysicalModel renderPhysicalModel = tester.allRenderObjects
         .whereType<RenderPhysicalModel>()
@@ -29,7 +29,7 @@ void main() {
 
     await tester.pumpWidget(
       const TestWidgetsApp(
-        home: PhysicalModel(clipBehavior: Clip.antiAlias, color: _debugRed),
+        home: PhysicalModel(clipBehavior: Clip.antiAlias, color: _debugBlack),
       ),
     );
 
@@ -42,7 +42,7 @@ void main() {
     await tester.pumpWidget(
       const TestWidgetsApp(
         home: PhysicalShape(
-          color: _debugRed,
+          color: _debugBlack,
           clipper: ShapeBorderClipper(shape: CircleBorder()),
         ),
       ),
@@ -58,7 +58,7 @@ void main() {
       const TestWidgetsApp(
         home: PhysicalShape(
           clipBehavior: Clip.antiAlias,
-          color: _debugRed,
+          color: _debugBlack,
           clipper: ShapeBorderClipper(shape: CircleBorder()),
         ),
       ),
@@ -82,19 +82,19 @@ void main() {
             child: Row(
               children: <Widget>[
                 PhysicalModel(
-                  color: _debugRed,
+                  color: _debugBlack,
                   child: Text('A long long long long long long long string'),
                 ),
                 PhysicalModel(
-                  color: _debugRed,
+                  color: _debugBlack,
                   child: Text('A long long long long long long long string'),
                 ),
                 PhysicalModel(
-                  color: _debugRed,
+                  color: _debugBlack,
                   child: Text('A long long long long long long long string'),
                 ),
                 PhysicalModel(
-                  color: _debugRed,
+                  color: _debugBlack,
                   child: Text('A long long long long long long long string'),
                 ),
               ],
