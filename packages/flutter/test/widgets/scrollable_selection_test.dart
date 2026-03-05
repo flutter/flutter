@@ -1671,10 +1671,7 @@ void main() {
                           },
                         ),
                       ),
-                      ...List<Widget>.generate(
-                        30,
-                        (int index) => Text('Outer item $index'),
-                      ),
+                      ...List<Widget>.generate(30, (int index) => Text('Outer item $index')),
                     ],
                   ),
                 ),
