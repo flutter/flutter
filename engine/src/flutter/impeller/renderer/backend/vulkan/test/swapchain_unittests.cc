@@ -138,7 +138,7 @@ TEST(SwapchainTest, CachesRenderPassOnSwapchainImage) {
 }
 
 TEST(SwapchainTest, NoFenceWaitAfterAcquireNextImageFailure) {
-  bool wait_for_fences_called;
+  bool wait_for_fences_called = false;
   auto const context =
       MockVulkanContextBuilder()
           .SetAcquireNextImageCallback(
