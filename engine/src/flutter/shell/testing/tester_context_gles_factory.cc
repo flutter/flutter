@@ -115,12 +115,13 @@ class TesterGLESDelegate : public GPUSurfaceGLDelegate {
     }
   }
 
-  bool IsContextCurrent() const { return ::eglGetCurrentContext() == context_; }
+  bool MakeContextCurrent() {
+    return ::eglMakeCurrent(display_, surface_, surface_, context_) == EGL_TRUE;
+  }
 
   // |GPUSurfaceGLDelegate|
   std::unique_ptr<GLContextResult> GLContextMakeCurrent() override {
-    return std::make_unique<GLContextDefaultResult>(
-        ::eglMakeCurrent(display_, surface_, surface_, context_) == EGL_TRUE);
+    return std::make_unique<GLContextDefaultResult>(MakeContextCurrent());
   }
 
   // |GPUSurfaceGLDelegate|
@@ -162,7 +163,7 @@ class TesterGLESWorker : public impeller::ReactorGLES::Worker {
 
   bool CanReactorReactOnCurrentThreadNow(
       const impeller::ReactorGLES& reactor) const override {
-    return delegate_->GLContextMakeCurrent()->GetResult();
+    return delegate_->MakeContextCurrent();
   }
 
  private:
@@ -189,8 +190,7 @@ class TesterContextGLES : public TesterContext {
     delegate_ = std::make_unique<TesterGLESDelegate>(
         std::move(delegate_status.value()));
 
-    auto switch_result = delegate_->GLContextMakeCurrent();
-    if (!switch_result->GetResult()) {
+    if (!delegate_->MakeContextCurrent()) {
       FML_LOG(ERROR) << "Could not make GLES context current.";
       return false;
     }
