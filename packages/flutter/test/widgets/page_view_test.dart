@@ -455,9 +455,8 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: SizedBox(
-            width: 200.0,
-            height: 200.0,
+          child: SizedBox.square(
+            dimension: 200.0,
             child: PageView(children: kStates.map<Widget>((String state) => Text(state)).toList()),
           ),
         ),
