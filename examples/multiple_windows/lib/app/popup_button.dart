@@ -111,7 +111,7 @@ class _PopupButtonState extends State<PopupButton> {
   }
 
   void _onPressed(
-    final WindowManager windowManager,
+    final KeyedWindowManager windowManager,
     final WindowSettings windowSettings,
   ) {
     // Toggle popup visibility.
@@ -171,7 +171,9 @@ class _PopupButtonState extends State<PopupButton> {
 
   @override
   Widget build(BuildContext context) {
-    final WindowManager windowManager = WindowManagerAccessor.of(context);
+    final KeyedWindowManager windowManager = KeyedWindowManagerAccessor.of(
+      context,
+    );
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
 
     return ViewAnchor(
