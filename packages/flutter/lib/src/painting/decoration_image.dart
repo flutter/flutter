@@ -61,6 +61,7 @@ class DecorationImage {
     this.filterQuality = FilterQuality.medium,
     this.invertColors = false,
     this.isAntiAlias = false,
+    this.destinationOffset = Offset.zero,
   });
 
   /// The image to be painted into the decoration.
@@ -174,6 +175,9 @@ class DecorationImage {
   /// Anti-aliasing alleviates the sawtooth artifact when the image is rotated.
   final bool isAntiAlias;
 
+  /// only translate dx, dy.
+  final Offset destinationOffset;
+
   /// Creates a [DecorationImagePainter] for this [DecorationImage].
   ///
   /// The `onChanged` argument will be called whenever the image needs to be
@@ -203,7 +207,8 @@ class DecorationImage {
         other.opacity == opacity &&
         other.filterQuality == filterQuality &&
         other.invertColors == invertColors &&
-        other.isAntiAlias == isAntiAlias;
+        other.isAntiAlias == isAntiAlias &&
+        other.destinationOffset == destinationOffset;
   }
 
   @override
@@ -220,6 +225,7 @@ class DecorationImage {
     filterQuality,
     invertColors,
     isAntiAlias,
+    destinationOffset,
   );
 
   @override
@@ -240,6 +246,7 @@ class DecorationImage {
       '$filterQuality',
       if (invertColors) 'invert colors',
       if (isAntiAlias) 'use anti-aliasing',
+      'destinationOffset $destinationOffset',
     ];
     return '${objectRuntimeType(this, 'DecorationImage')}(${properties.join(", ")})';
   }
@@ -403,6 +410,7 @@ class _DecorationImagePainter implements DecorationImagePainter {
       invertColors: _details.invertColors,
       isAntiAlias: _details.isAntiAlias,
       blendMode: blendMode,
+      destinationOffset: _details.destinationOffset,
     );
 
     if (clipPath != null) {
@@ -540,6 +548,7 @@ void paintImage({
   FilterQuality filterQuality = FilterQuality.medium,
   bool isAntiAlias = false,
   BlendMode blendMode = BlendMode.srcOver,
+  Offset destinationOffset = Offset.zero,
 }) {
   assert(
     image.debugGetOpenHandleStackTraces()?.isNotEmpty ?? true,
@@ -592,7 +601,7 @@ void paintImage({
   final double dx =
       halfWidthDelta + (flipHorizontally ? -alignment.x : alignment.x) * halfWidthDelta;
   final double dy = halfHeightDelta + alignment.y * halfHeightDelta;
-  final Offset destinationPosition = rect.topLeft.translate(dx, dy);
+  final Offset destinationPosition = rect.topLeft.translate(dx + destinationOffset.dx, dy + destinationOffset.dy);
   final Rect destinationRect = destinationPosition & destinationSize;
 
   // Set to true if we added a saveLayer to the canvas to invert/flip the image.
@@ -817,6 +826,8 @@ class _BlendedDecorationImage implements DecorationImage {
   bool get invertColors => b?.invertColors ?? a!.invertColors;
   @override
   bool get isAntiAlias => b?.isAntiAlias ?? a!.isAntiAlias;
+  @override
+  Offset get destinationOffset => b?.destinationOffset ?? a!.destinationOffset;
 
   @override
   DecorationImagePainter createPainter(VoidCallback onChanged) {
