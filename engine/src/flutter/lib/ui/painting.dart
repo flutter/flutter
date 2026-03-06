@@ -3016,8 +3016,8 @@ abstract class Path {
   /// The line segment added if `forceMoveTo` is false starts at the
   /// current point and ends at the start of the arc. Note that this
   /// method does not draw anything if the [sweepAngle] is a multiple
-  /// of $2\pi$ (e.g., $2\pi$, $4\pi$). If you need to draw a
-  /// full circle or an overlapping arc, use [addArc] as a workaround.
+  /// of $2\pi$ (e.g., $2\pi$, $4\pi$). If you need to draw a full
+  /// circle or an overlapping arc, use [addArc] as a workaround.
   void arcTo(Rect rect, double startAngle, double sweepAngle, bool forceMoveTo);
 
   /// Appends up to four conic curves weighted to describe an oval of `radius`
