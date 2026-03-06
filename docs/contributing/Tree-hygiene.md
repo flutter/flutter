@@ -323,20 +323,20 @@ PRs prepared using AI tools must follow these requirements:
 
 1. You must review all AI-generated code before opening a (non-draft) PR, and before requesting
    re-review of any updates to the PR.
-  * You are responsible for ensuring that code you submit meets the Flutter project’s standards.
-  * Unmodified AI output generally does not meet those standards.
+   * You are responsible for ensuring that code you submit meets the Flutter project’s standards.
+   * Unmodified AI output generally does not meet those standards.
 2. You must understand and be able to discuss the code in the PR.
-  * Non-trivial PRs require discussion and iteration during review. If you do not understand the
-    code, you cannot meaningfully respond to review feedback.
-  * In our experience, simply feeding review feedback into an AI agent and uncritically reposting
-    its output will not lead to a constructive review.
+   * Non-trivial PRs require discussion and iteration during review. If you do not understand the
+     code, you cannot meaningfully respond to review feedback.
+   * In our experience, simply feeding review feedback into an AI agent and uncritically reposting
+     its output will not lead to a constructive review.
 3. You must verify the accuracy of any AI-generated text you include in the PR description or
    review discussion comments.
-  * If an AI provides you incorrect information, it is just hallucinating; if you choose to paste
-    that text into GitHub, you are misrepresenting your PR to your reviewer.
-  * In particular, do not tell a reviewer that you have addressed their feedback just because
-    AI output says so. It is your responsibility to make sure that review feedback has actually
-    been addressed.
+   * If an AI provides you incorrect information, it is just hallucinating; if you choose to paste
+     that text into GitHub, you are misrepresenting your PR to your reviewer.
+   * In particular, do not tell a reviewer that you have addressed their feedback just because
+     AI output says so. It is your responsibility to make sure that review feedback has actually
+     been addressed.
 
 ### Reviewer guidelines
 
