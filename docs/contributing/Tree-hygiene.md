@@ -380,7 +380,7 @@ we have seen that these behaviors are orders of magnitude more common when AI is
   always a problem. This was rare before the widespread use of AI agents, but is more common with
   AI-assisted development.
 * Having several rounds of exchanges where a reviewer asks for a change, and the contributor says
-  that they have made that change but hasn’t, is always a waste of reviewer time. It’s very rare
+  that they have made that change but haven't, is always a waste of reviewer time. It’s very rare
   for a contributor to deliberately and obviously lie to a reviewer, but unfortunately common
   for contributors to uncritically repeat AI agent hallucinations.
 * PRs that ignore our process have always been problematic, because standardizing the PR process
