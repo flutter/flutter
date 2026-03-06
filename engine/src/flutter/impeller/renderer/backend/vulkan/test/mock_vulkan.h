@@ -117,14 +117,14 @@ class MockVulkanContextBuilder {
   MockVulkanContextBuilder SetAcquireNextImageCallback(
       std::function<std::remove_pointer_t<PFN_vkAcquireNextImageKHR>>
           acquire_next_image_callback) {
-    acquire_next_image_callback_ = acquire_next_image_callback;
+    acquire_next_image_callback_ = std::move(acquire_next_image_callback);
     return *this;
   }
 
   MockVulkanContextBuilder SetWaitForFencesCallback(
       std::function<std::remove_pointer_t<PFN_vkWaitForFences>>
           wait_for_fences_callback) {
-    wait_for_fences_callback_ = wait_for_fences_callback;
+    wait_for_fences_callback_ = std::move(wait_for_fences_callback);
     return *this;
   }
 
