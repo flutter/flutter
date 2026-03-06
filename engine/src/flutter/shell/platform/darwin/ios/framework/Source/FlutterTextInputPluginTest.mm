@@ -69,14 +69,7 @@ FLUTTER_ASSERT_ARC
 @property(nonatomic, readonly) UIView* keyboardView;
 @property(nonatomic, assign) UIView* cachedFirstResponder;
 @property(nonatomic, readonly) CGRect keyboardRect;
-// Whether the client disconnected while an autofill context was active.
-// The removeFromSuperview call is delayed until triggerAutofillSave
-// to avoid prematurely ending the autofill session.
 @property(nonatomic, readonly) BOOL pendingAutofillRemoval;
-// Whether the client disconnected without sending a hideText message.
-// This can indicate that the focus is being switched to a different
-// text field and to prevent flickering the removeFromSuperview
-// call should be delayed until hideTextInput.
 @property(nonatomic, readonly) BOOL pendingInputViewRemoval;
 @property(nonatomic, readonly)
     NSMutableDictionary<NSString*, FlutterTextInputView*>* autofillContext;

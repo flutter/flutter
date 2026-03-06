@@ -2497,7 +2497,14 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 // The current password-autofillable input fields that have yet to be saved.
 @property(nonatomic, readonly)
     NSMutableDictionary<NSString*, FlutterTextInputView*>* autofillContext;
+// Whether the client disconnected while an autofill context was active.
+// The removeFromSuperview call is delayed until triggerAutofillSave
+// to avoid prematurely ending the autofill session.
 @property(nonatomic, readonly) BOOL pendingAutofillRemoval;
+// Whether the client disconnected without sending a hideText message.
+// This can indicate that the focus is being switched to a different
+// text field and to prevent flickering the removeFromSuperview
+// call should be delayed until hideTextInput.
 @property(nonatomic, readonly) BOOL pendingInputViewRemoval;
 @property(nonatomic, retain) FlutterTextInputView* activeView;
 @property(nonatomic, retain) FlutterTextInputViewAccessibilityHider* inputHider;
