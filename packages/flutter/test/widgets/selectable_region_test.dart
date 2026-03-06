@@ -6610,6 +6610,57 @@ void main() {
       SystemMouseCursors.grab,
     );
   });
+
+  testWidgets(
+    'SelectableRegion does not leak selection from removed selectable into new selectable',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/183331.
+      var showFirst = true;
+      late StateSetter setState;
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter localSetState) {
+              setState = localSetState;
+              return SelectableRegion(
+                selectionControls: emptyTextSelectionControls,
+                child: showFirst ? const Text('First Item') : const Text('Second Item'),
+              );
+            },
+          ),
+        ),
+      );
+
+      // Select "First Item".
+      final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('First Item'), matching: find.byType(RichText)),
+      );
+
+      final TestGesture dragGesture = await tester.startGesture(
+        textOffsetToPosition(paragraph1, 0),
+        kind: PointerDeviceKind.mouse,
+      );
+      await tester.pump();
+      await dragGesture.moveTo(textOffsetToPosition(paragraph1, 10));
+      await tester.pump();
+      await dragGesture.up();
+      await tester.pumpAndSettle();
+      expect(paragraph1.selections, isNotEmpty);
+
+      // Switch to "Second Item".
+      setState(() {
+        showFirst = false;
+      });
+      await tester.pump();
+
+      // Verify "Second Item" is NOT selected.
+      final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('Second Item'), matching: find.byType(RichText)),
+      );
+      expect(paragraph2.selections, isEmpty);
+    },
+  );
 }
 
 class ColumnSelectionContainerDelegate extends StaticSelectionContainerDelegate {
