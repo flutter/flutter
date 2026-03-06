@@ -192,6 +192,10 @@ class AndroidValidator extends DoctorValidator {
   String _androidSdkPlatformToolsVersion(String platform, String tools) =>
       'Platform $platform, build-tools $tools';
 
+  String _androidBadSdkDir(String envKey, String homeDir) =>
+      '$envKey = $homeDir\n'
+      'but Android SDK not found at this location.';
+
   @override
   Future<ValidationResult> validateImpl() async {
     final messages = <ValidationMessage>[];
@@ -200,9 +204,7 @@ class AndroidValidator extends DoctorValidator {
       // No Android SDK found.
       if (_platform.environment.containsKey(kAndroidHome)) {
         final String androidHomeDir = _platform.environment[kAndroidHome]!;
-        messages.add(
-          ValidationMessage.error(_userMessages.androidBadSdkDir(kAndroidHome, androidHomeDir)),
-        );
+        messages.add(ValidationMessage.error(_androidBadSdkDir(kAndroidHome, androidHomeDir)));
       } else {
         // Instruct user to set [kAndroidSdkRoot] and not deprecated [kAndroidHome]
         // See https://github.com/flutter/flutter/issues/39301

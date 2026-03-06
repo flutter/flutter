@@ -28,9 +28,6 @@ class UserMessages {
       'You may also want to add it to your PATH environment variable.\n\n'
       'Certain features, such as `flutter emulators` and `flutter devices`, will '
       'not work without the currently missing SDK components.';
-  String androidBadSdkDir(String envKey, String homeDir) =>
-      '$envKey = $homeDir\n'
-      'but Android SDK not found at this location.';
   String androidMissingSdkInstructions(Platform platform) =>
       'Unable to locate Android SDK.\n'
       'Install Android Studio from: https://developer.android.com/studio/index.html\n'
