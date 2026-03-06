@@ -726,7 +726,7 @@ void main() {
       expect(client.latestMethodCall, 'connectionClosed');
     });
 
-    test('TextInputClient refocus method is called', () async {
+    test('TextInputClient onFocusReceived method is called', () async {
       final client = FakeTextInputClient(const TextEditingValue(text: 'test3'));
       const configuration = TextInputConfiguration();
       final TextInputConnection connection = TextInput.attach(client, configuration);
@@ -742,7 +742,7 @@ void main() {
       // Send refocu message to re-establish the connection.
       final ByteData? messageBytes2 = const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[1],
-        'method': 'TextInputClient.refocus',
+        'method': 'TextInputClient.onFocusReceived',
       });
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
@@ -750,10 +750,10 @@ void main() {
         (ByteData? _) {},
       );
 
-      expect(client.latestMethodCall, 'refocus');
+      expect(client.latestMethodCall, 'onFocusReceived');
     });
 
-    test('TextInputClient refocus method is not called if already connected', () async {
+    test('TextInputClient onFocusReceived method is called even if already connected', () async {
       final client = FakeTextInputClient(const TextEditingValue(text: 'test3'));
       const configuration = TextInputConfiguration();
       final TextInputConnection connection = TextInput.attach(client, configuration);
@@ -761,10 +761,10 @@ void main() {
       expect(connection.attached, isTrue);
       expect(client.latestMethodCall, isEmpty);
 
-      // Send refocus message to re-establish the connection.
+      // Send onFocusReceived message to re-establish the connection.
       final ByteData? messageBytes2 = const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'args': <dynamic>[1],
-        'method': 'TextInputClient.refocus',
+        'method': 'TextInputClient.onFocusReceived',
       });
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
@@ -772,9 +772,8 @@ void main() {
         (ByteData? _) {},
       );
 
-      // But the connection is already established, so nothing happens.
       expect(connection.attached, isTrue);
-      expect(client.latestMethodCall, isEmpty);
+      expect(client.latestMethodCall, 'onFocusReceived');
     });
 
     test('TextInputClient insertContent method is called', () async {
@@ -1677,8 +1676,8 @@ class FakeTextInputClient with TextInputClient {
   }
 
   @override
-  void refocus() {
-    latestMethodCall = 'refocus';
+  void onFocusReceived() {
+    latestMethodCall = 'onFocusReceived';
   }
 }
 

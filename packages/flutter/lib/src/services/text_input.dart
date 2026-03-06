@@ -1373,7 +1373,7 @@ mixin TextInputClient {
   ///
   /// This is necessary to support autofill on some browsers (e.g. iOS Safari) that blur the text
   /// field and refocus it before autofilling.
-  void refocus() {}
+  void onFocusReceived() {}
 
   /// Platform notified framework of closed connection.
   ///
@@ -2158,13 +2158,11 @@ class TextInput {
       case 'TextInputClient.scribbleInteractionFinished':
         _scribbleInProgress = false;
         return;
-      case 'TextInputClient.refocus':
+      case 'TextInputClient.onFocusReceived':
         final args = methodCall.arguments as List<dynamic>;
         final clientId = args[0] as int;
-        if (_currentConnection == null &&
-            _lastConnection != null &&
-            _lastConnection!._id == clientId) {
-          _lastConnection!._client.refocus();
+        if (_lastConnection != null && _lastConnection!._id == clientId) {
+          _lastConnection!._client.onFocusReceived();
         }
         return;
     }

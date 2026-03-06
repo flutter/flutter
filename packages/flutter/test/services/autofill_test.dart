@@ -205,8 +205,8 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
   }
 
   @override
-  void refocus() {
-    latestMethodCall = 'refocus';
+  void onFocusReceived() {
+    latestMethodCall = 'onFocusReceived';
   }
 
   @override

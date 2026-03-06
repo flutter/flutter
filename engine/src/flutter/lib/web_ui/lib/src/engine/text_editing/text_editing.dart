@@ -2488,12 +2488,12 @@ class TextEditingChannel {
     );
   }
 
-  /// Sends the 'TextInputClient.refocus' message to the framework.
-  void refocus(int? clientId) {
+  /// Sends the 'TextInputClient.onFocusReceived' message to the framework.
+  void onFocusReceived(int? clientId) {
     EnginePlatformDispatcher.instance.invokeOnPlatformMessage(
       'flutter/textinput',
       const JSONMethodCodec().encodeMethodCall(
-        MethodCall('TextInputClient.refocus', <dynamic>[clientId]),
+        MethodCall('TextInputClient.onFocusReceived', <dynamic>[clientId]),
       ),
       _emptyCallback,
     );
@@ -2530,9 +2530,11 @@ class HybridTextEditing {
       // for focus events in order to re-establish the connection with the framework when the text
       // field is focused again for autofill.
       for (final EngineFlutterView view in EnginePlatformDispatcher.instance.views) {
-        _addRefocusListenerToView(view.viewId);
+        _addFocusReceivedListenerToView(view.viewId);
       }
-      EnginePlatformDispatcher.instance.viewManager.onViewCreated.listen(_addRefocusListenerToView);
+      EnginePlatformDispatcher.instance.viewManager.onViewCreated.listen(
+        _addFocusReceivedListenerToView,
+      );
     }
   }
 
@@ -2599,12 +2601,15 @@ class HybridTextEditing {
     }
   }
 
-  void _addRefocusListenerToView(int viewId) {
+  void _addFocusReceivedListenerToView(int viewId) {
     final EngineFlutterView? view = EnginePlatformDispatcher.instance.viewManager[viewId];
-    view!.dom.textEditingHost.addEventListener('focusin', createDomEventListener(_handleRefocus));
+    view!.dom.textEditingHost.addEventListener(
+      'focusin',
+      createDomEventListener(_handleFocusReceived),
+    );
   }
 
-  void _handleRefocus(DomEvent event) {
+  void _handleFocusReceived(DomEvent event) {
     if (isEditing) {
       return;
     }
@@ -2613,7 +2618,7 @@ class HybridTextEditing {
       return;
     }
     if (target.classList.contains(HybridTextEditing.textEditingClass)) {
-      channel.refocus(_clientId);
+      channel.onFocusReceived(_clientId);
     }
   }
 }

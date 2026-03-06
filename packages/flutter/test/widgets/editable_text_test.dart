@@ -1736,7 +1736,7 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
   });
 
-  testWidgets('can re-acquire focus when the platform asks for refocus', (
+  testWidgets('can re-acquire focus when the platform sends onFocusReceived', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -1767,7 +1767,7 @@ void main() {
 
     expect(focusNode.hasFocus, isFalse);
 
-    editableText.refocus();
+    editableText.onFocusReceived();
     await tester.pump();
 
     expect(focusNode.hasFocus, isTrue);
@@ -1812,7 +1812,7 @@ void main() {
       ),
     );
 
-    editableText.refocus();
+    editableText.onFocusReceived();
     await tester.pump();
 
     expect(focusNode.hasFocus, isFalse);
