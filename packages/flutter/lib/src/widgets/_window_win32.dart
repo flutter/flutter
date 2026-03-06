@@ -217,7 +217,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
     BoxConstraints? preferredConstraints,
     String? title,
   }) {
-    throw UnimplementedError('Satellite windows are not yet implement on Windows.');
+    throw UnimplementedError('Satellite windows are not yet implemented on Windows.');
   }
 
   /// Register a new [WindowsMessageHandler].
