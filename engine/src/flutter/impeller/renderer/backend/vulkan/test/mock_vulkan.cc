@@ -418,6 +418,10 @@ void vkDestroyDevice(VkDevice device, const VkAllocationCallbacks* pAllocator) {
   MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
   mock_device->AddCalledFunction("vkDestroyDevice");
   delete reinterpret_cast<MockDevice*>(device);
+}
+
+void vkDestroyInstance(VkInstance instance,
+                       const VkAllocationCallbacks* pAllocator) {
   if (*g_mock_vulkan_state) {
     (*g_mock_vulkan_state).reset();
   }
@@ -565,10 +569,7 @@ VkResult vkWaitForFences(VkDevice device,
                          const VkFence* pFences,
                          VkBool32 waitAll,
                          uint64_t timeout) {
-  if (!*g_mock_vulkan_state) {
-    return VK_SUCCESS;
-  }
-  if (GetMockVulkanState().wait_for_fences_callback) {
+  if (*g_mock_vulkan_state && GetMockVulkanState().wait_for_fences_callback) {
     return GetMockVulkanState().wait_for_fences_callback(
         device, fenceCount, pFences, waitAll, timeout);
   }
@@ -906,6 +907,8 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return reinterpret_cast<PFN_vkVoidFunction>(vkCreateGraphicsPipelines);
   } else if (strcmp("vkDestroyDevice", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyDevice);
+  } else if (strcmp("vkDestroyInstance", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyInstance);
   } else if (strcmp("vkDestroyPipeline", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyPipeline);
   } else if (strcmp("vkCreateShaderModule", pName) == 0) {
