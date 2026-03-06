@@ -1141,5 +1141,4 @@ void main() {
 
     expect(reportedErrors, hasLength(1));
   });
-
 }
