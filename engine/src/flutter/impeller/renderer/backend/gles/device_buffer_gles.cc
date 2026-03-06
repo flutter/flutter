@@ -14,7 +14,7 @@ namespace impeller {
 
 DeviceBufferGLES::DeviceBufferGLES(DeviceBufferDescriptor desc,
                                    std::shared_ptr<ReactorGLES> reactor,
-                                   std::shared_ptr<Allocation> backing_store)
+                                   std::unique_ptr<Allocation> backing_store)
     : DeviceBuffer(desc),
       reactor_(std::move(reactor)),
       backing_store_(std::move(backing_store)) {}
