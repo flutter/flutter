@@ -397,7 +397,8 @@ void main() {
           );
         });
 
-        await channel1.invokeMethod<String>('sayHello', 'hello');
+        // ignore: unawaited_futures
+        channel1.invokeMethod<String>('sayHello', 'hello');
 
         // Calls the waiting API before the second channel message is sent.
         driverExtension
@@ -412,7 +413,8 @@ void main() {
         await tester.pump(const Duration(milliseconds: 5));
         expect(result, isNull);
 
-        await channel2.invokeMethod<String>('sayHello', 'hello');
+        // ignore: unawaited_futures
+        channel2.invokeMethod<String>('sayHello', 'hello');
 
         // Result of channel 1 is received, but channel 2 is still pending, so still waiting.
         await tester.pump(const Duration(milliseconds: 15));
@@ -450,7 +452,8 @@ void main() {
           );
         });
 
-        await channel1.invokeMethod<String>('sayHello', 'hello');
+        // ignore: unawaited_futures
+        channel1.invokeMethod<String>('sayHello', 'hello');
 
         driverExtension
             .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
@@ -464,7 +467,8 @@ void main() {
         await tester.pump(const Duration(milliseconds: 5));
         expect(result, isNull);
 
-        await channel2.invokeMethod<String>('sayHello', 'hello');
+        // ignore: unawaited_futures
+        channel2.invokeMethod<String>('sayHello', 'hello');
 
         // Result of channel 2 is received, but channel 1 is still pending, so still waiting.
         await tester.pump(const Duration(milliseconds: 10));
