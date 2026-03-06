@@ -857,11 +857,23 @@ class MaterialScrollBehavior extends ScrollBehavior {
   Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the base class ScrollBehavior as well.
-    return switch (Theme.of(context).platform) {
-      TargetPlatform.linux || TargetPlatform.macOS || TargetPlatform.windows =>
-        details.controller != null
-            ? Scrollbar(controller: details.controller, child: child)
-            : child,
+
+    // ÖNCE YARDIMCI FONKSİYONU TANIMLA
+    ScrollController? getNonNullController(ScrollableDetails details) {
+      // `Scrollbar` requires a non-null scroll controller for interactivity on
+      // desktop. Asserting here prevents confusing errors that are hard to
+      // trace. This value should never be null, as `ScrollableState` manages a
+      // fallback. The property itself is nullable because there are different
+      // default behaviors on other platforms.
+      assert(details.controller != null);
+      return details.controller;
+    }
+
+    // SONRA RETURN ET
+    return switch (getPlatform(context)) {
+      TargetPlatform.linux ||
+      TargetPlatform.macOS ||
+      TargetPlatform.windows => Scrollbar(controller: getNonNullController(details), child: child),
       TargetPlatform.android || TargetPlatform.fuchsia || TargetPlatform.iOS => child,
     };
   }
