@@ -107,19 +107,44 @@ class MockDevice final {
       IPLR_GUARDED_BY(commmand_pools_mutex_);
 };
 
-void noop() {}
+struct MockVulkanState {
+  std::vector<std::string> instance_extensions;
+  std::vector<std::string> instance_layers;
+  std::function<void(VkPhysicalDevice physicalDevice,
+                     VkFormat format,
+                     VkFormatProperties* pFormatProperties)>
+      format_properties_callback;
+  std::function<void(VkPhysicalDevice physicalDevice,
+                     VkPhysicalDeviceProperties* pProperties)>
+      physical_device_properties_callback;
+  std::function<std::remove_pointer_t<PFN_vkWaitForFences>>
+      wait_for_fences_callback;
+  std::function<std::remove_pointer_t<PFN_vkAcquireNextImageKHR>>
+      acquire_next_image_callback;
 
-static thread_local std::vector<std::string> g_instance_extensions;
+  void Clear() {
+    instance_extensions.clear();
+    instance_layers.clear();
+    format_properties_callback = nullptr;
+    physical_device_properties_callback = nullptr;
+    wait_for_fences_callback = nullptr;
+    acquire_next_image_callback = nullptr;
+  }
+};
+
+static thread_local MockVulkanState g_mock_vulkan_state;
+
+void noop() {}
 
 VkResult vkEnumerateInstanceExtensionProperties(
     const char* pLayerName,
     uint32_t* pPropertyCount,
     VkExtensionProperties* pProperties) {
   if (!pProperties) {
-    *pPropertyCount = g_instance_extensions.size();
+    *pPropertyCount = g_mock_vulkan_state.instance_extensions.size();
   } else {
     uint32_t count = 0;
-    for (const std::string& ext : g_instance_extensions) {
+    for (const std::string& ext : g_mock_vulkan_state.instance_extensions) {
       strncpy(pProperties[count].extensionName, ext.c_str(),
               sizeof(VkExtensionProperties::extensionName));
       pProperties[count].specVersion = 0;
@@ -129,15 +154,13 @@ VkResult vkEnumerateInstanceExtensionProperties(
   return VK_SUCCESS;
 }
 
-static thread_local std::vector<std::string> g_instance_layers;
-
 VkResult vkEnumerateInstanceLayerProperties(uint32_t* pPropertyCount,
                                             VkLayerProperties* pProperties) {
   if (!pProperties) {
-    *pPropertyCount = g_instance_layers.size();
+    *pPropertyCount = g_mock_vulkan_state.instance_layers.size();
   } else {
     uint32_t count = 0;
-    for (const std::string& layer : g_instance_layers) {
+    for (const std::string& layer : g_mock_vulkan_state.instance_layers) {
       strncpy(pProperties[count].layerName, layer.c_str(),
               sizeof(VkLayerProperties::layerName));
       pProperties[count].specVersion = 0;
@@ -158,21 +181,15 @@ VkResult vkEnumeratePhysicalDevices(VkInstance instance,
   return VK_SUCCESS;
 }
 
-static thread_local std::function<void(VkPhysicalDevice physicalDevice,
-                                       VkFormat format,
-                                       VkFormatProperties* pFormatProperties)>
-    g_format_properties_callback;
-
 void vkGetPhysicalDeviceFormatProperties(
     VkPhysicalDevice physicalDevice,
     VkFormat format,
     VkFormatProperties* pFormatProperties) {
-  g_format_properties_callback(physicalDevice, format, pFormatProperties);
+  if (g_mock_vulkan_state.format_properties_callback) {
+    g_mock_vulkan_state.format_properties_callback(physicalDevice, format,
+                                                   pFormatProperties);
+  }
 }
-
-static thread_local std::function<void(VkPhysicalDevice physicalDevice,
-                                       VkPhysicalDeviceProperties* pProperties)>
-    g_physical_device_properties_callback;
 
 void vkGetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice,
                                    VkPhysicalDeviceProperties* pProperties) {
@@ -181,8 +198,9 @@ void vkGetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice,
                                       VK_SAMPLE_COUNT_4_BIT);
   pProperties->limits.maxImageDimension2D = 4096;
   pProperties->limits.timestampPeriod = 1;
-  if (g_physical_device_properties_callback) {
-    g_physical_device_properties_callback(physicalDevice, pProperties);
+  if (g_mock_vulkan_state.physical_device_properties_callback) {
+    g_mock_vulkan_state.physical_device_properties_callback(physicalDevice,
+                                                            pProperties);
   }
 }
 
@@ -402,6 +420,7 @@ void vkDestroyDevice(VkDevice device, const VkAllocationCallbacks* pAllocator) {
   MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
   mock_device->AddCalledFunction("vkDestroyDevice");
   delete reinterpret_cast<MockDevice*>(device);
+  g_mock_vulkan_state.Clear();
 }
 
 void vkDestroyPipeline(VkDevice device,
@@ -541,17 +560,14 @@ VkResult vkQueueSubmit(VkQueue queue,
   return VK_SUCCESS;
 }
 
-static thread_local std::function<std::remove_pointer_t<PFN_vkWaitForFences>>
-    g_wait_for_fences_callback;
-
 VkResult vkWaitForFences(VkDevice device,
                          uint32_t fenceCount,
                          const VkFence* pFences,
                          VkBool32 waitAll,
                          uint64_t timeout) {
-  if (g_wait_for_fences_callback) {
-    return g_wait_for_fences_callback(device, fenceCount, pFences, waitAll,
-                                      timeout);
+  if (g_mock_vulkan_state.wait_for_fences_callback) {
+    return g_mock_vulkan_state.wait_for_fences_callback(
+        device, fenceCount, pFences, waitAll, timeout);
   }
   return VK_SUCCESS;
 }
@@ -760,19 +776,15 @@ void vkDestroySemaphore(VkDevice device,
   delete reinterpret_cast<MockSemaphore*>(semaphore);
 }
 
-static thread_local std::function<
-    std::remove_pointer_t<PFN_vkAcquireNextImageKHR>>
-    g_acquire_next_image_callback;
-
 VkResult vkAcquireNextImageKHR(VkDevice device,
                                VkSwapchainKHR swapchain,
                                uint64_t timeout,
                                VkSemaphore semaphore,
                                VkFence fence,
                                uint32_t* pImageIndex) {
-  if (g_acquire_next_image_callback) {
-    return g_acquire_next_image_callback(device, swapchain, timeout, semaphore,
-                                         fence, pImageIndex);
+  if (g_mock_vulkan_state.acquire_next_image_callback) {
+    return g_mock_vulkan_state.acquire_next_image_callback(
+        device, swapchain, timeout, semaphore, fence, pImageIndex);
   }
   auto current_index =
       reinterpret_cast<MockSwapchainKHR*>(swapchain)->current_image++;
@@ -1008,12 +1020,14 @@ std::shared_ptr<ContextVK> MockVulkanContextBuilder::Build() {
   if (settings_callback_) {
     settings_callback_(settings);
   }
-  g_instance_extensions = instance_extensions_;
-  g_instance_layers = instance_layers_;
-  g_format_properties_callback = format_properties_callback_;
-  g_physical_device_properties_callback = physical_properties_callback_;
-  g_acquire_next_image_callback = acquire_next_image_callback_;
-  g_wait_for_fences_callback = wait_for_fences_callback_;
+  g_mock_vulkan_state.instance_extensions = instance_extensions_;
+  g_mock_vulkan_state.instance_layers = instance_layers_;
+  g_mock_vulkan_state.format_properties_callback = format_properties_callback_;
+  g_mock_vulkan_state.physical_device_properties_callback =
+      physical_properties_callback_;
+  g_mock_vulkan_state.acquire_next_image_callback =
+      acquire_next_image_callback_;
+  g_mock_vulkan_state.wait_for_fences_callback = wait_for_fences_callback_;
   settings.embedder_data = embedder_data_;
   std::shared_ptr<ContextVK> result = ContextVK::Create(std::move(settings));
   return result;
