@@ -163,11 +163,24 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   /// Parses the NativeAssetsManifest.json in [outputDirectory] and returns a
   /// mapping from asset ID to the path of the code asset within the bundle
   /// (e.g., "MyFramework.framework/MyFramework").
-  static Map<String, String> parseNativeAssetsManifest(Directory outputDirectory) {
-    final File manifestFile = outputDirectory
-        .childDirectory('App.framework')
-        .childDirectory('flutter_assets')
-        .childFile('NativeAssetsManifest.json');
+  static Map<String, String> parseNativeAssetsManifest(
+    Directory outputDirectory,
+    FlutterDarwinPlatform platform,
+  ) {
+    File manifestFile;
+    switch (platform) {
+      case FlutterDarwinPlatform.ios:
+        manifestFile = outputDirectory
+            .childDirectory('App.framework')
+            .childDirectory('flutter_assets')
+            .childFile('NativeAssetsManifest.json');
+      case FlutterDarwinPlatform.macos:
+        manifestFile = outputDirectory
+            .childDirectory('App.framework')
+            .childDirectory('Resources')
+            .childDirectory('flutter_assets')
+            .childFile('NativeAssetsManifest.json');
+    }
     if (!manifestFile.existsSync()) {
       return const <String, String>{};
     }
@@ -205,9 +218,11 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   ) {
     final Map<String, String> deviceAssets = BuildFrameworkCommand.parseNativeAssetsManifest(
       iPhoneBuildOutput,
+      FlutterDarwinPlatform.ios,
     );
     final Map<String, String> simulatorAssets = BuildFrameworkCommand.parseNativeAssetsManifest(
       simulatorBuildOutput,
+      FlutterDarwinPlatform.ios,
     );
 
     for (final String assetId in deviceAssets.keys) {
