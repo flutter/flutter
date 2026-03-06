@@ -359,8 +359,8 @@ As always when closing a PR, explain why and provide next steps.
 
 As a guiding principle, if at any point in the process you feel that you are getting unfiltered
 or minimally filtered AI output as code and/or comment responses, ask yourself:
-* if this PR weren’t here, would I choose to spend my time fixing this issue, and
-* would I choose to fix it using an AI agent that took hours or days to respond to every prompt?
+* If this PR weren’t here, would I choose to spend my time fixing this issue?
+* Would I choose to fix it using an AI agent that took hours or days to respond to every prompt?
 
 Unless the answer to both questions is yes, the review is not a good use of your time.
 
