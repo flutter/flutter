@@ -363,6 +363,7 @@ deps = {
   'engine/src/flutter/third_party/dart/tools/sdks/dart-sdk':
    {'dep_type': 'cipd', 'packages': [{'package': 'dart/dart-sdk/${{platform}}', 'version': 'git_revision:bc20d999d68a261ae12c56bab7ba304bd0de5346'}]},
 
+  # WARNING: end of dart dependencies list that is cleaned up automatically - see create_updated_flutter_deps.py.
 
   # Prebuilt Dart SDK of the same revision as the Dart SDK source checkout
   'engine/src/flutter/prebuilts/linux-x64/dart-sdk': {
