@@ -22,6 +22,7 @@ Future<void> main() async {
     final SerializableFinder motionEventsListTile = find.byValueKey('MotionEventsListTile');
     await driver?.tap(motionEventsListTile);
     await driver?.runUnsynchronized(() async {
+      // ignore: unawaited_futures
       driver?.waitFor(find.byValueKey('PlatformView'));
     });
     final String errorMessage = (await driver?.requestData('run test'))!;
