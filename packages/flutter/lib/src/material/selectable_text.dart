@@ -73,7 +73,6 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
     super.onSingleTapUp(details);
     _state.widget.onTap?.call();
   }
-
 }
 
 /// A run of selectable text with a single style.
