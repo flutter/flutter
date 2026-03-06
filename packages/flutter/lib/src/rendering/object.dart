@@ -5638,6 +5638,10 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       next = this;
       while (!next!.parentDataDirty && !next.shouldFormSemanticsNode) {
         next = next.parent;
+        // The next should be at least at or below the root node. Since
+        // root node's parentData is always not dirty and form semantics
+        // node, the loop will terminate at or before the root node.
+        assert(next != null);
       }
     }
 
