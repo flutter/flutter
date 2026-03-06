@@ -84,6 +84,24 @@ user_pref("browser.aboutwelcome.enabled", false);
         temporaryProfileDirectory.createSync(recursive: true);
         File(path.join(temporaryProfileDirectory.path, 'prefs.js')).writeAsStringSync(profile);
 
+        // Policies
+
+        final executable = File(installation.executable);
+        // The FIREFOX_EXECUTABLE path points to a symlink to the downloaded CIPD package. So we
+        // need to create the policies file in the same directory as the actual executable.
+        final resolved = File(executable.resolveSymbolicLinksSync());
+
+        final policiesDir = Directory(path.join(resolved.parent.absolute.path, 'distribution'));
+        policiesDir.createSync(recursive: true);
+        final policiesFile = File(path.join(policiesDir.path, 'policies.json'));
+        policiesFile.writeAsStringSync('''
+{
+  "policies": {
+    "DisableAppUpdate": true
+  }
+}
+''');
+
         final args = <String>[
           url.toString(),
           '--profile',
