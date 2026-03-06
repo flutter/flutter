@@ -84,7 +84,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
                     clipDlRect.GetHeight());
 }
 
-static bool HasComplexClipForUnderlayCutout(const flutter::EmbeddedViewParams& params) {
+static bool HasNonRectClipForUnderlayCutout(const flutter::EmbeddedViewParams& params) {
   auto iter = params.mutatorsStack().Begin();
   while (iter != params.mutatorsStack().End()) {
     switch ((*iter)->GetType()) {
@@ -101,7 +101,8 @@ static bool HasComplexClipForUnderlayCutout(const flutter::EmbeddedViewParams& p
 }
 
 // Overlay canvas needs to be clipped to the shape of platform view to ensure
-// underlay shows up correctly
+// underlay shows up correctly, so that when there's backdrop filter, the region outside of platform
+// view's shape is blurred. See: https://github.com/flutter/flutter/issues/150660
 static void ApplyComplexClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
                                             const flutter::EmbeddedViewParams& params) {
   flutter::DlMatrix transform;
@@ -805,7 +806,7 @@ static void ApplyComplexClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
   for (int64_t viewId : self.compositionOrder) {
     const flutter::EmbeddedViewParams& params = self.currentCompositionParams[viewId];
     viewRects[viewId] = params.finalBoundingRect();
-    if (HasComplexClipForUnderlayCutout(params)) {
+    if (HasNonRectClipForUnderlayCutout(params)) {
       preserveUnderlayForViews.insert(viewId);
     }
   }
