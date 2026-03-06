@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'widgets_app_tester.dart';
+
 void main() {
   Future<void> pumpContainer(WidgetTester tester, Widget child) async {
     await tester.pumpWidget(MaterialApp(home: child));
@@ -197,6 +199,21 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(registrar.selectables.length, 1);
+  });
+
+  testWidgets('SelectionContainer does not crash at zero area', (WidgetTester tester) async {
+    final delegate = TestContainerDelegate();
+    addTearDown(delegate.dispose);
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: SelectionContainer(delegate: delegate, child: const Placeholder()),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SelectionContainer)), Size.zero);
   });
 }
 
