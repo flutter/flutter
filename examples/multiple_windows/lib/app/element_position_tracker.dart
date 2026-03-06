@@ -14,9 +14,6 @@ class ElementPositionTracker {
     _ElementPositionTrackerManager.instance.remove(this);
   }
 
-  final BuildContext element;
-  Rect? _lastReportedRect;
-
   /// Returns current global rect for tracked element or `null` if not available.
   Rect? getGlobalRect() {
     final rect = _getGlobalRect();
@@ -27,6 +24,9 @@ class ElementPositionTracker {
   /// Callback invoked every time the global position of the tracked element changes
   /// compared to last result of [getGlobalRect].
   void Function(Rect rect)? onGlobalRectChange;
+
+  final BuildContext element;
+  Rect? _lastReportedRect;
 
   Rect? _getGlobalRect() {
     if (!element.mounted) {
