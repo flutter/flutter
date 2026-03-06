@@ -9,11 +9,12 @@
 #include <utility>
 #include <vector>
 
+#include "flutter/fml/logging.h"
 #include "impeller/base/thread_safety.h"
 #include "impeller/renderer/backend/vulkan/vk.h"  // IWYU pragma: keep.
+#include "third_party/abseil-cpp/absl/base/no_destructor.h"
 #include "third_party/swiftshader/include/vulkan/vulkan_core.h"
 #include "vulkan/vulkan.hpp"
-#include "vulkan/vulkan_core.h"
 
 namespace impeller {
 namespace testing {
@@ -121,18 +122,15 @@ struct MockVulkanState {
       wait_for_fences_callback;
   std::function<std::remove_pointer_t<PFN_vkAcquireNextImageKHR>>
       acquire_next_image_callback;
-
-  void Clear() {
-    instance_extensions.clear();
-    instance_layers.clear();
-    format_properties_callback = nullptr;
-    physical_device_properties_callback = nullptr;
-    wait_for_fences_callback = nullptr;
-    acquire_next_image_callback = nullptr;
-  }
 };
 
-static thread_local MockVulkanState g_mock_vulkan_state;
+static thread_local absl::NoDestructor<std::unique_ptr<MockVulkanState>>
+    g_mock_vulkan_state;
+
+static MockVulkanState& GetMockVulkanState() {
+  FML_CHECK(*g_mock_vulkan_state) << "MockVulkanState must be initialized.";
+  return **g_mock_vulkan_state;
+}
 
 void noop() {}
 
@@ -141,10 +139,10 @@ VkResult vkEnumerateInstanceExtensionProperties(
     uint32_t* pPropertyCount,
     VkExtensionProperties* pProperties) {
   if (!pProperties) {
-    *pPropertyCount = g_mock_vulkan_state.instance_extensions.size();
+    *pPropertyCount = GetMockVulkanState().instance_extensions.size();
   } else {
     uint32_t count = 0;
-    for (const std::string& ext : g_mock_vulkan_state.instance_extensions) {
+    for (const std::string& ext : GetMockVulkanState().instance_extensions) {
       strncpy(pProperties[count].extensionName, ext.c_str(),
               sizeof(VkExtensionProperties::extensionName));
       pProperties[count].specVersion = 0;
@@ -157,10 +155,10 @@ VkResult vkEnumerateInstanceExtensionProperties(
 VkResult vkEnumerateInstanceLayerProperties(uint32_t* pPropertyCount,
                                             VkLayerProperties* pProperties) {
   if (!pProperties) {
-    *pPropertyCount = g_mock_vulkan_state.instance_layers.size();
+    *pPropertyCount = GetMockVulkanState().instance_layers.size();
   } else {
     uint32_t count = 0;
-    for (const std::string& layer : g_mock_vulkan_state.instance_layers) {
+    for (const std::string& layer : GetMockVulkanState().instance_layers) {
       strncpy(pProperties[count].layerName, layer.c_str(),
               sizeof(VkLayerProperties::layerName));
       pProperties[count].specVersion = 0;
@@ -185,9 +183,9 @@ void vkGetPhysicalDeviceFormatProperties(
     VkPhysicalDevice physicalDevice,
     VkFormat format,
     VkFormatProperties* pFormatProperties) {
-  if (g_mock_vulkan_state.format_properties_callback) {
-    g_mock_vulkan_state.format_properties_callback(physicalDevice, format,
-                                                   pFormatProperties);
+  if (GetMockVulkanState().format_properties_callback) {
+    GetMockVulkanState().format_properties_callback(physicalDevice, format,
+                                                    pFormatProperties);
   }
 }
 
@@ -198,9 +196,9 @@ void vkGetPhysicalDeviceProperties(VkPhysicalDevice physicalDevice,
                                       VK_SAMPLE_COUNT_4_BIT);
   pProperties->limits.maxImageDimension2D = 4096;
   pProperties->limits.timestampPeriod = 1;
-  if (g_mock_vulkan_state.physical_device_properties_callback) {
-    g_mock_vulkan_state.physical_device_properties_callback(physicalDevice,
-                                                            pProperties);
+  if (GetMockVulkanState().physical_device_properties_callback) {
+    GetMockVulkanState().physical_device_properties_callback(physicalDevice,
+                                                             pProperties);
   }
 }
 
@@ -420,7 +418,9 @@ void vkDestroyDevice(VkDevice device, const VkAllocationCallbacks* pAllocator) {
   MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
   mock_device->AddCalledFunction("vkDestroyDevice");
   delete reinterpret_cast<MockDevice*>(device);
-  g_mock_vulkan_state.Clear();
+  if (*g_mock_vulkan_state) {
+    (*g_mock_vulkan_state).reset();
+  }
 }
 
 void vkDestroyPipeline(VkDevice device,
@@ -565,8 +565,11 @@ VkResult vkWaitForFences(VkDevice device,
                          const VkFence* pFences,
                          VkBool32 waitAll,
                          uint64_t timeout) {
-  if (g_mock_vulkan_state.wait_for_fences_callback) {
-    return g_mock_vulkan_state.wait_for_fences_callback(
+  if (!*g_mock_vulkan_state) {
+    return VK_SUCCESS;
+  }
+  if (GetMockVulkanState().wait_for_fences_callback) {
+    return GetMockVulkanState().wait_for_fences_callback(
         device, fenceCount, pFences, waitAll, timeout);
   }
   return VK_SUCCESS;
@@ -782,8 +785,9 @@ VkResult vkAcquireNextImageKHR(VkDevice device,
                                VkSemaphore semaphore,
                                VkFence fence,
                                uint32_t* pImageIndex) {
-  if (g_mock_vulkan_state.acquire_next_image_callback) {
-    return g_mock_vulkan_state.acquire_next_image_callback(
+  if (*g_mock_vulkan_state &&
+      GetMockVulkanState().acquire_next_image_callback) {
+    return GetMockVulkanState().acquire_next_image_callback(
         device, swapchain, timeout, semaphore, fence, pImageIndex);
   }
   auto current_index =
@@ -1020,14 +1024,16 @@ std::shared_ptr<ContextVK> MockVulkanContextBuilder::Build() {
   if (settings_callback_) {
     settings_callback_(settings);
   }
-  g_mock_vulkan_state.instance_extensions = instance_extensions_;
-  g_mock_vulkan_state.instance_layers = instance_layers_;
-  g_mock_vulkan_state.format_properties_callback = format_properties_callback_;
-  g_mock_vulkan_state.physical_device_properties_callback =
+  *g_mock_vulkan_state = std::make_unique<MockVulkanState>();
+  (*g_mock_vulkan_state)->instance_extensions = instance_extensions_;
+  (*g_mock_vulkan_state)->instance_layers = instance_layers_;
+  (*g_mock_vulkan_state)->format_properties_callback =
+      format_properties_callback_;
+  (*g_mock_vulkan_state)->physical_device_properties_callback =
       physical_properties_callback_;
-  g_mock_vulkan_state.acquire_next_image_callback =
+  (*g_mock_vulkan_state)->acquire_next_image_callback =
       acquire_next_image_callback_;
-  g_mock_vulkan_state.wait_for_fences_callback = wait_for_fences_callback_;
+  (*g_mock_vulkan_state)->wait_for_fences_callback = wait_for_fences_callback_;
   settings.embedder_data = embedder_data_;
   std::shared_ptr<ContextVK> result = ContextVK::Create(std::move(settings));
   return result;
