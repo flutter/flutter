@@ -125,6 +125,8 @@ struct MockVulkanState {
 
 class MockVulkanStatePtr {
  public:
+  MockVulkanStatePtr() = default;
+
   ~MockVulkanStatePtr() {
     FML_CHECK(ptr_ == nullptr)
         << "MockVulkanState was not null upon thread exit. Leak detected!";
@@ -137,6 +139,8 @@ class MockVulkanStatePtr {
     ptr_ = ptr;
   }
 
+  MockVulkanStatePtr(const MockVulkanStatePtr&) = delete;
+  MockVulkanStatePtr& operator=(const MockVulkanStatePtr&) = delete;
   MockVulkanState* get() const { return ptr_; }
   MockVulkanState& operator*() const { return *ptr_; }
   MockVulkanState* operator->() const { return ptr_; }
