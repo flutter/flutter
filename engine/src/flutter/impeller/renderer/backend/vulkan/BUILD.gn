@@ -35,7 +35,6 @@ impeller_component("vulkan_unittests") {
     ":vulkan",
     "../../../playground:playground_test",
     "//flutter/testing:testing_lib",
-    "//third_party/abseil-cpp/absl/base:no_destructor",
   ]
 }
 
