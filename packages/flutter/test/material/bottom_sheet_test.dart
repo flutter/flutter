@@ -3238,7 +3238,13 @@ void main() {
 
     final TestGesture gesture = await tester.startGesture(tester.getCenter(dragHandle));
 
-    await tester.drag(dragHandle, const Offset(0, 200));
+    await gesture.moveBy(const Offset(0, 50));
+    await tester.pump();
+
+    await gesture.moveBy(const Offset(0, 50));
+    await tester.pump();
+
+    await gesture.moveBy(const Offset(0, 100));
     await tester.pump();
 
     final double yBeforeUp = tester.getTopLeft(find.byKey(sheetKey)).dy;
