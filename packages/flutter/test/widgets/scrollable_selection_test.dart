@@ -1653,11 +1653,13 @@ void main() {
       // origin as its first event). The inner delegate used to call
       // startAutoScrollIfNecessary with an Offset.infinite drag rect, triggering
       // an assertion failure inside EdgeDraggingAutoScroller.
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
       await tester.pumpWidget(
         TestWidgetsApp(
           home: SelectableRegion(
             selectionControls: emptyTextSelectionControls,
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             child: Column(
               children: <Widget>[
                 const Text('Header'),
