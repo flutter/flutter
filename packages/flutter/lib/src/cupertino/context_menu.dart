@@ -85,10 +85,6 @@ Rect _getRect(GlobalKey globalKey) {
 // [CupertinoContextMenu] opens.
 enum _ContextMenuLocation { center, left, right }
 
-class _ContextMenuIntent extends Intent {
-  const _ContextMenuIntent();
-}
-
 /// A full-screen modal route that opens when the [child] is long-pressed.
 ///
 /// When open, the [CupertinoContextMenu] shows the child in a large full-screen
@@ -382,7 +378,7 @@ class CupertinoContextMenu extends StatefulWidget {
 class _CupertinoContextMenuState extends State<CupertinoContextMenu> with TickerProviderStateMixin {
   final GlobalKey _childGlobalKey = GlobalKey();
   bool _childHidden = false;
-  KeyEvent? _lastKeyEvent;
+
   // Animates the child while it's opening.
   late AnimationController _openController;
   Rect? _decoyChildEndRect;
@@ -407,12 +403,6 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       ..onTapUp = _onTapUp
       ..onTap = _onTap;
   }
-
-  late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
-    _ContextMenuIntent: CallbackAction<_ContextMenuIntent>(
-      onInvoke: (_) => _performOpenMenu(fromTap: false),
-    ),
-  };
 
   void _listenerCallback() {
     if (_openController.status != AnimationStatus.reverse && _openController.value >= _midpoint) {
@@ -631,31 +621,6 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     _openController.forward(from: !fromTap ? 1.0 : null);
   }
 
-  void _onShowFocusHighlight(bool showHighlight) {
-    setState(() {
-      _lastKeyEvent = null;
-    });
-  }
-
-  KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
-    if (event case KeyDownEvent(logicalKey: LogicalKeyboardKey.tab)) {
-      _lastKeyEvent = event;
-      return KeyEventResult.handled;
-    }
-
-    if (event case KeyUpEvent(logicalKey: LogicalKeyboardKey.tab)) {
-      if (_lastKeyEvent case KeyDownEvent(logicalKey: LogicalKeyboardKey.tab)) {
-        FocusScope.of(context).nextFocus();
-      }
-      _lastKeyEvent = event;
-      return KeyEventResult.handled;
-    }
-
-    _lastKeyEvent = event;
-
-    return KeyEventResult.ignored;
-  }
-
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
@@ -667,21 +632,12 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
           child: Visibility.maintain(
             key: _childGlobalKey,
             visible: !_childHidden,
-            child: Shortcuts(
-              shortcuts: <ShortcutActivator, Intent>{
-                LogicalKeySet(LogicalKeyboardKey.tab, LogicalKeyboardKey.keyM):
-                    const _ContextMenuIntent(),
-              },
-              child: CupertinoFocusHalo.withRoundedSuperellipse(
-                borderRadius: widget.focusBorderRadius,
-                child: FocusableActionDetector(
-                  actions: _actionMap,
-                  focusNode: widget.focusNode,
-                  enabled: !_childHidden,
-                  onShowFocusHighlight: _onShowFocusHighlight,
-                  onKeyEvent: _onKeyEvent,
-                  child: Semantics(button: true, child: widget.builder(context, _openController)),
-                ),
+            child: CupertinoFocusHalo.withRoundedSuperellipse(
+              borderRadius: widget.focusBorderRadius,
+              child: FocusableActionDetector(
+                focusNode: widget.focusNode,
+                enabled: !_childHidden,
+                child: Semantics(button: true, child: widget.builder(context, _openController)),
               ),
             ),
           ),
