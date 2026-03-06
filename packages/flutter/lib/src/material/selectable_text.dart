@@ -74,18 +74,6 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
     _state.widget.onTap?.call();
   }
 
-  @override
-  void onSecondaryTap() {
-    if (!delegate.selectionEnabled) {
-      return;
-    }
-    // SelectableText is read-only, so right-clicking should not select a word.
-    // Only show the toolbar if there is an existing non-collapsed selection.
-    final TextSelection selection = editableText.textEditingValue.selection;
-    if (selection.isValid && !selection.isCollapsed) {
-      editableText.showToolbar();
-    }
-  }
 }
 
 /// A run of selectable text with a single style.

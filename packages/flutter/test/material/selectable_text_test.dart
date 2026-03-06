@@ -5737,7 +5737,7 @@ void main() {
   });
 
   testWidgets(
-    'Right-click does not select word on SelectableText',
+    'Right-click selects word on macOS SelectableText',
     (WidgetTester tester) async {
       const text = 'abc def ghi';
       TextSelection? selection;
@@ -5746,8 +5746,8 @@ void main() {
           home: Material(
             child: SelectableText(
               text,
-              onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause) {
-                selection = newSelection;
+              onSelectionChanged: (TextSelection s, SelectionChangedCause? _) {
+                selection = s;
               },
             ),
           ),
@@ -5765,56 +5765,10 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
 
-      // The selection should remain unchanged (no word selection).
-      expect(selection, isNull);
+      // Right-click should select the word under the cursor, matching NSTextView behavior.
+      expect(selection?.baseOffset, 4);
+      expect(selection?.extentOffset, 7);
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.macOS,
-      TargetPlatform.iOS,
-    }),
-  );
-
-  testWidgets(
-    'Right-click shows toolbar when text is already selected in SelectableText',
-    (WidgetTester tester) async {
-      const text = 'abc def ghi';
-      await tester.pumpWidget(const MaterialApp(home: Material(child: SelectableText(text))));
-
-      // First, double-tap to select a word.
-      final Offset defPos = textOffsetToPosition(tester, 5);
-      await tester.tapAt(defPos);
-      await tester.pump(const Duration(milliseconds: 50));
-      await tester.tapAt(defPos);
-      await tester.pumpAndSettle();
-
-      final EditableTextState state = tester.state(find.byType(EditableText));
-      expect(state.textEditingValue.selection.baseOffset, 4);
-      expect(state.textEditingValue.selection.extentOffset, 7);
-
-      // Dismiss the toolbar from the double-tap.
-      await tester.tapAt(Offset.zero);
-      await tester.pumpAndSettle();
-
-      // Right-click on the selected text.
-      final TestGesture gesture = await tester.startGesture(
-        defPos,
-        kind: PointerDeviceKind.mouse,
-        buttons: kSecondaryMouseButton,
-      );
-      await tester.pump();
-      await gesture.up();
-      await tester.pumpAndSettle();
-
-      // The selection should remain unchanged.
-      expect(state.textEditingValue.selection.baseOffset, 4);
-      expect(state.textEditingValue.selection.extentOffset, 7);
-
-      // The toolbar should be visible after right-clicking on selected text.
-      expect(find.text('Copy'), findsOneWidget);
-    },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.macOS,
-      TargetPlatform.iOS,
-    }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.macOS}),
   );
 }
