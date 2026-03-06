@@ -82,15 +82,15 @@ class WindowingOwnerMacOS extends WindowingOwner {
     String? title,
     bool decorated = true,
   }) {
-    final res = RegularWindowControllerMacOS(
+    final controller = RegularWindowControllerMacOS(
       owner: this,
       delegate: delegate,
       preferredSize: preferredSize,
       title: title,
       decorated: decorated,
     );
-    _activeControllers.add(res);
-    return res;
+    _activeControllers.add(controller);
+    return controller;
   }
 
   @override
@@ -102,7 +102,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
     String? title,
     bool decorated = true,
   }) {
-    final res = DialogWindowControllerMacOS(
+    final controller = DialogWindowControllerMacOS(
       owner: this,
       delegate: delegate,
       preferredSize: preferredSize,
@@ -110,8 +110,8 @@ class WindowingOwnerMacOS extends WindowingOwner {
       title: title,
       decorated: decorated,
     );
-    _activeControllers.add(res);
-    return res;
+    _activeControllers.add(controller);
+    return controller;
   }
 
   @internal
@@ -124,7 +124,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
-    final res = TooltipWindowControllerMacOS(
+    final controller = TooltipWindowControllerMacOS(
       owner: this,
       delegate: delegate,
       contentSizeConstraints: preferredConstraints,
@@ -132,8 +132,8 @@ class WindowingOwnerMacOS extends WindowingOwner {
       positioner: positioner,
       parent: parent,
     );
-    _activeControllers.add(res);
-    return res;
+    _activeControllers.add(controller);
+    return controller;
   }
 
   @internal
@@ -146,7 +146,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
-    final res = PopupWindowControllerMacOS(
+    final controller = PopupWindowControllerMacOS(
       owner: this,
       delegate: delegate,
       contentSizeConstraints: preferredConstraints,
@@ -154,8 +154,8 @@ class WindowingOwnerMacOS extends WindowingOwner {
       anchorRect: anchorRect,
       positioner: positioner,
     );
-    _activeControllers.add(res);
-    return res;
+    _activeControllers.add(controller);
+    return controller;
   }
 
   final List<_WindowControllerMixin> _activeControllers = <_WindowControllerMixin>[];
@@ -279,7 +279,7 @@ mixin _WindowControllerMixin {
 
 /// MacOS specific implementation of [TooltipWindowController].
 ///
-/// /// {@macro flutter.widgets.windowing.experimental}
+/// {@macro flutter.widgets.windowing.experimental}
 class TooltipWindowControllerMacOS extends TooltipWindowController with _WindowControllerMixin {
   /// Creates a new tooltip window controller for macOS.
   TooltipWindowControllerMacOS({
@@ -376,7 +376,7 @@ class TooltipWindowControllerMacOS extends TooltipWindowController with _WindowC
 
 /// MacOS specific implementation of [PopupWindowController].
 ///
-/// /// {@macro flutter.widgets.windowing.experimental}
+/// {@macro flutter.widgets.windowing.experimental}
 class PopupWindowControllerMacOS extends PopupWindowController with _WindowControllerMixin {
   /// Creates a new tooltip window controller for macOS.
   PopupWindowControllerMacOS({
