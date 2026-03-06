@@ -234,6 +234,8 @@ def Main(argv):
       for dep_path, dep_source in new_dart_deps.items():
         updatedfile.write(f"  '{dep_path}':\n   {dep_source},\n\n")
 
+      updatedfile.write(lines[i])
+
     else:
       updatedfile.write(lines[i])
     i = i + 1
