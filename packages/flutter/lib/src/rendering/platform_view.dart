@@ -211,8 +211,7 @@ class RenderAndroidView extends PlatformViewRenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if ((_viewController.textureId == null && !_viewController.requiresViewComposition) ||
-        _currentTextureSize == null) {
+    if (_viewController.textureId == null || _currentTextureSize == null) {
       return;
     }
 
@@ -253,13 +252,6 @@ class RenderAndroidView extends PlatformViewRenderBox {
 
   void _paintTexture(PaintingContext context, Offset offset) {
     if (_currentTextureSize == null) {
-      return;
-    }
-
-    if (_viewController.requiresViewComposition) {
-      context.addLayer(
-        PlatformViewLayer(rect: offset & _currentTextureSize!, viewId: _viewController.viewId),
-      );
       return;
     }
 

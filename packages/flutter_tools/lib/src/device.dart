@@ -984,7 +984,6 @@ class DebuggingOptions {
     this.uninstallFirst = false,
     this.uninstallApp = true,
     this.enableDartProfiling = true,
-    this.enableSurfaceControl = false,
     this.profileStartup = false,
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
@@ -1020,7 +1019,6 @@ class DebuggingOptions {
     this.uninstallFirst = false,
     this.uninstallApp = true,
     this.enableDartProfiling = true,
-    this.enableSurfaceControl = false,
     this.profileStartup = false,
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
@@ -1105,7 +1103,6 @@ class DebuggingOptions {
     required this.uninstallFirst,
     required this.uninstallApp,
     required this.enableDartProfiling,
-    required this.enableSurfaceControl,
     required this.profileStartup,
     required this.enableEmbedderApi,
     required this.usingCISystem,
@@ -1152,7 +1149,6 @@ class DebuggingOptions {
   final bool enableFlutterGpu;
   final bool enableVulkanValidation;
   final bool enableDartProfiling;
-  final bool enableSurfaceControl;
   final bool profileStartup;
   final bool enableEmbedderApi;
   final bool usingCISystem;
@@ -1310,7 +1306,6 @@ class DebuggingOptions {
     'enableVulkanValidation': enableVulkanValidation,
     'uninstallApp': uninstallApp,
     'enableDartProfiling': enableDartProfiling,
-    'enableSurfaceControl': enableSurfaceControl,
     'profileStartup': profileStartup,
     'enableEmbedderApi': enableEmbedderApi,
     'usingCISystem': usingCISystem,
@@ -1381,7 +1376,6 @@ class DebuggingOptions {
         uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
         uninstallApp: (json['uninstallApp'] as bool?) ?? true,
         enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
-        enableSurfaceControl: (json['enableSurfaceControl'] as bool?) ?? false,
         profileStartup: (json['profileStartup'] as bool?) ?? false,
         enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,
         usingCISystem: (json['usingCISystem'] as bool?) ?? false,
