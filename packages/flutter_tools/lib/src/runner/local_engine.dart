@@ -9,7 +9,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
-import '../base/user_messages.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
 
@@ -29,18 +28,15 @@ class LocalEngineLocator {
     required Logger logger,
     required FileSystem fileSystem,
     required String flutterRoot,
-    required UserMessages userMessages,
   }) : _platform = platform,
        _logger = logger,
        _fileSystem = fileSystem,
-       _flutterRoot = flutterRoot,
-       _userMessages = userMessages;
+       _flutterRoot = flutterRoot;
 
   final Platform _platform;
   final Logger _logger;
   final FileSystem _fileSystem;
   final String _flutterRoot;
-  final UserMessages _userMessages;
 
   String _runnerNoEngineBuild(String engineBuildPath) =>
       'No Flutter engine build found at $engineBuildPath.';
@@ -62,6 +58,12 @@ class LocalEngineLocator {
 
   String get _runnerLocalEngineOrWebSdkRequired =>
       'You must specify --local-engine or --local-web-sdk if you are using a locally built engine or web sdk.';
+
+  String _runnerNoEngineSrcDir(String enginePackageName, String engineEnvVar) =>
+      'Unable to detect local Flutter engine src directory.\n'
+      'Either specify a dependency_override for the $enginePackageName package in your pubspec.yaml and '
+      'ensure --package-root is set if necessary, or set the \$$engineEnvVar environment variable, or '
+      'use --local-engine-src-path to specify the path to the root of your flutter/engine repository.';
 
   /// Returns the engine build path of a local engine if one is located, otherwise `null`.
   Future<EngineBuildPaths?> findEnginePath({
@@ -118,10 +120,7 @@ class LocalEngineLocator {
     }
     if (localEngine != null || localWebSdk != null) {
       throwToolExit(
-        _userMessages.runnerNoEngineSrcDir(
-          kFlutterEnginePackageName,
-          kFlutterEngineEnvironmentVariableName,
-        ),
+        _runnerNoEngineSrcDir(kFlutterEnginePackageName, kFlutterEngineEnvironmentVariableName),
         exitCode: 2,
       );
     }
@@ -188,10 +187,7 @@ class LocalEngineLocator {
           engineSourcePath.isEmpty) {
         engineSourcePath = null;
         throwToolExit(
-          _userMessages.runnerNoEngineSrcDir(
-            kFlutterEnginePackageName,
-            kFlutterEngineEnvironmentVariableName,
-          ),
+          _runnerNoEngineSrcDir(kFlutterEnginePackageName, kFlutterEngineEnvironmentVariableName),
           exitCode: 2,
         );
       }

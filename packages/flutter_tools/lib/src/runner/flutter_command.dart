@@ -1565,6 +1565,9 @@ abstract class FlutterCommand extends Command<void> {
     }
   }
 
+  String _flutterElapsedTime(String name, String elapsedTime) =>
+      '"flutter $name" took $elapsedTime.';
+
   /// Additional usage values to be sent with the usage ping for
   /// package:unified_analytics.
   ///
@@ -1601,10 +1604,7 @@ abstract class FlutterCommand extends Command<void> {
         } finally {
           final DateTime endTime = globals.systemClock.now();
           globals.printTrace(
-            globals.userMessages.flutterElapsedTime(
-              name,
-              getElapsedAsMilliseconds(endTime.difference(startTime)),
-            ),
+            _flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))),
           );
           if (commandPath != null) {
             _sendPostUsage(commandPath, commandResult, startTime, endTime);
@@ -2028,6 +2028,11 @@ abstract class FlutterCommand extends Command<void> {
     return deviceList.single;
   }
 
+  String get _flutterNoPubspec =>
+      'Error: No pubspec.yaml file found.\n'
+      'This command should be run from the root of your Flutter project.';
+  String _flutterTargetFileMissing(String path) => 'Target file "$path" not found.';
+
   @protected
   @mustCallSuper
   Future<void> validateCommand() async {
@@ -2038,7 +2043,7 @@ abstract class FlutterCommand extends Command<void> {
       // until one can be found.
       final String? path = findProjectRoot(globals.fs, globals.fs.currentDirectory.path);
       if (path == null) {
-        throwToolExit(globals.userMessages.flutterNoPubspec);
+        throwToolExit(_flutterNoPubspec);
       }
       if (path != globals.fs.currentDirectory.path) {
         globals.fs.currentDirectory = path;
@@ -2051,7 +2056,7 @@ abstract class FlutterCommand extends Command<void> {
     if (_usesTargetOption) {
       final String targetPath = targetFile;
       if (!globals.fs.isFileSync(targetPath)) {
-        throwToolExit(globals.userMessages.flutterTargetFileMissing(targetPath));
+        throwToolExit(_flutterTargetFileMissing(targetPath));
       }
     }
   }

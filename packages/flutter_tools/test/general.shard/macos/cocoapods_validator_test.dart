@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/macos/cocoapods_validator.dart';
@@ -13,10 +12,7 @@ import '../../src/common.dart';
 void main() {
   group('CocoaPods validation', () {
     testWithoutContext('Emits installed status when CocoaPods is installed', () async {
-      final workflow = CocoaPodsValidator(
-        FakeCocoaPods(CocoaPodsStatus.recommended, '1000.0.0'),
-        UserMessages(),
-      );
+      final workflow = CocoaPodsValidator(FakeCocoaPods(CocoaPodsStatus.recommended, '1000.0.0'));
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.success);
       expect(result.messages.length, 1);
@@ -26,10 +22,7 @@ void main() {
     });
 
     testWithoutContext('Emits missing status when CocoaPods is not installed', () async {
-      final workflow = CocoaPodsValidator(
-        FakeCocoaPods(CocoaPodsStatus.notInstalled),
-        UserMessages(),
-      );
+      final workflow = CocoaPodsValidator(FakeCocoaPods(CocoaPodsStatus.notInstalled));
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.missing);
       expect(result.messages.length, 1);
@@ -42,10 +35,7 @@ void main() {
     testWithoutContext(
       'Emits partial status when CocoaPods is installed with unknown version',
       () async {
-        final workflow = CocoaPodsValidator(
-          FakeCocoaPods(CocoaPodsStatus.unknownVersion),
-          UserMessages(),
-        );
+        final workflow = CocoaPodsValidator(FakeCocoaPods(CocoaPodsStatus.unknownVersion));
         final ValidationResult result = await workflow.validate();
         expect(result.type, ValidationType.partial);
         expect(result.messages.length, 1);
@@ -62,7 +52,7 @@ void main() {
         CocoaPodsStatus.belowRecommendedVersion,
         currentVersion,
       );
-      final workflow = CocoaPodsValidator(fakeCocoaPods, UserMessages());
+      final workflow = CocoaPodsValidator(fakeCocoaPods);
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
       expect(result.messages.length, 1);

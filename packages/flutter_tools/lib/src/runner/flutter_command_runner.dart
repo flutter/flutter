@@ -357,6 +357,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
     return versionCheckFlag;
   }
 
+  String _runnerWrapColumnInvalid(dynamic value) =>
+      'Argument to --wrap-column must be a positive integer. You supplied $value.';
+
+  String _runnerWrapColumnParseError(dynamic value) =>
+      'Unable to parse argument --wrap-column=$value. Must be a positive integer.';
+
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
     final contextOverrides = <Type, Object?>{};
@@ -377,16 +383,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
         wrapColumn = int.parse(topLevelResults[FlutterGlobalOptions.kWrapColumnOption] as String);
         if (wrapColumn < 0) {
           throwToolExit(
-            globals.userMessages.runnerWrapColumnInvalid(
-              topLevelResults[FlutterGlobalOptions.kWrapColumnOption],
-            ),
+            _runnerWrapColumnInvalid(topLevelResults[FlutterGlobalOptions.kWrapColumnOption]),
           );
         }
       } on FormatException {
         throwToolExit(
-          globals.userMessages.runnerWrapColumnParseError(
-            topLevelResults[FlutterGlobalOptions.kWrapColumnOption],
-          ),
+          _runnerWrapColumnParseError(topLevelResults[FlutterGlobalOptions.kWrapColumnOption]),
         );
       }
     }

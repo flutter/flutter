@@ -132,6 +132,10 @@ class TargetDevices {
 
   void stopExtendedWirelessDeviceDiscovery() {}
 
+  String get _flutterNoDevelopmentDevice =>
+      "Unable to locate a development device; please run 'flutter doctor' "
+      'for information about installing additional components.';
+
   /// Find and return all target [Device]s based upon criteria entered by the
   /// user on the command line.
   ///
@@ -153,7 +157,7 @@ class TargetDevices {
     bool includeDevicesUnsupportedByProject = false,
   }) async {
     if (!globals.doctor!.canLaunchAnything) {
-      _logger.printError(globals.userMessages.flutterNoDevelopmentDevice);
+      _logger.printError(_flutterNoDevelopmentDevice);
       return null;
     }
 
@@ -193,6 +197,8 @@ class TargetDevices {
     return allDevices;
   }
 
+  String get _flutterNoSupportedDevices => 'No supported devices connected.';
+
   /// When no supported devices are found, display a message and list of
   /// unsupported devices found.
   Future<List<Device>?> _handleNoDevices() async {
@@ -212,9 +218,7 @@ class TargetDevices {
     }
 
     _logger.printStatus(
-      _deviceManager.hasSpecifiedAllDevices
-          ? _noDevicesFoundMessage
-          : globals.userMessages.flutterNoSupportedDevices,
+      _deviceManager.hasSpecifiedAllDevices ? _noDevicesFoundMessage : _flutterNoSupportedDevices,
     );
     await _printUnsupportedDevice(unsupportedDevices);
     return null;
@@ -247,6 +251,10 @@ class TargetDevices {
     }
   }
 
+  String get _flutterSpecifyDeviceWithAllOption =>
+      'More than one device connected; please specify a device with '
+      "the '-d <deviceId>' flag, or use '-d all' to act on all devices.";
+
   /// Display a list of found devices. When the user has not specified the
   /// device id/name, display devices unsupported by the project as well and
   /// give instructions to use a device selection flag.
@@ -271,7 +279,7 @@ class TargetDevices {
         supportFilter: DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutter(),
       );
 
-      _logger.printStatus(globals.userMessages.flutterSpecifyDeviceWithAllOption);
+      _logger.printStatus(_flutterSpecifyDeviceWithAllOption);
       _logger.printStatus('');
     }
 
@@ -463,7 +471,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
   }) async {
     try {
       if (!globals.doctor!.canLaunchAnything) {
-        _logger.printError(globals.userMessages.flutterNoDevelopmentDevice);
+        _logger.printError(_flutterNoDevelopmentDevice);
         return null;
       }
 

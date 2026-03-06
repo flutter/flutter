@@ -138,6 +138,18 @@ class LinuxDoctorValidator extends DoctorValidator {
   };
 
   final _requiredGtkLibraries = <String>['gtk+-3.0', 'glib-2.0', 'gio-2.0'];
+  String _pkgConfigTooOld(String minimumVersion) =>
+      'pkg-config $minimumVersion or later is required.';
+
+  String _pkgConfigVersion(String version) => 'pkg-config version $version';
+
+  String _ninjaTooOld(String minimumVersion) => 'ninja $minimumVersion or later is required.';
+
+  String _ninjaVersion(String version) => 'ninja version $version';
+
+  String _cmakeTooOld(String minimumVersion) => 'cmake $minimumVersion or later is required.';
+
+  String _clangTooOld(String minimumVersion) => 'clang++ $minimumVersion or later is required.';
 
   @override
   Future<ValidationResult> validateImpl() async {
@@ -169,9 +181,7 @@ class LinuxDoctorValidator extends DoctorValidator {
         messages.add(ValidationMessage(version.description));
         final Version requiredVersion = _requiredBinaryVersions[kClangBinary]!;
         if (version.number! < requiredVersion) {
-          messages.add(
-            ValidationMessage.error(_userMessages.clangTooOld(requiredVersion.toString())),
-          );
+          messages.add(ValidationMessage.error(_clangTooOld(requiredVersion.toString())));
         }
       }
     }
@@ -186,9 +196,7 @@ class LinuxDoctorValidator extends DoctorValidator {
         messages.add(ValidationMessage(version.description));
         final Version requiredVersion = _requiredBinaryVersions[kCmakeBinary]!;
         if (version.number! < requiredVersion) {
-          messages.add(
-            ValidationMessage.error(_userMessages.cmakeTooOld(requiredVersion.toString())),
-          );
+          messages.add(ValidationMessage.error(_cmakeTooOld(requiredVersion.toString())));
         }
       }
     }
@@ -201,12 +209,10 @@ class LinuxDoctorValidator extends DoctorValidator {
       } else {
         assert(_requiredBinaryVersions.containsKey(kNinjaBinary));
         // The full version description is just the number, so add context.
-        messages.add(ValidationMessage(_userMessages.ninjaVersion(version.description)));
+        messages.add(ValidationMessage(_ninjaVersion(version.description)));
         final Version requiredVersion = _requiredBinaryVersions[kNinjaBinary]!;
         if (version.number! < requiredVersion) {
-          messages.add(
-            ValidationMessage.error(_userMessages.ninjaTooOld(requiredVersion.toString())),
-          );
+          messages.add(ValidationMessage.error(_ninjaTooOld(requiredVersion.toString())));
         }
       }
     }
@@ -221,12 +227,10 @@ class LinuxDoctorValidator extends DoctorValidator {
       } else {
         assert(_requiredBinaryVersions.containsKey(kPkgConfigBinary));
         // The full version description is just the number, so add context.
-        messages.add(ValidationMessage(_userMessages.pkgConfigVersion(version.description)));
+        messages.add(ValidationMessage(_pkgConfigVersion(version.description)));
         final Version requiredVersion = _requiredBinaryVersions[kPkgConfigBinary]!;
         if (version.number! < requiredVersion) {
-          messages.add(
-            ValidationMessage.error(_userMessages.pkgConfigTooOld(requiredVersion.toString())),
-          );
+          messages.add(ValidationMessage.error(_pkgConfigTooOld(requiredVersion.toString())));
         }
       }
     }

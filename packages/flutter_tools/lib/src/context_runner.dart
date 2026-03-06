@@ -164,7 +164,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
         analytics: globals.analytics,
       ),
-      CocoaPodsValidator: () => CocoaPodsValidator(globals.cocoaPods!, globals.userMessages),
+      CocoaPodsValidator: () => CocoaPodsValidator(globals.cocoaPods!),
       Config: () => Config(
         Config.kFlutterSettings,
         fileSystem: globals.fs,
@@ -263,7 +263,6 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         processManager: globals.processManager,
       ),
       LocalEngineLocator: () => LocalEngineLocator(
-        userMessages: globals.userMessages,
         logger: globals.logger,
         platform: globals.platform,
         fileSystem: globals.fs,
@@ -321,7 +320,6 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       ),
       UserMessages: () => UserMessages(),
       VisualStudioValidator: () => VisualStudioValidator(
-        userMessages: globals.userMessages,
         visualStudio: VisualStudio(
           fileSystem: globals.fs,
           platform: globals.platform,

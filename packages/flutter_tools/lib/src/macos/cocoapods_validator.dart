@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../base/user_messages.dart';
 import '../doctor_validator.dart';
 import 'cocoapods.dart';
 
@@ -11,13 +10,36 @@ import 'cocoapods.dart';
 /// See also:
 ///   * [CocoaPods], for the interface to the cocoapods command line tool.
 class CocoaPodsValidator extends DoctorValidator {
-  CocoaPodsValidator(CocoaPods cocoaPods, UserMessages userMessages)
-    : _cocoaPods = cocoaPods,
-      _userMessages = userMessages,
-      super('CocoaPods subvalidator');
+  CocoaPodsValidator(CocoaPods cocoaPods) : _cocoaPods = cocoaPods, super('CocoaPods subvalidator');
 
   final CocoaPods _cocoaPods;
-  final UserMessages _userMessages;
+
+  String _cocoaPodsBrokenInstall(String consequence, String reinstallInstructions) =>
+      'CocoaPods installed but not working.\n'
+      '$consequence\n'
+      'For re-installation instructions, $reinstallInstructions';
+
+  String _cocoaPodsOutdated(
+    String currentVersion,
+    String recVersion,
+    String consequence,
+    String upgradeInstructions,
+  ) =>
+      'CocoaPods $currentVersion out of date ($recVersion is recommended).\n'
+      '$consequence\n'
+      'To update CocoaPods, $upgradeInstructions';
+
+  String _cocoaPodsVersion(String version) => 'CocoaPods version $version';
+
+  String _cocoaPodsMissing(String consequence, String installInstructions) =>
+      'CocoaPods not installed.\n'
+      '$consequence\n'
+      'For installation instructions, $installInstructions';
+
+  String _cocoaPodsUnknownVersion(String consequence, String upgradeInstructions) =>
+      'Unknown CocoaPods version installed.\n'
+      '$consequence\n'
+      'To update CocoaPods, $upgradeInstructions';
 
   @override
   Future<ValidationResult> validateImpl() async {
@@ -29,35 +51,27 @@ class CocoaPodsValidator extends DoctorValidator {
     switch (cocoaPodsStatus) {
       case CocoaPodsStatus.recommended:
         messages.add(
-          ValidationMessage(
-            _userMessages.cocoaPodsVersion((await _cocoaPods.cocoaPodsVersionText).toString()),
-          ),
+          ValidationMessage(_cocoaPodsVersion((await _cocoaPods.cocoaPodsVersionText).toString())),
         );
       case CocoaPodsStatus.notInstalled:
         status = ValidationType.missing;
         messages.add(
           ValidationMessage.error(
-            _userMessages.cocoaPodsMissing(noCocoaPodsConsequence, cocoaPodsInstallInstructions),
+            _cocoaPodsMissing(noCocoaPodsConsequence, cocoaPodsInstallInstructions),
           ),
         );
       case CocoaPodsStatus.brokenInstall:
         status = ValidationType.missing;
         messages.add(
           ValidationMessage.error(
-            _userMessages.cocoaPodsBrokenInstall(
-              brokenCocoaPodsConsequence,
-              cocoaPodsInstallInstructions,
-            ),
+            _cocoaPodsBrokenInstall(brokenCocoaPodsConsequence, cocoaPodsInstallInstructions),
           ),
         );
       case CocoaPodsStatus.unknownVersion:
         status = ValidationType.partial;
         messages.add(
           ValidationMessage.hint(
-            _userMessages.cocoaPodsUnknownVersion(
-              unknownCocoaPodsConsequence,
-              cocoaPodsUpdateInstructions,
-            ),
+            _cocoaPodsUnknownVersion(unknownCocoaPodsConsequence, cocoaPodsUpdateInstructions),
           ),
         );
       case CocoaPodsStatus.belowMinimumVersion:
@@ -66,7 +80,7 @@ class CocoaPodsValidator extends DoctorValidator {
         final currentVersionText = (await _cocoaPods.cocoaPodsVersionText).toString();
         messages.add(
           ValidationMessage.hint(
-            _userMessages.cocoaPodsOutdated(
+            _cocoaPodsOutdated(
               currentVersionText,
               cocoaPodsRecommendedVersion.toString(),
               noCocoaPodsConsequence,
