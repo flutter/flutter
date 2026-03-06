@@ -21,6 +21,7 @@ workspace:
   - dev/forbidden_from_release_tests
   - dev/integration_tests/android_engine_test
   - dev/integration_tests/android_semantics_testing
+  - dev/integration_tests/android_verified_input
   - dev/integration_tests/android_views
   - dev/integration_tests/channels
   - dev/integration_tests/deferred_components_test
@@ -186,7 +187,7 @@ dependencies:
   vector_math: 2.2.0
   video_player: 2.11.0
   video_player_android: 2.9.4
-  video_player_avfoundation: 2.9.3
+  video_player_avfoundation: 2.9.4
   video_player_platform_interface: 6.6.0
   video_player_web: 2.4.0
   vm_service: 15.0.2
@@ -216,4 +217,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: 5dmb2f
+# PUBSPEC CHECKSUM: sqrckg
