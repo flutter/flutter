@@ -10,83 +10,7 @@ import 'package:flutter/src/widgets/_window.dart';
 
 import 'window_content.dart';
 import 'models.dart';
-
-/// Manages all [_ElementPositionTracker] instances.
-///
-/// This class is a singleton because it needs to hook into the global frame
-/// callbacks to update all registered trackers. This callback may only be
-/// registered once, so we use a singleton to ensure that.
-class _ElementPositionTrackerManager {
-  _ElementPositionTrackerManager._() {
-    WidgetsBinding.instance.addPersistentFrameCallback((_) {
-      final trackersCopy = List<_ElementPositionTracker>.from(
-        _trackers,
-        growable: false,
-      );
-      for (final tracker in trackersCopy) {
-        tracker._updateSelf();
-      }
-    });
-  }
-
-  static final _instance = _ElementPositionTrackerManager._();
-  static _ElementPositionTrackerManager get instance => _instance;
-  final List<_ElementPositionTracker> _trackers = <_ElementPositionTracker>[];
-
-  void add(_ElementPositionTracker tracker) {
-    _trackers.add(tracker);
-  }
-
-  void remove(_ElementPositionTracker tracker) {
-    _trackers.remove(tracker);
-  }
-}
-
-/// Tracks global rect of an [Element].
-class _ElementPositionTracker {
-  _ElementPositionTracker({required this.element});
-
-  final BuildContext element;
-  Rect? _lastReportedRect;
-
-  /// Returns current global rect for tracked element or `null` if not available.
-  Rect? getGlobalRect() {
-    final rect = _getGlobalRect();
-    _lastReportedRect = rect;
-    return rect;
-  }
-
-  /// Callback invoked every time the global position of the tracked element changes
-  /// compared to last result of [getGlobalRect].
-  void Function(Rect rect)? onGlobalRectChange;
-
-  Rect? _getGlobalRect() {
-    if (!element.mounted) {
-      return null;
-    }
-    final renderBox = element.findRenderObject();
-    if (renderBox is! RenderBox) {
-      return null;
-    }
-
-    final transform = renderBox.getTransformTo(null);
-    final rect = Offset.zero & renderBox.size;
-    final globalRect = MatrixUtils.transformRect(transform, rect);
-    return globalRect;
-  }
-
-  void _updateSelf() {
-    final rect = _getGlobalRect();
-    if (rect == null) {
-      _ElementPositionTrackerManager.instance.remove(this);
-      return;
-    }
-    if (_lastReportedRect != rect) {
-      _lastReportedRect = rect;
-    }
-    onGlobalRectChange?.call(rect);
-  }
-}
+import 'element_position_tracker.dart';
 
 class PopupButton extends StatefulWidget {
   const PopupButton({super.key, required this.parentController});
@@ -99,14 +23,12 @@ class PopupButton extends StatefulWidget {
 
 class _PopupButtonState extends State<PopupButton> {
   PopupWindowController? _popupController;
-  _ElementPositionTracker? _popupTracker;
+  ElementPositionTracker? _popupTracker;
   final GlobalKey _popupButtonKey = GlobalKey();
 
   @override
   void dispose() {
-    if (_popupTracker != null) {
-      _ElementPositionTrackerManager.instance.remove(_popupTracker!);
-    }
+    _popupTracker?.dispose();
     super.dispose();
   }
 
@@ -117,20 +39,17 @@ class _PopupButtonState extends State<PopupButton> {
     // Toggle popup visibility.
     if (_popupController != null) {
       _popupController!.destroy();
-      if (_popupTracker != null) {
-        _ElementPositionTrackerManager.instance.remove(_popupTracker!);
-      }
+      _popupTracker?.dispose();
+      _popupWindow = null;
       setState(() {
-        _popupWindow = null;
         _popupController = null;
         _popupTracker = null;
       });
     } else {
       // Popup is not shown, show it.
-      final tracker = _ElementPositionTracker(
+      final tracker = ElementPositionTracker(
         element: _popupButtonKey.currentContext!,
       );
-      _ElementPositionTrackerManager.instance.add(tracker);
       final UniqueKey key = UniqueKey();
       final controller = PopupWindowController(
         anchorRect: tracker.getGlobalRect()!,
@@ -138,13 +57,9 @@ class _PopupButtonState extends State<PopupButton> {
         delegate: _PopupWindowControllerDelegate(
           onDestroyed: () {
             windowManager.remove(key);
-            _ElementPositionTrackerManager.instance.remove(tracker);
-            if (mounted) {
-              setState(() {
-                _popupController = null;
-                _popupTracker = null;
-              });
-            }
+            tracker.dispose();
+            _popupController = null;
+            _popupTracker = null;
           },
         ),
         parent: widget.parentController,
