@@ -38,7 +38,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     selection.addListener(() => selectionChangedCallback?.call());
   }
 
-  final Map<String, ServiceExtensionCallback> extensions = <String, ServiceExtensionCallback>{};
+  final Map<String, ServiceExtensionCallback> extensions = .new();
 
   final Map<DispatchedEventKey, List<Map<Object, Object?>>> eventsDispatched =
       <DispatchedEventKey, List<Map<Object, Object?>>>{};

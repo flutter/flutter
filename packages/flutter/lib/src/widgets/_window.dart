@@ -2127,3 +2127,235 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     );
   }
 }
+
+/// A registry used to render top-level windows.
+///
+/// The registry is often used to render top-level windows
+/// that are logically nested under a widget deep in the tree.
+///
+/// The [WindowManager] provides a [WindowRegistry] to its descendents.
+///
+/// Descendents of the manager can use [WindowRegistry.maybeOf] to access the
+/// registry. With the registry, they can call [WindowRegistry.register] to
+/// add a new window to the registry and [WindowRegistry.unregister] to remove
+/// a window from the registry.
+///
+/// {@macro flutter.widgets.windowing.experimental}
+///
+/// See also:
+///
+///  * [WindowManager], responsible for listening for new windows and rendering them.
+@internal
+class WindowRegistry extends ChangeNotifier {
+  /// Creates a window registry.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  WindowRegistry() {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+  }
+
+  final List<WindowEntry> _windows = <WindowEntry>[];
+
+  /// The list of registered windows.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  List<WindowEntry> get windows => List<WindowEntry>.unmodifiable(_windows);
+
+  /// Registers a window.
+  ///
+  /// The [entry] parameter specifies the window to register.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void register(WindowEntry entry) {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+
+    _windows.add(entry);
+    notifyListeners();
+  }
+
+  /// Unregisters a window.
+  ///
+  /// The window must be unregistered before it is destroyed. Call
+  /// [BaseWindowController.destroy] to destroy the window or listen
+  /// to the onWindowCloseRequested method of the window's delegate.
+  ///
+  /// The [entry] parameter specifies the window to unregister.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void unregister(WindowEntry entry) {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+
+    _windows.remove(entry);
+    notifyListeners();
+  }
+
+  /// Retrieves the [WindowRegistry] from the given [context].
+  ///
+  /// Returns null if no registry is found in the widget tree.
+  ///
+  /// This does not throw when used in a non-windowing environment, as this
+  /// may be a signal to the owner that windowing itself is unavailable.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  static WindowRegistry? maybeOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<_WindowRegistryScope>()?._registry;
+  }
+}
+
+class _WindowRegistryScope extends InheritedWidget {
+  _WindowRegistryScope({required WindowRegistry registry, required super.child})
+    : _registry = registry {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+  }
+
+  final WindowRegistry _registry;
+
+  @override
+  bool updateShouldNotify(_WindowRegistryScope oldWidget) {
+    return _registry != oldWidget._registry;
+  }
+}
+
+/// Represents an entry for a window such as a dialog.
+///
+/// This class holds the necessary information to build and manage
+/// a window within the application.
+///
+/// {@macro flutter.widgets.windowing.experimental}
+///
+/// See also:
+///
+///  * [WindowRegistry], where window entries can be registered.
+@internal
+class WindowEntry {
+  /// Creates a window entry.
+  ///
+  /// The [controller] parameter is the controller that manages the window.
+  ///
+  /// The [builder] parameter is a function that builds the content of the window.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  WindowEntry({required this.controller, required this.builder}) {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+  }
+
+  /// The controller that manages the window.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  final BaseWindowController controller;
+
+  /// The builder function that builds the content of the window.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  final WidgetBuilder builder;
+}
+
+/// The window manager provides a convenient way to render windows
+/// at the root of an application.
+///
+/// Descendents of the [WindowManager] may access the [WindowRegistry] via
+/// [WindowRegistry.maybeOf] in order to register new windows. [WindowManager]
+/// listens on the [WindowRegistry] and renders the new windows using the
+/// appropriate window widget as they are added or removed.
+///
+/// If windowing is not enabled, this widgets renders [child] directly
+/// and does not provide the [WindowRegistry].
+///
+/// {@tool dartpad}
+/// An example usage might look like this, where the window manager wraps
+/// the root of the widget tree so that dialogs can be rendered at the same level
+/// as a [RegularWindow].
+///
+/// ** See code in examples/api/lib/widgets/windows/window_manager.0.dart **
+/// {@end-tool}
+///
+/// {@macro flutter.widgets.windowing.experimental}
+///
+/// See also:
+///
+///  * [WindowRegistry], where window entries can be registered.
+@internal
+class WindowManager extends StatefulWidget {
+  /// Creates a window manager.
+  ///
+  /// The [child] is the content inside of the window manager.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  const WindowManager({super.key, required this.child});
+
+  /// The child widget of the window manager.
+  final Widget child;
+
+  @override
+  State<WindowManager> createState() => _WindowManagerState();
+}
+
+class _WindowManagerState extends State<WindowManager> {
+  final WindowRegistry _registry = WindowRegistry();
+
+  @override
+  Widget build(BuildContext context) {
+    if (!isWindowingEnabled) {
+      return widget.child;
+    }
+
+    return _WindowRegistryScope(
+      registry: _registry,
+      child: ListenableBuilder(
+        listenable: _registry,
+        builder: (BuildContext context, Widget? child) {
+          final List<Widget> subViews = _registry.windows.map((WindowEntry entry) {
+            return switch (entry.controller) {
+              final DialogWindowController dialog => DialogWindow(
+                controller: dialog,
+                child: entry.builder(context),
+              ),
+              final RegularWindowController regular => RegularWindow(
+                controller: regular,
+                child: entry.builder(context),
+              ),
+              final TooltipWindowController tooltip => TooltipWindow(
+                controller: tooltip,
+                child: entry.builder(context),
+              ),
+              final PopupWindowController popup => PopupWindow(
+                controller: popup,
+                child: entry.builder(context),
+              ),
+            };
+          }).toList();
+
+          final FlutterView? view = View.maybeOf(context);
+          if (view == null) {
+            return ViewCollection(views: subViews);
+          }
+
+          return ViewAnchor(
+            view: subViews.isNotEmpty ? ViewCollection(views: subViews) : null,
+            child: child!,
+          );
+        },
+        child: widget.child,
+      ),
+    );
+  }
+}
