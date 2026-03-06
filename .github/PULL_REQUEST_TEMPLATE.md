@@ -13,7 +13,7 @@ To learn more about code review, see our documentation on Tree Hygiene: https://
 ## Pre-launch Checklist
 
 - [ ] I read the [Contributor Guide] and followed the process outlined there for submitting PRs.
-- [ ] I read the [AI contribution guidelines] and understand my responsibilities, or I did not use AI tools.
+- [ ] I read the [AI contribution guidelines] and understand my responsibilities, or I am not using AI tools.
 - [ ] I read the [Tree Hygiene] wiki page, which explains my responsibilities.
 - [ ] I read and followed the [Flutter Style Guide], including [Features we expect every widget to implement].
 - [ ] I signed the [CLA].
