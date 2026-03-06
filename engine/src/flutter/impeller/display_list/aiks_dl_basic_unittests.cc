@@ -694,15 +694,14 @@ TEST_P(AiksTest, DrawThinStrokedCircle) {
     static float stroked_alpha = 255.0;
     static float stroked_scale[2] = {1.0, 1.0};
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
       ImGui::SliderFloat("Stroked Radius", &stroked_radius, 0, 500);
       ImGui::SliderFloat("Stroked Width", &stroke_width, 0, 500);
       ImGui::SliderFloat("Stroked Width Fine", &stroke_width_fine, 0, 5);
       ImGui::SliderFloat("Stroked Alpha", &stroked_alpha, 0, 10.0);
       ImGui::SliderFloat2("Stroked Scale", stroked_scale, 0, 10.0);
     }
-    ImGui::End();
 
     flutter::DisplayListBuilder builder;
     flutter::DlPaint paint;
