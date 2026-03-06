@@ -286,7 +286,7 @@ See the [Flutter Infra Team Triage](./Infra-Triage.md) page.
 - [macOS incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-macos%2Cfyi-macos+-label%3Atriaged-macos+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc+)
 - [Apple news](https://developer.apple.com/news) - check for updates that might affect us.
 - [hackers-ios channel on Discord](https://discord.com/channels/608014603317936148/846507953959862273)
-- [hackers-macos channel on Discord](https://discord.com/channels/608014603317936148/1169724112537657466)
+- [hackers-desktop channel on Discord](https://discord.com/channels/608014603317936148/608020180177780791)
 
 PRs are reviewed weekly across the framework, packages, and engine repositories:
 
