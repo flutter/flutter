@@ -10,9 +10,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'editable_text_utils.dart';
+import 'button_tester.dart';
+import 'editable_text_tester.dart';
 import 'semantics_tester.dart';
-import 'utils.dart';
 import 'widgets_app_tester.dart';
 
 Future<void> pumpTest(
