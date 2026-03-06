@@ -153,7 +153,7 @@ struct TexImage2DData {
   GLenum type = GL_NONE;
   BufferView buffer_view;
 
-  explicit TexImage2DData(PixelFormat pixel_format) {
+  explicit TexImage2DData(PixelFormat pixel_format, bool supports_bgra) {
     switch (pixel_format) {
       case PixelFormat::kA8UNormInt:
         internal_format = GL_ALPHA;
@@ -166,11 +166,20 @@ struct TexImage2DData {
         type = GL_UNSIGNED_BYTE;
         break;
       case PixelFormat::kR8G8B8A8UNormInt:
-      case PixelFormat::kB8G8R8A8UNormInt:
       case PixelFormat::kR8G8B8A8UNormIntSRGB:
-      case PixelFormat::kB8G8R8A8UNormIntSRGB:
         internal_format = GL_RGBA;
         external_format = GL_RGBA;
+        type = GL_UNSIGNED_BYTE;
+        break;
+      case PixelFormat::kB8G8R8A8UNormInt:
+      case PixelFormat::kB8G8R8A8UNormIntSRGB:
+        if (supports_bgra) {
+          internal_format = GL_BGRA_EXT;
+          external_format = GL_BGRA_EXT;
+        } else {
+          internal_format = GL_RGBA;
+          external_format = GL_RGBA;
+        }
         type = GL_UNSIGNED_BYTE;
         break;
       case PixelFormat::kR32G32B32A32Float:
@@ -210,8 +219,10 @@ struct TexImage2DData {
     is_valid_ = true;
   }
 
-  TexImage2DData(PixelFormat pixel_format, BufferView p_buffer_view)
-      : TexImage2DData(pixel_format) {
+  TexImage2DData(PixelFormat pixel_format,
+                 BufferView p_buffer_view,
+                 bool supports_bgra)
+      : TexImage2DData(pixel_format, supports_bgra) {
     buffer_view = std::move(p_buffer_view);
   }
 
@@ -280,7 +291,10 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
       break;
   }
 
-  TexImage2DData data = TexImage2DData(tex_descriptor.format, source);
+  TexImage2DData data(tex_descriptor.format, source,
+                      /*supports_bgra=*/
+                      reactor.GetProcTable().GetDescription()->HasExtension(
+                          "GL_EXT_texture_format_BGRA8888"));
   if (!data.IsValid()) {
     VALIDATION_LOG << "Invalid texture format.";
     return false;
