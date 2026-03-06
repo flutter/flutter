@@ -577,6 +577,12 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     _onTapCompleted();
   }
 
+  late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
+    ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _handleActivate),
+  };
+
+  void _handleActivate(ActivateIntent intent) => _performOpenMenu(fromTap: false);
+
   void _onTapDown(TapDownDetails details) => _performOpenMenu(fromTap: true);
 
   void _performOpenMenu({required bool fromTap}) {
@@ -637,6 +643,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
               child: FocusableActionDetector(
                 focusNode: widget.focusNode,
                 enabled: !_childHidden,
+                actions: _actionMap,
                 child: Semantics(button: true, child: widget.builder(context, _openController)),
               ),
             ),
