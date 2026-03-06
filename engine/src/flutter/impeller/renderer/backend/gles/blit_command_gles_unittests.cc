@@ -37,8 +37,9 @@ class MockWorker final : public ReactorGLES::Worker {
 
 namespace {
 
-std::shared_ptr<TextureGLES> CreateTexture(std::shared_ptr<ReactorGLES> reactor,
-                                           PixelFormat format) {
+std::shared_ptr<TextureGLES> CreateTexture(
+    const std::shared_ptr<ReactorGLES>& reactor,
+    PixelFormat format) {
   TextureDescriptor tex_desc;
   tex_desc.format = format;
   tex_desc.size = {10, 10};
