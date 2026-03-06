@@ -130,5 +130,5 @@ void main() {
     expect(image.height, 600);
 
     image.dispose();
-  });
+  }, skip: kIsWeb); // [intended] ui.getImageFromTexture isn't implement for web.
 }
