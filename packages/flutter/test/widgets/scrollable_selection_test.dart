@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'clipboard_utils.dart';
 import 'keyboard_utils.dart';
+import 'widgets_app_tester.dart';
 
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
   const caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
@@ -1653,9 +1654,10 @@ void main() {
       // startAutoScrollIfNecessary with an Offset.infinite drag rect, triggering
       // an assertion failure inside EdgeDraggingAutoScroller.
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectionArea(
-            selectionControls: materialTextSelectionControls,
+        TestWidgetsApp(
+          home: SelectableRegion(
+            selectionControls: emptyTextSelectionControls,
+            focusNode: FocusNode(),
             child: Column(
               children: <Widget>[
                 const Text('Header'),
@@ -1703,7 +1705,7 @@ void main() {
       // the inner delegate would pass Offset.infinite to startAutoScrollIfNecessary,
       // causing an assertion error in EdgeDraggingAutoScroller.
       final Offset pastBottom =
-          tester.getBottomRight(find.byType(MaterialApp)) + const Offset(0, 200);
+          tester.getBottomRight(find.byType(TestWidgetsApp)) + const Offset(0, 200);
       await gesture.moveTo(pastBottom);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
