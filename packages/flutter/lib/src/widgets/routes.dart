@@ -2527,11 +2527,11 @@ abstract mixin class RouteAware {
 
   /// Called when a new route has been pushed.
   ///
-  /// Note that this is called during the push operation, before the transition
-  /// animation completes. At this point the current route may still be
-  /// partially visible as it animates out. To perform actions after the route
-  /// is fully obscured, consider using [ModalRoute.animation] to listen for
-  /// animation completion, for example:
+  /// This method is called synchronously during the push operation, before the
+  /// transition animation completes. The current route may still be partially
+  /// visible as it animates out. To perform actions after the route is fully
+  /// obscured, consider using [ModalRoute.animation] to listen for animation
+  /// completion, for example:
   ///
   /// ```dart
   /// ModalRoute.of(context)?.animation?.addStatusListener((AnimationStatus status) {
