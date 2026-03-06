@@ -298,7 +298,8 @@ void main() {
             () => jsonMessage.encodeMessage(<dynamic>['hello world'])!,
           );
         });
-        await channel.invokeMethod<String>('sayHello', 'hello');
+        // ignore: unawaited_futures
+        channel.invokeMethod<String>('sayHello', 'hello');
 
         driverExtension
             .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
@@ -343,9 +344,10 @@ void main() {
             () => jsonMessage.encodeMessage(<dynamic>['hello world'])!,
           );
         });
-
-        await channel1.invokeMethod<String>('sayHello', 'hello');
-        await channel2.invokeMethod<String>('sayHello', 'hello');
+        // ignore: unawaited_futures
+        channel1.invokeMethod<String>('sayHello', 'hello');
+        // ignore: unawaited_futures
+        channel2.invokeMethod<String>('sayHello', 'hello');
 
         driverExtension
             .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())

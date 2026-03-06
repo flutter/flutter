@@ -91,9 +91,10 @@ class UndoManager {
   }
 
   void _setUndoState({bool canUndo = false, bool canRedo = false}) {
-    _channel.invokeMethod<void>('UndoManager.setUndoState', <String, bool>{
-      'canUndo': canUndo,
-      'canRedo': canRedo,
+    _channel
+        .invokeMethod<void>('UndoManager.setUndoState', <String, bool>{
+          'canUndo': canUndo,
+          'canRedo': canRedo,
         })
         .then(
           (_) {},

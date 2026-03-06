@@ -952,10 +952,9 @@ abstract class _DarwinViewState<
       return;
     }
     SystemChannels.textInput
-        .invokeMethod<void>(
-      'TextInput.setPlatformViewClient',
-      <String, dynamic>{'platformViewId': controller.id},
-    )
+        .invokeMethod<void>('TextInput.setPlatformViewClient', <String, dynamic>{
+          'platformViewId': controller.id,
+        })
         .then(
           (_) {},
           onError: (Object error, StackTrace stack) {

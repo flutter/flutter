@@ -79,7 +79,7 @@ void main() {
         FlutterError.onError = oldOnError;
         UndoManager.setChannel(SystemChannels.undoManager);
       }
-    });
+    }, skip: kIsWasm);
   });
 }
 
