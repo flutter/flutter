@@ -51,7 +51,7 @@ std::shared_ptr<TextureGLES> CreateTexture(
 }
 
 std::shared_ptr<DeviceBufferGLES> CreateBuffer(
-    std::shared_ptr<ReactorGLES> reactor) {
+    const std::shared_ptr<ReactorGLES>& reactor) {
   DeviceBufferDescriptor buffer_desc;
   buffer_desc.size = 10 * 10 * 4;
   buffer_desc.storage_mode = StorageMode::kHostVisible;
