@@ -9,15 +9,23 @@ library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 import 'semantics_tester.dart';
 import 'states.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
+  const kBlue = Color(0xFF0000FF);
+  const kGreen = Color(0xFF00FF00);
+  const kRed = Color(0xFFFF0000);
+  const kOrange = Color(0xFFFF8C00);
+  const kPurple = Color(0xFF800080);
+  const kYellow = Color(0xFFFFFF00);
+
   // Regression test for https://github.com/flutter/flutter/issues/100451
   testWidgets('PageView.builder respects findChildIndexCallback', (WidgetTester tester) async {
     var finderCalled = false;
@@ -129,7 +137,7 @@ void main() {
     // Change the page through the page controller when zero viewport
     controller.animateToPage(
       kStates.indexOf('Iowa'),
-      duration: kTabScrollDuration,
+      duration: const Duration(milliseconds: 300),
       curve: Curves.ease,
     );
     expect(controller.page, kStates.indexOf('Iowa'));
@@ -201,7 +209,7 @@ void main() {
               onTap: () {
                 log.add(state);
               },
-              child: Container(height: 200.0, color: const Color(0xFF0000FF), child: Text(state)),
+              child: Container(height: 200.0, color: kBlue, child: Text(state)),
             );
           }).toList(),
         ),
@@ -256,10 +264,10 @@ void main() {
     'PageView does not squish when overscrolled',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: PageView(
             children: List<Widget>.generate(10, (int i) {
-              return Container(key: ValueKey<int>(i), color: const Color(0xFF0000FF));
+              return Container(key: ValueKey<int>(i), color: kBlue);
             }),
           ),
         ),
@@ -585,7 +593,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 200.0,
-              color: index.isEven ? const Color(0xFF0000FF) : const Color(0xFF00FF00),
+              color: index.isEven ? kBlue : kGreen,
               child: Text(kStates[index]),
             );
           },
@@ -690,7 +698,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 200.0,
-              color: index.isEven ? const Color(0xFF0000FF) : const Color(0xFF00FF00),
+              color: index.isEven ? kBlue : kGreen,
               child: Text(kStates[index]),
             );
           },
@@ -733,7 +741,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 200.0,
-              color: index.isEven ? const Color(0xFF0000FF) : const Color(0xFF00FF00),
+              color: index.isEven ? kBlue : kGreen,
               child: Text(kStates[index]),
             );
           },
@@ -762,7 +770,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 200.0,
-              color: index.isEven ? const Color(0xFF0000FF) : const Color(0xFF00FF00),
+              color: index.isEven ? kBlue : kGreen,
               child: Text(kStates[index]),
             );
           },
@@ -802,7 +810,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 200.0,
-              color: index.isEven ? const Color(0xFF0000FF) : const Color(0xFF00FF00),
+              color: index.isEven ? kBlue : kGreen,
               child: Text(index.toString()),
             );
           },
@@ -1244,7 +1252,7 @@ void main() {
     const pixel6EmulatorWidth = 411.42857142857144;
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Center(
           child: SizedBox(
             width: pixel6EmulatorWidth,
@@ -1285,7 +1293,7 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Center(
           child: PageView(
             controller: controller,
@@ -1315,17 +1323,15 @@ void main() {
     final GlobalKey key = GlobalKey();
 
     Widget createPageView(PageController? controller) {
-      return MaterialApp(
-        home: Scaffold(
-          body: PageView(
-            key: key,
-            controller: controller,
-            children: const <Widget>[
-              Center(child: Text('0')),
-              Center(child: Text('1')),
-              Center(child: Text('2')),
-            ],
-          ),
+      return TestWidgetsApp(
+        home: PageView(
+          key: key,
+          controller: controller,
+          children: const <Widget>[
+            Center(child: Text('0')),
+            Center(child: Text('1')),
+            Center(child: Text('2')),
+          ],
         ),
       );
     }
@@ -1390,48 +1396,44 @@ void main() {
 
   group('Asserts in jumpToPage and animateToPage methods works properly', () {
     Widget createPageView([PageController? controller]) {
-      return MaterialApp(
-        home: Scaffold(
-          body: PageView(
-            controller: controller,
-            children: <Widget>[
-              Container(color: Colors.red),
-              Container(color: Colors.green),
-              Container(color: Colors.blue),
-            ],
-          ),
+      return TestWidgetsApp(
+        home: PageView(
+          controller: controller,
+          children: <Widget>[
+            Container(color: kRed),
+            Container(color: kGreen),
+            Container(color: kBlue),
+          ],
         ),
       );
     }
 
     group('One pageController is attached to multiple PageViews', () {
       Widget createMultiplePageViews(PageController controller) {
-        return MaterialApp(
-          home: Scaffold(
-            body: Column(
-              children: <Widget>[
-                Expanded(
-                  child: PageView(
-                    controller: controller,
-                    children: <Widget>[
-                      Container(color: Colors.red),
-                      Container(color: Colors.green),
-                      Container(color: Colors.blue),
-                    ],
-                  ),
+        return TestWidgetsApp(
+          home: Column(
+            children: <Widget>[
+              Expanded(
+                child: PageView(
+                  controller: controller,
+                  children: <Widget>[
+                    Container(color: kRed),
+                    Container(color: kGreen),
+                    Container(color: kBlue),
+                  ],
                 ),
-                Expanded(
-                  child: PageView(
-                    controller: controller,
-                    children: <Widget>[
-                      Container(color: Colors.orange),
-                      Container(color: Colors.purple),
-                      Container(color: Colors.yellow),
-                    ],
-                  ),
+              ),
+              Expanded(
+                child: PageView(
+                  controller: controller,
+                  children: <Widget>[
+                    Container(color: kOrange),
+                    Container(color: kPurple),
+                    Container(color: kYellow),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       }
@@ -1553,30 +1555,34 @@ void main() {
       late String currentPage;
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return Scaffold(
-                  body: PageView(
-                    controller: controller,
-                    children: <Widget>[
-                      Builder(
-                        builder: (BuildContext context) {
-                          currentPage = controller.page == null ? 'null' : 'not empty';
-                          return Center(child: Text(currentPage));
-                        },
-                      ),
-                    ],
+        TestWidgetsApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Column(
+                children: <Widget>[
+                  Expanded(
+                    child: PageView(
+                      controller: controller,
+                      children: <Widget>[
+                        Builder(
+                          builder: (BuildContext context) {
+                            currentPage = controller.page == null ? 'null' : 'not empty';
+                            return Center(child: Text(currentPage));
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                  floatingActionButton: FloatingActionButton(
-                    onPressed: () {
+                  GestureDetector(
+                    key: const Key('rebuild-trigger'),
+                    onTap: () {
                       setState(() {});
                     },
+                    child: const Text('Tap'),
                   ),
-                );
-              },
-            ),
+                ],
+              );
+            },
           ),
         ),
       );
@@ -1584,7 +1590,7 @@ void main() {
       expect(find.text('not empty'), findsNothing);
       expect(currentPage, 'null');
 
-      await tester.tap(find.byType(FloatingActionButton));
+      await tester.tap(find.byKey(const Key('rebuild-trigger')));
       await tester.pump();
       currentPage = controller.page == null ? 'null' : 'not empty';
       expect(find.text('not empty'), findsOneWidget);
@@ -1599,25 +1605,18 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Navigator(
-            onDidRemovePage: (Page<Object?> page) {},
-            pages: <Page<void>>[
-              MaterialPage<void>(
-                child: Scaffold(
-                  body: PageView(
-                    controller: controller,
-                    children: const <Widget>[
-                      Scaffold(body: Text('One')),
-                      Scaffold(body: Text('Two')),
-                    ],
-                  ),
-                ),
+      TestWidgetsApp(
+        home: Navigator(
+          onDidRemovePage: (Page<Object?> page) {},
+          pages: <Page<void>>[
+            _TestPage<void>(
+              child: PageView(
+                controller: controller,
+                children: const <Widget>[Text('One'), Text('Two')],
               ),
-              const MaterialPage<void>(child: Scaffold()),
-            ],
-          ),
+            ),
+            const _TestPage<void>(child: SizedBox.shrink()),
+          ],
         ),
       ),
     );
@@ -1634,25 +1633,18 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Navigator(
-            onDidRemovePage: (Page<Object?> page) {},
-            pages: <Page<void>>[
-              MaterialPage<void>(
-                child: Scaffold(
-                  body: PageView(
-                    controller: controller,
-                    children: const <Widget>[
-                      Scaffold(body: Text('One')),
-                      Scaffold(body: Text('Two')),
-                    ],
-                  ),
-                ),
+      TestWidgetsApp(
+        home: Navigator(
+          onDidRemovePage: (Page<Object?> page) {},
+          pages: <Page<void>>[
+            _TestPage<void>(
+              child: PageView(
+                controller: controller,
+                children: const <Widget>[Text('One'), Text('Two')],
               ),
-              const MaterialPage<void>(child: Scaffold()),
-            ],
-          ),
+            ),
+            const _TestPage<void>(child: SizedBox.shrink()),
+          ],
         ),
       ),
     );
@@ -1866,4 +1858,25 @@ void main() {
       expect(controller.page, 1.0);
     },
   );
+}
+
+class _TestPage<T> extends Page<T> {
+  const _TestPage({required this.child});
+
+  final Widget child;
+
+  @override
+  Route<T> createRoute(BuildContext context) {
+    return PageRouteBuilder<T>(
+      settings: this,
+      pageBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+          ) {
+            return child;
+          },
+    );
+  }
 }

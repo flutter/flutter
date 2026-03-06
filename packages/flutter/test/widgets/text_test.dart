@@ -6,14 +6,21 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
+  const kBlack = Color(0xFF000000);
+  const kRed = Color(0xFFFF0000);
+  const kGreen = Color(0xFF00FF00);
+  const kOpaqueColor = Color(0xFF123456);
+  const kTranslucentColor = Color(0x87654321);
+
   testWidgets('DefaultTextStyle.merge correctly merges arguments', (WidgetTester tester) async {
     var defaultTextStyle = const DefaultTextStyle.fallback();
 
@@ -21,7 +28,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: DefaultTextStyle(
-          style: const TextStyle(color: Colors.black, fontSize: 20),
+          style: const TextStyle(color: kBlack, fontSize: 20),
           textAlign: TextAlign.left,
           softWrap: false,
           overflow: TextOverflow.ellipsis,
@@ -29,7 +36,7 @@ void main() {
           textWidthBasis: TextWidthBasis.longestLine,
           textHeightBehavior: const TextHeightBehavior(applyHeightToFirstAscent: false),
           child: DefaultTextStyle.merge(
-            style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            style: const TextStyle(color: kRed, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
             softWrap: true,
             overflow: TextOverflow.fade,
@@ -49,7 +56,7 @@ void main() {
 
     expect(
       defaultTextStyle.style,
-      const TextStyle(color: Colors.red, fontSize: 20, fontWeight: FontWeight.bold),
+      const TextStyle(color: kRed, fontSize: 20, fontWeight: FontWeight.bold),
     );
     expect(defaultTextStyle.textAlign, TextAlign.center);
     expect(defaultTextStyle.softWrap, true);
@@ -296,11 +303,9 @@ void main() {
               child: SizedBox(
                 width: 20,
                 height: 40,
-                child: Card(
-                  child: RichText(
-                    text: const TextSpan(text: 'widget should be truncated'),
-                    textDirection: TextDirection.rtl,
-                  ),
+                child: RichText(
+                  text: const TextSpan(text: 'widget should be truncated'),
+                  textDirection: TextDirection.rtl,
                 ),
               ),
             ),
@@ -327,11 +332,9 @@ void main() {
               child: SizedBox(
                 width: 20,
                 height: 40,
-                child: Card(
-                  child: RichText(
-                    text: const TextSpan(text: 'widget should be truncated'),
-                    textDirection: TextDirection.rtl,
-                  ),
+                child: RichText(
+                  text: const TextSpan(text: 'widget should be truncated'),
+                  textDirection: TextDirection.rtl,
                 ),
               ),
             ),
@@ -354,26 +357,22 @@ void main() {
     final key = UniqueKey();
     var textScaleFactor = 1.0;
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: false),
-        home: Scaffold(
-          appBar: AppBar(title: const Text('title')),
-          body: Center(
-            child: Text.rich(
-              TextSpan(
-                children: <InlineSpan>[
-                  WidgetSpan(
-                    child: RichText(
-                      text: const TextSpan(text: 'widget should be truncated'),
-                      textDirection: TextDirection.ltr,
-                    ),
+      TestWidgetsApp(
+        home: Center(
+          child: Text.rich(
+            TextSpan(
+              children: <InlineSpan>[
+                WidgetSpan(
+                  child: RichText(
+                    text: const TextSpan(text: 'widget should be truncated'),
+                    textDirection: TextDirection.ltr,
                   ),
-                ],
-              ),
-              key: key,
-              textDirection: TextDirection.ltr,
-              textScaleFactor: textScaleFactor,
+                ),
+              ],
             ),
+            key: key,
+            textDirection: TextDirection.ltr,
+            textScaleFactor: textScaleFactor,
           ),
         ),
       ),
@@ -383,26 +382,23 @@ void main() {
     // Now, increases the text scale factor by 5 times.
     textScaleFactor = textScaleFactor * 5;
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: false),
-        home: Scaffold(
-          appBar: AppBar(title: const Text('title')),
-          body: Center(
-            child: Text.rich(
-              TextSpan(
-                children: <InlineSpan>[
-                  WidgetSpan(
-                    child: RichText(
-                      text: const TextSpan(text: 'widget should be truncated'),
-                      textDirection: TextDirection.ltr,
-                    ),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Text.rich(
+            TextSpan(
+              children: <InlineSpan>[
+                WidgetSpan(
+                  child: RichText(
+                    text: const TextSpan(text: 'widget should be truncated'),
+                    textDirection: TextDirection.ltr,
                   ),
-                ],
-              ),
-              key: key,
-              textDirection: TextDirection.ltr,
-              textScaleFactor: textScaleFactor,
+                ),
+              ],
             ),
+            key: key,
+            textDirection: TextDirection.ltr,
+            textScaleFactor: textScaleFactor,
           ),
         ),
       ),
@@ -993,11 +989,9 @@ void main() {
               child: SizedBox(
                 width: 20,
                 height: 40,
-                child: Card(
-                  child: RichText(
-                    text: const TextSpan(text: 'INTERRUPTION'),
-                    textDirection: TextDirection.rtl,
-                  ),
+                child: RichText(
+                  text: const TextSpan(text: 'INTERRUPTION'),
+                  textDirection: TextDirection.rtl,
                 ),
               ),
             ),
@@ -1050,11 +1044,9 @@ void main() {
               child: SizedBox(
                 width: 20,
                 height: 40,
-                child: Card(
-                  child: RichText(
-                    text: const TextSpan(text: 'INTERRUPTION'),
-                    textDirection: TextDirection.rtl,
-                  ),
+                child: RichText(
+                  text: const TextSpan(text: 'INTERRUPTION'),
+                  textDirection: TextDirection.rtl,
                 ),
               ),
             ),
@@ -1106,21 +1098,22 @@ void main() {
     semantics.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/62945
 
-  testWidgets('receives fontFamilyFallback and package from root ThemeData', (
+  testWidgets('receives fontFamilyFallback and package from DefaultTextStyle', (
     WidgetTester tester,
   ) async {
     const fontFamily = 'fontFamily';
     const package = 'package_name';
     final fontFamilyFallback = <String>['font', 'family', 'fallback'];
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(
-          fontFamily: fontFamily,
-          fontFamilyFallback: fontFamilyFallback,
-          package: package,
-          primarySwatch: Colors.blue,
+      TestWidgetsApp(
+        home: DefaultTextStyle(
+          style: TextStyle(
+            fontFamily: fontFamily,
+            fontFamilyFallback: fontFamilyFallback,
+            package: package,
+          ),
+          child: const Center(child: Text('foo')),
         ),
-        home: const Scaffold(body: Center(child: Text('foo'))),
       ),
     );
 
@@ -1206,17 +1199,14 @@ void main() {
   testWidgets('textWidthBasis affects the width of a Text widget', (WidgetTester tester) async {
     Future<void> createText(TextWidthBasis textWidthBasis) {
       return tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(useMaterial3: false),
-          home: Scaffold(
-            body: Center(
-              // Each word takes up more than a half of a line. Together they
-              // wrap onto two lines, but leave a lot of extra space.
-              child: Text(
-                'twowordsthateachtakeupmorethanhalfof alineoftextsothattheywrapwithlotsofextraspace',
-                textDirection: TextDirection.ltr,
-                textWidthBasis: textWidthBasis,
-              ),
+        TestWidgetsApp(
+          home: Center(
+            // Each word takes up more than a half of a line. Together they
+            // wrap onto two lines, but leave a lot of extra space.
+            child: Text(
+              'twowordsthateachtakeupmorethanhalfof alineoftextsothattheywrapwithlotsofextraspace',
+              textDirection: TextDirection.ltr,
+              textWidthBasis: textWidthBasis,
             ),
           ),
         ),
@@ -1244,35 +1234,33 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  'LEFT ALIGNED, PARENT',
-                  textAlign: TextAlign.left,
-                  textWidthBasis: TextWidthBasis.parent,
-                ),
-                Text(
-                  'RIGHT ALIGNED, PARENT',
-                  textAlign: TextAlign.right,
-                  textWidthBasis: TextWidthBasis.parent,
-                ),
-                Text(
-                  'LEFT ALIGNED, LONGEST LINE',
-                  textAlign: TextAlign.left,
-                  textWidthBasis: TextWidthBasis.longestLine,
-                ),
-                Text(
-                  'RIGHT ALIGNED, LONGEST LINE',
-                  textAlign: TextAlign.right,
-                  textWidthBasis: TextWidthBasis.longestLine,
-                ),
-              ],
-            ),
+      const TestWidgetsApp(
+        home: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                'LEFT ALIGNED, PARENT',
+                textAlign: TextAlign.left,
+                textWidthBasis: TextWidthBasis.parent,
+              ),
+              Text(
+                'RIGHT ALIGNED, PARENT',
+                textAlign: TextAlign.right,
+                textWidthBasis: TextWidthBasis.parent,
+              ),
+              Text(
+                'LEFT ALIGNED, LONGEST LINE',
+                textAlign: TextAlign.left,
+                textWidthBasis: TextWidthBasis.longestLine,
+              ),
+              Text(
+                'RIGHT ALIGNED, LONGEST LINE',
+                textAlign: TextAlign.right,
+                textWidthBasis: TextWidthBasis.longestLine,
+              ),
+            ],
           ),
         ),
       ),
@@ -1364,7 +1352,7 @@ void main() {
             const WidgetSpan(child: SizedBox.shrink()),
             TextSpan(
               text: 'HELLO',
-              style: const TextStyle(color: Colors.black),
+              style: const TextStyle(color: kBlack),
               recognizer: recognizer..onTap = () {},
             ),
           ],
@@ -1433,7 +1421,7 @@ void main() {
               const WidgetSpan(child: Text('included')),
               TextSpan(
                 text: 'HELLO',
-                style: const TextStyle(color: Colors.black),
+                style: const TextStyle(color: kBlack),
                 recognizer: recognizer..onTap = () {},
               ),
               const WidgetSpan(child: Text('included2')),
@@ -1494,7 +1482,7 @@ void main() {
               ),
               TextSpan(
                 text: 'HELLO',
-                style: const TextStyle(color: Colors.black),
+                style: const TextStyle(color: kBlack),
                 recognizer: recognizer..onTap = () {},
               ),
             ],
@@ -1543,7 +1531,7 @@ void main() {
         child: Center(
           child: ClipRect(
             child: Container(
-              color: Colors.green,
+              color: kGreen,
               height: 100,
               width: 100,
               child: OverflowBox(
@@ -1552,11 +1540,19 @@ void main() {
                 child: RichText(
                   text: TextSpan(
                     children: <InlineSpan>[
-                      const WidgetSpan(
-                        child: Icon(Icons.edit, size: 16, semanticLabel: 'not clipped'),
+                      WidgetSpan(
+                        child: Semantics(
+                          label: 'not clipped',
+                          child: const SizedBox(width: 16, height: 16),
+                        ),
                       ),
                       TextSpan(text: 'next WS is clipped', recognizer: recognizer..onTap = () {}),
-                      const WidgetSpan(child: Icon(Icons.edit, size: 16, semanticLabel: 'clipped')),
+                      WidgetSpan(
+                        child: Semantics(
+                          label: 'clipped',
+                          child: const SizedBox(width: 16, height: 16),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -1713,7 +1709,7 @@ void main() {
         child: Text(
           'Hello World',
           textDirection: TextDirection.ltr,
-          style: TextStyle(color: Color(0xFF123456)),
+          style: TextStyle(color: kOpaqueColor),
         ),
       ),
     );
@@ -1730,7 +1726,7 @@ void main() {
         child: Text(
           'Hello World',
           textDirection: TextDirection.ltr,
-          style: TextStyle(color: Color(0x87654321)),
+          style: TextStyle(color: kTranslucentColor),
         ),
       ),
     );
@@ -1742,7 +1738,17 @@ void main() {
   testWidgets('Mouse hovering over selectable Text uses SystemMouseCursor.text', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const MaterialApp(home: SelectionArea(child: Text('Flutter'))));
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: EmptyTextSelectionControls(),
+          focusNode: focusNode,
+          child: const Text('Flutter'),
+        ),
+      ),
+    );
 
     final TestGesture gesture = await tester.createGesture(
       kind: PointerDeviceKind.mouse,
@@ -1761,9 +1767,13 @@ void main() {
   testWidgets('Mouse hovering over selectable Text uses default selection style mouse cursor', (
     WidgetTester tester,
   ) async {
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: EmptyTextSelectionControls(),
+          focusNode: focusNode,
           child: DefaultSelectionStyle.merge(
             mouseCursor: SystemMouseCursors.click,
             child: const Text('Flutter'),

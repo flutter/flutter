@@ -7,10 +7,173 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  // Golden test colors — exact Material color values to preserve pixel output.
+  const kMaterialYellow200 = Color(0xFFFFF59D); // Colors.yellow[200]
+  const kMaterialBlue900 = Color(0xFF0D47A1); // Colors.blue[900]
+  const kMaterialGreen900 = Color(0xFF1B5E20); // Colors.green[900]
+
+  // Shadow definitions matching Material Design kElevationToShadow.
+  const kKeyUmbraOpacity = Color(0x33000000); // alpha = 0.2
+  const kKeyPenumbraOpacity = Color(0x24000000); // alpha = 0.14
+  const kAmbientShadowOpacity = Color(0x1F000000); // alpha = 0.12
+  const elevationToShadow = <int, List<BoxShadow>>{
+    0: <BoxShadow>[],
+    1: <BoxShadow>[
+      BoxShadow(
+        offset: Offset(0.0, 2.0),
+        blurRadius: 1.0,
+        spreadRadius: -1.0,
+        color: kKeyUmbraOpacity,
+      ),
+      BoxShadow(offset: Offset(0.0, 1.0), blurRadius: 1.0, color: kKeyPenumbraOpacity),
+      BoxShadow(offset: Offset(0.0, 1.0), blurRadius: 3.0, color: kAmbientShadowOpacity),
+    ],
+    2: <BoxShadow>[
+      BoxShadow(
+        offset: Offset(0.0, 3.0),
+        blurRadius: 1.0,
+        spreadRadius: -2.0,
+        color: kKeyUmbraOpacity,
+      ),
+      BoxShadow(offset: Offset(0.0, 2.0), blurRadius: 2.0, color: kKeyPenumbraOpacity),
+      BoxShadow(offset: Offset(0.0, 1.0), blurRadius: 5.0, color: kAmbientShadowOpacity),
+    ],
+    3: <BoxShadow>[
+      BoxShadow(
+        offset: Offset(0.0, 3.0),
+        blurRadius: 3.0,
+        spreadRadius: -2.0,
+        color: kKeyUmbraOpacity,
+      ),
+      BoxShadow(offset: Offset(0.0, 3.0), blurRadius: 4.0, color: kKeyPenumbraOpacity),
+      BoxShadow(offset: Offset(0.0, 1.0), blurRadius: 8.0, color: kAmbientShadowOpacity),
+    ],
+    4: <BoxShadow>[
+      BoxShadow(
+        offset: Offset(0.0, 2.0),
+        blurRadius: 4.0,
+        spreadRadius: -1.0,
+        color: kKeyUmbraOpacity,
+      ),
+      BoxShadow(offset: Offset(0.0, 4.0), blurRadius: 5.0, color: kKeyPenumbraOpacity),
+      BoxShadow(offset: Offset(0.0, 1.0), blurRadius: 10.0, color: kAmbientShadowOpacity),
+    ],
+    6: <BoxShadow>[
+      BoxShadow(
+        offset: Offset(0.0, 3.0),
+        blurRadius: 5.0,
+        spreadRadius: -1.0,
+        color: kKeyUmbraOpacity,
+      ),
+      BoxShadow(offset: Offset(0.0, 6.0), blurRadius: 10.0, color: kKeyPenumbraOpacity),
+      BoxShadow(offset: Offset(0.0, 1.0), blurRadius: 18.0, color: kAmbientShadowOpacity),
+    ],
+    8: <BoxShadow>[
+      BoxShadow(
+        offset: Offset(0.0, 5.0),
+        blurRadius: 5.0,
+        spreadRadius: -3.0,
+        color: kKeyUmbraOpacity,
+      ),
+      BoxShadow(
+        offset: Offset(0.0, 8.0),
+        blurRadius: 10.0,
+        spreadRadius: 1.0,
+        color: kKeyPenumbraOpacity,
+      ),
+      BoxShadow(
+        offset: Offset(0.0, 3.0),
+        blurRadius: 14.0,
+        spreadRadius: 2.0,
+        color: kAmbientShadowOpacity,
+      ),
+    ],
+    9: <BoxShadow>[
+      BoxShadow(
+        offset: Offset(0.0, 5.0),
+        blurRadius: 6.0,
+        spreadRadius: -3.0,
+        color: kKeyUmbraOpacity,
+      ),
+      BoxShadow(
+        offset: Offset(0.0, 9.0),
+        blurRadius: 12.0,
+        spreadRadius: 1.0,
+        color: kKeyPenumbraOpacity,
+      ),
+      BoxShadow(
+        offset: Offset(0.0, 3.0),
+        blurRadius: 16.0,
+        spreadRadius: 2.0,
+        color: kAmbientShadowOpacity,
+      ),
+    ],
+    12: <BoxShadow>[
+      BoxShadow(
+        offset: Offset(0.0, 7.0),
+        blurRadius: 8.0,
+        spreadRadius: -4.0,
+        color: kKeyUmbraOpacity,
+      ),
+      BoxShadow(
+        offset: Offset(0.0, 12.0),
+        blurRadius: 17.0,
+        spreadRadius: 2.0,
+        color: kKeyPenumbraOpacity,
+      ),
+      BoxShadow(
+        offset: Offset(0.0, 5.0),
+        blurRadius: 22.0,
+        spreadRadius: 4.0,
+        color: kAmbientShadowOpacity,
+      ),
+    ],
+    16: <BoxShadow>[
+      BoxShadow(
+        offset: Offset(0.0, 8.0),
+        blurRadius: 10.0,
+        spreadRadius: -5.0,
+        color: kKeyUmbraOpacity,
+      ),
+      BoxShadow(
+        offset: Offset(0.0, 16.0),
+        blurRadius: 24.0,
+        spreadRadius: 2.0,
+        color: kKeyPenumbraOpacity,
+      ),
+      BoxShadow(
+        offset: Offset(0.0, 6.0),
+        blurRadius: 30.0,
+        spreadRadius: 5.0,
+        color: kAmbientShadowOpacity,
+      ),
+    ],
+    24: <BoxShadow>[
+      BoxShadow(
+        offset: Offset(0.0, 11.0),
+        blurRadius: 15.0,
+        spreadRadius: -7.0,
+        color: kKeyUmbraOpacity,
+      ),
+      BoxShadow(
+        offset: Offset(0.0, 24.0),
+        blurRadius: 38.0,
+        spreadRadius: 3.0,
+        color: kKeyPenumbraOpacity,
+      ),
+      BoxShadow(
+        offset: Offset(0.0, 9.0),
+        blurRadius: 46.0,
+        spreadRadius: 8.0,
+        color: kAmbientShadowOpacity,
+      ),
+    ],
+  };
+
   tearDown(() {
     debugDisableShadows = true;
   });
@@ -21,7 +184,7 @@ void main() {
         child: RepaintBoundary(
           child: Container(
             margin: const EdgeInsets.all(50.0),
-            decoration: BoxDecoration(boxShadow: kElevationToShadow[9]),
+            decoration: BoxDecoration(boxShadow: elevationToShadow[9]),
             height: 100.0,
             width: 100.0,
           ),
@@ -52,7 +215,7 @@ void main() {
               shape: const BeveledRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(20.0)),
               ),
-              shadows: kElevationToShadow[elevation],
+              shadows: elevationToShadow[elevation],
             ),
             height: 100.0,
             width: 100.0,
@@ -61,7 +224,7 @@ void main() {
       );
     }
 
-    for (final int elevation in kElevationToShadow.keys) {
+    for (final int elevation in elevationToShadow.keys) {
       testWidgets('elevation $elevation', (WidgetTester tester) async {
         debugDisableShadows = false;
         await tester.pumpWidget(build(elevation));
@@ -80,11 +243,11 @@ void main() {
         child: RepaintBoundary(
           child: Container(
             margin: const EdgeInsets.all(150.0),
-            color: Colors.yellow[200],
-            child: PhysicalModel(
+            color: kMaterialYellow200,
+            child: const PhysicalModel(
               elevation: 9.0,
-              color: Colors.blue[900]!,
-              child: const SizedBox(height: 100.0, width: 100.0),
+              color: kMaterialBlue900,
+              child: SizedBox(height: 100.0, width: 100.0),
             ),
           ),
         ),
@@ -110,9 +273,9 @@ void main() {
         child: RepaintBoundary(
           child: Container(
             padding: const EdgeInsets.all(150.0),
-            color: Colors.yellow[200],
+            color: kMaterialYellow200,
             child: PhysicalShape(
-              color: Colors.green[900]!,
+              color: kMaterialGreen900,
               clipper: const ShapeBorderClipper(
                 shape: BeveledRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(20.0)),
@@ -126,7 +289,7 @@ void main() {
       );
     }
 
-    for (final int elevation in kElevationToShadow.keys) {
+    for (final int elevation in elevationToShadow.keys) {
       testWidgets('elevation $elevation', (WidgetTester tester) async {
         debugDisableShadows = false;
         await tester.pumpWidget(build(elevation.toDouble()));
