@@ -111,54 +111,11 @@ SubpixelPosition TextFrame::ComputeSubpixelPosition(
   }
 }
 
-Matrix TextFrame::GetOffsetTransform() const {
-  return transform_ * Matrix::MakeTranslation(offset_);
-}
-
-void TextFrame::SetPerFrameData(Rational scale,
-                                Point offset,
-                                const Matrix& transform,
-                                std::optional<GlyphProperties> properties) {
-  bound_values_.clear();
-  scale_ = scale;
-  offset_ = offset;
-  properties_ = properties;
-  transform_ = transform;
-}
-
-Rational TextFrame::GetScale() const {
-  return scale_;
-}
-
-Point TextFrame::GetOffset() const {
-  return offset_;
-}
-
-std::optional<GlyphProperties> TextFrame::GetProperties() const {
-  return properties_;
-}
-
-void TextFrame::AppendFrameBounds(const FrameBounds& frame_bounds) {
-  bound_values_.push_back(frame_bounds);
-}
-
-void TextFrame::ClearFrameBounds() {
-  bound_values_.clear();
-}
-
 fml::StatusOr<flutter::DlPath> TextFrame::GetPath() const {
   if (path_creator_) {
     return path_creator_();
   }
   return fml::Status(fml::StatusCode::kCancelled, "no path creator specified.");
-}
-
-bool TextFrame::IsFrameComplete() const {
-  size_t run_size = 0;
-  for (const auto& x : runs_) {
-    run_size += x.GetGlyphCount();
-  }
-  return bound_values_.size() == run_size;
 }
 
 const Font& TextFrame::GetFont() const {
@@ -170,20 +127,6 @@ std::optional<Glyph> TextFrame::AsSingleGlyph() const {
     return runs_[0].GetGlyphPositions()[0].glyph;
   }
   return std::nullopt;
-}
-
-const FrameBounds& TextFrame::GetFrameBounds(size_t index) const {
-  FML_DCHECK(index < bound_values_.size());
-  return bound_values_[index];
-}
-
-std::pair<size_t, intptr_t> TextFrame::GetAtlasGenerationAndID() const {
-  return std::make_pair(generation_, atlas_id_);
-}
-
-void TextFrame::SetAtlasGeneration(size_t value, intptr_t atlas_id) {
-  generation_ = value;
-  atlas_id_ = atlas_id;
 }
 
 }  // namespace impeller

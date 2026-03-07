@@ -15,6 +15,8 @@ Across the document we use the word "tree" to mean "the health state of flutter/
 
 - On our [build dashboard](https://flutter-dashboard.appspot.com/)
 - On every PR (referred to as "Tree Status")
+  - A failing "tree-status" check on a PR indicates a problem with the main branch,
+    not the PR itself. The check will pass once tree maintainers resolve the issue; no action is needed within the PR.
 - In the [tree-status](https://discord.com/channels/608014603317936148/613398423093116959) Discord channel
 
 ## Overview
@@ -84,6 +86,13 @@ The general process for submitting code to a Flutter repository is as follows:
 
    **If the trees or dashboards are showing any regressions, only fixes
    that improve the situation are allowed to go in.**
+
+   Two pre-commit tests are special, as failures are not caused by the PR's code and cannot be fixed directly within the PR.
+   - The "tree-status" test is a status indicator for the stability of the main branch.
+     It will pass once the issues blocking the tree are resolved.
+   - The "Google Testing" tests run internally at Google and are not publicly accessible.
+     If these fail, a Google employee (for example, the PR reviewer) should be contacted
+     to check the internal tests and recommend a solution.
 
 9. Once everything is green and you have an LGTM from the owners of the code you are affecting (or someone to whom they
    have delegated), and an LGTM from any other contributor who left comments, add the "autosubmit" label if you're in the flutter-hackers github group. A bot will land the patch when it feels like it. If you're not in the flutter-hackers group a reviewer will add the label for you.
@@ -300,11 +309,84 @@ When commenting on a PR, keep in mind the following mantra:
 
 It's better to close a PR than to leave it in limbo.
 
-_See also: [How to review a Flutter PR](https://docs.google.com/presentation/d/1apKVLEAEqxINby49JhLWSLI-CMH0nxCcnrf90nW4cts/edit?usp=sharing) presentation_
+_See also:_
+* _[How to review a Flutter PR](https://docs.google.com/presentation/d/1apKVLEAEqxINby49JhLWSLI-CMH0nxCcnrf90nW4cts/edit?usp=sharing)_
+* _[AI guidelines for reviewers](#reviewer-guidelines)_
 
 ### What (to do when the patch is abandoned)
 
 Sometimes the contributor is unable to finish the work of landing the patch. In that case, if the PR has promise, we may close it but mention it on the relevant issue so that other interested parties can pick it up. Such issues are given the label [`has partial patch`](https://github.com/flutter/flutter/labels/has%20partial%20patch).
+
+## AI contribution guidelines
+
+PRs prepared using AI tools must follow these requirements:
+
+1. You must review all AI-generated code before opening a (non-draft) PR, and before requesting
+   re-review of any updates to the PR.
+   * You are responsible for ensuring that code you submit meets the Flutter project’s standards.
+   * Unmodified AI output generally does not meet those standards.
+2. You must understand and be able to discuss the code in the PR.
+   * Non-trivial PRs require discussion and iteration during review. If you do not understand the
+     code, you cannot meaningfully respond to review feedback.
+   * In our experience, simply feeding review feedback into an AI agent and uncritically reposting
+     its output will not lead to a constructive review.
+3. You must verify the accuracy of any AI-generated text you include in the PR description or
+   review discussion comments.
+   * If an AI provides you incorrect information, it is just hallucinating; if you choose to paste
+     that text into GitHub, you are misrepresenting your PR to your reviewer.
+   * In particular, do not tell a reviewer that you have addressed their feedback just because
+     AI output says so. It is your responsibility to make sure that review feedback has actually
+     been addressed.
+
+### Reviewer guidelines
+
+Because the Flutter team’s time is limited, and the capacity for people outside the team to generate
+plausible-looking code is unlimited, be mindful as a reviewer about what code you choose to review.
+Consider immediately closing PRs that have any of the following red flags:
+
+* The PR description has entirely replaced our template with AI-generated output, and the PR is
+  missing at least one obvious checklist item (tests, issue link, etc.).
+  * If the contributor did not follow our process from the outset, they are unlikely to
+    understand what is expected of them during review.
+* The PR description does not match the changes.
+  * If the contributor did not review both the changes and the description enough to notice this,
+    they have not followed the AI contribution policy.
+* The PR contains irrelevant AI-generated files, such as agent planning .md files.
+  * If the contributor did not review the changes enough to notice and remove these files, they
+    have not followed the AI contribution policy.
+
+As always when closing a PR, explain why and provide next steps.
+
+As a guiding principle, if at any point in the process you feel that you are getting unfiltered
+or minimally filtered AI output as code and/or comment responses, ask yourself:
+* If this PR weren’t here, would I choose to spend my time fixing this issue?
+* Would I choose to fix it using an AI agent that took hours or days to respond to every prompt?
+
+Unless the answer to both questions is yes, the review is not a good use of your time.
+
+This applies even if you are multiple rounds into the review: if the contributor closed the PR,
+would you take it over using an extremely high-latency agent? Beware the sunk cost fallacy.
+
+### Philosophy
+
+A common question in discussions around AI policies for open source projects is: “Why have an
+AI policy at all? Why does it matter how the code was created; shouldn’t the code speak for itself?”
+
+In general, we agree, which is why our policy focuses on behaviors rather than tools. The behaviors
+that led to the creation of this policy are problematic regardless of whether they are AI-generated
+or human-generated. However, it is useful to highlight these policies in the context of AI because
+we have seen that these behaviors are orders of magnitude more common when AI is involved. For example:
+* Submitting a PR containing hundreds of lines of code that the contributor doesn't understand is
+  always a problem. This was rare before the widespread use of AI agents, but is more common with
+  AI-assisted development.
+* Having several rounds of exchanges where a reviewer asks for a change, and the contributor says
+  that they have made that change but haven't, is always a waste of reviewer time. It’s very rare
+  for a contributor to deliberately and obviously lie to a reviewer, but unfortunately common
+  for contributors to uncritically repeat AI agent hallucinations.
+* PRs that ignore our process have always been problematic, because standardizing the PR process
+  is an important part of how we keep our review load manageable. However, a contributor who has
+  spent hours or days on a PR is much more likely to take some time to learn and follow our process
+  to avoid having that effort be wasted than someone who spent a few minutes generating the PR.
 
 ## Landing a patch
 
@@ -483,7 +565,7 @@ In other words:
 @Deprecated(
   '[description of how to migrate] '
   '[brief motivation for why we are breaking the API] '
-  'This feature was deprecated after [beta version at time of deprecation].'
+  'This feature was deprecated after v[beta version at time of deprecation].'
 )
 ```
 

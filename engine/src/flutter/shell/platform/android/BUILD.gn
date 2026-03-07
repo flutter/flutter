@@ -221,6 +221,7 @@ android_java_sources = [
   "io/flutter/Log.java",
   "io/flutter/app/FlutterApplication.java",
   "io/flutter/embedding/android/AndroidTouchProcessor.java",
+  "io/flutter/embedding/android/ContentSizingFlag.java",
   "io/flutter/embedding/android/ExclusiveAppComponent.java",
   "io/flutter/embedding/android/FlutterActivity.java",
   "io/flutter/embedding/android/FlutterActivityAndFragmentDelegate.java",

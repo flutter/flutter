@@ -10,7 +10,7 @@
 
 // Impeller should only be enabled if the Metal backend is enabled.
 #define TESTER_ENABLE_METAL \
-  (IMPELLER_SUPPORTS_RENDERING && IMPELLER_ENABLE_METAL)
+  (IMPELLER_SUPPORTS_RENDERING && IMPELLER_ENABLE_METAL && SHELL_ENABLE_METAL)
 
 namespace flutter {
 

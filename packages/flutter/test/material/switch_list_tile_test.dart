@@ -327,6 +327,32 @@ void main() {
     expect(tester.getTopRight(find.text('L')).dx, 790.0); // 800 - contentPadding.start
   });
 
+  testWidgets('SwitchListTile forwards statesController to ListTile', (WidgetTester tester) async {
+    final controller = WidgetStatesController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: <Widget>[
+              SwitchListTile(
+                value: true,
+                onChanged: (_) {},
+                title: const Text('Switch'),
+                statesController: controller,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final ListTile listTile = tester.widget<ListTile>(find.byType(ListTile));
+
+    expect(listTile.statesController, same(controller));
+  });
+
   testWidgets('SwitchListTile can autofocus unless disabled.', (WidgetTester tester) async {
     final GlobalKey childKey = GlobalKey();
 
@@ -695,16 +721,18 @@ void main() {
         child: Center(
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Container(
+              return SizedBox(
                 width: 500,
                 height: 100,
-                color: Colors.white,
-                child: SwitchListTile(
-                  value: false,
-                  key: key,
-                  hoverColor: Colors.orange[500],
-                  title: const Text('A'),
-                  onChanged: (bool? value) {},
+                child: Material(
+                  color: Colors.white,
+                  child: SwitchListTile(
+                    value: false,
+                    key: key,
+                    hoverColor: Colors.orange[500],
+                    title: const Text('A'),
+                    onChanged: (bool? value) {},
+                  ),
                 ),
               );
             },
@@ -723,7 +751,7 @@ void main() {
       Material.of(tester.element(find.byKey(key))),
       paints
         ..rect()
-        ..rect(color: Colors.orange[500], rect: const Rect.fromLTRB(150.0, 250.0, 650.0, 350.0)),
+        ..rect(color: Colors.orange[500], rect: const Rect.fromLTRB(0.0, 0.0, 500.0, 100.0)),
     );
   });
 
