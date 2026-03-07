@@ -1986,8 +1986,7 @@ class SelectableRegionState extends State<SelectableRegion>
         if (lastSelection != null && lastSelection.plainText.isNotEmpty) {
           _showHandles();
           final SelectionOverlay? selectionOverlay = _selectionOverlay;
-          if (selectionOverlay == null ||
-              !selectionOverlay.toolbarIsVisible) {
+          if (selectionOverlay == null || !selectionOverlay.toolbarIsVisible) {
             _showToolbar();
           }
         }
