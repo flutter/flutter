@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safe Evacuation Route | Hazard Monitor</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f1115;
+            --panel-bg: #1a1d24;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #10b981;
+            --danger: #ef4444;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            padding: 16px 24px;
+            background: rgba(15, 17, 21, 0.9);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #map {
+            flex: 1;
+            width: 100%;
+        }
+
+        .info-panel {
+            position: absolute;
+            top: 80px;
+            left: 20px;
+            z-index: 1000;
+            background: var(--panel-bg);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 320px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .route-point {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .route-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-top: 4px;
+            box-shadow: 0 0 8px currentColor;
+        }
+
+        .dot-danger {
+            background: var(--danger);
+            color: var(--danger);
+        }
+
+        .dot-safe {
+            background: var(--accent);
+            color: var(--accent);
+        }
+
+        .route-text h3 {
+            margin: 0 0 4px 0;
+            font-size: 14px;
+        }
+
+        .route-text p {
+            margin: 0;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .btn-back {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Custom routing UI overrides */
+        .leaflet-routing-container {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>🗺️ Emergency Evacuation Route</h1>
+        <a href="/" class="btn-back">← Back to Dashboard</a>
+    </header>
+
+    <div class="info-panel">
+        <h2
+            style="margin:0 0 20px 0; font-size: 16px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:12px;">
+            Route Details</h2>
+
+        <div class="route-point">
+            <div class="route-dot dot-danger"></div>
+            <div class="route-text">
+                <h3 id="orig-name">Current Location</h3>
+                <p>High Hazard Zone</p>
+            </div>
+        </div>
+
+        <div style="width: 2px; height: 20px; background: rgba(255,255,255,0.1); margin: -8px 0 8px 5px;"></div>
+
+        <div class="route-point" style="margin-bottom: 0;">
+            <div class="route-dot dot-safe"></div>
+            <div class="route-text">
+                <h3 id="dest-name">Safe Zone</h3>
+                <p>Secure Location (Low Risk)</p>
+            </div>
+        </div>
+
+        <div id="route-stats"
+            style="margin-top: 24px; padding: 12px; background: rgba(16,185,129,0.1); border-radius: 8px; border: 1px solid rgba(16,185,129,0.2); font-size: 13px; text-align: center; color: #10b981; font-weight: 500;">
+            Calculating route...
+        </div>
+    </div>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+    <script>
+        // Parse URL params
+        const params = new URLSearchParams(window.location.search);
+        const lat = parseFloat(params.get('lat'));
+        const lon = parseFloat(params.get('lon'));
+        const safeLat = parseFloat(params.get('safeLat'));
+        const safeLon = parseFloat(params.get('safeLon'));
+        const name = params.get('name') || 'Current Location';
+        const safeName = params.get('safeName') || 'Nearest Safe Zone';
+
+        document.getElementById('orig-name').textContent = name;
+        document.getElementById('dest-name').textContent = safeName;
+
+        // Initialize Map
+        const map = L.map('map').setView([11.1271, 78.6569], 7);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '© OpenStreetMap contributors © CARTO',
+            subdomains: 'abcd',
+            maxZoom: 20
+        }).addTo(map);
+
+        if (lat && lon && safeLat && safeLon) {
+            // Custom Icons
+            const dangerIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div style="background-color:#ef4444; width:16px; height:16px; border-radius:50%; border:3px solid #fff; box-shadow:0 0 10px #ef4444;"></div>`,
+                iconSize: [22, 22], iconAnchor: [11, 11]
+            });
+            const safeIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div style="background-color:#10b981; width:16px; height:16px; border-radius:50%; border:3px solid #fff; box-shadow:0 0 10px #10b981;"></div>`,
+                iconSize: [22, 22], iconAnchor: [11, 11]
+            });
+
+            L.marker([lat, lon], { icon: dangerIcon }).addTo(map).bindPopup('<b>Danger Zone</b><br>Evacuate immediately.');
+            L.marker([safeLat, safeLon], { icon: safeIcon }).addTo(map).bindPopup('<b>Safe Zone</b><br>Proceed here.');
+
+            // Routing Machine
+            const control = L.Routing.control({
+                waypoints: [
+                    L.latLng(lat, lon),
+                    L.latLng(safeLat, safeLon)
+                ],
+                routeWhileDragging: false,
+                addWaypoints: false,
+                fitSelectedRoutes: true,
+                show: false, // Hide the default UI
+                lineOptions: {
+                    styles: [{ color: '#10b981', opacity: 0.8, weight: 6, dashArray: '10, 10' }]
+                },
+                createMarker: function () { return null; } // We added our own markers
+            }).addTo(map);
+
+            control.on('routesfound', function (e) {
+                const routes = e.routes;
+                const summary = routes[0].summary;
+                const distKm = (summary.totalDistance / 1000).toFixed(1);
+                const timeMin = Math.round(summary.totalTime / 60);
+
+                document.getElementById('route-stats').innerHTML = `
+                    🚀 Fastest Route Found<br>
+                    <span style="font-size: 18px; margin-top: 4px; display: block; color: white;">
+                        ${distKm} km • ${timeMin} mins
+                    </span>
+                `;
+            });
+        }
+    </script>
+</body>
+
+</html>

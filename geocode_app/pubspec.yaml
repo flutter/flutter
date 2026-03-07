@@ -1,0 +1,124 @@
+name: real_time_hazard_monitoring
+description: Real-time hazard monitoring and alert system using satellite data for Tamil Nadu.
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management
+  flutter_riverpod: ^2.4.0
+  riverpod_annotation: ^2.3.0
+
+  # HTTP & Networking
+  http: ^1.1.0
+  dio: ^5.3.0
+  connectivity_plus: ^5.0.0
+
+  # Local Database
+  sqflite: ^2.3.0
+  sqflite_common_ffi: ^2.3.0
+
+  # Location Services
+  geolocator: ^9.0.2
+  geocoding: ^2.1.0
+
+  # Mapping & Geospatial
+  flutter_map: ^5.0.0
+  flutter_map_tile_layer: ^5.0.0
+  mapbox_gl: ^0.17.0
+  latlong2: ^0.9.0
+  location: ^5.0.1
+
+  # Data Visualization Charts
+  fl_chart: ^0.63.0
+  charts_flutter: ^0.12.0
+
+  # Image & Network Image Caching
+  cached_network_image: ^3.3.0
+  image: ^4.0.0
+
+  # UI & Animation
+  animated_widgets: ^1.1.0
+  shimmer: ^3.0.0
+  lottie: ^2.7.0
+  google_fonts: ^6.1.0
+
+  # Date/Time Utilities
+  timeago: ^3.6.1
+  intl: ^0.19.0
+  timezone: ^0.9.2
+
+  # Notifications & Local Notifications
+  flutter_local_notifications: ^15.0.0
+
+  # Utilities
+  uuid: ^4.0.0
+  path_provider: ^2.1.0
+  shared_preferences: ^2.2.0
+  device_info_plus: ^9.1.0
+  permission_handler: ^11.4.0
+  share_plus: ^7.2.0
+
+  # JSON Serialization
+  json_serializable: ^6.7.0
+  json_annotation: ^4.8.0
+
+  # Logging
+  logger: ^2.0.1
+  sentry_flutter: ^8.1.0
+
+  # Firebase (optional, for push notifications)
+  firebase_core: ^2.24.0
+  firebase_messaging: ^14.6.0
+
+  # URL Launcher
+  url_launcher: ^6.1.11
+
+  # Pull to Refresh
+  pull_to_refresh: ^2.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Code Generation
+  build_runner: ^2.4.6
+  riverpod_generator: ^2.3.7
+  json_serializable: ^6.7.0
+
+  # Linting & Formatting
+  flutter_lints: ^2.0.0
+  very_good_analysis: ^5.1.0
+
+  # Testing
+  mockito: ^5.4.4
+  mocktail: ^1.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/lottie/
+    - assets/maps/
+
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-Regular.ttf
+        - asset: assets/fonts/Roboto-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Roboto-Italic.ttf
+          style: italic
+    - family: PTSans
+      fonts:
+        - asset: assets/fonts/PTSans-Regular.ttf
+        - asset: assets/fonts/PTSans-Bold.ttf
+          weight: 700

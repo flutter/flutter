@@ -1,0 +1,11 @@
+fastapi==0.104.1
+uvicorn==0.24.0
+pydantic==2.4.2
+python-dotenv==1.0.0
+httpx==0.25.0
+aiohttp==3.9.0
+google-generativeai==0.3.0
+requests==2.31.0
+shapely==2.0.1
+python-multipart==0.0.6
+jinja2==3.1.2

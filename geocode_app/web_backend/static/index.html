@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tamil Nadu Real-Time Hazard Monitor</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Leaflet Routing Machine CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+
+    <!-- Custom Styles -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0a0e27;
+            color: #e8eef5;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Header */
+        #header {
+            background: linear-gradient(135deg, #1a2250 0%, #0f1535 100%);
+            padding: 15px 20px;
+            border-bottom: 2px solid #3a4a7a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #c5d9ff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .header-status {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .status-badge {
+            background-color: #1a3a1a;
+            color: #7eff7e;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            border: 1px solid #4eff4e;
+        }
+
+        .status-badge.offline {
+            background-color: #3a1a1a;
+            color: #ff7e7e;
+            border-color: #ff4e4e;
+        }
+
+        /* Main Container */
+        #app-container {
+            display: flex;
+            height: calc(100vh - 60px);
+            gap: 0;
+        }
+
+        /* Left Sidebar */
+        #left-sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #0f1535 0%, #1a1f3a 100%);
+            border-right: 1px solid #3a4a7a;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        .sidebar-section {
+            margin-bottom: 25px;
+        }
+
+        .sidebar-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #a8c5ff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #3a4a7a;
+        }
+
+        .layer-control {
+            margin-bottom: 10px;
+        }
+
+        .layer-control label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: #d4e5ff;
+            font-size: 13px;
+            padding: 8px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .layer-control label:hover {
+            background-color: #2a3a6a;
+            color: #f0f8ff;
+        }
+
+        .layer-control input[type="checkbox"] {
+            cursor: pointer;
+            accent-color: #7eff7e;
+        }
+
+        .action-button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #2a5f5f 0%, #1a3a3a 100%);
+            color: #b8ffff;
+            border: 1px solid #4a9f9f;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .action-button:hover {
+            background: linear-gradient(135deg, #3a7f7f 0%, #2a5a5a 100%);
+            box-shadow: 0 0 12px rgba(122, 255, 255, 0.3);
+        }
+
+        .action-button.gps {
+            background: linear-gradient(135deg, #5f5f2a 0%, #3a3a1a 100%);
+            color: #ffff8b;
+            border-color: #9f9f4a;
+        }
+
+        .action-button.gps:hover {
+            background: linear-gradient(135deg, #7f7f3a 0%, #5a5a2a 100%);
+            box-shadow: 0 0 12px rgba(255, 255, 122, 0.3);
+        }
+
+        .action-button.evacuation {
+            background: linear-gradient(135deg, #5f2a2a 0%, #3a1a1a 100%);
+            color: #ffb8b8;
+            border-color: #9f4a4a;
+        }
+
+        .action-button.evacuation:hover {
+            background: linear-gradient(135deg, #7f3a3a 0%, #5a2a2a 100%);
+            box-shadow: 0 0 12px rgba(255, 184, 184, 0.3);
+        }
+
+        /* Map Container */
+        #map-container {
+            flex: 1;
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Right Sidebar */
+        #right-sidebar {
+            width: 320px;
+            background: linear-gradient(180deg, #1a1f3a 0%, #0f1535 100%);
+            border-left: 1px solid #3a4a7a;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: -4px 0 15px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        .metric-box {
+            background: linear-gradient(135deg, #1a2a4a 0%, #121a3a 100%);
+            border: 1px solid #3a4a7a;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .metric-box:hover {
+            border-color: #5a7aaa;
+            box-shadow: 0 4px 12px rgba(90, 122, 170, 0.2);
+        }
+
+        .metric-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #8a9abf;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #b8d8ff;
+            margin-bottom: 4px;
+        }
+
+        .metric-unit {
+            font-size: 12px;
+            color: #6a7a9f;
+        }
+
+        .risk-score {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #2a1a1a 0%, #1a0a0a 100%);
+            border-left: 4px solid #ff4a4a;
+            border-radius: 4px;
+        }
+
+        .risk-label {
+            color: #c5a8c5;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .risk-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffb8b8;
+        }
+
+        .risk-score.moderate {
+            border-left-color: #ffaa00;
+        }
+
+        .risk-score.moderate .risk-value {
+            color: #ffcc88;
+        }
+
+        .risk-score.high {
+            border-left-color: #ff5500;
+        }
+
+        .risk-score.high .risk-value {
+            color: #ffaa88;
+        }
+
+        .risk-score.low {
+            border-left-color: #4eff4e;
+        }
+
+        .risk-score.low .risk-value {
+            color: #7eff7e;
+        }
+
+        .ai-analysis {
+            background: linear-gradient(135deg, #0a1a3a 0%, #070a2a 100%);
+            border: 1px solid #3a5a7a;
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #b8d8ff;
+            margin-top: 20px;
+            font-style: italic;
+        }
+
+        /* Search Box (Ctrl+K) */
+        #search-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        #search-overlay.active {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 100px;
+        }
+
+        #search-box {
+            width: 500px;
+            max-width: 90%;
+        }
+
+        #search-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #3a4a7a;
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            background-color: #1a2250;
+            color: #e8eef5;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        #search-input:focus {
+            border-color: #7eff7e;
+        }
+
+        #search-results {
+            background-color: #1a2250;
+            border: 2px solid #3a4a7a;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 400px;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+        }
+
+        .search-result {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #2a3a6a;
+            transition: all 0.2s ease;
+            color: #c5d9ff;
+        }
+
+        .search-result:hover {
+            background-color: #2a3a6a;
+            color: #f0f8ff;
+            padding-left: 20px;
+        }
+
+        .search-result.selected {
+            background-color: #3a5a8a;
+            color: #ffffff;
+        }
+
+        .result-name {
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+
+        .result-district {
+            font-size: 12px;
+            color: #8a9abf;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #3a4a7a;
+            border-top-color: #7eff7e;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f1535;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #3a4a7a;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #5a7aaa;
+        }
+
+        /* Leaflet Overrides */
+        .leaflet-popup-content-wrapper {
+            background-color: #1a2250;
+            color: #e8eef5;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
+        }
+
+        .leaflet-popup-tip {
+            background-color: #1a2250;
+        }
+
+        .leaflet-control {
+            background: linear-gradient(135deg, #1a2250 0%, #0f1535 100%);
+            border: 1px solid #3a4a7a;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .leaflet-control-attribution {
+            background: rgba(26, 34, 80, 0.8) !important;
+            color: #8a9abf !important;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            #left-sidebar {
+                width: 200px;
+            }
+            #right-sidebar {
+                width: 250px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            #left-sidebar, #right-sidebar {
+                position: absolute;
+                top: 60px;
+                height: calc(100vh - 60px);
+                z-index: 500;
+                display: none;
+            }
+
+            #left-sidebar.mobile-open {
+                display: block;
+                left: 0;
+            }
+
+            #right-sidebar.mobile-open {
+                display: block;
+                right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div id="header">
+        <div class="header-title">🌍 Tamil Nadu Hazard Monitor</div>
+        <div class="header-status">
+            <div class="status-badge" id="connection-status">🔴 Connecting...</div>
+            <div id="time-display" style="font-size: 13px; color: #8a9abf;"></div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div id="app-container">
+        <!-- Left Sidebar -->
+        <div id="left-sidebar">
+            <!-- Layer Controls -->
+            <div class="sidebar-section">
+                <div class="sidebar-title">📊 Map Layers</div>
+                <div class="layer-control">
+                    <label>
+                        <input type="checkbox" id="layer-moisture" checked>
+                        <span>Soil Moisture</span>
+                    </label>
+                </div>
+                <div class="layer-control">
+                    <label>
+                        <input type="checkbox" id="layer-precipitation" checked>
+                        <span>Precipitation</span>
+                    </label>
+                </div>
+                <div class="layer-control">
+                    <label>
+                        <input type="checkbox" id="layer-deformation" checked>
+                        <span>Ground Deformation</span>
+                    </label>
+                </div>
+                <div class="layer-control">
+                    <label>
+                        <input type="checkbox" id="layer-vegetation" checked>
+                        <span>Vegetation Health</span>
+                    </label>
+                </div>
+                <div class="layer-control">
+                    <label>
+                        <input type="checkbox" id="layer-hazards" checked>
+                        <span>Risk Zones</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="sidebar-section">
+                <div class="sidebar-title">⚡ Actions</div>
+                <button class="action-button gps" id="gps-button" title="Click to enable GPS tracking">
+                    📍 Track My Location
+                </button>
+                <button class="action-button evacuation" id="evacuation-button" title="Find safe evacuation routes">
+                    🛣️ Safe Routes
+                </button>
+                <button class="action-button" id="refresh-button" style="margin-top: 10px;">
+                    🔄 Refresh Data
+                </button>
+            </div>
+
+            <!-- Legend -->
+            <div class="sidebar-section">
+                <div class="sidebar-title">📋 Risk Legend</div>
+                <div style="font-size: 12px; line-height: 1.8;">
+                    <div style="margin-bottom: 8px;">
+                        <span style="display: inline-block; width: 20px; height: 20px; background-color: #4eff4e; border-radius: 50%; margin-right: 8px;"></span>
+                        <span>Low Risk (&lt;30%)</span>
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span style="display: inline-block; width: 20px; height: 20px; background-color: #ffaa00; border-radius: 50%; margin-right: 8px;"></span>
+                        <span>Moderate (30-60%)</span>
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span style="display: inline-block; width: 20px; height: 20px; background-color: #ff5500; border-radius: 50%; margin-right: 8px;"></span>
+                        <span>High (60-80%)</span>
+                    </div>
+                    <div>
+                        <span style="display: inline-block; width: 20px; height: 20px; background-color: #ff4444; border-radius: 50%; margin-right: 8px;"></span>
+                        <span>Critical (≥80%)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Container -->
+        <div id="map-container">
+            <div id="map"></div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div id="right-sidebar">
+            <div class="sidebar-title">📍 Location Details</div>
+            <div id="location-info" style="color: #8a9abf; font-size: 13px;">
+                Click on a location or search using Ctrl+K
+            </div>
+
+            <div id="metrics-container"></div>
+        </div>
+    </div>
+
+    <!-- Search Overlay -->
+    <div id="search-overlay">
+        <div id="search-box">
+            <input
+                id="search-input"
+                type="text"
+                placeholder="🔍 Search cities, towns, districts... (Ctrl+K)"
+                autocomplete="off"
+            >
+            <div id="search-results"></div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+
+    <!-- Main Application Script -->
+    <script>
+        // ============== CONFIGURATION ==============
+        const API_BASE = window.location.origin;
+        const UPDATE_INTERVAL = 900000; // 15 minutes
+        let map;
+        let currentLocation = null;
+        let userMarker = null;
+        let routingControl = null;
+        let hazardMarkers = new Map();
+        let eventSource = null;
+
+        // ============== INITIALIZATION ==============
+        window.addEventListener('DOMContentLoaded', async () => {
+            console.log('Initializing Tamil Nadu Hazard Monitor...');
+
+            // Initialize map
+            initializeMap();
+
+            // Load locations
+            await loadLocations();
+
+            // Setup search
+            setupSearch();
+
+            // Setup actions
+            setupActions();
+
+            // Connect to SSE
+            connectSSE();
+
+            // Update time
+            updateTime();
+            setInterval(updateTime, 1000);
+        });
+
+        // ============== MAP INITIALIZATION ==============
+        function initializeMap() {
+            const tnCenter = [11.1271, 78.6569];
+            const tnBounds = [[8.0, 76.0], [13.5, 80.5]];
+
+            map = L.map('map').setView(tnCenter, 8);
+
+            // Base layer (Dark tile layer)
+            L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap',
+                maxZoom: 19,
+                maxBounds: tnBounds
+            }).addTo(map);
+
+            // Add hazard zone layer
+            addHazardZonesLayer();
+
+            // Click handler for location details
+            map.on('click', (e) => {
+                getLocationDetails(e.latlng.lat, e.latlng.lng);
+            });
+
+            console.log('Map initialized');
+        }
+
+        function addHazardZonesLayer() {
+            // Create a custom layer for hazard zones
+            const hazardLayer = L.featureGroup().addTo(map);
+            window.hazardLayer = hazardLayer;
+        }
+
+        // ============== LOCATION MANAGEMENT ==============
+        let allLocations = [];
+
+        async function loadLocations() {
+            try {
+                const response = await fetch(`${API_BASE}/api/locations`);
+                const data = await response.json();
+                allLocations = data.locations || [];
+                console.log(`Loaded ${allLocations.length} locations`);
+
+                // Add markers for major cities
+                allLocations.slice(0, 10).forEach(loc => {
+                    addLocationMarker(loc);
+                });
+            } catch (error) {
+                console.error('Failed to load locations:', error);
+            }
+        }
+
+        function addLocationMarker(location) {
+            const marker = L.circleMarker([location.lat, location.lon], {
+                radius: 6,
+                fillColor: '#8899ff',
+                color: '#4455dd',
+                weight: 2,
+                opacity: 0.7,
+                fillOpacity: 0.5
+            }).addTo(map);
+
+            marker.bindPopup(`<strong>${location.name}</strong><br/>${location.district}`);
+            marker.on('click', () => {
+                getLocationDetails(location.lat, location.lon);
+            });
+
+            hazardMarkers.set(`${location.name}`, marker);
+        }
+
+        // ============== LOCATION DETAILS ==============
+        async function getLocationDetails(lat, lon) {
+            try {
+                currentLocation = { lat, lon };
+                document.getElementById('location-info').innerHTML = `
+                    <div class="spinner"></div> Loading hazard data...
+                `;
+
+                const response = await fetch(`${API_BASE}/api/hazards?lat=${lat}&lon=${lon}`);
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    displayLocationDetails(data);
+
+                    // Update map view
+                    map.setView([lat, lon], 10);
+                }
+            } catch (error) {
+                console.error('Failed to get location details:', error);
+                document.getElementById('location-info').innerHTML = `
+                    <div style="color: #ff8888;">Error loading data</div>
+                `;
+            }
+        }
+
+        function displayLocationDetails(data) {
+            const { location, metrics, hazards, ai_analysis } = data;
+            const metricsContainer = document.getElementById('metrics-container');
+
+            let html = `
+                <div class="metric-box">
+                    <div class="metric-label">📍 Location</div>
+                    <div class="metric-value" style="font-size: 18px;">${location.name || 'Unknown'}</div>
+                    <div class="metric-unit">${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}</div>
+                </div>
+            `;
+
+            // Hazard Scores
+            if (hazards) {
+                Object.entries(hazards).forEach(([type, data]) => {
+                    const riskClass = data.score < 30 ? 'low' : data.score < 60 ? 'moderate' : data.score < 80 ? 'high' : 'critical';
+                    html += `
+                        <div class="risk-score ${riskClass}">
+                            <span class="risk-label">${type.toUpperCase()}</span>
+                            <span class="risk-value">${data.score.toFixed(1)}%</span>
+                        </div>
+                    `;
+                });
+            }
+
+            // Metrics
+            if (metrics) {
+                html += `
+                    <div class="sidebar-title" style="margin-top: 20px;">📊 Satellite Data</div>
+                    <div class="metric-box">
+                        <div class="metric-label">💧 Soil Moisture</div>
+                        <div class="metric-value">${(metrics.soil_moisture || 0).toFixed(1)}%</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">🌧️ Precipitation (24h)</div>
+                        <div class="metric-value">${(metrics.precipitation_24h || 0).toFixed(1)}mm</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">📍 Elevation</div>
+                        <div class="metric-value">${(metrics.elevation || 0).toFixed(0)}m</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">📐 Slope</div>
+                        <div class="metric-value">${(metrics.slope || 0).toFixed(1)}°</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">🌡️ Temperature</div>
+                        <div class="metric-value">${(metrics.temperature || 0).toFixed(1)}°C</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">🌱 Vegetation (NDVI)</div>
+                        <div class="metric-value">${(metrics.ndvi || 0).toFixed(2)}</div>
+                    </div>
+                `;
+            }
+
+            // AI Analysis
+            if (ai_analysis) {
+                html += `
+                    <div class="ai-analysis">
+                        <div style="font-weight: bold; margin-bottom: 8px; color: #d4e5ff;">AI ANALYSIS:</div>
+                        ${ai_analysis}
+                    </div>
+                `;
+            }
+
+            metricsContainer.innerHTML = html;
+        }
+
+        // ============== SEARCH FUNCTIONALITY ==============
+        function setupSearch() {
+            const searchInput = document.getElementById('search-input');
+            const searchOverlay = document.getElementById('search-overlay');
+            const searchResults = document.getElementById('search-results');
+
+            // Ctrl+K to open search
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 'k') {
+                    e.preventDefault();
+                    searchOverlay.classList.add('active');
+                    searchInput.focus();
+                }
+                if (e.key === 'Escape') {
+                    searchOverlay.classList.remove('active');
+                }
+            });
+
+            // Search input
+            searchInput.addEventListener('input', async (e) => {
+                const query = e.target.value.trim();
+                if (query.length < 1) {
+                    searchResults.innerHTML = '';
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${API_BASE}/api/search?q=${encodeURIComponent(query)}`);
+                    const data = await response.json();
+
+                    if (data.results && data.results.length > 0) {
+                        searchResults.innerHTML = data.results.map(loc => `
+                            <div class="search-result" onclick="selectLocation(${loc.lat}, ${loc.lon}, '${loc.name}')">
+                                <div class="result-name">${loc.name}</div>
+                                <div class="result-district">${loc.district} • ${loc.type}</div>
+                            </div>
+                        `).join('');
+                    } else {
+                        searchResults.innerHTML = '<div class="search-result" style="color: #8a9abf;">No results found</div>';
+                    }
+                } catch (error) {
+                    console.error('Search error:', error);
+                }
+            });
+
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const firstResult = searchResults.querySelector('.search-result');
+                    if (firstResult) firstResult.click();
+                }
+            });
+        }
+
+        function selectLocation(lat, lon, name) {
+            document.getElementById('search-overlay').classList.remove('active');
+            document.getElementById('search-input').value = '';
+            getLocationDetails(lat, lon);
+        }
+
+        // ============== ACTION BUTTONS ==============
+        function setupActions() {
+            // GPS Tracking
+            document.getElementById('gps-button').addEventListener('click', enableGPSTracking);
+
+            // Evacuation Routes
+            document.getElementById('evacuation-button').addEventListener('click', calculateEvacuationRoute);
+
+            // Refresh
+            document.getElementById('refresh-button').addEventListener('click', () => {
+                if (currentLocation) {
+                    getLocationDetails(currentLocation.lat, currentLocation.lon);
+                }
+            });
+        }
+
+        async function enableGPSTracking() {
+            console.log('Enabling GPS tracking...');
+            const button = document.getElementById('gps-button');
+            button.textContent = '📍 Locating...';
+            button.disabled = true;
+
+            try {
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        timeout: 10000,
+                        enableHighAccuracy: true
+                    });
+                });
+
+                const { latitude, longitude } = position.coords;
+                console.log(`User location: ${latitude}, ${longitude}`);
+
+                // Add user marker
+                if (userMarker) {
+                    map.removeLayer(userMarker);
+                }
+                userMarker = L.circleMarker([latitude, longitude], {
+                    radius: 8,
+                    fillColor: '#ff8844',
+                    color: '#ff4400',
+                    weight: 3,
+                    opacity: 1,
+                    fillOpacity: 0.7
+                }).addTo(map);
+
+                userMarker.bindPopup('<strong>📍 Your Location</strong><br/>Click for hazard info').openPopup();
+
+                // Get hazard data for user location
+                getLocationDetails(latitude, longitude);
+                map.setView([latitude, longitude], 10);
+
+                button.textContent = '📍 Track My Location';
+                button.disabled = false;
+            } catch (error) {
+                console.error('GPS error:', error);
+                button.textContent = '📍 GPS Failed';
+                button.disabled = false;
+                alert('Could not access location. Please enable GPS permissions.');
+            }
+        }
+
+        async function calculateEvacuationRoute() {
+            if (!currentLocation) {
+                alert('Please select a location first');
+                return;
+            }
+
+            console.log('Calculating evacuation route...');
+            const button = document.getElementById('evacuation-button');
+            button.textContent = '🛣️ Calculating...';
+            button.disabled = true;
+
+            try {
+                // Find nearest safe location (low risk < 40%)
+                const safeLocation = allLocations[0]; // Placeholder
+
+                if (routingControl) {
+                    map.removeControl(routingControl);
+                }
+
+                routingControl = L.Routing.control({
+                    waypoints: [
+                        L.latLng(currentLocation.lat, currentLocation.lon),
+                        L.latLng(safeLocation.lat, safeLocation.lon)
+                    ],
+                    routeWhileDragging: false,
+                    lineOptions: {
+                        styles: [{
+                            color: '#ffaa44',
+                            weight: 4,
+                            opacity: 0.8,
+                            dashArray: '5, 5'
+                        }]
+                    },
+                    summaryTemplate: '🛣️ {distance}, {time}'
+                }).addTo(map);
+
+                button.textContent = '🛣️ Safe Routes';
+                button.disabled = false;
+            } catch (error) {
+                console.error('Route calculation error:', error);
+                button.textContent = '🛣️ Safe Routes';
+                button.disabled = false;
+            }
+        }
+
+        // ============== SSE STREAMING ==============
+        function connectSSE() {
+            const connectionStatus = document.getElementById('connection-status');
+
+            try {
+                eventSource = new EventSource(`${API_BASE}/api/events`);
+
+                eventSource.onopen = () => {
+                    connectionStatus.textContent = '🟢 Live Data';
+                    connectionStatus.classList.remove('offline');
+                    console.log('SSE connected');
+                };
+
+                eventSource.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        updateHazardZones(data);
+                    } catch (error) {
+                        console.error('SSE parse error:', error);
+                    }
+                };
+
+                eventSource.onerror = () => {
+                    connectionStatus.textContent = '🔴 Offline';
+                    connectionStatus.classList.add('offline');
+                    console.log('SSE disconnected');
+                };
+            } catch (error) {
+                console.error('SSE connection error:', error);
+                connectionStatus.textContent = '⚠️ Connection Error';
+            }
+        }
+
+        function updateHazardZones(data) {
+            // Update hazard visualization based on real-time data
+            const hazardLayer = window.hazardLayer;
+            if (!hazardLayer) return;
+
+            data.locations.forEach(location => {
+                const maxRisk = Math.max(
+                    location.hazards.flood.score,
+                    location.hazards.landslide.score,
+                    location.hazards.drought.score
+                );
+
+                let color = '#4eff4e'; // Green
+                if (maxRisk >= 80) color = '#ff4444'; // Red
+                else if (maxRisk >= 60) color = '#ff5500'; // Orange
+                else if (maxRisk >= 30) color = '#ffaa00'; // Yellow
+
+                // Update or create circle marker
+                const key = `${location.name}-hazard`;
+                if (hazardMarkers.has(key)) {
+                    hazardMarkers.get(key).setStyle({ fillColor: color, color: color });
+                } else {
+                    const circle = L.circleMarker([location.latitude, location.longitude], {
+                        radius: 10,
+                        fillColor: color,
+                        color: color,
+                        weight: 2,
+                        opacity: 0.8,
+                        fillOpacity: 0.6
+                    }).addTo(hazardLayer);
+
+                    circle.bindPopup(`
+                        <strong>${location.name}</strong><br/>
+                        Flood: ${location.hazards.flood.score.toFixed(1)}%<br/>
+                        Landslide: ${location.hazards.landslide.score.toFixed(1)}%<br/>
+                        Drought: ${location.hazards.drought.score.toFixed(1)}%
+                    `);
+
+                    hazardMarkers.set(key, circle);
+                }
+            });
+        }
+
+        // ============== UTILITIES ==============
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-IN');
+            document.getElementById('time-display').textContent = timeString;
+        }
+
+        // ============== SHUTDOWN ==============
+        window.addEventListener('beforeunload', () => {
+            if (eventSource) {
+                eventSource.close();
+            }
+        });
+    </script>
+</body>
+</html>

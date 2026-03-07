@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tamil Nadu Hazard Monitor | Live Satellite Data — SMAP · GPM · InSAR · NISAR</title>
+    <meta name="description"
+        content="Real-time hazard monitoring using NASA SMAP NRT, GPM IMERG, Sentinel-1 InSAR, NISAR satellite data for Tamil Nadu. Landslide, flood, and drought alert system.">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet Heatmap -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loader-content">
+            <div class="satellite-icon">🛰️</div>
+            <h1>HAZARD MONITOR</h1>
+            <p>Initializing satellite data feeds...</p>
+            <div class="loader-bar">
+                <div class="loader-progress"></div>
+            </div>
+            <div class="loader-sources">
+                <span class="src-tag" data-delay="0">SMAP</span>
+                <span class="src-tag" data-delay="200">AMSR2</span>
+                <span class="src-tag" data-delay="400">GPM</span>
+                <span class="src-tag" data-delay="600">NISAR</span>
+                <span class="src-tag" data-delay="800">NDVI</span>
+                <span class="src-tag" data-delay="1000">DEM</span>
+                <span class="src-tag" data-delay="1200">GLDAS</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Navigation Bar -->
+    <header id="top-bar">
+        <div class="top-bar-left">
+            <div class="logo">
+                <span class="logo-icon">🛰️</span>
+                <div class="logo-text">
+                    <h1>HAZARD MONITOR</h1>
+                    <span class="logo-subtitle">Tamil Nadu | Live Satellite Data</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="top-bar-center">
+            <div class="search-container" id="search-container">
+                <div class="search-input-wrapper">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="m21 21-4.35-4.35" />
+                    </svg>
+                    <input type="text" id="search-input" placeholder="Search districts, cities..." autocomplete="off">
+                    <div class="search-shortcut">Ctrl+K</div>
+                    <button id="btn-locate" class="btn-locate" title="Track My Live Location"
+                        style="background: none; border: none; cursor: pointer; color: var(--text-muted); margin-left: 8px; display: flex; align-items: center; justify-content: center; padding: 4px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"
+                            height="18">
+                            <polygon points="3 11 22 2 13 21 11 13 3 11" />
+                        </svg>
+                    </button>
+                </div>
+                <div id="search-results" class="search-results"></div>
+            </div>
+        </div>
+
+        <div class="top-bar-right">
+            <div class="status-indicator" id="data-status">
+                <span class="pulse-dot"></span>
+                <span class="status-text">Live</span>
+            </div>
+            <div class="last-update" id="last-update">
+                Updated: --:--
+            </div>
+            <button class="btn-refresh" id="btn-refresh" title="Refresh Data">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-content">
+        <!-- Left Sidebar - Layers & Controls -->
+        <aside id="sidebar-left" class="sidebar">
+            <div class="sidebar-section">
+                <h3 class="section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <polygon points="12 2 22 8.5 12 15 2 8.5" />
+                        <polyline points="2 15.5 12 22 22 15.5" />
+                    </svg>
+                    Data Layers
+                </h3>
+                <div class="layer-controls">
+                    <label class="layer-toggle active" data-layer="soil-moisture">
+                        <input type="checkbox" checked>
+                        <span class="toggle-slider"></span>
+                        <span class="layer-color" style="background: linear-gradient(135deg, #ff6b35, #f7c948)"></span>
+                        <span class="layer-name">Soil Moisture</span>
+                        <span class="layer-source">SMAP + AMSR2</span>
+                    </label>
+                    <label class="layer-toggle" data-layer="precipitation">
+                        <input type="checkbox">
+                        <span class="toggle-slider"></span>
+                        <span class="layer-color" style="background: linear-gradient(135deg, #4fc3f7, #0277bd)"></span>
+                        <span class="layer-name">Precipitation</span>
+                        <span class="layer-source">GPM IMERG</span>
+                    </label>
+                    <label class="layer-toggle" data-layer="ground-deformation">
+                        <input type="checkbox">
+                        <span class="toggle-slider"></span>
+                        <span class="layer-color" style="background: linear-gradient(135deg, #ab47bc, #6a1b9a)"></span>
+                        <span class="layer-name">Ground Deformation</span>
+                        <span class="layer-source">NISAR InSAR</span>
+                    </label>
+                    <label class="layer-toggle" data-layer="ndvi">
+                        <input type="checkbox">
+                        <span class="toggle-slider"></span>
+                        <span class="layer-color" style="background: linear-gradient(135deg, #66bb6a, #1b5e20)"></span>
+                        <span class="layer-name">Vegetation NDVI</span>
+                        <span class="layer-source">MODIS/VIIRS</span>
+                    </label>
+                    <label class="layer-toggle" data-layer="terrain">
+                        <input type="checkbox">
+                        <span class="toggle-slider"></span>
+                        <span class="layer-color" style="background: linear-gradient(135deg, #8d6e63, #3e2723)"></span>
+                        <span class="layer-name">Terrain/Slope</span>
+                        <span class="layer-source">SRTM DEM</span>
+                    </label>
+                    <label class="layer-toggle" data-layer="runoff">
+                        <input type="checkbox">
+                        <span class="toggle-slider"></span>
+                        <span class="layer-color" style="background: linear-gradient(135deg, #29b6f6, #01579b)"></span>
+                        <span class="layer-name">Surface Runoff</span>
+                        <span class="layer-source">NASA GLDAS</span>
+                    </label>
+                    <label class="layer-toggle active" data-layer="hazard-zones">
+                        <input type="checkbox" checked>
+                        <span class="toggle-slider"></span>
+                        <span class="layer-color" style="background: linear-gradient(135deg, #ef5350, #b71c1c)"></span>
+                        <span class="layer-name">Hazard Zones</span>
+                        <span class="layer-source">Combined Risk</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+                        <path d="M12 6v6l4 2" />
+                    </svg>
+                    Dual Frequency
+                </h3>
+                <div class="freq-panel">
+                    <div class="freq-item">
+                        <span class="freq-band">L-Band</span>
+                        <span class="freq-value">1.257 GHz</span>
+                        <div class="freq-bar">
+                            <div class="freq-fill" style="width: 75%"></div>
+                        </div>
+                        <span class="freq-depth">Depth: 50cm</span>
+                    </div>
+                    <div class="freq-item">
+                        <span class="freq-band">S-Band</span>
+                        <span class="freq-value">3.226 GHz</span>
+                        <div class="freq-bar">
+                            <div class="freq-fill s-band" style="width: 55%"></div>
+                        </div>
+                        <span class="freq-depth">Depth: 15cm</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="section-title">Legend</h3>
+                <div class="legend">
+                    <div class="legend-item"><span class="legend-dot" style="background:#1a237e"></span>Very Dry
+                        (&lt;8%)</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#ef6c00"></span>Dry (8-18%)
+                    </div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#fdd835"></span>Normal (18-30%)
+                    </div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#43a047"></span>Moist (30-38%)
+                    </div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#1565c0"></span>Wet (38-48%)
+                    </div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#b71c1c"></span>Saturated
+                        (&gt;48%)</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Map Container -->
+        <div id="map-container">
+            <div id="map"></div>
+            <!-- Map Legend Overlay -->
+            <div id="map-legend" class="map-overlay">
+                <div class="gradient-bar">
+                    <div class="gradient-labels">
+                        <span>0%</span><span>20%</span><span>40%</span><span>60%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar - Dashboard -->
+        <aside id="sidebar-right" class="sidebar">
+            <div class="sidebar-section">
+                <h3 class="section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <path
+                            d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                        <line x1="12" y1="9" x2="12" y2="13" />
+                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                    Active Alerts
+                </h3>
+                <div id="alerts-panel" class="alerts-panel">
+                    <div class="loading-placeholder">Loading alerts...</div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <path d="M3 9h18M9 21V9" />
+                    </svg>
+                    Overview Metrics
+                </h3>
+                <div class="metrics-grid" id="metrics-grid">
+                    <div class="metric-card" id="metric-moisture">
+                        <div class="metric-icon">💧</div>
+                        <div class="metric-value" id="avg-moisture">--</div>
+                        <div class="metric-label">Avg Soil Moisture</div>
+                    </div>
+                    <div class="metric-card" id="metric-risk">
+                        <div class="metric-icon">⚠️</div>
+                        <div class="metric-value" id="high-risk-pct">--</div>
+                        <div class="metric-label">High Risk Areas</div>
+                    </div>
+                    <div class="metric-card" id="metric-precip">
+                        <div class="metric-icon">🌧️</div>
+                        <div class="metric-value" id="avg-precip">--</div>
+                        <div class="metric-label">Avg Precipitation</div>
+                    </div>
+                    <div class="metric-card" id="metric-ndvi">
+                        <div class="metric-icon">🌿</div>
+                        <div class="metric-value" id="avg-ndvi">--</div>
+                        <div class="metric-label">Avg NDVI</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 16v-4M12 8h.01" />
+                    </svg>
+                    Data Sources Status
+                </h3>
+                <div class="sources-panel" id="sources-panel">
+                    <div class="source-item active"><span class="source-dot"></span>SMAP L-Band<span
+                            class="source-status">Active</span></div>
+                    <div class="source-item active"><span class="source-dot"></span>AMSR2 Multi-Band<span
+                            class="source-status">Active</span></div>
+                    <div class="source-item active"><span class="source-dot"></span>GPM IMERG<span
+                            class="source-status">Active</span></div>
+                    <div class="source-item active"><span class="source-dot"></span>NISAR InSAR<span
+                            class="source-status">Active</span></div>
+                    <div class="source-item active"><span class="source-dot"></span>MODIS NDVI<span
+                            class="source-status">Active</span></div>
+                    <div class="source-item active"><span class="source-dot"></span>SRTM DEM<span
+                            class="source-status">Active</span></div>
+                    <div class="source-item active"><span class="source-dot"></span>GLDAS Runoff<span
+                            class="source-status">Active</span></div>
+                </div>
+            </div>
+
+            <!-- Location Detail Panel (hidden by default) -->
+            <div class="sidebar-section" id="location-detail" style="display:none">
+                <h3 class="section-title">📍 Location Details</h3>
+                <div id="location-detail-content"></div>
+
+                <h3 class="section-title" style="margin-top: 24px; color: var(--accent-blue);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <path
+                            d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83">
+                        </path>
+                    </svg>
+                    AI Hazard Insights
+                </h3>
+                <div id="ai-analysis-content"
+                    style="font-size: 11px; line-height: 1.5; color: var(--text-secondary); background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; margin-top: 8px; border: 1px solid var(--border-color);">
+                    <div class="loading-placeholder">Processing latest satellite metrics...</div>
+                </div>
+
+                <h3 class="section-title" style="margin-top: 24px;">📈 30-Day Historical Trend</h3>
+                <div class="trend-chart-container"
+                    style="position: relative; height:180px; width:100%; margin-top: 12px;">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Leaflet Heatmap Plugin -->
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- App Scripts -->
+    <script src="/static/js/map.js"></script>
+    <script src="/static/js/search.js"></script>
+    <script src="/static/js/dashboard.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+
+</html>

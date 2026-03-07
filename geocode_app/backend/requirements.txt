@@ -1,0 +1,58 @@
+# FastAPI & Web Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+python-multipart==0.0.6
+
+# Async & Task Queue
+celery==5.3.4
+redis==5.0.1
+aiohttp==3.9.1
+
+# Database
+sqlalchemy==2.0.23
+alembic==1.12.1
+
+# Geospatial
+rasterio==1.3.8
+geopandas==0.14.1
+shapely==2.0.2
+folium==0.14.0
+gdal==3.8.0
+
+# Data Processing
+numpy==1.26.2
+pandas==2.1.3
+xarray==2023.12.0
+
+# Machine Learning
+scikit-learn==1.3.2
+xgboost==2.0.3
+tensorflow==2.15.0
+joblib==1.3.2
+
+# Email & Notifications
+sendgrid==6.11.0
+python-dotenv==1.0.0
+
+# HTTP Clients
+requests==2.31.0
+httpx==0.25.2
+
+# Logging & Monitoring
+python-json-logger==2.0.7
+sentry-sdk==1.38.0
+
+# Utilities
+python-dateutil==2.8.2
+pytz==2023.3.post1
+click==8.1.7
+tqdm==4.67.0
+
+# Development
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+black==23.12.1
+flake8==6.1.0

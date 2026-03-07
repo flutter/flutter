@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: hazard-monitor-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn hazard_backend:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
+      - key: NASA_EARTHDATA_USER
+        sync: false
+      - key: NASA_EARTHDATA_PASS
+        sync: false
+      - key: EARTHDATA_USERNAME
+        sync: false
+      - key: EARTHDATA_PASSWORD
+        sync: false
+      - key: ALERT_EMAIL
+        sync: false
