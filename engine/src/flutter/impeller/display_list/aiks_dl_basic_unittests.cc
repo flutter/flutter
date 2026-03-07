@@ -20,6 +20,7 @@
 #include "flutter/impeller/geometry/scalar.h"
 #include "flutter/testing/display_list_testing.h"
 #include "flutter/testing/testing.h"
+#include "imgui.h"
 #include "impeller/playground/widgets.h"
 
 namespace impeller {
@@ -701,17 +702,22 @@ TEST_P(AiksTest, DrawThinStrokedCircle) {
       ImGui::SliderFloat("Stroked Width Fine", &stroke_width_fine, 0, 5);
       ImGui::SliderFloat("Stroked Alpha", &stroked_alpha, 0, 10.0);
       ImGui::SliderFloat2("Stroked Scale", stroked_scale, 0, 10.0);
+      ImGui::End();
     }
 
     flutter::DisplayListBuilder builder;
-    flutter::DlPaint paint;
 
+    DlPaint background_paint;
+    background_paint.setColor(DlColor(1, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
+    builder.DrawPaint(background_paint);
+
+    flutter::DlPaint paint;
     paint.setColor(flutter::DlColor::kRed().withAlpha(stroked_alpha));
     paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
     paint.setStrokeWidth(stroke_width + stroke_width_fine);
     builder.Save();
     builder.Scale(stroked_scale[0], stroked_scale[1]);
-    builder.DrawCircle(DlPoint(750, 750), stroked_radius, paint);
+    builder.DrawCircle(DlPoint(250, 250), stroked_radius, paint);
     builder.Restore();
     return builder.Build();
   };
