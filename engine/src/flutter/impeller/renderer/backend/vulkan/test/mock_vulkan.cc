@@ -541,11 +541,18 @@ VkResult vkQueueSubmit(VkQueue queue,
   return VK_SUCCESS;
 }
 
+static thread_local std::function<std::remove_pointer_t<PFN_vkWaitForFences>>
+    g_wait_for_fences_callback;
+
 VkResult vkWaitForFences(VkDevice device,
                          uint32_t fenceCount,
                          const VkFence* pFences,
                          VkBool32 waitAll,
                          uint64_t timeout) {
+  if (g_wait_for_fences_callback) {
+    return g_wait_for_fences_callback(device, fenceCount, pFences, waitAll,
+                                      timeout);
+  }
   return VK_SUCCESS;
 }
 
@@ -753,12 +760,20 @@ void vkDestroySemaphore(VkDevice device,
   delete reinterpret_cast<MockSemaphore*>(semaphore);
 }
 
+static thread_local std::function<
+    std::remove_pointer_t<PFN_vkAcquireNextImageKHR>>
+    g_acquire_next_image_callback;
+
 VkResult vkAcquireNextImageKHR(VkDevice device,
                                VkSwapchainKHR swapchain,
                                uint64_t timeout,
                                VkSemaphore semaphore,
                                VkFence fence,
                                uint32_t* pImageIndex) {
+  if (g_acquire_next_image_callback) {
+    return g_acquire_next_image_callback(device, swapchain, timeout, semaphore,
+                                         fence, pImageIndex);
+  }
   auto current_index =
       reinterpret_cast<MockSwapchainKHR*>(swapchain)->current_image++;
   *pImageIndex = (current_index + 1) % 3u;
@@ -997,6 +1012,8 @@ std::shared_ptr<ContextVK> MockVulkanContextBuilder::Build() {
   g_instance_layers = instance_layers_;
   g_format_properties_callback = format_properties_callback_;
   g_physical_device_properties_callback = physical_properties_callback_;
+  g_acquire_next_image_callback = acquire_next_image_callback_;
+  g_wait_for_fences_callback = wait_for_fences_callback_;
   settings.embedder_data = embedder_data_;
   std::shared_ptr<ContextVK> result = ContextVK::Create(std::move(settings));
   return result;

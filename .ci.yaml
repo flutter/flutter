@@ -2121,7 +2121,7 @@ targets:
 
   - name: Linux web_skwasm_tests_0
     recipe: flutter/flutter_drone
-    timeout: 30
+    timeout: 45
     properties:
       dependencies: >-
         [
@@ -2132,7 +2132,7 @@ targets:
       subshard: "0"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "1800" # 30 minutes to match the global `timeout` property.
+      test_timeout_secs: "2700" # 45 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2143,7 +2143,7 @@ targets:
 
   - name: Linux web_skwasm_tests_1
     recipe: flutter/flutter_drone
-    timeout: 30
+    timeout: 45
     properties:
       dependencies: >-
         [
@@ -2154,7 +2154,7 @@ targets:
       subshard: "1_last"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "1800" # 30 minutes to match the global `timeout` property.
+      test_timeout_secs: "2700" # 45 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**

@@ -13,6 +13,7 @@ import 'package:usage/uuid/uuid.dart';
 import 'artifacts.dart';
 import 'base/common.dart';
 import 'base/config.dart';
+import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
@@ -504,13 +505,14 @@ class _RejectRequest extends _CompilationRequest {
   Future<CompilerOutput?> _run(DefaultResidentCompiler compiler) async => compiler._reject();
 }
 
-/// Wrapper around incremental frontend server compiler, that communicates with
-/// server via stdin/stdout.
-///
-/// The wrapper is intended to stay resident in memory as user changes, reloads,
-/// restarts the Flutter app.
-abstract interface class ResidentCompiler {
-  factory ResidentCompiler({
+ResidentCompilerFactory get residentCompilerFactory =>
+    context.get<ResidentCompilerFactory>() ?? const ResidentCompilerFactory();
+
+/// A factory for generating [ResidentCompiler] instances.
+class ResidentCompilerFactory {
+  const ResidentCompilerFactory();
+
+  ResidentCompiler create({
     required TargetPlatform targetPlatform,
     required BuildInfo buildInfo,
     required Logger logger,
@@ -593,7 +595,14 @@ abstract interface class ResidentCompiler {
       testCompilation: testCompilation,
     );
   }
+}
 
+/// Wrapper around incremental frontend server compiler, that communicates with
+/// server via stdin/stdout.
+///
+/// The wrapper is intended to stay resident in memory as user changes, reloads,
+/// restarts the Flutter app.
+abstract interface class ResidentCompiler {
   // TODO(zanderso): find a better way to configure additional file system
   // roots from the runner.
   // See: https://github.com/flutter/flutter/issues/50494
