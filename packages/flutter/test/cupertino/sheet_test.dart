@@ -7,7 +7,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/navigator_utils.dart';
+/// Simulates a system back, like a back gesture on Android.
+Future<void> simulateSystemBack() {
+  return TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+    'flutter/navigation',
+    const JSONMessageCodec().encodeMessage(<String, dynamic>{'method': 'popRoute'}),
+    (ByteData? _) {},
+  );
+}
 
 // Matches _kTopGapRatio in cupertino/sheet.dart.
 const double _kTopGapRatio = 0.08;
