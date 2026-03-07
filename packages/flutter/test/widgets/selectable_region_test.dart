@@ -6661,6 +6661,68 @@ void main() {
       expect(paragraph2.selections, isEmpty);
     },
   );
+
+  testWidgets(
+    'SelectableRegion preserves selection in selectable when an adjacent selectable is replaced',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/183331.
+      var showSecond = true;
+      late StateSetter setState;
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter localSetState) {
+              setState = localSetState;
+              return SelectableRegion(
+                selectionControls: emptyTextSelectionControls,
+                child: Column(
+                  children: <Widget>[
+                    const Text('First Item'),
+                    if (showSecond) const Text('Second Item') else const Text('Third Item'),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      // Select "First Item".
+      final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('First Item'), matching: find.byType(RichText)),
+      );
+
+      final TestGesture dragGesture = await tester.startGesture(
+        textOffsetToPosition(paragraph1, 0),
+        kind: PointerDeviceKind.mouse,
+      );
+      await tester.pump();
+      await dragGesture.moveTo(textOffsetToPosition(paragraph1, 10));
+      await tester.pump();
+      await dragGesture.up();
+      await tester.pumpAndSettle();
+      const expectedSelection = TextSelection(baseOffset: 0, extentOffset: 10);
+      expect(paragraph1.selections, isNotEmpty);
+      expect(paragraph1.selections.first, expectedSelection);
+
+      // Switch "Second Item" to "Third Item".
+      setState(() {
+        showSecond = false;
+      });
+      await tester.pump();
+
+      // Verify "First Item" IS still selected.
+      expect(paragraph1.selections, isNotEmpty);
+      expect(paragraph1.selections.first, expectedSelection);
+
+      // Verify "Third Item" is NOT selected.
+      final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('Third Item'), matching: find.byType(RichText)),
+      );
+      expect(paragraph3.selections, isEmpty);
+    },
+  );
 }
 
 class ColumnSelectionContainerDelegate extends StaticSelectionContainerDelegate {
