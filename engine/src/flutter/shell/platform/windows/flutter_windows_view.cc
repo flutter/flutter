@@ -274,32 +274,30 @@ void FlutterWindowsView::OnPointerMove(double x,
   SendPointerMove(x, y, state);
 }
 
-void FlutterWindowsView::OnPointerDown(
-    double x,
-    double y,
-    FlutterPointerDeviceKind device_kind,
-    int32_t device_id,
-    FlutterPointerMouseButtons flutter_button,
-    uint32_t rotation,
-    uint32_t pressure) {
-  if (flutter_button != 0) {
+void FlutterWindowsView::OnPointerDown(double x,
+                                       double y,
+                                       FlutterPointerDeviceKind device_kind,
+                                       int32_t device_id,
+                                       uint64_t button,
+                                       uint32_t rotation,
+                                       uint32_t pressure) {
+  if (button != 0) {
     auto state = GetOrCreatePointerState(device_kind, device_id);
-    state->buttons |= flutter_button;
+    state->buttons |= button;
     state->rotation = rotation;
     state->pressure = pressure;
     SendPointerDown(x, y, state);
   }
 }
 
-void FlutterWindowsView::OnPointerUp(
-    double x,
-    double y,
-    FlutterPointerDeviceKind device_kind,
-    int32_t device_id,
-    FlutterPointerMouseButtons flutter_button) {
-  if (flutter_button != 0) {
+void FlutterWindowsView::OnPointerUp(double x,
+                                     double y,
+                                     FlutterPointerDeviceKind device_kind,
+                                     int32_t device_id,
+                                     uint64_t button) {
+  if (button != 0) {
     auto state = GetOrCreatePointerState(device_kind, device_id);
-    state->buttons &= ~flutter_button;
+    state->buttons &= ~button;
     SendPointerUp(x, y, state);
   }
 }
