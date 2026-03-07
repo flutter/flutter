@@ -7,9 +7,30 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/rendering_tester.dart' show TestCallbackPainter;
-import '../widgets/navigator_utils.dart';
 import '../widgets/widget_inspector_test_utils.dart';
+
+class TestCallbackPainter extends CustomPainter {
+  const TestCallbackPainter({required this.onPaint});
+
+  final VoidCallback onPaint;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    onPaint();
+  }
+
+  @override
+  bool shouldRepaint(TestCallbackPainter oldPainter) => true;
+}
+
+/// Simulates a system back, like a back gesture on Android.
+Future<void> simulateSystemBack() {
+  return TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+    'flutter/navigation',
+    const JSONMessageCodec().encodeMessage(<String, dynamic>{'method': 'popRoute'}),
+    (ByteData? _) {},
+  );
+}
 
 late List<int> selectedTabs;
 
