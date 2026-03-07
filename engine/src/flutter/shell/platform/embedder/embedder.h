@@ -1311,6 +1311,7 @@ typedef enum {
   kFlutterPointerDeviceKindTouch,
   kFlutterPointerDeviceKindStylus,
   kFlutterPointerDeviceKindTrackpad,
+  kFlutterPointerDeviceKindInvertedStylus,
 } FlutterPointerDeviceKind;
 
 /// Flags for the `buttons` field of `FlutterPointerEvent` when `device_kind`
@@ -1324,6 +1325,15 @@ typedef enum {
   /// If a mouse has more than five buttons, send higher bit shifted values
   /// corresponding to the button number: 1 << 5 for the 6th, etc.
 } FlutterPointerMouseButtons;
+
+/// Flags for the `buttons` field of `FlutterPointerEvent` when `device_kind`
+/// is `kFlutterPointerDeviceKindStylus` or
+// `kFlutterPointerDeviceKindInvertedStylus`.
+typedef enum {
+  kFlutterPointerButtonStylusContact = 1 << 0,
+  kFlutterPointerButtonStylusPrimary = 1 << 1,
+  kFlutterPointerButtonStylusSecondary = 1 << 2,
+} FlutterPointerStylusButtons;
 
 /// The type of a pointer signal.
 typedef enum {
