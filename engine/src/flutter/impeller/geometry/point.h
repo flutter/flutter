@@ -202,11 +202,12 @@ struct TPoint {
     return sqrt(GetDistanceSquared(p));
   }
 
-  constexpr Type GetLengthSquared() const {
-    return static_cast<double>(x) * x + static_cast<double>(y) * y;
+  constexpr Scalar GetLengthSquared() const {
+    return static_cast<Scalar>(static_cast<double>(x) * x +
+                               static_cast<double>(y) * y);
   }
 
-  constexpr Type GetLength() const { return std::sqrt(GetLengthSquared()); }
+  constexpr Scalar GetLength() const { return sqrt(GetLengthSquared()); }
 
   /// Returns the distance (squared) from this point to the closest point on
   /// the line segment p0 -> p1.
