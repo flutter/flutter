@@ -31,6 +31,15 @@ class IMockGLESImpl {
                           GLenum format,
                           GLenum type,
                           const void* pixels) {}
+  virtual void TexSubImage2D(GLenum target,
+                             GLint level,
+                             GLint xoffset,
+                             GLint yoffset,
+                             GLsizei width,
+                             GLsizei height,
+                             GLenum format,
+                             GLenum type,
+                             const void* pixels) {}
   virtual void GenFramebuffers(GLsizei n, GLuint* framebuffers) {}
   virtual void BindFramebuffer(GLenum target, GLuint framebuffer) {}
   virtual void FramebufferTexture2D(GLenum target,
@@ -106,6 +115,18 @@ class MockGLESImpl : public IMockGLESImpl {
                GLsizei width,
                GLsizei height,
                GLint border,
+               GLenum format,
+               GLenum type,
+               const void* pixels),
+              (override));
+  MOCK_METHOD(void,
+              TexSubImage2D,
+              (GLenum target,
+               GLint level,
+               GLint xoffset,
+               GLint yoffset,
+               GLsizei width,
+               GLsizei height,
                GLenum format,
                GLenum type,
                const void* pixels),
