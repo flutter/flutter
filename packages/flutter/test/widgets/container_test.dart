@@ -633,7 +633,7 @@ void main() {
   });
 
   testWidgets('getClipPath() works for lots of kinds of decorations', (WidgetTester tester) async {
-    Future<void> test(Decoration decoration) async {
+    Future<void> test(Decoration decoration, [String? name]) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.rtl,
@@ -653,12 +653,12 @@ void main() {
       );
       await expectLater(
         find.byType(Container),
-        matchesGoldenFile('container_test.getClipPath.${decoration.runtimeType}.png'),
+        matchesGoldenFile('container_test.getClipPath.${name ?? decoration.runtimeType}.png'),
       );
     }
 
     await test(const BoxDecoration());
-    await test(const _TestDecoration());
+    await test(const _TestDecoration(), 'UnderlineTabIndicator');
     await test(const ShapeDecoration(shape: StadiumBorder()));
     await test(const FlutterLogoDecoration());
   });
@@ -845,13 +845,32 @@ class _TestDecoration extends Decoration {
 
   @override
   Path getClipPath(Rect rect, TextDirection textDirection) {
-    return Path()..addRRect(RRect.fromRectAndRadius(rect, const Radius.circular(10)));
+    const borderSideWidth = 2.0;
+    final indicator = Rect.fromLTWH(
+      rect.left,
+      rect.bottom - borderSideWidth,
+      rect.width,
+      borderSideWidth,
+    );
+    return Path()..addRect(indicator);
   }
 }
 
 class _TestDecorationPainter extends BoxPainter {
   @override
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
-    // No painting needed for clip path testing.
+    assert(configuration.size != null);
+    final Rect rect = offset & configuration.size!;
+    const borderSideWidth = 2.0;
+    const color = Color(0xFFFFFFFF);
+    final paint = Paint()
+      ..color = color
+      ..strokeCap = StrokeCap.square
+      ..strokeWidth = borderSideWidth
+      ..style = PaintingStyle.stroke;
+    final Offset indicatorBottomLeft = rect.bottomLeft + const Offset(0.0, -borderSideWidth / 2.0);
+    final Offset indicatorBottomRight =
+        rect.bottomRight + const Offset(0.0, -borderSideWidth / 2.0);
+    canvas.drawLine(indicatorBottomLeft, indicatorBottomRight, paint);
   }
 }

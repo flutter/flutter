@@ -26,6 +26,7 @@ void main() {
   const kOrange = Color(0xFFFF8C00);
   const kPurple = Color(0xFF800080);
   const kYellow = Color(0xFFFFFF00);
+  const kBlack87 = Color(0xDD000000);
 
   // Regression test for https://github.com/flutter/flutter/issues/100451
   testWidgets('PageView.builder respects findChildIndexCallback', (WidgetTester tester) async {
@@ -1254,6 +1255,12 @@ void main() {
 
     await tester.pumpWidget(
       TestWidgetsApp(
+        builder: (BuildContext context, Widget? child) {
+          return DefaultTextStyle(
+            style: const TextStyle(color: kBlack87, fontSize: 14.0),
+            child: child!,
+          );
+        },
         home: Center(
           child: SizedBox(
             width: pixel6EmulatorWidth,
