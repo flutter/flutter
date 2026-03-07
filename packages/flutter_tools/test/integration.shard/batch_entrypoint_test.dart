@@ -52,7 +52,7 @@ Future<void> main() async {
     // If 7-Zip is not installed, unexpected overwrites results in error messages.
     // See: https://github.com/flutter/flutter/issues/132592
     expect(dartSdkStamp.existsSync(), true);
-    expect(output, contains('Downloading Dart SDK from Flutter engine ...'));
+    expect(output, contains('Downloading Dart SDK from Flutter engine...'));
     // Do not assert on the exact unzipping method, as this could change on CI
     expect(output, contains(RegExp(r'Expanding downloaded archive with (.*)...')));
     expect(output, isNot(contains('Use the -Force parameter' /* Luke */)));
