@@ -52,14 +52,14 @@ void main() {
   float pixel_derivative_sdf =
       length(vec2(dFdx(sdf_distance), dFdy(sdf_distance)));
 
-  // If the screen space derivative is less than the stroke width,
-  // only one pixel can be covered and shouldn't be faded.
-  if (frag_info.stroked > 0.0 &&
-      pixel_derivative_sdf * 2.0 >= frag_info.stroke_width) {
-    sdf_distance = -frag_info.radius;
-  }
-
+  // Clamp the AA fade width so it never exceeds half the stroke's
+  // screen-pixel width. This makes the fade width scale with stroke width.
+  // Making the transition continuous
   float fade_width = pixel_derivative_sdf * frag_info.aa_pixels;
+  if (frag_info.stroked > 0.0) {
+    float stroke_pixels = frag_info.stroke_width / pixel_derivative_sdf;
+    fade_width = min(fade_width, stroke_pixels * 0.5);
+  }
   // The sdf_distance will be -pixel_derivative_sdf*N exactly at N pixels away
   // from the edge of the circle
   float alpha = 1.0 - smoothstep(-fade_width, 0.0, sdf_distance);
