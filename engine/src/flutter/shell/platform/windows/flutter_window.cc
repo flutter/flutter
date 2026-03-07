@@ -554,11 +554,13 @@ FlutterWindow::HandleMessage(UINT const message,
       if (windows_proc_table_->GetPointerInfo(pointerId, &pointerInfo)) {
         UINT32 pressure = 0;
         UINT32 rotation = 0;
+        BOOL is_inverted = FALSE;
         if (pointerInfo.pointerType == PT_PEN) {
           POINTER_PEN_INFO penInfo;
           if (windows_proc_table_->GetPointerPenInfo(pointerId, &penInfo)) {
             pressure = penInfo.pressure;
             rotation = penInfo.rotation;
+            is_inverted = penInfo.penFlags & PEN_FLAG_INVERTED;
           }
         }
         auto touch_id = touch_id_generator_.GetGeneratedId(pointerId);
@@ -568,7 +570,8 @@ FlutterWindow::HandleMessage(UINT const message,
             device_kind = kFlutterPointerDeviceKindTouch;
             break;
           case PT_PEN:
-            device_kind = kFlutterPointerDeviceKindStylus;
+            device_kind = is_inverted ? kFlutterPointerDeviceKindInvertedStylus
+                                      : kFlutterPointerDeviceKindStylus;
             break;
           case PT_MOUSE:
             device_kind = kFlutterPointerDeviceKindMouse;
