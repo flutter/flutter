@@ -8,6 +8,7 @@
 #include <dwmapi.h>
 
 #include <chrono>
+#include <cstdint>
 #include <map>
 
 #include "flutter/fml/logging.h"
@@ -70,6 +71,19 @@ static uint64_t ConvertWinButtonToFlutterButton(UINT button) {
   }
   FML_LOG(WARNING) << "Mouse button not recognized: " << button;
   return 0;
+}
+
+// Translate stylus pointer flags from Win32 API to FlutterPointerStylusButtons.
+static uint64_t ConvertWinStylusFlagsToFlutterButtons(UINT flags) {
+  uint64_t flutter_buttons = 0;
+  flutter_buttons |= kFlutterPointerButtonStylusContact;
+  if (flags & PEN_FLAG_BARREL) {
+    flutter_buttons |= kFlutterPointerButtonStylusPrimary;
+  }
+  if (flags & PEN_FLAG_ERASER) {
+    flutter_buttons |= kFlutterPointerButtonStylusSecondary;
+  }
+  return flutter_buttons;
 }
 
 }  // namespace
@@ -180,15 +194,12 @@ void FlutterWindow::OnPointerDown(double x,
                                   double y,
                                   FlutterPointerDeviceKind device_kind,
                                   int32_t device_id,
-                                  UINT button,
+                                  uint64_t button,
                                   uint32_t pressure,
                                   uint32_t rotation) {
-  uint64_t flutter_button = ConvertWinButtonToFlutterButton(button);
-  if (flutter_button != 0) {
-    binding_handler_delegate_->OnPointerDown(
-        x, y, device_kind, device_id,
-        static_cast<FlutterPointerMouseButtons>(flutter_button), rotation,
-        pressure);
+  if (button != 0) {
+    binding_handler_delegate_->OnPointerDown(x, y, device_kind, device_id,
+                                             button, rotation, pressure);
   }
 }
 
@@ -196,12 +207,10 @@ void FlutterWindow::OnPointerUp(double x,
                                 double y,
                                 FlutterPointerDeviceKind device_kind,
                                 int32_t device_id,
-                                UINT button) {
-  uint64_t flutter_button = ConvertWinButtonToFlutterButton(button);
-  if (flutter_button != 0) {
-    binding_handler_delegate_->OnPointerUp(
-        x, y, device_kind, device_id,
-        static_cast<FlutterPointerMouseButtons>(flutter_button));
+                                uint64_t button) {
+  if (button != 0) {
+    binding_handler_delegate_->OnPointerUp(x, y, device_kind, device_id,
+                                           button);
   }
 }
 
@@ -520,6 +529,7 @@ FlutterWindow::HandleMessage(UINT const message,
   int x_pos = 0, y_pos = 0;
   UINT width = 0, height = 0;
   UINT button_pressed = 0;
+  uint64_t flutter_button = 0;
   FlutterPointerDeviceKind device_kind;
 
   switch (message) {
@@ -565,6 +575,8 @@ FlutterWindow::HandleMessage(UINT const message,
         }
         auto touch_id = touch_id_generator_.GetGeneratedId(pointerId);
         FlutterPointerDeviceKind device_kind = kFlutterPointerDeviceKindMouse;
+        flutter_button =
+            ConvertWinStylusFlagsToFlutterButtons(pointerInfo.pointerFlags);
         switch (pointerInfo.pointerType) {
           case PT_TOUCH:
             device_kind = kFlutterPointerDeviceKindTouch;
@@ -585,13 +597,13 @@ FlutterWindow::HandleMessage(UINT const message,
             break;
         }
         if (message == WM_POINTERDOWN) {
-          OnPointerDown(x, y, device_kind, touch_id, WM_LBUTTONDOWN, rotation,
+          OnPointerDown(x, y, device_kind, touch_id, flutter_button, rotation,
                         pressure);
         } else if (message == WM_POINTERUPDATE) {
           OnPointerMove(x, y, device_kind, touch_id, rotation, pressure,
                         /* modifiers_state=*/0);
         } else if (message == WM_POINTERUP) {
-          OnPointerUp(x, y, device_kind, touch_id, WM_LBUTTONUP);
+          OnPointerUp(x, y, device_kind, touch_id, flutter_button);
           // keep tracking the pointer (especially important for stylus)
           // This allows a stylus to "hover" over the window
         } else if (message == WM_POINTERLEAVE) {
@@ -674,8 +686,10 @@ FlutterWindow::HandleMessage(UINT const message,
       }
       x_pos = GET_X_LPARAM(lparam);
       y_pos = GET_Y_LPARAM(lparam);
+      flutter_button = ConvertWinButtonToFlutterButton(button_pressed);
+
       OnPointerDown(static_cast<double>(x_pos), static_cast<double>(y_pos),
-                    device_kind, kDefaultPointerDeviceId, button_pressed,
+                    device_kind, kDefaultPointerDeviceId, flutter_button,
                     /*rotation=*/0, /*pressure=*/0);
       break;
     case WM_LBUTTONUP:
@@ -696,8 +710,10 @@ FlutterWindow::HandleMessage(UINT const message,
       }
       x_pos = GET_X_LPARAM(lparam);
       y_pos = GET_Y_LPARAM(lparam);
+      flutter_button = ConvertWinButtonToFlutterButton(button_pressed);
+
       OnPointerUp(static_cast<double>(x_pos), static_cast<double>(y_pos),
-                  device_kind, kDefaultPointerDeviceId, button_pressed);
+                  device_kind, kDefaultPointerDeviceId, flutter_button);
       break;
     case WM_MOUSEWHEEL:
       OnScroll(0.0,
