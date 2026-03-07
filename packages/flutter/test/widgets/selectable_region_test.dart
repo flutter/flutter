@@ -904,7 +904,7 @@ void main() {
         // Should not throw - startGlyphHeight/endGlyphHeight return 0 when points are null.
         expect(tester.takeException(), isNull);
       },
-      skip: kIsWeb, // Web uses native context menu
+      skip: kIsWeb, // [intended] Web uses its native context menu.
     );
 
     testWidgets(
@@ -922,11 +922,7 @@ void main() {
               child: NullSelectionPointDelegateWidget(
                 key: delegateKey,
                 child: const Column(
-                  children: <Widget>[
-                    Text('First'),
-                    Text('Second'),
-                    Text('Third'),
-                  ],
+                  children: <Widget>[Text('First'), Text('Second'), Text('Third')],
                 ),
               ),
             ),
@@ -6761,12 +6757,10 @@ class NullSelectionPointDelegateWidget extends StatefulWidget {
   final Widget child;
 
   @override
-  State<NullSelectionPointDelegateWidget> createState() =>
-      NullSelectionPointDelegateWidgetState();
+  State<NullSelectionPointDelegateWidget> createState() => NullSelectionPointDelegateWidgetState();
 }
 
-class NullSelectionPointDelegateWidgetState
-    extends State<NullSelectionPointDelegateWidget> {
+class NullSelectionPointDelegateWidgetState extends State<NullSelectionPointDelegateWidget> {
   late final NullSelectionPointDelegate delegate;
 
   @override
@@ -6783,10 +6777,7 @@ class NullSelectionPointDelegateWidgetState
 
   @override
   Widget build(BuildContext context) {
-    return SelectionContainer(
-      delegate: delegate,
-      child: widget.child,
-    );
+    return SelectionContainer(delegate: delegate, child: widget.child);
   }
 }
 
