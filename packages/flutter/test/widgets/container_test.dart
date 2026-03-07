@@ -17,11 +17,9 @@ void main() {
   const kBlue = Color(0xFF0000FF);
   const kCyan = Color(0xFF00FFFF);
   const kBlack = Color(0xFF000000);
-  // The following colors match the Material Colors.* values they replaced,
-  // to preserve golden file pixel output.
-  const kMaterialYellowHalfOpacity = Color(0x80FFEB3B); // Colors.yellow.withOpacity(0.5)
-  const kMaterialRed = Color(0xFFF44336); // Colors.red
-  const kMaterialBlue = Color(0xFF2196F3); // Colors.blue
+  const kCustomYellowHalfOpacity = Color(0x80FFEB3B);
+  const kCustomRed = Color(0xFFF44336);
+  const kCustomBlue = Color(0xFF2196F3);
 
   group('Container control tests:', () {
     final container = Container(
@@ -646,7 +644,7 @@ void main() {
                 child: Container(
                   clipBehavior: Clip.hardEdge,
                   decoration: decoration,
-                  child: const ColoredBox(color: kMaterialYellowHalfOpacity),
+                  child: const ColoredBox(color: kCustomYellowHalfOpacity),
                 ),
               ),
             ),
@@ -773,8 +771,8 @@ void main() {
       clipBehavior: Clip.hardEdge,
       decoration: const BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(30)),
-        color: kMaterialRed,
-        boxShadow: <BoxShadow>[BoxShadow(color: kMaterialBlue, spreadRadius: 10, blurRadius: 20.0)],
+        color: kCustomRed,
+        boxShadow: <BoxShadow>[BoxShadow(color: kCustomBlue, spreadRadius: 10, blurRadius: 20.0)],
       ),
       child: const SizedBox(width: 50, height: 50),
     );
@@ -837,10 +835,8 @@ class _MockCanvas extends Fake implements Canvas {
 
 /// A simple [Decoration] for testing [Container]'s clip path behavior.
 ///
-/// This replaces the material-only [UnderlineTabIndicator] that was previously
-/// used in the getClipPath golden test. It draws a rounded rectangle clip path,
-/// providing a unique [runtimeType] to avoid golden file name collisions with
-/// [ShapeDecoration].
+/// It draws a rounded rectangle clip path, providing a unique [runtimeType] to
+/// avoid golden file name collisions with [ShapeDecoration].
 class _TestDecoration extends Decoration {
   const _TestDecoration();
 

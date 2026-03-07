@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'button_tester.dart';
+import 'test_page_tester.dart';
 import 'widgets_app_tester.dart';
 
 void main() {
@@ -1848,8 +1849,8 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation>
       pages: <Page<void>>[
         // We need at least two pages for the pop to propagate through.
         // Otherwise, the navigator will bubble the pop to the system navigator.
-        const _TestPage<void>(child: Text('base')),
-        _TestPage<void>(
+        const TestPage<void>(child: Text('base')),
+        TestPage<void>(
           key: ValueKey<String>(routeInformation.uri.toString()),
           child: builder(context, routeInformation),
         ),
@@ -2002,27 +2003,6 @@ class IntInheritedNotifier extends InheritedNotifier<ValueListenable<int>> {
 
   static int of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<IntInheritedNotifier>()!.notifier!.value;
-  }
-}
-
-class _TestPage<T> extends Page<T> {
-  const _TestPage({super.key, required this.child});
-
-  final Widget child;
-
-  @override
-  Route<T> createRoute(BuildContext context) {
-    return PageRouteBuilder<T>(
-      settings: this,
-      pageBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-          ) {
-            return child;
-          },
-    );
   }
 }
 

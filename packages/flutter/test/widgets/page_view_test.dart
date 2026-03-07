@@ -16,6 +16,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 import 'semantics_tester.dart';
 import 'states.dart';
+import 'test_page_tester.dart';
 import 'widgets_app_tester.dart';
 
 void main() {
@@ -1611,13 +1612,13 @@ void main() {
         home: Navigator(
           onDidRemovePage: (Page<Object?> page) {},
           pages: <Page<void>>[
-            _TestPage<void>(
+            TestPage<void>(
               child: PageView(
                 controller: controller,
                 children: const <Widget>[Text('One'), Text('Two')],
               ),
             ),
-            const _TestPage<void>(child: SizedBox.shrink()),
+            const TestPage<void>(child: SizedBox.shrink()),
           ],
         ),
       ),
@@ -1639,13 +1640,13 @@ void main() {
         home: Navigator(
           onDidRemovePage: (Page<Object?> page) {},
           pages: <Page<void>>[
-            _TestPage<void>(
+            TestPage<void>(
               child: PageView(
                 controller: controller,
                 children: const <Widget>[Text('One'), Text('Two')],
               ),
             ),
-            const _TestPage<void>(child: SizedBox.shrink()),
+            const TestPage<void>(child: SizedBox.shrink()),
           ],
         ),
       ),
@@ -1860,25 +1861,4 @@ void main() {
       expect(controller.page, 1.0);
     },
   );
-}
-
-class _TestPage<T> extends Page<T> {
-  const _TestPage({required this.child});
-
-  final Widget child;
-
-  @override
-  Route<T> createRoute(BuildContext context) {
-    return PageRouteBuilder<T>(
-      settings: this,
-      pageBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-          ) {
-            return child;
-          },
-    );
-  }
 }
