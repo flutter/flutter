@@ -1087,9 +1087,8 @@ class TextEditingValue {
 
     // Find the grapheme that contains replacementRange.end
     var graphemeEnd = graphemeStart;
-    final Iterator<String> it = characters.skip(graphemeStart).iterator;
-    while (codeUnitCount < replacementRange.end && it.moveNext()) {
-      codeUnitCount += it.current.length;
+    while (codeUnitCount < replacementRange.end && graphemeEnd < characters.length) {
+      codeUnitCount += characters.elementAt(graphemeEnd).length;
       graphemeEnd++;
     }
 
@@ -2360,22 +2359,11 @@ class TextInput {
 
       // Find the newly inserted character.
       var insertedText = '';
-      final previousCharCounts = <String, int>{};
-      for (final char in previousChars) {
-        previousCharCounts[char] = (previousCharCounts[char] ?? 0) + 1;
-      }
-
       for (final char in currentChars) {
-        if (char == '?' || char == '\uFFFD') {
-          continue;
-        }
-        final int? count = previousCharCounts[char];
-        if (count == null || count == 0) {
-          // This character is new.
+        if (char != '?' && char != '\uFFFD' && !previousChars.contains(char)) {
           insertedText = char;
           break;
         }
-        previousCharCounts[char] = count - 1;
       }
 
       if (insertedText.isEmpty) {
