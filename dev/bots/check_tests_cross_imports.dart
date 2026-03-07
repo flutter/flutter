@@ -140,7 +140,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/autocomplete_test.dart',
     'packages/flutter/test/widgets/shadow_test.dart',
     'packages/flutter/test/widgets/routes_transition_test.dart',
-    'packages/flutter/test/widgets/animated_cross_fade_test.dart',
     'packages/flutter/test/widgets/editable_text_shortcuts_test.dart',
     'packages/flutter/test/widgets/router_test.dart',
     'packages/flutter/test/widgets/editable_text_test.dart',
@@ -159,8 +158,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/scrollable_in_overlay_test.dart',
     'packages/flutter/test/widgets/nested_scroll_view_test.dart',
     'packages/flutter/test/widgets/scrollable_selection_test.dart',
-    'packages/flutter/test/widgets/physical_model_test.dart',
-    'packages/flutter/test/widgets/spell_check_test.dart',
     'packages/flutter/test/widgets/toggleable_test.dart',
     'packages/flutter/test/widgets/draggable_test.dart',
     'packages/flutter/test/widgets/page_transitions_builder_test.dart',
@@ -178,7 +175,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/navigator_on_did_remove_page_test.dart',
     'packages/flutter/test/widgets/baseline_test.dart',
     'packages/flutter/test/widgets/scrollable_semantics_test.dart',
-    'packages/flutter/test/widgets/pinned_header_sliver_test.dart',
     'packages/flutter/test/widgets/form_test.dart',
   };
 
