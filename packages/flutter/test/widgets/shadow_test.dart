@@ -11,15 +11,14 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  // Golden test colors — exact Material color values to preserve pixel output.
-  const kMaterialYellow200 = Color(0xFFFFF59D); // Colors.yellow[200]
-  const kMaterialBlue900 = Color(0xFF0D47A1); // Colors.blue[900]
-  const kMaterialGreen900 = Color(0xFF1B5E20); // Colors.green[900]
+  const kCustomYellow = Color(0xFFFFF59D);
+  const kCustomBlue = Color(0xFF0D47A1);
+  const kCustomGreen = Color(0xFF1B5E20);
 
-  // Shadow definitions matching Material Design kElevationToShadow.
-  const kKeyUmbraOpacity = Color(0x33000000); // alpha = 0.2
-  const kKeyPenumbraOpacity = Color(0x24000000); // alpha = 0.14
-  const kAmbientShadowOpacity = Color(0x1F000000); // alpha = 0.12
+  // Arbitrary shadow definitions.
+  const kKeyUmbraOpacity = Color(0x33000000);
+  const kKeyPenumbraOpacity = Color(0x24000000);
+  const kAmbientShadowOpacity = Color(0x1F000000);
   const elevationToShadow = <int, List<BoxShadow>>{
     0: <BoxShadow>[],
     1: <BoxShadow>[
@@ -243,10 +242,10 @@ void main() {
         child: RepaintBoundary(
           child: Container(
             margin: const EdgeInsets.all(150.0),
-            color: kMaterialYellow200,
+            color: kCustomYellow,
             child: const PhysicalModel(
               elevation: 9.0,
-              color: kMaterialBlue900,
+              color: kCustomBlue,
               child: SizedBox(height: 100.0, width: 100.0),
             ),
           ),
@@ -273,9 +272,9 @@ void main() {
         child: RepaintBoundary(
           child: Container(
             padding: const EdgeInsets.all(150.0),
-            color: kMaterialYellow200,
+            color: kCustomYellow,
             child: PhysicalShape(
-              color: kMaterialGreen900,
+              color: kCustomGreen,
               clipper: const ShapeBorderClipper(
                 shape: BeveledRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(20.0)),
