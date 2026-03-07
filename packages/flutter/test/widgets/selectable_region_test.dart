@@ -947,7 +947,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Switch delegate to return null selection points (simulates off-screen scenario).
-        final delegate = delegateKey.currentState!.delegate;
+        final NullSelectionPointDelegate delegate = delegateKey.currentState!.delegate;
         delegate.useNullSelectionPoints = true;
         delegate.notifyListeners();
         await tester.pump();
@@ -961,7 +961,7 @@ void main() {
         expect(state.startGlyphHeight, 0);
         expect(state.endGlyphHeight, 0);
       },
-      skip: kIsWeb,
+      skip: kIsWeb, // [intended] Web uses its native context menu.
     );
 
     testWidgets('mouse long press does not send select-word event', (WidgetTester tester) async {
@@ -6747,8 +6747,6 @@ class NullSelectionPointDelegate extends StaticSelectionContainerDelegate {
       return SelectionGeometry(
         status: geometry.status,
         hasContent: geometry.hasContent,
-        startSelectionPoint: null,
-        endSelectionPoint: null,
         selectionRects: geometry.selectionRects,
       );
     }

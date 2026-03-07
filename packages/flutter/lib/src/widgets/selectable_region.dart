@@ -29,15 +29,15 @@ import 'framework.dart';
 import 'gesture_detector.dart';
 import 'magnifier.dart';
 import 'media_query.dart';
+import 'notification_listener.dart';
 import 'overlay.dart';
 import 'platform_selectable_region_context_menu.dart';
+import 'scroll_notification.dart';
 import 'selection_container.dart';
 import 'tap_region.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
 import 'text_selection_toolbar_anchors.dart';
-import 'notification_listener.dart';
-import 'scroll_notification.dart';
 
 // Examples can assume:
 // late GlobalKey key;
@@ -1982,10 +1982,10 @@ class SelectableRegionState extends State<SelectableRegion>
       onNotification: (notification) {
         _selectionDelegate.layoutDidChange();
         _updateSelectedContentIfNeeded();
-        final lastSelection = _lastSelectedContent;
+        final SelectedContent? lastSelection = _lastSelectedContent;
         if (lastSelection != null && lastSelection.plainText.isNotEmpty) {
           _showHandles();
-          final selectionOverlay = _selectionOverlay;
+          final SelectionOverlay? selectionOverlay = _selectionOverlay;
           if (selectionOverlay == null ||
               !selectionOverlay.toolbarIsVisible) {
             _showToolbar();
