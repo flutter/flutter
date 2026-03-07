@@ -14,6 +14,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'widgets_app_tester.dart';
 
 const Color _debugBlack = Color(0xFF000000);
+const Color _debugCanvas = Color(0xFFFAFAFA);
+const Color _debugText = Color(0xDD000000);
 
 void main() {
   testWidgets('PhysicalModel updates clipBehavior in updateRenderObject', (
@@ -77,27 +79,30 @@ void main() {
         data: MediaQueryData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: Padding(
-            padding: EdgeInsets.all(50),
-            child: Row(
-              children: <Widget>[
-                PhysicalModel(
-                  color: _debugBlack,
-                  child: Text('A long long long long long long long string'),
-                ),
-                PhysicalModel(
-                  color: _debugBlack,
-                  child: Text('A long long long long long long long string'),
-                ),
-                PhysicalModel(
-                  color: _debugBlack,
-                  child: Text('A long long long long long long long string'),
-                ),
-                PhysicalModel(
-                  color: _debugBlack,
-                  child: Text('A long long long long long long long string'),
-                ),
-              ],
+          child: DefaultTextStyle(
+            style: TextStyle(color: _debugText, fontFamily: 'Roboto'),
+            child: Padding(
+              padding: EdgeInsets.all(50),
+              child: Row(
+                children: <Widget>[
+                  PhysicalModel(
+                    color: _debugCanvas,
+                    child: Text('A long long long long long long long string'),
+                  ),
+                  PhysicalModel(
+                    color: _debugCanvas,
+                    child: Text('A long long long long long long long string'),
+                  ),
+                  PhysicalModel(
+                    color: _debugCanvas,
+                    child: Text('A long long long long long long long string'),
+                  ),
+                  PhysicalModel(
+                    color: _debugCanvas,
+                    child: Text('A long long long long long long long string'),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
