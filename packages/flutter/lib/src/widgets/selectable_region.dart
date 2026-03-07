@@ -2225,10 +2225,9 @@ class StaticSelectionContainerDelegate extends MultiSelectableSelectionContainer
   @override
   void remove(Selectable selectable) {
     final int index = selectables.indexOf(selectable);
-    if (index <= currentSelectionEndIndex) {
+    final selectionIsContained = currentSelectionStartIndex == currentSelectionEndIndex;
+    if (index == currentSelectionStartIndex && selectionIsContained) {
       _lastEndEdgeUpdateGlobalPosition = null;
-    }
-    if (index <= currentSelectionStartIndex) {
       _lastStartEdgeUpdateGlobalPosition = null;
     }
     clearInternalSelectionStateForSelectable(selectable);
