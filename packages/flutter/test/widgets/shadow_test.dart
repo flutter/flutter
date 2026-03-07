@@ -15,7 +15,7 @@ void main() {
   const kCustomBlue = Color(0xFF0D47A1);
   const kCustomGreen = Color(0xFF1B5E20);
 
-  // Arbitrary shadow definitions.
+  // Shadow definitions derived from the Material Design 2 palette.
   const kKeyUmbraOpacity = Color(0x33000000);
   const kKeyPenumbraOpacity = Color(0x24000000);
   const kAmbientShadowOpacity = Color(0x1F000000);
