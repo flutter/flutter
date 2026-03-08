@@ -79,15 +79,7 @@ void main() {
 
       expect(
         createTestCommandRunner(command).run(const ['downgrade', '3.19.0']),
-        throwsToolExit(
-          message:
-              'Unexpected positional argument "3.19.0".\n\n'
-              '"flutter downgrade" does not support specifying a version.\n'
-              'It only undoes the last "flutter upgrade" on the current channel.\n\n'
-              'To switch to a specific Flutter version, see: '
-              'https://flutter.dev/to/switch-flutter-version',
-          exitCode: 2,
-        ),
+        throwsToolExit(message: downgradePositionalArgumentErrorMessage('3.19.0'), exitCode: 2),
       );
     },
     overrides: {ProcessManager: () => processManager},

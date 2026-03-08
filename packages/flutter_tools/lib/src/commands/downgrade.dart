@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../base/common.dart';
@@ -16,6 +17,17 @@ import '../globals.dart' as globals;
 import '../persistent_tool_state.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
+
+@visibleForTesting
+String downgradePositionalArgumentErrorMessage(String argument) {
+  return 'Unexpected positional argument "$argument".\n'
+      '\n'
+      '"flutter downgrade" does not support specifying a version.\n'
+      'It only undoes the last "flutter upgrade" on the current channel.\n'
+      '\n'
+      'To switch to a specific Flutter version, see: '
+      'https://flutter.dev/to/switch-flutter-version';
+}
 
 /// The flutter downgrade command returns the SDK to the last recorded version
 /// for a particular branch.
@@ -81,16 +93,7 @@ class DowngradeCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (argResults!.rest.isNotEmpty) {
-      throwToolExit(
-        'Unexpected positional argument "${argResults!.rest.first}".\n'
-        '\n'
-        '"flutter downgrade" does not support specifying a version.\n'
-        'It only undoes the last "flutter upgrade" on the current channel.\n'
-        '\n'
-        'To switch to a specific Flutter version, see: '
-        'https://flutter.dev/to/switch-flutter-version',
-        exitCode: 2,
-      );
+      throwToolExit(downgradePositionalArgumentErrorMessage(argResults!.rest.first), exitCode: 2);
     }
 
     // Commands do not necessarily have access to the correct zone injected
