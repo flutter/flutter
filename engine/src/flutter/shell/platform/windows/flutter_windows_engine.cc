@@ -6,6 +6,7 @@
 
 #include <dwmapi.h>
 
+#include <cstdlib>
 #include <filesystem>
 #include <shared_mutex>
 #include <sstream>
@@ -119,6 +120,64 @@ FlutterRendererConfig GetSoftwareRendererConfig() {
   return config;
 }
 
+// Creates and returns a FlutterRendererConfig that renders to the view (if any)
+// of a FlutterWindowsEngine, using Vulkan with KHR swapchain mode.
+// The user_data received by the render callbacks refers to the
+// FlutterWindowsEngine.
+//
+// In KHR swapchain mode, Impeller manages the swapchain internally
+// (identical to the Android Vulkan path). The embedder provides only
+// the VkSurfaceKHR and Vulkan device information -- no get_next_image
+// or present_image callbacks are needed.
+FlutterRendererConfig GetVulkanRendererConfig(VulkanManager* manager) {
+  FlutterRendererConfig config = {};
+  config.type = kVulkan;
+  config.vulkan.struct_size = sizeof(config.vulkan);
+  config.vulkan.version = manager->GetVulkanVersion();
+  config.vulkan.instance = manager->GetInstance();
+  config.vulkan.physical_device = manager->GetPhysicalDevice();
+  config.vulkan.device = manager->GetDevice();
+  config.vulkan.queue_family_index = manager->GetQueueFamilyIndex();
+  config.vulkan.queue = manager->GetQueue();
+
+  size_t instance_ext_count = 0;
+  config.vulkan.enabled_instance_extensions = const_cast<const char**>(
+      manager->GetEnabledInstanceExtensions(&instance_ext_count));
+  config.vulkan.enabled_instance_extension_count = instance_ext_count;
+
+  size_t device_ext_count = 0;
+  config.vulkan.enabled_device_extensions = const_cast<const char**>(
+      manager->GetEnabledDeviceExtensions(&device_ext_count));
+  config.vulkan.enabled_device_extension_count = device_ext_count;
+
+  config.vulkan.get_instance_proc_address_callback =
+      [](void* user_data, FlutterVulkanInstanceHandle instance,
+         const char* name) -> void* {
+    auto host = static_cast<FlutterWindowsEngine*>(user_data);
+    if (!host->vulkan_manager()) {
+      return nullptr;
+    }
+    return host->vulkan_manager()->GetInstanceProcAddress(
+        static_cast<VkInstance>(instance), name);
+  };
+
+  // KHR swapchain mode: pass the VkSurfaceKHR so Impeller manages the
+  // swapchain internally. No get_next_image / present_image callbacks needed.
+  // ReleaseSurface() transfers surface ownership to Impeller, preventing
+  // a double-free in VulkanManager's destructor.
+  config.vulkan.surface =
+      reinterpret_cast<FlutterVulkanSurfaceHandle>(manager->ReleaseSurface());
+
+  // Provide no-op callbacks for backward compatibility -- the engine
+  // validates these are non-null before the struct_size check.
+  config.vulkan.get_next_image_callback =
+      [](void*, const FlutterFrameInfo*) -> FlutterVulkanImage { return {}; };
+  config.vulkan.present_image_callback =
+      [](void*, const FlutterVulkanImage*) -> bool { return true; };
+
+  return config;
+}
+
 // Converts a FlutterPlatformMessage to an equivalent FlutterDesktopMessage.
 static FlutterDesktopMessage ConvertToDesktopMessage(
     const FlutterPlatformMessage& engine_message) {
@@ -194,11 +253,43 @@ FlutterWindowsEngine::FlutterWindowsEngine(
 
   // Check for impeller support.
   auto& switches = project_->GetSwitches();
+  FML_LOG(INFO) << "FlutterWindowsEngine: " << switches.size()
+                << " engine switches:";
+  for (const auto& sw : switches) {
+    FML_LOG(INFO) << "  switch: [" << sw << "]";
+  }
   enable_impeller_ = std::find(switches.begin(), switches.end(),
                                "--enable-impeller=true") != switches.end();
 
-  egl_manager_ = egl::Manager::Create(
-      static_cast<egl::GpuPreference>(project_->gpu_preference()));
+#ifndef FLUTTER_RELEASE
+  // Honor explicit backend request in debug/profile builds.
+  // Vulkan is gated to debug/profile until the implementation stabilizes.
+  // TODO(sero583): Enable Vulkan in release builds once validated.
+  bool vulkan_requested = false;
+  for (const auto& sw : switches) {
+    if (sw == "--impeller-backend=vulkan") {
+      vulkan_requested = true;
+      break;
+    }
+  }
+#else
+  bool vulkan_requested = false;
+#endif  // FLUTTER_RELEASE
+
+  if (vulkan_requested && enable_impeller_) {
+    vulkan_manager_ = VulkanManager::Create();
+    if (!vulkan_manager_) {
+      FML_LOG(WARNING) << "Vulkan initialization failed. Falling back to "
+                          "ANGLE/OpenGL.";
+    }
+  }
+
+  // Only initialize EGL/ANGLE when not using Vulkan.
+  if (!vulkan_manager_) {
+    egl_manager_ = egl::Manager::Create(
+        static_cast<egl::GpuPreference>(project_->gpu_preference()));
+  }
+
   window_proc_delegate_manager_ = std::make_unique<WindowProcDelegateManager>();
 
   display_manager_ = std::make_shared<DisplayManagerWin32>(this);
@@ -290,6 +381,13 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   std::string executable_name = GetExecutableName();
   std::vector<const char*> argv = {executable_name.c_str()};
   std::vector<std::string> switches = project_->GetSwitches();
+
+  // When using Vulkan rendering, ensure the engine knows the backend so
+  // dart:ui's PlatformDispatcher.renderingBackend returns the correct value.
+  if (vulkan_manager_) {
+    switches.push_back("--impeller-backend=vulkan");
+  }
+
   std::transform(
       switches.begin(), switches.end(), std::back_inserter(argv),
       [](const std::string& arg) -> const char* { return arg.c_str(); });
@@ -427,44 +525,55 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
     platform_view_plugin_ = std::make_unique<PlatformViewPlugin>(
         messenger_wrapper_.get(), task_runner_.get());
   }
-  if (egl_manager_) {
-    auto resolver = [](const char* name) -> void* {
-      return reinterpret_cast<void*>(::eglGetProcAddress(name));
-    };
 
-    // TODO(schectman) Pass the platform view manager to the compositor
-    // constructors: https://github.com/flutter/flutter/issues/143375
-    compositor_ =
-        std::make_unique<CompositorOpenGL>(this, resolver, enable_impeller_);
-  } else {
-    compositor_ = std::make_unique<CompositorSoftware>();
+  // For Vulkan KHR swapchain mode, Impeller manages the swapchain internally.
+  // The compositor is not used -- Impeller renders directly to the KHR
+  // swapchain surfaces it manages, matching the Android Vulkan path.
+  if (!vulkan_manager_) {
+    if (egl_manager_) {
+      auto resolver = [](const char* name) -> void* {
+        return reinterpret_cast<void*>(::eglGetProcAddress(name));
+      };
+
+      // TODO(schectman) Pass the platform view manager to the compositor
+      // constructors: https://github.com/flutter/flutter/issues/143375
+      compositor_ =
+          std::make_unique<CompositorOpenGL>(this, resolver, enable_impeller_);
+    } else {
+      compositor_ = std::make_unique<CompositorSoftware>();
+    }
   }
 
+  // Only set up the compositor callbacks for non-Vulkan renderers.
+  // Vulkan uses KHR swapchain mode where Impeller manages everything
+  // internally.
   FlutterCompositor compositor = {};
-  compositor.struct_size = sizeof(FlutterCompositor);
-  compositor.user_data = this;
-  compositor.create_backing_store_callback =
-      [](const FlutterBackingStoreConfig* config,
-         FlutterBackingStore* backing_store_out, void* user_data) -> bool {
-    auto host = static_cast<FlutterWindowsEngine*>(user_data);
+  if (!vulkan_manager_) {
+    compositor.struct_size = sizeof(FlutterCompositor);
+    compositor.user_data = this;
+    compositor.create_backing_store_callback =
+        [](const FlutterBackingStoreConfig* config,
+           FlutterBackingStore* backing_store_out, void* user_data) -> bool {
+      auto host = static_cast<FlutterWindowsEngine*>(user_data);
 
-    return host->compositor_->CreateBackingStore(*config, backing_store_out);
-  };
+      return host->compositor_->CreateBackingStore(*config, backing_store_out);
+    };
 
-  compositor.collect_backing_store_callback =
-      [](const FlutterBackingStore* backing_store, void* user_data) -> bool {
-    auto host = static_cast<FlutterWindowsEngine*>(user_data);
+    compositor.collect_backing_store_callback =
+        [](const FlutterBackingStore* backing_store, void* user_data) -> bool {
+      auto host = static_cast<FlutterWindowsEngine*>(user_data);
 
-    return host->compositor_->CollectBackingStore(backing_store);
-  };
+      return host->compositor_->CollectBackingStore(backing_store);
+    };
 
-  compositor.present_view_callback =
-      [](const FlutterPresentViewInfo* info) -> bool {
-    auto host = static_cast<FlutterWindowsEngine*>(info->user_data);
+    compositor.present_view_callback =
+        [](const FlutterPresentViewInfo* info) -> bool {
+      auto host = static_cast<FlutterWindowsEngine*>(info->user_data);
 
-    return host->Present(info);
-  };
-  args.compositor = &compositor;
+      return host->Present(info);
+    };
+    args.compositor = &compositor;
+  }
 
   if (aot_data_) {
     args.aot_data = aot_data_.get();
@@ -476,7 +585,31 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
 
   FlutterRendererConfig renderer_config;
 
-  if (enable_impeller_) {
+  if (vulkan_manager_) {
+    // Create the VkSurfaceKHR for the implicit view's HWND before launching
+    // the engine. The view is always created before Run() is called (see
+    // CreateViewController in flutter_windows.cc).
+    FlutterWindowsView* implicit_view = view(kImplicitViewId);
+    if (implicit_view) {
+      HWND hwnd = implicit_view->GetWindowHandle();
+      if (hwnd && !vulkan_manager_->GetSurface()) {
+        if (!vulkan_manager_->InitializeSurface(hwnd)) {
+          FML_LOG(ERROR) << "Failed to create Vulkan surface for window. "
+                            "Falling back to ANGLE/OpenGL.";
+          vulkan_manager_.reset();
+          // Create the EGL manager that was skipped during construction
+          // because Vulkan was initially available.
+          egl_manager_ = egl::Manager::Create(
+              static_cast<egl::GpuPreference>(project_->gpu_preference()));
+        }
+      }
+    }
+  }
+
+  if (vulkan_manager_) {
+    // Vulkan rendering with Impeller (KHR swapchain mode).
+    renderer_config = GetVulkanRendererConfig(vulkan_manager_.get());
+  } else if (enable_impeller_) {
     // Impeller does not support a Software backend. Avoid falling back and
     // confusing the engine on which renderer is selected.
     if (!egl_manager_) {
@@ -674,7 +807,36 @@ std::chrono::nanoseconds FlutterWindowsEngine::FrameInterval() {
   if (frame_interval_override_.has_value()) {
     return frame_interval_override_.value();
   }
-  uint64_t interval = 16600000;
+
+  // Try to get the refresh rate of the monitor the window is currently on.
+  // This correctly handles multi-monitor setups with different refresh rates
+  // (e.g. 144 Hz primary + 60 Hz secondary).
+  FlutterWindowsView* implicit_view = view(kImplicitViewId);
+  if (implicit_view) {
+    HWND hwnd = implicit_view->GetWindowHandle();
+    if (hwnd) {
+      HMONITOR monitor = ::MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+      if (monitor) {
+        MONITORINFOEXW monitor_info = {};
+        monitor_info.cbSize = sizeof(monitor_info);
+        if (::GetMonitorInfoW(monitor, &monitor_info)) {
+          DEVMODEW dev_mode = {};
+          dev_mode.dmSize = sizeof(dev_mode);
+          if (::EnumDisplaySettingsW(monitor_info.szDevice,
+                                     ENUM_CURRENT_SETTINGS, &dev_mode) &&
+              dev_mode.dmDisplayFrequency > 0) {
+            uint64_t interval = static_cast<uint64_t>(
+                1000000000.0 / dev_mode.dmDisplayFrequency);
+            return std::chrono::nanoseconds(interval);
+          }
+        }
+      }
+    }
+  }
+
+  // Fallback: use the DWM compositor timing (reports the desktop compositor
+  // rate, which is typically the primary monitor's rate).
+  uint64_t interval = 16600000;  // ~60 Hz default
 
   DWM_TIMING_INFO timing_info = {};
   timing_info.cbSize = sizeof(timing_info);
@@ -687,6 +849,16 @@ std::chrono::nanoseconds FlutterWindowsEngine::FrameInterval() {
   }
 
   return std::chrono::nanoseconds(interval);
+}
+
+FlutterDesktopRendererType FlutterWindowsEngine::GetRenderingBackend() const {
+  if (vulkan_manager_) {
+    return FlutterDesktopRendererVulkan;
+  }
+  if (egl_manager_) {
+    return FlutterDesktopRendererOpenGL;
+  }
+  return FlutterDesktopRendererSoftware;
 }
 
 FlutterWindowsView* FlutterWindowsEngine::view(FlutterViewId view_id) const {
@@ -1089,7 +1261,14 @@ void FlutterWindowsEngine::UpdateFlutterCursor(
 }
 
 void FlutterWindowsEngine::SetFlutterCursor(HCURSOR cursor) const {
-  windows_proc_table_->SetCursor(cursor);
+  // Route through the view's window so it can store the cursor for
+  // WM_SETCURSOR restoration (prevents stale resize cursors from persisting).
+  FlutterWindowsView* implicit_view = view(kImplicitViewId);
+  if (implicit_view) {
+    implicit_view->SetFlutterCursor(cursor);
+  } else {
+    windows_proc_table_->SetCursor(cursor);
+  }
 }
 
 void FlutterWindowsEngine::OnChannelUpdate(std::string name, bool listening) {

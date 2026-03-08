@@ -13,6 +13,7 @@
 #include "flutter/shell/platform/embedder/embedder_surface.h"
 #include "flutter/vulkan/procs/vulkan_proc_table.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
+#include "impeller/renderer/backend/vulkan/surface_context_vk.h"
 
 namespace flutter {
 
@@ -20,13 +21,24 @@ class EmbedderSurfaceVulkanImpeller final : public EmbedderSurface,
                                             public GPUSurfaceVulkanDelegate {
  public:
   struct VulkanDispatchTable {
-    PFN_vkGetInstanceProcAddr get_instance_proc_address;  // required
-    std::function<FlutterVulkanImage(const DlISize& frame_size)>
-        get_next_image;  // required
-    std::function<bool(VkImage image, VkFormat format)>
-        present_image;  // required
+    /// Resolves Vulkan function pointers from the instance. Required.
+    PFN_vkGetInstanceProcAddr get_instance_proc_address;
+    /// Acquires the next swapchain image for rendering.
+    /// Required for the delegate path; unused when a VkSurfaceKHR is provided.
+    std::function<FlutterVulkanImage(const DlISize& frame_size)> get_next_image;
+    /// Presents a rendered image to the display.
+    /// Required for the delegate path; unused when a VkSurfaceKHR is provided.
+    std::function<bool(VkImage image, VkFormat format)> present_image;
   };
 
+  /// Creates an embedder surface for Vulkan+Impeller rendering.
+  ///
+  /// When |surface| is VK_NULL_HANDLE (default/legacy), the delegate path
+  /// is used: the embedder provides swapchain images via callbacks.
+  ///
+  /// When |surface| is a valid VkSurfaceKHR, the KHR swapchain path is used:
+  /// Impeller manages swapchain, frame throttling, and resource lifecycle
+  /// internally -- identical to the Android Vulkan path.
   EmbedderSurfaceVulkanImpeller(
       uint32_t version,
       VkInstance instance,
@@ -39,7 +51,8 @@ class EmbedderSurfaceVulkanImpeller final : public EmbedderSurface,
       uint32_t queue_family_index,
       VkQueue queue,
       const VulkanDispatchTable& vulkan_dispatch_table,
-      std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
+      std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder,
+      VkSurfaceKHR surface = VK_NULL_HANDLE);
 
   ~EmbedderSurfaceVulkanImpeller() override;
 
@@ -55,12 +68,26 @@ class EmbedderSurfaceVulkanImpeller final : public EmbedderSurface,
   // |GPUSurfaceVulkanDelegate|
   std::shared_ptr<impeller::Context> CreateImpellerContext() const override;
 
+  // |EmbedderSurface|
+  void UpdateSurfaceSize(int64_t width, int64_t height) override;
+
+  /// Returns the SurfaceContextVK used in KHR swapchain mode.
+  /// Returns nullptr in delegate mode. Used by EmbedderEngine to update
+  /// the swapchain size on viewport metrics changes.
+  std::shared_ptr<impeller::SurfaceContextVK> GetSurfaceContext() const;
+
  private:
   bool valid_ = false;
   fml::RefPtr<vulkan::VulkanProcTable> vk_;
   VulkanDispatchTable vulkan_dispatch_table_;
   std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder_;
   std::shared_ptr<impeller::ContextVK> context_;
+
+  /// When true, uses Impeller's KHR swapchain path (like Android).
+  bool use_khr_swapchain_ = false;
+
+  /// SurfaceContextVK -- only created in KHR swapchain mode.
+  std::shared_ptr<impeller::SurfaceContextVK> surface_context_vk_;
 
   // |EmbedderSurface|
   bool IsValid() const override;
@@ -71,9 +98,7 @@ class EmbedderSurfaceVulkanImpeller final : public EmbedderSurface,
   // |EmbedderSurface|
   sk_sp<GrDirectContext> CreateResourceContext() const override;
 
-  EmbedderSurfaceVulkanImpeller(const EmbedderSurfaceVulkanImpeller&) = delete;
-  EmbedderSurfaceVulkanImpeller& operator=(
-      const EmbedderSurfaceVulkanImpeller&) = delete;
+  FML_DISALLOW_COPY_AND_ASSIGN(EmbedderSurfaceVulkanImpeller);
 };
 
 }  // namespace flutter

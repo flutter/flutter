@@ -24,6 +24,7 @@
 #include "flutter/shell/platform/linux/fl_touch_manager.h"
 #include "flutter/shell/platform/linux/fl_view_accessible.h"
 #include "flutter/shell/platform/linux/fl_view_private.h"
+#include "flutter/shell/platform/linux/fl_vulkan_manager.h"
 #include "flutter/shell/platform/linux/fl_window_state_monitor.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_plugin_registry.h"
@@ -119,8 +120,12 @@ static gboolean redraw_cb(gpointer user_data) {
       gtk_widget_get_scale_factor(GTK_WIDGET(self->render_area));
   size_t width = allocation.width * scale_factor;
   size_t height = allocation.height * scale_factor;
-  size_t frame_width, frame_height;
-  fl_compositor_get_frame_size(self->compositor, &frame_width, &frame_height);
+  // In Vulkan mode there is no compositor - Impeller manages the swapchain
+  // directly via KHR swapchain mode, so frame size is always the allocation.
+  size_t frame_width = width, frame_height = height;
+  if (self->compositor != nullptr) {
+    fl_compositor_get_frame_size(self->compositor, &frame_width, &frame_height);
+  }
   gboolean frame_size_matches = width == frame_width && height == frame_height;
   if (self->sized_to_content && !frame_size_matches) {
     gtk_widget_set_size_request(GTK_WIDGET(self->render_area),
@@ -239,6 +244,20 @@ static void handle_geometry_changed(FlView* self) {
       self->engine, display_id, self->view_id, min_width * scale_factor,
       min_height * scale_factor, max_width * scale_factor,
       max_height * scale_factor, scale_factor);
+
+  // Keep the Vulkan subsurface positioned at the content area offset.
+  if (fl_engine_get_renderer_type(self->engine) == kVulkan) {
+    FlVulkanManager* vulkan_manager =
+        fl_engine_get_vulkan_manager(self->engine);
+    if (vulkan_manager != nullptr) {
+      GtkWidget* toplevel = gtk_widget_get_toplevel(GTK_WIDGET(self));
+      gint content_x = 0, content_y = 0;
+      gtk_widget_translate_coordinates(GTK_WIDGET(self->render_area), toplevel,
+                                       0, 0, &content_x, &content_y);
+      fl_vulkan_manager_set_subsurface_position(vulkan_manager, content_x,
+                                                content_y);
+    }
+  }
 }
 
 static void view_added_cb(GObject* object,
@@ -283,9 +302,14 @@ static void fl_view_present_layers(FlRenderable* renderable,
                                    size_t layers_count) {
   FlView* self = FL_VIEW(renderable);
 
-  fl_compositor_present_layers(self->compositor, layers, layers_count);
+  // Vulkan/Impeller uses the non-compositor path: the engine renders directly
+  // to swapchain images via get_next_image/present_image callbacks, so no
+  // compositor present_layers call is needed.
+  if (self->compositor != nullptr) {
+    fl_compositor_present_layers(self->compositor, layers, layers_count);
+  }
 
-  // Perform the redraw in the GTK thead.
+  // Perform the redraw in the GTK thread.
   g_idle_add(redraw_cb, self);
 }
 
@@ -494,6 +518,46 @@ static void setup_software(FlView* self) {
       fl_compositor_software_new(fl_engine_get_task_runner(self->engine)));
 }
 
+static void setup_vulkan(FlView* self) {
+  // Get the toplevel GdkWindow for creating the Vulkan surface.
+  // The toplevel window is used because GTK child widgets do not have their
+  // own native windows on Wayland, and creating one via
+  // gdk_window_ensure_native() creates a separate toplevel instead of a
+  // proper subsurface.
+  GtkWidget* toplevel = gtk_widget_get_toplevel(GTK_WIDGET(self));
+  GdkWindow* window = gtk_widget_get_window(toplevel);
+  if (window == nullptr) {
+    g_warning("No GdkWindow available for Vulkan, falling back to software");
+    setup_software(self);
+    return;
+  }
+
+  // Create the Vulkan manager with the toplevel window.
+  // This manages the VkInstance, VkDevice, VkQueue, and swapchain.
+  // For Impeller: the engine renders directly to swapchain images via
+  // get_next_image/present_image callbacks. No compositor is needed.
+  FlVulkanManager* vulkan_manager = fl_vulkan_manager_new(window);
+  if (vulkan_manager == nullptr) {
+    g_warning("Vulkan manager creation failed, falling back to software");
+    setup_software(self);
+    return;
+  }
+
+  // Position the Vulkan subsurface at the content area offset (below header
+  // bar). The subsurface must be positioned so the swapchain renders only
+  // within the FlView widget, not over the entire toplevel window.
+  gint content_x = 0, content_y = 0;
+  gtk_widget_translate_coordinates(GTK_WIDGET(self->render_area), toplevel, 0,
+                                   0, &content_x, &content_y);
+  fl_vulkan_manager_set_subsurface_position(vulkan_manager, content_x,
+                                            content_y);
+
+  // Transfer ownership to the engine. fl_engine_set_vulkan_manager takes
+  // a ref, so unref our local reference afterwards.
+  fl_engine_set_vulkan_manager(self->engine, vulkan_manager);
+  g_object_unref(vulkan_manager);
+}
+
 static void realize_cb(FlView* self) {
   switch (fl_engine_get_renderer_type(self->engine)) {
     case kOpenGL:
@@ -501,6 +565,9 @@ static void realize_cb(FlView* self) {
       break;
     case kSoftware:
       setup_software(self);
+      break;
+    case kVulkan:
+      setup_vulkan(self);
       break;
     default:
       break;
@@ -522,8 +589,11 @@ static void realize_cb(FlView* self) {
                            G_CALLBACK(window_delete_event_cb), self);
 
   // Flutter engine will need to make the context current from raster thread
-  // during initialization.
-  fl_opengl_manager_clear_current(fl_engine_get_opengl_manager(self->engine));
+  // during initialization. Only needed for OpenGL - Vulkan uses a separate
+  // rendering path that does not have a current EGL context.
+  if (fl_engine_get_renderer_type(self->engine) != kVulkan) {
+    fl_opengl_manager_clear_current(fl_engine_get_opengl_manager(self->engine));
+  }
 
   g_autoptr(GError) error = nullptr;
   if (!fl_engine_start(self->engine, &error)) {
@@ -534,6 +604,15 @@ static void realize_cb(FlView* self) {
   setup_cursor(self);
 
   handle_geometry_changed(self);
+
+  // For Vulkan/Impeller: the non-compositor path does not call
+  // present_layers, so redraw_cb (which emits 'first-frame') is never
+  // scheduled. The application window is only shown on first-frame (see
+  // first_frame_cb in runner code). An idle source is used to ensure the
+  // window becomes visible.
+  if (fl_engine_get_renderer_type(self->engine) == kVulkan) {
+    g_idle_add(redraw_cb, self);
+  }
 }
 
 static void size_allocate_cb(FlView* self) {
@@ -553,7 +632,18 @@ static void paint_background(FlView* self, cairo_t* cr) {
 }
 
 static gboolean draw_cb(FlView* self, cairo_t* cr) {
+  // Always paint the background so the GTK window surface has content.
+  // Without this, XWayland/Wayland compositors may never display the window
+  // because the surface has no committed buffer.
   paint_background(self, cr);
+
+  // Vulkan/Impeller renders directly to swapchain images via
+  // get_next_image/present_image callbacks. On Wayland this goes to a
+  // subsurface; on X11 it goes to the same window (Vulkan overwrites the
+  // background). No compositor render is needed.
+  if (self->compositor == nullptr) {
+    return TRUE;
+  }
 
   if (self->render_context) {
     gdk_gl_context_make_current(self->render_context);
@@ -594,6 +684,16 @@ static void fl_view_dispose(GObject* object) {
     if (self->cursor_changed_cb_id != 0) {
       g_signal_handler_disconnect(handler, self->cursor_changed_cb_id);
       self->cursor_changed_cb_id = 0;
+    }
+
+    // Signal the Vulkan manager to stop accepting new render requests from
+    // the raster thread, and wait for in-flight GPU work to complete. This
+    // must happen BEFORE the engine is shut down because Impeller's teardown
+    // may still try to use Vulkan resources.
+    FlVulkanManager* vulkan_manager =
+        fl_engine_get_vulkan_manager(self->engine);
+    if (vulkan_manager != nullptr) {
+      fl_vulkan_manager_shutdown(vulkan_manager);
     }
 
     // Release the view ID from the engine.

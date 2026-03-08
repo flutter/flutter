@@ -18,7 +18,7 @@
 
 namespace impeller {
 
-// Holds the command pool in a background thread, recyling it when not in use.
+// Holds the command pool in a background thread, recycling it when not in use.
 class BackgroundCommandPoolVK final {
  public:
   BackgroundCommandPoolVK(BackgroundCommandPoolVK&&) = default;
@@ -45,6 +45,14 @@ class BackgroundCommandPoolVK final {
     // once for the original BackgroundCommandPoolVK() and once for the moved
     // BackgroundCommandPoolVK().
     if (!recycler) {
+      // Context is dying - release Vulkan handles without making API calls.
+      // The VkDevice may already be destroyed; calling vkFreeCommandBuffers
+      // or vkDestroyCommandPool with stale handles causes validation errors
+      // (VUID-vkFreeCommandBuffers-commandPool-parameter).
+      for (auto& buffer : buffers_) {
+        buffer.release();
+      }
+      pool_.release();
       return;
     }
     // If there are many unused command buffers, release some of them and
@@ -76,10 +84,25 @@ CommandPoolVK::~CommandPoolVK() {
 
   auto const context = context_.lock();
   if (!context) {
+    // Context is dying - release Vulkan handles without making API calls.
+    for (auto& buffer : collected_buffers_) {
+      buffer.release();
+    }
+    for (auto& buffer : unused_command_buffers_) {
+      buffer.release();
+    }
+    pool_.release();
     return;
   }
   auto const recycler = context->GetCommandPoolRecycler();
   if (!recycler) {
+    for (auto& buffer : collected_buffers_) {
+      buffer.release();
+    }
+    for (auto& buffer : unused_command_buffers_) {
+      buffer.release();
+    }
+    pool_.release();
     return;
   }
   // Any unused command buffers are added to the set of used command buffers.
@@ -143,6 +166,28 @@ void CommandPoolVK::Destroy() {
 
   // When the command pool is destroyed, all of its command buffers are freed.
   // Handles allocated from that pool are now invalid and must be discarded.
+  for (auto& buffer : collected_buffers_) {
+    buffer.release();
+  }
+  for (auto& buffer : unused_command_buffers_) {
+    buffer.release();
+  }
+  unused_command_buffers_.clear();
+  collected_buffers_.clear();
+}
+
+void CommandPoolVK::AbandonForDriverCrash() {
+  Lock lock(pool_mutex_);
+  if (!pool_) {
+    return;
+  }
+  // The AMD driver non-conformantly frees the VkCommandPool and its child
+  // VkCommandBuffer handles internally when vkQueueSubmit returns
+  // VK_ERROR_OUT_OF_HOST_MEMORY. Calling vkDestroyCommandPool or
+  // vkFreeCommandBuffers on these already-invalid handles causes validation
+  // layer errors and an access-violation crash inside the driver. Release
+  // the C++ ownership handles without invoking any Vulkan destroy/free calls.
+  pool_.release();
   for (auto& buffer : collected_buffers_) {
     buffer.release();
   }
@@ -269,21 +314,51 @@ void CommandPoolRecyclerVK::Reclaim(
   // Reset the pool on a background thread.
   auto strong_context = context_.lock();
   if (!strong_context) {
+    // Release all handles to prevent RAII from calling vk API with dead device.
+    for (auto& buf : buffers) {
+      buf.release();
+    }
+    pool.release();
     return;
   }
   auto device = strong_context->GetDevice();
   vk::CommandPoolResetFlags flags;
   if (should_trim) {
-    buffers.clear();
     flags = vk::CommandPoolResetFlagBits::eReleaseResources;
   }
+  // Release buffer handles BEFORE resetCommandPool. resetCommandPool
+  // implicitly returns all allocated command buffers to the pool, making
+  // the old VkCommandBuffer handles invalid. Letting RAII call
+  // vkFreeCommandBuffers on them afterwards is redundant at best and
+  // dangerous at worst (stale-handle use).
+  for (auto& buf : buffers) {
+    buf.release();
+  }
+  buffers.clear();
   const auto result = device.resetCommandPool(pool.get(), flags);
   if (result != vk::Result::eSuccess) {
     VALIDATION_LOG << "Could not reset command pool: " << vk::to_string(result);
   }
 
-  // Move the pool to the recycled list.
+  // Move the pool to the recycled list, capping at 8 to prevent unbounded
+  // host memory growth. Without a cap, heavy workloads (text rendering
+  // stress) can accumulate dozens of recycled pools, each consuming
+  // significant driver-internal memory.
   Lock recycled_lock(recycled_mutex_);
+  static constexpr size_t kMaxRecycledCommandPools = 8;
+  while (recycled_.size() >= kMaxRecycledCommandPools) {
+    auto& old = recycled_.front();
+    // Explicitly release buffer handles BEFORE destroying pool to prevent
+    // vkFreeCommandBuffers from using a potentially-stale pool handle.
+    // After resetCommandPool the buffers are already returned to the pool,
+    // so vkFreeCommandBuffers is redundant. Skipping it avoids a window
+    // where the pool handle could be reused by the driver.
+    for (auto& buf : old.buffers) {
+      buf.release();
+    }
+    old.buffers.clear();
+    recycled_.erase(recycled_.begin());
+  }
   recycled_.push_back(
       RecycledData{.pool = std::move(pool), .buffers = std::move(buffers)});
 }
@@ -319,7 +394,7 @@ void CommandPoolRecyclerVK::DestroyThreadLocalPools() {
       if (!pool) {
         continue;
       }
-      // Delete all objects held by this pool.  The destroyed pool will still
+      // Delete all objects held by this pool. The destroyed pool will still
       // remain in its thread's TLS map until that thread exits.
       pool->Destroy();
     }

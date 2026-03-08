@@ -1605,6 +1605,23 @@ class PlatformDispatcher {
   // configurationId does not match any configuration.
   @Native<Double Function(Double, Int)>(symbol: 'PlatformConfigurationNativeApi::GetScaledFontSize')
   external static double _getScaledFontSize(double unscaledFontSize, int configurationId);
+
+  /// The graphics rendering backend currently in use by the Flutter engine.
+  ///
+  /// This value is set once during engine initialization and does not change
+  /// for the lifetime of the application.
+  ///
+  /// The engine selects the rendering backend based on platform capabilities
+  /// and configuration. On most platforms, a default backend is chosen
+  /// automatically, but it may be overridden in debug and profile builds
+  /// using the `--impeller-backend` command-line flag.
+  ///
+  /// See also:
+  ///
+  ///   * [RenderingBackend], the enum of possible rendering backends.
+  RenderingBackend get renderingBackend {
+    return RenderingBackend._fromIndex(_renderingBackend);
+  }
 }
 
 /// A color specified in the operating system UI color palette.
@@ -3255,4 +3272,72 @@ enum ViewFocusDirection {
   ///
   /// This is typically result of the user pressing shift + tab.
   backward,
+}
+
+/// The rendering backend the Flutter engine is using to render frames.
+///
+/// The active backend is determined at engine startup based on platform
+/// capabilities and build configuration.
+///
+/// Access the current backend via [PlatformDispatcher.renderingBackend].
+///
+/// New values may be added in the future. Avoid exhaustive `switch`
+/// statements on this enum unless a `default` case is provided.
+///
+/// See also:
+///
+///   * [PlatformDispatcher.renderingBackend], which returns the active backend.
+enum RenderingBackend {
+  /// OpenGL or OpenGL ES.
+  ///
+  /// This is the default backend on Linux, Windows (via ANGLE), and older
+  /// Android devices that do not support Vulkan.
+  opengl,
+
+  /// Vulkan.
+  ///
+  /// Available on Linux, Windows, and Android devices with Vulkan support.
+  vulkan,
+
+  /// Software rasterizer.
+  ///
+  /// Used as a fallback when no GPU-accelerated backend is available.
+  software,
+
+  /// Metal.
+  ///
+  /// The default backend on iOS and macOS.
+  metal,
+
+  /// CanvasKit web renderer.
+  ///
+  /// Skia compiled to WebAssembly, rendering through WebGL.
+  /// Used when building with `--web-renderer canvaskit` (the default).
+  canvaskit,
+
+  /// Skwasm web renderer.
+  ///
+  /// Skia compiled to WebAssembly with dart:ffi, rendering through WebGPU.
+  /// Used when building with `--wasm` (requires WasmGC browser support).
+  /// Supports multi-threaded rendering via Web Workers.
+  skwasm;
+
+  // Must match the constants in dart_ui.cc (native) and the web_ui
+  // platform_dispatcher.dart (web):
+  // 0 = opengl, 1 = vulkan, 2 = software, 3 = metal,
+  // 4 = canvaskit, 5 = skwasm.
+  //
+  // Returns [opengl] for unknown indices, which can occur when a newer
+  // engine sends an index unknown to this version of the framework.
+  static RenderingBackend _fromIndex(int index) {
+    assert(
+      index >= 0 && index < RenderingBackend.values.length,
+      'Unknown rendering backend index: $index. '
+      'This may indicate a version mismatch between the engine and framework.',
+    );
+    if (index >= 0 && index < RenderingBackend.values.length) {
+      return RenderingBackend.values[index];
+    }
+    return RenderingBackend.opengl;
+  }
 }

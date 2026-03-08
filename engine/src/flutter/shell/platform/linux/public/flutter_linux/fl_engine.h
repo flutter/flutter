@@ -28,6 +28,20 @@ G_DECLARE_FINAL_TYPE(FlEngine, fl_engine, FL, ENGINE, GObject)
  */
 
 /**
+ * FlRendererType:
+ * @FL_RENDERER_TYPE_OPENGL: OpenGL rendering backend.
+ * @FL_RENDERER_TYPE_SOFTWARE: Software rendering backend.
+ * @FL_RENDERER_TYPE_VULKAN: Vulkan rendering backend.
+ *
+ * The rendering backend used by the Flutter engine.
+ */
+typedef enum {
+  FL_RENDERER_TYPE_OPENGL = 0,
+  FL_RENDERER_TYPE_SOFTWARE = 1,
+  FL_RENDERER_TYPE_VULKAN = 2,
+} FlRendererType;
+
+/**
  * fl_engine_new:
  * @project: an #FlDartProject.
  *
@@ -66,6 +80,16 @@ FlBinaryMessenger* fl_engine_get_binary_messenger(FlEngine* engine);
  * Returns: an #FlTextureRegistrar.
  */
 FlTextureRegistrar* fl_engine_get_texture_registrar(FlEngine* engine);
+
+/**
+ * fl_engine_get_rendering_backend:
+ * @engine: an #FlEngine.
+ *
+ * Gets the rendering backend used by this engine.
+ *
+ * Returns: an #FlRendererType.
+ */
+FlRendererType fl_engine_get_rendering_backend(FlEngine* engine);
 
 G_END_DECLS
 

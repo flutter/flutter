@@ -356,6 +356,14 @@ KHRSwapchainImplVK::AcquireResult KHRSwapchainImplVK::AcquireNextDrawable() {
 
   const auto& context = ContextVK::Cast(*context_strong);
 
+  // If the device is in a lost state (e.g. AMD OOM corruption), do not make
+  // any further Vulkan calls - vkWaitForFences / vkAcquireNextImageKHR would
+  // access-fault inside the corrupted ICD. Return an empty result so the
+  // calling code skips the frame gracefully.
+  if (context.IsDeviceLost()) {
+    return KHRSwapchainImplVK::AcquireResult{};
+  }
+
   current_frame_ = (current_frame_ + 1u) % synchronizers_.size();
 
   const auto& sync = synchronizers_[current_frame_];
@@ -389,10 +397,18 @@ KHRSwapchainImplVK::AcquireResult KHRSwapchainImplVK::AcquireNextDrawable() {
     case vk::Result::eSuboptimalKHR:
     case vk::Result::eErrorOutOfDateKHR:
       // A recoverable error. Just say we are out of date.
+      //
+      // WaitForFence above reset the synchronizer fence. Since we are not
+      // going to submit any GPU work for this frame, re-signal the fence
+      // with an empty queue submit. Without this the next attempt that
+      // wraps around to the same synchronizer will deadlock in
+      // waitForFences (infinite timeout on an unsignaled fence).
+      context.GetGraphicsQueue()->Submit(*sync->acquire);
       return AcquireResult{true /* out of date */};
       break;
     default:
-      // An unrecoverable error.
+      // An unrecoverable error. Re-signal the fence for the same reason.
+      context.GetGraphicsQueue()->Submit(*sync->acquire);
       VALIDATION_LOG << "Could not acquire next swapchain image: "
                      << vk::to_string(acq_result);
       return AcquireResult{false /* out of date */};
@@ -400,6 +416,7 @@ KHRSwapchainImplVK::AcquireResult KHRSwapchainImplVK::AcquireNextDrawable() {
 
   if (index >= images_.size()) {
     VALIDATION_LOG << "Swapchain returned an invalid image index.";
+    context.GetGraphicsQueue()->Submit(*sync->acquire);
     return KHRSwapchainImplVK::AcquireResult{};
   }
 

@@ -35,6 +35,7 @@ class MockWindowBindingHandler : public WindowBindingHandler {
   MOCK_METHOD(ui::AXPlatformNodeWin*, GetAlert, (), (override));
   MOCK_METHOD(bool, Focus, (), (override));
   MOCK_METHOD(FlutterEngineDisplayId, GetDisplayId, (), (override));
+  MOCK_METHOD(void, SetFlutterCursor, (HCURSOR cursor), (override));
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockWindowBindingHandler);

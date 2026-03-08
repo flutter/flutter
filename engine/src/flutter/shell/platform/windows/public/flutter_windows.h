@@ -60,6 +60,16 @@ typedef enum {
   RunOnSeparateThread,
 } FlutterDesktopUIThreadPolicy;
 
+// The rendering backend used by the Flutter engine.
+typedef enum {
+  // ANGLE/OpenGL ES rendering.
+  FlutterDesktopRendererOpenGL = 0,
+  // Software rendering.
+  FlutterDesktopRendererSoftware = 1,
+  // Vulkan rendering via Impeller.
+  FlutterDesktopRendererVulkan = 2,
+} FlutterDesktopRendererType;
+
 // Properties for configuring a Flutter engine instance.
 typedef struct {
   // The path to the flutter_assets folder for the application to be run.
@@ -239,6 +249,11 @@ FLUTTER_EXPORT void FlutterDesktopEngineSetNextFrameCallback(
     FlutterDesktopEngineRef engine,
     VoidCallback callback,
     void* user_data);
+
+// Gets the rendering backend used by the engine.
+// Valid after the engine has been created.
+FLUTTER_EXPORT FlutterDesktopRendererType
+FlutterDesktopEngineGetRenderingBackend(FlutterDesktopEngineRef engine);
 
 // ========== View ==========
 

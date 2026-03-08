@@ -217,10 +217,19 @@ static bool IsVulkanRendererConfigValid(const FlutterRendererConfig* config) {
       !SAFE_EXISTS(vulkan_config, physical_device) ||
       !SAFE_EXISTS(vulkan_config, device) ||
       !SAFE_EXISTS(vulkan_config, queue) ||
-      !SAFE_EXISTS(vulkan_config, get_instance_proc_address_callback) ||
-      !SAFE_EXISTS(vulkan_config, get_next_image_callback) ||
-      !SAFE_EXISTS(vulkan_config, present_image_callback)) {
+      !SAFE_EXISTS(vulkan_config, get_instance_proc_address_callback)) {
     return false;
+  }
+
+  // When a VkSurfaceKHR is provided (KHR swapchain mode), Impeller manages
+  // the swapchain internally and the get_next_image / present_image callbacks
+  // are not required. Without a surface, the callbacks are mandatory.
+  bool has_khr_surface = SAFE_ACCESS(vulkan_config, surface, 0) != 0;
+  if (!has_khr_surface) {
+    if (!SAFE_EXISTS(vulkan_config, get_next_image_callback) ||
+        !SAFE_EXISTS(vulkan_config, present_image_callback)) {
+      return false;
+    }
   }
 
   return true;
@@ -615,7 +624,8 @@ InferVulkanPlatformViewCreationCallback(
         platform_dispatch_table,
     std::unique_ptr<flutter::EmbedderExternalViewEmbedder>
         external_view_embedder,
-    bool enable_impeller) {
+    bool enable_impeller,
+    std::function<void(int64_t, int64_t)>* out_surface_size_updater) {
   if (config->type != kVulkan) {
     return nullptr;
   }
@@ -628,28 +638,37 @@ InferVulkanPlatformViewCreationCallback(
     return ptr(user_data, instance, proc_name);
   };
 
-  auto vulkan_get_next_image =
-      [ptr = config->vulkan.get_next_image_callback,
-       user_data](const flutter::DlISize& frame_size) -> FlutterVulkanImage {
-    FlutterFrameInfo frame_info = {
-        .struct_size = sizeof(FlutterFrameInfo),
-        .size = {static_cast<uint32_t>(frame_size.width),
-                 static_cast<uint32_t>(frame_size.height)},
+  // When the embedder provides a VkSurfaceKHR (KHR swapchain mode),
+  // Impeller manages the swapchain internally and these callbacks are not
+  // required. Without a surface, the embedder must supply both callbacks.
+  std::function<FlutterVulkanImage(const flutter::DlISize&)>
+      vulkan_get_next_image;
+  if (config->vulkan.get_next_image_callback) {
+    vulkan_get_next_image =
+        [ptr = config->vulkan.get_next_image_callback,
+         user_data](const flutter::DlISize& frame_size) -> FlutterVulkanImage {
+      FlutterFrameInfo frame_info = {
+          .struct_size = sizeof(FlutterFrameInfo),
+          .size = {static_cast<uint32_t>(frame_size.width),
+                   static_cast<uint32_t>(frame_size.height)},
+      };
+      return ptr(user_data, &frame_info);
     };
+  }
 
-    return ptr(user_data, &frame_info);
-  };
-
-  auto vulkan_present_image_callback =
-      [ptr = config->vulkan.present_image_callback, user_data](
-          VkImage image, VkFormat format) -> bool {
-    FlutterVulkanImage image_desc = {
-        .struct_size = sizeof(FlutterVulkanImage),
-        .image = reinterpret_cast<uint64_t>(image),
-        .format = static_cast<uint32_t>(format),
+  std::function<bool(VkImage, VkFormat)> vulkan_present_image_callback;
+  if (config->vulkan.present_image_callback) {
+    vulkan_present_image_callback =
+        [ptr = config->vulkan.present_image_callback, user_data](
+            VkImage image, VkFormat format) -> bool {
+      FlutterVulkanImage image_desc = {
+          .struct_size = sizeof(FlutterVulkanImage),
+          .image = reinterpret_cast<uint64_t>(image),
+          .format = static_cast<uint32_t>(format),
+      };
+      return ptr(user_data, &image_desc);
     };
-    return ptr(user_data, &image_desc);
-  };
+  }
 
   auto vk_instance = static_cast<VkInstance>(config->vulkan.instance);
   auto proc_addr =
@@ -660,6 +679,13 @@ InferVulkanPlatformViewCreationCallback(
 
 #if IMPELLER_SUPPORTS_RENDERING
   if (enable_impeller) {
+    // Check if the embedder provided a VkSurfaceKHR for the KHR swapchain
+    // path. This is backward-compatible: older embedders have a smaller
+    // struct_size that doesn't include the surface field.
+    const auto* vulkan_config = &config->vulkan;
+    VkSurfaceKHR vk_surface =
+        reinterpret_cast<VkSurfaceKHR>(SAFE_ACCESS(vulkan_config, surface, 0));
+
     flutter::EmbedderSurfaceVulkanImpeller::VulkanDispatchTable
         vulkan_dispatch_table = {
             .get_instance_proc_address =
@@ -679,7 +705,22 @@ InferVulkanPlatformViewCreationCallback(
             static_cast<VkDevice>(config->vulkan.device),
             config->vulkan.queue_family_index,
             static_cast<VkQueue>(config->vulkan.queue), vulkan_dispatch_table,
-            view_embedder);
+            view_embedder, vk_surface);
+
+    // Extract a surface-size updater for swapchain resize support.
+    // The EmbedderEngine needs this to update the swapchain size on viewport
+    // metrics changes, without going through PlatformView (which has
+    // WeakPtr thread-affinity checks). This follows Android's
+    // PlatformViewAndroid::NotifyChanged -> OnScreenSurfaceResize pattern.
+    if (out_surface_size_updater) {
+      auto surface_context = embedder_surface->GetSurfaceContext();
+      if (surface_context) {
+        *out_surface_size_updater = [surface_context](int64_t width,
+                                                      int64_t height) {
+          surface_context->UpdateSurfaceSize(impeller::ISize{width, height});
+        };
+      }
+    }
 
     return fml::MakeCopyable(
         [embedder_surface = std::move(embedder_surface),
@@ -815,7 +856,8 @@ InferPlatformViewCreationCallback(
         platform_dispatch_table,
     std::unique_ptr<flutter::EmbedderExternalViewEmbedder>
         external_view_embedder,
-    bool enable_impeller) {
+    bool enable_impeller,
+    std::function<void(int64_t, int64_t)>* out_surface_size_updater = nullptr) {
   if (config == nullptr) {
     return nullptr;
   }
@@ -836,7 +878,8 @@ InferPlatformViewCreationCallback(
     case kVulkan:
       return InferVulkanPlatformViewCreationCallback(
           config, user_data, platform_dispatch_table,
-          std::move(external_view_embedder), enable_impeller);
+          std::move(external_view_embedder), enable_impeller,
+          out_surface_size_updater);
     default:
       return nullptr;
   }
@@ -1513,7 +1556,13 @@ CreateEmbedderRenderTarget(
     }
     case kFlutterBackingStoreTypeVulkan: {
       if (enable_impeller) {
-        FML_LOG(ERROR) << "Unimplemented";
+        // Vulkan+Impeller uses the KHR swapchain path (via
+        // FlutterRendererConfig.vulkan.surface), which bypasses the
+        // compositor backing store entirely. This code path should never
+        // be reached. If it is, there is a configuration mismatch.
+        FML_LOG(ERROR) << "Vulkan+Impeller does not support compositor "
+                          "backing stores. Use the KHR swapchain surface "
+                          "path instead.";
         break;
       } else {
         auto skia_surface = MakeSkSurfaceFromBackingStore(
@@ -2305,10 +2354,11 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
           view_focus_change_request_callback,         //
       };
 
+  std::function<void(int64_t, int64_t)> surface_size_updater;
   auto on_create_platform_view = InferPlatformViewCreationCallback(
       config, user_data, platform_dispatch_table,
       std::move(external_view_embedder_result.value()),
-      settings.enable_impeller);
+      settings.enable_impeller, &surface_size_updater);
 
   if (!on_create_platform_view) {
     return LOG_EMBEDDER_ERROR(
@@ -2476,6 +2526,13 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
       on_create_rasterizer,                 //
       std::move(external_texture_resolver)  //
   );
+
+  // If the platform view creation produced a surface-size updater (e.g. for
+  // Vulkan KHR swapchain mode), install it so viewport metrics changes
+  // trigger swapchain resizes.
+  if (surface_size_updater) {
+    embedder_engine->SetSurfaceSizeUpdater(std::move(surface_size_updater));
+  }
 
   // Release the ownership of the embedder engine to the caller.
   *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(

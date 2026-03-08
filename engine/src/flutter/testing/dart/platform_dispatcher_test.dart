@@ -55,6 +55,61 @@ void main() {
     );
   });
 
+  test('RenderingBackend has expected values and indices', () {
+    expect(RenderingBackend.values.length, 6);
+    expect(RenderingBackend.opengl.index, 0);
+    expect(RenderingBackend.vulkan.index, 1);
+    expect(RenderingBackend.software.index, 2);
+    expect(RenderingBackend.metal.index, 3);
+    expect(RenderingBackend.canvaskit.index, 4);
+    expect(RenderingBackend.skwasm.index, 5);
+  });
+
+  test('RenderingBackend.name returns correct string', () {
+    expect(RenderingBackend.opengl.name, 'opengl');
+    expect(RenderingBackend.vulkan.name, 'vulkan');
+    expect(RenderingBackend.software.name, 'software');
+    expect(RenderingBackend.metal.name, 'metal');
+    expect(RenderingBackend.canvaskit.name, 'canvaskit');
+    expect(RenderingBackend.skwasm.name, 'skwasm');
+  });
+
+  test('PlatformDispatcher.renderingBackend returns a valid value', () {
+    final backend = PlatformDispatcher.instance.renderingBackend;
+    expect(RenderingBackend.values.contains(backend), true);
+    // On native test runners, the backend should be one of the native values
+    // (not canvaskit or skwasm, which are web-only).
+    expect(
+      backend == RenderingBackend.opengl ||
+          backend == RenderingBackend.vulkan ||
+          backend == RenderingBackend.software ||
+          backend == RenderingBackend.metal,
+      true,
+      reason: 'Native test runner should report a native backend, '
+          'got ${backend.name}',
+    );
+  });
+
+  test('RenderingBackend values cover all indices 0..length-1', () {
+    // Validates that _fromIndex can resolve every valid index.
+    for (int i = 0; i < RenderingBackend.values.length; i++) {
+      expect(RenderingBackend.values[i].index, i);
+    }
+    // Ensure the enum is not accidentally extended without updating
+    // dart_ui.cc constants.
+    expect(RenderingBackend.values.length, 6,
+        reason: 'If you add a new RenderingBackend, update dart_ui.cc too');
+  });
+
+  test('RenderingBackend.values OOB access throws RangeError', () {
+    // Validates that out-of-bounds indices cannot silently resolve to a
+    // valid enum value through the values list, which is what _fromIndex
+    // guards against with its assert + fallback.
+    expect(() => RenderingBackend.values[-1], throwsRangeError);
+    expect(() => RenderingBackend.values[6], throwsRangeError);
+    expect(() => RenderingBackend.values[999], throwsRangeError);
+  });
+
   test('scheduleWarmupFrame should call both callbacks and flush microtasks', () async {
     var microtaskFlushed = false;
     var beginFrameCalled = false;

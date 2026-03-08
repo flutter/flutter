@@ -99,6 +99,7 @@ source_set("flutter_linux_sources") {
              "fl_pointer_manager.h",
              "fl_task_runner.h",
              "fl_view_private.h",
+             "fl_vulkan_manager.h",
              "fl_window_monitor.h",
              "fl_window_state_monitor.h",
              "key_mapping.h",
@@ -170,6 +171,7 @@ source_set("flutter_linux_sources") {
     "fl_value.cc",
     "fl_view.cc",
     "fl_view_accessible.cc",
+    "fl_vulkan_manager.cc",
     "fl_window_monitor.cc",
     "fl_window_state_monitor.cc",
     "key_mapping.g.cc",
@@ -190,7 +192,13 @@ source_set("flutter_linux_sources") {
     "//flutter/shell/platform/common:common_cpp_switches",
     "//flutter/shell/platform/embedder:embedder_headers",
     "//flutter/third_party/rapidjson",
+    "//flutter/vulkan",
+    "//flutter/vulkan/procs",
   ]
+
+  # Wayland client library is needed for wl_subsurface support in Vulkan
+  # compositor. GTK+-3.0 depends on it but --as-needed may strip it.
+  libs = [ "wayland-client" ]
 }
 
 source_set("flutter_linux") {
@@ -265,8 +273,10 @@ executable("flutter_linux_unittests") {
     "fl_value_test.cc",
     "fl_view_accessible_test.cc",
     "fl_view_test.cc",
+    "fl_vulkan_manager_test.cc",
     "fl_window_state_monitor_test.cc",
     "key_mapping_test.cc",
+    "vulkan_native_surface_linux_test.cc",
     "testing/fl_mock_binary_messenger.cc",
     "testing/fl_test.cc",
     "testing/fl_test_gtk_logs.cc",
@@ -305,6 +315,7 @@ executable("flutter_linux_unittests") {
     "//flutter/shell/platform/embedder:embedder_headers",
     "//flutter/shell/platform/embedder:embedder_test_utils",
     "//flutter/testing",
+    "//flutter/vulkan:vulkan",
   ]
 }
 

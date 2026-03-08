@@ -98,6 +98,17 @@ void _setupHooks() {
   // In debug and profile mode, allow tools to display the current rendering backend.
   if (!_kReleaseMode) {
     developer.registerExtension('ext.ui.window.impellerEnabled', _getImpellerEnabled);
+    developer.registerExtension(
+      'ext.ui.window.renderingBackend',
+      (String method, Map<String, String> parameters) async {
+        return developer.ServiceExtensionResponse.result(
+          json.encode(<String, Object>{
+            'type': 'Success',
+            'renderingBackend': _renderingBackend,
+          }),
+        );
+      },
+    );
   }
 }
 
@@ -128,6 +139,13 @@ _ScheduleImmediateClosure _getScheduleMicrotaskClosure() => _scheduleMicrotask;
 // rendering.
 @pragma('vm:entry-point')
 bool _impellerEnabled = false;
+
+// Rendering backend index, set by the engine during initialization via
+// Dart_SetField in dart_ui.cc. Read by PlatformDispatcher.renderingBackend.
+// See RenderingBackend enum in platform_dispatcher.dart for index mapping.
+@pragma('vm:entry-point')
+// ignore: unused_element, Set by the engine via Dart_SetField in dart_ui.cc.
+int _renderingBackend = 0;
 
 // Used internally to indicate whether the embedder enables the implicit view,
 // and the implicit view's ID if so.

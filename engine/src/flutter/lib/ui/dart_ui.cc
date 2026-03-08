@@ -10,6 +10,7 @@
 #include "flutter/common/constants.h"
 #include "flutter/common/settings.h"
 #include "flutter/fml/build_config.h"
+#include "flutter/fml/logging.h"
 #include "flutter/lib/ui/compositing/scene.h"
 #include "flutter/lib/ui/compositing/scene_builder.h"
 #include "flutter/lib/ui/dart_runtime_hooks.h"
@@ -47,6 +48,17 @@
 using tonic::ToDart;
 
 namespace flutter {
+
+// Rendering backend constants exposed to Dart via _renderingBackend.
+// Must be kept in sync with the RenderingBackend enum in
+// platform_dispatcher.dart.
+constexpr int kRenderingBackendOpenGL = 0;
+constexpr int kRenderingBackendVulkan = 1;
+constexpr int kRenderingBackendSoftware = 2;
+constexpr int kRenderingBackendMetal = 3;
+// The following are web-only (index 4 = canvaskit, 5 = skwasm).
+// They are documented here to prevent accidental index reuse.
+// Do not add native constants for them.
 
 typedef CanvasImage Image;
 typedef CanvasPathMeasure PathMeasure;
@@ -365,6 +377,49 @@ void DartUI::InitForIsolate(const Settings& settings) {
 
   if (settings.enable_impeller) {
     result = Dart_SetField(dart_ui, ToDart("_impellerEnabled"), Dart_True());
+    if (Dart_IsError(result)) {
+      Dart_PropagateError(result);
+    }
+  }
+
+  {
+    int rendering_backend = kRenderingBackendOpenGL;
+    if (settings.requested_rendering_backend.has_value()) {
+      const std::string& backend = settings.requested_rendering_backend.value();
+      if (backend == "opengl") {
+        rendering_backend = kRenderingBackendOpenGL;
+      } else if (backend == "vulkan") {
+        rendering_backend = kRenderingBackendVulkan;
+      } else if (backend == "software") {
+        rendering_backend = kRenderingBackendSoftware;
+      } else if (backend == "metal") {
+        rendering_backend = kRenderingBackendMetal;
+      } else {
+        // "canvaskit" and "skwasm" are web-only backends that should never
+        // appear in the native engine. Log a warning for any unrecognized
+        // value and fall back to OpenGL.
+        FML_LOG(WARNING) << "Unknown rendering backend: " << backend
+                         << "; defaulting to OpenGL.";
+      }
+    } else if (settings.enable_impeller) {
+      // Auto-detect the rendering backend when Impeller is enabled but no
+      // explicit --impeller-backend flag was passed (e.g. Android/iOS where
+      // Impeller is the default).
+#if FML_OS_ANDROID
+      rendering_backend = kRenderingBackendVulkan;
+#elif FML_OS_IOS || FML_OS_IOS_SIMULATOR || FML_OS_MACOSX
+      rendering_backend = kRenderingBackendMetal;
+#elif FML_OS_LINUX || FML_OS_WIN
+      // On desktop, Impeller uses Vulkan when enabled. The explicit
+      // --impeller-backend flag (injected by flutter_tools) takes precedence
+      // above; this auto-detect covers direct engine launches.
+      rendering_backend = kRenderingBackendVulkan;
+#endif
+    } else if (settings.enable_software_rendering) {
+      rendering_backend = kRenderingBackendSoftware;
+    }
+    result = Dart_SetField(dart_ui, ToDart("_renderingBackend"),
+                           Dart_NewInteger(rendering_backend));
     if (Dart_IsError(result)) {
       Dart_PropagateError(result);
     }

@@ -151,6 +151,23 @@ bool EmbedderEngine::SetViewportMetrics(
   if (!platform_view) {
     return false;
   }
+
+  // Notify the rendering surface of the new physical dimensions so that
+  // surfaces managing their own swapchain (e.g. Vulkan KHR mode) can
+  // recreate it at the correct size. This mirrors Android's
+  // PlatformViewAndroid::NotifyChanged → OnScreenSurfaceResize flow.
+  // Posted to the raster thread because the swapchain is accessed there.
+  // We use a dedicated callback (not PlatformView) to avoid WeakPtr
+  // thread-affinity checks.
+  if (surface_size_updater_) {
+    auto updater = surface_size_updater_;
+    auto width = metrics.physical_width;
+    auto height = metrics.physical_height;
+    fml::TaskRunner::RunNowOrPostTask(
+        task_runners_.GetRasterTaskRunner(),
+        [updater, width, height]() { updater(width, height); });
+  }
+
   platform_view->SetViewportMetrics(view_id, metrics);
   return true;
 }
@@ -347,6 +364,11 @@ bool EmbedderEngine::ScheduleFrame() {
 Shell& EmbedderEngine::GetShell() {
   FML_DCHECK(shell_);
   return *shell_.get();
+}
+
+void EmbedderEngine::SetSurfaceSizeUpdater(
+    std::function<void(int64_t width, int64_t height)> updater) {
+  surface_size_updater_ = std::move(updater);
 }
 
 }  // namespace flutter

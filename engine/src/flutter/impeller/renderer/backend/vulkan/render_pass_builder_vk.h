@@ -59,6 +59,13 @@ class RenderPassBuilderVK {
   // Visible for testing.
   const std::optional<vk::AttachmentDescription>& GetDepthStencil() const;
 
+  /// @brief      When set to false, the render pass will not include input
+  ///             attachment references or self-dependencies needed for
+  ///             framebuffer fetch. This is required for drivers (such as
+  ///             Mesa's dzn / Direct3D 12 translation layer) that do not
+  ///             support subpass self-dependencies.
+  RenderPassBuilderVK& SetFramebufferFetchEnabled(bool enabled);
+
   // Visible for testing.
   std::optional<vk::AttachmentDescription> GetColor0() const;
 
@@ -69,6 +76,7 @@ class RenderPassBuilderVK {
   std::optional<vk::AttachmentDescription> color0_;
   std::optional<vk::AttachmentDescription> color0_resolve_;
   std::optional<vk::AttachmentDescription> depth_stencil_;
+  bool supports_framebuffer_fetch_ = true;
 
   // Color attachment 0 is stored in the field above and not in these maps.
   std::map<size_t, vk::AttachmentDescription> colors_;

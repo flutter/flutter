@@ -165,6 +165,52 @@ abstract class PlatformDispatcher {
   set onFrameDataChanged(VoidCallback? callback) {}
 
   double scaleFontSize(double unscaledFontSize);
+
+  /// Returns the rendering backend currently in use.
+  ///
+  /// On web, this is [RenderingBackend.canvaskit] when using the CanvasKit
+  /// renderer (WebGL), or [RenderingBackend.skwasm] when using the Skwasm
+  /// renderer (WebGPU + Wasm).
+  RenderingBackend get renderingBackend;
+}
+
+/// The rendering backend currently used by the Flutter engine.
+///
+/// On native platforms (Linux, Windows, Android, iOS, macOS), the value
+/// reflects the low-level GPU API in use (OpenGL, Vulkan, Metal, or
+/// software). On the web, it identifies the high-level renderer
+/// (CanvasKit or Skwasm).
+///
+/// Note: Both web renderers compile Skia to WebAssembly. The distinction
+/// is the graphics API — CanvasKit uses WebGL while Skwasm uses WebGPU.
+///
+/// New values may be added in the future. Avoid exhaustive `switch`
+/// statements on this enum unless a `default` case is provided.
+enum RenderingBackend {
+  /// OpenGL or OpenGL ES.
+  opengl,
+
+  /// Vulkan.
+  vulkan,
+
+  /// Software rasterizer.
+  software,
+
+  /// Metal.
+  metal,
+
+  /// CanvasKit web renderer.
+  ///
+  /// Skia compiled to WebAssembly, rendering through WebGL.
+  /// Used when building with `--web-renderer canvaskit` (the default).
+  canvaskit,
+
+  /// Skwasm web renderer.
+  ///
+  /// Skia compiled to WebAssembly with dart:ffi, rendering through WebGPU.
+  /// Used when building with `--wasm` (requires WasmGC browser support).
+  /// Supports multi-threaded rendering via Web Workers.
+  skwasm,
 }
 
 final class SystemColor {

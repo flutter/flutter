@@ -77,8 +77,9 @@ std::shared_ptr<BlitPass> CommandBufferVK::OnCreateBlitPass() {
   if (!context) {
     return nullptr;
   }
-  auto pass = std::shared_ptr<BlitPassVK>(new BlitPassVK(
-      shared_from_this(), ContextVK::Cast(*context).GetWorkarounds()));
+  auto pass = std::shared_ptr<BlitPassVK>(
+      new BlitPassVK(shared_from_this(), context->GetResourceAllocator(),
+                     ContextVK::Cast(*context).GetWorkarounds()));
   if (!pass->IsValid()) {
     return nullptr;
   }

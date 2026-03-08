@@ -41,6 +41,7 @@
 #include "flutter/shell/platform/windows/settings_plugin.h"
 #include "flutter/shell/platform/windows/task_runner.h"
 #include "flutter/shell/platform/windows/text_input_plugin.h"
+#include "flutter/shell/platform/windows/vulkan_manager.h"
 #include "flutter/shell/platform/windows/window_proc_delegate_manager.h"
 #include "flutter/shell/platform/windows/window_state.h"
 #include "flutter/shell/platform/windows/windows_lifecycle_manager.h"
@@ -181,6 +182,13 @@ class FlutterWindowsEngine {
   // The EGL manager object. If this is nullptr, then we are
   // rendering using software instead of OpenGL.
   egl::Manager* egl_manager() const { return egl_manager_.get(); }
+
+  // The Vulkan manager object. If this is non-null, Vulkan rendering is
+  // active. Mutually exclusive with egl_manager_.
+  VulkanManager* vulkan_manager() const { return vulkan_manager_.get(); }
+
+  // Returns the active rendering backend type.
+  FlutterDesktopRendererType GetRenderingBackend() const;
 
   WindowProcDelegateManager* window_proc_delegate_manager() {
     return window_proc_delegate_manager_.get();
@@ -454,6 +462,10 @@ class FlutterWindowsEngine {
   // surfaces. If nullptr, ANGLE failed to initialize and software rendering
   // should be used instead.
   std::unique_ptr<egl::Manager> egl_manager_;
+
+  // Manages Vulkan instance, device, queue, and swapchain for Vulkan
+  // rendering. If non-null, the engine uses Vulkan instead of OpenGL.
+  std::unique_ptr<VulkanManager> vulkan_manager_;
 
   // The compositor that creates backing stores for the engine to render into
   // and then presents them onto views.

@@ -39,7 +39,7 @@ class CommandPoolVK final {
   /// @param[in]  recycler  The context that will be notified on destruction.
   CommandPoolVK(vk::UniqueCommandPool pool,
                 std::vector<vk::UniqueCommandBuffer>&& buffers,
-                std::weak_ptr<ContextVK>& context)
+                const std::weak_ptr<ContextVK>& context)
       : pool_(std::move(pool)),
         unused_command_buffers_(std::move(buffers)),
         context_(context) {}
@@ -61,6 +61,15 @@ class CommandPoolVK final {
   /// @brief      Delete all Vulkan objects in this command pool.
   void Destroy();
 
+  /// @brief      Discard all Vulkan handles WITHOUT invoking any Vulkan
+  ///             destroy/free calls.
+  ///
+  /// Use this only after a failed vkQueueSubmit that has left the driver in a
+  /// state where the pool and its buffer handles are already invalid (e.g. the
+  /// AMD non-conformant OOM behaviour). Calling vkDestroyCommandPool or
+  /// vkFreeCommandBuffers on such handles causes validation errors and crashes.
+  void AbandonForDriverCrash();
+
  private:
   CommandPoolVK(const CommandPoolVK&) = delete;
 
@@ -68,8 +77,9 @@ class CommandPoolVK final {
 
   Mutex pool_mutex_;
   vk::UniqueCommandPool pool_ IPLR_GUARDED_BY(pool_mutex_);
-  std::vector<vk::UniqueCommandBuffer> unused_command_buffers_;
-  std::weak_ptr<ContextVK>& context_;
+  std::vector<vk::UniqueCommandBuffer> unused_command_buffers_
+      IPLR_GUARDED_BY(pool_mutex_);
+  std::weak_ptr<ContextVK> context_;
 
   // Used to retain a reference on these until the pool is reset.
   std::vector<vk::UniqueCommandBuffer> collected_buffers_
@@ -127,7 +137,7 @@ class CommandPoolRecyclerVK final
   ///
   /// @param[in]  pool The pool to recycle.
   /// @param[in]  should_trim whether to trim command pool memory before
-  ///             reseting.
+  ///             resetting.
   void Reclaim(vk::UniqueCommandPool&& pool,
                std::vector<vk::UniqueCommandBuffer>&& buffers,
                bool should_trim = false);

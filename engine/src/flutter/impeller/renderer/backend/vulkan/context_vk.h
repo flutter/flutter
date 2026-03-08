@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_CONTEXT_VK_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_CONTEXT_VK_H_
 
+#include <atomic>
 #include <format>
 #include <memory>
 
@@ -114,6 +115,17 @@ class ContextVK final : public Context,
 
   // |Context|
   bool IsValid() const override;
+
+  /// @brief      Returns true if the device has been permanently lost due
+  ///             to a non-recoverable GPU error (e.g. AMD non-conformant
+  ///             OOM from vkQueueSubmit). Once lost, all command-buffer
+  ///             creation and queue submission silently short-circuit to
+  ///             prevent further Vulkan calls on a broken driver state.
+  bool IsDeviceLost() const;
+
+  /// @brief      Permanently marks this context as device-lost.
+  ///             Thread-safe; idempotent.
+  void MarkDeviceLost();
 
   // |Context|
   std::shared_ptr<Allocator> GetResourceAllocator() const override;
@@ -300,6 +312,11 @@ class ContextVK final : public Context,
   const uint64_t hash_;
 
   bool is_valid_ = false;
+  // Set to true on any unrecoverable GPU error (e.g. vkQueueSubmit OOM on
+  // AMD). Once true, CreateCommandBuffer() returns nullptr and Submit()
+  // returns immediately so that no further Vulkan API calls are made on the
+  // corrupted driver state.
+  std::atomic<bool> device_lost_{false};
 
   explicit ContextVK(const Flags& flags);
 

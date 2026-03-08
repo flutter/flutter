@@ -92,6 +92,13 @@ class WindowBindingHandler {
   // Retrieve the display ID of the display that this window has the largest
   // area of intersection with.
   virtual FlutterEngineDisplayId GetDisplayId() = 0;
+
+  // Sets the current Flutter cursor for this window.
+  //
+  // This stores the cursor so it can be restored in response to WM_SETCURSOR
+  // messages, preventing stale cursors (e.g., resize cursors) from persisting
+  // when the mouse re-enters the client area.
+  virtual void SetFlutterCursor(HCURSOR cursor) = 0;
 };
 
 }  // namespace flutter

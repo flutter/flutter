@@ -93,6 +93,12 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // Returns the engine backing this view.
   FlutterWindowsEngine* GetEngine() const;
 
+  // Sets the current Flutter cursor on this view's window.
+  //
+  // This stores the cursor on the window so that it can be restored
+  // when the mouse re-enters the client area (via WM_SETCURSOR).
+  void SetFlutterCursor(HCURSOR cursor);
+
   // Tells the engine to generate a new frame
   void ForceRedraw();
 

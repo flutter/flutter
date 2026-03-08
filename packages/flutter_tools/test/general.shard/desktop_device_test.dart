@@ -319,9 +319,10 @@ void main() {
         environment: <String, String>{
           'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
           'FLUTTER_ENGINE_SWITCH_2': 'enable-impeller=true',
-          'FLUTTER_ENGINE_SWITCH_3': 'enable-checked-mode=true',
-          'FLUTTER_ENGINE_SWITCH_4': 'verify-entry-points=true',
-          'FLUTTER_ENGINE_SWITCHES': '4',
+          'FLUTTER_ENGINE_SWITCH_3': 'impeller-backend=vulkan',
+          'FLUTTER_ENGINE_SWITCH_4': 'enable-checked-mode=true',
+          'FLUTTER_ENGINE_SWITCH_5': 'verify-entry-points=true',
+          'FLUTTER_ENGINE_SWITCHES': '5',
         },
       ),
     ]);
@@ -375,10 +376,11 @@ void main() {
         environment: <String, String>{
           'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
           'FLUTTER_ENGINE_SWITCH_2': 'enable-impeller=true',
-          'FLUTTER_ENGINE_SWITCH_3': 'enable-flutter-gpu=true',
-          'FLUTTER_ENGINE_SWITCH_4': 'enable-checked-mode=true',
-          'FLUTTER_ENGINE_SWITCH_5': 'verify-entry-points=true',
-          'FLUTTER_ENGINE_SWITCHES': '5',
+          'FLUTTER_ENGINE_SWITCH_3': 'impeller-backend=vulkan',
+          'FLUTTER_ENGINE_SWITCH_4': 'enable-flutter-gpu=true',
+          'FLUTTER_ENGINE_SWITCH_5': 'enable-checked-mode=true',
+          'FLUTTER_ENGINE_SWITCH_6': 'verify-entry-points=true',
+          'FLUTTER_ENGINE_SWITCHES': '6',
         },
       ),
     ]);

@@ -51,8 +51,19 @@ CapabilitiesVK::CapabilitiesVK(bool enable_validations,
       }
     }
   } else {
+    // In embedder mode, use the extensions provided by the embedder but still
+    // enumerate available layers so that validation layers can be detected and
+    // enabled when requested.
     for (const auto& ext : embedder_instance_extensions_) {
       exts_[kInstanceLayer].insert(ext);
+    }
+    auto layers = vk::enumerateInstanceLayerProperties();
+    if (layers.result == vk::Result::eSuccess) {
+      for (const auto& layer : layers.value) {
+        // Register the layer name so HasLayer() works. Don't enumerate
+        // per-layer extensions - the embedder controls the instance.
+        exts_[std::string(layer.layerName)];
+      }
     }
   }
 
@@ -164,7 +175,7 @@ CapabilitiesVK::GetEnabledInstanceExtensions() const {
     required.push_back("VK_EXT_debug_utils");
 
     if (HasExtension("VK_EXT_validation_features")) {
-      // It's valid to not have `VK_EXT_validation_features` available.  That's
+      // It's valid to not have `VK_EXT_validation_features` available. That's
       // the case when using AGI as a frame debugger.
       required.push_back("VK_EXT_validation_features");
     }
