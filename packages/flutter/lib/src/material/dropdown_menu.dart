@@ -370,21 +370,11 @@ class DropdownMenu<T> extends StatefulWidget {
   /// Defaults to true as the search function could be commonly used.
   final bool enableSearch;
 
-  /// Whether to reset the text field to the currently selected value when the
-  /// widget loses focus or when the user submits the form (e.g., presses Enter).
+  /// Whether to revert the text field to the currently selected value when the
+  /// widget loses focus or is submitted (e.g., pressing Enter).
   ///
-  /// When this is true, if the user types text in the search field but does
-  /// not select a new option, the text field will automatically reset to the
-  /// label of the last selected value when:
-  /// * The field loses focus, or
-  /// * The user submits the form (e.g., presses Enter).
-  ///
-  /// Example scenarios:
-  ///
-  /// * If "A1" is selected and the user types "foo" but doesn't select it,
-  ///   the field will reset to "A1" when focus is lost or when Enter is pressed.
-  /// * If "A1" is selected and the user types "A2" but doesn't select it,
-  ///   the field will reset to "A1" when focus is lost or when Enter is pressed.
+  /// If true, any unselected manual input will be discarded and replaced by
+  /// the last selected label when the user navigates away or submits the field.
   ///
   /// Defaults to false.
   final bool clearOnBlur;
