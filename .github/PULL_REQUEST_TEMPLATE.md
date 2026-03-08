@@ -9,7 +9,7 @@ To learn more about code review, see our documentation on Tree Hygiene: https://
 *List the issues addressed by this PR. At least one issue is required unless the change is trivial.*
 
 - **Close an issue:** `Fixes #123`, `Closes #456`
-- **Partial work:** `Towards #789`, `Part of #012`
+- **Partial work:** `Related to #789`, `Part of #012`
 
 *If you are unsure which keyword to use, see [Linking a pull request to an issue].*
 
