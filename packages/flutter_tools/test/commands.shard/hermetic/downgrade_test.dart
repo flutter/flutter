@@ -62,6 +62,37 @@ void main() {
     );
   }, overrides: {ProcessManager: () => processManager});
 
+  testUsingContext(
+    'Downgrade exits on unexpected positional argument',
+    () async {
+      final fakeFlutterVersion = FakeFlutterVersion();
+      final command = DowngradeCommand(
+        persistentToolState: PersistentToolState.test(
+          directory: fileSystem.currentDirectory,
+          logger: bufferLogger,
+        ),
+        terminal: terminal,
+        stdio: stdio,
+        flutterVersion: fakeFlutterVersion,
+        logger: bufferLogger,
+      );
+
+      expect(
+        createTestCommandRunner(command).run(const ['downgrade', '3.19.0']),
+        throwsToolExit(
+          message:
+              'Unexpected positional argument "3.19.0".\n\n'
+              '"flutter downgrade" does not support specifying a version.\n'
+              'It only undoes the last "flutter upgrade" on the current channel.\n\n'
+              'To switch to a specific Flutter version, see: '
+              'https://flutter.dev/to/switch-flutter-version',
+          exitCode: 2,
+        ),
+      );
+    },
+    overrides: {ProcessManager: () => processManager},
+  );
+
   testUsingContext('Downgrade exits on no recorded version', () async {
     final fakeFlutterVersion = FakeFlutterVersion(branch: 'beta');
     fileSystem.currentDirectory

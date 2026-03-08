@@ -80,6 +80,19 @@ class DowngradeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    if (argResults!.rest.isNotEmpty) {
+      throwToolExit(
+        'Unexpected positional argument "${argResults!.rest.first}".\n'
+        '\n'
+        '"flutter downgrade" does not support specifying a version.\n'
+        'It only undoes the last "flutter upgrade" on the current channel.\n'
+        '\n'
+        'To switch to a specific Flutter version, see: '
+        'https://flutter.dev/to/switch-flutter-version',
+        exitCode: 2,
+      );
+    }
+
     // Commands do not necessarily have access to the correct zone injected
     // values when being created. Fields must be lazily instantiated in runCommand,
     // at least until the zone injection is refactored.
