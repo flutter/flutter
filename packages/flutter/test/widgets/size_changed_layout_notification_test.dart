@@ -5,6 +5,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'widgets_app_tester.dart';
+
 void main() {
   testWidgets('SizeChangedLayoutNotification test', (WidgetTester tester) async {
     var notified = false;
@@ -34,5 +36,16 @@ void main() {
     );
 
     expect(notified, isTrue);
+  });
+
+  testWidgets('SizeChangedLayoutNotifier does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const TestWidgetsApp(
+        home: Center(
+          child: SizedBox.shrink(child: SizeChangedLayoutNotifier(child: Placeholder())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SizeChangedLayoutNotifier)), Size.zero);
   });
 }
