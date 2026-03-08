@@ -5334,8 +5334,8 @@ void main() {
     );
   }, variant: focusVariants);
 
-  group('DropdownMenu.clearOnBlur', () {
-    testWidgets('clearOnBlur defaults to false and does not reset text on blur', (
+  group('DropdownMenu.resetOnBlur', () {
+    testWidgets('resetOnBlur defaults to false and does not reset text on blur', (
       WidgetTester tester,
     ) async {
       final controller = TextEditingController();
@@ -5383,7 +5383,7 @@ void main() {
       expect(controller.text, 'foo');
     });
 
-    testWidgets('clearOnBlur resets text on blur when true', (WidgetTester tester) async {
+    testWidgets('resetOnBlur resets text on blur when true', (WidgetTester tester) async {
       final controller = TextEditingController();
       addTearDown(controller.dispose);
       final focusNode = FocusNode();
@@ -5398,7 +5398,7 @@ void main() {
             body: Column(
               children: <Widget>[
                 DropdownMenu<TestMenu>(
-                  clearOnBlur: true,
+                  resetOnBlur: true,
                   controller: controller,
                   focusNode: focusNode,
                   initialSelection: TestMenu.mainMenu0,
@@ -5427,7 +5427,7 @@ void main() {
       await tester.pump();
       expect(controller.text, 'foo');
 
-      // Lose focus triggers clearOnBlur behavior
+      // Lose focus triggers resetOnBlur behavior
       otherFocusNode.requestFocus();
       await tester.pumpAndSettle();
 
@@ -5436,7 +5436,7 @@ void main() {
       expect(selectedValue, TestMenu.mainMenu0);
     });
 
-    testWidgets('clearOnBlur resets when search text does not match any option', (
+    testWidgets('resetOnBlur resets when search text does not match any option', (
       WidgetTester tester,
     ) async {
       final controller = TextEditingController();
@@ -5453,7 +5453,7 @@ void main() {
             body: Column(
               children: <Widget>[
                 DropdownMenu<TestMenu>(
-                  clearOnBlur: true,
+                  resetOnBlur: true,
                   controller: controller,
                   focusNode: focusNode,
                   initialSelection: TestMenu.mainMenu0,
@@ -5490,7 +5490,7 @@ void main() {
       expect(selectedValue, TestMenu.mainMenu0);
     });
 
-    testWidgets('clearOnBlur resets when search text matches option but is not selected', (
+    testWidgets('resetOnBlur resets when search text matches option but is not selected', (
       WidgetTester tester,
     ) async {
       final controller = TextEditingController();
@@ -5507,7 +5507,7 @@ void main() {
             body: Column(
               children: <Widget>[
                 DropdownMenu<TestMenu>(
-                  clearOnBlur: true,
+                  resetOnBlur: true,
                   controller: controller,
                   focusNode: focusNode,
                   initialSelection: TestMenu.mainMenu0,
@@ -5544,7 +5544,7 @@ void main() {
       expect(selectedValue, TestMenu.mainMenu0);
     });
 
-    testWidgets('clearOnBlur does not reset when text matches selected value', (
+    testWidgets('resetOnBlur does not reset when text matches selected value', (
       WidgetTester tester,
     ) async {
       final controller = TextEditingController();
@@ -5561,7 +5561,7 @@ void main() {
             body: Column(
               children: <Widget>[
                 DropdownMenu<TestMenu>(
-                  clearOnBlur: true,
+                  resetOnBlur: true,
                   controller: controller,
                   focusNode: focusNode,
                   initialSelection: TestMenu.mainMenu0,
@@ -5598,7 +5598,7 @@ void main() {
       expect(selectedValue, TestMenu.mainMenu0);
     });
 
-    testWidgets('clearOnBlur does not reset after new selection', (WidgetTester tester) async {
+    testWidgets('resetOnBlur does not reset after new selection', (WidgetTester tester) async {
       final controller = TextEditingController();
       addTearDown(controller.dispose);
       final focusNode = FocusNode();
@@ -5613,7 +5613,7 @@ void main() {
             body: Column(
               children: <Widget>[
                 DropdownMenu<TestMenu>(
-                  clearOnBlur: true,
+                  resetOnBlur: true,
                   controller: controller,
                   focusNode: focusNode,
                   initialSelection: TestMenu.mainMenu0,
@@ -5652,7 +5652,7 @@ void main() {
       expect(selectedValue, TestMenu.mainMenu2);
     });
 
-    testWidgets('clearOnBlur does not reset on Enter when false', (WidgetTester tester) async {
+    testWidgets('resetOnBlur does not reset on Enter when false', (WidgetTester tester) async {
       final controller = TextEditingController();
       addTearDown(controller.dispose);
       final focusNode = FocusNode();
@@ -5686,7 +5686,7 @@ void main() {
       expect(controller.text, 'foo');
     });
 
-    testWidgets('clearOnBlur handles null initial selection', (WidgetTester tester) async {
+    testWidgets('resetOnBlur handles null initial selection', (WidgetTester tester) async {
       final controller = TextEditingController();
       addTearDown(controller.dispose);
       final focusNode = FocusNode();
@@ -5701,7 +5701,7 @@ void main() {
             body: Column(
               children: <Widget>[
                 DropdownMenu<TestMenu>(
-                  clearOnBlur: true,
+                  resetOnBlur: true,
                   controller: controller,
                   focusNode: focusNode,
                   dropdownMenuEntries: menuChildren,
@@ -5735,7 +5735,7 @@ void main() {
       expect(selectedValue, isNull);
     });
 
-    testWidgets('clearOnBlur calls onSelected with correct value on blur', (
+    testWidgets('resetOnBlur calls onSelected with correct value on blur', (
       WidgetTester tester,
     ) async {
       final controller = TextEditingController();
@@ -5752,7 +5752,7 @@ void main() {
             body: Column(
               children: <Widget>[
                 DropdownMenu<TestMenu>(
-                  clearOnBlur: true,
+                  resetOnBlur: true,
                   controller: controller,
                   focusNode: focusNode,
                   initialSelection: TestMenu.mainMenu0,
@@ -5791,7 +5791,7 @@ void main() {
       expect(controller.text, 'Item 0');
     });
 
-    testWidgets('clearOnBlur works with enableSearch', (WidgetTester tester) async {
+    testWidgets('resetOnBlur works with enableSearch', (WidgetTester tester) async {
       final controller = TextEditingController();
       addTearDown(controller.dispose);
       final focusNode = FocusNode();
@@ -5805,7 +5805,7 @@ void main() {
             body: Column(
               children: <Widget>[
                 DropdownMenu<TestMenu>(
-                  clearOnBlur: true,
+                  resetOnBlur: true,
                   controller: controller,
                   focusNode: focusNode,
                   initialSelection: TestMenu.mainMenu0,
@@ -5836,7 +5836,7 @@ void main() {
       expect(controller.text, 'Item 0');
     });
 
-    testWidgets('clearOnBlur works with enableFilter', (WidgetTester tester) async {
+    testWidgets('resetOnBlur works with enableFilter', (WidgetTester tester) async {
       final controller = TextEditingController();
       addTearDown(controller.dispose);
       final focusNode = FocusNode();
@@ -5850,7 +5850,7 @@ void main() {
             body: Column(
               children: <Widget>[
                 DropdownMenu<TestMenu>(
-                  clearOnBlur: true,
+                  resetOnBlur: true,
                   enableFilter: true,
                   controller: controller,
                   focusNode: focusNode,
@@ -5882,7 +5882,7 @@ void main() {
       expect(controller.text, 'Item 0');
     });
 
-    testWidgets('clearOnBlur works correctly with multiple focus changes', (
+    testWidgets('resetOnBlur works correctly with multiple focus changes', (
       WidgetTester tester,
     ) async {
       final controller = TextEditingController();
@@ -5898,7 +5898,7 @@ void main() {
             body: Column(
               children: <Widget>[
                 DropdownMenu<TestMenu>(
-                  clearOnBlur: true,
+                  resetOnBlur: true,
                   controller: controller,
                   focusNode: focusNode,
                   initialSelection: TestMenu.mainMenu0,

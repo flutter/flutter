@@ -199,7 +199,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.selectedTrailingIcon,
     this.enableFilter = false,
     this.enableSearch = true,
-    this.clearOnBlur = false,
+    this.resetOnBlur = false,
     this.keyboardType,
     this.textStyle,
     this.textAlign = TextAlign.start,
@@ -377,7 +377,7 @@ class DropdownMenu<T> extends StatefulWidget {
   /// the last selected label when the user navigates away or submits the field.
   ///
   /// Defaults to false.
-  final bool clearOnBlur;
+  final bool resetOnBlur;
 
   /// The type of keyboard to use for editing the text.
   ///
@@ -1141,7 +1141,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   void _handleFocusChange() {
     // This method is only called when widget.focusNode is not null
     assert(widget.focusNode != null);
-    if (!widget.focusNode!.hasFocus && widget.clearOnBlur) {
+    if (!widget.focusNode!.hasFocus && widget.resetOnBlur) {
       final T? restoredValue = _restoreSelectionFromText();
       widget.onSelected?.call(restoredValue);
       if (!widget.enableSearch) {
@@ -1178,7 +1178,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   }
 
   void _handleSubmitted() {
-    if (widget.clearOnBlur) {
+    if (widget.resetOnBlur) {
       final T? restoredValue = _restoreSelectionFromText();
       widget.onSelected?.call(restoredValue);
     } else {
@@ -1300,7 +1300,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       menuChildren: menu,
       crossAxisUnconstrained: false,
       onClose: () {
-        if (widget.clearOnBlur) {
+        if (widget.resetOnBlur) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted &&
                 widget.focusNode != null &&
