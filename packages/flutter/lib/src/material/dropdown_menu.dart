@@ -1299,18 +1299,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       controller: _controller,
       menuChildren: menu,
       crossAxisUnconstrained: false,
-      onClose: () {
-        if (widget.resetOnBlur) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted &&
-                widget.focusNode != null &&
-                widget.focusNode!.hasFocus &&
-                !_controller.isOpen) {
-              widget.focusNode!.unfocus();
-            }
-          });
-        }
-      },
+      onClose: () {},
       builder: (BuildContext context, MenuController controller, Widget? child) {
         assert(_initialMenu != null);
         final DropdownMenuDecorationBuilder decorationBuilder =
