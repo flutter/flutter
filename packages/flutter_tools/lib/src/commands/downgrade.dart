@@ -27,6 +27,8 @@ import '../version.dart';
 /// able to downgrade again, since the tool only records one prior version.
 /// Additionally, if they had switched channels to stable before trying to downgrade,
 /// the command would fail since there was no previously recorded stable version.
+///
+/// If specific version is passed to the command. The framework is downgraded to the specific version
 class DowngradeCommand extends FlutterCommand {
   DowngradeCommand({
     bool verboseHelp = false,
@@ -70,7 +72,7 @@ class DowngradeCommand extends FlutterCommand {
   FileSystem? _fileSystem;
 
   @override
-  String get description => 'Downgrade Flutter to the last active version for the current channel.';
+  String get description => 'Downgrade Flutter to the last active version for the current channel or to a specific version';
 
   @override
   String get name => 'downgrade';
