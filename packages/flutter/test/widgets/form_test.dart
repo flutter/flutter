@@ -1014,10 +1014,11 @@ void main() {
       await tester.enterText(find.byType(TextFormField).first, '');
       await tester.pump();
 
-      // Now we expect the errors to be shown for the first Text Field and
-      // for the next two form fields that have their contents unchanged.
+      // Now we expect the error to be shown only for the first Text Field,
+      // while the other two form fields remain without errors because they
+      // haven't been interacted with individually.
       expect(find.text(errorText('')!), findsOneWidget);
-      expect(find.text(errorText(initialValue)!), findsNWidgets(2));
+      expect(find.text(errorText(initialValue)!), findsNothing);
     },
   );
 
