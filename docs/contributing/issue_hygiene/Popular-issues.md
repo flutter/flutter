@@ -42,8 +42,7 @@ Support for the iOS 26 “Liquid Glass” visual style will follow completion of
 
 Canonical is currently actively working on this initiative to enhance desktop parity and enable more advanced workflows for Flutter apps on desktop platforms.
 
-Track progress at https://github.com/flutter/flutter/issues/142845
-
+Track progress at https://github.com/flutter/flutter/issues/142845.
 
 ## [Let flutter be installable via homebrew](https://github.com/flutter/flutter/issues/14050) (#14050)
 
@@ -53,13 +52,11 @@ Currently, we see this as a lower priority than our other release-related work (
 
 If anyone would be interested in implementing an official homebrew installation path, the best thing to do would be to reach out on the #hackers-releases channel of our Discord (see [Chat](../Chat.md)). Implementing it would require integrating into our release pipeline, so familiarity with that would be extremely helpful. It would also require carefully negotiating how Flutter's primary distribution mechanism (shipping the `git` repo directly) should interact with Homebrew's mechanisms, so familiarity with both of those would also be needed.
 
-
 ## [Improve the indexability (SEO) of Flutter apps on the web](https://github.com/flutter/flutter/issues/46789) (#46789)
 
 This feature is one that is recognized as important. There are some prerequisites, like improving Flutter's deep linking and accessibility features, which we have to deal with first. There are also other issues, like those around performance, plugins, and embedding, that are currently higher on the list for people who are currently contributing to Flutter's web support.
 
 Fixing this issue is non-trivial, as Flutter's architecture is one that is fundamentally different than what the web usually expects. If you are interested in contributing, the best place to begin would be to discuss potential approaches on our #hackers-web [Chat](../Chat.md) channel, followed by writing up a design doc (the process for which is also on the [Chat](../Chat.md) page).
-
 
 ## [Apple CarPlay / Android Auto support?](https://github.com/flutter/flutter/issues/26801) (#26801)
 
