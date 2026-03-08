@@ -79,6 +79,9 @@ class DowngradeCommand extends FlutterCommand {
   final String category = FlutterCommandCategory.sdk;
 
   @override
+  String get invocation => '${runner?.executableName} $name [<version>]';
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     // Commands do not necessarily have access to the correct zone injected
     // values when being created. Fields must be lazily instantiated in runCommand,
@@ -104,7 +107,20 @@ class DowngradeCommand extends FlutterCommand {
       );
     }
     final PersistentToolState persistentToolState = _persistentToolState!;
-    final String? lastFlutterVersion = persistentToolState.lastActiveVersion(channel);
+    final List<String> rest = argResults?.rest ?? <String>[];
+    String? lastFlutterVersion;
+    if (rest.length == 1) {
+      lastFlutterVersion = rest[0];
+    } else if (rest.length > 1) {
+      throwToolExit('Too many arguments.\n$usage');
+    } else {
+      lastFlutterVersion = persistentToolState.lastActiveVersion(channel);
+    }
+
+    if (rest.isNotEmpty && lastFlutterVersion == _flutterVersion?.frameworkVersion) {
+      throwToolExit('Flutter is already at version $lastFlutterVersion');
+    }
+
     final String? currentFlutterVersion = _flutterVersion?.frameworkRevision;
     if (lastFlutterVersion == null || currentFlutterVersion == lastFlutterVersion) {
       final String trailing = await _createErrorMessage(workingDirectory, channel);

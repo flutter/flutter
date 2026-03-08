@@ -40,6 +40,58 @@ void main() {
     bufferLogger = BufferLogger.test(terminal: terminal);
   });
 
+  testUsingContext('Downgrade exits on already on the specified version', () async {
+    final fakeFlutterVersion = FakeFlutterVersion();
+    stdio.hasTerminal = false;
+    fileSystem.currentDirectory
+        .childFile('.flutter_tool_state')
+        .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
+
+    final command = DowngradeCommand(
+      persistentToolState: PersistentToolState.test(
+        directory: fileSystem.currentDirectory,
+        logger: bufferLogger,
+      ),
+      terminal: terminal,
+      stdio: stdio,
+      flutterVersion: fakeFlutterVersion,
+      logger: bufferLogger,
+    );
+
+    expect(
+      createTestCommandRunner(command).run(const ['downgrade', '0.0.0']),
+      throwsToolExit(message: 'Flutter is already at version 0.0.0')
+    );
+  }, overrides: {ProcessManager: () => processManager});
+
+  testUsingContext('Downgrade with version argument performs correct git commands', () async {
+    final fakeFlutterVersion = FakeFlutterVersion();
+    stdio.hasTerminal = false;
+    fileSystem.currentDirectory
+        .childFile('.flutter_tool_state')
+        .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
+    processManager.addCommands(const [
+      FakeCommand(command: ['git', 'describe', '--tags', '2.3.3'], stdout: 'v1.2.3'),
+      FakeCommand(command: ['git', 'reset', '--hard', '2.3.3']),
+      FakeCommand(command: ['git', 'checkout', 'master', '--']),
+    ]);
+    final command = DowngradeCommand(
+      persistentToolState: PersistentToolState.test(
+        directory: fileSystem.currentDirectory,
+        logger: bufferLogger,
+      ),
+      terminal: terminal,
+      stdio: stdio,
+      flutterVersion: fakeFlutterVersion,
+      logger: bufferLogger,
+    );
+
+    await createTestCommandRunner(command).run(const ['downgrade', '2.3.3']);
+
+    expect(bufferLogger.statusText, contains('Success'));
+  }, overrides: {ProcessManager: () => processManager});
+
+
   testUsingContext('Downgrade exits on unknown channel', () async {
     final fakeFlutterVersion = FakeFlutterVersion(branch: 'WestSideStory'); // an unknown branch
     fileSystem.currentDirectory
