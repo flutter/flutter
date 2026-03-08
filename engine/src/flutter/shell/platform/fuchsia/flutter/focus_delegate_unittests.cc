@@ -15,14 +15,14 @@
 #include "flutter/shell/platform/fuchsia/flutter/tests/fakes/view_ref_focused.h"
 #include "third_party/rapidjson/include/rapidjson/document.h"
 
-rapidjson::Value ParsePlatformMessage(std::string json) {
+rapidjson::Document ParsePlatformMessage(std::string json) {
   rapidjson::Document document;
   document.Parse(json);
   if (document.HasParseError() || !document.IsObject()) {
     FML_LOG(ERROR) << "Could not parse document";
-    return rapidjson::Value();
+    return rapidjson::Document();
   }
-  return document.GetObject();
+  return document;
 }
 
 namespace flutter_runner::testing {

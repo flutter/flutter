@@ -17,6 +17,7 @@ Fixes #
 ## Pre-launch Checklist
 
 - [ ] I read the [Contributor Guide] and followed the process outlined there for submitting PRs.
+- [ ] I read the [AI contribution guidelines] and understand my responsibilities, or I am not using AI tools.
 - [ ] I read the [Tree Hygiene] wiki page, which explains my responsibilities.
 - [ ] I read and followed the [Flutter Style Guide], including [Features we expect every widget to implement].
 - [ ] I signed the [CLA].
@@ -32,6 +33,7 @@ If you need help, consider asking for advice on the #hackers-new channel on [Dis
 
 <!-- Links -->
 [Contributor Guide]: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#overview
+[AI contribution guidelines]: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#ai-contribution-guidelines
 [Tree Hygiene]: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md
 [test-exempt]: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#tests
 [Flutter Style Guide]: https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md

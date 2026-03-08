@@ -25,7 +25,7 @@ apply plugin: "com.android.dynamic-feature"
 android {
     namespace = "io.flutter.integration.deferred_components_test.component1"
     compileSdk = 36
-
+    ndkVersion = "28.2.13676358" // This version must exactly match the version of the NDK that the recipe pulls from CIPD.
 
     sourceSets {
         applicationVariants.all { variant ->
