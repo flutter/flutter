@@ -86,6 +86,26 @@ static uint64_t ConvertWinStylusFlagsToFlutterButtons(UINT flags) {
   return flutter_buttons;
 }
 
+// Translate pointer pointer flags from Win32 API to
+// FlutterPointerStylusButtons.
+static uint64_t ConvertWinPointerFlagsToFlutterButtons(UINT flags) {
+  uint64_t flutter_buttons = 0;
+  if ((flags & POINTER_FLAG_INCONTACT) == 0) {
+    // If the pointer is not in contact, then no buttons should be considered
+    return flutter_buttons;
+  }
+  if (flags & POINTER_FLAG_FIRSTBUTTON) {
+    flutter_buttons |= kFlutterPointerButtonMousePrimary;
+  }
+  if (flags & POINTER_FLAG_SECONDBUTTON) {
+    flutter_buttons |= kFlutterPointerButtonMouseSecondary;
+  }
+  if (flags & POINTER_FLAG_THIRDBUTTON) {
+    flutter_buttons |= kFlutterPointerButtonMouseMiddle;
+  }
+  return flutter_buttons;
+}
+
 }  // namespace
 
 FlutterWindow::FlutterWindow(
@@ -571,12 +591,15 @@ FlutterWindow::HandleMessage(UINT const message,
             pressure = penInfo.pressure;
             rotation = penInfo.rotation;
             is_inverted = penInfo.penFlags & PEN_FLAG_INVERTED;
+            flutter_button =
+                ConvertWinStylusFlagsToFlutterButtons(penInfo.penFlags);
+          } else {
+            flutter_button = ConvertWinPointerFlagsToFlutterButtons(
+                pointerInfo.pointerFlags);
           }
         }
         auto touch_id = touch_id_generator_.GetGeneratedId(pointerId);
         FlutterPointerDeviceKind device_kind = kFlutterPointerDeviceKindMouse;
-        flutter_button =
-            ConvertWinStylusFlagsToFlutterButtons(pointerInfo.pointerFlags);
         switch (pointerInfo.pointerType) {
           case PT_TOUCH:
             device_kind = kFlutterPointerDeviceKindTouch;
