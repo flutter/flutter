@@ -168,12 +168,10 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/navigator_test.dart',
     'packages/flutter/test/widgets/page_view_test.dart',
     'packages/flutter/test/widgets/page_forward_transitions_test.dart',
-    'packages/flutter/test/widgets/slivers_test.dart',
     'packages/flutter/test/widgets/navigator_restoration_test.dart',
     'packages/flutter/test/widgets/sliver_prototype_item_extent_test.dart',
     'packages/flutter/test/widgets/image_filter_test.dart',
     'packages/flutter/test/widgets/navigator_on_did_remove_page_test.dart',
-    'packages/flutter/test/widgets/baseline_test.dart',
     'packages/flutter/test/widgets/scrollable_semantics_test.dart',
     'packages/flutter/test/widgets/form_test.dart',
   };

@@ -3,12 +3,15 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'list_tile_tester.dart';
 import 'semantics_tester.dart';
+import 'widgets_app_tester.dart';
+
+const Color _debugEvenColor = Color(0xFF00FF00);
+const Color _debugOddColor = Color(0xFFFF0000);
 
 Future<void> test(WidgetTester tester, double offset, {double anchor = 0.0}) {
   final viewportOffset = ViewportOffset.fixed(offset);
@@ -67,6 +70,31 @@ void verify(WidgetTester tester, List<Offset> idealPositions, List<bool> idealVi
       .toList();
   expect(actualPositions, equals(idealPositions));
   expect(actualVisibles, equals(idealVisibles));
+}
+
+Widget _buildSliverTestApp({required Widget child, Key? key}) {
+  return TestWidgetsApp(
+    home: SizedBox.expand(key: key, child: child),
+  );
+}
+
+Widget _buildIndexedTapTarget({required int index, required VoidCallback onTap}) {
+  return GestureDetector(
+    behavior: HitTestBehavior.opaque,
+    onTap: onTap,
+    child: ColoredBox(
+      color: index.isEven ? _debugEvenColor : _debugOddColor,
+      child: Text('Index $index'),
+    ),
+  );
+}
+
+Widget _buildTapTarget({required String label, required Color color, required VoidCallback onTap}) {
+  return GestureDetector(
+    behavior: HitTestBehavior.opaque,
+    onTap: onTap,
+    child: ColoredBox(color: color, child: Text(label)),
+  );
 }
 
 void main() {
@@ -479,19 +507,20 @@ void main() {
     var skip = true;
     Widget buildItem(BuildContext context, int index) {
       return !skip || index.isEven
-          ? Card(
-              child: TestListTile(title: Text('item$index', style: const TextStyle(fontSize: 80))),
+          ? SizedBox(
+              height: 96.0,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text('item$index', style: const TextStyle(fontSize: 72)),
+              ),
             )
-          : Container();
+          : const SizedBox.shrink();
     }
 
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: false),
-        home: Scaffold(
-          body: CustomScrollView(
-            slivers: <Widget>[SliverList.builder(itemCount: 30, itemBuilder: buildItem)],
-          ),
+      TestWidgetsApp(
+        home: CustomScrollView(
+          slivers: <Widget>[SliverList.builder(itemCount: 30, itemBuilder: buildItem)],
         ),
       ),
     );
@@ -509,11 +538,9 @@ void main() {
 
     skip = false;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: CustomScrollView(
-            slivers: <Widget>[SliverList.builder(itemCount: 30, itemBuilder: buildItem)],
-          ),
+      TestWidgetsApp(
+        home: CustomScrollView(
+          slivers: <Widget>[SliverList.builder(itemCount: 30, itemBuilder: buildItem)],
         ),
       ),
     );
@@ -708,20 +735,7 @@ void main() {
   );
 
   Widget boilerPlate(List<Widget> slivers) {
-    return Localizations(
-      locale: const Locale('en', 'us'),
-      delegates: const <LocalizationsDelegate<dynamic>>[
-        DefaultWidgetsLocalizations.delegate,
-        DefaultMaterialLocalizations.delegate,
-      ],
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(),
-          child: CustomScrollView(slivers: slivers),
-        ),
-      ),
-    );
+    return TestWidgetsApp(home: CustomScrollView(slivers: slivers));
   }
 
   group('SliverOffstage - ', () {
@@ -983,11 +997,9 @@ void main() {
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
-                return Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text('Lorem Ipsum $index'),
-                  ),
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('Lorem Ipsum $index'),
                 );
               },
               childCount: 50,
@@ -1011,16 +1023,14 @@ void main() {
   testWidgets('SliverList handles 0 scrollOffsetCorrection', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/62198
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: CustomScrollView(
-            physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-            slivers: <Widget>[
-              SliverList.list(
-                children: const <Widget>[SizedBox.shrink(), Text('index 1'), Text('index 2')],
-              ),
-            ],
-          ),
+      _buildSliverTestApp(
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+          slivers: <Widget>[
+            SliverList.list(
+              children: const <Widget>[SizedBox.shrink(), Text('index 1'), Text('index 2')],
+            ),
+          ],
         ),
       ),
     );
@@ -1035,27 +1045,22 @@ void main() {
     var secondTapped = 0;
     final Key key = UniqueKey();
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          key: key,
-          body: CustomScrollView(
-            slivers: <Widget>[
-              SliverGrid(
-                delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-                  return Material(
-                    color: index.isEven ? Colors.yellow : Colors.red,
-                    child: InkWell(
-                      onTap: () {
-                        index.isEven ? firstTapped++ : secondTapped++;
-                      },
-                      child: Text('Index $index'),
-                    ),
-                  );
-                }, childCount: 2),
-                gridDelegate: _TestArbitrarySliverGridDelegate(),
-              ),
-            ],
-          ),
+      _buildSliverTestApp(
+        key: key,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverGrid(
+              delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+                return _buildIndexedTapTarget(
+                  index: index,
+                  onTap: () {
+                    index.isEven ? firstTapped++ : secondTapped++;
+                  },
+                );
+              }, childCount: 2),
+              gridDelegate: _TestArbitrarySliverGridDelegate(),
+            ),
+          ],
         ),
       ),
     );
@@ -1090,23 +1095,20 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Directionality(
-          textDirection: TextDirection.ltr,
-          child: SizedBox(
-            height: 200,
-            child: CustomScrollView(
-              slivers: <Widget>[
-                SliverFixedExtentList.builder(
-                  itemExtent: 50,
-                  itemCount: 3,
-                  semanticIndexOffset: 10,
-                  itemBuilder: (BuildContext context, int index) {
-                    return SizedBox(height: 50, child: Text('Item $index'));
-                  },
-                ),
-              ],
-            ),
+      TestWidgetsApp(
+        home: SizedBox(
+          height: 200,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverFixedExtentList.builder(
+                itemExtent: 50,
+                itemCount: 3,
+                semanticIndexOffset: 10,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(height: 50, child: Text('Item $index'));
+                },
+              ),
+            ],
           ),
         ),
       ),
@@ -1132,29 +1134,22 @@ void main() {
   testWidgets('SliverList.builder can build children', (WidgetTester tester) async {
     var firstTapped = 0;
     var secondTapped = 0;
-    final Key key = UniqueKey();
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          key: key,
-          body: CustomScrollView(
-            slivers: <Widget>[
-              SliverList.builder(
-                itemCount: 2,
-                itemBuilder: (BuildContext context, int index) {
-                  return Material(
-                    color: index.isEven ? Colors.yellow : Colors.red,
-                    child: InkWell(
-                      onTap: () {
-                        index.isEven ? firstTapped++ : secondTapped++;
-                      },
-                      child: Text('Index $index'),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
+      _buildSliverTestApp(
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverList.builder(
+              itemCount: 2,
+              itemBuilder: (BuildContext context, int index) {
+                return _buildIndexedTapTarget(
+                  index: index,
+                  onTap: () {
+                    index.isEven ? firstTapped++ : secondTapped++;
+                  },
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -1172,29 +1167,22 @@ void main() {
   testWidgets('SliverList.builder can build children', (WidgetTester tester) async {
     var firstTapped = 0;
     var secondTapped = 0;
-    final Key key = UniqueKey();
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          key: key,
-          body: CustomScrollView(
-            slivers: <Widget>[
-              SliverList.builder(
-                itemCount: 2,
-                itemBuilder: (BuildContext context, int index) {
-                  return Material(
-                    color: index.isEven ? Colors.yellow : Colors.red,
-                    child: InkWell(
-                      onTap: () {
-                        index.isEven ? firstTapped++ : secondTapped++;
-                      },
-                      child: Text('Index $index'),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
+      _buildSliverTestApp(
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverList.builder(
+              itemCount: 2,
+              itemBuilder: (BuildContext context, int index) {
+                return _buildIndexedTapTarget(
+                  index: index,
+                  onTap: () {
+                    index.isEven ? firstTapped++ : secondTapped++;
+                  },
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -1212,30 +1200,23 @@ void main() {
   testWidgets('SliverList.separated can build children', (WidgetTester tester) async {
     var firstTapped = 0;
     var secondTapped = 0;
-    final Key key = UniqueKey();
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          key: key,
-          body: CustomScrollView(
-            slivers: <Widget>[
-              SliverList.separated(
-                itemCount: 2,
-                itemBuilder: (BuildContext context, int index) {
-                  return Material(
-                    color: index.isEven ? Colors.yellow : Colors.red,
-                    child: InkWell(
-                      onTap: () {
-                        index.isEven ? firstTapped++ : secondTapped++;
-                      },
-                      child: Text('Index $index'),
-                    ),
-                  );
-                },
-                separatorBuilder: (BuildContext context, int index) => Text('Separator $index'),
-              ),
-            ],
-          ),
+      _buildSliverTestApp(
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverList.separated(
+              itemCount: 2,
+              itemBuilder: (BuildContext context, int index) {
+                return _buildIndexedTapTarget(
+                  index: index,
+                  onTap: () {
+                    index.isEven ? firstTapped++ : secondTapped++;
+                  },
+                );
+              },
+              separatorBuilder: (BuildContext context, int index) => Text('Separator $index'),
+            ),
+          ],
         ),
       ),
     );
@@ -1251,20 +1232,16 @@ void main() {
   });
 
   testWidgets('SliverList.separated has correct number of children', (WidgetTester tester) async {
-    final Key key = UniqueKey();
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          key: key,
-          body: CustomScrollView(
-            slivers: <Widget>[
-              SliverList.separated(
-                itemCount: 2,
-                itemBuilder: (BuildContext context, int index) => const Text('item'),
-                separatorBuilder: (BuildContext context, int index) => const Text('separator'),
-              ),
-            ],
-          ),
+      _buildSliverTestApp(
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverList.separated(
+              itemCount: 2,
+              itemBuilder: (BuildContext context, int index) => const Text('item'),
+              separatorBuilder: (BuildContext context, int index) => const Text('separator'),
+            ),
+          ],
         ),
       ),
     );
@@ -1275,27 +1252,25 @@ void main() {
   testWidgets('SliverList.list can build children', (WidgetTester tester) async {
     var firstTapped = 0;
     var secondTapped = 0;
-    final Key key = UniqueKey();
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          key: key,
-          body: CustomScrollView(
-            slivers: <Widget>[
-              SliverList.list(
-                children: <Widget>[
-                  Material(
-                    color: Colors.yellow,
-                    child: InkWell(onTap: () => firstTapped++, child: const Text('Index 0')),
-                  ),
-                  Material(
-                    color: Colors.red,
-                    child: InkWell(onTap: () => secondTapped++, child: const Text('Index 1')),
-                  ),
-                ],
-              ),
-            ],
-          ),
+      _buildSliverTestApp(
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverList.list(
+              children: <Widget>[
+                _buildTapTarget(
+                  label: 'Index 0',
+                  color: _debugEvenColor,
+                  onTap: () => firstTapped++,
+                ),
+                _buildTapTarget(
+                  label: 'Index 1',
+                  color: _debugOddColor,
+                  onTap: () => secondTapped++,
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -1313,30 +1288,23 @@ void main() {
   testWidgets('SliverFixedExtentList.builder can build children', (WidgetTester tester) async {
     var firstTapped = 0;
     var secondTapped = 0;
-    final Key key = UniqueKey();
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          key: key,
-          body: CustomScrollView(
-            slivers: <Widget>[
-              SliverFixedExtentList.builder(
-                itemCount: 2,
-                itemExtent: 100,
-                itemBuilder: (BuildContext context, int index) {
-                  return Material(
-                    color: index.isEven ? Colors.yellow : Colors.red,
-                    child: InkWell(
-                      onTap: () {
-                        index.isEven ? firstTapped++ : secondTapped++;
-                      },
-                      child: Text('Index $index'),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
+      _buildSliverTestApp(
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverFixedExtentList.builder(
+              itemCount: 2,
+              itemExtent: 100,
+              itemBuilder: (BuildContext context, int index) {
+                return _buildIndexedTapTarget(
+                  index: index,
+                  onTap: () {
+                    index.isEven ? firstTapped++ : secondTapped++;
+                  },
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -1353,28 +1321,26 @@ void main() {
   testWidgets('SliverList.list can build children', (WidgetTester tester) async {
     var firstTapped = 0;
     var secondTapped = 0;
-    final Key key = UniqueKey();
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          key: key,
-          body: CustomScrollView(
-            slivers: <Widget>[
-              SliverFixedExtentList.list(
-                itemExtent: 100,
-                children: <Widget>[
-                  Material(
-                    color: Colors.yellow,
-                    child: InkWell(onTap: () => firstTapped++, child: const Text('Index 0')),
-                  ),
-                  Material(
-                    color: Colors.red,
-                    child: InkWell(onTap: () => secondTapped++, child: const Text('Index 1')),
-                  ),
-                ],
-              ),
-            ],
-          ),
+      _buildSliverTestApp(
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverFixedExtentList.list(
+              itemExtent: 100,
+              children: <Widget>[
+                _buildTapTarget(
+                  label: 'Index 0',
+                  color: _debugEvenColor,
+                  onTap: () => firstTapped++,
+                ),
+                _buildTapTarget(
+                  label: 'Index 1',
+                  color: _debugOddColor,
+                  onTap: () => secondTapped++,
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -1392,30 +1358,23 @@ void main() {
   testWidgets('SliverGrid.builder can build children', (WidgetTester tester) async {
     var firstTapped = 0;
     var secondTapped = 0;
-    final Key key = UniqueKey();
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          key: key,
-          body: CustomScrollView(
-            slivers: <Widget>[
-              SliverGrid.builder(
-                itemCount: 2,
-                itemBuilder: (BuildContext context, int index) {
-                  return Material(
-                    color: index.isEven ? Colors.yellow : Colors.red,
-                    child: InkWell(
-                      onTap: () {
-                        index.isEven ? firstTapped++ : secondTapped++;
-                      },
-                      child: Text('Index $index'),
-                    ),
-                  );
-                },
-                gridDelegate: _TestArbitrarySliverGridDelegate(),
-              ),
-            ],
-          ),
+      _buildSliverTestApp(
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverGrid.builder(
+              itemCount: 2,
+              itemBuilder: (BuildContext context, int index) {
+                return _buildIndexedTapTarget(
+                  index: index,
+                  onTap: () {
+                    index.isEven ? firstTapped++ : secondTapped++;
+                  },
+                );
+              },
+              gridDelegate: _TestArbitrarySliverGridDelegate(),
+            ),
+          ],
         ),
       ),
     );
@@ -1433,28 +1392,22 @@ void main() {
   testWidgets('SliverGrid.list can display children', (WidgetTester tester) async {
     var firstTapped = 0;
     var secondTapped = 0;
-    final Key key = UniqueKey();
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          key: key,
-          body: CustomScrollView(
-            slivers: <Widget>[
-              SliverGrid.list(
-                gridDelegate: _TestArbitrarySliverGridDelegate(),
-                children: <Widget>[
-                  Material(
-                    color: Colors.yellow,
-                    child: InkWell(onTap: () => firstTapped++, child: const Text('First')),
-                  ),
-                  Material(
-                    color: Colors.red,
-                    child: InkWell(onTap: () => secondTapped++, child: const Text('Second')),
-                  ),
-                ],
-              ),
-            ],
-          ),
+      _buildSliverTestApp(
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverGrid.list(
+              gridDelegate: _TestArbitrarySliverGridDelegate(),
+              children: <Widget>[
+                _buildTapTarget(label: 'First', color: _debugEvenColor, onTap: () => firstTapped++),
+                _buildTapTarget(
+                  label: 'Second',
+                  color: _debugOddColor,
+                  onTap: () => secondTapped++,
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -1471,16 +1424,14 @@ void main() {
 
   testWidgets('SliverGrid.list with empty children list', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: CustomScrollView(
-            slivers: <Widget>[
-              SliverGrid.list(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-                children: const <Widget>[],
-              ),
-            ],
-          ),
+      _buildSliverTestApp(
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverGrid.list(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+              children: const <Widget>[],
+            ),
+          ],
         ),
       ),
     );
@@ -1491,20 +1442,18 @@ void main() {
 
   testWidgets('SliverGrid.builder respects semanticIndexOffset', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: CustomScrollView(
-            slivers: <Widget>[
-              SliverGrid.builder(
-                itemCount: 3,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-                semanticIndexOffset: 7,
-                itemBuilder: (BuildContext context, int index) {
-                  return Center(child: Text('G $index'));
-                },
-              ),
-            ],
-          ),
+      _buildSliverTestApp(
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverGrid.builder(
+              itemCount: 3,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+              semanticIndexOffset: 7,
+              itemBuilder: (BuildContext context, int index) {
+                return Center(child: Text('G $index'));
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -1535,22 +1484,20 @@ void main() {
 
     // SliverGridDelegateWithFixedCrossAxisCount
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: CustomScrollView(
-            controller: controller,
-            slivers: <Widget>[
-              SliverGrid.builder(
-                itemCount: 0,
-                itemBuilder: (_, _) => Container(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 1,
-                  mainAxisSpacing: 10,
-                  childAspectRatio: 2.1,
-                ),
+      _buildSliverTestApp(
+        child: CustomScrollView(
+          controller: controller,
+          slivers: <Widget>[
+            SliverGrid.builder(
+              itemCount: 0,
+              itemBuilder: (_, _) => Container(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 1,
+                mainAxisSpacing: 10,
+                childAspectRatio: 2.1,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -1560,20 +1507,16 @@ void main() {
 
     // SliverGridDelegateWithMaxCrossAxisExtent
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: CustomScrollView(
-            controller: controller,
-            slivers: <Widget>[
-              SliverGrid.builder(
-                itemCount: 0,
-                itemBuilder: (_, _) => Container(),
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 30,
-                ),
-              ),
-            ],
-          ),
+      _buildSliverTestApp(
+        child: CustomScrollView(
+          controller: controller,
+          slivers: <Widget>[
+            SliverGrid.builder(
+              itemCount: 0,
+              itemBuilder: (_, _) => Container(),
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 30),
+            ),
+          ],
         ),
       ),
     );
