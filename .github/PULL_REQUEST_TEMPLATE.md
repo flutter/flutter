@@ -6,13 +6,20 @@ To learn more about code review, see our documentation on Tree Hygiene: https://
 
 *Replace this paragraph with a description of what this PR is changing or adding, and why. Consider including before/after screenshots.*
 
-## Related Issues
+*List the issues addressed by this PR. At least one issue is required unless the change is trivial.*
 
-*List which issues are fixed by this PR. You must list at least one issue. An issue is not required if the PR fixes something trivial like a typo.*
+- **Close an issue:** `Fixes #123`, `Closes #456`
+- **Partial work:** `Towards #789`, `Part of #012`
 
-Fixes #
+*If you are unsure which keyword to use, see [Linking a pull request to an issue].*
 
 *If you had to change anything in the [flutter/tests] repo, include a link to the migration guide as per the [breaking change policy].*
+
+<!--
+Please do NOT remove or modify the sections below.
+The Pre-launch Checklist and links are required for the review process.
+Only check the boxes that apply to your PR.
+-->
 
 ## Pre-launch Checklist
 
@@ -21,7 +28,7 @@ Fixes #
 - [ ] I read the [Tree Hygiene] wiki page, which explains my responsibilities.
 - [ ] I read and followed the [Flutter Style Guide], including [Features we expect every widget to implement].
 - [ ] I signed the [CLA].
-- [ ] I used GitHub auto-closing keyword(s) (e.g., `Fixes #123`) in the **Related Issues** section, as described in [Linking a pull request to an issue].
+- [ ] I listed at least one issue that this PR fixes in the description above.
 - [ ] I updated/added relevant documentation (doc comments with `///`).
 - [ ] I added new tests to check the change I am making, or this PR is [test-exempt].
 - [ ] I followed the [breaking change policy] and added [Data Driven Fixes] where supported.
