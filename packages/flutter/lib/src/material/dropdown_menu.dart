@@ -225,7 +225,8 @@ class DropdownMenu<T> extends StatefulWidget {
     this.cursorHeight,
     this.restorationId,
     this.menuController,
-  }) : assert(filterCallback == null || enableFilter),
+  }) : assert(!resetOnBlur || focusNode != null, 'resetOnBlur requires a focusNode to detect focus changes.'),
+       assert(filterCallback == null || enableFilter),
        assert(
          inputDecorationTheme == null ||
              (inputDecorationTheme is InputDecorationTheme ||
