@@ -135,16 +135,24 @@ class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
       Axis.vertical => newClip.height,
     };
 
+    Rect copyNewClipWith({double? left, double? top, double? right, double? bottom}) =>
+        Rect.fromLTRB(
+          left ?? newClip.left,
+          top ?? newClip.top,
+          right ?? newClip.right,
+          bottom ?? newClip.bottom,
+        );
+
     if (clipOverlap && constraints.overlap > 0) {
       final double clipOrigin = getClipOriginForOverlap(clipExtent);
       newClip = switch (applyGrowthDirectionToAxisDirection(
         constraints.axisDirection,
         constraints.growthDirection,
       )) {
-        AxisDirection.down => newClip.copyWith(top: clipOrigin),
-        AxisDirection.up => newClip.copyWith(bottom: geometry!.paintExtent - clipOrigin),
-        AxisDirection.right => newClip.copyWith(left: clipOrigin),
-        AxisDirection.left => newClip.copyWith(right: geometry!.paintExtent - clipOrigin),
+        AxisDirection.down => copyNewClipWith(top: clipOrigin),
+        AxisDirection.up => copyNewClipWith(bottom: geometry!.paintExtent - clipOrigin),
+        AxisDirection.right => copyNewClipWith(left: clipOrigin),
+        AxisDirection.left => copyNewClipWith(right: geometry!.paintExtent - clipOrigin),
       };
     }
     return newClip;
@@ -178,11 +186,6 @@ class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
       context.paintChild(child!, offset);
     }
   }
-}
-
-extension on Rect {
-  Rect copyWith({double? left, double? top, double? right, double? bottom}) =>
-      Rect.fromLTRB(left ?? this.left, top ?? this.top, right ?? this.right, bottom ?? this.bottom);
 }
 
 /// A sliver that clips its child using a rounded rectangle.
@@ -326,14 +329,26 @@ class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
       };
       final double clipOrigin = getClipOriginForOverlap(insideClipExtent);
 
+      RRect copyNewClipWith({double? left, double? top, double? right, double? bottom}) =>
+          RRect.fromLTRBAndCorners(
+            left ?? newClip.left,
+            top ?? newClip.top,
+            right ?? newClip.right,
+            bottom ?? newClip.bottom,
+            topLeft: newClip.tlRadius,
+            topRight: newClip.trRadius,
+            bottomLeft: newClip.blRadius,
+            bottomRight: newClip.brRadius,
+          );
+
       newClip = switch (applyGrowthDirectionToAxisDirection(
         constraints.axisDirection,
         constraints.growthDirection,
       )) {
-        AxisDirection.down => newClip.copyWith(top: clipOrigin),
-        AxisDirection.up => newClip.copyWith(bottom: geometry!.paintExtent - clipOrigin),
-        AxisDirection.right => newClip.copyWith(left: clipOrigin),
-        AxisDirection.left => newClip.copyWith(right: geometry!.paintExtent - clipOrigin),
+        AxisDirection.down => copyNewClipWith(top: clipOrigin),
+        AxisDirection.up => copyNewClipWith(bottom: geometry!.paintExtent - clipOrigin),
+        AxisDirection.right => copyNewClipWith(left: clipOrigin),
+        AxisDirection.left => copyNewClipWith(right: geometry!.paintExtent - clipOrigin),
       };
     }
 
@@ -378,20 +393,6 @@ class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
     );
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
-}
-
-extension on RRect {
-  RRect copyWith({double? left, double? top, double? right, double? bottom}) =>
-      RRect.fromLTRBAndCorners(
-        left ?? this.left,
-        top ?? this.top,
-        right ?? this.right,
-        bottom ?? this.bottom,
-        topLeft: tlRadius,
-        topRight: trRadius,
-        bottomLeft: blRadius,
-        bottomRight: brRadius,
-      );
 }
 
 abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
@@ -450,7 +451,7 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
   @protected
   T buildClip();
 
-  @protected
+  @visibleForTesting
   T? getClip() {
     if (clipBehavior == Clip.none) {
       _clip = null;
@@ -540,6 +541,7 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
       0.0,
       insideClipExtent - geometry!.maxScrollObstructionExtent,
     );
+    // To handle leading side of the viewport.
     final double minClipOrigin = -math.min(flexibleClipExtent, constraints.scrollOffset);
 
     // When flexibleClipExtent is scrolled, we can push up the clip.
