@@ -54,7 +54,6 @@ class PlaygroundImplGLES::ReactorWorker final : public ReactorGLES::Worker {
  private:
   mutable RWMutex mutex_;
   std::map<std::thread::id, bool> reactions_allowed_ IPLR_GUARDED_BY(mutex_);
-  bool is_gles3_;
 
   ReactorWorker(const ReactorWorker&) = delete;
 
