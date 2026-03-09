@@ -185,10 +185,13 @@ Dart_Handle CanvasImage::CreateFromTexture(Dart_Handle wrapper,
 
   fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate =
       dart_state->GetSnapshotDelegate();
+  fml::RefPtr<fml::TaskRunner> raster_task_runner =
+      dart_state->GetTaskRunners().GetRasterTaskRunner();
 
   fml::RefPtr<CanvasImage> image = CanvasImage::Create();
-  image->set_image(sk_make_sp<DlImageTextureRegistry>(
-      snapshot_delegate, texture_id, width, height));
+  image->set_image(DlImageTextureRegistry::Make(std::move(snapshot_delegate),
+                                                std::move(raster_task_runner),
+                                                texture_id, width, height));
   image->AssociateWithDartWrapper(wrapper);
 
   return Dart_Null();

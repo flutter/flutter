@@ -3,9 +3,13 @@
 // found in the LICENSE file.
 
 #include "flutter/common/graphics/texture.h"
+#include "flutter/fml/thread.h"
 #include "flutter/lib/ui/painting/dl_image_texture_registry.h"
 #include "flutter/lib/ui/painting/testing/mocks.h"
+#include "flutter/testing/post_task_sync.h"
 #include "gtest/gtest.h"
+#include "impeller/core/texture_descriptor.h"
+#include "impeller/renderer/testing/mocks.h"
 
 namespace flutter {
 namespace testing {
@@ -28,68 +32,138 @@ class MockTexture : public Texture {
   sk_sp<DlImage> GetTextureImage(PaintContext& context,
                                  const DlRect& bounds,
                                  bool freeze) override {
-    return nullptr;
+    return dl_image;
   }
+
+  sk_sp<DlImage> dl_image;
 };
 
 TEST(DlImageTextureRegistryTest, BasicInfo) {
-  MockSnapshotDelegate delegate;
-  DlImageTextureRegistry dl_image(delegate.GetWeakPtr(), /*texture_id=*/1234,
-                                  /*width=*/100, /*height=*/200);
+  fml::Thread raster_thread("raster");
+  auto task_runner = raster_thread.GetTaskRunner();
 
-  EXPECT_EQ(dl_image.GetSize().width, 100);
-  EXPECT_EQ(dl_image.GetSize().height, 200);
-  EXPECT_FALSE(dl_image.isOpaque());
-  EXPECT_TRUE(dl_image.isTextureBacked());
-  EXPECT_TRUE(dl_image.isUIThreadSafe());
-  EXPECT_EQ(dl_image.GetApproximateByteSize(), 100u * 200u * 4u);
+  std::unique_ptr<MockSnapshotDelegate> snapshot_delegate;
+  fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate_weak_ptr;
+
+  PostTaskSync(task_runner, [&]() {
+    snapshot_delegate = std::make_unique<MockSnapshotDelegate>();
+    snapshot_delegate_weak_ptr = snapshot_delegate->GetWeakPtr();
+  });
+
+  auto dl_image = DlImageTextureRegistry::Make(snapshot_delegate_weak_ptr,
+                                               task_runner, /*texture_id=*/1234,
+                                               /*width=*/100, /*height=*/200);
+
+  EXPECT_EQ(dl_image->GetSize().width, 100);
+  EXPECT_EQ(dl_image->GetSize().height, 200);
+  EXPECT_FALSE(dl_image->isOpaque());
+  EXPECT_TRUE(dl_image->isTextureBacked());
+  EXPECT_TRUE(dl_image->isUIThreadSafe());
+  EXPECT_GE(dl_image->GetApproximateByteSize(), 100u * 200u * 4u);
+
+  PostTaskSync(task_runner, [&]() { snapshot_delegate.reset(); });
 }
 
 TEST(DlImageTextureRegistryTest, ResolvesToNullWhenNoRegistry) {
-  MockSnapshotDelegate delegate;
-  EXPECT_CALL(delegate, GetTextureRegistry())
-      .WillRepeatedly(::testing::Return(nullptr));
-  DlImageTextureRegistry dl_image(delegate.GetWeakPtr(), /*texture_id=*/1234,
-                                  /*width=*/100, /*height=*/200);
+  fml::Thread raster_thread("raster");
+  auto task_runner = raster_thread.GetTaskRunner();
 
-  EXPECT_EQ(dl_image.skia_image(), nullptr);
-  EXPECT_EQ(dl_image.impeller_texture(), nullptr);
+  std::unique_ptr<MockSnapshotDelegate> snapshot_delegate;
+  fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate_weak_ptr;
+
+  PostTaskSync(task_runner, [&]() {
+    snapshot_delegate = std::make_unique<MockSnapshotDelegate>();
+    EXPECT_CALL(*snapshot_delegate, GetTextureRegistry())
+        .WillRepeatedly(::testing::Return(nullptr));
+    snapshot_delegate_weak_ptr = snapshot_delegate->GetWeakPtr();
+  });
+
+  auto dl_image = DlImageTextureRegistry::Make(snapshot_delegate_weak_ptr,
+                                               task_runner, /*texture_id=*/1234,
+                                               /*width=*/100, /*height=*/200);
+
+  // We need to wait for the posted task to complete. We can just post a sync
+  // task.
+  PostTaskSync(task_runner, []() {});
+
+  EXPECT_EQ(dl_image->impeller_texture(), nullptr);
+
+  PostTaskSync(task_runner, [&]() { snapshot_delegate.reset(); });
 }
 
 TEST(DlImageTextureRegistryTest, ResolvesToNullWhenTextureNotFound) {
-  MockSnapshotDelegate delegate;
-  auto registry = std::make_shared<TextureRegistry>();
-  EXPECT_CALL(delegate, GetTextureRegistry())
-      .WillRepeatedly(::testing::Return(registry));
+  fml::Thread raster_thread("raster");
+  auto task_runner = raster_thread.GetTaskRunner();
 
-  DlImageTextureRegistry dl_image(delegate.GetWeakPtr(), /*texture_id=*/1234,
-                                  /*width=*/100, /*height=*/200);
+  std::unique_ptr<MockSnapshotDelegate> snapshot_delegate;
+  fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate_weak_ptr;
 
-  EXPECT_EQ(dl_image.skia_image(), nullptr);
-  EXPECT_EQ(dl_image.impeller_texture(), nullptr);
+  PostTaskSync(task_runner, [&]() {
+    snapshot_delegate = std::make_unique<MockSnapshotDelegate>();
+    auto registry = std::make_shared<TextureRegistry>();
+    EXPECT_CALL(*snapshot_delegate, GetTextureRegistry())
+        .WillRepeatedly(::testing::Return(registry));
+    snapshot_delegate_weak_ptr = snapshot_delegate->GetWeakPtr();
+  });
+
+  auto dl_image = DlImageTextureRegistry::Make(snapshot_delegate_weak_ptr,
+                                               task_runner, /*texture_id=*/1234,
+                                               /*width=*/100, /*height=*/200);
+
+  PostTaskSync(task_runner, []() {});
+
+  EXPECT_EQ(dl_image->impeller_texture(), nullptr);
+
+  PostTaskSync(task_runner, [&]() { snapshot_delegate.reset(); });
 }
 
 TEST(DlImageTextureRegistryTest, ResolvesWhenTextureFound) {
-  MockSnapshotDelegate delegate;
-  auto registry = std::make_shared<TextureRegistry>();
-  EXPECT_CALL(delegate, GetTextureRegistry())
-      .WillRepeatedly(::testing::Return(registry));
+  fml::Thread raster_thread("raster");
+  auto task_runner = raster_thread.GetTaskRunner();
 
-  auto texture = std::shared_ptr<MockTexture>(new MockTexture(1234));
-  registry->RegisterTexture(texture);
+  std::unique_ptr<MockSnapshotDelegate> snapshot_delegate;
+  fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate_weak_ptr;
 
-  EXPECT_CALL(delegate, GetGrContext())
-      .WillRepeatedly(::testing::Return(nullptr));
-  EXPECT_CALL(delegate, GetSnapshotDelegateAiksContext())
-      .WillRepeatedly(::testing::Return(nullptr));
+  PostTaskSync(task_runner, [&]() {
+    snapshot_delegate = std::make_unique<MockSnapshotDelegate>();
+    auto registry = std::make_shared<TextureRegistry>();
+    EXPECT_CALL(*snapshot_delegate, GetTextureRegistry())
+        .WillRepeatedly(::testing::Return(registry));
 
-  DlImageTextureRegistry dl_image(delegate.GetWeakPtr(), /*texture_id=*/1234,
-                                  /*width=*/100, /*height=*/200);
+    auto texture = std::shared_ptr<MockTexture>(new MockTexture(1234));
 
-  // Still null because our MockTexture returns null, but it proves it didn't
-  // crash.
-  EXPECT_EQ(dl_image.skia_image(), nullptr);
-  EXPECT_EQ(dl_image.impeller_texture(), nullptr);
+    auto mock_dl_image = sk_make_sp<MockDlImage>();
+    impeller::TextureDescriptor desc;
+    desc.size = {1, 1};
+    auto impeller_texture =
+        std::make_shared<impeller::testing::MockTexture>(desc);
+    EXPECT_CALL(*mock_dl_image, impeller_texture)
+        .WillRepeatedly(::testing::Return(impeller_texture));
+    texture->dl_image = mock_dl_image;
+
+    registry->RegisterTexture(texture);
+
+    EXPECT_CALL(*snapshot_delegate, GetGrContext())
+        .WillRepeatedly(::testing::Return(nullptr));
+
+    auto dummy_aiks = std::shared_ptr<impeller::AiksContext>(
+        reinterpret_cast<impeller::AiksContext*>(1),
+        [](impeller::AiksContext*) {});
+    EXPECT_CALL(*snapshot_delegate, GetSnapshotDelegateAiksContext())
+        .WillRepeatedly(::testing::Return(dummy_aiks));
+
+    snapshot_delegate_weak_ptr = snapshot_delegate->GetWeakPtr();
+  });
+
+  auto dl_image = DlImageTextureRegistry::Make(snapshot_delegate_weak_ptr,
+                                               task_runner, /*texture_id=*/1234,
+                                               /*width=*/100, /*height=*/200);
+
+  PostTaskSync(task_runner, []() {});
+
+  EXPECT_NE(dl_image->impeller_texture(), nullptr);
+
+  PostTaskSync(task_runner, [&]() { snapshot_delegate.reset(); });
 }
 
 }  // namespace testing
