@@ -489,20 +489,21 @@ void main() {
         fakeClient.responses['scroll'] = makeFakeResponse(<String, dynamic>{});
         fakeClient.responses['scrollIntoView'] = makeFakeResponse(<String, dynamic>{});
 
-        var errorReported = false;
-        try {
-          await driver.scrollUntilVisible(
+        await expectLater(
+          driver.scrollUntilVisible(
             find.byTooltip('scrollable'),
             find.byTooltip('item'),
             dyScroll: 100,
             timeout: const Duration(milliseconds: 500),
-          );
-        } catch (error) {
-          if (error is DriverError && error.message.contains('waitFor failed')) {
-            errorReported = true;
-          }
-        }
-        expect(errorReported, isTrue, reason: 'Error from waitFor should be reported');
+          ),
+          throwsA(
+            isA<DriverError>().having(
+              (error) => error.message,
+              'message',
+              contains('waitFor failed'),
+            ),
+          ),
+        );
       });
     });
 

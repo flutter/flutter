@@ -466,13 +466,15 @@ abstract class FlutterDriver {
     // the chance to complete if the item is already onscreen; if not, scroll
     // repeatedly until we either find the item or time out.
     var isVisible = false;
-    dynamic waitForError;
+    Object? waitForError;
+    StackTrace? waitForStack;
     waitFor(item, timeout: timeout).then<void>(
       (_) {
         isVisible = true;
       },
       onError: (Object error, StackTrace stack) {
         waitForError = error;
+        waitForStack = stack;
       },
     );
 
@@ -482,7 +484,7 @@ abstract class FlutterDriver {
       await Future<void>.delayed(const Duration(milliseconds: 500));
     }
     if (waitForError != null) {
-      Error.throwWithStackTrace(waitForError as Object, StackTrace.current);
+      Error.throwWithStackTrace(waitForError!, waitForStack!);
     }
 
     return scrollIntoView(item, alignment: alignment);
