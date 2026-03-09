@@ -58,7 +58,7 @@ class DlImageTextureRegistry : public DlImage {
 
     ~TextureWrapper() = default;
 
-    std::shared_ptr<impeller::Texture> texture() const { return texture_; }
+    std::shared_ptr<impeller::Texture> texture() const;
     const DlISize& size() const { return size_; }
     bool isTextureBacked() const;
     std::optional<std::string> get_error() const;

@@ -91,7 +91,8 @@ DlImageTextureRegistry::TextureWrapper::TextureWrapper(
       size_(size) {}
 
 bool DlImageTextureRegistry::TextureWrapper::isTextureBacked() const {
-  return texture_ && texture_->IsValid();
+  std::shared_ptr<impeller::Texture> tex = std::atomic_load(&texture_);
+  return tex && tex->IsValid();
 }
 
 void DlImageTextureRegistry::TextureWrapper::SnapshotTexture() {
@@ -143,7 +144,8 @@ void DlImageTextureRegistry::TextureWrapper::SnapshotTexture() {
           wrapper->error_ = "Failed to create snapshot.";
           return;
         }
-        wrapper->texture_ = dl_image->impeller_texture();
+
+        std::atomic_store(&wrapper->texture_, dl_image->impeller_texture());
       }));
 }
 
@@ -151,6 +153,11 @@ std::optional<std::string> DlImageTextureRegistry::TextureWrapper::get_error()
     const {
   std::scoped_lock lock(error_mutex_);
   return error_;
+}
+
+std::shared_ptr<impeller::Texture>
+DlImageTextureRegistry::TextureWrapper::texture() const {
+  return std::atomic_load(&texture_);
 }
 
 }  // namespace flutter
