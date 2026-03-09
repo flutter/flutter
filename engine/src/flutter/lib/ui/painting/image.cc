@@ -170,14 +170,19 @@ void CanvasImage::decodeImageFromPixelsSync(Dart_Handle pixels_handle,
   }
 }
 
-void CanvasImage::CreateFromTexture(Dart_Handle wrapper,
-                                    int64_t texture_id,
-                                    int width,
-                                    int height) {
+Dart_Handle CanvasImage::CreateFromTexture(Dart_Handle wrapper,
+                                           int64_t texture_id,
+                                           int width,
+                                           int height) {
   UIDartState* dart_state = UIDartState::Current();
   if (!dart_state) {
-    return;
+    return tonic::ToDart("Dart state is null.");
   }
+
+  if (!dart_state->IsImpellerEnabled()) {
+    return tonic::ToDart("getImageFromTexture is not supported on Skia.");
+  }
+
   fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate =
       dart_state->GetSnapshotDelegate();
 
@@ -185,6 +190,8 @@ void CanvasImage::CreateFromTexture(Dart_Handle wrapper,
   image->set_image(sk_make_sp<DlImageTextureRegistry>(
       snapshot_delegate, texture_id, width, height));
   image->AssociateWithDartWrapper(wrapper);
+
+  return Dart_Null();
 }
 
 }  // namespace flutter

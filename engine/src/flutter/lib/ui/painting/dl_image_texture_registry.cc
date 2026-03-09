@@ -16,23 +16,8 @@ DlImageTextureRegistry::DlImageTextureRegistry(
       size_(DlISize(width, height)) {}
 
 sk_sp<SkImage> DlImageTextureRegistry::skia_image() const {
-  if (!snapshot_delegate_) {
-    return nullptr;
-  }
-  std::shared_ptr<TextureRegistry> registry =
-      snapshot_delegate_->GetTextureRegistry();
-  if (!registry) {
-    return nullptr;
-  }
-  std::shared_ptr<Texture> texture = registry->GetTexture(texture_id_);
-  if (!texture) {
-    return nullptr;
-  }
-  Texture::PaintContext ctx;
-  ctx.gr_context = snapshot_delegate_->GetGrContext();
-  sk_sp<DlImage> dl_image =
-      texture->GetTextureImage(ctx, DlRect::MakeSize(GetSize()), false);
-  return dl_image ? dl_image->skia_image() : nullptr;
+  FML_DCHECK(false) << "DlImageTextureRegistry is not supported on Skia.";
+  return nullptr;
 }
 
 std::shared_ptr<impeller::Texture> DlImageTextureRegistry::impeller_texture()
