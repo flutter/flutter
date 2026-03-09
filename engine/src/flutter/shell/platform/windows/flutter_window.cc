@@ -314,9 +314,11 @@ PointerLocation FlutterWindow::GetPrimaryPointerLocation() {
 }
 
 FlutterEngineDisplayId FlutterWindow::GetDisplayId() {
-  FlutterEngineDisplayId const display_id =
-      reinterpret_cast<FlutterEngineDisplayId>(
-          MonitorFromWindow(GetWindowHandle(), MONITOR_DEFAULTTONEAREST));
+  // Mask to 32 bits to match display_manager.cc — see comment there.
+  FlutterEngineDisplayId const display_id = static_cast<FlutterEngineDisplayId>(
+      reinterpret_cast<uintptr_t>(
+          MonitorFromWindow(GetWindowHandle(), MONITOR_DEFAULTTONEAREST)) &
+      0xFFFFFFFF);
   if (!display_manager_->FindById(display_id)) {
     FML_LOG(ERROR) << "Current monitor not found in display list.";
   }
@@ -541,6 +543,17 @@ FlutterWindow::HandleMessage(UINT const message,
     case WM_PAINT:
       OnPaint();
       break;
+    case WM_ACTIVATE:
+      // When the window becomes active (e.g. user brings it to front after
+      // it was behind another window), DWM may show the cached surface
+      // texture without sending WM_PAINT. Explicitly invalidate the
+      // client area so a WM_PAINT is generated, allowing the render loop
+      // to recover from any swapchain disruption that occurred while the
+      // window was occluded.
+      if (LOWORD(wparam) != WA_INACTIVE) {
+        ::InvalidateRect(window_handle_, nullptr, FALSE);
+      }
+      break;
     case WM_POINTERDOWN:
     case WM_POINTERUPDATE:
     case WM_POINTERUP:
@@ -634,6 +647,10 @@ FlutterWindow::HandleMessage(UINT const message,
     case WM_SETCURSOR: {
       UINT hit_test_result = LOWORD(lparam);
       if (hit_test_result == HTCLIENT) {
+        // Restore the current Flutter cursor. This prevents stale cursors
+        // (e.g., resize cursors from the non-client area) from persisting
+        // when the mouse re-enters the client area.
+        ::SetCursor(current_cursor_);
         // Halt further processing to prevent DefWindowProc from setting the
         // cursor back to the registered class cursor.
         return TRUE;
@@ -952,6 +969,11 @@ void FlutterWindow::Destroy() {
   }
 
   UnregisterClass(window_class_name_.c_str(), nullptr);
+}
+
+void FlutterWindow::SetFlutterCursor(HCURSOR cursor) {
+  current_cursor_ = cursor;
+  ::SetCursor(cursor);
 }
 
 void FlutterWindow::CreateAxFragmentRoot() {

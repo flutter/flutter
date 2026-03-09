@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/vulkan/blit_pass_vk.h"
 
+#include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/backend/vulkan/barrier_vk.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
@@ -45,8 +46,11 @@ static void InsertImageMemoryBarrier(const vk::CommandBuffer& cmd,
 }
 
 BlitPassVK::BlitPassVK(std::shared_ptr<CommandBufferVK> command_buffer,
+                       std::shared_ptr<Allocator> allocator,
                        const WorkaroundsVK& workarounds)
-    : command_buffer_(std::move(command_buffer)), workarounds_(workarounds) {}
+    : command_buffer_(std::move(command_buffer)),
+      allocator_(std::move(allocator)),
+      workarounds_(workarounds) {}
 
 BlitPassVK::~BlitPassVK() = default;
 
@@ -93,12 +97,21 @@ bool BlitPassVK::OnCopyTextureToTextureCommand(
   BarrierVK dst_barrier;
   dst_barrier.cmd_buffer = cmd_buffer;
   dst_barrier.new_layout = vk::ImageLayout::eTransferDstOptimal;
-  dst_barrier.src_access = {};
-  dst_barrier.src_stage = vk::PipelineStageFlagBits::eTopOfPipe;
-  dst_barrier.dst_access =
-      vk::AccessFlagBits::eShaderRead | vk::AccessFlagBits::eTransferWrite;
-  dst_barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader |
-                          vk::PipelineStageFlagBits::eTransfer;
+  // Wait for any prior buffer-to-image transfer writes to this destination
+  // before starting the image-to-image copy. In the atlas growth path,
+  // BulkUpdateAtlasBitmap writes rows 0..new_height via
+  // vkCmdCopyBufferToImage, then AddCopy(old->new) writes rows 0..old_height
+  // via vkCmdCopyImage. These writes overlap in rows 0..old_height. Without
+  // this barrier, the post-copy eTransfer->eFragmentShader barrier from
+  // BulkUpdateAtlasBitmap does NOT create a transitive dependency here because
+  // eTopOfPipe & eFragmentShader = empty - leaving a WAW hazard on AMD RDNA.
+  dst_barrier.src_access = vk::AccessFlagBits::eTransferWrite;
+  dst_barrier.src_stage = vk::PipelineStageFlagBits::eTransfer;
+  // dstAccessMask must only list accesses valid for TRANSFER_DST_OPTIMAL.
+  // eShaderRead is not permitted in that layout; including it triggers AMD
+  // best practices validation layer message ID -212008545 (0xF35D019F).
+  dst_barrier.dst_access = vk::AccessFlagBits::eTransferWrite;
+  dst_barrier.dst_stage = vk::PipelineStageFlagBits::eTransfer;
 
   if (!src.SetLayout(src_barrier) || !dst.SetLayout(dst_barrier)) {
     VALIDATION_LOG << "Could not complete layout transitions.";
@@ -137,8 +150,11 @@ bool BlitPassVK::OnCopyTextureToTextureCommand(
   BarrierVK barrier;
   barrier.cmd_buffer = cmd_buffer;
   barrier.new_layout = vk::ImageLayout::eShaderReadOnlyOptimal;
-  barrier.src_access = {};
-  barrier.src_stage = vk::PipelineStageFlagBits::eTopOfPipe;
+  // Flush the transfer write cache so that subsequent shader reads see the
+  // newly copied data. TOP_OF_PIPE with empty src_access does not flush the
+  // transfer write cache on AMD RDNA, leaving the DCC metadata stale.
+  barrier.src_access = vk::AccessFlagBits::eTransferWrite;
+  barrier.src_stage = vk::PipelineStageFlagBits::eTransfer;
   barrier.dst_access = vk::AccessFlagBits::eShaderRead;
   barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader;
 
@@ -170,9 +186,8 @@ bool BlitPassVK::OnCopyTextureToBufferCommand(
   barrier.src_stage = vk::PipelineStageFlagBits::eFragmentShader |
                       vk::PipelineStageFlagBits::eTransfer |
                       vk::PipelineStageFlagBits::eColorAttachmentOutput;
-  barrier.dst_access = vk::AccessFlagBits::eShaderRead;
-  barrier.dst_stage = vk::PipelineStageFlagBits::eVertexShader |
-                      vk::PipelineStageFlagBits::eFragmentShader;
+  barrier.dst_access = vk::AccessFlagBits::eTransferRead;
+  barrier.dst_stage = vk::PipelineStageFlagBits::eTransfer;
 
   const auto& dst = DeviceBufferVK::Cast(*destination);
 
@@ -259,12 +274,25 @@ bool BlitPassVK::OnCopyBufferToTextureCommand(
   BarrierVK dst_barrier;
   dst_barrier.cmd_buffer = cmd_buffer;
   dst_barrier.new_layout = vk::ImageLayout::eTransferDstOptimal;
-  dst_barrier.src_access = {};
-  dst_barrier.src_stage = vk::PipelineStageFlagBits::eTopOfPipe;
-  dst_barrier.dst_access =
-      vk::AccessFlagBits::eShaderRead | vk::AccessFlagBits::eTransferWrite;
-  dst_barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader |
-                          vk::PipelineStageFlagBits::eTransfer;
+  // The src_access and src_stage must match the texture's current layout.
+  // When multiple copies target the same texture within a single blit pass
+  // (e.g. GlyphAtlas updates with convert_to_read=false), the texture is
+  // already in eTransferDstOptimal after the first copy - using eShaderRead
+  // as src_access in that case violates BestPractices-ImageBarrierAccessLayout.
+  if (dst.GetLayout() == vk::ImageLayout::eTransferDstOptimal) {
+    // WAW hazard: drain the prior transfer write before starting the next.
+    dst_barrier.src_access = vk::AccessFlagBits::eTransferWrite;
+    dst_barrier.src_stage = vk::PipelineStageFlagBits::eTransfer;
+  } else {
+    // Normal path: texture was last sampled in a fragment shader.
+    dst_barrier.src_access = vk::AccessFlagBits::eShaderRead;
+    dst_barrier.src_stage = vk::PipelineStageFlagBits::eFragmentShader;
+  }
+  // dstAccessMask must only list accesses valid for TRANSFER_DST_OPTIMAL.
+  // eShaderRead is not permitted in that layout; including it triggers AMD
+  // best practices validation layer message ID -212008545 (0xF35D019F).
+  dst_barrier.dst_access = vk::AccessFlagBits::eTransferWrite;
+  dst_barrier.dst_stage = vk::PipelineStageFlagBits::eTransfer;
 
   vk::BufferImageCopy image_copy;
   image_copy.setBufferOffset(source.GetRange().offset);
@@ -279,19 +307,132 @@ bool BlitPassVK::OnCopyBufferToTextureCommand(
   image_copy.imageExtent.height = destination_region.GetHeight();
   image_copy.imageExtent.depth = 1u;
 
-  // Note: this barrier should do nothing if we're already in the transfer dst
-  // optimal state. This is important for performance of repeated blit pass
-  // encoding.
-  if (!dst.SetLayout(dst_barrier)) {
-    VALIDATION_LOG << "Could not encode layout transition.";
-    return false;
+  // Workaround for Mesa dzn (D3D12 translation layer) drivers that report
+  // minImageTransferGranularity of (0,0,0) and reject sub-region
+  // vkCmdCopyBufferToImage with VK_ERROR_OUT_OF_HOST_MEMORY. When the copy
+  // targets a sub-region, a staging image is used as an intermediary:
+  //   1. Full-region buffer -> staging image (not rejected)
+  //   2. vkCmdCopyImage staging -> destination at sub-region offset
+  //      (image-to-image copies are not subject to transfer granularity)
+  bool is_sub_region = false;
+  if (workarounds_.skip_sub_region_buffer_to_image_copy) {
+    const auto& dst_desc = destination->GetTextureDescriptor();
+    is_sub_region =
+        (destination_region.GetX() != 0 || destination_region.GetY() != 0 ||
+         static_cast<uint32_t>(destination_region.GetWidth()) !=
+             dst_desc.size.width ||
+         static_cast<uint32_t>(destination_region.GetHeight()) !=
+             dst_desc.size.height);
   }
 
-  cmd_buffer.copyBufferToImage(src.GetBuffer(),         //
-                               dst.GetImage(),          //
-                               dst_barrier.new_layout,  //
-                               image_copy               //
-  );
+  if (is_sub_region && allocator_) {
+    // Staging image path: create a texture matching the sub-region.
+    TextureDescriptor staging_desc;
+    staging_desc.format = destination->GetTextureDescriptor().format;
+    staging_desc.size =
+        ISize{static_cast<int64_t>(destination_region.GetWidth()),
+              static_cast<int64_t>(destination_region.GetHeight())};
+    staging_desc.storage_mode = StorageMode::kDevicePrivate;
+    staging_desc.usage = TextureUsage::kShaderRead;
+
+    auto staging_texture = allocator_->CreateTexture(staging_desc);
+    if (!staging_texture) {
+      VALIDATION_LOG << "Failed to create staging texture for sub-region copy.";
+      return false;
+    }
+    staging_texture->SetLabel("SubRegionStaging");
+
+    if (!command_buffer_->Track(staging_texture)) {
+      return false;
+    }
+
+    const auto& staging_vk = TextureVK::Cast(*staging_texture);
+
+    // Transition staging to transfer-dst.
+    BarrierVK staging_dst_barrier;
+    staging_dst_barrier.cmd_buffer = cmd_buffer;
+    staging_dst_barrier.new_layout = vk::ImageLayout::eTransferDstOptimal;
+    staging_dst_barrier.src_access = {};
+    staging_dst_barrier.src_stage = vk::PipelineStageFlagBits::eTopOfPipe;
+    staging_dst_barrier.dst_access = vk::AccessFlagBits::eTransferWrite;
+    staging_dst_barrier.dst_stage = vk::PipelineStageFlagBits::eTransfer;
+
+    if (!staging_vk.SetLayout(staging_dst_barrier)) {
+      VALIDATION_LOG << "Could not transition staging image layout.";
+      return false;
+    }
+
+    // Full-region buffer -> staging (offset 0,0 - not a sub-region copy).
+    vk::BufferImageCopy staging_copy;
+    staging_copy.setBufferOffset(source.GetRange().offset);
+    staging_copy.setBufferRowLength(0);
+    staging_copy.setBufferImageHeight(0);
+    staging_copy.setImageSubresource(
+        vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1));
+    staging_copy.imageOffset = vk::Offset3D(0, 0, 0);
+    staging_copy.imageExtent =
+        vk::Extent3D(static_cast<uint32_t>(destination_region.GetWidth()),
+                     static_cast<uint32_t>(destination_region.GetHeight()), 1u);
+
+    cmd_buffer.copyBufferToImage(src.GetBuffer(),                 //
+                                 staging_vk.GetImage(),           //
+                                 staging_dst_barrier.new_layout,  //
+                                 staging_copy                     //
+    );
+
+    // Transition staging to transfer-src.
+    BarrierVK staging_src_barrier;
+    staging_src_barrier.cmd_buffer = cmd_buffer;
+    staging_src_barrier.new_layout = vk::ImageLayout::eTransferSrcOptimal;
+    staging_src_barrier.src_access = vk::AccessFlagBits::eTransferWrite;
+    staging_src_barrier.src_stage = vk::PipelineStageFlagBits::eTransfer;
+    staging_src_barrier.dst_access = vk::AccessFlagBits::eTransferRead;
+    staging_src_barrier.dst_stage = vk::PipelineStageFlagBits::eTransfer;
+
+    if (!staging_vk.SetLayout(staging_src_barrier)) {
+      VALIDATION_LOG << "Could not transition staging image to transfer-src.";
+      return false;
+    }
+
+    // Transition destination to transfer-dst.
+    if (!dst.SetLayout(dst_barrier)) {
+      VALIDATION_LOG << "Could not encode layout transition.";
+      return false;
+    }
+
+    // Image-to-image copy: staging -> destination at sub-region offset.
+    // vkCmdCopyImage is not subject to minImageTransferGranularity.
+    vk::ImageCopy img_copy;
+    img_copy.setSrcSubresource(
+        vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1));
+    img_copy.setDstSubresource(vk::ImageSubresourceLayers(
+        vk::ImageAspectFlagBits::eColor, mip_level, slice, 1));
+    img_copy.srcOffset = vk::Offset3D(0, 0, 0);
+    img_copy.dstOffset =
+        vk::Offset3D(destination_region.GetX(), destination_region.GetY(), 0);
+    img_copy.extent =
+        vk::Extent3D(static_cast<uint32_t>(destination_region.GetWidth()),
+                     static_cast<uint32_t>(destination_region.GetHeight()), 1u);
+
+    cmd_buffer.copyImage(staging_vk.GetImage(),           //
+                         staging_src_barrier.new_layout,  //
+                         dst.GetImage(),                  //
+                         dst_barrier.new_layout,          //
+                         img_copy                         //
+    );
+  } else {
+    // Direct buffer-to-image copy (normal path).
+    if (!dst.SetLayout(dst_barrier)) {
+      VALIDATION_LOG << "Could not encode layout transition.";
+      return false;
+    }
+
+    cmd_buffer.copyBufferToImage(src.GetBuffer(),         //
+                                 dst.GetImage(),          //
+                                 dst_barrier.new_layout,  //
+                                 image_copy               //
+    );
+  }
 
   // Transition to shader-read.
   if (convert_to_read) {
@@ -305,6 +446,8 @@ bool BlitPassVK::OnCopyBufferToTextureCommand(
     barrier.new_layout = vk::ImageLayout::eShaderReadOnlyOptimal;
 
     if (!dst.SetLayout(barrier)) {
+      VALIDATION_LOG << "Failed to set destination texture layout to "
+                        "eShaderReadOnlyOptimal after blit.";
       return false;
     }
   }
@@ -341,10 +484,11 @@ bool BlitPassVK::ResizeTexture(const std::shared_ptr<Texture>& source,
   dst_barrier.new_layout = vk::ImageLayout::eTransferDstOptimal;
   dst_barrier.src_access = {};
   dst_barrier.src_stage = vk::PipelineStageFlagBits::eTopOfPipe;
-  dst_barrier.dst_access =
-      vk::AccessFlagBits::eShaderRead | vk::AccessFlagBits::eTransferWrite;
-  dst_barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader |
-                          vk::PipelineStageFlagBits::eTransfer;
+  // dstAccessMask must only list accesses valid for TRANSFER_DST_OPTIMAL.
+  // eShaderRead is not permitted in that layout; including it triggers AMD
+  // best practices validation layer message ID -212008545 (0xF35D019F).
+  dst_barrier.dst_access = vk::AccessFlagBits::eTransferWrite;
+  dst_barrier.dst_stage = vk::PipelineStageFlagBits::eTransfer;
 
   if (!src.SetLayout(src_barrier) || !dst.SetLayout(dst_barrier)) {
     VALIDATION_LOG << "Could not complete layout transitions.";
@@ -387,8 +531,10 @@ bool BlitPassVK::ResizeTexture(const std::shared_ptr<Texture>& source,
   BarrierVK barrier;
   barrier.cmd_buffer = cmd_buffer;
   barrier.new_layout = vk::ImageLayout::eShaderReadOnlyOptimal;
-  barrier.src_access = {};
-  barrier.src_stage = vk::PipelineStageFlagBits::eTopOfPipe;
+  // Flush the transfer write cache after blitImage so AMD RDNA DCC metadata
+  // is coherent before the next shader read.
+  barrier.src_access = vk::AccessFlagBits::eTransferWrite;
+  barrier.src_stage = vk::PipelineStageFlagBits::eTransfer;
   barrier.dst_access = vk::AccessFlagBits::eShaderRead;
   barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader;
 
@@ -419,16 +565,35 @@ bool BlitPassVK::OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
   // TransferSrc to prepare the mip level after it, use the image as the source
   // of the blit, before finally switching it to ShaderReadOnly so its available
   // for sampling in a shader.
+  //
+  // The src_access mask and src_stage are selected based on the image's current
+  // layout to produce a precise barrier that satisfies only the actual
+  // producing operation. This avoids BestPractices-ImageBarrierAccessLayout
+  // validation warnings that occur when using a broad OR of all possible
+  // stages. The dst_access is eTransferWrite (not eTransferRead) because the
+  // blit *writes* into the destination mip levels.
+  vk::AccessFlags mip_src_access;
+  vk::PipelineStageFlags mip_src_stage;
+  if (src.GetLayout() == vk::ImageLayout::eTransferDstOptimal) {
+    mip_src_access = vk::AccessFlagBits::eTransferWrite;
+    mip_src_stage = vk::PipelineStageFlagBits::eTransfer;
+  } else if (src.GetLayout() == vk::ImageLayout::eColorAttachmentOptimal) {
+    mip_src_access = vk::AccessFlagBits::eColorAttachmentWrite;
+    mip_src_stage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+  } else {
+    // Default: texture was last sampled in a fragment shader
+    // (eShaderReadOnlyOptimal) or is newly created (eUndefined).
+    mip_src_access = vk::AccessFlagBits::eShaderRead;
+    mip_src_stage = vk::PipelineStageFlagBits::eFragmentShader;
+  }
   InsertImageMemoryBarrier(
       /*cmd=*/cmd,
       /*image=*/image,
-      /*src_access_mask=*/vk::AccessFlagBits::eTransferWrite |
-          vk::AccessFlagBits::eColorAttachmentWrite,
-      /*dst_access_mask=*/vk::AccessFlagBits::eTransferRead,
+      /*src_access_mask=*/mip_src_access,
+      /*dst_access_mask=*/vk::AccessFlagBits::eTransferWrite,
       /*old_layout=*/src.GetLayout(),
       /*new_layout=*/vk::ImageLayout::eTransferDstOptimal,
-      /*src_stage=*/vk::PipelineStageFlagBits::eTransfer |
-          vk::PipelineStageFlagBits::eColorAttachmentOutput,
+      /*src_stage=*/mip_src_stage,
       /*dst_stage=*/vk::PipelineStageFlagBits::eTransfer,
       /*base_mip_level=*/0u,
       /*mip_level_count=*/mip_count);

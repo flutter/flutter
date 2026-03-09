@@ -156,6 +156,25 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   @override
   int? get engineId => null;
 
+  /// Returns the rendering backend currently in use.
+  ///
+  /// Returns [ui.RenderingBackend.canvaskit] when using the CanvasKit
+  /// renderer (WebGL-based), or [ui.RenderingBackend.skwasm] when using
+  /// the Skwasm renderer (WebGPU-based).
+  ///
+  /// Flutter currently supports exactly two web renderers: CanvasKit and
+  /// Skwasm. If additional renderers are added in the future, this getter
+  /// must be updated to return the appropriate value.
+  @override
+  ui.RenderingBackend get renderingBackend {
+    if (renderer is CanvasKitRenderer) {
+      return ui.RenderingBackend.canvaskit;
+    }
+    // The only other supported web renderer is Skwasm. If a new renderer
+    // is added, update this getter to return the correct backend.
+    return ui.RenderingBackend.skwasm;
+  }
+
   /// A callback that is invoked whenever the platform's [devicePixelRatio],
   /// [physicalSize], [padding], [viewInsets], or [systemGestureInsets]
   /// values change, for example when the device is rotated or when the

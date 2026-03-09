@@ -357,6 +357,10 @@ void ContextVK::Setup(Settings settings) {
     device_holder->device.reset(settings.embedder_data->device);
   }
 
+  // Initialize device-level dispatch so Vulkan-HPP calls go directly through
+  // the device dispatch table instead of the instance trampoline.
+  dispatcher.init(device_holder->device.get());
+
   if (!caps->SetPhysicalDevice(device_holder->physical_device,
                                *enabled_features)) {
     VALIDATION_LOG << "Capabilities could not be updated.";
@@ -536,7 +540,24 @@ std::shared_ptr<PipelineLibrary> ContextVK::GetPipelineLibrary() const {
   return pipeline_library_;
 }
 
+bool ContextVK::IsDeviceLost() const {
+  return device_lost_.load(std::memory_order_relaxed);
+}
+
+void ContextVK::MarkDeviceLost() {
+  device_lost_.store(true, std::memory_order_relaxed);
+  VALIDATION_LOG << "ContextVK: device marked as lost. No further Vulkan "
+                    "API calls will be made on this context.";
+}
+
 std::shared_ptr<CommandBuffer> ContextVK::CreateCommandBuffer() const {
+  // Short-circuit immediately if the device is lost. Any Vulkan allocation
+  // call (vkCreateCommandPool, vkAllocateCommandBuffers, etc.) on a driver
+  // that has entered a corrupted OOM state can access-fault inside the ICD.
+  if (device_lost_.load(std::memory_order_relaxed)) {
+    return nullptr;
+  }
+
   const auto& recycler = GetCommandPoolRecycler();
   auto tls_pool = recycler->Get();
   if (!tls_pool) {
@@ -668,7 +689,31 @@ bool ContextVK::FlushCommandBuffers() {
   }
 
   if (should_batch_cmd_buffers_) {
-    bool result = GetCommandQueue()->Submit(pending_command_buffers_).ok();
+    // Submit in chunks to prevent VK_ERROR_OUT_OF_HOST_MEMORY when a frame
+    // accumulates thousands of command buffers (e.g. heavy blur/filter
+    // workloads). Each Submit() creates its own fence and tracked-object
+    // set, so chunking at this level is safe - all command buffers are fully
+    // recorded by the time FlushCommandBuffers() is called.
+    //
+    // 64 was chosen as a balance between submission overhead and memory
+    // pressure: small enough that the driver's per-submit host allocation
+    // stays well within typical VK_ERROR_OUT_OF_HOST_MEMORY thresholds,
+    // large enough to amortize the cost of fence creation and queue
+    // submission across many command buffers.
+    static constexpr size_t kMaxBuffersPerSubmit = 64u;
+    bool result = true;
+    for (size_t i = 0; i < pending_command_buffers_.size();
+         i += kMaxBuffersPerSubmit) {
+      size_t end =
+          std::min(i + kMaxBuffersPerSubmit, pending_command_buffers_.size());
+      std::vector<std::shared_ptr<CommandBuffer>> chunk(
+          std::make_move_iterator(pending_command_buffers_.begin() + i),
+          std::make_move_iterator(pending_command_buffers_.begin() + end));
+      if (!GetCommandQueue()->Submit(chunk).ok()) {
+        result = false;
+        break;
+      }
+    }
     pending_command_buffers_.clear();
     return result;
   } else {
@@ -715,6 +760,9 @@ void ContextVK::InitializeCommonlyUsedShadersIfNeeded() const {
         stencil->store_action                                   //
     );
   }
+
+  builder.SetFramebufferFetchEnabled(
+      GetCapabilities()->SupportsFramebufferFetch());
 
   auto pass = builder.Build(GetDevice());
 }

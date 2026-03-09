@@ -873,7 +873,37 @@ void testMain() {
       });
     });
   }, skip: ui_web.browser.isFirefox);
-}
+
+  group('RenderingBackend', () {
+    test('enum has expected values and indices', () {
+      expect(ui.RenderingBackend.values.length, 6);
+      expect(ui.RenderingBackend.opengl.index, 0);
+      expect(ui.RenderingBackend.vulkan.index, 1);
+      expect(ui.RenderingBackend.software.index, 2);
+      expect(ui.RenderingBackend.metal.index, 3);
+      expect(ui.RenderingBackend.canvaskit.index, 4);
+      expect(ui.RenderingBackend.skwasm.index, 5);
+    });
+
+    test('renderingBackend returns canvaskit or skwasm on web', () {
+      final backend = ui.PlatformDispatcher.instance.renderingBackend;
+      expect(
+        backend == ui.RenderingBackend.canvaskit ||
+            backend == ui.RenderingBackend.skwasm,
+        true,
+        reason: 'Web test runner should report canvaskit or skwasm, '
+            'got ${backend.name}',
+      );
+    });
+
+    test('renderingBackend returns canvaskit for CanvasKit renderer', () {
+      // The default web test runner uses CanvasKit.
+      final backend = ui.PlatformDispatcher.instance.renderingBackend;
+      if (renderer is CanvasKitRenderer) {
+        expect(backend, ui.RenderingBackend.canvaskit);
+      }
+    });
+  });
 
 class MockAppLifecycleState extends AppLifecycleState {
   int activeCallCount = 0;

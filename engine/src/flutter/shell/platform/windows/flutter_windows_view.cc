@@ -211,6 +211,16 @@ bool FlutterWindowsView::OnWindowSizeChanged(size_t width, size_t height) {
     return true;
   }
 
+  // When using Vulkan rendering with KHR swapchain mode, Impeller manages
+  // the swapchain internally and recreates it when the surface size changes.
+  // Only the new window metrics need to be forwarded to the engine.
+  if (engine_->vulkan_manager()) {
+    SendWindowMetrics(width, height, binding_handler_->GetDpiScale());
+    // Force a new frame so Impeller's KHR swapchain picks up the new size.
+    ForceRedraw();
+    return true;
+  }
+
   if (!engine_->egl_manager()) {
     SendWindowMetrics(width, height, binding_handler_->GetDpiScale());
     return true;
@@ -781,6 +791,15 @@ bool FlutterWindowsView::IsImplicitView() const {
 void FlutterWindowsView::CreateRenderSurface() {
   FML_DCHECK(surface_ == nullptr);
 
+  // When using Vulkan rendering, no EGL surface is created.
+  // Impeller manages its own Vulkan surfaces and swapchain.
+  if (engine_->vulkan_manager()) {
+    PhysicalWindowBounds bounds = binding_handler_->GetPhysicalWindowBounds();
+    resize_target_width_ = bounds.width;
+    resize_target_height_ = bounds.height;
+    return;
+  }
+
   if (engine_->egl_manager()) {
     PhysicalWindowBounds bounds = binding_handler_->GetPhysicalWindowBounds();
     surface_ = engine_->egl_manager()->CreateWindowSurface(
@@ -845,6 +864,10 @@ HWND FlutterWindowsView::GetWindowHandle() const {
 
 FlutterWindowsEngine* FlutterWindowsView::GetEngine() const {
   return engine_;
+}
+
+void FlutterWindowsView::SetFlutterCursor(HCURSOR cursor) {
+  binding_handler_->SetFlutterCursor(cursor);
 }
 
 void FlutterWindowsView::AnnounceAlert(const std::wstring& text) {

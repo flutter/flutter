@@ -131,6 +131,8 @@ source_set("flutter_windows_source") {
     "text_input_manager.h",
     "text_input_plugin.cc",
     "text_input_plugin.h",
+    "vulkan_manager.cc",
+    "vulkan_manager.h",
     "wchar_util.cc",
     "wchar_util.h",
     "window_binding_handler.h",
@@ -182,6 +184,7 @@ source_set("flutter_windows_source") {
     "//flutter/shell/platform/common/client_wrapper",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/platform/windows/client_wrapper:client_wrapper_windows",
+    "//flutter/vulkan/procs",
 
     # libEGL_static MUST be ordered before libGLESv2_static in this list. If
     # reversed, a linker error will occur, reporting DllMain already defined in
@@ -269,6 +272,7 @@ executable("flutter_windows_unittests") {
     "testing/wm_builders.cc",
     "testing/wm_builders.h",
     "text_input_plugin_unittest.cc",
+    "vulkan_manager_unittests.cc",
     "window_manager_unittests.cc",
     "window_proc_delegate_manager_unittests.cc",
     "window_unittests.cc",

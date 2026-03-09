@@ -39,6 +39,35 @@ TrackedObjectsVK::~TrackedObjectsVK() {
   pool_->CollectCommandBuffer(std::move(buffer_));
 }
 
+void TrackedObjectsVK::AbandonForDriverCrash() {
+  if (!buffer_) {
+    return;
+  }
+  // Release the command buffer handle without returning it to the pool.
+  // The pool is also abandoned so that neither vkFreeCommandBuffers nor
+  // vkDestroyCommandPool is called on the now-invalid driver-side handles.
+  buffer_.release();
+  if (pool_) {
+    pool_->AbandonForDriverCrash();
+  }
+  // Release all VkDescriptorPool handles to prevent vkDestroyDescriptorPool
+  // calls on the corrupted device.
+  if (desc_pool_) {
+    desc_pool_->AbandonForDriverCrash();
+  }
+  // Clear tracked resource lists. If this TrackedObjectsVK is the last holder
+  // of these shared_ptrs their destructors would call vkDestroyBuffer /
+  // vkDestroyImage etc. on the corrupted device. Clearing here is safe
+  // because in the common case (pipeline objects, cached textures) other
+  // owners still hold the resources, so no destructor fires. In the rare
+  // case where we ARE the last owner we accept the potential for a Vulkan
+  // cleanup call - it is better than the guaranteed crash from waitIdle or
+  // vkCreateCommandPool on a driver in a corrupted OOM state.
+  tracked_objects_.clear();
+  tracked_buffers_.clear();
+  tracked_textures_.clear();
+}
+
 bool TrackedObjectsVK::IsValid() const {
   return is_valid_;
 }

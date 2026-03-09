@@ -7,6 +7,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/base/config.h"
+#include "impeller/core/allocator.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/renderer/backend/vulkan/workarounds_vk.h"
 #include "impeller/renderer/blit_pass.h"
@@ -27,9 +28,11 @@ class BlitPassVK final : public BlitPass {
                   MipmapGenerationTransitionsAllLevelsCorrectly);
 
   std::shared_ptr<CommandBufferVK> command_buffer_;
+  std::shared_ptr<Allocator> allocator_;
   const WorkaroundsVK workarounds_;
 
   explicit BlitPassVK(std::shared_ptr<CommandBufferVK> command_buffer,
+                      std::shared_ptr<Allocator> allocator,
                       const WorkaroundsVK& workarounds);
 
   // |BlitPass|

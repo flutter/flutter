@@ -179,6 +179,9 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
   // [FlutterWindowBindingHandler]
   virtual FlutterEngineDisplayId GetDisplayId() override;
 
+  // |WindowBindingHandler|
+  virtual void SetFlutterCursor(HCURSOR cursor) override;
+
   // Called when a theme change message is issued.
   virtual void OnThemeChange();
 
@@ -332,6 +335,11 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
 
   // The cursor rect set by Flutter.
   RECT cursor_rect_;
+
+  // The current cursor set by the Flutter framework. Defaults to the standard
+  // arrow cursor. Restored in WM_SETCURSOR to prevent stale cursors from
+  // persisting when the mouse re-enters the client area from non-client areas.
+  HCURSOR current_cursor_ = LoadCursor(nullptr, IDC_ARROW);
 
   // The window receives resize and focus messages before its view is set, so
   // these values cache the state of the window in the meantime so that the

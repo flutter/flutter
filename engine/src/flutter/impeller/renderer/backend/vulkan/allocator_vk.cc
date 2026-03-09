@@ -7,6 +7,13 @@
 #include <memory>
 #include <utility>
 
+#include "flutter/fml/build_config.h"
+
+#ifdef FML_OS_WIN
+#include <psapi.h>
+#include <windows.h>
+#endif  // FML_OS_WIN
+
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/allocation_size.h"
@@ -19,6 +26,13 @@
 #include "vulkan/vulkan_enums.hpp"
 
 namespace impeller {
+
+// Maximum number of VMA buffer pool blocks. 256 blocks x 4 MB = 1 GB.
+// Caps pool growth under high-water-mark buffer demand spikes.
+static constexpr uint32_t kMaxBufferPoolBlocks = 256;
+
+// Bytes-per-megabyte divisor for diagnostic logging.
+static constexpr size_t kBytesPerMB = 1024 * 1024;
 
 static constexpr vk::Flags<vk::MemoryPropertyFlagBits>
 ToVKBufferMemoryPropertyFlags(StorageMode mode) {
@@ -87,6 +101,11 @@ static PoolVMA CreateBufferPool(VmaAllocator allocator) {
   pool_create_info.memoryTypeIndex = memTypeIndex;
   pool_create_info.flags = VMA_POOL_CREATE_IGNORE_BUFFER_IMAGE_GRANULARITY_BIT;
   pool_create_info.minBlockCount = 1;
+  // Cap at 256 blocks x 4 MB = 1 GB. Without a cap, VMA grows this pool
+  // without bound when high-water-mark buffer demand spikes (e.g. during
+  // benchmarks), and pool-internal fragmentation may prevent block reuse even
+  // after individual allocations are freed.
+  pool_create_info.maxBlockCount = kMaxBufferPoolBlocks;
 
   VmaPool pool = {};
   result = vk::Result{::vmaCreatePool(allocator, &pool_create_info, &pool)};
@@ -396,6 +415,7 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
     if (result != vk::Result::eSuccess) {
       VALIDATION_LOG << "Unable to create an image view for allocation: "
                      << vk::to_string(result);
+      vmaDestroyImage(allocator, vk_image, allocation);
       return;
     }
     // Create a specialized view for render target attachments.
@@ -404,6 +424,7 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
     if (rt_result != vk::Result::eSuccess) {
       VALIDATION_LOG << "Unable to create an image view for allocation: "
                      << vk::to_string(rt_result);
+      vmaDestroyImage(allocator, vk_image, allocation);
       return;
     }
 
@@ -569,6 +590,61 @@ void AllocatorVK::DebugTraceMemoryStatistics() const {
                     "MemoryBudgetUsageMB",
                     DebugGetHeapUsage().ConvertTo<MebiBytes>().GetSize());
 #endif  // IMPELLER_DEBUG
+
+#ifdef FML_OS_WIN
+  // On Windows with Resizable BAR (AMD RDNA, Intel Arc), the GPU driver maps
+  // all VRAM into the process address space, inflating the working set far
+  // beyond actual CPU-side usage. Periodically trim the working set when RSS
+  // is disproportionately large relative to actual VMA allocations.
+  //
+  // The trim is rate-limited to once every ~5 seconds (300 frames at 60 fps)
+  // to avoid thrashing. We only act when:
+  //   1. VMA allocations are small (< 256 MB) - the driver BAR mapping is
+  //      responsible for the bloat, not actual GPU memory pressure.
+  //   2. RSS exceeds 1 GB and is > 4x VMA usage - confirms the working set
+  //      is dominated by driver-mapped pages, not application data.
+  //
+  // EmptyWorkingSet moves pages to the standby list without freeing them;
+  // they are faulted back in on next access, so the cost is minimal for
+  // pages that are actively used.
+  {
+    static constexpr size_t kTrimCooldownFrames = 300;  // ~5 s at 60 fps.
+    static constexpr size_t kMinRssMB = 1024;
+    static constexpr size_t kMaxVmaMB = 256;
+    static constexpr size_t kRssToVmaRatio = 4;
+
+    static thread_local int trim_cooldown = 0;
+    if (trim_cooldown > 0) {
+      --trim_cooldown;
+    }
+
+    if (trim_cooldown == 0) {
+      // Use vmaGetHeapBudgets instead of vmaCalculateStatistics —
+      // O(heap_count) vs O(allocations).
+      auto heap_count = memory_properties_.memoryHeapCount;
+      std::vector<VmaBudget> budgets(heap_count);
+      vmaGetHeapBudgets(allocator_.get(), budgets.data());
+      size_t total_usage = 0;
+      for (uint32_t i = 0; i < heap_count; i++) {
+        total_usage += budgets[i].usage;
+      }
+      size_t vma_mb = total_usage / kBytesPerMB;
+
+      if (vma_mb < kMaxVmaMB) {
+        PROCESS_MEMORY_COUNTERS pmc = {};
+        pmc.cb = sizeof(pmc);
+        if (::GetProcessMemoryInfo(::GetCurrentProcess(), &pmc, sizeof(pmc))) {
+          size_t rss_mb = pmc.WorkingSetSize / kBytesPerMB;
+          if (rss_mb > kMinRssMB && rss_mb > vma_mb * kRssToVmaRatio) {
+            trim_cooldown = kTrimCooldownFrames;
+            ::EmptyWorkingSet(::GetCurrentProcess());
+            FML_DLOG(INFO) << "Working set trimmed: " << rss_mb << " MB";
+          }
+        }
+      }
+    }
+  }
+#endif  // FML_OS_WIN
 }
 
 }  // namespace impeller

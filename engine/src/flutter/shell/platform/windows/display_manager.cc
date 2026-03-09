@@ -13,6 +13,9 @@ namespace flutter {
 
 namespace {
 
+// 32-bit bitmask to strip sign-extension from HMONITOR handles.
+static constexpr uintptr_t kHmonitor32BitMask = 0xFFFFFFFF;
+
 // Data structure to pass to the display enumeration callback.
 struct MonitorEnumState {
   const DisplayManagerWin32* display_manager;
@@ -45,7 +48,13 @@ std::optional<FlutterEngineDisplay> DisplayManagerWin32::FromMonitor(
 
   FlutterEngineDisplay display = {};
   display.struct_size = sizeof(FlutterEngineDisplay);
-  display.display_id = reinterpret_cast<FlutterEngineDisplayId>(monitor);
+  // HMONITOR handles on Windows are internally 32-bit values that may have
+  // the high bit set. A direct reinterpret_cast to uint64_t sign-extends the
+  // value (e.g. 0xE02E16A5 -> 0xFFFFFFFFE02E16A5), which overflows tonic's
+  // DartConverter<unsigned long long> assertion. Mask to 32 bits to produce
+  // a valid uint64_t display identifier.
+  display.display_id = static_cast<FlutterEngineDisplayId>(
+      reinterpret_cast<uintptr_t>(monitor) & kHmonitor32BitMask);
   display.single_display = false;
   display.refresh_rate = dev_mode.dmDisplayFrequency;
   display.width = monitor_info.rcMonitor.right - monitor_info.rcMonitor.left;

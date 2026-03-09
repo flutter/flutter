@@ -250,6 +250,11 @@ void FlutterDesktopEngineSetNextFrameCallback(FlutterDesktopEngineRef engine,
       [callback, user_data]() { callback(user_data); });
 }
 
+FlutterDesktopRendererType FlutterDesktopEngineGetRenderingBackend(
+    FlutterDesktopEngineRef engine) {
+  return EngineFromHandle(engine)->GetRenderingBackend();
+}
+
 HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef view) {
   return ViewFromHandle(view)->GetWindowHandle();
 }

@@ -127,7 +127,8 @@ static void ReportPipelineCreationFeedback(
 ///
 static vk::UniqueRenderPass CreateCompatRenderPassForPipeline(
     const vk::Device& device,
-    const PipelineDescriptor& desc) {
+    const PipelineDescriptor& desc,
+    bool supports_framebuffer_fetch) {
   RenderPassBuilderVK builder;
 
   for (const auto& [bind_point, color] : desc.GetColorAttachmentDescriptors()) {
@@ -153,6 +154,8 @@ static vk::UniqueRenderPass CreateCompatRenderPassForPipeline(
                                  StoreAction::kDontCare         //
     );
   }
+
+  builder.SetFramebufferFetchEnabled(supports_framebuffer_fetch);
 
   auto pass = builder.Build(device);
   if (!pass) {
@@ -489,8 +492,10 @@ std::unique_ptr<PipelineVK> PipelineVK::Create(
     return nullptr;
   }
 
-  vk::UniqueRenderPass render_pass =
-      CreateCompatRenderPassForPipeline(device_holder->GetDevice(), desc);
+  const auto* caps = pso_cache->GetCapabilities();
+  vk::UniqueRenderPass render_pass = CreateCompatRenderPassForPipeline(
+      device_holder->GetDevice(), desc,
+      caps != nullptr && caps->SupportsFramebufferFetch());
   if (!render_pass) {
     VALIDATION_LOG << "Could not create render pass for pipeline.";
     return nullptr;

@@ -297,6 +297,13 @@ abstract class DesktopDevice extends Device {
     switch (debuggingOptions.enableImpeller) {
       case ImpellerStatus.enabled:
         addFlag('enable-impeller=true');
+        // Request Vulkan backend for Impeller on Linux and Windows.
+        // macOS uses Metal natively and does not support Vulkan.
+        // The engine silently ignores this flag when Vulkan is unavailable
+        // and falls back to ANGLE/OpenGL.
+        if (platformType == PlatformType.linux || platformType == PlatformType.windows) {
+          addFlag('impeller-backend=vulkan');
+        }
       case ImpellerStatus.disabled:
       case ImpellerStatus.platformDefault:
         addFlag('enable-impeller=false');

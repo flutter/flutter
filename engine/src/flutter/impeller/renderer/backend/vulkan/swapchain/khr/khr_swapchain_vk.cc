@@ -80,7 +80,20 @@ std::unique_ptr<Surface> KHRSwapchainVK::AcquireNextDrawable(
     return nullptr;
   }
 
-  size_ = impl_->GetCurrentUnderlyingSurfaceSize().value_or(size_);
+  {
+    auto surface_size = impl_->GetCurrentUnderlyingSurfaceSize();
+    if (surface_size.has_value()) {
+      if (surface_size->IsEmpty()) {
+        // Minimized or occluded window - surface has zero extent. Skip this
+        // frame but preserve size_ so recovery works when the window is
+        // restored. The rendering loop will keep calling AcquireNextDrawable
+        // and eventually GetCurrentUnderlyingSurfaceSize() will return a
+        // non-zero value.
+        return nullptr;
+      }
+      size_ = surface_size.value();
+    }
+  }
 #endif  // !FML_OS_ANDROID
 
   TRACE_EVENT0("impeller", "RecreateSwapchain");

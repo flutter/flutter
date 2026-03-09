@@ -1074,4 +1074,65 @@ TEST(FlEngineTest, ChildObjects) {
   EXPECT_NE(fl_engine_get_mouse_cursor_handler(engine), nullptr);
 }
 
+// Checks FLUTTER_LINUX_RENDERER env var defaults to OpenGL when unset.
+TEST(FlEngineTest, RendererTypeDefaultsToOpenGL) {
+  g_unsetenv("FLUTTER_LINUX_RENDERER");
+
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+
+  EXPECT_EQ(fl_engine_get_renderer_type(engine), kOpenGL);
+}
+
+// Checks FLUTTER_LINUX_RENDERER=software selects software rendering.
+TEST(FlEngineTest, RendererTypeSoftware) {
+  g_setenv("FLUTTER_LINUX_RENDERER", "software", TRUE);
+
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+
+  EXPECT_EQ(fl_engine_get_renderer_type(engine), kSoftware);
+
+  g_unsetenv("FLUTTER_LINUX_RENDERER");
+}
+
+// Checks FLUTTER_LINUX_RENDERER=opengl selects OpenGL rendering.
+TEST(FlEngineTest, RendererTypeOpenGL) {
+  g_setenv("FLUTTER_LINUX_RENDERER", "opengl", TRUE);
+
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+
+  EXPECT_EQ(fl_engine_get_renderer_type(engine), kOpenGL);
+
+  g_unsetenv("FLUTTER_LINUX_RENDERER");
+}
+
+// Checks FLUTTER_LINUX_RENDERER=unknown falls back to OpenGL.
+TEST(FlEngineTest, RendererTypeUnknownFallsBackToOpenGL) {
+  g_setenv("FLUTTER_LINUX_RENDERER", "unknown_renderer", TRUE);
+
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+
+  EXPECT_EQ(fl_engine_get_renderer_type(engine), kOpenGL);
+
+  g_unsetenv("FLUTTER_LINUX_RENDERER");
+}
+
+// Checks FLUTTER_LINUX_RENDERER=vulkan selects Vulkan when available,
+// or falls back to OpenGL when Vulkan is not supported.
+TEST(FlEngineTest, RendererTypeVulkan) {
+  g_setenv("FLUTTER_LINUX_RENDERER", "vulkan", TRUE);
+
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+
+  // Result depends on runtime Vulkan availability.
+  FlutterRendererType type = fl_engine_get_renderer_type(engine);
+  EXPECT_TRUE(type == kVulkan || type == kOpenGL);
+
+  g_unsetenv("FLUTTER_LINUX_RENDERER");
+}
+
 // NOLINTEND(clang-analyzer-core.StackAddressEscape)

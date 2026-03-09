@@ -930,6 +930,9 @@ typedef void* FlutterVulkanQueueHandle;
 /// Alias for VkImage.
 typedef uint64_t FlutterVulkanImageHandle;
 
+/// Alias for VkSurfaceKHR.
+typedef uint64_t FlutterVulkanSurfaceHandle;
+
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterVulkanImage).
   size_t struct_size;
@@ -1021,6 +1024,32 @@ typedef struct {
   /// without any additional synchronization.
   /// Not used if a FlutterCompositor is supplied in FlutterProjectArgs.
   FlutterVulkanPresentCallback present_image_callback;
+
+  /// An optional VkSurfaceKHR handle for KHR swapchain mode.
+  ///
+  /// When non-null, the engine manages swapchain creation, image acquisition,
+  /// and presentation internally via Impeller's KHR swapchain implementation
+  /// (the same code path used by Android). In this mode,
+  /// `get_next_image_callback` and `present_image_callback` are not used —
+  /// the engine handles all swapchain operations automatically including
+  /// frame throttling, synchronization, and resource lifecycle management.
+  ///
+  /// When null (default/legacy), the embedder must provide images via
+  /// `get_next_image_callback` and `present_image_callback`.
+  ///
+  /// The VkSurfaceKHR must be created from the platform's windowing system
+  /// (e.g. vkCreateWin32SurfaceKHR on Windows, vkCreateXlibSurfaceKHR on
+  /// Linux). Unlike other handles in this struct (instance, device, queue)
+  /// which are owned by the embedder, the engine takes ownership of the
+  /// surface and will destroy it during shutdown -- the caller must not
+  /// destroy or reuse it.
+  ///
+  /// Ignored if a `FlutterCompositor` is supplied in `FlutterProjectArgs`.
+  ///
+  /// This field is backward-compatible: embedders compiled against older
+  /// versions of this header will have a smaller struct_size that excludes
+  /// this field, and the engine will fall back to the delegate path.
+  FlutterVulkanSurfaceHandle surface;
 
 } FlutterVulkanRendererConfig;
 

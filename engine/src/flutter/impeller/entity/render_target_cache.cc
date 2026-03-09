@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "impeller/entity/render_target_cache.h"
+
 #include "impeller/core/formats.h"
 #include "impeller/renderer/render_target.h"
 
@@ -32,6 +33,7 @@ void RenderTargetCache::End() {
       retain.push_back(td);
     }
   }
+
   render_target_data_.swap(retain);
 }
 
