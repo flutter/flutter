@@ -484,7 +484,7 @@ void main() {
     await SwiftPackageManagerUtils.buildApp(
       flutterBin,
       appDirectoryPath,
-      options: <String>['ios-framework', '--no-debug', '--no-profile', '-v'],
+      options: <String>['ios-framework', '--no-debug', '--no-profile', '--no-codesign', '-v'],
       unexpectedLines: <String>[
         'Adding Swift Package Manager integration...',
         'Swift Package Manager does not yet support this command. CocoaPods will be used instead.',
@@ -537,7 +537,14 @@ void main() {
     await SwiftPackageManagerUtils.buildApp(
       flutterBin,
       appDirectoryPath,
-      options: <String>['ios-framework', '--xcframework', '--no-debug', '--no-profile', '-v'],
+      options: <String>[
+        'ios-framework',
+        '--xcframework',
+        '--no-debug',
+        '--no-profile',
+        '--no-codesign',
+        '-v',
+      ],
       expectedLines: <String>[
         'Swift Package Manager does not yet support this command. CocoaPods will be used instead.',
       ],

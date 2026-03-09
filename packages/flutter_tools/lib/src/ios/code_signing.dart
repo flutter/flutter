@@ -30,20 +30,30 @@ const _codeSignSelectionCanceled = 'Code-signing setup canceled. Your changes ha
 /// User message when no development certificates are found in the keychain.
 ///
 /// The user likely never did any iOS development.
-const noCertificatesInstruction =
-    '''
-════════════════════════════════════════════════════════════════════════════════
+const noCertificatesFound = '''
 No valid code signing certificates were found
 You can connect to your Apple Developer account by signing in with your Apple ID
 in Xcode and create an iOS Development Certificate as well as a Provisioning\u0020
 Profile for your project by:
-$fixWithDevelopmentTeamInstruction
+$fixWithDevelopmentTeamInstruction''';
+
+const noCertificatesFoundMoreInfo = '''
+For more information, please visit:
+  https://developer.apple.com/library/content/documentation/IDEs/Conceptual/
+  AppDistributionGuide/MaintainingCertificates/MaintainingCertificates.html''';
+
+/// User message when no development certificates are found in the keychain with guidance to trust
+/// the certificate on the device or use simulator.
+///
+/// The user likely never did any iOS development.
+const noCertificatesInstruction =
+    '''
+════════════════════════════════════════════════════════════════════════════════
+$noCertificatesFound
   5- Trust your newly created Development Certificate on your iOS device
      via Settings > General > Device Management > [your new certificate] > Trust
 
-For more information, please visit:
-  https://developer.apple.com/library/content/documentation/IDEs/Conceptual/
-  AppDistributionGuide/MaintainingCertificates/MaintainingCertificates.html
+$noCertificatesFoundMoreInfo
 
 Or run on an iOS simulator without code signing
 ════════════════════════════════════════════════════════════════════════════════''';
@@ -328,12 +338,12 @@ class XcodeCodeSigningSettings {
       _logger.printTrace('Unable to get code-sign settings on non-Mac platform.');
       return null;
     }
-    final bool toolsValidated = await _validateCodeSignSearchTools();
+    final bool toolsValidated = await validateCodeSignSearchTools();
     if (!toolsValidated) {
       return null;
     }
 
-    final List<String> validCodeSigningIdentities = await _getSigningIdentities();
+    final List<String> validCodeSigningIdentities = await getSigningIdentities();
     if (validCodeSigningIdentities.isEmpty) {
       if (shouldExitOnNoCerts) {
         _logger.printError(noCertificatesInstruction, emphasis: true);
@@ -378,7 +388,11 @@ class XcodeCodeSigningSettings {
 
     String? identity;
     if (savedCertChoice != null) {
-      identity = _validateSavedIdentity(savedCertChoice, validCodeSigningIdentities);
+      identity = _validateSavedIdentity(
+        savedCertChoice,
+        validCodeSigningIdentities,
+        printStatus: true,
+      );
       if (identity == null) {
         _logger.printError(
           'Saved signing certificate "$savedCertChoice" is not a valid development '
@@ -398,12 +412,38 @@ class XcodeCodeSigningSettings {
       }
     }
 
-    final String? developmentTeam = await _getDevelopmentTeamFromIdentity(identity);
+    final String? developmentTeam = await getDevelopmentTeamFromIdentity(identity);
     if (developmentTeam == null) {
       return null;
     }
     _logger.printStatus('Developer identity "$identity" selected for iOS code signing');
     return <String, String>{_developmentTeamBuildSettingName: developmentTeam};
+  }
+
+  /// Get the [ProvisioningProfile] from the Flutter config if it's saved.
+  Future<ProvisioningProfile?> getProvisioningProfileFromConfig(
+    List<String> validCodeSigningIdentities,
+  ) async {
+    final savedProfile =
+        _config.getValue(XcodeCodeSigningSettings.kConfigCodeSignProvisioningProfile) as String?;
+    if (savedProfile != null) {
+      final ProvisioningProfile? validatedProfile = await _validateSavedProfile(
+        savedProfile,
+        validCodeSigningIdentities,
+      );
+      return validatedProfile;
+    }
+    return null;
+  }
+
+  /// Get the identity from the Flutter config if it's saved.
+  Future<String?> getIdentityFromCertFromConfig(List<String> validCodeSigningIdentities) async {
+    final savedCertChoice =
+        _config.getValue(XcodeCodeSigningSettings.kConfigCodeSignCertificate) as String?;
+    if (savedCertChoice != null) {
+      return _validateSavedIdentity(savedCertChoice, validCodeSigningIdentities);
+    }
+    return null;
   }
 
   void _saveCodeSignIdentity(String identity) {
@@ -417,7 +457,7 @@ class XcodeCodeSigningSettings {
   }
 
   /// Validates that command-line tools `security` and `openssl` are available.
-  Future<bool> _validateCodeSignSearchTools({bool printError = false}) async {
+  Future<bool> validateCodeSignSearchTools({bool printError = false}) async {
     // If the user's environment is missing the tools needed to find and read
     // certificates, abandon. Tools should be pre-equipped on macOS.
     if (!await _processUtils.exitsHappy(const <String>['which', 'security']) ||
@@ -433,7 +473,7 @@ class XcodeCodeSigningSettings {
   }
 
   /// Get list of code-signing identities.
-  Future<List<String>> _getSigningIdentities() async {
+  Future<List<String>> getSigningIdentities() async {
     String findIdentityStdout;
     try {
       findIdentityStdout = (await _processUtils.run(<String>[
@@ -541,6 +581,16 @@ class XcodeCodeSigningSettings {
     File certificate,
     List<String> validCodeSigningIdentities,
   ) async {
+    final String? commonName = await commonNameForCertificate(certificate);
+    if (commonName == null) {
+      _logger.printError('Unable to extract Common Name from certificate.');
+      return null;
+    }
+    return validCodeSigningIdentities.where((String id) => id.contains(commonName)).firstOrNull;
+  }
+
+  /// Extract the Common Name from the [certificate].
+  Future<String?> commonNameForCertificate(File certificate) async {
     final String resultsStdOut;
     try {
       final RunResult results = await _processUtils.run(<String>[
@@ -557,25 +607,26 @@ class XcodeCodeSigningSettings {
       _logger.printError('Unexpected failure from openssl: $error.');
       return null;
     }
-
     final String? commonName = _certificateCommonNameExtractionPattern
         .firstMatch(resultsStdOut)
         ?.group(1);
-    if (commonName == null) {
-      _logger.printError('Unable to extract Common Name from certificate.');
-      return null;
-    }
-    return validCodeSigningIdentities.where((String id) => id.contains(commonName)).firstOrNull;
+    return commonName;
   }
 
   /// Returns [identity] if it is found within [validCodeSigningIdentities] and
   /// prints a message that it was found.
-  String? _validateSavedIdentity(String identity, List<String> validCodeSigningIdentities) {
+  String? _validateSavedIdentity(
+    String identity,
+    List<String> validCodeSigningIdentities, {
+    bool printStatus = false,
+  }) {
     if (validCodeSigningIdentities.contains(identity)) {
-      _logger.printStatus(
-        'Found saved certificate choice "$identity". To clear, use "flutter config '
-        '--clear-ios-signing-settings".',
-      );
+      if (printStatus) {
+        _logger.printStatus(
+          'Found saved certificate choice "$identity". To clear, use "flutter config '
+          '--clear-ios-signing-settings".',
+        );
+      }
       return identity;
     }
     return null;
@@ -583,7 +634,7 @@ class XcodeCodeSigningSettings {
 
   /// Find the certificate for the [identity] and extract the development team /
   /// organizational unit from the certificate.
-  Future<String?> _getDevelopmentTeamFromIdentity(String identity) async {
+  Future<String?> getDevelopmentTeamFromIdentity(String identity) async {
     final String? signingCertificateId = _securityFindIdentityCertificateCnExtractionPattern
         .firstMatch(identity)
         ?.group(1);
@@ -659,7 +710,7 @@ class XcodeCodeSigningSettings {
     }
     _terminal.usesTerminalUi = true;
 
-    final bool toolsValidated = await _validateCodeSignSearchTools(printError: true);
+    final bool toolsValidated = await validateCodeSignSearchTools(printError: true);
     if (!toolsValidated) {
       return;
     }
@@ -684,7 +735,7 @@ class XcodeCodeSigningSettings {
     }
 
     if (style == _CodeSigningStyle.automatic) {
-      final List<String> validCodeSigningIdentities = await _getSigningIdentities();
+      final List<String> validCodeSigningIdentities = await getSigningIdentities();
       if (validCodeSigningIdentities.isEmpty) {
         _logger.printError(noCertificatesInstruction, emphasis: true);
         _logger.printWarning(_codeSignSelectionCanceled);
@@ -696,7 +747,7 @@ class XcodeCodeSigningSettings {
         return;
       }
     } else if (style == _CodeSigningStyle.manual) {
-      final List<ProvisioningProfile> validProvisioningProfiles = await _getProvisioningProfiles();
+      final List<ProvisioningProfile> validProvisioningProfiles = await getProvisioningProfiles();
       if (validProvisioningProfiles.isEmpty) {
         _logger.printError(
           'No provisioning profiles were found. To learn how to create or download '
@@ -805,7 +856,7 @@ class XcodeCodeSigningSettings {
   /// Get list of provisioning profiles from `~/Library/Developer/Xcode/UserData/Provisioning\ Profiles`.
   ///
   /// Only return non-Xcode-managed profiles with matching valid identities.
-  Future<List<ProvisioningProfile>> _getProvisioningProfiles() async {
+  Future<List<ProvisioningProfile>> getProvisioningProfiles({List<String>? validIdentities}) async {
     final Directory? profileDirectory = getProvisioningProfileDirectory(
       fileSystemUtils: _fileSystemUtils,
       fileSystem: _fileSystem,
@@ -815,7 +866,7 @@ class XcodeCodeSigningSettings {
       return <ProvisioningProfile>[];
     }
 
-    final List<String> validCodeSigningIdentities = await _getSigningIdentities();
+    final List<String> validCodeSigningIdentities = validIdentities ?? await getSigningIdentities();
 
     final profiles = <ProvisioningProfile>[];
     for (final FileSystemEntity entity in profileDirectory.listSync()) {

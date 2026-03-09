@@ -151,6 +151,8 @@ abstract final class FlutterOptions {
   static const kWebWasmFlag = 'wasm';
   static const kWebExperimentalHotReload = 'web-experimental-hot-reload';
   static const kEnableImpeller = 'enable-impeller';
+  static const kCodesignIdentity = 'codesign-identity';
+  static const kCodesign = 'codesign';
 }
 
 /// flutter command categories for usage.
@@ -1202,6 +1204,20 @@ abstract class FlutterCommand extends Command<void> {
           'Supports the use of product flavors in Android Gradle scripts, and '
           'the use of custom Xcode schemes.\n'
           'Overrides the value of the "default-flavor" entry in the flutter pubspec.',
+    );
+  }
+
+  void usesCodeSignXCFrameworksOption() {
+    argParser.addFlag(
+      FlutterOptions.kCodesign,
+      defaultsTo: true,
+      help: 'Whether to code-sign XCFrameworks.',
+    );
+    argParser.addOption(
+      FlutterOptions.kCodesignIdentity,
+      help:
+          'The identity to use for code-signing XCFrameworks. To see list of valid identities run '
+          '"security find-identity -p codesigning -v"',
     );
   }
 
