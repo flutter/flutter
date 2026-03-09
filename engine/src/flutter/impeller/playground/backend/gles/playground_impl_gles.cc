@@ -51,9 +51,6 @@ class PlaygroundImplGLES::ReactorWorker final : public ReactorGLES::Worker {
     reactions_allowed_[std::this_thread::get_id()] = allowed;
   }
 
-  bool IsGLES3() { return is_gles3_; }
-  void SetIsGLES3(bool is_gles3) { is_gles3_ = is_gles3; }
-
  private:
   mutable RWMutex mutex_;
   std::map<std::thread::id, bool> reactions_allowed_ IPLR_GUARDED_BY(mutex_);
@@ -193,7 +190,6 @@ std::shared_ptr<Context> PlaygroundImplGLES::GetContext() const {
 #endif
   }
   bool is_gles3 = gl->GetDescription()->GetGlVersion().IsAtLeast(Version(3));
-  worker_->SetIsGLES3(is_gles3);
   auto context =
       ContextGLES::Create(switches_.flags, std::move(gl),
                           ShaderLibraryMappingsForPlayground(is_gles3), true);
@@ -262,8 +258,15 @@ fml::Status PlaygroundImplGLES::SetCapabilities(
 }
 
 RuntimeStageBackend PlaygroundImplGLES::GetRuntimeStageBackend() const {
-  return worker_->IsGLES3() ? RuntimeStageBackend::kOpenGLES3
-                            : RuntimeStageBackend::kOpenGLES;
+  const auto gl =
+      std::make_unique<ProcTableGLES>(CreateGLProcAddressResolver());
+  if (!gl->IsValid()) {
+    FML_LOG(ERROR) << "Proc table was invalid. Assuming baseline OpenGL ES";
+    return RuntimeStageBackend::kOpenGLES;
+  }
+  bool is_gles3 = gl->GetDescription()->GetGlVersion().IsAtLeast(Version(3));
+  return is_gles3 ? RuntimeStageBackend::kOpenGLES3
+                  : RuntimeStageBackend::kOpenGLES;
 }
 
 }  // namespace impeller
