@@ -20,10 +20,10 @@ import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../darwin/darwin.dart';
+import '../darwin/xcode_build_failure_diagnostics.dart';
 import '../device.dart';
 import '../features.dart';
 import '../flutter_manifest.dart';
-import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
 import '../macos/swift_package_manager.dart';
@@ -35,7 +35,6 @@ import '../migrations/uiscene_migration.dart';
 import '../migrations/xcode_project_object_version_migration.dart';
 import '../migrations/xcode_script_build_phase_migration.dart';
 import '../migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
-import '../plugins.dart';
 import '../project.dart';
 import 'application_package.dart';
 import 'code_signing.dart';
@@ -1006,7 +1005,7 @@ _XCResultIssueHandlingResult _handleXCResultIssue({
       );
     }
   } else if (message.toLowerCase().contains('redefinition of module')) {
-    final String? duplicateModule = _parseModuleRedefinition(message);
+    final String? duplicateModule = XcodeBuildFailureDiagnostics.parseModuleRedefinition(message);
     return _XCResultIssueHandlingResult(
       requiresProvisioningProfile: false,
       hasProvisioningProfileIssue: false,
@@ -1016,7 +1015,9 @@ _XCResultIssueHandlingResult _handleXCResultIssue({
     // The message does not contain the plugin name, must parse the stdout.
     String? duplicateModule;
     if (result.stdout != null) {
-      duplicateModule = _parseDuplicateSymbols(result.stdout!);
+      duplicateModule = XcodeBuildFailureDiagnostics.analyzeOutput(
+        result.stdout,
+      ).duplicateModules.firstOrNull;
     }
     return _XCResultIssueHandlingResult(
       requiresProvisioningProfile: false,
@@ -1024,7 +1025,7 @@ _XCResultIssueHandlingResult _handleXCResultIssue({
       duplicateModule: duplicateModule,
     );
   } else if (message.toLowerCase().contains('not found')) {
-    final String? missingModule = _parseMissingModule(message);
+    final String? missingModule = XcodeBuildFailureDiagnostics.parseMissingModule(message);
     if (missingModule != null) {
       return _XCResultIssueHandlingResult(
         requiresProvisioningProfile: false,
@@ -1109,8 +1110,8 @@ Future<bool> _handleIssues(
   }
 
   final XcodeBasedProject xcodeProject = platform.xcodeProject(project);
-  final String? swiftPackageManagerMinPlatformMismatchMessage =
-      _swiftPackageManagerMinPlatformMismatchMessageFromStdout(result.stdout);
+  final XcodeBuildFailureOutputAnalysis stdoutDiagnostics =
+      XcodeBuildFailureDiagnostics.analyzeOutput(result.stdout);
 
   if (requiresProvisioningProfile) {
     logger.printError(noProvisioningProfileInstruction, emphasis: true);
@@ -1132,46 +1133,36 @@ Future<bool> _handleIssues(
     logger.printError("Also try selecting 'Product > Build' to fix the problem.");
   } else if (missingPlatform != null) {
     logger.printError(missingPlatformInstructions(missingPlatform), emphasis: true);
-  } else if (swiftPackageManagerMinPlatformMismatchMessage != null) {
-    logger.printError(swiftPackageManagerMinPlatformMismatchMessage, emphasis: true);
+  } else if (stdoutDiagnostics.platformMismatch != null) {
+    logger.printError(
+      _swiftPackageManagerMinPlatformMismatchMessage(stdoutDiagnostics.platformMismatch!),
+      emphasis: true,
+    );
     issueDetected = true;
   } else if (duplicateModules.isNotEmpty) {
     final bool usesCocoapods = xcodeProject.podfile.existsSync();
     final bool usesSwiftPackageManager = xcodeProject.usesSwiftPackageManager;
     if (usesCocoapods && usesSwiftPackageManager) {
       logger.printError(
-        'Your project uses both CocoaPods and Swift Package Manager, which can '
-        'cause the above error. It may be caused by there being both a CocoaPod '
-        'and Swift Package Manager dependency for the following module(s): '
-        '${duplicateModules.join(', ')}.\n\n'
-        'You can try to identify which Pod the conflicting module is from by '
-        'looking at your "ios/Podfile.lock" dependency tree and requesting the '
-        'author add Swift Package Manager compatibility. See https://stackoverflow.com/a/27955017 '
-        'to learn more about understanding Podlock dependency tree. \n\n'
-        '$kDisableSwiftPMInstructions',
+        _mixedDependencyManagerDuplicateModulesMessage(
+          platform: platform,
+          duplicateModules: duplicateModules,
+        ),
       );
     }
   } else if (missingModules.isNotEmpty) {
     final bool usesCocoapods = xcodeProject.podfile.existsSync();
     final bool usesSwiftPackageManager = xcodeProject.usesSwiftPackageManager;
     if (usesCocoapods && !usesSwiftPackageManager) {
-      final swiftPackageOnlyPlugins = <String>[];
-      for (final module in missingModules) {
-        if (await _isPluginSwiftPackageOnly(
-          platform: platform,
-          project: project,
-          pluginName: module,
-          fileSystem: fileSystem,
-        )) {
-          swiftPackageOnlyPlugins.add(module);
-        }
-      }
+      final List<String> swiftPackageOnlyPlugins =
+          await XcodeBuildFailureDiagnostics.findSwiftPackageOnlyPlugins(
+            platform: platform,
+            project: project,
+            pluginNames: missingModules,
+            fileSystem: fileSystem,
+          );
       if (swiftPackageOnlyPlugins.isNotEmpty) {
-        logger.printError(
-          'Your project uses CocoaPods as a dependency manager, but the following '
-          'plugin(s) only support Swift Package Manager: ${swiftPackageOnlyPlugins.join(', ')}.\n'
-          'Try enabling Swift Package Manager with "flutter config --enable-swift-package-manager".',
-        );
+        logger.printError(_swiftPackageOnlyPluginsInCocoapodsMessage(swiftPackageOnlyPlugins));
       }
     }
   } else if (modifiedPrecompiledSource) {
@@ -1218,36 +1209,6 @@ Future<bool> _simulatorSupportsIntel(Device device) async {
 }
 
 /// Returns true if a Package.swift is found for the plugin and a podspec is not.
-Future<bool> _isPluginSwiftPackageOnly({
-  required FlutterDarwinPlatform platform,
-  required FlutterProject project,
-  required String pluginName,
-  required FileSystem fileSystem,
-}) async {
-  final List<Plugin> plugins = await findPlugins(project);
-  final Plugin? matched = plugins
-      .where(
-        (Plugin plugin) =>
-            plugin.name.toLowerCase() == pluginName.toLowerCase() &&
-            plugin.platforms[platform.name] != null,
-      )
-      .firstOrNull;
-  if (matched == null) {
-    return false;
-  }
-  final String? swiftPackagePath = matched.pluginSwiftPackageManifestPath(
-    fileSystem,
-    platform.name,
-  );
-  final bool swiftPackageExists =
-      swiftPackagePath != null && fileSystem.file(swiftPackagePath).existsSync();
-
-  final String? podspecPath = matched.pluginPodspecPath(fileSystem, platform.name);
-  final bool podspecExists = podspecPath != null && fileSystem.file(podspecPath).existsSync();
-
-  return swiftPackageExists && !podspecExists;
-}
-
 // Return 'true' a missing development team issue is detected.
 bool _missingDevelopmentTeam(XcodeBuildExecution? xcodeBuildExecution) {
   // Make sure the user has specified one of:
@@ -1305,91 +1266,39 @@ String? _parseMissingPlatform(String message) {
   return pattern.firstMatch(message)?.group(1);
 }
 
-String? _swiftPackageManagerMinPlatformMismatchMessageFromStdout(String? stdout) {
-  if (stdout == null || stdout.isEmpty) {
-    return null;
-  }
-
-  final pattern = RegExp(
-    r"The package product '([^']+)' requires minimum platform version "
-    r'([0-9\.]+) for the (iOS|macOS) platform, but this target supports '
-    r"([0-9\.]+)(?: \(in target '([^']+)' from project '[^']+'\))?",
-    caseSensitive: false,
-  );
-
-  // We keep only the highest required version because bumping app minimum
-  // version to that value also satisfies lower plugin requirements.
-  // `highestSupportedVersion` is from the same mismatch to report "from X to Y".
-  String? highestRequiredByProduct;
-  Version? highestRequiredVersion;
-  Version? highestSupportedVersion;
-  for (final RegExpMatch match in pattern.allMatches(stdout)) {
-    final String? requiredByProduct = match.group(1);
-    final Version? requiredMinVersion = Version.parse(match.group(2));
-    final Version? targetSupportedVersion = Version.parse(match.group(4));
-    final String? targetName = match.group(5);
-    if (targetName != kFlutterGeneratedPluginSwiftPackageName) {
-      continue;
-    }
-    if (requiredByProduct == null || requiredMinVersion == null || targetSupportedVersion == null) {
-      continue;
-    }
-    if (highestRequiredVersion == null || requiredMinVersion > highestRequiredVersion) {
-      highestRequiredByProduct = requiredByProduct;
-      highestRequiredVersion = requiredMinVersion;
-      highestSupportedVersion = targetSupportedVersion;
-    }
-  }
-
-  if (highestRequiredByProduct == null ||
-      highestRequiredVersion == null ||
-      highestSupportedVersion == null) {
-    return null;
-  }
-
+String _swiftPackageManagerMinPlatformMismatchMessage(
+  XcodeBuildFailurePlatformMismatch platformMismatch,
+) {
   return '''
-To fix this error, increase your app's minimum platform version from $highestSupportedVersion to at least $highestRequiredVersion or remove the $highestRequiredByProduct dependency.
+To fix this error, increase your app's minimum platform version from ${platformMismatch.supportedVersion} to at least ${platformMismatch.requiredVersion} or remove the ${platformMismatch.requiredByProduct} dependency.
 
 To increase your app's minimum platform version, follow these instructions:
   https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#how-to-use-a-swift-package-manager-flutter-plugin-that-requires-a-higher-os-version
 ''';
 }
 
-String? _parseModuleRedefinition(String message) {
-  // Example: "Redefinition of module 'plugin_1_name'"
-  final pattern = RegExp(r"Redefinition of module '(.*?)'");
-  final RegExpMatch? match = pattern.firstMatch(message);
-  if (match != null && match.groupCount > 0) {
-    final String? version = match.group(1);
-    return version;
-  }
-  return null;
+String _mixedDependencyManagerDuplicateModulesMessage({
+  required FlutterDarwinPlatform platform,
+  required List<String> duplicateModules,
+}) {
+  final podfileLockPath = platform == FlutterDarwinPlatform.ios
+      ? 'ios/Podfile.lock'
+      : 'macos/Podfile.lock';
+  return 'Your project uses both CocoaPods and Swift Package Manager, which can '
+      'cause the above error. It may be caused by there being both a CocoaPod '
+      'and Swift Package Manager dependency for the following module(s): '
+      '${duplicateModules.join(', ')}.\n\n'
+      'You can try to identify which Pod the conflicting module is from by '
+      'looking at your "$podfileLockPath" dependency tree and requesting the '
+      'author add Swift Package Manager compatibility. See https://stackoverflow.com/a/27955017 '
+      'to learn more about understanding Podlock dependency tree. \n\n'
+      '$kDisableSwiftPMInstructions';
 }
 
-String? _parseDuplicateSymbols(String message) {
-  // Example: "duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_SdtF' in:
-  //             /Users/username/path/to/app/build/ios/Debug-iphonesimulator/plugin_1_name/plugin_1_name.framework/plugin_1_name[arm64][5](PluginNamePlugin.o)
-  final pattern = RegExp(r'duplicate symbol [\s|\S]*?\/(.*)\.o');
-  final RegExpMatch? match = pattern.firstMatch(message);
-  if (match != null && match.groupCount > 0) {
-    final String? version = match.group(1);
-    if (version != null) {
-      return version.split('/').last.split('[').first.split('(').first;
-    }
-    return version;
-  }
-  return null;
-}
-
-String? _parseMissingModule(String message) {
-  // Example: "Module 'plugin_1_name' not found"
-  final pattern = RegExp(r"Module '(.*?)' not found");
-  final RegExpMatch? match = pattern.firstMatch(message);
-  if (match != null && match.groupCount > 0) {
-    final String? version = match.group(1);
-    return version;
-  }
-  return null;
+String _swiftPackageOnlyPluginsInCocoapodsMessage(List<String> swiftPackageOnlyPlugins) {
+  return 'Your project uses CocoaPods as a dependency manager, but the following '
+      'plugin(s) only support Swift Package Manager: ${swiftPackageOnlyPlugins.join(', ')}.\n'
+      'Try enabling Swift Package Manager with "flutter config --enable-swift-package-manager".';
 }
 
 // The result of [_handleXCResultIssue].
