@@ -44,8 +44,10 @@
   - changed-files:
     - all-globs-to-any-file:
       - '**/*text*'
+      - '**/*Text*'
       - '!**/*context*'
-      - '!**/*texture*'
+      - '!**/*Context*'
+      - '!**/*Texture*'
 
 'd: api docs':
   - changed-files:
