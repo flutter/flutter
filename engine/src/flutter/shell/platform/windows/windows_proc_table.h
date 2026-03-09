@@ -35,6 +35,18 @@ class WindowsProcTable {
   virtual BOOL GetPointerType(UINT32 pointer_id,
                               POINTER_INPUT_TYPE* pointer_type) const;
 
+  // Retrieves the pointer info for a specified pointer.
+  //
+  // Used to react differently to touch or pen inputs. Returns false on failure.
+  // Available on Windows 8 and newer, otherwise returns false.
+  virtual BOOL GetPointerInfo(UINT32 pointer_id,
+                              POINTER_INFO* pointer_info) const;
+  // Retrieves the pointer info for a specified pointer.
+  //
+  // Used to retrieve information about the pen being used. Returns false on
+  // failure. Available on Windows 8 and newer, otherwise returns false.
+  virtual BOOL GetPointerPenInfo(UINT32 pointer_id,
+                                 POINTER_PEN_INFO* pointer_pen_info) const;
   // Get the preferred languages for the thread, and optionally the process,
   // and system, in that order, depending on the flags.
   //
@@ -164,6 +176,10 @@ class WindowsProcTable {
  private:
   using GetPointerType_ = BOOL __stdcall(UINT32 pointerId,
                                          POINTER_INPUT_TYPE* pointerType);
+  using GetPointerInfo_ = BOOL __stdcall(UINT32 pointerId,
+                                         POINTER_INFO* pointerInfo);
+  using GetPointerPenInfo_ = BOOL __stdcall(UINT32 pointerId,
+                                            POINTER_PEN_INFO* penInfo);
   using EnableNonClientDpiScaling_ = BOOL __stdcall(HWND hwnd);
   using SetWindowCompositionAttribute_ =
       BOOL __stdcall(HWND, WINDOWCOMPOSITIONATTRIBDATA*);
@@ -177,6 +193,8 @@ class WindowsProcTable {
   fml::RefPtr<fml::NativeLibrary> user32_;
 
   std::optional<GetPointerType_*> get_pointer_type_;
+  std::optional<GetPointerInfo_*> get_pointer_info_;
+  std::optional<GetPointerPenInfo_*> get_pointer_pen_info_;
   std::optional<EnableNonClientDpiScaling_*> enable_non_client_dpi_scaling_;
   std::optional<SetWindowCompositionAttribute_*>
       set_window_composition_attribute_;
