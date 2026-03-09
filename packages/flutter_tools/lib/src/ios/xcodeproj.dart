@@ -548,23 +548,19 @@ class XcodeProjectInfo {
     if (buildInfo == null) {
       return null;
     }
-    final String baseConfiguration = _baseConfigurationFor(buildInfo);
-    if (buildInfo.flavor == null) {
-      return _existingBuildConfigurationForBuildMode(baseConfiguration);
-    }
+
     final String expectedConfiguration = expectedBuildConfigurationFor(buildInfo, scheme);
     final String? exactMatch = _existingBuildConfigurationForBuildMode(expectedConfiguration);
     if (exactMatch != null) {
       return exactMatch;
     }
-    final String lowerBaseConfiguration = baseConfiguration.toLowerCase();
-    final String lowerScheme = scheme.toLowerCase();
+    final String baseConfiguration = _baseConfigurationFor(buildInfo);
     final String? buildConfigurationForBuildModeAndFlavor = _uniqueMatch(buildConfigurations, (
       String candidate,
     ) {
-      final String lowerCandidate = candidate.toLowerCase();
-      return lowerCandidate.contains(lowerBaseConfiguration) &&
-          lowerCandidate.contains(lowerScheme);
+      candidate = candidate.toLowerCase();
+      return candidate.contains(baseConfiguration.toLowerCase()) &&
+          candidate.contains(scheme.toLowerCase());
     });
     return buildConfigurationForBuildModeAndFlavor ??
         _existingBuildConfigurationForBuildMode(baseConfiguration);
