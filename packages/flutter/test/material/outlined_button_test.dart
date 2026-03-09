@@ -2290,11 +2290,11 @@ void main() {
   }
 
   testWidgets('OutlinedButton statesController', (WidgetTester tester) async {
-    testStatesController(null, tester);
+    await testStatesController(null, tester);
   });
 
   testWidgets('OutlinedButton.icon statesController', (WidgetTester tester) async {
-    testStatesController(const Icon(Icons.add), tester);
+    await testStatesController(const Icon(Icons.add), tester);
   });
 
   testWidgets('Disabled OutlinedButton statesController', (WidgetTester tester) async {
