@@ -15,6 +15,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
+import '../darwin/xcode_build_failure_diagnostics.dart';
 import '../globals.dart' as globals;
 import '../ios/migrations/metal_api_validation_migration.dart';
 import '../ios/xcode_build_settings.dart';
@@ -180,6 +181,7 @@ Future<void> buildMacOS({
   final sw = Stopwatch()..start();
   final Status status = globals.logger.startProgress('Building macOS application...');
   int result;
+  final xcodeBuildOutput = StringBuffer();
 
   File? disabledSandboxEntitlementFile;
   if (usingCISystem) {
@@ -213,6 +215,14 @@ Future<void> buildMacOS({
   // when dependencies don't support them
   final String? excludedArches = buildSettings['EXCLUDED_ARCHS'];
 
+  String? captureAndFilterBuildOutput(String line) {
+    xcodeBuildOutput.writeln(line);
+    if (verboseLogging) {
+      return line;
+    }
+    return _filteredOutput.hasMatch(line) ? line : null;
+  }
+
   try {
     result = await globals.processUtils.stream(
       <String>[
@@ -243,15 +253,54 @@ Future<void> buildMacOS({
       ],
       trace: true,
       stdoutErrorMatcher: verboseLogging ? null : _filteredOutput,
-      mapFunction: verboseLogging
-          ? null
-          : (String line) => _filteredOutput.hasMatch(line) ? line : null,
+      mapFunction: captureAndFilterBuildOutput,
     );
   } finally {
     status.cancel();
   }
 
   if (result != 0) {
+    final XcodeBuildFailureOutputAnalysis stdoutDiagnostics =
+        XcodeBuildFailureDiagnostics.analyzeOutput(xcodeBuildOutput.toString());
+
+    if (stdoutDiagnostics.platformMismatch != null) {
+      globals.logger.printError(
+        XcodeBuildFailureDiagnostics.swiftPackageManagerMinPlatformMismatchMessage(
+          stdoutDiagnostics.platformMismatch!,
+        ),
+        emphasis: true,
+      );
+    } else {
+      final bool usesCocoapods = flutterProject.macos.podfile.existsSync();
+      final bool usesSwiftPackageManager = flutterProject.macos.usesSwiftPackageManager;
+      if (stdoutDiagnostics.duplicateModules.isNotEmpty &&
+          usesCocoapods &&
+          usesSwiftPackageManager) {
+        globals.logger.printError(
+          XcodeBuildFailureDiagnostics.mixedDependencyManagerDuplicateModulesMessage(
+            platform: FlutterDarwinPlatform.macos,
+            duplicateModules: stdoutDiagnostics.duplicateModules.toList(),
+          ),
+        );
+      } else if (stdoutDiagnostics.missingModules.isNotEmpty &&
+          usesCocoapods &&
+          !usesSwiftPackageManager) {
+        final List<String> swiftPackageOnlyPlugins =
+            await XcodeBuildFailureDiagnostics.findSwiftPackageOnlyPlugins(
+              platform: FlutterDarwinPlatform.macos,
+              project: flutterProject,
+              pluginNames: stdoutDiagnostics.missingModules.toList(),
+              fileSystem: globals.fs,
+            );
+        if (swiftPackageOnlyPlugins.isNotEmpty) {
+          globals.logger.printError(
+            XcodeBuildFailureDiagnostics.swiftPackageOnlyPluginsInCocoapodsMessage(
+              swiftPackageOnlyPlugins,
+            ),
+          );
+        }
+      }
+    }
     throwToolExit('Build process failed');
   }
   final String? applicationBundle = MacOSApp.fromMacOSProject(
