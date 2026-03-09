@@ -27,6 +27,9 @@ struct _FlFramebuffer {
 
   // EGL image for this texture.
   EGLImage image;
+
+  // TRUE if this object owns [image] and must destroy it.
+  gboolean owns_image;
 };
 
 G_DEFINE_TYPE(FlFramebuffer, fl_framebuffer, G_TYPE_OBJECT)
@@ -52,6 +55,16 @@ static EGLImage create_egl_image(GLuint texture_id) {
 
 static void fl_framebuffer_dispose(GObject* object) {
   FlFramebuffer* self = FL_FRAMEBUFFER(object);
+
+  if (self->owns_image && self->image != nullptr) {
+    EGLDisplay egl_display = eglGetCurrentDisplay();
+    if (egl_display != EGL_NO_DISPLAY) {
+      eglDestroyImageKHR(egl_display, self->image);
+      self->image = nullptr;
+    } else {
+      g_warning("Failed to destroy EGL image: Failed to get current EGL display");
+    }
+  }
 
   glDeleteFramebuffers(1, &self->framebuffer_id);
   glDeleteTextures(1, &self->texture_id);
@@ -92,6 +105,7 @@ FlFramebuffer* fl_framebuffer_new(GLint format,
 
   if (shareable) {
     self->image = create_egl_image(self->texture_id);
+    self->owns_image = self->image != nullptr;
   }
 
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
@@ -127,6 +141,7 @@ FlFramebuffer* fl_framebuffer_create_sibling(FlFramebuffer* self) {
   sibling->width = self->width;
   sibling->height = self->height;
   sibling->image = self->image;
+  sibling->owns_image = FALSE;
 
   // Make texture from existing image.
   glGenTextures(1, &sibling->texture_id);

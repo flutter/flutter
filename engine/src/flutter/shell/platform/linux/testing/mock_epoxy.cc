@@ -384,6 +384,13 @@ EGLImageKHR _eglCreateImageKHR(EGLDisplay dpy,
   return &mock_image;
 }
 
+EGLBoolean _eglDestroyImageKHR(EGLDisplay dpy, EGLImageKHR image) {
+  if (mock) {
+    mock->eglDestroyImageKHR(dpy, image);
+  }
+  return EGL_TRUE;
+}
+
 static GLuint bound_texture_2d;
 
 static std::map<GLenum, GLuint> framebuffer_renderbuffers;
@@ -663,7 +670,7 @@ EGLImageKHR (*epoxy_eglCreateImageKHR)(EGLDisplay dpy,
                                        EGLenum target,
                                        EGLClientBuffer buffer,
                                        const EGLint* attrib_list);
-
+EGLBoolean (*epoxy_eglDestroyImageKHR)(EGLDisplay dpy, EGLImageKHR image);
 void (*epoxy_glAttachShader)(GLuint program, GLuint shader);
 void (*epoxy_glBindFramebuffer)(GLenum target, GLuint framebuffer);
 void (*epoxy_glBindRenderbuffer)(GLenum target, GLuint renderbuffer);
@@ -739,7 +746,7 @@ static void library_init() {
   epoxy_eglQueryContext = _eglQueryContext;
   epoxy_eglSwapBuffers = _eglSwapBuffers;
   epoxy_eglCreateImageKHR = _eglCreateImageKHR;
-
+  epoxy_eglDestroyImageKHR = _eglDestroyImageKHR;
   epoxy_glAttachShader = _glAttachShader;
   epoxy_glBindFramebuffer = _glBindFramebuffer;
   epoxy_glBindRenderbuffer = _glBindRenderbuffer;
