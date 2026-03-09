@@ -1298,14 +1298,25 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
     }
   }
 
-  Future<void> _handleFrameworkFocusChanged(bool isFocused) async {
+  void _handleFrameworkFocusChanged(bool isFocused) {
     if (!isFocused) {
       _controller?.clearFocus();
     }
-    await SystemChannels.textInput.invokeMethod<void>(
+    SystemChannels.textInput
+        .invokeMethod<void>(
       'TextInput.setPlatformViewClient',
       <String, dynamic>{'platformViewId': _id},
-    );
+    )
+        .catchError((Object error, StackTrace stack) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: error,
+              stack: stack,
+              library: 'widget library',
+              context: ErrorDescription('while handling framework focus changed on platform view'),
+            ),
+          );
+        });
   }
 
   void _handlePlatformFocusChanged(bool isFocused) {

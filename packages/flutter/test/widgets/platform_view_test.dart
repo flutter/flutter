@@ -3965,6 +3965,72 @@ void main() {
       expect(lastPlatformViewTextClient.containsKey('platformViewId'), true);
       expect(lastPlatformViewTextClient['platformViewId'], viewId);
     });
+
+    testWidgets('PlatformViewLink focus change reports error when channel fails', (
+      WidgetTester tester,
+    ) async {
+      late FakePlatformViewController controller;
+
+      final FlutterExceptionHandler? oldOnError = FlutterError.onError;
+      final errors = <FlutterErrorDetails>[];
+      FlutterError.onError = (FlutterErrorDetails details) {
+        errors.add(details);
+      };
+
+      try {
+        final platformViewLink = PlatformViewLink(
+          viewType: 'test',
+          onCreatePlatformView: (PlatformViewCreationParams params) {
+            params.onPlatformViewCreated(params.id);
+            controller = FakePlatformViewController(params.id);
+            return controller;
+          },
+          surfaceFactory: (BuildContext context, PlatformViewController controller) {
+            return PlatformViewSurface(
+              gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+              controller: controller,
+              hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+            );
+          },
+        );
+        await tester.pumpWidget(SizedBox(width: 300, height: 300, child: platformViewLink));
+
+        final Focus platformViewFocusWidget = tester.widget(
+          find.descendant(of: find.byType(PlatformViewLink), matching: find.byType(Focus)),
+        );
+
+        final FocusNode? focusNode = platformViewFocusWidget.focusNode;
+        expect(focusNode, isNotNull);
+        expect(focusNode!.hasFocus, false);
+
+        // Mock TextInput.setPlatformViewClient failure
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (
+          MethodCall methodCall,
+        ) async {
+          if (methodCall.method == 'TextInput.setPlatformViewClient') {
+            throw Exception('Channel failed');
+          }
+          return null;
+        });
+
+        platformViewFocusWidget.focusNode!.requestFocus();
+        await tester.pump();
+
+        expect(errors, hasLength(1));
+        expect(errors.single.exception, isA<Exception>());
+        expect(errors.single.exception.toString(), contains('Channel failed'));
+        expect(
+          errors.single.context.toString(),
+          contains('while handling framework focus changed on platform view'),
+        );
+      } finally {
+        FlutterError.onError = oldOnError;
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.textInput,
+          null,
+        );
+      }
+    });
   });
 
   testWidgets('Platform views respect hitTestBehavior', (WidgetTester tester) async {

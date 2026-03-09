@@ -1862,6 +1862,23 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
   return RawFloatingCursorPoint(offset: offset, state: state);
 }
 
+void _reportError(
+  Object exception,
+  StackTrace stack,
+  String context, [
+  InformationCollector? informationCollector,
+]) {
+  FlutterError.reportError(
+    FlutterErrorDetails(
+      exception: exception,
+      stack: stack,
+      library: 'services library',
+      context: ErrorDescription(context),
+      informationCollector: informationCollector,
+    ),
+  );
+}
+
 /// An low-level interface to the system's text input control.
 ///
 /// To start interacting with the system's text input control, call [attach] to
@@ -2094,20 +2111,13 @@ class TextInput {
     try {
       return await _handleTextInputInvocation(call);
     } catch (exception, stack) {
-      FlutterError.reportError(
-        FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'services library',
-          context: ErrorDescription('during method call ${call.method}'),
-          informationCollector: () => <DiagnosticsNode>[
-            DiagnosticsProperty<MethodCall>(
-              'call',
-              call,
-              style: DiagnosticsTreeStyle.errorProperty,
-            ),
-          ],
-        ),
+      _reportError(
+        exception,
+        stack,
+        'during method call ${call.method}',
+        () => <DiagnosticsNode>[
+          DiagnosticsProperty<MethodCall>('call', call, style: DiagnosticsTreeStyle.errorProperty),
+        ],
       );
       rethrow;
     }
@@ -2599,16 +2609,8 @@ class _PlatformTextInputControl with TextInputControl {
         ])
         .then(
           (void _) {},
-          onError: (Object error, StackTrace stack) {
-            FlutterError.reportError(
-              FlutterErrorDetails(
-                exception: error,
-                stack: stack,
-                library: 'services library',
-                context: ErrorDescription('while attaching the text input client'),
-              ),
-            );
-          },
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while attaching the text input client'),
         );
   }
 
@@ -2618,16 +2620,8 @@ class _PlatformTextInputControl with TextInputControl {
         .invokeMethod<void>('TextInput.clearClient')
         .then(
           (void _) {},
-          onError: (Object error, StackTrace stack) {
-            FlutterError.reportError(
-              FlutterErrorDetails(
-                exception: error,
-                stack: stack,
-                library: 'services library',
-                context: ErrorDescription('while detaching the text input client'),
-              ),
-            );
-          },
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while detaching the text input client'),
         );
   }
 
@@ -2637,16 +2631,8 @@ class _PlatformTextInputControl with TextInputControl {
         .invokeMethod<void>('TextInput.updateConfig', _configurationToJson(configuration))
         .then(
           (void _) {},
-          onError: (Object error, StackTrace stack) {
-            FlutterError.reportError(
-              FlutterErrorDetails(
-                exception: error,
-                stack: stack,
-                library: 'services library',
-                context: ErrorDescription('while updating text input configuration'),
-              ),
-            );
-          },
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while updating text input configuration'),
         );
   }
 
@@ -2656,16 +2642,8 @@ class _PlatformTextInputControl with TextInputControl {
         .invokeMethod<void>('TextInput.setEditingState', value.toJSON())
         .then(
           (void _) {},
-          onError: (Object error, StackTrace stack) {
-            FlutterError.reportError(
-              FlutterErrorDetails(
-                exception: error,
-                stack: stack,
-                library: 'services library',
-                context: ErrorDescription('while setting text input editing state'),
-              ),
-            );
-          },
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while setting text input editing state'),
         );
   }
 
@@ -2675,16 +2653,8 @@ class _PlatformTextInputControl with TextInputControl {
         .invokeMethod<void>('TextInput.show')
         .then(
           (void _) {},
-          onError: (Object error, StackTrace stack) {
-            FlutterError.reportError(
-              FlutterErrorDetails(
-                exception: error,
-                stack: stack,
-                library: 'services library',
-                context: ErrorDescription('while showing the text input client'),
-              ),
-            );
-          },
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while showing the text input client'),
         );
   }
 
@@ -2694,16 +2664,8 @@ class _PlatformTextInputControl with TextInputControl {
         .invokeMethod<void>('TextInput.hide')
         .then(
           (void _) {},
-          onError: (Object error, StackTrace stack) {
-            FlutterError.reportError(
-              FlutterErrorDetails(
-                exception: error,
-                stack: stack,
-                library: 'services library',
-                context: ErrorDescription('while hiding the text input client'),
-              ),
-            );
-          },
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while hiding the text input client'),
         );
   }
 
@@ -2717,16 +2679,8 @@ class _PlatformTextInputControl with TextInputControl {
         })
         .then(
           (void _) {},
-          onError: (Object error, StackTrace stack) {
-            FlutterError.reportError(
-              FlutterErrorDetails(
-                exception: error,
-                stack: stack,
-                library: 'services library',
-                context: ErrorDescription('while setting text input size and transform'),
-              ),
-            );
-          },
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while setting text input size and transform'),
         );
   }
 
@@ -2741,16 +2695,8 @@ class _PlatformTextInputControl with TextInputControl {
         })
         .then(
           (void _) {},
-          onError: (Object error, StackTrace stack) {
-            FlutterError.reportError(
-              FlutterErrorDetails(
-                exception: error,
-                stack: stack,
-                library: 'services library',
-                context: ErrorDescription('while setting text input composing rect'),
-              ),
-            );
-          },
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while setting text input composing rect'),
         );
   }
 
@@ -2765,16 +2711,8 @@ class _PlatformTextInputControl with TextInputControl {
         })
         .then(
           (void _) {},
-          onError: (Object error, StackTrace stack) {
-            FlutterError.reportError(
-              FlutterErrorDetails(
-                exception: error,
-                stack: stack,
-                library: 'services library',
-                context: ErrorDescription('while setting text input caret rect'),
-              ),
-            );
-          },
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while setting text input caret rect'),
         );
   }
 
@@ -2796,16 +2734,8 @@ class _PlatformTextInputControl with TextInputControl {
         )
         .then(
           (void _) {},
-          onError: (Object error, StackTrace stack) {
-            FlutterError.reportError(
-              FlutterErrorDetails(
-                exception: error,
-                stack: stack,
-                library: 'services library',
-                context: ErrorDescription('while setting text input selection rects'),
-              ),
-            );
-          },
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while setting text input selection rects'),
         );
   }
 
@@ -2834,16 +2764,8 @@ class _PlatformTextInputControl with TextInputControl {
         .invokeMethod<void>('TextInput.setStyle', style.toJson())
         .then(
           (void _) {},
-          onError: (Object error, StackTrace stack) {
-            FlutterError.reportError(
-              FlutterErrorDetails(
-                exception: error,
-                stack: stack,
-                library: 'services library',
-                context: ErrorDescription('while updating text input style'),
-              ),
-            );
-          },
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while updating text input style'),
         );
   }
 
@@ -2853,16 +2775,8 @@ class _PlatformTextInputControl with TextInputControl {
         .invokeMethod<void>('TextInput.requestAutofill')
         .then(
           (void _) {},
-          onError: (Object error, StackTrace stack) {
-            FlutterError.reportError(
-              FlutterErrorDetails(
-                exception: error,
-                stack: stack,
-                library: 'services library',
-                context: ErrorDescription('while requesting autofill'),
-              ),
-            );
-          },
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while requesting autofill'),
         );
   }
 
@@ -2872,16 +2786,8 @@ class _PlatformTextInputControl with TextInputControl {
         .invokeMethod<void>('TextInput.finishAutofillContext', shouldSave)
         .then(
           (void _) {},
-          onError: (Object error, StackTrace stack) {
-            FlutterError.reportError(
-              FlutterErrorDetails(
-                exception: error,
-                stack: stack,
-                library: 'services library',
-                context: ErrorDescription('while finishing autofill context'),
-              ),
-            );
-          },
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while finishing autofill context'),
         );
   }
 }
