@@ -1572,10 +1572,6 @@ abstract class DefaultTextEditingStrategy
 
   void placeForm() {
     inputConfiguration.autofillGroup!.wakeUp(activeDomElement, inputConfiguration.autofill!);
-    // When the form woke up, it should've placed the correct editing state on all fields, including
-    // the focused one. We update `lastEditingState` to reflect that.
-    lastEditingState = EditingState.fromDomElement(activeDomElement);
-
     _appendedToForm = true;
   }
 
