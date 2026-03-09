@@ -66,7 +66,7 @@ For more information, please visit:
       'getCodesignIdentity throws if no valid matching identities are found',
       () async {
         final Logger logger = BufferLogger.test();
-        const commonName = 'Apple Development: asdf (asdf)';
+        const commonName = 'Apple Development: EXAMPLE.IO LLC (A1BC2DF345)';
         final addtoAppCodesigning = DarwinAddToAppCodesigning(
           logger: logger,
           xcodeCodeSigningSettings: FakeXcodeCodeSigningSettings(identities: <String>[commonName]),
@@ -87,9 +87,9 @@ For more information, please visit:
       () async {
         final fs = MemoryFileSystem.test();
         const provisioningProfileName = 'iOS Team Provisioning Profile: *';
-        const certificateId = 'S8QB4VV633';
-        const certName = 'FLUTTER.IO LLC';
-        const commonName = 'Apple Development: $certName ($certificateId)';
+        const teamId = 'A1BC2DF345';
+        const entityName = 'EXAMPLE.IO LLC';
+        const commonName = 'Apple Development: $entityName ($teamId)';
         final Logger logger = BufferLogger.test();
         final addtoAppCodesigning = DarwinAddToAppCodesigning(
           logger: logger,
@@ -100,7 +100,7 @@ For more information, please visit:
                 filePath: 'test.mobileprovision',
                 name: provisioningProfileName,
                 uuid: 'test',
-                teamIdentifier: certificateId,
+                teamIdentifier: teamId,
                 expirationDate: DateTime.now().add(const Duration(days: 30)),
                 developerCertificates: <File>[
                   fs.file('developer.cer')..writeAsStringSync(commonName),
@@ -115,7 +115,7 @@ For more information, please visit:
           FakeXcodeBasedProject(
             buildSettings: <String, String>{
               'CODE_SIGN_STYLE': 'Manual',
-              'DEVELOPMENT_TEAM': certificateId,
+              'DEVELOPMENT_TEAM': teamId,
               'PROVISIONING_PROFILE_SPECIFIER': provisioningProfileName,
             },
           ),
@@ -127,22 +127,22 @@ For more information, please visit:
     testWithoutContext(
       'getCodesignIdentity from project uses team for automatic codesigning',
       () async {
-        const certificateId = 'WFT5WYD54Y';
-        const certName = 'Victoria';
-        const organizationalUnit = 'S8QB4VV633';
-        const commonName = 'Apple Development: $certName ($certificateId)';
+        const userId = 'ABC1DEF23G';
+        const entityName = 'User Name';
+        const organizationalUnitId = 'A1BC2DF345';
+        const commonName = 'Apple Development: $entityName ($userId)';
         final Logger logger = BufferLogger.test();
         final addtoAppCodesigning = DarwinAddToAppCodesigning(
           logger: logger,
           xcodeCodeSigningSettings: FakeXcodeCodeSigningSettings(
             identities: <String>[commonName],
-            identityToTeam: {commonName: organizationalUnit},
+            identityToTeam: {commonName: organizationalUnitId},
           ),
         );
         final String? codesignIdentity = await addtoAppCodesigning.getCodesignIdentity(
           BuildInfo.debug,
           FakeXcodeBasedProject(
-            buildSettings: <String, String>{'DEVELOPMENT_TEAM': organizationalUnit},
+            buildSettings: <String, String>{'DEVELOPMENT_TEAM': organizationalUnitId},
           ),
         );
         expect(codesignIdentity, commonName);
@@ -152,9 +152,9 @@ For more information, please visit:
     testWithoutContext(
       'getCodesignIdentity from project throws if multiple identities are found',
       () async {
-        const organizationalUnit = 'S8QB4VV633';
-        const commonName1 = 'Apple Development: CertName1 (CertID1)';
-        const commonName2 = 'Apple Development: CertName2 (CertID2)';
+        const organizationalUnit = 'A1BC2DF345';
+        const commonName1 = 'Apple Development: User Name 1 (UserID1)';
+        const commonName2 = 'Apple Development: User Name 2 (UserID2)';
         final Logger logger = BufferLogger.test();
         final addtoAppCodesigning = DarwinAddToAppCodesigning(
           logger: logger,
@@ -185,9 +185,9 @@ Available identities:
     testWithoutContext('getCodesignIdentity from config uses provisioning profile', () async {
       final fs = MemoryFileSystem.test();
       const provisioningProfileName = 'iOS Team Provisioning Profile: *';
-      const certificateId = 'S8QB4VV633';
-      const certName = 'FLUTTER.IO LLC';
-      const commonName = 'Apple Development: $certName ($certificateId)';
+      const teamId = 'A1BC2DF345';
+      const entityName = 'EXAMPLE.IO LLC';
+      const commonName = 'Apple Development: $entityName ($teamId)';
       final Logger logger = BufferLogger.test();
       final addtoAppCodesigning = DarwinAddToAppCodesigning(
         logger: logger,
@@ -197,7 +197,7 @@ Available identities:
             filePath: 'test.mobileprovision',
             name: provisioningProfileName,
             uuid: 'test',
-            teamIdentifier: certificateId,
+            teamIdentifier: teamId,
             expirationDate: DateTime.now().add(const Duration(days: 30)),
             developerCertificates: <File>[fs.file('developer.cer')..writeAsStringSync(commonName)],
             isXcodeManaged: false,
@@ -214,10 +214,9 @@ Available identities:
     testWithoutContext('getCodesignIdentity from config throws if multiple identities', () async {
       final fs = MemoryFileSystem.test();
       const provisioningProfileName = 'iOS Team Provisioning Profile: *';
-      const certificateId = 'S8QB4VV633';
-      const certName = 'FLUTTER.IO LLC';
-      const commonName1 = 'Apple Development: $certName ($certificateId)';
-      const commonName2 = 'Apple Development: $certName ($certificateId)';
+      const teamId = 'A1BC2DF345';
+      const commonName1 = 'Apple Development: User Name 1 (UserID1)';
+      const commonName2 = 'Apple Development: User Name 2 (UserID2)';
       final Logger logger = BufferLogger.test();
       final addtoAppCodesigning = DarwinAddToAppCodesigning(
         logger: logger,
@@ -227,7 +226,7 @@ Available identities:
             filePath: 'test.mobileprovision',
             name: provisioningProfileName,
             uuid: 'test',
-            teamIdentifier: certificateId,
+            teamIdentifier: teamId,
             expirationDate: DateTime.now().add(const Duration(days: 30)),
             developerCertificates: <File>[
               fs.file('developer.cer')..writeAsStringSync(commonName1),
@@ -251,9 +250,9 @@ Available identities:
     });
 
     testWithoutContext('getCodesignIdentity from config uses identity', () async {
-      const certificateId = 'S8QB4VV633';
-      const certName = 'FLUTTER.IO LLC';
-      const commonName = 'Apple Development: $certName ($certificateId)';
+      const userId = 'A1BC2DF345';
+      const entityName = 'EXAMPLE.IO LLC';
+      const commonName = 'Apple Development: $entityName ($userId)';
       final Logger logger = BufferLogger.test();
       final addtoAppCodesigning = DarwinAddToAppCodesigning(
         logger: logger,
@@ -279,12 +278,12 @@ Available identities:
               'codesign',
               '--force',
               '--sign',
-              'App Development: NAME (ID)',
+              'Apple Development: ENTITY_NAME (TEAM_ID)',
               'test.xcframework',
             ],
           ),
         ]),
-        codesignIdentity: 'App Development: NAME (ID)',
+        codesignIdentity: 'Apple Development: ENTITY_NAME (TEAM_ID)',
         buildMode: BuildMode.release,
       );
     });
@@ -299,13 +298,13 @@ Available identities:
               'codesign',
               '--force',
               '--sign',
-              'App Development: NAME (ID)',
+              'Apple Development: ENTITY_NAME (TEAM_ID)',
               '--timestamp=none',
               'test.xcframework',
             ],
           ),
         ]),
-        codesignIdentity: 'App Development: NAME (ID)',
+        codesignIdentity: 'Apple Development: ENTITY_NAME (TEAM_ID)',
         buildMode: BuildMode.debug,
       );
     });
@@ -326,7 +325,7 @@ Available identities:
               'codesign',
               '--force',
               '--sign',
-              'App Development: NAME (ID)',
+              'Apple Development: ENTITY_NAME (TEAM_ID)',
               '--timestamp=none',
               'Flutter.xcframework',
             ],
@@ -336,7 +335,7 @@ Available identities:
               'codesign',
               '--force',
               '--sign',
-              'App Development: NAME (ID)',
+              'Apple Development: ENTITY_NAME (TEAM_ID)',
               '--timestamp=none',
               'Flutter.xcframework/ios-arm64/Flutter.framework',
             ],
@@ -346,13 +345,13 @@ Available identities:
               'codesign',
               '--force',
               '--sign',
-              'App Development: NAME (ID)',
+              'Apple Development: ENTITY_NAME (TEAM_ID)',
               '--timestamp=none',
               'Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework',
             ],
           ),
         ]),
-        codesignIdentity: 'App Development: NAME (ID)',
+        codesignIdentity: 'Apple Development: ENTITY_NAME (TEAM_ID)',
         buildMode: BuildMode.debug,
       );
     });
@@ -372,7 +371,7 @@ Available identities:
               'codesign',
               '--force',
               '--sign',
-              'App Development: NAME (ID)',
+              'Apple Development: ENTITY_NAME (TEAM_ID)',
               '--timestamp=none',
               'FlutterMacOS.xcframework',
             ],
@@ -382,13 +381,13 @@ Available identities:
               'codesign',
               '--force',
               '--sign',
-              'App Development: NAME (ID)',
+              'Apple Development: ENTITY_NAME (TEAM_ID)',
               '--timestamp=none',
               'FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework',
             ],
           ),
         ]),
-        codesignIdentity: 'App Development: NAME (ID)',
+        codesignIdentity: 'Apple Development: ENTITY_NAME (TEAM_ID)',
         buildMode: BuildMode.debug,
       );
     });

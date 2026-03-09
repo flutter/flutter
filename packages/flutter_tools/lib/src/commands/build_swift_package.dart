@@ -89,7 +89,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     addDartObfuscationOption();
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
-    usesCodeSignXCFrameworksOption();
+    usesDarwinCodeSignXCFrameworksOption();
     argParser
       ..addOption(
         'output',

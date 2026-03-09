@@ -314,7 +314,13 @@ void main() {
       await SwiftPackageManagerUtils.buildApp(
         flutterBin,
         appDirectoryPath,
-        options: <String>['$platformName-framework', '--no-debug', '--no-profile', '-v'],
+        options: <String>[
+          '$platformName-framework',
+          '--no-debug',
+          '--no-profile',
+          '--no-codesign',
+          '-v',
+        ],
         expectedLines: <String>[
           'Swift Package Manager does not yet support this command. CocoaPods will be used instead.',
         ],

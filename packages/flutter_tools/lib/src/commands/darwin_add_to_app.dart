@@ -102,7 +102,7 @@ class DarwinAddToAppCodesigning {
     if (developmentTeam == null) {
       return null;
     }
-    List<String> matchingIdentities = [];
+    final matchingIdentities = <String>{};
     if (codesignStyle == 'Manual') {
       // When manual codesigning is used, we need to find the provisioning profile and
       // the certificate to find the matching identity.
@@ -117,9 +117,7 @@ class DarwinAddToAppCodesigning {
               cert,
             );
             if (commonName != null) {
-              matchingIdentities = identities
-                  .where((String id) => id.contains(commonName))
-                  .toList();
+              matchingIdentities.addAll(identities.where((String id) => id.contains(commonName)));
             }
           }
         }
@@ -159,14 +157,14 @@ class DarwinAddToAppCodesigning {
   /// If there are multiple identities that match, throw an error and ask the user to
   /// specify the codesigning identity.
   Future<String?> _getCodesignIdentityFromConfig(List<String> identities) async {
-    List<String> matchingIdentities = [];
+    final matchingIdentities = <String>{};
     final ProvisioningProfile? savedProfile = await _xcodeCodeSigningSettings
         .getProvisioningProfileFromConfig(identities);
     if (savedProfile != null) {
       for (final File cert in savedProfile.developerCertificates) {
         final String? commonName = await _xcodeCodeSigningSettings.commonNameForCertificate(cert);
         if (commonName != null) {
-          matchingIdentities = identities.where((String id) => id.contains(commonName)).toList();
+          matchingIdentities.addAll(identities.where((String id) => id.contains(commonName)));
         }
       }
       if (matchingIdentities.length > 1) {

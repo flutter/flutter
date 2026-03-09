@@ -1207,7 +1207,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void usesCodeSignXCFrameworksOption() {
+  void usesDarwinCodeSignXCFrameworksOption() {
     argParser.addFlag(
       FlutterOptions.kCodesign,
       defaultsTo: true,
@@ -1216,8 +1216,10 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addOption(
       FlutterOptions.kCodesignIdentity,
       help:
-          'The identity to use for code-signing XCFrameworks. To see list of valid identities run '
-          '"security find-identity -p codesigning -v"',
+          'The identity to use for code-signing XCFrameworks. If an identity is not provided and '
+          '"${FlutterOptions.kCodesign}" is enabled, a code signing identity will be selected '
+          'automatically from the Flutter app\'s Xcode project settings or Flutter config. To see '
+          'a list of valid identities run "security find-identity -p codesigning -v".',
     );
   }
 
