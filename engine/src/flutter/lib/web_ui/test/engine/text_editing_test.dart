@@ -2543,9 +2543,6 @@ Future<void> testMain() async {
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
 
-      const show = MethodCall('TextInput.show');
-      sendFrameworkMessage(codec.encodeMethodCall(show));
-
       // The "setSizeAndTransform" message has to be here before we call
       // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
       // we don't put the input element into the DOM until we get its correct
@@ -2556,6 +2553,9 @@ Future<void> testMain() async {
         Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
       );
       sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      const show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
 
       // The second [setEditingState] should override the first one.
       checkInputEditingState(textEditing!.strategy.domElement, 'abcd', 2, 3);
@@ -3522,16 +3522,23 @@ Future<void> testMain() async {
         <String>['email', 'username', 'password'],
         <String>['field1', 'field2', 'field3'],
       );
+      final emailAutofillMap = fields.first['autofill'] as Map<String, Object?>;
       final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
         kImplicitViewId,
-        createAutofillInfo('email', 'field1'),
+        emailAutofillMap,
         fields,
       )!;
-      // TODO(mdebbar): Things are different now. DOM elements aren't created immediately like they used to.
+
+      final emailFocusedElement = createDomElement('input') as DomHTMLInputElement;
+      final emailAutofill = AutofillInfo.fromFrameworkMessage(emailAutofillMap);
+      autofillForm.wakeUp(emailFocusedElement, emailAutofill);
+
+      final formElement = autofillForm.formElement;
       final formChildNodes =
           autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
-      final DomHTMLInputElement username = formChildNodes[0];
-      final DomHTMLInputElement password = formChildNodes[1];
+      final DomHTMLInputElement username = formChildNodes[1];
+      final DomHTMLInputElement password = formChildNodes[2];
+
       expect(username.name, 'username');
       expect(password.name, 'current-password');
       expect(username.style.width, isNot('0px'));
