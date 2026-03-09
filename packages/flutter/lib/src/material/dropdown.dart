@@ -1872,11 +1872,75 @@ class DropdownButtonFormField<T> extends FormField<T> {
              // Clear the decoration hintText because DropdownButton has its own hint logic.
              final String? hintText = effectiveDecoration.hintText != null ? '' : null;
 
-             effectiveDecoration = effectiveDecoration.copyWith(
-               error: error,
-               errorText: errorText,
-               hintText: hintText,
-             );
+             if (error != null) {
+               // When using errorBuilder, we need to explicitly clear errorText since
+               // copyWith cannot clear fields (null means "keep existing value").
+               effectiveDecoration = InputDecoration(
+                 error: error,
+                 errorText: null,
+                 hintText: hintText,
+                 icon: effectiveDecoration.icon,
+                 iconColor: effectiveDecoration.iconColor,
+                 label: effectiveDecoration.label,
+                 labelText: effectiveDecoration.labelText,
+                 labelStyle: effectiveDecoration.labelStyle,
+                 floatingLabelStyle: effectiveDecoration.floatingLabelStyle,
+                 helper: effectiveDecoration.helper,
+                 helperText: effectiveDecoration.helperText,
+                 helperStyle: effectiveDecoration.helperStyle,
+                 helperMaxLines: effectiveDecoration.helperMaxLines,
+                 hint: effectiveDecoration.hint,
+                 hintStyle: effectiveDecoration.hintStyle,
+                 hintTextDirection: effectiveDecoration.hintTextDirection,
+                 hintFadeDuration: effectiveDecoration.hintFadeDuration,
+                 hintMaxLines: effectiveDecoration.hintMaxLines,
+                 maintainHintHeight: effectiveDecoration.maintainHintHeight,
+                 maintainHintSize: effectiveDecoration.maintainHintSize,
+                 maintainLabelSize: effectiveDecoration.maintainLabelSize,
+                 errorStyle: effectiveDecoration.errorStyle,
+                 errorMaxLines: effectiveDecoration.errorMaxLines,
+                 floatingLabelBehavior: effectiveDecoration.floatingLabelBehavior,
+                 floatingLabelAlignment: effectiveDecoration.floatingLabelAlignment,
+                 isCollapsed: effectiveDecoration.isCollapsed,
+                 isDense: effectiveDecoration.isDense,
+                 contentPadding: effectiveDecoration.contentPadding,
+                 prefixIcon: effectiveDecoration.prefixIcon,
+                 prefix: effectiveDecoration.prefix,
+                 prefixText: effectiveDecoration.prefixText,
+                 prefixIconConstraints: effectiveDecoration.prefixIconConstraints,
+                 prefixStyle: effectiveDecoration.prefixStyle,
+                 prefixIconColor: effectiveDecoration.prefixIconColor,
+                 suffixIcon: effectiveDecoration.suffixIcon,
+                 suffix: effectiveDecoration.suffix,
+                 suffixText: effectiveDecoration.suffixText,
+                 suffixStyle: effectiveDecoration.suffixStyle,
+                 suffixIconColor: effectiveDecoration.suffixIconColor,
+                 suffixIconConstraints: effectiveDecoration.suffixIconConstraints,
+                 counter: effectiveDecoration.counter,
+                 counterText: effectiveDecoration.counterText,
+                 counterStyle: effectiveDecoration.counterStyle,
+                 filled: effectiveDecoration.filled,
+                 fillColor: effectiveDecoration.fillColor,
+                 focusColor: effectiveDecoration.focusColor,
+                 hoverColor: effectiveDecoration.hoverColor,
+                 errorBorder: effectiveDecoration.errorBorder,
+                 focusedBorder: effectiveDecoration.focusedBorder,
+                 focusedErrorBorder: effectiveDecoration.focusedErrorBorder,
+                 disabledBorder: effectiveDecoration.disabledBorder,
+                 enabledBorder: effectiveDecoration.enabledBorder,
+                 border: effectiveDecoration.border,
+                 enabled: effectiveDecoration.enabled,
+                 semanticCounterText: effectiveDecoration.semanticCounterText,
+                 alignLabelWithHint: effectiveDecoration.alignLabelWithHint,
+                 constraints: effectiveDecoration.constraints,
+                 visualDensity: effectiveDecoration.visualDensity,
+               );
+             } else {
+               effectiveDecoration = effectiveDecoration.copyWith(
+                 errorText: errorText,
+                 hintText: hintText,
+               );
+             }
            }
 
            // An unfocusable Focus widget so that this widget can detect if its
