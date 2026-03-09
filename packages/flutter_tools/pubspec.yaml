@@ -54,7 +54,7 @@ dependencies:
   http_multi_server: 3.2.2
   convert: 3.1.2
   async: 2.13.0
-  unified_analytics: 8.0.11
+  unified_analytics: 8.0.12
   pubspec_parse: 1.5.0
 
   graphs: 2.3.2
@@ -73,7 +73,7 @@ dependencies:
 
   standard_message_codec: 0.0.1+4
 
-  dart_style: 3.1.6
+  dart_style: 3.1.7
 
   # The below dependencies are transitive and are here to pin them to a specific version.
   _fe_analyzer_shared: 95.0.0
@@ -129,4 +129,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 4gkgn4
+# PUBSPEC CHECKSUM: 5ebg2m
