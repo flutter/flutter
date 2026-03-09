@@ -160,17 +160,22 @@ incomplete patch from the list of [issues with partial patches][has-partial-patc
 Reviewing Code
 --------------
 
-Reviewing code is just as valuable as writing it. It is one of the fastest ways to learn the codebase and help the team move faster. We welcome reviews from everyone, regardless of whether you have commit access.
+Reviewing code is just as valuable as writing it. It is one of the fastest ways
+to learn the codebase and help the team move faster. We welcome reviews from
+everyone, regardless of whether you have commit access.
 
 ### The Reviewer Path
 
-We think of code review as a progression of community trust:
+Anyone can provide review feedback on a change, and doing so is an excellent way
+to learn the codebase.
 
-| Role | How you contribute | Authority |
-| :--- | :--- | :--- |
-| **Community Reviewer** | Anyone. Read PRs, catch typos, test logic, and leave helpful comments. | **Feedback:** Vital for catching bugs early and learning more about Flutter. |
-| **Trusted Contributor** | Members with commit access. They have demonstrated a deep understanding of Flutter's style and values. | **Approval (LGTM):** Their approval is the "gate" required to land code. |
-| **Area Owner** | Tech Leads or experts for a specific domain (e.g., Engine, Material). | **Final Sign-off:** Ensures the change aligns with the long-term design of that library. |
+While reviews are welcome from the entire community, currently only members of
+the `flutter-hackers` group can grant the final approval required for a change
+to land. Consistently providing helpful code reviews is a valid and highly
+encouraged path to joining this group.
+
+For more information on how to earn commit access, please read the
+[Contributor access guide](./docs/contributing/Contributor-access.md).
 
 ### How to Review
 
