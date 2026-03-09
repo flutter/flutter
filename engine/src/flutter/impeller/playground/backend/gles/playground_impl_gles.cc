@@ -51,9 +51,13 @@ class PlaygroundImplGLES::ReactorWorker final : public ReactorGLES::Worker {
     reactions_allowed_[std::this_thread::get_id()] = allowed;
   }
 
+  bool IsGLES3() { return is_gles3_; }
+  void SetIsGLES3(bool is_gles3) { is_gles3_ = is_gles3; }
+
  private:
   mutable RWMutex mutex_;
   std::map<std::thread::id, bool> reactions_allowed_ IPLR_GUARDED_BY(mutex_);
+  bool is_gles3_;
 
   ReactorWorker(const ReactorWorker&) = delete;
 
@@ -188,10 +192,11 @@ std::shared_ptr<Context> PlaygroundImplGLES::GetContext() const {
     gl->Enable(GL_DEBUG_OUTPUT_SYNCHRONOUS_KHR);
 #endif
   }
-  is_gles3_ = gl->GetDescription()->GetGlVersion().IsAtLeast(Version(3));
+  bool is_gles3 = gl->GetDescription()->GetGlVersion().IsAtLeast(Version(3));
+  worker_->SetIsGLES3(is_gles3);
   auto context =
       ContextGLES::Create(switches_.flags, std::move(gl),
-                          ShaderLibraryMappingsForPlayground(is_gles3_), true);
+                          ShaderLibraryMappingsForPlayground(is_gles3), true);
   if (!context) {
     FML_LOG(ERROR) << "Could not create context.";
     return nullptr;
@@ -257,8 +262,8 @@ fml::Status PlaygroundImplGLES::SetCapabilities(
 }
 
 RuntimeStageBackend PlaygroundImplGLES::GetRuntimeStageBackend() const {
-  return is_gles3_ ? RuntimeStageBackend::kOpenGLES3
-                   : RuntimeStageBackend::kOpenGLES;
+  return worker_->IsGLES3() ? RuntimeStageBackend::kOpenGLES3
+                            : RuntimeStageBackend::kOpenGLES;
 }
 
 }  // namespace impeller
