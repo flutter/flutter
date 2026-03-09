@@ -36,16 +36,19 @@ EmbedderSurfaceGLSkia::GLDispatchTable StubDispatchTable(
 
 TEST(EmbedderSurfaceGLImpellerTest, GLES3ContextHasGLES3Shaders) {
   const auto gl_dispatch_table = StubDispatchTable("OpenGL ES 3.0");
-
   const auto surface =
       EmbedderSurfaceGLImpeller(gl_dispatch_table, false, nullptr);
 
-  const auto context = surface.CreateImpellerContext();
-  const auto shaders = context->GetShaderLibrary();
-  const auto func = shaders->GetFunction("imp_line_fragment_main",
-                                         impeller::ShaderStage::kFragment);
+  const std::shared_ptr<impeller::Context> context =
+      surface.CreateImpellerContext();
+  const std::shared_ptr<impeller::ShaderLibrary> shaders =
+      context->GetShaderLibrary();
+  const std::shared_ptr<const impeller::ShaderFunction> func =
+      shaders->GetFunction("imp_line_fragment_main",
+                           impeller::ShaderStage::kFragment);
   const auto gles_func = impeller::ShaderFunctionGLES::Cast(func.get());
-  const auto source = gles_func->GetSourceMapping();
+  const std::shared_ptr<const fml::Mapping> source =
+      gles_func->GetSourceMapping();
   const auto text =
       std::string_view(reinterpret_cast<const char*>(source->GetMapping()));
   EXPECT_THAT(text, StartsWith("#version 300 es"));
@@ -56,15 +59,19 @@ TEST(EmbedderSurfaceGLImpellerTest, GLES2ContextDoesNotHaveGLES3Shaders) {
   const auto surface =
       EmbedderSurfaceGLImpeller(gl_dispatch_table, false, nullptr);
 
-  const auto context = surface.CreateImpellerContext();
-  const auto shaders = context->GetShaderLibrary();
-  const auto func = shaders->GetFunction("imp_line_fragment_main",
-                                         impeller::ShaderStage::kFragment);
+  const std::shared_ptr<impeller::Context> context =
+      surface.CreateImpellerContext();
+  const std::shared_ptr<impeller::ShaderLibrary> shaders =
+      context->GetShaderLibrary();
+  const std::shared_ptr<const impeller::ShaderFunction> func =
+      shaders->GetFunction("imp_line_fragment_main",
+                           impeller::ShaderStage::kFragment);
   const auto gles_func = impeller::ShaderFunctionGLES::Cast(func.get());
-  const auto source = gles_func->GetSourceMapping();
+  const std::shared_ptr<const fml::Mapping> source =
+      gles_func->GetSourceMapping();
   const auto text =
       std::string_view(reinterpret_cast<const char*>(source->GetMapping()));
-  EXPECT_THAT(text, Not(StartsWith("#version 300 es")));
+  EXPECT_THAT(text, StartsWith("#version 100"));
 }
 }  // namespace testing
 }  // namespace flutter
