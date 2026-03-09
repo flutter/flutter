@@ -1218,7 +1218,7 @@ abstract class FlutterCommand extends Command<void> {
       help:
           'The identity to use for code-signing XCFrameworks. If an identity is not provided and '
           '"${FlutterOptions.kCodesign}" is enabled, a code signing identity will be selected '
-          'automatically from the Flutter app\'s Xcode project settings or Flutter config. To see '
+          "automatically from the Flutter app's Xcode project settings or Flutter config. To see "
           'a list of valid identities run "security find-identity -p codesigning -v".',
     );
   }
