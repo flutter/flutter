@@ -617,8 +617,7 @@ class _CachedImage extends _CachedImageBase {
 }
 
 class _LiveImage extends _CachedImageBase {
-  _LiveImage(ImageStreamCompleter completer, VoidCallback handleRemove, {int? sizeBytes})
-    : super(completer, sizeBytes: sizeBytes) {
+  _LiveImage(ImageStreamCompleter completer, VoidCallback handleRemove) : super(completer) {
     _handleRemove = () {
       handleRemove();
       dispose();

@@ -930,5 +930,170 @@ TEST_P(AiksTest,
   ASSERT_TRUE(OpenPlaygroundHere(dl));
 }
 
+TEST_P(AiksTest, CanDrawPerspectiveConvexShadow) {
+  DisplayListBuilder builder;
+  builder.Clear(DlColor::kWhite());
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  // The rect path should be optimized to a rect-specific shadow shader.
+  DlPath rect_path = DlPath::MakeRectLTRB(-50, -50, 50, 75);
+
+  // The pentagon path should go through the general convex path shadow
+  // tessellator.
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(-50, -50));
+  path_builder.LineTo(DlPoint(50, -50));
+  path_builder.LineTo(DlPoint(50, 50));
+  path_builder.LineTo(DlPoint(0, 75));
+  path_builder.LineTo(DlPoint(-50, 50));
+  path_builder.Close();
+  DlPath pentagon_path = path_builder.TakePath();
+
+  Matrix simple_y_rotate_matrix = Matrix::MakeRotationY(Degrees(45));
+
+  Matrix perspective_matrix;
+  perspective_matrix.e[2][3] = 0.0015f;
+  perspective_matrix = perspective_matrix * simple_y_rotate_matrix;
+
+  auto draw_paths_and_shadows = [&builder](const DlPath& path,
+                                           const DlColor& color,
+                                           const Matrix& matrix) {
+    builder.Save();
+
+    DlPaint paint;
+    paint.setColor(color.withAlphaF(0.25f));
+
+    DlPaint shadow_paint;
+    shadow_paint.setMaskFilter(
+        DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 10.0f));
+
+    builder.Save();
+    builder.Transform(matrix);
+    builder.DrawPath(path, paint);
+    builder.Restore();
+
+    builder.Translate(150, 0);
+
+    builder.Save();
+    builder.Transform(matrix);
+    builder.DrawPath(path, shadow_paint);
+    builder.Restore();
+
+    builder.Translate(150, 0);
+
+    builder.Save();
+    builder.Transform(matrix);
+    builder.DrawPath(path, shadow_paint);
+    builder.DrawPath(path, paint);
+    builder.Restore();
+
+    builder.Restore();
+  };
+
+  auto draw_test = [&](const DlPath& path) {
+    builder.Save();
+
+    builder.Translate(0, 75);
+    builder.DrawPath(path, DlPaint(DlColor::kPurple()));
+
+    builder.Translate(150, -75);
+    draw_paths_and_shadows(path, DlColor::kGreen(), simple_y_rotate_matrix);
+    builder.Translate(0, 175);
+    draw_paths_and_shadows(path, DlColor::kBlue(), perspective_matrix);
+
+    builder.Restore();
+  };
+
+  builder.Translate(100, 100);
+
+  draw_test(rect_path);
+  builder.Translate(0, 350);
+  draw_test(pentagon_path);
+
+  auto dl = builder.Build();
+  ASSERT_TRUE(OpenPlaygroundHere(dl));
+}
+
+TEST_P(AiksTest, CanDrawRotatedConvexShadow) {
+  DisplayListBuilder builder;
+  builder.Clear(DlColor::kWhite());
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(-50, -50));
+  path_builder.LineTo(DlPoint(50, -50));
+  path_builder.LineTo(DlPoint(50, 50));
+  path_builder.LineTo(DlPoint(0, 75));
+  path_builder.LineTo(DlPoint(-50, 50));
+  path_builder.Close();
+  DlPath pentagon_path = path_builder.TakePath();
+
+  DlPaint paint;
+  paint.setColor(DlColor::kGreen().withAlphaF(0.25f));
+
+  DlPaint shadow_paint;
+  shadow_paint.setMaskFilter(
+      DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 10.0f));
+
+  builder.Translate(500, 380);
+
+  for (int degrees = 0; degrees < 360; degrees += 30) {
+    builder.Save();
+    builder.Rotate(degrees);
+    builder.Translate(0, -300);
+    builder.DrawPath(pentagon_path, shadow_paint);
+    builder.DrawPath(pentagon_path, paint);
+    builder.Restore();
+  }
+
+  auto dl = builder.Build();
+  ASSERT_TRUE(OpenPlaygroundHere(dl));
+}
+
+TEST_P(AiksTest, CanDrawNonuniformScaleConvexShadow) {
+  DisplayListBuilder builder;
+  builder.Clear(DlColor::kWhite());
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(-50, -50));
+  path_builder.LineTo(DlPoint(50, -50));
+  path_builder.LineTo(DlPoint(50, 50));
+  path_builder.LineTo(DlPoint(0, 75));
+  path_builder.LineTo(DlPoint(-50, 50));
+  path_builder.Close();
+  DlPath pentagon_path = path_builder.TakePath();
+
+  DlPaint paint;
+  paint.setColor(DlColor::kGreen().withAlphaF(0.25f));
+
+  DlPaint shadow_paint;
+  shadow_paint.setMaskFilter(
+      DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 10.0f));
+
+  // The first row and column will be right at the edge of the screen
+  // but they should not draw anything anyway.
+  builder.Translate(50, 50);
+
+  for (int y = 0; y <= 5; y++) {
+    Scalar y_scale = y / 5.0f;
+    builder.Save();
+    for (int x = 0; x <= 10; x++) {
+      Scalar x_scale = x / 10.0f;
+      builder.Save();
+      builder.Scale(x_scale, y_scale);
+      builder.DrawPath(pentagon_path, shadow_paint);
+      builder.DrawPath(pentagon_path, paint);
+      builder.Restore();
+      builder.Translate(100 * x_scale + 20, 0);
+    }
+    builder.Restore();
+    builder.Translate(0, 125 * y_scale + 50);
+  }
+
+  auto dl = builder.Build();
+  ASSERT_TRUE(OpenPlaygroundHere(dl));
+}
+
 }  // namespace testing
 }  // namespace impeller

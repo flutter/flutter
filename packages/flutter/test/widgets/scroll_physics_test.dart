@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestScrollPhysics extends ScrollPhysics {
@@ -28,6 +28,8 @@ class TestScrollPhysics extends ScrollPhysics {
 }
 
 void main() {
+  const kBlueColor = Color(0xFF0000FF);
+
   test('ScrollPhysics applyTo()', () {
     const a = TestScrollPhysics(name: 'a');
     const b = TestScrollPhysics(name: 'b');
@@ -344,22 +346,18 @@ FlutterError
   testWidgets('PageScrollPhysics work with NestedScrollView', (WidgetTester tester) async {
     // Regression test for: https://github.com/flutter/flutter/issues/47850
     await tester.pumpWidget(
-      Material(
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: NestedScrollView(
-            physics: const PageScrollPhysics(),
-            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-              return <Widget>[
-                SliverToBoxAdapter(child: Container(height: 300, color: Colors.blue)),
-              ];
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: NestedScrollView(
+          physics: const PageScrollPhysics(),
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[SliverToBoxAdapter(child: Container(height: 300, color: kBlueColor))];
+          },
+          body: ListView.builder(
+            itemBuilder: (BuildContext context, int index) {
+              return Text('Index $index');
             },
-            body: ListView.builder(
-              itemBuilder: (BuildContext context, int index) {
-                return Text('Index $index');
-              },
-              itemCount: 100,
-            ),
+            itemCount: 100,
           ),
         ),
       ),

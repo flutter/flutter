@@ -3684,6 +3684,55 @@ void main() {
     expect(find.byType(FloatingActionButton), findsNothing);
   });
 
+  testWidgets('Scaffold FAB animates without rebuilding', (WidgetTester tester) async {
+    bool? dirty;
+    bool? checkDirty() {
+      final Finder finder = find.descendant(
+        of: find.byType(ScrollNotificationObserver),
+        matching: find.ancestor(
+          of: find.byType(CustomMultiChildLayout),
+          matching: find.byWidgetPredicate((widget) {
+            return widget is AnimatedBuilder || widget is Builder;
+          }),
+        ),
+      );
+      return finder.tryEvaluate() ? tester.element(finder).dirty : null;
+    }
+
+    final fabLocation = ValueNotifier<FloatingActionButtonLocation>(.centerDocked);
+    const builderKey = Key('Builder');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ValueListenableBuilder(
+          key: builderKey,
+          valueListenable: fabLocation,
+          builder: (context, location, child) {
+            dirty = checkDirty();
+
+            return Scaffold(
+              body: const SizedBox.expand(),
+              floatingActionButton: FloatingActionButton(onPressed: () {}),
+              floatingActionButtonLocation: location,
+            );
+          },
+        ),
+      ),
+    );
+
+    // Switch the FAB location to trigger the animation.
+    fabLocation.value = .endFloat;
+    await tester.pump(Durations.short1);
+
+    // Trigger a rebuild to update the "dirty" value.
+    tester.element(find.byKey(builderKey)).markNeedsBuild();
+    await tester.pump(Durations.short1);
+
+    // The element that builds the Scaffold's CustomMultiChildLayout should not be dirty.
+    expect(dirty, isFalse);
+
+    fabLocation.dispose();
+  });
+
   testWidgets('Scaffold background color defaults to ColorScheme.surface', (
     WidgetTester tester,
   ) async {

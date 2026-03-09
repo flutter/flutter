@@ -88,14 +88,19 @@ TEST(FlEngineTest, WindowMetrics) {
         called = true;
         EXPECT_EQ(event->display_id, 99u);
         EXPECT_EQ(event->view_id, 1);
-        EXPECT_EQ(event->width, static_cast<size_t>(3840));
-        EXPECT_EQ(event->height, static_cast<size_t>(2160));
+        EXPECT_EQ(event->width, 800u);
+        EXPECT_EQ(event->height, 600u);
+        EXPECT_TRUE(event->has_constraints);
+        EXPECT_EQ(event->min_width_constraint, 800u);
+        EXPECT_EQ(event->min_height_constraint, 600u);
+        EXPECT_EQ(event->max_width_constraint, 3840u);
+        EXPECT_EQ(event->max_height_constraint, 2160u);
         EXPECT_EQ(event->pixel_ratio, 2.0);
 
         return kSuccess;
       }));
 
-  fl_engine_send_window_metrics_event(engine, 99, 1, 3840, 2160, 2.0);
+  fl_engine_send_window_metrics_event(engine, 99, 1, 800, 600, 3840, 2160, 2.0);
 
   EXPECT_TRUE(called);
 }
@@ -717,6 +722,11 @@ TEST(FlEngineTest, AddView) {
         called = true;
         EXPECT_EQ(info->view_metrics->width, 123u);
         EXPECT_EQ(info->view_metrics->height, 456u);
+        EXPECT_TRUE(info->view_metrics->has_constraints);
+        EXPECT_EQ(info->view_metrics->min_width_constraint, 123u);
+        EXPECT_EQ(info->view_metrics->min_height_constraint, 456u);
+        EXPECT_EQ(info->view_metrics->max_width_constraint, 888u);
+        EXPECT_EQ(info->view_metrics->max_height_constraint, 999u);
         EXPECT_EQ(info->view_metrics->pixel_ratio, 2.0);
 
         FlutterAddViewResult result;
@@ -730,8 +740,8 @@ TEST(FlEngineTest, AddView) {
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
   FlutterViewId view_id =
-      fl_engine_add_view(engine, FL_RENDERABLE(renderable), 123, 456, 2.0,
-                         nullptr, add_view_cb, loop);
+      fl_engine_add_view(engine, FL_RENDERABLE(renderable), 123, 456, 888, 999,
+                         2.0, nullptr, add_view_cb, loop);
   EXPECT_GT(view_id, 0);
   EXPECT_TRUE(called);
 
@@ -769,8 +779,8 @@ TEST(FlEngineTest, AddViewError) {
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
   FlutterViewId view_id =
-      fl_engine_add_view(engine, FL_RENDERABLE(renderable), 123, 456, 2.0,
-                         nullptr, add_view_error_cb, loop);
+      fl_engine_add_view(engine, FL_RENDERABLE(renderable), 123, 456, 123, 456,
+                         2.0, nullptr, add_view_error_cb, loop);
   EXPECT_GT(view_id, 0);
 
   // Blocks here until add_view_error_cb is called.
@@ -801,8 +811,8 @@ TEST(FlEngineTest, AddViewEngineError) {
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
   FlutterViewId view_id =
-      fl_engine_add_view(engine, FL_RENDERABLE(renderable), 123, 456, 2.0,
-                         nullptr, add_view_engine_error_cb, loop);
+      fl_engine_add_view(engine, FL_RENDERABLE(renderable), 123, 456, 123, 456,
+                         2.0, nullptr, add_view_engine_error_cb, loop);
   EXPECT_GT(view_id, 0);
 
   // Blocks here until remove_view_engine_error_cb is called.

@@ -140,10 +140,7 @@ class _TopBar extends StatelessWidget {
                     image: const AssetImage('logo.png', package: 'rally_assets'),
                     placeholder: LayoutBuilder(
                       builder: (BuildContext context, BoxConstraints constraints) {
-                        return SizedBox(
-                          width: constraints.maxHeight,
-                          height: constraints.maxHeight,
-                        );
+                        return SizedBox.square(dimension: constraints.maxHeight);
                       },
                     ),
                   ),

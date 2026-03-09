@@ -140,8 +140,10 @@ void fl_engine_set_implicit_view(FlEngine* engine, FlRenderable* renderable);
  * fl_engine_add_view:
  * @engine: an #FlEngine.
  * @renderable: the object that will render this view.
- * @width: width of view in pixels.
- * @height: height of view in pixels.
+ * @min_width: minimum width of view in pixels.
+ * @min_height: minimum height of view in pixels.
+ * @max_width: maximum width of view in pixels.
+ * @max_height: maximum height of view in pixels.
  * @pixel_ratio: scale factor for view.
  * @cancellable: (allow-none): a #GCancellable or %NULL.
  * @callback: (scope async): a #GAsyncReadyCallback to call when the view is
@@ -155,8 +157,10 @@ void fl_engine_set_implicit_view(FlEngine* engine, FlRenderable* renderable);
  */
 FlutterViewId fl_engine_add_view(FlEngine* engine,
                                  FlRenderable* renderable,
-                                 size_t width,
-                                 size_t height,
+                                 size_t min_width,
+                                 size_t min_height,
+                                 size_t max_width,
+                                 size_t max_height,
                                  double pixel_ratio,
                                  GCancellable* cancellable,
                                  GAsyncReadyCallback callback,
@@ -250,17 +254,21 @@ void fl_engine_set_platform_message_handler(
  * @engine: an #FlEngine.
  * @display_id: the display this view is rendering on.
  * @view_id: the view that the event occured on.
- * @width: width of the window in pixels.
- * @height: height of the window in pixels.
- * @pixel_ratio: scale factor for window.
+ * @min_width: minimum width of view in pixels.
+ * @min_height: minimum height of view in pixels.
+ * @max_width: maximum width of view in pixels.
+ * @max_height: maximum height of view in pixels.
+ * @pixel_ratio: scale factor for view.
  *
  * Sends a window metrics event to the engine.
  */
 void fl_engine_send_window_metrics_event(FlEngine* engine,
                                          FlutterEngineDisplayId display_id,
                                          FlutterViewId view_id,
-                                         size_t width,
-                                         size_t height,
+                                         size_t min_width,
+                                         size_t min_height,
+                                         size_t max_width,
+                                         size_t max_height,
                                          double pixel_ratio);
 
 /**

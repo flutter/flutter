@@ -85,6 +85,7 @@ void main() {
           late Directory outputAppFramework;
           late File outputAppFrameworkBinary;
           late File outputRunnerBinary;
+          late File outputRunnerBinaryDebugDylib;
           late File outputPluginFrameworkBinary;
           late Directory buildPath;
           late Directory buildAppFrameworkDsym;
@@ -118,6 +119,7 @@ void main() {
             outputAppFrameworkBinary = outputAppFramework.childFile('App');
 
             outputRunnerBinary = outputApp.childFile('Runner');
+            outputRunnerBinaryDebugDylib = outputApp.childFile('Runner.debug.dylib');
 
             // Exists only if the plugin is built as a dynamic framework.
             // This is is the default for CocoaPods but not Swift Package Manager.
@@ -152,8 +154,11 @@ void main() {
             // If built as static library, the plugin's symbols will be in the
             // Runner binary.
             final bool helloDynamic = outputPluginFrameworkBinary.existsSync();
+            final String binaryPath = buildMode == BuildMode.debug
+                ? outputRunnerBinaryDebugDylib.path
+                : outputRunnerBinary.path;
             final bool helloStatic = AppleTestUtils.getExportedSymbols(
-              outputRunnerBinary.path,
+              binaryPath,
             ).any((String symbol) => symbol.contains('HelloPlugin') && symbol.contains('handle'));
 
             // Plugin is a dynamic xor static framework.
@@ -403,7 +408,7 @@ void main() {
             'ios',
             'iphonesimulator',
             'Runner.app',
-            'Runner',
+            'Runner.debug.dylib',
           ),
         );
         final File pluginFrameworkBinary = fileSystem.file(

@@ -523,7 +523,7 @@ resolution: workspace
         ]),
         throwsToolExit(
           message: RegExp(
-            r'Regular expression syntax is invalid. FormatException: Nothing to repeat[ \t]*"\$\+"',
+            r'Regular expression syntax is invalid. FormatException: Nothing to repeat[ \t\n]*"\$\+"',
           ),
         ),
       );
@@ -1515,6 +1515,40 @@ dev_dependencies:
           '--enable-flutter-gpu',
         ]);
         expect(testRunner.lastDebuggingOptionsValue.enableFlutterGpu, true);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'uninstallApp defaults to true',
+      () async {
+        final testRunner = FakeFlutterTestRunner(0);
+
+        final testCommand = TestCommand(testRunner: testRunner);
+        final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+        await commandRunner.run(const <String>['test', '--no-pub']);
+        expect(testRunner.lastDebuggingOptionsValue.uninstallApp, true);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      '--no-uninstall sets uninstallApp to false',
+      () async {
+        final testRunner = FakeFlutterTestRunner(0);
+
+        final testCommand = TestCommand(testRunner: testRunner);
+        final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+        await commandRunner.run(const <String>['test', '--no-pub', '--no-uninstall']);
+        expect(testRunner.lastDebuggingOptionsValue.uninstallApp, false);
       },
       overrides: <Type, Generator>{
         FileSystem: () => fs,

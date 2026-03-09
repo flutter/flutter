@@ -1762,15 +1762,13 @@ void main() {
           initialValue: selectedItem,
           items: items,
           itemHeight: null,
-          selectedItemBuilder: (BuildContext context) {
-            return items.map<Widget>((String item) {
-              return SizedBox(
-                height: double.parse(item),
-                width: double.parse(item),
+          selectedItemBuilder: (BuildContext context) => [
+            for (final item in items)
+              SizedBox.square(
+                dimension: double.parse(item),
                 child: Center(child: Text(item)),
-              );
-            }).toList();
-          },
+              ),
+          ],
           onChanged: (String? newValue) {},
         ),
       );
@@ -1798,15 +1796,13 @@ void main() {
           hint: const SizedBox(height: 50, width: 50, child: Text('hint')),
           items: items,
           itemHeight: null,
-          selectedItemBuilder: (BuildContext context) {
-            return items.map<Widget>((String item) {
-              return SizedBox(
-                height: double.parse(item),
-                width: double.parse(item),
+          selectedItemBuilder: (BuildContext context) => [
+            for (final item in items)
+              SizedBox.square(
+                dimension: double.parse(item),
                 child: Center(child: Text(item)),
-              );
-            }).toList();
-          },
+              ),
+          ],
           onChanged: (String? newValue) {},
         ),
       );
@@ -1838,15 +1834,13 @@ void main() {
           hint: const SizedBox(height: 125, width: 125, child: Text('hint')),
           items: items,
           itemHeight: null,
-          selectedItemBuilder: (BuildContext context) {
-            return items.map<Widget>((String item) {
-              return SizedBox(
-                height: double.parse(item),
-                width: double.parse(item),
+          selectedItemBuilder: (BuildContext context) => [
+            for (final item in items)
+              SizedBox.square(
+                dimension: double.parse(item),
                 child: Center(child: Text(item)),
-              );
-            }).toList();
-          },
+              ),
+          ],
           onChanged: (String? newValue) {},
         ),
       );
@@ -1874,15 +1868,13 @@ void main() {
           hint: const SizedBox(height: 50, width: 50, child: Text('hint')),
           items: items,
           itemHeight: null,
-          selectedItemBuilder: (BuildContext context) {
-            return items.map<Widget>((String item) {
-              return SizedBox(
-                height: double.parse(item),
-                width: double.parse(item),
+          selectedItemBuilder: (BuildContext context) => [
+            for (final item in items)
+              SizedBox.square(
+                dimension: double.parse(item),
                 child: Center(child: Text(item)),
-              );
-            }).toList();
-          },
+              ),
+          ],
         ),
       );
 
@@ -1909,15 +1901,13 @@ void main() {
           hint: const SizedBox(height: 125, width: 125, child: Text('hint')),
           items: items,
           itemHeight: null,
-          selectedItemBuilder: (BuildContext context) {
-            return items.map<Widget>((String item) {
-              return SizedBox(
-                height: double.parse(item),
-                width: double.parse(item),
+          selectedItemBuilder: (BuildContext context) => [
+            for (final item in items)
+              SizedBox.square(
+                dimension: double.parse(item),
                 child: Center(child: Text(item)),
-              );
-            }).toList();
-          },
+              ),
+          ],
         ),
       );
 
@@ -1944,15 +1934,13 @@ void main() {
           disabledHint: const SizedBox(height: 50, width: 50, child: Text('hint')),
           items: items,
           itemHeight: null,
-          selectedItemBuilder: (BuildContext context) {
-            return items.map<Widget>((String item) {
-              return SizedBox(
-                height: double.parse(item),
-                width: double.parse(item),
+          selectedItemBuilder: (BuildContext context) => [
+            for (final item in items)
+              SizedBox.square(
+                dimension: double.parse(item),
                 child: Center(child: Text(item)),
-              );
-            }).toList();
-          },
+              ),
+          ],
         ),
       );
 
@@ -1979,15 +1967,13 @@ void main() {
           disabledHint: const SizedBox(height: 125, width: 125, child: Text('hint')),
           items: items,
           itemHeight: null,
-          selectedItemBuilder: (BuildContext context) {
-            return items.map<Widget>((String item) {
-              return SizedBox(
-                height: double.parse(item),
-                width: double.parse(item),
+          selectedItemBuilder: (BuildContext context) => [
+            for (final item in items)
+              SizedBox.square(
+                dimension: double.parse(item),
                 child: Center(child: Text(item)),
-              );
-            }).toList();
-          },
+              ),
+          ],
         ),
       );
 
@@ -2011,15 +1997,13 @@ void main() {
         initialValue: selectedItem,
         items: items,
         menuWidth: 200,
-        selectedItemBuilder: (BuildContext context) {
-          return items.map<Widget>((String item) {
-            return SizedBox(
-              height: double.parse(item),
-              width: double.parse(item),
+        selectedItemBuilder: (BuildContext context) => [
+          for (final item in items)
+            SizedBox.square(
+              dimension: double.parse(item),
               child: Center(child: Text(item)),
-            );
-          }).toList();
-        },
+            ),
+        ],
         onChanged: (String? newValue) {},
       ),
     );

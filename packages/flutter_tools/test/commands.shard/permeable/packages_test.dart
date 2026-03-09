@@ -143,7 +143,7 @@ void main() {
       return <String>[
         if (includeLegacyPluginsList) '.flutter-plugins',
         '.flutter-plugins-dependencies',
-        'ios/Podfile',
+        'ios/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage/Package.swift',
       ];
     }
 
@@ -156,10 +156,8 @@ void main() {
     }
 
     const pluginContentWitnesses = <String, String>{
-      'ios/Flutter/Debug.xcconfig':
-          '#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
-      'ios/Flutter/Release.xcconfig':
-          '#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"',
+      'ios/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage/Package.swift':
+          '.package(name: "FlutterFramework", path: "../.packages/FlutterFramework")',
     };
 
     const modulePluginContentWitnesses = <String, String>{

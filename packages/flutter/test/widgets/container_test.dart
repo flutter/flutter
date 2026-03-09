@@ -628,9 +628,8 @@ void main() {
         Directionality(
           textDirection: TextDirection.rtl,
           child: Center(
-            child: SizedBox(
-              width: 100.0,
-              height: 100.0,
+            child: SizedBox.square(
+              dimension: 100.0,
               child: RepaintBoundary(
                 child: Container(
                   clipBehavior: Clip.hardEdge,

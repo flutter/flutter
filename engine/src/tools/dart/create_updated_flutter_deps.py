@@ -12,6 +12,7 @@
 
 import argparse
 import os
+import re
 import sys
 
 DART_SCRIPT_DIR = os.path.dirname(sys.argv[0])
@@ -53,6 +54,17 @@ def ParseDepsFile(deps_file):
 
   return (local_scope.get('vars', {}), local_scope.get('deps', {}))
 
+def GitHashArg(value):
+  """Validates that the string is a 40-character hex string."""
+  # If the argument is not passed, argparse usually handles the 'None'
+  # default, but this check ensures the string matches the pattern.
+  if not re.match(r"^[0-9a-f]{40}$", value):
+      raise argparse.ArgumentTypeError(
+          f"'{value}' is not a valid full git hash. "
+          "Expected a 40-character hexadecimal string."
+      )
+  return value
+
 def ParseArgs(args):
   args = args[1:]
   parser = argparse.ArgumentParser(
@@ -65,6 +77,9 @@ def ParseArgs(args):
       type=str,
       help='Flutter DEPS file.',
       default=FLUTTER_DEPS)
+  parser.add_argument('--dart_revision', '-r',
+      type=GitHashArg,
+      help='Dart revision to update to.')
   return parser.parse_args(args)
 
 def PrettifySourcePathForDEPS(flutter_vars, dep_path, source):
@@ -191,8 +206,13 @@ def Main(argv):
   lines = file.readlines()
   i = 0
   while i < len(lines):
-    updatedfile.write(lines[i])
     if lines[i].startswith("  'dart_revision':"):
+      if args.dart_revision is None:
+        # No dart revision supplied. Leave as-is.
+        updatedfile.write(lines[i])
+      else:
+        updatedfile.write("  'dart_revision': '%s',\n" % args.dart_revision)
+
       i = i + 2
       updatedfile.writelines([
         '\n',
@@ -205,6 +225,7 @@ def Main(argv):
       updatedfile.write('\n')
 
     elif lines[i].startswith("  # WARNING: Unused Dart dependencies"):
+      updatedfile.write(lines[i])
       updatedfile.write('\n')
       i = i + 1
       while i < len(lines) and not lines[i].startswith("  # WARNING: end of dart dependencies"):
@@ -213,6 +234,9 @@ def Main(argv):
       for dep_path, dep_source in new_dart_deps.items():
         updatedfile.write(f"  '{dep_path}':\n   {dep_source},\n\n")
 
+      updatedfile.write(lines[i])
+
+    else:
       updatedfile.write(lines[i])
     i = i + 1
 

@@ -12,6 +12,9 @@
 
 G_BEGIN_DECLS
 
+// Maximum time to wait for a frame to be ready before giving up and rendering.
+constexpr gint64 kCompositorRenderTimeoutMicroseconds = 100000;  // 100ms
+
 G_DECLARE_DERIVABLE_TYPE(FlCompositor, fl_compositor, FL, COMPOSITOR, GObject)
 
 struct _FlCompositorClass {
@@ -21,7 +24,14 @@ struct _FlCompositorClass {
                              const FlutterLayer** layers,
                              size_t layers_count);
 
-  gboolean (*render)(FlCompositor* compositor, cairo_t* cr, GdkWindow* window);
+  void (*get_frame_size)(FlCompositor* compositor,
+                         size_t* width,
+                         size_t* height);
+
+  gboolean (*render)(FlCompositor* compositor,
+                     cairo_t* cr,
+                     GdkWindow* window,
+                     gboolean wait_for_frame);
 };
 
 /**
@@ -45,10 +55,24 @@ gboolean fl_compositor_present_layers(FlCompositor* compositor,
                                       size_t layers_count);
 
 /**
+ * fl_compositor_get_frame_size:
+ * @compositor: an #FlCompositor.
+ * @width: location to write frame width in pixels.
+ * @height: location to write frame height in pixels.
+ *
+ * Get the size of the layer ready for rendering.
+ */
+void fl_compositor_get_frame_size(FlCompositor* compositor,
+                                  size_t* width,
+                                  size_t* height);
+
+/**
  * fl_compositor_render:
  * @compositor: an #FlCompositor.
  * @cr: a Cairo rendering context.
  * @window: window being rendered into.
+ * @wait_for_frame: if the available frame is not the size of the window block
+ * until a new frame is received.
  *
  * Renders the current frame. Called from the GTK thread.
  *
@@ -56,7 +80,8 @@ gboolean fl_compositor_present_layers(FlCompositor* compositor,
  */
 gboolean fl_compositor_render(FlCompositor* compositor,
                               cairo_t* cr,
-                              GdkWindow* window);
+                              GdkWindow* window,
+                              gboolean wait_for_frame);
 
 G_END_DECLS
 

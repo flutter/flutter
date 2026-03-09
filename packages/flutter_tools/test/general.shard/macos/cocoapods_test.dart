@@ -509,17 +509,21 @@ environement:
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testUsingContext('throws, if Podfile is missing.', () async {
-      final FlutterProject projectUnderTest = setupProjectUnderTest();
-      await expectLater(
-        cocoaPodsUnderTest.processPods(
-          xcodeProject: projectUnderTest.ios,
-          buildMode: BuildMode.debug,
-        ),
-        throwsToolExit(message: 'Podfile missing'),
-      );
-      expect(fakeProcessManager, hasNoRemainingExpectations);
-    });
+    testUsingContext(
+      'throws, if Podfile is missing.',
+      () async {
+        final FlutterProject projectUnderTest = setupProjectUnderTest();
+        await expectLater(
+          cocoaPodsUnderTest.processPods(
+            xcodeProject: projectUnderTest.ios,
+            buildMode: BuildMode.debug,
+          ),
+          throwsToolExit(message: 'Podfile missing'),
+        );
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
+    );
 
     testUsingContext(
       "doesn't throw, if using Swift Package Manager and Podfile is missing.",

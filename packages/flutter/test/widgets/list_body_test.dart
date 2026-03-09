@@ -110,9 +110,8 @@ void main() {
     FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
     try {
       await tester.pumpWidget(
-        const SizedBox(
-          width: 100,
-          height: 100,
+        const SizedBox.square(
+          dimension: 100.0,
           child: Directionality(
             textDirection: TextDirection.rtl,
             child: ListBody(mainAxis: Axis.horizontal, children: children),

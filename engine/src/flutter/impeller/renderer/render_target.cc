@@ -188,7 +188,7 @@ PixelFormat RenderTarget::GetRenderTargetPixelFormat() const {
   return PixelFormat::kUnknown;
 }
 
-size_t RenderTarget::GetMaxColorAttacmentBindIndex() const {
+size_t RenderTarget::GetMaxColorAttachmentBindIndex() const {
   size_t max = 0;
   for (const auto& color : colors_) {
     max = std::max(color.first, max);

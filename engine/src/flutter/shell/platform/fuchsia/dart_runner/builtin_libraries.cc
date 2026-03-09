@@ -10,7 +10,7 @@
 #include <optional>
 
 #include "flutter/fml/logging.h"
-#include "flutter/shell/platform/fuchsia/dart-pkg/fuchsia/sdk_ext/fuchsia.h"
+#include "flutter/shell/platform/fuchsia/dart_pkg/fuchsia/sdk_ext/fuchsia.h"
 #include "flutter/shell/platform/fuchsia/runtime/dart/utils/inlines.h"
 #include "third_party/dart/runtime/bin/io_natives.h"
 #include "third_party/dart/runtime/include/dart_api.h"

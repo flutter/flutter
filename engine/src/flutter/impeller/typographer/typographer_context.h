@@ -13,12 +13,27 @@
 
 namespace impeller {
 
+/// The data associated with a single rendering instance of a TextFrame,
+/// used to pre-load the glyph atlas with glyph and bounds information.
+struct RenderableText {
+  /// The TextFrame being rendered.
+  const std::shared_ptr<TextFrame> text_frame;
+
+  /// The transform that places the origin of the TextFrame within screen
+  /// space. This is the current transform (ctm) of the graphics context
+  /// translated by the local space position of the TextFrame.
+  const Matrix origin_transform;
+
+  /// The properties needed for rendering stroked text and/or the color
+  /// needed to cache a TextFrame where HasColor() == true.
+  const std::optional<GlyphProperties> properties;
+};
+
 //------------------------------------------------------------------------------
 /// @brief      The graphics context necessary to render text.
 ///
 ///             This is necessary to create and reference resources related to
 ///             rendering text on the GPU.
-///
 ///
 class TypographerContext {
  public:
@@ -34,7 +49,7 @@ class TypographerContext {
       GlyphAtlas::Type type,
       HostBuffer& host_buffer,
       const std::shared_ptr<GlyphAtlasContext>& atlas_context,
-      const std::vector<std::shared_ptr<TextFrame>>& text_frames) const = 0;
+      const std::vector<RenderableText>& text_frames) const = 0;
 
  protected:
   //----------------------------------------------------------------------------

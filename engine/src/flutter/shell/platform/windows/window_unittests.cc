@@ -166,7 +166,7 @@ TEST(MockWindow, MouseLeave) {
   const double mouse_y = 20.0;
 
   EXPECT_CALL(window, OnPointerMove(mouse_x, mouse_y,
-                                    kFlutterPointerDeviceKindMouse, 0, 0))
+                                    kFlutterPointerDeviceKindMouse, 0, 0, 0, 0))
       .Times(1);
   EXPECT_CALL(window, OnPointerLeave(mouse_x, mouse_y,
                                      kFlutterPointerDeviceKindMouse, 0))
@@ -365,12 +365,12 @@ TEST(MockWindow, DISABLED_GetObjectUia) {
   MockWindow window;
   bool uia_called = false;
   ON_CALL(window, OnGetObject)
-      .WillByDefault(Invoke([&uia_called](UINT msg, WPARAM wpar, LPARAM lpar) {
+      .WillByDefault([&uia_called](UINT msg, WPARAM wpar, LPARAM lpar) {
 #ifdef FLUTTER_ENGINE_USE_UIA
         uia_called = true;
 #endif  // FLUTTER_ENGINE_USE_UIA
         return static_cast<LRESULT>(0);
-      }));
+      });
   EXPECT_CALL(window, OnGetObject).Times(1);
 
   window.InjectWindowMessage(WM_GETOBJECT, 0, UiaRootObjectId);

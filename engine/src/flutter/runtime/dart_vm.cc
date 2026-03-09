@@ -19,6 +19,7 @@
 #include "flutter/runtime/dart_isolate.h"
 #include "flutter/runtime/dart_vm_initializer.h"
 #include "flutter/runtime/ptrace_check.h"
+#include "third_party/dart/runtime/bin/platform.h"
 #include "third_party/dart/runtime/include/bin/dart_io_api.h"
 #include "third_party/skia/include/core/SkExecutor.h"
 #include "third_party/tonic/converter/dart_converter.h"
@@ -294,6 +295,10 @@ DartVM::DartVM(const std::shared_ptr<const DartVMData>& vm_data,
   FML_DCHECK(vm_data_);
   FML_DCHECK(isolate_name_server_);
   FML_DCHECK(service_protocol_);
+
+  if (!dart::bin::Platform::Initialize(false)) {
+    FML_LOG(FATAL) << "Dart platform-specific initialization failed";
+  }
 
   {
     TRACE_EVENT0("flutter", "dart::bin::BootstrapDartIo");

@@ -3505,9 +3505,8 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Material(
             child: Center(
-              child: SizedBox(
-                height: 10.0,
-                width: 10.0,
+              child: SizedBox.square(
+                dimension: 10.0,
                 child: Slider(
                   value: sliderValue,
                   label: 'label',
@@ -3546,11 +3545,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Material(
             child: Center(
-              child: SizedBox(
-                height: 10.0,
-                width: 10.0,
-                child: Slider(value: 0.5, onChanged: null),
-              ),
+              child: SizedBox.square(dimension: 10.0, child: Slider(value: 0.5, onChanged: null)),
             ),
           ),
         ),

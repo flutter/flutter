@@ -1561,7 +1561,7 @@ void Shell::HandleEngineSkiaMessage(std::unique_ptr<PlatformMessage> message) {
   if (document.HasParseError() || !document.IsObject()) {
     return;
   }
-  auto root = document.GetObject();
+  auto root = document.GetObj();
   auto method = root.FindMember("method");
   if (method->value != "Skia.setResourceCacheMaxBytes") {
     return;

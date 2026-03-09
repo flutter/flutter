@@ -57,9 +57,8 @@ class _ValueListenableBuilderExampleState
               // the notifier.
               child: const Padding(
                 padding: EdgeInsets.all(10.0),
-                child: SizedBox(
-                  width: 40,
-                  height: 40,
+                child: SizedBox.square(
+                  dimension: 40,
                   child: FlutterLogo(size: 40),
                 ),
               ),

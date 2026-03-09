@@ -17,7 +17,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/list_tile_test_utils.dart';
+import '../widgets/list_tile_tester.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {

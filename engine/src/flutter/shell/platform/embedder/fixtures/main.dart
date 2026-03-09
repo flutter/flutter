@@ -1578,6 +1578,25 @@ void render_impeller_test() {
 
 @pragma('vm:entry-point')
 // ignore: non_constant_identifier_names
+void render_texture_impeller_test() {
+  PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
+    const size = Size(800.0, 600.0);
+
+    final builder = SceneBuilder();
+
+    builder.pushOffset(0.0, 0.0);
+
+    builder.addTexture(/*textureId*/ 1, width: size.width, height: size.height);
+
+    builder.pop();
+
+    PlatformDispatcher.instance.views.first.render(builder.build());
+  };
+  PlatformDispatcher.instance.scheduleFrame();
+}
+
+@pragma('vm:entry-point')
+// ignore: non_constant_identifier_names
 void render_impeller_text_test() {
   PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
     final builder = SceneBuilder();

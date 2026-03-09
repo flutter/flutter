@@ -3284,25 +3284,36 @@ class _RouteEntry extends RouteTransitionRecord {
     lastAnnouncedPoppedNextRoute = WeakReference<Route<dynamic>>(poppedRoute);
     if (lastFocusNode != null) {
       // Move focus back to the last focused node.
-      poppedRoute._disposeCompleter.future.then((dynamic result) async {
-        switch (defaultTargetPlatform) {
-          case TargetPlatform.android:
-            // In the Android platform, we have to wait for the system refocus to complete before
-            // sending the refocus message. Otherwise, the refocus message will be ignored.
-            // TODO(hangyujin): update this logic if Android provide a better way to do so.
-            final int? reFocusNode = lastFocusNode;
-            await Future<void>.delayed(_kAndroidRefocusingDelayDuration);
-            SystemChannels.accessibility.send(
-              const FocusSemanticEvent().toMap(nodeId: reFocusNode),
+      poppedRoute._disposeCompleter.future
+          .then((dynamic result) async {
+            switch (defaultTargetPlatform) {
+              case TargetPlatform.android:
+                // In the Android platform, we have to wait for the system refocus to complete before
+                // sending the refocus message. Otherwise, the refocus message will be ignored.
+                // TODO(hangyujin): update this logic if Android provide a better way to do so.
+                final int? reFocusNode = lastFocusNode;
+                await Future<void>.delayed(_kAndroidRefocusingDelayDuration);
+                await SystemChannels.accessibility.send(
+                  const FocusSemanticEvent().toMap(nodeId: reFocusNode),
+                );
+              case TargetPlatform.iOS:
+                await SystemChannels.accessibility.send(
+                  const FocusSemanticEvent().toMap(nodeId: lastFocusNode),
+                );
+              case _:
+                break;
+            }
+          })
+          .catchError((Object error, StackTrace stackTrace) {
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stackTrace,
+                library: 'widgets library',
+                context: ErrorDescription('while restoring focus in the navigator'),
+              ),
             );
-          case TargetPlatform.iOS:
-            SystemChannels.accessibility.send(
-              const FocusSemanticEvent().toMap(nodeId: lastFocusNode),
-            );
-          case _:
-            break;
-        }
-      });
+          });
     }
   }
 

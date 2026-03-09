@@ -82,13 +82,10 @@ abstract class AccessibilityEvaluation {
 @internal
 class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
   /// Create a new [MinimumTapTargetEvaluation].
-  const MinimumTapTargetEvaluation({required this.size, required this.link});
+  const MinimumTapTargetEvaluation({required this.size});
 
   /// The minimum allowed size of a tappable node.
   final Size size;
-
-  /// A link describing the tap target evaluations for a platform.
-  final String link;
 
   /// The gap between targets to their parent scrollables to be considered valid
   /// tap targets.
@@ -151,8 +148,7 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
         Violation(
           node,
           '$node: expected tap target size of at least $size, '
-          'but found $candidateSize\n'
-          'See also: $link',
+          'but found $candidateSize\n',
         ),
       );
     }
@@ -248,7 +244,22 @@ class LabeledTapTargetEvaluation extends AccessibilityEvaluation {
 @internal
 class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
   /// Create a new [MinimumTextContrastEvaluation].
-  const MinimumTextContrastEvaluation();
+  const MinimumTextContrastEvaluation({
+    required this.minNormalTextContrastRatio,
+    required this.minLargeTextContrastRatio,
+  });
+
+  /// The minimum contrast ratio for normal text.
+  ///
+  /// Normal text is text that is smaller than [kLargeTextMinimumSize] (18.0) or
+  /// smaller than [kBoldTextMinimumSize] (14.0) if bold.
+  final double minNormalTextContrastRatio;
+
+  /// The minimum contrast ratio for large text.
+  ///
+  /// Large text is text that is at least [kLargeTextMinimumSize] (18.0) or at
+  /// least [kBoldTextMinimumSize] (14.0) if bold.
+  final double minLargeTextContrastRatio;
 
   /// The minimum text size considered large for contrast checking.
   ///
@@ -464,46 +475,9 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
     final double fontSizeOrDefault = fontSize ?? _kDefaultFontSize;
     if ((bold && fontSizeOrDefault >= kBoldTextMinimumSize) ||
         fontSizeOrDefault >= kLargeTextMinimumSize) {
-      return kMinimumRatioLargeText;
+      return minLargeTextContrastRatio;
     }
-    return kMinimumRatioNormalText;
-  }
-}
-
-/// {@macro flutter.widgets.accessibility_evaluations.internal}
-///
-/// An evaluation which verifies that all nodes that contribute semantics via text
-/// meet **WCAG AAA** contrast levels.
-///
-/// The AAA level is defined by the Web Content Accessibility Guidelines:
-/// https://www.w3.org/WAI/WCAG22/Understanding/contrast-enhanced
-///
-/// This evaluation enforces a stricter contrast ratio:
-///  * Normal text must have a contrast ratio of at least 7.0
-///  * Large or bold text must have a contrast ratio of at least 4.5
-@internal
-class MinimumTextContrastEvaluationAAA extends MinimumTextContrastEvaluation {
-  /// Create a new [MinimumTextContrastEvaluationAAA].
-  const MinimumTextContrastEvaluationAAA();
-
-  /// The minimum contrast ratio for large text (bold ≥14px or ≥18px).
-  ///
-  /// Defined by WCAG AAA standard http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
-  static const double kAAAMinimumRatioLargeText = 4.5;
-
-  /// The minimum contrast ratio for normal text.
-  ///
-  /// Defined by WCAG AAA standard http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
-  static const double kAAAMinimumRatioNormalText = 7.0;
-
-  @override
-  double _targetContrastRatio(double? fontSize, {required bool bold}) {
-    final double fontSizeOrDefault = fontSize ?? MinimumTextContrastEvaluation._kDefaultFontSize;
-    if ((bold && fontSizeOrDefault >= MinimumTextContrastEvaluation.kBoldTextMinimumSize) ||
-        fontSizeOrDefault >= MinimumTextContrastEvaluation.kLargeTextMinimumSize) {
-      return kAAAMinimumRatioLargeText;
-    }
-    return kAAAMinimumRatioNormalText;
+    return minNormalTextContrastRatio;
   }
 }
 
@@ -609,4 +583,120 @@ Iterable<Element> _collectElementsByText(Element root, String text) {
     result.addAll(_collectElementsByText(child, text));
   });
   return result;
+}
+
+final int _scrollingActions =
+    SemanticsAction.scrollUp.index |
+    SemanticsAction.scrollDown.index |
+    SemanticsAction.scrollLeft.index |
+    SemanticsAction.scrollRight.index |
+    SemanticsAction.scrollToOffset.index;
+
+/// Whether or not the node is important for accessibility. Should match most cases
+/// on the platforms, but certain edge cases will be inconsistent.
+///
+/// Based on:
+///
+/// * [flutter/engine/AccessibilityBridge.java#SemanticsNode.isFocusable()](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java#L2641)
+/// * [flutter/engine/SemanticsObject.mm#SemanticsObject.isAccessibilityElement](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.mm#L449)
+bool _isImportantForAccessibility(SemanticsNode node) {
+  if (node.isMergedIntoParent) {
+    // If this node is merged, all its information are present on an ancestor
+    // node.
+    return false;
+  }
+  final SemanticsData data = node.getSemanticsData();
+  // If the node scopes a route, it doesn't matter what other flags/actions it
+  // has, it is _not_ important for accessibility, so we short circuit.
+  if (data.flagsCollection.scopesRoute) {
+    return false;
+  }
+
+  final hasNonScrollingAction = data.actions & ~_scrollingActions != 0;
+  if (hasNonScrollingAction) {
+    return true;
+  }
+
+  /// Based on Android's FOCUSABLE_FLAGS. See [flutter/engine/AccessibilityBridge.java](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java).
+  final bool hasImportantFlag =
+      data.flagsCollection.isChecked != ui.CheckedState.none ||
+      data.flagsCollection.isToggled != ui.Tristate.none ||
+      data.flagsCollection.isEnabled != ui.Tristate.none ||
+      data.flagsCollection.isButton ||
+      data.flagsCollection.isTextField ||
+      data.flagsCollection.isFocused != ui.Tristate.none ||
+      data.flagsCollection.isSlider ||
+      data.flagsCollection.isInMutuallyExclusiveGroup;
+
+  if (hasImportantFlag) {
+    return true;
+  }
+
+  final bool hasContent =
+      data.label.isNotEmpty ||
+      data.value.isNotEmpty ||
+      data.hint.isNotEmpty ||
+      data.tooltip.isNotEmpty;
+  if (hasContent) {
+    return true;
+  }
+
+  return false;
+}
+
+/// {@macro flutter.widgets.accessibility_evaluations.internal}
+///
+/// An evaluation which enforces that all leaf semantics nodes have a label,
+/// value, hint, or tooltip.
+@internal
+class UnlabeledLeafNodeEvaluation extends AccessibilityEvaluation {
+  const UnlabeledLeafNodeEvaluation();
+
+  @override
+  FutureOr<EvaluationResult> _evaluate(WidgetsBinding binding) {
+    final violations = <Violation>[];
+    for (final RenderView view in binding.renderViews) {
+      violations.addAll(_traverse(view.owner!.semanticsOwner!.rootSemanticsNode!));
+    }
+    return EvaluationResult(violations);
+  }
+
+  List<Violation> _traverse(SemanticsNode node) {
+    final violations = <Violation>[];
+    var hasChildren = false;
+    node.visitChildren((SemanticsNode child) {
+      hasChildren = true;
+      violations.addAll(_traverse(child));
+      return true;
+    });
+
+    if (node.isInvisible || node.flagsCollection.isHidden) {
+      return violations;
+    }
+
+    // If not merging descendants and has children, it's not a leaf.
+    if (hasChildren && !node.mergeAllDescendantsIntoThisNode) {
+      return violations;
+    }
+
+    if (!_isImportantForAccessibility(node)) {
+      return violations;
+    }
+
+    final SemanticsData data = node.getSemanticsData();
+    if (data.label.trim().isEmpty &&
+        data.value.trim().isEmpty &&
+        data.hint.trim().isEmpty &&
+        data.tooltip.trim().isEmpty) {
+      violations.add(
+        Violation(
+          node,
+          '$node: expected leaf semantics node to have a label, value, hint, or tooltip, '
+          'but none was found.',
+        ),
+      );
+    }
+
+    return violations;
+  }
 }

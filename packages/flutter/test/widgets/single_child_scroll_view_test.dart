@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
-import 'editable_text_utils.dart' show TestTextField;
+import 'editable_text_tester.dart';
 import 'semantics_tester.dart';
 import 'widgets_app_tester.dart';
 
@@ -790,9 +790,8 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: SizedBox(
-            height: 200.0,
-            width: 200.0,
+          child: SizedBox.square(
+            dimension: 200.0,
             child: SingleChildScrollView(
               controller: controllerY = ScrollController(initialScrollOffset: 400.0),
               child: SingleChildScrollView(

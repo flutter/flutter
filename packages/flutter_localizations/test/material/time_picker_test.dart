@@ -132,12 +132,7 @@ void main() {
     ];
 
     for (final locale in locales) {
-      final Offset center = await startPicker(
-        tester,
-        (TimeOfDay? time) {},
-        locale: locale,
-        useMaterial3: true,
-      );
+      final Offset center = await startPicker(tester, (TimeOfDay? time) {}, locale: locale);
       final Text stringFragmentText = tester.widget(timeSelectorSeparatorFinder);
       final double hourLeftOffset = tester.getTopLeft(dialHourControlFinder).dx;
       final double minuteLeftOffset = tester.getTopLeft(dialMinuteControlFinder).dx;
@@ -307,12 +302,7 @@ void main() {
     ];
 
     for (final locale in locales) {
-      final Offset center = await startPicker(
-        tester,
-        (TimeOfDay? time) {},
-        locale: locale,
-        useMaterial3: true,
-      );
+      final Offset center = await startPicker(tester, (TimeOfDay? time) {}, locale: locale);
       final Text stringFragmentText = tester.widget(timeSelectorSeparatorFinder);
       final double hourLeftOffset = tester.getTopLeft(dialHourControlFinder).dx;
       final double hourTopOffset = tester.getTopLeft(dialHourControlFinder).dy;
@@ -482,7 +472,6 @@ void main() {
           onChanged: (TimeOfDay? time) {},
           locale: locale,
           entryMode: TimePickerEntryMode.input,
-          useMaterial3: true,
         ),
       );
       await tester.tap(find.text('X'));
@@ -577,14 +566,9 @@ void main() {
       // should land on the outer ring's "00".
       for (var factor = startFactor; factor < endFactor; factor += 1) {
         TimeOfDay? result;
-        final Offset center = await startPicker(
-          tester,
-          (TimeOfDay? time) {
-            result = time;
-          },
-          locale: locale,
-          useMaterial3: true,
-        );
+        final Offset center = await startPicker(tester, (TimeOfDay? time) {
+          result = time;
+        }, locale: locale);
         final Size size = tester.getSize(dialCustomPaintFinder);
         final double dy = (size.height / 2.0 / 10) * factor;
         await tester.tapAt(Offset(center.dx, center.dy - dy));

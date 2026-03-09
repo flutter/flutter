@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'list_tile_test_utils.dart';
+import 'list_tile_tester.dart';
 
 void main() {
   testWidgets('Baseline - control test', (WidgetTester tester) async {

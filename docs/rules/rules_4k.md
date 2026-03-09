@@ -10,7 +10,7 @@
 * **Entry:** Standard `lib/main.dart`.
 * **Layers:** Presentation (Widgets), Domain (Logic), Data (Repo/API).
 * **Features:** Group by feature (e.g., `lib/features/login/`) for scalable apps.
-* **SOLID:** strictly enforced.
+* **SOLID:** Strictly enforced.
 * **State Management:**
   * **Pattern:** Separate UI state (ephemeral) from App state.
   * **Native First:** Use `ValueNotifier`, `ChangeNotifier`.

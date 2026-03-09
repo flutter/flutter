@@ -28,6 +28,7 @@ if (flutterVersionName == null) {
 android {
     namespace = "dev.benchmarks.platform_views_layout"
     compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
 
 
     compileOptions {

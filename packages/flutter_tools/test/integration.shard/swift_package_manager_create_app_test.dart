@@ -38,8 +38,10 @@ void main() {
               .childDirectory('Runner.xcodeproj')
               .childFile('project.pbxproj');
           expect(pbxprojFile.existsSync(), isTrue);
+          final String pbxprojFileContents = pbxprojFile.readAsStringSync();
+          expect(pbxprojFileContents.contains('FlutterGeneratedPluginSwiftPackage'), isFalse);
           expect(
-            pbxprojFile.readAsStringSync().contains('FlutterGeneratedPluginSwiftPackage'),
+            pbxprojFileContents.contains('784666492D4C4C64000A1A5F /* FlutterFramework */'),
             isFalse,
           );
 
@@ -106,7 +108,12 @@ void main() {
               .childDirectory('Runner.xcodeproj')
               .childFile('project.pbxproj');
           expect(pbxprojFile.existsSync(), isTrue);
-          expect(pbxprojFile.readAsStringSync(), contains('FlutterGeneratedPluginSwiftPackage'));
+          final String pbxprojFileContents = pbxprojFile.readAsStringSync();
+          expect(pbxprojFileContents, contains('FlutterGeneratedPluginSwiftPackage'));
+          expect(
+            pbxprojFileContents.contains('784666492D4C4C64000A1A5F /* FlutterFramework */'),
+            isFalse,
+          );
 
           final File xcschemeFile = fileSystem
               .directory(appDirectoryPath)

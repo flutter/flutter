@@ -1252,9 +1252,8 @@ void main() {
               child: SingleChildScrollView(
                 child: GestureDetector(
                   onTap: () => onTap = true,
-                  child: const SizedBox(
-                    width: 4000.0,
-                    height: 4000.0,
+                  child: const SizedBox.square(
+                    dimension: 4000.0,
                     child: ColoredBox(color: Color(0x00000000)),
                   ),
                 ),

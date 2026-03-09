@@ -23,20 +23,12 @@ import '../project.dart';
 /// https://developer.apple.com/documentation/apple-silicon/running-your-ios-apps-on-macos
 class MacOSDesignedForIPadDevice extends DesktopDevice {
   MacOSDesignedForIPadDevice({
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
+    required super.processManager,
+    required super.logger,
+    required super.fileSystem,
+    required super.operatingSystemUtils,
   }) : _operatingSystemUtils = operatingSystemUtils,
-       super(
-         'mac-designed-for-ipad',
-         platformType: PlatformType.macos,
-         ephemeral: false,
-         processManager: processManager,
-         logger: logger,
-         fileSystem: fileSystem,
-         operatingSystemUtils: operatingSystemUtils,
-       );
+       super('mac-designed-for-ipad', platformType: PlatformType.macos, ephemeral: false);
 
   final OperatingSystemUtils _operatingSystemUtils;
 

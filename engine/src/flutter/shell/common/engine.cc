@@ -404,7 +404,7 @@ bool Engine::HandleNavigationPlatformMessage(
   if (document.HasParseError() || !document.IsObject()) {
     return false;
   }
-  auto root = document.GetObject();
+  auto root = document.GetObj();
   auto method = root.FindMember("method");
   if (method->value != "setInitialRoute") {
     return false;
@@ -423,7 +423,7 @@ bool Engine::HandleLocalizationPlatformMessage(PlatformMessage* message) {
   if (document.HasParseError() || !document.IsObject()) {
     return false;
   }
-  auto root = document.GetObject();
+  auto root = document.GetObj();
   auto method = root.FindMember("method");
   if (method == root.MemberEnd()) {
     return false;

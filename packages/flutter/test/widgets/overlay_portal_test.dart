@@ -1462,9 +1462,8 @@ void main() {
     const GlobalObjectKey container = GlobalObjectKey('container');
     final controller1 = OverlayPortalController();
     final overlayPortal = UniqueKey();
-    final Widget overlayBody = SizedBox(
-      width: 100,
-      height: 100,
+    final Widget overlayBody = SizedBox.square(
+      dimension: 100.0,
       child: OverlayPortal(
         controller: controller1,
         overlayChildBuilder: (BuildContext context) => Placeholder(key: overlayPortal),
@@ -1520,9 +1519,8 @@ void main() {
     final oldRoot = GlobalKey<OverlayState>();
     final newRoot = GlobalKey<OverlayState>();
     final overlayPortal = UniqueKey();
-    final Widget overlayBody = SizedBox(
-      width: 100,
-      height: 100,
+    final Widget overlayBody = SizedBox.square(
+      dimension: 100.0,
       child: OverlayPortal(
         controller: controller1,
         overlayLocation: OverlayChildLocation.rootOverlay,
@@ -1594,9 +1592,8 @@ void main() {
     final overlayPortal = UniqueKey();
     final outer = GlobalKey<OverlayState>();
     final inner = GlobalKey<OverlayState>();
-    final Widget overlayBody = SizedBox(
-      width: 100,
-      height: 100,
+    final Widget overlayBody = SizedBox.square(
+      dimension: 100.0,
       child: OverlayPortal(
         controller: controller1,
         overlayLocation: OverlayChildLocation.rootOverlay,

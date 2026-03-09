@@ -259,6 +259,10 @@ class WindowPositionerConstraintAdjustment {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   final bool resizeY;
+
+  @override
+  String toString() =>
+      'WindowPositionerConstraintAdjustment(flipX: $flipX, flipY: $flipY, slideX: $slideX, slideY: $slideY, resizeX: $resizeX, resizeY: $resizeY)';
 }
 
 /// The [WindowPositioner] defines how child windows are placed relative to
@@ -500,6 +504,11 @@ class WindowPositioner {
     }
 
     return defaultResult;
+  }
+
+  @override
+  String toString() {
+    return 'WindowPositioner(parentAnchor: $parentAnchor, childAnchor: $childAnchor, offset: $offset, constraintAdjustment: $constraintAdjustment)';
   }
 }
 

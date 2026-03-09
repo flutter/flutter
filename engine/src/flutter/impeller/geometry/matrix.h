@@ -396,6 +396,14 @@ struct Matrix {
                    GetBasisZ().GetLength());
   }
 
+  constexpr Vector2 GetBasisX2D() const { return Vector2(m[0], m[1]); }
+
+  constexpr Vector2 GetBasisY2D() const { return Vector2(m[4], m[5]); }
+
+  inline Vector2 GetBasisScaleXY() const {
+    return Vector2(GetBasisX2D().GetLength(), GetBasisY2D().GetLength());
+  }
+
   inline Scalar GetDirectionScale(Vector3 direction) const {
     return 1.0f / (this->Basis().Invert() * direction.Normalize()).GetLength() *
            direction.GetLength();

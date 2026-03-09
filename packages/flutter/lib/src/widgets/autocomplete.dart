@@ -437,7 +437,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   void _updateOptionsViewVisibility() {
     if (_canShowOptionsView) {
       _optionsViewController.show();
-    } else {
+    } else if (_optionsViewController.isShowing) {
       _optionsViewController.hide();
     }
   }

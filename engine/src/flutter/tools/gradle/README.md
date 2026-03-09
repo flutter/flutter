@@ -30,7 +30,7 @@ Gradle version that you downloaded and verified.
 1. Authenticate with CIPD by running `cipd auth-login`.
 2. Run `cipd create -in gradle-7.5.1 -install-mode copy -tag version:7.5.1 -name flutter/gradle` to
 upload the new Gradle version to CIPD.
-3. Update the `engine/src/flutter/DEPS` Gradle entry (which should look something like [this](https://github.com/flutter/engine/blob/4caaab9f2502481b606b930abeea4a361022fa16/DEPS#L732-L743))
+3. Update the `DEPS` Gradle entry (which should look something like [this](https://github.com/flutter/flutter/blob/91b2d41a66d1c540233b819525553afc0fa1f58d/DEPS#L573))
 to contain the tag from the command above (version:7.5.1).
 4. Run `gclient sync` to verify that the dependency can be fetched.
 

@@ -57,6 +57,10 @@ Color _scaleAlpha(Color x, double factor) {
   return x.withValues(alpha: clampDouble(x.a * factor, 0, 1));
 }
 
+ColorSpace _widerColorSpace(ColorSpace a, ColorSpace b) {
+  return a == ColorSpace.displayP3 || b == ColorSpace.displayP3 ? ColorSpace.displayP3 : a;
+}
+
 /// An immutable color value in ARGB format.
 ///
 /// Consider the light teal of the [Flutter logo](https://flutter.dev/brand). It
@@ -412,6 +416,11 @@ class Color {
   ///
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
+  ///
+  /// If the two colors are in different color spaces, both are converted to
+  /// the wider gamut color space before interpolating. The result will be in
+  /// the wider gamut color space. For example, interpolating between an sRGB
+  /// color and a Display P3 color will produce a Display P3 result.
   static Color? lerp(Color? x, Color? y, double t) {
     assert(x?.colorSpace != ColorSpace.extendedSRGB);
     assert(y?.colorSpace != ColorSpace.extendedSRGB);
@@ -425,13 +434,24 @@ class Color {
       if (x == null) {
         return _scaleAlpha(y, t);
       } else {
-        assert(x.colorSpace == y.colorSpace);
+        final Color a;
+        final Color b;
+        final ColorSpace resultColorSpace;
+        if (x.colorSpace == y.colorSpace) {
+          a = x;
+          b = y;
+          resultColorSpace = x.colorSpace;
+        } else {
+          resultColorSpace = _widerColorSpace(x.colorSpace, y.colorSpace);
+          a = x.withValues(colorSpace: resultColorSpace);
+          b = y.withValues(colorSpace: resultColorSpace);
+        }
         return Color.from(
-          alpha: clampDouble(_lerpDouble(x.a, y.a, t), 0, 1),
-          red: clampDouble(_lerpDouble(x.r, y.r, t), 0, 1),
-          green: clampDouble(_lerpDouble(x.g, y.g, t), 0, 1),
-          blue: clampDouble(_lerpDouble(x.b, y.b, t), 0, 1),
-          colorSpace: x.colorSpace,
+          alpha: clampDouble(_lerpDouble(a.a, b.a, t), 0, 1),
+          red: clampDouble(_lerpDouble(a.r, b.r, t), 0, 1),
+          green: clampDouble(_lerpDouble(a.g, b.g, t), 0, 1),
+          blue: clampDouble(_lerpDouble(a.b, b.b, t), 0, 1),
+          colorSpace: resultColorSpace,
         );
       }
     }
@@ -3187,6 +3207,10 @@ abstract class Path {
   /// In particular, callers should be aware that [PathMetrics.length] is the
   /// number of contours, **not the length of the path**. To get the length of
   /// a contour in a path, use [PathMetric.length].
+  ///
+  /// Zero-length contours (where the start and end points are the same, such as
+  /// `Path()..lineTo(0, 0)`) are not included in the returned [PathMetrics].
+  /// Only contours with a positive length will have a corresponding [PathMetric].
   ///
   /// If `forceClosed` is set to true, the contours of the path will be measured
   /// as if they had been closed, even if they were not explicitly closed.

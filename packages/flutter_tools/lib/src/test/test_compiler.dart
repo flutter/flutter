@@ -180,7 +180,7 @@ class TestCompiler {
   /// Create the resident compiler used to compile the test.
   @visibleForTesting
   Future<ResidentCompiler?> createCompiler() async {
-    final residentCompiler = ResidentCompiler(
+    final ResidentCompiler residentCompiler = residentCompilerFactory.create(
       artifacts: globals.artifacts!,
       logger: globals.logger,
       processManager: globals.processManager,

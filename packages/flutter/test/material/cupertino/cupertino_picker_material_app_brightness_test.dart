@@ -14,9 +14,8 @@ void main() {
         theme: ThemeData(brightness: brightness),
         home: Align(
           alignment: Alignment.topLeft,
-          child: SizedBox(
-            height: 300.0,
-            width: 300.0,
+          child: SizedBox.square(
+            dimension: 300.0,
             child: CupertinoPicker(
               itemExtent: 50.0,
               onSelectedItemChanged: (_) {},

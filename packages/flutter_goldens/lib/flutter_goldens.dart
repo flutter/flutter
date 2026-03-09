@@ -669,7 +669,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
         'https://flutter-gold.skia.org.\n'
         'Validate image output found at $basedir',
       );
-      update(golden, imageBytes);
+      await update(golden, imageBytes);
       return true;
     }
 

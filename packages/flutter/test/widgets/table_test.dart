@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'editable_text_utils.dart' show TestTextField;
+import 'editable_text_tester.dart';
 import 'semantics_tester.dart';
 
 class TestStatefulWidget extends StatefulWidget {

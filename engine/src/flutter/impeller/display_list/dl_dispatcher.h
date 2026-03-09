@@ -28,6 +28,35 @@ using DlRoundRect = flutter::DlRoundRect;
 using DlRoundSuperellipse = flutter::DlRoundSuperellipse;
 using DlPath = flutter::DlPath;
 
+//////////////////////////////////////////////////////////////////////////
+/// Important implementation note.
+///
+/// The Impeller DisplayList Dispatcher implementation is divided into
+/// two parts and conducted in two passes.
+///
+/// The first pass is conducted using the FirstPassDispatcher which
+/// examines the rendering ops for important conditions needed by the
+/// rendering pass and computes some needed information for them.
+///
+/// The second pass is conducted using CanvasDlDispatcher to perform the
+/// actual rendering using a Canvas and data provided by the first pass.
+///
+/// @important It is important to note that the 2 passes perform slightly
+/// different DisplayList culling and may process different subsets of the
+/// frame's operations.
+/// See https://github.com/flutter/flutter/issues/182639
+///
+/// Given the above issue any data precomputed by the first pass should
+/// be presented in a way that doesn't assume a 1:1 correlation of the
+/// rendering operations in both passes (perhaps provide it in a map
+/// instead of a vector). While we have not yet observed and cases where
+/// an operation is missed during the first pass but still processed in
+/// the rendering pass, it would be wise to include a backup plan in
+/// the canvas dispatcher for when the data was not forwarded.
+//////////////////////////////////////////////////////////////////////////
+
+/// Base (virtual) dispatcher utility class to implement most DlOpReceiver
+/// operations for other specific classes.
 class DlDispatcherBase : public flutter::DlOpReceiver {
  public:
   // |flutter::DlOpReceiver|
@@ -260,6 +289,10 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
                                  const Paint& paint);
 };
 
+/// Specific non-virtual dispatcher utility class that uses DlDispatcherBase
+/// to implement most operations but provides additional implementation of
+/// operations that are specific to the rendering pass of the Impeller
+/// 2-pass rendering procedure.
 class CanvasDlDispatcher : public DlDispatcherBase {
  public:
   CanvasDlDispatcher(ContentContext& renderer,
@@ -306,8 +339,9 @@ class CanvasDlDispatcher : public DlDispatcherBase {
   Canvas& GetCanvas() override;
 };
 
-/// Performs a first pass over the display list to collect infomation.
-/// Collects things like text frames and backdrop filters.
+/// Performs a first pass over the display list to collect information
+/// that will be useful in a second pass by the CanvasDlDispatcher.
+/// This class collects things like text frames and backdrop filters.
 class FirstPassDispatcher : public flutter::IgnoreAttributeDispatchHelper,
                             public flutter::IgnoreClipDispatchHelper,
                             public flutter::IgnoreDrawDispatchHelper {

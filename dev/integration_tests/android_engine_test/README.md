@@ -11,7 +11,7 @@ and compare the screenshots against golden images.
 > tools, and only useful when the documentation and naming stays up to date and
 > is clearly actionable.
 >
-> Please take extra care when updating the test suite to also update the REAMDE.
+> Please take extra care when updating the test suite to also update the README.
 
 ## How it runs on CI (LUCI)
 

@@ -43,7 +43,7 @@ Future<TaskResult> run() async {
         isUsingValidationLayers = true;
       }
       // "ImpellerValidationBreak" comes from the engine:
-      // https://github.com/flutter/engine/blob/4160ebacdae2081d6f3160432f5f0dd87dbebec1/impeller/base/validation.cc#L40
+      // https://github.com/flutter/flutter/blob/91b2d41a66d1c540233b819525553afc0fa1f58d/engine/src/flutter/impeller/base/validation.cc#L54
       if (data.contains('ImpellerValidationBreak')) {
         hasValidationErrors = true;
       }

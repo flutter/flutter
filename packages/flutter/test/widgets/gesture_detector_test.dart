@@ -189,9 +189,8 @@ void main() {
                   },
                   child: Container(width: 100.0, height: 100.0, color: const Color(0xFF00FF00)),
                 ),
-                SizedBox(
-                  width: 100.0,
-                  height: 100.0,
+                SizedBox.square(
+                  dimension: 100.0,
                   child: GestureDetector(
                     onTap: ButtonVariant.button == kPrimaryButton
                         ? () {
