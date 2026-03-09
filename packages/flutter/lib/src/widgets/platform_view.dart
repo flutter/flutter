@@ -1303,10 +1303,9 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
       _controller?.clearFocus();
     }
     SystemChannels.textInput
-        .invokeMethod<void>(
-      'TextInput.setPlatformViewClient',
-      <String, dynamic>{'platformViewId': _id},
-    )
+        .invokeMethod<void>('TextInput.setPlatformViewClient', <String, dynamic>{
+          'platformViewId': _id,
+        })
         .catchError((Object error, StackTrace stack) {
           FlutterError.reportError(
             FlutterErrorDetails(
