@@ -9,6 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/widget_inspector_test_utils.dart';
 
+/// A [CustomPainter] that invokes a callback when it paints.
+///
+/// Used in tests to verify when a repaint occurs.
 class TestCallbackPainter extends CustomPainter {
   const TestCallbackPainter({required this.onPaint});
 
