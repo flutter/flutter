@@ -568,7 +568,7 @@ class AndroidDevice extends Device {
     print('$camilleTag for app with main path: $mainPath');
     print('$camilleTag for app with APK path: ${package?.applicationPackage.path}');
 
-    final List<String> androidShellArguments = debuggingOptions.getAndroidShellArguments();
+    final List<String> androidShellArguments = debuggingOptions.getAndroidLaunchArguments();
     // Add additional platform arguments to androidShellArguments.
     final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
     androidShellArguments.addAll(<String>[

@@ -268,6 +268,7 @@ void main() {
         userMessages: UserMessages(),
         androidSdk: sdk,
         processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+        buildMode: BuildMode.debug,
       );
 
       expect(androidApk, isNull);

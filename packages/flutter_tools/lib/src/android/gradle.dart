@@ -470,7 +470,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
     // The default Gradle script reads the version name and number
     // from the local.properties file.
-    // TODO(camsim99): Can I not do something like that??? This is tea...
     updateLocalProperties(project: project, buildInfo: androidBuildInfo.buildInfo);
 
     final options = <String>[];
@@ -489,6 +488,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
         : getAssembleTaskFor(buildInfo);
 
     // Add engine shell arugments to be injected into the manifest.
+    // TODO(camsim99): Choose different delimiter.
     if (androidShellArguments != null) {
       final String androidShellArgumentsStr = androidShellArguments.join(',');
       options.add('-PandroidShellArguments=$androidShellArgumentsStr');

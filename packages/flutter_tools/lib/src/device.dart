@@ -1261,35 +1261,35 @@ class DebuggingOptions {
     ];
   }
 
-  List<String> getAndroidShellArguments() {
+  List<String> getAndroidLaunchArguments() {
     final androidShellArguments = <String>[
-      if (enableDartProfiling) ...<String>['--enable-dart-profiling=true'],
-      if (profileStartup) ...<String>['--profile-startup=true'],
-      if (enableSoftwareRendering) ...<String>['--enable-software-rendering=true'],
-      if (skiaDeterministicRendering) ...<String>['--skia-deterministic-rendering=true'],
-      if (traceSkia) ...<String>['--trace-skia=true'],
+      if (enableDartProfiling) ...<String>['--enable-dart-profiling'],
+      if (profileStartup) ...<String>['--profile-startup'],
+      if (enableSoftwareRendering) ...<String>['--enable-software-rendering'],
+      if (skiaDeterministicRendering) ...<String>['--skia-deterministic-rendering'],
+      if (traceSkia) ...<String>['--trace-skia'],
       if (traceAllowlist != null) ...<String>['--trace-allowlist=${traceAllowlist!}'],
       if (traceSkiaAllowlist != null) ...<String>['--trace-skia-allowlist=${traceSkiaAllowlist!}'],
-      if (traceSystrace) ...<String>['--trace-systrace=true'],
+      if (traceSystrace) ...<String>['--trace-systrace'],
       if (traceToFile != null) ...<String>['--trace-to-file=${traceToFile!}'],
-      if (endlessTraceBuffer) ...<String>['--endless-trace-buffer=true'],
-      if (profileMicrotasks) ...<String>['--profile-microtasks=true'],
-      if (purgePersistentCache) ...<String>['--purge-persistent-cache=true'],
+      if (endlessTraceBuffer) ...<String>['--endless-trace-buffer'],
+      if (profileMicrotasks) ...<String>['--profile-microtasks'],
+      if (purgePersistentCache) ...<String>['--purge-persistent-cache'],
       if (enableImpeller == ImpellerStatus.enabled) ...<String>['--enable-impeller=true'],
       if (enableImpeller == ImpellerStatus.disabled) ...<String>['--enable-impeller=false'],
-      if (enableFlutterGpu) ...<String>['--enable-flutter-gpu=true'],
-      if (enableVulkanValidation) ...<String>['--enable-vulkan-validation=true'],
+      if (enableFlutterGpu) ...<String>['--enable-flutter-gpu'],
+      if (enableVulkanValidation) ...<String>['--enable-vulkan-validation'],
       if (debuggingEnabled) ...<String>[
         if (buildInfo.isDebug) ...<String>[
-          ...<String>['--enable-checked-mode=true'],
-          ...<String>['--verify-entry-points=true'],
+          ...<String>['--enable-checked-mode'],
+          ...<String>['--verify-entry-points'],
         ],
-        if (startPaused) ...<String>['--start-paused=true'],
-        if (disableServiceAuthCodes) ...<String>['--disable-service-auth-codes=true'],
-        if (dartFlags.isNotEmpty) ...<String>['--dart-flags', dartFlags],
-        if (enableSurfaceControl) ...<String>['--enable-surface-control=true'],
-        if (useTestFonts) ...<String>['--use-test-fonts=true'],
-        if (verboseSystemLogs) ...<String>['--verbose-logging=true'],
+        if (startPaused) ...<String>['--start-paused'],
+        if (disableServiceAuthCodes) ...<String>['--disable-service-auth-codes'],
+        if (dartFlags.isNotEmpty) ...<String>['--dart-flags=$dartFlags'],
+        if (enableSurfaceControl) ...<String>['--enable-surface-control'],
+        if (useTestFonts) ...<String>['--use-test-fonts'],
+        if (verboseSystemLogs) ...<String>['--verbose-logging'],
       ],
     ];
 
