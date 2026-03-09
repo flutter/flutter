@@ -65,6 +65,19 @@ $ flutter run lib/external_texture/surface_producer_smiley_face_main.dart
 $ flutter drive lib/external_texture/surface_producer_smiley_face_main.dart
 ```
 
+### `external_texture/surface_texture_image_smiley_face`
+
+This app displays a full screen rectangular deformed smiley face with a yellow
+background. It tests `getImageFromTexture` API in dart:ui.
+
+```sh
+# Run the app
+$ flutter run lib/external_texture/surface_texture_image_smiley_face_main.dart
+
+# Run the test
+$ flutter drive lib/external_texture/surface_texture_image_smiley_face_main.dart
+```
+
 ### `external_texture/surface_texture_smiley_face`
 
 This app displays a full screen rectangular deformed smiley face with a yellow
