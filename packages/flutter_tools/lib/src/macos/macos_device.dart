@@ -59,6 +59,7 @@ class MacOSDevice extends DesktopDevice {
     return flutterProject.macos.existsSync();
   }
 
+  /// Returns a [VMServiceDiscoveryForAttach] that uses both mDNS and log scanning.
   @override
   VMServiceDiscoveryForAttach getVMServiceDiscoveryForAttach({
     String? appId,
