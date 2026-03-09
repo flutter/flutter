@@ -394,6 +394,153 @@ void main() {
       reason: 'Should NOT hit at local 15 because it is below the 80px header (clip start at 20)',
     );
   });
+
+  testWidgets('SliverClipRRect uses correctheight for clip calculation', (
+    WidgetTester tester,
+  ) async {
+    final controller = ScrollController();
+    await tester.pumpWidget(
+      WidgetsApp(
+        color: const Color(0xffffffff),
+        onGenerateRoute: (settings) => PageRouteBuilder(
+          pageBuilder: (_, _, _) => CustomScrollView(
+            controller: controller,
+            slivers: <Widget>[
+              const SliverPersistentHeader(
+                delegate: _SliverPersistentHeaderDelegate(), // 100px Pinned Header
+                pinned: true,
+              ),
+              SliverClipRRect(
+                borderRadius: const BorderRadius.all(Radius.circular(40)),
+                sliver: SliverToBoxAdapter(
+                  child: Container(
+                    height: 100, // Total Height: 100px. middleRect.height is 20px (100 - 40 - 40).
+                    color: const Color(0xFF2196F3),
+                  ),
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 1000)),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Scroll by 50px.
+    // The header covers 0-100px in the viewport.
+    // The SliverClipRRect starts at 50px in the viewport (100px header - 50px scroll).
+    // The overlap is 50px. The clip should start at local y=50.
+    controller.jumpTo(50);
+    await tester.pump();
+
+    final RenderSliverClipRRect renderSliver = tester.renderObject(
+      find.byType(SliverClipRRect).first,
+    );
+    final RRect clip = renderSliver.getClip()!;
+
+    // ACTUAL: clip.top was 20.0 instead of 50.0.
+    // REASON: It used middleRect.height (20) instead of total height (100).
+    expect(
+      clip.top,
+      50.0,
+      reason:
+          'clip.top should be 50.0 to cover the overlap. Using middleRect.height (20) results in a miscalculated clip origin.',
+    );
+  });
+
+  testWidgets('SliverClipRRect rounded overlap cut causes content leak', (
+    WidgetTester tester,
+  ) async {
+    final controller = ScrollController();
+    await tester.pumpWidget(
+      WidgetsApp(
+        color: const Color(0xffffffff),
+        onGenerateRoute: (settings) => PageRouteBuilder(
+          pageBuilder: (_, _, _) => CustomScrollView(
+            controller: controller,
+            slivers: <Widget>[
+              const SliverPersistentHeader(
+                delegate: _SliverPersistentHeaderDelegate(),
+                pinned: true,
+              ),
+              SliverClipRRect(
+                borderRadius: const BorderRadius.all(Radius.circular(40)),
+                sliver: SliverToBoxAdapter(
+                  child: Container(height: 100, color: const Color(0xFF2196F3)),
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 1000)),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    controller.jumpTo(20);
+    await tester.pump();
+
+    final RenderSliverClipRRect renderSliver = tester.renderObject(
+      find.byType(SliverClipRRect).first,
+    );
+
+    // Test point (1, 21) in local coordinates.
+    // If the cut is rounded, this point is clipped (hit=false).
+    // This confirms that content is visible (or hidden) following a curve,
+    // which leaves "gaps" against a straight pinned header.
+    final result = SliverHitTestResult();
+    final bool hit = renderSliver.hitTest(result, mainAxisPosition: 21, crossAxisPosition: 1);
+
+    expect(
+      hit,
+      isTrue,
+      reason:
+          'Content at (1, 21) is clipped because the overlap cut is rounded, leaving visual gaps under the header.',
+    );
+  });
+
+  testWidgets('SliverClipRRect reverse scroll overlap calculation', (WidgetTester tester) async {
+    final controller = ScrollController();
+    await tester.pumpWidget(
+      WidgetsApp(
+        color: const Color(0xffffffff),
+        onGenerateRoute: (settings) => PageRouteBuilder(
+          pageBuilder: (_, _, _) => CustomScrollView(
+            reverse: true, // REVERSE SCROLLING
+            controller: controller,
+            slivers: <Widget>[
+              const SliverPersistentHeader(
+                delegate: _SliverPersistentHeaderDelegate(), // Pinned Header at the BOTTOM
+                pinned: true,
+              ),
+
+              SliverClipRRect(
+                borderRadius: const BorderRadius.all(Radius.circular(40)),
+                sliver: SliverToBoxAdapter(
+                  child: Container(height: 100, color: const Color(0xFF2196F3)),
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 1000)),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Scroll so there is 50px overlap at the bottom.
+    controller.jumpTo(50);
+    await tester.pump();
+
+    final RenderSliverClipRRect renderSliver = tester.renderObject(
+      find.byType(SliverClipRRect).first,
+    );
+    expect(renderSliver.constraints.overlap, 50.0);
+
+    final RRect clip = renderSliver.getClip()!;
+
+    // For AxisDirection.up, it uses newClip.copyWith(bottom: geometry!.paintExtent - clipOrigin)
+    // If clipOrigin is wrong (20 instead of 50), the bottom clip will be misplaced.
+    expect(clip.bottom, 50.0, reason: 'Reverse scroll overlap clipping is incorrect.');
+  });
 }
 
 class _TestPersistentHeader extends StatelessWidget {
