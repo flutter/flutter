@@ -52,14 +52,12 @@ Map<String, Map<String, String>> parseXcodeAllTargetsBuildSettings(String buildS
       continue;
     }
 
-    int equalsIndex = settingsLine.indexOf(' = ');
-    var separatorLength = 3;
-    if (equalsIndex == -1) {
-      equalsIndex = settingsLine.indexOf('=');
-      separatorLength = 1;
+    final RegExpMatch? keyValueMatch = RegExp(r'^([^=]+?)\s*=\s*(.*)$').firstMatch(settingsLine);
+    if (keyValueMatch == null) {
+      continue;
     }
-    final String key = settingsLine.substring(0, equalsIndex).trim();
-    final String value = settingsLine.substring(equalsIndex + separatorLength).trim();
+    final String key = keyValueMatch.group(1)!.trim();
+    final String value = keyValueMatch.group(2)!.trim();
     if (key.isNotEmpty) {
       settingsByTarget[currentTarget]![key] = value;
     }
@@ -560,8 +558,9 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       return;
     }
 
-    final Map<String, Map<String, String>> settingsByTarget =
-        parseXcodeAllTargetsBuildSettings(buildSettings);
+    final Map<String, Map<String, String>> settingsByTarget = parseXcodeAllTargetsBuildSettings(
+      buildSettings,
+    );
 
     final pluginsExcludingArmArch = <String>{};
     for (final pluginTargetName in iosPluginTargetNames) {
