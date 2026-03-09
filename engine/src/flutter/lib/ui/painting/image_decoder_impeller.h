@@ -12,9 +12,9 @@
 #include "impeller/core/formats.h"
 #include "impeller/geometry/size.h"
 #include "impeller/renderer/capabilities.h"
-#include "include/core/SkImageInfo.h"
 #include "third_party/abseil-cpp/absl/status/statusor.h"
 #include "third_party/skia/include/core/SkBitmap.h"
+#include "third_party/skia/include/core/SkImageInfo.h"
 
 namespace impeller {
 class Context;

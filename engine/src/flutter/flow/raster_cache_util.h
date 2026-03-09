@@ -7,9 +7,9 @@
 
 #include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/fml/logging.h"
-#include "include/core/SkM44.h"
-#include "include/core/SkMatrix.h"
-#include "include/core/SkRect.h"
+#include "third_party/skia/include/core/SkM44.h"
+#include "third_party/skia/include/core/SkMatrix.h"
+#include "third_party/skia/include/core/SkRect.h"
 
 namespace flutter {
 
