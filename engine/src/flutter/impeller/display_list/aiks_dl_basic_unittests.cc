@@ -716,7 +716,9 @@ TEST_P(AiksTest, DrawThinStrokedCircle) {
     paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
     paint.setStrokeWidth(stroke_width + stroke_width_fine);
     builder.Save();
+    builder.Translate(250, 250);
     builder.Scale(stroked_scale[0], stroked_scale[1]);
+    builder.Translate(-250, -250);
     builder.DrawCircle(DlPoint(250, 250), stroked_radius, paint);
     builder.Restore();
     return builder.Build();
