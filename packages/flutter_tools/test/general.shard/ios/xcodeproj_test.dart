@@ -1032,6 +1032,44 @@ Information about project "Runner":
     },
   );
 
+  testWithoutContext(
+    'build configuration for flavored project falls back to BuildMode when flavor match is unavailable',
+    () {
+      final info = XcodeProjectInfo(
+        <String>['Runner'],
+        <String>['Debug', 'Profile', 'Release'],
+        <String>['Banana'],
+        logger,
+      );
+
+      expect(
+        info.buildConfigurationFor(
+          const BuildInfo(
+            BuildMode.debug,
+            'banana',
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+          ),
+          'Banana',
+        ),
+        'Debug',
+      );
+
+      expect(
+        info.buildConfigurationFor(
+          const BuildInfo(
+            BuildMode.release,
+            'banana',
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+          ),
+          'Banana',
+        ),
+        'Release',
+      );
+    },
+  );
+
   testWithoutContext('build configuration for project with inconsistent naming is null', () {
     final info = XcodeProjectInfo(
       <String>['Runner'],

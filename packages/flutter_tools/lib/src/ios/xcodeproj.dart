@@ -548,22 +548,26 @@ class XcodeProjectInfo {
     if (buildInfo == null) {
       return null;
     }
-    final String expectedConfiguration = expectedBuildConfigurationFor(buildInfo, scheme);
-    final String? buildConfigurationForBuildMode = _existingBuildConfigurationForBuildMode(
-      expectedConfiguration,
-    );
-    if (buildConfigurationForBuildMode != null) {
-      return buildConfigurationForBuildMode;
-    }
     final String baseConfiguration = _baseConfigurationFor(buildInfo);
-    return _uniqueMatch(buildConfigurations, (String candidate) {
-      candidate = candidate.toLowerCase();
-      if (buildInfo.flavor == null) {
-        return candidate == expectedConfiguration.toLowerCase();
-      }
-      return candidate.contains(baseConfiguration.toLowerCase()) &&
-          candidate.contains(scheme.toLowerCase());
+    if (buildInfo.flavor == null) {
+      return _existingBuildConfigurationForBuildMode(baseConfiguration);
+    }
+    final String expectedConfiguration = expectedBuildConfigurationFor(buildInfo, scheme);
+    final String? exactMatch = _existingBuildConfigurationForBuildMode(expectedConfiguration);
+    if (exactMatch != null) {
+      return exactMatch;
+    }
+    final String lowerBaseConfiguration = baseConfiguration.toLowerCase();
+    final String lowerScheme = scheme.toLowerCase();
+    final String? buildConfigurationForBuildModeAndFlavor = _uniqueMatch(buildConfigurations, (
+      String candidate,
+    ) {
+      final String lowerCandidate = candidate.toLowerCase();
+      return lowerCandidate.contains(lowerBaseConfiguration) &&
+          lowerCandidate.contains(lowerScheme);
     });
+    return buildConfigurationForBuildModeAndFlavor ??
+        _existingBuildConfigurationForBuildMode(baseConfiguration);
   }
 
   static String _baseConfigurationFor(BuildInfo buildInfo) {
