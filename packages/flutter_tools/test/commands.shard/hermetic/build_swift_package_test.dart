@@ -337,16 +337,6 @@ import PluginB
               '--sign',
               codesignIdentity,
               '--timestamp=none',
-              flutterXCFramework.path,
-            ],
-          ),
-          FakeCommand(
-            command: [
-              'codesign',
-              '--force',
-              '--sign',
-              codesignIdentity,
-              '--timestamp=none',
               flutterPhoneFramework.path,
             ],
           ),
@@ -358,6 +348,16 @@ import PluginB
               codesignIdentity,
               '--timestamp=none',
               flutterSimulatorFramework.path,
+            ],
+          ),
+          FakeCommand(
+            command: [
+              'codesign',
+              '--force',
+              '--sign',
+              codesignIdentity,
+              '--timestamp=none',
+              flutterXCFramework.path,
             ],
           ),
         ]);

@@ -226,13 +226,6 @@ class DarwinAddToAppCodesigning {
     if (codesignIdentity == null) {
       return;
     }
-    await DarwinAddToAppCodesigning.codesign(
-      codesignIdentity: codesignIdentity,
-      artifact: xcframework,
-      processManager: processManager,
-      buildMode: buildMode,
-    );
-
     for (final FileSystemEntity child in xcframework.listSync()) {
       if (child is Directory && child.basename.contains(targetPlatform.name)) {
         final Directory framework = child.childDirectory('${targetPlatform.binaryName}.framework');
@@ -246,6 +239,14 @@ class DarwinAddToAppCodesigning {
         }
       }
     }
+    // After codesigning the sub-frameworks, codesign the XCFramework. This must be done after so
+    // that nothing within the XCFramework changes after code-signing it.
+    await DarwinAddToAppCodesigning.codesign(
+      codesignIdentity: codesignIdentity,
+      artifact: xcframework,
+      processManager: processManager,
+      buildMode: buildMode,
+    );
   }
 }
 
