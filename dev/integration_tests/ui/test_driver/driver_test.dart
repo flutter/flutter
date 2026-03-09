@@ -58,7 +58,7 @@ void main() {
 
     test('waitFor times out waiting for "present" to reappear', () async {
       await expectLater(
-        () => driver.waitFor(presentText, timeout: const Duration(seconds: 1)),
+        driver.waitFor(presentText, timeout: const Duration(seconds: 1)),
         throwsA(
           isA<DriverError>().having(
             (DriverError error) => error.message,

@@ -481,6 +481,32 @@ void main() {
       });
     });
 
+    group('scrollUntilVisible', () {
+      test('should report error when waitFor fails', () async {
+        fakeClient.responses['waitFor'] = makeFakeResponse(<String, dynamic>{
+          'message': 'waitFor failed',
+        }, isError: true);
+        fakeClient.responses['scroll'] = makeFakeResponse(<String, dynamic>{});
+        fakeClient.responses['scrollIntoView'] = makeFakeResponse(<String, dynamic>{});
+
+        await expectLater(
+          driver.scrollUntilVisible(
+            find.byTooltip('scrollable'),
+            find.byTooltip('item'),
+            dyScroll: 100,
+            timeout: const Duration(milliseconds: 500),
+          ),
+          throwsA(
+            isA<DriverError>().having(
+              (error) => error.message,
+              'message',
+              contains('waitFor failed'),
+            ),
+          ),
+        );
+      });
+    });
+
     group('waitUntilNoTransientCallbacks', () {
       test('sends the waitUntilNoTransientCallbacks command', () async {
         fakeClient.responses['waitForCondition'] = makeFakeResponse(<String, dynamic>{});
@@ -667,6 +693,7 @@ void main() {
         log.clear();
         fakeClient.artificialExtensionDelay = Completer<void>().future;
         FakeAsync().run((FakeAsync time) {
+          // ignore: unawaited_futures
           driver.waitFor(find.byTooltip('foo'));
           expect(log, <String>[]);
           time.elapse(kUnusuallyLongTimeout);
@@ -681,6 +708,7 @@ void main() {
         fakeClient.artificialExtensionDelay = Completer<void>().future;
         FakeAsync().run((FakeAsync time) {
           final Duration customTimeout = kUnusuallyLongTimeout - const Duration(seconds: 1);
+          // ignore: unawaited_futures
           driver.waitFor(find.byTooltip('foo'), timeout: customTimeout);
           expect(log, <String>[]);
           time.elapse(customTimeout);
@@ -695,7 +723,7 @@ void main() {
           'message': 'This is a failure',
         }, isError: true);
         await expectLater(
-          () => driver.waitFor(find.byTooltip('foo')),
+          driver.waitFor(find.byTooltip('foo')),
           throwsA(
             isA<DriverError>().having(
               (DriverError error) => error.message,

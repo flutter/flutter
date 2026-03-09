@@ -14,6 +14,7 @@ void main() {
     pageDelay: const Duration(seconds: 1),
     driverOps: (FlutterDriver driver) async {
       final SerializableFinder textfield = find.byValueKey('fullscreen-textfield');
+      // ignore: unawaited_futures
       driver.tap(textfield);
       await Future<void>.delayed(const Duration(milliseconds: 5000));
     },
