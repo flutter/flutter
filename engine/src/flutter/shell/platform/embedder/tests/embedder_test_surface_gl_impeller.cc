@@ -35,9 +35,11 @@ EmbedderSurfaceGLSkia::GLDispatchTable StubDispatchTable(
 }  // namespace
 
 TEST(EmbedderSurfaceGLImpellerTest, GLES3ContextHasGLES3Shaders) {
-  const auto gl_dispatch_table = StubDispatchTable("OpenGL ES 3.0");
-  const auto surface =
-      EmbedderSurfaceGLImpeller(gl_dispatch_table, false, nullptr);
+  const auto gl_dispatch_table =
+      StubDispatchTable(/* version */ "OpenGL ES 3.0");
+  const auto surface = EmbedderSurfaceGLImpeller(
+      gl_dispatch_table, /* fbo_reset_after_present */ false,
+      /* external_view_embedder */ nullptr);
 
   const std::shared_ptr<impeller::Context> context =
       surface.CreateImpellerContext();
@@ -55,9 +57,11 @@ TEST(EmbedderSurfaceGLImpellerTest, GLES3ContextHasGLES3Shaders) {
 }
 
 TEST(EmbedderSurfaceGLImpellerTest, GLES2ContextDoesNotHaveGLES3Shaders) {
-  const auto gl_dispatch_table = StubDispatchTable("OpenGL ES 2.0");
-  const auto surface =
-      EmbedderSurfaceGLImpeller(gl_dispatch_table, false, nullptr);
+  const auto gl_dispatch_table =
+      StubDispatchTable(/* version */ "OpenGL ES 2.0");
+  const auto surface = EmbedderSurfaceGLImpeller(
+      gl_dispatch_table, /* fbo_reset_after_present */ false,
+      /* external_view_embedder */ nullptr);
 
   const std::shared_ptr<impeller::Context> context =
       surface.CreateImpellerContext();
