@@ -101,6 +101,47 @@ void main() {
       );
 
       testUsingContext(
+        '$CleanCommand does not clean the example directory by default',
+        () async {
+          setupProjectUnderTest(fs.currentDirectory, true);
+          final FlutterProject exampleProject = setupProjectUnderTest(
+            fs.currentDirectory.childDirectory('example'),
+            true,
+          );
+          final Directory exampleBuildDir = exampleProject.directory.childDirectory('build');
+          exampleBuildDir.createSync(recursive: true);
+
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(1000, 0, 0);
+          await CleanCommand().runCommand();
+
+          expect(buildDirectory, isNot(exists));
+
+          expect(exampleBuildDir, exists);
+          expect(exampleProject.dartTool, exists);
+          expect(exampleProject.android.ephemeralDirectory, exists);
+          expect(exampleProject.ios.ephemeralDirectory, exists);
+          expect(exampleProject.linux.ephemeralDirectory, exists);
+          expect(exampleProject.macos.ephemeralDirectory, exists);
+          expect(exampleProject.windows.ephemeralDirectory, exists);
+          expect(exampleProject.flutterPluginsDependenciesFile, exists);
+
+          expect(xcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[
+            CleanWorkspaceCall('/ios/Runner.xcworkspace', 'Runner', false),
+            CleanWorkspaceCall('/ios/Runner.xcworkspace', 'custom-scheme', false),
+            CleanWorkspaceCall('/macos/Runner.xcworkspace', 'Runner', false),
+            CleanWorkspaceCall('/macos/Runner.xcworkspace', 'custom-scheme', false),
+          ]);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Xcode: () => xcode,
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+        },
+      );
+
+      testUsingContext(
         '$CleanCommand removes a specific xcode scheme --scheme',
         () async {
           setupProjectUnderTest(fs.currentDirectory, true);
