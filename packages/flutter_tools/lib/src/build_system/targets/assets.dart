@@ -154,10 +154,10 @@ Future<Depfile> copyAssets(
                 relativePath: entry.key,
               );
             case AssetKind.shader:
-              File inputToCompiler = content.file as File;
+              var inputToCompiler = content.file as File;
               if (entry.value.transformers.isNotEmpty) {
                 transformResource = await transformPool.request();
-                final String transformedShaderSourcePath = '${file.path}.transformed';
+                final transformedShaderSourcePath = '${file.path}.transformed';
                 final AssetTransformationFailure? failure = await assetTransformer.transformAsset(
                   asset: inputToCompiler,
                   outputPath: transformedShaderSourcePath,

@@ -205,9 +205,9 @@ Future<void> writeBundle(
             case AssetKind.font:
               break;
             case AssetKind.shader:
-              File inputToCompiler = input;
+              var inputToCompiler = input;
               if (entry.value.transformers.isNotEmpty) {
-                final String transformedShaderSourcePath = '${file.path}.transformed';
+                final transformedShaderSourcePath = '${file.path}.transformed';
                 final AssetTransformationFailure? failure = await assetTransformer.transformAsset(
                   asset: inputToCompiler,
                   outputPath: transformedShaderSourcePath,

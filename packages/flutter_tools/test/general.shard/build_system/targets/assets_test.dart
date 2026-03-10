@@ -241,7 +241,7 @@ flutter:
             defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
           );
 
-          final Artifacts artifacts = Artifacts.test();
+          final artifacts = Artifacts.test();
           final String impellercPath = artifacts.getHostArtifact(HostArtifact.impellerc).path;
           fileSystem.file(impellercPath).createSync(recursive: true);
 
@@ -297,7 +297,7 @@ flutter:
             defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
           );
 
-          final Artifacts artifacts = Artifacts.test();
+          final artifacts = Artifacts.test();
           final String impellercPath = artifacts.getHostArtifact(HostArtifact.impellerc).path;
           fileSystem.file(impellercPath).createSync(recursive: true);
 
@@ -357,7 +357,7 @@ flutter:
             defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
           );
 
-          final Artifacts artifacts = Artifacts.test();
+          final artifacts = Artifacts.test();
           final String impellercPath = artifacts.getHostArtifact(HostArtifact.impellerc).path;
           fileSystem.file(impellercPath).createSync(recursive: true);
 
@@ -508,7 +508,7 @@ flutter:
         defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
       );
 
-      final Artifacts artifacts = Artifacts.test();
+      final artifacts = Artifacts.test();
       final String impellercPath = artifacts.getHostArtifact(HostArtifact.impellerc).path;
       fileSystem.file(impellercPath).createSync(recursive: true);
 
@@ -543,7 +543,7 @@ flutter:
       FileSystem: () => fileSystem,
       Platform: () => FakePlatform(),
       ProcessManager: () {
-        final Artifacts artifacts = Artifacts.test();
+        final artifacts = Artifacts.test();
 
         return FakeProcessManager.list(<FakeCommand>[
           FakeCommand(
@@ -580,7 +580,7 @@ flutter:
               String? inputPath;
               String? outputPath;
               String? outputSpirvPath;
-              for (final String arg in args) {
+              for (final arg in args) {
                 if (arg.startsWith('--input=')) {
                   inputPath = arg.substring('--input='.length);
                 } else if (arg.startsWith('--sl=')) {
@@ -594,12 +594,12 @@ flutter:
               expect(outputPath, isNotNull);
               expect(outputSpirvPath, isNotNull);
 
-              final File input = fileSystem.file(inputPath!);
+              final File input = fileSystem.file(inputPath);
               expect(input, exists);
               expect(input.readAsStringSync(), 'ABC');
 
-              fileSystem.file(outputPath!).createSync(recursive: true);
-              fileSystem.file(outputSpirvPath!).createSync(recursive: true);
+              fileSystem.file(outputPath).createSync(recursive: true);
+              fileSystem.file(outputSpirvPath).createSync(recursive: true);
             },
           ),
         ]);
