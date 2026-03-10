@@ -477,8 +477,15 @@ class IOSSimulator extends Device {
 
     ProtocolDiscovery? vmServiceDiscovery;
     if (debuggingOptions.debuggingEnabled) {
+      final DeviceLogReader logReader = getLogReader(app: package);
+      // Start the log reader process before launching the app so we don't miss
+      // the VM service URI that the app emits on startup.
+      // See https://github.com/flutter/flutter/issues/181771.
+      if (logReader is SharedIOSDeviceLogReader) {
+        await logReader.start();
+      }
       vmServiceDiscovery = ProtocolDiscovery.vmService(
-        getLogReader(app: package),
+        logReader,
         ipv6: debuggingOptions.ipv6,
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
@@ -820,9 +827,15 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
   final String? _appName;
 
   late final _linesController = StreamController<String>.broadcast(
-    onListen: _start,
+    onListen: _connectProcessOutput,
     onCancel: _stop,
   );
+
+  bool _started = false;
+
+  // Whether unified logging (iOS 11+) or syslog is used.
+  // Determined during start() and used by the synchronous _connectProcessOutput().
+  bool _usesUnifiedLogging = false;
 
   @override
   @visibleForTesting
@@ -838,23 +851,41 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
   @override
   String get name => device.name;
 
-  Future<void> _start() async {
+  @override
+  Future<void> start() async {
+    if (_started) {
+      return;
+    }
+    _started = true;
     // Unified logging iOS 11 and greater (introduced in iOS 10).
-    if (await device.sdkMajorVersion >= 11) {
+    _usesUnifiedLogging = await device.sdkMajorVersion >= 11;
+    if (_usesUnifiedLogging) {
       _deviceProcess = await launchDeviceUnifiedLogging(device, _appName);
-      _deviceProcess?.stdout.transform(utf8LineDecoder).listen(_onUnifiedLoggingLine);
-      _deviceProcess?.stderr.transform(utf8LineDecoder).listen(_onUnifiedLoggingLine);
     } else {
       // Fall back to syslog parsing.
       await device.ensureLogsExists();
       _deviceProcess = await launchDeviceSystemLogTool(device);
-      _deviceProcess?.stdout.transform(utf8LineDecoder).listen(_onSysLogDeviceLine);
-      _deviceProcess?.stderr.transform(utf8LineDecoder).listen(_onSysLogDeviceLine);
     }
 
     // Track system.log crashes.
     // ReportCrash[37965]: Saved crash report for FlutterRunner[37941]...
     _systemProcess = await launchSystemLogTool(device);
+  }
+
+  /// Connects the already-launched log processes' output to [_linesController].
+  ///
+  /// Called synchronously when the first listener subscribes (via [onListen]).
+  /// [start] must have been awaited before any listener subscribes so that
+  /// [_deviceProcess] and [_systemProcess] are available.
+  void _connectProcessOutput() {
+    if (_usesUnifiedLogging) {
+      _deviceProcess?.stdout.transform(utf8LineDecoder).listen(_onUnifiedLoggingLine);
+      _deviceProcess?.stderr.transform(utf8LineDecoder).listen(_onUnifiedLoggingLine);
+    } else {
+      _deviceProcess?.stdout.transform(utf8LineDecoder).listen(_onSysLogDeviceLine);
+      _deviceProcess?.stderr.transform(utf8LineDecoder).listen(_onSysLogDeviceLine);
+    }
+
     if (_systemProcess != null) {
       _systemProcess?.stdout.transform(utf8LineDecoder).listen(_onSystemLine);
       _systemProcess?.stderr.transform(utf8LineDecoder).listen(_onSystemLine);

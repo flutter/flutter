@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/application_package.dart';
+import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
@@ -599,6 +600,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           final DeviceLogReader logReader = device.getLogReader(
             app: await BuildableIOSApp.fromProject(mockIosProject, null),
           );
+          await (logReader as SharedIOSDeviceLogReader).start();
 
           final List<String> lines = await logReader.logLines.toList();
           expect(lines, <String>[
@@ -643,6 +645,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           final DeviceLogReader logReader = device.getLogReader(
             app: await BuildableIOSApp.fromProject(mockIosProject, null),
           );
+          await (logReader as SharedIOSDeviceLogReader).start();
 
           final List<String> lines = await logReader.logLines.toList();
           expect(lines, <String>[
@@ -700,6 +703,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           final DeviceLogReader logReader = device.getLogReader(
             app: await BuildableIOSApp.fromProject(mockIosProject, null),
           );
+          await (logReader as SharedIOSDeviceLogReader).start();
 
           final List<String> lines = await logReader.logLines.toList();
           expect(lines, <String>[
@@ -782,6 +786,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           final DeviceLogReader logReader = device.getLogReader(
             app: await BuildableIOSApp.fromProject(mockIosProject, null),
           );
+          await (logReader as SharedIOSDeviceLogReader).start();
 
           final List<String> lines = await logReader.logLines.toList();
           expect(lines, <String>[
@@ -836,6 +841,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           final DeviceLogReader logReader = device.getLogReader(
             app: await BuildableIOSApp.fromProject(mockIosProject, null),
           );
+          await (logReader as SharedIOSDeviceLogReader).start();
 
           final List<String> lines = await logReader.logLines.toList();
           expect(lines, isEmpty);
