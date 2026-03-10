@@ -60,6 +60,18 @@ FlView* fl_view_new(FlDartProject* project);
 FlView* fl_view_new_for_engine(FlEngine* engine);
 
 /**
+ * fl_view_new_sized_to_content:
+ * @engine: an #FlEngine.
+ *
+ * Creates a widget to show a window in a Flutter application.
+ * The window will always display content in the size that Flutter provides.
+ * The engine must be not be headless.
+ *
+ * Returns: a new #FlView.
+ */
+FlView* fl_view_new_sized_to_content(FlEngine* engine);
+
+/**
  * fl_view_get_engine:
  * @view: an #FlView.
  *
