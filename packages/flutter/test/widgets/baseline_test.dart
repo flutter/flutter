@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'list_tile_tester.dart';
+import 'widgets_app_tester.dart';
+
+const Color _debugChipColor = Color(0xFFCCCCCC);
 
 void main() {
   testWidgets('Baseline - control test', (WidgetTester tester) async {
@@ -42,17 +45,15 @@ void main() {
     debugCheckIntrinsicSizes = false;
     var calls = 0;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Baseline(
-            baseline: 100.0,
-            baselineType: TextBaseline.alphabetic,
-            child: Chip(
-              label: BaselineDetector(() {
-                assert(!debugCheckIntrinsicSizes);
-                calls += 1;
-              }),
-            ),
+      TestWidgetsApp(
+        home: Baseline(
+          baseline: 100.0,
+          baselineType: TextBaseline.alphabetic,
+          child: TestChip(
+            label: BaselineDetector(() {
+              assert(!debugCheckIntrinsicSizes);
+              calls += 1;
+            }),
           ),
         ),
       ),
@@ -71,17 +72,15 @@ void main() {
     debugCheckIntrinsicSizes = false;
     var calls = 0;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Baseline(
-            baseline: 100.0,
-            baselineType: TextBaseline.alphabetic,
-            child: TestListTile(
-              title: BaselineDetector(() {
-                assert(!debugCheckIntrinsicSizes);
-                calls += 1;
-              }),
-            ),
+      TestWidgetsApp(
+        home: Baseline(
+          baseline: 100.0,
+          baselineType: TextBaseline.alphabetic,
+          child: TestListTile(
+            title: BaselineDetector(() {
+              assert(!debugCheckIntrinsicSizes);
+              calls += 1;
+            }),
           ),
         ),
       ),
@@ -97,16 +96,14 @@ void main() {
 
   testWidgets("LayoutBuilder returns child's baseline", (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Baseline(
-            baseline: 180.0,
-            baselineType: TextBaseline.alphabetic,
-            child: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                return BaselineDetector(() {});
-              },
-            ),
+      TestWidgetsApp(
+        home: Baseline(
+          baseline: 180.0,
+          baselineType: TextBaseline.alphabetic,
+          child: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              return BaselineDetector(() {});
+            },
           ),
         ),
       ),
@@ -114,6 +111,29 @@ void main() {
 
     expect(tester.getRect(find.byType(BaselineDetector)).top, 160.0);
   });
+}
+
+class TestChip extends StatelessWidget {
+  const TestChip({required this.label, super.key});
+
+  final Widget label;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: _debugChipColor,
+        borderRadius: BorderRadius.all(Radius.circular(16.0)),
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 32.0),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+          child: label,
+        ),
+      ),
+    );
+  }
 }
 
 class BaselineDetector extends LeafRenderObjectWidget {
