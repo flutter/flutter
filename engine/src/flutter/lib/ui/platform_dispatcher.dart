@@ -3317,5 +3317,10 @@ class HitTestResponse {
   ///
   /// The first hit test entry is typically the child that is
   /// visually "on top" (i.e., paints later).
+  ///
+  /// See also:
+  ///
+  /// * [NativeHitTestTarget], the Flutter framework mixin that represents a hit test target
+  ///   backed by a platform view.
   final bool isPlatformView;
 }

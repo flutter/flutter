@@ -28,8 +28,8 @@ static constexpr NSUInteger kFlutterClippingMaskViewPoolCapacity = 5;
 
 static NSString* const kGestureBlockingPolicyEagerValue = @"eager";
 static NSString* const kGestureBlockingPolicyWaitUntilTouchesEndedValue = @"waitUntilTouchesEnded";
+static NSString* const kGestureBlockingPolicyDoNotBlockGesture = @"doNotBlockGesture";
 static NSString* const kGestureBlockingPolicyFallbackToPluginDefault = @"fallbackToPluginDefault";
-static NSString* const kGestureBlockingPolicyTouchBlockingOnly = @"touchBlockingOnly";
 
 struct LayerData {
   DlRect rect;
@@ -333,8 +333,8 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
   NSString* gestureBlockingPolicyValue = args[@"gestureBlockingPolicy"];
   FlutterPlatformViewGestureRecognizersBlockingPolicy gestureBlockingPolicy;
-  if ([gestureBlockingPolicyValue isEqualToString:kGestureBlockingPolicyTouchBlockingOnly]) {
-    gestureBlockingPolicy = FlutterPlatformViewGestureRecognizersBlockingPolicyTouchBlockingOnly;
+  if ([gestureBlockingPolicyValue isEqualToString:kGestureBlockingPolicyDoNotBlockGesture]) {
+    gestureBlockingPolicy = FlutterPlatformViewGestureRecognizersBlockingPolicyDoNotBlockGesture;
   } else if ([gestureBlockingPolicyValue isEqualToString:kGestureBlockingPolicyEagerValue]) {
     gestureBlockingPolicy = FlutterPlatformViewGestureRecognizersBlockingPolicyEager;
   } else if ([gestureBlockingPolicyValue
@@ -345,12 +345,11 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
                  isEqualToString:kGestureBlockingPolicyFallbackToPluginDefault]) {
     gestureBlockingPolicy = self.gestureRecognizersBlockingPoliciesByType[viewType];
   } else {
-    NSString* errorMessage =
-        [NSString stringWithFormat:@"Unsupported gesture blocking policy: %@, so we fallback to "
-                                   @"use the policy set via engine API.",
-                                   gestureBlockingPolicyValue];
-    [FlutterLogger logError:errorMessage];
-    gestureBlockingPolicy = self.gestureRecognizersBlockingPoliciesByType[viewType];
+    result([FlutterError
+        errorWithCode:@"unknown_gesture_blocking_policy"
+              message:@"Trying to create a platform view with an unknown gesture blocking policy"
+              details:[NSString stringWithFormat:@"view id: '%lld'", viewId]]);
+    return;
   }
 
   FlutterTouchInterceptingView* touchInterceptor =

@@ -2168,6 +2168,7 @@ void addPlatformView(
   double width = 500,
   double height = 500,
   String viewType = 'scenarios/textPlatformView',
+  String gestureBlockingPolicy = 'fallbackToPluginDefault',
 }) {
   if (scenarioParams['view_type'] is String) {
     viewType = scenarioParams['view_type'] as String;
@@ -2217,6 +2218,10 @@ void addPlatformView(
     ..._encodeString('viewType'),
     valueString,
     ..._encodeString(viewType),
+    valueString,
+    ..._encodeString('gestureBlockingPolicy'),
+    valueString,
+    ..._encodeString(gestureBlockingPolicy),
     if (Platform.isAndroid && !usesAndroidHybridComposition) ...<int>[
       valueString,
       ..._encodeString('width'),

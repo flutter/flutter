@@ -82,10 +82,8 @@ class MockDelegate : public PlatformView::Delegate {
   void OnPlatformViewDispatchPlatformMessage(std::unique_ptr<PlatformMessage> message) override {}
   void OnPlatformViewDispatchPointerDataPacket(std::unique_ptr<PointerDataPacket> packet) override {
   }
-  bool OnPlatformViewEmbeddedNativeViewShouldAcceptTouch(
-      int64_t view_id,
-      const flutter::PointData touch_began_location) override {
-    return false;
+  HitTestResponse OnPlatformViewHitTest(int64_t view_id, const flutter::PointData offset) override {
+    return {.is_platform_view = false};
   }
   void OnPlatformViewDispatchSemanticsAction(int64_t view_id,
                                              int32_t node_id,

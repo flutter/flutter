@@ -12,6 +12,7 @@ struct PointData {
   double x;
   double y;
 };
+
 }  // namespace flutter
 
 #endif  // FLUTTER_LIB_UI_WINDOW_POINT_DATA_H_

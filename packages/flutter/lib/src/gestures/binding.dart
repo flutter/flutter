@@ -37,9 +37,6 @@ export 'pointer_signal_resolver.dart' show PointerSignalResolver;
 
 typedef _HandleSampleTimeChangedCallback = void Function();
 
-/// Abstract class that represents a hit test target backed by a embedded native view.
-abstract class NativeHitTestTarget {}
-
 /// Class that implements clock used for sampling.
 class SamplingClock {
   /// Returns current time.

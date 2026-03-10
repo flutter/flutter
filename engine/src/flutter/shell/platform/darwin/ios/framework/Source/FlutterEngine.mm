@@ -394,7 +394,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   if (!self.platformView) {
     return NO;
   }
-  return self.platformView->EmbeddedNativeViewShouldAcceptTouch(viewId, location);
+  return self.platformView->HitTest(viewId, location).is_platform_view;
 }
 
 - (void)installFirstFrameCallback:(void (^)(void))block {

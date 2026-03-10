@@ -374,16 +374,22 @@ void _dispatchPointerDataPacket(ByteData packet) {
   PlatformDispatcher.instance._dispatchPointerDataPacket(packet);
 }
 
-// TODO(hellohuanlin): rename function to _onHitTest.
-// See: https://github.com/flutter/flutter/issues/179762.
+@pragma("vm:entry-point")
+class _HitTestResponse {
+  _HitTestResponse({required this.isPlatformView});
+
+  @pragma("vm:entry-point")
+  final bool isPlatformView;
+}
+
 @pragma('vm:entry-point')
-bool _platformViewShouldAcceptTouch(int viewId, double x, double y) {
+_HitTestResponse _hitTest(int viewId, double x, double y) {
   assert(PlatformDispatcher.instance._views.containsKey(viewId), 'View $viewId does not exist.');
   final FlutterView view = PlatformDispatcher.instance._views[viewId]!;
   final offset = Offset(x, y);
   final request = HitTestRequest(view: view, offset: offset);
   final HitTestResponse response = PlatformDispatcher.instance._hitTest(request);
-  return response.isPlatformView;
+  return _HitTestResponse(isPlatformView: response.isPlatformView);
 }
 
 @pragma('vm:entry-point')
