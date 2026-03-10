@@ -172,35 +172,6 @@ abstract class ScrollActivity {
   String toString() => describeIdentity(this);
 }
 
-/// Describes the source of a scroll input.
-///
-/// Used by [RetargetableScrollActivity] and [ScrollPhysics.createScrollActivity]
-/// to determine how to handle the scroll input.
-enum ScrollInputSource {
-  /// The scroll was initiated by a pointer device (e.g. mouse wheel, trackpad).
-  pointer,
-
-  /// The scroll was initiated by a keyboard input.
-  keyboard,
-
-  /// The scroll was initiated programmatically (e.g. [ScrollController.animateTo]).
-  programmatic,
-}
-
-/// A [ScrollActivity] that can be retargeted with additional scroll deltas.
-///
-/// This is used by scroll coordinators to allow smooth scrolling activities
-/// to absorb additional scroll input without restarting.
-abstract class RetargetableScrollActivity extends ScrollActivity {
-  /// Creates a retargetable scroll activity.
-  RetargetableScrollActivity(super.delegate);
-
-  /// Adjusts the activity's target by the given [delta].
-  ///
-  /// The [source] describes the source of the scroll input.
-  void retarget(double delta, ScrollInputSource source);
-}
-
 /// A scroll activity that does nothing.
 ///
 /// When a scroll view is not scrolling, it is performing the idle activity.

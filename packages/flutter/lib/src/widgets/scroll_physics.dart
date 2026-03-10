@@ -23,7 +23,6 @@ import 'package:flutter/physics.dart';
 import 'binding.dart' show WidgetsBinding;
 import 'framework.dart';
 import 'overscroll_indicator.dart';
-import 'scroll_activity.dart';
 import 'scroll_metrics.dart';
 import 'scroll_simulation.dart';
 import 'view.dart';
@@ -407,23 +406,6 @@ class ScrollPhysics {
   //     https://github.com/flutter/flutter/issues/109675
   Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
     return parent?.createBallisticSimulation(position, velocity);
-  }
-
-  /// Returns a [ScrollActivity] for a discrete scroll input (e.g. pointer
-  /// scroll or keyboard) starting from the given position with the given delta.
-  ///
-  /// This is used by [NestedScrollView]'s coordinator to create smooth scroll
-  /// activities that can span the entire nested scroll extent.
-  ///
-  /// Returns `null` to indicate that the default behavior (an immediate jump)
-  /// should be used instead.
-  ScrollActivity? createScrollActivity(
-    ScrollActivityDelegate delegate,
-    double from,
-    double delta,
-    ScrollInputSource source,
-  ) {
-    return parent?.createScrollActivity(delegate, from, delta, source);
   }
 
   static final SpringDescription _kDefaultSpring = SpringDescription.withDampingRatio(

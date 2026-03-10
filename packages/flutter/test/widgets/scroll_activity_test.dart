@@ -362,24 +362,6 @@ void main() {
     );
   });
 
-  test('ScrollInputSource enum values', () {
-    expect(ScrollInputSource.values.length, 3);
-    expect(ScrollInputSource.pointer, isNotNull);
-    expect(ScrollInputSource.keyboard, isNotNull);
-    expect(ScrollInputSource.programmatic, isNotNull);
-
-    expect(ScrollInputSource.pointer, isNot(ScrollInputSource.keyboard));
-    expect(ScrollInputSource.pointer, isNot(ScrollInputSource.programmatic));
-    expect(ScrollInputSource.keyboard, isNot(ScrollInputSource.programmatic));
-  });
-
-  test('RetargetableScrollActivity.retarget is callable', () {
-    final delegate = _ScrollActivityDelegate();
-    final activity = _TestRetargetableScrollActivity(delegate);
-    // Calling retarget should not throw.
-    activity.retarget(10.0, ScrollInputSource.pointer);
-    activity.dispose();
-  });
 }
 
 class PageView62209 extends StatefulWidget {
@@ -579,20 +561,3 @@ class _ScrollActivityDelegate extends ScrollActivityDelegate {
   double setPixels(double pixels) => 0.0;
 }
 
-class _TestRetargetableScrollActivity extends RetargetableScrollActivity {
-  _TestRetargetableScrollActivity(super.delegate);
-
-  @override
-  void retarget(double delta, ScrollInputSource source) {
-    // No-op for testing.
-  }
-
-  @override
-  bool get shouldIgnorePointer => false;
-
-  @override
-  bool get isScrolling => false;
-
-  @override
-  double get velocity => 0.0;
-}

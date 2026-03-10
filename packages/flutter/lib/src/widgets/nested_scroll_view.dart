@@ -948,28 +948,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       position.didStartScroll();
     }
 
-    // 1. Try retargeting an existing smooth scroll activity.
-    if (_currentUnifiedActivity is RetargetableScrollActivity) {
-      (_currentUnifiedActivity! as RetargetableScrollActivity).retarget(
-        delta,
-        ScrollInputSource.pointer,
-      );
-    }
-    // 2. Try creating a new smooth scroll activity from physics.
-    else {
-      final ScrollActivity? activity = _outerPosition!.physics.createScrollActivity(
-        this,
-        _unifiedPixels,
-        delta,
-        ScrollInputSource.pointer,
-      );
-      if (activity != null) {
-        _beginUnifiedActivity(activity);
-      } else {
-        // 3. Fallback: delta-based distribution (current behavior).
-        _applyPointerScrollDelta(delta);
-      }
-    }
+    _applyPointerScrollDelta(delta);
 
     _outerPosition!.didEndScroll();
     for (final _NestedScrollPosition position in _innerPositions) {
