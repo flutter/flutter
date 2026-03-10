@@ -579,8 +579,8 @@ bool validateGradleAndKGP(Logger logger, {required String? kgpV, required String
     // Documented max is 9.0.0, using 9.0.99 non inclusive covers patch versions.
     return isWithinVersionRange(gradleV, min: '7.6.3', max: '9.0.99', inclusiveMax: false);
   }
-  // Documented max is 2.3.0, using 2.2.29 covers patch versions.
-  if (isWithinVersionRange(kgpV, min: '2.2.20', max: '2.2.29')) {
+  // Documented max is 2.2.21, using 2.3.0 covers patch versions.
+  if (isWithinVersionRange(kgpV, min: '2.2.20', max: '2.3.0')) {
     // Documented max is 8.14, using 8.14.99 non inclusive covers patch versions.
     return isWithinVersionRange(gradleV, min: '7.6.3', max: '8.14.99', inclusiveMax: false);
   }
@@ -694,12 +694,12 @@ bool validateAgpAndKgp(Logger logger, {required String? kgpV, required String? a
     return isWithinVersionRange(agpV, min: '8.2.2', max: '9.0.99', inclusiveMax: false);
   }
   // Documented max is 2.3.0
-  if (isWithinVersionRange(kgpV, min: '2.3.0', max: '2.3.0')) {
+  if (isWithinVersionRange(kgpV, min: '2.3.0', max: '2.3.10', inclusiveMax: false)) {
     // Documented max is 8.13.0
     return isWithinVersionRange(agpV, min: '8.2.2', max: '8.14', inclusiveMax: false);
   }
   // Documented max is 2.2.20
-  if (isWithinVersionRange(kgpV, min: '2.2.20', max: '2.2.29')) {
+  if (isWithinVersionRange(kgpV, min: '2.2.20', max: '2.3.0', inclusiveMax: false)) {
     // Documented max is 8.11.1
     return isWithinVersionRange(agpV, min: '7.3.1', max: '8.12', inclusiveMax: false);
   }
