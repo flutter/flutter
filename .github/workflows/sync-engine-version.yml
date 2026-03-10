@@ -22,7 +22,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
         run: |
-          git config user.name "[bot] Sync Engine Version"
+          git config user.name "GitHub Actions Bot"
           git config user.email "<>"
           git remote add upstream https://github.com/flutter/flutter.git
           git fetch upstream ${{ github.ref_name }}

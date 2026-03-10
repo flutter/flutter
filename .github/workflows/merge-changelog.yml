@@ -25,7 +25,7 @@ jobs:
 
       - name: Configure git
         run: |
-          git config user.name "[bot] Merge Changelog"
+          git config user.name "GitHub Actions Bot"
           git config user.email "<>"
           git remote add upstream https://github.com/flutter/flutter.git
 
