@@ -311,12 +311,15 @@ void HostWindow::InitializeFlutterView(
 
   SetChildContent(view_controller_->view()->GetWindowHandle(), window_handle_);
 
-  // TODO(loicsharma): Hide the window until the first frame is rendered.
-  // Single window apps use the engine's next frame callback to show the
-  // window. This doesn't work for multi window apps as the engine cannot have
-  // multiple next frame callbacks. If multiple windows are created, only the
-  // last one will be shown.
-  ShowWindow(window_handle_, params.nCmdShow);
+  // Defer showing the window until the first frame is rendered so the user
+  // doesn't see a blank window. Each view has its own first-frame callback,
+  // so this works correctly for multi-window apps.
+  view_controller_->view()->SetFirstFrameCallback(
+      [hwnd = window_handle_, cmd_show = params.nCmdShow]() {
+        if (::IsWindow(hwnd)) {
+          ShowWindow(hwnd, cmd_show);
+        }
+      });
   SetWindowLongPtr(window_handle_, GWLP_USERDATA,
                    reinterpret_cast<LONG_PTR>(this));
 }
