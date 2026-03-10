@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -184,7 +183,6 @@ name: my_app
             devices,
             debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
             target: 'main.dart',
-            devtoolsHandler: createNoOpHandler,
             analytics: fakeAnalytics,
           ).restart(fullRestart: true);
           expect(result.isOk, false);
@@ -215,7 +213,6 @@ name: my_app
             devices,
             debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
             target: 'main.dart',
-            devtoolsHandler: createNoOpHandler,
             reassembleHelper:
                 (
                   List<FlutterDevice?> flutterDevices,
@@ -256,6 +253,7 @@ name: my_app
           final devices = <FlutterDevice>[
             FlutterDevice(
               device,
+              targetPlatform: .unsupported,
               generator: residentCompiler,
               buildInfo: BuildInfo.debug,
               developmentShaderCompiler: const FakeShaderCompiler(),
@@ -286,6 +284,7 @@ name: my_app
           final devices = <FlutterDevice>[
             FlutterDevice(
               device,
+              targetPlatform: .unsupported,
               generator: residentCompiler,
               buildInfo: BuildInfo.debug,
               developmentShaderCompiler: const FakeShaderCompiler(),
@@ -343,7 +342,6 @@ name: my_app
             devices,
             debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
             target: 'main.dart',
-            devtoolsHandler: createNoOpHandler,
             stopwatchFactory: fakeStopwatchFactory,
             analytics: fakeAnalytics,
           ).restart(fullRestart: true);
@@ -437,7 +435,6 @@ name: my_app
             devices,
             debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
             target: 'main.dart',
-            devtoolsHandler: createNoOpHandler,
             stopwatchFactory: fakeStopwatchFactory,
             analytics: fakeAnalytics,
             reloadSourcesHelper:
@@ -550,7 +547,6 @@ name: my_app
             devices,
             debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
             target: 'main.dart',
-            devtoolsHandler: createNoOpHandler,
             analytics: fakeAnalytics,
           );
 
@@ -595,7 +591,6 @@ name: my_app
             devices,
             debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
             target: 'main.dart',
-            devtoolsHandler: createNoOpHandler,
             analytics: fakeAnalytics,
           );
 

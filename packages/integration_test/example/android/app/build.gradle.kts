@@ -12,15 +12,7 @@ plugins {
 android {
     namespace = "com.example.integration_test_example"
     compileSdk = flutter.compileSdkVersion
-
-    // Flutter's CI installs the NDK at a non-standard path.
-    // This non-standard structure is initially created by
-    // https://github.com/flutter/engine/blob/3.27.0/tools/android_sdk/create_cipd_packages.sh.
-    val systemNdkPath = System.getenv("ANDROID_NDK_PATH")
-    if (systemNdkPath != null) {
-        ndkVersion = flutter.ndkVersion
-        ndkPath = systemNdkPath
-    }
+    ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -44,6 +36,10 @@ android {
             signingConfig = signingConfigs.getByName("debug")
             proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
         }
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 }
 

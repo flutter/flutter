@@ -24,8 +24,8 @@ import '../../src/test_flutter_command_runner.dart';
 import '../../src/testbed.dart';
 
 class FakePub extends Fake implements Pub {
-  var calledGetOffline = 0;
-  var calledOnline = 0;
+  int calledGetOffline = 0;
+  int calledOnline = 0;
 
   @override
   Future<void> get({
@@ -130,6 +130,27 @@ void main() {
               'templates',
               'plugin_cocoapods',
             ),
+            globals.fs.path.join(
+              'flutter',
+              'packages',
+              'flutter_tools',
+              'templates',
+              'plugin_swift_package_manager',
+            ),
+            globals.fs.path.join(
+              'flutter',
+              'packages',
+              'flutter_tools',
+              'templates',
+              'plugin_darwin_cocoapods',
+            ),
+            globals.fs.path.join(
+              'flutter',
+              'packages',
+              'flutter_tools',
+              'templates',
+              'plugin_darwin_spm',
+            ),
           ];
           for (final templatePath in templatePaths) {
             globals.fs.directory(templatePath).createSync(recursive: true);
@@ -222,33 +243,6 @@ void main() {
     );
 
     testUsingContext(
-      'set iOS host language type as usage value',
-      () => testbed.run(() async {
-        final command = CreateCommand();
-        final CommandRunner<void> runner = createTestCommandRunner(command);
-
-        await runner.run(<String>['create', '--no-pub', '--template=plugin', 'testy']);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createIosLanguage'],
-          'swift',
-        );
-
-        await runner.run(<String>[
-          'create',
-          '--no-pub',
-          '--template=plugin',
-          '--ios-language=objc',
-          'testy',
-        ]);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createIosLanguage'],
-          'objc',
-        );
-      }),
-      overrides: <Type, Generator>{Java: () => FakeJava()},
-    );
-
-    testUsingContext(
       'set Android host language type as usage value',
       () => testbed.run(() async {
         final command = CreateCommand();
@@ -308,6 +302,14 @@ void main() {
         ),
       },
     );
+
+    testUsingContext('plugin_ffi template is marked as deprecated in help', () {
+      final command = CreateCommand();
+      final String? templateHelp =
+          command.argParser.options['template']?.allowedHelp?['plugin_ffi'];
+      expect(templateHelp, contains('(deprecated)'));
+      expect(templateHelp, contains('Use "package_ffi" instead.'));
+    });
   });
 }
 

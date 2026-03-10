@@ -36,6 +36,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import '../foundation/_features.dart';
+import '_accessibility_evaluations.dart';
 import '_window.dart';
 import 'app.dart';
 import 'debug.dart';
@@ -151,6 +152,22 @@ abstract mixin class WidgetsBindingObserver {
   /// Currently, this is only used on Android devices that support the
   /// predictive back feature.
   void handleCancelBackGesture() {}
+
+  /// Called when the user taps the status bar on iOS, to scroll a scroll
+  /// view to the top.
+  ///
+  /// This event should usually only be handled by at most one scroll view, so
+  /// implementer(s) of this callback must coordinate to determine the most
+  /// suitable scroll view for handling this event.
+  ///
+  /// This callback is only called on iOS. The default implementation provided by
+  /// [WidgetsBindingObserver] does nothing.
+  ///
+  /// See also:
+  ///
+  ///  * [Scaffold] and [CupertinoPageScaffold] which use this callback to implement
+  ///    iOS scroll-to-top.
+  void handleStatusBarTap() {}
 
   /// Called when the host tells the application to push a new route onto the
   /// navigator.
@@ -273,13 +290,17 @@ abstract mixin class WidgetsBindingObserver {
   ///
   /// ```dart
   /// class TextScaleFactorReactor extends StatefulWidget {
-  ///   const TextScaleFactorReactor({ super.key });
+  ///   const TextScaleFactorReactor({super.key});
   ///
   ///   @override
   ///   State<TextScaleFactorReactor> createState() => _TextScaleFactorReactorState();
   /// }
   ///
-  /// class _TextScaleFactorReactorState extends State<TextScaleFactorReactor> with WidgetsBindingObserver {
+  /// class _TextScaleFactorReactorState extends State<TextScaleFactorReactor>
+  ///     with WidgetsBindingObserver {
+  ///   double _lastTextScaleFactor =
+  ///       WidgetsBinding.instance.platformDispatcher.textScaleFactor;
+  ///
   ///   @override
   ///   void initState() {
   ///     super.initState();
@@ -292,11 +313,12 @@ abstract mixin class WidgetsBindingObserver {
   ///     super.dispose();
   ///   }
   ///
-  ///   late double _lastTextScaleFactor;
-  ///
   ///   @override
   ///   void didChangeTextScaleFactor() {
-  ///     setState(() { _lastTextScaleFactor = WidgetsBinding.instance.platformDispatcher.textScaleFactor; });
+  ///     setState(() {
+  ///       _lastTextScaleFactor =
+  ///           WidgetsBinding.instance.platformDispatcher.textScaleFactor;
+  ///     });
   ///   }
   ///
   ///   @override
@@ -456,12 +478,13 @@ mixin WidgetsBinding
     platformDispatcher.onLocaleChanged = handleLocaleChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
     SystemChannels.backGesture.setMethodCallHandler(_handleBackGestureInvocation);
+    SystemChannels.statusBar.setMethodCallHandler(_handleStatusBarActions);
     assert(() {
       FlutterErrorDetails.propertiesTransformers.add(debugTransformDebugCreator);
       return true;
     }());
     platformMenuDelegate = DefaultPlatformMenuDelegate();
-    _windowingOwner = WindowingOwner.createDefaultOwner();
+    _windowingOwner = createDefaultWindowingOwner();
   }
 
   /// The current [WidgetsBinding], if one has been created.
@@ -535,53 +558,53 @@ mixin WidgetsBinding
   }
 
   void _debugAddStackFilters() {
-    const PartialStackFrame elementInflateWidget = PartialStackFrame(
+    const elementInflateWidget = PartialStackFrame(
       package: 'package:flutter/src/widgets/framework.dart',
       className: 'Element',
       method: 'inflateWidget',
     );
-    const PartialStackFrame elementUpdateChild = PartialStackFrame(
+    const elementUpdateChild = PartialStackFrame(
       package: 'package:flutter/src/widgets/framework.dart',
       className: 'Element',
       method: 'updateChild',
     );
-    const PartialStackFrame elementRebuild = PartialStackFrame(
+    const elementRebuild = PartialStackFrame(
       package: 'package:flutter/src/widgets/framework.dart',
       className: 'Element',
       method: 'rebuild',
     );
-    const PartialStackFrame componentElementPerformRebuild = PartialStackFrame(
+    const componentElementPerformRebuild = PartialStackFrame(
       package: 'package:flutter/src/widgets/framework.dart',
       className: 'ComponentElement',
       method: 'performRebuild',
     );
-    const PartialStackFrame componentElementFirstBuild = PartialStackFrame(
+    const componentElementFirstBuild = PartialStackFrame(
       package: 'package:flutter/src/widgets/framework.dart',
       className: 'ComponentElement',
       method: '_firstBuild',
     );
-    const PartialStackFrame componentElementMount = PartialStackFrame(
+    const componentElementMount = PartialStackFrame(
       package: 'package:flutter/src/widgets/framework.dart',
       className: 'ComponentElement',
       method: 'mount',
     );
-    const PartialStackFrame statefulElementFirstBuild = PartialStackFrame(
+    const statefulElementFirstBuild = PartialStackFrame(
       package: 'package:flutter/src/widgets/framework.dart',
       className: 'StatefulElement',
       method: '_firstBuild',
     );
-    const PartialStackFrame singleChildMount = PartialStackFrame(
+    const singleChildMount = PartialStackFrame(
       package: 'package:flutter/src/widgets/framework.dart',
       className: 'SingleChildRenderObjectElement',
       method: 'mount',
     );
-    const PartialStackFrame statefulElementRebuild = PartialStackFrame(
+    const statefulElementRebuild = PartialStackFrame(
       package: 'package:flutter/src/widgets/framework.dart',
       className: 'StatefulElement',
       method: 'performRebuild',
     );
 
-    const String replacementString = '...     Normal element mounting';
+    const replacementString = '...     Normal element mounting';
 
     // ComponentElement variations
     FlutterError.addDefaultStackFilter(
@@ -730,6 +753,46 @@ mixin WidgetsBinding
           debugProfileBuildsEnabledUserWidgets = value;
         },
       );
+
+      registerServiceExtension(
+        name: WidgetsServiceExtensions.accessibilityEvaluations.name,
+        callback: (Map<String, String> parameters) async {
+          final String? type = parameters['type'];
+          if (type == null) {
+            throw Exception('type parameter is required');
+          }
+
+          switch (type) {
+            case 'MinimumTextContrastEvaluation':
+              if (parameters case {
+                'minNormalTextContrastRatio': final String minNormalTextContrastRatio,
+                'minLargeTextContrastRatio': final String minLargeTextContrastRatio,
+              }) {
+                final EvaluationResult result = await MinimumTextContrastEvaluation(
+                  minNormalTextContrastRatio: double.parse(minNormalTextContrastRatio),
+                  minLargeTextContrastRatio: double.parse(minLargeTextContrastRatio),
+                ).evaluate(this);
+                return _formatEvaluationResult(result.violations);
+              }
+              throw Exception('Invalid arguments');
+            case 'MinimumTapTargetEvaluation':
+              if (parameters case {'targetSize': final String targetSize}) {
+                final EvaluationResult result = await MinimumTapTargetEvaluation(
+                  size: Size.square(double.parse(targetSize)),
+                ).evaluate(this);
+                return _formatEvaluationResult(result.violations);
+              }
+              throw Exception('Invalid arguments');
+            case 'LabeledTapTargetEvaluation':
+              final EvaluationResult result = await const LabeledTapTargetEvaluation().evaluate(
+                this,
+              );
+              return _formatEvaluationResult(result.violations);
+            default:
+              throw Exception('unknown type: $type');
+          }
+        },
+      );
     }
 
     assert(() {
@@ -749,6 +812,17 @@ mixin WidgetsBinding
 
       return true;
     }());
+  }
+
+  Map<String, List<Map<String, String>>> _formatEvaluationResult(List<Violation> violations) {
+    return <String, List<Map<String, String>>>{
+      'result': violations.map((Violation violation) {
+        return <String, String>{
+          'nodeId': violation.node.id.toString(),
+          'message': violation.reason,
+        };
+      }).toList(),
+    };
   }
 
   Future<void> _forceRebuild() {
@@ -819,13 +893,26 @@ mixin WidgetsBinding
 
   @override
   Future<AppExitResponse> handleRequestAppExit() async {
-    bool didCancel = false;
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      if ((await observer.didRequestAppExit()) == AppExitResponse.cancel) {
-        didCancel = true;
-        // Don't early return. For the case where someone is just using the
-        // observer to know when exit happens, we want to call all the
-        // observers, even if we already know we're going to cancel.
+    var didCancel = false;
+    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+      try {
+        if ((await observer.didRequestAppExit()) == AppExitResponse.cancel) {
+          didCancel = true;
+          // Don't early return. For the case where someone is just using the
+          // observer to know when exit happens, we want to call all the
+          // observers, even if we already know we're going to cancel.
+        }
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didRequestAppExit',
+            ),
+          ),
+        );
       }
     }
     return didCancel ? AppExitResponse.cancel : AppExitResponse.exit;
@@ -834,32 +921,84 @@ mixin WidgetsBinding
   @override
   void handleMetricsChanged() {
     super.handleMetricsChanged();
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      observer.didChangeMetrics();
+    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+      try {
+        observer.didChangeMetrics();
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didChangeMetrics',
+            ),
+          ),
+        );
+      }
     }
   }
 
   @override
   void handleTextScaleFactorChanged() {
     super.handleTextScaleFactorChanged();
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      observer.didChangeTextScaleFactor();
+    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+      try {
+        observer.didChangeTextScaleFactor();
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didChangeTextScaleFactor',
+            ),
+          ),
+        );
+      }
     }
   }
 
   @override
   void handlePlatformBrightnessChanged() {
     super.handlePlatformBrightnessChanged();
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      observer.didChangePlatformBrightness();
+    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+      try {
+        observer.didChangePlatformBrightness();
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didChangePlatformBrightness',
+            ),
+          ),
+        );
+      }
     }
   }
 
   @override
   void handleAccessibilityFeaturesChanged() {
     super.handleAccessibilityFeaturesChanged();
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      observer.didChangeAccessibilityFeatures();
+    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+      try {
+        observer.didChangeAccessibilityFeatures();
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didChangeAccessibilityFeatures',
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -884,8 +1023,21 @@ mixin WidgetsBinding
   @protected
   @mustCallSuper
   void dispatchLocalesChanged(List<Locale>? locales) {
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      observer.didChangeLocales(locales);
+    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+      try {
+        observer.didChangeLocales(locales);
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didChangeLocales',
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -898,8 +1050,26 @@ mixin WidgetsBinding
   @protected
   @mustCallSuper
   void dispatchAccessibilityFeaturesChanged() {
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangeAccessibilityFeatures();
+    }
+  }
+
+  Future<void> _handleStatusBarActions(MethodCall call) async {
+    assert(call.method == 'handleScrollToTop');
+    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+      try {
+        observer.handleStatusBarTap();
+      } catch (exception, stack) {
+        final details = FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets library',
+          context: ErrorDescription('handling status bar action'),
+        );
+        FlutterError.reportError(details);
+        // No error widget possible here since it wouldn't have a view to render into.
+      }
     }
   }
 
@@ -941,9 +1111,22 @@ mixin WidgetsBinding
   @protected
   @visibleForTesting
   Future<bool> handlePopRoute() async {
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      if (await observer.didPopRoute()) {
-        return true;
+    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+      try {
+        if (await observer.didPopRoute()) {
+          return true;
+        }
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didPopRoute',
+            ),
+          ),
+        );
       }
     }
     SystemNavigator.pop();
@@ -955,10 +1138,23 @@ mixin WidgetsBinding
 
   bool _handleStartBackGesture(Map<String?, Object?> arguments) {
     _backGestureObservers.clear();
-    final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      if (observer.handleStartBackGesture(backEvent)) {
-        _backGestureObservers.add(observer);
+    final backEvent = PredictiveBackEvent.fromMap(arguments);
+    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+      try {
+        if (observer.handleStartBackGesture(backEvent)) {
+          _backGestureObservers.add(observer);
+        }
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.handleStartBackGesture',
+            ),
+          ),
+        );
       }
     }
     return _backGestureObservers.isNotEmpty;
@@ -969,9 +1165,22 @@ mixin WidgetsBinding
       return;
     }
 
-    final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
+    final backEvent = PredictiveBackEvent.fromMap(arguments);
     for (final WidgetsBindingObserver observer in _backGestureObservers) {
-      observer.handleUpdateBackGestureProgress(backEvent);
+      try {
+        observer.handleUpdateBackGestureProgress(backEvent);
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.handleUpdateBackGestureProgress',
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -986,13 +1195,39 @@ mixin WidgetsBinding
       return;
     }
     for (final WidgetsBindingObserver observer in _backGestureObservers) {
-      observer.handleCommitBackGesture();
+      try {
+        observer.handleCommitBackGesture();
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.handleCommitBackGesture',
+            ),
+          ),
+        );
+      }
     }
   }
 
   void _handleCancelBackGesture() {
     for (final WidgetsBindingObserver observer in _backGestureObservers) {
-      observer.handleCancelBackGesture();
+      try {
+        observer.handleCancelBackGesture();
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.handleCancelBackGesture',
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -1010,23 +1245,49 @@ mixin WidgetsBinding
   @mustCallSuper
   @visibleForTesting
   Future<bool> handlePushRoute(String route) async {
-    final RouteInformation routeInformation = RouteInformation(uri: Uri.parse(route));
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      if (await observer.didPushRouteInformation(routeInformation)) {
-        return true;
+    final routeInformation = RouteInformation(uri: Uri.parse(route));
+    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+      try {
+        if (await observer.didPushRouteInformation(routeInformation)) {
+          return true;
+        }
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didPushRouteInformation',
+            ),
+          ),
+        );
       }
     }
     return false;
   }
 
   Future<bool> _handlePushRouteInformation(Map<dynamic, dynamic> routeArguments) async {
-    final RouteInformation routeInformation = RouteInformation(
+    final routeInformation = RouteInformation(
       uri: Uri.parse(routeArguments['location'] as String),
       state: routeArguments['state'] as Object?,
     );
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      if (await observer.didPushRouteInformation(routeInformation)) {
-        return true;
+    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+      try {
+        if (await observer.didPushRouteInformation(routeInformation)) {
+          return true;
+        }
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didPushRouteInformation',
+            ),
+          ),
+        );
       }
     }
     return false;
@@ -1059,24 +1320,63 @@ mixin WidgetsBinding
   @override
   void handleAppLifecycleStateChanged(AppLifecycleState state) {
     super.handleAppLifecycleStateChanged(state);
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      observer.didChangeAppLifecycleState(state);
+    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+      try {
+        observer.didChangeAppLifecycleState(state);
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didChangeAppLifecycleState',
+            ),
+          ),
+        );
+      }
     }
   }
 
   @override
   void handleViewFocusChanged(ViewFocusEvent event) {
     super.handleViewFocusChanged(event);
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      observer.didChangeViewFocus(event);
+    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+      try {
+        observer.didChangeViewFocus(event);
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didChangeViewFocus',
+            ),
+          ),
+        );
+      }
     }
   }
 
   @override
   void handleMemoryPressure() {
     super.handleMemoryPressure();
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      observer.didHaveMemoryPressure();
+    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+      try {
+        observer.didHaveMemoryPressure();
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didHaveMemoryPressure',
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -1232,7 +1532,7 @@ mixin WidgetsBinding
     }());
 
     TimingsCallback? firstFrameCallback;
-    bool debugFrameWasSentToEngine = false;
+    var debugFrameWasSentToEngine = false;
     if (_needToReportFirstFrame) {
       assert(!_firstFrameCompleter.isCompleted);
 
@@ -1374,7 +1674,7 @@ mixin WidgetsBinding
   /// [RootWidget] of that version (see [WidgetTester.restartAndRestore] for an
   /// exemplary use case).
   void attachToBuildOwner(RootWidget widget) {
-    final bool isBootstrapFrame = rootElement == null;
+    final isBootstrapFrame = rootElement == null;
     _readyToProduceFrames = true;
     _rootElement = widget.attach(buildOwner!, rootElement as RootElement?);
     if (isBootstrapFrame) {
@@ -1644,12 +1944,12 @@ void _runWidget(Widget app, WidgetsBinding binding, String debugEntryPoint) {
 }
 
 String _debugDumpAppString() {
-  const String mode = kDebugMode
+  const mode = kDebugMode
       ? 'DEBUG MODE'
       : kReleaseMode
       ? 'RELEASE MODE'
       : 'PROFILE MODE';
-  final StringBuffer buffer = StringBuffer();
+  final buffer = StringBuffer();
   buffer.writeln('${WidgetsBinding.instance.runtimeType} - $mode');
   if (WidgetsBinding.instance.rootElement != null) {
     buffer.writeln(WidgetsBinding.instance.rootElement!.toStringDeep());
@@ -1781,7 +2081,7 @@ class RootElement extends Element with RootElementMixin {
     try {
       _child = updateChild(_child, (widget as RootWidget).child, /* slot */ null);
     } catch (exception, stack) {
-      final FlutterErrorDetails details = FlutterErrorDetails(
+      final details = FlutterErrorDetails(
         exception: exception,
         stack: stack,
         library: 'widgets library',

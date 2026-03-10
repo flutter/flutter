@@ -35,7 +35,7 @@ final List<String> _knownUnlinkedExamples = <String>[
 ];
 
 void main(List<String> args) {
-  final ArgParser argParser = ArgParser();
+  final argParser = ArgParser();
   argParser.addFlag('help', negatable: false, help: 'Print help for this command.');
   argParser.addOption(
     'examples',
@@ -87,7 +87,7 @@ void main(List<String> args) {
   final Directory dartUIPath = filesystem.directory(parsedArgs['dart-ui']! as String);
   final Directory flutterRoot = filesystem.directory(parsedArgs['flutter-root']! as String);
 
-  final SampleChecker checker = SampleChecker(
+  final checker = SampleChecker(
     examples: examples,
     packages: packages,
     dartUIPath: dartUIPath,
@@ -160,18 +160,18 @@ class SampleChecker {
     }
 
     if (missingTests.isNotEmpty) {
-      final StringBuffer buffer = StringBuffer('The following example test files are missing:\n');
-      for (final File name in missingTests) {
+      final buffer = StringBuffer('The following example test files are missing:\n');
+      for (final name in missingTests) {
         buffer.writeln('  ${getRelativePath(name)}');
       }
       foundError(buffer.toString().trimRight().split('\n'));
     }
 
     if (missingFilenames.isNotEmpty) {
-      final StringBuffer buffer = StringBuffer(
+      final buffer = StringBuffer(
         'The following examples are not linked from any source file API doc comments:\n',
       );
-      for (final String name in missingFilenames) {
+      for (final name in missingFilenames) {
         buffer.writeln('  $name');
       }
       buffer.write('Either link them to a source file API doc comment, or remove them.');
@@ -179,10 +179,10 @@ class SampleChecker {
     }
 
     if (malformedLinks.isNotEmpty) {
-      final StringBuffer buffer = StringBuffer(
+      final buffer = StringBuffer(
         'The following malformed links were found in API doc comments:\n',
       );
-      for (final LinkInfo link in malformedLinks) {
+      for (final link in malformedLinks) {
         buffer.writeln('  $link');
       }
       buffer.write(
@@ -225,21 +225,21 @@ class SampleChecker {
 
   (Set<String>, Set<LinkInfo>) getExampleLinks(Directory searchDirectory) {
     final List<File> files = getFiles(searchDirectory, RegExp(r'\.dart$'));
-    final Set<String> searchStrings = <String>{};
-    final Set<LinkInfo> malformedStrings = <LinkInfo>{};
-    final RegExp validExampleRe = RegExp(r'\*\* See code in (?<path>.+) \*\*');
+    final searchStrings = <String>{};
+    final malformedStrings = <LinkInfo>{};
+    final validExampleRe = RegExp(r'\*\* See code in (?<path>.+) \*\*');
     // Looks for some common broken versions of example links. This looks for
     // something that is at minimum "///*seecode<something>*" to indicate that it
     // looks like an example link. It should be narrowed if we start getting false
     // positives.
-    final RegExp malformedLinkRe = RegExp(
+    final malformedLinkRe = RegExp(
       r'^(?<malformed>\s*///\s*\*\*?\s*[sS][eE][eE]\s*[Cc][Oo][Dd][Ee].+\*\*?)',
     );
-    for (final File file in files) {
+    for (final file in files) {
       final String contents = file.readAsStringSync();
       final List<String> lines = contents.split('\n');
-      int count = 0;
-      for (final String line in lines) {
+      var count = 0;
+      for (final line in lines) {
         count += 1;
         final RegExpMatch? validMatch = validExampleRe.firstMatch(line);
         if (validMatch != null) {
@@ -256,8 +256,8 @@ class SampleChecker {
   }
 
   List<String> checkForMissingLinks(List<File> exampleFilenames, Set<String> searchStrings) {
-    final List<String> missingFilenames = <String>[];
-    for (final File example in exampleFilenames) {
+    final missingFilenames = <String>[];
+    for (final example in exampleFilenames) {
       final String relativePath = getRelativePath(example);
       if (!searchStrings.contains(relativePath)) {
         missingFilenames.add(relativePath);
@@ -278,8 +278,8 @@ class SampleChecker {
   }
 
   List<File> checkForMissingTests(List<File> exampleFilenames) {
-    final List<File> missingTests = <File>[];
-    for (final File example in exampleFilenames) {
+    final missingTests = <File>[];
+    for (final example in exampleFilenames) {
       final File testFile = filesystem.file(getTestNameForExample(example, examples));
       if (!testFile.existsSync()) {
         missingTests.add(testFile);

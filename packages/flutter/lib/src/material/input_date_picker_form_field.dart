@@ -196,7 +196,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
     if (_selectedDate != null) {
       final MaterialLocalizations localizations = MaterialLocalizations.of(context);
       _inputText = widget.calendarDelegate.formatCompactDate(_selectedDate!, localizations);
-      TextEditingValue textEditingValue = TextEditingValue(text: _inputText!);
+      var textEditingValue = TextEditingValue(text: _inputText!);
       // Select the new text if we are auto focused and haven't selected the text before.
       if (widget.autofocus && !_autoSelected) {
         textEditingValue = textEditingValue.copyWith(
@@ -259,10 +259,10 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
     final bool useMaterial3 = theme.useMaterial3;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final DatePickerThemeData datePickerTheme = theme.datePickerTheme;
-    final InputDecorationThemeData inputTheme = theme.inputDecorationTheme;
+    final InputDecorationThemeData inputTheme = InputDecorationTheme.of(context);
     final InputBorder effectiveInputBorder =
         datePickerTheme.inputDecorationTheme?.border ??
-        theme.inputDecorationTheme.border ??
+        inputTheme.border ??
         (useMaterial3 ? const OutlineInputBorder() : const UnderlineInputBorder());
 
     return Semantics(

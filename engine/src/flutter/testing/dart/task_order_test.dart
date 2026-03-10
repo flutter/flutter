@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 
 void main() {
   test('Message loop flushes microtasks between iterations', () async {
-    final List<int> tasks = <int>[];
+    final tasks = <int>[];
 
     tasks.add(1);
 

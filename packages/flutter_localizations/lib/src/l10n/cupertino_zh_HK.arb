@@ -1,4 +1,10 @@
 {
+  "expansionTileExpandedHint": "㩒兩下就可以收合",
+  "collapsedHint": "已展開",
+  "expandedHint": "已收合",
+  "expansionTileCollapsedTapHint": "展開就可以查看詳情",
+  "expansionTileExpandedTapHint": "收合",
+  "expansionTileCollapsedHint": "㩒兩下就可以展開",
   "cancelButtonLabel": "取消",
   "backButtonLabel": "返回",
   "clearButtonLabel": "清除",

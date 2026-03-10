@@ -10,7 +10,7 @@ import '../base/process.dart';
 import '../base/terminal.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import 'gradle_utils.dart';
+import 'gradle_utils.dart' as utils;
 
 typedef GradleErrorTest = bool Function(String);
 
@@ -83,6 +83,8 @@ final gradleErrors = <GradleHandledError>[
   usageOfV1EmbeddingReferencesHandler,
   jlinkErrorWithJava21AndSourceCompatibility,
   missingNdkSourcePropertiesFile,
+  applyingKotlinAndroidPluginErrorHandler,
+  useNewAgpDslErrorHandler,
   incompatibleKotlinVersionHandler, // This handler should always be last, as its key log output is sometimes in error messages with other root causes.
 ];
 
@@ -400,20 +402,16 @@ final outdatedGradleHandler = GradleHandledError(
   test: _outdatedGradlePattern.hasMatch,
   handler: ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
     final File gradleFile = project.android.hostAppGradleFile;
-    final File gradlePropertiesFile = project.directory
-        .childDirectory('android')
-        .childDirectory('gradle')
-        .childDirectory('wrapper')
-        .childFile('gradle-wrapper.properties');
+    final File gradlePropertiesFile = project.android.gradleWrapperPropertiesFile;
     globals.printBox(
       '${globals.logger.terminal.warningMark} Your project needs to upgrade Gradle and the Android Gradle plugin.\n\n'
       'To fix this issue, replace the following content:\n'
       '${gradleFile.path}:\n'
       '    ${globals.terminal.color("- classpath 'com.android.tools.build:gradle:<current-version>'", TerminalColor.red)}\n'
-      '    ${globals.terminal.color("+ classpath 'com.android.tools.build:gradle:$templateAndroidGradlePluginVersion'", TerminalColor.green)}\n'
+      '    ${globals.terminal.color("+ classpath 'com.android.tools.build:gradle:${utils.templateAndroidGradlePluginVersion}'", TerminalColor.green)}\n'
       '${gradlePropertiesFile.path}:\n'
       '    ${globals.terminal.color('- https://services.gradle.org/distributions/gradle-<current-version>-all.zip', TerminalColor.red)}\n'
-      '    ${globals.terminal.color('+ https://services.gradle.org/distributions/gradle-$templateDefaultGradleVersion-all.zip', TerminalColor.green)}',
+      '    ${globals.terminal.color('+ https://services.gradle.org/distributions/gradle-${utils.templateDefaultGradleVersion}-all.zip', TerminalColor.green)}',
       title: _boxTitle,
     );
     return GradleBuildStatus.exit;
@@ -507,13 +505,7 @@ final incompatibleJavaAndGradleVersionsHandler = GradleHandledError(
   },
   handler:
       ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
-        final File gradlePropertiesFile = project.directory
-            .childDirectory('android')
-            .childDirectory('gradle')
-            .childDirectory('wrapper')
-            .childFile('gradle-wrapper.properties');
-        // TODO(reidbaker): Replace URL with constant defined in
-        // https://github.com/flutter/flutter/pull/123916.
+        final File gradlePropertiesFile = project.android.gradleWrapperPropertiesFile;
         globals.printBox(
           "${globals.logger.terminal.warningMark} Your project's Gradle version "
           'is incompatible with the Java version that Flutter is using for Gradle.\n\n'
@@ -522,7 +514,7 @@ final incompatibleJavaAndGradleVersionsHandler = GradleHandledError(
           'Then, update the Gradle version specified in ${gradlePropertiesFile.path} '
           'to be compatible with that Java version. '
           'See the link below for more information on compatible Java/Gradle versions:\n'
-          'https://docs.gradle.org/current/userguide/compatibility.html#java\n\n',
+          '${AndroidProject.javaGradleCompatUrl}\n\n',
           title: _boxTitle,
         );
         return GradleBuildStatus.exit;
@@ -667,4 +659,62 @@ final missingNdkSourcePropertiesFile = GradleHandledError(
         return GradleBuildStatus.exit;
       },
   eventLabel: 'ndk-missing-source-properties-file',
+);
+
+// TODO(jesswon): Remove this constant and its usages once AGP 9 is supported in the ecosystem: https://github.com/flutter/flutter/issues/181383
+const String _kAgp9WarningAndMigrationPrompt = '''
+Please do not upgrade your Flutter app on Android to AGP 9 as migrating plugins to AGP 9
+and Flutter apps on AGP 9 using plugins is not yet supported. For more details, see https://github.com/flutter/flutter/issues/181383.
+\nTo proceed with the AGP 9 migration despite this warning:
+    ''';
+
+/// Handler when applying the kotlin-android plugin results in a build failure. This failure occurs when
+/// using AGP 9+ because built-in Kotlin has become the default behavior.
+@visibleForTesting
+final applyingKotlinAndroidPluginErrorHandler = GradleHandledError(
+  test: (String line) {
+    return line.contains(
+      "The 'org.jetbrains.kotlin.android' plugin is no longer required for Kotlin support since AGP 9.0",
+    );
+  },
+  handler:
+      ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
+        final File appGradleFile = project.android.appGradleFile;
+        globals.printBox(
+          '''
+${globals.logger.terminal.warningMark} $_kAgp9WarningAndMigrationPrompt
+Starting AGP 9+, the default has become built-in Kotlin. This results in a build failure when applying the kotlin-android plugin at ${appGradleFile.path}.
+\nTo resolve this, migrate to built-in Kotlin. For instructions on how to migrate, see: https://docs.flutter.dev/release/breaking-changes/migrate-to-agp-9''',
+          title: _boxTitle,
+        );
+
+        return GradleBuildStatus.exit;
+      },
+  eventLabel: 'applying-kotlin-android-plugin-error',
+);
+
+/// Handler when using the new AGP DSL interfaces. Starting AGP 9+, only the new
+/// DSL interfaces are used. This results in a failure because we still depend
+/// on old DSL types.
+@visibleForTesting
+final useNewAgpDslErrorHandler = GradleHandledError(
+  test: _lineMatcher(const <String>[
+    "> Failed to apply plugin 'dev.flutter.flutter-gradle-plugin'",
+    '> java.lang.NullPointerException (no error message)',
+  ]),
+  handler:
+      ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
+        final File appGradleFile = project.android.appGradleFile;
+        globals.printBox(
+          '''
+${globals.logger.terminal.warningMark} $_kAgp9WarningAndMigrationPrompt
+Starting AGP 9+, only the new DSL interface will be read. This results in a build failure when applying the Flutter Gradle plugin at ${appGradleFile.path}.
+\nTo resolve this update flutter or opt out of `android.newDsl`. For instructions on how to opt out, see: https://docs.flutter.dev/release/breaking-changes/migrate-to-agp-9
+\nIf you are not upgrading to AGP 9+, run `flutter analyze --suggestions` to check for incompatible dependencies.''',
+          title: _boxTitle,
+        );
+
+        return GradleBuildStatus.exit;
+      },
+  eventLabel: 'use-new-agp-dsl-error',
 );

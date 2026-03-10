@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/transitions/decorated_box_transition.0.dart' as example;
+import 'package:flutter_api_samples/widgets/transitions/decorated_box_transition.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -12,11 +13,17 @@ void main() {
     expect(find.byType(FlutterLogo), findsOneWidget);
     expect(find.byType(Center), findsOneWidget);
     expect(
-      find.descendant(of: find.byType(Center), matching: find.byType(FlutterLogo)),
+      find.descendant(
+        of: find.byType(Center),
+        matching: find.byType(FlutterLogo),
+      ),
       findsOneWidget,
     );
     expect(
-      find.ancestor(of: find.byType(FlutterLogo), matching: find.byType(Container)),
+      find.ancestor(
+        of: find.byType(FlutterLogo),
+        matching: find.byType(Container),
+      ),
       findsAtLeast(1),
     );
     expect(find.byType(DecoratedBoxTransition), findsOneWidget);

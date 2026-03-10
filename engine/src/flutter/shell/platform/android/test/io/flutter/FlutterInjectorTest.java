@@ -61,17 +61,12 @@ public class FlutterInjectorTest {
 
     List<Callable<String>> callables =
         Arrays.asList(
-            () -> {
-              return Thread.currentThread().getName();
-            },
-            () -> {
-              return Thread.currentThread().getName();
-            });
+            () -> Thread.currentThread().getName(), () -> Thread.currentThread().getName());
 
     List<Future<String>> threadNames;
     threadNames = injector.executorService().invokeAll(callables);
 
-    assertEquals(threadNames.size(), 2);
+    assertEquals(2, threadNames.size());
     for (Future<String> name : threadNames) {
       assertTrue(name.get().startsWith("flutter-worker-"));
     }
@@ -109,9 +104,8 @@ public class FlutterInjectorTest {
 
     assertThrows(
         IllegalStateException.class,
-        () -> {
-          FlutterInjector.setInstance(
-              new FlutterInjector.Builder().setFlutterLoader(mockFlutterLoader).build());
-        });
+        () ->
+            FlutterInjector.setInstance(
+                new FlutterInjector.Builder().setFlutterLoader(mockFlutterLoader).build()));
   }
 }

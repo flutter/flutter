@@ -44,6 +44,9 @@ abstract class Renderer {
 
   late Rasterizer rasterizer;
 
+  /// A surface used specifically for `Picture.toImage`.
+  Surface get pictureToImageSurface;
+
   /// Resets the [Rasterizer] to the default value. Used in tests.
   @visibleForTesting
   void debugResetRasterizer();
@@ -59,8 +62,15 @@ abstract class Renderer {
   // Listens for view disposal events from the view manager.
   late StreamSubscription<int> _onViewDisposedListener;
 
+  /// Set the maximum number of bytes that can be held in the GPU resource cache.
+  set resourceCacheMaxBytes(int bytes) => rasterizer.setResourceCacheMaxBytes(bytes);
+
   @mustCallSuper
   FutureOr<void> initialize() {
+    _setUpViewListeners();
+  }
+
+  void _setUpViewListeners() {
     // Views may have been registered before this renderer was initialized.
     // Create rasterizers for them and then start listening for new view
     // creation/disposal events.
@@ -147,6 +157,7 @@ abstract class Renderer {
     double sigmaX = 0.0,
     double sigmaY = 0.0,
     ui.TileMode? tileMode,
+    ui.Rect? bounds,
   });
   ui.ImageFilter createDilateImageFilter({double radiusX = 0.0, double radiusY = 0.0});
   ui.ImageFilter createErodeImageFilter({double radiusX = 0.0, double radiusY = 0.0});
@@ -275,7 +286,56 @@ abstract class Renderer {
   /// Map from view id to the associated [ViewRasterizer] for that view.
   final Map<int, ViewRasterizer> rasterizers = <int, ViewRasterizer>{};
 
-  Future<void> renderScene(ui.Scene scene, EngineFlutterView view);
+  Future<void> renderScene(ui.Scene scene, EngineFlutterView view) async {
+    assert(
+      rasterizers.containsKey(view.viewId),
+      "Unable to render to a view which hasn't been registered",
+    );
+    final ViewRasterizer rasterizer = rasterizers[view.viewId]!;
+    final RenderQueue renderQueue = rasterizer.queue;
+    final FrameTimingRecorder? recorder = FrameTimingRecorder.frameTimingsEnabled
+        ? FrameTimingRecorder()
+        : null;
+    if (renderQueue.current != null) {
+      // If a scene is already queued up, drop it and queue this one up instead
+      // so that the scene view always displays the most recently requested scene.
+      renderQueue.next?.completer.complete();
+      final completer = Completer<void>();
+      renderQueue.next = (scene: scene, completer: completer, recorder: recorder);
+      return completer.future;
+    }
+    final completer = Completer<void>();
+    renderQueue.current = (scene: scene, completer: completer, recorder: recorder);
+    unawaited(_kickRenderLoop(rasterizer));
+    return completer.future;
+  }
+
+  Future<void> _kickRenderLoop(ViewRasterizer rasterizer) async {
+    final RenderQueue renderQueue = rasterizer.queue;
+    final RenderRequest current = renderQueue.current!;
+    try {
+      await _renderScene(current.scene, rasterizer, current.recorder);
+      current.completer.complete();
+    } catch (error, stackTrace) {
+      current.completer.completeError(error, stackTrace);
+    }
+    renderQueue.current = renderQueue.next;
+    renderQueue.next = null;
+    if (renderQueue.current == null) {
+      return;
+    } else {
+      return _kickRenderLoop(rasterizer);
+    }
+  }
+
+  Future<void> _renderScene(
+    ui.Scene scene,
+    ViewRasterizer rasterizer,
+    FrameTimingRecorder? recorder,
+  ) async {
+    await rasterizer.draw((scene as LayerScene).layerTree, recorder);
+    recorder?.submitTimings();
+  }
 
   void dumpDebugInfo();
 
@@ -284,18 +344,19 @@ abstract class Renderer {
   void dispose() {
     _onViewCreatedListener.cancel();
     _onViewDisposedListener.cancel();
-    for (final ViewRasterizer rasterizer in rasterizers.values) {
-      rasterizer.dispose();
-    }
-    rasterizers.clear();
     rasterizer.dispose();
+    pictureToImageSurface.dispose();
   }
 
   /// Clears the state of this renderer. Used in tests.
   @mustCallSuper
   void debugClear() {
+    _onViewCreatedListener.cancel();
+    _onViewDisposedListener.cancel();
     for (final ViewRasterizer rasterizer in rasterizers.values) {
-      rasterizer.debugClear();
+      rasterizer.dispose();
     }
+    rasterizers.clear();
+    _setUpViewListeners();
   }
 }

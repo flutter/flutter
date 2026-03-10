@@ -369,7 +369,6 @@ import java.util.List;
    * </ol>
    */
   @NonNull
-  @RequiresApi(API_LEVELS.API_24)
   View onCreateView(
       LayoutInflater inflater,
       @Nullable ViewGroup container,
@@ -571,6 +570,7 @@ import java.util.List;
   void onResume() {
     Log.v(TAG, "onResume()");
     ensureAlive();
+    flutterEngine.getRenderer().restoreSurfaceProducers();
     if (host.shouldDispatchAppLifecycleState() && flutterEngine != null) {
       flutterEngine.getLifecycleChannel().appIsResumed();
     }
@@ -667,7 +667,6 @@ import java.util.List;
    *
    * <p>This method removes this delegate's {@link FlutterView}'s {@link FlutterUiDisplayListener}.
    */
-  @RequiresApi(API_LEVELS.API_24)
   void onDestroyView() {
     Log.v(TAG, "onDestroyView()");
     ensureAlive();

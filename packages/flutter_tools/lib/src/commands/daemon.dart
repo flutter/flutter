@@ -665,6 +665,7 @@ class AppDomain extends Domain {
     String? route,
     DebuggingOptions options,
     bool enableHotReload, {
+    Map<String, String> webDefines = const <String, String>{},
     File? applicationBinary,
     required bool trackWidgetCreation,
     String? projectRootPath,
@@ -712,6 +713,7 @@ class AppDomain extends Domain {
         platform: globals.platform,
         outputPreferences: globals.outputPreferences,
         fileSystem: globals.fs,
+        webDefines: webDefines,
       );
     } else if (enableHotReload) {
       runner = HotRunner(
@@ -796,15 +798,18 @@ class AppDomain extends Domain {
       // As it just writes to stdout.
       unawaited(
         connectionInfoCompleter.future.then<void>((DebugConnectionInfo info) {
-          final params = <String, Object?>{
+          _sendAppEvent(app, 'debugPort', {
             // The web vmservice proxy does not have an http address.
             'port': info.httpUri?.port ?? info.wsUri!.port,
             'wsUri': info.wsUri.toString(),
-          };
-          if (info.baseUri != null) {
-            params['baseUri'] = info.baseUri;
+            'baseUri': ?info.baseUri,
+          });
+          if (info.devToolsUri != null) {
+            _sendAppEvent(app, 'devTools', {'uri': info.devToolsUri!.toString()});
           }
-          _sendAppEvent(app, 'debugPort', params);
+          if (info.dtdUri != null) {
+            _sendAppEvent(app, 'dtd', {'uri': info.dtdUri!.toString()});
+          }
         }),
       );
     }
@@ -1280,7 +1285,11 @@ class DeviceDomain extends Domain {
       devToolsServerAddress: devToolsServerAddress,
     );
     unawaited(device.dds.done.whenComplete(() => sendEvent('device.dds.done.$deviceId')));
-    return <String, Object?>{'ddsUri': device.dds.uri?.toString()};
+    return <String, Object?>{
+      'ddsUri': device.dds.uri?.toString(),
+      'devToolsUri': device.dds.devToolsUri?.toString(),
+      'dtdUri': device.dds.dtdUri?.toString(),
+    };
   }
 
   /// Starts DDS for the device.
@@ -1444,7 +1453,7 @@ class NotifyingLogger extends DelegatingLogger {
   final messageBuffer = <LogMessage>[];
   late StreamController<LogMessage> _messageController;
 
-  var notifyVerbose = false;
+  bool notifyVerbose = false;
 
   void _onListen() {
     if (messageBuffer.isNotEmpty) {
@@ -1588,7 +1597,7 @@ class EmulatorDomain extends Domain {
     registerHandler('create', create);
   }
 
-  var emulators = EmulatorManager(
+  EmulatorManager emulators = EmulatorManager(
     fileSystem: globals.fs,
     logger: globals.logger,
     java: globals.java,

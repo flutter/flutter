@@ -4,6 +4,7 @@
 
 package io.flutter.embedding.android;
 
+import static io.flutter.Build.API_LEVELS;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.DART_ENTRYPOINT_META_DATA_KEY;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.DART_ENTRYPOINT_URI_META_DATA_KEY;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.DEFAULT_BACKGROUND_MODE;
@@ -27,6 +28,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -602,14 +604,18 @@ public class FlutterFragmentActivity extends FragmentActivity
 
   /**
    * @deprecated This method is outdated because it calls {@code setStatusBarColor}, which is
-   *     deprecated in Android 15 and above. Consider using the new WindowInsetsController or other
-   *     Android 15+ APIs for system UI styling.
+   *     deprecated in Android 15 and above, meaning calls to this method will have no effect on
+   *     those versions. Consider using the
+   *     [WindowInsetsController](https://developer.android.com/reference/android/view/WindowInsetsController)
+   *     or other Android 15+ APIs for system UI styling.
    */
   @Deprecated
   private void configureStatusBarForFullscreenFlutterExperience() {
     Window window = getWindow();
     window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-    window.setStatusBarColor(0x40000000);
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_35) {
+      window.setStatusBarColor(0x40000000);
+    }
     window.getDecorView().setSystemUiVisibility(PlatformPlugin.DEFAULT_SYSTEM_UI);
   }
 
@@ -738,7 +744,17 @@ public class FlutterFragmentActivity extends FragmentActivity
    */
   @Override
   public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
-    if (flutterFragment != null && flutterFragment.isFlutterEngineInjected()) {
+    FlutterFragment attachedFlutterFragment = flutterFragment;
+    if (attachedFlutterFragment == null) {
+      // During activity recreation, `FragmentManager` may restore and attach an existing
+      // `FlutterFragment` before `ensureFlutterFragmentCreated()` refreshes the
+      // `flutterFragment` field.
+      // Query by tag here so plugin auto-registration can still honor the injected-engine guard.
+      // Keep `flutterFragment` field ownership in `ensureFlutterFragmentCreated()`; this lookup
+      // only informs the guard.
+      attachedFlutterFragment = retrieveExistingFlutterFragmentIfPossible();
+    }
+    if (attachedFlutterFragment != null && attachedFlutterFragment.isFlutterEngineInjected()) {
       // If the FlutterEngine was explicitly built and injected into this FlutterActivity, the
       // builder should explicitly decide whether to automatically register plugins via the
       // FlutterEngine's construction parameter or via the AndroidManifest metadata.

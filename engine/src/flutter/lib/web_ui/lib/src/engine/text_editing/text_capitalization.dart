@@ -58,7 +58,7 @@ class TextCapitalizationConfig {
   /// See: https://developers.google.com/web/updates/2015/04/autocapitalize
   /// https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/autocapitalize
   void setAutocapitalizeAttribute(DomHTMLElement domElement) {
-    String autocapitalize = '';
+    var autocapitalize = '';
     switch (textCapitalization) {
       case TextCapitalization.words:
         autocapitalize = 'words';
@@ -70,10 +70,10 @@ class TextCapitalizationConfig {
         autocapitalize = 'off';
     }
     if (domElement.isA<DomHTMLInputElement>()) {
-      final DomHTMLInputElement element = domElement as DomHTMLInputElement;
+      final element = domElement as DomHTMLInputElement;
       element.setAttribute('autocapitalize', autocapitalize);
     } else if (domElement.isA<DomHTMLTextAreaElement>()) {
-      final DomHTMLTextAreaElement element = domElement as DomHTMLTextAreaElement;
+      final element = domElement as DomHTMLTextAreaElement;
       element.setAttribute('autocapitalize', autocapitalize);
     }
   }

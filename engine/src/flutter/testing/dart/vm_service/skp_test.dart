@@ -26,14 +26,14 @@ void main() {
       'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws',
     );
 
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     PlatformDispatcher.instance.onBeginFrame = (Duration timeStamp) {
-      final PictureRecorder recorder = PictureRecorder();
-      final Canvas canvas = Canvas(recorder);
+      final recorder = PictureRecorder();
+      final canvas = Canvas(recorder);
       canvas.drawRect(const Rect.fromLTRB(10, 10, 20, 20), Paint());
       final Picture picture = recorder.endRecording();
 
-      final SceneBuilder builder = SceneBuilder();
+      final builder = SceneBuilder();
       builder.addPicture(Offset.zero, picture);
       final Scene scene = builder.build();
 
@@ -47,7 +47,7 @@ void main() {
     try {
       final vms.Response response = await vmService.callServiceExtension('_flutter.screenshotSkp');
       expect(impellerEnabled, false);
-      final String base64data = response.json!['skp'] as String;
+      final base64data = response.json!['skp'] as String;
       expect(base64data, isNotNull);
       expect(base64data, isNotEmpty);
       final Uint8List decoded = base64Decode(base64data);

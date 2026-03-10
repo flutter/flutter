@@ -15,7 +15,10 @@ class RestorablePushReplacementExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const RootRestorationScope(
       restorationId: 'app',
-      child: MaterialApp(restorationScopeId: 'app', home: RestorablePushReplacementExample()),
+      child: MaterialApp(
+        restorationScopeId: 'app',
+        home: RestorablePushReplacementExample(),
+      ),
     );
   }
 }
@@ -26,15 +29,18 @@ class RestorablePushReplacementExample extends StatefulWidget {
   final bool wasPushed;
 
   @override
-  State<RestorablePushReplacementExample> createState() => _RestorablePushReplacementExampleState();
+  State<RestorablePushReplacementExample> createState() =>
+      _RestorablePushReplacementExampleState();
 }
 
 @pragma('vm:entry-point')
-class _RestorablePushReplacementExampleState extends State<RestorablePushReplacementExample> {
+class _RestorablePushReplacementExampleState
+    extends State<RestorablePushReplacementExample> {
   @pragma('vm:entry-point')
   static Route<void> _myRouteBuilder(BuildContext context, Object? arguments) {
     return MaterialPageRoute<void>(
-      builder: (BuildContext context) => const RestorablePushReplacementExample(wasPushed: true),
+      builder: (BuildContext context) =>
+          const RestorablePushReplacementExample(wasPushed: true),
     );
   }
 
@@ -48,7 +54,8 @@ class _RestorablePushReplacementExampleState extends State<RestorablePushReplace
             : const Text('This is the initial route.'),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.restorablePushReplacement(context, _myRouteBuilder),
+        onPressed: () =>
+            Navigator.restorablePushReplacement(context, _myRouteBuilder),
         tooltip: 'Increment Counter',
         child: const Icon(Icons.add),
       ),

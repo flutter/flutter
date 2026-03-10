@@ -31,6 +31,7 @@ abstract class AndroidAssetBundle extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/app.dill'),
+    Source.pattern('{BUILD_DIR}/${DartBuild.dartHookResultFilename}'),
     ...IconTreeShaker.inputs,
   ];
 
@@ -466,7 +467,7 @@ Target androidx64ReleaseDeferredComponentsBundle = AndroidAotDeferredComponentsB
 );
 
 /// A set of all target names that build deferred component apps.
-var deferredComponentsTargets = <String>{
+Set<String> deferredComponentsTargets = <String>{
   androidArmProfileDeferredComponentsBundle.name,
   androidArm64ProfileDeferredComponentsBundle.name,
   androidx64ProfileDeferredComponentsBundle.name,

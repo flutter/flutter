@@ -43,12 +43,15 @@ abstract class UnpackMacOS extends UnpackDarwin {
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/FlutterMacOS.framework/Versions/A/FlutterMacOS'),
-  ];
+  List<Source> get outputs {
+    return <Source>[kFlutterMacOSFrameworkBinarySource];
+  }
 
   @override
   List<Target> get dependencies => <Target>[];
+
+  @override
+  FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.macos;
 
   @override
   Future<void> build(Environment environment) async {
@@ -310,6 +313,9 @@ class CompileMacOSFramework extends Target {
         extraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
       }
 
+      // Suppress AOTSnapshotter build status logs
+      final quiet = environment.defines[kBuildSwiftPackage] == 'true';
+
       pending.add(
         snapshotter.build(
           buildMode: buildMode,
@@ -320,6 +326,7 @@ class CompileMacOSFramework extends Target {
           splitDebugInfo: splitDebugInfo,
           dartObfuscation: dartObfuscation,
           extraGenSnapshotOptions: extraGenSnapshotOptions,
+          quiet: quiet,
         ),
       );
     }
@@ -380,6 +387,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/App.framework/App'),
+    Source.pattern('{BUILD_DIR}/${DartBuild.dartHookResultFilename}'),
     ...IconTreeShaker.inputs,
   ];
 

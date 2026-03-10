@@ -254,7 +254,7 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
 
   static const kTesterDeviceId = 'flutter-tester';
 
-  static var showFlutterTesterDevice = false;
+  static bool showFlutterTesterDevice = false;
 
   final FlutterTesterDevice _testerDevice;
 
@@ -265,7 +265,10 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
   bool get supportsPlatform => true;
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
+  Future<List<Device>> pollingGetDevices({
+    Duration? timeout,
+    bool forWirelessDiscovery = false,
+  }) async {
     return showFlutterTesterDevice ? <Device>[_testerDevice] : <Device>[];
   }
 

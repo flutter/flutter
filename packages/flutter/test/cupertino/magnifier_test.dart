@@ -6,16 +6,15 @@
 library;
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final Offset basicOffset = Offset(
+  final basicOffset = Offset(
     CupertinoMagnifier.kDefaultSize.width / 2,
     CupertinoMagnifier.kDefaultSize.height - CupertinoMagnifier.kMagnifierAboveFocalPoint,
   );
-  const Rect reasonableTextField = Rect.fromLTRB(0, 100, 200, 200);
-  final MagnifierController magnifierController = MagnifierController();
+  const reasonableTextField = Rect.fromLTRB(0, 100, 200, 200);
+  final magnifierController = MagnifierController();
 
   // Make sure that your gesture in magnifierInfo is within the line in magnifierInfo,
   // or else the magnifier status will stay hidden and this will not complete.
@@ -45,12 +44,12 @@ void main() {
       final Key fakeTextFieldKey = UniqueKey();
 
       await tester.pumpWidget(
-        MaterialApp(
+        CupertinoApp(
           home: SizedBox.square(
             key: fakeTextFieldKey,
             dimension: 10,
             child: CupertinoTheme(
-              data: const CupertinoThemeData(primaryColor: Colors.green),
+              data: const CupertinoThemeData(primaryColor: CupertinoColors.activeGreen),
               child: Builder(
                 builder: (BuildContext context) {
                   return const Placeholder();
@@ -63,12 +62,11 @@ void main() {
       final BuildContext context = tester.element(find.byType(Placeholder));
 
       // Magnifier should be positioned directly over the red square.
-      final RenderBox tapPointRenderBox =
-          tester.firstRenderObject(find.byKey(fakeTextFieldKey)) as RenderBox;
+      final tapPointRenderBox = tester.firstRenderObject(find.byKey(fakeTextFieldKey)) as RenderBox;
       final Rect fakeTextFieldRect =
           tapPointRenderBox.localToGlobal(Offset.zero) & tapPointRenderBox.size;
 
-      final ValueNotifier<MagnifierInfo> magnifier = ValueNotifier<MagnifierInfo>(
+      final magnifier = ValueNotifier<MagnifierInfo>(
         MagnifierInfo(
           currentLineBoundaries: fakeTextFieldRect,
           fieldBounds: fakeTextFieldRect,
@@ -86,7 +84,7 @@ void main() {
           .widget<CupertinoMagnifier>(find.byType(CupertinoMagnifier))
           .borderSide
           .color;
-      expect(magnifierBorderColor, equals(Colors.green));
+      expect(magnifierBorderColor, equals(CupertinoColors.activeGreen));
     });
 
     group('position', () {
@@ -104,16 +102,20 @@ void main() {
         final Key outerKey = UniqueKey();
 
         await tester.pumpWidget(
-          ColoredBox(
+          CupertinoApp(
             key: outerKey,
-            color: const Color.fromARGB(255, 0, 255, 179),
-            child: MaterialApp(
-              home: Center(
+            theme: const CupertinoThemeData(primaryColor: Color(0xFF6750A4)),
+            // The CupertinoApp adds a `CupertinoUserInterfaceLevel` widget,
+            // which has effect on the color of the background behind the child.
+            // So enforce a consistent background color that fills the background.
+            home: ColoredBox(
+              color: const Color.fromARGB(255, 0, 255, 179),
+              child: Center(
                 child: Container(
                   key: fakeTextFieldKey,
                   width: 10,
                   height: 10,
-                  color: Colors.red,
+                  color: const Color(0xFFF44336),
                   child: const Placeholder(),
                 ),
               ),
@@ -123,12 +125,12 @@ void main() {
         final BuildContext context = tester.element(find.byType(Placeholder));
 
         // Magnifier should be positioned directly over the red square.
-        final RenderBox tapPointRenderBox =
+        final tapPointRenderBox =
             tester.firstRenderObject(find.byKey(fakeTextFieldKey)) as RenderBox;
         final Rect fakeTextFieldRect =
             tapPointRenderBox.localToGlobal(Offset.zero) & tapPointRenderBox.size;
 
-        final ValueNotifier<MagnifierInfo> magnifier = ValueNotifier<MagnifierInfo>(
+        final magnifier = ValueNotifier<MagnifierInfo>(
           MagnifierInfo(
             currentLineBoundaries: fakeTextFieldRect,
             fieldBounds: fakeTextFieldRect,
@@ -153,12 +155,12 @@ void main() {
         WidgetTester tester,
       ) async {
         await tester.pumpWidget(
-          const MaterialApp(color: Color.fromARGB(7, 0, 129, 90), home: Placeholder()),
+          const CupertinoApp(color: Color.fromARGB(7, 0, 129, 90), home: Placeholder()),
         );
 
         final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
-        final ValueNotifier<MagnifierInfo> magnifierInfo = ValueNotifier<MagnifierInfo>(
+        final magnifierInfo = ValueNotifier<MagnifierInfo>(
           MagnifierInfo(
             currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
@@ -178,12 +180,12 @@ void main() {
         final double dragPositionBelowTextField = reasonableTextField.center.dy + 30;
 
         await tester.pumpWidget(
-          const MaterialApp(color: Color.fromARGB(7, 0, 129, 90), home: Placeholder()),
+          const CupertinoApp(color: Color.fromARGB(7, 0, 129, 90), home: Placeholder()),
         );
 
         final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
-        final ValueNotifier<MagnifierInfo> magnifierInfo = ValueNotifier<MagnifierInfo>(
+        final magnifierInfo = ValueNotifier<MagnifierInfo>(
           MagnifierInfo(
             currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
@@ -215,12 +217,12 @@ void main() {
         WidgetTester tester,
       ) async {
         await tester.pumpWidget(
-          const MaterialApp(color: Color.fromARGB(7, 0, 129, 90), home: Placeholder()),
+          const CupertinoApp(color: Color.fromARGB(7, 0, 129, 90), home: Placeholder()),
         );
 
         final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
-        final ValueNotifier<MagnifierInfo> magnifierInfo = ValueNotifier<MagnifierInfo>(
+        final magnifierInfo = ValueNotifier<MagnifierInfo>(
           MagnifierInfo(
             currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
@@ -252,12 +254,12 @@ void main() {
 
       testWidgets('should re-show if gesture moves back up', (WidgetTester tester) async {
         await tester.pumpWidget(
-          const MaterialApp(color: Color.fromARGB(7, 0, 129, 90), home: Placeholder()),
+          const CupertinoApp(color: Color.fromARGB(7, 0, 129, 90), home: Placeholder()),
         );
 
         final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
-        final ValueNotifier<MagnifierInfo> magnifierInfo = ValueNotifier<MagnifierInfo>(
+        final magnifierInfo = ValueNotifier<MagnifierInfo>(
           MagnifierInfo(
             currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
@@ -308,7 +310,7 @@ void main() {
         WidgetTester tester,
       ) async {
         expect(
-          () => MaterialApp(home: Scaffold(body: CupertinoMagnifier(magnificationScale: 0))),
+          () => CupertinoPageScaffold(child: CupertinoMagnifier(magnificationScale: 0)),
           throwsAssertionError,
         );
       });
@@ -317,7 +319,7 @@ void main() {
         WidgetTester tester,
       ) async {
         expect(
-          () => MaterialApp(home: Scaffold(body: CupertinoMagnifier(magnificationScale: -1))),
+          () => CupertinoPageScaffold(child: CupertinoMagnifier(magnificationScale: -1)),
           throwsAssertionError,
         );
       });
@@ -325,7 +327,9 @@ void main() {
       testWidgets('CupertinoMagnifier magnification scale defaults to 1', (
         WidgetTester tester,
       ) async {
-        await tester.pumpWidget(const MaterialApp(home: Scaffold(body: CupertinoMagnifier())));
+        await tester.pumpWidget(
+          const CupertinoApp(home: CupertinoPageScaffold(child: CupertinoMagnifier())),
+        );
 
         expect(
           tester.widget(find.byType(RawMagnifier)),
@@ -341,7 +345,9 @@ void main() {
         WidgetTester tester,
       ) async {
         await tester.pumpWidget(
-          const MaterialApp(home: Scaffold(body: CupertinoMagnifier(magnificationScale: 2))),
+          const CupertinoApp(
+            home: CupertinoPageScaffold(child: CupertinoMagnifier(magnificationScale: 2)),
+          ),
         );
 
         expect(
@@ -354,5 +360,28 @@ void main() {
         );
       });
     });
+  });
+
+  testWidgets('CupertinoMagnifier does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(child: SizedBox.shrink(child: CupertinoMagnifier(magnificationScale: 2))),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoMagnifier)), Size.zero);
+  });
+
+  testWidgets('RawMagnifier does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: RawMagnifier(size: Size.square(2), child: Text('X')),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(RawMagnifier)), Size.zero);
   });
 }

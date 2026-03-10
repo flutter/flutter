@@ -25,6 +25,7 @@ class WebExpressionCompiler implements ExpressionCompiler {
   Future<ExpressionCompilationResult> compileExpressionToJs(
     String isolateId,
     String libraryUri,
+    String scriptUri,
     int line,
     int column,
     Map<String, String> jsModules,
@@ -34,6 +35,7 @@ class WebExpressionCompiler implements ExpressionCompiler {
   ) async {
     final CompilerOutput? compilerOutput = await _generator.compileExpressionToJs(
       libraryUri,
+      scriptUri,
       line,
       column,
       jsModules,

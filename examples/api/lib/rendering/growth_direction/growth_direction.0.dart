@@ -110,41 +110,31 @@ class _MyWidgetState extends State<MyWidget> {
     return DefaultTextStyle(
       style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
       child: RadioTheme(
-        data: RadioThemeData(fillColor: WidgetStateProperty.all<Color>(Colors.white)),
+        data: RadioThemeData(
+          fillColor: WidgetStateProperty.all<Color>(Colors.white),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              Radio<AxisDirection>(
-                value: AxisDirection.up,
-                groupValue: _axisDirection,
-                onChanged: _onAxisDirectionChanged,
-              ),
-              const Text('up'),
-              _spacer,
-              Radio<AxisDirection>(
-                value: AxisDirection.down,
-                groupValue: _axisDirection,
-                onChanged: _onAxisDirectionChanged,
-              ),
-              const Text('down'),
-              _spacer,
-              Radio<AxisDirection>(
-                value: AxisDirection.left,
-                groupValue: _axisDirection,
-                onChanged: _onAxisDirectionChanged,
-              ),
-              const Text('left'),
-              _spacer,
-              Radio<AxisDirection>(
-                value: AxisDirection.right,
-                groupValue: _axisDirection,
-                onChanged: _onAxisDirectionChanged,
-              ),
-              const Text('right'),
-              _spacer,
-            ],
+          child: RadioGroup<AxisDirection>(
+            groupValue: _axisDirection,
+            onChanged: _onAxisDirectionChanged,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Radio<AxisDirection>(value: AxisDirection.up),
+                const Text('up'),
+                _spacer,
+                Radio<AxisDirection>(value: AxisDirection.down),
+                const Text('down'),
+                _spacer,
+                Radio<AxisDirection>(value: AxisDirection.left),
+                const Text('left'),
+                _spacer,
+                Radio<AxisDirection>(value: AxisDirection.right),
+                const Text('right'),
+                _spacer,
+              ],
+            ),
           ),
         ),
       ),
@@ -186,7 +176,10 @@ class _MyWidgetState extends State<MyWidget> {
         title: const Text('GrowthDirections'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(50),
-          child: Padding(padding: const EdgeInsets.all(8.0), child: _getRadioRow()),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: _getRadioRow(),
+          ),
         ),
       ),
       body: CustomScrollView(

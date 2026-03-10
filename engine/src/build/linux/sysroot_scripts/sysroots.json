@@ -1,27 +1,50 @@
 {
-    "sid_amd64": {
-        "Sha1Sum": "79a7783607a69b6f439add567eb6fcb48877085c",
-        "SysrootDir": "debian_sid_amd64-sysroot",
-        "Tarball": "debian_sid_amd64_sysroot.tar.xz"
+    "bullseye_amd64": {
+        "Sha256Sum": "36a164623d03f525e3dfb783a5e9b8a00e98e1ddd2b5cff4e449bd016dd27e50",
+        "SysrootDir": "debian_bullseye_amd64-sysroot",
+        "Tarball": "debian_bullseye_amd64_sysroot.tar.xz",
+        "URL": "https://commondatastorage.googleapis.com/chrome-linux-sysroot"
     },
-    "sid_arm": {
-        "Sha1Sum": "3fcc1d4e44127006318371002a0f421a4fde2ab4",
-        "SysrootDir": "debian_sid_arm-sysroot",
-        "Tarball": "debian_sid_arm_sysroot.tar.xz"
+    "bullseye_arm64": {
+        "Sha256Sum": "2f915d821eec27515c0c6d21b69898e23762908d8d7ccc1aa2a8f5f25e8b7e18",
+        "SysrootDir": "debian_bullseye_arm64-sysroot",
+        "Tarball": "debian_bullseye_arm64_sysroot.tar.xz",
+        "URL": "https://commondatastorage.googleapis.com/chrome-linux-sysroot"
     },
-    "sid_arm64": {
-        "Sha1Sum": "2cade9ee1ca9186b28ac768c19e1ab7c45ee0600",
-        "SysrootDir": "debian_sid_arm64-sysroot",
-        "Tarball": "debian_sid_arm64_sysroot.tar.xz"
+    "bullseye_armhf": {
+        "Sha256Sum": "47b3a0b161ca011b2b33d4fc1ef6ef269b8208a0b7e4c900700c345acdfd1814",
+        "SysrootDir": "debian_bullseye_armhf-sysroot",
+        "Tarball": "debian_bullseye_armhf_sysroot.tar.xz",
+        "URL": "https://commondatastorage.googleapis.com/chrome-linux-sysroot"
     },
-    "sid_armel": {
-        "Sha1Sum": "72aecf0a5603919b41cfb0766fe511c34933e915",
-        "SysrootDir": "debian_sid_armel-sysroot",
-        "Tarball": "debian_sid_armel_sysroot.tar.xz"
+    "bullseye_i386": {
+        "Sha256Sum": "63f0e5128b84f7b0421956a4a40affa472be8da0e58caf27e9acbc84072daee7",
+        "SysrootDir": "debian_bullseye_i386-sysroot",
+        "Tarball": "debian_bullseye_i386_sysroot.tar.xz",
+        "URL": "https://commondatastorage.googleapis.com/chrome-linux-sysroot"
     },
-    "sid_i386": {
-        "Sha1Sum": "e954fb79fcddf64bc39d721c9a5b652b6da549fa",
-        "SysrootDir": "debian_sid_i386-sysroot",
-        "Tarball": "debian_sid_i386_sysroot.tar.xz"
+    "bullseye_mips64el": {
+        "Sha256Sum": "58f8594905bfe0fa0b7c7a7e882f01725455d07b7161e6539de5169867009b9f",
+        "SysrootDir": "debian_bullseye_mips64el-sysroot",
+        "Tarball": "debian_bullseye_mips64el_sysroot.tar.xz",
+        "URL": "https://commondatastorage.googleapis.com/chrome-linux-sysroot"
+    },
+    "bullseye_mipsel": {
+        "Sha256Sum": "2098b42d9698f5c8a15683abbf6d424b7f56200bd2488198e15f31554acb391f",
+        "SysrootDir": "debian_bullseye_mipsel-sysroot",
+        "Tarball": "debian_bullseye_mipsel_sysroot.tar.xz",
+        "URL": "https://commondatastorage.googleapis.com/chrome-linux-sysroot"
+    },
+    "bullseye_ppc64el": {
+        "Sha256Sum": "485f85dde52830594f7b58ad53b9ca8ff6088b397cacb52aff682be5ffd6f198",
+        "SysrootDir": "debian_bullseye_ppc64el-sysroot",
+        "Tarball": "debian_bullseye_ppc64el_sysroot.tar.xz",
+        "URL": "https://commondatastorage.googleapis.com/chrome-linux-sysroot"
+    },
+    "trixie_riscv64": {
+        "Sha256Sum": "5c8ef4067f41a625d81113a6292180acf4ef49a2ffe015c2779123c133b8e250",
+        "SysrootDir": "debian_trixie_riscv64-sysroot",
+        "Tarball": "debian_trixie_riscv64_sysroot.tar.xz",
+        "URL": "https://commondatastorage.googleapis.com/chrome-linux-sysroot"
     }
 }

@@ -121,7 +121,7 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const SizedBox spacing = SizedBox(width: 30);
+    const spacing = SizedBox(width: 30);
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
     return Container(
       width: double.infinity,
@@ -140,10 +140,7 @@ class _TopBar extends StatelessWidget {
                     image: const AssetImage('logo.png', package: 'rally_assets'),
                     placeholder: LayoutBuilder(
                       builder: (BuildContext context, BoxConstraints constraints) {
-                        return SizedBox(
-                          width: constraints.maxHeight,
-                          height: constraints.maxHeight,
-                        );
+                        return SizedBox.square(dimension: constraints.maxHeight);
                       },
                     ),
                   ),

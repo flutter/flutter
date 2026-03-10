@@ -19,7 +19,7 @@ object FlutterTaskHelper {
 
     internal fun getOutputDirectory(flutterTask: FlutterTask): File? = flutterTask.intermediateDir
 
-    internal fun getAssetsDirectory(flutterTask: FlutterTask): String = "${flutterTask.outputDirectory}/flutter_assets"
+    internal fun getAssetsDirectory(flutterTask: FlutterTask): String = "${flutterTask.outputDirectory}${File.separator}flutter_assets"
 
     internal fun getAssets(
         project: Project,
@@ -38,7 +38,7 @@ object FlutterTaskHelper {
             from("${flutterTask.intermediateDir}")
             if (flutterTask.buildMode == "release" || flutterTask.buildMode == "profile") {
                 flutterTask.targetPlatformValues!!.forEach { targetArch ->
-                    include("${FlutterPluginConstants.PLATFORM_ARCH_MAP[targetArch]}/app.so")
+                    include("${FlutterPluginConstants.PLATFORM_ARCH_MAP[targetArch]}${File.separator}app.so")
                 }
             }
         }
@@ -58,7 +58,7 @@ object FlutterTaskHelper {
             val matcher = Regex("""(\\ |\S)+""").findAll(fileString)
             // then we replace all escaped spaces with regular spaces
             val depList =
-                matcher.map { it.value.replace("\\\\ ", " ") }.toList()
+                matcher.map { it.value.replace("\\ ", " ") }.toList()
             return project.files(depList)
         }
         return project.files()

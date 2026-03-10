@@ -6,7 +6,9 @@ import 'package:flutter_api_samples/widgets/basic/offstage.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can off/on stage Flutter logo widget', (WidgetTester tester) async {
+  testWidgets('Can off/on stage Flutter logo widget', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.OffstageApp());
 
     // The Flutter logo is off stage and not visible.
@@ -16,7 +18,10 @@ void main() {
     await tester.tap(find.text('Get Flutter Logo size'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Flutter Logo size is Size(150.0, 150.0)'), findsOneWidget);
+    expect(
+      find.text('Flutter Logo size is Size(150.0, 150.0)'),
+      findsOneWidget,
+    );
 
     // Tap to toggle the offstage value.
     await tester.tap(find.text('Toggle Offstage Value'));

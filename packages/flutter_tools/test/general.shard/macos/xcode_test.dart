@@ -28,7 +28,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart';
+import '../../src/fakes.dart' hide FakeProcess;
 
 void main() {
   late BufferLogger logger;
@@ -326,7 +326,7 @@ void main() {
 
         testWithoutContext('version checks fail when version is less than minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(9, null, null);
+          xcodeProjectInterpreter.version = Version(14, null, null);
 
           expect(xcode.isRequiredVersionSatisfactory, isFalse);
           expect(xcode.isRecommendedVersionSatisfactory, isFalse);
@@ -343,7 +343,7 @@ void main() {
           'version checks pass when version meets minimum but not recommended',
           () {
             xcodeProjectInterpreter.isInstalled = true;
-            xcodeProjectInterpreter.version = Version(14, null, null);
+            xcodeProjectInterpreter.version = Version(15, 4, null);
 
             expect(xcode.isRequiredVersionSatisfactory, isTrue);
             expect(xcode.isRecommendedVersionSatisfactory, isFalse);
@@ -352,28 +352,28 @@ void main() {
 
         testWithoutContext('version checks pass when major version exceeds minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(15, 0, 0);
+          xcodeProjectInterpreter.version = Version(26, 0, 0);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('version checks pass when minor version exceeds minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(14, 3, 0);
+          xcodeProjectInterpreter.version = Version(15, 4, 0);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('version checks pass when patch version exceeds minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(14, 0, 2);
+          xcodeProjectInterpreter.version = Version(15, 0, 2);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('version checks pass when major version exceeds recommendation', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(16, 0, 0);
+          xcodeProjectInterpreter.version = Version(26, 0, 0);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
@@ -381,7 +381,7 @@ void main() {
 
         testWithoutContext('version checks pass when minor version exceeds recommendation', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(15, 3, 0);
+          xcodeProjectInterpreter.version = Version(16, 4, 0);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
@@ -389,7 +389,7 @@ void main() {
 
         testWithoutContext('version checks pass when patch version exceeds recommendation', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(15, 0, 2);
+          xcodeProjectInterpreter.version = Version(16, 0, 1);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
@@ -406,7 +406,7 @@ void main() {
           'isInstalledAndMeetsVersionCheck is false when version not satisfied',
           () {
             xcodeProjectInterpreter.isInstalled = true;
-            xcodeProjectInterpreter.version = Version(10, 2, 0);
+            xcodeProjectInterpreter.version = Version(14, 2, 0);
 
             expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
             expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -417,7 +417,7 @@ void main() {
           'isInstalledAndMeetsVersionCheck is true when macOS and installed and version is satisfied',
           () {
             xcodeProjectInterpreter.isInstalled = true;
-            xcodeProjectInterpreter.version = Version(14, null, null);
+            xcodeProjectInterpreter.version = Version(15, null, null);
 
             expect(xcode.isInstalledAndMeetsVersionCheck, isTrue);
             expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -1518,6 +1518,69 @@ void main() {
         }, overrides: <Type, Generator>{Platform: () => macPlatform});
 
         group('with CoreDevices', () {
+          testUsingContext('wireless discovery is cancelled', () async {
+            final getCoreDevicesCompleter = Completer<void>();
+            final coreDeviceControl = FakeIOSCoreDeviceControl(
+              getCoreDevicesCompleter: getCoreDevicesCompleter,
+            );
+            coreDeviceControl.devices.add(
+              FakeIOSCoreDevice(
+                udid: '00008110-00062D2E2632801E',
+                connectionInterface: DeviceConnectionInterface.wireless,
+                developerModeStatus: 'enabled',
+              ),
+            );
+            xcdevice = XCDevice(
+              processManager: fakeProcessManager,
+              logger: logger,
+              xcode: xcode,
+              platform: FakePlatform(operatingSystem: 'macos'),
+              artifacts: Artifacts.test(),
+              cache: Cache.test(processManager: FakeProcessManager.any()),
+              iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
+              fileSystem: fileSystem,
+              coreDeviceControl: coreDeviceControl,
+              xcodeDebug: FakeXcodeDebug(),
+              analytics: fakeAnalytics,
+              shutdownHooks: FakeShutdownHooks(),
+            );
+            const devicesOutput = '''
+[
+  {
+    "simulator" : false,
+    "operatingSystemVersion" : "17.0 (17C54)",
+    "interface" : "network",
+    "available" : true,
+    "platform" : "com.apple.platform.iphoneos",
+    "modelCode" : "iPhone15,1",
+    "identifier" : "234234234234234234345445687594e089dede3c44",
+    "architecture" : "arm64",
+    "modelName" : "iPhone 14",
+    "name" : "A networked iPhone"
+  }
+]
+''';
+
+            fakeProcessManager.addCommands(<FakeCommand>[
+              const FakeCommand(
+                command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
+                stdout: devicesOutput,
+              ),
+            ]);
+
+            final Future<List<IOSDevice>> futureDevices = xcdevice
+                .getAvailableIOSDevicesForWirelessDiscovery();
+
+            await pumpEventQueue();
+
+            xcdevice.cancelWirelessDiscovery();
+            getCoreDevicesCompleter.complete();
+
+            final List<IOSDevice> devices = await futureDevices;
+            expect(devices, isEmpty);
+
+            expect(fakeProcessManager, hasNoRemainingExpectations);
+          });
           testUsingContext(
             'returns devices with corresponding CoreDevices',
             () async {
@@ -1897,10 +1960,10 @@ void main() {
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
   @override
-  var version = Version(0, 0, 0);
+  Version version = Version(0, 0, 0);
 
   @override
-  var isInstalled = false;
+  bool isInstalled = false;
 
   @override
   List<String> xcrunCommand() => <String>['xcrun'];
@@ -1909,10 +1972,19 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 class FakeXcodeDebug extends Fake implements XcodeDebug {}
 
 class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
-  var devices = <FakeIOSCoreDevice>[];
+  FakeIOSCoreDeviceControl({this.getCoreDevicesCompleter});
+
+  final Completer<void>? getCoreDevicesCompleter;
+  List<FakeIOSCoreDevice> devices = <FakeIOSCoreDevice>[];
 
   @override
-  Future<List<IOSCoreDevice>> getCoreDevices({Duration timeout = Duration.zero}) async {
+  Future<List<IOSCoreDevice>> getCoreDevices({
+    Duration timeout = Duration.zero,
+    Completer<void>? cancelCompleter,
+  }) async {
+    if (getCoreDevicesCompleter != null) {
+      await getCoreDevicesCompleter!.future;
+    }
     return devices;
   }
 }

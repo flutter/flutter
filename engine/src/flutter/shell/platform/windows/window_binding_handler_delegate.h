@@ -7,7 +7,7 @@
 
 #include <functional>
 
-#include "flutter/shell/platform/common/geometry.h"
+#include "flutter/shell/geometry/geometry.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/windows_lifecycle_manager.h"
 #include "flutter/third_party/accessibility/ax/platform/ax_fragment_root_delegate_win.h"
@@ -37,6 +37,8 @@ class WindowBindingHandlerDelegate {
                              double y,
                              FlutterPointerDeviceKind device_kind,
                              int32_t device_id,
+                             uint32_t rotation,
+                             uint32_t pressure,
                              int modifiers_state) = 0;
 
   // Notifies delegate that backing window mouse pointer button has been
@@ -45,7 +47,9 @@ class WindowBindingHandlerDelegate {
                              double y,
                              FlutterPointerDeviceKind device_kind,
                              int32_t device_id,
-                             FlutterPointerMouseButtons button) = 0;
+                             FlutterPointerMouseButtons button,
+                             uint32_t rotation,
+                             uint32_t pressure) = 0;
 
   // Notifies delegate that backing window mouse pointer button has been
   // released. Typically called by currently configured WindowBindingHandler.

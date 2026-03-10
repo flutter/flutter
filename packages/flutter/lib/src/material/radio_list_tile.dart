@@ -50,7 +50,7 @@ enum _RadioType { material, adaptive }
 /// This widget does not coordinate the [selected] state and the
 /// [checked] state; to have the list tile appear selected when the
 /// radio button is the selected radio button, set [selected] to true
-/// when [value] matches [groupValue].
+/// when [value] matches [RadioGroup.groupValue].
 ///
 /// The radio button is shown on the left by default in left-to-right languages
 /// (i.e. the leading edge). This can be changed using [controlAffinity]. The
@@ -193,8 +193,13 @@ class RadioListTile<T> extends StatefulWidget {
     this.selectedTileColor,
     this.visualDensity,
     this.focusNode,
+    this.statesController,
     this.onFocusChange,
     this.enableFeedback,
+    this.horizontalTitleGap,
+    this.minVerticalPadding,
+    this.minLeadingWidth,
+    this.minTileHeight,
     this.radioScaleFactor = 1.0,
     this.titleAlignment,
     this.enabled,
@@ -247,8 +252,13 @@ class RadioListTile<T> extends StatefulWidget {
     this.selectedTileColor,
     this.visualDensity,
     this.focusNode,
+    this.statesController,
     this.onFocusChange,
     this.enableFeedback,
+    this.horizontalTitleGap,
+    this.minVerticalPadding,
+    this.minLeadingWidth,
+    this.minTileHeight,
     this.radioScaleFactor = 1.0,
     this.enabled,
     this.useCupertinoCheckmarkStyle = false,
@@ -294,7 +304,9 @@ class RadioListTile<T> extends StatefulWidget {
   /// RadioListTile<SingingCharacter>(
   ///   title: const Text('Lafayette'),
   ///   value: SingingCharacter.lafayette,
+  ///   // ignore: deprecated_member_use
   ///   groupValue: _character,
+  ///   // ignore: deprecated_member_use
   ///   onChanged: (SingingCharacter? newValue) {
   ///     setState(() {
   ///       _character = newValue;
@@ -460,6 +472,9 @@ class RadioListTile<T> extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
+  /// Controls the interactive states of the backing [ListTile].
+  final WidgetStatesController? statesController;
+
   /// {@macro flutter.material.inkwell.onFocusChange}
   final ValueChanged<bool>? onFocusChange;
 
@@ -469,6 +484,18 @@ class RadioListTile<T> extends StatefulWidget {
   ///
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
+
+  /// {@macro flutter.material.ListTile.horizontalTitleGap}
+  final double? horizontalTitleGap;
+
+  /// {@macro flutter.material.ListTile.minVerticalPadding}
+  final double? minVerticalPadding;
+
+  /// {@macro flutter.material.ListTile.minLeadingWidth}
+  final double? minLeadingWidth;
+
+  /// {@macro flutter.material.ListTile.minTileHeight}
+  final double? minTileHeight;
 
   final _RadioType _radioType;
 
@@ -568,6 +595,7 @@ class RadioListTile<T> extends StatefulWidget {
 
 class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T> {
   FocusNode? _internalFocusNode;
+
   @override
   FocusNode get focusNode => widget.focusNode ?? (_internalFocusNode ??= FocusNode());
 
@@ -576,6 +604,9 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T>
 
   @override
   bool get tristate => widget.toggleable;
+
+  @override
+  bool get enabled => _enabled;
 
   bool get checked => radioValue == effectiveGroupValue;
 
@@ -691,7 +722,7 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T>
     };
     final ThemeData theme = Theme.of(context);
     final RadioThemeData radioThemeData = RadioTheme.of(context);
-    final Set<WidgetState> states = <WidgetState>{if (widget.selected) WidgetState.selected};
+    final states = <WidgetState>{if (widget.selected) WidgetState.selected};
     final Color effectiveActiveColor =
         widget.activeColor ??
         radioThemeData.fillColor?.resolve(states) ??
@@ -715,8 +746,13 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T>
         contentPadding: widget.contentPadding,
         visualDensity: widget.visualDensity,
         focusNode: focusNode,
+        statesController: widget.statesController,
         onFocusChange: widget.onFocusChange,
         enableFeedback: widget.enableFeedback,
+        horizontalTitleGap: widget.horizontalTitleGap,
+        minVerticalPadding: widget.minVerticalPadding,
+        minLeadingWidth: widget.minLeadingWidth,
+        minTileHeight: widget.minTileHeight,
         titleAlignment: widget.titleAlignment,
         internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
       ),

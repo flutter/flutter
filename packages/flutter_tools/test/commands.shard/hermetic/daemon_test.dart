@@ -662,6 +662,7 @@ void main() {
               'deviceId': 'device',
               'disableServiceAuthCodes': false,
               'vmServiceUri': 'http://fake_uri/auth_code',
+              'enableDevTools': true,
             },
           }),
         );
@@ -676,6 +677,7 @@ void main() {
         expect(device.dds.startCalled, true);
         expect(device.dds.startDisableServiceAuthCodes, false);
         expect(device.dds.startVMServiceUri, Uri.parse('http://fake_uri/auth_code'));
+        expect(device.dds.enableDevTools, true);
 
         // dds.done event should be sent to the client.
         ddsDoneCompleter.complete();
@@ -1224,17 +1226,24 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 }
 
 class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
-  var startCalled = false;
+  bool startCalled = false;
   late Uri startVMServiceUri;
   bool? startDisableServiceAuthCodes;
 
-  var shutdownCalled = false;
+  bool shutdownCalled = false;
+  bool enableDevTools = false;
 
   @override
   late Future<void> done;
 
   @override
   Uri? uri;
+
+  @override
+  Uri? devToolsUri;
+
+  @override
+  Uri? dtdUri;
 
   @override
   Future<void> startDartDevelopmentService(
@@ -1251,6 +1260,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
     startCalled = true;
     startVMServiceUri = vmServiceUri;
     startDisableServiceAuthCodes = disableServiceAuthCodes;
+    this.enableDevTools = enableDevTools;
   }
 
   @override
@@ -1261,7 +1271,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
 
 class FakeDeviceLogReader implements DeviceLogReader {
   final logLinesController = StreamController<String>();
-  var disposeCalled = false;
+  bool disposeCalled = false;
 
   @override
   void dispose() {
@@ -1313,7 +1323,7 @@ final class TestIOOverrides extends io.IOOverrides {
 }
 
 class FakeSocket extends Fake implements io.Socket {
-  var closeCalled = false;
+  bool closeCalled = false;
   final controller = StreamController<Uint8List>();
   final addedData = <List<int>>[];
   final doneCompleter = Completer<bool>();

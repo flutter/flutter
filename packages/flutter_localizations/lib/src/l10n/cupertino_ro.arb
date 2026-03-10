@@ -35,10 +35,10 @@
   "clearButtonLabel": "Ștergeți",
   "cancelButtonLabel": "Anulați",
   "backButtonLabel": "Înapoi",
-  "expansionTileExpandedHint": "double tap to collapse",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "atingeți de două ori pentru a restrânge",
+  "expansionTileCollapsedHint": "atingeți de două ori pentru a extinde",
+  "expansionTileExpandedTapHint": "Restrângeți",
+  "expansionTileCollapsedTapHint": "Extindeți pentru mai multe detalii",
+  "expandedHint": "Restrâns",
+  "collapsedHint": "Extins"
 }

@@ -31,6 +31,15 @@ class IMockGLESImpl {
                           GLenum format,
                           GLenum type,
                           const void* pixels) {}
+  virtual void TexSubImage2D(GLenum target,
+                             GLint level,
+                             GLint xoffset,
+                             GLint yoffset,
+                             GLsizei width,
+                             GLsizei height,
+                             GLenum format,
+                             GLenum type,
+                             const void* pixels) {}
   virtual void GenFramebuffers(GLsizei n, GLuint* framebuffers) {}
   virtual void BindFramebuffer(GLenum target, GLuint framebuffer) {}
   virtual void FramebufferTexture2D(GLenum target,
@@ -55,6 +64,24 @@ class IMockGLESImpl {
                               const GLchar* label) {}
   virtual void Uniform1fv(GLint location, GLsizei count, const GLfloat* value) {
   }
+  virtual void Uniform2fv(GLint location, GLsizei count, const GLfloat* value) {
+  }
+  virtual void Uniform3fv(GLint location, GLsizei count, const GLfloat* value) {
+  }
+  virtual void Uniform4fv(GLint location, GLsizei count, const GLfloat* value) {
+  }
+  virtual void UniformMatrix2fv(GLint location,
+                                GLsizei count,
+                                GLboolean transpose,
+                                const GLfloat* value) {}
+  virtual void UniformMatrix3fv(GLint location,
+                                GLsizei count,
+                                GLboolean transpose,
+                                const GLfloat* value) {}
+  virtual void UniformMatrix4fv(GLint location,
+                                GLsizei count,
+                                GLboolean transpose,
+                                const GLfloat* value) {}
   virtual void GenQueriesEXT(GLsizei n, GLuint* ids) {}
   virtual void BeginQueryEXT(GLenum target, GLuint id) {}
   virtual void EndQueryEXT(GLuint id) {}
@@ -66,6 +93,10 @@ class IMockGLESImpl {
   virtual void GenBuffers(GLsizei n, GLuint* buffers) {}
   virtual void DeleteBuffers(GLsizei n, const GLuint* buffers) {}
   virtual GLboolean IsTexture(GLuint texture) { return true; }
+  virtual void DiscardFramebufferEXT(GLenum target,
+                                     GLsizei numAttachments,
+                                     const GLenum* attachments) {};
+  virtual void GetIntegerv(GLenum name, GLint* attachments) {};
 };
 
 class MockGLESImpl : public IMockGLESImpl {
@@ -84,6 +115,18 @@ class MockGLESImpl : public IMockGLESImpl {
                GLsizei width,
                GLsizei height,
                GLint border,
+               GLenum format,
+               GLenum type,
+               const void* pixels),
+              (override));
+  MOCK_METHOD(void,
+              TexSubImage2D,
+              (GLenum target,
+               GLint level,
+               GLint xoffset,
+               GLint yoffset,
+               GLsizei width,
+               GLsizei height,
                GLenum format,
                GLenum type,
                const void* pixels),
@@ -128,6 +171,39 @@ class MockGLESImpl : public IMockGLESImpl {
               Uniform1fv,
               (GLint location, GLsizei count, const GLfloat* value),
               (override));
+  MOCK_METHOD(void,
+              Uniform2fv,
+              (GLint location, GLsizei count, const GLfloat* value),
+              (override));
+  MOCK_METHOD(void,
+              Uniform3fv,
+              (GLint location, GLsizei count, const GLfloat* value),
+              (override));
+  MOCK_METHOD(void,
+              Uniform4fv,
+              (GLint location, GLsizei count, const GLfloat* value),
+              (override));
+  MOCK_METHOD(void,
+              UniformMatrix2fv,
+              (GLint location,
+               GLsizei count,
+               GLboolean transpose,
+               const GLfloat* value),
+              (override));
+  MOCK_METHOD(void,
+              UniformMatrix3fv,
+              (GLint location,
+               GLsizei count,
+               GLboolean transpose,
+               const GLfloat* value),
+              (override));
+  MOCK_METHOD(void,
+              UniformMatrix4fv,
+              (GLint location,
+               GLsizei count,
+               GLboolean transpose,
+               const GLfloat* value),
+              (override));
   MOCK_METHOD(void, GenQueriesEXT, (GLsizei n, GLuint* ids), (override));
   MOCK_METHOD(void, BeginQueryEXT, (GLenum target, GLuint id), (override));
   MOCK_METHOD(void, EndQueryEXT, (GLuint id), (override));
@@ -149,6 +225,13 @@ class MockGLESImpl : public IMockGLESImpl {
               (GLsizei n, const GLuint* buffers),
               (override));
   MOCK_METHOD(GLboolean, IsTexture, (GLuint texture), (override));
+  MOCK_METHOD(void,
+              DiscardFramebufferEXT,
+              (GLenum target,
+               GLsizei numAttachments,
+               const GLenum* attachments),
+              (override));
+  MOCK_METHOD(void, GetIntegerv, (GLenum name, GLint* value), (override));
 };
 
 /// @brief      Provides a mocked version of the |ProcTableGLES| class.

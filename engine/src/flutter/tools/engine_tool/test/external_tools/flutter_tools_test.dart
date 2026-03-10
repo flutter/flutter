@@ -84,7 +84,7 @@ void main() {
     addTearDown(testEnv.cleanup);
 
     final flutterTool = FlutterTool.fromEnvironment(testEnv.environment);
-    final devices = await flutterTool.devices();
+    final List<Device> devices = await flutterTool.devices();
     expect(devices, equals([testAndroidArm64Device]));
   });
 
@@ -111,7 +111,7 @@ void main() {
     addTearDown(testEnv.cleanup);
 
     final flutterTool = FlutterTool.fromEnvironment(testEnv.environment);
-    final devices = await flutterTool.devices();
+    final List<Device> devices = await flutterTool.devices();
     expect(devices, equals([testAndroidArm64Device, testIosArm64Device]));
   });
 
@@ -127,7 +127,7 @@ void main() {
     addTearDown(testEnv.cleanup);
 
     final flutterTool = FlutterTool.fromEnvironment(testEnv.environment);
-    final devices = await flutterTool.devices();
+    final List<Device> devices = await flutterTool.devices();
     expect(devices, isEmpty);
 
     expect(
@@ -152,7 +152,7 @@ void main() {
     addTearDown(testEnv.cleanup);
 
     final flutterTool = FlutterTool.fromEnvironment(testEnv.environment);
-    final devices = await flutterTool.devices();
+    final List<Device> devices = await flutterTool.devices();
     expect(devices, isEmpty);
 
     expect(
@@ -180,7 +180,7 @@ void main() {
     addTearDown(testEnv.cleanup);
 
     final flutterTool = FlutterTool.fromEnvironment(testEnv.environment);
-    final devices = await flutterTool.devices();
+    final List<Device> devices = await flutterTool.devices();
     expect(devices, isEmpty);
 
     expect(

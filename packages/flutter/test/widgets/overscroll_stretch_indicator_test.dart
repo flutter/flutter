@@ -88,12 +88,16 @@ void main() {
     );
   }
 
+  StretchEffect findStretchEffect(WidgetTester tester) {
+    return tester.widget<StretchEffect>(find.byType(StretchEffect));
+  }
+
   testWidgets('Stretch overscroll will do nothing when axes do not match', (
     WidgetTester tester,
   ) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -159,7 +163,7 @@ void main() {
       final GlobalKey box1Key = GlobalKey();
       final GlobalKey box2Key = GlobalKey();
       final GlobalKey box3Key = GlobalKey();
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(buildTest(box1Key, box2Key, box3Key, controller));
@@ -243,7 +247,7 @@ void main() {
       final GlobalKey box1Key = GlobalKey();
       final GlobalKey box2Key = GlobalKey();
       final GlobalKey box3Key = GlobalKey();
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(buildTest(box1Key, box2Key, box3Key, controller, reverse: true));
@@ -283,7 +287,7 @@ void main() {
       final GlobalKey box1Key = GlobalKey();
       final GlobalKey box2Key = GlobalKey();
       final GlobalKey box3Key = GlobalKey();
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -325,7 +329,7 @@ void main() {
       final GlobalKey box1Key = GlobalKey();
       final GlobalKey box2Key = GlobalKey();
       final GlobalKey box3Key = GlobalKey();
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -420,7 +424,7 @@ void main() {
       final GlobalKey box1Key = GlobalKey();
       final GlobalKey box2Key = GlobalKey();
       final GlobalKey box3Key = GlobalKey();
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -506,7 +510,7 @@ void main() {
       final GlobalKey box1Key = GlobalKey();
       final GlobalKey box2Key = GlobalKey();
       final GlobalKey box3Key = GlobalKey();
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -553,7 +557,7 @@ void main() {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     double indicatorNotification = 0;
@@ -798,7 +802,7 @@ void main() {
           ),
         ),
       );
-      const double maxStretchLocation = 52.63178407049861;
+      const maxStretchLocation = 52.63178407049861;
 
       expect(find.text('Index 1'), findsOneWidget);
       expect(tester.getCenter(find.text('Index 1')).dy, 51.0);
@@ -913,7 +917,7 @@ void main() {
       final GlobalKey box1Key = GlobalKey();
       final GlobalKey box2Key = GlobalKey();
       final GlobalKey box3Key = GlobalKey();
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -991,7 +995,7 @@ void main() {
       final GlobalKey box1Key = GlobalKey();
       final GlobalKey box2Key = GlobalKey();
       final GlobalKey box3Key = GlobalKey();
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -1070,7 +1074,7 @@ void main() {
       final GlobalKey box1Key = GlobalKey();
       final GlobalKey box2Key = GlobalKey();
       final GlobalKey box3Key = GlobalKey();
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(buildTest(box1Key, box2Key, box3Key, controller));
@@ -1115,7 +1119,7 @@ void main() {
       final GlobalKey box1Key = GlobalKey();
       final GlobalKey box2Key = GlobalKey();
       final GlobalKey box3Key = GlobalKey();
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(buildTest(box1Key, box2Key, box3Key, controller));
@@ -1151,8 +1155,8 @@ void main() {
       // The boxes should now be at different locations because of the scaling.
       expect(controller.offset, 0.0);
       expect(box1.localToGlobal(Offset.zero).dy, 0.0);
-      expect(box2.localToGlobal(Offset.zero).dy, greaterThan(254.0));
-      expect(box3.localToGlobal(Offset.zero).dy, greaterThan(508.0));
+      expect(box2.localToGlobal(Offset.zero).dy, greaterThan(250.9));
+      expect(box3.localToGlobal(Offset.zero).dy, greaterThan(500.9));
 
       await tester.pumpAndSettle();
 
@@ -1172,7 +1176,7 @@ void main() {
       final GlobalKey box1Key = GlobalKey();
       final GlobalKey box2Key = GlobalKey();
       final GlobalKey box3Key = GlobalKey();
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(buildTest(box1Key, box2Key, box3Key, controller, boxHeight: 205.0));
@@ -1210,17 +1214,13 @@ void main() {
 
       // Explicitly check that the box1 offset is not 0.0, since this would probably mean that
       // the stretch direction is wrong.
-      expect(box1.localToGlobal(Offset.zero).dy, isNot(0.0));
+      expect(findStretchEffect(tester).stretchStrength, isNot(0.0));
 
-      expect(box1.localToGlobal(Offset.zero).dy, lessThan(-12.0));
-      expect(box2.localToGlobal(Offset.zero).dy, lessThan(197.0));
-      expect(box3.localToGlobal(Offset.zero).dy, lessThan(407.0));
-
+      await gesture.up();
       await tester.pump(const Duration(milliseconds: 100));
 
-      expect(box1.localToGlobal(Offset.zero).dy, lessThan(-6.0));
-      expect(box2.localToGlobal(Offset.zero).dy, lessThan(201.0));
-      expect(box3.localToGlobal(Offset.zero).dy, lessThan(408.0));
+      // At this point, the stretchStrength should be close to 0.
+      expect(findStretchEffect(tester).stretchStrength.abs(), lessThan(0.01));
 
       await tester.pumpAndSettle();
 
@@ -1228,8 +1228,6 @@ void main() {
       expect(box1.localToGlobal(Offset.zero).dy, 0.0);
       expect(box2.localToGlobal(Offset.zero).dy, 205.0);
       expect(box3.localToGlobal(Offset.zero).dy, 410.0);
-
-      await gesture.up();
     },
     // Skips this test when fragment shaders are used.
     skip: shaderSupported,
@@ -1241,7 +1239,7 @@ void main() {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -1268,7 +1266,7 @@ void main() {
       final GlobalKey box2Key = GlobalKey();
       final GlobalKey box3Key = GlobalKey();
       late final OverscrollNotification overscrollNotification;
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -1310,6 +1308,94 @@ void main() {
       expect(box3.localToGlobal(Offset.zero).dy, 350.0);
     },
   );
+
+  testWidgets('Fling overscroll triggers stretching animation correctly', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/169659
+    final GlobalKey box1Key = GlobalKey();
+    final GlobalKey box2Key = GlobalKey();
+    final GlobalKey box3Key = GlobalKey();
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(buildTest(box1Key, box2Key, box3Key, controller));
+
+    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+    final RenderBox box1 = tester.renderObject(find.byKey(box1Key));
+    final RenderBox box2 = tester.renderObject(find.byKey(box2Key));
+    final RenderBox box3 = tester.renderObject(find.byKey(box3Key));
+
+    expect(controller.offset, 0.0);
+    expect(box1.localToGlobal(Offset.zero), Offset.zero);
+    expect(box2.localToGlobal(Offset.zero), const Offset(0.0, 250.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(0.0, 500.0));
+
+    // Simulates a fast and short user fling.
+    await tester.fling(find.byType(CustomScrollView), const Offset(0.0, 50.0), 1000.0);
+
+    // Records the current stretch strength of the StretchEffect widget
+    // before pumping additional frames, so it can be compared later
+    // to verify that the stretch increases after the fling.
+    final double progressStrength = findStretchEffect(tester).stretchStrength;
+
+    await tester.pumpFrames(
+      tester.widget(find.byType(Directionality)),
+      const Duration(milliseconds: 50),
+    );
+
+    // Verifies that the stretchStrength has increased compared to the
+    // previously recorded value, ensuring the fling triggers stretching.
+    expect(findStretchEffect(tester).stretchStrength, greaterThan(progressStrength));
+
+    await tester.pumpAndSettle();
+    expect(findStretchEffect(tester).stretchStrength.abs(), 0.0);
+  });
+
+  testWidgets('Fling overscroll triggers stretching animation correctly in reverse', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/169659
+    final GlobalKey box1Key = GlobalKey();
+    final GlobalKey box2Key = GlobalKey();
+    final GlobalKey box3Key = GlobalKey();
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(buildTest(box1Key, box2Key, box3Key, controller, reverse: true));
+
+    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+    final RenderBox box1 = tester.renderObject(find.byKey(box1Key));
+    final RenderBox box2 = tester.renderObject(find.byKey(box2Key));
+    final RenderBox box3 = tester.renderObject(find.byKey(box3Key));
+
+    expect(controller.offset, 0.0);
+    expect(box1.localToGlobal(Offset.zero), const Offset(0.0, 350.0));
+    expect(box2.localToGlobal(Offset.zero), const Offset(0.0, 100.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(0.0, -150.0));
+
+    // Simulates a fast and short user fling.
+    await tester.fling(find.byType(CustomScrollView), const Offset(0.0, -50.0), 1000.0);
+
+    // Records the current stretch strength of the StretchEffect widget
+    // before pumping additional frames, so it can be compared later
+    // to verify that the stretch increases after the fling.
+    final double progressStrength = findStretchEffect(tester).stretchStrength;
+
+    await tester.pumpFrames(
+      tester.widget(find.byType(Directionality)),
+      const Duration(milliseconds: 50),
+    );
+
+    // Verifies that the stretchStrength has increased compared to the
+    // previously recorded value, ensuring the fling triggers stretching.
+    expect(findStretchEffect(tester).stretchStrength, lessThan(progressStrength));
+
+    await tester.pumpAndSettle();
+    expect(findStretchEffect(tester).stretchStrength.abs(), 0.0);
+  });
 }
 
 final class _HighFrictionClampingScrollPhysics extends ScrollPhysics {

@@ -460,7 +460,7 @@ class CupertinoPageTransition extends StatefulWidget {
     bool allowSnapshotting,
     Widget? child,
   ) {
-    final CurvedAnimation animation = CurvedAnimation(
+    final animation = CurvedAnimation(
       parent: secondaryAnimation,
       curve: Curves.linearToEaseOut,
       reverseCurve: Curves.easeInToLinear,
@@ -1074,12 +1074,12 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
       TextDirection.ltr => (-1, offset.dx),
     };
 
-    int bandColorIndex = 0;
-    for (int dx = 0; dx < shadowWidth; dx += 1) {
+    var bandColorIndex = 0;
+    for (var dx = 0; dx < shadowWidth; dx += 1) {
       if (dx ~/ bandWidth != bandColorIndex) {
         bandColorIndex += 1;
       }
-      final Paint paint = Paint()
+      final paint = Paint()
         ..color = Color.lerp(
           colors[bandColorIndex],
           colors[bandColorIndex + 1],
@@ -1200,7 +1200,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   @override
   Simulation createSimulation({required bool forward}) {
     assert(!debugTransitionCompleted(), 'Cannot reuse a $runtimeType after disposing it.');
-    final double end = forward ? 1.0 : 0.0;
+    final end = forward ? 1.0 : 0.0;
     return SpringSimulation(
       _kStandardSpring,
       controller!.value,
@@ -1506,7 +1506,7 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
   @override
   Simulation createSimulation({required bool forward}) {
     assert(!debugTransitionCompleted(), 'Cannot reuse a $runtimeType after disposing it.');
-    final double end = forward ? 1.0 : 0.0;
+    final end = forward ? 1.0 : 0.0;
     return SpringSimulation(
       _kStandardSpring,
       controller!.value,
@@ -1547,4 +1547,53 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
   // they reuse the same animation curve that was modeled after native page
   // transitions.
   static final Tween<double> _dialogScaleTween = Tween<double>(begin: 1.3, end: 1.0);
+}
+
+/// A [PageTransitionsBuilder] that provides an iOS-style page transition
+/// animation.
+///
+/// The page slides in from the right and exits in reverse. It also shifts
+/// to the left in a parallax motion when another page enters to cover it.
+/// This transition is commonly seen in native iOS applications.
+///
+/// In a [CupertinoApp], this transition is used automatically when navigating
+/// with [CupertinoPageRoute].
+///
+/// See also:
+///
+///  * [CupertinoPageRoute], which uses this transition style by default for
+///    Cupertino apps.
+///  * [CupertinoPageTransition], the widget that implements the iOS page
+///    transition animation.
+///  * [MaterialPageRoute], an adaptive [PageRoute] that can use this builder
+///    through [PageTransitionsTheme].
+///  * [PageTransitionsTheme], which defines the page transitions used by
+///    [MaterialPageRoute] for different target platforms.
+class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
+  /// Constructs a page transition animation that matches the iOS transition.
+  const CupertinoPageTransitionsBuilder();
+
+  @override
+  Duration get transitionDuration => CupertinoRouteTransitionMixin.kTransitionDuration;
+
+  @override
+  DelegatedTransitionBuilder? get delegatedTransition =>
+      CupertinoPageTransition.delegatedTransition;
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return CupertinoRouteTransitionMixin.buildPageTransitions<T>(
+      route,
+      context,
+      animation,
+      secondaryAnimation,
+      child,
+    );
+  }
 }

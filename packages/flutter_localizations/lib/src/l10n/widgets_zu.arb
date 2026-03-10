@@ -12,6 +12,7 @@
   "shareButtonLabel": "Yabelana",
   "pasteButtonLabel": "Namathisela",
   "selectAllButtonLabel": "Khetha konke",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found"
+  "searchResultsFound": "Imiphumela yokusesha itholakele",
+  "noResultsFound": "Ayikho imiphumela etholakele",
+  "radioButtonUnselectedLabel": "Ayikhethiwe"
 }

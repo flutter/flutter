@@ -11,6 +11,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'base/context.dart';
+import 'base/dds.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
@@ -38,10 +39,10 @@ HotRunnerConfig? get hotRunnerConfig => context.get<HotRunnerConfig>();
 
 class HotRunnerConfig {
   /// Should the hot runner assume that the minimal Dart dependencies do not change?
-  var stableDartDependencies = false;
+  bool stableDartDependencies = false;
 
   /// Whether the hot runner should scan for modified files asynchronously.
-  var asyncScanning = false;
+  bool asyncScanning = false;
 
   /// A hook for implementations to perform any necessary initialization prior
   /// to a hot restart. Should return true if the hot restart should continue.
@@ -89,13 +90,13 @@ class HotRunner extends ResidentRunner {
     super.dillOutputPath,
     super.stayResident,
     super.machine,
-    super.devtoolsHandler,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
     ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
     ReassembleHelper reassembleHelper = _defaultReassembleHelper,
     String? nativeAssetsYamlFile,
     required Analytics analytics,
     super.dartBuilder,
+    super.shutdownHooks,
   }) : _stopwatchFactory = stopwatchFactory,
        _reloadSourcesHelper = reloadSourcesHelper,
        _reassembleHelper = reassembleHelper,
@@ -128,12 +129,12 @@ class HotRunner extends ResidentRunner {
 
   final benchmarkData = <String, List<int>>{};
 
+  @visibleForTesting
+  String? get targetPlatformName => _targetPlatformName;
+
   String? _targetPlatformName;
-  TargetPlatform get _targetPlatform => _targetPlatformName != null
-      ? getTargetPlatformForName(_targetPlatformName!)
-      : throw ArgumentError(
-          'Access to the target platform needs a call to _calculateTargetPlatform first',
-        );
+  final _targetPlatforms = <TargetPlatform>{};
+
   String? _sdkName;
   bool? _emulator;
 
@@ -150,17 +151,25 @@ class HotRunner extends ResidentRunner {
     if (_targetPlatformName != null) {
       return;
     }
-
+    assert(_targetPlatforms.isEmpty);
     switch (flutterDevices.length) {
       case 1:
         final Device device = flutterDevices.first.device!;
-        _targetPlatformName = getNameForTargetPlatform(await device.targetPlatform);
+        final TargetPlatform targetPlatform = await device.targetPlatform;
+        _targetPlatformName = getNameForTargetPlatform(targetPlatform);
+        _targetPlatforms.add(targetPlatform);
         _sdkName = await device.sdkNameAndVersion;
         _emulator = await device.isLocalEmulator;
       case > 1:
         _targetPlatformName = 'multiple';
+        _targetPlatforms.addAll(
+          await Future.wait([
+            for (final flutterDevice in flutterDevices) flutterDevice.device!.targetPlatform,
+          ]),
+        );
         _sdkName = 'multiple';
         _emulator = false;
+
       default:
         _targetPlatformName = 'unknown';
         _sdkName = 'unknown';
@@ -272,17 +281,6 @@ class HotRunner extends ResidentRunner {
       globals.printError('Error connecting to the service protocol: $error');
       return 2;
     }
-    // TODO(bkonyi): remove when ready to serve DevTools from DDS.
-    if (debuggingOptions.enableDevTools) {
-      // The method below is guaranteed never to return a failing future.
-      unawaited(
-        residentDevtoolsHandler!.serveAndAnnounceDevTools(
-          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-          flutterDevices: flutterDevices,
-          isStartPaused: debuggingOptions.startPaused,
-        ),
-      );
-    }
 
     for (final FlutterDevice? device in flutterDevices) {
       device!.developmentShaderCompiler.configureCompiler(device.targetPlatform);
@@ -290,12 +288,16 @@ class HotRunner extends ResidentRunner {
     try {
       final List<Uri?> baseUris = await _initDevFS();
       if (connectionInfoCompleter != null) {
+        final FlutterVmService vmService = flutterDevices.first.vmService!;
+        final DartDevelopmentService dds = flutterDevices.first.device!.dds;
         // Only handle one debugger connection.
         connectionInfoCompleter.complete(
           DebugConnectionInfo(
-            httpUri: flutterDevices.first.vmService!.httpAddress,
-            wsUri: flutterDevices.first.vmService!.wsAddress,
+            httpUri: vmService.httpAddress,
+            wsUri: vmService.wsAddress,
             baseUri: baseUris.first.toString(),
+            devToolsUri: dds.devToolsUri,
+            dtdUri: dds.dtdUri,
           ),
         );
       }
@@ -309,7 +311,7 @@ class HotRunner extends ResidentRunner {
     final initialUpdateDevFSsTimer = Stopwatch()..start();
     final UpdateFSReport devfsResult = await _updateDevFS(
       fullRestart: needsFullRestart,
-      targetPlatform: _targetPlatform,
+      targetPlatforms: _targetPlatforms,
     );
 
     _addBenchmarkData(
@@ -492,23 +494,26 @@ class HotRunner extends ResidentRunner {
 
   Future<UpdateFSReport> _updateDevFS({
     bool fullRestart = false,
-    required TargetPlatform targetPlatform,
+    required Set<TargetPlatform> targetPlatforms,
   }) async {
     final bool isFirstUpload = !assetBundle.wasBuiltOnce();
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
-      globals.printTrace('Updating assets');
-      final int result = await assetBundle.build(
-        flutterHookResult: await dartBuilder?.runHooks(
+      for (final targetPlatform in targetPlatforms) {
+        globals.printTrace('Updating assets for ${targetPlatform.osName}');
+        final int result = await assetBundle.build(
+          flutterHookResult: await dartBuilder?.runHooks(
+            targetPlatform: targetPlatform,
+            environment: environment,
+            logger: _logger,
+          ),
+          packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
+          flavor: debuggingOptions.buildInfo.flavor,
           targetPlatform: targetPlatform,
-          environment: environment,
-          logger: _logger,
-        ),
-        packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
-        flavor: debuggingOptions.buildInfo.flavor,
-      );
-      if (result != 0) {
-        return UpdateFSReport();
+        );
+        if (result != 0) {
+          return UpdateFSReport();
+        }
       }
     }
 
@@ -618,7 +623,7 @@ class HotRunner extends ResidentRunner {
     final restartTimer = Stopwatch()..start();
     UpdateFSReport updatedDevFS;
     try {
-      updatedDevFS = await _updateDevFS(fullRestart: true, targetPlatform: _targetPlatform);
+      updatedDevFS = await _updateDevFS(fullRestart: true, targetPlatforms: _targetPlatforms);
     } finally {
       hotRunnerConfig!.updateDevFSComplete();
     }
@@ -805,11 +810,9 @@ class HotRunner extends ResidentRunner {
       if (!silent) {
         globals.printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
       }
-      // TODO(bkonyi): remove when ready to serve DevTools from DDS.
-      unawaited(residentDevtoolsHandler!.hotRestart(flutterDevices));
-      // for (final FlutterDevice? device in flutterDevices) {
-      //   unawaited(device?.handleHotRestart());
-      // }
+      for (final FlutterDevice? device in flutterDevices) {
+        unawaited(device?.handleHotRestart());
+      }
       return result;
     }
     final OperationResult result = await _hotReloadHelper(
@@ -1035,7 +1038,7 @@ class HotRunner extends ResidentRunner {
     final devFSTimer = Stopwatch()..start();
     UpdateFSReport updatedDevFS;
     try {
-      updatedDevFS = await _updateDevFS(targetPlatform: _targetPlatform);
+      updatedDevFS = await _updateDevFS(targetPlatforms: _targetPlatforms);
     } finally {
       hotRunnerConfig!.updateDevFSComplete();
     }
@@ -1242,7 +1245,6 @@ class HotRunner extends ResidentRunner {
 
   @override
   Future<void> cleanupAfterSignal() async {
-    await residentDevtoolsHandler!.shutdown();
     await stopEchoingDeviceLog();
     await hotRunnerConfig!.runPreShutdownOperations();
     shutdownDartDevelopmentService();
@@ -1265,8 +1267,8 @@ class HotRunner extends ResidentRunner {
       await flutterDevice!.device!.dispose();
     }
     await _cleanupDevFS();
-    await residentDevtoolsHandler!.shutdown();
     await stopEchoingDeviceLog();
+    await super.cleanupAtFinish();
   }
 }
 

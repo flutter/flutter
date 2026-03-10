@@ -39,6 +39,7 @@ class CopyFlutterBundle extends Target {
     Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
     Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
     Source.pattern('{BUILD_DIR}/app.dill'),
+    Source.pattern('{BUILD_DIR}/${DartBuild.dartHookResultFilename}'),
     ...IconTreeShaker.inputs,
     ...ShaderCompiler.inputs,
   ];
@@ -48,6 +49,7 @@ class CopyFlutterBundle extends Target {
     Source.pattern('{OUTPUT_DIR}/vm_snapshot_data'),
     Source.pattern('{OUTPUT_DIR}/isolate_snapshot_data'),
     Source.pattern('{OUTPUT_DIR}/kernel_blob.bin'),
+    Source.pattern('{BUILD_DIR}/${DartBuild.dartHookResultFilename}'),
   ];
 
   @override
@@ -228,6 +230,7 @@ class KernelSnapshot extends Target {
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.ios:
       case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_riscv64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
         forceLinkPlatform = false;
@@ -243,7 +246,9 @@ class KernelSnapshot extends Target {
       TargetPlatform.android_x64 => 'android',
       TargetPlatform.darwin => 'macos',
       TargetPlatform.ios => 'ios',
-      TargetPlatform.linux_arm64 || TargetPlatform.linux_x64 => 'linux',
+      TargetPlatform.linux_arm64 ||
+      TargetPlatform.linux_riscv64 ||
+      TargetPlatform.linux_x64 => 'linux',
       TargetPlatform.windows_arm64 || TargetPlatform.windows_x64 => 'windows',
       TargetPlatform.tester || TargetPlatform.web_javascript => null,
       TargetPlatform.unsupported => TargetPlatform.throwUnsupportedTarget(),

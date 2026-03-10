@@ -16,7 +16,7 @@ import 'package:flutter_devicelab/framework/utils.dart';
 /// The tasks are chosen depending on the command-line options.
 Future<void> main(List<String> rawArgs) async {
   // This is populated by a callback in the ArgParser.
-  final List<String> taskNames = <String>[];
+  final taskNames = <String>[];
   final ArgParser argParser = createArgParser(taskNames);
 
   ArgResults args;
@@ -32,26 +32,28 @@ Future<void> main(List<String> rawArgs) async {
   /// Suppresses standard output, prints only standard error output.
   final bool silent = (args['silent'] as bool?) ?? false;
 
+  final buildMode = args['build-mode'] as String;
+
   /// The build of the local engine to use.
   ///
   /// Required for A/B test mode.
-  final String? localEngine = args['local-engine'] as String?;
+  final localEngine = args['local-engine'] as String?;
 
   /// The build of the local engine to use as the host platform.
   ///
   /// Required if [localEngine] is set.
-  final String? localEngineHost = args['local-engine-host'] as String?;
+  final localEngineHost = args['local-engine-host'] as String?;
 
   /// The build of the local Web SDK to use.
   ///
   /// Required for A/B test mode.
-  final String? localWebSdk = args['local-web-sdk'] as String?;
+  final localWebSdk = args['local-web-sdk'] as String?;
 
   /// The path to the engine "src/" directory.
-  final String? localEngineSrcPath = args['local-engine-src-path'] as String?;
+  final localEngineSrcPath = args['local-engine-src-path'] as String?;
 
   /// The device-id to run test on.
-  final String? deviceId = args['device-id'] as String?;
+  final deviceId = args['device-id'] as String?;
 
   /// Whether to exit on first test failure.
   final bool exitOnFirstTestFailure = (args['exit'] as bool?) ?? false;
@@ -61,22 +63,22 @@ Future<void> main(List<String> rawArgs) async {
       (args['terminate-stray-dart-processes'] as bool?) ?? false;
 
   /// The git branch being tested on.
-  final String? gitBranch = args['git-branch'] as String?;
+  final gitBranch = args['git-branch'] as String?;
 
   /// Name of the LUCI builder this test is currently running on.
   ///
   /// This is only passed on CI runs for Cocoon to be able to uniquely identify
   /// this test run.
-  final String? luciBuilder = args['luci-builder'] as String?;
+  final luciBuilder = args['luci-builder'] as String?;
 
   /// Path to write test results to.
-  final String? resultsPath = args['results-file'] as String?;
+  final resultsPath = args['results-file'] as String?;
 
   /// Use an emulator for this test if it is an android test.
   final bool useEmulator = (args['use-emulator'] as bool?) ?? false;
 
   if (args.wasParsed('list')) {
-    for (int i = 0; i < taskNames.length; i++) {
+    for (var i = 0; i < taskNames.length; i++) {
       print('${(i + 1).toString().padLeft(3)} - ${taskNames[i]}');
     }
     exit(0);
@@ -120,6 +122,7 @@ Future<void> main(List<String> rawArgs) async {
       resultsFile: resultsFile,
       taskName: taskNames.single,
       onlyLocalEngine: (args['ab-local-engine-only'] as bool?) ?? false,
+      buildMode: buildMode,
     );
   } else {
     await runTasks(
@@ -128,6 +131,7 @@ Future<void> main(List<String> rawArgs) async {
       localEngine: localEngine,
       localEngineHost: localEngineHost,
       localEngineSrcPath: localEngineSrcPath,
+      localWebSdk: localWebSdk,
       deviceId: deviceId,
       exitOnFirstTestFailure: exitOnFirstTestFailure,
       terminateStrayDartProcesses: terminateStrayDartProcesses,
@@ -135,6 +139,7 @@ Future<void> main(List<String> rawArgs) async {
       luciBuilder: luciBuilder,
       resultsPath: resultsPath,
       useEmulator: useEmulator,
+      buildMode: buildMode,
     );
   }
 }
@@ -145,6 +150,7 @@ Future<void> _runABTest({
   required String? localEngine,
   required String? localEngineHost,
   required String? localWebSdk,
+  required String buildMode,
   required String? localEngineSrcPath,
   required String? deviceId,
   required String resultsFile,
@@ -155,12 +161,12 @@ Future<void> _runABTest({
 
   assert(localEngine != null || localWebSdk != null);
 
-  final ABTest abTest = ABTest(
+  final abTest = ABTest(
     localEngine: (localEngine ?? localWebSdk)!,
     localEngineHost: localEngineHost,
     taskName: taskName,
   );
-  for (int i = 1; i <= runsPerTest; i++) {
+  for (var i = 1; i <= runsPerTest; i++) {
     section('Run #$i');
 
     if (onlyLocalEngine) {
@@ -171,6 +177,7 @@ Future<void> _runABTest({
         taskName,
         silent: silent,
         deviceId: deviceId,
+        buildMode: buildMode,
       );
 
       print('Default engine result:');
@@ -192,6 +199,7 @@ Future<void> _runABTest({
       localEngineHost: localEngineHost,
       localWebSdk: localWebSdk,
       localEngineSrcPath: localEngineSrcPath,
+      buildMode: buildMode,
       deviceId: deviceId,
     );
 
@@ -232,8 +240,8 @@ File _uniqueFile(String filenameTemplate) {
   if (parts.length != 2) {
     return File(filenameTemplate);
   }
-  File file = File(parts[0] + parts[1]);
-  int i = 1;
+  var file = File(parts[0] + parts[1]);
+  var i = 1;
   while (file.existsSync()) {
     file = File(parts[0] + i.toString() + parts[1]);
     i++;
@@ -254,6 +262,12 @@ ArgParser createArgParser(List<String> taskNames) {
       callback: (List<String> tasks) {
         taskNames.addAll(tasks);
       },
+    )
+    ..addOption(
+      'build-mode',
+      defaultsTo: 'profile',
+      allowed: <String>['debug', 'profile'],
+      help: 'The build mode to use for the benchmark.',
     )
     ..addOption(
       'device-id',

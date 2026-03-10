@@ -21,6 +21,7 @@
                 "debug",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
+                "--no-lto",
                 "--rbe",
                 "--no-goma"
             ],
@@ -65,9 +66,9 @@
                 "ci/host_profile_test",
                 "--runtime-mode",
                 "profile",
-                "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
+                "--no-lto",
                 "--rbe",
                 "--no-goma"
             ],
@@ -120,6 +121,7 @@
                 "release",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
+                "--no-lto",
                 "--rbe",
                 "--no-goma"
             ],

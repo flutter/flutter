@@ -142,12 +142,10 @@ class _CupertinoExpansionTileState extends State<CupertinoExpansionTile> {
 
   Widget? _buildIcon(BuildContext context, Animation<double> animation) {
     _iconTurns = animation.drive(_quarterTween.chain(CurveTween(curve: _kAnimationCurve)));
-    final double? size = CupertinoTheme.of(context).textTheme.textStyle.fontSize;
     return RotationTransition(
       turns: _iconTurns,
-      child: SizedBox(
-        width: size,
-        height: size,
+      child: SizedBox.square(
+        dimension: CupertinoTheme.of(context).textTheme.textStyle.fontSize,
         child: const Center(
           child: Icon(
             CupertinoIcons.right_chevron,
@@ -226,9 +224,8 @@ class _CupertinoExpansionTileState extends State<CupertinoExpansionTile> {
           controller: _fadeController,
           overlayChildBuilder: (BuildContext context) {
             final BuildContext headerContext = _headerKey.currentContext!;
-            final RenderBox overlay =
-                Overlay.of(headerContext).context.findRenderObject()! as RenderBox;
-            final RenderBox headerBox = headerContext.findRenderObject()! as RenderBox;
+            final overlay = Overlay.of(headerContext).context.findRenderObject()! as RenderBox;
+            final headerBox = headerContext.findRenderObject()! as RenderBox;
             final Offset headerOffset = headerBox.localToGlobal(Offset.zero, ancestor: overlay);
             return Positioned(
               top: headerOffset.dy + _kHeaderHeight,

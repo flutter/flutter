@@ -6,6 +6,7 @@ import 'package:code_assets/code_assets.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -81,6 +82,7 @@ void main() {
             if (flutterTester) ...<FakeCommand>[
               FakeCommand(
                 command: <Pattern>[
+                  'xcrun',
                   'lipo',
                   '-create',
                   '-output',
@@ -88,8 +90,17 @@ void main() {
                   '${isArm64 ? 'arm64' : 'x64'}/libbar.dylib',
                 ],
               ),
+              if (buildMode == BuildMode.release) ...<FakeCommand>[
+                FakeCommand(
+                  command: <Pattern>['xcrun', 'dsymutil', dylibPathBar, '-o', '$signPathBar.dSYM'],
+                  onRun: (_) {
+                    fileSystem.directory('$signPathBar.dSYM').createSync(recursive: true);
+                  },
+                ),
+                FakeCommand(command: <Pattern>['xcrun', 'strip', '-x', '-S', dylibPathBar]),
+              ],
               FakeCommand(
-                command: <Pattern>['otool', '-D', dylibPathBar],
+                command: <Pattern>['xcrun', 'otool', '-D', dylibPathBar],
                 stdout: <String>[
                   '$dylibPathBar (architecture x86_64):',
                   '@rpath/libbar.dylib',
@@ -99,6 +110,7 @@ void main() {
               ),
               FakeCommand(
                 command: <Pattern>[
+                  'xcrun',
                   'lipo',
                   '-create',
                   '-output',
@@ -106,8 +118,17 @@ void main() {
                   '${isArm64 ? 'arm64' : 'x64'}/libbuz.dylib',
                 ],
               ),
+              if (buildMode == BuildMode.release) ...<FakeCommand>[
+                FakeCommand(
+                  command: <Pattern>['xcrun', 'dsymutil', dylibPathBuz, '-o', '$signPathBuz.dSYM'],
+                  onRun: (_) {
+                    fileSystem.directory('$signPathBuz.dSYM').createSync(recursive: true);
+                  },
+                ),
+                FakeCommand(command: <Pattern>['xcrun', 'strip', '-x', '-S', dylibPathBuz]),
+              ],
               FakeCommand(
-                command: <Pattern>['otool', '-D', dylibPathBuz],
+                command: <Pattern>['xcrun', 'otool', '-D', dylibPathBuz],
                 stdout: <String>[
                   '$dylibPathBuz (architecture ${isArm64 ? 'arm64' : 'x86_64'}):',
                   '@rpath/libbuz.dylib',
@@ -115,6 +136,7 @@ void main() {
               ),
               FakeCommand(
                 command: <Pattern>[
+                  'xcrun',
                   'install_name_tool',
                   '-id',
                   dylibPathBar,
@@ -129,6 +151,7 @@ void main() {
               ),
               FakeCommand(
                 command: <Pattern>[
+                  'xcrun',
                   'codesign',
                   '--force',
                   '--sign',
@@ -139,6 +162,7 @@ void main() {
               ),
               FakeCommand(
                 command: <Pattern>[
+                  'xcrun',
                   'install_name_tool',
                   '-id',
                   dylibPathBuz,
@@ -153,6 +177,7 @@ void main() {
               ),
               FakeCommand(
                 command: <Pattern>[
+                  'xcrun',
                   'codesign',
                   '--force',
                   '--sign',
@@ -164,6 +189,7 @@ void main() {
             ] else ...<FakeCommand>[
               FakeCommand(
                 command: <Pattern>[
+                  'xcrun',
                   'lipo',
                   '-create',
                   '-output',
@@ -172,8 +198,17 @@ void main() {
                   'x64/libbar.dylib',
                 ],
               ),
+              if (buildMode == BuildMode.release) ...<FakeCommand>[
+                FakeCommand(
+                  command: <Pattern>['xcrun', 'dsymutil', dylibPathBar, '-o', '$signPathBar.dSYM'],
+                  onRun: (_) {
+                    fileSystem.directory('$signPathBar.dSYM').createSync(recursive: true);
+                  },
+                ),
+                FakeCommand(command: <Pattern>['xcrun', 'strip', '-x', '-S', dylibPathBar]),
+              ],
               FakeCommand(
-                command: <Pattern>['otool', '-D', dylibPathBar],
+                command: <Pattern>['xcrun', 'otool', '-D', dylibPathBar],
                 stdout: <String>[
                   '$dylibPathBar (architecture x86_64):',
                   '@rpath/libbar.dylib',
@@ -183,6 +218,7 @@ void main() {
               ),
               FakeCommand(
                 command: <Pattern>[
+                  'xcrun',
                   'lipo',
                   '-create',
                   '-output',
@@ -191,8 +227,17 @@ void main() {
                   'x64/libbuz.dylib',
                 ],
               ),
+              if (buildMode == BuildMode.release) ...<FakeCommand>[
+                FakeCommand(
+                  command: <Pattern>['xcrun', 'dsymutil', dylibPathBuz, '-o', '$signPathBuz.dSYM'],
+                  onRun: (_) {
+                    fileSystem.directory('$signPathBuz.dSYM').createSync(recursive: true);
+                  },
+                ),
+                FakeCommand(command: <Pattern>['xcrun', 'strip', '-x', '-S', dylibPathBuz]),
+              ],
               FakeCommand(
-                command: <Pattern>['otool', '-D', dylibPathBuz],
+                command: <Pattern>['xcrun', 'otool', '-D', dylibPathBuz],
                 stdout: <String>[
                   '$dylibPathBuz (architecture x86_64):',
                   '@rpath/libbuz.dylib',
@@ -202,6 +247,7 @@ void main() {
               ),
               FakeCommand(
                 command: <Pattern>[
+                  'xcrun',
                   'install_name_tool',
                   '-id',
                   '@rpath/bar.framework/bar',
@@ -216,6 +262,7 @@ void main() {
               ),
               FakeCommand(
                 command: <Pattern>[
+                  'xcrun',
                   'install_name_tool',
                   '-id',
                   '@rpath/buz.framework/buz',
@@ -295,6 +342,10 @@ void main() {
             projectUri: projectUri,
             fileSystem: fileSystem,
             buildRunner: buildRunner,
+            buildCodeAssets: BuildCodeAssetsOptions(
+              appBuildDirectory: fileSystem.directory(projectUri),
+            ),
+            buildDataAssets: true,
           );
           final Uri nativeAssetsFileUri = flutterTester
               ? projectUri.resolve(
@@ -309,6 +360,7 @@ void main() {
             projectUri: projectUri,
             fileSystem: fileSystem,
             nativeAssetsFileUri: nativeAssetsFileUri,
+            targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/macos/'),
           );
           final expectedArchsBeingBuilt = flutterTester
               ? (isArm64 ? 'macos_arm64' : 'macos_x64')
@@ -350,6 +402,20 @@ void main() {
           // Multi arch.
           expect(buildRunner.buildInvocations, flutterTester ? 1 : 2);
           expect(buildRunner.linkInvocations, buildMode == BuildMode.release ? 2 : 0);
+
+          if (!flutterTester) {
+            // Not running on the host system, so the code asset has been turned into a framework.
+            final Directory frameworkRoot = fileSystem.directory(
+              '/build/native_assets/macos/bar.framework',
+            );
+
+            // MacOS frameworks use symlinks for versioned content:
+            // https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPFrameworks/Concepts/FrameworkAnatomy.html
+            expect(frameworkRoot.childLink('bar').targetSync(), 'Versions/Current/bar');
+            expect(frameworkRoot.childLink('Resources').targetSync(), 'Versions/Current/Resources');
+
+            expect(frameworkRoot.childLink('Versions/Current').targetSync(), 'A');
+          }
         },
       );
     }
@@ -359,17 +425,17 @@ void main() {
   // randomization causing issues with what processes are invoked.
   // Exercise the parsing of the process output in this separate test.
   testUsingContext(
-    'NativeAssetsBuildRunnerImpl.cCompilerConfig',
+    'NativeAssetsBuildRunnerImpl.cCompilerConfig normal installation',
     overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-          command: <Pattern>['xcrun', 'clang', '--version'],
-          stdout: '''
-Apple clang version 14.0.0 (clang-1400.0.29.202)
-Target: arm64-apple-darwin22.6.0
-Thread model: posix
-InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin''',
-        ),
+        for (final binary in <String>['clang', 'ar', 'ld'])
+          FakeCommand(
+            command: <Pattern>['xcrun', '--find', binary],
+            stdout:
+                '''
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/$binary
+''', // NOTE: explicitly test needing to trim new line
+          ),
       ]),
     },
     () async {
@@ -377,13 +443,90 @@ InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault
         return;
       }
 
-      final CCompilerConfig result = await cCompilerConfigMacOS();
+      final CCompilerConfig result = (await cCompilerConfigMacOS(throwIfNotFound: true))!;
       expect(
         result.compiler,
         Uri.file(
           '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang',
         ),
       );
+      expect(
+        result.archiver,
+        Uri.file(
+          '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar',
+        ),
+      );
+      expect(
+        result.linker,
+        Uri.file(
+          '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld',
+        ),
+      );
+    },
+  );
+
+  testUsingContext(
+    'NativeAssetsBuildRunnerImpl.cCompilerConfig Nix installation',
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        for (final binary in <String>['clang', 'ar', 'ld'])
+          FakeCommand(
+            command: <Pattern>['xcrun', '--find', binary],
+            stdout: '/nix/store/random-path-to-clang-wrapper/bin/$binary',
+          ),
+      ]),
+    },
+    () async {
+      if (!const LocalPlatform().isMacOS) {
+        return;
+      }
+
+      final CCompilerConfig result = (await cCompilerConfigMacOS(throwIfNotFound: true))!;
+      expect(result.compiler, Uri.file('/nix/store/random-path-to-clang-wrapper/bin/clang'));
+      expect(result.archiver, Uri.file('/nix/store/random-path-to-clang-wrapper/bin/ar'));
+      expect(result.linker, Uri.file('/nix/store/random-path-to-clang-wrapper/bin/ld'));
+    },
+  );
+
+  testUsingContext(
+    'missing xcode when required',
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        for (final binary in <String>['clang', 'ar', 'ld'])
+          FakeCommand(
+            command: <Pattern>['xcrun', '--find', binary],
+            exitCode: 1,
+            stderr: 'not found',
+          ),
+      ]),
+    },
+    () async {
+      if (!const LocalPlatform().isMacOS) {
+        return;
+      }
+
+      await expectLater(cCompilerConfigMacOS(throwIfNotFound: true), throwsA(isA<ToolExit>()));
+    },
+  );
+
+  testUsingContext(
+    'missing xcode when not required',
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        for (final binary in <String>['clang', 'ar', 'ld'])
+          FakeCommand(
+            command: <Pattern>['xcrun', '--find', binary],
+            exitCode: 1,
+            stderr: 'not found',
+          ),
+      ]),
+    },
+    () async {
+      if (!const LocalPlatform().isMacOS) {
+        return;
+      }
+
+      expect(await cCompilerConfigMacOS(throwIfNotFound: false), isNull);
     },
   );
 }

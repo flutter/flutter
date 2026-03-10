@@ -29,7 +29,7 @@ Future<void> main() async {
     section('Create Flutter module project');
 
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_module_test.');
-    final Directory projectDir = Directory(path.join(tempDir.path, 'hello'));
+    final projectDir = Directory(path.join(tempDir.path, 'hello'));
     try {
       await inDirectory(tempDir, () async {
         await flutter(
@@ -52,7 +52,7 @@ Future<void> main() async {
         await exec('chmod', <String>['444', readonlyTxtAssetFile.path]);
       }
 
-      final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
+      final pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
         '${Platform.lineTerminator}  # assets:${Platform.lineTerminator}',
@@ -156,7 +156,7 @@ Future<void> main() async {
 
       section('Add to existing Android app');
 
-      final Directory hostApp = Directory(path.join(tempDir.path, 'hello_host_app'));
+      final hostApp = Directory(path.join(tempDir.path, 'hello_host_app'));
       mkdir(hostApp);
       recursiveCopy(
         Directory(
@@ -241,7 +241,7 @@ Future<void> main() async {
         'assets',
         'read-only.txt',
       ]);
-      final File readonlyDebugAssetFile = File(readonlyDebugAssetFilePath);
+      final readonlyDebugAssetFile = File(readonlyDebugAssetFilePath);
       if (!exists(readonlyDebugAssetFile)) {
         return TaskResult.failure('Failed to copy read-only asset file');
       }
@@ -315,7 +315,7 @@ Future<void> main() async {
         'assets',
         'read-only.txt',
       ]);
-      final File readonlyReleaseAssetFile = File(readonlyReleaseAssetFilePath);
+      final readonlyReleaseAssetFile = File(readonlyReleaseAssetFilePath);
       if (!exists(readonlyReleaseAssetFile)) {
         return TaskResult.failure('Failed to copy read-only asset file');
       }

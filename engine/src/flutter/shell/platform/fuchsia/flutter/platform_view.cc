@@ -4,7 +4,7 @@
 
 #define RAPIDJSON_HAS_STDSTRING 1
 
-#include "platform_view.h"
+#include "flutter/shell/platform/fuchsia/flutter/platform_view.h"
 
 #include <fuchsia/ui/app/cpp/fidl.h>
 #include <zircon/status.h>
@@ -24,11 +24,10 @@
 #include "third_party/rapidjson/include/rapidjson/writer.h"
 
 #include "flutter/fml/make_copyable.h"
-#include "logging.h"
-#include "pointer_injector_delegate.h"
-#include "runtime/dart/utils/inlines.h"
-#include "text_delegate.h"
-#include "vsync_waiter.h"
+#include "flutter/shell/platform/fuchsia/flutter/pointer_injector_delegate.h"
+#include "flutter/shell/platform/fuchsia/flutter/text_delegate.h"
+#include "flutter/shell/platform/fuchsia/flutter/vsync_waiter.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/inlines.h"
 
 namespace {
 // Helper to extract a given member with a given type from a rapidjson object.
@@ -342,6 +341,14 @@ void PlatformView::OnGetLayout(fuchsia::ui::composition::LayoutInfo info) {
                  pixel_ratio),  // physical_width
       std::round(view_logical_size_.value()[1] *
                  pixel_ratio),  // physical_height
+      std::round(view_logical_size_.value()[0] *
+                 pixel_ratio),  // physical_min_width_constraint
+      std::round(view_logical_size_.value()[0] *
+                 pixel_ratio),  // physical_max_width_constraint
+      std::round(view_logical_size_.value()[1] *
+                 pixel_ratio),  // physical_min_height_constraint
+      std::round(view_logical_size_.value()[1] *
+                 pixel_ratio),  // physical_max_height_constraint
       0.0f,                     // physical_padding_top
       0.0f,                     // physical_padding_right
       0.0f,                     // physical_padding_bottom
@@ -359,6 +366,10 @@ void PlatformView::OnGetLayout(fuchsia::ui::composition::LayoutInfo info) {
       {},                       // p_physical_display_features_type
       {},                       // p_physical_display_features_state
       0,                        // p_display_id
+      -1.0,                     // p_physical_display_corner_radius_top_left
+      -1.0,                     // p_physical_display_corner_radius_top_right
+      -1.0,                     // p_physical_display_corner_radius_bottom_right
+      -1.0,                     // p_physical_display_corner_radius_bottom_left
   };
   SetViewportMetrics(kFlutterImplicitViewId, metrics);
 
@@ -888,11 +899,12 @@ bool PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
       return true;
     }
   } else if (method.rfind("View.focus", 0) == 0) {
-    return focus_delegate_->HandlePlatformMessage(root, message->response());
+    return focus_delegate_->HandlePlatformMessage(document,
+                                                  message->response());
   } else if (method.rfind(PointerInjectorDelegate::kPointerInjectorMethodPrefix,
                           0) == 0) {
     return pointer_injector_delegate_->HandlePlatformMessage(
-        root, message->response());
+        document, message->response());
   } else {
     FML_LOG(ERROR) << "Unknown " << message->channel() << " method " << method;
   }

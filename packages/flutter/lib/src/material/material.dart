@@ -481,7 +481,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     }
     contents = NotificationListener<LayoutChangedNotification>(
       onNotification: (LayoutChangedNotification notification) {
-        final _RenderInkFeatures renderer =
+        final renderer =
             _inkFeatureRenderer.currentContext!.findRenderObject()! as _RenderInkFeatures;
         renderer._didChangeLayout();
         return false;
@@ -718,11 +718,11 @@ abstract class InkFeature {
   // RenderObject.paintsChild).
   static Matrix4? _getPaintTransform(RenderObject fromRenderObject, RenderObject toRenderObject) {
     // The paths to fromRenderObject and toRenderObject's common ancestor.
-    final List<RenderObject> fromPath = <RenderObject>[fromRenderObject];
-    final List<RenderObject> toPath = <RenderObject>[toRenderObject];
+    final fromPath = <RenderObject>[fromRenderObject];
+    final toPath = <RenderObject>[toRenderObject];
 
-    RenderObject from = fromRenderObject;
-    RenderObject to = toRenderObject;
+    var from = fromRenderObject;
+    var to = toRenderObject;
 
     while (!identical(from, to)) {
       final int fromDepth = from.depth;
@@ -750,8 +750,8 @@ abstract class InkFeature {
     }
     assert(identical(from, to));
 
-    final Matrix4 transform = Matrix4.identity();
-    final Matrix4 inverseTransform = Matrix4.identity();
+    final transform = Matrix4.identity();
+    final inverseTransform = Matrix4.identity();
 
     for (int index = toPath.length - 1; index > 0; index -= 1) {
       toPath[index].applyPaintTransform(toPath[index - 1], transform);

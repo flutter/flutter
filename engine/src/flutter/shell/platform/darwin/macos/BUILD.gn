@@ -133,6 +133,7 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterViewEngineProvider.h",
     "framework/Source/FlutterViewEngineProvider.mm",
     "framework/Source/FlutterViewProvider.h",
+    "framework/Source/FlutterView_Internal.h",
     "framework/Source/FlutterWindowController.h",
     "framework/Source/FlutterWindowController.mm",
     "framework/Source/KeyCodeMap.g.mm",
@@ -142,7 +143,7 @@ source_set("flutter_framework_source") {
 
   deps = [
     ":macos_gpu_configuration",
-    "//flutter/flow:flow",
+    "//flutter/flow",
     "//flutter/fml",
     "//flutter/shell/platform/common:common_cpp_accessibility",
     "//flutter/shell/platform/common:common_cpp_core",
@@ -152,7 +153,7 @@ source_set("flutter_framework_source") {
     "//flutter/shell/platform/common:common_cpp_switches",
     "//flutter/shell/platform/darwin/common:availability_version_check",
     "//flutter/shell/platform/darwin/common:framework_common",
-    "//flutter/shell/platform/darwin/graphics:graphics",
+    "//flutter/shell/platform/darwin/graphics",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/skia",
   ]
@@ -239,10 +240,10 @@ executable("flutter_desktop_darwin_unittests") {
     "framework/Source/FlutterViewControllerTestUtils.mm",
     "framework/Source/FlutterViewEngineProviderTest.mm",
     "framework/Source/FlutterViewTest.mm",
+    "framework/Source/FlutterWindowControllerTest.mm",
     "framework/Source/KeyCodeMapTest.mm",
     "framework/Source/TestFlutterPlatformView.h",
     "framework/Source/TestFlutterPlatformView.mm",
-    "framework/source/FlutterWindowControllerTest.mm",
   ]
 
   deps = [
@@ -263,7 +264,7 @@ executable("flutter_desktop_darwin_unittests") {
     "//flutter/testing:dart",
     "//flutter/testing:skia",
     "//flutter/testing:testing_lib",
-    "//flutter/third_party/ocmock:ocmock",
+    "//flutter/third_party/ocmock",
   ]
 }
 

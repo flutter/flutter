@@ -28,4 +28,8 @@ std::string HandleTypeToString(HandleType type) {
   FML_UNREACHABLE();
 }
 
+bool HandleTypeIsShareable(HandleType type) {
+  return type != HandleType::kFrameBuffer;
+}
+
 }  // namespace impeller

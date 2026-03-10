@@ -52,7 +52,10 @@ class _ArticleDescription extends StatelessWidget {
             style: const TextStyle(fontSize: 12.0, color: Colors.black54),
           ),
         ),
-        Text(author, style: const TextStyle(fontSize: 12.0, color: Colors.black87)),
+        Text(
+          author,
+          style: const TextStyle(fontSize: 12.0, color: Colors.black87),
+        ),
         Text(
           '$publishDate - $readDuration',
           style: const TextStyle(fontSize: 12.0, color: Colors.black54),
@@ -120,7 +123,9 @@ class CustomListItemExample extends StatelessWidget {
         padding: const EdgeInsets.all(10.0),
         children: <Widget>[
           CustomListItemTwo(
-            thumbnail: Container(decoration: const BoxDecoration(color: Colors.pink)),
+            thumbnail: Container(
+              decoration: const BoxDecoration(color: Colors.pink),
+            ),
             title: 'Flutter 1.0 Launch',
             subtitle:
                 'Flutter continues to improve and expand its horizons. '
@@ -130,7 +135,9 @@ class CustomListItemExample extends StatelessWidget {
             readDuration: '5 mins',
           ),
           CustomListItemTwo(
-            thumbnail: Container(decoration: const BoxDecoration(color: Colors.blue)),
+            thumbnail: Container(
+              decoration: const BoxDecoration(color: Colors.blue),
+            ),
             title: 'Flutter 1.2 Release - Continual updates to the framework',
             subtitle: 'Flutter once again improves and makes updates.',
             author: 'Flutter',

@@ -59,4 +59,4 @@ Text editing code is shared between CanvasKit and HTML, and it lives in
 Small common utilities do not need dedicated directories. It is OK to put all
 such utilities in `lib/src/engine` (see, for example, `alarm_clock.dart`).
 
-[1]: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo
+[1]: https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md

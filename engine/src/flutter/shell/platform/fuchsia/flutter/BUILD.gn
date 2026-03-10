@@ -124,7 +124,7 @@ template("runner_sources") {
       "//flutter/lib/ui",
       "//flutter/runtime",
       "//flutter/shell/common",
-      "//flutter/shell/platform/common/client_wrapper:client_wrapper",
+      "//flutter/shell/platform/common/client_wrapper",
     ]
 
     flutter_deps = [
@@ -176,8 +176,8 @@ template("runner_sources") {
              "${fuchsia_sdk}/pkg/trace-provider-so",
              "${fuchsia_sdk}/pkg/vfs_cpp",
              "${fuchsia_sdk}/pkg/zx",
-             "//flutter/shell/platform/fuchsia/dart-pkg/fuchsia",
-             "//flutter/shell/platform/fuchsia/dart-pkg/zircon",
+             "//flutter/shell/platform/fuchsia/dart_pkg/fuchsia",
+             "//flutter/shell/platform/fuchsia/dart_pkg/zircon",
            ] + flutter_deps
   }
 }
@@ -498,7 +498,7 @@ if (enable_unittests) {
     flutter_deps = [
       "$dart_src/runtime:libdart_jit",
       "$dart_src/runtime/platform:libdart_platform_jit",
-      "//flutter/assets:assets",
+      "//flutter/assets",
       "//flutter/common/graphics",
       "//flutter/flow",
       "//flutter/lib/ui",

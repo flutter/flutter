@@ -164,7 +164,7 @@ public class KeyboardManager
    */
   public interface ViewDelegate {
     /** Returns a {@link BinaryMessenger} to send platform messages with. */
-    public BinaryMessenger getBinaryMessenger();
+    BinaryMessenger getBinaryMessenger();
 
     /**
      * Send a {@link KeyEvent} that is not handled by the keyboard responders to the text input
@@ -174,10 +174,10 @@ public class KeyboardManager
      *     must not be null.
      * @return Whether the text input handles the key event.
      */
-    public boolean onTextInputKeyEvent(@NonNull KeyEvent keyEvent);
+    boolean onTextInputKeyEvent(@NonNull KeyEvent keyEvent);
 
     /** Send a {@link KeyEvent} that is not handled by Flutter back to the platform. */
-    public void redispatch(@NonNull KeyEvent keyEvent);
+    void redispatch(@NonNull KeyEvent keyEvent);
   }
 
   private class PerEventCallbackBuilder {
@@ -241,7 +241,7 @@ public class KeyboardManager
       Log.w(
           TAG,
           "A KeyboardManager was destroyed with "
-              + String.valueOf(remainingRedispatchCount)
+              + remainingRedispatchCount
               + " unhandled redispatch event(s).");
     }
   }

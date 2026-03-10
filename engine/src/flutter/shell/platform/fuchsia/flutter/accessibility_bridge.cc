@@ -15,7 +15,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
 
-#include "../runtime/dart/utils/root_inspect_node.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/root_inspect_node.h"
 
 namespace flutter_runner {
 namespace {
@@ -178,6 +178,12 @@ std::string NodeActionsToString(const flutter::SemanticsNode& node) {
   }
   if (node.HasAction(flutter::SemanticsAction::kFocus)) {
     output += "kFocus|";
+  }
+  if (node.HasAction(flutter::SemanticsAction::kExpand)) {
+    output += "kExpand|";
+  }
+  if (node.HasAction(flutter::SemanticsAction::kCollapse)) {
+    output += "kCollapse|";
   }
 
   return output;

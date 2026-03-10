@@ -14,11 +14,17 @@ jobs:
       pull-requests: write
 
     steps:
+      # defaults to `fetch-depth:1` which only checks out the current branch
+      # since the action runs on master, it will only checkout master.
       - name: Setup Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
-          repository: ${{ github.repository }}
           ref: master
+
+      # avoid downloading hundreds of other branches/history
+      # utilizing `fetch-depth:0` in actions/checkout would clone everything.
+      - name: Fetch Stable Branch Only
+        run: git fetch origin stable:stable --depth=1
 
       - name: Configure git
         run: |
@@ -28,7 +34,9 @@ jobs:
       - name: Read CHANGELOG.md from the stable branch
         id: read_stable_changelog
         run: |
-          CHANGELOG_CONTENT=$(git show origin/stable:CHANGELOG.md)
+          # origin/stable is locally mapped to stable
+          # use the local stable ref from above
+          CHANGELOG_CONTENT=$(git show stable:CHANGELOG.md)
           echo "CHANGELOG_CONTENT<<EOF" >> $GITHUB_ENV
           echo "$CHANGELOG_CONTENT" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV

@@ -8,7 +8,9 @@ import 'package:flutter_api_samples/material/input_decorator/input_decoration.la
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Decorates TextField in sample app with label', (WidgetTester tester) async {
+  testWidgets('Decorates TextField in sample app with label', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.LabelExampleApp());
     expect(find.text('InputDecoration.label Sample'), findsOneWidget);
 

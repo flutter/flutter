@@ -12,7 +12,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'material_state.dart';
 import 'theme.dart';
 
 // Examples can assume:
@@ -21,7 +20,7 @@ import 'theme.dart';
 /// Defines default property values for descendant [SearchBar] widgets.
 ///
 /// Descendant widgets obtain the current [SearchBarThemeData] object using
-/// `SearchBarTheme.of(context)`. Instances of [SearchBarThemeData] can be customized
+/// [SearchBarTheme.of]. Instances of [SearchBarThemeData] can be customized
 /// with [SearchBarThemeData.copyWith].
 ///
 /// Typically a [SearchBarThemeData] is specified as part of the overall [Theme]
@@ -150,7 +149,7 @@ class SearchBarThemeData with Diagnosticable {
         t,
         Color.lerp,
       ),
-      side: MaterialStateBorderSide.lerp(a?.side, b?.side, t),
+      side: WidgetStateBorderSide.lerp(a?.side, b?.side, t),
       shape: WidgetStateProperty.lerp<OutlinedBorder?>(a?.shape, b?.shape, t, OutlinedBorder.lerp),
       padding: WidgetStateProperty.lerp<EdgeInsetsGeometry?>(
         a?.padding,

@@ -24,7 +24,7 @@ source_set("graphics") {
     "//flutter/display_list",
     "//flutter/fml",
     "//flutter/shell/common:base64",
-    "//flutter/shell/version:version",
+    "//flutter/shell/version",
     "//flutter/skia",
     "//flutter/third_party/boringssl",
     "//flutter/third_party/rapidjson",

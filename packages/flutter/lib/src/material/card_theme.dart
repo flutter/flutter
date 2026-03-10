@@ -13,16 +13,19 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+
 /// Defines default property values for descendant [Card] widgets.
 ///
-/// Descendant widgets obtain the current [CardTheme] object using
-/// `CardTheme.of(context)`. Instances of [CardTheme] can be
-/// customized with [CardTheme.copyWith].
+/// Descendant widgets obtain the current [CardThemeData] object using
+/// [CardTheme.of]. Instances of [CardThemeData] can be
+/// customized with [CardThemeData.copyWith].
 ///
-/// Typically a [CardTheme] is specified as part of the overall [Theme]
+/// Typically a [CardThemeData] is specified as part of the overall [Theme]
 /// with [ThemeData.cardTheme].
 ///
-/// All [CardTheme] properties are `null` by default. When null, the [Card]
+/// All [CardThemeData] properties are `null` by default. When null, the [Card]
 /// will use the values from [ThemeData] if they exist, otherwise it will
 /// provide its own defaults.
 ///
@@ -157,7 +160,15 @@ class CardTheme extends InheritedWidget with Diagnosticable {
     );
   }
 
-  /// The [ThemeData.cardTheme] property of the ambient [Theme].
+  /// Returns the configuration [data] from the closest [CardTheme] ancestor.
+  ///
+  /// If there is no ancestor, it returns [ThemeData.cardTheme].
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// CardThemeData theme = CardTheme.of(context);
+  /// ```
   static CardThemeData of(BuildContext context) {
     final CardTheme? cardTheme = context.dependOnInheritedWidgetOfExactType<CardTheme>();
     return cardTheme?.data ?? Theme.of(context).cardTheme;

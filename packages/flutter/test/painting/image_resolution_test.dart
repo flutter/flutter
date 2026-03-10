@@ -56,13 +56,9 @@ class TestAssetBundle extends CachingAssetBundle {
 void main() {
   group('1.0 scale device tests', () {
     void buildAndTestWithOneAsset(String mainAssetPath) {
-      final Map<String, List<Map<Object?, Object?>>> assetBundleMap =
-          <String, List<Map<Object?, Object?>>>{};
+      final assetBundleMap = <String, List<Map<Object?, Object?>>>{};
 
-      final AssetImage assetImage = AssetImage(
-        mainAssetPath,
-        bundle: TestAssetBundle(assetBundleMap),
-      );
+      final assetImage = AssetImage(mainAssetPath, bundle: TestAssetBundle(assetBundleMap));
       const ImageConfiguration configuration = ImageConfiguration.empty;
 
       assetImage
@@ -114,19 +110,18 @@ void main() {
 
   group('High-res device behavior tests', () {
     test('When asset is not main variant check scale is not 1.0', () {
-      const String mainAssetPath = 'assets/normalFolder/normalFile.png';
-      const String variantPath = 'assets/normalFolder/3.0x/normalFile.png';
+      const mainAssetPath = 'assets/normalFolder/normalFile.png';
+      const variantPath = 'assets/normalFolder/3.0x/normalFile.png';
 
-      final Map<String, List<Map<Object?, Object?>>> assetBundleMap =
-          <String, List<Map<Object?, Object?>>>{};
+      final assetBundleMap = <String, List<Map<Object?, Object?>>>{};
 
-      final Map<Object?, Object?> mainAssetVariantManifestEntry = <Object?, Object?>{};
+      final mainAssetVariantManifestEntry = <Object?, Object?>{};
       mainAssetVariantManifestEntry['asset'] = variantPath;
       mainAssetVariantManifestEntry['dpr'] = 3.0;
       assetBundleMap[mainAssetPath] = <Map<Object?, Object?>>[mainAssetVariantManifestEntry];
-      final TestAssetBundle testAssetBundle = TestAssetBundle(assetBundleMap);
+      final testAssetBundle = TestAssetBundle(assetBundleMap);
 
-      final AssetImage assetImage = AssetImage(mainAssetPath, bundle: testAssetBundle);
+      final assetImage = AssetImage(mainAssetPath, bundle: testAssetBundle);
 
       assetImage
           .obtainKey(ImageConfiguration.empty)
@@ -150,19 +145,15 @@ void main() {
     test(
       'When high-res device and high-res asset not present in bundle then return main variant',
       () {
-        const String mainAssetPath = 'assets/normalFolder/normalFile.png';
+        const mainAssetPath = 'assets/normalFolder/normalFile.png';
 
-        final Map<String, List<Map<Object?, Object?>>> assetBundleMap =
-            <String, List<Map<Object?, Object?>>>{};
+        final assetBundleMap = <String, List<Map<Object?, Object?>>>{};
 
         assetBundleMap[mainAssetPath] = <Map<Object?, Object?>>[];
 
-        final TestAssetBundle testAssetBundle = TestAssetBundle(assetBundleMap);
+        final testAssetBundle = TestAssetBundle(assetBundleMap);
 
-        final AssetImage assetImage = AssetImage(
-          mainAssetPath,
-          bundle: TestAssetBundle(assetBundleMap),
-        );
+        final assetImage = AssetImage(mainAssetPath, bundle: TestAssetBundle(assetBundleMap));
 
         assetImage
             .obtainKey(ImageConfiguration.empty)
@@ -188,24 +179,23 @@ void main() {
   group(
     'Regression - When assets available are 1.0 and 3.0 check devices with a range of scales',
     () {
-      const String mainAssetPath = 'assets/normalFolder/normalFile.png';
-      const String variantPath = 'assets/normalFolder/3.0x/normalFile.png';
+      const mainAssetPath = 'assets/normalFolder/normalFile.png';
+      const variantPath = 'assets/normalFolder/3.0x/normalFile.png';
 
       void buildBundleAndTestVariantLogic(
         double deviceRatio,
         double chosenAssetRatio,
         String expectedAssetPath,
       ) {
-        const Map<String, List<Map<Object?, Object?>>> assetManifest =
-            <String, List<Map<Object?, Object?>>>{
-              'assets/normalFolder/normalFile.png': <Map<Object?, Object?>>[
-                <Object?, Object?>{'asset': 'assets/normalFolder/normalFile.png'},
-                <Object?, Object?>{'asset': 'assets/normalFolder/3.0x/normalFile.png', 'dpr': 3.0},
-              ],
-            };
-        final TestAssetBundle testAssetBundle = TestAssetBundle(assetManifest);
+        const assetManifest = <String, List<Map<Object?, Object?>>>{
+          'assets/normalFolder/normalFile.png': <Map<Object?, Object?>>[
+            <Object?, Object?>{'asset': 'assets/normalFolder/normalFile.png'},
+            <Object?, Object?>{'asset': 'assets/normalFolder/3.0x/normalFile.png', 'dpr': 3.0},
+          ],
+        };
+        final testAssetBundle = TestAssetBundle(assetManifest);
 
-        final AssetImage assetImage = AssetImage(mainAssetPath, bundle: testAssetBundle);
+        final assetImage = AssetImage(mainAssetPath, bundle: testAssetBundle);
 
         // we have 1.0 and 3.0, asking for 1.5 should give
         assetImage

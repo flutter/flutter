@@ -11,7 +11,7 @@ const bool skipExpectsWithKnownBugs = false;
 
 void main() {
   test('TextPainter - basic words', () {
-    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
+    final painter = TextPainter()..textDirection = TextDirection.ltr;
 
     painter.text = const TextSpan(text: 'ABC DEF\nGHI', style: TextStyle(fontSize: 10.0));
     painter.layout();
@@ -32,14 +32,14 @@ void main() {
   });
 
   test('TextPainter - bidi overrides in LTR', () {
-    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
+    final painter = TextPainter()..textDirection = TextDirection.ltr;
 
     painter.text = const TextSpan(
       text: '${Unicode.RLO}HEBREW1 ${Unicode.LRO}english2${Unicode.PDF} HEBREW3${Unicode.PDF}',
       //      0       12345678      9      101234567       18     90123456       27
       style: TextStyle(fontSize: 10.0),
     );
-    TextSpan textSpan = painter.text! as TextSpan;
+    var textSpan = painter.text! as TextSpan;
     expect(textSpan.text!.length, 28);
     painter.layout();
 
@@ -147,7 +147,7 @@ void main() {
     );
 
     textSpan = painter.text! as TextSpan;
-    final List<List<TextBox>> list = <List<TextBox>>[
+    final list = <List<TextBox>>[
       for (int index = 0; index < textSpan.text!.length; index += 1)
         painter.getBoxesForSelection(TextSelection(baseOffset: index, extentOffset: index + 1)),
     ];
@@ -187,14 +187,14 @@ void main() {
   }, skip: skipTestsWithKnownBugs); // https://github.com/flutter/flutter/issues/87536
 
   test('TextPainter - bidi overrides in RTL', () {
-    final TextPainter painter = TextPainter()..textDirection = TextDirection.rtl;
+    final painter = TextPainter()..textDirection = TextDirection.rtl;
 
     painter.text = const TextSpan(
       text: '${Unicode.RLO}HEBREW1 ${Unicode.LRO}english2${Unicode.PDF} HEBREW3${Unicode.PDF}',
       //      0       12345678      9      101234567       18     90123456       27
       style: TextStyle(fontSize: 10.0),
     );
-    final TextSpan textSpan = painter.text! as TextSpan;
+    final textSpan = painter.text! as TextSpan;
     expect(textSpan.text!.length, 28);
     painter.layout();
 
@@ -304,17 +304,17 @@ void main() {
   }, skip: skipTestsWithKnownBugs); // https://github.com/flutter/flutter/issues/87536
 
   test('TextPainter - forced line-wrapping with bidi', () {
-    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
+    final painter = TextPainter()..textDirection = TextDirection.ltr;
 
     painter.text = const TextSpan(
       text: 'A\u05D0', // A, Alef
       style: TextStyle(fontSize: 10.0),
     );
-    final TextSpan textSpan = painter.text! as TextSpan;
+    final textSpan = painter.text! as TextSpan;
     expect(textSpan.text!.length, 2);
     painter.layout(maxWidth: 10.0);
 
-    for (int index = 0; index <= 2; index += 1) {
+    for (var index = 0; index <= 2; index += 1) {
       expect(
         painter.getWordBoundary(const TextPosition(offset: 0)),
         const TextRange(start: 0, end: 2),
@@ -386,7 +386,7 @@ void main() {
   });
 
   test('TextPainter - line wrap mid-word', () {
-    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
+    final painter = TextPainter()..textDirection = TextDirection.ltr;
 
     painter.text = const TextSpan(
       style: TextStyle(fontSize: 10.0),
@@ -420,7 +420,7 @@ void main() {
   }, skip: skipTestsWithKnownBugs); // https://github.com/flutter/flutter/issues/87536
 
   test('TextPainter - line wrap mid-word, bidi - LTR base', () {
-    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
+    final painter = TextPainter()..textDirection = TextDirection.ltr;
 
     painter.text = const TextSpan(
       style: TextStyle(fontSize: 10.0),
@@ -451,7 +451,7 @@ void main() {
       skip: skipExpectsWithKnownBugs, // https://github.com/flutter/flutter/issues/87536
     );
 
-    final List<List<TextBox>> list = <List<TextBox>>[
+    final list = <List<TextBox>>[
       for (int index = 0; index < 5 + 4 + 5; index += 1)
         painter.getBoxesForSelection(TextSelection(baseOffset: index, extentOffset: index + 1)),
     ];
@@ -476,7 +476,7 @@ void main() {
   }, skip: skipTestsWithKnownBugs); // https://github.com/flutter/flutter/issues/87536
 
   test('TextPainter - line wrap mid-word, bidi - RTL base', () {
-    final TextPainter painter = TextPainter()..textDirection = TextDirection.rtl;
+    final painter = TextPainter()..textDirection = TextDirection.rtl;
 
     painter.text = const TextSpan(
       style: TextStyle(fontSize: 10.0),
@@ -511,7 +511,7 @@ void main() {
   }, skip: skipTestsWithKnownBugs); // https://github.com/flutter/flutter/issues/87536
 
   test('TextPainter - multiple levels', () {
-    final TextPainter painter = TextPainter()..textDirection = TextDirection.rtl;
+    final painter = TextPainter()..textDirection = TextDirection.rtl;
 
     final String pyramid = rlo(lro(rlo(lro(rlo('')))));
     painter.text = TextSpan(text: pyramid, style: const TextStyle(fontSize: 10.0));
@@ -539,7 +539,7 @@ void main() {
   }, skip: skipTestsWithKnownBugs); // https://github.com/flutter/flutter/issues/87536
 
   test('TextPainter - getPositionForOffset - RTL in LTR', () {
-    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
+    final painter = TextPainter()..textDirection = TextDirection.ltr;
 
     painter.text = const TextSpan(
       text:
@@ -625,7 +625,7 @@ void main() {
   }, skip: skipTestsWithKnownBugs); // https://github.com/flutter/flutter/issues/87536
 
   test('TextPainter - getPositionForOffset - LTR in RTL', () {
-    final TextPainter painter = TextPainter()..textDirection = TextDirection.rtl;
+    final painter = TextPainter()..textDirection = TextDirection.rtl;
 
     painter.text = const TextSpan(
       text: '\u05D0\u05D1\u05D2ABC\u05D3\u05D4\u05D5',
@@ -672,7 +672,7 @@ void main() {
   }, skip: skipTestsWithKnownBugs); // https://github.com/flutter/flutter/issues/87536
 
   test('TextPainter - Spaces', () {
-    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
+    final painter = TextPainter()..textDirection = TextDirection.ltr;
 
     painter.text = const TextSpan(
       text: ' ',
@@ -730,7 +730,7 @@ void main() {
   }, skip: skipTestsWithKnownBugs); // https://github.com/flutter/flutter/issues/87536
 
   test('TextPainter - empty text baseline', () {
-    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
+    final painter = TextPainter()..textDirection = TextDirection.ltr;
     painter.text = const TextSpan(
       text: '',
       style: TextStyle(fontFamily: 'FlutterTest', fontSize: 100.0, height: 1.0),

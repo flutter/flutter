@@ -14,7 +14,8 @@ class ExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return WidgetsApp(
-      builder: (BuildContext context, Widget? navigator) => const ExampleWidget(),
+      builder: (BuildContext context, Widget? navigator) =>
+          const ExampleWidget(),
       color: const Color(0xffffffff),
     );
   }
@@ -31,7 +32,10 @@ class ExampleWidget extends StatelessWidget {
       '-> MCMXCVII <-', // 1997
       style: TextStyle(
         fontFamily: 'Piazzolla',
-        fontFeatures: <FontFeature>[FontFeature.stylisticSet(1), FontFeature.stylisticSet(2)],
+        fontFeatures: <FontFeature>[
+          FontFeature.stylisticSet(1),
+          FontFeature.stylisticSet(2),
+        ],
       ),
     );
   }

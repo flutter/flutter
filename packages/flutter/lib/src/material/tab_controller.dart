@@ -161,7 +161,7 @@ class TabController extends ChangeNotifier {
     if (index != null) {
       _animationController!.value = index.toDouble();
     }
-    final TabController result = TabController._(
+    final result = TabController._(
       index: index ?? _index,
       length: length ?? this.length,
       animationController: _animationController,

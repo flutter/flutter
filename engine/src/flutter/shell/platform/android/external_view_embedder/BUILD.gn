@@ -29,6 +29,8 @@ source_set("external_view_embedder") {
     "//flutter/shell/platform/android/surface",
     "//flutter/skia",
   ]
+
+  public_deps = [ "//third_party/abseil-cpp/absl/container:flat_hash_set" ]
 }
 
 test_fixtures("external_view_embedder_fixtures") {

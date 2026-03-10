@@ -45,7 +45,7 @@ const double _kIndicatorHeight = 32;
 /// Adaptive layouts can build different instances of the [Scaffold] in order to
 /// have a navigation rail for more horizontal layouts and a bottom navigation
 /// bar for more vertical layouts. See
-/// [the adaptive_scaffold.dart sample](https://github.com/flutter/samples/blob/main/experimental/web_dashboard/lib/src/widgets/third_party/adaptive_scaffold.dart)
+/// [the adaptive_scaffold.dart sample](https://github.com/flutter/demos/blob/main/web_dashboard/lib/src/widgets/third_party/adaptive_scaffold.dart)
 /// for an example.
 ///
 /// {@tool dartpad}
@@ -476,7 +476,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
             opacity: unselectedIconTheme.opacity ?? defaults.unselectedIconTheme!.opacity,
           );
 
-    final bool isRTLDirection = Directionality.of(context) == TextDirection.rtl;
+    final isRTLDirection = Directionality.of(context) == TextDirection.rtl;
 
     Widget mainGroup = Column(
       mainAxisSize: MainAxisSize.min,
@@ -690,7 +690,7 @@ class _RailDestinationState extends State<_RailDestination> {
       textDirection,
     );
     Offset indicatorOffset;
-    bool applyXOffset = false;
+    var applyXOffset = false;
 
     final Widget themedIcon = IconTheme(
       data: widget.disabled
@@ -806,9 +806,7 @@ class _RailDestinationState extends State<_RailDestination> {
           _verticalDestinationPaddingWithLabel,
           appearingAnimationValue,
         )!;
-        final Interval interval = widget.selected
-            ? const Interval(0.25, 0.75)
-            : const Interval(0.75, 1.0);
+        final interval = widget.selected ? const Interval(0.25, 0.75) : const Interval(0.75, 1.0);
         final Animation<double> labelFadeAnimation = widget.destinationAnimation.drive(
           CurveTween(curve: interval),
         );

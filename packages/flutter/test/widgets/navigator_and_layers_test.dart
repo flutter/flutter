@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'test_widgets.dart';
+import 'widgets_app_tester.dart';
 
 class TestCustomPainter extends CustomPainter {
   TestCustomPainter({required this.log, required this.name});
@@ -26,10 +27,10 @@ class TestCustomPainter extends CustomPainter {
 
 void main() {
   testWidgets('Do we paint when coming back from a navigation', (WidgetTester tester) async {
-    final List<String> log = <String>[];
+    final log = <String>[];
     log.add('0');
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         routes: <String, WidgetBuilder>{
           '/': (BuildContext context) => RepaintBoundary(
             child: RepaintBoundary(

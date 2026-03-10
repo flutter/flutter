@@ -4,6 +4,7 @@
 
 #include <dlfcn.h>
 #include <gdk/gdkwayland.h>
+#include <stdarg.h>
 
 #include "flutter/shell/platform/linux/testing/mock_gtk.h"
 
@@ -375,4 +376,42 @@ void gtk_clipboard_request_text(GtkClipboard* clipboard,
                                 GtkClipboardTextReceivedFunc callback,
                                 gpointer user_data) {
   check_thread();
+}
+
+void atk_object_notify_state_change(AtkObject* accessible,
+                                    AtkState state,
+                                    gboolean value) {
+  check_thread();
+  if (mock != nullptr) {
+    mock->atk_object_notify_state_change(accessible, state, value);
+  }
+}
+
+void g_object_set(gpointer object, const gchar* first_property_name, ...) {
+  check_thread();
+  if (first_property_name == nullptr) {
+    return;
+  }
+
+  va_list args;
+  va_start(args, first_property_name);
+
+  const gchar* name = first_property_name;
+  while (name != nullptr) {
+    // Extract the value (as gint, works for enums like GtkInputPurpose and
+    // GtkInputHints)
+    gint value = va_arg(args, gint);
+
+    // Check if this is a property we want to mock (input-purpose or
+    // input-hints)
+    if (mock != nullptr && (g_strcmp0(name, "input-purpose") == 0 ||
+                            g_strcmp0(name, "input-hints") == 0)) {
+      mock->g_object_set(G_OBJECT(object), name, value);
+    }
+
+    // Get next property name (or nullptr to terminate)
+    name = va_arg(args, gchar*);
+  }
+
+  va_end(args);
 }

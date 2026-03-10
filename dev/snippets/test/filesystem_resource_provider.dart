@@ -250,25 +250,25 @@ class _PhysicalFolder extends _PhysicalResource implements Folder {
   @override
   _PhysicalFile getChildAssumingFile(String relPath) {
     final String canonicalPath = canonicalizePath(relPath);
-    final io.File file = io.File(canonicalPath);
+    final file = io.File(canonicalPath);
     return _PhysicalFile(file);
   }
 
   @override
   _PhysicalFolder getChildAssumingFolder(String relPath) {
     final String canonicalPath = canonicalizePath(relPath);
-    final io.Directory directory = io.Directory(canonicalPath);
+    final directory = io.Directory(canonicalPath);
     return _PhysicalFolder(directory);
   }
 
   @override
   List<Resource> getChildren() {
     try {
-      final List<Resource> children = <Resource>[];
-      final io.Directory directory = _entry as io.Directory;
+      final children = <Resource>[];
+      final directory = _entry as io.Directory;
       final List<io.FileSystemEntity> entries = directory.listSync();
       final int numEntries = entries.length;
-      for (int i = 0; i < numEntries; i++) {
+      for (var i = 0; i < numEntries; i++) {
         final io.FileSystemEntity entity = entries[i];
         if (entity is io.Directory) {
           children.add(_PhysicalFolder(entity));

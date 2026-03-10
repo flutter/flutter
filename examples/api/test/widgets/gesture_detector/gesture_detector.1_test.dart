@@ -3,15 +3,21 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/gesture_detector/gesture_detector.1.dart' as example;
+import 'package:flutter_api_samples/widgets/gesture_detector/gesture_detector.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('GestureDetector updates Container color on tap', (WidgetTester tester) async {
+  testWidgets('GestureDetector updates Container color on tap', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.GestureDetectorExampleApp());
 
     Container container = tester.widget(
-      find.ancestor(of: find.byType(GestureDetector), matching: find.byType(Container)),
+      find.ancestor(
+        of: find.byType(GestureDetector),
+        matching: find.byType(Container),
+      ),
     );
 
     expect(container.color, Colors.white);
@@ -20,7 +26,10 @@ void main() {
     await tester.pump();
 
     container = tester.widget(
-      find.ancestor(of: find.byType(GestureDetector), matching: find.byType(Container)),
+      find.ancestor(
+        of: find.byType(GestureDetector),
+        matching: find.byType(Container),
+      ),
     );
 
     expect(container.color, Colors.yellow);
@@ -29,7 +38,10 @@ void main() {
     await tester.pump();
 
     container = tester.widget(
-      find.ancestor(of: find.byType(GestureDetector), matching: find.byType(Container)),
+      find.ancestor(
+        of: find.byType(GestureDetector),
+        matching: find.byType(Container),
+      ),
     );
 
     expect(container.color, Colors.white);

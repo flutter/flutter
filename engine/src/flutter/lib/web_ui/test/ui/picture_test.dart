@@ -8,7 +8,6 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../common/test_initialization.dart';
-import 'utils.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -18,9 +17,9 @@ Future<void> testMain() async {
   setUpUnitTests();
 
   test('recorder and picture dispose underlying objects properly', () {
-    final LayerPictureRecorder recorder = ui.PictureRecorder() as LayerPictureRecorder;
-    final ui.Canvas canvas = ui.Canvas(recorder);
-    const ui.Rect rect = ui.Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    final recorder = ui.PictureRecorder() as LayerPictureRecorder;
+    final canvas = ui.Canvas(recorder);
+    const rect = ui.Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
     canvas.clipRect(rect);
 
     expect(recorder.isRecording, true);
@@ -33,12 +32,39 @@ Future<void> testMain() async {
 
     picture.dispose();
     expect(picture.debugDisposed, true);
-    // Unskip when Skwasm and CanvasKit are unified:
-    // https://github.com/flutter/flutter/issues/172311
-  }, skip: isSkwasm);
+  });
+
+  test('Disposing picture does not dispose picture in PictureLayer', () {
+    final recorder = ui.PictureRecorder() as LayerPictureRecorder;
+    final canvas = ui.Canvas(recorder);
+    const rect = ui.Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    canvas.clipRect(rect);
+
+    expect(recorder.isRecording, true);
+    expect(recorder.debugDisposed, false);
+    final ui.Picture picture = recorder.endRecording();
+
+    expect(picture.debugDisposed, false);
+    expect(recorder.isRecording, false);
+    expect(recorder.debugDisposed, true);
+
+    final builder = ui.SceneBuilder() as LayerSceneBuilder;
+    builder.addPicture(ui.Offset.zero, picture);
+    final LayerScene scene = builder.build();
+    final pictureLayer = scene.layerTree.rootLayer.children.first as PictureLayer;
+
+    expect(pictureLayer.picture.debugDisposed, false);
+
+    picture.dispose();
+    expect(picture.debugDisposed, true);
+    expect(pictureLayer.picture.debugDisposed, false);
+
+    pictureLayer.dispose();
+    expect(pictureLayer.picture.debugDisposed, true);
+  });
 
   test('Picture construction invokes onCreate once', () async {
-    int onCreateInvokedCount = 0;
+    var onCreateInvokedCount = 0;
     ui.Picture? createdPicture;
     ui.Picture.onCreate = (ui.Picture picture) {
       onCreateInvokedCount++;
@@ -58,7 +84,7 @@ Future<void> testMain() async {
   });
 
   test('approximateBytesUsed is available for onCreate', () async {
-    int pictureSize = -1;
+    var pictureSize = -1;
 
     ui.Picture.onCreate = (ui.Picture picture) => pictureSize = picture.approximateBytesUsed;
 
@@ -69,7 +95,7 @@ Future<void> testMain() async {
   });
 
   test('dispose() invokes onDispose once', () async {
-    int onDisposeInvokedCount = 0;
+    var onDisposeInvokedCount = 0;
     ui.Picture? disposedPicture;
     ui.Picture.onDispose = (ui.Picture picture) {
       onDisposeInvokedCount++;
@@ -91,9 +117,9 @@ Future<void> testMain() async {
 }
 
 ui.Picture _createPicture() {
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final ui.Canvas canvas = ui.Canvas(recorder);
-  const ui.Rect rect = ui.Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+  final recorder = ui.PictureRecorder();
+  final canvas = ui.Canvas(recorder);
+  const rect = ui.Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
   canvas.clipRect(rect);
   return recorder.endRecording();
 }

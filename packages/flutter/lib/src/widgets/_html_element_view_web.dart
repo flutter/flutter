@@ -57,11 +57,7 @@ extension HtmlElementViewImpl on HtmlElementView {
 
   /// Creates the controller and kicks off its initialization.
   _HtmlElementViewController _createController(PlatformViewCreationParams params) {
-    final _HtmlElementViewController controller = _HtmlElementViewController(
-      params.id,
-      viewType,
-      creationParams,
-    );
+    final controller = _HtmlElementViewController(params.id, viewType, creationParams);
     controller._initialize().then((_) {
       params.onPlatformViewCreated(params.id);
       onPlatformViewCreated?.call(params.id);
@@ -97,11 +93,7 @@ class _HtmlElementViewController extends PlatformViewController {
   bool _initialized = false;
 
   Future<void> _initialize() async {
-    final Map<String, dynamic> args = <String, dynamic>{
-      'id': viewId,
-      'viewType': viewType,
-      'params': creationParams,
-    };
+    final args = <String, dynamic>{'id': viewId, 'viewType': viewType, 'params': creationParams};
     await SystemChannels.platform_views.invokeMethod<void>('create', args);
     _initialized = true;
   }

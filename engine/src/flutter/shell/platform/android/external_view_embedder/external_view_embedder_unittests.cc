@@ -11,10 +11,13 @@
 #include "flutter/flow/embedded_views.h"
 #include "flutter/flow/surface.h"
 #include "flutter/fml/raster_thread_merger.h"
+#include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/thread.h"
+#include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/platform/android/jni/jni_mock.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
 #include "flutter/shell/platform/android/surface/android_surface_mock.h"
+#include "flutter/testing/testing.h"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -1063,6 +1066,39 @@ TEST(AndroidExternalViewEmbedder, Teardown) {
   EXPECT_CALL(*jni_mock, FlutterViewDestroyOverlaySurfaces());
   // Teardown.
   embedder->Teardown();
+}
+
+TEST(AndroidExternalViewEmbedder, MaybeResizeSurfaceView) {
+  auto jni_mock = std::make_shared<JNIMock>();
+  auto android_context = AndroidContext(AndroidRenderingAPI::kSoftware);
+  ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
+                         ThreadHost::Type::kPlatform | ThreadHost::Type::kIo |
+                             ThreadHost::Type::kUi | ThreadHost::Type::kRaster);
+  TaskRunners task_runners(
+      "test",
+      thread_host.platform_thread->GetTaskRunner(),  // platform
+      thread_host.raster_thread->GetTaskRunner(),    // raster
+      thread_host.ui_thread->GetTaskRunner(),        // ui
+      thread_host.io_thread->GetTaskRunner()         // io
+  );
+  auto embedder = std::make_unique<AndroidExternalViewEmbedder>(
+      android_context, jni_mock, nullptr, task_runners);
+
+  fml::Thread rasterizer_thread("rasterizer");
+  auto raster_thread_merger =
+      GetThreadMergerFromPlatformThread(&rasterizer_thread);
+  ASSERT_FALSE(raster_thread_merger->IsMerged());
+
+  EXPECT_CALL(*jni_mock, FlutterViewBeginFrame());
+  embedder->BeginFrame(nullptr, raster_thread_merger);
+
+  EXPECT_CALL(*jni_mock, MaybeResizeSurfaceView(100, 200));
+  embedder->PrepareFlutterView(DlISize(100, 200), 1.0);
+
+  fml::AutoResetWaitableEvent latch;
+  fml::TaskRunner::RunNowOrPostTask(task_runners.GetPlatformTaskRunner(),
+                                    [&latch]() { latch.Signal(); });
+  latch.Wait();
 }
 
 TEST(AndroidExternalViewEmbedder, TeardownDoesNotCallJNIMethod) {

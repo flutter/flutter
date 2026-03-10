@@ -23,9 +23,13 @@ class _SwitchAppState extends State<SwitchApp> {
   Widget build(BuildContext context) {
     final ThemeData theme = ThemeData(
       platform: isMaterial ? TargetPlatform.android : TargetPlatform.iOS,
-      adaptations: <Adaptation<Object>>[if (isCustomized) const _SwitchThemeAdaptation()],
+      adaptations: <Adaptation<Object>>[
+        if (isCustomized) const _SwitchThemeAdaptation(),
+      ],
     );
-    final ButtonStyle style = OutlinedButton.styleFrom(fixedSize: const Size(220, 40));
+    final ButtonStyle style = OutlinedButton.styleFrom(
+      fixedSize: const Size(220, 40),
+    );
 
     return MaterialApp(
       theme: theme,
@@ -67,7 +71,11 @@ class _SwitchAppState extends State<SwitchApp> {
 }
 
 class SwitchWithLabel extends StatefulWidget {
-  const SwitchWithLabel({super.key, required this.enabled, required this.label});
+  const SwitchWithLabel({
+    super.key,
+    required this.enabled,
+    required this.label,
+  });
 
   final bool enabled;
   final String label;
@@ -84,7 +92,11 @@ class _SwitchWithLabelState extends State<SwitchWithLabel> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        Container(width: 150, padding: const EdgeInsets.only(right: 20), child: Text(widget.label)),
+        Container(
+          width: 150,
+          padding: const EdgeInsets.only(right: 20),
+          child: Text(widget.label),
+        ),
         Switch.adaptive(
           value: active,
           onChanged: !widget.enabled

@@ -17,6 +17,9 @@ template("shader_archive") {
     outputs = [ output_file ]
     output_path_rebased = rebase_path(output_file, root_build_dir)
     args = [ "--output=$output_path_rebased" ]
+    if (defined(invoker.entry_point_prefix)) {
+      args += [ "--entry-point-prefix=${invoker.entry_point_prefix}" ]
+    }
     foreach(shader, invoker.shaders) {
       shader_path = rebase_path(shader, root_build_dir)
       args += [ "--input=$shader_path" ]

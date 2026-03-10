@@ -30,7 +30,7 @@ void testMain() {
 
     test('RSuperellipse.contains is correct with no corners', () {
       // RSuperellipse of bounds with no corners contains corners just barely.
-      const RSuperellipse rse = RSuperellipse.fromLTRBXY(-50, -50, 50, 50, 0, 0);
+      const rse = RSuperellipse.fromLTRBXY(-50, -50, 50, 50, 0, 0);
 
       expect(rse.contains(const Offset(-50, -50)), isTrue);
       // Rectangles have half-in, half-out containment so we need
@@ -50,7 +50,7 @@ void testMain() {
 
     test('RSuperellipse.contains is correct with tiny corners', () {
       // RSuperellipse of bounds with even the tiniest corners does not contain corners.
-      const RSuperellipse rse = RSuperellipse.fromLTRBXY(-50, -50, 50, 50, 0.01, 0.01);
+      const rse = RSuperellipse.fromLTRBXY(-50, -50, 50, 50, 0.01, 0.01);
 
       expect(rse.contains(const Offset(-50, -50)), isFalse);
       expect(rse.contains(const Offset(-50, 50)), isFalse);
@@ -59,7 +59,7 @@ void testMain() {
     });
 
     test('RSuperellipse.contains is correct with uniform corners', () {
-      const RSuperellipse rse = RSuperellipse.fromLTRBXY(-50, -50, 50, 50, 5.0, 5.0);
+      const rse = RSuperellipse.fromLTRBXY(-50, -50, 50, 50, 5.0, 5.0);
 
       void checkPointAndMirrors(Offset p) {
         checkPointWithOffset(rse, Offset(p.dx, p.dy), const Offset(0.02, 0.02));
@@ -78,7 +78,7 @@ void testMain() {
     });
 
     test('RSuperellipse.contains is correct with uniform elliptical corners', () {
-      const RSuperellipse rse = RSuperellipse.fromLTRBXY(-50, -50, 50, 50, 5.0, 10.0);
+      const rse = RSuperellipse.fromLTRBXY(-50, -50, 50, 50, 5.0, 10.0);
 
       void checkPointAndMirrors(Offset p) {
         checkPointWithOffset(rse, Offset(p.dx, p.dy), const Offset(0.02, 0.02));
@@ -98,7 +98,7 @@ void testMain() {
 
     test('RSuperellipse.contains is correct with uniform corners and unequal height and width', () {
       // The bounds is not centered at the origin and has unequal height and width.
-      const RSuperellipse rse = RSuperellipse.fromLTRBXY(0, 0, 50, 100, 23.0, 30.0);
+      const rse = RSuperellipse.fromLTRBXY(0, 0, 50, 100, 23.0, 30.0);
 
       final Offset center = rse.outerRect.center;
       void checkPointAndMirrors(Offset globalPoint) {
@@ -115,7 +115,7 @@ void testMain() {
       checkPointAndMirrors(const Offset(39.99, 94.73));
       checkPointAndMirrors(const Offset(44.13, 89.99));
       checkPointAndMirrors(const Offset(48.46, 79.99));
-      checkPointAndMirrors(const Offset(49.68, 69.99));
+      checkPointAndMirrors(const Offset(49.70, 69.99));
       checkPointAndMirrors(const Offset(49.97, 59.99));
       checkPointAndMirrors(const Offset(49.99, 49.99)); // Right mid-edge
     });
@@ -123,7 +123,7 @@ void testMain() {
     test('RSuperellipse.contains is correct for a slim diagonal shape', () {
       // This shape has large radii on one diagonal and tiny radii on the other,
       // resulting in a almond-like shape placed diagonally (NW to SE).
-      final RSuperellipse rse = RSuperellipse.fromLTRBAndCorners(
+      final rse = RSuperellipse.fromLTRBAndCorners(
         -50,
         -50,
         50,
@@ -151,7 +151,7 @@ void testMain() {
       }
 
       // A few other points along the edge
-      checkDiagonalPoints(const Offset(-40.0, -49.59));
+      checkDiagonalPoints(const Offset(-40.0, -49.58));
       checkDiagonalPoints(const Offset(-20.0, -45.64));
       checkDiagonalPoints(const Offset(0.0, -37.01));
       checkDiagonalPoints(const Offset(20.0, -21.96));

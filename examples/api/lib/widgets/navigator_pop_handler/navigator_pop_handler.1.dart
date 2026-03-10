@@ -69,18 +69,30 @@ class _BottomNavPageState extends State<_BottomNavPage> with RestorationMixin {
   final GlobalKey _tabOneKey = GlobalKey();
   final GlobalKey _tabTwoKey = GlobalKey();
 
-  final _RestorableTabPageList _restorableTabHomePages = _RestorableTabPageList();
-  final _RestorableTabPageList _restorableTabOnePages = _RestorableTabPageList();
-  final _RestorableTabPageList _restorableTabTwoPages = _RestorableTabPageList();
+  final _RestorableTabPageList _restorableTabHomePages =
+      _RestorableTabPageList();
+  final _RestorableTabPageList _restorableTabOnePages =
+      _RestorableTabPageList();
+  final _RestorableTabPageList _restorableTabTwoPages =
+      _RestorableTabPageList();
 
   BottomNavigationBarItem _itemForPage(_Tab page) {
     switch (page) {
       case _Tab.home:
-        return const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Go to Home');
+        return const BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          label: 'Go to Home',
+        );
       case _Tab.one:
-        return const BottomNavigationBarItem(icon: Icon(Icons.one_k), label: 'Go to One');
+        return const BottomNavigationBarItem(
+          icon: Icon(Icons.one_k),
+          label: 'Go to One',
+        );
       case _Tab.two:
-        return const BottomNavigationBarItem(icon: Icon(Icons.two_k), label: 'Go to Two');
+        return const BottomNavigationBarItem(
+          icon: Icon(Icons.two_k),
+          label: 'Go to Two',
+        );
     }
   }
 
@@ -204,7 +216,8 @@ class _BottomNavTabState extends State<_BottomNavTab> {
           if (tabPage == null) {
             return;
           }
-          final List<_TabPage> nextPages = <_TabPage>[...widget.pages]..remove(tabPage);
+          final List<_TabPage> nextPages = <_TabPage>[...widget.pages]
+            ..remove(tabPage);
           if (nextPages.length < widget.pages.length) {
             widget.onChangePages(nextPages);
           }
@@ -222,9 +235,14 @@ class _BottomNavTabState extends State<_BottomNavTab> {
                     TextButton(
                       onPressed: () {
                         assert(!widget.pages.contains(_TabPage.one));
-                        widget.onChangePages(<_TabPage>[...widget.pages, _TabPage.one]);
+                        widget.onChangePages(<_TabPage>[
+                          ...widget.pages,
+                          _TabPage.one,
+                        ]);
                       },
-                      child: const Text('Go to another route in this nested Navigator'),
+                      child: const Text(
+                        'Go to another route in this nested Navigator',
+                      ),
                     ),
                   ],
                 ),
@@ -239,7 +257,9 @@ class _BottomNavTabState extends State<_BottomNavTab> {
                   buttons: <Widget>[
                     TextButton(
                       onPressed: () {
-                        widget.onChangePages(<_TabPage>[...widget.pages]..removeLast());
+                        widget.onChangePages(
+                          <_TabPage>[...widget.pages]..removeLast(),
+                        );
                       },
                       child: const Text('Go back'),
                     ),
@@ -286,7 +306,10 @@ class _UnknownPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey.withBlue(180),
       body: const Center(
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[Text('404')]),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[Text('404')],
+        ),
       ),
     );
   }
@@ -335,7 +358,9 @@ class _RestorableTabPageList extends RestorableValue<List<_TabPage>> {
       final String dataString = data as String;
       final List<String> listOfStrings = dataString.split(',');
       return listOfStrings.map((String tabPageName) {
-        return _TabPage.values.firstWhere((_TabPage tabPage) => tabPageName == tabPage.name);
+        return _TabPage.values.firstWhere(
+          (_TabPage tabPage) => tabPageName == tabPage.name,
+        );
       }).toList();
     }
     return <_TabPage>[];

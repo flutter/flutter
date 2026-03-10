@@ -635,7 +635,7 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
       // There is no future to subscribe to, do nothing.
       return;
     }
-    final Object callbackIdentity = Object();
+    final callbackIdentity = Object();
     _activeCallbackIdentity = callbackIdentity;
     widget.future!.then<void>(
       (T data) {

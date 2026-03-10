@@ -12,6 +12,7 @@
   "shareButtonLabel": "Ulashish",
   "pasteButtonLabel": "Joylash",
   "selectAllButtonLabel": "Hammasi",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found"
+  "searchResultsFound": "Qidiruv natijalari topildi",
+  "noResultsFound": "Hech narsa topilmadi",
+  "radioButtonUnselectedLabel": "Tanlanmagan"
 }

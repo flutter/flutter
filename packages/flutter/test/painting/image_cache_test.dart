@@ -26,7 +26,7 @@ void main() {
   test('maintains cache size', () async {
     imageCache.maximumSize = 3;
 
-    final TestImageInfo a =
+    final a =
         await extractOneFrame(
               TestImageProvider(
                 1,
@@ -36,7 +36,7 @@ void main() {
             )
             as TestImageInfo;
     expect(a.value, equals(1));
-    final TestImageInfo b =
+    final b =
         await extractOneFrame(
               TestImageProvider(
                 1,
@@ -46,7 +46,7 @@ void main() {
             )
             as TestImageInfo;
     expect(b.value, equals(1));
-    final TestImageInfo c =
+    final c =
         await extractOneFrame(
               TestImageProvider(
                 1,
@@ -56,7 +56,7 @@ void main() {
             )
             as TestImageInfo;
     expect(c.value, equals(1));
-    final TestImageInfo d =
+    final d =
         await extractOneFrame(
               TestImageProvider(
                 1,
@@ -66,7 +66,7 @@ void main() {
             )
             as TestImageInfo;
     expect(d.value, equals(1));
-    final TestImageInfo e =
+    final e =
         await extractOneFrame(
               TestImageProvider(
                 1,
@@ -76,7 +76,7 @@ void main() {
             )
             as TestImageInfo;
     expect(e.value, equals(1));
-    final TestImageInfo f =
+    final f =
         await extractOneFrame(
               TestImageProvider(
                 1,
@@ -91,7 +91,7 @@ void main() {
 
     // cache still only has one entry in it: 1(1)
 
-    final TestImageInfo g =
+    final g =
         await extractOneFrame(
               TestImageProvider(
                 2,
@@ -104,7 +104,7 @@ void main() {
 
     // cache has two entries in it: 1(1), 2(7)
 
-    final TestImageInfo h =
+    final h =
         await extractOneFrame(
               TestImageProvider(
                 1,
@@ -117,7 +117,7 @@ void main() {
 
     // cache still has two entries in it: 2(7), 1(1)
 
-    final TestImageInfo i =
+    final i =
         await extractOneFrame(
               TestImageProvider(
                 3,
@@ -130,7 +130,7 @@ void main() {
 
     // cache has three entries in it: 2(7), 1(1), 3(9)
 
-    final TestImageInfo j =
+    final j =
         await extractOneFrame(
               TestImageProvider(
                 1,
@@ -143,7 +143,7 @@ void main() {
 
     // cache still has three entries in it: 2(7), 3(9), 1(1)
 
-    final TestImageInfo k =
+    final k =
         await extractOneFrame(
               TestImageProvider(
                 4,
@@ -156,7 +156,7 @@ void main() {
 
     // cache has three entries: 3(9), 1(1), 4(11)
 
-    final TestImageInfo l =
+    final l =
         await extractOneFrame(
               TestImageProvider(
                 1,
@@ -169,7 +169,7 @@ void main() {
 
     // cache has three entries: 3(9), 4(11), 1(1)
 
-    final TestImageInfo m =
+    final m =
         await extractOneFrame(
               TestImageProvider(
                 2,
@@ -182,7 +182,7 @@ void main() {
 
     // cache has three entries: 4(11), 1(1), 2(13)
 
-    final TestImageInfo n =
+    final n =
         await extractOneFrame(
               TestImageProvider(
                 3,
@@ -195,7 +195,7 @@ void main() {
 
     // cache has three entries: 1(1), 2(13), 3(14)
 
-    final TestImageInfo o =
+    final o =
         await extractOneFrame(
               TestImageProvider(
                 4,
@@ -208,7 +208,7 @@ void main() {
 
     // cache has three entries: 2(13), 3(14), 4(15)
 
-    final TestImageInfo p =
+    final p =
         await extractOneFrame(
               TestImageProvider(
                 1,
@@ -287,13 +287,13 @@ void main() {
       );
     }
 
-    final ErrorImageProvider errorImage = ErrorImageProvider();
+    final errorImage = ErrorImageProvider();
     expect(
       () =>
           imageCache.putIfAbsent(errorImage, () => errorImage.loadBuffer(errorImage, basicDecoder)),
       throwsA(isA<Error>()),
     );
-    bool caughtError = false;
+    var caughtError = false;
     final ImageStreamCompleter? result = imageCache.putIfAbsent(
       errorImage,
       () => errorImage.loadBuffer(errorImage, basicDecoder),
@@ -308,15 +308,15 @@ void main() {
   test('already pending image is returned when it is put into the cache again', () async {
     final ui.Image testImage = await createTestImage(width: 8, height: 8);
 
-    final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
-    final TestImageStreamCompleter completer2 = TestImageStreamCompleter();
+    final completer1 = TestImageStreamCompleter();
+    final completer2 = TestImageStreamCompleter();
 
-    final TestImageStreamCompleter resultingCompleter1 =
+    final resultingCompleter1 =
         imageCache.putIfAbsent(testImage, () {
               return completer1;
             })!
             as TestImageStreamCompleter;
-    final TestImageStreamCompleter resultingCompleter2 =
+    final resultingCompleter2 =
         imageCache.putIfAbsent(testImage, () {
               return completer2;
             })!
@@ -329,17 +329,17 @@ void main() {
   test('pending image is removed when cache is cleared', () async {
     final ui.Image testImage = await createTestImage(width: 8, height: 8);
 
-    final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
-    final TestImageStreamCompleter completer2 = TestImageStreamCompleter();
+    final completer1 = TestImageStreamCompleter();
+    final completer2 = TestImageStreamCompleter();
 
-    final TestImageStreamCompleter resultingCompleter1 =
+    final resultingCompleter1 =
         imageCache.putIfAbsent(testImage, () {
               return completer1;
             })!
             as TestImageStreamCompleter;
 
     // Make the image seem live.
-    final ImageStreamListener listener = ImageStreamListener((_, _) {});
+    final listener = ImageStreamListener((_, _) {});
     completer1.addListener(listener);
 
     expect(imageCache.statusForKey(testImage).pending, true);
@@ -351,7 +351,7 @@ void main() {
     expect(imageCache.statusForKey(testImage).pending, false);
     expect(imageCache.statusForKey(testImage).live, false);
 
-    final TestImageStreamCompleter resultingCompleter2 =
+    final resultingCompleter2 =
         imageCache.putIfAbsent(testImage, () {
               return completer2;
             })!
@@ -364,10 +364,10 @@ void main() {
   test('pending image is removed when image is evicted', () async {
     final ui.Image testImage = await createTestImage(width: 8, height: 8);
 
-    final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
-    final TestImageStreamCompleter completer2 = TestImageStreamCompleter();
+    final completer1 = TestImageStreamCompleter();
+    final completer2 = TestImageStreamCompleter();
 
-    final TestImageStreamCompleter resultingCompleter1 =
+    final resultingCompleter1 =
         imageCache.putIfAbsent(testImage, () {
               return completer1;
             })!
@@ -375,7 +375,7 @@ void main() {
 
     imageCache.evict(testImage);
 
-    final TestImageStreamCompleter resultingCompleter2 =
+    final resultingCompleter2 =
         imageCache.putIfAbsent(testImage, () {
               return completer2;
             })!
@@ -408,9 +408,9 @@ void main() {
   test('containsKey - pending', () async {
     final ui.Image testImage = await createTestImage(width: 8, height: 8);
 
-    final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
+    final completer1 = TestImageStreamCompleter();
 
-    final TestImageStreamCompleter resultingCompleter1 =
+    final resultingCompleter1 =
         imageCache.putIfAbsent(testImage, () {
               return completer1;
             })!
@@ -423,9 +423,9 @@ void main() {
   test('containsKey - completed', () async {
     final ui.Image testImage = await createTestImage(width: 8, height: 8);
 
-    final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
+    final completer1 = TestImageStreamCompleter();
 
-    final TestImageStreamCompleter resultingCompleter1 =
+    final resultingCompleter1 =
         imageCache.putIfAbsent(testImage, () {
               return completer1;
             })!
@@ -443,13 +443,12 @@ void main() {
     final ui.Image testImage = await createTestImage(width: 8, height: 8);
     final ui.Image testImage2 = await createTestImage(width: 10, height: 10);
 
-    final TestImageStreamCompleter completer1 = TestImageStreamCompleter()..testSetImage(testImage);
-    final TestImageStreamCompleter completer2 = TestImageStreamCompleter()
-      ..testSetImage(testImage2);
+    final completer1 = TestImageStreamCompleter()..testSetImage(testImage);
+    final completer2 = TestImageStreamCompleter()..testSetImage(testImage2);
 
     completer1.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {}));
 
-    final TestImageStreamCompleter resultingCompleter1 =
+    final resultingCompleter1 =
         imageCache.putIfAbsent(testImage, () {
               return completer1;
             })!
@@ -459,7 +458,7 @@ void main() {
     expect(imageCache.statusForKey(testImage).keepAlive, true);
     expect(imageCache.statusForKey(testImage).live, true);
     expect(imageCache.statusForKey(testImage2).untracked, true);
-    final TestImageStreamCompleter resultingCompleter2 =
+    final resultingCompleter2 =
         imageCache.putIfAbsent(testImage2, () {
               return completer2;
             })!
@@ -516,9 +515,8 @@ void main() {
     final ui.Image testImage1 = await createTestImage(width: 8, height: 8);
     final ui.Image testImage2 = await createTestImage(width: 10, height: 10);
 
-    final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
-    final TestImageStreamCompleter completer2 = TestImageStreamCompleter()
-      ..testSetImage(testImage2);
+    final completer1 = TestImageStreamCompleter();
+    final completer2 = TestImageStreamCompleter()..testSetImage(testImage2);
 
     imageCache.putIfAbsent(testImage1, () => completer1);
     expect(imageCache.statusForKey(testImage1).pending, true);
@@ -540,7 +538,7 @@ void main() {
   test('Evicting a pending image clears the live image by default', () async {
     final ui.Image testImage = await createTestImage(width: 8, height: 8);
 
-    final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
+    final completer1 = TestImageStreamCompleter();
 
     imageCache.putIfAbsent(testImage, () => completer1);
     expect(imageCache.statusForKey(testImage).pending, true);
@@ -556,7 +554,7 @@ void main() {
     () async {
       final ui.Image testImage = await createTestImage(width: 8, height: 8);
 
-      final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
+      final completer1 = TestImageStreamCompleter();
 
       imageCache.putIfAbsent(testImage, () => completer1);
       expect(imageCache.statusForKey(testImage).pending, true);
@@ -575,7 +573,7 @@ void main() {
     () async {
       final ui.Image testImage = await createTestImage(width: 8, height: 8);
 
-      final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
+      final completer1 = TestImageStreamCompleter();
 
       imageCache.putIfAbsent(testImage, () => completer1);
       expect(imageCache.statusForKey(testImage).pending, true);
@@ -593,7 +591,7 @@ void main() {
   test('Evicting a completed image does clear the live image by default', () async {
     final ui.Image testImage = await createTestImage(width: 8, height: 8);
 
-    final TestImageStreamCompleter completer1 = TestImageStreamCompleter()
+    final completer1 = TestImageStreamCompleter()
       ..testSetImage(testImage)
       ..addListener(ImageStreamListener((ImageInfo info, bool syncCall) {}));
 
@@ -611,7 +609,7 @@ void main() {
     () async {
       final ui.Image testImage = await createTestImage(width: 8, height: 8);
 
-      final TestImageStreamCompleter completer1 = TestImageStreamCompleter()
+      final completer1 = TestImageStreamCompleter()
         ..testSetImage(testImage)
         ..addListener(ImageStreamListener((ImageInfo info, bool syncCall) {}));
 
@@ -630,13 +628,13 @@ void main() {
   test('Clearing liveImages removes callbacks', () async {
     final ui.Image testImage = await createTestImage(width: 8, height: 8);
 
-    final ImageStreamListener listener = ImageStreamListener((ImageInfo info, bool syncCall) {});
+    final listener = ImageStreamListener((ImageInfo info, bool syncCall) {});
 
-    final TestImageStreamCompleter completer1 = TestImageStreamCompleter()
+    final completer1 = TestImageStreamCompleter()
       ..testSetImage(testImage)
       ..addListener(listener);
 
-    final TestImageStreamCompleter completer2 = TestImageStreamCompleter()
+    final completer2 = TestImageStreamCompleter()
       ..testSetImage(testImage)
       ..addListener(listener);
 
@@ -674,9 +672,9 @@ void main() {
     final ui.Image testImage = await createTestImage(width: 8, height: 8);
     const int testImageSize = 8 * 8 * 4;
 
-    final ImageStreamListener listener = ImageStreamListener((ImageInfo info, bool syncCall) {});
+    final listener = ImageStreamListener((ImageInfo info, bool syncCall) {});
 
-    final TestImageStreamCompleter completer1 = TestImageStreamCompleter()..addListener(listener);
+    final completer1 = TestImageStreamCompleter()..addListener(listener);
 
     imageCache.putIfAbsent(testImage, () => completer1);
     expect(imageCache.statusForKey(testImage).pending, true);
@@ -707,16 +705,16 @@ void main() {
   });
 
   test('Image is obtained and disposed of properly for cache', () async {
-    const int key = 1;
+    const key = 1;
     final ui.Image testImage = await createTestImage(width: 8, height: 8, cache: false);
     expect(testImage.debugGetOpenHandleStackTraces()!.length, 1);
 
     late ImageInfo imageInfo;
-    final ImageStreamListener listener = ImageStreamListener((ImageInfo info, bool syncCall) {
+    final listener = ImageStreamListener((ImageInfo info, bool syncCall) {
       imageInfo = info;
     });
 
-    final TestImageStreamCompleter completer = TestImageStreamCompleter();
+    final completer = TestImageStreamCompleter();
 
     completer.addListener(listener);
     imageCache.putIfAbsent(key, () => completer);
@@ -754,16 +752,16 @@ void main() {
   test(
     'Image is obtained and disposed of properly for cache when listener is still active',
     () async {
-      const int key = 1;
+      const key = 1;
       final ui.Image testImage = await createTestImage(width: 8, height: 8, cache: false);
       expect(testImage.debugGetOpenHandleStackTraces()!.length, 1);
 
       late ImageInfo imageInfo;
-      final ImageStreamListener listener = ImageStreamListener((ImageInfo info, bool syncCall) {
+      final listener = ImageStreamListener((ImageInfo info, bool syncCall) {
         imageInfo = info;
       });
 
-      final TestImageStreamCompleter completer = TestImageStreamCompleter();
+      final completer = TestImageStreamCompleter();
 
       completer.addListener(listener);
       imageCache.putIfAbsent(key, () => completer);
@@ -797,7 +795,7 @@ void main() {
   test('clear does not leave pending images stuck', () async {
     final ui.Image testImage = await createTestImage(width: 8, height: 8);
 
-    final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
+    final completer1 = TestImageStreamCompleter();
 
     imageCache.putIfAbsent(testImage, () {
       return completer1;

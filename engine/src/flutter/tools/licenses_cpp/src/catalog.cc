@@ -8,7 +8,8 @@
 #include <fstream>
 #include <vector>
 
-#include "flutter/third_party/abseil-cpp/absl/log/log.h"
+#include "third_party/abseil-cpp/absl/log/log.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace fs = std::filesystem;
 
@@ -76,12 +77,15 @@ std::optional<Catalog::Match> FindMatchForSelectedMatcher(
       const char* position = full_match.data();
       for (int i = 1; i <= num_groups; ++i) {
         std::string_view submatch = submatches[i];
+        if (submatch.data() == nullptr) {
+          continue;
+        }
         if (submatch.data() > position) {
           non_group_text.append(position, submatch.data() - position);
         }
         position = submatch.data() + submatch.size();
       }
-      if (position < full_match_end) {
+      if (position != nullptr && position < full_match_end) {
         non_group_text.append(position, full_match_end - position);
       }
 
@@ -229,7 +233,8 @@ absl::StatusOr<std::vector<Catalog::Match>> Catalog::FindMatch(
                      results[j].GetMatchedText())) {
           return absl::InvalidArgumentError(absl::StrCat(
               "Selected matchers overlap (", results[i].GetMatcher(), ", ",
-              results[j].GetMatcher(), ")."));
+              results[j].GetMatcher(), ").\n", results[i].GetMatchedText(),
+              "\n############\n", results[j].GetMatchedText()));
         }
       }
     }

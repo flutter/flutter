@@ -145,6 +145,12 @@ class PlatformViewAndroid final : public PlatformView {
       flutter::CustomAccessibilityActionUpdates actions) override;
 
   // |PlatformView|
+  void SetApplicationLocale(std::string locale) override;
+
+  // |PlatformView|
+  void SetSemanticsTreeEnabled(bool enabled) override;
+
+  // |PlatformView|
   void HandlePlatformMessage(
       std::unique_ptr<flutter::PlatformMessage> message) override;
 

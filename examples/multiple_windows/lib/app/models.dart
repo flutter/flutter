@@ -1,0 +1,151 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// ignore_for_file: invalid_use_of_internal_member
+// ignore_for_file: implementation_imports
+
+import 'package:flutter/widgets.dart';
+import 'package:flutter/src/widgets/_window.dart';
+import 'package:flutter/src/widgets/_window_positioner.dart';
+
+class KeyedWindow {
+  KeyedWindow({
+    this.isMainWindow = false,
+    required this.key,
+    required this.controller,
+  });
+
+  BaseWindowController? get parent {
+    switch (controller) {
+      case RegularWindowController():
+        return null;
+      case DialogWindowController dialogController:
+        return dialogController.parent;
+      case TooltipWindowController tooltipController:
+        return tooltipController.parent;
+      default:
+        throw Exception('Unknown controller type');
+    }
+  }
+
+  final bool isMainWindow;
+  final UniqueKey key;
+  final BaseWindowController controller;
+}
+
+/// Provides access to the windows created by the application.
+///
+/// The window manager manages a flat list of all of the [BaseWindowController]s
+/// that have been created by the application as well as which controller is
+/// currently selected by the UI.
+class KeyedWindowManager extends ChangeNotifier {
+  KeyedWindowManager({required List<KeyedWindow> initialWindows})
+    : _windows = initialWindows;
+
+  final List<KeyedWindow> _windows;
+  List<KeyedWindow> get windows => _windows;
+
+  void add(KeyedWindow window) {
+    _windows.add(window);
+    notifyListeners();
+  }
+
+  void remove(UniqueKey key) {
+    _windows.removeWhere((KeyedWindow window) => window.key == key);
+    notifyListeners();
+  }
+
+  Iterable<KeyedWindow> getWindows({required BaseWindowController? parent}) {
+    return _windows.where((KeyedWindow window) => window.parent == parent);
+  }
+}
+
+/// Provides access to the [KeyedWindowManager] from the widget tree.
+class KeyedWindowManagerAccessor extends InheritedNotifier<KeyedWindowManager> {
+  const KeyedWindowManagerAccessor({
+    super.key,
+    required super.child,
+    required KeyedWindowManager windowManager,
+  }) : super(notifier: windowManager);
+
+  static KeyedWindowManager of(BuildContext context) {
+    final KeyedWindowManagerAccessor? result = context
+        .dependOnInheritedWidgetOfExactType<KeyedWindowManagerAccessor>();
+    assert(result != null, 'No KeyedWindowManager found in context');
+    return result!.notifier!;
+  }
+}
+
+class TooltipSettings {}
+
+/// Settings that control the behavior of newly created windows.
+class WindowSettings {
+  WindowSettings({
+    this.regularSize = const Size(800, 600),
+    this.dialogSize = const Size(400, 400),
+    this.positioner = const WindowPositioner(
+      parentAnchor: WindowPositionerAnchor.right,
+      childAnchor: WindowPositionerAnchor.left,
+    ),
+  });
+
+  /// The initial size for newly created regular windows.
+  Size regularSize;
+
+  /// The initial size of the dialog window.
+  Size dialogSize;
+
+  /// The positioner used to determine where new tooltips and popups are placed.
+  WindowPositioner positioner;
+}
+
+/// Provides access to the [WindowSettings] from the widget tree.
+class WindowSettingsAccessor extends InheritedWidget {
+  const WindowSettingsAccessor({
+    super.key,
+    required super.child,
+    required this.windowSettings,
+  });
+
+  final WindowSettings windowSettings;
+
+  static WindowSettings of(BuildContext context) {
+    final WindowSettingsAccessor? result = context
+        .dependOnInheritedWidgetOfExactType<WindowSettingsAccessor>();
+    assert(result != null, 'No WindowSettings found in context');
+    return result!.windowSettings;
+  }
+
+  @override
+  bool updateShouldNotify(WindowSettingsAccessor oldWidget) {
+    return windowSettings != oldWidget.windowSettings;
+  }
+}
+
+class CallbackDialogWindowControllerDelegate
+    with DialogWindowControllerDelegate {
+  CallbackDialogWindowControllerDelegate({required this.onDestroyed});
+
+  @override
+  void onWindowDestroyed() {
+    onDestroyed();
+    super.onWindowDestroyed();
+  }
+
+  final VoidCallback onDestroyed;
+}
+
+String anchorToString(WindowPositionerAnchor anchor) {
+  return switch (anchor) {
+    WindowPositionerAnchor.center => 'Center',
+    WindowPositionerAnchor.top => 'Top',
+    WindowPositionerAnchor.bottom => 'Bottom',
+    WindowPositionerAnchor.left => 'Left',
+    WindowPositionerAnchor.right => 'Right',
+    WindowPositionerAnchor.topLeft => 'Top Left',
+    WindowPositionerAnchor.bottomLeft => 'Bottom Left',
+    WindowPositionerAnchor.topRight => 'Top Right',
+    WindowPositionerAnchor.bottomRight => 'Bottom Right',
+  };
+}

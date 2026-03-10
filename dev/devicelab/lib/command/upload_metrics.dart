@@ -28,10 +28,10 @@ class UploadMetricsCommand extends Command<void> {
 
   @override
   Future<void> run() async {
-    final String? resultsPath = argResults!['results-file'] as String?;
-    final String? commitTime = argResults!['commit-time'] as String?;
-    final String? taskName = argResults!['task-name'] as String?;
-    final String? benchmarkTags = argResults!['benchmark-tags'] as String?;
+    final resultsPath = argResults!['results-file'] as String?;
+    final commitTime = argResults!['commit-time'] as String?;
+    final taskName = argResults!['task-name'] as String?;
+    final benchmarkTags = argResults!['benchmark-tags'] as String?;
 
     // Upload metrics to skia perf from test runner when `resultsPath` is specified.
     if (resultsPath != null) {

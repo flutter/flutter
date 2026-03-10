@@ -39,7 +39,7 @@ final RegExp servedAtPattern = RegExp('is being served at (.*)');
 int hotRestartCount = 0;
 
 Future<List<int>> launch({required bool isFirstRun}) async {
-  final List<String> options = <String>[
+  final options = <String>[
     '--hot',
     '-d',
     kWebServerDevice,
@@ -49,14 +49,14 @@ Future<List<int>> launch({required bool isFirstRun}) async {
   ];
   final Process process = await startFlutter('run', options: options);
 
-  final List<int> measurements = <int>[];
+  final measurements = <int>[];
 
-  final Completer<void> stdoutDone = Completer<void>();
-  final Completer<void> stderrDone = Completer<void>();
-  final Completer<void> waitForService = Completer<void>();
-  final Stopwatch sw = Stopwatch()..start();
+  final stdoutDone = Completer<void>();
+  final stderrDone = Completer<void>();
+  final waitForService = Completer<void>();
+  final sw = Stopwatch()..start();
   Chrome? chrome;
-  bool restarted = false;
+  var restarted = false;
   process
     ..stdout
         .transform<String>(utf8.decoder)
@@ -150,7 +150,7 @@ Future<List<int>> launch({required bool isFirstRun}) async {
 TaskFunction createWebDevModeTest() {
   deviceOperatingSystem = DeviceOperatingSystem.webServer;
   return () async {
-    final Map<String, int> measurements = <String, int>{};
+    final measurements = <String, int>{};
     await inDirectory<void>(flutterDirectory, () async {
       rmTree(_editedFlutterGalleryDir);
       mkdirs(_editedFlutterGalleryDir);
@@ -159,7 +159,7 @@ TaskFunction createWebDevModeTest() {
       final String rootPubspec = File(
         path.join(flutterDirectory.path, 'pubspec.yaml'),
       ).readAsStringSync();
-      final YamlEditor yamlEditor = YamlEditor(rootPubspec);
+      final yamlEditor = YamlEditor(rootPubspec);
       yamlEditor.update(<String>['workspace'], <String>['edited_flutter_gallery']);
       File(
         path.join(_editedFlutterGalleryDir.parent.path, 'pubspec.yaml'),

@@ -39,7 +39,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
   ];
 
   Future<void> _handleRefresh() {
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     Timer(const Duration(seconds: 3), () => completer.complete());
     return completer.future.then((_) {
       if (!mounted) {

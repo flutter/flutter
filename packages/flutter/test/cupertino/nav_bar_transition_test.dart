@@ -188,7 +188,7 @@ void main() {
 
     final Size size = tester.getSize(find.text('Page 1'));
 
-    for (int i = 0; i < 150; i++) {
+    for (var i = 0; i < 150; i++) {
       await tester.pump(const Duration(milliseconds: 1));
       expect(flying(tester, find.text('Page 1')), findsNWidgets(2));
       expect(tester.getSize(flying(tester, find.text('Page 1')).first), size);
@@ -209,7 +209,7 @@ void main() {
       flying(tester, find.text('Page 1')).first,
     );
     expect(bottomMiddle.text.style!.color, isSameColorAs(const Color(0xff000306)));
-    expect(bottomMiddle.text.style!.fontWeight, FontWeight.w600);
+    expect(bottomMiddle.text.style!.fontWeight, const FontWeight(595));
     expect(bottomMiddle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomMiddle.text.style!.letterSpacing, -0.41);
 
@@ -221,7 +221,7 @@ void main() {
       flying(tester, find.text('Page 1')).last,
     );
     expect(topBackLabel.text.style!.color, isSameColorAs(const Color(0xff000306)));
-    expect(topBackLabel.text.style!.fontWeight, FontWeight.w600);
+    expect(topBackLabel.text.style!.fontWeight, const FontWeight(595));
     expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
 
@@ -230,14 +230,14 @@ void main() {
     // Move animation further a bit.
     await tester.pump(const Duration(milliseconds: 200));
     expect(bottomMiddle.text.style!.color, isSameColorAs(const Color(0xff005ec5)));
-    expect(bottomMiddle.text.style!.fontWeight, FontWeight.w400);
+    expect(bottomMiddle.text.style!.fontWeight, const FontWeight(445));
     expect(bottomMiddle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomMiddle.text.style!.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).first, 0.0);
 
     expect(topBackLabel.text.style!.color, isSameColorAs(const Color(0xff005ec5)));
-    expect(topBackLabel.text.style!.fontWeight, FontWeight.w400);
+    expect(topBackLabel.text.style!.fontWeight, const FontWeight(445));
     expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
 
@@ -259,7 +259,7 @@ void main() {
       flying(tester, find.text('Page 1')).first,
     );
     expect(bottomMiddle.text.style!.color, isSameColorAs(const Color(0xfff8fbff)));
-    expect(bottomMiddle.text.style!.fontWeight, FontWeight.w600);
+    expect(bottomMiddle.text.style!.fontWeight, const FontWeight(595));
     expect(bottomMiddle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomMiddle.text.style!.letterSpacing, -0.41);
 
@@ -271,7 +271,7 @@ void main() {
       flying(tester, find.text('Page 1')).last,
     );
     expect(topBackLabel.text.style!.color, isSameColorAs(const Color(0xfff8fbff)));
-    expect(topBackLabel.text.style!.fontWeight, FontWeight.w600);
+    expect(topBackLabel.text.style!.fontWeight, const FontWeight(595));
     expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
 
@@ -280,14 +280,14 @@ void main() {
     // Move animation further a bit.
     await tester.pump(const Duration(milliseconds: 200));
     expect(bottomMiddle.text.style!.color, isSameColorAs(const Color(0xff409fff)));
-    expect(bottomMiddle.text.style!.fontWeight, FontWeight.w400);
+    expect(bottomMiddle.text.style!.fontWeight, const FontWeight(445));
     expect(bottomMiddle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomMiddle.text.style!.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).first, 0.0);
 
     expect(topBackLabel.text.style!.color, isSameColorAs(const Color(0xff409fff)));
-    expect(topBackLabel.text.style!.fontWeight, FontWeight.w400);
+    expect(topBackLabel.text.style!.fontWeight, const FontWeight(445));
     expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
 
@@ -640,7 +640,7 @@ void main() {
     WidgetTester tester,
   ) async {
     setWindowToPortrait(tester);
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
@@ -704,7 +704,7 @@ void main() {
     'Opaque extended large title background keeps bottom nav bar transition background box ',
     (WidgetTester tester) async {
       setWindowToPortrait(tester);
-      final ScrollController scrollController = ScrollController();
+      final scrollController = ScrollController();
       addTearDown(scrollController.dispose);
 
       await tester.pumpWidget(
@@ -818,7 +818,7 @@ void main() {
     WidgetTester tester,
   ) async {
     const Widget userMiddle = Placeholder();
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
@@ -1408,7 +1408,7 @@ void main() {
       flying(tester, find.text('Page 1')).first,
     );
     expect(bottomLargeTitle.text.style!.color, isSameColorAs(const Color(0xff000306)));
-    expect(bottomLargeTitle.text.style!.fontWeight, FontWeight.w700);
+    expect(bottomLargeTitle.text.style!.fontWeight, const FontWeight(692));
     expect(bottomLargeTitle.text.style!.fontFamily, 'CupertinoSystemDisplay');
     expect(bottomLargeTitle.text.style!.letterSpacing, moreOrLessEquals(0.35967791542410854));
 
@@ -1417,19 +1417,19 @@ void main() {
       flying(tester, find.text('Page 1')).last,
     );
     expect(topBackLabel.text.style!.color, isSameColorAs(const Color(0xff000306)));
-    expect(topBackLabel.text.style!.fontWeight, FontWeight.w700);
+    expect(topBackLabel.text.style!.fontWeight, const FontWeight(692));
     expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemDisplay');
     expect(topBackLabel.text.style!.letterSpacing, moreOrLessEquals(0.35967791542410854));
 
     // Move animation further a bit.
     await tester.pump(const Duration(milliseconds: 200));
     expect(bottomLargeTitle.text.style!.color, isSameColorAs(const Color(0xff005ec5)));
-    expect(bottomLargeTitle.text.style!.fontWeight, FontWeight.w500);
+    expect(bottomLargeTitle.text.style!.fontWeight, const FontWeight(467));
     expect(bottomLargeTitle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomLargeTitle.text.style!.letterSpacing, moreOrLessEquals(-0.23270857974886894));
 
     expect(topBackLabel.text.style!.color, isSameColorAs(const Color(0xff005ec5)));
-    expect(topBackLabel.text.style!.fontWeight, FontWeight.w500);
+    expect(topBackLabel.text.style!.fontWeight, const FontWeight(467));
     expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, moreOrLessEquals(-0.23270857974886894));
   });
@@ -1466,7 +1466,7 @@ void main() {
 
     Size? previousSize;
 
-    for (int i = 0; i < 150; i++) {
+    for (var i = 0; i < 150; i++) {
       await tester.pump(const Duration(milliseconds: 1));
       expect(flying(tester, find.text('Page 2')), findsOneWidget);
       final Size size = tester.getSize(flying(tester, find.text('Page 2')));
@@ -1565,8 +1565,8 @@ void main() {
   testWidgets('Top CupertinoSliverNavigationBar.bottom is aligned with top large title animation', (
     WidgetTester tester,
   ) async {
-    const double horizontalPadding = 16.0; // _kNavBarEdgePadding
-    const double height = 30.0;
+    const horizontalPadding = 16.0; // _kNavBarEdgePadding
+    const height = 30.0;
     setWindowToPortrait(tester);
     await startTransitionBetween(
       tester,
@@ -1686,8 +1686,8 @@ void main() {
   testWidgets('Components are not unnecessarily rebuilt during transitions', (
     WidgetTester tester,
   ) async {
-    int bottomBuildTimes = 0;
-    int topBuildTimes = 0;
+    var bottomBuildTimes = 0;
+    var topBuildTimes = 0;
     setWindowToPortrait(tester);
     await startTransitionBetween(
       tester,
@@ -1797,7 +1797,7 @@ void main() {
     final TextScaler scaler = tester
         .firstWidget<RichText>(flying(tester, find.byType(RichText)))
         .textScaler;
-    final List<double> fontSizes = List<double>.generate(100, (int index) => index / 3 + 1);
+    final fontSizes = List<double>.generate(100, (int index) => index / 3 + 1);
     expect(fontSizes.map(scaler.scale), fontSizes);
   });
 
@@ -1874,7 +1874,7 @@ void main() {
   });
 
   testWidgets('Back label is not clipped mid-transition', (WidgetTester tester) async {
-    const String label = 'backbackback';
+    const label = 'backbackback';
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',

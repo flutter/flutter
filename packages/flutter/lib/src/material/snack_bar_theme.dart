@@ -16,8 +16,10 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'material_state.dart';
 import 'theme.dart';
+
+// Examples can assume:
+// late BuildContext context;
 
 /// Defines where a [SnackBar] should appear within a [Scaffold] and how its
 /// location should be adjusted when the scaffold also includes a
@@ -45,7 +47,7 @@ enum SnackBarBehavior {
 /// Customizes default property values for [SnackBar] widgets.
 ///
 /// Descendant widgets obtain the current [SnackBarThemeData] object using
-/// `Theme.of(context).snackBarTheme`. Instances of [SnackBarThemeData] can be
+/// [SnackBarTheme.of]. Instances of [SnackBarThemeData] can be
 /// customized with [SnackBarThemeData.copyWith].
 ///
 /// Typically a [SnackBarThemeData] is specified as part of the overall [Theme]
@@ -91,9 +93,9 @@ class SnackBarThemeData with Diagnosticable {
          'Action overflow threshold must be between 0 and 1 inclusive',
        ),
        assert(
-         actionBackgroundColor is! MaterialStateColor || disabledActionBackgroundColor == null,
+         actionBackgroundColor is! WidgetStateColor || disabledActionBackgroundColor == null,
          'disabledBackgroundColor must not be provided when background color is '
-         'a MaterialStateColor',
+         'a WidgetStateColor',
        );
 
   /// Overrides the default value for [SnackBar.backgroundColor].
@@ -342,4 +344,43 @@ class SnackBarThemeData with Diagnosticable {
       ),
     );
   }
+}
+
+/// An inherited widget that defines the configuration for
+/// [SnackBar]s in this widget's subtree.
+///
+/// Values specified here are used for [SnackBar] properties that are not
+/// given an explicit non-null value.
+class SnackBarTheme extends InheritedTheme {
+  /// Creates a snackbar theme that controls the configurations for
+  /// [SnackBar]s in its widget subtree.
+  const SnackBarTheme({super.key, required this.data, required super.child});
+
+  /// The properties for descendant [SnackBar] widgets.
+  final SnackBarThemeData data;
+
+  /// The closest instance of this class's [data] value that encloses the given
+  /// context.
+  ///
+  /// If there is no ancestor, it returns [ThemeData.snackBarTheme]. Applications
+  /// can assume that the returned value will not be null.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// SnackBarThemeData theme = SnackBarTheme.of(context);
+  /// ```
+  static SnackBarThemeData of(BuildContext context) {
+    final SnackBarTheme? snackBarTheme = context
+        .dependOnInheritedWidgetOfExactType<SnackBarTheme>();
+    return snackBarTheme?.data ?? Theme.of(context).snackBarTheme;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    return SnackBarTheme(data: data, child: child);
+  }
+
+  @override
+  bool updateShouldNotify(SnackBarTheme oldWidget) => data != oldWidget.data;
 }

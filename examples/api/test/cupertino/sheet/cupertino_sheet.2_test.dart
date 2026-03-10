@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_api_samples/cupertino/sheet/cupertino_sheet.2.dart' as example;
+import 'package:flutter_api_samples/cupertino/sheet/cupertino_sheet.2.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Tap on button displays cupertino sheet', (WidgetTester tester) async {
+  testWidgets('Tap on button displays cupertino sheet', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.RestorableSheetExampleApp());
 
     final Finder dialogTitle = find.text('Current Count: 0');

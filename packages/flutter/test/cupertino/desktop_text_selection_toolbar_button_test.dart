@@ -10,7 +10,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('can press', (WidgetTester tester) async {
-    bool pressed = false;
+    var pressed = false;
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -126,5 +126,20 @@ void main() {
     expect(find.byType(CupertinoButton), findsOneWidget);
     final CupertinoButton button = tester.widget(find.byType(CupertinoButton));
     expect(button.enabled, isFalse);
+  });
+
+  testWidgets('CupertinoDesktopTextSelectionToolbarButton does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: CupertinoDesktopTextSelectionToolbarButton(onPressed: null, child: Text('X')),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoDesktopTextSelectionToolbarButton)), Size.zero);
   });
 }

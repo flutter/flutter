@@ -32,9 +32,6 @@ import android.media.Image;
 import android.media.ImageReader;
 import android.os.Looper;
 import android.view.Surface;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleRegistry;
-import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.android.FlutterActivity;
@@ -47,6 +44,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowBuild;
 
 @RunWith(AndroidJUnit4.class)
 public class FlutterRendererTest {
@@ -331,7 +330,15 @@ public class FlutterRendererTest {
             anyInt(),
             boundsCaptor.capture(),
             typeCaptor.capture(),
-            stateCaptor.capture());
+            stateCaptor.capture(),
+            anyInt(),
+            anyInt(),
+            anyInt(),
+            anyInt(),
+            anyInt(),
+            anyInt(),
+            anyInt(),
+            anyInt());
 
     assertArrayEquals(new int[] {10, 20, 30, 40, 50, 60, 70, 80}, boundsCaptor.getValue());
     assertArrayEquals(
@@ -819,6 +826,23 @@ public class FlutterRendererTest {
   }
 
   @Test
+  @Config(sdk = 29)
+  public void createSurfaceProducer_usesSurfaceTextureWhenHardwareBufferDefect() {
+    // Setup: Simulate a Huawei device on API 29 where HardwareBuffer has known defects.
+    // See: https://github.com/flutter/flutter/issues/166481
+    ShadowBuild.setManufacturer("HUAWEI");
+
+    // Execute the behavior under test.
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+
+    // Verify: Should return SurfaceTextureSurfaceProducer instead of ImageReaderSurfaceProducer.
+    assertTrue(
+        "Expected SurfaceTextureSurfaceProducer on Huawei API <= 29 due to HardwareBuffer defect causing video playback failures",
+        producer instanceof SurfaceTextureSurfaceProducer);
+  }
+
+  @Test
   public void ImageReaderSurfaceProducerDoesNotCropOrRotate() {
     FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
     TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
@@ -922,38 +946,6 @@ public class FlutterRendererTest {
     // Verify was not called.
     verify(callback, never()).onSurfaceCleanup();
     verify(callback, never()).onSurfaceDestroyed();
-  }
-
-  @Test
-  @SuppressWarnings({"deprecation", "removal"})
-  public void ImageReaderSurfaceProducerIsCreatedOnLifecycleResume() throws Exception {
-    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
-    TextureRegistry.SurfaceProducer producer =
-        flutterRenderer.createSurfaceProducer(TextureRegistry.SurfaceLifecycle.resetInBackground);
-
-    // Create a callback.
-    CountDownLatch latch = new CountDownLatch(1);
-    TextureRegistry.SurfaceProducer.Callback callback =
-        new TextureRegistry.SurfaceProducer.Callback() {
-          @Override
-          public void onSurfaceAvailable() {
-            latch.countDown();
-          }
-
-          @Override
-          public void onSurfaceDestroyed() {}
-        };
-    producer.setCallback(callback);
-
-    // Trim memory.
-    flutterRenderer.onTrimMemory(TRIM_MEMORY_BACKGROUND);
-
-    // Trigger a resume.
-    ((LifecycleRegistry) ProcessLifecycleOwner.get().getLifecycle())
-        .setCurrentState(Lifecycle.State.RESUMED);
-
-    // Verify.
-    latch.await();
   }
 
   @Test
@@ -1061,5 +1053,25 @@ public class FlutterRendererTest {
     Surface secondSurface = producer.getSurface();
 
     assertEquals(firstSurface, secondSurface);
+  }
+
+  @Test
+  public void restoreSurfaceProducers_restoresImageReaderSurfaceProducersAsIfApplicationResumed() {
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    FlutterRenderer.ImageReaderSurfaceProducer imageReaderProducer1 =
+        (FlutterRenderer.ImageReaderSurfaceProducer) flutterRenderer.createSurfaceProducer();
+    FlutterRenderer.ImageReaderSurfaceProducer imageReaderProducer2 =
+        (FlutterRenderer.ImageReaderSurfaceProducer) flutterRenderer.createSurfaceProducer();
+    imageReaderProducer1.callback = mock(TextureRegistry.SurfaceProducer.Callback.class);
+    imageReaderProducer2.callback = mock(TextureRegistry.SurfaceProducer.Callback.class);
+    imageReaderProducer1.notifiedDestroy = true;
+    imageReaderProducer2.notifiedDestroy = true;
+
+    flutterRenderer.restoreSurfaceProducers();
+
+    verify(imageReaderProducer1.callback).onSurfaceAvailable();
+    verify(imageReaderProducer2.callback).onSurfaceAvailable();
+    assertFalse(imageReaderProducer1.notifiedDestroy);
+    assertFalse(imageReaderProducer2.notifiedDestroy);
   }
 }

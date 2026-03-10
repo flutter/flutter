@@ -11,6 +11,7 @@ import 'darwin_system_font.dart';
 import 'get_bitmap_scenario.dart';
 import 'initial_route_reply.dart';
 import 'locale_initialization.dart';
+import 'platform_channel_echo.dart';
 import 'platform_view.dart';
 import 'poppable_screen.dart';
 import 'scenario.dart';
@@ -141,7 +142,8 @@ Map<String, _ScenarioFactory> _scenarios = <String, _ScenarioFactory>{
       TwoPlatformViewClipPath(view, firstId: _viewId++, secondId: _viewId++),
   'two_platform_view_clip_path_multiple_clips': (FlutterView view) =>
       TwoPlatformViewClipPathMultipleClips(view, firstId: _viewId++, secondId: _viewId++),
-  'tap_status_bar': (FlutterView view) => TouchesScenario(view),
+  'tap_status_bar': (FlutterView view) =>
+      EchoPlatformChannelScenario(view, channel: 'flutter/status_bar'),
   'initial_route_reply': (FlutterView view) => InitialRouteReply(view),
   'platform_view_with_continuous_texture': (FlutterView view) =>
       PlatformViewWithContinuousTexture(view, id: _viewId++),
@@ -161,7 +163,7 @@ Scenario? _currentScenarioInstance;
 /// Loads an scenario.
 /// The map must contain a `name` entry, which equals to the name of the scenario.
 void loadScenario(Map<String, dynamic> scenario, FlutterView view) {
-  final String scenarioName = scenario['name'] as String;
+  final scenarioName = scenario['name'] as String;
   assert(_scenarios[scenarioName] != null);
   _currentScenarioParams = scenario;
 

@@ -14,28 +14,6 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 bool get isExperimentalWebParagraph =>
     configuration.canvasKitVariant == CanvasKitVariant.experimentalWebParagraph;
 
-enum CanvasKitVariant {
-  /// The appropriate variant is chosen based on the browser.
-  ///
-  /// This is the default variant.
-  auto,
-
-  /// The full variant that can be used in any browser.
-  full,
-
-  /// The variant that is optimized for Chromium browsers.
-  ///
-  /// WARNING: In most cases, you should use [auto] instead of this variant. Using
-  /// this variant in a non-Chromium browser will result in a broken app.
-  chromium,
-
-  /// The variant that contains the new WebParagraph implementation on top of Chrome's Text Clusters
-  /// API: https://github.com/fserb/canvas2D/blob/master/spec/enhanced-textmetrics.md
-  ///
-  /// WARNING: This is an experimental variant that's not yet ready for production use.
-  experimentalWebParagraph,
-}
-
 class CanvasKitRenderer extends Renderer {
   static CanvasKitRenderer get instance => _instance;
   static late CanvasKitRenderer _instance;
@@ -45,6 +23,9 @@ class CanvasKitRenderer extends Renderer {
   @override
   String get rendererTag => 'canvaskit';
 
+  /// Whether the renderer is using software rendering.
+  bool get isSoftware => _pictureToImageSurface.isSoftware;
+
   late final FlutterFontCollection _fontCollection = isExperimentalWebParagraph
       ? WebFontCollection()
       : SkiaFontCollection();
@@ -52,27 +33,22 @@ class CanvasKitRenderer extends Renderer {
   @override
   FlutterFontCollection get fontCollection => _fontCollection;
 
-  /// The scene host, where the root canvas and overlay canvases are added to.
-  DomElement? _sceneHost;
-  DomElement? get sceneHost => _sceneHost;
-
   static Rasterizer _createRasterizer() {
     if (configuration.canvasKitForceMultiSurfaceRasterizer || isSafari || isFirefox) {
-      return MultiSurfaceRasterizer();
+      return MultiSurfaceRasterizer(
+        (OnscreenCanvasProvider canvasProvider) => CkOnscreenSurface(canvasProvider),
+      );
     }
-    return OffscreenCanvasRasterizer();
+    return OffscreenCanvasRasterizer(
+      (OffscreenCanvasProvider canvasProvider) => CkOffscreenSurface(canvasProvider),
+    );
   }
 
   @override
   void debugResetRasterizer() {
     rasterizer = _createRasterizer();
+    _pictureToImageSurface = rasterizer.createPictureToImageSurface() as CkSurface;
   }
-
-  set resourceCacheMaxBytes(int bytes) => rasterizer.setResourceCacheMaxBytes(bytes);
-
-  /// A surface used specifically for `Picture.toImage` when software rendering
-  /// is supported.
-  final Surface pictureToImageSurface = Surface();
 
   @override
   Future<void> initialize() async {
@@ -87,6 +63,7 @@ class CanvasKitRenderer extends Renderer {
         windowFlutterCanvasKit = canvasKit;
       }
       rasterizer = _createRasterizer();
+      _pictureToImageSurface = rasterizer.createPictureToImageSurface() as CkSurface;
       _instance = this;
       await super.initialize();
     }();
@@ -184,7 +161,12 @@ class CanvasKitRenderer extends Renderer {
     double sigmaX = 0.0,
     double sigmaY = 0.0,
     ui.TileMode? tileMode,
-  }) => CkImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
+    ui.Rect? bounds,
+  }) =>
+      // TODO(dkwingsmt): `bounds` is currently not implemented in CanvasKit.
+      // Fall back to unbounded blur.
+      // https://github.com/flutter/flutter/issues/175899
+      CkImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
 
   @override
   ui.ImageFilter createDilateImageFilter({double radiusX = 0.0, double radiusY = 0.0}) =>
@@ -232,7 +214,12 @@ class CanvasKitRenderer extends Renderer {
 
   @override
   ui.Image createImageFromImageBitmap(DomImageBitmap imageBitmap) {
-    final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(imageBitmap, true);
+    SkImage? skImage;
+    if (isSoftware) {
+      skImage = canvasKit.MakeImageFromCanvasImageSource(imageBitmap);
+    } else {
+      skImage = canvasKit.MakeLazyImageFromImageBitmap(imageBitmap, true);
+    }
     if (skImage == null) {
       throw Exception('Failed to convert image bitmap to an SkImage.');
     }
@@ -255,16 +242,31 @@ class CanvasKitRenderer extends Renderer {
       ));
       return createImageFromImageBitmap(bitmap);
     }
-    final SkImage? skImage = canvasKit.MakeLazyImageFromTextureSourceWithInfo(
-      object,
-      SkPartialImageInfo(
-        width: width.toDouble(),
-        height: height.toDouble(),
-        alphaType: canvasKit.AlphaType.Premul,
-        colorType: canvasKit.ColorType.RGBA_8888,
-        colorSpace: SkColorSpaceSRGB,
-      ),
-    );
+    SkImage? skImage;
+    if (isSoftware) {
+      if (object.isA<VideoFrame>()) {
+        // If the object is a VideoFrame, we need to draw it to a canvas first to
+        // avoid a bug in CanvasKit where MakeImageFromCanvasImageSource doesn't
+        // work with VideoFrames.
+        final DomHTMLCanvasElement canvas = createDomCanvasElement(width: width, height: height);
+        final DomCanvasRenderingContext2D ctx = canvas.context2D;
+        ctx.drawImage(object as VideoFrame, 0, 0);
+        skImage = canvasKit.MakeImageFromCanvasImageSource(canvas);
+      } else {
+        skImage = canvasKit.MakeImageFromCanvasImageSource(object);
+      }
+    } else {
+      skImage = canvasKit.MakeLazyImageFromTextureSourceWithInfo(
+        object,
+        SkPartialImageInfo(
+          width: width.toDouble(),
+          height: height.toDouble(),
+          alphaType: canvasKit.AlphaType.Premul,
+          colorType: canvasKit.ColorType.RGBA_8888,
+          colorSpace: SkColorSpaceSRGB,
+        ),
+      );
+    }
 
     if (skImage == null) {
       throw Exception('Failed to convert image bitmap to an SkImage.');
@@ -340,7 +342,29 @@ class CanvasKitRenderer extends Renderer {
     List<ui.FontFeature>? fontFeatures,
     List<ui.FontVariation>? fontVariations,
   }) => isExperimentalWebParagraph
-      ? WebTextStyle(fontFamily: fontFamily, fontSize: fontSize, color: color)
+      ? WebTextStyle(
+          color: color,
+          decoration: decoration,
+          decorationColor: decorationColor,
+          decorationStyle: decorationStyle,
+          decorationThickness: decorationThickness,
+          fontWeight: fontWeight,
+          fontStyle: fontStyle,
+          textBaseline: textBaseline,
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+          fontSize: fontSize,
+          letterSpacing: letterSpacing,
+          wordSpacing: wordSpacing,
+          height: height,
+          leadingDistribution: leadingDistribution,
+          locale: locale,
+          background: background as CkPaint?,
+          foreground: foreground as CkPaint?,
+          shadows: shadows,
+          fontFeatures: fontFeatures,
+          fontVariations: fontVariations,
+        )
       : CkTextStyle(
           color: color,
           decoration: decoration,
@@ -381,10 +405,18 @@ class CanvasKitRenderer extends Renderer {
     ui.Locale? locale,
   }) => isExperimentalWebParagraph
       ? WebParagraphStyle(
-          textDirection: textDirection,
           textAlign: textAlign,
+          textDirection: textDirection,
+          maxLines: maxLines,
           fontFamily: fontFamily,
           fontSize: fontSize,
+          height: height,
+          textHeightBehavior: textHeightBehavior,
+          fontWeight: fontWeight,
+          fontStyle: fontStyle,
+          strutStyle: strutStyle as WebStrutStyle?,
+          ellipsis: ellipsis,
+          locale: locale,
         )
       : CkParagraphStyle(
           textAlign: textAlign,
@@ -413,7 +445,17 @@ class CanvasKitRenderer extends Renderer {
     ui.FontStyle? fontStyle,
     bool? forceStrutHeight,
   }) => isExperimentalWebParagraph
-      ? WebStrutStyle()
+      ? WebStrutStyle(
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+          fontSize: fontSize,
+          height: height,
+          leadingDistribution: leadingDistribution,
+          leading: leading,
+          fontWeight: fontWeight,
+          fontStyle: fontStyle,
+          forceStrutHeight: forceStrutHeight,
+        )
       : CkStrutStyle(
           fontFamily: fontFamily,
           fontFamilyFallback: fontFamilyFallback,
@@ -429,71 +471,6 @@ class CanvasKitRenderer extends Renderer {
   @override
   ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style) =>
       isExperimentalWebParagraph ? WebParagraphBuilder(style) : CkParagraphBuilder(style);
-
-  // TODO(harryterkelsen): Merge this logic with the async logic in
-  // [EngineScene], https://github.com/flutter/flutter/issues/142072.
-  @override
-  Future<void> renderScene(ui.Scene scene, EngineFlutterView view) async {
-    assert(
-      rasterizers.containsKey(view.viewId),
-      "Unable to render to a view which hasn't been registered",
-    );
-    final ViewRasterizer rasterizer = rasterizers[view.viewId]!;
-    final RenderQueue renderQueue = rasterizer.queue;
-    final FrameTimingRecorder? recorder = FrameTimingRecorder.frameTimingsEnabled
-        ? FrameTimingRecorder()
-        : null;
-    if (renderQueue.current != null) {
-      // If a scene is already queued up, drop it and queue this one up instead
-      // so that the scene view always displays the most recently requested scene.
-      renderQueue.next?.completer.complete();
-      final Completer<void> completer = Completer<void>();
-      renderQueue.next = (scene: scene, completer: completer, recorder: recorder);
-      return completer.future;
-    }
-    final Completer<void> completer = Completer<void>();
-    renderQueue.current = (scene: scene, completer: completer, recorder: recorder);
-    unawaited(_kickRenderLoop(rasterizer));
-    return completer.future;
-  }
-
-  Future<void> _kickRenderLoop(ViewRasterizer rasterizer) async {
-    final RenderQueue renderQueue = rasterizer.queue;
-    final RenderRequest current = renderQueue.current!;
-    try {
-      await _renderScene(current.scene, rasterizer, current.recorder);
-      current.completer.complete();
-    } catch (error, stackTrace) {
-      current.completer.completeError(error, stackTrace);
-    }
-    renderQueue.current = renderQueue.next;
-    renderQueue.next = null;
-    if (renderQueue.current == null) {
-      return;
-    } else {
-      return _kickRenderLoop(rasterizer);
-    }
-  }
-
-  Future<void> _renderScene(
-    ui.Scene scene,
-    ViewRasterizer rasterizer,
-    FrameTimingRecorder? recorder,
-  ) async {
-    // "Build finish" and "raster start" happen back-to-back because we
-    // render on the same thread, so there's no overhead from hopping to
-    // another thread.
-    //
-    // CanvasKit works differently from the HTML renderer in that in HTML
-    // we update the DOM in SceneBuilder.build, which is these function calls
-    // here are CanvasKit-only.
-    recorder?.recordBuildFinish();
-    recorder?.recordRasterStart();
-
-    await rasterizer.draw((scene as LayerScene).layerTree, null);
-    recorder?.recordRasterFinish();
-    recorder?.submitTimings();
-  }
 
   @override
   void clearFragmentProgramCache() {
@@ -537,5 +514,19 @@ class CanvasKitRenderer extends Renderer {
   );
 
   @override
-  void dumpDebugInfo() {}
+  void dumpDebugInfo() {
+    var i = 0;
+    for (final ViewRasterizer viewRasterizer in rasterizers.values) {
+      final Map<String, dynamic>? debugJson = viewRasterizer.dumpDebugInfo();
+      if (debugJson != null) {
+        downloadDebugInfo('flutter-scene$i', debugJson);
+        i++;
+      }
+    }
+  }
+
+  late CkSurface _pictureToImageSurface;
+
+  @override
+  CkSurface get pictureToImageSurface => _pictureToImageSurface;
 }

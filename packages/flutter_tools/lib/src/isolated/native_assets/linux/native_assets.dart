@@ -6,42 +6,90 @@ import 'package:code_assets/code_assets.dart';
 
 import '../../../base/common.dart';
 import '../../../base/file_system.dart';
-import '../../../base/io.dart';
+import '../../../convert.dart';
 import '../../../globals.dart' as globals;
 
-/// Flutter expects `clang++` to be on the path on Linux hosts.
+/// Returns a [CCompilerConfig] suitable for compiling code assets for Linux apps.
 ///
-/// Search for the accompanying `clang`, `ar`, and `ld`.
-Future<CCompilerConfig> cCompilerConfigLinux() async {
-  const kClangPlusPlusBinary = 'clang++';
-  const kClangBinary = 'clang';
-  const kArBinary = 'llvm-ar';
-  const kLdBinary = 'ld.lld';
-
-  final ProcessResult whichResult = await globals.processManager.run(<String>[
-    'which',
-    kClangPlusPlusBinary,
-  ]);
-  if (whichResult.exitCode != 0) {
-    throwToolExit('Failed to find $kClangPlusPlusBinary on PATH.');
+/// For app builds, [cmakeDirectory] must be given and point to the CMake build root for the app,
+/// e.g. `build/linux/x64/debug`. The compiler configuration is resolved by reading the
+/// `CMakeCache.txt` file in that directory to ensure we use the same compiler as the main app.
+///
+/// Flutter also builds code assets for widget tests. Since there is no app build in that context,
+/// [cmakeDirectory] should be set to null for those builds.
+Future<CCompilerConfig?> cCompilerConfigLinux({Directory? cmakeDirectory}) async {
+  if (cmakeDirectory == null) {
+    // No CMake reference (e.g. for a widget test). Hooks can resolve to any
+    // compiler.
+    return null;
   }
-  File clangPpFile = globals.fs.file((whichResult.stdout as String).trim());
-  clangPpFile = globals.fs.file(await clangPpFile.resolveSymbolicLinks());
 
-  final Directory clangDir = clangPpFile.parent;
-  final binaryPaths = <String, Uri>{};
-  for (final binary in <String>[kClangBinary, kArBinary, kLdBinary]) {
-    final File binaryFile = clangDir.childFile(binary);
-    if (!await binaryFile.exists()) {
-      throwToolExit("Failed to find $binary relative to $clangPpFile: $binaryFile doesn't exist.");
+  // For app builds, use the same compiler as the native/GTK parts of the app.
+  final File cmakeCacheTxt = cmakeDirectory.childFile('CMakeCache.txt');
+  if (!cmakeCacheTxt.existsSync()) {
+    throwToolExit(
+      'Could not read compiler configurations for build hooks, expected ${cmakeCacheTxt.path} to exist.',
+    );
+  }
+
+  const archiverVariable = 'CMAKE_AR';
+  // Flutter CMake projects use `LANGUAGES CXX`, so we can't read a configured C
+  // compiler directly. We read the C++ compiler and infer the C compiler from
+  // there.
+  const compilerVariable = 'CMAKE_CXX_COMPILER';
+  const linkerVariable = 'CMAKE_LINKER';
+
+  String? archiver;
+  String? cxxCompiler;
+  String? linker;
+
+  final String cmakeCacheContents = await cmakeCacheTxt.readAsString();
+  for (final String line in const LineSplitter().convert(cmakeCacheContents)) {
+    final RegExpMatch? match = _cmakeCacheEntry.firstMatch(line);
+    if (match != null) {
+      final String variable = match.group(1)!;
+      final String value = match.group(2)!;
+
+      switch (variable) {
+        case archiverVariable:
+          archiver = value;
+        case compilerVariable:
+          cxxCompiler = value;
+        case linkerVariable:
+          linker = value;
+      }
     }
-    binaryPaths[binary] = binaryFile.uri;
   }
-  final Uri? archiver = binaryPaths[kArBinary];
-  final Uri? compiler = binaryPaths[kClangBinary];
-  final Uri? linker = binaryPaths[kLdBinary];
-  if (archiver == null || compiler == null || linker == null) {
-    throwToolExit('Clang could not be found.');
+
+  Uri requireTool(String? found, String variableName) {
+    if (found == null) {
+      throwToolExit('Expected ${cmakeCacheTxt.path} to contain an entry for $variableName');
+    }
+
+    final File file = globals.fs.file(found);
+    if (!file.existsSync()) {
+      throwToolExit(
+        'Expected ${file.path} (read from $variableName in ${cmakeCacheTxt.path}) to exist.',
+      );
+    }
+
+    return file.uri;
   }
-  return CCompilerConfig(archiver: archiver, compiler: compiler, linker: linker);
+
+  // Find clang next to the clang++ we use in CMake
+  File clangPpFile = globals.fs.file(requireTool(cxxCompiler, compilerVariable));
+  clangPpFile = globals.fs.file(await clangPpFile.resolveSymbolicLinks());
+  final File clangFile = clangPpFile.parent.childFile('clang');
+  if (!clangFile.existsSync()) {
+    throwToolExit('Expected to find clang next to ${clangPpFile.path}');
+  }
+
+  return CCompilerConfig(
+    compiler: clangFile.uri,
+    linker: requireTool(linker, linkerVariable),
+    archiver: requireTool(archiver, archiverVariable),
+  );
 }
+
+// Format: `VARIABLE_NAME:TYPE=value`;
+final RegExp _cmakeCacheEntry = RegExp(r'^(\w+):\w+=(.*)$');

@@ -23,7 +23,10 @@ class SpinModel extends InheritedNotifier<AnimationController> {
   const SpinModel({super.key, super.notifier, required super.child});
 
   static double of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<SpinModel>()!.notifier!.value;
+    return context
+        .dependOnInheritedWidgetOfExactType<SpinModel>()!
+        .notifier!
+        .value;
   }
 }
 
@@ -48,7 +51,8 @@ class InheritedNotifierExample extends StatefulWidget {
   const InheritedNotifierExample({super.key});
 
   @override
-  State<InheritedNotifierExample> createState() => _InheritedNotifierExampleState();
+  State<InheritedNotifierExample> createState() =>
+      _InheritedNotifierExampleState();
 }
 
 /// [AnimationController]s can be created with `vsync: this` because of
@@ -60,7 +64,10 @@ class _InheritedNotifierExampleState extends State<InheritedNotifierExample>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(duration: const Duration(seconds: 10), vsync: this)..repeat();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 10),
+      vsync: this,
+    )..repeat();
   }
 
   @override

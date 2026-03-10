@@ -8,10 +8,15 @@ import 'package:flutter_api_samples/material/chip/deletable_chip_attributes.on_d
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Chip.onDeleted can be used to delete chips', (WidgetTester tester) async {
+  testWidgets('Chip.onDeleted can be used to delete chips', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.OnDeletedExampleApp());
 
-    expect(find.widgetWithText(AppBar, 'DeletableChipAttributes.onDeleted Sample'), findsOne);
+    expect(
+      find.widgetWithText(AppBar, 'DeletableChipAttributes.onDeleted Sample'),
+      findsOne,
+    );
     expect(find.widgetWithText(Chip, 'Aaron Burr'), findsOne);
     expect(find.widgetWithText(Chip, 'Alexander Hamilton'), findsOne);
     expect(find.widgetWithText(Chip, 'Eliza Hamilton'), findsOne);

@@ -301,7 +301,7 @@ class Tab1ItemPage extends StatefulWidget {
 
 class Tab1ItemPageState extends State<Tab1ItemPage> {
   late final List<Color> relatedColors = List<Color>.generate(10, (int index) {
-    final math.Random random = math.Random(widget.randomSeed);
+    final random = math.Random(widget.randomSeed);
     return Color.fromARGB(
       255,
       (widget.color!.red + random.nextInt(100) - 50).clamp(0, 255),
@@ -681,7 +681,7 @@ class Tab2ConversationRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isSelf = avatar == null;
+    final isSelf = avatar == null;
     return SafeArea(
       child: Row(
         mainAxisAlignment: isSelf ? MainAxisAlignment.end : MainAxisAlignment.start,

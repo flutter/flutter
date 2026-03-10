@@ -45,7 +45,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 
   ImageInfo complete() {
-    final ImageInfo imageInfo = ImageInfo(image: testImage);
+    final imageInfo = ImageInfo(image: testImage);
     _completer.complete(imageInfo);
     return imageInfo;
   }

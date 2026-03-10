@@ -403,14 +403,14 @@ class TestUsage implements Usage {
   final events = <TestUsageEvent>[];
   final exceptions = <dynamic>[];
   final timings = <TestTimingEvent>[];
-  var ensureAnalyticsSentCalls = 0;
+  int ensureAnalyticsSentCalls = 0;
   var _printedWelcome = false;
 
   @override
-  var enabled = true;
+  bool enabled = true;
 
   @override
-  var suppressAnalytics = false;
+  bool suppressAnalytics = false;
 
   @override
   String get clientId => 'test-client';

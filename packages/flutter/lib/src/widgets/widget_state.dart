@@ -15,8 +15,8 @@ import 'package:flutter/services.dart';
 // late BuildContext context;
 // late Set<WidgetState> states;
 
-/// This class allows [WidgetState] enum values to be combined
-/// using [WidgetStateOperators].
+/// This mixin allows [WidgetState] enum values to be combined
+/// using the `&`, `|`, and `~` operators.
 ///
 /// A [Map] with [WidgetStatesConstraint] objects as keys can be used
 /// in the [WidgetStateProperty.fromMap] constructor to resolve to
@@ -24,7 +24,7 @@ import 'package:flutter/services.dart';
 /// the current set of states.
 ///
 /// {@macro flutter.widgets.WidgetStateMap}
-abstract interface class WidgetStatesConstraint {
+mixin WidgetStatesConstraint {
   /// Whether the provided [states] satisfy this object's criteria.
   ///
   /// If the constraint is a single [WidgetState] object,
@@ -44,10 +44,19 @@ abstract interface class WidgetStatesConstraint {
   /// ```
   /// {@endtemplate}
   bool isSatisfiedBy(Set<WidgetState> states);
+
+  /// Combines two [WidgetStatesConstraint] values using logical "and".
+  WidgetStatesConstraint operator &(WidgetStatesConstraint other) => _WidgetStateAnd(this, other);
+
+  /// Combines two [WidgetStatesConstraint] values using logical "or".
+  WidgetStatesConstraint operator |(WidgetStatesConstraint other) => _WidgetStateOr(this, other);
+
+  /// Takes a [WidgetStatesConstraint] and applies the logical "not".
+  WidgetStatesConstraint operator ~() => _WidgetStateNot(this);
 }
 
 @immutable
-sealed class _WidgetStateCombo implements WidgetStatesConstraint {
+sealed class _WidgetStateCombo with WidgetStatesConstraint {
   const _WidgetStateCombo(this.first, this.second);
 
   final WidgetStatesConstraint first;
@@ -95,7 +104,7 @@ class _WidgetStateOr extends _WidgetStateCombo {
 }
 
 @immutable
-class _WidgetStateNot implements WidgetStatesConstraint {
+class _WidgetStateNot with WidgetStatesConstraint {
   const _WidgetStateNot(this.value);
 
   final WidgetStatesConstraint value;
@@ -115,29 +124,8 @@ class _WidgetStateNot implements WidgetStatesConstraint {
   String toString() => '~$value';
 }
 
-/// These operators can be used inside a [WidgetStateMap] to combine states
-/// and find a match.
-///
-/// Example:
-///
-/// {@macro flutter.widgets.WidgetStatesConstraint.isSatisfiedBy}
-///
-/// Since enums can't extend other classes, [WidgetState] instead `implements`
-/// the [WidgetStatesConstraint] interface. This `extension` ensures that
-/// the operators can be used without being directly inherited.
-extension WidgetStateOperators on WidgetStatesConstraint {
-  /// Combines two [WidgetStatesConstraint] values using logical "and".
-  WidgetStatesConstraint operator &(WidgetStatesConstraint other) => _WidgetStateAnd(this, other);
-
-  /// Combines two [WidgetStatesConstraint] values using logical "or".
-  WidgetStatesConstraint operator |(WidgetStatesConstraint other) => _WidgetStateOr(this, other);
-
-  /// Takes a [WidgetStatesConstraint] and applies the logical "not".
-  WidgetStatesConstraint operator ~() => _WidgetStateNot(this);
-}
-
 // A private class, used to create [WidgetState.any].
-class _AnyWidgetStates implements WidgetStatesConstraint {
+class _AnyWidgetStates with WidgetStatesConstraint {
   const _AnyWidgetStates();
 
   @override
@@ -177,7 +165,7 @@ class _AnyWidgetStates implements WidgetStatesConstraint {
 ///    `WidgetStateProperty` which is used in APIs that need to accept either
 ///    a [TextStyle] or a [WidgetStateProperty<TextStyle>].
 /// {@endtemplate}
-enum WidgetState implements WidgetStatesConstraint {
+enum WidgetState with WidgetStatesConstraint {
   /// The state when the user drags their mouse cursor over the given widget.
   ///
   /// See: https://material.io/design/interaction/states.html#hover.
@@ -283,10 +271,6 @@ typedef WidgetPropertyResolver<T> = T Function(Set<WidgetState> states);
 /// }
 /// ```
 /// {@end-tool}
-///
-/// See also:
-///
-///  * [MaterialStateColor], the Material specific version of `WidgetStateColor`.
 abstract class WidgetStateColor extends Color implements WidgetStateProperty<Color> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -372,8 +356,6 @@ class _WidgetStateColorMapper extends WidgetStateMapper<Color> implements Widget
 ///
 /// See also:
 ///
-///  * [MaterialStateMouseCursor], the Material specific version of
-///    `WidgetStateMouseCursor`.
 ///  * [MouseCursor] for introduction on the mouse cursor system.
 ///  * [SystemMouseCursors], which defines cursors that are supported by
 ///    native platforms.
@@ -420,17 +402,41 @@ abstract class WidgetStateMouseCursor extends MouseCursor
   ///
   /// By default this cursor resolves to [SystemMouseCursors.click]. If the widget is
   /// disabled, the cursor resolves to [SystemMouseCursors.basic].
-  ///
-  /// This cursor is the default for many widgets.
   static const WidgetStateMouseCursor clickable = WidgetStateMouseCursor.resolveWith(
     _clickable,
     debugDescription: 'WidgetStateMouseCursor(clickable)',
   );
+
   static MouseCursor _clickable(Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled)) {
       return SystemMouseCursors.basic;
     }
     return SystemMouseCursors.click;
+  }
+
+  /// A platform-adaptive mouse cursor for clickable widgets, which resolves
+  /// differently based on the widget's state and the platform.
+  ///
+  /// On web platforms, this cursor resolves to [SystemMouseCursors.click] by
+  /// default. If the widget is disabled, it resolves to
+  /// [SystemMouseCursors.basic].
+  ///
+  /// On non-web platforms, this cursor always resolves to
+  /// [SystemMouseCursors.basic].
+  ///
+  /// This cursor is commonly used for interactive widgets like buttons. The
+  /// difference in behavior across platforms reflects native conventions (e.g.,
+  /// web uses a hand pointer for buttons, while desktop platforms do not).
+  static const WidgetStateMouseCursor adaptiveClickable = WidgetStateMouseCursor.resolveWith(
+    _adaptiveClickable,
+    debugDescription: 'WidgetStateMouseCursor(adaptiveClickable)',
+  );
+
+  static MouseCursor _adaptiveClickable(Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
+      return SystemMouseCursors.basic;
+    }
+    return kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic;
   }
 
   /// A mouse cursor for widgets related to text, which resolves differently
@@ -492,11 +498,6 @@ class _WidgetMouseCursorMapper extends WidgetStateMapper<MouseCursor>
 ///
 /// ** See code in examples/api/lib/widgets/widget_state/widget_state_border_side.0.dart **
 /// {@end-tool}
-///
-/// See also:
-///
-///  * [MaterialStateBorderSide], the Material specific version of
-///    `WidgetStateBorderSide`.
 abstract class WidgetStateBorderSide extends BorderSide
     implements WidgetStateProperty<BorderSide?> {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -649,7 +650,7 @@ class _WidgetBorderSideMapper extends WidgetStateMapper<BorderSide?>
 /// implementation of [WidgetStateOutlinedBorder], that resolves to
 /// [RoundedRectangleBorder] when its widget is selected.
 ///
-/// ** See code in examples/api/lib/material/material_state/material_state_outlined_border.0.dart **
+/// ** See code in examples/api/lib/widgets/widget_state/widget_state_outlined_border.0.dart **
 /// {@end-tool}
 ///
 /// This class should only be used for parameters which are documented to take
@@ -658,8 +659,6 @@ class _WidgetBorderSideMapper extends WidgetStateMapper<BorderSide?>
 /// See also:
 ///
 ///  * [ShapeBorder] the base class for shape outlines.
-///  * [MaterialStateOutlinedBorder], the Material specific version of
-///    `WidgetStateOutlinedBorder`.
 abstract class WidgetStateOutlinedBorder extends OutlinedBorder
     implements WidgetStateProperty<OutlinedBorder?> {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -728,11 +727,6 @@ class _WidgetOutlinedBorderMapper extends WidgetStateMapper<OutlinedBorder?>
 ///   2. Use [WidgetStateTextStyle.resolveWith] and pass in a callback that
 ///      will be used to resolve the text style in the given states.
 ///   3. Use [WidgetStateTextStyle.fromMap] to assign a style using a [WidgetStateMap].
-///
-/// See also:
-///
-///  * [MaterialStateTextStyle], the Material specific version of
-///    `WidgetStateTextStyle`.
 abstract class WidgetStateTextStyle extends TextStyle implements WidgetStateProperty<TextStyle> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.

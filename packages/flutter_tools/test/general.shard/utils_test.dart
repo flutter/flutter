@@ -2,10 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/base/version.dart';
+import 'package:stack_trace/stack_trace.dart';
 
 import '../src/common.dart';
 
@@ -519,6 +523,98 @@ needs to be wrapped.
     expect(
       getSizeAsPlatformMB(10 * 1000 * 1000, platform: FakePlatform(operatingSystem: 'web')),
       '10.0MB',
+    );
+  });
+
+  testWithoutContext('Stream.transformWithCallSite', () async {
+    final inputController = StreamController<String>();
+    const jsonMap = <String, Object?>{'foo': 123};
+    const invalidJson = 'Hello world!';
+
+    final validCompleter = Completer<void>();
+    final errorCompleter = Completer<void>();
+
+    // Wrap the callsite of `transformWithCallSite` with a named function to be more confident
+    // that the top frame is the location we expect without actually needing to check exact line
+    // and column numbers.
+    void listenToStream() {
+      inputController.stream
+          .transformWithCallSite(json.decoder)
+          .listen(
+            (result) {
+              expect(validCompleter.isCompleted, false);
+              expect(result, jsonMap);
+              validCompleter.complete();
+            },
+            onError: (Object e, StackTrace st) {
+              expect(errorCompleter.isCompleted, false);
+              expect(e, isA<FormatException>());
+              final trace = Trace.from(st);
+              // Validate that the top stack frame corresponds to where `transformWithCallSite`
+              // was invoked.
+              expect(trace.frames.first.member, 'main.<fn>.listenToStream');
+              errorCompleter.complete();
+            },
+          );
+    }
+
+    listenToStream();
+
+    // Write both valid and invalid JSON to the stream.
+    inputController.add(json.encode(jsonMap));
+    inputController.add(invalidJson);
+
+    await inputController.sink.close();
+    await validCompleter.future;
+    await errorCompleter.future;
+  });
+
+  testWithoutContext('formatTable', () {
+    expect(formatTable(<List<String>>[]), isEmpty);
+
+    expect(() => formatTable(<List<String>>[<String>[]]), throwsException);
+    expect(() => formatTable(<List<String>>[<String>[], <String>[]]), throwsException);
+
+    expect(
+      formatTable(<List<String>>[
+        <String>['Col1', 'Col2'],
+        <String>['Value1', 'Value2'],
+      ]).join('\n'),
+      '''
+Col1   • Col2
+Value1 • Value2''',
+    );
+
+    expect(
+      formatTable(<List<String>>[
+        <String>['A', 'B', 'C'],
+        <String>['LongValue', 'Short', 'Tiny'],
+      ]).join('\n'),
+      '''
+A         • B     • C
+LongValue • Short • Tiny''',
+    );
+
+    expect(
+      formatTable(<List<String>>[
+        <String>['A', 'B'],
+        <String>['1', '2'],
+      ], separator: ' | ').join('\n'),
+      '''
+A | B
+1 | 2''',
+    );
+  });
+
+  testWithoutContext('formatTable with indent', () {
+    expect(
+      formatTable(<List<String>>[
+        <String>['A', 'B'],
+        <String>['1', '2'],
+      ], indent: 2).join('\n'),
+      '''
+  A • B
+  1 • 2''',
     );
   });
 }

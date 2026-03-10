@@ -35,10 +35,8 @@ void main(List<String> args) async {
   }
 
   // Find and parse the engine build configs.
-  final io.Directory buildConfigsDir = io.Directory(
-    p.join(engine.flutterDir.path, 'ci', 'builders'),
-  );
-  final BuildConfigLoader loader = BuildConfigLoader(buildConfigsDir: buildConfigsDir);
+  final buildConfigsDir = io.Directory(p.join(engine.flutterDir.path, 'ci', 'builders'));
+  final loader = BuildConfigLoader(buildConfigsDir: buildConfigsDir);
 
   // Treat it as an error if no build configs were found. The caller likely
   // expected to find some.
@@ -59,7 +57,7 @@ void main(List<String> args) async {
   } else {
     logger = Logger();
   }
-  final Environment environment = Environment(
+  final environment = Environment(
     abi: ffi.Abi.current(),
     engine: engine,
     platform: const LocalPlatform(),
@@ -69,11 +67,7 @@ void main(List<String> args) async {
   );
 
   // Use the Engine and BuildConfig collection to build the CommandRunner.
-  final ToolCommandRunner runner = ToolCommandRunner(
-    environment: environment,
-    configs: configs,
-    help: help,
-  );
+  final runner = ToolCommandRunner(environment: environment, configs: configs, help: help);
 
   try {
     io.exitCode = await runner.run(args);

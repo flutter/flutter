@@ -26,6 +26,7 @@ previous run for a given device, then you can skip this step by passing
 """
 
 ADB_LOCAL_PATH = 'flutter/third_party/android_tools/sdk/platform-tools/adb'
+ANDROID_NDK_VERSION = '28.2.13676358'
 
 
 def _get_flutter_root():
@@ -84,7 +85,7 @@ class GdbClient(object):
     SYSTEM_LIBS_PATH = '/tmp/flutter_gdb_device_libs'
 
     def _gdb_local_path(self):
-        GDB_LOCAL_PATH = ('flutter/third_party/android_tools/ndk/prebuilt/%s-x86_64/bin/gdb')
+        GDB_LOCAL_PATH = ('flutter/third_party/android_tools/sdk/ndk/%s/prebuilt/%%s-x86_64/bin/gdb' % ANDROID_NDK_VERSION)
         if sys.platform.startswith('darwin'):
             return GDB_LOCAL_PATH % 'darwin'
         else:
@@ -192,7 +193,7 @@ class GdbServer(object):
             return 1
 
         abi = _get_device_abi(adb_command)
-        gdb_server_local_path = 'flutter/third_party/android_tools/ndk/prebuilt/android-%s/gdbserver/gdbserver' % abi
+        gdb_server_local_path = 'flutter/third_party/android_tools/sdk/ndk/%s/prebuilt/android-%s/gdbserver/gdbserver' % (ANDROID_NDK_VERSION, abi)
 
         # Copy gdbserver to the package's data directory.
         subprocess.check_call(adb_command + ['push',

@@ -10,7 +10,7 @@ class TextFieldTemplate extends TokenTemplate {
   @override
   String generate() =>
       '''
-TextStyle? _m3StateInputStyle(BuildContext context) => MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
+TextStyle? _m3StateInputStyle(BuildContext context) => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
   if (states.contains(WidgetState.disabled)) {
     return TextStyle(color: ${textStyle("md.comp.filled-text-field.label-text")}!.color?.withOpacity(0.38));
   }

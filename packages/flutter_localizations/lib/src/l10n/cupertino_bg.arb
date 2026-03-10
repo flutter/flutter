@@ -30,10 +30,10 @@
   "shareButtonLabel": "Споделяне...",
   "cancelButtonLabel": "Отказ",
   "backButtonLabel": "Назад",
-  "expansionTileExpandedHint": "double tap to collapse",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "докоснете два пъти за свиване",
+  "expansionTileCollapsedHint": "докоснете два пъти за разгъване",
+  "expansionTileExpandedTapHint": "Свиване",
+  "expansionTileCollapsedTapHint": "Разгъване за още подробности",
+  "expandedHint": "Свито",
+  "collapsedHint": "Разгънато"
 }

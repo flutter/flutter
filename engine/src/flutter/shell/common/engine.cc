@@ -404,7 +404,7 @@ bool Engine::HandleNavigationPlatformMessage(
   if (document.HasParseError() || !document.IsObject()) {
     return false;
   }
-  auto root = document.GetObject();
+  auto root = document.GetObj();
   auto method = root.FindMember("method");
   if (method->value != "setInitialRoute") {
     return false;
@@ -423,7 +423,7 @@ bool Engine::HandleLocalizationPlatformMessage(PlatformMessage* message) {
   if (document.HasParseError() || !document.IsObject()) {
     return false;
   }
-  auto root = document.GetObject();
+  auto root = document.GetObj();
   auto method = root.FindMember("method");
   if (method == root.MemberEnd()) {
     return false;
@@ -527,6 +527,10 @@ void Engine::UpdateSemantics(int64_t view_id,
                              CustomAccessibilityActionUpdates actions) {
   delegate_.OnEngineUpdateSemantics(view_id, std::move(update),
                                     std::move(actions));
+}
+
+void Engine::SetApplicationLocale(std::string locale) {
+  delegate_.OnEngineSetApplicationLocale(std::move(locale));
 }
 
 void Engine::SetSemanticsTreeEnabled(bool enabled) {

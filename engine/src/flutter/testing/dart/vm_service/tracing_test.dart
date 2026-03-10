@@ -17,8 +17,8 @@ import '../impeller_enabled.dart';
 Future<void> _testChromeFormatTrace(vms.VmService vmService) async {
   final vms.Timeline timeline = await vmService.getVMTimeline();
 
-  int saveLayerRecordCount = 0;
-  int saveLayerCount = 0;
+  var saveLayerRecordCount = 0;
+  var saveLayerCount = 0;
   // int flowEventCount = 0;
   for (final vms.TimelineEvent event in timeline.traceEvents!) {
     final Map<String, dynamic> json = event.json!;
@@ -47,10 +47,10 @@ Future<void> _testPerfettoFormatTrace(vms.VmService vmService) async {
       .where((TracePacket packet) => packet.hasTrackEvent())
       .map((TracePacket packet) => packet.trackEvent);
 
-  int saveLayerRecordCount = 0;
-  int saveLayerCount = 0;
+  var saveLayerRecordCount = 0;
+  var saveLayerCount = 0;
   // int flowIdCount = 0;
-  for (final TrackEvent event in events) {
+  for (final event in events) {
     if (event.type == TrackEvent_Type.TYPE_SLICE_BEGIN) {
       if (event.name == 'ui.Canvas::saveLayer (Recorded)') {
         saveLayerRecordCount += 1;
@@ -68,49 +68,55 @@ Future<void> _testPerfettoFormatTrace(vms.VmService vmService) async {
 }
 
 void main() {
-  test('Canvas.saveLayer emits tracing', () async {
-    final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
+  test(
+    'Canvas.saveLayer emits tracing',
+    () async {
+      final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
 
-    if (info.serverUri == null) {
-      fail('This test must not be run with --disable-vm-service.');
-    }
+      if (info.serverUri == null) {
+        fail('This test must not be run with --disable-vm-service.');
+      }
 
-    final vms.VmService vmService = await vmServiceConnectUri(
-      'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws',
-    );
-    await vmService.clearVMTimeline();
+      final vms.VmService vmService = await vmServiceConnectUri(
+        'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws',
+      );
+      await vmService.clearVMTimeline();
 
-    final Completer<void> completer = Completer<void>();
-    PlatformDispatcher.instance.onBeginFrame = (Duration timeStamp) async {
-      final PictureRecorder recorder = PictureRecorder();
-      final Canvas canvas = Canvas(recorder);
-      canvas.drawColor(const Color(0xff0000ff), BlendMode.srcOut);
-      // Will saveLayer implicitly for Skia, but not Impeller.
-      canvas.drawPaint(Paint()..imageFilter = ImageFilter.blur(sigmaX: 2, sigmaY: 3));
-      canvas.saveLayer(null, Paint());
-      canvas.drawRect(const Rect.fromLTRB(10, 10, 20, 20), Paint());
-      canvas.saveLayer(const Rect.fromLTWH(0, 0, 100, 100), Paint());
-      canvas.drawRect(const Rect.fromLTRB(10, 10, 20, 20), Paint());
-      canvas.drawRect(const Rect.fromLTRB(15, 15, 25, 25), Paint());
-      canvas.restore();
-      canvas.restore();
-      final Picture picture = recorder.endRecording();
+      final completer = Completer<void>();
+      PlatformDispatcher.instance.onBeginFrame = (Duration timeStamp) async {
+        final recorder = PictureRecorder();
+        final canvas = Canvas(recorder);
+        canvas.drawColor(const Color(0xff0000ff), BlendMode.srcOut);
+        // Will saveLayer implicitly for Skia, but not Impeller.
+        canvas.drawPaint(Paint()..imageFilter = ImageFilter.blur(sigmaX: 2, sigmaY: 3));
+        canvas.saveLayer(null, Paint());
+        canvas.drawRect(const Rect.fromLTRB(10, 10, 20, 20), Paint());
+        canvas.saveLayer(const Rect.fromLTWH(0, 0, 100, 100), Paint());
+        canvas.drawRect(const Rect.fromLTRB(10, 10, 20, 20), Paint());
+        canvas.drawRect(const Rect.fromLTRB(15, 15, 25, 25), Paint());
+        canvas.restore();
+        canvas.restore();
+        final Picture picture = recorder.endRecording();
 
-      final SceneBuilder builder = SceneBuilder();
-      builder.addPicture(Offset.zero, picture);
-      final Scene scene = builder.build();
+        final builder = SceneBuilder();
+        builder.addPicture(Offset.zero, picture);
+        final Scene scene = builder.build();
 
-      await scene.toImage(100, 100);
-      scene.dispose();
-      completer.complete();
-    };
-    PlatformDispatcher.instance.scheduleFrame();
-    await completer.future;
+        await scene.toImage(100, 100);
+        scene.dispose();
+        completer.complete();
+      };
+      PlatformDispatcher.instance.scheduleFrame();
+      await completer.future;
 
-    await _testChromeFormatTrace(vmService);
-    await _testPerfettoFormatTrace(vmService);
-    await vmService.dispose();
-  });
+      await _testChromeFormatTrace(vmService);
+      await _testPerfettoFormatTrace(vmService);
+      await vmService.dispose();
+    },
+    // Test times out with the default 30 second timeout:
+    // https://github.com/flutter/flutter/issues/182150
+    timeout: const Timeout(Duration(seconds: 60)),
+  );
 
   test('Frame request pending begin/end pairs are matched', () async {
     final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
@@ -124,13 +130,13 @@ void main() {
     );
     await vmService.clearVMTimeline();
 
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     PlatformDispatcher.instance.onBeginFrame = (Duration timeStamp) async {
       completer.complete();
     };
 
     // Schedule some frames.
-    for (int i = 0; i < 5; i++) {
+    for (var i = 0; i < 5; i++) {
       PlatformDispatcher.instance.scheduleFrame();
     }
     await completer.future;
@@ -138,8 +144,8 @@ void main() {
     // Check that each "Frame Request Pending" event is ended before the next
     // one begins.
     final vms.Timeline timeline = await vmService.getVMTimeline();
-    bool eventStarted = false;
-    int frameCount = 0;
+    var eventStarted = false;
+    var frameCount = 0;
     for (final vms.TimelineEvent event in timeline.traceEvents!) {
       final Map<String, dynamic> json = event.json!;
       if (json['name'] == 'Frame Request Pending') {

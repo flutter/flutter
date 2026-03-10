@@ -19,7 +19,7 @@ void main() {
     mockHelper = FakeBuilder();
   });
 
-  int testListLength = 10;
+  var testListLength = 10;
   SliverList buildAListOfStuff() {
     return SliverList.builder(
       itemCount: testListLength,
@@ -196,7 +196,7 @@ void main() {
     testWidgets(
       'drag past threshold triggers refresh task',
       (WidgetTester tester) async {
-        final List<MethodCall> platformCallLog = <MethodCall>[];
+        final platformCallLog = <MethodCall>[];
 
         tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
           MethodCall methodCall,
@@ -382,7 +382,7 @@ void main() {
     testWidgets(
       'refreshing task keeps the sliver expanded forever until completes with error',
       (WidgetTester tester) async {
-        final FlutterError error = FlutterError('Oops');
+        final error = FlutterError('Oops');
         double errorCount = 0;
         final TargetPlatform? platform =
             debugDefaultTargetPlatformOverride; // Will not be correct within the zone.
@@ -1609,7 +1609,7 @@ void main() {
         await tester.pump(); // Sliver scroll offset correction is applied one frame later.
 
         await gesture.moveBy(const Offset(0.0, -300.0));
-        double indicatorDestinationPosition = -145.0332383665717;
+        var indicatorDestinationPosition = -145.0332383665717;
         if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
           indicatorDestinationPosition = -150.0;
         }

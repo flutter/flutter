@@ -16,17 +16,21 @@ import 'package:web/web.dart' as web;
 // See also `dev/integration_tests/web/lib/stack_trace.dart` that tests the
 // framework's ability to parse stack traces in all build modes.
 Future<void> main() async {
-  final StringBuffer errorMessage = StringBuffer();
+  final errorMessage = StringBuffer();
   debugPrint = (String? message, {int? wrapWidth}) {
     errorMessage.writeln(message);
   };
+  // Error messages on the web are printed to console.error.
+  ErrorToConsoleDumper.addWebDumpListener((String message) {
+    errorMessage.writeln(message);
+  });
 
   runApp(const ThrowingWidget());
 
   // Let the framework flush error messages.
   await Future<void>.delayed(Duration.zero);
 
-  final StringBuffer output = StringBuffer();
+  final output = StringBuffer();
   if (_errorMessageFormattedCorrectly(errorMessage.toString())) {
     output.writeln('--- TEST SUCCEEDED ---');
   } else {
@@ -51,7 +55,7 @@ bool _errorMessageFormattedCorrectly(String errorMessage) {
     return true;
   }
 
-  const List<String> expectedFunctions = <String>[
+  const expectedFunctions = <String>[
     'topLevelFunction',
     'secondLevelFunction',
     'thirdLevelFunction',

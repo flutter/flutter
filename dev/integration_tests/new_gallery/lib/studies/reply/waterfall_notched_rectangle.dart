@@ -47,10 +47,10 @@ class WaterfallNotchedRectangle extends NotchedShape {
     // available at: https://docs.google.com/document/d/e/2PACX-1vRVPWGtR85bawGynRSWzYTKgQtqrxCnxXCKC5xM9ab3IvtRHueku4rRIuJ4TbedzyMz2oy2pkzM71-_/pub
 
     // s1, s2 are the two knobs controlling the behavior of the bezier curve.
-    const double s1 = 21.0;
-    const double s2 = 6.0;
+    const s1 = 21.0;
+    const s2 = 6.0;
 
-    final double r = notchRadius;
+    final r = notchRadius;
     final double a = -1.0 * r - s2;
     final double b = host.top - guest.center.dy;
 
@@ -60,12 +60,12 @@ class WaterfallNotchedRectangle extends NotchedShape {
     final double p2yA = math.sqrt(r * r - p2xA * p2xA);
     final double p2yB = math.sqrt(r * r - p2xB * p2xB);
 
-    final List<Offset?> p = List<Offset?>.filled(6, null);
+    final p = List<Offset?>.filled(6, null);
 
     // p0, p1, and p2 are the control points for segment A.
     p[0] = Offset(a - s1, b);
     p[1] = Offset(a, b);
-    final double cmp = b < 0 ? -1.0 : 1.0;
+    final cmp = b < 0 ? -1.0 : 1.0;
     p[2] = cmp * p2yA > cmp * p2yB ? Offset(p2xA, p2yA) : Offset(p2xB, p2yB);
 
     // p3, p4, and p5 are the control points for segment B, which is a mirror
@@ -75,7 +75,7 @@ class WaterfallNotchedRectangle extends NotchedShape {
     p[5] = Offset(-1.0 * p[0]!.dx, p[0]!.dy);
 
     // translate all points back to the absolute coordinate system.
-    for (int i = 0; i < p.length; i += 1) {
+    for (var i = 0; i < p.length; i += 1) {
       p[i] = p[i]! + guest.center;
     }
 

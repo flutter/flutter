@@ -30,10 +30,10 @@
   "shareButtonLabel": "শেয়ার করুন...",
   "cancelButtonLabel": "বাতিল করুন",
   "backButtonLabel": "ফিরে যান",
-  "expansionTileExpandedHint": "double tap to collapse",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "আড়াল করতে ডবল ট্যাপ করুন",
+  "expansionTileCollapsedHint": "বড় করে দেখতে ডবল ট্যাপ করুন",
+  "expansionTileExpandedTapHint": "আড়াল করুন",
+  "expansionTileCollapsedTapHint": "আরও বিবরণ পেতে বড় করে দেখুন",
+  "expandedHint": "আড়াল করা হয়েছে",
+  "collapsedHint": "বড় করা হয়েছে"
 }

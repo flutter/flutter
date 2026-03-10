@@ -7,6 +7,7 @@ import 'dart:convert';
 
 import 'package:dtd/dtd.dart';
 import 'package:file/file.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
@@ -35,7 +36,6 @@ final firstLaunchMessagesWebServer = <Pattern>[
   'Creating widget preview scaffolding at:',
   launchingOnDeviceRegExp,
   'main.dart is being served at',
-  'Done loading previews.',
 ];
 
 final subsequentLaunchMessagesWeb = <Pattern>[launchingOnDeviceRegExp, 'Done loading previews.'];
@@ -79,6 +79,7 @@ void main() {
       'start',
       '--verbose',
       '--${WidgetPreviewStartCommand.kHeadless}',
+      '--${WidgetPreviewStartCommand.kDisableDtdServiceUuid}',
       if (useWebServer) '--${WidgetPreviewStartCommand.kWebServer}',
       if (dtdUri != null) '--${WidgetPreviewStartCommand.kDtdUrl}=$dtdUri',
       if (devToolsServerAddress != null)
@@ -116,6 +117,10 @@ void main() {
     await completer.future;
   }
 
+  void runFlutterClean() {
+    processManager.runSync(<String>[flutterBin, 'clean'], workingDirectory: tempDir.path);
+  }
+
   group('flutter widget-preview start', () {
     testWithoutContext('smoke test', () async {
       await runWidgetPreview(expectedMessages: firstLaunchMessagesWeb);
@@ -125,13 +130,53 @@ void main() {
       await runWidgetPreview(expectedMessages: firstLaunchMessagesWebServer, useWebServer: true);
     });
 
-    testWithoutContext('does not recreate project on subsequent runs', () async {
-      // The first run of 'flutter widget-preview start' should generate a new preview scaffold
-      await runWidgetPreview(expectedMessages: firstLaunchMessagesWeb);
+    testWithoutContext(
+      'runs flutter pub get in widget_preview_scaffold if '
+      "widget_preview_scaffold/.dart_tool doesn't exist",
+      () async {
+        // Regression test for https://github.com/flutter/flutter/issues/178660
+        // Generate the widget preview scaffold, but don't bother launching it.
+        processManager.runSync(<String>[
+          flutterBin,
+          'widget-preview',
+          'start',
+          '--no-${WidgetPreviewStartCommand.kLaunchPreviewer}',
+        ], workingDirectory: tempDir.path);
 
-      // We shouldn't regenerate the scaffold after the initial run.
-      await runWidgetPreview(expectedMessages: subsequentLaunchMessagesWeb);
-    });
+        // Ensure widget_preview_scaffold/.dart_tool/package_config.json exists.
+        final Directory widgetPreviewScaffoldDartTool = tempDir
+            .childDirectory('.dart_tool')
+            .childDirectory('widget_preview_scaffold')
+            .childDirectory('.dart_tool');
+        expect(widgetPreviewScaffoldDartTool, exists);
+        expect(widgetPreviewScaffoldDartTool.childFile('package_config.json'), exists);
+
+        // Delete widget_preview_scaffold/.dart_tool/. This simulates an interrupted
+        // flutter widget-preview start where 'flutter pub get' wasn't run after
+        // the widget_preview_scaffold project was created.
+        widgetPreviewScaffoldDartTool.deleteSync(recursive: true);
+
+        // Ensure we don't crash due to the package_config.json lookup pointing to
+        // the parent project's package_config.json due to
+        // widget_preview_scaffold/.dart_tool/package_config.json not existing.
+        await runWidgetPreview(expectedMessages: subsequentLaunchMessagesWeb);
+      },
+      // Project is always regenerated.
+      skip: true, // See https://github.com/flutter/flutter/issues/179036.
+    );
+
+    testWithoutContext(
+      'does not recreate project on subsequent runs',
+      () async {
+        // The first run of 'flutter widget-preview start' should generate a new preview scaffold
+        await runWidgetPreview(expectedMessages: firstLaunchMessagesWeb);
+
+        // We shouldn't regenerate the scaffold after the initial run.
+        await runWidgetPreview(expectedMessages: subsequentLaunchMessagesWeb);
+      },
+      // Project is always regenerated.
+      skip: true, // See https://github.com/flutter/flutter/issues/179036.
+    );
 
     testUsingContext('can connect to an existing DTD instance', () async {
       dtdLauncher = DtdLauncher(
@@ -148,14 +193,15 @@ void main() {
       // The preview scaffold will send a 'Connected' event on this stream once it has initialized
       // and is ready.
       final DartToolingDaemon dtdConnection = await DartToolingDaemon.connect(dtdUri);
-      const kWidgetPreviewScaffoldStream = 'WidgetPreviewScaffold';
       final completer = Completer<void>();
-      dtdConnection.onEvent(kWidgetPreviewScaffoldStream).listen((DTDEvent event) {
-        expect(event.stream, kWidgetPreviewScaffoldStream);
+      dtdConnection.onEvent(WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot).listen((
+        DTDEvent event,
+      ) {
+        expect(event.stream, WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot);
         expect(event.kind, 'Connected');
         completer.complete();
       });
-      await dtdConnection.streamListen(kWidgetPreviewScaffoldStream);
+      await dtdConnection.streamListen(WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot);
 
       // Start the widget preview and wait for the 'Connected' event.
       await runWidgetPreview(expectedMessages: firstLaunchMessagesWeb, dtdUri: dtdUri);
@@ -180,6 +226,50 @@ void main() {
         ],
         devToolsServerAddress: devtoolsUri,
       );
+    });
+
+    testUsingContext("doesn't crash on flutter clean", () async {
+      // Regression test for https://github.com/flutter/flutter/issues/175058.\
+      dtdLauncher = DtdLauncher(
+        logger: logger!,
+        artifacts: globals.artifacts!,
+        processManager: globals.processManager,
+      );
+
+      // Start a DTD instance.
+      final Uri dtdUri = await dtdLauncher!.launch();
+
+      // Connect to it and listen to the WidgetPreviewScaffold stream.
+      //
+      // The preview scaffold will send a 'Connected' event on this stream once it has initialized
+      // and is ready.
+      final DartToolingDaemon dtdConnection = await DartToolingDaemon.connect(dtdUri);
+      final completer = Completer<void>();
+      var firstConnection = true;
+      dtdConnection.onEvent(WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot).listen((
+        DTDEvent event,
+      ) {
+        expect(event.stream, WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot);
+        expect(event.kind, 'Connected');
+        if (firstConnection) {
+          firstConnection = false;
+          runFlutterClean();
+          dtdConnection.call(
+            WidgetPreviewDtdServices.kWidgetPreviewServiceRoot,
+            WidgetPreviewDtdServices.kHotRestartPreviewer,
+          );
+          return;
+        }
+        // The second `Connected` event should come after the previewer is hot restarted after
+        // we perform the `flutter clean`. This event won't be sent again if the previewer has
+        // crashed.
+        completer.complete();
+      });
+      await dtdConnection.streamListen(WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot);
+
+      // Start the widget preview and wait for the 'Connected' event.
+      await runWidgetPreview(expectedMessages: firstLaunchMessagesWeb, dtdUri: dtdUri);
+      await completer.future;
     });
   });
 }

@@ -17,7 +17,7 @@ class SearchBarTemplate extends TokenTemplate {
     final String? color = colorOrTransparent(
       'md.comp.search-bar.container.surface-tint-layer.color',
     );
-    final String surfaceTintColor = 'MaterialStatePropertyAll<Color>($color);';
+    final surfaceTintColor = 'MaterialStatePropertyAll<Color>($color);';
     if (color == 'Colors.transparent') {
       return 'const $surfaceTintColor';
     }

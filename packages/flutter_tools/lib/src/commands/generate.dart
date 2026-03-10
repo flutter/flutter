@@ -21,7 +21,7 @@ class GenerateCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     globals.printError(
-      '"flutter generate" is deprecated, use "dart pub run build_runner" instead. '
+      '"flutter generate" is deprecated, use "dart run build_runner" instead. '
       'The following dependencies must be added to dev_dependencies in pubspec.yaml:\n'
       'build_runner: ^1.10.0\n'
       'including all dependencies under the "builders" key',
