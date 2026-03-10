@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -80,6 +81,15 @@ class DowngradeCommand extends FlutterCommand {
   final Git _git;
   Stdio? _stdio;
   FileSystem? _fileSystem;
+
+  @override
+  ArgParser get argParser => _argParser;
+  late final ArgParser _argParser = ArgParser(
+    allowTrailingOptions: false,
+    usageLineLength: globals.outputPreferences.wrapText
+        ? globals.outputPreferences.wrapColumn
+        : null,
+  );
 
   @override
   String get description => 'Downgrade Flutter to the last active version for the current channel.';
