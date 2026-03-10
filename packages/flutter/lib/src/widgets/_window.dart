@@ -937,15 +937,22 @@ mixin class SatelliteWindowControllerDelegate {
 /// A controller for a satellite window.
 ///
 /// A satellite window is an auxiliary window to a regular or dialog window.
-/// Satellite windows maintain their position relative to their parent and are
-/// hidden when the application loses focus. They are also hidden when their parent
-/// becomes fullscreen or maximized. They may be resized by the user.
+/// Satellite windows are initiially placed using a [WindowPositioner]. Afterwards,
+/// the satellite window maintains its position relative to its parent. It is
+/// hidden if the application loses focus or when their parent
+/// becomes fullscreen or maximized.
+///
+/// Satellite windows may be resized and moved by the user. After being moved by
+/// the user, the satellite window will retain its new position relative to its
+/// parent such that when its parent moves, the satellite will be moved by the same
+/// offset.
 ///
 /// A satellite may be reparented. For example, if an application has two documents
 /// open, the satellite may choose to reparent to the active document such that
 /// closing one document will not cause the satellite to close. This behavior
-/// may be implemented at the toolkit level. Reparenting a satellite will not
-/// change the current absolute position of the satellite.
+/// may be implemented at the library level, such as in the Material API.
+/// Reparenting a satellite will not change the current absolute position of the
+/// satellite.
 ///
 /// Upon construction, the window is created for the platform with the provided
 /// properties.
@@ -976,37 +983,20 @@ abstract class SatelliteWindowController extends BaseWindowController {
   ///
   /// The [parent] argument specifies the parent window of this satellite.
   ///
-  /// The [anchorRect] argument specifies the rectangle in the parent's coordinate
-  /// space to which the tooltip is anchored.
-  ///
-  /// The [positioner] argument specifies how the satellite should be positioned
-  /// relative to the [anchorRect]. The positioner is only applied the first
+  /// The [initialPositioner] argument specifies how the satellite should be positioned
+  /// relative to the [initialAnchorRect]. The positioner is only applied the first
   /// time that the window is shown. Afterwards, the user may move and resize
-  /// the window to their preference.
+  /// the window to their preference. If the [parent] of the satellite moves, the
+  /// satellite is moved relative to its parent. The satellite will always retain
+  /// its current offset from its parent unless it is moved independently.
   ///
-  /// {@template flutter.widgets.windowing.constraints}
-  /// The [preferredSize] is the preferred content size of the window.
-  /// This might not be honored by the platform. This is the size that
-  /// the platform will try to apply to the window when it is created. In contrast,
-  /// the [preferredConstraints] field enforces the minimum and maximum size of
-  /// the window. If the [preferredSize] does not satisfy the [preferredConstraints]
-  /// or the [preferredSize] is null, then the platform will attempt to use an
-  /// initial size that does satisfy the [preferredConstraints] instead.
+  /// The [initialAnchorRect] argument specifies the rectangle in the parent's coordinate
+  /// space to which the tooltip is anchored. If it is `null`, then the satellite
+  /// is position relative to the parent window, including its decorations.
   ///
-  /// The [preferredConstraints] are the constraints placed upon the size
-  /// of the window. This might not be honored by the platform.
-  /// This field enforces a minimum and maximum size on the window. If the
-  /// user attempts to resize the window beyond these constraints, the platform
-  /// will enforce the constraints according to its own policy. For example, the
-  /// platform might clip the content to fit within the resized window, or it might
-  /// prevent the window from being resized altogether. If null, the window will
-  /// be unconstrained.
+  /// {@macro flutter.widgets.windowing.constraints}
   ///
-  /// If both [preferredSize] and [preferredConstraints] are null,
-  /// then the platform will use its own default size for the window.
-  /// {@endtemplate}
-  ///
-  /// The [title] argument configures the window's initial title.
+  /// The [title] argument configures the window's title.
   /// If omitted, some platforms might fall back to the app's name.
   ///
   /// The [delegate] argument can be used to listen to the window's
@@ -1017,8 +1007,8 @@ abstract class SatelliteWindowController extends BaseWindowController {
   @internal
   factory SatelliteWindowController({
     required BaseWindowController parent,
-    required Rect anchorRect,
-    required WindowPositioner positioner,
+    required WindowPositioner initialPositioner,
+    Rect? initialAnchorRect,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
@@ -1036,8 +1026,8 @@ abstract class SatelliteWindowController extends BaseWindowController {
     return owner.createSatelliteWindowController(
       delegate: delegate ?? SatelliteWindowControllerDelegate(),
       parent: parent,
-      anchorRect: anchorRect,
-      positioner: positioner,
+      initialAnchorRect: initialAnchorRect,
+      initialPositioner: initialPositioner,
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       title: title,
@@ -1061,11 +1051,15 @@ abstract class SatelliteWindowController extends BaseWindowController {
   /// The parent controller of this satellite.
   ///
   /// The satellite will be destroyed if its parent is destroyed.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
   BaseWindowController get parent;
 
   /// The current title of the window.
   ///
-  /// This might differ from the requested title.
+  /// The title shown in the window is controlled by the platform and may differ
+  /// from the given `title`.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
@@ -1214,8 +1208,8 @@ abstract class WindowingOwner {
   SatelliteWindowController createSatelliteWindowController({
     required SatelliteWindowControllerDelegate delegate,
     required BaseWindowController parent,
-    required Rect anchorRect,
-    required WindowPositioner positioner,
+    required WindowPositioner initialPositioner,
+    Rect? initialAnchorRect,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
@@ -1293,8 +1287,8 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
   SatelliteWindowController createSatelliteWindowController({
     required SatelliteWindowControllerDelegate delegate,
     required BaseWindowController parent,
-    required Rect anchorRect,
-    required WindowPositioner positioner,
+    required WindowPositioner initialPositioner,
+    Rect? initialAnchorRect,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
@@ -2339,6 +2333,10 @@ class _WindowManagerState extends State<WindowManager> {
               ),
               final PopupWindowController popup => PopupWindow(
                 controller: popup,
+                child: entry.builder(context),
+              ),
+              final SatelliteWindowController satellite => SatelliteWindow(
+                controller: satellite,
                 child: entry.builder(context),
               ),
             };

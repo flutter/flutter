@@ -11,5 +11,6 @@ void main() {
     WidgetTester tester,
   ) async {
     expect(() => example.main(), returnsNormally);
+    expect(find.text('Unsupported'), findsOneWidget);
   });
 }

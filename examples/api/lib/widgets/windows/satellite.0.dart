@@ -12,6 +12,7 @@ import 'package:flutter/src/widgets/_window_positioner.dart';
 
 void main() {
   try {
+    WidgetsFlutterBinding.ensureInitialized();
     runWidget(
       RegularWindow(
         controller: RegularWindowController(
@@ -55,20 +56,17 @@ class _CallbackSatelliteDelegate extends SatelliteWindowControllerDelegate {
 }
 
 class _MyAppState extends State<MyApp> {
-  final GlobalKey _key = GlobalKey();
   SatelliteWindowController? _satelliteController;
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[
       ElevatedButton(
-        key: _key,
         onPressed: () {
           setState(() {
             _satelliteController ??= SatelliteWindowController(
               parent: WindowScope.of(context),
-              anchorRect: _getAnchorRect()!,
-              positioner: const WindowPositioner(
+              initialPositioner: const WindowPositioner(
                 parentAnchor: WindowPositionerAnchor.right,
                 childAnchor: WindowPositionerAnchor.left,
               ),
@@ -123,17 +121,5 @@ class _MyAppState extends State<MyApp> {
         child: Row(mainAxisSize: MainAxisSize.min, children: children),
       ),
     );
-  }
-
-  Rect? _getAnchorRect() {
-    final RenderBox? renderBox =
-        _key.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox != null) {
-      final Offset position = renderBox.localToGlobal(Offset.zero);
-      final Size size = renderBox.size;
-      return position & size;
-    }
-
-    return null;
   }
 }

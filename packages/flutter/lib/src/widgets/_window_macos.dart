@@ -162,13 +162,13 @@ class WindowingOwnerMacOS extends WindowingOwner {
   SatelliteWindowController createSatelliteWindowController({
     required SatelliteWindowControllerDelegate delegate,
     required BaseWindowController parent,
-    required Rect anchorRect,
-    required WindowPositioner positioner,
+    required WindowPositioner initialPositioner,
+    required Rect initialAnchorRect,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
   }) {
-    throw UnimplementedError('Satellite windows are not yet implemented on MacOS.');
+    throw UnimplementedError('Satellite windows are not yet implemented on macOS.');
   }
 }
 

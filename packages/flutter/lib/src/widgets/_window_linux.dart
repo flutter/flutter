@@ -154,8 +154,8 @@ class WindowingOwnerLinux extends WindowingOwner {
   SatelliteWindowController createSatelliteWindowController({
     required SatelliteWindowControllerDelegate delegate,
     required BaseWindowController parent,
-    required Rect anchorRect,
-    required WindowPositioner positioner,
+    required Rect initialAnchorRect,
+    required WindowPositioner initialPositioner,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
