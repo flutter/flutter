@@ -62,7 +62,9 @@ class CleanCommand extends FlutterCommand {
     deleteFile(buildDir);
     _deleteProjectFiles(flutterProject);
 
-    if (boolArg('include-example') && flutterProject.hasExampleApp) {
+    if ((argResults?.wasParsed('include-example') ?? false) &&
+        boolArg('include-example') &&
+        flutterProject.hasExampleApp) {
       final FlutterProject exampleProject = flutterProject.example;
       if (isXcodeInstalledAndMeetsVersionCheck) {
         await _cleanXcode(exampleProject.ios);
