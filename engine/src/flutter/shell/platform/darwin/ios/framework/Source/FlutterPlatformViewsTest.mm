@@ -283,10 +283,8 @@ class FlutterPlatformViewsTestMockPlatformViewDelegate : public PlatformView::De
   void OnPlatformViewDispatchPlatformMessage(std::unique_ptr<PlatformMessage> message) override {}
   void OnPlatformViewDispatchPointerDataPacket(std::unique_ptr<PointerDataPacket> packet) override {
   }
-  bool OnPlatformViewEmbeddedNativeViewShouldAcceptTouch(
-      int64_t view_id,
-      const flutter::PointData touch_began_location) override {
-    return false;
+  HitTestResponse OnPlatformViewHitTest(int64_t view_id, const flutter::PointData offset) override {
+    return {.is_platform_view = false};
   }
   void OnPlatformViewDispatchSemanticsAction(int64_t view_id,
                                              int32_t node_id,
@@ -1697,11 +1695,13 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   FlutterResult result = ^(id result) {
   };
   [flutterPlatformViewsController
-      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
-                                                     arguments:@{
-                                                       @"id" : @2,
-                                                       @"viewType" : @"MockFlutterPlatformView"
-                                                     }]
+      onMethodCall:[FlutterMethodCall
+                       methodCallWithMethodName:@"create"
+                                      arguments:@{
+                                        @"id" : @2,
+                                        @"viewType" : @"MockFlutterPlatformView",
+                                        @"gestureBlockingPolicy" : @"fallbackToPluginDefault"
+                                      }]
             result:result];
 
   XCTAssertNotNil(gMockPlatformView);
@@ -1779,11 +1779,13 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   FlutterResult result = ^(id result) {
   };
   [flutterPlatformViewsController
-      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
-                                                     arguments:@{
-                                                       @"id" : @2,
-                                                       @"viewType" : @"MockFlutterPlatformView"
-                                                     }]
+      onMethodCall:[FlutterMethodCall
+                       methodCallWithMethodName:@"create"
+                                      arguments:@{
+                                        @"id" : @2,
+                                        @"viewType" : @"MockFlutterPlatformView",
+                                        @"gestureBlockingPolicy" : @"fallbackToPluginDefault"
+                                      }]
             result:result];
 
   XCTAssertNotNil(gMockPlatformView);
@@ -3446,7 +3448,11 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   [flutterPlatformViewsController
       onMethodCall:[FlutterMethodCall
                        methodCallWithMethodName:@"create"
-                                      arguments:@{@"id" : @2, @"viewType" : @"MockWrapperWebView"}]
+                                      arguments:@{
+                                        @"id" : @2,
+                                        @"viewType" : @"MockWrapperWebView",
+                                        @"gestureBlockingPolicy" : @"fallbackToPluginDefault"
+                                      }]
             result:result];
 
   XCTAssertNotNil(gMockPlatformView);
@@ -3637,7 +3643,11 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
     [flutterPlatformViewsController
         onMethodCall:[FlutterMethodCall
                          methodCallWithMethodName:@"create"
-                                        arguments:@{@"id" : @2, @"viewType" : @"MockWebView"}]
+                                        arguments:@{
+                                          @"id" : @2,
+                                          @"viewType" : @"MockWebView",
+                                          @"gestureBlockingPolicy" : @"fallbackToPluginDefault"
+                                        }]
               result:result];
 
     XCTAssertNotNil(gMockPlatformView);
@@ -3746,11 +3756,13 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
     FlutterResult result = ^(id result) {
     };
     [flutterPlatformViewsController
-        onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
-                                                       arguments:@{
-                                                         @"id" : @2,
-                                                         @"viewType" : @"MockWrapperWebView"
-                                                       }]
+        onMethodCall:[FlutterMethodCall
+                         methodCallWithMethodName:@"create"
+                                        arguments:@{
+                                          @"id" : @2,
+                                          @"viewType" : @"MockWrapperWebView",
+                                          @"gestureBlockingPolicy" : @"fallbackToPluginDefault"
+                                        }]
               result:result];
 
     XCTAssertNotNil(gMockPlatformView);
@@ -3894,7 +3906,11 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
     [flutterPlatformViewsController
         onMethodCall:[FlutterMethodCall
                          methodCallWithMethodName:@"create"
-                                        arguments:@{@"id" : @2, @"viewType" : @"MockWebView"}]
+                                        arguments:@{
+                                          @"id" : @2,
+                                          @"viewType" : @"MockWebView",
+                                          @"gestureBlockingPolicy" : @"fallbackToPluginDefault"
+                                        }]
               result:result];
 
     XCTAssertNotNil(gMockPlatformView);
@@ -4016,7 +4032,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   }
 }
 
-- (void)testFlutterPlatformViewBlockGestureHitTestPolicyShouldNotAddDelayingRecognizer {
+- (void)
+    testFlutterPlatformViewGestureBlockingPolicy_ShouldNotAddDelayingRecognizerUnderDoNotBlockGesturePolicy {
   flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
 
   flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
@@ -4040,7 +4057,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   [flutterPlatformViewsController registerViewFactory:factory
                                                withId:@"MockFlutterPlatformView"
                      gestureRecognizersBlockingPolicy:
-                         FlutterPlatformViewGestureRecognizersBlockingPolicyTouchBlockingOnly];
+                         FlutterPlatformViewGestureRecognizersBlockingPolicyDoNotBlockGesture];
   FlutterResult result = ^(id result) {
   };
   [flutterPlatformViewsController
@@ -4049,7 +4066,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
                                       arguments:@{
                                         @"id" : @2,
                                         @"viewType" : @"MockFlutterPlatformView",
-                                        @"gestureBlockingPolicy" : @"touchBlockingOnly"
+                                        @"gestureBlockingPolicy" : @"doNotBlockGesture"
                                       }]
             result:result];
 
@@ -4068,7 +4085,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   XCTAssert([forwardingRecognizer isKindOfClass:[ForwardingGestureRecognizer class]]);
 }
 
-- (void)testFlutterPlatformViewBlockGestureUnderNonHitTestPolicyShouldAddDelayingRecognizer {
+- (void)testFlutterPlatformViewGestureBlockingPolicy_ShouldAddDelayingRecognizerUnderEagerPolicy {
   flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
 
   flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
@@ -4121,7 +4138,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   XCTAssert([forwardingRecognizer isKindOfClass:[ForwardingGestureRecognizer class]]);
 }
 
-- (void)testFlutterPlatformViewBlockGestureHitTestPolicyAcceptGesture {
+- (void)testFlutterPlatformViewHitTest_AcceptTouchIfInstructedByFramework {
   flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
 
   flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
@@ -4149,70 +4166,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   [flutterPlatformViewsController registerViewFactory:factory
                                                withId:@"MockFlutterPlatformView"
                      gestureRecognizersBlockingPolicy:
-                         FlutterPlatformViewGestureRecognizersBlockingPolicyTouchBlockingOnly];
-  FlutterResult result = ^(id result) {
-  };
-  [flutterPlatformViewsController
-      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
-                                                     arguments:@{
-                                                       @"id" : @2,
-                                                       @"viewType" : @"MockFlutterPlatformView",
-                                                       @"gestureBlockingPolicy" : @"eager"
-                                                     }]
-            result:result];
-
-  XCTAssertNotNil(gMockPlatformView);
-
-  // Find touch inteceptor view
-  UIView* touchInterceptorView = gMockPlatformView;
-  while (touchInterceptorView != nil &&
-         ![touchInterceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
-    touchInterceptorView = touchInterceptorView.superview;
-  }
-  XCTAssertNotNil(touchInterceptorView);
-
-  touchInterceptorView.frame = CGRectMake(0, 0, 100, 100);
-  CGPoint touchBeganLocation = CGPointMake(1, 1);
-
-  UIEvent* mockEvent = OCMClassMock([UIEvent class]);
-  OCMStub([mockEvent type]).andReturn(UIEventTypeTouches);
-
-  OCMStub([mockFlutterViewController
-              platformViewShouldAcceptTouchAtTouchBeganLocation:touchBeganLocation])
-      .andReturn(YES);
-  UIView* hitTestResult = [touchInterceptorView hitTest:touchBeganLocation withEvent:mockEvent];
-  XCTAssert(hitTestResult == gMockPlatformView);
-}
-
-- (void)testFlutterPlatformViewBlockGestureHitTestPolicyRejectGesture {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
-                               /*platform=*/GetDefaultTaskRunner(),
-                               /*raster=*/GetDefaultTaskRunner(),
-                               /*ui=*/GetDefaultTaskRunner(),
-                               /*io=*/GetDefaultTaskRunner());
-  FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-
-  FlutterViewController* mockFlutterViewController = OCMClassMock([FlutterViewController class]);
-  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
-
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
-  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
-      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
-  [flutterPlatformViewsController registerViewFactory:factory
-                                               withId:@"MockFlutterPlatformView"
-                     gestureRecognizersBlockingPolicy:
-                         FlutterPlatformViewGestureRecognizersBlockingPolicyTouchBlockingOnly];
+                         FlutterPlatformViewGestureRecognizersBlockingPolicyDoNotBlockGesture];
   FlutterResult result = ^(id result) {
   };
   [flutterPlatformViewsController
@@ -4221,7 +4175,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
                                       arguments:@{
                                         @"id" : @2,
                                         @"viewType" : @"MockFlutterPlatformView",
-                                        @"gestureBlockingPolicy" : @"touchBlockingOnly"
+                                        @"gestureBlockingPolicy" : @"doNotBlockGesture"
                                       }]
             result:result];
 
@@ -4241,14 +4195,16 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   UIEvent* mockEvent = OCMClassMock([UIEvent class]);
   OCMStub([mockEvent type]).andReturn(UIEventTypeTouches);
 
+  // Framework instructs "accept touch".
   OCMStub([mockFlutterViewController
               platformViewShouldAcceptTouchAtTouchBeganLocation:touchBeganLocation])
-      .andReturn(NO);
+      .andReturn(YES);
   UIView* hitTestResult = [touchInterceptorView hitTest:touchBeganLocation withEvent:mockEvent];
-  XCTAssert(hitTestResult == touchInterceptorView);
+  // HitTest returning the platform view means platform view will receive touch events.
+  XCTAssert(hitTestResult == gMockPlatformView);
 }
 
-- (void)testFlutterPlatformViewGestureBlockingPolicyMapping {
+- (void)testFlutterPlatformViewHitTest_RejectTouchIfInstructedByFramework {
   flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
 
   flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
@@ -4276,8 +4232,78 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   [flutterPlatformViewsController registerViewFactory:factory
                                                withId:@"MockFlutterPlatformView"
                      gestureRecognizersBlockingPolicy:
-                         FlutterPlatformViewGestureRecognizersBlockingPolicyWaitUntilTouchesEnded];
+                         FlutterPlatformViewGestureRecognizersBlockingPolicyDoNotBlockGesture];
   FlutterResult result = ^(id result) {
+  };
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall
+                       methodCallWithMethodName:@"create"
+                                      arguments:@{
+                                        @"id" : @2,
+                                        @"viewType" : @"MockFlutterPlatformView",
+                                        @"gestureBlockingPolicy" : @"doNotBlockGesture"
+                                      }]
+            result:result];
+
+  XCTAssertNotNil(gMockPlatformView);
+
+  // Find touch inteceptor view
+  UIView* touchInterceptorView = gMockPlatformView;
+  while (touchInterceptorView != nil &&
+         ![touchInterceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
+    touchInterceptorView = touchInterceptorView.superview;
+  }
+  XCTAssertNotNil(touchInterceptorView);
+
+  touchInterceptorView.frame = CGRectMake(0, 0, 100, 100);
+  CGPoint touchBeganLocation = CGPointMake(1, 1);
+
+  UIEvent* mockEvent = OCMClassMock([UIEvent class]);
+  OCMStub([mockEvent type]).andReturn(UIEventTypeTouches);
+
+  // Framework instructs "reject touch".
+  OCMStub([mockFlutterViewController
+              platformViewShouldAcceptTouchAtTouchBeganLocation:touchBeganLocation])
+      .andReturn(NO);
+  UIView* hitTestResult = [touchInterceptorView hitTest:touchBeganLocation withEvent:mockEvent];
+  // HitTest returning the touch interceptor view means platform view will not receive touch events.
+  XCTAssert(hitTestResult == touchInterceptorView);
+}
+
+- (void)testFlutterPlatformViewGestureBlockingPolicy_PolicyMappingIsCorrect {
+  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
+
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/GetDefaultTaskRunner(),
+                               /*raster=*/GetDefaultTaskRunner(),
+                               /*ui=*/GetDefaultTaskRunner(),
+                               /*io=*/GetDefaultTaskRunner());
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      [[FlutterPlatformViewsController alloc] init];
+
+  FlutterViewController* mockFlutterViewController = OCMClassMock([FlutterViewController class]);
+  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
+
+  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
+      /*platform_views_controller=*/flutterPlatformViewsController,
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
+
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController registerViewFactory:factory
+                                               withId:@"MockFlutterPlatformView"
+                     // the policy set by engine API will be overwritten by the dart API, unless
+                     // `fallbackToPluginDefault` is used in dart API.
+                     gestureRecognizersBlockingPolicy:
+                         FlutterPlatformViewGestureRecognizersBlockingPolicyWaitUntilTouchesEnded];
+  __block id methodResult;
+  FlutterResult result = ^(id result) {
+    methodResult = result;
   };
 
   // eager
@@ -4315,14 +4341,13 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   XCTAssertEqual(((FlutterTouchInterceptingView*)touchInterceptorView).blockingPolicy,
                  FlutterPlatformViewGestureRecognizersBlockingPolicyWaitUntilTouchesEnded);
 
-  // touchBlockingOnly
   [flutterPlatformViewsController
       onMethodCall:[FlutterMethodCall
                        methodCallWithMethodName:@"create"
                                       arguments:@{
                                         @"id" : @4,
                                         @"viewType" : @"MockFlutterPlatformView",
-                                        @"gestureBlockingPolicy" : @"touchBlockingOnly"
+                                        @"gestureBlockingPolicy" : @"doNotBlockGesture"
                                       }]
             result:result];
   touchInterceptorView = gMockPlatformView;
@@ -4331,7 +4356,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
     touchInterceptorView = touchInterceptorView.superview;
   }
   XCTAssertEqual(((FlutterTouchInterceptingView*)touchInterceptorView).blockingPolicy,
-                 FlutterPlatformViewGestureRecognizersBlockingPolicyTouchBlockingOnly);
+                 FlutterPlatformViewGestureRecognizersBlockingPolicyDoNotBlockGesture);
+  XCTAssertNil(methodResult);
 
   // fallbackToPluginDefault (which is waitUntilTouchesEnded)
   [flutterPlatformViewsController
@@ -4350,6 +4376,24 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   }
   XCTAssertEqual(((FlutterTouchInterceptingView*)touchInterceptorView).blockingPolicy,
                  FlutterPlatformViewGestureRecognizersBlockingPolicyWaitUntilTouchesEnded);
+  XCTAssertNil(methodResult);
+
+  // Unkonwn gesture blocking policy should fail
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                     arguments:@{
+                                                       @"id" : @6,
+                                                       @"viewType" : @"MockFlutterPlatformView",
+                                                       @"gestureBlockingPolicy" : @"unknownPolicy"
+                                                     }]
+            result:result];
+  XCTAssertTrue([methodResult isKindOfClass:[FlutterError class]]);
+  FlutterError* resultError = (FlutterError*)methodResult;
+  XCTAssertEqualObjects(resultError.code, @"unknown_gesture_blocking_policy");
+  XCTAssertEqualObjects(
+      resultError.message,
+      @"Trying to create a platform view with an unknown gesture blocking policy");
+  XCTAssertEqualObjects(resultError.details, @"view id: '6'");
 }
 
 - (void)testFlutterPlatformViewControllerSubmitFrameWithoutFlutterViewNotCrashing {

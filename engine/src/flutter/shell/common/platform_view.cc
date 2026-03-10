@@ -35,11 +35,9 @@ void PlatformView::DispatchPointerDataPacket(
   delegate_.OnPlatformViewDispatchPointerDataPacket(std::move(packet));
 }
 
-bool PlatformView::EmbeddedNativeViewShouldAcceptTouch(
-    int64_t view_id,
-    const flutter::PointData touch_began_location) {
-  return delegate_.OnPlatformViewEmbeddedNativeViewShouldAcceptTouch(
-      view_id, touch_began_location);
+HitTestResponse PlatformView::HitTest(int64_t view_id,
+                                      const flutter::PointData offset) {
+  return delegate_.OnPlatformViewHitTest(view_id, offset);
 }
 
 void PlatformView::DispatchSemanticsAction(int64_t view_id,

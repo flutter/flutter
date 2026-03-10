@@ -374,16 +374,13 @@ bool RuntimeController::DispatchPointerDataPacket(
   return false;
 }
 
-bool RuntimeController::EmbeddedNativeViewShouldAcceptTouch(
-    int64_t view_id,
-    const flutter::PointData touch_began_location) {
+HitTestResponse RuntimeController::HitTest(int64_t view_id,
+                                           const flutter::PointData offset) {
   if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
-    TRACE_EVENT0("flutter",
-                 "RuntimeController::EmbeddedNativeViewShouldAcceptTouch");
-    return platform_configuration->EmbeddedNativeViewShouldAcceptTouch(
-        view_id, touch_began_location);
+    TRACE_EVENT0("flutter", "RuntimeController::HitTest");
+    return platform_configuration->HitTest(view_id, offset);
   }
-  return false;
+  return {.is_platform_view = false};
 }
 
 bool RuntimeController::DispatchSemanticsAction(int64_t view_id,

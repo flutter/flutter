@@ -1226,15 +1226,15 @@ void Shell::OnPlatformViewDispatchPointerDataPacket(
   next_pointer_flow_id_++;
 }
 
-bool Shell::OnPlatformViewEmbeddedNativeViewShouldAcceptTouch(
-    int64_t view_id,
-    const flutter::PointData touch_began_location) {
+HitTestResponse Shell::OnPlatformViewHitTest(int64_t view_id,
+                                             const flutter::PointData offset) {
+  // hit test should be performed only when UI & platform threads are merged.
   FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
+  FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
   if (engine_) {
-    return engine_->EmbeddedNativeViewShouldAcceptTouch(view_id,
-                                                        touch_began_location);
+    return engine_->HitTest(view_id, offset);
   }
-  return false;
+  return {.is_platform_view = false};
 }
 
 // |PlatformView::Delegate|

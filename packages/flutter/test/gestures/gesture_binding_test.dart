@@ -105,10 +105,10 @@ void main() {
         (HitTestResult result, Offset position, int viewId) {};
 
     final request = ui.HitTestRequest(view: _FakeFlutterView(), offset: const Offset(1, 1));
-    final ui.HitTestResponse repsonse =
+    final ui.HitTestResponse response =
         GestureBinding.instance.platformDispatcher.onHitTest?.call(request) ??
         ui.HitTestResponse.empty;
-    expect(repsonse.isPlatformView, isFalse);
+    expect(response.isPlatformView, isFalse);
   });
 
   test('Platform view hit test should not accept gesture if no platform view', () {
@@ -118,10 +118,10 @@ void main() {
         };
 
     final request = ui.HitTestRequest(view: _FakeFlutterView(), offset: const Offset(1, 1));
-    final ui.HitTestResponse repsonse =
+    final ui.HitTestResponse response =
         GestureBinding.instance.platformDispatcher.onHitTest?.call(request) ??
         ui.HitTestResponse.empty;
-    expect(repsonse.isPlatformView, isFalse);
+    expect(response.isPlatformView, isFalse);
   });
 
   test('Platform view hit test should not accept gesture if first hit is not a platform view', () {
@@ -133,11 +133,11 @@ void main() {
 
     final request = ui.HitTestRequest(view: _FakeFlutterView(), offset: const Offset(1, 1));
 
-    final ui.HitTestResponse repsonse =
+    final ui.HitTestResponse response =
         GestureBinding.instance.platformDispatcher.onHitTest?.call(request) ??
         ui.HitTestResponse.empty;
 
-    expect(repsonse.isPlatformView, isFalse);
+    expect(response.isPlatformView, isFalse);
   });
 
   test('Platform view hit test should accept gesture if first hit is a platform view', () {
@@ -149,11 +149,11 @@ void main() {
 
     final request = ui.HitTestRequest(view: _FakeFlutterView(), offset: const Offset(1, 1));
 
-    final ui.HitTestResponse repsonse =
+    final ui.HitTestResponse response =
         GestureBinding.instance.platformDispatcher.onHitTest?.call(request) ??
         ui.HitTestResponse.empty;
 
-    expect(repsonse.isPlatformView, isTrue);
+    expect(response.isPlatformView, isTrue);
   });
 
   test('Pointer tap events', () {

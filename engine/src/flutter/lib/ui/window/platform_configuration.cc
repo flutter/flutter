@@ -77,12 +77,8 @@ void PlatformConfiguration::DidCreateIsolate() {
   dispatch_pointer_data_packet_.Set(
       tonic::DartState::Current(),
       Dart_GetField(library, tonic::ToDart("_dispatchPointerDataPacket")));
-  // The embedded native view (e.g. UIView on iOS) is called "platform view"
-  // on framework side, but "embedded native view" on engine side. On the other
-  // hand, "platform view" refers to the whole flutter view on engine side.
-  embedded_native_view_should_accept_touch_.Set(
-      tonic::DartState::Current(),
-      Dart_GetField(library, tonic::ToDart("_platformViewShouldAcceptTouch")));
+  hit_test_.Set(tonic::DartState::Current(),
+                Dart_GetField(library, tonic::ToDart("_hitTest")));
   dispatch_semantics_action_.Set(
       tonic::DartState::Current(),
       Dart_GetField(library, tonic::ToDart("_dispatchSemanticsAction")));
@@ -406,24 +402,29 @@ void PlatformConfiguration::DispatchPointerDataPacket(
       tonic::DartInvoke(dispatch_pointer_data_packet_.Get(), {data_handle}));
 }
 
-bool PlatformConfiguration::EmbeddedNativeViewShouldAcceptTouch(
+HitTestResponse PlatformConfiguration::HitTest(
     int64_t view_id,
-    const flutter::PointData touch_began_location) {
-  std::shared_ptr<tonic::DartState> dart_state =
-      embedded_native_view_should_accept_touch_.dart_state().lock();
+    const flutter::PointData offset) {
+  std::shared_ptr<tonic::DartState> dart_state = hit_test_.dart_state().lock();
   if (!dart_state) {
-    return false;
+    return {.is_platform_view = false};
   }
   tonic::DartState::Scope scope(dart_state);
 
   Dart_Handle dart_result = tonic::DartInvoke(
-      embedded_native_view_should_accept_touch_.Get(),
-      {tonic::ToDart(view_id), tonic::ToDart(touch_began_location.x),
-       tonic::ToDart(touch_began_location.y)});
+      hit_test_.Get(), {tonic::ToDart(view_id), tonic::ToDart(offset.x),
+                        tonic::ToDart(offset.y)});
   if (tonic::CheckAndHandleError(dart_result)) {
-    return false;
+    return {.is_platform_view = false};
   }
-  return tonic::DartConverter<bool>::FromDart(dart_result);
+
+  Dart_Handle is_platform_view_handle =
+      Dart_GetField(dart_result, tonic::ToDart("isPlatformView"));
+  if (tonic::CheckAndHandleError(is_platform_view_handle)) {
+    return {.is_platform_view = false};
+  }
+  return {.is_platform_view =
+              tonic::DartConverter<bool>::FromDart(is_platform_view_handle)};
 }
 
 void PlatformConfiguration::DispatchSemanticsAction(int64_t view_id,
