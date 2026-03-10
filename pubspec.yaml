@@ -185,7 +185,7 @@ dependencies:
   url_launcher_web: 2.4.2
   url_launcher_windows: 3.1.5
   vector_math: 2.2.0
-  video_player: 2.11.0
+  video_player: 2.11.1
   video_player_android: 2.9.4
   video_player_avfoundation: 2.9.4
   video_player_platform_interface: 6.6.0
@@ -217,4 +217,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: jesvn3
+# PUBSPEC CHECKSUM: 9sdb3f
