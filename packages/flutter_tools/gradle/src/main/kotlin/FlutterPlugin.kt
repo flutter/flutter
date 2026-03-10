@@ -406,6 +406,10 @@ class FlutterPlugin : Plugin<Project> {
                 projectToAddTasksTo,
                 getPluginHandler(projectToAddTasksTo).getPluginList()
             )
+            FlutterPluginUtils.detectApplyingKotlinGradlePlugin(
+                projectToAddTasksTo,
+                getPluginHandler(projectToAddTasksTo).getPluginListWithoutDevDependencies()
+            )
             return
         }
         // Flutter host module project (Add-to-app).
@@ -484,6 +488,10 @@ class FlutterPlugin : Plugin<Project> {
         FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(
             projectToAddTasksTo,
             getPluginHandler(projectToAddTasksTo).getPluginList()
+        )
+        FlutterPluginUtils.detectApplyingKotlinGradlePlugin(
+            projectToAddTasksTo,
+            getPluginHandler(projectToAddTasksTo).getPluginListWithoutDevDependencies()
         )
     }
 
