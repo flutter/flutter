@@ -705,7 +705,7 @@ class _TestSatelliteWindowController extends SatelliteWindowController
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
     required BaseWindowController parent,
-    required ui.Rect anchorRect,
+    ui.Rect? anchorRect,
     required WindowPositioner positioner,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
@@ -736,7 +736,7 @@ class _TestSatelliteWindowController extends SatelliteWindowController
   BaseWindowController _parent;
   final _TestWindowingOwner windowingOwner;
   // ignore: unused_field
-  final ui.Rect _anchorRect;
+  final ui.Rect? _anchorRect;
   // ignore: unused_field
   final WindowPositioner _positioner;
   Size _size;
@@ -1002,8 +1002,8 @@ class _TestWindowingOwner extends WindowingOwner {
   SatelliteWindowController createSatelliteWindowController({
     required SatelliteWindowControllerDelegate delegate,
     required BaseWindowController parent,
-    required Rect initialAnchorRect,
     required WindowPositioner initialPositioner,
+    Rect? initialAnchorRect,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,

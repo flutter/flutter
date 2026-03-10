@@ -163,7 +163,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
     required SatelliteWindowControllerDelegate delegate,
     required BaseWindowController parent,
     required WindowPositioner initialPositioner,
-    required Rect initialAnchorRect,
+    Rect? initialAnchorRect,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,

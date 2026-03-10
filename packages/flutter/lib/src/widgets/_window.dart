@@ -939,8 +939,7 @@ mixin class SatelliteWindowControllerDelegate {
 /// A satellite window is an auxiliary window to a regular or dialog window.
 /// Satellite windows are initiially placed using a [WindowPositioner]. Afterwards,
 /// the satellite window maintains its position relative to its parent. It is
-/// hidden if the application loses focus or when their parent
-/// becomes fullscreen or maximized.
+/// hidden if the application becomes fullscreen or maximized.
 ///
 /// Satellite windows may be resized and moved by the user. After being moved by
 /// the user, the satellite window will retain its new position relative to its
