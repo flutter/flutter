@@ -10,9 +10,10 @@
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/trace_event.h"
 
-// This is because libcxx doesn't support atomic shared_ptr in C++20 yet. This
-// silences warnings on windows.
-#define _SILENCE_CXX20_OLD_SHARED_PTR_ATOMIC_SUPPORT_DEPRECATION_WARNING
+// Disable a warning on Windows about use of deprecated atomic operations
+// on std::shared_ptr.  These functions are used because libcxx does not
+// yet support std::atomic<std::shared_ptr>.
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
 namespace flutter {
 
