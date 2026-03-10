@@ -71,7 +71,6 @@ class _RTLMirrorReproState extends State<RTLMirrorRepro> {
           onTap: () {
             setState(() {
               blueTapped = true;
-              _showSnackBar(context, 'click blue');
             });
           },
           child: Container(
