@@ -373,7 +373,7 @@ class ResidentWebRunner extends ResidentRunner {
           debuggingOptions: debuggingOptions,
           platformArgs: <String, Object>{'uri': url.toString()},
         );
-        return await attach(
+        return attach(
           connectionInfoCompleter: connectionInfoCompleter,
           appStartedCompleter: appStartedCompleter,
           connectDebug: connectDebug,
