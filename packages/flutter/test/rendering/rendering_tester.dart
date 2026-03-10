@@ -337,64 +337,6 @@ class RenderSizedBox extends RenderBox {
   bool hitTestSelf(Offset position) => true;
 }
 
-class FakeTickerProvider implements TickerProvider {
-  @override
-  Ticker createTicker(TickerCallback onTick, [bool disableAnimations = false]) {
-    return FakeTicker();
-  }
-}
-
-class FakeTicker implements Ticker {
-  @override
-  bool muted = false;
-
-  @override
-  bool forceFrames = false;
-
-  @override
-  void absorbTicker(Ticker originalTicker) {}
-
-  @override
-  String? get debugLabel => null;
-
-  @override
-  bool get isActive => throw UnimplementedError();
-
-  @override
-  bool get isTicking => throw UnimplementedError();
-
-  @override
-  bool get scheduled => throw UnimplementedError();
-
-  @override
-  bool get shouldScheduleTick => throw UnimplementedError();
-
-  @override
-  void dispose() {}
-
-  @override
-  void scheduleTick({bool rescheduling = false}) {}
-
-  @override
-  TickerFuture start() {
-    throw UnimplementedError();
-  }
-
-  @override
-  void stop({bool canceled = false}) {}
-
-  @override
-  void unscheduleTick() {}
-
-  @override
-  String toString({bool debugIncludeStack = false}) => super.toString();
-
-  @override
-  DiagnosticsNode describeForError(String name) {
-    return DiagnosticsProperty<Ticker>(name, this, style: DiagnosticsTreeStyle.errorProperty);
-  }
-}
-
 class TestClipPaintingContext extends PaintingContext {
   TestClipPaintingContext() : this._(ContainerLayer());
 
