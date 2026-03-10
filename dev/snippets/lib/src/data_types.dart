@@ -157,9 +157,9 @@ abstract class CodeSample {
 /// Snippets are code that is not meant to be run as a complete application, but
 /// rather as a code usage example.
 class SnippetSample extends CodeSample {
-  SnippetSample(List<SourceLine> input, {required int index, required SourceLine lineProto})
+  SnippetSample(List<SourceLine> input, {required super.index, required super.lineProto})
     : assumptions = <SourceLine>[],
-      super(<String>['snippet'], input, index: index, lineProto: lineProto);
+      super(<String>['snippet'], input);
 
   factory SnippetSample.combine(
     List<SnippetSample> sections, {
