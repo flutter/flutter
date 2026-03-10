@@ -62,7 +62,8 @@ static void fl_framebuffer_dispose(GObject* object) {
       eglDestroyImageKHR(egl_display, self->image);
       self->image = nullptr;
     } else {
-      g_warning("Failed to destroy EGL image: Failed to get current EGL display");
+      g_warning(
+          "Failed to destroy EGL image: Failed to get current EGL display");
     }
   }
 

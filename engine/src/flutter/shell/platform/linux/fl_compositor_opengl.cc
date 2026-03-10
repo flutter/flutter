@@ -432,8 +432,7 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
 
   if (fl_framebuffer_get_shareable(self->framebuffer)) {
     if (self->render_sibling == nullptr) {
-      self->render_sibling =
-          fl_framebuffer_create_sibling(self->framebuffer);
+      self->render_sibling = fl_framebuffer_create_sibling(self->framebuffer);
     }
     gdk_cairo_draw_from_gl(cr, window,
                            fl_framebuffer_get_texture_id(self->render_sibling),
