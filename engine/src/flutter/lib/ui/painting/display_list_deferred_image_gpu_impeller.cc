@@ -137,13 +137,13 @@ void DlDeferredImageGPUImpeller::ImageWrapper::OnGrContextCreated() {}
 
 void DlDeferredImageGPUImpeller::ImageWrapper::OnGrContextDestroyed() {}
 
-const std::shared_ptr<impeller::Texture>
+std::shared_ptr<impeller::Texture>
 DlDeferredImageGPUImpeller::ImageWrapper::texture() const {
   return std::atomic_load(&texture_);
 }
 
 bool DlDeferredImageGPUImpeller::ImageWrapper::isTextureBacked() const {
-  std::shared_ptr<impeller::Texture> tex = std::atomic_load(&texture_);
+  std::shared_ptr<impeller::Texture> tex = texture();
   return tex && tex->IsValid();
 }
 
