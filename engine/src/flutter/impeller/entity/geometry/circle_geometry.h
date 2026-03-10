@@ -37,10 +37,18 @@ class CircleGeometry final : public Geometry {
   // |Geometry|
   std::optional<Rect> GetCoverage(const Matrix& transform) const override;
 
+  std::optional<Rect> GetCoverageWithAA(const Matrix& transform,
+                                        Scalar aa_pixels) const;
+
   // |Geometry|
   GeometryResult GetPositionBuffer(const ContentContext& renderer,
                                    const Entity& entity,
                                    RenderPass& pass) const override;
+
+  GeometryResult GetPositionBufferWithAA(const ContentContext& renderer,
+                                         const Entity& entity,
+                                         RenderPass& pass,
+                                         Scalar aa_pixels) const;
 
  private:
   Point center_;

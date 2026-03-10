@@ -52,23 +52,45 @@ Scalar CircleGeometry::GetStrokeWidth() const {
 GeometryResult CircleGeometry::GetPositionBuffer(const ContentContext& renderer,
                                                  const Entity& entity,
                                                  RenderPass& pass) const {
+  return GetPositionBufferWithAA(renderer, entity, pass, 0.0);
+}
+
+GeometryResult CircleGeometry::GetPositionBufferWithAA(
+    const ContentContext& renderer,
+    const Entity& entity,
+    RenderPass& pass,
+    Scalar aa_pixels) const {
   auto& transform = entity.GetTransform();
 
-  Scalar half_width = stroke_width_ < 0 ? 0.0
-                                        : LineGeometry::ComputePixelHalfWidth(
-                                              transform, stroke_width_);
+  Scalar max_basis = transform.GetMaxBasisLengthXY();
+  Scalar expansion = max_basis == 0 ? 0.0 : aa_pixels / max_basis;
 
-  // We call the StrokedCircle method which will simplify to a
-  // FilledCircleGenerator if the inner_radius is <= 0.
-  auto generator = renderer.GetTessellator().StrokedCircle(transform, center_,
-                                                           radius_, half_width);
+  if (stroke_width_ < 0) {
+    auto generator = renderer.GetTessellator().FilledCircle(
+        transform, center_, radius_ + expansion);
+    return ComputePositionGeometry(renderer, generator, entity, pass);
+  }
+
+  Scalar half_width =
+      LineGeometry::ComputePixelHalfWidth(transform, stroke_width_);
+
+  auto generator = renderer.GetTessellator().StrokedCircle(
+      transform, center_, radius_, half_width + expansion);
 
   return ComputePositionGeometry(renderer, generator, entity, pass);
 }
 
 std::optional<Rect> CircleGeometry::GetCoverage(const Matrix& transform) const {
+  return GetCoverageWithAA(transform, 0.0);
+}
+
+std::optional<Rect> CircleGeometry::GetCoverageWithAA(const Matrix& transform,
+                                                      Scalar aa_pixels) const {
+  Scalar max_basis = transform.GetMaxBasisLengthXY();
+  Scalar expansion = max_basis == 0 ? 0.0 : aa_pixels / max_basis;
+
   Scalar half_width = stroke_width_ < 0 ? 0.0 : stroke_width_ * 0.5f;
-  Scalar outer_radius = radius_ + half_width;
+  Scalar outer_radius = radius_ + half_width + expansion;
   return Rect::MakeLTRB(-outer_radius, -outer_radius,  //
                         +outer_radius, +outer_radius)
       .Shift(center_)

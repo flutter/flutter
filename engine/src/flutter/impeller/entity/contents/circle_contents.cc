@@ -11,26 +11,11 @@
 namespace impeller {
 
 namespace {
-using BindFragmentCallback = std::function<bool(RenderPass& pass)>;
 using PipelineBuilderCallback =
     std::function<PipelineRef(ContentContextOptions)>;
-using CreateGeometryCallback =
-    std::function<GeometryResult(const ContentContext& renderer,
-                                 const Entity& entity,
-                                 RenderPass& pass,
-                                 const Geometry* geometry)>;
 
 using VS = CirclePipeline::VertexShader;
 using FS = CirclePipeline::FragmentShader;
-
-GeometryResult CreateGeometry(const ContentContext& renderer,
-                              const Entity& entity,
-                              RenderPass& pass,
-                              const CircleGeometry* circle_geometry) {
-  auto geometry_result =
-      circle_geometry->GetPositionBuffer(renderer, entity, pass);
-  return geometry_result;
-}
 }  // namespace
 
 std::unique_ptr<CircleContents> CircleContents::Make(
@@ -51,17 +36,19 @@ bool CircleContents::Render(const ContentContext& renderer,
                             RenderPass& pass) const {
   auto& data_host_buffer = renderer.GetTransientsDataBuffer();
 
+  Scalar aa_pixels = 1.0;
+
   VS::FrameInfo frame_info;
   FS::FragInfo frag_info;
   frag_info.color = color_.WithAlpha(color_.alpha * GetOpacityFactor());
   frag_info.center = geometry_->GetCenter();
   frag_info.radius = geometry_->GetRadius();
   frag_info.stroke_width = geometry_->GetStrokeWidth();
-  frag_info.aa_pixels = 1.0;
+  frag_info.aa_pixels = aa_pixels;
   frag_info.stroked = stroked_ ? 1.0f : 0.0f;
 
   auto geometry_result =
-      CreateGeometry(renderer, entity, pass, geometry_.get());
+      geometry_->GetPositionBufferWithAA(renderer, entity, pass, aa_pixels);
 
   PipelineBuilderCallback pipeline_callback =
       [&renderer](ContentContextOptions options) {
@@ -86,7 +73,7 @@ bool CircleContents::Render(const ContentContext& renderer,
 }
 
 std::optional<Rect> CircleContents::GetCoverage(const Entity& entity) const {
-  return geometry_->GetCoverage(entity.GetTransform());
+  return geometry_->GetCoverageWithAA(entity.GetTransform(), 1.0);
 }
 
 }  // namespace impeller

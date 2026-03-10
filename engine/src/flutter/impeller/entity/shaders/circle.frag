@@ -21,52 +21,46 @@ out vec4 frag_color;
 
 highp in vec2 v_position;
 
-float distanceFromCircle(float radius, vec2 center, vec2 point) {
-  return distance(point, center) - radius;
+float distanceFromCircle(float dist_to_center, float radius) {
+  return dist_to_center - radius;
 }
 
-float distanceFromStrokedCircle(float radius,
-                                float stroke_width,
-                                vec2 center,
-                                vec2 point) {
-  float half_stroke = stroke_width / 2.0;
+float distanceFromStrokedCircle(float dist_to_center,
+                                float radius,
+                                float half_stroke_width) {
+  float outer_radius = radius + half_stroke_width;
+  float inner_radius = radius - half_stroke_width;
 
-  float inner_radius = radius - half_stroke;
+  float outer_distance = distanceFromCircle(dist_to_center, outer_radius);
+  float inner_distance = distanceFromCircle(dist_to_center, inner_radius);
 
-  float outer_radius = radius + half_stroke;
-
-  float outer_distance = distanceFromCircle(outer_radius, center, point);
-
-  float inner_distance = -distanceFromCircle(inner_radius, center, point);
-
-  return max(inner_distance, outer_distance);
+  return max(-inner_distance, outer_distance);
 }
 
 void main() {
-  float dist_filled =
-      distanceFromCircle(frag_info.radius, frag_info.center, v_position);
+  vec2 vec_to_center = v_position - frag_info.center;
+  float dist_to_center = length(vec_to_center);
+  vec2 unitvec_towards_center =
+      dist_to_center > 0.0 ? vec_to_center / dist_to_center : vec2(1.0, 0.0);
+
+  float local_dx = length(dFdx(v_position));
+  float local_dy = length(dFdy(v_position));
+  float local_dist_towards_center =
+      dot(vec2(local_dx, local_dy), abs(unitvec_towards_center));
+
+  float adjusted_stroke_width =
+      max(frag_info.stroke_width, local_dist_towards_center);
+
+  float dist_filled = distanceFromCircle(dist_to_center, frag_info.radius);
   float dist_stroked = distanceFromStrokedCircle(
-      frag_info.radius, frag_info.stroke_width, frag_info.center, v_position);
+      dist_to_center, frag_info.radius, adjusted_stroke_width * 0.5f);
+
   float sdf_distance = mix(dist_filled, dist_stroked, frag_info.stroked);
 
-  float pixel_derivative_sdf =
-      length(vec2(dFdx(sdf_distance), dFdy(sdf_distance)));
-
-  // If the screen space derivative is less than the stroke width,
-  // only one pixel can be covered and shouldn't be faded.
-  if (frag_info.stroked > 0.0 &&
-      pixel_derivative_sdf * 2.0 >= frag_info.stroke_width) {
-    sdf_distance = -frag_info.radius;
-  }
-
-  float fade_width = pixel_derivative_sdf * frag_info.aa_pixels;
+  float fade_size = local_dist_towards_center * frag_info.aa_pixels * 0.5;
   // The sdf_distance will be -pixel_derivative_sdf*N exactly at N pixels away
   // from the edge of the circle
-  float alpha = 1.0 - smoothstep(-fade_width, 0.0, sdf_distance);
+  float alpha = 1.0 - smoothstep(-fade_size, fade_size, sdf_distance);
 
-  float finalAlpha = frag_info.color.w * alpha;
-
-  frag_color = vec4(frag_info.color.xyz, finalAlpha);
-
-  frag_color = IPPremultiply(frag_color);
+  frag_color = frag_info.color * alpha;
 }
