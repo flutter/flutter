@@ -176,9 +176,40 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     switch (type) {
       case 'memoryPressure':
         handleMemoryPressure();
+      case 'beforeprint':
+        handleBeforePrint();
+      case 'afterprint':
+        handleAfterPrint();
     }
     return;
   }
+
+  /// Called just before the platform takes a print snapshot of the page.
+  ///
+  /// On web, this corresponds to the browser's `beforeprint` event, which
+  /// fires synchronously before the print dialog opens. Subclasses can
+  /// override this to expand viewport render extents so that all scrollable
+  /// content is built and painted before the snapshot is captured.
+  ///
+  /// See also:
+  ///
+  ///  * [handleAfterPrint], which is called after printing completes.
+  @protected
+  @mustCallSuper
+  void handleBeforePrint() {}
+
+  /// Called after the platform finishes a print operation.
+  ///
+  /// On web, this corresponds to the browser's `afterprint` event. Subclasses
+  /// can override this to restore any rendering state changed by
+  /// [handleBeforePrint].
+  ///
+  /// See also:
+  ///
+  ///  * [handleBeforePrint], which is called before printing begins.
+  @protected
+  @mustCallSuper
+  void handleAfterPrint() {}
 
   /// Adds relevant licenses to the [LicenseRegistry].
   ///

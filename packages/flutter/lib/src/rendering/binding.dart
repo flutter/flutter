@@ -18,11 +18,14 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
+import 'box.dart';
 import 'debug.dart';
 import 'mouse_tracker.dart';
 import 'object.dart';
 import 'service_extensions.dart';
+import 'sliver.dart';
 import 'view.dart';
+import 'viewport.dart';
 
 export 'package:flutter/gestures.dart' show HitTestResult;
 
@@ -636,6 +639,135 @@ mixin RendererBinding
       rootPipelineOwner.flushSemantics(); // this sends the semantics to the OS.
       _firstFrameSent = true;
     }
+  }
+
+  // State captured by handleBeforePrint and restored by handleAfterPrint.
+  final Map<RenderViewportBase<dynamic>, ScrollCacheExtent> _savedViewportCacheExtents =
+      <RenderViewportBase<dynamic>, ScrollCacheExtent>{};
+  final Map<RenderView, ViewConfiguration> _savedViewConfigurations =
+      <RenderView, ViewConfiguration>{};
+
+  /// Prepares the render tree for printing.
+  ///
+  /// Performs the following steps before the browser takes its print snapshot:
+  ///
+  /// 1. Expands the [scrollCacheExtent] of every [RenderViewportBase] to a
+  ///    large value so that all sliver children are built and laid out.
+  /// 2. Measures the total content height of each vertical viewport by summing
+  ///    the [SliverGeometry.scrollExtent] of its children.
+  /// 3. Updates each [RenderView]'s [ViewConfiguration] to the measured height
+  ///    so that [RenderView.compositeFrame] produces a canvas large enough to
+  ///    render all content rather than just the visible viewport.
+  /// 4. Flushes a full frame: layout, compositing bits, paint, and composite.
+  ///
+  /// See: https://github.com/flutter/flutter/issues/182817
+  @override
+  void handleBeforePrint() {
+    super.handleBeforePrint();
+    if (!kIsWeb) {
+      return;
+    }
+    _savedViewportCacheExtents.clear();
+    _savedViewConfigurations.clear();
+
+    // Pass 1: expand cache extents so all sliver children are built, then
+    // flush layout so that each sliver's geometry.scrollExtent is populated.
+    for (final RenderView renderView in renderViews) {
+      renderView.visitChildren(_expandViewportCacheExtents);
+    }
+    rootPipelineOwner.flushLayout();
+
+    // Pass 2: read actual content height from each RenderView's viewports and
+    // set the ViewConfiguration to that height so compositeFrame uses a canvas
+    // that covers all content, not just the visible viewport.
+    for (final RenderView renderView in renderViews) {
+      final ViewConfiguration saved = renderView.configuration;
+      _savedViewConfigurations[renderView] = saved;
+
+      // Walk all descendant viewports to find the tallest content height.
+      // Sliver geometry is read directly to avoid a dependency on the widgets
+      // layer (e.g. ScrollPosition).
+      double maxContentHeight = saved.physicalConstraints.maxHeight;
+      void measureViewport(RenderObject node) {
+        if (node is RenderViewportBase && node.axis == Axis.vertical) {
+          // Sum the scrollExtent of every child sliver. scrollExtent is the
+          // full logical length of a sliver regardless of how much of it is
+          // currently visible, so the sum gives the total content height.
+          var totalScrollExtent = 0.0;
+          RenderSliver? child = node.firstChild;
+          while (child != null) {
+            if (child.geometry != null) {
+              totalScrollExtent += child.geometry!.scrollExtent;
+            }
+            child = node.childAfter(child);
+          }
+          final double fullHeight = totalScrollExtent * saved.devicePixelRatio;
+          if (fullHeight > maxContentHeight) {
+            maxContentHeight = fullHeight;
+          }
+        }
+        node.visitChildren(measureViewport);
+      }
+
+      renderView.visitChildren(measureViewport);
+
+      // Expand the physical and logical max heights to the measured content
+      // height. A finite value is used rather than infinity so that
+      // non-viewport RenderBox ancestors (e.g. Scaffold) receive bounded
+      // constraints and do not throw "given an infinite size" errors.
+      if (maxContentHeight > saved.physicalConstraints.maxHeight) {
+        final double logicalContentHeight = maxContentHeight / saved.devicePixelRatio;
+        renderView.configuration = ViewConfiguration(
+          physicalConstraints: BoxConstraints(
+            minWidth: saved.physicalConstraints.minWidth,
+            maxWidth: saved.physicalConstraints.maxWidth,
+            minHeight: saved.physicalConstraints.minHeight,
+            maxHeight: maxContentHeight,
+          ),
+          logicalConstraints: BoxConstraints(
+            minWidth: saved.logicalConstraints.minWidth,
+            maxWidth: saved.logicalConstraints.maxWidth,
+            minHeight: saved.logicalConstraints.minHeight,
+            maxHeight: logicalContentHeight,
+          ),
+          devicePixelRatio: saved.devicePixelRatio,
+        );
+      }
+    }
+
+    // Flush a full frame so the expanded canvas size is painted and composited.
+    rootPipelineOwner.flushLayout();
+    rootPipelineOwner.flushCompositingBits();
+    rootPipelineOwner.flushPaint();
+    for (final RenderView renderView in renderViews) {
+      renderView.compositeFrame();
+    }
+  }
+
+  void _expandViewportCacheExtents(RenderObject node) {
+    if (node is RenderViewportBase) {
+      _savedViewportCacheExtents[node] = node.scrollCacheExtent;
+      node.scrollCacheExtent = const ScrollCacheExtent.pixels(1e9);
+    }
+    node.visitChildren(_expandViewportCacheExtents);
+  }
+
+  /// Restores the render tree to the state it was in before [handleBeforePrint].
+  @override
+  void handleAfterPrint() {
+    super.handleAfterPrint();
+    if (!kIsWeb) {
+      return;
+    }
+    for (final MapEntry<RenderViewportBase<dynamic>, ScrollCacheExtent> entry
+        in _savedViewportCacheExtents.entries) {
+      entry.key.scrollCacheExtent = entry.value;
+    }
+    _savedViewportCacheExtents.clear();
+    for (final MapEntry<RenderView, ViewConfiguration> entry in _savedViewConfigurations.entries) {
+      entry.key.configuration = entry.value;
+    }
+    _savedViewConfigurations.clear();
   }
 
   @override

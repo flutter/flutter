@@ -306,6 +306,18 @@ class RentrantObserver implements WidgetsBindingObserver {
   }
 
   @override
+  void didBeforePrint() {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didAfterPrint() {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
   Future<bool> didPopRoute() {
     assert(active);
     WidgetsBinding.instance.addObserver(this);

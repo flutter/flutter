@@ -93,4 +93,34 @@ void doTests() {
       expect(styleAfter.left, '0px', reason: 'Should cover the whole viewport.');
     });
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/182817
+  group('print handling', () {
+    test('beforeprint temporarily lifts position:fixed and overflow:hidden from body', () {
+      // ignore: unused_local_variable
+      final strategy = FullPageEmbeddingStrategy();
+      final DomElement body = domDocument.body!;
+
+      expect(body.style.position, 'fixed', reason: 'Body should be fixed at runtime.');
+      expect(body.style.overflow, 'hidden', reason: 'Body should clip overflow at runtime.');
+
+      domWindow.dispatchEvent(createDomEvent('Event', 'beforeprint'));
+
+      expect(
+        body.style.position,
+        'absolute',
+        reason: 'beforeprint should switch position to absolute so the page can expand for print.',
+      );
+      expect(
+        body.style.overflow,
+        'visible',
+        reason: 'beforeprint should make overflow visible so off-screen content is printed.',
+      );
+
+      domWindow.dispatchEvent(createDomEvent('Event', 'afterprint'));
+
+      expect(body.style.position, 'fixed', reason: 'afterprint should restore position:fixed.');
+      expect(body.style.overflow, 'hidden', reason: 'afterprint should restore overflow:hidden.');
+    });
+  });
 }

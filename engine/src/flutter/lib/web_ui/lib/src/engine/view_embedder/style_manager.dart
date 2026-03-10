@@ -77,6 +77,19 @@ void applyGlobalCssRulesToSheet(
     '$cssSelectorPrefix ${DomManager.sceneHostTagName} {'
     '  font: $defaultCssFont;'
     '}'
+    // During printing, `position: fixed` and `overflow: hidden` on <body>
+    // clip the page to the visible viewport, preventing the browser from
+    // rendering off-screen content. The beforeprint/afterprint listeners in
+    // FullPageEmbeddingStrategy toggle these styles dynamically. This
+    // @media print rule acts as a CSS fallback in case the listeners do not
+    // execute before the browser takes its snapshot.
+    // See: https://github.com/flutter/flutter/issues/182817
+    '@media print {'
+    '  body {'
+    '    position: absolute !important;'
+    '    overflow: visible !important;'
+    '  }'
+    '}'
     // This undoes browser's default painting and layout attributes of range
     // input, which is used in semantics.
     '$cssSelectorPrefix flt-semantics input[type=range] {'

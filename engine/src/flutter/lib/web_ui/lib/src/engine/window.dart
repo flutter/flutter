@@ -226,10 +226,26 @@ class EngineFlutterView implements ui.FlutterView {
     // to the smaller visible size, it would break the `viewInsets` logic
     // on subsequent calculations.
     if (!_shouldPreservePhysicalSizeOnResize) {
-      // Force an update of the physicalSize so it's ready for the renderer.
-      _physicalSize = _computePhysicalSize();
+      if (isPrinting) {
+        // The framework requests an expanded canvas height during printing, but
+        // `_computePhysicalSize` reads from `visualViewport`, which remains at
+        // the browser window height and does not reflect the expanded size.
+        // Assign `newPhysicalSize` directly so the rasterizer creates a canvas
+        // tall enough to render all content.
+        // See: https://github.com/flutter/flutter/issues/182817
+        _physicalSize = newPhysicalSize;
+      } else {
+        // Force an update of the physicalSize so it's ready for the renderer.
+        _physicalSize = _computePhysicalSize();
+      }
     }
   }
+
+  /// Whether a browser print operation is in progress.
+  ///
+  /// Set to `true` by [FullPageEmbeddingStrategy] when a `beforeprint` event
+  /// is received, and restored to `false` on the matching `afterprint` event.
+  bool isPrinting = false;
 
   /// Lazily populated and cleared at the end of the frame.
   ui.Size? _physicalSize;

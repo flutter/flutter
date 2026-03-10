@@ -407,6 +407,27 @@ abstract mixin class WidgetsBindingObserver {
   /// This method exposes notifications from
   /// [dart:ui.PlatformDispatcher.onAccessibilityFeaturesChanged].
   void didChangeAccessibilityFeatures() {}
+
+  /// Called just before the platform takes a print snapshot of the page.
+  ///
+  /// On web, this corresponds to the browser's `beforeprint` event, which
+  /// fires synchronously before the print dialog opens. Observers can use this
+  /// to update state or trigger a rebuild before the snapshot is captured.
+  ///
+  /// See also:
+  ///
+  ///  * [didAfterPrint], which is called after printing completes.
+  void didBeforePrint() {}
+
+  /// Called after the platform finishes a print operation.
+  ///
+  /// On web, this corresponds to the browser's `afterprint` event. Observers
+  /// can use this to restore any state changed in [didBeforePrint].
+  ///
+  /// See also:
+  ///
+  ///  * [didBeforePrint], which is called before printing begins.
+  void didAfterPrint() {}
 }
 
 /// The glue between the widgets layer and the Flutter engine.
@@ -1373,6 +1394,48 @@ mixin WidgetsBinding
             library: 'widgets library',
             context: ErrorDescription(
               'while dispatching notifications for WidgetsBindingObserver.didHaveMemoryPressure',
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  void handleBeforePrint() {
+    super.handleBeforePrint();
+    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+      try {
+        observer.didBeforePrint();
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didBeforePrint',
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  void handleAfterPrint() {
+    super.handleAfterPrint();
+    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+      try {
+        observer.didAfterPrint();
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didAfterPrint',
             ),
           ),
         );
