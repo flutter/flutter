@@ -1442,6 +1442,7 @@ TEST_P(DisplayListTest, DrawCirclesWithTransformations) {
     static float filled_scale[2] = {1.0, 1.0};
     static float stroked_radius = 20.0;
     static float stroke_width = 10.0;
+    static float stroke_width_fine = 0.0;
     static float stroked_alpha = 255.0;
     static float stroked_scale[2] = {1.0, 1.0};
 
@@ -1450,8 +1451,9 @@ TEST_P(DisplayListTest, DrawCirclesWithTransformations) {
       ImGui::SliderFloat("Filled Radius", &filled_radius, 0, 500);
       ImGui::SliderFloat("Filled Alpha", &filled_alpha, 0, 255);
       ImGui::SliderFloat2("Filled Scale", filled_scale, 0, 10.0);
-      ImGui::SliderFloat("Stroked Radius", &stroked_radius, 0, 10.0);
+      ImGui::SliderFloat("Stroked Radius", &stroked_radius, 0, 500);
       ImGui::SliderFloat("Stroked Width", &stroke_width, 0, 500);
+      ImGui::SliderFloat("Stroked Width Fine", &stroke_width_fine, 0, 5);
       ImGui::SliderFloat("Stroked Alpha", &stroked_alpha, 0, 10.0);
       ImGui::SliderFloat2("Stroked Scale", stroked_scale, 0, 10.0);
     }
@@ -1469,7 +1471,7 @@ TEST_P(DisplayListTest, DrawCirclesWithTransformations) {
 
     paint.setColor(flutter::DlColor::kRed().withAlpha(stroked_alpha));
     paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
-    paint.setStrokeWidth(stroke_width);
+    paint.setStrokeWidth(stroke_width + stroke_width_fine);
     builder.Save();
     builder.Scale(stroked_scale[0], stroked_scale[1]);
     builder.DrawCircle(DlPoint(1250, 750), stroked_radius, paint);
