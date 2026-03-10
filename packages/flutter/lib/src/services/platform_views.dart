@@ -274,8 +274,8 @@ class PlatformViewsService {
         gestureBlockingPolicyValue = 'waitUntilTouchesEnded';
       case UiKitViewGestureBlockingPolicy.fallbackToPluginDefault:
         gestureBlockingPolicyValue = 'fallbackToPluginDefault';
-      case UiKitViewGestureBlockingPolicy.touchBlockingOnly:
-        gestureBlockingPolicyValue = 'touchBlockingOnly';
+      case UiKitViewGestureBlockingPolicy.doNotBlockGesture:
+        gestureBlockingPolicyValue = 'doNotBlockGesture';
     }
 
     // TODO(amirh): pass layoutDirection once the system channel supports it.
@@ -1597,20 +1597,23 @@ abstract class DarwinPlatformViewController {
 enum UiKitViewGestureBlockingPolicy {
   /// Flutter blocks all the UIGestureRecognizers on the platform view as soon as it
   /// decides they should be blocked.
+  ///
+  /// This policy employs a dual blocking strategy: synchronous blocking via hitTest results and asynchronous blocking managed through the framework’s gesture arena.
+  /// With this policy, only the `touchesBegan` method for all the UIGestureRecognizers is guaranteed
+  /// to be called.
   eager,
 
-  /// Flutter blocks the platform view's UIGestureRecognizers from recognizing only after
-  /// touchesEnded was invoked.
+  /// Flutter blocks all the UIGestureRecognizers on the platform view only after touchesEnded was invoked.
+  ///
+  /// This results in the platform view's UIGestureRecognizers seeing the entire touch sequence,
+  /// but never recognizing the gesture (and never invoking actions).
   waitUntilTouchesEnded,
 
-  /// Flutter blocks all the UIGestureRecognizers on the platform view as soon as it
-  /// decides they should be blocked.
+  /// Flutter blocks all the UIGestureRecognizers on the platform view based on results from hitTest.
   ///
-  /// This is similar to FlutterPlatformViewGestureRecognizersBlockingPolicyEager. However,
-  /// internally it performs hit test rather than a blocking gesture recognizer. This addresses
-  /// a few bugs related to WKWebView being untappable. See
-  /// https://github.com/flutter/flutter/issues/175099.
-  touchBlockingOnly,
+  /// Unlike FlutterPlatformViewGestureRecognizersBlockingPolicyEager, this policy does not rely on Flutter's gesture arena. This is a workaround to address a few bugs related to platform view's gesture recognizers being stuck in a stale state.
+  /// See: https://github.com/flutter/flutter/issues/175099.
+  doNotBlockGesture,
 
   /// Fallback to use the policy set by the `registerViewFactory` engine API in FlutterPlugin.h.
   fallbackToPluginDefault,

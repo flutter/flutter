@@ -28,8 +28,8 @@ static constexpr NSUInteger kFlutterClippingMaskViewPoolCapacity = 5;
 
 static NSString* const kGestureBlockingPolicyEagerValue = @"eager";
 static NSString* const kGestureBlockingPolicyWaitUntilTouchesEndedValue = @"waitUntilTouchesEnded";
+static NSString* const kGestureBlockingPolicyDoNotBlockGesture = @"doNotBlockGesture";
 static NSString* const kGestureBlockingPolicyFallbackToPluginDefault = @"fallbackToPluginDefault";
-static NSString* const kGestureBlockingPolicyTouchBlockingOnly = @"touchBlockingOnly";
 
 struct LayerData {
   DlRect rect;
@@ -338,8 +338,8 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
   NSString* gestureBlockingPolicyValue = args[@"gestureBlockingPolicy"];
   FlutterPlatformViewGestureRecognizersBlockingPolicy gestureBlockingPolicy;
-  if ([gestureBlockingPolicyValue isEqualToString:kGestureBlockingPolicyTouchBlockingOnly]) {
-    gestureBlockingPolicy = FlutterPlatformViewGestureRecognizersBlockingPolicyTouchBlockingOnly;
+  if ([gestureBlockingPolicyValue isEqualToString:kGestureBlockingPolicyDoNotBlockGesture]) {
+    gestureBlockingPolicy = FlutterPlatformViewGestureRecognizersBlockingPolicyDoNotBlockGesture;
   } else if ([gestureBlockingPolicyValue isEqualToString:kGestureBlockingPolicyEagerValue]) {
     gestureBlockingPolicy = FlutterPlatformViewGestureRecognizersBlockingPolicyEager;
   } else if ([gestureBlockingPolicyValue

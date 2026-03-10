@@ -545,7 +545,7 @@ static BOOL _preparedOnce = NO;
     // For hit test, don't block gestures using delaying recognizer. However, we still
     // forward touches so Flutter can process it in its gesture arena (e.g. dismiss a
     // drop-down menu when tapping outside of the menu but inside the platform view).
-    if (blockingPolicy != FlutterPlatformViewGestureRecognizersBlockingPolicyTouchBlockingOnly) {
+    if (blockingPolicy != FlutterPlatformViewGestureRecognizersBlockingPolicyDoNotBlockGesture) {
       [self addGestureRecognizer:_delayingRecognizer];
     }
     [self addGestureRecognizer:forwardingRecognizer];
@@ -620,21 +620,19 @@ static BOOL _preparedOnce = NO;
 }
 
 - (UIView*)hitTest:(CGPoint)point withEvent:(UIEvent*)event {
-  if (_blockingPolicy == FlutterPlatformViewGestureRecognizersBlockingPolicyTouchBlockingOnly) {
-    // In release mode, FlutterTouchInterceptingView's init is called before flutterViewController
-    // is set on platformViewsController.
-    if (self.flutterViewController == nil) {
-      _flutterViewController = self.platformViewsController.flutterViewController;
-    }
-    CGPoint pointInFlutterView = [self convertPoint:point toView:self.flutterViewController.view];
-    // Consult the framework on if the touch should be handled by the platform view.
-    // If NO, the touch is handled by a Flutter widget and should be blocked (by returning self).
-    // If YES, the touch should continue to the standard hit-testing (through super), allowing the
-    // touch to be delivered to the underlying native platform view or one of its subviews.
-    if (![self.flutterViewController
-            platformViewShouldAcceptTouchAtTouchBeganLocation:pointInFlutterView]) {
-      return self;
-    }
+  // In release mode, FlutterTouchInterceptingView's init is called before flutterViewController
+  // is set on platformViewsController.
+  if (self.flutterViewController == nil) {
+    _flutterViewController = self.platformViewsController.flutterViewController;
+  }
+  CGPoint pointInFlutterView = [self convertPoint:point toView:self.flutterViewController.view];
+  // Consult the framework on if the touch should be handled by the platform view.
+  // If NO, the touch is handled by a Flutter widget and should be blocked (by returning self).
+  // If YES, the touch should continue to the standard hit-testing (through super), allowing the
+  // touch to be delivered to the underlying native platform view or one of its subviews.
+  if (![self.flutterViewController
+          platformViewShouldAcceptTouchAtTouchBeganLocation:pointInFlutterView]) {
+    return self;
   }
 
   return [super hitTest:point withEvent:event];
@@ -642,10 +640,9 @@ static BOOL _preparedOnce = NO;
 
 - (void)blockGesture {
   switch (_blockingPolicy) {
-    case FlutterPlatformViewGestureRecognizersBlockingPolicyTouchBlockingOnly:
+    case FlutterPlatformViewGestureRecognizersBlockingPolicyDoNotBlockGesture:
       // No-op. Handled by hit test.
       break;
-
     case FlutterPlatformViewGestureRecognizersBlockingPolicyEager:
       // We block all other gesture recognizers immediately in this policy.
       self.delayingRecognizer.state = UIGestureRecognizerStateEnded;
