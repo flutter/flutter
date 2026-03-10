@@ -28,4 +28,3 @@ TEST_F(ShellTest, AcceptsApngWithFrameDataLengthEqualToFour) {
 
 }  // namespace testing
 }  // namespace flutter
-
