@@ -39,10 +39,6 @@ std::optional<PixelFormatGLES> ToPixelFormatGLES(PixelFormat pixel_format,
       format.type = GL_UNSIGNED_BYTE;
       break;
     case PixelFormat::kR8G8B8A8UNormInt:
-      format.internal_format = GL_RGBA;
-      format.external_format = GL_RGBA;
-      format.type = GL_UNSIGNED_BYTE;
-      break;
     case PixelFormat::kR8G8B8A8UNormIntSRGB:
       format.internal_format = GL_RGBA;
       format.external_format = GL_RGBA;
