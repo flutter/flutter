@@ -472,7 +472,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
       // discovery and does not wait for devices to connect.
       if (deviceDiscoveryTimeout != null ||
           deviceConnectionInterface == DeviceConnectionInterface.attached) {
-        return super.findAllTargetDevices(
+        return await super.findAllTargetDevices(
           deviceDiscoveryTimeout: deviceDiscoveryTimeout,
           includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
         );
@@ -546,14 +546,14 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
       );
 
       if (attachedDevices.isEmpty) {
-        return _handleNoAttachedDevices(attachedDevices, futureWirelessDevices);
+        return await _handleNoAttachedDevices(attachedDevices, futureWirelessDevices);
       } else if (_deviceManager.hasSpecifiedAllDevices) {
-        return _handleAllDevices(attachedDevices, futureWirelessDevices);
+        return await _handleAllDevices(attachedDevices, futureWirelessDevices);
       }
       // Even if there's only a single attached device, continue to
       // `_handleRemainingDevices` since there might be wireless devices
       // that are not loaded yet.
-      return _handleRemainingDevices(attachedDevices, futureWirelessDevices);
+      return await _handleRemainingDevices(attachedDevices, futureWirelessDevices);
     } finally {
       stopExtendedWirelessDeviceDiscovery();
     }
