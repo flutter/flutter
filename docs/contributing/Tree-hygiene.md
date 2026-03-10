@@ -73,7 +73,7 @@ The general process for submitting code to a Flutter repository is as follows:
    from the relevant expert(s) for the areas you touched. Otherwise, wait for
    [reviewers to be assigned](#who).
 
-9. Make sure your PR passes all the pre-commit tests. Consider running some of the
+8. Make sure your PR passes all the pre-commit tests. Consider running some of the
    post-commit tests locally (see the
    [devicelab](https://github.com/flutter/flutter/blob/main/dev/devicelab/README.md)
    directory). If any tests break, especially the `customer_testing` tests, please
@@ -93,10 +93,10 @@ The general process for submitting code to a Flutter repository is as follows:
      If these fail, a Google employee (for example, the PR reviewer) should be contacted
      to check the internal tests and recommend a solution.
 
-10. Once everything is green and you have an LGTM from the owners of the code you are affecting (or someone to whom they
+ 9. Once everything is green and you have an LGTM from the owners of the code you are affecting (or someone to whom they
    have delegated), and an LGTM from any other contributor who left comments, add the "autosubmit" label if you're in the flutter-hackers github group. A bot will land the patch when it feels like it. If you're not in the flutter-hackers group a reviewer will add the label for you.
 
-11. Watch the post-commit tests on the [dashboard](https://dashboard.flutter.dev/#/build) to make sure everything passes. If anything
+10. Watch the post-commit tests on the [dashboard](https://dashboard.flutter.dev/#/build) to make sure everything passes. If anything
    goes wrong, revert your patch and study the problem. You should aim to be the one to revert your patch. You will be racing everyone
    else on the team who will also be trying to revert your patch. (See below for guidance on reverting PRs.)
 
