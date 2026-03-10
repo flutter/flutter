@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
+import 'widgets_app_tester.dart';
 
 class TestState extends StatefulWidget {
   const TestState({super.key, required this.child, required this.log});
@@ -620,6 +621,17 @@ void main() {
     await tester.pumpWidget(newWidget(ancestorIsVisible: false, descendantIsVisible: true));
     expect(didChangeDependencies, isTrue);
     expect(find.text('is visible ? false', skipOffstage: false), findsOneWidget);
+  });
+
+  testWidgets('Visibility does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const TestWidgetsApp(
+        home: Center(
+          child: SizedBox.shrink(child: Visibility(child: Placeholder())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Visibility)), Size.zero);
   });
 }
 
