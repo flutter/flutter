@@ -72,12 +72,6 @@ void verify(WidgetTester tester, List<Offset> idealPositions, List<bool> idealVi
   expect(actualVisibles, equals(idealVisibles));
 }
 
-Widget _buildSliverTestApp({required Widget child, Key? key}) {
-  return TestWidgetsApp(
-    home: SizedBox.expand(key: key, child: child),
-  );
-}
-
 Widget _buildIndexedTapTarget({required int index, required VoidCallback onTap}) {
   return GestureDetector(
     behavior: HitTestBehavior.opaque,
@@ -734,15 +728,15 @@ void main() {
     },
   );
 
-  Widget boilerPlate(List<Widget> slivers) {
-    return TestWidgetsApp(home: CustomScrollView(slivers: slivers));
-  }
-
   group('SliverOffstage - ', () {
     testWidgets('offstage true', (WidgetTester tester) async {
       final semantics = SemanticsTester(tester);
       await tester.pumpWidget(
-        boilerPlate(<Widget>[const SliverOffstage(sliver: SliverToBoxAdapter(child: Text('a')))]),
+        const TestWidgetsApp(
+          home: CustomScrollView(
+            slivers: <Widget>[SliverOffstage(sliver: SliverToBoxAdapter(child: Text('a')))],
+          ),
+        ),
       );
 
       expect(semantics.nodesWith(label: 'a'), hasLength(0));
@@ -757,9 +751,13 @@ void main() {
     testWidgets('offstage false', (WidgetTester tester) async {
       final semantics = SemanticsTester(tester);
       await tester.pumpWidget(
-        boilerPlate(<Widget>[
-          const SliverOffstage(offstage: false, sliver: SliverToBoxAdapter(child: Text('a'))),
-        ]),
+        const TestWidgetsApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              SliverOffstage(offstage: false, sliver: SliverToBoxAdapter(child: Text('a'))),
+            ],
+          ),
+        ),
       );
 
       expect(semantics.nodesWith(label: 'a'), hasLength(1));
@@ -778,12 +776,16 @@ void main() {
 
       // Opacity 1.0: Semantics and painting
       await tester.pumpWidget(
-        boilerPlate(<Widget>[
-          const SliverOpacity(
-            sliver: SliverToBoxAdapter(child: Text('a', textDirection: TextDirection.rtl)),
-            opacity: 1.0,
+        const TestWidgetsApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              SliverOpacity(
+                sliver: SliverToBoxAdapter(child: Text('a', textDirection: TextDirection.rtl)),
+                opacity: 1.0,
+              ),
+            ],
           ),
-        ]),
+        ),
       );
 
       expect(semantics.nodesWith(label: 'a'), hasLength(1));
@@ -791,12 +793,16 @@ void main() {
 
       // Opacity 0.0: Nothing
       await tester.pumpWidget(
-        boilerPlate(<Widget>[
-          const SliverOpacity(
-            sliver: SliverToBoxAdapter(child: Text('a', textDirection: TextDirection.rtl)),
-            opacity: 0.0,
+        const TestWidgetsApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              SliverOpacity(
+                sliver: SliverToBoxAdapter(child: Text('a', textDirection: TextDirection.rtl)),
+                opacity: 0.0,
+              ),
+            ],
           ),
-        ]),
+        ),
       );
 
       expect(semantics.nodesWith(label: 'a'), hasLength(0));
@@ -804,13 +810,17 @@ void main() {
 
       // Opacity 0.0 with semantics: Just semantics
       await tester.pumpWidget(
-        boilerPlate(<Widget>[
-          const SliverOpacity(
-            sliver: SliverToBoxAdapter(child: Text('a', textDirection: TextDirection.rtl)),
-            opacity: 0.0,
-            alwaysIncludeSemantics: true,
+        const TestWidgetsApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              SliverOpacity(
+                sliver: SliverToBoxAdapter(child: Text('a', textDirection: TextDirection.rtl)),
+                opacity: 0.0,
+                alwaysIncludeSemantics: true,
+              ),
+            ],
           ),
-        ]),
+        ),
       );
 
       expect(semantics.nodesWith(label: 'a'), hasLength(1));
@@ -818,12 +828,16 @@ void main() {
 
       // Opacity 0.0 without semantics: Nothing
       await tester.pumpWidget(
-        boilerPlate(<Widget>[
-          const SliverOpacity(
-            sliver: SliverToBoxAdapter(child: Text('a', textDirection: TextDirection.rtl)),
-            opacity: 0.0,
+        const TestWidgetsApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              SliverOpacity(
+                sliver: SliverToBoxAdapter(child: Text('a', textDirection: TextDirection.rtl)),
+                opacity: 0.0,
+              ),
+            ],
           ),
-        ]),
+        ),
       );
 
       expect(semantics.nodesWith(label: 'a'), hasLength(0));
@@ -831,12 +845,16 @@ void main() {
 
       // Opacity 0.1: Semantics and painting
       await tester.pumpWidget(
-        boilerPlate(<Widget>[
-          const SliverOpacity(
-            sliver: SliverToBoxAdapter(child: Text('a', textDirection: TextDirection.rtl)),
-            opacity: 0.1,
+        const TestWidgetsApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              SliverOpacity(
+                sliver: SliverToBoxAdapter(child: Text('a', textDirection: TextDirection.rtl)),
+                opacity: 0.1,
+              ),
+            ],
           ),
-        ]),
+        ),
       );
 
       expect(semantics.nodesWith(label: 'a'), hasLength(1));
@@ -844,12 +862,16 @@ void main() {
 
       // Opacity 0.1 without semantics: Still has semantics and painting
       await tester.pumpWidget(
-        boilerPlate(<Widget>[
-          const SliverOpacity(
-            sliver: SliverToBoxAdapter(child: Text('a', textDirection: TextDirection.rtl)),
-            opacity: 0.1,
+        const TestWidgetsApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              SliverOpacity(
+                sliver: SliverToBoxAdapter(child: Text('a', textDirection: TextDirection.rtl)),
+                opacity: 0.1,
+              ),
+            ],
           ),
-        ]),
+        ),
       );
 
       expect(semantics.nodesWith(label: 'a'), hasLength(1));
@@ -857,13 +879,17 @@ void main() {
 
       // Opacity 0.1 with semantics: Semantics and painting
       await tester.pumpWidget(
-        boilerPlate(<Widget>[
-          const SliverOpacity(
-            sliver: SliverToBoxAdapter(child: Text('a', textDirection: TextDirection.rtl)),
-            opacity: 0.1,
-            alwaysIncludeSemantics: true,
+        const TestWidgetsApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              SliverOpacity(
+                sliver: SliverToBoxAdapter(child: Text('a', textDirection: TextDirection.rtl)),
+                opacity: 0.1,
+                alwaysIncludeSemantics: true,
+              ),
+            ],
           ),
-        ]),
+        ),
       );
 
       expect(semantics.nodesWith(label: 'a'), hasLength(1));
@@ -878,19 +904,23 @@ void main() {
       final semantics = SemanticsTester(tester);
       final events = <String>[];
       await tester.pumpWidget(
-        boilerPlate(<Widget>[
-          SliverIgnorePointer(
-            ignoringSemantics: false,
-            sliver: SliverToBoxAdapter(
-              child: GestureDetector(
-                child: const Text('a'),
-                onTap: () {
-                  events.add('tap');
-                },
+        TestWidgetsApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              SliverIgnorePointer(
+                ignoringSemantics: false,
+                sliver: SliverToBoxAdapter(
+                  child: GestureDetector(
+                    child: const Text('a'),
+                    onTap: () {
+                      events.add('tap');
+                    },
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ]),
+        ),
       );
       expect(semantics.nodesWith(label: 'a'), hasLength(1));
       await tester.tap(find.byType(GestureDetector), warnIfMissed: false);
@@ -902,20 +932,24 @@ void main() {
       final semantics = SemanticsTester(tester);
       final events = <String>[];
       await tester.pumpWidget(
-        boilerPlate(<Widget>[
-          SliverIgnorePointer(
-            ignoring: false,
-            ignoringSemantics: true,
-            sliver: SliverToBoxAdapter(
-              child: GestureDetector(
-                child: const Text('a'),
-                onTap: () {
-                  events.add('tap');
-                },
+        TestWidgetsApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              SliverIgnorePointer(
+                ignoring: false,
+                ignoringSemantics: true,
+                sliver: SliverToBoxAdapter(
+                  child: GestureDetector(
+                    child: const Text('a'),
+                    onTap: () {
+                      events.add('tap');
+                    },
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ]),
+        ),
       );
       expect(semantics.nodesWith(label: 'a'), hasLength(0));
       await tester.tap(find.byType(GestureDetector));
@@ -926,13 +960,17 @@ void main() {
     testWidgets('ignoring only block semantics actions', (WidgetTester tester) async {
       final semantics = SemanticsTester(tester);
       await tester.pumpWidget(
-        boilerPlate(<Widget>[
-          SliverIgnorePointer(
-            sliver: SliverToBoxAdapter(
-              child: GestureDetector(child: const Text('a'), onTap: () {}),
-            ),
+        TestWidgetsApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              SliverIgnorePointer(
+                sliver: SliverToBoxAdapter(
+                  child: GestureDetector(child: const Text('a'), onTap: () {}),
+                ),
+              ),
+            ],
           ),
-        ]),
+        ),
       );
       expect(semantics, includesNodeWith(label: 'a', actions: <SemanticsAction>[]));
       semantics.dispose();
@@ -942,19 +980,23 @@ void main() {
       final semantics = SemanticsTester(tester);
       final events = <String>[];
       await tester.pumpWidget(
-        boilerPlate(<Widget>[
-          SliverIgnorePointer(
-            ignoringSemantics: true,
-            sliver: SliverToBoxAdapter(
-              child: GestureDetector(
-                child: const Text('a'),
-                onTap: () {
-                  events.add('tap');
-                },
+        TestWidgetsApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              SliverIgnorePointer(
+                ignoringSemantics: true,
+                sliver: SliverToBoxAdapter(
+                  child: GestureDetector(
+                    child: const Text('a'),
+                    onTap: () {
+                      events.add('tap');
+                    },
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ]),
+        ),
       );
       expect(semantics.nodesWith(label: 'a'), hasLength(0));
       await tester.tap(find.byType(GestureDetector), warnIfMissed: false);
@@ -966,20 +1008,24 @@ void main() {
       final semantics = SemanticsTester(tester);
       final events = <String>[];
       await tester.pumpWidget(
-        boilerPlate(<Widget>[
-          SliverIgnorePointer(
-            ignoring: false,
-            ignoringSemantics: false,
-            sliver: SliverToBoxAdapter(
-              child: GestureDetector(
-                child: const Text('a'),
-                onTap: () {
-                  events.add('tap');
-                },
+        TestWidgetsApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              SliverIgnorePointer(
+                ignoring: false,
+                ignoringSemantics: false,
+                sliver: SliverToBoxAdapter(
+                  child: GestureDetector(
+                    child: const Text('a'),
+                    onTap: () {
+                      events.add('tap');
+                    },
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ]),
+        ),
       );
       expect(semantics.nodesWith(label: 'a'), hasLength(1));
       await tester.tap(find.byType(GestureDetector));
@@ -992,22 +1038,26 @@ void main() {
     testWidgets('ensure semantics', (WidgetTester tester) async {
       final semantics = SemanticsTester(tester);
       await tester.pumpWidget(
-        boilerPlate(<Widget>[
-          const SliverEnsureSemantics(sliver: SliverToBoxAdapter(child: Text('a'))),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text('Lorem Ipsum $index'),
-                );
-              },
-              childCount: 50,
-              semanticIndexOffset: 1,
-            ),
+        TestWidgetsApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              const SliverEnsureSemantics(sliver: SliverToBoxAdapter(child: Text('a'))),
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('Lorem Ipsum $index'),
+                    );
+                  },
+                  childCount: 50,
+                  semanticIndexOffset: 1,
+                ),
+              ),
+              const SliverEnsureSemantics(sliver: SliverToBoxAdapter(child: Text('b'))),
+            ],
           ),
-          const SliverEnsureSemantics(sliver: SliverToBoxAdapter(child: Text('b'))),
-        ]),
+        ),
       );
 
       // Even though 'b' is outside of the Viewport and cacheExtent, since it is
@@ -1023,14 +1073,16 @@ void main() {
   testWidgets('SliverList handles 0 scrollOffsetCorrection', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/62198
     await tester.pumpWidget(
-      _buildSliverTestApp(
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-          slivers: <Widget>[
-            SliverList.list(
-              children: const <Widget>[SizedBox.shrink(), Text('index 1'), Text('index 2')],
-            ),
-          ],
+      TestWidgetsApp(
+        home: SizedBox.expand(
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+            slivers: <Widget>[
+              SliverList.list(
+                children: const <Widget>[SizedBox.shrink(), Text('index 1'), Text('index 2')],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1045,22 +1097,24 @@ void main() {
     var secondTapped = 0;
     final Key key = UniqueKey();
     await tester.pumpWidget(
-      _buildSliverTestApp(
-        key: key,
-        child: CustomScrollView(
-          slivers: <Widget>[
-            SliverGrid(
-              delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-                return _buildIndexedTapTarget(
-                  index: index,
-                  onTap: () {
-                    index.isEven ? firstTapped++ : secondTapped++;
-                  },
-                );
-              }, childCount: 2),
-              gridDelegate: _TestArbitrarySliverGridDelegate(),
-            ),
-          ],
+      TestWidgetsApp(
+        home: SizedBox.expand(
+          key: key,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverGrid(
+                delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+                  return _buildIndexedTapTarget(
+                    index: index,
+                    onTap: () {
+                      index.isEven ? firstTapped++ : secondTapped++;
+                    },
+                  );
+                }, childCount: 2),
+                gridDelegate: _TestArbitrarySliverGridDelegate(),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1135,21 +1189,23 @@ void main() {
     var firstTapped = 0;
     var secondTapped = 0;
     await tester.pumpWidget(
-      _buildSliverTestApp(
-        child: CustomScrollView(
-          slivers: <Widget>[
-            SliverList.builder(
-              itemCount: 2,
-              itemBuilder: (BuildContext context, int index) {
-                return _buildIndexedTapTarget(
-                  index: index,
-                  onTap: () {
-                    index.isEven ? firstTapped++ : secondTapped++;
-                  },
-                );
-              },
-            ),
-          ],
+      TestWidgetsApp(
+        home: SizedBox.expand(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverList.builder(
+                itemCount: 2,
+                itemBuilder: (BuildContext context, int index) {
+                  return _buildIndexedTapTarget(
+                    index: index,
+                    onTap: () {
+                      index.isEven ? firstTapped++ : secondTapped++;
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1168,21 +1224,23 @@ void main() {
     var firstTapped = 0;
     var secondTapped = 0;
     await tester.pumpWidget(
-      _buildSliverTestApp(
-        child: CustomScrollView(
-          slivers: <Widget>[
-            SliverList.builder(
-              itemCount: 2,
-              itemBuilder: (BuildContext context, int index) {
-                return _buildIndexedTapTarget(
-                  index: index,
-                  onTap: () {
-                    index.isEven ? firstTapped++ : secondTapped++;
-                  },
-                );
-              },
-            ),
-          ],
+      TestWidgetsApp(
+        home: SizedBox.expand(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverList.builder(
+                itemCount: 2,
+                itemBuilder: (BuildContext context, int index) {
+                  return _buildIndexedTapTarget(
+                    index: index,
+                    onTap: () {
+                      index.isEven ? firstTapped++ : secondTapped++;
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1201,22 +1259,24 @@ void main() {
     var firstTapped = 0;
     var secondTapped = 0;
     await tester.pumpWidget(
-      _buildSliverTestApp(
-        child: CustomScrollView(
-          slivers: <Widget>[
-            SliverList.separated(
-              itemCount: 2,
-              itemBuilder: (BuildContext context, int index) {
-                return _buildIndexedTapTarget(
-                  index: index,
-                  onTap: () {
-                    index.isEven ? firstTapped++ : secondTapped++;
-                  },
-                );
-              },
-              separatorBuilder: (BuildContext context, int index) => Text('Separator $index'),
-            ),
-          ],
+      TestWidgetsApp(
+        home: SizedBox.expand(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverList.separated(
+                itemCount: 2,
+                itemBuilder: (BuildContext context, int index) {
+                  return _buildIndexedTapTarget(
+                    index: index,
+                    onTap: () {
+                      index.isEven ? firstTapped++ : secondTapped++;
+                    },
+                  );
+                },
+                separatorBuilder: (BuildContext context, int index) => Text('Separator $index'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1233,15 +1293,17 @@ void main() {
 
   testWidgets('SliverList.separated has correct number of children', (WidgetTester tester) async {
     await tester.pumpWidget(
-      _buildSliverTestApp(
-        child: CustomScrollView(
-          slivers: <Widget>[
-            SliverList.separated(
-              itemCount: 2,
-              itemBuilder: (BuildContext context, int index) => const Text('item'),
-              separatorBuilder: (BuildContext context, int index) => const Text('separator'),
-            ),
-          ],
+      TestWidgetsApp(
+        home: SizedBox.expand(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverList.separated(
+                itemCount: 2,
+                itemBuilder: (BuildContext context, int index) => const Text('item'),
+                separatorBuilder: (BuildContext context, int index) => const Text('separator'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1253,24 +1315,26 @@ void main() {
     var firstTapped = 0;
     var secondTapped = 0;
     await tester.pumpWidget(
-      _buildSliverTestApp(
-        child: CustomScrollView(
-          slivers: <Widget>[
-            SliverList.list(
-              children: <Widget>[
-                _buildTapTarget(
-                  label: 'Index 0',
-                  color: _debugEvenColor,
-                  onTap: () => firstTapped++,
-                ),
-                _buildTapTarget(
-                  label: 'Index 1',
-                  color: _debugOddColor,
-                  onTap: () => secondTapped++,
-                ),
-              ],
-            ),
-          ],
+      TestWidgetsApp(
+        home: SizedBox.expand(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverList.list(
+                children: <Widget>[
+                  _buildTapTarget(
+                    label: 'Index 0',
+                    color: _debugEvenColor,
+                    onTap: () => firstTapped++,
+                  ),
+                  _buildTapTarget(
+                    label: 'Index 1',
+                    color: _debugOddColor,
+                    onTap: () => secondTapped++,
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1289,22 +1353,24 @@ void main() {
     var firstTapped = 0;
     var secondTapped = 0;
     await tester.pumpWidget(
-      _buildSliverTestApp(
-        child: CustomScrollView(
-          slivers: <Widget>[
-            SliverFixedExtentList.builder(
-              itemCount: 2,
-              itemExtent: 100,
-              itemBuilder: (BuildContext context, int index) {
-                return _buildIndexedTapTarget(
-                  index: index,
-                  onTap: () {
-                    index.isEven ? firstTapped++ : secondTapped++;
-                  },
-                );
-              },
-            ),
-          ],
+      TestWidgetsApp(
+        home: SizedBox.expand(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverFixedExtentList.builder(
+                itemCount: 2,
+                itemExtent: 100,
+                itemBuilder: (BuildContext context, int index) {
+                  return _buildIndexedTapTarget(
+                    index: index,
+                    onTap: () {
+                      index.isEven ? firstTapped++ : secondTapped++;
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1322,25 +1388,27 @@ void main() {
     var firstTapped = 0;
     var secondTapped = 0;
     await tester.pumpWidget(
-      _buildSliverTestApp(
-        child: CustomScrollView(
-          slivers: <Widget>[
-            SliverFixedExtentList.list(
-              itemExtent: 100,
-              children: <Widget>[
-                _buildTapTarget(
-                  label: 'Index 0',
-                  color: _debugEvenColor,
-                  onTap: () => firstTapped++,
-                ),
-                _buildTapTarget(
-                  label: 'Index 1',
-                  color: _debugOddColor,
-                  onTap: () => secondTapped++,
-                ),
-              ],
-            ),
-          ],
+      TestWidgetsApp(
+        home: SizedBox.expand(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverFixedExtentList.list(
+                itemExtent: 100,
+                children: <Widget>[
+                  _buildTapTarget(
+                    label: 'Index 0',
+                    color: _debugEvenColor,
+                    onTap: () => firstTapped++,
+                  ),
+                  _buildTapTarget(
+                    label: 'Index 1',
+                    color: _debugOddColor,
+                    onTap: () => secondTapped++,
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1359,22 +1427,24 @@ void main() {
     var firstTapped = 0;
     var secondTapped = 0;
     await tester.pumpWidget(
-      _buildSliverTestApp(
-        child: CustomScrollView(
-          slivers: <Widget>[
-            SliverGrid.builder(
-              itemCount: 2,
-              itemBuilder: (BuildContext context, int index) {
-                return _buildIndexedTapTarget(
-                  index: index,
-                  onTap: () {
-                    index.isEven ? firstTapped++ : secondTapped++;
-                  },
-                );
-              },
-              gridDelegate: _TestArbitrarySliverGridDelegate(),
-            ),
-          ],
+      TestWidgetsApp(
+        home: SizedBox.expand(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverGrid.builder(
+                itemCount: 2,
+                itemBuilder: (BuildContext context, int index) {
+                  return _buildIndexedTapTarget(
+                    index: index,
+                    onTap: () {
+                      index.isEven ? firstTapped++ : secondTapped++;
+                    },
+                  );
+                },
+                gridDelegate: _TestArbitrarySliverGridDelegate(),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1393,21 +1463,27 @@ void main() {
     var firstTapped = 0;
     var secondTapped = 0;
     await tester.pumpWidget(
-      _buildSliverTestApp(
-        child: CustomScrollView(
-          slivers: <Widget>[
-            SliverGrid.list(
-              gridDelegate: _TestArbitrarySliverGridDelegate(),
-              children: <Widget>[
-                _buildTapTarget(label: 'First', color: _debugEvenColor, onTap: () => firstTapped++),
-                _buildTapTarget(
-                  label: 'Second',
-                  color: _debugOddColor,
-                  onTap: () => secondTapped++,
-                ),
-              ],
-            ),
-          ],
+      TestWidgetsApp(
+        home: SizedBox.expand(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverGrid.list(
+                gridDelegate: _TestArbitrarySliverGridDelegate(),
+                children: <Widget>[
+                  _buildTapTarget(
+                    label: 'First',
+                    color: _debugEvenColor,
+                    onTap: () => firstTapped++,
+                  ),
+                  _buildTapTarget(
+                    label: 'Second',
+                    color: _debugOddColor,
+                    onTap: () => secondTapped++,
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1424,14 +1500,16 @@ void main() {
 
   testWidgets('SliverGrid.list with empty children list', (WidgetTester tester) async {
     await tester.pumpWidget(
-      _buildSliverTestApp(
-        child: CustomScrollView(
-          slivers: <Widget>[
-            SliverGrid.list(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-              children: const <Widget>[],
-            ),
-          ],
+      TestWidgetsApp(
+        home: SizedBox.expand(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverGrid.list(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+                children: const <Widget>[],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1442,18 +1520,20 @@ void main() {
 
   testWidgets('SliverGrid.builder respects semanticIndexOffset', (WidgetTester tester) async {
     await tester.pumpWidget(
-      _buildSliverTestApp(
-        child: CustomScrollView(
-          slivers: <Widget>[
-            SliverGrid.builder(
-              itemCount: 3,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-              semanticIndexOffset: 7,
-              itemBuilder: (BuildContext context, int index) {
-                return Center(child: Text('G $index'));
-              },
-            ),
-          ],
+      TestWidgetsApp(
+        home: SizedBox.expand(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverGrid.builder(
+                itemCount: 3,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+                semanticIndexOffset: 7,
+                itemBuilder: (BuildContext context, int index) {
+                  return Center(child: Text('G $index'));
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1484,20 +1564,22 @@ void main() {
 
     // SliverGridDelegateWithFixedCrossAxisCount
     await tester.pumpWidget(
-      _buildSliverTestApp(
-        child: CustomScrollView(
-          controller: controller,
-          slivers: <Widget>[
-            SliverGrid.builder(
-              itemCount: 0,
-              itemBuilder: (_, _) => Container(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 1,
-                mainAxisSpacing: 10,
-                childAspectRatio: 2.1,
+      TestWidgetsApp(
+        home: SizedBox.expand(
+          child: CustomScrollView(
+            controller: controller,
+            slivers: <Widget>[
+              SliverGrid.builder(
+                itemCount: 0,
+                itemBuilder: (_, _) => Container(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 1,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: 2.1,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -1507,16 +1589,20 @@ void main() {
 
     // SliverGridDelegateWithMaxCrossAxisExtent
     await tester.pumpWidget(
-      _buildSliverTestApp(
-        child: CustomScrollView(
-          controller: controller,
-          slivers: <Widget>[
-            SliverGrid.builder(
-              itemCount: 0,
-              itemBuilder: (_, _) => Container(),
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 30),
-            ),
-          ],
+      TestWidgetsApp(
+        home: SizedBox.expand(
+          child: CustomScrollView(
+            controller: controller,
+            slivers: <Widget>[
+              SliverGrid.builder(
+                itemCount: 0,
+                itemBuilder: (_, _) => Container(),
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 30,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
