@@ -45,7 +45,11 @@ class SafeAreaExampleApp extends StatelessWidget {
         builder: (BuildContext context) => Scaffold(
           appBar: Toggle.appBar.of(context) ? appBar : null,
           body: const DefaultTextStyle(
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black),
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+            ),
             child: Center(child: SafeAreaExample()),
           ),
         ),
@@ -90,7 +94,10 @@ sealed class Value implements Enum {
 
   List<Widget> get controls;
 
-  static const List<Value> allValues = <Value>[...Inset.values, ...Toggle.values];
+  static const List<Value> allValues = <Value>[
+    ...Inset.values,
+    ...Toggle.values,
+  ];
 }
 
 enum Inset implements Value {
@@ -109,7 +116,8 @@ enum Inset implements Value {
     bottom => model.insets.bottom,
   };
 
-  double of(BuildContext context) => _getValue(Model.of<_InsetModel>(context, this));
+  double of(BuildContext context) =>
+      _getValue(Model.of<_InsetModel>(context, this));
 
   @override
   List<Widget> get controls => <Widget>[
@@ -141,7 +149,8 @@ enum Toggle implements Value {
     safeArea => model.buildSafeArea,
   };
 
-  bool of(BuildContext context) => _getValue(Model.of<_ToggleModel>(context, this));
+  bool of(BuildContext context) =>
+      _getValue(Model.of<_ToggleModel>(context, this));
 
   @override
   List<Widget> get controls => <Widget>[
@@ -169,7 +178,9 @@ abstract class Model<E extends Value> extends InheritedModel<E> {
 
   @override
   bool updateShouldNotifyDependent(Model<E> oldWidget, Set<E> dependencies) {
-    return dependencies.any((E data) => data._getValue(this) != data._getValue(oldWidget));
+    return dependencies.any(
+      (E data) => data._getValue(this) != data._getValue(oldWidget),
+    );
   }
 }
 

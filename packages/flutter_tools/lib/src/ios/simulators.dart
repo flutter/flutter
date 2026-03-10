@@ -29,6 +29,7 @@ import '../project.dart';
 import '../protocol_discovery.dart';
 import '../vmservice.dart';
 import 'application_package.dart';
+import 'devices.dart';
 import 'mac.dart';
 import 'plist_parser.dart';
 
@@ -558,6 +559,7 @@ class IOSSimulator extends Device {
         logger: globals.logger,
         platform: FlutterDarwinPlatform.ios,
         project: app.project.parent,
+        device: this,
       );
       throwToolExit('Could not build the application for the simulator.');
     }
@@ -770,6 +772,8 @@ Future<Process> launchDeviceUnifiedLogging(IOSSimulator device, String? appName)
       'senderImagePath ENDSWITH "/Flutter"',
       'senderImagePath ENDSWITH "/libswiftCore.dylib"',
       'processImageUUID == senderImageUUID',
+      'eventMessage CONTAINS "`UIScene` lifecycle will soon be required"',
+      'eventMessage CONTAINS "This process does not adopt UIScene lifecycle."',
     ]),
     // Filter out some messages that clearly aren't related to Flutter.
     notP('eventMessage CONTAINS ": could not find icon for representation -> com.apple."'),
@@ -808,7 +812,7 @@ Future<Process?> launchSystemLogTool(IOSSimulator device) async {
   return null;
 }
 
-class _IOSSimulatorLogReader extends DeviceLogReader {
+class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
   _IOSSimulatorLogReader(this.device, IOSApp? app) : _appName = app?.name?.replaceAll('.app', '');
 
   final IOSSimulator device;
@@ -819,6 +823,10 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     onListen: _start,
     onCancel: _stop,
   );
+
+  @override
+  @visibleForTesting
+  StreamController<String> get linesController => _linesController;
 
   // We log from two files: the device and the system log.
   Process? _deviceProcess;
@@ -834,40 +842,22 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     // Unified logging iOS 11 and greater (introduced in iOS 10).
     if (await device.sdkMajorVersion >= 11) {
       _deviceProcess = await launchDeviceUnifiedLogging(device, _appName);
-      _deviceProcess?.stdout
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen(_onUnifiedLoggingLine);
-      _deviceProcess?.stderr
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen(_onUnifiedLoggingLine);
+      _deviceProcess?.stdout.transform(utf8LineDecoder).listen(_onUnifiedLoggingLine);
+      _deviceProcess?.stderr.transform(utf8LineDecoder).listen(_onUnifiedLoggingLine);
     } else {
       // Fall back to syslog parsing.
       await device.ensureLogsExists();
       _deviceProcess = await launchDeviceSystemLogTool(device);
-      _deviceProcess?.stdout
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen(_onSysLogDeviceLine);
-      _deviceProcess?.stderr
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen(_onSysLogDeviceLine);
+      _deviceProcess?.stdout.transform(utf8LineDecoder).listen(_onSysLogDeviceLine);
+      _deviceProcess?.stderr.transform(utf8LineDecoder).listen(_onSysLogDeviceLine);
     }
 
     // Track system.log crashes.
     // ReportCrash[37965]: Saved crash report for FlutterRunner[37941]...
     _systemProcess = await launchSystemLogTool(device);
     if (_systemProcess != null) {
-      _systemProcess?.stdout
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen(_onSystemLine);
-      _systemProcess?.stderr
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen(_onSystemLine);
+      _systemProcess?.stdout.transform(utf8LineDecoder).listen(_onSystemLine);
+      _systemProcess?.stderr.transform(utf8LineDecoder).listen(_onSystemLine);
     }
 
     // We don't want to wait for the process or its callback. Best effort
@@ -976,13 +966,13 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
         int repeat = int.parse(multi.group(1)!);
         repeat = math.max(0, math.min(100, repeat));
         for (var i = 1; i < repeat; i++) {
-          _linesController.add(_lastLine!);
+          addLogToStream(_lastLine!);
         }
       }
     } else {
       _lastLine = _filterDeviceLine(line);
       if (_lastLine != null) {
-        _linesController.add(_lastLine!);
+        addLogToStream(_lastLine!);
         _lastLineMatched = true;
       } else {
         _lastLineMatched = false;
@@ -1000,7 +990,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
       try {
         final Object? decodedJson = jsonDecode(message);
         if (decodedJson is String) {
-          _linesController.add(decodedJson);
+          addLogToStream(decodedJson);
         }
       } on FormatException {
         globals.printError('Logger returned non-JSON response: $message');
@@ -1021,7 +1011,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
     final String filteredLine = _filterSystemLog(line);
 
-    _linesController.add(filteredLine);
+    addLogToStream(filteredLine);
   }
 
   void _stop() {

@@ -25,7 +25,7 @@ const String _kWebScriptPrefix = r"window.$flutterDriver('";
 const String _kWebScriptSuffix = "')";
 
 void main() {
-  final List<String> log = <String>[];
+  final log = <String>[];
 
   driverLog = (String source, String message) {
     log.add('$source: $message');
@@ -62,9 +62,9 @@ void main() {
         expect(exists, true, reason: 'Not found ${logFile.path}');
 
         final String commandLog = await logFile.readAsString();
-        const String waitForCommandLog =
+        const waitForCommandLog =
             '>>> {command: waitFor, timeout: $_kSerializedTestTimeout, finderType: ByTooltipMessage, text: foo}';
-        const String responseLog = '<<< {isError: false, response: {status: ok}}';
+        const responseLog = '<<< {isError: false, response: {status: ok}}';
 
         expect(
           commandLog.contains(waitForCommandLog),
@@ -414,7 +414,7 @@ void main() {
           'tree': 'hello',
         });
         final LayerTree result = await driver.getLayerTree(timeout: _kTestTimeout);
-        final LayerTree referenceTree = LayerTree.fromJson(<String, String>{'tree': 'hello'});
+        final referenceTree = LayerTree.fromJson(<String, String>{'tree': 'hello'});
         expect(result.tree, referenceTree.tree);
         expect(fakeClient.commandLog, <String>[
           'ext.flutter.driver {command: get_layer_tree, timeout: $_kSerializedTestTimeout}',
@@ -478,6 +478,32 @@ void main() {
         expect(fakeClient.commandLog, <String>[
           'ext.flutter.driver {command: waitForCondition, timeout: $_kSerializedTestTimeout, conditionName: CombinedCondition, conditions: [{"conditionName":"NoPendingFrameCondition"},{"conditionName":"NoTransientCallbacksCondition"}]}',
         ]);
+      });
+    });
+
+    group('scrollUntilVisible', () {
+      test('should report error when waitFor fails', () async {
+        fakeClient.responses['waitFor'] = makeFakeResponse(<String, dynamic>{
+          'message': 'waitFor failed',
+        }, isError: true);
+        fakeClient.responses['scroll'] = makeFakeResponse(<String, dynamic>{});
+        fakeClient.responses['scrollIntoView'] = makeFakeResponse(<String, dynamic>{});
+
+        await expectLater(
+          driver.scrollUntilVisible(
+            find.byTooltip('scrollable'),
+            find.byTooltip('item'),
+            dyScroll: 100,
+            timeout: const Duration(milliseconds: 500),
+          ),
+          throwsA(
+            isA<DriverError>().having(
+              (error) => error.message,
+              'message',
+              contains('waitFor failed'),
+            ),
+          ),
+        );
       });
     });
 
@@ -636,7 +662,7 @@ void main() {
 
     group('traceAction with timeline streams', () {
       test('specify non-default timeline streams', () async {
-        bool actionCalled = false;
+        var actionCalled = false;
 
         final Timeline timeline = await driver.traceAction(
           () async {
@@ -667,6 +693,7 @@ void main() {
         log.clear();
         fakeClient.artificialExtensionDelay = Completer<void>().future;
         FakeAsync().run((FakeAsync time) {
+          // ignore: unawaited_futures
           driver.waitFor(find.byTooltip('foo'));
           expect(log, <String>[]);
           time.elapse(kUnusuallyLongTimeout);
@@ -681,6 +708,7 @@ void main() {
         fakeClient.artificialExtensionDelay = Completer<void>().future;
         FakeAsync().run((FakeAsync time) {
           final Duration customTimeout = kUnusuallyLongTimeout - const Duration(seconds: 1);
+          // ignore: unawaited_futures
           driver.waitFor(find.byTooltip('foo'), timeout: customTimeout);
           expect(log, <String>[]);
           time.elapse(customTimeout);
@@ -695,7 +723,7 @@ void main() {
           'message': 'This is a failure',
         }, isError: true);
         await expectLater(
-          () => driver.waitFor(find.byTooltip('foo')),
+          driver.waitFor(find.byTooltip('foo')),
           throwsA(
             isA<DriverError>().having(
               (DriverError error) => error.message,
@@ -814,9 +842,9 @@ void main() {
       expect(exists, true, reason: 'Not found ${logFile.path}');
 
       final String commandLog = await logFile.readAsString();
-      const String waitForCommandLog =
+      const waitForCommandLog =
           '>>> {command: waitFor, timeout: 1234, finderType: ByTooltipMessage, text: logCommunicationToFile test}';
-      const String responseLog = '<<< {isError: false, response: {status: ok}, type: Response}';
+      const responseLog = '<<< {isError: false, response: {status: ok}, type: Response}';
 
       expect(
         commandLog,
@@ -1138,7 +1166,7 @@ void main() {
 //   window.flutterDriver('[actual script]')
 String _checkAndEncode(dynamic script) {
   expect(script, isA<String>());
-  final String scriptString = script as String;
+  final scriptString = script as String;
   expect(scriptString.startsWith(_kWebScriptPrefix), isTrue);
   expect(scriptString.endsWith(_kWebScriptSuffix), isTrue);
   // Strip prefix and suffix
@@ -1167,8 +1195,7 @@ class FakeFlutterWebConnection extends Fake implements FlutterWebConnection {
   @override
   Future<dynamic> sendCommand(String script, Duration? duration) async {
     commandLog.add('$script $duration');
-    final Map<String, dynamic> decoded =
-        jsonDecode(_checkAndEncode(script)) as Map<String, dynamic>;
+    final decoded = jsonDecode(_checkAndEncode(script)) as Map<String, dynamic>;
     final dynamic response = responses[decoded['command']];
     assert(response != null, 'Missing ${decoded['command']} in responses.');
     return response;

@@ -13,46 +13,80 @@ import 'window_settings_dialog.dart';
 import 'models.dart';
 import 'regular_window_edit_dialog.dart';
 import 'dialog_window_edit_dialog.dart';
+import 'tooltip_window_edit_dialog.dart';
+import 'tooltip_button.dart';
+import 'window_content.dart';
 
 class MainWindow extends StatelessWidget {
-  const MainWindow({super.key});
+  const MainWindow({super.key, required this.controller});
+
+  final RegularWindowController controller;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Multi Window Reference App')),
-      body: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 60,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: _WindowsTable(),
+    final KeyedWindowManager windowManager = KeyedWindowManagerAccessor.of(
+      context,
+    );
+
+    return ViewAnchor(
+      view: ListenableBuilder(
+        listenable: windowManager,
+        builder: (BuildContext context, Widget? child) {
+          final List<Widget> childViews = <Widget>[];
+          for (final KeyedWindow window in windowManager.getWindows(
+            parent: controller,
+          )) {
+            childViews.add(
+              WindowContent(
+                controller: window.controller,
+                windowKey: window.key,
+                onDestroyed: () => windowManager.remove(window.key),
+                onError: () => windowManager.remove(window.key),
+              ),
+            );
+          }
+
+          return ViewCollection(views: childViews);
+        },
+      ),
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Multi Window Reference App')),
+        body: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 60,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
+                      child: _WindowsTable(),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Expanded(
-            flex: 40,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [Expanded(child: _WindowCreatorCard())],
+            Expanded(
+              flex: 40,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [Expanded(child: _WindowCreatorCard())],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
 class _WindowsTable extends StatelessWidget {
-  List<DataRow> _buildRows(WindowManager windowManager, BuildContext context) {
+  List<DataRow> _buildRows(
+    KeyedWindowManager windowManager,
+    BuildContext context,
+  ) {
     List<DataRow> rows = [];
     for (KeyedWindow controller in windowManager.windows) {
       rows.add(
@@ -69,6 +103,7 @@ class _WindowsTable extends StatelessWidget {
             DataCell(Text(_getWindowTypeName(controller.controller))),
             DataCell(
               Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   IconButton(
                     icon: const Icon(Icons.edit_outlined),
@@ -101,6 +136,11 @@ class _WindowsTable extends StatelessWidget {
         context: context,
         controller: dialog,
       ),
+      final TooltipWindowController tooltip => showTooltipWindowEditDialog(
+        context: context,
+        controller: tooltip,
+      ),
+      PopupWindowController() => null,
     };
   }
 
@@ -108,12 +148,16 @@ class _WindowsTable extends StatelessWidget {
     return switch (controller) {
       RegularWindowController() => 'Regular',
       DialogWindowController() => 'Dialog',
+      TooltipWindowController() => 'Tooltip',
+      PopupWindowController() => 'Popup',
     };
   }
 
   @override
   Widget build(BuildContext context) {
-    final WindowManager windowManager = WindowManagerAccessor.of(context);
+    final KeyedWindowManager windowManager = KeyedWindowManagerAccessor.of(
+      context,
+    );
     return DataTable(
       showBottomBorder: true,
       columns: const [
@@ -139,8 +183,12 @@ class _WindowsTable extends StatelessWidget {
 class _WindowCreatorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final WindowManager windowManager = WindowManagerAccessor.of(context);
+    final KeyedWindowManager windowManager = KeyedWindowManagerAccessor.of(
+      context,
+    );
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
+    final BaseWindowController windowController = WindowScope.of(context);
+
     return Card.outlined(
       margin: const EdgeInsets.symmetric(horizontal: 25),
       child: Padding(
@@ -155,58 +203,84 @@ class _WindowCreatorCard extends StatelessWidget {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                OutlinedButton(
-                  onPressed: () async {
-                    final UniqueKey key = UniqueKey();
-                    windowManager.add(
-                      KeyedWindow(
-                        key: key,
-                        controller: RegularWindowController(
-                          delegate: CallbackRegularWindowControllerDelegate(
-                            onDestroyed: () => windowManager.remove(key),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    OutlinedButton(
+                      onPressed: () {
+                        final UniqueKey key = UniqueKey();
+                        windowManager.add(
+                          KeyedWindow(
+                            key: key,
+                            controller: RegularWindowController(
+                              delegate: CallbackRegularWindowControllerDelegate(
+                                onDestroyed: () => windowManager.remove(key),
+                              ),
+                              title: 'Regular',
+                              preferredSize: windowSettings.regularSize,
+                            ),
                           ),
-                          title: 'Regular',
-                          preferredSize: windowSettings.regularSize,
-                        ),
-                      ),
-                    );
-                  },
-                  child: const Text('Regular'),
-                ),
-                const SizedBox(height: 8),
-                OutlinedButton(
-                  onPressed: () async {
-                    final UniqueKey key = UniqueKey();
-                    windowManager.add(
-                      KeyedWindow(
-                        key: key,
-                        controller: DialogWindowController(
-                          delegate: CallbackDialogWindowControllerDelegate(
-                            onDestroyed: () => windowManager.remove(key),
+                        );
+                      },
+                      child: const Text('Regular'),
+                    ),
+                    const SizedBox(height: 8),
+                    TooltipButton(parentController: windowController),
+                    const SizedBox(height: 8),
+                    OutlinedButton(
+                      onPressed: () {
+                        final UniqueKey key = UniqueKey();
+                        windowManager.add(
+                          KeyedWindow(
+                            key: key,
+                            controller: DialogWindowController(
+                              delegate: CallbackDialogWindowControllerDelegate(
+                                onDestroyed: () => windowManager.remove(key),
+                              ),
+                              title: 'Modeless Dialog',
+                              preferredSize: windowSettings.dialogSize,
+                            ),
                           ),
-                          title: 'Modeless Dialog',
-                          preferredSize: windowSettings.dialogSize,
-                        ),
+                        );
+                      },
+                      child: const Text('Modeless Dialog'),
+                    ),
+                    const SizedBox(height: 8),
+                    OutlinedButton(
+                      onPressed: () {
+                        final UniqueKey key = UniqueKey();
+                        windowManager.add(
+                          KeyedWindow(
+                            key: key,
+                            controller: DialogWindowController(
+                              delegate: CallbackDialogWindowControllerDelegate(
+                                onDestroyed: () => windowManager.remove(key),
+                              ),
+                              title: 'Modal Dialog',
+                              preferredSize: windowSettings.dialogSize,
+                              parent: windowController,
+                            ),
+                          ),
+                        );
+                      },
+                      child: const Text('Modal Dialog'),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      alignment: Alignment.bottomRight,
+                      child: TextButton(
+                        child: const Text('SETTINGS'),
+                        onPressed: () {
+                          showWindowSettingsDialog(context, windowSettings);
+                        },
                       ),
-                    );
-                  },
-                  child: const Text('Modeless Dialog'),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                Container(
-                  alignment: Alignment.bottomRight,
-                  child: TextButton(
-                    child: const Text('SETTINGS'),
-                    onPressed: () {
-                      showWindowSettingsDialog(context, windowSettings);
-                    },
-                  ),
-                ),
-                const SizedBox(width: 8),
-              ],
+              ),
             ),
           ],
         ),

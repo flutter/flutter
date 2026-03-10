@@ -55,9 +55,9 @@ void main() {
   });
 
   testWidgets('Text Foreground', (WidgetTester tester) async {
-    const Color black = Color(0xFF000000);
-    const Color red = Color(0xFFFF0000);
-    const Color blue = Color(0xFF0000FF);
+    const black = Color(0xFF000000);
+    const red = Color(0xFFFF0000);
+    const blue = Color(0xFF0000FF);
     final Shader linearGradient = const LinearGradient(
       colors: <Color>[red, blue],
     ).createShader(const Rect.fromLTWH(0.0, 0.0, 50.0, 20.0));
@@ -138,8 +138,8 @@ void main() {
   testWidgets('Text Background', (WidgetTester tester) async {
     const Color red = Colors.red;
     const Color blue = Colors.blue;
-    const Color translucentGreen = Color(0x5000F000);
-    const Color translucentDarkRed = Color(0x500F0000);
+    const translucentGreen = Color(0x5000F000);
+    const translucentDarkRed = Color(0x500F0000);
     await tester.pumpWidget(
       Align(
         alignment: Alignment.topLeft,
@@ -371,7 +371,7 @@ void main() {
   });
 
   testWidgets('Decoration thickness', (WidgetTester tester) async {
-    final TextDecoration allDecorations = TextDecoration.combine(<TextDecoration>[
+    final allDecorations = TextDecoration.combine(<TextDecoration>[
       TextDecoration.underline,
       TextDecoration.overline,
       TextDecoration.lineThrough,
@@ -402,7 +402,7 @@ void main() {
   });
 
   testWidgets('Decoration thickness', (WidgetTester tester) async {
-    final TextDecoration allDecorations = TextDecoration.combine(<TextDecoration>[
+    final allDecorations = TextDecoration.combine(<TextDecoration>[
       TextDecoration.underline,
       TextDecoration.overline,
       TextDecoration.lineThrough,
@@ -480,9 +480,8 @@ void main() {
                           TextSpan(text: 'hello world! seize the day!'),
                           WidgetSpan(child: Checkbox(value: false, onChanged: null)),
                           WidgetSpan(
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
+                            child: SizedBox.square(
+                              dimension: 20.0,
                               child: Checkbox(value: true, onChanged: null),
                             ),
                           ),
@@ -492,9 +491,8 @@ void main() {
                             baseline: TextBaseline.alphabetic,
                           ),
                           WidgetSpan(
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
+                            child: SizedBox.square(
+                              dimension: 20.0,
                               child: Checkbox(value: true, onChanged: null),
                             ),
                           ),
@@ -728,9 +726,8 @@ void main() {
                           WidgetSpan(
                             alignment: PlaceholderAlignment.baseline,
                             baseline: TextBaseline.alphabetic,
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
+                            child: SizedBox.square(
+                              dimension: 20,
                               child: Checkbox(value: true, onChanged: null),
                             ),
                           ),
@@ -742,9 +739,8 @@ void main() {
                           WidgetSpan(
                             alignment: PlaceholderAlignment.baseline,
                             baseline: TextBaseline.alphabetic,
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
+                            child: SizedBox.square(
+                              dimension: 20,
                               child: Checkbox(value: true, onChanged: null),
                             ),
                           ),
@@ -828,9 +824,8 @@ void main() {
                           WidgetSpan(
                             alignment: PlaceholderAlignment.aboveBaseline,
                             baseline: TextBaseline.alphabetic,
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
+                            child: SizedBox.square(
+                              dimension: 20,
                               child: Checkbox(value: true, onChanged: null),
                             ),
                           ),
@@ -842,9 +837,8 @@ void main() {
                           WidgetSpan(
                             alignment: PlaceholderAlignment.aboveBaseline,
                             baseline: TextBaseline.alphabetic,
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
+                            child: SizedBox.square(
+                              dimension: 20,
                               child: Checkbox(value: true, onChanged: null),
                             ),
                           ),
@@ -928,9 +922,8 @@ void main() {
                           WidgetSpan(
                             alignment: PlaceholderAlignment.belowBaseline,
                             baseline: TextBaseline.alphabetic,
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
+                            child: SizedBox.square(
+                              dimension: 20,
                               child: Checkbox(value: true, onChanged: null),
                             ),
                           ),
@@ -942,9 +935,8 @@ void main() {
                           WidgetSpan(
                             alignment: PlaceholderAlignment.belowBaseline,
                             baseline: TextBaseline.alphabetic,
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
+                            child: SizedBox.square(
+                              dimension: 20,
                               child: Checkbox(value: true, onChanged: null),
                             ),
                           ),
@@ -1028,9 +1020,8 @@ void main() {
                           WidgetSpan(
                             alignment: PlaceholderAlignment.top,
                             baseline: TextBaseline.alphabetic,
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
+                            child: SizedBox.square(
+                              dimension: 20,
                               child: Checkbox(value: true, onChanged: null),
                             ),
                           ),
@@ -1042,9 +1033,8 @@ void main() {
                           WidgetSpan(
                             alignment: PlaceholderAlignment.top,
                             baseline: TextBaseline.alphabetic,
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
+                            child: SizedBox.square(
+                              dimension: 20,
                               child: Checkbox(value: true, onChanged: null),
                             ),
                           ),
@@ -1128,9 +1118,8 @@ void main() {
                           WidgetSpan(
                             alignment: PlaceholderAlignment.middle,
                             baseline: TextBaseline.alphabetic,
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
+                            child: SizedBox.square(
+                              dimension: 20,
                               child: Checkbox(value: true, onChanged: null),
                             ),
                           ),
@@ -1142,9 +1131,8 @@ void main() {
                           WidgetSpan(
                             alignment: PlaceholderAlignment.middle,
                             baseline: TextBaseline.alphabetic,
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
+                            child: SizedBox.square(
+                              dimension: 20,
                               child: Checkbox(value: true, onChanged: null),
                             ),
                           ),

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "pointer_delegate.h"
+#include "flutter/shell/platform/fuchsia/flutter/pointer_delegate.h"
 
 #include <lib/trace/event.h>
 #include <zircon/status.h>

@@ -1,0 +1,85 @@
+name: android_verified_input
+description: "An integration test for verified MotionEvents."
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+version: 1.0.0+1
+environment:
+  sdk: ^3.10.0-0
+
+resolution: workspace
+
+# Dependencies specify other packages that your package needs in order to work.
+# To automatically upgrade your package dependencies to the latest versions
+# consider running `flutter pub upgrade --major-versions`. Alternatively,
+# dependencies can be manually updated by changing the version numbers below to
+# the latest version available on pub.dev. To see which dependencies have newer
+# versions available, run `flutter pub outdated`.
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+
+  async: any
+  boolean_selector: any
+  characters: any
+  collection: any
+  file: any
+  matcher: any
+  material_color_utilities: any
+  meta: any
+  path: any
+  source_span: any
+  stack_trace: any
+  stream_channel: any
+  string_scanner: any
+  sync_http: any
+  term_glyph: any
+  test_api: any
+  vector_math: any
+  vm_service: any
+  webdriver: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  test: ^1.26.3
+
+  _fe_analyzer_shared: any
+  analyzer: any
+  args: any
+  clock: any
+  convert: any
+  coverage: any
+  crypto: any
+  fake_async: any
+  frontend_server_client: any
+  glob: any
+  http_multi_server: any
+  http_parser: any
+  io: any
+  js: any
+  leak_tracker: any
+  leak_tracker_flutter_testing: any
+  leak_tracker_testing: any
+  logging: any
+  mime: any
+  node_preamble: any
+  package_config: any
+  pool: any
+  pub_semver: any
+  shelf: any
+  shelf_packages_handler: any
+  shelf_static: any
+  shelf_web_socket: any
+  source_map_stack_trace: any
+  source_maps: any
+  test_core: any
+  typed_data: any
+  watcher: any
+  web: any
+  web_socket: any
+  web_socket_channel: any
+  webkit_inspection_protocol: any
+  yaml: any
+
+# PUBSPEC CHECKSUM: rdqmb5

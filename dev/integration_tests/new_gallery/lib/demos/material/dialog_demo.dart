@@ -128,29 +128,28 @@ class _DialogDemoState extends State<DialogDemo> with RestorationMixin {
 
     return DialogRoute<String>(
       context: context,
-      builder:
-          (BuildContext context) => ApplyTextOptions(
-            child: SimpleDialog(
-              title: Text(GalleryLocalizations.of(context)!.dialogSetBackup),
-              children: <Widget>[
-                _DialogDemoItem(
-                  icon: Icons.account_circle,
-                  color: theme.colorScheme.primary,
-                  text: 'username@gmail.com',
-                ),
-                _DialogDemoItem(
-                  icon: Icons.account_circle,
-                  color: theme.colorScheme.secondary,
-                  text: 'user02@gmail.com',
-                ),
-                _DialogDemoItem(
-                  icon: Icons.add_circle,
-                  text: GalleryLocalizations.of(context)!.dialogAddAccount,
-                  color: theme.disabledColor,
-                ),
-              ],
+      builder: (BuildContext context) => ApplyTextOptions(
+        child: SimpleDialog(
+          title: Text(GalleryLocalizations.of(context)!.dialogSetBackup),
+          children: <Widget>[
+            _DialogDemoItem(
+              icon: Icons.account_circle,
+              color: theme.colorScheme.primary,
+              text: 'username@gmail.com',
             ),
-          ),
+            _DialogDemoItem(
+              icon: Icons.account_circle,
+              color: theme.colorScheme.secondary,
+              text: 'user02@gmail.com',
+            ),
+            _DialogDemoItem(
+              icon: Icons.add_circle,
+              text: GalleryLocalizations.of(context)!.dialogAddAccount,
+              color: theme.disabledColor,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -171,27 +170,26 @@ class _DialogDemoState extends State<DialogDemo> with RestorationMixin {
       onGenerateRoute: (RouteSettings settings) {
         return _NoAnimationMaterialPageRoute<void>(
           settings: settings,
-          builder:
-              (BuildContext context) => Scaffold(
-                appBar: AppBar(automaticallyImplyLeading: false, title: Text(_title(context))),
-                body: Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      switch (widget.type) {
-                        case DialogDemoType.alert:
-                          _alertDialogRoute.present();
-                        case DialogDemoType.alertTitle:
-                          _alertDialogWithTitleRoute.present();
-                        case DialogDemoType.simple:
-                          _simpleDialogRoute.present();
-                        case DialogDemoType.fullscreen:
-                          Navigator.restorablePush<void>(context, _fullscreenDialogRoute);
-                      }
-                    },
-                    child: Text(GalleryLocalizations.of(context)!.dialogShow),
-                  ),
-                ),
+          builder: (BuildContext context) => Scaffold(
+            appBar: AppBar(automaticallyImplyLeading: false, title: Text(_title(context))),
+            body: Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  switch (widget.type) {
+                    case DialogDemoType.alert:
+                      _alertDialogRoute.present();
+                    case DialogDemoType.alertTitle:
+                      _alertDialogWithTitleRoute.present();
+                    case DialogDemoType.simple:
+                      _simpleDialogRoute.present();
+                    case DialogDemoType.fullscreen:
+                      Navigator.restorablePush<void>(context, _fullscreenDialogRoute);
+                  }
+                },
+                child: Text(GalleryLocalizations.of(context)!.dialogShow),
               ),
+            ),
+          ),
         );
       },
     );

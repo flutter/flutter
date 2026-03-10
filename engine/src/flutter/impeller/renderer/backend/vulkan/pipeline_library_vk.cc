@@ -26,7 +26,8 @@ PipelineLibraryVK::PipelineLibraryVK(
       pso_cache_(std::make_shared<PipelineCacheVK>(std::move(caps),
                                                    device_holder,
                                                    std::move(cache_directory))),
-      worker_task_runner_(std::move(worker_task_runner)) {
+      worker_task_runner_(std::move(worker_task_runner)),
+      compile_queue_(PipelineCompileQueue::Create(worker_task_runner_)) {
   FML_DCHECK(worker_task_runner_);
   if (!pso_cache_->IsValid() || !worker_task_runner_) {
     return;
@@ -179,8 +180,6 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryVK::GetPipeline(
     auto thiz = weak_this.lock();
     if (!thiz) {
       promise->set_value(nullptr);
-      VALIDATION_LOG << "Pipeline library was collected before the pipeline "
-                        "could be created.";
       return;
     }
 
@@ -193,7 +192,8 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryVK::GetPipeline(
   };
 
   if (async) {
-    worker_task_runner_->PostTask(generation_task);
+    compile_queue_->PostJobForDescriptor(descriptor,
+                                         std::move(generation_task));
   } else {
     generation_task();
   }
@@ -302,6 +302,10 @@ const std::shared_ptr<PipelineCacheVK>& PipelineLibraryVK::GetPSOCache() const {
 const std::shared_ptr<fml::ConcurrentTaskRunner>&
 PipelineLibraryVK::GetWorkerTaskRunner() const {
   return worker_task_runner_;
+}
+
+PipelineCompileQueue* PipelineLibraryVK::GetPipelineCompileQueue() const {
+  return compile_queue_.get();
 }
 
 }  // namespace impeller

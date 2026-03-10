@@ -18,7 +18,7 @@ if (!is_fuchsia) {
 }
 
 # Overrides for ANGLE's dependencies.
-angle_abseil_cpp_dir = "//flutter/third_party/abseil-cpp"
+angle_abseil_cpp_dir = "//third_party/abseil-cpp"
 angle_glslang_dir = "//flutter/third_party/vulkan-deps/glslang/src"
 angle_googletest_dir = "//third_party/googletest/googletest/src"
 

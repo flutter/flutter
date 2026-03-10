@@ -282,7 +282,7 @@ void main() {
   // https://github.com/flutter/flutter/pull/152981
   CupertinoCheckbox(fillColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
  if (states.contains(WidgetState.disabled)) {
- return CupertinoColors.white.withOpacity(0.5);
+ return CupertinoColors.white.withValues(alpha: 0.5);
  }
  if (states.contains(WidgetState.selected)) {
  return CupertinoDynamicColor.resolve(CupertinoDynamicColor.withBrightness(
@@ -294,7 +294,7 @@ void main() {
  }));
   CupertinoCheckbox(activeColor: Colors.white, fillColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
  if (states.contains(WidgetState.disabled)) {
- return CupertinoColors.white.withOpacity(0.5);
+ return CupertinoColors.white.withValues(alpha: 0.5);
  }
  if (states.contains(WidgetState.selected)) {
  return Colors.white;
@@ -311,7 +311,10 @@ void main() {
   // https://github.com/flutter/flutter/pull/170625
   showCupertinoSheet(
     context: context,
-    builder: (BuildContext context) => Container(),
+    scrollableBuilder: (BuildContext context, ScrollController controller) {
+      WidgetBuilder widgetBuilder = (BuildContext context) => Container();
+      return widgetBuilder(context);
+    },
   );
 
   // https://github.com/flutter/flutter/pull/171160
@@ -322,4 +325,22 @@ void main() {
   dynamicColor.a;
   dynamicColor.toARGB32();
   dynamicColor = dynamicColor.withValues(alpha: 0.55);
+
+  // Changes made in https://github.com/flutter/flutter/pull/177337
+  showCupertinoSheet(
+    context: context,
+    scrollableBuilder: (BuildContext context, ScrollController controller) {
+      WidgetBuilder widgetBuilder = (BuildContext context) => Container();
+      return widgetBuilder(context);
+    },
+  );
+
+  // Changes made in https://github.com/flutter/flutter/pull/177337
+  CupertinoSheetRoute<void>(
+    context: context,
+    scrollableBuilder: (BuildContext context, ScrollController controller) {
+      WidgetBuilder widgetBuilder = (BuildContext context) => Container();
+      return widgetBuilder(context);
+    },
+  );
 }

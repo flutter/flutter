@@ -30,17 +30,17 @@ import 'android_sdk.dart';
 // Please see the README before changing any of these values.
 
 // See https://gradle.org/releases
-const templateDefaultGradleVersion = '8.12';
+const templateDefaultGradleVersion = '8.14';
 
 // When bumping, also update:
 //  * AGP version constants in packages/flutter_tools/gradle/build.gradle.kts
 //  * AGP test constants in packages/flutter_tools/gradle/src/test/kotlin/DependencyVersionCheckerTest.kt
 // See https://mvnrepository.com/artifact/com.android.tools.build/gradle
-const templateAndroidGradlePluginVersion = '8.9.1';
-const templateAndroidGradlePluginVersionForModule = '8.9.1';
+const templateAndroidGradlePluginVersion = '8.11.1';
+const templateAndroidGradlePluginVersionForModule = '8.11.1';
 
 // See https://kotlinlang.org/docs/releases.html#release-details
-const templateKotlinGradlePluginVersion = '2.1.0';
+const templateKotlinGradlePluginVersion = '2.2.20';
 
 // The Flutter Gradle Plugin is only applied to app projects, and modules that
 // are built from source using (`include_flutter.groovy`). The remaining
@@ -79,7 +79,7 @@ const maxKnownAndSupportedGradleVersion = '9.1.0';
 //
 // Supported here means supported by the tooling for
 // flutter analyze --suggestions and does not imply broader flutter support.
-const maxKnownAndSupportedKgpVersion = '2.2.20';
+const maxKnownAndSupportedKgpVersion = '2.3.0';
 
 // Update this when new versions of AGP come out.
 //
@@ -87,6 +87,12 @@ const maxKnownAndSupportedKgpVersion = '2.2.20';
 // compatibility.
 @visibleForTesting
 const maxKnownAndSupportedAgpVersion = '9.0';
+
+// Update this when new versions of AGP with Kotlin support come out.
+//
+// Supported here means supported by the tooling for
+// flutter analyze --suggestions and does not imply broader flutter support.
+const maxKnownAgpVersionWithFullKotlinSupport = '8.13.0';
 
 // Update this when new versions of AGP come out.
 const maxKnownAgpVersion = '9.0';
@@ -650,7 +656,6 @@ bool validateAgpAndKgp(Logger logger, {required String? kgpV, required String? a
       'AGP version ($agpV) older than oldest supported $oldestConsideredAgpVersion.',
     );
   }
-  const maxKnownAgpVersionWithFullKotinSupport = '8.7.2';
 
   if (isWithinVersionRange(
         kgpV,
@@ -660,7 +665,7 @@ bool validateAgpAndKgp(Logger logger, {required String? kgpV, required String? a
       ) ||
       isWithinVersionRange(
         agpV,
-        min: maxKnownAgpVersionWithFullKotinSupport,
+        min: maxKnownAgpVersionWithFullKotlinSupport,
         max: '100.100',
         inclusiveMin: false,
       )) {
@@ -677,6 +682,12 @@ bool validateAgpAndKgp(Logger logger, {required String? kgpV, required String? a
   // add a comment with the documented value.
   // Continuous KGP version handling is prefered in case an emergency patch to a
   // past release is shipped this code will assume the version range that is closest.
+
+  // Documented max is 2.3.0
+  if (isWithinVersionRange(kgpV, min: '2.3.0', max: '2.3.0')) {
+    // Documented max is 8.13.0
+    return isWithinVersionRange(agpV, min: '8.2.2', max: '8.14', inclusiveMax: false);
+  }
 
   // Documented max is 2.2.20
   if (isWithinVersionRange(kgpV, min: '2.2.20', max: '2.2.29')) {

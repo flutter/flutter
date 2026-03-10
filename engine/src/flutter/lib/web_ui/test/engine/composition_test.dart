@@ -34,12 +34,11 @@ GloballyPositionedTextEditingStrategy _enableEditingStrategy({
   required bool deltaModel,
   void Function(EditingState?, TextEditingDeltaState?)? onChange,
 }) {
-  final HybridTextEditing owner = HybridTextEditing();
+  final owner = HybridTextEditing();
 
   owner.configuration = InputConfiguration(viewId: kImplicitViewId, enableDeltaModel: deltaModel);
 
-  final GloballyPositionedTextEditingStrategy editingStrategy =
-      GloballyPositionedTextEditingStrategy(owner);
+  final editingStrategy = GloballyPositionedTextEditingStrategy(owner);
 
   owner.debugTextEditingStrategyOverride = editingStrategy;
 
@@ -50,7 +49,7 @@ GloballyPositionedTextEditingStrategy _enableEditingStrategy({
 Future<void> testMain() async {
   setUpImplicitView();
 
-  const String fakeComposingText = 'ImComposingText';
+  const fakeComposingText = 'ImComposingText';
 
   group('$CompositionAwareMixin', () {
     late TextEditingStrategy editingStrategy;
@@ -65,8 +64,7 @@ Future<void> testMain() async {
 
     group('composition end', () {
       test('should reset composing text on handle composition end', () {
-        final _MockWithCompositionAwareMixin mockWithCompositionAwareMixin =
-            _MockWithCompositionAwareMixin();
+        final mockWithCompositionAwareMixin = _MockWithCompositionAwareMixin();
         mockWithCompositionAwareMixin.composingText = fakeComposingText;
         mockWithCompositionAwareMixin.addCompositionEventHandlers(_inputElement);
 
@@ -80,8 +78,7 @@ Future<void> testMain() async {
 
     group('composition start', () {
       test('should reset composing text on handle composition start', () {
-        final _MockWithCompositionAwareMixin mockWithCompositionAwareMixin =
-            _MockWithCompositionAwareMixin();
+        final mockWithCompositionAwareMixin = _MockWithCompositionAwareMixin();
         mockWithCompositionAwareMixin.composingText = fakeComposingText;
         mockWithCompositionAwareMixin.addCompositionEventHandlers(_inputElement);
 
@@ -95,9 +92,8 @@ Future<void> testMain() async {
 
     group('composition update', () {
       test('should set composing text to event composing text', () {
-        const String fakeEventText = 'IAmComposingThis';
-        final _MockWithCompositionAwareMixin mockWithCompositionAwareMixin =
-            _MockWithCompositionAwareMixin();
+        const fakeEventText = 'IAmComposingThis';
+        final mockWithCompositionAwareMixin = _MockWithCompositionAwareMixin();
         mockWithCompositionAwareMixin.composingText = fakeComposingText;
         mockWithCompositionAwareMixin.addCompositionEventHandlers(_inputElement);
 
@@ -114,70 +110,53 @@ Future<void> testMain() async {
 
     group('determine composition state', () {
       test('should return editing state if extentOffset is null', () {
-        final EditingState editingState = EditingState(
-          text: 'Test',
-          baseOffset: 0,
-          extentOffset: 0,
-        );
+        final editingState = EditingState(text: 'Test', baseOffset: 0, extentOffset: 0);
 
-        final _MockWithCompositionAwareMixin mockWithCompositionAwareMixin =
-            _MockWithCompositionAwareMixin();
+        final mockWithCompositionAwareMixin = _MockWithCompositionAwareMixin();
         mockWithCompositionAwareMixin.composingText = 'Test';
 
         expect(mockWithCompositionAwareMixin.determineCompositionState(editingState), editingState);
       });
 
       test('should return editing state if composingText is null', () {
-        final EditingState editingState = EditingState(
-          text: 'Test',
-          baseOffset: 0,
-          extentOffset: 4,
-        );
+        final editingState = EditingState(text: 'Test', baseOffset: 0, extentOffset: 4);
 
-        final _MockWithCompositionAwareMixin mockWithCompositionAwareMixin =
-            _MockWithCompositionAwareMixin();
+        final mockWithCompositionAwareMixin = _MockWithCompositionAwareMixin();
 
         expect(mockWithCompositionAwareMixin.determineCompositionState(editingState), editingState);
       });
 
       test('should return editing state if text is null', () {
-        final EditingState editingState = EditingState(text: '', baseOffset: 0, extentOffset: 0);
+        final editingState = EditingState(text: '', baseOffset: 0, extentOffset: 0);
 
-        final _MockWithCompositionAwareMixin mockWithCompositionAwareMixin =
-            _MockWithCompositionAwareMixin();
+        final mockWithCompositionAwareMixin = _MockWithCompositionAwareMixin();
         mockWithCompositionAwareMixin.composingText = 'Test';
 
         expect(mockWithCompositionAwareMixin.determineCompositionState(editingState), editingState);
       });
 
       test('should return editing state if extentOffset is smaller than composingText length', () {
-        const String composingText = 'composeMe';
+        const composingText = 'composeMe';
 
-        final EditingState editingState = EditingState(
-          text: 'Test',
-          baseOffset: 0,
-          extentOffset: 4,
-        );
+        final editingState = EditingState(text: 'Test', baseOffset: 0, extentOffset: 4);
 
-        final _MockWithCompositionAwareMixin mockWithCompositionAwareMixin =
-            _MockWithCompositionAwareMixin();
+        final mockWithCompositionAwareMixin = _MockWithCompositionAwareMixin();
         mockWithCompositionAwareMixin.composingText = composingText;
 
         expect(mockWithCompositionAwareMixin.determineCompositionState(editingState), editingState);
       });
 
       test('should return new composition state - compositing middle of text', () {
-        const int baseOffset = 7;
-        const String composingText = 'Test';
+        const baseOffset = 7;
+        const composingText = 'Test';
 
-        final EditingState editingState = EditingState(
+        final editingState = EditingState(
           text: 'Testing',
           baseOffset: baseOffset,
           extentOffset: baseOffset,
         );
 
-        final _MockWithCompositionAwareMixin mockWithCompositionAwareMixin =
-            _MockWithCompositionAwareMixin();
+        final mockWithCompositionAwareMixin = _MockWithCompositionAwareMixin();
         mockWithCompositionAwareMixin.composingText = composingText;
 
         const int expectedComposingBase = baseOffset - composingText.length;
@@ -192,15 +171,14 @@ Future<void> testMain() async {
       });
 
       test('should return new composition state - compositing from beginning of text', () {
-        const String composingText = '今日は';
+        const composingText = '今日は';
 
-        final EditingState editingState = EditingState(text: '今日は', baseOffset: 0, extentOffset: 3);
+        final editingState = EditingState(text: '今日は', baseOffset: 0, extentOffset: 3);
 
-        final _MockWithCompositionAwareMixin mockWithCompositionAwareMixin =
-            _MockWithCompositionAwareMixin();
+        final mockWithCompositionAwareMixin = _MockWithCompositionAwareMixin();
         mockWithCompositionAwareMixin.composingText = composingText;
 
-        const int expectedComposingBase = 0;
+        const expectedComposingBase = 0;
 
         expect(
           mockWithCompositionAwareMixin.determineCompositionState(editingState),
@@ -212,12 +190,11 @@ Future<void> testMain() async {
       });
 
       test('should retain composing base offset if composing text area is changed', () {
-        const String composingText = '今日は寒い日です';
+        const composingText = '今日は寒い日です';
 
-        EditingState editingState = EditingState(text: '今日は寒い日です', baseOffset: 0, extentOffset: 8);
+        var editingState = EditingState(text: '今日は寒い日です', baseOffset: 0, extentOffset: 8);
 
-        final _MockWithCompositionAwareMixin mockWithCompositionAwareMixin =
-            _MockWithCompositionAwareMixin();
+        final mockWithCompositionAwareMixin = _MockWithCompositionAwareMixin();
         mockWithCompositionAwareMixin.composingText = composingText;
 
         expect(
@@ -254,7 +231,7 @@ Future<void> testMain() async {
     });
 
     test('should be [0, compostionStrLength] on new composition', () {
-      const String composingText = 'hi';
+      const composingText = 'hi';
 
       _inputElement.dispatchEvent(
         createDomCompositionEvent(
@@ -286,9 +263,9 @@ Future<void> testMain() async {
     test(
       'should be [beforeComposingText - composingText, compostionStrLength] on composition in the middle of text',
       () {
-        const String composingText = 'hi';
-        const String beforeComposingText = 'beforeComposingText';
-        const String afterComposingText = 'afterComposingText';
+        const composingText = 'hi';
+        const beforeComposingText = 'beforeComposingText';
+        const afterComposingText = 'afterComposingText';
 
         // Type in the text box, then move cursor to the middle.
         _inputElement.value = '$beforeComposingText$afterComposingText';
@@ -325,8 +302,7 @@ Future<void> testMain() async {
   group('Text Editing Delta Model', () {
     late GloballyPositionedTextEditingStrategy editingStrategy;
 
-    final StreamController<TextEditingDeltaState?> deltaStream =
-        StreamController<TextEditingDeltaState?>.broadcast();
+    final deltaStream = StreamController<TextEditingDeltaState?>.broadcast();
 
     setUp(() {
       editingStrategy = _enableEditingStrategy(
@@ -340,7 +316,7 @@ Future<void> testMain() async {
     });
 
     test('should have newly entered composing characters', () async {
-      const String newComposingText = 'n';
+      const newComposingText = 'n';
 
       editingStrategy.setEditingState(
         EditingState(text: newComposingText, baseOffset: 1, extentOffset: 1),
@@ -384,10 +360,10 @@ Future<void> testMain() async {
     test(
       'should emit changed composition',
       () async {
-        const String newComposingCharsInOrder = 'hiCompose';
+        const newComposingCharsInOrder = 'hiCompose';
 
         for (
-          int currCharIndex = 0;
+          var currCharIndex = 0;
           currCharIndex < newComposingCharsInOrder.length;
           currCharIndex++
         ) {

@@ -8,6 +8,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/darwin/darwin.dart';
 
 import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
@@ -84,6 +85,7 @@ void main() {
           late Directory outputAppFramework;
           late File outputAppFrameworkBinary;
           late File outputRunnerBinary;
+          late File outputRunnerBinaryDebugDylib;
           late File outputPluginFrameworkBinary;
           late Directory buildPath;
           late Directory buildAppFrameworkDsym;
@@ -117,6 +119,7 @@ void main() {
             outputAppFrameworkBinary = outputAppFramework.childFile('App');
 
             outputRunnerBinary = outputApp.childFile('Runner');
+            outputRunnerBinaryDebugDylib = outputApp.childFile('Runner.debug.dylib');
 
             // Exists only if the plugin is built as a dynamic framework.
             // This is is the default for CocoaPods but not Swift Package Manager.
@@ -151,8 +154,11 @@ void main() {
             // If built as static library, the plugin's symbols will be in the
             // Runner binary.
             final bool helloDynamic = outputPluginFrameworkBinary.existsSync();
+            final String binaryPath = buildMode == BuildMode.debug
+                ? outputRunnerBinaryDebugDylib.path
+                : outputRunnerBinary.path;
             final bool helloStatic = AppleTestUtils.getExportedSymbols(
-              outputRunnerBinary.path,
+              binaryPath,
             ).any((String symbol) => symbol.contains('HelloPlugin') && symbol.contains('handle'));
 
             // Plugin is a dynamic xor static framework.
@@ -170,6 +176,29 @@ void main() {
             );
 
             expect(vmSnapshot.existsSync(), buildMode == BuildMode.debug);
+          });
+
+          testWithoutContext('App.framework Info.plist contains correct MinimumOSVersion', () {
+            final File templateInfoPlist = fileSystem.file(
+              fileSystem.path.join(projectRoot, 'ios', 'Flutter', 'AppFrameworkInfo.plist'),
+            );
+            expect(templateInfoPlist, exists);
+            final String templateContents = templateInfoPlist.readAsStringSync();
+            expect(templateContents, isNot(contains('MinimumOSVersion')));
+
+            final File appFrameworkInfoPlist = outputAppFramework.childFile('Info.plist');
+            expect(appFrameworkInfoPlist, exists);
+
+            final expectedMinimumOSVersion = FlutterDarwinPlatform.ios
+                .deploymentTarget()
+                .toString();
+
+            final String appFrameworkInfoPlistContents = appFrameworkInfoPlist.readAsStringSync();
+
+            expect(
+              appFrameworkInfoPlistContents,
+              contains('<key>MinimumOSVersion</key>\n\t<string>$expectedMinimumOSVersion</string>'),
+            );
           });
 
           testWithoutContext('Info.plist dart VM Service Bonjour service', () {
@@ -379,7 +408,7 @@ void main() {
             'ios',
             'iphonesimulator',
             'Runner.app',
-            'Runner',
+            'Runner.debug.dylib',
           ),
         );
         final File pluginFrameworkBinary = fileSystem.file(

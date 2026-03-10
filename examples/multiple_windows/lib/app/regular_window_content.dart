@@ -11,6 +11,7 @@ import 'models.dart';
 import 'rotated_wire_cube.dart';
 import 'dart:math';
 import 'package:flutter/src/widgets/_window.dart';
+import 'tooltip_button.dart';
 
 class RegularWindowContent extends StatelessWidget {
   RegularWindowContent({super.key, required this.window})
@@ -33,7 +34,9 @@ class RegularWindowContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final dpr = MediaQuery.of(context).devicePixelRatio;
     final windowSize = WindowScope.contentSizeOf(context);
-    final WindowManager windowManager = WindowManagerAccessor.of(context);
+    final KeyedWindowManager windowManager = KeyedWindowManagerAccessor.of(
+      context,
+    );
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
 
     final child = Scaffold(
@@ -89,6 +92,8 @@ class RegularWindowContent extends StatelessWidget {
                   child: const Text('Create Modal Dialog'),
                 ),
                 const SizedBox(height: 20),
+                TooltipButton(parentController: window),
+                const SizedBox(height: 20),
                 Text(
                   'View #${window.rootView.viewId}\n'
                   'Size: ${(windowSize.width).toStringAsFixed(1)}\u00D7${(windowSize.height).toStringAsFixed(1)}\n'
@@ -107,17 +112,17 @@ class RegularWindowContent extends StatelessWidget {
         listenable: windowManager,
         builder: (BuildContext context, Widget? child) {
           final List<Widget> childViews = <Widget>[];
-          for (final KeyedWindow window in windowManager.windows) {
-            if (window.parent == window.controller) {
-              childViews.add(
-                WindowContent(
-                  controller: window.controller,
-                  windowKey: window.key,
-                  onDestroyed: () => windowManager.remove(window.key),
-                  onError: () => windowManager.remove(window.key),
-                ),
-              );
-            }
+          for (final KeyedWindow childWindow in windowManager.getWindows(
+            parent: window,
+          )) {
+            childViews.add(
+              WindowContent(
+                controller: childWindow.controller,
+                windowKey: childWindow.key,
+                onDestroyed: () => windowManager.remove(childWindow.key),
+                onError: () => windowManager.remove(childWindow.key),
+              ),
+            );
           }
 
           return ViewCollection(views: childViews);
@@ -131,19 +136,6 @@ class RegularWindowContent extends StatelessWidget {
 class CallbackRegularWindowControllerDelegate
     with RegularWindowControllerDelegate {
   CallbackRegularWindowControllerDelegate({required this.onDestroyed});
-
-  @override
-  void onWindowDestroyed() {
-    onDestroyed();
-    super.onWindowDestroyed();
-  }
-
-  final VoidCallback onDestroyed;
-}
-
-class CallbackDialogWindowControllerDelegate
-    with DialogWindowControllerDelegate {
-  CallbackDialogWindowControllerDelegate({required this.onDestroyed});
 
   @override
   void onWindowDestroyed() {

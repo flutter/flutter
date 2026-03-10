@@ -46,12 +46,13 @@ void main() {
       ...getLocalEngineArguments(),
       'build',
       'apk',
+      '-v',
       '--target-platform=android-arm',
       '--config-only',
     ], workingDirectory: exampleAppDir.path);
 
     expect(gradleFile, exists);
-    expect(result.stdout, contains(RegExp(r'Config complete')));
-    expect(result.stdout, isNot(contains(RegExp(r'Running Gradle task'))));
+    expect(result.stdout, isNot(contains('Running Gradle task')));
+    expect(result.stdout, isNot(contains('assembleRelease')));
   });
 }

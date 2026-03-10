@@ -182,6 +182,7 @@ class VisualStudio {
   String? get cmakeGenerator {
     // From https://cmake.org/cmake/help/v3.22/manual/cmake-generators.7.html#visual-studio-generators
     return switch (_majorVersion) {
+      18 => 'Visual Studio 18 2026',
       17 => 'Visual Studio 17 2022',
       _ => 'Visual Studio 16 2019',
     };

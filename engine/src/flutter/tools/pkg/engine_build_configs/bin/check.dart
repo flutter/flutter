@@ -51,13 +51,13 @@ void run(
 }) {
   y.yamlWarningCallback = (String message, [SourceSpan? span]) {};
 
-  final argResults = _argParser.parse(args);
+  final ArgResults argResults = _argParser.parse(args);
   if (argResults.flag('help')) {
     stdout.writeln(_argParser.usage);
     return;
   }
 
-  final verbose = argResults.flag('verbose');
+  final bool verbose = argResults.flag('verbose');
   void debugPrint(String output) {
     if (!verbose) {
       return;
@@ -71,7 +71,7 @@ void run(
     }
   }
 
-  final supportsEmojis = !platform.isWindows || platform.environment.containsKey('WT_SESSION');
+  final bool supportsEmojis = !platform.isWindows || platform.environment.containsKey('WT_SESSION');
   final symbolSuccess = supportsEmojis ? '✅' : '✓';
   final symbolFailure = supportsEmojis ? '❌' : 'X';
   void statusPrint(String describe, {required bool success}) {
@@ -85,10 +85,8 @@ void run(
   debugPrint('Initializing from ${p.relative(engine.srcDir.path)}');
 
   // Find and parse the engine build configs.
-  final io.Directory buildConfigsDir = io.Directory(
-    p.join(engine.flutterDir.path, 'ci', 'builders'),
-  );
-  final BuildConfigLoader loader = BuildConfigLoader(buildConfigsDir: buildConfigsDir);
+  final buildConfigsDir = io.Directory(p.join(engine.flutterDir.path, 'ci', 'builders'));
+  final loader = BuildConfigLoader(buildConfigsDir: buildConfigsDir);
 
   // Treat it as an error if no build configs were found. The caller likely
   // expected to find some.
@@ -152,7 +150,7 @@ void run(
   // (2) Each sub-build does not have `tests: [ ... ]`
   final buildConventionErrors = <String>[];
   for (final MapEntry(key: _, value: target) in ciConfig.ciTargets.entries) {
-    final config = loader.configs[target.properties.configName];
+    final BuilderConfig? config = loader.configs[target.properties.configName];
     if (target.properties.configName == null) {
       // * builder_cache targets do not have configuration files.
       debugPrint('  Skipping ${target.name}: No configuration file found');
@@ -172,7 +170,7 @@ void run(
         continue;
       }
       // Check each build: it must have "archives: [ ... ]" and NOT "tests: [ ... ]"
-      for (final build in config.builds) {
+      for (final Build build in config.builds) {
         if (build.archives.isEmpty) {
           configConventionErrors.add('${build.name}: Does not have "archives: [ ... ]"');
         }
@@ -203,14 +201,14 @@ void run(
 
 // This check ensures that all the json files were deserialized without errors.
 List<String> checkForInvalidConfigs(Map<String, BuilderConfig> configs) {
-  final List<String> errors = <String>[];
+  final errors = <String>[];
   for (final String name in configs.keys) {
     final BuilderConfig buildConfig = configs[name]!;
     final List<String> buildConfigErrors = buildConfig.check(name);
     if (buildConfigErrors.isNotEmpty) {
       errors.add('Errors in ${buildConfig.path}:');
     }
-    for (final String error in buildConfigErrors) {
+    for (final error in buildConfigErrors) {
       errors.add('    $error');
     }
   }
@@ -220,8 +218,8 @@ List<String> checkForInvalidConfigs(Map<String, BuilderConfig> configs) {
 // Thjs check ensures that json files do not contain builds with duplicate
 // names.
 List<String> checkForDuplicateConfigs(Map<String, BuilderConfig> configs) {
-  final List<String> errors = <String>[];
-  final Map<String, Set<String>> builderBuildSet = <String, Set<String>>{};
+  final errors = <String>[];
+  final builderBuildSet = <String, Set<String>>{};
   _forEachBuild(configs, (String name, BuilderConfig config, Build build) {
     final Set<String> builds = builderBuildSet.putIfAbsent(name, () => <String>{});
     if (builds.contains(build.name)) {
@@ -235,9 +233,9 @@ List<String> checkForDuplicateConfigs(Map<String, BuilderConfig> configs) {
 
 // This check ensures that json files do not duplicate archive paths.
 List<String> checkForDuplicateArchives(Map<String, BuilderConfig> configs) {
-  final RegExp zipPathPattern = RegExp(r'zip_archives/(.*\.zip)$');
-  final List<String> errors = <String>[];
-  final Set<String> archivePaths = <String>{};
+  final zipPathPattern = RegExp(r'zip_archives/(.*\.zip)$');
+  final errors = <String>[];
+  final archivePaths = <String>{};
   _forEachBuild(configs, (String name, BuilderConfig config, Build build) {
     for (final BuildArchive archive in build.archives) {
       for (final String path in archive.includePaths) {
@@ -258,7 +256,7 @@ List<String> checkForDuplicateArchives(Map<String, BuilderConfig> configs) {
 // This check ensures that builds are named in a way that is understood by
 // `et`.
 List<String> checkForInvalidBuildNames(Map<String, BuilderConfig> configs) {
-  final List<String> errors = <String>[];
+  final errors = <String>[];
 
   // In local_engine.json, allowed OS names are linux, macos, and windows.
   final List<String> osNames = <String>[
@@ -274,7 +272,7 @@ List<String> checkForInvalidBuildNames(Map<String, BuilderConfig> configs) {
   ].expand((String s) => <String>['$s/', '$s\\']).toList();
 
   _forEachBuild(configs, (String name, BuilderConfig config, Build build) {
-    final List<String> goodPrefixes = name.contains('local_engine') ? osNames : ciNames;
+    final goodPrefixes = name.contains('local_engine') ? osNames : ciNames;
     if (!goodPrefixes.any(build.name.startsWith)) {
       errors.add(
         '${build.name} in $name must start with one of '

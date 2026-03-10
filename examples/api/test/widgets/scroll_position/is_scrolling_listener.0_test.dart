@@ -15,7 +15,10 @@ void main() {
     expect(find.byType(Scrollbar), findsOneWidget);
 
     ScrollPosition getScrollPosition() {
-      return tester.widget<CustomScrollView>(find.byType(CustomScrollView)).controller!.position;
+      return tester
+          .widget<CustomScrollView>(find.byType(CustomScrollView))
+          .controller!
+          .position;
     }
 
     // Viewport is 600 pixels high, each item's height is 100, 6 items are visible.

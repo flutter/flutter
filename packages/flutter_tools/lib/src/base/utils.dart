@@ -12,6 +12,7 @@ import 'package:file/file.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
+import 'package:stack_trace/stack_trace.dart';
 
 import '../convert.dart';
 import 'platform.dart';
@@ -574,9 +575,74 @@ extension DurationAgo on Duration {
   }
 }
 
+extension UriParseExtension on String {
+  /// Convenience method for parsing [Uri]s from a [String].
+  ///
+  /// Allows for use of null-aware operators when building [Uri]s.
+  Uri toUri() => Uri.parse(this);
+}
+
 extension UriExtension on Uri {
   /// Returns this [Uri] with its query parameters removed.
   Uri withoutQueryParameters() {
     return Uri(scheme: scheme, userInfo: userInfo, host: host, port: port, path: this.path);
   }
+}
+
+extension StackTraceTransform<T> on Stream<T> {
+  /// A custom implementation of [transform] that captures the
+  /// stack trace at the point of invocation.
+  Stream<S> transformWithCallSite<S>(StreamTransformer<T, S> transformer) {
+    // Don't include this frame with the stack trace as it adds no value.
+    final callSiteTrace = Trace.current(1);
+    return transform(transformer).transform(
+      StreamTransformer.fromHandlers(
+        handleData: (data, sink) {
+          sink.add(data);
+        },
+        handleError: (error, stackTrace, sink) {
+          sink.addError(error, callSiteTrace);
+        },
+      ),
+    );
+  }
+}
+
+final utf8LineDecoder = StreamTransformer<List<int>, String>.fromBind(
+  (stream) => stream.transformWithCallSite(utf8.decoder).transform(const LineSplitter()),
+);
+
+/// Formats a list of rows into a table with aligned columns.
+///
+/// [table] is a list of rows, where each row is a list of strings.
+/// [separator] is the string used to separate columns (default is ' • ').
+///
+/// Returns a list of strings, where each string is a formatted row.
+List<String> formatTable(List<List<String>> table, {String separator = ' • ', int indent = 0}) {
+  if (table.isEmpty) {
+    return <String>[];
+  }
+
+  // Calculate column widths
+  if (table.first.isEmpty) {
+    throw Exception('Table header cannot be empty');
+  }
+  final indices = List<int>.generate(table.first.length - 1, (int i) => i);
+  final widths = List<int>.filled(indices.length, 0);
+  for (final row in table) {
+    for (final i in indices) {
+      widths[i] = math.max(widths[i], row[i].length);
+    }
+  }
+
+  final String indentString = ' ' * indent;
+
+  // Join columns into lines of text
+  return table.map<String>((List<String> row) {
+    final String formatted = indices
+        .map<String>((int i) => row[i].padRight(widths[i]))
+        .followedBy(<String>[row.last])
+        .join(separator);
+    return '$indentString$formatted';
+  }).toList();
 }

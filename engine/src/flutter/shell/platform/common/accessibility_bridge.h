@@ -182,6 +182,7 @@ class AccessibilityBridge
     std::vector<int32_t> children_in_traversal_order;
     std::vector<int32_t> custom_accessibility_actions;
     int32_t heading_level;
+    std::string identifier;
   } SemanticsNode;
 
   // See FlutterSemanticsCustomAction in embedder.h
@@ -226,6 +227,8 @@ class AccessibilityBridge
                                              const SemanticsNode& node);
   void SetStringListAttributesFromFlutterUpdate(ui::AXNodeData& node_data,
                                                 const SemanticsNode& node);
+  void SetIdentifierFromFlutterUpdate(ui::AXNodeData& node_data,
+                                      const SemanticsNode& node);
   void SetNameFromFlutterUpdate(ui::AXNodeData& node_data,
                                 const SemanticsNode& node);
   void SetValueFromFlutterUpdate(ui::AXNodeData& node_data,

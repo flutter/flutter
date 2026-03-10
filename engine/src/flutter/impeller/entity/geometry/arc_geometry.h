@@ -40,6 +40,9 @@ class ArcGeometry final : public Geometry {
   // |Geometry|
   std::optional<Rect> GetCoverage(const Matrix& transform) const override;
 
+  // Whether the arc has overlapping stroke caps
+  bool CapsOverlap() const;
+
   Arc arc_;
   Scalar stroke_width_;
   Cap cap_;

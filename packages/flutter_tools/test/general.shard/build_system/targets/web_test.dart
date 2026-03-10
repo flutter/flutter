@@ -293,6 +293,71 @@ name: foo
     );
   });
 
+  group('--web-define', () {
+    test(
+      'WebTemplatedFiles substitutes web-define variables in index.html',
+      () => testbed.run(() async {
+        environment.defines['${kWebDefinePrefix}VERSION'] = 'v1.2.3';
+        environment.defines['${kWebDefinePrefix}API_URL'] = 'https://api.example.com';
+        final Directory webResources = environment.projectDir.childDirectory('web');
+        webResources.childFile('index.html').createSync(recursive: true);
+        webResources.childFile('index.html').writeAsStringSync('''
+<!DOCTYPE html><html><head><base href="/"></head><body>
+<script>
+  const version = '{{VERSION}}';
+  const apiUrl = '{{API_URL}}';
+</script>
+</body></html>
+    ''');
+        environment.buildDir.childFile('main.dart.js').createSync();
+        await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+
+        final String outputHtml = environment.outputDir.childFile('index.html').readAsStringSync();
+        expect(outputHtml, contains("const version = 'v1.2.3'"));
+        expect(outputHtml, contains("const apiUrl = 'https://api.example.com'"));
+      }),
+    );
+
+    test(
+      'WebTemplatedFiles substitutes web-define variables in flutter_bootstrap.js',
+      () => testbed.run(() async {
+        environment.defines['${kWebDefinePrefix}APP_VERSION'] = 'test-build-42';
+        final Directory webResources = environment.projectDir.childDirectory('web');
+        webResources.childFile('index.html').createSync(recursive: true);
+        webResources.childFile('flutter_bootstrap.js').createSync(recursive: true);
+        webResources.childFile('flutter_bootstrap.js').writeAsStringSync('''
+const appVersion = '{{APP_VERSION}}';
+_flutter.loader.load();
+''');
+        environment.buildDir.childFile('main.dart.js').createSync();
+        await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+
+        final String outputBootstrap = environment.outputDir
+            .childFile('flutter_bootstrap.js')
+            .readAsStringSync();
+        expect(outputBootstrap, contains("const appVersion = 'test-build-42'"));
+      }),
+    );
+
+    test(
+      'WebTemplatedFiles works with no web-define variables',
+      () => testbed.run(() async {
+        final Directory webResources = environment.projectDir.childDirectory('web');
+        webResources.childFile('index.html').createSync(recursive: true);
+        webResources.childFile('index.html').writeAsStringSync('''
+<!DOCTYPE html><html><head><base href="/"></head><body></body></html>
+    ''');
+        environment.buildDir.childFile('main.dart.js').createSync();
+        await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+
+        expect(
+          environment.outputDir.childFile('index.html').readAsStringSync(),
+          contains('<base href="/">'),
+        );
+      }),
+    );
+  });
+
   test(
     'WebReleaseBundle copies dart2js output and resource files to output directory',
     () => testbed.run(() async {
@@ -1163,7 +1228,7 @@ name: foo
       );
 
       await Dart2JSTarget(
-        const JsCompilerConfig(noFrequencyBasedMinification: true, sourceMaps: false),
+        const JsCompilerConfig(useFrequencyBasedMinification: false, sourceMaps: false),
       ).build(environment);
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
@@ -1269,7 +1334,7 @@ name: foo
       JsCompilerConfig(dumpInfo: true),
       JsCompilerConfig(nativeNullAssertions: true),
       JsCompilerConfig(optimizationLevel: 0),
-      JsCompilerConfig(noFrequencyBasedMinification: true),
+      JsCompilerConfig(useFrequencyBasedMinification: false),
       JsCompilerConfig(sourceMaps: false),
       JsCompilerConfig(minify: false),
 
@@ -1279,7 +1344,7 @@ name: foo
         dumpInfo: true,
         nativeNullAssertions: true,
         optimizationLevel: 0,
-        noFrequencyBasedMinification: true,
+        useFrequencyBasedMinification: false,
         sourceMaps: false,
       ),
     ];
@@ -1401,129 +1466,10 @@ name: foo
       );
       final String result = generateServiceWorker(
         fileGeneratorsPath,
-        <String, String>{'/foo': 'abcd'},
-        <String>[],
         serviceWorkerStrategy: ServiceWorkerStrategy.none,
       );
 
       expect(result, '');
-    }),
-  );
-
-  test(
-    'Generated service worker correctly inlines file hashes',
-    () => testbed.run(() {
-      final String fileGeneratorsPath = environment.artifacts.getArtifactPath(
-        Artifact.flutterToolsFileGenerators,
-      );
-      final String result = generateServiceWorker(
-        fileGeneratorsPath,
-        <String, String>{'/foo': 'abcd'},
-        <String>[],
-        serviceWorkerStrategy: ServiceWorkerStrategy.offlineFirst,
-      );
-
-      expect(result, contains('{"/foo": "abcd"};'));
-    }),
-  );
-
-  test(
-    'Generated service worker includes core files',
-    () => testbed.run(() {
-      final String fileGeneratorsPath = environment.artifacts.getArtifactPath(
-        Artifact.flutterToolsFileGenerators,
-      );
-      final String result = generateServiceWorker(
-        fileGeneratorsPath,
-        <String, String>{'/foo': 'abcd'},
-        <String>['foo', 'bar'],
-        serviceWorkerStrategy: ServiceWorkerStrategy.offlineFirst,
-      );
-
-      expect(result, contains('"foo",\n"bar"'));
-    }),
-  );
-
-  test(
-    'WebServiceWorker generates a service_worker for a web resource folder',
-    () => testbed.run(() async {
-      environment.outputDir.childDirectory('a').childFile('a.txt')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('A');
-      await WebServiceWorker(globals.fs, <WebCompilerConfig>[
-        const JsCompilerConfig(),
-      ], const NoOpAnalytics()).build(environment);
-
-      expect(environment.outputDir.childFile('flutter_service_worker.js'), exists);
-      // Contains file hash.
-      expect(
-        environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
-        contains('"a/a.txt": "7fc56270e7a70fa81a5935b72eacbe29"'),
-      );
-      expect(environment.buildDir.childFile('service_worker.d'), exists);
-      // Depends on resource file.
-      expect(
-        environment.buildDir.childFile('service_worker.d').readAsStringSync(),
-        contains('a/a.txt'),
-      );
-      // Does NOT contain NOTICES
-      expect(
-        environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
-        isNot(contains('NOTICES')),
-      );
-    }),
-  );
-
-  test(
-    'WebServiceWorker contains baseUrl cache',
-    () => testbed.run(() async {
-      environment.outputDir.childFile('index.html').createSync(recursive: true);
-      environment.outputDir.childFile('assets/index.html')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('A');
-      await WebServiceWorker(globals.fs, <WebCompilerConfig>[
-        const JsCompilerConfig(),
-      ], const NoOpAnalytics()).build(environment);
-
-      expect(environment.outputDir.childFile('flutter_service_worker.js'), exists);
-      // Contains the same file hash for both `/` and the root index.html file.
-      const rootIndexHash = 'd41d8cd98f00b204e9800998ecf8427e';
-      expect(
-        environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
-        contains('"/": "$rootIndexHash"'),
-      );
-      expect(
-        environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
-        contains('"index.html": "$rootIndexHash"'),
-      );
-      // Make sure `assets/index.html` has a different hash than `index.html`.
-      expect(
-        environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
-        contains('"assets/index.html": "7fc56270e7a70fa81a5935b72eacbe29"'),
-      );
-      expect(environment.buildDir.childFile('service_worker.d'), exists);
-    }),
-  );
-
-  test(
-    'WebServiceWorker does not cache source maps',
-    () => testbed.run(() async {
-      environment.outputDir.childFile('main.dart.js').createSync(recursive: true);
-      environment.outputDir.childFile('main.dart.js.map').createSync(recursive: true);
-      await WebServiceWorker(globals.fs, <WebCompilerConfig>[
-        const JsCompilerConfig(),
-      ], const NoOpAnalytics()).build(environment);
-
-      // No caching of source maps.
-      expect(
-        environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
-        isNot(contains('"main.dart.js.map"')),
-      );
-      // Expected twice, once for RESOURCES and once for CORE.
-      expect(
-        environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
-        contains('"main.dart.js"'),
-      );
     }),
   );
 

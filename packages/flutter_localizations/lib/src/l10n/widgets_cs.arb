@@ -12,7 +12,7 @@
   "shareButtonLabel": "Sdílet",
   "pasteButtonLabel": "Vložit",
   "selectAllButtonLabel": "Vybrat vše",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "Byly nalezeny výsledky vyhledávání",
+  "noResultsFound": "Nebyly nalezeny žádné výsledky",
+  "radioButtonUnselectedLabel": "Nevybráno"
 }

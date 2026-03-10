@@ -109,7 +109,7 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
     style = null;
     geometry = null;
 
-    for (int i = 0; i < subscriptions.length; i++) {
+    for (var i = 0; i < subscriptions.length; i++) {
       subscriptions[i].cancel();
     }
     subscriptions.clear();
@@ -208,7 +208,12 @@ class SemanticTextField extends SemanticRole {
   }
 
   @override
-  bool get acceptsPointerEvents => true;
+  bool get acceptsPointerEvents {
+    return switch (semanticsObject.hitTestBehavior) {
+      ui.SemanticsHitTestBehavior.transparent => false,
+      _ => true,
+    };
+  }
 
   /// The element used for editing, e.g. `<input>`, `<textarea>`, which is
   /// different from the host [element].
@@ -230,7 +235,7 @@ class SemanticTextField extends SemanticRole {
   }
 
   DomHTMLTextAreaElement _createMultiLineField() {
-    final textArea = createMultilineTextArea();
+    final DomHTMLTextAreaElement textArea = createMultilineTextArea();
 
     if (semanticsObject.flags.isObscured) {
       // -webkit-text-security is not standard, but it's the best we can do.
@@ -337,7 +342,22 @@ class SemanticTextField extends SemanticRole {
     } else {
       editableElement.removeAttribute('aria-required');
     }
+
+    // Apply hint as aria-description on the editable element so screen readers
+    // announce it along with the input field. This enables form validation
+    // errors to be announced when the error text is passed via the hint property.
+    _updateHintDescription();
+
     _updateInputType();
+  }
+
+  void _updateHintDescription() {
+    final String? hint = semanticsObject.hint;
+    if (hint != null && hint.trim().isNotEmpty) {
+      editableElement.setAttribute('aria-description', hint);
+    } else {
+      editableElement.removeAttribute('aria-description');
+    }
   }
 
   void _updateEnabledState() {
@@ -349,7 +369,7 @@ class SemanticTextField extends SemanticRole {
       // text area can't be annotated with input type
       return;
     }
-    final DomHTMLInputElement input = editableElement as DomHTMLInputElement;
+    final input = editableElement as DomHTMLInputElement;
     if (semanticsObject.flags.isObscured) {
       input.type = 'password';
     } else {

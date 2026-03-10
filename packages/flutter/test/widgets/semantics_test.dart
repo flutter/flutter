@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:math';
+import 'dart:ui';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'button_tester.dart';
 import 'semantics_tester.dart';
 
 void main() {
@@ -18,7 +21,7 @@ void main() {
   testWidgets('Semantics shutdown and restart', (WidgetTester tester) async {
     SemanticsTester? semantics = SemanticsTester(tester);
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(label: 'test1', textDirection: TextDirection.ltr),
       ],
@@ -49,7 +52,7 @@ void main() {
   }, semanticsEnabled: false);
 
   testWidgets('Semantics tag only applies to immediate child', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Directionality(
@@ -95,9 +98,9 @@ void main() {
   }, semanticsEnabled: false);
 
   testWidgets('Semantics tooltip', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(tooltip: 'test1', textDirection: TextDirection.ltr),
       ],
@@ -113,7 +116,7 @@ void main() {
   });
 
   testWidgets('Detach and reattach assert', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     final GlobalKey key = GlobalKey();
 
     await tester.pumpWidget(
@@ -182,8 +185,45 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('different locale will not merge', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+    final GlobalKey key = GlobalKey();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Semantics(
+          localeForSubtree: const Locale('AB', 'CD'),
+          child: Semantics(
+            key: key,
+            localeForSubtree: const Locale('DE', 'FG'),
+            child: const SizedBox(width: 10, height: 10),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              locale: const Locale('AB', 'CD'),
+              children: <TestSemantics>[TestSemantics(locale: const Locale('DE', 'FG'))],
+            ),
+          ],
+        ),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+    semantics.dispose();
+  });
+
   testWidgets('Semantics and Directionality - RTL', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Directionality(
@@ -197,7 +237,7 @@ void main() {
   });
 
   testWidgets('Semantics and Directionality - LTR', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Directionality(
@@ -213,9 +253,9 @@ void main() {
   testWidgets('Semantics and Directionality - cannot override RTL with LTR', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(label: 'test1', textDirection: TextDirection.ltr),
       ],
@@ -238,9 +278,9 @@ void main() {
   testWidgets('Semantics and Directionality - cannot override LTR with RTL', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(label: 'test1', textDirection: TextDirection.rtl),
       ],
@@ -261,7 +301,7 @@ void main() {
   });
 
   testWidgets('Semantics label and hint', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Directionality(
@@ -270,7 +310,7 @@ void main() {
       ),
     );
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           label: 'label',
@@ -289,7 +329,7 @@ void main() {
   });
 
   testWidgets('Semantics hints can merge', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Directionality(
@@ -306,7 +346,7 @@ void main() {
       ),
     );
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(hint: 'hint one\nhint two', textDirection: TextDirection.ltr),
       ],
@@ -320,7 +360,7 @@ void main() {
   });
 
   testWidgets('Semantics values do not merge', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Directionality(
@@ -337,7 +377,7 @@ void main() {
       ),
     );
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           children: <TestSemantics>[
@@ -356,7 +396,7 @@ void main() {
   });
 
   testWidgets('Semantics value and hint can merge', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Directionality(
@@ -373,7 +413,7 @@ void main() {
       ),
     );
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(hint: 'hint', value: 'value', textDirection: TextDirection.ltr),
       ],
@@ -387,7 +427,7 @@ void main() {
   });
 
   testWidgets('Semantics tagForChildren works', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Directionality(
@@ -405,7 +445,7 @@ void main() {
       ),
     );
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           children: <TestSemantics>[
@@ -432,9 +472,9 @@ void main() {
   });
 
   testWidgets('Semantics widget supports all actions', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
-    final List<SemanticsAction> performedActions = <SemanticsAction>[];
+    final performedActions = <SemanticsAction>[];
 
     await tester.pumpWidget(
       Semantics(
@@ -474,8 +514,8 @@ void main() {
       ..remove(SemanticsAction.showOnScreen) // showOnScreen is not user-exposed
       ..remove(SemanticsAction.scrollToOffset); // scrollToOffset is not user-exposed
 
-    const int expectedId = 1;
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    const expectedId = 1;
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           id: expectedId,
@@ -491,8 +531,8 @@ void main() {
 
     // Do the actions work?
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
-    int expectedLength = 1;
-    for (final SemanticsAction action in allActions) {
+    var expectedLength = 1;
+    for (final action in allActions) {
       switch (action) {
         case SemanticsAction.moveCursorBackwardByCharacter:
         case SemanticsAction.moveCursorForwardByCharacter:
@@ -537,8 +577,9 @@ void main() {
   });
 
   testWidgets('Semantics widget supports all flags', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     // Checked state and toggled state are mutually exclusive.
+    // Focused and isAccessibilityFocusBlocked are mutually exclusive.
     await tester.pumpWidget(
       Semantics(
         key: const Key('a'),
@@ -569,14 +610,31 @@ void main() {
         isRequired: true,
       ),
     );
-    final List<SemanticsFlag> flags = SemanticsFlag.values.toList();
-    flags
-      ..remove(SemanticsFlag.hasToggledState)
-      ..remove(SemanticsFlag.isToggled)
-      ..remove(SemanticsFlag.hasImplicitScrolling)
-      ..remove(SemanticsFlag.isCheckStateMixed);
+    var flags = SemanticsFlags(
+      isChecked: CheckedState.isTrue,
+      isSelected: Tristate.isTrue,
+      isEnabled: Tristate.isTrue,
+      isExpanded: Tristate.isTrue,
+      isRequired: Tristate.isTrue,
+      isFocused: Tristate.isTrue,
+      isButton: true,
+      isTextField: true,
+      isInMutuallyExclusiveGroup: true,
+      isObscured: true,
+      scopesRoute: true,
+      namesRoute: true,
+      isHidden: true,
+      isImage: true,
+      isHeader: true,
+      isLiveRegion: true,
+      isMultiline: true,
+      isReadOnly: true,
+      isLink: true,
+      isSlider: true,
+      isKeyboardKey: true,
+    );
 
-    TestSemantics expectedSemantics = TestSemantics.root(
+    var expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(rect: TestSemantics.fullScreen, flags: flags),
       ],
@@ -635,9 +693,7 @@ void main() {
         isRequired: true,
       ),
     );
-    flags
-      ..remove(SemanticsFlag.isChecked)
-      ..add(SemanticsFlag.isCheckStateMixed);
+    flags = flags.copyWith(isChecked: CheckedState.mixed);
     semantics.dispose();
     expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
@@ -650,18 +706,18 @@ void main() {
   testWidgets('Actions can be replaced without triggering semantics update', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    int semanticsUpdateCount = 0;
+    final semantics = SemanticsTester(tester);
+    var semanticsUpdateCount = 0;
     tester.binding.pipelineOwner.semanticsOwner!.addListener(() {
       semanticsUpdateCount += 1;
     });
 
-    final List<String> performedActions = <String>[];
+    final performedActions = <String>[];
 
     await tester.pumpWidget(Semantics(container: true, onTap: () => performedActions.add('first')));
 
-    const int expectedId = 1;
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    const expectedId = 1;
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           id: expectedId,
@@ -703,7 +759,7 @@ void main() {
       ),
     );
 
-    final TestSemantics expectedSemanticsWithLongPress = TestSemantics.root(
+    final expectedSemanticsWithLongPress = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           id: expectedId,
@@ -816,9 +872,305 @@ void main() {
 
     semantics.dispose();
   });
+  testWidgets('AccessiblityFocusBlockType.blockSubtree is applied to the subtree,', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Semantics(
+        container: true,
+        accessibilityFocusBlockType: AccessibilityFocusBlockType.blockSubtree,
+        child: Column(
+          children: <Widget>[
+            // If the child set blockSubTreeAccessibilityFocus to `none`, it's still blcok because its parent.
+            Semantics(
+              container: true,
+              accessibilityFocusBlockType: AccessibilityFocusBlockType.none,
+              customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+                const CustomSemanticsAction(label: 'action1'): () {},
+              },
+              child: const SizedBox(width: 10, height: 10),
+            ),
+            // If the child doesn't have a value for accessibilityFocusable, it will also use the parent data.
+            Semantics(
+              container: true,
+              customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+                const CustomSemanticsAction(label: 'action2'): () {},
+              },
+              child: const SizedBox(width: 10, height: 10),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 1,
+              flags: SemanticsFlags(isAccessibilityFocusBlocked: true),
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  flags: SemanticsFlags(isAccessibilityFocusBlocked: true),
+                  actions: <SemanticsAction>[SemanticsAction.customAction],
+                ),
+                TestSemantics(
+                  id: 3,
+                  flags: SemanticsFlags(isAccessibilityFocusBlocked: true),
+                  actions: <SemanticsAction>[SemanticsAction.customAction],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreTransform: true,
+        ignoreRect: true,
+        ignoreId: true,
+      ),
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('AccessiblityFocusBlockType.blockNode is not applied to the subtree,', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Semantics(
+        container: true,
+        accessibilityFocusBlockType: AccessibilityFocusBlockType.blockNode,
+        child: Column(
+          children: <Widget>[
+            Semantics(
+              container: true,
+              accessibilityFocusBlockType: AccessibilityFocusBlockType.none,
+              customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+                const CustomSemanticsAction(label: 'action1'): () {},
+              },
+              child: const SizedBox(width: 10, height: 10),
+            ),
+            Semantics(
+              container: true,
+              customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+                const CustomSemanticsAction(label: 'action2'): () {},
+              },
+              child: const SizedBox(width: 10, height: 10),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 1,
+              flags: SemanticsFlags(isAccessibilityFocusBlocked: true),
+              children: <TestSemantics>[
+                TestSemantics(id: 2, actions: <SemanticsAction>[SemanticsAction.customAction]),
+                TestSemantics(id: 3, actions: <SemanticsAction>[SemanticsAction.customAction]),
+              ],
+            ),
+          ],
+        ),
+        ignoreTransform: true,
+        ignoreRect: true,
+        ignoreId: true,
+      ),
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('MergeSemantics merges children with AccessiblityFocusBlockType.blockNode', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MergeSemantics(
+          child: Column(
+            children: <Widget>[
+              Semantics(
+                container: true,
+                accessibilityFocusBlockType: AccessibilityFocusBlockType.blockNode,
+                label: 'node1',
+                child: const SizedBox(width: 10, height: 10),
+              ),
+              Semantics(
+                container: true,
+                label: 'node2',
+                child: const SizedBox(width: 10, height: 10),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 1,
+              flags: SemanticsFlags(isAccessibilityFocusBlocked: true),
+              label: 'node1\nnode2',
+            ),
+          ],
+        ),
+        ignoreTransform: true,
+        ignoreRect: true,
+        ignoreId: true,
+      ),
+    );
+    semantics.dispose();
+  });
+
+  testWidgets('AccessiblityFocusBlockType.blockNode doesnt merge up or merge down', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Semantics(
+          label: 'root',
+          child: Semantics(
+            accessibilityFocusBlockType: AccessibilityFocusBlockType.blockNode,
+            label: 'semantics label 0',
+            child: Column(
+              children: <Widget>[
+                Semantics(label: 'semantics label 1', child: const SizedBox(width: 10, height: 10)),
+                Semantics(label: 'semantics label 2', child: const SizedBox(width: 10, height: 10)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 1,
+              label: 'root',
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  label: 'semantics label 0',
+                  flags: SemanticsFlags(isAccessibilityFocusBlocked: true),
+                  children: <TestSemantics>[
+                    TestSemantics(id: 3, label: 'semantics label 1'),
+                    TestSemantics(id: 4, label: 'semantics label 2'),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreTransform: true,
+        ignoreRect: true,
+        ignoreId: true,
+      ),
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('AccessiblityFocusBlockType.blockSubtree doesnt merge up', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Semantics(
+          label: 'root',
+          child: Semantics(
+            accessibilityFocusBlockType: AccessibilityFocusBlockType.blockSubtree,
+            label: 'semantics label 0',
+            child: Column(
+              children: <Widget>[
+                Semantics(label: 'semantics label 1', child: const SizedBox(width: 10, height: 10)),
+                Semantics(label: 'semantics label 2', child: const SizedBox(width: 10, height: 10)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 1,
+              label: 'root',
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  label: 'semantics label 0\nsemantics label 1\nsemantics label 2',
+                  flags: SemanticsFlags(isAccessibilityFocusBlocked: true),
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreTransform: true,
+        ignoreRect: true,
+        ignoreId: true,
+      ),
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('semantics node cant be keyboard focusable but accessibility unfocusable', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Semantics(
+        container: true,
+        accessibilityFocusBlockType: AccessibilityFocusBlockType.blockSubtree,
+        focused: true,
+        customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+          const CustomSemanticsAction(label: 'action1'): () {},
+        },
+        child: const SizedBox(width: 10, height: 10),
+      ),
+    );
+    final Object? exception = tester.takeException();
+    expect(exception, isFlutterError);
+    final error = exception! as FlutterError;
+    expect(
+      error.message,
+      startsWith('A node that is keyboard focusable cannot be set to accessibility unfocusable'),
+    );
+  });
 
   testWidgets('Increased/decreased values are annotated', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Directionality(
@@ -860,8 +1212,8 @@ void main() {
   testWidgets('Semantics widgets built in a widget tree are sorted properly', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    int semanticsUpdateCount = 0;
+    final semantics = SemanticsTester(tester);
+    var semanticsUpdateCount = 0;
     tester.binding.pipelineOwner.semanticsOwner!.addListener(() {
       semanticsUpdateCount += 1;
     });
@@ -925,8 +1277,8 @@ void main() {
   testWidgets('Semantics widgets built with explicit sort orders are sorted properly', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    int semanticsUpdateCount = 0;
+    final semantics = SemanticsTester(tester);
+    var semanticsUpdateCount = 0;
     tester.binding.pipelineOwner.semanticsOwner!.addListener(() {
       semanticsUpdateCount += 1;
     });
@@ -964,8 +1316,8 @@ void main() {
   testWidgets('Semantics widgets without sort orders are sorted properly', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    int semanticsUpdateCount = 0;
+    final semantics = SemanticsTester(tester);
+    var semanticsUpdateCount = 0;
     tester.binding.pipelineOwner.semanticsOwner!.addListener(() {
       semanticsUpdateCount += 1;
     });
@@ -1006,8 +1358,8 @@ void main() {
   testWidgets('Semantics widgets that are transformed are sorted properly', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    int semanticsUpdateCount = 0;
+    final semantics = SemanticsTester(tester);
+    var semanticsUpdateCount = 0;
     tester.binding.pipelineOwner.semanticsOwner!.addListener(() {
       semanticsUpdateCount += 1;
     });
@@ -1053,8 +1405,8 @@ void main() {
   testWidgets(
     'Semantics widgets without sort orders are sorted properly when no Directionality is present',
     (WidgetTester tester) async {
-      final SemanticsTester semantics = SemanticsTester(tester);
-      int semanticsUpdateCount = 0;
+      final semantics = SemanticsTester(tester);
+      var semanticsUpdateCount = 0;
       tester.binding.pipelineOwner.semanticsOwner!.addListener(() {
         semanticsUpdateCount += 1;
       });
@@ -1144,7 +1496,7 @@ void main() {
   );
 
   testWidgets('Semantics excludeSemantics ignores children', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       Semantics(
         label: 'label',
@@ -1526,11 +1878,12 @@ void main() {
   testWidgets('blocking user interaction works on explicit child node.', (
     WidgetTester tester,
   ) async {
-    final UniqueKey key1 = UniqueKey();
-    final UniqueKey key2 = UniqueKey();
+    final key1 = UniqueKey();
+    final key2 = UniqueKey();
     await tester.pumpWidget(
-      MaterialApp(
-        home: Semantics(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Semantics(
           blockUserActions: true,
           explicitChildNodes: true,
           child: Column(
@@ -1565,10 +1918,11 @@ void main() {
   });
 
   testWidgets('blocking user interaction on a merged child', (WidgetTester tester) async {
-    final UniqueKey key = UniqueKey();
+    final key = UniqueKey();
     await tester.pumpWidget(
-      MaterialApp(
-        home: Semantics(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Semantics(
           key: key,
           container: true,
           child: Column(
@@ -1599,10 +1953,11 @@ void main() {
   testWidgets('does not merge conflicting actions even if one of them is blocked', (
     WidgetTester tester,
   ) async {
-    final UniqueKey key = UniqueKey();
+    final key = UniqueKey();
     await tester.pumpWidget(
-      MaterialApp(
-        home: Semantics(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Semantics(
           key: key,
           container: true,
           child: Column(
@@ -1628,8 +1983,8 @@ void main() {
       node,
       matchesSemantics(
         children: <Matcher>[
-          containsSemantics(label: 'label1'),
-          containsSemantics(label: 'label2'),
+          isSemantics(label: 'label1'),
+          isSemantics(label: 'label2'),
         ],
       ),
     );
@@ -1640,13 +1995,13 @@ void main() {
     expect(Semantics(child: const Text('dummy text')).properties.headingLevel, isNull);
 
     // Headings level 1-6.
-    for (int level = 1; level <= 6; level++) {
-      final Semantics semantics = Semantics(headingLevel: level, child: const Text('dummy text'));
+    for (var level = 1; level <= 6; level++) {
+      final semantics = Semantics(headingLevel: level, child: const Text('dummy text'));
       expect(semantics.properties.headingLevel, level);
     }
 
     // Invalid heading levels.
-    for (final int badLevel in const <int>[-1, 0, 7, 8, 9]) {
+    for (final badLevel in const <int>[-1, 0, 7, 8, 9]) {
       expect(
         () => Semantics(headingLevel: badLevel, child: const Text('dummy text')),
         throwsAssertionError,
@@ -1657,10 +2012,10 @@ void main() {
   testWidgets('parent heading level takes precedence when it absorbs a child', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     Future<SemanticsConfiguration> pumpHeading(int? level) async {
-      final ValueKey<String> key = ValueKey<String>('heading-$level');
+      final key = ValueKey<String>('heading-$level');
       await tester.pumpWidget(
         Semantics(
           key: key,
@@ -1671,13 +2026,13 @@ void main() {
       final RenderSemanticsAnnotations object = tester.renderObject<RenderSemanticsAnnotations>(
         find.byKey(key),
       );
-      final SemanticsConfiguration config = SemanticsConfiguration();
+      final config = SemanticsConfiguration();
       object.describeSemanticsConfiguration(config);
       return config;
     }
 
     // Tuples contain (parent level, child level, expected combined level).
-    final List<(int, int, int)> scenarios = <(int, int, int)>[
+    final scenarios = <(int, int, int)>[
       // Case: neither are headings
       (0, 0, 0), // expect not a heading
       // Case: parent not a heading, child always wins.
@@ -1697,7 +2052,7 @@ void main() {
       (1, 5, 1),
     ];
 
-    for (final (int, int, int) scenario in scenarios) {
+    for (final scenario in scenarios) {
       final int parentLevel = scenario.$1;
       final int childLevel = scenario.$2;
       final int resultLevel = scenario.$3;
@@ -1705,7 +2060,7 @@ void main() {
       final SemanticsConfiguration parent = await pumpHeading(
         parentLevel == 0 ? null : parentLevel,
       );
-      final SemanticsConfiguration child = SemanticsConfiguration()..headingLevel = childLevel;
+      final child = SemanticsConfiguration()..headingLevel = childLevel;
       parent.absorb(child);
       expect(
         reason:
@@ -1721,29 +2076,27 @@ void main() {
   });
 
   testWidgets('applies heading semantics to semantics tree', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          appBar: AppBar(title: const Text('Headings')),
-          body: ListView(
-            children: <Widget>[
-              for (int level = 1; level <= 6; level++)
-                Semantics(
-                  key: ValueKey<String>('heading-$level'),
-                  headingLevel: level,
-                  child: Text('Heading level $level'),
-                ),
-              const Text('This is not a heading'),
-            ],
-          ),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          children: <Widget>[
+            for (int level = 1; level <= 6; level++)
+              Semantics(
+                key: ValueKey<String>('heading-$level'),
+                headingLevel: level,
+                child: Text('Heading level $level'),
+              ),
+            const Text('This is not a heading'),
+          ],
         ),
       ),
     );
 
-    for (int level = 1; level <= 6; level++) {
-      final ValueKey<String> key = ValueKey<String>('heading-$level');
+    for (var level = 1; level <= 6; level++) {
+      final key = ValueKey<String>('heading-$level');
       final SemanticsNode node = tester.getSemantics(find.byKey(key));
       expect('$node', contains('headingLevel: $level'));
     }
@@ -1755,10 +2108,10 @@ void main() {
   });
 
   testWidgets('RenderSemanticsAnnotations provides validation result', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     Future<SemanticsConfiguration> pumpValidationResult(SemanticsValidationResult result) async {
-      final ValueKey<String> key = ValueKey<String>('validation-$result');
+      final key = ValueKey<String>('validation-$result');
       await tester.pumpWidget(
         Semantics(
           key: key,
@@ -1769,7 +2122,7 @@ void main() {
       final RenderSemanticsAnnotations object = tester.renderObject<RenderSemanticsAnnotations>(
         find.byKey(key),
       );
-      final SemanticsConfiguration config = SemanticsConfiguration();
+      final config = SemanticsConfiguration();
       object.describeSemanticsConfiguration(config);
       return config;
     }
@@ -1793,14 +2146,14 @@ void main() {
   });
 
   testWidgets('validation result precedence', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     Future<void> expectValidationResult({
       required SemanticsValidationResult outer,
       required SemanticsValidationResult inner,
       required SemanticsValidationResult expected,
     }) async {
-      const ValueKey<String> key = ValueKey<String>('validated-widget');
+      const key = ValueKey<String>('validated-widget');
       await tester.pumpWidget(
         Semantics(
           validationResult: outer,
@@ -1817,7 +2170,7 @@ void main() {
       final SemanticsNode result = tester.getSemantics(find.byKey(key));
       expect(
         result,
-        containsSemantics(label: 'Outer = $outer; inner = $inner', validationResult: expected),
+        isSemantics(label: 'Outer = $outer; inner = $inner', validationResult: expected),
       );
     }
 
@@ -1873,6 +2226,243 @@ void main() {
     );
 
     semantics.dispose();
+  });
+
+  testWidgets('semantics grafting in traversal order', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+    const identifier = '111';
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          children: <Widget>[
+            Semantics(
+              traversalParentIdentifier: identifier,
+              child: const SizedBox.square(dimension: 10),
+            ),
+            Semantics(
+              traversalChildIdentifier: identifier,
+              child: const SizedBox.square(dimension: 10),
+            ),
+            const SizedBox.square(dimension: 10),
+          ],
+        ),
+      ),
+    );
+
+    // Semantics tree in traversal order. On web, no grafting.
+    expect(
+      semantics,
+      kIsWeb
+          ? hasSemantics(
+              TestSemantics.root(
+                children: <TestSemantics>[
+                  TestSemantics(id: 1, traversalParentIdentifier: identifier),
+                  TestSemantics(id: 2, traversalChildIdentifier: identifier),
+                ],
+              ),
+              ignoreRect: true,
+              ignoreTransform: true,
+            )
+          : hasSemantics(
+              TestSemantics.root(
+                children: <TestSemantics>[
+                  TestSemantics.rootChild(
+                    id: 1,
+                    traversalParentIdentifier: identifier,
+                    children: <TestSemantics>[
+                      TestSemantics(id: 2, traversalChildIdentifier: identifier),
+                    ],
+                  ),
+                ],
+              ),
+              ignoreRect: true,
+              ignoreTransform: true,
+            ),
+    );
+
+    // Semantics tree in hit-test order.
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(id: 1, traversalParentIdentifier: identifier),
+            TestSemantics(id: 2, traversalChildIdentifier: identifier),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+        childOrder: DebugSemanticsDumpOrder.inverseHitTest,
+      ),
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('semantics grafting in traversal order with multiple same traversalChildIdentifier', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+    const identifier = '111';
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          children: <Widget>[
+            Semantics(
+              traversalParentIdentifier: identifier,
+              child: const SizedBox.square(dimension: 10),
+            ),
+            Semantics(
+              traversalChildIdentifier: identifier,
+              child: const SizedBox.square(dimension: 10),
+            ),
+            Semantics(
+              traversalChildIdentifier: identifier,
+              child: const SizedBox.square(dimension: 10),
+            ),
+            const SizedBox.square(dimension: 10),
+          ],
+        ),
+      ),
+    );
+
+    // Semantics tree in traversal order. On web, no grafting.
+    expect(
+      semantics,
+      kIsWeb
+          ? hasSemantics(
+              TestSemantics.root(
+                children: <TestSemantics>[
+                  TestSemantics(id: 1, traversalParentIdentifier: identifier),
+                  TestSemantics(id: 2, traversalChildIdentifier: identifier),
+                  TestSemantics(id: 3, traversalChildIdentifier: identifier),
+                ],
+              ),
+              ignoreRect: true,
+              ignoreTransform: true,
+            )
+          : hasSemantics(
+              TestSemantics.root(
+                children: <TestSemantics>[
+                  TestSemantics.rootChild(
+                    id: 1,
+                    traversalParentIdentifier: identifier,
+                    children: <TestSemantics>[
+                      TestSemantics(id: 2, traversalChildIdentifier: identifier),
+                      TestSemantics(id: 3, traversalChildIdentifier: identifier),
+                    ],
+                  ),
+                ],
+              ),
+              ignoreRect: true,
+              ignoreTransform: true,
+            ),
+    );
+
+    // Semantics tree in hit-test order.
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(id: 1, traversalParentIdentifier: identifier),
+            TestSemantics(id: 2, traversalChildIdentifier: identifier),
+            TestSemantics(id: 3, traversalChildIdentifier: identifier),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+        childOrder: DebugSemanticsDumpOrder.inverseHitTest,
+      ),
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets(
+    'no grafting in traversal order when traversal child is the parent of its traversal parent',
+    (WidgetTester tester) async {
+      final semantics = SemanticsTester(tester);
+      const identifier = '111';
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            container: true,
+            child: Column(
+              children: <Widget>[
+                Semantics(
+                  label: 'child_node',
+                  traversalChildIdentifier: identifier,
+                  child: TestButton(
+                    onPressed: () {},
+                    child: Semantics(
+                      label: 'parent_node',
+                      traversalParentIdentifier: identifier,
+                      child: const Text('Button Text'),
+                    ),
+                  ),
+                ),
+                const SizedBox.square(dimension: 10),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final error = exception! as FlutterError;
+      expect(
+        error.message,
+        matches(
+          RegExp(
+            r'The traversalParent \d+ cannot be the child of the traversalChild \d+ in hit-test order',
+          ),
+        ),
+      );
+
+      semantics.dispose();
+    },
+    skip: kIsWeb, // [intended] the web traversal order by using ARIA-OWNS.
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/173097.
+  testWidgets('Semantics geometry can scroll to reveal hidden children in a scrollable container', (
+    WidgetTester tester,
+  ) async {
+    final scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(
+          controller: scrollController,
+          child: Semantics(
+            container: true,
+            explicitChildNodes: true,
+            child: Column(
+              children: <Widget>[
+                for (int i = 0; i < 20; i++) ...<Widget>[
+                  Text('Label text $i'),
+                  const SizedBox(height: 50),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    final SemanticsNode label10 = tester.getSemantics(
+      find.text('Label text 10', skipOffstage: false),
+    );
+    expect(label10, matchesSemantics(isHidden: true));
+
+    scrollController.jumpTo(500);
+    await tester.pumpAndSettle();
+    expect(label10, matchesSemantics(isHidden: false)); // ignore: avoid_redundant_argument_values
   });
 }
 

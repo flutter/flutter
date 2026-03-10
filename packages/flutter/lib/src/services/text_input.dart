@@ -852,7 +852,7 @@ class TextInputConfiguration {
 
   @override
   String toString() {
-    final List<String> description = <String>[
+    final description = <String>[
       if (viewId != null) 'viewId: $viewId',
       'inputType: $inputType',
       'readOnly: $readOnly',
@@ -967,14 +967,14 @@ class TextEditingValue {
 
   /// Creates an instance of this class from a JSON object.
   factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
-    final String text = encoded['text'] as String;
-    final TextSelection selection = TextSelection(
+    final text = encoded['text'] as String;
+    final selection = TextSelection(
       baseOffset: encoded['selectionBase'] as int? ?? -1,
       extentOffset: encoded['selectionExtent'] as int? ?? -1,
       affinity: _toTextAffinity(encoded['selectionAffinity'] as String?) ?? TextAffinity.downstream,
       isDirectional: encoded['selectionIsDirectional'] as bool? ?? false,
     );
-    final TextRange composing = TextRange(
+    final composing = TextRange(
       start: encoded['composingBase'] as int? ?? -1,
       end: encoded['composingExtent'] as int? ?? -1,
     );
@@ -1090,11 +1090,11 @@ class TextEditingValue {
       return originalIndex + replacedLength - removedLength;
     }
 
-    final TextSelection adjustedSelection = TextSelection(
+    final adjustedSelection = TextSelection(
       baseOffset: adjustIndex(selection.baseOffset),
       extentOffset: adjustIndex(selection.extentOffset),
     );
-    final TextRange adjustedComposing = TextRange(
+    final adjustedComposing = TextRange(
       start: adjustIndex(composing.start),
       end: adjustIndex(composing.end),
     );
@@ -1518,6 +1518,114 @@ mixin DeltaTextInputClient implements TextInputClient {
   void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas);
 }
 
+/// Text styling information for the current input client.
+///
+/// See also:
+///
+///  * [TextInputConnection.updateStyle], which uses this class to send style
+///    information to the platform.
+///  * [TextInputControl.updateStyle], which receives this style information
+///    in custom text input controls.
+@immutable
+final class TextInputStyle with Diagnosticable {
+  /// Creates text styling information for the current input client.
+  const TextInputStyle({
+    this.fontFamily,
+    this.fontSize,
+    this.fontWeight,
+    required this.textDirection,
+    required this.textAlign,
+    this.letterSpacing,
+    this.wordSpacing,
+    this.lineHeight,
+  });
+
+  /// The name of the font to use when painting the text (e.g., Roboto).
+  final String? fontFamily;
+
+  /// The size of fonts (in logical pixels) to use when painting the text.
+  final double? fontSize;
+
+  /// The typeface thickness to use when painting the text (e.g., bold).
+  final FontWeight? fontWeight;
+
+  /// The directionality of the text.
+  final TextDirection textDirection;
+
+  /// How the text should be aligned horizontally.
+  final TextAlign textAlign;
+
+  /// The amount of space (in logical pixels) to add between each letter.
+  final double? letterSpacing;
+
+  /// The amount of space (in logical pixels) to add at each sequence of
+  /// white-space (i.e. between each word).
+  final double? wordSpacing;
+
+  /// The line height in logical pixels.
+  final double? lineHeight;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is TextInputStyle &&
+        other.fontFamily == fontFamily &&
+        other.fontSize == fontSize &&
+        other.fontWeight == fontWeight &&
+        other.textDirection == textDirection &&
+        other.textAlign == textAlign &&
+        other.letterSpacing == letterSpacing &&
+        other.wordSpacing == wordSpacing &&
+        other.lineHeight == lineHeight;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(
+      fontFamily,
+      fontSize,
+      fontWeight,
+      textDirection,
+      textAlign,
+      letterSpacing,
+      wordSpacing,
+      lineHeight,
+    );
+  }
+
+  /// Returns a representation of this object as a JSON object.
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'fontFamily': fontFamily,
+      'fontSize': fontSize,
+      'fontWeightIndex': fontWeight?.index,
+      'textAlignIndex': textAlign.index,
+      'textDirectionIndex': textDirection.index,
+      'letterSpacing': letterSpacing,
+      'wordSpacing': wordSpacing,
+      'lineHeight': lineHeight,
+    };
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('fontFamily', fontFamily, defaultValue: null));
+    properties.add(DoubleProperty('fontSize', fontSize, defaultValue: null));
+    properties.add(DiagnosticsProperty<FontWeight>('fontWeight', fontWeight, defaultValue: null));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection));
+    properties.add(EnumProperty<TextAlign>('textAlign', textAlign));
+    properties.add(DoubleProperty('letterSpacing', letterSpacing, defaultValue: null));
+    properties.add(DoubleProperty('wordSpacing', wordSpacing, defaultValue: null));
+    properties.add(DoubleProperty('lineHeight', lineHeight, defaultValue: null));
+  }
+}
+
 /// An interface for interacting with a text input control.
 ///
 /// See also:
@@ -1655,6 +1763,10 @@ class TextInputConnection {
   /// This information is used by the Flutter Web Engine to change the style
   /// of the hidden native input's content. Hence, the content size will match
   /// to the size of the editable widget's content.
+  @Deprecated(
+    'Use updateStyle instead. '
+    'This feature was deprecated after v3.41.0-0.0.pre.',
+  )
   void setStyle({
     required String? fontFamily,
     required double? fontSize,
@@ -1662,15 +1774,25 @@ class TextInputConnection {
     required TextDirection textDirection,
     required TextAlign textAlign,
   }) {
-    assert(attached);
-
-    TextInput._instance._setStyle(
-      fontFamily: fontFamily,
-      fontSize: fontSize,
-      fontWeight: fontWeight,
-      textDirection: textDirection,
-      textAlign: textAlign,
+    updateStyle(
+      TextInputStyle(
+        fontFamily: fontFamily,
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        textDirection: textDirection,
+        textAlign: textAlign,
+      ),
     );
+  }
+
+  /// Send text styling information.
+  ///
+  /// This information is used by the Flutter Web Engine to change the style
+  /// of the hidden native input's content. Hence, the content size will match
+  /// to the size of the editable widget's content.
+  void updateStyle(TextInputStyle style) {
+    assert(attached);
+    TextInput._instance._updateStyle(style);
   }
 
   /// Stop interacting with the text input control.
@@ -1916,7 +2038,7 @@ class TextInput {
   /// should call [TextInputConnection.close] on the returned
   /// [TextInputConnection].
   static TextInputConnection attach(TextInputClient client, TextInputConfiguration configuration) {
-    final TextInputConnection connection = TextInputConnection._(client);
+    final connection = TextInputConnection._(client);
     _instance._attach(connection, configuration);
     return connection;
   }
@@ -1995,7 +2117,7 @@ class TextInput {
     final String method = methodCall.method;
     switch (method) {
       case 'TextInputClient.focusElement':
-        final List<dynamic> args = methodCall.arguments as List<dynamic>;
+        final args = methodCall.arguments as List<dynamic>;
         _scribbleClients[args[0]]?.onScribbleFocus(
           Offset((args[1] as num).toDouble(), (args[2] as num).toDouble()),
         );
@@ -2007,7 +2129,7 @@ class TextInput {
             .toList();
         return _scribbleClients.keys
             .where((String elementIdentifier) {
-              final Rect rect = Rect.fromLTWH(args[0], args[1], args[2], args[3]);
+              final rect = Rect.fromLTWH(args[0], args[1], args[2], args[3]);
               if (!(_scribbleClients[elementIdentifier]?.isInScribbleRect(rect) ?? false)) {
                 return false;
               }
@@ -2044,16 +2166,16 @@ class TextInput {
       return;
     }
 
-    final List<dynamic> args = methodCall.arguments as List<dynamic>;
+    final args = methodCall.arguments as List<dynamic>;
 
     // The updateEditingStateWithTag request (autofill) can come up even to a
     // text field that doesn't have a connection.
     if (method == 'TextInputClient.updateEditingStateWithTag') {
       final TextInputClient client = _currentConnection!._client;
       final AutofillScope? scope = client.currentAutofillScope;
-      final Map<String, dynamic> editingValue = args[1] as Map<String, dynamic>;
+      final editingValue = args[1] as Map<String, dynamic>;
       for (final String tag in editingValue.keys) {
-        final TextEditingValue textEditingValue = TextEditingValue.fromJSON(
+        final textEditingValue = TextEditingValue.fromJSON(
           editingValue[tag] as Map<String, dynamic>,
         );
         final AutofillClient? client = scope?.getAutofillClient(tag);
@@ -2065,11 +2187,11 @@ class TextInput {
       return;
     }
 
-    final int client = args[0] as int;
+    final client = args[0] as int;
     if (client != _currentConnection!._id) {
       // If the client IDs don't match, the incoming message was for a different
       // client.
-      bool debugAllowAnyway = false;
+      var debugAllowAnyway = false;
       assert(() {
         // In debug builds we allow "-1" as a magical client ID that ignores
         // this verification step so that tests can always get through, even
@@ -2086,15 +2208,15 @@ class TextInput {
 
     switch (method) {
       case 'TextInputClient.updateEditingState':
-        final TextEditingValue value = TextEditingValue.fromJSON(args[1] as Map<String, dynamic>);
+        final value = TextEditingValue.fromJSON(args[1] as Map<String, dynamic>);
         TextInput._instance._updateEditingValue(value, exclude: _PlatformTextInputControl.instance);
       case 'TextInputClient.updateEditingStateWithDeltas':
         assert(
           _currentConnection!._client is DeltaTextInputClient,
           'You must be using a DeltaTextInputClient if TextInputConfiguration.enableDeltaModel is set to true',
         );
-        final Map<String, dynamic> encoded = args[1] as Map<String, dynamic>;
-        final List<TextEditingDelta> deltas = <TextEditingDelta>[
+        final encoded = args[1] as Map<String, dynamic>;
+        final deltas = <TextEditingDelta>[
           for (final dynamic encodedDelta in encoded['deltas'] as List<dynamic>)
             TextEditingDelta.fromJSON(encodedDelta as Map<String, dynamic>),
         ];
@@ -2102,9 +2224,7 @@ class TextInput {
         (_currentConnection!._client as DeltaTextInputClient).updateEditingValueWithDeltas(deltas);
       case 'TextInputClient.performAction':
         if (args[1] as String == 'TextInputAction.commitContent') {
-          final KeyboardInsertedContent content = KeyboardInsertedContent.fromJson(
-            args[2] as Map<String, dynamic>,
-          );
+          final content = KeyboardInsertedContent.fromJson(args[2] as Map<String, dynamic>);
           _currentConnection!._client.insertContent(content);
         } else {
           _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));
@@ -2113,7 +2233,7 @@ class TextInput {
         final List<String> selectors = (args[1] as List<dynamic>).cast<String>();
         selectors.forEach(_currentConnection!._client.performSelector);
       case 'TextInputClient.performPrivateCommand':
-        final Map<String, dynamic> firstArg = args[1] as Map<String, dynamic>;
+        final firstArg = args[1] as Map<String, dynamic>;
         _currentConnection!._client.performPrivateCommand(
           firstArg['action'] as String,
           firstArg['data'] == null ? <String, dynamic>{} : firstArg['data'] as Map<String, dynamic>,
@@ -2221,21 +2341,9 @@ class TextInput {
     }
   }
 
-  void _setStyle({
-    required String? fontFamily,
-    required double? fontSize,
-    required FontWeight? fontWeight,
-    required TextDirection textDirection,
-    required TextAlign textAlign,
-  }) {
+  void _updateStyle(TextInputStyle style) {
     for (final TextInputControl control in _inputControls) {
-      control.setStyle(
-        fontFamily: fontFamily,
-        fontSize: fontSize,
-        fontWeight: fontWeight,
-        textDirection: textDirection,
-        textAlign: textAlign,
-      );
+      control.updateStyle(style);
     }
   }
 
@@ -2426,6 +2534,10 @@ mixin TextInputControl {
   ///
   /// This method is called on the when the attached input client's text style
   /// changes.
+  @Deprecated(
+    'Use updateStyle instead. '
+    'This feature was deprecated after v3.41.0-0.0.pre.',
+  )
   void setStyle({
     required String? fontFamily,
     required double? fontSize,
@@ -2433,6 +2545,12 @@ mixin TextInputControl {
     required TextDirection textDirection,
     required TextAlign textAlign,
   }) {}
+
+  /// Informs the text input control about text style changes.
+  ///
+  /// This method is called on the when the attached input client's text style
+  /// changes.
+  void updateStyle(TextInputStyle style) {}
 
   /// Requests autofill from the text input control.
   ///
@@ -2559,13 +2677,20 @@ class _PlatformTextInputControl with TextInputControl {
     required TextDirection textDirection,
     required TextAlign textAlign,
   }) {
-    _channel.invokeMethod<void>('TextInput.setStyle', <String, dynamic>{
-      'fontFamily': fontFamily,
-      'fontSize': fontSize,
-      'fontWeightIndex': fontWeight?.index,
-      'textAlignIndex': textAlign.index,
-      'textDirectionIndex': textDirection.index,
-    });
+    updateStyle(
+      TextInputStyle(
+        fontFamily: fontFamily,
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        textDirection: textDirection,
+        textAlign: textAlign,
+      ),
+    );
+  }
+
+  @override
+  void updateStyle(TextInputStyle style) {
+    _channel.invokeMethod<void>('TextInput.setStyle', style.toJson());
   }
 
   @override
@@ -2784,7 +2909,7 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
     ServicesBinding.systemContextMenuClient = this;
 
     _customActionCallbacks.clear();
-    for (final IOSSystemContextMenuItemData item in items) {
+    for (final item in items) {
       if (item is IOSSystemContextMenuItemDataCustom) {
         assert(
           !_customActionCallbacks.containsKey(item.callbackId) ||

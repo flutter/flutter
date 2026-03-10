@@ -60,4 +60,4 @@ CheckOptions:
 # updated.
 #
 # tl;dr: I'm sorry.
-HeaderFilterRegex: "[..\/]+\/flutter\/(assets|benchmarking|bin|build|ci|common|display_list|docs|examples|flow|flutter_frontend_server|flutter_vma|fml|impeller|lib|runtime|shell|skia|sky|testing|tools|txt|vulkan|wasm|web_sdk)\/.*"
+HeaderFilterRegex: "[..\/]+\/flutter\/(assets|benchmarking|bin|build|ci|common|display_list|docs|examples|flow|flutter_frontend_server|flutter_vma|fml|impeller|lib|runtime|shell|skia|skwasm|sky|testing|tools|txt|vulkan|wasm|web_sdk)\/.*"

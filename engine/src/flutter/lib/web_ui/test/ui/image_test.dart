@@ -18,7 +18,7 @@ void main() {
 Future<void> testMain() async {
   setUpUnitTests(withImplicitView: true);
   test('Image constructor invokes onCreate once', () async {
-    int onCreateInvokedCount = 0;
+    var onCreateInvokedCount = 0;
     ui.Image? createdImage;
     ui.Image.onCreate = (ui.Image image) {
       onCreateInvokedCount++;
@@ -39,7 +39,7 @@ Future<void> testMain() async {
   });
 
   test('dispose() invokes onDispose once', () async {
-    int onDisposeInvokedCount = 0;
+    var onDisposeInvokedCount = 0;
     ui.Image? disposedImage;
     ui.Image.onDispose = (ui.Image image) {
       onDisposeInvokedCount++;
@@ -113,7 +113,7 @@ Future<void> testMain() async {
   });
 
   test('instantiateImageCodecWithSize disposes temporary image', () async {
-    final Set<ui.Image> activeImages = <ui.Image>{};
+    final activeImages = <ui.Image>{};
     ui.Image.onCreate = activeImages.add;
     ui.Image.onDispose = activeImages.remove;
 
@@ -142,9 +142,9 @@ Future<void> testMain() async {
 Future<ui.Image> _createImage() => _createPicture().toImage(10, 10);
 
 ui.Picture _createPicture() {
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final ui.Canvas canvas = ui.Canvas(recorder);
-  const ui.Rect rect = ui.Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+  final recorder = ui.PictureRecorder();
+  final canvas = ui.Canvas(recorder);
+  const rect = ui.Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
   canvas.clipRect(rect);
   return recorder.endRecording();
 }

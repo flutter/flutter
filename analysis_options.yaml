@@ -40,11 +40,11 @@ linter:
     - always_declare_return_types
     - always_put_control_body_on_new_line
     # - always_put_required_named_parameters_first # we prefer having parameters in the same order as fields https://github.com/flutter/flutter/issues/10219
-    - always_specify_types
+    # - always_specify_types # conflicts with omit_obvious_local_variable_types
     # - always_use_package_imports # we do this commonly
     - annotate_overrides
     - annotate_redeclares
-    # - avoid_annotating_with_dynamic # conflicts with always_specify_types
+    # - avoid_annotating_with_dynamic # conflicts with type_annotate_public_apis
     - avoid_bool_literals_in_conditional_expressions
     # - avoid_catches_without_on_clauses # blocked on https://github.com/dart-lang/linter/issues/3023
     # - avoid_catching_errors # blocked on https://github.com/dart-lang/linter/issues/4998
@@ -78,7 +78,7 @@ linter:
     - avoid_slow_async_io
     - avoid_type_to_string
     - avoid_types_as_parameter_names
-    # - avoid_types_on_closure_parameters # conflicts with always_specify_types
+    # - avoid_types_on_closure_parameters # not yet tested
     - avoid_unnecessary_containers
     - avoid_unused_constructor_parameters
     - avoid_void_async
@@ -144,9 +144,9 @@ linter:
     - noop_primitive_operations
     - null_check_on_nullable_type_parameter
     - null_closures
-    # - omit_local_variable_types # opposite of always_specify_types
-    # - omit_obvious_local_variable_types # not yet tested
-    # - omit_obvious_property_types # not yet tested
+    # - omit_local_variable_types # superset of omit_obvious_local_variable_types
+    - omit_obvious_local_variable_types # not yet tested
+    # - omit_obvious_property_types # conflicts with type_annotate_public_apis
     # - one_member_abstracts # too many false positives
     - only_throw_errors # this does get disabled in a few places where we have legacy code that uses strings et al
     - overridden_fields
@@ -204,13 +204,13 @@ linter:
     - sort_constructors_first
     # - sort_pub_dependencies # prevents separating pinned transitive dependencies
     - sort_unnamed_constructors_first
-    # - specify_nonobvious_local_variable_types # not yet tested
-    # - specify_nonobvious_property_types # not yet tested
+    - specify_nonobvious_local_variable_types
+    - specify_nonobvious_property_types
     - strict_top_level_inference
     - test_types_in_equals
     - throw_in_finally
     - tighten_type_of_initializing_formals
-    # - type_annotate_public_apis # subset of always_specify_types
+    - type_annotate_public_apis
     - type_init_formals
     - type_literal_in_constant_pattern
     # - unawaited_futures # too many false positives, especially with the way AnimationController works

@@ -302,6 +302,11 @@ TEST_F(EmbedderA11yTest, A11yStringAttributes) {
 
         auto node = update->nodes[0];
 
+        // Verify identifier
+        {
+          ASSERT_EQ(std::string(node->identifier), "identifier");
+        }
+
         // Verify label
         {
           ASSERT_EQ(std::string(node->label), "What is the meaning of life?");
@@ -876,6 +881,7 @@ TEST_F(EmbedderA11yTest, A11yTreesAreConsistentWithMultipleViews) {
   window_metrics_event.physical_view_inset_left = 0.0;
   window_metrics_event.display_id = 0;
   window_metrics_event.view_id = first_view_id;
+  window_metrics_event.has_constraints = false;
 
   FlutterAddViewInfo add_view_info;
   add_view_info.struct_size = sizeof(FlutterAddViewInfo);

@@ -133,7 +133,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
           'event which is incorrect.',
     );
 
-    final VMServiceFlutterDriver driver = VMServiceFlutterDriver.connectedTo(
+    final driver = VMServiceFlutterDriver.connectedTo(
       client,
       isolate,
       printCommunication: printCommunication,
@@ -156,7 +156,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
       }
 
       return client.resume(isolate.id!).catchError((Object e) {
-        const int vmMustBePausedCode = 101;
+        const vmMustBePausedCode = 101;
         if (e is vms.RPCError && e.code == vmMustBePausedCode) {
           // No biggie; something else must have resumed the isolate
           _log(
@@ -190,7 +190,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
         return Completer<void>().future;
       });
 
-      final Completer<void> extensionAdded = Completer<void>();
+      final extensionAdded = Completer<void>();
       late StreamSubscription<vms.Event> isolateAddedSubscription;
 
       isolateAddedSubscription = client.onIsolateEvent.listen(
@@ -407,10 +407,10 @@ class VMServiceFlutterDriver extends FlutterDriver {
         final vms.Timeline timeline = await _serviceClient.getVMTimeline();
         return Timeline.fromJson(timeline.json!);
       }
-      const int kSecondInMicros = 1000000;
+      const kSecondInMicros = 1000000;
       int currentStart = startTime;
       int currentEnd = startTime + kSecondInMicros; // 1 second of timeline
-      final List<Map<String, Object?>?> chunks = <Map<String, Object?>?>[];
+      final chunks = <Map<String, Object?>?>[];
       do {
         final vms.Timeline chunk = await _serviceClient.getVMTimeline(
           timeOriginMicros: currentStart,
@@ -435,7 +435,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
 
   Future<bool> _isPrecompiledMode() async {
     final List<Map<String, dynamic>> flags = await getVmFlags();
-    for (final Map<String, dynamic> flag in flags) {
+    for (final flag in flags) {
       if (flag['name'] == 'precompiled_mode') {
         return flag['valueAsString'] == 'true';
       }
@@ -520,7 +520,7 @@ void restoreVmServiceConnectFunction() {
 
 String _getWebSocketUrl(String url) {
   Uri uri = Uri.parse(url);
-  final List<String> pathSegments = <String>[
+  final pathSegments = <String>[
     // If there's an authentication code (default), we need to add it to our path.
     if (uri.pathSegments.isNotEmpty) uri.pathSegments.first,
     'ws',
@@ -535,18 +535,18 @@ String _getWebSocketUrl(String url) {
 /// the [vms.VmService].
 Future<vms.VmService> _waitAndConnect(String url, Map<String, dynamic>? headers) async {
   final String webSocketUrl = _getWebSocketUrl(url);
-  int attempts = 0;
+  var attempts = 0;
   WebSocket? socket;
   while (true) {
     try {
       socket = await WebSocket.connect(webSocketUrl, headers: headers);
-      final StreamController<dynamic> controller = StreamController<dynamic>();
-      final Completer<void> streamClosedCompleter = Completer<void>();
+      final controller = StreamController<dynamic>();
+      final streamClosedCompleter = Completer<void>();
       socket.listen(
         (dynamic data) => controller.add(data),
         onDone: () => streamClosedCompleter.complete(),
       );
-      final vms.VmService service = vms.VmService(
+      final service = vms.VmService(
         controller.stream,
         socket.add,
         disposeHandler: () => socket!.close(),
@@ -606,7 +606,7 @@ Future<T> _warnIfSlow<T>({
   required Duration timeout,
   required String message,
 }) async {
-  final Completer<void> completer = Completer<void>();
+  final completer = Completer<void>();
   completer.future.timeout(
     timeout,
     onTimeout: () {

@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'button_tester.dart';
 
 void main() {
   testWidgets('AnimatedCrossFade test', (WidgetTester tester) async {
@@ -215,7 +217,7 @@ void main() {
     final _TickerWatchingWidgetState state = findState();
 
     await tester.pumpWidget(crossFadeWithWatcher(towardsSecond: true));
-    for (int i = 0; i < 3; i += 1) {
+    for (var i = 0; i < 3; i += 1) {
       await tester.pump(const Duration(milliseconds: 25));
       expect(findState(), same(state));
     }
@@ -240,7 +242,7 @@ void main() {
     expect(findSemantics().excluding, false);
 
     await tester.pumpWidget(crossFadeWithWatcher(towardsSecond: true));
-    for (int i = 0; i < 2; i += 1) {
+    for (var i = 0; i < 2; i += 1) {
       await tester.pump(const Duration(milliseconds: 25));
       // Animations are kept alive in the middle of cross-fade
       expect(state.ticker.muted, false);
@@ -304,8 +306,8 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: AnimatedCrossFade(
-          firstChild: TextButton(onPressed: () {}, child: const Text('AAA')),
-          secondChild: TextButton(onPressed: () {}, child: const Text('BBB')),
+          firstChild: TestButton(onPressed: () {}, child: const Text('AAA')),
+          secondChild: TestButton(onPressed: () {}, child: const Text('BBB')),
           crossFadeState: CrossFadeState.showFirst,
           duration: const Duration(milliseconds: 50),
         ),
@@ -328,8 +330,8 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: AnimatedCrossFade(
-          firstChild: TextButton(onPressed: () {}, child: const Text('AAA')),
-          secondChild: TextButton(onPressed: () {}, child: const Text('BBB')),
+          firstChild: TestButton(onPressed: () {}, child: const Text('AAA')),
+          secondChild: TestButton(onPressed: () {}, child: const Text('BBB')),
           crossFadeState: CrossFadeState.showFirst,
           duration: const Duration(milliseconds: 50),
           excludeBottomFocus: false,
@@ -351,7 +353,7 @@ void main() {
   testWidgets('AnimatedCrossFade second child do not receive touch events', (
     WidgetTester tester,
   ) async {
-    int numberOfTouchEventNoticed = 0;
+    var numberOfTouchEventNoticed = 0;
 
     Future<void> buildAnimatedFrame(CrossFadeState crossFadeState) {
       return tester.pumpWidget(
@@ -362,12 +364,15 @@ void main() {
             textDirection: TextDirection.ltr,
             child: AnimatedCrossFade(
               firstChild: const Text('AAA'),
-              secondChild: TextButton(
-                style: TextButton.styleFrom(minimumSize: const Size(double.infinity, 600)),
-                onPressed: () {
-                  numberOfTouchEventNoticed++;
-                },
-                child: const Text('BBB'),
+              secondChild: SizedBox(
+                width: double.infinity,
+                height: 600,
+                child: TestButton(
+                  onPressed: () {
+                    numberOfTouchEventNoticed++;
+                  },
+                  child: const Text('BBB'),
+                ),
               ),
               crossFadeState: crossFadeState,
               duration: const Duration(milliseconds: 50),
@@ -395,6 +400,158 @@ void main() {
     await touchSecondButton();
 
     expect(numberOfTouchEventNoticed, 1);
+  });
+
+  testWidgets('AnimatedCrossFade does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: AnimatedCrossFade(
+              firstChild: Text('X'),
+              secondChild: Text('Y'),
+              crossFadeState: CrossFadeState.showFirst,
+              duration: Duration(seconds: 1),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(AnimatedCrossFade)), Size.zero);
+  });
+
+  testWidgets('AnimatedCrossFade onEnd callback is called when animation completes forward', (
+    WidgetTester tester,
+  ) async {
+    var onEndCallCount = 0;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedCrossFade(
+          firstChild: const SizedBox(width: 100.0, height: 100.0),
+          secondChild: const SizedBox(width: 200.0, height: 200.0),
+          crossFadeState: CrossFadeState.showFirst,
+          duration: const Duration(milliseconds: 200),
+          onEnd: () {
+            onEndCallCount++;
+          },
+        ),
+      ),
+    );
+
+    expect(onEndCallCount, 0);
+
+    // Transition to showSecond.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedCrossFade(
+          firstChild: const SizedBox(width: 100.0, height: 100.0),
+          secondChild: const SizedBox(width: 200.0, height: 200.0),
+          crossFadeState: CrossFadeState.showSecond,
+          duration: const Duration(milliseconds: 200),
+          onEnd: () {
+            onEndCallCount++;
+          },
+        ),
+      ),
+    );
+
+    // Pump halfway through animation.
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(onEndCallCount, 0);
+
+    // Pump to complete animation and settle.
+    await tester.pumpAndSettle();
+    expect(onEndCallCount, 1);
+  });
+
+  testWidgets('AnimatedCrossFade onEnd callback is called when animation completes reverse', (
+    WidgetTester tester,
+  ) async {
+    var onEndCallCount = 0;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedCrossFade(
+          firstChild: const SizedBox(width: 100.0, height: 100.0),
+          secondChild: const SizedBox(width: 200.0, height: 200.0),
+          crossFadeState: CrossFadeState.showSecond,
+          duration: const Duration(milliseconds: 200),
+          onEnd: () {
+            onEndCallCount++;
+          },
+        ),
+      ),
+    );
+
+    expect(onEndCallCount, 0);
+
+    // Reverse transition to showFirst.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedCrossFade(
+          firstChild: const SizedBox(width: 100.0, height: 100.0),
+          secondChild: const SizedBox(width: 200.0, height: 200.0),
+          crossFadeState: CrossFadeState.showFirst,
+          duration: const Duration(milliseconds: 200),
+          onEnd: () {
+            onEndCallCount++;
+          },
+        ),
+      ),
+    );
+
+    // Pump halfway through animation.
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(onEndCallCount, 0);
+
+    // Pump to complete animation and settle.
+    await tester.pumpAndSettle();
+    expect(onEndCallCount, 1);
+  });
+
+  testWidgets('AnimatedCrossFade onEnd callback is called for each animation cycle', (
+    WidgetTester tester,
+  ) async {
+    var onEndCallCount = 0;
+
+    Widget buildWidget(CrossFadeState state) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedCrossFade(
+          firstChild: const SizedBox(width: 100.0, height: 100.0),
+          secondChild: const SizedBox(width: 200.0, height: 200.0),
+          crossFadeState: state,
+          duration: const Duration(milliseconds: 200),
+          onEnd: () {
+            onEndCallCount++;
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget(CrossFadeState.showFirst));
+    expect(onEndCallCount, 0);
+
+    // First forward transition.
+    await tester.pumpWidget(buildWidget(CrossFadeState.showSecond));
+    await tester.pumpAndSettle();
+    expect(onEndCallCount, 1);
+
+    // First reverse transition.
+    await tester.pumpWidget(buildWidget(CrossFadeState.showFirst));
+    await tester.pumpAndSettle();
+    expect(onEndCallCount, 2);
+
+    // Second forward transition.
+    await tester.pumpWidget(buildWidget(CrossFadeState.showSecond));
+    await tester.pumpAndSettle();
+    expect(onEndCallCount, 3);
   });
 }
 

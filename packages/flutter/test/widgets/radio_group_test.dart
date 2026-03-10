@@ -7,10 +7,12 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'editable_text_tester.dart';
+
 void main() {
   testWidgets('Radio group control test', (WidgetTester tester) async {
-    final UniqueKey key0 = UniqueKey();
-    final UniqueKey key1 = UniqueKey();
+    final key0 = UniqueKey();
+    final key1 = UniqueKey();
 
     await tester.pumpWidget(
       Material(
@@ -26,39 +28,39 @@ void main() {
     );
     expect(
       tester.getSemantics(find.byKey(key0)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
     );
     expect(
       tester.getSemantics(find.byKey(key1)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
     );
 
     await tester.tap(find.byKey(key0));
     await tester.pumpAndSettle();
     expect(
       tester.getSemantics(find.byKey(key0)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: true, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: true, isEnabled: true),
     );
     expect(
       tester.getSemantics(find.byKey(key1)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
     );
 
     await tester.tap(find.byKey(key1));
     await tester.pumpAndSettle();
     expect(
       tester.getSemantics(find.byKey(key0)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
     );
     expect(
       tester.getSemantics(find.byKey(key1)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: true, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: true, isEnabled: true),
     );
   });
 
   testWidgets('Radio group can have disabled radio', (WidgetTester tester) async {
-    final UniqueKey key0 = UniqueKey();
-    final UniqueKey key1 = UniqueKey();
+    final key0 = UniqueKey();
+    final key1 = UniqueKey();
 
     await tester.pumpWidget(
       Material(
@@ -74,11 +76,11 @@ void main() {
     );
     expect(
       tester.getSemantics(find.byKey(key0)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: false),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: false),
     );
     expect(
       tester.getSemantics(find.byKey(key1)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
     );
 
     await tester.tap(find.byKey(key0));
@@ -86,11 +88,11 @@ void main() {
     // Can't be select because the radio is disabled.
     expect(
       tester.getSemantics(find.byKey(key0)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: false),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: false),
     );
     expect(
       tester.getSemantics(find.byKey(key1)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
     );
   });
 
@@ -116,10 +118,10 @@ void main() {
   });
 
   testWidgets('Radio group can use arrow key', (WidgetTester tester) async {
-    final UniqueKey key0 = UniqueKey();
-    final UniqueKey key1 = UniqueKey();
-    final UniqueKey key2 = UniqueKey();
-    final FocusNode focusNode = FocusNode();
+    final key0 = UniqueKey();
+    final key1 = UniqueKey();
+    final key2 = UniqueKey();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(
       MaterialApp(
@@ -172,10 +174,10 @@ void main() {
   });
 
   testWidgets('Radio group arrow key skips disabled radio', (WidgetTester tester) async {
-    final UniqueKey key0 = UniqueKey();
-    final UniqueKey key1 = UniqueKey();
-    final UniqueKey key2 = UniqueKey();
-    final FocusNode focusNode = FocusNode();
+    final key0 = UniqueKey();
+    final key1 = UniqueKey();
+    final key2 = UniqueKey();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(
       MaterialApp(
@@ -227,23 +229,23 @@ void main() {
   });
 
   testWidgets('Radio group can tab in and out', (WidgetTester tester) async {
-    final UniqueKey key0 = UniqueKey();
-    final UniqueKey key1 = UniqueKey();
-    final UniqueKey key2 = UniqueKey();
-    final FocusNode radio0 = FocusNode();
+    final key0 = UniqueKey();
+    final key1 = UniqueKey();
+    final key2 = UniqueKey();
+    final radio0 = FocusNode();
     addTearDown(radio0.dispose);
-    final FocusNode radio1 = FocusNode();
+    final radio1 = FocusNode();
     addTearDown(radio1.dispose);
-    final FocusNode textFieldBefore = FocusNode();
+    final textFieldBefore = FocusNode();
     addTearDown(textFieldBefore.dispose);
-    final FocusNode textFieldAfter = FocusNode();
+    final textFieldAfter = FocusNode();
     addTearDown(textFieldAfter.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: Column(
             children: <Widget>[
-              TextField(focusNode: textFieldBefore),
+              TestTextField(focusNode: textFieldBefore),
               TestRadioGroup<int>(
                 child: Column(
                   children: <Widget>[
@@ -253,7 +255,7 @@ void main() {
                   ],
                 ),
               ),
-              TextField(focusNode: textFieldAfter),
+              TestTextField(focusNode: textFieldAfter),
             ],
           ),
         ),
@@ -302,7 +304,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/175258.
   testWidgets('Radio group throws on multiple selection', (WidgetTester tester) async {
-    final UniqueKey key1 = UniqueKey();
+    final key1 = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -387,8 +389,8 @@ void main() {
   testWidgets('Radio group does not intercept key events when no radio is focused', (
     WidgetTester tester,
   ) async {
-    final List<String> log = <String>[];
-    late final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{
+    final log = <String>[];
+    late final shortcuts = <ShortcutActivator, Intent>{
       const SingleActivator(LogicalKeyboardKey.arrowLeft): VoidCallbackIntent(() => log.add('←')),
       const SingleActivator(LogicalKeyboardKey.arrowRight): VoidCallbackIntent(() => log.add('→')),
       const SingleActivator(LogicalKeyboardKey.arrowDown): VoidCallbackIntent(() => log.add('↓')),
@@ -396,9 +398,9 @@ void main() {
       const SingleActivator(LogicalKeyboardKey.space): VoidCallbackIntent(() => log.add('_')),
     };
 
-    final FocusNode firstRadioFocusNode = FocusNode();
+    final firstRadioFocusNode = FocusNode();
     addTearDown(firstRadioFocusNode.dispose);
-    final FocusNode textFieldFocusNode = FocusNode();
+    final textFieldFocusNode = FocusNode();
     addTearDown(textFieldFocusNode.dispose);
 
     await tester.pumpWidget(
@@ -412,7 +414,7 @@ void main() {
                   Radio<int>(focusNode: firstRadioFocusNode, value: 0),
                   const RadioListTile<int>(value: 1),
                   const Radio<int>(value: 2),
-                  TextField(focusNode: textFieldFocusNode),
+                  TestTextField(focusNode: textFieldFocusNode),
                 ],
               ),
             ),

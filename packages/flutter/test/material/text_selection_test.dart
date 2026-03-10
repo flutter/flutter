@@ -18,7 +18,7 @@ import '../widgets/editable_text_utils.dart'
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  final MockClipboard mockClipboard = MockClipboard();
+  final mockClipboard = MockClipboard();
 
   setUp(() async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
@@ -39,10 +39,10 @@ void main() {
 
   group('canSelectAll', () {
     Widget createEditableText({required Key key, String? text, TextSelection? selection}) {
-      final TextEditingController controller = TextEditingController(text: text)
+      final controller = TextEditingController(text: text)
         ..selection = selection ?? const TextSelection.collapsed(offset: -1);
       addTearDown(controller.dispose);
-      final FocusNode focusNode = FocusNode();
+      final focusNode = FocusNode();
       addTearDown(focusNode.dispose);
 
       return MaterialApp(
@@ -104,7 +104,7 @@ void main() {
     testWidgets(
       'All menu items show when they fit.',
       (WidgetTester tester) async {
-        final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+        final controller = TextEditingController(text: 'abc def ghi');
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
@@ -171,7 +171,7 @@ void main() {
         tester.view.physicalSize = const Size(1000, 800);
         addTearDown(tester.view.reset);
 
-        final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+        final controller = TextEditingController(text: 'abc def ghi');
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
@@ -246,7 +246,7 @@ void main() {
         tester.view.physicalSize = const Size(800, 800);
         addTearDown(tester.view.reset);
 
-        final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+        final controller = TextEditingController(text: 'abc def ghi');
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
@@ -312,7 +312,7 @@ void main() {
         tester.view.physicalSize = const Size(1000, 800);
         addTearDown(tester.view.reset);
 
-        final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+        final controller = TextEditingController(text: 'abc def ghi');
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
@@ -387,7 +387,7 @@ void main() {
         tester.view.physicalSize = const Size(1000, 800);
         addTearDown(tester.view.reset);
 
-        final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+        final controller = TextEditingController(text: 'abc def ghi');
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
@@ -497,9 +497,7 @@ void main() {
     testWidgets(
       'When renders below a block of text, menu appears below bottom endpoint',
       (WidgetTester tester) async {
-        final TextEditingController controller = TextEditingController(
-          text: 'abc\ndef\nghi\njkl\nmno\npqr',
-        );
+        final controller = TextEditingController(text: 'abc\ndef\nghi\njkl\nmno\npqr');
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
@@ -572,9 +570,7 @@ void main() {
     testWidgets(
       'When selecting multiple lines over max lines',
       (WidgetTester tester) async {
-        final TextEditingController controller = TextEditingController(
-          text: 'abc\ndef\nghi\njkl\nmno\npqr',
-        );
+        final controller = TextEditingController(text: 'abc\ndef\nghi\njkl\nmno\npqr');
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
@@ -726,9 +722,7 @@ void main() {
   testWidgets(
     'Paste only appears when clipboard has contents',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
+      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         MaterialApp(
@@ -742,7 +736,7 @@ void main() {
       await Clipboard.setData(const ClipboardData(text: ''));
 
       // Double tap to select the first word.
-      const int index = 4;
+      const index = 4;
       await tester.tapAt(textOffsetToPosition(tester, index));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.tapAt(textOffsetToPosition(tester, index));
@@ -775,5 +769,82 @@ void main() {
     },
     skip: isBrowser, // [intended] we don't supply the cut/copy/paste buttons on the web.
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
+  );
+
+  testWidgets(
+    'does not crash when long press is cancelled after unmounting',
+    (WidgetTester tester) async {
+      // Regression test for b/425840577.
+      final scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: CustomScrollView(
+              controller: scrollController,
+              slivers: <Widget>[
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (_, int index) => index == 0 ? const TextField() : const SizedBox(height: 50),
+                    childCount: 200,
+                    addAutomaticKeepAlives: false,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      // Start a long press, don't release it, and don't completely reach kLongPressTimeout so the
+      // gesture is not accepted and is cancelled when the recognizer is disposed.
+      await tester.startGesture(tester.getCenter(find.byType(TextField)));
+      await tester.pump(const Duration(milliseconds: 200));
+      await tester.pumpAndSettle();
+
+      // While attempting to long press, scroll the TextField out of view
+      // to dispose of it and its gesture recognizers.
+      scrollController.jumpTo(8000.0);
+      await tester.pump();
+      expect(state.mounted, isFalse);
+      // Should reach the end of the test without any failures.
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/37032.
+  testWidgets(
+    "selection handle's GestureDetector should not cover the entire screen",
+    (WidgetTester tester) async {
+      final controller = TextEditingController(text: 'a');
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(body: TextField(autofocus: true, controller: controller)),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      final Finder gestureDetector = find.descendant(
+        of: find.byType(CompositedTransformFollower),
+        matching: find.descendant(
+          of: find.byType(FadeTransition),
+          matching: find.byType(RawGestureDetector),
+        ),
+      );
+
+      expect(gestureDetector, findsOneWidget);
+      // The GestureDetector's size should not exceed that of the TextField.
+      final Rect hitRect = tester.getRect(gestureDetector);
+      final Rect textFieldRect = tester.getRect(find.byType(TextField));
+
+      expect(hitRect.size.width, lessThanOrEqualTo(textFieldRect.size.width));
+      expect(hitRect.size.height, lessThanOrEqualTo(textFieldRect.size.height));
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
   );
 }

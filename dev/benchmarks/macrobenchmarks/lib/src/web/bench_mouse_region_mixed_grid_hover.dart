@@ -22,7 +22,7 @@ class _NestedMouseRegion extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget current = child;
-    for (int i = 0; i < nests; i++) {
+    for (var i = 0; i < nests; i++) {
       current = MouseRegion(onEnter: (_) {}, child: child);
     }
     return current;
@@ -38,7 +38,7 @@ class _NestedListener extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget current = child;
-    for (int i = 0; i < nests; i++) {
+    for (var i = 0; i < nests; i++) {
       current = Listener(onPointerDown: (_) {}, child: child);
     }
     return current;
@@ -63,7 +63,7 @@ class BenchMouseRegionMixedGridHover extends WidgetRecorder {
 
   // Use a non-trivial border to force Web to switch painter
   Border _getBorder(int columnIndex, int rowIndex) {
-    const BorderSide defaultBorderSide = BorderSide();
+    const defaultBorderSide = BorderSide();
 
     return Border(
       left: columnIndex == 0 ? defaultBorderSide : BorderSide.none,
@@ -89,16 +89,15 @@ class BenchMouseRegionMixedGridHover extends WidgetRecorder {
 
   @override
   Widget createWidget() {
-    const int rowsCount = 60;
-    const int columnsCount = 20;
+    const rowsCount = 60;
+    const columnsCount = 20;
     const double containerSize = 20;
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Align(
         alignment: Alignment.topLeft,
-        child: SizedBox(
-          width: 400,
-          height: 400,
+        child: SizedBox.square(
+          dimension: 400,
           child: ListView.builder(
             itemCount: rowsCount,
             cacheExtent: rowsCount * containerSize,
@@ -175,7 +174,7 @@ class _Tester {
 
   Future<void> _hoverTo(Offset location, Duration duration) async {
     currentTime += duration;
-    final Stopwatch stopwatch = Stopwatch()..start();
+    final stopwatch = Stopwatch()..start();
     await gesture.moveTo(location, timeStamp: currentTime);
     stopwatch.stop();
     onDataPoint(stopwatch.elapsed);

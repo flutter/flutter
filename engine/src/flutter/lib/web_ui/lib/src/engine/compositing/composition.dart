@@ -35,7 +35,7 @@ class Composition {
     if (other.entities.length != entities.length) {
       return false;
     }
-    for (int i = 0; i < entities.length; i++) {
+    for (var i = 0; i < entities.length; i++) {
       if (!entities[i].equalsForCompositing(other.entities[i])) {
         return false;
       }
@@ -123,7 +123,7 @@ class CompositionPlatformView extends CompositionEntity {
 ui.Rect computePlatformViewBounds(EmbeddedViewParams params) {
   ui.Rect currentClipBounds = ui.Rect.largest;
 
-  Matrix4 currentTransform = Matrix4.identity();
+  var currentTransform = Matrix4.identity();
   for (final Mutator mutator in params.mutators.reversed) {
     switch (mutator.type) {
       case MutatorType.clipRect:
@@ -154,7 +154,7 @@ ui.Rect computePlatformViewBounds(EmbeddedViewParams params) {
 
   // The width and height are in physical pixels already, so apply the inverse
   // scale since the transform already applied the scaling.
-  final ui.Rect rawBounds = ui.Rect.fromLTWH(
+  final rawBounds = ui.Rect.fromLTWH(
     params.offset.dx,
     params.offset.dy,
     params.size.width,
@@ -172,17 +172,17 @@ Composition createOptimizedComposition(
   Iterable<SceneElement> sceneElements,
   Map<int, EmbeddedViewParams> paramsForViews,
 ) {
-  final Map<int, ui.Rect> cachedComputedRects = <int, ui.Rect>{};
+  final cachedComputedRects = <int, ui.Rect>{};
 
-  final Composition result = Composition();
+  final result = Composition();
 
   // The first picture is added to the composition in a new canvas.
-  CompositionCanvas tentativeCanvas = CompositionCanvas();
+  var tentativeCanvas = CompositionCanvas();
 
-  for (final SceneElement sceneElement in sceneElements) {
+  for (final sceneElement in sceneElements) {
     if (sceneElement is PlatformViewSceneElement) {
       final int viewId = sceneElement.viewId;
-      final CompositionPlatformView platformView = CompositionPlatformView(viewId);
+      final platformView = CompositionPlatformView(viewId);
       if (PlatformViewManager.instance.isVisible(viewId)) {
         final ui.Rect platformViewBounds = cachedComputedRects[viewId] = computePlatformViewBounds(
           paramsForViews[viewId]!,
@@ -219,7 +219,7 @@ Composition createOptimizedComposition(
       }
 
       CompositionCanvas? lastCanvasSeen;
-      bool addedPictureToComposition = false;
+      var addedPictureToComposition = false;
       for (final CompositionEntity entity in result.entities.reversed) {
         if (entity is CompositionPlatformView) {
           if (PlatformViewManager.instance.isVisible(entity.viewId)) {

@@ -188,7 +188,7 @@ extension type const JsonObject(Map<String, Object?> _object) {
       _error(InvalidTypeJsonReadException(this, key, expected: List<T>, actual: value.runtimeType));
       return <T>[];
     } else {
-      final List<T> result = <T>[];
+      final result = <T>[];
       for (final Object? element in value) {
         if (element is! T) {
           _error(InvalidTypeJsonReadException(this, key, expected: T, actual: element.runtimeType));
@@ -292,7 +292,7 @@ extension type const JsonObject(Map<String, Object?> _object) {
     final List<JsonReadException>? previousErrors = _mapErrors;
 
     // Start collecting errors for this map operation.
-    final List<JsonReadException> currentErrors = <JsonReadException>[];
+    final currentErrors = <JsonReadException>[];
     _mapErrors = currentErrors;
 
     try {

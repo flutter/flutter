@@ -9,12 +9,12 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Future<ui.Image> createTestImage(int width, int height, ui.Color color) async {
-  final ui.Paint paint = ui.Paint()
+  final paint = ui.Paint()
     ..style = ui.PaintingStyle.stroke
     ..strokeWidth = 1.0
     ..color = color;
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final ui.Canvas pictureCanvas = ui.Canvas(recorder);
+  final recorder = ui.PictureRecorder();
+  final pictureCanvas = ui.Canvas(recorder);
   pictureCanvas.drawCircle(Offset.zero, 20.0, paint);
   final ui.Picture picture = recorder.endRecording();
   final ui.Image image = await picture.toImage(width, height);
@@ -23,9 +23,9 @@ Future<ui.Image> createTestImage(int width, int height, ui.Color color) async {
 }
 
 void main() {
-  const ui.Color red = ui.Color.fromARGB(255, 255, 0, 0);
-  const ui.Color green = ui.Color.fromARGB(255, 0, 255, 0);
-  const ui.Color transparentRed = ui.Color.fromARGB(128, 255, 0, 0);
+  const red = ui.Color.fromARGB(255, 255, 0, 0);
+  const green = ui.Color.fromARGB(255, 0, 255, 0);
+  const transparentRed = ui.Color.fromARGB(128, 255, 0, 0);
 
   group('succeeds', () {
     testWidgets('when images have the same content', (WidgetTester tester) async {
@@ -63,7 +63,7 @@ void main() {
         ..physicalSize = const Size(10, 10)
         ..devicePixelRatio = 1;
 
-      const ValueKey<String> repaintBoundaryKey = ValueKey<String>('boundary');
+      const repaintBoundaryKey = ValueKey<String>('boundary');
 
       await tester.pumpWidget(
         const RepaintBoundary(
@@ -120,7 +120,7 @@ void main() {
         ..physicalSize = const Size(10, 10)
         ..devicePixelRatio = 1;
 
-      const ValueKey<String> repaintBoundaryKey = ValueKey<String>('boundary');
+      const repaintBoundaryKey = ValueKey<String>('boundary');
 
       await tester.pumpWidget(
         const RepaintBoundary(

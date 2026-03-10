@@ -5,7 +5,8 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/ink/ink.image_clip.1.dart' as example;
+import 'package:flutter_api_samples/material/ink/ink.image_clip.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -80,7 +81,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: example.ImageClipExample(image: MemoryImage(Uint8List.fromList(kTransparentImage))),
+          body: example.ImageClipExample(
+            image: MemoryImage(Uint8List.fromList(kTransparentImage)),
+          ),
         ),
       ),
     );
@@ -89,6 +92,9 @@ void main() {
       of: find.byType(Ink),
       matching: find.byType(Material),
     );
-    expect(find.ancestor(of: inkMaterialFinder, matching: find.byType(ClipRRect)), findsOneWidget);
+    expect(
+      find.ancestor(of: inkMaterialFinder, matching: find.byType(ClipRRect)),
+      findsOneWidget,
+    );
   });
 }

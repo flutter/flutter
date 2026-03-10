@@ -27,6 +27,11 @@
 *.props.tmpl      text eol=crlf
 *.vcxproj.tmpl    text eol=crlf
 
+# Make sure that these Linux files always have LF line endings in checkout
+bin/flutter       text eol=lf
+bin/flutter-dev   text eol=lf
+bin/dart          text eol=lf
+
 # Never perform LF normalization on these files
 *.ico    binary
 *.jar    binary

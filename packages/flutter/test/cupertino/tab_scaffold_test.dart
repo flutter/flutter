@@ -7,9 +7,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../image_data.dart';
 import '../rendering/rendering_tester.dart' show TestCallbackPainter;
 import '../widgets/navigator_utils.dart';
+import '../widgets/widget_inspector_test_utils.dart';
 
 late List<int> selectedTabs;
 
@@ -38,24 +38,21 @@ class MockCupertinoTabController extends CupertinoTabController {
   }
 }
 
+BottomNavigationBarItem tabGenerator(int index) {
+  return BottomNavigationBarItem(icon: const Icon(CupertinoIcons.map), label: 'Tab ${index + 1}');
+}
+
 void main() {
+  // Must be called before any testWidgets so the service is set before
+  // binding initialization triggers initServiceExtensions.
+  _TabScaffoldWidgetInspectorService.runTests();
+
   setUp(() {
     selectedTabs = <int>[];
   });
 
-  tearDown(() {
-    imageCache.clear();
-  });
-
-  BottomNavigationBarItem tabGenerator(int index) {
-    return BottomNavigationBarItem(
-      icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-      label: 'Tab ${index + 1}',
-    );
-  }
-
   testWidgets('Tab switching', (WidgetTester tester) async {
-    final List<int> tabsPainted = <int>[];
+    final tabsPainted = <int>[];
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -103,7 +100,7 @@ void main() {
   });
 
   testWidgets('Tabs are lazy built and moved offstage when inactive', (WidgetTester tester) async {
-    final List<int> tabsBuilt = <int>[];
+    final tabsBuilt = <int>[];
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -139,11 +136,11 @@ void main() {
 
   testWidgets('Last tab gets focus', (WidgetTester tester) async {
     // 2 nodes for 2 tabs
-    final List<FocusNode> focusNodes = <FocusNode>[
+    final focusNodes = <FocusNode>[
       FocusNode(debugLabel: 'Node 1'),
       FocusNode(debugLabel: 'Node 2'),
     ];
-    for (final FocusNode focusNode in focusNodes) {
+    for (final focusNode in focusNodes) {
       addTearDown(focusNode.dispose);
     }
 
@@ -174,13 +171,13 @@ void main() {
   });
 
   testWidgets('Do not affect focus order in the route', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = <FocusNode>[
+    final focusNodes = <FocusNode>[
       FocusNode(debugLabel: 'Node 1'),
       FocusNode(debugLabel: 'Node 2'),
       FocusNode(debugLabel: 'Node 3'),
       FocusNode(debugLabel: 'Node 4'),
     ];
-    for (final FocusNode focusNode in focusNodes) {
+    for (final focusNode in focusNodes) {
       addTearDown(focusNode.dispose);
     }
 
@@ -227,9 +224,9 @@ void main() {
   testWidgets('Programmatic tab switching by changing the index of an existing controller', (
     WidgetTester tester,
   ) async {
-    final CupertinoTabController controller = CupertinoTabController(initialIndex: 1);
+    final controller = CupertinoTabController(initialIndex: 1);
     addTearDown(controller.dispose);
-    final List<int> tabsPainted = <int>[];
+    final tabsPainted = <int>[];
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -270,7 +267,7 @@ void main() {
   testWidgets('Programmatic tab switching by passing in a new controller', (
     WidgetTester tester,
   ) async {
-    final List<int> tabsPainted = <int>[];
+    final tabsPainted = <int>[];
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -292,7 +289,7 @@ void main() {
 
     expect(tabsPainted, const <int>[0]);
 
-    final CupertinoTabController controller = CupertinoTabController(initialIndex: 1);
+    final controller = CupertinoTabController(initialIndex: 1);
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       CupertinoApp(
@@ -337,7 +334,7 @@ void main() {
       ),
     );
 
-    BoxDecoration tabDecoration =
+    var tabDecoration =
         tester
                 .widget<DecoratedBox>(
                   find.descendant(
@@ -557,7 +554,7 @@ void main() {
   testWidgets('Deleting tabs after selecting them should switch to the last available tab', (
     WidgetTester tester,
   ) async {
-    final List<int> tabsBuilt = <int>[];
+    final tabsBuilt = <int>[];
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -627,8 +624,8 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/33455
   testWidgets('Adding new tabs does not crash the app', (WidgetTester tester) async {
-    final List<int> tabsPainted = <int>[];
-    final CupertinoTabController controller = CupertinoTabController();
+    final tabsPainted = <int>[];
+    final controller = CupertinoTabController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -684,8 +681,8 @@ void main() {
   testWidgets('If a controller is initially provided then the parent stops doing so for rebuilds, '
       'a new instance of CupertinoTabController should be created and used by the widget, '
       "while preserving the previous controller's tab index", (WidgetTester tester) async {
-    final List<int> tabsPainted = <int>[];
-    final CupertinoTabController oldController = CupertinoTabController();
+    final tabsPainted = <int>[];
+    final oldController = CupertinoTabController();
     addTearDown(oldController.dispose);
 
     await tester.pumpWidget(
@@ -744,7 +741,7 @@ void main() {
 
   testWidgets('Do not call dispose on a controller that we do not own '
       'but do remove from its listeners when done listening to it', (WidgetTester tester) async {
-    final MockCupertinoTabController mockController = MockCupertinoTabController(initialIndex: 0);
+    final mockController = MockCupertinoTabController(initialIndex: 0);
     addTearDown(mockController.dispose);
 
     await tester.pumpWidget(
@@ -774,7 +771,7 @@ void main() {
   });
 
   testWidgets('The owner can dispose the old controller', (WidgetTester tester) async {
-    CupertinoTabController controller = CupertinoTabController(initialIndex: 2);
+    var controller = CupertinoTabController(initialIndex: 2);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -810,9 +807,9 @@ void main() {
 
   testWidgets('A controller can control more than one CupertinoTabScaffold, '
       'removal of listeners does not break the controller', (WidgetTester tester) async {
-    final List<int> tabsPainted0 = <int>[];
-    final List<int> tabsPainted1 = <int>[];
-    MockCupertinoTabController controller = MockCupertinoTabController(initialIndex: 2);
+    final tabsPainted0 = <int>[];
+    final tabsPainted1 = <int>[];
+    var controller = MockCupertinoTabController(initialIndex: 2);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -914,7 +911,7 @@ void main() {
   });
 
   testWidgets('Assert when current tab index >= number of tabs', (WidgetTester tester) async {
-    final CupertinoTabController controller = CupertinoTabController(initialIndex: 2);
+    final controller = CupertinoTabController(initialIndex: 2);
     addTearDown(controller.dispose);
 
     try {
@@ -946,7 +943,7 @@ void main() {
     controller.index = 10;
     await tester.pump();
 
-    final String message = tester.takeException().toString();
+    final message = tester.takeException().toString();
     expect(message, contains('current index ${controller.index}'));
     expect(message, contains('with 3 tabs'));
   });
@@ -954,12 +951,12 @@ void main() {
   testWidgets("Don't replace focus nodes for existing tabs when changing tab count", (
     WidgetTester tester,
   ) async {
-    final CupertinoTabController controller = CupertinoTabController(initialIndex: 2);
+    final controller = CupertinoTabController(initialIndex: 2);
     addTearDown(controller.dispose);
 
-    final List<FocusScopeNode> scopes = <FocusScopeNode>[];
-    for (int i = 0; i < 5; i++) {
-      final FocusScopeNode scope = FocusScopeNode();
+    final scopes = <FocusScopeNode>[];
+    for (var i = 0; i < 5; i++) {
+      final scope = FocusScopeNode();
       addTearDown(scope.dispose);
       scopes.add(scope);
     }
@@ -976,13 +973,13 @@ void main() {
       ),
     );
 
-    for (int i = 0; i < 3; i++) {
+    for (var i = 0; i < 3; i++) {
       controller.index = i;
       await tester.pump();
     }
     await tester.pump();
 
-    final List<FocusScopeNode> newScopes = <FocusScopeNode>[];
+    final newScopes = <FocusScopeNode>[];
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
@@ -995,7 +992,7 @@ void main() {
         ),
       ),
     );
-    for (int i = 0; i < 5; i++) {
+    for (var i = 0; i < 5; i++) {
       controller.index = i;
       await tester.pump();
     }
@@ -1015,7 +1012,7 @@ void main() {
 
     expectAssertionError(() => CupertinoTabController(initialIndex: -1), '>= 0');
 
-    final CupertinoTabController controller = CupertinoTabController();
+    final controller = CupertinoTabController();
     addTearDown(controller.dispose);
 
     expectAssertionError(() => controller.index = -1, '>= 0');
@@ -1073,13 +1070,7 @@ void main() {
               maxScaleFactor: 99,
               child: CupertinoTabScaffold(
                 tabBar: CupertinoTabBar(
-                  items: List<BottomNavigationBarItem>.generate(
-                    10,
-                    (int i) => BottomNavigationBarItem(
-                      icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-                      label: '$i',
-                    ),
-                  ),
+                  items: List<BottomNavigationBarItem>.generate(10, tabGenerator),
                 ),
                 tabBuilder: (BuildContext context, int index) => const Text('content'),
               ),
@@ -1120,13 +1111,7 @@ void main() {
         restorationScopeId: 'app',
         home: CupertinoTabScaffold(
           restorationId: 'scaffold',
-          tabBar: CupertinoTabBar(
-            items: List<BottomNavigationBarItem>.generate(
-              4,
-              (int i) =>
-                  BottomNavigationBarItem(icon: const Icon(CupertinoIcons.map), label: 'Tab $i'),
-            ),
-          ),
+          tabBar: CupertinoTabBar(items: List<BottomNavigationBarItem>.generate(4, tabGenerator)),
           tabBuilder: (BuildContext context, int i) => Text('Content $i'),
         ),
       ),
@@ -1137,7 +1122,7 @@ void main() {
     expect(find.text('Content 2'), findsNothing);
     expect(find.text('Content 3'), findsNothing);
 
-    await tester.tap(find.text('Tab 2'));
+    await tester.tap(find.text('Tab 3'));
     await tester.pumpAndSettle();
 
     expect(find.text('Content 0'), findsNothing);
@@ -1154,7 +1139,7 @@ void main() {
 
     final TestRestorationData data = await tester.getRestorationData();
 
-    await tester.tap(find.text('Tab 1'));
+    await tester.tap(find.text('Tab 2'));
     await tester.pumpAndSettle();
 
     expect(find.text('Content 0'), findsNothing);
@@ -1179,13 +1164,7 @@ void main() {
         home: CupertinoTabScaffold(
           controller: controller,
           restorationId: 'scaffold',
-          tabBar: CupertinoTabBar(
-            items: List<BottomNavigationBarItem>.generate(
-              4,
-              (int i) =>
-                  BottomNavigationBarItem(icon: const Icon(CupertinoIcons.map), label: 'Tab $i'),
-            ),
-          ),
+          tabBar: CupertinoTabBar(items: List<BottomNavigationBarItem>.generate(4, tabGenerator)),
           tabBuilder: (BuildContext context, int i) => Text('Content $i'),
         ),
       );
@@ -1198,7 +1177,7 @@ void main() {
     expect(find.text('Content 2'), findsNothing);
     expect(find.text('Content 3'), findsNothing);
 
-    await tester.tap(find.text('Tab 2'));
+    await tester.tap(find.text('Tab 3'));
     await tester.pumpAndSettle();
 
     expect(find.text('Content 0'), findsNothing);
@@ -1206,7 +1185,7 @@ void main() {
     expect(find.text('Content 2'), findsOneWidget);
     expect(find.text('Content 3'), findsNothing);
 
-    final CupertinoTabController controller = CupertinoTabController(initialIndex: 3);
+    final controller = CupertinoTabController(initialIndex: 3);
     addTearDown(controller.dispose);
     await tester.pumpWidget(buildWidget(controller: controller));
 
@@ -1347,27 +1326,144 @@ void main() {
         expect(find.text('Page 1 of tab 2'), findsOneWidget);
         expect(find.text('Page 2 of tab 2'), findsNothing);
         expect(lastFrameworkHandlesBack, isFalse);
-
-        imageCache.clear();
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
       skip: kIsWeb, // [intended] frameworkHandlesBack not used on web.
     );
   });
+
+  testWidgets('CupertinoTabScaffold does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: CupertinoTabScaffold(
+              tabBar: _buildTabBar(),
+              tabBuilder: (BuildContext context, int index) => Text('$index'),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoTabScaffold)), Size.zero);
+  });
+
+  testWidgets('dark mode background color', (WidgetTester tester) async {
+    const backgroundColor = CupertinoDynamicColor.withBrightness(
+      color: Color(0xFF123456),
+      darkColor: Color(0xFF654321),
+    );
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.light),
+        home: CupertinoTabScaffold(
+          backgroundColor: backgroundColor,
+          tabBar: _buildTabBar(),
+          tabBuilder: (BuildContext context, int index) {
+            return const Placeholder();
+          },
+        ),
+      ),
+    );
+
+    // The DecoratedBox with the smallest depth is the DecoratedBox of the
+    // CupertinoTabScaffold.
+    var tabDecoration =
+        tester
+                .firstWidget<DecoratedBox>(
+                  find.descendant(
+                    of: find.byType(CupertinoTabScaffold),
+                    matching: find.byType(DecoratedBox),
+                  ),
+                )
+                .decoration
+            as BoxDecoration;
+
+    expect(tabDecoration.color!.value, backgroundColor.color.value);
+
+    // Dark mode
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        home: CupertinoTabScaffold(
+          backgroundColor: backgroundColor,
+          tabBar: _buildTabBar(),
+          tabBuilder: (BuildContext context, int index) {
+            return const Placeholder();
+          },
+        ),
+      ),
+    );
+
+    tabDecoration =
+        tester
+                .firstWidget<DecoratedBox>(
+                  find.descendant(
+                    of: find.byType(CupertinoTabScaffold),
+                    matching: find.byType(DecoratedBox),
+                  ),
+                )
+                .decoration
+            as BoxDecoration;
+
+    expect(tabDecoration.color!.value, backgroundColor.darkColor.value);
+  });
+}
+
+class _TabScaffoldWidgetInspectorService extends TestWidgetInspectorService {
+  // These tests need access to protected members of WidgetInspectorService.
+  static void runTests() {
+    final service = _TabScaffoldWidgetInspectorService();
+    final WidgetInspectorService previousInstance = WidgetInspectorService.instance;
+    WidgetInspectorService.instance = service;
+
+    tearDown(() {
+      service.resetAllState();
+      WidgetInspectorService.instance = previousInstance;
+    });
+
+    testWidgets('ext.flutter.inspector.getLayoutExplorerNode does not throw StackOverflowError', (
+      WidgetTester tester,
+    ) async {
+      // Regression test for https://github.com/flutter/flutter/issues/115228
+      const group = 'test-group';
+      const Key leafKey = ValueKey<String>('ColoredBox');
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTabScaffold(
+            tabBar: CupertinoTabBar(
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(icon: Icon(CupertinoIcons.home), label: 'Tab 1'),
+                BottomNavigationBarItem(icon: Icon(CupertinoIcons.search), label: 'Tab 2'),
+              ],
+            ),
+            tabBuilder: (BuildContext context, int index) {
+              return Builder(
+                builder: (BuildContext context) {
+                  return ColoredBox(key: leafKey, color: CupertinoTheme.of(context).primaryColor);
+                },
+              );
+            },
+          ),
+        ),
+      );
+
+      final Element leaf = tester.element(find.byKey(leafKey));
+      service.setSelection(leaf, group);
+      final DiagnosticsNode diagnostic = leaf.toDiagnosticsNode();
+      final String id = service.toId(diagnostic, group)!;
+
+      await service.testExtension(
+        WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+        <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
+      );
+    });
+  }
 }
 
 CupertinoTabBar _buildTabBar({int selectedTab = 0}) {
   return CupertinoTabBar(
-    items: <BottomNavigationBarItem>[
-      BottomNavigationBarItem(
-        icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-        label: 'Tab 1',
-      ),
-      BottomNavigationBarItem(
-        icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-        label: 'Tab 2',
-      ),
-    ],
+    items: <BottomNavigationBarItem>[tabGenerator(0), tabGenerator(1)],
     currentIndex: selectedTab,
     onTap: (int newTab) => selectedTabs.add(newTab),
   );

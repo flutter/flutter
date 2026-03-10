@@ -21,7 +21,7 @@ void main() {
 void doTests() {
   group('DomManager', () {
     test('DOM tree looks right', () {
-      final DomManager domManager = DomManager(devicePixelRatio: 3.0);
+      final domManager = DomManager(devicePixelRatio: 3.0);
 
       // Check tag names.
 
@@ -53,7 +53,7 @@ void doTests() {
     test(
       'hide placeholder text for textfield',
       () {
-        final DomManager domManager = DomManager(devicePixelRatio: 3.0);
+        final domManager = DomManager(devicePixelRatio: 3.0);
         domDocument.body!.append(domManager.rootElement);
 
         final DomHTMLInputElement regularTextField = createDomHTMLInputElement();
@@ -102,7 +102,7 @@ void doTests() {
     });
 
     test('Initializes and attaches a shadow root', () {
-      final DomManager domManager = DomManager(devicePixelRatio: 3.0);
+      final domManager = DomManager(devicePixelRatio: 3.0);
 
       expect(domManager.renderingHost.isA<DomShadowRoot>(), isTrue);
       expect(domManager.renderingHost.host, domManager.platformViewsHost);
@@ -119,7 +119,7 @@ void doTests() {
     });
 
     test('Attaches a stylesheet to the shadow root', () {
-      final DomManager domManager = DomManager(devicePixelRatio: 3.0);
+      final domManager = DomManager(devicePixelRatio: 3.0);
       final DomElement? style = domManager.renderingHost.querySelector('#flt-internals-stylesheet');
 
       expect(style, isNotNull);
@@ -128,7 +128,7 @@ void doTests() {
     });
 
     test('setScene', () {
-      final DomManager domManager = DomManager(devicePixelRatio: 3.0);
+      final domManager = DomManager(devicePixelRatio: 3.0);
 
       final DomElement sceneHost = domManager.renderingHost.querySelector('flt-scene-host')!;
 

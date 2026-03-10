@@ -106,41 +106,31 @@ class _MyWidgetState extends State<MyWidget> {
     return DefaultTextStyle(
       style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
       child: RadioTheme(
-        data: RadioThemeData(fillColor: WidgetStateProperty.all<Color>(Colors.white)),
+        data: RadioThemeData(
+          fillColor: WidgetStateProperty.all<Color>(Colors.white),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              Radio<AxisDirection>(
-                value: AxisDirection.up,
-                groupValue: _axisDirection,
-                onChanged: _onAxisDirectionChanged,
-              ),
-              const Text('up'),
-              spacer,
-              Radio<AxisDirection>(
-                value: AxisDirection.down,
-                groupValue: _axisDirection,
-                onChanged: _onAxisDirectionChanged,
-              ),
-              const Text('down'),
-              spacer,
-              Radio<AxisDirection>(
-                value: AxisDirection.left,
-                groupValue: _axisDirection,
-                onChanged: _onAxisDirectionChanged,
-              ),
-              const Text('left'),
-              spacer,
-              Radio<AxisDirection>(
-                value: AxisDirection.right,
-                groupValue: _axisDirection,
-                onChanged: _onAxisDirectionChanged,
-              ),
-              const Text('right'),
-              spacer,
-            ],
+          child: RadioGroup<AxisDirection>(
+            groupValue: _axisDirection,
+            onChanged: _onAxisDirectionChanged,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Radio<AxisDirection>(value: AxisDirection.up),
+                const Text('up'),
+                spacer,
+                Radio<AxisDirection>(value: AxisDirection.down),
+                const Text('down'),
+                spacer,
+                Radio<AxisDirection>(value: AxisDirection.left),
+                const Text('left'),
+                spacer,
+                Radio<AxisDirection>(value: AxisDirection.right),
+                const Text('right'),
+                spacer,
+              ],
+            ),
           ),
         ),
       ),
@@ -163,7 +153,10 @@ class _MyWidgetState extends State<MyWidget> {
         title: const Text('ScrollDirections'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(50),
-          child: Padding(padding: const EdgeInsets.all(8.0), child: _getRadioRow()),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: _getRadioRow(),
+          ),
         ),
       ),
       body: NotificationListener<UserScrollNotification>(
@@ -186,12 +179,17 @@ class _MyWidgetState extends State<MyWidget> {
                   child = _getLeading();
                 } else {
                   child = Container(
-                    color: index.isEven ? Colors.amber[100] : Colors.amberAccent,
+                    color: index.isEven
+                        ? Colors.amber[100]
+                        : Colors.amberAccent,
                     padding: const EdgeInsets.all(8.0),
                     child: Center(child: Text(alphabet[index - 1])),
                   );
                 }
-                return Padding(padding: const EdgeInsets.all(8.0), child: child);
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: child,
+                );
               },
             ),
           ],

@@ -58,9 +58,9 @@ class ProcessRunner {
     if (subprocessOutput) {
       stderr.write('Running "${commandLine.join(' ')}" in ${workingDirectory.path}.\n');
     }
-    final List<int> output = <int>[];
-    final Completer<void> stdoutComplete = Completer<void>();
-    final Completer<void> stderrComplete = Completer<void>();
+    final output = <int>[];
+    final stdoutComplete = Completer<void>();
+    final stderrComplete = Completer<void>();
     late Process process;
     Future<int> allComplete() async {
       await stderrComplete.future;
@@ -88,12 +88,12 @@ class ProcessRunner {
         stderrComplete.complete();
       }
     } on ProcessException catch (e) {
-      final String message =
+      final message =
           'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
           'failed with:\n$e';
       throw PreparePackageException(message);
     } on ArgumentError catch (e) {
-      final String message =
+      final message =
           'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
           'failed with:\n$e';
       throw PreparePackageException(message);
@@ -101,8 +101,7 @@ class ProcessRunner {
 
     final int exitCode = await allComplete();
     if (exitCode != 0 && !failOk) {
-      final String message =
-          'Running "${commandLine.join(' ')}" in ${workingDirectory.path} failed';
+      final message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} failed';
       throw PreparePackageException(
         message,
         ProcessResult(0, exitCode, null, 'returned $exitCode'),

@@ -20,7 +20,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/isolated/release_asset_server.dart';
 import 'package:flutter_tools/src/isolated/web_asset_server.dart';
-import 'package:flutter_tools/src/isolated/web_server_utlities.dart';
+import 'package:flutter_tools/src/isolated/web_server_utilities.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:flutter_tools/src/web_template.dart';
@@ -81,6 +81,7 @@ void main() {
           webRenderer: WebRendererMode.canvaskit,
           useLocalCanvasKit: false,
           fileSystem: globals.fs,
+          logger: logger,
         );
         releaseAssetServer = ReleaseAssetServer(
           globals.fs.file('main.dart').uri,
@@ -329,6 +330,7 @@ void main() {
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
       fileSystem: globals.fs,
+      logger: logger,
     );
 
     expect(webAssetServer.basePath, 'foo/bar');
@@ -350,6 +352,7 @@ void main() {
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
       fileSystem: globals.fs,
+      logger: logger,
     );
 
     // Defaults to "/" when there's no base element.
@@ -373,6 +376,7 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
+        logger: logger,
       ),
       throwsToolExit(),
     );
@@ -395,6 +399,7 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
+        logger: logger,
       ),
       throwsToolExit(),
     );
@@ -814,6 +819,7 @@ void main() {
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+        webCrossOriginIsolation: false,
       );
       webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
       webDevFS.flutterJs.createSync(recursive: true);
@@ -920,6 +926,7 @@ void main() {
           fileSystem: globals.fs,
           logger: globals.logger,
           platform: globals.platform,
+          webCrossOriginIsolation: false,
         );
         webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
         webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -993,6 +1000,7 @@ void main() {
       fileSystem: globals.fs,
       logger: globals.logger,
       platform: globals.platform,
+      webCrossOriginIsolation: false,
     );
     webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1041,6 +1049,7 @@ void main() {
       fileSystem: globals.fs,
       logger: globals.logger,
       platform: globals.platform,
+      webCrossOriginIsolation: false,
     );
     webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1092,6 +1101,7 @@ void main() {
       fileSystem: globals.fs,
       logger: globals.logger,
       platform: globals.platform,
+      webCrossOriginIsolation: false,
     );
     webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1132,6 +1142,7 @@ void main() {
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+        crossOriginIsolation: false,
       );
 
       expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
@@ -1171,6 +1182,7 @@ void main() {
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+        crossOriginIsolation: false,
       );
 
       expect(webAssetServer.defaultResponseHeaders[extraHeaderKey], <String>[extraHeaderValue]);
@@ -1209,6 +1221,7 @@ void main() {
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
       fileSystem: globals.fs,
+      logger: logger,
     );
 
     expect(await webAssetServer.metadataContents('foo/main_module.ddc_merged_metadata'), null);
@@ -1258,6 +1271,7 @@ void main() {
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+        webCrossOriginIsolation: false,
       );
       webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
       webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1276,7 +1290,7 @@ void main() {
 }
 
 class FakeHttpServer extends Fake implements HttpServer {
-  var closed = false;
+  bool closed = false;
 
   @override
   Future<void> close({bool force = false}) async {

@@ -19,11 +19,12 @@ class PopupMenuApp extends StatelessWidget {
 
 enum AnimationStyles { defaultStyle, custom, none }
 
-const List<(AnimationStyles, String)> animationStyleSegments = <(AnimationStyles, String)>[
-  (AnimationStyles.defaultStyle, 'Default'),
-  (AnimationStyles.custom, 'Custom'),
-  (AnimationStyles.none, 'None'),
-];
+const List<(AnimationStyles, String)> animationStyleSegments =
+    <(AnimationStyles, String)>[
+      (AnimationStyles.defaultStyle, 'Default'),
+      (AnimationStyles.custom, 'Custom'),
+      (AnimationStyles.none, 'None'),
+    ];
 
 enum Menu { preview, share, getLink, remove, download }
 
@@ -35,7 +36,9 @@ class PopupMenuExample extends StatefulWidget {
 }
 
 class _PopupMenuExampleState extends State<PopupMenuExample> {
-  Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{AnimationStyles.defaultStyle};
+  Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{
+    AnimationStyles.defaultStyle,
+  };
   AnimationStyle? _animationStyle;
 
   @override
@@ -68,11 +71,16 @@ class _PopupMenuExampleState extends State<PopupMenuExample> {
                       }
                     });
                   },
-                  segments: animationStyleSegments.map<ButtonSegment<AnimationStyles>>((
-                    (AnimationStyles, String) shirt,
-                  ) {
-                    return ButtonSegment<AnimationStyles>(value: shirt.$1, label: Text(shirt.$2));
-                  }).toList(),
+                  segments: animationStyleSegments
+                      .map<ButtonSegment<AnimationStyles>>((
+                        (AnimationStyles, String) shirt,
+                      ) {
+                        return ButtonSegment<AnimationStyles>(
+                          value: shirt.$1,
+                          label: Text(shirt.$2),
+                        );
+                      })
+                      .toList(),
                 ),
                 const SizedBox(height: 10),
                 PopupMenuButton<Menu>(
@@ -89,16 +97,25 @@ class _PopupMenuExampleState extends State<PopupMenuExample> {
                     ),
                     const PopupMenuItem<Menu>(
                       value: Menu.share,
-                      child: ListTile(leading: Icon(Icons.share_outlined), title: Text('Share')),
+                      child: ListTile(
+                        leading: Icon(Icons.share_outlined),
+                        title: Text('Share'),
+                      ),
                     ),
                     const PopupMenuItem<Menu>(
                       value: Menu.getLink,
-                      child: ListTile(leading: Icon(Icons.link_outlined), title: Text('Get link')),
+                      child: ListTile(
+                        leading: Icon(Icons.link_outlined),
+                        title: Text('Get link'),
+                      ),
                     ),
                     const PopupMenuDivider(),
                     const PopupMenuItem<Menu>(
                       value: Menu.remove,
-                      child: ListTile(leading: Icon(Icons.delete_outline), title: Text('Remove')),
+                      child: ListTile(
+                        leading: Icon(Icons.delete_outline),
+                        title: Text('Remove'),
+                      ),
                     ),
                     const PopupMenuItem<Menu>(
                       value: Menu.download,

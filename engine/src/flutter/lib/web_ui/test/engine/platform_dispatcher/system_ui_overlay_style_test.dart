@@ -27,8 +27,7 @@ void testMain() {
   }
 
   String? getCssThemeColor() {
-    final DomHTMLMetaElement? theme =
-        domDocument.querySelector('#flutterweb-theme') as DomHTMLMetaElement?;
+    final theme = domDocument.querySelector('#flutterweb-theme') as DomHTMLMetaElement?;
     return theme?.content;
   }
 
@@ -36,7 +35,7 @@ void testMain() {
     test('theme color is set / removed by platform message', () {
       expect(getCssThemeColor(), null);
 
-      const ui.Color statusBarColor = ui.Color(0xFFF44336);
+      const statusBarColor = ui.Color(0xFFF44336);
       sendSetSystemUIOverlayStyle(statusBarColor: statusBarColor);
       expect(getCssThemeColor(), statusBarColor.toCssString());
 

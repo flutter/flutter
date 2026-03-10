@@ -5,7 +5,7 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../impeller_test_helpers.dart';
@@ -92,7 +92,7 @@ void main() {
     'Default text selection color',
     (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
-      final OverlayEntry overlayEntry = OverlayEntry(
+      final overlayEntry = OverlayEntry(
         builder: (BuildContext context) => SelectableRegion(
           selectionControls: emptyTextSelectionControls,
           child: Align(
@@ -182,8 +182,8 @@ Future<void> _expectColors(
   final ByteData bytes = (await binding.runAsync<ByteData?>(
     () => image.toByteData(format: ui.ImageByteFormat.rawStraightRgba),
   ))!;
-  final Set<int> actualColorValues = <int>{};
-  for (int offset = 0; offset < bytes.lengthInBytes; offset += 4) {
+  final actualColorValues = <int>{};
+  for (var offset = 0; offset < bytes.lengthInBytes; offset += 4) {
     actualColorValues.add(
       (bytes.getUint8(offset + 3) << 24) +
           (bytes.getUint8(offset + 0) << 16) +

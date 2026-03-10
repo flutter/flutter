@@ -54,24 +54,32 @@ class MySelectableAdapter extends StatelessWidget {
 }
 
 class _SelectableAdapter extends SingleChildRenderObjectWidget {
-  const _SelectableAdapter({required this.registrar, required Widget child}) : super(child: child);
+  const _SelectableAdapter({required this.registrar, required Widget child})
+    : super(child: child);
 
   final SelectionRegistrar registrar;
 
   @override
   _RenderSelectableAdapter createRenderObject(BuildContext context) {
-    return _RenderSelectableAdapter(DefaultSelectionStyle.of(context).selectionColor!, registrar);
+    return _RenderSelectableAdapter(
+      DefaultSelectionStyle.of(context).selectionColor!,
+      registrar,
+    );
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderSelectableAdapter renderObject) {
+  void updateRenderObject(
+    BuildContext context,
+    _RenderSelectableAdapter renderObject,
+  ) {
     renderObject
       ..selectionColor = DefaultSelectionStyle.of(context).selectionColor!
       ..registrar = registrar;
   }
 }
 
-class _RenderSelectableAdapter extends RenderProxyBox with Selectable, SelectionRegistrant {
+class _RenderSelectableAdapter extends RenderProxyBox
+    with Selectable, SelectionRegistrant {
   _RenderSelectableAdapter(Color selectionColor, SelectionRegistrar registrar)
     : _selectionColor = selectionColor,
       _geometry = ValueNotifier<SelectionGeometry>(_noSelection) {
@@ -101,7 +109,8 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
   void addListener(VoidCallback listener) => _geometry.addListener(listener);
 
   @override
-  void removeListener(VoidCallback listener) => _geometry.removeListener(listener);
+  void removeListener(VoidCallback listener) =>
+      _geometry.removeListener(listener);
 
   @override
   SelectionGeometry get value => _geometry.value;
@@ -156,8 +165,12 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
       _geometry.value = SelectionGeometry(
         status: SelectionStatus.uncollapsed,
         hasContent: true,
-        startSelectionPoint: isReversed ? secondSelectionPoint : firstSelectionPoint,
-        endSelectionPoint: isReversed ? firstSelectionPoint : secondSelectionPoint,
+        startSelectionPoint: isReversed
+            ? secondSelectionPoint
+            : firstSelectionPoint,
+        endSelectionPoint: isReversed
+            ? firstSelectionPoint
+            : secondSelectionPoint,
         selectionRects: <Rect>[selectionRect],
       );
     }
@@ -169,10 +182,20 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
     switch (event.type) {
       case SelectionEventType.startEdgeUpdate:
       case SelectionEventType.endEdgeUpdate:
-        final Rect renderObjectRect = Rect.fromLTWH(0, 0, size.width, size.height);
+        final Rect renderObjectRect = Rect.fromLTWH(
+          0,
+          0,
+          size.width,
+          size.height,
+        );
         // Normalize offset in case it is out side of the rect.
-        final Offset point = globalToLocal((event as SelectionEdgeUpdateEvent).globalPosition);
-        final Offset adjustedPoint = SelectionUtils.adjustDragOffset(renderObjectRect, point);
+        final Offset point = globalToLocal(
+          (event as SelectionEdgeUpdateEvent).globalPosition,
+        );
+        final Offset adjustedPoint = SelectionUtils.adjustDragOffset(
+          renderObjectRect,
+          point,
+        );
         if (event.type == SelectionEventType.startEdgeUpdate) {
           _start = adjustedPoint;
         } else {
@@ -199,15 +222,21 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
           }
         }
         // Move the corresponding selection edge.
-        final Offset newOffset = extendSelectionEvent.forward ? Offset.infinite : Offset.zero;
+        final Offset newOffset = extendSelectionEvent.forward
+            ? Offset.infinite
+            : Offset.zero;
         if (extendSelectionEvent.isEnd) {
           if (newOffset == _end) {
-            result = extendSelectionEvent.forward ? SelectionResult.next : SelectionResult.previous;
+            result = extendSelectionEvent.forward
+                ? SelectionResult.next
+                : SelectionResult.previous;
           }
           _end = newOffset;
         } else {
           if (newOffset == _start) {
-            result = extendSelectionEvent.forward ? SelectionResult.next : SelectionResult.previous;
+            result = extendSelectionEvent.forward
+                ? SelectionResult.next
+                : SelectionResult.previous;
           }
           _start = newOffset;
         }
@@ -228,7 +257,8 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
               _start = _end = Offset.infinite;
             }
             // Move the corresponding selection edge.
-            if (extendSelectionEvent.direction == SelectionExtendDirection.previousLine ||
+            if (extendSelectionEvent.direction ==
+                    SelectionExtendDirection.previousLine ||
                 horizontalBaseLine < 0) {
               newOffset = Offset.zero;
             } else {
@@ -242,7 +272,8 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
               _start = _end = Offset.zero;
             }
             // Move the corresponding selection edge.
-            if (extendSelectionEvent.direction == SelectionExtendDirection.nextLine ||
+            if (extendSelectionEvent.direction ==
+                    SelectionExtendDirection.nextLine ||
                 horizontalBaseLine > size.width) {
               newOffset = Offset.infinite;
             } else {
@@ -269,7 +300,9 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
   // widget into clipboard.
   @override
   SelectedContent? getSelectedContent() {
-    return value.hasSelection ? const SelectedContent(plainText: 'Custom Text') : null;
+    return value.hasSelection
+        ? const SelectedContent(plainText: 'Custom Text')
+        : null;
   }
 
   @override
@@ -306,19 +339,28 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
     final Paint selectionPaint = Paint()
       ..style = PaintingStyle.fill
       ..color = _selectionColor;
-    context.canvas.drawRect(_getSelectionHighlightRect().shift(offset), selectionPaint);
+    context.canvas.drawRect(
+      _getSelectionHighlightRect().shift(offset),
+      selectionPaint,
+    );
 
     // Push the layer links if any.
     if (_startHandle != null) {
       context.pushLayer(
-        LeaderLayer(link: _startHandle!, offset: offset + value.startSelectionPoint!.localPosition),
+        LeaderLayer(
+          link: _startHandle!,
+          offset: offset + value.startSelectionPoint!.localPosition,
+        ),
         (PaintingContext context, Offset offset) {},
         Offset.zero,
       );
     }
     if (_endHandle != null) {
       context.pushLayer(
-        LeaderLayer(link: _endHandle!, offset: offset + value.endSelectionPoint!.localPosition),
+        LeaderLayer(
+          link: _endHandle!,
+          offset: offset + value.endSelectionPoint!.localPosition,
+        ),
         (PaintingContext context, Offset offset) {},
         Offset.zero,
       );

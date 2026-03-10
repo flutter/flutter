@@ -665,6 +665,7 @@ class AppDomain extends Domain {
     String? route,
     DebuggingOptions options,
     bool enableHotReload, {
+    Map<String, String> webDefines = const <String, String>{},
     File? applicationBinary,
     required bool trackWidgetCreation,
     String? projectRootPath,
@@ -712,6 +713,7 @@ class AppDomain extends Domain {
         platform: globals.platform,
         outputPreferences: globals.outputPreferences,
         fileSystem: globals.fs,
+        webDefines: webDefines,
       );
     } else if (enableHotReload) {
       runner = HotRunner(
@@ -1451,7 +1453,7 @@ class NotifyingLogger extends DelegatingLogger {
   final messageBuffer = <LogMessage>[];
   late StreamController<LogMessage> _messageController;
 
-  var notifyVerbose = false;
+  bool notifyVerbose = false;
 
   void _onListen() {
     if (messageBuffer.isNotEmpty) {
@@ -1595,7 +1597,7 @@ class EmulatorDomain extends Domain {
     registerHandler('create', create);
   }
 
-  var emulators = EmulatorManager(
+  EmulatorManager emulators = EmulatorManager(
     fileSystem: globals.fs,
     logger: globals.logger,
     java: globals.java,

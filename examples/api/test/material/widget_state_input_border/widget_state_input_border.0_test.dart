@@ -9,18 +9,27 @@ import 'package:flutter_api_samples/material/widget_state_input_border/widget_st
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('InputBorder appearance matches configuration', (WidgetTester tester) async {
-    const WidgetStateInputBorder inputBorder = WidgetStateInputBorder.resolveWith(
-      example.WidgetStateInputBorderExample.veryCoolBorder,
-    );
+  testWidgets('InputBorder appearance matches configuration', (
+    WidgetTester tester,
+  ) async {
+    const WidgetStateInputBorder inputBorder =
+        WidgetStateInputBorder.resolveWith(
+          example.WidgetStateInputBorderExample.veryCoolBorder,
+        );
 
     void expectBorderToMatch(Set<WidgetState> states) {
       final RenderBox renderBox = tester.renderObject(
-        find.descendant(of: find.byType(TextField), matching: find.byType(CustomPaint)),
+        find.descendant(
+          of: find.byType(TextField),
+          matching: find.byType(CustomPaint),
+        ),
       );
 
       final BorderSide side = inputBorder.resolve(states).borderSide;
-      expect(renderBox, paints..line(color: side.color, strokeWidth: side.width));
+      expect(
+        renderBox,
+        paints..line(color: side.color, strokeWidth: side.width),
+      );
     }
 
     await tester.pumpWidget(const example.WidgetStateInputBorderExampleApp());
@@ -34,9 +43,16 @@ void main() {
     await tester.pumpAndSettle();
     expectBorderToMatch(const <WidgetState>{WidgetState.focused});
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer(location: tester.getCenter(find.byType(TextField)));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer(
+      location: tester.getCenter(find.byType(TextField)),
+    );
     await tester.pumpAndSettle();
-    expectBorderToMatch(const <WidgetState>{WidgetState.focused, WidgetState.hovered});
+    expectBorderToMatch(const <WidgetState>{
+      WidgetState.focused,
+      WidgetState.hovered,
+    });
   });
 }

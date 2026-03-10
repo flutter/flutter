@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('SliverList reverse children (with keys)', (WidgetTester tester) async {
-    final List<int> items = List<int>.generate(20, (int i) => i);
-    const double itemHeight = 300.0;
-    const double viewportHeight = 500.0;
+    final items = List<int>.generate(20, (int i) => i);
+    const itemHeight = 300.0;
+    const viewportHeight = 500.0;
 
     const double scrollPosition = 18 * itemHeight;
-    final ScrollController controller = ScrollController(initialScrollOffset: scrollPosition);
+    final controller = ScrollController(initialScrollOffset: scrollPosition);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -59,12 +59,12 @@ void main() {
   });
 
   testWidgets('SliverList replace children (with keys)', (WidgetTester tester) async {
-    final List<int> items = List<int>.generate(20, (int i) => i);
-    const double itemHeight = 300.0;
-    const double viewportHeight = 500.0;
+    final items = List<int>.generate(20, (int i) => i);
+    const itemHeight = 300.0;
+    const viewportHeight = 500.0;
 
     const double scrollPosition = 18 * itemHeight;
-    final ScrollController controller = ScrollController(initialScrollOffset: scrollPosition);
+    final controller = ScrollController(initialScrollOffset: scrollPosition);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -118,12 +118,12 @@ void main() {
   testWidgets('SliverList replace with shorter children list (with keys)', (
     WidgetTester tester,
   ) async {
-    final List<int> items = List<int>.generate(20, (int i) => i);
-    const double itemHeight = 300.0;
-    const double viewportHeight = 500.0;
+    final items = List<int>.generate(20, (int i) => i);
+    const itemHeight = 300.0;
+    const viewportHeight = 500.0;
 
     final double scrollPosition = items.length * itemHeight - viewportHeight;
-    final ScrollController controller = ScrollController(initialScrollOffset: scrollPosition);
+    final controller = ScrollController(initialScrollOffset: scrollPosition);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -166,8 +166,8 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/35904.
-    List<String> items = <String>['1', '2'];
-    final ScrollController controller1 = ScrollController();
+    var items = <String>['1', '2'];
+    final controller1 = ScrollController();
     addTearDown(controller1.dispose);
     await tester.pumpWidget(_buildSliverListRenderWidgetChild(items, controller1));
     await tester.pumpAndSettle();
@@ -176,7 +176,7 @@ void main() {
     expect(find.text('Tile 2'), findsOneWidget);
 
     items = items.reversed.toList();
-    final ScrollController controller2 = ScrollController();
+    final controller2 = ScrollController();
     addTearDown(controller2.dispose);
     await tester.pumpWidget(_buildSliverListRenderWidgetChild(items, controller2));
     await tester.pumpAndSettle();
@@ -189,8 +189,8 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/42142.
-    final List<int> items = List<int>.generate(20, (int i) => i);
-    final ScrollController controller = ScrollController();
+    final items = List<int>.generate(20, (int i) => i);
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -252,8 +252,8 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/42142.
-    final List<int> items = List<int>.generate(20, (int i) => i);
-    final ScrollController controller = ScrollController();
+    final items = List<int>.generate(20, (int i) => i);
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -308,8 +308,8 @@ void main() {
     'SliverList should start to perform layout from the initial child when there is no valid offset',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/66198.
-      bool isShow = true;
-      final ScrollController controller = ScrollController();
+      var isShow = true;
+      final controller = ScrollController();
       addTearDown(controller.dispose);
 
       Widget buildSliverList(ScrollController controller) {
@@ -384,24 +384,20 @@ void main() {
 }
 
 Widget _buildSliverListRenderWidgetChild(List<String> items, ScrollController controller) {
-  return MaterialApp(
-    home: Directionality(
-      textDirection: TextDirection.ltr,
-      child: Material(
-        child: SizedBox(
-          height: 500,
-          child: CustomScrollView(
-            controller: controller,
-            slivers: <Widget>[
-              SliverList.builder(
-                itemCount: items.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return Chip(key: Key(items[index]), label: Text('Tile ${items[index]}'));
-                },
-              ),
-            ],
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: SizedBox(
+      height: 500,
+      child: CustomScrollView(
+        controller: controller,
+        slivers: <Widget>[
+          SliverList.builder(
+            itemCount: items.length,
+            itemBuilder: (BuildContext context, int index) {
+              return SizedBox(key: Key(items[index]), child: Text('Tile ${items[index]}'));
+            },
           ),
-        ),
+        ],
       ),
     ),
   );
@@ -431,7 +427,7 @@ Widget _buildSliverList({
                   );
                 },
                 findChildIndexCallback: (Key key) {
-                  final ValueKey<int> valueKey = key as ValueKey<int>;
+                  final valueKey = key as ValueKey<int>;
                   final int index = items.indexOf(valueKey.value);
                   return index == -1 ? null : index;
                 },

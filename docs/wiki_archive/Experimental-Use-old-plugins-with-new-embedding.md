@@ -4,7 +4,7 @@ Flutter's v2 Android embedding includes reflection code that should find and reg
 
 To prevent Flutter from registering all plugins and instead register only specific plugins of your choosing, do the following.
 
-First, construct a `FlutterEngine` either as a [cached `FlutterEngine`](https://flutter.dev/docs/development/add-to-app/android/add-flutter-screen#step-3-optional-use-a-cached-flutterengine), or by overriding `provideFlutterEngine()` in [`FlutterActivity`](https://api.flutter.dev/javadoc/io/flutter/embedding/android/FlutterActivity.html#provideFlutterEngine-android.content.Context-) or [`FlutterFragment`](https://api.flutter.dev/javadoc/io/flutter/embedding/android/FlutterFragment.html#provideFlutterEngine-android.content.Context-) such that the `FlutterEngine` instance doesn't automatically register plugins.
+First, construct a `FlutterEngine` either as a [cached `FlutterEngine`](https://docs.flutter.dev/development/add-to-app/android/add-flutter-screen#step-3-optional-use-a-cached-flutterengine), or by overriding `provideFlutterEngine()` in [`FlutterActivity`](https://api.flutter.dev/javadoc/io/flutter/embedding/android/FlutterActivity.html#provideFlutterEngine-android.content.Context-) or [`FlutterFragment`](https://api.flutter.dev/javadoc/io/flutter/embedding/android/FlutterFragment.html#provideFlutterEngine-android.content.Context-) such that the `FlutterEngine` instance doesn't automatically register plugins.
 
 ```java
 FlutterEngine flutterEngine = new FlutterEngine(

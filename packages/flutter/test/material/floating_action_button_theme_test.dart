@@ -18,14 +18,14 @@ void main() {
 
   test('FloatingActionButtonThemeData lerp special cases', () {
     expect(FloatingActionButtonThemeData.lerp(null, null, 0), null);
-    const FloatingActionButtonThemeData data = FloatingActionButtonThemeData();
+    const data = FloatingActionButtonThemeData();
     expect(identical(FloatingActionButtonThemeData.lerp(data, data, 0.5), data), true);
   });
 
   testWidgets(
     'Material3: Default values are used when no FloatingActionButton or FloatingActionButtonThemeData properties are specified',
     (WidgetTester tester) async {
-      const ColorScheme colorScheme = ColorScheme.light();
+      const colorScheme = ColorScheme.light();
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData.from(colorScheme: colorScheme),
@@ -64,7 +64,7 @@ void main() {
   testWidgets(
     'Material2: Default values are used when no FloatingActionButton or FloatingActionButtonThemeData properties are specified',
     (WidgetTester tester) async {
-      const ColorScheme colorScheme = ColorScheme.light();
+      const colorScheme = ColorScheme.light();
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData.from(useMaterial3: false, colorScheme: colorScheme),
@@ -97,18 +97,18 @@ void main() {
   testWidgets(
     'FloatingActionButtonThemeData values are used when no FloatingActionButton properties are specified',
     (WidgetTester tester) async {
-      const Color backgroundColor = Color(0xBEEFBEEF);
-      const Color foregroundColor = Color(0xFACEFACE);
-      const Color splashColor = Color(0xCAFEFEED);
+      const backgroundColor = Color(0xBEEFBEEF);
+      const foregroundColor = Color(0xFACEFACE);
+      const splashColor = Color(0xCAFEFEED);
       const double elevation = 7;
       const double disabledElevation = 1;
       const double highlightElevation = 13;
       const ShapeBorder shape = StadiumBorder();
-      const BoxConstraints constraints = BoxConstraints.tightFor(width: 100.0, height: 100.0);
+      const constraints = BoxConstraints.tightFor(width: 100.0, height: 100.0);
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData().copyWith(
+          theme: ThemeData(
             floatingActionButtonTheme: const FloatingActionButtonThemeData(
               backgroundColor: backgroundColor,
               foregroundColor: foregroundColor,
@@ -143,9 +143,9 @@ void main() {
   testWidgets(
     'FloatingActionButton values take priority over FloatingActionButtonThemeData values when both properties are specified',
     (WidgetTester tester) async {
-      const Color backgroundColor = Color(0x00000001);
-      const Color foregroundColor = Color(0x00000002);
-      const Color splashColor = Color(0x00000003);
+      const backgroundColor = Color(0x00000001);
+      const foregroundColor = Color(0x00000002);
+      const splashColor = Color(0x00000003);
       const double elevation = 7;
       const double disabledElevation = 1;
       const double highlightElevation = 13;
@@ -153,7 +153,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData().copyWith(
+          theme: ThemeData(
             floatingActionButtonTheme: const FloatingActionButtonThemeData(
               backgroundColor: Color(0x00000004),
               foregroundColor: Color(0x00000005),
@@ -190,6 +190,100 @@ void main() {
     },
   );
 
+  testWidgets('Local FloatingActionButtonTheme properties are used', (WidgetTester tester) async {
+    const backgroundColor = Color(0x00000001);
+    const foregroundColor = Color(0x00000002);
+    const splashColor = Color(0x00000003);
+    const double elevation = 7;
+    const double disabledElevation = 1;
+    const double highlightElevation = 13;
+    const ShapeBorder shape = StadiumBorder();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: FloatingActionButtonTheme(
+          data: const FloatingActionButtonThemeData(
+            backgroundColor: backgroundColor,
+            foregroundColor: foregroundColor,
+            splashColor: splashColor,
+            elevation: elevation,
+            disabledElevation: disabledElevation,
+            highlightElevation: highlightElevation,
+            shape: shape,
+          ),
+          child: Scaffold(
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {},
+              child: const Icon(Icons.add),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(_getRawMaterialButton(tester).fillColor, backgroundColor);
+    expect(_getRichText(tester).text.style!.color, foregroundColor);
+    expect(_getRawMaterialButton(tester).elevation, elevation);
+    expect(_getRawMaterialButton(tester).disabledElevation, disabledElevation);
+    expect(_getRawMaterialButton(tester).highlightElevation, highlightElevation);
+    expect(_getRawMaterialButton(tester).shape, shape);
+    expect(_getRawMaterialButton(tester).splashColor, splashColor);
+  });
+
+  testWidgets(
+    'Local FloatingActionButtonTheme takes priority over ThemeData.floatingActionButtonTheme',
+    (WidgetTester tester) async {
+      const backgroundColor = Color(0x00000001);
+      const foregroundColor = Color(0x00000002);
+      const splashColor = Color(0x00000003);
+      const double elevation = 7;
+      const double disabledElevation = 1;
+      const double highlightElevation = 13;
+      const ShapeBorder shape = StadiumBorder();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            floatingActionButtonTheme: const FloatingActionButtonThemeData(
+              backgroundColor: Color(0x00000004),
+              foregroundColor: Color(0x00000005),
+              splashColor: Color(0x00000006),
+              elevation: 23,
+              disabledElevation: 11,
+              highlightElevation: 43,
+              shape: BeveledRectangleBorder(),
+            ),
+          ),
+          home: FloatingActionButtonTheme(
+            data: const FloatingActionButtonThemeData(
+              backgroundColor: backgroundColor,
+              foregroundColor: foregroundColor,
+              splashColor: splashColor,
+              elevation: elevation,
+              disabledElevation: disabledElevation,
+              highlightElevation: highlightElevation,
+              shape: shape,
+            ),
+            child: Scaffold(
+              floatingActionButton: FloatingActionButton(
+                onPressed: () {},
+                child: const Icon(Icons.add),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(_getRawMaterialButton(tester).fillColor, backgroundColor);
+      expect(_getRichText(tester).text.style!.color, foregroundColor);
+      expect(_getRawMaterialButton(tester).elevation, elevation);
+      expect(_getRawMaterialButton(tester).disabledElevation, disabledElevation);
+      expect(_getRawMaterialButton(tester).highlightElevation, highlightElevation);
+      expect(_getRawMaterialButton(tester).shape, shape);
+      expect(_getRawMaterialButton(tester).splashColor, splashColor);
+    },
+  );
+
   testWidgets('FloatingActionButton uses a custom shape when specified in the theme', (
     WidgetTester tester,
   ) async {
@@ -209,12 +303,12 @@ void main() {
   testWidgets('FloatingActionButton.small uses custom constraints when specified in the theme', (
     WidgetTester tester,
   ) async {
-    const BoxConstraints constraints = BoxConstraints.tightFor(width: 100.0, height: 100.0);
-    const double iconSize = 24.0;
+    const constraints = BoxConstraints.tightFor(width: 100.0, height: 100.0);
+    const iconSize = 24.0;
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData().copyWith(
+        theme: ThemeData(
           floatingActionButtonTheme: const FloatingActionButtonThemeData(
             smallSizeConstraints: constraints,
           ),
@@ -236,12 +330,12 @@ void main() {
   testWidgets('FloatingActionButton.large uses custom constraints when specified in the theme', (
     WidgetTester tester,
   ) async {
-    const BoxConstraints constraints = BoxConstraints.tightFor(width: 100.0, height: 100.0);
-    const double iconSize = 36.0;
+    const constraints = BoxConstraints.tightFor(width: 100.0, height: 100.0);
+    const iconSize = 36.0;
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData().copyWith(
+        theme: ThemeData(
           floatingActionButtonTheme: const FloatingActionButtonThemeData(
             largeSizeConstraints: constraints,
           ),
@@ -263,17 +357,18 @@ void main() {
   testWidgets(
     'Material3: FloatingActionButton.extended uses custom properties when specified in the theme',
     (WidgetTester tester) async {
-      const ColorScheme colorScheme = ColorScheme.light();
-      const Key iconKey = Key('icon');
-      const Key labelKey = Key('label');
-      const BoxConstraints constraints = BoxConstraints.tightFor(height: 100.0);
-      const double iconLabelSpacing = 33.0;
-      const EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(start: 5.0, end: 6.0);
-      const TextStyle textStyle = TextStyle(letterSpacing: 2.0);
+      const colorScheme = ColorScheme.light();
+      const iconKey = Key('icon');
+      const labelKey = Key('label');
+      const constraints = BoxConstraints.tightFor(height: 100.0);
+      const iconLabelSpacing = 33.0;
+      const padding = EdgeInsetsDirectional.only(start: 5.0, end: 6.0);
+      const textStyle = TextStyle(letterSpacing: 2.0);
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(colorScheme: colorScheme).copyWith(
+          theme: ThemeData(
+            colorScheme: colorScheme,
             floatingActionButtonTheme: const FloatingActionButtonThemeData(
               extendedSizeConstraints: constraints,
               extendedIconLabelSpacing: iconLabelSpacing,
@@ -316,16 +411,17 @@ void main() {
   testWidgets(
     'Material2: FloatingActionButton.extended uses custom properties when specified in the theme',
     (WidgetTester tester) async {
-      const Key iconKey = Key('icon');
-      const Key labelKey = Key('label');
-      const BoxConstraints constraints = BoxConstraints.tightFor(height: 100.0);
-      const double iconLabelSpacing = 33.0;
-      const EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(start: 5.0, end: 6.0);
-      const TextStyle textStyle = TextStyle(letterSpacing: 2.0);
+      const iconKey = Key('icon');
+      const labelKey = Key('label');
+      const constraints = BoxConstraints.tightFor(height: 100.0);
+      const iconLabelSpacing = 33.0;
+      const padding = EdgeInsetsDirectional.only(start: 5.0, end: 6.0);
+      const textStyle = TextStyle(letterSpacing: 2.0);
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: false).copyWith(
+          theme: ThemeData(
+            useMaterial3: false,
             floatingActionButtonTheme: const FloatingActionButtonThemeData(
               extendedSizeConstraints: constraints,
               extendedIconLabelSpacing: iconLabelSpacing,
@@ -369,16 +465,17 @@ void main() {
   testWidgets(
     'Material3: FloatingActionButton.extended custom properties takes priority over FloatingActionButtonThemeData spacing',
     (WidgetTester tester) async {
-      const ColorScheme colorScheme = ColorScheme.light();
-      const Key iconKey = Key('icon');
-      const Key labelKey = Key('label');
-      const double iconLabelSpacing = 33.0;
-      const EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(start: 5.0, end: 6.0);
-      const TextStyle textStyle = TextStyle(letterSpacing: 2.0);
+      const colorScheme = ColorScheme.light();
+      const iconKey = Key('icon');
+      const labelKey = Key('label');
+      const iconLabelSpacing = 33.0;
+      const padding = EdgeInsetsDirectional.only(start: 5.0, end: 6.0);
+      const textStyle = TextStyle(letterSpacing: 2.0);
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(colorScheme: colorScheme).copyWith(
+          theme: ThemeData(
+            colorScheme: colorScheme,
             floatingActionButtonTheme: const FloatingActionButtonThemeData(
               extendedIconLabelSpacing: 25.0,
               extendedPadding: EdgeInsetsDirectional.only(start: 7.0, end: 8.0),
@@ -422,15 +519,16 @@ void main() {
   testWidgets(
     'Material2: FloatingActionButton.extended custom properties takes priority over FloatingActionButtonThemeData spacing',
     (WidgetTester tester) async {
-      const Key iconKey = Key('icon');
-      const Key labelKey = Key('label');
-      const double iconLabelSpacing = 33.0;
-      const EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(start: 5.0, end: 6.0);
-      const TextStyle textStyle = TextStyle(letterSpacing: 2.0);
+      const iconKey = Key('icon');
+      const labelKey = Key('label');
+      const iconLabelSpacing = 33.0;
+      const padding = EdgeInsetsDirectional.only(start: 5.0, end: 6.0);
+      const textStyle = TextStyle(letterSpacing: 2.0);
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: false).copyWith(
+          theme: ThemeData(
+            useMaterial3: false,
             floatingActionButtonTheme: const FloatingActionButtonThemeData(
               extendedIconLabelSpacing: 25.0,
               extendedPadding: EdgeInsetsDirectional.only(start: 7.0, end: 8.0),
@@ -473,7 +571,7 @@ void main() {
   );
 
   testWidgets('default FloatingActionButton debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const FloatingActionButtonThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -485,7 +583,7 @@ void main() {
   });
 
   testWidgets('Material implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const FloatingActionButtonThemeData(
       foregroundColor: Color(0xFEEDFEED),
       backgroundColor: Color(0xCAFECAFE),
@@ -545,7 +643,7 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData().copyWith(
+          theme: ThemeData(
             floatingActionButtonTheme: FloatingActionButtonThemeData(
               mouseCursor: WidgetStateProperty.all(SystemMouseCursors.text),
             ),

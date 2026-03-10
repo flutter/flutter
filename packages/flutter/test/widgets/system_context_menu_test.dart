@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../system_context_menu_utils.dart';
+import 'editable_text_tester.dart';
 
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
@@ -15,14 +16,14 @@ void main() {
   testWidgets(
     'asserts when built on an unsupported device',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(text: 'one two three');
+      final controller = TextEditingController(text: 'one two three');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         // By default, MediaQueryData.supportsShowingSystemContextMenu is false.
         MaterialApp(
           home: Scaffold(
             body: Center(
-              child: TextField(
+              child: TestTextField(
                 controller: controller,
                 contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
                   return SystemContextMenu.editableText(editableTextState: editableTextState);
@@ -33,7 +34,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(TextField));
+      await tester.tap(find.byType(TestTextField));
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.showToolbar(), true);
       await tester.pump();
@@ -65,14 +66,14 @@ void main() {
         );
       });
 
-      final TextEditingController controller = TextEditingController(text: 'one two three');
+      final controller = TextEditingController(text: 'one two three');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         // By default, MediaQueryData.supportsShowingSystemContextMenu is false.
         MaterialApp(
           home: Scaffold(
             body: Center(
-              child: TextField(
+              child: TestTextField(
                 controller: controller,
                 contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
                   return SystemContextMenu.editableText(editableTextState: editableTextState);
@@ -83,7 +84,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(TextField));
+      await tester.tap(find.byType(TestTextField));
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.showToolbar(), true);
       await tester.pump();
@@ -97,7 +98,7 @@ void main() {
   testWidgets(
     'can be shown and hidden like a normal context menu',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(text: 'one two three');
+      final controller = TextEditingController(text: 'one two three');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         Builder(
@@ -108,7 +109,7 @@ void main() {
               child: MaterialApp(
                 home: Scaffold(
                   body: Center(
-                    child: TextField(
+                    child: TestTextField(
                       controller: controller,
                       contextMenuBuilder:
                           (BuildContext context, EditableTextState editableTextState) {
@@ -127,7 +128,7 @@ void main() {
 
       expect(find.byType(SystemContextMenu), findsNothing);
 
-      await tester.tap(find.byType(TextField));
+      await tester.tap(find.byType(TestTextField));
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.showToolbar(), true);
       await tester.pump();
@@ -144,19 +145,18 @@ void main() {
   testWidgets(
     'can customize the menu items',
     (WidgetTester tester) async {
-      final List<List<IOSSystemContextMenuItemData>> itemsReceived =
-          <List<IOSSystemContextMenuItemData>>[];
+      final itemsReceived = <List<IOSSystemContextMenuItemData>>[];
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.platform,
         (MethodCall methodCall) async {
           switch (methodCall.method) {
             case 'ContextMenu.showSystemContextMenu':
-              final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
-              final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
+              final arguments = methodCall.arguments as Map<String, dynamic>;
+              final untypedItems = arguments['items'] as List<dynamic>;
               final List<IOSSystemContextMenuItemData> lastItems = untypedItems.map((
                 dynamic value,
               ) {
-                final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
+                final itemJson = value as Map<String, dynamic>;
                 return systemContextMenuItemDataFromJson(itemJson);
               }).toList();
               itemsReceived.add(lastItems);
@@ -171,12 +171,12 @@ void main() {
         );
       });
 
-      const List<IOSSystemContextMenuItem> items1 = <IOSSystemContextMenuItem>[
+      const items1 = <IOSSystemContextMenuItem>[
         IOSSystemContextMenuItemCopy(),
         IOSSystemContextMenuItemShare(title: 'My Share Title'),
         IOSSystemContextMenuItemLiveText(),
       ];
-      final TextEditingController controller = TextEditingController(text: 'one two three');
+      final controller = TextEditingController(text: 'one two three');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         Builder(
@@ -187,7 +187,7 @@ void main() {
               child: MaterialApp(
                 home: Scaffold(
                   body: Center(
-                    child: TextField(
+                    child: TestTextField(
                       controller: controller,
                       contextMenuBuilder:
                           (BuildContext context, EditableTextState editableTextState) {
@@ -208,7 +208,7 @@ void main() {
       expect(find.byType(SystemContextMenu), findsNothing);
       expect(itemsReceived, hasLength(0));
 
-      await tester.tap(find.byType(TextField));
+      await tester.tap(find.byType(TestTextField));
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.showToolbar(), true);
       await tester.pump();
@@ -234,19 +234,18 @@ void main() {
   testWidgets(
     "passing empty items builds the widget but doesn't show the system context menu",
     (WidgetTester tester) async {
-      final List<List<IOSSystemContextMenuItemData>> itemsReceived =
-          <List<IOSSystemContextMenuItemData>>[];
+      final itemsReceived = <List<IOSSystemContextMenuItemData>>[];
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.platform,
         (MethodCall methodCall) async {
           switch (methodCall.method) {
             case 'ContextMenu.showSystemContextMenu':
-              final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
-              final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
+              final arguments = methodCall.arguments as Map<String, dynamic>;
+              final untypedItems = arguments['items'] as List<dynamic>;
               final List<IOSSystemContextMenuItemData> lastItems = untypedItems.map((
                 dynamic value,
               ) {
-                final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
+                final itemJson = value as Map<String, dynamic>;
                 return systemContextMenuItemDataFromJson(itemJson);
               }).toList();
               itemsReceived.add(lastItems);
@@ -261,8 +260,8 @@ void main() {
         );
       });
 
-      const List<IOSSystemContextMenuItem> items1 = <IOSSystemContextMenuItem>[];
-      final TextEditingController controller = TextEditingController(text: 'one two three');
+      const items1 = <IOSSystemContextMenuItem>[];
+      final controller = TextEditingController(text: 'one two three');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         Builder(
@@ -273,7 +272,7 @@ void main() {
               child: MaterialApp(
                 home: Scaffold(
                   body: Center(
-                    child: TextField(
+                    child: TestTextField(
                       controller: controller,
                       contextMenuBuilder:
                           (BuildContext context, EditableTextState editableTextState) {
@@ -296,7 +295,7 @@ void main() {
       expect(find.byType(SystemContextMenu), findsNothing);
       expect(itemsReceived, hasLength(0));
 
-      await tester.tap(find.byType(TextField));
+      await tester.tap(find.byType(TestTextField));
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.showToolbar(), true);
       expect(tester.takeException(), isNull);
@@ -313,19 +312,18 @@ void main() {
   testWidgets(
     'items receive a default title',
     (WidgetTester tester) async {
-      final List<List<IOSSystemContextMenuItemData>> itemsReceived =
-          <List<IOSSystemContextMenuItemData>>[];
+      final itemsReceived = <List<IOSSystemContextMenuItemData>>[];
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.platform,
         (MethodCall methodCall) async {
           switch (methodCall.method) {
             case 'ContextMenu.showSystemContextMenu':
-              final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
-              final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
+              final arguments = methodCall.arguments as Map<String, dynamic>;
+              final untypedItems = arguments['items'] as List<dynamic>;
               final List<IOSSystemContextMenuItemData> lastItems = untypedItems.map((
                 dynamic value,
               ) {
-                final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
+                final itemJson = value as Map<String, dynamic>;
                 return systemContextMenuItemDataFromJson(itemJson);
               }).toList();
               itemsReceived.add(lastItems);
@@ -340,13 +338,13 @@ void main() {
         );
       });
 
-      const List<IOSSystemContextMenuItem> items1 = <IOSSystemContextMenuItem>[
+      const items1 = <IOSSystemContextMenuItem>[
         // Copy gets no title, it's set by the platform.
         IOSSystemContextMenuItemCopy(),
         // Share could take a title, but if not, it gets a localized default.
         IOSSystemContextMenuItemShare(),
       ];
-      final TextEditingController controller = TextEditingController(text: 'one two three');
+      final controller = TextEditingController(text: 'one two three');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         Builder(
@@ -357,7 +355,7 @@ void main() {
               child: MaterialApp(
                 home: Scaffold(
                   body: Center(
-                    child: TextField(
+                    child: TestTextField(
                       controller: controller,
                       contextMenuBuilder:
                           (BuildContext context, EditableTextState editableTextState) {
@@ -378,7 +376,7 @@ void main() {
       expect(find.byType(SystemContextMenu), findsNothing);
       expect(itemsReceived, hasLength(0));
 
-      await tester.tap(find.byType(TextField));
+      await tester.tap(find.byType(TestTextField));
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.showToolbar(), true);
       await tester.pump();
@@ -404,14 +402,13 @@ void main() {
   testWidgets(
     'can be updated.',
     (WidgetTester tester) async {
-      final List<Map<String, double>> targetRects = <Map<String, double>>[];
+      final targetRects = <Map<String, double>>[];
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.platform,
         (MethodCall methodCall) async {
           if (methodCall.method == 'ContextMenu.showSystemContextMenu') {
-            final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
-            final Map<String, dynamic> untypedTargetRect =
-                arguments['targetRect'] as Map<String, dynamic>;
+            final arguments = methodCall.arguments as Map<String, dynamic>;
+            final untypedTargetRect = arguments['targetRect'] as Map<String, dynamic>;
             final Map<String, double> lastTargetRect = untypedTargetRect.map((
               String key,
               dynamic value,
@@ -430,7 +427,7 @@ void main() {
         );
       });
 
-      final TextEditingController controller = TextEditingController(text: 'one two three');
+      final controller = TextEditingController(text: 'one two three');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         Builder(
@@ -441,7 +438,7 @@ void main() {
               child: MaterialApp(
                 home: Scaffold(
                   body: Center(
-                    child: TextField(
+                    child: TestTextField(
                       controller: controller,
                       contextMenuBuilder:
                           (BuildContext context, EditableTextState editableTextState) {
@@ -460,7 +457,7 @@ void main() {
 
       expect(targetRects, isEmpty);
 
-      await tester.tap(find.byType(TextField));
+      await tester.tap(find.byType(TestTextField));
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.showToolbar(), true);
       await tester.pump();
@@ -481,7 +478,7 @@ void main() {
   testWidgets(
     'can be rebuilt',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(text: 'one two three');
+      final controller = TextEditingController(text: 'one two three');
       addTearDown(controller.dispose);
       late StateSetter setState;
       await tester.pumpWidget(
@@ -496,7 +493,7 @@ void main() {
                     child: StatefulBuilder(
                       builder: (BuildContext context, StateSetter localSetState) {
                         setState = localSetState;
-                        return TextField(
+                        return TestTextField(
                           controller: controller,
                           contextMenuBuilder:
                               (BuildContext context, EditableTextState editableTextState) {
@@ -515,7 +512,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(TextField));
+      await tester.tap(find.byType(TestTextField));
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.showToolbar(), true);
       await tester.pump();
@@ -532,9 +529,9 @@ void main() {
   testWidgets(
     'can handle multiple instances',
     (WidgetTester tester) async {
-      final TextEditingController controller1 = TextEditingController(text: 'one two three');
+      final controller1 = TextEditingController(text: 'one two three');
       addTearDown(controller1.dispose);
-      final TextEditingController controller2 = TextEditingController(text: 'four five six');
+      final controller2 = TextEditingController(text: 'four five six');
       addTearDown(controller2.dispose);
       final GlobalKey field1Key = GlobalKey();
       final GlobalKey field2Key = GlobalKey();
@@ -551,7 +548,7 @@ void main() {
                   body: Center(
                     child: Column(
                       children: <Widget>[
-                        TextField(
+                        TestTextField(
                           key: field1Key,
                           controller: controller1,
                           contextMenuBuilder:
@@ -562,7 +559,7 @@ void main() {
                                 );
                               },
                         ),
-                        TextField(
+                        TestTextField(
                           key: field2Key,
                           controller: controller2,
                           contextMenuBuilder:
@@ -623,7 +620,7 @@ void main() {
   test(
     'can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemCopy',
     () {
-      const IOSSystemContextMenuItemCopy item = IOSSystemContextMenuItemCopy();
+      const item = IOSSystemContextMenuItemCopy();
       const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
       expect(item.getData(localizations), const IOSSystemContextMenuItemDataCopy());
     },
@@ -632,7 +629,7 @@ void main() {
   test(
     'can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemCut',
     () {
-      const IOSSystemContextMenuItemCut item = IOSSystemContextMenuItemCut();
+      const item = IOSSystemContextMenuItemCut();
       const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
       expect(item.getData(localizations), const IOSSystemContextMenuItemDataCut());
     },
@@ -641,7 +638,7 @@ void main() {
   test(
     'can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemPaste',
     () {
-      const IOSSystemContextMenuItemPaste item = IOSSystemContextMenuItemPaste();
+      const item = IOSSystemContextMenuItemPaste();
       const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
       expect(item.getData(localizations), const IOSSystemContextMenuItemDataPaste());
     },
@@ -650,7 +647,7 @@ void main() {
   test(
     'can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemSelectAll',
     () {
-      const IOSSystemContextMenuItemSelectAll item = IOSSystemContextMenuItemSelectAll();
+      const item = IOSSystemContextMenuItemSelectAll();
       const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
       expect(item.getData(localizations), const IOSSystemContextMenuItemDataSelectAll());
     },
@@ -659,7 +656,7 @@ void main() {
   test(
     'can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemLookUp',
     () {
-      const IOSSystemContextMenuItemLookUp item = IOSSystemContextMenuItemLookUp();
+      const item = IOSSystemContextMenuItemLookUp();
       const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
       expect(
         item.getData(localizations),
@@ -671,7 +668,7 @@ void main() {
   test(
     'can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemSearchWeb',
     () {
-      const IOSSystemContextMenuItemSearchWeb item = IOSSystemContextMenuItemSearchWeb();
+      const item = IOSSystemContextMenuItemSearchWeb();
       const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
       expect(
         item.getData(localizations),
@@ -683,7 +680,7 @@ void main() {
   test(
     'can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemShare',
     () {
-      const IOSSystemContextMenuItemShare item = IOSSystemContextMenuItemShare();
+      const item = IOSSystemContextMenuItemShare();
       const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
       expect(
         item.getData(localizations),
@@ -695,7 +692,7 @@ void main() {
   test(
     'can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemLiveText',
     () {
-      const IOSSystemContextMenuItemLiveText item = IOSSystemContextMenuItemLiveText();
+      const item = IOSSystemContextMenuItemLiveText();
       const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
       final IOSSystemContextMenuItemData data = item.getData(localizations);
       expect(data, isA<IOSSystemContextMenuItemDataLiveText>());
@@ -703,15 +700,15 @@ void main() {
   );
 
   test('systemContextMenuItemDataFromJson handles Live Text', () {
-    final Map<String, dynamic> json = <String, dynamic>{'type': 'captureTextFromCamera'};
+    final json = <String, dynamic>{'type': 'captureTextFromCamera'};
     final IOSSystemContextMenuItemData item = systemContextMenuItemDataFromJson(json);
     expect(item, isA<IOSSystemContextMenuItemDataLiveText>());
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/169696.
   test('IOSSystemContextMenuItemLookUp debugFillProperties', () {
-    const String title = 'my title';
-    const IOSSystemContextMenuItemLookUp item = IOSSystemContextMenuItemLookUp(title: title);
+    const title = 'my title';
+    const item = IOSSystemContextMenuItemLookUp(title: title);
     final List<DiagnosticsNode> diagnosticsNodes = item.toDiagnosticsNode().getProperties();
     expect(diagnosticsNodes, hasLength(1));
     expect(diagnosticsNodes.first.name, 'title');
@@ -720,8 +717,8 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/169696.
   test('IOSSystemContextMenuItemSearchWeb debugFillProperties', () {
-    const String title = 'my title';
-    const IOSSystemContextMenuItemSearchWeb item = IOSSystemContextMenuItemSearchWeb(title: title);
+    const title = 'my title';
+    const item = IOSSystemContextMenuItemSearchWeb(title: title);
     final List<DiagnosticsNode> diagnosticsNodes = item.toDiagnosticsNode().getProperties();
     expect(diagnosticsNodes, hasLength(1));
     expect(diagnosticsNodes.first.name, 'title');
@@ -730,8 +727,8 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/169696.
   test('IOSSystemContextMenuItemShare debugFillProperties', () {
-    const String title = 'my title';
-    const IOSSystemContextMenuItemShare item = IOSSystemContextMenuItemShare(title: title);
+    const title = 'my title';
+    const item = IOSSystemContextMenuItemShare(title: title);
     final List<DiagnosticsNode> diagnosticsNodes = item.toDiagnosticsNode().getProperties();
     expect(diagnosticsNodes, hasLength(1));
     expect(diagnosticsNodes.first.name, 'title');
@@ -741,7 +738,7 @@ void main() {
   testWidgets(
     'when supportsShowingSystemContextMenu is false, isSupported is false',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(text: 'one two three');
+      final controller = TextEditingController(text: 'one two three');
       addTearDown(controller.dispose);
       late BuildContext buildContext;
       await tester.pumpWidget(
@@ -755,7 +752,7 @@ void main() {
                   body: Builder(
                     builder: (BuildContext context) {
                       buildContext = context;
-                      return TextField(
+                      return TestTextField(
                         controller: controller,
                         contextMenuBuilder:
                             (BuildContext context, EditableTextState editableTextState) {
@@ -782,7 +779,7 @@ void main() {
   testWidgets(
     'when supportsShowingSystemContextMenu is true and the platform is iOS, isSupported is true',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(text: 'one two three');
+      final controller = TextEditingController(text: 'one two three');
       addTearDown(controller.dispose);
       late BuildContext buildContext;
       await tester.pumpWidget(
@@ -796,7 +793,7 @@ void main() {
                   body: Builder(
                     builder: (BuildContext context) {
                       buildContext = context;
-                      return TextField(
+                      return TestTextField(
                         controller: controller,
                         contextMenuBuilder:
                             (BuildContext context, EditableTextState editableTextState) {
@@ -823,7 +820,7 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
-  for (final bool readOnly in <bool>[true, false]) {
+  for (final readOnly in <bool>[true, false]) {
     testWidgets(
       'read only fields do not support the system context menu',
       (WidgetTester tester) async {
@@ -834,7 +831,7 @@ void main() {
               return MediaQuery(
                 data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
                 child: MaterialApp(
-                  home: Scaffold(body: TextField(readOnly: readOnly)),
+                  home: Scaffold(body: TestTextField(readOnly: readOnly)),
                 ),
               );
             },
@@ -856,7 +853,7 @@ void main() {
   testWidgets(
     'when supportsShowingSystemContextMenu is false, SystemContextMenu throws',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(text: 'one two three');
+      final controller = TextEditingController(text: 'one two three');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         Builder(
@@ -867,7 +864,7 @@ void main() {
               child: MaterialApp(
                 home: Scaffold(
                   body: Center(
-                    child: TextField(
+                    child: TestTextField(
                       controller: controller,
                       contextMenuBuilder:
                           (BuildContext context, EditableTextState editableTextState) {
@@ -886,7 +883,7 @@ void main() {
 
       expect(find.byType(SystemContextMenu), findsNothing);
 
-      await tester.tap(find.byType(TextField));
+      await tester.tap(find.byType(TestTextField));
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.showToolbar(), true);
       await tester.pump();
@@ -899,22 +896,21 @@ void main() {
   testWidgets(
     'can use custom menu items',
     (WidgetTester tester) async {
-      bool customAction1Called = false;
-      bool customAction2Called = false;
-      final List<List<IOSSystemContextMenuItemData>> itemsReceived =
-          <List<IOSSystemContextMenuItemData>>[];
+      var customAction1Called = false;
+      var customAction2Called = false;
+      final itemsReceived = <List<IOSSystemContextMenuItemData>>[];
 
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.platform,
         (MethodCall methodCall) async {
           switch (methodCall.method) {
             case 'ContextMenu.showSystemContextMenu':
-              final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
-              final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
+              final arguments = methodCall.arguments as Map<String, dynamic>;
+              final untypedItems = arguments['items'] as List<dynamic>;
               final List<IOSSystemContextMenuItemData> lastItems = untypedItems.map((
                 dynamic value,
               ) {
-                final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
+                final itemJson = value as Map<String, dynamic>;
                 return systemContextMenuItemDataFromJson(itemJson);
               }).toList();
               itemsReceived.add(lastItems);
@@ -929,7 +925,7 @@ void main() {
         );
       });
 
-      final List<IOSSystemContextMenuItem> items = <IOSSystemContextMenuItem>[
+      final items = <IOSSystemContextMenuItem>[
         const IOSSystemContextMenuItemCopy(),
         IOSSystemContextMenuItemCustom(
           title: 'Custom Action 1',
@@ -945,7 +941,7 @@ void main() {
         ),
       ];
 
-      final TextEditingController controller = TextEditingController(text: 'test text');
+      final controller = TextEditingController(text: 'test text');
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -957,7 +953,7 @@ void main() {
               child: MaterialApp(
                 home: Scaffold(
                   body: Center(
-                    child: TextField(
+                    child: TestTextField(
                       controller: controller,
                       contextMenuBuilder:
                           (BuildContext context, EditableTextState editableTextState) {
@@ -975,7 +971,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(TextField));
+      await tester.tap(find.byType(TestTextField));
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.showToolbar(), true);
       await tester.pump();
@@ -996,8 +992,8 @@ void main() {
         'Custom Action 2',
       );
 
-      final IOSSystemContextMenuItemCustom customItem1 = items[1] as IOSSystemContextMenuItemCustom;
-      final IOSSystemContextMenuItemCustom customItem2 = items[2] as IOSSystemContextMenuItemCustom;
+      final customItem1 = items[1] as IOSSystemContextMenuItemCustom;
+      final customItem2 = items[2] as IOSSystemContextMenuItemCustom;
 
       ByteData? message = const JSONMethodCodec().encodeMethodCall(
         MethodCall('ContextMenu.onPerformCustomAction', <dynamic>[
@@ -1037,8 +1033,8 @@ void main() {
   testWidgets(
     'system context menu auto-closes after custom action',
     (WidgetTester tester) async {
-      bool customActionCalled = false;
-      final TextEditingController controller = TextEditingController(text: 'test text');
+      var customActionCalled = false;
+      final controller = TextEditingController(text: 'test text');
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -1050,7 +1046,7 @@ void main() {
               child: MaterialApp(
                 home: Scaffold(
                   body: Center(
-                    child: TextField(
+                    child: TestTextField(
                       controller: controller,
                       contextMenuBuilder:
                           (BuildContext context, EditableTextState editableTextState) {
@@ -1075,7 +1071,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(TextField));
+      await tester.tap(find.byType(TestTextField));
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.showToolbar(), true);
       await tester.pump();
@@ -1085,7 +1081,7 @@ void main() {
       final SystemContextMenu menu = tester.widget<SystemContextMenu>(
         find.byType(SystemContextMenu),
       );
-      final IOSSystemContextMenuItemCustom item = menu.items[0] as IOSSystemContextMenuItemCustom;
+      final item = menu.items[0] as IOSSystemContextMenuItemCustom;
 
       final ByteData message = const JSONMethodCodec().encodeMethodCall(
         MethodCall('ContextMenu.onPerformCustomAction', <dynamic>[0, item.hashCode.toString()]),
@@ -1119,11 +1115,11 @@ void main() {
   testWidgets(
     'can trigger custom menu action through platform channel message',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(text: 'one two three');
+      final controller = TextEditingController(text: 'one two three');
       addTearDown(controller.dispose);
 
-      bool customActionCalled = false;
-      final List<IOSSystemContextMenuItem> items = <IOSSystemContextMenuItem>[
+      var customActionCalled = false;
+      final items = <IOSSystemContextMenuItem>[
         const IOSSystemContextMenuItemCut(),
         IOSSystemContextMenuItemCustom(
           title: 'Test Action',
@@ -1142,7 +1138,7 @@ void main() {
               child: MaterialApp(
                 home: Scaffold(
                   body: Center(
-                    child: TextField(
+                    child: TestTextField(
                       controller: controller,
                       contextMenuBuilder:
                           (BuildContext context, EditableTextState editableTextState) {
@@ -1160,19 +1156,18 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(TextField));
+      await tester.tap(find.byType(TestTextField));
       await tester.pumpAndSettle();
 
-      const TextSelection selection = TextSelection(baseOffset: 0, extentOffset: 3);
+      const selection = TextSelection(baseOffset: 0, extentOffset: 3);
       controller.selection = selection;
-
-      await tester.longPress(find.byType(TextField));
+      await tester.longPress(find.byType(TestTextField));
       await tester.pumpAndSettle();
 
       expect(find.byType(SystemContextMenu), findsOneWidget);
 
-      final IOSSystemContextMenuItemCustom customItem = items[1] as IOSSystemContextMenuItemCustom;
-      final String callbackId = customItem.hashCode.toString();
+      final customItem = items[1] as IOSSystemContextMenuItemCustom;
+      final callbackId = customItem.hashCode.toString();
 
       final ByteData message = const JSONMethodCodec().encodeMethodCall(
         MethodCall('ContextMenu.onPerformCustomAction', <dynamic>[0, callbackId]),
@@ -1205,11 +1200,11 @@ void main() {
   testWidgets(
     'two TextFields can have different custom SystemContextMenu items',
     (WidgetTester tester) async {
-      bool field1ActionCalled = false;
-      bool field2ActionCalled = false;
+      var field1ActionCalled = false;
+      var field2ActionCalled = false;
 
-      final TextEditingController controller1 = TextEditingController(text: 'Field 1 text');
-      final TextEditingController controller2 = TextEditingController(text: 'Field 2 text');
+      final controller1 = TextEditingController(text: 'Field 1 text');
+      final controller2 = TextEditingController(text: 'Field 2 text');
       addTearDown(() {
         controller1.dispose();
         controller2.dispose();
@@ -1225,7 +1220,7 @@ void main() {
                 home: Scaffold(
                   body: Column(
                     children: <Widget>[
-                      TextField(
+                      TestTextField(
                         controller: controller1,
                         contextMenuBuilder:
                             (BuildContext context, EditableTextState editableTextState) {
@@ -1242,7 +1237,7 @@ void main() {
                               );
                             },
                       ),
-                      TextField(
+                      TestTextField(
                         controller: controller2,
                         contextMenuBuilder:
                             (BuildContext context, EditableTextState editableTextState) {
@@ -1268,14 +1263,14 @@ void main() {
         ),
       );
 
-      await tester.longPress(find.byType(TextField).first);
+      await tester.longPress(find.byType(TestTextField).first);
       await tester.pump();
       expect(find.byType(SystemContextMenu), findsOneWidget);
 
       final SystemContextMenu menu1 = tester.widget<SystemContextMenu>(
         find.byType(SystemContextMenu),
       );
-      final IOSSystemContextMenuItemCustom item1 = menu1.items[0] as IOSSystemContextMenuItemCustom;
+      final item1 = menu1.items[0] as IOSSystemContextMenuItemCustom;
 
       ByteData message = const JSONMethodCodec().encodeMethodCall(
         MethodCall('ContextMenu.onPerformCustomAction', <dynamic>[0, item1.hashCode.toString()]),
@@ -1301,14 +1296,14 @@ void main() {
 
       field1ActionCalled = false;
 
-      await tester.longPress(find.byType(TextField).last);
+      await tester.longPress(find.byType(TestTextField).last);
       await tester.pump();
       expect(find.byType(SystemContextMenu), findsOneWidget);
 
       final SystemContextMenu menu2 = tester.widget<SystemContextMenu>(
         find.byType(SystemContextMenu),
       );
-      final IOSSystemContextMenuItemCustom item2 = menu2.items[0] as IOSSystemContextMenuItemCustom;
+      final item2 = menu2.items[0] as IOSSystemContextMenuItemCustom;
 
       message = const JSONMethodCodec().encodeMethodCall(
         MethodCall('ContextMenu.onPerformCustomAction', <dynamic>[0, item2.hashCode.toString()]),
@@ -1333,6 +1328,76 @@ void main() {
       await tester.pump();
 
       expect(find.byType(SystemContextMenu), findsNothing);
+    },
+    skip: kIsWeb, // [intended]
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
+  testWidgets(
+    'Default iOS SystemContextMenu includes Share for non-empty selection',
+    (WidgetTester tester) async {
+      final itemsReceived = <List<IOSSystemContextMenuItemData>>[];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (MethodCall methodCall) async {
+          if (methodCall.method == 'ContextMenu.showSystemContextMenu') {
+            final arguments = methodCall.arguments as Map<String, dynamic>;
+            final untypedItems = arguments['items'] as List<dynamic>;
+            final lastItems = <IOSSystemContextMenuItemData>[
+              for (final dynamic value in untypedItems)
+                systemContextMenuItemDataFromJson(value as Map<String, dynamic>),
+            ];
+            itemsReceived.add(lastItems);
+          }
+          return;
+        },
+      );
+      addTearDown(() {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        );
+      });
+
+      final controller = TextEditingController(text: 'Hello world');
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(supportsShowingSystemContextMenu: true),
+          child: MaterialApp(
+            home: Scaffold(
+              body: Center(
+                child: TextField(
+                  controller: controller,
+                  contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                    return SystemContextMenu.editableText(editableTextState: editableTextState);
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Focus the field first (this establishes the TextInputConnection).
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+      // Set a non-empty selection to enable sharing.
+      controller.selection = const TextSelection(baseOffset: 0, extentOffset: 5); // "Hello"
+      await tester.pump();
+
+      // Nit: ensure no platform message sent before showing toolbar.
+      expect(itemsReceived, isEmpty);
+
+      // Show the context menu.
+      expect(state.showToolbar(), true);
+      await tester.pump();
+
+      // Assert that the platform message included a Share item.
+      expect(itemsReceived, isNotEmpty);
+      expect(itemsReceived.last, contains(isA<IOSSystemContextMenuItemDataShare>()));
     },
     skip: kIsWeb, // [intended]
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),

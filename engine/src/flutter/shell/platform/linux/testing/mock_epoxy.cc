@@ -375,18 +375,29 @@ EGLBoolean _eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
   return bool_success();
 }
 
-EGLImage _eglCreateImage(EGLDisplay dpy,
-                         EGLContext ctx,
-                         EGLenum target,
-                         EGLClientBuffer buffer,
-                         const EGLAttrib* attrib_list) {
-  mock->eglCreateImage(dpy, ctx, target, buffer, attrib_list);
+EGLImageKHR _eglCreateImageKHR(EGLDisplay dpy,
+                               EGLContext ctx,
+                               EGLenum target,
+                               EGLClientBuffer buffer,
+                               const EGLint* attrib_list) {
+  mock->eglCreateImageKHR(dpy, ctx, target, buffer, attrib_list);
   return &mock_image;
 }
 
 static GLuint bound_texture_2d;
 
 static std::map<GLenum, GLuint> framebuffer_renderbuffers;
+
+static GLboolean enable_blend = GL_FALSE;
+static GLboolean enable_scissor_test = GL_FALSE;
+
+static void _setEnable(GLenum cap, GLboolean value) {
+  if (cap == GL_BLEND) {
+    enable_blend = value;
+  } else if (cap == GL_SCISSOR_TEST) {
+    enable_scissor_test = value;
+  }
+}
 
 void _glAttachShader(GLuint program, GLuint shader) {}
 
@@ -446,6 +457,14 @@ void _glDeleteTextures(GLsizei n, const GLuint* textures) {
   if (mock) {
     mock->glDeleteTextures(n, textures);
   }
+}
+
+static void _glDisable(GLenum cap) {
+  _setEnable(cap, GL_FALSE);
+}
+
+static void _glEnable(GLenum cap) {
+  _setEnable(cap, GL_TRUE);
 }
 
 static void _glFramebufferRenderbuffer(GLenum target,
@@ -532,6 +551,16 @@ static void _glGetShaderInfoLog(GLuint shader,
 
 static const GLubyte* _glGetString(GLenum pname) {
   return mock->glGetString(pname);
+}
+
+static GLboolean _glIsEnabled(GLenum cap) {
+  if (cap == GL_BLEND) {
+    return enable_blend;
+  } else if (cap == GL_SCISSOR_TEST) {
+    return enable_scissor_test;
+  } else {
+    return GL_FALSE;
+  }
 }
 
 static void _glTexParameterf(GLenum target, GLenum pname, GLfloat param) {}
@@ -629,11 +658,11 @@ EGLBoolean (*epoxy_eglMakeCurrent)(EGLDisplay dpy,
                                    EGLSurface read,
                                    EGLContext ctx);
 EGLBoolean (*epoxy_eglSwapBuffers)(EGLDisplay dpy, EGLSurface surface);
-EGLImage (*epoxy_eglCreateImage)(EGLDisplay dpy,
-                                 EGLContext ctx,
-                                 EGLenum target,
-                                 EGLClientBuffer buffer,
-                                 const EGLAttrib* attrib_list);
+EGLImageKHR (*epoxy_eglCreateImageKHR)(EGLDisplay dpy,
+                                       EGLContext ctx,
+                                       EGLenum target,
+                                       EGLClientBuffer buffer,
+                                       const EGLint* attrib_list);
 
 void (*epoxy_glAttachShader)(GLuint program, GLuint shader);
 void (*epoxy_glBindFramebuffer)(GLenum target, GLuint framebuffer);
@@ -709,7 +738,7 @@ static void library_init() {
   epoxy_eglMakeCurrent = _eglMakeCurrent;
   epoxy_eglQueryContext = _eglQueryContext;
   epoxy_eglSwapBuffers = _eglSwapBuffers;
-  epoxy_eglCreateImage = _eglCreateImage;
+  epoxy_eglCreateImageKHR = _eglCreateImageKHR;
 
   epoxy_glAttachShader = _glAttachShader;
   epoxy_glBindFramebuffer = _glBindFramebuffer;
@@ -724,6 +753,8 @@ static void library_init() {
   epoxy_glDeleteRenderbuffers = _glDeleteRenderbuffers;
   epoxy_glDeleteShader = _glDeleteShader;
   epoxy_glDeleteTextures = _glDeleteTextures;
+  epoxy_glDisable = _glDisable;
+  epoxy_glEnable = _glEnable;
   epoxy_glFramebufferRenderbuffer = _glFramebufferRenderbuffer;
   epoxy_glFramebufferTexture2D = _glFramebufferTexture2D;
   epoxy_glGenFramebuffers = _glGenFramebuffers;
@@ -737,6 +768,7 @@ static void library_init() {
   epoxy_glGetShaderiv = _glGetShaderiv;
   epoxy_glGetShaderInfoLog = _glGetShaderInfoLog;
   epoxy_glGetString = _glGetString;
+  epoxy_glIsEnabled = _glIsEnabled;
   epoxy_glLinkProgram = _glLinkProgram;
   epoxy_glRenderbufferStorage = _glRenderbufferStorage;
   epoxy_glShaderSource = _glShaderSource;

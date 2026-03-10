@@ -55,6 +55,7 @@ std::unique_ptr<FlutterSemanticsFlags> ConvertToFlutterSemanticsFlags(
       .is_link = source.isLink,
       .is_slider = source.isSlider,
       .is_keyboard_key = source.isKeyboardKey,
+      .is_accessibility_focus_blocked = source.isAccessibilityFocusBlocked,
   });
 }
 
@@ -341,6 +342,8 @@ void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
       decreased_value_attributes.count,
       decreased_value_attributes.attributes,
       flags_.back().get(),
+      node.headingLevel,
+      node.identifier.c_str(),
   });
 }
 

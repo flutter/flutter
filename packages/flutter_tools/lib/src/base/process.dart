@@ -13,6 +13,7 @@ import 'async_guard.dart';
 import 'exit.dart';
 import 'io.dart';
 import 'logger.dart';
+import 'utils.dart';
 
 typedef StringConverter = String? Function(String string);
 
@@ -561,8 +562,7 @@ class _DefaultProcessUtils implements ProcessUtils {
       environment: environment,
     );
     final StreamSubscription<String> stdoutSubscription = process.stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
+        .transform(utf8LineDecoder)
         .where((String line) => filter == null || filter.hasMatch(line))
         .listen((String line) {
           String? mappedLine = line;
@@ -581,8 +581,7 @@ class _DefaultProcessUtils implements ProcessUtils {
           }
         });
     final StreamSubscription<String> stderrSubscription = process.stderr
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
+        .transform(utf8LineDecoder)
         .where((String line) => filter == null || filter.hasMatch(line))
         .listen((String line) {
           String? mappedLine = line;

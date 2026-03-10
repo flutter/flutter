@@ -4,13 +4,15 @@
 
 import 'package:flutter/material.dart';
 
-import 'package:flutter_api_samples/painting/star_border/star_border.0.dart' as example;
+import 'package:flutter_api_samples/painting/star_border/star_border.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Finder getStartBorderFinder(StarBorder shape) {
     return find.byWidgetPredicate(
-      (Widget widget) => widget is example.ExampleBorder && widget.border == shape,
+      (Widget widget) =>
+          widget is example.ExampleBorder && widget.border == shape,
     );
   }
 
@@ -34,7 +36,9 @@ void main() {
     expect(find.widgetWithText(ElevatedButton, 'Reset'), findsOne);
   });
 
-  testWidgets('StartBorder uses the values from the sliders', (WidgetTester tester) async {
+  testWidgets('StartBorder uses the values from the sliders', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.StarBorderApp());
 
     expect(find.text('0.00'), findsExactly(4));
@@ -108,13 +112,18 @@ Container(
     );
   });
 
-  testWidgets('StartBorder.polygon uses the values from the sliders', (WidgetTester tester) async {
+  testWidgets('StartBorder.polygon uses the values from the sliders', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.StarBorderApp());
 
     expect(find.text('0.00'), findsExactly(4));
     expect(find.text('5.0'), findsOne);
     expect(find.text('0.40'), findsOne);
-    expect(getStartBorderFinder(const StarBorder(side: BorderSide())), findsOne);
+    expect(
+      getStartBorderFinder(const StarBorder(side: BorderSide())),
+      findsOne,
+    );
     expect(
       find.text('''
 Container(
@@ -173,7 +182,9 @@ Container(
     );
   });
 
-  testWidgets('The "Nearest" button rounds the number of points', (WidgetTester tester) async {
+  testWidgets('The "Nearest" button rounds the number of points', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.StarBorderApp());
 
     expect(find.text('5.0'), findsOne);
@@ -190,30 +201,31 @@ Container(
     expect(find.text('12.0'), findsOne);
   });
 
-  testWidgets('The "Reset" button resets the parameters to the default values', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(const example.StarBorderApp());
+  testWidgets(
+    'The "Reset" button resets the parameters to the default values',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const example.StarBorderApp());
 
-    expect(find.text('0.00'), findsExactly(4));
-    expect(find.text('5.0'), findsOne);
-    expect(find.text('0.40'), findsOne);
+      expect(find.text('0.00'), findsExactly(4));
+      expect(find.text('5.0'), findsOne);
+      expect(find.text('0.40'), findsOne);
 
-    // Put all the sliders to the middle.
-    for (int i = 0; i < 6; i++) {
-      await tester.tap(find.byType(Slider).at(i));
+      // Put all the sliders to the middle.
+      for (int i = 0; i < 6; i++) {
+        await tester.tap(find.byType(Slider).at(i));
+        await tester.pump();
+      }
+
+      expect(find.text('0.50'), findsExactly(4));
+      expect(find.text('11.5'), findsOne);
+      expect(find.text('180.00'), findsOne);
+
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Reset'));
       await tester.pump();
-    }
 
-    expect(find.text('0.50'), findsExactly(4));
-    expect(find.text('11.5'), findsOne);
-    expect(find.text('180.00'), findsOne);
-
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Reset'));
-    await tester.pump();
-
-    expect(find.text('0.00'), findsExactly(4));
-    expect(find.text('5.0'), findsOne);
-    expect(find.text('0.40'), findsOne);
-  });
+      expect(find.text('0.00'), findsExactly(4));
+      expect(find.text('5.0'), findsOne);
+      expect(find.text('0.40'), findsOne);
+    },
+  );
 }

@@ -109,6 +109,8 @@ source_set("flutter_linux_sources") {
   public_configs = [ ":disable_warnings" ]
 
   sources = [
+    "fl_accessibility_channel.cc",
+    "fl_accessibility_handler.cc",
     "fl_accessible_node.cc",
     "fl_accessible_text_field.cc",
     "fl_application.cc",
@@ -170,8 +172,6 @@ source_set("flutter_linux_sources") {
     "fl_view_accessible.cc",
     "fl_window_monitor.cc",
     "fl_window_state_monitor.cc",
-    "fl_windowing_channel.cc",
-    "fl_windowing_handler.cc",
     "key_mapping.g.cc",
   ]
 
@@ -221,6 +221,7 @@ executable("flutter_linux_unittests") {
   testonly = true
 
   sources = [
+    "fl_accessibility_handler_test.cc",
     "fl_accessible_node_test.cc",
     "fl_accessible_text_field_test.cc",
     "fl_application_test.cc",
@@ -265,7 +266,6 @@ executable("flutter_linux_unittests") {
     "fl_view_accessible_test.cc",
     "fl_view_test.cc",
     "fl_window_state_monitor_test.cc",
-    "fl_windowing_handler_test.cc",
     "key_mapping_test.cc",
     "testing/fl_mock_binary_messenger.cc",
     "testing/fl_test.cc",

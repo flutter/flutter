@@ -115,7 +115,7 @@ class FrameTimingRecorder {
       _buildFinishMicros != null && _rasterStartMicros != null && _rasterFinishMicros != null,
       'Attempted to submit an incomplete timings.',
     );
-    final ui.FrameTiming timing = ui.FrameTiming(
+    final timing = ui.FrameTiming(
       vsyncStart: _vsyncStartMicros,
       buildStart: _buildStartMicros,
       buildFinish: _buildFinishMicros!,

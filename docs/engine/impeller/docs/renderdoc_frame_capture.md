@@ -7,7 +7,7 @@
    If the RenderDoc installed from your package manager crashes on startup, consider [building from source](https://github.com/baldurk/renderdoc/blob/v1.x/docs/CONTRIBUTING/Compiling.md).
 
 2. The next step would be to run the application you wish the capture the frames of.
-   Typically these would be one of the [playground tests](https://github.com/flutter/engine/tree/main/impeller/playground),
+   Typically these would be one of the [playground tests](https://github.com/flutter/flutter/tree/main/engine/src/flutter/impeller/playground),
    for example [those in entity_unittests.cc](https://github.com/flutter/flutter/blob/main/engine/src/flutter/impeller/entity/entity_unittests.cc).
    To build these, do:
 
@@ -47,6 +47,31 @@
 
    ![Renderdoc Capture](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/renderdoc_frame_capture/render-doc-capture.avif)
 
-_See also:_
+## RenderDoc on Android
+
+RenderDoc can be used on a debug-mode Flutter app running on Android.
+
+1. First use `flutter run` to build and install the debug-mode app apk onto the Android device.
+    - The app can use the default engine
+    or it can [use a local engine](https://github.com/flutter/flutter/blob/main/docs/engine/Debugging-the-engine.md#running-a-flutter-app-with-a-local-engine).
+    - To debug an app with Impeller explicitly enabled or disabled,
+    specify an `EnableImpeller` value in your `AndroidManifest.xml` as described
+    [here](https://github.com/flutter/flutter/blob/main/engine/src/flutter/impeller/README.md#android).
+      - **Note**: Any `--(no-)enable-impeller` flag used with `flutter run` will not be retained when the app is launched from RenderDoc.
+
+2. Follow the RenderDoc [Android How To](https://renderdoc.org/docs/how/how_android_capture.html)
+   to connect RenderDoc to your Android device and select your app to debug.
+     - Click the `...` button at the end of the "Executable Path" input field
+       to choose from available installed app packages on the device.
+
+3. Click "Launch".
+   If everything is working, the app should begin running on your device.
+   Capturing frames works in exactly the same way as described above for
+   debugging a Linux executable.
+
+## See also
 
  * [Learning to Read GPU Frame Captures](https://github.com/flutter/flutter/blob/main/docs/engine/impeller/docs/read_frame_captures.md)
+ * The official [RenderDoc documentation](https://renderdoc.org/docs/index.html)
+   * Particularly the [Quick Start](https://renderdoc.org/docs/getting_started/quick_start.html)
+     and [How do I...?](https://renderdoc.org/docs/how/index.html) guides

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 
@@ -859,21 +858,8 @@ abstract class Device {
       ]);
     }
 
-    // Calculate column widths
-    final indices = List<int>.generate(table[0].length - 1, (int i) => i);
-    List<int> widths = indices.map<int>((int i) => 0).toList();
-    for (final row in table) {
-      widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
-    }
-
     // Join columns into lines of text
-    return <String>[
-      for (final List<String> row in table)
-        indices
-            .map<String>((int i) => row[i].padRight(widths[i]))
-            .followedBy(<String>[row.last])
-            .join(' • '),
-    ];
+    return formatTable(table);
   }
 
   static Future<void> printDevices(
@@ -987,6 +973,7 @@ class DebuggingOptions {
     this.webBrowserFlags = const <String>[],
     this.webEnableExpressionEvaluation = false,
     this.webLaunchUrl,
+    bool? webCrossOriginIsolation,
     WebRendererMode? webRenderer,
     this.webUseWasm = false,
     this.vmserviceOutFile,
@@ -995,6 +982,7 @@ class DebuggingOptions {
     this.enableFlutterGpu = false,
     this.enableVulkanValidation = false,
     this.uninstallFirst = false,
+    this.uninstallApp = true,
     this.enableDartProfiling = true,
     this.profileStartup = false,
     this.enableEmbedderApi = false,
@@ -1004,8 +992,10 @@ class DebuggingOptions {
     this.ipv6 = false,
     this.google3WorkspaceRoot,
     this.printDtd = false,
+    this.enableLocalDiscovery = false,
     this.webDevServerConfig,
   }) : debuggingEnabled = true,
+       webCrossOriginIsolation = webCrossOriginIsolation ?? webUseWasm,
        webRenderer = webRenderer ?? WebRendererMode.getDefault(useWasm: webUseWasm);
 
   DebuggingOptions.disabled(
@@ -1019,6 +1009,7 @@ class DebuggingOptions {
     this.webBrowserDebugPort,
     this.webBrowserFlags = const <String>[],
     this.webLaunchUrl,
+    bool? webCrossOriginIsolation,
     WebRendererMode? webRenderer,
     this.webUseWasm = false,
     this.traceAllowlist,
@@ -1026,12 +1017,14 @@ class DebuggingOptions {
     this.enableFlutterGpu = false,
     this.enableVulkanValidation = false,
     this.uninstallFirst = false,
+    this.uninstallApp = true,
     this.enableDartProfiling = true,
     this.profileStartup = false,
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
     this.debugLogsDirectoryPath,
     this.webDevServerConfig,
+    this.enableLocalDiscovery = false,
   }) : debuggingEnabled = false,
        useTestFonts = false,
        startPaused = false,
@@ -1056,6 +1049,7 @@ class DebuggingOptions {
        devToolsServerAddress = null,
        vmserviceOutFile = null,
        webEnableExpressionEvaluation = false,
+       webCrossOriginIsolation = webCrossOriginIsolation ?? webUseWasm,
        nativeNullAssertions = false,
        enableDevTools = false,
        ipv6 = false,
@@ -1098,6 +1092,7 @@ class DebuggingOptions {
     required this.webBrowserFlags,
     required this.webEnableExpressionEvaluation,
     required this.webLaunchUrl,
+    required this.webCrossOriginIsolation,
     required this.webRenderer,
     required this.webUseWasm,
     required this.vmserviceOutFile,
@@ -1106,6 +1101,7 @@ class DebuggingOptions {
     required this.enableFlutterGpu,
     required this.enableVulkanValidation,
     required this.uninstallFirst,
+    required this.uninstallApp,
     required this.enableDartProfiling,
     required this.profileStartup,
     required this.enableEmbedderApi,
@@ -1115,6 +1111,7 @@ class DebuggingOptions {
     required this.ipv6,
     required this.google3WorkspaceRoot,
     required this.printDtd,
+    required this.enableLocalDiscovery,
     this.webDevServerConfig,
   });
 
@@ -1160,12 +1157,19 @@ class DebuggingOptions {
   final bool ipv6;
   final String? google3WorkspaceRoot;
   final bool printDtd;
+  final bool enableLocalDiscovery;
   final WebDevServerConfig? webDevServerConfig;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
   ///
   /// This is not implemented for every platform.
   final bool uninstallFirst;
+
+  /// Whether the tool should uninstall the app after running.
+  ///
+  /// This is currently only implemented for integration tests.
+  /// Defaults to true.
+  final bool uninstallApp;
 
   /// Whether to run the browser in headless mode.
   ///
@@ -1185,6 +1189,10 @@ class DebuggingOptions {
 
   /// Allow developers to customize the browser's launch URL
   final String? webLaunchUrl;
+
+  /// Whether to enable cross-origin isolation. This is on by default for the
+  /// skwasm renderer.
+  final bool webCrossOriginIsolation;
 
   /// Which web renderer to use for the debugging session
   final WebRendererMode webRenderer;
@@ -1287,6 +1295,7 @@ class DebuggingOptions {
     'webBrowserFlags': webBrowserFlags,
     'webEnableExpressionEvaluation': webEnableExpressionEvaluation,
     'webLaunchUrl': webLaunchUrl,
+    'webCrossOriginIsolation': webCrossOriginIsolation,
     'webHeaders': webDevServerConfig?.headers ?? <String, String>{},
     'webRenderer': webRenderer.name,
     'webUseWasm': webUseWasm,
@@ -1295,6 +1304,7 @@ class DebuggingOptions {
     'enableImpeller': enableImpeller.asBool,
     'enableFlutterGpu': enableFlutterGpu,
     'enableVulkanValidation': enableVulkanValidation,
+    'uninstallApp': uninstallApp,
     'enableDartProfiling': enableDartProfiling,
     'profileStartup': profileStartup,
     'enableEmbedderApi': enableEmbedderApi,
@@ -1314,6 +1324,7 @@ class DebuggingOptions {
     // with the google3 checked in binary.
     'dumpSkpOnShaderCompilation': false,
     'cacheSkSL': false,
+    'enableLocalDiscovery': enableLocalDiscovery,
   };
 
   static DebuggingOptions fromJson(Map<String, Object?> json, BuildInfo buildInfo) =>
@@ -1354,6 +1365,7 @@ class DebuggingOptions {
         webBrowserFlags: (json['webBrowserFlags']! as List<dynamic>).cast<String>(),
         webEnableExpressionEvaluation: json['webEnableExpressionEvaluation']! as bool,
         webLaunchUrl: json['webLaunchUrl'] as String?,
+        webCrossOriginIsolation: json['webCrossOriginIsolation']! as bool,
         webRenderer: WebRendererMode.values.byName(json['webRenderer']! as String),
         webUseWasm: json['webUseWasm']! as bool,
         vmserviceOutFile: json['vmserviceOutFile'] as String?,
@@ -1362,6 +1374,7 @@ class DebuggingOptions {
         enableFlutterGpu: json['enableFlutterGpu']! as bool,
         enableVulkanValidation: (json['enableVulkanValidation'] as bool?) ?? false,
         uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
+        uninstallApp: (json['uninstallApp'] as bool?) ?? true,
         enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
         profileStartup: (json['profileStartup'] as bool?) ?? false,
         enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,
@@ -1371,16 +1384,11 @@ class DebuggingOptions {
         ipv6: (json['ipv6'] as bool?) ?? false,
         google3WorkspaceRoot: json['google3WorkspaceRoot'] as String?,
         printDtd: (json['printDtd'] as bool?) ?? false,
+        enableLocalDiscovery: (json['enableLocalDiscovery'] as bool?) ?? false,
         webDevServerConfig: WebDevServerConfig(
           port: json['port'] is int ? json['port']! as int : 8080,
           host: json['hostname'] is String ? json['hostname']! as String : 'localhost',
-
-          https: (json['tlsCertPath'] != null || json['tlsCertKeyPath'] != null)
-              ? HttpsConfig(
-                  certPath: json['tlsCertPath'] as String?,
-                  certKeyPath: json['tlsCertKeyPath'] as String?,
-                )
-              : null,
+          https: HttpsConfig.parse(json['tlsCertPath'], json['tlsCertKeyPath']),
           headers: (json['webHeaders']! as Map<dynamic, dynamic>).cast<String, String>(),
         ),
       );

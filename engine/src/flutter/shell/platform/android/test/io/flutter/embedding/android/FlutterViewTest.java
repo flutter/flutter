@@ -6,6 +6,9 @@ package io.flutter.embedding.android;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertNotSame;
+import static junit.framework.TestCase.assertNull;
+import static junit.framework.TestCase.assertSame;
 import static junit.framework.TestCase.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -36,10 +39,14 @@ import android.media.ImageReader;
 import android.os.Build;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
+import android.util.SparseArray;
 import android.view.DisplayCutout;
+import android.view.RoundedCorner;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewStructure;
 import android.view.WindowInsets;
+import android.view.autofill.AutofillValue;
 import android.widget.FrameLayout;
 import androidx.core.util.Consumer;
 import androidx.test.core.app.ActivityScenario;
@@ -55,6 +62,7 @@ import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.plugin.platform.PlatformViewsController2;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
@@ -164,12 +172,12 @@ public class FlutterViewTest {
 
     flutterView.attachToFlutterEngine(flutterEngine);
     flutterView.convertToImageView();
-    assertEquals(flutterView.getChildCount(), 2);
+    assertEquals(2, flutterView.getChildCount());
     View view = flutterView.getChildAt(1);
     assertTrue(view instanceof FlutterImageView);
 
     flutterView.detachFromFlutterEngine();
-    assertEquals(flutterView.getChildCount(), 1);
+    assertEquals(1, flutterView.getChildCount());
     view = flutterView.getChildAt(0);
     assertFalse(view instanceof FlutterImageView);
   }
@@ -189,13 +197,13 @@ public class FlutterViewTest {
 
     flutterView.attachToFlutterEngine(flutterEngine);
 
-    assertFalse(flutterView.renderSurface == imageViewMock);
+    assertNotSame(flutterView.renderSurface, imageViewMock);
 
     flutterView.convertToImageView();
-    assertTrue(flutterView.renderSurface == imageViewMock);
+    assertSame(flutterView.renderSurface, imageViewMock);
 
     flutterView.detachFromFlutterEngine();
-    assertFalse(flutterView.renderSurface == imageViewMock);
+    assertNotSame(flutterView.renderSurface, imageViewMock);
     verify(imageViewMock, times(1)).closeImageReader();
   }
 
@@ -219,7 +227,7 @@ public class FlutterViewTest {
     assertFalse(flutterView.renderSurface instanceof FlutterImageView);
 
     flutterView.detachFromFlutterEngine();
-    assertEquals(null, flutterView.getCurrentImageSurface());
+    assertNull(flutterView.getCurrentImageSurface());
 
     // Invoke all registered `FlutterUiDisplayListener` callback
     mockFlutterJni.onFirstFrame();
@@ -243,9 +251,6 @@ public class FlutterViewTest {
     verify(flutterEngine, times(2)).getSettingsChannel();
   }
 
-  @SuppressWarnings("deprecation")
-  // Robolectric.setupActivity
-  // TODO(reidbaker): https://github.com/flutter/flutter/issues/133151
   @Test
   public void onConfigurationChanged_notifiesEngineOfDisplaySize() {
     try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
@@ -1066,7 +1071,7 @@ public class FlutterViewTest {
     Method getAccessibilityViewIdMethod = View.class.getDeclaredMethod("getAccessibilityViewId");
     Integer accessibilityViewId = (Integer) getAccessibilityViewIdMethod.invoke(flutterView);
 
-    assertEquals(null, flutterView.findViewByAccessibilityIdTraversal(accessibilityViewId));
+    assertNull(flutterView.findViewByAccessibilityIdTraversal(accessibilityViewId));
   }
 
   @Test
@@ -1204,6 +1209,52 @@ public class FlutterViewTest {
     validateViewportMetricPadding(viewportMetricsCaptor, 100, 0, 100, 0);
   }
 
+  @Test
+  @TargetApi(31)
+  @Config(minSdk = API_LEVELS.API_31)
+  public void itSetsDisplayCornerRadii() {
+    FlutterView flutterView = new FlutterView(ctx);
+    FlutterEngine flutterEngine = spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+    FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
+    when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
+
+    // When the new FlutterView is attached to the engine without any system insets, the corner
+    // radii default to -1.
+    flutterView.attachToFlutterEngine(flutterEngine);
+    ArgumentCaptor<FlutterRenderer.ViewportMetrics> viewportMetricsCaptor =
+        ArgumentCaptor.forClass(FlutterRenderer.ViewportMetrics.class);
+    verify(flutterRenderer).setViewportMetrics(viewportMetricsCaptor.capture());
+    assertEquals(-1, viewportMetricsCaptor.getValue().displayCornerRadiusTopLeft);
+    assertEquals(-1, viewportMetricsCaptor.getValue().displayCornerRadiusTopRight);
+    assertEquals(-1, viewportMetricsCaptor.getValue().displayCornerRadiusBottomRight);
+    assertEquals(-1, viewportMetricsCaptor.getValue().displayCornerRadiusBottomLeft);
+
+    // Simulate the system applying a window inset.
+    WindowInsets windowInsets =
+        new WindowInsets.Builder()
+            .setRoundedCorner(
+                RoundedCorner.POSITION_TOP_LEFT,
+                new RoundedCorner(RoundedCorner.POSITION_TOP_LEFT, 1, 1, 1))
+            .setRoundedCorner(
+                RoundedCorner.POSITION_TOP_RIGHT,
+                new RoundedCorner(RoundedCorner.POSITION_TOP_RIGHT, 2, 2, 2))
+            .setRoundedCorner(
+                RoundedCorner.POSITION_BOTTOM_RIGHT,
+                new RoundedCorner(RoundedCorner.POSITION_BOTTOM_RIGHT, 3, 3, 3))
+            .setRoundedCorner(
+                RoundedCorner.POSITION_BOTTOM_LEFT,
+                new RoundedCorner(RoundedCorner.POSITION_BOTTOM_LEFT, 4, 4, 4))
+            .build();
+    flutterView.onApplyWindowInsets(windowInsets);
+
+    // Verify.
+    verify(flutterRenderer, times(3)).setViewportMetrics(viewportMetricsCaptor.capture());
+    assertEquals(1, viewportMetricsCaptor.getValue().displayCornerRadiusTopLeft);
+    assertEquals(2, viewportMetricsCaptor.getValue().displayCornerRadiusTopRight);
+    assertEquals(3, viewportMetricsCaptor.getValue().displayCornerRadiusBottomRight);
+    assertEquals(4, viewportMetricsCaptor.getValue().displayCornerRadiusBottomLeft);
+  }
+
   // TODO(mattcarroll): turn this into an e2e test. GitHub #42990
   @Test
   public void itSendsDarkPlatformBrightnessToFlutter() {
@@ -1303,6 +1354,45 @@ public class FlutterViewTest {
     assertEquals(SettingsChannel.PlatformBrightness.light, reportedBrightness.get());
   }
 
+  @Test
+  public void onMeasure_whenWrapContent_sendsCorrectViewportMetrics() {
+    FlutterSurfaceView flutterSurfaceView = spy(new FlutterSurfaceView(ctx));
+    FlutterView flutterView = new FlutterView(ctx, flutterSurfaceView);
+    flutterView.isContentSizingEnabled = true;
+    FlutterEngine flutterEngine = spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+    FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
+    when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
+    flutterView.onMeasure(
+        View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+        View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+
+    flutterView.onSizeChanged(1, 1, 0, 0);
+    flutterView.attachToFlutterEngine(flutterEngine);
+
+    ArgumentCaptor<FlutterRenderer.ViewportMetrics> viewportMetricsCaptor =
+        ArgumentCaptor.forClass(FlutterRenderer.ViewportMetrics.class);
+    verify(flutterRenderer, times(1)).setViewportMetrics(viewportMetricsCaptor.capture());
+    FlutterRenderer.ViewportMetrics metrics = viewportMetricsCaptor.getValue();
+    assertEquals(0, metrics.minWidth);
+    assertEquals(FlutterView.CONTENT_SIZING_MAX, metrics.maxWidth);
+    assertEquals(0, metrics.minHeight);
+    assertEquals(FlutterView.CONTENT_SIZING_MAX, metrics.maxHeight);
+  }
+
+  @Test
+  public void resizeEngineView_resizesTheSurfaceView() {
+    FlutterSurfaceView flutterSurfaceView = spy(new FlutterSurfaceView(ctx));
+    FlutterView flutterView = new FlutterView(ctx, flutterSurfaceView);
+    FlutterEngine flutterEngine = spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+    FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
+    when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
+    flutterView.attachToFlutterEngine(flutterEngine);
+
+    clearInvocations(flutterSurfaceView);
+    flutterView.flutterUiResizeListener.resizeEngineView(100, 200);
+    verify(flutterSurfaceView, times(1)).setLayoutParams(any());
+  }
+
   @SuppressWarnings("deprecation")
   private void setExpectedDisplayRotation(int rotation) {
     ShadowDisplay myDisplay =
@@ -1377,5 +1467,33 @@ public class FlutterViewTest {
     public int getWindowSystemUiVisibility() {
       return View.SYSTEM_UI_FLAG_FULLSCREEN;
     }
+  }
+
+  /**
+   * Test that autofill methods do nothing when TextInputPlugin is null. This verifies that no
+   * NullPointerException is thrown and the plugin methods are not called.
+   */
+  @Test
+  public void autofill_doesNothingWhenTextInputPluginIsNull() throws Exception {
+    // Setup: Create FlutterView without attaching to engine
+    // This simulates the case where textInputPlugin is null (e.g., when
+    // attachToEngineAutomatically is false)
+    FlutterView flutterView = new FlutterView(ctx);
+
+    // Verify textInputPlugin is null (not initialized)
+    Field textInputPluginField = FlutterView.class.getDeclaredField("textInputPlugin");
+    textInputPluginField.setAccessible(true);
+    assertNull(textInputPluginField.get(flutterView));
+
+    // Test onProvideAutofillVirtualStructure - should not throw NPE
+    ViewStructure structure = mock(ViewStructure.class);
+    int flags = 0;
+    flutterView.onProvideAutofillVirtualStructure(structure, flags);
+    // No exception should be thrown
+
+    // Test autofill - should not throw NPE
+    SparseArray<AutofillValue> values = mock(SparseArray.class);
+    flutterView.autofill(values);
+    // No exception should be thrown
   }
 }

@@ -46,9 +46,11 @@ typedef DebugPrintCallback = void Function(String? message, {int? wrapWidth});
 ///
 ///   * [DebugPrintCallback], for function parameters and usage details.
 ///   * [debugPrintThrottled], the default implementation.
+///   * [ErrorToConsoleDumper], for error messages dumped to the console.
 DebugPrintCallback debugPrint = debugPrintThrottled;
 
 /// Alternative implementation of [debugPrint] that does not throttle.
+///
 /// Used by tests.
 void debugPrintSynchronously(String? message, {int? wrapWidth}) {
   if (message != null && wrapWidth != null) {
@@ -63,8 +65,9 @@ void debugPrintSynchronously(String? message, {int? wrapWidth}) {
   }
 }
 
-/// Implementation of [debugPrint] that throttles messages. This avoids dropping
-/// messages on platforms that rate-limit their logging (for example, Android).
+/// Implementation of [debugPrint] that throttles messages.
+///
+/// This avoids dropping messages on platforms that rate-limit their logging (for example, Android).
 ///
 /// If `wrapWidth` is not null, the message is wrapped using [debugWordWrap].
 void debugPrintThrottled(String? message, {int? wrapWidth}) {
@@ -145,12 +148,12 @@ Iterable<String> debugWordWrap(String message, int width, {String wrapIndent = '
   if (message.length < width || message.trimLeft()[0] == '#') {
     return <String>[message];
   }
-  final List<String> wrapped = <String>[];
+  final wrapped = <String>[];
   final Match prefixMatch = _indentPattern.matchAsPrefix(message)!;
   final String prefix = wrapIndent + ' ' * prefixMatch.group(0)!.length;
-  int start = 0;
-  int startForLengthCalculations = 0;
-  bool addPrefix = false;
+  var start = 0;
+  var startForLengthCalculations = 0;
+  var addPrefix = false;
   int index = prefix.length;
   _WordWrapParseMode mode = _WordWrapParseMode.inSpace;
   late int lastWordStart;

@@ -286,8 +286,8 @@ void main() {
   testWidgets('inserting and removing an item when overscrolled', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/62890
 
-    const double itemExtent = 100.0;
-    final UniqueKey key = UniqueKey();
+    const itemExtent = 100.0;
+    final key = UniqueKey();
     final Finder finder = find.byKey(key);
     Widget build({required bool twoItems}) {
       return Directionality(
@@ -295,9 +295,8 @@ void main() {
         child: ScrollConfiguration(
           behavior: const RangeMaintainingTestScrollBehavior(),
           child: Align(
-            child: SizedBox(
-              width: 100.0,
-              height: 100.0,
+            child: SizedBox.square(
+              dimension: 100.0,
               child: ListView(
                 children: <Widget>[
                   SizedBox(

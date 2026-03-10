@@ -14,7 +14,7 @@ void main() {
     late List<Uri> uriConnections;
 
     setUp(() {
-      final List<Map<String, dynamic>> flutterViewCannedResponses = <Map<String, dynamic>>[
+      final flutterViewCannedResponses = <Map<String, dynamic>>[
         <String, dynamic>{
           'views': <Map<String, dynamic>>[
             <String, dynamic>{'type': 'FlutterView', 'id': 'flutterView0'},
@@ -57,7 +57,7 @@ void main() {
       uriConnections = <Uri>[];
       Future<vms.VmService> fakeVmConnectionFunction(Uri uri, {Duration? timeout}) {
         return Future<vms.VmService>(() async {
-          final FakeVmService service = FakeVmService();
+          final service = FakeVmService();
           fakeVmServices.add(service);
           uriConnections.add(uri);
           service.flutterListViews = vms.Response.parse(flutterViewCannedResponses[uri.port]);
@@ -76,7 +76,7 @@ void main() {
     });
 
     test('end-to-end with one vm connection and flutter view query', () async {
-      int port = 0;
+      var port = 0;
       Future<PortForwarder> fakePortForwardingFunction(
         String address,
         int remotePort, [
@@ -84,7 +84,7 @@ void main() {
         String? configFile,
       ]) {
         return Future<PortForwarder>(() {
-          final FakePortForwarder pf = FakePortForwarder();
+          final pf = FakePortForwarder();
           forwardedPorts.add(pf);
           pf.port = port++;
           pf.remotePort = remotePort;
@@ -93,7 +93,7 @@ void main() {
       }
 
       fuchsiaPortForwardingFunction = fakePortForwardingFunction;
-      final FakeSshCommandRunner fakeRunner = FakeSshCommandRunner();
+      final fakeRunner = FakeSshCommandRunner();
       // Adds some extra junk to make sure the strings will be cleaned up.
       fakeRunner.iqueryResponse = <String>[
         '[',
@@ -160,7 +160,7 @@ void main() {
     });
 
     test('end-to-end with one vm and remote open port', () async {
-      int port = 0;
+      var port = 0;
       Future<PortForwarder> fakePortForwardingFunction(
         String address,
         int remotePort, [
@@ -168,7 +168,7 @@ void main() {
         String? configFile,
       ]) {
         return Future<PortForwarder>(() {
-          final FakePortForwarder pf = FakePortForwarder();
+          final pf = FakePortForwarder();
           forwardedPorts.add(pf);
           pf.port = port++;
           pf.remotePort = remotePort;
@@ -178,7 +178,7 @@ void main() {
       }
 
       fuchsiaPortForwardingFunction = fakePortForwardingFunction;
-      final FakeSshCommandRunner fakeRunner = FakeSshCommandRunner();
+      final fakeRunner = FakeSshCommandRunner();
       // Adds some extra junk to make sure the strings will be cleaned up.
       fakeRunner.iqueryResponse = <String>[
         '[',
@@ -247,7 +247,7 @@ void main() {
     });
 
     test('end-to-end with one vm and ipv4', () async {
-      int port = 0;
+      var port = 0;
       Future<PortForwarder> fakePortForwardingFunction(
         String address,
         int remotePort, [
@@ -255,7 +255,7 @@ void main() {
         String? configFile,
       ]) {
         return Future<PortForwarder>(() {
-          final FakePortForwarder pf = FakePortForwarder();
+          final pf = FakePortForwarder();
           forwardedPorts.add(pf);
           pf.port = port++;
           pf.remotePort = remotePort;
@@ -264,7 +264,7 @@ void main() {
       }
 
       fuchsiaPortForwardingFunction = fakePortForwardingFunction;
-      final FakeSshCommandRunner fakeRunner = FakeSshCommandRunner();
+      final fakeRunner = FakeSshCommandRunner();
       // Adds some extra junk to make sure the strings will be cleaned up.
       fakeRunner.iqueryResponse = <String>[
         '[',

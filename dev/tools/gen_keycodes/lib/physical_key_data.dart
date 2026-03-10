@@ -39,11 +39,9 @@ class PhysicalKeyData {
 
   /// Parses the given JSON data and populates the data structure from it.
   factory PhysicalKeyData.fromJson(Map<String, dynamic> contentMap) {
-    final Map<String, PhysicalKeyEntry> data = <String, PhysicalKeyEntry>{};
+    final data = <String, PhysicalKeyEntry>{};
     for (final MapEntry<String, dynamic> jsonEntry in contentMap.entries) {
-      final PhysicalKeyEntry entry = PhysicalKeyEntry.fromJsonMapEntry(
-        jsonEntry.value as Map<String, dynamic>,
-      );
+      final entry = PhysicalKeyEntry.fromJsonMapEntry(jsonEntry.value as Map<String, dynamic>);
       data[entry.name] = entry;
     }
     return PhysicalKeyData._(data);
@@ -74,7 +72,7 @@ class PhysicalKeyData {
   /// Converts the data structure into a JSON structure that can be parsed by
   /// [PhysicalKeyData.fromJson].
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> outputMap = <String, dynamic>{};
+    final outputMap = <String, dynamic>{};
     for (final PhysicalKeyEntry entry in _data.values) {
       outputMap[entry.name] = entry.toJson();
     }
@@ -98,14 +96,14 @@ class PhysicalKeyData {
   /// Some keys (notably `MEDIA_EJECT`) can be mapped to more than
   /// one scan code, so the mapping can't just be 1:1, it has to be 1:many.
   static Map<String, List<int>> _readAndroidScanCodes(String keyboardLayout, String nameMap) {
-    final RegExp keyEntry = RegExp(
+    final keyEntry = RegExp(
       r'#?\s*' // Optional comment mark
       r'key\s+' // Literal "key"
       r'(?<id>[0-9]+)\s*' // ID section
       r'"?(?:KEY_)?(?<name>[0-9A-Z_]+|\(undefined\))"?\s*' // Name section
       r'(?<function>FUNCTION)?', // Optional literal "FUNCTION"
     );
-    final Map<String, List<int>> androidNameToScanCodes = <String, List<int>>{};
+    final androidNameToScanCodes = <String, List<int>>{};
     for (final RegExpMatch match in keyEntry.allMatches(keyboardLayout)) {
       if (match.namedGroup('function') == 'FUNCTION') {
         // Skip odd duplicate Android FUNCTION keys (F1-F12 are already defined).
@@ -133,8 +131,8 @@ class PhysicalKeyData {
       String name,
       List<String> androidNames,
     ) {
-      final Set<int> scanCodes = <int>{};
-      for (final String androidName in androidNames) {
+      final scanCodes = <int>{};
+      for (final androidName in androidNames) {
         scanCodes.addAll(androidNameToScanCodes[androidName] ?? <int>[]);
       }
       return MapEntry<String, List<int>>(name, scanCodes.toList()..sort());
@@ -152,8 +150,8 @@ class PhysicalKeyData {
     String input,
     Map<String, List<int>> nameToAndroidScanCodes,
   ) {
-    final Map<int, PhysicalKeyEntry> entries = <int, PhysicalKeyEntry>{};
-    final RegExp usbMapRegExp = RegExp(
+    final entries = <int, PhysicalKeyEntry>{};
+    final usbMapRegExp = RegExp(
       r'DOM_CODE\s*\(\s*'
       r'0[xX](?<usb>[a-fA-F0-9]+),\s*'
       r'0[xX](?<evdev>[a-fA-F0-9]+),\s*'
@@ -167,7 +165,7 @@ class PhysicalKeyData {
       // multiple lines.
       multiLine: true,
     );
-    final RegExp commentRegExp = RegExp(r'//.*$', multiLine: true);
+    final commentRegExp = RegExp(r'//.*$', multiLine: true);
     input = input.replaceAll(commentRegExp, '');
     for (final RegExpMatch match in usbMapRegExp.allMatches(input)) {
       final int usbHidCode = getHex(match.namedGroup('usb')!);
@@ -202,7 +200,7 @@ class PhysicalKeyData {
         existing.otherWebCodes.add(chromiumCode!);
         continue;
       }
-      final PhysicalKeyEntry newEntry = PhysicalKeyEntry(
+      final newEntry = PhysicalKeyEntry(
         usbHidCode: usbHidCode,
         androidScanCodes: nameToAndroidScanCodes[name] ?? <int>[],
         evdevCode: evdevCode == 0 ? null : evdevCode,
@@ -242,8 +240,8 @@ class PhysicalKeyEntry {
 
   /// Populates the key from a JSON map.
   factory PhysicalKeyEntry.fromJsonMapEntry(Map<String, dynamic> map) {
-    final Map<String, dynamic> names = map['names'] as Map<String, dynamic>;
-    final Map<String, dynamic> scanCodes = map['scanCodes'] as Map<String, dynamic>;
+    final names = map['names'] as Map<String, dynamic>;
+    final scanCodes = map['scanCodes'] as Map<String, dynamic>;
     return PhysicalKeyEntry(
       name: names['name'] as String,
       chromiumCode: names['chromium'] as String?,
@@ -357,7 +355,7 @@ class PhysicalKeyEntry {
 
   @override
   String toString() {
-    final String otherWebStr = otherWebCodes.isEmpty
+    final otherWebStr = otherWebCodes.isEmpty
         ? ''
         : ', otherWebCodes: [${otherWebCodes.join(', ')}]';
     return """'$constantName': (name: "$name", usbHidCode: ${toHex(usbHidCode)}, """

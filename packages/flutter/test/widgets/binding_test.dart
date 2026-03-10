@@ -56,6 +56,190 @@ class PushRouteInformationObserver with WidgetsBindingObserver {
   }
 }
 
+class ThrowingObserver with WidgetsBindingObserver {
+  @override
+  Future<AppExitResponse> didRequestAppExit() {
+    throw Exception('Intentional test exception from observer');
+  }
+
+  @override
+  void didChangeMetrics() {
+    throw Exception('Intentional test exception from observer');
+  }
+
+  @override
+  void didChangeTextScaleFactor() {
+    throw Exception('Intentional test exception from observer');
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    throw Exception('Intentional test exception from observer');
+  }
+
+  @override
+  void didChangeAccessibilityFeatures() {
+    throw Exception('Intentional test exception from observer');
+  }
+
+  @override
+  void didChangeLocales(List<Locale>? locales) {
+    throw Exception('Intentional test exception from observer');
+  }
+
+  @override
+  Future<bool> didPopRoute() async {
+    throw Exception('Intentional test exception from observer');
+  }
+
+  @override
+  bool handleStartBackGesture(PredictiveBackEvent backEvent) {
+    throw Exception('Intentional test exception from observer');
+  }
+
+  @override
+  void handleUpdateBackGestureProgress(PredictiveBackEvent backEvent) {
+    throw Exception('Intentional test exception from observer');
+  }
+
+  @override
+  void handleCommitBackGesture() {
+    throw Exception('Intentional test exception from observer');
+  }
+
+  @override
+  void handleCancelBackGesture() {
+    throw Exception('Intentional test exception from observer');
+  }
+
+  @override
+  Future<bool> didPushRouteInformation(RouteInformation routeInformation) {
+    throw Exception('Intentional test exception from observer');
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    throw Exception('Intentional test exception from observer');
+  }
+
+  @override
+  void didChangeViewFocus(ViewFocusEvent event) {
+    throw Exception('Intentional test exception from observer');
+  }
+
+  @override
+  void didHaveMemoryPressure() {
+    throw Exception('Intentional test exception from observer');
+  }
+}
+
+class BackGestureThrowingObserver with WidgetsBindingObserver {
+  @override
+  bool handleStartBackGesture(PredictiveBackEvent backEvent) {
+    return true; // Return true to get tracked for subsequent events
+  }
+
+  @override
+  void handleUpdateBackGestureProgress(PredictiveBackEvent backEvent) {
+    throw Exception('Intentional test exception from observer');
+  }
+
+  @override
+  void handleCommitBackGesture() {
+    throw Exception('Intentional test exception from observer');
+  }
+
+  @override
+  void handleCancelBackGesture() {
+    throw Exception('Intentional test exception from observer');
+  }
+}
+
+class LoggingObserver with WidgetsBindingObserver {
+  LoggingObserver(this.log);
+
+  final List<String> log;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    log.add('didChangeAppLifecycleState');
+  }
+
+  @override
+  void didChangeMetrics() {
+    log.add('didChangeMetrics');
+  }
+
+  @override
+  Future<bool> didPopRoute() async {
+    log.add('didPopRoute');
+    return false;
+  }
+
+  @override
+  Future<AppExitResponse> didRequestAppExit() {
+    log.add('didRequestAppExit');
+    return Future<AppExitResponse>.value(AppExitResponse.exit);
+  }
+
+  @override
+  void didChangeTextScaleFactor() {
+    log.add('didChangeTextScaleFactor');
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    log.add('didChangePlatformBrightness');
+  }
+
+  @override
+  void didChangeAccessibilityFeatures() {
+    log.add('didChangeAccessibilityFeatures');
+  }
+
+  @override
+  void didChangeLocales(List<Locale>? locales) {
+    log.add('didChangeLocales');
+  }
+
+  @override
+  bool handleStartBackGesture(PredictiveBackEvent backEvent) {
+    log.add('handleStartBackGesture');
+    return true;
+  }
+
+  @override
+  void handleUpdateBackGestureProgress(PredictiveBackEvent backEvent) {
+    log.add('handleUpdateBackGestureProgress');
+  }
+
+  @override
+  void handleCommitBackGesture() {
+    log.add('handleCommitBackGesture');
+  }
+
+  @override
+  void handleCancelBackGesture() {
+    log.add('handleCancelBackGesture');
+  }
+
+  @override
+  Future<bool> didPushRouteInformation(RouteInformation routeInformation) {
+    log.add('didPushRouteInformation');
+    return Future<bool>.value(false);
+  }
+
+  @override
+  void didChangeViewFocus(ViewFocusEvent event) {
+    log.add('didChangeViewFocus');
+  }
+
+  @override
+  void didHaveMemoryPressure() {
+    log.add('didHaveMemoryPressure');
+  }
+}
+
 // Implements to make sure all methods get coverage.
 class RentrantObserver implements WidgetsBindingObserver {
   RentrantObserver() {
@@ -66,7 +250,7 @@ class RentrantObserver implements WidgetsBindingObserver {
 
   int removeSelf() {
     active = false;
-    int count = 0;
+    var count = 0;
     while (WidgetsBinding.instance.removeObserver(this)) {
       count += 1;
     }
@@ -176,6 +360,12 @@ class RentrantObserver implements WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     return Future<AppExitResponse>.value(AppExitResponse.exit);
   }
+
+  @override
+  void handleStatusBarTap() {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+  }
 }
 
 void main() {
@@ -191,7 +381,7 @@ void main() {
   testWidgets('Rentrant observer callbacks do not result in exceptions', (
     WidgetTester tester,
   ) async {
-    final RentrantObserver observer = RentrantObserver();
+    final observer = RentrantObserver();
     WidgetsBinding.instance.handleAccessibilityFeaturesChanged();
     WidgetsBinding.instance.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     WidgetsBinding.instance.handleLocaleChanged();
@@ -215,7 +405,7 @@ void main() {
   });
 
   testWidgets('didHaveMemoryPressure callback', (WidgetTester tester) async {
-    final MemoryPressureObserver observer = MemoryPressureObserver();
+    final observer = MemoryPressureObserver();
     WidgetsBinding.instance.addObserver(observer);
     final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{
       'type': 'memoryPressure',
@@ -230,7 +420,7 @@ void main() {
   });
 
   testWidgets('handleLifecycleStateChanged callback', (WidgetTester tester) async {
-    final AppLifecycleStateObserver observer = AppLifecycleStateObserver();
+    final observer = AppLifecycleStateObserver();
     WidgetsBinding.instance.addObserver(observer);
 
     await setAppLifeCycleState(AppLifecycleState.paused);
@@ -287,10 +477,10 @@ void main() {
   });
 
   testWidgets('handleViewFocusChanged callback', (WidgetTester tester) async {
-    final ViewFocusObserver observer = ViewFocusObserver();
+    final observer = ViewFocusObserver();
     WidgetsBinding.instance.addObserver(observer);
 
-    const ViewFocusEvent expectedEvent = ViewFocusEvent(
+    const expectedEvent = ViewFocusEvent(
       viewId: 0,
       state: ViewFocusState.focused,
       direction: ViewFocusDirection.forward,
@@ -303,10 +493,10 @@ void main() {
   });
 
   testWidgets('didPushRoute callback', (WidgetTester tester) async {
-    final PushRouteObserver observer = PushRouteObserver();
+    final observer = PushRouteObserver();
     WidgetsBinding.instance.addObserver(observer);
 
-    const String testRouteName = 'testRouteName';
+    const testRouteName = 'testRouteName';
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRoute', testRouteName),
     );
@@ -315,7 +505,7 @@ void main() {
       message,
       (_) {},
     ))!;
-    final bool decodedResult = const JSONMethodCodec().decodeEnvelope(result) as bool;
+    final decodedResult = const JSONMethodCodec().decodeEnvelope(result) as bool;
 
     expect(decodedResult, true);
     expect(observer.pushedRoute, testRouteName);
@@ -324,10 +514,10 @@ void main() {
   });
 
   testWidgets('didPushRouteInformation calls didPushRoute by default', (WidgetTester tester) async {
-    final PushRouteObserver observer = PushRouteObserver();
+    final observer = PushRouteObserver();
     WidgetsBinding.instance.addObserver(observer);
 
-    const Map<String, dynamic> testRouteInformation = <String, dynamic>{
+    const testRouteInformation = <String, dynamic>{
       'location': 'testRouteName',
       'state': 'state',
       'restorationData': <dynamic, dynamic>{'test': 'config'},
@@ -340,7 +530,7 @@ void main() {
       message,
       (_) {},
     ))!;
-    final bool decodedResult = const JSONMethodCodec().decodeEnvelope(result) as bool;
+    final decodedResult = const JSONMethodCodec().decodeEnvelope(result) as bool;
 
     expect(decodedResult, true);
     expect(observer.pushedRoute, 'testRouteName');
@@ -350,11 +540,11 @@ void main() {
   testWidgets('didPushRouteInformation calls didPushRoute correctly when handling url', (
     WidgetTester tester,
   ) async {
-    final PushRouteObserver observer = PushRouteObserver();
+    final observer = PushRouteObserver();
     WidgetsBinding.instance.addObserver(observer);
 
     // A url without any path.
-    Map<String, dynamic> testRouteInformation = const <String, dynamic>{
+    var testRouteInformation = const <String, dynamic>{
       'location': 'http://hostname',
       'state': 'state',
       'restorationData': <dynamic, dynamic>{'test': 'config'},
@@ -388,13 +578,10 @@ void main() {
   });
 
   testWidgets('didPushRouteInformation callback', (WidgetTester tester) async {
-    final PushRouteInformationObserver observer = PushRouteInformationObserver();
+    final observer = PushRouteInformationObserver();
     WidgetsBinding.instance.addObserver(observer);
 
-    const Map<String, dynamic> testRouteInformation = <String, dynamic>{
-      'location': 'testRouteName',
-      'state': 'state',
-    };
+    const testRouteInformation = <String, dynamic>{'location': 'testRouteName', 'state': 'state'};
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRouteInformation', testRouteInformation),
     );
@@ -409,10 +596,10 @@ void main() {
   });
 
   testWidgets('didPushRouteInformation callback can handle url', (WidgetTester tester) async {
-    final PushRouteInformationObserver observer = PushRouteInformationObserver();
+    final observer = PushRouteInformationObserver();
     WidgetsBinding.instance.addObserver(observer);
 
-    const Map<String, dynamic> testRouteInformation = <String, dynamic>{
+    const testRouteInformation = <String, dynamic>{
       'location': 'http://hostname/abc?def=123&def=456#789',
       'state': 'state',
     };
@@ -434,13 +621,10 @@ void main() {
   });
 
   testWidgets('didPushRouteInformation callback with null state', (WidgetTester tester) async {
-    final PushRouteInformationObserver observer = PushRouteInformationObserver();
+    final observer = PushRouteInformationObserver();
     WidgetsBinding.instance.addObserver(observer);
 
-    const Map<String, dynamic> testRouteInformation = <String, dynamic>{
-      'location': 'testRouteName',
-      'state': null,
-    };
+    const testRouteInformation = <String, dynamic>{'location': 'testRouteName', 'state': null};
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRouteInformation', testRouteInformation),
     );
@@ -458,10 +642,7 @@ void main() {
   testWidgets('pushRouteInformation not handled by observer returns false', (
     WidgetTester tester,
   ) async {
-    const Map<String, dynamic> testRouteInformation = <String, dynamic>{
-      'location': 'testRouteName',
-      'state': null,
-    };
+    const testRouteInformation = <String, dynamic>{'location': 'testRouteName', 'state': null};
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRouteInformation', testRouteInformation),
     );
@@ -471,13 +652,13 @@ void main() {
       message,
       (_) {},
     ))!;
-    final bool decodedResult = const JSONMethodCodec().decodeEnvelope(result) as bool;
+    final decodedResult = const JSONMethodCodec().decodeEnvelope(result) as bool;
 
     expect(decodedResult, false);
   });
 
   testWidgets('pushRoute not handled by observer returns false', (WidgetTester tester) async {
-    const String testRoute = 'testRouteName';
+    const testRoute = 'testRouteName';
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRoute', testRoute),
     );
@@ -487,7 +668,7 @@ void main() {
       message,
       (_) {},
     ))!;
-    final bool decodedResult = const JSONMethodCodec().decodeEnvelope(result) as bool;
+    final decodedResult = const JSONMethodCodec().decodeEnvelope(result) as bool;
 
     expect(decodedResult, false);
   });
@@ -500,7 +681,7 @@ void main() {
       message,
       (_) {},
     ))!;
-    final bool decodedResult = const JSONMethodCodec().decodeEnvelope(result) as bool;
+    final decodedResult = const JSONMethodCodec().decodeEnvelope(result) as bool;
 
     expect(decodedResult, false);
   });
@@ -539,7 +720,7 @@ void main() {
     expect(tester.binding.hasScheduledFrame, isTrue);
     await tester.pump();
 
-    int frameCount = 0;
+    var frameCount = 0;
     tester.binding.addPostFrameCallback((Duration duration) {
       frameCount += 1;
     });
@@ -637,9 +818,452 @@ void main() {
     );
     FlutterError.onError = oldHandler;
     expect(errorDetails.exception, isAssertionError);
-    const String toMatch = '...     Normal element mounting (';
+    const toMatch = '...     Normal element mounting (';
     expect(toMatch.allMatches(errorDetails.toString()).length, 1);
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87875
+
+  group('WidgetsBindingObserver callbacks handle exceptions gracefully', () {
+    testWidgets('didChangeAppLifecycleState', (WidgetTester tester) async {
+      final log = <String>[];
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) => errors.add(details);
+      addTearDown(() {
+        FlutterError.onError = oldHandler;
+      });
+
+      final throwingObserver = ThrowingObserver();
+      final loggingObserver = LoggingObserver(log);
+      WidgetsBinding.instance.addObserver(throwingObserver);
+      WidgetsBinding.instance.addObserver(loggingObserver);
+      addTearDown(() {
+        WidgetsBinding.instance.removeObserver(throwingObserver);
+        WidgetsBinding.instance.removeObserver(loggingObserver);
+      });
+
+      WidgetsBinding.instance.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      expect(log, contains('didChangeAppLifecycleState'));
+      expect(errors, hasLength(1));
+    });
+
+    testWidgets('didPopRoute', (WidgetTester tester) async {
+      final log = <String>[];
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) => errors.add(details);
+      addTearDown(() {
+        FlutterError.onError = oldHandler;
+      });
+
+      final throwingObserver = ThrowingObserver();
+      final loggingObserver = LoggingObserver(log);
+      WidgetsBinding.instance.addObserver(throwingObserver);
+      WidgetsBinding.instance.addObserver(loggingObserver);
+      addTearDown(() {
+        WidgetsBinding.instance.removeObserver(throwingObserver);
+        WidgetsBinding.instance.removeObserver(loggingObserver);
+      });
+
+      await WidgetsBinding.instance.handlePopRoute();
+      expect(log, contains('didPopRoute'));
+      expect(errors, hasLength(1));
+    });
+
+    testWidgets('didChangeMetrics', (WidgetTester tester) async {
+      final log = <String>[];
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) => errors.add(details);
+      addTearDown(() {
+        FlutterError.onError = oldHandler;
+      });
+
+      final throwingObserver = ThrowingObserver();
+      final loggingObserver = LoggingObserver(log);
+      WidgetsBinding.instance.addObserver(throwingObserver);
+      WidgetsBinding.instance.addObserver(loggingObserver);
+      addTearDown(() {
+        WidgetsBinding.instance.removeObserver(throwingObserver);
+        WidgetsBinding.instance.removeObserver(loggingObserver);
+      });
+
+      WidgetsBinding.instance.handleMetricsChanged();
+      expect(log, contains('didChangeMetrics'));
+      expect(errors, hasLength(1));
+    });
+
+    testWidgets('didRequestAppExit', (WidgetTester tester) async {
+      final log = <String>[];
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) => errors.add(details);
+      addTearDown(() {
+        FlutterError.onError = oldHandler;
+      });
+
+      final throwingObserver = ThrowingObserver();
+      final loggingObserver = LoggingObserver(log);
+      WidgetsBinding.instance.addObserver(throwingObserver);
+      WidgetsBinding.instance.addObserver(loggingObserver);
+      addTearDown(() {
+        WidgetsBinding.instance.removeObserver(throwingObserver);
+        WidgetsBinding.instance.removeObserver(loggingObserver);
+      });
+
+      await WidgetsBinding.instance.handleRequestAppExit();
+      expect(log, contains('didRequestAppExit'));
+      expect(errors, hasLength(1));
+    });
+
+    testWidgets('didChangeTextScaleFactor', (WidgetTester tester) async {
+      final log = <String>[];
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) => errors.add(details);
+      addTearDown(() {
+        FlutterError.onError = oldHandler;
+      });
+
+      final throwingObserver = ThrowingObserver();
+      final loggingObserver = LoggingObserver(log);
+      WidgetsBinding.instance.addObserver(throwingObserver);
+      WidgetsBinding.instance.addObserver(loggingObserver);
+      addTearDown(() {
+        WidgetsBinding.instance.removeObserver(throwingObserver);
+        WidgetsBinding.instance.removeObserver(loggingObserver);
+      });
+
+      WidgetsBinding.instance.handleTextScaleFactorChanged();
+      expect(log, contains('didChangeTextScaleFactor'));
+      expect(errors, hasLength(1));
+    });
+
+    testWidgets('didChangePlatformBrightness', (WidgetTester tester) async {
+      final log = <String>[];
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) => errors.add(details);
+      addTearDown(() {
+        FlutterError.onError = oldHandler;
+      });
+
+      final throwingObserver = ThrowingObserver();
+      final loggingObserver = LoggingObserver(log);
+      WidgetsBinding.instance.addObserver(throwingObserver);
+      WidgetsBinding.instance.addObserver(loggingObserver);
+      addTearDown(() {
+        WidgetsBinding.instance.removeObserver(throwingObserver);
+        WidgetsBinding.instance.removeObserver(loggingObserver);
+      });
+
+      WidgetsBinding.instance.handlePlatformBrightnessChanged();
+      expect(log, contains('didChangePlatformBrightness'));
+      expect(errors, hasLength(1));
+    });
+
+    testWidgets('didChangeAccessibilityFeatures', (WidgetTester tester) async {
+      final log = <String>[];
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) => errors.add(details);
+      addTearDown(() {
+        FlutterError.onError = oldHandler;
+      });
+
+      final throwingObserver = ThrowingObserver();
+      final loggingObserver = LoggingObserver(log);
+      WidgetsBinding.instance.addObserver(throwingObserver);
+      WidgetsBinding.instance.addObserver(loggingObserver);
+      addTearDown(() {
+        WidgetsBinding.instance.removeObserver(throwingObserver);
+        WidgetsBinding.instance.removeObserver(loggingObserver);
+      });
+
+      WidgetsBinding.instance.handleAccessibilityFeaturesChanged();
+      expect(log, contains('didChangeAccessibilityFeatures'));
+      expect(errors, hasLength(1));
+    });
+
+    testWidgets('didChangeLocales', (WidgetTester tester) async {
+      final log = <String>[];
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) => errors.add(details);
+      addTearDown(() {
+        FlutterError.onError = oldHandler;
+      });
+
+      final throwingObserver = ThrowingObserver();
+      final loggingObserver = LoggingObserver(log);
+      WidgetsBinding.instance.addObserver(throwingObserver);
+      WidgetsBinding.instance.addObserver(loggingObserver);
+      addTearDown(() {
+        WidgetsBinding.instance.removeObserver(throwingObserver);
+        WidgetsBinding.instance.removeObserver(loggingObserver);
+      });
+
+      WidgetsBinding.instance.handleLocaleChanged();
+      expect(log, contains('didChangeLocales'));
+      expect(errors, hasLength(1));
+    });
+
+    testWidgets('handleStartBackGesture', (WidgetTester tester) async {
+      final log = <String>[];
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) => errors.add(details);
+      addTearDown(() {
+        FlutterError.onError = oldHandler;
+      });
+
+      final throwingObserver = ThrowingObserver();
+      final loggingObserver = LoggingObserver(log);
+      WidgetsBinding.instance.addObserver(throwingObserver);
+      WidgetsBinding.instance.addObserver(loggingObserver);
+      addTearDown(() {
+        WidgetsBinding.instance.removeObserver(throwingObserver);
+        WidgetsBinding.instance.removeObserver(loggingObserver);
+      });
+
+      final ByteData startBackGestureMessage = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall('startBackGesture', <String, dynamic>{
+          'touchOffset': <double>[5.0, 300.0],
+          'progress': 0.0,
+          'swipeEdge': 0,
+        }),
+      );
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        startBackGestureMessage,
+        (ByteData? _) {},
+      );
+      expect(log, contains('handleStartBackGesture'));
+      expect(errors, hasLength(1));
+    });
+
+    testWidgets('didPushRouteInformation', (WidgetTester tester) async {
+      final log = <String>[];
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) => errors.add(details);
+      addTearDown(() {
+        FlutterError.onError = oldHandler;
+      });
+
+      final throwingObserver = ThrowingObserver();
+      final loggingObserver = LoggingObserver(log);
+      WidgetsBinding.instance.addObserver(throwingObserver);
+      WidgetsBinding.instance.addObserver(loggingObserver);
+      addTearDown(() {
+        WidgetsBinding.instance.removeObserver(throwingObserver);
+        WidgetsBinding.instance.removeObserver(loggingObserver);
+      });
+
+      const testRouteInformation = <String, dynamic>{'location': 'testRouteName', 'state': 'state'};
+      final ByteData pushRouteMessage = const JSONMethodCodec().encodeMethodCall(
+        const MethodCall('pushRouteInformation', testRouteInformation),
+      );
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/navigation',
+        pushRouteMessage,
+        (ByteData? _) {},
+      );
+      expect(log, contains('didPushRouteInformation'));
+      expect(errors, hasLength(1));
+    });
+
+    testWidgets('didChangeViewFocus', (WidgetTester tester) async {
+      final log = <String>[];
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) => errors.add(details);
+      addTearDown(() {
+        FlutterError.onError = oldHandler;
+      });
+
+      final throwingObserver = ThrowingObserver();
+      final loggingObserver = LoggingObserver(log);
+      WidgetsBinding.instance.addObserver(throwingObserver);
+      WidgetsBinding.instance.addObserver(loggingObserver);
+      addTearDown(() {
+        WidgetsBinding.instance.removeObserver(throwingObserver);
+        WidgetsBinding.instance.removeObserver(loggingObserver);
+      });
+
+      WidgetsBinding.instance.handleViewFocusChanged(
+        const ViewFocusEvent(
+          viewId: 0,
+          state: ViewFocusState.focused,
+          direction: ViewFocusDirection.forward,
+        ),
+      );
+      expect(log, contains('didChangeViewFocus'));
+      expect(errors, hasLength(1));
+    });
+
+    testWidgets('didHaveMemoryPressure', (WidgetTester tester) async {
+      final log = <String>[];
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) => errors.add(details);
+      addTearDown(() {
+        FlutterError.onError = oldHandler;
+      });
+
+      final throwingObserver = ThrowingObserver();
+      final loggingObserver = LoggingObserver(log);
+      WidgetsBinding.instance.addObserver(throwingObserver);
+      WidgetsBinding.instance.addObserver(loggingObserver);
+      addTearDown(() {
+        WidgetsBinding.instance.removeObserver(throwingObserver);
+        WidgetsBinding.instance.removeObserver(loggingObserver);
+      });
+
+      WidgetsBinding.instance.handleMemoryPressure();
+      expect(log, contains('didHaveMemoryPressure'));
+      expect(errors, hasLength(1));
+    });
+
+    testWidgets('handleUpdateBackGestureProgress', (WidgetTester tester) async {
+      final log = <String>[];
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) => errors.add(details);
+      addTearDown(() {
+        FlutterError.onError = oldHandler;
+      });
+
+      final backGestureObserver = BackGestureThrowingObserver();
+      final loggingObserver = LoggingObserver(log);
+      WidgetsBinding.instance.addObserver(backGestureObserver);
+      WidgetsBinding.instance.addObserver(loggingObserver);
+      addTearDown(() {
+        WidgetsBinding.instance.removeObserver(backGestureObserver);
+        WidgetsBinding.instance.removeObserver(loggingObserver);
+      });
+
+      // First send startBackGesture to get the observer tracked
+      final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall('startBackGesture', <String, dynamic>{
+          'touchOffset': <double>[5.0, 300.0],
+          'progress': 0.0,
+          'swipeEdge': 0,
+        }),
+      );
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        startMessage,
+        (ByteData? _) {},
+      );
+
+      // Now test updateBackGestureProgress
+      final ByteData updateMessage = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall('updateBackGestureProgress', <String, dynamic>{
+          'x': 100.0,
+          'y': 300.0,
+          'progress': 0.35,
+          'swipeEdge': 0,
+        }),
+      );
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        updateMessage,
+        (ByteData? _) {},
+      );
+      expect(log, contains('handleUpdateBackGestureProgress'));
+      expect(errors, hasLength(1));
+    });
+
+    testWidgets('handleCommitBackGesture', (WidgetTester tester) async {
+      final log = <String>[];
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) => errors.add(details);
+      addTearDown(() {
+        FlutterError.onError = oldHandler;
+      });
+
+      final backGestureObserver = BackGestureThrowingObserver();
+      final loggingObserver = LoggingObserver(log);
+      WidgetsBinding.instance.addObserver(backGestureObserver);
+      WidgetsBinding.instance.addObserver(loggingObserver);
+      addTearDown(() {
+        WidgetsBinding.instance.removeObserver(backGestureObserver);
+        WidgetsBinding.instance.removeObserver(loggingObserver);
+      });
+
+      // First send startBackGesture to get the observer tracked
+      final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall('startBackGesture', <String, dynamic>{
+          'touchOffset': <double>[5.0, 300.0],
+          'progress': 0.0,
+          'swipeEdge': 0,
+        }),
+      );
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        startMessage,
+        (ByteData? _) {},
+      );
+
+      // Now test commitBackGesture
+      final ByteData commitMessage = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall('commitBackGesture'),
+      );
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        commitMessage,
+        (ByteData? _) {},
+      );
+      expect(log, contains('handleCommitBackGesture'));
+      expect(errors, hasLength(1));
+    });
+
+    testWidgets('handleCancelBackGesture', (WidgetTester tester) async {
+      final log = <String>[];
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) => errors.add(details);
+      addTearDown(() {
+        FlutterError.onError = oldHandler;
+      });
+
+      final backGestureObserver = BackGestureThrowingObserver();
+      final loggingObserver = LoggingObserver(log);
+      WidgetsBinding.instance.addObserver(backGestureObserver);
+      WidgetsBinding.instance.addObserver(loggingObserver);
+      addTearDown(() {
+        WidgetsBinding.instance.removeObserver(backGestureObserver);
+        WidgetsBinding.instance.removeObserver(loggingObserver);
+      });
+
+      // First send startBackGesture to get the observer tracked
+      final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall('startBackGesture', <String, dynamic>{
+          'touchOffset': <double>[5.0, 300.0],
+          'progress': 0.0,
+          'swipeEdge': 0,
+        }),
+      );
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        startMessage,
+        (ByteData? _) {},
+      );
+
+      // Now test cancelBackGesture
+      final ByteData cancelMessage = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall('cancelBackGesture'),
+      );
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        cancelMessage,
+        (ByteData? _) {},
+      );
+      expect(log, contains('handleCancelBackGesture'));
+      expect(errors, hasLength(1));
+    });
+  });
 }
 
 class TestStatefulWidget extends StatefulWidget {

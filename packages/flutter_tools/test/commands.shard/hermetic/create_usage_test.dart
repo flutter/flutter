@@ -24,8 +24,8 @@ import '../../src/test_flutter_command_runner.dart';
 import '../../src/testbed.dart';
 
 class FakePub extends Fake implements Pub {
-  var calledGetOffline = 0;
-  var calledOnline = 0;
+  int calledGetOffline = 0;
+  int calledOnline = 0;
 
   @override
   Future<void> get({
@@ -129,6 +129,27 @@ void main() {
               'flutter_tools',
               'templates',
               'plugin_cocoapods',
+            ),
+            globals.fs.path.join(
+              'flutter',
+              'packages',
+              'flutter_tools',
+              'templates',
+              'plugin_swift_package_manager',
+            ),
+            globals.fs.path.join(
+              'flutter',
+              'packages',
+              'flutter_tools',
+              'templates',
+              'plugin_darwin_cocoapods',
+            ),
+            globals.fs.path.join(
+              'flutter',
+              'packages',
+              'flutter_tools',
+              'templates',
+              'plugin_darwin_spm',
             ),
           ];
           for (final templatePath in templatePaths) {
@@ -281,6 +302,14 @@ void main() {
         ),
       },
     );
+
+    testUsingContext('plugin_ffi template is marked as deprecated in help', () {
+      final command = CreateCommand();
+      final String? templateHelp =
+          command.argParser.options['template']?.allowedHelp?['plugin_ffi'];
+      expect(templateHelp, contains('(deprecated)'));
+      expect(templateHelp, contains('Use "package_ffi" instead.'));
+    });
   });
 }
 

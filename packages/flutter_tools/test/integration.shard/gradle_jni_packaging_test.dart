@@ -11,6 +11,8 @@ import 'package:flutter_tools/src/build_info.dart';
 import '../src/common.dart';
 import 'test_utils.dart';
 
+/// This test requires `FLUTTER_ROOT` env variable to be set if running using `dart test` and not
+/// `flutter test`.
 void main() {
   late Directory tempDir;
 
@@ -40,43 +42,157 @@ void main() {
           .childFile('libflutter.so'),
       exists,
     );
-
+    // Verify that libflutter.so is packaged in the APK for Flutter supported architectures.
+    expect(_checkLibIsInApk(projectDir, 'lib/arm64-v8a/libflutter.so'), true);
+    expect(_checkLibIsInApk(projectDir, 'lib/x86_64/libflutter.so'), true);
+    expect(_checkLibIsInApk(projectDir, 'lib/armeabi-v7a/libflutter.so'), true);
     // Verify that libflutter.so is not packaged in the APK for x86 architecture.
     expect(_checkLibIsInApk(projectDir, 'lib/x86/libflutter.so'), false);
   });
 
-  testWithoutContext('abiFilters provided by the user take precedence over the default', () async {
-    final Directory projectDir = createProjectWithThirdpartyLib(tempDir);
-    final String buildGradleContents = projectDir
-        .childFile('android/app/build.gradle.kts')
-        .readAsStringSync();
+  testWithoutContext(
+    'abiFilters provided by the user in buildTypes can override Flutter defaults',
+    () async {
+      final Directory projectDir = createProjectWithThirdpartyLib(tempDir);
+      final String buildGradleContents = projectDir
+          .childFile('android/app/build.gradle.kts')
+          .readAsStringSync();
 
-    // Modify the project's build.gradle.kts file to include abiFilters for a single ABI only.
-    final String updatedBuildGradleContents = buildGradleContents.replaceFirstMapped(
-      RegExp(r'(buildTypes\s*\{\s*release\s*\{)([^}]*)\}', dotAll: true),
-      (Match match) {
-        final String before = match.group(1)!;
-        final String body = match.group(2)!;
-        const ndkBlock = '''
+      // Modify the project's build.gradle.kts file to include abiFilters for a single ABI only.
+      final String updatedBuildGradleContents = buildGradleContents.replaceFirstMapped(
+        RegExp(r'(buildTypes\s*\{\s*release\s*\{)([^}]*)\}', dotAll: true),
+        (Match match) {
+          final String before = match.group(1)!;
+          final String body = match.group(2)!;
+          const ndkBlock = '''
                 ndk {
                     abiFilters.clear()
                     abiFilters.addAll(listOf("arm64-v8a"))
                 }
     ''';
-        return '$before$body$ndkBlock        }';
-      },
-    );
-    projectDir
-        .childFile('android/app/build.gradle.kts')
-        .writeAsStringSync(updatedBuildGradleContents);
+          return '$before$body$ndkBlock        }';
+        },
+      );
+      projectDir
+          .childFile('android/app/build.gradle.kts')
+          .writeAsStringSync(updatedBuildGradleContents);
 
-    processManager.runSync(<String>[flutterBin, 'build', 'apk'], workingDirectory: projectDir.path);
+      processManager.runSync(<String>[
+        flutterBin,
+        'build',
+        'apk',
+        '-P',
+        'disable-abi-filtering=true',
+      ], workingDirectory: projectDir.path);
 
-    expect(_checkLibIsInApk(projectDir, 'lib/arm64-v8a/libflutter.so'), true);
-    expect(_checkLibIsInApk(projectDir, 'lib/x86_64/libflutter.so'), false);
-    expect(_checkLibIsInApk(projectDir, 'lib/armeabi-v7a/libflutter.so'), false);
-    expect(_checkLibIsInApk(projectDir, 'lib/x86/libflutter.so'), false);
-  });
+      expect(_checkLibIsInApk(projectDir, 'lib/arm64-v8a/libflutter.so'), true);
+      expect(_checkLibIsInApk(projectDir, 'lib/x86_64/libflutter.so'), false);
+      expect(_checkLibIsInApk(projectDir, 'lib/armeabi-v7a/libflutter.so'), false);
+      expect(_checkLibIsInApk(projectDir, 'lib/x86/libflutter.so'), false);
+    },
+  );
+
+  testWithoutContext(
+    'abiFilters provided by the user in defaultConfig take precedence over flutter',
+    () async {
+      final Directory projectDir = createProjectWithThirdpartyLib(tempDir);
+      final String buildGradleContents = projectDir
+          .childFile('android/app/build.gradle.kts')
+          .readAsStringSync();
+
+      // Modify the project's build.gradle.kts file to include abiFilters for a single ABI only.
+      final String updatedBuildGradleContents = buildGradleContents.replaceFirstMapped(
+        RegExp(r'(defaultConfig\s*\{)([^}]*)\}', dotAll: true),
+        (Match match) {
+          final String before = match.group(1)!;
+          final String body = match.group(2)!;
+          const ndkBlock = '''
+                ndk {
+                    abiFilters.clear()
+                    abiFilters.addAll(listOf("arm64-v8a"))
+                }
+    ''';
+          return '$before$body$ndkBlock        }';
+        },
+      );
+      projectDir
+          .childFile('android/app/build.gradle.kts')
+          .writeAsStringSync(updatedBuildGradleContents);
+
+      processManager.runSync(<String>[
+        flutterBin,
+        'build',
+        'apk',
+      ], workingDirectory: projectDir.path);
+
+      expect(_checkLibIsInApk(projectDir, 'lib/arm64-v8a/libflutter.so'), true);
+      expect(_checkLibIsInApk(projectDir, 'lib/x86_64/libflutter.so'), false);
+      expect(_checkLibIsInApk(projectDir, 'lib/armeabi-v7a/libflutter.so'), false);
+      expect(_checkLibIsInApk(projectDir, 'lib/x86/libflutter.so'), false);
+    },
+  );
+
+  testWithoutContext(
+    'abiFilters in product flavors provided by the user take precedence over the default',
+    () async {
+      final Directory projectDir = createProjectWithThirdpartyLib(tempDir);
+      final String buildGradleContents = projectDir
+          .childFile('android/app/build.gradle.kts')
+          .readAsStringSync();
+
+      const productFlavorsBlock = '''
+    flavorDimensions += listOf("device")
+    productFlavors {
+        create("arm64") {
+            dimension = "device"
+            ndk {
+                abiFilters.clear()
+                abiFilters.addAll(listOf("arm64-v8a"))
+            }
+        }
+        create("armeabi") {
+            dimension = "device"
+            ndk {
+                abiFilters.clear()
+                abiFilters.addAll(listOf("armeabi-v7a"))
+            }
+        }
+    }''';
+      // Modify the project's build.gradle.kts file to include abiFilters for product flavors.
+      final String updatedBuildGradleContents = buildGradleContents.replaceFirstMapped(
+        RegExp(r'^(android\s*\{)', multiLine: true),
+        (Match match) => '${match.group(1)!}\n$productFlavorsBlock',
+      );
+      projectDir
+          .childFile('android/app/build.gradle.kts')
+          .writeAsStringSync(updatedBuildGradleContents);
+
+      processManager.runSync(<String>[
+        flutterBin,
+        'build',
+        'apk',
+        '--release',
+        '--flavor',
+        'arm64',
+        '-P',
+        'disable-abi-filtering=true',
+      ], workingDirectory: projectDir.path);
+
+      expect(
+        _checkLibIsInApk(projectDir, 'lib/arm64-v8a/libflutter.so', productFlavor: 'arm64'),
+        true,
+      );
+      expect(
+        _checkLibIsInApk(projectDir, 'lib/x86_64/libflutter.so', productFlavor: 'arm64'),
+        false,
+      );
+      expect(
+        _checkLibIsInApk(projectDir, 'lib/armeabi-v7a/libflutter.so', productFlavor: 'arm64'),
+        false,
+      );
+      expect(_checkLibIsInApk(projectDir, 'lib/x86/libflutter.so', productFlavor: 'arm64'), false);
+    },
+  );
 }
 
 Directory createProjectWithThirdpartyLib(Directory workingDir) {
@@ -118,6 +234,7 @@ bool _checkLibIsInApk(
   Directory appDir,
   String filename, {
   BuildMode buildMode = BuildMode.release,
+  String productFlavor = '',
 }) {
   final File localPropertiesFile = appDir.childDirectory('android').childFile('local.properties');
   if (!localPropertiesFile.existsSync()) {
@@ -139,9 +256,15 @@ bool _checkLibIsInApk(
       .childFile(Platform.isWindows ? 'apkanalyzer.bat' : 'apkanalyzer')
       .path;
 
-  final File apkFile = appDir
-      .childDirectory('build/app/outputs/apk/${buildMode.cliName}')
-      .childFile('app-${buildMode.cliName}.apk');
+  final apkName = (productFlavor.isEmpty)
+      ? 'app-${buildMode.cliName}.apk'
+      : 'app-$productFlavor-${buildMode.cliName}.apk';
+
+  final String apkDir = (productFlavor.isEmpty)
+      ? buildMode.cliName
+      : '$productFlavor/${buildMode.cliName}';
+
+  final File apkFile = appDir.childDirectory('build/app/outputs/apk/$apkDir').childFile(apkName);
 
   if (!apkFile.existsSync()) {
     throw StateError('APK file not found at ${apkFile.path}');

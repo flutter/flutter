@@ -10,7 +10,7 @@
 #endif
 
 #if defined(SK_FONTMGR_FREETYPE_DIRECTORY_AVAILABLE)
-#include "include/ports/SkFontMgr_directory.h"
+#include "third_party/skia/include/ports/SkFontMgr_directory.h"
 #endif
 
 #if defined(SK_FONTMGR_FREETYPE_EMPTY_AVAILABLE)
@@ -20,7 +20,8 @@
 namespace txt {
 
 std::vector<std::string> GetDefaultFontFamilies() {
-  return {"Ubuntu", "Cantarell", "DejaVu Sans", "Liberation Sans", "Arial"};
+  return {"Ubuntu",      "Adwaita Sans",    "Cantarell",
+          "DejaVu Sans", "Liberation Sans", "Arial"};
 }
 
 sk_sp<SkFontMgr> GetDefaultFontManager(uint32_t font_initialization_data) {

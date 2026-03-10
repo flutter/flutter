@@ -29,6 +29,7 @@ class ServiceProtocol {
   static const std::string_view kGetSkSLsExtensionName;
   static const std::string_view kEstimateRasterCacheMemoryExtensionName;
   static const std::string_view kReloadAssetFonts;
+  static const std::string_view kGetPipelineUsageExtensionName;
 
   class Handler {
    public:

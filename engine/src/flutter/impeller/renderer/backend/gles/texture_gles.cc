@@ -40,6 +40,7 @@ static bool IsDepthStencilFormat(PixelFormat format) {
     case PixelFormat::kB10G10R10XR:
     case PixelFormat::kB10G10R10XRSRGB:
     case PixelFormat::kB10G10R10A10XR:
+    case PixelFormat::kR32Float:
       return false;
   }
   FML_UNREACHABLE();
@@ -67,7 +68,7 @@ struct TexImage2DData {
   GLenum type = GL_NONE;
   std::shared_ptr<const fml::Mapping> data;
 
-  explicit TexImage2DData(PixelFormat pixel_format) {
+  explicit TexImage2DData(PixelFormat pixel_format, bool supports_bgra) {
     switch (pixel_format) {
       case PixelFormat::kA8UNormInt:
         internal_format = GL_ALPHA;
@@ -79,13 +80,27 @@ struct TexImage2DData {
         external_format = GL_RED;
         type = GL_UNSIGNED_BYTE;
         break;
-      case PixelFormat::kR8G8B8A8UNormInt:
       case PixelFormat::kB8G8R8A8UNormInt:
-      case PixelFormat::kR8G8B8A8UNormIntSRGB:
       case PixelFormat::kB8G8R8A8UNormIntSRGB:
+        if (supports_bgra) {
+          internal_format = GL_BGRA_EXT;
+          external_format = GL_BGRA_EXT;
+        } else {
+          internal_format = GL_RGBA;
+          external_format = GL_RGBA;
+        }
+        type = GL_UNSIGNED_BYTE;
+        break;
+      case PixelFormat::kR8G8B8A8UNormInt:
+      case PixelFormat::kR8G8B8A8UNormIntSRGB:
         internal_format = GL_RGBA;
         external_format = GL_RGBA;
         type = GL_UNSIGNED_BYTE;
+        break;
+      case PixelFormat::kR32Float:
+        internal_format = GL_R32F;
+        external_format = GL_RGBA;
+        type = GL_FLOAT;
         break;
       case PixelFormat::kR32G32B32A32Float:
         internal_format = GL_RGBA32F;
@@ -120,8 +135,9 @@ struct TexImage2DData {
   }
 
   TexImage2DData(PixelFormat pixel_format,
-                 std::shared_ptr<const fml::Mapping> mapping)
-      : TexImage2DData(pixel_format) {
+                 std::shared_ptr<const fml::Mapping> mapping,
+                 bool supports_bgra)
+      : TexImage2DData(pixel_format, supports_bgra) {
     data = std::move(mapping);
   }
 
@@ -325,8 +341,11 @@ bool TextureGLES::OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
       break;
   }
 
-  auto data = std::make_shared<TexImage2DData>(tex_descriptor.format,
-                                               std::move(mapping));
+  auto data = std::make_shared<TexImage2DData>(
+      tex_descriptor.format, std::move(mapping),
+      /*supports_bgra=*/
+      reactor_->GetProcTable().GetDescription()->HasExtension(
+          "GL_EXT_texture_format_BGRA8888"));
   if (!data || !data->IsValid()) {
     VALIDATION_LOG << "Invalid texture format.";
     return false;
@@ -401,6 +420,7 @@ static std::optional<GLenum> ToRenderBufferFormat(PixelFormat format) {
     case PixelFormat::kB10G10R10XRSRGB:
     case PixelFormat::kB10G10R10XR:
     case PixelFormat::kB10G10R10A10XR:
+    case PixelFormat::kR32Float:
       return std::nullopt;
   }
   FML_UNREACHABLE();
@@ -441,7 +461,11 @@ void TextureGLES::InitializeContentsIfNecessary() const {
   switch (type_) {
     case Type::kTexture:
     case Type::kTextureMultisampled: {
-      TexImage2DData tex_data(GetTextureDescriptor().format);
+      TexImage2DData tex_data(
+          GetTextureDescriptor().format,
+          /*supports_bgra=*/
+          reactor_->GetProcTable().GetDescription()->HasExtension(
+              "GL_EXT_texture_format_BGRA8888"));
       if (!tex_data.IsValid()) {
         VALIDATION_LOG << "Invalid format for texture image.";
         return;

@@ -14,6 +14,7 @@
 /// @docImport 'scaffold.dart';
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/widgets.dart';
 
@@ -220,7 +221,7 @@ class Drawer extends StatelessWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// Typically a [SliverList].
+  /// Typically a [ListView].
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
@@ -249,19 +250,15 @@ class Drawer extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final DrawerThemeData drawerTheme = DrawerTheme.of(context);
-    String? label = semanticLabel;
-    switch (Theme.of(context).platform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        break;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        label = semanticLabel ?? MaterialLocalizations.of(context).drawerLabel;
-    }
+    final String? label = switch (defaultTargetPlatform) {
+      TargetPlatform.iOS || TargetPlatform.macOS => semanticLabel,
+      TargetPlatform.android ||
+      TargetPlatform.fuchsia ||
+      TargetPlatform.linux ||
+      TargetPlatform.windows => semanticLabel ?? MaterialLocalizations.of(context).drawerLabel,
+    };
     final bool useMaterial3 = Theme.of(context).useMaterial3;
-    final bool isDrawerStart = DrawerController.maybeOf(context)?.alignment != DrawerAlignment.end;
+    final isDrawerStart = DrawerController.maybeOf(context)?.alignment != DrawerAlignment.end;
     final DrawerThemeData defaults = useMaterial3
         ? _DrawerDefaultsM3(context)
         : _DrawerDefaultsM2(context);
@@ -578,7 +575,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   final GlobalKey _drawerKey = GlobalKey();
 
   double get _width {
-    final RenderBox? box = _drawerKey.currentContext?.findRenderObject() as RenderBox?;
+    final box = _drawerKey.currentContext?.findRenderObject() as RenderBox?;
     // return _kWidth if drawer not being shown currently
     return box?.size.width ?? _kWidth;
   }
@@ -684,17 +681,14 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         return const SizedBox.shrink();
       }
     } else {
-      final bool platformHasBackButton;
-      switch (Theme.of(context).platform) {
-        case TargetPlatform.android:
-          platformHasBackButton = true;
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          platformHasBackButton = false;
-      }
+      final bool platformHasBackButton = switch (defaultTargetPlatform) {
+        TargetPlatform.android => true,
+        TargetPlatform.iOS ||
+        TargetPlatform.macOS ||
+        TargetPlatform.fuchsia ||
+        TargetPlatform.linux ||
+        TargetPlatform.windows => false,
+      };
 
       final Color scrimColor =
           widget.scrimColor ?? DrawerTheme.of(context).scrimColor ?? Colors.black54;

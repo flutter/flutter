@@ -112,7 +112,8 @@ class SliderTheme extends InheritedTheme {
 }
 
 /// Describes the conditions under which the value indicator on a [Slider]
-/// will be shown. Used with [SliderThemeData.showValueIndicator].
+/// will be shown. Used in [Slider.showValueIndicator] and
+/// [SliderThemeData.showValueIndicator].
 ///
 /// See also:
 ///
@@ -160,13 +161,15 @@ enum Thumb {
   end,
 }
 
-/// Holds the color, shape, and typography values for a Material Design slider
-/// theme.
+/// Overrides the default values of visual properties for descendant
+/// [Slider] widgets.
 ///
-/// Use this class to configure a [SliderTheme] widget, or to set the
-/// [ThemeData.sliderTheme] for a [Theme] widget.
+/// Descendant widgets obtain the current [SliderThemeData] object with
+/// [SliderTheme.of]. Instances of [SliderThemeData] can
+/// be customized with [SliderThemeData.copyWith].
 ///
-/// To obtain the current ambient slider theme, use [SliderTheme.of].
+/// Typically a [SliderThemeData] is specified as part of the overall
+/// [Theme] with [ThemeData.sliderTheme].
 ///
 /// This theme is for both the [Slider] and the [RangeSlider]. The properties
 /// that are only for the [Slider] are: [tickMarkShape], [thumbShape],
@@ -333,20 +336,20 @@ class SliderThemeData with Diagnosticable {
   }) {
     // These are Material Design defaults, and are used to derive
     // component Colors (with opacity) from base colors.
-    const int activeTrackAlpha = 0xff;
-    const int inactiveTrackAlpha = 0x3d; // 24% opacity
-    const int secondaryActiveTrackAlpha = 0x8a; // 54% opacity
-    const int disabledActiveTrackAlpha = 0x52; // 32% opacity
-    const int disabledInactiveTrackAlpha = 0x1f; // 12% opacity
-    const int disabledSecondaryActiveTrackAlpha = 0x1f; // 12% opacity
-    const int activeTickMarkAlpha = 0x8a; // 54% opacity
-    const int inactiveTickMarkAlpha = 0x8a; // 54% opacity
-    const int disabledActiveTickMarkAlpha = 0x1f; // 12% opacity
-    const int disabledInactiveTickMarkAlpha = 0x1f; // 12% opacity
-    const int thumbAlpha = 0xff;
-    const int disabledThumbAlpha = 0x52; // 32% opacity
-    const int overlayAlpha = 0x1f; // 12% opacity
-    const int valueIndicatorAlpha = 0xff;
+    const activeTrackAlpha = 0xff;
+    const inactiveTrackAlpha = 0x3d; // 24% opacity
+    const secondaryActiveTrackAlpha = 0x8a; // 54% opacity
+    const disabledActiveTrackAlpha = 0x52; // 32% opacity
+    const disabledInactiveTrackAlpha = 0x1f; // 12% opacity
+    const disabledSecondaryActiveTrackAlpha = 0x1f; // 12% opacity
+    const activeTickMarkAlpha = 0x8a; // 54% opacity
+    const inactiveTickMarkAlpha = 0x8a; // 54% opacity
+    const disabledActiveTickMarkAlpha = 0x1f; // 12% opacity
+    const disabledInactiveTickMarkAlpha = 0x1f; // 12% opacity
+    const thumbAlpha = 0xff;
+    const disabledThumbAlpha = 0x52; // 32% opacity
+    const overlayAlpha = 0x1f; // 12% opacity
+    const valueIndicatorAlpha = 0xff;
 
     return SliderThemeData(
       trackHeight: 2.0,
@@ -911,7 +914,7 @@ class SliderThemeData with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    const SliderThemeData defaultData = SliderThemeData();
+    const defaultData = SliderThemeData();
     properties.add(
       DoubleProperty('trackHeight', trackHeight, defaultValue: defaultData.trackHeight),
     );

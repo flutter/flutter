@@ -249,10 +249,12 @@ def generate_module_output_file_map_fragment(args):
 
   if args.whole_module_optimization:
     fragment = {
+        # In WMO, the Swift driver does not emit reference-dependencies (.swiftdeps).
+        # Do not declare them in the OutputFileMap to avoid Ninja expecting a file
+        # that will never be produced.
         'const-values': f'{out_name}.swiftconstvalues',
         'dependencies': f'{out_name}.d',
         'diagnostics': f'{out_name}.dia',
-        'swift-dependencies': f'{out_name}.swiftdeps',
     }
   else:
     fragment = {

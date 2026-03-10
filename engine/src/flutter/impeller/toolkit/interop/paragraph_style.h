@@ -28,7 +28,7 @@ class ParagraphStyle final
 
   void SetBackground(ScopedObject<Paint> paint);
 
-  void SetFontWeight(txt::FontWeight weight);
+  void SetFontWeight(int weight);
 
   void SetFontStyle(txt::FontStyle style);
 

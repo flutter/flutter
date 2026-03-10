@@ -9,7 +9,6 @@ library;
 
 import 'dart:async';
 import 'dart:ui' as ui;
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -45,7 +44,7 @@ class Evaluation {
       return this;
     }
 
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     if (reason != null && reason!.isNotEmpty) {
       buffer.write(reason);
       buffer.writeln();
@@ -133,7 +132,7 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
 
   @override
   FutureOr<Evaluation> evaluate(WidgetTester tester) {
-    Evaluation result = const Evaluation.pass();
+    var result = const Evaluation.pass();
     for (final RenderView view in tester.binding.renderViews) {
       result += _traverse(view.flutterView, view.owner!.semanticsOwner!.rootSemanticsNode!);
     }
@@ -141,8 +140,8 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
     return result;
   }
 
-  Evaluation _traverse(FlutterView view, SemanticsNode node) {
-    Evaluation result = const Evaluation.pass();
+  Evaluation _traverse(ui.FlutterView view, SemanticsNode node) {
+    var result = const Evaluation.pass();
     node.visitChildren((SemanticsNode child) {
       result += _traverse(view, child);
       return true;
@@ -236,7 +235,7 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
 
   @override
   FutureOr<Evaluation> evaluate(WidgetTester tester) {
-    Evaluation result = const Evaluation.pass();
+    var result = const Evaluation.pass();
 
     for (final RenderView view in tester.binding.renderViews) {
       result += _traverse(view.owner!.semanticsOwner!.rootSemanticsNode!);
@@ -246,7 +245,7 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
   }
 
   Evaluation _traverse(SemanticsNode node) {
-    Evaluation result = const Evaluation.pass();
+    var result = const Evaluation.pass();
     node.visitChildren((SemanticsNode child) {
       result += _traverse(child);
       return true;
@@ -314,9 +313,9 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 
   @override
   Future<Evaluation> evaluate(WidgetTester tester) async {
-    Evaluation result = const Evaluation.pass();
+    var result = const Evaluation.pass();
     for (final RenderView renderView in tester.binding.renderViews) {
-      final OffsetLayer layer = renderView.debugLayer! as OffsetLayer;
+      final layer = renderView.debugLayer! as OffsetLayer;
       final SemanticsNode root = renderView.owner!.semanticsOwner!.rootSemanticsNode!;
 
       late ui.Image image;
@@ -343,10 +342,10 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     ByteData byteData,
     RenderView renderView,
   ) async {
-    Evaluation result = const Evaluation.pass();
+    var result = const Evaluation.pass();
 
     // Skip disabled nodes, as they not required to pass contrast check.
-    final bool isDisabled = node.flagsCollection.isEnabled == ui.Tristate.isFalse;
+    final isDisabled = node.flagsCollection.isEnabled == ui.Tristate.isFalse;
 
     if (node.isInvisible ||
         node.isMergedIntoParent ||
@@ -356,12 +355,12 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     }
 
     final SemanticsData data = node.getSemanticsData();
-    final List<SemanticsNode> children = <SemanticsNode>[];
+    final children = <SemanticsNode>[];
     node.visitChildren((SemanticsNode child) {
       children.add(child);
       return true;
     });
-    for (final SemanticsNode child in children) {
+    for (final child in children) {
       result += await _evaluateNode(child, tester, image, byteData, renderView);
     }
     if (shouldSkipNode(data)) {
@@ -369,7 +368,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     }
     final String text = data.label.isEmpty ? data.value : data.label;
     final Iterable<Element> elements = find.text(text).hitTestable().evaluate();
-    for (final Element element in elements) {
+    for (final element in elements) {
       result += await _evaluateElement(node, element, tester, image, byteData, renderView);
     }
     return result;
@@ -404,7 +403,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     // The semantics node transform will include root view transform, which is
     // not included in renderBox.getTransformTo(null). Manually multiply the
     // root transform to the global transform.
-    final Matrix4 rootTransform = Matrix4.identity();
+    final rootTransform = Matrix4.identity();
     renderView.applyPaintTransform(renderView.child!, rootTransform);
     rootTransform.multiply(globalTransform);
     screenBounds = MatrixUtils.transformRect(rootTransform, renderBox.paintBounds);
@@ -456,7 +455,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       return const Evaluation.pass();
     }
 
-    final _ContrastReport report = _ContrastReport(colorHistogram);
+    final report = _ContrastReport(colorHistogram);
 
     final double contrastRatio = report.contrastRatio();
     final double targetContrastRatio = this.targetContrastRatio(fontSize, bold: isBold);
@@ -596,49 +595,56 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
 
   @override
   Future<Evaluation> evaluate(WidgetTester tester) async {
-    // Compute elements to be evaluated.
-    final List<Element> elements = finder.evaluate().toList();
-    final Map<FlutterView, ui.Image> images = <FlutterView, ui.Image>{};
-    final Map<FlutterView, ByteData> byteDatas = <FlutterView, ByteData>{};
-
     // Collate all evaluations into a final evaluation, then return.
-    Evaluation result = const Evaluation.pass();
-    for (final Element element in elements) {
-      final FlutterView view = tester.viewOf(find.byElementPredicate((Element e) => e == element));
-      final RenderView renderView = tester.binding.renderViews.firstWhere(
-        (RenderView r) => r.flutterView == view,
-      );
-      final OffsetLayer layer = renderView.debugLayer! as OffsetLayer;
+    var result = const Evaluation.pass();
+    final images = <ui.FlutterView, ui.Image>{};
+    try {
+      // Compute elements to be evaluated.
+      final List<Element> elements = finder.evaluate().toList();
+      final byteDatas = <ui.FlutterView, ByteData>{};
 
-      late final ui.Image image;
-      late final ByteData byteData;
-
-      // Obtain a previously rendered image or render one for a new view.
-      await tester.binding.runAsync(() async {
-        image = images[view] ??= await layer.toImage(
-          renderView.paintBounds,
-          // Needs to be the same pixel ratio otherwise our dimensions
-          // won't match the last transform layer.
-          pixelRatio: 1 / view.devicePixelRatio,
+      for (final element in elements) {
+        final ui.FlutterView view = tester.viewOf(
+          find.byElementPredicate((Element e) => e == element),
         );
-        byteData = byteDatas[view] ??= (await image.toByteData())!;
-      });
+        final RenderView renderView = tester.binding.renderViews.firstWhere(
+          (RenderView r) => r.flutterView == view,
+        );
+        final layer = renderView.debugLayer! as OffsetLayer;
 
-      result = result + _evaluateElement(element, byteData, image);
+        late final ui.Image image;
+        late final ByteData byteData;
+
+        // Obtain a previously rendered image or render one for a new view.
+        await tester.binding.runAsync(() async {
+          image = images[view] ??= await layer.toImage(
+            renderView.paintBounds,
+            // Needs to be the same pixel ratio otherwise our dimensions
+            // won't match the last transform layer.
+            pixelRatio: 1 / view.devicePixelRatio,
+          );
+          byteData = byteDatas[view] ??= (await image.toByteData())!;
+        });
+
+        result = result + _evaluateElement(element, byteData, image);
+      }
+    } finally {
+      for (final ui.Image image in images.values) {
+        image.dispose();
+      }
     }
-
     return result;
   }
 
   // How to evaluate a single element.
   Evaluation _evaluateElement(Element element, ByteData byteData, ui.Image image) {
-    final RenderBox renderObject = element.renderObject! as RenderBox;
+    final renderObject = element.renderObject! as RenderBox;
 
     final Rect originalPaintBounds = renderObject.paintBounds;
 
     final Rect inflatedPaintBounds = originalPaintBounds.inflate(4.0);
 
-    final Rect paintBounds = Rect.fromPoints(
+    final paintBounds = Rect.fromPoints(
       renderObject.localToGlobal(inflatedPaintBounds.topLeft),
       renderObject.localToGlobal(inflatedPaintBounds.bottomRight),
     );
@@ -654,7 +660,7 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
       return const Evaluation.pass();
     }
 
-    final _ContrastReport report = _ContrastReport(colorHistogram);
+    final report = _ContrastReport(colorHistogram);
     final double contrastRatio = report.contrastRatio();
 
     if (contrastRatio >= minimumRatio - tolerance) {
@@ -684,8 +690,8 @@ class _ContrastReport {
   factory _ContrastReport(Map<Color, int> colorHistogram) {
     // To determine the lighter and darker color, partition the colors
     // by HSL lightness and then choose the mode from each group.
-    double totalLightness = 0.0;
-    int count = 0;
+    var totalLightness = 0.0;
+    var count = 0;
     for (final MapEntry<Color, int> entry in colorHistogram.entries) {
       totalLightness += HSLColor.fromColor(entry.key).lightness * entry.value;
       count += entry.value;
@@ -747,15 +753,15 @@ Map<Color, int> _colorsWithinRect(ByteData data, Rect paintBounds, int width, in
   final int topY = truePaintBounds.top.floor();
   final int bottomY = truePaintBounds.bottom.ceil();
 
-  final Map<int, int> rgbaToCount = <int, int>{};
+  final rgbaToCount = <int, int>{};
 
   int getPixel(ByteData data, int x, int y) {
     final int offset = (y * width + x) * 4;
     return data.getUint32(offset);
   }
 
-  for (int x = leftX; x < rightX; x++) {
-    for (int y = topY; y < bottomY; y++) {
+  for (var x = leftX; x < rightX; x++) {
+    for (var y = topY; y < bottomY; y++) {
       rgbaToCount.update(getPixel(data, x, y), (int count) => count + 1, ifAbsent: () => 1);
     }
   }

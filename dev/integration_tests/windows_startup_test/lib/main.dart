@@ -11,19 +11,19 @@ import 'package:flutter_driver/driver_extension.dart';
 import 'windows.dart';
 
 void drawHelloWorld(ui.FlutterView view) {
-  final ui.ParagraphStyle style = ui.ParagraphStyle();
-  final ui.ParagraphBuilder paragraphBuilder = ui.ParagraphBuilder(style)..addText('Hello world');
+  final style = ui.ParagraphStyle();
+  final paragraphBuilder = ui.ParagraphBuilder(style)..addText('Hello world');
   final ui.Paragraph paragraph = paragraphBuilder.build();
 
   paragraph.layout(const ui.ParagraphConstraints(width: 100.0));
 
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final ui.Canvas canvas = ui.Canvas(recorder);
+  final recorder = ui.PictureRecorder();
+  final canvas = ui.Canvas(recorder);
 
   canvas.drawParagraph(paragraph, ui.Offset.zero);
 
   final ui.Picture picture = recorder.endRecording();
-  final ui.SceneBuilder sceneBuilder = ui.SceneBuilder()
+  final sceneBuilder = ui.SceneBuilder()
     ..addPicture(ui.Offset.zero, picture)
     ..pop();
 
@@ -56,7 +56,7 @@ void main() async {
 
   // Create a completer to send the window visibility result back to the
   // integration test.
-  final Completer<String> visibilityCompleter = Completer<String>();
+  final visibilityCompleter = Completer<String>();
   enableFlutterDriverExtension(
     handler: (String? message) async {
       if (message == 'verifyWindowVisibility') {
@@ -73,12 +73,32 @@ void main() async {
         // The code points are passed a list of integers through the method channel,
         // which will use the UTF16 to UTF8 utility function to convert them to a
         // std::string, which should equate to the original expected string.
-        const String expected = 'ABCℵ';
-        final Int32List codePoints = Int32List.fromList(expected.codeUnits);
+        const expected = 'ABCℵ';
+        final codePoints = Int32List.fromList(expected.codeUnits);
         final String converted = await testStringConversion(codePoints);
         return (converted == expected)
             ? 'success'
             : 'error: conversion of UTF16 string to UTF8 failed, expected "${expected.codeUnits}" but got "${converted.codeUnits}"';
+      } else if (message == 'verifyNullStringConversion') {
+        // Test that Utf8FromUtf16 handles nullptr gracefully by returning empty string.
+        final String converted = await testNullStringConversion();
+        return converted.isEmpty
+            ? 'success'
+            : 'error: nullptr conversion should return empty string, got "${converted.codeUnits}"';
+      } else if (message == 'verifyEmptyStringConversion') {
+        // Test that Utf8FromUtf16 handles empty string gracefully.
+        final String converted = await testEmptyStringConversion();
+        return converted.isEmpty
+            ? 'success'
+            : 'error: empty string conversion should return empty string, got "${converted.codeUnits}"';
+      } else if (message == 'verifyInvalidUtf16Conversion') {
+        // Test that Utf8FromUtf16 handles invalid UTF-16 (unpaired surrogate) gracefully.
+        // With WC_ERR_INVALID_CHARS flag, WideCharToMultiByte returns 0 for invalid input,
+        // so Utf8FromUtf16 should return an empty string.
+        final String converted = await testInvalidUtf16Conversion();
+        return converted.isEmpty
+            ? 'success'
+            : 'error: invalid UTF-16 conversion should return empty string, got "${converted.codeUnits}"';
       }
 
       throw 'Unrecognized message: $message';
@@ -90,7 +110,7 @@ void main() async {
       throw 'Window should be hidden at startup';
     }
 
-    int frameCount = 0;
+    var frameCount = 0;
     ui.PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
       // Our goal is to verify that it's `drawHelloWorld` that makes the window
       // appear, not anything else. This requires checking the visibility right

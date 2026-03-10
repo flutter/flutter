@@ -13,7 +13,10 @@ void main() {
   ) async {
     await tester.pumpWidget(const example.ExpansionPanelListRadioExampleApp());
 
-    expect(find.widgetWithText(AppBar, 'ExpansionPanelList.radio Sample'), findsOne);
+    expect(
+      find.widgetWithText(AppBar, 'ExpansionPanelList.radio Sample'),
+      findsOne,
+    );
     expect(find.byType(ExpansionPanelList), findsOne);
     for (int i = 0; i < 8; i++) {
       expect(find.widgetWithText(ListTile, 'Panel $i'), findsOne);
