@@ -26,12 +26,12 @@ void main() {
         child: const MaterialApp(home: MyApp()),
       ),
     );
-  } on UnsupportedError catch (e) {
+  } on UnsupportedError catch (_) {
     // TODO(mattkae): Remove this catch block when satellite windows are supported in tests.
     // For now, we need to catch the error so that the API smoke tests pass.
     runApp(
       MaterialApp(
-        home: Scaffold(body: Center(child: Text(e.message ?? 'Unsupported'))),
+        home: Scaffold(body: Center(child: Text('Unsupported'))),
       ),
     );
   }
