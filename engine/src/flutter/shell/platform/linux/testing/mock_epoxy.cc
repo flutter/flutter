@@ -386,7 +386,7 @@ EGLImageKHR _eglCreateImageKHR(EGLDisplay dpy,
 
 EGLBoolean _eglDestroyImageKHR(EGLDisplay dpy, EGLImageKHR image) {
   if (mock) {
-    mock->eglDestroyImageKHR(dpy, image);
+    return mock->eglDestroyImageKHR(dpy, image);
   }
   return EGL_TRUE;
 }
