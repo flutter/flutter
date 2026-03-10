@@ -528,7 +528,7 @@ object FlutterPluginUtils {
         val kgpRegex = """^([^/\n]*?)(?:apply\s+plugin\s*:\s*|id\s*\(?\s*)(['"])(?:kotlin-android|org\.jetbrains\.kotlin\.android)\2(?![^/\n]*\bapply\s*[:(]?\s*false\b)""".toRegex(RegexOption.MULTILINE)
 
         project.rootProject.subprojects {
-            // Accounts for Add-to-app scenarios where ephemeral .android/ should not be adjusted and by default do not apply KGP
+            // Accounts for Add-to-app scenarios where the Flutter Module ephemeral .android/ directory should not be adjusted and by default do not apply KGP
             if (!buildFile.exists() || buildFile.absolutePath.contains(".android")) return@subprojects
 
             val scriptText: String =
