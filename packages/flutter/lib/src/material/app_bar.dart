@@ -835,6 +835,15 @@ class _AppBarState extends State<AppBar> {
     }
     _scrollNotificationObserver = ScrollNotificationObserver.maybeOf(context);
     _scrollNotificationObserver?.addListener(_handleScrollNotification);
+
+    // Reset _scrolledUnder when the scroll context is re-established (e.g.
+    // when the Scaffold body is swapped out). The new content will update
+    // _scrolledUnder via ScrollUpdateNotification on its first scroll event.
+    if (_scrolledUnder) {
+      setState(() {
+        _scrolledUnder = false;
+      });
+    }
   }
 
   @override
