@@ -10,6 +10,10 @@
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/trace_event.h"
 
+// This is because libcxx doesn't support atomic shared_ptr in C++20 yet. This
+// silences warnings on windows.
+#define _SILENCE_CXX20_OLD_SHARED_PTR_ATOMIC_SUPPORT_DEPRECATION_WARNING
+
 namespace flutter {
 
 sk_sp<DlImageTextureRegistry> DlImageTextureRegistry::Make(
