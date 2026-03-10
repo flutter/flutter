@@ -93,7 +93,7 @@ The general process for submitting code to a Flutter repository is as follows:
      If these fail, a Google employee (for example, the PR reviewer) should be contacted
      to check the internal tests and recommend a solution.
 
- 9. Once everything is green and you have an LGTM from the owners of the code you are affecting (or someone to whom they
+9. Once everything is green and you have an LGTM from the owners of the code you are affecting (or someone to whom they
    have delegated), and an LGTM from any other contributor who left comments, add the "autosubmit" label if you're in the flutter-hackers github group. A bot will land the patch when it feels like it. If you're not in the flutter-hackers group a reviewer will add the label for you.
 
 10. Watch the post-commit tests on the [dashboard](https://dashboard.flutter.dev/#/build) to make sure everything passes. If anything
