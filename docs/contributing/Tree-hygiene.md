@@ -69,12 +69,11 @@ The general process for submitting code to a Flutter repository is as follows:
    This doesn’t prohibit the use of coding assistance tools, but what’s submitted does
    need to be a contributor’s original creation.
 
-7. Get your code reviewed (see below). You should probably reach out to the relevant
-   expert(s) for the areas you touched and ask them to review your PR directly.
-   GitHub sometimes recommends specific reviewers; if you're not sure who to ask,
-   that's probably a good place to start.
+7. Get your code reviewed (see below). If you are a team membeer, request review
+   from the relevant expert(s) for the areas you touched. Otherwise, wait for
+   [reviewers to be assigned](#who).
 
-8. Make sure your PR passes all the pre-commit tests. Consider running some of the
+9. Make sure your PR passes all the pre-commit tests. Consider running some of the
    post-commit tests locally (see the
    [devicelab](https://github.com/flutter/flutter/blob/main/dev/devicelab/README.md)
    directory). If any tests break, especially the `customer_testing` tests, please
@@ -94,10 +93,10 @@ The general process for submitting code to a Flutter repository is as follows:
      If these fail, a Google employee (for example, the PR reviewer) should be contacted
      to check the internal tests and recommend a solution.
 
-9. Once everything is green and you have an LGTM from the owners of the code you are affecting (or someone to whom they
+10. Once everything is green and you have an LGTM from the owners of the code you are affecting (or someone to whom they
    have delegated), and an LGTM from any other contributor who left comments, add the "autosubmit" label if you're in the flutter-hackers github group. A bot will land the patch when it feels like it. If you're not in the flutter-hackers group a reviewer will add the label for you.
 
-10. Watch the post-commit tests on the [dashboard](https://dashboard.flutter.dev/#/build) to make sure everything passes. If anything
+11. Watch the post-commit tests on the [dashboard](https://dashboard.flutter.dev/#/build) to make sure everything passes. If anything
    goes wrong, revert your patch and study the problem. You should aim to be the one to revert your patch. You will be racing everyone
    else on the team who will also be trying to revert your patch. (See below for guidance on reverting PRs.)
 
@@ -245,7 +244,7 @@ Code should be reviewed by the owner (tech lead) of the area(s) of the codebase 
 or someone to whom they have delegated that authority.
 If anyone else leaves comments, please also wait for their approval (LGTM) before landing code.
 
-If nobody has reviewed your code after a week, then reach out on our [Chat](Chat.md) channels.
+If nobody has reviewed your code after two weeks, then reach out on our [Chat](Chat.md) channels.
 The `#hackers-new` channel is a good place to ask for help if you're a new contributor.
 
 _For PRs affecting the `material` and `cupertino` libraries, team members are expected to seek reviewers directly;
