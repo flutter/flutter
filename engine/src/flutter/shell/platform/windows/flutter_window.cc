@@ -169,21 +169,26 @@ void FlutterWindow::OnPointerMove(double x,
                                   double y,
                                   FlutterPointerDeviceKind device_kind,
                                   int32_t device_id,
+                                  uint32_t rotation,
+                                  uint32_t pressure,
                                   int modifiers_state) {
   binding_handler_delegate_->OnPointerMove(x, y, device_kind, device_id,
-                                           modifiers_state);
+                                           rotation, pressure, modifiers_state);
 }
 
 void FlutterWindow::OnPointerDown(double x,
                                   double y,
                                   FlutterPointerDeviceKind device_kind,
                                   int32_t device_id,
-                                  UINT button) {
+                                  UINT button,
+                                  uint32_t pressure,
+                                  uint32_t rotation) {
   uint64_t flutter_button = ConvertWinButtonToFlutterButton(button);
   if (flutter_button != 0) {
     binding_handler_delegate_->OnPointerDown(
         x, y, device_kind, device_id,
-        static_cast<FlutterPointerMouseButtons>(flutter_button));
+        static_cast<FlutterPointerMouseButtons>(flutter_button), rotation,
+        pressure);
   }
 }
 
@@ -500,7 +505,6 @@ LRESULT CALLBACK FlutterWindow::WndProc(HWND const window,
     auto that = static_cast<FlutterWindow*>(cs->lpCreateParams);
     that->window_handle_ = window;
     that->text_input_manager_->SetWindowHandle(window);
-    RegisterTouchWindow(window, 0);
   } else if (FlutterWindow* that = GetThisFromHandle(window)) {
     return that->HandleMessage(message, wparam, lparam);
   }
@@ -513,7 +517,7 @@ FlutterWindow::HandleMessage(UINT const message,
                              WPARAM const wparam,
                              LPARAM const lparam) noexcept {
   LPARAM result_lparam = lparam;
-  int xPos = 0, yPos = 0;
+  int x_pos = 0, y_pos = 0;
   UINT width = 0, height = 0;
   UINT button_pressed = 0;
   FlutterPointerDeviceKind device_kind;
@@ -537,47 +541,72 @@ FlutterWindow::HandleMessage(UINT const message,
     case WM_PAINT:
       OnPaint();
       break;
-    case WM_TOUCH: {
-      UINT num_points = LOWORD(wparam);
-      touch_points_.resize(num_points);
-      auto touch_input_handle = reinterpret_cast<HTOUCHINPUT>(lparam);
-      if (GetTouchInputInfo(touch_input_handle, num_points,
-                            touch_points_.data(), sizeof(TOUCHINPUT))) {
-        for (const auto& touch : touch_points_) {
-          // Generate a mapped ID for the Windows-provided touch ID
-          auto touch_id = touch_id_generator_.GetGeneratedId(touch.dwID);
-
-          POINT pt = {TOUCH_COORD_TO_PIXEL(touch.x),
-                      TOUCH_COORD_TO_PIXEL(touch.y)};
-          ScreenToClient(window_handle_, &pt);
-          auto x = static_cast<double>(pt.x);
-          auto y = static_cast<double>(pt.y);
-
-          if (touch.dwFlags & TOUCHEVENTF_DOWN) {
-            OnPointerDown(x, y, kFlutterPointerDeviceKindTouch, touch_id,
-                          WM_LBUTTONDOWN);
-          } else if (touch.dwFlags & TOUCHEVENTF_MOVE) {
-            OnPointerMove(x, y, kFlutterPointerDeviceKindTouch, touch_id, 0);
-          } else if (touch.dwFlags & TOUCHEVENTF_UP) {
-            OnPointerUp(x, y, kFlutterPointerDeviceKindTouch, touch_id,
-                        WM_LBUTTONDOWN);
-            OnPointerLeave(x, y, kFlutterPointerDeviceKindTouch, touch_id);
-            touch_id_generator_.ReleaseNumber(touch.dwID);
+    case WM_POINTERDOWN:
+    case WM_POINTERUPDATE:
+    case WM_POINTERUP:
+    case WM_POINTERLEAVE: {
+      x_pos = GET_X_LPARAM(lparam);
+      y_pos = GET_Y_LPARAM(lparam);
+      auto const x = static_cast<double>(x_pos);
+      auto const y = static_cast<double>(y_pos);
+      auto const pointerId = GET_POINTERID_WPARAM(wparam);
+      POINTER_INFO pointerInfo;
+      if (windows_proc_table_->GetPointerInfo(pointerId, &pointerInfo)) {
+        UINT32 pressure = 0;
+        UINT32 rotation = 0;
+        if (pointerInfo.pointerType == PT_PEN) {
+          POINTER_PEN_INFO penInfo;
+          if (windows_proc_table_->GetPointerPenInfo(pointerId, &penInfo)) {
+            pressure = penInfo.pressure;
+            rotation = penInfo.rotation;
           }
         }
-        CloseTouchInputHandle(touch_input_handle);
+        auto touch_id = touch_id_generator_.GetGeneratedId(pointerId);
+        FlutterPointerDeviceKind device_kind = kFlutterPointerDeviceKindMouse;
+        switch (pointerInfo.pointerType) {
+          case PT_TOUCH:
+            device_kind = kFlutterPointerDeviceKindTouch;
+            break;
+          case PT_PEN:
+            device_kind = kFlutterPointerDeviceKindStylus;
+            break;
+          case PT_MOUSE:
+            device_kind = kFlutterPointerDeviceKindMouse;
+            break;
+          case PT_TOUCHPAD:
+            device_kind = kFlutterPointerDeviceKindTrackpad;
+            break;
+          default:
+            FML_LOG(ERROR) << "Unrecognized device key "
+                           << pointerInfo.pointerType;
+            break;
+        }
+        if (message == WM_POINTERDOWN) {
+          OnPointerDown(x, y, device_kind, touch_id, WM_LBUTTONDOWN, rotation,
+                        pressure);
+        } else if (message == WM_POINTERUPDATE) {
+          OnPointerMove(x, y, device_kind, touch_id, rotation, pressure,
+                        /* modifiers_state=*/0);
+        } else if (message == WM_POINTERUP) {
+          OnPointerUp(x, y, device_kind, touch_id, WM_LBUTTONUP);
+          // keep tracking the pointer (especially important for stylus)
+          // This allows a stylus to "hover" over the window
+        } else if (message == WM_POINTERLEAVE) {
+          OnPointerLeave(x, y, device_kind, touch_id);
+          touch_id_generator_.ReleaseNumber(pointerId);
+        }
       }
-      return 0;
+      break;
     }
     case WM_MOUSEMOVE:
       device_kind = GetFlutterPointerDeviceKind();
       if (device_kind == kFlutterPointerDeviceKindMouse) {
         TrackMouseLeaveEvent(window_handle_);
 
-        xPos = GET_X_LPARAM(lparam);
-        yPos = GET_Y_LPARAM(lparam);
-        mouse_x_ = static_cast<double>(xPos);
-        mouse_y_ = static_cast<double>(yPos);
+        x_pos = GET_X_LPARAM(lparam);
+        y_pos = GET_Y_LPARAM(lparam);
+        mouse_x_ = static_cast<double>(x_pos);
+        mouse_y_ = static_cast<double>(y_pos);
 
         int mods = 0;
         if (wparam & MK_CONTROL) {
@@ -587,7 +616,7 @@ FlutterWindow::HandleMessage(UINT const message,
           mods |= kShift;
         }
         OnPointerMove(mouse_x_, mouse_y_, device_kind, kDefaultPointerDeviceId,
-                      mods);
+                      /*rotation=*/0, /*pressure=*/0, mods);
       }
       break;
     case WM_MOUSELEAVE:
@@ -640,10 +669,11 @@ FlutterWindow::HandleMessage(UINT const message,
       if (message == WM_XBUTTONDOWN) {
         button_pressed = GET_XBUTTON_WPARAM(wparam);
       }
-      xPos = GET_X_LPARAM(lparam);
-      yPos = GET_Y_LPARAM(lparam);
-      OnPointerDown(static_cast<double>(xPos), static_cast<double>(yPos),
-                    device_kind, kDefaultPointerDeviceId, button_pressed);
+      x_pos = GET_X_LPARAM(lparam);
+      y_pos = GET_Y_LPARAM(lparam);
+      OnPointerDown(static_cast<double>(x_pos), static_cast<double>(y_pos),
+                    device_kind, kDefaultPointerDeviceId, button_pressed,
+                    /*rotation=*/0, /*pressure=*/0);
       break;
     case WM_LBUTTONUP:
     case WM_RBUTTONUP:
@@ -661,9 +691,9 @@ FlutterWindow::HandleMessage(UINT const message,
       if (message == WM_XBUTTONUP) {
         button_pressed = GET_XBUTTON_WPARAM(wparam);
       }
-      xPos = GET_X_LPARAM(lparam);
-      yPos = GET_Y_LPARAM(lparam);
-      OnPointerUp(static_cast<double>(xPos), static_cast<double>(yPos),
+      x_pos = GET_X_LPARAM(lparam);
+      y_pos = GET_Y_LPARAM(lparam);
+      OnPointerUp(static_cast<double>(x_pos), static_cast<double>(y_pos),
                   device_kind, kDefaultPointerDeviceId, button_pressed);
       break;
     case WM_MOUSEWHEEL:
@@ -707,8 +737,8 @@ FlutterWindow::HandleMessage(UINT const message,
       break;
     case WM_IME_SETCONTEXT:
       OnImeSetContext(message, wparam, lparam);
-      // Strip the ISC_SHOWUICOMPOSITIONWINDOW bit from lparam before passing it
-      // to DefWindowProc() so that the composition window is hidden since
+      // Strip the ISC_SHOWUICOMPOSITIONWINDOW bit from lparam before passing
+      // it to DefWindowProc() so that the composition window is hidden since
       // Flutter renders the composing string itself.
       result_lparam &= ~ISC_SHOWUICOMPOSITIONWINDOW;
       break;
@@ -844,9 +874,9 @@ void FlutterWindow::OnImeComposition(UINT const message,
     OnComposeCommit();
   }
 
-  // Process GCS_RESULTSTR at fisrt, because Google Japanese Input and ATOK send
-  // both GCS_RESULTSTR and GCS_COMPSTR to commit composed text and send new
-  // composing text.
+  // Process GCS_RESULTSTR at fisrt, because Google Japanese Input and ATOK
+  // send both GCS_RESULTSTR and GCS_COMPSTR to commit composed text and send
+  // new composing text.
   if (lparam & GCS_RESULTSTR) {
     // Commit but don't end composing.
     // Read the committed composing string.

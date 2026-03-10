@@ -248,7 +248,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addEnableFlutterGpuFlag(verboseHelp: verboseHelp);
     addEnableVulkanValidationFlag(verboseHelp: verboseHelp);
     addEnableEmbedderApiFlag(verboseHelp: verboseHelp);
-    addEnableSurfaceControlFlag(verboseHelp: verboseHelp);
   }
 
   bool get traceStartup => boolArg('trace-startup');
@@ -265,7 +264,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get enableVulkanValidation => boolArg('enable-vulkan-validation');
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
-  bool get enableSurfaceControl => boolArg('enable-surface-control');
   bool get enableLocalDiscovery => boolArg(RunCommand.kEnableLocalDiscovery);
 
   @override
@@ -331,7 +329,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         usingCISystem: usingCISystem,
         debugLogsDirectoryPath: debugLogsDirectoryPath,
         webDevServerConfig: webDevServerConfig,
-        enableSurfaceControl: enableSurfaceControl,
         enableLocalDiscovery: enableLocalDiscovery,
       );
     } else {
@@ -395,7 +392,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
         ipv6: boolArg(FlutterCommand.ipv6Flag),
         printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
-        enableSurfaceControl: enableSurfaceControl,
         enableLocalDiscovery: enableLocalDiscovery,
         webDevServerConfig: webDevServerConfig,
       );
@@ -841,6 +837,7 @@ class RunCommand extends RunCommandBase {
           route,
           debuggingOptions,
           hotMode,
+          webDefines: extractWebDefines(),
           applicationBinary: applicationBinaryPath == null
               ? null
               : globals.fs.file(applicationBinaryPath),

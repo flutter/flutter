@@ -114,18 +114,29 @@ void main() {
     command: <String>['xattr', '-r', '-d', 'com.apple.provenance', '/'],
   );
 
-  FakeCommand setUpRsyncCommand({void Function(List<String> command)? onRun}) {
-    return FakeCommand(
-      command: const <String>[
-        'rsync',
-        '-8',
-        '-av',
-        '--delete',
-        'build/ios/Release-iphoneos/Runner.app',
-        'build/ios/iphoneos',
-      ],
-      onRun: onRun,
-    );
+  List<FakeCommand> postBuildCommands({void Function(List<String> command)? onRun}) {
+    return [
+      const FakeCommand(
+        command: <String>[
+          'xattr',
+          '-w',
+          'com.apple.xcode.CreatedByBuildSystem',
+          'true',
+          'build/ios/Release-iphoneos',
+        ],
+      ),
+      FakeCommand(
+        command: const <String>[
+          'rsync',
+          '-8',
+          '-av',
+          '--delete',
+          'build/ios/Release-iphoneos/Runner.app',
+          'build/ios/iphoneos',
+        ],
+        onRun: onRun,
+      ),
+    ];
   }
 
   // Sets up xcresulttool command for Xcode versions below 16.
@@ -317,7 +328,7 @@ void main() {
                 .createSync(recursive: true);
           },
         ),
-        setUpRsyncCommand(),
+        ...postBuildCommands(),
       ]),
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -348,7 +359,7 @@ void main() {
                 .createSync(recursive: true);
           },
         ),
-        setUpRsyncCommand(),
+        ...postBuildCommands(),
       ]);
 
       await createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']);
@@ -395,7 +406,7 @@ void main() {
                 .createSync(recursive: true);
           },
         ),
-        setUpRsyncCommand(),
+        ...postBuildCommands(),
       ]),
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
@@ -434,7 +445,7 @@ void main() {
                 .createSync(recursive: true);
           },
         ),
-        setUpRsyncCommand(),
+        ...postBuildCommands(),
       ]),
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
@@ -466,7 +477,7 @@ void main() {
                 .createSync(recursive: true);
           },
         ),
-        setUpRsyncCommand(),
+        ...postBuildCommands(),
       ]);
 
       fileSystem
@@ -515,7 +526,7 @@ void main() {
                 .createSync(recursive: true);
           },
         ),
-        setUpRsyncCommand(),
+        ...postBuildCommands(),
       ]);
       createMinimalMockProjectFiles();
 
@@ -556,7 +567,7 @@ void main() {
                 .createSync(recursive: true);
           },
         ),
-        setUpRsyncCommand(),
+        ...postBuildCommands(),
       ]);
       createMinimalMockProjectFiles();
 
@@ -597,7 +608,7 @@ void main() {
                 .createSync(recursive: true);
           },
         ),
-        setUpRsyncCommand(),
+        ...postBuildCommands(),
       ]);
 
       await createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub', '-v']);
@@ -647,7 +658,7 @@ void main() {
               ..writeAsStringSync('{}');
           },
         ),
-        setUpRsyncCommand(
+        ...postBuildCommands(
           onRun: (_) =>
               fileSystem.file('build/ios/iphoneos/Runner.app/Frameworks/App.framework/App')
                 ..createSync(recursive: true)
@@ -725,7 +736,7 @@ void main() {
                   .createSync(recursive: true);
             },
           ),
-          setUpRsyncCommand(
+          ...postBuildCommands(
             onRun: (_) =>
                 fileSystem.file('build/ios/iphoneos/Runner.app/Frameworks/App.framework/App')
                   ..createSync(recursive: true)
@@ -780,7 +791,7 @@ void main() {
                   .createSync(recursive: true);
             },
           ),
-          setUpRsyncCommand(
+          ...postBuildCommands(
             onRun: (_) =>
                 fileSystem.file('build/ios/iphoneos/Runner.app/Frameworks/App.framework/App')
                   ..createSync(recursive: true)
@@ -831,7 +842,7 @@ void main() {
             },
           ),
           setUpLegacyXCResultCommand(),
-          setUpRsyncCommand(),
+          ...postBuildCommands(),
         ]);
 
         createMinimalMockProjectFiles();
@@ -876,7 +887,7 @@ void main() {
             stdout: 'Lots of spew from Xcode',
           ),
           setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssues),
-          setUpRsyncCommand(),
+          ...postBuildCommands(),
         ]);
 
         createMinimalMockProjectFiles();
@@ -926,7 +937,7 @@ void main() {
             },
           ),
           setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
-          setUpRsyncCommand(),
+          ...postBuildCommands(),
         ]);
 
         createMinimalMockProjectFiles();
@@ -977,7 +988,7 @@ void main() {
           xattrCommand2,
           setUpFakeXcodeBuildHandler(exitCode: 1),
           setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssues),
-          setUpRsyncCommand(),
+          ...postBuildCommands(),
         ]);
 
         createMinimalMockProjectFiles();
@@ -1023,7 +1034,7 @@ void main() {
             },
           ),
           setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
-          setUpRsyncCommand(),
+          ...postBuildCommands(),
         ]);
 
         createMinimalMockProjectFiles();
@@ -1082,7 +1093,7 @@ void main() {
             },
           ),
           setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithNoProvisioningProfileIssue),
-          setUpRsyncCommand(),
+          ...postBuildCommands(),
         ]);
 
         createMinimalMockProjectFiles();
@@ -1132,7 +1143,7 @@ void main() {
             },
           ),
           setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithActionIssues),
-          setUpRsyncCommand(),
+          ...postBuildCommands(),
         ]);
 
         createMinimalMockProjectFiles();
@@ -1196,7 +1207,7 @@ void main() {
             },
           ),
           setUpLegacyXCResultCommand(stdout: kSampleResultJsonNoIssues),
-          setUpRsyncCommand(),
+          ...postBuildCommands(),
         ]);
 
         createMinimalMockProjectFiles();
@@ -1240,7 +1251,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
             },
           ),
           setUpLegacyXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
-          setUpRsyncCommand(),
+          ...postBuildCommands(),
         ]);
 
         createMinimalMockProjectFiles();
@@ -1284,7 +1295,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
             },
           ),
           setUpLegacyXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
-          setUpRsyncCommand(),
+          ...postBuildCommands(),
         ]);
 
         createMinimalMockProjectFiles();
@@ -1344,7 +1355,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
             },
           ),
           setUpLegacyXCResultCommand(stdout: kSampleResultJsonNoIssues),
-          setUpRsyncCommand(),
+          ...postBuildCommands(),
         ]),
         Pub: ThrowingPub.new,
         EnvironmentType: () => EnvironmentType.physical,
@@ -1375,7 +1386,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
             },
           ),
           setUpLegacyXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
-          setUpRsyncCommand(),
+          ...postBuildCommands(),
         ]);
 
         createMinimalMockProjectFiles();
@@ -1419,7 +1430,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
             },
           ),
           setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithNoProvisioningProfileIssue),
-          setUpRsyncCommand(),
+          ...postBuildCommands(),
         ]);
 
         createMinimalMockProjectFiles();
@@ -1465,7 +1476,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
             },
           ),
           setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
-          setUpRsyncCommand(),
+          ...postBuildCommands(),
         ]);
 
         createMinimalMockProjectFiles();
@@ -1521,7 +1532,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
             },
           ),
           setUpLegacyXCResultCommand(),
-          setUpRsyncCommand(),
+          ...postBuildCommands(),
         ]);
 
         createMinimalMockProjectFiles();
@@ -1568,7 +1579,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
             },
           ),
           setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssues),
-          setUpRsyncCommand(),
+          ...postBuildCommands(),
         ]);
 
         createMinimalMockProjectFiles();
@@ -1620,7 +1631,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
             },
           ),
           setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
-          setUpRsyncCommand(),
+          ...postBuildCommands(),
         ]);
 
         createMinimalMockProjectFiles();
@@ -1673,7 +1684,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           xattrCommand2,
           setUpFakeXcodeBuildHandler(simulator: true, exitCode: 1),
           setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssues),
-          setUpRsyncCommand(),
+          ...postBuildCommands(),
         ]);
 
         createMinimalMockProjectFiles();
