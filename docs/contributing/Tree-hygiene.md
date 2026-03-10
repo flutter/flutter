@@ -69,7 +69,7 @@ The general process for submitting code to a Flutter repository is as follows:
    This doesn’t prohibit the use of coding assistance tools, but what’s submitted does
    need to be a contributor’s original creation.
 
-7. Get your code reviewed (see below). If you are a team membeer, request review
+7. Get your code reviewed (see below). If you are a team member, request review
    from the relevant expert(s) for the areas you touched. Otherwise, wait for
    [reviewers to be assigned](#who).
 
