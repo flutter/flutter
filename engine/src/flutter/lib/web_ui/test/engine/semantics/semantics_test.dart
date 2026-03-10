@@ -1614,9 +1614,8 @@ void _testContainer() {
       semantics().semanticsEnabled = false;
     });
 
-    test('non-interactive leaf nodes do not accept pointer events', () async {
+    test('non-interactive leaf nodes defer to browser hit testing', () async {
       final builder = ui.SemanticsUpdateBuilder();
-      // Create a non-interactive leaf node (no actions, no interactive flags)
       updateNode(builder);
 
       owner().updateSemantics(builder.build());
@@ -1626,8 +1625,8 @@ void _testContainer() {
       )!;
       expect(
         element.style.pointerEvents,
-        'none',
-        reason: 'Non-interactive leaf nodes should not intercept pointer events',
+        'auto',
+        reason: 'Non-interactive leaf nodes should defer to browser z-index hit testing',
       );
     });
 
@@ -1737,7 +1736,6 @@ void _testContainer() {
 
     test('non-interactive containers do not accept pointer events', () async {
       final builder = ui.SemanticsUpdateBuilder();
-      // Create a container with children but no explicit hitTestBehavior
       updateNode(
         builder,
         childrenInTraversalOrder: Int32List.fromList(<int>[1]),
@@ -1753,8 +1751,7 @@ void _testContainer() {
       expect(
         container.style.pointerEvents,
         'none',
-        reason:
-            'Non-interactive containers should not accept pointer events when hitTestBehavior is defer',
+        reason: 'Non-interactive containers should not intercept pointer events',
       );
     });
 
@@ -1809,6 +1806,102 @@ void _testContainer() {
         'none',
         reason:
             'Framework declaration (Tier 1) should take precedence over interactive behaviors (Tier 2)',
+      );
+    });
+
+    test('opaque containers with children accept pointer events', () async {
+      final builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        hitTestBehavior: ui.SemanticsHitTestBehavior.opaque,
+        childrenInTraversalOrder: Int32List.fromList(<int>[1]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[1]),
+      );
+      updateNode(builder, id: 1);
+
+      owner().updateSemantics(builder.build());
+
+      final DomElement container = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        container.style.pointerEvents,
+        'all',
+        reason: 'Opaque containers should accept pointer events regardless of children',
+      );
+    });
+
+    test('transparent containers with children do not accept pointer events', () async {
+      final builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        hitTestBehavior: ui.SemanticsHitTestBehavior.transparent,
+        childrenInTraversalOrder: Int32List.fromList(<int>[1]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[1]),
+      );
+      updateNode(builder, id: 1);
+
+      owner().updateSemantics(builder.build());
+
+      final DomElement container = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        container.style.pointerEvents,
+        'none',
+        reason: 'Transparent containers should not accept pointer events',
+      );
+    });
+
+    test('platform view leaf with transparent does not accept pointer events', () async {
+      final builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        platformViewId: 99,
+        hitTestBehavior: ui.SemanticsHitTestBehavior.transparent,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+
+      owner().updateSemantics(builder.build());
+
+      final DomElement element = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        element.style.pointerEvents,
+        'none',
+        reason:
+            'Platform view semantics nodes should let events pass through to the native element',
+      );
+    });
+
+    test('non-interactive leaf child gets auto while container parent gets none', () async {
+      final builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        childrenInTraversalOrder: Int32List.fromList(<int>[1]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[1]),
+      );
+      updateNode(builder, id: 1);
+
+      owner().updateSemantics(builder.build());
+
+      final DomElement parent = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        parent.style.pointerEvents,
+        'none',
+        reason: 'Container parent should not intercept pointer events',
+      );
+
+      final DomElement child = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}1',
+      )!;
+      expect(
+        child.style.pointerEvents,
+        'auto',
+        reason: 'Non-interactive leaf child should defer to browser z-index hit testing',
       );
     });
   });
@@ -3895,7 +3988,12 @@ void _testPlatformView() {
       ..semanticsEnabled = true;
 
     final builder = ui.SemanticsUpdateBuilder();
-    updateNode(builder, platformViewId: 5, rect: const ui.Rect.fromLTRB(0, 0, 100, 50));
+    updateNode(
+      builder,
+      platformViewId: 5,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      hitTestBehavior: ui.SemanticsHitTestBehavior.transparent,
+    );
     owner().updateSemantics(builder.build());
 
     expectSemanticsTree(owner(), '<sem aria-owns="flt-pv-5"></sem>');
@@ -3968,6 +4066,7 @@ void _testPlatformView() {
       // This has to match the values passed to `addPlatformView` above.
       rect: const ui.Rect.fromLTRB(0, 15, 20, 45),
       platformViewId: 0,
+      hitTestBehavior: ui.SemanticsHitTestBehavior.transparent,
     );
     updateNode(
       builder,

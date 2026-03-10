@@ -13,7 +13,7 @@
 #include "flutter/flow/raster_cache_item.h"
 #include "flutter/fml/time/time_point.h"
 #include "flutter/fml/trace_event.h"
-#include "include/core/SkColorSpace.h"
+#include "third_party/skia/include/core/SkColorSpace.h"
 
 namespace flutter {
 

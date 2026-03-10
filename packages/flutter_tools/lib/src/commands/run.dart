@@ -837,6 +837,7 @@ class RunCommand extends RunCommandBase {
           route,
           debuggingOptions,
           hotMode,
+          webDefines: extractWebDefines(),
           applicationBinary: applicationBinaryPath == null
               ? null
               : globals.fs.file(applicationBinaryPath),
