@@ -95,9 +95,9 @@ Future<void> testMain() async {
 
 /// Generates a blank GIF to be used in tests.
 Uint8List _createTestGif() {
-  final width = 1;
-  final height = 1;
-  final numFrames = 2;
+  const width = 1;
+  const height = 1;
+  const numFrames = 2;
   final bytes = <int>[];
   // Generate header.
   bytes.addAll('GIF'.codeUnits);
