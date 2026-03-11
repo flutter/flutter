@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'semantics_tester.dart';
+
 void main() {
   testWidgets('PageView.shrinkWrapCrossAxis sizes to the current page after swipes', (
     WidgetTester tester,
@@ -21,7 +23,7 @@ void main() {
           child: PageView(
             controller: controller,
             shrinkWrapCrossAxis: true,
-            children: const <Widget>[
+            children: <Widget>[
               _HorizontalPage(height: 100.0, label: 'Page 1'),
               _HorizontalPage(height: 220.0, label: 'Page 2'),
             ],
@@ -56,7 +58,7 @@ void main() {
           child: PageView(
             controller: controller,
             shrinkWrapCrossAxis: true,
-            children: const <Widget>[
+            children: <Widget>[
               _HorizontalPage(height: 100.0, label: 'Page 1'),
               _HorizontalPage(height: 200.0, label: 'Page 2'),
             ],
@@ -74,10 +76,52 @@ void main() {
     expect(tester.getSize(find.byType(PageView)).height, closeTo(137.5, 0.001));
   });
 
-  testWidgets('PageView.shrinkWrapCrossAxis with padEnds false keeps the leading edge aligned', (
+  testWidgets(
+    'PageView.shrinkWrapCrossAxis with padEnds false uses the max-scroll-clamped trailing size',
+    (WidgetTester tester) async {
+      final PageController controller = PageController(viewportFraction: 0.8);
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: PageView(
+              controller: controller,
+              shrinkWrapCrossAxis: true,
+              padEnds: false,
+              children: const <Widget>[
+                _HorizontalPage(height: 100.0, label: 'Page 1', key: ValueKey<String>('page-1')),
+                _HorizontalPage(height: 220.0, label: 'Page 2', key: ValueKey<String>('page-2')),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // With padEnds: false and viewportFraction < 1.0, pages are narrower than
+      // the viewport. The first page starts at x=0, but the trailing page is
+      // limited by the max scroll extent and may never reach its full-page size.
+      expect(tester.getTopLeft(find.byKey(const ValueKey<String>('page-1'))).dx, 0.0);
+      expect(tester.getSize(find.byType(PageView)).height, 100.0);
+
+      controller.jumpToPage(1);
+      await tester.pumpAndSettle();
+
+      // With viewportFraction: 0.8, max scroll = 2*640-800 = 480 < 640 (page 1 offset).
+      // At scroll 480, rawPage = 480/640 = 0.75, so interpolated height = 100 + 120*0.75 = 190.
+      expect(tester.getSize(find.byType(PageView)).height, 190.0);
+    },
+  );
+
+  testWidgets('PageView.shrinkWrapCrossAxis supports implicit accessibility scrolling', (
     WidgetTester tester,
   ) async {
-    final PageController controller = PageController(viewportFraction: 0.8);
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    final PageController controller = PageController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -87,11 +131,19 @@ void main() {
           alignment: Alignment.topCenter,
           child: PageView(
             controller: controller,
+            allowImplicitScrolling: true,
             shrinkWrapCrossAxis: true,
-            padEnds: false,
-            children: const <Widget>[
-              _HorizontalPage(height: 100.0, label: 'Page 1', key: ValueKey<String>('page-1')),
-              _HorizontalPage(height: 220.0, label: 'Page 2', key: ValueKey<String>('page-2')),
+            children: <Widget>[
+              Semantics(
+                key: ValueKey<String>('page-1-semantics'),
+                container: true,
+                child: _HorizontalPage(height: 100.0, label: 'Page 1'),
+              ),
+              Semantics(
+                key: ValueKey<String>('page-2-semantics'),
+                container: true,
+                child: _HorizontalPage(height: 220.0, label: 'Page 2'),
+              ),
             ],
           ),
         ),
@@ -99,18 +151,34 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // With padEnds: false and viewportFraction < 1.0, pages are narrower than
-    // the viewport. The first page starts at x=0, but the scroll extent means
-    // page 2 may not reach x=0 due to max scroll clamping.
-    expect(tester.getTopLeft(find.byKey(const ValueKey<String>('page-1'))).dx, 0.0);
-    expect(tester.getSize(find.byType(PageView)).height, 100.0);
+    expect(controller.page, 0.0);
+    expect(tester.getSize(find.byType(PageView)), const Size(800.0, 100.0));
+    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling]));
+    expect(semantics, includesNodeWith(label: 'Page 1'));
+    expect(
+      semantics,
+      includesNodeWith(label: 'Page 2', flags: <SemanticsFlag>[SemanticsFlag.isHidden]),
+    );
 
-    controller.jumpToPage(1);
+    final int secondPageId = tester
+        .renderObject(find.byKey(const ValueKey<String>('page-2-semantics'), skipOffstage: false))
+        .debugSemantics!
+        .id;
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(
+      secondPageId,
+      SemanticsAction.showOnScreen,
+    );
     await tester.pumpAndSettle();
 
-    // With viewportFraction: 0.8, max scroll = 2*640-800 = 480 < 640 (page 1 offset).
-    // At scroll 480, rawPage = 480/640 = 0.75, so interpolated height = 100 + 120*0.75 = 190.
-    expect(tester.getSize(find.byType(PageView)).height, 190.0);
+    expect(controller.page, 1.0);
+    expect(tester.getSize(find.byType(PageView)), const Size(800.0, 220.0));
+    expect(
+      semantics,
+      includesNodeWith(label: 'Page 1', flags: <SemanticsFlag>[SemanticsFlag.isHidden]),
+    );
+    expect(semantics, includesNodeWith(label: 'Page 2'));
+
+    semantics.dispose();
   });
 
   testWidgets('Vertical PageView with shrinkWrapCrossAxis adapts width', (
