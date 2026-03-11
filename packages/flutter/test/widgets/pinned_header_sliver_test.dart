@@ -254,32 +254,16 @@ void main() {
       final semantics = SemanticsTester(tester);
 
       await tester.pumpWidget(
-        Semantics(
-          textDirection: TextDirection.ltr,
-          child: Localizations(
-            locale: const Locale('en', 'us'),
-            delegates: const <LocalizationsDelegate<dynamic>>[
-              DefaultWidgetsLocalizations.delegate,
-              DefaultMaterialLocalizations.delegate,
-            ],
-            child: Directionality(
-              textDirection: TextDirection.ltr,
-              child: MediaQuery(
-                data: const MediaQueryData(),
-                child: CustomScrollView(
-                  slivers: <Widget>[
-                    const SliverToBoxAdapter(
-                      child: SizedBox(height: 100, child: Text('First child')),
-                    ),
-                    const PinnedHeaderSliver(child: Text('PinnedHeaderSliver')),
-                    SliverList.builder(
-                      itemCount: 50,
-                      itemBuilder: (BuildContext context, int index) => Text('Item $index'),
-                    ),
-                  ],
-                ),
+        TestWidgetsApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              const SliverToBoxAdapter(child: SizedBox(height: 100, child: Text('First child'))),
+              const PinnedHeaderSliver(child: Text('PinnedHeaderSliver')),
+              SliverList.builder(
+                itemCount: 50,
+                itemBuilder: (BuildContext context, int index) => Text('Item $index'),
               ),
-            ),
+            ],
           ),
         ),
       );
