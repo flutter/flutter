@@ -204,7 +204,16 @@ public class FlutterView extends FrameLayout
               surfaceParams.width = width;
             }
             if (changed) {
-              flutterEngineView.setLayoutParams(surfaceParams);
+              // There is a latch in the engine that waits for this to return before proceeding.
+              // By posting this on the next message loop, it ensures that latch completes before
+              // another call to sendViewportMetrics is made preventing a deadlock between the latch
+              // and the incoming call.
+              flutterEngineView.post(new Runnable() {
+                @Override
+                public void run() {
+                  flutterEngineView.setLayoutParams(surfaceParams);
+                }
+              });
             }
           } else {
             Log.e(TAG, "Flutter engine view not set.");
