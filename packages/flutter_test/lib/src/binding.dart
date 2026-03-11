@@ -291,6 +291,13 @@ mixin _ChildWindowHierarchyMixin {
           }
           activateable = (popupChild as _TestPopupWindowController).getFirstActivatableChild();
           foundPopup = true;
+        case final OverlayWindowController overlayChild:
+          if (foundPopup) {
+            // Already found a popup, skip anything else.
+            break;
+          }
+          activateable = (overlayChild as _TestOverlayWindowController).getFirstActivatableChild();
+          foundPopup = true;
       }
     }
 
@@ -429,6 +436,8 @@ void _addChildToParent(BaseWindowController? parent, BaseWindowController child)
         (testParent as _TestPopupWindowController).addChild(child);
       case TooltipWindowController _:
         fail('TooltipWindowController cannot be a parent of another window controller.');
+      case final OverlayWindowController testParent:
+        (testParent as _TestOverlayWindowController).addChild(child);
     }
   }
 }
@@ -444,6 +453,8 @@ void _removeChildFromParent(BaseWindowController? parent, BaseWindowController c
         (testParent as _TestPopupWindowController).removeChild(child);
       case TooltipWindowController _:
         fail('TooltipWindowController cannot be a parent of another window controller.');
+      case final OverlayWindowController testParent:
+        (testParent as _TestOverlayWindowController).removeChild(child);
     }
   }
 }
@@ -687,6 +698,102 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
   }
 }
 
+class _TestOverlayWindowController extends OverlayWindowController with _ChildWindowHierarchyMixin {
+  _TestOverlayWindowController({
+    required OverlayWindowControllerDelegate delegate,
+    required TestPlatformDispatcher platformDispatcher,
+    required this.windowingOwner,
+    required ui.Rect anchorRect,
+    required WindowPositioner positioner,
+    required BoxConstraints contentSizeConstraints,
+    BaseWindowController? parent,
+    String? title,
+    bool alwaysOnTop = false,
+  }) : _delegate = delegate,
+       _parent = parent,
+       _constraints = contentSizeConstraints,
+       _anchorRect = anchorRect,
+       _positioner = positioner,
+       _title = title ?? 'Test Overlay Window',
+       _alwaysOnTop = alwaysOnTop,
+       super.empty() {
+    rootView = _TestFlutterView(
+      controller: this,
+      platformDispatcher: platformDispatcher,
+      constraints: _constraints,
+    );
+    _addChildToParent(parent, this);
+
+    // Automatically activate the window when created.
+    activate();
+  }
+
+  final OverlayWindowControllerDelegate _delegate;
+  final BaseWindowController? _parent;
+  final _TestWindowingOwner windowingOwner;
+  final BoxConstraints _constraints;
+  // ignore: unused_field
+  final ui.Rect _anchorRect;
+  // ignore: unused_field
+  final WindowPositioner _positioner;
+  String _title;
+  bool _alwaysOnTop;
+  bool _isMinimized = false;
+
+  @override
+  Size get contentSize => _constraints.biggest;
+
+  @override
+  BaseWindowController? get parent => _parent;
+
+  @override
+  String get title => _title;
+
+  @override
+  bool get isActivated => windowingOwner.isWindowControllerActive(this);
+
+  @override
+  bool get isMinimized => _isMinimized;
+
+  @override
+  bool get alwaysOnTop => _alwaysOnTop;
+
+  @override
+  void setTitle(String title) {
+    _title = title;
+    notifyListeners();
+  }
+
+  @override
+  void activate() {
+    final BaseWindowController activated = windowingOwner.activateWindowController(this);
+    activated.notifyListeners();
+  }
+
+  @override
+  void setMinimized(bool minimized) {
+    _isMinimized = minimized;
+    if (_isMinimized) {
+      windowingOwner.deactivateWindowController(this);
+    }
+    notifyListeners();
+  }
+
+  @override
+  void setAlwaysOnTop(bool alwaysOnTop) {
+    _alwaysOnTop = alwaysOnTop;
+    notifyListeners();
+  }
+
+  @override
+  void destroy() {
+    _delegate.onWindowDestroyed();
+    removeAllChildren();
+    windowingOwner.deactivateWindowController(this);
+    _removeChildFromParent(_parent, this);
+  }
+}
+
 /// A [WindowingOwner] used for tests.
 ///
 /// This windowing owner will behave as a perfect windowing system, with no
@@ -731,6 +838,11 @@ class _TestWindowingOwner extends WindowingOwner {
             .getFirstActivatableChild();
         _activeWindowController = leaf;
         return _activeWindowController!;
+      case final OverlayWindowController _:
+        final BaseWindowController leaf = (controller as _TestOverlayWindowController)
+            .getFirstActivatableChild();
+        _activeWindowController = leaf;
+        return _activeWindowController!;
     }
   }
 
@@ -748,6 +860,8 @@ class _TestWindowingOwner extends WindowingOwner {
         fail('TooltipWindowController cannot be a parent of DialogWindowController.');
       case final PopupWindowController popupParent:
         popupParent.activate();
+      case final OverlayWindowController overlayParent:
+        overlayParent.activate();
     }
 
     return true;
@@ -781,6 +895,10 @@ class _TestWindowingOwner extends WindowingOwner {
         );
       case final PopupWindowController popupController:
         if (!_tryActivateParent(popupController.parent)) {
+          _activeWindowController = null;
+        }
+      case final OverlayWindowController overlayController:
+        if (!_tryActivateParent(overlayController.parent)) {
           _activeWindowController = null;
         }
     }
@@ -866,6 +984,29 @@ class _TestWindowingOwner extends WindowingOwner {
       anchorRect: anchorRect,
       positioner: positioner,
       parent: parent,
+    );
+  }
+
+  @override
+  OverlayWindowController createOverlayWindowController({
+    required OverlayWindowControllerDelegate delegate,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
+    required BoxConstraints contentSizeConstraints,
+    BaseWindowController? parent,
+    String? title,
+    bool alwaysOnTop = false,
+  }) {
+    return _TestOverlayWindowController(
+      delegate: delegate,
+      platformDispatcher: _platformDispatcher,
+      windowingOwner: this,
+      anchorRect: anchorRect,
+      positioner: positioner,
+      contentSizeConstraints: contentSizeConstraints,
+      parent: parent,
+      title: title,
+      alwaysOnTop: alwaysOnTop,
     );
   }
 }

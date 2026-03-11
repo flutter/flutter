@@ -148,6 +148,19 @@ class WindowingOwnerLinux extends WindowingOwner {
   }) {
     throw UnimplementedError('Popup windows are not yet implemented on Linux.');
   }
+
+  @override
+  OverlayWindowController createOverlayWindowController({
+    required OverlayWindowControllerDelegate delegate,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
+    required BoxConstraints contentSizeConstraints,
+    BaseWindowController? parent,
+    String? title,
+    bool alwaysOnTop = false,
+  }) {
+    throw UnimplementedError('Overlay windows are not yet implemented on Linux.');
+  }
 }
 
 /// Implementation of [RegularWindowController] for the Linux platform.

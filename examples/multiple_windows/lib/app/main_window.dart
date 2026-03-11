@@ -141,6 +141,7 @@ class _WindowsTable extends StatelessWidget {
         controller: tooltip,
       ),
       PopupWindowController() => null,
+      OverlayWindowController() => null,
     };
   }
 
@@ -150,6 +151,7 @@ class _WindowsTable extends StatelessWidget {
       DialogWindowController() => 'Dialog',
       TooltipWindowController() => 'Tooltip',
       PopupWindowController() => 'Popup',
+      OverlayWindowController() => 'Overlay',
     };
   }
 
