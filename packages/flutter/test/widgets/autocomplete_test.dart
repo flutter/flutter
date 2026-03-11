@@ -3830,7 +3830,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Same option should be selectable after text is cleared', (
+  testWidgets('Same option in RawAutocomplete should be selectable again after text is cleared', (
     WidgetTester tester,
   ) async {
     final textCtrl = TextEditingController();
@@ -3840,36 +3840,57 @@ void main() {
     final listItem = <String>['test', 'abc', 'dexter'];
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Row(
-            children: <Widget>[
-              Expanded(
-                child: Autocomplete<String>(
-                  textEditingController: textCtrl,
-                  focusNode: textFocus,
-                  optionsBuilder: (TextEditingValue textEditingValue) {
-                    return listItem.where(
-                      (String e) => e.toLowerCase().contains(textEditingValue.text.toLowerCase()),
-                    );
-                  },
-                ),
-              ),
-              IconButton(
-                key: const ValueKey<String>('clear'),
-                onPressed: () {
-                  textCtrl.clear();
+      TestWidgetsApp(
+        home: Row(
+          children: <Widget>[
+            Expanded(
+              child: RawAutocomplete<String>(
+                textEditingController: textCtrl,
+                focusNode: textFocus,
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  return listItem.where((String e) => e.contains(textEditingValue.text));
                 },
-                icon: const Icon(Icons.add),
+                fieldViewBuilder:
+                    (
+                      BuildContext context,
+                      TextEditingController textEditingController,
+                      FocusNode focusNode,
+                      VoidCallback onFieldSubmitted,
+                    ) {
+                      return TestTextField(controller: textEditingController, focusNode: focusNode);
+                    },
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<String> onSelected,
+                      Iterable<String> options,
+                    ) {
+                      return ListView.builder(
+                        itemCount: options.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          final String option = options.elementAt(index);
+                          return GestureDetector(
+                            onTap: () => onSelected(option),
+                            child: Text(option),
+                          );
+                        },
+                      );
+                    },
               ),
-            ],
-          ),
+            ),
+            GestureDetector(
+              onTap: () {
+                textCtrl.clear();
+              },
+              child: const Text('Clear'),
+            ),
+          ],
         ),
       ),
     );
 
     // Open the popup menu.
-    await tester.enterText(find.byType(TextField), '');
+    await tester.enterText(find.byType(TestTextField), '');
     await tester.pumpAndSettle();
     expect(find.text('test'), findsOneWidget);
 
@@ -3878,14 +3899,14 @@ void main() {
     await tester.pumpAndSettle();
     expect(textCtrl.text, 'test');
 
-    // Clear text using the icon button
-    await tester.tap(find.byKey(const ValueKey<String>('clear')));
+    // Clear text
+    await tester.tap(find.text('Clear'));
     textFocus.unfocus();
     await tester.pumpAndSettle();
     expect(textCtrl.text, '');
 
     // Select 'test' again
-    await tester.tap(find.byType(TextField));
+    await tester.tap(find.byType(TestTextField));
     await tester.pumpAndSettle();
     expect(find.text('test'), findsWidgets);
     await tester.tap(find.text('test').last);
