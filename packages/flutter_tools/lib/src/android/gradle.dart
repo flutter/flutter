@@ -276,6 +276,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required FlutterProject project,
     required List<GradleHandledError> localGradleErrors,
     required String gradleExecutablePath,
+    bool printOutput = true,
     int retry = 0,
     VoidCallback? preRunTask,
     VoidCallback? postRunTask,
@@ -338,7 +339,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
         }
       }
       // Pipe stdout/stderr from Gradle.
-      return line;
+      return printOutput ? line : null;
     }
 
     final Status status = _logger.startProgress("Running Gradle task '$taskName'...");
@@ -398,6 +399,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
               postRunTask: postRunTask,
               localGradleErrors: localGradleErrors,
               gradleExecutablePath: gradleExecutablePath,
+              printOutput: printOutput,
               retry: retry,
               project: project,
               maxRetries: maxRetries,
@@ -1021,6 +1023,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
         project: project,
         localGradleErrors: gradleErrors,
         gradleExecutablePath: gradleExecutablePath,
+        printOutput: false,
         outputParser: (String line) {
           if (_kNdkVersionRegex.firstMatch(line) case final RegExpMatch match) {
             result = match.namedGroup(_kNdkVersionRegexGroupName);
