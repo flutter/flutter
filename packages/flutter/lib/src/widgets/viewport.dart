@@ -526,3 +526,118 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
     );
   }
 }
+
+/// A viewport that adapts its cross-axis extent to match the currently
+/// visible content.
+///
+/// [CrossAxisFittedViewport] is similar to [Viewport] but does not fill its
+/// parent in the cross axis. Instead, it queries its sliver children for
+/// their effective cross-axis extent (via the [RenderSliverCrossAxisAdaptable]
+/// mixin) and sizes itself accordingly.
+///
+/// During page transitions, the cross-axis extent smoothly interpolates
+/// between the sizes of the outgoing and incoming pages.
+///
+/// This viewport only supports forward-growing children (no center/anchor).
+///
+/// See also:
+///
+///  * [Viewport], which always fills its parent in both axes.
+///  * [ShrinkWrappingViewport], which shrink-wraps in the main axis.
+///  * [SliverFittedPage], which reports cross-axis extents used by
+///    this viewport.
+class CrossAxisFittedViewport extends MultiChildRenderObjectWidget {
+  /// Creates a viewport that fits its cross axis to the currently visible
+  /// content.
+  const CrossAxisFittedViewport({
+    super.key,
+    this.axisDirection = AxisDirection.down,
+    this.crossAxisDirection,
+    required this.offset,
+    this.paintOrder = SliverPaintOrder.firstIsTop,
+    this.clipBehavior = Clip.hardEdge,
+    this.scrollCacheExtent,
+    List<Widget> slivers = const <Widget>[],
+  }) : super(children: slivers);
+
+  /// The direction in which the [offset]'s [ViewportOffset.pixels] increases.
+  ///
+  /// For example, if the [axisDirection] is [AxisDirection.down], a scroll
+  /// offset of zero is at the top of the viewport and increases towards the
+  /// bottom of the viewport.
+  final AxisDirection axisDirection;
+
+  /// The direction in which child should be laid out in the cross axis.
+  ///
+  /// If the [axisDirection] is [AxisDirection.down] or [AxisDirection.up], this
+  /// property defaults to [AxisDirection.left] if the ambient [Directionality]
+  /// is [TextDirection.rtl] and [AxisDirection.right] if the ambient
+  /// [Directionality] is [TextDirection.ltr].
+  ///
+  /// If the [axisDirection] is [AxisDirection.left] or [AxisDirection.right],
+  /// this property defaults to [AxisDirection.down].
+  final AxisDirection? crossAxisDirection;
+
+  /// Which part of the content inside the viewport should be visible.
+  final ViewportOffset offset;
+
+  /// {@macro flutter.rendering.RenderViewportBase.paintOrder}
+  ///
+  /// Defaults to [SliverPaintOrder.firstIsTop].
+  final SliverPaintOrder paintOrder;
+
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
+
+  /// {@macro flutter.rendering.RenderViewportBase.scrollCacheExtent}
+  final ScrollCacheExtent? scrollCacheExtent;
+
+  @override
+  RenderCrossAxisFittedViewport createRenderObject(BuildContext context) {
+    return RenderCrossAxisFittedViewport(
+      axisDirection: axisDirection,
+      crossAxisDirection: crossAxisDirection ??
+          Viewport.getDefaultCrossAxisDirection(context, axisDirection),
+      offset: offset,
+      paintOrder: paintOrder,
+      clipBehavior: clipBehavior,
+      scrollCacheExtent: scrollCacheExtent,
+    );
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    RenderCrossAxisFittedViewport renderObject,
+  ) {
+    renderObject
+      ..axisDirection = axisDirection
+      ..crossAxisDirection = crossAxisDirection ??
+          Viewport.getDefaultCrossAxisDirection(context, axisDirection)
+      ..offset = offset
+      ..paintOrder = paintOrder
+      ..clipBehavior = clipBehavior
+      ..scrollCacheExtent = scrollCacheExtent;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(
+      EnumProperty<AxisDirection>('axisDirection', axisDirection),
+    );
+    properties.add(
+      EnumProperty<AxisDirection>(
+        'crossAxisDirection', crossAxisDirection, defaultValue: null,
+      ),
+    );
+    properties.add(DiagnosticsProperty<ViewportOffset>('offset', offset));
+    properties.add(
+      DiagnosticsProperty<ScrollCacheExtent>(
+        'scrollCacheExtent', scrollCacheExtent, defaultValue: null,
+      ),
+    );
+  }
+}

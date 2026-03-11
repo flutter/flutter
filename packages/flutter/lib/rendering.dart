@@ -66,6 +66,7 @@ export 'src/rendering/service_extensions.dart';
 export 'src/rendering/shifted_box.dart';
 export 'src/rendering/sliver.dart';
 export 'src/rendering/sliver_fill.dart';
+export 'src/rendering/sliver_fitted_page.dart';
 export 'src/rendering/sliver_fixed_extent_list.dart';
 export 'src/rendering/sliver_grid.dart';
 export 'src/rendering/sliver_group.dart';

@@ -31,6 +31,7 @@ import 'scroll_position_with_single_context.dart';
 import 'scroll_view.dart';
 import 'scrollable.dart';
 import 'sliver_fill.dart';
+import 'sliver_fitted_page.dart';
 import 'viewport.dart';
 
 /// A controller for [PageView].
@@ -696,6 +697,7 @@ class PageView extends StatefulWidget {
     this.hitTestBehavior = HitTestBehavior.opaque,
     this.scrollBehavior,
     this.padEnds = true,
+    this.wrapCrossAxis = false,
   }) : childrenDelegate = SliverChildListDelegate(children);
 
   /// Creates a scrollable list that works page by page using widgets that are
@@ -741,6 +743,7 @@ class PageView extends StatefulWidget {
     this.hitTestBehavior = HitTestBehavior.opaque,
     this.scrollBehavior,
     this.padEnds = true,
+    this.wrapCrossAxis = false,
   }) : childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
          findChildIndexCallback: findChildIndexCallback,
@@ -774,6 +777,7 @@ class PageView extends StatefulWidget {
     this.hitTestBehavior = HitTestBehavior.opaque,
     this.scrollBehavior,
     this.padEnds = true,
+    this.wrapCrossAxis = false,
   });
 
   /// Controls whether the widget's pages will respond to
@@ -881,6 +885,36 @@ class PageView extends StatefulWidget {
   /// This property defaults to true.
   final bool padEnds;
 
+  /// Whether the page view should size itself in the cross axis to fit the
+  /// currently displayed page's natural size.
+  ///
+  /// When set to true, the page view measures its children with loose
+  /// cross-axis constraints. The viewport then sizes itself to match the
+  /// current page's natural cross-axis extent. During page transitions, the
+  /// size smoothly interpolates between the outgoing and incoming pages.
+  ///
+  /// For a horizontal [PageView], this means the height adapts to the current
+  /// page. For a vertical [PageView], the width adapts.
+  ///
+  /// When false (the default), the page view fills all available space in
+  /// both axes, matching the standard [PageView] behavior.
+  ///
+  /// This is useful when a [PageView] is placed inside a [Column], a
+  /// [ListView], or a bottom sheet where each page has a different natural
+  /// height and the surrounding layout should respond to the current page's
+  /// size.
+  ///
+  /// {@tool dartpad}
+  /// This example shows a [PageView] with [wrapCrossAxis] set to true,
+  /// placed inside a [Column]. Each page has a different height, and the
+  /// [PageView] smoothly animates its height during page transitions.
+  ///
+  /// ** See code in examples/api/lib/widgets/page_view/page_view.2.dart **
+  /// {@end-tool}
+  ///
+  /// Defaults to false.
+  final bool wrapCrossAxis;
+
   @override
   State<PageView> createState() => _PageViewState();
 }
@@ -968,13 +1002,31 @@ class _PageViewState extends State<PageView> {
         scrollBehavior:
             widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false),
         viewportBuilder: (BuildContext context, ViewportOffset position) {
+          final cacheExtent = widget.allowImplicitScrolling
+              ? const ScrollCacheExtent.viewport(1.0)
+              : const ScrollCacheExtent.viewport(0.0);
+
+          if (widget.wrapCrossAxis) {
+            return CrossAxisFittedViewport(
+              scrollCacheExtent: cacheExtent,
+              axisDirection: axisDirection,
+              offset: position,
+              clipBehavior: widget.clipBehavior,
+              slivers: <Widget>[
+                SliverFittedPage(
+                  viewportFraction: _controller.viewportFraction,
+                  delegate: widget.childrenDelegate,
+                  padEnds: widget.padEnds,
+                ),
+              ],
+            );
+          }
+
           return Viewport(
             // TODO(dnfield): we should provide a way to set cacheExtent
             // independent of implicit scrolling:
             // https://github.com/flutter/flutter/issues/45632
-            scrollCacheExtent: widget.allowImplicitScrolling
-                ? const ScrollCacheExtent.viewport(1.0)
-                : const ScrollCacheExtent.viewport(0.0),
+            scrollCacheExtent: cacheExtent,
             axisDirection: axisDirection,
             offset: position,
             clipBehavior: widget.clipBehavior,
@@ -1008,6 +1060,13 @@ class _PageViewState extends State<PageView> {
         'allowImplicitScrolling',
         value: widget.allowImplicitScrolling,
         ifTrue: 'allow implicit scrolling',
+      ),
+    );
+    description.add(
+      FlagProperty(
+        'wrapCrossAxis',
+        value: widget.wrapCrossAxis,
+        ifTrue: 'wrap cross axis',
       ),
     );
   }
