@@ -52,8 +52,7 @@ public class FlutterLoader {
       "io.flutter.embedding.android.EnableVulkanGPUTracing";
   private static final String DISABLE_MERGED_PLATFORM_UI_THREAD_KEY =
       "io.flutter.embedding.android.DisableMergedPlatformUIThread";
-  private static final String ENABLE_SURFACE_CONTROL =
-      "io.flutter.embedding.android.EnableSurfaceControl";
+  private static final String ENABLE_HCPP = "io.flutter.embedding.android.EnableHcpp";
   private static final String ENABLE_FLUTTER_GPU = "io.flutter.embedding.android.EnableFlutterGPU";
   private static final String IMPELLER_LAZY_SHADER_MODE =
       "io.flutter.embedding.android.ImpellerLazyShaderInitialization";
@@ -436,8 +435,8 @@ public class FlutterLoader {
         if (metaData.getBoolean(ENABLE_FLUTTER_GPU, false)) {
           shellArgs.add("--enable-flutter-gpu");
         }
-        if (metaData.getBoolean(ENABLE_SURFACE_CONTROL, false)) {
-          shellArgs.add("--enable-surface-control");
+        if (metaData.getBoolean(ENABLE_HCPP, false)) {
+          shellArgs.add("--enable-hcpp-and-surface-control");
         }
 
         String backend = metaData.getString(IMPELLER_BACKEND_META_DATA_KEY);

@@ -116,7 +116,7 @@ TaskFunction createAndroidHCPPScrollPerfTest() {
     testDriver: 'test_driver/scroll_perf_hcpp_test.dart',
     needsFullTimeline: false,
     enableImpeller: true,
-    enableSurfaceControl: true,
+    enableHcpp: true,
     enableMergedPlatformThread: true,
   ).run;
 }
@@ -272,14 +272,14 @@ TaskFunction createFlutterGalleryStartupTest({
   String target = 'lib/main.dart',
   Map<String, String>? runEnvironment,
   bool enableLazyShaderMode = false,
-  bool enableHCPP = false,
+  bool enableHcpp = false,
 }) {
   return StartupTest(
     '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
     target: target,
     runEnvironment: runEnvironment,
     enableLazyShaderMode: enableLazyShaderMode,
-    enableHCPP: enableHCPP,
+    enableHcpp: enableHcpp,
   ).run;
 }
 
@@ -860,10 +860,8 @@ void _addMetadataToManifest(String testDirectory, List<(String, String)> keyPair
   file.writeAsStringSync(xmlDoc.toXmlString(pretty: true, indent: '    '));
 }
 
-void _addSurfaceControlSupportToManifest(String testDirectory) {
-  final keyPairs = <(String, String)>[
-    ('io.flutter.embedding.android.EnableSurfaceControl', 'true'),
-  ];
+void _addHcppSupportToManifest(String testDirectory) {
+  final keyPairs = <(String, String)>[('io.flutter.embedding.android.EnableHcpp', 'true')];
   _addMetadataToManifest(testDirectory, keyPairs);
 }
 
@@ -938,13 +936,13 @@ class StartupTest {
     this.target = 'lib/main.dart',
     this.runEnvironment,
     this.enableLazyShaderMode = false,
-    this.enableHCPP = false,
+    this.enableHcpp = false,
   });
 
   final String testDirectory;
   final bool reportMetrics;
   final bool enableLazyShaderMode;
-  final bool enableHCPP;
+  final bool enableHcpp;
   final String target;
   final Map<String, String>? runEnvironment;
 
@@ -958,8 +956,8 @@ class StartupTest {
       if (enableLazyShaderMode) {
         _addLazyShaderMode(testDirectory);
       }
-      if (enableHCPP) {
-        _addSurfaceControlSupportToManifest(testDirectory);
+      if (enableHcpp) {
+        _addHcppSupportToManifest(testDirectory);
       }
 
       try {
@@ -1256,7 +1254,7 @@ class PerfTest {
     this.forceOpenGLES,
     this.disablePartialRepaint = false,
     this.enableMergedPlatformThread = false,
-    this.enableSurfaceControl = false,
+    this.enableHcpp = false,
     this.enableLazyShaderMode = false,
     this.createPlatforms = const <String>[],
   }) : _resultFilename = resultFilename;
@@ -1279,7 +1277,7 @@ class PerfTest {
     this.forceOpenGLES,
     this.disablePartialRepaint = false,
     this.enableMergedPlatformThread = false,
-    this.enableSurfaceControl = false,
+    this.enableHcpp = false,
     this.enableLazyShaderMode = false,
     this.createPlatforms = const <String>[],
   }) : saveTraceFile = false,
@@ -1337,8 +1335,8 @@ class PerfTest {
   /// Whether the UI thread should be the platform thread.
   final bool enableMergedPlatformThread;
 
-  /// Whether to enable SurfaceControl swapchain.
-  final bool enableSurfaceControl;
+  /// Whether to enable SurfaceControl swapchain and the HCPP platform view backend.
+  final bool enableHcpp;
 
   /// Whether to defer construction of all PSO objects in the Impeller backend.
   final bool enableLazyShaderMode;
@@ -1438,8 +1436,8 @@ class PerfTest {
           if (enableMergedPlatformThread) {
             _addMergedPlatformThreadSupportToManifest(testDirectory);
           }
-          if (enableSurfaceControl) {
-            _addSurfaceControlSupportToManifest(testDirectory);
+          if (enableHcpp) {
+            _addHcppSupportToManifest(testDirectory);
           }
           if (enableLazyShaderMode) {
             _addLazyShaderMode(testDirectory);
