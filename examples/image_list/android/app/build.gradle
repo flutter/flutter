@@ -28,7 +28,6 @@ if (flutterVersionName == null) {
 android {
     namespace = "com.example.image_list"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
 
 
     compileOptions {

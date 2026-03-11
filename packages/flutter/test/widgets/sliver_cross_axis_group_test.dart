@@ -3,20 +3,17 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../rendering/sliver_utils.dart';
-import 'widgets_app_tester.dart';
 
 const double VIEWPORT_HEIGHT = 600;
 const double VIEWPORT_WIDTH = 300;
 
 void main() {
-  const kYellowColor = Color(0xFFFFFF00);
-
   testWidgets('SliverCrossAxisGroup is laid out properly', (WidgetTester tester) async {
     final items = List<int>.generate(20, (int i) => i);
     final controller = ScrollController();
@@ -477,8 +474,8 @@ void main() {
             itemMainAxisExtent: 300,
             items: items,
             label: (int item) => tile == item && group == 0
-                ? GestureDetector(
-                    onTap: () => clickedTile = 'Group 0 Tile $item',
+                ? TextButton(
+                    onPressed: () => clickedTile = 'Group 0 Tile $item',
                     child: Text('Group 0 Tile $item'),
                   )
                 : Text('Group 0 Tile $item'),
@@ -486,8 +483,8 @@ void main() {
           _buildSliverList(
             items: items,
             label: (int item) => tile == item && group == 1
-                ? GestureDetector(
-                    onTap: () => clickedTile = 'Group 1 Tile $item',
+                ? TextButton(
+                    onPressed: () => clickedTile = 'Group 1 Tile $item',
                     child: Text('Group 1 Tile $item'),
                   )
                 : Text('Group 1 Tile $item'),
@@ -496,7 +493,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(GestureDetector));
+    await tester.tap(find.byType(TextButton));
     await tester.pumpAndSettle();
     expect(clickedTile, equals('Group 0 Tile 0'));
 
@@ -511,8 +508,8 @@ void main() {
             itemMainAxisExtent: 300,
             items: items,
             label: (int item) => tile == item && group == 0
-                ? GestureDetector(
-                    onTap: () => clickedTile = 'Group 0 Tile $item',
+                ? TextButton(
+                    onPressed: () => clickedTile = 'Group 0 Tile $item',
                     child: Text('Group 0 Tile $item'),
                   )
                 : Text('Group 0 Tile $item'),
@@ -520,8 +517,8 @@ void main() {
           _buildSliverList(
             items: items,
             label: (int item) => tile == item && group == 1
-                ? GestureDetector(
-                    onTap: () => clickedTile = 'Group 1 Tile $item',
+                ? TextButton(
+                    onPressed: () => clickedTile = 'Group 1 Tile $item',
                     child: Text('Group 1 Tile $item'),
                   )
                 : Text('Group 1 Tile $item'),
@@ -530,7 +527,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(GestureDetector));
+    await tester.tap(find.byType(TextButton));
     await tester.pumpAndSettle();
     expect(clickedTile, equals('Group 1 Tile 2'));
   });
@@ -863,7 +860,7 @@ void main() {
   );
 
   testWidgets(
-    'SliverPersistentHeader with floating: false, pinned: false is painted within bounds of SliverCrossAxisGroup',
+    'SliverAppBar with floating: false, pinned: false, snap: false is painted within bounds of SliverCrossAxisGroup',
     (WidgetTester tester) async {
       final controller = ScrollController();
       addTearDown(controller.dispose);
@@ -872,7 +869,7 @@ void main() {
           controller: controller,
           slivers: <Widget>[
             const SliverToBoxAdapter(child: SizedBox(height: 600)),
-            SliverPersistentHeader(delegate: TestDelegate(minExtent: 30.0)),
+            const SliverAppBar(toolbarHeight: 30, expandedHeight: 60),
           ],
           otherSlivers: <Widget>[const SliverToBoxAdapter(child: SizedBox(height: 2400))],
         ),
@@ -895,7 +892,7 @@ void main() {
   );
 
   testWidgets(
-    'SliverPersistentHeader with floating: true, pinned: false is painted within bounds of SliverCrossAxisGroup',
+    'SliverAppBar with floating: true, pinned: false, snap: true is painted within bounds of SliverCrossAxisGroup',
     (WidgetTester tester) async {
       final controller = ScrollController();
       addTearDown(controller.dispose);
@@ -904,7 +901,7 @@ void main() {
           controller: controller,
           slivers: <Widget>[
             const SliverToBoxAdapter(child: SizedBox(height: 600)),
-            SliverPersistentHeader(delegate: TestDelegate(minExtent: 30.0), floating: true),
+            const SliverAppBar(toolbarHeight: 30, expandedHeight: 60, floating: true, snap: true),
           ],
           otherSlivers: <Widget>[const SliverToBoxAdapter(child: SizedBox(height: 2400))],
         ),
@@ -923,20 +920,20 @@ void main() {
       await gesture.moveBy(const Offset(0.0, 10));
       await tester.pump();
 
-      // Floating header appears as user scrolls back.
+      // The snap animation does not go through until the gesture is released.
       expect(renderHeader.geometry!.paintExtent, equals(10));
       expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
 
-      // After gesture release, the floating header remains at its current extent.
+      // Once it is released, the header's paint extent becomes the maximum and the group sets an offset of -50.0.
       await gesture.up();
       await tester.pumpAndSettle();
-      expect(renderHeader.geometry!.paintExtent, equals(10));
-      expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
+      expect(renderHeader.geometry!.paintExtent, equals(60));
+      expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-50.0));
     },
   );
 
   testWidgets(
-    'SliverPersistentHeader with floating: true, pinned: true is painted within bounds of SliverCrossAxisGroup',
+    'SliverAppBar with floating: true, pinned: true, snap: true is painted within bounds of SliverCrossAxisGroup',
     (WidgetTester tester) async {
       final controller = ScrollController();
       addTearDown(controller.dispose);
@@ -945,10 +942,12 @@ void main() {
           controller: controller,
           slivers: <Widget>[
             const SliverToBoxAdapter(child: SizedBox(height: 600)),
-            SliverPersistentHeader(
-              delegate: TestDelegate(minExtent: 30.0),
+            const SliverAppBar(
+              toolbarHeight: 30,
+              expandedHeight: 60,
               floating: true,
               pinned: true,
+              snap: true,
             ),
           ],
           otherSlivers: <Widget>[const SliverToBoxAdapter(child: SizedBox(height: 2400))],
@@ -971,11 +970,11 @@ void main() {
       expect(renderHeader.geometry!.paintExtent, equals(30.0));
       expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-20.0));
 
-      // After gesture release, the floating header remains at its current extent.
+      // Once we lift the gesture up, the animation should finish.
       await gesture.up();
       await tester.pumpAndSettle();
-      expect(renderHeader.geometry!.paintExtent, equals(30.0));
-      expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-20.0));
+      expect(renderHeader.geometry!.paintExtent, equals(60.0));
+      expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-50.0));
     },
   );
 
@@ -1028,19 +1027,19 @@ void main() {
         slivers: <Widget>[
           MockSliverToBoxAdapter(
             incrementCounter: incrementCounter,
-            child: Container(height: 1000, decoration: const BoxDecoration(color: kYellowColor)),
+            child: Container(height: 1000, decoration: const BoxDecoration(color: Colors.amber)),
           ),
           MockSliverToBoxAdapter(
             incrementCounter: incrementCounter,
-            child: Container(height: 400, decoration: const BoxDecoration(color: kYellowColor)),
+            child: Container(height: 400, decoration: const BoxDecoration(color: Colors.amber)),
           ),
           MockSliverToBoxAdapter(
             incrementCounter: incrementCounter,
-            child: Container(height: 500, decoration: const BoxDecoration(color: kYellowColor)),
+            child: Container(height: 500, decoration: const BoxDecoration(color: Colors.amber)),
           ),
           MockSliverToBoxAdapter(
             incrementCounter: incrementCounter,
-            child: Container(height: 300, decoration: const BoxDecoration(color: kYellowColor)),
+            child: Container(height: 300, decoration: const BoxDecoration(color: Colors.amber)),
           ),
         ],
       ),
@@ -1192,20 +1191,23 @@ Widget _buildSliverCrossAxisGroup({
   bool reverse = false,
   List<Widget> otherSlivers = const <Widget>[],
 }) {
-  return TestWidgetsApp(
-    home: Align(
-      alignment: Alignment.topLeft,
-      child: SizedBox(
-        height: viewportHeight,
-        width: viewportWidth,
-        child: CustomScrollView(
-          scrollDirection: scrollDirection,
-          reverse: reverse,
-          controller: controller,
-          slivers: <Widget>[
-            SliverCrossAxisGroup(slivers: slivers),
-            ...otherSlivers,
-          ],
+  return MaterialApp(
+    home: Directionality(
+      textDirection: TextDirection.ltr,
+      child: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          height: viewportHeight,
+          width: viewportWidth,
+          child: CustomScrollView(
+            scrollDirection: scrollDirection,
+            reverse: reverse,
+            controller: controller,
+            slivers: <Widget>[
+              SliverCrossAxisGroup(slivers: slivers),
+              ...otherSlivers,
+            ],
+          ),
         ),
       ),
     ),

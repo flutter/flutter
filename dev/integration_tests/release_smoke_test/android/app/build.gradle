@@ -29,7 +29,6 @@ if (flutterVersionName == null) {
 android {
     namespace = "com.example.release_smoke_test"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
 
 
     compileOptions {

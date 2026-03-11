@@ -34,9 +34,7 @@ class RegularWindowContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final dpr = MediaQuery.of(context).devicePixelRatio;
     final windowSize = WindowScope.contentSizeOf(context);
-    final KeyedWindowManager windowManager = KeyedWindowManagerAccessor.of(
-      context,
-    );
+    final WindowManager windowManager = WindowManagerAccessor.of(context);
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
 
     final child = Scaffold(

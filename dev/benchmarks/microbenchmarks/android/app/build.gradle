@@ -28,7 +28,6 @@ if (flutterVersionName == null) {
 android {
     namespace = "com.yourcompany.microbenchmarks"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
 
 
     compileOptions {

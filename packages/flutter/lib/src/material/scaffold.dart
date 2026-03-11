@@ -997,14 +997,14 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     // for floating action button
     required this.previousFloatingActionButtonLocation,
     required this.currentFloatingActionButtonLocation,
-    required this.floatingActionButtonMoveAnimation,
+    required this.floatingActionButtonMoveAnimationProgress,
     required this.floatingActionButtonMotionAnimator,
     required this.isSnackBarFloating,
     required this.snackBarWidth,
     required this.extendBody,
     required this.extendBodyBehindAppBar,
     required this.extendBodyBehindMaterialBanner,
-  }) : super(relayout: floatingActionButtonMoveAnimation);
+  });
 
   final bool extendBody;
   final bool extendBodyBehindAppBar;
@@ -1015,7 +1015,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
   final FloatingActionButtonLocation previousFloatingActionButtonLocation;
   final FloatingActionButtonLocation currentFloatingActionButtonLocation;
-  final ValueListenable<double> floatingActionButtonMoveAnimation;
+  final double floatingActionButtonMoveAnimationProgress;
   final FloatingActionButtonAnimator floatingActionButtonMotionAnimator;
 
   final bool isSnackBarFloating;
@@ -1185,7 +1185,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       final Offset fabOffset = floatingActionButtonMotionAnimator.getOffset(
         begin: previousFabOffset,
         end: currentFabOffset,
-        progress: floatingActionButtonMoveAnimation.value,
+        progress: floatingActionButtonMoveAnimationProgress,
       );
       positionChild(_ScaffoldSlot.floatingActionButton, fabOffset);
       floatingActionButtonRect = fabOffset & fabSize;
@@ -1300,6 +1300,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     return oldDelegate.minInsets != minInsets ||
         oldDelegate.minViewPadding != minViewPadding ||
         oldDelegate.textDirection != textDirection ||
+        oldDelegate.floatingActionButtonMoveAnimationProgress !=
+            floatingActionButtonMoveAnimationProgress ||
         oldDelegate.previousFloatingActionButtonLocation != previousFloatingActionButtonLocation ||
         oldDelegate.currentFloatingActionButtonLocation != currentFloatingActionButtonLocation ||
         oldDelegate.extendBody != extendBody ||
@@ -3235,8 +3237,9 @@ class ScaffoldState extends State<Scaffold>
       child: ScrollNotificationObserver(
         child: Material(
           color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
-          child: Builder(
-            builder: (BuildContext context) {
+          child: AnimatedBuilder(
+            animation: _floatingActionButtonMoveController,
+            builder: (BuildContext context, Widget? child) {
               return Actions(
                 actions: <Type, Action<Intent>>{DismissIntent: _DismissDrawerAction(context)},
                 child: CustomMultiChildLayout(
@@ -3246,7 +3249,8 @@ class ScaffoldState extends State<Scaffold>
                     minInsets: minInsets,
                     minViewPadding: minViewPadding,
                     currentFloatingActionButtonLocation: _floatingActionButtonLocation!,
-                    floatingActionButtonMoveAnimation: _floatingActionButtonMoveController,
+                    floatingActionButtonMoveAnimationProgress:
+                        _floatingActionButtonMoveController.value,
                     floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
                     geometryNotifier: _geometryNotifier,
                     previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,

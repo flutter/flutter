@@ -7,21 +7,15 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'widgets_app_tester.dart';
-
-const Color _debugBlack = Color(0xFF000000);
-const Color _debugCanvas = Color(0xFFFAFAFA);
-const Color _debugText = Color(0xDD000000);
 
 void main() {
   testWidgets('PhysicalModel updates clipBehavior in updateRenderObject', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const TestWidgetsApp(home: PhysicalModel(color: _debugBlack)));
+    await tester.pumpWidget(const MaterialApp(home: PhysicalModel(color: Colors.red)));
 
     final RenderPhysicalModel renderPhysicalModel = tester.allRenderObjects
         .whereType<RenderPhysicalModel>()
@@ -30,8 +24,8 @@ void main() {
     expect(renderPhysicalModel.clipBehavior, equals(Clip.none));
 
     await tester.pumpWidget(
-      const TestWidgetsApp(
-        home: PhysicalModel(clipBehavior: Clip.antiAlias, color: _debugBlack),
+      const MaterialApp(
+        home: PhysicalModel(clipBehavior: Clip.antiAlias, color: Colors.red),
       ),
     );
 
@@ -42,9 +36,9 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      const TestWidgetsApp(
+      const MaterialApp(
         home: PhysicalShape(
-          color: _debugBlack,
+          color: Colors.red,
           clipper: ShapeBorderClipper(shape: CircleBorder()),
         ),
       ),
@@ -57,10 +51,10 @@ void main() {
     expect(renderPhysicalShape.clipBehavior, equals(Clip.none));
 
     await tester.pumpWidget(
-      const TestWidgetsApp(
+      const MaterialApp(
         home: PhysicalShape(
           clipBehavior: Clip.antiAlias,
-          color: _debugBlack,
+          color: Colors.red,
           clipper: ShapeBorderClipper(shape: CircleBorder()),
         ),
       ),
@@ -74,33 +68,21 @@ void main() {
   ) async {
     const key = Key('test');
     await tester.pumpWidget(
-      const MediaQuery(
-        key: key,
-        data: MediaQueryData(),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: DefaultTextStyle(
-            style: TextStyle(color: _debugText, fontFamily: 'Roboto'),
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: const MediaQuery(
+          key: key,
+          data: MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
             child: Padding(
               padding: EdgeInsets.all(50),
               child: Row(
                 children: <Widget>[
-                  PhysicalModel(
-                    color: _debugCanvas,
-                    child: Text('A long long long long long long long string'),
-                  ),
-                  PhysicalModel(
-                    color: _debugCanvas,
-                    child: Text('A long long long long long long long string'),
-                  ),
-                  PhysicalModel(
-                    color: _debugCanvas,
-                    child: Text('A long long long long long long long string'),
-                  ),
-                  PhysicalModel(
-                    color: _debugCanvas,
-                    child: Text('A long long long long long long long string'),
-                  ),
+                  Material(child: Text('A long long long long long long long string')),
+                  Material(child: Text('A long long long long long long long string')),
+                  Material(child: Text('A long long long long long long long string')),
+                  Material(child: Text('A long long long long long long long string')),
                 ],
               ),
             ),

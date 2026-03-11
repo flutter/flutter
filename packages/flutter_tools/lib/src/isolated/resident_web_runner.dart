@@ -969,13 +969,14 @@ class ResidentWebRunner extends ResidentRunner {
           // TODO(bkonyi): consider removing this log message and using only the standard VM
           // service message instead.
           _logger.printStatus('Debug service listening on $websocketUri');
-          final connectionInfo = DebugConnectionInfo(
-            wsUri: websocketUri,
-            devToolsUri: debugConnection.devToolsUri?.toUri(),
-            dtdUri: debugConnection.dtdUri?.toUri(),
+          printDebuggerList();
+          connectionInfoCompleter?.complete(
+            DebugConnectionInfo(
+              wsUri: websocketUri,
+              devToolsUri: debugConnection.devToolsUri?.toUri(),
+              dtdUri: debugConnection.dtdUri?.toUri(),
+            ),
           );
-          printDebuggerList(connectionInfo: connectionInfo);
-          connectionInfoCompleter?.complete(connectionInfo);
         }),
       );
     } else {

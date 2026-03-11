@@ -124,14 +124,4 @@ enum FlutterDarwinPlatform {
       macos => project.macos,
     };
   }
-
-  /// Returns the corresponding build directory for the platform.
-  String buildDirectory() {
-    switch (this) {
-      case FlutterDarwinPlatform.ios:
-        return getIosBuildDirectory();
-      case FlutterDarwinPlatform.macos:
-        return getMacOSBuildDirectory();
-    }
-  }
 }

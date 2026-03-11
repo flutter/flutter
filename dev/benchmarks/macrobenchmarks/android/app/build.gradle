@@ -28,7 +28,6 @@ if (flutterVersionName == null) {
 android {
     namespace = "com.example.macrobenchmarks"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
 
 
     compileOptions {

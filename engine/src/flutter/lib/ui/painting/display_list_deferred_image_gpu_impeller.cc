@@ -9,11 +9,6 @@
 
 #include "flutter/fml/make_copyable.h"
 
-// Disable a warning on Windows about use of deprecated atomic operations
-// on std::shared_ptr.  These functions are used because libcxx does not
-// yet support std::atomic<std::shared_ptr>.
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-
 namespace flutter {
 
 sk_sp<DlDeferredImageGPUImpeller> DlDeferredImageGPUImpeller::Make(
@@ -137,14 +132,8 @@ void DlDeferredImageGPUImpeller::ImageWrapper::OnGrContextCreated() {}
 
 void DlDeferredImageGPUImpeller::ImageWrapper::OnGrContextDestroyed() {}
 
-std::shared_ptr<impeller::Texture>
-DlDeferredImageGPUImpeller::ImageWrapper::texture() const {
-  return std::atomic_load(&texture_);
-}
-
 bool DlDeferredImageGPUImpeller::ImageWrapper::isTextureBacked() const {
-  std::shared_ptr<impeller::Texture> tex = texture();
-  return tex && tex->IsValid();
+  return texture_ && texture_->IsValid();
 }
 
 void DlDeferredImageGPUImpeller::ImageWrapper::SnapshotDisplayList(
@@ -183,7 +172,7 @@ void DlDeferredImageGPUImpeller::ImageWrapper::SnapshotDisplayList(
           wrapper->error_ = "Failed to create snapshot.";
           return;
         }
-        std::atomic_store(&wrapper->texture_, snapshot->impeller_texture());
+        wrapper->texture_ = snapshot->impeller_texture();
       }));
 }
 

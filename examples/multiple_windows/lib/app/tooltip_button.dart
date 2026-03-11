@@ -109,7 +109,7 @@ class _TooltipButtonState extends State<TooltipButton> {
   }
 
   void _onPressed(
-    final KeyedWindowManager windowManager,
+    final WindowManager windowManager,
     final WindowSettings windowSettings,
   ) {
     // Toggle tooltip visibility.
@@ -159,9 +159,7 @@ class _TooltipButtonState extends State<TooltipButton> {
 
   @override
   Widget build(BuildContext context) {
-    final KeyedWindowManager windowManager = KeyedWindowManagerAccessor.of(
-      context,
-    );
+    final WindowManager windowManager = WindowManagerAccessor.of(context);
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
 
     return OutlinedButton(

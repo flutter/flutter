@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'button_tester.dart';
 
 void main() {
   testWidgets('AnimatedCrossFade test', (WidgetTester tester) async {
@@ -306,8 +304,8 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: AnimatedCrossFade(
-          firstChild: TestButton(onPressed: () {}, child: const Text('AAA')),
-          secondChild: TestButton(onPressed: () {}, child: const Text('BBB')),
+          firstChild: TextButton(onPressed: () {}, child: const Text('AAA')),
+          secondChild: TextButton(onPressed: () {}, child: const Text('BBB')),
           crossFadeState: CrossFadeState.showFirst,
           duration: const Duration(milliseconds: 50),
         ),
@@ -330,8 +328,8 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: AnimatedCrossFade(
-          firstChild: TestButton(onPressed: () {}, child: const Text('AAA')),
-          secondChild: TestButton(onPressed: () {}, child: const Text('BBB')),
+          firstChild: TextButton(onPressed: () {}, child: const Text('AAA')),
+          secondChild: TextButton(onPressed: () {}, child: const Text('BBB')),
           crossFadeState: CrossFadeState.showFirst,
           duration: const Duration(milliseconds: 50),
           excludeBottomFocus: false,
@@ -364,15 +362,12 @@ void main() {
             textDirection: TextDirection.ltr,
             child: AnimatedCrossFade(
               firstChild: const Text('AAA'),
-              secondChild: SizedBox(
-                width: double.infinity,
-                height: 600,
-                child: TestButton(
-                  onPressed: () {
-                    numberOfTouchEventNoticed++;
-                  },
-                  child: const Text('BBB'),
-                ),
+              secondChild: TextButton(
+                style: TextButton.styleFrom(minimumSize: const Size(double.infinity, 600)),
+                onPressed: () {
+                  numberOfTouchEventNoticed++;
+                },
+                child: const Text('BBB'),
               ),
               crossFadeState: crossFadeState,
               duration: const Duration(milliseconds: 50),

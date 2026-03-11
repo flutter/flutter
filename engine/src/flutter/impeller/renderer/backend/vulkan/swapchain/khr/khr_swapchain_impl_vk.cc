@@ -22,7 +22,6 @@ static constexpr size_t kMaxFramesInFlight = 2u;
 
 struct KHRFrameSynchronizerVK {
   vk::UniqueFence acquire;
-  bool acquire_fence_pending = false;
   vk::UniqueSemaphore render_ready;
   std::shared_ptr<CommandBuffer> final_cmd_buffer;
   bool is_valid = false;
@@ -30,7 +29,8 @@ struct KHRFrameSynchronizerVK {
   bool has_onscreen = false;
 
   explicit KHRFrameSynchronizerVK(const vk::Device& device) {
-    auto acquire_res = device.createFenceUnique({});
+    auto acquire_res = device.createFenceUnique(
+        vk::FenceCreateInfo{vk::FenceCreateFlagBits::eSignaled});
     auto render_res = device.createSemaphoreUnique({});
     if (acquire_res.result != vk::Result::eSuccess ||
         render_res.result != vk::Result::eSuccess) {
@@ -45,9 +45,6 @@ struct KHRFrameSynchronizerVK {
   ~KHRFrameSynchronizerVK() = default;
 
   bool WaitForFence(const vk::Device& device) {
-    if (!acquire_fence_pending) {
-      return true;
-    }
     if (auto result = device.waitForFences(
             *acquire,                             // fence
             true,                                 // wait all
@@ -57,7 +54,6 @@ struct KHRFrameSynchronizerVK {
       VALIDATION_LOG << "Fence wait failed: " << vk::to_string(result);
       return false;
     }
-    acquire_fence_pending = false;
     if (auto result = device.resetFences(*acquire);
         result != vk::Result::eSuccess) {
       VALIDATION_LOG << "Could not reset fence: " << vk::to_string(result);
@@ -391,10 +387,6 @@ KHRSwapchainImplVK::AcquireResult KHRSwapchainImplVK::AcquireNextDrawable() {
       // A recoverable error. Just say we are out of date.
       return AcquireResult{true /* out of date */};
       break;
-    case vk::Result::eErrorSurfaceLostKHR:
-      // This error code is returned by Android for some situations that are
-      // recoverable but do not require recreating the swapchain.
-      return AcquireResult{false /* out of date */};
     default:
       // An unrecoverable error.
       VALIDATION_LOG << "Could not acquire next swapchain image: "
@@ -493,7 +485,6 @@ bool KHRSwapchainImplVK::Present(
                      << vk::to_string(result);
       return false;
     }
-    sync->acquire_fence_pending = true;
   }
 
   //----------------------------------------------------------------------------

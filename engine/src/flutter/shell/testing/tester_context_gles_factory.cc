@@ -15,7 +15,9 @@
 
 #include "flutter/common/graphics/gl_context_switch.h"
 #include "flutter/fml/logging.h"
+#include "flutter/fml/make_copyable.h"
 #include "flutter/fml/mapping.h"
+#include "flutter/fml/message_loop.h"
 #include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
 #include "flutter/shell/gpu/gpu_surface_gl_impeller.h"
 #include "flutter/testing/test_swangle_utils.h"
@@ -30,6 +32,26 @@
 namespace flutter {
 
 namespace {
+
+class TesterGLContext : public SwitchableGLContext {
+ public:
+  TesterGLContext(EGLDisplay display, EGLSurface surface, EGLContext context)
+      : display_(display), surface_(surface), context_(context) {}
+
+  bool SetCurrent() override {
+    return ::eglMakeCurrent(display_, surface_, surface_, context_) == EGL_TRUE;
+  }
+
+  bool RemoveCurrent() override {
+    ::eglMakeCurrent(display_, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    return true;
+  }
+
+ private:
+  EGLDisplay display_;
+  EGLSurface surface_;
+  EGLContext context_;
+};
 
 class TesterGLESDelegate : public GPUSurfaceGLDelegate {
  public:
@@ -107,21 +129,25 @@ class TesterGLESDelegate : public GPUSurfaceGLDelegate {
         ::eglDestroySurface(display_, surface_);
       }
       if (context_ != EGL_NO_CONTEXT) {
-        ::eglMakeCurrent(display_, EGL_NO_SURFACE, EGL_NO_SURFACE,
-                         EGL_NO_CONTEXT);
         ::eglDestroyContext(display_, context_);
       }
       ::eglTerminate(display_);
     }
   }
 
-  bool MakeContextCurrent() {
-    return ::eglMakeCurrent(display_, surface_, surface_, context_) == EGL_TRUE;
-  }
+  bool IsContextCurrent() const { return ::eglGetCurrentContext() == context_; }
 
   // |GPUSurfaceGLDelegate|
   std::unique_ptr<GLContextResult> GLContextMakeCurrent() override {
-    return std::make_unique<GLContextDefaultResult>(MakeContextCurrent());
+    if (IsContextCurrent()) {
+      return std::make_unique<GLContextDefaultResult>(true);
+    }
+
+    // Set the current context by instantiating a GLContextSwitch with a
+    // TesterGLContext. This clears the current context on destruction of the
+    // GLContextSwitch.
+    return std::make_unique<GLContextSwitch>(
+        std::make_unique<TesterGLContext>(display_, surface_, context_));
   }
 
   // |GPUSurfaceGLDelegate|
@@ -163,7 +189,22 @@ class TesterGLESWorker : public impeller::ReactorGLES::Worker {
 
   bool CanReactorReactOnCurrentThreadNow(
       const impeller::ReactorGLES& reactor) const override {
-    return delegate_->MakeContextCurrent();
+    if (delegate_->IsContextCurrent()) {
+      return true;
+    }
+    std::unique_ptr<GLContextResult> result = delegate_->GLContextMakeCurrent();
+    if (!result->GetResult()) {
+      return false;
+    }
+    // Move the result into a TaskObserver to ensure it is destroyed (and the
+    // current egl context cleared) at the end of the current task.
+    fml::MessageLoop::GetCurrent().AddTaskObserver(
+        reinterpret_cast<intptr_t>(this),
+        fml::MakeCopyable([this, result = std::move(result)]() {
+          fml::MessageLoop::GetCurrent().RemoveTaskObserver(
+              reinterpret_cast<intptr_t>(this));
+        }));
+    return true;
   }
 
  private:
@@ -190,7 +231,8 @@ class TesterContextGLES : public TesterContext {
     delegate_ = std::make_unique<TesterGLESDelegate>(
         std::move(delegate_status.value()));
 
-    if (!delegate_->MakeContextCurrent()) {
+    auto switch_result = delegate_->GLContextMakeCurrent();
+    if (!switch_result->GetResult()) {
       FML_LOG(ERROR) << "Could not make GLES context current.";
       return false;
     }

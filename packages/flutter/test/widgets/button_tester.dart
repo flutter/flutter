@@ -12,7 +12,6 @@ class TestButton extends StatelessWidget {
     this.focusNode,
     this.autofocus = false,
     this.onPressed,
-    this.behavior,
     super.key,
   });
 
@@ -20,7 +19,6 @@ class TestButton extends StatelessWidget {
   final FocusNode? focusNode;
   final VoidCallback? onPressed;
   final Widget child;
-  final HitTestBehavior? behavior;
 
   void _onFocus() => focusNode?.requestFocus();
 
@@ -37,7 +35,7 @@ class TestButton extends StatelessWidget {
         enabled: onPressed != null,
         focusNode: focusNode,
         autofocus: autofocus,
-        child: GestureDetector(behavior: behavior, onTap: onPressed, child: child),
+        child: GestureDetector(onTap: onPressed, child: child),
       ),
     );
   }

@@ -13,7 +13,7 @@ following:
   * `compiler` - What compiler is used to compile the tests. Currently we support
     `dart2js` and `dart2wasm` as values.
   * `renderer` - Which renderer to use when compiling the tests. Currently we
-    support `canvaskit`, and `skwasm`.
+    support `html`, `canvaskit`, and `skwasm`.
 
 ## `test-sets`
 A group of files that contain unit tests. Each test set specifies the following:

@@ -2,15 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'editable_text_tester.dart';
 import 'semantics_tester.dart';
-import 'widgets_app_tester.dart';
-
-const Color _debugRowDecorationColor = Color(0xFF00FF00);
 
 class TestStatefulWidget extends StatefulWidget {
   const TestStatefulWidget({super.key});
@@ -112,7 +108,7 @@ void main() {
       key: GlobalKey(),
       children: const <TableRow>[
         TableRow(
-          decoration: BoxDecoration(color: _debugRowDecorationColor),
+          decoration: BoxDecoration(color: Colors.yellow),
           children: <Widget>[Placeholder()],
         ),
       ],
@@ -968,16 +964,18 @@ void main() {
   testWidgets('Table has correct roles in semantics', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
     await tester.pumpWidget(
-      TestWidgetsApp(
-        home: Table(
-          children: const <TableRow>[
-            TableRow(
-              children: <Widget>[
-                TableCell(child: Text('Data Cell 1')),
-                TableCell(child: Text('Data Cell 2')),
-              ],
-            ),
-          ],
+      MaterialApp(
+        home: Scaffold(
+          body: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableCell(child: Text('Data Cell 1')),
+                  TableCell(child: Text('Data Cell 2')),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -990,20 +988,25 @@ void main() {
             TestSemantics(
               children: <TestSemantics>[
                 TestSemantics(
-                  role: SemanticsRole.table,
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     TestSemantics(
-                      role: SemanticsRole.row,
+                      role: SemanticsRole.table,
                       children: <TestSemantics>[
                         TestSemantics(
-                          label: 'Data Cell 1',
-                          textDirection: TextDirection.ltr,
-                          role: SemanticsRole.cell,
-                        ),
-                        TestSemantics(
-                          label: 'Data Cell 2',
-                          textDirection: TextDirection.ltr,
-                          role: SemanticsRole.cell,
+                          role: SemanticsRole.row,
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              label: 'Data Cell 1',
+                              textDirection: TextDirection.ltr,
+                              role: SemanticsRole.cell,
+                            ),
+                            TestSemantics(
+                              label: 'Data Cell 2',
+                              textDirection: TextDirection.ltr,
+                              role: SemanticsRole.cell,
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -1028,11 +1031,13 @@ void main() {
     final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(
-      TestWidgetsApp(
-        home: Table(
-          children: <TableRow>[
-            TableRow(children: <Widget>[TestTextField(focusNode: focusNode)]),
-          ],
+      MaterialApp(
+        home: Scaffold(
+          body: Table(
+            children: <TableRow>[
+              TableRow(children: <Widget>[TestTextField(focusNode: focusNode)]),
+            ],
+          ),
         ),
       ),
     );

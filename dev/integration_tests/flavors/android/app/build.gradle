@@ -18,7 +18,6 @@ if (localPropertiesFile.exists()) {
 android {
     namespace = "com.yourcompany.flavors"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
 
 
     compileOptions {

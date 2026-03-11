@@ -6,7 +6,7 @@ plugins {
 android {
     namespace = "com.example.myapplication"
     compileSdk = 36
-    ndkVersion = "28.2.13676358" // This version must exactly match the version of the NDK that the recipe pulls from CIPD.
+
 
     defaultConfig {
         applicationId = "com.example.myapplication"

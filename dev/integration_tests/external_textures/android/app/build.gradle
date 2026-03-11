@@ -18,7 +18,6 @@ if (localPropertiesFile.exists()) {
 android {
     namespace = "io.flutter.externalui"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
 
 
     compileOptions {

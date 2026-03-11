@@ -744,17 +744,7 @@ public class FlutterFragmentActivity extends FragmentActivity
    */
   @Override
   public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
-    FlutterFragment attachedFlutterFragment = flutterFragment;
-    if (attachedFlutterFragment == null) {
-      // During activity recreation, `FragmentManager` may restore and attach an existing
-      // `FlutterFragment` before `ensureFlutterFragmentCreated()` refreshes the
-      // `flutterFragment` field.
-      // Query by tag here so plugin auto-registration can still honor the injected-engine guard.
-      // Keep `flutterFragment` field ownership in `ensureFlutterFragmentCreated()`; this lookup
-      // only informs the guard.
-      attachedFlutterFragment = retrieveExistingFlutterFragmentIfPossible();
-    }
-    if (attachedFlutterFragment != null && attachedFlutterFragment.isFlutterEngineInjected()) {
+    if (flutterFragment != null && flutterFragment.isFlutterEngineInjected()) {
       // If the FlutterEngine was explicitly built and injected into this FlutterActivity, the
       // builder should explicitly decide whether to automatically register plugins via the
       // FlutterEngine's construction parameter or via the AndroidManifest metadata.

@@ -87,7 +87,10 @@ class DlDeferredImageGPUImpeller final : public DlImage {
 
     bool isTextureBacked() const;
 
-    std::shared_ptr<impeller::Texture> texture() const;
+    const std::shared_ptr<impeller::Texture> texture() const {
+      FML_DCHECK(raster_task_runner_->RunsTasksOnCurrentThread());
+      return texture_;
+    }
 
     const DlISize size() const { return size_; }
 
