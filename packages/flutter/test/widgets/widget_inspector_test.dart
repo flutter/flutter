@@ -5186,6 +5186,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           await tester.pumpWidget(const Placeholder());
 
           // Verify that the call to getLayoutExplorerNode for the Row widget
+          // does not throw an exception.
           expect(
             service.testExtension(
               WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
