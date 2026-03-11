@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/android/application_package.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
-import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -104,7 +103,7 @@ void main() {
         );
         processManager.addCommand(
           FakeCommand(
-            command: <String>[
+            command: const <String>[
               '/android-sdk/cmdline-tools/latest/bin/sdkmanager',
               '--sdk_root=/android-sdk',
               '--install',
@@ -189,6 +188,123 @@ void main() {
             fileSystem: fileSystem,
           );
           return sdkForPreprovisionBuild;
+        },
+        AndroidStudio: () => FakeAndroidStudio(),
+      },
+    );
+
+    testUsingContext(
+      'build apk forwards skip dependency checks to printNdkVersion',
+      () async {
+        final builder = AndroidGradleBuilder(
+          java: FakeJava(),
+          logger: logger,
+          processManager: processManager,
+          fileSystem: fileSystem,
+          artifacts: Artifacts.test(),
+          analytics: fakeAnalytics,
+          gradleUtils: FakeGradleUtils(),
+          platform: FakePlatform(),
+          androidStudio: FakeAndroidStudio(),
+        );
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'gradlew',
+              '-q',
+              '-PskipDependencyChecks=true',
+              'printNdkVersion',
+            ],
+            stdout: 'NdkVersion: 29.0.13846066\n',
+          ),
+        );
+        processManager.addCommand(
+          FakeCommand(
+            command: const <String>[
+              '/android-sdk/cmdline-tools/latest/bin/sdkmanager',
+              '--sdk_root=/android-sdk',
+              '--install',
+              'ndk;29.0.13846066',
+            ],
+            onRun: (_) {
+              fileSystem
+                  .directory('/android-sdk/ndk/29.0.13846066')
+                  .childFile('source.properties')
+                  .createSync(recursive: true);
+            },
+          ),
+        );
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'gradlew',
+              '-q',
+              '-PskipDependencyChecks=true',
+              '-Ptarget-platform=android-arm,android-arm64,android-x64',
+              '-Ptarget=lib/main.dart',
+              '-Pbase-application-name=android.app.Application',
+              '-Pdart-obfuscation=false',
+              '-Ptrack-widget-creation=false',
+              '-Ptree-shake-icons=false',
+              '-Pflutter-preprovisioned-ndk-version=29.0.13846066',
+              'assembleRelease',
+            ],
+          ),
+        );
+
+        fileSystem.file('android/gradlew').createSync(recursive: true);
+        fileSystem.directory('android').childFile('gradle.properties').createSync(recursive: true);
+        fileSystem.file('android/build.gradle').createSync(recursive: true);
+        fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+        fileSystem
+            .directory('build')
+            .childDirectory('app')
+            .childDirectory('outputs')
+            .childDirectory('flutter-apk')
+            .childFile('app-release.apk')
+            .createSync(recursive: true);
+
+        final FlutterProject project = FlutterProject.fromDirectoryTest(
+          fileSystem.currentDirectory,
+        );
+        project.android.appManifestFile
+          ..createSync(recursive: true)
+          ..writeAsStringSync(minimalV2EmbeddingManifest);
+
+        await builder.buildGradleApp(
+          project: project,
+          androidBuildInfo: const AndroidBuildInfo(
+            BuildInfo(
+              BuildMode.release,
+              null,
+              treeShakeIcons: false,
+              packageConfigPath: '.dart_tool/package_config.json',
+              androidSkipBuildDependencyValidation: true,
+            ),
+          ),
+          target: 'lib/main.dart',
+          isBuildingBundle: false,
+          configOnly: false,
+          localGradleErrors: const <GradleHandledError>[],
+        );
+
+        expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        AndroidSdk: () {
+          fileSystem.directory('/android-sdk').createSync(recursive: true);
+          fileSystem.directory('/android-sdk/licenses').createSync(recursive: true);
+          fileSystem
+              .directory('/android-sdk/cmdline-tools/latest/bin')
+              .childFile('sdkmanager')
+              .createSync(recursive: true);
+          return AndroidSdk(
+            fileSystem.directory('/android-sdk'),
+            java: FakeJava(),
+            fileSystem: fileSystem,
+          );
         },
         AndroidStudio: () => FakeAndroidStudio(),
       },

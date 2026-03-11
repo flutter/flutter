@@ -29,8 +29,8 @@ import '../convert.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import 'android_sdk.dart';
 import 'android_builder.dart';
+import 'android_sdk.dart';
 import 'android_studio.dart';
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
@@ -572,6 +572,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     final String? preprovisionedNdkVersion = await _preprovisionAndroidNdkIfNeeded(
       project: project,
       gradleExecutablePath: gradleExecutablePath,
+      buildInfo: buildInfo,
     );
     if (preprovisionedNdkVersion != null) {
       options.add('-P$_kPreprovisionedNdkVersionProperty=$preprovisionedNdkVersion');
@@ -918,6 +919,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
   Future<String?> _preprovisionAndroidNdkIfNeeded({
     required FlutterProject project,
     required String gradleExecutablePath,
+    required BuildInfo buildInfo,
   }) async {
     final AndroidSdk? androidSdk = globals.androidSdk;
     if (androidSdk == null || !androidSdk.directory.existsSync()) {
@@ -927,6 +929,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     final String? requiredNdkVersion = await _getNdkVersion(
       project: project,
       gradleExecutablePath: gradleExecutablePath,
+      buildInfo: buildInfo,
     );
     if (requiredNdkVersion == null) {
       return null;
@@ -989,6 +992,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
   Future<String?> _getNdkVersion({
     required FlutterProject project,
     required String gradleExecutablePath,
+    required BuildInfo buildInfo,
   }) async {
     late Stopwatch sw;
     var exitCode = 1;
@@ -1010,7 +1014,10 @@ class AndroidGradleBuilder implements AndroidBuilder {
             ),
           );
         },
-        options: const <String>['-q'],
+        options: <String>[
+          '-q',
+          if (buildInfo.androidSkipBuildDependencyValidation) '-PskipDependencyChecks=true',
+        ],
         project: project,
         localGradleErrors: gradleErrors,
         gradleExecutablePath: gradleExecutablePath,
