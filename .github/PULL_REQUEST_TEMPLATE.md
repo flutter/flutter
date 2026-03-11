@@ -16,7 +16,6 @@ To learn more about code review, see our documentation on Tree Hygiene: https://
 <!--
 Please DO NOT remove the Pre-launch Checklist.
 The Pre-launch Checklist and its links are required for the review process.
-Only check the boxes that apply to your PR.
 -->
 
 ## Pre-launch Checklist
