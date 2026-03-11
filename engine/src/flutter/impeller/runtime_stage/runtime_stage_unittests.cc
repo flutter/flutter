@@ -84,6 +84,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
   ASSERT_TRUE(stage);
   switch (GetBackend()) {
     case PlaygroundBackend::kMetal:
+    case PlaygroundBackend::kMetalSDF:
       [[fallthrough]];
     case PlaygroundBackend::kOpenGLES: {
       ASSERT_EQ(stage->GetUniforms().size(), 14u);

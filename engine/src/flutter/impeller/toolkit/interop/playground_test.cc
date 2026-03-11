@@ -59,6 +59,7 @@ void PlaygroundTest::TearDown() {
 ScopedObject<Context> PlaygroundTest::CreateContext() const {
   switch (GetBackend()) {
     case PlaygroundBackend::kMetal:
+    case PlaygroundBackend::kMetalSDF:
       return Adopt<Context>(
           ImpellerContextCreateMetalNew(ImpellerGetVersion()));
     case PlaygroundBackend::kOpenGLES: {
