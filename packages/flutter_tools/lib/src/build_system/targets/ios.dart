@@ -520,6 +520,12 @@ class DebugIosLLDBInit extends Target {
   List<Target> get dependencies => <Target>[];
 
   @override
+  Future<bool> canSkip(Environment environment) async {
+    // The `build swift-package` is not run on a device and therefore does not need an LLDB Init File.
+    return environment.defines[kBuildSwiftPackage] == 'true';
+  }
+
+  @override
   Future<void> build(Environment environment) async {
     final String? sdkRoot = environment.defines[kSdkRoot];
     if (sdkRoot == null) {
@@ -914,7 +920,7 @@ Future<void> _createStubAppFramework(
 }
 
 Future<void> _signFramework(Environment environment, File binary, BuildMode buildMode) async {
-  await removeFinderExtendedAttributes(
+  await removeExtendedAttributes(
     binary,
     ProcessUtils(processManager: environment.processManager, logger: environment.logger),
     environment.logger,

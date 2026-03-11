@@ -581,18 +581,6 @@ class _CarouselViewState extends State<CarouselView> {
     return _controller.initialItem;
   }
 
-  AxisDirection _getDirection(BuildContext context) {
-    switch (widget.scrollDirection) {
-      case Axis.horizontal:
-        assert(debugCheckHasDirectionality(context));
-        final TextDirection textDirection = Directionality.of(context);
-        final AxisDirection axisDirection = textDirectionToAxisDirection(textDirection);
-        return widget.reverse ? flipAxisDirection(axisDirection) : axisDirection;
-      case Axis.vertical:
-        return widget.reverse ? AxisDirection.up : AxisDirection.down;
-    }
-  }
-
   Widget _buildCarouselItem(int index) {
     final CarouselViewThemeData carouselTheme = CarouselViewTheme.of(context);
     final ColorScheme colorScheme = ColorScheme.of(context);
@@ -685,7 +673,6 @@ class _CarouselViewState extends State<CarouselView> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final AxisDirection axisDirection = _getDirection(context);
     final ScrollPhysics physics = widget.itemSnapping
         ? const CarouselScrollPhysics()
         : ScrollConfiguration.of(context).getScrollPhysics(context);
@@ -696,22 +683,18 @@ class _CarouselViewState extends State<CarouselView> {
           Axis.horizontal => constraints.maxWidth,
           Axis.vertical => constraints.maxHeight,
         };
+
         _itemExtent = widget.itemExtent == null
             ? null
             : clampDouble(widget.itemExtent!, 0, mainAxisExtent);
-        return Scrollable(
-          axisDirection: axisDirection,
+        return CustomScrollView(
+          scrollDirection: widget.scrollDirection,
+          reverse: widget.reverse,
           controller: _controller,
           physics: physics,
-          viewportBuilder: (BuildContext context, ViewportOffset position) {
-            return Viewport(
-              scrollCacheExtent: const ScrollCacheExtent.viewport(0.0),
-              axisDirection: axisDirection,
-              offset: position,
-              clipBehavior: Clip.antiAlias,
-              slivers: <Widget>[_buildSliverCarousel(theme)],
-            );
-          },
+          clipBehavior: Clip.antiAlias,
+          scrollCacheExtent: const ScrollCacheExtent.viewport(0.0),
+          slivers: <Widget>[_buildSliverCarousel(theme)],
         );
       },
     );

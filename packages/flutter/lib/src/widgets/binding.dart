@@ -36,6 +36,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import '../foundation/_features.dart';
+import '_accessibility_evaluations.dart';
 import '_window.dart';
 import 'app.dart';
 import 'debug.dart';
@@ -151,6 +152,22 @@ abstract mixin class WidgetsBindingObserver {
   /// Currently, this is only used on Android devices that support the
   /// predictive back feature.
   void handleCancelBackGesture() {}
+
+  /// Called when the user taps the status bar on iOS, to scroll a scroll
+  /// view to the top.
+  ///
+  /// This event should usually only be handled by at most one scroll view, so
+  /// implementer(s) of this callback must coordinate to determine the most
+  /// suitable scroll view for handling this event.
+  ///
+  /// This callback is only called on iOS. The default implementation provided by
+  /// [WidgetsBindingObserver] does nothing.
+  ///
+  /// See also:
+  ///
+  ///  * [Scaffold] and [CupertinoPageScaffold] which use this callback to implement
+  ///    iOS scroll-to-top.
+  void handleStatusBarTap() {}
 
   /// Called when the host tells the application to push a new route onto the
   /// navigator.
@@ -461,6 +478,7 @@ mixin WidgetsBinding
     platformDispatcher.onLocaleChanged = handleLocaleChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
     SystemChannels.backGesture.setMethodCallHandler(_handleBackGestureInvocation);
+    SystemChannels.statusBar.setMethodCallHandler(_handleStatusBarActions);
     assert(() {
       FlutterErrorDetails.propertiesTransformers.add(debugTransformDebugCreator);
       return true;
@@ -735,6 +753,46 @@ mixin WidgetsBinding
           debugProfileBuildsEnabledUserWidgets = value;
         },
       );
+
+      registerServiceExtension(
+        name: WidgetsServiceExtensions.accessibilityEvaluations.name,
+        callback: (Map<String, String> parameters) async {
+          final String? type = parameters['type'];
+          if (type == null) {
+            throw Exception('type parameter is required');
+          }
+
+          switch (type) {
+            case 'MinimumTextContrastEvaluation':
+              if (parameters case {
+                'minNormalTextContrastRatio': final String minNormalTextContrastRatio,
+                'minLargeTextContrastRatio': final String minLargeTextContrastRatio,
+              }) {
+                final EvaluationResult result = await MinimumTextContrastEvaluation(
+                  minNormalTextContrastRatio: double.parse(minNormalTextContrastRatio),
+                  minLargeTextContrastRatio: double.parse(minLargeTextContrastRatio),
+                ).evaluate(this);
+                return _formatEvaluationResult(result.violations);
+              }
+              throw Exception('Invalid arguments');
+            case 'MinimumTapTargetEvaluation':
+              if (parameters case {'targetSize': final String targetSize}) {
+                final EvaluationResult result = await MinimumTapTargetEvaluation(
+                  size: Size.square(double.parse(targetSize)),
+                ).evaluate(this);
+                return _formatEvaluationResult(result.violations);
+              }
+              throw Exception('Invalid arguments');
+            case 'LabeledTapTargetEvaluation':
+              final EvaluationResult result = await const LabeledTapTargetEvaluation().evaluate(
+                this,
+              );
+              return _formatEvaluationResult(result.violations);
+            default:
+              throw Exception('unknown type: $type');
+          }
+        },
+      );
     }
 
     assert(() {
@@ -754,6 +812,17 @@ mixin WidgetsBinding
 
       return true;
     }());
+  }
+
+  Map<String, List<Map<String, String>>> _formatEvaluationResult(List<Violation> violations) {
+    return <String, List<Map<String, String>>>{
+      'result': violations.map((Violation violation) {
+        return <String, String>{
+          'nodeId': violation.node.id.toString(),
+          'message': violation.reason,
+        };
+      }).toList(),
+    };
   }
 
   Future<void> _forceRebuild() {
@@ -983,6 +1052,24 @@ mixin WidgetsBinding
   void dispatchAccessibilityFeaturesChanged() {
     for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangeAccessibilityFeatures();
+    }
+  }
+
+  Future<void> _handleStatusBarActions(MethodCall call) async {
+    assert(call.method == 'handleScrollToTop');
+    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+      try {
+        observer.handleStatusBarTap();
+      } catch (exception, stack) {
+        final details = FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets library',
+          context: ErrorDescription('handling status bar action'),
+        );
+        FlutterError.reportError(details);
+        // No error widget possible here since it wouldn't have a view to render into.
+      }
     }
   }
 

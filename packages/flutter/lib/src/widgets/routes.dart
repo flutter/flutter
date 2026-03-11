@@ -1098,10 +1098,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   @override
   void initState() {
     super.initState();
-    final animations = <Listenable>[
-      if (widget.route.animation != null) widget.route.animation!,
-      if (widget.route.secondaryAnimation != null) widget.route.secondaryAnimation!,
-    ];
+    final animations = <Listenable>[?widget.route.animation, ?widget.route.secondaryAnimation];
     _listenable = Listenable.merge(animations);
   }
 
