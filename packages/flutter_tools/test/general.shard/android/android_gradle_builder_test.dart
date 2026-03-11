@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -62,8 +63,13 @@ void main() {
 
     String sdkPath() => fileSystem.directory('android-sdk').absolute.path;
     String missingSdkPath() => fileSystem.directory('nonexistent-android-sdk').absolute.path;
-    String sdkManagerPath() =>
-        fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin', 'sdkmanager');
+    String sdkManagerPath() => fileSystem.path.join(
+      sdkPath(),
+      'cmdline-tools',
+      'latest',
+      'bin',
+      globals.platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager',
+    );
     String sdkLicensesPath() => fileSystem.path.join(sdkPath(), 'licenses');
     String ndkPath(String version) => fileSystem.path.join(sdkPath(), 'ndk', version);
     String apkAnalyzerPath() =>
@@ -189,7 +195,7 @@ void main() {
           fileSystem.directory(sdkLicensesPath()).createSync(recursive: true);
           fileSystem
               .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
-              .childFile('sdkmanager')
+              .childFile(globals.platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager')
               .createSync(recursive: true);
           sdkForPreprovisionBuild = AndroidSdk(
             fileSystem.directory(sdkPath()),
@@ -302,7 +308,7 @@ void main() {
           fileSystem.directory(sdkLicensesPath()).createSync(recursive: true);
           fileSystem
               .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
-              .childFile('sdkmanager')
+              .childFile(globals.platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager')
               .createSync(recursive: true);
           return AndroidSdk(
             fileSystem.directory(sdkPath()),
@@ -398,7 +404,7 @@ void main() {
           fileSystem.directory(sdkLicensesPath()).createSync(recursive: true);
           fileSystem
               .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
-              .childFile('sdkmanager')
+              .childFile(globals.platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager')
               .createSync(recursive: true);
           sdkForFailedQuery = AndroidSdk(
             fileSystem.directory(sdkPath()),
