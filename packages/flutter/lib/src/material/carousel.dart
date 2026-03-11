@@ -500,7 +500,7 @@ class CarouselView extends StatefulWidget {
   ///
   /// If null, the carousel will continue to build items until [itemBuilder] returns null.
   ///
-  /// When [infinite] is true, this parameter is ignored and the carousel will loop infinitely.
+  /// When [infinite] is true, the carousel will loop infinitely.
   final int? itemCount;
 
   /// Whether the carousel should loop infinitely.
