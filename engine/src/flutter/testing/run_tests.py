@@ -938,7 +938,6 @@ def gather_dart_tests(
 
   opengles_skipped_tests = [
       'gpu_test.dart',
-      'high_bitrate_texture_test.dart',
   ]
 
   impeller_backends = ['', 'vulkan', 'opengles']
