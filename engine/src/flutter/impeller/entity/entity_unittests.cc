@@ -1759,8 +1759,7 @@ TEST_P(EntityTest, RuntimeEffect) {
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
@@ -1816,9 +1815,7 @@ TEST_P(EntityTest, RuntimeEffect) {
     auto runtime_stages_result =
         OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
     ABSL_ASSERT_OK(runtime_stages_result);
-    runtime_stage =
-        runtime_stages_result
-            .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+    runtime_stage = runtime_stages_result.value()[GetRuntimeStageBackend()];
 
     ASSERT_TRUE(runtime_stage->IsDirty());
     expect_dirty = true;
@@ -1831,9 +1828,7 @@ TEST_P(EntityTest, RuntimeEffectCanSuccessfullyRender) {
   auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
-  auto runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  auto runtime_stage = runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
@@ -1881,8 +1876,7 @@ TEST_P(EntityTest, RuntimeEffectCanPrecache) {
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
@@ -1900,9 +1894,7 @@ TEST_P(EntityTest, RuntimeEffectSetsRightSizeWhenUniformIsStruct) {
   auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
-  auto runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  auto runtime_stage = runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
