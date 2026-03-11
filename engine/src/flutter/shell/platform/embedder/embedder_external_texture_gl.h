@@ -26,6 +26,11 @@ class EmbedderExternalTextureGL : public flutter::Texture {
  private:
   const ExternalTextureCallback& external_texture_callback_;
   sk_sp<DlImage> last_image_;
+  // If a impeller::TextureGLES and impeller::HandleGLES are created every time
+  // when a texture is rendered. the impeller::TextureGLES destructor is called
+  // after rendering, and impeller::RefactorGLES will destroy
+  // impeller::HandleGLES.Now add texture_gles_ new variable to ensure that the
+  // gl handle is not destroyed if the same gl handle is used every time.
   std::shared_ptr<impeller::TextureGLES> texture_gles_;
 
   sk_sp<DlImage> ResolveTexture(int64_t texture_id,
