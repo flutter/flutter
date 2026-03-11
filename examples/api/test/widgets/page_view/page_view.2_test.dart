@@ -20,6 +20,7 @@ void main() {
     // The PageView should adapt its height to the first page.
     final pageView = find.byType(PageView);
     expect(pageView, findsOneWidget);
+    expect(tester.getSize(pageView).height, 100.0);
 
     // Swipe to the second page.
     await tester.fling(pageView, const Offset(-300.0, 0.0), 3000);
@@ -27,5 +28,6 @@ void main() {
 
     // Verify the second page is shown.
     expect(find.text('Page 2 — Medium (250)'), findsOneWidget);
+    expect(tester.getSize(pageView).height, 250.0);
   });
 }

@@ -24,12 +24,6 @@ import 'sliver.dart';
 /// axis. Each child is sized to fill the viewport, both in the main and cross
 /// axis.
 ///
-/// When [shrinkWrapCrossAxis] is true, each child still fills the viewport in
-/// the main axis, but it is allowed to determine its own size in the cross
-/// axis. In that mode, the sliver reports the visible page's cross-axis extent
-/// to ancestor viewports that honor [SliverGeometry.crossAxisExtent], such as
-/// [CrossAxisShrinkWrappingViewport].
-///
 /// See also:
 ///
 ///  * [SliverFixedExtentList], which has a configurable
@@ -46,7 +40,6 @@ class SliverFillViewport extends StatelessWidget {
     required this.delegate,
     this.viewportFraction = 1.0,
     this.padEnds = true,
-    this.shrinkWrapCrossAxis = false,
   }) : assert(viewportFraction > 0.0);
 
   /// The fraction of the viewport that each child should fill in the main axis.
@@ -69,16 +62,6 @@ class SliverFillViewport extends StatelessWidget {
   /// Defaults to true.
   final bool padEnds;
 
-  /// Whether the sliver should allow the visible child to determine the
-  /// viewport's size in the cross axis.
-  ///
-  /// When this is true, each child still fills the viewport in the main axis,
-  /// but it is laid out with a loose constraint in the cross axis. This is
-  /// useful with [CrossAxisShrinkWrappingViewport].
-  ///
-  /// Defaults to false.
-  final bool shrinkWrapCrossAxis;
-
   /// {@macro flutter.widgets.SliverMultiBoxAdaptorWidget.delegate}
   final SliverChildDelegate delegate;
 
@@ -88,7 +71,6 @@ class SliverFillViewport extends StatelessWidget {
       viewportFraction: padEnds ? clampDouble(1 - viewportFraction, 0, 1) / 2 : 0,
       sliver: _SliverFillViewportRenderObjectWidget(
         viewportFraction: viewportFraction,
-        shrinkWrapCrossAxis: shrinkWrapCrossAxis,
         delegate: delegate,
       ),
     );
@@ -99,27 +81,19 @@ class _SliverFillViewportRenderObjectWidget extends SliverMultiBoxAdaptorWidget 
   const _SliverFillViewportRenderObjectWidget({
     required super.delegate,
     this.viewportFraction = 1.0,
-    this.shrinkWrapCrossAxis = false,
   }) : assert(viewportFraction > 0.0);
 
   final double viewportFraction;
-  final bool shrinkWrapCrossAxis;
 
   @override
   RenderSliverFillViewport createRenderObject(BuildContext context) {
     final element = context as SliverMultiBoxAdaptorElement;
-    return RenderSliverFillViewport(
-      childManager: element,
-      viewportFraction: viewportFraction,
-      shrinkWrapCrossAxis: shrinkWrapCrossAxis,
-    );
+    return RenderSliverFillViewport(childManager: element, viewportFraction: viewportFraction);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderSliverFillViewport renderObject) {
-    renderObject
-      ..viewportFraction = viewportFraction
-      ..shrinkWrapCrossAxis = shrinkWrapCrossAxis;
+    renderObject.viewportFraction = viewportFraction;
   }
 }
 

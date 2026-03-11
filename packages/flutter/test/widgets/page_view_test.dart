@@ -1204,57 +1204,18 @@ void main() {
     expect(tester.widget<SliverFillViewport>(viewportFinder()).padEnds, false);
   });
 
-  testWidgets('PageView.shrinkWrapCrossAxis switches viewport and sliver behavior', (
+  testWidgets('PageView.shrinkWrapCrossAxis switches viewport behavior', (
     WidgetTester tester,
   ) async {
-    Finder sliverFinder() => find.byType(SliverFillViewport, skipOffstage: false);
-
     await tester.pumpWidget(Directionality(textDirection: TextDirection.ltr, child: PageView()));
 
-    expect(find.byType(CrossAxisShrinkWrappingViewport), findsNothing);
-    expect(tester.widget<SliverFillViewport>(sliverFinder()).shrinkWrapCrossAxis, isFalse);
+    expect(find.byType(Viewport), findsOneWidget);
 
     await tester.pumpWidget(
       Directionality(textDirection: TextDirection.ltr, child: PageView(shrinkWrapCrossAxis: true)),
     );
 
-    expect(find.byType(CrossAxisShrinkWrappingViewport), findsOneWidget);
-    expect(tester.widget<SliverFillViewport>(sliverFinder()).shrinkWrapCrossAxis, isTrue);
-  });
-
-  testWidgets('PageView.shrinkWrapCrossAxis interpolates current page extent', (
-    WidgetTester tester,
-  ) async {
-    final PageController controller = PageController(viewportFraction: 0.8);
-    addTearDown(controller.dispose);
-
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: PageView(
-            controller: controller,
-            shrinkWrapCrossAxis: true,
-            children: <Widget>[
-              Container(height: 100.0, color: const Color(0xFFAA0000)),
-              Container(height: 200.0, color: const Color(0xFF00AA00)),
-            ],
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(tester.getSize(find.byType(PageView)).height, 100.0);
-
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(PageView)));
-    await gesture.moveBy(const Offset(-400.0, 0.0));
-    await tester.pump();
-
-    expect(tester.getSize(find.byType(PageView)).height, 150.0);
-
-    await gesture.up();
+    expect(find.byType(Viewport), findsNothing);
   });
 
   testWidgets('PageView - precision error inside RenderSliverFixedExtentBoxAdaptor', (
