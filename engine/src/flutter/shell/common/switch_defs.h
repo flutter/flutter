@@ -297,6 +297,9 @@ DEF_SWITCH(ImpellerLazyShaderMode,
 DEF_SWITCH(ImpellerAntialiasLines,
            "impeller-antialias-lines",
            "Experimental flag to test drawing lines with antialiasing.")
+DEF_SWITCH(ImpellerUseSDFs,
+           "impeller-use-sdfs",
+           "Whether to use SDFs for rendering in Impeller.")
 DEF_SWITCHES_END
 
 }  // namespace flutter

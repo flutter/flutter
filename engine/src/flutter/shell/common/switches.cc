@@ -557,6 +557,15 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
   settings.impeller_antialiased_lines =
       command_line.HasOption(FlagForSwitch(Switch::ImpellerAntialiasLines));
 
+  {
+    std::string impeller_use_sdfs_value;
+    if (command_line.GetOptionValue(FlagForSwitch(Switch::ImpellerUseSDFs),
+                                    &impeller_use_sdfs_value)) {
+      settings.impeller_use_sdfs =
+          impeller_use_sdfs_value.empty() || "true" == impeller_use_sdfs_value;
+    }
+  }
+
   return settings;
 }
 
