@@ -146,82 +146,6 @@ bool BlitCopyTextureToTextureCommandGLES::Encode(
   return true;
 };
 
-namespace {
-struct TexImage2DData {
-  GLint internal_format = 0;
-  GLenum external_format = GL_NONE;
-  GLenum type = GL_NONE;
-  BufferView buffer_view;
-
-  explicit TexImage2DData(PixelFormat pixel_format) {
-    switch (pixel_format) {
-      case PixelFormat::kA8UNormInt:
-        internal_format = GL_ALPHA;
-        external_format = GL_ALPHA;
-        type = GL_UNSIGNED_BYTE;
-        break;
-      case PixelFormat::kR8UNormInt:
-        internal_format = GL_RED;
-        external_format = GL_RED;
-        type = GL_UNSIGNED_BYTE;
-        break;
-      case PixelFormat::kR8G8B8A8UNormInt:
-      case PixelFormat::kB8G8R8A8UNormInt:
-      case PixelFormat::kR8G8B8A8UNormIntSRGB:
-      case PixelFormat::kB8G8R8A8UNormIntSRGB:
-        internal_format = GL_RGBA;
-        external_format = GL_RGBA;
-        type = GL_UNSIGNED_BYTE;
-        break;
-      case PixelFormat::kR32G32B32A32Float:
-        internal_format = GL_RGBA;
-        external_format = GL_RGBA;
-        type = GL_FLOAT;
-        break;
-      case PixelFormat::kR32Float:
-        internal_format = GL_RED;
-        external_format = GL_RED;
-        type = GL_FLOAT;
-        break;
-      case PixelFormat::kR16G16B16A16Float:
-        internal_format = GL_RGBA;
-        external_format = GL_RGBA;
-        type = GL_HALF_FLOAT;
-        break;
-      case PixelFormat::kS8UInt:
-        // Pure stencil textures are only available in OpenGL 4.4+, which is
-        // ~0% of mobile devices. Instead, we use a depth-stencil texture and
-        // only use the stencil component.
-        //
-        // https://registry.khronos.org/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
-      case PixelFormat::kD24UnormS8Uint:
-        internal_format = GL_DEPTH_STENCIL;
-        external_format = GL_DEPTH_STENCIL;
-        type = GL_UNSIGNED_INT_24_8;
-        break;
-      case PixelFormat::kUnknown:
-      case PixelFormat::kD32FloatS8UInt:
-      case PixelFormat::kR8G8UNormInt:
-      case PixelFormat::kB10G10R10XRSRGB:
-      case PixelFormat::kB10G10R10XR:
-      case PixelFormat::kB10G10R10A10XR:
-        return;
-    }
-    is_valid_ = true;
-  }
-
-  TexImage2DData(PixelFormat pixel_format, BufferView p_buffer_view)
-      : TexImage2DData(pixel_format) {
-    buffer_view = std::move(p_buffer_view);
-  }
-
-  bool IsValid() const { return is_valid_; }
-
- private:
-  bool is_valid_ = false;
-};
-}  // namespace
-
 BlitCopyBufferToTextureCommandGLES::~BlitCopyBufferToTextureCommandGLES() =
     default;
 
@@ -280,8 +204,12 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
       break;
   }
 
-  TexImage2DData data = TexImage2DData(tex_descriptor.format, source);
-  if (!data.IsValid()) {
+  std::optional<PixelFormatGLES> gles_format =
+      ToPixelFormatGLES(tex_descriptor.format,
+                        /*supports_bgra=*/
+                        reactor.GetProcTable().GetDescription()->HasExtension(
+                            "GL_EXT_texture_format_BGRA8888"));
+  if (!gles_format.has_value()) {
     VALIDATION_LOG << "Invalid texture format.";
     return false;
   }
@@ -294,22 +222,21 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
   }
   const auto& gl = reactor.GetProcTable();
   gl.BindTexture(texture_type, gl_handle.value());
-  const GLvoid* tex_data = data.buffer_view.GetBuffer()->OnGetContents() +
-                           data.buffer_view.GetRange().offset;
+  const GLvoid* tex_data =
+      source.GetBuffer()->OnGetContents() + source.GetRange().offset;
 
   // GL_INVALID_OPERATION if the texture array has not been
   // defined by a previous glTexImage2D operation.
   if (!texture_gles.IsSliceInitialized(slice)) {
-    gl.TexImage2D(texture_target,              // target
-                  mip_level,                   // LOD level
-                  data.internal_format,        // internal format
-                  tex_descriptor.size.width,   // width
-                  tex_descriptor.size.height,  // height
-                  0u,                          // border
-                  data.external_format,        // external format
-                  data.type,                   // type
-                  nullptr                      // data
-    );
+    gl.TexImage2D(texture_target,                // target
+                  mip_level,                     // LOD level
+                  gles_format->internal_format,  // internal format
+                  tex_descriptor.size.width,     // width
+                  tex_descriptor.size.height,    // height
+                  0u,                            // border
+                  gles_format->external_format,  // format
+                  gles_format->type,             // type
+                  nullptr);                      // data
     texture_gles.MarkSliceInitialized(slice);
   }
 
@@ -321,11 +248,9 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
                      destination_region.GetY(),       // yoffset
                      destination_region.GetWidth(),   // width
                      destination_region.GetHeight(),  // height
-                     data.external_format,            // external format
-                     data.type,                       // type
-                     tex_data                         // data
-
-    );
+                     gles_format->external_format,    // format
+                     gles_format->type,               // type
+                     tex_data);                       // data
   }
   return true;
 }
@@ -339,12 +264,20 @@ std::string BlitCopyTextureToBufferCommandGLES::GetLabel() const {
 
 bool BlitCopyTextureToBufferCommandGLES::Encode(
     const ReactorGLES& reactor) const {
-  if (source->GetTextureDescriptor().format != PixelFormat::kR8G8B8A8UNormInt) {
-    VALIDATION_LOG << "Only textures with pixel format RGBA are supported yet.";
+  const auto& gl = reactor.GetProcTable();
+
+  PixelFormat source_format = source->GetTextureDescriptor().format;
+  std::optional<PixelFormatGLES> gles_format =
+      ToPixelFormatGLES(source_format,
+                        /*supports_bgra=*/
+                        reactor.GetProcTable().GetDescription()->HasExtension(
+                            "GL_EXT_texture_format_BGRA8888"));
+
+  if (!gles_format.has_value()) {
+    VALIDATION_LOG << "Texture has unsupported pixel format.";
     return false;
   }
 
-  const auto& gl = reactor.GetProcTable();
   TextureCoordinateSystem coord_system = source->GetCoordinateSystem();
 
   GLuint read_fbo = GL_NONE;
@@ -360,23 +293,27 @@ bool BlitCopyTextureToBufferCommandGLES::Encode(
   }
 
   DeviceBufferGLES::Cast(*destination)
-      .UpdateBufferData([&gl, this, coord_system,
-                         rows = source->GetSize().height](uint8_t* data,
-
-                                                          size_t length) {
-        gl.ReadPixels(source_region.GetX(), source_region.GetY(),
-                      source_region.GetWidth(), source_region.GetHeight(),
-                      GL_RGBA, GL_UNSIGNED_BYTE, data + destination_offset);
-        switch (coord_system) {
-          case TextureCoordinateSystem::kUploadFromHost:
-            break;
-          case TextureCoordinateSystem::kRenderToTexture:
-            // The texture is upside down, and must be inverted when copying
-            // byte data out.
-            FlipImage(data + destination_offset, source_region.GetWidth(),
-                      source_region.GetHeight(), 4);
-        }
-      });
+      .UpdateBufferData(
+          [&gl,                                                          //
+           this,                                                         //
+           format = gles_format->external_format,                        //
+           type = gles_format->type,                                     //
+           coord_system,                                                 //
+           bytes_per_pixel = BytesPerPixelForPixelFormat(source_format)  //
+  ](uint8_t* data, size_t length) {
+            gl.ReadPixels(source_region.GetX(), source_region.GetY(),
+                          source_region.GetWidth(), source_region.GetHeight(),
+                          format, type, data + destination_offset);
+            switch (coord_system) {
+              case TextureCoordinateSystem::kUploadFromHost:
+                break;
+              case TextureCoordinateSystem::kRenderToTexture:
+                // The texture is upside down, and must be inverted when copying
+                // byte data out.
+                FlipImage(data + destination_offset, source_region.GetWidth(),
+                          source_region.GetHeight(), bytes_per_pixel);
+            }
+          });
 
   return true;
 };
