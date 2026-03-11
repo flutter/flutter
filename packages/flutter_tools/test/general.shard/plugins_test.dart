@@ -2323,7 +2323,7 @@ flutter:
     );
 
     testWithoutContext(
-      'Symlink failures instruct developers to have their project on the same drive as their SDK',
+      'Symlink failures explain when the filesystem does not support symlinks',
       () async {
         final Platform platform = FakePlatform(operatingSystem: 'windows');
         final os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14972]');
@@ -2339,7 +2339,8 @@ flutter:
             destination: ephemeralPackagePath,
           ),
           throwsToolExit(
-            message: 'Try moving your Flutter project to the same drive as your Flutter SDK',
+            message:
+                'This can happen when symlinks are unsupported by the filesystem, such as on Windows ReFS Dev Drives.',
           ),
         );
       },
