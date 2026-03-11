@@ -8,16 +8,16 @@ To learn more about code review, see our documentation on Tree Hygiene: https://
 
 *List the issues addressed by this PR. At least one issue is required unless the change is trivial.*
 
-- **Close an issue:** `Fixes #123`, `Closes #456`
-- **Partial work:** `Related to #789`, `Part of #012`
-
 *If you are unsure which keyword to use, see [Linking a pull request to an issue].*
 
 *If you had to change anything in the [flutter/tests] repo, include a link to the migration guide as per the [breaking change policy].*
 
+
 <!--
-Please do NOT remove or modify the sections below.
-The Pre-launch Checklist and links are required for the review process.
+Please DO NOT remove the Pre-launch Checklist.
+
+The Pre-launch Checklist and its links are required for the review process.
+
 Only check the boxes that apply to your PR.
 -->
 
