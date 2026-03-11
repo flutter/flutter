@@ -247,6 +247,7 @@ void AndroidExternalViewEmbedder2::PrepareFlutterView(
     fml::AutoResetWaitableEvent latch;
     fml::TaskRunner::RunNowOrPostTask(
         task_runners_.GetPlatformTaskRunner(), [&]() {
+          // No-op if content sizing is turned off.
           jni_facade_->MaybeResizeSurfaceView(frame_size.width,
                                               frame_size.height);
           latch.Signal();
