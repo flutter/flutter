@@ -22,8 +22,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
         run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "<>"
+          git config user.name "flutteractionsbot"
+          git config user.email "<flutter-actions-bot@google.com>"
           git remote add upstream https://github.com/flutter/flutter.git
           git fetch upstream ${{ github.ref_name }}
 
@@ -53,7 +53,8 @@ jobs:
         id: git-check
         run: |
           # -N (intent-to-add) treats untracked files as existing but empty
-          git add -N bin/internal/engine.version
+          # -f adds even if it's in the .gitignore (which it usually is)
+          git add -N -f bin/internal/engine.version
 
           if git diff --exit-code bin/internal/engine.version; then
             echo "changed=false" >> $GITHUB_OUTPUT
