@@ -874,8 +874,8 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
 
   /// Connects the already-launched log processes' output to [_linesController].
   ///
-  /// Called synchronously when the first listener subscribes (via [onListen]).
-  /// [start] must have been awaited before any listener subscribes so that
+  /// Called synchronously when the first listener subscribes (via onListen).
+  /// `start()` must have been awaited before any listener subscribes so that
   /// [_deviceProcess] and [_systemProcess] are available.
   void _connectProcessOutput() {
     if (_usesUnifiedLogging) {
