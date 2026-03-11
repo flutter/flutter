@@ -60,6 +60,15 @@ void main() {
       );
     });
 
+    String sdkPath() => fileSystem.directory('android-sdk').absolute.path;
+    String missingSdkPath() => fileSystem.directory('nonexistent-android-sdk').absolute.path;
+    String sdkManagerPath() =>
+        fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin', 'sdkmanager');
+    String sdkLicensesPath() => fileSystem.path.join(sdkPath(), 'licenses');
+    String ndkPath(String version) => fileSystem.path.join(sdkPath(), 'ndk', version);
+    String apkAnalyzerPath() =>
+        fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin', apkAnalyzerBinaryName);
+
     void testUsingContext(
       String description,
       dynamic Function() body, {
@@ -70,7 +79,7 @@ void main() {
         body,
         overrides: <Type, Generator>{
           AndroidSdk: () => AndroidSdk(
-            fileSystem.directory('/nonexistent-android-sdk'),
+            fileSystem.directory(missingSdkPath()),
             java: FakeJava(),
             fileSystem: fileSystem,
           ),
@@ -103,15 +112,15 @@ void main() {
         );
         processManager.addCommand(
           FakeCommand(
-            command: const <String>[
-              '/android-sdk/cmdline-tools/latest/bin/sdkmanager',
-              '--sdk_root=/android-sdk',
+            command: <String>[
+              sdkManagerPath(),
+              '--sdk_root=${sdkPath()}',
               '--install',
               'ndk;29.0.13846066',
             ],
             onRun: (_) {
               fileSystem
-                  .directory('/android-sdk/ndk/29.0.13846066')
+                  .directory(ndkPath('29.0.13846066'))
                   .childFile('source.properties')
                   .createSync(recursive: true);
             },
@@ -176,14 +185,14 @@ void main() {
       },
       overrides: <Type, Generator>{
         AndroidSdk: () {
-          fileSystem.directory('/android-sdk').createSync(recursive: true);
-          fileSystem.directory('/android-sdk/licenses').createSync(recursive: true);
+          fileSystem.directory(sdkPath()).createSync(recursive: true);
+          fileSystem.directory(sdkLicensesPath()).createSync(recursive: true);
           fileSystem
-              .directory('/android-sdk/cmdline-tools/latest/bin')
+              .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
               .childFile('sdkmanager')
               .createSync(recursive: true);
           sdkForPreprovisionBuild = AndroidSdk(
-            fileSystem.directory('/android-sdk'),
+            fileSystem.directory(sdkPath()),
             java: FakeJava(),
             fileSystem: fileSystem,
           );
@@ -209,26 +218,21 @@ void main() {
         );
         processManager.addCommand(
           const FakeCommand(
-            command: <String>[
-              'gradlew',
-              '-q',
-              '-PskipDependencyChecks=true',
-              'printNdkVersion',
-            ],
+            command: <String>['gradlew', '-q', '-PskipDependencyChecks=true', 'printNdkVersion'],
             stdout: 'NdkVersion: 29.0.13846066\n',
           ),
         );
         processManager.addCommand(
           FakeCommand(
-            command: const <String>[
-              '/android-sdk/cmdline-tools/latest/bin/sdkmanager',
-              '--sdk_root=/android-sdk',
+            command: <String>[
+              sdkManagerPath(),
+              '--sdk_root=${sdkPath()}',
               '--install',
               'ndk;29.0.13846066',
             ],
             onRun: (_) {
               fileSystem
-                  .directory('/android-sdk/ndk/29.0.13846066')
+                  .directory(ndkPath('29.0.13846066'))
                   .childFile('source.properties')
                   .createSync(recursive: true);
             },
@@ -294,14 +298,14 @@ void main() {
       },
       overrides: <Type, Generator>{
         AndroidSdk: () {
-          fileSystem.directory('/android-sdk').createSync(recursive: true);
-          fileSystem.directory('/android-sdk/licenses').createSync(recursive: true);
+          fileSystem.directory(sdkPath()).createSync(recursive: true);
+          fileSystem.directory(sdkLicensesPath()).createSync(recursive: true);
           fileSystem
-              .directory('/android-sdk/cmdline-tools/latest/bin')
+              .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
               .childFile('sdkmanager')
               .createSync(recursive: true);
           return AndroidSdk(
-            fileSystem.directory('/android-sdk'),
+            fileSystem.directory(sdkPath()),
             java: FakeJava(),
             fileSystem: fileSystem,
           );
@@ -390,14 +394,14 @@ void main() {
       },
       overrides: <Type, Generator>{
         AndroidSdk: () {
-          fileSystem.directory('/android-sdk').createSync(recursive: true);
-          fileSystem.directory('/android-sdk/licenses').createSync(recursive: true);
+          fileSystem.directory(sdkPath()).createSync(recursive: true);
+          fileSystem.directory(sdkLicensesPath()).createSync(recursive: true);
           fileSystem
-              .directory('/android-sdk/cmdline-tools/latest/bin')
+              .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
               .childFile('sdkmanager')
               .createSync(recursive: true);
           sdkForFailedQuery = AndroidSdk(
-            fileSystem.directory('/android-sdk'),
+            fileSystem.directory(sdkPath()),
             java: FakeJava(),
             fileSystem: fileSystem,
           );
@@ -1279,12 +1283,7 @@ void main() {
 
           processManager.addCommand(
             FakeCommand(
-              command: <String>[
-                '/android-sdk/cmdline-tools/latest/bin/$apkAnalyzerBinaryName',
-                'files',
-                'list',
-                aabFile.path,
-              ],
+              command: <String>[apkAnalyzerPath(), 'files', 'list', aabFile.path],
               stdout: apkanalyzerOutputWithSymFiles,
             ),
           );
@@ -1319,13 +1318,13 @@ void main() {
         },
         overrides: <Type, Generator>{
           AndroidSdk: () {
-            fileSystem.directory('/android-sdk').createSync(recursive: true);
+            fileSystem.directory(sdkPath()).createSync(recursive: true);
             fileSystem
-                .directory('/android-sdk/cmdline-tools/latest/bin')
+                .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
                 .childFile(apkAnalyzerBinaryName)
                 .createSync(recursive: true);
             return AndroidSdk(
-              fileSystem.directory('/android-sdk'),
+              fileSystem.directory(sdkPath()),
               java: FakeJava(),
               fileSystem: fileSystem,
             );
@@ -1365,12 +1364,7 @@ void main() {
 
           processManager.addCommand(
             FakeCommand(
-              command: <String>[
-                '/android-sdk/cmdline-tools/latest/bin/$apkAnalyzerBinaryName',
-                'files',
-                'list',
-                aabFile.path,
-              ],
+              command: <String>[apkAnalyzerPath(), 'files', 'list', aabFile.path],
               stdout: apkanalyzerOutputWithDebugInfoAndSymFiles,
             ),
           );
@@ -1405,13 +1399,13 @@ void main() {
         },
         overrides: <Type, Generator>{
           AndroidSdk: () {
-            fileSystem.directory('/android-sdk').createSync(recursive: true);
+            fileSystem.directory(sdkPath()).createSync(recursive: true);
             fileSystem
-                .directory('/android-sdk/cmdline-tools/latest/bin')
+                .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
                 .childFile(apkAnalyzerBinaryName)
                 .createSync(recursive: true);
             return AndroidSdk(
-              fileSystem.directory('/android-sdk'),
+              fileSystem.directory(sdkPath()),
               java: FakeJava(),
               fileSystem: fileSystem,
             );

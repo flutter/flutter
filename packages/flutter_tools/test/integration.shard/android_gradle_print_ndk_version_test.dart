@@ -31,11 +31,7 @@ void main() {
         tempDir.path,
         '--project-name=testapp',
       ], workingDirectory: tempDir.path);
-      expect(
-        result.exitCode,
-        0,
-        reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}',
-      );
+      expect(result.exitCode, 0, reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}');
 
       result = await processManager.run(<String>[
         flutterBin,
@@ -43,11 +39,7 @@ void main() {
         'apk',
         '--config-only',
       ], workingDirectory: tempDir.path);
-      expect(
-        result.exitCode,
-        0,
-        reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}',
-      );
+      expect(result.exitCode, 0, reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}');
 
       final Directory androidApp = tempDir.childDirectory('android');
       result = await processManager.run(<String>[
