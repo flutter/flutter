@@ -571,11 +571,13 @@ class AndroidGradleBuilder implements AndroidBuilder {
     if (androidBuildInfo.splitPerAbi) {
       options.add('-Psplit-per-abi=true');
     }
-    final String? preprovisionedNdkVersion = await _preprovisionAndroidNdkIfNeeded(
-      project: project,
-      gradleExecutablePath: gradleExecutablePath,
-      buildInfo: buildInfo,
-    );
+    final String? preprovisionedNdkVersion = _shouldPreprovisionAndroidNdk(buildInfo)
+        ? await _preprovisionAndroidNdkIfNeeded(
+            project: project,
+            gradleExecutablePath: gradleExecutablePath,
+            buildInfo: buildInfo,
+          )
+        : null;
     if (preprovisionedNdkVersion != null) {
       options.add('-P$_kPreprovisionedNdkVersionProperty=$preprovisionedNdkVersion');
     }
@@ -1497,4 +1499,9 @@ String _getTargetPlatformByLocalEnginePath(String engineOutPath) {
     result = 'android-arm64';
   }
   return result;
+}
+
+bool _shouldPreprovisionAndroidNdk(BuildInfo buildInfo) {
+  final String? flavor = buildInfo.flavor;
+  return flavor != null && flavor.isNotEmpty;
 }

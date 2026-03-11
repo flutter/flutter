@@ -144,7 +144,7 @@ void main() {
               '-Ptrack-widget-creation=false',
               '-Ptree-shake-icons=false',
               '-Pflutter-preprovisioned-ndk-version=29.0.13846066',
-              'assembleRelease',
+              'assembleDevRelease',
             ],
           ),
         );
@@ -160,7 +160,7 @@ void main() {
             .childDirectory('app')
             .childDirectory('outputs')
             .childDirectory('flutter-apk')
-            .childFile('app-release.apk')
+            .childFile('app-dev-release.apk')
             .createSync(recursive: true);
 
         final FlutterProject project = FlutterProject.fromDirectoryTest(
@@ -175,7 +175,7 @@ void main() {
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
-              null,
+              'dev',
               treeShakeIcons: false,
               packageConfigPath: '.dart_tool/package_config.json',
             ),
@@ -257,7 +257,7 @@ void main() {
               '-Ptrack-widget-creation=false',
               '-Ptree-shake-icons=false',
               '-Pflutter-preprovisioned-ndk-version=29.0.13846066',
-              'assembleRelease',
+              'assembleDevRelease',
             ],
           ),
         );
@@ -273,7 +273,7 @@ void main() {
             .childDirectory('app')
             .childDirectory('outputs')
             .childDirectory('flutter-apk')
-            .childFile('app-release.apk')
+            .childFile('app-dev-release.apk')
             .createSync(recursive: true);
 
         final FlutterProject project = FlutterProject.fromDirectoryTest(
@@ -288,7 +288,7 @@ void main() {
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
-              null,
+              'dev',
               treeShakeIcons: false,
               packageConfigPath: '.dart_tool/package_config.json',
               androidSkipBuildDependencyValidation: true,
@@ -353,7 +353,7 @@ void main() {
               '-Pdart-obfuscation=false',
               '-Ptrack-widget-creation=false',
               '-Ptree-shake-icons=false',
-              'assembleRelease',
+              'assembleDevRelease',
             ],
           ),
         );
@@ -369,7 +369,7 @@ void main() {
             .childDirectory('app')
             .childDirectory('outputs')
             .childDirectory('flutter-apk')
-            .childFile('app-release.apk')
+            .childFile('app-dev-release.apk')
             .createSync(recursive: true);
 
         final FlutterProject project = FlutterProject.fromDirectoryTest(
@@ -384,7 +384,7 @@ void main() {
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
-              null,
+              'dev',
               treeShakeIcons: false,
               packageConfigPath: '.dart_tool/package_config.json',
             ),
@@ -1274,13 +1274,6 @@ void main() {
             androidStudio: FakeAndroidStudio(),
           );
           processManager.addCommand(
-            const FakeCommand(
-              command: <String>['gradlew', '-q', 'printNdkVersion'],
-              stderr: 'Task failed\n',
-              exitCode: 1,
-            ),
-          );
-          processManager.addCommand(
             FakeCommand(command: List<String>.of(commonCommandPortion)..add('bundleRelease')),
           );
 
@@ -1353,13 +1346,6 @@ void main() {
             gradleUtils: FakeGradleUtils(),
             platform: FakePlatform(environment: <String, String>{'HOME': '/home'}),
             androidStudio: FakeAndroidStudio(),
-          );
-          processManager.addCommand(
-            const FakeCommand(
-              command: <String>['gradlew', '-q', 'printNdkVersion'],
-              stderr: 'Task failed\n',
-              exitCode: 1,
-            ),
           );
           processManager.addCommand(
             FakeCommand(command: List<String>.of(commonCommandPortion)..add('bundleRelease')),
