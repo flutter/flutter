@@ -10,7 +10,7 @@ struct Flags {
   /// When turned on DrawLine will use the experimental antialiased path.
   bool antialiased_lines = false;
   /// Use SDFs for rendering.
-  bool use_sdfs = true;
+  bool use_sdfs = false;
 };
 }  // namespace impeller
 
