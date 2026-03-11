@@ -247,9 +247,6 @@ If anyone else leaves comments, please also wait for their approval (LGTM) befor
 If nobody has reviewed your code after two weeks, then reach out on our [Chat](Chat.md) channels.
 The `#hackers-new` channel is a good place to ask for help if you're a new contributor.
 
-_For PRs affecting the `material` and `cupertino` libraries, team members are expected to seek reviewers directly;
-they will not be assigned during PR triage._
-
 ### How
 
 Code review status is managed via GitHub's approval system. PRs should
