@@ -6,7 +6,7 @@ To learn more about code review, see our documentation on Tree Hygiene: https://
 
 *Replace this paragraph with a description of what this PR is changing or adding, and why. Consider including before/after screenshots.*
 
-*List the issues addressed by this PR. At least one issue is required unless the change is trivial.*
+*List which issues are fixed by this PR. You must list at least one issue. An issue is not required if the PR fixes something trivial like a typo.*
 
 *If you are unsure which keyword to use, see [Linking a pull request to an issue].*
 
