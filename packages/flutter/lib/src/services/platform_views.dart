@@ -1612,7 +1612,6 @@ abstract class PlatformViewController {
   bool get awaitingCreation => false;
 
   /// Dispatches the `event` to the platform view.
-  @awaitNotRequired
   Future<void> dispatchPointerEvent(PointerEvent event);
 
   /// Creates the platform view with the initial [size].

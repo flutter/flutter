@@ -485,7 +485,7 @@ abstract class ImageProvider<T extends Object> {
       }
       if (!didError) {
         didError = true;
-        errorCallback.call(obtainedKey, exception, stack);
+        await errorCallback(obtainedKey, exception, stack);
       }
     }
 
