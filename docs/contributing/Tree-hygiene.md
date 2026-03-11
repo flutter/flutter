@@ -278,7 +278,7 @@ As a reviewer, you are the last line of defense.
 7. Is new code licensed correctly?
 8. Is the documentation thorough and useful? Look for useless documentation, empty prose, and breadcrumbs. See the [documentation section](Style-guide-for-Flutter-repo.md#documentation-dartdocs-javadocs-etc) of our style guide for what that means.
 9. Check for good grammar in API docs and comments. Check that identifiers are named according to our conventions.
-10. Check for proper issue linkage. Verify that the PR description correctly references the relevant issues using an appropriate keyword if the issue should be auto-closed.[See the GitHub documentation](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue).
+10. Check for proper issue linkage. Verify that the PR description correctly references the relevant issues using an appropriate keyword if the issue should be auto-closed. [See the GitHub documentation](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue).
 
 Once you are satisfied with the contribution, and _only_ once you are satisfied,
 use the GitHub "Approval" mechanism (an "LGTM" comment is not sufficient).
