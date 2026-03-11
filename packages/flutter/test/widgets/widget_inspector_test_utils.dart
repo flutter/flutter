@@ -82,7 +82,6 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     ).where((Map<Object, Object?> event) => event['extension'] == extensionName);
   }
 
-  @awaitNotRequired
   Future<Object?> testExtension(String name, Map<String, String> arguments) async {
     expect(extensions, contains(name));
     // Encode and decode to JSON to match behavior using a real service

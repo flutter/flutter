@@ -165,7 +165,6 @@ void main() {
   });
 
   group('error control test', () {
-    @awaitNotRequired
     Future<void> expectFlutterError({
       required GlobalKey<NavigatorState> key,
       required Widget widget,

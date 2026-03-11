@@ -4413,7 +4413,6 @@ class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
     return OneFrameImageStreamCompleter(_completer.future);
   }
 
-  @awaitNotRequired
   Future<void> complete() async {
     _completer.complete(ImageInfo(image: image));
   }
