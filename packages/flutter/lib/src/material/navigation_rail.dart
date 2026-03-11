@@ -359,6 +359,8 @@ class NavigationRail extends StatefulWidget {
   /// setting this to [MainAxisAlignment.spaceEvenly] will distribute the
   /// destinations equally along the available vertical space.
   ///
+  /// When this property is not null, [groupAlignment] is ignored.
+  ///
   /// If null, the layout behaves as if [MainAxisAlignment.start] was
   /// specified.
   ///
