@@ -43,7 +43,7 @@ vars = {
   # updates to Clang Tidy will not turn the tree red.
   #
   # See https://github.com/flutter/flutter/wiki/Engine-pre‐submits-and-post‐submits#post-submit
-  'clang_version': 'git_revision:8c7a2ce01a77c96028fe2c8566f65c45ad9408d3',
+  'clang_version': 'git_revision:80743bd43fd5b38fedc503308e7a652e23d3ec93',
 
   'reclient_version': 're_client_version:0.185.0.db415f21-gomaip',
 
@@ -515,7 +515,7 @@ deps = {
   Var('swiftshader_git') + '/SwiftShader.git' + '@' + '794b0cfce1d828d187637e6d932bae484fbe0976',
 
   'engine/src/flutter/third_party/angle':
-  Var('flutter_git') + '/third_party/angle' + '@' + 'ad5b0084fe6b7606fe87d38f60fddf3cea45a685',
+  Var('flutter_git') + '/third_party/angle' + '@' + '84027aca9b71c9ba335bd000dad1107b8810a511',
 
   'engine/src/flutter/third_party/vulkan_memory_allocator':
   Var('chromium_git') + '/external/github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator' + '@' + 'c788c52156f3ef7bc7ab769cb03c110a53ac8fcb',
@@ -764,7 +764,7 @@ deps = {
     'packages': [
       {
         'package': 'flutter_internal/rbe/reclient_cfgs',
-        'version': 'LNMZdvF2Y86Dq05IWthtVJ_PswIFSRiywIHrkfHhelUC',
+        'version': '0vARzGeIZgIhW7zVfWuqIPQ_HXMLDccjAstykWZKjaEC',
       }
     ],
     'condition': 'use_rbe',
