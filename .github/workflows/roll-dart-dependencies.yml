@@ -18,6 +18,24 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          repository: flutteractionsbot/flutter
+          token: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          ref: master
+
+      - name: Configure git
+        env:
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+          git remote add upstream https://github.com/flutter/flutter.git
+          git fetch upstream ${{ github.ref_name }}
+
+          BRANCH_NAME="sync-dart-${{ inputs.dart_hash }}"
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
+          git checkout -b "$BRANCH_NAME" upstream/${{ github.ref_name }}
 
       - name: Download and Decode Dart DEPS
         id: download-deps
@@ -78,20 +96,15 @@ jobs:
       - name: Create PR if Changed
         if: steps.git-check.outputs.changed == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
         run: |
-          git config user.name "[bot] Update Dart Dependencies"
-          git config user.email "<>"
-
-          BRANCH_NAME="sync-dart-${{ inputs.dart_hash }}"
-
-          git checkout -b "$BRANCH_NAME"
           git add DEPS
-          git commit -m "Update flutter DEPS to dart $DART_HASH"
+          git commit -m "Update flutter DEPS to dart ${{ inputs.dart_hash }}"
           git push origin "$BRANCH_NAME" --force
 
           gh pr create \
             --title "[${{ github.ref_name }}] Update Flutter DEPS to Dart ${{ inputs.dart_hash }}" \
             --body "This PR updates the transitive dependencies in the engine \`DEPS\` file based on Dart SDK hash \`${{ inputs.dart_hash }}\`." \
+            --repo flutter/flutter \
             --base ${{ github.ref_name }} \
-            --head "$BRANCH_NAME"
+            --head flutteractionsbot:$BRANCH_NAME
