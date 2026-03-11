@@ -7,14 +7,16 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('PageView.wrapCrossAxis sizes height to current child', (WidgetTester tester) async {
+  testWidgets('PageView.shrinkWrapCrossAxis sizes height to current child', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Align(
           alignment: Alignment.topCenter,
           child: PageView(
-            wrapCrossAxis: true,
+            shrinkWrapCrossAxis: true,
             children: <Widget>[
               SizedBox(height: 100, child: Container(color: Colors.red)),
               SizedBox(height: 200, child: Container(color: Colors.green)),
@@ -33,7 +35,7 @@ void main() {
     expect(size.width, 800.0);
   });
 
-  testWidgets('PageView.wrapCrossAxis interpolates height during page transition', (
+  testWidgets('PageView.shrinkWrapCrossAxis interpolates height during page transition', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -42,7 +44,7 @@ void main() {
         child: Align(
           alignment: Alignment.topCenter,
           child: PageView(
-            wrapCrossAxis: true,
+            shrinkWrapCrossAxis: true,
             children: <Widget>[
               SizedBox(height: 100, child: Container(color: Colors.red)),
               SizedBox(height: 300, child: Container(color: Colors.green)),
@@ -74,7 +76,9 @@ void main() {
     expect(tester.getSize(find.byType(PageView)).height, 300.0);
   });
 
-  testWidgets('PageView.wrapCrossAxis with different child heights', (WidgetTester tester) async {
+  testWidgets('PageView.shrinkWrapCrossAxis with different child heights', (
+    WidgetTester tester,
+  ) async {
     final controller = PageController();
     addTearDown(controller.dispose);
 
@@ -85,7 +89,7 @@ void main() {
           alignment: Alignment.topCenter,
           child: PageView(
             controller: controller,
-            wrapCrossAxis: true,
+            shrinkWrapCrossAxis: true,
             children: <Widget>[
               SizedBox(height: 150, child: Container(color: Colors.red)),
               SizedBox(height: 250, child: Container(color: Colors.green)),
@@ -110,7 +114,7 @@ void main() {
     expect(tester.getSize(find.byType(PageView)).height, 50.0);
   });
 
-  testWidgets('PageView.builder with wrapCrossAxis', (WidgetTester tester) async {
+  testWidgets('PageView.builder with shrinkWrapCrossAxis', (WidgetTester tester) async {
     final heights = <double>[100, 200, 300, 400];
     final controller = PageController();
     addTearDown(controller.dispose);
@@ -122,7 +126,7 @@ void main() {
           alignment: Alignment.topCenter,
           child: PageView.builder(
             controller: controller,
-            wrapCrossAxis: true,
+            shrinkWrapCrossAxis: true,
             itemCount: heights.length,
             itemBuilder: (BuildContext context, int index) {
               return SizedBox(
@@ -143,7 +147,7 @@ void main() {
     expect(tester.getSize(find.byType(PageView)).height, 400.0);
   });
 
-  testWidgets('PageView.custom with wrapCrossAxis', (WidgetTester tester) async {
+  testWidgets('PageView.custom with shrinkWrapCrossAxis', (WidgetTester tester) async {
     final controller = PageController();
     addTearDown(controller.dispose);
 
@@ -154,7 +158,7 @@ void main() {
           alignment: Alignment.topCenter,
           child: PageView.custom(
             controller: controller,
-            wrapCrossAxis: true,
+            shrinkWrapCrossAxis: true,
             childrenDelegate: SliverChildListDelegate(<Widget>[
               SizedBox(height: 80, child: Container(color: Colors.red)),
               SizedBox(height: 160, child: Container(color: Colors.green)),
@@ -172,7 +176,9 @@ void main() {
     expect(tester.getSize(find.byType(PageView)).height, 160.0);
   });
 
-  testWidgets('Vertical PageView with wrapCrossAxis adapts width', (WidgetTester tester) async {
+  testWidgets('Vertical PageView with shrinkWrapCrossAxis adapts width', (
+    WidgetTester tester,
+  ) async {
     final controller = PageController();
     addTearDown(controller.dispose);
 
@@ -184,7 +190,7 @@ void main() {
           child: PageView(
             controller: controller,
             scrollDirection: Axis.vertical,
-            wrapCrossAxis: true,
+            shrinkWrapCrossAxis: true,
             children: <Widget>[
               SizedBox(width: 100, child: Container(color: Colors.red)),
               SizedBox(width: 300, child: Container(color: Colors.green)),
@@ -205,14 +211,14 @@ void main() {
     expect(tester.getSize(find.byType(PageView)).width, 300.0);
   });
 
-  testWidgets('PageView.wrapCrossAxis with single child', (WidgetTester tester) async {
+  testWidgets('PageView.shrinkWrapCrossAxis with single child', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Align(
           alignment: Alignment.topCenter,
           child: PageView(
-            wrapCrossAxis: true,
+            shrinkWrapCrossAxis: true,
             children: <Widget>[SizedBox(height: 123, child: Container(color: Colors.red))],
           ),
         ),
@@ -223,7 +229,9 @@ void main() {
     expect(tester.getSize(find.byType(PageView)).height, 123.0);
   });
 
-  testWidgets('PageView.wrapCrossAxis with identical child sizes', (WidgetTester tester) async {
+  testWidgets('PageView.shrinkWrapCrossAxis with identical child sizes', (
+    WidgetTester tester,
+  ) async {
     final controller = PageController();
     addTearDown(controller.dispose);
 
@@ -234,7 +242,7 @@ void main() {
           alignment: Alignment.topCenter,
           child: PageView(
             controller: controller,
-            wrapCrossAxis: true,
+            shrinkWrapCrossAxis: true,
             children: <Widget>[
               SizedBox(height: 200, child: Container(color: Colors.red)),
               SizedBox(height: 200, child: Container(color: Colors.green)),
@@ -257,7 +265,7 @@ void main() {
     expect(tester.getSize(find.byType(PageView)).height, 200.0);
   });
 
-  testWidgets('PageView.wrapCrossAxis with animateToPage', (WidgetTester tester) async {
+  testWidgets('PageView.shrinkWrapCrossAxis with animateToPage', (WidgetTester tester) async {
     final controller = PageController();
     addTearDown(controller.dispose);
 
@@ -268,7 +276,7 @@ void main() {
           alignment: Alignment.topCenter,
           child: PageView(
             controller: controller,
-            wrapCrossAxis: true,
+            shrinkWrapCrossAxis: true,
             children: <Widget>[
               SizedBox(height: 100, child: Container(color: Colors.red)),
               SizedBox(height: 300, child: Container(color: Colors.green)),
@@ -295,7 +303,7 @@ void main() {
     expect(tester.getSize(find.byType(PageView)).height, 300.0);
   });
 
-  testWidgets('PageView.wrapCrossAxis false preserves existing behavior', (
+  testWidgets('PageView.shrinkWrapCrossAxis false preserves existing behavior', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -314,28 +322,24 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // With wrapCrossAxis: false (default), PageView fills the parent.
+    // With shrinkWrapCrossAxis: false (default), PageView fills the parent.
     expect(tester.getSize(find.byType(PageView)).height, 500.0);
     expect(tester.getSize(find.byType(PageView)).width, 800.0);
   });
 
-  testWidgets('PageView.wrapCrossAxis in a Column', (WidgetTester tester) async {
-    // A horizontal PageView with wrapCrossAxis in a Column needs a bounded
-    // max height (cross axis). Use a ConstrainedBox to provide the upper bound.
+  testWidgets('PageView.shrinkWrapCrossAxis in a Column', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 400),
-              child: PageView(
-                wrapCrossAxis: true,
-                children: <Widget>[
-                  SizedBox(height: 120, child: Container(color: Colors.red)),
-                  SizedBox(height: 240, child: Container(color: Colors.green)),
-                ],
-              ),
+            PageView(
+              shrinkWrapCrossAxis: true,
+              children: <Widget>[
+                SizedBox(height: 120, child: Container(color: Colors.red)),
+                SizedBox(height: 240, child: Container(color: Colors.green)),
+              ],
             ),
             const Expanded(child: Placeholder()),
           ],
@@ -344,12 +348,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // PageView should take 120 height (current child's natural height),
-    // not the full 400 max.
+    // PageView should take the current child's natural height directly.
     expect(tester.getSize(find.byType(PageView)).height, 120.0);
   });
 
-  testWidgets('PageView.wrapCrossAxis with viewportFraction < 1.0', (WidgetTester tester) async {
+  testWidgets('PageView.shrinkWrapCrossAxis with viewportFraction < 1.0', (
+    WidgetTester tester,
+  ) async {
     final controller = PageController(viewportFraction: 0.8);
     addTearDown(controller.dispose);
 
@@ -360,7 +365,7 @@ void main() {
           alignment: Alignment.topCenter,
           child: PageView(
             controller: controller,
-            wrapCrossAxis: true,
+            shrinkWrapCrossAxis: true,
             children: <Widget>[
               SizedBox(height: 100, child: Container(color: Colors.red)),
               SizedBox(height: 200, child: Container(color: Colors.green)),
@@ -375,13 +380,19 @@ void main() {
     // With viewportFraction < 1.0, edges of adjacent pages may be visible,
     // but the effective height should still be based on the current page.
     final Size size = tester.getSize(find.byType(PageView));
-    expect(size.height, greaterThanOrEqualTo(100.0));
+    expect(size.height, 100.0);
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(PageView)));
+    await gesture.moveBy(const Offset(-400, 0));
+    await tester.pump();
+    expect(tester.getSize(find.byType(PageView)).height, 150.0);
+    await gesture.up();
   });
 
-  testWidgets('PageView.wrapCrossAxis preserves scroll notification depth', (
+  testWidgets('PageView.shrinkWrapCrossAxis preserves scroll notification depth', (
     WidgetTester tester,
   ) async {
-    Future<int> pumpAndGetDepth({required bool wrapCrossAxis}) async {
+    Future<int> pumpAndGetDepth({required bool shrinkWrapCrossAxis}) async {
       int? depth;
 
       await tester.pumpWidget(
@@ -399,7 +410,7 @@ void main() {
                 width: 800,
                 height: 400,
                 child: PageView(
-                  wrapCrossAxis: wrapCrossAxis,
+                  shrinkWrapCrossAxis: shrinkWrapCrossAxis,
                   children: <Widget>[
                     SizedBox(height: 100, child: Container(color: Colors.red)),
                     SizedBox(height: 200, child: Container(color: Colors.green)),
@@ -424,20 +435,73 @@ void main() {
       return depth!;
     }
 
-    final int baselineDepth = await pumpAndGetDepth(wrapCrossAxis: false);
-    final int adaptiveDepth = await pumpAndGetDepth(wrapCrossAxis: true);
+    final int baselineDepth = await pumpAndGetDepth(shrinkWrapCrossAxis: false);
+    final int adaptiveDepth = await pumpAndGetDepth(shrinkWrapCrossAxis: true);
 
     expect(adaptiveDepth, baselineDepth);
   });
 
-  testWidgets('PageView.wrapCrossAxis: child fills main axis (width)', (WidgetTester tester) async {
+  testWidgets('PageView.shrinkWrapCrossAxis preserves nested scroll notification depth', (
+    WidgetTester tester,
+  ) async {
+    Future<int> pumpAndGetDepth({required bool shrinkWrapCrossAxis}) async {
+      int? depth;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: NotificationListener<ScrollUpdateNotification>(
+            onNotification: (ScrollUpdateNotification notification) {
+              if (notification.metrics is! PageMetrics) {
+                depth ??= notification.depth;
+              }
+              return false;
+            },
+            child: Center(
+              child: SizedBox(
+                width: 800,
+                height: 400,
+                child: PageView(
+                  shrinkWrapCrossAxis: shrinkWrapCrossAxis,
+                  children: <Widget>[
+                    ListView(
+                      children: List<Widget>.generate(
+                        20,
+                        (int index) => SizedBox(height: 80, child: Text('Item $index')),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.drag(find.byType(ListView), const Offset(0, -200));
+      await tester.pumpAndSettle();
+
+      expect(depth, isNotNull);
+      return depth!;
+    }
+
+    final int baselineDepth = await pumpAndGetDepth(shrinkWrapCrossAxis: false);
+    final int adaptiveDepth = await pumpAndGetDepth(shrinkWrapCrossAxis: true);
+
+    expect(adaptiveDepth, baselineDepth);
+  });
+
+  testWidgets('PageView.shrinkWrapCrossAxis: child fills main axis (width)', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Align(
           alignment: Alignment.topCenter,
           child: PageView(
-            wrapCrossAxis: true,
+            shrinkWrapCrossAxis: true,
             children: <Widget>[Container(height: 100, color: Colors.red)],
           ),
         ),
@@ -451,7 +515,7 @@ void main() {
     expect(container.height, 100.0);
   });
 
-  testWidgets('PageView.wrapCrossAxis with reverse', (WidgetTester tester) async {
+  testWidgets('PageView.shrinkWrapCrossAxis with reverse', (WidgetTester tester) async {
     final controller = PageController();
     addTearDown(controller.dispose);
 
@@ -463,7 +527,7 @@ void main() {
           child: PageView(
             controller: controller,
             reverse: true,
-            wrapCrossAxis: true,
+            shrinkWrapCrossAxis: true,
             children: <Widget>[
               SizedBox(height: 100, child: Container(color: Colors.red)),
               SizedBox(height: 200, child: Container(color: Colors.green)),
@@ -481,7 +545,7 @@ void main() {
     expect(tester.getSize(find.byType(PageView)).height, 200.0);
   });
 
-  testWidgets('PageView.wrapCrossAxis with padEnds: false', (WidgetTester tester) async {
+  testWidgets('PageView.shrinkWrapCrossAxis with padEnds: false', (WidgetTester tester) async {
     final controller = PageController(viewportFraction: 0.8);
     addTearDown(controller.dispose);
 
@@ -492,7 +556,7 @@ void main() {
           alignment: Alignment.topCenter,
           child: PageView(
             controller: controller,
-            wrapCrossAxis: true,
+            shrinkWrapCrossAxis: true,
             padEnds: false,
             children: <Widget>[
               SizedBox(height: 100, child: Container(color: Colors.red)),
@@ -509,10 +573,13 @@ void main() {
     expect(tester.getSize(find.byType(PageView)).height, greaterThanOrEqualTo(100.0));
   });
 
-  testWidgets('PageView.wrapCrossAxis debugFillProperties includes wrapCrossAxis', (
+  testWidgets('PageView.shrinkWrapCrossAxis debugFillProperties includes shrinkWrapCrossAxis', (
     WidgetTester tester,
   ) async {
-    final pageView = PageView(wrapCrossAxis: true, children: const <Widget>[SizedBox(height: 100)]);
+    final pageView = PageView(
+      shrinkWrapCrossAxis: true,
+      children: const <Widget>[SizedBox(height: 100)],
+    );
 
     final builder = DiagnosticPropertiesBuilder();
     // PageView is a StatefulWidget, so we test via its State's debugFillProperties
@@ -526,12 +593,12 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Find the state and verify debug properties include wrapCrossAxis.
+    // Find the state and verify debug properties include shrinkWrapCrossAxis.
     final State<StatefulWidget> state = tester.state(find.byType(PageView));
     state.debugFillProperties(builder);
     final Iterable<FlagProperty> flagProperties = builder.properties
         .whereType<FlagProperty>()
-        .where((FlagProperty p) => p.name == 'wrapCrossAxis');
+        .where((FlagProperty p) => p.name == 'shrinkWrapCrossAxis');
     expect(flagProperties, isNotEmpty);
   });
 }

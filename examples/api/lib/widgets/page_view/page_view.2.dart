@@ -4,26 +4,26 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [PageView.wrapCrossAxis].
+/// Flutter code sample for [PageView.shrinkWrapCrossAxis].
 
-void main() => runApp(const WrapCrossAxisExampleApp());
+void main() => runApp(const ShrinkWrapCrossAxisExampleApp());
 
-class WrapCrossAxisExampleApp extends StatelessWidget {
-  const WrapCrossAxisExampleApp({super.key});
+class ShrinkWrapCrossAxisExampleApp extends StatelessWidget {
+  const ShrinkWrapCrossAxisExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('PageView wrapCrossAxis')),
-        body: const WrapCrossAxisExample(),
+        appBar: AppBar(title: const Text('PageView shrinkWrapCrossAxis')),
+        body: const ShrinkWrapCrossAxisExample(),
       ),
     );
   }
 }
 
-class WrapCrossAxisExample extends StatelessWidget {
-  const WrapCrossAxisExample({super.key});
+class ShrinkWrapCrossAxisExample extends StatelessWidget {
+  const ShrinkWrapCrossAxisExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -37,31 +37,25 @@ class WrapCrossAxisExample extends StatelessWidget {
             style: Theme.of(context).textTheme.bodyLarge,
           ),
           const SizedBox(height: 16),
-          // The ConstrainedBox provides an upper bound for the cross-axis
-          // (height). The PageView will shrink within this bound to match
-          // the current child's natural height.
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 400),
-            child: PageView(
-              wrapCrossAxis: true,
-              children: const <Widget>[
-                _PageContent(
-                  color: Colors.blue,
-                  height: 100,
-                  label: 'Page 1 — Short (100)',
-                ),
-                _PageContent(
-                  color: Colors.orange,
-                  height: 250,
-                  label: 'Page 2 — Medium (250)',
-                ),
-                _PageContent(
-                  color: Colors.green,
-                  height: 400,
-                  label: 'Page 3 — Tall (400)',
-                ),
-              ],
-            ),
+          PageView(
+            shrinkWrapCrossAxis: true,
+            children: const <Widget>[
+              _PageContent(
+                color: Colors.blue,
+                height: 100,
+                label: 'Page 1 — Short (100)',
+              ),
+              _PageContent(
+                color: Colors.orange,
+                height: 250,
+                label: 'Page 2 — Medium (250)',
+              ),
+              _PageContent(
+                color: Colors.green,
+                height: 400,
+                label: 'Page 3 — Tall (400)',
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           const Text('← Swipe to see the height change →'),
@@ -89,10 +83,7 @@ class _PageContent extends StatelessWidget {
       child: Card(
         color: color.withValues(alpha: 0.2),
         child: Center(
-          child: Text(
-            label,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
+          child: Text(label, style: Theme.of(context).textTheme.titleMedium),
         ),
       ),
     );

@@ -186,6 +186,9 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver
         mainAxisPaddingPaintExtent + childLayoutGeometry.paintExtent,
         beforePaddingPaintExtent + childLayoutGeometry.hitTestExtent,
       ),
+      crossAxisExtent: childLayoutGeometry.crossAxisExtent == null
+          ? null
+          : childLayoutGeometry.crossAxisExtent! + crossAxisPadding,
       hasVisualOverflow: childLayoutGeometry.hasVisualOverflow,
     );
     final double calculatedOffset = switch (applyGrowthDirectionToAxisDirection(

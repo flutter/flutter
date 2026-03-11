@@ -8,9 +8,10 @@ import 'package:flutter_api_samples/widgets/page_view/page_view.2.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('PageView.wrapCrossAxis example renders and swipes',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(const example.WrapCrossAxisExampleApp());
+  testWidgets('PageView.shrinkWrapCrossAxis example renders and swipes', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.ShrinkWrapCrossAxisExampleApp());
     await tester.pumpAndSettle();
 
     // Verify the first page is shown.
@@ -21,11 +22,7 @@ void main() {
     expect(pageView, findsOneWidget);
 
     // Swipe to the second page.
-    await tester.fling(
-      pageView,
-      const Offset(-300.0, 0.0),
-      3000,
-    );
+    await tester.fling(pageView, const Offset(-300.0, 0.0), 3000);
     await tester.pumpAndSettle();
 
     // Verify the second page is shown.

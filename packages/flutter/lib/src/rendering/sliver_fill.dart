@@ -9,7 +9,7 @@ library;
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show precisionErrorTolerance;
+import 'package:flutter/foundation.dart';
 
 import 'box.dart';
 import 'object.dart';
@@ -35,66 +35,13 @@ import 'sliver_multi_box_adaptor.dart';
 class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
   /// Creates a sliver that contains multiple box children that each fill the
   /// viewport.
-  RenderSliverFillViewport({required super.childManager, double viewportFraction = 1.0})
-    : assert(viewportFraction > 0.0),
-      _viewportFraction = viewportFraction;
-
-  @override
-  double get itemExtent => constraints.viewportMainAxisExtent * viewportFraction;
-
-  /// The fraction of the viewport that each child should fill in the main axis.
-  ///
-  /// If this fraction is less than 1.0, more than one child will be visible at
-  /// once. If this fraction is greater than 1.0, each child will be larger than
-  /// the viewport in the main axis.
-  double get viewportFraction => _viewportFraction;
-  double _viewportFraction;
-  set viewportFraction(double value) {
-    if (_viewportFraction == value) {
-      return;
-    }
-    _viewportFraction = value;
-    markNeedsLayout();
-  }
-}
-
-/// A mixin for [RenderSliver] objects that can report their effective
-/// cross-axis extent based on the current scroll position.
-///
-/// This is used by viewports that adapt their cross-axis size to their
-/// content, such as when a [PageView] uses `wrapCrossAxis: true`.
-mixin RenderSliverCrossAxisAdaptable on RenderSliver {
-  /// The effective cross-axis extent at the current scroll position.
-  ///
-  /// This value is computed during layout and reflects the cross-axis size
-  /// that the viewport should adopt, typically interpolated between visible
-  /// children during page transitions.
-  double get effectiveCrossAxisExtent;
-}
-
-/// A sliver that contains multiple box children that each fill the viewport
-/// in the main axis, but use their natural size in the cross axis.
-///
-/// [RenderSliverFittedPage] places its children in a linear array along the
-/// main axis. Each child is sized to fill the viewport in the main axis
-/// (multiplied by [viewportFraction]), but is given loose constraints in the
-/// cross axis, allowing it to determine its own cross-axis size.
-///
-/// After layout, this sliver reports an [effectiveCrossAxisExtent] that
-/// interpolates smoothly between the cross-axis sizes of the currently
-/// visible children. This is used by PageView's adaptive viewport to
-/// dynamically size the viewport's cross axis.
-///
-/// See also:
-///
-///  * [RenderSliverFillViewport], which forces children to fill both axes.
-class RenderSliverFittedPage extends RenderSliverFixedExtentBoxAdaptor
-    with RenderSliverCrossAxisAdaptable {
-  /// Creates a sliver that sizes children to fill the main axis but adapts
-  /// to children's natural cross-axis sizes.
-  RenderSliverFittedPage({required super.childManager, double viewportFraction = 1.0})
-    : assert(viewportFraction > 0.0),
-      _viewportFraction = viewportFraction;
+  RenderSliverFillViewport({
+    required super.childManager,
+    double viewportFraction = 1.0,
+    bool shrinkWrapCrossAxis = false,
+  }) : assert(viewportFraction > 0.0),
+       _viewportFraction = viewportFraction,
+       _shrinkWrapCrossAxis = shrinkWrapCrossAxis;
 
   @override
   double get itemExtent => constraints.viewportMainAxisExtent * viewportFraction;
@@ -114,81 +61,26 @@ class RenderSliverFittedPage extends RenderSliverFixedExtentBoxAdaptor
     markNeedsLayout();
   }
 
-  /// Cross-axis extents of laid-out children, keyed by child index.
-  final Map<int, double> _childCrossAxisExtents = <int, double>{};
-
-  @override
-  double effectiveCrossAxisExtent = 0.0;
-
-  /// Returns the cross-axis size of the given [child] after layout.
-  double _childCrossAxisSize(RenderBox child) {
-    return switch (constraints.axis) {
-      Axis.horizontal => child.size.height,
-      Axis.vertical => child.size.width,
-    };
-  }
-
-  /// Records the cross-axis size of [child] at the given [index].
-  void _trackChildCrossAxisExtent(RenderBox child, int index) {
-    _childCrossAxisExtents[index] = _childCrossAxisSize(child);
-  }
-
-  /// Computes the interpolated cross-axis extent based on scroll position.
+  /// Whether the sliver should allow each child to determine its own cross-axis
+  /// extent and report the visible page's extent in [geometry].
   ///
-  /// During a page transition, this linearly interpolates between the
-  /// cross-axis sizes of the two visible pages.
-  double _computeEffectiveCrossAxisExtent(double scrollOffset) {
-    if (_childCrossAxisExtents.isEmpty) {
-      return constraints.crossAxisExtent;
+  /// When false, every child is forced to fill the viewport in the cross axis.
+  bool get shrinkWrapCrossAxis => _shrinkWrapCrossAxis;
+  bool _shrinkWrapCrossAxis;
+  set shrinkWrapCrossAxis(bool value) {
+    if (_shrinkWrapCrossAxis == value) {
+      return;
     }
-
-    final double pageExtent = itemExtent;
-    if (pageExtent <= 0.0) {
-      return _childCrossAxisExtents.values.fold(0.0, math.max);
-    }
-
-    final double page = scrollOffset / pageExtent;
-    final int currentPage = page.floor();
-    final double fraction = page - currentPage;
-
-    final double? currentExtent = _childCrossAxisExtents[currentPage];
-    if (currentExtent == null) {
-      return _childCrossAxisExtents.values.fold(0.0, math.max);
-    }
-
-    if (fraction < precisionErrorTolerance) {
-      return currentExtent;
-    }
-
-    final double? nextExtent = _childCrossAxisExtents[currentPage + 1];
-    if (nextExtent == null) {
-      return currentExtent;
-    }
-
-    return currentExtent + (nextExtent - currentExtent) * fraction;
-  }
-
-  /// Builds [BoxConstraints] for a child with tight main-axis extent and
-  /// loose cross-axis constraints.
-  BoxConstraints _buildChildConstraints() {
-    final double mainExtent = itemExtent;
-    return switch (constraints.axis) {
-      Axis.horizontal => BoxConstraints(
-        minWidth: mainExtent,
-        maxWidth: mainExtent,
-        maxHeight: constraints.crossAxisExtent,
-      ),
-      Axis.vertical => BoxConstraints(
-        maxWidth: constraints.crossAxisExtent,
-        minHeight: mainExtent,
-        maxHeight: mainExtent,
-      ),
-    };
+    _shrinkWrapCrossAxis = value;
+    markNeedsLayout();
   }
 
   @override
   void performLayout() {
-    assert(itemExtent.isFinite && itemExtent >= 0);
+    if (!shrinkWrapCrossAxis) {
+      super.performLayout();
+      return;
+    }
 
     final SliverConstraints constraints = this.constraints;
     childManager.didStartLayout();
@@ -208,8 +100,6 @@ class RenderSliverFittedPage extends RenderSliverFixedExtentBoxAdaptor
         ? getMaxChildIndexForScrollOffset(targetEndScrollOffset, deprecatedExtraItemExtent)
         : null;
 
-    _childCrossAxisExtents.clear();
-
     if (firstChild != null) {
       final int leadingGarbage = calculateLeadingGarbage(firstIndex: firstIndex);
       final int trailingGarbage = targetLastIndex != null
@@ -220,22 +110,19 @@ class RenderSliverFittedPage extends RenderSliverFixedExtentBoxAdaptor
       collectGarbage(0, 0);
     }
 
-    final BoxConstraints childConstraints = _buildChildConstraints();
-
     if (firstChild == null) {
       final double layoutOffset = indexToLayoutOffset(deprecatedExtraItemExtent, firstIndex);
       if (!addInitialChild(index: firstIndex, layoutOffset: layoutOffset)) {
-        final double max;
-        if (firstIndex <= 0) {
-          max = 0.0;
-        } else {
-          max = computeMaxScrollOffset(constraints, deprecatedExtraItemExtent);
-        }
-        geometry = SliverGeometry(scrollExtent: max, maxPaintExtent: max);
+        final double max = firstIndex <= 0
+            ? 0.0
+            : computeMaxScrollOffset(constraints, deprecatedExtraItemExtent);
+        geometry = SliverGeometry(scrollExtent: max, maxPaintExtent: max, crossAxisExtent: 0.0);
         childManager.didFinishLayout();
         return;
       }
     }
+
+    final BoxConstraints childConstraints = _getShrinkWrapCrossAxisChildConstraints();
 
     RenderBox? trailingChildWithLayout;
 
@@ -252,7 +139,6 @@ class RenderSliverFittedPage extends RenderSliverFixedExtentBoxAdaptor
       childParentData.layoutOffset = indexToLayoutOffset(deprecatedExtraItemExtent, index);
       assert(childParentData.index == index);
       trailingChildWithLayout ??= child;
-      _trackChildCrossAxisExtent(child, index);
     }
 
     if (trailingChildWithLayout == null) {
@@ -261,7 +147,6 @@ class RenderSliverFittedPage extends RenderSliverFixedExtentBoxAdaptor
           firstChild!.parentData! as SliverMultiBoxAdaptorParentData;
       childParentData.layoutOffset = indexToLayoutOffset(deprecatedExtraItemExtent, firstIndex);
       trailingChildWithLayout = firstChild;
-      _trackChildCrossAxisExtent(firstChild!, firstIndex);
     }
 
     double estimatedMaxScrollOffset = double.infinity;
@@ -292,7 +177,6 @@ class RenderSliverFittedPage extends RenderSliverFixedExtentBoxAdaptor
         deprecatedExtraItemExtent,
         childParentData.index!,
       );
-      _trackChildCrossAxisExtent(child, index);
     }
 
     final int lastIndex = indexOf(lastChild!);
@@ -343,17 +227,90 @@ class RenderSliverFittedPage extends RenderSliverFixedExtentBoxAdaptor
       paintExtent: paintExtent,
       cacheExtent: cacheExtent,
       maxPaintExtent: estimatedMaxScrollOffset,
+      crossAxisExtent: _currentPageCrossAxisExtent(),
       hasVisualOverflow:
           (targetLastIndexForPaint != null && lastIndex >= targetLastIndexForPaint) ||
           constraints.scrollOffset > 0.0,
     );
 
-    effectiveCrossAxisExtent = _computeEffectiveCrossAxisExtent(constraints.scrollOffset);
-
     if (estimatedMaxScrollOffset == trailingScrollOffset) {
       childManager.setDidUnderflow(true);
     }
     childManager.didFinishLayout();
+  }
+
+  BoxConstraints _getShrinkWrapCrossAxisChildConstraints() {
+    final double extent = itemExtent;
+    return switch (constraints.axis) {
+      Axis.horizontal => BoxConstraints(
+        minWidth: extent,
+        maxWidth: extent,
+        minHeight: 0.0,
+        maxHeight: constraints.crossAxisExtent,
+      ),
+      Axis.vertical => BoxConstraints(
+        minWidth: 0.0,
+        maxWidth: constraints.crossAxisExtent,
+        minHeight: extent,
+        maxHeight: extent,
+      ),
+    };
+  }
+
+  RenderBox? _childForIndex(int index) {
+    RenderBox? child = firstChild;
+    while (child != null) {
+      final int childIndex = indexOf(child);
+      if (childIndex == index) {
+        return child;
+      }
+      if (childIndex > index) {
+        return null;
+      }
+      child = childAfter(child);
+    }
+    return null;
+  }
+
+  double _childCrossAxisExtent(RenderBox child) {
+    return switch (constraints.axis) {
+      Axis.horizontal => child.size.height,
+      Axis.vertical => child.size.width,
+    };
+  }
+
+  double _currentPageCrossAxisExtent() {
+    final RenderBox? firstLiveChild = firstChild;
+    if (firstLiveChild == null) {
+      return 0.0;
+    }
+
+    final double mainAxisExtent = itemExtent;
+    if (mainAxisExtent == 0.0) {
+      return _childCrossAxisExtent(firstLiveChild);
+    }
+
+    final double initialPageOffset = math.max(
+      0.0,
+      (mainAxisExtent - constraints.viewportMainAxisExtent) / 2.0,
+    );
+    final double rawPage =
+        math.max(0.0, constraints.scrollOffset - initialPageOffset) / mainAxisExtent;
+    final int lowerIndex = rawPage.floor();
+    final int upperIndex = rawPage.ceil();
+    final RenderBox? lowerChild = _childForIndex(lowerIndex);
+    final RenderBox? upperChild = _childForIndex(upperIndex);
+
+    if (lowerChild == null && upperChild == null) {
+      return _childCrossAxisExtent(firstLiveChild);
+    }
+
+    final double lowerExtent = lowerChild != null
+        ? _childCrossAxisExtent(lowerChild)
+        : _childCrossAxisExtent(upperChild!);
+    final double upperExtent = upperChild != null ? _childCrossAxisExtent(upperChild) : lowerExtent;
+    final double pageDelta = rawPage - lowerIndex;
+    return lowerExtent + (upperExtent - lowerExtent) * pageDelta;
   }
 }
 
