@@ -9,7 +9,6 @@ import 'package:android_semantics_testing/android_semantics_testing.dart';
 import 'package:android_semantics_testing/main.dart' as app;
 import 'package:android_semantics_testing/test_constants.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
