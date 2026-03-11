@@ -7,8 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('PageView.wrapCrossAxis sizes height to current child',
-      (WidgetTester tester) async {
+  testWidgets('PageView.wrapCrossAxis sizes height to current child', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -34,8 +33,9 @@ void main() {
     expect(size.width, 800.0);
   });
 
-  testWidgets('PageView.wrapCrossAxis interpolates height during page transition',
-      (WidgetTester tester) async {
+  testWidgets('PageView.wrapCrossAxis interpolates height during page transition', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -56,9 +56,7 @@ void main() {
     expect(tester.getSize(find.byType(PageView)).height, 100.0);
 
     // Start dragging to the second page (drag left for a horizontal PageView).
-    final TestGesture gesture = await tester.startGesture(
-      tester.getCenter(find.byType(PageView)),
-    );
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(PageView)));
     // Drag half a page width (400 of 800).
     await gesture.moveBy(const Offset(-400, 0));
     await tester.pump();
@@ -76,8 +74,7 @@ void main() {
     expect(tester.getSize(find.byType(PageView)).height, 300.0);
   });
 
-  testWidgets('PageView.wrapCrossAxis with different child heights',
-      (WidgetTester tester) async {
+  testWidgets('PageView.wrapCrossAxis with different child heights', (WidgetTester tester) async {
     final controller = PageController();
     addTearDown(controller.dispose);
 
@@ -175,8 +172,7 @@ void main() {
     expect(tester.getSize(find.byType(PageView)).height, 160.0);
   });
 
-  testWidgets('Vertical PageView with wrapCrossAxis adapts width',
-      (WidgetTester tester) async {
+  testWidgets('Vertical PageView with wrapCrossAxis adapts width', (WidgetTester tester) async {
     final controller = PageController();
     addTearDown(controller.dispose);
 
@@ -209,8 +205,7 @@ void main() {
     expect(tester.getSize(find.byType(PageView)).width, 300.0);
   });
 
-  testWidgets('PageView.wrapCrossAxis with single child',
-      (WidgetTester tester) async {
+  testWidgets('PageView.wrapCrossAxis with single child', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -218,9 +213,7 @@ void main() {
           alignment: Alignment.topCenter,
           child: PageView(
             wrapCrossAxis: true,
-            children: <Widget>[
-              SizedBox(height: 123, child: Container(color: Colors.red)),
-            ],
+            children: <Widget>[SizedBox(height: 123, child: Container(color: Colors.red))],
           ),
         ),
       ),
@@ -230,8 +223,7 @@ void main() {
     expect(tester.getSize(find.byType(PageView)).height, 123.0);
   });
 
-  testWidgets('PageView.wrapCrossAxis with identical child sizes',
-      (WidgetTester tester) async {
+  testWidgets('PageView.wrapCrossAxis with identical child sizes', (WidgetTester tester) async {
     final controller = PageController();
     addTearDown(controller.dispose);
 
@@ -265,8 +257,7 @@ void main() {
     expect(tester.getSize(find.byType(PageView)).height, 200.0);
   });
 
-  testWidgets('PageView.wrapCrossAxis with animateToPage',
-      (WidgetTester tester) async {
+  testWidgets('PageView.wrapCrossAxis with animateToPage', (WidgetTester tester) async {
     final controller = PageController();
     addTearDown(controller.dispose);
 
@@ -290,11 +281,7 @@ void main() {
 
     expect(tester.getSize(find.byType(PageView)).height, 100.0);
 
-    controller.animateToPage(
-      1,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.linear,
-    );
+    controller.animateToPage(1, duration: const Duration(milliseconds: 300), curve: Curves.linear);
 
     // Kick off the animation and advance to ~50%.
     await tester.pump();
@@ -308,8 +295,9 @@ void main() {
     expect(tester.getSize(find.byType(PageView)).height, 300.0);
   });
 
-  testWidgets('PageView.wrapCrossAxis false preserves existing behavior',
-      (WidgetTester tester) async {
+  testWidgets('PageView.wrapCrossAxis false preserves existing behavior', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -318,9 +306,7 @@ void main() {
             height: 500,
             width: 800,
             child: PageView(
-              children: <Widget>[
-                SizedBox(height: 100, child: Container(color: Colors.red)),
-              ],
+              children: <Widget>[SizedBox(height: 100, child: Container(color: Colors.red))],
             ),
           ),
         ),
@@ -363,8 +349,7 @@ void main() {
     expect(tester.getSize(find.byType(PageView)).height, 120.0);
   });
 
-  testWidgets('PageView.wrapCrossAxis with viewportFraction < 1.0',
-      (WidgetTester tester) async {
+  testWidgets('PageView.wrapCrossAxis with viewportFraction < 1.0', (WidgetTester tester) async {
     final controller = PageController(viewportFraction: 0.8);
     addTearDown(controller.dispose);
 
@@ -393,32 +378,59 @@ void main() {
     expect(size.height, greaterThanOrEqualTo(100.0));
   });
 
-  testWidgets('RenderCrossAxisFittedViewport uses CrossAxisFittedViewport widget',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: PageView(
-            wrapCrossAxis: true,
-            children: <Widget>[
-              SizedBox(height: 100, child: Container(color: Colors.red)),
-            ],
+  testWidgets('PageView.wrapCrossAxis preserves scroll notification depth', (
+    WidgetTester tester,
+  ) async {
+    Future<int> pumpAndGetDepth({required bool wrapCrossAxis}) async {
+      int? depth;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: NotificationListener<ScrollUpdateNotification>(
+            onNotification: (ScrollUpdateNotification notification) {
+              if (notification.metrics is PageMetrics) {
+                depth ??= notification.depth;
+              }
+              return false;
+            },
+            child: Center(
+              child: SizedBox(
+                width: 800,
+                height: 400,
+                child: PageView(
+                  wrapCrossAxis: wrapCrossAxis,
+                  children: <Widget>[
+                    SizedBox(height: 100, child: Container(color: Colors.red)),
+                    SizedBox(height: 200, child: Container(color: Colors.green)),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    // Verify the correct render object type is created.
-    expect(find.byType(CrossAxisFittedViewport), findsOneWidget);
-    final RenderObject renderObject = tester.renderObject(find.byType(CrossAxisFittedViewport));
-    expect(renderObject, isA<RenderCrossAxisFittedViewport>());
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(find.byType(PageView)),
+      );
+      await gesture.moveBy(const Offset(-200, 0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(depth, isNotNull);
+      return depth!;
+    }
+
+    final int baselineDepth = await pumpAndGetDepth(wrapCrossAxis: false);
+    final int adaptiveDepth = await pumpAndGetDepth(wrapCrossAxis: true);
+
+    expect(adaptiveDepth, baselineDepth);
   });
 
-  testWidgets('PageView.wrapCrossAxis: child fills main axis (width)',
-      (WidgetTester tester) async {
+  testWidgets('PageView.wrapCrossAxis: child fills main axis (width)', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -426,9 +438,7 @@ void main() {
           alignment: Alignment.topCenter,
           child: PageView(
             wrapCrossAxis: true,
-            children: <Widget>[
-              Container(height: 100, color: Colors.red),
-            ],
+            children: <Widget>[Container(height: 100, color: Colors.red)],
           ),
         ),
       ),
@@ -441,8 +451,7 @@ void main() {
     expect(container.height, 100.0);
   });
 
-  testWidgets('PageView.wrapCrossAxis with reverse',
-      (WidgetTester tester) async {
+  testWidgets('PageView.wrapCrossAxis with reverse', (WidgetTester tester) async {
     final controller = PageController();
     addTearDown(controller.dispose);
 
@@ -472,8 +481,7 @@ void main() {
     expect(tester.getSize(find.byType(PageView)).height, 200.0);
   });
 
-  testWidgets('PageView.wrapCrossAxis with padEnds: false',
-      (WidgetTester tester) async {
+  testWidgets('PageView.wrapCrossAxis with padEnds: false', (WidgetTester tester) async {
     final controller = PageController(viewportFraction: 0.8);
     addTearDown(controller.dispose);
 
@@ -501,12 +509,10 @@ void main() {
     expect(tester.getSize(find.byType(PageView)).height, greaterThanOrEqualTo(100.0));
   });
 
-  testWidgets('PageView.wrapCrossAxis debugFillProperties includes wrapCrossAxis',
-      (WidgetTester tester) async {
-    final pageView = PageView(
-      wrapCrossAxis: true,
-      children: const <Widget>[SizedBox(height: 100)],
-    );
+  testWidgets('PageView.wrapCrossAxis debugFillProperties includes wrapCrossAxis', (
+    WidgetTester tester,
+  ) async {
+    final pageView = PageView(wrapCrossAxis: true, children: const <Widget>[SizedBox(height: 100)]);
 
     final builder = DiagnosticPropertiesBuilder();
     // PageView is a StatefulWidget, so we test via its State's debugFillProperties
@@ -515,10 +521,7 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: pageView,
-        ),
+        child: Align(alignment: Alignment.topCenter, child: pageView),
       ),
     );
     await tester.pumpAndSettle();
