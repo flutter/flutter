@@ -937,7 +937,13 @@ def gather_dart_tests(
   dart_tests = glob.glob(f'{dart_tests_dir}/*_test.dart')
 
   opengles_skipped_tests = [
+      'codec_test.dart',
+      'decode_image_from_pixels_sync_test.dart',
+      'encoding_test.dart',
       'gpu_test.dart',
+      'high_bitrate_texture_test.dart',
+      'image_dispose_test.dart',
+      'image_resize_test.dart',
   ]
 
   impeller_backends = ['', 'vulkan', 'opengles']

@@ -665,10 +665,8 @@ abstract class SemanticRole {
 
   /// Whether this role accepts pointer events.
   ///
-  /// When `true`, the `pointer-events` CSS property is set to `all` on the
-  /// semantics [element]. When `false`, it is either `none` or `auto`
-  /// depending on [ui.SemanticsHitTestBehavior] and whether the node has
-  /// children. See the pointer-events assignment in `_updateSemantics`.
+  /// This boolean decides whether to set the `pointer-events` CSS property to
+  /// `all` or to `none` on the semantics [element].
   ///
   /// The behavior is determined by [ui.SemanticsHitTestBehavior]:
   /// - `opaque`: Accepts pointer events (blocks elements behind)
@@ -2008,21 +2006,10 @@ class SemanticsObject {
     // Apply updates to the DOM.
     _updateRole();
 
-    // Pointer events are assigned in three tiers:
-    //
-    //  * `all`:  interactive nodes or explicit `opaque` — intercept events.
-    //  * `none`: explicit `transparent` (e.g. platform views, which need the
-    //            underlying native element to receive clicks) or container
-    //            nodes with children (children handle their own events).
-    //  * `auto`: non-interactive leaf nodes with `defer` — delegate to the
-    //            browser's z-index hit testing so that higher-z-index overlays
-    //            (e.g. OverlayPortal content) correctly intercept events.
     if (semanticRole!.acceptsPointerEvents) {
       element.style.pointerEvents = 'all';
-    } else if (hitTestBehavior == ui.SemanticsHitTestBehavior.transparent || hasChildren) {
-      element.style.pointerEvents = 'none';
     } else {
-      element.style.pointerEvents = 'auto';
+      element.style.pointerEvents = 'none';
     }
   }
 

@@ -4,17 +4,12 @@
 
 import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'list_tile_tester.dart';
 import 'semantics_tester.dart';
-import 'widgets_app_tester.dart';
-
-const _kRedColor = Color(0xFFFF0000);
-const _kGreenColor = Color(0xFF00FF00);
-const _kDragHandleIconData = IconData(0xe25d, fontFamily: 'MaterialIcons');
 
 void main() {
   testWidgets('SliverReorderableList works well when having gestureSettings', (
@@ -32,7 +27,7 @@ void main() {
 
     // The list has five elements of height 100
     await tester.pumpWidget(
-      TestWidgetsApp(
+      MaterialApp(
         home: MediaQuery(
           data: const MediaQueryData(gestureSettings: DeviceGestureSettings(touchSlop: 8.0)),
           child: CustomScrollView(
@@ -87,7 +82,7 @@ void main() {
 
     // The list has five elements of height 100
     await tester.pumpWidget(
-      TestWidgetsApp(
+      MaterialApp(
         home: MediaQuery(
           data: const MediaQueryData(gestureSettings: DeviceGestureSettings(touchSlop: 8.0)),
           child: CustomScrollView(
@@ -142,7 +137,7 @@ void main() {
     final items = List<int>.generate(itemCount, (int index) => index);
     // The list has five elements of height 100
     await tester.pumpWidget(
-      TestWidgetsApp(
+      MaterialApp(
         home: MediaQuery(
           data: const MediaQueryData(gestureSettings: DeviceGestureSettings(touchSlop: 8.0)),
           child: CustomScrollView(
@@ -188,7 +183,7 @@ void main() {
     late StateSetter stateSetter;
 
     await tester.pumpWidget(
-      TestWidgetsApp(
+      MaterialApp(
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             stateSetter = setState;
@@ -228,7 +223,7 @@ void main() {
     }
 
     await tester.pumpWidget(
-      TestWidgetsApp(
+      MaterialApp(
         home: ReorderableList(
           itemBuilder: (BuildContext context, int index) {
             return ReorderableDragStartListener(
@@ -267,7 +262,7 @@ void main() {
   testWidgets('negative itemCount should assert', (WidgetTester tester) async {
     final items = <int>[1, 2, 3];
     await tester.pumpWidget(
-      TestWidgetsApp(
+      MaterialApp(
         home: StatefulBuilder(
           builder: (BuildContext outerContext, StateSetter setState) {
             return CustomScrollView(
@@ -295,7 +290,7 @@ void main() {
   testWidgets('zero itemCount should not build widget', (WidgetTester tester) async {
     final items = <int>[1, 2, 3];
     await tester.pumpWidget(
-      TestWidgetsApp(
+      MaterialApp(
         home: StatefulBuilder(
           builder: (BuildContext outerContext, StateSetter setState) {
             return CustomScrollView(
@@ -507,7 +502,7 @@ void main() {
     'ReorderableList supports items with nested list views without throwing layout exception.',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        TestWidgetsApp(
+        MaterialApp(
           builder: (BuildContext context, Widget? child) {
             return MediaQuery(
               // Ensure there is always a top padding to simulate a phone with
@@ -518,28 +513,31 @@ void main() {
               child: child!,
             );
           },
-          home: ReorderableList(
-            itemCount: 10,
-            itemBuilder: (BuildContext context, int index) {
-              return ReorderableDragStartListener(
-                index: index,
-                key: ValueKey<int>(index),
-                child: Column(
-                  children: <Widget>[
-                    ListView(
-                      shrinkWrap: true,
-                      physics: const ClampingScrollPhysics(),
-                      children: const <Widget>[
-                        Text('Other data'),
-                        Text('Other data'),
-                        Text('Other data'),
-                      ],
-                    ),
-                  ],
-                ),
-              );
-            },
-            onReorderItem: (_, _) {},
+          home: Scaffold(
+            appBar: AppBar(title: const Text('Nested Lists')),
+            body: ReorderableList(
+              itemCount: 10,
+              itemBuilder: (BuildContext context, int index) {
+                return ReorderableDragStartListener(
+                  index: index,
+                  key: ValueKey<int>(index),
+                  child: Column(
+                    children: <Widget>[
+                      ListView(
+                        shrinkWrap: true,
+                        physics: const ClampingScrollPhysics(),
+                        children: const <Widget>[
+                          Text('Other data'),
+                          Text('Other data'),
+                          Text('Other data'),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+              onReorderItem: (_, _) {},
+            ),
           ),
         ),
       );
@@ -564,7 +562,7 @@ void main() {
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/83224.
       await tester.pumpWidget(
-        TestWidgetsApp(
+        MaterialApp(
           builder: (BuildContext context, Widget? child) {
             return MediaQuery(
               // Ensure there is always a top padding to simulate a phone with
@@ -575,28 +573,31 @@ void main() {
               child: child!,
             );
           },
-          home: ReorderableList(
-            itemCount: 10,
-            itemBuilder: (BuildContext context, int index) {
-              return ReorderableDragStartListener(
-                index: index,
-                key: ValueKey<int>(index),
-                child: Column(
-                  children: <Widget>[
-                    ListView(
-                      shrinkWrap: true,
-                      physics: const ClampingScrollPhysics(),
-                      children: const <Widget>[
-                        Text('Other data'),
-                        Text('Other data'),
-                        Text('Other data'),
-                      ],
-                    ),
-                  ],
-                ),
-              );
-            },
-            onReorderItem: (_, _) {},
+          home: Scaffold(
+            appBar: AppBar(title: const Text('Nested Lists')),
+            body: ReorderableList(
+              itemCount: 10,
+              itemBuilder: (BuildContext context, int index) {
+                return ReorderableDragStartListener(
+                  index: index,
+                  key: ValueKey<int>(index),
+                  child: Column(
+                    children: <Widget>[
+                      ListView(
+                        shrinkWrap: true,
+                        physics: const ClampingScrollPhysics(),
+                        children: const <Widget>[
+                          Text('Other data'),
+                          Text('Other data'),
+                          Text('Other data'),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+              onReorderItem: (_, _) {},
+            ),
           ),
         ),
       );
@@ -966,7 +967,7 @@ void main() {
     }
 
     await tester.pumpWidget(
-      TestWidgetsApp(
+      MaterialApp(
         home: ReorderableList(
           itemCount: items.length,
           itemBuilder: (BuildContext context, int index) {
@@ -1044,7 +1045,7 @@ void main() {
     }
 
     await tester.pumpWidget(
-      TestWidgetsApp(
+      MaterialApp(
         home: CustomScrollView(
           slivers: <Widget>[
             SliverReorderableList(
@@ -1104,7 +1105,7 @@ void main() {
     }
 
     await tester.pumpWidget(
-      TestWidgetsApp(
+      MaterialApp(
         home: CustomScrollView(
           slivers: <Widget>[
             SliverReorderableList(
@@ -1192,7 +1193,7 @@ void main() {
     }
 
     await tester.pumpWidget(
-      TestWidgetsApp(
+      MaterialApp(
         home: ReorderableList(
           itemCount: items.length,
           itemBuilder: (BuildContext context, int index) {
@@ -1248,7 +1249,7 @@ void main() {
     }
 
     await tester.pumpWidget(
-      TestWidgetsApp(
+      MaterialApp(
         home: ReorderableList(
           itemCount: items.length,
           itemBuilder: (BuildContext context, int index) {
@@ -1352,7 +1353,7 @@ void main() {
 
     // The list has five elements, that indicate the extent for the item at the given index.
     await tester.pumpWidget(
-      TestWidgetsApp(
+      MaterialApp(
         home: ReorderableList(
           itemBuilder: (_, int index) {
             return SizedBox(key: ValueKey<double>(items[index]), child: Text('Item $index'));
@@ -1406,29 +1407,31 @@ void main() {
     final numbers = <int>[0, 1, 2];
 
     await tester.pumpWidget(
-      TestWidgetsApp(
-        home: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return ReorderableList(
-              itemBuilder: (BuildContext context, int index) {
-                return SizedBox(
-                  key: ValueKey<int>(numbers[index]),
-                  // children with different heights
-                  height: 20 + numbers[index] * 10,
-                  child: ReorderableDragStartListener(
-                    index: index,
-                    child: Text(numbers[index].toString()),
-                  ),
-                );
-              },
-              itemCount: numbers.length,
-              itemExtent: 30,
-              onReorderItem: (int fromIndex, int toIndex) {
-                final int value = numbers.removeAt(fromIndex);
-                numbers.insert(toIndex, value);
-              },
-            );
-          },
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return ReorderableList(
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(
+                    key: ValueKey<int>(numbers[index]),
+                    // children with different heights
+                    height: 20 + numbers[index] * 10,
+                    child: ReorderableDragStartListener(
+                      index: index,
+                      child: Text(numbers[index].toString()),
+                    ),
+                  );
+                },
+                itemCount: numbers.length,
+                itemExtent: 30,
+                onReorderItem: (int fromIndex, int toIndex) {
+                  final int value = numbers.removeAt(fromIndex);
+                  numbers.insert(toIndex, value);
+                },
+              );
+            },
+          ),
         ),
       ),
     );
@@ -1448,26 +1451,28 @@ void main() {
     final numbers = <int>[0, 1, 2];
 
     await tester.pumpWidget(
-      TestWidgetsApp(
-        home: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return ReorderableList(
-              itemBuilder: (BuildContext context, int index) {
-                return SizedBox(
-                  key: ValueKey<int>(numbers[index]),
-                  // children with different heights
-                  height: 20 + numbers[index] * 10,
-                  child: ReorderableDragStartListener(
-                    index: index,
-                    child: Text(numbers[index].toString()),
-                  ),
-                );
-              },
-              itemCount: numbers.length,
-              prototypeItem: const SizedBox(height: 30, child: Text('3')),
-              onReorderItem: (_, _) {},
-            );
-          },
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return ReorderableList(
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(
+                    key: ValueKey<int>(numbers[index]),
+                    // children with different heights
+                    height: 20 + numbers[index] * 10,
+                    child: ReorderableDragStartListener(
+                      index: index,
+                      child: Text(numbers[index].toString()),
+                    ),
+                  );
+                },
+                itemCount: numbers.length,
+                prototypeItem: const SizedBox(height: 30, child: Text('3')),
+                onReorderItem: (_, _) {},
+              );
+            },
+          ),
         ),
       ),
     );
@@ -1496,7 +1501,7 @@ void main() {
 
       // The list has five elements of height 100
       await tester.pumpWidget(
-        TestWidgetsApp(
+        MaterialApp(
           home: ReorderableList(
             itemCount: itemCount,
             itemBuilder: (BuildContext context, int index) {
@@ -1542,7 +1547,7 @@ void main() {
 
       // The list has five elements of height 100
       await tester.pumpWidget(
-        TestWidgetsApp(
+        MaterialApp(
           home: ReorderableList(
             itemCount: itemCount,
             itemBuilder: (BuildContext context, int index) {
@@ -1591,7 +1596,7 @@ void main() {
 
       // The list has five elements of height 100
       await tester.pumpWidget(
-        TestWidgetsApp(
+        MaterialApp(
           home: ReorderableList(
             itemCount: itemCount,
             itemBuilder: (BuildContext context, int index) {
@@ -1638,7 +1643,7 @@ void main() {
 
       // The list has five elements of height 100
       await tester.pumpWidget(
-        TestWidgetsApp(
+        MaterialApp(
           home: ReorderableList(
             itemCount: itemCount,
             itemBuilder: (BuildContext context, int index) {
@@ -1676,53 +1681,51 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/105010
     const itemCount = 5;
     final items = List<int>.generate(itemCount, (int index) => index);
-    var showList = false;
 
     await tester.pumpWidget(
-      TestWidgetsApp(
-        home: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            if (!showList) {
-              return GestureDetector(
-                onTap: () => setState(() {
-                  showList = true;
-                }),
-                child: const Text('Show list'),
-              );
-            }
-            return Column(
-              children: <Widget>[
-                Expanded(
-                  child: CustomScrollView(
-                    slivers: <Widget>[
-                      SliverReorderableList(
-                        itemCount: itemCount,
-                        itemBuilder: (BuildContext context, int index) {
-                          return ReorderableDragStartListener(
-                            key: ValueKey<String>('item-$index'),
-                            index: index,
-                            child: TestListTile(title: Text('item ${items[index]}')),
-                          );
-                        },
-                        onReorderItem: (_, _) {},
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(),
+          drawer: Drawer(
+            child: Builder(
+              builder: (BuildContext context) {
+                return Column(
+                  children: <Widget>[
+                    Expanded(
+                      child: CustomScrollView(
+                        slivers: <Widget>[
+                          SliverReorderableList(
+                            itemCount: itemCount,
+                            itemBuilder: (BuildContext context, int index) {
+                              return Material(
+                                key: ValueKey<String>('item-$index'),
+                                child: ReorderableDragStartListener(
+                                  index: index,
+                                  child: TestListTile(title: Text('item ${items[index]}')),
+                                ),
+                              );
+                            },
+                            onReorderItem: (_, _) {},
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () => setState(() {
-                    showList = false;
-                  }),
-                  child: const Text('Close list'),
-                ),
-              ],
-            );
-          },
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Scaffold.of(context).closeDrawer();
+                      },
+                      child: const Text('Close drawer'),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
         ),
       ),
     );
 
-    await tester.tap(find.text('Show list'));
+    await tester.tap(find.byIcon(Icons.menu));
     await tester.pumpAndSettle();
 
     final Finder item0 = find.text('item 0');
@@ -1733,7 +1736,7 @@ void main() {
     await drag.moveBy(const Offset(0, 200));
     await tester.pump();
 
-    await tester.tap(find.text('Close list'));
+    await tester.tap(find.text('Close drawer'));
     await tester.pumpAndSettle();
 
     expect(item0, findsNothing);
@@ -1762,7 +1765,7 @@ void main() {
       addTearDown(scrollController.dispose);
 
       await tester.pumpWidget(
-        TestWidgetsApp(
+        MaterialApp(
           home: CustomScrollView(
             controller: scrollController,
             slivers: <Widget>[
@@ -1771,14 +1774,14 @@ void main() {
                   return Container(
                     key: ValueKey<int>(items[index]),
                     height: 100,
-                    color: items[index].isOdd ? _kRedColor : _kGreenColor,
+                    color: items[index].isOdd ? Colors.red : Colors.green,
                     child: ReorderableDragStartListener(
                       index: index,
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text('item ${items[index]}'),
-                          const Icon(_kDragHandleIconData),
+                          const Icon(Icons.drag_handle),
                         ],
                       ),
                     ),
@@ -1839,7 +1842,7 @@ void main() {
       final items = List<String>.generate(itemCount, (int index) => 'Item ${index + 1}');
 
       await tester.pumpWidget(
-        TestWidgetsApp(
+        MaterialApp(
           home: ReorderableList(
             onReorderItem: (int oldIndex, int newIndex) {
               final String item = items.removeAt(oldIndex);
@@ -1851,7 +1854,7 @@ void main() {
               return ReorderableDragStartListener(
                 key: Key('$index'),
                 index: index,
-                child: TestListTile(title: Text(items[index])),
+                child: Material(child: TestListTile(title: Text(items[index]))),
               );
             },
           ),
@@ -1874,31 +1877,33 @@ void main() {
 
   testWidgets('When creating a new item, be in the correct position', (WidgetTester tester) async {
     await tester.pumpWidget(
-      TestWidgetsApp(
+      MaterialApp(
         home: LayoutBuilder(
           builder: (_, BoxConstraints view) {
             // The third one just appears on the screen
             final double itemSize = view.maxWidth / 2 - 20;
-            return CustomScrollView(
-              scrollDirection: Axis.horizontal,
-              cacheExtent: 0, // The fourth one will not be created in the initial state.
-              slivers: <Widget>[
-                SliverReorderableList(
-                  itemBuilder: (BuildContext context, int index) {
-                    return ReorderableDragStartListener(
-                      key: ValueKey<int>(index),
-                      index: index,
-                      child: Builder(
-                        builder: (BuildContext context) {
-                          return SizedBox(width: itemSize, child: Text('$index'));
-                        },
-                      ),
-                    );
-                  },
-                  itemCount: 4,
-                  onReorderItem: (_, _) {},
-                ),
-              ],
+            return Scaffold(
+              body: CustomScrollView(
+                scrollDirection: Axis.horizontal,
+                cacheExtent: 0, // The fourth one will not be created in the initial state.
+                slivers: <Widget>[
+                  SliverReorderableList(
+                    itemBuilder: (BuildContext context, int index) {
+                      return ReorderableDragStartListener(
+                        key: ValueKey<int>(index),
+                        index: index,
+                        child: Builder(
+                          builder: (BuildContext context) {
+                            return SizedBox(width: itemSize, child: Text('$index'));
+                          },
+                        ),
+                      );
+                    },
+                    itemCount: 4,
+                    onReorderItem: (_, _) {},
+                  ),
+                ],
+              ),
             );
           },
         ),
@@ -1921,38 +1926,40 @@ void main() {
     final itemSizes = <double>[20, 50, 30, 80, 100, 30];
     Future<void> pumpFor(bool reverse, Axis scrollDirection) async {
       await tester.pumpWidget(
-        TestWidgetsApp(
+        MaterialApp(
           home: Builder(
             builder: (BuildContext context) {
               screenSize = MediaQuery.sizeOf(context);
-              return CustomScrollView(
-                reverse: reverse,
-                scrollDirection: scrollDirection,
-                slivers: <Widget>[
-                  SliverReorderableList(
-                    itemBuilder: (BuildContext context, int index) {
-                      return ReorderableDragStartListener(
-                        key: ValueKey<int>(index),
-                        index: index,
-                        child: Builder(
-                          builder: (BuildContext context) {
-                            return SizedBox(
-                              height: scrollDirection == Axis.vertical
-                                  ? itemSizes[index]
-                                  : double.infinity,
-                              width: scrollDirection == Axis.horizontal
-                                  ? itemSizes[index]
-                                  : double.infinity,
-                              child: Text('$index'),
-                            );
-                          },
-                        ),
-                      );
-                    },
-                    itemCount: itemSizes.length,
-                    onReorderItem: (_, _) {},
-                  ),
-                ],
+              return Scaffold(
+                body: CustomScrollView(
+                  reverse: reverse,
+                  scrollDirection: scrollDirection,
+                  slivers: <Widget>[
+                    SliverReorderableList(
+                      itemBuilder: (BuildContext context, int index) {
+                        return ReorderableDragStartListener(
+                          key: ValueKey<int>(index),
+                          index: index,
+                          child: Builder(
+                            builder: (BuildContext context) {
+                              return SizedBox(
+                                height: scrollDirection == Axis.vertical
+                                    ? itemSizes[index]
+                                    : double.infinity,
+                                width: scrollDirection == Axis.horizontal
+                                    ? itemSizes[index]
+                                    : double.infinity,
+                                child: Text('$index'),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                      itemCount: itemSizes.length,
+                      onReorderItem: (_, _) {},
+                    ),
+                  ],
+                ),
               );
             },
           ),
@@ -2003,23 +2010,25 @@ void main() {
   ) async {
     Future<void> pumpFor({Widget? prototypeItem, double? itemExtent}) async {
       await tester.pumpWidget(
-        TestWidgetsApp(
-          home: CustomScrollView(
-            slivers: <Widget>[
-              SliverReorderableList(
-                itemBuilder: (BuildContext context, int index) {
-                  return ReorderableDragStartListener(
-                    key: ValueKey<int>(index),
-                    index: index,
-                    child: SizedBox(height: 100, child: Text('$index')),
-                  );
-                },
-                itemCount: 5,
-                itemExtent: itemExtent,
-                prototypeItem: prototypeItem,
-                onReorderItem: (_, _) {},
-              ),
-            ],
+        MaterialApp(
+          home: Scaffold(
+            body: CustomScrollView(
+              slivers: <Widget>[
+                SliverReorderableList(
+                  itemBuilder: (BuildContext context, int index) {
+                    return ReorderableDragStartListener(
+                      key: ValueKey<int>(index),
+                      index: index,
+                      child: SizedBox(height: 100, child: Text('$index')),
+                    );
+                  },
+                  itemCount: 5,
+                  itemExtent: itemExtent,
+                  prototypeItem: prototypeItem,
+                  onReorderItem: (_, _) {},
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -2046,26 +2055,28 @@ void main() {
   ) async {
     final itemLayoutConstraints = <int, BoxConstraints>{};
     await tester.pumpWidget(
-      TestWidgetsApp(
-        home: CustomScrollView(
-          slivers: <Widget>[
-            SliverReorderableList(
-              itemBuilder: (BuildContext context, int index) {
-                return LayoutBuilder(
-                  key: ValueKey<int>(index),
-                  builder: (BuildContext context, BoxConstraints constraints) {
-                    itemLayoutConstraints[index] = constraints;
-                    return SizedBox(
-                      height: 100,
-                      child: ReorderableDragStartListener(index: index, child: Text('$index')),
-                    );
-                  },
-                );
-              },
-              itemCount: 5,
-              onReorderItem: (_, _) {},
-            ),
-          ],
+      MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              SliverReorderableList(
+                itemBuilder: (BuildContext context, int index) {
+                  return LayoutBuilder(
+                    key: ValueKey<int>(index),
+                    builder: (BuildContext context, BoxConstraints constraints) {
+                      itemLayoutConstraints[index] = constraints;
+                      return SizedBox(
+                        height: 100,
+                        child: ReorderableDragStartListener(index: index, child: Text('$index')),
+                      );
+                    },
+                  );
+                },
+                itemCount: 5,
+                onReorderItem: (_, _) {},
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -2084,10 +2095,9 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      TestWidgetsApp(
-        home: Align(
-          alignment: Alignment.topLeft,
-          child: Container(
+      MaterialApp(
+        home: Scaffold(
+          body: Container(
             margin: const EdgeInsets.only(top: 100),
             height: 300,
             child: DragBoundary(
@@ -2152,49 +2162,51 @@ class TestList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TestWidgetsApp(
-      home: DefaultTextStyle(
-        style: TextStyle(color: textColor),
-        child: IconTheme(
-          data: IconThemeData(color: iconColor),
-          child: StatefulBuilder(
-            builder: (BuildContext outerContext, StateSetter setState) {
-              final List<int> items = this.items;
-              return CustomScrollView(
-                reverse: reverse,
-                slivers: <Widget>[
-                  SliverReorderableList(
-                    itemBuilder: (BuildContext context, int index) {
-                      return Container(
-                        key: ValueKey<int>(items[index]),
-                        height: 100,
-                        color: items[index].isOdd ? _kRedColor : _kGreenColor,
-                        child: ReorderableDragStartListener(
-                          index: index,
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text('item ${items[index]}'),
-                              const Icon(_kDragHandleIconData),
-                            ],
+    return MaterialApp(
+      home: Scaffold(
+        body: DefaultTextStyle(
+          style: TextStyle(color: textColor),
+          child: IconTheme(
+            data: IconThemeData(color: iconColor),
+            child: StatefulBuilder(
+              builder: (BuildContext outerContext, StateSetter setState) {
+                final List<int> items = this.items;
+                return CustomScrollView(
+                  reverse: reverse,
+                  slivers: <Widget>[
+                    SliverReorderableList(
+                      itemBuilder: (BuildContext context, int index) {
+                        return Container(
+                          key: ValueKey<int>(items[index]),
+                          height: 100,
+                          color: items[index].isOdd ? Colors.red : Colors.green,
+                          child: ReorderableDragStartListener(
+                            index: index,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text('item ${items[index]}'),
+                                const Icon(Icons.drag_handle),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                    itemCount: items.length,
-                    onReorderItem: (int fromIndex, int toIndex) {
-                      setState(() {
-                        items.insert(toIndex, items.removeAt(fromIndex));
-                      });
-                    },
-                    proxyDecorator: proxyDecorator,
-                    onReorderStart: onReorderStart,
-                    onReorderEnd: onReorderEnd,
-                    autoScrollerVelocityScalar: autoScrollerVelocityScalar,
-                  ),
-                ],
-              );
-            },
+                        );
+                      },
+                      itemCount: items.length,
+                      onReorderItem: (int fromIndex, int toIndex) {
+                        setState(() {
+                          items.insert(toIndex, items.removeAt(fromIndex));
+                        });
+                      },
+                      proxyDecorator: proxyDecorator,
+                      onReorderStart: onReorderStart,
+                      onReorderEnd: onReorderEnd,
+                      autoScrollerVelocityScalar: autoScrollerVelocityScalar,
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ),

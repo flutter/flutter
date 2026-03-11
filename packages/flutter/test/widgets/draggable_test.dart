@@ -3774,7 +3774,7 @@ void main() {
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.grabbing,
     );
-    await gesture.up();
+    gesture.up();
   });
 
   testWidgets('configurable feedback ignore pointer behavior', (WidgetTester tester) async {

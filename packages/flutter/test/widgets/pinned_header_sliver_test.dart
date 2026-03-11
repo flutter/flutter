@@ -2,25 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('PinnedHeaderSliver basics', (WidgetTester tester) async {
     Widget buildFrame({required Axis axis, required bool reverse}) {
-      return TestWidgetsApp(
-        home: CustomScrollView(
-          scrollDirection: axis,
-          reverse: reverse,
-          slivers: <Widget>[
-            const PinnedHeaderSliver(child: Text('PinnedHeaderSliver')),
-            SliverList.builder(
-              itemCount: 100,
-              itemBuilder: (BuildContext context, int index) => Text('Item $index'),
-            ),
-          ],
+      return MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            scrollDirection: axis,
+            reverse: reverse,
+            slivers: <Widget>[
+              const PinnedHeaderSliver(child: Text('PinnedHeaderSliver')),
+              SliverList.builder(
+                itemCount: 100,
+                itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -147,17 +147,19 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      TestWidgetsApp(
-        home: CustomScrollView(
-          slivers: <Widget>[
-            const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 0')),
-            const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 1')),
-            const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 2')),
-            SliverList.builder(
-              itemCount: 100,
-              itemBuilder: (BuildContext context, int index) => Text('Item $index'),
-            ),
-          ],
+      MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 0')),
+              const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 1')),
+              const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 2')),
+              SliverList.builder(
+                itemCount: 100,
+                itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -179,29 +181,31 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      TestWidgetsApp(
-        home: CustomScrollView(
-          slivers: <Widget>[
-            SliverList.builder(
-              itemCount: 2,
-              itemBuilder: (BuildContext context, int index) => Text('Item 0.$index'),
-            ),
-            const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 0')),
-            SliverList.builder(
-              itemCount: 2,
-              itemBuilder: (BuildContext context, int index) => Text('Item 1.$index'),
-            ),
-            const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 1')),
-            SliverList.builder(
-              itemCount: 2,
-              itemBuilder: (BuildContext context, int index) => Text('Item 2.$index'),
-            ),
-            const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 2')),
-            SliverList.builder(
-              itemCount: 100,
-              itemBuilder: (BuildContext context, int index) => Text('Item $index'),
-            ),
-          ],
+      MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              SliverList.builder(
+                itemCount: 2,
+                itemBuilder: (BuildContext context, int index) => Text('Item 0.$index'),
+              ),
+              const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 0')),
+              SliverList.builder(
+                itemCount: 2,
+                itemBuilder: (BuildContext context, int index) => Text('Item 1.$index'),
+              ),
+              const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 1')),
+              SliverList.builder(
+                itemCount: 2,
+                itemBuilder: (BuildContext context, int index) => Text('Item 2.$index'),
+              ),
+              const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 2')),
+              SliverList.builder(
+                itemCount: 100,
+                itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+              ),
+            ],
+          ),
         ),
       ),
     );

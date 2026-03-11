@@ -378,10 +378,7 @@ void main() {
     });
 
     testWidgets('disallows re-entry', (WidgetTester tester) async {
-      // This test requires the first runAsync to not have finished
-      // in order to test re-entry.
       final completer = Completer<void>();
-      // ignore: unawaited_futures
       tester.runAsync<void>(() => completer.future);
       expect(() => tester.runAsync(() async {}), throwsA(isA<TestFailure>()));
       completer.complete();

@@ -12,8 +12,8 @@ import 'future_data_handler.dart';
 import 'page.dart';
 
 class NestedViewEventPage extends PageWidget {
-  const NestedViewEventPage({super.key})
-    : super('Nested View Event Tests', const ValueKey<String>('NestedViewEventTile'));
+  const NestedViewEventPage({Key? key})
+    : super('Nested View Event Tests', const ValueKey<String>('NestedViewEventTile'), key: key);
 
   @override
   Widget build(BuildContext context) => const NestedViewEventBody();

@@ -43,7 +43,9 @@ void CanvasImage::dispose() {
 }
 
 int CanvasImage::colorSpace() {
-  if (image_->impeller_texture()) {
+  if (image_->skia_image()) {
+    return ColorSpace::kSRGB;
+  } else if (image_->impeller_texture()) {
 #if IMPELLER_SUPPORTS_RENDERING
     return ImageEncodingImpeller::GetColorSpace(image_->impeller_texture());
 #endif  // IMPELLER_SUPPORTS_RENDERING

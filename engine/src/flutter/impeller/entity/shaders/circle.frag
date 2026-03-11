@@ -49,8 +49,7 @@ void main() {
       frag_info.radius, frag_info.stroke_width, frag_info.center, v_position);
   float sdf_distance = mix(dist_filled, dist_stroked, frag_info.stroked);
 
-  float pixel_derivative_sdf =
-      length(vec2(dFdx(sdf_distance), dFdy(sdf_distance)));
+  float pixel_derivative_sdf = fwidth(sdf_distance);
 
   // If the screen space derivative is less than the stroke width,
   // only one pixel can be covered and shouldn't be faded.

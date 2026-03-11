@@ -17,8 +17,8 @@ import 'page.dart';
 const String kEventsFileName = 'touchEvents';
 
 class MotionEventsPage extends PageWidget {
-  const MotionEventsPage({super.key})
-    : super('Motion Event Tests', const ValueKey<String>('MotionEventsListTile'));
+  const MotionEventsPage({Key? key})
+    : super('Motion Event Tests', const ValueKey<String>('MotionEventsListTile'), key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -1852,6 +1852,6 @@ void main() {
         rrect: RRect.fromRectAndRadius(tester.getRect(findInkWell), const Radius.circular(radius)),
       ),
     );
-    await gesture.removePointer();
+    gesture.removePointer();
   });
 }

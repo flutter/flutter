@@ -10,7 +10,6 @@ plugins {
 android {
     namespace = "io.flutter.examples.Layers"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
 
 
     compileOptions {

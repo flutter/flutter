@@ -530,50 +530,6 @@ void main() {
           },
         );
 
-        group('web', () {
-          late FakeWebRunnerFactory fakeWebRunnerFactory;
-
-          setUp(() {
-            fakeWebRunnerFactory = FakeWebRunnerFactory();
-          });
-
-          testUsingContext(
-            'can pass --web-define',
-            () async {
-              final command = RunCommand();
-              final device = FakeDevice(
-                platformType: PlatformType.web,
-                targetPlatform: TargetPlatform.web_javascript,
-              );
-              testDeviceManager.devices = <Device>[device];
-
-              await expectLater(
-                () => createTestCommandRunner(command).run(<String>[
-                  'run',
-                  '--no-pub',
-                  '--machine',
-                  '-d',
-                  device.id,
-                  '--web-define=NAME=VAL',
-                ]),
-                throwsToolExit(),
-              );
-              expect(fakeWebRunnerFactory.lastWebDefines, <String, String>{'NAME': 'VAL'});
-            },
-            overrides: <Type, Generator>{
-              Artifacts: () => artifacts,
-              Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-              DeviceManager: () => testDeviceManager,
-              FeatureFlags: () => FakeFeatureFlags(),
-              FileSystem: () => fs,
-              ProcessManager: () => FakeProcessManager.any(),
-              Stdio: () => FakeStdio(),
-              Logger: () => MachineOutputLogger(parent: logger),
-              WebRunnerFactory: () => fakeWebRunnerFactory,
-            },
-          );
-        });
-
         testUsingContext(
           'can disable devtools with --no-devtools',
           () async {
@@ -2034,11 +1990,6 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
     }
     return 0;
   }
-
-  @override
-  DebuggingOptions get debuggingOptions {
-    throwToolExit('');
-  }
 }
 
 class DaemonCapturingRunCommand extends RunCommand {
@@ -2068,7 +2019,6 @@ class CapturingAppDomain extends AppDomain {
     String? route,
     DebuggingOptions options,
     bool enableHotReload, {
-    Map<String, String> webDefines = const <String, String>{},
     File? applicationBinary,
     required bool trackWidgetCreation,
     String? projectRootPath,
@@ -2124,7 +2074,6 @@ class FakeFeatureFlags extends Fake implements FeatureFlags {
 /// A Fake WebRunnerFactory that CAPTURES the debugging options passed to it.
 class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
   DebuggingOptions? lastOptions;
-  Map<String, String>? lastWebDefines;
 
   @override
   ResidentRunner createWebRunner(
@@ -2145,7 +2094,6 @@ class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
     Map<String, String> webDefines = const <String, String>{},
   }) {
     lastOptions = debuggingOptions;
-    lastWebDefines = webDefines;
     return FakeResidentRunner();
   }
 }

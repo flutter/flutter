@@ -2,35 +2,35 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('SliverFloatingHeader basics', (WidgetTester tester) async {
     Widget buildFrame({required Axis axis, required bool reverse}) {
-      return TestWidgetsApp(
-        home: CustomScrollView(
-          scrollDirection: axis,
-          reverse: reverse,
-          slivers: <Widget>[
-            SliverFloatingHeader(
-              child: switch (axis) {
-                Axis.vertical => const SizedBox(height: 200, child: Text('header')),
-                Axis.horizontal => const SizedBox(width: 200, child: Text('header')),
-              },
-            ),
-            SliverList.builder(
-              itemCount: 100,
-              itemBuilder: (BuildContext context, int index) {
-                return switch (axis) {
-                  Axis.vertical => SizedBox(height: 100, child: Text('item $index')),
-                  Axis.horizontal => SizedBox(width: 100, child: Text('item $index')),
-                };
-              },
-            ),
-          ],
+      return MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            scrollDirection: axis,
+            reverse: reverse,
+            slivers: <Widget>[
+              SliverFloatingHeader(
+                child: switch (axis) {
+                  Axis.vertical => const SizedBox(height: 200, child: Text('header')),
+                  Axis.horizontal => const SizedBox(width: 200, child: Text('header')),
+                },
+              ),
+              SliverList.builder(
+                itemCount: 100,
+                itemBuilder: (BuildContext context, int index) {
+                  return switch (axis) {
+                    Axis.vertical => SizedBox(height: 100, child: Text('item $index')),
+                    Axis.horizontal => SizedBox(width: 100, child: Text('item $index')),
+                  };
+                },
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -175,25 +175,27 @@ void main() {
 
   testWidgets('SliverFloatingHeader override default AnimationStyle', (WidgetTester tester) async {
     await tester.pumpWidget(
-      TestWidgetsApp(
-        home: CustomScrollView(
-          slivers: <Widget>[
-            const SliverFloatingHeader(
-              animationStyle: AnimationStyle(
-                curve: Curves.linear,
-                reverseCurve: Curves.linear,
-                duration: Duration(seconds: 1),
-                reverseDuration: Duration(seconds: 1),
+      MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              const SliverFloatingHeader(
+                animationStyle: AnimationStyle(
+                  curve: Curves.linear,
+                  reverseCurve: Curves.linear,
+                  duration: Duration(seconds: 1),
+                  reverseDuration: Duration(seconds: 1),
+                ),
+                child: SizedBox(height: 200, child: Text('header')),
               ),
-              child: SizedBox(height: 200, child: Text('header')),
-            ),
-            SliverList.builder(
-              itemCount: 100,
-              itemBuilder: (BuildContext context, int index) {
-                return SizedBox(height: 100, child: Text('item $index'));
-              },
-            ),
-          ],
+              SliverList.builder(
+                itemCount: 100,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(height: 100, child: Text('item $index'));
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -238,20 +240,22 @@ void main() {
 
   testWidgets('SliverFloatingHeader snapMode parameter', (WidgetTester tester) async {
     Widget buildFrame(FloatingHeaderSnapMode snapMode) {
-      return TestWidgetsApp(
-        home: CustomScrollView(
-          slivers: <Widget>[
-            SliverFloatingHeader(
-              snapMode: snapMode,
-              child: const SizedBox(height: 200, child: Text('header')),
-            ),
-            SliverList.builder(
-              itemCount: 100,
-              itemBuilder: (BuildContext context, int index) {
-                return SizedBox(height: 100, child: Text('item $index'));
-              },
-            ),
-          ],
+      return MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              SliverFloatingHeader(
+                snapMode: snapMode,
+                child: const SizedBox(height: 200, child: Text('header')),
+              ),
+              SliverList.builder(
+                itemCount: 100,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(height: 100, child: Text('item $index'));
+                },
+              ),
+            ],
+          ),
         ),
       );
     }

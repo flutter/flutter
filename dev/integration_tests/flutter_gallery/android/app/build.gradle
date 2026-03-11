@@ -47,7 +47,6 @@ if (flutterVersionName == null) {
 android {
     namespace = "io.flutter.demo.gallery"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
 
 
     compileOptions {

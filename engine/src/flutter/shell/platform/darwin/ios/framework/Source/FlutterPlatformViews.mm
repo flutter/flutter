@@ -95,13 +95,11 @@ static BOOL _preparedOnce = NO;
 - (instancetype)initWithFrame:(CGRect)frame
                    blurRadius:(CGFloat)blurRadius
                  cornerRadius:(CGFloat)cornerRadius
-        isRoundedSuperellipse:(BOOL)isRoundedSuperellipse
              visualEffectView:(UIVisualEffectView*)visualEffectView {
   if (self = [super init]) {
     _frame = frame;
     _blurRadius = blurRadius;
     _cornerRadius = cornerRadius;
-    _isRoundedSuperellipse = isRoundedSuperellipse;
     [PlatformViewFilter prepareOnce:visualEffectView];
     if (![PlatformViewFilter isUIVisualEffectViewImplementationValid]) {
       FML_DLOG(ERROR) << "Apple's API for UIVisualEffectView changed. Update the implementation to "
@@ -168,10 +166,6 @@ static BOOL _preparedOnce = NO;
   visualEffectView.frame = _frame;
 
   visualEffectView.layer.cornerRadius = _cornerRadius;
-  if (@available(iOS 13.0, *)) {
-    visualEffectView.layer.cornerCurve =
-        _isRoundedSuperellipse ? kCACornerCurveContinuous : kCACornerCurveCircular;
-  }
   visualEffectView.clipsToBounds = YES;
 
   self.backdropFilterView = visualEffectView;
@@ -824,12 +818,6 @@ static BOOL _preparedOnce = NO;
 }
 
 - (void)forceResetStateIfNeeded {
-  // Apple fixed the bug where the gesture recognizer gets stuck at "failed" state in iOS 26.
-  // The workaround is no longer needed on iOS 26+.
-  // See: https://github.com/flutter/flutter/issues/179907
-  if (@available(iOS 26.0, *)) {
-    return;
-  }
   __weak ForwardingGestureRecognizer* weakSelf = self;
   dispatch_async(dispatch_get_main_queue(), ^{
     ForwardingGestureRecognizer* strongSelf = weakSelf;

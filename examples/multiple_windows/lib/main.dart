@@ -40,12 +40,12 @@ class _MultiWindowAppState extends State<MultiWindowApp> {
     delegate: MainControllerWindowDelegate(),
   );
   final WindowSettings settings = WindowSettings();
-  late final KeyedWindowManager windowManager;
+  late final WindowManager windowManager;
 
   @override
   void initState() {
     super.initState();
-    windowManager = KeyedWindowManager(
+    windowManager = WindowManager(
       initialWindows: <KeyedWindow>[
         KeyedWindow(
           isMainWindow: true,
@@ -68,7 +68,7 @@ class _MultiWindowAppState extends State<MultiWindowApp> {
       controller: controller,
       child: MaterialApp(home: MainWindow(controller: controller)),
     );
-    return KeyedWindowManagerAccessor(
+    return WindowManagerAccessor(
       windowManager: windowManager,
       child: WindowSettingsAccessor(
         windowSettings: settings,
