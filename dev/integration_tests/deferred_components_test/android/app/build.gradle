@@ -35,6 +35,7 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace = "io.flutter.integration.deferred_components_test"
     compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'

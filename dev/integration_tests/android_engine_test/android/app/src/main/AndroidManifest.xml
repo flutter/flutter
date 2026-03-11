@@ -6,7 +6,8 @@ found in the LICENSE file. -->
     <application
         android:label="android_engine_test"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:supportsRtl="true">
         <activity
             android:name=".MainActivity"
             android:exported="true"
