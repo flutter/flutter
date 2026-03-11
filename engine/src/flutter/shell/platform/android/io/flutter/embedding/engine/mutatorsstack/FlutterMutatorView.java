@@ -12,6 +12,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -101,7 +102,8 @@ public class FlutterMutatorView extends FrameLayout {
     this.mutatorsStack = mutatorsStack;
     this.left = left;
     this.top = top;
-    FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(width, height);
+    FrameLayout.LayoutParams layoutParams =
+        new FrameLayout.LayoutParams(width, height, Gravity.LEFT | Gravity.TOP);
     layoutParams.leftMargin = left;
     layoutParams.topMargin = top;
     setLayoutParams(layoutParams);
