@@ -641,6 +641,10 @@ mixin RendererBinding
     }
   }
 
+  // A large finite cache extent used during printing to force all sliver
+  // children to be built and laid out regardless of their scroll position.
+  static const double _kPrintCacheExtent = 1e9;
+
   // State captured by handleBeforePrint and restored by handleAfterPrint.
   final Map<RenderViewportBase<dynamic>, ScrollCacheExtent> _savedViewportCacheExtents =
       <RenderViewportBase<dynamic>, ScrollCacheExtent>{};
@@ -747,7 +751,7 @@ mixin RendererBinding
   void _expandViewportCacheExtents(RenderObject node) {
     if (node is RenderViewportBase) {
       _savedViewportCacheExtents[node] = node.scrollCacheExtent;
-      node.scrollCacheExtent = const ScrollCacheExtent.pixels(1e9);
+      node.scrollCacheExtent = const ScrollCacheExtent.pixels(_kPrintCacheExtent);
     }
     node.visitChildren(_expandViewportCacheExtents);
   }

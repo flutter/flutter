@@ -75,13 +75,13 @@ class FullPageEmbeddingStrategy implements EmbeddingStrategy {
     setElementStyle(hostElement, 'touch-action', 'none');
   }
 
-  // Registers beforeprint/afterprint listeners to temporarily lift the
-  // `position: fixed` and `overflow: hidden` styles from <body> while the
-  // browser captures the print snapshot.
-  //
-  // These styles are required at runtime to fill the viewport, but during
-  // printing they prevent the browser from seeing content beyond the visible
-  // area. See: https://github.com/flutter/flutter/issues/182817
+  /// Registers beforeprint/afterprint listeners to temporarily lift the
+  /// `position: fixed` and `overflow: hidden` styles from <body> while the
+  /// browser captures the print snapshot.
+  ///
+  /// These styles are required at runtime to fill the viewport, but during
+  /// printing they prevent the browser from seeing content beyond the visible
+  /// area. See: https://github.com/flutter/flutter/issues/182817
   void _registerPrintListeners() {
     _beforePrintListener = createDomEventListener(_onBeforePrint);
     _afterPrintListener = createDomEventListener(_onAfterPrint);
@@ -112,8 +112,8 @@ class FullPageEmbeddingStrategy implements EmbeddingStrategy {
     _sendSystemMessage('afterprint');
   }
 
-  // Encodes [type] as a system message and delivers it synchronously to the
-  // framework on the `flutter/system` channel via [invokeOnPlatformMessage].
+  /// Encodes [type] as a system message and delivers it synchronously to the
+  /// framework on the `flutter/system` channel via [invokeOnPlatformMessage].
   void _sendSystemMessage(String type) {
     final ByteData? message = const JSONMessageCodec().encodeMessage(<String, dynamic>{
       'type': type,
