@@ -5186,10 +5186,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           await tester.pumpWidget(const Placeholder());
 
           // Verify that the call to getLayoutExplorerNode for the Row widget
-          // does not throw an exception.
-          await service.testExtension(
-            WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
-            <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
+          expect(
+            service.testExtension(
+              WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+              <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
+            ),
+            returnsNormally,
           );
         },
       );
