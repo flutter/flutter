@@ -19,22 +19,25 @@ jobs:
       - name: Setup Repository
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          repository: flutteractionsbot/flutter
+          token: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           ref: master
+
+      - name: Configure git
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+          git remote add upstream https://github.com/flutter/flutter.git
 
       # avoid downloading hundreds of other branches/history
       # utilizing `fetch-depth:0` in actions/checkout would clone everything.
       - name: Fetch Stable Branch Only
-        run: git fetch origin stable:stable --depth=1
-
-      - name: Configure git
-        run: |
-          git config user.name "[bot] Merge Changelog"
-          git config user.email "<>"
+        run: git fetch upstream stable:stable --depth=1
 
       - name: Read CHANGELOG.md from the stable branch
         id: read_stable_changelog
         run: |
-          # origin/stable is locally mapped to stable
+          # upstream/stable is locally mapped to stable
           # use the local stable ref from above
           CHANGELOG_CONTENT=$(git show stable:CHANGELOG.md)
           echo "CHANGELOG_CONTENT<<EOF" >> $GITHUB_ENV
@@ -43,6 +46,8 @@ jobs:
 
       - name: Prepare PR branch and commit changes
         id: prepare_pr_branch
+        env:
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
         run: |
           PR_BRANCH="sync-changelog-stable-to-master-$(date +%s)"
           echo "pr_branch_name=$PR_BRANCH" >> "$GITHUB_OUTPUT"
@@ -54,13 +59,14 @@ jobs:
 
       - name: Create Pull Request
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
         run: |
           PR_HEAD_BRANCH=${{ steps.prepare_pr_branch.outputs.pr_branch_name }}
 
           gh pr create \
             --base master \
-            --head "$PR_HEAD_BRANCH" \
+            --head flutteractionsbot:$PR_HEAD_BRANCH \
+            --repo flutter/flutter \
             --title "Sync CHANGELOG.md from stable" \
             --body "This PR automates the synchronization of \`CHANGELOG.md\` from the \`stable\` branch to the \`master\` branch." \
             --label autosubmit

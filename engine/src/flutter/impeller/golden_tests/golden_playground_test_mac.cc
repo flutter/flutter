@@ -344,4 +344,8 @@ std::unique_ptr<testing::Screenshot> GoldenPlaygroundTest::MakeScreenshot(
       renderer, DisplayListToTexture(list, physical_window_size, renderer));
 }
 
+RuntimeStageBackend GoldenPlaygroundTest::GetRuntimeStageBackend() const {
+  return pimpl_->screenshotter->GetPlayground().GetRuntimeStageBackend();
+}
+
 }  // namespace impeller

@@ -35,8 +35,7 @@ absl::StatusOr<std::shared_ptr<DlColorSource>> MakeRuntimeEffect(
     return runtime_stages_result.status();
   }
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(test->GetBackend())];
+      runtime_stages_result.value()[test->GetRuntimeStageBackend()];
   if (!runtime_stage) {
     return absl::InternalError("Runtime stage not found for backend.");
   }
@@ -105,8 +104,7 @@ TEST_P(AiksTest, CanRenderRuntimeEffectFilter) {
       OpenAssetAsRuntimeStage("runtime_stage_filter_example.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
@@ -179,8 +177,7 @@ TEST_P(AiksTest, ComposePaintRuntimeOuter) {
       OpenAssetAsRuntimeStage("runtime_stage_filter_warp.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
@@ -216,8 +213,7 @@ TEST_P(AiksTest, ComposePaintRuntimeInner) {
       OpenAssetAsRuntimeStage("runtime_stage_filter_warp.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
   Scalar xoffset = 50;
@@ -304,8 +300,7 @@ TEST_P(AiksTest, ComposeBackdropRuntimeOuterBlurInner) {
       OpenAssetAsRuntimeStage("runtime_stage_filter_circle.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
   Scalar sigma = 20.0;
@@ -369,8 +364,7 @@ TEST_P(AiksTest, ComposeBackdropRuntimeOuterBlurInnerSmallSigma) {
       OpenAssetAsRuntimeStage("runtime_stage_filter_circle.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
   Scalar sigma = 5.0;
@@ -433,8 +427,7 @@ TEST_P(AiksTest, ClippedComposeBackdropRuntimeOuterBlurInnerSmallSigma) {
       OpenAssetAsRuntimeStage("runtime_stage_filter_circle.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
   Scalar sigma = 5.0;
@@ -516,8 +509,7 @@ TEST_P(AiksTest, ClippedBackdropFilterWithShader) {
       OpenAssetAsRuntimeStage("runtime_stage_border.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
@@ -577,8 +569,7 @@ TEST_P(AiksTest, RuntimeEffectImageFilterRotated) {
   auto runtime_stages_result = OpenAssetAsRuntimeStage("gradient.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
