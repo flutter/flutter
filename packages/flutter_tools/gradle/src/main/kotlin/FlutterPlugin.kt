@@ -235,7 +235,9 @@ class FlutterPlugin : Plugin<Project> {
             }
         }
 
-        FlutterPluginUtils.forceNdkDownload(project, flutterRootPath)
+        project.afterEvaluate {
+            FlutterPluginUtils.forceNdkDownload(project, flutterRootPath)
+        }
 
         if (FlutterPluginUtils.shouldProjectUseLocalEngine(project)) {
             // This is required to pass the local engine to flutter build aot.
@@ -309,6 +311,7 @@ class FlutterPlugin : Plugin<Project> {
         FlutterPluginUtils.addTaskForKGPVersion(projectToAddTasksTo)
         if (FlutterPluginUtils.isFlutterAppProject(projectToAddTasksTo)) {
             FlutterPluginUtils.addTaskForPrintBuildVariants(projectToAddTasksTo)
+            FlutterPluginUtils.addTaskForPrintNdkVersion(projectToAddTasksTo)
             FlutterPluginUtils.addTasksForOutputsAppLinkSettings(projectToAddTasksTo)
         }
 
