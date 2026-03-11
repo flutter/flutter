@@ -645,7 +645,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           usingCISystem: true,
           majorSdkVersion: 16,
         );
-        await (logReader as IOSDeviceLogReader).start();
+        await logReader.start();
         final List<String> lines = await logReader.logLines.toList();
 
         expect(logReader.useSyslogLogging, isTrue);
@@ -726,7 +726,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         iosDeployDebugger.logLines = debuggingLogs;
         logReader.debuggerStream = iosDeployDebugger;
 
-        await (logReader as IOSDeviceLogReader).start();
+        await logReader.start();
         final List<String> lines = await logReader.logLines.toList();
 
         expect(logReader.useIOSDeployLogging, isFalse);
@@ -830,7 +830,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         );
         await logReader.provideVmService(vmService);
 
-        await (logReader as IOSDeviceLogReader).start();
+        await logReader.start();
         final List<String> lines = await logReader.logLines.toList();
 
         // Wait for stream listeners to fire.
@@ -892,7 +892,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         coreDeviceLauncher.coreDeviceLogForwarder.addLog(deviceCtlLog);
         coreDeviceLauncher.lldbLogForwarder.addLog(lldbLog);
 
-        await (logReader as IOSDeviceLogReader).start();
+        await logReader.start();
         expect(logReader.useCoreDeviceLogging, isFalse);
         await expectLater(logReader.logLines, neverEmits(deviceCtlLog));
 
@@ -922,7 +922,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           expect(logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
           expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.idevicesyslog);
 
-          await (logReader as IOSDeviceLogReader).start();
+          await logReader.start();
           final Future<List<String>> logLines = logReader.logLines.toList();
 
           logReader.addToLinesController(
@@ -971,7 +971,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         expect(logReader.logSources.primarySource, IOSDeviceLogSource.idevicesyslog);
         expect(logReader.logSources.fallbackSource, isNull);
 
-        await (logReader as IOSDeviceLogReader).start();
+        await logReader.start();
         final Future<List<String>> logLines = logReader.logLines.toList();
 
         logReader.addToLinesController(
@@ -1022,7 +1022,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           expect(logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
           expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.idevicesyslog);
 
-          await (logReader as IOSDeviceLogReader).start();
+          await logReader.start();
           final Future<List<String>> logLines = logReader.logLines.toList();
 
           logReader.addToLinesController(
@@ -1087,7 +1087,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           expect(logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
           expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.idevicesyslog);
 
-          await (logReader as IOSDeviceLogReader).start();
+          await logReader.start();
           final Future<List<String>> logLines = logReader.logLines.toList();
 
           logReader.addToLinesController(
@@ -1147,7 +1147,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         expect(logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
         expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.idevicesyslog);
 
-        await (logReader as IOSDeviceLogReader).start();
+        await logReader.start();
         final Future<List<String>> logLines = logReader.logLines.toList();
 
         logReader.addToLinesController(

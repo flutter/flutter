@@ -1460,7 +1460,7 @@ abstract class SharedIOSDeviceLogReader extends DeviceLogReader {
   /// Must be awaited before subscribing to [logLines] to avoid a race
   /// condition where the app launches and emits the VM service URI before the
   /// log reader process has started. See https://github.com/flutter/flutter/issues/181771.
-  Future<void> start() async {}
+  Future<void> start();
 }
 
 /// Listens to multiple logging sources to get the logs from the physical iOS device.
@@ -1832,8 +1832,8 @@ class IOSDeviceLogReader extends SharedIOSDeviceLogReader {
 
   /// Connects the already-launched [idevicesyslogProcess] output to [linesController].
   ///
-  /// Called synchronously when the first listener subscribes (via [onListen]).
-  /// [start] must have been awaited before any listener subscribes so that
+  /// Called synchronously when the first listener subscribes (via onListen).
+  /// `start()` must have been awaited before any listener subscribes so that
   /// [idevicesyslogProcess] is available.
   void _connectSyslogOutput() {
     if (!useSyslogLogging) {

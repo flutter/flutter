@@ -1926,6 +1926,9 @@ class FakeSharedIOSDeviceLogReader extends SharedIOSDeviceLogReader {
   @override
   StreamController<String> get linesController => _linesController;
 
+  @override
+  Future<void> start() async {}
+
   void _onListen() {
     _lineQueue.forEach(_linesController.add);
     _lineQueue.clear();
