@@ -1243,7 +1243,8 @@ class TextureAndroidViewController extends AndroidViewController {
     super.creationParamsCodec,
   }) : super._();
 
-  _AndroidViewControllerInternals _internals = _TextureAndroidViewControllerInternals();
+  final _TextureAndroidViewControllerInternals _internals =
+      _TextureAndroidViewControllerInternals();
 
   @override
   bool get _createRequiresSize => true;
@@ -1255,27 +1256,21 @@ class TextureAndroidViewController extends AndroidViewController {
       'trying to create $TextureAndroidViewController without setting a valid size.',
     );
 
-    final dynamic response = await _AndroidViewControllerInternals.sendCreateMessage(
-      viewId: viewId,
-      viewType: _viewType,
-      hybrid: false,
-      layoutDirection: _layoutDirection,
-      creationParams: _creationParams,
-      size: size,
-      position: position,
-    );
-    if (response is int) {
-      (_internals as _TextureAndroidViewControllerInternals).textureId = response;
-    } else {
-      _internals = _Hybrid2AndroidViewControllerInternals();
-    }
+    _internals.textureId =
+        await _AndroidViewControllerInternals.sendCreateMessage(
+              viewId: viewId,
+              viewType: _viewType,
+              hybrid: false,
+              layoutDirection: _layoutDirection,
+              creationParams: _creationParams,
+              size: size,
+              position: position,
+            )
+            as int;
   }
 
   @override
   int? get textureId {
-    if (_internals.requiresViewComposition) {
-      return null;
-    }
     return _internals.textureId;
   }
 
@@ -1291,17 +1286,11 @@ class TextureAndroidViewController extends AndroidViewController {
 
   @override
   Future<Size> _sendResizeMessage(Size size) {
-    if (_internals.requiresViewComposition) {
-      return Future<Size>.value(size);
-    }
     return _internals.setSize(size, viewId: viewId, viewState: _state);
   }
 
   @override
   Future<void> setOffset(Offset off) {
-    if (_internals.requiresViewComposition) {
-      return Future<void>.value();
-    }
     return _internals.setOffset(off, viewId: viewId, viewState: _state);
   }
 }
