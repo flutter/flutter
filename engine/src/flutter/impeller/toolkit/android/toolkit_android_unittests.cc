@@ -12,16 +12,14 @@
 
 namespace impeller::android::testing {
 
-#define DISABLE_ANDROID_PROC(name)                 \
-  struct Disable##name {                           \
-    Disable##name() {                              \
-      real_proc = GetMutableProcTable().name.proc; \
-      GetMutableProcTable().name.proc = nullptr;   \
-    }                                              \
-    ~Disable##name() {                             \
-      GetMutableProcTable().name.proc = real_proc; \
-    }                                              \
-    decltype(name)* real_proc;                     \
+#define DISABLE_ANDROID_PROC(name)                                    \
+  struct Disable##name {                                              \
+    Disable##name() {                                                 \
+      real_proc = GetMutableProcTable().name.proc;                    \
+      GetMutableProcTable().name.proc = nullptr;                      \
+    }                                                                 \
+    ~Disable##name() { GetMutableProcTable().name.proc = real_proc; } \
+    decltype(name)* real_proc;                                        \
   } disable##name;
 
 TEST(ToolkitAndroidTest, CanCreateProcTable) {
