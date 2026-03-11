@@ -233,6 +233,7 @@ executable("flutter_linux_unittests") {
     "fl_compositor_software_test.cc",
     "fl_dart_project_test.cc",
     "fl_display_monitor_test.cc",
+    "fl_egl_image_test.cc",
     "fl_engine_test.cc",
     "fl_event_channel_test.cc",
     "fl_framebuffer_test.cc",
