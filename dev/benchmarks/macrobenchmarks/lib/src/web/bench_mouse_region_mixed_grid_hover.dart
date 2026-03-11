@@ -96,9 +96,8 @@ class BenchMouseRegionMixedGridHover extends WidgetRecorder {
       textDirection: TextDirection.ltr,
       child: Align(
         alignment: Alignment.topLeft,
-        child: SizedBox(
-          width: 400,
-          height: 400,
+        child: SizedBox.square(
+          dimension: 400,
           child: ListView.builder(
             itemCount: rowsCount,
             cacheExtent: rowsCount * containerSize,

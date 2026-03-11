@@ -107,7 +107,10 @@ class RunningAppsCommand extends FlutterCommand {
       final String deviceId = app.deviceId;
       final String platform = app.targetPlatform;
       final String vmServiceUri = app.wsUri;
-      final String age = processAge(app.epoch, _systemClock);
+      final String age = _systemClock
+          .now()
+          .difference(DateTime.fromMillisecondsSinceEpoch(app.epoch))
+          .ago();
 
       // If the device name and ID are effectively the same (e.g., "macos" and "macos"),
       // only show the name to avoid redundancy like "macos (macos)".
@@ -149,26 +152,5 @@ class RunningAppsCommand extends FlutterCommand {
     } on Exception {
       // Ignore errors for individual lookups
     }
-  }
-}
-
-/// Formats the elapsed time since the given epoch.
-@visibleForTesting
-String processAge(int? epoch, SystemClock systemClock) {
-  // TODO(jwren): Consider using [DurationAgo] from `lib/src/base/utils.dart`.
-  // We need to decide on the width and precision, possibly modifying the utility
-  // to support a shorter form (e.g. "5m" versus "5 minutes ago").
-  if (epoch == null) {
-    return 'unknown age';
-  }
-  final Duration elapsed = systemClock.now().difference(DateTime.fromMillisecondsSinceEpoch(epoch));
-  if (elapsed.inDays > 0) {
-    return '${elapsed.inDays}d';
-  } else if (elapsed.inHours > 0) {
-    return '${elapsed.inHours}h';
-  } else if (elapsed.inMinutes > 0) {
-    return '${elapsed.inMinutes}m';
-  } else {
-    return '${elapsed.inSeconds}s';
   }
 }

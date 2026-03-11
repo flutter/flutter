@@ -184,8 +184,9 @@ TEST_F(PerformanceOverlayLayerTest, InvalidOptions) {
   const uint64_t overlay_opts = 0;
   auto layer = std::make_shared<PerformanceOverlayLayer>(overlay_opts);
 
-  // TODO(): Note calling code has to call set_paint_bounds right now.  Make
-  // this a constructor parameter and move the set_paint_bounds into Preroll
+  // TODO(team-engine): Note calling code has to call set_paint_bounds right
+  // now.  Make this a constructor parameter and move the set_paint_bounds
+  // into Preroll
   layer->set_paint_bounds(layer_bounds);
 
   layer->Preroll(preroll_context());
@@ -207,8 +208,9 @@ TEST_F(PerformanceOverlayLayerTest, SimpleRasterizerStatistics) {
   auto layer = std::make_shared<PerformanceOverlayLayer>(overlay_opts);
   auto font = PerformanceOverlayLayer::MakeStatisticsFont("");
 
-  // TODO(): Note calling code has to call set_paint_bounds right now.  Make
-  // this a constructor parameter and move the set_paint_bounds into Preroll
+  // TODO(team-engine): Note calling code has to call set_paint_bounds right
+  // now.  Make this a constructor parameter and move the set_paint_bounds
+  // into Preroll
   layer->set_paint_bounds(layer_bounds);
 
   layer->Preroll(preroll_context());

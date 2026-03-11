@@ -482,8 +482,7 @@ TEST_P(AiksTest, DrawVerticesTextureCoordinatesWithFragmentShader) {
       OpenAssetAsRuntimeStage("runtime_stage_simple.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
 
   auto runtime_effect = DlRuntimeEffectImpeller::Make(runtime_stage);
@@ -532,8 +531,7 @@ TEST_P(AiksTest,
       OpenAssetAsRuntimeStage("runtime_stage_position.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
 
   auto runtime_effect = DlRuntimeEffectImpeller::Make(runtime_stage);
