@@ -7,12 +7,7 @@
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 
 namespace {
-DWORD GetWindowStyleForDialog(std::optional<HWND> const& owner_window,
-                              bool decorated) {
-  if (!decorated) {
-    return 0;
-  }
-
+DWORD GetWindowStyleForDialog(std::optional<HWND> const& owner_window) {
   DWORD window_style = WS_OVERLAPPED | WS_CAPTION | WS_THICKFRAME;
   if (!owner_window) {
     // If the dialog has no owner, add a minimize box and a system menu.
@@ -42,16 +37,15 @@ HostWindowDialog::HostWindowDialog(WindowManager* window_manager,
                                    const WindowSizeRequest& preferred_size,
                                    const BoxConstraints& constraints,
                                    LPCWSTR title,
-                                   bool decorated,
                                    std::optional<HWND> const& owner_window)
     : HostWindow(window_manager, engine) {
   InitializeFlutterView(HostWindowInitializationParams{
       .archetype = WindowArchetype::kDialog,
-      .window_style = GetWindowStyleForDialog(owner_window, decorated),
+      .window_style = GetWindowStyleForDialog(owner_window),
       .extended_window_style = GetExtendedWindowStyleForDialog(owner_window),
       .box_constraints = constraints,
-      .initial_window_rect = GetInitialRect(engine, preferred_size, constraints,
-                                            owner_window, decorated),
+      .initial_window_rect =
+          GetInitialRect(engine, preferred_size, constraints, owner_window),
       .title = title,
       .owner_window = owner_window,
   });
@@ -70,9 +64,8 @@ HostWindowDialog::HostWindowDialog(WindowManager* window_manager,
 Rect HostWindowDialog::GetInitialRect(FlutterWindowsEngine* engine,
                                       const WindowSizeRequest& preferred_size,
                                       const BoxConstraints& constraints,
-                                      std::optional<HWND> const& owner_window,
-                                      bool decorated) {
-  auto const window_style = GetWindowStyleForDialog(owner_window, decorated);
+                                      std::optional<HWND> const& owner_window) {
+  auto const window_style = GetWindowStyleForDialog(owner_window);
   auto const extended_window_style =
       GetExtendedWindowStyleForDialog(owner_window);
   std::optional<Size> const window_size =

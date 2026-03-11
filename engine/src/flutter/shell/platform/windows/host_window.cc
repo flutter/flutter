@@ -207,11 +207,10 @@ std::unique_ptr<HostWindow> HostWindow::CreateRegularWindow(
     FlutterWindowsEngine* engine,
     const WindowSizeRequest& preferred_size,
     const WindowConstraints& preferred_constraints,
-    LPCWSTR title,
-    bool decorated) {
+    LPCWSTR title) {
   return std::unique_ptr<HostWindow>(new HostWindowRegular(
       window_manager, engine, preferred_size,
-      FromWindowConstraints(preferred_constraints), title, decorated));
+      FromWindowConstraints(preferred_constraints), title));
 }
 
 std::unique_ptr<HostWindow> HostWindow::CreateDialogWindow(
@@ -220,12 +219,11 @@ std::unique_ptr<HostWindow> HostWindow::CreateDialogWindow(
     const WindowSizeRequest& preferred_size,
     const WindowConstraints& preferred_constraints,
     LPCWSTR title,
-    bool decorated,
     HWND parent) {
   return std::unique_ptr<HostWindow>(
       new HostWindowDialog(window_manager, engine, preferred_size,
                            FromWindowConstraints(preferred_constraints), title,
-                           decorated, parent ? parent : std::optional<HWND>()));
+                           parent ? parent : std::optional<HWND>()));
 }
 
 std::unique_ptr<HostWindow> HostWindow::CreateTooltipWindow(

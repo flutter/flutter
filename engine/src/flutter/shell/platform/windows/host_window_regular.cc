@@ -11,17 +11,15 @@ HostWindowRegular::HostWindowRegular(WindowManager* window_manager,
                                      FlutterWindowsEngine* engine,
                                      const WindowSizeRequest& preferred_size,
                                      const BoxConstraints& constraints,
-                                     LPCWSTR title,
-                                     bool decorated)
+                                     LPCWSTR title)
 
     : HostWindow(window_manager, engine) {
   // TODO(knopp): Investigate sizing the window to its content with the help of
   // https://github.com/flutter/flutter/pull/173610.
   FML_CHECK(preferred_size.has_preferred_view_size);
-  DWORD window_style = decorated ? WS_OVERLAPPEDWINDOW : 0;
   InitializeFlutterView(HostWindowInitializationParams{
       .archetype = WindowArchetype::kRegular,
-      .window_style = window_style,
+      .window_style = WS_OVERLAPPEDWINDOW,
       .extended_window_style = 0,
       .box_constraints = constraints,
       .initial_window_rect =
