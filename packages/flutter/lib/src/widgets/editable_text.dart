@@ -3473,6 +3473,7 @@ class EditableTextState extends State<EditableText>
     widget.controller.removeListener(_didChangeTextEditingValue);
     _floatingCursorResetController?.dispose();
     _floatingCursorResetController = null;
+    _deferredCloseScheduled = false;
     _closeInputConnectionIfNeeded();
     assert(!_hasInputConnection);
     _cursorTimer?.cancel();
@@ -4010,13 +4011,68 @@ class EditableTextState extends State<EditableText>
     }
   }
 
+  /// Cleans up local input connection state without sending a close/clearClient
+  /// message to the platform.
+  ///
+  /// Used when the connection has already been superseded by another text
+  /// input's [TextInput.attach] call, so the platform keyboard should remain
+  /// visible.
+  void _clearLocalInputConnectionState() {
+    _textInputConnection = null;
+    _lastKnownRemoteTextEditingValue = null;
+    _scribbleCacheKey = null;
+    removeTextPlaceholder();
+  }
+
+  bool _deferredCloseScheduled = false;
+
   void _openOrCloseInputConnectionIfNeeded() {
     if (_hasFocus && widget.focusNode.consumeKeyboardToken()) {
+      _deferredCloseScheduled = false;
       _openInputConnection();
     } else if (!_hasFocus) {
-      _closeInputConnectionIfNeeded();
+      _scheduleDeferredInputConnectionClose();
       widget.controller.clearComposing();
     }
+  }
+
+  /// Schedules a deferred close of the input connection.
+  ///
+  /// When focus leaves this field, instead of immediately closing the input
+  /// connection (which sends `TextInput.clearClient` and causes the platform
+  /// keyboard to dismiss), we defer the close to a microtask. If another text
+  /// input field gains focus before the microtask runs, [TextInput.attach]
+  /// will have already replaced the current connection, and we only need to
+  /// clean up local state — the keyboard stays visible.
+  void _scheduleDeferredInputConnectionClose() {
+    if (_textInputConnection == null) {
+      return;
+    }
+    if (_deferredCloseScheduled) {
+      return;
+    }
+    _deferredCloseScheduled = true;
+    scheduleMicrotask(_deferredCloseInputConnection);
+  }
+
+  void _deferredCloseInputConnection() {
+    _deferredCloseScheduled = false;
+    if (!mounted) return;
+    if (_hasFocus) {
+      // Focus returned to this field; do not close.
+      return;
+    }
+    if (_textInputConnection == null) {
+      // Already cleaned up.
+      return;
+    }
+    if (_textInputConnection!.attached) {
+      // Still the active connection — no other text input took over.
+      // Close it fully, which tells the platform to dismiss the keyboard.
+      _textInputConnection!.close();
+    }
+    // Clean up local state regardless.
+    _clearLocalInputConnectionState();
   }
 
   bool _restartConnectionScheduled = false;
