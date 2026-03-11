@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:convert';
 import 'dart:io';
 import 'package:android_driver_extensions/native_driver.dart';
@@ -36,9 +40,9 @@ void main() async {
       expect(initialState, 'false');
 
       // 3. Tapping the blue box on the right using a physical ADB tap.
-      // This bypasses accessibility and native view lookups, as it is
-      //the only way to reproduce
-      //https://github.com/flutter/flutter/issues/182823.
+      // This bypasses accessibility and native view lookups, as well as
+      // flutter driver tap dispatching as it is the only way to reproduce
+      // https://github.com/flutter/flutter/issues/182823.
       print('Sending adb tap to physical coordinates: ($physicalX, $physicalY)');
       final ProcessResult result = await Process.run('adb', <String>[
         'shell',
