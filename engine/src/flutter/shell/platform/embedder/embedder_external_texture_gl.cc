@@ -165,6 +165,9 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
   texture_gles_ = CreateTextureGLES(aiks_context, texture.get());
 
   if (!texture_gles_) {
+    if (texture->destruction_callback) {
+      texture->destruction_callback(texture->user_data);
+    }
     return nullptr;
   }
 
@@ -181,9 +184,7 @@ EmbedderExternalTextureGL::CreateTextureGLES(
 
   auto type = ToImpellerTextureType(texture->target);
   if (!type.has_value()) {
-    if (texture->destruction_callback) {
-      texture->destruction_callback(texture->user_data);
-    }
+    FML_LOG(ERROR) << "Could not convert to impeller texture type";
     return nullptr;
   }
   desc.type = type.value();
@@ -197,9 +198,6 @@ EmbedderExternalTextureGL::CreateTextureGLES(
   if (!image) {
     // In case Skia rejects the image, call the release proc so that
     // embedders can perform collection of intermediates.
-    if (texture->destruction_callback) {
-      texture->destruction_callback(texture->user_data);
-    }
     FML_LOG(ERROR) << "Could not create external texture";
     return nullptr;
   }
