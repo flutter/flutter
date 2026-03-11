@@ -369,10 +369,13 @@ class RegularWindowControllerMacOS extends RegularWindowController with _WindowC
     bool decorated = true,
   }) : _delegate = delegate,
        super.empty() {
+    if (!decorated) {
+      throw UnimplementedError('Undecorated windows are not yet implemented on MacOS.');
+    }
+
     _initController(owner);
 
     final int viewId = _MacOSPlatformInterface.createRegularWindow(
-      decorated: decorated,
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       onShouldClose: _onShouldClose.nativeFunction,
@@ -506,10 +509,13 @@ class DialogWindowControllerMacOS extends DialogWindowController with _WindowCon
     bool decorated = true,
   }) : _delegate = delegate,
        super.empty() {
+    if (!decorated) {
+      throw UnimplementedError('Undecorated windows are not yet implemented on MacOS.');
+    }
+
     _initController(owner);
 
     final int viewId = _MacOSPlatformInterface.createDialogWindow(
-      decorated: decorated,
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       onShouldClose: _onShouldClose.nativeFunction,
@@ -604,9 +610,6 @@ class DialogWindowControllerMacOS extends DialogWindowController with _WindowCon
 }
 
 final class _WindowCreationRequest extends Struct {
-  @Bool()
-  external bool decorated;
-
   @Bool()
   external bool hasSize;
   external _Size contentSize;
@@ -732,7 +735,6 @@ class _MacOSPlatformInterface {
 
   /// Creates a new window and returns the viewId of the created FlutterView.
   static int createRegularWindow({
-    bool decorated = true,
     required Size? preferredSize,
     BoxConstraints? preferredConstraints,
     required Pointer<NativeFunction<Void Function()>> onShouldClose,
@@ -740,7 +742,6 @@ class _MacOSPlatformInterface {
     required Pointer<NativeFunction<Void Function()>> onNotifyListeners,
   }) {
     final Pointer<_WindowCreationRequest> request = _allocator<_WindowCreationRequest>()
-      ..ref.decorated = decorated
       ..ref.onShouldClose = onShouldClose
       ..ref.onWillClose = onWillClose
       ..ref.onNotifyListeners = onNotifyListeners;
@@ -775,7 +776,6 @@ class _MacOSPlatformInterface {
 
   /// Creates a new window and returns the viewId of the created FlutterView.
   static int createDialogWindow({
-    bool decorated = true,
     required Size? preferredSize,
     BoxConstraints? preferredConstraints,
     int? parentViewId,
@@ -784,7 +784,6 @@ class _MacOSPlatformInterface {
     required Pointer<NativeFunction<Void Function()>> onNotifyListeners,
   }) {
     final Pointer<_WindowCreationRequest> request = _allocator<_WindowCreationRequest>()
-      ..ref.decorated = decorated
       ..ref.onShouldClose = onShouldClose
       ..ref.onWillClose = onWillClose
       ..ref.onNotifyListeners = onNotifyListeners

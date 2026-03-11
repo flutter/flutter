@@ -265,9 +265,8 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
   [window setReleasedWhenClosed:NO];
 
   window.contentViewController = controller;
-  window.styleMask = request->decorated ? NSWindowStyleMaskResizable | NSWindowStyleMaskTitled |
-                                              NSWindowStyleMaskClosable
-                                        : NSWindowStyleMaskBorderless;
+  window.styleMask =
+      NSWindowStyleMaskResizable | NSWindowStyleMaskTitled | NSWindowStyleMaskClosable;
   window.collectionBehavior = NSWindowCollectionBehaviorFullScreenAuxiliary;
   if (request->has_size) {
     [window flutterSetContentSize:request->size];
@@ -373,10 +372,8 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
   [window setReleasedWhenClosed:NO];
 
   window.contentViewController = controller;
-  window.styleMask = request->decorated
-                         ? NSWindowStyleMaskResizable | NSWindowStyleMaskTitled |
-                               NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable
-                         : NSWindowStyleMaskBorderless;
+  window.styleMask = NSWindowStyleMaskResizable | NSWindowStyleMaskTitled |
+                     NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable;
   if (request->has_size) {
     [window flutterSetContentSize:request->size];
   }
