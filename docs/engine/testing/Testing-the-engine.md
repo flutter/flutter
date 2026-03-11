@@ -34,6 +34,17 @@ an Apple Silicon Mac), run:
 testing/run_tests.py --type=engine --variant=host_debug_unopt_arm64
 ```
 
+Some tests depend on the underlying Graphics Driver implementation which can result
+in test flakyness. Test reliability on Linux for OpenGLES can be improved by selecting the
+[Software OpenGLES renderer](https://docs.mesa3d.org/drivers/llvmpipe.html)
+with [libglvnd](https://gitlab.freedesktop.org/glvnd/libglvnd). For example:
+
+```sh
+__EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json
+testing/run_tests.py
+```
+Check your distribution's documentation for more details.
+
 Behind the scenes, those tests in the same directory are built together as a
 testonly executable when you build the engine variant. The `run_tests.py` script
 executes them one by one.

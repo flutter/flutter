@@ -182,7 +182,7 @@ class RegularWindowControllerLinux extends RegularWindowController {
     bool decorated = true,
   }) : _owner = owner,
        _delegate = delegate,
-       _window = _GtkWindow(),
+       _window = _GtkWindow(_GtkWindowType.toplevel),
        super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
@@ -209,7 +209,8 @@ class RegularWindowControllerLinux extends RegularWindowController {
       setTitle(title);
     }
     _window.setDecorated(decorated);
-    final view = _FlView();
+    final engine = _FlEngine.current();
+    final view = _FlView(engine);
     final int viewId = view.getId();
     rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
@@ -251,16 +252,16 @@ class RegularWindowControllerLinux extends RegularWindowController {
 
   @override
   @internal
-  bool get isMaximized => (_window.getWindow().getState() & _GDK_WINDOW_STATE_MAXIMIZED) != 0;
+  bool get isMaximized => _window.getWindow().getState().contains(_GdkWindowState.maximized);
 
   @override
   @internal
   // NOTE: On Wayland this is never set, see https://gitlab.gnome.org/GNOME/gtk/-/issues/67
-  bool get isMinimized => (_window.getWindow().getState() & _GDK_WINDOW_STATE_ICONIFIED) != 0;
+  bool get isMinimized => _window.getWindow().getState().contains(_GdkWindowState.iconified);
 
   @override
   @internal
-  bool get isFullscreen => (_window.getWindow().getState() & _GDK_WINDOW_STATE_FULLSCREEN) != 0;
+  bool get isFullscreen => _window.getWindow().getState().contains(_GdkWindowState.fullscreen);
 
   @override
   @internal
@@ -353,13 +354,13 @@ class DialogWindowControllerLinux extends DialogWindowController {
   }) : _owner = owner,
        _delegate = delegate,
        _parent = parent,
-       _window = _GtkWindow(),
+       _window = _GtkWindow(_GtkWindowType.toplevel),
        super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
 
-    _window.setTypeHint(_GDK_WINDOW_TYPE_HINT_DIALOG);
+    _window.setTypeHint(_GdkWindowTypeHint.dialog);
     if (parent != null) {
       final _GtkWindow? parentWindow = owner._windows[parent.rootView.viewId];
       if (parentWindow != null) {
@@ -389,7 +390,8 @@ class DialogWindowControllerLinux extends DialogWindowController {
       setTitle(title);
     }
     _window.setDecorated(decorated);
-    final view = _FlView();
+    final engine = _FlEngine.current();
+    final view = _FlView(engine);
     final int viewId = view.getId();
     rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
@@ -437,7 +439,7 @@ class DialogWindowControllerLinux extends DialogWindowController {
   @override
   @internal
   // NOTE: On Wayland this is never set, see https://gitlab.gnome.org/GNOME/gtk/-/issues/67
-  bool get isMinimized => (_window.getWindow().getState() & _GDK_WINDOW_STATE_ICONIFIED) != 0;
+  bool get isMinimized => _window.getWindow().getState().contains(_GdkWindowState.iconified);
 
   @override
   @internal
@@ -479,6 +481,73 @@ class DialogWindowControllerLinux extends DialogWindowController {
   }
 }
 
+// The following classes are thin wrappers around the corresponding GTK/GDK
+// objects, with only the methods we need implemented. The method signatures
+// and enum values are designed to match the corresponding C APIs as closely
+// as possible, to minimize the amount of translation needed in the method
+// implementations.
+
+/// The type of a GtkWindow. Matches the GtkWindowType enum in gtk/gtktypes.h.
+enum _GtkWindowType {
+  toplevel,
+  // ignore: unused_field
+  popup,
+}
+
+/// States a toplevel window can be in. Matches the order of the GdkWindowState
+/// enum in gdk/gdkwindow.h, except these are bit positions when passed to GTK.
+enum _GdkWindowState {
+  withdrawn,
+  iconified,
+  maximized,
+  sticky,
+  fullscreen,
+  above,
+  below,
+  focused,
+  tiled,
+  topTiled,
+  topResizable,
+  rightTiled,
+  rightResizable,
+  bottomTiled,
+  bottomResizable,
+  leftTiled,
+  leftResizable,
+}
+
+/// Hints for the window manager on how to treat a window. Matches the
+/// GdkWindowTypeHint enum in gdk/gdkwindow.h.
+enum _GdkWindowTypeHint {
+  // ignore: unused_field
+  normal,
+  dialog,
+  // ignore: unused_field
+  menu,
+  // ignore: unused_field
+  toolbar,
+  // ignore: unused_field
+  splashscreen,
+  // ignore: unused_field
+  utility,
+  // ignore: unused_field
+  dock,
+  // ignore: unused_field
+  desktop,
+  // ignore: unused_field
+  dropdown_menu,
+  // ignore: unused_field
+  popup_menu,
+  // ignore: unused_field
+  tooltip,
+  // ignore: unused_field
+  notification,
+  // ignore: unused_field
+  combo,
+  // ignore: unused_field
+  dnd,
+}
+
 @ffi.Native<ffi.Pointer<ffi.NativeType> Function(ffi.Int)>(symbol: 'g_malloc0')
 external ffi.Pointer<ffi.NativeType> _gMalloc0(int count);
 
@@ -502,10 +571,12 @@ String _nativeToString(ffi.Pointer<ffi.Uint8> value) {
   return utf8.decode(value.asTypedList(length));
 }
 
-/// Wraps GObject
+/// Wraps GObject.
 class _GObject {
+  /// Creates a wrapper to an existing [GObject] in [instance].
   const _GObject(this.instance);
 
+  /// The pointer to the underlying [GObject].
   final ffi.Pointer<ffi.NativeType> instance;
 
   /// Drop reference to this object.
@@ -517,8 +588,9 @@ class _GObject {
   external static void _unref(ffi.Pointer<ffi.NativeType> widget);
 }
 
-/// Wraps GtkContainer
+/// Wraps GtkContainer.
 class _GtkContainer extends _GtkWidget {
+  /// Creates a wrapper to an existing [GtkContainer] in [instance].
   const _GtkContainer(super.instance);
 
   /// Adds [child] widget to this container.
@@ -535,8 +607,9 @@ class _GtkContainer extends _GtkWidget {
   );
 }
 
-/// Wraps GtkWidget
+/// Wraps GtkWidget.
 class _GtkWidget extends _GObject {
+  /// Creates a wrapper to an existing [GtkWidget] in [instance].
   const _GtkWidget(super.instance);
 
   /// Show the widget (defaults to hidden).
@@ -568,20 +641,29 @@ class _GtkWidget extends _GObject {
   external static void _gtkWindowDestroy(ffi.Pointer<ffi.NativeType> widget);
 }
 
-/// Wraps GdkWindow
+/// Wraps GdkWindow.
 class _GdkWindow extends _GObject {
+  /// Creates a wrapper to an existing [GdkWindow] in [instance].
   const _GdkWindow(super.instance);
 
-  /// Gets the window state bitfield (_GDK_WINDOW_STATE_*).
-  int getState() {
-    return _gdkWindowGetState(instance);
+  /// Gets the window state.
+  Set<_GdkWindowState> getState() {
+    final int stateBits = _gdkWindowGetState(instance);
+    final states = <_GdkWindowState>{};
+    for (final _GdkWindowState state in _GdkWindowState.values) {
+      if ((stateBits & (1 << state.index)) != 0) {
+        states.add(state);
+      }
+    }
+
+    return states;
   }
 
   @ffi.Native<ffi.Int Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gdk_window_get_state')
   external static int _gdkWindowGetState(ffi.Pointer<ffi.NativeType> window);
 }
 
-/// Wrapds GdkGeometry
+/// Wraps GdkGeometry.
 final class _GdkGeometry extends ffi.Struct {
   factory _GdkGeometry() {
     return ffi.Struct.create();
@@ -621,16 +703,10 @@ final class _GdkGeometry extends ffi.Struct {
   external int winGravity;
 }
 
-const int _GDK_WINDOW_STATE_ICONIFIED = 1 << 1;
-const int _GDK_WINDOW_STATE_MAXIMIZED = 1 << 2;
-const int _GDK_WINDOW_STATE_FULLSCREEN = 1 << 4;
-
-const int _GDK_WINDOW_TYPE_HINT_DIALOG = 1;
-
-/// Wraps GtkWindow
+/// Wraps GtkWindow.
 class _GtkWindow extends _GtkContainer {
   /// Create a new GtkWindow
-  _GtkWindow() : super(_gtkWindowNew(0));
+  _GtkWindow(_GtkWindowType type) : super(_gtkWindowNew(type.index));
 
   /// Make window visible and grab focus.
   void present() {
@@ -648,8 +724,8 @@ class _GtkWindow extends _GtkContainer {
   }
 
   /// Set the type of this window.
-  void setTypeHint(int hint) {
-    _gtkWindowSetTypeHint(instance, hint);
+  void setTypeHint(_GdkWindowTypeHint hint) {
+    _gtkWindowSetTypeHint(instance, hint.index);
   }
 
   /// Sets if this window has decorations (titlebar, borders, shadow).
@@ -848,17 +924,19 @@ class _GtkWindow extends _GtkContainer {
   external static bool _gtkWindowIsActive(ffi.Pointer<ffi.NativeType> widget);
 }
 
-/// Wraps FlView
+/// Wraps FlEngine.
+class _FlEngine extends _GObject {
+  /// Gets the FlEngine object for the engine with the given ID.
+  _FlEngine(int engineId) : super(ffi.Pointer<ffi.NativeType>.fromAddress(engineId));
+
+  /// Gets the engine object running in the current isolate.
+  factory _FlEngine.current() => _FlEngine(WidgetsBinding.instance.platformDispatcher.engineId!);
+}
+
+/// Wraps FlView.
 class _FlView extends _GtkWidget {
   /// Create a new FlView widget.
-  _FlView()
-    : super(
-        _flViewNewForEngine(
-          ffi.Pointer<ffi.NativeType>.fromAddress(
-            WidgetsBinding.instance.platformDispatcher.engineId!,
-          ),
-        ),
-      );
+  _FlView(_FlEngine engine) : super(_flViewNewForEngine(engine.instance));
 
   /// Get the ID for the Flutter view being shown in this widget.
   int getId() {
