@@ -5188,7 +5188,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           // Verify that the call to getLayoutExplorerNode for the Row widget
           // does not throw an exception.
           expect(
-            service.testExtension(
+            () => service.testExtension(
               WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
               <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
             ),
