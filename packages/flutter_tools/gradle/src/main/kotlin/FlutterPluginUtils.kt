@@ -673,13 +673,7 @@ object FlutterPluginUtils {
             return true
         }
 
-        val preprovisionedNdkVersion =
-            project.findProperty(PROP_PREPROVISIONED_NDK_VERSION)?.toString()
-        if (preprovisionedNdkVersion == null) {
-            return false
-        }
-        val configuredNdkVersion = getAndroidExtension(project).ndkVersion ?: FlutterExtension().ndkVersion
-        return preprovisionedNdkVersion == configuredNdkVersion
+        return project.findProperty(PROP_PREPROVISIONED_NDK_VERSION)?.toString() != null
     }
 
     @JvmStatic

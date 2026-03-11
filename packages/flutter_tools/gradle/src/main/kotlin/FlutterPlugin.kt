@@ -235,9 +235,7 @@ class FlutterPlugin : Plugin<Project> {
             }
         }
 
-        project.afterEvaluate {
-            FlutterPluginUtils.forceNdkDownload(project, flutterRootPath)
-        }
+        FlutterPluginUtils.forceNdkDownload(project, flutterRootPath)
 
         if (FlutterPluginUtils.shouldProjectUseLocalEngine(project)) {
             // This is required to pass the local engine to flutter build aot.
