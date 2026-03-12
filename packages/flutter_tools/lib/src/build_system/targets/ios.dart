@@ -299,21 +299,7 @@ abstract class UnpackIOS extends UnpackDarwin {
     }
     await thinFramework(environment, frameworkBinaryPath, archs);
 
-    var codesignFramework = true;
-    if (environment.defines[kXcodeBuildScript] == kXcodeBuildScriptValuePrepare) {
-      // Skip codesigning during "prepare" when using SwiftPM. When SwiftPM places the Flutter
-      // framework in the BUILT_PRODUCTS_DIR, it does not codesign it (it is later codesigned
-      // in TARGET_BUILD_DIR). Skipping codesigning will improve the caching for the "prepare" script.
-      final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
-      final XcodeBasedProject xcodeProject = darwinPlatform.xcodeProject(flutterProject);
-      if (xcodeProject.usesSwiftPackageManager &&
-          xcodeProject.flutterFrameworkSwiftPackageDirectory.existsSync()) {
-        codesignFramework = false;
-      }
-    }
-    if (codesignFramework) {
-      await _signFramework(environment, frameworkBinary, buildMode);
-    }
+    await _signFramework(environment, frameworkBinary, buildMode);
   }
 
   Future<void> _copyFrameworkDysm(
@@ -534,6 +520,12 @@ class DebugIosLLDBInit extends Target {
   List<Target> get dependencies => <Target>[];
 
   @override
+  Future<bool> canSkip(Environment environment) async {
+    // The `build swift-package` is not run on a device and therefore does not need an LLDB Init File.
+    return environment.defines[kBuildSwiftPackage] == 'true';
+  }
+
+  @override
   Future<void> build(Environment environment) async {
     final String? sdkRoot = environment.defines[kSdkRoot];
     if (sdkRoot == null) {
@@ -637,6 +629,7 @@ abstract class IosAssetBundle extends Target {
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/App.framework/App'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    Source.pattern('{BUILD_DIR}/${DartBuild.dartHookResultFilename}'),
     ...IconTreeShaker.inputs,
     ...ShaderCompiler.inputs,
   ];
@@ -927,7 +920,7 @@ Future<void> _createStubAppFramework(
 }
 
 Future<void> _signFramework(Environment environment, File binary, BuildMode buildMode) async {
-  await removeFinderExtendedAttributes(
+  await removeExtendedAttributes(
     binary,
     ProcessUtils(processManager: environment.processManager, logger: environment.logger),
     environment.logger,

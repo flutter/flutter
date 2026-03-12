@@ -19,7 +19,6 @@ import 'package:flutter/gestures.dart'
         kDoubleTapTimeout,
         kLongPressTimeout,
         kSecondaryMouseButton;
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -240,41 +239,42 @@ void main() {
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
 
-  testWidgets('Live Text button shows and hides correctly when LiveTextStatus changes', (
-    WidgetTester tester,
-  ) async {
-    final liveTextInputTester = LiveTextInputTester();
-    addTearDown(liveTextInputTester.dispose);
+  testWidgets(
+    'Live Text button shows and hides correctly when LiveTextStatus changes',
+    (WidgetTester tester) async {
+      final liveTextInputTester = LiveTextInputTester();
+      addTearDown(liveTextInputTester.dispose);
 
-    final controller = TextEditingController(text: '');
-    addTearDown(controller.dispose);
-    const Key key = ValueKey<String>('TextField');
-    final focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
-    final Widget app = MaterialApp(
-      theme: ThemeData(platform: TargetPlatform.iOS),
-      home: Scaffold(
-        body: Center(
-          child: CupertinoTextField(key: key, controller: controller, focusNode: focusNode),
+      final controller = TextEditingController(text: '');
+      addTearDown(controller.dispose);
+      const Key key = ValueKey<String>('TextField');
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final Widget app = CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: Center(
+            child: CupertinoTextField(key: key, controller: controller, focusNode: focusNode),
+          ),
         ),
-      ),
-    );
+      );
 
-    liveTextInputTester.mockLiveTextInputEnabled = true;
-    await tester.pumpWidget(app);
-    focusNode.requestFocus();
-    await tester.pumpAndSettle();
+      liveTextInputTester.mockLiveTextInputEnabled = true;
+      await tester.pumpWidget(app);
+      focusNode.requestFocus();
+      await tester.pumpAndSettle();
 
-    final Finder textFinder = find.byType(EditableText);
-    await tester.longPress(textFinder);
-    await tester.pumpAndSettle();
-    expect(findLiveTextButton(), kIsWeb ? findsNothing : findsOneWidget);
+      final Finder textFinder = find.byType(EditableText);
+      await tester.longPress(textFinder);
+      await tester.pumpAndSettle();
+      expect(findLiveTextButton(), kIsWeb ? findsNothing : findsOneWidget);
 
-    liveTextInputTester.mockLiveTextInputEnabled = false;
-    await tester.longPress(textFinder);
-    await tester.pumpAndSettle();
-    expect(findLiveTextButton(), findsNothing);
-  });
+      liveTextInputTester.mockLiveTextInputEnabled = false;
+      await tester.longPress(textFinder);
+      await tester.pumpAndSettle();
+      expect(findLiveTextButton(), findsNothing);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
+  );
 
   testWidgets(
     'Look Up shows up on iOS only',
@@ -672,7 +672,7 @@ void main() {
 
       await tester.pumpWidget(
         CupertinoApp(
-          theme: const CupertinoThemeData(selectionHandleColor: Colors.red),
+          theme: const CupertinoThemeData(selectionHandleColor: CupertinoColors.destructiveRed),
           home: Center(
             child: CupertinoTheme(
               data: const CupertinoThemeData(selectionHandleColor: expectedSelectionHandleColor),
@@ -704,8 +704,8 @@ void main() {
   testWidgets('uses DefaultSelectionStyle for selection and cursor colors if provided', (
     WidgetTester tester,
   ) async {
-    const Color selectionColor = Colors.black;
-    const Color cursorColor = Colors.white;
+    const selectionColor = Color(0xFF000000);
+    const cursorColor = Color(0xFFFFFFFF);
 
     await tester.pumpWidget(
       const CupertinoApp(
@@ -730,8 +730,8 @@ void main() {
     final Key key2 = UniqueKey();
     final controller1 = TextEditingController();
     addTearDown(controller1.dispose);
-    const Color selectionColor = Colors.orange;
-    const Color cursorColor = Colors.red;
+    const Color selectionColor = CupertinoColors.activeOrange;
+    const Color cursorColor = CupertinoColors.destructiveRed;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -918,38 +918,32 @@ void main() {
       var outsideClickB = false;
       var outsideClickC = false;
       await tester.pumpWidget(
-        MaterialApp(
+        CupertinoApp(
           home: Align(
             alignment: Alignment.topLeft,
             child: Column(
               children: <Widget>[
                 const Text('Outside'),
-                Material(
-                  child: CupertinoTextField(
-                    key: keyA,
-                    groupId: 'Group A',
-                    onTapOutside: (PointerDownEvent event) {
-                      outsideClickA = true;
-                    },
-                  ),
+                CupertinoTextField(
+                  key: keyA,
+                  groupId: 'Group A',
+                  onTapOutside: (PointerDownEvent event) {
+                    outsideClickA = true;
+                  },
                 ),
-                Material(
-                  child: CupertinoTextField(
-                    key: keyB,
-                    groupId: 'Group B',
-                    onTapOutside: (PointerDownEvent event) {
-                      outsideClickB = true;
-                    },
-                  ),
+                CupertinoTextField(
+                  key: keyB,
+                  groupId: 'Group B',
+                  onTapOutside: (PointerDownEvent event) {
+                    outsideClickB = true;
+                  },
                 ),
-                Material(
-                  child: CupertinoTextField(
-                    key: keyC,
-                    groupId: 'Group C',
-                    onTapOutside: (PointerDownEvent event) {
-                      outsideClickC = true;
-                    },
-                  ),
+                CupertinoTextField(
+                  key: keyC,
+                  groupId: 'Group C',
+                  onTapOutside: (PointerDownEvent event) {
+                    outsideClickC = true;
+                  },
                 ),
               ],
             ),
@@ -6499,9 +6493,8 @@ void main() {
         home: DecoratedBox(
           decoration: const BoxDecoration(color: Color(0xFFFFFFFF)),
           child: Center(
-            child: SizedBox(
-              width: 200,
-              height: 200,
+            child: SizedBox.square(
+              dimension: 200.0,
               child: RepaintBoundary(
                 key: const ValueKey<int>(1),
                 child: CupertinoTextField(controller: controller, enabled: false),
@@ -6694,9 +6687,8 @@ void main() {
             home: CupertinoPageScaffold(
               child: Align(
                 alignment: Alignment.topLeft,
-                child: SizedBox(
-                  width: 200,
-                  height: 200,
+                child: SizedBox.square(
+                  dimension: 200.0,
                   child: CupertinoTextField(controller: controller, maxLines: null),
                 ),
               ),
@@ -6758,9 +6750,8 @@ void main() {
             home: CupertinoPageScaffold(
               child: Align(
                 alignment: Alignment.topRight,
-                child: SizedBox(
-                  width: 200,
-                  height: 200,
+                child: SizedBox.square(
+                  dimension: 200,
                   child: CupertinoTextField(controller: controller, maxLines: null),
                 ),
               ),
@@ -6822,9 +6813,8 @@ void main() {
             debugShowCheckedModeBanner: false,
             home: CupertinoPageScaffold(
               child: Align(
-                child: SizedBox(
-                  width: 200,
-                  height: 200,
+                child: SizedBox.square(
+                  dimension: 200,
                   child: CupertinoTextField(controller: controller, maxLines: null),
                 ),
               ),
@@ -6893,9 +6883,8 @@ void main() {
             debugShowCheckedModeBanner: false,
             home: CupertinoPageScaffold(
               child: Align(
-                child: SizedBox(
-                  width: 200,
-                  height: 200,
+                child: SizedBox.square(
+                  dimension: 200,
                   child: CupertinoTextField(controller: controller, maxLines: null),
                 ),
               ),
@@ -6966,9 +6955,8 @@ void main() {
             debugShowCheckedModeBanner: false,
             home: CupertinoPageScaffold(
               child: Align(
-                child: SizedBox(
-                  width: 200,
-                  height: 200,
+                child: SizedBox.square(
+                  dimension: 200,
                   child: CupertinoTextField(controller: controller, maxLines: null),
                 ),
               ),
@@ -8323,9 +8311,8 @@ void main() {
     final Widget widget = CupertinoApp(
       home: RepaintBoundary(
         key: const ValueKey<int>(1),
-        child: SizedBox(
-          height: 200.0,
-          width: 200.0,
+        child: SizedBox.square(
+          dimension: 200.0,
           child: Center(
             child: SizedBox(
               // Make sure the input field is not high enough for the WidgetSpan.
@@ -9824,10 +9811,9 @@ void main() {
                         ValueNotifier<MagnifierInfo> localMagnifierInfo,
                       ) {
                         magnifierController = controller;
-                        return TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
-                          context,
-                          controller,
-                          localMagnifierInfo,
+                        return CupertinoTextMagnifier(
+                          controller: controller,
+                          magnifierInfo: localMagnifierInfo,
                         );
                       },
                 ),
@@ -10005,9 +9991,8 @@ void main() {
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
+            child: SizedBox.square(
+              dimension: 100,
               child: CupertinoTextField(autofocus: true, focusNode: focusNode),
             ),
           ),
@@ -10029,9 +10014,8 @@ void main() {
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
+            child: SizedBox.square(
+              dimension: 100,
               child: CupertinoTextField(autofocus: true, focusNode: focusNode),
             ),
           ),
@@ -10063,9 +10047,8 @@ void main() {
             debugShowCheckedModeBanner: false,
             home: CupertinoPageScaffold(
               child: Align(
-                child: SizedBox(
-                  width: 200,
-                  height: 200,
+                child: SizedBox.square(
+                  dimension: 200,
                   child: CupertinoTextField(
                     autofocus: true,
                     focusNode: focusNode,
@@ -10118,9 +10101,8 @@ void main() {
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
+            child: SizedBox.square(
+              dimension: 100,
               child: CupertinoTextField(autofocus: true, focusNode: focusNode),
             ),
           ),
@@ -10151,7 +10133,7 @@ void main() {
           child: CupertinoTextField(
             dragStartBehavior: DragStartBehavior.down,
             controller: controller,
-            style: const TextStyle(color: Colors.black, fontSize: 34.0),
+            style: const TextStyle(color: Color(0xFF000000), fontSize: 34.0),
             maxLines: 3,
           ),
         ),
@@ -10534,12 +10516,16 @@ void main() {
     final controller = TextEditingController(text: 'abcd');
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Center(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: Center(
             child: RepaintBoundary(
               key: const ValueKey<int>(1),
-              child: CupertinoTextField(autofocus: true, controller: controller),
+              child: CupertinoTextField(
+                cursorColor: const Color(0xFF6750A4),
+                autofocus: true,
+                controller: controller,
+              ),
             ),
           ),
         ),
@@ -10926,6 +10912,6 @@ void main() {
     );
     expect(tester.getSize(find.byType(CupertinoTextField)), Size.zero);
     controller.selection = const TextSelection.collapsed(offset: 0);
-    tester.pump();
+    await tester.pump();
   });
 }

@@ -22,6 +22,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/clipboard_utils.dart';
+import 'editable_text_tester.dart';
 import 'editable_text_utils.dart';
 import 'live_text_utils.dart';
 import 'semantics_tester.dart';
@@ -5702,6 +5703,9 @@ void main() {
           'fontWeightIndex': 5,
           'textAlignIndex': 4,
           'textDirectionIndex': 0,
+          'letterSpacing': null,
+          'wordSpacing': null,
+          'lineHeight': 20.0,
         },
       ),
     );
@@ -5744,6 +5748,9 @@ void main() {
           'fontWeightIndex': FontWeight.bold.index,
           'textAlignIndex': 4,
           'textDirectionIndex': 0,
+          'letterSpacing': null,
+          'wordSpacing': null,
+          'lineHeight': 20.0,
         },
       ),
     );
@@ -5761,6 +5768,8 @@ void main() {
       fontSize: 20.0,
       fontFamily: 'Raleway',
       fontWeight: FontWeight.w700,
+      letterSpacing: 1.0,
+      wordSpacing: 2.0,
     );
     var currentTextStyle = textStyle1;
 
@@ -5822,6 +5831,9 @@ void main() {
           'fontWeightIndex': 6,
           'textAlignIndex': 4,
           'textDirectionIndex': 1,
+          'letterSpacing': 1.0,
+          'wordSpacing': 2.0,
+          'lineHeight': 20.0,
         },
       ),
     );
@@ -9142,9 +9154,8 @@ void main() {
                     builder: (BuildContext innerContext) {
                       return Align(
                         alignment: Alignment.topLeft,
-                        child: SizedBox(
-                          width: 200,
-                          height: 200,
+                        child: SizedBox.square(
+                          dimension: 200.0,
                           child: EditableText(
                             maxLines: null,
                             controller: controller,
@@ -9219,9 +9230,8 @@ void main() {
       MaterialApp(
         home: Align(
           alignment: Alignment.topLeft,
-          child: SizedBox(
-            width: 200,
-            height: 200,
+          child: SizedBox.square(
+            dimension: 200,
             child: SingleChildScrollView(
               controller: outerController,
               child: EditableText(
@@ -9264,9 +9274,8 @@ void main() {
         MaterialApp(
           home: Align(
             alignment: Alignment.topLeft,
-            child: SizedBox(
-              width: 200,
-              height: 200,
+            child: SizedBox.square(
+              dimension: 200,
               child: EditableText(
                 maxLines: null,
                 controller: controller,
@@ -13076,9 +13085,8 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
-          child: SizedBox(
-            height: 600.0,
-            width: 600.0,
+          child: SizedBox.square(
+            dimension: 600.0,
             child: EditableText(
               controller: controller,
               scrollController: scrollController,
