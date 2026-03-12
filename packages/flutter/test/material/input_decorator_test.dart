@@ -15983,4 +15983,96 @@ void main() {
     );
     expect(tester.getSize(find.byType(InputDecorator)), Size.zero);
   });
+
+  testWidgets('errorPadding defined in InputDecoration is used for error text', (WidgetTester tester) async {
+    const customPaddingStart = 32.0;
+    const inputWidth = 300.0;
+    const errorText = 'error';
+
+    Future<void> buildDecorator({
+      required TextDirection direction,
+      EdgeInsetsGeometry? errorPadding,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Directionality(
+              textDirection: direction,
+              child: SizedBox(
+                width: inputWidth,
+                child: InputDecorator(
+                  decoration: InputDecoration(
+                    filled: true,
+                    errorText: errorText,
+                    errorPadding: errorPadding,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    final Finder errorFinder = find.text(errorText);
+
+    const inputGap = 4.0; // _kInputExtraPadding in Material 3 filled field.
+    // LTR with custom errorPadding.
+    await buildDecorator(
+      direction: TextDirection.ltr,
+      errorPadding: const EdgeInsetsDirectional.only(start: customPaddingStart),
+    );
+    expect(tester.getTopLeft(errorFinder).dx, customPaddingStart + inputGap);
+
+    // RTL with custom errorPadding (EdgeInsetsDirectional).
+    await buildDecorator(
+      direction: TextDirection.rtl,
+      errorPadding: const EdgeInsetsDirectional.only(start: customPaddingStart),
+    );
+    // In RTL, "start" is from the right.
+    expect(tester.getTopRight(errorFinder).dx, inputWidth - (customPaddingStart + inputGap));
+  });
+
+  testWidgets('errorPadding defined in InputDecorationTheme is used for error text', (WidgetTester tester) async {
+    const themePaddingStart = 40.0;
+    const inputWidth = 300.0;
+    const errorText = 'error';
+
+    Future<void> buildDecorator({required TextDirection direction}) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            inputDecorationTheme: const InputDecorationThemeData(
+              errorPadding: EdgeInsetsDirectional.only(start: themePaddingStart),
+            ),
+          ),
+          home: Scaffold(
+            body: Directionality(
+              textDirection: direction,
+              child: const SizedBox(
+                width: inputWidth,
+                child: InputDecorator(
+                  decoration: InputDecoration(filled: true, errorText: errorText),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    final Finder errorFinder = find.text(errorText);
+    const inputGap = 4.0;
+
+    // LTR with theme errorPadding.
+    await buildDecorator(direction: TextDirection.ltr);
+    expect(tester.getTopLeft(errorFinder).dx, themePaddingStart + inputGap);
+
+    // RTL with theme errorPadding.
+    await buildDecorator(direction: TextDirection.rtl);
+    // In RTL, "start" is from the right.
+    expect(tester.getTopRight(errorFinder).dx, inputWidth - (themePaddingStart + inputGap));
+  });
 }
