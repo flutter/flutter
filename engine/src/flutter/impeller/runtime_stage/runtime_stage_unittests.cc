@@ -37,8 +37,7 @@ TEST_P(RuntimeStageTest, CanReadValidBlob) {
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
   ABSL_ASSERT_OK(stages);
-  auto stage =
-      stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  auto stage = stages.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(stage);
   ASSERT_EQ(stage->GetShaderStage(), RuntimeShaderStage::kFragment);
 }
@@ -80,8 +79,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
   ABSL_ASSERT_OK(stages);
-  auto stage =
-      stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  auto stage = stages.value()[GetRuntimeStageBackend()];
 
   ASSERT_TRUE(stage);
   switch (GetBackend()) {
@@ -242,7 +240,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
           stage->GetUniform(RuntimeStage::kVulkanUBOName);
       ASSERT_TRUE(uni);
       EXPECT_EQ(uni->type, RuntimeUniformType::kStruct);
-      EXPECT_EQ(uni->struct_float_count, 35u);
+      EXPECT_EQ(uni->struct_float_count, 26u);
 
       EXPECT_EQ(uni->GetGPUSize(), 640u);
       std::vector<RuntimePaddingType> layout(uni->GetGPUSize() / sizeof(float),
@@ -257,9 +255,9 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
       layout[15] = RuntimePaddingType::kPadding;
       layout[18] = RuntimePaddingType::kPadding;
       layout[19] = RuntimePaddingType::kPadding;
-      // uMat3 is packed as 3 vec4s, with the last 3 bytes being padding
-      layout[29] = RuntimePaddingType::kPadding;
-      layout[30] = RuntimePaddingType::kPadding;
+      // uMat3 is packed as 3 vec4s, with the last byte of each being padding
+      layout[23] = RuntimePaddingType::kPadding;
+      layout[27] = RuntimePaddingType::kPadding;
       layout[31] = RuntimePaddingType::kPadding;
       // uFloatArray is packed as 2 vec4s, with the last 3 bytes of each
       // being padding.
@@ -280,7 +278,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
       layout[71] = RuntimePaddingType::kPadding;
       // uVec4Array has no padding.
       // uMat2Array[2] is packed as 4 vec4s, With the last 2 bytes of each being
-      // padding. padding.
+      // padding.
       layout[82] = RuntimePaddingType::kPadding;
       layout[83] = RuntimePaddingType::kPadding;
       layout[86] = RuntimePaddingType::kPadding;
@@ -289,13 +287,13 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
       layout[91] = RuntimePaddingType::kPadding;
       layout[94] = RuntimePaddingType::kPadding;
       layout[95] = RuntimePaddingType::kPadding;
-      // uMat3Array[2] is packed as 6 vec4s, with the last 3 bytes of the 3rd
-      // and 6th being padding.
-      layout[105] = RuntimePaddingType::kPadding;
-      layout[106] = RuntimePaddingType::kPadding;
+      // uMat3Array[2] is packed as 6 vec4s, with the last byte of each being
+      // padding.
+      layout[99] = RuntimePaddingType::kPadding;
+      layout[103] = RuntimePaddingType::kPadding;
       layout[107] = RuntimePaddingType::kPadding;
-      layout[117] = RuntimePaddingType::kPadding;
-      layout[118] = RuntimePaddingType::kPadding;
+      layout[111] = RuntimePaddingType::kPadding;
+      layout[115] = RuntimePaddingType::kPadding;
       layout[119] = RuntimePaddingType::kPadding;
       // uMat4Array[2] is packed as 8 vec4s with no padding.
       layout[152] = RuntimePaddingType::kPadding;
@@ -341,8 +339,7 @@ TEST_P(RuntimeStageTest, CanReadUniformsSamplerBeforeUBO) {
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
   ABSL_ASSERT_OK(stages);
-  auto stage =
-      stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  auto stage = stages.value()[GetRuntimeStageBackend()];
 
   EXPECT_EQ(stage->GetUniforms().size(), 2u);
   auto uni = stage->GetUniform(RuntimeStage::kVulkanUBOName);
@@ -368,8 +365,7 @@ TEST_P(RuntimeStageTest, CanReadUniformsSamplerAfterUBO) {
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
   ABSL_ASSERT_OK(stages);
-  auto stage =
-      stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  auto stage = stages.value()[GetRuntimeStageBackend()];
 
   EXPECT_EQ(stage->GetUniforms().size(), 2u);
   auto uni = stage->GetUniform(RuntimeStage::kVulkanUBOName);
@@ -391,8 +387,7 @@ TEST_P(RuntimeStageTest, CanRegisterStage) {
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
   ABSL_ASSERT_OK(stages);
-  auto stage =
-      stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  auto stage = stages.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(stage);
   std::promise<bool> registration;
   auto future = registration.get_future();
@@ -424,9 +419,7 @@ TEST_P(RuntimeStageTest, CanRegisterStage) {
 TEST_P(RuntimeStageTest, CanCreatePipelineFromRuntimeStage) {
   auto stages_result = OpenAssetAsRuntimeStage("ink_sparkle.frag.iplr");
   ABSL_ASSERT_OK(stages_result);
-  auto stage =
-      stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  auto stage = stages_result.value()[GetRuntimeStageBackend()];
 
   ASSERT_TRUE(stage);
   ASSERT_NE(stage, nullptr);
@@ -471,12 +464,18 @@ TEST_P(RuntimeStageTest, ContainsExpectedShaderTypes) {
   auto stages_result = OpenAssetAsRuntimeStage("ink_sparkle.frag.iplr");
   ABSL_ASSERT_OK(stages_result);
   auto stages = stages_result.value();
-  // Right now, SkSL gets implicitly bundled regardless of what the build rule
-  // for this test requested. After
-  // https://github.com/flutter/flutter/issues/138919, this may require a build
-  // rule change or a new test.
   EXPECT_TRUE(stages[RuntimeStageBackend::kSkSL]);
+  EXPECT_TRUE(stages[RuntimeStageBackend::kOpenGLES]);
+  EXPECT_TRUE(stages[RuntimeStageBackend::kMetal]);
+  EXPECT_TRUE(stages[RuntimeStageBackend::kVulkan]);
+}
 
+TEST_P(RuntimeStageTest, ContainsExpectedShaderTypesNoSksl) {
+  auto stages_result =
+      OpenAssetAsRuntimeStage("runtime_stage_simple_no_sksl.frag.iplr");
+  ABSL_ASSERT_OK(stages_result);
+  auto stages = stages_result.value();
+  EXPECT_FALSE(stages[RuntimeStageBackend::kSkSL]);
   EXPECT_TRUE(stages[RuntimeStageBackend::kOpenGLES]);
   EXPECT_TRUE(stages[RuntimeStageBackend::kMetal]);
   EXPECT_TRUE(stages[RuntimeStageBackend::kVulkan]);

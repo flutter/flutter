@@ -10,6 +10,7 @@ plugins {
 android {
     namespace = "com.example.view"
     compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
 
 
     compileOptions {

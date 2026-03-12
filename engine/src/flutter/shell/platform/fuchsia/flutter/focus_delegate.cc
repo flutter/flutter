@@ -4,7 +4,7 @@
 
 #include <ostream>
 
-#include "focus_delegate.h"
+#include "flutter/shell/platform/fuchsia/flutter/focus_delegate.h"
 
 namespace flutter_runner {
 
@@ -25,7 +25,7 @@ void FocusDelegate::WatchLoop(std::function<void(bool)> callback) {
 }
 
 bool FocusDelegate::HandlePlatformMessage(
-    rapidjson::Value request,
+    const rapidjson::Document& request,
     fml::RefPtr<flutter::PlatformMessageResponse> response) {
   auto method = request.FindMember("method");
   if (method == request.MemberEnd() || !method->value.IsString()) {

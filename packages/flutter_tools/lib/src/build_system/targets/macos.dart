@@ -44,16 +44,6 @@ abstract class UnpackMacOS extends UnpackDarwin {
 
   @override
   List<Source> get outputs {
-    // Swift Package Manager will also produce the FlutterMacOS framework. If both SwiftPM and
-    // "Flutter Assemble" output the framework, the build will fail with an error about multiple
-    // commands producing the same output. Only output the framework if the project isn't using
-    // SwiftPM.
-    final FlutterProject flutterProject = FlutterProject.current();
-    final MacOSProject xcodeProject = flutterProject.macos;
-    if (xcodeProject.usesSwiftPackageManager &&
-        xcodeProject.flutterFrameworkSwiftPackageDirectory.existsSync()) {
-      return <Source>[];
-    }
     return <Source>[kFlutterMacOSFrameworkBinarySource];
   }
 
@@ -323,6 +313,9 @@ class CompileMacOSFramework extends Target {
         extraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
       }
 
+      // Suppress AOTSnapshotter build status logs
+      final quiet = environment.defines[kBuildSwiftPackage] == 'true';
+
       pending.add(
         snapshotter.build(
           buildMode: buildMode,
@@ -333,6 +326,7 @@ class CompileMacOSFramework extends Target {
           splitDebugInfo: splitDebugInfo,
           dartObfuscation: dartObfuscation,
           extraGenSnapshotOptions: extraGenSnapshotOptions,
+          quiet: quiet,
         ),
       );
     }
@@ -393,6 +387,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/App.framework/App'),
+    Source.pattern('{BUILD_DIR}/${DartBuild.dartHookResultFilename}'),
     ...IconTreeShaker.inputs,
   ];
 
