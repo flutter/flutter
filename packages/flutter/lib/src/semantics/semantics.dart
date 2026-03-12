@@ -1797,9 +1797,14 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// If non-null, indicates that this subtree represents a header.
   ///
-  /// A header divides into sections. For example, an address book application
-  /// might define headers A, B, C, etc. to divide the list of alphabetically
-  /// sorted contacts into sections.
+  /// A header divides content into sections. For example, an address book
+  /// application might define headers A, B, C, etc. to divide the list of
+  /// alphabetically sorted contacts into sections.
+  ///
+  /// Support for this semantic varies by platform. Android accessibility
+  /// exposes headings rather than a separate header concept, so `header` alone
+  /// is not sufficient there. To mark content as a heading on Android, also set
+  /// [headingLevel].
   final bool? header;
 
   /// If non-null, indicates that this subtree represents a text field.
