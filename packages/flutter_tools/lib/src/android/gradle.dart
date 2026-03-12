@@ -577,7 +577,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
             gradleExecutablePath: gradleExecutablePath,
             buildInfo: buildInfo,
           )
-        : null;
+        : _getExistingAndroidNdkSkipValue();
     if (preprovisionedNdkVersion != null) {
       options.add('-P$_kPreprovisionedNdkVersionProperty=$preprovisionedNdkVersion');
     }
@@ -1504,4 +1504,42 @@ String _getTargetPlatformByLocalEnginePath(String engineOutPath) {
 bool _shouldPreprovisionAndroidNdk(BuildInfo buildInfo) {
   final String? flavor = buildInfo.flavor;
   return flavor != null && flavor.isNotEmpty;
+}
+
+String? _getExistingAndroidNdkSkipValue() {
+  final AndroidSdk? androidSdk = globals.androidSdk;
+  if (androidSdk == null || !androidSdk.directory.existsSync()) {
+    return null;
+  }
+
+  for (final String? envPath in <String?>[
+    globals.platform.environment[kAndroidNdkHome],
+    globals.platform.environment[kAndroidNdkPath],
+    globals.platform.environment[kAndroidNdkRoot],
+  ]) {
+    if (envPath == null || envPath.isEmpty) {
+      continue;
+    }
+    final Directory envDirectory = globals.fs.directory(envPath);
+    if (_isExistingAndroidNdkDirectory(envDirectory)) {
+      return envDirectory.basename;
+    }
+  }
+
+  final Directory ndkRoot = androidSdk.directory.childDirectory('ndk');
+  if (!ndkRoot.existsSync()) {
+    return null;
+  }
+
+  for (final Directory ndkDirectory in ndkRoot.listSync().whereType<Directory>()) {
+    if (_isExistingAndroidNdkDirectory(ndkDirectory)) {
+      return ndkDirectory.basename;
+    }
+  }
+
+  return null;
+}
+
+bool _isExistingAndroidNdkDirectory(Directory directory) {
+  return directory.childFile('source.properties').existsSync();
 }
