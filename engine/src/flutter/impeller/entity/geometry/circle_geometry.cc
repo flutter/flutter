@@ -52,10 +52,10 @@ Scalar CircleGeometry::GetStrokeWidth() const {
 GeometryResult CircleGeometry::GetPositionBuffer(const ContentContext& renderer,
                                                  const Entity& entity,
                                                  RenderPass& pass) const {
-  return GetPositionBufferWithAA(renderer, entity, pass, 0.0);
+  return GetPositionBufferAntialiased(renderer, entity, pass, 0.0);
 }
 
-GeometryResult CircleGeometry::GetPositionBufferWithAA(
+GeometryResult CircleGeometry::GetPositionBufferAntialiased(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass,
@@ -81,10 +81,10 @@ GeometryResult CircleGeometry::GetPositionBufferWithAA(
 }
 
 std::optional<Rect> CircleGeometry::GetCoverage(const Matrix& transform) const {
-  return GetCoverageWithAA(transform, 0.0);
+  return GetCoverageAntialiased(transform, 0.0);
 }
 
-std::optional<Rect> CircleGeometry::GetCoverageWithAA(const Matrix& transform,
+std::optional<Rect> CircleGeometry::GetCoverageAntialiased(const Matrix& transform,
                                                       Scalar aa_pixels) const {
   Scalar max_basis = transform.GetMaxBasisLengthXY();
   Scalar expansion = max_basis == 0 ? 0.0 : aa_pixels / max_basis;
