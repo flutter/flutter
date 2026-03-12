@@ -80,8 +80,8 @@ void main() {
       expect(codesignIdentity, 'new identity');
       expect(logger.statusText, contains('Using code-signing identity: new identity'));
       expect(logger.warningText, '''
-       └── Identity has changed since last run. Previous identity: old identity
-           If this triggers a notice in Xcode, select "Accept Change" to accept the new identity.
+   └── Identity has changed since last run. Previous identity: old identity
+       If this triggers a notice in Xcode, select "Accept Change" to accept the new identity.
 ''');
       expect(identityFile.readAsStringSync(), 'new identity');
     });
@@ -106,8 +106,8 @@ void main() {
         expect(codesignIdentity, 'new identity');
         expect(logger.statusText, contains('Using code-signing identity: new identity'));
         expect(logger.warningText, '''
-       └── Unable to verify if code-signing identity has changed. If this triggers a notice in Xcode,
-           select "Accept Change" to accept the new identity.
+   └── Unable to verify if code-signing identity has changed. If this triggers a notice in Xcode,
+       select "Accept Change" to accept the new identity.
 ''');
         expect(identityFile.readAsStringSync(), 'new identity');
       },
