@@ -4928,6 +4928,68 @@ void _testLink() {
     expect(object.element.getAttribute('href'), 'https://flutter.dev');
   });
 
+  test('clicking a same-origin link prevents default browser navigation', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      flags: const ui.SemanticsFlags(isLink: true),
+      actions: ui.SemanticsAction.tap.index,
+      linkUrl: '/legal/terms',
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    tester.apply();
+
+    final SemanticsObject object = tester.getSemanticsObject(0);
+    expect(object.element.getAttribute('href'), '/legal/terms');
+
+    final DomRect rect = object.element.getBoundingClientRect();
+    final DomEvent clickEvent = createDomMouseEvent('click', <Object?, Object?>{
+      'clientX': (rect.left + (rect.right - rect.left) / 2).floor(),
+      'clientY': (rect.top + (rect.bottom - rect.top) / 2).floor(),
+    });
+    object.element.dispatchEvent(clickEvent);
+
+    expect(clickEvent.defaultPrevented, isTrue,
+        reason: 'Same-origin link clicks should prevent default browser navigation');
+
+    semantics().semanticsEnabled = false;
+  });
+
+  test('clicking a cross-origin link allows default browser navigation', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      flags: const ui.SemanticsFlags(isLink: true),
+      actions: ui.SemanticsAction.tap.index,
+      linkUrl: 'https://flutter.dev',
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    tester.apply();
+
+    final SemanticsObject object = tester.getSemanticsObject(0);
+    expect(object.element.getAttribute('href'), 'https://flutter.dev');
+
+    final DomRect rect = object.element.getBoundingClientRect();
+    final DomEvent clickEvent = createDomMouseEvent('click', <Object?, Object?>{
+      'clientX': (rect.left + (rect.right - rect.left) / 2).floor(),
+      'clientY': (rect.top + (rect.bottom - rect.top) / 2).floor(),
+    });
+    object.element.dispatchEvent(clickEvent);
+
+    expect(clickEvent.defaultPrevented, isFalse,
+        reason: 'Cross-origin link clicks should allow default browser navigation');
+
+    semantics().semanticsEnabled = false;
+  });
+
   test('a node that is both a link and a button is rendered as a link', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
