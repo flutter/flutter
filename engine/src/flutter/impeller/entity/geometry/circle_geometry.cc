@@ -84,8 +84,9 @@ std::optional<Rect> CircleGeometry::GetCoverage(const Matrix& transform) const {
   return GetCoverageAntialiased(transform, 0.0);
 }
 
-std::optional<Rect> CircleGeometry::GetCoverageAntialiased(const Matrix& transform,
-                                                      Scalar aa_pixels) const {
+std::optional<Rect> CircleGeometry::GetCoverageAntialiased(
+    const Matrix& transform,
+    Scalar aa_pixels) const {
   Scalar max_basis = transform.GetMaxBasisLengthXY();
   Scalar expansion = max_basis == 0 ? 0.0 : aa_pixels / max_basis;
 

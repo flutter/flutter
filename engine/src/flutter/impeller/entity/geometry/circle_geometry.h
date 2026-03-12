@@ -39,7 +39,7 @@ class CircleGeometry final : public Geometry {
 
   // The coverage of this geometry when applying SDF-based antialiasing.
   std::optional<Rect> GetCoverageAntialiased(const Matrix& transform,
-                                        Scalar aa_pixels) const;
+                                             Scalar aa_pixels) const;
 
   // |Geometry|
   GeometryResult GetPositionBuffer(const ContentContext& renderer,
@@ -48,9 +48,9 @@ class CircleGeometry final : public Geometry {
 
   // The position buffer to be used when applying SDF-based antialiasing.
   GeometryResult GetPositionBufferAntialiased(const ContentContext& renderer,
-                                         const Entity& entity,
-                                         RenderPass& pass,
-                                         Scalar aa_pixels) const;
+                                              const Entity& entity,
+                                              RenderPass& pass,
+                                              Scalar aa_pixels) const;
 
  private:
   Point center_;

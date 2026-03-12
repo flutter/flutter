@@ -48,7 +48,8 @@ void main() {
   float local_dx = length(dFdx(v_position));
   float local_dy = length(dFdy(v_position));
 
-  // Get the vector towards the center of the circle in terms of the pixel units.
+  // Get the vector towards the center of the circle in terms of the pixel
+  // units.
   float local_dist_towards_center =
       dot(vec2(local_dx, local_dy), abs(unitvec_towards_center));
 
@@ -62,11 +63,15 @@ void main() {
   float sdf_distance = mix(dist_filled, dist_stroked, frag_info.stroked);
 
   // Calculate the size of the anti-aliasing fade region in SDF units.
-  // This should correspond to roughly half a pixel's width on screen, scaled by the aa_pixels factor.
+  // This should correspond to roughly half a pixel's width on screen, scaled by
+  // the aa_pixels factor.
   float fade_size = local_dist_towards_center * frag_info.aa_pixels * 0.5;
 
   float alpha = 1.0 - smoothstep(-fade_size, fade_size, sdf_distance);
 
-  // Apply the calculated alpha to the base color.
-  frag_color = frag_info.color * alpha;
+  float finalAlpha = frag_info.color.w * alpha;
+
+  frag_color = vec4(frag_info.color.xyz, finalAlpha);
+
+  frag_color = IPPremultiply(frag_color);
 }

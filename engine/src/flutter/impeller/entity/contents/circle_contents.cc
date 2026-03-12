@@ -45,8 +45,8 @@ bool CircleContents::Render(const ContentContext& renderer,
   frag_info.aa_pixels = kAntiliasPixels;
   frag_info.stroked = stroked_ ? 1.0f : 0.0f;
 
-  auto geometry_result =
-      geometry_->GetPositionBufferAntialiased(renderer, entity, pass, kAntiliasPixels);
+  auto geometry_result = geometry_->GetPositionBufferAntialiased(
+      renderer, entity, pass, kAntiliasPixels);
 
   PipelineBuilderCallback pipeline_callback =
       [&renderer](ContentContextOptions options) {
@@ -71,7 +71,8 @@ bool CircleContents::Render(const ContentContext& renderer,
 }
 
 std::optional<Rect> CircleContents::GetCoverage(const Entity& entity) const {
-  return geometry_->GetCoverageAntialiased(entity.GetTransform(), kAntiliasPixels);
+  return geometry_->GetCoverageAntialiased(entity.GetTransform(),
+                                           kAntiliasPixels);
 }
 
 }  // namespace impeller
