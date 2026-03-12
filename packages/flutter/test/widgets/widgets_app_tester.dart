@@ -48,6 +48,23 @@ import 'package:flutter/widgets.dart';
 ///   await tester.pumpAndSettle();
 /// });
 /// ```
+///
+/// For tests that need full control over route generation:
+/// ```dart
+/// testWidgets('custom route test', (WidgetTester tester) async {
+///   await tester.pumpWidget(
+///     TestWidgetsApp(
+///       initialRoute: '/',
+///       onGenerateRoute: (RouteSettings settings) {
+///         return PageRouteBuilder<void>(
+///           settings: settings,
+///           pageBuilder: (_, __, ___) => const Text('Generated'),
+///         );
+///       },
+///     ),
+///   );
+/// });
+/// ```
 // TODO(rkishan516): Move this to flutter_test package.
 // Tracking issue: https://github.com/flutter/flutter/issues/181283
 class TestWidgetsApp extends StatelessWidget {
@@ -57,6 +74,7 @@ class TestWidgetsApp extends StatelessWidget {
     this.navigatorKey,
     this.home,
     this.initialRoute,
+    this.onGenerateRoute,
     this.routes = const <String, WidgetBuilder>{},
     this.color = const Color(0xFFFFFFFF),
     this.pageRouteBuilder = _defaultPageRouteBuilder,
@@ -104,6 +122,17 @@ class TestWidgetsApp extends StatelessWidget {
   ///
   ///  * [WidgetsApp.initialRoute], the equivalent property in [WidgetsApp].
   final String? initialRoute;
+
+  /// The route generator callback used when the app is navigated to a named
+  /// route.
+  ///
+  /// When provided, this takes over route generation from [home] and [routes].
+  /// The [pageRouteBuilder] is not used when [onGenerateRoute] is specified.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.onGenerateRoute], the equivalent property in [WidgetsApp].
+  final RouteFactory? onGenerateRoute;
 
   /// The application's top-level routing table.
   ///
@@ -226,6 +255,7 @@ class TestWidgetsApp extends StatelessWidget {
       navigatorKey: navigatorKey,
       home: home,
       initialRoute: initialRoute,
+      onGenerateRoute: onGenerateRoute,
       routes: routes,
       pageRouteBuilder: pageRouteBuilder,
       builder: builder,
