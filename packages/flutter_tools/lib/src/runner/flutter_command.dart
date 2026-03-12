@@ -1304,6 +1304,14 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addEnableHcppFlag({required bool verboseHelp}) {
+    argParser.addFlag(
+      'enable-hcpp',
+      hide: !verboseHelp,
+      help: 'Whether to enable the HCPP platform view mode on the Impeller rendering backend.',
+    );
+  }
+
   /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
   FlutterProject get project => FlutterProject.current();

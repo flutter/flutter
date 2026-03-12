@@ -28,6 +28,7 @@
 #include "impeller/playground/imgui/imgui_impl_impeller.h"
 #include "impeller/playground/playground.h"
 #include "impeller/playground/playground_impl.h"
+#include "impeller/renderer/backend/gles/context_gles.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/render_pass.h"
 #include "third_party/imgui/backends/imgui_impl_glfw.h"
@@ -270,7 +271,7 @@ bool Playground::OpenPlaygroundHere(
     RenderTarget render_target = surface->GetRenderTarget();
 
     ImGui::NewFrame();
-    ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(),
+    ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(),
                                  ImGuiDockNodeFlags_PassthruCentralNode);
     bool result = render_callback(render_target);
     ImGui::Render();
@@ -529,6 +530,10 @@ Playground::VKProcAddressResolver Playground::CreateVKProcAddressResolver()
 
 void Playground::SetGPUDisabled(bool value) const {
   impl_->SetGPUDisabled(value);
+}
+
+RuntimeStageBackend Playground::GetRuntimeStageBackend() const {
+  return impl_->GetRuntimeStageBackend();
 }
 
 }  // namespace impeller

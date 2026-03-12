@@ -64,9 +64,8 @@ class _MyAppState extends State<MyApp> {
                 child: Stack(
                   children: <Widget>[
                     Center(
-                      child: SizedBox(
-                        width: 300,
-                        height: 300,
+                      child: SizedBox.square(
+                        dimension: 300,
                         child: PlatformViewLink(
                           viewType: 'changing_color_button_platform_view',
                           surfaceFactory:
@@ -94,9 +93,8 @@ class _MyAppState extends State<MyApp> {
 
                     if (_showTexture)
                       const Center(
-                        child: SizedBox(
-                          width: 275,
-                          height: 275,
+                        child: SizedBox.square(
+                          dimension: 275,
                           child: Opacity(
                             opacity: 0.5,
                             child: Texture(
