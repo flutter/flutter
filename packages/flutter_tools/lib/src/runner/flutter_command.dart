@@ -408,8 +408,8 @@ abstract class FlutterCommand extends Command<void> {
       'base-href',
       help:
           'Overrides the href attribute of the <base> tag in web/index.html. '
-          'No change is done to web/index.html file if this flag is not provided. '
-          'The value has to start and end with a slash "/". '
+          'No change is made to web/index.html file if this flag is not provided. '
+          'The value must start and end with "/". '
           'For more information: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base',
     );
   }
