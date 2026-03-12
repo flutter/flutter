@@ -44,6 +44,80 @@ void main() {
     expect(tester.getSize(pageView), const Size(800.0, 220.0));
   });
 
+  testWidgets('PageView.builder shrinkWrapCrossAxis honors initialPage on first layout', (
+    WidgetTester tester,
+  ) async {
+    final controller = PageController(initialPage: 1);
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: PageView.builder(
+            controller: controller,
+            shrinkWrapCrossAxis: true,
+            itemCount: 3,
+            itemBuilder: (BuildContext context, int index) {
+              return _HorizontalPage(
+                height: switch (index) {
+                  0 => 100.0,
+                  1 => 220.0,
+                  _ => 340.0,
+                },
+                label: 'Page ${index + 1}',
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Page 2'), findsOneWidget);
+    expect(tester.getSize(find.byType(PageView)), const Size(800.0, 220.0));
+  });
+
+  testWidgets('PageView.custom shrinkWrapCrossAxis supports lazy delegates', (
+    WidgetTester tester,
+  ) async {
+    final controller = PageController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: PageView.custom(
+            controller: controller,
+            shrinkWrapCrossAxis: true,
+            childrenDelegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+              return _HorizontalPage(
+                height: switch (index) {
+                  0 => 100.0,
+                  1 => 220.0,
+                  _ => 340.0,
+                },
+                label: 'Page ${index + 1}',
+              );
+            }, childCount: 3),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(PageView)), const Size(800.0, 100.0));
+
+    controller.jumpToPage(2);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Page 3'), findsOneWidget);
+    expect(tester.getSize(find.byType(PageView)), const Size(800.0, 340.0));
+  });
+
   testWidgets('PageView.shrinkWrapCrossAxis interpolates the midpoint size', (
     WidgetTester tester,
   ) async {
