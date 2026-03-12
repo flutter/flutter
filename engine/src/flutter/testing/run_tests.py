@@ -936,10 +936,6 @@ def gather_dart_tests(
   )
   dart_tests = glob.glob(f'{dart_tests_dir}/*_test.dart')
 
-  opengles_skipped_tests = [
-      'gpu_test.dart',
-  ]
-
   impeller_backends = ['', 'vulkan', 'opengles']
   if is_mac():
     impeller_backends.append('metal')
@@ -957,10 +953,6 @@ def gather_dart_tests(
       _logger.info("Gathering dart test '%s'", dart_test_file)
 
     for impeller in impeller_backends:
-      if impeller == 'opengles' and dart_test_basename in opengles_skipped_tests:
-        _logger.info("Skipping for opengles: '%s'", dart_test_file)
-        continue
-
       for multithreaded in [False, True]:
         # An opengles implementation that is multithreaded would require the
         # raster thread and the io thread to have their own contexts in a share
