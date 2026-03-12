@@ -313,6 +313,7 @@ class RegularWindowControllerWin32 extends RegularWindowController {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
     if (!decorated) {
+      // See https://github.com/flutter/flutter/issues/183559
       throw UnimplementedError('Undecorated windows are not yet implemented on Windows.');
     }
 
@@ -550,6 +551,7 @@ class DialogWindowControllerWin32 extends DialogWindowController {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
     if (!decorated) {
+      // See https://github.com/flutter/flutter/issues/183559
       throw UnimplementedError('Undecorated windows are not yet implemented on Windows.');
     }
 
