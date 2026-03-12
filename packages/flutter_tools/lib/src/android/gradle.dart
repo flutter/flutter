@@ -23,6 +23,7 @@ import '../base/process.dart';
 import '../base/project_migrator.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
+import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
@@ -1531,7 +1532,33 @@ String? _getExistingAndroidNdkSkipValue() {
     return null;
   }
 
-  for (final Directory ndkDirectory in ndkRoot.listSync().whereType<Directory>()) {
+  final List<Directory> ndkDirectories = ndkRoot.listSync().whereType<Directory>().toList();
+  ndkDirectories.sort((Directory a, Directory b) {
+    Version? aVersion;
+    Version? bVersion;
+    try {
+      aVersion = Version.parse(a.basename);
+    } on FormatException {
+      // Ignore directories that are not valid version strings.
+    }
+    try {
+      bVersion = Version.parse(b.basename);
+    } on FormatException {
+      // Ignore directories that are not valid version strings.
+    }
+    if (aVersion == null && bVersion == null) {
+      return 0;
+    }
+    if (aVersion == null) {
+      return 1;
+    }
+    if (bVersion == null) {
+      return -1;
+    }
+    return bVersion.compareTo(aVersion);
+  });
+
+  for (final Directory ndkDirectory in ndkDirectories) {
     if (_isExistingAndroidNdkDirectory(ndkDirectory)) {
       return ndkDirectory.basename;
     }
