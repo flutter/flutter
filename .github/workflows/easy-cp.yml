@@ -42,7 +42,7 @@ jobs:
     steps:
       - name: Remove Label and Leave Comment
         run: |
-          gh issue edit ${{ github.event.issue.number }} --remove-label "${{ github.event.label.name }}"
+          gh issue edit ${{ github.event.issue.number }} -R flutter/flutter --remove-label "${{ github.event.label.name }}"
           gh issue comment ${{ github.event.issue.number }} -R flutter/flutter -b "Cherry-pick labels should only be applied to merged pull requests."
         env:
           GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
