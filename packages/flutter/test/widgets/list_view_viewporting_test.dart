@@ -10,9 +10,8 @@ import 'test_widgets.dart';
 import 'widgets_app_tester.dart';
 
 void main() {
-  const debugBlue = Color(0xFF2196F3);
-  const debugGreen = Color(0xFF4CAF50);
-  const debugBrightGreen = Color(0xFF00FF00);
+  const debugBlue = Color(0xFF0000FF);
+  const debugGreen = Color(0xFF00FF00);
   const debugBlack = Color(0xFF000000);
   const debugRed = Color(0xFFFF0000);
   testWidgets('ListView mount/dismount smoke test', (WidgetTester tester) async {
@@ -254,19 +253,17 @@ void main() {
 
   testWidgets('ListView reinvoke builders', (WidgetTester tester) async {
     late StateSetter setState;
-    var iconThemeColor = debugBlue;
+    var itemColor = debugBlue;
 
     Widget itemBuilder(BuildContext context, int index) {
       return Container(
         key: ValueKey<int>(index),
         width: 500.0, // this should be ignored
         height: 220.0,
-        color: IconTheme.of(context).color,
+        color: itemColor,
         child: Text('$index', textDirection: TextDirection.ltr),
       );
     }
-
-    final Widget viewport = ListView.builder(itemBuilder: itemBuilder);
 
     await tester.pumpWidget(
       Directionality(
@@ -274,7 +271,7 @@ void main() {
         child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setter) {
             setState = setter;
-            return IconTheme(data: IconThemeData(color: iconThemeColor), child: viewport);
+            return ListView.builder(itemBuilder: itemBuilder);
           },
         ),
       ),
@@ -284,7 +281,7 @@ void main() {
     expect(widget.color, equals(debugBlue));
 
     setState(() {
-      iconThemeColor = debugGreen;
+      itemColor = debugGreen;
     });
 
     await tester.pump();
@@ -299,7 +296,7 @@ void main() {
         key: ValueKey<int>(index),
         width: 500.0, // this should be ignored
         height: 220.0,
-        color: debugBrightGreen,
+        color: debugGreen,
         child: Text('$index', textDirection: TextDirection.ltr),
       );
     }
