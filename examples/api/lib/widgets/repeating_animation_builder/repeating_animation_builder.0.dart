@@ -76,9 +76,8 @@ class _RepeatingAnimationBuilderExampleState
 
   /// Builds the layered visual of the flower and the gem.
   Widget _buildFlowerGem(ColorScheme colors) {
-    return SizedBox(
-      width: 250,
-      height: 250,
+    return SizedBox.square(
+      dimension: 250,
       child: Stack(
         alignment: Alignment.center,
         children: <Widget>[
@@ -158,9 +157,8 @@ class _RepeatingAnimationBuilderExampleState
   /// Builds the custom Play/Pause button with a progress indicator border.
   Widget _buildPlayPauseButton(ColorScheme colors, double animationValue) {
     const double buttonSize = 88.0;
-    return SizedBox(
-      width: buttonSize,
-      height: buttonSize,
+    return SizedBox.square(
+      dimension: buttonSize,
       // InkWell provides the ripple effect on tap.
       child: InkWell(
         borderRadius: BorderRadius.circular(buttonSize / 2),

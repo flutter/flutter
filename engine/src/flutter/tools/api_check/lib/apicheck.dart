@@ -12,35 +12,37 @@ import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/analysis/session.dart';
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/element/element.dart';
 
 /// Returns all indexed fields in [className].
 ///
 /// Field names are expected to be of the form `kFooBarIndex`; prefixed with a
 /// `k` and terminated in `Index`.
-List<String> getDartClassFields({required String sourcePath, required String className}) {
+Future<List<String>> getDartClassFields({
+  required String sourcePath,
+  required String className,
+}) async {
   final includedPaths = <String>[sourcePath];
   final collection = AnalysisContextCollection(includedPaths: includedPaths);
   final AnalysisContext context = collection.contextFor(sourcePath);
   final AnalysisSession session = context.currentSession;
 
-  final SomeParsedUnitResult result = session.getParsedUnit(sourcePath);
-  if (result is! ParsedUnitResult) {
+  final SomeUnitElementResult result = await session.getUnitElement(sourcePath);
+  if (result is! UnitElementResult) {
     return <String>[];
   }
 
   // Locate all fields matching the expression in the class.
   final fieldExp = RegExp(r'_k(\w*)Index');
   final fields = <String>[];
-  for (final CompilationUnitMember unitMember in result.unit.declarations) {
-    if (unitMember is ClassDeclaration && unitMember.name.lexeme == className) {
-      for (final ClassMember classMember in unitMember.members) {
-        if (classMember is FieldDeclaration) {
-          for (final VariableDeclaration field in classMember.fields.variables) {
-            final String fieldName = field.name.lexeme;
-            final RegExpMatch? match = fieldExp.firstMatch(fieldName);
-            if (match != null) {
-              fields.add(match.group(1)!);
-            }
+  for (final ClassFragment cls in result.fragment.classes) {
+    if (cls.name == className) {
+      for (final FieldFragment field in cls.fields) {
+        final String? fieldName = field.name;
+        if (fieldName != null) {
+          final RegExpMatch? match = fieldExp.firstMatch(fieldName);
+          if (match != null) {
+            fields.add(match.group(1)!);
           }
         }
       }
