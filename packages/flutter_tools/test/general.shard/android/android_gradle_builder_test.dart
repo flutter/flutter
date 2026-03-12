@@ -332,7 +332,7 @@ void main() {
         expect(logger.statusText, contains('Retrying Gradle Build: #2, wait time: 200ms'));
 
         expect(testFnCalled, equals(maxRetries + 1));
-        expect(fakeAnalytics.sentEvents, hasLength(9));
+        expect(fakeAnalytics.sentEvents, hasLength(12));
         expect(
           fakeAnalytics.sentEvents,
           contains(
@@ -340,6 +340,16 @@ void main() {
               label: 'gradle-random-event-label-failure',
               buildType: 'gradle',
               settings: 'androidGradlePluginVersion: null',
+            ),
+          ),
+        );
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.flutterTrackAndroidDependencies(
+              success: false,
+              label: 'gradle-random-event-label-failure',
+              isModule: false,
             ),
           ),
         );
@@ -426,7 +436,7 @@ void main() {
 
         expect(handlerCalled, isTrue);
 
-        expect(fakeAnalytics.sentEvents, hasLength(3));
+        expect(fakeAnalytics.sentEvents, hasLength(4));
         expect(
           fakeAnalytics.sentEvents,
           contains(
@@ -434,6 +444,16 @@ void main() {
               label: 'gradle-random-event-label-failure',
               buildType: 'gradle',
               settings: 'androidGradlePluginVersion: null',
+            ),
+          ),
+        );
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.flutterTrackAndroidDependencies(
+              success: false,
+              label: 'gradle-random-event-label-failure',
+              isModule: false,
             ),
           ),
         );

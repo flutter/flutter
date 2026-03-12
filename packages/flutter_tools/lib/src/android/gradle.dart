@@ -376,7 +376,11 @@ class AndroidGradleBuilder implements AndroidBuilder {
         project: project,
         usesAndroidX: usesAndroidX,
       );
-
+      final String? gradleVersion = await gradle.getGradleVersion(
+        project.android.hostAppGradleRoot,
+        globals.logger,
+        globals.processManager,
+      );
       if (maxRetries == null || retry < maxRetries) {
         switch (status) {
           case GradleBuildStatus.retry:
@@ -406,6 +410,16 @@ class AndroidGradleBuilder implements AndroidBuilder {
                   settings: 'androidGradlePluginVersion: $agpVersion',
                 ),
               );
+              _analytics.send(
+                Event.flutterTrackAndroidDependencies(
+                  success: true,
+                  label: successEventLabel,
+                  isModule: project.isModule,
+                  agpVersion: agpVersion,
+                  jdkVersion: int.tryParse(versionToParsableString(_java?.version).toString()),
+                  gradleVersion: gradleVersion,
+                ),
+              );
               return exitCode;
             }
           case GradleBuildStatus.exit:
@@ -418,6 +432,16 @@ class AndroidGradleBuilder implements AndroidBuilder {
           label: usageLabel,
           buildType: 'gradle',
           settings: 'androidGradlePluginVersion: $agpVersion',
+        ),
+      );
+      _analytics.send(
+        Event.flutterTrackAndroidDependencies(
+          success: false,
+          label: usageLabel,
+          isModule: project.isModule,
+          agpVersion: agpVersion,
+          jdkVersion: int.tryParse(versionToParsableString(_java?.version).toString()),
+          gradleVersion: gradleVersion,
         ),
       );
     }
