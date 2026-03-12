@@ -2626,6 +2626,120 @@ public class AccessibilityBridgeTest {
     verify(mockChannel).dispatchSemanticsAction(0, AccessibilityBridge.Action.COLLAPSE);
   }
 
+  @Config(sdk = API_LEVELS.API_36)
+  @TargetApi(API_LEVELS.API_36)
+  @Test
+  public void itSendsContentChangeCheckedOnAPI36ForCheckbox() {
+    View mockRootView = mock(View.class);
+    Context mockContext = mock(Context.class);
+    when(mockRootView.getContext()).thenReturn(mockContext);
+    when(mockContext.getPackageName()).thenReturn("test");
+    ViewParent mockParent = mock(ViewParent.class);
+    when(mockRootView.getParent()).thenReturn(mockParent);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    when(mockManager.isEnabled()).thenReturn(true);
+
+    AccessibilityBridge accessibilityBridge = setUpBridge(mockRootView, mockManager, null);
+
+    TestSemanticsNode node = new TestSemanticsNode();
+    node.id = 0;
+    node.addFlag(AccessibilityBridge.Flag.HAS_CHECKED_STATE);
+    node.toUpdate().sendUpdateToBridge(accessibilityBridge);
+
+    // Change checked state
+    node.addFlag(AccessibilityBridge.Flag.IS_CHECKED);
+    node.toUpdate().sendUpdateToBridge(accessibilityBridge);
+
+    ArgumentCaptor<AccessibilityEvent> eventCaptor = ArgumentCaptor.forClass(AccessibilityEvent.class);
+    verify(mockParent, atLeastOnce()).requestSendAccessibilityEvent(eq(mockRootView), eventCaptor.capture());
+
+    boolean found = false;
+    for (AccessibilityEvent event : eventCaptor.getAllValues()) {
+      if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+          && event.getContentChangeTypes() == AccessibilityEvent.CONTENT_CHANGE_TYPE_CHECKED) {
+        found = true;
+        break;
+      }
+    }
+    assertTrue("CONTENT_CHANGE_TYPE_CHECKED event not found for checkbox", found);
+  }
+
+  @Config(sdk = API_LEVELS.API_36)
+  @TargetApi(API_LEVELS.API_36)
+  @Test
+  public void itSendsContentChangeCheckedOnAPI36ForToggle() {
+    View mockRootView = mock(View.class);
+    Context mockContext = mock(Context.class);
+    when(mockRootView.getContext()).thenReturn(mockContext);
+    when(mockContext.getPackageName()).thenReturn("test");
+    ViewParent mockParent = mock(ViewParent.class);
+    when(mockRootView.getParent()).thenReturn(mockParent);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    when(mockManager.isEnabled()).thenReturn(true);
+
+    AccessibilityBridge accessibilityBridge = setUpBridge(mockRootView, mockManager, null);
+
+    TestSemanticsNode node = new TestSemanticsNode();
+    node.id = 0;
+    node.addFlag(AccessibilityBridge.Flag.HAS_TOGGLED_STATE);
+    node.toUpdate().sendUpdateToBridge(accessibilityBridge);
+
+    // Change toggle state
+    node.addFlag(AccessibilityBridge.Flag.IS_TOGGLED);
+    node.toUpdate().sendUpdateToBridge(accessibilityBridge);
+
+    ArgumentCaptor<AccessibilityEvent> eventCaptor = ArgumentCaptor.forClass(AccessibilityEvent.class);
+    verify(mockParent, atLeastOnce()).requestSendAccessibilityEvent(eq(mockRootView), eventCaptor.capture());
+
+    boolean found = false;
+    for (AccessibilityEvent event : eventCaptor.getAllValues()) {
+      if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+          && event.getContentChangeTypes() == AccessibilityEvent.CONTENT_CHANGE_TYPE_CHECKED) {
+        found = true;
+        break;
+      }
+    }
+    assertTrue("CONTENT_CHANGE_TYPE_CHECKED event not found for toggle", found);
+  }
+
+  @Config(sdk = API_LEVELS.API_36)
+  @TargetApi(API_LEVELS.API_36)
+  @Test
+  public void itSendsContentChangeCheckedOnAPI36ForMixedState() {
+    View mockRootView = mock(View.class);
+    Context mockContext = mock(Context.class);
+    when(mockRootView.getContext()).thenReturn(mockContext);
+    when(mockContext.getPackageName()).thenReturn("test");
+    ViewParent mockParent = mock(ViewParent.class);
+    when(mockRootView.getParent()).thenReturn(mockParent);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    when(mockManager.isEnabled()).thenReturn(true);
+
+    AccessibilityBridge accessibilityBridge = setUpBridge(mockRootView, mockManager, null);
+
+    TestSemanticsNode node = new TestSemanticsNode();
+    node.id = 0;
+    node.addFlag(AccessibilityBridge.Flag.HAS_CHECKED_STATE);
+    node.toUpdate().sendUpdateToBridge(accessibilityBridge);
+
+    // Change to mixed state
+    node.addFlag(AccessibilityBridge.Flag.IS_CHECK_STATE_MIXED);
+    node.toUpdate().sendUpdateToBridge(accessibilityBridge);
+
+    ArgumentCaptor<AccessibilityEvent> eventCaptor = ArgumentCaptor.forClass(AccessibilityEvent.class);
+    verify(mockParent, atLeastOnce()).requestSendAccessibilityEvent(eq(mockRootView), eventCaptor.capture());
+
+    boolean found = false;
+    for (AccessibilityEvent event : eventCaptor.getAllValues()) {
+      if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+          && event.getContentChangeTypes() == AccessibilityEvent.CONTENT_CHANGE_TYPE_CHECKED) {
+        found = true;
+        break;
+      }
+    }
+    assertTrue("CONTENT_CHANGE_TYPE_CHECKED event not found for mixed state", found);
+  }
+
   @Config(sdk = API_LEVELS.API_28)
   @TargetApi(API_LEVELS.API_28)
   @Test
