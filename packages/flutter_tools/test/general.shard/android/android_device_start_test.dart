@@ -377,7 +377,7 @@ void main() {
           startPaused: true,
           disableServiceAuthCodes: true,
           dartFlags: '--foo',
-          enableSurfaceControl: true,
+          enableHcpp: true,
           useTestFonts: true,
           verboseSystemLogs: true,
         );
@@ -404,7 +404,7 @@ void main() {
           '--start-paused',
           '--disable-service-auth-codes',
           '--dart-flags=--foo',
-          '--enable-surface-control',
+          '--enable-hcpp-and-surface-control',
           '--use-test-fonts',
           '--verbose-logging',
           '--trace-startup',

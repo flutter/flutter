@@ -1287,7 +1287,7 @@ class DebuggingOptions {
         if (startPaused) ...<String>['--start-paused'],
         if (disableServiceAuthCodes) ...<String>['--disable-service-auth-codes'],
         if (dartFlags.isNotEmpty) ...<String>['--dart-flags=$dartFlags'],
-        if (enableSurfaceControl) ...<String>['--enable-surface-control'],
+        if (enableHcpp) ...<String>['--enable-hcpp-and-surface-control'],
         if (useTestFonts) ...<String>['--use-test-fonts'],
         if (verboseSystemLogs) ...<String>['--verbose-logging'],
       ],
