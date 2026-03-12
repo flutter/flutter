@@ -481,7 +481,159 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
   }
 }
 
-/// A class that reports the contrast ratio of a part of the screen.
+/// {@macro flutter.widgets.accessibility_evaluations.internal}
+///
+/// An evaluation which verifies that all nodes that represent non-text controls
+/// meet minimum contrast levels of 3.0.
+///
+/// The evaluatiosn are defined by the Web Content Accessibility Guidelines,
+/// https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html
+@internal
+class MinimumNonTextContrastEvaluation extends AccessibilityEvaluation {
+  /// Create a new [MinimumNonTextContrastEvaluation].
+  const MinimumNonTextContrastEvaluation();
+
+  /// The minimum contrast ratio for non-text controls.
+  ///
+  /// Defined by http://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html
+  static const double kMinimumRatioNonText = 3.0;
+
+  static const double _tolerance = -0.01;
+
+  @override
+  Future<EvaluationResult> _evaluate(WidgetsBinding binding) async {
+    final violations = <Violation>[];
+    for (final RenderView renderView in binding.renderViews) {
+      final layer = renderView.debugLayer! as OffsetLayer;
+      final SemanticsNode root = renderView.owner!.semanticsOwner!.rootSemanticsNode!;
+      // Needs to be the same pixel ratio otherwise our dimensions won't match
+      // the last transform layer.
+      final double ratio = 1 / renderView.flutterView.devicePixelRatio;
+      final ui.Image image = await layer.toImage(renderView.paintBounds, pixelRatio: ratio);
+      final ByteData? byteData = await image.toByteData();
+
+      violations.addAll(await _evaluateNode(root, image, byteData!, renderView));
+      image.dispose();
+    }
+
+    return EvaluationResult(violations);
+  }
+
+  Future<List<Violation>> _evaluateNode(
+    SemanticsNode node,
+    ui.Image image,
+    ByteData byteData,
+    RenderView renderView,
+  ) async {
+    final violations = <Violation>[];
+
+    // Skip disabled nodes, as they are not required to pass contrast checks.
+    final isDisabled = node.flagsCollection.isEnabled == ui.Tristate.isFalse;
+
+    if (node.isInvisible ||
+        node.isMergedIntoParent ||
+        node.flagsCollection.isHidden ||
+        isDisabled) {
+      return violations;
+    }
+
+    final SemanticsData data = node.getSemanticsData();
+    final children = <SemanticsNode>[];
+    node.visitChildren((SemanticsNode child) {
+      children.add(child);
+      return true;
+    });
+    for (final child in children) {
+      violations.addAll(await _evaluateNode(child, image, byteData, renderView));
+    }
+    if (_shouldSkipNode(data)) {
+      return violations;
+    }
+
+    Rect nodeBounds = node.rect;
+    SemanticsNode? current = node;
+    while (current != null) {
+      final Matrix4? transform = current.transform;
+      if (transform != null && current.parent != null) {
+        nodeBounds = MatrixUtils.transformRect(transform, nodeBounds);
+      }
+      current = current.parent;
+    }
+
+    final double devicePixelRatio = renderView.flutterView.devicePixelRatio;
+    final logicalBounds = Rect.fromLTRB(
+      nodeBounds.left / devicePixelRatio,
+      nodeBounds.top / devicePixelRatio,
+      nodeBounds.right / devicePixelRatio,
+      nodeBounds.bottom / devicePixelRatio,
+    );
+
+    final Rect inflatedBounds = logicalBounds.inflate(4.0);
+
+    if (_isNodeOffScreen(inflatedBounds, renderView.flutterView)) {
+      return violations;
+    }
+
+    final Map<Color, int> colorHistogram = _colorsWithinRect(
+      byteData,
+      inflatedBounds,
+      image.width,
+      image.height,
+    );
+
+    if (colorHistogram.length <= 1) {
+      return violations;
+    }
+
+    final report = _ContrastReport(colorHistogram);
+    final double contrastRatio = report.contrastRatio();
+
+    if (contrastRatio - kMinimumRatioNonText >= _tolerance) {
+      return violations;
+    }
+
+    violations.add(
+      Violation(
+        node,
+        '$node:\n'
+        'Expected non-text control contrast ratio of at least $kMinimumRatioNonText '
+        'but found ${contrastRatio.toStringAsFixed(2)}.\n'
+        'The computed colors were:\n'
+        'light - ${report.lightColor}, dark - ${report.darkColor}\n',
+      ),
+    );
+    return violations;
+  }
+
+  bool _shouldSkipNode(SemanticsData data) {
+    if (data.flagsCollection.scopesRoute) {
+      return true;
+    }
+
+    final bool isControl =
+        data.flagsCollection.isButton ||
+        data.flagsCollection.isSlider ||
+        data.flagsCollection.isTextField ||
+        data.flagsCollection.isChecked != ui.CheckedState.none ||
+        data.flagsCollection.isToggled != ui.Tristate.none ||
+        data.hasAction(ui.SemanticsAction.tap) ||
+        data.hasAction(ui.SemanticsAction.longPress);
+
+    if (!isControl) {
+      return true;
+    }
+    return false;
+  }
+
+  bool _isNodeOffScreen(Rect paintBounds, ui.FlutterView window) {
+    final Size windowPhysicalSize = window.physicalSize * window.devicePixelRatio;
+    return paintBounds.top < -50.0 ||
+        paintBounds.left < -50.0 ||
+        paintBounds.bottom > windowPhysicalSize.height + 50.0 ||
+        paintBounds.right > windowPhysicalSize.width + 50.0;
+  }
+}
+
 class _ContrastReport {
   /// Generates a contrast report given a color histogram.
   ///
