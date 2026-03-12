@@ -8,10 +8,9 @@ import '../semantics.dart';
 /// Provides accessibility for links.
 ///
 /// For same-origin URLs, click events are intercepted and the browser's default
-/// navigation is prevented. This allows Flutter's [Router] to handle the
-/// navigation without a full page reload, preserving SPA behavior. The
-/// framework receives the tap via [SemanticsAction.tap] and can update the
-/// route accordingly.
+/// navigation is prevented. Instead, the URL is pushed via the browser's
+/// History API and a popstate event is dispatched, which the framework's
+/// BrowserHistory listens to and forwards to the Router.
 ///
 /// For cross-origin URLs, the browser's default navigation is allowed so that
 /// external links work as expected.
@@ -36,15 +35,18 @@ class SemanticLink extends SemanticRole {
   }
 
   /// Intercepts click events on the anchor element to prevent the browser's
-  /// default navigation for same-origin URLs.
+  /// default navigation for same-origin URLs and instead push the route via
+  /// the browser's History API.
   ///
   /// Without this, clicking a semantic link with an `href` causes a full page
   /// navigation, reinitializing the Flutter engine and losing all app state.
   void _addLinkClickInterceptor() {
     _clickListener = createDomEventListener((DomEvent event) {
       final String? href = element.getAttribute('href');
-      if (href != null && _isSameOrigin(href)) {
+      if (href case final href? when _isSameOrigin(href)) {
         event.preventDefault();
+        domWindow.history.pushState(null, '', href);
+        domWindow.dispatchEvent(DomPopStateEvent('popstate'));
       }
     });
     element.addEventListener('click', _clickListener);
