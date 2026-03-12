@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/semantics.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'widgets_app_tester.dart';
@@ -492,7 +490,7 @@ void main() {
     addTearDown(tester.view.reset);
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
@@ -548,7 +546,7 @@ void main() {
         addTearDown(controller.dispose);
         const localizations = DefaultWidgetsLocalizations();
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: Expansible(
               controller: controller,
               animationStyle: AnimationStyle.noAnimation,
@@ -562,129 +560,34 @@ void main() {
           ),
         );
 
-        // The header should have tap action and isExpanded is false initially.
-        final SemanticsNode semantics = tester.getSemantics(find.text('Header'));
-        expect(semantics, isNotNull);
-        expect(
-          semantics.hint,
-          '${localizations.expandedHint}\n ${localizations.expansibleCollapsedHint}',
-        );
-
-        controller.expand();
-        await tester.pumpAndSettle();
-        expect(
-          tester.takeAnnouncements().first,
-          isAccessibilityAnnouncement(localizations.collapsedHint),
-        );
-
-        controller.collapse();
-        await tester.pumpAndSettle();
-        expect(
-          tester.takeAnnouncements().first,
-          isAccessibilityAnnouncement(localizations.expandedHint),
-        );
-        controller.dispose();
-        handle.dispose();
-      },
-      variant: const TargetPlatformVariant(<TargetPlatform>{
-        TargetPlatform.macOS,
-        TargetPlatform.windows,
-        TargetPlatform.linux,
-        TargetPlatform.fuchsia,
-      }),
-    );
-
-    testWidgets(
-      'Expansible includes correct Semantics hint for expanded and collapsed states non iOS/MacOS devices',
-      (WidgetTester tester) async {
-        final SemanticsHandle handle = tester.ensureSemantics();
-        final ExpansibleController controller = ExpansibleController();
-
-        const DefaultWidgetsLocalizations localizations = DefaultWidgetsLocalizations();
-
-        await tester.pumpWidget(
-          TestWidgetsApp(
-            home: Expansible(
-              controller: controller,
-              headerBuilder: (BuildContext context, Animation<double> animation) =>
-                  GestureDetector(onTap: controller.toggle, child: const Text('Header')),
-              bodyBuilder: (BuildContext context, Animation<double> animation) =>
-                  const Text('Body'),
-            ),
-          ),
-        );
-
-        expect(tester.takeAnnouncements(), isEmpty);
-
-        controller.expand();
-        await tester.pump(const Duration(seconds: 1));
-        expect(
-          tester.takeAnnouncements().first,
-          isAccessibilityAnnouncement(localizations.collapsedHint),
-        );
-        controller.dispose();
-        handle.dispose();
-      },
-      variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
-    );
-
-    testWidgets(
-      'Expansible uses live region on Android',
-      (WidgetTester tester) async {
-        final SemanticsHandle handle = tester.ensureSemantics();
-
-        final ExpansibleController controller = ExpansibleController();
-        addTearDown(controller.dispose);
-
-        addTearDown(controller.dispose);
-        const DefaultWidgetsLocalizations localizations = DefaultWidgetsLocalizations();
-
-        await tester.pumpWidget(
-          TestWidgetsApp(
-            home: Expansible(
-              controller: controller,
-              animationStyle: AnimationStyle.noAnimation,
-              headerBuilder: (BuildContext context, Animation<double> animation) =>
-                  GestureDetector(onTap: controller.toggle, child: const Text('Header')),
-              bodyBuilder: (BuildContext context, Animation<double> animation) =>
-                  const Text('Body'),
-            ),
-          ),
-        );
-
         // Find the semantics node for the Expansible widget
         SemanticsNode semanticsNode = tester.getSemantics(find.byType(Expansible));
 
         // Default closed state
-        expect(semanticsNode.hint, localizations.expandedHint);
+        expect(semanticsNode.label, localizations.expandedHint);
 
         // Expanded state test
         await tester.tap(find.text('Header'));
         await tester.pump();
         semanticsNode = tester.getSemantics(find.byType(Expansible));
-        expect(semanticsNode.hint, localizations.collapsedHint);
+        expect(semanticsNode.label, localizations.collapsedHint);
 
         // Collapsed state test
         await tester.tap(find.text('Header'));
         await tester.pump();
         semanticsNode = tester.getSemantics(find.byType(Expansible));
-        expect(semanticsNode.hint, localizations.expandedHint);
+        expect(semanticsNode.label, localizations.expandedHint);
       },
-      variant: const TargetPlatformVariant(<TargetPlatform>{
-        TargetPlatform.fuchsia,
-        TargetPlatform.linux,
-        TargetPlatform.windows,
-      }),
+      variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
     );
 
     testWidgets(
-      'Expansible uses hint semantics on iOS/macOS',
+      'Expansible uses expanded semantics on non iOS/macOS',
       (WidgetTester tester) async {
         final controller = ExpansibleController();
         addTearDown(controller.dispose);
-        const localizations = DefaultWidgetsLocalizations();
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: Expansible(
               controller: controller,
               animationStyle: AnimationStyle.noAnimation,
@@ -698,32 +601,64 @@ void main() {
           ),
         );
 
-        // Find the semantics node for the Expansible widget
+        // Initially collapsed.
         SemanticsNode semanticsNode = tester.getSemantics(find.byType(Expansible));
-
-        // Default closed state
-        expect(
-          semanticsNode.hint,
-          '${localizations.expandedHint}\n ${localizations.expansibleCollapsedHint}',
-        );
+        expect(semanticsNode.hasFlag(SemanticsFlag.isExpanded), isFalse);
 
         // Expanded state test
         await tester.tap(find.text('Header'));
         await tester.pump();
         semanticsNode = tester.getSemantics(find.byType(Expansible));
-        expect(
-          semanticsNode.hint,
-          '${localizations.collapsedHint}\n ${localizations.expansibleExpandedHint}',
-        );
+        expect(semanticsNode.hasFlag(SemanticsFlag.isExpanded), isTrue);
 
         // Collapsed state test
         await tester.tap(find.text('Header'));
         await tester.pump();
         semanticsNode = tester.getSemantics(find.byType(Expansible));
-        expect(
-          semanticsNode.hint,
-          '${localizations.expandedHint}\n ${localizations.expansibleCollapsedHint}',
+        expect(semanticsNode.hasFlag(SemanticsFlag.isExpanded), isFalse);
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.fuchsia,
+        TargetPlatform.linux,
+        TargetPlatform.windows,
+      }),
+    );
+
+    testWidgets(
+      'Expansible uses expanded semantics on iOS/macOS',
+      (WidgetTester tester) async {
+        final controller = ExpansibleController();
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: Expansible(
+              controller: controller,
+              animationStyle: AnimationStyle.noAnimation,
+              bodyBuilder: (BuildContext context, Animation<double> animation) =>
+                  const Text('Body'),
+              headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
+                onTap: controller.isExpanded ? controller.collapse : controller.expand,
+                child: const Text('Header'),
+              ),
+            ),
+          ),
         );
+
+        // Initially collapsed.
+        SemanticsNode semanticsNode = tester.getSemantics(find.byType(Expansible));
+        expect(semanticsNode.hasFlag(SemanticsFlag.isExpanded), isFalse);
+
+        // Expanded state test
+        await tester.tap(find.text('Header'));
+        await tester.pump();
+        semanticsNode = tester.getSemantics(find.byType(Expansible));
+        expect(semanticsNode.hasFlag(SemanticsFlag.isExpanded), isTrue);
+
+        // Collapsed state test
+        await tester.tap(find.text('Header'));
+        await tester.pump();
+        semanticsNode = tester.getSemantics(find.byType(Expansible));
+        expect(semanticsNode.hasFlag(SemanticsFlag.isExpanded), isFalse);
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{
         TargetPlatform.iOS,

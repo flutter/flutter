@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'icons.dart';
 import 'list_tile.dart';
+import 'localizations.dart';
 import 'theme.dart';
 
 /// The curve of the animation used to expand or collapse the

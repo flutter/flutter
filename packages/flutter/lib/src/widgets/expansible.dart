@@ -506,9 +506,6 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
     final bool closed = !widget.controller.isExpanded && _animationController.isDismissed;
     final bool shouldRemoveBody = closed && !widget.maintainState;
     final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
-    final String onTapHint = widget.controller.isExpanded
-        ? localizations.expansibleExpandedTapHint
-        : localizations.expansibleCollapsedTapHint;
     final String semanticsHint = switch (defaultTargetPlatform) {
       TargetPlatform.iOS || TargetPlatform.macOS =>
         widget.controller.isExpanded
@@ -523,8 +520,6 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
     );
 
     final Widget semanticsChild = Semantics(
-      hint: semanticsHint,
-      onTapHint: onTapHint,
       expanded: widget.controller.isExpanded,
       onExpand: widget.controller.isExpanded ? null : widget.controller.expand,
       onCollapse: !widget.controller.isExpanded ? null : widget.controller.collapse,

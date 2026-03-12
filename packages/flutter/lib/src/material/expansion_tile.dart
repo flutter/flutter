@@ -8,6 +8,7 @@ library;
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
@@ -17,6 +18,7 @@ import 'icons.dart';
 import 'list_tile.dart';
 import 'list_tile_theme.dart';
 import 'material.dart';
+import 'material_localizations.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -582,8 +584,19 @@ class _ExpansionTileState extends State<ExpansionTile> {
   Widget _buildHeader(BuildContext context, Animation<double> animation) {
     _iconColor = animation.drive(_iconColorTween.chain(_easeInTween));
     _headerColor = animation.drive(_headerColorTween.chain(_easeInTween));
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final String onTapHint = _tileController.isExpanded
+        ? localizations.expansionTileExpandedTapHint
+        : localizations.expansionTileCollapsedTapHint;
+    final String semanticsHint = switch (defaultTargetPlatform) {
+      TargetPlatform.iOS || TargetPlatform.macOS =>
+        _tileController.isExpanded
+            ? '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}'
+            : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}',
+      _ => _tileController.isExpanded ? localizations.collapsedHint : localizations.expandedHint,
+    };
 
-    return ListTileTheme.merge(
+    final Widget child = ListTileTheme.merge(
       iconColor: _iconColor.value ?? _expansionTileTheme.iconColor,
       textColor: _headerColor.value,
       child: ListTile(
@@ -604,6 +617,7 @@ class _ExpansionTileState extends State<ExpansionTile> {
         internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
       ),
     );
+    return Semantics(hint: semanticsHint, onTapHint: onTapHint, child: child);
   }
 
   Widget _buildBody(BuildContext context, Animation<double> animation) {
