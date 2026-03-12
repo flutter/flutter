@@ -18,13 +18,7 @@ struct UniqueID {
 
   UniqueID();
 
-  constexpr bool operator==(const UniqueID& other) const {
-    return id == other.id;
-  }
-
-  constexpr bool operator<(const UniqueID& other) const {
-    return id < other.id;
-  }
+  constexpr auto operator<=>(const UniqueID&) const = default;
 };
 
 class ComparableBase {};
