@@ -965,7 +965,10 @@ mixin class SatelliteWindowControllerDelegate {
 /// controller to release the resources associated with the window.
 ///
 /// If the parent window of the satellite is destroyed, then the satellite will
-/// be destroyed as well. [SatelliteWindowControllerDelegate.onWindowDestroyed]
+/// be destroyed as well. The user does not need to explicitly call [destroy]
+/// in this case.
+///
+/// [SatelliteWindowControllerDelegate.onWindowDestroyed]
 /// will be called when the window is destroyed.
 ///
 /// {@tool snippet}
