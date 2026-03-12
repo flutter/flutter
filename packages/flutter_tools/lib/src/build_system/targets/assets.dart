@@ -108,6 +108,9 @@ Future<Depfile> copyAssets(
     }),
   };
 
+  // Suppress IconTreeShaker summary messages
+  final quiet = environment.defines[kBuildSwiftPackage] == 'true';
+
   await Future.wait<void>(
     assetEntries.entries.map<Future<void>>((MapEntry<String, AssetBundleEntry> entry) async {
       final PoolResource copyResource = await copyFilesPool.request();
@@ -152,6 +155,7 @@ Future<Depfile> copyAssets(
                 input: content.file as File,
                 outputPath: file.path,
                 relativePath: entry.key,
+                quiet: quiet,
               );
             case AssetKind.shader:
               var inputToCompiler = content.file as File;
@@ -241,6 +245,7 @@ Future<Depfile> copyAssets(
                   input: content.file as File,
                   outputPath: file.path,
                   relativePath: entry.key,
+                  quiet: quiet,
                 )) {
                   await (content.file as File).copy(file.path);
                 }
@@ -267,17 +272,14 @@ class CopyAssets extends Target {
   String get name => 'copy_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[
-    DartBuildForNative(),
-    KernelSnapshot(),
-    InstallCodeAssets(),
-  ];
+  List<Target> get dependencies => const <Target>[DartBuildForNative(), KernelSnapshot()];
 
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern(
       '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/assets.dart',
     ),
+    Source.pattern('{BUILD_DIR}/${DartBuild.dartHookResultFilename}'),
     ...IconTreeShaker.inputs,
     ...ShaderCompiler.inputs,
   ];
@@ -308,11 +310,6 @@ class CopyAssets extends Target {
       targetPlatform: targetPlatform,
       buildMode: buildMode,
       flavor: environment.defines[kFlavor],
-      additionalContent: <String, DevFSContent>{
-        'NativeAssetsManifest.json': DevFSFileContent(
-          environment.buildDir.childFile('native_assets.json'),
-        ),
-      },
     );
     environment.depFileService.writeToFile(
       depfile,

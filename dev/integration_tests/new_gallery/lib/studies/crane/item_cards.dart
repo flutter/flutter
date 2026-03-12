@@ -53,9 +53,8 @@ class DestinationCard extends StatelessWidget {
                 contentPadding: const EdgeInsetsDirectional.only(end: 8),
                 leading: ClipRRect(
                   borderRadius: const BorderRadius.all(Radius.circular(4)),
-                  child: SizedBox(
-                    width: mobileThumbnailSize,
-                    height: mobileThumbnailSize,
+                  child: SizedBox.square(
+                    dimension: mobileThumbnailSize,
                     child: _DestinationImage(destination: destination),
                   ),
                 ),

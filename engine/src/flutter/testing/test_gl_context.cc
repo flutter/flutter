@@ -12,52 +12,9 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/testing/test_gl_utils.h"
+#include "flutter/testing/test_swangle_utils.h"
 
 namespace flutter::testing {
-
-namespace {
-bool HasExtension(const char* extensions, const char* name) {
-  const char* r = strstr(extensions, name);
-  auto len = strlen(name);
-  // check that the extension name is terminated by space or null terminator
-  return r != nullptr && (r[len] == ' ' || r[len] == 0);
-}
-
-void CheckSwanglekExtensions() {
-  const char* extensions = ::eglQueryString(EGL_NO_DISPLAY, EGL_EXTENSIONS);
-  FML_CHECK(HasExtension(extensions, "EGL_EXT_platform_base")) << extensions;
-  FML_CHECK(HasExtension(extensions, "EGL_ANGLE_platform_angle_vulkan"))
-      << extensions;
-  FML_CHECK(HasExtension(extensions,
-                         "EGL_ANGLE_platform_angle_device_type_swiftshader"))
-      << extensions;
-}
-
-EGLDisplay CreateSwangleDisplay() {
-  CheckSwanglekExtensions();
-
-  PFNEGLGETPLATFORMDISPLAYEXTPROC egl_get_platform_display_EXT =
-      reinterpret_cast<PFNEGLGETPLATFORMDISPLAYEXTPROC>(
-          eglGetProcAddress("eglGetPlatformDisplayEXT"));
-  FML_CHECK(egl_get_platform_display_EXT)
-      << "eglGetPlatformDisplayEXT not available.";
-
-  const EGLint display_config[] = {
-      EGL_PLATFORM_ANGLE_TYPE_ANGLE,
-      EGL_PLATFORM_ANGLE_TYPE_VULKAN_ANGLE,
-      EGL_PLATFORM_ANGLE_DEVICE_TYPE_ANGLE,
-      EGL_PLATFORM_ANGLE_DEVICE_TYPE_SWIFTSHADER_ANGLE,
-      EGL_PLATFORM_ANGLE_NATIVE_PLATFORM_TYPE_ANGLE,
-      EGL_PLATFORM_VULKAN_DISPLAY_MODE_HEADLESS_ANGLE,
-      EGL_NONE,
-  };
-
-  return egl_get_platform_display_EXT(
-      EGL_PLATFORM_ANGLE_ANGLE,
-      reinterpret_cast<EGLNativeDisplayType*>(EGL_DEFAULT_DISPLAY),
-      display_config);
-}
-}  // namespace
 
 TestEGLContext::TestEGLContext() {
   display = CreateSwangleDisplay();

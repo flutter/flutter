@@ -7,8 +7,10 @@ library;
 
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'widgets_app_tester.dart';
 
 class _MockAnimationController extends AnimationController {
   _MockAnimationController()
@@ -52,10 +54,10 @@ void main() {
       const double magnificationScale = 2;
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           key: appKey,
           home: Container(
-            color: Colors.blue,
+            color: const Color(0xFF0000FF), // blue
             width: double.infinity,
             height: double.infinity,
             child: Stack(
@@ -66,7 +68,7 @@ void main() {
                   left: magnifierPosition.dx + magnifierFocalPoint.dx,
                   top: magnifierPosition.dy + magnifierFocalPoint.dy,
                   child: Container(
-                    color: Colors.black,
+                    color: const Color(0xFF000000), // black
                     // Since it is the size of the magnifier but over its
                     // magnificationScale, it should take up the whole magnifier.
                     width: (magnifierSize.width * 1.5) / magnificationScale,
@@ -86,7 +88,7 @@ void main() {
                         BoxShadow(
                           spreadRadius: 10.0,
                           blurRadius: 10.0,
-                          color: Colors.yellow,
+                          color: Color(0xFFFFFF00), // yellow
                           offset: Offset(5.0, 5.0),
                         ),
                       ],
@@ -126,7 +128,7 @@ void main() {
         await runFakeAsync((FakeAsync async) async {
           const testMagnifier = RawMagnifier(size: Size(100, 100));
 
-          await tester.pumpWidget(const MaterialApp(home: Placeholder()));
+          await tester.pumpWidget(const TestWidgetsApp(home: Placeholder()));
 
           final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
@@ -154,7 +156,7 @@ void main() {
 
           const testMagnifier = RawMagnifier(size: Size(100, 100));
 
-          await tester.pumpWidget(const MaterialApp(home: Placeholder()));
+          await tester.pumpWidget(const TestWidgetsApp(home: Placeholder()));
 
           final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
@@ -203,7 +205,7 @@ void main() {
 
     group('show', () {
       testWidgets('should insert below below widget', (WidgetTester tester) async {
-        await tester.pumpWidget(const MaterialApp(home: Text('text')));
+        await tester.pumpWidget(const TestWidgetsApp(home: Text('text')));
 
         final BuildContext context = tester.firstElement(find.byType(Text));
 
@@ -247,7 +249,7 @@ void main() {
           const testMagnifier = RawMagnifier(size: Size(100, 100));
           const testMagnifier2 = RawMagnifier(size: Size(100, 100));
 
-          await tester.pumpWidget(const MaterialApp(home: Placeholder()));
+          await tester.pumpWidget(const TestWidgetsApp(home: Placeholder()));
 
           final BuildContext context = tester.firstElement(find.byType(Placeholder));
 

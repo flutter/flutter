@@ -262,7 +262,7 @@ std::vector<PersistentCache::SkSLCache> PersistentCache::LoadSkSLs() const {
     if (parse_result.IsError()) {
       FML_LOG(ERROR) << "Failed to parse json file: " << kAssetFileName;
     } else {
-      for (auto& item : json_doc["data"].GetObject()) {
+      for (auto& item : json_doc["data"].GetObj()) {
         sk_sp<SkData> key = ParseBase32(item.name.GetString());
         sk_sp<SkData> sksl = ParseBase64(item.value.GetString());
         if (key != nullptr && sksl != nullptr) {
