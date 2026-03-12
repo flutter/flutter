@@ -36,7 +36,7 @@ Future<void> setClipboard(String message) async {
   if (SchedulerBinding.instance.hasScheduledFrame) {
     SchedulerBinding.instance.addPostFrameCallback(completeSetClipboard);
   } else {
-    completeSetClipboard();
+    await completeSetClipboard();
   }
   await completer.future;
 }
@@ -55,7 +55,7 @@ Future<AndroidSemanticsNode> getSemantics(Finder finder, WidgetTester tester) as
   if (SchedulerBinding.instance.hasScheduledFrame) {
     SchedulerBinding.instance.addPostFrameCallback(completeSemantics);
   } else {
-    completeSemantics();
+    await completeSemantics();
   }
   return AndroidSemanticsNode.deserialize(await completer.future);
 }
