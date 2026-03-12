@@ -3205,7 +3205,7 @@ Future<void> testMain() async {
         <String>['username', 'password', 'newPassword'],
         <String>['field1', 'field2', 'field3'],
       );
-      final focusedAutofillMap = fields.first['autofill'] as Map<String, Object?>;
+      final focusedAutofillMap = fields.first['autofill']! as Map<String, Object?>;
       final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
         kImplicitViewId,
         focusedAutofillMap,
@@ -3290,12 +3290,11 @@ Future<void> testMain() async {
     test('form wakeUp and goDormant', () {
       expect(defaultTextEditingRoot.querySelectorAll('form'), isEmpty);
 
-      final List<dynamic> fields = createFieldValues(
+      final List<Map<String, Object?>> fields = createFieldValues(
         <String>['username', 'password', 'newPassword'],
         <String>['field1', 'fields2', 'field3'],
       );
-      final Map<String, dynamic> focusedAutofillMap =
-          fields.first['autofill'] as Map<String, dynamic>;
+      final focusedAutofillMap = fields.first['autofill']! as Map<String, Object?>;
       final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
         kImplicitViewId,
         focusedAutofillMap,
@@ -3339,9 +3338,11 @@ Future<void> testMain() async {
     });
 
     test('Validate single element form', () {
-      final List<dynamic> fields = createFieldValues(<String>['username'], <String>['field1']);
-      final Map<String, dynamic> focusedAutofillMap =
-          fields.first['autofill'] as Map<String, dynamic>;
+      final List<Map<String, Object?>> fields = createFieldValues(
+        <String>['username'],
+        <String>['field1'],
+      );
+      final focusedAutofillMap = fields.first['autofill']! as Map<String, Object?>;
 
       final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
         kImplicitViewId,
@@ -3391,11 +3392,11 @@ Future<void> testMain() async {
     });
 
     test('wakeUp() should place element in correct position', () {
-      final Map<String, dynamic> focusedAutofillMap = createAutofillInfo('email', 'field1');
-      final List<dynamic> fields = createFieldValues(
+      final List<Map<String, Object?>> fields = createFieldValues(
         <String>['email', 'username', 'password'],
         <String>['field1', 'field2', 'field3'],
       );
+      final focusedAutofillMap = fields.first['autofill']! as Map<String, Object?>;
       final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
         kImplicitViewId,
         focusedAutofillMap,
@@ -3430,12 +3431,12 @@ Future<void> testMain() async {
     });
 
     test('multiple wakeUp() calls', () {
-      final List<dynamic> fields = createFieldValues(
+      final List<Map<String, Object?>> fields = createFieldValues(
         <String>['email', 'password'],
         <String>['field1', 'field2'],
       );
-      final Map<String, dynamic> emailAutofillMap = createAutofillInfo('email', 'field1');
-      final Map<String, dynamic> passwordAutofillMap = createAutofillInfo('password', 'field2');
+      final emailAutofillMap = fields.first['autofill']! as Map<String, Object?>;
+      final passwordAutofillMap = fields.last['autofill']! as Map<String, Object?>;
       final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
         kImplicitViewId,
         emailAutofillMap,
@@ -3459,7 +3460,7 @@ Future<void> testMain() async {
         emailAutofill.uniqueIdentifier,
       );
 
-      final formElement = autofillForm.formElement;
+      final DomHTMLFormElement formElement = autofillForm.formElement!;
 
       final passwordFocusedElement = createDomElement('input') as DomHTMLInputElement;
       final passwordAutofill = AutofillInfo.fromFrameworkMessage(passwordAutofillMap);
@@ -3483,11 +3484,11 @@ Future<void> testMain() async {
     test(
       'hidden autofill elements should have a width and height of 0 on non-Safari browsers',
       () {
-        final List<dynamic> fields = createFieldValues(
+        final List<Map<String, Object?>> fields = createFieldValues(
           <String>['email', 'username', 'password'],
           <String>['field1', 'field2', 'field3'],
         );
-        final emailAutofillMap = fields.first['autofill'] as Map<String, Object?>;
+        final emailAutofillMap = fields.first['autofill']! as Map<String, Object?>;
         final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
           kImplicitViewId,
           emailAutofillMap,
@@ -3498,7 +3499,6 @@ Future<void> testMain() async {
         final emailAutofill = AutofillInfo.fromFrameworkMessage(emailAutofillMap);
         autofillForm.wakeUp(emailFocusedElement, emailAutofill);
 
-        final formElement = autofillForm.formElement;
         final formChildNodes =
             autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
         final DomHTMLInputElement username = formChildNodes[1];
@@ -3518,11 +3518,11 @@ Future<void> testMain() async {
     );
 
     test('hidden autofill elements should not have a width and height of 0 on Safari', () {
-      final List<dynamic> fields = createFieldValues(
+      final List<Map<String, Object?>> fields = createFieldValues(
         <String>['email', 'username', 'password'],
         <String>['field1', 'field2', 'field3'],
       );
-      final emailAutofillMap = fields.first['autofill'] as Map<String, Object?>;
+      final emailAutofillMap = fields.first['autofill']! as Map<String, Object?>;
       final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
         kImplicitViewId,
         emailAutofillMap,
@@ -3533,7 +3533,6 @@ Future<void> testMain() async {
       final emailAutofill = AutofillInfo.fromFrameworkMessage(emailAutofillMap);
       autofillForm.wakeUp(emailFocusedElement, emailAutofill);
 
-      final formElement = autofillForm.formElement;
       final formChildNodes =
           autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
       final DomHTMLInputElement username = formChildNodes[1];
@@ -3553,11 +3552,11 @@ Future<void> testMain() async {
     test(
       'the focused element within a form should explicitly set pointer events on Safari',
       () {
-        final Map<String, dynamic> focusedAutofillMap = createAutofillInfo('email', 'field1');
-        final List<dynamic> fields = createFieldValues(
+        final List<Map<String, Object?>> fields = createFieldValues(
           <String>['email', 'username', 'password'],
           <String>['field1', 'field2', 'field3'],
         );
+        final focusedAutofillMap = fields.first['autofill']! as Map<String, Object?>;
         final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
           kImplicitViewId,
           focusedAutofillMap,
