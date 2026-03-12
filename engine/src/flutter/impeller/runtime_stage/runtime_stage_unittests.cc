@@ -117,7 +117,8 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->location, 2u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
         auto padding = uni->padding_layout;
-        if (GetBackend() == PlaygroundBackend::kMetal) {
+        if (GetBackend() == PlaygroundBackend::kMetal ||
+            GetBackend() == PlaygroundBackend::kMetalSDF) {
           EXPECT_EQ(padding.size(), 4u);
           EXPECT_EQ(padding[0], RuntimePaddingType::kFloat);
           EXPECT_EQ(padding[1], RuntimePaddingType::kFloat);
