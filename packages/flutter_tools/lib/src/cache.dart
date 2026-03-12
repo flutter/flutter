@@ -1515,11 +1515,22 @@ final _flattenNameSubstitutions = <int, List<int>>{
 /// - [_ProgressBarDisplay]: ANSI progress bar for terminals with color support.
 /// - [_SpinnerDisplay]: Spinner-based display via [Logger.startProgress].
 abstract class _DownloadDisplay {
+  /// Called when the download begins.
   void start();
+
+  /// Called when a chunk of data is received.
   void onChunk(int chunkSize, int contentLength);
+
+  /// Called when the download completes successfully.
   void finish();
+
+  /// Called when the download is cancelled or fails.
   void cancel();
+
+  /// Pauses the display (e.g. when another status message needs the terminal).
   void pause();
+
+  /// Resumes the display after a pause.
   void resume();
 }
 
