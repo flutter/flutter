@@ -1292,11 +1292,11 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addEnableSurfaceControlFlag({required bool verboseHelp}) {
+  void addEnableHcppFlag({required bool verboseHelp}) {
     argParser.addFlag(
-      'enable-surface-control',
+      'enable-hcpp',
       hide: !verboseHelp,
-      help: 'Whether to enable surface control on the Impeller rendering backend.',
+      help: 'Whether to enable the HCPP platform view mode on the Impeller rendering backend.',
     );
   }
 
