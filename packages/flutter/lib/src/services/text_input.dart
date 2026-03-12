@@ -709,8 +709,8 @@ class TextInputConfiguration {
   /// This feature is specific to iOS 17 and later. It has no effect on other platforms.
   ///
   /// By default, this property is null, meaning the platform setting is used.
-  /// Setting this flag overrides the platform setting.
-  /// When true, inline prediction is shown; when false, it is disabled.
+  /// Setting this flag overrides the platform setting on iOS:
+  /// when true, inline prediction is shown; when false, it is disabled.
   /// {@endtemplate}
   final bool? enableInlinePrediction;
 
