@@ -119,15 +119,22 @@ class IOSCoreDeviceLauncher {
       return launchResult;
     }
 
-    // Find the process that was launched using the installationURL.
+    // Prefer the main app executable directly inside the installed app bundle.
+    // Matching any process whose executable merely contains the installation
+    // URL can pick an app extension inside `Runner.app/PlugIns/*.appex/*` and
+    // attach LLDB to the wrong process.
     final List<IOSCoreDeviceRunningProcess> processes = await _coreDeviceControl
         .getRunningProcesses(deviceId: deviceId);
-    final IOSCoreDeviceRunningProcess? launchedProcess = processes
-        .where(
-          (IOSCoreDeviceRunningProcess process) =>
-              process.executable != null && process.executable!.contains(installationURL),
-        )
-        .firstOrNull;
+    final IOSCoreDeviceRunningProcess? launchedProcess = processes.where((
+      IOSCoreDeviceRunningProcess process,
+    ) {
+      final String? executable = process.executable;
+      if (executable == null || !executable.startsWith('$installationURL/')) {
+        return false;
+      }
+      final String relativeExecutablePath = executable.substring(installationURL.length + 1);
+      return !relativeExecutablePath.contains('/');
+    }).firstOrNull;
 
     final int? processId = launchedProcess?.processIdentifier;
     if (launchedProcess == null || processId == null) {
