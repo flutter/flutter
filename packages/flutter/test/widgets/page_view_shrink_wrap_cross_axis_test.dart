@@ -76,6 +76,38 @@ void main() {
     expect(tester.getSize(find.byType(PageView)).height, closeTo(137.5, 0.001));
   });
 
+  testWidgets('PageView.shrinkWrapCrossAxis does not interpolate inside leading pad', (
+    WidgetTester tester,
+  ) async {
+    final PageController controller = PageController(viewportFraction: 0.8);
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: PageView(
+            controller: controller,
+            shrinkWrapCrossAxis: true,
+            children: <Widget>[
+              _HorizontalPage(height: 100.0, label: 'Page 1'),
+              _HorizontalPage(height: 200.0, label: 'Page 2'),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final double leadingPad =
+        controller.position.viewportDimension * (1 - controller.viewportFraction) / 2;
+    controller.jumpTo(leadingPad / 2);
+    await tester.pump();
+
+    expect(tester.getSize(find.byType(PageView)).height, 100.0);
+  });
+
   testWidgets(
     'PageView.shrinkWrapCrossAxis with padEnds false uses the max-scroll-clamped trailing size',
     (WidgetTester tester) async {
