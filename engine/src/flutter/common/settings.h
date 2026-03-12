@@ -242,7 +242,7 @@ struct Settings {
   bool impeller_antialiased_lines = false;
 
   // Whether to use SDFs for rendering in Impeller.
-  bool impeller_use_sdfs = true;
+  bool impeller_use_sdfs = false;
 
   // Log a warning during shell initialization if Impeller is not enabled.
   bool warn_on_impeller_opt_out = false;
