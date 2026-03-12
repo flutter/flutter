@@ -82,7 +82,7 @@ void main() {
         xcode: FakeXcode(),
         featureFlags: FakeFeatureFlags(),
         verboseHelp: false,
-        codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+        codesign: FakeDarwinAddToAppCodesigning(),
       );
       final Directory swiftPackageOutput = fs.directory(pluginRegistrantSwiftPackagePath);
       swiftPackageOutput.createSync(recursive: true);

@@ -66,7 +66,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     required ProcessManager processManager,
     required TemplateRenderer templateRenderer,
     required Xcode? xcode,
-    required DarwinAddToAppCodesigning codeSigningSettings,
+    required DarwinAddToAppCodesigning codesign,
     required bool verboseHelp,
   }) : _analytics = analytics,
        _artifacts = artifacts,
@@ -79,7 +79,7 @@ class BuildSwiftPackage extends BuildSubCommand {
        _flutterVersion = flutterVersion,
        _templateRenderer = templateRenderer,
        _xcode = xcode,
-       _codeSigningSettings = codeSigningSettings,
+       _codesign = codesign,
        super(verboseHelp: verboseHelp) {
     usesFlavorOption();
     addTreeShakeIconsFlag();
@@ -127,7 +127,7 @@ class BuildSwiftPackage extends BuildSubCommand {
   final TemplateRenderer _templateRenderer;
   final FlutterVersion _flutterVersion;
   final FeatureFlags _featureFlags;
-  final DarwinAddToAppCodesigning _codeSigningSettings;
+  final DarwinAddToAppCodesigning _codesign;
 
   @override
   bool get supported => _platform.isMacOS;
@@ -298,7 +298,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     );
 
     final File codesignIdentityFile = cacheDirectory.childFile(_kCodesignIdentityFile);
-    final String? codesignIdentity = await _codeSigningSettings.getCodesignIdentity(
+    final String? codesignIdentity = await _codesign.getCodesignIdentity(
       buildInfo: buildInfos.first,
       codesignEnabled: boolArg(FlutterOptions.kCodesign),
       codesignIdentityOption: stringArg(FlutterOptions.kCodesignIdentity),

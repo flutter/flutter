@@ -60,7 +60,7 @@ class BuildCommand extends FlutterCommand {
         logger: logger,
         buildSystem: buildSystem,
         verboseHelp: verboseHelp,
-        codeSigningSettings: DarwinAddToAppCodesigning(
+        codesign: DarwinAddToAppCodesigning(
           logger: logger,
           xcodeCodeSigningSettings: XcodeCodeSigningSettings(
             config: config,
@@ -80,7 +80,7 @@ class BuildCommand extends FlutterCommand {
         logger: logger,
         buildSystem: buildSystem,
         verboseHelp: verboseHelp,
-        codeSigningSettings: DarwinAddToAppCodesigning(
+        codesign: DarwinAddToAppCodesigning(
           logger: logger,
           xcodeCodeSigningSettings: XcodeCodeSigningSettings(
             config: config,

@@ -36,7 +36,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
     required super.logger,
     super.cache,
     super.platform,
-    required super.codeSigningSettings,
+    required super.codesign,
   });
 
   @override
@@ -76,7 +76,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
 
     final List<BuildInfo> buildInfos = await getBuildInfos();
 
-    final String? codesignIdentity = await codeSigningSettings.getCodesignIdentity(
+    final String? codesignIdentity = await codesign.getCodesignIdentity(
       buildInfo: buildInfos.first,
       codesignEnabled: boolArg(FlutterOptions.kCodesign),
       codesignIdentityOption: stringArg(FlutterOptions.kCodesignIdentity),

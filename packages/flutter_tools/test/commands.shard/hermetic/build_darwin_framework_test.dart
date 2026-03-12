@@ -82,7 +82,7 @@ void main() {
             flutterVersion: fakeFlutterVersion,
             cache: cache,
             verboseHelp: false,
-            codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+            codesign: FakeDarwinAddToAppCodesigning(),
           );
 
           expect(
@@ -124,7 +124,7 @@ void main() {
             flutterVersion: fakeFlutterVersion,
             cache: cache,
             verboseHelp: false,
-            codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+            codesign: FakeDarwinAddToAppCodesigning(),
           );
 
           expect(
@@ -163,7 +163,7 @@ void main() {
             flutterVersion: fakeFlutterVersion,
             cache: cache,
             verboseHelp: false,
-            codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+            codesign: FakeDarwinAddToAppCodesigning(),
           );
 
           expect(
@@ -215,7 +215,7 @@ void main() {
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
                 verboseHelp: false,
-                codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+                codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.debug, outputDirectory, force: true);
 
@@ -258,7 +258,7 @@ void main() {
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
                 verboseHelp: false,
-                codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+                codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
 
@@ -284,7 +284,7 @@ void main() {
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
                 verboseHelp: false,
-                codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+                codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
 
@@ -313,7 +313,7 @@ void main() {
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
                 verboseHelp: false,
-                codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+                codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.profile, outputDirectory);
 
@@ -342,7 +342,7 @@ void main() {
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
                 verboseHelp: false,
-                codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+                codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.release, outputDirectory);
 
@@ -437,7 +437,7 @@ void main() {
           flutterVersion: fakeFlutterVersion,
           cache: cache,
           verboseHelp: false,
-          codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+          codesign: FakeDarwinAddToAppCodesigning(),
         );
 
         // Mock engine artifacts. _TestArtifacts uses a string like this for getArtifactPath.
@@ -523,7 +523,7 @@ void main() {
           flutterVersion: fakeFlutterVersion,
           cache: cache,
           verboseHelp: false,
-          codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+          codesign: FakeDarwinAddToAppCodesigning(),
         );
 
         // Mock engine artifacts
@@ -593,7 +593,7 @@ void main() {
             flutterVersion: fakeFlutterVersion,
             cache: cache,
             verboseHelp: false,
-            codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+            codesign: FakeDarwinAddToAppCodesigning(),
           );
 
           expect(
@@ -635,7 +635,7 @@ void main() {
             flutterVersion: fakeFlutterVersion,
             cache: cache,
             verboseHelp: false,
-            codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+            codesign: FakeDarwinAddToAppCodesigning(),
           );
 
           expect(
@@ -674,7 +674,7 @@ void main() {
             flutterVersion: fakeFlutterVersion,
             cache: cache,
             verboseHelp: false,
-            codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+            codesign: FakeDarwinAddToAppCodesigning(),
           );
 
           expect(
@@ -725,7 +725,7 @@ void main() {
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
                 verboseHelp: false,
-                codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+                codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.debug, outputDirectory, force: true);
 
@@ -767,7 +767,7 @@ void main() {
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
                 verboseHelp: false,
-                codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+                codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
 
@@ -793,7 +793,7 @@ void main() {
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
                 verboseHelp: false,
-                codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+                codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
 
@@ -822,7 +822,7 @@ void main() {
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
                 verboseHelp: false,
-                codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+                codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.profile, outputDirectory);
 
@@ -851,7 +851,7 @@ void main() {
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
                 verboseHelp: false,
-                codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+                codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.release, outputDirectory);
 
@@ -1258,7 +1258,7 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
           verboseHelp: false,
-          codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+          codesign: FakeDarwinAddToAppCodesigning(),
         );
 
         await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
@@ -1302,7 +1302,7 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
           verboseHelp: false,
-          codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+          codesign: FakeDarwinAddToAppCodesigning(),
         );
 
         await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
@@ -1384,7 +1384,7 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
           verboseHelp: false,
-          codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+          codesign: FakeDarwinAddToAppCodesigning(),
         );
 
         await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
@@ -1438,7 +1438,7 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
           verboseHelp: false,
-          codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+          codesign: FakeDarwinAddToAppCodesigning(),
         );
 
         await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
@@ -1495,7 +1495,7 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
           verboseHelp: false,
-          codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+          codesign: FakeDarwinAddToAppCodesigning(),
         );
 
         await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
@@ -1548,7 +1548,7 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
           verboseHelp: false,
-          codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+          codesign: FakeDarwinAddToAppCodesigning(),
         );
 
         await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
@@ -1613,7 +1613,7 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
           verboseHelp: false,
-          codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+          codesign: FakeDarwinAddToAppCodesigning(),
         );
 
         await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
@@ -1679,7 +1679,7 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
           verboseHelp: false,
-          codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+          codesign: FakeDarwinAddToAppCodesigning(),
         );
 
         await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
@@ -1746,7 +1746,7 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
           verboseHelp: false,
-          codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+          codesign: FakeDarwinAddToAppCodesigning(),
         );
 
         await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
@@ -1804,7 +1804,7 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
           verboseHelp: false,
-          codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+          codesign: FakeDarwinAddToAppCodesigning(),
         );
 
         await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
@@ -1868,7 +1868,7 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
           verboseHelp: false,
-          codeSigningSettings: FakeDarwinAddToAppCodesigning(),
+          codesign: FakeDarwinAddToAppCodesigning(),
         );
 
         await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);

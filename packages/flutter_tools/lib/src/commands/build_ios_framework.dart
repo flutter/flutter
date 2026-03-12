@@ -37,7 +37,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     required bool verboseHelp,
     Cache? cache,
     Platform? platform,
-    required this.codeSigningSettings,
+    required this.codesign,
     required super.logger,
   }) : _injectedFlutterVersion = flutterVersion,
        _buildSystem = buildSystem,
@@ -107,7 +107,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
         hide: !verboseHelp,
       );
   }
-  final DarwinAddToAppCodesigning codeSigningSettings;
+  final DarwinAddToAppCodesigning codesign;
 
   final BuildSystem? _buildSystem;
   @protected
@@ -450,7 +450,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
     required bool verboseHelp,
     super.cache,
     super.platform,
-    required super.codeSigningSettings,
+    required super.codesign,
   }) : super(verboseHelp: verboseHelp) {
     usesFlavorOption();
 
@@ -514,7 +514,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
     );
     final List<BuildInfo> buildInfos = await getBuildInfos();
 
-    final String? codesignIdentity = await codeSigningSettings.getCodesignIdentity(
+    final String? codesignIdentity = await codesign.getCodesignIdentity(
       buildInfo: buildInfos.first,
       codesignEnabled: boolArg(FlutterOptions.kCodesign),
       codesignIdentityOption: stringArg(FlutterOptions.kCodesignIdentity),
