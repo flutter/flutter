@@ -47,6 +47,8 @@ class ScopedCleanupClosure final {
 
   ~ScopedCleanupClosure() { Reset(); }
 
+  explicit operator bool() const { return static_cast<bool>(closure_); }
+
   fml::closure SetClosure(const fml::closure& closure) {
     auto old_closure = closure_;
     closure_ = closure;

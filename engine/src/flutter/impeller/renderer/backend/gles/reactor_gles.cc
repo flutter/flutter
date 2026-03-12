@@ -315,8 +315,12 @@ bool ReactorGLES::ConsolidateHandles() {
         if (owner_thread.has_value() && *owner_thread != current_thread) {
           continue;
         }
-        handles_to_delete.emplace_back(
-            std::make_tuple(handle.first, handle.second.name));
+        std::optional<GLStorage> storage;
+        // Do not delete the GL object if the handle has a cleanup callback.
+        if (!handle.second.callback) {
+          storage = handle.second.name;
+        }
+        handles_to_delete.emplace_back(std::make_tuple(handle.first, storage));
         continue;
       }
       // Create live handles.
