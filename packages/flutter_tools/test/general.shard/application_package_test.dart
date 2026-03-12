@@ -746,6 +746,225 @@ void main() {
       );
     }, overrides: overrides);
   });
+
+  group('fromApk handles engine shell arguments as expected', () {
+    late FakeAndroidSdk sdk;
+    late FakeAndroidSdkVersion sdkVersion;
+    late FakeProcessManager fakeProcessManager;
+    late BufferLogger testLogger;
+
+    setUp(() async {
+      sdk = FakeAndroidSdk();
+      sdkVersion = FakeAndroidSdkVersion();
+      fakeProcessManager = FakeProcessManager.empty();
+      testLogger = BufferLogger.test();
+    });
+
+    testUsingContext(
+      'fromAPK returns APK without engineShellArgs if the generated flags manifest cannot be found',
+      () async {
+        final FileSystem fs = MemoryFileSystem.test();
+        const aaptPath = 'aaptPath';
+        const apkName = 'app.apk';
+        final File apkFile = globals.fs.file(apkName);
+
+        sdkVersion.aaptPath = aaptPath;
+        sdk.latestVersion = sdkVersion;
+        sdk.platformToolsAvailable = true;
+        sdk.licensesAvailable = false;
+
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[aaptPath, 'dump', 'xmltree', apkFile.path, 'AndroidManifest.xml'],
+            stdout: _aaptDataWithDefaultEnabledAndMainLauncherActivity,
+          ),
+        );
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              aaptPath,
+              'dump',
+              'xmltree',
+              fs.path.join('app', 'build', 'host', 'outputs', 'apk', apkName),
+              'AndroidManifest.xml',
+            ],
+            stdout: _aaptDataWithDefaultEnabledAndMainLauncherActivity,
+          ),
+        );
+
+        await ApplicationPackageFactory.instance!.getPackageForPlatform(
+          TargetPlatform.android_arm,
+          applicationBinary: apkFile,
+        );
+
+        final AndroidApk? apk = AndroidApk.fromApk(
+          apkFile,
+          androidSdk: sdk,
+          processManager: fakeProcessManager,
+          userMessages: UserMessages(),
+          logger: testLogger,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: testLogger),
+          buildMode: BuildMode.debug,
+        );
+
+        expect(apk, isNotNull);
+        expect(apk!.engineShellArgs, isNull);
+      },
+    );
+
+    testUsingContext(
+      'fromApk returns APK with engineShellArgs if the generated flags manifest is found non-empty',
+      () async {
+        final FileSystem fs = MemoryFileSystem.test();
+        const aaptPath = 'aaptPath';
+        const apkName = 'app.apk';
+        final File apkFile = globals.fs.file(apkName);
+
+        sdkVersion.aaptPath = aaptPath;
+        sdk.latestVersion = sdkVersion;
+        sdk.platformToolsAvailable = true;
+        sdk.licensesAvailable = false;
+
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[aaptPath, 'dump', 'xmltree', apkFile.path, 'AndroidManifest.xml'],
+            stdout: _aaptDataWithDefaultEnabledAndMainLauncherActivity,
+          ),
+        );
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              aaptPath,
+              'dump',
+              'xmltree',
+              fs.path.join('app', 'build', 'host', 'outputs', 'apk', apkName),
+              'AndroidManifest.xml',
+            ],
+            stdout: _aaptDataWithDefaultEnabledAndMainLauncherActivity,
+          ),
+        );
+
+        await ApplicationPackageFactory.instance!.getPackageForPlatform(
+          TargetPlatform.android_arm,
+          applicationBinary: apkFile,
+        );
+
+        final File generatedManifest = globals.fs.file(
+          globals.fs.path.join(
+            'build',
+            'app',
+            'generated',
+            'manifests',
+            'debugGenerateEngineFlagsManifestTask',
+            'AndroidManifest.xml',
+          ),
+        );
+        generatedManifest.createSync(recursive: true);
+        const androidEngineShellArgs = '--enable-impeller=true,--trace-startup,--verbose-logging';
+        const generatedManfiestContents =
+            '''
+  <?xml version="1.0" encoding="utf-8"?>
+  <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+      <application>
+          <meta-data
+              android:name="androidEngineShellArgs"
+              android:value="$androidEngineShellArgs" />
+      </application>
+  </manifest>
+''';
+        generatedManifest.writeAsStringSync(generatedManfiestContents);
+
+        final AndroidApk? apk = AndroidApk.fromApk(
+          apkFile,
+          androidSdk: sdk,
+          processManager: fakeProcessManager,
+          userMessages: UserMessages(),
+          logger: testLogger,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: testLogger),
+          buildMode: BuildMode.debug,
+        );
+
+        expect(apk, isNotNull);
+        expect(apk!.engineShellArgs, isNotNull);
+        expect(apk.engineShellArgs, equals(androidEngineShellArgs.split(',').toSet()));
+      },
+    );
+
+    testUsingContext(
+      'fromApk returns APK without engineShellArgs if the generated flags manifest is found empty',
+      () async {
+        final FileSystem fs = MemoryFileSystem.test();
+        const aaptPath = 'aaptPath';
+        const apkName = 'app.apk';
+        final File apkFile = globals.fs.file(apkName);
+
+        sdkVersion.aaptPath = aaptPath;
+        sdk.latestVersion = sdkVersion;
+        sdk.platformToolsAvailable = true;
+        sdk.licensesAvailable = false;
+
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[aaptPath, 'dump', 'xmltree', apkFile.path, 'AndroidManifest.xml'],
+            stdout: _aaptDataWithDefaultEnabledAndMainLauncherActivity,
+          ),
+        );
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              aaptPath,
+              'dump',
+              'xmltree',
+              fs.path.join('app', 'build', 'host', 'outputs', 'apk', apkName),
+              'AndroidManifest.xml',
+            ],
+            stdout: _aaptDataWithDefaultEnabledAndMainLauncherActivity,
+          ),
+        );
+
+        await ApplicationPackageFactory.instance!.getPackageForPlatform(
+          TargetPlatform.android_arm,
+          applicationBinary: apkFile,
+        );
+
+        final File generatedManifest = globals.fs.file(
+          globals.fs.path.join(
+            'build',
+            'app',
+            'generated',
+            'manifests',
+            'debugGenerateEngineFlagsManifestTask',
+            'AndroidManifest.xml',
+          ),
+        );
+        generatedManifest.createSync(recursive: true);
+        const generatedManfiestContents = '''
+  <?xml version="1.0" encoding="utf-8"?>
+  <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+      <application>
+          <meta-data
+              android:name="androidEngineShellArgs"
+              android:value="" />
+      </application>
+  </manifest>
+''';
+        generatedManifest.writeAsStringSync(generatedManfiestContents);
+
+        final AndroidApk? apk = AndroidApk.fromApk(
+          apkFile,
+          androidSdk: sdk,
+          processManager: fakeProcessManager,
+          userMessages: UserMessages(),
+          logger: testLogger,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: testLogger),
+          buildMode: BuildMode.debug,
+        );
+
+        expect(apk, isNotNull);
+        expect(apk!.engineShellArgs, isNull);
+      },
+    );
+  });
 }
 
 const _aaptDataWithExplicitEnabledAndMainLauncherActivity = '''

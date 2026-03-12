@@ -84,25 +84,13 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
 
     Set<String>? androidEngineShellArgs;
     if (buildMode != null) {
-      final relativeGeneratedEngineFlagsManifestFilePath =
-          'intermediates/flutter/extra_manifest/${buildMode.cliName}/AndroidManifest.xml';
-      var camilleTag = '###################CAMILLE##################### in fromApk:';
-      print(
-        '$camilleTag with relativeGeneratedEngineFlagsManifestFilePath: $relativeGeneratedEngineFlagsManifestFilePath',
-      );
-      print('$camilleTag with getAndroidBuildDirectory(): ${getAndroidBuildDirectory()}');
-
       final generatedEngineFlagsManifestFile = io.File(
         '${getAndroidBuildDirectory()}/app/generated/manifests/debugGenerateEngineFlagsManifestTask/AndroidManifest.xml',
       );
 
       if (generatedEngineFlagsManifestFile.existsSync()) {
-        print('$camilleTag manifest does exist!');
         final String generatedEngineFlagsManifestFileStr = generatedEngineFlagsManifestFile
             .readAsStringSync();
-        print(
-          '$camilleTag generatedEngineFlagsManifestFileStr: $generatedEngineFlagsManifestFileStr',
-        );
         final document = XmlDocument.parse(generatedEngineFlagsManifestFileStr);
 
         // Find the one expected activity element and one expected androidEngineShellArgs metadata.
@@ -112,12 +100,13 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
             .first;
         final String? androidEngineShellArgsList = androidEngineShellArgsMetadataElement
             .getAttribute('android:value');
-        print('$camilleTag androidEngineShellArgsList: $androidEngineShellArgsList');
         // TODO(camsim99): Stop using comma as a separator bc it's terrible for parsing.
-        androidEngineShellArgs =
-            (androidEngineShellArgsList == null || androidEngineShellArgsList.isEmpty)
-            ? <String>{}
-            : androidEngineShellArgsList.split(',').map((String arg) => arg.trim()).toSet();
+        if (androidEngineShellArgsList != null && androidEngineShellArgsList.isNotEmpty) {
+          androidEngineShellArgs = androidEngineShellArgsList
+              .split(',')
+              .map((String arg) => arg.trim())
+              .toSet();
+        }
       }
     }
 
