@@ -6340,6 +6340,65 @@ void main() {
     },
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
+
+  testWidgets('pushReplacement from onPopInvokedWithResult throws a helpful error', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return Center(
+              child: TextButton(
+                onPressed: () {
+                  Navigator.of(context).push<void>(
+                    MaterialPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return PopScope<void>(
+                          onPopInvokedWithResult: (bool didPop, void result) {
+                            if (!didPop) {
+                              return;
+                            }
+                            Navigator.of(context).pushReplacement<void, void>(
+                              MaterialPageRoute<void>(
+                                builder: (BuildContext context) => const Placeholder(),
+                              ),
+                            );
+                          },
+                          child: Center(
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: const Text('Pop'),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+                child: const Text('Push'),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Push'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Pop'));
+    final FlutterError error = tester.takeException()! as FlutterError;
+
+    expect(
+      error.toStringDeep(),
+      contains('Navigator operation requested with a locked Navigator.'),
+    );
+    expect(error.toStringDeep(), contains('PopScope.onPopInvokedWithResult'));
+    expect(error.toStringDeep(), contains('scheduling the navigation for the next frame'));
+  });
 }
 
 typedef AnnouncementCallBack = void Function(Route<dynamic>?);
