@@ -914,6 +914,19 @@ class PageView extends StatefulWidget {
   /// ** See code in examples/api/lib/widgets/page_view/page_view.2.dart **
   /// {@end-tool}
   ///
+  /// Conceptually, the viewport resizes to match the page that is currently
+  /// visible in the cross axis:
+  ///
+  /// ```text
+  /// Before swipe:                After swipe:
+  /// ┌──────────────────────┐     ┌────────────────────────────┐
+  /// │ PageView (100 high)  │ --> │ PageView (250 high)        │
+  /// │ ┌──────────────────┐ │     │ ┌────────────────────────┐ │
+  /// │ │ Page 1           │ │     │ │ Page 2                 │ │
+  /// │ └──────────────────┘ │     │ └────────────────────────┘ │
+  /// └──────────────────────┘     └────────────────────────────┘
+  /// ```
+  ///
   /// Defaults to false.
   final bool shrinkWrapCrossAxis;
 
@@ -1003,44 +1016,56 @@ class _PageViewState extends State<PageView> {
         hitTestBehavior: widget.hitTestBehavior,
         scrollBehavior:
             widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false),
-        viewportBuilder: (BuildContext context, ViewportOffset position) {
-          final Widget viewport = widget.shrinkWrapCrossAxis
-              ? _PageViewCrossAxisShrinkWrappingViewport(
-                  scrollCacheExtent: widget.allowImplicitScrolling
-                      ? const ScrollCacheExtent.viewport(1.0)
-                      : const ScrollCacheExtent.viewport(0.0),
-                  axisDirection: axisDirection,
-                  offset: position,
-                  clipBehavior: widget.clipBehavior,
-                  slivers: <Widget>[
-                    _PageViewShrinkWrappingSliverFillViewport(
-                      viewportFraction: _controller.viewportFraction,
-                      delegate: widget.childrenDelegate,
-                      padEnds: widget.padEnds,
-                    ),
-                  ],
-                )
-              : Viewport(
-                  // TODO(dnfield): we should provide a way to set cacheExtent
-                  // independent of implicit scrolling:
-                  // https://github.com/flutter/flutter/issues/45632
-                  scrollCacheExtent: widget.allowImplicitScrolling
-                      ? const ScrollCacheExtent.viewport(1.0)
-                      : const ScrollCacheExtent.viewport(0.0),
-                  axisDirection: axisDirection,
-                  offset: position,
-                  clipBehavior: widget.clipBehavior,
-                  slivers: <Widget>[
-                    SliverFillViewport(
-                      viewportFraction: _controller.viewportFraction,
-                      delegate: widget.childrenDelegate,
-                      padEnds: widget.padEnds,
-                    ),
-                  ],
-                );
-          return viewport;
-        },
+        viewportBuilder: (BuildContext context, ViewportOffset position) =>
+            _buildViewport(axisDirection: axisDirection, position: position),
       ),
+    );
+  }
+
+  ScrollCacheExtent _scrollCacheExtent() {
+    // TODO(dnfield): we should provide a way to set cacheExtent
+    // independent of implicit scrolling:
+    // https://github.com/flutter/flutter/issues/45632
+    return widget.allowImplicitScrolling
+        ? const ScrollCacheExtent.viewport(1.0)
+        : const ScrollCacheExtent.viewport(0.0);
+  }
+
+  Widget _buildPageSliver({required bool shrinkWrapCrossAxis}) {
+    if (shrinkWrapCrossAxis) {
+      return _PageViewShrinkWrappingSliverFillViewport(
+        viewportFraction: _controller.viewportFraction,
+        delegate: widget.childrenDelegate,
+        padEnds: widget.padEnds,
+      );
+    }
+    return SliverFillViewport(
+      viewportFraction: _controller.viewportFraction,
+      delegate: widget.childrenDelegate,
+      padEnds: widget.padEnds,
+    );
+  }
+
+  Widget _buildViewport({required AxisDirection axisDirection, required ViewportOffset position}) {
+    final ScrollCacheExtent scrollCacheExtent = _scrollCacheExtent();
+    final Widget pageSliver = _buildPageSliver(shrinkWrapCrossAxis: widget.shrinkWrapCrossAxis);
+
+    if (widget.shrinkWrapCrossAxis) {
+      return _PageViewCrossAxisShrinkWrappingViewport(
+        scrollCacheExtent: scrollCacheExtent,
+        axisDirection: axisDirection,
+        offset: position,
+        clipBehavior: widget.clipBehavior,
+        slivers: <Widget>[pageSliver],
+      );
+    }
+
+    return Viewport(
+      scrollCacheExtent: scrollCacheExtent,
+      axisDirection: axisDirection,
+      offset: position,
+      clipBehavior: widget.clipBehavior,
+      slivers: <Widget>[pageSliver],
     );
   }
 
@@ -1073,6 +1098,9 @@ class _PageViewState extends State<PageView> {
   }
 }
 
+/// Applies [SliverFillViewport]'s padding behavior while using a custom render
+/// sliver that can report the visible page's cross-axis extent back to the
+/// viewport.
 class _PageViewShrinkWrappingSliverFillViewport extends StatelessWidget {
   const _PageViewShrinkWrappingSliverFillViewport({
     required this.delegate,
@@ -1109,6 +1137,11 @@ class _PageViewShrinkWrappingSliverFillViewport extends StatelessWidget {
   }
 }
 
+/// Creates the render sliver used by [PageView.shrinkWrapCrossAxis].
+///
+/// This mirrors [_SliverFillViewportRenderObjectWidget], but instantiates a
+/// render object that measures its children with loose cross-axis constraints
+/// and reports the interpolated visible-page extent to the viewport.
 class _PageViewSliverFillViewportRenderObjectWidget extends SliverMultiBoxAdaptorWidget {
   const _PageViewSliverFillViewportRenderObjectWidget({
     required super.delegate,
@@ -1135,6 +1168,13 @@ class _PageViewSliverFillViewportRenderObjectWidget extends SliverMultiBoxAdapto
   }
 }
 
+/// A [RenderSliverFillViewport] that lets pages choose their cross-axis size.
+///
+/// The main axis still behaves exactly like [RenderSliverFillViewport]: each
+/// child gets the viewport fraction of the main axis and scrolls page by page.
+/// The difference is that children are laid out with loose constraints in the
+/// cross axis, and the sliver reports the visible page's cross-axis extent so
+/// the enclosing viewport can shrink-wrap to it.
 class _RenderSliverFillViewportWithCrossAxisShrinkWrapping extends RenderSliverFillViewport {
   _RenderSliverFillViewportWithCrossAxisShrinkWrapping({
     required super.childManager,
@@ -1370,10 +1410,11 @@ class _RenderSliverFillViewportWithCrossAxisShrinkWrapping extends RenderSliverF
   }
 }
 
-// ---------------------------------------------------------------------------
-// Private cross-axis-shrink-wrapping viewport used only by PageView.
-// ---------------------------------------------------------------------------
-
+/// A viewport variant that accepts cross-axis extents reported by its slivers.
+///
+/// [PageView] uses this instead of [Viewport] when [PageView.shrinkWrapCrossAxis]
+/// is enabled so the viewport can resize to the visible page while still
+/// lazily building slivers.
 class _PageViewCrossAxisShrinkWrappingViewport extends MultiChildRenderObjectWidget {
   const _PageViewCrossAxisShrinkWrappingViewport({
     this.axisDirection = AxisDirection.down,
@@ -1417,6 +1458,7 @@ class _PageViewCrossAxisShrinkWrappingViewport extends MultiChildRenderObjectWid
   }
 }
 
+/// Tracks onstage children for the shrink-wrapping page-view viewport.
 class _PageViewCrossAxisShrinkWrappingViewportElement extends MultiChildRenderObjectElement
     with NotifiableElementMixin, ViewportElementMixin {
   _PageViewCrossAxisShrinkWrappingViewportElement(
@@ -1434,6 +1476,11 @@ class _PageViewCrossAxisShrinkWrappingViewportElement extends MultiChildRenderOb
   }
 }
 
+/// A shrink-wrapping viewport that only shrinks in the cross axis.
+///
+/// The main axis remains bounded exactly like a regular [Viewport], but the
+/// cross axis is computed from the largest visible sliver-reported extent for
+/// the current frame.
 class _RenderPageViewCrossAxisShrinkWrappingViewport extends RenderShrinkWrappingViewport {
   _RenderPageViewCrossAxisShrinkWrappingViewport({
     super.axisDirection,
