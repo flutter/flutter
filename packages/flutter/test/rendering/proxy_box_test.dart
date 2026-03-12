@@ -365,7 +365,7 @@ void main() {
   });
 
   test('RenderAnimatedOpacity does not composite if it is transparent', () async {
-    final Animation<double> opacityAnimation = AnimationController(vsync: FakeTickerProvider())
+    final Animation<double> opacityAnimation = AnimationController(vsync: const TestVSync())
       ..value = 0.0;
 
     final renderAnimatedOpacity = RenderAnimatedOpacity(
@@ -378,7 +378,7 @@ void main() {
   });
 
   test('RenderAnimatedOpacity does composite if it is opaque', () {
-    final Animation<double> opacityAnimation = AnimationController(vsync: FakeTickerProvider())
+    final Animation<double> opacityAnimation = AnimationController(vsync: const TestVSync())
       ..value = 1.0;
 
     final renderAnimatedOpacity = RenderAnimatedOpacity(
@@ -391,7 +391,7 @@ void main() {
   });
 
   test('RenderAnimatedOpacity does composite if it is partially opaque', () {
-    final Animation<double> opacityAnimation = AnimationController(vsync: FakeTickerProvider())
+    final Animation<double> opacityAnimation = AnimationController(vsync: const TestVSync())
       ..value = 0.5;
 
     final renderAnimatedOpacity = RenderAnimatedOpacity(
@@ -404,7 +404,7 @@ void main() {
   });
 
   test('RenderAnimatedOpacity reuses its layer', () {
-    final Animation<double> opacityAnimation = AnimationController(vsync: FakeTickerProvider())
+    final Animation<double> opacityAnimation = AnimationController(vsync: const TestVSync())
       ..value = 0.5; // must not be 0 or 1.0. Otherwise, it won't create a layer
 
     _testLayerReuse<OpacityLayer>(
@@ -886,7 +886,7 @@ void main() {
     final RenderBox box = RenderConstrainedBox(
       additionalConstraints: const BoxConstraints.tightFor(width: 20),
     );
-    final opacityAnimation = AnimationController(value: 1, vsync: FakeTickerProvider());
+    final opacityAnimation = AnimationController(value: 1, vsync: const TestVSync());
     final opacity = RenderAnimatedOpacity(opacity: opacityAnimation, child: box);
 
     // Make it listen to the animation.
@@ -903,7 +903,7 @@ void main() {
     final RenderSliver sliver = RenderSliverToBoxAdapter(
       child: RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20)),
     );
-    final opacityAnimation = AnimationController(value: 1, vsync: FakeTickerProvider());
+    final opacityAnimation = AnimationController(value: 1, vsync: const TestVSync());
     final opacity = RenderSliverAnimatedOpacity(opacity: opacityAnimation, sliver: sliver);
 
     // Make it listen to the animation.

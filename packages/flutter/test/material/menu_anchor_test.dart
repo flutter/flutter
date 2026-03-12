@@ -4057,6 +4057,64 @@ void main() {
       expect(tester.getRect(findMenuPanels()).top, tester.getRect(find.byKey(contentKey)).bottom);
     });
 
+    testWidgets('menu is positioned to avoid the software keyboard', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/142921
+      // The menu should not extend into the area occupied by the software keyboard.
+      const screenSize = Size(600, 800);
+      await changeSurfaceSize(tester, screenSize);
+      const keyboardHeight = 200.0;
+      final controller = MenuController();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(viewInsets: const EdgeInsets.only(bottom: keyboardHeight)),
+              child: child!,
+            );
+          },
+          home: Material(
+            child: Stack(
+              children: <Widget>[
+                // Position anchor just above the keyboard, so menu would extend
+                // into keyboard area if opened below.
+                Positioned(
+                  left: 100,
+                  bottom: keyboardHeight + 100, // 100px above keyboard
+                  child: MenuAnchor(
+                    controller: controller,
+                    menuChildren: List<Widget>.generate(5, (index) {
+                      return MenuItemButton(onPressed: () {}, child: Text('Item $index'));
+                    }),
+                    builder: (BuildContext context, MenuController controller, Widget? child) {
+                      return FilledButton(
+                        onPressed: controller.open,
+                        child: const Text('Open Menu'),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      controller.open();
+      await tester.pumpAndSettle();
+
+      final Rect menuRect = tester.getRect(findMenuPanels());
+      // Menu should not extend into the keyboard area (bottom 200px of screen).
+      expect(
+        menuRect.bottom,
+        lessThanOrEqualTo(screenSize.height - keyboardHeight),
+        reason:
+            'Menu bottom (${menuRect.bottom}) should not extend into keyboard area (below ${screenSize.height - keyboardHeight})',
+      );
+    });
+
     testWidgets(
       'Menu is correctly offset when a LayerLink is provided and alignmentOffset is set',
       (WidgetTester tester) async {
@@ -6741,6 +6799,44 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.widget<Scrollbar>(find.byType(Scrollbar)).thumbVisibility, isTrue);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/182929.
+    testWidgets('Positioned menus always begin animating at the target position', (
+      WidgetTester tester,
+    ) async {
+      final controller = MenuController();
+      const targetPosition = Offset(400.0, 400.0);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuAnchor(
+              style: const MenuStyle(
+                padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.zero),
+              ),
+              controller: controller,
+              animated: true,
+              menuChildren: const <Widget>[SizedBox(height: 160)],
+            ),
+          ),
+        ),
+      );
+
+      controller.open(position: targetPosition);
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 2));
+
+      final Finder panel = find.descendant(
+        of: find.byType(MenuAnchor),
+        matching: find.byType(FocusScope),
+      );
+      expect(tester.getTopLeft(panel), targetPosition);
+
+      await tester.pumpAndSettle();
+
+      expect(tester.getTopLeft(panel), targetPosition);
     });
   });
 

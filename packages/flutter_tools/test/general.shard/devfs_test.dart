@@ -584,7 +584,6 @@ void main() {
 
     final residentCompiler = DefaultResidentCompiler(
       'sdkroot',
-      buildMode: BuildMode.debug,
       logger: logger,
       processManager: fakeProcessManager,
       artifacts: Artifacts.test(),
@@ -592,6 +591,8 @@ void main() {
       fileSystem: fileSystem,
       stdoutHandler: generatorStdoutHandler,
       shutdownHooks: FakeShutdownHooks(),
+      config: Config.test(),
+      buildInfo: BuildInfo.debug,
     );
 
     fileSystem.file('lib/foo.txt.dill').createSync(recursive: true);
