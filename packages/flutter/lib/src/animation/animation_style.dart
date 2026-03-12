@@ -98,10 +98,7 @@ class AnimationStyle with Diagnosticable {
 
   @optionalTypeArgs
   static T? _lerp<T extends Object>(T? a, T? b, double t, T Function(T? a, T? b, double t) lerp) {
-    if (identical(a, b)) {
-      return a;
-    }
-    if (t == 0.0) {
+    if (a == b || t == 0.0) {
       return a;
     }
     if (t == 1.0) {
