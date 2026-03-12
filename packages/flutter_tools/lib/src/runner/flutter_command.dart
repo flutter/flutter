@@ -404,6 +404,10 @@ abstract class FlutterCommand extends Command<void> {
           'skwasm renderer, use "--no-cross-origin-isolation".',
       hide: !verboseHelp,
     );
+    usesBaseHrefOption();
+  }
+
+  void usesBaseHrefOption() {
     argParser.addOption(
       'base-href',
       help:
