@@ -30,8 +30,8 @@ import 'scroll_position.dart';
 import 'scroll_position_with_single_context.dart';
 import 'scroll_view.dart';
 import 'scrollable.dart';
-import 'sliver_fill.dart';
 import 'sliver.dart';
+import 'sliver_fill.dart';
 import 'sliver_layout_builder.dart';
 import 'viewport.dart';
 
@@ -1119,7 +1119,7 @@ class _PageViewSliverFillViewportRenderObjectWidget extends SliverMultiBoxAdapto
 
   @override
   _RenderSliverFillViewportWithCrossAxisShrinkWrapping createRenderObject(BuildContext context) {
-    final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
+    final element = context as SliverMultiBoxAdaptorElement;
     return _RenderSliverFillViewportWithCrossAxisShrinkWrapping(
       childManager: element,
       viewportFraction: viewportFraction,
@@ -1138,8 +1138,8 @@ class _PageViewSliverFillViewportRenderObjectWidget extends SliverMultiBoxAdapto
 class _RenderSliverFillViewportWithCrossAxisShrinkWrapping extends RenderSliverFillViewport {
   _RenderSliverFillViewportWithCrossAxisShrinkWrapping({
     required super.childManager,
-    double viewportFraction = 1.0,
-  }) : super(viewportFraction: viewportFraction);
+    super.viewportFraction = 1.0,
+  });
 
   @override
   void performLayout() {
@@ -1195,8 +1195,7 @@ class _RenderSliverFillViewportWithCrossAxisShrinkWrapping extends RenderSliverF
         );
         return;
       }
-      final SliverMultiBoxAdaptorParentData childParentData =
-          child.parentData! as SliverMultiBoxAdaptorParentData;
+      final childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
       childParentData.layoutOffset = indexToLayoutOffset(deprecatedExtraItemExtent, index);
       assert(childParentData.index == index);
       trailingChildWithLayout ??= child;
@@ -1204,8 +1203,7 @@ class _RenderSliverFillViewportWithCrossAxisShrinkWrapping extends RenderSliverF
 
     if (trailingChildWithLayout == null) {
       firstChild!.layout(childConstraints, parentUsesSize: true);
-      final SliverMultiBoxAdaptorParentData childParentData =
-          firstChild!.parentData! as SliverMultiBoxAdaptorParentData;
+      final childParentData = firstChild!.parentData! as SliverMultiBoxAdaptorParentData;
       childParentData.layoutOffset = indexToLayoutOffset(deprecatedExtraItemExtent, firstIndex);
       trailingChildWithLayout = firstChild;
     }
@@ -1231,8 +1229,7 @@ class _RenderSliverFillViewportWithCrossAxisShrinkWrapping extends RenderSliverF
         child.layout(childConstraints, parentUsesSize: true);
       }
       trailingChildWithLayout = child;
-      final SliverMultiBoxAdaptorParentData childParentData =
-          child.parentData! as SliverMultiBoxAdaptorParentData;
+      final childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
       assert(childParentData.index == index);
       childParentData.layoutOffset = indexToLayoutOffset(
         deprecatedExtraItemExtent,
@@ -1306,11 +1303,9 @@ class _RenderSliverFillViewportWithCrossAxisShrinkWrapping extends RenderSliverF
       Axis.horizontal => BoxConstraints(
         minWidth: extent,
         maxWidth: extent,
-        minHeight: 0.0,
         maxHeight: constraints.crossAxisExtent,
       ),
       Axis.vertical => BoxConstraints(
-        minWidth: 0.0,
         maxWidth: constraints.crossAxisExtent,
         minHeight: extent,
         maxHeight: extent,
@@ -1432,7 +1427,7 @@ class _PageViewCrossAxisShrinkWrappingViewportElement extends MultiChildRenderOb
   void debugVisitOnstageChildren(ElementVisitor visitor) {
     children
         .where((Element child) {
-          final RenderSliver renderSliver = child.renderObject! as RenderSliver;
+          final renderSliver = child.renderObject! as RenderSliver;
           return renderSliver.geometry!.visible;
         })
         .forEach(visitor);
@@ -1446,8 +1441,7 @@ class _RenderPageViewCrossAxisShrinkWrappingViewport extends RenderShrinkWrappin
     required super.offset,
     super.clipBehavior,
     super.scrollCacheExtent,
-    List<RenderSliver>? children,
-  }) : super(children: children);
+  });
 
   @override
   bool debugThrowIfNotCheckingIntrinsics() {

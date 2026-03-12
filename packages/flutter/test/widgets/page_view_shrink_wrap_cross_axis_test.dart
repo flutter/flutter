@@ -12,7 +12,7 @@ void main() {
   testWidgets('PageView.shrinkWrapCrossAxis sizes to the current page after swipes', (
     WidgetTester tester,
   ) async {
-    final PageController controller = PageController();
+    final controller = PageController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -23,7 +23,7 @@ void main() {
           child: PageView(
             controller: controller,
             shrinkWrapCrossAxis: true,
-            children: <Widget>[
+            children: const <Widget>[
               _HorizontalPage(height: 100.0, label: 'Page 1'),
               _HorizontalPage(height: 220.0, label: 'Page 2'),
             ],
@@ -121,7 +121,7 @@ void main() {
   testWidgets('PageView.shrinkWrapCrossAxis interpolates the midpoint size', (
     WidgetTester tester,
   ) async {
-    final PageController controller = PageController(viewportFraction: 0.8);
+    final controller = PageController(viewportFraction: 0.8);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -132,7 +132,7 @@ void main() {
           child: PageView(
             controller: controller,
             shrinkWrapCrossAxis: true,
-            children: <Widget>[
+            children: const <Widget>[
               _HorizontalPage(height: 100.0, label: 'Page 1'),
               _HorizontalPage(height: 200.0, label: 'Page 2'),
             ],
@@ -153,7 +153,7 @@ void main() {
   testWidgets('PageView.shrinkWrapCrossAxis does not interpolate inside leading pad', (
     WidgetTester tester,
   ) async {
-    final PageController controller = PageController(viewportFraction: 0.8);
+    final controller = PageController(viewportFraction: 0.8);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -164,7 +164,7 @@ void main() {
           child: PageView(
             controller: controller,
             shrinkWrapCrossAxis: true,
-            children: <Widget>[
+            children: const <Widget>[
               _HorizontalPage(height: 100.0, label: 'Page 1'),
               _HorizontalPage(height: 200.0, label: 'Page 2'),
             ],
@@ -185,7 +185,7 @@ void main() {
   testWidgets(
     'PageView.shrinkWrapCrossAxis with padEnds false uses the max-scroll-clamped trailing size',
     (WidgetTester tester) async {
-      final PageController controller = PageController(viewportFraction: 0.8);
+      final controller = PageController(viewportFraction: 0.8);
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -225,9 +225,9 @@ void main() {
   testWidgets('PageView.shrinkWrapCrossAxis supports implicit accessibility scrolling', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
-    final PageController controller = PageController();
+    final controller = PageController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -241,14 +241,14 @@ void main() {
             shrinkWrapCrossAxis: true,
             children: <Widget>[
               Semantics(
-                key: ValueKey<String>('page-1-semantics'),
+                key: const ValueKey<String>('page-1-semantics'),
                 container: true,
-                child: _HorizontalPage(height: 100.0, label: 'Page 1'),
+                child: const _HorizontalPage(height: 100.0, label: 'Page 1'),
               ),
               Semantics(
-                key: ValueKey<String>('page-2-semantics'),
+                key: const ValueKey<String>('page-2-semantics'),
                 container: true,
-                child: _HorizontalPage(height: 220.0, label: 'Page 2'),
+                child: const _HorizontalPage(height: 220.0, label: 'Page 2'),
               ),
             ],
           ),
@@ -290,7 +290,7 @@ void main() {
   testWidgets('Vertical PageView with shrinkWrapCrossAxis adapts width', (
     WidgetTester tester,
   ) async {
-    final PageController controller = PageController();
+    final controller = PageController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -324,7 +324,7 @@ void main() {
   testWidgets('PageView.shrinkWrapCrossAxis with reverse selects the right page size', (
     WidgetTester tester,
   ) async {
-    final PageController controller = PageController();
+    final controller = PageController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -485,12 +485,12 @@ void main() {
   testWidgets('PageView.shrinkWrapCrossAxis debugFillProperties includes shrinkWrapCrossAxis', (
     WidgetTester tester,
   ) async {
-    final PageView pageView = PageView(
+    final pageView = PageView(
       shrinkWrapCrossAxis: true,
       children: const <Widget>[SizedBox(height: 100.0)],
     );
 
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
 
     await tester.pumpWidget(
       Directionality(
