@@ -766,14 +766,7 @@ void main() {
         expect(allOutput, contains('\x1B[1A')); // cursor up
 
         // Completion line should be right-aligned to terminal width (80).
-        // Find the write containing the cursor-up code, which is _finishProgressDisplay's write.
-        final String completionWrite = stdio.writtenToStdout.lastWhere(
-          (String s) => s.contains('\x1B[1A'),
-        );
-        // The completion line follows the last clear-line escape code.
-        const clearCode = '\x1B[K';
-        final int lineStart = completionWrite.lastIndexOf(clearCode) + clearCode.length;
-        final String completionLine = completionWrite.substring(lineStart).replaceAll('\n', '');
+        final String completionLine = stdio.writtenToStdout.last.replaceAll('\n', '');
         expect(completionLine.length, 80);
       },
     );

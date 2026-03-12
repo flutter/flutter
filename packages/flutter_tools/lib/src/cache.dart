@@ -1141,8 +1141,6 @@ class ArtifactUpdater {
 
   final Stdio? _stdio;
 
-  static const _progressUpdateIntervalMs = 100;
-
   /// Keep track of the files we've downloaded for this execution so we
   /// can delete them after completion. We don't delete them right after
   /// extraction in case [ArtifactSet.update] is interrupted, so we can
@@ -1180,43 +1178,12 @@ class ArtifactUpdater {
     _downloadTotal = 0;
   }
 
-  /// Whether the terminal supports ANSI progress display.
-  bool get _canShowProgress => _stdio != null && _logger.supportsColor;
-
-  static const int _maxTerminalWidth = 80;
-  int get _terminalWidth =>
-      (_stdio?.terminalColumns ?? _maxTerminalWidth).clamp(0, _maxTerminalWidth);
-
-  /// Writes or updates the progress line below the current status line.
-  void _writeProgressLine(DownloadProgress progress, Duration elapsed) {
-    final String line = progress.formatProgressLine(
-      elapsed: elapsed,
-      terminalWidth: _terminalWidth,
-    );
-    _stdio!.stdoutWrite('${AnsiTerminal.clearAndReturnCode}$line');
-  }
-
-  /// Clears both the progress line and the status line above it.
-  void _clearProgressDisplay() {
-    _stdio!.stdoutWrite(
-      '${AnsiTerminal.clearAndReturnCode}'
-      '${AnsiTerminal.cursorUpLineCode}'
-      '${AnsiTerminal.clearAndReturnCode}',
-    );
-  }
-
-  /// Clears the progress display and rewrites the status line with a completion summary,
-  /// right-aligned to the terminal width.
-  void _finishProgressDisplay(String statusMessage, DownloadProgress progress, Duration elapsed) {
-    final String summary = progress.formatCompletionSummary(elapsed);
-    final int padding = _terminalWidth - statusMessage.length - summary.length;
-    final line = '$statusMessage${' ' * max(1, padding)}$summary';
-    _stdio!.stdoutWrite(
-      '${AnsiTerminal.clearAndReturnCode}'
-      '${AnsiTerminal.cursorUpLineCode}'
-      '${AnsiTerminal.clearAndReturnCode}'
-      '$line\n',
-    );
+  /// Creates the appropriate display for the current terminal capabilities.
+  _DownloadDisplay _createDisplay(String statusMessage) {
+    if (_stdio != null && _logger.supportsColor) {
+      return _ProgressBarDisplay(stdio: _stdio, statusMessage: statusMessage);
+    }
+    return _SpinnerDisplay(logger: _logger, statusMessage: statusMessage);
   }
 
   /// These filenames, should they exist after extracting an archive, should be deleted.
@@ -1279,47 +1246,22 @@ class ArtifactUpdater {
     _downloadIndex++;
 
     while (retries > 0) {
-      final progress = DownloadProgress();
-      final downloadStopwatch = Stopwatch()..start();
-      var lastUpdateMs = 0;
-      var downloadCompleted = false;
-      Status? status;
-
-      if (_canShowProgress) {
-        _stdio!.stdoutWrite('$formattedMessage\n');
-      } else {
-        status = _logger.startProgress(formattedMessage);
-      }
-
-      void onProgress(int chunkSize, int contentLength) {
-        if (progress.totalBytes < 0) {
-          progress.totalBytes = contentLength;
-        }
-        progress.addBytesReceived(chunkSize);
-        final int currentMs = downloadStopwatch.elapsedMilliseconds;
-        if (currentMs >= lastUpdateMs + _progressUpdateIntervalMs) {
-          lastUpdateMs = currentMs;
-          _writeProgressLine(progress, downloadStopwatch.elapsed);
-        }
-      }
+      final _DownloadDisplay display = _createDisplay(formattedMessage);
+      display.start();
 
       try {
         _ensureExists(tempFile.parent);
         if (tempFile.existsSync()) {
           tempFile.deleteSync();
         }
-        await _download(
-          url,
-          tempFile,
-          status,
-          onReceiveProgress: _canShowProgress ? onProgress : null,
-        );
+        await _download(url, tempFile, display);
 
         if (!tempFile.existsSync()) {
           throw Exception('Did not find downloaded file ${tempFile.path}');
         }
-        downloadCompleted = true;
+        display.finish();
       } on Exception catch (err) {
+        display.cancel();
         _logger.printTrace(err.toString());
         retries -= 1;
         if (retries == 0) {
@@ -1329,6 +1271,7 @@ class ArtifactUpdater {
         }
         continue;
       } on ArgumentError catch (error) {
+        display.cancel();
         final String? overrideUrl = _platform.environment[kFlutterStorageBaseUrl];
         if (overrideUrl != null && url.toString().contains(overrideUrl)) {
           _logger.printError(error.toString());
@@ -1343,17 +1286,6 @@ class ArtifactUpdater {
         // This error should not be hit if there was not a storage URL override, allow the
         // tool to crash.
         rethrow;
-      } finally {
-        if (_canShowProgress) {
-          downloadStopwatch.stop();
-          if (downloadCompleted) {
-            _finishProgressDisplay(formattedMessage, progress, downloadStopwatch.elapsed);
-          } else {
-            _clearProgressDisplay();
-          }
-        } else {
-          status?.stop();
-        }
       }
 
       /// Unzipping multiple file into a directory will not remove old files
@@ -1405,12 +1337,7 @@ class ArtifactUpdater {
   ///
   /// See also:
   ///   * https://cloud.google.com/storage/docs/xml-api/reference-headers#xgooghash
-  Future<void> _download(
-    Uri url,
-    File file,
-    Status? status, {
-    void Function(int chunkSize, int contentLength)? onReceiveProgress,
-  }) async {
+  Future<void> _download(Uri url, File file, _DownloadDisplay display) async {
     final bool isAllowedUrl = _allowedBaseUrls.any(
       (String baseUrl) => url.toString().startsWith(baseUrl),
     );
@@ -1424,12 +1351,12 @@ class ArtifactUpdater {
 
     // In production, issue a warning but allow the download to proceed.
     if (!isAllowedUrl) {
-      status?.pause();
+      display.pause();
       _logger.printWarning(
         'Downloading an artifact that may not be reachable in some environments (e.g. firewalled environments): $url\n'
         'This should not have happened. This is likely a Flutter SDK bug. Please file an issue at https://github.com/flutter/flutter/issues/new?template=01_activation.yml',
       );
-      status?.resume();
+      display.resume();
     }
 
     final HttpClientRequest request = await _httpClient.getUrl(url);
@@ -1451,7 +1378,7 @@ class ArtifactUpdater {
     await response.forEach((List<int> chunk) {
       inputSink?.add(chunk);
       randomAccessFile.writeFromSync(chunk);
-      onReceiveProgress?.call(chunk.length, contentLength);
+      display.onChunk(chunk.length, contentLength);
     });
     randomAccessFile.closeSync();
     if (inputSink != null) {
@@ -1582,6 +1509,128 @@ final _flattenNameSubstitutions = <int, List<int>>{
   r'?'.codeUnitAt(0): '@ques@'.codeUnits,
 };
 
+/// Abstraction for displaying download progress.
+///
+/// Two implementations exist:
+/// - [_ProgressBarDisplay]: ANSI progress bar for terminals with color support.
+/// - [_SpinnerDisplay]: Spinner-based display via [Logger.startProgress].
+abstract class _DownloadDisplay {
+  void start();
+  void onChunk(int chunkSize, int contentLength);
+  void finish();
+  void cancel();
+  void pause();
+  void resume();
+}
+
+/// Displays an ANSI progress bar with speed, ETA, and percentage.
+class _ProgressBarDisplay extends _DownloadDisplay {
+  _ProgressBarDisplay({required Stdio stdio, required this.statusMessage}) : _stdio = stdio;
+
+  static const int _maxTerminalWidth = 80;
+  static const int _progressUpdateIntervalMs = 100;
+
+  final Stdio _stdio;
+  final String statusMessage;
+  final DownloadProgress _progress = DownloadProgress();
+  final Stopwatch _stopwatch = Stopwatch();
+  int _lastUpdateMs = 0;
+
+  int get _terminalWidth =>
+      (_stdio.terminalColumns ?? _maxTerminalWidth).clamp(0, _maxTerminalWidth);
+
+  @override
+  void start() {
+    _stopwatch.start();
+    _stdio.stdoutWrite('$statusMessage\n');
+  }
+
+  @override
+  void onChunk(int chunkSize, int contentLength) {
+    if (_progress.totalBytes < 0) {
+      _progress.totalBytes = contentLength;
+    }
+    _progress.addBytesReceived(chunkSize);
+    final int currentMs = _stopwatch.elapsedMilliseconds;
+    if (currentMs >= _lastUpdateMs + _progressUpdateIntervalMs) {
+      _lastUpdateMs = currentMs;
+      final String line = _progress.formatProgressLine(
+        elapsed: _stopwatch.elapsed,
+        terminalWidth: _terminalWidth,
+      );
+      _stdio.stdoutWrite('${AnsiTerminal.clearAndReturnCode}$line');
+    }
+  }
+
+  void _stopAndClear() {
+    _stopwatch.stop();
+    _stdio.stdoutWrite(
+      '${AnsiTerminal.clearAndReturnCode}'
+      '${AnsiTerminal.cursorUpLineCode}'
+      '${AnsiTerminal.clearAndReturnCode}',
+    );
+  }
+
+  @override
+  void finish() {
+    _stopAndClear();
+    final String summary = _progress.formatCompletionSummary(_stopwatch.elapsed);
+    final int padding = _terminalWidth - statusMessage.length - summary.length;
+    final line = '$statusMessage${' ' * max(1, padding)}$summary';
+    _stdio.stdoutWrite('$line\n');
+  }
+
+  @override
+  void cancel() {
+    _stopAndClear();
+  }
+
+  @override
+  void pause() {}
+
+  @override
+  void resume() {}
+}
+
+/// Displays a spinner via [Logger.startProgress].
+class _SpinnerDisplay extends _DownloadDisplay {
+  _SpinnerDisplay({required Logger logger, required String statusMessage})
+    : _logger = logger,
+      _statusMessage = statusMessage;
+
+  final Logger _logger;
+  final String _statusMessage;
+  Status? _status;
+
+  @override
+  void start() {
+    _status = _logger.startProgress(_statusMessage);
+  }
+
+  @override
+  void onChunk(int chunkSize, int contentLength) {}
+
+  @override
+  void finish() {
+    _status?.stop();
+  }
+
+  @override
+  void cancel() {
+    _status?.stop();
+  }
+
+  @override
+  void pause() {
+    _status?.pause();
+  }
+
+  @override
+  void resume() {
+    _status?.resume();
+  }
+}
+
 /// Tracks download progress and provides formatted display strings.
 @visibleForTesting
 class DownloadProgress {
@@ -1615,8 +1664,8 @@ class DownloadProgress {
     if (!hasKnownSize || speed == 0) {
       return null;
     }
-    final int timeRemainingBytes = totalBytes - _bytesReceived;
-    return Duration(milliseconds: (timeRemainingBytes * 1000 / speed).round());
+    final int totalRemainingBytes = totalBytes - _bytesReceived;
+    return Duration(milliseconds: (totalRemainingBytes * 1000 / speed).round());
   }
 
   static const _subBlocks = ['▏', '▎', '▍', '▌', '▋', '▊', '▉'];
@@ -1631,9 +1680,9 @@ class DownloadProgress {
     final int totalEighths = (fractionReceived * width * 8).round();
     final int fullBlocks = totalEighths ~/ 8;
     final int remainder = totalEighths % 8;
-    final int emptyBlocks = width - fullBlocks - (remainder > 0 ? 1 : 0);
+    final int emptyBlocks = width - fullBlocks - 1;
     final String filled = '█' * fullBlocks;
-    final String partial = remainder > 0 ? _subBlocks[remainder - 1] : '';
+    final String partial = remainder > 0 ? _subBlocks[remainder - 1] : ' ';
     final String empty = ' ' * emptyBlocks;
     return '$filled$partial$empty';
   }
@@ -1663,7 +1712,7 @@ class DownloadProgress {
 
   /// Formats the full progress line for terminal display.
   String formatProgressLine({required Duration elapsed, required int terminalWidth}) {
-    const indent = '     ';
+    final String indent = ' ' * 5;
     final percentReceivedStr = hasKnownSize ? '${percentReceived.toString().padLeft(3)}%' : '';
     final String bytesStr = formatBytes();
     final String speedStr = formatSpeed(elapsed);
@@ -1672,6 +1721,11 @@ class DownloadProgress {
     final parts = <String>[percentReceivedStr, bytesStr, speedStr, etaStr];
     final String info = parts.where((String s) => s.isNotEmpty).join('  ');
 
+    // The progress bar is 28 characters wide and terminated on either side by
+    // thin vertical lines which take up another 2 characters. 28 characters was
+    // chosen empirically to make the progress bar take up enough space to look
+    // good while leaving enough space for the detailed info under "normal"
+    // conditions (artifact size <1GB, download speed >1MB/s).
     const barInner = 28;
     const int barTotal = barInner + 2; // ▕ + bar + ▏
     final String line;
