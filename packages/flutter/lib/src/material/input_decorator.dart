@@ -2834,7 +2834,6 @@ class InputDecoration {
     this.errorText,
     this.errorStyle,
     this.errorMaxLines,
-    this.errorPadding,
     this.floatingLabelBehavior,
     this.floatingLabelAlignment,
     this.isCollapsed,
@@ -2870,6 +2869,7 @@ class InputDecoration {
     this.alignLabelWithHint,
     this.constraints,
     this.visualDensity,
+    this.errorPadding,
   }) : assert(
          !(label != null && labelText != null),
          'Declaring both label and labelText is not supported.',
@@ -5411,13 +5411,13 @@ class InputDecorationThemeData with Diagnosticable {
   ///    within a [Theme].
   ///  * [InputDecoration.visualDensity], which can override this setting for a
   ///    given decorator.
+  /// {@macro flutter.material.inputDecoration.visualDensity}
+  final VisualDensity? visualDensity;
+
   /// The padding for the [InputDecoration.errorText].
   ///
   /// If [errorPadding] is null, [contentPadding] will be used for padding for both error and input text.
   final EdgeInsetsGeometry? errorPadding;
-
-  /// {@macro flutter.material.inputDecoration.visualDensity}
-  final VisualDensity? visualDensity;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
