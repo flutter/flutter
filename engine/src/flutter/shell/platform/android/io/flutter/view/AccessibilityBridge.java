@@ -2156,7 +2156,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
    * <p>The given {@code virtualViewId} should be a {@link SemanticsNode} below which the content
    * has changed.
    */
-
   private void sendWindowContentChangeEvent(int virtualViewId, int changeType) {
     AccessibilityEvent event =
         obtainAccessibilityEvent(virtualViewId, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);

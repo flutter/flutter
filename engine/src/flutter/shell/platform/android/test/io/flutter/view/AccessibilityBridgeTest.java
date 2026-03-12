@@ -2650,8 +2650,10 @@ public class AccessibilityBridgeTest {
     node.addFlag(AccessibilityBridge.Flag.IS_CHECKED);
     node.toUpdate().sendUpdateToBridge(accessibilityBridge);
 
-    ArgumentCaptor<AccessibilityEvent> eventCaptor = ArgumentCaptor.forClass(AccessibilityEvent.class);
-    verify(mockParent, atLeastOnce()).requestSendAccessibilityEvent(eq(mockRootView), eventCaptor.capture());
+    ArgumentCaptor<AccessibilityEvent> eventCaptor =
+        ArgumentCaptor.forClass(AccessibilityEvent.class);
+    verify(mockParent, atLeastOnce())
+        .requestSendAccessibilityEvent(eq(mockRootView), eventCaptor.capture());
 
     boolean found = false;
     for (AccessibilityEvent event : eventCaptor.getAllValues()) {
@@ -2688,8 +2690,10 @@ public class AccessibilityBridgeTest {
     node.addFlag(AccessibilityBridge.Flag.IS_TOGGLED);
     node.toUpdate().sendUpdateToBridge(accessibilityBridge);
 
-    ArgumentCaptor<AccessibilityEvent> eventCaptor = ArgumentCaptor.forClass(AccessibilityEvent.class);
-    verify(mockParent, atLeastOnce()).requestSendAccessibilityEvent(eq(mockRootView), eventCaptor.capture());
+    ArgumentCaptor<AccessibilityEvent> eventCaptor =
+        ArgumentCaptor.forClass(AccessibilityEvent.class);
+    verify(mockParent, atLeastOnce())
+        .requestSendAccessibilityEvent(eq(mockRootView), eventCaptor.capture());
 
     boolean found = false;
     for (AccessibilityEvent event : eventCaptor.getAllValues()) {
@@ -2726,8 +2730,10 @@ public class AccessibilityBridgeTest {
     node.addFlag(AccessibilityBridge.Flag.IS_CHECK_STATE_MIXED);
     node.toUpdate().sendUpdateToBridge(accessibilityBridge);
 
-    ArgumentCaptor<AccessibilityEvent> eventCaptor = ArgumentCaptor.forClass(AccessibilityEvent.class);
-    verify(mockParent, atLeastOnce()).requestSendAccessibilityEvent(eq(mockRootView), eventCaptor.capture());
+    ArgumentCaptor<AccessibilityEvent> eventCaptor =
+        ArgumentCaptor.forClass(AccessibilityEvent.class);
+    verify(mockParent, atLeastOnce())
+        .requestSendAccessibilityEvent(eq(mockRootView), eventCaptor.capture());
 
     boolean found = false;
     for (AccessibilityEvent event : eventCaptor.getAllValues()) {
