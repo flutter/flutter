@@ -1734,6 +1734,9 @@ void main() {
       final verticalController = ScrollController();
       final horizontalController = ScrollController();
 
+      addTearDown(verticalController.dispose);
+      addTearDown(horizontalController.dispose);
+
       final onRespondCalls = <bool>[];
 
       await tester.pumpWidget(
