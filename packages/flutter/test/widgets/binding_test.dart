@@ -241,6 +241,39 @@ class LoggingObserver with WidgetsBindingObserver {
 }
 
 // Implements to make sure all methods get coverage.
+class SelectiveLoggingObserver with WidgetsBindingObserver {
+  SelectiveLoggingObserver({
+    required this.name,
+    required this.log,
+    required this.handlesBackGesture,
+  });
+
+  final String name;
+  final List<String> log;
+  final bool handlesBackGesture;
+
+  @override
+  bool handleStartBackGesture(PredictiveBackEvent backEvent) {
+    log.add('$name.handleStartBackGesture');
+    return handlesBackGesture;
+  }
+
+  @override
+  void handleUpdateBackGestureProgress(PredictiveBackEvent backEvent) {
+    log.add('$name.handleUpdateBackGestureProgress');
+  }
+
+  @override
+  void handleCommitBackGesture() {
+    log.add('$name.handleCommitBackGesture');
+  }
+
+  @override
+  void handleCancelBackGesture() {
+    log.add('$name.handleCancelBackGesture');
+  }
+}
+
 class RentrantObserver implements WidgetsBindingObserver {
   RentrantObserver() {
     WidgetsBinding.instance.addObserver(this);
@@ -1122,6 +1155,70 @@ void main() {
       WidgetsBinding.instance.handleMemoryPressure();
       expect(log, contains('didHaveMemoryPressure'));
       expect(errors, hasLength(1));
+    });
+
+    testWidgets('only the deepest observer handles a predictive back gesture', (
+      WidgetTester tester,
+    ) async {
+      final log = <String>[];
+      final outerObserver = SelectiveLoggingObserver(
+        name: 'outer',
+        log: log,
+        handlesBackGesture: true,
+      );
+      final innerObserver = SelectiveLoggingObserver(
+        name: 'inner',
+        log: log,
+        handlesBackGesture: true,
+      );
+      WidgetsBinding.instance.addObserver(outerObserver);
+      WidgetsBinding.instance.addObserver(innerObserver);
+      addTearDown(() {
+        WidgetsBinding.instance.removeObserver(outerObserver);
+        WidgetsBinding.instance.removeObserver(innerObserver);
+      });
+
+      final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall('startBackGesture', <String, dynamic>{
+          'touchOffset': <double>[5.0, 300.0],
+          'progress': 0.0,
+          'swipeEdge': 0,
+        }),
+      );
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        startMessage,
+        (ByteData? _) {},
+      );
+
+      final ByteData updateMessage = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall('updateBackGestureProgress', <String, dynamic>{
+          'x': 100.0,
+          'y': 300.0,
+          'progress': 0.35,
+          'swipeEdge': 0,
+        }),
+      );
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        updateMessage,
+        (ByteData? _) {},
+      );
+
+      final ByteData commitMessage = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall('commitBackGesture'),
+      );
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        commitMessage,
+        (ByteData? _) {},
+      );
+
+      expect(log, <String>[
+        'inner.handleStartBackGesture',
+        'inner.handleUpdateBackGestureProgress',
+        'inner.handleCommitBackGesture',
+      ]);
     });
 
     testWidgets('handleUpdateBackGestureProgress', (WidgetTester tester) async {

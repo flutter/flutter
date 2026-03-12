@@ -1139,10 +1139,11 @@ mixin WidgetsBinding
   bool _handleStartBackGesture(Map<String?, Object?> arguments) {
     _backGestureObservers.clear();
     final backEvent = PredictiveBackEvent.fromMap(arguments);
-    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+    for (final observer in List<WidgetsBindingObserver>.of(_observers).reversed) {
       try {
         if (observer.handleStartBackGesture(backEvent)) {
           _backGestureObservers.add(observer);
+          break;
         }
       } catch (exception, stack) {
         FlutterError.reportError(
