@@ -3925,8 +3925,10 @@ class InputDecoration {
   ///    given decorator.
   final VisualDensity? visualDensity;
 
-  /// Padding for the error text for decorators separated from input text padding [contentPadding].
-  /// if [errorPadding] is null [contentPadding] will be used for padding for both error and input text
+  /// The padding applied to the error text.
+  ///
+  /// This padding is applied specifically to error text and is independent of [contentPadding].
+  ///  if [errorPadding] is null, the value of [contentPadding] will be used for both error and input text padding.
   final EdgeInsetsGeometry? errorPadding;
 
   /// Creates a copy of this input decoration with the given fields replaced
