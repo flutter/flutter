@@ -58,16 +58,15 @@ class SemanticLink extends SemanticRole {
     if (href.startsWith('/') && !href.startsWith('//')) {
       return true;
     }
-    try {
-      final Uri uri = Uri.parse(href);
-      if (!uri.hasScheme) {
-        // Relative URLs without a leading slash (e.g., "legal/terms")
-        return true;
-      }
-      return uri.origin == domWindow.location.origin;
-    } catch (_) {
+    final Uri? uri = Uri.tryParse(href);
+    if (uri == null) {
       return false;
     }
+    if (!uri.hasScheme) {
+      // Relative URLs without a leading slash (e.g., "legal/terms")
+      return true;
+    }
+    return uri.origin == domWindow.location.origin;
   }
 
   @override
