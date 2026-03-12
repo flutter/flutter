@@ -416,7 +416,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
                   label: successEventLabel,
                   isModule: project.isModule,
                   agpVersion: agpVersion,
-                  jdkVersion: int.tryParse(versionToParsableString(_java?.version).toString()),
+                  jdkVersion: _java?.version?.major,
                   gradleVersion: gradleVersion,
                 ),
               );
