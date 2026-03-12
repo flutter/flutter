@@ -262,9 +262,18 @@ void main() {
 
   group('startApp handles engine shell arguments from debugging options as expected', () {
     late FakeAndroidBuilder fakeAndroidBuilder;
+    late _FakeApplicationPackageFactory fakeApplicationPackageFactory;
+    const apkId = 'FlutterApp';
+    const apkPath = 'app-debug.apk';
+    const apkLaunchActivity = 'FlutterActivity';
 
     setUp(() {
       fakeAndroidBuilder = FakeAndroidBuilder();
+      fakeApplicationPackageFactory = _FakeApplicationPackageFactory(
+        apkId,
+        apkPath,
+        apkLaunchActivity,
+      );
     });
 
     testUsingContext(
@@ -307,23 +316,13 @@ void main() {
               'force-stop',
               '--user',
               '10',
-              'FlutterApp', // fake APK id for _FakeAndroidApk
+              apkId,
             ],
           ),
         );
         processManager.addCommand(
           const FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'install',
-              '-t',
-              '-r',
-              '--user',
-              '10',
-              'app-debug.apk',
-            ],
+            command: <String>['adb', '-s', '1234', 'install', '-t', '-r', '--user', '10', apkPath],
             stdout: '\n\nThe Dart VM service is listening on http://127.0.0.1:456\n\n',
           ),
         );
@@ -352,7 +351,7 @@ void main() {
               '0x20000000',
               '--user',
               '10',
-              'FlutterActivity', // name of Activity used to start _FakeAndroidApk
+              apkLaunchActivity,
             ],
           ),
         );
@@ -430,7 +429,7 @@ void main() {
       },
       overrides: <Type, Generator>{
         AndroidBuilder: () => fakeAndroidBuilder,
-        ApplicationPackageFactory: () => _FakeApplicationPackageFactory(),
+        ApplicationPackageFactory: () => fakeApplicationPackageFactory,
       },
     );
 
@@ -484,23 +483,13 @@ void main() {
               'force-stop',
               '--user',
               '10',
-              'FlutterApp', // fake APK id for _FakeAndroidApk
+              apkId,
             ],
           ),
         );
         processManager.addCommand(
           const FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'install',
-              '-t',
-              '-r',
-              '--user',
-              '10',
-              'app-debug.apk',
-            ],
+            command: <String>['adb', '-s', '1234', 'install', '-t', '-r', '--user', '10', apkPath],
             stdout: '\n\nThe Dart VM service is listening on http://127.0.0.1:456\n\n',
           ),
         );
@@ -529,7 +518,7 @@ void main() {
               '0x20000000',
               '--user',
               '10',
-              'FlutterActivity', // name of Activity used to start _FakeAndroidApk
+              apkLaunchActivity,
             ],
           ),
         );
@@ -559,7 +548,7 @@ void main() {
       },
       overrides: <Type, Generator>{
         AndroidBuilder: () => fakeAndroidBuilder,
-        ApplicationPackageFactory: () => _FakeApplicationPackageFactory(),
+        ApplicationPackageFactory: () => fakeApplicationPackageFactory,
       },
     );
 
@@ -613,23 +602,13 @@ void main() {
               'force-stop',
               '--user',
               '10',
-              'FlutterApp', // fake APK id for _FakeAndroidApk
+              apkId,
             ],
           ),
         );
         processManager.addCommand(
           const FakeCommand(
-            command: <String>[
-              'adb',
-              '-s',
-              '1234',
-              'install',
-              '-t',
-              '-r',
-              '--user',
-              '10',
-              'app-debug.apk',
-            ],
+            command: <String>['adb', '-s', '1234', 'install', '-t', '-r', '--user', '10', apkPath],
             stdout: '\n\nThe Dart VM service is listening on http://127.0.0.1:456\n\n',
           ),
         );
@@ -658,7 +637,7 @@ void main() {
               '0x20000000',
               '--user',
               '10',
-              'FlutterActivity', // name of Activity used to start _FakeAndroidApk
+              apkLaunchActivity,
             ],
           ),
         );
@@ -692,7 +671,7 @@ void main() {
       },
       overrides: <Type, Generator>{
         AndroidBuilder: () => fakeAndroidBuilder,
-        ApplicationPackageFactory: () => _FakeApplicationPackageFactory(),
+        ApplicationPackageFactory: () => fakeApplicationPackageFactory,
       },
     );
   });
@@ -752,7 +731,11 @@ class FakeAndroidBuilder implements AndroidBuilder {
 }
 
 class _FakeApplicationPackageFactory implements ApplicationPackageFactory {
-  _FakeAndroidApk applicationPackage = _FakeAndroidApk();
+  _FakeApplicationPackageFactory(this.apkId, this.apkPath, this.apkLaunchActivity);
+
+  final String apkId;
+  final String apkPath;
+  final String apkLaunchActivity;
 
   @override
   Future<ApplicationPackage?> getPackageForPlatform(
@@ -760,22 +743,28 @@ class _FakeApplicationPackageFactory implements ApplicationPackageFactory {
     BuildInfo? buildInfo,
     File? applicationBinary,
   }) async {
-    return applicationPackage;
+    return _FakeAndroidApk(apkId, apkPath, apkLaunchActivity);
   }
 }
 
 class _FakeAndroidApk extends Fake implements AndroidApk {
+  _FakeAndroidApk(this._id, this.applicationPackagePath, this._launchActivity);
+
+  final String applicationPackagePath;
+  final String _id;
+  final String _launchActivity;
+
   @override
-  String get id => 'FlutterApp';
+  String get id => _id;
 
   @override
   String get name => 'fakeApkName';
 
   @override
-  FileSystemEntity get applicationPackage => FakeFile('app-debug.apk');
+  FileSystemEntity get applicationPackage => FakeFile(applicationPackagePath);
 
   @override
-  String get launchActivity => 'FlutterActivity';
+  String get launchActivity => _launchActivity;
 }
 
 class FakeFile extends Fake implements File {
