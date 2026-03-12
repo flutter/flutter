@@ -1915,7 +1915,13 @@ class FakePlistParser extends PlistParser {
 
 class FakeDarwinAddToAppCodesigning extends Fake implements DarwinAddToAppCodesigning {
   @override
-  Future<String?> getCodesignIdentity(BuildInfo buildInfo, XcodeBasedProject xcodeProject) async {
+  Future<String?> getCodesignIdentity({
+    required BuildInfo buildInfo,
+    required bool codesignEnabled,
+    required String? codesignIdentityOption,
+    required File identityFile,
+    required XcodeBasedProject xcodeProject,
+  }) async {
     return null;
   }
 }

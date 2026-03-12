@@ -32,11 +32,35 @@ class DarwinAddToAppCodesigning {
 
   /// Find the codesigning identity to use to codesign XCFrameworks.
   ///
-  /// First, attempt to find the codesigning identity in the Flutter project build settings.
-  /// If that fails, attempt to find the codesigning identity in the Flutter config.
-  /// If no codesign identity is found, print a warning and return null.
-  Future<String?> getCodesignIdentity(BuildInfo buildInfo, XcodeBasedProject xcodeProject) async {
-    final Status status = _logger.startProgress('Finding codesigning identities...');
+  /// If [codesignEnabled] is false, return null and print a status that code-signing is being
+  /// skipped.
+  ///
+  /// If [codesignIdentityOption] is provided, use it as the code-signing identity. Otherwise,
+  /// first attempt to find the code-signing identity from the Flutter project build settings.
+  /// If that fails, attempt to find the code-signing identity in the Flutter config. If no
+  /// code-signing identity is found, throw an error.
+  Future<String?> getCodesignIdentity({
+    required BuildInfo buildInfo,
+    required bool codesignEnabled,
+    required String? codesignIdentityOption,
+    required File identityFile,
+    required XcodeBasedProject xcodeProject,
+  }) async {
+    if (!codesignEnabled) {
+      _skipCodesigning(identityFile: identityFile);
+      return null;
+    }
+    // Use identity from command line argument if provided.
+    if (codesignIdentityOption != null) {
+      _logger.printStatus('Using code-signing identity: $codesignIdentityOption');
+      _warnIfChangedAndSaveIdentity(
+        identity: codesignIdentityOption,
+        identityFile: identityFile,
+        subMessage: false,
+      );
+      return codesignIdentityOption;
+    }
+    final Status status = _logger.startProgress('Finding code-signing identities...');
     final bool toolsAvailable = await _xcodeCodeSigningSettings.validateCodeSignSearchTools();
     if (!toolsAvailable) {
       throwToolExit(
@@ -46,7 +70,9 @@ class DarwinAddToAppCodesigning {
     }
     final List<String> identities = await _xcodeCodeSigningSettings.getSigningIdentities();
     if (identities.isEmpty) {
-      throwToolExit('$noCertificatesFound\n\n$noCertificatesFoundMoreInfo');
+      throwToolExit(
+        noCertificatesInstruction(includeTrustStep: false, includeSimulatorAlternative: false),
+      );
     }
 
     // Attempt to get codesigning info from Flutter project
@@ -58,6 +84,7 @@ class DarwinAddToAppCodesigning {
     if (identity != null) {
       status.stop();
       _logger.printStatus('   └── Using code-signing identity from Flutter project: $identity');
+      _warnIfChangedAndSaveIdentity(identity: identity, identityFile: identityFile);
       return identity;
     }
 
@@ -66,6 +93,7 @@ class DarwinAddToAppCodesigning {
     if (identity != null) {
       status.stop();
       _logger.printStatus('   └── Using code-signing identity from Flutter config: $identity');
+      _warnIfChangedAndSaveIdentity(identity: identity, identityFile: identityFile);
       return identity;
     }
 
@@ -74,6 +102,50 @@ class DarwinAddToAppCodesigning {
       'No valid code-signing identity found. Please specify which identity to use with '
       '--${FlutterOptions.kCodesignIdentity} or use --no-codesign.',
     );
+  }
+
+  /// Print a message to the user that code-signing is being skipped and save an empty string to
+  /// the [identityFile].
+  void _skipCodesigning({required File identityFile}) {
+    _logger.printStatus('Skipping code-signing...');
+    _warnIfChangedAndSaveIdentity(identity: '', identityFile: identityFile, subMessage: false);
+  }
+
+  /// Print a warning if the codesigning identity has changed since the last run and save the new
+  /// identity to the [identityFile].
+  ///
+  /// If the identity has changed since the last run, print a warning that this may cause Xcode
+  /// to fail to build the project. See
+  /// https://developer.apple.com/documentation/xcode/verifying-the-origin-of-your-xcframeworks#Diagnose-build-failures-caused-by-code-signature-changes
+  void _warnIfChangedAndSaveIdentity({
+    required String identity,
+    required File identityFile,
+    bool subMessage = true,
+  }) {
+    var indent = '   ';
+    if (subMessage) {
+      indent = '       ';
+    }
+    if (identityFile.existsSync()) {
+      String previousIdentity = identityFile.readAsStringSync();
+      if (previousIdentity == identity) {
+        return;
+      }
+      if (previousIdentity.isEmpty) {
+        previousIdentity = '<none>';
+      }
+      _logger.printWarning(
+        '$indent└── Identity has changed since last run. Previous identity: $previousIdentity\n'
+        '$indent    If this triggers a notice in Xcode, select "Accept Change" to accept the new identity.',
+      );
+    } else {
+      _logger.printWarning(
+        '$indent└── Unable to verify if code-signing identity has changed. If this triggers a notice in Xcode,\n'
+        '$indent    select "Accept Change" to accept the new identity.',
+      );
+    }
+    identityFile.createSync(recursive: true);
+    identityFile.writeAsStringSync(identity);
   }
 
   /// Find the codesigning identity in the Flutter project build settings.
@@ -183,17 +255,13 @@ class DarwinAddToAppCodesigning {
     return _xcodeCodeSigningSettings.getIdentityFromCertFromConfig(identities);
   }
 
-  /// Codesigns a file or directory if [codesignIdentity] is not null. Throws [ToolExit] if the
-  /// codesigning fails.
+  /// Codesigns a file or directory. Throws [ToolExit] if the codesigning fails.
   static Future<void> codesign({
     required FileSystemEntity artifact,
     required ProcessManager processManager,
-    required String? codesignIdentity,
+    required String codesignIdentity,
     required BuildMode buildMode,
   }) async {
-    if (codesignIdentity == null) {
-      return;
-    }
     final ProcessResult codesignResult = await processManager.run(<String>[
       'codesign',
       '--force',
@@ -210,37 +278,27 @@ class DarwinAddToAppCodesigning {
     }
   }
 
-  /// Codesigns a Flutter/FlutterMacOS XCFramework and it's sub-frameworks if [codesignIdentity]
-  /// is not null.
+  /// Codesigns a Flutter/FlutterMacOS XCFramework if it's not already codesigned.
   ///
-  /// Codesigning the sub-frameworks is needed for the Flutter/FlutterMacOS XCFramework because on
-  /// stable the engine artifacts have both the XCFramework and the frameworks inside codesigned,
-  /// so to properly overwrite the signature, the sub-frameworks need to be codesigned as well.
+  /// On the stable and beta channels, the Flutter XCFramework is already codesigned with Flutter's
+  /// cert, so this method will skip codesigning it.
   static Future<void> codesignFlutterXCFramework({
     required Directory xcframework,
-    required String? codesignIdentity,
+    required String codesignIdentity,
     required BuildMode buildMode,
-    required FlutterDarwinPlatform targetPlatform,
     required ProcessManager processManager,
   }) async {
-    if (codesignIdentity == null) {
+    // Check if the XCFramework is already codesigned.
+    final ProcessResult codesignResult = await processManager.run(<String>[
+      'codesign',
+      '-d',
+      xcframework.path,
+    ]);
+    if (!codesignResult.stderr.toString().contains('not signed at all')) {
+      // If the Flutter XCFramework is already codesigned, skip codesigning it. It should already
+      // be codesigned with Flutter's cert on stable and beta channels.
       return;
     }
-    for (final FileSystemEntity child in xcframework.listSync()) {
-      if (child is Directory && child.basename.contains(targetPlatform.name)) {
-        final Directory framework = child.childDirectory('${targetPlatform.binaryName}.framework');
-        if (framework.existsSync()) {
-          await DarwinAddToAppCodesigning.codesign(
-            codesignIdentity: codesignIdentity,
-            artifact: framework,
-            processManager: processManager,
-            buildMode: buildMode,
-          );
-        }
-      }
-    }
-    // After codesigning the sub-frameworks, codesign the XCFramework. This must be done after so
-    // that nothing within the XCFramework changes after code-signing it.
     await DarwinAddToAppCodesigning.codesign(
       codesignIdentity: codesignIdentity,
       artifact: xcframework,

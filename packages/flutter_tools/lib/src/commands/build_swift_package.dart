@@ -49,6 +49,7 @@ const String _kNativeAssets = 'NativeAssets';
 const String kPluginSwiftPackageName = 'FlutterPluginRegistrant';
 const String _kSources = 'Sources';
 const List<String> _kSupportedPlatforms = ['ios', 'macos'];
+const String _kCodesignIdentityFile = '.codesign_identity';
 
 /// Create a swift package that can be used to embed a Flutter app inside a native iOS or macOS app.
 class BuildSwiftPackage extends BuildSubCommand {
@@ -296,15 +297,14 @@ class BuildSwiftPackage extends BuildSubCommand {
       pluginsDirectory: pluginsDirectory,
     );
 
-    String? codesignIdentity;
-    if (boolArg(FlutterOptions.kCodesign)) {
-      // Use identity from command line argument if provided.
-      // Otherwise, attempt to get codesigning identity from settings.
-      codesignIdentity =
-          stringArg(FlutterOptions.kCodesignIdentity) ??
-          await _codeSigningSettings.getCodesignIdentity(buildInfos.first, _xcodeProject);
-    }
-
+    final File codesignIdentityFile = cacheDirectory.childFile(_kCodesignIdentityFile);
+    final String? codesignIdentity = await _codeSigningSettings.getCodesignIdentity(
+      buildInfo: buildInfos.first,
+      codesignEnabled: boolArg(FlutterOptions.kCodesign),
+      codesignIdentityOption: stringArg(FlutterOptions.kCodesignIdentity),
+      identityFile: codesignIdentityFile,
+      xcodeProject: _xcodeProject,
+    );
     for (final buildInfo in buildInfos) {
       final String xcodeBuildConfiguration = buildInfo.mode.uppercaseName;
       final Directory xcframeworkOutput = pluginRegistrantSwiftPackage
@@ -317,6 +317,7 @@ class BuildSwiftPackage extends BuildSubCommand {
         xcframeworkOutput: xcframeworkOutput,
         cacheDirectory: cacheDirectory,
         codesignIdentity: codesignIdentity,
+        codesignIdentityFile: codesignIdentityFile,
       );
 
       await _generateSwiftPackages(
@@ -340,6 +341,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     required Directory xcframeworkOutput,
     required Directory cacheDirectory,
     required String? codesignIdentity,
+    required File codesignIdentityFile,
   }) async {
     logger.printStatus('Building for $xcodeBuildConfiguration...');
     await flutterFrameworkDependency.generateArtifacts(
@@ -363,6 +365,7 @@ class BuildSwiftPackage extends BuildSubCommand {
       cacheDirectory: cacheDirectory,
       xcframeworkOutput: xcframeworkOutput,
       codesignIdentity: codesignIdentity,
+      codesignIdentityFile: codesignIdentityFile,
     );
   }
 
@@ -584,17 +587,17 @@ class FlutterFrameworkDependency {
           '${result.stdout}\n---\n${result.stderr}',
         );
       }
-
-      final Directory copiedXCFramework = xcframeworkOutput.childDirectory(
-        '${_targetPlatform.binaryName}.xcframework',
-      );
-      await DarwinAddToAppCodesigning.codesignFlutterXCFramework(
-        codesignIdentity: codesignIdentity,
-        xcframework: copiedXCFramework,
-        processManager: _utils.processManager,
-        buildMode: buildMode,
-        targetPlatform: _targetPlatform,
-      );
+      if (codesignIdentity != null) {
+        final Directory copiedXCFramework = xcframeworkOutput.childDirectory(
+          '${_targetPlatform.binaryName}.xcframework',
+        );
+        await DarwinAddToAppCodesigning.codesignFlutterXCFramework(
+          codesignIdentity: codesignIdentity,
+          xcframework: copiedXCFramework,
+          processManager: _utils.processManager,
+          buildMode: buildMode,
+        );
+      }
     } finally {
       status.stop();
     }
@@ -1248,6 +1251,7 @@ class CocoaPodPluginDependencies {
     required Directory xcframeworkOutput,
     required bool buildStatic,
     required String? codesignIdentity,
+    required File codesignIdentityFile,
   }) async {
     final String xcodeBuildConfiguration = buildInfo.mode.uppercaseName;
     final Directory podsDirectory = _xcodeProject.hostAppRoot.childDirectory('Pods');
@@ -1268,6 +1272,7 @@ class CocoaPodPluginDependencies {
         buildInfo.mode.cliName,
         buildStatic,
         _xcodeProject,
+        codesignIdentityFile,
       );
       if (!dependenciesChanged && cocoapodXCFrameworkOutput.existsSync()) {
         skipped = true;
@@ -1313,6 +1318,7 @@ class CocoaPodPluginDependencies {
         cocoapodXCFrameworkOutput,
         buildInfo.mode.cliName,
         buildStatic,
+        codesignIdentityFile,
       );
     } finally {
       status.stop();
@@ -1409,12 +1415,14 @@ class CocoaPodPluginDependencies {
     String xcodeBuildConfiguration,
     bool buildStatic,
     XcodeBasedProject xcodeProject,
+    File codesignIdentityFile,
   ) {
     final Fingerprinter fingerprinter = _cocoapodsFingerprinter(
-      cacheDirectoryPath,
-      cocoapodXCFrameworkDirectory,
-      xcodeBuildConfiguration,
-      buildStatic,
+      cacheDirectoryPath: cacheDirectoryPath,
+      cocoapodXCFrameworkDirectory: cocoapodXCFrameworkDirectory,
+      xcodeBuildConfiguration: xcodeBuildConfiguration,
+      buildStatic: buildStatic,
+      codesignIdentityFile: codesignIdentityFile,
     );
     if (!fingerprinter.doesFingerprintMatch()) {
       return true;
@@ -1427,12 +1435,14 @@ class CocoaPodPluginDependencies {
     Directory cocoapodXCFrameworkDirectory,
     String xcodeBuildConfiguration,
     bool buildStatic,
+    File codesignIdentityFile,
   ) {
     final Fingerprinter fingerprinter = _cocoapodsFingerprinter(
-      cacheDirectoryPath,
-      cocoapodXCFrameworkDirectory,
-      xcodeBuildConfiguration,
-      buildStatic,
+      cacheDirectoryPath: cacheDirectoryPath,
+      cocoapodXCFrameworkDirectory: cocoapodXCFrameworkDirectory,
+      xcodeBuildConfiguration: xcodeBuildConfiguration,
+      buildStatic: buildStatic,
+      codesignIdentityFile: codesignIdentityFile,
     );
     fingerprinter.writeFingerprint();
   }
@@ -1442,13 +1452,14 @@ class CocoaPodPluginDependencies {
   /// The [Fingerprinter] is used to check if the CocoaPod output, static status, build
   /// configuration, this file, Xcode project, Podfile, generated plugin Swift Package, or
   /// podhelper have changed since the last build.
-  Fingerprinter _cocoapodsFingerprinter(
-    String cacheDirectoryPath,
-    Directory cocoapodXCFrameworkDirectory,
-    String xcodeBuildConfiguration,
-    bool buildStatic,
-  ) {
-    final fingerprintedFiles = <String>[];
+  Fingerprinter _cocoapodsFingerprinter({
+    required String cacheDirectoryPath,
+    required Directory cocoapodXCFrameworkDirectory,
+    required String xcodeBuildConfiguration,
+    required bool buildStatic,
+    required File codesignIdentityFile,
+  }) {
+    final fingerprintedFiles = <String>[codesignIdentityFile.path];
 
     final File staticStatus =
         _utils.fileSystem.file(
@@ -1586,12 +1597,14 @@ Future<void> _produceXCFramework({
   if (xcframeworkResult.exitCode != 0) {
     throwToolExit('Unable to create $frameworkBinaryName.xcframework: ${xcframeworkResult.stderr}');
   }
-  await DarwinAddToAppCodesigning.codesign(
-    codesignIdentity: codesignIdentity,
-    artifact: xcframeworkOutput,
-    processManager: processManager,
-    buildMode: buildMode,
-  );
+  if (codesignIdentity != null) {
+    await DarwinAddToAppCodesigning.codesign(
+      codesignIdentity: codesignIdentity,
+      artifact: xcframeworkOutput,
+      processManager: processManager,
+      buildMode: buildMode,
+    );
+  }
 }
 
 /// Generate target dependencies and binary targets from a directory of XCFrameworks.

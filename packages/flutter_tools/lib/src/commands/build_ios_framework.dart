@@ -253,13 +253,14 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
         'Unable to create $frameworkBinaryName.xcframework: ${xcframeworkResult.stderr}',
       );
     }
-
-    await DarwinAddToAppCodesigning.codesign(
-      codesignIdentity: codesignIdentity,
-      artifact: outputDirectory.childDirectory('$frameworkBinaryName.xcframework'),
-      processManager: processManager,
-      buildMode: buildMode,
-    );
+    if (codesignIdentity != null) {
+      await DarwinAddToAppCodesigning.codesign(
+        codesignIdentity: codesignIdentity,
+        artifact: outputDirectory.childDirectory('$frameworkBinaryName.xcframework'),
+        processManager: processManager,
+        buildMode: buildMode,
+      );
+    }
   }
 
   /// Copies vendored frameworks from CocoaPods plugins to the output directory.
@@ -513,14 +514,13 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
     );
     final List<BuildInfo> buildInfos = await getBuildInfos();
 
-    String? codesignIdentity;
-    if (boolArg(FlutterOptions.kCodesign)) {
-      // Use identity from command line argument if provided.
-      // Otherwise, attempt to get codesigning identity from settings.
-      codesignIdentity =
-          stringArg(FlutterOptions.kCodesignIdentity) ??
-          await codeSigningSettings.getCodesignIdentity(buildInfos.first, project.ios);
-    }
+    final String? codesignIdentity = await codeSigningSettings.getCodesignIdentity(
+      buildInfo: buildInfos.first,
+      codesignEnabled: boolArg(FlutterOptions.kCodesign),
+      codesignIdentityOption: stringArg(FlutterOptions.kCodesignIdentity),
+      identityFile: outputDirectory.childFile('.codesign_identity'),
+      xcodeProject: project.ios,
+    );
 
     for (final buildInfo in buildInfos) {
       // Create the build-mode specific metadata.
@@ -758,14 +758,14 @@ end
         globals.fs.directory(engineCacheFlutterFrameworkDirectory),
         flutterFrameworkCopy,
       );
-
-      await DarwinAddToAppCodesigning.codesignFlutterXCFramework(
-        codesignIdentity: codesignIdentity,
-        xcframework: flutterFrameworkCopy,
-        processManager: globals.processManager,
-        buildMode: buildInfo.mode,
-        targetPlatform: FlutterDarwinPlatform.ios,
-      );
+      if (codesignIdentity != null) {
+        await DarwinAddToAppCodesigning.codesignFlutterXCFramework(
+          codesignIdentity: codesignIdentity,
+          xcframework: flutterFrameworkCopy,
+          processManager: globals.processManager,
+          buildMode: buildInfo.mode,
+        );
+      }
     } finally {
       status.stop();
     }

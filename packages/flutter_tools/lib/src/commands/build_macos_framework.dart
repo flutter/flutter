@@ -76,14 +76,13 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
 
     final List<BuildInfo> buildInfos = await getBuildInfos();
 
-    String? codesignIdentity;
-    if (boolArg(FlutterOptions.kCodesign)) {
-      // Use identity from command line argument if provided.
-      // Otherwise, attempt to get codesigning identity from settings.
-      codesignIdentity =
-          stringArg(FlutterOptions.kCodesignIdentity) ??
-          await codeSigningSettings.getCodesignIdentity(buildInfos.first, project.macos);
-    }
+    final String? codesignIdentity = await codeSigningSettings.getCodesignIdentity(
+      buildInfo: buildInfos.first,
+      codesignEnabled: boolArg(FlutterOptions.kCodesign),
+      codesignIdentityOption: stringArg(FlutterOptions.kCodesignIdentity),
+      identityFile: outputDirectory.childFile('.codesign_identity'),
+      xcodeProject: project.macos,
+    );
 
     for (final buildInfo in buildInfos) {
       globals.printStatus('Building macOS frameworks in ${buildInfo.mode.cliName} mode...');
@@ -332,14 +331,14 @@ end
         flutterFrameworkCopy,
         followLinks: false,
       );
-
-      await DarwinAddToAppCodesigning.codesignFlutterXCFramework(
-        codesignIdentity: codesignIdentity,
-        xcframework: flutterFrameworkCopy,
-        processManager: globals.processManager,
-        buildMode: buildInfo.mode,
-        targetPlatform: FlutterDarwinPlatform.macos,
-      );
+      if (codesignIdentity != null) {
+        await DarwinAddToAppCodesigning.codesignFlutterXCFramework(
+          codesignIdentity: codesignIdentity,
+          xcframework: flutterFrameworkCopy,
+          processManager: globals.processManager,
+          buildMode: buildInfo.mode,
+        );
+      }
     } finally {
       status.stop();
     }

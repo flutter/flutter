@@ -57,6 +57,7 @@ void main() {
   const flutterCachePath = '/path/to/flutter/bin/cache';
   const engineArtifactPath = '$flutterCachePath/artifacts/engine/ios/Flutter.xcframework';
   const codesignIdentity = 'Apple Development: Company (TEAM_ID)';
+  const codesignIdentityFile = '$cacheDirectoryPath/.codesign_identity';
 
   group('BuildSwiftPackage', () {
     // TODO(vashworth): Test args validation for BuildSwiftPackage once command has been added as
@@ -171,7 +172,7 @@ void main() {
         );
 
         expect(logger.traceText, isEmpty);
-        expect(processManager.hasRemainingExpectations, false);
+        expect(processManager, hasNoRemainingExpectations);
         final File generatedPackageManifest = modeDirectory.childFile('Package.swift');
         expect(generatedPackageManifest, exists);
         expect(generatedPackageManifest.readAsStringSync(), '''
@@ -296,7 +297,7 @@ import PluginB
           xcframeworkOutput: xcframeworkOutput,
           codesignIdentity: null,
         );
-        expect(processManager.hasRemainingExpectations, isFalse);
+        expect(processManager, hasNoRemainingExpectations);
       });
 
       testWithoutContext('generateArtifacts and codesign', () async {
@@ -306,13 +307,6 @@ import PluginB
         final Directory flutterXCFramework = xcframeworkOutput.childDirectory(
           'Flutter.xcframework',
         );
-        final Directory flutterPhoneFramework = flutterXCFramework
-            .childDirectory('ios-arm64')
-            .childDirectory('Flutter.framework');
-        final Directory flutterSimulatorFramework = flutterXCFramework
-            .childDirectory('ios-arm64_x86_64-simulator')
-            .childDirectory('Flutter.framework');
-
         final processManager = FakeProcessManager.list([
           FakeCommand(
             command: [
@@ -325,30 +319,10 @@ import PluginB
               engineArtifactPath,
               xcframeworkOutput.path,
             ],
-            onRun: (command) {
-              flutterPhoneFramework.createSync(recursive: true);
-              flutterSimulatorFramework.createSync(recursive: true);
-            },
           ),
           FakeCommand(
-            command: [
-              'codesign',
-              '--force',
-              '--sign',
-              codesignIdentity,
-              '--timestamp=none',
-              flutterPhoneFramework.path,
-            ],
-          ),
-          FakeCommand(
-            command: [
-              'codesign',
-              '--force',
-              '--sign',
-              codesignIdentity,
-              '--timestamp=none',
-              flutterSimulatorFramework.path,
-            ],
+            command: ['codesign', '-d', flutterXCFramework.path],
+            stderr: '${flutterXCFramework.path}: code object is not signed at all',
           ),
           FakeCommand(
             command: [
@@ -387,7 +361,7 @@ import PluginB
           xcframeworkOutput: xcframeworkOutput,
           codesignIdentity: codesignIdentity,
         );
-        expect(processManager.hasRemainingExpectations, isFalse);
+        expect(processManager, hasNoRemainingExpectations);
       });
 
       testWithoutContext('generateSwiftPackage', () async {
@@ -797,7 +771,7 @@ let package = Package(
           xcframeworkOutput: xcframeworkOutput,
           codesignIdentity: null,
         );
-        expect(processManager.hasRemainingExpectations, isFalse);
+        expect(processManager, hasNoRemainingExpectations);
         expect(logger.warningText, isEmpty);
       });
 
@@ -905,7 +879,7 @@ let package = Package(
           xcframeworkOutput: xcframeworkOutput,
           codesignIdentity: null,
         );
-        expect(processManager.hasRemainingExpectations, isFalse);
+        expect(processManager, hasNoRemainingExpectations);
         expect(logger.warningText, isEmpty);
       });
 
@@ -1031,7 +1005,7 @@ let package = Package(
           xcframeworkOutput: xcframeworkOutput,
           codesignIdentity: codesignIdentity,
         );
-        expect(processManager.hasRemainingExpectations, isFalse);
+        expect(processManager, hasNoRemainingExpectations);
         expect(logger.warningText, isEmpty);
       });
 
@@ -1166,7 +1140,7 @@ let package = Package(
           codesignIdentity: null,
         );
 
-        expect(processManager.hasRemainingExpectations, isFalse);
+        expect(processManager, hasNoRemainingExpectations);
         expect(
           logger.warningText,
           contains('The asset "my_native_asset" does not support iOS Simulator (iphonesimulator)'),
@@ -1307,7 +1281,7 @@ let package = Package(
             ),
           );
 
-          expect(processManager.hasRemainingExpectations, isFalse);
+          expect(processManager, hasNoRemainingExpectations);
           expect(logger.warningText, isEmpty);
         },
       );
@@ -1441,6 +1415,10 @@ let package = Package(
             '$simulatorDirPath/Debug-iphonesimulator/cocoapod_plugin/cocoapod_plugin.framework';
         const cocoapodPluginXCFrameworkPath =
             '$debugCocoaPodsDirectoryPath/cocoapod_plugin.xcframework';
+        final File identityFile = fs.file(codesignIdentityFile);
+        identityFile
+          ..createSync(recursive: true)
+          ..writeAsStringSync('');
 
         final processManager = FakeProcessManager.list([
           FakeCommand(
@@ -1523,6 +1501,7 @@ let package = Package(
           xcframeworkOutput: xcframeworkOutput,
           buildStatic: false,
           codesignIdentity: null,
+          codesignIdentityFile: identityFile,
         );
 
         // Run again to verify fingerprinter caches
@@ -1532,6 +1511,7 @@ let package = Package(
           xcframeworkOutput: xcframeworkOutput,
           buildStatic: false,
           codesignIdentity: null,
+          codesignIdentityFile: identityFile,
         );
         expect(processManager, hasNoRemainingExpectations);
       });
@@ -1687,6 +1667,7 @@ let package = Package(
           xcframeworkOutput: xcframeworkOutput,
           buildStatic: true,
           codesignIdentity: null,
+          codesignIdentityFile: fs.file(codesignIdentityFile),
         );
 
         // Run again to verify fingerprinter does not match when static changes
@@ -1696,6 +1677,7 @@ let package = Package(
           xcframeworkOutput: xcframeworkOutput,
           buildStatic: false,
           codesignIdentity: null,
+          codesignIdentityFile: fs.file(codesignIdentityFile),
         );
         expect(processManager, hasNoRemainingExpectations);
       });
@@ -1716,7 +1698,10 @@ let package = Package(
             '$simulatorDirPath/Debug-iphonesimulator/cocoapod_plugin/cocoapod_plugin.framework';
         const cocoapodPluginXCFrameworkPath =
             '$debugCocoaPodsDirectoryPath/cocoapod_plugin.xcframework';
-
+        final File identityFile = fs.file(codesignIdentityFile);
+        identityFile
+          ..createSync(recursive: true)
+          ..writeAsStringSync(codesignIdentity);
         final processManager = FakeProcessManager.list([
           FakeCommand(
             command: const [
@@ -1808,6 +1793,7 @@ let package = Package(
           xcframeworkOutput: xcframeworkOutput,
           buildStatic: false,
           codesignIdentity: codesignIdentity,
+          codesignIdentityFile: identityFile,
         );
 
         // Run again to verify fingerprinter caches
@@ -1816,7 +1802,8 @@ let package = Package(
           cacheDirectory: fs.directory(cacheDirectoryPath),
           xcframeworkOutput: xcframeworkOutput,
           buildStatic: false,
-          codesignIdentity: null,
+          codesignIdentity: codesignIdentity,
+          codesignIdentityFile: identityFile,
         );
         expect(processManager, hasNoRemainingExpectations);
       });
@@ -1927,7 +1914,7 @@ let package = Package(
         );
 
         expect(logger.traceText, isEmpty);
-        expect(processManager.hasRemainingExpectations, false);
+        expect(processManager, hasNoRemainingExpectations);
         final File generatedPackageManifest = modeDirectory.childFile('Package.swift');
         expect(generatedPackageManifest, exists);
         expect(generatedPackageManifest.readAsStringSync(), '''
@@ -2366,7 +2353,7 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
           xcframeworkOutput: xcframeworkOutput,
           codesignIdentity: null,
         );
-        expect(processManager.hasRemainingExpectations, isFalse);
+        expect(processManager, hasNoRemainingExpectations);
         expect(logger.warningText, isEmpty);
       });
 
@@ -2479,6 +2466,10 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
             '$macosCacheDirPath/Debug/cocoapod_plugin/cocoapod_plugin.framework';
         const cocoapodPluginXCFrameworkPath =
             '$debugCocoaPodsDirectoryPath/cocoapod_plugin.xcframework';
+        final File identityFile = fs.file(codesignIdentityFile);
+        identityFile
+          ..createSync(recursive: true)
+          ..writeAsStringSync('');
         final processManager = FakeProcessManager.list([
           FakeCommand(
             command: const [
@@ -2541,6 +2532,7 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
           xcframeworkOutput: xcframeworkOutput,
           buildStatic: false,
           codesignIdentity: null,
+          codesignIdentityFile: identityFile,
         );
 
         // Run again to verify fingerprinter caches
@@ -2550,6 +2542,7 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
           xcframeworkOutput: xcframeworkOutput,
           buildStatic: false,
           codesignIdentity: null,
+          codesignIdentityFile: identityFile,
         );
         expect(processManager, hasNoRemainingExpectations);
       });

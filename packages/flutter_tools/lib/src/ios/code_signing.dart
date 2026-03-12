@@ -30,44 +30,38 @@ const _codeSignSelectionCanceled = 'Code-signing setup canceled. Your changes ha
 /// User message when no development certificates are found in the keychain.
 ///
 /// The user likely never did any iOS development.
-const noCertificatesFound = '''
+String noCertificatesInstruction({
+  bool includeTrustStep = true,
+  bool includeSimulatorAlternative = true,
+}) {
+  final simulatorAlternative = includeSimulatorAlternative
+      ? '\nOr run on an iOS simulator without code signing'
+      : '';
+  return '''
+════════════════════════════════════════════════════════════════════════════════
 No valid code signing certificates were found
 You can connect to your Apple Developer account by signing in with your Apple ID
 in Xcode and create an iOS Development Certificate as well as a Provisioning\u0020
 Profile for your project by:
-$fixWithDevelopmentTeamInstruction''';
+${fixWithDevelopmentTeamInstruction(includeTrustStep: includeTrustStep)}
 
-const noCertificatesFoundMoreInfo = '''
 For more information, please visit:
   https://developer.apple.com/library/content/documentation/IDEs/Conceptual/
-  AppDistributionGuide/MaintainingCertificates/MaintainingCertificates.html''';
-
-/// User message when no development certificates are found in the keychain with guidance to trust
-/// the certificate on the device or use simulator.
-///
-/// The user likely never did any iOS development.
-const noCertificatesInstruction =
-    '''
-════════════════════════════════════════════════════════════════════════════════
-$noCertificatesFound
-  5- Trust your newly created Development Certificate on your iOS device
-     via Settings > General > Device Management > [your new certificate] > Trust
-
-$noCertificatesFoundMoreInfo
-
-Or run on an iOS simulator without code signing
+  AppDistributionGuide/MaintainingCertificates/MaintainingCertificates.html
+$simulatorAlternative
 ════════════════════════════════════════════════════════════════════════════════''';
+}
 
 /// User message when there are no provisioning profile for the current app bundle identifier.
 ///
 /// The user did iOS development but never on this project and/or device.
-const noProvisioningProfileInstruction =
+String noProvisioningProfileInstruction =
     '''
 ════════════════════════════════════════════════════════════════════════════════
 No Provisioning Profile was found for your project's Bundle Identifier or your\u0020
 device. You can create a new Provisioning Profile for your project in Xcode for\u0020
 your team by:
-$fixWithDevelopmentTeamInstruction
+${fixWithDevelopmentTeamInstruction(includeTrustStep: false)}
 
 It's also possible that a previously installed app with the same Bundle\u0020
 Identifier was signed with a different certificate.
@@ -81,19 +75,25 @@ Or run on an iOS simulator without code signing
 /// Fallback error message for signing issues.
 ///
 /// Couldn't auto sign the app but can likely solved by retracing the signing flow in Xcode.
-const noDevelopmentTeamInstruction =
+String noDevelopmentTeamInstruction =
     '''
 ════════════════════════════════════════════════════════════════════════════════
 Building a deployable iOS app requires a selected Development Team with a\u0020
 Provisioning Profile. Please ensure that a Development Team is selected by:
-$fixWithDevelopmentTeamInstruction
+${fixWithDevelopmentTeamInstruction(includeTrustStep: false)}
 
 For more information, please visit:
   https://flutter.dev/to/ios-development-team
 
 Or run on an iOS simulator without code signing
 ════════════════════════════════════════════════════════════════════════════════''';
-const fixWithDevelopmentTeamInstruction = '''
+
+String fixWithDevelopmentTeamInstruction({required bool includeTrustStep}) {
+  final trustStep = includeTrustStep
+      ? '\n  5- Trust your newly created Development Certificate on your iOS device\n'
+            '     via Settings > General > Device Management > [your new certificate] > Trust'
+      : '';
+  return '''
   1- Open the Flutter project's Xcode target with
        open ios/Runner.xcworkspace
   2- Select the 'Runner' project in the navigator then the 'Runner' target
@@ -104,7 +104,8 @@ const fixWithDevelopmentTeamInstruction = '''
          - Ensure you have a valid unique Bundle ID
          - Register your device with your Apple Developer Account
          - Let Xcode automatically provision a profile for your app
-  4- Build or run your project again''';
+  4- Build or run your project again$trustStep''';
+}
 
 /// Pattern to extract identity from list of identities.
 ///
@@ -346,7 +347,7 @@ class XcodeCodeSigningSettings {
     final List<String> validCodeSigningIdentities = await getSigningIdentities();
     if (validCodeSigningIdentities.isEmpty) {
       if (shouldExitOnNoCerts) {
-        _logger.printError(noCertificatesInstruction, emphasis: true);
+        _logger.printError(noCertificatesInstruction(), emphasis: true);
         throwToolExit(
           'No development certificates available to code sign app for device deployment',
         );
@@ -426,24 +427,20 @@ class XcodeCodeSigningSettings {
   ) async {
     final savedProfile =
         _config.getValue(XcodeCodeSigningSettings.kConfigCodeSignProvisioningProfile) as String?;
-    if (savedProfile != null) {
-      final ProvisioningProfile? validatedProfile = await _validateSavedProfile(
-        savedProfile,
-        validCodeSigningIdentities,
-      );
-      return validatedProfile;
+    if (savedProfile == null) {
+      return null;
     }
-    return null;
+    return _validateSavedProfile(savedProfile, validCodeSigningIdentities);
   }
 
   /// Get the identity from the Flutter config if it's saved.
   Future<String?> getIdentityFromCertFromConfig(List<String> validCodeSigningIdentities) async {
     final savedCertChoice =
         _config.getValue(XcodeCodeSigningSettings.kConfigCodeSignCertificate) as String?;
-    if (savedCertChoice != null) {
-      return _validateSavedIdentity(savedCertChoice, validCodeSigningIdentities);
+    if (savedCertChoice == null) {
+      return null;
     }
-    return null;
+    return _validateSavedIdentity(savedCertChoice, validCodeSigningIdentities);
   }
 
   void _saveCodeSignIdentity(String identity) {
@@ -737,7 +734,7 @@ class XcodeCodeSigningSettings {
     if (style == _CodeSigningStyle.automatic) {
       final List<String> validCodeSigningIdentities = await getSigningIdentities();
       if (validCodeSigningIdentities.isEmpty) {
-        _logger.printError(noCertificatesInstruction, emphasis: true);
+        _logger.printError(noCertificatesInstruction(), emphasis: true);
         _logger.printWarning(_codeSignSelectionCanceled);
         return;
       }

@@ -379,23 +379,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
   section('Check all XCFrameworks are codesigned');
   for (final mode in <String>['Debug', 'Profile', 'Release']) {
     final String modePath = path.join(outputPath, mode);
-    final String flutterXCFrameworkPath = path.join(modePath, 'Flutter.xcframework');
-    final String flutterPhoneFrameworkPath = path.join(
-      flutterXCFrameworkPath,
-      'ios-arm64',
-      'Flutter.framework',
-    );
-    final String flutterSimulatorFrameworkPath = path.join(
-      flutterXCFrameworkPath,
-      'ios-arm64_x86_64-simulator',
-      'Flutter.framework',
-    );
-    await _checkCodeSignature(flutterXCFrameworkPath);
-    await _checkCodeSignature(flutterPhoneFrameworkPath);
-    await _checkCodeSignature(path.join(flutterPhoneFrameworkPath, 'Flutter'));
-    await _checkCodeSignature(flutterSimulatorFrameworkPath);
-    await _checkCodeSignature(path.join(flutterSimulatorFrameworkPath, 'Flutter'));
-
+    await _checkCodeSignature(path.join(modePath, 'Flutter.xcframework'));
     await _checkCodeSignature(path.join(modePath, 'App.xcframework'));
     await _checkCodeSignature(path.join(modePath, 'connectivity.xcframework'));
     await _checkCodeSignature(path.join(modePath, 'Reachability.xcframework'));
@@ -737,16 +721,7 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
   section('Check all XCFrameworks are codesigned');
   for (final mode in <String>['Debug', 'Profile', 'Release']) {
     final String modePath = path.join(outputPath, mode);
-    final String flutterXCFrameworkPath = path.join(modePath, 'FlutterMacOS.xcframework');
-    final String flutterFrameworkPath = path.join(
-      flutterXCFrameworkPath,
-      'macos-arm64_x86_64',
-      'FlutterMacOS.framework',
-    );
-    await _checkCodeSignature(flutterXCFrameworkPath);
-    await _checkCodeSignature(flutterFrameworkPath);
-    await _checkCodeSignature(path.join(flutterFrameworkPath, 'FlutterMacOS'));
-
+    await _checkCodeSignature(path.join(modePath, 'FlutterMacOS.xcframework'));
     await _checkCodeSignature(path.join(modePath, 'App.xcframework'));
     await _checkCodeSignature(path.join(modePath, 'connectivity_macos.xcframework'));
     await _checkCodeSignature(path.join(modePath, 'Reachability.xcframework'));
@@ -943,7 +918,7 @@ Future<void> _checkStatic(String pathToLibrary) async {
 Future<void> _checkCodeSignature(String pathToArtifact) async {
   final stderrBuffer = StringBuffer();
   await eval('codesign', <String>['-dv', pathToArtifact], canFail: true, stderr: stderrBuffer);
-  if (!stderrBuffer.toString().contains('Signature=adhoc')) {
+  if (stderrBuffer.toString().contains('not signed at all')) {
     throw TaskResult.failure('$pathToArtifact is not signed');
   }
 }
