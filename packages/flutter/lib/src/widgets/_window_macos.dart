@@ -145,7 +145,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
-    throw UnimplementedError('Popup windows are not yet implemented on MacOS.');
+    throw UnimplementedError('Popup windows are not yet implemented on macOS.');
   }
 
   final List<_WindowControllerMixin> _activeControllers = <_WindowControllerMixin>[];
@@ -370,7 +370,7 @@ class RegularWindowControllerMacOS extends RegularWindowController with _WindowC
   }) : _delegate = delegate,
        super.empty() {
     if (!decorated) {
-      throw UnimplementedError('Undecorated windows are not yet implemented on MacOS.');
+      throw UnimplementedError('Undecorated windows are not yet implemented on macOS.');
     }
 
     _initController(owner);
