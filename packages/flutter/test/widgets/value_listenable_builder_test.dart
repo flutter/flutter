@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'widgets_app_tester.dart';
+
 void main() {
   late SpyStringValueNotifier valueListenable;
   late Widget textBuilderUnderTest;
@@ -114,6 +116,22 @@ void main() {
 
     expect(find.text('Gilfoyle'), findsNothing);
     expect(valueListenable.hasListeners, false);
+  });
+
+  testWidgets('ValueListenableBuilder does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: ValueListenableBuilder<String?>(
+              valueListenable: valueListenable,
+              builder: (BuildContext context, String? value, Widget? child) => const Placeholder(),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(ValueListenableBuilder<String?>)), Size.zero);
   });
 }
 
