@@ -615,8 +615,9 @@ static NSDictionary<UIApplicationOpenURLOptionsKey, id>* ConvertOptions(
     if (!delegate || (isFallback && [self pluginSupportsSceneLifecycle:delegate])) {
       continue;
     }
-    if ([delegate respondsToSelector:@selector(application:
-                                         performActionForShortcutItem:completionHandler:)]) {
+    if ([delegate
+            respondsToSelector:@selector(
+                                   application:performActionForShortcutItem:completionHandler:)]) {
       if ([delegate application:application
               performActionForShortcutItem:shortcutItem
                          completionHandler:completionHandler]) {
@@ -688,8 +689,8 @@ static NSDictionary<UIApplicationOpenURLOptionsKey, id>* ConvertOptions(
     if (!delegate || (isFallback && [self pluginSupportsSceneLifecycle:delegate])) {
       continue;
     }
-    if ([delegate respondsToSelector:@selector(application:
-                                         continueUserActivity:restorationHandler:)]) {
+    if ([delegate
+            respondsToSelector:@selector(application:continueUserActivity:restorationHandler:)]) {
       if ([delegate application:application
               continueUserActivity:userActivity
                 restorationHandler:restorationHandler]) {
