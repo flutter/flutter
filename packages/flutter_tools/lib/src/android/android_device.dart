@@ -563,37 +563,26 @@ class AndroidDevice extends Device {
         return LaunchResult.failed();
     }
 
-    var camilleTag = ':::::::::::CAMILLE PRINT:::::::::::: startApp called';
-    print('$camilleTag with a prebuilt application: $prebuiltApplication');
-    print('$camilleTag for app with main path: $mainPath');
-    print('$camilleTag for app with APK path: ${package?.applicationPackage.path}');
-
     final List<String> androidShellArguments = debuggingOptions.getAndroidLaunchArguments();
     // Add additional platform arguments to androidShellArguments.
     final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
     androidShellArguments.addAll(<String>[
-      if (traceStartup) ...<String>['--ez', 'trace-startup', 'true'],
-      if (route != null) ...<String>['--es', 'route', route],
+      if (traceStartup) ...<String>['--trace-startup'],
+      if (route != null) ...<String>['--route=$route'],
     ]);
 
     var engineShellArgumentsHaveNotChangedFromPreviousInvocation = true;
     final Set<String>? previousEngineShellArguments = package?.engineShellArgs;
     if (previousEngineShellArguments != null) {
       engineShellArgumentsHaveNotChangedFromPreviousInvocation =
-          Set<String>.from(previousEngineShellArguments!).containsAll(androidShellArguments) &&
+          Set<String>.from(previousEngineShellArguments).containsAll(androidShellArguments) &&
           Set<String>.from(androidShellArguments).containsAll(previousEngineShellArguments) &&
           previousEngineShellArguments.length == androidShellArguments.length;
     }
-    print('$camilleTag with the cached arguments: $previousEngineShellArguments');
-    print('$camilleTag with the new arguments: $androidShellArguments');
-    print(
-      '$camilleTag and the arguments have not changed? $engineShellArgumentsHaveNotChangedFromPreviousInvocation',
-    );
 
     if (!prebuiltApplication ||
         !engineShellArgumentsHaveNotChangedFromPreviousInvocation ||
         _androidSdk.licensesAvailable && _androidSdk.latestVersion == null) {
-      print('$camilleTag and we are rebuilding the APK!');
       _logger.printTrace('Building APK');
       final FlutterProject project = FlutterProject.current();
 
@@ -643,7 +632,6 @@ class AndroidDevice extends Device {
       );
     }
 
-    // TODO(camsim99): check if any of the remaining arguments can be moved to the manifest
     final cmd = <String>[
       'shell', 'am', 'start',
       '-a', 'android.intent.action.MAIN',
