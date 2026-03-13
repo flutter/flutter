@@ -15,6 +15,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'clipboard_utils.dart';
 import 'editable_text_tester.dart';
 import 'editable_text_utils.dart';
+import 'widgets_app_tester.dart';
 
 const int kSingleTapUpTimeout = 500;
 
@@ -1942,20 +1943,17 @@ void main() {
         final customControls = DirectionalitySpyTextSelectionControls();
         final controller = TextEditingController(text: testCase.text);
         final focusNode = FocusNode();
+        addTearDown(controller.dispose);
+        addTearDown(focusNode.dispose);
 
         await tester.pumpWidget(
-          MaterialApp(
-            theme: ThemeData(
-              textSelectionTheme: const TextSelectionThemeData(selectionColor: Colors.blue),
-            ),
+          TestWidgetsApp(
             home: Directionality(
               textDirection: testCase.ambientDirection,
-              child: Material(
-                child: TextField(
-                  controller: controller,
-                  focusNode: focusNode,
-                  selectionControls: customControls,
-                ),
+              child: TestTextField(
+                controller: controller,
+                focusNode: focusNode,
+                selectionControls: customControls,
               ),
             ),
           ),
@@ -2039,16 +2037,13 @@ void main() {
       addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(
-            textSelectionTheme: const TextSelectionThemeData(selectionColor: Colors.blue),
-          ),
-          home: Material(
-            child: TextField(
+        TestWidgetsApp(
+          home: Directionality(
+            textDirection: TextDirection.ltr,
+            child: TestTextField(
               controller: controller,
               focusNode: focusNode,
               selectionControls: customControls,
-              textDirection: TextDirection.ltr,
             ),
           ),
         ),
@@ -2088,16 +2083,13 @@ void main() {
       addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(
-            textSelectionTheme: const TextSelectionThemeData(selectionColor: Colors.blue),
-          ),
-          home: Material(
-            child: TextField(
+        TestWidgetsApp(
+          home: Directionality(
+            textDirection: TextDirection.ltr,
+            child: TestTextField(
               controller: controller,
               focusNode: focusNode,
               selectionControls: customControls,
-              textDirection: TextDirection.ltr,
             ),
           ),
         ),
@@ -2359,7 +2351,7 @@ class FakeTextSelectionDelegate extends Fake implements TextSelectionDelegate {
   void copySelection(SelectionChangedCause cause) {}
 }
 
-class DirectionalitySpyTextSelectionControls extends MaterialTextSelectionControls {
+class DirectionalitySpyTextSelectionControls extends TextSelectionControls {
   final List<TextSelectionHandleType> builtHandleTypes = <TextSelectionHandleType>[];
 
   void clearBuiltHandleTypes() {
@@ -2379,10 +2371,31 @@ class DirectionalitySpyTextSelectionControls extends MaterialTextSelectionContro
     VoidCallback? onTap,
   ]) {
     builtHandleTypes.add(type);
-    return KeyedSubtree(
-      key: ValueKey<TextSelectionHandleType>(type),
-      child: super.buildHandle(context, type, textLineHeight, onTap),
-    );
+    return SizedBox.square(key: ValueKey<TextSelectionHandleType>(type), dimension: textLineHeight);
+  }
+
+  @override
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset selectionMidpoint,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
+  ) {
+    return const SizedBox.shrink();
+  }
+
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    return Offset.zero;
+  }
+
+  @override
+  Size getHandleSize(double textLineHeight) {
+    return Size.square(textLineHeight);
   }
 }
 
