@@ -2525,21 +2525,24 @@ abstract mixin class RouteAware {
   /// Called when the current route has been popped off.
   void didPop() {}
 
-  /// Called when a new route has been pushed.
+  /// Called when a new route has been pushed on top of this route, temporarily
+  /// obscuring it.
   ///
   /// This method is called synchronously during the push operation, before the
   /// transition animation completes. The current route may still be partially
   /// visible as it animates out. To perform actions after the route is fully
-  /// obscured, consider using [ModalRoute.animation] to listen for animation
-  /// completion, for example:
+  /// obscured, consider using [ModalRoute.secondaryAnimation] to listen for
+  /// animation completion, for example:
   ///
+  /// {@tool snippet}
   /// ```dart
-  /// ModalRoute.of(context)?.animation?.addStatusListener((AnimationStatus status) {
+  /// ModalRoute.of(context)?.secondaryAnimation?.addStatusListener((AnimationStatus status) {
   ///   if (status == AnimationStatus.completed) {
-  ///     // The new route is now fully visible and the old route is fully obscured.
+  ///     // This route is now fully obscured by the new route.
   ///   }
   /// });
   /// ```
+  /// {@end-tool}
   void didPushNext() {}
 }
 
