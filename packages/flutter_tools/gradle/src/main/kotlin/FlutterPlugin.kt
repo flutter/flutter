@@ -314,7 +314,7 @@ class FlutterPlugin : Plugin<Project> {
             // Task required for Flutter apps that need to pass engine shell arguments to the embedding. 
             if (projectToAddTasksTo.hasProperty("androidShellArguments")) {
                 val androidShellArguments: String = projectToAddTasksTo.properties["androidShellArguments"].toString()
-                FlutterPluginUtils.addTaskForEngineShellArgumentManifestInjection(projectToAddTasksTo, androidShellArguments)
+                FlutterPluginUtils.addTaskForGeneratingEngineShellArgumentManifest(projectToAddTasksTo, androidShellArguments)
             }
         }
 

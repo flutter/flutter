@@ -13,6 +13,7 @@ import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.flutter.gradle.tasks.FlutterTask
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.verify
@@ -95,8 +96,6 @@ class FlutterPluginTest {
         verify { project.tasks.register("javaVersion", any()) }
         verify { project.tasks.register("printBuildVariants", any()) }
     }
-
-    // TODO(camsim99): Add test for FlutterPluginUtils.addTaskForEngineShellArgumentManifestInjection call
 
     @Test
     fun `copyFlutterAssets task sets filePermissions correctly`(
@@ -269,6 +268,70 @@ class FlutterPluginTest {
             }
         } else {
             fail("FilePermissions configuration action was not captured")
+        }
+    }
+
+    @Test
+    fun `apply adds task for generating manifest with engine shell arguments`(@TempDir tempDir: Path) {
+        // Mocks required to run FlutterPlugin.apply
+        val project = mockk<Project>(relaxed = true)
+        val projectDir = tempDir.resolve("project-dir").resolve("android").resolve("app")
+        projectDir.toFile().mkdirs()
+        every { project.projectDir } returns projectDir.toFile()
+        val fakeFlutterSdkDir = tempDir.resolve("fake-flutter-sdk")
+        fakeFlutterSdkDir.toFile().mkdirs()
+        every { project.findProperty("flutter.sdk") } returns fakeFlutterSdkDir.toString()
+        every { project.file(fakeFlutterSdkDir.toString()) } returns fakeFlutterSdkDir.toFile()
+        val fakeCacheDir = fakeFlutterSdkDir.resolve("bin").resolve("cache")
+        fakeCacheDir.toFile().mkdirs()
+        val fakeEngineStampFile = fakeCacheDir.resolve("engine.stamp")
+        fakeEngineStampFile.writeText(FAKE_ENGINE_STAMP)
+        val fakeEngineRealmFile = fakeCacheDir.resolve("engine.realm")
+        fakeEngineRealmFile.writeText(FAKE_ENGINE_REALM)
+        val flutterExtension = FlutterExtension()
+        every { project.extensions.create("flutter", any<Class<*>>()) } returns flutterExtension
+        every { project.extensions.findByType(FlutterExtension::class.java) } returns flutterExtension
+        every { project.file(flutterExtension.source!!) } returns mockk()
+        val mockBaseExtension = mockk<BaseExtension>(relaxed = true)
+        every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
+        val mockApplicationExtension = mockk<ApplicationExtension>(relaxed = true)
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockApplicationExtension
+        every { project.extensions.getByType(ApplicationExtension::class.java) } returns mockApplicationExtension
+        val mockApplicationDefaultConfig = mockk<ApplicationDefaultConfig>(relaxed = true)
+        every { mockApplicationExtension.defaultConfig } returns mockApplicationDefaultConfig
+        every { project.state.failure } returns null
+        val mockAbstractAppExtension = mockk<AbstractAppExtension>(relaxed = true)
+        val mockLibraryExtension = mockk<LibraryExtension>(relaxed = true)
+        every { project.extensions.findByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
+        every { project.extensions.getByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
+        every { project.extensions.getByType(LibraryExtension::class.java) } returns mockLibraryExtension
+        every { project.extensions.findByName("android") } returns mockAbstractAppExtension
+        val mockAndroidSourceSet = mockk<com.android.build.gradle.api.AndroidSourceSet>(relaxed = true)
+        every { mockAbstractAppExtension.sourceSets.getByName("main") } returns mockAndroidSourceSet
+                val mockAndroidComponentsExtension = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
+        every { project.extensions.getByType(AndroidComponentsExtension::class.java) } returns mockAndroidComponentsExtension
+        every { mockAndroidComponentsExtension.selector() } returns
+            mockk {
+                every { all() } returns mockk()
+            }
+        mockkObject(NativePluginLoaderReflectionBridge)
+        every { NativePluginLoaderReflectionBridge.getPlugins(any(), any()) } returns
+            listOf()
+        every { project.extraProperties } returns mockk()
+        every { project.file(flutterExtension.source!!) } returns mockk()
+
+        // Mocks required to test FlutterPluginUtils.addTaskForGeneratingEngineShellArgumentManifest
+        mockkStatic(FlutterPluginUtils::class)
+        val flutterPlugin = FlutterPlugin()
+        val flagsStr = "--flag-1,--flag=2"
+
+        every {project.hasProperty("androidShellArguments") } returns true
+        every { project.properties["androidShellArguments"] } returns flagsStr
+
+        flutterPlugin.apply(project)
+
+        verify {
+            FlutterPluginUtils.addTaskForGeneratingEngineShellArgumentManifest(project, flagsStr)
         }
     }
 

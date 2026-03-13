@@ -1073,7 +1073,7 @@ class FlutterPluginUtilsTest {
     }
 
     @Test
-    fun `test addTaskForEngineShellArgumentManifestInjection registers task correctly`() {
+    fun `test addTaskForGeneratingEngineShellArgumentManifest registers task correctly`() {
         val project: Project = ProjectBuilder.builder().build()
         val mockComponents = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
         val mockVariant = mockk<Variant>(relaxed = true)
@@ -1088,7 +1088,7 @@ class FlutterPluginUtilsTest {
         project.extensions.add(AndroidComponentsExtension::class.java, "androidComponents", mockComponents)
 
         val testArgs = "--trace-skia,--enable-impeller=true"
-        FlutterPluginUtils.addTaskForEngineShellArgumentManifestInjection(project, testArgs)
+        FlutterPluginUtils.addTaskForGeneratingEngineShellArgumentManifest(project, testArgs)
 
         // Manually trigger the callback that AGP would normally trigger to register task.
         if (onVariantsLambda.isCaptured) {

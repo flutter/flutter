@@ -840,8 +840,8 @@ object FlutterPluginUtils {
     }
 
     @JvmStatic
-    @JvmName("addTaskForEngineShellArgumentManifestInjection")
-    internal fun addTaskForEngineShellArgumentManifestInjection(project: Project, androidEngineShellArgs: String) {
+    @JvmName("addTaskForGeneratingEngineShellArgumentManifest")
+    internal fun addTaskForGeneratingEngineShellArgumentManifest(project: Project, androidEngineShellArgs: String) {
         val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
         print("&&&&&&&&&&&&&&&&&&&&CAMILLE&&&&&&&&&&&&&&& in FlutterPluginUtils writing to " + project.layout.buildDirectory);
 
