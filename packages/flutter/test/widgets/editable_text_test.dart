@@ -18855,7 +18855,7 @@ void main() {
       controller.selection = TextSelection(baseOffset: 0, extentOffset: controller.text.length);
       await tester.pump();
 
-      expect(state.renderEditable.selectionWidthStyle, BoxWidthStyle.max);
+      expect(state.renderEditable.selectionWidthStyle, BoxWidthStyle.tight);
 
       controller.selection = const TextSelection(baseOffset: 0, extentOffset: 5);
       await tester.pump();
@@ -18892,7 +18892,7 @@ void main() {
       controller.selection = TextSelection(baseOffset: 0, extentOffset: controller.text.length);
       await tester.pump();
 
-      expect(state.renderEditable.selectionWidthStyle, BoxWidthStyle.max);
+      expect(state.renderEditable.selectionWidthStyle, BoxWidthStyle.tight);
 
       controller.selection = const TextSelection(baseOffset: 0, extentOffset: 5);
       await tester.pump();
