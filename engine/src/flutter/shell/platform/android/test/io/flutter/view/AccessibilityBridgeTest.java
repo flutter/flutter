@@ -2666,7 +2666,10 @@ public class AccessibilityBridgeTest {
         foundCount++;
       }
     }
-    assertEquals("CONTENT_CHANGE_TYPE_CHECKED event should be sent twice for checkbox transitions", 2, foundCount);
+    assertEquals(
+        "CONTENT_CHANGE_TYPE_CHECKED event should be sent twice for checkbox transitions",
+        2,
+        foundCount);
   }
 
   @Config(sdk = API_LEVELS.API_36)
@@ -2709,7 +2712,10 @@ public class AccessibilityBridgeTest {
         foundCount++;
       }
     }
-    assertEquals("CONTENT_CHANGE_TYPE_CHECKED event should be sent twice for toggle transitions", 2, foundCount);
+    assertEquals(
+        "CONTENT_CHANGE_TYPE_CHECKED event should be sent twice for toggle transitions",
+        2,
+        foundCount);
   }
 
   @Config(sdk = API_LEVELS.API_36)
@@ -2752,7 +2758,10 @@ public class AccessibilityBridgeTest {
         foundCount++;
       }
     }
-    assertEquals("CONTENT_CHANGE_TYPE_CHECKED event should be sent twice for mixed state transitions", 2, foundCount);
+    assertEquals(
+        "CONTENT_CHANGE_TYPE_CHECKED event should be sent twice for mixed state transitions",
+        2,
+        foundCount);
   }
 
   @Config(sdk = API_LEVELS.API_28)
