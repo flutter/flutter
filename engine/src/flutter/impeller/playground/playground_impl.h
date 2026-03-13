@@ -42,6 +42,9 @@ class PlaygroundImpl {
 
   virtual void SetGPUDisabled(bool disabled) const {}
 
+  [[nodiscard]]
+  virtual RuntimeStageBackend GetRuntimeStageBackend() const = 0;
+
  protected:
   const PlaygroundSwitches switches_;
 
