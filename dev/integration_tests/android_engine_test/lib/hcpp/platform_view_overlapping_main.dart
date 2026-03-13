@@ -49,9 +49,8 @@ class _MainAppState extends State<MainApp> {
           Positioned.directional(
             top: 100,
             textDirection: TextDirection.ltr,
-            child: const SizedBox(
-              width: 200,
-              height: 200,
+            child: const SizedBox.square(
+              dimension: 200,
               child: _HybridCompositionAndroidPlatformView(viewType: 'box_platform_view'),
             ),
           ),
@@ -63,9 +62,8 @@ class _MainAppState extends State<MainApp> {
           Positioned.directional(
             top: 300,
             textDirection: TextDirection.ltr,
-            child: const SizedBox(
-              width: 200,
-              height: 200,
+            child: const SizedBox.square(
+              dimension: 200,
               child: _HybridCompositionAndroidPlatformView(viewType: 'box_platform_view'),
             ),
           ),
@@ -77,9 +75,8 @@ class _MainAppState extends State<MainApp> {
           Positioned.directional(
             top: 500,
             textDirection: TextDirection.ltr,
-            child: const SizedBox(
-              width: 200,
-              height: 200,
+            child: const SizedBox.square(
+              dimension: 200,
               child: _HybridCompositionAndroidPlatformView(viewType: 'box_platform_view'),
             ),
           ),

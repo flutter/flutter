@@ -1,0 +1,82 @@
+name: Sync Engine Version
+
+on:
+  workflow_dispatch:
+
+jobs:
+  sync-engine:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          repository: flutteractionsbot/flutter
+          token: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          ref: master
+
+      - name: Configure git
+        env:
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+        run: |
+          git config user.name "flutteractionsbot"
+          git config user.email "<flutter-actions-bot@google.com>"
+          git remote add upstream https://github.com/flutter/flutter.git
+          git fetch upstream ${{ github.ref_name }}
+
+          BRANCH_NAME="update-engine-$(date +%s)"
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
+          git checkout -b "$BRANCH_NAME" upstream/${{ github.ref_name }}
+
+      - name: Generate and Capture Hash
+        id: generate-hash
+        run: |
+          chmod +x bin/internal/last_engine_commit.sh
+
+          # Run the script and capture the output
+          ENGINE_HASH=$(./bin/internal/last_engine_commit.sh)
+
+          # Save to the version file
+          echo "$ENGINE_HASH" > bin/internal/engine.version
+
+          # Export to environment for later steps
+          echo "ENGINE_HASH=$ENGINE_HASH" >> $GITHUB_ENV
+
+          # Log it to the Action summary for easy viewing
+          echo "### Generated Engine Hash: \`$ENGINE_HASH\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Check for Changes
+        id: git-check
+        run: |
+          # -N (intent-to-add) treats untracked files as existing but empty
+          # -f adds even if it's in the .gitignore (which it usually is)
+          git add -N -f bin/internal/engine.version
+
+          if git diff --exit-code bin/internal/engine.version; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No changes detected. Skipping PR." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create PR if Changed
+        if: steps.git-check.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+        run: |
+          # Make a commit and push to the branch.
+          git add bin/internal/engine.version
+          git commit -m "Update engine.version to $(cat bin/internal/engine.version)"
+          git push origin "$BRANCH_NAME"
+
+          # Use the GitHub CLI (pre-installed on runners) to create the PR
+          gh pr create \
+            --title "[${{ github.ref_name }}] Sync engine.version to ${{ env.ENGINE_HASH }}" \
+            --body "Updates the engine.version file." \
+            --repo flutter/flutter \
+            --base ${{ github.ref_name }} \
+            --head flutteractionsbot:$BRANCH_NAME

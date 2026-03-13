@@ -1733,7 +1733,6 @@ targets:
 
   - name: Linux_android_emu_vulkan_stable android_engine_vulkan_tests
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       shard: android_engine_vulkan_tests
@@ -2119,7 +2118,7 @@ targets:
 
   - name: Linux web_skwasm_tests_0
     recipe: flutter/flutter_drone
-    timeout: 30
+    timeout: 45
     properties:
       dependencies: >-
         [
@@ -2130,7 +2129,7 @@ targets:
       subshard: "0"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "1800" # 30 minutes to match the global `timeout` property.
+      test_timeout_secs: "2700" # 45 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2141,7 +2140,7 @@ targets:
 
   - name: Linux web_skwasm_tests_1
     recipe: flutter/flutter_drone
-    timeout: 30
+    timeout: 45
     properties:
       dependencies: >-
         [
@@ -2152,7 +2151,7 @@ targets:
       subshard: "1_last"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "1800" # 30 minutes to match the global `timeout` property.
+      test_timeout_secs: "2700" # 45 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -4695,7 +4694,6 @@ targets:
 
   # mac mokey test
   - name: Mac_arm64_mokey entrypoint_dart_registrant
-    bringup: true # Flakey https://github.com/flutter/flutter/issues/179514
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -5877,7 +5875,6 @@ targets:
   - name: Windows framework_tests_misc_leak_tracking
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true # New builder https://github.com/flutter/flutter/pull/176992
     properties:
       test_timeout_secs: "3600" # 1 hour
       dependencies: >-
@@ -6542,7 +6539,6 @@ targets:
   - name: Windows tool_tests_commands_1_2
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-

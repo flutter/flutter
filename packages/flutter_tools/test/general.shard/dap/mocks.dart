@@ -236,9 +236,9 @@ class FakeFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
     this.stdin,
     this.stdout,
     ByteStreamServerChannel channel, {
-    required FileSystem fileSystem,
-    required Platform platform,
-  }) : super(channel, fileSystem: fileSystem, platform: platform);
+    required super.fileSystem,
+    required super.platform,
+  }) : super(channel);
 
   final StreamSink<List<int>> stdin;
   final Stream<List<int>> stdout;

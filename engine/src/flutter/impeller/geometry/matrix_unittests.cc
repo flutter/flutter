@@ -286,6 +286,37 @@ TEST(MatrixTest, GetMaxBasisXYWithLargeAndSmallScalingFactorNonScaleTranslate) {
   EXPECT_TRUE(std::isinf(m.GetMaxBasisLengthXY()));
 }
 
+TEST(MatrixTest, GetBasisXYScale2D) {
+  Matrix m = Matrix::MakeScale({5.0f, 3.0f, 1.0f});
+  EXPECT_POINT_NEAR(m.GetBasisX2D(), Vector2(5.0f, 0.0f));
+  EXPECT_POINT_NEAR(m.GetBasisY2D(), Vector2(0.0f, 3.0f));
+  EXPECT_POINT_NEAR(m.GetBasisScaleXY(), Vector2(5.0f, 3.0f));
+
+  Matrix m2 = Matrix::MakeColumn(
+      // clang-format off
+      2.0f, 3.0f, 0.0f, 0.0f,
+      5.0f, 7.0f, 0.0f, 0.0f,
+      0.0f, 0.0f, 1.0f, 0.0f,
+      0.0f, 0.0f, 0.0f, 1.0f
+      // clang-format on
+  );
+  EXPECT_POINT_NEAR(m2.GetBasisX2D(), Vector2(2.0f, 3.0f));
+  EXPECT_POINT_NEAR(m2.GetBasisY2D(), Vector2(5.0f, 7.0f));
+  EXPECT_POINT_NEAR(m2.GetBasisScaleXY(), Vector2(sqrt(13.0f), sqrt(74.0f)));
+
+  Matrix m3 = Matrix::MakeColumn(
+      // clang-format off
+      2.0f, 3.0f, 4.0f, 11.0f,
+      5.0f, 7.0f, 6.0f, 13.0f,
+      1.0f, 8.0f, 9.0f, 15.0f,
+      1.0f, 1.0f, 1.0f, 17.0f
+      // clang-format on
+  );
+  EXPECT_POINT_NEAR(m3.GetBasisX2D(), Vector2(2.0f, 3.0f));
+  EXPECT_POINT_NEAR(m3.GetBasisY2D(), Vector2(5.0f, 7.0f));
+  EXPECT_POINT_NEAR(m2.GetBasisScaleXY(), Vector2(sqrt(13.0f), sqrt(74.0f)));
+}
+
 TEST(MatrixTest, TranslateWithPerspective) {
   Matrix m = Matrix::MakeRow(1.0, 0.0, 0.0, 10.0,  //
                              0.0, 1.0, 0.0, 20.0,  //
