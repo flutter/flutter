@@ -167,6 +167,7 @@ void GoldenPlaygroundTest::SetUp() {
       test_name.find("ExperimentAntialiasLines_") != std::string::npos;
   switch (GetParam()) {
     case PlaygroundBackend::kMetal:
+    case PlaygroundBackend::kMetalSDF:
       if (!DoesSupportWideGamutTests()) {
         GTEST_SKIP()
             << "This metal device doesn't support wide gamut golden tests.";
