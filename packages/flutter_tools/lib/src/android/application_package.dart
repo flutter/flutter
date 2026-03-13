@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:collection';
-import 'dart:io' as io;
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -84,8 +83,15 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
 
     Set<String>? androidEngineShellArgs;
     if (buildMode != null) {
-      final generatedEngineFlagsManifestFile = io.File(
-        '${getAndroidBuildDirectory()}/app/generated/manifests/debugGenerateEngineFlagsManifestTask/AndroidManifest.xml',
+      final File generatedEngineFlagsManifestFile = apk.fileSystem.file(
+        apk.fileSystem.path.join(
+          getAndroidBuildDirectory(),
+          'app',
+          'generated',
+          'manifests',
+          'debugGenerateEngineFlagsManifestTask',
+          'AndroidManifest.xml',
+        ),
       );
 
       if (generatedEngineFlagsManifestFile.existsSync()) {
