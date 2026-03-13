@@ -10413,6 +10413,27 @@ void main() {
     expect(rectWithText.height, greaterThan(100));
   });
 
+  testWidgets('Multiline placeholder remains within text field bounds when maxLines is null', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: SizedBox(
+            width: 300.0,
+            child: CupertinoTextField(maxLines: null, placeholder: '1111\n222\n333'),
+          ),
+        ),
+      ),
+    );
+
+    final Rect textFieldRect = tester.getRect(find.byType(CupertinoTextField));
+    final Rect placeholderRect = tester.getRect(find.text('1111\n222\n333'));
+
+    expect(placeholderRect.top, greaterThanOrEqualTo(textFieldRect.top));
+    expect(placeholderRect.bottom, lessThanOrEqualTo(textFieldRect.bottom));
+  });
+
   testWidgets('Placeholder is baseline aligned with text', (WidgetTester tester) async {
     const placeholderTextContent = 'hint text';
     const actualTextContent = 'text';
