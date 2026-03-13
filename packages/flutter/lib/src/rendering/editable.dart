@@ -1752,8 +1752,8 @@ class RenderEditable extends RenderBox
       final int endOffset = selection.end;
       final int textLength = plainText.length;
 
-      final int startBoxOffset = math.min(startOffset + 1, textLength);
-      final int endBoxOffset = math.max(endOffset - 1, 0);
+      final int startBoxOffset = _textPainter.getOffsetAfter(startOffset) ?? textLength;
+      final int endBoxOffset = _textPainter.getOffsetBefore(endOffset) ?? 0;
 
       final List<ui.TextBox> startBoxes = _textPainter.getBoxesForSelection(
         TextSelection(baseOffset: startOffset, extentOffset: startBoxOffset),
