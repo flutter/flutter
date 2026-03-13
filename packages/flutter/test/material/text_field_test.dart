@@ -180,9 +180,26 @@ void main() {
     FadeTransition handle = tester.widget(fadeFinder.at(0));
     expect(handle.opacity.value, equals(0.0));
 
+    expect(
+      controller.value,
+      const TextEditingValue(
+        text: 'I Love Flutter!',
+        selection: TextSelection.collapsed(offset: 15),
+      ),
+    );
+
     // Tap on the text field to show the handle.
     await tester.tap(find.byType(TextField));
     await tester.pumpAndSettle();
+
+    /// Failing here!!!
+    expect(
+      controller.value,
+      const TextEditingValue(
+        text: 'I Love Flutter!',
+        selection: TextSelection.collapsed(offset: 15),
+      ),
+    );
 
     expect(fadeFinder, findsNWidgets(1));
     handle = tester.widget(fadeFinder.at(0));
