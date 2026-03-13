@@ -1,0 +1,5 @@
+flutter test test/cupertino/text_field_test.dart --plain-name "can use the desktop cut/copy/paste buttons on Mac"
+
+flutter test test/material/text_field_test.dart --plain-name 'Composing change does not hide selection handle caret'
+Failure:
+file:///Users/polina/_/flutter_dev/packages/flutter/test/material/text_field_test.dart:184:5

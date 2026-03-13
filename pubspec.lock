@@ -458,14 +458,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.0"
-  listen:
+  listen_beta:
     dependency: transitive
     description:
-      name: listen
-      sha256: "703154e58da344e9896a509a738b0fa2059498fcb87122866d92b8b13ac57131"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0"
+      path: "../spikes/listen_beta"
+      relative: true
+    source: path
+    version: "0.2.7"
   logging:
     dependency: "direct main"
     description:
@@ -1112,5 +1111,5 @@ packages:
     source: hosted
     version: "2.2.4"
 sdks:
-  dart: ">=3.11.0 <4.0.0"
+  dart: ">=3.10.3 <4.0.0"
   flutter: ">=3.38.4"

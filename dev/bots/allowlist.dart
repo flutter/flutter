@@ -32,6 +32,7 @@ const Set<String> kCorePackageAllowList = <String>{
   'integration_test',
   'intl',
   'listen',
+  'listen_beta',
   'leak_tracker',
   'leak_tracker_flutter_testing',
   'leak_tracker_testing',
