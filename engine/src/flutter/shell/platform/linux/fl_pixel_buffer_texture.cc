@@ -108,12 +108,10 @@ gboolean fl_pixel_buffer_texture_populate(FlPixelBufferTexture* texture,
   opengl_texture->target = GL_TEXTURE_2D;
   opengl_texture->name = priv->texture_id;
   opengl_texture->format = GL_RGBA8;
+  opengl_texture->destruction_callback = nullptr;
   opengl_texture->user_data = nullptr;
   opengl_texture->width = width;
   opengl_texture->height = height;
-  // Set a no-op destruction callback to indicate that the embedder controls
-  // this texture's lifetime and Impeller should not delete it.
-  opengl_texture->destruction_callback = [](void*) {};
 
   return TRUE;
 }
