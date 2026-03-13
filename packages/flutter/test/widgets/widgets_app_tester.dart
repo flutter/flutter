@@ -126,8 +126,10 @@ class TestWidgetsApp extends StatelessWidget {
   /// The route generator callback used when the app is navigated to a named
   /// route.
   ///
-  /// When provided, this takes over route generation from [home] and [routes].
-  /// The [pageRouteBuilder] is not used when [onGenerateRoute] is specified.
+  /// This callback is used if [routes] and [home] do not contain the requested
+  /// route.
+  ///
+  /// The [pageRouteBuilder] is not used for routes created by this callback.
   ///
   /// See also:
   ///
