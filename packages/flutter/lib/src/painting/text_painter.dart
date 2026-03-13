@@ -1707,7 +1707,8 @@ class TextPainter {
     assert(_debugAssertTextLayoutIsValid);
     assert(!_debugNeedsRelayout);
     final _TextPainterLayoutCacheWithOffset cachedLayout = _layoutCache!;
-    return cachedLayout.paragraph.getPositionForOffset(offset - cachedLayout.paintOffset);
+    final result = cachedLayout.paragraph.getPositionForOffset(offset - cachedLayout.paintOffset);
+    return result;
   }
 
   /// {@template flutter.painting.TextPainter.getWordBoundary}
