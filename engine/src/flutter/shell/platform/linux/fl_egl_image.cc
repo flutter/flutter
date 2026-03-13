@@ -17,13 +17,13 @@ static EGLImage create_egl_image(GLuint texture_id) {
   EGLDisplay egl_display = eglGetCurrentDisplay();
   if (egl_display == EGL_NO_DISPLAY) {
     g_warning("Failed to create EGL image: Failed to get current EGL display");
-    return nullptr;
+    return EGL_NO_IMAGE_KHR;
   }
 
   EGLContext egl_context = eglGetCurrentContext();
   if (egl_context == EGL_NO_CONTEXT) {
     g_warning("Failed to create EGL image: Failed to get current EGL context");
-    return nullptr;
+    return EGL_NO_IMAGE_KHR;
   }
 
   return eglCreateImageKHR(
@@ -60,13 +60,7 @@ FlEGLImage* fl_egl_image_new(GLuint texture) {
   FlEGLImage* self =
       FL_EGL_IMAGE(g_object_new(fl_egl_image_get_type(), nullptr));
 
-  EGLImage egl_image = create_egl_image(texture);
-  if (egl_image == EGL_NO_IMAGE_KHR) {
-    g_warning("Failed to create EGL image for texture %u", texture);
-    return nullptr;
-  }
-
-  self->image = egl_image;
+  self->image = create_egl_image(texture);
 
   return self;
 }
