@@ -3843,7 +3843,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           final Element elementA = findElementABC('a');
           service.setSelection(elementA, 'my-group');
 
-          service.testExtension(
+          await service.testExtension(
             WidgetInspectorServiceExtensions.addPubRootDirectories.name,
             <String, String>{'arg0': '$pubRootTest/different', 'arg1': '/unrelated/$pubRootTest'},
           );
@@ -3863,7 +3863,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             final Element elementA = findElementABC('a');
             service.setSelection(elementA, 'my-group');
 
-            service.testExtension(
+            await service.testExtension(
               WidgetInspectorServiceExtensions.addPubRootDirectories.name,
               <String, String>{'arg0': 'file://$pubRootTest'},
             );
@@ -3882,11 +3882,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           final Element elementA = findElementABC('a');
           service.setSelection(elementA, 'my-group');
 
-          service.testExtension(
+          await service.testExtension(
             WidgetInspectorServiceExtensions.addPubRootDirectories.name,
             <String, String>{'arg0': pubRootTest},
           );
-          service.testExtension(
+          await service.testExtension(
             WidgetInspectorServiceExtensions.addPubRootDirectories.name,
             <String, String>{'arg0': '/invalid/$pubRootTest'},
           );
@@ -3905,7 +3905,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           final Element elementA = findElementABC('a');
           service.setSelection(elementA, 'my-group');
 
-          service.testExtension(
+          await service.testExtension(
             WidgetInspectorServiceExtensions.addPubRootDirectories.name,
             <String, String>{'arg0': pubRootTest, 'arg1': '/invalid/$pubRootTest'},
           );
@@ -3917,7 +3917,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             contains('createdByLocalProject'),
           );
 
-          service.testExtension(
+          await service.testExtension(
             WidgetInspectorServiceExtensions.removePubRootDirectories.name,
             <String, String>{'arg0': '/invalid/$pubRootTest'},
           );
@@ -3940,7 +3940,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               .evaluate()
               .first;
           service.setSelection(richText, 'my-group');
-          service.testExtension(
+          await service.testExtension(
             WidgetInspectorServiceExtensions.addPubRootDirectories.name,
             <String, String>{'arg0': pubRootTest},
           );
@@ -3965,7 +3965,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           final pubRootFramework =
               '/${pathSegmentsFramework.take(pathSegmentsFramework.length - 3).join('/')}';
           service.resetPubRootDirectories();
-          service.testExtension(
+          await service.testExtension(
             WidgetInspectorServiceExtensions.addPubRootDirectories.name,
             <String, String>{'arg0': pubRootFramework},
           );
@@ -3986,7 +3986,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           );
 
           service.resetPubRootDirectories();
-          service.testExtension(
+          await service.testExtension(
             WidgetInspectorServiceExtensions.addPubRootDirectories.name,
             <String, String>{'arg0': pubRootFramework, 'arg1': pubRootTest},
           );
@@ -4068,7 +4068,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           final Element elementA = findElementABC('a');
           service.setSelection(elementA, 'my-group');
 
-          service.testExtension(
+          await service.testExtension(
             WidgetInspectorServiceExtensions.addPubRootDirectories.name,
             <String, String>{'arg0': '$pubRootTest/different', 'arg1': '/unrelated/$pubRootTest'},
           );
@@ -4088,7 +4088,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             final Element elementA = findElementABC('a');
             service.setSelection(elementA, 'my-group');
 
-            service.testExtension(
+            await service.testExtension(
               WidgetInspectorServiceExtensions.addPubRootDirectories.name,
               <String, String>{'arg0': 'file://$pubRootTest', 'isolateId': '34'},
             );
@@ -4107,11 +4107,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           final Element elementA = findElementABC('a');
           service.setSelection(elementA, 'my-group');
 
-          service.testExtension(
+          await service.testExtension(
             WidgetInspectorServiceExtensions.addPubRootDirectories.name,
             <String, String>{'arg0': pubRootTest, 'isolateId': '34'},
           );
-          service.testExtension(
+          await service.testExtension(
             WidgetInspectorServiceExtensions.addPubRootDirectories.name,
             <String, String>{'arg0': '/invalid/$pubRootTest', 'isolateId': '34'},
           );
@@ -4130,7 +4130,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           final Element elementA = findElementABC('a');
           service.setSelection(elementA, 'my-group');
 
-          service.testExtension(
+          await service.testExtension(
             WidgetInspectorServiceExtensions.addPubRootDirectories.name,
             <String, String>{
               'arg0': pubRootTest,
@@ -4146,7 +4146,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             contains('createdByLocalProject'),
           );
 
-          service.testExtension(
+          await service.testExtension(
             WidgetInspectorServiceExtensions.removePubRootDirectories.name,
             <String, String>{'arg0': '/invalid/$pubRootTest', 'isolateId': '34'},
           );
