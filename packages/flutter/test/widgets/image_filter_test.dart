@@ -73,6 +73,36 @@ void main() {
     await expectLater(find.byType(ImageFiltered), matchesGoldenFile('image_filter_erode.png'));
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/101874
 
+  const matrixTestHome = TestWidgetsApp(
+    home: Column(
+      children: <Widget>[
+        ColoredBox(
+          color: debugBlue,
+          child: SizedBox(
+            height: 56,
+            width: double.infinity,
+            child: Center(child: Text('Matrix ImageFilter Test')),
+          ),
+        ),
+        Expanded(child: Center(child: Text('Hooray!'))),
+        Align(
+          alignment: Alignment.bottomRight,
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: SizedBox(
+              width: 56,
+              height: 56,
+              child: DecoratedBox(
+                decoration: BoxDecoration(color: debugBlue, shape: BoxShape.circle),
+                child: Center(child: Text('+')),
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+
   testWidgets('Image filter - matrix', (WidgetTester tester) async {
     final matrix = ImageFilter.matrix(
       Float64List.fromList(<double>[
@@ -84,38 +114,7 @@ void main() {
     );
     await tester.pumpWidget(
       RepaintBoundary(
-        child: ImageFiltered(
-          imageFilter: matrix,
-          child: const TestWidgetsApp(
-            home: Column(
-              children: <Widget>[
-                ColoredBox(
-                  color: debugBlue,
-                  child: SizedBox(
-                    height: 56,
-                    width: double.infinity,
-                    child: Center(child: Text('Matrix ImageFilter Test')),
-                  ),
-                ),
-                Expanded(child: Center(child: Text('Hooray!'))),
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: SizedBox(
-                      width: 56,
-                      height: 56,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(color: debugBlue, shape: BoxShape.circle),
-                        child: Center(child: Text('+')),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+        child: ImageFiltered(imageFilter: matrix, child: matrixTestHome),
       ),
     );
     await expectLater(find.byType(ImageFiltered), matchesGoldenFile('image_filter_matrix.png'));
@@ -130,38 +129,7 @@ void main() {
         key: key,
         child: Transform.translate(
           offset: const Offset(50, 50),
-          child: ImageFiltered(
-            imageFilter: matrixFilter,
-            child: const TestWidgetsApp(
-              home: Column(
-                children: <Widget>[
-                  ColoredBox(
-                    color: debugBlue,
-                    child: SizedBox(
-                      height: 56,
-                      width: double.infinity,
-                      child: Center(child: Text('Matrix ImageFilter Test')),
-                    ),
-                  ),
-                  Expanded(child: Center(child: Text('Hooray!'))),
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: SizedBox(
-                        width: 56,
-                        height: 56,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(color: debugBlue, shape: BoxShape.circle),
-                          child: Center(child: Text('+')),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          child: ImageFiltered(imageFilter: matrixFilter, child: matrixTestHome),
         ),
       ),
     );
