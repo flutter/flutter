@@ -246,9 +246,10 @@ void AndroidExternalViewEmbedder2::PrepareFlutterView(
 
     // This should not block to prevent deadlocks with
     // setViewportMetrics.
-    task_runners_.GetPlatformTaskRunner()->PostTask(
-        fml::MakeCopyable([jni_facade = jni_facade_, frame_size = frame_size]() {
-          jni_facade->MaybeResizeSurfaceView(frame_size.width, frame_size.height);
+    task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
+        [jni_facade = jni_facade_, frame_size = frame_size]() {
+          jni_facade->MaybeResizeSurfaceView(frame_size.width,
+                                             frame_size.height);
         }));
   }
   surface_pool_->SetFrameSize(frame_size);
