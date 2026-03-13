@@ -16,12 +16,15 @@ using PipelineBuilderCallback =
 
 using VS = CirclePipeline::VertexShader;
 using FS = CirclePipeline::FragmentShader;
+
+Scalar kAntiliasPixels = 1.0;
 }  // namespace
 
 std::unique_ptr<CircleContents> CircleContents::Make(
     std::unique_ptr<CircleGeometry> geometry,
     Color color,
     bool stroked) {
+  geometry->SetAntialiasPadding(kAntiliasPixels);
   return std::unique_ptr<CircleContents>(
       new CircleContents(std::move(geometry), color, stroked));
 }
@@ -45,8 +48,7 @@ bool CircleContents::Render(const ContentContext& renderer,
   frag_info.aa_pixels = kAntiliasPixels;
   frag_info.stroked = stroked_ ? 1.0f : 0.0f;
 
-  auto geometry_result = geometry_->GetPositionBufferAntialiased(
-      renderer, entity, pass, kAntiliasPixels);
+  auto geometry_result = geometry_->GetPositionBuffer(renderer, entity, pass);
 
   PipelineBuilderCallback pipeline_callback =
       [&renderer](ContentContextOptions options) {
@@ -71,8 +73,7 @@ bool CircleContents::Render(const ContentContext& renderer,
 }
 
 std::optional<Rect> CircleContents::GetCoverage(const Entity& entity) const {
-  return geometry_->GetCoverageAntialiased(entity.GetTransform(),
-                                           kAntiliasPixels);
+  return geometry_->GetCoverage(entity.GetTransform());
 }
 
 }  // namespace impeller

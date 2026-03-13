@@ -38,17 +38,23 @@ float distanceFromStrokedCircle(float dist_to_center,
 }
 
 void main() {
+  // We need to make sure that for stroked circles we have a cross section
+  // that is at least as wide as a pixel. The cross section is measured towards
+  // the center of the circle which is the same direction in both local and
+  // screen coordinates for uniformly scaled transforms and only slightly off
+  // for skewed transforms.
   vec2 vec_to_center = v_position - frag_info.center;
   float dist_to_center = length(vec_to_center);
   vec2 unitvec_towards_center =
       dist_to_center > 0.0 ? vec_to_center / dist_to_center : vec2(1.0, 0.0);
 
   // Get the width and height of a pixel in v_position units.
-  // This gives us a basis to work in for calculating the SDF.
+  // This gives us a basis in local space coordinates to work in for calculating
+  // the SDF.
   float local_dx = length(dFdx(v_position));
   float local_dy = length(dFdy(v_position));
 
-  // Get the vector towards the center of the circle in terms of the pixel
+  // Get the vector towards the center of the circle measured in pixel
   // units.
   float local_dist_towards_center =
       dot(vec2(local_dx, local_dy), abs(unitvec_towards_center));
@@ -69,9 +75,9 @@ void main() {
 
   float alpha = 1.0 - smoothstep(-fade_size, fade_size, sdf_distance);
 
-  float finalAlpha = frag_info.color.w * alpha;
+  float finalAlpha = frag_info.color.a * alpha;
 
-  frag_color = vec4(frag_info.color.xyz, finalAlpha);
+  frag_color = vec4(frag_info.color.rgb, finalAlpha);
 
   frag_color = IPPremultiply(frag_color);
 }

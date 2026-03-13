@@ -37,25 +37,20 @@ class CircleGeometry final : public Geometry {
   // |Geometry|
   std::optional<Rect> GetCoverage(const Matrix& transform) const override;
 
-  // The coverage of this geometry when applying SDF-based antialiasing.
-  std::optional<Rect> GetCoverageAntialiased(const Matrix& transform,
-                                             Scalar aa_pixels) const;
-
   // |Geometry|
   GeometryResult GetPositionBuffer(const ContentContext& renderer,
                                    const Entity& entity,
                                    RenderPass& pass) const override;
 
-  // The position buffer to be used when applying SDF-based antialiasing.
-  GeometryResult GetPositionBufferAntialiased(const ContentContext& renderer,
-                                              const Entity& entity,
-                                              RenderPass& pass,
-                                              Scalar aa_pixels) const;
+  // Set the number of pixels to add to the edge(s) of the circle for
+  // SDF-based antialiasing
+  void SetAntialiasPadding(Scalar extra_pixels);
 
  private:
   Point center_;
   Scalar radius_;
   Scalar stroke_width_;
+  Scalar padding_pixels_;
 
   CircleGeometry(const CircleGeometry&) = delete;
 

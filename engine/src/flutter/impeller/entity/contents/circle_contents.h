@@ -31,8 +31,6 @@ class CircleContents : public ColorSourceContents {
   std::unique_ptr<CircleGeometry> geometry_;
   Color color_;
   bool stroked_;
-
-  static constexpr Scalar kAntiliasPixels = 1.0;
 };
 }  // namespace impeller
 

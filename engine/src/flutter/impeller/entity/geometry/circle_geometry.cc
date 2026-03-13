@@ -9,6 +9,7 @@
 #include "flutter/impeller/entity/geometry/line_geometry.h"
 #include "impeller/core/formats.h"
 #include "impeller/entity/geometry/geometry.h"
+#include "impeller/geometry/scalar.h"
 
 namespace impeller {
 
@@ -49,21 +50,17 @@ Scalar CircleGeometry::GetStrokeWidth() const {
   return stroke_width_;
 }
 
+void CircleGeometry::SetAntialiasPadding(Scalar extra_padding) {
+  padding_pixels_ = extra_padding;
+}
+
 GeometryResult CircleGeometry::GetPositionBuffer(const ContentContext& renderer,
                                                  const Entity& entity,
                                                  RenderPass& pass) const {
-  return GetPositionBufferAntialiased(renderer, entity, pass, 0.0);
-}
-
-GeometryResult CircleGeometry::GetPositionBufferAntialiased(
-    const ContentContext& renderer,
-    const Entity& entity,
-    RenderPass& pass,
-    Scalar aa_pixels) const {
   auto& transform = entity.GetTransform();
 
   Scalar max_basis = transform.GetMaxBasisLengthXY();
-  Scalar expansion = max_basis == 0 ? 0.0 : aa_pixels / max_basis;
+  Scalar expansion = max_basis == 0 ? 0.0 : padding_pixels_ / max_basis;
 
   if (stroke_width_ < 0) {
     auto generator = renderer.GetTessellator().FilledCircle(
@@ -81,14 +78,8 @@ GeometryResult CircleGeometry::GetPositionBufferAntialiased(
 }
 
 std::optional<Rect> CircleGeometry::GetCoverage(const Matrix& transform) const {
-  return GetCoverageAntialiased(transform, 0.0);
-}
-
-std::optional<Rect> CircleGeometry::GetCoverageAntialiased(
-    const Matrix& transform,
-    Scalar aa_pixels) const {
   Scalar max_basis = transform.GetMaxBasisLengthXY();
-  Scalar expansion = max_basis == 0 ? 0.0 : aa_pixels / max_basis;
+  Scalar expansion = max_basis == 0 ? 0.0 : padding_pixels_ / max_basis;
 
   Scalar half_width = stroke_width_ < 0 ? 0.0 : stroke_width_ * 0.5f;
   Scalar outer_radius = radius_ + half_width + expansion;
