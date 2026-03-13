@@ -685,25 +685,41 @@ class BouncingScrollPhysics extends ScrollPhysics {
   /// Used to determine parameters for friction simulations.
   final ScrollDecelerationRate decelerationRate;
 
-  /// Approximation of iOS native rubber band decay rate.
-  static const double _kRubberBandDecayRate = 0.07;
+  // Approximation of iOS native rubber band decay rate.
+  static const double _rubberBandHalfLifeSeconds = 0.07;
 
-  /// Decay constant (lambda) for rubber band spring simulation.
+  // Decay constant (lambda) for rubber band spring simulation.
+  static final double _rubberBandLambda = math.log(2) / _rubberBandHalfLifeSeconds;
+
+  /// Spring used to animate overscroll bounce from a stationary release in iOS
+  /// native style.
   ///
-  /// Derived from half-life of 70ms: lambda = ln(2) / 0.07
-  static final double _rubberBandLambda = math.log(2) / _kRubberBandDecayRate;
-
-  /// Spring used to animate overscroll bounce similar to iOS native behavior.
   /// Used in [createBallisticSimulation] depending on the conditions.
   ///
-  /// This overdamped spring produces exponential decay x(t) = e^(-lambda*t)
-  /// with two modes:
-  /// - Slow mode: r1 = -lambda (desired decay rate, visible)
-  /// - Fast mode: r2 = -1e5 * lambda (vanishes almost instantly)
-  ///
-  /// Mathematical derivation:
-  /// - r1 + r2 = -damping/mass, so damping = (1e5 + 1) * lambda
-  /// - r1 * r2 = stiffness/mass, so stiffness = 1e5 * lambda^2
+  /// Research indicates that iOS employs a distinct decay function when a
+  /// scrollable area is released in an overscroll and stationary state (zero
+  /// initial velocity), conforming to an exponential decay model.
+  //
+  // ## Mathematical derivation
+  //
+  // A standard spring-damper system follows the second-order differential equation:
+  // m*x'' + c*x' + k*x = 0
+  //
+  // To force this second-order system to behave like a first-order exponential
+  // decay x(t) = C * e^(-lambda * t), we configure it as an overdamped spring
+  // with two explicitly defined roots (r1 and r2) for its characteristic
+  // equation:
+  //
+  // * r1 = -lambda (the primary root driving the visible exponential decay)
+  // * r2 = -100000 * lambda (an extremely large negative root)
+  //
+  // Because r2 is massive and negative, its corresponding term in the exact
+  // mathematical solution (C2 * e^(r2 * t)) decays to zero almost
+  // instantaneously. The system movement becomes dominated by r1.
+  //
+  // Using Vieta's formulas for the characteristic equation r^2 + (c/m)r + (k/m) = 0:
+  // * r1 + r2 = -c/m => damping (c) = -(r1 + r2) * m
+  // * r1 * r2 = k/m  => stiffness (k) = (r1 * r2) * m
   static final SpringDescription rubberBandSpring = SpringDescription(
     mass: 1.0,
     stiffness: 1e5 * _rubberBandLambda * _rubberBandLambda,
