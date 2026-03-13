@@ -98,9 +98,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('ImageIcon renders original image colors when renderOriginalImage is true', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('ImageIcon respects IconTheme color by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -112,7 +110,12 @@ void main() {
     );
 
     expect(tester.widget<Image>(find.byType(Image)).color, const Color(0xFF0000FF));
+    imageCache.clear();
+  });
 
+  testWidgets('ImageIcon ignores IconTheme color when useOriginalColors is true', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
