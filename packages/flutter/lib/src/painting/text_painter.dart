@@ -1707,7 +1707,7 @@ class TextPainter {
     assert(_debugAssertTextLayoutIsValid);
     assert(!_debugNeedsRelayout);
     final _TextPainterLayoutCacheWithOffset cachedLayout = _layoutCache!;
-    final Offset newOffset = offset - cachedLayout.paintOffset;
+    final newOffset = offset - cachedLayout.paintOffset;
     print('!!!! ${cachedLayout.paragraph.runtimeType}');
     print('!!!! $newOffset');
     print('!!!! ${cachedLayout.paragraph}');
