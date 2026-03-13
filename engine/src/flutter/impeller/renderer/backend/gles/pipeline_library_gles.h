@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "flutter/fml/hash_combine.h"
+#include "flutter/fml/task_runner.h"
 #include "impeller/base/thread.h"
 #include "impeller/renderer/backend/gles/reactor_gles.h"
 #include "impeller/renderer/backend/gles/unique_handle_gles.h"
@@ -91,8 +92,10 @@ class PipelineLibraryGLES final
   PipelineMap pipelines_;
   Mutex programs_mutex_;
   ProgramMap programs_ IPLR_GUARDED_BY(programs_mutex_);
+  fml::RefPtr<fml::TaskRunner> io_task_runner_;
 
-  explicit PipelineLibraryGLES(std::shared_ptr<ReactorGLES> reactor);
+  explicit PipelineLibraryGLES(std::shared_ptr<ReactorGLES> reactor,
+                               fml::RefPtr<fml::TaskRunner> io_task_runner);
 
   // |PipelineLibrary|
   bool IsValid() const override;

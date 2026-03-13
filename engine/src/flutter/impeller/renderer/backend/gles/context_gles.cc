@@ -22,16 +22,19 @@ std::shared_ptr<ContextGLES> ContextGLES::Create(
     const Flags& flags,
     std::unique_ptr<ProcTableGLES> gl,
     const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries,
-    bool enable_gpu_tracing) {
-  return std::shared_ptr<ContextGLES>(new ContextGLES(
-      flags, std::move(gl), shader_libraries, enable_gpu_tracing));
+    bool enable_gpu_tracing,
+    fml::RefPtr<fml::TaskRunner> io_task_runner) {
+  return std::shared_ptr<ContextGLES>(
+      new ContextGLES(flags, std::move(gl), shader_libraries,
+                      enable_gpu_tracing, std::move(io_task_runner)));
 }
 
 ContextGLES::ContextGLES(
     const Flags& flags,
     std::unique_ptr<ProcTableGLES> gl,
     const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_mappings,
-    bool enable_gpu_tracing)
+    bool enable_gpu_tracing,
+    fml::RefPtr<fml::TaskRunner> io_task_runner)
     : Context(flags) {
   reactor_ = std::make_shared<ReactorGLES>(std::move(gl));
   if (!reactor_->IsValid()) {
@@ -52,8 +55,8 @@ ContextGLES::ContextGLES(
 
   // Create the pipeline library.
   {
-    pipeline_library_ =
-        std::shared_ptr<PipelineLibraryGLES>(new PipelineLibraryGLES(reactor_));
+    pipeline_library_ = std::shared_ptr<PipelineLibraryGLES>(
+        new PipelineLibraryGLES(reactor_, std::move(io_task_runner)));
   }
 
   // Create allocators.
