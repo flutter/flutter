@@ -459,13 +459,13 @@ packages:
     source: hosted
     version: "6.1.0"
   listen_beta:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: listen_beta
-      sha256: "8850abce820131930ee888967846a5ba2cf6dedf03f0dc25e5ae2d5453e24b4b"
+      sha256: cdd95993a296ca0d3706e38bf68b914f396134d856301991829cd45e8e02031d
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.7"
+    version: "0.2.8"
   logging:
     dependency: "direct main"
     description:

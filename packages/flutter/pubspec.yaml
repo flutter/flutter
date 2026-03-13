@@ -14,7 +14,7 @@ dependencies:
   # https://github.com/flutter/flutter/blob/main/docs/infra/Updating-dependencies-in-Flutter.md
   characters: 1.4.1
   collection: 1.19.1
-  listen_beta: 0.2.7
+  listen_beta: 0.2.8
   #   path: ../../../spikes/listen_beta
   material_color_utilities: 0.13.0
   meta: 1.18.0
