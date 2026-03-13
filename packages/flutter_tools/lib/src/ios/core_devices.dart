@@ -129,10 +129,13 @@ class IOSCoreDeviceLauncher {
       IOSCoreDeviceRunningProcess process,
     ) {
       final String? executable = process.executable;
-      if (executable == null || !executable.startsWith('$installationURL/')) {
+      final String installationPrefix = installationURL.endsWith('/')
+          ? installationURL
+          : '$installationURL/';
+      if (executable == null || !executable.startsWith(installationPrefix)) {
         return false;
       }
-      final String relativeExecutablePath = executable.substring(installationURL.length + 1);
+      final String relativeExecutablePath = executable.substring(installationPrefix.length);
       return !relativeExecutablePath.contains('/');
     }).firstOrNull;
 
