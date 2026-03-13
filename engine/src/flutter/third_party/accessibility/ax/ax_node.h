@@ -103,7 +103,7 @@ class AX_EXPORT AXNode final {
          int32_t id,
          size_t index_in_parent,
          size_t unignored_index_in_parent = 0);
-  virtual ~AXNode();
+  ~AXNode();
 
   // Accessors.
   OwnerTree* tree() const { return tree_; }
