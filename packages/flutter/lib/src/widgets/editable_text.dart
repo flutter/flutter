@@ -281,8 +281,14 @@ class TextEditingController extends ValueNotifier<TextEditingValue> with ChangeN
     );
   }
 
+  int count = 0;
+
   @override
   set value(TextEditingValue newValue) {
+    count++;
+    if (count > 3) {
+      print('!!!!!! set value = $newValue');
+    }
     assert(
       !newValue.composing.isValid || newValue.isComposingRangeValid,
       'New TextEditingValue $newValue has an invalid non-empty composing range '
