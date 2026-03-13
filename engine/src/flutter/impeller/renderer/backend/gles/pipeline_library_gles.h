@@ -93,6 +93,7 @@ class PipelineLibraryGLES final
   Mutex programs_mutex_;
   ProgramMap programs_ IPLR_GUARDED_BY(programs_mutex_);
   fml::RefPtr<fml::TaskRunner> io_task_runner_;
+  std::shared_ptr<PipelineCompileQueue> compile_queue_;
 
   explicit PipelineLibraryGLES(std::shared_ptr<ReactorGLES> reactor,
                                fml::RefPtr<fml::TaskRunner> io_task_runner);
@@ -130,6 +131,8 @@ class PipelineLibraryGLES final
 
   void SetProgramForKey(const ProgramKey& key,
                         std::shared_ptr<UniqueHandleGLES> program);
+  // |PipelineLibrary|
+  PipelineCompileQueue* GetPipelineCompileQueue() const override;
 };
 
 }  // namespace impeller

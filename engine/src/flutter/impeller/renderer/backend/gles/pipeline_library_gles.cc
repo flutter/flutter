@@ -20,7 +20,11 @@ PipelineLibraryGLES::PipelineLibraryGLES(
     std::shared_ptr<ReactorGLES> reactor,
     fml::RefPtr<fml::TaskRunner> io_task_runner)
     : reactor_(std::move(reactor)),
-      io_task_runner_(std::move(io_task_runner)) {}
+      io_task_runner_(std::move(io_task_runner)),
+      compile_queue_(
+          PipelineCompileQueue::Create(std::shared_ptr<fml::BasicTaskRunner>(
+              io_task_runner_.get(),
+              [runner = io_task_runner_](fml::BasicTaskRunner*) {}))) {}
 
 static std::string GetShaderInfoLog(const ProcTableGLES& gl, GLuint shader) {
   GLint log_length = 0;
@@ -374,6 +378,10 @@ void PipelineLibraryGLES::SetProgramForKey(
     std::shared_ptr<UniqueHandleGLES> program) {
   Lock lock(programs_mutex_);
   programs_[key] = std::move(program);
+}
+
+PipelineCompileQueue* PipelineLibraryGLES::GetPipelineCompileQueue() const {
+  return compile_queue_.get();
 }
 
 }  // namespace impeller
