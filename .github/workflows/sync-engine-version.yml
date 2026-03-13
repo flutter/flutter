@@ -13,6 +13,24 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          repository: flutteractionsbot/flutter
+          token: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          ref: master
+
+      - name: Configure git
+        env:
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+        run: |
+          git config user.name "flutteractionsbot"
+          git config user.email "<flutter-actions-bot@google.com>"
+          git remote add upstream https://github.com/flutter/flutter.git
+          git fetch upstream ${{ github.ref_name }}
+
+          BRANCH_NAME="update-engine-$(date +%s)"
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
+          git checkout -b "$BRANCH_NAME" upstream/${{ github.ref_name }}
 
       - name: Generate and Capture Hash
         id: generate-hash
@@ -35,7 +53,8 @@ jobs:
         id: git-check
         run: |
           # -N (intent-to-add) treats untracked files as existing but empty
-          git add -N bin/internal/engine.version
+          # -f adds even if it's in the .gitignore (which it usually is)
+          git add -N -f bin/internal/engine.version
 
           if git diff --exit-code bin/internal/engine.version; then
             echo "changed=false" >> $GITHUB_OUTPUT
@@ -47,15 +66,9 @@ jobs:
       - name: Create PR if Changed
         if: steps.git-check.outputs.changed == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
         run: |
-          # Configure Git
-          git config user.name "[bot] Sync Engine Version"
-          git config user.email "<>"
-
-          # Create and push a unique branch
-          BRANCH_NAME="update-engine-$(date +%s)"
-          git checkout -b "$BRANCH_NAME"
+          # Make a commit and push to the branch.
           git add bin/internal/engine.version
           git commit -m "Update engine.version to $(cat bin/internal/engine.version)"
           git push origin "$BRANCH_NAME"
@@ -64,5 +77,6 @@ jobs:
           gh pr create \
             --title "[${{ github.ref_name }}] Sync engine.version to ${{ env.ENGINE_HASH }}" \
             --body "Updates the engine.version file." \
+            --repo flutter/flutter \
             --base ${{ github.ref_name }} \
-            --head "$BRANCH_NAME"
+            --head flutteractionsbot:$BRANCH_NAME
