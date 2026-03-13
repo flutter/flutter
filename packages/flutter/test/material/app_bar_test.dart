@@ -3748,4 +3748,112 @@ void main() {
       },
     );
   });
+
+  group('AppBar _scrolledUnder reset on scroll context change', () {
+    testWidgets('scrolledUnder flag resets when Scaffold body is swapped', (
+      WidgetTester tester,
+    ) async {
+      // Regression test for https://github.com/flutter/flutter/issues/181701
+      // When the Scaffold body is replaced, the AppBar _scrolledUnder flag
+      // should reset to false even without a new scroll event.
+      const scrolledUnderElevation = 8.0;
+
+      Widget buildScaffold({required Widget body}) {
+        return MaterialApp(
+          home: Scaffold(
+            appBar: AppBar(
+              title: const Text('Title'),
+              scrolledUnderElevation: scrolledUnderElevation,
+            ),
+            body: body,
+          ),
+        );
+      }
+
+      final scrollableBody = ListView.builder(
+        key: const ValueKey<int>(0),
+        itemCount: 50,
+        itemBuilder: (BuildContext context, int index) =>
+            SizedBox(height: 50, child: Text('Item $index')),
+      );
+
+      const shortBody = SingleChildScrollView(
+        key: ValueKey<int>(1),
+        child: SizedBox(height: 100, child: Text('Short content')),
+      );
+
+      Material getAppBarMaterial() => tester.widget<Material>(
+        find.descendant(
+          of: find.byType(AppBar),
+          matching: find.byType(Material),
+        ),
+      );
+
+      await tester.pumpWidget(buildScaffold(body: scrollableBody));
+
+      // Initially not scrolled under.
+      expect(getAppBarMaterial().elevation, 0);
+
+      // Scroll down so AppBar is in scrolled-under state.
+      await tester.fling(
+        find.text('Item 2'),
+        const Offset(0.0, -600.0),
+        2000.0,
+      );
+      await tester.pumpAndSettle();
+      expect(getAppBarMaterial().elevation, scrolledUnderElevation);
+
+      // Swap the Scaffold body — simulates a navigation/tab switch.
+      await tester.pumpWidget(buildScaffold(body: shortBody));
+      await tester.pumpAndSettle();
+
+      // After body swap, _scrolledUnder should reset — elevation back to 0.
+      expect(
+        getAppBarMaterial().elevation,
+        0,
+        reason:
+            'AppBar elevation should reset after body is swapped because '
+            '_scrolledUnder flag must be cleared when scroll context changes.',
+      );
+    });
+
+    testWidgets('scrolledUnder flag does not reset when body is not swapped', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            appBar: AppBar(
+              title: const Text('Title'),
+              scrolledUnderElevation: 8.0,
+            ),
+            body: ListView.builder(
+              itemCount: 50,
+              itemBuilder: (BuildContext context, int index) =>
+                  SizedBox(height: 50, child: Text('Item $index')),
+            ),
+          ),
+        ),
+      );
+
+      Material getAppBarMaterial() => tester.widget<Material>(
+        find.descendant(
+          of: find.byType(AppBar),
+          matching: find.byType(Material),
+        ),
+      );
+
+      expect(getAppBarMaterial().elevation, 0);
+
+      await tester.fling(
+        find.text('Item 2'),
+        const Offset(0.0, -600.0),
+        2000.0,
+      );
+      await tester.pumpAndSettle();
+
+      // Scrolled-under elevation should remain while body is unchanged.
+      expect(getAppBarMaterial().elevation, 8.0);
+    });
+  });
 }
