@@ -69,10 +69,9 @@ The general process for submitting code to a Flutter repository is as follows:
    This doesn’t prohibit the use of coding assistance tools, but what’s submitted does
    need to be a contributor’s original creation.
 
-7. Get your code reviewed (see below). You should probably reach out to the relevant
-   expert(s) for the areas you touched and ask them to review your PR directly.
-   GitHub sometimes recommends specific reviewers; if you're not sure who to ask,
-   that's probably a good place to start.
+7. Get your code reviewed (see below). If you are a team member, request review
+   from the relevant expert(s) for the areas you touched. Otherwise, wait for
+   [reviewers to be assigned](#who).
 
 8. Make sure your PR passes all the pre-commit tests. Consider running some of the
    post-commit tests locally (see the
@@ -245,11 +244,8 @@ Code should be reviewed by the owner (tech lead) of the area(s) of the codebase 
 or someone to whom they have delegated that authority.
 If anyone else leaves comments, please also wait for their approval (LGTM) before landing code.
 
-If nobody has reviewed your code after a week, then reach out on our [Chat](Chat.md) channels.
+If nobody has reviewed your code after two weeks, then reach out on our [Chat](Chat.md) channels.
 The `#hackers-new` channel is a good place to ask for help if you're a new contributor.
-
-_For PRs affecting the `material` and `cupertino` libraries, team members are expected to seek reviewers directly;
-they will not be assigned during PR triage._
 
 ### How
 
