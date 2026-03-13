@@ -2028,6 +2028,104 @@ void main() {
       variant: TargetPlatformVariant.only(TargetPlatform.android),
     );
   }
+
+  testWidgets(
+    'selection handles use endpoint direction for mixed-directionality text on Android',
+    (WidgetTester tester) async {
+      final customControls = DirectionalitySpyTextSelectionControls();
+      final controller = TextEditingController(text: 'abc مرحبا');
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            textSelectionTheme: const TextSelectionThemeData(selectionColor: Colors.blue),
+          ),
+          home: Material(
+            child: TextField(
+              controller: controller,
+              focusNode: focusNode,
+              selectionControls: customControls,
+              textDirection: TextDirection.ltr,
+            ),
+          ),
+        ),
+      );
+
+      focusNode.requestFocus();
+      await tester.pump();
+
+      customControls.clearBuiltHandleTypes();
+      controller.selection = TextSelection(baseOffset: 0, extentOffset: controller.text.length);
+      await tester.pumpAndSettle();
+
+      final RenderEditable renderEditable = tester.allRenderObjects
+          .whereType<RenderEditable>()
+          .first;
+      final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
+        controller.selection,
+      );
+
+      expect(endpoints, hasLength(2));
+      expect(endpoints.first.direction, TextDirection.ltr);
+      expect(endpoints.last.direction, TextDirection.rtl);
+      expect(customControls.builtHandleTypes.length, greaterThanOrEqualTo(2));
+      expect(customControls.lastStartHandleType, TextSelectionHandleType.left);
+      expect(customControls.lastEndHandleType, TextSelectionHandleType.left);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
+
+  testWidgets(
+    'selection handles use text direction for mixed-directionality text on iOS',
+    (WidgetTester tester) async {
+      final customControls = DirectionalitySpyTextSelectionControls();
+      final controller = TextEditingController(text: 'abc مرحبا');
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            textSelectionTheme: const TextSelectionThemeData(selectionColor: Colors.blue),
+          ),
+          home: Material(
+            child: TextField(
+              controller: controller,
+              focusNode: focusNode,
+              selectionControls: customControls,
+              textDirection: TextDirection.ltr,
+            ),
+          ),
+        ),
+      );
+
+      focusNode.requestFocus();
+      await tester.pump();
+
+      customControls.clearBuiltHandleTypes();
+      controller.selection = TextSelection(baseOffset: 0, extentOffset: controller.text.length);
+      await tester.pumpAndSettle();
+
+      final RenderEditable renderEditable = tester.allRenderObjects
+          .whereType<RenderEditable>()
+          .first;
+      final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
+        controller.selection,
+      );
+
+      expect(endpoints, hasLength(2));
+      expect(endpoints.first.direction, TextDirection.ltr);
+      expect(endpoints.last.direction, TextDirection.rtl);
+      expect(customControls.builtHandleTypes.length, greaterThanOrEqualTo(2));
+      expect(customControls.lastStartHandleType, TextSelectionHandleType.left);
+      expect(customControls.lastEndHandleType, TextSelectionHandleType.right);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
 }
 
 class FakeTextSelectionGestureDetectorBuilderDelegate
@@ -2262,6 +2360,16 @@ class FakeTextSelectionDelegate extends Fake implements TextSelectionDelegate {
 }
 
 class DirectionalitySpyTextSelectionControls extends MaterialTextSelectionControls {
+  final List<TextSelectionHandleType> builtHandleTypes = <TextSelectionHandleType>[];
+
+  void clearBuiltHandleTypes() {
+    builtHandleTypes.clear();
+  }
+
+  TextSelectionHandleType get lastStartHandleType => builtHandleTypes[builtHandleTypes.length - 2];
+
+  TextSelectionHandleType get lastEndHandleType => builtHandleTypes[builtHandleTypes.length - 1];
+
   // Wrap the handle in a widget with a Key that identifies its type.
   @override
   Widget buildHandle(
@@ -2270,6 +2378,7 @@ class DirectionalitySpyTextSelectionControls extends MaterialTextSelectionContro
     double textLineHeight, [
     VoidCallback? onTap,
   ]) {
+    builtHandleTypes.add(type);
     return KeyedSubtree(
       key: ValueKey<TextSelectionHandleType>(type),
       child: super.buildHandle(context, type, textLineHeight, onTap),

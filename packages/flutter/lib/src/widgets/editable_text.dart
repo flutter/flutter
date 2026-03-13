@@ -2609,11 +2609,6 @@ class EditableTextState extends State<EditableText>
 
   Orientation? _lastOrientation;
 
-  // Tracks the last known text direction to detect when it changes.
-  // When the direction changes (e.g., switching between LTR and RTL layout),
-  // we need to update the selection overlay to ensure handles are positioned correctly.
-  TextDirection? _lastKnownTextDirection;
-
   bool get _stylusHandwritingEnabled {
     // During the deprecation period, respect scribbleEnabled being explicitly
     // set.
@@ -3316,20 +3311,6 @@ class EditableTextState extends State<EditableText>
         _textInputConnection!.updateStyle(_getTextInputStyle(context));
       }, debugLabel: 'EditableText.updateStyle');
     }
-
-    // Update selection overlay when text direction changes (e.g., switching
-    // between LTR and RTL layout) to ensure handles are positioned correctly.
-    final TextDirection currentTextDirection = _textDirection;
-    if (_lastKnownTextDirection != null && _lastKnownTextDirection != currentTextDirection) {
-      // Schedule the update after the current frame to ensure the render object
-      // has been updated with the new direction.
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _selectionOverlay?.updateForScroll();
-        }
-      }, debugLabel: 'EditableText.updateSelectionOverlayDirection');
-    }
-    _lastKnownTextDirection = currentTextDirection;
 
     if (defaultTargetPlatform != TargetPlatform.iOS &&
         defaultTargetPlatform != TargetPlatform.android) {
@@ -5663,26 +5644,6 @@ class EditableTextState extends State<EditableText>
     EditableTextTapUpOutsideIntent: _makeOverridable(_EditableTextTapUpOutsideAction()),
   };
 
-  /// Returns the [ui.BoxWidthStyle] to use for painting the selection.
-  ///
-  /// On Android, this returns [ui.BoxWidthStyle.max] when all text is selected,
-  /// matching native behavior where the selection highlights the full width of
-  /// the line (including whitespace). Otherwise, it returns [widget.selectionWidthStyle].
-  ///
-  /// This also resolves an issue with single-word selection for Arabic text when
-  /// using [ui.BoxWidthStyle.tight].
-  ui.BoxWidthStyle _getEffectiveSelectionWidthStyle() {
-    final ui.BoxWidthStyle style = widget.selectionWidthStyle;
-    if (defaultTargetPlatform == TargetPlatform.android &&
-        _value.selection.isValid &&
-        _value.selection.baseOffset == 0 &&
-        _value.selection.extentOffset == _value.text.length &&
-        !_value.selection.isCollapsed) {
-      return ui.BoxWidthStyle.max;
-    }
-    return style;
-  }
-
   @protected
   @override
   Widget build(BuildContext context) {
@@ -5865,7 +5826,7 @@ class EditableTextState extends State<EditableText>
                                     cursorRadius: widget.cursorRadius,
                                     cursorOffset: widget.cursorOffset ?? Offset.zero,
                                     selectionHeightStyle: widget.selectionHeightStyle,
-                                    selectionWidthStyle: _getEffectiveSelectionWidthStyle(),
+                                    selectionWidthStyle: widget.selectionWidthStyle,
                                     paintCursorAboveText: widget.paintCursorAboveText,
                                     enableInteractiveSelection: widget._userSelectionEnabled,
                                     textSelectionDelegate: this,

@@ -17963,7 +17963,7 @@ void main() {
       controller.selection = TextSelection(baseOffset: 0, extentOffset: controller.text.length);
       await tester.pump();
 
-      expect(state.renderEditable.selectionWidthStyle, BoxWidthStyle.max);
+      expect(state.renderEditable.selectionWidthStyle, BoxWidthStyle.tight);
 
       // Partial selection
       controller.selection = const TextSelection(baseOffset: 0, extentOffset: 5);
@@ -18004,7 +18004,7 @@ void main() {
       await tester.pump();
 
       // Should be max despite widget param being tight
-      expect(state.renderEditable.selectionWidthStyle, BoxWidthStyle.max);
+      expect(state.renderEditable.selectionWidthStyle, BoxWidthStyle.tight);
 
       // Partial selection
       controller.selection = const TextSelection(baseOffset: 0, extentOffset: 5);

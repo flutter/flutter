@@ -381,7 +381,6 @@ class TextSelectionOverlay {
       onSelectionHandleTapped: onSelectionHandleTapped,
       dragStartBehavior: dragStartBehavior,
       toolbarLocation: renderObject.lastSecondaryTapDownPosition,
-      textDirection: renderObject.textDirection,
     );
   }
 
@@ -551,11 +550,16 @@ class TextSelectionOverlay {
       startHandleType = TextSelectionHandleType.collapsed;
       endHandleType = TextSelectionHandleType.collapsed;
     } else {
-      assert(endpoints.length == 2);
-      final TextDirection startHandleDirection =
-          endpoints.first.direction ?? renderObject.textDirection;
-      final TextDirection endHandleDirection =
-          endpoints.last.direction ?? renderObject.textDirection;
+      final TextDirection textDirection = renderObject.textDirection;
+      // UIKit keeps selection handles aligned with the field direction.
+      final bool useTextDirectionForSelectionHandles = defaultTargetPlatform == TargetPlatform.iOS;
+      final TextDirection startHandleDirection = useTextDirectionForSelectionHandles
+          ? textDirection
+          : endpoints.first.direction ?? textDirection;
+      final TextSelectionPoint? endPoint = endpoints.length > 1 ? endpoints.last : null;
+      final TextDirection endHandleDirection = useTextDirectionForSelectionHandles
+          ? textDirection
+          : (endPoint?.direction ?? endpoints.first.direction) ?? textDirection;
 
       startHandleType = switch (startHandleDirection) {
         TextDirection.ltr => TextSelectionHandleType.left,
@@ -1087,14 +1091,12 @@ class SelectionOverlay {
     )
     Offset? toolbarLocation,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
-    TextDirection? textDirection,
   }) : _startHandleType = startHandleType,
        _lineHeightAtStart = lineHeightAtStart,
        _endHandleType = endHandleType,
        _lineHeightAtEnd = lineHeightAtEnd,
        _selectionEndpoints = selectionEndpoints,
        _toolbarLocation = toolbarLocation,
-       _textDirection = textDirection,
        assert(debugCheckHasOverlay(context)) {
     assert(debugMaybeDispatchCreated('widgets', 'SelectionOverlay', this));
   }
@@ -1129,21 +1131,6 @@ class SelectionOverlay {
     return selectionControls is TextSelectionHandleControls
         ? _contextMenuController.isShown || _spellCheckToolbarController.isShown
         : _toolbar != null || _spellCheckToolbarController.isShown;
-  }
-
-  /// The text direction of the text being selected.
-  ///
-  /// This is used to determine the direction of the selection handles.
-  ///
-  /// Changing the value while the handles are visible causes them to rebuild.
-  TextDirection? get textDirection => _textDirection;
-  TextDirection? _textDirection;
-  set textDirection(TextDirection? value) {
-    if (_textDirection == value) {
-      return;
-    }
-    _textDirection = value;
-    markNeedsBuild();
   }
 
   /// {@template flutter.widgets.SelectionOverlay.magnifierIsVisible}
