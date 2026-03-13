@@ -274,6 +274,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// actions, not during the build, layout, or paint phases. This property can
   /// be set from a listener added to this [TextEditingController].
   set text(String newText) {
+    print('!!!!!! set text = $newText');
     value = value.copyWith(
       text: newText,
       selection: const TextSelection.collapsed(offset: -1),
@@ -289,6 +290,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
       '${newValue.composing}. It is recommended to use a valid composing range, '
       'even for readonly text fields.',
     );
+    print('!!!!!! set value = $newValue');
     super.value = newValue;
   }
 
