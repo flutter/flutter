@@ -37,7 +37,7 @@ jobs:
         run: |
           # Capture the OLD hash (handle case where file doesn't exist)
           if [ -f bin/internal/engine.version ]; then
-            OLD_HASH=$(cat bin/internal/engine.version)
+            OLD_HASH=$(< bin/internal/engine.version)
           else
             OLD_HASH="None (New File)"
           fi
