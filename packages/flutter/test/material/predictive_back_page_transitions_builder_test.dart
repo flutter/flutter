@@ -124,10 +124,8 @@ void main() {
     );
 
     testWidgets(
-      'PredictiveBackPageTransitionsBuilder supports predictive back when swipeEdge is edgeNone',
+      'Predictive back transitions support predictive back when swipeEdge is edgeNone',
       (WidgetTester tester) async {
-        const PageTransitionsBuilder pageTransitionsBuilder =
-            PredictiveBackPageTransitionsBuilder();
 
         final routes = <String, WidgetBuilder>{
           '/': (BuildContext context) => Material(
