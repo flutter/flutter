@@ -53,6 +53,10 @@ struct _FlCompositorOpenGL {
   // Last rendered frame.
   FlFramebuffer* framebuffer;
 
+  // Reusable sibling framebuffer for gdk_cairo_draw_from_gl (Wayland).
+  // Avoids per-frame texture churn that GTK/Wayland retains.
+  FlFramebuffer* render_sibling;
+
   // Last rendered frame pixels (only set if shareable is TRUE).
   uint8_t* pixels;
 
@@ -251,9 +255,13 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
   if (self->framebuffer == nullptr ||
       fl_framebuffer_get_width(self->framebuffer) != width ||
       fl_framebuffer_get_height(self->framebuffer) != height) {
-    g_clear_object(&self->framebuffer);
-    self->framebuffer =
+    // Allocate new framebuffer before disposing old ones to avoid GL texture
+    // ID collision (engine may dispose backing stores later with recycled IDs).
+    FlFramebuffer* new_framebuffer =
         fl_framebuffer_new(general_format, width, height, self->shareable);
+    g_clear_object(&self->render_sibling);
+    g_clear_object(&self->framebuffer);
+    self->framebuffer = new_framebuffer;
 
     // If not shareable make buffer to copy frame pixels into.
     if (!self->shareable) {
@@ -423,9 +431,11 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
   }
 
   if (fl_framebuffer_get_shareable(self->framebuffer)) {
-    g_autoptr(FlFramebuffer) sibling =
-        fl_framebuffer_create_sibling(self->framebuffer);
-    gdk_cairo_draw_from_gl(cr, window, fl_framebuffer_get_texture_id(sibling),
+    if (self->render_sibling == nullptr) {
+      self->render_sibling = fl_framebuffer_create_sibling(self->framebuffer);
+    }
+    gdk_cairo_draw_from_gl(cr, window,
+                           fl_framebuffer_get_texture_id(self->render_sibling),
                            GL_TEXTURE, scale_factor, 0, 0, width, height);
   } else {
     GLint saved_texture_binding;
@@ -459,6 +469,7 @@ static void fl_compositor_opengl_dispose(GObject* object) {
 
   g_clear_object(&self->task_runner);
   g_clear_object(&self->opengl_manager);
+  g_clear_object(&self->render_sibling);
   g_clear_object(&self->framebuffer);
   g_clear_pointer(&self->pixels, g_free);
   g_mutex_clear(&self->frame_mutex);
