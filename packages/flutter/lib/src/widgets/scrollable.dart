@@ -1303,7 +1303,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       _autoScroller.stopAutoScroll();
       return result;
     }
-    if (_selectionStartsInScrollable) {
+    if (_selectionStartsInScrollable && event.globalPosition.isFinite) {
       _autoScroller.startAutoScrollIfNecessary(_dragTargetFromEvent(event));
       if (_autoScroller.scrolling) {
         return SelectionResult.pending;
@@ -1504,21 +1504,10 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   }
 
   bool _globalPositionInScrollable(Offset globalPosition) {
-    if (!globalPosition.isFinite) {
-      return false;
-    }
     final box = state.context.findRenderObject()! as RenderBox;
     final Offset localPosition = box.globalToLocal(globalPosition);
-    // Use strict interior bounds (excluding exact edges) to prevent nested
-    // delegates from incorrectly setting _selectionStartsInScrollable = true
-    // when a parent delegate synthesizes a boundary position
-    // (e.g. box.localToGlobal(Offset.zero)) for an out-of-bounds drag event.
-    // Nested scrollables that share a top-left origin would otherwise see the
-    // snapped Offset.zero as being within their bounds.
-    return localPosition.dx > 0 &&
-        localPosition.dy > 0 &&
-        localPosition.dx < box.size.width &&
-        localPosition.dy < box.size.height;
+    final rect = Rect.fromLTWH(0, 0, box.size.width, box.size.height);
+    return rect.contains(localPosition);
   }
 
   Rect _dragTargetFromEvent(SelectionEdgeUpdateEvent event) {
