@@ -103,13 +103,50 @@ class CircleAvatar extends StatelessWidget {
   /// {@macro flutter.widgets.RawAvatar.onForegroundImageError}
   final ImageErrorListener? onForegroundImageError;
 
-  /// {@macro flutter.widgets.RawAvatar.radius}
+  /// The size of the avatar, expressed as the radius (half the diameter).
+  ///
+  /// If [radius] is specified, then neither [minRadius] nor [maxRadius] may be
+  /// specified. Specifying [radius] is equivalent to specifying a [minRadius]
+  /// and [maxRadius], both with the value of [radius].
+  ///
+  /// If neither [minRadius] nor [maxRadius] are specified, defaults to 20
+  /// logical pixels. This is the appropriate size for use with
+  /// [ListTile.leading].
+  ///
+  /// Changes to the [radius] are animated (including changing from an explicit
+  /// [radius] to a [minRadius]/[maxRadius] pair or vice versa).
   final double? radius;
 
-  /// {@macro flutter.widgets.RawAvatar.minRadius}
+  /// The minimum size of the avatar, expressed as the radius (half the
+  /// diameter).
+  ///
+  /// If [minRadius] is specified, then [radius] must not also be specified.
+  ///
+  /// Defaults to zero.
+  ///
+  /// Constraint changes are animated, but size changes due to the environment
+  /// itself changing are not. For example, changing the [minRadius] from 10 to
+  /// 20 when the [CircleAvatar] is in an unconstrained environment will cause
+  /// the avatar to animate from a 20 pixel diameter to a 40 pixel diameter.
+  /// However, if the [minRadius] is 40 and the [CircleAvatar] has a parent
+  /// [SizedBox] whose size changes instantaneously from 20 pixels to 40 pixels,
+  /// the size will snap to 40 pixels instantly.
   final double? minRadius;
 
-  /// {@macro flutter.widgets.RawAvatar.maxRadius}
+  /// The maximum size of the avatar, expressed as the radius (half the
+  /// diameter).
+  ///
+  /// If [maxRadius] is specified, then [radius] must not also be specified.
+  ///
+  /// Defaults to [double.infinity].
+  ///
+  /// Constraint changes are animated, but size changes due to the environment
+  /// itself changing are not. For example, changing the [maxRadius] from 10 to
+  /// 20 when the [CircleAvatar] is in an unconstrained environment will cause
+  /// the avatar to animate from a 20 pixel diameter to a 40 pixel diameter.
+  /// However, if the [maxRadius] is 40 and the [CircleAvatar] has a parent
+  /// [SizedBox] whose size changes instantaneously from 20 pixels to 40 pixels,
+  /// the size will snap to 40 pixels instantly.
   final double? maxRadius;
 
   @override
@@ -136,13 +173,17 @@ class CircleAvatar extends StatelessWidget {
       };
     }
 
+    final double? size = radius != null ? radius! * 2 : null;
+    final double? minSize = minRadius != null ? minRadius! * 2 : null;
+    final double? maxSize = maxRadius != null ? maxRadius! * 2 : null;
+
     return RawAvatar(
       backgroundColor: effectiveBackgroundColor,
       textStyle: textStyle,
       iconTheme: theme.iconTheme.copyWith(color: textStyle.color),
-      radius: radius,
-      minRadius: minRadius,
-      maxRadius: maxRadius,
+      size: size,
+      minSize: minSize,
+      maxSize: maxSize,
       backgroundImage: backgroundImage,
       foregroundImage: foregroundImage,
       onBackgroundImageError: onBackgroundImageError,

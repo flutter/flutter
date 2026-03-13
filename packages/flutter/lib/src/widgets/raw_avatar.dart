@@ -59,16 +59,16 @@ class RawAvatar extends StatelessWidget {
     this.onBackgroundImageError,
     this.onForegroundImageError,
     this.foregroundColor,
-    this.radius,
-    this.minRadius,
-    this.maxRadius,
+    this.size,
+    this.minSize,
+    this.maxSize,
     this.shape,
     this.textStyle,
     this.iconTheme,
     this.boxShape,
     this.borderRadius,
     this.duration = const Duration(milliseconds: 200),
-  }) : assert(radius == null || (minRadius == null && maxRadius == null)),
+  }) : assert(size == null || (minSize == null && maxSize == null)),
        assert(backgroundImage != null || onBackgroundImageError == null),
        assert(foregroundImage != null || onForegroundImageError == null),
        assert(shape == null || boxShape == null),
@@ -188,79 +188,59 @@ class RawAvatar extends StatelessWidget {
   /// The duration of the animation for changes in properties.
   final Duration duration;
 
-  /// {@template flutter.widgets.RawAvatar.radius}
-  /// The size of the avatar, expressed as the radius (half the diameter).
+  /// {@template flutter.widgets.RawAvatar.size}
+  /// The size of the avatar, expressed as the diameter.
   ///
-  /// If [radius] is specified, then neither [minRadius] nor [maxRadius] may be
-  /// specified. Specifying [radius] is equivalent to specifying a [minRadius]
-  /// and [maxRadius], both with the value of [radius].
+  /// If [size] is specified, then neither [minSize] nor [maxSize] may be
+  /// specified. Specifying [size] is equivalent to specifying a [minSize]
+  /// and [maxSize] with the same value.
   ///
-  /// If neither [minRadius] nor [maxRadius] are specified, defaults to 20
-  /// logical pixels. This is the appropriate size for use with
-  /// [ListTile.leading].
+  /// If neither [minSize] nor [maxSize] are specified, the avatar defaults
+  /// to 40 logical pixels.
   ///
-  /// Changes to the [radius] are animated (including changing from an explicit
-  /// [radius] to a [minRadius]/[maxRadius] pair or vice versa).
+  /// Changes to the [size] are animated.
   /// {@endtemplate}
-  final double? radius;
+  final double? size;
 
-  /// {@template flutter.widgets.RawAvatar.minRadius}
-  /// The minimum size of the avatar, expressed as the radius (half the
-  /// diameter).
+  /// {@template flutter.widgets.RawAvatar.minSize}
+  /// The minimum size of the avatar, expressed as the diameter.
   ///
-  /// If [minRadius] is specified, then [radius] must not also be specified.
+  /// If [minSize] is specified, then [size] must not also be specified.
   ///
   /// Defaults to zero.
-  ///
-  /// Constraint changes are animated, but size changes due to the environment
-  /// itself changing are not. For example, changing the [minRadius] from 10 to
-  /// 20 when the avatar is in an unconstrained environment will cause
-  /// the avatar to animate from a 20 pixel diameter to a 40 pixel diameter.
-  /// However, if the [minRadius] is 40 and the avatar has a parent
-  /// [SizedBox] whose size changes instantaneously from 20 pixels to 40 pixels,
-  /// the size will snap to 40 pixels instantly.
   /// {@endtemplate}
-  final double? minRadius;
+  final double? minSize;
 
-  /// {@template flutter.widgets.RawAvatar.maxRadius}
-  /// The maximum size of the avatar, expressed as the radius (half the
-  /// diameter).
+  /// {@template flutter.widgets.RawAvatar.maxSize}
+  /// The maximum size of the avatar, expressed as the diameter.
   ///
-  /// If [maxRadius] is specified, then [radius] must not also be specified.
+  /// If [maxSize] is specified, then [size] must not also be specified.
   ///
   /// Defaults to [double.infinity].
-  ///
-  /// Constraint changes are animated, but size changes due to the environment
-  /// itself changing are not. For example, changing the [maxRadius] from 10 to
-  /// 20 when the avatar is in an unconstrained environment will cause
-  /// the avatar to animate from a 20 pixel diameter to a 40 pixel diameter.
-  /// However, if the [maxRadius] is 40 and the avatar has a parent
-  /// [SizedBox] whose size changes instantaneously from 20 pixels to 40 pixels,
-  /// the size will snap to 40 pixels instantly.
   /// {@endtemplate}
-  final double? maxRadius;
+  final double? maxSize;
 
-  // The default radius if nothing is specified.
-  static const double _defaultRadius = 20.0;
+  // Default diameter if nothing is specified.
+  static const double _defaultSize = 40.0;
 
-  // The default min if only the max is specified.
-  static const double _defaultMinRadius = 0.0;
+  // Default min if only max is specified.
+  static const double _defaultMinSize = 0.0;
 
-  // The default max if only the min is specified.
-  static const double _defaultMaxRadius = double.infinity;
+  // Default max if only min is specified.
+  static const double _defaultMaxSize = double.infinity;
 
   double get _minDiameter {
-    if (radius == null && minRadius == null && maxRadius == null) {
-      return _defaultRadius * 2.0;
+    if (size == null && minSize == null && maxSize == null) {
+      return _defaultSize;
     }
-    return 2.0 * (radius ?? minRadius ?? _defaultMinRadius);
+    return size ?? minSize ?? _defaultMinSize;
   }
 
   double get _maxDiameter {
-    if (radius == null && minRadius == null && maxRadius == null) {
-      return _defaultRadius * 2.0;
+    if (size == null && minSize == null && maxSize == null) {
+      return _defaultSize;
     }
-    return 2.0 * (radius ?? maxRadius ?? _defaultMaxRadius);
+    return size ?? maxSize ?? _defaultMaxSize;
   }
 
   @override
