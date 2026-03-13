@@ -65,10 +65,10 @@ void main() {
         // Start a system pop gesture, which will switch to using
         // _PredictiveBackSharedElementPageTransition for the page transition.
         final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
-          const MethodCall('startBackGesture', <String, dynamic>{
-            'touchOffset': <double>[5.0, 300.0],
+          MethodCall('startBackGesture', <String, dynamic>{
+            'touchOffset': const <double>[5.0, 300.0],
             'progress': 0.0,
-            'swipeEdge': 0, // left
+            'swipeEdge': SwipeEdge.left.index,
           }),
         );
         await binding.defaultBinaryMessenger.handlePlatformMessage(
@@ -85,11 +85,10 @@ void main() {
 
         // Drag the system back gesture far enough to commit.
         final ByteData updateMessage = const StandardMethodCodec().encodeMethodCall(
-          const MethodCall('updateBackGestureProgress', <String, dynamic>{
-            'x': 100.0,
-            'y': 300.0,
+          MethodCall('updateBackGestureProgress', <String, dynamic>{
+            'touchOffset': const <double>[100.0, 300.0],
             'progress': 0.35,
-            'swipeEdge': 0, // left
+            'swipeEdge': SwipeEdge.left.index,
           }),
         );
         await binding.defaultBinaryMessenger.handlePlatformMessage(
@@ -118,6 +117,100 @@ void main() {
 
         expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
         expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
+        expect(find.text('push'), findsOneWidget);
+        expect(find.text('page b'), findsNothing);
+      },
+      variant: TargetPlatformVariant.all(),
+    );
+
+    testWidgets(
+      'PredictiveBackPageTransitionsBuilder supports predictive back when swipeEdge is edgeNone',
+      (WidgetTester tester) async {
+        const PageTransitionsBuilder pageTransitionsBuilder =
+            PredictiveBackPageTransitionsBuilder();
+
+        final routes = <String, WidgetBuilder>{
+          '/': (BuildContext context) => Material(
+            child: TextButton(
+              child: const Text('push'),
+              onPressed: () {
+                Navigator.of(context).pushNamed('/b');
+              },
+            ),
+          ),
+          '/b': (BuildContext context) => const Text('page b'),
+        };
+
+        final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(
+              pageTransitionsTheme: PageTransitionsTheme(
+                builders: <TargetPlatform, PageTransitionsBuilder>{
+                  for (final TargetPlatform platform in TargetPlatform.values)
+                    platform: pageTransitionsBuilder,
+                },
+              ),
+            ),
+            routes: routes,
+          ),
+        );
+
+        await tester.tap(find.text('push'));
+        await tester.pumpAndSettle();
+
+        if (defaultTargetPlatform != TargetPlatform.android) {
+          return;
+        }
+
+        // Start predictive back with EDGE_NONE (3-button navigation)
+        final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
+          MethodCall('startBackGesture', <String, dynamic>{
+            'touchOffset': const <double>[0.0, 0.0],
+            'progress': 0.0,
+            'swipeEdge': SwipeEdge.edgeNone.index,
+          }),
+        );
+
+        await binding.defaultBinaryMessenger.handlePlatformMessage(
+          'flutter/backgesture',
+          startMessage,
+          (ByteData? _) {},
+        );
+
+        await tester.pump();
+
+        expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsOneWidget);
+
+        final ByteData updateMessage = const StandardMethodCodec().encodeMethodCall(
+          MethodCall('updateBackGestureProgress', <String, dynamic>{
+            'touchOffset': const <double>[0.0, 0.0],
+            'progress': 0.3,
+            'swipeEdge': SwipeEdge.edgeNone.index,
+          }),
+        );
+
+        await binding.defaultBinaryMessenger.handlePlatformMessage(
+          'flutter/backgesture',
+          updateMessage,
+          (ByteData? _) {},
+        );
+
+        await tester.pump();
+
+        final ByteData commitMessage = const StandardMethodCodec().encodeMethodCall(
+          const MethodCall('commitBackGesture'),
+        );
+
+        await binding.defaultBinaryMessenger.handlePlatformMessage(
+          'flutter/backgesture',
+          commitMessage,
+          (ByteData? _) {},
+        );
+
+        await tester.pumpAndSettle();
+
         expect(find.text('push'), findsOneWidget);
         expect(find.text('page b'), findsNothing);
       },
@@ -175,10 +268,10 @@ void main() {
         // Start a system pop gesture, which will switch to using
         // _PredictiveBackSharedElementPageTransition for the page transition.
         final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
-          const MethodCall('startBackGesture', <String, dynamic>{
-            'touchOffset': <double>[5.0, 300.0],
+          MethodCall('startBackGesture', <String, dynamic>{
+            'touchOffset': const <double>[5.0, 300.0],
             'progress': 0.0,
-            'swipeEdge': 0, // left
+            'swipeEdge': SwipeEdge.left.index,
           }),
         );
         await binding.defaultBinaryMessenger.handlePlatformMessage(
@@ -195,10 +288,10 @@ void main() {
 
         // Drag the system back gesture.
         final ByteData updateMessage = const StandardMethodCodec().encodeMethodCall(
-          const MethodCall('updateBackGestureProgress', <String, dynamic>{
-            'touchOffset': <double>[100.0, 300.0],
+          MethodCall('updateBackGestureProgress', <String, dynamic>{
+            'touchOffset': const <double>[100.0, 300.0],
             'progress': 0.35,
-            'swipeEdge': 0, // left
+            'swipeEdge': SwipeEdge.left.index,
           }),
         );
         await binding.defaultBinaryMessenger.handlePlatformMessage(
@@ -328,10 +421,10 @@ void main() {
         // Start a system pop gesture, which will switch to using
         // _PredictiveBackSharedElementPageTransition for the page transition.
         final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
-          const MethodCall('startBackGesture', <String, dynamic>{
-            'touchOffset': <double>[5.0, 300.0],
+          MethodCall('startBackGesture', <String, dynamic>{
+            'touchOffset': const <double>[5.0, 300.0],
             'progress': 0.0,
-            'swipeEdge': 0, // left
+            'swipeEdge': SwipeEdge.left.index,
           }),
         );
         await binding.defaultBinaryMessenger.handlePlatformMessage(
@@ -348,10 +441,10 @@ void main() {
 
         // Drag the system back gesture.
         final ByteData updateMessage = const StandardMethodCodec().encodeMethodCall(
-          const MethodCall('updateBackGestureProgress', <String, dynamic>{
-            'touchOffset': <double>[100.0, 300.0],
+          MethodCall('updateBackGestureProgress', <String, dynamic>{
+            'touchOffset': const <double>[100.0, 300.0],
             'progress': 0.3,
-            'swipeEdge': 0, // left
+            'swipeEdge': SwipeEdge.left.index,
           }),
         );
         await binding.defaultBinaryMessenger.handlePlatformMessage(
@@ -380,10 +473,10 @@ void main() {
         // Send another drag gesture, and ensure that the original observer still
         // gets it.
         final ByteData updateMessage2 = const StandardMethodCodec().encodeMethodCall(
-          const MethodCall('updateBackGestureProgress', <String, dynamic>{
-            'touchOffset': <double>[110.0, 300.0],
+          MethodCall('updateBackGestureProgress', <String, dynamic>{
+            'touchOffset': const <double>[110.0, 300.0],
             'progress': 0.35,
-            'swipeEdge': 0, // left
+            'swipeEdge': SwipeEdge.left.index,
           }),
         );
         await binding.defaultBinaryMessenger.handlePlatformMessage(
@@ -490,10 +583,10 @@ void main() {
       // Start a system pop gesture, which will switch to using
       // _PredictiveBackSharedElementPageTransition for the page transition.
       final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
-        const MethodCall('startBackGesture', <String, dynamic>{
-          'touchOffset': <double>[5.0, 300.0],
+        MethodCall('startBackGesture', <String, dynamic>{
+          'touchOffset': const <double>[5.0, 300.0],
           'progress': 0.0,
-          'swipeEdge': 0, // left
+          'swipeEdge': SwipeEdge.left.index,
         }),
       );
       await binding.defaultBinaryMessenger.handlePlatformMessage(
@@ -508,11 +601,10 @@ void main() {
 
       // Drag the system back gesture far enough to commit.
       final ByteData updateMessage = const StandardMethodCodec().encodeMethodCall(
-        const MethodCall('updateBackGestureProgress', <String, dynamic>{
-          'x': 100.0,
-          'y': 300.0,
+        MethodCall('updateBackGestureProgress', <String, dynamic>{
+          'touchOffset': const <double>[100.0, 300.0],
           'progress': 0.35,
-          'swipeEdge': 0, // left
+          'swipeEdge': SwipeEdge.left.index,
         }),
       );
       await binding.defaultBinaryMessenger.handlePlatformMessage(
@@ -548,10 +640,10 @@ void main() {
       // Start another system pop gesture, before the first has finished
       // animating out.
       final ByteData startMessage2 = const StandardMethodCodec().encodeMethodCall(
-        const MethodCall('startBackGesture', <String, dynamic>{
-          'touchOffset': <double>[5.0, 300.0],
+        MethodCall('startBackGesture', <String, dynamic>{
+          'touchOffset': const <double>[5.0, 300.0],
           'progress': 0.0,
-          'swipeEdge': 0, // left
+          'swipeEdge': SwipeEdge.left.index,
         }),
       );
       await binding.defaultBinaryMessenger.handlePlatformMessage(
@@ -566,11 +658,10 @@ void main() {
 
       // Drag the system back gesture far enough to commit.
       final ByteData updateMessage2 = const StandardMethodCodec().encodeMethodCall(
-        const MethodCall('updateBackGestureProgress', <String, dynamic>{
-          'x': 100.0,
-          'y': 300.0,
+        MethodCall('updateBackGestureProgress', <String, dynamic>{
+          'touchOffset': const <double>[100.0, 300.0],
           'progress': 0.35,
-          'swipeEdge': 0, // left
+          'swipeEdge': SwipeEdge.left.index,
         }),
       );
       await binding.defaultBinaryMessenger.handlePlatformMessage(
@@ -653,10 +744,10 @@ void main() {
       // Start a system pop gesture, which will switch to using
       // _PredictiveBackSharedElementPageTransition for the page transition.
       final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
-        const MethodCall('startBackGesture', <String, dynamic>{
-          'touchOffset': <double>[5.0, 300.0],
+        MethodCall('startBackGesture', <String, dynamic>{
+          'touchOffset': const <double>[5.0, 300.0],
           'progress': 0.0,
-          'swipeEdge': 0, // left
+          'swipeEdge': SwipeEdge.left.index,
         }),
       );
       await binding.defaultBinaryMessenger.handlePlatformMessage(

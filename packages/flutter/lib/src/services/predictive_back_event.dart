@@ -16,6 +16,10 @@ enum SwipeEdge {
 
   /// Indicates that the swipe gesture starts from the right edge of the screen.
   right,
+
+  /// Indicates that the back event was not triggered by an edge swipe back gesture.
+  /// This applies to cases like using the back button in 3-button navigation or pressing a hardware back button.
+  edgeNone,
 }
 
 /// Object used to report back gesture progress in Android.
@@ -76,17 +80,27 @@ final class PredictiveBackEvent {
   /// The screen edge from which the swipe gesture starts.
   final SwipeEdge swipeEdge;
 
-  /// Indicates if the event was triggered by a system back button press.
+  /// Indicates if the event was triggered by a legacy system back button press.
   ///
-  /// Returns false for a predictive back gesture.
-  bool get isButtonEvent =>
-      // The Android documentation for BackEvent
-      // (https://developer.android.com/reference/android/window/BackEvent#getTouchX())
-      // says that getTouchX and getTouchY should return NaN when the system
-      // back button is pressed, but in practice it seems to return 0.0, hence
-      // the check for Offset.zero here. This was tested directly in the engine
-      // on Android emulator running API 34.
-      touchOffset == null || (progress == 0.0 && touchOffset == Offset.zero);
+  /// Returns false for predictive back gestures.
+  ///
+  /// Starting with Android API 36, predictive back gestures can originate from
+  /// the system back button in 3-button navigation mode. In this case the event
+  /// will have [SwipeEdge.edgeNone] and is still considered a predictive gesture,
+  /// so this getter returns false.
+  bool get isButtonEvent {
+    if (touchOffset == null) {
+      return true;
+    }
+
+    // The Android documentation for BackEvent
+    // (https://developer.android.com/reference/android/window/BackEvent#getTouchX())
+    // says that getTouchX and getTouchY should return NaN when the system
+    // back button is pressed, but in practice it seems to return 0.0, hence
+    // the check for Offset.zero here. This was tested directly in the engine
+    // on Android emulator running API 34.
+    return swipeEdge != SwipeEdge.edgeNone && (progress == 0.0 && touchOffset == Offset.zero);
+  }
 
   @override
   bool operator ==(Object other) {
