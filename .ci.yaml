@@ -3820,6 +3820,7 @@ targets:
   - name: Mac_benchmark complex_layout_macos_impeller__start_up
     presubmit: false
     recipe: devicelab/devicelab_drone
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
