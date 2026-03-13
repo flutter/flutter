@@ -226,21 +226,21 @@ void main() {
       await tester.pumpWidget(buildFrame(useSearchViewProperties: true));
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle(); // allow the animations to finish
-      checkSearchView(tester);
+      await checkSearchView(tester);
     });
 
     testWidgets('SearchView theme data overrides defaults', (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(searchViewThemeData: searchViewTheme));
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
-      checkSearchView(tester);
+      await checkSearchView(tester);
     });
 
     testWidgets('Overall Theme SearchView theme overrides defaults', (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(overallTheme: searchViewTheme));
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
-      checkSearchView(tester);
+      await checkSearchView(tester);
     });
 
     // Same as the previous tests with empty SearchViewThemeData's instead of null.
@@ -257,7 +257,7 @@ void main() {
       );
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle(); // allow the animations to finish
-      checkSearchView(tester);
+      await checkSearchView(tester);
     });
 
     testWidgets('SearchView theme overrides defaults and overall theme', (
@@ -268,7 +268,7 @@ void main() {
       );
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle(); // allow the animations to finish
-      checkSearchView(tester);
+      await checkSearchView(tester);
     });
 
     testWidgets('Overall Theme SearchView theme overrides defaults and null theme', (
@@ -277,7 +277,7 @@ void main() {
       await tester.pumpWidget(buildFrame(overallTheme: searchViewTheme));
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle(); // allow the animations to finish
-      checkSearchView(tester);
+      await checkSearchView(tester);
     });
   });
 }

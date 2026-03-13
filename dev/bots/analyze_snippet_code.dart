@@ -1335,7 +1335,7 @@ Future<void> _runInteractive({
         checker.cleanupTempDirectory();
         exit(0);
       case 'r' when !busy:
-        rerun();
+        await rerun();
     }
   });
   Watcher(file.absolute.path).events.listen((_) => rerun());
