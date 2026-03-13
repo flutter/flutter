@@ -1371,7 +1371,7 @@ void _generatePubspecLock(Directory directory) {
   final flutterPackages = flutterPubspecLock['packages'] as YamlMap;
 
   final packages = <String, Object?>{
-    for (final package in _fixedPackages) package: flutterPackages[package],
+    for (final package in gatherSdkPackageDependencies(fs)) package: flutterPackages[package],
   };
 
   /// Pub will rewrite this file as yaml pretty after resolution.
@@ -1380,21 +1380,28 @@ void _generatePubspecLock(Directory directory) {
       .writeAsStringSync(const JsonEncoder.withIndent('  ').convert({'packages': packages}));
 }
 
-/// These are the external dependencies from the SDK packages flutter,
-/// flutter_test, flutter_localization.
-const _fixedPackages = [
-  'characters',
-  'clock',
-  'collection',
-  'fake_async',
-  'intl',
-  'leak_tracker_flutter_testing',
-  'matcher',
-  'material_color_utilities',
-  'meta',
-  'path',
-  'stack_trace',
-  'stream_channel',
-  'test_api',
-  'vector_math',
-];
+/// Find the external dependencies from the SDK packages flutter,
+/// flutter_test, flutter_localizations.
+List<String> gatherSdkPackageDependencies(FileSystem fs) {
+  final result = <String>{};
+  for (final sdkPackage in <String>['flutter', 'flutter_test', 'flutter_localizations']) {
+    final String flutterRoot = Cache.flutterRoot!;
+    final pubspecYaml =
+        loadYaml(
+              fs
+                  .file(fs.path.join(flutterRoot, 'packages', sdkPackage, 'pubspec.yaml'))
+                  .readAsStringSync(),
+            )
+            as YamlMap;
+    for (final MapEntry<dynamic, dynamic> dependency
+        in (pubspecYaml['dependencies'] as YamlMap).entries) {
+      final descriptor = dependency.value as Object?;
+      if (descriptor is String) {
+        // a hosted dependency.
+        final name = dependency.key as String;
+        result.add(name);
+      }
+    }
+  }
+  return result.toList();
+}
