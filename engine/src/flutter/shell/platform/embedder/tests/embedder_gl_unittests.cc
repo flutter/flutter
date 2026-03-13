@@ -4909,7 +4909,8 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerOpenGL) {
   latch.Wait();
   ASSERT_TRUE(
       ImageMatchesFixture("external_texture_impeller.png", rendered_scene));
-  for (int i = 0; i < 5; i++) {
+  constexpr int kFrameCount = 5;
+  for (int i = 0; i < kFrameCount; i++) {
     rendered_scene = context.GetNextSceneImage();
     ASSERT_TRUE(embedder_engine->MarkTextureFrameAvailable(1));
     latch.Wait();

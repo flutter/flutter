@@ -165,12 +165,14 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
     FML_LOG(ERROR) << "Could not create external texture";
     return nullptr;
   }
-  // Set a no-op cleanup callback if the texture does not provide a callback.
-  // The presence of a cleanup callback indicates that the embedder controls
-  // the GL texture's lifetime and Impeller should not delete it.
-  VoidCallback destruction_callback = texture->destruction_callback
-                                          ? texture->destruction_callback
-                                          : [](void*) {};
+
+  VoidCallback destruction_callback = texture->destruction_callback;
+  if (!destruction_callback) {
+    // Set a no-op cleanup callback if the texture does not provide a callback.
+    // The presence of a cleanup callback indicates that the embedder controls
+    // the GL texture's lifetime and Impeller should not delete it.
+    destruction_callback = [](void*) {};
+  }
   auto cleanup_callback = [callback = destruction_callback,
                            user_data = texture->user_data]() {
     callback(user_data);
@@ -180,6 +182,7 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
     FML_LOG(ERROR) << "Could not register destruction callback";
     return nullptr;
   }
+
   image->SetCoordinateSystem(
       impeller::TextureCoordinateSystem::kUploadFromHost);
 
