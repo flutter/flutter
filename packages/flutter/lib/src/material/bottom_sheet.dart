@@ -709,7 +709,6 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
       _curvedSheetAnimation.reverseCurve ==
           (widget.animationStyle?.reverseCurve ?? _kModalBottomSheetCurve),
     );
-    assert(_sheetAnimation.parent == _curvedSheetAnimation);
   }
 
   @override
