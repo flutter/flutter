@@ -166,6 +166,14 @@ void main() {
     expect(controller.value.text, testValue);
     await skipPastScrollingAnimation(tester);
 
+    expect(
+      controller.value,
+      const TextEditingValue(
+        text: 'I Love Flutter!',
+        selection: TextSelection.collapsed(offset: 15),
+      ),
+    );
+
     // Handle not shown.
     expect(controller.selection.isCollapsed, true);
     final Finder fadeFinder = find.byType(FadeTransition);
