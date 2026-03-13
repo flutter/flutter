@@ -1707,8 +1707,12 @@ class TextPainter {
     assert(_debugAssertTextLayoutIsValid);
     assert(!_debugNeedsRelayout);
     final _TextPainterLayoutCacheWithOffset cachedLayout = _layoutCache!;
-    print('!!! cachedLayout.paragraph: ' + cachedLayout.paragraph.runtimeType.toString());
-    final result = cachedLayout.paragraph.getPositionForOffset(offset - cachedLayout.paintOffset);
+    final Offset newOffset = offset - cachedLayout.paintOffset;
+    print('!!!! ${cachedLayout.paragraph.runtimeType}');
+    print('!!!! $newOffset');
+    print('!!!! ${cachedLayout.paragraph}');
+    final result = cachedLayout.paragraph.getPositionForOffset(newOffset);
+    print('!!!! $result');
     return result;
   }
 
