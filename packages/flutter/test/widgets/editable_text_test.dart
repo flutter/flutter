@@ -17271,9 +17271,10 @@ void main() {
         .getHandleSize(lineHeight)
         .height;
     final double interactiveHandleHeight = math.max(handleHeight, kMinInteractiveDimension);
-    final Offset anchor = state.selectionOverlay!.selectionControls!.getHandleAnchor(
+    final Offset anchor = state.selectionOverlay!.selectionControls!.calculateHandleAnchor(
       TextSelectionHandleType.collapsed,
       lineHeight,
+      targetWidth: state.widget.cursorWidth,
     );
     final double handleCenter = handleHeight / 2 - anchor.dy;
     final double bottomSpacing = math.max(
@@ -18032,11 +18033,7 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
   }
 
   @override
-  Offset getHandleAnchor(
-    TextSelectionHandleType type,
-    double textLineHeight, {
-    double cursorWidth = 2.0,
-  }) {
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     return Offset.zero;
   }
 
@@ -18141,11 +18138,7 @@ class _CustomTextSelectionControls extends TextSelectionControls {
   }
 
   @override
-  Offset getHandleAnchor(
-    TextSelectionHandleType type,
-    double textLineHeight, {
-    double cursorWidth = 2.0,
-  }) {
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     return Offset.zero;
   }
 

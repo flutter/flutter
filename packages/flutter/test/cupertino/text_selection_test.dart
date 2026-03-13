@@ -217,15 +217,16 @@ void main() {
       );
     });
 
-    test('getHandleAnchor ignores cursorWidth for Cupertino handles', () {
-      final Offset anchorDefault = cupertinoTextSelectionControls.getHandleAnchor(
+    test('calculateHandleAnchor ignores targetWidth for Cupertino handles', () {
+      final Offset anchorDefault = cupertinoTextSelectionControls.calculateHandleAnchor(
         TextSelectionHandleType.left,
         10.0,
+        targetWidth: 2.0,
       );
-      final Offset anchorWide = cupertinoTextSelectionControls.getHandleAnchor(
+      final Offset anchorWide = cupertinoTextSelectionControls.calculateHandleAnchor(
         TextSelectionHandleType.left,
         10.0,
-        cursorWidth: 20.0,
+        targetWidth: 20.0,
       );
       expect(anchorDefault, equals(anchorWide));
     });

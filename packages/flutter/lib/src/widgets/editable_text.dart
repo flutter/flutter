@@ -4415,10 +4415,10 @@ class EditableTextState extends State<EditableText>
             .getHandleSize(lineHeight)
             .height;
         final double interactiveHandleHeight = math.max(handleHeight, kMinInteractiveDimension);
-        final Offset anchor = _selectionOverlay!.selectionControls!.getHandleAnchor(
+        final Offset anchor = _selectionOverlay!.selectionControls!.calculateHandleAnchor(
           TextSelectionHandleType.collapsed,
           lineHeight,
-          cursorWidth: widget.cursorWidth,
+          targetWidth: widget.cursorWidth,
         );
         final double handleCenter = handleHeight / 2 - anchor.dy;
         bottomSpacing = math.max(handleCenter + interactiveHandleHeight / 2, bottomSpacing);

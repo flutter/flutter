@@ -1319,6 +1319,7 @@ void main() {
         selectionControls: selectionControls,
         selectionEndpoints: const <TextSelectionPoint>[],
         toolbarLayerLink: toolbarLayerLink,
+        targetWidth: 0.0,
         magnifierConfiguration: magnifierConfiguration ?? TextMagnifierConfiguration.disabled,
       );
     }
@@ -2145,11 +2146,7 @@ class TextSelectionControlsSpy extends TextSelectionControls {
   }
 
   @override
-  Offset getHandleAnchor(
-    TextSelectionHandleType type,
-    double textLineHeight, {
-    double cursorWidth = 2.0,
-  }) {
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     return Offset.zero;
   }
 

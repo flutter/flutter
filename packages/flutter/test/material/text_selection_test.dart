@@ -847,50 +847,53 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
   );
 
-  group('getHandleAnchor', () {
+  group('calculateHandleAnchor', () {
     test('returns correct anchor for collapsed handle', () {
       const expected = Offset(10.0, -5.0);
-      final Offset actual = materialTextSelectionControls.getHandleAnchor(
+      final Offset actual = materialTextSelectionControls.calculateHandleAnchor(
         TextSelectionHandleType.collapsed,
         0,
+        targetWidth: 2.0,
       );
       expect(actual, equals(expected));
     });
 
     test('returns correct anchor for left handle', () {
       const expected = Offset(22.0, 0);
-      final Offset actual = materialTextSelectionControls.getHandleAnchor(
+      final Offset actual = materialTextSelectionControls.calculateHandleAnchor(
         TextSelectionHandleType.left,
         0,
+        targetWidth: 2.0,
       );
       expect(actual, equals(expected));
     });
 
     test('returns correct anchor for right handle', () {
       const Offset expected = Offset.zero;
-      final Offset actual = materialTextSelectionControls.getHandleAnchor(
+      final Offset actual = materialTextSelectionControls.calculateHandleAnchor(
         TextSelectionHandleType.right,
         0,
+        targetWidth: 2.0,
       );
       expect(actual, equals(expected));
     });
 
-    test('returns correct anchor for collapsed handle with custom cursor width', () {
+    test('returns correct anchor for collapsed handle with custom target width', () {
       const expected = Offset(1.0, -5.0);
-      final Offset actual = materialTextSelectionControls.getHandleAnchor(
+      final Offset actual = materialTextSelectionControls.calculateHandleAnchor(
         TextSelectionHandleType.collapsed,
         0,
-        cursorWidth: 20.0,
+        targetWidth: 20.0,
       );
       expect(actual, equals(expected));
     });
 
-    test('returns correct anchor for collapsed handle with odd cursor width', () {
+    test('returns correct anchor for collapsed handle with odd target width', () {
       const expected = Offset(5.75, -5.0);
-      final Offset actual = materialTextSelectionControls.getHandleAnchor(
+      final Offset actual = materialTextSelectionControls.calculateHandleAnchor(
         TextSelectionHandleType.collapsed,
         0,
-        cursorWidth: 10.5,
+        targetWidth: 10.5,
       );
       expect(actual, equals(expected));
     });
