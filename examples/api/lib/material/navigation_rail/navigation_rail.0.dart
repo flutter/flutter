@@ -140,13 +140,34 @@ class _NavRailExampleState extends State<NavRailExample> {
                   const SizedBox(height: 10),
                   SegmentedButton<MainAxisAlignment?>(
                     segments: const <ButtonSegment<MainAxisAlignment?>>[
-                      ButtonSegment<MainAxisAlignment?>(value: null, label: Text('Default')),
-                      ButtonSegment<MainAxisAlignment?>(value: MainAxisAlignment.start, label: Text('Start')),
-                      ButtonSegment<MainAxisAlignment?>(value: MainAxisAlignment.end, label: Text('End')),
-                      ButtonSegment<MainAxisAlignment?>(value: MainAxisAlignment.center, label: Text('Center')),
-                      ButtonSegment<MainAxisAlignment?>(value: MainAxisAlignment.spaceEvenly, label: Text('Space Evenly')),
-                      ButtonSegment<MainAxisAlignment?>(value: MainAxisAlignment.spaceBetween, label: Text('Space Between')),
-                      ButtonSegment<MainAxisAlignment?>(value: MainAxisAlignment.spaceAround, label: Text('Space Around')),
+                      ButtonSegment<MainAxisAlignment?>(
+                        value: null,
+                        label: Text('Default'),
+                      ),
+                      ButtonSegment<MainAxisAlignment?>(
+                        value: MainAxisAlignment.start,
+                        label: Text('Start'),
+                      ),
+                      ButtonSegment<MainAxisAlignment?>(
+                        value: MainAxisAlignment.end,
+                        label: Text('End'),
+                      ),
+                      ButtonSegment<MainAxisAlignment?>(
+                        value: MainAxisAlignment.center,
+                        label: Text('Center'),
+                      ),
+                      ButtonSegment<MainAxisAlignment?>(
+                        value: MainAxisAlignment.spaceEvenly,
+                        label: Text('Space Evenly'),
+                      ),
+                      ButtonSegment<MainAxisAlignment?>(
+                        value: MainAxisAlignment.spaceBetween,
+                        label: Text('Space Between'),
+                      ),
+                      ButtonSegment<MainAxisAlignment?>(
+                        value: MainAxisAlignment.spaceAround,
+                        label: Text('Space Around'),
+                      ),
                     ],
                     selected: <MainAxisAlignment?>{alignment},
                     onSelectionChanged: (Set<MainAxisAlignment?> newSelection) {

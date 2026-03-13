@@ -6160,14 +6160,14 @@ void main() {
 
     // Find the exact column by checking both alignment and size
     final Finder columnFinder = find.byWidgetPredicate(
-      (Widget widget) => widget is Column &&
-                         widget.mainAxisAlignment == MainAxisAlignment.spaceEvenly &&
-                         widget.mainAxisSize == MainAxisSize.max,
+      (Widget widget) =>
+          widget is Column &&
+          widget.mainAxisAlignment == MainAxisAlignment.spaceEvenly &&
+          widget.mainAxisSize == MainAxisSize.max,
     );
 
     expect(columnFinder, findsOneWidget);
   });
-
 }
 
 TestSemantics _expectedSemantics({bool scrollable = false}) {
