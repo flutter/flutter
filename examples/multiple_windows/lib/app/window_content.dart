@@ -49,6 +49,7 @@ class WindowContent extends StatelessWidget {
         ),
       ),
       PopupWindowController() => throw UnimplementedError(),
+      SatelliteWindowController() => throw UnimplementedError(),
     };
   }
 }

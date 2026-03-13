@@ -156,6 +156,20 @@ class WindowingOwnerMacOS extends WindowingOwner {
       view.viewId,
     );
   }
+
+  @internal
+  @override
+  SatelliteWindowController createSatelliteWindowController({
+    required SatelliteWindowControllerDelegate delegate,
+    required BaseWindowController parent,
+    required WindowPositioner initialPositioner,
+    Rect? initialAnchorRect,
+    Size? preferredSize,
+    BoxConstraints? preferredConstraints,
+    String? title,
+  }) {
+    throw UnimplementedError('Satellite windows are not yet implemented on macOS.');
+  }
 }
 
 mixin _WindowControllerMixin {
