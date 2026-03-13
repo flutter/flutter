@@ -10,13 +10,13 @@
 namespace impeller {
 
 std::shared_ptr<PipelineCompileQueue> PipelineCompileQueue::Create(
-    std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner) {
+    std::shared_ptr<fml::BasicTaskRunner> worker_task_runner) {
   return std::shared_ptr<PipelineCompileQueue>(
       new PipelineCompileQueue(std::move(worker_task_runner)));
 }
 
 PipelineCompileQueue::PipelineCompileQueue(
-    std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner)
+    std::shared_ptr<fml::BasicTaskRunner> worker_task_runner)
     : worker_task_runner_(std::move(worker_task_runner)) {}
 
 PipelineCompileQueue::~PipelineCompileQueue() {

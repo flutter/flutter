@@ -43,7 +43,7 @@ class PipelineCompileQueue final
     : public std::enable_shared_from_this<PipelineCompileQueue> {
  public:
   static std::shared_ptr<PipelineCompileQueue> Create(
-      std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner);
+      std::shared_ptr<fml::BasicTaskRunner> worker_task_runner);
 
   ~PipelineCompileQueue();
 
@@ -73,7 +73,7 @@ class PipelineCompileQueue final
   void PerformJobEagerly(const PipelineDescriptor& desc);
 
  private:
-  std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner_;
+  std::shared_ptr<fml::BasicTaskRunner> worker_task_runner_;
   Mutex pending_jobs_mutex_;
   size_t priorities_elevated_ = {};
 
@@ -84,7 +84,7 @@ class PipelineCompileQueue final
       pending_jobs_ IPLR_GUARDED_BY(pending_jobs_mutex_);
 
   explicit PipelineCompileQueue(
-      std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner);
+      std::shared_ptr<fml::BasicTaskRunner> worker_task_runner);
 
   fml::closure TakeJob(const PipelineDescriptor& desc);
 
