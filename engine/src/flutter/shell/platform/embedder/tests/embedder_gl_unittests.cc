@@ -4854,6 +4854,7 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerOpenGL) {
   static glTexImage2DProc glTexImage2D = reinterpret_cast<glTexImage2DProc>(
       context.GLGetProcAddress("glTexImage2D"));
 
+  static GLuint gl_texture = 0;
   auto rendered_scene = context.GetNextSceneImage();
   context.GetRendererConfig().open_gl.gl_external_texture_frame_callback =
       [](void* user_data, int64_t texture_id, size_t width, size_t height,
@@ -4873,8 +4874,9 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerOpenGL) {
       buffer[i * 4 + 3] = 255;  // Alpha channel (fully opaque)
     }
 
-    GLuint gl_texture;
-    glGenTextures(1, &gl_texture);
+    if (gl_texture == 0) {
+      glGenTextures(1, &gl_texture);
+    }
     glBindTexture(GL_TEXTURE_2D, gl_texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 800, 600, 0, GL_RGBA,
                  GL_UNSIGNED_BYTE, buffer.data());
@@ -4895,7 +4897,6 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerOpenGL) {
   flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
 
   ASSERT_TRUE(embedder_engine->RegisterTexture(1));
-  ASSERT_TRUE(embedder_engine->MarkTextureFrameAvailable(1));
 
   // Send a window metrics events so frames may be scheduled.
   FlutterWindowMetricsEvent event = {};
@@ -4908,6 +4909,13 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerOpenGL) {
   latch.Wait();
   ASSERT_TRUE(
       ImageMatchesFixture("external_texture_impeller.png", rendered_scene));
+  for (int i = 0; i < 5; i++) {
+    rendered_scene = context.GetNextSceneImage();
+    ASSERT_TRUE(embedder_engine->MarkTextureFrameAvailable(1));
+    latch.Wait();
+    ASSERT_TRUE(
+        ImageMatchesFixture("external_texture_impeller.png", rendered_scene));
+  }
 }
 
 TEST_F(EmbedderTest, ImpellerOpenGLImageSnapshot) {
