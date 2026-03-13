@@ -528,7 +528,7 @@ object FlutterPluginUtils {
         val kgpRegex = """^([^/\n]*?)(?:apply\s+plugin\s*:\s*|id\s*\(?\s*)(['"])(?:kotlin-android|org\.jetbrains\.kotlin\.android)\2(?![^/\n]*\bapply\s*[:(]?\s*false\b)""".toRegex(RegexOption.MULTILINE)
 
         project.rootProject.subprojects {
-            // Accounts for Add-to-app scenarios where the Flutter Module ephemeral .android/ directory should not be adjusted and by default do not apply KGP
+            // Accounts for Add-to-app scenarios where the Flutter Module ephemeral .android/ directory should not be adjusted and by default does not apply KGP
             if (!buildFile.exists() || buildFile.absolutePath.contains(".android")) return@subprojects
 
             val scriptText: String =
@@ -538,24 +538,26 @@ object FlutterPluginUtils {
                     buildFile.readText()
                 }
 
+            val hasKgpPlugin = kgpRegex.containsMatchIn(scriptText)
             val hasAppPlugin = appPluginRegex.containsMatchIn(scriptText)
             val hasLibPlugin = libPluginRegex.containsMatchIn(scriptText)
-            val hasKgpPlugin = kgpRegex.containsMatchIn(scriptText)
 
+            // Ensures applying AGP exists in the build file configuration.
             if (!hasAppPlugin && !hasLibPlugin) return@subprojects
 
-            if (hasKgpPlugin) {
-                if (hasAppPlugin) {
-                    projectToPrintAppLog = this
-                } else {
-                    pluginsWithKGPAppliedList.add(name)
-                }
-            } else {
+            if (!hasKgpPlugin) {
                 pluginManager.apply("kotlin-android")
+                return@subprojects
+            }
+
+            // Apply AGP exists and Apply KGP also exists in build.gradle
+            if (hasAppPlugin) {
+                projectToPrintAppLog = this
+            } else {
+                pluginsWithKGPAppliedList.add(name)
             }
         }
 
-        // 5. Output warnings using helper methods
         project.gradle.projectsEvaluated {
             printAppWarnings(projectToPrintAppLog)
             printPluginWarnings(pluginsWithKGPAppliedList, pluginList)
