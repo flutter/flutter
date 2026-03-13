@@ -3831,6 +3831,7 @@ targets:
   - name: Mac_benchmark complex_layout_scroll_perf_macos_impeller__timeline_summary
     presubmit: false
     recipe: devicelab/devicelab_drone
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
