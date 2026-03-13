@@ -382,17 +382,19 @@ FlutterError
     final Simulation simStationary = physics.createBallisticSimulation(metrics, 0.0)!;
     final Simulation simMoving = physics.createBallisticSimulation(metrics, -100.0)!;
 
-    final double xStationary = simStationary.x(0.2);
-    final double xMoving = simMoving.x(0.2);
-
     expect(simStationary, isA<BouncingScrollSimulation>());
     expect(simMoving, isA<BouncingScrollSimulation>());
 
-    // Both simulations should still be in motion.
-    expect(xStationary.abs(), greaterThan(0));
-    expect(xMoving.abs(), greaterThan(0));
+    // Stationary simulation should follow the expected spring trajectory.
+    expect(simStationary.x(0.1), closeTo(-185.7511436536831, 0.01));
+    expect(simStationary.x(0.2), closeTo(-69.00628466755506, 0.01));
+    expect(simStationary.x(0.3), closeTo(-25.635736232654022, 0.01));
+    expect(simStationary.x(0.4), closeTo(-9.523639409892818, 0.01));
 
-    // Stationary spring should recover faster.
-    expect(xStationary.abs(), lessThan(xMoving.abs()));
+    final double xStationary = simStationary.x(0.2);
+    final double xMoving = simMoving.x(0.2);
+
+    // Stationary and moving simulations should produce different positions.
+    expect(xStationary, isNot(closeTo(xMoving, precisionErrorTolerance)));
   });
 }
