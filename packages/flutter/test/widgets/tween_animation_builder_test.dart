@@ -5,6 +5,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'widgets_app_tester.dart';
+
 void main() {
   testWidgets('Animates forward when built', (WidgetTester tester) async {
     final values = <int>[];
@@ -392,5 +394,23 @@ void main() {
     expect(values, <Size>[const Size(10, 10)]);
     await tester.pump(const Duration(seconds: 2));
     expect(values, <Size>[const Size(10, 10)]);
+  });
+
+  testWidgets('TweenAnimationBuilder does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: TweenAnimationBuilder<Size?>(
+            tween: SizeTween(end: const Size(10, 10)),
+            duration: const Duration(seconds: 1),
+            builder: (_, _, _) => const Placeholder(),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(TweenAnimationBuilder<Size?>)), Size.zero);
+    await tester.pump(const Duration(milliseconds: 300));
   });
 }
