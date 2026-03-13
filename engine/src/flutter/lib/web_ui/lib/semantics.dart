@@ -807,7 +807,7 @@ class SemanticsUpdateBuilder {
         locale: locale,
         minValue: minValue,
         maxValue: maxValue,
-        mergesDescendants: mergesDescendants,
+        absorbedChildSemantics: mergesDescendants,
       ),
     );
   }

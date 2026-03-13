@@ -337,7 +337,7 @@ class SemanticsNodeUpdate {
     required this.locale,
     required this.minValue,
     required this.maxValue,
-    this.mergesDescendants = false,
+    this.absorbedChildSemantics = false,
   });
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
@@ -469,12 +469,12 @@ class SemanticsNodeUpdate {
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final String maxValue;
 
-  /// Whether this node merges all descendant semantics into itself.
+  /// Whether a descendant's tap action was absorbed into this node.
   ///
-  /// When true, the framework has absorbed the semantics of all descendants
-  /// into this single node. The node's rect may cover a larger area than the
-  /// individual tappable widget within it.
-  final bool mergesDescendants;
+  /// When true, the node's rect may cover a larger area than the actual
+  /// tappable widget within it. This happens with [MergeSemantics] or when a
+  /// [Semantics] container absorbs a child [GestureDetector]'s tap handler.
+  final bool absorbedChildSemantics;
 }
 
 /// Identifies [SemanticRole] implementations.
@@ -1775,13 +1775,13 @@ class SemanticsObject {
   bool get hasChildren =>
       _childrenInTraversalOrder != null && _childrenInTraversalOrder!.isNotEmpty;
 
-  /// Whether this node merges all descendant semantics into itself.
+  /// Whether a descendant's tap action was absorbed into this node.
   ///
-  /// When true, this node's rect may cover a larger area than the individual
-  /// tappable widget within it. Pointer events at arbitrary coordinates within
-  /// the rect may not hit the underlying tappable render object.
-  bool get mergesDescendants => _mergesDescendants;
-  bool _mergesDescendants = false;
+  /// When true, this node's rect may cover a larger area than the actual
+  /// tappable widget within it, so pointer events at arbitrary coordinates
+  /// within the rect may not hit the underlying tappable render object.
+  bool get absorbedChildSemantics => _absorbedChildSemantics;
+  bool _absorbedChildSemantics = false;
 
   /// Whether this object represents an editable text field.
   bool get isTextField => flags.isTextField;
@@ -2019,7 +2019,7 @@ class SemanticsObject {
       _markLocaleDirty();
     }
 
-    _mergesDescendants = update.mergesDescendants;
+    _absorbedChildSemantics = update.absorbedChildSemantics;
 
     // Apply updates to the DOM.
     _updateRole();

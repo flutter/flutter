@@ -67,7 +67,7 @@ class Tappable extends SemanticBehavior {
           viewId,
           semanticsObject.id,
           _isListening,
-          isMergedNode: semanticsObject.mergesDescendants,
+          absorbedChildSemantics: semanticsObject.absorbedChildSemantics,
         );
       });
       owner.element.addEventListener('click', _clickListener);

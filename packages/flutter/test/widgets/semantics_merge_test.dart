@@ -191,4 +191,65 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('absorbedChildSemantics is false for simple ElevatedButton', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ElevatedButton(onPressed: () {}, child: const Text('Tap me')),
+      ),
+    );
+
+    final SemanticsNode node = tester.getSemantics(find.bySemanticsLabel('Tap me'));
+    expect(node.absorbedChildSemantics, isFalse);
+
+    semantics.dispose();
+  });
+
+  testWidgets('absorbedChildSemantics is true when MergeSemantics absorbs child with onTap', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MergeSemantics(
+          child: Column(
+            children: <Widget>[
+              const Text('Label'),
+              GestureDetector(onTap: () {}, child: const Text('Action')),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final SemanticsNode node = tester.getSemantics(find.byType(MergeSemantics));
+    expect(node.absorbedChildSemantics, isTrue);
+
+    semantics.dispose();
+  });
+
+  testWidgets('absorbedChildSemantics is true when Semantics container absorbs child with onTap', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Semantics(
+          container: true,
+          child: GestureDetector(onTap: () {}, child: const Text('Tap target')),
+        ),
+      ),
+    );
+
+    final SemanticsNode node = tester.getSemantics(find.bySemanticsLabel('Tap target'));
+    expect(node.absorbedChildSemantics, isTrue);
+
+    semantics.dispose();
+  });
 }
