@@ -55,19 +55,29 @@ class SemanticLink extends SemanticRole {
   /// Returns `true` if [href] points to the same origin as the current page.
   ///
   /// Relative URLs (e.g., `/legal/terms`) are always same-origin. Absolute URLs
-  /// are compared by their origin (scheme + host + port).
+  /// are compared by their origin (scheme + host + port). Protocol-relative
+  /// URLs (e.g., `//example.com/page`) are resolved using the current scheme.
   static bool _isSameOrigin(String href) {
     if (href.startsWith('/') && !href.startsWith('//')) {
       return true;
     }
+
     final Uri? uri = Uri.tryParse(href);
     if (uri == null) {
       return false;
     }
+
     if (!uri.hasScheme) {
-      // Relative URLs without a leading slash (e.g., "legal/terms")
-      return true;
+      if (uri.host.isEmpty) {
+        return true;
+      }
+      // Protocol-relative URL (e.g., "//other.com/foo"). Prepend the current
+      // scheme so origin comparison works correctly.
+      final String currentScheme = Uri.parse(domWindow.location.href).scheme;
+      final Uri fullUri = Uri.parse('$currentScheme:$href');
+      return fullUri.origin == domWindow.location.origin;
     }
+
     return uri.origin == domWindow.location.origin;
   }
 

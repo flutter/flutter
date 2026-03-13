@@ -4928,10 +4928,12 @@ void _testLink() {
     expect(object.element.getAttribute('href'), 'https://flutter.dev');
   });
 
-  test('clicking a same-origin link prevents default browser navigation', () {
+  test('clicking a same-origin link prevents default browser navigation and pushes route', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
+
+    final String originalPathname = domWindow.location.pathname!;
 
     final tester = SemanticsTester(owner());
     tester.updateNode(
@@ -4946,6 +4948,12 @@ void _testLink() {
     final SemanticsObject object = tester.getSemanticsObject(0);
     expect(object.element.getAttribute('href'), '/legal/terms');
 
+    bool popstateReceived = false;
+    final DomEventListener popstateListener = createDomEventListener((DomEvent event) {
+      popstateReceived = true;
+    });
+    domWindow.addEventListener('popstate', popstateListener);
+
     final DomRect rect = object.element.getBoundingClientRect();
     final DomEvent clickEvent = createDomMouseEvent('click', <Object?, Object?>{
       'clientX': (rect.left + (rect.right - rect.left) / 2).floor(),
@@ -4955,7 +4963,13 @@ void _testLink() {
 
     expect(clickEvent.defaultPrevented, isTrue,
         reason: 'Same-origin link clicks should prevent default browser navigation');
+    expect(domWindow.location.pathname, '/legal/terms',
+        reason: 'pushState should update the browser URL');
+    expect(popstateReceived, isTrue,
+        reason: 'A popstate event should be dispatched for the framework Router');
 
+    domWindow.history.replaceState(null, '', originalPathname);
+    domWindow.removeEventListener('popstate', popstateListener);
     semantics().semanticsEnabled = false;
   });
 
@@ -4963,6 +4977,8 @@ void _testLink() {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
+
+    final String originalPathname = domWindow.location.pathname!;
 
     final tester = SemanticsTester(owner());
     tester.updateNode(
@@ -4977,6 +4993,13 @@ void _testLink() {
     final SemanticsObject object = tester.getSemanticsObject(0);
     expect(object.element.getAttribute('href'), 'https://flutter.dev');
 
+    // Listen to verify no popstate is dispatched for cross-origin links.
+    bool popstateReceived = false;
+    final DomEventListener popstateListener = createDomEventListener((DomEvent event) {
+      popstateReceived = true;
+    });
+    domWindow.addEventListener('popstate', popstateListener);
+
     final DomRect rect = object.element.getBoundingClientRect();
     final DomEvent clickEvent = createDomMouseEvent('click', <Object?, Object?>{
       'clientX': (rect.left + (rect.right - rect.left) / 2).floor(),
@@ -4986,7 +5009,12 @@ void _testLink() {
 
     expect(clickEvent.defaultPrevented, isFalse,
         reason: 'Cross-origin link clicks should allow default browser navigation');
+    expect(domWindow.location.pathname, originalPathname,
+        reason: 'pushState should not be called for cross-origin links');
+    expect(popstateReceived, isFalse,
+        reason: 'No popstate event should be dispatched for cross-origin links');
 
+    domWindow.removeEventListener('popstate', popstateListener);
     semantics().semanticsEnabled = false;
   });
 
