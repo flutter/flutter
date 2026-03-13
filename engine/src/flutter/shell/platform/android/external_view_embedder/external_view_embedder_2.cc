@@ -244,15 +244,12 @@ void AndroidExternalViewEmbedder2::PrepareFlutterView(
   if (frame_size_ != frame_size) {
     DestroySurfaces();
 
-    fml::AutoResetWaitableEvent latch;
-    fml::TaskRunner::RunNowOrPostTask(
-        task_runners_.GetPlatformTaskRunner(), [&, frame_size]() {
-          // No-op if content sizing is turned off.
-          jni_facade_->MaybeResizeSurfaceView(frame_size.width,
-                                              frame_size.height);
-          latch.Signal();
-        });
-    latch.Wait();
+    // This should not block to prevent deadlocks with
+    // setViewportMetrics.
+    task_runners_.GetPlatformTaskRunner()->PostTask(
+        fml::MakeCopyable([jni_facade = jni_facade_, frame_size = frame_size]() {
+          jni_facade->MaybeResizeSurfaceView(frame_size.width, frame_size.height);
+        }));
   }
   surface_pool_->SetFrameSize(frame_size);
 
