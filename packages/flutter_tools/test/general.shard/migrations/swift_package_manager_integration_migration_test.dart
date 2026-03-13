@@ -3338,12 +3338,6 @@ flutter:
       ios:
         pluginClass: MyPlugin
 ''');
-    xcodeProject.relativeSwiftPackagesDirectory
-        .childLink(pluginName)
-        .createSync(
-          pluginProjectDir.childDirectory(platform.name).childDirectory(pluginName).path,
-          recursive: true,
-        );
   }
 }
 
@@ -4384,13 +4378,6 @@ class FakeXcodeProject extends Fake implements IosProject {
     return xcodeProjectInfoFile.existsSync() &&
         xcodeProjectInfoFile.readAsStringSync().contains('FlutterGeneratedPluginSwiftPackage');
   }
-
-  @override
-  Directory get relativeSwiftPackagesDirectory => hostAppRoot
-      .childDirectory('Flutter')
-      .childDirectory('ephemeral')
-      .childDirectory('Packages')
-      .childDirectory('.packages');
 
   @override
   Directory get flutterFrameworkSwiftPackageDirectory => hostAppRoot

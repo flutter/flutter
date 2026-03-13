@@ -1209,28 +1209,22 @@ $newContent
         );
         if (parentProject.isPlugin && parentProject.hasExampleApp) {
           final String pluginName = parentProject.manifest.appName;
-          final Link linkedPlugin = xcodeProject.relativeSwiftPackagesDirectory.childLink(
-            pluginName,
-          );
-          if (linkedPlugin.existsSync()) {
-            final String absolutePath = linkedPlugin.targetSync();
-            final String relativePath;
-            switch (platform) {
-              case FlutterDarwinPlatform.ios:
-                relativePath = fileSystem.path.relative(
-                  absolutePath,
-                  from: xcodeProject.hostAppRoot.path,
-                );
-              case FlutterDarwinPlatform.macos:
-                // The path is relative to the "Flutter" [managedDirectory] on macOS because the
-                // Flutter `PBXGroup` in macOS pbxproj files uses `path` instead of `name`.
-                relativePath = fileSystem.path.relative(
-                  absolutePath,
-                  from: xcodeProject.managedDirectory.path,
-                );
-            }
-            return (name: pluginName, path: relativePath);
+          final String relativePath;
+          switch (platform) {
+            case FlutterDarwinPlatform.ios:
+              relativePath = fileSystem.path.relative(
+                parentProject.directory.path,
+                from: xcodeProject.hostAppRoot.path,
+              );
+            case FlutterDarwinPlatform.macos:
+              // The path is relative to the "Flutter" [managedDirectory] on macOS because the
+              // Flutter `PBXGroup` in macOS pbxproj files uses `path` instead of `name`.
+              relativePath = fileSystem.path.relative(
+                parentProject.directory.path,
+                from: xcodeProject.managedDirectory.path,
+              );
           }
+          return (name: pluginName, path: relativePath);
         }
       }
     } on Exception catch (e) {
