@@ -197,7 +197,7 @@ void main() {
       controller.value,
       const TextEditingValue(
         text: 'I Love Flutter!',
-        selection: TextSelection.collapsed(offset: 15),
+        selection: TextSelection.collapsed(offset: 15, affinity: TextAffinity.upstream),
       ),
     );
 
