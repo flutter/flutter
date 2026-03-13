@@ -495,7 +495,7 @@ InferOpenGLPlatformViewCreationCallback(
               shell.GetTaskRunners(),  // task runners
               std::make_unique<flutter::EmbedderSurfaceGLImpeller>(
                   gl_dispatch_table, fbo_reset_after_present, view_embedder,
-                  impeller_flags),      // embedder_surface
+                  shell.GetTaskRunners().GetIOTaskRunner(),impeller_flags),      // embedder_surface
               platform_dispatch_table,  // embedder platform dispatch table
               view_embedder             // external view embedder
           );

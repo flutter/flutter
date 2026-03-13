@@ -16,8 +16,11 @@
 
 namespace impeller {
 
-PipelineLibraryGLES::PipelineLibraryGLES(std::shared_ptr<ReactorGLES> reactor)
-    : reactor_(std::move(reactor)) {}
+PipelineLibraryGLES::PipelineLibraryGLES(
+    std::shared_ptr<ReactorGLES> reactor,
+    fml::RefPtr<fml::TaskRunner> io_task_runner)
+    : reactor_(std::move(reactor)),
+      io_task_runner_(std::move(io_task_runner)) {}
 
 static std::string GetShaderInfoLog(const ProcTableGLES& gl, GLuint shader) {
   GLint log_length = 0;
