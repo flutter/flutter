@@ -161,6 +161,7 @@ FLUTTER_DARWIN_EXPORT
 @property(nonatomic) UITextSmartQuotesType smartQuotesType API_AVAILABLE(ios(11.0));
 @property(nonatomic) UITextSmartDashesType smartDashesType API_AVAILABLE(ios(11.0));
 @property(nonatomic, copy) UITextContentType textContentType API_AVAILABLE(ios(10.0));
+@property(nonatomic) UITextInlinePredictionType inlinePredictionType API_AVAILABLE(ios(17.0));
 
 @property(nonatomic, weak) UIAccessibilityElement* backingTextInputAccessibilityObject;
 
