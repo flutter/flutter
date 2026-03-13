@@ -2379,7 +2379,7 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 
   testWidgets('Test Callback on Toggle of DatePicker Mode', (WidgetTester tester) async {
-    prepareDatePicker(tester, (Future<DateTime?> date) async {
+    await prepareDatePicker(tester, (Future<DateTime?> date) async {
       await tester.tap(find.byIcon(Icons.edit));
       expect(currentMode, DatePickerEntryMode.input);
       await tester.pumpAndSettle();
