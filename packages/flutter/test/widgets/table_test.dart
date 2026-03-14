@@ -2,14 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@Tags(<String>['reduced-test-set'])
-library;
-
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'editable_text_utils.dart' show TestTextField;
+
+import 'editable_text_tester.dart';
 import 'semantics_tester.dart';
+import 'widgets_app_tester.dart';
+
+const Color _debugRowDecorationColor = Color(0xFF00FF00);
 
 class TestStatefulWidget extends StatefulWidget {
   const TestStatefulWidget({super.key});
@@ -111,7 +112,7 @@ void main() {
       key: GlobalKey(),
       children: const <TableRow>[
         TableRow(
-          decoration: BoxDecoration(color: Colors.yellow),
+          decoration: BoxDecoration(color: _debugRowDecorationColor),
           children: <Widget>[Placeholder()],
         ),
       ],
@@ -969,18 +970,16 @@ void main() {
   testWidgets('Table has correct roles in semantics', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Table(
-            children: const <TableRow>[
-              TableRow(
-                children: <Widget>[
-                  TableCell(child: Text('Data Cell 1')),
-                  TableCell(child: Text('Data Cell 2')),
-                ],
-              ),
-            ],
-          ),
+      TestWidgetsApp(
+        home: Table(
+          children: const <TableRow>[
+            TableRow(
+              children: <Widget>[
+                TableCell(child: Text('Data Cell 1')),
+                TableCell(child: Text('Data Cell 2')),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -993,25 +992,20 @@ void main() {
             TestSemantics(
               children: <TestSemantics>[
                 TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  role: SemanticsRole.table,
                   children: <TestSemantics>[
                     TestSemantics(
-                      role: SemanticsRole.table,
+                      role: SemanticsRole.row,
                       children: <TestSemantics>[
                         TestSemantics(
-                          role: SemanticsRole.row,
-                          children: <TestSemantics>[
-                            TestSemantics(
-                              label: 'Data Cell 1',
-                              textDirection: TextDirection.ltr,
-                              role: SemanticsRole.cell,
-                            ),
-                            TestSemantics(
-                              label: 'Data Cell 2',
-                              textDirection: TextDirection.ltr,
-                              role: SemanticsRole.cell,
-                            ),
-                          ],
+                          label: 'Data Cell 1',
+                          textDirection: TextDirection.ltr,
+                          role: SemanticsRole.cell,
+                        ),
+                        TestSemantics(
+                          label: 'Data Cell 2',
+                          textDirection: TextDirection.ltr,
+                          role: SemanticsRole.cell,
                         ),
                       ],
                     ),
@@ -1036,13 +1030,11 @@ void main() {
     final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Table(
-            children: <TableRow>[
-              TableRow(children: <Widget>[TestTextField(focusNode: focusNode)]),
-            ],
-          ),
+      TestWidgetsApp(
+        home: Table(
+          children: <TableRow>[
+            TableRow(children: <Widget>[TestTextField(focusNode: focusNode)]),
+          ],
         ),
       ),
     );
@@ -1589,7 +1581,7 @@ void main() {
                             colSpan: 2,
                             child: Container(
                               height: 40,
-                              color: Colors.blue,
+                              color: const Color(0xFF2196F3),
                               alignment: Alignment.center,
                               child: const Text('Spanning 2 cols'),
                             ),
@@ -1597,7 +1589,7 @@ void main() {
                           TableCell.none,
                           Container(
                             height: 40,
-                            color: Colors.green,
+                            color: const Color(0xFF4CAF50),
                             alignment: Alignment.center,
                             child: const Text('Col 3'),
                           ),
@@ -1607,19 +1599,19 @@ void main() {
                         children: <Widget>[
                           Container(
                             height: 40,
-                            color: Colors.red[100],
+                            color: const Color(0xFFFFCDD2),
                             alignment: Alignment.center,
                             child: const Text('R2C1'),
                           ),
                           Container(
                             height: 40,
-                            color: Colors.red[200],
+                            color: const Color(0xFFEF9A9A),
                             alignment: Alignment.center,
                             child: const Text('R2C2'),
                           ),
                           Container(
                             height: 40,
-                            color: Colors.red[300],
+                            color: const Color(0xFFE57373),
                             alignment: Alignment.center,
                             child: const Text('R2C3'),
                           ),
@@ -1653,20 +1645,20 @@ void main() {
                             rowSpan: 2,
                             child: Container(
                               height: 80,
-                              color: Colors.blue,
+                              color: const Color(0xFF2196F3),
                               alignment: Alignment.center,
                               child: const Text('Spanning\n2 rows'),
                             ),
                           ),
                           Container(
                             height: 40,
-                            color: Colors.green[100],
+                            color: const Color(0xFFC8E6C9),
                             alignment: Alignment.center,
                             child: const Text('R1C2'),
                           ),
                           Container(
                             height: 40,
-                            color: Colors.green[200],
+                            color: const Color(0xFFA5D6A7),
                             alignment: Alignment.center,
                             child: const Text('R1C3'),
                           ),
@@ -1677,13 +1669,13 @@ void main() {
                           TableCell.none,
                           Container(
                             height: 40,
-                            color: Colors.red[100],
+                            color: const Color(0xFFFFCDD2),
                             alignment: Alignment.center,
                             child: const Text('R2C2'),
                           ),
                           Container(
                             height: 40,
-                            color: Colors.red[200],
+                            color: const Color(0xFFEF9A9A),
                             alignment: Alignment.center,
                             child: const Text('R2C3'),
                           ),
@@ -1720,7 +1712,7 @@ void main() {
                             rowSpan: 2,
                             child: Container(
                               height: 80,
-                              color: Colors.blue,
+                              color: const Color(0xFF2196F3),
                               alignment: Alignment.center,
                               child: const Text('2x2\nCell'),
                             ),
@@ -1728,7 +1720,7 @@ void main() {
                           TableCell.none,
                           Container(
                             height: 40,
-                            color: Colors.green,
+                            color: const Color(0xFF4CAF50),
                             alignment: Alignment.center,
                             child: const Text('R1C3'),
                           ),
@@ -1740,7 +1732,7 @@ void main() {
                           TableCell.none,
                           Container(
                             height: 40,
-                            color: Colors.orange,
+                            color: const Color(0xFFFF9800),
                             alignment: Alignment.center,
                             child: const Text('R2C3'),
                           ),
@@ -1750,19 +1742,19 @@ void main() {
                         children: <Widget>[
                           Container(
                             height: 40,
-                            color: Colors.red[100],
+                            color: const Color(0xFFFFCDD2),
                             alignment: Alignment.center,
                             child: const Text('R3C1'),
                           ),
                           Container(
                             height: 40,
-                            color: Colors.red[200],
+                            color: const Color(0xFFEF9A9A),
                             alignment: Alignment.center,
                             child: const Text('R3C2'),
                           ),
                           Container(
                             height: 40,
-                            color: Colors.red[300],
+                            color: const Color(0xFFE57373),
                             alignment: Alignment.center,
                             child: const Text('R3C3'),
                           ),
@@ -1798,7 +1790,7 @@ void main() {
                     children: <TableRow>[
                       // Header row spanning all columns
                       TableRow(
-                        decoration: const BoxDecoration(color: Colors.blueGrey),
+                        decoration: const BoxDecoration(color: Color(0xFF607D8B)),
                         children: <Widget>[
                           TableCell(
                             colSpan: 4,
@@ -1807,7 +1799,10 @@ void main() {
                               alignment: Alignment.center,
                               child: const Text(
                                 'Table Header',
-                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFFFFFFFF),
+                                ),
                               ),
                             ),
                           ),
@@ -1823,26 +1818,26 @@ void main() {
                             rowSpan: 2,
                             child: Container(
                               height: 80,
-                              color: Colors.amber,
+                              color: const Color(0xFFFFC107),
                               alignment: Alignment.center,
                               child: const Text('Label'),
                             ),
                           ),
                           Container(
                             height: 40,
-                            color: Colors.lightBlue[100],
+                            color: const Color(0xFFB3E5FC),
                             alignment: Alignment.center,
                             child: const Text('A'),
                           ),
                           Container(
                             height: 40,
-                            color: Colors.lightBlue[200],
+                            color: const Color(0xFF81D4FA),
                             alignment: Alignment.center,
                             child: const Text('B'),
                           ),
                           Container(
                             height: 40,
-                            color: Colors.lightBlue[300],
+                            color: const Color(0xFF4FC3F7),
                             alignment: Alignment.center,
                             child: const Text('C'),
                           ),
@@ -1853,7 +1848,7 @@ void main() {
                           TableCell.none,
                           Container(
                             height: 40,
-                            color: Colors.lightGreen[100],
+                            color: const Color(0xFFDCEDC8),
                             alignment: Alignment.center,
                             child: const Text('D'),
                           ),
@@ -1861,7 +1856,7 @@ void main() {
                             colSpan: 2,
                             child: Container(
                               height: 40,
-                              color: Colors.purple[200],
+                              color: const Color(0xFFCE93D8),
                               alignment: Alignment.center,
                               child: const Text('E+F'),
                             ),
@@ -1900,7 +1895,7 @@ void main() {
                             rowSpan: 2,
                             child: Container(
                               height: spannedCellHeight,
-                              color: Colors.blue,
+                              color: const Color(0xFF2196F3),
                               alignment: Alignment.center,
                               child: const Text('RowSpan'),
                             ),
@@ -1909,7 +1904,7 @@ void main() {
                             colSpan: 2,
                             child: Container(
                               height: spannedCellHeight,
-                              color: Colors.green,
+                              color: const Color(0xFF4CAF50),
                               alignment: Alignment.center,
                               child: const Text('ColSpan'),
                             ),
@@ -1924,14 +1919,14 @@ void main() {
                             verticalAlignment: TableCellVerticalAlignment.top,
                             child: Container(
                               height: regularCellHeight,
-                              color: Colors.orange,
+                              color: const Color(0xFFFF9800),
                               alignment: Alignment.center,
                               child: const Text('Reg1'),
                             ),
                           ),
                           Container(
                             height: regularCellHeight,
-                            color: Colors.red,
+                            color: const Color(0xFFF44336),
                             alignment: Alignment.center,
                             child: const Text('Reg2'),
                           ),

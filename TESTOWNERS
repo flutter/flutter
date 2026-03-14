@@ -251,6 +251,7 @@
 /dev/devicelab/bin/tasks/build_ios_framework_module_test.dart @vashworth @flutter/tool
 /dev/devicelab/bin/tasks/channels_integration_test_macos.dart @gaaclarke @flutter/desktop
 /dev/devicelab/bin/tasks/complex_layout_macos__compile.dart @cbracken @flutter/desktop
+/dev/devicelab/bin/tasks/complex_layout_macos_impeller__start_up.dart @gaaclarke @flutter/desktop
 /dev/devicelab/bin/tasks/complex_layout_macos__start_up.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/complex_layout_scroll_perf_macos__timeline_summary.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/complex_layout_win_desktop__compile.dart @yaakovschectman @flutter/desktop

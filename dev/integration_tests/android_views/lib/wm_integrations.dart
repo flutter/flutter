@@ -10,12 +10,8 @@ import 'package:flutter/services.dart';
 import 'page.dart';
 
 class WindowManagerIntegrationsPage extends PageWidget {
-  const WindowManagerIntegrationsPage({Key? key})
-    : super(
-        'Window Manager Integrations Tests',
-        const ValueKey<String>('WmIntegrationsListTile'),
-        key: key,
-      );
+  const WindowManagerIntegrationsPage({super.key})
+    : super('Window Manager Integrations Tests', const ValueKey<String>('WmIntegrationsListTile'));
 
   @override
   Widget build(BuildContext context) => const WindowManagerBody();

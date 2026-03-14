@@ -43,7 +43,7 @@ import androidx.fragment.app.FragmentManager;
 import io.flutter.Log;
 import io.flutter.embedding.android.FlutterActivityLaunchConfigs.BackgroundMode;
 import io.flutter.embedding.engine.FlutterEngine;
-import io.flutter.embedding.engine.FlutterShellArgsIntentUtils;
+import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.plugins.util.GeneratedPluginRegister;
 import io.flutter.plugin.platform.PlatformPlugin;
 import java.util.ArrayList;
@@ -591,7 +591,7 @@ public class FlutterFragmentActivity extends FragmentActivity
           .dartEntrypointArgs(getDartEntrypointArgs())
           .initialRoute(getInitialRoute())
           .appBundlePath(getAppBundlePath())
-          .flutterShellArgs(FlutterShellArgsIntentUtils.getFlutterShellCommandLineArgs(getIntent()))
+          .flutterShellArgs(FlutterShellArgs.fromIntent(getIntent()))
           .handleDeeplinking(shouldHandleDeeplinking())
           .renderMode(renderMode)
           .transparencyMode(transparencyMode)
@@ -744,7 +744,17 @@ public class FlutterFragmentActivity extends FragmentActivity
    */
   @Override
   public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
-    if (flutterFragment != null && flutterFragment.isFlutterEngineInjected()) {
+    FlutterFragment attachedFlutterFragment = flutterFragment;
+    if (attachedFlutterFragment == null) {
+      // During activity recreation, `FragmentManager` may restore and attach an existing
+      // `FlutterFragment` before `ensureFlutterFragmentCreated()` refreshes the
+      // `flutterFragment` field.
+      // Query by tag here so plugin auto-registration can still honor the injected-engine guard.
+      // Keep `flutterFragment` field ownership in `ensureFlutterFragmentCreated()`; this lookup
+      // only informs the guard.
+      attachedFlutterFragment = retrieveExistingFlutterFragmentIfPossible();
+    }
+    if (attachedFlutterFragment != null && attachedFlutterFragment.isFlutterEngineInjected()) {
       // If the FlutterEngine was explicitly built and injected into this FlutterActivity, the
       // builder should explicitly decide whether to automatically register plugins via the
       // FlutterEngine's construction parameter or via the AndroidManifest metadata.

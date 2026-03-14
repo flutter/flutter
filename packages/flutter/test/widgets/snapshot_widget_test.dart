@@ -10,14 +10,20 @@ library;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../impeller_test_helpers.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
+  const kYellowColor = Color(0xFFAABB11);
+  const kRedColor = Color(0xFFAA0000);
+  const kBlackColor = Color(0xFF000000);
+  const kBlueColor = Color(0xFF0000FF);
+
   testWidgets('SnapshotWidget can rasterize child', (WidgetTester tester) async {
     final controller = SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
@@ -29,7 +35,7 @@ void main() {
         child: TestDependencies(
           child: SnapshotWidget(
             controller: controller,
-            child: Container(width: 100, height: 100, color: const Color(0xFFAABB11)),
+            child: Container(width: 100, height: 100, color: kYellowColor),
           ),
         ),
       ),
@@ -43,7 +49,7 @@ void main() {
         child: TestDependencies(
           child: SnapshotWidget(
             controller: controller,
-            child: Container(width: 100, height: 100, color: const Color(0xFFAA0000)),
+            child: Container(width: 100, height: 100, color: kRedColor),
           ),
         ),
       ),
@@ -149,7 +155,7 @@ void main() {
           child: TestDependencies(
             child: SnapshotWidget(
               controller: controller,
-              child: Container(width: 100, height: 100, color: const Color(0xFFAABB11)),
+              child: Container(width: 100, height: 100, color: kYellowColor),
             ),
           ),
         ),
@@ -298,16 +304,15 @@ void main() {
       await tester.pumpWidget(
         RepaintBoundary(
           key: repaintBoundaryKey,
-          child: MaterialApp(
-            debugShowCheckedModeBanner: false,
+          child: TestWidgetsApp(
             home: Container(
-              color: Colors.black,
+              color: kBlackColor,
               padding: const EdgeInsets.only(right: 0.6, bottom: 0.6),
               child: SnapshotWidget(
                 controller: controller,
                 child: Container(
                   margin: const EdgeInsets.only(right: 0.4, bottom: 0.4),
-                  color: Colors.blue,
+                  color: kBlueColor,
                 ),
               ),
             ),

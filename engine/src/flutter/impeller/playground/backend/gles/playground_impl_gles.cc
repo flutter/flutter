@@ -17,9 +17,15 @@
 #include "impeller/entity/gles/entity_shaders_gles.h"
 #include "impeller/entity/gles/framebuffer_blend_shaders_gles.h"
 #include "impeller/entity/gles/modern_shaders_gles.h"
+#include "impeller/entity/gles3/entity_shaders_gles.h"
+#include "impeller/entity/gles3/framebuffer_blend_shaders_gles.h"
+#include "impeller/entity/gles3/modern_shaders_gles.h"
 #include "impeller/fixtures/gles/fixtures_shaders_gles.h"
 #include "impeller/fixtures/gles/modern_fixtures_shaders_gles.h"
+#include "impeller/fixtures/gles3/fixtures_shaders_gles.h"
+#include "impeller/fixtures/gles3/modern_fixtures_shaders_gles.h"
 #include "impeller/playground/imgui/gles/imgui_shaders_gles.h"
+#include "impeller/playground/imgui/gles3/imgui_shaders_gles.h"
 #include "impeller/renderer/backend/gles/context_gles.h"
 #include "impeller/renderer/backend/gles/surface_gles.h"
 
@@ -111,7 +117,29 @@ PlaygroundImplGLES::PlaygroundImplGLES(PlaygroundSwitches switches)
 PlaygroundImplGLES::~PlaygroundImplGLES() = default;
 
 static std::vector<std::shared_ptr<fml::Mapping>>
-ShaderLibraryMappingsForPlayground() {
+ShaderLibraryMappingsForPlayground(bool is_gles3) {
+  if (is_gles3) {
+    return {
+        std::make_shared<fml::NonOwnedMapping>(
+            impeller_entity_shaders_gles3_data,
+            impeller_entity_shaders_gles3_length),
+        std::make_shared<fml::NonOwnedMapping>(
+            impeller_modern_shaders_gles3_data,
+            impeller_modern_shaders_gles3_length),
+        std::make_shared<fml::NonOwnedMapping>(
+            impeller_framebuffer_blend_shaders_gles3_data,
+            impeller_framebuffer_blend_shaders_gles3_length),
+        std::make_shared<fml::NonOwnedMapping>(
+            impeller_fixtures_shaders_gles3_data,
+            impeller_fixtures_shaders_gles3_length),
+        std::make_shared<fml::NonOwnedMapping>(
+            impeller_modern_fixtures_shaders_gles3_data,
+            impeller_modern_fixtures_shaders_gles3_length),
+        std::make_shared<fml::NonOwnedMapping>(
+            impeller_imgui_shaders_gles3_data,
+            impeller_imgui_shaders_gles3_length),
+    };
+  }
   return {
       std::make_shared<fml::NonOwnedMapping>(
           impeller_entity_shaders_gles_data,
@@ -160,9 +188,10 @@ std::shared_ptr<Context> PlaygroundImplGLES::GetContext() const {
     gl->Enable(GL_DEBUG_OUTPUT_SYNCHRONOUS_KHR);
 #endif
   }
+  bool is_gles3 = gl->GetDescription()->GetGlVersion().IsAtLeast(Version(3));
   auto context =
       ContextGLES::Create(switches_.flags, std::move(gl),
-                          ShaderLibraryMappingsForPlayground(), true);
+                          ShaderLibraryMappingsForPlayground(is_gles3), true);
   if (!context) {
     FML_LOG(ERROR) << "Could not create context.";
     return nullptr;
@@ -225,6 +254,18 @@ fml::Status PlaygroundImplGLES::SetCapabilities(
   return fml::Status(
       fml::StatusCode::kUnimplemented,
       "PlaygroundImplGLES doesn't support setting the capabilities.");
+}
+
+RuntimeStageBackend PlaygroundImplGLES::GetRuntimeStageBackend() const {
+  const auto gl =
+      std::make_unique<ProcTableGLES>(CreateGLProcAddressResolver());
+  if (!gl->IsValid()) {
+    FML_LOG(ERROR) << "Proc table was invalid. Assuming baseline OpenGL ES";
+    return RuntimeStageBackend::kOpenGLES;
+  }
+  bool is_gles3 = gl->GetDescription()->GetGlVersion().IsAtLeast(Version(3));
+  return is_gles3 ? RuntimeStageBackend::kOpenGLES3
+                  : RuntimeStageBackend::kOpenGLES;
 }
 
 }  // namespace impeller

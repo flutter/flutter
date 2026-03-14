@@ -774,7 +774,7 @@ abstract class FlutterCommand extends Command<void> {
           'Variables are replaced in the format {{VARIABLE_NAME}}.\n'
           'Multiple defines can be passed by repeating "--${FlutterOptions.kWebDefinesOption}" multiple times.\n'
           'If a template contains a variable placeholder but no corresponding "--web-define" is provided, '
-          'the build will fail with an error.',
+          'it will warn that you have an unhandled variable.',
       valueHelp: 'API_URL=https://api.example.com',
       splitCommas: false,
     );
@@ -1289,6 +1289,14 @@ abstract class FlutterCommand extends Command<void> {
       negatable: false,
       help: 'Outputs in a machine readable structured JSON format.',
       hide: !verboseHelp,
+    );
+  }
+
+  void addEnableHcppFlag({required bool verboseHelp}) {
+    argParser.addFlag(
+      'enable-hcpp',
+      hide: !verboseHelp,
+      help: 'Whether to enable the HCPP platform view mode on the Impeller rendering backend.',
     );
   }
 
