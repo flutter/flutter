@@ -1613,8 +1613,7 @@ void main() {
         ),
       );
 
-      final Finder findDatePicker = find.byType(CalendarDatePicker);
-      MaterialInkController inkFeatures = Material.of(tester.element(findDatePicker));
+      final Object inkFeatures = Material.of(tester.element(find.byType(CalendarDatePicker)));
       expect(
         inkFeatures,
         isNot(
@@ -1627,7 +1626,6 @@ void main() {
       await gesture.addPointer();
       await gesture.moveTo(tester.getCenter(find.text('25')));
       await tester.pumpAndSettle();
-      inkFeatures = Material.of(tester.element(findDatePicker));
       expect(
         inkFeatures,
         paints
