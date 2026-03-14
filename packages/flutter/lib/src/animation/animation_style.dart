@@ -64,13 +64,13 @@ class AnimationStyle with Diagnosticable {
     );
   }
 
-  /// Creates a new animation style that is a combination of this animation style
+  /// Creates a new [AnimationStyle] that is a combination of this animation style
   /// and the given `other` animation style.
   ///
   /// If `other` is non-null, its non-null properties are used to override the
   /// corresponding properties of this style.
   ///
-  /// If a `null` argument is passed, returns this animation style.
+  /// Returns this animation style if `other` is null.
   AnimationStyle merge(AnimationStyle? other) {
     if (other == null) {
       return this;
@@ -172,5 +172,5 @@ class _LerpedCurve extends Curve {
   int get hashCode => Object.hash(first, second, _t);
 
   @override
-  String toString() => 'interpolated curve ($first, $second, t: $_t)';
+  String toString() => '_LerpedCurve($first, $second, t: $_t)';
 }
