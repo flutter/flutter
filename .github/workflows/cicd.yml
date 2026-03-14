@@ -18,6 +18,6 @@ jobs:
     steps:
       - name: Remove outdated CICD label
         run: |
-          gh pr edit ${{ github.event.pull_request.number }} --remove-label "CICD"
+          gh pr edit ${{ github.event.pull_request.number }} -R flutter/flutter --remove-label "CICD"
         env:
           GITHUB_TOKEN: ${{ github.token }}
