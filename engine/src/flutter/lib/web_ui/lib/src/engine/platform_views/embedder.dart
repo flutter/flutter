@@ -375,7 +375,7 @@ class PlatformViewEmbedder {
       final bool isViewInvalid = !PlatformViewManager.instance.knowsViewId(viewId);
       if (isViewInvalid) {
         debugInvalidViewIds ??= <int>[];
-        debugInvalidViewIds!.add(viewId);
+        debugInvalidViewIds.add(viewId);
         continue;
       }
 
@@ -387,9 +387,9 @@ class PlatformViewEmbedder {
 
     unusedViews.forEach(disposeView);
 
-    if (debugInvalidViewIds != null && debugInvalidViewIds!.isNotEmpty) {
+    if (debugInvalidViewIds != null && debugInvalidViewIds.isNotEmpty) {
       printWarning(
-        'Cannot render platform views: ${debugInvalidViewIds!.join(', ')}. '
+        'Cannot render platform views: ${debugInvalidViewIds.join(', ')}. '
         'These views have not been created, or they have been deleted.',
       );
     }

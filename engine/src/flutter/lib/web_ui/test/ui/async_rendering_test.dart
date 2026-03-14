@@ -82,7 +82,7 @@ Future<void> disposePlatformView(int id) {
 void testMain() {
   setUpUnitTests(withImplicitView: true);
 
-  final List<String> warnings = <String>[];
+  final warnings = <String>[];
   late void Function(String) originalPrintWarning;
 
   setUp(() {

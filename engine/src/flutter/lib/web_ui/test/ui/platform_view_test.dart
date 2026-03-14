@@ -660,7 +660,14 @@ Future<void> testMain() async {
     } finally {
       printWarning = originalPrintWarning;
     }
-    expect(warnings, contains(contains('Cannot render platform views: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15. These views have not been created, or they have been deleted.')));
+    expect(
+      warnings,
+      contains(
+        contains(
+          'Cannot render platform views: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15. These views have not been created, or they have been deleted.',
+        ),
+      ),
+    );
 
     // Frame 7:
     //   Render: a platform view after error.
