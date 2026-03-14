@@ -786,6 +786,7 @@ class TextPainter {
       return true;
     }());
     _layoutCache?.paragraph.dispose();
+    print('!!!! set _layoutCache to null');
     _layoutCache = null;
   }
 
@@ -1288,6 +1289,7 @@ class TextPainter {
         contentWidth,
       );
     }
+    print('!!!! set _layoutCache to $newLayoutCache');
     _layoutCache = newLayoutCache;
   }
 
@@ -1835,6 +1837,7 @@ class TextPainter {
     _layoutTemplate?.dispose();
     _layoutTemplate = null;
     _layoutCache?.paragraph.dispose();
+    print('!!!! set _layoutCache to null, for disposing');
     _layoutCache = null;
     _text = null;
   }
