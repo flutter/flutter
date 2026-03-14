@@ -36,9 +36,15 @@ abstract class EdgeInsetsGeometry {
   /// Creates insets where all the offsets are `value`.
   const factory EdgeInsetsGeometry.all(double value) = EdgeInsets.all;
 
-  /// Creates [EdgeInsets] with only the given values non-zero.
-  const factory EdgeInsetsGeometry.only({double left, double right, double top, double bottom}) =
-      EdgeInsets.only;
+  /// Creates an [EdgeInsetsGeometry] object with only the given values non-zero.
+  const factory EdgeInsetsGeometry.only({
+    double left,
+    double right,
+    double start,
+    double end,
+    double top,
+    double bottom,
+  }) = _MixedEdgeInsets.only;
 
   /// Creates [EdgeInsetsDirectional] with only the given values non-zero.
   const factory EdgeInsetsGeometry.directional({
@@ -982,6 +988,20 @@ class _MixedEdgeInsets extends EdgeInsetsGeometry {
     this._top,
     this._bottom,
   );
+
+  const _MixedEdgeInsets.only({
+    double left = 0.0,
+    double right = 0.0,
+    double start = 0.0,
+    double end = 0.0,
+    double top = 0.0,
+    double bottom = 0.0,
+  }) : _left = left,
+       _right = right,
+       _start = start,
+       _end = end,
+       _top = top,
+       _bottom = bottom;
 
   @override
   final double _left;
