@@ -58,7 +58,6 @@ class RawAvatar extends StatelessWidget {
     this.foregroundImage,
     this.onBackgroundImageError,
     this.onForegroundImageError,
-    this.foregroundColor,
     this.size,
     this.minSize,
     this.maxSize,
@@ -90,13 +89,6 @@ class RawAvatar extends StatelessWidget {
   /// When this value changes, the avatar animates smoothly to the new color.
   /// {@endtemplate}
   final Color? backgroundColor;
-
-  /// {@template flutter.widgets.RawAvatar.foregroundColor}
-  /// The default text color used by [child].
-  ///
-  /// This is typically used when displaying initials inside the avatar.
-  /// {@endtemplate}
-  final Color? foregroundColor;
 
   /// {@template flutter.widgets.RawAvatar.textStyle}
   /// The default text style for text displayed inside the avatar.
@@ -269,7 +261,7 @@ class RawAvatar extends StatelessWidget {
           )
         : null;
 
-    return AnimatedContainer(
+    Widget avatar = AnimatedContainer(
       duration: duration,
       constraints: BoxConstraints(
         minHeight: minDiameter,
@@ -290,6 +282,15 @@ class RawAvatar extends StatelessWidget {
               ),
             ),
     );
+
+    if (shape != null) {
+      avatar = ClipPath(
+        clipper: ShapeBorderClipper(shape: shape!),
+        child: avatar,
+      );
+    }
+
+    return avatar;
   }
 
   Decoration _buildDecoration({
@@ -300,25 +301,19 @@ class RawAvatar extends StatelessWidget {
     ImageProvider? image,
     ImageErrorListener? onError,
   }) {
+    final DecorationImage? decorationImage = image != null
+        ? DecorationImage(image: image, fit: BoxFit.cover, onError: onError)
+        : null;
+
     if (shape != null) {
-      return ShapeDecoration(
-        shape: shape,
-        color: color,
-        image: image != null
-            ? DecorationImage(image: image, fit: BoxFit.cover, onError: onError)
-            : null,
-      );
+      return ShapeDecoration(shape: shape, color: color, image: decorationImage);
     }
 
-    final BoxShape effectiveShape = boxShape ?? BoxShape.circle;
-
     return BoxDecoration(
-      shape: effectiveShape,
-      borderRadius: effectiveShape == BoxShape.rectangle ? borderRadius : null,
+      shape: boxShape ?? BoxShape.circle,
+      borderRadius: borderRadius,
       color: color,
-      image: image != null
-          ? DecorationImage(image: image, fit: BoxFit.cover, onError: onError)
-          : null,
+      image: decorationImage,
     );
   }
 }
