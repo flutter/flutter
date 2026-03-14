@@ -1588,7 +1588,8 @@ class RenderTable extends RenderBox {
     final remainingRowSpanHeights = Float64List(rows);
     final rowHeights = Float64List(rows);
     final beforeBaselineDistances = Float64List(rows);
-    // Use flat arrays instead of nested lists for better cache locality.
+    // Flat arrays in row-major order (index: y * columns + x) instead of
+    // nested lists for better cache locality.
     final spanWidthsInRowMajor = Float64List(rows * columns);
     final baselinesInRowMajor = Float64List(rows * columns);
 
