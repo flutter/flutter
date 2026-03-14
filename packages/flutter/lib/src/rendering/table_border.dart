@@ -307,7 +307,9 @@ class TableBorder {
     Rect rect,
     List<double> columnList,
     List<double> rowTops,
-    List<Set<int>> spannedColumnsPerRow,
+    Uint8List colSpanHiddenCells,
+    int tableColumns,
+    bool isRTL,
     Paint paint,
     Path path,
   ) {
@@ -325,12 +327,15 @@ class TableBorder {
 
     for (var y = 0; y < rowTops.length - 1; y++) {
       final double nextY = yOffset + (rowTops[y + 1] - rowTops[y]);
-      final Set<int> hiddenCols = y < spannedColumnsPerRow.length
-          ? spannedColumnsPerRow[y]
-          : const <int>{};
 
       for (var x = 0; x < columnList.length; x++) {
-        if (hiddenCols.contains(x + 1)) {
+        // Skip a vertical divider when a colSpan covers both the cell to its
+        // left and the cell to its right at this row.  In LTR the right cell
+        // is logical col (x+1); in RTL the "right" visual cell becomes logical
+        // col (cols-1-x) which is to the left visually.
+        final int logicalX = isRTL ? (tableColumns - 1 - x) : (x + 1);
+        final int bit = y * tableColumns + logicalX;
+        if (colSpanHiddenCells[bit >> 3] & (1 << (bit & 7)) != 0) {
           continue;
         }
         final double xPos = rect.left + columnList[x];
@@ -351,7 +356,9 @@ class TableBorder {
     Rect rect,
     List<double> rowList,
     List<double> columnList,
-    List<Set<int>> spannedRowsPerColumn,
+    Uint8List rowSpanHiddenCells,
+    int tableColumns,
+    bool isRTL,
     Paint paint,
     Path path,
   ) {
@@ -378,18 +385,20 @@ class TableBorder {
       final double yPos = rect.top + rowList[y];
 
       for (var x = 0; x < columnOffsets.length - 1; x++) {
-        final Set<int> hiddenRows = x < spannedRowsPerColumn.length
-            ? spannedRowsPerColumn[x]
-            : const <int>{};
-
-        if (hiddenRows.contains(y + 1)) {
+        // Skip a horizontal divider when a rowSpan covers both the cell above
+        // and the cell below the divider in the same column.  Only rowSpan
+        // crossings are relevant here; colSpan-hidden cells on either side do
+        // not remove a horizontal border.
+        // In LTR visual segment x maps to logical col x; in RTL it maps to
+        // logical col (cols-1-x).
+        final int logicalX = isRTL ? (tableColumns - 1 - x) : x;
+        final int bit = (y + 1) * tableColumns + logicalX;
+        if (rowSpanHiddenCells[bit >> 3] & (1 << (bit & 7)) != 0) {
           continue;
         }
-        final double xStart = columnOffsets[x];
-        final double xEnd = columnOffsets[x + 1];
         path
-          ..moveTo(xStart, yPos)
-          ..lineTo(xEnd, yPos);
+          ..moveTo(columnOffsets[x], yPos)
+          ..lineTo(columnOffsets[x + 1], yPos);
       }
     }
 
@@ -417,13 +426,20 @@ class TableBorder {
   /// each row (plus a final entry for the bottom of the last row). Row heights
   /// are derived from consecutive differences and never cached separately.
   ///
-  /// The [spannedColumnsPerRow] list defines, for each row, which column
-  /// dividers should be skipped when painting (e.g., for cells that span
-  /// multiple columns).
+  /// The optional [colSpanHiddenCells] and [rowSpanHiddenCells] are flat
+  /// bitmaps in **logical** row-major order (`bit = y * tableColumns + x`).
   ///
-  /// The [spannedRowsPerColumn] list defines, for each column, which row
-  /// dividers should be skipped when painting (e.g., for cells that span
-  /// multiple rows).
+  ///  * [colSpanHiddenCells] – a set bit means logical cell (x, y) is covered
+  ///    by a **horizontal** (colSpan) span.  Vertical inner borders that fall
+  ///    inside such a span are skipped.
+  ///  * [rowSpanHiddenCells] – a set bit means logical cell (x, y) is covered
+  ///    by a **vertical** (rowSpan) span.  Horizontal inner borders that fall
+  ///    inside such a span are skipped.
+  ///
+  /// Cells at the corner of a rectangular span have their bit set in **both**
+  /// bitmaps.  When both parameters are null, no borders are skipped.
+  /// Pass [textDirection] so the bitmaps can be interpreted correctly for RTL
+  /// tables.
   ///
   /// The [verticalInside] border is only drawn if there are at least two
   /// columns. The [horizontalInside] border is only drawn if there are at least
@@ -440,8 +456,9 @@ class TableBorder {
     required Iterable<double> rows,
     required Iterable<double> columns,
     required List<double> rowTops,
-    List<Set<int>> spannedColumnsPerRow = const <Set<int>>[],
-    List<Set<int>> spannedRowsPerColumn = const <Set<int>>[],
+    Uint8List? colSpanHiddenCells,
+    Uint8List? rowSpanHiddenCells,
+    TextDirection textDirection = TextDirection.ltr,
   }) {
     // Validate row and column offsets are within the table's bounds.
     assert(rows.isEmpty || (rows.first >= 0.0 && rows.last <= rect.height));
@@ -449,40 +466,36 @@ class TableBorder {
 
     final paint = Paint();
     final path = Path();
-
-    // Determine which types of spans exist to choose the optimal rendering path.
-    final bool hasRowSpans = spannedRowsPerColumn.isNotEmpty;
-    final bool hasColSpans = spannedColumnsPerRow.isNotEmpty;
-
     final List<double> columnList = columns.toList();
 
-    if (hasRowSpans) {
+    if (colSpanHiddenCells != null || rowSpanHiddenCells != null) {
+      final int tableColumns = columnList.length + 1;
+      final bool isRTL = textDirection == TextDirection.rtl;
       final List<double> rowList = rows.toList();
-
       _paintHorizontalDividersWithSpans(
         canvas,
         rect,
         rowList,
         columnList,
-        spannedRowsPerColumn,
+        rowSpanHiddenCells ?? Uint8List(0),
+        tableColumns,
+        isRTL,
         paint,
         path,
       );
-    } else {
-      _paintHorizontalDividersUnspanned(canvas, rect, rows, paint, path);
-    }
-
-    if (hasColSpans) {
       _paintVerticalDividersWithSpans(
         canvas,
         rect,
         columnList,
         rowTops,
-        spannedColumnsPerRow,
+        colSpanHiddenCells ?? Uint8List(0),
+        tableColumns,
+        isRTL,
         paint,
         path,
       );
     } else {
+      _paintHorizontalDividersUnspanned(canvas, rect, rows, paint, path);
       _paintVerticalDividersUnspanned(canvas, rect, columns, paint, path);
     }
 

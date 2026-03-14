@@ -1284,21 +1284,29 @@ class RenderTable extends RenderBox {
   Iterable<double>? _columnLefts;
   late double _tableWidth;
 
-  // Precomputed during layout and reused during painting to avoid
-  // recomputation per frame:
-  // - _cachedSpannedColumnsInRows: per row, which column indices are
-  //   covered by a colSpan cell (used to skip inner vertical borders).
-  // - _cachedSpannedRowsInColumns: per column, which row indices are
-  //   covered by a rowSpan cell (used to skip inner horizontal borders).
+  // Two bitmaps of hidden cells for border painting, both in logical row-major
+  // order (bit = y * columns + x). They differ in *why* a cell is hidden:
+  //
+  //  _cachedColSpanHiddenCells – cell is covered by a horizontal (colSpan) span,
+  //    i.e. the span origin is in the same row.  Used to skip *vertical* inner
+  //    borders that fall inside a spanning cell.
+  //
+  //  _cachedRowSpanHiddenCells – cell is covered by a vertical (rowSpan) span,
+  //    i.e. the span origin is in an earlier row.  Used to skip *horizontal*
+  //    inner borders that fall inside a spanning cell.
+  //
+  //  A cell at the corner of a rectangular span (colSpan > 1 AND rowSpan > 1)
+  //  has its bit set in **both** bitmaps.
+  //
   // Row heights are not cached; they are computed on-the-fly as
   // _rowTops[i + 1] - _rowTops[i], which is O(1) per row.
-  List<Set<int>> _cachedSpannedColumnsInRows = const <Set<int>>[];
-  List<Set<int>> _cachedSpannedRowsInColumns = const <Set<int>>[];
+  Uint8List? _cachedColSpanHiddenCells;
+  Uint8List? _cachedRowSpanHiddenCells;
 
   /// Invalidates the cached span information when the table structure changes.
   void _invalidateSpanCache() {
-    _cachedSpannedColumnsInRows = const <Set<int>>[];
-    _cachedSpannedRowsInColumns = const <Set<int>>[];
+    _cachedColSpanHiddenCells = null;
+    _cachedRowSpanHiddenCells = null;
   }
 
   @override
@@ -1457,18 +1465,16 @@ class RenderTable extends RenderBox {
       return;
     }
     final List<double> widths = _computeColumnWidths(constraints);
-    // Logical span caches built in-place during layout and published to the
-    // painted span caches at the end of performLayout.
-    final logicalSpannedColumnsPerRow = List<Set<int>>.generate(
-      rows,
-      (_) => <int>{},
-      growable: false,
-    );
-    final logicalSpannedRowsPerColumn = List<Set<int>>.generate(
-      columns,
-      (_) => <int>{},
-      growable: false,
-    );
+    // Two flat bitmaps for hidden-cell detection.
+    // colSpanHiddenBitmap: cells covered by a horizontal (colSpan) span;
+    //   used to skip vertical inner borders during painting.
+    // rowSpanHiddenBitmap: cells covered by a vertical (rowSpan) span;
+    //   used to skip horizontal inner borders during painting.
+    // Both are in logical row-major order: bit = y * columns + x.
+    // A cell at the corner of a rectangular span is set in both bitmaps.
+    final colSpanHiddenBitmap = Uint8List((rows * columns + 7) >> 3);
+    final rowSpanHiddenBitmap = Uint8List((rows * columns + 7) >> 3);
+    var hasCellSpans = false;
     // Use typed lists for predictable memory layout and faster indexed access.
     final columnStartPositions = Float64List(columns);
     final remainingRowSpanHeights = Float64List(rows);
@@ -1568,21 +1574,26 @@ class RenderTable extends RenderBox {
               if (dx == 0 && dy == 0) {
                 continue;
               }
-              // dx > 0: covered by a colSpan → record for vertical-border skip.
+              hasCellSpans = true;
+              final int bit = (y + dy) * columns + (x + dx);
+              // dx > 0: covered by horizontal (colSpan) extent.
+              // dy > 0: covered by vertical (rowSpan) extent.
+              // Corner cells (dx > 0 AND dy > 0) get set in both.
               if (dx > 0) {
-                logicalSpannedColumnsPerRow[y + dy].add(x + dx);
+                colSpanHiddenBitmap[bit >> 3] |= 1 << (bit & 7);
               }
-              // dy > 0: covered by a rowSpan → record for horizontal-border skip.
               if (dy > 0) {
-                logicalSpannedRowsPerColumn[x + dx].add(y + dy);
+                rowSpanHiddenBitmap[bit >> 3] |= 1 << (bit & 7);
               }
             }
           }
         }
 
-        final bool isHiddenCell =
-            logicalSpannedColumnsPerRow[y].contains(x) ||
-            logicalSpannedRowsPerColumn[x].contains(y);
+        final int cellBit = y * columns + x;
+        final isHiddenCell =
+            (colSpanHiddenBitmap[cellBit >> 3] | rowSpanHiddenBitmap[cellBit >> 3]) &
+                (1 << (cellBit & 7)) !=
+            0;
         if (isHiddenCell) {
           assert(
             !childParentData._isVisible,
@@ -1690,9 +1701,11 @@ class RenderTable extends RenderBox {
 
         final childParentData = child.parentData! as TableCellParentData;
         final int rowSpan = childParentData.rowSpan;
-        final bool isHiddenCell =
-            logicalSpannedColumnsPerRow[y].contains(x) ||
-            logicalSpannedRowsPerColumn[x].contains(y);
+        final int cellBit = y * columns + x;
+        final isHiddenCell =
+            (colSpanHiddenBitmap[cellBit >> 3] | rowSpanHiddenBitmap[cellBit >> 3]) &
+                (1 << (cellBit & 7)) !=
+            0;
         if (isHiddenCell) {
           assert(
             !childParentData._isVisible,
@@ -1746,19 +1759,13 @@ class RenderTable extends RenderBox {
     size = constraints.constrain(Size(_tableWidth, rowTop));
     assert(_rowTops.length == rows + 1);
 
-    // Publish the span caches, adjusting column indices for RTL.
-    switch (textDirection) {
-      case TextDirection.ltr:
-        _cachedSpannedColumnsInRows = logicalSpannedColumnsPerRow;
-        _cachedSpannedRowsInColumns = logicalSpannedRowsPerColumn;
-      case TextDirection.rtl:
-        _cachedSpannedColumnsInRows = logicalSpannedColumnsPerRow.map((Set<int> rowSpans) {
-          return rowSpans.map((int col) => columns - col).toSet();
-        }).toList();
-        _cachedSpannedRowsInColumns = List<Set<int>>.generate(columns, (int visualCol) {
-          final int logicalCol = columns - 1 - visualCol;
-          return logicalSpannedRowsPerColumn[logicalCol];
-        });
+    // Publish the two hidden-cell bitmaps for use during border painting.
+    if (hasCellSpans) {
+      _cachedColSpanHiddenCells = colSpanHiddenBitmap;
+      _cachedRowSpanHiddenCells = rowSpanHiddenBitmap;
+    } else {
+      _cachedColSpanHiddenCells = null;
+      _cachedRowSpanHiddenCells = null;
     }
   }
 
@@ -1841,9 +1848,10 @@ class RenderTable extends RenderBox {
         borderRect,
         rows: rows,
         columns: columns,
-        spannedColumnsPerRow: _cachedSpannedColumnsInRows,
-        spannedRowsPerColumn: _cachedSpannedRowsInColumns,
         rowTops: _rowTops,
+        colSpanHiddenCells: _cachedColSpanHiddenCells,
+        rowSpanHiddenCells: _cachedRowSpanHiddenCells,
+        textDirection: textDirection,
       );
     }
   }
