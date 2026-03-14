@@ -15,10 +15,9 @@ Widget _defaultTransitionsBuilder(
 
 /// A [Page] that creates a [PageRouteBuilder].
 ///
-/// This provides a concrete, design-agnostic [Page] subclass that gives
-/// developers an out-of-the-box way to use the declarative [Navigator] API
-/// ([Navigator.pages]) without having to depend on `Material` or `Cupertino`
-/// within widget tests.
+/// This provides a concrete, design-agnostic [Page] subclass that provides
+/// an out-of-the-box way to use the declarative [Navigator] API
+/// ([Navigator.pages]) within widget tests.
 class TestPage<T> extends Page<T> {
   /// Creates a page that delegates to a widget child.
   const TestPage({
