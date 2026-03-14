@@ -26,14 +26,30 @@ class TableCellParentData extends BoxParentData {
   int? y;
 
   /// The number of columns this cell should span.
-  int colSpan = 1;
+  ///
+  /// Must be either 0 (hidden placeholder cell) or >= 1 (normal or spanning cell).
+  /// A hidden cell must have both [colSpan] and [rowSpan] set to 0.
+  int get colSpan => _colSpan;
+  int _colSpan = 1;
+  set colSpan(int value) {
+    assert(value == 0 || value >= 1, 'colSpan must be 0 (hidden) or >= 1, got $value.');
+    _colSpan = value;
+  }
 
   /// The number of rows this cell should span.
-  int rowSpan = 1;
+  ///
+  /// Must be either 0 (hidden placeholder cell) or >= 1 (normal or spanning cell).
+  /// A hidden cell must have both [colSpan] and [rowSpan] set to 0.
+  int get rowSpan => _rowSpan;
+  int _rowSpan = 1;
+  set rowSpan(int value) {
+    assert(value == 0 || value >= 1, 'rowSpan must be 0 (hidden) or >= 1, got $value.');
+    _rowSpan = value;
+  }
 
   /// Whether this cell is visible (not hidden by spanning cells).
-  /// Hidden cells have their rowSpan or colSpan set to 0.
-  bool get _isVisible => rowSpan != 0 && colSpan != 0;
+  /// Hidden cells have both [rowSpan] and [colSpan] set to 0.
+  bool get _isVisible => _rowSpan != 0 && _colSpan != 0;
 
   /// Whether this cell spans multiple rows or columns.
   bool get _hasSpan => colSpan > 1 || rowSpan > 1;
