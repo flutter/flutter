@@ -38,7 +38,7 @@ import 'theme.dart';
 ///
 /// ```dart
 /// CircleAvatar(
-///   backgroundColor: Colors.brown,
+///   backgroundColor: Colors.brown.shade800,
 ///   child: const Text('AH'),
 /// )
 /// ```
