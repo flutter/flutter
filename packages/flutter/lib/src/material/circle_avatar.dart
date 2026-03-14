@@ -64,9 +64,7 @@ class CircleAvatar extends StatelessWidget {
     this.radius,
     this.minRadius,
     this.maxRadius,
-  }) : assert(radius == null || (minRadius == null && maxRadius == null)),
-       assert(backgroundImage != null || onBackgroundImageError == null),
-       assert(foregroundImage != null || onForegroundImageError == null);
+  }) : assert(radius == null || (minRadius == null && maxRadius == null));
 
   /// {@macro flutter.widgets.RawAvatar.child}
   final Widget? child;
