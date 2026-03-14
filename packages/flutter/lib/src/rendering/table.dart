@@ -1301,131 +1301,6 @@ class RenderTable extends RenderBox {
     _cachedSpannedRowsInColumns = const <Set<int>>[];
   }
 
-  /// Computes and caches the span information for table borders.
-  /// This is called during layout to avoid recomputation during paint.
-  void _computeSpanInformation() {
-    if (rows == 0 || columns == 0) {
-      _invalidateSpanCache();
-      return;
-    }
-
-    // Pre-allocate lists with correct size for better performance
-    final logicalSpannedColumnsPerRow = List<Set<int>>.generate(
-      rows,
-      (_) => <int>{},
-      growable: false,
-    );
-    final logicalSpannedRowsPerColumn = List<Set<int>>.generate(
-      columns,
-      (_) => <int>{},
-      growable: false,
-    );
-
-    for (var y = 0; y < rows; y++) {
-      for (var x = 0; x < columns; x++) {
-        final int xy = x + y * columns;
-        final RenderBox? child = _children[xy];
-        if (child == null) {
-          continue;
-        }
-
-        final parentData = child.parentData! as TableCellParentData;
-        final int colSpan = parentData.colSpan;
-        final int rowSpan = parentData.rowSpan;
-
-        // Only process if there are actual spans to avoid unnecessary work
-        if (!parentData._hasSpan) {
-          continue;
-        }
-
-        // Check if rowSpan or colSpan exceeds the table bounds
-        assert(() {
-          // Check if colSpan exceeds available columns
-          if (x + colSpan > columns) {
-            throw FlutterError.fromParts(<DiagnosticsNode>[
-              ErrorSummary('Invalid TableCell.colSpan'),
-              ErrorDescription(
-                'In row $y, the cell at column $x has a colSpan of $colSpan, '
-                'which extends beyond the total number of columns ($columns).',
-              ),
-              ErrorHint(
-                'Ensure that colSpan does not exceed the remaining columns in the row.\n'
-                'For example, if a table has $columns columns, '
-                'and you are at column index $x, the maximum valid colSpan is '
-                '${columns - x}.',
-              ),
-            ]);
-          }
-
-          // Check if rowSpan exceeds available rows
-          if (y + rowSpan > rows) {
-            throw FlutterError.fromParts(<DiagnosticsNode>[
-              ErrorSummary('Invalid TableCell.rowSpan'),
-              ErrorDescription(
-                'In row $y, the cell at column $x has a rowSpan of $rowSpan, '
-                'which extends beyond the total number of rows ($rows).',
-              ),
-              ErrorHint(
-                'Ensure that rowSpan does not exceed the remaining rows in the table.\n'
-                'For example, if a table has $rows rows, '
-                'and you are at row index $y, the maximum valid rowSpan is '
-                '${rows - y}.',
-              ),
-            ]);
-          }
-          return true;
-        }());
-
-        // Calculate bounds once to avoid repeated boundary checks
-        final int maxColSpan = math.min(colSpan, columns - x);
-        final int maxRowSpan = math.min(rowSpan, rows - y);
-
-        // Mark vertical dividers to skip for the first row of the span.
-        if (maxColSpan > 1) {
-          for (var dx = 1; dx < maxColSpan; dx++) {
-            logicalSpannedColumnsPerRow[y].add(x + dx);
-          }
-        }
-
-        // Mark horizontal dividers to skip for the first column of the span.
-        if (maxRowSpan > 1) {
-          for (var dy = 1; dy < maxRowSpan; dy++) {
-            logicalSpannedRowsPerColumn[x].add(y + dy);
-          }
-        }
-
-        // Mark internal dividers to skip for cells that span both rows and columns.
-        if (maxColSpan > 1 && maxRowSpan > 1) {
-          for (var dx = 1; dx < maxColSpan; dx++) {
-            for (var dy = 1; dy < maxRowSpan; dy++) {
-              logicalSpannedRowsPerColumn[x + dx].add(y + dy);
-              logicalSpannedColumnsPerRow[y + dy].add(x + dx);
-            }
-          }
-        }
-      }
-    }
-
-    switch (textDirection) {
-      case TextDirection.ltr:
-        // In LTR mode, use the logical span mappings directly.
-        _cachedSpannedColumnsInRows = logicalSpannedColumnsPerRow;
-        _cachedSpannedRowsInColumns = logicalSpannedRowsPerColumn;
-      case TextDirection.rtl:
-        // In RTL mode, convert logical span mappings to visual coordinates.
-        _cachedSpannedColumnsInRows = logicalSpannedColumnsPerRow.map((Set<int> rowSpans) {
-          return rowSpans.map((int col) => columns - col).toSet();
-        }).toList();
-
-        _cachedSpannedRowsInColumns = List<Set<int>>.generate(columns, (int visualCol) {
-          final int logicalCol = columns - 1 - visualCol;
-          return logicalCol < logicalSpannedRowsPerColumn.length
-              ? logicalSpannedRowsPerColumn[logicalCol]
-              : <int>{};
-        });
-    }
-  }
-
   @override
   void markNeedsLayout() {
     _invalidateSpanCache();
@@ -1582,7 +1457,18 @@ class RenderTable extends RenderBox {
       return;
     }
     final List<double> widths = _computeColumnWidths(constraints);
-    final hiddenCells = List<Set<int>>.generate(rows, (_) => <int>{}, growable: false);
+    // Logical span caches built in-place during layout and published to the
+    // painted span caches at the end of performLayout.
+    final logicalSpannedColumnsPerRow = List<Set<int>>.generate(
+      rows,
+      (_) => <int>{},
+      growable: false,
+    );
+    final logicalSpannedRowsPerColumn = List<Set<int>>.generate(
+      columns,
+      (_) => <int>{},
+      growable: false,
+    );
     // Use typed lists for predictable memory layout and faster indexed access.
     final columnStartPositions = Float64List(columns);
     final remainingRowSpanHeights = Float64List(rows);
@@ -1592,8 +1478,6 @@ class RenderTable extends RenderBox {
     // nested lists for better cache locality.
     final spanWidthsInRowMajor = Float64List(rows * columns);
     final baselinesInRowMajor = Float64List(rows * columns);
-
-    var hasCellSpans = false;
 
     switch (textDirection) {
       case TextDirection.rtl:
@@ -1621,7 +1505,6 @@ class RenderTable extends RenderBox {
       var haveBaseline = false;
       var beforeBaselineDistance = 0.0;
       var afterBaselineDistance = 0.0;
-      final Set<int> currentRowHiddenCells = hiddenCells[y];
 
       for (var x = 0; x < columns; x += 1) {
         final int xy = x + y * columns;
@@ -1643,20 +1526,63 @@ class RenderTable extends RenderBox {
         }
         spanWidthsInRowMajor[y * columns + x] = spanWidth;
 
-        // Mark hidden cells that are covered by a spanning cell.
+        // Update span caches for hidden-cell detection and border painting.
         if (childParentData._hasSpan) {
-          hasCellSpans = true;
-          for (var dx = 0; dx < colSpan && x + dx < columns; dx++) {
-            for (var dy = 0; dy < rowSpan && y + dy < rows; dy++) {
+          assert(() {
+            if (x + colSpan > columns) {
+              throw FlutterError.fromParts(<DiagnosticsNode>[
+                ErrorSummary('Invalid TableCell.colSpan'),
+                ErrorDescription(
+                  'In row $y, the cell at column $x has a colSpan of $colSpan, '
+                  'which extends beyond the total number of columns ($columns).',
+                ),
+                ErrorHint(
+                  'Ensure that colSpan does not exceed the remaining columns in the row.\n'
+                  'For example, if a table has $columns columns, '
+                  'and you are at column index $x, the maximum valid colSpan is '
+                  '${columns - x}.',
+                ),
+              ]);
+            }
+            if (y + rowSpan > rows) {
+              throw FlutterError.fromParts(<DiagnosticsNode>[
+                ErrorSummary('Invalid TableCell.rowSpan'),
+                ErrorDescription(
+                  'In row $y, the cell at column $x has a rowSpan of $rowSpan, '
+                  'which extends beyond the total number of rows ($rows).',
+                ),
+                ErrorHint(
+                  'Ensure that rowSpan does not exceed the remaining rows in the table.\n'
+                  'For example, if a table has $rows rows, '
+                  'and you are at row index $y, the maximum valid rowSpan is '
+                  '${rows - y}.',
+                ),
+              ]);
+            }
+            return true;
+          }());
+          final int maxColSpan = math.min(colSpan, columns - x);
+          final int maxRowSpan = math.min(rowSpan, rows - y);
+          for (var dx = 0; dx < maxColSpan; dx++) {
+            for (var dy = 0; dy < maxRowSpan; dy++) {
               if (dx == 0 && dy == 0) {
                 continue;
               }
-              hiddenCells[y + dy].add(x + dx);
+              // dx > 0: covered by a colSpan → record for vertical-border skip.
+              if (dx > 0) {
+                logicalSpannedColumnsPerRow[y + dy].add(x + dx);
+              }
+              // dy > 0: covered by a rowSpan → record for horizontal-border skip.
+              if (dy > 0) {
+                logicalSpannedRowsPerColumn[x + dx].add(y + dy);
+              }
             }
           }
         }
 
-        final bool isHiddenCell = currentRowHiddenCells.contains(x);
+        final bool isHiddenCell =
+            logicalSpannedColumnsPerRow[y].contains(x) ||
+            logicalSpannedRowsPerColumn[x].contains(y);
         if (isHiddenCell) {
           continue;
         }
@@ -1749,7 +1675,6 @@ class RenderTable extends RenderBox {
       _rowTops.add(rowTop);
       final double beforeBaselineDistance = beforeBaselineDistances[y];
       final double rowHeight = rowHeights[y];
-      final Set<int> currentRowHiddenCells = hiddenCells[y];
 
       for (var x = 0; x < columns; x += 1) {
         final int xy = x + y * columns;
@@ -1760,7 +1685,9 @@ class RenderTable extends RenderBox {
 
         final childParentData = child.parentData! as TableCellParentData;
         final int rowSpan = childParentData.rowSpan;
-        final bool isHiddenCell = currentRowHiddenCells.contains(x);
+        final bool isHiddenCell =
+            logicalSpannedColumnsPerRow[y].contains(x) ||
+            logicalSpannedRowsPerColumn[x].contains(y);
         if (isHiddenCell) {
           continue;
         }
@@ -1809,9 +1736,19 @@ class RenderTable extends RenderBox {
     size = constraints.constrain(Size(_tableWidth, rowTop));
     assert(_rowTops.length == rows + 1);
 
-    if (hasCellSpans) {
-      // Cache span metadata for use during painting.
-      _computeSpanInformation();
+    // Publish the span caches, adjusting column indices for RTL.
+    switch (textDirection) {
+      case TextDirection.ltr:
+        _cachedSpannedColumnsInRows = logicalSpannedColumnsPerRow;
+        _cachedSpannedRowsInColumns = logicalSpannedRowsPerColumn;
+      case TextDirection.rtl:
+        _cachedSpannedColumnsInRows = logicalSpannedColumnsPerRow.map((Set<int> rowSpans) {
+          return rowSpans.map((int col) => columns - col).toSet();
+        }).toList();
+        _cachedSpannedRowsInColumns = List<Set<int>>.generate(columns, (int visualCol) {
+          final int logicalCol = columns - 1 - visualCol;
+          return logicalSpannedRowsPerColumn[logicalCol];
+        });
     }
   }
 
