@@ -5652,6 +5652,49 @@ void main() {
       expect(selectedValue, TestMenu.mainMenu2);
     });
 
+    testWidgets('resetOnBlur resets on Enter when true and text does not match any option', (
+      WidgetTester tester,
+    ) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      TestMenu? selectedValue;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              resetOnBlur: true,
+              controller: controller,
+              focusNode: focusNode,
+              initialSelection: TestMenu.mainMenu0,
+              dropdownMenuEntries: menuChildren,
+              requestFocusOnTap: true,
+              onSelected: (TestMenu? value) {
+                selectedValue = value;
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(controller.text, 'Item 0');
+
+      focusNode.requestFocus();
+      await tester.pump();
+      await tester.enterText(find.byType(TextField).first, 'foo');
+      await tester.pump();
+      expect(controller.text, 'foo');
+      
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+
+      // Should reset to the last selected value
+      expect(controller.text, 'Item 0');
+      expect(selectedValue, TestMenu.mainMenu0);
+    });
+
     testWidgets('resetOnBlur does not reset on Enter when false', (WidgetTester tester) async {
       final controller = TextEditingController();
       addTearDown(controller.dispose);
