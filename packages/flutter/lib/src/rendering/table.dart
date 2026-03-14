@@ -1268,7 +1268,13 @@ class RenderTable extends RenderBox {
   Iterable<double>? _columnLefts;
   late double _tableWidth;
 
-  // Cached layout data used during painting to avoid recomputation.
+  // Precomputed during layout and reused during painting to avoid
+  // recomputation per frame:
+  // - _cachedSpannedColumnsInRows: per row, which column indices are
+  //   covered by a colSpan cell (used to skip inner vertical borders).
+  // - _cachedSpannedRowsInColumns: per column, which row indices are
+  //   covered by a rowSpan cell (used to skip inner horizontal borders).
+  // - _cachedRowHeights: height of each row (used to position borders).
   List<Set<int>> _cachedSpannedColumnsInRows = const <Set<int>>[];
   List<Set<int>> _cachedSpannedRowsInColumns = const <Set<int>>[];
   Float64List _cachedRowHeights = Float64List(0);
@@ -1767,7 +1773,11 @@ class RenderTable extends RenderBox {
         }
 
         final int colSpan = childParentData.colSpan;
-        final double cellX = _computeCellX(positions: columnStartPositions, columnIndex: x, colSpan: colSpan);
+        final double cellX = _computeCellX(
+          positions: columnStartPositions,
+          columnIndex: x,
+          colSpan: colSpan,
+        );
 
         // Set the child's final offset based on vertical alignment.
         switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
