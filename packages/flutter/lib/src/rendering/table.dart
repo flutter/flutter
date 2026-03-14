@@ -1290,10 +1290,10 @@ class RenderTable extends RenderBox {
   //   covered by a colSpan cell (used to skip inner vertical borders).
   // - _cachedSpannedRowsInColumns: per column, which row indices are
   //   covered by a rowSpan cell (used to skip inner horizontal borders).
-  // - _cachedRowHeights: height of each row (used to position borders).
+  // Row heights are not cached; they are computed on-the-fly as
+  // _rowTops[i + 1] - _rowTops[i], which is O(1) per row.
   List<Set<int>> _cachedSpannedColumnsInRows = const <Set<int>>[];
   List<Set<int>> _cachedSpannedRowsInColumns = const <Set<int>>[];
-  Float64List _cachedRowHeights = Float64List(0);
 
   /// Invalidates the cached span information when the table structure changes.
   void _invalidateSpanCache() {
@@ -1423,21 +1423,6 @@ class RenderTable extends RenderBox {
               ? logicalSpannedRowsPerColumn[logicalCol]
               : <int>{};
         });
-    }
-  }
-
-  /// Updates the cached row heights derived from the current `_rowTops`.
-  ///
-  /// These cached values are used during painting to determine the visual
-  /// height of each row without recomputing differences at draw time.
-  void _updateCachedRowHeights() {
-    if (_rowTops.length > 1) {
-      _cachedRowHeights = Float64List(_rowTops.length - 1);
-      for (var i = 0; i < _cachedRowHeights.length; i++) {
-        _cachedRowHeights[i] = _rowTops[i + 1] - _rowTops[i];
-      }
-    } else {
-      _cachedRowHeights = Float64List(0);
     }
   }
 
@@ -1824,8 +1809,6 @@ class RenderTable extends RenderBox {
     assert(_rowTops.length == rows + 1);
 
     if (hasCellSpans) {
-      // Cache row heights derived from the final row geometry.
-      _updateCachedRowHeights();
       // Cache span metadata for use during painting.
       _computeSpanInformation();
     }
@@ -1865,7 +1848,7 @@ class RenderTable extends RenderBox {
           borderRect,
           rows: const <double>[],
           columns: const <double>[],
-          rowHeights: Float64List(0),
+          rowTops: const <double>[],
         );
       }
       return;
@@ -1912,7 +1895,7 @@ class RenderTable extends RenderBox {
         columns: columns,
         spannedColumnsPerRow: _cachedSpannedColumnsInRows,
         spannedRowsPerColumn: _cachedSpannedRowsInColumns,
-        rowHeights: _cachedRowHeights,
+        rowTops: _rowTops,
       );
     }
   }

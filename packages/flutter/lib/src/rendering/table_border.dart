@@ -306,7 +306,7 @@ class TableBorder {
     Canvas canvas,
     Rect rect,
     List<double> columnList,
-    Float64List rowHeights,
+    List<double> rowTops,
     List<Set<int>> spannedColumnsPerRow,
     Paint paint,
     Path path,
@@ -323,8 +323,8 @@ class TableBorder {
 
     double yOffset = rect.top;
 
-    for (var y = 0; y < rowHeights.length; y++) {
-      final double nextY = yOffset + rowHeights[y];
+    for (var y = 0; y < rowTops.length - 1; y++) {
+      final double nextY = yOffset + (rowTops[y + 1] - rowTops[y]);
       final Set<int> hiddenCols = y < spannedColumnsPerRow.length
           ? spannedColumnsPerRow[y]
           : const <int>{};
@@ -413,8 +413,9 @@ class TableBorder {
   /// single value, 100.0, which is the vertical position between the two
   /// columns (relative to the left edge of `rect`).
   ///
-  /// The [rowHeights] list contains the absolute height of each row and is used
-  /// to compute vertical border positions more efficiently during painting.
+  /// The [rowTops] list contains the absolute y-position of the top edge of
+  /// each row (plus a final entry for the bottom of the last row). Row heights
+  /// are derived from consecutive differences and never cached separately.
   ///
   /// The [spannedColumnsPerRow] list defines, for each row, which column
   /// dividers should be skipped when painting (e.g., for cells that span
@@ -438,7 +439,7 @@ class TableBorder {
     Rect rect, {
     required Iterable<double> rows,
     required Iterable<double> columns,
-    required Float64List rowHeights,
+    required List<double> rowTops,
     List<Set<int>> spannedColumnsPerRow = const <Set<int>>[],
     List<Set<int>> spannedRowsPerColumn = const <Set<int>>[],
   }) {
@@ -476,7 +477,7 @@ class TableBorder {
         canvas,
         rect,
         columnList,
-        rowHeights,
+        rowTops,
         spannedColumnsPerRow,
         paint,
         path,
