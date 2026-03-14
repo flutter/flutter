@@ -205,6 +205,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         rootDirectory.childDirectory('packages').childDirectory('flutter'),
         rootDirectory.childDirectory('packages').childDirectory('flutter_test'),
         rootDirectory.childDirectory('packages').childDirectory('flutter_localizations'),
+        widgetPreviewScaffoldProject.directory,
         hooksUserDefineIntegrationTestDirectory,
       ]) {
         _updatePubspec(package, deps);

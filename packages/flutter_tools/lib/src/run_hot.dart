@@ -131,7 +131,6 @@ class HotRunner extends ResidentRunner {
 
   @visibleForTesting
   String? get targetPlatformName => _targetPlatformName;
-
   String? _targetPlatformName;
   final _targetPlatforms = <TargetPlatform>{};
 

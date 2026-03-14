@@ -181,18 +181,23 @@ void main() {
           expect(podspec.readAsStringSync(), contains('Sources'));
           expect(podspec.readAsStringSync().contains('Classes'), isFalse);
 
-          final File swiftManifest = fileSystem
-              .directory(createdSwiftPackagePlugin.pluginPath)
-              .childDirectory(platformName)
-              .childDirectory(createdSwiftPackagePlugin.pluginName)
+          // Verify that a plugin having a dependency on the FlutterFramework package
+          // builds successfully.
+          final File manifest = fileSystem
+              .directory(createdSwiftPackagePlugin.swiftPackagePlatformPath)
               .childFile('Package.swift');
-          expect(swiftManifest.existsSync(), isTrue);
-          expect(
-            swiftManifest.readAsStringSync().contains(
-              '.package(name: "FlutterFramework", path: "../FlutterFramework")',
-            ),
-            isTrue,
-          );
+          expect(manifest.existsSync(), isTrue);
+          const packageDependency =
+              '.package(name: "FlutterFramework", path: "../FlutterFramework")';
+          const targetDependency =
+              '.product(name: "FlutterFramework", package: "FlutterFramework")';
+          final String manifestContent = manifest
+              .readAsStringSync()
+              .replaceFirst('dependencies: [],', 'dependencies: [$packageDependency],')
+              .replaceFirst('dependencies: [],', 'dependencies: [$targetDependency],');
+          expect(manifestContent.contains(packageDependency), isTrue);
+          expect(manifestContent.contains(targetDependency), isTrue);
+          manifest.writeAsStringSync(manifestContent);
 
           await SwiftPackageManagerUtils.buildApp(
             flutterBin,
