@@ -1,0 +1,23 @@
+# Copyright 2024 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+name: Remove outdated CICD Label
+
+on:
+  pull_request_target:
+    types: [synchronize]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  remove_label:
+    if: contains(github.event.pull_request.labels.*.name, 'CICD')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remove outdated CICD label
+        run: |
+          gh pr edit ${{ github.event.pull_request.number }} --remove-label "CICD"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
