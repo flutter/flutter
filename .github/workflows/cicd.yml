@@ -13,7 +13,6 @@ permissions:
 
 jobs:
   remove_label:
-    if: contains(github.event.pull_request.labels.*.name, 'CICD')
     runs-on: ubuntu-latest
     steps:
       - name: Remove outdated CICD label
