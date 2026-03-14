@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1168,6 +1169,10 @@ void main() {
     testWidgets('TableCell colSpan exceeds table columns - throws error', (
       WidgetTester tester,
     ) async {
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = errors.add;
+
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -1176,7 +1181,7 @@ void main() {
               TableRow(
                 children: <Widget>[
                   TableCell(colSpan: 3, child: Text('Too Wide')),
-                  Text('Cell 1'),
+                  TableCell.none,
                 ],
               ),
             ],
@@ -1184,12 +1189,18 @@ void main() {
         ),
       );
 
-      final Object? exception = tester.takeException();
-      expect(exception, isA<FlutterError>());
-      expect(exception.toString(), contains('Invalid TableCell.colSpan'));
+      FlutterError.onError = oldHandler;
+
+      expect(errors, isNotEmpty);
+      expect(errors.first.exception, isA<FlutterError>());
+      expect(errors.first.exception.toString(), contains('Invalid TableCell.colSpan'));
     });
 
     testWidgets('TableCell rowSpan exceeds table rows - throws error', (WidgetTester tester) async {
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = errors.add;
+
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -1198,7 +1209,7 @@ void main() {
               TableRow(
                 children: <Widget>[
                   TableCell(rowSpan: 3, child: Text('Too Tall')),
-                  Text('Cell 1'),
+                  TableCell.none,
                 ],
               ),
               TableRow(children: <Widget>[TableCell.none, Text('Cell 2')]),
@@ -1207,10 +1218,81 @@ void main() {
         ),
       );
 
-      final Object? exception = tester.takeException();
+      FlutterError.onError = oldHandler;
 
-      expect(exception, isA<FlutterError>());
-      expect(exception.toString(), contains('Invalid TableCell.rowSpan'));
+      expect(errors, isNotEmpty);
+      expect(errors.first.exception, isA<FlutterError>());
+      expect(errors.first.exception.toString(), contains('Invalid TableCell.rowSpan'));
+    });
+
+    testWidgets('Non-TableCell.none widget in colSpan-covered position - throws error', (
+      WidgetTester tester,
+    ) async {
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = errors.add;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableCell(colSpan: 2, child: Text('Spanning')),
+                  Text('not a placeholder'), // must be TableCell.none
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      FlutterError.onError = oldHandler;
+
+      expect(errors, isNotEmpty);
+      expect(
+        errors.first.exception.toString(),
+        contains('is covered by a spanning cell but is not TableCell.none'),
+      );
+    });
+
+    testWidgets('Non-TableCell.none widget in rowSpan-covered position - throws error', (
+      WidgetTester tester,
+    ) async {
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = errors.add;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableCell(rowSpan: 2, child: Text('Spanning')),
+                  Text('Cell 1'),
+                ],
+              ),
+              TableRow(
+                children: <Widget>[
+                  Text('not a placeholder'), // must be TableCell.none
+                  Text('Cell 2'),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      FlutterError.onError = oldHandler;
+
+      expect(errors, isNotEmpty);
+      expect(
+        errors.first.exception.toString(),
+        contains('is covered by a spanning cell but is not TableCell.none'),
+      );
     });
 
     testWidgets('TableCell with colSpan at last column - valid edge case', (
