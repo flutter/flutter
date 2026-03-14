@@ -1584,6 +1584,11 @@ class RenderTable extends RenderBox {
             logicalSpannedColumnsPerRow[y].contains(x) ||
             logicalSpannedRowsPerColumn[x].contains(y);
         if (isHiddenCell) {
+          assert(
+            !childParentData._isVisible,
+            'Cell at ($x, $y) is covered by a spanning cell but is not TableCell.none. '
+            'Cells that are covered by a colSpan or rowSpan must be declared as TableCell.none.',
+          );
           continue;
         }
 
@@ -1689,6 +1694,11 @@ class RenderTable extends RenderBox {
             logicalSpannedColumnsPerRow[y].contains(x) ||
             logicalSpannedRowsPerColumn[x].contains(y);
         if (isHiddenCell) {
+          assert(
+            !childParentData._isVisible,
+            'Cell at ($x, $y) is covered by a spanning cell but is not TableCell.none. '
+            'Cells that are covered by a colSpan or rowSpan must be declared as TableCell.none.',
+          );
           continue;
         }
 
