@@ -1381,21 +1381,21 @@ class RenderTable extends RenderBox {
         final int maxRowSpan = math.min(rowSpan, rows - y);
 
         // Mark vertical dividers to skip for the first row of the span.
-        if (colSpan > 1) {
+        if (maxColSpan > 1) {
           for (var dx = 1; dx < maxColSpan; dx++) {
             logicalSpannedColumnsPerRow[y].add(x + dx);
           }
         }
 
         // Mark horizontal dividers to skip for the first column of the span.
-        if (rowSpan > 1) {
+        if (maxRowSpan > 1) {
           for (var dy = 1; dy < maxRowSpan; dy++) {
             logicalSpannedRowsPerColumn[x].add(y + dy);
           }
         }
 
         // Mark internal dividers to skip for cells that span both rows and columns.
-        if (colSpan > 1 && rowSpan > 1) {
+        if (maxColSpan > 1 && maxRowSpan > 1) {
           for (var dx = 1; dx < maxColSpan; dx++) {
             for (var dy = 1; dy < maxRowSpan; dy++) {
               logicalSpannedRowsPerColumn[x + dx].add(y + dy);
