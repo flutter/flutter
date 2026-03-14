@@ -47,6 +47,11 @@ abstract class EdgeInsetsGeometry {
   }) = _MixedEdgeInsets.only;
 
   /// Creates [EdgeInsetsDirectional] with only the given values non-zero.
+  @Deprecated(
+    'Use EdgeInsetsGeometry.only instead. '
+    'The .only() constructor allows setting start and end values. '
+    'This feature was deprecated after 3.43.0-0.1.pre.',
+  )
   const factory EdgeInsetsGeometry.directional({
     double start,
     double end,

@@ -18,6 +18,17 @@
 # * Fixes in this file are from the Painting library. *
 version: 1
 transforms:
+  # Change made in https://github.com/flutter/flutter/pull/183699
+  - title: "Migrate to 'EdgeInsetsDirectional.only'"
+    date: 2023-06-09
+    element:
+      uris: [ 'painting.dart' ]
+      constructor: 'directional'
+      inClass: 'EdgeInsetsGeometry'
+    changes:
+      - kind: 'rename'
+        newName: 'only'
+
   # Change made in https://github.com/flutter/flutter/pull/128522
   - title: "Migrate to 'textScaler'"
     date: 2023-06-09

@@ -5,6 +5,9 @@
 import 'package:flutter/painting.dart';
 
 void main() {
+  // Change made in https://github.com/flutter/flutter/pull/183699
+  const EdgeInsetsGeometry onlyStart = .directional(start: 10);
+
   // Change made in https://github.com/flutter/flutter/pull/121152
   final EdgeInsets insets = EdgeInsets.fromWindowPadding(ViewPadding.zero, 3.0);
 
