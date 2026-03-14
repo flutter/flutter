@@ -2515,7 +2515,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   ///
   /// It is intended to be used by tests and asserts.
   bool get debugNeedsLayout {
-    late bool result;
+    bool result = false;
     assert(() {
       result = _needsLayout;
       return true;
@@ -3263,7 +3263,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// [markNeedsPaint] method is implicitly called by the framework after a
   /// render object is laid out, prior to the paint phase.
   bool get debugNeedsPaint {
-    late bool result;
+    bool result = false;
     assert(() {
       result = _needsPaint;
       return true;
@@ -3282,7 +3282,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   ///
   /// It is intended to be used by tests and asserts.
   bool get debugNeedsCompositedLayerUpdate {
-    late bool result;
+    bool result = false;
     assert(() {
       result = _needsCompositedLayerUpdate;
       return true;
