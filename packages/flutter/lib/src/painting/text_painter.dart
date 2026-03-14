@@ -1290,13 +1290,16 @@ class TextPainter {
       );
     }
     _layoutCount++;
-    if (_layoutCount > 4) {
-      print('!!!! set _layoutCache to $newLayoutCache');
+    if (_layoutCount > 3) {
+      print(
+        '!!!! set _layoutCache to $newLayoutCache, ${this.runtimeType}, ${identityHashCode(this)}',
+      );
     }
+
     _layoutCache = newLayoutCache;
   }
 
-  int _layoutCount = 0;
+  static int _layoutCount = 0;
 
   /// Causes the paragraph to paint the layout boxes of the text.
   ///
@@ -1716,7 +1719,7 @@ class TextPainter {
     final _TextPainterLayoutCacheWithOffset cachedLayout = _layoutCache!;
     final newOffset = offset - cachedLayout.paintOffset;
     final p = cachedLayout.paragraph;
-    print('!!!! ${p.runtimeType}');
+    print('!!!! ${p.runtimeType}, ${this.runtimeType}, ${identityHashCode(this)}');
     print('!!!! $newOffset');
     print('!!!! ${p.height}');
     print('!!!! ${p.width}');
