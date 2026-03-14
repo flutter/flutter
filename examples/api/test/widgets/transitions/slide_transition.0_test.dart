@@ -51,4 +51,18 @@ void main() {
       tester.getCenter(find.byType(Center)),
     );
   });
+
+  testWidgets('SlideTransition does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: const example.SlideTransitionExample()),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SlideTransition)), Size.zero);
+  });
 }
