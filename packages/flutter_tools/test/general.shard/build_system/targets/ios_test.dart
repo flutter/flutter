@@ -134,6 +134,15 @@ void main() {
           ],
         ),
         FakeCommand(
+          command: <String>['xattr', '-r', appFrameworkPath],
+          stdout:
+              '''
+${appFrameworkPath}:
+com.apple.FinderInfo
+com.apple.provenance
+''',
+        ),
+        FakeCommand(
           command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', appFrameworkPath],
         ),
         FakeCommand(
@@ -187,6 +196,15 @@ void main() {
             '-o',
             appFrameworkPath,
           ],
+        ),
+        FakeCommand(
+          command: <String>['xattr', '-r', appFrameworkPath],
+          stdout:
+              '''
+${appFrameworkPath}:
+com.apple.FinderInfo
+com.apple.provenance
+''',
         ),
         FakeCommand(
           command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', appFrameworkPath],
@@ -262,6 +280,15 @@ void main() {
         ),
 
         FakeCommand(
+          command: <String>['xattr', '-r', frameworkBinary.path],
+          stdout:
+              '''
+${frameworkBinary.path}:
+com.apple.FinderInfo
+com.apple.provenance
+''',
+        ),
+        FakeCommand(
           command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', frameworkBinary.path],
         ),
         FakeCommand(
@@ -331,6 +358,15 @@ void main() {
       final File infoPlist = frameworkDirectory.childFile('Info.plist');
       processManager.addCommands(<FakeCommand>[
         createPlutilFakeCommand(infoPlist),
+        FakeCommand(
+          command: <String>['xattr', '-r', frameworkDirectoryBinary.path],
+          stdout:
+              '''
+${frameworkDirectoryBinary.path}:
+com.apple.FinderInfo
+com.apple.provenance
+''',
+        ),
         FakeCommand(
           command: <String>[
             'xattr',
@@ -432,6 +468,15 @@ void main() {
       final File infoPlist = frameworkDirectory.childFile('Info.plist');
       processManager.addCommands(<FakeCommand>[
         createPlutilFakeCommand(infoPlist),
+        FakeCommand(
+          command: <String>['xattr', '-r', frameworkDirectoryBinary.path],
+          stdout:
+              '''
+${frameworkDirectoryBinary.path}:
+com.apple.FinderInfo
+com.apple.provenance
+''',
+        ),
         FakeCommand(
           command: <String>[
             'xattr',
@@ -544,6 +589,15 @@ void main() {
         ),
         createPlutilFakeCommand(infoPlist),
         FakeCommand(
+          command: <String>['xattr', '-r', frameworkDirectoryBinary.path],
+          stdout:
+              '''
+${frameworkDirectoryBinary.path}:
+com.apple.FinderInfo
+com.apple.provenance
+''',
+        ),
+        FakeCommand(
           command: <String>[
             'xattr',
             '-r',
@@ -629,6 +683,15 @@ void main() {
       processManager.addCommands(<FakeCommand>[
         createPlutilFakeCommand(infoPlist),
         FakeCommand(
+          command: <String>['xattr', '-r', frameworkDirectoryBinary.path],
+          stdout:
+              '''
+${frameworkDirectoryBinary.path}:
+com.apple.FinderInfo
+com.apple.provenance
+''',
+        ),
+        FakeCommand(
           command: <String>[
             'xattr',
             '-r',
@@ -707,6 +770,15 @@ void main() {
       final File infoPlist = frameworkDirectory.childFile('Info.plist');
       processManager.addCommands(<FakeCommand>[
         createPlutilFakeCommand(infoPlist),
+        FakeCommand(
+          command: <String>['xattr', '-r', frameworkDirectoryBinary.path],
+          stdout:
+              '''
+${frameworkDirectoryBinary.path}:
+com.apple.FinderInfo
+com.apple.provenance
+''',
+        ),
         FakeCommand(
           command: <String>[
             'xattr',
@@ -849,7 +921,7 @@ void main() {
     late FakeCommand copyPhysicalFrameworkDsymCommandFailure;
     late FakeCommand lipoCommandNonFatResult;
     late FakeCommand lipoVerifyArm64Command;
-    late FakeCommand xattrCommand;
+    late List<FakeCommand> xattrCommands;
     late FakeCommand adHocCodesignCommand;
 
     setUp(() {
@@ -906,9 +978,19 @@ void main() {
         command: <String>['lipo', binary.path, '-verify_arch', 'arm64'],
       );
 
-      xattrCommand = FakeCommand(
-        command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', binary.path],
-      );
+      xattrCommands = <FakeCommand>[
+        FakeCommand(
+          command: <String>['xattr', '-r', binary.path],
+          stdout:
+              '''
+${binary.path}:
+com.apple.FinderInfo
+com.apple.provenance
+''',
+        ),
+        FakeCommand(command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', binary.path]),
+        FakeCommand(command: <String>['xattr', '-r', '-d', 'com.apple.provenance', binary.path]),
+      ];
 
       adHocCodesignCommand = FakeCommand(
         command: <String>['codesign', '--force', '--sign', '-', '--timestamp=none', binary.path],
@@ -942,7 +1024,7 @@ void main() {
         ),
         lipoCommandNonFatResult,
         FakeCommand(command: <String>['lipo', binary.path, '-verify_arch', 'x86_64']),
-        xattrCommand,
+        ...xattrCommands,
         adHocCodesignCommand,
       ]);
       await const DebugUnpackIOS().build(environment);
@@ -1205,7 +1287,7 @@ void main() {
         copyPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
-        xattrCommand,
+        ...xattrCommands,
         adHocCodesignCommand,
       ]);
       await const DebugUnpackIOS().build(environment);
@@ -1250,7 +1332,7 @@ void main() {
             binary.path,
           ],
         ),
-        xattrCommand,
+        ...xattrCommands,
         adHocCodesignCommand,
       ]);
 
@@ -1275,7 +1357,7 @@ void main() {
         copyPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
-        xattrCommand,
+        ...xattrCommands,
         adHocCodesignCommand,
       ]);
       await const DebugUnpackIOS().build(environment);
@@ -1304,7 +1386,7 @@ void main() {
         copyPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
-        xattrCommand,
+        ...xattrCommands,
         FakeCommand(
           command: <String>[
             'codesign',
@@ -1367,7 +1449,7 @@ void main() {
         copyPhysicalFrameworkDsymCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
-        xattrCommand,
+        ...xattrCommands,
         FakeCommand(
           command: <String>[
             'codesign',

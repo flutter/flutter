@@ -962,6 +962,15 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
     testWithoutContext('removes xattr', () async {
       final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
+          command: <String>['xattr', '-r', projectDirectory.path],
+          stdout:
+              '''
+${projectDirectory.path}:
+com.apple.FinderInfo
+com.apple.provenance
+''',
+        ),
+        FakeCommand(
           command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', projectDirectory.path],
         ),
         FakeCommand(
@@ -980,6 +989,15 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
     testWithoutContext('ignores errors', () async {
       final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
+          command: <String>['xattr', '-r', projectDirectory.path],
+          stdout:
+              '''
+${projectDirectory.path}:
+com.apple.FinderInfo
+com.apple.provenance
+''',
+        ),
+        FakeCommand(
           command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', projectDirectory.path],
           exitCode: 1,
         ),
@@ -996,6 +1014,26 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       );
       expect(logger.traceText, contains('Failed to remove com.apple.FinderInfo'));
       expect(logger.traceText, contains('Failed to remove com.apple.provenance'));
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('skips removal for attributes that are not present', () async {
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>['xattr', '-r', projectDirectory.path],
+          stdout:
+              '''
+${projectDirectory.path}:
+com.apple.xcode.CreatedByBuildSystem
+''',
+        ),
+      ]);
+
+      await removeExtendedAttributes(
+        projectDirectory,
+        ProcessUtils(processManager: processManager, logger: logger),
+        logger,
+      );
       expect(processManager, hasNoRemainingExpectations);
     });
   });

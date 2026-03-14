@@ -40,9 +40,18 @@ import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/throwing_pub.dart';
 
-// Helper to generate xattr commands for removing specific extended attributes
+// Helper to generate xattr commands for removing specific extended attributes.
 List<FakeCommand> xattrCommands(FlutterProject flutterProject) {
   return <FakeCommand>[
+    FakeCommand(
+      command: <String>['xattr', '-r', flutterProject.directory.path],
+      stdout:
+          '''
+${flutterProject.directory.path}:
+com.apple.FinderInfo
+com.apple.provenance
+''',
+    ),
     FakeCommand(
       command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', flutterProject.directory.path],
     ),

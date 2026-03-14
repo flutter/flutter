@@ -138,6 +138,15 @@ void main() {
     createCoreMockProjectFiles();
   }
 
+  const xattrListCommand = FakeCommand(
+    command: <String>['xattr', '-r', '/'],
+    stdout: '''
+/:
+com.apple.FinderInfo
+com.apple.provenance
+''',
+  );
+
   const xattrCommand1 = FakeCommand(
     command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', '/'],
   );
@@ -421,6 +430,7 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -458,6 +468,7 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -516,6 +527,7 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -574,6 +586,7 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -631,6 +644,7 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -667,6 +681,7 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -724,6 +739,7 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -760,6 +776,7 @@ void main() {
       };
 
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -803,6 +820,7 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -865,6 +883,7 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -903,6 +922,7 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -964,6 +984,7 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -1027,6 +1048,7 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -1089,6 +1111,7 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -1122,6 +1145,7 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -1156,6 +1180,7 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -1220,6 +1245,7 @@ void main() {
       );
       createMinimalMockProjectFiles();
 
+      fakeProcessManager.addCommands(<FakeCommand>[xattrListCommand, xattrCommand1, xattrCommand2]);
       fakeProcessManager.addCommand(setUpFakeXcodeBuildHandler());
       await expectToolExitLater(
         createTestCommandRunner(
@@ -1256,6 +1282,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -1317,6 +1344,7 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -1362,6 +1390,7 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -1405,6 +1434,7 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -1452,6 +1482,7 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -1507,6 +1538,7 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -1547,6 +1579,7 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -1600,6 +1633,7 @@ void main() {
       const plistPath =
           'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -1661,6 +1695,7 @@ void main() {
       const plistPath =
           'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -1727,6 +1762,7 @@ void main() {
       const plistPath =
           'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -1792,6 +1828,7 @@ void main() {
       const plistPath =
           'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -1843,6 +1880,7 @@ void main() {
       const plistPath =
           'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -1903,6 +1941,7 @@ void main() {
           '/flutter_template_images/templates/app/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
 
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -1998,6 +2037,7 @@ void main() {
           '/flutter_template_images/templates/app/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
 
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -2089,6 +2129,7 @@ void main() {
           'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
 
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -2166,6 +2207,7 @@ void main() {
           'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
 
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -2243,6 +2285,7 @@ void main() {
           'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
 
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -2320,6 +2363,7 @@ void main() {
           'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
 
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -2405,6 +2449,7 @@ void main() {
       ];
 
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -2526,6 +2571,7 @@ void main() {
           '/flutter_template_images/templates/app/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png';
 
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -2619,6 +2665,7 @@ void main() {
           '/flutter_template_images/templates/app/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png';
 
       fakeProcessManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,

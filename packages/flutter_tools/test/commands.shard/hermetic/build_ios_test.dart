@@ -107,6 +107,15 @@ void main() {
     createCoreMockProjectFiles();
   }
 
+  const xattrListCommand = FakeCommand(
+    command: <String>['xattr', '-r', '/'],
+    stdout: '''
+/:
+com.apple.FinderInfo
+com.apple.provenance
+''',
+  );
+
   const xattrCommand1 = FakeCommand(
     command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', '/'],
   );
@@ -318,6 +327,7 @@ void main() {
       FileSystem: () => fileSystem,
       Pub: ThrowingPub.new,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -349,6 +359,7 @@ void main() {
       createMinimalMockProjectFiles();
 
       processManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -395,6 +406,7 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -435,6 +447,7 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -466,6 +479,7 @@ void main() {
       );
 
       processManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -515,6 +529,7 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       processManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -556,6 +571,7 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       processManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -597,6 +613,7 @@ void main() {
       );
       createMinimalMockProjectFiles();
       processManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -634,6 +651,7 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
       );
       processManager.addCommands(<FakeCommand>[
+        xattrListCommand,
         xattrCommand1,
 
         xattrCommand2,
@@ -726,6 +744,7 @@ void main() {
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+          xattrListCommand,
           xattrCommand1,
 
           xattrCommand2,
@@ -781,6 +800,7 @@ void main() {
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+          xattrListCommand,
           xattrCommand1,
 
           xattrCommand2,
@@ -832,6 +852,7 @@ void main() {
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
+          xattrListCommand,
           xattrCommand1,
 
           xattrCommand2,
@@ -876,6 +897,7 @@ void main() {
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
+          xattrListCommand,
           xattrCommand1,
 
           xattrCommand2,
@@ -927,6 +949,7 @@ void main() {
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
+          xattrListCommand,
           xattrCommand1,
 
           xattrCommand2,
@@ -983,6 +1006,7 @@ void main() {
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
+          xattrListCommand,
           xattrCommand1,
 
           xattrCommand2,
@@ -1024,6 +1048,7 @@ void main() {
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
+          xattrListCommand,
           xattrCommand1,
 
           xattrCommand2,
@@ -1083,6 +1108,7 @@ void main() {
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
+          xattrListCommand,
           xattrCommand1,
 
           xattrCommand2,
@@ -1133,6 +1159,7 @@ void main() {
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
+          xattrListCommand,
           xattrCommand1,
 
           xattrCommand2,
@@ -1177,6 +1204,7 @@ void main() {
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
+          xattrListCommand,
           xattrCommand1,
 
           xattrCommand2,
@@ -1238,6 +1266,7 @@ void main() {
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
+          xattrListCommand,
           xattrCommand1,
 
           xattrCommand2,
@@ -1285,6 +1314,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
+          xattrListCommand,
           xattrCommand1,
 
           xattrCommand2,
@@ -1342,6 +1372,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+          xattrListCommand,
           xattrCommand1,
 
           xattrCommand2,
@@ -1376,6 +1407,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
+          xattrListCommand,
           xattrCommand1,
 
           xattrCommand2,
@@ -1420,6 +1452,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
+          xattrListCommand,
           xattrCommand1,
 
           xattrCommand2,
@@ -1466,6 +1499,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
+          xattrListCommand,
           xattrCommand1,
 
           xattrCommand2,
@@ -1521,6 +1555,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
+          xattrListCommand,
           xattrCommand1,
 
           xattrCommand2,
@@ -1568,6 +1603,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
+          xattrListCommand,
           xattrCommand1,
 
           xattrCommand2,
@@ -1620,6 +1656,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         );
 
         processManager.addCommands(<FakeCommand>[
+          xattrListCommand,
           xattrCommand1,
 
           xattrCommand2,
@@ -1679,6 +1716,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           osUtils: FakeOperatingSystemUtils(),
         );
         processManager.addCommands(<FakeCommand>[
+          xattrListCommand,
           xattrCommand1,
 
           xattrCommand2,
