@@ -130,6 +130,18 @@ void main() {
     imageCache.clear();
   });
 
+  testWidgets(
+    'ImageIcon throws assertion error if color is provided and useOriginalColors is true',
+    (WidgetTester tester) async {
+      expect(
+        () => ImageIcon(image, color: const Color(0xFF0000FF), useOriginalColors: true),
+        throwsAssertionError,
+      );
+
+      imageCache.clear();
+    },
+  );
+
   testWidgets('ImageIcon does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(

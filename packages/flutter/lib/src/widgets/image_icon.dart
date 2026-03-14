@@ -35,7 +35,7 @@ class ImageIcon extends StatelessWidget {
     this.useOriginalColors = false,
   }) : assert(
          !(useOriginalColors && color != null),
-         'Cannot provide both a color and useOriginalColors. '
+         'Cannot provide a color while useOriginalColors is true. '
          'To use a specific color, set useOriginalColors to false or omit it.',
        );
 
@@ -75,8 +75,8 @@ class ImageIcon extends StatelessWidget {
   /// Whether to render the image using its original colors.
   ///
   /// If this is false (the default), the image is colorized by merging the
-  /// [color] (or, if that is null, the [IconTheme] color) with the image using [BlendMode.srcIn].
-  /// This is the standard behavior for icons.
+  /// [color] (or, if that is null, the [IconTheme] color) with the image
+  /// using [BlendMode.srcIn]. This is the standard behavior for icons.
   ///
   /// If this is true, the color-blend filter is disabled, and the image is
   /// rendered with its original colors. This allows multi-colored images,
