@@ -77,6 +77,23 @@ void main() {
     expect(symmetric.resolve(TextDirection.rtl), equals(const EdgeInsets.fromLTRB(10, 20, 10, 20)));
   });
 
+  test('EdgeInsetsGeometry.only() constructor', () {
+    const singleValue = EdgeInsetsGeometry.only(start: 10);
+    expect(singleValue.resolve(TextDirection.ltr), equals(const EdgeInsets.only(left: 10)));
+    expect(singleValue.resolve(TextDirection.rtl), equals(const EdgeInsets.only(right: 10)));
+
+    const allValues = EdgeInsetsGeometry.only(
+      left: 10,
+      right: 10,
+      start: 10,
+      end: 10,
+      top: 10,
+      bottom: 10,
+    );
+    expect(allValues.resolve(TextDirection.ltr), equals(const EdgeInsets.fromLTRB(20, 10, 20, 10)));
+    expect(allValues.resolve(TextDirection.rtl), equals(const EdgeInsets.fromLTRB(20, 10, 20, 10)));
+  });
+
   test('EdgeInsets control test', () {
     const insets = EdgeInsets.fromLTRB(5.0, 7.0, 11.0, 13.0);
 
