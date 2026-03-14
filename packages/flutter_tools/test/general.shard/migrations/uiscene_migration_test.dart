@@ -31,11 +31,18 @@ void main() {
       expect(logger.traceText, contains('UIScene migration: unable to find Info.plist'));
       expect(
         logger.errorText,
-        contains(
-          'To ensure your app continues to launch on upcoming iOS versions, UIScene lifecycle '
-          'support will soon be required. Please see https://flutter.dev/to/uiscene-migration '
-          'for the migration guide.\nSee https://flutter.dev/to/uiscene-migration/#hide-migration-warning'
-          ' for instructions to hide this warning.',
+        allOf(
+          contains(
+            'To ensure your app continues to launch on upcoming iOS versions, UIScene lifecycle '
+            'support will soon be required. Please see https://flutter.dev/to/uiscene-migration '
+            'for the migration guide.',
+          ),
+          contains('Flutter could not find the default iOS Info.plist at "'),
+          contains('Info.plist". If your project moved or renamed the host Info.plist, '),
+          contains(
+            'See https://flutter.dev/to/uiscene-migration/#hide-migration-warning for '
+            'instructions to hide this warning.',
+          ),
         ),
       );
     });
