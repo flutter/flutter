@@ -413,9 +413,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     if (notification is ScrollStartNotification && notification.dragDetails != null) {
       return true;
     }
-    if (notification is ScrollUpdateNotification &&
-        notification.dragDetails != null &&
-        widget.triggerMode == RefreshIndicatorTriggerMode.anywhere) {
+    if (notification is ScrollUpdateNotification && notification.dragDetails != null) {
       return true;
     }
     return false;
@@ -438,7 +436,16 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     final bool isUserDrag = _isScrollTriggeredByUser(notification);
     final bool isAtEdge = _isAtScrollEdge(notification.metrics);
 
-    return isUserDrag && isAtEdge && _status == null && _start(notification.metrics.axisDirection);
+    if (!isUserDrag || !isAtEdge || _status != null) {
+      return false;
+    }
+
+    if (widget.triggerMode == RefreshIndicatorTriggerMode.onEdge &&
+        notification is! ScrollStartNotification) {
+      return false;
+    }
+
+    return _start(notification.metrics.axisDirection);
   }
 
   /// Evaluates whether the indicator should currently be displayed at the top or bottom based on axis direction.
@@ -578,13 +585,12 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     assert(_isIndicatorAtTop == null);
     assert(_dragOffset == null);
 
-    final bool? atTop = _getIndicatorAtTop(direction);
-    if (atTop == null) {
-      // we dont support horizontal refresh indicator
+    _isIndicatorAtTop = _getIndicatorAtTop(direction);
+    if (_isIndicatorAtTop == null) {
+      // Does not support a horizontal refresh indicator.
       return false;
     }
 
-    _isIndicatorAtTop = atTop;
     _dragOffset = 0.0;
     _scaleController.value = 0.0;
     _positionController.value = 0.0;
