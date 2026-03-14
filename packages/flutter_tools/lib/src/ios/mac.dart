@@ -23,7 +23,6 @@ import '../darwin/darwin.dart';
 import '../device.dart';
 import '../features.dart';
 import '../flutter_manifest.dart';
-import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
 import '../macos/swift_package_manager.dart';
@@ -1159,7 +1158,7 @@ Future<bool> _handleIssues(
       for (final module in missingModules) {
         if (await _isPluginSwiftPackageOnly(
           platform: platform,
-          project: project,
+          project: xcodeProject,
           pluginName: module,
           fileSystem: fileSystem,
         )) {
@@ -1220,11 +1219,11 @@ Future<bool> _simulatorSupportsIntel(Device device) async {
 /// Returns true if a Package.swift is found for the plugin and a podspec is not.
 Future<bool> _isPluginSwiftPackageOnly({
   required FlutterDarwinPlatform platform,
-  required FlutterProject project,
+  required XcodeBasedProject project,
   required String pluginName,
   required FileSystem fileSystem,
 }) async {
-  final List<Plugin> plugins = await findPlugins(project);
+  final List<Plugin> plugins = await project.plugins;
   final Plugin? matched = plugins
       .where(
         (Plugin plugin) =>
