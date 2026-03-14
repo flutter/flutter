@@ -1143,8 +1143,11 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     // This method is only called when widget.focusNode is not null
     assert(widget.focusNode != null);
     if (!widget.focusNode!.hasFocus && widget.resetOnBlur) {
+      final String textBeforeRestore = _effectiveTextEditingController.text;
       final T? restoredValue = _restoreSelectionFromText();
-      widget.onSelected?.call(restoredValue);
+      if (_effectiveTextEditingController.text != textBeforeRestore) {
+        widget.onSelected?.call(restoredValue);
+      }
       if (!widget.enableSearch) {
         currentHighlight = null;
       }

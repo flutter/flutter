@@ -5553,7 +5553,7 @@ void main() {
       addTearDown(focusNode.dispose);
       final otherFocusNode = FocusNode();
       addTearDown(otherFocusNode.dispose);
-      TestMenu? selectedValue;
+      var onSelectedCount = 0;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -5567,7 +5567,7 @@ void main() {
                   initialSelection: TestMenu.mainMenu0,
                   dropdownMenuEntries: menuChildren,
                   onSelected: (TestMenu? value) {
-                    selectedValue = value;
+                    onSelectedCount++;
                   },
                 ),
                 ElevatedButton(
@@ -5593,9 +5593,9 @@ void main() {
       otherFocusNode.requestFocus();
       await tester.pumpAndSettle();
 
-      // No reset needed since text already matches the selected value
+      // onSelected should not be called since text already matches the selected value
       expect(controller.text, 'Item 0');
-      expect(selectedValue, TestMenu.mainMenu0);
+      expect(onSelectedCount, 0);
     });
 
     testWidgets('resetOnBlur does not reset after new selection', (WidgetTester tester) async {
