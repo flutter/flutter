@@ -1186,7 +1186,7 @@ void main() {
 
       final Element firstScope = tester.element(find.byKey(key1));
       final nodes = <FocusNode>[];
-      final keys = <Key>[];
+      final keys = <Object>[];
       bool visitor(FocusNode node) {
         nodes.add(node);
         keys.add(node.context!.widget.key!);

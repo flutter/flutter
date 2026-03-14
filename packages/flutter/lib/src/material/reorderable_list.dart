@@ -562,7 +562,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
 class _ReorderableListViewChildGlobalKey extends GlobalObjectKey {
   const _ReorderableListViewChildGlobalKey(this.subKey, this.state) : super(subKey);
 
-  final Key subKey;
+  final Object subKey;
   final State state;
 
   @override

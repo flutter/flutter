@@ -175,8 +175,8 @@ bool debugEnhanceBuildTimelineArguments = false;
 /// Show banners for deprecated widgets.
 bool debugHighlightDeprecatedWidgets = false;
 
-Key? _firstNonUniqueKey(Iterable<Widget> widgets) {
-  final Set<Key> keySet = HashSet<Key>();
+Object? _firstNonUniqueKey(Iterable<Widget> widgets) {
+  final Set<Object> keySet = HashSet<Object>();
   for (final widget in widgets) {
     if (widget.key == null) {
       continue;
@@ -213,7 +213,7 @@ Key? _firstNonUniqueKey(Iterable<Widget> widgets) {
 /// Does nothing if asserts are disabled. Always returns false.
 bool debugChildrenHaveDuplicateKeys(Widget parent, Iterable<Widget> children, {String? message}) {
   assert(() {
-    final Key? nonUniqueKey = _firstNonUniqueKey(children);
+    final Object? nonUniqueKey = _firstNonUniqueKey(children);
     if (nonUniqueKey != null) {
       throw FlutterError(
         "${message ?? 'Duplicate keys found.\n'
@@ -240,7 +240,7 @@ bool debugChildrenHaveDuplicateKeys(Widget parent, Iterable<Widget> children, {S
 /// Does nothing if asserts are disabled. Always returns false.
 bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
   assert(() {
-    final Key? nonUniqueKey = _firstNonUniqueKey(items);
+    final Object? nonUniqueKey = _firstNonUniqueKey(items);
     if (nonUniqueKey != null) {
       throw FlutterError('Duplicate key found: $nonUniqueKey.');
     }

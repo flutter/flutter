@@ -398,15 +398,15 @@ class SwitchingChildBuilderTest extends StatefulWidget {
 
 class _SwitchingChildBuilderTest extends State<SwitchingChildBuilderTest> {
   late List<Widget> children;
-  late Map<Key, int> _mapKeyToIndex;
+  late Map<Object, int> _mapKeyToIndex;
 
   @override
   void initState() {
     super.initState();
     children = widget.children;
-    _mapKeyToIndex = <Key, int>{};
+    _mapKeyToIndex = <Object, int>{};
     for (var index = 0; index < children.length; index += 1) {
-      final Key? key = children[index].key;
+      final Object? key = children[index].key;
       if (key != null) {
         _mapKeyToIndex[key] = index;
       }
@@ -418,9 +418,9 @@ class _SwitchingChildBuilderTest extends State<SwitchingChildBuilderTest> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.children != widget.children) {
       children = widget.children;
-      _mapKeyToIndex = <Key, int>{};
+      _mapKeyToIndex = <Object, int>{};
       for (var index = 0; index < children.length; index += 1) {
-        final Key? key = children[index].key;
+        final Object? key = children[index].key;
         if (key != null) {
           _mapKeyToIndex[key] = index;
         }

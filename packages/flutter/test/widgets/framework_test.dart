@@ -149,9 +149,9 @@ void main() {
     (WidgetTester tester) async {
       final Key key1 = GlobalKey(debugLabel: 'Text1');
       final Key key2 = GlobalKey(debugLabel: 'Text2');
-      Key? rebuiltKeyOfSecondChildBeforeLayout;
-      Key? rebuiltKeyOfFirstChildAfterLayout;
-      Key? rebuiltKeyOfSecondChildAfterLayout;
+      Object? rebuiltKeyOfSecondChildBeforeLayout;
+      Object? rebuiltKeyOfFirstChildAfterLayout;
+      Object? rebuiltKeyOfSecondChildAfterLayout;
       await tester.pumpWidget(
         LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
@@ -225,9 +225,9 @@ void main() {
       const Key key1 = GlobalObjectKey('Text1');
       const Key key2 = GlobalObjectKey('Text2');
       const Key key3 = GlobalObjectKey('Text3');
-      Key? rebuiltKeyOfSecondChildBeforeLayout;
-      Key? rebuiltKeyOfSecondChildAfterLayout;
-      Key? rebuiltKeyOfThirdChildAfterLayout;
+      Object? rebuiltKeyOfSecondChildBeforeLayout;
+      Object? rebuiltKeyOfSecondChildAfterLayout;
+      Object? rebuiltKeyOfThirdChildAfterLayout;
       await tester.pumpWidget(
         LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
@@ -305,8 +305,8 @@ void main() {
     'GlobalKey correct case 5 - can deal with early rebuild in layoutbuilder - only one global key',
     (WidgetTester tester) async {
       const Key key1 = GlobalObjectKey('Text1');
-      Key? rebuiltKeyOfSecondChildBeforeLayout;
-      Key? rebuiltKeyOfThirdChildAfterLayout;
+      Object? rebuiltKeyOfSecondChildBeforeLayout;
+      Object? rebuiltKeyOfThirdChildAfterLayout;
       await tester.pumpWidget(
         LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
@@ -1023,9 +1023,9 @@ void main() {
     (WidgetTester tester) async {
       const Key key1 = GlobalObjectKey('Text1');
       const Key key2 = GlobalObjectKey('Text2');
-      Key? rebuiltKeyOfSecondChildBeforeLayout;
-      Key? rebuiltKeyOfFirstChildAfterLayout;
-      Key? rebuiltKeyOfSecondChildAfterLayout;
+      Object? rebuiltKeyOfSecondChildBeforeLayout;
+      Object? rebuiltKeyOfFirstChildAfterLayout;
+      Object? rebuiltKeyOfSecondChildAfterLayout;
       await tester.pumpWidget(
         LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
@@ -1831,7 +1831,7 @@ void main() {
   testWidgets('Element.deactivate reports its deactivation to the InheritedElement it depends on', (
     WidgetTester tester,
   ) async {
-    final removedDependentWidgetKeys = <Key>[];
+    final removedDependentWidgetKeys = <Object>[];
 
     InheritedElement elementCreator(InheritedWidget widget) {
       return _InheritedElementSpy(

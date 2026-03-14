@@ -259,7 +259,7 @@ class Viewport extends MultiChildRenderObjectWidget {
     if (center != null) {
       properties.add(DiagnosticsProperty<Key>('center', center));
     } else if (children.isNotEmpty && children.first.key != null) {
-      properties.add(DiagnosticsProperty<Key>('center', children.first.key, tooltip: 'implicit'));
+      properties.add(DiagnosticsProperty<Object>('center', children.first.key, tooltip: 'implicit'));
     }
     properties.add(DiagnosticsProperty<ScrollCacheExtent>('scrollCacheExtent', scrollCacheExtent));
   }
