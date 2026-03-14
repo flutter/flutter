@@ -1613,9 +1613,8 @@ void main() {
         ),
       );
 
-      RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-        (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-      );
+      final Finder findDatePicker = find.byType(CalendarDatePicker);
+      MaterialInkController inkFeatures = Material.of(tester.element(findDatePicker));
       expect(
         inkFeatures,
         isNot(
@@ -1628,9 +1627,7 @@ void main() {
       await gesture.addPointer();
       await gesture.moveTo(tester.getCenter(find.text('25')));
       await tester.pumpAndSettle();
-      inkFeatures = tester.allRenderObjects.firstWhere(
-        (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-      );
+      inkFeatures = Material.of(tester.element(findDatePicker));
       expect(
         inkFeatures,
         paints

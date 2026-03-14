@@ -720,9 +720,7 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byIcon(Icons.access_alarm)));
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
+    final MaterialInkController inkFeatures = Material.of(tester.element(find.text('AC')));
     var indicatorCenter = const Offset(600, 30);
     const includedIndicatorSize = Size(64, 32);
     const excludedIndicatorSize = Size(74, 40);
@@ -1164,6 +1162,8 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byType(NavigationIndicator).last));
     await tester.pumpAndSettle();
 
+    // This test extracts the controller from the allRenderObjects iterable
+    // in order to prevent some wonkiness when running via skwasm.
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
       (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
     );
@@ -1318,9 +1318,7 @@ void main() {
       await gesture.moveTo(tester.getCenter(find.byIcon(Icons.access_alarm)));
       await tester.pumpAndSettle();
 
-      final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-        (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-      );
+      final MaterialInkController inkFeatures = Material.of(tester.element(find.text('AC')));
       var indicatorCenter = const Offset(600, 33);
       const includedIndicatorSize = Size(64, 32);
       const excludedIndicatorSize = Size(74, 40);

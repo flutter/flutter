@@ -75,10 +75,10 @@ void main() {
     // Material 3 uses the InkSparkle which uses a shader, so we can't capture
     // the effect with paint methods.
     if (!material3) {
-      final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-        (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
+      expect(
+        Material.of(tester.element(find.text('button'))),
+        paints..circle(color: colorScheme.onPrimary.withOpacity(0.24)),
       );
-      expect(inkFeatures, paints..circle(color: colorScheme.onPrimary.withOpacity(0.24)));
     }
 
     // Only elevation changes when enabled and pressed.
@@ -391,11 +391,7 @@ void main() {
       ),
     );
 
-    RenderObject overlayColor() {
-      return tester.allRenderObjects.firstWhere(
-        (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-      );
-    }
+    Object overlayColor() => Material.of(tester.element(find.text('ElevatedButton')));
 
     double elevation() {
       return tester
@@ -876,10 +872,7 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byType(ElevatedButton)));
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
-    expect(inkFeatures, paints..rect(color: hoverColor));
+    expect(Material.of(tester.element(find.text('button'))), paints..rect(color: hoverColor));
   });
 
   testWidgets('Does ElevatedButton work with focus', (WidgetTester tester) async {
@@ -906,10 +899,7 @@ void main() {
     focusNode.requestFocus();
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
-    expect(inkFeatures, paints..rect(color: focusColor));
+    expect(Material.of(tester.element(find.text('button'))), paints..rect(color: focusColor));
 
     focusNode.dispose();
   });
@@ -940,10 +930,7 @@ void main() {
     FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
-    expect(inkFeatures, paints..rect(color: focusColor));
+    expect(Material.of(tester.element(find.text('button'))), paints..rect(color: focusColor));
 
     focusNode.dispose();
   });

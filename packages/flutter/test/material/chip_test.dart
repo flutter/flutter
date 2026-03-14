@@ -5518,9 +5518,7 @@ void main() {
       ),
     );
 
-    RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
+    MaterialInkController inkFeatures = Material.of(tester.element(find.byType(Ink)));
     expect(inkFeatures, isNot(paints..rect(color: theme.hoverColor)));
     expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 0));
 
@@ -5531,9 +5529,7 @@ void main() {
     addTearDown(hoverGesture.removePointer);
     await tester.pumpAndSettle();
 
-    inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
+    inkFeatures = Material.of(tester.element(find.byType(Ink)));
     expect(inkFeatures, paints..rect(color: theme.hoverColor));
     expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 1));
 

@@ -567,22 +567,21 @@ void main() {
       buildFrame(tabs: tabs, value: selectedValue, useMaterial3: theme.useMaterial3),
     );
 
-    RenderObject overlayColor() {
-      return tester.allRenderObjects.firstWhere(
-        (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-      );
-    }
+    Object inkController(String text) => Material.of(tester.element(find.text(text)));
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     await gesture.moveTo(tester.getCenter(find.text(selectedValue)));
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect(color: theme.colorScheme.primary.withOpacity(0.08)));
+    expect(
+      inkController(selectedValue),
+      paints..rect(color: theme.colorScheme.primary.withOpacity(0.08)),
+    );
 
     await gesture.down(tester.getCenter(find.text(selectedValue)));
     await tester.pumpAndSettle();
     expect(
-      overlayColor(),
+      inkController(selectedValue),
       paints
         ..rect()
         ..rect(color: theme.colorScheme.primary.withOpacity(0.1)),
@@ -592,16 +591,22 @@ void main() {
 
     await gesture.moveTo(tester.getCenter(find.text(unselectedValue)));
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.08)));
+    expect(
+      inkController(unselectedValue),
+      paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.08)),
+    );
 
     await gesture.moveTo(tester.getCenter(find.text(selectedValue)));
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect(color: theme.colorScheme.primary.withOpacity(0.08)));
+    expect(
+      inkController(unselectedValue),
+      paints..rect(color: theme.colorScheme.primary.withOpacity(0.08)),
+    );
 
     await gesture.down(tester.getCenter(find.text(selectedValue)));
     await tester.pumpAndSettle();
     expect(
-      overlayColor(),
+      inkController(unselectedValue),
       paints
         ..rect()
         ..rect(color: theme.colorScheme.primary.withOpacity(0.1)),
@@ -625,22 +630,21 @@ void main() {
       ),
     );
 
-    RenderObject overlayColor() {
-      return tester.allRenderObjects.firstWhere(
-        (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-      );
-    }
+    Object inkController(String text) => Material.of(tester.element(find.text(text)));
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     await gesture.moveTo(tester.getCenter(find.text(selectedValue)));
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.08)));
+    expect(
+      inkController(selectedValue),
+      paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.08)),
+    );
 
     await gesture.down(tester.getCenter(find.text(selectedValue)));
     await tester.pumpAndSettle();
     expect(
-      overlayColor(),
+      inkController(selectedValue),
       paints
         ..rect()
         ..rect(color: theme.colorScheme.onSurface.withOpacity(0.1)),
@@ -650,12 +654,15 @@ void main() {
 
     await gesture.moveTo(tester.getCenter(find.text(unselectedValue)));
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.08)));
+    expect(
+      inkController(unselectedValue),
+      paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.08)),
+    );
 
     await gesture.down(tester.getCenter(find.text(selectedValue)));
     await tester.pumpAndSettle();
     expect(
-      overlayColor(),
+      inkController(unselectedValue),
       paints
         ..rect()
         ..rect(color: theme.colorScheme.onSurface.withOpacity(0.1)),
@@ -5113,11 +5120,8 @@ void main() {
       await gesture.addPointer();
       await gesture.moveTo(tester.getCenter(find.byType(Tab)));
       await tester.pumpAndSettle();
-      final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-        (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-      );
       expect(
-        inkFeatures,
+        Material.of(tester.element(find.text('A'))),
         paints..rect(
           rect: const Rect.fromLTRB(0.0, 276.0, 800.0, 324.0),
           color: const Color(0xff00ff00),
@@ -5154,10 +5158,8 @@ void main() {
           tester.getRect(find.byType(InkWell)).center,
         );
         await tester.pump(const Duration(milliseconds: 200)); // unconfirmed splash is well underway
-        final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-          (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-        );
-        expect(inkFeatures, paints..circle(x: 400, y: 24, color: splashColor));
+        final BuildContext context = tester.element(find.text('A'));
+        expect(Material.of(context), paints..circle(x: 400, y: 24, color: splashColor));
         await gesture.up();
       },
     );
@@ -6663,7 +6665,7 @@ void main() {
               return Colors.black54;
             }),
             splashBorderRadius: BorderRadius.circular(radius),
-            tabs: const <Widget>[Tab(child: Text(''))],
+            tabs: const <Widget>[Tab(child: Text('Tab'))],
           ),
         ),
       ),
@@ -6675,11 +6677,8 @@ void main() {
     );
     await gesture.moveTo(tester.getCenter(find.byType(Tab)));
     await tester.pumpAndSettle();
-    final RenderObject object = tester.allRenderObjects.firstWhere(
-      (RenderObject element) => element.runtimeType.toString() == '_RenderInkFeatures',
-    );
     expect(
-      object,
+      Material.of(tester.element(find.text('Tab'))),
       paints..rrect(
         color: hoverColor,
         rrect: RRect.fromRectAndRadius(
@@ -6879,9 +6878,7 @@ void main() {
     await tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', useMaterial3: theme.useMaterial3));
 
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
+    final MaterialInkController inkFeatures = Material.of(tester.element(find.text('C')));
     expect(inkFeatures, isNot(paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.08))));
     expect(inkFeatures, isNot(paints..rect(color: theme.colorScheme.primary.withOpacity(0.08))));
 
@@ -6910,9 +6907,7 @@ void main() {
     );
 
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
+    final MaterialInkController inkFeatures = Material.of(tester.element(find.text('B')));
     expect(inkFeatures, isNot(paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.1))));
     expect(inkFeatures, isNot(paints..rect(color: theme.colorScheme.primary.withOpacity(0.1))));
 
@@ -6938,9 +6933,7 @@ void main() {
     );
 
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
+    final MaterialInkController inkFeatures = Material.of(tester.element(find.text('B')));
     expect(inkFeatures, isNot(paints..rect(color: theme.colorScheme.primary.withOpacity(0.1))));
 
     // Press unselected tab.

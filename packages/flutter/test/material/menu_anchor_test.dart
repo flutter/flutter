@@ -181,12 +181,6 @@ void main() {
     );
   }
 
-  RenderObject getOverlayColor(WidgetTester tester) {
-    return tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
-  }
-
   TextStyle iconStyle(WidgetTester tester, IconData icon) {
     final RichText iconRichText = tester.widget<RichText>(
       find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
@@ -3353,6 +3347,7 @@ void main() {
           ),
         ),
       );
+      final MaterialInkController controller = Material.of(tester.element(find.text('MenuItem')));
 
       // Hovered.
       final Offset center = tester.getCenter(find.byType(MenuItemButton));
@@ -3360,13 +3355,13 @@ void main() {
       await gesture.addPointer();
       await gesture.moveTo(center);
       await tester.pumpAndSettle();
-      expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.08)));
+      expect(controller, paints..rect(color: overlayColor.withOpacity(0.08)));
 
       // Highlighted (pressed).
       await gesture.down(center);
       await tester.pumpAndSettle();
       expect(
-        getOverlayColor(tester),
+        controller,
         paints
           ..rect(color: overlayColor.withOpacity(0.08))
           ..rect(color: overlayColor.withOpacity(0.08))
@@ -5035,6 +5030,7 @@ void main() {
           ),
         ),
       );
+      final MaterialInkController controller = Material.of(tester.element(find.text('Submenu')));
 
       // Hovered.
       final Offset center = tester.getCenter(find.byType(SubmenuButton));
@@ -5042,13 +5038,13 @@ void main() {
       await gesture.addPointer();
       await gesture.moveTo(center);
       await tester.pumpAndSettle();
-      expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.08)));
+      expect(controller, paints..rect(color: overlayColor.withOpacity(0.08)));
 
       // Highlighted (pressed).
       await gesture.down(center);
       await tester.pumpAndSettle();
       expect(
-        getOverlayColor(tester),
+        controller,
         paints
           ..rect(color: overlayColor.withOpacity(0.08))
           ..rect(color: overlayColor.withOpacity(0.08))

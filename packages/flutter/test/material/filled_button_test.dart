@@ -501,11 +501,7 @@ void main() {
       ),
     );
 
-    RenderObject overlayColor() {
-      return tester.allRenderObjects.firstWhere(
-        (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-      );
-    }
+    MaterialInkController overlayColor() => Material.of(tester.element(find.text('FilledButton')));
 
     double elevation() {
       return tester
@@ -573,11 +569,7 @@ void main() {
       ),
     );
 
-    RenderObject overlayColor() {
-      return tester.allRenderObjects.firstWhere(
-        (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-      );
-    }
+    MaterialInkController overlayColor() => Material.of(tester.element(find.text('FilledButton')));
 
     double elevation() {
       return tester
@@ -1058,10 +1050,7 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byType(FilledButton)));
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
-    expect(inkFeatures, paints..rect(color: hoverColor));
+    expect(Material.of(tester.element(find.text('button'))), paints..rect(color: hoverColor));
   });
 
   testWidgets('Does FilledButton work with focus', (WidgetTester tester) async {
@@ -1088,10 +1077,7 @@ void main() {
     focusNode.requestFocus();
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
-    expect(inkFeatures, paints..rect(color: focusColor));
+    expect(Material.of(tester.element(find.text('button'))), paints..rect(color: focusColor));
     focusNode.dispose();
   });
 
@@ -1121,10 +1107,7 @@ void main() {
     FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
-    expect(inkFeatures, paints..rect(color: focusColor));
+    expect(Material.of(tester.element(find.text('button'))), paints..rect(color: focusColor));
     focusNode.dispose();
   });
 

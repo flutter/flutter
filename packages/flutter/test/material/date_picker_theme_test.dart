@@ -613,9 +613,8 @@ void main() {
     expect(arrowIcon.color, datePickerTheme.subHeaderForegroundColor);
 
     // Test the day overlay color.
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
+    final BuildContext context = tester.element(find.byType(DatePickerDialog));
+    final MaterialInkController inkFeatures = Material.of(context);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     await gesture.moveTo(tester.getCenter(find.text('25')));
@@ -773,9 +772,8 @@ void main() {
     expect(selectedDate.style?.fontSize, datePickerTheme.rangePickerHeaderHeadlineStyle?.fontSize);
 
     // Test the day overlay color.
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
+    final BuildContext context = tester.element(find.byType(DatePickerDialog));
+    final MaterialInkController inkFeatures = Material.of(context);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     await gesture.moveTo(tester.getCenter(find.text('16')));
@@ -842,9 +840,8 @@ void main() {
     expect(selectedDate.style?.fontSize, datePickerTheme.rangePickerHeaderHeadlineStyle?.fontSize);
 
     // Test the day overlay color.
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
+    final BuildContext context = tester.element(find.byType(DatePickerDialog));
+    final MaterialInkController inkFeatures = Material.of(context);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     await gesture.moveTo(tester.getCenter(find.text('16')));
@@ -1102,9 +1099,8 @@ void main() {
     );
 
     // Test the hover overlay color.
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
+    final BuildContext context = tester.element(find.byType(DatePickerDialog));
+    final MaterialInkController inkFeatures = Material.of(context);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     await gesture.moveTo(tester.getCenter(find.text('2022')));
@@ -1181,9 +1177,8 @@ void main() {
     );
 
     // Test the hover overlay color.
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
+    final BuildContext context = tester.element(find.byType(DatePickerDialog));
+    final MaterialInkController inkFeatures = Material.of(context);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     await gesture.moveTo(tester.getCenter(find.text('18')));

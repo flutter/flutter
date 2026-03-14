@@ -34,10 +34,8 @@ void main() {
     mockOnPressedFunction = MockOnPressedFunction();
   });
 
-  RenderObject getOverlayColor(WidgetTester tester) {
-    return tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
+  MaterialInkController getOverlayColor(WidgetTester tester) {
+    return Material.of(tester.element(find.byType(Icon)));
   }
 
   Finder findTooltipContainer(String tooltipText) {
@@ -3067,7 +3065,7 @@ void main() {
     await gesture.down(topLeft);
     await tester.pumpAndSettle();
     expect(
-      getOverlayColor(tester),
+      Material.of(tester.element(find.byType(ColoredBox))),
       paints
         ..rect(color: const Color(0xFFFF0000)) // ColoredBox.
         ..rect(color: const Color(0xFF00FF00)), // IconButton overlay.
@@ -3383,6 +3381,7 @@ void main() {
     addTearDown(focusNode.dispose);
 
     const Color focusColor = Colors.orange;
+    final Finder findIcon = find.byIcon(Icons.headphones);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -3409,15 +3408,13 @@ void main() {
       SemanticsActionEvent(
         type: SemanticsAction.focus,
         viewId: tester.view.viewId,
-        nodeId: tester.semantics.find(find.byIcon(Icons.headphones)).id,
+        nodeId: tester.semantics.find(findIcon).id,
       ),
     );
     await tester.pumpAndSettle();
 
     // Make sure no focus highlight was drawn.
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
-      return object.runtimeType.toString() == '_RenderInkFeatures';
-    });
+    final MaterialInkController inkFeatures = Material.of(tester.element(findIcon));
     expect(focusNode.hasFocus, isTrue);
     expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
     expect(inkFeatures, isNot(paints..rect(color: focusColor)));
