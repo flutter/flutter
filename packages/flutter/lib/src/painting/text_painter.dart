@@ -786,6 +786,7 @@ class TextPainter {
       return true;
     }());
     _layoutCache?.paragraph.dispose();
+    print('!!!! set _layoutCache to null');
     _layoutCache = null;
   }
 
@@ -1288,8 +1289,14 @@ class TextPainter {
         contentWidth,
       );
     }
+    _layoutCount++;
+    if (_layoutCount > 4) {
+      print('!!!! set _layoutCache to $newLayoutCache');
+    }
     _layoutCache = newLayoutCache;
   }
+
+  int _layoutCount = 0;
 
   /// Causes the paragraph to paint the layout boxes of the text.
   ///
@@ -1835,6 +1842,7 @@ class TextPainter {
     _layoutTemplate?.dispose();
     _layoutTemplate = null;
     _layoutCache?.paragraph.dispose();
+    print('!!!! set _layoutCache to null for dispose');
     _layoutCache = null;
     _text = null;
   }
