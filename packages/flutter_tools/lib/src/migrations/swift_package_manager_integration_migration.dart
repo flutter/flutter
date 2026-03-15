@@ -131,6 +131,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     xcodeProject: _xcodeProject,
     fileSystem: _fileSystem,
     logger: logger,
+    platform: _platform,
   );
 
   void restoreFromBackup(SchemeInfo? schemeInfo) {
@@ -1197,6 +1198,7 @@ $newContent
     required XcodeBasedProject xcodeProject,
     required FileSystem fileSystem,
     required Logger logger,
+    required FlutterDarwinPlatform platform,
   }) {
     try {
       final FlutterProject flutterProject = xcodeProject.parent;
@@ -1212,10 +1214,21 @@ $newContent
           );
           if (linkedPlugin.existsSync()) {
             final String absolutePath = linkedPlugin.targetSync();
-            final String relativePath = fileSystem.path.relative(
-              absolutePath,
-              from: xcodeProject.hostAppRoot.path,
-            );
+            final String relativePath;
+            switch (platform) {
+              case FlutterDarwinPlatform.ios:
+                relativePath = fileSystem.path.relative(
+                  absolutePath,
+                  from: xcodeProject.hostAppRoot.path,
+                );
+              case FlutterDarwinPlatform.macos:
+                // The path is relative to the "Flutter" [managedDirectory] on macOS because the
+                // Flutter `PBXGroup` in macOS pbxproj files uses `path` instead of `name`.
+                relativePath = fileSystem.path.relative(
+                  absolutePath,
+                  from: xcodeProject.managedDirectory.path,
+                );
+            }
             return (name: pluginName, path: relativePath);
           }
         }

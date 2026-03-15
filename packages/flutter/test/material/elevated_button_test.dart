@@ -2098,11 +2098,11 @@ void main() {
   }
 
   testWidgets('ElevatedButton statesController', (WidgetTester tester) async {
-    testStatesController(null, tester);
+    await testStatesController(null, tester);
   });
 
   testWidgets('ElevatedButton.icon statesController', (WidgetTester tester) async {
-    testStatesController(const Icon(Icons.add), tester);
+    await testStatesController(const Icon(Icons.add), tester);
   });
 
   testWidgets('Disabled ElevatedButton statesController', (WidgetTester tester) async {
