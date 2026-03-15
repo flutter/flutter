@@ -19,6 +19,7 @@ import 'package:path/path.dart' as path;
 
 import 'allowlist.dart';
 import 'custom_rules/analyze.dart';
+import 'custom_rules/avoid_debug_only_rendering_getters.dart';
 import 'custom_rules/avoid_future_catcherror.dart';
 import 'custom_rules/no_double_clamp.dart';
 import 'custom_rules/no_stop_watches.dart';
@@ -200,6 +201,7 @@ Future<void> run(List<String> arguments) async {
     // lints are easier to write when they can assume, for example, there is no
     // inheritance cycles.
     final rules = <AnalyzeRule>[
+      avoidDebugOnlyRenderingGetters,
       noDoubleClamp,
       noStopwatches,
       renderBoxIntrinsicCalculation,
