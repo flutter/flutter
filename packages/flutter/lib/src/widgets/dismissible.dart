@@ -115,7 +115,6 @@ class Dismissible extends StatefulWidget {
     this.crossAxisEndOffset = 0.0,
     this.dragStartBehavior = DragStartBehavior.start,
     this.behavior = HitTestBehavior.opaque,
-    this.allowFling = true,
   }) : assert(secondaryBackground == null || background != null);
 
   /// The widget below this widget in the tree.
@@ -211,18 +210,6 @@ class Dismissible extends StatefulWidget {
   ///
   /// This defaults to [HitTestBehavior.opaque].
   final HitTestBehavior behavior;
-
-  /// Whether the dismissible can be dismissed by flinging.
-  ///
-  /// By default, flinging the dismissible will start a dismissal animation. If
-  /// this is set to false, the dismissible can only be dismissed by dragging it
-  /// far enough.
-  ///
-  /// Setting this to false can be useful to reduce accidental dismissals when
-  /// the dismissible is part of a scrollable list.
-  ///
-  /// Defaults to true.
-  final bool allowFling;
 
   /// Called when the dismissible widget has been dragged.
   ///
@@ -479,9 +466,6 @@ class _DismissibleState extends State<Dismissible>
   }
 
   _FlingGestureKind _describeFlingGesture(Velocity velocity) {
-    if (!widget.allowFling) {
-      return _FlingGestureKind.none;
-    }
     if (_dragExtent == 0.0) {
       // If it was a fling, then it was a fling that was let loose at the exact
       // middle of the range (i.e. when there's no displacement). In that case,
