@@ -181,21 +181,19 @@ class RawAvatar extends StatelessWidget {
   final Duration duration;
 
   /// {@template flutter.widgets.RawAvatar.size}
-  /// The size of the avatar, expressed as the diameter.
+  /// The size of the avatar in logical pixels.
   ///
   /// If [size] is specified, then neither [minSize] nor [maxSize] may be
-  /// specified. Specifying [size] is equivalent to specifying a [minSize]
+  /// specified. Specifying [size] is equivalent to specifying both [minSize]
   /// and [maxSize] with the same value.
   ///
-  /// If neither [minSize] nor [maxSize] are specified, the avatar defaults
-  /// to 40 logical pixels.
-  ///
-  /// Changes to the [size] are animated.
+  /// If neither [size], [minSize], nor [maxSize] are specified, the avatar
+  /// defaults to 40 logical pixels.
   /// {@endtemplate}
   final double? size;
 
   /// {@template flutter.widgets.RawAvatar.minSize}
-  /// The minimum size of the avatar, expressed as the diameter.
+  /// The minimum size of the avatar in logical pixels.
   ///
   /// If [minSize] is specified, then [size] must not also be specified.
   ///
@@ -204,7 +202,7 @@ class RawAvatar extends StatelessWidget {
   final double? minSize;
 
   /// {@template flutter.widgets.RawAvatar.maxSize}
-  /// The maximum size of the avatar, expressed as the diameter.
+  /// The maximum size of the avatar in logical pixels.
   ///
   /// If [maxSize] is specified, then [size] must not also be specified.
   ///
@@ -212,7 +210,7 @@ class RawAvatar extends StatelessWidget {
   /// {@endtemplate}
   final double? maxSize;
 
-  // Default diameter if nothing is specified.
+  // Default size if nothing is specified.
   static const double _defaultSize = 40.0;
 
   // Default min if only max is specified.
@@ -221,15 +219,17 @@ class RawAvatar extends StatelessWidget {
   // Default max if only min is specified.
   static const double _defaultMaxSize = double.infinity;
 
-  double get _minDiameter {
-    if (size == null && minSize == null && maxSize == null) {
+  bool get _hasExplicitSize => size != null || minSize != null || maxSize != null;
+
+  double get _effectiveMinSize {
+    if (!_hasExplicitSize) {
       return _defaultSize;
     }
     return size ?? minSize ?? _defaultMinSize;
   }
 
-  double get _maxDiameter {
-    if (size == null && minSize == null && maxSize == null) {
+  double get _effectiveMaxSize {
+    if (!_hasExplicitSize) {
       return _defaultSize;
     }
     return size ?? maxSize ?? _defaultMaxSize;
@@ -239,10 +239,7 @@ class RawAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
 
-    final double minDiameter = _minDiameter;
-    final double maxDiameter = _maxDiameter;
-
-    final Decoration decoration = _buildDecoration(
+    final Decoration decoration = _effectiveDecoration(
       shape: shape,
       boxShape: boxShape,
       borderRadius: borderRadius,
@@ -252,7 +249,7 @@ class RawAvatar extends StatelessWidget {
     );
 
     final Decoration? foregroundDecoration = foregroundImage != null
-        ? _buildDecoration(
+        ? _effectiveDecoration(
             shape: shape,
             boxShape: boxShape,
             borderRadius: borderRadius,
@@ -264,10 +261,10 @@ class RawAvatar extends StatelessWidget {
     Widget avatar = AnimatedContainer(
       duration: duration,
       constraints: BoxConstraints(
-        minHeight: minDiameter,
-        minWidth: minDiameter,
-        maxHeight: maxDiameter,
-        maxWidth: maxDiameter,
+        minHeight: _effectiveMinSize,
+        minWidth: _effectiveMinSize,
+        maxHeight: _effectiveMaxSize,
+        maxWidth: _effectiveMaxSize,
       ),
       decoration: decoration,
       foregroundDecoration: foregroundDecoration,
@@ -293,7 +290,7 @@ class RawAvatar extends StatelessWidget {
     return avatar;
   }
 
-  Decoration _buildDecoration({
+  Decoration _effectiveDecoration({
     ShapeBorder? shape,
     BoxShape? boxShape,
     BorderRadius? borderRadius,

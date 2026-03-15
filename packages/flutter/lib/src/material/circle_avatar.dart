@@ -47,9 +47,10 @@ import 'theme.dart';
 /// See also:
 ///
 ///  * [RawAvatar], the low-level widget that renders the avatar.
-///  * [Chip], for representing users or concepts inline.
-///  * [ListTile], which can combine an icon (such as a [CircleAvatar])
-///    with text in a fixed-height row.
+///  * [Chip], for representing users or concepts in long form.
+///  * [ListTile], which can combine an icon (such as a [CircleAvatar]) with
+///    some text for a fixed height list entry.
+///  * <https://material.io/design/components/chips.html#input-chips>
 class CircleAvatar extends StatelessWidget {
   /// Creates a circular avatar.
   const CircleAvatar({
