@@ -1836,8 +1836,8 @@ class SelectableRegionState extends State<SelectableRegion>
     clearSelection();
     _selectable?.dispatchSelectionEvent(const SelectAllSelectionEvent());
     if (cause == SelectionChangedCause.toolbar) {
-      _showToolbar();
       _showHandles();
+      _showToolbar();
     }
     _updateSelectedContentIfNeeded();
     _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
