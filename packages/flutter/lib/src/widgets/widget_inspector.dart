@@ -2232,7 +2232,7 @@ mixin WidgetInspectorService {
       return null;
     }
 
-    if (renderObject.debugNeedsLayout) {
+    if (renderObject.debugNeedsLayout) { // flutter_ignore: debug_only_rendering_getter (see analyze.dart)
       final PipelineOwner owner = renderObject.owner!;
       assert(!owner.debugDoingLayout);
       owner
@@ -2244,7 +2244,7 @@ mixin WidgetInspectorService {
       // in the layout phase and therefore can't be painted. It is clearer to
       // return null indicating that a screenshot is unavailable than to return
       // an empty image.
-      if (renderObject.debugNeedsLayout) {
+      if (renderObject.debugNeedsLayout) { // flutter_ignore: debug_only_rendering_getter (see analyze.dart)
         return null;
       }
     }
@@ -2320,7 +2320,7 @@ mixin WidgetInspectorService {
           }
 
           try {
-            if (!renderObject.debugNeedsLayout) {
+            if (!renderObject.debugNeedsLayout) { // flutter_ignore: debug_only_rendering_getter (see analyze.dart)
               // ignore: invalid_use_of_protected_member
               final Constraints constraints = renderObject.constraints;
               final constraintsProperty = <String, Object>{
