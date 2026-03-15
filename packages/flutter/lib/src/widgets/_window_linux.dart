@@ -164,6 +164,20 @@ class WindowingOwnerLinux extends WindowingOwner {
   }) {
     throw UnimplementedError('Popup windows are not yet implemented on Linux.');
   }
+
+  @internal
+  @override
+  SatelliteWindowController createSatelliteWindowController({
+    required SatelliteWindowControllerDelegate delegate,
+    required BaseWindowController parent,
+    required WindowPositioner initialPositioner,
+    Rect? initialAnchorRect,
+    Size? preferredSize,
+    BoxConstraints? preferredConstraints,
+    String? title,
+  }) {
+    throw UnimplementedError('Satellite windows are not yet implemented on Linux.');
+  }
 }
 
 /// Implementation of [RegularWindowController] for the Linux platform.
