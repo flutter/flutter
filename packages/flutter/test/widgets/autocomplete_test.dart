@@ -3915,4 +3915,69 @@ void main() {
     // The text field should be updated to 'test'.
     expect(textCtrl.text, 'test');
   });
+
+  testWidgets('options update when selection changes', (WidgetTester tester) async {
+    final GlobalKey fieldKey = GlobalKey();
+    final GlobalKey optionsKey = GlobalKey();
+    late FocusNode focusNode;
+    late TextEditingController textEditingController;
+    Iterable<String>? lastOptions;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: RawAutocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              // An optionsBuilder that uses the selection, not just the text.
+              final int offset = textEditingValue.selection.baseOffset;
+              final String textUpToCursor = textEditingValue.text.substring(
+                0,
+                offset.clamp(0, textEditingValue.text.length),
+              );
+              return kOptions.where((String option) {
+                return option.contains(textUpToCursor.toLowerCase());
+              });
+            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  focusNode = fieldFocusNode;
+                  textEditingController = fieldTextEditingController;
+                  return TextField(
+                    key: fieldKey,
+                    focusNode: focusNode,
+                    controller: textEditingController,
+                  );
+                },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  lastOptions = options;
+                  return Container(key: optionsKey);
+                },
+          ),
+        ),
+      ),
+    );
+
+    focusNode.requestFocus();
+    await tester.enterText(find.byKey(fieldKey), 'goose');
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsOneWidget);
+    // Full text "goose" matches only "goose".
+    expect(lastOptions, <String>['goose']);
+
+    // Move the cursor to just after "go".
+    textEditingController.selection = const TextSelection.collapsed(offset: 2);
+    await tester.pump();
+    // Now text up to cursor is "go", which matches more options.
+    expect(lastOptions, <String>['dingo', 'flamingo', 'goose']);
+  });
 }

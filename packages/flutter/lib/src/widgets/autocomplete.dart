@@ -388,6 +388,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   // Set the initial value to null so when this widget gets focused for the first
   // time it will try to run the options view builder.
   String? _lastFieldText;
+  bool _userHidOptions = false;
   final ValueNotifier<int> _highlightedOptionIndex = ValueNotifier<int>(0);
 
   static const Map<ShortcutActivator, Intent> _appleShortcuts = <ShortcutActivator, Intent>{
@@ -426,8 +427,9 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   void _onFocusChange() {
     if (_focusNode.hasFocus != _hasFocus) {
       _hasFocus = _focusNode.hasFocus;
-      // Gaining focus can open the options view (if there are options). Losing
-      // focus always closes it.
+      if (_hasFocus) {
+        _userHidOptions = false;
+      }
       _updateOptionsViewVisibility();
     }
   }
@@ -435,7 +437,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   /// Shows the options view when the field is focused and there is at least one
   /// option to display; otherwise hides the options view.
   void _updateOptionsViewVisibility() {
-    if (_canShowOptionsView) {
+    if (_canShowOptionsView && !_userHidOptions) {
       _optionsViewController.show();
     } else if (_optionsViewController.isShowing) {
       _optionsViewController.hide();
@@ -466,13 +468,11 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     }
     final TextEditingValue value = _textEditingController.value;
 
-    // Makes sure that options change only when content of the field changes.
-    var shouldUpdateOptions = false;
     if (value.text != _lastFieldText) {
-      shouldUpdateOptions = true;
-      _onChangedCallId += 1;
+      _userHidOptions = false;
     }
     _lastFieldText = value.text;
+    _onChangedCallId += 1;
     final int callId = _onChangedCallId;
     final Iterable<T> options = await widget.optionsBuilder(value);
 
@@ -481,7 +481,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     }
 
     // Makes sure that previous call results do not replace new ones.
-    if (callId != _onChangedCallId || !shouldUpdateOptions) {
+    if (callId != _onChangedCallId) {
       return;
     }
     if (_options.isEmpty != options.isEmpty) {
@@ -554,6 +554,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
   void _highlightOption(int index) {
     assert(_canShowOptionsView);
+    _userHidOptions = false;
     _updateOptionsViewVisibility();
     assert(_optionsViewController.isShowing);
     _updateHighlight(index);
@@ -561,6 +562,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
   Object? _hideOptions(DismissIntent intent) {
     if (_optionsViewController.isShowing) {
+      _userHidOptions = true;
       _optionsViewController.hide();
       return null;
     } else {
