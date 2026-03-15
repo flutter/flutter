@@ -11,7 +11,7 @@ import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'editable_text_utils.dart' show TestTextField;
+import 'editable_text_tester.dart';
 import 'semantics_tester.dart';
 
 final List<String> results = <String>[];

@@ -284,9 +284,10 @@ DEF_SWITCH(MergedPlatformUIThread,
 DEF_SWITCH(DisableMergedPlatformUIThread,
            "no-enable-merged-platform-ui-thread",
            "Disables merging of the UI and platform threads.")
-DEF_SWITCH(EnableAndroidSurfaceControl,
-           "enable-surface-control",
-           "Enable the SurfaceControl backed swapchain when supported.")
+DEF_SWITCH(EnableAndroidHcppAndSurfaceControl,
+           "enable-hcpp-and-surface-control",
+           "Enable the HCPP platform view mode and SurfaceControl backed "
+           "swapchain when supported.")
 DEF_SWITCH(EnableFlutterGPU,
            "enable-flutter-gpu",
            "Whether Flutter GPU is enabled.")
@@ -297,6 +298,9 @@ DEF_SWITCH(ImpellerLazyShaderMode,
 DEF_SWITCH(ImpellerAntialiasLines,
            "impeller-antialias-lines",
            "Experimental flag to test drawing lines with antialiasing.")
+DEF_SWITCH(ImpellerUseSDFs,
+           "impeller-use-sdfs",
+           "Whether to use SDFs for rendering in Impeller.")
 DEF_SWITCHES_END
 
 }  // namespace flutter
