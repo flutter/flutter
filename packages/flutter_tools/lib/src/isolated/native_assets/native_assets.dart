@@ -44,6 +44,21 @@ class FlutterCodeAsset {
 /// support more asset types in the future.
 enum SupportedAssetTypes { codeAssets, dataAssets }
 
+/// Hook options specific to building code assets.
+final class BuildCodeAssetsOptions {
+  const BuildCodeAssetsOptions({required this.appBuildDirectory});
+
+  /// The build directory of the main app build, e.g. `/path/to/app/build`.
+  ///
+  /// Depending on the target platform, we may try to lookup compiler options
+  /// based on files in this directory to align code assets toolchains with the
+  /// main app build.
+  ///
+  /// Null for hook invocations not associated with an app build (e.g. widget
+  /// tests).
+  final Directory? appBuildDirectory;
+}
+
 /// Invokes the build of all transitive Dart package hooks and prepares assets
 /// to be included in the native build.
 Future<DartHooksResult> runFlutterSpecificHooks({
@@ -52,7 +67,7 @@ Future<DartHooksResult> runFlutterSpecificHooks({
   required TargetPlatform targetPlatform,
   required Uri projectUri,
   required FileSystem fileSystem,
-  required bool buildCodeAssets,
+  required BuildCodeAssetsOptions? buildCodeAssets,
   required bool buildDataAssets,
 }) async {
   if (!await _hookRunRequired(buildRunner)) {
@@ -60,26 +75,33 @@ Future<DartHooksResult> runFlutterSpecificHooks({
   }
 
   final supportedAssetTypes = <SupportedAssetTypes>[
-    if (featureFlags.isNativeAssetsEnabled && buildCodeAssets) SupportedAssetTypes.codeAssets,
+    if (featureFlags.isNativeAssetsEnabled && buildCodeAssets != null)
+      SupportedAssetTypes.codeAssets,
     if (featureFlags.isDartDataAssetsEnabled && buildDataAssets) SupportedAssetTypes.dataAssets,
   ];
-  final List<AssetBuildTarget> targets = AssetBuildTarget.targetsFor(
-    targetPlatform: targetPlatform,
-    environmentDefines: environmentDefines,
-    fileSystem: fileSystem,
-    supportedAssetTypes: supportedAssetTypes,
-  );
-
-  // This is ugly, but sadly necessary as fetching the cCompilerConfig is async,
-  // while using it in native_assets_builder is not.
-  for (final CodeAssetTarget target in targets.whereType<CodeAssetTarget>()) {
-    await buildRunner.setCCompilerConfig(target);
-  }
 
   final BuildMode buildMode = _getBuildMode(
     environmentDefines,
     targetPlatform == TargetPlatform.tester,
   );
+
+  final List<AssetBuildTarget> targets = AssetBuildTarget.targetsFor(
+    targetPlatform: targetPlatform,
+    buildMode: buildMode,
+    environmentDefines: environmentDefines,
+    fileSystem: fileSystem,
+    supportedAssetTypes: supportedAssetTypes,
+    buildDirectory: buildCodeAssets?.appBuildDirectory,
+  );
+
+  if (supportedAssetTypes.contains(SupportedAssetTypes.codeAssets)) {
+    // This is ugly, but sadly necessary as fetching the cCompilerConfig is async,
+    // while using it in native_assets_builder is not.
+    for (final CodeAssetTarget target in targets.whereType<CodeAssetTarget>()) {
+      await buildRunner.setCCompilerConfig(target);
+    }
+  }
+
   final bool linkingEnabled = _nativeAssetsLinkingEnabled(buildMode);
 
   return _runDartHooks(

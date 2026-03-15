@@ -147,6 +147,9 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 @property(nonatomic, strong) FlutterMethodChannel* navigationChannel;
 @property(nonatomic, strong) FlutterMethodChannel* restorationChannel;
 @property(nonatomic, strong) FlutterMethodChannel* platformChannel;
+// This channel only sends status bar related events to the framework thus has
+// no handlers.
+@property(nonatomic, strong) FlutterMethodChannel* statusBarChannel;
 @property(nonatomic, strong) FlutterMethodChannel* platformViewsChannel;
 @property(nonatomic, strong) FlutterMethodChannel* textInputChannel;
 @property(nonatomic, strong) FlutterMethodChannel* undoManagerChannel;
@@ -577,6 +580,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   self.navigationChannel = nil;
   self.restorationChannel = nil;
   self.platformChannel = nil;
+  self.statusBarChannel = nil;
   self.platformViewsChannel = nil;
   self.textInputChannel = nil;
   self.undoManagerChannel = nil;
@@ -640,6 +644,12 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
       [[FlutterMethodChannel alloc] initWithName:@"flutter/platform"
                                  binaryMessenger:self.binaryMessenger
                                            codec:[FlutterJSONMethodCodec sharedInstance]];
+
+  self.statusBarChannel =
+      [[FlutterMethodChannel alloc] initWithName:@"flutter/status_bar"
+                                 binaryMessenger:self.binaryMessenger
+                                           codec:[FlutterJSONMethodCodec sharedInstance]];
+  [self.statusBarChannel resizeChannelBuffer:0];  // No buffering.
 
   self.platformViewsChannel =
       [[FlutterMethodChannel alloc] initWithName:@"flutter/platform_views"
@@ -1483,6 +1493,13 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   [self.localizationChannel invokeMethod:@"setLocale" arguments:localeData];
 }
 
+- (void)onStatusBarTap {
+  // Called by FlutterViewController to notify the framework that a tap landed
+  // on the status bar, and the most relevant vertical scroll view visible in the
+  // app, if applicable, should scroll to top.
+  [self.statusBarChannel invokeMethod:@"handleScrollToTop" arguments:nil];
+}
+
 - (void)waitForFirstFrameSync:(NSTimeInterval)timeout
                      callback:(NS_NOESCAPE void (^_Nonnull)(BOOL didTimeout))callback {
   fml::TimeDelta waitTime = fml::TimeDelta::FromMilliseconds(timeout * 1000);
@@ -1669,6 +1686,29 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   }];
 }
 
+/// Returns YES if the Flutter plugin responds to any legacy app lifecycle selectors.
+/// These selectors correspond to UIApplicationDelegate methods that have scene-based
+/// equivalents and require migration to FlutterSceneLifeCycleDelegate.
+static BOOL FLTFlutterPluginRespondsToLegacyAppLifecycleSelectors(
+    NSObject<FlutterPlugin>* delegate) {
+  SEL selectors[] = {
+    @selector(applicationDidBecomeActive:),
+    @selector(applicationWillResignActive:),
+    @selector(applicationWillEnterForeground:),
+    @selector(applicationDidEnterBackground:),
+    @selector(application:continueUserActivity:restorationHandler:),
+    @selector(application:performActionForShortcutItem:completionHandler:),
+    @selector(application:openURL:options:),
+    @selector(application:performFetchWithCompletionHandler:),
+  };
+  for (SEL sel : selectors) {
+    if ([delegate respondsToSelector:sel]) {
+      return YES;
+    }
+  }
+  return NO;
+}
+
 - (void)addApplicationDelegate:(NSObject<FlutterPlugin>*)delegate {
   id<UIApplicationDelegate> appDelegate = FlutterSharedApplication.application.delegate;
   if ([appDelegate conformsToProtocol:@protocol(FlutterAppLifeCycleProvider)]) {
@@ -1676,11 +1716,17 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
         (id<FlutterAppLifeCycleProvider>)appDelegate;
     [lifeCycleProvider addApplicationLifeCycleDelegate:delegate];
   }
-  if (![delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleDelegate)]) {
-    // TODO(vashworth): If the plugin doesn't conform to the FlutterSceneLifeCycleDelegate,
-    // print a warning pointing to documentation: https://github.com/flutter/flutter/issues/175956
-    // [FlutterLogger logWarning:[NSString stringWithFormat:@"Plugin %@ has not migrated to
-    // scenes.", self.key]];
+  if (![delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleDelegate)] &&
+      FLTFlutterPluginRespondsToLegacyAppLifecycleSelectors(delegate)) {
+    [FlutterLogger
+        logWarning:
+            [NSString stringWithFormat:
+                          @"Plugin %@ uses deprecated application lifecycle events. Please contact "
+                          @"plugin maintainers and request UIScene lifecycle support. This will be "
+                          @"required in a future version of Flutter. See "
+                          @"https://docs.flutter.dev/release/breaking-changes/"
+                          @"uiscenedelegate#migration-guide-for-flutter-plugins",
+                          self.key]];
   }
 }
 

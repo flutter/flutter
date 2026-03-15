@@ -113,6 +113,15 @@ enum WidgetsServiceExtensions {
   /// * [WidgetsBinding.initServiceExtensions], where the service extension is
   ///   registered.
   debugAllowBanner,
+
+  /// Name of service extension that, when called, will perform accessibility
+  /// evaluations on the widget tree and return the results.
+  ///
+  /// See also:
+  ///
+  /// * [WidgetsBinding.initServiceExtensions], where the service extension is
+  ///   registered.
+  accessibilityEvaluations,
 }
 
 /// Service extension constants for the Widget Inspector.

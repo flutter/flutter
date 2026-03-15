@@ -8,13 +8,12 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/src/gestures/monodrag.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'editable_text_utils.dart' show TestTextField;
+import 'editable_text_tester.dart';
 import 'two_dimensional_utils.dart';
 
 Widget? _testChildBuilder(BuildContext context, ChildVicinity vicinity) {
-  return SizedBox(
-    height: 200,
-    width: 200,
+  return SizedBox.square(
+    dimension: 200.0,
     child: Center(child: Text('C${vicinity.xIndex}:R${vicinity.yIndex}')),
   );
 }

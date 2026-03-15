@@ -21,7 +21,7 @@ struct AX_BASE_EXPORT AXEventIntent final {
   AXEventIntent(ax::mojom::Command command,
                 ax::mojom::TextBoundary text_boundary,
                 ax::mojom::MoveDirection move_direction);
-  virtual ~AXEventIntent();
+  ~AXEventIntent();
   AXEventIntent(const AXEventIntent& intent);
   AXEventIntent& operator=(const AXEventIntent& intent);
 
