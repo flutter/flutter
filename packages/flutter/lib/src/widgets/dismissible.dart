@@ -394,6 +394,7 @@ class _DismissibleState extends State<Dismissible>
   bool _dragUnderway = false;
   Size? _sizePriorToCollapse;
   bool _dismissThresholdReached = false;
+  bool _forceDismiss = false;
 
   final GlobalKey _contentKey = GlobalKey();
 
@@ -576,15 +577,16 @@ class _DismissibleState extends State<Dismissible>
       return;
     }
     _dragUnderway = false;
+    _forceDismiss = false;
 
-    late final double flingVelocity = _directionIsXAxis ? details.velocity.pixelsPerSecond.dx : details.velocity.pixelsPerSecond.dy;
-    late final _FlingGestureKind flingGesture = _describeFlingGesture(details.velocity);
-    late final bool reached = _moveController.value > _dismissThreshold;
+    final double flingVelocity = _directionIsXAxis ? details.velocity.pixelsPerSecond.dx : details.velocity.pixelsPerSecond.dy;
+    final _FlingGestureKind flingGesture = _describeFlingGesture(details.velocity);
+    final bool reached = _moveController.value > _dismissThreshold;
 
     // Use value returned by `shouldTriggerDismiss` if a callback is provided.
     // If the callback returns null, use the default behavior.
     if (widget.shouldTriggerDismiss != null) {
-      final TriggerDismissDetails triggerDismissDetails = TriggerDismissDetails(
+      final triggerDismissDetails = TriggerDismissDetails(
         direction: _dismissDirection,
         reached: reached,
         progress: _moveController.value,
@@ -600,6 +602,7 @@ class _DismissibleState extends State<Dismissible>
           return;
         }
 
+        _forceDismiss = shouldDismiss;
         if (shouldDismiss) {
           if (_moveController.isCompleted) {
             _handleMoveCompleted();
@@ -654,11 +657,12 @@ class _DismissibleState extends State<Dismissible>
   }
 
   Future<void> _handleMoveCompleted() async {
-    if (_dismissThreshold >= 1.0) {
+    if (_dismissThreshold >= 1.0 && !_forceDismiss) {
       _moveController.reverse();
       return;
     }
     final bool result = await _confirmStartResizeAnimation();
+    _forceDismiss = false;
     if (mounted) {
       if (result) {
         _startResizeAnimation();
