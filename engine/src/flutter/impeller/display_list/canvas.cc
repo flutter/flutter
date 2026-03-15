@@ -32,6 +32,7 @@
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
 #include "impeller/entity/contents/line_contents.h"
+#include "impeller/entity/contents/sdf_vertices_contents.h"
 #include "impeller/entity/contents/shadow_vertices_contents.h"
 #include "impeller/entity/contents/solid_rrect_blur_contents.h"
 #include "impeller/entity/contents/solid_rsuperellipse_blur_contents.h"
@@ -417,9 +418,14 @@ void Canvas::DrawPath(const flutter::DlPath& path, const Paint& paint) {
     }
   }
 
+  const Matrix& transform = GetCurrentTransform();
   Entity entity;
-  entity.SetTransform(GetCurrentTransform());
+  entity.SetTransform(transform);
   entity.SetBlendMode(paint.blend_mode);
+
+  if (AttemptDrawAntialiasedPath(path, paint)) {
+    return;
+  }
 
   if (paint.style == Paint::Style::kFill) {
     FillPathGeometry geom(path);
@@ -540,6 +546,40 @@ bool Canvas::AttemptDrawAntialiasedCircle(const Point& center,
 
   auto contents =
       CircleContents::Make(std::move(geom), paint.color, is_stroked);
+
+  entity.SetContents(std::move(contents));
+  AddRenderEntityToCurrentPass(entity);
+
+  return true;
+}
+
+bool Canvas::AttemptDrawAntialiasedPath(const PathSource& source,
+                                        const Paint& paint)
+{
+  if (paint.style != Paint::Style::kFill || paint.HasColorFilter() ||
+      paint.image_filter || paint.invert_colors || paint.color_source ||
+      paint.mask_blur_descriptor.has_value()) {
+    return false;
+  }
+
+  const Matrix& transform = GetCurrentTransform();
+
+  // REMIND - get aa_pixels constant from wherever it lives...
+  auto geometry = ShadowPathGeometry::MakeSDFVertices(
+      renderer_.GetTessellator(), source, transform, 1.0f);
+  if (!geometry) {
+    return false;
+  }
+  if (geometry->IsEmpty()) {
+    return true;
+  }
+
+  Entity entity;
+  entity.SetTransform(transform);
+  entity.SetBlendMode(paint.blend_mode);
+
+  auto contents = SDFVerticesContents::Make(geometry);
+  contents->SetColor(paint.color);
 
   entity.SetContents(std::move(contents));
   AddRenderEntityToCurrentPass(entity);

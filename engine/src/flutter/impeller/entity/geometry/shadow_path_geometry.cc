@@ -22,30 +22,35 @@ using impeller::Trig;
 using impeller::Vector2;
 
 /// Each point in the polygon form of the path is turned into a structure
-/// that tracks the gradient of the shadow at that point in the path. The
+/// that tracks the gradient of the mesh at that point in the path. The
 /// shape is turned into a sort of pin cushion where each struct acts
-/// like a pin pushed into that cushion in the direction of the shadow
+/// like a pin pushed into that cushion in the direction of the mesh
 /// gradient at that location.
+///
+/// The gradient can be defined by the size and opacity of a shadow umbra
+/// vs. its penumbra, or it can be a SDF gradient from full coverage of
+/// the path to no coverage.
 ///
 /// Each entry contains the direction of the pin at that location and the
 /// depth to which the pin is inserted, expressed as a fraction of the full
-/// umbra size indicated by the shadow parameters. A depth of 1.0 means
-/// the pin was inserted all the way to the depth of the shadow gradient
-/// and didn't collide with any other pins. A fraction less than 1.0 can
-/// occur if either the shape was too small and the pins intersected with
-/// other pins across the shape from them, or if the curvature in a given
-/// area was so tight that adjacent pins started bumping into their neighbors
-/// even if the overall size of the shape was larger than the shadow.
+/// inset gradient size indicated by the projection parameters. The depth
+/// is expressed as a fraction where 1.0 means the pin was inserted all the
+/// way to the depth of the inset and didn't collide with any other pins.
+/// A fraction less than 1.0 can occur if either the shape was too small
+/// and the pins intersected with other pins across the shape from them,
+/// or if the curvature in a given area was so tight that adjacent pins
+/// started bumping into their neighbors even if the overall size of the
+/// shape was larger than the gradient.
 ///
 /// Different pins will be shortened by different amounts in the same shape
 /// depending on their local geometry (tight curves or narrow cross section).
-struct UmbraPin {
+struct PolygonPin {
   /// An initial value for the pin fraction that indicates that we have
   /// not yet visited this pin during the clipping process.
   static constexpr Scalar kFractionUninitialized = -1.0f;
 
   /// The point on the original path that generated this entry into the
-  /// umbra geometry.
+  /// mesh geometry.
   ///
   /// AKA the point on the path at which this pin was stabbed.
   Point path_vertex;
@@ -55,50 +60,50 @@ struct UmbraPin {
 
   /// The vector from the path_vertex to the head of the pin (the part
   /// outside the shape).
-  Vector2 penumbra_delta;
+  Vector2 outset_delta;
 
   /// The location of the end of this pin, taking into account the reduction
-  /// of the umbra_size due to minimum distance to centroid, but ignoring
+  /// of the inset_size due to the minimum distance to centroid, but ignoring
   /// clipping against other pins.
-  Point pin_tip;
+  Point inset_tip;
 
-  /// The location that this pin confers to the umbra polygon. Initially,
-  /// this is the same as the pin_tip, but can be reduced by intersecting
+  /// The location that this pin confers to the inner polygon. Initially,
+  /// this is the same as the inset_tip, but can be reduced by intersecting
   /// and clipping against other pins and even eliminated if the other
-  /// nearby pins make it redundant for defining the umbra polygon.
+  /// nearby pins make it redundant for defining the inset polygon.
   ///
   /// Redundant or "removed" pins are indicated by no longer being a part
   /// of the linked list formed by the |p_next| and |p_prev| pointers.
   ///
-  /// Eventually, if this pin's umbra_vertex was eliminated, this location
-  /// will be overwritten by the surviving umbra vertex that best servies
+  /// Eventually, if this pin's inset_vertex was eliminated, this location
+  /// will be overwritten by the surviving inset_vertex that best servies
   /// this pin's path_vertex in a follow-on step.
-  Point umbra_vertex;
+  Point inset_vertex;
 
-  /// The index in the vertices vector where the umbra_vertex is eventually
+  /// The index in the vertices vector where the inset_vertex is eventually
   /// inserted. Used to enter triangles into the indices vector.
-  uint16_t umbra_index = 0u;
+  uint16_t inset_index = 0u;
 
-  /// The interior penetration of the umbra starts out at the full blur
+  /// The interior penetration of the pin starts out at the full inset
   /// radius as modified by the global distance of the path segments to
   /// the centroid, but can be shortened when pins are too crowded and start
   /// intersecting each other due to tight curvature.
   ///
-  /// It's initial value is actually the uninitialized constant so that the
+  /// Its initial value is actually the uninitialized constant so that the
   /// algorithm can treat it specially the first time it is encountered.
-  Scalar umbra_fraction = kFractionUninitialized;
+  Scalar inset_fraction = kFractionUninitialized;
 
-  /// Pointers used to create a circular linked list while pruning the umbra
-  /// polygon. The final list of vertices that remain in the umbra polygon
+  /// Pointers used to create a circular linked list while pruning the inset
+  /// polygon. The final list of vertices that remain in the inset polygon
   /// are the vertices that remain on this linked list from a "head" pin.
-  UmbraPin* p_next = nullptr;
-  UmbraPin* p_prev = nullptr;
+  PolygonPin* p_next = nullptr;
+  PolygonPin* p_prev = nullptr;
 
-  /// Returns true after the umbra_fraction is first initialized to a real
+  /// Returns true after the inset_fraction is first initialized to a real
   /// value representing its potential intersections with other pins. At
   /// that point it will be a number from 0 to 1.
   bool IsFractionInitialized() const {
-    return umbra_fraction > kFractionUninitialized;
+    return inset_fraction > kFractionUninitialized;
   }
 };
 
@@ -131,7 +136,7 @@ struct DirectionDetector {
 };
 
 /// Utility class to receive the vertices of a path and turn them into
-/// a vector of UmbraPins along with a centroid Point.
+/// a vector of PolygonPins along with a centroid Point.
 ///
 /// The class will immediately flag and stop processing any path that
 /// has more than one contour since algorithms of the nature implemented
@@ -142,7 +147,7 @@ struct DirectionDetector {
 /// paths. Though it is possible to improve the algorithm to handle
 /// concave single-contour paths in the future as the Skia utilities
 /// provide a solution for those paths.
-class UmbraPinAccumulator : public PathTessellator::VertexWriter {
+class PolygonPinAccumulator : public PathTessellator::VertexWriter {
  public:
   /// Parameters that determine the sub-pixel grid we will use to simplify
   /// the contours to avoid degenerate differences in the vertices.
@@ -172,9 +177,9 @@ class UmbraPinAccumulator : public PathTessellator::VertexWriter {
     kMultipleContours,
   };
 
-  explicit UmbraPinAccumulator(Vector2 device_scale);
+  explicit PolygonPinAccumulator(Vector2 device_scale);
 
-  ~UmbraPinAccumulator() = default;
+  ~PolygonPinAccumulator() = default;
 
   /// Reserve enough pins for the indicated number of path vertices to
   /// avoid having to grow the vector during processing.
@@ -184,9 +189,9 @@ class UmbraPinAccumulator : public PathTessellator::VertexWriter {
   /// see |PathStatus|
   PathStatus GetStatus() { return GetResults().status; }
 
-  /// Returns a reference to the accumulated vector of UmbraPin structs.
+  /// Returns a reference to the accumulated vector of PolygonPin structs.
   /// Only valid if the status is kConvex.
-  std::vector<UmbraPin>& GetPins() { return pins_; }
+  std::vector<PolygonPin>& GetPins() { return pins_; }
 
   /// Returns the centroid of the path.
   /// Only valid if the status is kConvex.
@@ -227,7 +232,7 @@ class UmbraPinAccumulator : public PathTessellator::VertexWriter {
 
   /// The list of pins being accumulated for further processing by the
   /// mesh generation code.
-  std::vector<UmbraPin> pins_;
+  std::vector<PolygonPin> pins_;
 
   /// Internal state variable used by the VertexWriter callbacks to know
   /// if the path contained multiple contours. It is set to true when the
@@ -257,6 +262,40 @@ class UmbraPinAccumulator : public PathTessellator::VertexWriter {
   PathResults FinalizePath();
 };
 
+/// A specification of one of the projections of the path for a shadow or
+/// other SDF-type tessellation. A pair of these structures should be
+/// produced for either shadows or SDF projections.
+struct ParameterizedProjection {
+  /// How far to project the path (either inward or outward).
+  Scalar distance;
+
+  /// The vertex value to assign to the vertices on this projection,
+  /// whether for gaussian accumulation (for shadows) or for SDF coverage
+  /// calculations.
+  Scalar parameter;
+
+  ParameterizedProjection operator+(
+      const ParameterizedProjection& other) const {
+    return {
+        .distance = distance + other.distance,
+        .parameter = parameter + other.parameter,
+    };
+  }
+};
+
+struct ParameterizedPair {
+  ParameterizedProjection inset;
+  ParameterizedProjection outset;
+
+  ParameterizedProjection LerpByInsetDistance(Scalar d) const {
+    Scalar t = (outset.distance + d) / (inset.distance + outset.distance);
+    return {
+        .distance = d,
+        .parameter = (outset.parameter + t * (inset.parameter - outset.parameter)),
+    };
+  }
+};
+
 /// The |PolygonInfo| class does most of the work of generating a mesh from
 /// a path, including transforming it into device space, computing new vertices
 /// by applying the inset and outset for the indicated occluder_height, and
@@ -271,9 +310,23 @@ class PolygonInfo {
     return GetPenumbraSizeForHeight(occluder_height);
   }
 
+  /// Compute the size of the penumbra for a given occluder_height which
+  /// can vary depending on the type of shadow. Here we are only processing
+  /// ambient shadows.
+  static constexpr Scalar GetPenumbraSizeForHeight(Scalar occluder_height) {
+    return occluder_height;
+  }
+
+  /// Compute the size of the umbra for a given occluder_height which
+  /// can vary depending on the type of shadow. Here we are only processing
+  /// ambient shadows.
+  static constexpr Scalar GetUmbraSizeForHeight(Scalar occluder_height) {
+    return occluder_height;
+  }
+
   /// Construct a PolygonInfo that will accept a path and compute a shadow
   /// mesh at the indicated occluder_height.
-  explicit PolygonInfo(Scalar occluder_height);
+  explicit PolygonInfo(ParameterizedPair mesh_parameters);
 
   /// Computes a shadow mesh for the indicated path (source) under the
   /// given matrix with the associated trigs. If the algorithm is successful,
@@ -296,31 +349,16 @@ class PolygonInfo {
       const Tessellator::Trigs& trigs);
 
  private:
-  /// Compute the size of the penumbra for a given occluder_height which
-  /// can vary depending on the type of shadow. Here we are only processing
-  /// ambient shadows.
-  static constexpr Scalar GetPenumbraSizeForHeight(Scalar occluder_height) {
-    return occluder_height;
-  }
-
-  /// Compute the size of the umbra for a given occluder_height which
-  /// can vary depending on the type of shadow. Here we are only processing
-  /// ambient shadows.
-  static constexpr Scalar GetUmbraSizeForHeight(Scalar occluder_height) {
-    return occluder_height;
-  }
-
   /// The minimum distance (squared) between points on the mesh before we
   /// eliminate them as redundant.
   static constexpr Scalar kMinSubPixelDistanceSquared =
-      UmbraPinAccumulator::kSubPixelScale * UmbraPinAccumulator::kSubPixelScale;
+      PolygonPinAccumulator::kSubPixelScale *
+      PolygonPinAccumulator::kSubPixelScale;
 
-  /// The occluder_height for which we are processing this shadow.
-  const Scalar occluder_height_;
-
-  /// The maximum gaussian of the umbra part of the shadow, usually 1.0f
-  /// but can be reduced if the umbra size was clipped.
-  Scalar umbra_gaussian_ = 1.0f;
+  /// The projection data for the pair of polygons used to draw a mesh
+  /// around the outline of the supplied path.
+  const ParameterizedPair mesh_parameters_;
+  ParameterizedProjection adjusted_inner_parameters_;
 
   /// The vertex mesh result that represents the shadow, to be rendered
   /// using a modified indexed variant of DrawVertices that also adjusts
@@ -340,19 +378,20 @@ class PolygonInfo {
   std::vector<Scalar> gaussians_;
 
   /// Run through the pins and determine the closest pin to the centroid
-  /// and, in particular, adjust the umbra_gaussian value if the closest pin
-  /// is less than the required umbra distance.
-  void ComputePinDirectionsAndMinDistanceToCentroid(std::vector<UmbraPin>& pins,
-                                                    const Point& centroid,
-                                                    Scalar direction);
+  /// and, in particular, adjust the adjusted_inset_parameters_ value if
+  /// the closest pin is less than the required gradient distance.
+  void ComputePinDirectionsAndMinDistanceToCentroid(
+      std::vector<PolygonPin>& pins,
+      const Point& centroid,
+      Scalar direction);
 
-  /// The head and count for the list of UmbraPins that contribute to the
-  /// umbra vertex ring.
+  /// The head and count for the list of PolygonPins that contribute to the
+  /// inset vertex ring.
   ///
   /// The forward and backward pointers for the linked list are stored
-  /// in the UmbraPin struct as p_next, p_prev.
-  struct UmbraPinLinkedList {
-    UmbraPin* p_head_pin = nullptr;
+  /// in the PolygonPin struct as p_next, p_prev.
+  struct PolygonPinLinkedList {
+    PolygonPin* p_head_pin = nullptr;
     size_t pin_count = 0u;
 
     bool IsNull() { return p_head_pin == nullptr; }
@@ -361,17 +400,17 @@ class PolygonInfo {
   /// Run through the pins and determine if they intersect each other
   /// internally, whether they are completely obscured by other pins,
   /// their new relative lengths if they defer to another pin at some
-  /// depth, and which remaining pins are part of the umbra polygon,
-  /// and then return the pointer to the first pin in the "umbra polygon".
-  UmbraPinLinkedList ResolveUmbraIntersections(std::vector<UmbraPin>& pins,
-                                               Scalar direction);
+  /// depth, and which remaining pins are part of the inset polygon,
+  /// and then return the pointer to the first pin in the "inset polygon".
+  PolygonPinLinkedList ResolveInsetIntersections(std::vector<PolygonPin>& pins,
+                                                 Scalar direction);
 
   /// Structure to store the result of computing the intersection between
   /// 2 pins, pin0 and pin1, containing the point of intersection and the
   /// relative fractions at which the 2 pins intersected (expressed as a
   /// ratio of 0 to 1 where 0 represents intersecting at the path outline
-  /// and 1 represents intersecting at the tip of the pin where the umbra
-  /// is darkest.
+  /// and 1 represents intersecting at the tip of the pin where the inset
+  /// gradient is fully visible.
   struct PinIntersection {
     // The Point of the intersection between the pins.
     Point intersection;
@@ -384,8 +423,8 @@ class PolygonInfo {
   /// Return the intersection between the 2 pins pin0 and pin1 if there
   /// is an intersection, otherwise a nullopt to indicate that there is
   /// no intersection.
-  static std::optional<PinIntersection> ComputeIntersection(UmbraPin& pin0,
-                                                            UmbraPin& pin1);
+  static std::optional<PinIntersection> ComputeIntersection(PolygonPin& pin0,
+                                                            PolygonPin& pin1);
 
   /// Constants used to resolve pin intersections, adopted from the Skia
   /// version of the algorithm.
@@ -399,7 +438,7 @@ class PolygonInfo {
   }
 
   /// Determine if the numerator and denominator are outside of the
-  /// interval that makes sense for an umbra intersection.
+  /// interval that makes sense for an inset intersection.
   ///
   /// Note calculation borrowed from Skia's SkPathUtils.
   static constexpr inline bool OutsideInterval(Scalar numer,
@@ -410,7 +449,7 @@ class PolygonInfo {
   }
 
   /// Remove the pin at p_pin from the linked list of pins when the caller
-  /// determines that it should not contribute to the final umbra polygon.
+  /// determines that it should not contribute to the final inset polygon.
   /// The pointer to the head pin at *p_head will also be adjusted if we've
   /// eliminated the head pin itself and it will be additionally set to
   /// nullptr if that was the last pin in the list.
@@ -418,7 +457,7 @@ class PolygonInfo {
   /// @param p_pin    The pin to be eliminated from the list.
   /// @param p_head   The pointer to the head of the list which might also
   ///                 need adjustment depending on which pin is removed.
-  static void RemovePin(UmbraPin* p_pin, UmbraPin** p_head);
+  static void RemovePin(PolygonPin* p_pin, PolygonPin** p_head);
 
   /// A helper method for resolving pin conflicts, adopted directly from the
   /// associated Skia algorithm.
@@ -426,58 +465,59 @@ class PolygonInfo {
   /// Note calculation borrowed from Skia's SkPathUtils.
   static int ComputeSide(const Point& p0, const Vector2& v, const Point& p);
 
-  /// Run through the path calculating the outset vertices for the penumbra
-  /// and connecting them to the inset vertices of the umbra and then to
-  /// the centroid in a system of triangles with the appropriate alpha values
-  /// representing the intensity of the (non-gamma-adjusted) shadow at those
-  /// points. The resulting mesh should consist of 2 rings of triangles, an
-  /// inner ring connecting the centroid to the umbra polygon, and another
-  /// outer ring connecting vertices in the umbra polygon to vertices on the
-  /// outer edge of the penumbra.
+  /// Run through the path calculating the outset vertices for the mesh
+  /// and connecting them to the inset polygon vertices and then to the
+  /// centroid in a system of triangles with the appropriate parameter values
+  /// representing the intensity of the gradient at those points.
+  ///
+  /// The resulting mesh should consist of 2 rings of triangles, an inner
+  /// ring connecting the centroid to the inset polygon, and another outer
+  /// ring connecting vertices in the inner polygon to vertices on the
+  /// outer polygon.
   ///
   /// @param pins       The list of pins, one for each edge of the polygon.
   /// @param centroid   The centroid ("center of mass") of the polygon.
   /// @param list       The linked list of the subset of pins that have
-  ///                   umbra vertices which appear in the umbra polygon.
+  ///                   vertices which appear in the inset polygon.
   /// @param trigs      The vector of sin and cos for subdivided arcs that
-  ///                   can round the penumbra corner at each polygon corner.
+  ///                   can round the outer polygon corners.
   /// @param direction  The overall direction of the path as determined by
   ///                   the consistent cross products of each edge turn.
-  void ComputeMesh(std::vector<UmbraPin>& pins,
+  void ComputeMesh(std::vector<PolygonPin>& pins,
                    const Point& centroid,
-                   UmbraPinLinkedList& list,
+                   PolygonPinLinkedList& list,
                    const impeller::Tessellator::Trigs& trigs,
                    Scalar direction);
 
-  /// After the umbra_vertices of the pins are accumulated and linked into a
-  /// ring using their p_prev/p_next pointers, compute the best surviving umbra
-  /// vertex for each pin and set its location and index into the UmbraPin.
+  /// After the inset_vertices of the pins are accumulated and linked into a
+  /// ring using their p_prev/p_next pointers, compute the best surviving inset
+  /// vertex for each pin and store its location and index in the PolygonPin.
   ///
   /// @param pins       The list of pins, one for each edge of the polygon.
   /// @param list       The linked list of the subset of pins that have
-  ///                   umbra vertices which appear in the umbra polygon.
+  ///                   inset vertices which appear in the inset polygon.
   /// @param centroid   The centroid ("center of mass") of the polygon.
-  void PopulateUmbraVertices(std::vector<UmbraPin>& pins,
-                             UmbraPinLinkedList& list,
+  void PopulateUmbraVertices(std::vector<PolygonPin>& pins,
+                             PolygonPinLinkedList& list,
                              const Point centroid);
 
-  /// Appends a fan of penumbra vertices centered on the path vertex of the
+  /// Appends a fan of outer vertices centered on the path vertex of the
   /// |p_curr_pin| starting from the absolute point |fan_start| and ending
   /// at the absolute point |fan_end|, both of which should be equi-distant
   /// from the path vertex. The index of the vertex at |fan_start| should
   /// already be in the vector of vertices at an index given by |start_index|.
   ///
-  /// @param p_curr_pin    The pin at the corner around which the penumbra is
-  ///                      rotating.
-  /// @param fan_start     The point on the penumbra where the fan starts.
-  /// @param fan_start     The point on the penumbra where the fan ends.
+  /// @param p_curr_pin    The pin at the corner around which the outer
+  ///                      polygon is rotating.
+  /// @param fan_start     The point on the outer polygon where the fan starts.
+  /// @param fan_start     The point on the outer polygon where the fan ends.
   /// @param start_index   The index in the vector of vertices where the
   ///                      fan_start vertex has already been inserted.
   /// @param trigs      The vector of sin and cos for subdivided arcs that
-  ///                   can round the penumbra corner at each polygon corner.
+  ///                   can round the outer polygon corners.
   /// @param direction  The overall direction of the path as determined by
   ///                   the consistent cross products of each edge turn.
-  uint16_t AppendFan(const UmbraPin* p_curr_pin,
+  uint16_t AppendFan(const PolygonPin* p_curr_pin,
                      const Point& fan_start,
                      const Point& fan_end,
                      uint16_t start_index,
@@ -492,8 +532,8 @@ class PolygonInfo {
   void AddTriangle(uint16_t v0, uint16_t v1, uint16_t v2);
 };
 
-PolygonInfo::PolygonInfo(Scalar occluder_height)
-    : occluder_height_(occluder_height) {}
+PolygonInfo::PolygonInfo(ParameterizedPair mesh_parameters)
+    : mesh_parameters_(mesh_parameters) {}
 
 const std::shared_ptr<ShadowVertices> PolygonInfo::CalculateConvexShadowMesh(
     const impeller::PathSource& source,
@@ -511,7 +551,7 @@ const std::shared_ptr<ShadowVertices> PolygonInfo::CalculateConvexShadowMesh(
     return ShadowVertices::kEmpty;
   }
 
-  UmbraPinAccumulator pin_accumulator(scale_2d);
+  PolygonPinAccumulator pin_accumulator(scale_2d);
 
   Scalar scale = std::max(scale_2d.x, scale_2d.y);
   auto [point_count, contour_count] =
@@ -521,28 +561,28 @@ const std::shared_ptr<ShadowVertices> PolygonInfo::CalculateConvexShadowMesh(
   PathTessellator::PathToFilledVertices(source, pin_accumulator, scale);
 
   switch (pin_accumulator.GetStatus()) {
-    case UmbraPinAccumulator::PathStatus::kEmpty:
+    case PolygonPinAccumulator::PathStatus::kEmpty:
       return ShadowVertices::kEmpty;
-    case UmbraPinAccumulator::PathStatus::kNonConvex:
-    case UmbraPinAccumulator::PathStatus::kMultipleContours:
+    case PolygonPinAccumulator::PathStatus::kNonConvex:
+    case PolygonPinAccumulator::PathStatus::kMultipleContours:
       return nullptr;
-    case UmbraPinAccumulator::PathStatus::kConvex:
+    case PolygonPinAccumulator::PathStatus::kConvex:
       break;
   }
 
-  std::vector<UmbraPin>& pins = pin_accumulator.GetPins();
+  std::vector<PolygonPin>& pins = pin_accumulator.GetPins();
   const Point& centroid = pin_accumulator.GetCentroid();
   Scalar direction = pin_accumulator.GetDirection();
 
   ComputePinDirectionsAndMinDistanceToCentroid(pins, centroid, direction);
 
-  UmbraPinLinkedList list = ResolveUmbraIntersections(pins, direction);
+  PolygonPinLinkedList list = ResolveInsetIntersections(pins, direction);
   if (list.IsNull()) {
     // Ideally the Resolve algorithm will always be able to create an
-    // inner loop of umbra vertices, but it is not perfect.
+    // inner loop of inset vertices, but it is not perfect.
     //
     // The Skia algorithm from which this was taken tries to fake an
-    // umbra polygon that is 95% from the path polygon to the centroid,
+    // inset polygon that is 95% from the path polygon to the centroid,
     // but that result does not resemble a proper shadow. If we run into
     // this case a lot we should either beef up the ResolveIntersections
     // algorithm or find a better approximation than "95% to the centroid".
@@ -562,7 +602,7 @@ const std::shared_ptr<ShadowVertices> PolygonInfo::CalculateConvexShadowMesh(
                               std::move(gaussians_));
 }
 
-UmbraPinAccumulator::UmbraPinAccumulator(Vector2 device_scale)
+PolygonPinAccumulator::PolygonPinAccumulator(Vector2 device_scale)
     : device_scale_(device_scale * kSubPixelCount) {}
 
 // Enter a new point for the polygon approximation of the shape. Points are
@@ -570,7 +610,7 @@ UmbraPinAccumulator::UmbraPinAccumulator(Vector2 device_scale)
 // at that sub-pixel grid are ignored, collinear points are reduced to just
 // the endpoints, and the centroid is updated from the remaining non-duplicate
 // grid points.
-void UmbraPinAccumulator::Write(Point point) {
+void PolygonPinAccumulator::Write(Point point) {
   // This type of algorithm will never be able to handle multiple contours.
   if (first_contour_ended_) {
     has_multiple_contours_ = true;
@@ -628,7 +668,7 @@ void UmbraPinAccumulator::Write(Point point) {
 // centroid accumulation do its math for ever segment in the path, but
 // going forward we don't need the extra pin in the shape so we verify that
 // it is a duplicate and then we delete it.
-void UmbraPinAccumulator::EndContour() {
+void PolygonPinAccumulator::EndContour() {
   // This type of algorithm will never be able to handle multiple contours.
   if (first_contour_ended_) {
     has_multiple_contours_ = true;
@@ -644,7 +684,7 @@ void UmbraPinAccumulator::EndContour() {
 }
 
 // Adjust the device point to its nearest sub-pixel grid location.
-Point UmbraPinAccumulator::ToDeviceGrid(Point point) {
+Point PolygonPinAccumulator::ToDeviceGrid(Point point) {
   return (point * device_scale_).Round() * kSubPixelScale;
 }
 
@@ -665,7 +705,7 @@ Point UmbraPinAccumulator::ToDeviceGrid(Point point) {
 //   - The turning direction of every triplet of points.
 //   - The signs of the area accumulated using cross products.
 //   - The number of times that the path edges change sign in X or Y.
-UmbraPinAccumulator::PathResults UmbraPinAccumulator::FinalizePath() {
+PolygonPinAccumulator::PathResults PolygonPinAccumulator::FinalizePath() {
   FML_DCHECK(!results_.has_value());
 
   if (has_multiple_contours_) {
@@ -686,7 +726,7 @@ UmbraPinAccumulator::PathResults UmbraPinAccumulator::FinalizePath() {
   Point prev = pins_.back().path_vertex;
   Point prev_prev = pins_.end()[-2].path_vertex;
   Point first = pins_.front().path_vertex;
-  for (UmbraPin& pin : pins_) {
+  for (PolygonPin& pin : pins_) {
     Point new_point = pin.path_vertex;
 
     // Check for going around more than once in the same direction.
@@ -790,12 +830,12 @@ UmbraPinAccumulator::PathResults UmbraPinAccumulator::FinalizePath() {
 }
 
 void PolygonInfo::ComputePinDirectionsAndMinDistanceToCentroid(
-    std::vector<UmbraPin>& pins,
+    std::vector<PolygonPin>& pins,
     const Point& centroid,
     Scalar direction) {
-  Scalar desired_umbra_size = GetUmbraSizeForHeight(occluder_height_);
-  Scalar min_umbra_squared = desired_umbra_size * desired_umbra_size;
+  Scalar desired_inset_size = mesh_parameters_.inset.distance;
   FML_DCHECK(direction == 1.0f || direction == -1.0f);
+  FML_DCHECK(pins.size() > 2u);
 
   // For simplicity of iteration, we start with the last vertex as the
   // "previous" pin and then iterate once over the vector of pins,
@@ -804,41 +844,41 @@ void PolygonInfo::ComputePinDirectionsAndMinDistanceToCentroid(
   // segments are processed once even if we start with the last pin.
 
   // First pass, compute the smallest distance to the centroid.
-  UmbraPin* p_prev_pin = &pins.back();
-  for (UmbraPin& pin : pins) {
-    UmbraPin* p_curr_pin = &pin;
+  PolygonPin* p_prev_pin = &pins[0];
+  Scalar max_inset_squared = centroid.GetDistanceToSegmentSquared(
+      pins.back().path_vertex, p_prev_pin->path_vertex);
+  for (size_t i = 1u; i < pins.size(); i++) {
+    PolygonPin* p_curr_pin = &pins[i];
 
     // Accumulate (min) the distance from the centroid to "this" segment.
     Scalar distance_squared = centroid.GetDistanceToSegmentSquared(
         p_prev_pin->path_vertex, p_curr_pin->path_vertex);
-    min_umbra_squared = std::min(min_umbra_squared, distance_squared);
+    max_inset_squared = std::min(max_inset_squared, distance_squared);
 
     p_prev_pin = p_curr_pin;
   }
 
   static constexpr auto kTolerance = 1.0e-2f;
-  Scalar umbra_size = std::sqrt(min_umbra_squared);
-  if (umbra_size < desired_umbra_size + kTolerance) {
-    // if the umbra would collapse, we back off a bit on the inner blur and
-    // adjust the alpha
-    auto newInset = umbra_size - kTolerance;
-    auto ratio = 0.5f * (newInset / desired_umbra_size + 1);
-    FML_DCHECK(std::isfinite(ratio));
-
-    umbra_gaussian_ = ratio;
-    umbra_size = newInset;
-  } else {
-    FML_DCHECK(umbra_gaussian_ == 1.0f);
+  ParameterizedProjection adjusted_insets = mesh_parameters_.inset;
+  Scalar max_inset_size = std::sqrt(max_inset_squared);
+  if (max_inset_size < desired_inset_size + kTolerance) {
+    // If the inset polygon would collapse, we back off a bit on the inner
+    // distance and adjust the inset parameter.
+    max_inset_size -= kTolerance;
+    adjusted_insets = mesh_parameters_.LerpByInsetDistance(max_inset_size);
+    FML_DCHECK(std::isfinite(adjusted_insets.parameter));
   }
+  adjusted_inner_parameters_ = adjusted_insets;
 
-  // Second pass, fill out the pin data with the final umbra size.
+  // Second pass, fill out the pin data with the final inset size.
   //
   // We also link all of the pins into a circular linked list so they can be
   // quickly eliminated in the method that resolves intersections of the pins.
-  Scalar penumbra_scale = -GetPenumbraSizeForHeight(occluder_height_);
+  Scalar outset_distance = -mesh_parameters_.outset.distance;
+  Scalar inset_distance = adjusted_insets.distance;
   p_prev_pin = &pins.back();
-  for (UmbraPin& pin : pins) {
-    UmbraPin* p_curr_pin = &pin;
+  for (PolygonPin& pin : pins) {
+    PolygonPin* p_curr_pin = &pin;
     p_curr_pin->p_prev = p_prev_pin;
     p_prev_pin->p_next = p_curr_pin;
 
@@ -853,10 +893,10 @@ void PolygonInfo::ComputePinDirectionsAndMinDistanceToCentroid(
                                 .PerpendicularRight() *
                             direction;
 
-    p_prev_pin->penumbra_delta = pin_direction * penumbra_scale;
-    p_prev_pin->umbra_vertex =  //
-        p_prev_pin->pin_tip =
-            p_prev_pin->path_vertex + pin_direction * umbra_size;
+    p_prev_pin->outset_delta = pin_direction * outset_distance;
+    p_prev_pin->inset_vertex =  //
+        p_prev_pin->inset_tip =
+            p_prev_pin->path_vertex + pin_direction * inset_distance;
 
     p_prev_pin = p_curr_pin;
   }
@@ -873,11 +913,11 @@ void PolygonInfo::ComputePinDirectionsAndMinDistanceToCentroid(
 // SkShadowTessellator.cpp and SkPolyUtils.cpp, except for variable
 // naming and differences in the methods on Point and Vertex2.
 std::optional<PolygonInfo::PinIntersection> PolygonInfo::ComputeIntersection(
-    UmbraPin& pin0,
-    UmbraPin& pin1) {
+    PolygonPin& pin0,
+    PolygonPin& pin1) {
   Vector2 v0 = pin0.path_delta;
   Vector2 v1 = pin1.path_delta;
-  Vector2 tip_delta = pin1.pin_tip - pin0.pin_tip;
+  Vector2 tip_delta = pin1.inset_tip - pin0.inset_tip;
   Vector2 w = tip_delta;
   Scalar denom = pin0.path_delta.Cross(pin1.path_delta);
   bool denom_positive = (denom > 0);
@@ -916,7 +956,7 @@ std::optional<PolygonInfo::PinIntersection> PolygonInfo::ComputeIntersection(
         // Check if they're the same point
         if (w.IsFinite() && !w.IsZero()) {
           return {{
-              .intersection = pin0.pin_tip,
+              .intersection = pin0.inset_tip,
               .fraction0 = 0.0f,
               .fraction1 = 0.0f,
           }};
@@ -978,15 +1018,15 @@ std::optional<PolygonInfo::PinIntersection> PolygonInfo::ComputeIntersection(
   Scalar fraction1 = numerator1 / denom;
 
   return {{
-      .intersection = pin0.pin_tip + v0 * fraction0,
+      .intersection = pin0.inset_tip + v0 * fraction0,
       .fraction0 = fraction0,
       .fraction1 = fraction1,
   }};
 }
 
-void PolygonInfo::RemovePin(UmbraPin* p_pin, UmbraPin** p_head) {
-  UmbraPin* p_next = p_pin->p_next;
-  UmbraPin* p_prev = p_pin->p_prev;
+void PolygonInfo::RemovePin(PolygonPin* p_pin, PolygonPin** p_head) {
+  PolygonPin* p_next = p_pin->p_next;
+  PolygonPin* p_prev = p_pin->p_prev;
   p_prev->p_next = p_next;
   p_next->p_prev = p_prev;
   if (*p_head == p_pin) {
@@ -1012,13 +1052,13 @@ int PolygonInfo::ComputeSide(const Point& p0,
 // This method was converted nearly verbatim from the Skia source files
 // SkShadowTessellator.cpp and SkPolyUtils.cpp, except for variable
 // naming and differences in the methods on Point and Vertex2.
-PolygonInfo::UmbraPinLinkedList PolygonInfo::ResolveUmbraIntersections(
-    std::vector<UmbraPin>& pins,
+PolygonInfo::PolygonPinLinkedList PolygonInfo::ResolveInsetIntersections(
+    std::vector<PolygonPin>& pins,
     Scalar direction) {
-  UmbraPin* p_head_pin = &pins.front();
-  UmbraPin* p_curr_pin = p_head_pin;
-  UmbraPin* p_prev_pin = p_curr_pin->p_prev;
-  size_t umbra_vertex_count = pins.size();
+  PolygonPin* p_head_pin = &pins.front();
+  PolygonPin* p_curr_pin = p_head_pin;
+  PolygonPin* p_prev_pin = p_curr_pin->p_prev;
+  size_t inner_vertex_count = pins.size();
 
   // we should check each edge against each other edge at most once
   size_t allowed_iterations = pins.size() * pins.size() + 1u;
@@ -1033,22 +1073,22 @@ PolygonInfo::UmbraPinLinkedList PolygonInfo::ResolveUmbraIntersections(
     if (intersection.has_value()) {
       // If the new intersection is further back on previous inset from the
       // prior intersection...
-      if (intersection->fraction0 < p_prev_pin->umbra_fraction) {
+      if (intersection->fraction0 < p_prev_pin->inset_fraction) {
         // no point in considering this one again
         RemovePin(p_prev_pin, &p_head_pin);
-        --umbra_vertex_count;
+        --inner_vertex_count;
         // go back one segment
         p_prev_pin = p_prev_pin->p_prev;
       } else if (p_curr_pin->IsFractionInitialized() &&
-                 p_curr_pin->umbra_vertex.GetDistanceSquared(
+                 p_curr_pin->inset_vertex.GetDistanceSquared(
                      intersection->intersection) < kIntersectionTolerance) {
         // We've already considered this intersection and come to the same
         // result, we're done.
         break;
       } else {
         // Add intersection.
-        p_curr_pin->umbra_vertex = intersection->intersection;
-        p_curr_pin->umbra_fraction = intersection->fraction1;
+        p_curr_pin->inset_vertex = intersection->intersection;
+        p_curr_pin->inset_fraction = intersection->fraction1;
 
         // go to next segment
         p_prev_pin = p_curr_pin;
@@ -1056,23 +1096,23 @@ PolygonInfo::UmbraPinLinkedList PolygonInfo::ResolveUmbraIntersections(
       }
     } else {
       // if previous pin is to right side of the current pin...
-      int side = direction * ComputeSide(p_curr_pin->pin_tip,     //
+      int side = direction * ComputeSide(p_curr_pin->inset_tip,   //
                                          p_curr_pin->path_delta,  //
-                                         p_prev_pin->pin_tip);
+                                         p_prev_pin->inset_tip);
       if (side < 0 &&
-          side == direction * ComputeSide(p_curr_pin->pin_tip,     //
+          side == direction * ComputeSide(p_curr_pin->inset_tip,   //
                                           p_curr_pin->path_delta,  //
-                                          p_prev_pin->pin_tip +
+                                          p_prev_pin->inset_tip +
                                               p_prev_pin->path_delta)) {
         // no point in considering this one again
         RemovePin(p_prev_pin, &p_head_pin);
-        --umbra_vertex_count;
+        --inner_vertex_count;
         // go back one segment
         p_prev_pin = p_prev_pin->p_prev;
       } else {
         // move to next segment
         RemovePin(p_curr_pin, &p_head_pin);
-        --umbra_vertex_count;
+        --inner_vertex_count;
         p_curr_pin = p_curr_pin->p_next;
       }
     }
@@ -1082,18 +1122,18 @@ PolygonInfo::UmbraPinLinkedList PolygonInfo::ResolveUmbraIntersections(
     return {};
   }
 
-  // Now remove any duplicates from the umbra polygon. The head pin is
-  // automatically included as the first point of the umbra polygon.
+  // Now remove any duplicates from the inset polygon. The head pin is
+  // automatically included as the first point of the inset polygon.
   p_prev_pin = p_head_pin;
   p_curr_pin = p_head_pin->p_next;
-  size_t umbra_vertices = 1u;
+  size_t inset_vertices = 1u;
   while (p_curr_pin != p_head_pin) {
-    if (p_prev_pin->umbra_vertex.GetDistanceSquared(p_curr_pin->umbra_vertex) <
+    if (p_prev_pin->inset_vertex.GetDistanceSquared(p_curr_pin->inset_vertex) <
         kMinSubPixelDistanceSquared) {
       RemovePin(p_curr_pin, &p_head_pin);
       p_curr_pin = p_curr_pin->p_next;
     } else {
-      umbra_vertices++;
+      inset_vertices++;
       p_prev_pin = p_curr_pin;
       p_curr_pin = p_curr_pin->p_next;
     }
@@ -1101,37 +1141,37 @@ PolygonInfo::UmbraPinLinkedList PolygonInfo::ResolveUmbraIntersections(
     FML_DCHECK(p_prev_pin == p_curr_pin->p_prev);
   }
 
-  if (umbra_vertices < 3u) {
+  if (inset_vertices < 3u) {
     return {};
   }
 
-  return {p_head_pin, umbra_vertices};
+  return {p_head_pin, inset_vertices};
 }
 
 // The mesh computed connects all of the points in two rings. The outermost
-// ring represents the point where the shadow disappears and those points
-// are associated with an alpha of 0. The umbra polygon represents the ring
-// where the shadow is its darkest, usually fully "opaque" (potentially
-// modulated by a non-opaque shadow color, but opaque with respect to the
-// shadow's varying intensity). The umbra polygon may not be fully "opaque"
-// with respect to the shadow cast by the shape if the shadows radius is
-// larger than the cross-section of the shape. If the umbra polygon is pulled
-// back from extending the shadow distance inward due to this phenomenon,
-// then the umbra_gaussian will be computed to be less than fully opaque.
+// ring represents the polygon outset by the parameters and those points
+// are associated with the outset parameter. The inner polygon represents
+// the ring where the gradient is its full inset distance (potentially
+// reduced by collisions). The inset polygon may not be fully realized
+// with respect to the inner gradient parameter if the inset distance is
+// larger than the cross-section of the shape. If the inset polygon is pulled
+// back from extending the full inset distance inward due to this phenomenon,
+// then the adjusted parameter will be computed to be less than its normally
+// full value.
 //
-// The mesh will connect the centroid to the umbra (inner) polygon at a
-// constant level as computed in umbra_gaussian, and then the umbra polygon
-// is connected to the nearest points on the penumbra (outer) polygon which
-// is seeded with points that are fully transparent (umbra level 0).
+// The mesh will connect the centroid to the inner polygon at a constant
+// level as indicated by the adjusted_inner_parameters, and then the inset
+// polygon is connected to the nearest points on the outer polygon which
+// is seeded with points that store the parameter of the outset projection.
 //
 // This creates 2 rings of triangles that are interspersed in the vertices_
 // and connected into triangles using indices_ both to reuse the vertices
 // as best we can and also because we don't generate the vertices in any
 // kind of useful fan or strip format. The points are reused as such:
 //
-// - The centroid vertex will be used once for each pair of umbra vertices
+// - The centroid vertex will be used once for each pair of inset vertices
 //   to make triangles for the inner ring.
-// - Each umbra vertex will be used in both the inner and the outer rings.
+// - Each inset vertex will be used in both the inner and the outer rings.
 //   In particular, in 2 of the inner ring triangles and in an arbitrary
 //   number of the outer ring vertices (each outer ring vertex is connected
 //   to the neariest inner ring vertex so the mapping is not predictable).
@@ -1139,62 +1179,64 @@ PolygonInfo::UmbraPinLinkedList PolygonInfo::ResolveUmbraIntersections(
 //   one that links to the vertex before it and the one that links to the
 //   vertex following it, plus we insert extra vertices on the outer ring
 //   to turn the corners beteween the projected segments.
-void PolygonInfo::ComputeMesh(std::vector<UmbraPin>& pins,
+void PolygonInfo::ComputeMesh(std::vector<PolygonPin>& pins,
                               const Point& centroid,
-                              UmbraPinLinkedList& list,
+                              PolygonPinLinkedList& list,
                               const impeller::Tessellator::Trigs& trigs,
                               Scalar direction) {
-  // Centroid and umbra polygon...
+  // Centroid and inset polygon...
   size_t vertex_count = list.pin_count + 1u;
   size_t triangle_count = list.pin_count;
 
-  // Penumbra corners - likely many more fan vertices than estimated...
-  size_t penumbra_count = pins.size() * 2;  // 2 perp at each vertex.
-  penumbra_count += trigs.size() * 4;       // total 360 degrees of fans.
-  vertex_count += penumbra_count;
-  triangle_count += penumbra_count;
+  // Outset corners - likely many more fan vertices than estimated...
+  size_t outer_count = pins.size() * 2;  // 2 perp at each vertex.
+  outer_count += trigs.size() * 4;       // total 360 degrees of fans.
+  vertex_count += outer_count;
+  triangle_count += outer_count;
 
   vertices_.reserve(vertex_count);
   gaussians_.reserve(vertex_count);
   indices_.reserve(triangle_count * 3);
 
-  // First we populate the umbra_vertex and umbra_index of each pin with its
-  // nearest point on the umbra polygon (the linked list computed earlier).
+  Scalar outset_parameter = mesh_parameters_.outset.parameter;
+
+  // First we populate the inset_vertex and inset_index of each pin with its
+  // nearest point on the inset polygon (the linked list computed earlier).
   //
   // This step simplifies the following operations because we will always
-  // know which umbra vertex each pin object is associated with and whether
+  // know which inset vertex each pin object is associated with and whether
   // we need to bridge between them as we progress through the pins, without
   // having to search through the linked list every time.
   //
   // This method will also fill in the inner part of the mesh that connects
-  // the centroid to every vertex in the umbra polygon with triangles that
-  // are all at the maximum umbra gaussian coefficient.
+  // the centroid to every vertex in the inset polygon with triangles that
+  // are all at the maximum adjusted inset parameter.
   PopulateUmbraVertices(pins, list, centroid);
 
   // We now run through the list of all pins and append points and triangles
   // to our internal vectors to cover the part of the mesh that extends
-  // out from the umbra polygon to the outer penumbra points.
+  // out from the inset polygon to the outset points.
   //
   // Each pin assumes that the previous pin contributed some points to the
-  // penumbra polygon that ended with the point that is perpendicular to
+  // outset polygon that ended with the point that is perpendicular to
   // the side between that previous path vertex and its own path vertex.
   // This pin will then contribute any number of the following points to
-  // the penumbra polygon:
+  // the outer polygon:
   //
-  // - If this pin uses a different umbra vertex than the previous pin
-  //   (common for simple large polygons that have no clipping of their
-  //   inner umbra points) then it inserts a bridging quad that connects
+  // - If this pin uses a different inner vertex than the previous pin
+  //   (common for simple large polygons that have no collision of their
+  //   inset pins) then it inserts a bridging quad that connects
   //   from the ending segment of the previous pin to the starting segment
-  //   of this pin. If both are based on the same umbra vertex then the
+  //   of this pin. If both are based on the same inset vertex then the
   //   end of the previous pin is identical to the start of this one.
   // - Possibly a fan of extra vertices to round the corner from the
   //   last segment added, which is perpendicular to the previous path
   //   segment, to the final segmet of this pin, which will be perpendicular
   //   to the following path segment.
-  // - The last penumbra point added will be the penumbra point that is
+  // - The last outer polygon point added will be the point that is
   //   perpendicular to the following segment, which prepares for the
   //   initial conditions that the next pin will expect.
-  const UmbraPin* p_prev_pin = &pins.back();
+  const PolygonPin* p_prev_pin = &pins.back();
 
   // This point may be duplicated at the end of the path. We can try to
   // avoid adding it twice with some bookkeeping, but it is simpler to
@@ -1202,136 +1244,138 @@ void PolygonInfo::ComputeMesh(std::vector<UmbraPin>& pins,
   // pin and allow the duplication to happen naturally as we process the
   // final pin later. One extra point should not be very noticeable in
   // the long list of mesh vertices.
-  Point last_penumbra_point =
-      p_prev_pin->path_vertex + p_prev_pin->penumbra_delta;
-  uint16_t last_penumbra_index = AppendVertex(last_penumbra_point, 0.0f);
+  Point last_outer_point = p_prev_pin->path_vertex + p_prev_pin->outset_delta;
+  uint16_t last_outer_index = AppendVertex(last_outer_point, outset_parameter);
 
-  for (const UmbraPin& pin : pins) {
-    const UmbraPin* p_curr_pin = &pin;
+  for (const PolygonPin& pin : pins) {
+    const PolygonPin* p_curr_pin = &pin;
 
     // Preconditions:
-    // - last_penumbra_point was the last outer vertex added by the
+    // - last_outer_point was the last outer vertex added by the
     //   previous pin
-    // - last_penumbra_index is its index in the vertices to be used
+    // - last_outer_index is its index in the vertices to be used
     //   for creating indexed triangles.
 
-    if (p_prev_pin->umbra_index != p_curr_pin->umbra_index) {
-      // We've moved on to a new umbra index to anchor our penumbra triangles.
+    if (p_prev_pin->inset_index != p_curr_pin->inset_index) {
+      // We've moved on to a new inset index to anchor our outset triangles.
       // We need to bridge the gap so that we are now building a new fan from
       // a point that has the same relative angle from the current pin's
-      // path vertex as the previous penumbra point had from the previous
+      // path vertex as the previous outset point had from the previous
       // pin's path vertex.
       //
-      // Our previous penumbra fan vector would have gone from the previous
-      // pin's umbra point to the previous pen's final penumbra point:
-      // - prev->umbra_vertex
-      // => prev->path_vertex + prev->penumbra_delta
+      // Our previous outset fan vector would have gone from the previous
+      // pin's inset point to the previous pen's final outset point:
+      // - prev->inset_vertex
+      // => prev->path_vertex + prev->outset_delta
       // We will connect to a parallel vector that extends from the new
-      // (current pin's) umbra index in the same direction:
-      // - curr->umbra_vertex
-      // => curr->path_vertex + prev->penumbra_delta
+      // (current pin's) inset index in the same direction:
+      // - curr->inset_vertex
+      // => curr->path_vertex + prev->outset_delta
 
-      // First we pivot about the old penumbra point to bridge from the old
-      // umbra vertex to our new umbra point.
-      AddTriangle(last_penumbra_index,  //
-                  p_prev_pin->umbra_index, p_curr_pin->umbra_index);
+      // First we pivot about the old ouset point to bridge from the old
+      // inset vertex to our new inset point.
+      AddTriangle(last_outer_index,  //
+                  p_prev_pin->inset_index, p_curr_pin->inset_index);
     }
 
-    // Then we bridge from the old penumbra point to the new parallel
-    // penumbra point, pivoting around the new umbra index.
-    Point new_penumbra_point =
-        p_curr_pin->path_vertex + p_prev_pin->penumbra_delta;
-    uint16_t new_penumbra_index = AppendVertex(new_penumbra_point, 0.0f);
+    // Then we bridge from the old outset point to the new parallel
+    // outset point, pivoting around the new inset index.
+    Point new_outer_point = p_curr_pin->path_vertex + p_prev_pin->outset_delta;
+    uint16_t new_outer_index = AppendVertex(new_outer_point, outset_parameter);
 
-    if (last_penumbra_index != new_penumbra_index) {
-      AddTriangle(p_curr_pin->umbra_index, last_penumbra_index,
-                  new_penumbra_index);
+    if (last_outer_index != new_outer_index) {
+      AddTriangle(p_curr_pin->inset_index, last_outer_index, new_outer_index);
     }
 
-    last_penumbra_point = new_penumbra_point;
-    last_penumbra_index = new_penumbra_index;
+    last_outer_point = new_outer_point;
+    last_outer_index = new_outer_index;
 
-    // Now draw a fan from the current pin's umbra vertex to all of the
-    // penumbra points associated with this pin's path vertex, ending at
-    // our new final penumbra point associated with this pin.
-    new_penumbra_point = p_curr_pin->path_vertex + p_curr_pin->penumbra_delta;
-    new_penumbra_index =
-        AppendFan(p_curr_pin, last_penumbra_point, new_penumbra_point,
-                  last_penumbra_index, trigs, direction);
+    // Now draw a fan from the current pin's inset vertex to all of the
+    // outset points associated with this pin's path vertex, ending at
+    // our new final outset point associated with this pin.
+    new_outer_point = p_curr_pin->path_vertex + p_curr_pin->outset_delta;
+    new_outer_index = AppendFan(p_curr_pin, last_outer_point, new_outer_point,
+                                last_outer_index, trigs, direction);
 
-    last_penumbra_point = new_penumbra_point;
-    last_penumbra_index = new_penumbra_index;
+    last_outer_point = new_outer_point;
+    last_outer_index = new_outer_index;
     p_prev_pin = p_curr_pin;
   }
 }
 
-// Visit each pin and find the nearest umbra_vertex from the linked list of
-// surviving umbra pins so we don't have to constantly find this as we stitch
+// Visit each pin and find the nearest inset_vertex from the linked list of
+// surviving inset pins so we don't have to constantly find this as we stitch
 // together the mesh.
-void PolygonInfo::PopulateUmbraVertices(std::vector<UmbraPin>& pins,
-                                        UmbraPinLinkedList& list,
+void PolygonInfo::PopulateUmbraVertices(std::vector<PolygonPin>& pins,
+                                        PolygonPinLinkedList& list,
                                         const Point centroid) {
   // We should be having the first crack at the vertex list, filling it with
-  // the centroid, the umbra vertices, and the mesh connecting those into the
+  // the centroid, the inset vertices, and the mesh connecting those into the
   // central core of the shadow.
   FML_DCHECK(list.p_head_pin != nullptr);
   FML_DCHECK(vertices_.empty());
   FML_DCHECK(gaussians_.empty());
   FML_DCHECK(indices_.empty());
 
-  // Always start with the centroid.
-  uint16_t last_umbra_index = AppendVertex(centroid, umbra_gaussian_);
-  FML_DCHECK(last_umbra_index == 0u);
+  // Use the adjusted parameter calculated by the Centroid checks above.
+  //
+  // see ComputePinDirectionsAndMinDistanceToCentroid
+  Scalar inset_parameter = adjusted_inner_parameters_.parameter;
 
-  // curr_umbra_pin is the most recently matched umbra vertex pin.
-  // next_umbra_pin is the next umbra vertex pin to consider.
+  // Always start with the centroid.
+  uint16_t last_inset_index = AppendVertex(centroid, inset_parameter);
+  FML_DCHECK(last_inset_index == 0u);
+
+  // curr_inset_pin is the most recently matched inset vertex pin.
+  // next_inset_pin is the next inset vertex pin to consider.
   // These pointers will always point to one of the pins that is on the
-  // linked list of surviving umbra pins, possibly jumping over many
-  // other umbra pins that were eliminated when we inset the polygon.
-  UmbraPin* p_next_umbra_pin = list.p_head_pin;
-  UmbraPin* p_curr_umbra_pin = p_next_umbra_pin->p_prev;
-  for (UmbraPin& pin : pins) {
-    if (p_next_umbra_pin == &pin ||
-        (pin.path_vertex.GetDistanceSquared(p_curr_umbra_pin->umbra_vertex) >
-         pin.path_vertex.GetDistanceSquared(p_next_umbra_pin->umbra_vertex))) {
+  // linked list of surviving inset pins, possibly jumping over many
+  // other inset pins that were eliminated when we inset the polygon.
+  PolygonPin* p_next_inset_pin = list.p_head_pin;
+  PolygonPin* p_curr_inset_pin = p_next_inset_pin->p_prev;
+  for (PolygonPin& pin : pins) {
+    if (p_next_inset_pin == &pin ||
+        (pin.path_vertex.GetDistanceSquared(p_curr_inset_pin->inset_vertex) >
+         pin.path_vertex.GetDistanceSquared(p_next_inset_pin->inset_vertex))) {
       // We always bump to the next vertex when it was generated from this
       // pin, and also when it is closer to this path_vertex than the last
       // matched pin (curr).
-      p_curr_umbra_pin = p_next_umbra_pin;
-      p_next_umbra_pin = p_next_umbra_pin->p_next;
+      p_curr_inset_pin = p_next_inset_pin;
+      p_next_inset_pin = p_next_inset_pin->p_next;
 
-      // New umbra vertex - append it and remember its index.
-      uint16_t new_umbra_index =
-          AppendVertex(p_curr_umbra_pin->umbra_vertex, umbra_gaussian_);
-      p_curr_umbra_pin->umbra_index = new_umbra_index;
-      if (last_umbra_index != 0u) {
-        AddTriangle(0u, last_umbra_index, new_umbra_index);
+      // New inset vertex - append it and remember its index.
+      uint16_t new_inset_index =
+          AppendVertex(p_curr_inset_pin->inset_vertex, inset_parameter);
+      p_curr_inset_pin->inset_index = new_inset_index;
+      if (last_inset_index != 0u) {
+        AddTriangle(0u, last_inset_index, new_inset_index);
       }
-      last_umbra_index = new_umbra_index;
+      last_inset_index = new_inset_index;
     }
-    if (p_curr_umbra_pin != &pin) {
-      pin.umbra_vertex = p_curr_umbra_pin->umbra_vertex;
-      pin.umbra_index = last_umbra_index;
+    if (p_curr_inset_pin != &pin) {
+      pin.inset_vertex = p_curr_inset_pin->inset_vertex;
+      pin.inset_index = last_inset_index;
     }
-    FML_DCHECK(pin.umbra_index != 0u);
+    FML_DCHECK(pin.inset_index != 0u);
   }
-  if (last_umbra_index != pins.front().umbra_index) {
-    AddTriangle(0u, last_umbra_index, pins.front().umbra_index);
+  if (last_inset_index != pins.front().inset_index) {
+    AddTriangle(0u, last_inset_index, pins.front().inset_index);
   }
 }
 
 // Appends a fan based on center from the relative point in start_delta to
 // the relative point in end_delta, potentially adding additional relative
 // vectors if the turning rate is faster than the trig values in trigs_.
-uint16_t PolygonInfo::AppendFan(const UmbraPin* p_curr_pin,
+uint16_t PolygonInfo::AppendFan(const PolygonPin* p_curr_pin,
                                 const Vector2& start,
                                 const Vector2& end,
                                 uint16_t start_index,
                                 const impeller::Tessellator::Trigs& trigs,
                                 Scalar direction) {
   Point center = p_curr_pin->path_vertex;
-  uint16_t center_index = p_curr_pin->umbra_index;
+  uint16_t center_index = p_curr_pin->inset_index;
   uint16_t prev_index = start_index;
+  Scalar outset_parameter = mesh_parameters_.outset.parameter;
 
   Vector2 start_delta = start - center;
   Vector2 end_delta = end - center;
@@ -1342,7 +1386,7 @@ uint16_t PolygonInfo::AppendFan(const UmbraPin* p_curr_pin,
     if (fan_delta.Cross(end_delta) * direction <= 0) {
       break;
     }
-    uint16_t cur_index = AppendVertex(center + fan_delta, 0.0f);
+    uint16_t cur_index = AppendVertex(center + fan_delta, outset_parameter);
     if (prev_index != cur_index) {
       AddTriangle(center_index, prev_index, cur_index);
       prev_index = cur_index;
@@ -1359,7 +1403,7 @@ uint16_t PolygonInfo::AppendFan(const UmbraPin* p_curr_pin,
       start_delta = fan_delta;
     }
   }
-  uint16_t cur_index = AppendVertex(center + end_delta, 0.0f);
+  uint16_t cur_index = AppendVertex(center + end_delta, outset_parameter);
   if (prev_index != cur_index) {
     AddTriangle(center_index, prev_index, cur_index);
   }
@@ -1369,7 +1413,6 @@ uint16_t PolygonInfo::AppendFan(const UmbraPin* p_curr_pin,
 // Appends a vertex and gaussian value into the associated std::vectors
 // and returns the index at which the point was inserted.
 uint16_t PolygonInfo::AppendVertex(const Point& vertex, Scalar gaussian) {
-  FML_DCHECK(gaussian >= 0.0f && gaussian <= 1.0f);
   uint16_t index = vertices_.size();
   FML_DCHECK(index == gaussians_.size());
   // TODO(jimgraham): Turn this condition into a failure of the tessellation
@@ -1477,7 +1520,54 @@ std::shared_ptr<ShadowVertices> ShadowPathGeometry::MakeAmbientShadowVertices(
   Scalar trig_radius = PolygonInfo::GetTrigRadiusForHeight(occluder_height);
   Tessellator::Trigs trigs = tessellator.GetTrigsForDeviceRadius(trig_radius);
 
-  PolygonInfo polygon(occluder_height);
+  PolygonInfo polygon(ParameterizedPair{
+      .inset =
+          ParameterizedProjection{
+              .distance = PolygonInfo::GetUmbraSizeForHeight(occluder_height),
+              .parameter = 1.0f,
+          },
+      .outset =
+          ParameterizedProjection{
+              .distance =
+                  PolygonInfo::GetPenumbraSizeForHeight(occluder_height),
+              .parameter = 0.0f,
+          },
+  });
+
+  return polygon.CalculateConvexShadowMesh(source, matrix, trigs);
+}
+
+std::shared_ptr<ShadowVertices> ShadowPathGeometry::MakeSDFVertices(
+    Tessellator& tessellator,
+    const PathSource& source,
+    const Matrix& matrix,
+    Scalar antialias_pixels) {
+  Tessellator::Trigs trigs = tessellator.GetTrigsForDeviceRadius(1.0f);
+
+  // We inset and outset the path by the full value of antialias_pixels
+  // to make sure that we include any pixel that might contribute coverage
+  // between 0 and 1. The shader will clip the parameter to the range:
+  // [-0.5, 0.5] and produce a coverage alpha in the [0, 1] range.
+  //
+  // The sdf values are distributed as follows:
+  //
+  // -0.5 - a full antialias pixel outside the path
+  //  0.0 - half an antialias pixel outside the path
+  //  0.5 - right on the path
+  //  1.0 - half an antialias pixel inside the path
+  //  1.5 - a full antialias pixel inside the path
+  PolygonInfo polygon(ParameterizedPair{
+      .inset =
+          ParameterizedProjection{
+              .distance = antialias_pixels * 1.5f,
+              .parameter = 2.0f,
+          },
+      .outset =
+          ParameterizedProjection{
+              .distance = antialias_pixels * 1.5f,
+              .parameter = -1.0f,
+          },
+  });
 
   return polygon.CalculateConvexShadowMesh(source, matrix, trigs);
 }

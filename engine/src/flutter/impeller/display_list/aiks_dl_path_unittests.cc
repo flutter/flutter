@@ -19,6 +19,9 @@
 #include "impeller/playground/widgets.h"
 #include "impeller/tessellator/path_tessellator.h"
 
+#include "flutter/impeller/entity/geometry/shadow_path_geometry.h"
+
+
 namespace impeller {
 namespace testing {
 
@@ -1089,6 +1092,88 @@ TEST_P(AiksTest, BlurredCircleWithStrokeWidth) {
   paint.setMaskFilter(DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 5));
 
   builder.DrawCircle(DlPoint(200, 200), 100, paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+void DrawMesh(DisplayListBuilder& builder, const DlPath& path) {
+  DlPaint paint;
+  paint.setColor(DlColor::kRed().withAlphaF(0.25f));
+
+  Tessellator tessellator;
+  auto geometry = ShadowPathGeometry::MakeSDFVertices(
+    tessellator, path, Matrix(), 1.0f);
+  FML_DCHECK(geometry);
+  FML_DCHECK(!geometry->IsEmpty());
+
+  Point prev = geometry->GetVertices()[0];
+  int i = 0;
+  for (uint16_t index : geometry->GetIndices()) {
+    Point vertex = geometry->GetVertices()[index];
+    Scalar parameter = geometry->GetGaussians()[index];
+    FML_LOG(ERROR) << "vertex[" << ++i << "] == " << vertex << ", " << parameter;
+    builder.DrawLine(prev, vertex, paint);
+    prev = vertex;
+  }
+}
+
+TEST_P(AiksTest, CanFillConvexPath) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kGreen());
+
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(150, 100));
+  path_builder.LineTo(DlPoint(250, 100));
+  path_builder.LineTo(DlPoint(300, 150));
+  path_builder.LineTo(DlPoint(250, 200));
+  path_builder.LineTo(DlPoint(150, 200));
+  path_builder.LineTo(DlPoint(100, 150));
+  path_builder.Close();
+  DlPath path = path_builder.TakePath();
+  ASSERT_TRUE(path.IsConvex());
+
+  FML_LOG(ERROR) << path.GetBounds();
+
+  builder.DrawPath(path, paint);
+
+  builder.Translate(500, 0);
+  builder.DrawPath(path, paint);
+  DrawMesh(builder, path);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanFillConvexCurvedPath) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kGreen());
+
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(100, 200));
+  path_builder.QuadraticCurveTo(DlPoint(100, 100), DlPoint(200, 100));
+  path_builder.ConicCurveTo(DlPoint(300, 100), DlPoint(300, 200), 0.2);
+  path_builder.CubicCurveTo(DlPoint(300, 280), DlPoint(280, 300),
+                            DlPoint(200, 300));
+  path_builder.Close();
+  DlPath convex_path = path_builder.CopyPath();
+  path_builder.LineTo(DlPoint(200, 200));
+  DlPath non_convex_path = path_builder.TakePath();
+  ASSERT_TRUE(convex_path.IsConvex());
+
+  builder.DrawPath(convex_path, paint);
+
+  builder.Translate(250, 0);
+  builder.DrawPath(convex_path, paint);
+  DrawMesh(builder, convex_path);
+
+  builder.Translate(250, 0);
+  paint.setColor(DlColor::kRed());
+  builder.DrawPath(non_convex_path, paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
