@@ -114,9 +114,7 @@ class DarwinAddToAppCodesigning {
   /// Print a warning if the codesigning identity has changed since the last run and save the new
   /// identity to the [identityFile].
   ///
-  /// If the identity has changed since the last run, print a warning that this may cause Xcode
-  /// to fail to build the project. See
-  /// https://developer.apple.com/documentation/xcode/verifying-the-origin-of-your-xcframeworks#Diagnose-build-failures-caused-by-code-signature-changes
+  /// See https://developer.apple.com/documentation/xcode/verifying-the-origin-of-your-xcframeworks#Diagnose-build-failures-caused-by-code-signature-changes
   void _warnIfChangedAndSaveIdentity({
     required String identity,
     required File identityFile,
@@ -211,10 +209,7 @@ class DarwinAddToAppCodesigning {
         '  ${matchingIdentities.join('\n  ')}',
       );
     }
-    if (matchingIdentities.length == 1) {
-      return matchingIdentities.single;
-    }
-    return null;
+    return matchingIdentities.singleOrNull;
   }
 
   /// Find the codesigning identity in the Flutter config.
@@ -247,10 +242,7 @@ class DarwinAddToAppCodesigning {
           '  ${matchingIdentities.join('\n  ')}',
         );
       }
-      if (matchingIdentities.length == 1) {
-        return matchingIdentities.single;
-      }
-      return null;
+      return matchingIdentities.singleOrNull;
     }
     return _xcodeCodeSigningSettings.getIdentityFromCertFromConfig(identities);
   }
@@ -267,10 +259,8 @@ class DarwinAddToAppCodesigning {
       '--force',
       '--sign',
       codesignIdentity,
-      if (buildMode != BuildMode.release) ...<String>[
-        // Mimic Xcode's timestamp codesigning behavior on non-release binaries.
-        '--timestamp=none',
-      ],
+      // Mimic Xcode's timestamp codesigning behavior on non-release binaries.
+      if (buildMode != BuildMode.release) '--timestamp=none',
       artifact.path,
     ]);
     if (codesignResult.exitCode != 0) {
@@ -347,6 +337,8 @@ class DarwinAddToAppNativeAssets {
       for (final MapEntry<String, Object?> entry in targetAssets.entries) {
         final String assetId = entry.key;
         final Object? pathInfo = entry.value;
+        // The path info is a list of strings, where the first string is the type of path (see
+        // [KernelAssetAbsolutePath]), and the second string is the actual path.
         if (pathInfo is List<Object?> && pathInfo.length >= 2) {
           final path = pathInfo[1]! as String;
           result[assetId] = path;
