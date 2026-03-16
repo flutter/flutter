@@ -17,7 +17,7 @@
 ^flutter/buildtools/.*
 ^flutter/impeller/fixtures/.*
 ^flutter/prebuilts/.*
-^flutter/shell/platform/fuchsia/dart-pkg/zircon_ffi/lib/zircon_ffi.dart
+^flutter/shell/platform/fuchsia/dart_pkg/zircon_ffi/lib/zircon_ffi.dart
 ^flutter/sky/packages/sky_engine/LICENSE
 ^flutter/testing/.*
 ^flutter/third_party/android_tools/.*

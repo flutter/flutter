@@ -108,7 +108,7 @@ void main() {
       rootProject.replacePubspec(
         rootProject.manifest.copyWith(
           logger: logger,
-          shaders: <Uri>[Uri(host: 'Random')],
+          shaders: <AssetsEntry>[AssetsEntry(uri: Uri.parse('Random'))],
         ),
       );
       expect(previewManifest.shouldRegeneratePubspec(), true);

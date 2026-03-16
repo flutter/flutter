@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "runner.h"
+#include "flutter/shell/platform/fuchsia/flutter/runner.h"
 
 #include <fcntl.h>
 #include <fuchsia/mem/cpp/fidl.h>
@@ -22,10 +22,10 @@
 #include "flutter/fml/make_copyable.h"
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/runtime/dart_vm.h"
-#include "runtime/dart/utils/files.h"
-#include "runtime/dart/utils/root_inspect_node.h"
-#include "runtime/dart/utils/vmo.h"
-#include "runtime/dart/utils/vmservice_object.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/files.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/root_inspect_node.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/vmo.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/vmservice_object.h"
 #include "third_party/icu/source/common/unicode/udata.h"
 #include "third_party/skia/include/core/SkGraphics.h"
 

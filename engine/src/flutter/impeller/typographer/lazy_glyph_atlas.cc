@@ -20,49 +20,40 @@ static const std::shared_ptr<GlyphAtlas> kNullGlyphAtlas = nullptr;
 LazyGlyphAtlas::LazyGlyphAtlas(
     std::shared_ptr<TypographerContext> typographer_context)
     : typographer_context_(std::move(typographer_context)),
-      alpha_context_(typographer_context_
-                         ? typographer_context_->CreateGlyphAtlasContext(
-                               GlyphAtlas::Type::kAlphaBitmap)
-                         : nullptr),
-      color_context_(typographer_context_
-                         ? typographer_context_->CreateGlyphAtlasContext(
-                               GlyphAtlas::Type::kColorBitmap)
-                         : nullptr) {}
+      alpha_data_(typographer_context_
+                      ? typographer_context_->CreateGlyphAtlasContext(
+                            GlyphAtlas::Type::kAlphaBitmap)
+                      : nullptr),
+      color_data_(typographer_context_
+                      ? typographer_context_->CreateGlyphAtlasContext(
+                            GlyphAtlas::Type::kColorBitmap)
+                      : nullptr) {}
 
 LazyGlyphAtlas::~LazyGlyphAtlas() = default;
 
-void LazyGlyphAtlas::AddTextFrame(const std::shared_ptr<TextFrame>& frame,
-                                  Rational scale,
-                                  Point offset,
-                                  const Matrix& transform,
-                                  std::optional<GlyphProperties> properties) {
-  frame->SetPerFrameData(scale, offset, transform, properties);
-  FML_DCHECK(alpha_atlas_ == nullptr && color_atlas_ == nullptr);
-  if (frame->GetAtlasType() == GlyphAtlas::Type::kAlphaBitmap) {
-    alpha_text_frames_.push_back(frame);
-  } else {
-    color_text_frames_.push_back(frame);
-  }
+void LazyGlyphAtlas::AddTextFrame(
+    const std::shared_ptr<TextFrame>& frame,
+    Point position,
+    const Matrix& transform,
+    const std::optional<GlyphProperties>& properties) {
+  FML_DCHECK(alpha_data_.atlas == nullptr && color_data_.atlas == nullptr);
+  AtlasData& data = GetData(frame->GetAtlasType());
+  data.renderable_frames.emplace_back(
+      frame, transform * Matrix::MakeTranslation(position), properties);
 }
 
 void LazyGlyphAtlas::ResetTextFrames() {
-  alpha_text_frames_.clear();
-  color_text_frames_.clear();
-  alpha_atlas_.reset();
-  color_atlas_.reset();
+  alpha_data_.reset();
+  color_data_.reset();
 }
 
 const std::shared_ptr<GlyphAtlas>& LazyGlyphAtlas::CreateOrGetGlyphAtlas(
     Context& context,
     HostBuffer& data_host_buffer,
-    GlyphAtlas::Type type) const {
-  {
-    if (type == GlyphAtlas::Type::kAlphaBitmap && alpha_atlas_) {
-      return alpha_atlas_;
-    }
-    if (type == GlyphAtlas::Type::kColorBitmap && color_atlas_) {
-      return color_atlas_;
-    }
+    GlyphAtlas::Type type) {
+  AtlasData& data = GetData(type);
+  if (data.atlas) {
+    return data.atlas;
   }
 
   if (!typographer_context_) {
@@ -76,23 +67,31 @@ const std::shared_ptr<GlyphAtlas>& LazyGlyphAtlas::CreateOrGetGlyphAtlas(
     return kNullGlyphAtlas;
   }
 
-  auto& glyph_map = type == GlyphAtlas::Type::kAlphaBitmap ? alpha_text_frames_
-                                                           : color_text_frames_;
-  const std::shared_ptr<GlyphAtlasContext>& atlas_context =
-      type == GlyphAtlas::Type::kAlphaBitmap ? alpha_context_ : color_context_;
-  std::shared_ptr<GlyphAtlas> atlas = typographer_context_->CreateGlyphAtlas(
-      context, type, data_host_buffer, atlas_context, glyph_map);
-  if (!atlas || !atlas->IsValid()) {
+  data.atlas = typographer_context_->CreateGlyphAtlas(
+      context, type, data_host_buffer, data.context, data.renderable_frames);
+  if (!data.atlas || !data.atlas->IsValid()) {
     VALIDATION_LOG << "Could not create valid atlas.";
     return kNullGlyphAtlas;
   }
-  if (type == GlyphAtlas::Type::kAlphaBitmap) {
-    alpha_atlas_ = std::move(atlas);
-    return alpha_atlas_;
-  }
-  if (type == GlyphAtlas::Type::kColorBitmap) {
-    color_atlas_ = std::move(atlas);
-    return color_atlas_;
+  return data.atlas;
+}
+
+LazyGlyphAtlas::AtlasData::AtlasData(std::shared_ptr<GlyphAtlasContext> context)
+    : context(std::move(context)) {}
+
+LazyGlyphAtlas::AtlasData::~AtlasData() = default;
+
+void LazyGlyphAtlas::AtlasData::reset() {
+  renderable_frames.clear();
+  atlas.reset();
+}
+
+LazyGlyphAtlas::AtlasData& LazyGlyphAtlas::GetData(GlyphAtlas::Type type) {
+  switch (type) {
+    case GlyphAtlas::Type::kAlphaBitmap:
+      return alpha_data_;
+    case GlyphAtlas::Type::kColorBitmap:
+      return color_data_;
   }
   FML_UNREACHABLE();
 }

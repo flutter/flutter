@@ -57,6 +57,10 @@ Color _scaleAlpha(Color x, double factor) {
   return x.withValues(alpha: clampDouble(x.a * factor, 0, 1));
 }
 
+ColorSpace _widerColorSpace(ColorSpace a, ColorSpace b) {
+  return a == ColorSpace.displayP3 || b == ColorSpace.displayP3 ? ColorSpace.displayP3 : a;
+}
+
 /// An immutable color value in ARGB format.
 ///
 /// Consider the light teal of the [Flutter logo](https://flutter.dev/brand). It
@@ -412,6 +416,11 @@ class Color {
   ///
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
+  ///
+  /// If the two colors are in different color spaces, both are converted to
+  /// the wider gamut color space before interpolating. The result will be in
+  /// the wider gamut color space. For example, interpolating between an sRGB
+  /// color and a Display P3 color will produce a Display P3 result.
   static Color? lerp(Color? x, Color? y, double t) {
     assert(x?.colorSpace != ColorSpace.extendedSRGB);
     assert(y?.colorSpace != ColorSpace.extendedSRGB);
@@ -425,13 +434,24 @@ class Color {
       if (x == null) {
         return _scaleAlpha(y, t);
       } else {
-        assert(x.colorSpace == y.colorSpace);
+        final Color a;
+        final Color b;
+        final ColorSpace resultColorSpace;
+        if (x.colorSpace == y.colorSpace) {
+          a = x;
+          b = y;
+          resultColorSpace = x.colorSpace;
+        } else {
+          resultColorSpace = _widerColorSpace(x.colorSpace, y.colorSpace);
+          a = x.withValues(colorSpace: resultColorSpace);
+          b = y.withValues(colorSpace: resultColorSpace);
+        }
         return Color.from(
-          alpha: clampDouble(_lerpDouble(x.a, y.a, t), 0, 1),
-          red: clampDouble(_lerpDouble(x.r, y.r, t), 0, 1),
-          green: clampDouble(_lerpDouble(x.g, y.g, t), 0, 1),
-          blue: clampDouble(_lerpDouble(x.b, y.b, t), 0, 1),
-          colorSpace: x.colorSpace,
+          alpha: clampDouble(_lerpDouble(a.a, b.a, t), 0, 1),
+          red: clampDouble(_lerpDouble(a.r, b.r, t), 0, 1),
+          green: clampDouble(_lerpDouble(a.g, b.g, t), 0, 1),
+          blue: clampDouble(_lerpDouble(a.b, b.b, t), 0, 1),
+          colorSpace: resultColorSpace,
         );
       }
     }
@@ -2994,7 +3014,10 @@ abstract class Path {
   /// angles going clockwise around the oval.
   ///
   /// The line segment added if `forceMoveTo` is false starts at the
-  /// current point and ends at the start of the arc.
+  /// current point and ends at the start of the arc. Note that this
+  /// method does not draw anything if the [sweepAngle] is a multiple
+  /// of $2\pi$ (e.g., $2\pi$, $4\pi$). If you need to draw a full
+  /// circle or an overlapping arc, use [addArc] as a workaround.
   void arcTo(Rect rect, double startAngle, double sweepAngle, bool forceMoveTo);
 
   /// Appends up to four conic curves weighted to describe an oval of `radius`
@@ -3187,6 +3210,10 @@ abstract class Path {
   /// In particular, callers should be aware that [PathMetrics.length] is the
   /// number of contours, **not the length of the path**. To get the length of
   /// a contour in a path, use [PathMetric.length].
+  ///
+  /// Zero-length contours (where the start and end points are the same, such as
+  /// `Path()..lineTo(0, 0)`) are not included in the returned [PathMetrics].
+  /// Only contours with a positive length will have a corresponding [PathMetric].
   ///
   /// If `forceClosed` is set to true, the contours of the path will be measured
   /// as if they had been closed, even if they were not explicitly closed.
@@ -5524,7 +5551,11 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
     }
 
     if (!found) {
-      throw ArgumentError('No uniform named "$name".');
+      if (_hasUniform(name)) {
+        throw ArgumentError('Uniform "$name" is not an image sampler.');
+      } else {
+        throw ArgumentError('No uniform named "$name".');
+      }
     }
     return index;
   }
@@ -5718,6 +5749,189 @@ base class UniformVec4Slot extends UniformType {
   }
 
   final UniformFloatSlot _xSlot, _ySlot, _zSlot, _wSlot;
+}
+
+/// A binding to a uniform of type mat2. Calling [set] on this object updates
+/// the uniform's value.
+///
+/// Example:
+///
+/// ```dart
+/// void updateShader(ui.FragmentShader shader) {
+///   shader.getUniformMat2('uIdentity').set(
+///     1.0, 0.0,
+///     0.0, 1.0
+///   );
+/// }
+/// ```
+///
+/// See also:
+///   [FragmentShader.getUniformMat2] - How [UniformMat2Slot] instances are acquired.
+///
+base class UniformMat2Slot extends UniformType {
+  UniformMat2Slot._(this._m00, this._m01, this._m10, this._m11);
+
+  /// Set the float value of the matrix in row-major order.
+  void set(double m00, double m01, double m10, double m11) {
+    _m00.set(m00);
+    _m01.set(m01);
+    _m10.set(m10);
+    _m11.set(m11);
+  }
+
+  final UniformFloatSlot _m00, _m01, _m10, _m11;
+}
+
+/// A binding to a uniform of type mat3. Calling [set] on this object updates
+/// the uniform's value.
+///
+/// Example:
+///
+/// ```dart
+/// void updateShader(ui.FragmentShader shader) {
+///   shader.getUniformMat3('uIdentity').set(
+///     1.0, 0.0, 0.0,
+///     0.0, 1.0, 0.0,
+///     0.0, 0.0, 1.0
+///   );
+/// }
+/// ```
+///
+/// See also:
+///   [FragmentShader.getUniformMat3] - How [UniformMat3Slot] instances are acquired.
+///
+base class UniformMat3Slot extends UniformType {
+  UniformMat3Slot._(
+    this._m00,
+    this._m01,
+    this._m02,
+    this._m10,
+    this._m11,
+    this._m12,
+    this._m20,
+    this._m21,
+    this._m22,
+  );
+
+  /// Set the float value of the matrix in row-major order.
+  void set(
+    double m00,
+    double m01,
+    double m02,
+    double m10,
+    double m11,
+    double m12,
+    double m20,
+    double m21,
+    double m22,
+  ) {
+    _m00.set(m00);
+    _m01.set(m01);
+    _m02.set(m02);
+    _m10.set(m10);
+    _m11.set(m11);
+    _m12.set(m12);
+    _m20.set(m20);
+    _m21.set(m21);
+    _m22.set(m22);
+  }
+
+  final UniformFloatSlot _m00, _m01, _m02, _m10, _m11, _m12, _m20, _m21, _m22;
+}
+
+/// A binding to a uniform of type mat4. Calling [set] on this object updates
+/// the uniform's value.
+///
+/// Example:
+///
+/// ```dart
+/// void updateShader(ui.FragmentShader shader) {
+///   shader.getUniformMat4('uIdentity').set(
+///     1.0, 0.0, 0.0, 0.0,
+///     0.0, 1.0, 0.0, 0.0,
+///     0.0, 0.0, 1.0, 0.0,
+///     0.0, 0.0, 0.0, 1.0
+///   );
+/// }
+/// ```
+///
+/// See also:
+///   [FragmentShader.getUniformMat4] - How [UniformMat4Slot] instances are acquired.
+///
+
+base class UniformMat4Slot extends UniformType {
+  UniformMat4Slot._(
+    this._m00,
+    this._m01,
+    this._m02,
+    this._m03,
+    this._m10,
+    this._m11,
+    this._m12,
+    this._m13,
+    this._m20,
+    this._m21,
+    this._m22,
+    this._m23,
+    this._m30,
+    this._m31,
+    this._m32,
+    this._m33,
+  );
+
+  /// Set the float value of the matrix in row-major order.
+  void set(
+    double m00,
+    double m01,
+    double m02,
+    double m03,
+    double m10,
+    double m11,
+    double m12,
+    double m13,
+    double m20,
+    double m21,
+    double m22,
+    double m23,
+    double m30,
+    double m31,
+    double m32,
+    double m33,
+  ) {
+    _m00.set(m00);
+    _m01.set(m01);
+    _m02.set(m02);
+    _m03.set(m03);
+    _m10.set(m10);
+    _m11.set(m11);
+    _m12.set(m12);
+    _m13.set(m13);
+    _m20.set(m20);
+    _m21.set(m21);
+    _m22.set(m22);
+    _m23.set(m23);
+    _m30.set(m30);
+    _m31.set(m31);
+    _m32.set(m32);
+    _m33.set(m33);
+  }
+
+  final UniformFloatSlot _m00,
+      _m01,
+      _m02,
+      _m03,
+      _m10,
+      _m11,
+      _m12,
+      _m13,
+      _m20,
+      _m21,
+      _m22,
+      _m23,
+      _m30,
+      _m31,
+      _m32,
+      _m33;
 }
 
 /// An array of bindings to uniforms of the same type T. Access elements via [] and
@@ -5960,6 +6174,87 @@ base class FragmentShader extends Shader {
     return UniformVec4Slot._(slots[0], slots[1], slots[2], slots[3]);
   }
 
+  /// Access the float binding for a mat2 uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform mat2 uIdentity;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   shader.getUniformMat2('uIdentity');
+  /// }
+  /// ```
+  UniformMat2Slot getUniformMat2(String name) {
+    final List<UniformFloatSlot> slots = _getSlotsForUniform(name, 4);
+    return UniformMat2Slot._(slots[0], slots[1], slots[2], slots[3]);
+  }
+
+  /// Access the float binding for a mat3 uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform mat3 uIdentity;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   shader.getUniformMat3('uIdentity');
+  /// }
+  /// ```
+  UniformMat3Slot getUniformMat3(String name) {
+    final List<UniformFloatSlot> slots = _getSlotsForUniform(name, 9);
+    return UniformMat3Slot._(
+      slots[0],
+      slots[1],
+      slots[2],
+      slots[3],
+      slots[4],
+      slots[5],
+      slots[6],
+      slots[7],
+      slots[8],
+    );
+  }
+
+  /// Access the float binding for a mat4 uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform mat4 uIdentity;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   shader.getUniformMat4('uIdentity');
+  /// }
+  /// ```
+  UniformMat4Slot getUniformMat4(String name) {
+    final List<UniformFloatSlot> slots = _getSlotsForUniform(name, 16);
+    return UniformMat4Slot._(
+      slots[0],
+      slots[1],
+      slots[2],
+      slots[3],
+      slots[4],
+      slots[5],
+      slots[6],
+      slots[7],
+      slots[8],
+      slots[9],
+      slots[10],
+      slots[11],
+      slots[12],
+      slots[13],
+      slots[14],
+      slots[15],
+    );
+  }
+
   UniformArray<T> _getUniformArray<T extends UniformType>(
     String name,
     int elementSize,
@@ -6077,6 +6372,111 @@ base class FragmentShader extends Shader {
         components[2],
         components[3],
       ), // Create Vec4
+    );
+  }
+
+  /// Access the binding for a mat2[] uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform mat2[10] uMatricies;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   final ui.UniformArray<ui.UniformMat2Slot> mats = shader.getUniformMat2Array('uMatricies');
+  ///   mats[0].set(
+  ///     1.0, 0.0,
+  ///     1.0, 0.5
+  ///   );
+  /// }
+  /// ```
+  UniformArray<UniformMat2Slot> getUniformMat2Array(String name) {
+    return _getUniformArray<UniformMat2Slot>(
+      name,
+      4,
+      (components) => UniformMat2Slot._(components[0], components[1], components[2], components[3]),
+    );
+  }
+
+  /// Access the binding for a mat3[] uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform mat3[10] uMatricies;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   final ui.UniformArray<ui.UniformMat3Slot> mats = shader.getUniformMat3Array('uMatricies');
+  ///   mats[0].set(
+  ///     1.0, 0.0, 0.0,
+  ///     1.0, 0.5, 0.0,
+  ///     1.0, 0.3, 1.2
+  ///   );
+  /// }
+  /// ```
+  UniformArray<UniformMat3Slot> getUniformMat3Array(String name) {
+    return _getUniformArray<UniformMat3Slot>(
+      name,
+      9,
+      (components) => UniformMat3Slot._(
+        components[0],
+        components[1],
+        components[2],
+        components[3],
+        components[4],
+        components[5],
+        components[6],
+        components[7],
+        components[8],
+      ),
+    );
+  }
+
+  /// Access the binding for a mat4[] uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform mat4[10] uMatricies;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   final ui.UniformArray<ui.UniformMat4Slot> mats = shader.getUniformMat4Array('uMatricies');
+  ///   mats[0].set(
+  ///     1.0, 0.0, 0.0, 1.0,
+  ///     1.0, 0.5, 0.0, 0.4,
+  ///     1.0, 0.3, 1.2, 0.2,
+  ///     0.0, 0.0, 1.0, 0.3,
+  ///   );
+  /// }
+  /// ```
+  UniformArray<UniformMat4Slot> getUniformMat4Array(String name) {
+    return _getUniformArray<UniformMat4Slot>(
+      name,
+      16, // 4 floats per element
+      (components) => UniformMat4Slot._(
+        components[0],
+        components[1],
+        components[2],
+        components[3],
+        components[4],
+        components[5],
+        components[6],
+        components[7],
+        components[8],
+        components[9],
+        components[10],
+        components[11],
+        components[12],
+        components[13],
+        components[14],
+        components[15],
+      ),
     );
   }
 

@@ -816,7 +816,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
           final Widget transform = StretchEffect(
             stretchStrength: overscroll,
             axis: widget.axis,
-            child: widget.child!,
+            child: widget.child ?? const SizedBox.shrink(),
           );
 
           // Only clip if the viewport dimension is smaller than that of the
