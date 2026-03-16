@@ -253,6 +253,7 @@
 /dev/devicelab/bin/tasks/complex_layout_macos__compile.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/complex_layout_macos_impeller__start_up.dart @gaaclarke @flutter/desktop
 /dev/devicelab/bin/tasks/complex_layout_macos__start_up.dart @cbracken @flutter/desktop
+/dev/devicelab/bin/tasks/complex_layout_scroll_perf_macos_impeller__timeline_summary.dart @gaaclarke @flutter/desktop
 /dev/devicelab/bin/tasks/complex_layout_scroll_perf_macos__timeline_summary.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/complex_layout_win_desktop__compile.dart @yaakovschectman @flutter/desktop
 /dev/devicelab/bin/tasks/complex_layout_win_desktop__start_up.dart @yaakovschectman @flutter/desktop
