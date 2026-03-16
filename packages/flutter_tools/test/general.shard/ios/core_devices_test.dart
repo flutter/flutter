@@ -223,6 +223,60 @@ void main() {
         expect(fakeLLDB.attemptedToAttach, isTrue);
       });
 
+      testWithoutContext('ignores app extension processes', () async {
+        final fakeCoreDeviceControl = FakeIOSCoreDeviceControl(
+          installResult: IOSCoreDeviceInstallResult.fromJson(const <String, Object?>{
+            'info': <String, Object?>{'outcome': 'success'},
+            'result': <String, Object?>{
+              'installedApplications': [
+                <String, Object?>{'installationURL': '/asdf'},
+              ],
+            },
+          }),
+          launchResult: IOSCoreDeviceLaunchResult.fromJson(const <String, Object?>{
+            'info': <String, Object?>{'outcome': 'success'},
+            'result': <String, Object?>{
+              'process': <String, Object?>{'processIdentifier': 124},
+            },
+          }),
+          runningProcesses: [
+            // Extension process — lower PID, would be picked first without the fix
+            IOSCoreDeviceRunningProcess.fromJson(const <String, Object?>{
+              'processIdentifier': 123,
+              'executable': '/asdf/PlugIns/SomethingExtension.appex/SomethingExtension',
+            }),
+            // Main app process
+            IOSCoreDeviceRunningProcess.fromJson(const <String, Object?>{
+              'processIdentifier': 124,
+              'executable': '/asdf',
+            }),
+          ],
+        );
+        final processManager = FakeProcessManager.any();
+        final logger = BufferLogger.test();
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+        final fakeLLDB = FakeLLDB();
+        final launcher = IOSCoreDeviceLauncher(
+          coreDeviceControl: fakeCoreDeviceControl,
+          logger: logger,
+          xcodeDebug: FakeXcodeDebug(),
+          fileSystem: MemoryFileSystem.test(),
+          processUtils: processUtils,
+          lldb: fakeLLDB,
+        );
+
+        final bool result = await launcher.launchAppWithLLDBDebugger(
+          deviceId: 'device-id',
+          bundlePath: 'bundle-path',
+          bundleId: 'bundle-id',
+          launchArguments: <String>[],
+          shutdownHooks: FakeShutdownHooks(),
+        );
+
+        expect(result, isTrue);
+        expect(fakeLLDB.attemptedToAttach, isTrue);
+      });
+
       testWithoutContext('fails on install', () async {
         final fakeCoreDeviceControl = FakeIOSCoreDeviceControl(
           installResult: IOSCoreDeviceInstallResult.fromJson(const <String, Object?>{

@@ -120,12 +120,17 @@ class IOSCoreDeviceLauncher {
     }
 
     // Find the process that was launched using the installationURL.
+    // Filter out app extension processes (.appex) to avoid attaching the
+    // debugger to a widget extension or other extension instead of the
+    // main app process.
     final List<IOSCoreDeviceRunningProcess> processes = await _coreDeviceControl
         .getRunningProcesses(deviceId: deviceId);
     final IOSCoreDeviceRunningProcess? launchedProcess = processes
         .where(
           (IOSCoreDeviceRunningProcess process) =>
-              process.executable != null && process.executable!.contains(installationURL),
+              process.executable != null &&
+              process.executable!.contains(installationURL) &&
+              !process.executable!.contains('.appex'),
         )
         .firstOrNull;
 
