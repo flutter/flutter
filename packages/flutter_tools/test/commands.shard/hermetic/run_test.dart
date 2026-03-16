@@ -1454,9 +1454,7 @@ server:
             () => createTestCommandRunner(
               command,
             ).run(<String>['run', '--no-pub', '--no-hot', '--base-href=preview/']),
-            throwsToolExit(
-              message: '--base-href should start and end with /',
-            ),
+            throwsToolExit(message: '--base-href should start and end with /'),
           );
         },
         overrides: <Type, Generator>{
@@ -1477,9 +1475,7 @@ server:
             () => createTestCommandRunner(
               command,
             ).run(<String>['run', '--no-pub', '--no-hot', '--base-href=/preview']),
-            throwsToolExit(
-              message: '--base-href should start and end with /',
-            ),
+            throwsToolExit(message: '--base-href should start and end with /'),
           );
         },
         overrides: <Type, Generator>{
@@ -1496,9 +1492,7 @@ server:
         'base-href defaults to null when not provided',
         () async {
           final command = RunCommand();
-          await createTestCommandRunner(
-            command,
-          ).run(<String>['run', '--no-pub', '--no-hot']);
+          await createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
           expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);

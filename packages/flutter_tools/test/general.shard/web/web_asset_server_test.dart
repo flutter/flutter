@@ -402,10 +402,7 @@ void main() {
         Uri.base,
         null,
         crossOriginIsolation: false,
-        webDevServerConfig: const WebDevServerConfig(
-          host: 'localhost',
-          baseHref: '/preview/',
-        ),
+        webDevServerConfig: const WebDevServerConfig(host: 'localhost', baseHref: '/preview/'),
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         useLocalCanvasKit: false,
@@ -443,6 +440,5 @@ void main() {
 
       expect(server.basePath, isEmpty);
     });
-
   });
 }
