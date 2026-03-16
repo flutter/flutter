@@ -224,12 +224,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         FlutterOptions.kWebWasmFlag,
         help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
         negatable: false,
-      )
-      ..addFlag(
-        RunCommand.kEnableLocalDiscovery,
-        help:
-            'Whether to advertise the application on the local network (via mDNS) '
-            'for discovery by "flutter running-apps".',
       );
     usesWebOptions(verboseHelp: verboseHelp);
     usesTargetOption();
@@ -266,7 +260,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
   bool get enableHcpp => boolArg('enable-hcpp');
-  bool get enableLocalDiscovery => boolArg(RunCommand.kEnableLocalDiscovery);
 
   @override
   bool get refreshWirelessDevices => true;
@@ -332,7 +325,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         debugLogsDirectoryPath: debugLogsDirectoryPath,
         webDevServerConfig: webDevServerConfig,
         enableHcpp: enableHcpp,
-        enableLocalDiscovery: enableLocalDiscovery,
       );
     } else {
       return DebuggingOptions.enabled(
@@ -396,7 +388,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         ipv6: boolArg(FlutterCommand.ipv6Flag),
         printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
         enableHcpp: enableHcpp,
-        enableLocalDiscovery: enableLocalDiscovery,
         webDevServerConfig: webDevServerConfig,
       );
     }
@@ -443,7 +434,6 @@ class RunCommand extends RunCommandBase {
     addPublishPort(verboseHelp: verboseHelp);
     addIgnoreDeprecationOption();
     addMachineOutputFlag(verboseHelp: verboseHelp);
-
     argParser
       ..addFlag(
         'await-first-frame-when-tracing',
@@ -510,8 +500,6 @@ class RunCommand extends RunCommandBase {
 
   @override
   final name = 'run';
-
-  static const String kEnableLocalDiscovery = 'enable-local-discovery';
 
   @override
   DeprecationBehavior get deprecationBehavior =>
@@ -911,9 +899,9 @@ class RunCommand extends RunCommandBase {
     final appStartedTimeRecorder = Completer<void>.sync();
 
     TerminalHandler? handler;
+    // This callback can't throw.
     unawaited(
-      // This callback is executed once the application has successfully started.
-      appStartedTimeRecorder.future.then<void>((_) async {
+      appStartedTimeRecorder.future.then<void>((_) {
         appStartedTime = globals.systemClock.now();
         if (stayResident) {
           handler =
