@@ -68,7 +68,7 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
           // make less things start up unnecessarily.
           '--no-dds',
           '--no-enable-dart-profiling',
-          if (useHCPPFlag) '--enable-surface-control',
+          if (useHCPPFlag) '--enable-hcpp',
           '--test-arguments=test',
           '--test-arguments=--reporter=expanded',
         ],
@@ -122,8 +122,8 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
 
       androidManifestXml.writeAsStringSync(
         androidManifestXml.readAsStringSync().replaceFirst(
-          kSurfaceControlMetadataDisabled,
-          kSurfaceControlMetadataEnabled,
+          kHcppMetadataDisabled,
+          kHcppMetadataEnabled,
         ),
       );
       for (final file in mains) {
@@ -143,10 +143,10 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
   }
 }
 
-const String kSurfaceControlMetadataDisabled =
-    '<meta-data android:name="io.flutter.embedding.android.EnableSurfaceControl" android:value="false" />';
-const String kSurfaceControlMetadataEnabled =
-    '<meta-data android:name="io.flutter.embedding.android.EnableSurfaceControl" android:value="true" />';
+const String kHcppMetadataDisabled =
+    '<meta-data android:name="io.flutter.embedding.android.EnableHcpp" android:value="false" />';
+const String kHcppMetadataEnabled =
+    '<meta-data android:name="io.flutter.embedding.android.EnableHcpp" android:value="true" />';
 
 String _impellerBackendMetadata({required String value}) {
   return '<meta-data android:name="io.flutter.embedding.android.ImpellerBackend" android:value="$value" />';

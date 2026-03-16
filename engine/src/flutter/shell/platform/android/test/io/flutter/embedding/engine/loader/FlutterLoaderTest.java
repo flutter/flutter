@@ -353,7 +353,6 @@ public class FlutterLoaderTest {
             anyString(),
             anyLong(),
             anyInt());
-
     List<String> actualArgs = Arrays.asList(shellArgsCaptor.getValue());
 
     // This check works because the tests run in debug mode. If run in release (or JIT release)
@@ -369,6 +368,58 @@ public class FlutterLoaderTest {
     // FlutterLoader.ensureInitialized and mockFlutterJNI.init for testing.
     flutterLoader.initialized = false;
     clearInvocations(mockFlutterJNI);
+  }
+
+  @Test
+  public void itSetsEnableHcppFromMetaData() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metaData = new Bundle();
+    metaData.putBoolean("io.flutter.embedding.android.EnableHcpp", true);
+    ctx.getApplicationInfo().metaData = metaData;
+
+    final String hcppArg = "--enable-hcpp-and-surface-control";
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+    assertTrue(arguments.contains(hcppArg));
+  }
+
+  @Test
+  public void itSetsShaderInitModeFromMetaData() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metaData = new Bundle();
+    metaData.putBoolean("io.flutter.embedding.android.ImpellerLazyShaderInitialization", true);
+    ctx.getApplicationInfo().metaData = metaData;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, null);
+    shadowOf(getMainLooper()).idle();
+
+    final String shaderModeArg = "--impeller-lazy-shader-mode";
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+    assertTrue(arguments.contains(shaderModeArg));
   }
 
   @Test

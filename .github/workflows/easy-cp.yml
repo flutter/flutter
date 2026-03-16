@@ -8,16 +8,20 @@ on:
   pull_request_target:
     branches: master
     types: [labeled]
+  issues:
+    types: [labeled]
 
 permissions:
   contents: read
   pull-requests: write
+  issues: write
 
 jobs:
   cherrypick_not_merged_remove_label:
     name: cherrypick_not_merged_remove_label
     runs-on: ubuntu-latest
     if: |
+      github.event_name == 'pull_request_target' &&
       (github.event.label.name == format('cp{0} beta', ':') || github.event.label.name == format('cp{0} stable', ':')) &&
       (github.event.pull_request.merged == false)
     steps:
@@ -28,10 +32,26 @@ jobs:
           gh pr comment ${{ github.event.pull_request.number }} -R flutter/flutter -b "Only merged pull requests can be cherrypicked."
         env:
           GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+
+  remove_label_from_issues:
+    name: remove_label_from_issues
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'issues' &&
+      (github.event.label.name == format('cp{0} beta', ':') || github.event.label.name == format('cp{0} stable', ':'))
+    steps:
+      - name: Remove Label and Leave Comment
+        run: |
+          gh issue edit ${{ github.event.issue.number }} -R flutter/flutter --remove-label "${{ github.event.label.name }}"
+          gh issue comment ${{ github.event.issue.number }} -R flutter/flutter -b "Cherry-pick labels should only be applied to merged pull requests."
+        env:
+          GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+
   cherrypick_to_release:
     name: cherrypick_to_release
     runs-on: ubuntu-latest
     if: |
+      github.event_name == 'pull_request_target' &&
       (github.event.label.name == format('cp{0} beta', ':') || github.event.label.name == format('cp{0} stable', ':')) &&
       (github.event.pull_request.merged == true)
     steps:
@@ -59,8 +79,8 @@ jobs:
         id: attempt-cp
         working-directory: ./flutter
         run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "<>"
+          git config user.name "flutteractionsbot"
+          git config user.email "<flutter-actions-bot@google.com>"
           git remote add upstream https://github.com/flutter/flutter.git
           git fetch upstream $RELEASE_BRANCH
           git fetch upstream master

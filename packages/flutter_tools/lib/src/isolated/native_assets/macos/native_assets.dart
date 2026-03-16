@@ -122,7 +122,7 @@ Future<List<File>> copyNativeCodeAssetsMacOS(
     final Uri assetTargetUri = targetUri.resolveUri(target);
     final String name = assetTargetUri.pathSegments.last;
     final Directory frameworkDir = fileSystem.file(assetTargetUri).parent;
-    if (await frameworkDir.exists()) {
+    if (frameworkDir.existsSync()) {
       await frameworkDir.delete(recursive: true);
     }
     // MyFramework.framework/                           frameworkDir
@@ -226,7 +226,7 @@ Future<List<File>> copyNativeCodeAssetsMacOSFlutterTester(
     final Uri assetTargetUri = targetUri.resolveUri(target);
     final File dylibFile = fileSystem.file(assetTargetUri);
     final Directory targetParent = dylibFile.parent;
-    if (!await targetParent.exists()) {
+    if (!targetParent.existsSync()) {
       await targetParent.create(recursive: true);
     }
     await lipoDylibs(dylibFile, sources);

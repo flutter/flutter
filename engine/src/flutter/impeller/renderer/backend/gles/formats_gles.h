@@ -196,6 +196,15 @@ constexpr std::optional<GLenum> ToTextureTarget(TextureType type) {
   FML_UNREACHABLE();
 }
 
+struct PixelFormatGLES {
+  GLint internal_format = 0;
+  GLenum external_format = GL_NONE;
+  GLenum type = GL_NONE;
+};
+
+std::optional<PixelFormatGLES> ToPixelFormatGLES(PixelFormat format,
+                                                 bool supports_bgra);
+
 std::string DebugToFramebufferError(int status);
 
 }  // namespace impeller
