@@ -44,6 +44,9 @@ const EdgeInsetsGeometry _kUnalignedMenuMargin = EdgeInsetsDirectional.only(star
 /// A builder to customize dropdown buttons.
 ///
 /// Used by [DropdownButton.selectedItemBuilder].
+///
+/// The list of widgets returned by this builder must be exactly the same length
+/// as the [DropdownButton.items] list.
 typedef DropdownButtonBuilder = List<Widget> Function(BuildContext context);
 
 class _DropdownMenuPainter extends CustomPainter {
@@ -1157,6 +1160,9 @@ class DropdownButton<T> extends StatefulWidget {
   ///
   /// If this callback is null, the [DropdownMenuItem] from [items]
   /// that matches [value] will be displayed.
+  ///
+  /// The list of widgets returned by this builder must be exactly the same length
+  /// as the [items] list.
   final DropdownButtonBuilder? selectedItemBuilder;
 
   /// The z-coordinate at which to place the menu when open.
