@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('PageStorage read and write', (WidgetTester tester) async {
@@ -12,7 +14,7 @@ void main() {
     var storedValue = 0;
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: StatefulBuilder(
           key: builderKey,
           builder: (BuildContext context, StateSetter setter) {
@@ -40,7 +42,7 @@ void main() {
     var storedValue = 0;
 
     Widget buildWidthKey(Key key) {
-      return MaterialApp(
+      return TestWidgetsApp(
         home: StatefulBuilder(
           key: key,
           builder: (BuildContext context, StateSetter setter) {

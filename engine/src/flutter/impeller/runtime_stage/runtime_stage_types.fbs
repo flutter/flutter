@@ -34,6 +34,11 @@ enum PaddingType:uint8 {
   kFloat = 1,
 }
 
+table StructField {
+  name: string;
+  byte_size: uint64;
+}
+
 table UniformDescription {
   name: string;
   location: uint64;
@@ -44,6 +49,7 @@ table UniformDescription {
   columns: uint64;
   array_elements: uint64;
   padding_layout: [PaddingType];
+  struct_fields: [StructField];
   struct_float_count: uint64;
 }
 

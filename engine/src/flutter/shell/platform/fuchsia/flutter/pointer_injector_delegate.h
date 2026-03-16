@@ -39,7 +39,7 @@ class PointerInjectorDelegate {
   //  - Attempts to dispatch a pointer event to the given viewRef. Completes
   //    with [0] when the pointer event is sent to the given viewRef.
   bool HandlePlatformMessage(
-      rapidjson::Value request,
+      const rapidjson::Document& request,
       fml::RefPtr<flutter::PlatformMessageResponse> response);
 
   // Adds an endpoint for |view_id| in |valid_views_| for lifecycle management.
