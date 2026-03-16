@@ -42,6 +42,11 @@
 @property(nonatomic, readonly) BOOL enableFlutterGPU;
 
 /**
+ * Whether the Signed Distance Fields are enabled for rendering.
+ */
+@property(nonatomic, readonly) BOOL enableSDFs;
+
+/**
  * Whether wide gamut color support is enabled
  */
 @property(nonatomic, readonly) BOOL enableWideGamut;
