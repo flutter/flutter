@@ -275,6 +275,7 @@ void main() {
 
         expect(result, isTrue);
         expect(fakeLLDB.attemptedToAttach, isTrue);
+        expect(fakeLLDB.attachedProcessId, 124);
       });
 
       testWithoutContext('fails on install', () async {
@@ -3993,6 +3994,7 @@ class FakeLLDB extends Fake implements LLDB {
   bool attachSuccess;
 
   bool attemptedToAttach = false;
+  int? attachedProcessId;
 
   var _isRunning = false;
   int? _processId;
@@ -4016,6 +4018,7 @@ class FakeLLDB extends Fake implements LLDB {
     required LLDBLogForwarder lldbLogForwarder,
   }) async {
     attemptedToAttach = true;
+    attachedProcessId = appProcessId;
     return attachSuccess;
   }
 
