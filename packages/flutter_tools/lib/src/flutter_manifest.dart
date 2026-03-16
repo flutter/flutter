@@ -14,7 +14,6 @@ import 'base/deferred_component.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
-import 'globals.dart' as globals;
 import 'platform_plugins.dart';
 import 'plugins.dart';
 
@@ -80,7 +79,7 @@ class FlutterManifest {
     required Logger logger,
     List<AssetsEntry>? assets,
     List<Font>? fonts,
-    List<Uri>? shaders,
+    List<AssetsEntry>? shaders,
     List<DeferredComponent>? deferredComponents,
     bool removeDependencies = false,
   }) {
@@ -107,9 +106,9 @@ class FlutterManifest {
     }
 
     if (shaders != null && shaders.isNotEmpty) {
-      copy._flutterDescriptor['shaders'] = YamlList.wrap(
-        shaders.map((Uri uri) => uri.toString()).toList(),
-      );
+      copy._flutterDescriptor['shaders'] = YamlList.wrap(<Object?>[
+        for (final AssetsEntry shader in shaders) shader.descriptor,
+      ]);
     }
 
     if (deferredComponents != null && deferredComponents.isNotEmpty) {
@@ -157,6 +156,15 @@ class FlutterManifest {
   // Flag to avoid printing multiple invalid version messages.
   var _hasShowInvalidVersionMsg = false;
 
+  String _invalidVersionSettingHintMessage(String invalidVersion) =>
+      'Invalid version $invalidVersion found, default value will be used.\n'
+      'In pubspec.yaml, a valid version should look like: build-name+build-number.\n'
+      'In Android, build-name is used as versionName while build-number used as versionCode.\n'
+      'Read more about Android versioning at https://developer.android.com/studio/publish/versioning\n'
+      'In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.\n'
+      'Read more about iOS versioning at\n'
+      'https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html\n';
+
   /// The version String from the `pubspec.yaml` file.
   /// Can be null if it isn't set or has a wrong format.
   String? get appVersion {
@@ -170,10 +178,7 @@ class FlutterManifest {
       version = Version.parse(verStr);
     } on Exception {
       if (!_hasShowInvalidVersionMsg) {
-        _logger.printStatus(
-          globals.userMessages.invalidVersionSettingHintMessage(verStr),
-          emphasis: true,
-        );
+        _logger.printStatus(_invalidVersionSettingHintMessage(verStr), emphasis: true);
         _hasShowInvalidVersionMsg = true;
       }
     }
@@ -426,31 +431,7 @@ class FlutterManifest {
     return fonts;
   }
 
-  late final List<Uri> shaders = _extractAssetUris('shaders', 'Shader');
-
-  List<Uri> _extractAssetUris(String key, String singularName) {
-    if (!_flutterDescriptor.containsKey(key)) {
-      return <Uri>[];
-    }
-
-    final items = _flutterDescriptor[key] as List<Object?>?;
-    if (items == null) {
-      return const <Uri>[];
-    }
-    final results = <Uri>[];
-    for (final Object? item in items) {
-      if (item is! String || item == '') {
-        _logger.printError('$singularName manifest contains a null or empty uri.');
-        continue;
-      }
-      try {
-        results.add(Uri.parse(item));
-      } on FormatException {
-        _logger.printError('$singularName manifest contains invalid uri: $item.');
-      }
-    }
-    return results;
-  }
+  late final List<AssetsEntry> shaders = _computeAssets(_flutterDescriptor['shaders']);
 
   /// Whether localization Dart files should be generated.
   late final generateLocalizations = _flutterDescriptor['generate'] == true;
@@ -567,17 +548,7 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
       case 'assets':
         errors.addAll(_validateAssets(yamlValue));
       case 'shaders':
-        if (yamlValue is! YamlList) {
-          errors.add(
-            'Expected "$yamlKey" to be a list, but got $yamlValue (${yamlValue.runtimeType}).',
-          );
-        } else if (yamlValue.isEmpty) {
-          break;
-        } else if (yamlValue[0] is! String) {
-          errors.add(
-            'Expected "$yamlKey" to be a list of strings, but the first element is $yamlValue (${yamlValue.runtimeType}).',
-          );
-        }
+        errors.addAll(_validateAssets(yamlValue));
       case 'fonts':
         if (yamlValue is! YamlList) {
           errors.add(

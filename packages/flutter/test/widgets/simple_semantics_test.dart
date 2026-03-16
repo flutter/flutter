@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('Simple tree is simple', (WidgetTester tester) async {
@@ -35,12 +34,11 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Simple tree is simple - material', (WidgetTester tester) async {
+  testWidgets('Simple tree is simple - WidgetsApp', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
 
-    // Not using Text widget because of https://github.com/flutter/flutter/issues/12357.
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Center(
           child: Semantics(label: 'Hello!', child: const SizedBox(width: 10.0, height: 10.0)),
         ),
@@ -62,17 +60,10 @@ void main() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 3,
-                      rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 600.0),
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 4,
-                          label: 'Hello!',
-                          textDirection: TextDirection.ltr,
-                          rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
-                          transform: Matrix4.translationValues(395.0, 295.0, 0.0),
-                        ),
-                      ],
+                      label: 'Hello!',
+                      textDirection: TextDirection.ltr,
+                      rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+                      transform: Matrix4.translationValues(395.0, 295.0, 0.0),
                     ),
                   ],
                 ),

@@ -21,27 +21,36 @@ class LazyGlyphAtlas {
   ~LazyGlyphAtlas();
 
   void AddTextFrame(const std::shared_ptr<TextFrame>& frame,
-                    Rational scale,
-                    Point offset,
+                    Point position,
                     const Matrix& transform,
-                    std::optional<GlyphProperties> properties);
+                    const std::optional<GlyphProperties>& properties);
 
   void ResetTextFrames();
 
   const std::shared_ptr<GlyphAtlas>& CreateOrGetGlyphAtlas(
       Context& context,
       HostBuffer& host_buffer,
-      GlyphAtlas::Type type) const;
+      GlyphAtlas::Type type);
 
  private:
   std::shared_ptr<TypographerContext> typographer_context_;
 
-  std::vector<std::shared_ptr<TextFrame>> alpha_text_frames_;
-  std::vector<std::shared_ptr<TextFrame>> color_text_frames_;
-  std::shared_ptr<GlyphAtlasContext> alpha_context_;
-  std::shared_ptr<GlyphAtlasContext> color_context_;
-  mutable std::shared_ptr<GlyphAtlas> alpha_atlas_;
-  mutable std::shared_ptr<GlyphAtlas> color_atlas_;
+  struct AtlasData {
+    explicit AtlasData(std::shared_ptr<GlyphAtlasContext> context);
+
+    ~AtlasData();
+
+    std::vector<RenderableText> renderable_frames;
+    std::shared_ptr<GlyphAtlasContext> context;
+    std::shared_ptr<GlyphAtlas> atlas;
+
+    void reset();
+  };
+
+  AtlasData alpha_data_;
+  AtlasData color_data_;
+
+  AtlasData& GetData(GlyphAtlas::Type type);
 
   LazyGlyphAtlas(const LazyGlyphAtlas&) = delete;
 
