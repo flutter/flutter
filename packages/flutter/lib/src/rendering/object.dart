@@ -6241,7 +6241,33 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     if (configProvider.effective.isSemanticBoundary) {
       renderObject.assembleSemanticsNode(node, configProvider.effective, children);
     } else {
-      node.updateWith(config: configProvider.effective, childrenInInversePaintOrder: children);
+      if (configProvider.effective.isMergingSemanticsOfDescendants && semanticsNodes.length > 1) {
+
+
+        final SemanticsConfiguration housingConfig = SemanticsConfiguration()
+          ..absorb(configProvider.effective)
+          ..isMergingSemanticsOfDescendants = false;
+
+        final SemanticsNode mergeHousingNode = SemanticsNode(showOnScreen: renderObject.showOnScreen)
+          ..updateWith(
+            config: housingConfig,
+            childrenInInversePaintOrder: children,
+          )
+          ..isMergedIntoParent = true;
+
+        final config = SemanticsConfiguration()
+          ..isMergingSemanticsOfDescendants = true;
+        if (configProvider.effective.isSemanticBoundary) {
+          config.isSemanticBoundary = true;
+        }
+
+        node.updateWith(
+          config: config,
+          childrenInInversePaintOrder: <SemanticsNode>[mergeHousingNode],
+        );
+      } else {
+        node.updateWith(config: configProvider.effective, childrenInInversePaintOrder: children);
+      }
     }
   }
 
