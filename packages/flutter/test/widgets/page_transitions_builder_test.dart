@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'utils.dart';
+
 void main() {
   testWidgets('PageTransitionsBuilder buildTransitions method is called correctly', (
     WidgetTester tester,
@@ -111,9 +113,11 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Navigator(
           onGenerateRoute: (RouteSettings settings) {
-            return _CustomPageRoute<void>(
+            return TestRoute<void>(
               settings: settings,
               transitionsBuilder: customTransitionsBuilder,
+              transitionDuration: const Duration(milliseconds: 300),
+              maintainState: true,
               builder: (BuildContext context) {
                 if (settings.name == '/') {
                   return Center(
@@ -183,9 +187,11 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Navigator(
           onGenerateRoute: (RouteSettings settings) {
-            return _CustomPageRoute<void>(
+            return TestRoute<void>(
               settings: settings,
               transitionsBuilder: const FadeUpwardsPageTransitionsBuilder(),
+              transitionDuration: const Duration(milliseconds: 300),
+              maintainState: true,
               builder: (BuildContext context) {
                 if (settings.name == '/') {
                   return ColoredBox(
@@ -382,9 +388,11 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Navigator(
           onGenerateRoute: (RouteSettings settings) {
-            return _CustomPageRoute<void>(
+            return TestRoute<void>(
               settings: settings,
               transitionsBuilder: const OpenUpwardsPageTransitionsBuilder(),
+              transitionDuration: const Duration(milliseconds: 300),
+              maintainState: true,
               builder: (BuildContext context) {
                 if (settings.name == '/') {
                   return ColoredBox(
@@ -505,50 +513,6 @@ void main() {
     },
     variant: TargetPlatformVariant.only(TargetPlatform.android),
   );
-}
-
-class _CustomPageRoute<T> extends PageRoute<T> {
-  _CustomPageRoute({required this.builder, required this.transitionsBuilder, super.settings});
-
-  final WidgetBuilder builder;
-  final PageTransitionsBuilder transitionsBuilder;
-
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 300);
-
-  @override
-  bool get maintainState => true;
-
-  @override
-  Color? get barrierColor => null;
-
-  @override
-  String? get barrierLabel => null;
-
-  @override
-  Widget buildPage(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-  ) {
-    return builder(context);
-  }
-
-  @override
-  Widget buildTransitions(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    return transitionsBuilder.buildTransitions<T>(
-      this,
-      context,
-      animation,
-      secondaryAnimation,
-      child,
-    );
-  }
 }
 
 class _TestPageTransitionsBuilder extends PageTransitionsBuilder {

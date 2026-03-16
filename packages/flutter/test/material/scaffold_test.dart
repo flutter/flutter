@@ -13,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
+import '../widgets/utils.dart';
 
 // From bottom_sheet.dart.
 const Duration _bottomSheetExitDuration = Duration(milliseconds: 200);
@@ -1164,11 +1165,13 @@ void main() {
     }
 
     PageRoute<void> customPageRouteBuilder() {
-      return _CustomPageRoute<void>(
+      return TestRoute<void>(
+        fullscreenDialog: true,
+        maintainState: true,
+        transitionDuration: const Duration(milliseconds: 300),
         builder: (BuildContext context) {
           return Scaffold(appBar: AppBar(), body: const Text('Page 2'));
         },
-        fullscreenDialog: true,
       );
     }
 
@@ -3878,48 +3881,6 @@ class _GeometryCachePainter extends CustomPainter {
   @override
   bool shouldRepaint(_GeometryCachePainter oldDelegate) {
     return true;
-  }
-}
-
-class _CustomPageRoute<T> extends PageRoute<T> {
-  _CustomPageRoute({
-    required this.builder,
-    RouteSettings super.settings = const RouteSettings(),
-    this.maintainState = true,
-    super.fullscreenDialog,
-  });
-
-  final WidgetBuilder builder;
-
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 300);
-
-  @override
-  Color? get barrierColor => null;
-
-  @override
-  String? get barrierLabel => null;
-
-  @override
-  final bool maintainState;
-
-  @override
-  Widget buildPage(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-  ) {
-    return builder(context);
-  }
-
-  @override
-  Widget buildTransitions(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    return child;
   }
 }
 
