@@ -1801,10 +1801,10 @@ class SemanticsProperties extends DiagnosticableTree {
   /// application might define headers A, B, C, etc. to divide the list of
   /// alphabetically sorted contacts into sections.
   ///
-  /// Support for this semantic varies by platform. Android accessibility
-  /// exposes headings rather than a separate header concept, so `header` alone
-  /// is not sufficient there. To mark content as a heading on Android, also set
-  /// [headingLevel].
+  /// Support for this semantic varies by platform. On Android, this property
+  /// alone is not sufficient. To mark content as a heading for accessibility
+  /// services, also set [headingLevel]. This is because Android accessibility
+  /// APIs expose headings, but not a separate header concept.
   final bool? header;
 
   /// If non-null, indicates that this subtree represents a text field.
