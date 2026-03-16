@@ -396,7 +396,6 @@ public class FlutterLoaderTest {
             anyLong(),
             anyInt());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
-    System.out.println(arguments);
     assertTrue(arguments.contains(hcppArg));
   }
 
