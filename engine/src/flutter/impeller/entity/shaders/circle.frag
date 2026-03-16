@@ -34,6 +34,18 @@ float distanceFromStrokedCircle(float dist_to_center,
   float outer_distance = distanceFromCircle(dist_to_center, outer_radius);
   float inner_distance = distanceFromCircle(dist_to_center, inner_radius);
 
+  // If a point lies inside of the hole of the stroked circle, the
+  // inner_distance will be negative. -inner_distance is then a value that's
+  // positive inside of the hole, zero at the inner boundary, and negative
+  // elsewhere. outer_distance is a value that's negative inside the the outer
+  // radius of the circle, zero at the outer boundary, and positive elsewhere.
+  // If a point lies:
+  //  - inside the hole -> max(-inner_distance, outer_distance) > 0
+  //  - outside the outer radius -> max(-inner_distance, outer_distance) > 0
+  //  - on the boundary of the stroke -> max(-inner_distance, outer_distance) =
+  //  0
+  //  - inside of the stroke -> max(-inner_distance, outer_distance) < 0. With
+  //  the value minimal at the radius, and approaching zero at the boundaries
   return max(-inner_distance, outer_distance);
 }
 
@@ -54,8 +66,8 @@ void main() {
   float local_dx = length(dFdx(v_position));
   float local_dy = length(dFdy(v_position));
 
-  // Get the vector towards the center of the circle measured in pixel
-  // units.
+  // Get the length of the vector towards the center of the circle measured in
+  // local coordinates.
   float local_dist_towards_center =
       dot(vec2(local_dx, local_dy), abs(unitvec_towards_center));
 
