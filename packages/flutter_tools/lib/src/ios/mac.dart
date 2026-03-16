@@ -759,7 +759,6 @@ Future<void> removeExtendedAttributes(
       .split('\n')
       .map<String>((String line) => line.trim())
       .where((String line) => line.isNotEmpty && !line.endsWith(':'))
-      .map<String>((String line) => line.endsWith(':') ? line.substring(0, line.length - 1) : line)
       .toSet();
 
   for (final String attribute in attributesToRemove.intersection(presentAttributes)) {
