@@ -1,0 +1,116 @@
+name: Roll Dart Dependencies
+
+on:
+  workflow_dispatch:
+    inputs:
+      dart_hash:
+        description: 'The Dart SDK commit hash to update to'
+        required: true
+        type: string
+
+jobs:
+  update-deps:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          repository: flutteractionsbot/flutter
+          token: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          ref: master
+
+      - name: Configure git
+        env:
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+        run: |
+          git config user.name "flutteractionsbot"
+          git config user.email "<flutter-actions-bot@google.com>"
+          git remote add upstream https://github.com/flutter/flutter.git
+          git fetch upstream ${{ github.ref_name }}
+
+          BRANCH_NAME="sync-dart-${{ inputs.dart_hash }}"
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
+          git checkout -b "$BRANCH_NAME" upstream/${{ github.ref_name }}
+
+      - name: Download and Decode Dart DEPS
+        id: download-deps
+        run: |
+          DART_HASH="${{ inputs.dart_hash }}"
+          URL="https://dart.googlesource.com/sdk/+/$DART_HASH/DEPS?format=TEXT"
+
+          echo "Fetching DEPS from $URL"
+
+          # Googlesource returns base64 encoded text when format=TEXT is used
+          RESPONSE=$(curl -s -f "$URL")
+
+          if [ $? -ne 0 ]; then
+            echo "::error::Failed to download DEPS file. Please verify the Dart hash: $DART_HASH"
+            exit 1
+          fi
+
+          echo "$RESPONSE" | base64 --decode > dart_deps_file
+
+          if [ ! -s dart_deps_file ]; then
+            echo "::error::Downloaded DEPS file is empty or decoding failed."
+            exit 1
+          fi
+
+      - name: Run Update Script
+        id: run-script
+        run: |
+          DART_HASH="${{ inputs.dart_hash }}"
+          DART_DEPS="dart_deps_file"
+          FLUTTER_DEPS="DEPS" # Root of the repository
+          SCRIPT="engine/src/tools/dart/create_updated_flutter_deps.py"
+
+          if [ ! -f "$SCRIPT" ]; then
+            echo "::error::Update script not found at $SCRIPT"
+            exit 1
+          fi
+
+          echo "Running $SCRIPT..."
+
+          # Execute the python script
+          if ! python3 "$SCRIPT" -d "$DART_DEPS" -f "$FLUTTER_DEPS" -r "$DART_HASH"; then
+            echo "::error::The python update script failed during execution."
+            exit 1
+          fi
+
+      - name: Check for Changes
+        id: git-check
+        run: |
+          # Check if the root DEPS file has changed
+          if git diff --exit-code DEPS; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "## ✅ Dart version already up to date" >> $GITHUB_STEP_SUMMARY
+            echo "The DEPS file is already up to date with Dart hash \`${{ inputs.dart_hash }}\`." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create PR if Changed
+        if: steps.git-check.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+        run: |
+          git add DEPS
+          git commit -m "Update flutter DEPS to dart ${{ inputs.dart_hash }}"
+          git push origin "$BRANCH_NAME" --force
+
+          PR_URL=$(gh pr create \
+            --title "[${{ github.ref_name }}] Update Flutter DEPS to Dart ${{ inputs.dart_hash }}" \
+            --body "This PR updates the transitive dependencies in the engine \`DEPS\` file based on Dart SDK hash \`${{ inputs.dart_hash }}\`." \
+            --repo flutter/flutter \
+            --base ${{ github.ref_name }} \
+            --head flutteractionsbot:$BRANCH_NAME)
+
+          # Nice big PR Success Summary
+          echo "## 🚀 PR Created Successfully" >> $GITHUB_STEP_SUMMARY
+          echo "Updated dart dependencies to \`${{ inputs.dart_hash }}\`." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **View Pull Request:** $PR_URL" >> $GITHUB_STEP_SUMMARY
