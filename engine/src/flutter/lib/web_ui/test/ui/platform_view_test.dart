@@ -652,7 +652,7 @@ Future<void> testMain() async {
       await completer.future;
     }
 
-    final List<String> warnings = <String>[];
+    final warnings = <String>[];
     final void Function(String) originalPrintWarning = printWarning;
     printWarning = (String warning) => warnings.add(warning);
     try {
