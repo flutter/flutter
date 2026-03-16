@@ -308,7 +308,6 @@ public class FlutterLoader {
       boolean oldGenHeapSizeSet = false;
       boolean isLeakVMSet = false;
 
-      // TODO(camsim99): handle hcpp.
       if (applicationMetaData != null) {
         for (FlutterEngineFlags.Flag flag : FlutterEngineFlags.ALL_FLAGS) {
           String metadataKey = flag.metadataKey;

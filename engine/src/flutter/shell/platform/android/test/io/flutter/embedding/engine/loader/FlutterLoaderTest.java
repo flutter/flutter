@@ -378,6 +378,12 @@ public class FlutterLoaderTest {
     metaData.putBoolean("io.flutter.embedding.android.EnableHcpp", true);
     ctx.getApplicationInfo().metaData = metaData;
 
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, null);
+    shadowOf(getMainLooper()).idle();
+
     final String hcppArg = "--enable-hcpp-and-surface-control";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
@@ -390,6 +396,7 @@ public class FlutterLoaderTest {
             anyLong(),
             anyInt());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+    System.out.println(arguments);
     assertTrue(arguments.contains(hcppArg));
   }
 

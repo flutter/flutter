@@ -223,6 +223,15 @@ public final class FlutterEngineFlags {
       new Flag("--enable-surface-control", "EnableSurfaceControl", true);
 
   /**
+   * Enables Hybrid Composition++.
+   *
+   * <p>Allowed in release to opt-in to this platform views implementation in production. Settable
+   * via the manifest and the command line.
+   */
+  private static final Flag ENABLE_HCPP =
+      new Flag("--enable-hcpp-and-surface-control", "EnableHcpp", true);
+
+  /**
    * Enables the Flutter GPU backend.
    *
    * <p>Allowed in release for developers to use the Flutter GPU backend in production. Settable via
@@ -474,7 +483,8 @@ public final class FlutterEngineFlags {
               IMPELLER_LAZY_SHADER_MODER,
               IMPELLER_ANTIALIAS_LINES,
               IMPELLER_OPENGL_GPU_TRACING,
-              IMPELLER_VULKAN_GPU_TRACING));
+              IMPELLER_VULKAN_GPU_TRACING,
+              ENABLE_HCPP));
 
   // Flags that have been turned off.
   private static final List<Flag> DISABLED_FLAGS =
