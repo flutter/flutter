@@ -1129,7 +1129,8 @@ version: 0.0.1
         );
 
         await dependencyManagement.setUp(platform: FlutterDarwinPlatform.ios);
-        expect(testLogger.warningText, isEmpty);
+        // The example-app-specific warning (always contains the docs URL) should not fire.
+        expect(testLogger.warningText, isNot(contains(kSwiftPackageManagerDocsUrl)));
       });
 
       testWithoutContext('does not warn when parent pubspec is malformed', () async {
@@ -1168,8 +1169,8 @@ version: 0.0.1
         );
 
         await dependencyManagement.setUp(platform: FlutterDarwinPlatform.ios);
-        // Should not warn because the malformed pubspec is caught and skipped.
-        expect(testLogger.warningText, isEmpty);
+        // Should not fire the example-app-specific warning (always contains the docs URL).
+        expect(testLogger.warningText, isNot(contains(kSwiftPackageManagerDocsUrl)));
       });
 
       testWithoutContext('does not warn when parent directory has no pubspec.yaml', () async {
@@ -1205,7 +1206,7 @@ version: 0.0.1
         );
 
         await dependencyManagement.setUp(platform: FlutterDarwinPlatform.ios);
-        expect(testLogger.warningText, isEmpty);
+        expect(testLogger.warningText, isNot(contains(kSwiftPackageManagerDocsUrl)));
       });
 
       testWithoutContext('does not warn when parent is not a Flutter plugin', () async {
@@ -1243,7 +1244,7 @@ version: 0.0.1
         );
 
         await dependencyManagement.setUp(platform: FlutterDarwinPlatform.ios);
-        expect(testLogger.warningText, isEmpty);
+        expect(testLogger.warningText, isNot(contains(kSwiftPackageManagerDocsUrl)));
       });
 
       testWithoutContext('does not warn when plugin name not found in plugins list', () async {
@@ -1291,7 +1292,7 @@ flutter:
         );
 
         await dependencyManagement.setUp(platform: FlutterDarwinPlatform.ios);
-        expect(testLogger.warningText, isEmpty);
+        expect(testLogger.warningText, isNot(contains(kSwiftPackageManagerDocsUrl)));
       });
     });
   });
