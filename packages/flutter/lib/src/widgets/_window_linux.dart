@@ -757,7 +757,7 @@ enum _GdkWindowTypeHint {
   dnd,
 }
 
-/// FIXME
+/// Window reference points. Matches the GdkGravity enum in gdk/gdkwindow.h.
 enum _GdkGravity {
   // ignore: unused_field
   none,
@@ -774,7 +774,9 @@ enum _GdkGravity {
   static_,
 }
 
-/// FIXME
+/// Positioning hints for aligning a window relative to a rectangle. Matches
+/// the GdkAnchorHint enum in gdk/gdkwindow.h, except these are bit positions
+/// when passed to GTK.
 enum _GdkAnchorHint { flipX, flipY, slideX, slideY, resizeX, resizeY }
 
 @ffi.Native<ffi.Pointer<ffi.NativeType> Function(ffi.Int)>(symbol: 'g_malloc0')
