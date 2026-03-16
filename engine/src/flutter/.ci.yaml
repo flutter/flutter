@@ -33,7 +33,7 @@ platform_properties:
       os: Mac-15.7
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "17c529"
+          "sdk_version": "17e5179g"
         }
   windows:
     properties:
@@ -465,7 +465,7 @@ targets:
         ]
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "17c529"
+          "sdk_version": "17e5179g"
         }
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
@@ -494,7 +494,7 @@ targets:
       config_name: mac_ios_engine
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "17c529"
+          "sdk_version": "17e5179g"
         }
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
@@ -514,7 +514,7 @@ targets:
       config_name: mac_ios_engine_ddm
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "17c529"
+          "sdk_version": "17e5179g"
         }
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
