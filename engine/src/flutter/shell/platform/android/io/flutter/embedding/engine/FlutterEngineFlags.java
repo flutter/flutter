@@ -214,15 +214,6 @@ public final class FlutterEngineFlags {
       new Flag("--isolate-snapshot-data=", "IsolateSnapshotData", true);
 
   /**
-   * Enables Android SurfaceControl for rendering.
-   *
-   * <p>Allowed in release to opt-in to this rendering feature in production. Only settable via the
-   * manifest.
-   */
-  private static final Flag ENABLE_SURFACE_CONTROL =
-      new Flag("--enable-surface-control", "EnableSurfaceControl", true);
-
-  /**
    * Enables Hybrid Composition++.
    *
    * <p>Allowed in release to opt-in to this platform views implementation in production. Settable
@@ -478,7 +469,6 @@ public final class FlutterEngineFlags {
               TRACE_STARTUP,
               LEAK_VM,
               TEST_FLAG,
-              ENABLE_SURFACE_CONTROL,
               ENABLE_FLUTTER_GPU,
               IMPELLER_LAZY_SHADER_MODER,
               IMPELLER_ANTIALIAS_LINES,
