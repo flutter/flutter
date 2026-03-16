@@ -42,11 +42,7 @@ namespace impeller {
 class PipelineCompileQueue
     : public std::enable_shared_from_this<PipelineCompileQueue> {
  public:
-  static std::shared_ptr<PipelineCompileQueue> Create(
-      std::shared_ptr<fml::BasicTaskRunner> worker_task_runner);
-
-  explicit PipelineCompileQueue(
-      std::shared_ptr<fml::BasicTaskRunner> worker_task_runner);
+  PipelineCompileQueue() = default;
 
   virtual ~PipelineCompileQueue();
 
@@ -83,10 +79,9 @@ class PipelineCompileQueue
   /// @return     If the job was successfully posted to the parallel task
   ///             runners.
   ///
-  virtual void PostJob(const fml::closure& job);
+  virtual void PostJob(const fml::closure& job) = 0;
 
  private:
-  std::shared_ptr<fml::BasicTaskRunner> worker_task_runner_;
   Mutex pending_jobs_mutex_;
   size_t priorities_elevated_ = {};
 

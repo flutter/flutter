@@ -14,9 +14,10 @@ namespace impeller {
 class PipelineCompileQueueGLES : public PipelineCompileQueue {
  public:
   static std::shared_ptr<PipelineCompileQueueGLES> Create(
-      fml::RefPtr<fml::TaskRunner> task_runner);
+      fml::RefPtr<fml::TaskRunner> worker_task_runner);
 
-  explicit PipelineCompileQueueGLES(fml::RefPtr<fml::TaskRunner> task_runner);
+  explicit PipelineCompileQueueGLES(
+      fml::RefPtr<fml::TaskRunner> worker_task_runner);
 
   ~PipelineCompileQueueGLES() override;
 
@@ -29,13 +30,10 @@ class PipelineCompileQueueGLES : public PipelineCompileQueue {
   ///
   /// @param[in]  job   The job
   ///
-  /// @return     If the job was successfully posted to the parallel task
-  ///             runners.
-  ///
   void PostJob(const fml::closure& job) override;
 
  private:
-  fml::RefPtr<fml::TaskRunner> task_runner_;
+  fml::RefPtr<fml::TaskRunner> worker_task_runner_;
 };
 
 }  // namespace impeller
