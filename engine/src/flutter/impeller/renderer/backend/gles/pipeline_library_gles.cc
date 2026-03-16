@@ -300,17 +300,34 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
       PipelineFuture<PipelineDescriptor>{descriptor, promise->get_future()};
   pipelines_[descriptor] = pipeline_future;
 
-  const auto result = reactor_->AddOperation([promise,                       //
-                                              weak_this = weak_from_this(),  //
-                                              descriptor,                    //
-                                              vert_function,                 //
-                                              frag_function,                 //
-                                              threadsafe                     //
-  ](const ReactorGLES& reactor) {
-    promise->set_value(CreatePipeline(weak_this, descriptor, vert_function,
-                                      frag_function, threadsafe));
-  });
-  FML_CHECK(result);
+  auto weak_this = weak_from_this();
+  auto reactor = reactor_;
+  auto generation_task = [promise, weak_this, descriptor, vert_function,
+                          frag_function, threadsafe, reactor]() {
+    auto thiz = weak_this.lock();
+    if (!thiz) {
+      promise->set_value(nullptr);
+      return;
+    }
+    const auto result = reactor->AddOperation([promise,        //
+                                               weak_this,      //
+                                               descriptor,     //
+                                               vert_function,  //
+                                               frag_function,  //
+                                               threadsafe      //
+    ](const ReactorGLES& reactor) {
+      promise->set_value(CreatePipeline(weak_this, descriptor, vert_function,
+                                        frag_function, threadsafe));
+    });
+    FML_CHECK(result);
+  };
+
+  if (async) {
+    compile_queue_->PostJobForDescriptor(descriptor,
+                                         std::move(generation_task));
+  } else {
+    generation_task();
+  }
 
   return pipeline_future;
 }
