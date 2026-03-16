@@ -1145,16 +1145,19 @@ void handleSymlinkException(
           : 'You must build from a terminal run as administrator.';
       throwToolExit('Building with plugins requires symlink support.\n\n$instructions');
     }
-    // ERROR_INVALID_FUNCTION can happen when symlinks are unsupported on the
-    // underlying filesystem, such as ReFS, or when Windows cannot create the
-    // requested link.
+    // ERROR_INVALID_FUNCTION can happen when source and destination are on
+    // different drives, when symlinks are unsupported on the underlying
+    // filesystem (such as ReFS), or when Windows cannot create the requested
+    // link.
     if (e.osError?.errorCode == 1) {
       throwToolExit(
         'Creating symlink from $source to $destination failed with '
-        'ERROR_INVALID_FUNCTION. This can happen when symlinks are unsupported '
-        'by the filesystem, such as on Windows ReFS Dev Drives. Try moving '
-        'your Flutter project to a filesystem with symlink support, such as '
-        'NTFS.',
+        'ERROR_INVALID_FUNCTION. This can happen when source and destination '
+        'are on different drives. Make sure your Flutter project and pub cache '
+        'are on the same drive. This can also happen when symlinks are '
+        'unsupported by the filesystem, such as on Windows ReFS Dev Drives. '
+        'Try moving your Flutter project to a filesystem with symlink support, '
+        'such as NTFS.',
       );
     }
   }
