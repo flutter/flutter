@@ -39,13 +39,16 @@ namespace impeller {
 ///             entirely optional. The queue skipping mechanism all assume the
 ///             optional availability of a compile queue.
 ///
-class PipelineCompileQueue final
+class PipelineCompileQueue
     : public std::enable_shared_from_this<PipelineCompileQueue> {
  public:
   static std::shared_ptr<PipelineCompileQueue> Create(
       std::shared_ptr<fml::BasicTaskRunner> worker_task_runner);
 
-  ~PipelineCompileQueue();
+  explicit PipelineCompileQueue(
+      std::shared_ptr<fml::BasicTaskRunner> worker_task_runner);
+
+  virtual ~PipelineCompileQueue();
 
   PipelineCompileQueue(const PipelineCompileQueue&) = delete;
 
@@ -72,6 +75,16 @@ class PipelineCompileQueue final
   ///
   void PerformJobEagerly(const PipelineDescriptor& desc);
 
+  //----------------------------------------------------------------------------
+  /// @brief      Post a job to the worker task runner.
+  ///
+  /// @param[in]  job   The job
+  ///
+  /// @return     If the job was successfully posted to the parallel task
+  ///             runners.
+  ///
+  virtual void PostJob(const fml::closure& job);
+
  private:
   std::shared_ptr<fml::BasicTaskRunner> worker_task_runner_;
   Mutex pending_jobs_mutex_;
@@ -82,9 +95,6 @@ class PipelineCompileQueue final
                      ComparableHash<PipelineDescriptor>,
                      ComparableEqual<PipelineDescriptor>>
       pending_jobs_ IPLR_GUARDED_BY(pending_jobs_mutex_);
-
-  explicit PipelineCompileQueue(
-      std::shared_ptr<fml::BasicTaskRunner> worker_task_runner);
 
   fml::closure TakeJob(const PipelineDescriptor& desc);
 
