@@ -221,7 +221,10 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       }
 
       // Get the project info to make sure it compiles with xcodebuild
-      await _xcodeProjectInterpreter.getInfo(_xcodeProject.hostAppRoot.path);
+      await _xcodeProjectInterpreter.getInfo(
+        _xcodeProject.hostAppRoot.path,
+        dartToolDir: _xcodeProject.parent.dartTool,
+      );
     } on Exception catch (e) {
       restoreFromBackup(schemeInfo);
       if (optionalOnly) {

@@ -218,7 +218,10 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
         !xcodeProjectInterpreter.isInstalled) {
       return null;
     }
-    return _projectInfo ??= await xcodeProjectInterpreter.getInfo(hostAppRoot.path);
+    return _projectInfo ??= await xcodeProjectInterpreter.getInfo(
+      hostAppRoot.path,
+      dartToolDir: parent.dartTool,
+    );
   }
 
   XcodeProjectInfo? _projectInfo;
@@ -317,6 +320,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
     final Map<String, String> buildSettings = await xcodeProjectInterpreter.getBuildSettings(
       xcodeProject.path,
       buildContext: buildContext,
+      dartToolDir: parent.dartTool,
     );
     if (buildSettings.isNotEmpty) {
       // No timeouts, flakes, or errors.

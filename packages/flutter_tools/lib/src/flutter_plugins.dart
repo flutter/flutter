@@ -1360,6 +1360,13 @@ Future<void> injectPlugins(
     if (macOSPlatform) {
       await darwinDependencyManagerSetup.setUp(platform: FlutterDarwinPlatform.macos);
     }
+
+    // Start the SwiftPM dependency resolution in the background.
+    await globals.xcodeProjectInterpreter?.prefetchSwiftPackages(
+      project.ios.hostAppRoot.path,
+      dartToolDir: project.dartTool,
+      waitForCompletion: false,
+    );
   }
 }
 

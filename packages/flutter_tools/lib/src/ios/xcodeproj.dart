@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -18,6 +20,8 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../convert.dart';
+import '../globals.dart' as globals;
 import '../reporting/reporting.dart';
 
 final _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
@@ -173,6 +177,21 @@ class XcodeProjectInterpreter {
     return xcrunCommand;
   }
 
+  List<String> xcodebuildCommand(Directory dartToolDir, {bool skipPackageResolution = true}) {
+    return <String>[
+      ...xcrunCommand(),
+      'xcodebuild',
+      '-clonedSourcePackagesDirPath',
+      dartToolDir.childDirectory('swift_package_cache').path,
+      if (skipPackageResolution) ...<String>[
+        '-disableAutomaticPackageResolution',
+        '-skipPackageUpdates',
+        '-skipPackagePluginValidation',
+        '-skipPackageSignatureValidation',
+      ],
+    ];
+  }
+
   /// Asynchronously retrieve xcode build settings. This one is preferred for
   /// new call-sites.
   ///
@@ -180,6 +199,7 @@ class XcodeProjectInterpreter {
   /// return build settings for the first discovered target (by default this is Runner).
   Future<Map<String, String>> getBuildSettings(
     String projectPath, {
+    required Directory dartToolDir,
     required XcodeProjectBuildContext buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
@@ -194,8 +214,7 @@ class XcodeProjectInterpreter {
       XcodeSdk.WatchOS || XcodeSdk.WatchSimulator => getIosBuildDirectory(),
     };
     final showBuildSettingsCommand = <String>[
-      ...xcrunCommand(),
-      'xcodebuild',
+      ...xcodebuildCommand(dartToolDir),
       '-project',
       _fileSystem.path.absolute(projectPath),
       if (scheme != null) ...<String>['-scheme', scheme],
@@ -303,10 +322,14 @@ class XcodeProjectInterpreter {
     }
   }
 
-  Future<void> cleanWorkspace(String workspacePath, String scheme, {bool verbose = false}) async {
+  Future<void> cleanWorkspace(
+    String workspacePath,
+    String scheme, {
+    bool verbose = false,
+    required Directory dartToolDir,
+  }) async {
     await _processUtils.run(<String>[
-      ...xcrunCommand(),
-      'xcodebuild',
+      ...xcodebuildCommand(dartToolDir),
       '-workspace',
       workspacePath,
       '-scheme',
@@ -317,7 +340,85 @@ class XcodeProjectInterpreter {
     ], workingDirectory: _fileSystem.currentDirectory.path);
   }
 
-  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
+  Process? _swiftPackageFetchProcess;
+  StreamSubscription<String>? _swiftPackageFetchStdoutSubscription;
+  StreamSubscription<String>? _swiftPackageFetchStderrSubscription;
+
+  Future<void> prefetchSwiftPackages(
+    String projectPath, {
+    required Directory dartToolDir,
+    bool quiet = true,
+    bool waitForCompletion = true,
+  }) async {
+    Status? status;
+    final command = <String>[
+      ...xcodebuildCommand(dartToolDir, skipPackageResolution: false),
+      '-resolvePackageDependencies',
+    ];
+    try {
+      if (_swiftPackageFetchProcess == null) {
+        // Check if process is already running from a previous Flutter command. If it is, kill it
+        // so we don't have the process running twice. The new process will pick up where the old
+        // one left off.
+        final RunResult result = await _processUtils.run(['pgrep', '-n', ...command]);
+        if (result.exitCode == 0) {
+          final int? pid = int.tryParse(result.stdout.trim());
+          _logger.printTrace('SwiftPM dependencies are already being fetched by PID $pid');
+          if (pid != null) {
+            await _processUtils.run(['kill', '$pid']);
+          }
+        }
+      }
+
+      final Process process =
+          _swiftPackageFetchProcess ??
+          await _processUtils.start(command, workingDirectory: projectPath);
+      _swiftPackageFetchProcess ??= process;
+      if (!waitForCompletion) {
+        return;
+      }
+      if (!quiet) {
+        var printFetchWarnings = false;
+        _swiftPackageFetchStdoutSubscription ??= process.stdout
+            .transform(utf8.decoder)
+            .transform(const LineSplitter())
+            .listen((String line) {
+              if (line.startsWith('Fetching')) {
+                status?.cancel();
+                if (!printFetchWarnings) {
+                  globals.logger.printStatus(
+                    'Swift Package Manager is fetching dependencies. This may take several minutes the first time...',
+                  );
+                  printFetchWarnings = true;
+                }
+                status = globals.logger.startProgress('  $line...');
+              }
+            });
+      }
+      final stderrBuffer = StringBuffer();
+      _swiftPackageFetchStderrSubscription ??= process.stderr
+          .transform<String>(const Utf8Decoder(reportErrors: false))
+          .listen(stderrBuffer.write);
+
+      final int exitCode = await process.exitCode.whenComplete(() {
+        _swiftPackageFetchStdoutSubscription?.cancel();
+        _swiftPackageFetchStderrSubscription?.cancel();
+      });
+      if (exitCode != 0) {
+        throwToolExit('Failed to resolve SwiftPM dependencies:\n$stderrBuffer');
+      }
+    } finally {
+      status?.cancel();
+    }
+  }
+
+  Future<XcodeProjectInfo?> getInfo(
+    String projectPath, {
+    String? projectFilename,
+    required Directory dartToolDir,
+  }) async {
+    await prefetchSwiftPackages(projectPath, dartToolDir: dartToolDir, quiet: false);
+
     // The exit code returned by 'xcodebuild -list' when either:
     // * -project is passed and the given project isn't there, or
     // * no -project is passed and there isn't a project.
@@ -327,8 +428,7 @@ class XcodeProjectInterpreter {
     bool allowedFailures(int c) => c == missingProjectExitCode || c == corruptedProjectExitCode;
     final RunResult result = await _processUtils.run(
       <String>[
-        ...xcrunCommand(),
-        'xcodebuild',
+        ...xcodebuildCommand(dartToolDir),
         '-list',
         if (projectFilename != null) ...<String>['-project', projectFilename],
       ],

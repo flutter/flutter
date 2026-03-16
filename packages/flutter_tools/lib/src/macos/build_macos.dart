@@ -127,6 +127,7 @@ Future<void> buildMacOS({
   final XcodeProjectInfo? projectInfo = await globals.xcodeProjectInterpreter?.getInfo(
     xcodeProject.parent.path,
     projectFilename: xcodeProjectName,
+    dartToolDir: flutterProject.dartTool,
   );
   final String? scheme = projectInfo?.schemeFor(buildInfo);
   if (scheme == null) {
@@ -217,8 +218,7 @@ Future<void> buildMacOS({
     result = await globals.processUtils.stream(
       <String>[
         '/usr/bin/env',
-        'xcrun',
-        'xcodebuild',
+        ...globals.xcode!.xcodebuildCommand(flutterProject.dartTool, skipPackageResolution: false),
         '-workspace',
         xcodeWorkspace.path,
         '-configuration',
