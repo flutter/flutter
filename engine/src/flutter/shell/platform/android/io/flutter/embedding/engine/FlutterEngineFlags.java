@@ -217,7 +217,7 @@ public final class FlutterEngineFlags {
    * Enables Hybrid Composition++.
    *
    * <p>Allowed in release to opt-in to this platform views implementation in production. Settable
-   * via the manifest and the command line.
+   * via the manifest and the command line (via --enable-hcpp).
    */
   private static final Flag ENABLE_HCPP =
       new Flag("--enable-hcpp-and-surface-control", "EnableHcpp", true);
