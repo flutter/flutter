@@ -1854,15 +1854,12 @@ class _RenderBaselineAlignedStack extends RenderBox
     final double placeholderTop = placeholderBaselineValue != null
         ? editableTextBaselineValue - placeholderBaselineValue
         : 0.0;
-    final double placeholderBottom = placeholderTop + (placeholder?.size.height ?? 0.0);
-    final double alignedGroupTop = math.min(0.0, placeholderTop);
-    final double alignedGroupBottom = math.max(editableText.size.height, placeholderBottom);
-    final double alignedGroupHeight = alignedGroupBottom - alignedGroupTop;
-    final double dy = Alignment(
-      0.0,
-      textAlignVertical.y,
-    ).alongOffset(Offset(0.0, size.height - alignedGroupHeight)).dy;
-    final double groupOffset = dy - alignedGroupTop;
+    final Rect editableTextRect = Offset.zero & editableText.size;
+    final Rect placeholderRect = Offset(0.0, placeholderTop) & (placeholder?.size ?? Size.zero);
+    final Rect alignedGroupRect = editableTextRect.expandToInclude(placeholderRect);
+    final double availableDy = size.height - alignedGroupRect.height;
+    final double dy = (textAlignVertical.y + 1.0) * availableDy / 2.0;
+    final double groupOffset = dy - alignedGroupRect.top;
 
     editableTextParentData.offset = Offset(0.0, groupOffset);
     // Baseline-align the placeholder to the editable text while keeping the
