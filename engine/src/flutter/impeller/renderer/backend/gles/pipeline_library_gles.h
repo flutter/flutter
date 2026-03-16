@@ -11,6 +11,7 @@
 #include "flutter/fml/hash_combine.h"
 #include "flutter/fml/task_runner.h"
 #include "impeller/base/thread.h"
+#include "impeller/renderer/backend/gles/pipeline_compile_queue_gles.h"
 #include "impeller/renderer/backend/gles/reactor_gles.h"
 #include "impeller/renderer/backend/gles/unique_handle_gles.h"
 #include "impeller/renderer/pipeline_library.h"
@@ -93,7 +94,7 @@ class PipelineLibraryGLES final
   Mutex programs_mutex_;
   ProgramMap programs_ IPLR_GUARDED_BY(programs_mutex_);
   fml::RefPtr<fml::TaskRunner> io_task_runner_;
-  std::shared_ptr<PipelineCompileQueue> compile_queue_;
+  std::shared_ptr<PipelineCompileQueueGLES> compile_queue_;
 
   explicit PipelineLibraryGLES(std::shared_ptr<ReactorGLES> reactor,
                                fml::RefPtr<fml::TaskRunner> io_task_runner);

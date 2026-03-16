@@ -69,6 +69,8 @@ impeller_component("gles") {
     "gpu_tracer_gles.h",
     "handle_gles.cc",
     "handle_gles.h",
+    "pipeline_compile_queue_gles.cc",
+    "pipeline_compile_queue_gles.h",
     "pipeline_gles.cc",
     "pipeline_gles.h",
     "pipeline_library_gles.cc",
