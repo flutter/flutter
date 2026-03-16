@@ -149,7 +149,7 @@ class RawAvatar extends StatelessWidget {
   /// When this is specified, [boxShape] and [borderRadius] must be null.
   ///
   /// If none of [shape], [boxShape], or [borderRadius] are provided, the avatar
-  /// defaults to a circular shape using [CircleBorder].
+  /// defaults to a circular shape.
   /// {@endtemplate}
   final ShapeBorder? shape;
 
