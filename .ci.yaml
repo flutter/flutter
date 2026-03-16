@@ -5833,11 +5833,8 @@ targets:
       subshard: libraries
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      env_variables: >-
-        {
-          "LEAK_TRACKING": "true",
-          "TEST_RANDOMIZATION_OFF": "true"
-        }
+      leak_tracking: "true"
+      test_randomization_off: "true"
     runIf:
       - dev/**
       - packages/flutter/**
@@ -5900,11 +5897,8 @@ targets:
       subshard: misc
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      env_variables: >-
-        {
-          "LEAK_TRACKING": "true",
-          "TEST_RANDOMIZATION_OFF": "true"
-        }
+      leak_tracking: "true"
+      test_randomization_off: "true"
     runIf:
       - dev/**
       - packages/flutter/**
@@ -5960,11 +5954,8 @@ targets:
       subshard: widgets
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      env_variables: >-
-        {
-          "LEAK_TRACKING": "true",
-          "TEST_RANDOMIZATION_OFF": "true"
-        }
+      leak_tracking: "true"
+      test_randomization_off: "true"
     runIf:
       - dev/**
       - packages/flutter/**
