@@ -1569,9 +1569,19 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     // We should explicitly type the items list to be a list of <Widget>,
     // otherwise, no explicit type adding items maybe trigger a crash/failure
     // when hint and selectedItemBuilder are provided.
-    final items = widget.selectedItemBuilder == null
-        ? (widget.items != null ? List<Widget>.of(widget.items!) : <Widget>[])
-        : List<Widget>.of(widget.selectedItemBuilder!(context));
+    final List<Widget> items;
+    if (widget.selectedItemBuilder != null) {
+      final List<Widget> selectedItems = widget.selectedItemBuilder!(context);
+      assert(
+        widget.items == null || selectedItems.length == widget.items!.length,
+        'The selectedItemBuilder must return a list of widgets with the same length as the items list.\n'
+        'Currently, selectedItemBuilder returns a list of length ${selectedItems.length}, '
+        'but items has length ${widget.items!.length}.',
+      );
+      items = List<Widget>.of(selectedItems);
+    } else {
+      items = widget.items != null ? List<Widget>.of(widget.items!) : <Widget>[];
+    }
 
     int? hintIndex;
     if (widget.hint != null || (!_enabled && widget.disabledHint != null)) {

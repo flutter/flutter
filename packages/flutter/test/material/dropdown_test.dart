@@ -4882,4 +4882,38 @@ void main() {
     ).style;
     expect(labelStyle.color, labelColor);
   });
+
+  testWidgets('DropdownButton selectedItemBuilder length must match items length', (
+    WidgetTester tester,
+  ) async {
+    final List<DropdownMenuItem<String>> items = <String>['a', 'b']
+        .map<DropdownMenuItem<String>>(
+          (String value) => DropdownMenuItem<String>(value: value, child: Text(value)),
+        )
+        .toList();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(
+              child: DropdownButtonFormField<String>(
+                onChanged: (_) {},
+                items: items,
+                selectedItemBuilder: (BuildContext context) {
+                  return <Widget>[const Text('a')];
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      (tester.takeException() as AssertionError).message,
+      'The selectedItemBuilder must return a list of widgets with the same length as the items list.\n'
+      'Currently, selectedItemBuilder returns a list of length 1, but items has length 2.',
+    );
+  });
 }
