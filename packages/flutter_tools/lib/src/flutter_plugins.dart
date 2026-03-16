@@ -32,7 +32,7 @@ import 'plugins.dart';
 import 'project.dart';
 
 Future<bool> _fileContentsUnchanged(File file, String renderedTemplate) async {
-  if (!await file.exists()) {
+  if (!file.existsSync()) {
     return false;
   }
   final List<int> fileBytes = await file.readAsBytes();
@@ -1808,7 +1808,7 @@ Future<void> generateMainDartWithPluginRegistrant(
   final File newMainDart = rootProject.dartPluginRegistrant;
   if (resolutions.isEmpty) {
     try {
-      if (await newMainDart.exists()) {
+      if (newMainDart.existsSync()) {
         await newMainDart.delete();
       }
     } on FileSystemException catch (error) {
