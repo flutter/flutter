@@ -13,10 +13,10 @@
 #include "impeller/base/thread.h"
 #include "impeller/renderer/backend/vulkan/compute_pipeline_vk.h"
 #include "impeller/renderer/backend/vulkan/pipeline_cache_vk.h"
+#include "impeller/renderer/backend/vulkan/pipeline_compile_queue_vulkan.h"
 #include "impeller/renderer/backend/vulkan/pipeline_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/pipeline.h"
-#include "impeller/renderer/pipeline_compile_queue.h"
 #include "impeller/renderer/pipeline_library.h"
 
 namespace impeller {
@@ -49,7 +49,7 @@ class PipelineLibraryVK final
   PipelineKey pipeline_key_ IPLR_GUARDED_BY(pipelines_mutex_) = 1;
   bool is_valid_ = false;
   bool cache_dirty_ = false;
-  std::shared_ptr<PipelineCompileQueue> compile_queue_;
+  std::shared_ptr<PipelineCompileQueueVulkan> compile_queue_;
 
   PipelineLibraryVK(
       const std::shared_ptr<DeviceHolderVK>& device_holder,

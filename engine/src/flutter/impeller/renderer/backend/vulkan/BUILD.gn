@@ -94,6 +94,8 @@ impeller_component("vulkan") {
     "pipeline_cache_data_vk.h",
     "pipeline_cache_vk.cc",
     "pipeline_cache_vk.h",
+    "pipeline_compile_queue_vulkan.cc",
+    "pipeline_compile_queue_vulkan.h",
     "pipeline_library_vk.cc",
     "pipeline_library_vk.h",
     "pipeline_vk.cc",
