@@ -177,6 +177,14 @@ class XcodeProjectInterpreter {
     return xcrunCommand;
   }
 
+  /// A list of required arguments for the `xcodebuild` command.
+  ///
+  /// Using this method when running `xcodebuild` commands ensures that `xcrun` is used properly
+  /// and that the Swift package cache is properly configured.
+  ///
+  /// When [skipPackageResolution] is true, it uses arguments to attempt skipping any Swift package
+  /// resolution or updates. This should be false when running [prefetchSwiftPackages], so packages
+  /// should already be resolved, downloaded, and updated on subsquent `xcodebuild` commands.
   List<String> xcodebuildCommand(Directory dartToolDir, {bool skipPackageResolution = true}) {
     return <String>[
       ...xcrunCommand(),
@@ -340,10 +348,23 @@ class XcodeProjectInterpreter {
     ], workingDirectory: _fileSystem.currentDirectory.path);
   }
 
+  /// The process used to fetch Swift packages.
   Process? _swiftPackageFetchProcess;
+
+  /// The stdout subscription for the Swift package fetch process.
   StreamSubscription<String>? _swiftPackageFetchStdoutSubscription;
+
+  /// The stderr subscription for the Swift package fetch process.
   StreamSubscription<String>? _swiftPackageFetchStderrSubscription;
 
+  /// Prefetches Swift packages for the given Xcode project.
+  ///
+  /// If a process is already running from a previous Flutter command, kill it before starting
+  /// the command. If the process is already running from the same Flutter command, wait for it to
+  /// complete if [waitForCompletion] is true.
+  ///
+  /// If [quiet] is false, it will print a spinner while the command is running and print logs of
+  /// what Swift packages are being fetched.
   Future<void> prefetchSwiftPackages(
     String projectPath, {
     required Directory dartToolDir,
@@ -358,8 +379,8 @@ class XcodeProjectInterpreter {
     try {
       if (_swiftPackageFetchProcess == null) {
         // Check if process is already running from a previous Flutter command. If it is, kill it
-        // so we don't have the process running twice. The new process will pick up where the old
-        // one left off.
+        // so we don't have the process running twice. When this process is run twice, it'll cause
+        // one to error. The new process will pick up where the old one left off.
         final RunResult result = await _processUtils.run(['pgrep', '-n', ...command]);
         if (result.exitCode == 0) {
           final int? pid = int.tryParse(result.stdout.trim());
