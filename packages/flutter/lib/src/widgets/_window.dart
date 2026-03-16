@@ -157,6 +157,10 @@ mixin class RegularWindowControllerDelegate {
 /// When the window is no longer needed, the user should call [destroy] on this
 /// controller to release the resources associated with the window.
 ///
+/// If the parent window of the dialog is destroyed, then the dialog will
+/// be destroyed as well. The user does not need to explicitly call [destroy]
+/// in this case.
+///
 /// {@tool snippet}
 /// An example usage might look like:
 ///
@@ -215,7 +219,7 @@ abstract class RegularWindowController extends BaseWindowController {
   /// then the platform will use its own default size for the window.
   /// {@endtemplate}
   ///
-  /// The [title] argument configures the window's initial title.
+  /// The [title] argument configures the window's title.
   /// If omitted, some platforms might fall back to the app's name.
   ///
   /// The [delegate] argument can be used to listen to the window's
@@ -263,7 +267,8 @@ abstract class RegularWindowController extends BaseWindowController {
 
   /// The current title of the window.
   ///
-  /// This might differ from the requested title.
+  /// The title shown in the window is controlled by the platform and may differ
+  /// from the given `title`.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
@@ -502,7 +507,7 @@ abstract class DialogWindowController extends BaseWindowController {
   /// Such dialogs do not have a system menu. They are also not selectable
   /// from the window switcher and they are closed when the parent is closed.
   ///
-  /// The [title] argument configures the window's initial title.
+  /// The [title] argument configures the window's title.
   /// If omitted, some platforms might fall back to the app's name.
   ///
   /// The [delegate] argument can be used to listen to the window's
@@ -546,11 +551,15 @@ abstract class DialogWindowController extends BaseWindowController {
   ///
   /// If null, this dialog is modeless.
   /// If non-null, this dialog is modal to the parent.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
   BaseWindowController? get parent;
 
   /// The current title of the window.
   ///
-  /// This might differ from the requested title.
+  /// The title shown in the window is controlled by the platform and may differ
+  /// from the given `title`.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
@@ -659,6 +668,10 @@ mixin class TooltipWindowControllerDelegate {
 /// When the window is no longer needed, the user should call [destroy] on this
 /// controller to release the resources associated with the window.
 ///
+/// If the parent window of the tooltip is destroyed, then the tooltip will
+/// be destroyed as well. The user does not need to explicitly call [destroy]
+/// in this case.
+///
 /// {@tool snippet}
 /// An example usage of [TooltipWindowController] looks like:
 ///
@@ -734,6 +747,9 @@ abstract class TooltipWindowController extends BaseWindowController {
   /// The parent controller of this tooltip.
   ///
   /// The tooltip will be destroyed if its parent is destroyed.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
   BaseWindowController get parent;
 
   /// Request change to the constraints of the window.
@@ -791,6 +807,10 @@ mixin class PopupWindowControllerDelegate {
 /// The user of this class is responsible for managing the lifecycle of the window.
 /// When the window is no longer needed, the user should call [destroy] on this
 /// controller to release the resources associated with the window.
+///
+/// If the parent window of the popup is destroyed, then the popup will
+/// be destroyed as well. The user does not need to explicitly call [destroy]
+/// in this case.
 ///
 /// {@tool snippet}
 /// An example usage of [PopupWindowController] looks like:
@@ -857,6 +877,9 @@ abstract class PopupWindowController extends BaseWindowController {
   /// The parent controller of this popup.
   ///
   /// The popup will be destroyed if its parent is destroyed.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
   BaseWindowController get parent;
 
   /// Whether the window is currently activated.
