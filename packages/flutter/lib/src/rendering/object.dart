@@ -3937,7 +3937,6 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     SemanticsConfiguration config,
     Iterable<SemanticsNode> children,
   ) {
-    assert(node == _semantics.cachedSemanticsNode);
     // TODO(a14n): remove the following cast by updating type of parameter in either updateWith or assembleSemanticsNode
     node.updateWith(config: config, childrenInInversePaintOrder: children as List<SemanticsNode>);
   }
@@ -6239,42 +6238,36 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       });
     }
     if (configProvider.effective.isSemanticBoundary) {
-      renderObject.assembleSemanticsNode(node, configProvider.effective, children);
-    } else {
-      if (configProvider.effective.isMergingSemanticsOfDescendants && semanticsNodes.length > 1) {
-
-
-        final SemanticsConfiguration housingConfig = SemanticsConfiguration()
-          ..absorb(configProvider.effective)
-          ..isMergingSemanticsOfDescendants = false;
-
-        final SemanticsNode mergeHousingNode = SemanticsNode(showOnScreen: renderObject.showOnScreen)
-          ..updateWith(
-            config: housingConfig,
-            childrenInInversePaintOrder: children,
-          )
-          ..isMergedIntoParent = true;
+      if (configProvider.effective.isMergingSemanticsOfDescendants && semanticsNodes.isNotEmpty) {
+        // This node needs to merge the sibling nodes in the sub tree.
+        //
+        // Create an inner node to hold the configuration and children, and the cachedSemanticsNode will
+        // hold the inner node and the sibling nodes so that all of them can be merged together.
+        final innerNode = SemanticsNode(showOnScreen: renderObject.showOnScreen);
+        renderObject.assembleSemanticsNode(innerNode, configProvider.effective, children);
 
         final config = SemanticsConfiguration()
+          ..isSemanticBoundary = true
           ..isMergingSemanticsOfDescendants = true;
-        if (configProvider.effective.isSemanticBoundary) {
-          config.isSemanticBoundary = true;
-        }
 
         node.updateWith(
           config: config,
-          childrenInInversePaintOrder: <SemanticsNode>[mergeHousingNode],
+          childrenInInversePaintOrder: <SemanticsNode>[innerNode, ...semanticsNodes],
         );
+        // Clear the sibling nodes since they are now attached under the node.
+        semanticsNodes.clear();
       } else {
-        node.updateWith(config: configProvider.effective, childrenInInversePaintOrder: children);
+        renderObject.assembleSemanticsNode(node, configProvider.effective, children);
       }
+    } else {
+      assert(!configProvider.effective.isMergingSemanticsOfDescendants);
+      node.updateWith(config: configProvider.effective, childrenInInversePaintOrder: children);
     }
   }
 
   void _produceSemanticsNode({required Set<int> usedSemanticsIds}) {
     assert(!built);
     final SemanticsNode node = cachedSemanticsNode ??= _createSemanticsNode();
-    semanticsNodes.add(node);
     node
       ..isMergedIntoParent = (parentData?.mergeIntoParent ?? false)
       ..tags = parentData?.tagsForChildren;
@@ -6282,6 +6275,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
     _mergeSiblingGroup(usedSemanticsIds);
     _buildSemanticsSubtree(usedSemanticsIds: usedSemanticsIds);
+    semanticsNodes.add(node);
     built = true;
   }
 
