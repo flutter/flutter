@@ -3020,11 +3020,11 @@ void main() {
       );
       await expectValueIndicator(
         tester,
-        visibleWhenDragged: false,
-        visibleWhenReleased: false,
         theme: sliderTheme,
         divisions: 3,
         enabled: false,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
       );
       await expectValueIndicator(
         tester,
