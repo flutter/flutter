@@ -61,6 +61,30 @@ class AHBTextureSourceVK final : public TextureSourceVK {
 
   const android::HardwareBuffer* GetBackingStore() const;
 
+  using AHBProperties = vk::StructureChain<
+      // For VK_ANDROID_external_memory_android_hardware_buffer
+      vk::AndroidHardwareBufferPropertiesANDROID,
+      // For VK_ANDROID_external_memory_android_hardware_buffer
+      vk::AndroidHardwareBufferFormatPropertiesANDROID>;
+
+  using ImageViewInfo = vk::StructureChain<vk::ImageViewCreateInfo,
+                                           // Core in 1.1
+                                           vk::SamplerYcbcrConversionInfo>;
+
+  /// Create a VkImage that wraps an Android hardware buffer.
+  static vk::UniqueImage CreateVKImageWrapperForAndroidHarwareBuffer(
+      const vk::Device& device,
+      const AHBProperties& ahb_props,
+      const AHardwareBuffer_Desc& ahb_desc);
+
+  /// Create a VkImageViewCreateInfo that matches the properties of an Android
+  /// hardware buffer.
+  static ImageViewInfo CreateImageViewInfo(
+      const vk::Image& image,
+      const std::shared_ptr<YUVConversionVK>& yuv_conversion_wrapper,
+      const AHBProperties& ahb_props,
+      const AHardwareBuffer_Desc& ahb_desc);
+
  private:
   std::unique_ptr<android::HardwareBuffer> backing_store_;
   vk::UniqueDeviceMemory device_memory_ = {};

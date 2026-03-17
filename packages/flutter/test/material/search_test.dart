@@ -1308,7 +1308,7 @@ void main() {
     final TextField textField = tester.widget<TextField>(textFieldFinder);
     expect(textField.controller!.text.length, 0);
 
-    mockClipboard.handleMethodCall(
+    await mockClipboard.handleMethodCall(
       const MethodCall('Clipboard.setData', <String, dynamic>{'text': 'pasteablestring'}),
     );
 

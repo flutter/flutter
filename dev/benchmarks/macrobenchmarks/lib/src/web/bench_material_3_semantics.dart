@@ -22,7 +22,7 @@ class BenchMaterial3Semantics extends WidgetBuildRecorder {
   @override
   Future<void> setUpAll() async {
     FlutterTimeline.debugCollectionEnabled = true;
-    super.setUpAll();
+    await super.setUpAll();
     SemanticsBinding.instance.ensureSemantics();
   }
 
@@ -79,7 +79,7 @@ class BenchMaterial3ScrollSemantics extends WidgetRecorder {
   @override
   Future<void> setUpAll() async {
     FlutterTimeline.debugCollectionEnabled = true;
-    super.setUpAll();
+    await super.setUpAll();
     SemanticsBinding.instance.ensureSemantics();
   }
 
