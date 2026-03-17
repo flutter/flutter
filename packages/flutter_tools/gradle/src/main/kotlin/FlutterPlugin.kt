@@ -311,7 +311,7 @@ class FlutterPlugin : Plugin<Project> {
             FlutterPluginUtils.addTaskForPrintBuildVariants(projectToAddTasksTo)
             FlutterPluginUtils.addTasksForOutputsAppLinkSettings(projectToAddTasksTo)
 
-            // Task required for Flutter apps that need to pass engine shell arguments to the embedding. 
+            // Task required for Flutter apps that need to pass engine shell arguments to the embedding.
             if (projectToAddTasksTo.hasProperty("androidShellArguments")) {
                 val androidShellArguments: String = projectToAddTasksTo.properties["androidShellArguments"].toString()
                 FlutterPluginUtils.addTaskForGeneratingEngineShellArgumentManifest(projectToAddTasksTo, androidShellArguments)

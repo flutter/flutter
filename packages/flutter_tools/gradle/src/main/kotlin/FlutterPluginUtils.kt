@@ -841,18 +841,24 @@ object FlutterPluginUtils {
 
     @JvmStatic
     @JvmName("addTaskForGeneratingEngineShellArgumentManifest")
-    internal fun addTaskForGeneratingEngineShellArgumentManifest(project: Project, androidEngineShellArgs: String) {
+    internal fun addTaskForGeneratingEngineShellArgumentManifest(
+        project: Project,
+        androidEngineShellArgs: String
+    ) {
         val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
-        print("&&&&&&&&&&&&&&&&&&&&CAMILLE&&&&&&&&&&&&&&& in FlutterPluginUtils writing to " + project.layout.buildDirectory);
+        print("&&&&&&&&&&&&&&&&&&&&CAMILLE&&&&&&&&&&&&&&& in FlutterPluginUtils writing to " + project.layout.buildDirectory)
 
         androidComponents.onVariants { variant ->
-            val genTask = project.tasks.register("${variant.name}GenerateEngineFlagsManifestTask", GenerateEngineFlagsManifestTask::class.java) {
-                description = "Generates manifest containing engine shell arguments"
-                shellArgs.set(androidEngineShellArgs)
-                manifestOutputFile.set(
-                                project.layout.buildDirectory.file("intermediates/flutter/extra_manifest/${variant.name}/AndroidManifest.xml")
-                            )
-            }
+            val genTask =
+                project.tasks.register("${variant.name}GenerateEngineFlagsManifestTask", GenerateEngineFlagsManifestTask::class.java) {
+                    description = "Generates manifest containing engine shell arguments"
+                    shellArgs.set(androidEngineShellArgs)
+                    manifestOutputFile.set(
+                        project.layout.buildDirectory.file(
+                            "intermediates/flutter/extra_manifest/${variant.name}/AndroidManifest.xml"
+                        )
+                    )
+                }
 
             variant.sources.manifests?.addGeneratedManifestFile(
                 genTask,

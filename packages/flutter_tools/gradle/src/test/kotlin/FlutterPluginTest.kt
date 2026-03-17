@@ -13,8 +13,8 @@ import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.flutter.gradle.tasks.FlutterTask
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.verify
 import org.gradle.api.Action
@@ -272,7 +272,9 @@ class FlutterPluginTest {
     }
 
     @Test
-    fun `apply adds task for generating manifest with engine shell arguments`(@TempDir tempDir: Path) {
+    fun `apply adds task for generating manifest with engine shell arguments`(
+        @TempDir tempDir: Path
+    ) {
         // Mocks required to run FlutterPlugin.apply
         val project = mockk<Project>(relaxed = true)
         val projectDir = tempDir.resolve("project-dir").resolve("android").resolve("app")
@@ -308,7 +310,7 @@ class FlutterPluginTest {
         every { project.extensions.findByName("android") } returns mockAbstractAppExtension
         val mockAndroidSourceSet = mockk<com.android.build.gradle.api.AndroidSourceSet>(relaxed = true)
         every { mockAbstractAppExtension.sourceSets.getByName("main") } returns mockAndroidSourceSet
-                val mockAndroidComponentsExtension = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
+        val mockAndroidComponentsExtension = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
         every { project.extensions.getByType(AndroidComponentsExtension::class.java) } returns mockAndroidComponentsExtension
         every { mockAndroidComponentsExtension.selector() } returns
             mockk {
@@ -325,7 +327,7 @@ class FlutterPluginTest {
         val flutterPlugin = FlutterPlugin()
         val flagsStr = "--flag-1,--flag=2"
 
-        every {project.hasProperty("androidShellArguments") } returns true
+        every { project.hasProperty("androidShellArguments") } returns true
         every { project.properties["androidShellArguments"] } returns flagsStr
 
         flutterPlugin.apply(project)

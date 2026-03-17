@@ -4,12 +4,16 @@
 
 package com.flutter.gradle
 
+import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.api.variant.Sources
+import com.android.build.api.variant.Variant
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.internal.dsl.CmakeOptions
 import com.android.build.gradle.internal.dsl.DefaultConfig
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
+import com.flutter.gradle.tasks.GenerateEngineFlagsManifestTask
 import io.mockk.called
 import io.mockk.every
 import io.mockk.mockk
@@ -24,7 +28,10 @@ import org.gradle.api.UnknownTaskException
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.logging.Logger
+import org.gradle.api.tasks.TaskProvider
+import org.gradle.testfixtures.ProjectBuilder
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
@@ -34,13 +41,6 @@ import kotlin.io.path.createDirectory
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
-import com.android.build.api.variant.AndroidComponentsExtension
-import com.android.build.api.variant.Variant
-import com.android.build.api.variant.Sources
-import org.gradle.testfixtures.ProjectBuilder
-import org.junit.jupiter.api.Assertions.assertNotNull
-import com.flutter.gradle.tasks.GenerateEngineFlagsManifestTask
-import org.gradle.api.tasks.TaskProvider
 
 class FlutterPluginUtilsTest {
     companion object {
@@ -1077,11 +1077,11 @@ class FlutterPluginUtilsTest {
         val project: Project = ProjectBuilder.builder().build()
         val mockComponents = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
         val mockVariant = mockk<Variant>(relaxed = true)
-        val mockSources = mockk<Sources>(relaxed = true) 
+        val mockSources = mockk<Sources>(relaxed = true)
 
         every { mockVariant.name } returns "debug"
         every { mockVariant.sources } returns mockSources
-        
+
         val onVariantsLambda = slot<(Variant) -> Unit>()
         every { mockComponents.onVariants(callback = capture(onVariantsLambda)) } returns Unit
 
@@ -1096,16 +1096,14 @@ class FlutterPluginUtilsTest {
         }
 
         val task = project.tasks.findByName("debugGenerateEngineFlagsManifestTask") as? GenerateEngineFlagsManifestTask
-        
+
         assertNotNull(task, "The debugGenerateEngineFlagsManifestTask task should have been registered.")
         assertEquals(testArgs, task?.shellArgs?.get())
         verify {
             mockSources.manifests?.addGeneratedManifestFile(
-                any<TaskProvider<GenerateEngineFlagsManifestTask>>(), 
+                any<TaskProvider<GenerateEngineFlagsManifestTask>>(),
                 any<(GenerateEngineFlagsManifestTask) -> org.gradle.api.file.RegularFileProperty>()
             )
         }
     }
-
 }
-

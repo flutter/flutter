@@ -89,6 +89,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
           'app',
           'generated',
           'manifests',
+          // TODO(camsim99): use build mode
           'debugGenerateEngineFlagsManifestTask',
           'AndroidManifest.xml',
         ),

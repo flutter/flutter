@@ -4,22 +4,13 @@
 
 package com.flutter.gradle.tasks
 
-import com.flutter.gradle.Deeplink
-import com.flutter.gradle.IntentFilterCheck
-import io.mockk.every
-import io.mockk.mockk
-import org.gradle.api.Project
-import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.provider.Property
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.io.TempDir
-import org.xml.sax.SAXParseException
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import kotlin.test.fail
 
 class GenerateEngineFlagsManifestTaskTest {
     @TempDir
