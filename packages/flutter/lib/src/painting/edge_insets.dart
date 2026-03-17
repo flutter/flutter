@@ -37,6 +37,14 @@ abstract class EdgeInsetsGeometry {
   const factory EdgeInsetsGeometry.all(double value) = EdgeInsets.all;
 
   /// Creates an [EdgeInsetsGeometry] object with only the given values non-zero.
+  ///
+  /// The `left`, `right`, `top`, and `bottom` parameters set values with respect to
+  /// [EdgeInsets].
+  ///
+  /// The other two parameters set the padding based on the ambient [Directionality].
+  /// When using [TextDirection.ltr], `start` adds to the left padding and `end` adds to
+  /// the right padding. And for [TextDirection.rtl], `start` corresponds to the right and
+  /// `end` corresponds to the left.
   const factory EdgeInsetsGeometry.only({
     double left,
     double right,
