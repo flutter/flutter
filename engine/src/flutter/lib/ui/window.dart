@@ -316,11 +316,18 @@ class FlutterView {
   /// application.
   ///
   /// When this changes, [PlatformDispatcher.onMetricsChanged] is called.
+  /// When using the Flutter framework, using [MediaQuery.keyboardVisibleOf] to
+  /// obtain the keyboard visibility (via [MediaQueryData.keyboardVisible]),
+  /// instead of directly obtaining the [keyboardVisible] from a [FlutterView],
+  /// will automatically cause any widgets dependent on the keyboard visibility
+  /// to rebuild when it changes, without having to listen to
+  /// [PlatformDispatcher.onMetricsChanged].
   ///
   /// See also:
   ///
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
   ///    observe when this value changes.
+  ///  * [MediaQuery.keyboardVisibleOf], a simpler mechanism for the same.
   bool get keyboardVisible => _viewConfiguration.keyboardVisible;
 
   /// Additional configuration for touch gestures performed on this view.

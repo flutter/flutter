@@ -152,6 +152,7 @@ void main() {
     expect(data, hasOneLineDescription);
     expect(data.hashCode, equals(data.copyWith().hashCode));
     expect(data.size, equals(tester.view.physicalSize / tester.view.devicePixelRatio));
+    expect(data.keyboardVisible, false);
     expect(data.accessibleNavigation, false);
     expect(data.invertColors, false);
     expect(data.disableAnimations, false);
@@ -170,6 +171,7 @@ void main() {
     const platformData = MediaQueryData(
       textScaler: TextScaler.linear(1234),
       platformBrightness: Brightness.dark,
+      keyboardVisible: true,
       accessibleNavigation: true,
       invertColors: true,
       disableAnimations: true,
@@ -205,6 +207,8 @@ void main() {
       data.systemGestureInsets,
       EdgeInsets.fromViewPadding(tester.view.systemGestureInsets, tester.view.devicePixelRatio),
     );
+    // keyboardVisible always comes from the view; platformData is ignored.
+    expect(data.keyboardVisible, tester.view.keyboardVisible);
     expect(data.accessibleNavigation, platformData.accessibleNavigation);
     expect(data.invertColors, platformData.invertColors);
     expect(data.disableAnimations, platformData.disableAnimations);
@@ -227,6 +231,9 @@ void main() {
         ..platformBrightnessTestValue = Brightness.dark
         ..accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
       addTearDown(() => tester.platformDispatcher.clearAllTestValues());
+
+      tester.view.keyboardVisible = true;
+      addTearDown(tester.view.resetKeyboardVisible);
 
       final data = MediaQueryData.fromView(tester.view);
       expect(data, hasOneLineDescription);
@@ -251,6 +258,7 @@ void main() {
         data.systemGestureInsets,
         EdgeInsets.fromViewPadding(tester.view.systemGestureInsets, tester.view.devicePixelRatio),
       );
+      expect(data.keyboardVisible, tester.view.keyboardVisible);
       expect(
         data.accessibleNavigation,
         tester.platformDispatcher.accessibilityFeatures.accessibleNavigation,
@@ -284,6 +292,7 @@ void main() {
       const platformData = MediaQueryData(
         textScaler: TextScaler.linear(1234),
         platformBrightness: Brightness.dark,
+        keyboardVisible: true,
         accessibleNavigation: true,
         invertColors: true,
         disableAnimations: true,
@@ -333,6 +342,7 @@ void main() {
         data.systemGestureInsets,
         EdgeInsets.fromViewPadding(tester.view.systemGestureInsets, tester.view.devicePixelRatio),
       );
+      expect(data.keyboardVisible, tester.view.keyboardVisible);
       expect(data.accessibleNavigation, platformData.accessibleNavigation);
       expect(data.invertColors, platformData.invertColors);
       expect(data.disableAnimations, platformData.disableAnimations);
@@ -356,6 +366,9 @@ void main() {
         ..platformBrightnessTestValue = Brightness.dark
         ..accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
       addTearDown(() => tester.platformDispatcher.clearAllTestValues());
+
+      tester.view.keyboardVisible = true;
+      addTearDown(tester.view.resetKeyboardVisible);
 
       late MediaQueryData data;
       MediaQueryData? outerData;
@@ -398,6 +411,7 @@ void main() {
         data.systemGestureInsets,
         EdgeInsets.fromViewPadding(tester.view.systemGestureInsets, tester.view.devicePixelRatio),
       );
+      expect(data.keyboardVisible, tester.view.keyboardVisible);
       expect(
         data.accessibleNavigation,
         tester.platformDispatcher.accessibilityFeatures.accessibleNavigation,
@@ -485,6 +499,12 @@ void main() {
     await tester.pump();
     expect(data.devicePixelRatio, 55);
     expect(rebuildCount, 5);
+
+    expect(data.keyboardVisible, false);
+    tester.view.keyboardVisible = true;
+    await tester.pump();
+    expect(data.keyboardVisible, true);
+    expect(rebuildCount, 6);
   });
 
   testWidgets('MediaQuery.fromView updates on notifications (with parent data)', (
@@ -546,6 +566,12 @@ void main() {
     await tester.pump();
     expect(data.devicePixelRatio, 55);
     expect(rebuildCount, 2);
+
+    expect(data.keyboardVisible, false);
+    tester.view.keyboardVisible = true;
+    await tester.pump();
+    expect(data.keyboardVisible, true);
+    expect(rebuildCount, 3);
   });
 
   testWidgets('MediaQuery.fromView updates when parent data changes', (WidgetTester tester) async {
@@ -595,6 +621,7 @@ void main() {
     expect(copied.viewPadding, data.viewPadding);
     expect(copied.viewInsets, data.viewInsets);
     expect(copied.systemGestureInsets, data.systemGestureInsets);
+    expect(copied.keyboardVisible, data.keyboardVisible);
     expect(copied.alwaysUse24HourFormat, data.alwaysUse24HourFormat);
     expect(copied.accessibleNavigation, data.accessibleNavigation);
     expect(copied.invertColors, data.invertColors);
@@ -638,6 +665,7 @@ void main() {
       viewPadding: customViewPadding,
       viewInsets: customViewInsets,
       systemGestureInsets: customSystemGestureInsets,
+      keyboardVisible: true,
       alwaysUse24HourFormat: true,
       accessibleNavigation: true,
       invertColors: true,
@@ -659,6 +687,7 @@ void main() {
     expect(copied.viewPadding, customViewPadding);
     expect(copied.viewInsets, customViewInsets);
     expect(copied.systemGestureInsets, customSystemGestureInsets);
+    expect(copied.keyboardVisible, true);
     expect(copied.alwaysUse24HourFormat, true);
     expect(copied.accessibleNavigation, true);
     expect(copied.invertColors, true);
@@ -1906,6 +1935,14 @@ void main() {
         const _MediaQueryAspectCase(
           MediaQuery.maybeViewPaddingOf,
           MediaQueryData(viewPadding: EdgeInsets.all(1)),
+        ),
+        const _MediaQueryAspectCase(
+          MediaQuery.keyboardVisibleOf,
+          MediaQueryData(keyboardVisible: true),
+        ),
+        const _MediaQueryAspectCase(
+          MediaQuery.maybeKeyboardVisibleOf,
+          MediaQueryData(keyboardVisible: true),
         ),
         const _MediaQueryAspectCase(
           MediaQuery.alwaysUse24HourFormatOf,
