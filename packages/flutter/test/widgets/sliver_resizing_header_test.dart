@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('SliverResizingHeader basics', (WidgetTester tester) async {
@@ -12,23 +14,21 @@ void main() {
         Axis.vertical => (const SizedBox(height: 100), const SizedBox(height: 300)),
         Axis.horizontal => (const SizedBox(width: 100), const SizedBox(width: 300)),
       };
-      return MaterialApp(
-        home: Scaffold(
-          body: CustomScrollView(
-            scrollDirection: axis,
-            reverse: reverse,
-            slivers: <Widget>[
-              SliverResizingHeader(
-                minExtentPrototype: minPrototype,
-                maxExtentPrototype: maxPrototype,
-                child: const SizedBox.expand(child: Text('header')),
-              ),
-              SliverList.builder(
-                itemCount: 100,
-                itemBuilder: (BuildContext context, int index) => Text('item $index'),
-              ),
-            ],
-          ),
+      return TestWidgetsApp(
+        home: CustomScrollView(
+          scrollDirection: axis,
+          reverse: reverse,
+          slivers: <Widget>[
+            SliverResizingHeader(
+              minExtentPrototype: minPrototype,
+              maxExtentPrototype: maxPrototype,
+              child: const SizedBox.expand(child: Text('header')),
+            ),
+            SliverList.builder(
+              itemCount: 100,
+              itemBuilder: (BuildContext context, int index) => Text('item $index'),
+            ),
+          ],
         ),
       );
     }
@@ -171,20 +171,18 @@ void main() {
 
   testWidgets('SliverResizingHeader default minExtent is 0', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: CustomScrollView(
-            slivers: <Widget>[
-              const SliverResizingHeader(
-                maxExtentPrototype: SizedBox(height: 300),
-                child: SizedBox.expand(child: Text('header')),
-              ),
-              SliverList.builder(
-                itemCount: 100,
-                itemBuilder: (BuildContext context, int index) => Text('item $index'),
-              ),
-            ],
-          ),
+      TestWidgetsApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            const SliverResizingHeader(
+              maxExtentPrototype: SizedBox(height: 300),
+              child: SizedBox.expand(child: Text('header')),
+            ),
+            SliverList.builder(
+              itemCount: 100,
+              itemBuilder: (BuildContext context, int index) => Text('item $index'),
+            ),
+          ],
         ),
       ),
     );
@@ -206,21 +204,19 @@ void main() {
     'SliverResizingHeader with identical min/max prototypes is effectively a pinned header',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: CustomScrollView(
-              slivers: <Widget>[
-                const SliverResizingHeader(
-                  minExtentPrototype: SizedBox(height: 100),
-                  maxExtentPrototype: SizedBox(height: 100),
-                  child: SizedBox.expand(child: Text('header')),
-                ),
-                SliverList.builder(
-                  itemCount: 100,
-                  itemBuilder: (BuildContext context, int index) => Text('item $index'),
-                ),
-              ],
-            ),
+        TestWidgetsApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              const SliverResizingHeader(
+                minExtentPrototype: SizedBox(height: 100),
+                maxExtentPrototype: SizedBox(height: 100),
+                child: SizedBox.expand(child: Text('header')),
+              ),
+              SliverList.builder(
+                itemCount: 100,
+                itemBuilder: (BuildContext context, int index) => Text('item $index'),
+              ),
+            ],
           ),
         ),
       );
@@ -249,19 +245,17 @@ void main() {
   ) async {
     final Key headerKey = UniqueKey();
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: CustomScrollView(
-            slivers: <Widget>[
-              SliverResizingHeader(child: SizedBox(key: headerKey, height: 300)),
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) => Text('item $index'),
-                  childCount: 100,
-                ),
+      TestWidgetsApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverResizingHeader(child: SizedBox(key: headerKey, height: 300)),
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) => Text('item $index'),
+                childCount: 100,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -283,17 +277,15 @@ void main() {
     WidgetTester tester,
   ) async {
     Widget buildFrame(double childHeight) {
-      return MaterialApp(
-        home: Scaffold(
-          body: CustomScrollView(
-            slivers: <Widget>[
-              SliverResizingHeader(
-                minExtentPrototype: const SizedBox(height: 100),
-                maxExtentPrototype: const SizedBox(height: 300),
-                child: SizedBox(height: childHeight, child: const Text('header')),
-              ),
-            ],
-          ),
+      return TestWidgetsApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverResizingHeader(
+              minExtentPrototype: const SizedBox(height: 100),
+              maxExtentPrototype: const SizedBox(height: 300),
+              child: SizedBox(height: childHeight, child: const Text('header')),
+            ),
+          ],
         ),
       );
     }
@@ -307,23 +299,21 @@ void main() {
 
   testWidgets('SliverResizingHeader update prototypes', (WidgetTester tester) async {
     Widget buildFrame(double minHeight, double maxHeight) {
-      return MaterialApp(
-        home: Scaffold(
-          body: CustomScrollView(
-            slivers: <Widget>[
-              SliverResizingHeader(
-                minExtentPrototype: SizedBox(height: minHeight),
-                maxExtentPrototype: SizedBox(height: maxHeight),
-                child: const SizedBox(height: 300, child: Text('header')),
+      return TestWidgetsApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverResizingHeader(
+              minExtentPrototype: SizedBox(height: minHeight),
+              maxExtentPrototype: SizedBox(height: maxHeight),
+              child: const SizedBox(height: 300, child: Text('header')),
+            ),
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) => SizedBox(height: 50, child: Text('$index')),
+                childCount: 100,
               ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) => SizedBox(height: 50, child: Text('$index')),
-                  childCount: 100,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       );
     }
@@ -359,34 +349,32 @@ void main() {
 
   testWidgets('SliverResizingHeader maxScrollObstructionExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: NestedScrollView(
-            headerSliverBuilder: (BuildContext context, _) => <Widget>[
-              SliverOverlapAbsorber(
-                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                sliver: const SliverResizingHeader(
-                  minExtentPrototype: SizedBox(height: 100),
-                  maxExtentPrototype: SizedBox(height: 300),
-                  child: SizedBox.expand(child: Text('header')),
+      TestWidgetsApp(
+        home: NestedScrollView(
+          headerSliverBuilder: (BuildContext context, _) => <Widget>[
+            SliverOverlapAbsorber(
+              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+              sliver: const SliverResizingHeader(
+                minExtentPrototype: SizedBox(height: 100),
+                maxExtentPrototype: SizedBox(height: 300),
+                child: SizedBox.expand(child: Text('header')),
+              ),
+            ),
+          ],
+          body: Builder(
+            builder: (BuildContext context) => CustomScrollView(
+              slivers: <Widget>[
+                SliverOverlapInjector(
+                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                 ),
-              ),
-            ],
-            body: Builder(
-              builder: (BuildContext context) => CustomScrollView(
-                slivers: <Widget>[
-                  SliverOverlapInjector(
-                    handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) =>
+                        SizedBox(height: 50, child: Text('$index')),
+                    childCount: 100,
                   ),
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (BuildContext context, int index) =>
-                          SizedBox(height: 50, child: Text('$index')),
-                      childCount: 100,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
