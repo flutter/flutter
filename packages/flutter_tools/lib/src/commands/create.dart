@@ -1399,8 +1399,10 @@ List<String> gatherSdkPackageDependencies(Directory directory) {
   }
 
   final result = <String>{};
+  // Initialized by FlutterCommandRunner on startup.
+  // So it is safe to access it here.
+  final String flutterRoot = Cache.flutterRoot!;
   for (final sdkPackage in sdkPackages) {
-    final String flutterRoot = Cache.flutterRoot!;
     final pubspecYaml =
         loadYaml(
               fs
