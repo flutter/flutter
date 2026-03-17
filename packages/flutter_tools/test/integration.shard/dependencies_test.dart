@@ -194,7 +194,7 @@ Dependency "$dependencyName" in "${pubspecFile.path}" is not locked at its lower
         if (currentVersion != constraint.min) {
           fail('''
 Dependency "$dependencyName" is not locked at its lower bound in "${pubspecFile.path}".
-Either upgrade the dependency to ^$currentVersion or downgrade it to ^${constraint.min} in the lockfile.
+Either upgrade the constraint to $currentVersion in pubspec.yaml or downgrade the version to ${constraint.min} in pubspec.lock.
 ''');
         }
       }
