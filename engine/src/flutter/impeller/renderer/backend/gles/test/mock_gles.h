@@ -97,6 +97,7 @@ class IMockGLESImpl {
                                      GLsizei numAttachments,
                                      const GLenum* attachments) {};
   virtual void GetIntegerv(GLenum name, GLint* attachments) {};
+  virtual void Viewport(GLint x, GLint y, GLsizei width, GLsizei height) {}
 };
 
 class MockGLESImpl : public IMockGLESImpl {
@@ -232,6 +233,10 @@ class MockGLESImpl : public IMockGLESImpl {
                const GLenum* attachments),
               (override));
   MOCK_METHOD(void, GetIntegerv, (GLenum name, GLint* value), (override));
+  MOCK_METHOD(void,
+              Viewport,
+              (GLint x, GLint y, GLsizei width, GLsizei height),
+              (override));
 };
 
 /// @brief      Provides a mocked version of the |ProcTableGLES| class.
