@@ -186,12 +186,15 @@ void main() {
         command: const <String>[
           'Artifact.engineDartSdkPath/bin/dart',
           'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
-          '--disable-server-feature-completion',
-          '--disable-server-feature-search',
+          '--lsp',
           '--sdk',
           'Artifact.engineDartSdkPath',
         ],
         stdin: IOSink(stdin.sink),
+        stdout: 'Content-Length: 36\r\n\r\n{"jsonrpc":"2.0","id":1,"result":{}}'
+            'Content-Length: 93\r\n\r\n{"jsonrpc":"2.0","method":"\$/progress","params":{"token":"analyze","value":{"kind":"begin"}}}'
+            'Content-Length: 119\r\n\r\n{"jsonrpc":"2.0","method":"textDocument/publishDiagnostics","params":{"uri":"file:///directoryA/foo","diagnostics":[]}}'
+            'Content-Length: 91\r\n\r\n{"jsonrpc":"2.0","method":"\$/progress","params":{"token":"analyze","value":{"kind":"end"}}}',
       ),
     ]);
 
@@ -222,13 +225,13 @@ void main() {
         command: const <String>[
           'Artifact.engineDartSdkPath/bin/dart',
           'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
-          '--disable-server-feature-completion',
-          '--disable-server-feature-search',
+          '--lsp',
           '--sdk',
           'Artifact.engineDartSdkPath',
           '--suppress-analytics',
         ],
         stdin: IOSink(stdin.sink),
+        stdout: 'Content-Length: 36\r\n\r\n{"jsonrpc":"2.0","id":1,"result":{}}',
       ),
     ]);
 
@@ -265,20 +268,19 @@ void main() {
         command: const <String>[
           'Artifact.engineDartSdkPath/bin/dart',
           'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
-          '--disable-server-feature-completion',
-          '--disable-server-feature-search',
+          '--lsp',
           '--sdk',
           'Artifact.engineDartSdkPath',
           '--suppress-analytics',
         ],
         stdin: IOSink(stdin.sink),
-        stdout: '''
-{"event":"server.status","params":{"analysis":{"isAnalyzing":true}}}
-{"event":"analysis.errors","params":{"file":"/directoryA/foo","errors":[{"type":"TestError","message":"It's an error.","severity":"warning","code":"500","location":{"file":"/directoryA/foo","startLine": 100,"startColumn":5,"offset":0}}]}}
-{"event":"server.status","params":{"analysis":{"isAnalyzing":false}}}
-''',
+        stdout: 'Content-Length: 36\r\n\r\n{"jsonrpc":"2.0","id":1,"result":{}}'
+            'Content-Length: 93\r\n\r\n{"jsonrpc":"2.0","method":"\$/progress","params":{"token":"analyze","value":{"kind":"begin"}}}'
+            'Content-Length: 249\r\n\r\n{"jsonrpc":"2.0","method":"textDocument/publishDiagnostics","params":{"uri":"file:///directoryA/foo","diagnostics":[{"range":{"start":{"line":99,"character":4},"end":{"line":99,"character":4}},"severity":2,"code":"500","message":"It\'s an error."}]}}'
+            'Content-Length: 91\r\n\r\n{"jsonrpc":"2.0","method":"\$/progress","params":{"token":"analyze","value":{"kind":"end"}}}',
       ),
     ]);
+
 
     final artifacts = Artifacts.test();
     final command = AnalyzeCommand(
@@ -318,20 +320,19 @@ void main() {
         command: const <String>[
           'Artifact.engineDartSdkPath/bin/dart',
           'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
-          '--disable-server-feature-completion',
-          '--disable-server-feature-search',
+          '--lsp',
           '--sdk',
           'Artifact.engineDartSdkPath',
           '--suppress-analytics',
         ],
         stdin: IOSink(stdin.sink),
-        stdout: '''
-{"event":"server.status","params":{"analysis":{"isAnalyzing":true}}}
-{"event":"analysis.errors","params":{"file":"/directoryA/bar","errors":[{"type":"TestError","message":"It's an error.","severity":"warning","code":"500","location":{"file":"/directoryA/bar","startLine":100,"startColumn":5,"offset":0}}]}}
-{"event":"server.status","params":{"analysis":{"isAnalyzing":false}}}
-''',
+        stdout: 'Content-Length: 36\r\n\r\n{"jsonrpc":"2.0","id":1,"result":{}}'
+            'Content-Length: 93\r\n\r\n{"jsonrpc":"2.0","method":"\$/progress","params":{"token":"analyze","value":{"kind":"begin"}}}'
+            'Content-Length: 249\r\n\r\n{"jsonrpc":"2.0","method":"textDocument/publishDiagnostics","params":{"uri":"file:///directoryA/bar","diagnostics":[{"range":{"start":{"line":99,"character":4},"end":{"line":99,"character":4}},"severity":2,"code":"500","message":"It\'s an error."}]}}'
+            'Content-Length: 91\r\n\r\n{"jsonrpc":"2.0","method":"\$/progress","params":{"token":"analyze","value":{"kind":"end"}}}',
       ),
     ]);
+
 
     final artifacts = Artifacts.test();
     final command = AnalyzeCommand(
@@ -362,64 +363,61 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext(
-    'AnalysisService --watch does not crash when the VM service is enabled',
-    () async {
-      // Pretend the VM service was enabled by sending SIGQUIT (CTRL + \) to ensure we don't try to
-      // invoke json.decode(...) on the VM service message.
-      //
-      // Regression test for https://github.com/flutter/flutter/issues/58391.
-      final logger = BufferLogger.test();
-      final completer = Completer<void>();
-      final stdin = StreamController<List<int>>();
-      final processManager = FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
-          command: const <String>[
-            'Artifact.engineDartSdkPath/bin/dart',
-            'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
-            '--disable-server-feature-completion',
-            '--disable-server-feature-search',
-            '--sdk',
-            'Artifact.engineDartSdkPath',
-            '--suppress-analytics',
-          ],
-          stdin: IOSink(stdin.sink),
-          stdout: '''
-The Dart VM service is listening on http://127.0.0.1:65155/ZkxDXuYz2Aw=/
-{"event":"server.status","params":{"analysis":{"isAnalyzing":true}}}
-{"event":"analysis.errors","params":{"file":"/directoryA/bar","errors":[{"type":"TestError","message":"It's an error.","severity":"warning","code":"500","location":{"file":"/directoryA/bar","startLine":100,"startColumn":5,"offset":0}}]}}
-{"event":"server.status","params":{"analysis":{"isAnalyzing":false}}}
-''',
-        ),
-      ]);
+  testUsingContext('AnalysisService --watch does not crash when the VM service is enabled', () async {
+    // Pretend the VM service was enabled by sending SIGQUIT (CTRL + \) to ensure we don't try to
+    // invoke json.decode(...) on the VM service message.
+    //
+    // Regression test for https://github.com/flutter/flutter/issues/58391.
+    final logger = BufferLogger.test();
+    final completer = Completer<void>();
+    final stdin = StreamController<List<int>>();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>[
+          'Artifact.engineDartSdkPath/bin/dart',
+          'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+          '--lsp',
+          '--sdk',
+          'Artifact.engineDartSdkPath',
+          '--suppress-analytics',
+        ],
+        stdin: IOSink(stdin.sink),
+        stdout: 'The Dart VM service is listening on http://127.0.0.1:65155/ZkxDXuYz2Aw=/\n'
+            'Content-Length: 36\r\n\r\n{"jsonrpc":"2.0","id":1,"result":{}}'
+            'Content-Length: 93\r\n\r\n{"jsonrpc":"2.0","method":"\$/progress","params":{"token":"analyze","value":{"kind":"begin"}}}'
+            'Content-Length: 249\r\n\r\n{"jsonrpc":"2.0","method":"textDocument/publishDiagnostics","params":{"uri":"file:///directoryA/bar","diagnostics":[{"range":{"start":{"line":99,"character":4},"end":{"line":99,"character":4}},"severity":2,"code":"500","message":"It\'s an error."}]}}'
+            'Content-Length: 91\r\n\r\n{"jsonrpc":"2.0","method":"\$/progress","params":{"token":"analyze","value":{"kind":"end"}}}',
 
-      final artifacts = Artifacts.test();
-      final command = AnalyzeCommand(
-        terminal: Terminal.test(),
-        artifacts: artifacts,
-        logger: logger,
-        platform: FakePlatform(),
-        fileSystem: MemoryFileSystem.test(),
-        processManager: processManager,
-        allProjectValidators: <ProjectValidator>[],
-        suppressAnalytics: true,
-      );
+      ),
+    ]);
 
-      await FakeAsync().run((FakeAsync time) async {
-        final commandRunner = TestFlutterCommandRunner();
-        commandRunner.addCommand(command);
-        unawaited(commandRunner.run(<String>['analyze', '--watch']));
 
-        while (!logger.statusText.contains('analyzed 1 file')) {
-          time.flushMicrotasks();
-        }
-        completer.complete();
-        return completer.future;
-      });
+    final artifacts = Artifacts.test();
+    final command = AnalyzeCommand(
+      terminal: Terminal.test(),
+      artifacts: artifacts,
+      logger: logger,
+      platform: FakePlatform(),
+      fileSystem: MemoryFileSystem.test(),
+      processManager: processManager,
+      allProjectValidators: <ProjectValidator>[],
+      suppressAnalytics: true,
+    );
 
-      expect(logger.statusText, contains('No issues found!'));
-      expect(logger.errorText, isEmpty);
-      expect(processManager, hasNoRemainingExpectations);
-    },
-  );
+    await FakeAsync().run((FakeAsync time) async {
+      final commandRunner = TestFlutterCommandRunner();
+      commandRunner.addCommand(command);
+      unawaited(commandRunner.run(<String>['analyze', '--watch']));
+
+      while (!logger.statusText.contains('analyzed 1 file')) {
+        time.flushMicrotasks();
+      }
+      completer.complete();
+      return completer.future;
+    });
+
+    expect(logger.statusText, contains('No issues found!'));
+    expect(logger.errorText, isEmpty);
+    expect(processManager, hasNoRemainingExpectations);
+  });
 }

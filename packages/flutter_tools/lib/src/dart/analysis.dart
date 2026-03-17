@@ -51,6 +51,8 @@ class AnalysisServer {
   var _didServerErrorOccur = false;
 
   var _id = 0;
+  int? _initializeId;
+  Completer<void>? _initializeCompleter;
 
   Future<void> start() async {
     final String snapshot = _fileSystem.path.join(
@@ -62,8 +64,7 @@ class AnalysisServer {
     final command = <String>[
       _fileSystem.path.join(sdkPath, 'bin', 'dart'),
       snapshot,
-      '--disable-server-feature-completion',
-      '--disable-server-feature-search',
+      '--lsp',
       '--sdk',
       sdkPath,
       if (suppressAnalytics) '--suppress-analytics',
@@ -78,17 +79,20 @@ class AnalysisServer {
     final Stream<String> errorStream = _process!.stderr.transform(utf8LineDecoder);
     errorStream.listen(_handleError);
 
-    final Stream<String> inStream = _process!.stdout.transform(utf8LineDecoder);
-    inStream.listen(_handleServerResponse);
+    _process!.stdout.listen(_handleServerResponseRaw);
 
-    _sendCommand('server.setSubscriptions', <String, dynamic>{
-      'subscriptions': <String>['STATUS'],
+    _initializeId = ++_id;
+    _initializeCompleter = Completer<void>();
+    _sendCommandWithId(_initializeId!, 'initialize', <String, Object?>{
+      'processId': pid,
+      'rootUri': _fileSystem.directory(directories.first).uri.toString(),
+      'capabilities': <String, Object?>{
+        'window': <String, Object?>{'workDoneProgress': true},
+      },
     });
 
-    _sendCommand('analysis.setAnalysisRoots', <String, dynamic>{
-      'included': directories,
-      'excluded': <String>[],
-    });
+    await _initializeCompleter!.future;
+    _sendNotification('initialized', <String, Object?>{});
   }
 
   final _logs = <String>[];
@@ -121,14 +125,96 @@ class AnalysisServer {
 
   Future<int?> get onExit async => _process?.exitCode;
 
-  void _sendCommand(String method, Map<String, dynamic> params) {
-    final String message = json.encode(<String, dynamic>{
-      'id': (++_id).toString(),
+  /// Tells the analysis server to register services with a DTD instance at [dtdUri].
+  void connectToDtd({required Uri dtdUri}) {
+    _sendCommand('dart/connectToDtd', {'uri': dtdUri.toString()});
+  }
+
+  void _sendCommand(String method, Map<String, Object?> params) {
+    _sendCommandWithId(++_id, method, params);
+  }
+
+  void _sendNotification(String method, Map<String, Object?> params) {
+    final String message = json.encode(<String, Object?>{
+      'jsonrpc': '2.0',
       'method': method,
       'params': params,
     });
-    _process?.stdin.writeln(message);
+    _process?.stdin.write('Content-Length: ${message.length}\r\n\r\n$message');
     _logger.printTrace('==> $message');
+  }
+
+  void _sendResponse(Object? id, Object? result) {
+    final String message = json.encode(<String, Object?>{
+      'jsonrpc': '2.0',
+      'id': id,
+      'result': result,
+    });
+    _process?.stdin.write('Content-Length: ${message.length}\r\n\r\n$message');
+    _logger.printTrace('==> $message');
+  }
+
+  void _sendCommandWithId(int id, String method, Map<String, Object?> params) {
+    final String message = json.encode(<String, Object?>{
+      'jsonrpc': '2.0',
+      'id': ++id,
+      'method': method,
+      'params': params,
+    });
+    _process?.stdin.write('Content-Length: ${message.length}\r\n\r\n$message');
+    _logger.printTrace('==> $message');
+  }
+
+  final List<int> _byteBuffer = <int>[];
+  void _handleServerResponseRaw(List<int> data) {
+    _byteBuffer.addAll(data);
+    while (_byteBuffer.isNotEmpty) {
+      // Find \r\n\r\n header separator
+      var byteHeaderEnd = -1;
+      for (var i = 0; i < _byteBuffer.length - 3; i++) {
+        if (_byteBuffer[i] == 13 &&
+            _byteBuffer[i + 1] == 10 &&
+            _byteBuffer[i + 2] == 13 &&
+            _byteBuffer[i + 3] == 10) {
+          byteHeaderEnd = i;
+          break;
+        }
+      }
+      if (byteHeaderEnd == -1) {
+        break;
+      }
+
+      final String headers = utf8.decode(_byteBuffer.sublist(0, byteHeaderEnd));
+      final int contentLength = _parseContentLength(headers);
+      if (contentLength == -1) {
+        _logger.printTrace('No Content-Length found in headers:\n$headers');
+        _byteBuffer.removeRange(0, byteHeaderEnd + 4);
+        continue;
+      }
+      if (_byteBuffer.length < byteHeaderEnd + 4 + contentLength) {
+        break;
+      }
+      final List<int> messageBytes = _byteBuffer.sublist(
+        byteHeaderEnd + 4,
+        byteHeaderEnd + 4 + contentLength,
+      );
+      _byteBuffer.removeRange(0, byteHeaderEnd + 4 + contentLength);
+      final String message = utf8.decode(messageBytes);
+      _handleServerResponse(message);
+    }
+  }
+
+  static final RegExp _contentLengthRegExp = RegExp(
+    r'content-length:\s*(\d+)',
+    caseSensitive: false,
+  );
+
+  int _parseContentLength(String headers) {
+    final Match? match = _contentLengthRegExp.firstMatch(headers);
+    if (match != null) {
+      return int.tryParse(match.group(1)!) ?? -1;
+    }
+    return -1;
   }
 
   void _handleServerResponse(String line) {
@@ -138,64 +224,85 @@ class AnalysisServer {
       return;
     }
 
-    final dynamic response = json.decode(line);
+    final Object? response = json.decode(line);
 
-    if (response is Map<String, dynamic>) {
-      if (response['event'] != null) {
-        final event = response['event'] as String;
-        final dynamic params = response['params'];
-        Map<String, dynamic>? paramsMap;
-        if (params is Map<String, dynamic>) {
+    if (response is Map<String, Object?>) {
+      if (response.containsKey('result') || response.containsKey('error')) {
+        final Object? id = response['id'];
+        if (id == _initializeId) {
+          if (response.containsKey('result')) {
+            _initializeCompleter?.complete();
+          } else {
+            final Map<String, Object?> error = castStringKeyedMap(response['error'])!;
+            _initializeCompleter?.completeError(
+              error['message'] ?? 'Unknown error during initialize',
+            );
+          }
+        }
+      }
+
+      final method = response['method'] as String?;
+      if (method != null) {
+        final Object? id = response['id'];
+        final Object? params = response['params'];
+        Map<String, Object?>? paramsMap;
+        if (params is Map<String, Object?>) {
           paramsMap = castStringKeyedMap(params);
         }
 
-        if (paramsMap != null) {
-          switch (event) {
-            case 'server.status':
-              _handleStatus(paramsMap);
-            case 'analysis.errors':
+        if (id != null) {
+          // Handle requests from the server
+          switch (method) {
+            case 'window/workDoneProgress/create':
+              _sendResponse(id, null);
+          }
+        } else if (paramsMap != null) {
+          // Handle notifications from the server
+          switch (method) {
+            case r'$/progress':
+              _handleProgress(paramsMap);
+            case 'textDocument/publishDiagnostics':
               _handleAnalysisIssues(paramsMap);
-            case 'server.error':
+            case 'window/showMessage':
               _handleServerError(paramsMap);
           }
-        }
-      } else if (response['error'] != null) {
-        // Fields are 'code', 'message', and 'stackTrace'.
-        final Map<String, dynamic> error = castStringKeyedMap(response['error'])!;
-        _logger.printError('Error response from the server: ${error['code']} ${error['message']}');
-        if (error['stackTrace'] != null) {
-          _logger.printError(error['stackTrace'] as String);
         }
       }
     }
   }
 
-  void _handleStatus(Map<String, dynamic> statusInfo) {
-    // {"event":"server.status","params":{"analysis":{"isAnalyzing":true}}}
-    if (statusInfo['analysis'] != null && !_analyzingController.isClosed) {
-      final isAnalyzing = (statusInfo['analysis'] as Map<String, dynamic>)['isAnalyzing'] as bool;
-      _analyzingController.add(isAnalyzing);
+  void _handleProgress(Map<String, Object?> params) {
+    // LSP progress for analysis is typically reported via tokens.
+    // The server sends begin/report/end for a token.
+    final Object? value = params['value'];
+    if (value is Map<String, Object?>) {
+      final kind = value['kind'] as String?;
+      if (kind == 'begin') {
+        _analyzingController.add(true);
+      } else if (kind == 'end') {
+        _analyzingController.add(false);
+      }
     }
   }
 
-  void _handleServerError(Map<String, dynamic> error) {
-    // Fields are 'isFatal', 'message', and 'stackTrace'.
-    _logger.printError('Error from the analysis server: ${error['message']}');
-    if (error['stackTrace'] != null) {
-      _logger.printError(error['stackTrace'] as String);
-    }
+  void _handleServerError(Map<String, Object?> params) {
+    // LSP window/showMessage
+    final message = params['message']! as String;
+    _logger.printError('Error from the analysis server: $message');
     _didServerErrorOccur = true;
   }
 
-  void _handleAnalysisIssues(Map<String, dynamic> issueInfo) {
-    // {"event":"analysis.errors","params":{"file":"/Users/.../lib/main.dart","errors":[]}}
-    final file = issueInfo['file'] as String;
-    final errorsList = issueInfo['errors'] as List<dynamic>;
-    final List<AnalysisError> errors = errorsList
-        .map<Map<String, dynamic>>((dynamic e) => castStringKeyedMap(e) ?? <String, dynamic>{})
-        .map<AnalysisError>((Map<String, dynamic> json) {
+  void _handleAnalysisIssues(Map<String, Object?> params) {
+    // {"method":"textDocument/publishDiagnostics","params":{"uri":"file:///.../lib/main.dart","diagnostics":[]}}
+    final Uri uri = Uri.parse(params['uri']! as String);
+    final String file = uri.toFilePath();
+    final diagnosticsList = params['diagnostics']! as List<Object?>;
+
+    final List<AnalysisError> errors = diagnosticsList
+        .map<Map<String, Object?>>((Object? e) => castStringKeyedMap(e) ?? <String, Object?>{})
+        .map<AnalysisError>((Map<String, Object?> json) {
           return AnalysisError(
-            WrittenError.fromJson(json),
+            WrittenError.fromLsp(json, file),
             fileSystem: _fileSystem,
             platform: _platform,
             terminal: _terminal,
@@ -250,8 +357,18 @@ class AnalysisError implements Comparable<AnalysisError> {
       return writtenError.file.compareTo(other.writtenError.file);
     }
 
-    if (writtenError.offset != other.writtenError.offset) {
+    if (writtenError.offset != other.writtenError.offset &&
+        writtenError.offset != -1 &&
+        other.writtenError.offset != -1) {
       return writtenError.offset - other.writtenError.offset;
+    }
+
+    if (writtenError.startLine != other.writtenError.startLine) {
+      return writtenError.startLine - other.writtenError.startLine;
+    }
+
+    if (writtenError.startColumn != other.writtenError.startColumn) {
+      return writtenError.startColumn - other.writtenError.startColumn;
     }
 
     final int diff = other.writtenError.severityLevel.index - writtenError.severityLevel.index;
@@ -304,17 +421,34 @@ class WrittenError {
   ///      "message":"...",
   ///      "hasFix":false
   ///  }
-  static WrittenError fromJson(Map<String, dynamic> json) {
-    final location = json['location'] as Map<String, dynamic>;
+  static WrittenError fromJson(Map<String, Object?> json) {
+    final location = json['location']! as Map<String, Object?>;
     return WrittenError._(
-      severity: json['severity'] as String,
-      type: json['type'] as String,
-      message: json['message'] as String,
-      code: json['code'] as String,
-      file: location['file'] as String,
-      startLine: location['startLine'] as int,
-      startColumn: location['startColumn'] as int,
-      offset: location['offset'] as int,
+      severity: json['severity']! as String,
+      type: json['type']! as String,
+      message: json['message']! as String,
+      code: json['code']! as String,
+      file: location['file']! as String,
+      startLine: location['startLine']! as int,
+      startColumn: location['startColumn']! as int,
+      offset: location['offset']! as int,
+    );
+  }
+
+  static WrittenError fromLsp(Map<String, Object?> json, String file) {
+    final range = json['range']! as Map<String, Object?>;
+    final start = range['start']! as Map<String, Object?>;
+    final severity = json['severity'] as int?;
+    return WrittenError._(
+      severity: _lspSeverityMap[severity] ?? 'INFO',
+      type: 'ANALYSIS', // LSP doesn't have a direct equivalent to 'type'
+      message: json['message']! as String,
+      code: (json['code'] ?? '').toString(),
+      file: file,
+      // LSP is 0-indexed, legacy is 1-indexed.
+      startLine: (start['line']! as int) + 1,
+      startColumn: (start['character']! as int) + 1,
+      offset: -1, // LSP doesn't provide offset
     );
   }
 
@@ -333,6 +467,8 @@ class WrittenError {
     'WARNING': AnalysisSeverity.warning,
     'ERROR': AnalysisSeverity.error,
   };
+
+  static final _lspSeverityMap = <int, String>{1: 'ERROR', 2: 'WARNING', 3: 'INFO', 4: 'INFO'};
 
   AnalysisSeverity get severityLevel => _severityMap[severity] ?? AnalysisSeverity.none;
 
