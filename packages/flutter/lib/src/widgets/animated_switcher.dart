@@ -184,10 +184,13 @@ class AnimatedSwitcher extends StatefulWidget {
   ///
  /// The default is [AnimatedSwitcher.defaultTransitionBuilder].
   ///
-  /// The following example uses a [SlideTransition] instead of the default
+ /// The following example uses a [SlideTransition] instead of the default
   /// [FadeTransition]:
   ///
   /// ```dart
+  /// // Somewhere in your StatefulWidget:
+  /// // int _count = 0;
+  ///
   /// AnimatedSwitcher(
   ///   duration: const Duration(milliseconds: 400),
   ///   transitionBuilder: (Widget child, Animation<double> animation) {
@@ -199,10 +202,14 @@ class AnimatedSwitcher extends StatefulWidget {
   ///       child: child,
   ///     );
   ///   },
-  ///   child: Text('$_count', key: ValueKey<int>(_count)),
+  ///   child: Text(
+  ///     '$_count',
+  ///     // A unique key is required to trigger the transition
+  ///     // when the child value changes.
+  ///     key: ValueKey<int>(_count),
+  ///   ),
   /// )
   /// ```
-  ///
   /// The animation provided to the builder has the [duration] and
   /// [switchInCurve] or [switchOutCurve] applied as provided when the
   /// corresponding [child] was first provided.
