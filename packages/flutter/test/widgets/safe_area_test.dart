@@ -241,6 +241,25 @@ void main() {
         },
       );
     });
+
+    testWidgets('SafeArea - nested baseMinimum does not accumulate padding', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(padding: EdgeInsets.all(20.0)),
+          child: SafeArea(
+            baseMinimum: EdgeInsets.all(20),
+            child: SafeArea(baseMinimum: EdgeInsets.all(30), child: Placeholder()),
+          ),
+        ),
+      );
+
+      // Outer safe area applies 20 padding -> 760x560 space remaining.
+      // Inner safe area adds 10 padding to meet its baseMinimum of 30. Total padding from edges is 30 -> 740x540
+      expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(30.0, 30.0));
+      expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(770.0, 570.0));
+    });
   });
 
   group('SliverSafeArea', () {
@@ -367,6 +386,133 @@ void main() {
         const Rect.fromLTWH(100.0, 130.0, 700.0, 100.0),
         const Rect.fromLTWH(0.0, 230.0, 800.0, 100.0),
       ]);
+    });
+
+    testWidgets('SliverSafeArea - nested baseMinimum does not accumulate padding', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        buildWidget(
+          const EdgeInsets.all(20.0),
+          const SliverSafeArea(
+            baseMinimum: EdgeInsets.all(20),
+            sliver: SliverSafeArea(
+              baseMinimum: EdgeInsets.all(30),
+              sliver: SliverToBoxAdapter(
+                child: SizedBox(width: 800.0, height: 100.0, child: Text('padded')),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Outer SliverSafeArea provides 20 padding. Inner one needs 30 total, so it adds 10. Total top padding is 30.
+      verify(tester, <Rect>[
+        const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
+        const Rect.fromLTWH(30.0, 130.0, 740.0, 100.0),
+        const Rect.fromLTWH(0.0, 260.0, 800.0, 100.0), // 130 + 100 + 30 = 260
+      ]);
+    });
+
+    testWidgets('SafeArea nested in SliverSafeArea baseMinimum does not accumulate padding', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        buildWidget(
+          const EdgeInsets.all(20.0),
+          const SliverSafeArea(
+            baseMinimum: EdgeInsets.all(20),
+            sliver: SliverToBoxAdapter(
+              child: SafeArea(
+                baseMinimum: EdgeInsets.all(30),
+                child: SizedBox(width: 800.0, height: 100.0, child: Text('padded')),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      verify(tester, <Rect>[
+        const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
+        const Rect.fromLTWH(
+          30.0,
+          130.0,
+          740.0,
+          100.0,
+        ), // y-position is 130: 100(before) + 20(outer padding) + 10(inner padding).
+        const Rect.fromLTWH(
+          0.0,
+          260.0,
+          800.0,
+          100.0,
+        ), // The sliver's total extent is 160px (20 outer padding + 120 for SafeArea + 20 outer padding). Next sliver starts at 100(before) + 160 = 260.
+      ]);
+    });
+
+    testWidgets('SliverSafeArea nested in SafeArea baseMinimum does not accumulate padding', (
+      WidgetTester tester,
+    ) async {
+      late final ViewportOffset offset;
+      addTearDown(() => offset.dispose());
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(padding: EdgeInsets.all(20.0)),
+          child: SafeArea(
+            baseMinimum: EdgeInsets.all(20.0),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Viewport(
+                offset: offset = ViewportOffset.fixed(0.0),
+                slivers: const <Widget>[
+                  SliverToBoxAdapter(
+                    child: SizedBox(width: 800.0, height: 100.0, child: Text('before')),
+                  ),
+                  SliverSafeArea(
+                    baseMinimum: EdgeInsets.all(30),
+                    sliver: SliverToBoxAdapter(
+                      child: SizedBox(width: 800.0, height: 100.0, child: Text('padded')),
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: SizedBox(width: 800.0, height: 100.0, child: Text('after')),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final List<Rect> testAnswers = tester
+          .renderObjectList<RenderBox>(find.byType(SizedBox))
+          .map<Rect>((RenderBox target) {
+            final Offset topLeft = target.localToGlobal(Offset.zero);
+            final Offset bottomRight = target.localToGlobal(target.size.bottomRight(Offset.zero));
+            return Rect.fromPoints(topLeft, bottomRight);
+          })
+          .toList();
+
+      // Outer safe area applies 20 padding natively inside the media constraints.
+      // So viewport starts at x=20, y=20.
+      expect(
+        testAnswers,
+        equals(<Rect>[
+          const Rect.fromLTWH(20.0, 20.0, 760.0, 100.0),
+          const Rect.fromLTWH(
+            30.0,
+            130.0,
+            740.0,
+            100.0,
+          ), // SliverSafeArea adds 10 more padding, so x=30. y=20+100+10 = 130
+          const Rect.fromLTWH(
+            20.0,
+            240.0,
+            760.0,
+            100.0,
+          ), // SliverSafeArea bottom adds 10 padding. 130 + 100 + 10 = 240.
+        ]),
+      );
     });
   });
 
