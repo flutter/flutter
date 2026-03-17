@@ -1261,8 +1261,8 @@ class DebuggingOptions {
     ];
   }
 
-  List<String> getAndroidLaunchArguments() {
-    final androidShellArguments = <String>[
+  Set<String> getAndroidLaunchArguments() {
+    final androidShellArguments = <String>{
       if (enableDartProfiling) ...<String>['--enable-dart-profiling'],
       if (profileStartup) ...<String>['--profile-startup'],
       if (enableSoftwareRendering) ...<String>['--enable-software-rendering'],
@@ -1291,7 +1291,7 @@ class DebuggingOptions {
         if (useTestFonts) ...<String>['--use-test-fonts'],
         if (verboseSystemLogs) ...<String>['--verbose-logging'],
       ],
-    ];
+    };
 
     return androidShellArguments;
   }

@@ -29,7 +29,7 @@ abstract class AndroidBuilder {
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
     required String target,
-    List<String>? androidShellArguments,
+    Set<String>? androidShellArguments,
     bool configOnly = false,
   });
 

@@ -686,7 +686,7 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 }
 
 class FakeAndroidBuilder implements AndroidBuilder {
-  List<String>? capturedAndroidShellArgs;
+  Set<String>? capturedAndroidShellArgs;
 
   @override
   Future<void> buildAar({
@@ -703,7 +703,7 @@ class FakeAndroidBuilder implements AndroidBuilder {
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
     required String target,
-    List<String>? androidShellArguments,
+    Set<String>? androidShellArguments,
     bool configOnly = false,
   }) async {
     capturedAndroidShellArgs = androidShellArguments;

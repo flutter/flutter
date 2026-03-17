@@ -229,7 +229,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
     required String target,
-    List<String>? androidShellArguments,
+    Set<String>? androidShellArguments,
     bool configOnly = false,
   }) async {
     await buildGradleApp(
@@ -442,7 +442,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required bool isBuildingBundle,
     required List<GradleHandledError> localGradleErrors,
     required bool configOnly,
-    List<String>? androidShellArguments,
+    Set<String>? androidShellArguments,
     bool validateDeferredComponents = true,
     bool deferredComponentsEnabled = false,
     int retry = 0,

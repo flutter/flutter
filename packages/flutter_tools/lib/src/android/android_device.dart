@@ -563,7 +563,7 @@ class AndroidDevice extends Device {
         return LaunchResult.failed();
     }
 
-    final List<String> androidShellArguments = debuggingOptions.getAndroidLaunchArguments();
+    final Set<String> androidShellArguments = debuggingOptions.getAndroidLaunchArguments();
     // Add additional platform arguments to androidShellArguments.
     final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
     androidShellArguments.addAll(<String>[
@@ -575,8 +575,8 @@ class AndroidDevice extends Device {
     final Set<String>? previousEngineShellArguments = package?.engineShellArgs;
     if (previousEngineShellArguments != null) {
       engineShellArgumentsHaveNotChangedFromPreviousInvocation =
-          Set<String>.from(previousEngineShellArguments).containsAll(androidShellArguments) &&
-          Set<String>.from(androidShellArguments).containsAll(previousEngineShellArguments) &&
+          previousEngineShellArguments.containsAll(androidShellArguments) &&
+          androidShellArguments.containsAll(previousEngineShellArguments) &&
           previousEngineShellArguments.length == androidShellArguments.length;
     }
 
