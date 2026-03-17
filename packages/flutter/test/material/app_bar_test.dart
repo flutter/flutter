@@ -3796,11 +3796,11 @@ void main() {
       await tester.pumpAndSettle();
       expect(getAppBarMaterial().elevation, scrolledUnderElevation);
 
-      // Swap the Scaffold body — simulates a navigation/tab switch.
+      // Swap the Scaffold body to simulate a navigation/tab switch.
       await tester.pumpWidget(buildScaffold(body: shortBody));
       await tester.pumpAndSettle();
 
-      // After body swap, _scrolledUnder should reset — elevation back to 0.
+      // After body swap, _scrolledUnder should reset and elevation back to 0.
       expect(
         getAppBarMaterial().elevation,
         0,
