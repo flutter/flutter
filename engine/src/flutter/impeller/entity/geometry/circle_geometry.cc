@@ -14,7 +14,10 @@
 namespace impeller {
 
 CircleGeometry::CircleGeometry(const Point& center, Scalar radius)
-    : center_(center), radius_(radius), stroke_width_(-1.0f) {
+    : center_(center),
+      radius_(radius),
+      stroke_width_(-1.0f),
+      padding_pixels_(0.0f) {
   FML_DCHECK(radius >= 0);
 }
 
