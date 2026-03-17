@@ -376,9 +376,11 @@ public class FlutterLoader {
       }
 
       shellArgs.add("--cache-dir-path=" + result.engineCachesPath);
-      if (flutterApplicationInfo.domainNetworkPolicy != null) {
-        shellArgs.add("--domain-network-policy=" + flutterApplicationInfo.domainNetworkPolicy);
+
+      if (flutterApplicationInfo.disallowInsecureConnections) {
+        shellArgs.add("--disallow-insecure-connections");
       }
+
       if (settings.getLogTag() != null) {
         shellArgs.add("--log-tag=" + settings.getLogTag());
       }

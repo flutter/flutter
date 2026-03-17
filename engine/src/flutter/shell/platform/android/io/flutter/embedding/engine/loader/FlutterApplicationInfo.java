@@ -15,18 +15,18 @@ public final class FlutterApplicationInfo {
   public final String vmSnapshotData;
   public final String isolateSnapshotData;
   public final String flutterAssetsDir;
-  public final String domainNetworkPolicy;
   public final String nativeLibraryDir;
   final boolean automaticallyRegisterPlugins;
+  final boolean disallowInsecureConnections;
 
   public FlutterApplicationInfo(
       String aotSharedLibraryName,
       String vmSnapshotData,
       String isolateSnapshotData,
       String flutterAssetsDir,
-      String domainNetworkPolicy,
       String nativeLibraryDir,
-      boolean automaticallyRegisterPlugins) {
+      boolean automaticallyRegisterPlugins,
+      boolean disallowInsecureConnections) {
     this.aotSharedLibraryName =
         aotSharedLibraryName == null ? DEFAULT_AOT_SHARED_LIBRARY_NAME : aotSharedLibraryName;
     this.vmSnapshotData = vmSnapshotData == null ? DEFAULT_VM_SNAPSHOT_DATA : vmSnapshotData;
@@ -35,7 +35,7 @@ public final class FlutterApplicationInfo {
     this.flutterAssetsDir =
         flutterAssetsDir == null ? DEFAULT_FLUTTER_ASSETS_DIR : flutterAssetsDir;
     this.nativeLibraryDir = nativeLibraryDir;
-    this.domainNetworkPolicy = domainNetworkPolicy == null ? "" : domainNetworkPolicy;
     this.automaticallyRegisterPlugins = automaticallyRegisterPlugins;
+    this.disallowInsecureConnections = disallowInsecureConnections;
   }
 }
