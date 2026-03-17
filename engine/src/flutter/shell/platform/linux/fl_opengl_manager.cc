@@ -69,12 +69,24 @@ static void fl_opengl_manager_init(FlOpenGLManager* self) {
   eglChooseConfig(self->display, config_attributes, &config, 1, &num_config);
 
   const EGLint context_attributes[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
+
   self->render_context = eglCreateContext(self->display, config, EGL_NO_CONTEXT,
                                           context_attributes);
+  if (self->render_context == EGL_NO_CONTEXT) {
+    g_warning("Failed to create EGL context for rendering");
+  }
+
   self->resource_context = eglCreateContext(
       self->display, config, self->render_context, context_attributes);
+  if (self->resource_context == EGL_NO_CONTEXT) {
+    g_warning("Failed to create EGL context for resource sharing");
+  }
+
   self->platform_context = eglCreateContext(
       self->display, config, self->render_context, context_attributes);
+  if (self->platform_context == EGL_NO_CONTEXT) {
+    g_warning("Failed to create EGL context for platform thread");
+  }
 }
 
 FlOpenGLManager* fl_opengl_manager_new() {
