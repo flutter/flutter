@@ -42,8 +42,7 @@ float distanceFromStrokedCircle(float dist_to_center,
   // If a point lies:
   //  - inside the hole -> max(-inner_distance, outer_distance) > 0
   //  - outside the outer radius -> max(-inner_distance, outer_distance) > 0
-  //  - on the boundary of the stroke -> max(-inner_distance, outer_distance) =
-  //  0
+  //  - on the stroke boundary -> max(-inner_distance, outer_distance) = 0
   //  - inside of the stroke -> max(-inner_distance, outer_distance) < 0. With
   //  the value minimal at the radius, and approaching zero at the boundaries
   return max(-inner_distance, outer_distance);
