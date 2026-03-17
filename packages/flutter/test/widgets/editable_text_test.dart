@@ -1818,6 +1818,73 @@ void main() {
     expect(focusNode.hasFocus, isFalse);
   });
 
+  testWidgets('does not refocus when it is hidden by a new route', (WidgetTester tester) async {
+    final navigatorKey = GlobalKey<NavigatorState>();
+    final focusNode = FocusNode(debugLabel: 'EditableText Node');
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigatorKey,
+        home: Column(
+          children: [
+            EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              autofocus: true,
+              cursorColor: cursorColor,
+            ),
+            TextButton(
+              onPressed: () async {
+                if (navigatorKey.currentState == null) {
+                  return;
+                }
+                await navigatorKey.currentState!.push(
+                  MaterialPageRoute<void>(
+                    settings: const RouteSettings(name: '/TestMaterialRoute'),
+                    builder: (BuildContext innerContext) {
+                      return SizedBox(
+                        width: 600,
+                        height: 600,
+                        child: Container(color: Colors.blue),
+                      );
+                    },
+                  ),
+                );
+              },
+              child: const Text('Push Route'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final EditableTextState editableText = tester.state(find.byType(EditableText));
+    expect(editableText.widget.focusNode.hasFocus, isTrue);
+    editableText.connectionClosed();
+    await tester.pump();
+
+    expect(editableText.widget.focusNode.hasFocus, isFalse);
+
+    // Push a new route.
+    await tester.tap(find.text('Push Route'));
+    await tester.pumpAndSettle();
+
+    // The text field is hidden by the new route, so it should not regain focus.
+    editableText.onFocusReceived();
+    await tester.pump();
+    expect(editableText.widget.focusNode.hasFocus, isFalse); // Fails!
+
+    // Pop the route.
+    navigatorKey.currentState!.pop();
+    await tester.pumpAndSettle();
+
+    // The text field is visible again, so it should regain focus this time.
+    editableText.onFocusReceived();
+    await tester.pump();
+    expect(editableText.widget.focusNode.hasFocus, isTrue);
+  }, skip: true);
+
   // Test case for
   // https://github.com/flutter/flutter/issues/123523
   // https://github.com/flutter/flutter/issues/134846 .
