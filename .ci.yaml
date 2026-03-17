@@ -3817,6 +3817,18 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
+  - name: Mac_benchmark complex_layout_macos_impeller__start_up
+    presubmit: false
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
+      task_name: complex_layout_macos_impeller__start_up
+
   - name: Mac_benchmark complex_layout_macos__start_up
     presubmit: false
     recipe: devicelab/devicelab_drone
@@ -3827,6 +3839,18 @@ targets:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       task_name: complex_layout_macos__start_up
+
+  - name: Mac_benchmark complex_layout_scroll_perf_macos_impeller__timeline_summary
+    presubmit: false
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
+      task_name: complex_layout_scroll_perf_macos_impeller__timeline_summary
 
   - name: Mac_benchmark complex_layout_scroll_perf_macos__timeline_summary
     presubmit: false
@@ -4242,6 +4266,14 @@ targets:
     timeout: 60
     properties:
       task_name: platform_view_macos__start_up
+
+  - name: Mac_benchmark platform_view_macos_impeller__start_up
+    presubmit: false
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    bringup: true
+    properties:
+      task_name: platform_view_macos_impeller__start_up
 
   - name: Mac platform_channel_sample_test_macos
     recipe: devicelab/devicelab_drone
@@ -5821,11 +5853,8 @@ targets:
       subshard: libraries
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      env_variables: >-
-        {
-          "LEAK_TRACKING": "true",
-          "TEST_RANDOMIZATION_OFF": "true"
-        }
+      leak_tracking: "true"
+      test_randomization_off: "true"
     runIf:
       - dev/**
       - packages/flutter/**
@@ -5888,11 +5917,8 @@ targets:
       subshard: misc
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      env_variables: >-
-        {
-          "LEAK_TRACKING": "true",
-          "TEST_RANDOMIZATION_OFF": "true"
-        }
+      leak_tracking: "true"
+      test_randomization_off: "true"
     runIf:
       - dev/**
       - packages/flutter/**
@@ -5948,11 +5974,8 @@ targets:
       subshard: widgets
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      env_variables: >-
-        {
-          "LEAK_TRACKING": "true",
-          "TEST_RANDOMIZATION_OFF": "true"
-        }
+      leak_tracking: "true"
+      test_randomization_off: "true"
     runIf:
       - dev/**
       - packages/flutter/**

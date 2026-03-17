@@ -94,7 +94,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
     nativeAssetsFileUri: nativeAssetsFileUri,
     targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/$osName/'),
   );
-  assert(await globals.fs.file(nativeAssetsFileUri).exists());
+  assert(globals.fs.file(nativeAssetsFileUri).existsSync());
 
   return nativeAssetsFileUri;
 }
