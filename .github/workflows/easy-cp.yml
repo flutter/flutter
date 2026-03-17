@@ -59,8 +59,8 @@ jobs:
         id: attempt-cp
         working-directory: ./flutter
         run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "<>"
+          git config user.name "flutteractionsbot"
+          git config user.email "<flutter-actions-bot@google.com>"
           git remote add upstream https://github.com/flutter/flutter.git
           git fetch upstream $RELEASE_BRANCH
           git fetch upstream master
