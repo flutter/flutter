@@ -28,7 +28,8 @@ CircleGeometry::CircleGeometry(const Point& center,
                                Scalar stroke_width)
     : center_(center),
       radius_(radius),
-      stroke_width_(std::max(stroke_width, 0.0f)) {
+      stroke_width_(std::max(stroke_width, 0.0f)),
+      padding_pixels_(0.0) {
   FML_DCHECK(radius >= 0);
   FML_DCHECK(stroke_width >= 0);
 }
