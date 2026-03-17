@@ -75,6 +75,7 @@ Flutter engine uses `gclient` to manage dependencies.
 > ```
 >
 > This performs a shallow sync, reducing download size and improving reliability.
+>
 > Note that this omits full Git history, which may limit certain development workflows.
 
 ### Add `et` to `PATH`
