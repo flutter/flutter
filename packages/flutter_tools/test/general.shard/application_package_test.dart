@@ -860,7 +860,7 @@ void main() {
           ),
         );
         generatedManifest.createSync(recursive: true);
-        const androidEngineShellArgs = '--enable-impeller=true,--trace-startup,--verbose-logging';
+        const androidEngineShellArgs = '--enable-impeller=true;--trace-startup;--verbose-logging';
         const generatedManfiestContents =
             '''
   <?xml version="1.0" encoding="utf-8"?>

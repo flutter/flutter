@@ -488,9 +488,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
         : getAssembleTaskFor(buildInfo);
 
     // Add engine shell arugments to be injected into the manifest.
-    // TODO(camsim99): Choose different delimiter.
     if (androidShellArguments != null) {
-      final String androidShellArgumentsStr = androidShellArguments.join(',');
+      final String androidShellArgumentsStr = androidShellArguments.join(';');
       options.add('-PandroidShellArguments=$androidShellArgumentsStr');
     }
 

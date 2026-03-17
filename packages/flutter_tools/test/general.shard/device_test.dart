@@ -1033,36 +1033,33 @@ void main() {
         verboseSystemLogs: true,
       );
 
-      final List<String> launchArguments = options.getAndroidLaunchArguments();
+      final Set<String> launchArguments = options.getAndroidLaunchArguments();
 
-      expect(
-        launchArguments.join(' '),
-        <String>[
-          '--enable-dart-profiling',
-          '--profile-startup',
-          '--enable-software-rendering',
-          '--skia-deterministic-rendering',
-          '--trace-skia',
-          '--trace-allowlist=foo',
-          '--trace-skia-allowlist=skia.a,skia.b',
-          '--trace-systrace',
-          '--trace-to-file=path/to/trace.file',
-          '--endless-trace-buffer',
-          '--profile-microtasks',
-          '--purge-persistent-cache',
-          '--enable-impeller=false',
-          '--enable-flutter-gpu',
-          '--enable-vulkan-validation',
-          '--enable-checked-mode',
-          '--verify-entry-points',
-          '--start-paused',
-          '--disable-service-auth-codes',
-          '--dart-flags=--foo',
-          '--enable-hcpp-and-surface-control',
-          '--use-test-fonts',
-          '--verbose-logging',
-        ].join(' '),
-      );
+      expect(launchArguments, <String>{
+        '--enable-dart-profiling',
+        '--profile-startup',
+        '--enable-software-rendering',
+        '--skia-deterministic-rendering',
+        '--trace-skia',
+        '--trace-allowlist=foo',
+        '--trace-skia-allowlist=skia.a,skia.b',
+        '--trace-systrace',
+        '--trace-to-file=path/to/trace.file',
+        '--endless-trace-buffer',
+        '--profile-microtasks',
+        '--purge-persistent-cache',
+        '--enable-impeller=false',
+        '--enable-flutter-gpu',
+        '--enable-vulkan-validation',
+        '--enable-checked-mode',
+        '--verify-entry-points',
+        '--start-paused',
+        '--disable-service-auth-codes',
+        '--dart-flags=--foo',
+        '--enable-hcpp-and-surface-control',
+        '--use-test-fonts',
+        '--verbose-logging',
+      });
     });
 
     testWithoutContext(

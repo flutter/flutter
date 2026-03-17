@@ -333,7 +333,7 @@ public class FlutterLoader {
         String shellArgsFromCommandLine =
             metaData.getString(SHELL_ARGS_FROM_COMMAND_LINE_METADATA_KEY);
         if (shellArgsFromCommandLine != null) {
-          String[] commandLineArgs = shellArgsFromCommandLine.split(",");
+          String[] commandLineArgs = shellArgsFromCommandLine.split(";");
           for (String arg : commandLineArgs) {
             // TODO(camsim99): Use logic addded in https://github.com/flutter/flutter/pull/177127 to
             // filter
