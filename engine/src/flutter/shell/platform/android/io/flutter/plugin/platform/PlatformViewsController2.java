@@ -9,6 +9,7 @@ import static io.flutter.Build.API_LEVELS;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.util.SparseArray;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
@@ -518,7 +519,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     parentView.bringToFront();
 
     final FrameLayout.LayoutParams layoutParams =
-        new FrameLayout.LayoutParams(viewWidth, viewHeight);
+        new FrameLayout.LayoutParams(viewWidth, viewHeight, Gravity.LEFT | Gravity.TOP);
     final View view = platformViews.get(viewId).getView();
     if (view != null) {
       view.setLayoutParams(layoutParams);
