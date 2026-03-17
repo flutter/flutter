@@ -506,13 +506,13 @@ class XcodeProjectInfo {
     return '$baseConfiguration-$scheme';
   }
 
-  /// Finds a build configuration matching [buildMode], ignoring case,
+  /// Finds a build configuration matching [name], ignoring case,
   /// and returns it, or null if there is no match.
-  String? _existingBuildConfigurationForBuildMode(String buildMode) {
-    buildMode = buildMode.toLowerCase();
-    for (final String name in buildConfigurations) {
-      if (name.toLowerCase() == buildMode) {
-        return name;
+  String? _existingBuildConfigurationWithName(String name) {
+    name = name.toLowerCase();
+    for (final String configName in buildConfigurations) {
+      if (configName.toLowerCase() == name) {
+        return configName;
       }
     }
     return null;
@@ -550,8 +550,9 @@ class XcodeProjectInfo {
     }
     final String expectedConfiguration = expectedBuildConfigurationFor(buildInfo, scheme);
     // Check for an exact match, e.g. "Debug-MyFlavor" if using a flavor or "Debug" if not.
-    final String? exactMatch = _existingBuildConfigurationForBuildMode(expectedConfiguration);
-    if (exactMatch != null) {
+    final String? exactMatch = _existingBuildConfigurationWithName(expectedConfiguration);
+    // When flavor is null, an exact match is required.
+    if (exactMatch != null || buildInfo.flavor == null) {
       return exactMatch;
     }
     final String baseConfiguration = _baseConfigurationFor(buildInfo);
@@ -565,7 +566,7 @@ class XcodeProjectInfo {
     });
     // Fall back to the base configuration if no match or more than one match is found.
     return buildConfigurationForBuildModeAndFlavor ??
-        _existingBuildConfigurationForBuildMode(baseConfiguration);
+        _existingBuildConfigurationWithName(baseConfiguration);
   }
 
   static String _baseConfigurationFor(BuildInfo buildInfo) {
