@@ -275,7 +275,9 @@ class DarwinAddToAppCodesigning {
   ///
   /// Apple requires that the Flutter.xcframework is code-signed and to avoid build failures due to
   /// code-signing identity changing, we only use the app developer's identity to code-sign it when
-  /// necessary. See go/flutter-ios-privacy-impacting-sdks-codesign-requirement and
+  /// necessary. In addition, Flutter code-signs both the XCFramework and it's inner frameworks.
+  /// Re-codesigning it would require code-signing the inner frameworks as well as the XCFramework.
+  /// See go/flutter-ios-privacy-impacting-sdks-codesign-requirement and
   /// https://developer.apple.com/documentation/xcode/verifying-the-origin-of-your-xcframeworks#Diagnose-build-failures-caused-by-code-signature-changes
   static Future<void> codesignFlutterXCFramework({
     required Directory xcframework,
