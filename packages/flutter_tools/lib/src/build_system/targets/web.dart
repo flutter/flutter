@@ -705,7 +705,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
         environment.serviceWorkerStrategy == ServiceWorkerStrategy.offlineFirst;
     final File inputFlutterBootstrapJs = webResources.childFile('flutter_bootstrap.js');
     final String inputBootstrapContent;
-    if (await inputFlutterBootstrapJs.exists()) {
+    if (inputFlutterBootstrapJs.existsSync()) {
       inputBootstrapContent = await inputFlutterBootstrapJs.readAsString();
     } else {
       inputBootstrapContent = generateDefaultFlutterBootstrapScript(

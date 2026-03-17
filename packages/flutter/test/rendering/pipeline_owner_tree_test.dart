@@ -244,6 +244,8 @@ void main() {
 
     root.adoptChild(child);
     root.attach(manifold);
+    rootRenderObject.layout(const BoxConstraints());
+    childRenderObject.layout(const BoxConstraints());
     log.clear();
 
     rootRenderObject.markNeedsSemanticsUpdate();
@@ -281,6 +283,8 @@ void main() {
 
     root.adoptChild(child);
     root.attach(manifold);
+    rootRenderObject.layout(const BoxConstraints());
+    childRenderObject.layout(const BoxConstraints());
     rootRenderObject.markNeedsSemanticsUpdate();
     childRenderObject.markNeedsSemanticsUpdate();
     root.flushSemantics();
