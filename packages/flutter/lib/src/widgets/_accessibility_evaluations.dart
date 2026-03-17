@@ -289,7 +289,7 @@ abstract class _ContrastEvaluation extends AccessibilityEvaluation {
   }
 
   bool _shouldSkipNodeTraversal(SemanticsNode node) {
-    final bool isDisabled = node.flagsCollection.isEnabled == ui.Tristate.isFalse;
+    final isDisabled = node.flagsCollection.isEnabled == ui.Tristate.isFalse;
     return node.isInvisible ||
         node.isMergedIntoParent ||
         node.flagsCollection.isHidden ||
@@ -563,7 +563,7 @@ class MinimumNonTextContrastEvaluation extends _ContrastEvaluation {
     }
 
     final double devicePixelRatio = renderView.flutterView.devicePixelRatio;
-    final Rect logicalBounds = Rect.fromLTRB(
+    final logicalBounds = Rect.fromLTRB(
       nodeBounds.left / devicePixelRatio,
       nodeBounds.top / devicePixelRatio,
       nodeBounds.right / devicePixelRatio,
