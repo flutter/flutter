@@ -326,7 +326,7 @@ void main() {
   });
 
   test('Can fix C++ formatting errors with non-ASCII content', () {
-    final FileContentPair ccNonAsciiContentPair = FileContentPair(
+    final ccNonAsciiContentPair = FileContentPair(
       'int main\u221E(){return 0;}\n',
       'int main\u221E() {\n  return 0;\n}\n',
     );

@@ -232,7 +232,7 @@ abstract class FormatChecker {
     final patchPool = ProcessPool(
       processRunner: _processRunner,
       printReport: namedReport('patch'),
-      encoding: Utf8Codec(),
+      encoding: const Utf8Codec(),
     );
     final List<WorkerJob> jobs = patches.map<WorkerJob>((String patch) {
       return WorkerJob(<String>[
