@@ -157,10 +157,6 @@ mixin class RegularWindowControllerDelegate {
 /// When the window is no longer needed, the user should call [destroy] on this
 /// controller to release the resources associated with the window.
 ///
-/// If the parent window of the dialog is destroyed, then the dialog will
-/// be destroyed as well. The user does not need to explicitly call [destroy]
-/// in this case.
-///
 /// {@tool snippet}
 /// An example usage might look like:
 ///
