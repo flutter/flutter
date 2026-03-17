@@ -770,7 +770,8 @@ void Canvas::DrawLine(const Point& p0,
 
   auto geometry = std::make_unique<LineGeometry>(p0, p1, paint.stroke);
 
-  if (renderer_.GetContext()->GetFlags().antialiased_lines &&
+  if ((renderer_.GetContext()->GetFlags().antialiased_lines ||
+       renderer_.GetContext()->GetFlags().use_sdfs) &&
       !paint.color_filter && !paint.invert_colors && !paint.image_filter &&
       !paint.mask_blur_descriptor.has_value() && !paint.color_source) {
     auto contents = LineContents::Make(std::move(geometry), paint.color);
