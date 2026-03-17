@@ -3641,10 +3641,6 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardFindFirstResponderIsNilRecursive {
-  if (@available(iOS 26.0, *)) {
-    XCTSkip(@"Interactive keyboard tests broken on iOS 26+ due to SDK bugs. See: "
-             "https://github.com/flutter/flutter/issues/183473");
-  }
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
   [UIApplication.sharedApplication.keyWindow addSubview:inputView];
   [inputView setTextInputClient:123];
@@ -3931,10 +3927,6 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   textInputPlugin.cachedFirstResponder = nil;
 }
 - (void)testInteractiveKeyboardShowKeyboardAndRemoveScreenshotAnimationIsNotImmediatelyEnable {
-  if (@available(iOS 26.0, *)) {
-    XCTSkip(@"Interactive keyboard tests broken on iOS 26+ due to SDK bugs. See: "
-             "https://github.com/flutter/flutter/issues/183473");
-  }
   [UIView setAnimationsEnabled:YES];
   [textInputPlugin showKeyboardAndRemoveScreenshot];
   XCTAssertFalse(
@@ -3943,10 +3935,6 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardShowKeyboardAndRemoveScreenshotAnimationIsReenabledAfterDelay {
-  if (@available(iOS 26.0, *)) {
-    XCTSkip(@"Interactive keyboard tests broken on iOS 26+ due to SDK bugs. See: "
-             "https://github.com/flutter/flutter/issues/183473");
-  }
   [UIView setAnimationsEnabled:YES];
   [textInputPlugin showKeyboardAndRemoveScreenshot];
 
