@@ -182,7 +182,26 @@ class AnimatedSwitcher extends StatefulWidget {
   /// the transition is rebuilt for the current child and all previous children
   /// using the new [transitionBuilder]. The function must not return null.
   ///
-  /// The default is [AnimatedSwitcher.defaultTransitionBuilder].
+ /// The default is [AnimatedSwitcher.defaultTransitionBuilder].
+  ///
+  /// The following example uses a [SlideTransition] instead of the default
+  /// [FadeTransition]:
+  ///
+  /// ```dart
+  /// AnimatedSwitcher(
+  ///   duration: const Duration(milliseconds: 400),
+  ///   transitionBuilder: (Widget child, Animation<double> animation) {
+  ///     return SlideTransition(
+  ///       position: Tween<Offset>(
+  ///         begin: const Offset(1.0, 0.0),
+  ///         end: Offset.zero,
+  ///       ).animate(animation),
+  ///       child: child,
+  ///     );
+  ///   },
+  ///   child: Text('$_count', key: ValueKey<int>(_count)),
+  /// )
+  /// ```
   ///
   /// The animation provided to the builder has the [duration] and
   /// [switchInCurve] or [switchOutCurve] applied as provided when the
