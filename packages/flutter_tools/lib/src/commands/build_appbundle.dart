@@ -169,6 +169,8 @@ class BuildAppBundleCommand extends BuildSubCommand {
       project: project,
       target: targetFile,
       androidBuildInfo: androidBuildInfo,
+      // TODO(camsim99): what about shell args in this case?
+      androidShellArguments: <String>[],
       validateDeferredComponents: boolArg('validate-deferred-components'),
       deferredComponentsEnabled: boolArg('deferred-components') && !boolArg('debug'),
     );

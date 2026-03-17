@@ -837,6 +837,13 @@ object FlutterPluginUtils {
                 ).toTransform(SingleArtifact.MERGED_MANIFEST) // (3) Indicate the artifact and operation type.
         }
     }
+
+    /** TODO(camsim99) */
+    @JvmStatic
+    @JvmName("addTaskForEngineShellArgumentManifestInjection")
+    internal fun addTaskForEngineShellArgumentManifestInjection(project: Project, androidEngineShellArgs: String) {
+        
+    }
 }
 
 private data class PluginVersionPair(
