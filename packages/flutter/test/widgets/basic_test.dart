@@ -13,11 +13,13 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'button_tester.dart';
 import 'semantics_tester.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
   group('RawImage', () {
@@ -59,7 +61,7 @@ void main() {
       const double width = 1;
       const double height = 1;
       const scale = 2.0;
-      const Color color = Colors.black;
+      const color = Color(0xFF000000);
       const Animation<double> opacity = AlwaysStoppedAnimation<double>(0.0);
       const BlendMode colorBlendMode = BlendMode.difference;
       const BoxFit fit = BoxFit.contain;
@@ -264,11 +266,7 @@ void main() {
                           offset = const Offset(0.8, 0.8);
                         });
                       },
-                      child: SizedBox(
-                        width: 100.0,
-                        height: 100.0,
-                        child: Text('foo', key: textKey),
-                      ),
+                      child: SizedBox.square(dimension: 100.0, child: Text('foo', key: textKey)),
                     ),
                   ),
                 ),
@@ -333,33 +331,32 @@ void main() {
     testWidgets('Semantics can set attributed Text', (WidgetTester tester) async {
       final key = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Semantics(
-              key: key,
-              attributedLabel: AttributedString(
-                'label',
-                attributes: <StringAttribute>[
-                  SpellOutStringAttribute(range: const TextRange(start: 0, end: 5)),
-                ],
-              ),
-              attributedValue: AttributedString(
-                'value',
-                attributes: <StringAttribute>[
-                  LocaleStringAttribute(
-                    range: const TextRange(start: 0, end: 5),
-                    locale: const Locale('en', 'MX'),
-                  ),
-                ],
-              ),
-              attributedHint: AttributedString(
-                'hint',
-                attributes: <StringAttribute>[
-                  SpellOutStringAttribute(range: const TextRange(start: 1, end: 2)),
-                ],
-              ),
-              child: const Placeholder(),
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            key: key,
+            attributedLabel: AttributedString(
+              'label',
+              attributes: <StringAttribute>[
+                SpellOutStringAttribute(range: const TextRange(start: 0, end: 5)),
+              ],
             ),
+            attributedValue: AttributedString(
+              'value',
+              attributes: <StringAttribute>[
+                LocaleStringAttribute(
+                  range: const TextRange(start: 0, end: 5),
+                  locale: const Locale('en', 'MX'),
+                ),
+              ],
+            ),
+            attributedHint: AttributedString(
+              'hint',
+              attributes: <StringAttribute>[
+                SpellOutStringAttribute(range: const TextRange(start: 1, end: 2)),
+              ],
+            ),
+            child: const Placeholder(),
           ),
         ),
       );
@@ -388,18 +385,10 @@ void main() {
       final key1 = UniqueKey();
       final key2 = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Semantics(
-              key: key1,
-              role: SemanticsRole.dialog,
-              child: Semantics(
-                key: key2,
-                role: SemanticsRole.alertDialog,
-                child: const Placeholder(),
-              ),
-            ),
-          ),
+        Semantics(
+          key: key1,
+          role: SemanticsRole.dialog,
+          child: Semantics(key: key2, role: SemanticsRole.alertDialog, child: const Placeholder()),
         ),
       );
       final SemanticsNode node1 = tester.getSemantics(find.byKey(key1));
@@ -413,14 +402,10 @@ void main() {
       final key1 = UniqueKey();
       final key2 = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Semantics(
-              key: key1,
-              role: SemanticsRole.dialog,
-              child: Semantics(key: key2, textField: true, child: const Placeholder()),
-            ),
-          ),
+        Semantics(
+          key: key1,
+          role: SemanticsRole.dialog,
+          child: Semantics(key: key2, textField: true, child: const Placeholder()),
         ),
       );
       final SemanticsNode node1 = tester.getSemantics(find.byKey(key1));
@@ -434,14 +419,10 @@ void main() {
       final key1 = UniqueKey();
       final key2 = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Semantics(
-              key: key1,
-              role: SemanticsRole.dialog,
-              child: Semantics(key: key2, link: true, child: const Placeholder()),
-            ),
-          ),
+        Semantics(
+          key: key1,
+          role: SemanticsRole.dialog,
+          child: Semantics(key: key2, link: true, child: const Placeholder()),
         ),
       );
       final SemanticsNode node1 = tester.getSemantics(find.byKey(key1));
@@ -455,18 +436,14 @@ void main() {
       final key1 = UniqueKey();
       final key2 = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Semantics(
-              key: key1,
-              role: SemanticsRole.dialog,
-              child: Semantics(
-                key: key2,
-                scopesRoute: true,
-                explicitChildNodes: true,
-                child: const Placeholder(),
-              ),
-            ),
+        Semantics(
+          key: key1,
+          role: SemanticsRole.dialog,
+          child: Semantics(
+            key: key2,
+            scopesRoute: true,
+            explicitChildNodes: true,
+            child: const Placeholder(),
           ),
         ),
       );
@@ -481,14 +458,10 @@ void main() {
       final key1 = UniqueKey();
       final key2 = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Semantics(
-              key: key1,
-              role: SemanticsRole.dialog,
-              child: Semantics(key: key2, header: true, child: const Placeholder()),
-            ),
-          ),
+        Semantics(
+          key: key1,
+          role: SemanticsRole.dialog,
+          child: Semantics(key: key2, header: true, child: const Placeholder()),
         ),
       );
       final SemanticsNode node1 = tester.getSemantics(find.byKey(key1));
@@ -506,14 +479,10 @@ void main() {
       final key1 = UniqueKey();
       final key2 = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Semantics(
-              key: key1,
-              role: SemanticsRole.dialog,
-              child: Semantics(key: key2, image: true, child: const Placeholder()),
-            ),
-          ),
+        Semantics(
+          key: key1,
+          role: SemanticsRole.dialog,
+          child: Semantics(key: key2, image: true, child: const Placeholder()),
         ),
       );
       final SemanticsNode node1 = tester.getSemantics(find.byKey(key1));
@@ -527,14 +496,10 @@ void main() {
       final key1 = UniqueKey();
       final key2 = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Semantics(
-              key: key1,
-              role: SemanticsRole.dialog,
-              child: Semantics(key: key2, slider: true, child: const Placeholder()),
-            ),
-          ),
+        Semantics(
+          key: key1,
+          role: SemanticsRole.dialog,
+          child: Semantics(key: key2, slider: true, child: const Placeholder()),
         ),
       );
       final SemanticsNode node1 = tester.getSemantics(find.byKey(key1));
@@ -548,14 +513,10 @@ void main() {
       final key1 = UniqueKey();
       final key2 = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Semantics(
-              key: key1,
-              role: SemanticsRole.dialog,
-              child: Semantics(key: key2, keyboardKey: true, child: const Placeholder()),
-            ),
-          ),
+        Semantics(
+          key: key1,
+          role: SemanticsRole.dialog,
+          child: Semantics(key: key2, keyboardKey: true, child: const Placeholder()),
         ),
       );
       final SemanticsNode node1 = tester.getSemantics(find.byKey(key1));
@@ -569,14 +530,10 @@ void main() {
       final key1 = UniqueKey();
       final key2 = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Semantics(
-              key: key1,
-              role: SemanticsRole.dialog,
-              child: Semantics(key: key2, slider: true, child: const Placeholder()),
-            ),
-          ),
+        Semantics(
+          key: key1,
+          role: SemanticsRole.dialog,
+          child: Semantics(key: key2, slider: true, child: const Placeholder()),
         ),
       );
       final SemanticsNode node1 = tester.getSemantics(find.byKey(key1));
@@ -589,15 +546,7 @@ void main() {
     testWidgets('Semantics can set controls visibility of nodes', (WidgetTester tester) async {
       final key = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Semantics(
-              key: key,
-              controlsNodes: const <String>{'abc'},
-              child: const Placeholder(),
-            ),
-          ),
-        ),
+        Semantics(key: key, controlsNodes: const <String>{'abc'}, child: const Placeholder()),
       );
       final SemanticsNode node = tester.getSemantics(find.byKey(key));
       final SemanticsData data = node.getSemanticsData();
@@ -608,17 +557,10 @@ void main() {
     testWidgets('Semantics can set controls visibility of nodes', (WidgetTester tester) async {
       final key = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Semantics(
-              key: key,
-              controlsNodes: const <String>{'abc', 'ghi'},
-              child: Semantics(
-                controlsNodes: const <String>{'abc', 'def'},
-                child: const Placeholder(),
-              ),
-            ),
-          ),
+        Semantics(
+          key: key,
+          controlsNodes: const <String>{'abc', 'ghi'},
+          child: Semantics(controlsNodes: const <String>{'abc', 'def'}, child: const Placeholder()),
         ),
       );
       final SemanticsNode node = tester.getSemantics(find.byKey(key));
@@ -630,14 +572,10 @@ void main() {
     testWidgets('Semantics can set semantics input type', (WidgetTester tester) async {
       final key1 = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Semantics(
-              key: key1,
-              inputType: SemanticsInputType.phone,
-              child: const SizedBox(width: 10, height: 10),
-            ),
-          ),
+        Semantics(
+          key: key1,
+          inputType: SemanticsInputType.phone,
+          child: const SizedBox(width: 10, height: 10),
         ),
       );
       final SemanticsNode node1 = tester.getSemantics(find.byKey(key1));
@@ -647,11 +585,7 @@ void main() {
     testWidgets('Semantics can set alert rule', (WidgetTester tester) async {
       final key = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Semantics(key: key, role: SemanticsRole.alert, child: const Placeholder()),
-          ),
-        ),
+        Semantics(key: key, role: SemanticsRole.alert, child: const Placeholder()),
       );
       final SemanticsNode node = tester.getSemantics(find.byKey(key));
       final SemanticsData data = node.getSemanticsData();
@@ -661,11 +595,7 @@ void main() {
     testWidgets('Semantics can set status rule', (WidgetTester tester) async {
       final key = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Semantics(key: key, role: SemanticsRole.status, child: const Placeholder()),
-          ),
-        ),
+        Semantics(key: key, role: SemanticsRole.status, child: const Placeholder()),
       );
       final SemanticsNode node = tester.getSemantics(find.byKey(key));
       final SemanticsData data = node.getSemanticsData();
@@ -675,10 +605,23 @@ void main() {
     testWidgets('Semantics can merge attributed strings', (WidgetTester tester) async {
       final key = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Semantics(
-              key: key,
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            key: key,
+            attributedLabel: AttributedString(
+              'label',
+              attributes: <StringAttribute>[
+                SpellOutStringAttribute(range: const TextRange(start: 0, end: 5)),
+              ],
+            ),
+            attributedHint: AttributedString(
+              'hint',
+              attributes: <StringAttribute>[
+                SpellOutStringAttribute(range: const TextRange(start: 1, end: 2)),
+              ],
+            ),
+            child: Semantics(
               attributedLabel: AttributedString(
                 'label',
                 attributes: <StringAttribute>[
@@ -691,21 +634,7 @@ void main() {
                   SpellOutStringAttribute(range: const TextRange(start: 1, end: 2)),
                 ],
               ),
-              child: Semantics(
-                attributedLabel: AttributedString(
-                  'label',
-                  attributes: <StringAttribute>[
-                    SpellOutStringAttribute(range: const TextRange(start: 0, end: 5)),
-                  ],
-                ),
-                attributedHint: AttributedString(
-                  'hint',
-                  attributes: <StringAttribute>[
-                    SpellOutStringAttribute(range: const TextRange(start: 1, end: 2)),
-                  ],
-                ),
-                child: const Placeholder(),
-              ),
+              child: const Placeholder(),
             ),
           ),
         ),
@@ -731,19 +660,15 @@ void main() {
       final key1 = UniqueKey();
       final key2 = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Semantics(
-              key: key1,
-              role: SemanticsRole.list,
-              container: true,
-              child: Semantics(
-                key: key2,
-                role: SemanticsRole.listItem,
-                container: true,
-                child: const Placeholder(),
-              ),
-            ),
+        Semantics(
+          key: key1,
+          role: SemanticsRole.list,
+          container: true,
+          child: Semantics(
+            key: key2,
+            role: SemanticsRole.listItem,
+            container: true,
+            child: const Placeholder(),
           ),
         ),
       );
@@ -756,13 +681,7 @@ void main() {
 
     testWidgets('Semantics can use form', (WidgetTester tester) async {
       final key1 = UniqueKey();
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Semantics(key: key1, role: SemanticsRole.form, container: true),
-          ),
-        ),
-      );
+      await tester.pumpWidget(Semantics(key: key1, role: SemanticsRole.form, container: true));
       final SemanticsNode formNode = tester.getSemantics(find.byKey(key1));
 
       expect(formNode.role, SemanticsRole.form);
@@ -773,27 +692,26 @@ void main() {
     ) async {
       final key = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Semantics(
-              key: key,
-              attributedLabel: AttributedString(
-                'label1',
-                attributes: <StringAttribute>[
-                  SpellOutStringAttribute(range: const TextRange(start: 0, end: 5)),
-                ],
-              ),
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            key: key,
+            attributedLabel: AttributedString(
+              'label1',
+              attributes: <StringAttribute>[
+                SpellOutStringAttribute(range: const TextRange(start: 0, end: 5)),
+              ],
+            ),
+            child: Semantics(
+              label: 'label2',
               child: Semantics(
-                label: 'label2',
-                child: Semantics(
-                  attributedLabel: AttributedString(
-                    'label3',
-                    attributes: <StringAttribute>[
-                      SpellOutStringAttribute(range: const TextRange(start: 1, end: 3)),
-                    ],
-                  ),
-                  child: const Placeholder(),
+                attributedLabel: AttributedString(
+                  'label3',
+                  attributes: <StringAttribute>[
+                    SpellOutStringAttribute(range: const TextRange(start: 1, end: 3)),
+                  ],
                 ),
+                child: const Placeholder(),
               ),
             ),
           ),
@@ -812,8 +730,9 @@ void main() {
       'Semantics with attributedValue should be recognized as containing text and not fail',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: Semantics(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Semantics(
               attributedValue: AttributedString('test value'),
               child: const Placeholder(),
             ),
@@ -827,8 +746,9 @@ void main() {
       'Semantics with attributedDecreasedValue should be recognized as containing text and not fail',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: Semantics(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Semantics(
               attributedDecreasedValue: AttributedString('test value'),
               child: const Placeholder(),
             ),
@@ -842,8 +762,9 @@ void main() {
       'Semantics with attributedIncreasedValue should be recognized as containing text and not fail',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: Semantics(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Semantics(
               attributedIncreasedValue: AttributedString('test value'),
               child: const Placeholder(),
             ),
@@ -857,8 +778,9 @@ void main() {
       'Semantics with decreasedValue should be recognized as containing text and not fail',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: Semantics(decreasedValue: 'test value', child: const Placeholder()),
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Semantics(decreasedValue: 'test value', child: const Placeholder()),
           ),
         );
         expect(tester.takeException(), isNull);
@@ -869,8 +791,9 @@ void main() {
       'Semantics with increasedValue should be recognized as containing text and not fail',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: Semantics(increasedValue: 'test value', child: const Placeholder()),
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Semantics(increasedValue: 'test value', child: const Placeholder()),
           ),
         );
         expect(tester.takeException(), isNull);
@@ -881,8 +804,9 @@ void main() {
       'Semantics with attributedHint should be recognized as containing text and not fail',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: Semantics(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Semantics(
               attributedHint: AttributedString('test value'),
               child: const Placeholder(),
             ),
@@ -903,10 +827,10 @@ void main() {
       const double fontSize2 = 12;
 
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(useMaterial3: false),
-          home: Scaffold(
-            body: Row(
+        TestWidgetsApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.baseline,
               textBaseline: TextBaseline.alphabetic,
               children: <Widget>[
@@ -970,10 +894,10 @@ void main() {
       const double fontSize2 = 12;
 
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(useMaterial3: false),
-          home: Scaffold(
-            body: Row(
+        TestWidgetsApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.baseline,
               textBaseline: TextBaseline.alphabetic,
               children: <Widget>[
@@ -1260,7 +1184,7 @@ void main() {
                     Transform.scale(
                       scale: 1.04,
                       child: const ColoredBox(
-                        color: Colors.orange,
+                        color: Color(0xFFFF9800),
                         child: Padding(
                           padding: EdgeInsets.all(2),
                           child: Row(
@@ -1268,42 +1192,42 @@ void main() {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: <Widget>[
                               ColoredBox(
-                                color: Colors.white,
+                                color: Color(0xFFFFFFFF),
                                 child: Padding(
                                   padding: EdgeInsets.all(4.0),
                                   child: Text(
                                     'Short',
-                                    style: TextStyle(fontSize: 16, color: Colors.black),
+                                    style: TextStyle(fontSize: 16, color: Color(0xFF000000)),
                                   ),
                                 ),
                               ),
                               ColoredBox(
-                                color: Colors.white,
+                                color: Color(0xFFFFFFFF),
                                 child: Padding(
                                   padding: EdgeInsets.all(4.0),
                                   child: Text(
                                     'Just text ',
-                                    style: TextStyle(fontSize: 14, color: Colors.black),
+                                    style: TextStyle(fontSize: 14, color: Color(0xFF000000)),
                                   ),
                                 ),
                               ),
                               ColoredBox(
-                                color: Colors.white,
+                                color: Color(0xFFFFFFFF),
                                 child: Padding(
                                   padding: EdgeInsets.all(4.0),
                                   child: Text(
                                     ' Tall text ',
-                                    style: TextStyle(fontSize: 18, color: Colors.black),
+                                    style: TextStyle(fontSize: 18, color: Color(0xFF000000)),
                                   ),
                                 ),
                               ),
                               ColoredBox(
-                                color: Colors.white,
+                                color: Color(0xFFFFFFFF),
                                 child: Padding(
                                   padding: EdgeInsets.all(4.0),
                                   child: Text(
                                     'Medium',
-                                    style: TextStyle(fontSize: 32, color: Colors.black),
+                                    style: TextStyle(fontSize: 32, color: Color(0xFF000000)),
                                   ),
                                 ),
                               ),
@@ -1315,7 +1239,7 @@ void main() {
                     Transform.scale(
                       scale: 1.04,
                       child: const ColoredBox(
-                        color: Colors.orange,
+                        color: Color(0xFFFF9800),
                         isAntiAlias: false,
                         child: Padding(
                           padding: EdgeInsets.all(2),
@@ -1324,46 +1248,46 @@ void main() {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: <Widget>[
                               ColoredBox(
-                                color: Colors.white,
+                                color: Color(0xFFFFFFFF),
                                 isAntiAlias: false,
                                 child: Padding(
                                   padding: EdgeInsets.all(4.0),
                                   child: Text(
                                     'Short',
-                                    style: TextStyle(fontSize: 16, color: Colors.black),
+                                    style: TextStyle(fontSize: 16, color: Color(0xFF000000)),
                                   ),
                                 ),
                               ),
                               ColoredBox(
-                                color: Colors.white,
+                                color: Color(0xFFFFFFFF),
                                 isAntiAlias: false,
                                 child: Padding(
                                   padding: EdgeInsets.all(4.0),
                                   child: Text(
                                     'Just text ',
-                                    style: TextStyle(fontSize: 14, color: Colors.black),
+                                    style: TextStyle(fontSize: 14, color: Color(0xFF000000)),
                                   ),
                                 ),
                               ),
                               ColoredBox(
-                                color: Colors.white,
+                                color: Color(0xFFFFFFFF),
                                 isAntiAlias: false,
                                 child: Padding(
                                   padding: EdgeInsets.all(4.0),
                                   child: Text(
                                     ' Tall text ',
-                                    style: TextStyle(fontSize: 18, color: Colors.black),
+                                    style: TextStyle(fontSize: 18, color: Color(0xFF000000)),
                                   ),
                                 ),
                               ),
                               ColoredBox(
-                                color: Colors.white,
+                                color: Color(0xFFFFFFFF),
                                 isAntiAlias: false,
                                 child: Padding(
                                   padding: EdgeInsets.all(4.0),
                                   child: Text(
                                     'Medium',
-                                    style: TextStyle(fontSize: 32, color: Colors.black),
+                                    style: TextStyle(fontSize: 32, color: Color(0xFF000000)),
                                   ),
                                 ),
                               ),
@@ -1382,7 +1306,7 @@ void main() {
                               dimension: 50,
                               child: Transform.rotate(
                                 angle: math.pi / 5,
-                                child: const ColoredBox(color: Colors.blue),
+                                child: const ColoredBox(color: Color(0xFF2196F3)),
                               ),
                             ),
                           ),
@@ -1394,7 +1318,10 @@ void main() {
                               dimension: 50,
                               child: Transform.rotate(
                                 angle: math.pi / 5,
-                                child: const ColoredBox(color: Colors.amber, isAntiAlias: false),
+                                child: const ColoredBox(
+                                  color: Color(0xFFFFC107),
+                                  isAntiAlias: false,
+                                ),
                               ),
                             ),
                           ),
@@ -1408,7 +1335,10 @@ void main() {
                                 angle: math.pi / 5,
                                 child: Transform.scale(
                                   scale: 1.2,
-                                  child: const ColoredBox(color: Colors.teal, isAntiAlias: false),
+                                  child: const ColoredBox(
+                                    color: Color(0xFF009688),
+                                    isAntiAlias: false,
+                                  ),
                                 ),
                               ),
                             ),
@@ -1447,9 +1377,8 @@ void main() {
       alignment: Alignment.topLeft,
       child: Directionality(
         textDirection: TextDirection.ltr,
-        child: SizedBox(
-          width: 100,
-          height: 100,
+        child: SizedBox.square(
+          dimension: 100.0,
           child: Listener(
             onPointerDown: (_) {
               logs.add('down1');
@@ -1543,10 +1472,11 @@ void main() {
     testWidgets('does not change semantics when not ignoring', (WidgetTester tester) async {
       final key = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: IgnorePointer(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: IgnorePointer(
             ignoring: false,
-            child: ElevatedButton(key: key, onPressed: () {}, child: const Text('button')),
+            child: TestButton(key: key, onPressed: () {}, child: const Text('button')),
           ),
         ),
       );
@@ -1569,8 +1499,9 @@ void main() {
       final key2 = UniqueKey();
       final key3 = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: TestIgnorePointer(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: TestIgnorePointer(
             child: Semantics(
               key: key1,
               label: '1',
@@ -1641,10 +1572,11 @@ void main() {
       final semantics = SemanticsTester(tester);
       final key = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: IgnorePointer(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: IgnorePointer(
             ignoringSemantics: true,
-            child: ElevatedButton(key: key, onPressed: () {}, child: const Text('button')),
+            child: TestButton(key: key, onPressed: () {}, child: const Text('button')),
           ),
         ),
       );
@@ -1655,9 +1587,10 @@ void main() {
     testWidgets('ignores user interactions', (WidgetTester tester) async {
       final key = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: IgnorePointer(
-            child: ElevatedButton(key: key, onPressed: () {}, child: const Text('button')),
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: IgnorePointer(
+            child: TestButton(key: key, onPressed: () {}, child: const Text('button')),
           ),
         ),
       );
@@ -1681,9 +1614,8 @@ void main() {
       alignment: Alignment.topLeft,
       child: Directionality(
         textDirection: TextDirection.ltr,
-        child: SizedBox(
-          width: 100,
-          height: 100,
+        child: SizedBox.square(
+          dimension: 100.0,
           child: Listener(
             onPointerDown: (_) {
               logs.add('down1');
