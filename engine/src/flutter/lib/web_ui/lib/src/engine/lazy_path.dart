@@ -808,7 +808,7 @@ class LazyPathMetricIterator implements Iterator<ui.PathMetric>, Collectable {
       return;
     }
     _cachedIterator = path.builtPath.getMetricsIterator(forceClosed: forceClosed);
-    for (int i = 0; i < _nextIndex; i++) {
+    for (var i = 0; i < _nextIndex; i++) {
       if (_cachedIterator!.moveNext()) {
         _metrics.add(_cachedIterator!.current);
       } else {

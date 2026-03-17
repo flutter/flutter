@@ -305,7 +305,7 @@ class CkPathBuilder implements DisposablePathBuilder {
       toSkPathOp(operation),
     );
 
-    final CkPathBuilder combined = CkPathBuilder.fromSkPath(combinedSkPath, path1.fillType);
+    final combined = CkPathBuilder.fromSkPath(combinedSkPath, path1.fillType);
     combinedSkPath.delete();
     return combined;
   }
