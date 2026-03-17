@@ -32,6 +32,10 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.41 Changes
 
+### [3.41.5](https://github.com/flutter/flutter/releases/tag/3.41.5)
+- [flutter/182708](https://github.com/flutter/flutter/issues/182708) When using Impeller on any platform, bur artifacts in circles rendering at 45 degree angles.
+- [flutter/183551](https://github.com/flutter/flutter/pull/183551) Configuration change for Github workflow commits.
+
 ### [3.41.4](https://github.com/flutter/flutter/releases/tag/3.41.4)
 - [flutter/182748](https://github.com/flutter/flutter/issues/182748) When building for an iOS simulator with Xcode 26, the build will fail when there is a CocoaPod dependency that does not support arm.
 - [flutter/182361](https://github.com/flutter/flutter/issues/182361) When iOS plugins register to receive lifecycle events during an event, a crash may occur.
