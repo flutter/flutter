@@ -706,12 +706,12 @@ When referencing a parameter, use backticks. However, when referencing a paramet
 ```dart
 // GOOD
 
-  /// Creates a foobar, which allows a baz to quux the bar.
+  /// Creates a foobar.
   ///
-  /// The [bar] argument must not be null.
+  /// The [bar] argument allows the baz to quux.
   ///
   /// The `baz` argument must be greater than zero.
-  Foo({ this.bar, int baz }) : assert(bar != null), assert(baz > 0);
+  Foo({required this.bar, required int baz}) : assert(baz > 0);
 ```
 
 Avoid using terms like "above" or "below" to reference one dartdoc section from another. Dartdoc sections are often shown alone on a Web page, the full context of the class is not present.
@@ -924,7 +924,6 @@ the following pattern:
 TheType get theProperty => _theProperty;
 TheType _theProperty;
 void set theProperty(TheType value) {
-  assert(value != null);
   if (_theProperty == value) {
     return;
   }
