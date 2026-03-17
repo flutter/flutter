@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestScrollPhysics extends ScrollPhysics {
@@ -365,5 +364,4 @@ FlutterError
     );
     await tester.fling(find.text('Index 2'), const Offset(0.0, -300.0), 10000.0);
   });
-
 }

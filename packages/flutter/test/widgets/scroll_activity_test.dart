@@ -361,7 +361,6 @@ void main() {
       areCreateAndDispose,
     );
   });
-
 }
 
 class PageView62209 extends StatefulWidget {
@@ -560,4 +559,3 @@ class _ScrollActivityDelegate extends ScrollActivityDelegate {
   @override
   double setPixels(double pixels) => 0.0;
 }
-
