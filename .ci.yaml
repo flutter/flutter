@@ -4267,6 +4267,14 @@ targets:
     properties:
       task_name: platform_view_macos__start_up
 
+  - name: Mac_benchmark platform_view_macos_impeller__start_up
+    presubmit: false
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    bringup: true
+    properties:
+      task_name: platform_view_macos_impeller__start_up
+
   - name: Mac platform_channel_sample_test_macos
     recipe: devicelab/devicelab_drone
     presubmit: false
