@@ -495,7 +495,6 @@ class MinimumTextContrastEvaluation extends _ContrastEvaluation {
     ];
   }
 
-
   /// Returns the required contrast ratio for the [fontSize] and [bold] setting.
   ///
   /// Defined by http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
@@ -609,8 +608,6 @@ class MinimumNonTextContrastEvaluation extends _ContrastEvaluation {
     );
     return violations;
   }
-
-
 }
 
 class _ContrastReport {
