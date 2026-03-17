@@ -259,7 +259,6 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
     // ID collision (engine may dispose backing stores later with recycled IDs).
     FlFramebuffer* new_framebuffer =
         fl_framebuffer_new(general_format, width, height, self->shareable);
-    g_clear_object(&self->render_sibling);
     g_clear_object(&self->framebuffer);
     self->framebuffer = new_framebuffer;
 
@@ -431,9 +430,8 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
   }
 
   if (fl_framebuffer_get_shareable(self->framebuffer)) {
-    if (self->render_sibling == nullptr) {
-      self->render_sibling = fl_framebuffer_create_sibling(self->framebuffer);
-    }
+    g_clear_object(&self->render_sibling);
+    self->render_sibling = fl_framebuffer_create_sibling(self->framebuffer);
     gdk_cairo_draw_from_gl(cr, window,
                            fl_framebuffer_get_texture_id(self->render_sibling),
                            GL_TEXTURE, scale_factor, 0, 0, width, height);
