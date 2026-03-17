@@ -3931,9 +3931,8 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: SizedBox(
-            width: 600,
-            height: 600,
+          child: SizedBox.square(
+            dimension: 600.0,
             child: MouseRegion(
               onEnter: (_) {
                 logs.add('enter1');
@@ -3945,9 +3944,8 @@ void main() {
               child: Stack(
                 children: <Widget>[
                   Center(
-                    child: SizedBox(
-                      width: 400,
-                      height: 400,
+                    child: SizedBox.square(
+                      dimension: 400,
                       child: MouseRegion(
                         onEnter: (_) {
                           logs.add('enter2');

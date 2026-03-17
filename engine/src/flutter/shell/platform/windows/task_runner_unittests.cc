@@ -121,6 +121,12 @@ class TestTaskRunnerWindow : public TaskRunnerWindow {
   TestTaskRunnerWindow() : TaskRunnerWindow() {}
 };
 
+TEST(TaskRunnerTest, EmptyTaskRunnerReturnsNanoSecondsMax) {
+  TaskRunner runner(MockGetCurrentTime, [](const FlutterTask*) {});
+  auto res = runner.ProcessTasks();
+  EXPECT_EQ(res, std::chrono::nanoseconds::max());
+}
+
 TEST(TaskRunnerTest, TaskRunnerWindowCoalescesWakeUpMessages) {
   class Delegate : public TaskRunnerWindow::Delegate {
    public:

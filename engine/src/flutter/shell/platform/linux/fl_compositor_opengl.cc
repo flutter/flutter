@@ -110,7 +110,7 @@ static gchar* get_program_log(GLuint program) {
 }
 
 static void setup_shader(FlCompositorOpenGL* self) {
-  if (!fl_opengl_manager_make_current(self->opengl_manager)) {
+  if (!fl_opengl_manager_make_platform_current(self->opengl_manager)) {
     g_warning(
         "Failed to setup compositor shaders, unable to make OpenGL context "
         "current");
@@ -169,7 +169,7 @@ static void setup_shader(FlCompositorOpenGL* self) {
 }
 
 static void cleanup_shader(FlCompositorOpenGL* self) {
-  if (!fl_opengl_manager_make_current(self->opengl_manager)) {
+  if (!fl_opengl_manager_make_platform_current(self->opengl_manager)) {
     g_warning(
         "Failed to cleanup compositor shaders, unable to make OpenGL context "
         "current");
@@ -361,9 +361,29 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
   return TRUE;
 }
 
+static void fl_compositor_opengl_get_frame_size(FlCompositor* compositor,
+                                                size_t* width,
+                                                size_t* height) {
+  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
+
+  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
+
+  if (width != nullptr) {
+    *width = self->framebuffer != nullptr
+                 ? fl_framebuffer_get_width(self->framebuffer)
+                 : 0;
+  }
+  if (height != nullptr) {
+    *height = self->framebuffer != nullptr
+                  ? fl_framebuffer_get_height(self->framebuffer)
+                  : 0;
+  }
+}
+
 static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
                                             cairo_t* cr,
-                                            GdkWindow* window) {
+                                            GdkWindow* window,
+                                            gboolean wait_for_frame) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
 
   g_mutex_lock(&self->frame_mutex);
@@ -374,12 +394,31 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
 
   // If frame not ready, then wait for it.
   gint scale_factor = gdk_window_get_scale_factor(window);
-  size_t width = gdk_window_get_width(window) * scale_factor;
-  size_t height = gdk_window_get_height(window) * scale_factor;
-  while (fl_framebuffer_get_width(self->framebuffer) != width ||
-         fl_framebuffer_get_height(self->framebuffer) != height) {
+  size_t width, height;
+  gint64 expiry_time =
+      g_get_monotonic_time() + kCompositorRenderTimeoutMicroseconds;
+  while (true) {
+    width = gdk_window_get_width(window) * scale_factor;
+    height = gdk_window_get_height(window) * scale_factor;
+    if (!wait_for_frame) {
+      break;
+    }
+
+    size_t framebuffer_width = fl_framebuffer_get_width(self->framebuffer);
+    size_t framebuffer_height = fl_framebuffer_get_height(self->framebuffer);
+    if (framebuffer_width == width && framebuffer_height == height) {
+      break;
+    }
+
+    if (g_get_monotonic_time() > expiry_time) {
+      g_warning(
+          "Timed out waiting for OpenGL frame of size %zdx%zd (have %zdx%zd)",
+          width, height, framebuffer_width, framebuffer_height);
+      break;
+    }
+
     g_mutex_unlock(&self->frame_mutex);
-    fl_task_runner_wait(self->task_runner);
+    fl_task_runner_wait(self->task_runner, expiry_time);
     g_mutex_lock(&self->frame_mutex);
   }
 
@@ -430,6 +469,8 @@ static void fl_compositor_opengl_dispose(GObject* object) {
 static void fl_compositor_opengl_class_init(FlCompositorOpenGLClass* klass) {
   FL_COMPOSITOR_CLASS(klass)->present_layers =
       fl_compositor_opengl_present_layers;
+  FL_COMPOSITOR_CLASS(klass)->get_frame_size =
+      fl_compositor_opengl_get_frame_size;
   FL_COMPOSITOR_CLASS(klass)->render = fl_compositor_opengl_render;
 
   G_OBJECT_CLASS(klass)->dispose = fl_compositor_opengl_dispose;
