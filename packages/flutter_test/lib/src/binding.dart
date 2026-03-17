@@ -224,6 +224,9 @@ class _TestFlutterView implements FlutterView {
   ui.ViewPadding get viewPadding => ui.ViewPadding.zero;
 
   @override
+  bool get keyboardVisible => false;
+
+  @override
   ui.DisplayCornerRadii? get displayCornerRadii => null;
 
   @override

@@ -260,6 +260,13 @@ class EngineFlutterView implements ui.FlutterView {
   ViewPadding get viewInsets => _viewInsets;
   ViewPadding _viewInsets = ui.ViewPadding.zero as ViewPadding;
 
+  void debugSetViewInsets(ViewPadding insets) {
+    assert(() {
+      _viewInsets = insets;
+      return true;
+    }());
+  }
+
   @override
   ViewPadding get viewPadding => _viewConfiguration.viewPadding;
 
@@ -268,6 +275,9 @@ class EngineFlutterView implements ui.FlutterView {
 
   @override
   ViewPadding get padding => _viewConfiguration.padding;
+
+  @override
+  bool get keyboardVisible => _viewInsets.bottom > 0;
 
   @override
   ui.GestureSettings get gestureSettings => _viewConfiguration.gestureSettings;

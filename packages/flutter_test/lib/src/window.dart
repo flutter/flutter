@@ -1241,6 +1241,31 @@ class TestFlutterView implements FlutterView {
     platformDispatcher.onMetricsChanged?.call();
   }
 
+  /// The keyboard visibility to use for this test.
+  ///
+  /// Defaults to the value provided by [FlutterView.keyboardVisible]. This
+  /// can only be set in a test environment to emulate different view
+  /// configurations. A standard [FlutterView] is not mutable from the framework.
+  ///
+  /// See also:
+  ///
+  ///   * [FlutterView.keyboardVisible] for the standard implementation
+  ///   * [resetKeyboardVisible] to reset this value specifically
+  ///   * [reset] to reset all test values for this view
+  @override
+  bool get keyboardVisible => _keyboardVisible ?? _view.keyboardVisible;
+  bool? _keyboardVisible;
+  set keyboardVisible(bool value) {
+    _keyboardVisible = value;
+    platformDispatcher.onMetricsChanged?.call();
+  }
+
+  /// Resets [keyboardVisible] to the default value for this view.
+  void resetKeyboardVisible() {
+    _keyboardVisible = null;
+    platformDispatcher.onMetricsChanged?.call();
+  }
+
   /// The gesture settings to use for this test.
   ///
   /// Defaults to the value provided by [FlutterView.gestureSettings]. This
@@ -1287,6 +1312,7 @@ class TestFlutterView implements FlutterView {
   ///   * [resetSystemGestureInsets] to reset [systemGestureInsets] specifically
   ///   * [resetViewInsets] to reset [viewInsets] specifically
   ///   * [resetViewPadding] to reset [viewPadding] specifically
+  ///   * [resetKeyboardVisible] to reset [keyboardVisible] specifically
   ///   * [resetGestureSettings] to reset [gestureSettings] specifically
   void reset() {
     resetDevicePixelRatio();
@@ -1297,6 +1323,7 @@ class TestFlutterView implements FlutterView {
     resetSystemGestureInsets();
     resetViewInsets();
     resetViewPadding();
+    resetKeyboardVisible();
     resetGestureSettings();
   }
 
@@ -1725,6 +1752,37 @@ class TestWindow implements SingletonFlutterWindow {
   }
 
   @Deprecated(
+    'Use WidgetTester.view.keyboardVisible instead. '
+    'Deprecated to prepare for the upcoming multi-window support. '
+    'This feature was deprecated after v3.9.0-0.1.pre.',
+  )
+  @override
+  bool get keyboardVisible => _view.keyboardVisible;
+
+  /// Hides the real keyboardVisible and reports the given
+  /// [keyboardVisibleTestValue] instead.
+  @Deprecated(
+    'Use WidgetTester.view.keyboardVisible instead. '
+    'Deprecated to prepare for the upcoming multi-window support. '
+    'This feature was deprecated after v3.9.0-0.1.pre.',
+  )
+  // ignore: avoid_setters_without_getters
+  set keyboardVisibleTestValue(bool value) {
+    _view.keyboardVisible = value;
+  }
+
+  /// Deletes any existing keyboardVisible and
+  /// returns to using the real keyboardVisible.
+  @Deprecated(
+    'Use WidgetTester.view.resetKeyboardVisible() instead. '
+    'Deprecated to prepare for the upcoming multi-window support. '
+    'This feature was deprecated after v3.9.0-0.1.pre.',
+  )
+  void clearKeyboardVisibleTestValue() {
+    _view.resetKeyboardVisible();
+  }
+
+  @Deprecated(
     'Use WidgetTester.view.gestureSettings instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
     'This feature was deprecated after v3.9.0-0.1.pre.',
@@ -2148,6 +2206,7 @@ class TestWindow implements SingletonFlutterWindow {
   void clearAllTestValues() {
     clearDevicePixelRatioTestValue();
     clearPaddingTestValue();
+    clearKeyboardVisibleTestValue();
     clearGestureSettingsTestValue();
     clearDisplayFeaturesTestValue();
     clearPhysicalSizeTestValue();

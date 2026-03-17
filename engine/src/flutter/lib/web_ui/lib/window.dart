@@ -21,6 +21,7 @@ abstract class FlutterView {
   ViewPadding get viewPadding;
   ViewPadding get systemGestureInsets;
   ViewPadding get padding;
+  bool get keyboardVisible;
   GestureSettings get gestureSettings;
   List<DisplayFeature> get displayFeatures;
   Display get display;
