@@ -664,6 +664,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   List<FocusNode>? _ancestors;
   List<FocusNode>? _descendants;
   bool _hasKeyboardToken = false;
+  bool _hasRouteRegainedFocusToken = false;
 
   /// Returns the parent node for this object.
   ///
@@ -991,6 +992,32 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     return true;
   }
 
+  /// Removes the route regained-focus token from this focus node if it has one.
+  ///
+  /// This mechanism helps distinguish between an input control regaining focus
+  /// because the route it is in became the top-most route again, and gaining
+  /// focus as a result of a direct focus request, such as a tap on the input
+  /// control.
+  ///
+  /// When a route in the navigation history becomes the top-most route again
+  /// (for example, when the route above it is popped or removed) and focus is
+  /// returned to the node that was focused when the route was covered (via
+  /// [FocusScopeNode.setFirstFocus] with `isRouteRegainingFocus` set to true),
+  /// the node receives this token. Later, when the focus node becomes focused,
+  /// the widget that manages the [TextInputConnection] can consume this token
+  /// to restore the soft keyboard's previous visibility instead of
+  /// unconditionally showing the keyboard, and to avoid bringing the input
+  /// control into view.
+  ///
+  /// Returns true if this method successfully consumes the token.
+  bool consumeRouteRegainedFocusToken() {
+    if (!_hasRouteRegainedFocusToken) {
+      return false;
+    }
+    _hasRouteRegainedFocusToken = false;
+    return true;
+  }
+
   // Marks the node as being the next to be focused, meaning that it will become
   // the primary focus and notify listeners of a focus change the next time
   // focus is resolved by the manager. If something else calls _markNextFocus
@@ -1174,7 +1201,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   }
 
   // This is overridden in FocusScopeNode.
-  void _doRequestFocus({required bool findFirstFocus}) {
+  void _doRequestFocus({required bool findFirstFocus, bool isRouteRegainingFocus = false}) {
     if (!canRequestFocus) {
       assert(
         _focusDebug(() => 'Node NOT requesting focus because canRequestFocus is false: $this'),
@@ -1194,6 +1221,15 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       return;
     }
     _hasKeyboardToken = true;
+    // While this node is already marked as the next focus, a second focus
+    // request with isRouteRegainingFocus set to false must not take away a
+    // token that an earlier request has just granted: for example, an
+    // outgoing route's disabled focus scope releases focus to its previously
+    // focused child in the same build in which the route below has already
+    // requested focus as the route regaining it.
+    if (isRouteRegainingFocus || _manager?._markedForFocus != this) {
+      _hasRouteRegainedFocusToken = isRouteRegainingFocus;
+    }
     assert(_focusDebug(() => 'Node requesting focus: $this'));
     _markNextFocus(this);
   }
@@ -1449,7 +1485,13 @@ class FocusScopeNode extends FocusNode {
   /// If the given [scope] is not yet a part of the focus tree, then add it to
   /// the tree as a child of this scope. If it is already part of the focus
   /// tree, the given scope must be a descendant of this scope.
-  void setFirstFocus(FocusScopeNode scope) {
+  ///
+  /// If [isRouteRegainingFocus] is true, the focus change happens because a
+  /// route that was already in the navigation history became the top-most
+  /// route again and is returning focus to its previously focused node, rather
+  /// than because of a direct focus request. The node that regains focus this
+  /// way receives a token; see [FocusNode.consumeRouteRegainedFocusToken].
+  void setFirstFocus(FocusScopeNode scope, {bool isRouteRegainingFocus = false}) {
     assert(scope != this, 'Unexpected self-reference in setFirstFocus.');
     assert(
       _focusDebug(() => 'Setting scope as first focus in $this to node:', () => <Object>[scope]),
@@ -1462,7 +1504,7 @@ class FocusScopeNode extends FocusNode {
       '$FocusScopeNode $scope must be a child of $this to set it as first focus.',
     );
     if (hasFocus) {
-      scope._doRequestFocus(findFirstFocus: true);
+      scope._doRequestFocus(findFirstFocus: true, isRouteRegainingFocus: isRouteRegainingFocus);
     } else {
       scope._setAsFocusedChildForScope();
     }
@@ -1500,7 +1542,7 @@ class FocusScopeNode extends FocusNode {
   }
 
   @override
-  void _doRequestFocus({required bool findFirstFocus}) {
+  void _doRequestFocus({required bool findFirstFocus, bool isRouteRegainingFocus = false}) {
     // It is possible that a previously focused child is no longer focusable, so
     // clean out the list if so.
     while (_focusedChildren.isNotEmpty &&
@@ -1520,7 +1562,7 @@ class FocusScopeNode extends FocusNode {
       return;
     }
 
-    focusedChild._doRequestFocus(findFirstFocus: true);
+    focusedChild._doRequestFocus(findFirstFocus: true, isRouteRegainingFocus: isRouteRegainingFocus);
   }
 
   @override
