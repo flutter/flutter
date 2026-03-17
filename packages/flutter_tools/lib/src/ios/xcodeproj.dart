@@ -549,11 +549,13 @@ class XcodeProjectInfo {
       return null;
     }
     final String expectedConfiguration = expectedBuildConfigurationFor(buildInfo, scheme);
+    // Check for an exact match, e.g. "Debug-MyFlavor" if using a flavor or "Debug" if not.
     final String? exactMatch = _existingBuildConfigurationForBuildMode(expectedConfiguration);
     if (exactMatch != null) {
       return exactMatch;
     }
     final String baseConfiguration = _baseConfigurationFor(buildInfo);
+    // Check for a unique match for build mode and flavor, e.g. "debug myflavor".
     final String? buildConfigurationForBuildModeAndFlavor = _uniqueMatch(buildConfigurations, (
       String candidate,
     ) {
@@ -561,6 +563,7 @@ class XcodeProjectInfo {
       return candidate.contains(baseConfiguration.toLowerCase()) &&
           candidate.contains(scheme.toLowerCase());
     });
+    // Fall back to the base configuration if no match or more than one match is found.
     return buildConfigurationForBuildModeAndFlavor ??
         _existingBuildConfigurationForBuildMode(baseConfiguration);
   }
