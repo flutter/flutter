@@ -27,8 +27,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
         run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "<>"
+          git config user.name "flutteractionsbot"
+          git config user.email "<flutter-actions-bot@google.com>"
           git remote add upstream https://github.com/flutter/flutter.git
           git fetch upstream ${{ github.ref_name }}
 
@@ -87,7 +87,7 @@ jobs:
           # Check if the root DEPS file has changed
           if git diff --exit-code DEPS; then
             echo "changed=false" >> $GITHUB_OUTPUT
-            echo "### No-op Success" >> $GITHUB_STEP_SUMMARY
+            echo "## ✅ Dart version already up to date" >> $GITHUB_STEP_SUMMARY
             echo "The DEPS file is already up to date with Dart hash \`${{ inputs.dart_hash }}\`." >> $GITHUB_STEP_SUMMARY
           else
             echo "changed=true" >> $GITHUB_OUTPUT
@@ -102,9 +102,15 @@ jobs:
           git commit -m "Update flutter DEPS to dart ${{ inputs.dart_hash }}"
           git push origin "$BRANCH_NAME" --force
 
-          gh pr create \
+          PR_URL=$(gh pr create \
             --title "[${{ github.ref_name }}] Update Flutter DEPS to Dart ${{ inputs.dart_hash }}" \
             --body "This PR updates the transitive dependencies in the engine \`DEPS\` file based on Dart SDK hash \`${{ inputs.dart_hash }}\`." \
             --repo flutter/flutter \
             --base ${{ github.ref_name }} \
-            --head flutteractionsbot:$BRANCH_NAME
+            --head flutteractionsbot:$BRANCH_NAME)
+
+          # Nice big PR Success Summary
+          echo "## 🚀 PR Created Successfully" >> $GITHUB_STEP_SUMMARY
+          echo "Updated dart dependencies to \`${{ inputs.dart_hash }}\`." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **View Pull Request:** $PR_URL" >> $GITHUB_STEP_SUMMARY

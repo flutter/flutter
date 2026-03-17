@@ -80,7 +80,7 @@ class DartBuild extends Target {
       outputDepfile.parent.createSync(recursive: true);
     }
     environment.depFileService.writeToFile(depfile, outputDepfile);
-    if (!await outputDepfile.exists()) {
+    if (!outputDepfile.existsSync()) {
       throw StateError("${outputDepfile.path} doesn't exist.");
     }
   }
@@ -167,14 +167,14 @@ class InstallCodeAssets extends Target {
       nativeAssetsFileUri: nativeAssetsFileUri,
       targetUri: targetUri,
     );
-    assert(await fileSystem.file(nativeAssetsFileUri).exists());
+    assert(fileSystem.file(nativeAssetsFileUri).existsSync());
 
     final depfile = Depfile(<File>[
       for (final Uri file in dartHookResult.filesToBeBundled) fileSystem.file(file),
     ], installedFiles);
     final File outputDepfile = environment.buildDir.childFile(depFilename);
     environment.depFileService.writeToFile(depfile, outputDepfile);
-    if (!await outputDepfile.exists()) {
+    if (!outputDepfile.existsSync()) {
       throwToolExit("${outputDepfile.path} doesn't exist.");
     }
   }

@@ -59,6 +59,7 @@ void PlaygroundTest::TearDown() {
 ScopedObject<Context> PlaygroundTest::CreateContext() const {
   switch (GetBackend()) {
     case PlaygroundBackend::kMetal:
+    case PlaygroundBackend::kMetalSDF:
       return Adopt<Context>(
           ImpellerContextCreateMetalNew(ImpellerGetVersion()));
     case PlaygroundBackend::kOpenGLES: {
@@ -105,6 +106,7 @@ static ScopedObject<Surface> CreateSharedSurface(
   switch (backend) {
 #if IMPELLER_ENABLE_METAL
     case PlaygroundBackend::kMetal:
+    case PlaygroundBackend::kMetalSDF:
       return Adopt<Surface>(new SurfaceMTL(context, std::move(shared_surface)));
 #endif
 
@@ -149,6 +151,7 @@ static ScopedObject<Context> CreateSharedContext(
   switch (backend) {
 #if IMPELLER_ENABLE_METAL
     case PlaygroundBackend::kMetal:
+    case PlaygroundBackend::kMetalSDF:
       return ContextMTL::Create(shared_context);
 #endif
 #if IMPELLER_ENABLE_OPENGLES
