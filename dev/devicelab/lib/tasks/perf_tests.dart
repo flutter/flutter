@@ -283,8 +283,11 @@ TaskFunction createFlutterGalleryStartupTest({
   ).run;
 }
 
-TaskFunction createComplexLayoutStartupTest() {
-  return StartupTest('${flutterDirectory.path}/dev/benchmarks/complex_layout').run;
+TaskFunction createComplexLayoutStartupTest({bool? enableImpeller}) {
+  return StartupTest(
+    '${flutterDirectory.path}/dev/benchmarks/complex_layout',
+    enableImpeller: enableImpeller,
+  ).run;
 }
 
 TaskFunction createFlutterGalleryCompileTest() {
@@ -328,8 +331,12 @@ TaskFunction createFlutterViewStartupTest() {
   return StartupTest('${flutterDirectory.path}/examples/flutter_view', reportMetrics: false).run;
 }
 
-TaskFunction createPlatformViewStartupTest() {
-  return StartupTest('${flutterDirectory.path}/examples/platform_view', reportMetrics: false).run;
+TaskFunction createPlatformViewStartupTest({bool? enableImpeller}) {
+  return StartupTest(
+    '${flutterDirectory.path}/examples/platform_view',
+    reportMetrics: false,
+    enableImpeller: enableImpeller,
+  ).run;
 }
 
 TaskFunction createBasicMaterialCompileTest() {
@@ -937,12 +944,14 @@ class StartupTest {
     this.runEnvironment,
     this.enableLazyShaderMode = false,
     this.enableHcpp = false,
+    this.enableImpeller,
   });
 
   final String testDirectory;
   final bool reportMetrics;
   final bool enableLazyShaderMode;
   final bool enableHcpp;
+  final bool? enableImpeller;
   final String target;
   final Map<String, String>? runEnvironment;
 
@@ -1062,6 +1071,8 @@ class StartupTest {
               '-d',
               device.deviceId,
               if (applicationBinaryPath != null) '--use-application-binary=$applicationBinaryPath',
+              if (enableImpeller != null && enableImpeller!) '--enable-impeller',
+              if (enableImpeller != null && !enableImpeller!) '--no-enable-impeller',
             ],
             environment: runEnvironment,
             canFail: true,
