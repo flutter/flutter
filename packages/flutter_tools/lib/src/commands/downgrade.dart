@@ -78,6 +78,20 @@ class DowngradeCommand extends FlutterCommand {
   @override
   final String category = FlutterCommandCategory.sdk;
 
+  @protected
+  @mustCallSuper
+  @override
+  Future<void> validateCommand() async {
+    await super.validateCommand();
+    if (argResults!.rest.isNotEmpty) {
+      throwToolExit(
+        'The "downgrade" command does not take any positional arguments.\n'
+        'Unexpected argument(s): ${argResults!.rest.join(', ')}\n'
+        'Run "flutter downgrade --help" for more information.',
+      );
+    }
+  }
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     // Commands do not necessarily have access to the correct zone injected

@@ -40,6 +40,24 @@ void main() {
     bufferLogger = BufferLogger.test(terminal: terminal);
   });
 
+  testUsingContext('downgrade command fails with positional arguments', () async {
+    final command = DowngradeCommand(
+      persistentToolState: PersistentToolState.test(
+        directory: fileSystem.currentDirectory,
+        logger: bufferLogger,
+      ),
+      terminal: terminal,
+      stdio: stdio,
+      flutterVersion: FakeFlutterVersion(),
+      logger: bufferLogger,
+    );
+
+    expect(
+      () => createTestCommandRunner(command).run(const ['downgrade', 'unexpected-arg']),
+      throwsToolExit(message: 'The "downgrade" command does not take any positional arguments.'),
+    );
+  });
+
   testUsingContext('Downgrade exits on unknown channel', () async {
     final fakeFlutterVersion = FakeFlutterVersion(branch: 'WestSideStory'); // an unknown branch
     fileSystem.currentDirectory
