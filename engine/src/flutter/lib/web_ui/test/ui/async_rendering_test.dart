@@ -55,29 +55,23 @@ class FakeDisplayCanvas extends DisplayCanvas {
   void dispose() {}
 }
 
-// Sends a platform message to create a Platform View with the given id and viewType.
-Future<void> createPlatformView(int id, String viewType) {
+Future<void> _sendPlatformViewMessage(String method, dynamic args) {
   final completer = Completer<void>();
   const MethodCodec codec = StandardMethodCodec();
   ui.PlatformDispatcher.instance.sendPlatformMessage(
     'flutter/platform_views',
-    codec.encodeMethodCall(MethodCall('create', <String, dynamic>{'id': id, 'viewType': viewType})),
+    codec.encodeMethodCall(MethodCall(method, args)),
     (dynamic _) => completer.complete(),
   );
   return completer.future;
 }
 
+// Sends a platform message to create a Platform View with the given id and viewType.
+Future<void> createPlatformView(int id, String viewType) =>
+    _sendPlatformViewMessage('create', <String, dynamic>{'id': id, 'viewType': viewType});
+
 // Sends a platform message to dispose the Platform View with the given id.
-Future<void> disposePlatformView(int id) {
-  final completer = Completer<void>();
-  const MethodCodec codec = StandardMethodCodec();
-  ui.PlatformDispatcher.instance.sendPlatformMessage(
-    'flutter/platform_views',
-    codec.encodeMethodCall(MethodCall('dispose', id)),
-    (dynamic _) => completer.complete(),
-  );
-  return completer.future;
-}
+Future<void> disposePlatformView(int id) => _sendPlatformViewMessage('dispose', id);
 
 void testMain() {
   setUpUnitTests(withImplicitView: true);
