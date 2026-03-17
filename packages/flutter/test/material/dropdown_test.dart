@@ -4886,6 +4886,7 @@ void main() {
   testWidgets('DropdownButton selectedItemBuilder length must match items length', (
     WidgetTester tester,
   ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/92773
     final List<DropdownMenuItem<String>> items = <String>['a', 'b']
         .map<DropdownMenuItem<String>>(
           (String value) => DropdownMenuItem<String>(value: value, child: Text(value)),
