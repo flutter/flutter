@@ -268,7 +268,7 @@ abstract class RegularWindowController extends BaseWindowController {
   /// The current title of the window.
   ///
   /// The title shown in the window is controlled by the platform and may differ
-  /// from the given `title`.
+  /// from the `title` set by the constructor or `setTitle`.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
@@ -559,7 +559,7 @@ abstract class DialogWindowController extends BaseWindowController {
   /// The current title of the window.
   ///
   /// The title shown in the window is controlled by the platform and may differ
-  /// from the given `title`.
+  /// from the `title` set by the constructor or `setTitle`.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
@@ -1088,7 +1088,7 @@ abstract class SatelliteWindowController extends BaseWindowController {
   /// The current title of the window.
   ///
   /// The title shown in the window is controlled by the platform and may differ
-  /// from the given `title`.
+  /// from the `title` set by the constructor or `setTitle`.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
