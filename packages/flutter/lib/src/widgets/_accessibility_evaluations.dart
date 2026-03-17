@@ -305,6 +305,17 @@ abstract class _ContrastEvaluation extends AccessibilityEvaluation {
     ByteData byteData,
     RenderView renderView,
   );
+
+  /// Returns if a rectangle of node is off the screen.
+  ///
+  /// Allows node to be off screen partially before culling the node.
+  bool _isNodeOffScreen(Rect paintBounds, ui.FlutterView window) {
+    final Size windowLogicalSize = window.physicalSize / window.devicePixelRatio;
+    return paintBounds.top < -50.0 ||
+        paintBounds.left < -50.0 ||
+        paintBounds.bottom > windowLogicalSize.height + 50.0 ||
+        paintBounds.right > windowLogicalSize.width + 50.0;
+  }
 }
 
 /// {@macro flutter.widgets.accessibility_evaluations.internal}
@@ -484,16 +495,6 @@ class MinimumTextContrastEvaluation extends _ContrastEvaluation {
     ];
   }
 
-  /// Returns if a rectangle of node is off the screen.
-  ///
-  /// Allows node to be off screen partially before culling the node.
-  bool _isNodeOffScreen(Rect paintBounds, ui.FlutterView window) {
-    final Size windowPhysicalSize = window.physicalSize * window.devicePixelRatio;
-    return paintBounds.top < -50.0 ||
-        paintBounds.left < -50.0 ||
-        paintBounds.bottom > windowPhysicalSize.height + 50.0 ||
-        paintBounds.right > windowPhysicalSize.width + 50.0;
-  }
 
   /// Returns the required contrast ratio for the [fontSize] and [bold] setting.
   ///
@@ -609,13 +610,7 @@ class MinimumNonTextContrastEvaluation extends _ContrastEvaluation {
     return violations;
   }
 
-  bool _isNodeOffScreen(Rect paintBounds, ui.FlutterView window) {
-    final Size windowLogicalSize = window.physicalSize / window.devicePixelRatio;
-    return paintBounds.top < -50.0 ||
-        paintBounds.left < -50.0 ||
-        paintBounds.bottom > windowLogicalSize.height + 50.0 ||
-        paintBounds.right > windowLogicalSize.width + 50.0;
-  }
+
 }
 
 class _ContrastReport {
