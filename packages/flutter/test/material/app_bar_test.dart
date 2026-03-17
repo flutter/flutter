@@ -3783,10 +3783,7 @@ void main() {
       );
 
       Material getAppBarMaterial() => tester.widget<Material>(
-        find.descendant(
-          of: find.byType(AppBar),
-          matching: find.byType(Material),
-        ),
+        find.descendant(of: find.byType(AppBar), matching: find.byType(Material)),
       );
 
       await tester.pumpWidget(buildScaffold(body: scrollableBody));
@@ -3795,11 +3792,7 @@ void main() {
       expect(getAppBarMaterial().elevation, 0);
 
       // Scroll down so AppBar is in scrolled-under state.
-      await tester.fling(
-        find.text('Item 2'),
-        const Offset(0.0, -600.0),
-        2000.0,
-      );
+      await tester.fling(find.text('Item 2'), const Offset(0.0, -600.0), 2000.0);
       await tester.pumpAndSettle();
       expect(getAppBarMaterial().elevation, scrolledUnderElevation);
 
@@ -3823,10 +3816,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            appBar: AppBar(
-              title: const Text('Title'),
-              scrolledUnderElevation: 8.0,
-            ),
+            appBar: AppBar(title: const Text('Title'), scrolledUnderElevation: 8.0),
             body: ListView.builder(
               itemCount: 50,
               itemBuilder: (BuildContext context, int index) =>
@@ -3837,23 +3827,78 @@ void main() {
       );
 
       Material getAppBarMaterial() => tester.widget<Material>(
-        find.descendant(
-          of: find.byType(AppBar),
-          matching: find.byType(Material),
-        ),
+        find.descendant(of: find.byType(AppBar), matching: find.byType(Material)),
       );
 
       expect(getAppBarMaterial().elevation, 0);
 
-      await tester.fling(
-        find.text('Item 2'),
-        const Offset(0.0, -600.0),
-        2000.0,
-      );
+      await tester.fling(find.text('Item 2'), const Offset(0.0, -600.0), 2000.0);
       await tester.pumpAndSettle();
 
       // Scrolled-under elevation should remain while body is unchanged.
       expect(getAppBarMaterial().elevation, 8.0);
+    });
+
+    testWidgets('scrolledUnder updates to true when new body is already scrolled', (
+      WidgetTester tester,
+    ) async {
+      const scrolledUnderElevation = 8.0;
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+
+      Widget buildScaffold({required Widget body}) {
+        return MaterialApp(
+          home: Scaffold(
+            appBar: AppBar(
+              title: const Text('Title'),
+              scrolledUnderElevation: scrolledUnderElevation,
+            ),
+            body: body,
+          ),
+        );
+      }
+
+      final scrollableBody = ListView.builder(
+        key: const ValueKey<int>(0),
+        itemCount: 50,
+        itemBuilder: (BuildContext context, int index) =>
+            SizedBox(height: 50, child: Text('Item $index')),
+      );
+
+      final preScrolledBody = ListView.builder(
+        key: const ValueKey<int>(1),
+        controller: controller,
+        itemCount: 50,
+        itemBuilder: (BuildContext context, int index) =>
+            SizedBox(height: 50, child: Text('New item $index')),
+      );
+
+      Material getAppBarMaterial() => tester.widget<Material>(
+        find.descendant(of: find.byType(AppBar), matching: find.byType(Material)),
+      );
+
+      // Start with a scrollable body and scroll past the app bar.
+      await tester.pumpWidget(buildScaffold(body: scrollableBody));
+      await tester.fling(find.text('Item 2'), const Offset(0.0, -600.0), 2000.0);
+      await tester.pumpAndSettle();
+      expect(getAppBarMaterial().elevation, scrolledUnderElevation);
+
+      // Swap to a new body. _scrolledUnder resets to false first.
+      await tester.pumpWidget(buildScaffold(body: preScrolledBody));
+      await tester.pumpAndSettle();
+
+      // Jump to a non-zero scroll position in the new body immediately,
+      // dispatching a ScrollUpdateNotification that sets _scrolledUnder = true.
+      controller.jumpTo(300.0);
+      await tester.pump();
+
+      expect(
+        getAppBarMaterial().elevation,
+        scrolledUnderElevation,
+        reason:
+            'AppBar should show scrolledUnderElevation because the new body '
+            'is at a non-zero scroll position.',
+      );
     });
   });
 }
