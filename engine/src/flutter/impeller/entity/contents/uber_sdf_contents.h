@@ -5,6 +5,7 @@
 
 #include "flutter/impeller/entity/contents/color_source_contents.h"
 #include "flutter/impeller/entity/contents/contents.h"
+#include "impeller/entity/geometry/geometry.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/rect.h"
 
@@ -17,14 +18,17 @@ class UberSDFContents : public ColorSourceContents {
     kRect,
   };
 
-  static std::unique_ptr<UberSDFContents> Make(Type type,
-                                               Rect rect,
-                                               Color color,
-                                               Scalar stroke_width,
-                                               bool stroked);
+  static std::unique_ptr<UberSDFContents> Make(
+      Type type,
+      Rect rect,
+      std::unique_ptr<Geometry> geometry,
+      Color color,
+      Scalar stroke_width,
+      bool stroked);
 
   UberSDFContents(Type type,
                   Rect rect,
+                  std::unique_ptr<Geometry> geometry,
                   Color color,
                   Scalar stroke_width,
                   bool stroked);
@@ -40,6 +44,7 @@ class UberSDFContents : public ColorSourceContents {
  private:
   Type type_ = Type::kCircle;
   Rect rect_;
+  std::unique_ptr<Geometry> geometry_;
   Color color_;
   Scalar stroke_width_ = 0.0f;
   bool stroked_ = false;
