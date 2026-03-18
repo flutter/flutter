@@ -372,16 +372,10 @@ class PlatformViewEmbedder {
     for (var i = 0; i < _compositionOrder.length; i++) {
       final int viewId = _compositionOrder[i];
 
-      var isViewInvalid = false;
-      assert(() {
-        isViewInvalid = !PlatformViewManager.instance.knowsViewId(viewId);
-        if (isViewInvalid) {
-          debugInvalidViewIds ??= <int>[];
-          debugInvalidViewIds!.add(viewId);
-        }
-        return true;
-      }());
+      final bool isViewInvalid = !PlatformViewManager.instance.knowsViewId(viewId);
       if (isViewInvalid) {
+        debugInvalidViewIds ??= <int>[];
+        debugInvalidViewIds.add(viewId);
         continue;
       }
 
@@ -393,11 +387,12 @@ class PlatformViewEmbedder {
 
     unusedViews.forEach(disposeView);
 
-    assert(
-      debugInvalidViewIds == null || debugInvalidViewIds!.isEmpty,
-      'Cannot render platform views: ${debugInvalidViewIds!.join(', ')}. '
-      'These views have not been created, or they have been deleted.',
-    );
+    if (debugInvalidViewIds != null && debugInvalidViewIds.isNotEmpty) {
+      printWarning(
+        'Cannot render platform views: ${debugInvalidViewIds.join(', ')}. '
+        'These views have not been created, or they have been deleted.',
+      );
+    }
   }
 
   void disposeView(int viewId) {
