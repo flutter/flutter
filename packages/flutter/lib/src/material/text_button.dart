@@ -315,7 +315,7 @@ class TextButton extends ButtonStyleButton {
   /// * `fixedSize` - null
   /// * `maximumSize` - Size.infinite
   /// * `side` - null
-  /// * `shape` - RoundedRectangleBorder(borderRadius: const BorderRadius.all(Radius.circular(4)))
+  /// * `shape` - RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
   /// * `mouseCursor` - WidgetStateMouseCursor.adaptiveClickable
   /// * `visualDensity` - theme.visualDensity
   /// * `tapTargetSize` - theme.materialTapTargetSize

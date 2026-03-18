@@ -158,7 +158,7 @@ class CupertinoContextMenu extends StatefulWidget {
   ///   builder:(BuildContext context, Animation<double> animation) {
   ///     final Animation<BorderRadius?> borderRadiusAnimation = BorderRadiusTween(
   ///       begin: BorderRadius.zero,
-  ///       end: const BorderRadius.all(Radius.circular(CupertinoContextMenu.kOpenBorderRadius)),
+  ///       end: BorderRadius.circular(CupertinoContextMenu.kOpenBorderRadius),
   ///     ).animate(
   ///       CurvedAnimation(
   ///         parent: animation,
@@ -267,7 +267,7 @@ class CupertinoContextMenu extends StatefulWidget {
   ///   builder:(BuildContext context, Animation<double> animation) {
   ///     final Animation<BorderRadius?> borderRadiusAnimation = BorderRadiusTween(
   ///       begin: BorderRadius.zero,
-  ///       end: const BorderRadius.all(Radius.circular(CupertinoContextMenu.kOpenBorderRadius)),
+  ///       end: BorderRadius.circular(CupertinoContextMenu.kOpenBorderRadius),
   ///     ).animate(
   ///       CurvedAnimation(
   ///         parent: animation,

@@ -46,7 +46,7 @@ class CupertinoFocusHalo extends StatefulWidget {
   ///
   /// ```dart
   /// CupertinoFocusHalo.withRRect(
-  ///   borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+  ///   borderRadius: BorderRadius.circular(10.0),
   ///   child: Column(
   ///     children: <Widget>[
   ///       CupertinoButton(child: const Text('Child 1'), onPressed: () {}),
@@ -69,7 +69,7 @@ class CupertinoFocusHalo extends StatefulWidget {
   ///
   /// ```dart
   /// CupertinoFocusHalo.withRoundedSuperellipse(
-  ///   borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+  ///   borderRadius: BorderRadius.circular(10.0),
   ///   child: Column(
   ///     children: <Widget>[
   ///       CupertinoButton(child: const Text('Child 1'), onPressed: () {}),
