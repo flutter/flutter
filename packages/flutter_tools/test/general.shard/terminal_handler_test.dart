@@ -863,6 +863,25 @@ void main() {
       expect(runner.calledRestart, false);
     });
 
+    testWithoutContext(
+      'r - reloadIsRestart when canHotReload is false (web --no-hot case)',
+      () async {
+        final TerminalHandler terminalHandler = setUpTerminalHandler(
+          <FakeVmServiceRequest>[],
+          supportsHotReload: false,
+        );
+        final runner = terminalHandler.residentRunner as FakeResidentRunner;
+        runner.reloadIsRestart = true;
+
+        await terminalHandler.processTerminalInput('r');
+
+        // When reloadIsRestart is true, 'r' should still trigger a restart
+        // even though canHotReload is false
+        expect(runner.calledReload, false);
+        expect(runner.calledRestart, true);
+      },
+    );
+
     testWithoutContext('R - hotRestart', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
       final runner = terminalHandler.residentRunner as FakeResidentRunner;
@@ -1533,6 +1552,9 @@ class FakeResidentRunner extends ResidentHandlers {
   bool supportsServiceProtocol = true;
 
   @override
+  bool reloadIsRestart = false; // Defaults to false, only true when web --no-hot
+
+  @override
   Future<void> cleanupAfterSignal() async {}
 
   @override
@@ -1563,6 +1585,10 @@ class FakeResidentRunner extends ResidentHandlers {
     bool pause = false,
     String? reason,
   }) async {
+    // When reloadIsRestart is true, treat a reload as a restart
+    if (reloadIsRestart && !fullRestart) {
+      fullRestart = true;
+    }
     if (fullRestart && !supportsRestart) {
       throw StateError('illegal restart');
     }
