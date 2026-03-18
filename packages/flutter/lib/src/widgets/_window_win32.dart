@@ -1238,7 +1238,6 @@ final class _DialogWindowCreationRequest extends ffi.Struct {
 
 final class _TooltipWindowCreationRequest extends ffi.Struct {
   external _WindowConstraintsRequest preferredConstraints;
-  @ffi.Bool()
   external HWND parent;
   external ffi.Pointer<
     ffi.NativeFunction<
