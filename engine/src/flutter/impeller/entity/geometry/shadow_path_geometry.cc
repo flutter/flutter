@@ -172,7 +172,8 @@ class UmbraPinAccumulator : public PathTessellator::VertexWriter {
     kMultipleContours,
   };
 
-  UmbraPinAccumulator() = default;
+  explicit UmbraPinAccumulator(Vector2 device_scale);
+
   ~UmbraPinAccumulator() = default;
 
   /// Reserve enough pins for the indicated number of path vertices to
@@ -220,7 +221,9 @@ class UmbraPinAccumulator : public PathTessellator::VertexWriter {
   void EndContour() override;
 
   /// Rounds the device coordinate to the sub-pixel grid.
-  static Point ToDeviceGrid(Point point);
+  Point ToDeviceGrid(Point point);
+
+  const Point device_scale_;
 
   /// The list of pins being accumulated for further processing by the
   /// mesh generation code.
@@ -496,20 +499,26 @@ const std::shared_ptr<ShadowVertices> PolygonInfo::CalculateConvexShadowMesh(
     const impeller::PathSource& source,
     const Matrix& matrix,
     const Tessellator::Trigs& trigs) {
-  if (!matrix.IsInvertible()) {
+  // We are operating in "2D device space" with respect to scale and there
+  // is no need to involve translations or Z or perspective in the various
+  // calculations, so we extract the incoming matrix's 2D scales on X and Y
+  // and just use those measurements to guide our tessellation.
+  Vector2 scale_2d = matrix.GetBasisScaleXY();
+
+  FML_DCHECK(scale_2d.x >= 0.0f && scale_2d.y >= 0.0f);
+  if (!(scale_2d.x * scale_2d.y > 0.0f)) {
+    // NaN should fall in here as well.
     return ShadowVertices::kEmpty;
   }
 
-  Scalar scale = matrix.GetMaxBasisLengthXY();
+  UmbraPinAccumulator pin_accumulator(scale_2d);
 
-  UmbraPinAccumulator pin_accumulator;
-
+  Scalar scale = std::max(scale_2d.x, scale_2d.y);
   auto [point_count, contour_count] =
       impeller::PathTessellator::CountFillStorage(source, scale);
   pin_accumulator.Reserve(point_count);
 
-  PathTessellator::PathToTransformedFilledVertices(source, pin_accumulator,
-                                                   matrix);
+  PathTessellator::PathToFilledVertices(source, pin_accumulator, scale);
 
   switch (pin_accumulator.GetStatus()) {
     case UmbraPinAccumulator::PathStatus::kEmpty:
@@ -542,13 +551,19 @@ const std::shared_ptr<ShadowVertices> PolygonInfo::CalculateConvexShadowMesh(
 
   ComputeMesh(pins, centroid, list, trigs, direction);
 
-  Matrix inverted_matrix = matrix.Invert();
+  // Finally, we were working in a device space scaled by scale_2d
+  // so we need to un-scale the outgoing vertices by the same amount.
+  Vector2 inverted_scale_2d = 1.0f / scale_2d;
   for (Point& vertex : vertices_) {
-    vertex = inverted_matrix * vertex;
+    vertex = vertex * inverted_scale_2d;
   }
+
   return ShadowVertices::Make(std::move(vertices_), std::move(indices_),
                               std::move(gaussians_));
 }
+
+UmbraPinAccumulator::UmbraPinAccumulator(Vector2 device_scale)
+    : device_scale_(device_scale * kSubPixelCount) {}
 
 // Enter a new point for the polygon approximation of the shape. Points are
 // normalized to a device subpixel grid based on |kSubPixelCount|, duplicates
@@ -630,7 +645,7 @@ void UmbraPinAccumulator::EndContour() {
 
 // Adjust the device point to its nearest sub-pixel grid location.
 Point UmbraPinAccumulator::ToDeviceGrid(Point point) {
-  return (point * kSubPixelCount).Round() * kSubPixelScale;
+  return (point * device_scale_).Round() * kSubPixelScale;
 }
 
 // This method assumes that the pins have been accumulated by the PathVertex
