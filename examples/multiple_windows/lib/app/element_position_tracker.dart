@@ -14,7 +14,7 @@ class ElementPositionTracker {
     _ElementPositionTrackerManager.instance.remove(this);
   }
 
-  /// Returns current global rect for tracked element or `null` if not available.
+  /// Returns current global rect for the tracked element, or `null` if not available.
   Rect? getGlobalRect() {
     final rect = _getGlobalRect();
     _lastReportedRect = rect;
@@ -51,8 +51,8 @@ class ElementPositionTracker {
     }
     if (_lastReportedRect != rect) {
       _lastReportedRect = rect;
+      onGlobalRectChange?.call(rect);
     }
-    onGlobalRectChange?.call(rect);
   }
 }
 
