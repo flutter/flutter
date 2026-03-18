@@ -21,10 +21,7 @@ abstract class SkwasmShader implements ui.Shader {
 // An implementation that handles the storage, disposal, and finalization of
 // a native shader handle.
 class SkwasmNativeShader extends SkwasmObjectWrapper<RawShader> implements SkwasmShader {
-  SkwasmNativeShader(ShaderHandle handle) : super(handle, _registry);
-
-  static final SkwasmFinalizationRegistry<RawShader> _registry =
-      SkwasmFinalizationRegistry<RawShader>((ShaderHandle handle) => shaderDispose(handle));
+  SkwasmNativeShader(ShaderHandle handle) : super(handle, (ShaderHandle h) => shaderDispose(h));
 
   @override
   bool get isGradient => false;
@@ -216,7 +213,7 @@ class SkwasmImageShader extends SkwasmNativeShader implements ui.ImageShader {
 class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
     implements ui.FragmentProgram {
   SkwasmFragmentProgram._(this.name, RuntimeEffectHandle handle, this._shaderData)
-    : super(handle, _registry);
+    : super(handle, (RuntimeEffectHandle h) => runtimeEffectDispose(h));
 
   factory SkwasmFragmentProgram.fromBytes(String name, Uint8List bytes) {
     final shaderData = ShaderData.fromBytes(bytes);
@@ -234,11 +231,6 @@ class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
     skStringFree(sourceString);
     return SkwasmFragmentProgram._(name, handle, shaderData);
   }
-
-  static final SkwasmFinalizationRegistry<RawRuntimeEffect> _registry =
-      SkwasmFinalizationRegistry<RawRuntimeEffect>(
-        (RuntimeEffectHandle handle) => runtimeEffectDispose(handle),
-      );
 
   final String name;
   int get floatUniformCount => _shaderData.floatCount;
@@ -261,12 +253,8 @@ class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
 }
 
 class SkwasmShaderData extends SkwasmObjectWrapper<RawUniformData> {
-  SkwasmShaderData(int size) : super(uniformDataCreate(size), _registry);
-
-  static final SkwasmFinalizationRegistry<RawUniformData> _registry =
-      SkwasmFinalizationRegistry<RawUniformData>(
-        (UniformDataHandle handle) => uniformDataDispose(handle),
-      );
+  SkwasmShaderData(int size)
+    : super(uniformDataCreate(size), (UniformDataHandle h) => uniformDataDispose(h));
 
   Pointer<Void> get pointer => uniformDataGetPointer(handle);
 }
