@@ -363,8 +363,9 @@ std::shared_ptr<MockGLES> MockGLES::Init(
   g_extensions = extensions.value_or(kExtensions);
   g_extensions_string.clear();
   for (const auto& ext : g_extensions) {
-    if (!g_extensions_string.empty())
+    if (!g_extensions_string.empty()) {
       g_extensions_string += " ";
+    }
     g_extensions_string += ext;
   }
   g_version = version_string;
