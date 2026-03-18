@@ -569,13 +569,11 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
     required BoxConstraints preferredConstraints,
-    required bool isSizedToContent,
     required ui.Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) : _delegate = delegate,
        _constraints = preferredConstraints,
-       _isSizedToContent = isSizedToContent,
        _anchorRect = anchorRect,
        _positioner = positioner,
        _parent = parent,
@@ -585,7 +583,7 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
       platformDispatcher: platformDispatcher,
       constraints: _constraints,
       onRender: (size) {
-        if (_isSizedToContent && _lastRenderedSize != size) {
+        if (_lastRenderedSize != size) {
           _lastRenderedSize = size;
           scheduleMicrotask(() {
             notifyListeners();
@@ -602,12 +600,10 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
   ui.Rect _anchorRect;
   WindowPositioner _positioner;
   final BaseWindowController _parent;
-  final bool _isSizedToContent;
   Size? _lastRenderedSize;
 
   @override
-  Size get contentSize =>
-      _isSizedToContent && _lastRenderedSize != null ? _lastRenderedSize! : _constraints.biggest;
+  Size get contentSize => _lastRenderedSize != null ? _lastRenderedSize! : _constraints.biggest;
 
   @override
   BaseWindowController get parent => _parent;
@@ -639,13 +635,11 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
     required BoxConstraints preferredConstraints,
-    required bool isSizedToContent,
     required ui.Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) : _delegate = delegate,
        _constraints = preferredConstraints,
-       _isSizedToContent = isSizedToContent,
        _anchorRect = anchorRect,
        _positioner = positioner,
        _parent = parent,
@@ -655,7 +649,7 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
       platformDispatcher: platformDispatcher,
       constraints: _constraints,
       onRender: (size) {
-        if (_isSizedToContent && _lastRenderedSize != size) {
+        if (_lastRenderedSize != size) {
           _lastRenderedSize = size;
           scheduleMicrotask(() {
             notifyListeners();
@@ -672,12 +666,10 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
   ui.Rect _anchorRect;
   WindowPositioner _positioner;
   final BaseWindowController _parent;
-  final bool _isSizedToContent;
   Size? _lastRenderedSize;
 
   @override
-  Size get contentSize =>
-      _isSizedToContent && _lastRenderedSize != null ? _lastRenderedSize! : _constraints.biggest;
+  Size get contentSize => _lastRenderedSize != null ? _lastRenderedSize! : _constraints.biggest;
 
   @override
   BaseWindowController get parent => _parent;
@@ -971,7 +963,6 @@ class _TestWindowingOwner extends WindowingOwner {
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
     required BoxConstraints preferredConstraints,
-    required bool isSizedToContent,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -981,7 +972,6 @@ class _TestWindowingOwner extends WindowingOwner {
       platformDispatcher: _platformDispatcher,
       windowingOwner: this,
       preferredConstraints: preferredConstraints,
-      isSizedToContent: isSizedToContent,
       anchorRect: anchorRect,
       positioner: positioner,
       parent: parent,
@@ -992,7 +982,6 @@ class _TestWindowingOwner extends WindowingOwner {
   PopupWindowController createPopupWindowController({
     required PopupWindowControllerDelegate delegate,
     required BoxConstraints preferredConstraints,
-    required bool isSizedToContent,
     required ui.Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -1000,7 +989,6 @@ class _TestWindowingOwner extends WindowingOwner {
     return _TestPopupWindowController(
       delegate: delegate,
       platformDispatcher: _platformDispatcher,
-      isSizedToContent: isSizedToContent,
       windowingOwner: this,
       preferredConstraints: preferredConstraints,
       anchorRect: anchorRect,
