@@ -64,9 +64,7 @@ This display mode requires SDK 23 or later.
 
 ## Hybrid Composition++
 
-This mode is a new hybrid composition strategy designed to solve compositing and synchronization issues seen in earlier modes. It is currently available as an opt-in feature.
-
-Unlike previous hybrid composition approaches, HCPP offers improved rendering integration by managing composition logic down to the hardware layer.
+This mode is a new hybrid composition strategy designed to solve compositing performance and synchronization issues seen in earlier modes. It is currently available as an opt-in feature.
 
 ### Requirements
 - **Android API 34 or later**: Required for native transaction synchronization capabilities.
