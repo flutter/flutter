@@ -2940,39 +2940,39 @@ void main() {
       await tester.pumpAndSettle();
       expectIndicatorVisible(visibleWhenReleased);
 
-      // Reset state to clear state to be extra sure.
+      // Reset state to avoid state leak.
       await tester.pumpWidget(Container());
     }
 
     testWidgets('showValueIndicator set to onlyForDiscrete', (WidgetTester tester) async {
-      // Default value is onlyForDiscrete.
+      // The default value is onlyForDiscrete. No modification is needed.
       await expectValueIndicator(
         tester,
+        theme: theme,
+        divisions: 3,
         visibleWhenDragged: true,
         visibleWhenReleased: false,
-        theme: theme,
-        divisions: 3,
       );
       await expectValueIndicator(
         tester,
-        visibleWhenDragged: false,
-        visibleWhenReleased: false,
         theme: theme,
         divisions: 3,
         enabled: false,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
       );
       await expectValueIndicator(
         tester,
-        visibleWhenDragged: false,
-        visibleWhenReleased: false,
         theme: theme,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
       );
       await expectValueIndicator(
         tester,
-        visibleWhenDragged: false,
-        visibleWhenReleased: false,
         theme: theme,
         enabled: false,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
       );
     });
 
@@ -2980,31 +2980,31 @@ void main() {
       theme = theme.copyWith(showValueIndicator: ShowValueIndicator.onlyForContinuous);
       await expectValueIndicator(
         tester,
-        visibleWhenDragged: false,
-        visibleWhenReleased: false,
         theme: theme,
         divisions: 3,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
       );
       await expectValueIndicator(
         tester,
-        visibleWhenDragged: false,
-        visibleWhenReleased: false,
         theme: theme,
         divisions: 3,
         enabled: false,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
       );
       await expectValueIndicator(
         tester,
+        theme: theme,
         visibleWhenDragged: true,
         visibleWhenReleased: false,
-        theme: theme,
       );
       await expectValueIndicator(
         tester,
-        visibleWhenDragged: false,
-        visibleWhenReleased: false,
         theme: theme,
         enabled: false,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
       );
     });
 
@@ -3012,31 +3012,31 @@ void main() {
       theme = theme.copyWith(showValueIndicator: ShowValueIndicator.onDrag);
       await expectValueIndicator(
         tester,
-        visibleWhenDragged: true,
-        visibleWhenReleased: false,
         theme: theme,
         divisions: 3,
+        visibleWhenDragged: true,
+        visibleWhenReleased: false,
       );
       await expectValueIndicator(
         tester,
-        visibleWhenDragged: false,
-        visibleWhenReleased: false,
         theme: theme,
         divisions: 3,
         enabled: false,
-      );
-      await expectValueIndicator(
-        tester,
-        visibleWhenDragged: true,
-        visibleWhenReleased: false,
-        theme: theme,
-      );
-      await expectValueIndicator(
-        tester,
         visibleWhenDragged: false,
         visibleWhenReleased: false,
+      );
+      await expectValueIndicator(
+        tester,
+        theme: theme,
+        visibleWhenDragged: true,
+        visibleWhenReleased: false,
+      );
+      await expectValueIndicator(
+        tester,
         theme: theme,
         enabled: false,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
       );
     });
 
@@ -3044,31 +3044,31 @@ void main() {
       theme = theme.copyWith(showValueIndicator: ShowValueIndicator.never);
       await expectValueIndicator(
         tester,
-        visibleWhenDragged: false,
-        visibleWhenReleased: false,
         theme: theme,
         divisions: 3,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
       );
       await expectValueIndicator(
         tester,
-        visibleWhenDragged: false,
-        visibleWhenReleased: false,
         theme: theme,
         divisions: 3,
         enabled: false,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
       );
       await expectValueIndicator(
         tester,
-        visibleWhenDragged: false,
-        visibleWhenReleased: false,
         theme: theme,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
       );
       await expectValueIndicator(
         tester,
-        visibleWhenDragged: false,
-        visibleWhenReleased: false,
         theme: theme,
         enabled: false,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
       );
     });
 
@@ -3076,31 +3076,31 @@ void main() {
       theme = theme.copyWith(showValueIndicator: ShowValueIndicator.alwaysVisible);
       await expectValueIndicator(
         tester,
-        visibleWhenDragged: true,
-        visibleWhenReleased: true,
         theme: theme,
         divisions: 3,
+        visibleWhenDragged: true,
+        visibleWhenReleased: true,
       );
       await expectValueIndicator(
         tester,
-        visibleWhenDragged: false,
-        visibleWhenReleased: false,
         theme: theme,
         divisions: 3,
         enabled: false,
-      );
-      await expectValueIndicator(
-        tester,
-        visibleWhenDragged: true,
-        visibleWhenReleased: true,
-        theme: theme,
-      );
-      await expectValueIndicator(
-        tester,
         visibleWhenDragged: false,
         visibleWhenReleased: false,
+      );
+      await expectValueIndicator(
+        tester,
+        theme: theme,
+        visibleWhenDragged: true,
+        visibleWhenReleased: true,
+      );
+      await expectValueIndicator(
+        tester,
         theme: theme,
         enabled: false,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
       );
     });
   });

@@ -6800,6 +6800,44 @@ void main() {
 
       expect(tester.widget<Scrollbar>(find.byType(Scrollbar)).thumbVisibility, isTrue);
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/182929.
+    testWidgets('Positioned menus always begin animating at the target position', (
+      WidgetTester tester,
+    ) async {
+      final controller = MenuController();
+      const targetPosition = Offset(400.0, 400.0);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuAnchor(
+              style: const MenuStyle(
+                padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.zero),
+              ),
+              controller: controller,
+              animated: true,
+              menuChildren: const <Widget>[SizedBox(height: 160)],
+            ),
+          ),
+        ),
+      );
+
+      controller.open(position: targetPosition);
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 2));
+
+      final Finder panel = find.descendant(
+        of: find.byType(MenuAnchor),
+        matching: find.byType(FocusScope),
+      );
+      expect(tester.getTopLeft(panel), targetPosition);
+
+      await tester.pumpAndSettle();
+
+      expect(tester.getTopLeft(panel), targetPosition);
+    });
   });
 
   testWidgets('Menu panel default reserved padding', (WidgetTester tester) async {

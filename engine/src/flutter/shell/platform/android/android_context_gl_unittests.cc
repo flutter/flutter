@@ -15,6 +15,7 @@
 #include "gtest/gtest.h"
 #include "impeller/core/runtime_types.h"
 #include "shell/platform/android/context/android_context.h"
+#include "third_party/skia/include/gpu/ganesh/mock/GrMockTypes.h"
 
 namespace flutter {
 namespace testing {

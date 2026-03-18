@@ -6,6 +6,7 @@
 //
 // Run with --help for usage.
 
+import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 
@@ -228,13 +229,17 @@ abstract class FormatChecker {
 
   @protected
   Future<bool> applyPatch(List<String> patches) async {
-    final patchPool = ProcessPool(processRunner: _processRunner, printReport: namedReport('patch'));
+    final patchPool = ProcessPool(
+      processRunner: _processRunner,
+      printReport: namedReport('patch'),
+      encoding: const Utf8Codec(),
+    );
     final List<WorkerJob> jobs = patches.map<WorkerJob>((String patch) {
       return WorkerJob(<String>[
         'git',
         'apply',
         '--ignore-space-change',
-      ], stdinRaw: codeUnitsAsStream(patch.codeUnits));
+      ], stdin: Stream.value(patch));
     }).toList();
     final List<WorkerJob> completedJobs = await patchPool.runToCompletion(jobs);
     if (patchPool.failedJobs != 0) {
@@ -983,11 +988,14 @@ class PythonFormatChecker extends FormatChecker {
   }
 
   Future<int> _runYapfCheck({required bool fixing}) async {
-    final filesToCheck = <String>[
-      ...await getFileList(<String>['*.py']),
-      // Always include flutter/tools/gn.
-      '${engineDir(repoDir).path}/tools/gn',
-    ];
+    final List<String> filesToCheck = await getFileList(<String>[
+      '*.py',
+      path.join(engineSubPath, 'tools', 'gn'),
+    ]);
+    if (filesToCheck.isEmpty) {
+      message('No Python files with changes, skipping Python format check.');
+      return 0;
+    }
 
     final cmd = <String>[
       yapfBin.path,

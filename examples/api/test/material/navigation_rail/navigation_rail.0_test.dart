@@ -61,7 +61,12 @@ void main() {
     expect(find.text('Group alignment: -1.0'), findsOneWidget);
 
     // switch to center alignment
-    await tester.tap(find.text('Center'));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(SegmentedButton<double>),
+        matching: find.text('Center'),
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Group alignment: 0.0'), findsOneWidget);
 
@@ -69,6 +74,31 @@ void main() {
     await tester.tap(find.text('Bottom'));
     await tester.pumpAndSettle();
     expect(find.text('Group alignment: 1.0'), findsOneWidget);
+  });
+
+  testWidgets('Navigation rail updates main axis alignment', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.NavigationRailExampleApp());
+
+    // Switch to End alignment
+    await tester.tap(find.text('End'));
+    await tester.pumpAndSettle();
+
+    NavigationRail rail = tester.firstWidget(find.byType(NavigationRail));
+    expect(rail.mainAxisAlignment, MainAxisAlignment.end);
+
+    // Switch to Center alignment (disambiguated)
+    await tester.tap(
+      find.descendant(
+        of: find.byType(SegmentedButton<MainAxisAlignment?>),
+        matching: find.text('Center'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    rail = tester.firstWidget(find.byType(NavigationRail));
+    expect(rail.mainAxisAlignment, MainAxisAlignment.center);
   });
 
   testWidgets('NavigationRail shows leading/trailing widgets', (
