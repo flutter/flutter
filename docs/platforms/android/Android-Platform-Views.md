@@ -32,7 +32,7 @@ There are currently four different implementations of Android platform views:
 - [Virtual Display](Virtual-Display.md) (VD)
 - [Hybrid Composition](../Hybrid-Composition.md) (HC)
 - [Texture Layer Hybrid Composition](Texture-Layer-Hybrid-Composition.md) (TLHC)
-- Hybrid Composition++ (HCPP)
+- [Hybrid Composition++ (HCPP)](#hybrid-composition-1)
 
 Each has a different set of limitations and tradeoffs, as discussed below. The pages linked above give details about each implementation.
 
