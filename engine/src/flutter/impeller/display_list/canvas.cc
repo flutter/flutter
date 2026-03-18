@@ -39,6 +39,7 @@
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/contents/text_shadow_cache.h"
 #include "impeller/entity/contents/texture_contents.h"
+#include "impeller/entity/contents/uber_sdf_contents.h"
 #include "impeller/entity/contents/vertices_contents.h"
 #include "impeller/entity/geometry/arc_geometry.h"
 #include "impeller/entity/geometry/circle_geometry.h"
@@ -820,6 +821,19 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
   Entity entity;
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
+
+  if (renderer_.GetContext()->GetFlags().use_sdfs && !paint.color_source) {
+    auto contents = UberSDFContents::Make(
+        /*type=*/UberSDFContents::Type::kRect, /*rect=*/rect,
+        /*color=*/paint.color, /*stroke_width=*/paint.stroke.width,
+        /*stroked=*/paint.style == Paint::Style::kStroke);
+    FillRectGeometry geom(rect);
+    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint,
+                                            /*reuse_depth=*/false,
+                                            /*override_contents=*/
+                                            std::move(contents));
+    return;
+  }
 
   if (paint.style == Paint::Style::kStroke) {
     StrokeRectGeometry geom(rect, paint.stroke);
@@ -1907,12 +1921,14 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
   AddRenderEntityToCurrentPass(entity, false);
 }
 
-void Canvas::AddRenderEntityWithFiltersToCurrentPass(Entity& entity,
-                                                     const Geometry* geometry,
-                                                     const Paint& paint,
-                                                     bool reuse_depth) {
+void Canvas::AddRenderEntityWithFiltersToCurrentPass(
+    Entity& entity,
+    const Geometry* geometry,
+    const Paint& paint,
+    bool reuse_depth,
+    std::shared_ptr<ColorSourceContents> override_contents) {
   std::shared_ptr<ColorSourceContents> contents =
-      paint.CreateContents(geometry);
+      override_contents ? override_contents : paint.CreateContents(geometry);
   if (!paint.color_filter && !paint.invert_colors && !paint.image_filter &&
       !paint.mask_blur_descriptor.has_value()) {
     entity.SetContents(std::move(contents));
