@@ -235,6 +235,8 @@ void main() {
           flutterBin,
           'build',
           add2appBuildSubcommand,
+          '--codesign-identity',
+          '-',
         ], workingDirectory: exampleDirectory.path);
         if (result.exitCode != 0) {
           throw Exception(
@@ -538,6 +540,8 @@ void expectDylibIsBundledWithFrameworks(Directory appDirectory, String buildMode
     expect(simulatorDylib, exists);
     _expectBinaryContainsArchitectures(simulatorDylib, ['x86_64', 'arm64']);
   }
+
+  _expectXCFrameworkCodesigned(xcFrameworkDirectory);
 }
 
 /// Check that the native assets are built with the C Compiler that Flutter uses.
@@ -651,5 +655,17 @@ void _expectBinaryContainsArchitectures(File binary, List<String> expectedArchs)
       reason:
           'Binary ${binary.path} does not contain expected architecture $arch.\nLipo output: $lipoOutput',
     );
+  }
+}
+
+void _expectXCFrameworkCodesigned(Directory xcFramework) {
+  expect(xcFramework, exists);
+  final ProcessResult result = processManager.runSync(<String>[
+    'codesign',
+    '-dv',
+    xcFramework.path,
+  ]);
+  if (!result.stderr.toString().contains('Signature=adhoc')) {
+    throw Exception('XCFramework ${xcFramework.path} is not codesigned:\n${result.stderr}');
   }
 }
