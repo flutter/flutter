@@ -82,39 +82,12 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     }
 
     Set<String>? androidEngineShellArgs;
-    if (buildMode != null) {
-      final File generatedEngineFlagsManifestFile = apk.fileSystem.file(
-        apk.fileSystem.path.join(
-          getAndroidBuildDirectory(),
-          'app',
-          'generated',
-          'manifests',
-          // TODO(camsim99): use build mode
-          'debugGenerateEngineFlagsManifestTask',
-          'AndroidManifest.xml',
-        ),
-      );
-
-      if (generatedEngineFlagsManifestFile.existsSync()) {
-        final String generatedEngineFlagsManifestFileStr = generatedEngineFlagsManifestFile
-            .readAsStringSync();
-        final document = XmlDocument.parse(generatedEngineFlagsManifestFileStr);
-
-        // Find the one expected activity element and one expected androidEngineShellArgs metadata.
-        final XmlElement applicationElement = document.findAllElements('application').first;
-        final XmlElement androidEngineShellArgsMetadataElement = applicationElement
-            .findElements('meta-data')
-            .first;
-        final String? androidEngineShellArgsList = androidEngineShellArgsMetadataElement
-            .getAttribute('android:value');
-        // TODO(camsim99): Stop using comma as a separator bc it's terrible for parsing.
-        if (androidEngineShellArgsList != null && androidEngineShellArgsList.isNotEmpty) {
-          androidEngineShellArgs = androidEngineShellArgsList
-              .split(',')
-              .map((String arg) => arg.trim())
-              .toSet();
-        }
-      }
+    final String? androidEngineShellArgsFromManifest = data.androidEngineShellArgs;
+    if (androidEngineShellArgsFromManifest != null) {
+      androidEngineShellArgs = androidEngineShellArgsFromManifest
+          .split(';')
+          .map((String arg) => arg.trim())
+          .toSet();
     }
 
     return AndroidApk(
@@ -400,6 +373,25 @@ class ApkManifestData {
       return null;
     }
 
+    final Iterable<_Element?> applicationMetadataElements = application.allElements('meta-data');
+
+    String? androidEngineShellArgs;
+    for (final metadata in applicationMetadataElements) {
+      final String? elementAttributeValue = metadata!.firstAttribute('android:name')?.value;
+      if (elementAttributeValue != null &&
+          elementAttributeValue.startsWith('"androidEngineShellArgs"')) {
+        final _Attribute? androidEngineShellArgsList = metadata.firstAttribute('android:value');
+        if (androidEngineShellArgsList != null && androidEngineShellArgsList.value != null) {
+          //  A: android:value(0x01010024)="--enable-dart-profiling;--enable-checked-mode" (Raw: "--enable-dart-profiling;--enable-checked-mode")
+          androidEngineShellArgs = androidEngineShellArgsList.value!.substring(
+            1,
+            androidEngineShellArgsList.value?.indexOf('" '),
+          );
+        }
+        break;
+      }
+    }
+
     final Iterable<_Element> activities = application.allElements('activity');
 
     _Element? launchActivity;
@@ -478,6 +470,8 @@ class ApkManifestData {
       if (packageName != null) 'package': <String, String>{'name': packageName},
       'version-code': <String, String>{'name': versionCode.toString()},
       if (activityName != null) 'launchable-activity': <String, String>{'name': activityName},
+      if (androidEngineShellArgs != null)
+        'androidEngineShellArgs': <String, String>{'name': androidEngineShellArgs},
     };
 
     return ApkManifestData._(map);
@@ -496,6 +490,9 @@ class ApkManifestData {
   String? get launchableActivityName {
     return _data['launchable-activity'] == null ? null : _data['launchable-activity']?['name'];
   }
+
+  String? get androidEngineShellArgs =>
+      _data['androidEngineShellArgs'] == null ? null : _data['androidEngineShellArgs']?['name'];
 
   @override
   String toString() => _data.toString();
