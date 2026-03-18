@@ -46,7 +46,14 @@ import 'page_transitions_theme.dart';
 class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Creates an instance of a [PageTransitionsBuilder] that matches Android U's
   /// predictive back transition.
-  const PredictiveBackPageTransitionsBuilder();
+  const PredictiveBackPageTransitionsBuilder({this.fallbackColor});
+
+  /// The color of the scrim (background) when the predictive back transition is
+  /// not supported.
+  ///
+  /// If not provided, the background color of a default
+  /// [FadeForwardsPageTransitionsBuilder] will be used.
+  final Color? fallbackColor;
 
   @override
   Duration get transitionDuration =>
@@ -85,13 +92,9 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
               );
             }
 
-            return const FadeForwardsPageTransitionsBuilder().buildTransitions(
-              route,
-              context,
-              animation,
-              secondaryAnimation,
-              child,
-            );
+            return FadeForwardsPageTransitionsBuilder(
+              backgroundColor: fallbackColor,
+            ).buildTransitions(route, context, animation, secondaryAnimation, child);
           },
     );
   }
@@ -127,7 +130,14 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
 class PredictiveBackFullscreenPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Creates an instance of a [PageTransitionsBuilder] that matches Android U's
   /// full screen predictive back transition.
-  const PredictiveBackFullscreenPageTransitionsBuilder();
+  const PredictiveBackFullscreenPageTransitionsBuilder({this.fallbackColor});
+
+  /// The color of the scrim (background) when the predictive back transition is
+  /// not supported.
+  ///
+  /// If not provided, the background color of a default
+  /// [ZoomPageTransitionsBuilder] will be used.
+  final Color? fallbackColor;
 
   @override
   Widget buildTransitions<T>(
@@ -159,13 +169,9 @@ class PredictiveBackFullscreenPageTransitionsBuilder extends PageTransitionsBuil
               );
             }
 
-            return const ZoomPageTransitionsBuilder().buildTransitions(
-              route,
-              context,
-              animation,
-              secondaryAnimation,
-              child,
-            );
+            return ZoomPageTransitionsBuilder(
+              backgroundColor: fallbackColor,
+            ).buildTransitions(route, context, animation, secondaryAnimation, child);
           },
     );
   }
@@ -360,14 +366,15 @@ class _PredictiveBackSharedElementPageTransitionState
     curve: _kCurve,
   );
 
-  // Ideally this would match the curvature of the physical Android device being
-  // used, but that is not yet supported. Instead, this value is a best guess at
-  // a value that looks reasonable on most devices.
+  // A fallback corner radius used when the display corner radii are
+  // unavailable (e.g., on Android API levels below 31, iOS, and other
+  // platforms). This is a best-guess value that looks reasonable on most
+  // devices.
   // See https://github.com/flutter/flutter/issues/97349.
   static const double _kDeviceBorderRadius = 32.0;
 
-  // Since we don't know the device border radius, this provides a smooth
-  // transition between the default radius and the actual radius.
+  // Provides a smooth transition between the default radius and the
+  // _kDeviceBorderRadius, when the display corner radii are unavailable.
   final Tween<double> _borderRadiusTween = Tween<double>(begin: 0.0, end: _kDeviceBorderRadius);
 
   // The route fades out after commit.
@@ -523,7 +530,9 @@ class _PredictiveBackSharedElementPageTransitionState
             child: Opacity(
               opacity: _opacityTween.evaluate(_commitAnimation),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(_borderRadiusTween.evaluate(_bounceAnimation)),
+                borderRadius:
+                    MediaQuery.displayCornerRadiiOf(context) ??
+                    BorderRadius.circular(_borderRadiusTween.evaluate(_bounceAnimation)),
                 child: child,
               ),
             ),
@@ -700,9 +709,13 @@ class _PredictiveBackFullscreenPageTransitionState
         animation: widget.animation,
         builder: _primaryAnimatedBuilder,
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(
-            _PredictiveBackSharedElementPageTransitionState._kDeviceBorderRadius,
-          ),
+          borderRadius:
+              MediaQuery.displayCornerRadiiOf(context) ??
+              const BorderRadius.all(
+                Radius.circular(
+                  _PredictiveBackSharedElementPageTransitionState._kDeviceBorderRadius,
+                ),
+              ),
           child: widget.child,
         ),
       ),

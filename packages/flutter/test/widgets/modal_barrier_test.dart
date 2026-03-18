@@ -28,9 +28,8 @@ void main() {
       onTap: () {
         tapped = true;
       },
-      child: const SizedBox(
-        width: 10.0,
-        height: 10.0,
+      child: const SizedBox.square(
+        dimension: 10.0,
         child: Text('target', textDirection: TextDirection.ltr),
       ),
     );
@@ -46,9 +45,8 @@ void main() {
       onExit: (_) {
         hovered = true;
       },
-      child: const SizedBox(
-        width: 10.0,
-        height: 10.0,
+      child: const SizedBox.square(
+        dimension: 10.0,
         child: Text('target', textDirection: TextDirection.ltr),
       ),
     );
@@ -955,6 +953,18 @@ void main() {
         TargetPlatform.android,
       }),
     );
+
+    testWidgets('AnimatedModalBarrier does not crash at zero area', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox.shrink(child: AnimatedModalBarrier(color: colorAnimation)),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(AnimatedModalBarrier)), Size.zero);
+    });
   });
 
   group('SemanticsClipper', () {

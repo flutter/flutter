@@ -13,8 +13,12 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_ios_framework.dart';
 import 'package:flutter_tools/src/commands/build_macos_framework.dart';
+import 'package:flutter_tools/src/commands/darwin_add_to_app.dart';
+import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools/src/xcode_project.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -78,6 +82,7 @@ void main() {
             flutterVersion: fakeFlutterVersion,
             cache: cache,
             verboseHelp: false,
+            codesign: FakeDarwinAddToAppCodesigning(),
           );
 
           expect(
@@ -119,6 +124,7 @@ void main() {
             flutterVersion: fakeFlutterVersion,
             cache: cache,
             verboseHelp: false,
+            codesign: FakeDarwinAddToAppCodesigning(),
           );
 
           expect(
@@ -157,6 +163,7 @@ void main() {
             flutterVersion: fakeFlutterVersion,
             cache: cache,
             verboseHelp: false,
+            codesign: FakeDarwinAddToAppCodesigning(),
           );
 
           expect(
@@ -208,6 +215,7 @@ void main() {
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
                 verboseHelp: false,
+                codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.debug, outputDirectory, force: true);
 
@@ -250,6 +258,7 @@ void main() {
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
                 verboseHelp: false,
+                codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
 
@@ -275,6 +284,7 @@ void main() {
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
                 verboseHelp: false,
+                codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
 
@@ -303,6 +313,7 @@ void main() {
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
                 verboseHelp: false,
+                codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.profile, outputDirectory);
 
@@ -331,6 +342,7 @@ void main() {
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
                 verboseHelp: false,
+                codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.release, outputDirectory);
 
@@ -425,6 +437,7 @@ void main() {
           flutterVersion: fakeFlutterVersion,
           cache: cache,
           verboseHelp: false,
+          codesign: FakeDarwinAddToAppCodesigning(),
         );
 
         // Mock engine artifacts. _TestArtifacts uses a string like this for getArtifactPath.
@@ -510,6 +523,7 @@ void main() {
           flutterVersion: fakeFlutterVersion,
           cache: cache,
           verboseHelp: false,
+          codesign: FakeDarwinAddToAppCodesigning(),
         );
 
         // Mock engine artifacts
@@ -579,6 +593,7 @@ void main() {
             flutterVersion: fakeFlutterVersion,
             cache: cache,
             verboseHelp: false,
+            codesign: FakeDarwinAddToAppCodesigning(),
           );
 
           expect(
@@ -620,6 +635,7 @@ void main() {
             flutterVersion: fakeFlutterVersion,
             cache: cache,
             verboseHelp: false,
+            codesign: FakeDarwinAddToAppCodesigning(),
           );
 
           expect(
@@ -658,6 +674,7 @@ void main() {
             flutterVersion: fakeFlutterVersion,
             cache: cache,
             verboseHelp: false,
+            codesign: FakeDarwinAddToAppCodesigning(),
           );
 
           expect(
@@ -708,6 +725,7 @@ void main() {
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
                 verboseHelp: false,
+                codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.debug, outputDirectory, force: true);
 
@@ -749,6 +767,7 @@ void main() {
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
                 verboseHelp: false,
+                codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
 
@@ -774,6 +793,7 @@ void main() {
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
                 verboseHelp: false,
+                codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
 
@@ -802,6 +822,7 @@ void main() {
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
                 verboseHelp: false,
+                codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.profile, outputDirectory);
 
@@ -830,6 +851,7 @@ void main() {
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
                 verboseHelp: false,
+                codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.release, outputDirectory);
 
@@ -861,12 +883,12 @@ void main() {
       fakeProcessManager = FakeProcessManager.empty();
     });
 
-    testWithoutContext('created', () async {
+    testWithoutContext('created and codesigned', () async {
       final Directory frameworkA = fileSystem.directory('FrameworkA.framework')..createSync();
       final Directory frameworkB = fileSystem.directory('FrameworkB.framework')..createSync();
       final Directory output = fileSystem.directory('output');
 
-      fakeProcessManager.addCommand(
+      fakeProcessManager.addCommands([
         FakeCommand(
           command: <String>[
             'xcrun',
@@ -880,12 +902,24 @@ void main() {
             output.childDirectory('Combine.xcframework').path,
           ],
         ),
-      );
+        FakeCommand(
+          command: [
+            'codesign',
+            '--force',
+            '--sign',
+            'Apple Development: Company (TEAM_ID)',
+            '--timestamp=none',
+            output.childDirectory('Combine.xcframework').path,
+          ],
+        ),
+      ]);
       await BuildFrameworkCommand.produceXCFramework(
         <Directory>[frameworkA, frameworkB],
         'Combine',
         output,
         fakeProcessManager,
+        'Apple Development: Company (TEAM_ID)',
+        BuildMode.debug,
       );
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
@@ -926,6 +960,8 @@ void main() {
         'Combine',
         output,
         fakeProcessManager,
+        null,
+        BuildMode.debug,
       );
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
@@ -956,7 +992,7 @@ void main() {
       expect(names, isEmpty);
     });
 
-    testWithoutContext('parseNativeAssetsManifest', () {
+    testWithoutContext('parseNativeAssetsManifest for iOS', () {
       final Directory output = fileSystem.directory('output')..createSync();
       final File manifest = output
           .childDirectory('App.framework')
@@ -978,7 +1014,43 @@ void main() {
 }
 ''');
 
-      final Map<String, String> assets = BuildFrameworkCommand.parseNativeAssetsManifest(output);
+      final Map<String, String> assets = DarwinAddToAppNativeAssets.parseNativeAssetsManifest(
+        output,
+        FlutterDarwinPlatform.ios,
+      );
+      expect(assets, <String, String>{
+        'package:project/asset1': 'Foo.framework/Foo',
+        'package:project/asset2': 'Bar.framework/Bar',
+      });
+    });
+
+    testWithoutContext('parseNativeAssetsManifest for macOS', () {
+      final Directory output = fileSystem.directory('output')..createSync();
+      final File manifest = output
+          .childDirectory('App.framework')
+          .childDirectory('Resources')
+          .childDirectory('flutter_assets')
+          .childFile('NativeAssetsManifest.json');
+      manifest.createSync(recursive: true);
+      manifest.writeAsStringSync('''
+{
+  "format-version": [1, 0, 0],
+  "native-assets": {
+    "macos_x64": {
+      "package:project/asset1": ["absolute", "Foo.framework/Foo"],
+      "package:project/asset2": ["absolute", "Bar.framework/Bar"]
+    },
+    "macos_arm64": {
+      "package:project/asset1": ["absolute", "Foo.framework/Foo"]
+    }
+  }
+}
+''');
+
+      final Map<String, String> assets = DarwinAddToAppNativeAssets.parseNativeAssetsManifest(
+        output,
+        FlutterDarwinPlatform.macos,
+      );
       expect(assets, <String, String>{
         'package:project/asset1': 'Foo.framework/Foo',
         'package:project/asset2': 'Bar.framework/Bar',
@@ -1186,6 +1258,7 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
           verboseHelp: false,
+          codesign: FakeDarwinAddToAppCodesigning(),
         );
 
         await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
@@ -1229,6 +1302,7 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
           verboseHelp: false,
+          codesign: FakeDarwinAddToAppCodesigning(),
         );
 
         await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
@@ -1310,6 +1384,7 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
           verboseHelp: false,
+          codesign: FakeDarwinAddToAppCodesigning(),
         );
 
         await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
@@ -1363,6 +1438,7 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
           verboseHelp: false,
+          codesign: FakeDarwinAddToAppCodesigning(),
         );
 
         await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
@@ -1419,6 +1495,7 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
           verboseHelp: false,
+          codesign: FakeDarwinAddToAppCodesigning(),
         );
 
         await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
@@ -1471,6 +1548,7 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
           verboseHelp: false,
+          codesign: FakeDarwinAddToAppCodesigning(),
         );
 
         await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
@@ -1535,6 +1613,7 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
           verboseHelp: false,
+          codesign: FakeDarwinAddToAppCodesigning(),
         );
 
         await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
@@ -1600,6 +1679,7 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
           verboseHelp: false,
+          codesign: FakeDarwinAddToAppCodesigning(),
         );
 
         await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
@@ -1666,6 +1746,7 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
           verboseHelp: false,
+          codesign: FakeDarwinAddToAppCodesigning(),
         );
 
         await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
@@ -1723,6 +1804,7 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
           verboseHelp: false,
+          codesign: FakeDarwinAddToAppCodesigning(),
         );
 
         await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
@@ -1786,6 +1868,7 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
           verboseHelp: false,
+          codesign: FakeDarwinAddToAppCodesigning(),
         );
 
         await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
@@ -1827,5 +1910,18 @@ class FakePlistParser extends PlistParser {
   @override
   String? plistJsonContent(String filePath) {
     return _jsonContentByPath[filePath];
+  }
+}
+
+class FakeDarwinAddToAppCodesigning extends Fake implements DarwinAddToAppCodesigning {
+  @override
+  Future<String?> getCodesignIdentity({
+    required BuildInfo buildInfo,
+    required bool codesignEnabled,
+    required String? codesignIdentityOption,
+    required File identityFile,
+    required XcodeBasedProject xcodeProject,
+  }) async {
+    return null;
   }
 }
