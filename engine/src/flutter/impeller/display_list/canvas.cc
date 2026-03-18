@@ -533,6 +533,13 @@ bool Canvas::AttemptDrawAntialiasedCircle(const Point& center,
   entity.SetBlendMode(paint.blend_mode);
 
   const bool is_stroked = paint.style == Paint::Style::kStroke;
+  std::unique_ptr<CircleGeometry> geom;
+  if (is_stroked) {
+    geom = std::make_unique<CircleGeometry>(center, radius, paint.stroke.width);
+  } else {
+    geom = std::make_unique<CircleGeometry>(center, radius);
+  }
+  geom->SetAntialiasPadding(1.0f);  // 1.0 for AA
 
   if (renderer_.GetContext()->GetFlags().use_sdfs) {
     auto contents = UberSDFContents::Make(
@@ -540,17 +547,11 @@ bool Canvas::AttemptDrawAntialiasedCircle(const Point& center,
         /*rect=*/
         Rect::MakeLTRB(center.x - radius, center.y - radius, center.x + radius,
                        center.y + radius),
+        /*geometry=*/std::move(geom),
         /*color=*/paint.color, /*stroke_width=*/paint.stroke.width,
         /*stroked=*/is_stroked);
     entity.SetContents(std::move(contents));
   } else {
-    std::unique_ptr<CircleGeometry> geom;
-    if (is_stroked) {
-      geom =
-          std::make_unique<CircleGeometry>(center, radius, paint.stroke.width);
-    } else {
-      geom = std::make_unique<CircleGeometry>(center, radius);
-    }
     auto contents =
         CircleContents::Make(std::move(geom), paint.color, is_stroked);
     entity.SetContents(std::move(contents));
@@ -834,8 +835,15 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
   entity.SetBlendMode(paint.blend_mode);
 
   if (renderer_.GetContext()->GetFlags().use_sdfs && !paint.color_source) {
+    Scalar expand_size = 1.0f;  // 1.0 for AA
+    if (paint.style == Paint::Style::kStroke) {
+      expand_size += paint.stroke.width / 2.0f;
+    }
+    Rect expanded_rect = rect.Expand(expand_size);
+
     auto contents = UberSDFContents::Make(
         /*type=*/UberSDFContents::Type::kRect, /*rect=*/rect,
+        /*geometry=*/std::make_unique<FillRectGeometry>(expanded_rect),
         /*color=*/paint.color, /*stroke_width=*/paint.stroke.width,
         /*stroked=*/paint.style == Paint::Style::kStroke);
     FillRectGeometry geom(rect);

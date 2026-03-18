@@ -17,22 +17,26 @@ using FS = UberSDFPipeline::FragmentShader;
 Scalar kAntialiasPixels = 1.0;
 }  // namespace
 
-std::unique_ptr<UberSDFContents> UberSDFContents::Make(Type type,
-                                                       Rect rect,
-                                                       Color color,
-                                                       Scalar stroke_width,
-                                                       bool stroked) {
-  return std::unique_ptr<UberSDFContents>(
-      new UberSDFContents(type, rect, color, stroke_width, stroked));
+std::unique_ptr<UberSDFContents> UberSDFContents::Make(
+    Type type,
+    Rect rect,
+    std::unique_ptr<Geometry> geometry,
+    Color color,
+    Scalar stroke_width,
+    bool stroked) {
+  return std::unique_ptr<UberSDFContents>(new UberSDFContents(
+      type, rect, std::move(geometry), color, stroke_width, stroked));
 }
 
 UberSDFContents::UberSDFContents(Type type,
                                  Rect rect,
+                                 std::unique_ptr<Geometry> geometry,
                                  Color color,
                                  Scalar stroke_width,
                                  bool stroked)
     : type_(type),
       rect_(rect),
+      geometry_(std::move(geometry)),
       color_(color),
       stroke_width_(stroke_width),
       stroked_(stroked) {}
@@ -54,15 +58,7 @@ bool UberSDFContents::Render(const ContentContext& renderer,
   frag_info.stroked = stroked_ ? 1.0f : 0.0f;
   frag_info.type = type_ == Type::kCircle ? 0.0f : 1.0f;
 
-  // Expand the rect for AA and stroke width
-  Scalar expand_size = kAntialiasPixels;
-  if (stroked_) {
-    expand_size += stroke_width_ / 2.0f;
-  }
-  Rect expanded_rect = rect_.Expand(expand_size);
-
-  FillRectGeometry geometry(expanded_rect);
-  auto geometry_result = geometry.GetPositionBuffer(renderer, entity, pass);
+  auto geometry_result = geometry_->GetPositionBuffer(renderer, entity, pass);
 
   PipelineBuilderCallback pipeline_callback =
       [&renderer](ContentContextOptions options) {
@@ -70,7 +66,8 @@ bool UberSDFContents::Render(const ContentContext& renderer,
       };
 
   return ColorSourceContents::DrawGeometry<VS>(
-      this, &geometry, renderer, entity, pass, pipeline_callback, frame_info,
+      this, geometry_.get(), renderer, entity, pass, pipeline_callback,
+      frame_info,
       /*bind_fragment_callback=*/
       [&frag_info, &data_host_buffer](RenderPass& pass) {
         FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));
@@ -86,12 +83,7 @@ bool UberSDFContents::Render(const ContentContext& renderer,
 }
 
 std::optional<Rect> UberSDFContents::GetCoverage(const Entity& entity) const {
-  Scalar expand_size = kAntialiasPixels;
-  if (stroked_) {
-    expand_size += stroke_width_ / 2.0f;
-  }
-  FillRectGeometry geometry(rect_.Expand(expand_size));
-  return geometry.GetCoverage(entity.GetTransform());
+  return geometry_->GetCoverage(entity.GetTransform());
 }
 
 }  // namespace impeller
