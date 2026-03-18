@@ -306,9 +306,13 @@ class _Attribute extends _Entry {
   factory _Attribute.fromLine(String line, _Element parent) {
     //     A: android:label(0x01010001)="hello_world" (Raw: "hello_world")
     const attributePrefix = 'A: ';
-    final List<String> keyVal = line
-        .substring(line.indexOf(attributePrefix) + attributePrefix.length)
-        .split('=');
+    final int valueStart = line.indexOf(attributePrefix) + attributePrefix.length;
+    final int splitIndex = line.indexOf('=');
+    final List<String> keyVal = [
+      line.substring(valueStart, splitIndex),
+      line.substring(splitIndex + 1).trim(),
+    ];
+
     return _Attribute._(keyVal[0], keyVal[1], parent, line.length - line.trimLeft().length);
   }
 
@@ -383,10 +387,11 @@ class ApkManifestData {
         final _Attribute? androidEngineShellArgsList = metadata.firstAttribute('android:value');
         if (androidEngineShellArgsList != null && androidEngineShellArgsList.value != null) {
           //  A: android:value(0x01010024)="--enable-dart-profiling;--enable-checked-mode" (Raw: "--enable-dart-profiling;--enable-checked-mode")
-          androidEngineShellArgs = androidEngineShellArgsList.value!.substring(
-            1,
-            androidEngineShellArgsList.value?.indexOf('" '),
-          );
+          final String androidEngineShellArgsListValue = androidEngineShellArgsList.value!
+              .substring(1, androidEngineShellArgsList.value?.indexOf('" '));
+          androidEngineShellArgs = androidEngineShellArgsListValue.isEmpty
+              ? null
+              : androidEngineShellArgsListValue;
         }
         break;
       }
