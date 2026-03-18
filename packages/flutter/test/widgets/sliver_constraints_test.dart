@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -11,8 +11,9 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: CustomScrollView(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
           slivers: <Widget>[
             const SliverToBoxAdapter(child: SizedBox(width: double.infinity, height: 150.0)),
             const SliverToBoxAdapter(child: SizedBox(width: double.infinity, height: 150.0)),

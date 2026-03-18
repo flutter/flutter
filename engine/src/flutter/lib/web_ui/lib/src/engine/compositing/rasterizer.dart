@@ -80,13 +80,13 @@ abstract class ViewRasterizer {
     final bitmapSize = BitmapSize.fromSize(frameSize);
 
     currentFrameSize = bitmapSize;
-    await prepareToDraw();
     viewEmbedder.frameSize = currentFrameSize;
     final Frame compositorFrame = context.acquireFrame(viewEmbedder);
 
     compositorFrame.raster(layerTree, currentFrameSize, recorder);
     _lastRenderedLayerTree = layerTree;
 
+    await prepareToDraw();
     await viewEmbedder.submitFrame(recorder);
   }
 

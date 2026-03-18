@@ -10,7 +10,10 @@ import androidx.annotation.NonNull;
 import java.util.*;
 
 /**
- * Arguments that can be delivered to the Flutter shell when it is created.
+ * DEPRECATED. Please see {@link FlutterEngineFlags} for the list of arguments to use or update if
+ * you are adding a new flag.
+ *
+ * <p>Arguments that can be delivered to the Flutter shell when it is created.
  *
  * <p>The term "shell" refers to the native code that adapts Flutter to different platforms.
  * Flutter's Android Java code initializes a native "shell" and passes these arguments to that
@@ -18,7 +21,10 @@ import java.util.*;
  * io.flutter.embedding.engine.loader.FlutterLoader#ensureInitializationComplete(Context, String[])}
  * for more information.
  */
+// TODO(camsim99): Delete this class when support for setting engine shell arguments via Intent
+// is no longer supported. See https://github.com/flutter/flutter/issues/180686.
 @SuppressWarnings({"WeakerAccess", "unused"})
+@Deprecated
 public class FlutterShellArgs {
   public static final String ARG_KEY_TRACE_STARTUP = "trace-startup";
   public static final String ARG_TRACE_STARTUP = "--trace-startup";
@@ -53,9 +59,12 @@ public class FlutterShellArgs {
   public static final String ARG_DISABLE_IMPELLER = "--enable-impeller=false";
   public static final String ARG_KEY_ENABLE_VULKAN_VALIDATION = "enable-vulkan-validation";
   public static final String ARG_ENABLE_VULKAN_VALIDATION = "--enable-vulkan-validation";
-  public static final String ARG_KEY_TOGGLE_SURFACE_CONTROL = "enable-surface-control";
-  public static final String ARG_ENABLE_SURFACE_CONTROL = "--enable-surface-control=true";
-  public static final String ARG_DISABLE_SURFACE_CONTROL = "--enable-surface-control=false";
+  public static final String ARG_KEY_ENABLE_HCPP_AND_SURFACE_CONTROL =
+      "enable-hcpp-and-surface-control";
+  public static final String ARG_ENABLE_HCPP_AND_SURFACE_CONTROL =
+      "--enable-hcpp-and-surface-control=true";
+  public static final String ARG_DISABLE_HCPP_AND_SURFACE_CONTROL =
+      "--enable-hcpp-and-surface-control=false";
   public static final String ARG_KEY_DUMP_SHADER_SKP_ON_SHADER_COMPILATION =
       "dump-skp-on-shader-compilation";
   public static final String ARG_DUMP_SHADER_SKP_ON_SHADER_COMPILATION =
@@ -135,11 +144,11 @@ public class FlutterShellArgs {
     if (intent.getBooleanExtra(ARG_KEY_ENABLE_VULKAN_VALIDATION, false)) {
       args.add(ARG_ENABLE_VULKAN_VALIDATION);
     }
-    if (intent.hasExtra(ARG_KEY_TOGGLE_SURFACE_CONTROL)) {
-      if (intent.getBooleanExtra(ARG_KEY_TOGGLE_SURFACE_CONTROL, false)) {
-        args.add(ARG_ENABLE_SURFACE_CONTROL);
+    if (intent.hasExtra(ARG_KEY_ENABLE_HCPP_AND_SURFACE_CONTROL)) {
+      if (intent.getBooleanExtra(ARG_KEY_ENABLE_HCPP_AND_SURFACE_CONTROL, false)) {
+        args.add(ARG_ENABLE_HCPP_AND_SURFACE_CONTROL);
       } else {
-        args.add(ARG_DISABLE_SURFACE_CONTROL);
+        args.add(ARG_DISABLE_HCPP_AND_SURFACE_CONTROL);
       }
     }
 

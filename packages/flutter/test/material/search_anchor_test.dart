@@ -67,7 +67,7 @@ void main() {
     );
 
     final Material material = tester.widget<Material>(searchBarMaterial);
-    checkSearchBarDefaults(tester, colorScheme, material);
+    await checkSearchBarDefaults(tester, colorScheme, material);
   });
 
   testWidgets('SearchBar respects controller property', (WidgetTester tester) async {
@@ -2931,7 +2931,7 @@ void main() {
       );
 
       final Material material = tester.widget<Material>(searchBarMaterial);
-      checkSearchBarDefaults(tester, theme.colorScheme, material);
+      await checkSearchBarDefaults(tester, theme.colorScheme, material);
     });
 
     testWidgets('Overall InputDecorationThemeData does not override text field style'
