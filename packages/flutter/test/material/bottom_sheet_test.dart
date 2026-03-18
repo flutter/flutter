@@ -3209,6 +3209,57 @@ void main() {
 
     expect(find.byKey(sheetKey), findsNothing);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/183299.
+  testWidgets('ModalBottomSheet does not jump when drag gesture ends', (WidgetTester tester) async {
+    final Key sheetKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () => showModalBottomSheet<void>(
+                context: context,
+                showDragHandle: true,
+                builder: (context) => SizedBox.expand(key: sheetKey, child: const SizedBox()),
+              ),
+              child: const Text('Open'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+
+    final Finder dragHandle = find.bySemanticsLabel('Dismiss');
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(dragHandle));
+
+    await gesture.moveBy(const Offset(0, 50));
+    await tester.pump();
+
+    await gesture.moveBy(const Offset(0, 50));
+    await tester.pump();
+
+    await gesture.moveBy(const Offset(0, 100));
+    await tester.pump();
+
+    final double yBeforeUp = tester.getTopLeft(find.byKey(sheetKey)).dy;
+
+    await gesture.up();
+    await tester.pump();
+
+    final double yAfterUp = tester.getTopLeft(find.byKey(sheetKey)).dy;
+
+    // The bottom sheet should not jump when the drag gesture ends.
+    // Its position immediately after releasing the gesture should remain
+    // approximately the same as the last dragged position, ensuring the
+    // animation continues from the current visual offset.
+    expect(yAfterUp, closeTo(yBeforeUp, 0.1));
+  });
 }
 
 class _TestPage extends StatelessWidget {
