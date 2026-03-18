@@ -168,6 +168,32 @@ static void parse_locale(const gchar* locale,
   }
 }
 
+/// Stores a weak reference to the renderable with the given ID.
+static void set_renderable(FlEngine* self,
+                           int64_t view_id,
+                           FlRenderable* renderable) {
+  GWeakRef* ref = g_new(GWeakRef, 1);
+  g_weak_ref_init(ref, G_OBJECT(renderable));
+  g_hash_table_insert(self->renderables_by_view_id, GINT_TO_POINTER(view_id),
+                      ref);
+}
+
+/// Returns the renderable with the given ID, or nullptr if no such view exists.
+/// Returns a reference to the renderable.
+static FlRenderable* get_renderable(FlEngine* self, int64_t view_id) {
+  GWeakRef* ref = static_cast<GWeakRef*>(g_hash_table_lookup(
+      self->renderables_by_view_id, GINT_TO_POINTER(view_id)));
+  if (ref == nullptr) {
+    return nullptr;
+  }
+  return FL_RENDERABLE(g_weak_ref_get(ref));
+}
+
+/// Remove a renderable that no longer exists.
+static void remove_renderable(FlEngine* self, int64_t view_id) {
+  g_hash_table_remove(self->renderables_by_view_id, GINT_TO_POINTER(view_id));
+}
+
 static void view_added_cb(const FlutterAddViewResult* result) {
   g_autoptr(GTask) task = G_TASK(result->user_data);
 
@@ -363,12 +389,7 @@ static bool compositor_present_view_callback(
     const FlutterPresentViewInfo* info) {
   FlEngine* self = static_cast<FlEngine*>(info->user_data);
 
-  GWeakRef* ref = static_cast<GWeakRef*>(g_hash_table_lookup(
-      self->renderables_by_view_id, GINT_TO_POINTER(info->view_id)));
-  if (ref == nullptr) {
-    return true;
-  }
-  g_autoptr(FlRenderable) renderable = FL_RENDERABLE(g_weak_ref_get(ref));
+  g_autoptr(FlRenderable) renderable = get_renderable(self, info->view_id);
   if (renderable == nullptr) {
     return true;
   }
@@ -883,10 +904,7 @@ void fl_engine_notify_display_update(FlEngine* self,
 }
 
 void fl_engine_set_implicit_view(FlEngine* self, FlRenderable* renderable) {
-  GWeakRef* ref = g_new(GWeakRef, 1);
-  g_weak_ref_init(ref, G_OBJECT(renderable));
-  g_hash_table_insert(self->renderables_by_view_id,
-                      GINT_TO_POINTER(flutter::kFlutterImplicitViewId), ref);
+  set_renderable(self, flutter::kFlutterImplicitViewId, renderable);
 }
 
 FlutterViewId fl_engine_add_view(FlEngine* self,
@@ -906,10 +924,7 @@ FlutterViewId fl_engine_add_view(FlEngine* self,
   FlutterViewId view_id = self->next_view_id;
   self->next_view_id++;
 
-  GWeakRef* ref = g_new(GWeakRef, 1);
-  g_weak_ref_init(ref, G_OBJECT(renderable));
-  g_hash_table_insert(self->renderables_by_view_id, GINT_TO_POINTER(view_id),
-                      ref);
+  set_renderable(self, view_id, renderable);
 
   // We don't know which display this view will open on, so set to zero and this
   // will be updated in a following FlutterWindowMetricsEvent
@@ -955,9 +970,7 @@ gboolean fl_engine_add_view_finish(FlEngine* self,
 FlRenderable* fl_engine_get_renderable(FlEngine* self, FlutterViewId view_id) {
   g_return_val_if_fail(FL_IS_ENGINE(self), nullptr);
 
-  GWeakRef* ref = static_cast<GWeakRef*>(g_hash_table_lookup(
-      self->renderables_by_view_id, GINT_TO_POINTER(view_id)));
-  return ref != nullptr ? FL_RENDERABLE(g_weak_ref_get(ref)) : nullptr;
+  return get_renderable(self, view_id);
 }
 
 void fl_engine_remove_view(FlEngine* self,
@@ -967,7 +980,7 @@ void fl_engine_remove_view(FlEngine* self,
                            gpointer user_data) {
   g_return_if_fail(FL_IS_ENGINE(self));
 
-  g_hash_table_remove(self->renderables_by_view_id, GINT_TO_POINTER(view_id));
+  remove_renderable(self, view_id);
 
   g_autoptr(GTask) task = g_task_new(self, cancellable, callback, user_data);
 
