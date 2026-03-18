@@ -447,8 +447,11 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
                    ? ScrollCacheExtent.pixels(cacheExtent)
                    : RenderAbstractViewport.kDefaultScrollCacheExtent,
            },
+       _hasSetCacheExtentStyle = cacheExtentStyle != null || scrollCacheExtent != null,
        _paintOrder = paintOrder,
        _clipBehavior = clipBehavior;
+
+  bool _hasSetCacheExtentStyle;
 
   /// Report the semantics of this node, for example for accessibility purposes.
   ///
@@ -566,7 +569,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     if (value == null) {
       _scrollCacheExtent = RenderAbstractViewport.kDefaultScrollCacheExtent;
     } else {
-      if (scrollCacheExtent == RenderAbstractViewport.kDefaultScrollCacheExtent) {
+      if (!_hasSetCacheExtentStyle) {
         // The scrollCacheExtent was default value, this means developer hasn't set the
         // cacheExtentStyle yet. Thus default to pixels style.
         _scrollCacheExtent = ScrollCacheExtent.pixels(value);
@@ -644,6 +647,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     if (value == cacheExtentStyle) {
       return;
     }
+    _hasSetCacheExtentStyle = true;
     _scrollCacheExtent = switch (value) {
       CacheExtentStyle.pixel => ScrollCacheExtent.pixels(cacheExtent!),
       CacheExtentStyle.viewport => ScrollCacheExtent.viewport(cacheExtent!),

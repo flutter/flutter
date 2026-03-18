@@ -278,4 +278,62 @@ void main() {
 
     handle.dispose();
   });
+
+  testWidgets(
+    'RenderViewportBase.cacheExtent setter should not switch style if explicitly set to default fraction',
+    (WidgetTester tester) async {
+      final offset = ViewportOffset.fixed(0.0);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Viewport(
+            offset: offset,
+            cacheExtent: 0.8,
+            cacheExtentStyle: CacheExtentStyle.viewport, // Explicitly set to same as default
+            slivers: const <Widget>[SliverToBoxAdapter(child: SizedBox(height: 1000))],
+          ),
+        ),
+      );
+
+      final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
+      expect(viewport.cacheExtentStyle, CacheExtentStyle.viewport);
+      expect(viewport.cacheExtent, 0.8);
+
+      // Now set cacheExtent to 0.5. Since it was exactly 0.8 (default),
+      // it hits the heuristic and switches to pixels(0.5)!
+      viewport.cacheExtent = 0.5;
+
+      // THIS IS UNEXPECTED: developer explicitly chose viewport style
+      expect(
+        viewport.cacheExtentStyle,
+        CacheExtentStyle.viewport,
+        reason: 'Style should have remained viewport because it was explicitly chosen',
+      );
+    },
+  );
+
+  testWidgets('RenderViewportBase correctly switches to pixels if using default', (
+    WidgetTester tester,
+  ) async {
+    final offset = ViewportOffset.fixed(0.0);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Viewport(
+          offset: offset,
+          slivers: const <Widget>[SliverToBoxAdapter(child: SizedBox(height: 1000))],
+        ),
+      ),
+    );
+
+    final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
+    // Truly default
+    expect(viewport.cacheExtentStyle, CacheExtentStyle.viewport);
+    expect(viewport.cacheExtent, 0.8);
+
+    // Set to 250.0 pixels
+    viewport.cacheExtent = 250.0;
+    expect(viewport.cacheExtentStyle, CacheExtentStyle.pixel);
+    expect(viewport.cacheExtent, 250.0);
+  });
 }

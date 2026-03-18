@@ -577,12 +577,15 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
                    CacheExtentStyle.viewport => ScrollCacheExtent.viewport(cacheExtent),
                  }
                : RenderAbstractViewport.kDefaultScrollCacheExtent),
+       _hasSetCacheExtentStyle = cacheExtentStyle != null || scrollCacheExtent != null,
        _clipBehavior = clipBehavior {
     assert(() {
       _debugDanglingKeepAlives = <RenderBox>[];
       return true;
     }());
   }
+
+  bool _hasSetCacheExtentStyle;
 
   /// Which part of the content inside the viewport should be visible in the
   /// horizontal axis.
@@ -722,10 +725,16 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     if (value == null) {
       _scrollCacheExtent = RenderAbstractViewport.kDefaultScrollCacheExtent;
     } else {
-      _scrollCacheExtent = switch (cacheExtentStyle) {
-        CacheExtentStyle.pixel => ScrollCacheExtent.pixels(value),
-        CacheExtentStyle.viewport => ScrollCacheExtent.viewport(value),
-      };
+      if (!_hasSetCacheExtentStyle) {
+        // The scrollCacheExtent was still completely default value, this means developer hasn't set the
+        // cacheExtentStyle yet. Thus default to pixels style for legacy compatibility.
+        _scrollCacheExtent = ScrollCacheExtent.pixels(value);
+      } else {
+        _scrollCacheExtent = switch (cacheExtentStyle) {
+          CacheExtentStyle.pixel => ScrollCacheExtent.pixels(value),
+          CacheExtentStyle.viewport => ScrollCacheExtent.viewport(value),
+        };
+      }
     }
     markNeedsLayout();
   }
@@ -744,6 +753,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     if (value == cacheExtentStyle) {
       return;
     }
+    _hasSetCacheExtentStyle = value != null;
     if (value == null) {
       if (_scrollCacheExtent == RenderAbstractViewport.kDefaultScrollCacheExtent) {
         return;
