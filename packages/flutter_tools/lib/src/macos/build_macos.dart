@@ -127,7 +127,7 @@ Future<void> buildMacOS({
   final XcodeProjectInfo? projectInfo = await globals.xcodeProjectInterpreter?.getInfo(
     xcodeProject.parent.path,
     projectFilename: xcodeProjectName,
-    dartToolDir: flutterProject.dartTool,
+    buildDirectory: flutterBuildDir,
   );
   final String? scheme = projectInfo?.schemeFor(buildInfo);
   if (scheme == null) {

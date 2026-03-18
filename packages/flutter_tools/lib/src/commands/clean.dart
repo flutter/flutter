@@ -82,7 +82,7 @@ class CleanCommand extends FlutterCommand {
       final XcodeProjectInterpreter xcodeProjectInterpreter = globals.xcodeProjectInterpreter!;
       final XcodeProjectInfo projectInfo = (await xcodeProjectInterpreter.getInfo(
         xcodeWorkspace.parent.path,
-        dartToolDir: xcodeProject.parent.dartTool,
+        buildDirectory: globals.fs.directory(xcodeProject.darwinPlatform.buildDirectory()),
       ))!;
       if (argResults?.wasParsed('scheme') ?? false) {
         final scheme = argResults!['scheme'] as String;
@@ -96,7 +96,7 @@ class CleanCommand extends FlutterCommand {
           xcodeWorkspace.path,
           scheme,
           verbose: _verbose,
-          dartToolDir: xcodeProject.parent.dartTool,
+          buildDirectory: globals.fs.directory(xcodeProject.darwinPlatform.buildDirectory()),
         );
       } else {
         for (final String scheme in projectInfo.schemes) {
@@ -104,7 +104,7 @@ class CleanCommand extends FlutterCommand {
             xcodeWorkspace.path,
             scheme,
             verbose: _verbose,
-            dartToolDir: xcodeProject.parent.dartTool,
+            buildDirectory: globals.fs.directory(xcodeProject.darwinPlatform.buildDirectory()),
           );
         }
       }

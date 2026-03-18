@@ -10,6 +10,7 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../darwin/darwin.dart';
 import '../features.dart';
+import '../ios/xcodeproj.dart';
 import '../plugins.dart';
 import '../project.dart';
 import 'cocoapods.dart';
@@ -30,7 +31,9 @@ class DarwinDependencyManagement {
     required Logger logger,
     required Analytics analytics,
     required Platform platform,
-  }) : _project = project,
+    required XcodeProjectInterpreter? xcodeProjectInterpreter,
+  }) : _xcodeProjectInterpreter = xcodeProjectInterpreter,
+       _project = project,
        _plugins = plugins,
        _cocoapods = cocoapods,
        _swiftPackageManager = swiftPackageManager,
@@ -49,6 +52,7 @@ class DarwinDependencyManagement {
   final Logger _logger;
   final Analytics _analytics;
   final Platform _hostPlatform;
+  final XcodeProjectInterpreter? _xcodeProjectInterpreter;
 
   /// Generates/updates required files and project settings for Darwin
   /// Dependency Managers (CocoaPods and Swift Package Manager). Projects may
@@ -66,6 +70,13 @@ class DarwinDependencyManagement {
     final XcodeBasedProject xcodeProject = platform.xcodeProject(_project);
     if (xcodeProject.usesSwiftPackageManager) {
       await _swiftPackageManager.generatePluginsSwiftPackage(_plugins, platform, xcodeProject);
+
+      // Start the SwiftPM dependency resolution in the background.
+      await _xcodeProjectInterpreter?.prefetchSwiftPackages(
+        xcodeProject.hostAppRoot.path,
+        waitForCompletion: false,
+        buildDirectory: _fileSystem.directory(platform.buildDirectory()),
+      );
     } else if (xcodeProject.flutterPluginSwiftPackageInProjectSettings) {
       // If Swift Package Manager is not enabled but the project is already
       // integrated for Swift Package Manager, pass no plugins to the generator.

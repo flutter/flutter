@@ -290,7 +290,10 @@ Future<XcodeBuildResult> buildXcodeProject({
   final bool incrementalBuild = targetBuildDir != null && targetBuildDir.existsSync();
 
   final buildCommands = <String>[
-    ...globals.xcode!.xcodebuildCommand(app.project.parent.dartTool, skipPackageResolution: false),
+    ...globals.xcode!.xcodebuildCommand(
+      globals.fs.directory(buildDirectoryPath),
+      skipPackageResolution: false,
+    ),
     '-configuration',
     configuration,
   ];

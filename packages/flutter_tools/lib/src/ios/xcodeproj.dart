@@ -185,12 +185,12 @@ class XcodeProjectInterpreter {
   /// When [skipPackageResolution] is true, it uses arguments to attempt skipping any Swift package
   /// resolution or updates. This should be false when running [prefetchSwiftPackages], so packages
   /// should already be resolved, downloaded, and updated on subsquent `xcodebuild` commands.
-  List<String> xcodebuildCommand(Directory dartToolDir, {bool skipPackageResolution = true}) {
+  List<String> xcodebuildCommand(Directory buildDirectory, {bool skipPackageResolution = true}) {
     return <String>[
       ...xcrunCommand(),
       'xcodebuild',
       '-clonedSourcePackagesDirPath',
-      dartToolDir.childDirectory('swift_package_cache').path,
+      buildDirectory.childDirectory('swift_package_cache').path,
       if (skipPackageResolution) ...<String>[
         '-disableAutomaticPackageResolution',
         '-skipPackageUpdates',
@@ -207,7 +207,6 @@ class XcodeProjectInterpreter {
   /// return build settings for the first discovered target (by default this is Runner).
   Future<Map<String, String>> getBuildSettings(
     String projectPath, {
-    required Directory dartToolDir,
     required XcodeProjectBuildContext buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
@@ -222,7 +221,7 @@ class XcodeProjectInterpreter {
       XcodeSdk.WatchOS || XcodeSdk.WatchSimulator => getIosBuildDirectory(),
     };
     final showBuildSettingsCommand = <String>[
-      ...xcodebuildCommand(dartToolDir),
+      ...xcodebuildCommand(globals.fs.directory(buildDir)),
       '-project',
       _fileSystem.path.absolute(projectPath),
       if (scheme != null) ...<String>['-scheme', scheme],
@@ -334,10 +333,10 @@ class XcodeProjectInterpreter {
     String workspacePath,
     String scheme, {
     bool verbose = false,
-    required Directory dartToolDir,
+    required Directory buildDirectory,
   }) async {
     await _processUtils.run(<String>[
-      ...xcodebuildCommand(dartToolDir),
+      ...xcodebuildCommand(buildDirectory),
       '-workspace',
       workspacePath,
       '-scheme',
@@ -367,13 +366,13 @@ class XcodeProjectInterpreter {
   /// what Swift packages are being fetched.
   Future<void> prefetchSwiftPackages(
     String projectPath, {
-    required Directory dartToolDir,
+    required Directory buildDirectory,
     bool quiet = true,
     bool waitForCompletion = true,
   }) async {
     Status? status;
     final command = <String>[
-      ...xcodebuildCommand(dartToolDir, skipPackageResolution: false),
+      ...xcodebuildCommand(buildDirectory, skipPackageResolution: false),
       '-resolvePackageDependencies',
     ];
     try {
@@ -408,7 +407,7 @@ class XcodeProjectInterpreter {
                 status?.cancel();
                 if (!printFetchWarnings) {
                   globals.logger.printStatus(
-                    'Swift Package Manager is fetching dependencies. This may take several minutes the first time...',
+                    'Xcode is fetching Swift Package Manager dependencies. This may take several minutes...',
                   );
                   printFetchWarnings = true;
                 }
@@ -436,9 +435,9 @@ class XcodeProjectInterpreter {
   Future<XcodeProjectInfo?> getInfo(
     String projectPath, {
     String? projectFilename,
-    required Directory dartToolDir,
+    required Directory buildDirectory,
   }) async {
-    await prefetchSwiftPackages(projectPath, dartToolDir: dartToolDir, quiet: false);
+    await prefetchSwiftPackages(projectPath, buildDirectory: buildDirectory, quiet: false);
 
     // The exit code returned by 'xcodebuild -list' when either:
     // * -project is passed and the given project isn't there, or
@@ -449,7 +448,7 @@ class XcodeProjectInterpreter {
     bool allowedFailures(int c) => c == missingProjectExitCode || c == corruptedProjectExitCode;
     final RunResult result = await _processUtils.run(
       <String>[
-        ...xcodebuildCommand(dartToolDir),
+        ...xcodebuildCommand(buildDirectory),
         '-list',
         if (projectFilename != null) ...<String>['-project', projectFilename],
       ],
