@@ -124,7 +124,7 @@ class PlatformViewManager {
   /// ```html
   /// <flt-platform-view id="flt-pv-VIEW_ID" slot="..." aria-hidden="true">
   ///   <arbitrary-html-elements />
-  /// </flt-platform-view-slot>
+  /// </flt-platform-view>
   /// ```
   ///
   /// The `arbitrary-html-elements` are the result of the call to the user-supplied

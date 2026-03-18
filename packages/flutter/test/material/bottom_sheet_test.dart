@@ -3047,6 +3047,219 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('ModalBottomSheet uses AnimationStyle curve', (WidgetTester tester) async {
+    final Key sheetKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  showModalBottomSheet<void>(
+                    context: context,
+                    sheetAnimationStyle: const AnimationStyle(curve: Curves.linear),
+                    builder: (BuildContext context) {
+                      return SizedBox.expand(
+                        key: sheetKey,
+                        child: FilledButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Close'),
+                        ),
+                      );
+                    },
+                  );
+                },
+                child: const Text('X'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump();
+
+    // Advance the animation by 50ms.
+    await tester.pump(const Duration(milliseconds: 50));
+    final double openExtent1 = tester.getTopLeft(find.byKey(sheetKey)).dy;
+
+    // Advance the animation by an additional 50ms.
+    await tester.pump(const Duration(milliseconds: 50));
+    final double openExtent2 = tester.getTopLeft(find.byKey(sheetKey)).dy;
+
+    // Advance the animation by an additional 50ms.
+    await tester.pump(const Duration(milliseconds: 50));
+    final double openExtent3 = tester.getTopLeft(find.byKey(sheetKey)).dy;
+
+    // For the linear curve, the distance covered in each time interval should
+    // be the same.
+    expect(openExtent1 - openExtent2, closeTo(openExtent2 - openExtent3, 0.1));
+    await tester.pumpAndSettle();
+
+    // Dismiss the bottom sheet.
+    await tester.tap(find.widgetWithText(FilledButton, 'Close'));
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('ModalBottomSheet uses AnimationStyle reverseCurve', (WidgetTester tester) async {
+    final Key sheetKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  showModalBottomSheet<void>(
+                    context: context,
+                    sheetAnimationStyle: const AnimationStyle(reverseCurve: Curves.linear),
+                    builder: (BuildContext context) {
+                      return SizedBox.expand(
+                        key: sheetKey,
+                        child: FilledButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Close'),
+                        ),
+                      );
+                    },
+                  );
+                },
+                child: const Text('X'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    // Start the dismissal.
+    await tester.tap(find.text('Close'));
+    await tester.pump();
+
+    // Advance the animation by 50ms during the close transition.
+    await tester.pump(const Duration(milliseconds: 50));
+    final double closeExtent1 = tester.getTopLeft(find.byKey(sheetKey)).dy;
+
+    // Advance the animation by an additional 50ms.
+    await tester.pump(const Duration(milliseconds: 50));
+    final double closeExtent2 = tester.getTopLeft(find.byKey(sheetKey)).dy;
+
+    // Advance the animation by an additional 50ms.
+    await tester.pump(const Duration(milliseconds: 50));
+    final double closeExtent3 = tester.getTopLeft(find.byKey(sheetKey)).dy;
+
+    // For the linear curve, the distance covered in each time interval should
+    // be the same.
+    expect(closeExtent2 - closeExtent1, closeTo(closeExtent3 - closeExtent2, 0.1));
+
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('ModalBottomSheet with AnimationStyle.noAnimation opens and closes immediately', (
+    WidgetTester tester,
+  ) async {
+    final Key sheetKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  showModalBottomSheet<void>(
+                    context: context,
+                    sheetAnimationStyle: AnimationStyle.noAnimation,
+                    builder: (BuildContext context) {
+                      return SizedBox(
+                        key: sheetKey,
+                        child: FilledButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Close'),
+                        ),
+                      );
+                    },
+                  );
+                },
+                child: const Text('Open'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open'));
+    await tester.pump();
+
+    expect(find.byKey(sheetKey), findsOneWidget);
+
+    await tester.tap(find.text('Close'));
+    await tester.pump();
+
+    expect(find.byKey(sheetKey), findsNothing);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/183299.
+  testWidgets('ModalBottomSheet does not jump when drag gesture ends', (WidgetTester tester) async {
+    final Key sheetKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () => showModalBottomSheet<void>(
+                context: context,
+                showDragHandle: true,
+                builder: (context) => SizedBox.expand(key: sheetKey, child: const SizedBox()),
+              ),
+              child: const Text('Open'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+
+    final Finder dragHandle = find.bySemanticsLabel('Dismiss');
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(dragHandle));
+
+    await gesture.moveBy(const Offset(0, 50));
+    await tester.pump();
+
+    await gesture.moveBy(const Offset(0, 50));
+    await tester.pump();
+
+    await gesture.moveBy(const Offset(0, 100));
+    await tester.pump();
+
+    final double yBeforeUp = tester.getTopLeft(find.byKey(sheetKey)).dy;
+
+    await gesture.up();
+    await tester.pump();
+
+    final double yAfterUp = tester.getTopLeft(find.byKey(sheetKey)).dy;
+
+    // The bottom sheet should not jump when the drag gesture ends.
+    // Its position immediately after releasing the gesture should remain
+    // approximately the same as the last dragged position, ensuring the
+    // animation continues from the current visual offset.
+    expect(yAfterUp, closeTo(yBeforeUp, 0.1));
+  });
 }
 
 class _TestPage extends StatelessWidget {
