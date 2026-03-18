@@ -30,6 +30,7 @@ class _NavRailExampleState extends State<NavRailExample> {
   bool showLeading = false;
   bool showTrailing = false;
   double groupAlignment = -1.0;
+  MainAxisAlignment? alignment;
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +41,7 @@ class _NavRailExampleState extends State<NavRailExample> {
             NavigationRail(
               selectedIndex: _selectedIndex,
               groupAlignment: groupAlignment,
+              mainAxisAlignment: alignment,
               onDestinationSelected: (int index) {
                 setState(() {
                   _selectedIndex = index;
@@ -54,7 +56,7 @@ class _NavRailExampleState extends State<NavRailExample> {
                       },
                       child: const Icon(Icons.add),
                     )
-                  : const SizedBox(),
+                  : null,
               trailing: showTrailing
                   ? IconButton(
                       onPressed: () {
@@ -62,7 +64,7 @@ class _NavRailExampleState extends State<NavRailExample> {
                       },
                       icon: const Icon(Icons.more_horiz_rounded),
                     )
-                  : const SizedBox(),
+                  : null,
               destinations: const <NavigationRailDestination>[
                 NavigationRailDestination(
                   icon: Icon(Icons.favorite_border),
@@ -130,6 +132,47 @@ class _NavRailExampleState extends State<NavRailExample> {
                     onSelectionChanged: (Set<double> newSelection) {
                       setState(() {
                         groupAlignment = newSelection.first;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  const Text('Main Axis Alignment:'),
+                  const SizedBox(height: 10),
+                  SegmentedButton<MainAxisAlignment?>(
+                    segments: const <ButtonSegment<MainAxisAlignment?>>[
+                      ButtonSegment<MainAxisAlignment?>(
+                        value: null,
+                        label: Text('Default'),
+                      ),
+                      ButtonSegment<MainAxisAlignment?>(
+                        value: MainAxisAlignment.start,
+                        label: Text('Start'),
+                      ),
+                      ButtonSegment<MainAxisAlignment?>(
+                        value: MainAxisAlignment.end,
+                        label: Text('End'),
+                      ),
+                      ButtonSegment<MainAxisAlignment?>(
+                        value: MainAxisAlignment.center,
+                        label: Text('Center'),
+                      ),
+                      ButtonSegment<MainAxisAlignment?>(
+                        value: MainAxisAlignment.spaceEvenly,
+                        label: Text('Space Evenly'),
+                      ),
+                      ButtonSegment<MainAxisAlignment?>(
+                        value: MainAxisAlignment.spaceBetween,
+                        label: Text('Space Between'),
+                      ),
+                      ButtonSegment<MainAxisAlignment?>(
+                        value: MainAxisAlignment.spaceAround,
+                        label: Text('Space Around'),
+                      ),
+                    ],
+                    selected: <MainAxisAlignment?>{alignment},
+                    onSelectionChanged: (Set<MainAxisAlignment?> newSelection) {
+                      setState(() {
+                        alignment = newSelection.first;
                       });
                     },
                   ),
