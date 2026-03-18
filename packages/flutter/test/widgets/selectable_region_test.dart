@@ -872,6 +872,22 @@ void main() {
         isTrue,
       );
     });
+
+    testWidgets('SelectableRegion does not crash at zero area', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Center(
+            child: SizedBox.shrink(
+              child: SelectableRegion(
+                selectionControls: materialTextSelectionControls,
+                child: const SelectionSpy(),
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(SelectableRegion)), Size.zero);
+    });
   });
 
   testWidgets('Can extend StaticSelectionContainerDelegate', (WidgetTester tester) async {

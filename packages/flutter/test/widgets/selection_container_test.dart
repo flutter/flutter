@@ -200,6 +200,21 @@ void main() {
     await tester.pumpAndSettle();
     expect(registrar.selectables.length, 1);
   });
+
+  testWidgets('SelectionContainer does not crash at zero area', (WidgetTester tester) async {
+    final delegate = TestContainerDelegate();
+    addTearDown(delegate.dispose);
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: SelectionContainer(delegate: delegate, child: const Placeholder()),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SelectionContainer)), Size.zero);
+  });
 }
 
 class TestContainerDelegate extends MultiSelectableSelectionContainerDelegate {

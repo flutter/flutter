@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('SemanticsDebugger will schedule a frame', (WidgetTester tester) async {
@@ -586,6 +587,17 @@ void main() {
     );
     expect(tester.binding.semanticsEnabled, isTrue);
   }, semanticsEnabled: false);
+
+  testWidgets('SemanticsDebugger does not crash at zero', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const TestWidgetsApp(
+        home: Center(
+          child: SizedBox.shrink(child: SemanticsDebugger(child: Placeholder())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SemanticsDebugger)), Size.zero);
+  });
 }
 
 String _getMessageShownInSemanticsDebugger({

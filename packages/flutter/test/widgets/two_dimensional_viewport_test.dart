@@ -1497,6 +1497,24 @@ void main() {
         await tester.pumpAndSettle();
       });
     });
+
+    testWidgets('TwoDimensionalScrollable does not crash at zero', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox.shrink(
+              child: TwoDimensionalScrollable(
+                horizontalDetails: const ScrollableDetails.horizontal(),
+                verticalDetails: const ScrollableDetails.vertical(),
+                viewportBuilder: (_, _, _) => const Placeholder(),
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(TwoDimensionalScrollable)), Size.zero);
+    });
   });
 
   testWidgets('TwoDimensionalViewport asserts against axes mismatch', (WidgetTester tester) async {

@@ -1725,6 +1725,17 @@ void main() {
     expect(getScrollOffset(tester), 200);
     await gesture.up();
   });
+
+  testWidgets('Scrollable does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: SizedBox.shrink(child: Scrollable(viewportBuilder: (_, _) => const Placeholder())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Scrollable)), Size.zero);
+  });
 }
 
 // ignore: must_be_immutable
