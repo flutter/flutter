@@ -774,13 +774,9 @@ final class _Size extends Struct {
   external double height;
 
   @override
-  String toString() {
-    return 'Size(width: $width, height: $height)';
-  }
+  String toString() => 'Size(width: $width, height: $height)';
 
-  Size toSize() {
-    return Size(width, height);
-  }
+  Size toSize() => Size(width, height);
 }
 
 final class _Offset extends Struct {
@@ -791,13 +787,9 @@ final class _Offset extends Struct {
   external double y;
 
   @override
-  String toString() {
-    return 'Offset(x: $x, y: $y)';
-  }
+  String toString() => 'Offset(x: $x, y: $y)';
 
-  Offset toOffset() {
-    return Offset(x, y);
-  }
+  Offset toOffset() => Offset(x, y);
 }
 
 final class _Rect extends Struct {
