@@ -384,6 +384,7 @@ class RegularWindowControllerMacOS extends RegularWindowController with _WindowC
   }) : _delegate = delegate,
        super.empty() {
     if (!decorated) {
+      // TODO(team-macos): Implement undecorated windows on macOS.
       // See https://github.com/flutter/flutter/issues/183560
       throw UnimplementedError('Undecorated windows are not yet implemented on macOS.');
     }
@@ -525,8 +526,9 @@ class DialogWindowControllerMacOS extends DialogWindowController with _WindowCon
   }) : _delegate = delegate,
        super.empty() {
     if (!decorated) {
+      // TODO(team-macos): Implement undecorated windows on macOS.
       // See https://github.com/flutter/flutter/issues/183560
-      throw UnimplementedError('Undecorated windows are not yet implemented on MacOS.');
+      throw UnimplementedError('Undecorated windows are not yet implemented on macOS.');
     }
 
     _initController(owner);
