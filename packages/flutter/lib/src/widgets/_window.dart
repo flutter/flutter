@@ -893,7 +893,7 @@ abstract class PopupWindowController extends BaseWindowController {
   @internal
   void updatePosition({Rect? anchorRect, WindowPositioner? positioner});
 
-  /// Returns the offset of popup's top-left corner in parent window client area.
+  /// Returns the offset of the popup's top-left corner in the parent window client area.
   ///
   /// The offset is in logical coordinates.
   ///
