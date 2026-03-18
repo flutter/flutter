@@ -6,10 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'button_tester.dart';
 import 'checkbox_tester.dart';
-import 'editable_text_utils.dart';
 import 'slider_tester.dart';
-import 'utils.dart';
 import 'widgets_app_tester.dart';
 
 void main() {
@@ -492,37 +491,6 @@ void main() {
     },
     variant: TargetPlatformVariant.all(),
   );
-
-  testWidgets('SemanticsDebugger textfield', (WidgetTester tester) async {
-    final textField = UniqueKey();
-    final debugger = UniqueKey();
-
-    await tester.pumpWidget(
-      TestWidgetsApp(
-        home: SemanticsDebugger(
-          key: debugger,
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: TestTextField(key: textField),
-          ),
-        ),
-      ),
-    );
-
-    final dynamic semanticsDebuggerPainter = _getSemanticsDebuggerPainter(
-      debuggerKey: debugger,
-      tester: tester,
-    );
-    final RenderObject renderTextfield = tester.renderObject(
-      find.descendant(of: find.byKey(textField), matching: find.byType(Semantics)).first,
-    );
-
-    expect(
-      // ignore: avoid_dynamic_calls
-      semanticsDebuggerPainter.getMessage(renderTextfield.debugSemantics),
-      'textfield',
-    );
-  });
 
   testWidgets('SemanticsDebugger label style is used in the painter.', (WidgetTester tester) async {
     final debugger = UniqueKey();

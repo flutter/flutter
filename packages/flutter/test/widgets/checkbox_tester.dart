@@ -6,9 +6,6 @@
 
 import 'package:flutter/widgets.dart';
 
-// TODO(rizwan-saleem): Move this to material package.
-// Tracking issue: https://github.com/flutter/flutter/issues/177414
-
 /// A very basic checkbox for use in widget tests.
 ///
 /// This widget provides minimal checkbox functionality without depending on

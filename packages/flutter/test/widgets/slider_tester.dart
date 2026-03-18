@@ -6,9 +6,6 @@
 
 import 'package:flutter/widgets.dart';
 
-// TODO(rizwan-saleem): Move this to material package.
-// Tracking issue: https://github.com/flutter/flutter/issues/177414
-
 /// A very basic slider for use in widget tests.
 ///
 /// This widget provides minimal slider functionality without depending on
