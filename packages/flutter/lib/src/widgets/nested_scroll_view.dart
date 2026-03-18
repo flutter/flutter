@@ -573,11 +573,14 @@ typedef _NestedScrollActivityGetter = ScrollActivity Function(_NestedScrollPosit
 class _CoordinatedScrollActivity extends ScrollActivity {
   _CoordinatedScrollActivity(
     super.delegate, {
+    required ScrollActivity unifiedActivity,
     required bool shouldIgnorePointer,
     required bool isScrolling,
-  }) : _shouldIgnorePointer = shouldIgnorePointer,
+  }) : _unifiedActivity = unifiedActivity,
+       _shouldIgnorePointer = shouldIgnorePointer,
        _isScrolling = isScrolling;
 
+  final ScrollActivity _unifiedActivity;
   final bool _shouldIgnorePointer;
   final bool _isScrolling;
 
@@ -588,7 +591,7 @@ class _CoordinatedScrollActivity extends ScrollActivity {
   bool get isScrolling => _isScrolling;
 
   @override
-  double get velocity => 0.0;
+  double get velocity => _unifiedActivity.velocity;
 }
 
 class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldController {
@@ -718,6 +721,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     _outerPosition!.beginActivity(
       _CoordinatedScrollActivity(
         _outerPosition!,
+        unifiedActivity: activity,
         shouldIgnorePointer: shouldIgnorePointer,
         isScrolling: activity.isScrolling,
       ),
@@ -726,6 +730,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       position.beginActivity(
         _CoordinatedScrollActivity(
           position,
+          unifiedActivity: activity,
           shouldIgnorePointer: shouldIgnorePointer,
           isScrolling: activity.isScrolling,
         ),
