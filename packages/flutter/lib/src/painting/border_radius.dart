@@ -34,7 +34,7 @@ abstract class BorderRadiusGeometry {
 
   /// Creates a [BorderRadius] where all radii are [Radius.circular(radius)].
   ///
-  /// It's better to use the const [BorderRadiusGeometry.all] constructor
+  /// Consider using the `const` [BorderRadiusGeometry.all] constructor
   /// for better performance.
   // The radius applies equally on all sides, so BorderRadiusDirectional is
   // irrelevant in this case.
@@ -357,7 +357,7 @@ class BorderRadius extends BorderRadiusGeometry {
 
   /// Creates a border radius where all radii are [Radius.circular(radius)].
   ///
-  /// It's better to use the const [BorderRadius.all] constructor for better performance.
+  /// Consider using the `const` [BorderRadius.all] constructor for better performance.
   BorderRadius.circular(double radius) : this.all(Radius.circular(radius));
 
   /// Creates a vertically symmetric border radius where the top and bottom
@@ -607,7 +607,7 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
 
   /// Creates a border radius where all radii are [Radius.circular(radius)].
   ///
-  /// It's better to use the const [BorderRadiusDirectional.all] constructor
+  /// Consider using the `const` [BorderRadiusDirectional.all] constructor
   /// for better performance.
   BorderRadiusDirectional.circular(double radius) : this.all(Radius.circular(radius));
 
