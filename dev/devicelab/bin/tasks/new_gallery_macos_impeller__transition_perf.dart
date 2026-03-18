@@ -4,9 +4,10 @@
 
 import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/tasks/perf_tests.dart';
+import 'package:flutter_devicelab/tasks/new_gallery.dart';
 
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.macos;
-  await task(createPlatformViewStartupTest(enableImpeller: false));
+
+  await task(NewGalleryPerfTest(enableImpeller: true).run);
 }
