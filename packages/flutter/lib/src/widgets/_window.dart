@@ -900,6 +900,50 @@ abstract class PopupWindowController extends BaseWindowController {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   Offset get offsetInParent;
+
+  /// Request activations of the window hierarchy to which this popup belongs.
+  ///
+  /// The popup window will receive keyboard input when the closest regular
+  /// or dialog window is active and a focus node within this popup window
+  /// is focused.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void activate() {
+    BaseWindowController parent = this.parent;
+    while (true) {
+      if (parent is RegularWindowController) {
+        parent.activate();
+        break;
+      } else if (parent is DialogWindowController) {
+        parent.activate();
+        break;
+      } else if (parent is PopupWindowController) {
+        parent = parent.parent;
+      } else {
+        throw StateError('Unexpected controller in hierarchy $parent');
+      }
+    }
+  }
+
+  /// Whether the window this popup belongs to is currently activated.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  bool get isActivated {
+    BaseWindowController parent = this.parent;
+    while (true) {
+      if (parent is RegularWindowController) {
+        return parent.isActivated;
+      } else if (parent is DialogWindowController) {
+        return parent.isActivated;
+      } else if (parent is PopupWindowController) {
+        parent = parent.parent;
+      } else {
+        throw StateError('Unexpected controller in hierarchy $parent');
+      }
+    }
+  }
 }
 
 /// Delegate class for satellite window controller.
@@ -1854,7 +1898,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
       RegularWindowController() => controller.isActivated,
       DialogWindowController() => controller.isActivated,
       TooltipWindowController() => false,
-      PopupWindowController() => false,
+      PopupWindowController() => controller.isActivated,
       SatelliteWindowController() => controller.isActivated,
     };
   }
@@ -1879,7 +1923,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
       RegularWindowController() => controller.isActivated,
       DialogWindowController() => controller.isActivated,
       TooltipWindowController() => false,
-      PopupWindowController() => false,
+      PopupWindowController() => controller.isActivated,
       SatelliteWindowController() => controller.isActivated,
     };
   }
@@ -2107,7 +2151,8 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
               final DialogWindowController dialog =>
                 dialog.isActivated != (oldWidget.controller as DialogWindowController).isActivated,
               TooltipWindowController() => false,
-              PopupWindowController() => false,
+              final PopupWindowController popup =>
+                popup.isActivated != (oldWidget.controller as PopupWindowController).isActivated,
               final SatelliteWindowController satellite =>
                 satellite.isActivated !=
                     (oldWidget.controller as SatelliteWindowController).isActivated,
