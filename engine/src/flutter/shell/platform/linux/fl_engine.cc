@@ -100,6 +100,10 @@ struct _FlEngine {
   // Objects rendering the views.
   GHashTable* renderables_by_view_id;
 
+  // Mutex to protect access to renderables_by_view_id which is accessed by both
+  // engine threads and GTK.
+  GMutex renderables_mutex;
+
   // Function to call when a platform message is received.
   FlEnginePlatformMessageHandler platform_message_handler;
   gpointer platform_message_handler_data;
@@ -172,6 +176,7 @@ static void parse_locale(const gchar* locale,
 static void set_renderable(FlEngine* self,
                            int64_t view_id,
                            FlRenderable* renderable) {
+  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->renderables_mutex);
   GWeakRef* ref = g_new(GWeakRef, 1);
   g_weak_ref_init(ref, G_OBJECT(renderable));
   g_hash_table_insert(self->renderables_by_view_id, GINT_TO_POINTER(view_id),
@@ -181,6 +186,7 @@ static void set_renderable(FlEngine* self,
 /// Returns the renderable with the given ID, or nullptr if no such view exists.
 /// Returns a reference to the renderable.
 static FlRenderable* get_renderable(FlEngine* self, int64_t view_id) {
+  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->renderables_mutex);
   GWeakRef* ref = static_cast<GWeakRef*>(g_hash_table_lookup(
       self->renderables_by_view_id, GINT_TO_POINTER(view_id)));
   if (ref == nullptr) {
@@ -191,6 +197,7 @@ static FlRenderable* get_renderable(FlEngine* self, int64_t view_id) {
 
 /// Remove a renderable that no longer exists.
 static void remove_renderable(FlEngine* self, int64_t view_id) {
+  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->renderables_mutex);
   g_hash_table_remove(self->renderables_by_view_id, GINT_TO_POINTER(view_id));
 }
 
@@ -614,7 +621,12 @@ static void fl_engine_dispose(GObject* object) {
   g_clear_object(&self->keyboard_handler);
   g_clear_object(&self->mouse_cursor_handler);
   g_clear_object(&self->task_runner);
-  g_clear_pointer(&self->renderables_by_view_id, g_hash_table_unref);
+  {
+    g_autoptr(GMutexLocker) locker =
+        g_mutex_locker_new(&self->renderables_mutex);
+    g_clear_pointer(&self->renderables_by_view_id, g_hash_table_unref);
+  }
+  g_mutex_clear(&self->renderables_mutex);
 
   if (self->platform_message_handler_destroy_notify) {
     self->platform_message_handler_destroy_notify(
@@ -662,6 +674,7 @@ static void fl_engine_init(FlEngine* self) {
 
   // Implicit view is 0, so start at 1.
   self->next_view_id = 1;
+  g_mutex_init(&self->renderables_mutex);
   self->renderables_by_view_id = g_hash_table_new_full(
       g_direct_hash, g_direct_equal, nullptr, [](gpointer value) {
         GWeakRef* ref = static_cast<GWeakRef*>(value);
