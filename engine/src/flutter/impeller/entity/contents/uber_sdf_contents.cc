@@ -70,8 +70,7 @@ bool UberSDFContents::Render(const ContentContext& renderer,
       };
 
   return ColorSourceContents::DrawGeometry<VS>(
-      this, &geometry, renderer, entity, pass, pipeline_callback,
-      frame_info,
+      this, &geometry, renderer, entity, pass, pipeline_callback, frame_info,
       /*bind_fragment_callback=*/
       [&frag_info, &data_host_buffer](RenderPass& pass) {
         FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));

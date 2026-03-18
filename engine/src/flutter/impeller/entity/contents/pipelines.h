@@ -63,9 +63,9 @@
 #include "impeller/entity/texture_fill_strict_src.frag.h"
 #include "impeller/entity/texture_uv_fill.vert.h"
 #include "impeller/entity/tiled_texture_fill.frag.h"
+#include "impeller/entity/uber_sdf.frag.h"
 #include "impeller/entity/vertices_uber_1.frag.h"
 #include "impeller/entity/vertices_uber_2.frag.h"
-#include "impeller/entity/uber_sdf.frag.h"
 #include "impeller/entity/yuv_to_rgb_filter.frag.h"
 #include "impeller/renderer/pipeline.h"
 
