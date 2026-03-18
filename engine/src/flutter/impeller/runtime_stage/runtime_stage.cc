@@ -95,6 +95,13 @@ absl::StatusOr<RuntimeStage> RuntimeStage::Create(
           desc.padding_layout.push_back(type);
         }
       }
+      if (i->struct_fields()) {
+        for (const auto& elem : *i->struct_fields()) {
+          desc.struct_fields.emplace_back(
+              StructField{.name = elem->name()->str(),
+                          .byte_size = static_cast<size_t>(elem->byte_size())});
+        }
+      }
       desc.struct_float_count = i->struct_float_count();
       stage.uniforms_.push_back(std::move(desc));
     }

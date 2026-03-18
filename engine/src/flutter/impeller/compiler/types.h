@@ -47,6 +47,12 @@ enum class SourceLanguage {
   kHLSL,
 };
 
+struct StructField {
+  std::string name;
+  // The size in bytes of this field, not including padding.
+  size_t byte_size;
+};
+
 struct UniformDescription {
   std::string name;
   size_t location = 0u;
@@ -61,6 +67,9 @@ struct UniformDescription {
   /// UniformDescription::padding_layout.
   /// \see RuntimeEffectContents::EmplaceUniform
   std::vector<fb::PaddingType> padding_layout = {};
+  // The fields of the struct. Necessary on Vulkan, where everything is
+  // packed into a struct.
+  std::vector<StructField> struct_fields = {};
   size_t struct_float_count = 0u;
 };
 
@@ -112,10 +121,6 @@ std::string EntryPointFunctionNameFromSourceName(
     SourceType type,
     SourceLanguage source_language,
     const std::string& entry_point_name);
-
-bool TargetPlatformNeedsReflection(TargetPlatform platform);
-
-bool TargetPlatformBundlesSkSL(TargetPlatform platform);
 
 std::string ShaderCErrorToString(shaderc_compilation_status status);
 

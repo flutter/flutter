@@ -127,6 +127,10 @@ template("android_toolchains_helper") {
   }
 }
 
+android_toolchains_helper("x86") {
+  toolchain_cpu = "x86"
+}
+
 android_toolchains_helper("arm") {
   toolchain_cpu = "arm"
 }

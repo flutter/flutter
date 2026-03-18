@@ -115,7 +115,14 @@ if (_host_os_name == "mac") {
   _host_os_name = "windows"
 }
 
+# When building 32-bit Android development artifacts for Windows host (like
+# gen_snapshot), the host_cpu is set to x86. However, the correct prebuilt
+# Dart SDK to use during this build is still the 64-bit one.
 _host_cpu = host_cpu
+if (host_os == "win" && host_cpu == "x86") {
+  _host_cpu = "x64"
+}
+
 _target_prebuilt_config = "$_target_os_name-$target_cpu"
 _host_prebuilt_config = "$_host_os_name-$_host_cpu"
 

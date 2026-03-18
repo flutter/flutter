@@ -3,11 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('SemanticsNode ids are stable', (WidgetTester tester) async {
@@ -198,9 +199,13 @@ void main() {
       'THEN the SemanticsNode contains the correct language tag', (WidgetTester tester) async {
     const locale = Locale('de', 'DE');
     const text = 'Flutter 2050';
+
     await tester.pumpWidget(
-      const MaterialApp(
-        home: SelectionArea(child: Text(text, locale: locale)),
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: emptyTextSelectionControls,
+          child: const Text(text, locale: locale),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -221,5 +226,72 @@ void main() {
 
     expect(targetNode.label, text);
     expect(localeStringAttribute.locale.toLanguageTag(), 'de-DE');
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/180894.
+  testWidgets('Text with semanticsIdentifier creates its own semantic node', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Text('Hello World', semanticsIdentifier: 'my-text-identifier'),
+      ),
+    );
+
+    final SemanticsNode node = tester.getSemantics(find.text('Hello World'));
+    expect(node.identifier, 'my-text-identifier');
+    expect(node.label, 'Hello World');
+
+    semantics.dispose();
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/180894.
+  // Tests that Text.semanticsIdentifier is not absorbed by a route-scoping ancestor.
+  testWidgets('Text with semanticsIdentifier is not absorbed by route-scoping ancestor', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Semantics(
+          scopesRoute: true,
+          explicitChildNodes: true,
+          child: const Text('Dialog Text', semanticsIdentifier: 'dialog-text-identifier'),
+        ),
+      ),
+    );
+
+    final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!;
+    final allNodes = <SemanticsNode>[];
+    void collectNodes(SemanticsNode node) {
+      allNodes.add(node);
+      node.visitChildren((SemanticsNode child) {
+        collectNodes(child);
+        return true;
+      });
+    }
+
+    collectNodes(root);
+
+    final SemanticsNode? routeNode = allNodes
+        .where((SemanticsNode n) => n.hasFlag(SemanticsFlag.scopesRoute))
+        .firstOrNull;
+    final SemanticsNode? textNode = allNodes
+        .where((SemanticsNode n) => n.identifier == 'dialog-text-identifier')
+        .firstOrNull;
+
+    expect(routeNode, isNotNull, reason: 'Route-scoping semantic node should exist');
+    expect(textNode, isNotNull, reason: 'Text semantic node should exist with its identifier');
+    expect(textNode!.label, 'Dialog Text');
+
+    expect(routeNode!.identifier, isNot('dialog-text-identifier'));
+    expect(textNode.id, isNot(routeNode.id));
+
+    semantics.dispose();
   });
 }

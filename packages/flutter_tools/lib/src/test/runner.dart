@@ -210,7 +210,7 @@ interface class FlutterTestRunner {
         .childDirectory('.dart_tool')
         .childFile('package_config.json');
     PackageConfig? projectPackageConfig;
-    if (await packageConfigFile.exists()) {
+    if (packageConfigFile.existsSync()) {
       projectPackageConfig = PackageConfig.parseBytes(
         packageConfigFile.readAsBytesSync(),
         Uri.file(flutterProject.directory.path),
@@ -546,9 +546,7 @@ class SpawnPlugin extends PlatformPlugin {
   }
 
   static Future<void> _compileFile({
-    required DebuggingOptions debuggingOptions,
-    required File packageConfigFile,
-    required PackageConfig packageConfig,
+    required BuildInfo buildInfo,
     required File sourceFile,
     required File outputDillFile,
     required TestTimeRecorder? testTimeRecorder,
@@ -558,30 +556,24 @@ class SpawnPlugin extends PlatformPlugin {
     final compilerTime = Stopwatch()..start();
     final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Compile);
 
-    final residentCompiler = ResidentCompiler(
-      globals.artifacts!.getArtifactPath(Artifact.flutterPatchedSdkPath),
+    final ResidentCompiler residentCompiler = residentCompilerFactory.create(
+      targetPlatform: .tester,
       artifacts: globals.artifacts!,
       logger: globals.logger,
       processManager: globals.processManager,
-      buildMode: debuggingOptions.buildInfo.mode,
-      trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation,
-      dartDefines: debuggingOptions.buildInfo.dartDefines,
-      packagesPath: packageConfigFile.path,
-      frontendServerStarterPath: debuggingOptions.buildInfo.frontendServerStarterPath,
-      extraFrontEndOptions: debuggingOptions.buildInfo.extraFrontEndOptions,
+      buildInfo: buildInfo,
       platform: globals.platform,
       testCompilation: true,
       fileSystem: globals.fs,
-      fileSystemRoots: debuggingOptions.buildInfo.fileSystemRoots,
-      fileSystemScheme: debuggingOptions.buildInfo.fileSystemScheme,
       shutdownHooks: globals.shutdownHooks,
+      config: globals.config,
     );
 
     await residentCompiler.recompile(
       sourceFile.absolute.uri,
       null,
       outputPath: outputDillFile.absolute.path,
-      packageConfig: packageConfig,
+      packageConfig: buildInfo.packageConfig,
       fs: globals.fs,
       nativeAssetsYaml: nativeAssetsYaml,
     );
@@ -689,19 +681,19 @@ class SpawnPlugin extends PlatformPlugin {
       rootTestIsolateSpawnerSourceFile: rootTestIsolateSpawnerSourceFile,
     );
 
-    await _compileFile(
-      debuggingOptions: debuggingOptions,
-      packageConfigFile: isolateSpawningTesterPackageConfigFile,
+    final BuildInfo buildInfo = debuggingOptions.buildInfo.copyWith(
       packageConfig: isolateSpawningTesterPackageConfig,
+      packageConfigPath: isolateSpawningTesterPackageConfigFile.path,
+    );
+    await _compileFile(
+      buildInfo: buildInfo,
       sourceFile: childTestIsolateSpawnerSourceFile,
       outputDillFile: childTestIsolateSpawnerDillFile,
       testTimeRecorder: testTimeRecorder,
     );
 
     await _compileFile(
-      debuggingOptions: debuggingOptions,
-      packageConfigFile: isolateSpawningTesterPackageConfigFile,
-      packageConfig: isolateSpawningTesterPackageConfig,
+      buildInfo: buildInfo,
       sourceFile: rootTestIsolateSpawnerSourceFile,
       outputDillFile: rootTestIsolateSpawnerDillFile,
       testTimeRecorder: testTimeRecorder,
