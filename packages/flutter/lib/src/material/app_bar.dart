@@ -823,6 +823,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 class _AppBarState extends State<AppBar> {
   ScrollNotificationObserverState? _scrollNotificationObserver;
   bool _scrolledUnder = false;
+  bool _drawerWasOpen = false;
 
   @override
   void didChangeDependencies() {
@@ -831,6 +832,7 @@ class _AppBarState extends State<AppBar> {
     final ScaffoldState? scaffoldState = Scaffold.maybeOf(context);
 
     if (scaffoldState != null && (scaffoldState.isDrawerOpen || scaffoldState.isEndDrawerOpen)) {
+      _drawerWasOpen = true;
       return;
     }
     _scrollNotificationObserver = ScrollNotificationObserver.maybeOf(context);
@@ -839,12 +841,14 @@ class _AppBarState extends State<AppBar> {
     // Reset _scrolledUnder when the scroll context is re-established (e.g. tab
     // switch). Assume a starting state of false; if the new content is already
     // scrolled, a ScrollUpdateNotification will be dispatched immediately to
-    // update the flag.
-    if (_scrolledUnder) {
+    // update the flag. Skip the reset if a drawer was open before this call,
+    // since closing a drawer does not change the scroll context.
+    if (_scrolledUnder && !_drawerWasOpen) {
       setState(() {
         _scrolledUnder = false;
       });
     }
+    _drawerWasOpen = false;
   }
 
   @override
