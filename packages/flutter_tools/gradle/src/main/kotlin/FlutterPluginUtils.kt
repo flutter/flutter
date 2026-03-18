@@ -846,7 +846,6 @@ object FlutterPluginUtils {
         androidEngineShellArgs: String
     ) {
         val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
-        print("&&&&&&&&&&&&&&&&&&&&CAMILLE&&&&&&&&&&&&&&& in FlutterPluginUtils writing to " + project.layout.buildDirectory)
 
         androidComponents.onVariants { variant ->
             val genTask =

@@ -763,7 +763,6 @@ void main() {
     testUsingContext(
       'fromAPK returns APK without engineShellArgs if the generated flags manifest cannot be found',
       () async {
-        final FileSystem fs = MemoryFileSystem.test();
         const aaptPath = 'aaptPath';
         const apkName = 'app.apk';
         final File apkFile = globals.fs.file(apkName);
@@ -803,7 +802,6 @@ void main() {
     testUsingContext(
       'fromApk returns APK with engineShellArgs if the generated flags manifest is found non-empty',
       () async {
-        final FileSystem fs = MemoryFileSystem.test();
         const aaptPath = 'aaptPath';
         const apkName = 'app.apk';
         final File apkFile = globals.fs.file(apkName);

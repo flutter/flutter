@@ -1087,7 +1087,7 @@ class FlutterPluginUtilsTest {
 
         project.extensions.add(AndroidComponentsExtension::class.java, "androidComponents", mockComponents)
 
-        val testArgs = "--trace-skia,--enable-impeller=true"
+        val testArgs = "--trace-skia;--enable-impeller=true"
         FlutterPluginUtils.addTaskForGeneratingEngineShellArgumentManifest(project, testArgs)
 
         // Manually trigger the callback that AGP would normally trigger to register task.

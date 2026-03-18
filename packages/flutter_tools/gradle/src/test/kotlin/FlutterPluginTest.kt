@@ -325,7 +325,7 @@ class FlutterPluginTest {
         // Mocks required to test FlutterPluginUtils.addTaskForGeneratingEngineShellArgumentManifest
         mockkStatic(FlutterPluginUtils::class)
         val flutterPlugin = FlutterPlugin()
-        val flagsStr = "--flag-1,--flag=2"
+        val flagsStr = "--flag-1;--flag=2"
 
         every { project.hasProperty("androidShellArguments") } returns true
         every { project.properties["androidShellArguments"] } returns flagsStr

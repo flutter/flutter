@@ -20,10 +20,6 @@ abstract class GenerateEngineFlagsManifestTask : DefaultTask() {
 
     @TaskAction
     fun generate() {
-        print(
-            "::::::::::::::CAMILLE PRINT::::::::::::::: android engine shell args added to manifest via GenerateEngineFlagsManifestTask: " +
-                shellArgs.get()
-        )
         val outputFile = manifestOutputFile.get().asFile
         val content =
             """

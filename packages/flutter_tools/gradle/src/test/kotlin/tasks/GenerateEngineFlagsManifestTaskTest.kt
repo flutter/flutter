@@ -30,6 +30,30 @@ class GenerateEngineFlagsManifestTaskTest {
     }
 
     @Test
+    fun generateHandlesNoArgsCorrectly() {
+        val manifestOutputFile = File(testProjectDir, "AndroidManifest.xml")
+        val expectedContent =
+            """
+            <?xml version="1.0" encoding="utf-8"?>
+            <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+                <application>
+                    <meta-data
+                        android:name="androidEngineShellArgs"
+                        android:value="" />
+                </application>
+            </manifest>
+            """.trimIndent()
+
+        task.shellArgs.set("")
+        task.manifestOutputFile.set(manifestOutputFile)
+
+        task.generate()
+
+        assertTrue(manifestOutputFile.exists(), "Output file should be created")
+        assertEquals(expectedContent, manifestOutputFile.readText())
+    }
+
+    @Test
     fun generateHandlesOneArgCorrectly() {
         val shellArg = "--verbose-logging"
         val manifestOutputFile = File(testProjectDir, "AndroidManifest.xml")
@@ -56,7 +80,7 @@ class GenerateEngineFlagsManifestTaskTest {
 
     @Test
     fun generateHandlesMultipleArgsCorrectly() {
-        val shellArgs = "--enable-dart-profiling,--trace-to-file=path/to/some/file"
+        val shellArgs = "--enable-dart-profiling;--trace-to-file=path/to/some/file"
         val manifestOutputFile = File(testProjectDir, "AndroidManifest.xml")
         val expectedContent =
             """
