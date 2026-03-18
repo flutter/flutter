@@ -875,8 +875,9 @@ class _TestWindowingOwner extends WindowingOwner {
       case final DialogWindowController dialogParent:
         dialogParent.activate();
       case final TooltipWindowController _:
-        fail('TooltipWindowController cannot be a parent of DialogWindowController.');
-      case final PopupWindowController _:
+        fail('TooltipWindowController cannot be a parent of another window controller.');
+      case final PopupWindowController popupParent:
+        popupParent.activate();
       case final SatelliteWindowController satelliteParent:
         satelliteParent.activate();
     }
