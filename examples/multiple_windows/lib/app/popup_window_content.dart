@@ -103,7 +103,7 @@ class _PopupWindowContentState extends State<PopupWindowContent> {
                   horizontal: 12,
                   vertical: 8,
                 ),
-                child: EditableText(
+                child: TextField(
                   controller: _textController,
                   focusNode: _focusNode,
                   style: const TextStyle(
@@ -111,7 +111,6 @@ class _PopupWindowContentState extends State<PopupWindowContent> {
                     fontSize: 14,
                   ),
                   cursorColor: const Color(0xFFFFFFFF),
-                  backgroundCursorColor: const Color(0x99FFFFFF),
                 ),
               ),
             ],
