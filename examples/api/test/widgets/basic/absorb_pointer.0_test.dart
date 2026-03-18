@@ -32,7 +32,6 @@ void main() {
     expect(tester.widget<Switch>(switchFinder).value, isTrue);
     expect(find.text('Button 2 Pressed'), findsOneWidget);
 
-
     // Toggle the Switch to OFF (enable AbsorbPointer)
     await tester.tap(switchFinder);
     await tester.pumpAndSettle();
@@ -47,7 +46,5 @@ void main() {
     await tester.tap(find.text('Button 2'), warnIfMissed: false);
     await tester.pumpAndSettle();
     expect(find.text('Buttons are disabled'), findsOneWidget);
-
-
   });
 }
