@@ -8,7 +8,6 @@ import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
-import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.android.builder.model.BuildType
@@ -414,10 +413,6 @@ object FlutterPluginUtils {
     internal fun getAndroidApplicationExtension(project: Project): ApplicationExtension =
         project.extensions.getByType(ApplicationExtension::class.java)
 
-    // Avoid new usages this class is not part of the public AGP DSL.
-    private fun getAndroidAppExtensionOrNull(project: Project): AbstractAppExtension? =
-        project.extensions.findByType(AbstractAppExtension::class.java)
-
     /**
      * Expected format of getAndroidExtension(project).compileSdkVersion is a string of the form
      * `android-` followed by either the numeric version, e.g. `android-35`, or a preview version,
@@ -661,7 +656,8 @@ object FlutterPluginUtils {
 
     @JvmStatic
     @JvmName("isFlutterAppProject")
-    internal fun isFlutterAppProject(project: Project): Boolean = project.extensions.findByType(AbstractAppExtension::class.java) != null
+    internal fun isFlutterAppProject(project: Project): Boolean = project.extensions.findByType(
+        ApplicationExtension::class.java) != null
 
     /**
      * Ensures that the dependencies required by the Flutter project are available.
@@ -771,15 +767,18 @@ object FlutterPluginUtils {
     @JvmStatic
     @JvmName("addTaskForPrintBuildVariants")
     internal fun addTaskForPrintBuildVariants(project: Project) {
-        // Groovy was dynamically getting a different subtype here than our Kotlin getAndroidExtension method.
-        // TODO(gmackall): We should take another pass at the different types we are using in our conversion of
-        //                 the groovy `flutter.android` lines.
-        val androidExtension = project.extensions.getByType(AbstractAppExtension::class.java)
+        val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
+        val variantNames = project.objects.listProperty(String::class.java)
+
+        androidComponents.onVariants { variant ->
+            variantNames.add(variant.name)
+        }
+
         project.tasks.register("printBuildVariants") {
             description = "Prints out all build variants for this Android project"
             doLast {
-                androidExtension.applicationVariants.forEach { variant ->
-                    println("BuildVariant: ${variant.name}")
+                variantNames.get().forEach { name ->
+                    println("BuildVariant: $name")
                 }
             }
         }
