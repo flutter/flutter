@@ -2807,11 +2807,6 @@ class InputDecoration {
     this.hintText,
     this.hint,
     this.hintStyle,
-    @Deprecated(
-      'Use textDirection instead. '
-      'This will maintain consistency between label and hint directions. '
-      'This feature was deprecated after v3.42.0-1.0.pre.',
-    )
     this.hintTextDirection,
     this.hintMaxLines,
     this.hintFadeDuration,
@@ -2911,11 +2906,6 @@ class InputDecoration {
     FloatingLabelAlignment? floatingLabelAlignment,
     this.hintStyle,
     this.hint,
-    @Deprecated(
-      'Use textDirection instead. '
-      'This will maintain consistency between label and hint directions. '
-      'This feature was deprecated after v3.42.0-1.0.pre.',
-    )
     this.hintTextDirection,
     this.hintMaxLines,
     this.hintFadeDuration,
@@ -3186,11 +3176,6 @@ class InputDecoration {
   ///
   /// If null, defaults to a value derived from [Directionality] for the
   /// input field and the current context.
-  @Deprecated(
-    'Use textDirection instead. '
-    'This will maintain consistency between label and hint directions. '
-    'This feature was deprecated after v3.42.0-1.0.pre.',
-  )
   final TextDirection? hintTextDirection;
 
   /// The direction to use for both the [labelText] and the [hintText].
