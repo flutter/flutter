@@ -1917,6 +1917,29 @@ void main() {
     final Finder xText = find.text('X');
     expect(tester.getSize(xText).isEmpty, isTrue);
   });
+
+  testWidgets('LicensePage filters packages', (WidgetTester tester) async {
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable([
+        const LicenseEntryWithLineBreaks(['foo', 'bar'], 'License Text'),
+      ]);
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        title: 'Pirate app',
+        home: Center(
+          child: LicensePage(
+            packageFilter: (name) => name != 'foo',
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('foo'), findsNothing);
+    expect(find.text('bar'), findsOneWidget);
+    expect(find.text('License Text'), findsOneWidget);
+  });
 }
 
 class FakeLicenseEntry extends LicenseEntry {

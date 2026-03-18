@@ -71,6 +71,7 @@ class AboutListTile extends StatelessWidget {
     this.applicationVersion,
     this.applicationIcon,
     this.applicationLegalese,
+    this.packageFilter,
     this.aboutBoxChildren,
     this.dense,
   });
@@ -123,6 +124,12 @@ class AboutListTile extends StatelessWidget {
   /// Defaults to the empty string.
   final String? applicationLegalese;
 
+  /// A callback to filter the packages being shown.
+  ///
+  /// By default, all packages the application uses are included, even
+  /// transitive dependencies.
+  final bool Function(String packageName)? packageFilter;
+
   /// Widgets to add to the [AboutDialog] after the name, version, and legalese.
   ///
   /// This could include a link to a Web site, some descriptive text, credits,
@@ -159,6 +166,7 @@ class AboutListTile extends StatelessWidget {
           applicationVersion: applicationVersion,
           applicationIcon: applicationIcon,
           applicationLegalese: applicationLegalese,
+          packageFilter: packageFilter,
           children: aboutBoxChildren,
         );
       },
@@ -189,6 +197,7 @@ void showAboutDialog({
   String? applicationVersion,
   Widget? applicationIcon,
   String? applicationLegalese,
+  bool Function(String packageName)? packageFilter,
   List<Widget>? children,
   bool barrierDismissible = true,
   Color? barrierColor,
@@ -209,6 +218,7 @@ void showAboutDialog({
         applicationVersion: applicationVersion,
         applicationIcon: applicationIcon,
         applicationLegalese: applicationLegalese,
+        packageFilter: packageFilter,
         children: children,
       );
     },
@@ -298,6 +308,7 @@ void showLicensePage({
   String? applicationVersion,
   Widget? applicationIcon,
   String? applicationLegalese,
+  bool Function(String packageName)? packageFilter,
   bool useRootNavigator = false,
 }) {
   final CapturedThemes themes = InheritedTheme.capture(
@@ -312,6 +323,7 @@ void showLicensePage({
           applicationVersion: applicationVersion,
           applicationIcon: applicationIcon,
           applicationLegalese: applicationLegalese,
+          packageFilter: packageFilter,
         ),
       ),
     ),
@@ -349,6 +361,7 @@ class AboutDialog extends StatelessWidget {
     this.applicationVersion,
     this.applicationIcon,
     this.applicationLegalese,
+    this.packageFilter,
     this.children,
   });
 
@@ -371,6 +384,7 @@ class AboutDialog extends StatelessWidget {
     String? applicationVersion,
     Widget? applicationIcon,
     String? applicationLegalese,
+    bool Function(String packageName)? packageFilter,
     List<Widget>? children,
   }) = _AdaptiveAboutDialog;
 
@@ -401,6 +415,12 @@ class AboutDialog extends StatelessWidget {
   ///
   /// Defaults to the empty string.
   final String? applicationLegalese;
+
+  /// A callback to filter the packages being shown.
+  ///
+  /// By default, all packages the application uses are included, even
+  /// transitive dependencies.
+  final bool Function(String packageName)? packageFilter;
 
   /// Widgets to add to the dialog box after the name, version, and legalese.
   ///
@@ -457,6 +477,7 @@ class AboutDialog extends StatelessWidget {
               applicationVersion: applicationVersion,
               applicationIcon: applicationIcon,
               applicationLegalese: applicationLegalese,
+              packageFilter: packageFilter,
             );
           },
         ),
@@ -483,6 +504,7 @@ class _AdaptiveAboutDialog extends AboutDialog {
     super.applicationVersion,
     super.applicationIcon,
     super.applicationLegalese,
+    super.packageFilter,
     super.children,
   });
 
@@ -507,6 +529,7 @@ class _AdaptiveAboutDialog extends AboutDialog {
                 applicationVersion: applicationVersion,
                 applicationIcon: applicationIcon,
                 applicationLegalese: applicationLegalese,
+                packageFilter: packageFilter,
               );
             },
           ),
@@ -539,6 +562,7 @@ class _AdaptiveAboutDialog extends AboutDialog {
                 applicationVersion: applicationVersion,
                 applicationIcon: applicationIcon,
                 applicationLegalese: applicationLegalese,
+                packageFilter: packageFilter,
               );
             },
           ),
@@ -621,6 +645,7 @@ class LicensePage extends StatefulWidget {
     this.applicationVersion,
     this.applicationIcon,
     this.applicationLegalese,
+    this.packageFilter,
   });
 
   /// The name of the application.
@@ -650,6 +675,12 @@ class LicensePage extends StatefulWidget {
   ///
   /// Defaults to the empty string.
   final String? applicationLegalese;
+
+  /// A callback to filter the packages being shown.
+  ///
+  /// By default, all packages the application uses are included, even
+  /// transitive dependencies.
+  final bool Function(String packageName)? packageFilter;
 
   @override
   State<LicensePage> createState() => _LicensePageState();
@@ -691,7 +722,12 @@ class _LicensePageState extends State<LicensePage> {
       version: widget.applicationVersion ?? _defaultApplicationVersion(context),
       legalese: widget.applicationLegalese,
     );
-    return _PackagesView(about: about, isLateral: isLateral, selectedId: selectedId);
+    return _PackagesView(
+      about: about,
+      isLateral: isLateral,
+      selectedId: selectedId,
+      packageFilter: widget.packageFilter ?? (_) => true,
+    );
   }
 }
 
@@ -739,23 +775,36 @@ class _AboutProgram extends StatelessWidget {
 }
 
 class _PackagesView extends StatefulWidget {
-  const _PackagesView({required this.about, required this.isLateral, required this.selectedId});
+  const _PackagesView({
+    required this.about,
+    required this.isLateral,
+    required this.selectedId,
+    required this.packageFilter
+  });
 
   final Widget about;
   final bool isLateral;
   final ValueNotifier<int?> selectedId;
+  final bool Function(String packageName) packageFilter;
 
   @override
   _PackagesViewState createState() => _PackagesViewState();
 }
 
 class _PackagesViewState extends State<_PackagesView> {
-  final Future<_LicenseData> licenses = LicenseRegistry.licenses
-      .fold<_LicenseData>(
-        _LicenseData(),
-        (_LicenseData prev, LicenseEntry license) => prev..addLicense(license),
-      )
-      .then((_LicenseData licenseData) => licenseData..sortPackages());
+  late final Future<_LicenseData> licenses;
+
+  @override
+  void initState() {
+    super.initState();
+
+    licenses = LicenseRegistry.licenses
+        .fold<_LicenseData>(
+          _LicenseData(), (_LicenseData prev, LicenseEntry license) =>
+          prev..addLicense(license, widget.packageFilter)
+        )
+        .then((_LicenseData licenseData) => licenseData..sortPackages());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -910,10 +959,14 @@ class _LicenseData {
   // for delivered application.
   String? firstPackage;
 
-  void addLicense(LicenseEntry entry) {
+  void addLicense(LicenseEntry entry, bool Function(String packageName) packageFilter) {
     // Before the license can be added, we must first record the packages to
     // which it belongs.
     for (final String package in entry.packages) {
+      if (!packageFilter(package)) {
+        continue;
+      }
+
       _addPackage(package);
       // Bind this license to the package using the next index value. This
       // creates a contract that this license must be inserted at this same
