@@ -1252,7 +1252,7 @@ class DeviceDomain extends Domain {
     final tempFileName = 'screenshot_${_id++}';
     final File tempFile = daemon.proxyDomain.tempDirectory.childFile(tempFileName);
     await device.takeScreenshot(tempFile);
-    if (await tempFile.exists()) {
+    if (tempFile.existsSync()) {
       final String imageBase64 = base64.encode(await tempFile.readAsBytes());
       return imageBase64;
     } else {
@@ -1665,7 +1665,7 @@ class ProxyDomain extends Domain {
     final String path = _getStringArg(args, 'path', required: true)!;
     final bool cacheResult = _getBoolArg(args, 'cacheResult') ?? false;
     final File file = tempDirectory.childFile(path);
-    if (!await file.exists()) {
+    if (!file.existsSync()) {
       return null;
     }
     final File hashFile = file.parent.childFile('${file.basename}.hashes');
@@ -1688,7 +1688,7 @@ class ProxyDomain extends Domain {
   Future<bool?> updateFile(Map<String, Object?> args, Stream<List<int>>? binary) async {
     final String path = _getStringArg(args, 'path', required: true)!;
     final File file = tempDirectory.childFile(path);
-    if (!await file.exists()) {
+    if (!file.existsSync()) {
       return null;
     }
     final List<Map<String, Object?>> deltaJson = (args['delta']! as List<Object?>)

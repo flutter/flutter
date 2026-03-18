@@ -23,9 +23,11 @@ import '../globals.dart' as globals;
 import '../ios/plist_parser.dart';
 import '../ios/xcodeproj.dart';
 import '../macos/cocoapod_utils.dart';
-import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
+import '../runner/flutter_command.dart'
+    show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
 import '../version.dart';
 import 'build.dart';
+import 'darwin_add_to_app.dart';
 
 abstract class BuildFrameworkCommand extends BuildSubCommand {
   BuildFrameworkCommand({
@@ -35,6 +37,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     required bool verboseHelp,
     Cache? cache,
     Platform? platform,
+    required this.codesign,
     required super.logger,
   }) : _injectedFlutterVersion = flutterVersion,
        _buildSystem = buildSystem,
@@ -49,6 +52,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     addDartObfuscationOption();
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
+    usesDarwinCodeSignXCFrameworksOption();
 
     argParser
       ..addFlag(
@@ -103,6 +107,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
         hide: !verboseHelp,
       );
   }
+  final DarwinAddToAppCodesigning codesign;
 
   final BuildSystem? _buildSystem;
   @protected
@@ -160,52 +165,6 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
         .map((Directory d) => d.basename);
   }
 
-  /// Parses the NativeAssetsManifest.json in [outputDirectory] and returns a
-  /// mapping from asset ID to the path of the code asset within the bundle
-  /// (e.g., "MyFramework.framework/MyFramework").
-  static Map<String, String> parseNativeAssetsManifest(
-    Directory outputDirectory,
-    FlutterDarwinPlatform platform,
-  ) {
-    File manifestFile;
-    switch (platform) {
-      case FlutterDarwinPlatform.ios:
-        manifestFile = outputDirectory
-            .childDirectory('App.framework')
-            .childDirectory('flutter_assets')
-            .childFile('NativeAssetsManifest.json');
-      case FlutterDarwinPlatform.macos:
-        manifestFile = outputDirectory
-            .childDirectory('App.framework')
-            .childDirectory('Resources')
-            .childDirectory('flutter_assets')
-            .childFile('NativeAssetsManifest.json');
-    }
-    if (!manifestFile.existsSync()) {
-      return const <String, String>{};
-    }
-    final manifest = json.decode(manifestFile.readAsStringSync()) as Map<String, Object?>;
-    final nativeAssets = manifest['native-assets'] as Map<String, Object?>?;
-    if (nativeAssets == null) {
-      return const <String, String>{};
-    }
-    final result = <String, String>{};
-    for (final Object? targetAssets in nativeAssets.values) {
-      if (targetAssets is! Map<String, Object?>) {
-        continue;
-      }
-      for (final MapEntry<String, Object?> entry in targetAssets.entries) {
-        final String assetId = entry.key;
-        final Object? pathInfo = entry.value;
-        if (pathInfo is List<Object?> && pathInfo.length >= 2) {
-          final path = pathInfo[1]! as String;
-          result[assetId] = path;
-        }
-      }
-    }
-    return result;
-  }
-
   /// Verifies that code assets built for physical devices and simulators are
   /// consistent.
   ///
@@ -216,14 +175,15 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     Directory iPhoneBuildOutput,
     Directory simulatorBuildOutput,
   ) {
-    final Map<String, String> deviceAssets = BuildFrameworkCommand.parseNativeAssetsManifest(
+    final Map<String, String> deviceAssets = DarwinAddToAppNativeAssets.parseNativeAssetsManifest(
       iPhoneBuildOutput,
       FlutterDarwinPlatform.ios,
     );
-    final Map<String, String> simulatorAssets = BuildFrameworkCommand.parseNativeAssetsManifest(
-      simulatorBuildOutput,
-      FlutterDarwinPlatform.ios,
-    );
+    final Map<String, String> simulatorAssets =
+        DarwinAddToAppNativeAssets.parseNativeAssetsManifest(
+          simulatorBuildOutput,
+          FlutterDarwinPlatform.ios,
+        );
 
     for (final String assetId in deviceAssets.keys) {
       final String deviceAssetPath = deviceAssets[assetId]!;
@@ -263,6 +223,8 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     String frameworkBinaryName,
     Directory outputDirectory,
     ProcessManager processManager,
+    String? codesignIdentity,
+    BuildMode buildMode,
   ) async {
     final xcframeworkCommand = <String>[
       'xcrun',
@@ -289,6 +251,14 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     if (xcframeworkResult.exitCode != 0) {
       throwToolExit(
         'Unable to create $frameworkBinaryName.xcframework: ${xcframeworkResult.stderr}',
+      );
+    }
+    if (codesignIdentity != null) {
+      await DarwinAddToAppCodesigning.codesign(
+        codesignIdentity: codesignIdentity,
+        artifact: outputDirectory.childDirectory('$frameworkBinaryName.xcframework'),
+        processManager: processManager,
+        buildMode: buildMode,
       );
     }
   }
@@ -480,6 +450,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
     required bool verboseHelp,
     super.cache,
     super.platform,
+    required super.codesign,
   }) : super(verboseHelp: verboseHelp) {
     usesFlavorOption();
 
@@ -542,6 +513,15 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       globals.fs.path.absolute(globals.fs.path.normalize(outputArgument)),
     );
     final List<BuildInfo> buildInfos = await getBuildInfos();
+
+    final String? codesignIdentity = await codesign.getCodesignIdentity(
+      buildInfo: buildInfos.first,
+      codesignEnabled: boolArg(FlutterOptions.kCodesign),
+      codesignIdentityOption: stringArg(FlutterOptions.kCodesignIdentity),
+      identityFile: outputDirectory.childFile('.codesign_identity'),
+      xcodeProject: project.ios,
+    );
+
     for (final buildInfo in buildInfos) {
       // Create the build-mode specific metadata.
       //
@@ -571,7 +551,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
         produceFlutterPodspec(buildInfo.mode, modeDirectory, force: boolArg('force'));
       } else {
         // Copy Flutter.xcframework.
-        await _produceFlutterFramework(buildInfo, modeDirectory);
+        await _produceFlutterFramework(buildInfo, modeDirectory, codesignIdentity);
       }
 
       // Build aot, create module.framework and copy.
@@ -581,7 +561,13 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       final Directory simulatorBuildOutput = modeDirectory.childDirectory(
         XcodeSdk.IPhoneSimulator.platformName,
       );
-      await _produceAppFramework(buildInfo, modeDirectory, iPhoneBuildOutput, simulatorBuildOutput);
+      await _produceAppFramework(
+        buildInfo,
+        modeDirectory,
+        iPhoneBuildOutput,
+        simulatorBuildOutput,
+        codesignIdentity,
+      );
 
       // Build and copy plugins.
       await processPodsIfNeeded(
@@ -597,6 +583,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
           iPhoneBuildOutput,
           simulatorBuildOutput,
           modeDirectory,
+          codesignIdentity,
         );
       }
 
@@ -627,6 +614,8 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
           frameworkName.replaceAll('.framework', ''),
           modeDirectory,
           globals.processManager,
+          codesignIdentity,
+          buildInfo.mode,
         );
       }
 
@@ -747,7 +736,11 @@ end
     }
   }
 
-  Future<void> _produceFlutterFramework(BuildInfo buildInfo, Directory modeDirectory) async {
+  Future<void> _produceFlutterFramework(
+    BuildInfo buildInfo,
+    Directory modeDirectory,
+    String? codesignIdentity,
+  ) async {
     final Status status = globals.logger.startProgress(' ├─Copying Flutter.xcframework...');
     final String engineCacheFlutterFrameworkDirectory = globals.artifacts!.getArtifactPath(
       Artifact.flutterXcframework,
@@ -765,6 +758,14 @@ end
         globals.fs.directory(engineCacheFlutterFrameworkDirectory),
         flutterFrameworkCopy,
       );
+      if (codesignIdentity != null) {
+        await DarwinAddToAppCodesigning.codesignFlutterXCFramework(
+          codesignIdentity: codesignIdentity,
+          xcframework: flutterFrameworkCopy,
+          processManager: globals.processManager,
+          buildMode: buildInfo.mode,
+        );
+      }
     } finally {
       status.stop();
     }
@@ -775,6 +776,7 @@ end
     Directory outputDirectory,
     Directory iPhoneBuildOutput,
     Directory simulatorBuildOutput,
+    String? codesignIdentity,
   ) async {
     const appFrameworkName = 'App.framework';
     final Status status = globals.logger.startProgress(' ├─Building App.xcframework...');
@@ -841,6 +843,8 @@ end
       'App',
       outputDirectory,
       globals.processManager,
+      codesignIdentity,
+      buildInfo.mode,
     );
   }
 
@@ -850,6 +854,7 @@ end
     Directory iPhoneBuildOutput,
     Directory simulatorBuildOutput,
     Directory modeDirectory,
+    String? codesignIdentity,
   ) async {
     final Status status = globals.logger.startProgress(' ├─Building plugins...');
     try {
@@ -933,6 +938,8 @@ end
             binaryName,
             modeDirectory,
             globals.processManager,
+            codesignIdentity,
+            mode,
           );
         }
       }
