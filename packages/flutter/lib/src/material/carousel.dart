@@ -1979,6 +1979,10 @@ class CarouselController extends ScrollController {
   ///
   /// The [Duration] defaults to 300 milliseconds and [Curve] defaults to [Curves.ease].
   ///
+  /// When [CarouselView.infinite] is true, the animation always scrolls forward
+  /// to reach the target item, even if the item is closer in the backward
+  /// direction.
+  ///
   /// Does nothing if the carousel is not attached to this controller.
   Future<void> animateToItem(
     int index, {
