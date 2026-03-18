@@ -11,7 +11,8 @@ HostWindowRegular::HostWindowRegular(WindowManager* window_manager,
                                      FlutterWindowsEngine* engine,
                                      const WindowSizeRequest& preferred_size,
                                      const BoxConstraints& constraints,
-                                     LPCWSTR title)
+                                     LPCWSTR title,
+                                     bool decorated)
 
     : HostWindow(window_manager, engine) {
   // TODO(knopp): Investigate sizing the window to its content with the help of
@@ -26,7 +27,7 @@ HostWindowRegular::HostWindowRegular(WindowManager* window_manager,
           GetInitialRect(engine, preferred_size, constraints),
       .title = title,
       .owner_window = std::optional<HWND>(),
-  });
+      .decorated = decorated});
 }
 
 Rect HostWindowRegular::GetInitialRect(FlutterWindowsEngine* engine,

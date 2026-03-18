@@ -220,6 +220,7 @@ class _WindowCreatorCard extends StatelessWidget {
                               ),
                               title: 'Regular',
                               preferredSize: windowSettings.regularSize,
+                              decorated: windowSettings.regularDecorated,
                             ),
                           ),
                         );
@@ -262,6 +263,7 @@ class _WindowCreatorCard extends StatelessWidget {
                               title: 'Modal Dialog',
                               preferredSize: windowSettings.dialogSize,
                               parent: windowController,
+                              decorated: windowSettings.dialogDecorated,
                             ),
                           ),
                         );

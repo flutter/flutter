@@ -45,7 +45,8 @@ class HostWindow {
       FlutterWindowsEngine* engine,
       const WindowSizeRequest& preferred_size,
       const WindowConstraints& preferred_constraints,
-      LPCWSTR title);
+      LPCWSTR title,
+      bool decorated);
 
   // Creates a dialog Win32 window with a child view confined to its client
   // area. |window_manager| is a pointer to the window manager that manages the
@@ -64,7 +65,8 @@ class HostWindow {
       const WindowSizeRequest& preferred_size,
       const WindowConstraints& preferred_constraints,
       LPCWSTR title,
-      HWND parent);
+      HWND parent,
+      bool decorated);
 
   static std::unique_ptr<HostWindow> CreateTooltipWindow(
       WindowManager* window_manager,
@@ -127,6 +129,7 @@ class HostWindow {
     int nCmdShow = SW_SHOWNORMAL;
     FlutterWindowsViewSizingDelegate* sizing_delegate = nullptr;
     bool is_sized_to_content = false;
+    bool decorated = true;
   };
 
   // Initialize the underlying native window and the Flutter view.
@@ -236,6 +239,10 @@ class HostWindow {
 
   // Used to mark a window as fullscreen.
   Microsoft::WRL::ComPtr<ITaskbarList2> task_bar_list_;
+
+  // Whether or not the window has non-client area decorations such as title bar
+  // and borders.
+  bool decorated_ = true;
 
   FML_DISALLOW_COPY_AND_ASSIGN(HostWindow);
 };

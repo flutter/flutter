@@ -37,7 +37,8 @@ HostWindowDialog::HostWindowDialog(WindowManager* window_manager,
                                    const WindowSizeRequest& preferred_size,
                                    const BoxConstraints& constraints,
                                    LPCWSTR title,
-                                   std::optional<HWND> const& owner_window)
+                                   std::optional<HWND> const& owner_window,
+                                   bool decorated)
     : HostWindow(window_manager, engine) {
   InitializeFlutterView(HostWindowInitializationParams{
       .archetype = WindowArchetype::kDialog,
@@ -48,7 +49,7 @@ HostWindowDialog::HostWindowDialog(WindowManager* window_manager,
           GetInitialRect(engine, preferred_size, constraints, owner_window),
       .title = title,
       .owner_window = owner_window,
-  });
+      .decorated = decorated});
   auto hwnd = window_handle_;
   if (owner_window == nullptr) {
     if (HMENU hMenu = GetSystemMenu(hwnd, FALSE)) {
