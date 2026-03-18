@@ -533,17 +533,28 @@ bool Canvas::AttemptDrawAntialiasedCircle(const Point& center,
   entity.SetBlendMode(paint.blend_mode);
 
   const bool is_stroked = paint.style == Paint::Style::kStroke;
-  std::unique_ptr<CircleGeometry> geom;
-  if (is_stroked) {
-    geom = std::make_unique<CircleGeometry>(center, radius, paint.stroke.width);
+
+  if (renderer_.GetContext()->GetFlags().use_sdfs) {
+    auto contents = UberSDFContents::Make(
+        /*type=*/UberSDFContents::Type::kCircle,
+        /*rect=*/
+        Rect::MakeLTRB(center.x - radius, center.y - radius, center.x + radius,
+                       center.y + radius),
+        /*color=*/paint.color, /*stroke_width=*/paint.stroke.width,
+        /*stroked=*/is_stroked);
+    entity.SetContents(std::move(contents));
   } else {
-    geom = std::make_unique<CircleGeometry>(center, radius);
+    std::unique_ptr<CircleGeometry> geom;
+    if (is_stroked) {
+      geom =
+          std::make_unique<CircleGeometry>(center, radius, paint.stroke.width);
+    } else {
+      geom = std::make_unique<CircleGeometry>(center, radius);
+    }
+    auto contents =
+        CircleContents::Make(std::move(geom), paint.color, is_stroked);
+    entity.SetContents(std::move(contents));
   }
-
-  auto contents =
-      CircleContents::Make(std::move(geom), paint.color, is_stroked);
-
-  entity.SetContents(std::move(contents));
   AddRenderEntityToCurrentPass(entity);
 
   return true;
