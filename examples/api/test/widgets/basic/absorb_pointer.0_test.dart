@@ -13,33 +13,41 @@ void main() {
   ) async {
     await tester.pumpWidget(const example.AbsorbPointerApp());
 
-    // Verify initial state: Switch is ON by default (isAbsorbing = true)
+    // Verify initial state: Switch is ON by default (the Buttons are clickable)
     final Finder switchFinder = find.byType(Switch);
     expect(tester.widget<Switch>(switchFinder).value, isTrue);
+    expect(find.text('No button pressed yet'), findsOneWidget);
 
-    // Buttons should be clickable when Switch is ON
+    // Button 1 should be clickable when Switch is ON
     await tester.tap(find.text('Button 1'));
-    await tester.pumpAndSettle(); // Wait for SnackBar animation
-
-    expect(find.text('Button 1 Pressed'), findsOneWidget);
-
-    // Dismiss SnackBar for next test
-    ScaffoldMessenger.of(
-      tester.element(find.text('Button 1')),
-    ).clearSnackBars();
     await tester.pumpAndSettle();
 
-    // Toggle the Switch to OFF (isAbsorbing = false)
+    expect(tester.widget<Switch>(switchFinder).value, isTrue);
+    expect(find.text('Button 1 Pressed'), findsOneWidget);
+
+    // Button 2 should be clickable when Switch is ON
+    await tester.tap(find.text('Button 2'));
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<Switch>(switchFinder).value, isTrue);
+    expect(find.text('Button 2 Pressed'), findsOneWidget);
+
+
+    // Toggle the Switch to OFF (enable AbsorbPointer)
     await tester.tap(switchFinder);
     await tester.pumpAndSettle();
 
-    expect(tester.widget<Switch>(switchFinder).value, isFalse);
+    expect(find.text('Buttons are disabled'), findsOneWidget);
 
     // Buttons should NOT be clickable when Switch is OFF
+    await tester.tap(find.text('Button 1'), warnIfMissed: false);
+    await tester.pumpAndSettle();
+    expect(find.text('Buttons are disabled'), findsOneWidget);
+
     await tester.tap(find.text('Button 2'), warnIfMissed: false);
     await tester.pumpAndSettle();
+    expect(find.text('Buttons are disabled'), findsOneWidget);
 
-    // Verify that NO SnackBar appeared
-    expect(find.text('Button 2 Pressed'), findsNothing);
+
   });
 }

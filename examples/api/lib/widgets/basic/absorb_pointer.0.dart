@@ -30,51 +30,71 @@ class AbsorbPointerExample extends StatefulWidget {
 }
 
 class _AbsorbPointerExampleState extends State<AbsorbPointerExample> {
-  bool isAbsorbing = true;
+  bool isEnabled = true;
+  String message = "No button pressed yet";
 
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      spacing: 40,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text("Enable Buttons"),
             Switch(
-              value: isAbsorbing,
+              value: isEnabled,
               onChanged: (value) {
                 setState(() {
-                  isAbsorbing = value;
+                  isEnabled = value;
+                  message = value
+                      ? "Buttons are enabled"
+                      : "Buttons are disabled";
                 });
               },
             ),
           ],
         ),
+        const SizedBox(height: 40),
         AbsorbPointer(
-          absorbing: !isAbsorbing,
+          absorbing: !isEnabled,
           child: Column(
             children: [
               ElevatedButton(
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Button 1 Pressed")),
-                  );
+                  setState(() {
+                    message = "Button 1 Pressed";
+                  });
                 },
                 child: const Text("Button 1"),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Button 2 Pressed")),
-                  );
+                  setState(() {
+                    message = "Button 2 Pressed";
+                  });
                 },
                 child: const Text("Button 2"),
               ),
             ],
           ),
+        ),
+
+        const SizedBox(height: 30),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 8,
+          children: [
+            Icon(
+              isEnabled ? Icons.check_circle : Icons.block,
+              color: isEnabled ? Colors.green : Colors.red,
+            ),
+            Text(
+              message,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+          ],
         ),
       ],
     );
