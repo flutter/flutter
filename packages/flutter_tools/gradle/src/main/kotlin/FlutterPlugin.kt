@@ -217,6 +217,10 @@ class FlutterPlugin : Plugin<Project> {
             releaseBuildType.isShrinkResources = FlutterPluginUtils.isBuiltAsApp(project)
             releaseBuildType.proguardFiles.add(FlutterPluginUtils.getAndroidExtension(project).getDefaultProguardFile("proguard-android-optimize.txt"))
             releaseBuildType.proguardFiles.add(flutterProguardRules)
+            val proguardRulesPro = File("${project.projectDir}/proguard-rules.pro")
+            if (proguardRulesPro.exists()) {
+                releaseBuildType.proguardFiles.add(proguardRulesPro)
+            }
         }
 
         FlutterPluginUtils.forceNdkDownload(project, flutterRootPath)
