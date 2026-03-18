@@ -1440,6 +1440,62 @@ void main() {
     handle.dispose();
   });
 
+  testWidgets('Dropdown button Semantics expanded state should update when menu opens and closes', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/183432
+    const key = Key('test');
+    await tester.pumpWidget(buildFrame(buttonKey: key, onChanged: onChanged));
+
+    // Before opening: should have expanded state but not be expanded.
+    expect(
+      tester.getSemantics(find.byType(DropdownButton<String>)),
+      matchesSemantics(
+        isButton: true,
+        hasExpandedState: true,
+        label: 'two',
+        hasTapAction: true,
+        hasFocusAction: true,
+        isFocusable: true,
+      ),
+    );
+
+    // Open the menu.
+    await tester.tap(find.text('two'));
+    await tester.pumpAndSettle();
+
+    // While the menu is open, BlockSemantics in ModalBarrier blocks the
+    // button's semantics node (making tester.getSemantics return a stale node).
+    // Verify the Semantics widget's expanded property directly instead.
+    final Semantics expandedSemantics = tester.widget<Semantics>(
+      find.descendant(
+        of: find.byKey(key),
+        matching: find.byWidgetPredicate(
+          (Widget widget) => widget is Semantics && widget.properties.expanded != null,
+        ),
+      ),
+    );
+    expect(expandedSemantics.properties.expanded, isTrue);
+
+    // Close the menu by selecting an item.
+    await tester.tap(find.text('one').last);
+    await tester.pumpAndSettle();
+
+    // After closing: should have expanded state but not be expanded.
+    expect(
+      tester.getSemantics(find.byType(DropdownButton<String>)),
+      matchesSemantics(
+        isButton: true,
+        hasExpandedState: true,
+        label: 'two',
+        hasTapAction: true,
+        hasFocusAction: true,
+        isFocusable: true,
+        isFocused: true,
+      ),
+    );
+  });
+
   testWidgets('Dropdown menu includes semantics', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
     const key = Key('test');
