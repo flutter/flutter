@@ -362,12 +362,11 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
 
   NSWindow* parent = nil;
 
-  if (request->parent_view_id != 0) {
-    for (FlutterWindowOwner* owner in _windows) {
-      if (owner.flutterViewController.viewIdentifier == request->parent_view_id) {
-        parent = owner.window;
-        break;
-      }
+  FML_DCHECK(request->parent_view_id != 0);
+  for (FlutterWindowOwner* owner in _windows) {
+    if (owner.flutterViewController.viewIdentifier == request->parent_view_id) {
+      parent = owner.window;
+      break;
     }
   }
 
@@ -414,12 +413,11 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
 
   NSWindow* parent = nil;
 
-  if (request->parent_view_id != 0) {
-    for (FlutterWindowOwner* owner in _windows) {
-      if (owner.flutterViewController.viewIdentifier == request->parent_view_id) {
-        parent = owner.window;
-        break;
-      }
+  FML_DCHECK(request->parent_view_id != 0);
+  for (FlutterWindowOwner* owner in _windows) {
+    if (owner.flutterViewController.viewIdentifier == request->parent_view_id) {
+      parent = owner.window;
+      break;
     }
   }
 
