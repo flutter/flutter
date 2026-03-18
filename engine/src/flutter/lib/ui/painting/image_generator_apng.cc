@@ -510,6 +510,10 @@ APNGImageGenerator::DemuxNextImage(const void* buffer_p,
     // Copy the image data/ancillary chunks.
     for (const ChunkHeader* c : image_chunks) {
       if (c->get_type() == kFrameDataChunkType) {
+        if (c->get_data_length() < 4) {
+          return std::make_pair(std::nullopt, nullptr);
+        }
+
         // Write a new IDAT chunk header.
         ChunkHeader* write_header =
             reinterpret_cast<ChunkHeader*>(write_cursor);
