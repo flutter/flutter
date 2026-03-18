@@ -1621,6 +1621,39 @@ void main() {
   });
 
   group('RenderTwoDimensionalViewport', () {
+    testWidgets(
+      'ISSUE 1: RenderTwoDimensionalViewport.cacheExtent setter fails to switch style from default',
+      (WidgetTester tester) async {
+        final horizontalOffset = ViewportOffset.fixed(0.0);
+        final verticalOffset = ViewportOffset.fixed(0.0);
+        final childManager = _SimpleChildManager();
+
+        final viewport = _SimpleTwoDimensionalViewport(
+          horizontalOffset: horizontalOffset,
+          horizontalAxisDirection: AxisDirection.right,
+          verticalOffset: verticalOffset,
+          verticalAxisDirection: AxisDirection.down,
+          delegate: _SimpleDelegate(),
+          mainAxis: Axis.vertical,
+          childManager: childManager,
+        );
+
+        // Default is viewport(0.8)
+        expect(viewport.cacheExtentStyle, CacheExtentStyle.viewport);
+        expect(viewport.cacheExtent, 0.8);
+
+        // Setting a typical pixel value (250)
+        viewport.cacheExtent = 250.0;
+
+        // BUG: It remains viewport style, resulting in viewport(250.0)
+        expect(
+          viewport.cacheExtentStyle,
+          CacheExtentStyle.pixel,
+          reason: 'Style should have switched to pixel for backward compatibility',
+        );
+      },
+    );
+
     testWidgets('asserts against axes mismatch', (WidgetTester tester) async {
       // Horizontal mismatch
       expect(
@@ -3220,4 +3253,29 @@ class _SomeRenderTwoDimensionalViewport extends RenderTwoDimensionalViewport {
 
   @override
   void layoutChildSequence() {}
+}
+
+class _SimpleTwoDimensionalViewport extends RenderTwoDimensionalViewport {
+  _SimpleTwoDimensionalViewport({
+    required super.horizontalOffset,
+    required super.horizontalAxisDirection,
+    required super.verticalOffset,
+    required super.verticalAxisDirection,
+    required super.delegate,
+    required super.mainAxis,
+    required super.childManager,
+  });
+
+  @override
+  void layoutChildSequence() {}
+}
+
+class _SimpleChildManager extends TwoDimensionalChildManager {}
+
+class _SimpleDelegate extends TwoDimensionalChildDelegate {
+  _SimpleDelegate();
+  @override
+  Widget? build(BuildContext context, ChildVicinity vicinity) => null;
+  @override
+  bool shouldRebuild(covariant TwoDimensionalChildDelegate oldDelegate) => false;
 }
