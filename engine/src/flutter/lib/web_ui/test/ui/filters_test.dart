@@ -573,7 +573,7 @@ Future<void> testMain() async {
         }
       }
     });
-  }, skip: isWimp); // https://github.com/flutter/flutter/issues/175371
+  });
 
   group('MaskFilter', () {
     test('with 0 sigma can be set on a Paint', () {

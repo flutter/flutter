@@ -8,6 +8,7 @@
 #include "flutter/impeller/entity/gles3/entity_shaders_gles.h"
 #include "flutter/impeller/renderer/backend/gles/context_gles.h"
 #include "flutter/impeller/renderer/backend/gles/surface_gles.h"
+#include "flutter/impeller/renderer/backend/gles/texture_gles.h"
 #include "flutter/impeller/typographer/backends/skia/text_frame_skia.h"
 #include "flutter/impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "flutter/skwasm/export.h"
@@ -39,6 +40,9 @@ class ReactorWorker : public impeller::ReactorGLES::Worker {
   }
 };
 
+class ImpellerRenderContext;
+thread_local std::vector<ImpellerRenderContext*> active_contexts;
+
 class ImpellerRenderContext : public Skwasm::RenderContext {
  public:
   ImpellerRenderContext(std::shared_ptr<impeller::ContextGLES> context,
@@ -49,17 +53,54 @@ class ImpellerRenderContext : public Skwasm::RenderContext {
         content_context_(
             std::make_unique<impeller::ContentContext>(context_,
                                                        typographer_context_,
-                                                       nullptr)) {}
+                                                       nullptr)) {
+    active_contexts.push_back(this);
+  }
+
+  virtual ~ImpellerRenderContext() {
+    auto it = std::find(active_contexts.begin(), active_contexts.end(), this);
+    if (it != active_contexts.end()) {
+      active_contexts.erase(it);
+    }
+  }
 
   virtual void RenderPicture(
       const sk_sp<flutter::DisplayList> display_list) override {
-    impeller::RenderToTarget(
-        *content_context_, surface_->GetRenderTarget(), display_list,
-        impeller::Rect::MakeLTRB(0, 0, width_, height_), true);
+    impeller::RenderToTarget(*content_context_, surface_->GetRenderTarget(),
+                             display_list,
+                             impeller::Rect::MakeLTRB(0, 0, width_, height_),
+                             true, true, &image_cache_);
   }
 
-  virtual void RenderImage(flutter::DlImage* image,
-                           Skwasm::ImageByteFormat format) override {}
+  virtual bool RasterizeImage(flutter::DlImage* image,
+                              Skwasm::ImageByteFormat format,
+                              void* out_pixels) override {
+    auto texture = image->GetImpellerTexture(context_);
+    if (!texture) {
+      return false;
+    }
+
+    auto gles_texture = static_cast<impeller::TextureGLES*>(texture.get());
+    GLuint fbo = 0;
+    glGenFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+    bool attached = gles_texture->SetAsFramebufferAttachment(
+        GL_FRAMEBUFFER, impeller::TextureGLES::AttachmentType::kColor0);
+    if (!attached) {
+      glDeleteFramebuffers(1, &fbo);
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+      return false;
+    }
+
+    glReadPixels(0, 0, image->width(), image->height(), GL_RGBA,
+                 GL_UNSIGNED_BYTE, out_pixels);
+
+    glDeleteFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    return true;
+  }
 
   virtual void Resize(int width, int height) override {
     if (width_ != width || height_ != height) {
@@ -68,6 +109,8 @@ class ImpellerRenderContext : public Skwasm::RenderContext {
       RecreateSurface();
     }
   }
+
+  void RemoveImage(const flutter::DlImage* image) { image_cache_.erase(image); }
 
   virtual void SetResourceCacheLimit(int bytes) override {
     // No-op
@@ -88,6 +131,7 @@ class ImpellerRenderContext : public Skwasm::RenderContext {
   std::shared_ptr<impeller::TypographerContext> typographer_context_;
   std::unique_ptr<impeller::ContentContext> content_context_;
   std::unique_ptr<impeller::Surface> surface_;
+  impeller::TextureCache image_cache_;
   int width_ = 0;
   int height_ = 0;
 };
@@ -134,4 +178,12 @@ std::unique_ptr<Skwasm::RenderContext> Skwasm::RenderContext::Make(
   context->AddReactorWorker(worker);
   return std::make_unique<ImpellerRenderContext>(std::move(context),
                                                  std::move(worker));
+}
+
+SKWASM_EXPORT void skwasm_disposeDlImageOnWorker(void* dl_image_ptr) {
+  const flutter::DlImage* image =
+      reinterpret_cast<const flutter::DlImage*>(dl_image_ptr);
+  for (auto* context : active_contexts) {
+    context->RemoveImage(image);
+  }
 }

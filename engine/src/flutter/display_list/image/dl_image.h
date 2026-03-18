@@ -16,6 +16,7 @@
 #include "third_party/skia/include/core/SkRefCnt.h"
 
 namespace impeller {
+class Context;
 class Texture;
 }  // namespace impeller
 
@@ -55,6 +56,20 @@ class DlImage : public SkRefCnt {
   /// @return     An Impeller texture instance or null.
   ///
   virtual std::shared_ptr<impeller::Texture> impeller_texture() const = 0;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Gets the Impeller texture instance, providing the current
+  /// context.
+  ///             This allows the image to lazily generate the texture if it
+  ///             needs to know the context (e.g. for deferred WebGL rendering).
+  ///
+  /// @param      context  The active Impeller context.
+  /// @return     An Impeller texture instance or null.
+  ///
+  virtual std::shared_ptr<impeller::Texture> GetImpellerTexture(
+      const std::shared_ptr<impeller::Context>& context) const {
+    return impeller_texture();
+  }
 
   //----------------------------------------------------------------------------
   /// @brief      If the pixel format of this image ignores alpha, this returns
