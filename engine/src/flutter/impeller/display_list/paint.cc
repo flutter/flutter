@@ -59,7 +59,9 @@ void Paint::ConvertStops(const flutter::DlGradientColorSourceBase* gradient,
   }
 }
 
-std::shared_ptr<ColorSourceContents> Paint::CreateContents() const {
+std::shared_ptr<ColorSourceContents> Paint::CreateContents(
+    const std::shared_ptr<Context>& context,
+    TextureCache* image_cache) const {
   if (color_source == nullptr) {
     auto contents = std::make_shared<SolidColorContents>();
     contents->SetColor(color);
@@ -189,8 +191,10 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents() const {
       const flutter::DlImageColorSource* image_color_source =
           color_source->asImage();
       FML_DCHECK(image_color_source &&
-                 image_color_source->image()->impeller_texture());
-      auto texture = image_color_source->image()->impeller_texture();
+                 impeller::GetCachedTexture(image_color_source->image().get(),
+                                            context, image_cache));
+      auto texture = impeller::GetCachedTexture(
+          image_color_source->image().get(), context, image_cache);
       auto x_tile_mode = static_cast<Entity::TileMode>(
           image_color_source->horizontal_tile_mode());
       auto y_tile_mode = static_cast<Entity::TileMode>(
@@ -256,11 +260,13 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents() const {
           contents->SetColor(Color::BlackTransparent());
           return contents;
         }
-        FML_DCHECK(image->image()->impeller_texture());
+        auto texture = impeller::GetCachedTexture(image->image().get(), context,
+                                                  image_cache);
+        FML_DCHECK(texture);
         texture_inputs.push_back({
             .sampler_descriptor =
                 skia_conversions::ToSamplerDescriptor(image->sampling()),
-            .texture = image->image()->impeller_texture(),
+            .texture = texture,
         });
       }
 
@@ -276,10 +282,12 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents() const {
 }
 
 std::shared_ptr<Contents> Paint::WithFilters(
+    const std::shared_ptr<Context>& context,
+    TextureCache* image_cache,
     std::shared_ptr<Contents> input) const {
   input = WithColorFilter(input, ColorFilterContents::AbsorbOpacity::kYes);
-  auto image_filter =
-      WithImageFilter(input, Matrix(), Entity::RenderingMode::kDirect);
+  auto image_filter = WithImageFilter(context, image_cache, input, Matrix(),
+                                      Entity::RenderingMode::kDirect);
   if (image_filter) {
     input = image_filter;
   }
@@ -287,10 +295,12 @@ std::shared_ptr<Contents> Paint::WithFilters(
 }
 
 std::shared_ptr<Contents> Paint::WithFiltersForSubpassTarget(
+    const std::shared_ptr<Context>& context,
+    TextureCache* image_cache,
     std::shared_ptr<Contents> input,
     const Matrix& effect_transform) const {
   auto image_filter =
-      WithImageFilter(input, effect_transform,
+      WithImageFilter(context, image_cache, input, effect_transform,
                       Entity::RenderingMode::kSubpassPrependSnapshotTransform);
   if (image_filter) {
     input = image_filter;
@@ -310,13 +320,16 @@ std::shared_ptr<Contents> Paint::WithMaskBlur(std::shared_ptr<Contents> input,
 }
 
 std::shared_ptr<FilterContents> Paint::WithImageFilter(
+    const std::shared_ptr<Context>& context,
+    TextureCache* image_cache,
     const FilterInput::Variant& input,
     const Matrix& effect_transform,
     Entity::RenderingMode rendering_mode) const {
   if (!image_filter) {
     return nullptr;
   }
-  auto filter = WrapInput(image_filter, FilterInput::Make(input));
+  auto filter =
+      WrapInput(context, image_cache, image_filter, FilterInput::Make(input));
   filter->SetRenderingMode(rendering_mode);
   filter->SetEffectTransform(effect_transform);
   return filter;

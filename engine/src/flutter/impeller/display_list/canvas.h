@@ -16,6 +16,7 @@
 #include "flutter/display_list/geometry/dl_path.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/display_list/paint.h"
+#include "impeller/display_list/texture_cache.h"
 #include "impeller/entity/contents/atlas_contents.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/solid_rrect_like_blur_contents.h"
@@ -142,6 +143,8 @@ class Canvas {
                   IRect32 cull_rect);
 
   ~Canvas() = default;
+
+  void SetImageCache(TextureCache* image_cache) { image_cache_ = image_cache; }
 
   /// @brief Update the backdrop data used to group together backdrop filters
   ///        within the same layer
@@ -299,6 +302,7 @@ class Canvas {
   RenderTarget render_target_;
   const bool is_onscreen_;
   bool requires_readback_;
+  TextureCache* image_cache_ = nullptr;
   EntityPassClipStack clip_coverage_stack_;
 
   std::deque<CanvasStackEntry> transform_stack_;
