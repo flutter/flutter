@@ -3480,6 +3480,364 @@ void main() {
       areCreateAndDispose,
     );
   });
+
+  // ---- Unified offset model tests ----
+
+  testWidgets('Fling down continues from outer into inner', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/13496
+    // Regression test for https://github.com/flutter/flutter/issues/73864
+    final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+    await tester.pumpWidget(buildTest(key: globalKey));
+
+    // Switch to the DD tab which has a long inner list (10000.0 height).
+    await tester.tap(find.text('DD'));
+    await tester.pumpAndSettle();
+
+    expect(globalKey.currentState!.outerController.offset, 0.0);
+    expect(globalKey.currentState!.innerController.offset, 0.0);
+
+    // Fling down (scroll content up) with enough velocity to pass outer extent.
+    await tester.fling(find.byType(NestedScrollView), const Offset(0.0, -800.0), 2000.0);
+    await tester.pumpAndSettle();
+
+    final double outerMax = globalKey.currentState!.outerController.position.maxScrollExtent;
+    expect(globalKey.currentState!.outerController.offset, outerMax);
+    expect(globalKey.currentState!.innerController.offset, greaterThan(0.0));
+  });
+
+  testWidgets('Fling up continues from inner back to outer', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/13496
+    // Regression test for https://github.com/flutter/flutter/issues/79067
+    final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+    await tester.pumpWidget(buildTest(key: globalKey));
+
+    // Switch to the DD tab.
+    await tester.tap(find.text('DD'));
+    await tester.pumpAndSettle();
+
+    // First, scroll down past outer max via drag so inner has offset.
+    final double outerMax = globalKey.currentState!.outerController.position.maxScrollExtent;
+    final TestGesture gesture = await tester.startGesture(const Offset(400.0, 300.0));
+    await gesture.moveBy(Offset(0.0, -(outerMax + 200.0)));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(globalKey.currentState!.outerController.offset, outerMax);
+    expect(globalKey.currentState!.innerController.offset, greaterThan(0.0));
+
+    // Fling up (scroll content down) with enough velocity.
+    await tester.fling(find.byType(NestedScrollView), const Offset(0.0, 800.0), 2000.0);
+    await tester.pumpAndSettle();
+
+    expect(globalKey.currentState!.innerController.offset, 0.0);
+    expect(globalKey.currentState!.outerController.offset, lessThan(outerMax));
+  });
+
+  testWidgets('Ballistic scrolling with BouncingScrollPhysics does not jank', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/73864
+    // Regression test for https://github.com/flutter/flutter/issues/52233
+    final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: NestedScrollView(
+            key: globalKey,
+            physics: const BouncingScrollPhysics(),
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[const SliverAppBar(expandedHeight: 200.0, pinned: true)];
+            },
+            body: ListView.builder(
+              physics: const BouncingScrollPhysics(),
+              itemCount: 100,
+              itemBuilder: (BuildContext context, int index) {
+                return SizedBox(height: 50.0, child: Text('Item $index'));
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Record pixel values each frame.
+    final outerPixels = <double>[];
+    final innerPixels = <double>[];
+    void recordPositions() {
+      outerPixels.add(globalKey.currentState!.outerController.offset);
+      innerPixels.add(globalKey.currentState!.innerController.offset);
+    }
+
+    recordPositions();
+
+    // Fling down.
+    await tester.fling(find.byType(NestedScrollView), const Offset(0.0, -300.0), 1500.0);
+
+    // Pump frame by frame, recording positions.
+    for (var i = 0; i < 60; i++) {
+      await tester.pump(const Duration(milliseconds: 16));
+      recordPositions();
+    }
+
+    // Verify monotonic: combined offset (outer + inner) should never decrease
+    // during a downward fling.
+    final combined = <double>[];
+    for (var i = 0; i < outerPixels.length; i++) {
+      combined.add(outerPixels[i] + innerPixels[i]);
+    }
+    for (var i = 1; i < combined.length; i++) {
+      // Allow small floating point tolerance.
+      expect(
+        combined[i],
+        greaterThanOrEqualTo(combined[i - 1] - 0.01),
+        reason:
+            'Combined offset decreased from frame ${i - 1} to $i: '
+            '${combined[i - 1]} -> ${combined[i]}',
+      );
+    }
+  });
+
+  testWidgets('BouncingScrollPhysics allows overscroll on inner', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/79062
+    final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: NestedScrollView(
+            key: globalKey,
+            physics: const BouncingScrollPhysics(),
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[const SliverAppBar(expandedHeight: 200.0, pinned: true)];
+            },
+            body: ListView(
+              physics: const BouncingScrollPhysics(),
+              children: const <Widget>[
+                SizedBox(height: 300.0, child: Text('item1')),
+                SizedBox(height: 300.0, child: Text('item2')),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // First scroll to the bottom so inner is at max.
+    final double outerMax = globalKey.currentState!.outerController.position.maxScrollExtent;
+    final TestGesture gesture = await tester.startGesture(const Offset(400.0, 300.0));
+    await gesture.moveBy(Offset(0.0, -(outerMax + 1000.0)));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // Now fling hard past inner maxScrollExtent.
+    await tester.fling(find.byType(NestedScrollView), const Offset(0.0, -500.0), 5000.0);
+    // Pump a few frames (not settle) to catch overscroll in progress.
+    for (var i = 0; i < 5; i++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+
+    final double innerMax = globalKey.currentState!.innerController.position.maxScrollExtent;
+    final double innerPixels = globalKey.currentState!.innerController.offset;
+    expect(innerPixels, greaterThan(innerMax));
+
+    // Let it bounce back.
+    await tester.pumpAndSettle();
+    expect(
+      globalKey.currentState!.innerController.offset,
+      moreOrLessEquals(innerMax, epsilon: 1.0),
+    );
+  });
+
+  testWidgets('shouldIgnorePointer is false during bounce-back', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/82150
+    final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+    var tapped = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: NestedScrollView(
+            key: globalKey,
+            physics: const BouncingScrollPhysics(),
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[const SliverAppBar(expandedHeight: 200.0, pinned: true)];
+            },
+            body: ListView(
+              physics: const BouncingScrollPhysics(),
+              children: <Widget>[
+                GestureDetector(
+                  onTap: () => tapped = true,
+                  child: const SizedBox(height: 600.0, child: Text('Tap me')),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Fling past the end to create overscroll.
+    final double outerMax = globalKey.currentState!.outerController.position.maxScrollExtent;
+    final TestGesture gesture = await tester.startGesture(const Offset(400.0, 300.0));
+    await gesture.moveBy(Offset(0.0, -(outerMax + 1000.0)));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    // Now fling hard to overscroll.
+    await tester.fling(find.byType(NestedScrollView), const Offset(0.0, -300.0), 3000.0);
+    // Pump a few frames to get into bounce-back.
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+
+    // During bounce-back, tap on the GestureDetector.
+    await tester.tap(find.text('Tap me'), warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    expect(tapped, isTrue);
+  });
+
+  testWidgets('setPixels distributes to outer first then inner', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/136199
+    final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+    await tester.pumpWidget(buildTest(key: globalKey));
+
+    // Switch to the DD tab which has a long inner list.
+    await tester.tap(find.text('DD'));
+    await tester.pumpAndSettle();
+
+    final double outerMax = globalKey.currentState!.outerController.position.maxScrollExtent;
+
+    // Record transitions: outer should reach max before inner starts moving.
+    final outerValues = <double>[];
+    final innerValues = <double>[];
+
+    void listener() {
+      outerValues.add(globalKey.currentState!.outerController.offset);
+      innerValues.add(globalKey.currentState!.innerController.offset);
+    }
+
+    globalKey.currentState!.outerController.addListener(listener);
+    globalKey.currentState!.innerController.addListener(listener);
+
+    // animateTo a unified offset past outer max.
+    final double target = outerMax + 200.0;
+    globalKey.currentState!.innerController.animateTo(
+      target,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.linear,
+    );
+
+    await tester.pumpAndSettle();
+
+    globalKey.currentState!.outerController.removeListener(listener);
+    globalKey.currentState!.innerController.removeListener(listener);
+
+    // Find the first frame where inner > 0 and verify outer is at max.
+    var foundInnerMoving = false;
+    for (var i = 0; i < innerValues.length; i++) {
+      if (innerValues[i] > 0.0) {
+        foundInnerMoving = true;
+        // At this point, outer should be at max.
+        expect(
+          outerValues[i],
+          moreOrLessEquals(outerMax, epsilon: 1.0),
+          reason: 'Outer should be at max when inner starts moving',
+        );
+        break;
+      }
+    }
+    expect(foundInnerMoving, isTrue, reason: 'Inner should have moved past 0');
+  });
+
+  testWidgets('animateTo scrolls both outer and inner smoothly', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/93818
+    final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+    await tester.pumpWidget(buildTest(key: globalKey));
+
+    // Switch to the DD tab.
+    await tester.tap(find.text('DD'));
+    await tester.pumpAndSettle();
+
+    final double outerMax = globalKey.currentState!.outerController.position.maxScrollExtent;
+    const innerTarget = 100.0;
+    // Inner controller animateTo with a value past outer range should move both.
+    // The inner controller's animateTo maps to unified offset via unnestOffset.
+    globalKey.currentState!.innerController.animateTo(
+      innerTarget,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.linear,
+    );
+    await tester.pumpAndSettle();
+
+    // Outer should be at max, inner should be at innerTarget.
+    expect(
+      globalKey.currentState!.outerController.offset,
+      moreOrLessEquals(outerMax, epsilon: 1.0),
+    );
+    expect(
+      globalKey.currentState!.innerController.offset,
+      moreOrLessEquals(innerTarget, epsilon: 1.0),
+    );
+  });
+
+  testWidgets('animateTo completes future when animation finishes', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/93818
+    final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+    await tester.pumpWidget(buildTest(key: globalKey));
+
+    // Switch to the DD tab.
+    await tester.tap(find.text('DD'));
+    await tester.pumpAndSettle();
+
+    var futureCompleted = false;
+    globalKey.currentState!.innerController
+        .animateTo(200.0, duration: const Duration(milliseconds: 300), curve: Curves.linear)
+        .then((_) {
+          futureCompleted = true;
+        });
+
+    expect(futureCompleted, isFalse);
+    await tester.pumpAndSettle();
+    expect(futureCompleted, isTrue);
+  });
+
+  testWidgets('Pointer scroll falls back to delta distribution', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/63948
+    // Regression test for https://github.com/flutter/flutter/issues/151459
+    final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+    await tester.pumpWidget(buildTest(key: globalKey));
+
+    // Switch to the DD tab.
+    await tester.tap(find.text('DD'));
+    await tester.pumpAndSettle();
+
+    expect(globalKey.currentState!.outerController.offset, 0.0);
+    expect(globalKey.currentState!.innerController.offset, 0.0);
+
+    final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    testPointer.hover(const Offset(400.0, 300.0));
+
+    // Scroll a small amount — should go to outer first.
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 50.0)));
+    await tester.pump();
+
+    expect(globalKey.currentState!.outerController.offset, 50.0);
+    expect(globalKey.currentState!.innerController.offset, 0.0);
+
+    // Scroll past outer max.
+    final double outerMax = globalKey.currentState!.outerController.position.maxScrollExtent;
+    final double remaining = outerMax - 50.0;
+    await tester.sendEventToBinding(testPointer.scroll(Offset(0.0, remaining + 30.0)));
+    await tester.pump();
+
+    expect(
+      globalKey.currentState!.outerController.offset,
+      moreOrLessEquals(outerMax, epsilon: 1.0),
+    );
+    expect(globalKey.currentState!.innerController.offset, moreOrLessEquals(30.0, epsilon: 1.0));
+  });
 }
 
 double appBarHeight(WidgetTester tester) =>
