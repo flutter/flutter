@@ -333,8 +333,8 @@ class FlutterPlugin : Plugin<Project> {
         val flutterPlugin = this
 
         if (FlutterPluginUtils.isFlutterAppProject(projectToAddTasksTo)) {
-            val androidExtension = FlutterPluginUtils.getAndroidExtension(projectToAddTasksTo)
-            configureAbis(projectToAddTasksTo, androidExtension)
+            val appExtension = FlutterPluginUtils.getAndroidApplicationExtension(projectToAddTasksTo)
+            configureAbis(projectToAddTasksTo, appExtension)
             
             val androidComponents = projectToAddTasksTo.extensions.findByType(AndroidComponentsExtension::class.java)
             androidComponents?.onVariants { variant ->
@@ -455,7 +455,7 @@ class FlutterPlugin : Plugin<Project> {
          */
         private fun configureAbis(
             projectToAddTasksTo: Project,
-            androidExtension: BaseExtension
+            androidExtension: ApplicationExtension
         ) {
             // By default, assembling APKs generates fat APKs if multiple platforms are passed.
             // Configuring split per ABI allows to generate separate APKs for each abi.
@@ -499,12 +499,15 @@ class FlutterPlugin : Plugin<Project> {
          */
         private fun configureAbiWithoutSplits(
             projectToAddTasksTo: Project,
-            extension: BaseExtension
+            extension: ApplicationExtension
         ) {
             if (!FlutterPluginUtils.shouldProjectDisableAbiFiltering(projectToAddTasksTo)) {
-                extension.defaultConfig.ndk {
-                    abiFilters.clear()
-                    abiFilters.addAll(PLATFORM_ABI_LIST)
+                @Suppress("UNCHECKED_CAST")
+                val commonExtension = extension as? com.android.build.api.dsl.CommonExtension
+                val ndk = commonExtension?.defaultConfig?.ndk
+                ndk?.abiFilters?.clear()
+                if (ndk != null) {
+                    ndk.abiFilters.addAll(PLATFORM_ABI_LIST)
                 }
             }
         }

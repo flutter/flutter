@@ -14,19 +14,17 @@ object BaseApplicationNameHandler {
     internal const val GRADLE_BASE_APPLICATION_NAME_PROPERTY: String = "base-application-name"
 
     @JvmStatic fun setBaseName(project: Project) {
-        // Only set the base application name for apps, skip otherwise (LibraryExtension, DynamicFeatureExtension).
         val androidExtension =
-            project.extensions.findByType(com.android.build.gradle.BaseExtension::class.java) ?: return
+            project.extensions.findByType(ApplicationExtension::class.java) ?: return
 
-        // Setting to android.app.Application is the same as omitting the attribute.
         var baseApplicationName: String = DEFAULT_BASE_APPLICATION_NAME
 
-        // Respect this property if it set by the Flutter tool.
         if (project.hasProperty(GRADLE_BASE_APPLICATION_NAME_PROPERTY)) {
             baseApplicationName = project.property(GRADLE_BASE_APPLICATION_NAME_PROPERTY).toString()
         }
 
-        androidExtension.defaultConfig.manifestPlaceholders["applicationName"] =
-            baseApplicationName
+        @Suppress("UNCHECKED_CAST")
+        val commonExtension = androidExtension as? com.android.build.api.dsl.CommonExtension
+        commonExtension?.defaultConfig?.manifestPlaceholders?.put("applicationName", baseApplicationName)
     }
 }
