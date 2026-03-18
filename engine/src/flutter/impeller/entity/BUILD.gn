@@ -18,6 +18,7 @@ impeller_shaders("entity_shaders") {
     "shaders/blending/advanced_blend.frag",
     "shaders/circle.frag",
     "shaders/circle.vert",
+    "shaders/uber_sdf.frag",
     "shaders/clip.frag",
     "shaders/clip.vert",
     "shaders/glyph_atlas.frag",
