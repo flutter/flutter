@@ -49,13 +49,11 @@ const hasChromiumBreakIterators = () => {
     (typeof Intl.Segmenter !== "undefined");
 }
 
-const supportsWasmGC = () => {
-  // This attempts to instantiate a wasm module that only will validate if the
-  // final WasmGC spec is implemented in the browser.
-  //
-  // Copied from https://github.com/GoogleChromeLabs/wasm-feature-detect/blob/main/src/detectors/gc/index.js
-  const bytes = [0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 95, 1, 120, 0];
-  return WebAssembly.validate(new Uint8Array(bytes));
+const supportsDart2Wasm = () => {
+  // Dart2Wasm's `app.support.js` expression. It currently tests for
+  //   - WasmGC support
+  //   - `js-string` builtin support
+  return (WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,0,0,1,5,1,95,1,120,0]))&&!WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,0,0,1,4,1,96,0,0,2,23,1,14,119,97,115,109,58,106,115,45,115,116,114,105,110,103,4,99,97,115,116,0,0]),{"builtins":["js-string"]}));
 }
 
 const detectWebGLVersion = () => {
@@ -83,7 +81,7 @@ export const browserEnvironment = {
   browserEngine: browserEngine,
   hasImageCodecs: hasImageCodecs(),
   hasChromiumBreakIterators: hasChromiumBreakIterators(),
-  supportsWasmGC: supportsWasmGC(),
+  supportsDart2Wasm: supportsDart2Wasm(),
   crossOriginIsolated: window.crossOriginIsolated,
   webGLVersion: detectWebGLVersion(),
   isChromeExtension: isChromeExtension(),
