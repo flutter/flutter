@@ -93,7 +93,7 @@ You can enable HCPP using one of the following methods:
    ```
 
 ### Limitations and Known Issues
-- **SurfaceView Compatibility**: Opting in is currently not recommended if your application contains a platform view which is or contains a native `SurfaceView` (often used by video players or map plugins).
+- **SurfaceView Compatibility**: Opting in is currently not recommended if your application contains a platform view which is or contains a native `SurfaceView` (often used by video players or map plugins), due to clipping issues. This is tracked in https://github.com/flutter/flutter/issues/175546.
 - **Complex Overlay Stacking**: Transparent platform views will not display correctly in layout stacks structured as: Flutter canvas -> Platform View -> Overlay -> Transparent Platform View, when all four of these layers intersect.
 
 # Selecting a mode
