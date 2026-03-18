@@ -401,8 +401,14 @@ Future<Uint8List> readChunked(
 /// A [ui.Image] backed by an `SkImage` from Skia.
 class CkImage implements ui.Image, StackTraceDebugger {
   CkImage(SkImage skImage, {this.imageSource}) {
-    box = CountedRef<CkImage, SkImage>(skImage, this, 'SkImage');
+    box = CkCountedRef<CkImage, SkImage>(
+      skImage,
+      this,
+      'SkImage',
+      onDisposed: (CkImage image) => ui.Image.onDispose?.call(image),
+    );
     _init();
+    ui.Image.onCreate?.call(this);
     imageSource?.refCount++;
   }
 
@@ -417,7 +423,6 @@ class CkImage implements ui.Image, StackTraceDebugger {
       _debugStackTrace = StackTrace.current;
       return true;
     }());
-    ui.Image.onCreate?.call(this);
   }
 
   @override
@@ -426,7 +431,7 @@ class CkImage implements ui.Image, StackTraceDebugger {
 
   // Use ref counting because `SkImage` may be deleted either due to this object
   // being garbage-collected, or by an explicit call to [delete].
-  late final CountedRef<CkImage, SkImage> box;
+  late final CkCountedRef<CkImage, SkImage> box;
 
   /// If this [CkImage] is backed by an image source (either VideoFrame, <img>
   /// element, or ImageBitmap), this is the backing image source. We read pixels
@@ -436,7 +441,7 @@ class CkImage implements ui.Image, StackTraceDebugger {
 
   /// The underlying Skia image object.
   ///
-  /// Do not store the returned value. It is memory-managed by [CountedRef].
+  /// Do not store the returned value. It is memory-managed by [CkCountedRef].
   /// Storing it may result in use-after-free bugs.
   SkImage get skImage => box.nativeObject;
 
@@ -450,7 +455,6 @@ class CkImage implements ui.Image, StackTraceDebugger {
   @override
   void dispose() {
     assert(!_disposed, 'Cannot dispose an image that has already been disposed.');
-    ui.Image.onDispose?.call(this);
     _disposed = true;
     box.unref(this);
 

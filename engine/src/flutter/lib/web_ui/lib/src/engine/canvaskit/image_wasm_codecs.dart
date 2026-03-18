@@ -22,10 +22,10 @@ class CkAnimatedImage implements ui.Codec {
   /// Decodes an image from a list of encoded bytes.
   CkAnimatedImage.decodeFromBytes(this._bytes, this.src, {this.targetWidth, this.targetHeight}) {
     final SkAnimatedImage skAnimatedImage = createSkAnimatedImage();
-    _ref = UniqueRef<SkAnimatedImage>(this, skAnimatedImage, 'Codec');
+    _ref = CkUniqueRef<SkAnimatedImage>(this, skAnimatedImage, 'Codec');
   }
 
-  late final UniqueRef<SkAnimatedImage> _ref;
+  late final CkUniqueRef<SkAnimatedImage> _ref;
   final String src;
   final Uint8List _bytes;
   int _frameCount = 0;
