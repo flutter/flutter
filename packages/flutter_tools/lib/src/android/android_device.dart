@@ -571,21 +571,25 @@ class AndroidDevice extends Device {
       if (route != null) ...<String>['--route=$route'],
     ]);
 
-    var engineShellArgumentsHaveNotChangedFromPreviousInvocation = true;
+    var shouldRegenerateEngineShellArgsManifest = true;
     final Set<String>? previousEngineShellArguments = package?.engineShellArgs;
     if (previousEngineShellArguments != null) {
-      engineShellArgumentsHaveNotChangedFromPreviousInvocation =
-          previousEngineShellArguments.containsAll(androidShellArguments) &&
-          androidShellArguments.containsAll(previousEngineShellArguments) &&
-          previousEngineShellArguments.length == androidShellArguments.length;
+      shouldRegenerateEngineShellArgsManifest =
+          !previousEngineShellArguments.containsAll(androidShellArguments) ||
+          !androidShellArguments.containsAll(previousEngineShellArguments) ||
+          previousEngineShellArguments.length != androidShellArguments.length;
     }
 
     if (!prebuiltApplication ||
-        !engineShellArgumentsHaveNotChangedFromPreviousInvocation ||
+        shouldRegenerateEngineShellArgsManifest ||
         _androidSdk.licensesAvailable && _androidSdk.latestVersion == null) {
-      _logger.printTrace('Building APK');
+      final bool apkBuildNotExpected =
+          shouldRegenerateEngineShellArgsManifest && !prebuiltApplication;
+      final buildApkLoggerMessage = apkBuildNotExpected
+          ? 'Re-building APK instead of using prebuilt application binary to include updated engine flags'
+          : 'Building APK';
+      _logger.printTrace(buildApkLoggerMessage);
       final FlutterProject project = FlutterProject.current();
-
       await androidBuilder!.buildApk(
         project: project,
         target: mainPath ?? 'lib/main.dart',
