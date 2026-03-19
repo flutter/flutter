@@ -1513,7 +1513,7 @@ String? _getExistingAndroidNdkSkipValue() {
     return null;
   }
 
-  for (final String? envPath in <String?>[
+  for (final envPath in <String?>[
     globals.platform.environment[kAndroidNdkHome],
     globals.platform.environment[kAndroidNdkPath],
     globals.platform.environment[kAndroidNdkRoot],
@@ -1558,7 +1558,7 @@ String? _getExistingAndroidNdkSkipValue() {
     return bVersion.compareTo(aVersion);
   });
 
-  for (final Directory ndkDirectory in ndkDirectories) {
+  for (final ndkDirectory in ndkDirectories) {
     if (_isExistingAndroidNdkDirectory(ndkDirectory)) {
       return ndkDirectory.basename;
     }
