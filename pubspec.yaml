@@ -126,6 +126,7 @@ dependencies:
   isolate: 2.1.1
   js: 0.7.2
   json_annotation: 4.11.0
+  listen_beta: 0.2.8
   leak_tracker: 11.0.2
   leak_tracker_flutter_testing: 3.0.10
   leak_tracker_testing: 3.0.2

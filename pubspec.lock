@@ -458,6 +458,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.0"
+  listen_beta:
+    dependency: "direct main"
+    description:
+      name: listen_beta
+      sha256: cdd95993a296ca0d3706e38bf68b914f396134d856301991829cd45e8e02031d
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.8"
   logging:
     dependency: "direct main"
     description:
@@ -534,10 +542,10 @@ packages:
     dependency: transitive
     description:
       name: objective_c
-      sha256: "9922a1ad59ac5afb154cc948aa6ded01987a75003651d0a2866afc23f4da624e"
+      sha256: "100a1c87616ab6ed41ec263b083c0ef3261ee6cd1dc3b0f35f8ddfa4f996fe52"
       url: "https://pub.dev"
     source: hosted
-    version: "9.2.3"
+    version: "9.3.0"
   package_config:
     dependency: "direct main"
     description:

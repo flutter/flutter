@@ -438,7 +438,8 @@ abstract class RestorableListenable<T extends Listenable> extends RestorableProp
 /// Furthermore, the property will dispose the wrapped [ChangeNotifier] when
 /// either the property itself is disposed or its value is replaced with another
 /// [ChangeNotifier] instance.
-abstract class RestorableChangeNotifier<T extends ChangeNotifier> extends RestorableListenable<T> {
+abstract class RestorableChangeNotifier<T extends DartChangeNotifier>
+    extends RestorableListenable<T> {
   @override
   void initWithValue(T value) {
     _disposeOldValue();

@@ -786,6 +786,7 @@ class TextPainter {
       return true;
     }());
     _layoutCache?.paragraph.dispose();
+    print('!!!! set _layoutCache to null');
     _layoutCache = null;
   }
 
@@ -1288,6 +1289,7 @@ class TextPainter {
         contentWidth,
       );
     }
+    print('!!!! set _layoutCache to $newLayoutCache');
     _layoutCache = newLayoutCache;
   }
 
@@ -1707,7 +1709,16 @@ class TextPainter {
     assert(_debugAssertTextLayoutIsValid);
     assert(!_debugNeedsRelayout);
     final _TextPainterLayoutCacheWithOffset cachedLayout = _layoutCache!;
-    return cachedLayout.paragraph.getPositionForOffset(offset - cachedLayout.paintOffset);
+    final newOffset = offset - cachedLayout.paintOffset;
+    final p = cachedLayout.paragraph;
+    print('!!!! ${p.runtimeType}');
+    print('!!!! $newOffset');
+    print('!!!! ${p.height}');
+    print('!!!! ${p.width}');
+    print('!!!! ${p.longestLine}');
+    final result = p.getPositionForOffset(newOffset);
+    print('!!!! $result');
+    return result;
   }
 
   /// {@template flutter.painting.TextPainter.getWordBoundary}
@@ -1826,6 +1837,7 @@ class TextPainter {
     _layoutTemplate?.dispose();
     _layoutTemplate = null;
     _layoutCache?.paragraph.dispose();
+    print('!!!! set _layoutCache to null, for disposing');
     _layoutCache = null;
     _text = null;
   }
