@@ -119,7 +119,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/range_maintaining_scroll_physics_test.dart',
     'packages/flutter/test/widgets/selectable_region_test.dart',
     'packages/flutter/test/widgets/editable_text_scribe_test.dart',
-    'packages/flutter/test/widgets/semantics_debugger_test.dart',
     'packages/flutter/test/widgets/page_route_builder_test.dart',
     'packages/flutter/test/widgets/two_dimensional_scroll_view_test.dart',
     'packages/flutter/test/widgets/routes_test.dart',
