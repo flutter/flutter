@@ -2410,6 +2410,17 @@ public class AccessibilityBridgeTest {
     assertEquals("android.widget.HorizontalScrollView", nodeInfo.getClassName().toString());
   }
 
+  @Test
+  public void itAddsProgressBarToClassName() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = 23; // SemanticsRole::kProgressBar
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.widget.ProgressBar", nodeInfo.getClassName().toString());
+  }
+
   @Config(sdk = API_LEVELS.API_32)
   @TargetApi(API_LEVELS.API_32)
   @Test
@@ -2928,6 +2939,7 @@ public class AccessibilityBridgeTest {
     String tooltip = null;
     String linkUrl = null;
     String locale = null;
+    int role = 0;
     int headingLevel = 0;
     int textDirection = 0;
     float left = 0.0f;
@@ -2984,6 +2996,7 @@ public class AccessibilityBridgeTest {
       bytes.putFloat(scrollPosition);
       bytes.putFloat(scrollExtentMax);
       bytes.putFloat(scrollExtentMin);
+      bytes.putInt(role);
       if (identifier == null) {
         bytes.putInt(-1);
       } else {

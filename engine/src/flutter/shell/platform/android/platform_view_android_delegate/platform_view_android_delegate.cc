@@ -214,6 +214,7 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
       buffer_float32[position++] = static_cast<float>(node.scrollPosition);
       buffer_float32[position++] = static_cast<float>(node.scrollExtentMax);
       buffer_float32[position++] = static_cast<float>(node.scrollExtentMin);
+      buffer_int32[position++] = static_cast<int32_t>(node.role);
 
       putStringIntoBuffer(node.identifier, buffer_int32, &position, strings);
 

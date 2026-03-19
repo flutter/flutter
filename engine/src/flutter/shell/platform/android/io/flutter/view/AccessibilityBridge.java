@@ -851,6 +851,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       // TODO(jonahwilliams): Figure out a way conform to the expected id from TalkBack's
       // CustomLabelManager. talkback/src/main/java/labeling/CustomLabelManager.java#L525
     }
+    if (semanticsNode.role == 23 /* ProgressBar */) {
+      result.setClassName("android.widget.ProgressBar");
+    }
     if (semanticsNode.hasAction(Action.DISMISS)) {
       result.setDismissable(true);
       result.addAction(AccessibilityNodeInfo.ACTION_DISMISS);
@@ -2521,6 +2524,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
     // The locale of the content of this node.
     @Nullable private String locale;
+    private int role;
 
     // The heading level for this node (0 means not a heading).
     private int headingLevel;
@@ -2730,6 +2734,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       scrollPosition = buffer.getFloat();
       scrollExtentMax = buffer.getFloat();
       scrollExtentMin = buffer.getFloat();
+      role = buffer.getInt();
 
       identifier = getStringFromBuffer(buffer, strings);
 
