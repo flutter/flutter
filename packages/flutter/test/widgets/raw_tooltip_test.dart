@@ -948,10 +948,13 @@ void main() {
     expect(find.text('first tooltip'), findsOneWidget);
     expect(find.text('last tooltip'), findsNothing);
 
-    // Move to the second tooltip and expect it to show up immediately.
+    // Move to the second tooltip and expect it to respect hoverDelay.
     await gesture.moveTo(tester.getCenter(find.byType(RawTooltip).last));
     await tester.pump();
     expect(find.text('first tooltip'), findsNothing);
+    expect(find.text('last tooltip'), findsNothing);
+
+    await tester.pump(hoverDelay);
     expect(find.text('last tooltip'), findsOneWidget);
   });
 

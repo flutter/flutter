@@ -753,9 +753,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
       assert(tooltip.mounted);
       tooltip._scheduleDismissTooltip();
     }
-    _scheduleShowTooltip(
-      withDelay: tooltipsToDismiss.isNotEmpty ? Duration.zero : widget.hoverDelay,
-    );
+    _scheduleShowTooltip(withDelay: widget.hoverDelay);
   }
 
   void _handleMouseExit(PointerExitEvent event) {
