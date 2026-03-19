@@ -853,7 +853,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
     if (semanticsNode.role == Role.PROGRESS_BAR.value) {
       result.setClassName("android.widget.ProgressBar");
-      if (semanticsNode.hasValue()) {
+      if (semanticsNode.value != null) {
         try {
           float min = 0.0f;
           float max = 100.0f;
@@ -863,7 +863,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           if (semanticsNode.maxValue != null) {
             max = Float.parseFloat(semanticsNode.maxValue);
           }
-          float parsedValue = Float.parseFloat(semanticsNode.getValue());
+          float parsedValue = Float.parseFloat(semanticsNode.value);
           result.setRangeInfo(
               AccessibilityNodeInfo.RangeInfo.obtain(
                   AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT, min, max, parsedValue));
