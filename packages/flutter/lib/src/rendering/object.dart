@@ -5675,6 +5675,11 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
   bool get isRoot => parent == null;
 
+  bool get _needsMergingSiblingNodesIntoSelf {
+    return configProvider.effective.isMergingSemanticsOfDescendants &&
+        _producedSiblingNodesAndOwners.isNotEmpty;
+  }
+
   bool get shouldFormSemanticsNode {
     if (configProvider.effective.isSemanticBoundary) {
       return true;
@@ -6194,8 +6199,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       }
     }
     if (!built) {
-      semanticsNodes.clear();
-      _producedSiblingNodesAndOwners.clear();
       _produceSemanticsNode(usedSemanticsIds: usedSemanticsIds);
     }
     assert(built);
@@ -6247,7 +6250,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       });
     }
     if (configProvider.effective.isSemanticBoundary) {
-      if (configProvider.effective.isMergingSemanticsOfDescendants && semanticsNodes.isNotEmpty) {
+      if (_needsMergingSiblingNodesIntoSelf) {
         // This node needs to merge the sibling nodes in the sub tree.
         //
         // Create an inner node to hold the configuration and children, and the cachedSemanticsNode will
@@ -6261,10 +6264,11 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
         node.updateWith(
           config: config,
-          childrenInInversePaintOrder: <SemanticsNode>[innerNode, ...semanticsNodes],
+          childrenInInversePaintOrder: <SemanticsNode>[
+            innerNode,
+            ..._producedSiblingNodesAndOwners.keys,
+          ],
         );
-        // Clear the sibling nodes since they are now attached under the node.
-        semanticsNodes.clear();
       } else {
         renderObject.assembleSemanticsNode(node, configProvider.effective, children);
       }
@@ -6276,6 +6280,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
   void _produceSemanticsNode({required Set<int> usedSemanticsIds}) {
     assert(!built);
+    semanticsNodes.clear();
+    _producedSiblingNodesAndOwners.clear();
+
     final SemanticsNode node = cachedSemanticsNode ??= _createSemanticsNode();
     node
       ..isMergedIntoParent = (parentData?.mergeIntoParent ?? false)
@@ -6284,6 +6291,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
     _mergeSiblingGroup(usedSemanticsIds);
     _buildSemanticsSubtree(usedSemanticsIds: usedSemanticsIds);
+    if (!_needsMergingSiblingNodesIntoSelf) {
+      semanticsNodes.addAll(_producedSiblingNodesAndOwners.keys);
+    }
     semanticsNodes.add(node);
     built = true;
   }
@@ -6338,7 +6348,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         }
         node.updateWith(config: configuration, childrenInInversePaintOrder: childrenNodes);
         _producedSiblingNodesAndOwners[node] = group;
-        semanticsNodes.add(node);
 
         final Set<SemanticsTag> tags = group
             .map<Set<SemanticsTag>?>(
