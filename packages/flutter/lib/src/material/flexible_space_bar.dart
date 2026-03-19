@@ -85,7 +85,9 @@ class FlexibleSpaceBar extends StatefulWidget {
     this.title,
     this.background,
     this.centerTitle,
+    this.titleCurve,
     this.titlePadding,
+    this.expandedTitlePadding,
     this.collapseMode = CollapseMode.parallax,
     this.stretchModes = const <StretchMode>[StretchMode.zoomBackground],
     this.expandedTitleScale = 1.5,
@@ -121,21 +123,49 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// Defaults to include [StretchMode.zoomBackground].
   final List<StretchMode> stretchModes;
 
-  /// Defines how far the [title] is inset from either the widget's
-  /// bottom-left or its center.
+  /// The curve used to animate the title padding and scale.
   ///
-  /// Typically this property is used to adjust how far the title is
-  /// inset from the bottom-left and it is specified along with
-  /// [centerTitle] false.
+  /// This curve can be used to prevent the title from colliding with another
+  /// widget, like [SliverAppBar.leading].
   ///
-  /// If [centerTitle] is true, then the title is centered within the
-  /// flexible space bar with a bottom padding of 16.0 pixels.
+  /// The curve is applied to the transition between the expanded and collapsed
+  /// states. A value of 0.0 corresponds to the expanded state, and 1.0
+  /// corresponds to the collapsed state.
   ///
-  /// If [centerTitle] is false and [FlexibleSpaceBarSettings.hasLeading] is true,
-  /// then the title is aligned to the start of the flexible space bar with the
-  /// [titlePadding] applied. If [titlePadding] is null, then defaults to start
-  /// padding of 72.0 pixels and bottom padding of 16.0 pixels.
+  /// For example, using [Curves.easeOutSine] will allow the title to flee
+  /// quickly to the collapsed position, making space for a leading widget.
+  /// [Curves.easeInSine] can be used to create a more gentle transition.
+  ///
+  /// If null, defaults to [Curves.linear].
+  final Curve? titleCurve;
+
+  /// Defines how far the [title] is inset from either the widget's bottom-left
+  /// or its center.
+  ///
+  /// {@template flutter.material.FlexibleSpaceBar.titlePadding}
+  /// Typically this property is used to adjust how far the title is inset from
+  /// the bottom-left if it is specified along with [centerTitle] false.
+  ///
+  /// If [centerTitle] is true, then the title is centered within the flexible
+  /// space bar with a bottom padding of 16.0 pixels.
+  /// {@endtemplate}
+  ///
+  /// If [centerTitle] is false and [FlexibleSpaceBarSettings.hasLeading] is
+  /// true, then the title is aligned to the start of the flexible space bar
+  /// with the [titlePadding] applied. If [titlePadding] is null, then defaults
+  /// to start padding of 72.0 pixels and bottom padding of 16.0 pixels.
   final EdgeInsetsGeometry? titlePadding;
+
+  /// Defines how far the [title] is inset from either the widget's
+  /// bottom-left or its center when the FlexibleSpaceBar is fully expanded.
+  ///
+  /// {@macro flutter.material.FlexibleSpaceBar.titlePadding}
+  ///
+  /// If [centerTitle] is false, then the title is aligned to the bottom-left
+  /// with [expandedTitlePadding] applied. If [expandedTitlePadding] is null,
+  /// then defaults to start padding of 16.0 pixels and bottom padding of 16.0
+  /// pixels.
+  final EdgeInsetsGeometry? expandedTitlePadding;
 
   /// Defines how much the title is scaled when the FlexibleSpaceBar is expanded
   /// due to the user scrolling downwards. The title is scaled uniformly on the
@@ -320,17 +350,22 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
                 : theme.primaryTextTheme.titleLarge!;
             titleStyle = titleStyle.copyWith(color: titleStyle.color!.withOpacity(opacity));
             final bool effectiveCenterTitle = _getEffectiveCenterTitle(theme);
-            final leadingPadding = (settings.hasLeading ?? true) ? 72.0 : 0.0;
-            final EdgeInsetsGeometry padding =
-                widget.titlePadding ??
-                EdgeInsetsDirectional.only(
-                  start: effectiveCenterTitle ? 0.0 : leadingPadding,
-                  bottom: 16.0,
-                );
-            final double scaleValue = Tween<double>(
-              begin: widget.expandedTitleScale,
-              end: 1.0,
-            ).transform(t);
+            final leadingPadding = (settings.hasLeading ?? true) ? 72.0 : 16.0;
+            final double curveValue = (widget.titleCurve ?? Curves.linear).transform(t);
+            final EdgeInsetsGeometry padding = EdgeInsetsGeometry.lerp(
+              widget.expandedTitlePadding ??
+                  EdgeInsetsDirectional.only(
+                    start: effectiveCenterTitle ? 0.0 : 16.0,
+                    bottom: 16.0,
+                  ),
+              widget.titlePadding ??
+                  EdgeInsetsDirectional.only(
+                    start: effectiveCenterTitle ? 0.0 : leadingPadding,
+                    bottom: 16.0,
+                  ),
+              curveValue,
+            )!;
+            final double scaleValue = ui.lerpDouble(widget.expandedTitleScale, 1.0, curveValue)!;
             final scaleTransform = Matrix4.identity()
               ..scaleByDouble(scaleValue, scaleValue, 1.0, 1);
             final Alignment titleAlignment = _getTitleAlignment(effectiveCenterTitle);

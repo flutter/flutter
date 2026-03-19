@@ -779,6 +779,7 @@ void main() {
                     stretch: true,
                     flexibleSpace: FlexibleSpaceBar(
                       titlePadding: EdgeInsets.zero,
+                      expandedTitlePadding: EdgeInsets.zero,
                       title: Text(
                         'X' * 2000,
                         maxLines: 1,
@@ -832,6 +833,7 @@ void main() {
                     stretch: true,
                     flexibleSpace: FlexibleSpaceBar(
                       titlePadding: EdgeInsets.zero,
+                      expandedTitlePadding: EdgeInsets.zero,
                       title: Text(
                         'X' * 2000,
                         maxLines: 1,
@@ -881,6 +883,7 @@ void main() {
                   flexibleSpace: FlexibleSpaceBar(
                     expandedTitleScale: expandedTitleScale,
                     titlePadding: EdgeInsets.zero,
+                    expandedTitlePadding: EdgeInsets.zero,
                     title: Text(
                       'X' * 41,
                       maxLines: 1,
@@ -951,6 +954,7 @@ void main() {
                   flexibleSpace: FlexibleSpaceBar(
                     expandedTitleScale: expandedTitleScale,
                     titlePadding: EdgeInsets.zero,
+                    expandedTitlePadding: EdgeInsets.zero,
                     title: Text(
                       'X' * 41,
                       maxLines: 1,
@@ -1635,6 +1639,288 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(FlexibleSpaceBar)), Size.zero);
+  });
+
+  testWidgets('FlexibleSpaceBar titleCurve affects title position during collapse', (
+    WidgetTester tester,
+  ) async {
+    const height = 300.0;
+    Widget buildFrame({Curve? titleCurve}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              SliverAppBar(
+                expandedHeight: height,
+                pinned: true,
+                flexibleSpace: FlexibleSpaceBar(
+                  title: const Text('Title'),
+                  centerTitle: false,
+                  titleCurve: titleCurve,
+                ),
+              ),
+              SliverList.builder(
+                itemCount: 10,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(height: 200.0, child: Center(child: Text('Item $index')));
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    await tester.drag(find.text('Item 0'), const Offset(0, -150.0));
+    await tester.pumpAndSettle();
+
+    final Offset linearTitlePosition = tester.getTopLeft(find.text('Title'));
+
+    await tester.drag(find.text('Item 1'), const Offset(0, 150.0));
+    await tester.pumpAndSettle();
+    await tester.pumpWidget(Container(key: UniqueKey()));
+
+    await tester.pumpWidget(buildFrame(titleCurve: Curves.easeOut));
+    await tester.drag(find.text('Item 0'), const Offset(0, -150.0));
+    await tester.pumpAndSettle();
+
+    final Offset easeOutTitlePosition = tester.getTopLeft(find.text('Title'));
+
+    expect(linearTitlePosition.dx, isNot(equals(easeOutTitlePosition.dx)));
+  });
+
+  testWidgets('FlexibleSpaceBar titleCurve defaults to Curves.linear', (WidgetTester tester) async {
+    const height = 300.0;
+    Widget buildFrame({Curve? titleCurve}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              SliverAppBar(
+                expandedHeight: height,
+                pinned: true,
+                flexibleSpace: FlexibleSpaceBar(
+                  title: const Text('Title'),
+                  centerTitle: false,
+                  titleCurve: titleCurve,
+                ),
+              ),
+              SliverList.builder(
+                itemCount: 10,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(height: 200.0, child: Center(child: Text('Item $index')));
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    await tester.drag(find.text('Item 0'), const Offset(0, -150.0));
+    await tester.pumpAndSettle();
+
+    final Offset defaultTitlePosition = tester.getTopLeft(find.text('Title'));
+
+    await tester.drag(find.text('Item 1'), const Offset(0, 150.0));
+    await tester.pumpAndSettle();
+    await tester.pumpWidget(Container(key: UniqueKey()));
+
+    await tester.pumpWidget(buildFrame(titleCurve: Curves.linear));
+    await tester.drag(find.text('Item 0'), const Offset(0, -150.0));
+    await tester.pumpAndSettle();
+
+    final Offset linearTitlePosition = tester.getTopLeft(find.text('Title'));
+
+    expect(defaultTitlePosition, equals(linearTitlePosition));
+  });
+
+  testWidgets('Material3 - FlexibleSpaceBar expandedTitlePadding', (WidgetTester tester) async {
+    const height = 300.0;
+    Widget buildFrame({EdgeInsetsGeometry? expandedTitlePadding}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              SliverAppBar(
+                expandedHeight: height,
+                pinned: true,
+                flexibleSpace: FlexibleSpaceBar(
+                  title: const Text('Title'),
+                  centerTitle: false,
+                  expandedTitlePadding: expandedTitlePadding,
+                ),
+              ),
+              SliverList.builder(
+                itemCount: 10,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(height: 200.0, child: Center(child: Text('Item $index')));
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final Finder title = find.text('Title');
+    final Finder flexibleSpaceBar = find.byType(FlexibleSpaceBar);
+
+    Offset getTitleBottomLeft() {
+      return Offset(
+        tester.getTopLeft(title).dx,
+        tester.getBottomRight(flexibleSpaceBar).dy - tester.getBottomRight(title).dy,
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    expect(getTitleBottomLeft(), const Offset(16.0, 16.0));
+
+    await tester.pumpWidget(
+      buildFrame(expandedTitlePadding: const EdgeInsets.only(left: 32.0, bottom: 24.0)),
+    );
+    await tester.pumpAndSettle();
+    expect(getTitleBottomLeft(), const Offset(32.0, 24.0));
+
+    await tester.pumpWidget(buildFrame(expandedTitlePadding: EdgeInsets.zero));
+    await tester.pumpAndSettle();
+    expect(getTitleBottomLeft(), Offset.zero);
+  });
+
+  testWidgets('Material2 - FlexibleSpaceBar expandedTitlePadding', (WidgetTester tester) async {
+    const height = 300.0;
+    Widget buildFrame({EdgeInsetsGeometry? expandedTitlePadding}) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              SliverAppBar(
+                expandedHeight: height,
+                pinned: true,
+                flexibleSpace: FlexibleSpaceBar(
+                  title: const Text('Title'),
+                  centerTitle: false,
+                  expandedTitlePadding: expandedTitlePadding,
+                ),
+              ),
+              SliverList.builder(
+                itemCount: 10,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(height: 200.0, child: Center(child: Text('Item $index')));
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final Finder title = find.text('Title');
+    final Finder flexibleSpaceBar = find.byType(FlexibleSpaceBar);
+
+    Offset getTitleBottomLeft() {
+      return Offset(
+        tester.getTopLeft(title).dx,
+        tester.getBottomRight(flexibleSpaceBar).dy - tester.getBottomRight(title).dy,
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    expect(getTitleBottomLeft(), const Offset(16.0, 16.0));
+
+    await tester.pumpWidget(
+      buildFrame(expandedTitlePadding: const EdgeInsets.only(left: 32.0, bottom: 24.0)),
+    );
+    await tester.pumpAndSettle();
+    expect(getTitleBottomLeft(), const Offset(32.0, 24.0));
+
+    await tester.pumpWidget(buildFrame(expandedTitlePadding: EdgeInsets.zero));
+    await tester.pumpAndSettle();
+    expect(getTitleBottomLeft(), Offset.zero);
+  });
+
+  testWidgets('FlexibleSpaceBar expandedTitlePadding lerps to titlePadding when collapsed', (
+    WidgetTester tester,
+  ) async {
+    const height = 300.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              const SliverAppBar(
+                expandedHeight: height,
+                pinned: true,
+                flexibleSpace: FlexibleSpaceBar(
+                  title: Text('Title'),
+                  centerTitle: false,
+                  expandedTitlePadding: EdgeInsets.only(left: 16.0, bottom: 16.0),
+                  titlePadding: EdgeInsets.only(left: 72.0, bottom: 16.0),
+                ),
+              ),
+              SliverList.builder(
+                itemCount: 10,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(height: 200.0, child: Center(child: Text('Item $index')));
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Finder title = find.text('Title');
+
+    expect(tester.getTopLeft(title).dx, 16.0);
+
+    await tester.drag(find.text('Item 0'), const Offset(0, -600.0));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(title).dx, 72.0);
+  });
+
+  testWidgets('FlexibleSpaceBar expandedTitlePadding with centerTitle true', (
+    WidgetTester tester,
+  ) async {
+    const height = 300.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              const SliverAppBar(
+                expandedHeight: height,
+                pinned: true,
+                flexibleSpace: FlexibleSpaceBar(
+                  title: Text('Title'),
+                  centerTitle: true,
+                  expandedTitlePadding: EdgeInsets.only(bottom: 32.0),
+                ),
+              ),
+              SliverList.builder(
+                itemCount: 10,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(height: 200.0, child: Center(child: Text('Item $index')));
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Finder title = find.text('Title');
+    final Finder flexibleSpaceBar = find.byType(FlexibleSpaceBar);
+
+    final double bottomOffset =
+        tester.getBottomRight(flexibleSpaceBar).dy - tester.getBottomRight(title).dy;
+    expect(bottomOffset, 32.0);
+
+    expect(tester.getCenter(flexibleSpaceBar).dx, tester.getCenter(title).dx);
   });
 }
 
