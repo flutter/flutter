@@ -776,6 +776,10 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       _localTextEditingController?.dispose();
       _localTextEditingController = null;
     }
+    if (oldWidget.focusNode != widget.focusNode) {
+      _focusNode?.dispose();
+      _focusNode = null;
+    }
     if (oldWidget.enableFilter != widget.enableFilter) {
       if (!widget.enableFilter) {
         _enableFilter = false;
