@@ -41,6 +41,10 @@ class UberSDFContents : public ColorSourceContents {
 
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
+  Color GetColor() const;
+
+  bool ApplyColorFilter(const ColorFilterProc& color_filter_proc) override;
+
  private:
   Type type_ = Type::kCircle;
   Rect rect_;

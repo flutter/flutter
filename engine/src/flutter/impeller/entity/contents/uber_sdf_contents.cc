@@ -86,4 +86,14 @@ std::optional<Rect> UberSDFContents::GetCoverage(const Entity& entity) const {
   return geometry_->GetCoverage(entity.GetTransform());
 }
 
+Color UberSDFContents::GetColor() const {
+  return color_;
+}
+
+bool UberSDFContents::ApplyColorFilter(
+    const ColorFilterProc& color_filter_proc) {
+  color_ = color_filter_proc(color_);
+  return true;
+}
+
 }  // namespace impeller
