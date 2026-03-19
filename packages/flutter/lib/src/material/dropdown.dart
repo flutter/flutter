@@ -1779,7 +1779,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       // to prevent the widget from stretching to fill the parent's
       // available height.
       if (!widget.isVerticallyExpanded) {
-        result = Align(alignment: Alignment.topCenter, heightFactor: 1.0, child: result);
+        result = Align(alignment: AlignmentDirectional.topStart, heightFactor: 1.0, child: result);
       }
     } else {
       result = InkWell(
