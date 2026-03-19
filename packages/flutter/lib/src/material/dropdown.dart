@@ -1835,7 +1835,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     InputDecoration? decoration,
     super.onSaved,
     super.validator,
-    super.errorBuilder,
+    Widget Function(BuildContext, String)? errorBuilder,
     super.forceErrorText,
     AutovalidateMode? autovalidateMode,
     double? menuMaxHeight,
@@ -1862,10 +1862,15 @@ class DropdownButtonFormField<T> extends FormField<T> {
          'with the same value',
        ),
        assert(itemHeight == null || itemHeight >= kMinInteractiveDimension),
+       assert(
+         errorBuilder == null || decoration == null || decoration.errorText == null,
+         'Declaring both errorBuilder and decoration.errorText is not supported.',
+       ),
        decoration = decoration ?? const InputDecoration(),
        super(
          initialValue: initialValue ?? value,
          autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
+         errorBuilder: errorBuilder,
          builder: (FormFieldState<T> field) {
            final state = field as _DropdownButtonFormFieldState<T>;
            InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())

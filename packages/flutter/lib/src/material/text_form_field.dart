@@ -149,7 +149,7 @@ class TextFormField extends FormField<String> {
     ValueChanged<String>? onFieldSubmitted,
     super.onSaved,
     super.validator,
-    super.errorBuilder,
+    Widget Function(BuildContext, String)? errorBuilder,
     List<TextInputFormatter>? inputFormatters,
     bool? enabled,
     bool? ignorePointers,
@@ -205,10 +205,15 @@ class TextFormField extends FormField<String> {
        ),
        assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
+       assert(
+         errorBuilder == null || decoration == null || decoration.errorText == null,
+         'Declaring both errorBuilder and decoration.errorText is not supported.',
+       ),
        super(
          initialValue: controller != null ? controller.text : (initialValue ?? ''),
          enabled: enabled ?? decoration?.enabled ?? true,
          autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
+         errorBuilder: errorBuilder,
          builder: (FormFieldState<String> field) {
            final state = field as _TextFormFieldState;
            InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
