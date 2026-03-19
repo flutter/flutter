@@ -541,21 +541,9 @@ bool Canvas::AttemptDrawAntialiasedCircle(const Point& center,
   }
   geom->SetAntialiasPadding(1.0f);  // 1.0 for AA
 
-  if (renderer_.GetContext()->GetFlags().use_sdfs) {
-    auto contents = UberSDFContents::Make(
-        /*type=*/UberSDFContents::Type::kCircle,
-        /*rect=*/
-        Rect::MakeLTRB(center.x - radius, center.y - radius, center.x + radius,
-                       center.y + radius),
-        /*geometry=*/std::move(geom),
-        /*color=*/paint.color, /*stroke_width=*/paint.stroke.width,
-        /*stroked=*/is_stroked);
-    entity.SetContents(std::move(contents));
-  } else {
-    auto contents =
-        CircleContents::Make(std::move(geom), paint.color, is_stroked);
-    entity.SetContents(std::move(contents));
-  }
+  auto contents =
+      CircleContents::Make(std::move(geom), paint.color, is_stroked);
+  entity.SetContents(std::move(contents));
   AddRenderEntityToCurrentPass(entity);
 
   return true;
@@ -1036,6 +1024,46 @@ void Canvas::DrawCircle(const Point& center,
     if (AttemptDrawBlur(shape, paint)) {
       return;
     }
+  }
+
+  if (renderer_.GetContext()->GetFlags().use_sdfs && !paint.color_source) {
+    const bool is_stroked = paint.style == Paint::Style::kStroke;
+    std::unique_ptr<CircleGeometry> geom;
+    if (is_stroked) {
+      geom =
+          std::make_unique<CircleGeometry>(center, radius, paint.stroke.width);
+    } else {
+      geom = std::make_unique<CircleGeometry>(center, radius);
+    }
+    geom->SetAntialiasPadding(1.0f);  // 1.0 for AA
+
+    auto contents = UberSDFContents::Make(
+        /*type=*/UberSDFContents::Type::kCircle,
+        /*rect=*/
+        Rect::MakeLTRB(center.x - radius, center.y - radius, center.x + radius,
+                       center.y + radius),
+        /*geometry=*/std::move(geom),
+        /*color=*/paint.color, /*stroke_width=*/paint.stroke.width,
+        /*stroked=*/is_stroked);
+
+    Entity entity;
+    entity.SetTransform(GetCurrentTransform());
+    entity.SetBlendMode(paint.blend_mode);
+
+    if (is_stroked) {
+      CircleGeometry draw_geom(center, radius, paint.stroke.width);
+      AddRenderEntityWithFiltersToCurrentPass(
+          entity, &draw_geom, paint,
+          /*reuse_depth=*/false,
+          /*override_contents=*/std::move(contents));
+    } else {
+      CircleGeometry draw_geom(center, radius);
+      AddRenderEntityWithFiltersToCurrentPass(
+          entity, &draw_geom, paint,
+          /*reuse_depth=*/false,
+          /*override_contents=*/std::move(contents));
+    }
+    return;
   }
 
   if (AttemptDrawAntialiasedCircle(center, radius, paint)) {
