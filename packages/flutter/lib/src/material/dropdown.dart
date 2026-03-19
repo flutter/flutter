@@ -1863,7 +1863,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
        ),
        assert(itemHeight == null || itemHeight >= kMinInteractiveDimension),
        assert(
-         errorBuilder == null || decoration == null || decoration.errorText == null,
+         errorBuilder == null || decoration?.errorText == null,
          'Declaring both errorBuilder and decoration.errorText is not supported.',
        ),
        decoration = decoration ?? const InputDecoration(),
