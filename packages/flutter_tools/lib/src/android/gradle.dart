@@ -176,6 +176,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
        _analytics = analytics,
        _gradleUtils = gradleUtils,
        _androidStudio = androidStudio,
+       _platform = platform,
        _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
@@ -188,6 +189,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
   final GradleUtils _gradleUtils;
   final FileSystemUtils _fileSystemUtils;
   final AndroidStudio? _androidStudio;
+  final Platform _platform;
 
   /// Builds the AAR and POM files for the current Flutter module or plugin.
   @override
@@ -1044,6 +1046,66 @@ class AndroidGradleBuilder implements AndroidBuilder {
     return result;
   }
 
+  String? _getExistingAndroidNdkSkipValue() {
+    final AndroidSdk? androidSdk = globals.androidSdk;
+    if (androidSdk == null || !androidSdk.directory.existsSync()) {
+      return null;
+    }
+
+    for (final envPath in <String?>[
+      _platform.environment[kAndroidNdkHome],
+      _platform.environment[kAndroidNdkPath],
+      _platform.environment[kAndroidNdkRoot],
+    ]) {
+      if (envPath == null || envPath.isEmpty) {
+        continue;
+      }
+      final Directory envDirectory = _fileSystem.directory(envPath);
+      if (_isExistingAndroidNdkDirectory(envDirectory)) {
+        return envDirectory.basename;
+      }
+    }
+
+    final Directory ndkRoot = androidSdk.directory.childDirectory('ndk');
+    if (!ndkRoot.existsSync()) {
+      return null;
+    }
+
+    final List<Directory> ndkDirectories = ndkRoot.listSync().whereType<Directory>().toList();
+    ndkDirectories.sort((Directory a, Directory b) {
+      Version? aVersion;
+      Version? bVersion;
+      try {
+        aVersion = Version.parse(a.basename);
+      } on FormatException {
+        // Ignore directories that are not valid version strings.
+      }
+      try {
+        bVersion = Version.parse(b.basename);
+      } on FormatException {
+        // Ignore directories that are not valid version strings.
+      }
+      if (aVersion == null && bVersion == null) {
+        return 0;
+      }
+      if (aVersion == null) {
+        return 1;
+      }
+      if (bVersion == null) {
+        return -1;
+      }
+      return bVersion.compareTo(aVersion);
+    });
+
+    for (final ndkDirectory in ndkDirectories) {
+      if (_isExistingAndroidNdkDirectory(ndkDirectory)) {
+        return ndkDirectory.basename;
+      }
+    }
+
+    return null;
+  }
+
   @override
   Future<List<String>> getBuildVariants({required FlutterProject project}) async {
     late Stopwatch sw;
@@ -1505,66 +1567,6 @@ String _getTargetPlatformByLocalEnginePath(String engineOutPath) {
 bool _shouldPreprovisionAndroidNdk(BuildInfo buildInfo) {
   final String? flavor = buildInfo.flavor;
   return flavor != null && flavor.isNotEmpty;
-}
-
-String? _getExistingAndroidNdkSkipValue() {
-  final AndroidSdk? androidSdk = globals.androidSdk;
-  if (androidSdk == null || !androidSdk.directory.existsSync()) {
-    return null;
-  }
-
-  for (final envPath in <String?>[
-    globals.platform.environment[kAndroidNdkHome],
-    globals.platform.environment[kAndroidNdkPath],
-    globals.platform.environment[kAndroidNdkRoot],
-  ]) {
-    if (envPath == null || envPath.isEmpty) {
-      continue;
-    }
-    final Directory envDirectory = globals.fs.directory(envPath);
-    if (_isExistingAndroidNdkDirectory(envDirectory)) {
-      return envDirectory.basename;
-    }
-  }
-
-  final Directory ndkRoot = androidSdk.directory.childDirectory('ndk');
-  if (!ndkRoot.existsSync()) {
-    return null;
-  }
-
-  final List<Directory> ndkDirectories = ndkRoot.listSync().whereType<Directory>().toList();
-  ndkDirectories.sort((Directory a, Directory b) {
-    Version? aVersion;
-    Version? bVersion;
-    try {
-      aVersion = Version.parse(a.basename);
-    } on FormatException {
-      // Ignore directories that are not valid version strings.
-    }
-    try {
-      bVersion = Version.parse(b.basename);
-    } on FormatException {
-      // Ignore directories that are not valid version strings.
-    }
-    if (aVersion == null && bVersion == null) {
-      return 0;
-    }
-    if (aVersion == null) {
-      return 1;
-    }
-    if (bVersion == null) {
-      return -1;
-    }
-    return bVersion.compareTo(aVersion);
-  });
-
-  for (final ndkDirectory in ndkDirectories) {
-    if (_isExistingAndroidNdkDirectory(ndkDirectory)) {
-      return ndkDirectory.basename;
-    }
-  }
-
-  return null;
 }
 
 bool _isExistingAndroidNdkDirectory(Directory directory) {
