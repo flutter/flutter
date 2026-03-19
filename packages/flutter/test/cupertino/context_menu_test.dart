@@ -406,7 +406,7 @@ void main() {
 
       final decoyContainer = tester.firstElement(findBuilderDecoyChild()).widget as Container;
       final decoyDecoration = decoyContainer.decoration as BoxDecoration?;
-      expect(decoyDecoration?.borderRadius, equals(BorderRadius.circular(0)));
+      expect(decoyDecoration?.borderRadius, equals(BorderRadius.zero));
 
       expect(findBuilderDecoyChild(), findsOneWidget);
 
@@ -414,7 +414,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
       final decoyLaterContainer = tester.firstElement(findBuilderDecoyChild()).widget as Container;
       final decoyLaterDecoration = decoyLaterContainer.decoration as BoxDecoration?;
-      expect(decoyLaterDecoration?.borderRadius, isNot(equals(BorderRadius.circular(0))));
+      expect(decoyLaterDecoration?.borderRadius, isNot(equals(BorderRadius.zero)));
 
       // Finish gesture to release resources.
       await tester.pumpAndSettle();
@@ -708,7 +708,7 @@ void main() {
       // Check border radius.
       expect(findStaticDefaultPreview(), findsOneWidget);
       final previewWidget = tester.firstWidget(findStaticDefaultPreview()) as ClipRSuperellipse;
-      expect(previewWidget.borderRadius, equals(BorderRadius.circular(12.0)));
+      expect(previewWidget.borderRadius, equals(const BorderRadius.all(Radius.circular(12.0))));
     });
 
     testWidgets('CupertinoContextMenu width is correct', (WidgetTester tester) async {
