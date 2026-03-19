@@ -71,5 +71,6 @@ class SkwasmVertices extends SkwasmObjectWrapper<RawVertices> implements ui.Vert
     );
   });
 
-  SkwasmVertices._(VerticesHandle handle) : super(handle, (VerticesHandle h) => verticesDispose(h));
+  SkwasmVertices._(VerticesHandle handle)
+    : super(handle, (VerticesHandle h) => verticesDispose(h), 'Vertices');
 }

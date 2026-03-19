@@ -21,7 +21,7 @@ String _robotoUrl =
 
 class SkwasmTypeface extends SkwasmObjectWrapper<RawTypeface> {
   SkwasmTypeface(SkDataHandle data)
-    : super(typefaceCreate(data), (TypefaceHandle h) => typefaceDispose(h));
+    : super(typefaceCreate(data), (TypefaceHandle h) => typefaceDispose(h), 'Typeface');
 }
 
 class SkwasmFontCollection implements FlutterFontCollection {

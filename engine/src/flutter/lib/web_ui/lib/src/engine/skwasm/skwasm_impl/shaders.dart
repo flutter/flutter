@@ -21,7 +21,8 @@ abstract class SkwasmShader implements ui.Shader {
 // An implementation that handles the storage, disposal, and finalization of
 // a native shader handle.
 class SkwasmNativeShader extends SkwasmObjectWrapper<RawShader> implements SkwasmShader {
-  SkwasmNativeShader(ShaderHandle handle) : super(handle, (ShaderHandle h) => shaderDispose(h));
+  SkwasmNativeShader(ShaderHandle handle)
+    : super(handle, (ShaderHandle h) => shaderDispose(h), 'Shader');
 
   @override
   bool get isGradient => false;
@@ -213,7 +214,7 @@ class SkwasmImageShader extends SkwasmNativeShader implements ui.ImageShader {
 class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
     implements ui.FragmentProgram {
   SkwasmFragmentProgram._(this.name, RuntimeEffectHandle handle, this._shaderData)
-    : super(handle, (RuntimeEffectHandle h) => runtimeEffectDispose(h));
+    : super(handle, (RuntimeEffectHandle h) => runtimeEffectDispose(h), 'FragmentProgram');
 
   factory SkwasmFragmentProgram.fromBytes(String name, Uint8List bytes) {
     final shaderData = ShaderData.fromBytes(bytes);
@@ -254,7 +255,7 @@ class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
 
 class SkwasmShaderData extends SkwasmObjectWrapper<RawUniformData> {
   SkwasmShaderData(int size)
-    : super(uniformDataCreate(size), (UniformDataHandle h) => uniformDataDispose(h));
+    : super(uniformDataCreate(size), (UniformDataHandle h) => uniformDataDispose(h), 'ShaderData');
 
   Pointer<Void> get pointer => uniformDataGetPointer(handle);
 }
