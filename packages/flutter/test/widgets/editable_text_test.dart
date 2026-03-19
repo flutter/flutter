@@ -1860,6 +1860,10 @@ void main() {
   testWidgets('does not refocus when it is hidden by a new route', (WidgetTester tester) async {
     final navigatorKey = GlobalKey<NavigatorState>();
     final focusNode = FocusNode(debugLabel: 'EditableText Node');
+    addTearDown(() {
+      focusNode.dispose();
+    });
+
     await tester.pumpWidget(
       MaterialApp(
         navigatorKey: navigatorKey,
@@ -1927,6 +1931,11 @@ void main() {
   testWidgets('does not refocus when scrolled away in a ListView', (WidgetTester tester) async {
     final focusNode = FocusNode(debugLabel: 'EditableText Node');
     final scrollController = ScrollController();
+    addTearDown(() {
+      focusNode.dispose();
+      scrollController.dispose();
+    });
+
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
