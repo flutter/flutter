@@ -2219,16 +2219,17 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// The heading level in the document structure.
   ///
-  /// Screen readers will use this value to determine which part of the page
+  /// A heading divides content into sections. For example, an address book
+  /// application might define headings A, B, C, etc. to divide the list of
+  /// alphabetically sorted contacts into sections.
+  ///
+  /// Screen readers use this value to determine which part of the page
   /// structure this heading represents. A level 1 heading usually indicates
   /// the main heading of a page, a level 2 heading the first subsection,
   /// a level 3 is a subsection of that, and so on.
   ///
   /// On web, this sets the `aria-level` attribute (e.g., `aria-level="1"`).
   /// On Android, this sets the `isHeading` property for accessibility.
-  ///
-  /// Android accessibility does not expose a separate "header" semantic, so
-  /// use [headingLevel] to mark heading semantics for assistive technology.
   final int? headingLevel;
 
   /// Overrides the default accessibility hints provided by the platform.
