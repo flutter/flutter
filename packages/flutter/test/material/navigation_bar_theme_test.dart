@@ -285,6 +285,8 @@ void main() {
       await gesture.moveTo(tester.getCenter(find.byType(NavigationIndicator).last));
       await tester.pumpAndSettle();
 
+      // This test extracts the controller from the allRenderObjects iterable
+      // in order to prevent some wonkiness when running via skwasm.
       final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
         (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
       );

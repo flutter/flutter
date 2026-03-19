@@ -447,6 +447,7 @@ void main() {
     );
 
     final Offset center = tester.getCenter(find.text('First child'));
+    final MaterialInkController inkFeatures = Material.of(tester.element(find.text('First child')));
 
     // splashColor
     // highlightColor
@@ -454,10 +455,6 @@ void main() {
     await touchGesture.down(center);
     await tester.pumpAndSettle();
 
-    RenderObject inkFeatures;
-    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
-      return object.runtimeType.toString() == '_RenderInkFeatures';
-    });
     expect(inkFeatures, paints..circle(color: splashColor));
 
     await touchGesture.up();
@@ -469,9 +466,6 @@ void main() {
     await hoverGesture.moveTo(center);
     await tester.pumpAndSettle();
 
-    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
-      return object.runtimeType.toString() == '_RenderInkFeatures';
-    });
     expect(inkFeatures, paints..rect(color: hoverColor));
     await hoverGesture.moveTo(Offset.zero);
 
@@ -479,9 +473,6 @@ void main() {
     FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
-      return object.runtimeType.toString() == '_RenderInkFeatures';
-    });
     expect(inkFeatures, paints..rect(color: focusColor));
 
     await hoverGesture.removePointer();

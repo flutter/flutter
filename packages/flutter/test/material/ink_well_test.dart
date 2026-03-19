@@ -13,10 +13,9 @@ import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  RenderObject getInkFeatures(WidgetTester tester) {
-    return tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
+  RenderObject getInkFeatures(WidgetTester tester, {Type type = InkWell}) {
+    final BuildContext context = tester.element(find.byType(type));
+    return Material.of(context) as RenderObject;
   }
 
   testWidgets('InkWell gestures control test', (WidgetTester tester) async {
@@ -619,7 +618,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = getInkFeatures(tester);
+    final RenderObject inkFeatures = getInkFeatures(tester, type: InkResponse);
     expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 0));
     focusNode.requestFocus();
     await tester.pumpAndSettle();
@@ -839,7 +838,7 @@ void main() {
 
     await tester.pumpWidget(boilerplate(10));
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = getInkFeatures(tester);
+    final RenderObject inkFeatures = getInkFeatures(tester, type: InkResponse);
     expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 0));
 
     focusNode.requestFocus();
@@ -879,7 +878,7 @@ void main() {
 
     await tester.pumpWidget(boilerplate(BoxShape.circle));
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = getInkFeatures(tester);
+    final RenderObject inkFeatures = getInkFeatures(tester, type: InkResponse);
     expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 0));
     expect(inkFeatures, paintsExactlyCountTimes(#drawRRect, 0));
 

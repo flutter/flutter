@@ -556,24 +556,19 @@ void main() {
       ),
     );
 
-    RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
+    MaterialInkController inkFeatures() => Material.of(tester.element(find.byType(SearchBar)));
 
     // On hovered.
     final TestGesture gesture = await _pointGestureToSearchBar(tester);
     await tester.pumpAndSettle();
-    expect(inkFeatures, paints..rect(color: hoveredColor.withOpacity(1.0)));
+    expect(inkFeatures(), paints..rect(color: hoveredColor.withOpacity(1.0)));
 
     // On pressed.
     await tester.pumpAndSettle();
     await gesture.down(tester.getCenter(find.byType(SearchBar)));
     await tester.pumpAndSettle();
-    inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
     expect(
-      inkFeatures,
+      inkFeatures(),
       paints
         ..rect()
         ..rect(color: pressedColor.withOpacity(1.0)),
@@ -586,11 +581,8 @@ void main() {
     // Remove the pointer so we are no longer hovering.
     await gesture.removePointer();
     await tester.pump();
-    inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
     expect(
-      inkFeatures,
+      inkFeatures(),
       paints
         ..rect()
         ..rect(color: focusedColor.withOpacity(1.0)),

@@ -11,6 +11,14 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
+  MaterialInkController inkController(WidgetTester tester) {
+    final BuildContext context = tester.element(
+      find.descendant(of: find.byType(NavigationRail), matching: find.byType(Expanded)),
+    );
+
+    return Material.of(context);
+  }
+
   testWidgets('Custom selected and unselected textStyles are honored', (WidgetTester tester) async {
     const selectedTextStyle = TextStyle(fontWeight: FontWeight.w300, fontSize: 17.0);
     const unselectedTextStyle = TextStyle(fontWeight: FontWeight.w800, fontSize: 11.0);
@@ -3095,15 +3103,12 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byIcon(Icons.favorite_border)));
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
     const indicatorRect = Rect.fromLTRB(12.0, 0.0, 68.0, 32.0);
     const includedRect = indicatorRect;
     final Rect excludedRect = includedRect.inflate(10);
 
     expect(
-      inkFeatures,
+      inkController(tester),
       paints
         ..clipPath(
           pathMatcher: isPathThat(
@@ -3157,15 +3162,12 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byIcon(Icons.favorite_border)));
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
     const indicatorRect = Rect.fromLTRB(12.0, 6.0, 68.0, 38.0);
     const includedRect = indicatorRect;
     final Rect excludedRect = includedRect.inflate(10);
 
     expect(
-      inkFeatures,
+      inkController(tester),
       paints
         ..clipPath(
           pathMatcher: isPathThat(
@@ -3223,15 +3225,12 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byIcon(Icons.favorite_border)));
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
     const indicatorRect = Rect.fromLTRB(22.0, 16.0, 78.0, 48.0);
     const includedRect = indicatorRect;
     final Rect excludedRect = includedRect.inflate(10);
 
     expect(
-      inkFeatures,
+      inkController(tester),
       paints
         ..clipPath(
           pathMatcher: isPathThat(
@@ -3288,15 +3287,12 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byIcon(Icons.favorite_border)));
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
     const indicatorRect = Rect.fromLTRB(-3.0, 6.0, 53.0, 38.0);
     const includedRect = indicatorRect;
     final Rect excludedRect = includedRect.inflate(10);
 
     expect(
-      inkFeatures,
+      inkController(tester),
       paints
         ..clipPath(
           pathMatcher: isPathThat(
@@ -3355,15 +3351,12 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byIcon(Icons.favorite_border)));
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
     const indicatorRect = Rect.fromLTRB(132.0, 16.0, 188.0, 48.0);
     const includedRect = indicatorRect;
     final Rect excludedRect = includedRect.inflate(10);
 
     expect(
-      inkFeatures,
+      inkController(tester),
       paints
         ..clipPath(
           pathMatcher: isPathThat(
@@ -3418,10 +3411,6 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byIcon(Icons.favorite_border)));
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
-
     // Default values from M3 specification.
     const railMinWidth = 80.0;
     const indicatorHeight = 32.0;
@@ -3441,7 +3430,7 @@ void main() {
     const double indicatorHorizontalPadding = (railMinWidth - indicatorWidth) / 2; // 12.0
 
     expect(
-      inkFeatures,
+      inkController(tester),
       paints
         ..clipPath(
           pathMatcher: isPathThat(
@@ -3508,10 +3497,6 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byIcon(Icons.favorite_border)));
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
-
     // Default values from M3 specification.
     const railMinWidth = 80.0;
     const indicatorHeight = 32.0;
@@ -3541,7 +3526,7 @@ void main() {
     const double secondIndicatorVerticalOffset = (iconSize - indicatorHeight) / 2;
 
     expect(
-      inkFeatures,
+      inkController(tester),
       paints
         ..clipPath(
           pathMatcher: isPathThat(
@@ -3607,10 +3592,6 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byIcon(Icons.favorite_border)));
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
-
     // Default values from M3 specification.
     const railMinExtendedWidth = 256.0;
     const indicatorHeight = 32.0;
@@ -3639,7 +3620,7 @@ void main() {
     const double secondIndicatorVerticalOffset = verticalDestinationSpacingM3 / 2;
 
     expect(
-      inkFeatures,
+      inkController(tester),
       paints
         ..clipPath(
           pathMatcher: isPathThat(
@@ -3892,11 +3873,8 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(tester.getCenter(find.byIcon(Icons.favorite_border)));
     await tester.pumpAndSettle();
-    RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
 
-    expect(inkFeatures, paints..rect(color: Colors.transparent));
+    expect(inkController(tester), paints..rect(color: Colors.transparent));
 
     await gesture.down(tester.getCenter(find.byIcon(Icons.favorite_border)));
     await tester.pump(); // Start the splash and highlight animations.
@@ -3904,10 +3882,7 @@ void main() {
       const Duration(milliseconds: 800),
     ); // Wait for splash and highlight to be well under way.
 
-    inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
-    expect(inkFeatures, paints..circle(color: Colors.transparent));
+    expect(inkController(tester), paints..circle(color: Colors.transparent));
   });
 
   testWidgets('Navigation rail can have expanded widgets inside', (WidgetTester tester) async {

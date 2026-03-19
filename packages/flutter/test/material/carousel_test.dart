@@ -93,9 +93,10 @@ void main() {
     expect(material.elevation, 10.0);
     expect(material.shape, const StadiumBorder());
 
-    RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
+    final BuildContext context = tester.element(
+      find.descendant(of: carouselViewMaterial, matching: find.byType(InkWell)),
     );
+    final MaterialInkController inkFeatures = Material.of(context);
 
     // On hovered.
     final TestGesture gesture = await hoverPointerOverCarouselItem(tester, key);
@@ -106,9 +107,6 @@ void main() {
     await tester.pumpAndSettle();
     await gesture.down(tester.getCenter(find.byKey(key)));
     await tester.pumpAndSettle();
-    inkFeatures = tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
-    );
     expect(
       inkFeatures,
       paints

@@ -188,18 +188,11 @@ void main() {
       return iconRichText.text.style;
     }
 
-    RenderObject overlayPainter(WidgetTester tester, TestMenu menuItem) {
-      return tester.renderObject(
-        find
-            .descendant(
-              of: findMenuItemButton(menuItem.label),
-              matching: find.byElementPredicate(
-                (Element element) =>
-                    element.renderObject.runtimeType.toString() == '_RenderInkFeatures',
-              ),
-            )
-            .last,
+    MaterialInkController overlayPainter(WidgetTester tester, TestMenu menuItem) {
+      final BuildContext context = tester.element(
+        find.descendant(of: findMenuItemButton(menuItem.label), matching: find.byType(InkWell)),
       );
+      return Material.of(context);
     }
 
     testWidgets('defaults are correct', (WidgetTester tester) async {
