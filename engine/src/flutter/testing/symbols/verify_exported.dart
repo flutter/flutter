@@ -13,9 +13,14 @@ import 'package:path/path.dart' as p;
 // Android binaries (libflutter.so) should only export one symbol "JNI_OnLoad"
 // of type "T".
 //
-// iOS binaries (Flutter.framework/Flutter) should only export Objective-C
-// Symbols from the Flutter namespace. These are either of type
-// "(__DATA,__common)" or "(__DATA,__objc_data)".
+// Ideally, iOS binaries (Flutter.framework/Flutter) should only export
+// Objective-C Symbols from the Flutter namespace, of type "(__DATA,__common)" or
+// "(__DATA,__objc_data)". However, to allow Swift symbols to be exported in
+// an Objective-C bridging header, they must be public or open. The framework
+// uses these types internally and never publishes these types in a public header.
+// Like `_InternalFlutter` Obj-C symbols, we allow `InternalFlutterSwift` and
+// `InternalFlutterSwiftCommon` symbols, as they are clearly marked as internal
+// in the name.
 
 /// Takes the path to the out directory as the first argument, and the path to
 /// the buildtools directory as the second argument.
@@ -98,28 +103,39 @@ int _checkIos(String outPath, String nmPath, Iterable<String> builds) {
     final Iterable<NmEntry> unexpectedEntries = NmEntry.parse(nmResult.stdout as String).where((
       NmEntry entry,
     ) {
-      final bool cSymbol =
-          (entry.type == '(__DATA,__common)' ||
-              entry.type == '(__DATA,__const)' ||
-              entry.type == '(__DATA_CONST,__const)') &&
-          entry.name.startsWith('_Flutter');
       final bool cInternalSymbol =
           entry.type == '(__TEXT,__text)' && entry.name.startsWith('_InternalFlutter');
-      final bool objcSymbol =
-          (entry.type == '(__DATA,__objc_data)' || entry.type == '(__DATA,__data)') &&
-          (entry.name.startsWith(r'_OBJC_METACLASS_$_Flutter') ||
-              entry.name.startsWith(r'_OBJC_CLASS_$_Flutter'));
-      // Swift's name mangling uses s followed by symbol length followed by symbol.
-      final swiftInternalRegExp = RegExp(r'^_\$s\d+InternalFlutterSwift');
-      final bool swiftInternalSymbol =
-          (entry.type == '(__TEXT,__text)' ||
-              entry.type == '(__TEXT,__const)' ||
-              entry.type == '(__TEXT,__constg_swiftt)' ||
-              entry.type == '(__DATA_CONST,__const)' ||
-              entry.type == '(__DATA,__data)' ||
-              entry.type == '(__DATA,__objc_data)') &&
-          swiftInternalRegExp.hasMatch(entry.name);
-      return !(cSymbol || cInternalSymbol || objcSymbol || swiftInternalSymbol);
+      if (cInternalSymbol || entry.isAllowedCSymbol || entry.isAllowedObjCSymbol) {
+        return false;
+      }
+      final bool isSwiftSymbol =
+          switch (entry.type) {
+            '(__TEXT,__text)' ||
+            '(__TEXT,__const)' ||
+            '(__TEXT,__constg_swiftt)' ||
+            '(__DATA_CONST,__const)' ||
+            '(__DATA,__data)' ||
+            '(__DATA,__objc_data)' => true,
+            _ => false,
+          } &&
+          entry.name.startsWith(r'_$s');
+      if (!isSwiftSymbol) {
+        return false;
+      }
+      // This assumes `swift` is in `PATH`.
+      final ProcessResult demangledResult = Process.runSync('swift', <String>[
+        'demangle',
+        '--tree-only',
+        entry.name,
+      ]);
+      if (demangledResult.exitCode != 0) {
+        print('ERROR: failed to execute "swift demangle":\n${demangledResult.stderr}');
+        return true;
+      }
+      return switch (_parseModuleName(demangledResult.stdout as String)) {
+        'InternalFlutterSwiftCommon' || 'InternalFlutterSwift' => false,
+        _ => true,
+      };
     });
     if (unexpectedEntries.isNotEmpty) {
       print('ERROR: $libFlutter exports unexpected symbols:');
@@ -215,7 +231,7 @@ int _checkLinux(String outPath, String nmPath, Iterable<String> builds) {
   return failures;
 }
 
-class NmEntry {
+final class NmEntry {
   NmEntry._(this.type, this.name);
 
   final String type;
@@ -228,6 +244,46 @@ class NmEntry {
     });
   }
 
+  bool get isAllowedCSymbol {
+    return switch (type) {
+          '(__DATA,__common)' || '(__DATA,__const)' || '(__DATA_CONST,__const)' => true,
+          _ => false,
+        } &&
+        name.startsWith('_Flutter');
+  }
+
+  bool get isAllowedObjCSymbol {
+    return switch (type) {
+          '(__DATA,__objc_data)' || '(__DATA,__data)' => true,
+          _ => false,
+        } &&
+        (name.startsWith(r'_OBJC_METACLASS_$_Flutter') ||
+            name.startsWith(r'_OBJC_CLASS_$_Flutter'));
+  }
+
   @override
   String toString() => '$name: $type';
+}
+
+final moduleLinePattern = RegExp(r'kind=Module, text="(.+)"');
+
+/// Parses the output from `swift demangle --tree-only` and returns the module
+/// name of the symbol.
+String? _parseModuleName(String demangleOutput) {
+  // Example output:
+  //
+  // Demangling for _$s26InternalFlutterSwiftCommon8LogLevelOSYAAMc
+  // kind=Global
+  //   kind=ProtocolConformanceDescriptor
+  //     kind=ProtocolConformance
+  //       kind=Type
+  //         kind=Enum
+  //           kind=Module, text="InternalFlutterSwiftCommon"
+  //           kind=Identifier, text="LogLevel"
+  //       kind=Type
+  //         kind=Protocol
+  //           kind=Module, text="Swift"
+  //           kind=Identifier, text="RawRepresentable"
+  //       kind=Module, text="InternalFlutterSwiftCommon"
+  return moduleLinePattern.firstMatch(demangleOutput)?.group(1);
 }

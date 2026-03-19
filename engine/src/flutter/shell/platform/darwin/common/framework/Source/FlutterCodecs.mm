@@ -5,6 +5,7 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
 
 #include <cstring>
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -87,29 +88,10 @@ FLUTTER_ASSERT_ARC
   if ([message length] == 0) {
     return nil;
   }
-  BOOL isSimpleValue = NO;
-  id decoded = nil;
   NSError* error;
-  if (0 < message.length) {
-    UInt8 first;
-    [message getBytes:&first length:1];
-    isSimpleValue = first != '{' && first != '[';
-    if (isSimpleValue) {
-      // NSJSONSerialization does not support top-level simple values.
-      // We expand encoding to singleton array, then decode that and extract
-      // the single entry.
-      UInt8 begin = '[';
-      UInt8 end = ']';
-      NSMutableData* expandedMessage = [NSMutableData dataWithLength:message.length + 2];
-      [expandedMessage replaceBytesInRange:NSMakeRange(0, 1) withBytes:&begin];
-      [expandedMessage replaceBytesInRange:NSMakeRange(1, message.length) withBytes:message.bytes];
-      [expandedMessage replaceBytesInRange:NSMakeRange(message.length + 1, 1) withBytes:&end];
-      message = expandedMessage;
-    }
-    decoded = [NSJSONSerialization JSONObjectWithData:message options:0 error:&error];
-  }
+  id decoded = [self decodeMessage:message error:&error];
   NSAssert(decoded, @"Invalid JSON message, decoding failed: %@", error);
-  return isSimpleValue ? ((NSArray*)decoded)[0] : decoded;
+  return decoded;
 }
 @end
 

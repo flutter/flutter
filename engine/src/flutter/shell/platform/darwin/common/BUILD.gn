@@ -131,7 +131,10 @@ source_set("InternalFlutterSwiftCommon") {
   visibility = [ ":framework_common" ]
   configs += [ ":config" ]
   bridge_header = "InternalFlutterSwiftCommon-Bridging-Header.h"
-  sources = [ "framework/Source/Logger.swift" ]
+  sources = [
+    "framework/Source/FlutterJSONMessageCodec+SafeDecode.swift",
+    "framework/Source/Logger.swift",
+  ]
   public = framework_common_headers
 }
 
@@ -204,7 +207,10 @@ executable("framework_common_swift_unittests") {
     ":test_config",
     ":swift_testing_config",
   ]
-  sources = [ "framework/Source/LoggerTest.swift" ]
+  sources = [
+    "framework/Source/FlutterCodecsTest.swift",
+    "framework/Source/LoggerTest.swift",
+  ]
   deps = [
     ":framework_common",
     ":swift_testing_main",
