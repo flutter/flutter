@@ -54,6 +54,7 @@ export 'src/rendering/layout_helper.dart';
 export 'src/rendering/list_body.dart';
 export 'src/rendering/list_wheel_viewport.dart';
 export 'src/rendering/mouse_tracker.dart';
+export 'src/rendering/nested_slivers.dart';
 export 'src/rendering/object.dart';
 export 'src/rendering/paragraph.dart';
 export 'src/rendering/performance_overlay.dart';
