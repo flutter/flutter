@@ -64,15 +64,33 @@ class SkwasmImage implements ui.Image, StackTraceDebugger {
 
   late final CountedRef<SkwasmImage, ImageHandle> box;
 
+  bool _disposed = false;
+
   @override
   void dispose() {
+    if (_disposed) {
+      return;
+    }
+    _disposed = true;
     box.unref(this);
   }
 
   ImageHandle get handle => box.nativeObject;
 
   @override
-  bool get debugDisposed => box.debugDisposed;
+  bool get debugDisposed {
+    bool? result;
+    assert(() {
+      result = _disposed;
+      return true;
+    }());
+
+    if (result != null) {
+      return result!;
+    }
+
+    throw StateError('Image.debugDisposed is only available when asserts are enabled.');
+  }
 
   @override
   int get width => imageGetWidth(handle);

@@ -463,7 +463,19 @@ class CkImage implements ui.Image, StackTraceDebugger {
   }
 
   @override
-  bool get debugDisposed => box.debugDisposed;
+  bool get debugDisposed {
+    bool? result;
+    assert(() {
+      result = _disposed;
+      return true;
+    }());
+
+    if (result != null) {
+      return result!;
+    }
+
+    throw StateError('Image.debugDisposed is only available when asserts are enabled.');
+  }
 
   @override
   CkImage clone() {
