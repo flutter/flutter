@@ -1078,6 +1078,41 @@ class _CupertinoDragGestureController<T> {
     return popDragController.value != 1.0;
   }
 
+  /// Determines whether the sheet should animate forward (stay open) or
+  /// backward (close) based on velocity and current state.
+  bool _shouldAnimateForward(double velocity) {
+    final bool isCurrent = getIsCurrent();
+
+    if (!isCurrent) {
+      // If the page has already been navigated away from, then the animation
+      // direction depends on whether or not it's still in the navigation stack,
+      // regardless of velocity or drag position. For example, if a route is
+      // being slowly dragged back by just a few pixels, but then a programmatic
+      // pop occurs, the route should still be animated off the screen.
+      // See https://github.com/flutter/flutter/issues/141268.
+      return getIsActive();
+    } else if (velocity.abs() >= _kMinFlingVelocity) {
+      // If the user releases the page before mid screen with sufficient velocity,
+      // or after mid screen, we should animate the page out. Otherwise, the page
+      // should be animated back in.
+      return velocity <= 0;
+    } else {
+      // If the drag is dropped with low velocity, the sheet will pop if the
+      // the drag goes a little past the halfway point on the screen. This is
+      // eyeballed on a simulator running iOS 18.0.
+      return popDragController.value > 0.52;
+    }
+  }
+
+  /// Animates the sheet back to its initial position.
+  TickerFuture _animateSheetBack() {
+    return popDragController.animateBack(
+      0.0,
+      duration: _kDroppedSheetDragAnimationDuration,
+      curve: Curves.easeOut,
+    );
+  }
+
   /// The drag gesture has ended with a vertical motion of [velocity] as a
   /// fraction of screen height per second.
   void dragEnd(double velocity, AnimationController? upController) {
@@ -1099,27 +1134,7 @@ class _CupertinoDragGestureController<T> {
     // animations on a simulator running iOS 18.0.
     const Curve animationCurve = Curves.easeOut;
     final bool isCurrent = getIsCurrent();
-    final bool animateForward;
-
-    if (!isCurrent) {
-      // If the page has already been navigated away from, then the animation
-      // direction depends on whether or not it's still in the navigation stack,
-      // regardless of velocity or drag position. For example, if a route is
-      // being slowly dragged back by just a few pixels, but then a programmatic
-      // pop occurs, the route should still be animated off the screen.
-      // See https://github.com/flutter/flutter/issues/141268.
-      animateForward = getIsActive();
-    } else if (velocity.abs() >= _kMinFlingVelocity) {
-      // If the user releases the page before mid screen with sufficient velocity,
-      // or after mid screen, we should animate the page out. Otherwise, the page
-      // should be animated back in.
-      animateForward = velocity <= 0;
-    } else {
-      // If the drag is dropped with low velocity, the sheet will pop if the
-      // the drag goes a little past the halfway point on the screen. This is
-      // eyeballed on a simulator running iOS 18.0.
-      animateForward = popDragController.value > 0.52;
-    }
+    final bool animateForward = _shouldAnimateForward(velocity);
 
     if (animateForward) {
       popDragController.animateTo(
@@ -1129,16 +1144,18 @@ class _CupertinoDragGestureController<T> {
       );
     } else {
       if (isCurrent) {
-        // This route is destined to pop at this point. Reuse navigator's pop.
-        navigator.pop();
-      }
-
-      if (popDragController.isAnimating) {
-        popDragController.animateBack(
-          0.0,
-          duration: _kDroppedSheetDragAnimationDuration,
-          curve: animationCurve,
-        );
+        // If the sheet is current, it shouldn't be popped immediately. The user
+        // might catch the sheet mid-flight. Animate back to 0.0 first, and only
+        // pop the route if the animation completes successfully.
+        _animateSheetBack().then<void>((void value) {
+          if (getIsCurrent() && popDragController.isDismissed) {
+            navigator.pop();
+          }
+        });
+      } else {
+        // If the sheet was already popped (back button pressed during drag),
+        // just finish the visual animation.
+        _animateSheetBack();
       }
     }
 
@@ -1146,7 +1163,6 @@ class _CupertinoDragGestureController<T> {
       // Keep the userGestureInProgress in true state so we don't change the
       // curve of the page transition mid-flight since CupertinoPageTransition
       // depends on userGestureInProgress.
-      // late AnimationStatusListener animationStatusCallback;
       void animationStatusCallback(AnimationStatus status) {
         navigator.didStopUserGesture();
         popDragController.removeStatusListener(animationStatusCallback);
