@@ -10,7 +10,7 @@ import 'package:web_integration/c.dart'
     as message2;
 
 void main() {
-  if (message1.message == 'a' && message2.message == 'd') {
+  if (message1.message == 'a' && message2.message == 'f') {
     print('--- TEST SUCCEEDED ---');
   } else {
     print('--- TEST FAILED ---');
