@@ -1797,14 +1797,8 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// If non-null, indicates that this subtree represents a header.
   ///
-  /// A header divides content into sections. For example, an address book
-  /// application might define headers A, B, C, etc. to divide the list of
-  /// alphabetically sorted contacts into sections.
-  ///
-  /// Support for this semantic varies by platform. Android accessibility
-  /// services do not expose a separate "header" concept, so this flag is not
-  /// announced on Android by itself. To mark content as a heading for Android
-  /// assistive technologies, set [headingLevel].
+  /// A header is typically the top element of a page or section, such as a
+  /// page title or app bar title.
   final bool? header;
 
   /// If non-null, indicates that this subtree represents a text field.
@@ -2232,6 +2226,9 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   /// On web, this sets the `aria-level` attribute (e.g., `aria-level="1"`).
   /// On Android, this sets the `isHeading` property for accessibility.
+  ///
+  /// Android accessibility does not expose a separate "header" semantic, so
+  /// use [headingLevel] to mark heading semantics for assistive technology.
   final int? headingLevel;
 
   /// Overrides the default accessibility hints provided by the platform.
