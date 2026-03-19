@@ -198,6 +198,7 @@ TaskFunction _testCommandLineFlagPrecedence() {
 
       section('Run Flutter Android app with modified manifest and --test-flag');
       final commandLinePrecedenceCompleter = Completer<bool>();
+      var foundManifestLogBeforeCommandLineLog = false;
       late Process run;
 
       await inDirectory(path.join(tempDir.path, projectName), () async {
@@ -213,11 +214,11 @@ TaskFunction _testCommandLineFlagPrecedence() {
             } else if (line.contains(
               'For testing purposes only: test flag specified on the command line was loaded by the FlutterLoader.',
             )) {
-              commandLinePrecedenceCompleter.complete(true);
+              commandLinePrecedenceCompleter.complete(foundManifestLogBeforeCommandLineLog);
             } else if (line.contains(
               'For testing purposes only: test flag specified in the manifest was loaded by the FlutterLoader.',
             )) {
-              commandLinePrecedenceCompleter.complete(false);
+              foundManifestLogBeforeCommandLineLog = true;
             }
           });
 

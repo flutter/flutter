@@ -249,6 +249,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addEnableVulkanValidationFlag(verboseHelp: verboseHelp);
     addEnableEmbedderApiFlag(verboseHelp: verboseHelp);
     addEnableHcppFlag(verboseHelp: verboseHelp);
+    addTestFlag(verboseHelp: verboseHelp);
   }
 
   bool get traceStartup => boolArg('trace-startup');
@@ -267,6 +268,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
   bool get enableHcpp => boolArg('enable-hcpp');
   bool get enableLocalDiscovery => boolArg(RunCommand.kEnableLocalDiscovery);
+  bool get testFlag => boolArg('test-flag');
 
   @override
   bool get refreshWirelessDevices => true;
@@ -332,6 +334,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         debugLogsDirectoryPath: debugLogsDirectoryPath,
         webDevServerConfig: webDevServerConfig,
         enableHcpp: enableHcpp,
+        testFlag: testFlag,
         enableLocalDiscovery: enableLocalDiscovery,
       );
     } else {
@@ -398,6 +401,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         enableHcpp: enableHcpp,
         enableLocalDiscovery: enableLocalDiscovery,
         webDevServerConfig: webDevServerConfig,
+        testFlag: testFlag,
       );
     }
   }
