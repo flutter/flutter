@@ -172,7 +172,12 @@ class ImageInfo {
 @immutable
 class ImageStreamListener {
   /// Creates a new [ImageStreamListener].
-  const ImageStreamListener(this.onImage, {this.onChunk, this.onError});
+  const ImageStreamListener(
+    this.onImage, {
+    this.onChunk,
+    this.onError,
+    this.preventErrorReporting = false,
+  });
 
   /// Callback for getting notified that an image is available.
   ///
@@ -212,14 +217,25 @@ class ImageStreamListener {
   /// be handled. An error handler can explicitly rethrow the exception reported
   /// to it to safely indicate that it did not handle the exception.
   ///
-  /// If an image stream has no listeners that handled the error when the error
-  /// was first encountered, then the error is reported using
-  /// [FlutterError.reportError], with the [FlutterErrorDetails.silent] flag set
-  /// to true.
+  /// If the image stream has no error listeners (listeners with an [onError]
+  /// callback), the error is silently ignored. This prevents unnecessary
+  /// error noise when errors occur after the widget has been disposed.
   final ImageErrorListener? onError;
 
+  /// Whether to prevent errors from being reported to [FlutterError.onError]
+  /// after this listener is removed.
+  ///
+  /// When true, errors that arrive after this listener is removed (e.g.
+  /// because the widget is disposed) are not reported to
+  /// [FlutterError.onError]. This is useful when [FlutterError.onError] is
+  /// configured to report errors to a server.
+  ///
+  /// Defaults to false. The [Image] widget sets this to true when an
+  /// [Image.errorBuilder] is provided.
+  final bool preventErrorReporting;
+
   @override
-  int get hashCode => Object.hash(onImage, onChunk, onError);
+  int get hashCode => Object.hash(onImage, onChunk, onError, preventErrorReporting);
 
   @override
   bool operator ==(Object other) {
@@ -229,7 +245,8 @@ class ImageStreamListener {
     return other is ImageStreamListener &&
         other.onImage == onImage &&
         other.onChunk == onChunk &&
-        other.onError == onError;
+        other.onError == onError &&
+        other.preventErrorReporting == preventErrorReporting;
   }
 }
 
@@ -517,6 +534,13 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// that they are being called asynchronously.
   bool _addingInitialListeners = false;
 
+  /// Whether a listener with [ImageStreamListener.preventErrorReporting] set
+  /// to true has ever been added.
+  ///
+  /// When true, [reportError] skips [FlutterError.reportError] for errors
+  /// that arrive after all listeners have been removed.
+  bool _hadErrorListener = false;
+
   /// Adds a listener callback that is called whenever a new concrete [ImageInfo]
   /// object is available or an error is reported. If a concrete image is
   /// already available, or if an error has been already reported, this object
@@ -533,6 +557,10 @@ abstract class ImageStreamCompleter with Diagnosticable {
   ///    automatically removed after first image load or error.
   void addListener(ImageStreamListener listener) {
     _checkDisposed();
+    // Track that an error-preventing listener was once registered.
+    if (listener.preventErrorReporting) {
+      _hadErrorListener = true;
+    }
     _listeners.add(listener);
     if (_currentImage != null) {
       try {
@@ -752,9 +780,9 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// occurred while resolving the image.
   ///
   /// If no error listeners (listeners with an [ImageStreamListener.onError]
-  /// specified) are attached, or if the handlers all rethrow the exception
-  /// verbatim (with `throw exception`), a [FlutterError] will be reported using
-  /// [FlutterError.reportError].
+  /// callback) are attached, the error is silently ignored. This prevents
+  /// unnecessary error noise when errors occur after the widget has been
+  /// disposed.
   ///
   /// The `context` should be a string describing where the error was caught, in
   /// a form that will make sense in English when following the word "thrown",
@@ -824,6 +852,12 @@ abstract class ImageStreamCompleter with Diagnosticable {
       }
     }
     if (!handled) {
+      // If an error listener was previously registered but is no longer
+      // present, the error was intended to be handled. Skip reporting to
+      // FlutterError.onError after the widget is disposed.
+      if (_hadErrorListener) {
+        return;
+      }
       FlutterError.reportError(_currentError!);
     }
   }
