@@ -2434,9 +2434,9 @@ public class AccessibilityBridgeTest {
     AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
     assertEquals("android.widget.ProgressBar", nodeInfo.getClassName().toString());
     assertNotNull(nodeInfo.getRangeInfo());
-    assertEquals(0.0f, nodeInfo.getRangeInfo().getMin());
-    assertEquals(100.0f, nodeInfo.getRangeInfo().getMax());
-    assertEquals(50.0f, nodeInfo.getRangeInfo().getCurrent());
+    assertEquals(0.0f, nodeInfo.getRangeInfo().getMin(), 1e-4f);
+    assertEquals(100.0f, nodeInfo.getRangeInfo().getMax(), 1e-4f);
+    assertEquals(50.0f, nodeInfo.getRangeInfo().getCurrent(), 1e-4f);
   }
 
   @Config(sdk = API_LEVELS.API_32)
