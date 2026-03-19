@@ -6662,7 +6662,7 @@ void main() {
               }
               return Colors.black54;
             }),
-            splashBorderRadius: BorderRadius.circular(radius),
+            splashBorderRadius: const BorderRadius.all(Radius.circular(radius)),
             tabs: const <Widget>[Tab(child: Text(''))],
           ),
         ),

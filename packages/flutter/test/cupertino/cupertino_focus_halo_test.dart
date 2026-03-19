@@ -228,7 +228,7 @@ void main() {
   testWidgets('CupertinoFocusHalo.withRRect draws a correct shape', (WidgetTester tester) async {
     final focusNode = FocusNode();
     final GlobalKey haloKey = GlobalKey();
-    final borderRadius = BorderRadius.circular(12.0);
+    const borderRadius = BorderRadius.all(Radius.circular(12.0));
 
     addTearDown(focusNode.dispose);
 
@@ -263,7 +263,7 @@ void main() {
   ) async {
     final focusNode = FocusNode();
     final GlobalKey haloKey = GlobalKey();
-    final borderRadius = BorderRadius.circular(12.0);
+    const borderRadius = BorderRadius.all(Radius.circular(12.0));
 
     addTearDown(focusNode.dispose);
 
