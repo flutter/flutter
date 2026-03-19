@@ -149,7 +149,7 @@ class TextFormField extends FormField<String> {
     ValueChanged<String>? onFieldSubmitted,
     super.onSaved,
     super.validator,
-    FormFieldErrorBuilder? errorBuilder,
+    super.errorBuilder,
     List<TextInputFormatter>? inputFormatters,
     bool? enabled,
     bool? ignorePointers,
@@ -213,7 +213,6 @@ class TextFormField extends FormField<String> {
          initialValue: controller != null ? controller.text : (initialValue ?? ''),
          enabled: enabled ?? decoration?.enabled ?? true,
          autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
-         errorBuilder: errorBuilder,
          builder: (FormFieldState<String> field) {
            final state = field as _TextFormFieldState;
            InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
