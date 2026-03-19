@@ -207,10 +207,11 @@ std::unique_ptr<HostWindow> HostWindow::CreateRegularWindow(
     FlutterWindowsEngine* engine,
     const WindowSizeRequest& preferred_size,
     const WindowConstraints& preferred_constraints,
-    LPCWSTR title) {
+    LPCWSTR title,
+    bool decorated) {
   return std::unique_ptr<HostWindow>(new HostWindowRegular(
       window_manager, engine, preferred_size,
-      FromWindowConstraints(preferred_constraints), title));
+      FromWindowConstraints(preferred_constraints), title, decorated));
 }
 
 std::unique_ptr<HostWindow> HostWindow::CreateDialogWindow(
@@ -219,11 +220,12 @@ std::unique_ptr<HostWindow> HostWindow::CreateDialogWindow(
     const WindowSizeRequest& preferred_size,
     const WindowConstraints& preferred_constraints,
     LPCWSTR title,
-    HWND parent) {
+    HWND parent,
+    bool decorated) {
   return std::unique_ptr<HostWindow>(
       new HostWindowDialog(window_manager, engine, preferred_size,
                            FromWindowConstraints(preferred_constraints), title,
-                           parent ? parent : std::optional<HWND>()));
+                           parent ? parent : std::optional<HWND>(), decorated));
 }
 
 std::unique_ptr<HostWindow> HostWindow::CreateTooltipWindow(
@@ -244,6 +246,8 @@ HostWindow::HostWindow(WindowManager* window_manager,
 
 void HostWindow::InitializeFlutterView(
     HostWindowInitializationParams const& params) {
+  decorated_ = params.decorated;
+
   // Set up the view.
   auto view_window = std::make_unique<FlutterWindow>(
       params.initial_window_rect.width(), params.initial_window_rect.height(),
@@ -319,6 +323,14 @@ void HostWindow::InitializeFlutterView(
   ShowWindow(window_handle_, params.nCmdShow);
   SetWindowLongPtr(window_handle_, GWLP_USERDATA,
                    reinterpret_cast<LONG_PTR>(this));
+
+  if (!decorated_) {
+    // Force Windows to re-send WM_NCCALCSIZE now that the instance pointer is
+    // set and our message handler can receive it.
+    SetWindowPos(window_handle_, nullptr, 0, 0, 0, 0,
+                 SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
+                     SWP_NOACTIVATE);
+  }
 }
 
 HostWindow::~HostWindow() {
@@ -476,6 +488,15 @@ LRESULT HostWindow::HandleMessage(HWND hwnd,
     case WM_DWMCOLORIZATIONCOLORCHANGED:
       UpdateTheme(hwnd);
       return 0;
+
+    case WM_NCCALCSIZE:
+      // When wParam is TRUE, Windows is requesting the client rect.
+      // Returning 0 sets the entire window rect as the client area,
+      // effectively removing all non-client decorations.
+      if (!decorated_ && wparam) {
+        return 0;
+      }
+      break;
 
     default:
       break;
