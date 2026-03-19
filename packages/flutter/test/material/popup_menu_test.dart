@@ -1382,6 +1382,74 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('PopupMenuButton Semantics expanded state updates when menu opens and closes', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/183432
+    const key = Key('test');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: PopupMenuButton<int>(
+            key: key,
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuItem<int>>[
+                const PopupMenuItem<int>(value: 1, child: Text('Item 1')),
+                const PopupMenuItem<int>(value: 2, child: Text('Item 2')),
+              ];
+            },
+            child: const SizedBox(height: 100.0, width: 100.0, child: Text('XXX')),
+          ),
+        ),
+      ),
+    );
+
+    // Before opening: should have expanded state but not be expanded.
+    expect(
+      tester.getSemantics(find.byType(PopupMenuButton<int>)),
+      matchesSemantics(
+        hasExpandedState: true,
+        label: 'XXX',
+        hasTapAction: true,
+        hasFocusAction: true,
+        isFocusable: true,
+      ),
+    );
+
+    // Open the menu.
+    await tester.tap(find.text('XXX'));
+    await tester.pumpAndSettle();
+
+    // While the menu is open, BlockSemantics in ModalBarrier blocks the
+    // button's semantics node (making tester.getSemantics return a stale node).
+    // Verify the Semantics widget's expanded property directly instead.
+    final Semantics expandedSemantics = tester.widget<Semantics>(
+      find.descendant(
+        of: find.byKey(key),
+        matching: find.byWidgetPredicate(
+          (Widget widget) => widget is Semantics && widget.properties.expanded != null,
+        ),
+      ),
+    );
+    expect(expandedSemantics.properties.expanded, isTrue);
+
+    // Close the menu by selecting an item.
+    await tester.tap(find.text('Item 1').last);
+    await tester.pumpAndSettle();
+
+    // After closing: should have expanded state but not be expanded.
+    expect(
+      tester.getSemantics(find.byType(PopupMenuButton<int>)),
+      matchesSemantics(
+        hasExpandedState: true,
+        label: 'XXX',
+        hasTapAction: true,
+        hasFocusAction: true,
+        isFocusable: true,
+      ),
+    );
+  });
+
   testWidgets('PopupMenuItem merges the semantics of its descendants', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
     await tester.pumpWidget(
