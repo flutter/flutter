@@ -17,26 +17,22 @@ using FS = UberSDFPipeline::FragmentShader;
 Scalar kAntialiasPixels = 1.0;
 }  // namespace
 
-std::unique_ptr<UberSDFContents> UberSDFContents::Make(
-    Type type,
-    Rect rect,
-    std::unique_ptr<Geometry> geometry,
-    Color color,
-    Scalar stroke_width,
-    bool stroked) {
-  return std::unique_ptr<UberSDFContents>(new UberSDFContents(
-      type, rect, std::move(geometry), color, stroke_width, stroked));
+std::unique_ptr<UberSDFContents> UberSDFContents::Make(Type type,
+                                                       Rect rect,
+                                                       Color color,
+                                                       Scalar stroke_width,
+                                                       bool stroked) {
+  return std::unique_ptr<UberSDFContents>(
+      new UberSDFContents(type, rect, color, stroke_width, stroked));
 }
 
 UberSDFContents::UberSDFContents(Type type,
                                  Rect rect,
-                                 std::unique_ptr<Geometry> geometry,
                                  Color color,
                                  Scalar stroke_width,
                                  bool stroked)
     : type_(type),
       rect_(rect),
-      geometry_(std::move(geometry)),
       color_(color),
       stroke_width_(stroke_width),
       stroked_(stroked) {}
@@ -58,7 +54,8 @@ bool UberSDFContents::Render(const ContentContext& renderer,
   frag_info.stroked = stroked_ ? 1.0f : 0.0f;
   frag_info.type = type_ == Type::kCircle ? 0.0f : 1.0f;
 
-  auto geometry_result = geometry_->GetPositionBuffer(renderer, entity, pass);
+  auto geometry_result =
+      GetGeometry()->GetPositionBuffer(renderer, entity, pass);
 
   PipelineBuilderCallback pipeline_callback =
       [&renderer](ContentContextOptions options) {
@@ -66,7 +63,7 @@ bool UberSDFContents::Render(const ContentContext& renderer,
       };
 
   return ColorSourceContents::DrawGeometry<VS>(
-      this, geometry_.get(), renderer, entity, pass, pipeline_callback,
+      this, GetGeometry(), renderer, entity, pass, pipeline_callback,
       frame_info,
       /*bind_fragment_callback=*/
       [&frag_info, &data_host_buffer](RenderPass& pass) {
@@ -83,7 +80,7 @@ bool UberSDFContents::Render(const ContentContext& renderer,
 }
 
 std::optional<Rect> UberSDFContents::GetCoverage(const Entity& entity) const {
-  return geometry_->GetCoverage(entity.GetTransform());
+  return GetGeometry()->GetCoverage(entity.GetTransform());
 }
 
 Color UberSDFContents::GetColor() const {
