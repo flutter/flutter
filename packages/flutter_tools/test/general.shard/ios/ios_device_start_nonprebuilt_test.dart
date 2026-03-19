@@ -40,8 +40,22 @@ import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/throwing_pub.dart';
 
-List<String> _xattrArgs(FlutterProject flutterProject) {
-  return <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', flutterProject.directory.path];
+// Helper to generate xattr commands for removing specific extended attributes
+List<FakeCommand> xattrCommands(FlutterProject flutterProject) {
+  return <FakeCommand>[
+    FakeCommand(
+      command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', flutterProject.directory.path],
+    ),
+    FakeCommand(
+      command: <String>['xattr', '-r', '-d', 'com.apple.provenance', flutterProject.directory.path],
+    ),
+  ];
+}
+
+FakeCommand xattrCreatedByBuildSystemCommand(String outputDirPath) {
+  return FakeCommand(
+    command: <String>['xattr', '-w', 'com.apple.xcode.CreatedByBuildSystem', 'true', outputDirPath],
+  );
 }
 
 const kRunReleaseArgs = <String>[
@@ -136,7 +150,7 @@ void main() {
           'My Super Awesome App',
         );
 
-        processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
+        processManager.addCommands(xattrCommands(flutterProject));
         processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
 
         final LaunchResult launchResult = await iosDevice.startApp(
@@ -243,8 +257,9 @@ void main() {
             .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
             .createSync(recursive: true);
 
-        processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
+        processManager.addCommands(xattrCommands(flutterProject));
         processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
+        processManager.addCommand(xattrCreatedByBuildSystemCommand('build/ios/Release-iphoneos'));
         processManager.addCommand(
           const FakeCommand(
             command: <String>[
@@ -330,7 +345,7 @@ void main() {
             .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
             .createSync(recursive: true);
 
-        processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
+        processManager.addCommands(xattrCommands(flutterProject));
         processManager.addCommand(
           const FakeCommand(
             command: <String>[
@@ -361,6 +376,7 @@ void main() {
             ],
           ),
         );
+        processManager.addCommand(xattrCreatedByBuildSystemCommand('build/ios/Release-iphoneos'));
         processManager.addCommand(
           const FakeCommand(
             command: <String>[
@@ -467,7 +483,7 @@ void main() {
               .childFile('FlutterPlugin.h')
               .createSync(recursive: true);
           processManager.addCommands([
-            FakeCommand(command: _xattrArgs(flutterProject)),
+            ...xattrCommands(flutterProject),
             FakeCommand(
               command: const <String>[
                 'xcrun',
@@ -506,6 +522,7 @@ void main() {
                 );
               },
             ),
+            xattrCreatedByBuildSystemCommand('build/ios/Release-iphoneos'),
             FakeCommand(
               command: <String>[
                 iosDeployPath,
@@ -572,7 +589,7 @@ void main() {
               .childFile('FlutterPlugin.h')
               .createSync(recursive: true);
           processManager.addCommands([
-            FakeCommand(command: _xattrArgs(flutterProject)),
+            ...xattrCommands(flutterProject),
             const FakeCommand(
               command: <String>[
                 'xcrun',
@@ -601,6 +618,7 @@ void main() {
                 'COMPILER_INDEX_STORE_ENABLE=NO',
               ],
             ),
+            xattrCreatedByBuildSystemCommand('build/ios/Release-iphoneos'),
           ]);
 
           await iosDevice.startApp(
@@ -647,7 +665,7 @@ void main() {
           'My Super Awesome App',
         );
 
-        processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
+        processManager.addCommands(xattrCommands(flutterProject));
         // The first xcrun call should fail with a
         // concurrent build exception.
         processManager.addCommand(
@@ -658,6 +676,7 @@ void main() {
           ),
         );
         processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
+        processManager.addCommand(xattrCreatedByBuildSystemCommand('build/ios/Release-iphoneos'));
         processManager.addCommand(
           FakeCommand(
             command: <String>[

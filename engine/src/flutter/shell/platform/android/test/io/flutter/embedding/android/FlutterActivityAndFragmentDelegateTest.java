@@ -40,6 +40,7 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterEngineCache;
 import io.flutter.embedding.engine.FlutterEngineGroup;
 import io.flutter.embedding.engine.FlutterEngineGroupCache;
+import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.plugins.activity.ActivityControlSurface;
@@ -78,6 +79,8 @@ public class FlutterActivityAndFragmentDelegateTest {
   private FlutterActivityAndFragmentDelegate.Host mockHost2;
 
   @Before
+  // Annotation required because FlutterShellArgs was deprecated in favor of FlutterEngineFlags.
+  @SuppressWarnings("deprecation")
   public void setup() {
     FlutterInjector.reset();
     // Create a mocked FlutterEngine for the various interactions required by the delegate
@@ -88,6 +91,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     mockHost = mock(FlutterActivityAndFragmentDelegate.Host.class);
     when(mockHost.getContext()).thenReturn(ctx);
     when(mockHost.getLifecycle()).thenReturn(mock(Lifecycle.class));
+    when(mockHost.getFlutterShellArgs()).thenReturn(new FlutterShellArgs(new String[] {}));
     when(mockHost.getDartEntrypointFunctionName()).thenReturn("main");
     when(mockHost.getDartEntrypointArgs()).thenReturn(null);
     when(mockHost.getAppBundlePath()).thenReturn("/fake/path");
@@ -104,6 +108,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     mockHost2 = mock(FlutterActivityAndFragmentDelegate.Host.class);
     when(mockHost2.getContext()).thenReturn(ctx);
     when(mockHost2.getLifecycle()).thenReturn(mock(Lifecycle.class));
+    when(mockHost2.getFlutterShellArgs()).thenReturn(new FlutterShellArgs(new String[] {}));
     when(mockHost2.getDartEntrypointFunctionName()).thenReturn("main");
     when(mockHost2.getDartEntrypointArgs()).thenReturn(null);
     when(mockHost2.getAppBundlePath()).thenReturn("/fake/path");
@@ -459,6 +464,8 @@ public class FlutterActivityAndFragmentDelegateTest {
   }
 
   @Test
+  // Annotation required because FlutterShellArgs was deprecated in favor of FlutterEngineFlags.
+  @SuppressWarnings("deprecation")
   public void itGivesHostAnOpportunityToConfigureFlutterTextureView() {
     // ---- Test setup ----
     Host customMockHost = mock(Host.class);
@@ -468,6 +475,8 @@ public class FlutterActivityAndFragmentDelegateTest {
           activity -> {
             when(customMockHost.getActivity()).thenReturn(activity);
             when(customMockHost.getLifecycle()).thenReturn(mock(Lifecycle.class));
+            when(customMockHost.getFlutterShellArgs())
+                .thenReturn(new FlutterShellArgs(new String[] {}));
             when(customMockHost.getDartEntrypointFunctionName()).thenReturn("main");
             when(customMockHost.getAppBundlePath()).thenReturn("/fake/path");
             when(customMockHost.getInitialRoute()).thenReturn("/");

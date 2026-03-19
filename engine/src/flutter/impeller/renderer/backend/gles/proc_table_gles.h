@@ -231,6 +231,8 @@ struct GLProc {
   PROC(Uniform2fv);                          \
   PROC(Uniform3fv);                          \
   PROC(Uniform4fv);                          \
+  PROC(UniformMatrix2fv);                    \
+  PROC(UniformMatrix3fv);                    \
   PROC(UniformMatrix4fv);                    \
   PROC(UseProgram);                          \
   PROC(VertexAttribPointer);                 \
@@ -263,8 +265,9 @@ void(glDepthRange)(GLdouble n, GLdouble f);
   PROC(UniformBlockBinding);               \
   PROC(BindBufferRange);                   \
   PROC(WaitSync);                          \
-  PROC(RenderbufferStorageMultisample)     \
-  PROC(BlitFramebuffer);
+  PROC(RenderbufferStorageMultisample);    \
+  PROC(BlitFramebuffer);                   \
+  PROC(InvalidateFramebuffer);
 
 #define FOR_EACH_IMPELLER_EXT_PROC(PROC)    \
   PROC(DebugMessageControlKHR);             \

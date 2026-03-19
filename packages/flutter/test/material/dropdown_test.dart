@@ -1440,6 +1440,62 @@ void main() {
     handle.dispose();
   });
 
+  testWidgets('Dropdown button Semantics expanded state should update when menu opens and closes', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/183432
+    const key = Key('test');
+    await tester.pumpWidget(buildFrame(buttonKey: key, onChanged: onChanged));
+
+    // Before opening: should have expanded state but not be expanded.
+    expect(
+      tester.getSemantics(find.byType(DropdownButton<String>)),
+      matchesSemantics(
+        isButton: true,
+        hasExpandedState: true,
+        label: 'two',
+        hasTapAction: true,
+        hasFocusAction: true,
+        isFocusable: true,
+      ),
+    );
+
+    // Open the menu.
+    await tester.tap(find.text('two'));
+    await tester.pumpAndSettle();
+
+    // While the menu is open, BlockSemantics in ModalBarrier blocks the
+    // button's semantics node (making tester.getSemantics return a stale node).
+    // Verify the Semantics widget's expanded property directly instead.
+    final Semantics expandedSemantics = tester.widget<Semantics>(
+      find.descendant(
+        of: find.byKey(key),
+        matching: find.byWidgetPredicate(
+          (Widget widget) => widget is Semantics && widget.properties.expanded != null,
+        ),
+      ),
+    );
+    expect(expandedSemantics.properties.expanded, isTrue);
+
+    // Close the menu by selecting an item.
+    await tester.tap(find.text('one').last);
+    await tester.pumpAndSettle();
+
+    // After closing: should have expanded state but not be expanded.
+    expect(
+      tester.getSemantics(find.byType(DropdownButton<String>)),
+      matchesSemantics(
+        isButton: true,
+        hasExpandedState: true,
+        label: 'two',
+        hasTapAction: true,
+        hasFocusAction: true,
+        isFocusable: true,
+        isFocused: true,
+      ),
+    );
+  });
+
   testWidgets('Dropdown menu includes semantics', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
     const key = Key('test');
@@ -1762,15 +1818,13 @@ void main() {
           initialValue: selectedItem,
           items: items,
           itemHeight: null,
-          selectedItemBuilder: (BuildContext context) {
-            return items.map<Widget>((String item) {
-              return SizedBox(
-                height: double.parse(item),
-                width: double.parse(item),
+          selectedItemBuilder: (BuildContext context) => [
+            for (final item in items)
+              SizedBox.square(
+                dimension: double.parse(item),
                 child: Center(child: Text(item)),
-              );
-            }).toList();
-          },
+              ),
+          ],
           onChanged: (String? newValue) {},
         ),
       );
@@ -1798,15 +1852,13 @@ void main() {
           hint: const SizedBox(height: 50, width: 50, child: Text('hint')),
           items: items,
           itemHeight: null,
-          selectedItemBuilder: (BuildContext context) {
-            return items.map<Widget>((String item) {
-              return SizedBox(
-                height: double.parse(item),
-                width: double.parse(item),
+          selectedItemBuilder: (BuildContext context) => [
+            for (final item in items)
+              SizedBox.square(
+                dimension: double.parse(item),
                 child: Center(child: Text(item)),
-              );
-            }).toList();
-          },
+              ),
+          ],
           onChanged: (String? newValue) {},
         ),
       );
@@ -1838,15 +1890,13 @@ void main() {
           hint: const SizedBox(height: 125, width: 125, child: Text('hint')),
           items: items,
           itemHeight: null,
-          selectedItemBuilder: (BuildContext context) {
-            return items.map<Widget>((String item) {
-              return SizedBox(
-                height: double.parse(item),
-                width: double.parse(item),
+          selectedItemBuilder: (BuildContext context) => [
+            for (final item in items)
+              SizedBox.square(
+                dimension: double.parse(item),
                 child: Center(child: Text(item)),
-              );
-            }).toList();
-          },
+              ),
+          ],
           onChanged: (String? newValue) {},
         ),
       );
@@ -1874,15 +1924,13 @@ void main() {
           hint: const SizedBox(height: 50, width: 50, child: Text('hint')),
           items: items,
           itemHeight: null,
-          selectedItemBuilder: (BuildContext context) {
-            return items.map<Widget>((String item) {
-              return SizedBox(
-                height: double.parse(item),
-                width: double.parse(item),
+          selectedItemBuilder: (BuildContext context) => [
+            for (final item in items)
+              SizedBox.square(
+                dimension: double.parse(item),
                 child: Center(child: Text(item)),
-              );
-            }).toList();
-          },
+              ),
+          ],
         ),
       );
 
@@ -1909,15 +1957,13 @@ void main() {
           hint: const SizedBox(height: 125, width: 125, child: Text('hint')),
           items: items,
           itemHeight: null,
-          selectedItemBuilder: (BuildContext context) {
-            return items.map<Widget>((String item) {
-              return SizedBox(
-                height: double.parse(item),
-                width: double.parse(item),
+          selectedItemBuilder: (BuildContext context) => [
+            for (final item in items)
+              SizedBox.square(
+                dimension: double.parse(item),
                 child: Center(child: Text(item)),
-              );
-            }).toList();
-          },
+              ),
+          ],
         ),
       );
 
@@ -1944,15 +1990,13 @@ void main() {
           disabledHint: const SizedBox(height: 50, width: 50, child: Text('hint')),
           items: items,
           itemHeight: null,
-          selectedItemBuilder: (BuildContext context) {
-            return items.map<Widget>((String item) {
-              return SizedBox(
-                height: double.parse(item),
-                width: double.parse(item),
+          selectedItemBuilder: (BuildContext context) => [
+            for (final item in items)
+              SizedBox.square(
+                dimension: double.parse(item),
                 child: Center(child: Text(item)),
-              );
-            }).toList();
-          },
+              ),
+          ],
         ),
       );
 
@@ -1979,15 +2023,13 @@ void main() {
           disabledHint: const SizedBox(height: 125, width: 125, child: Text('hint')),
           items: items,
           itemHeight: null,
-          selectedItemBuilder: (BuildContext context) {
-            return items.map<Widget>((String item) {
-              return SizedBox(
-                height: double.parse(item),
-                width: double.parse(item),
+          selectedItemBuilder: (BuildContext context) => [
+            for (final item in items)
+              SizedBox.square(
+                dimension: double.parse(item),
                 child: Center(child: Text(item)),
-              );
-            }).toList();
-          },
+              ),
+          ],
         ),
       );
 
@@ -2011,15 +2053,13 @@ void main() {
         initialValue: selectedItem,
         items: items,
         menuWidth: 200,
-        selectedItemBuilder: (BuildContext context) {
-          return items.map<Widget>((String item) {
-            return SizedBox(
-              height: double.parse(item),
-              width: double.parse(item),
+        selectedItemBuilder: (BuildContext context) => [
+          for (final item in items)
+            SizedBox.square(
+              dimension: double.parse(item),
               child: Center(child: Text(item)),
-            );
-          }).toList();
-        },
+            ),
+        ],
         onChanged: (String? newValue) {},
       ),
     );
@@ -4897,5 +4937,40 @@ void main() {
       tester.firstElement(find.text(labelText)),
     ).style;
     expect(labelStyle.color, labelColor);
+  });
+
+  testWidgets('DropdownButton selectedItemBuilder length must match items length', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/92773
+    final List<DropdownMenuItem<String>> items = <String>['a', 'b']
+        .map<DropdownMenuItem<String>>(
+          (String value) => DropdownMenuItem<String>(value: value, child: Text(value)),
+        )
+        .toList();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(
+              child: DropdownButtonFormField<String>(
+                onChanged: (_) {},
+                items: items,
+                selectedItemBuilder: (BuildContext context) {
+                  return <Widget>[const Text('a')];
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      (tester.takeException() as AssertionError).message,
+      'The selectedItemBuilder must return a list of widgets with the same length as the items list.\n'
+      'Currently, selectedItemBuilder returns a list of length 1, but items has length 2.',
+    );
   });
 }

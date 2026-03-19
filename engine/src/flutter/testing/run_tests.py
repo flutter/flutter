@@ -468,6 +468,7 @@ def run_cc_tests(
       make_test('embedder_unittests'),
       make_test('fml_unittests'),
       make_test('geometry_unittests'),
+      make_test('gpu_surface_unittests'),
       make_test('no_dart_plugin_registrant_unittests'),
       make_test('runtime_unittests'),
       make_test('testing_unittests'),
@@ -503,7 +504,6 @@ def run_cc_tests(
         make_test('framework_common_swift_unittests'),
         make_test('framework_common_unittests'),
         make_test('spring_animation_unittests'),
-        make_test('gpu_surface_metal_unittests'),
     ]
 
   if is_linux():
@@ -936,17 +936,6 @@ def gather_dart_tests(
   )
   dart_tests = glob.glob(f'{dart_tests_dir}/*_test.dart')
 
-  opengles_skipped_tests = [
-      'codec_test.dart',
-      'decode_image_from_pixels_sync_test.dart',
-      'encoding_test.dart',
-      'fragment_shader_test.dart',
-      'gpu_test.dart',
-      'high_bitrate_texture_test.dart',
-      'image_dispose_test.dart',
-      'image_resize_test.dart',
-  ]
-
   impeller_backends = ['', 'vulkan', 'opengles']
   if is_mac():
     impeller_backends.append('metal')
@@ -964,11 +953,12 @@ def gather_dart_tests(
       _logger.info("Gathering dart test '%s'", dart_test_file)
 
     for impeller in impeller_backends:
-      if impeller == 'opengles' and dart_test_basename in opengles_skipped_tests:
-        _logger.info("Skipping for opengles: '%s'", dart_test_file)
-        continue
-
       for multithreaded in [False, True]:
+        # An opengles implementation that is multithreaded would require the
+        # raster thread and the io thread to have their own contexts in a share
+        # group. This isn't currently supported by swangle.
+        if impeller == 'opengles' and multithreaded:
+          continue
         yield gather_dart_test(
             build_dir, dart_test_file,
             FlutterTesterOptions(

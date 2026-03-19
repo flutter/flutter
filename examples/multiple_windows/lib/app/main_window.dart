@@ -24,7 +24,9 @@ class MainWindow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final WindowManager windowManager = WindowManagerAccessor.of(context);
+    final KeyedWindowManager windowManager = KeyedWindowManagerAccessor.of(
+      context,
+    );
 
     return ViewAnchor(
       view: ListenableBuilder(
@@ -81,7 +83,10 @@ class MainWindow extends StatelessWidget {
 }
 
 class _WindowsTable extends StatelessWidget {
-  List<DataRow> _buildRows(WindowManager windowManager, BuildContext context) {
+  List<DataRow> _buildRows(
+    KeyedWindowManager windowManager,
+    BuildContext context,
+  ) {
     List<DataRow> rows = [];
     for (KeyedWindow controller in windowManager.windows) {
       rows.add(
@@ -136,6 +141,7 @@ class _WindowsTable extends StatelessWidget {
         controller: tooltip,
       ),
       PopupWindowController() => null,
+      SatelliteWindowController() => null,
     };
   }
 
@@ -145,12 +151,15 @@ class _WindowsTable extends StatelessWidget {
       DialogWindowController() => 'Dialog',
       TooltipWindowController() => 'Tooltip',
       PopupWindowController() => 'Popup',
+      SatelliteWindowController() => 'Satellite',
     };
   }
 
   @override
   Widget build(BuildContext context) {
-    final WindowManager windowManager = WindowManagerAccessor.of(context);
+    final KeyedWindowManager windowManager = KeyedWindowManagerAccessor.of(
+      context,
+    );
     return DataTable(
       showBottomBorder: true,
       columns: const [
@@ -176,7 +185,9 @@ class _WindowsTable extends StatelessWidget {
 class _WindowCreatorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final WindowManager windowManager = WindowManagerAccessor.of(context);
+    final KeyedWindowManager windowManager = KeyedWindowManagerAccessor.of(
+      context,
+    );
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
     final BaseWindowController windowController = WindowScope.of(context);
 

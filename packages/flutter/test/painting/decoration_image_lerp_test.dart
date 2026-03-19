@@ -1401,9 +1401,8 @@ class _TestImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(2.0),
-      child: SizedBox(
-        width: 20,
-        height: 20,
+      child: SizedBox.square(
+        dimension: 20.0,
         child: DecoratedBox(decoration: BoxDecoration(image: image)),
       ),
     );

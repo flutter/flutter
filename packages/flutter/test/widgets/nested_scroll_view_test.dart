@@ -12,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
-import 'list_tile_test_utils.dart';
+import 'list_tile_tester.dart';
 
 class _CustomPhysics extends ClampingScrollPhysics {
   const _CustomPhysics({super.parent});
@@ -3479,6 +3479,23 @@ void main() {
       ),
       areCreateAndDispose,
     );
+  });
+
+  testWidgets('NestedScrollView does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: NestedScrollView(
+              headerSliverBuilder: (_, _) => [const SliverToBoxAdapter(child: Text('Y'))],
+              body: const Text('X'),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(NestedScrollView)), Size.zero);
   });
 }
 

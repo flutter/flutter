@@ -34,15 +34,17 @@ public class MainActivity extends AppCompatActivity {
     private static final String PING = "ping";
     private BasicMessageChannel<String> messageChannel;
 
-    // Previously, this example checked for certain flags set via Intent. Engine
-    // flags can no longer be set via Intent, so warn developers that Intent extras
-    // will be ignored and point to alternative methods for setting engine flags.
+    // Previously, this example checked for certain flags set via Intent. The
+    // ability to set flags via Intent will be removed as part of
+    //https://github.com/flutter/flutter/issues/172553, so warn developers that
+    // Intent extras will be ignored and point to alternative methods for
+    // setting engine flags.
     private void warnIfEngineFlagsSetViaIntent(Intent intent) {
         List<String> previouslySupportedFlagsViaIntent = Arrays.asList(
             "trace-startup", "start-paused", "enable-dart-profiling");
         for (String flag : previouslySupportedFlagsViaIntent) {
             if (intent.hasExtra(flag)) {
-                Log.w("MainActivity", "Engine flags can no longer be set via Intent on Android. If you wish to set " + flag + ", see https://github.com/flutter/flutter/blob/main/docs/engine/Android-Flutter-Shell-Arguments.md for alternative methods.");
+                Log.e("MainActivity", "Engine flags can no longer be set via Intent on Android. If you wish to set " + flag + ", see https://github.com/flutter/flutter/blob/main/docs/engine/Flutter-Android-Engine-Flags.md for alternative methods.");
                 break;
             }
         }
