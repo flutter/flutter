@@ -72,7 +72,7 @@ class SkwasmImage implements ui.Image, StackTraceDebugger {
   ImageHandle get handle => box.nativeObject;
 
   @override
-  bool get debugDisposed => box.isDisposed;
+  bool get debugDisposed => box.debugDisposed;
 
   @override
   int get width => imageGetWidth(handle);

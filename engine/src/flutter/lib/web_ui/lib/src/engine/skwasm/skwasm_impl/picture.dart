@@ -78,17 +78,7 @@ class SkwasmPicture implements LayerPicture, StackTraceDebugger {
   bool get isDisposed => box.isDisposed;
 
   @override
-  bool get debugDisposed {
-    bool? result;
-    assert(() {
-      result = isDisposed;
-      return true;
-    }());
-    if (result != null) {
-      return result!;
-    }
-    throw StateError('Picture.debugDisposed is only available when asserts are enabled.');
-  }
+  bool get debugDisposed => box.debugDisposed;
 }
 
 class SkwasmPictureRecorder extends SkwasmObjectWrapper<RawPictureRecorder>

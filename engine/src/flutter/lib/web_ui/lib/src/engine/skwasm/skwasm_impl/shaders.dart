@@ -314,7 +314,19 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
   }
 
   @override
-  bool get debugDisposed => _isDisposed;
+  bool get debugDisposed {
+    bool? result;
+    assert(() {
+      result = _isDisposed;
+      return true;
+    }());
+
+    if (result != null) {
+      return result!;
+    }
+
+    throw StateError('debugDisposed is only available when asserts are enabled.');
+  }
 
   @override
   void setFloat(int index, double value) {

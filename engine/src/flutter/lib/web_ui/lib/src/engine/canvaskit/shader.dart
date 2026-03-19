@@ -309,7 +309,19 @@ class CkImageShader implements ui.ImageShader, CkShader {
   bool _isDisposed = false;
 
   @override
-  bool get debugDisposed => _isDisposed;
+  bool get debugDisposed {
+    bool? result;
+    assert(() {
+      result = _isDisposed;
+      return true;
+    }());
+
+    if (result != null) {
+      return result!;
+    }
+
+    throw StateError('debugDisposed is only available when asserts are enabled.');
+  }
 
   @override
   void dispose() {
