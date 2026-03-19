@@ -379,7 +379,6 @@ static void SetViewportMetrics(JNIEnv* env,
   env->GetIntArrayRegion(javaDisplayFeaturesState, 0, stateSize,
                          &displayFeaturesState[0]);
 
-  // TODO(boetger): update for https://github.com/flutter/flutter/issues/149033
   const flutter::ViewportMetrics metrics{
       static_cast<double>(devicePixelRatio),  // p_device_pixel_ratio
       static_cast<double>(physicalWidth),     // p_physical_width

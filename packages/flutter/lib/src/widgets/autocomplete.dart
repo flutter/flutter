@@ -516,6 +516,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       selection: TextSelection.collapsed(offset: selectionString.length),
       text: selectionString,
     );
+    _lastFieldText = selectionString;
     widget.onSelected?.call(nextSelection);
     if (_optionsViewController.isShowing) {
       _optionsViewController.hide(); // Close the options view after a selection is made.

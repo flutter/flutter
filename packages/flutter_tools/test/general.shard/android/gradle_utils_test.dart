@@ -893,6 +893,8 @@ pluginManagement {
         ),
 
         // Kotlin version at the edge of support window.
+        GradleKgpTestData(true, kgpVersion: '2.3.10', gradleVersion: '8.14'),
+        GradleKgpTestData(true, kgpVersion: '2.3.0', gradleVersion: '8.14'),
         GradleKgpTestData(true, kgpVersion: '2.2.20', gradleVersion: '8.14'),
         GradleKgpTestData(true, kgpVersion: '2.2.10', gradleVersion: '8.14'),
         GradleKgpTestData(true, kgpVersion: '2.2.20', gradleVersion: '7.6.3'),
@@ -918,6 +920,8 @@ pluginManagement {
         GradleKgpTestData(true, kgpVersion: '1.6.21', gradleVersion: '6.1.1'),
         GradleKgpTestData(true, kgpVersion: '1.6.20', gradleVersion: '7.0.2'),
         // Gradle at the edge of the suppport window.
+        GradleKgpTestData(true, kgpVersion: '2.3.10', gradleVersion: '9.0.1'),
+        GradleKgpTestData(true, kgpVersion: '2.3.0', gradleVersion: '9.0.0'),
         GradleKgpTestData(true, kgpVersion: '2.2.20', gradleVersion: '8.14'),
         GradleKgpTestData(true, kgpVersion: '2.2.10', gradleVersion: '8.14'),
         GradleKgpTestData(true, kgpVersion: '2.2.0', gradleVersion: '8.14'),
@@ -942,8 +946,10 @@ pluginManagement {
         GradleKgpTestData(true, kgpVersion: '1.6.21', gradleVersion: '6.7.1'),
         GradleKgpTestData(true, kgpVersion: '1.6.21', gradleVersion: '6.5'),
         // Kotlin newer than max known.
-        GradleKgpTestData(true, kgpVersion: '2.2.29', gradleVersion: '8.12.1'),
+        GradleKgpTestData(true, kgpVersion: '2.3.29', gradleVersion: '8.12.1'),
         // Kotlin too new for gradle version.
+        GradleKgpTestData(false, kgpVersion: '2.3.10', gradleVersion: '7.6.2'),
+        GradleKgpTestData(false, kgpVersion: '2.3.0', gradleVersion: '7.6.2'),
         GradleKgpTestData(false, kgpVersion: '2.2.20', gradleVersion: '7.6.2'),
         GradleKgpTestData(false, kgpVersion: '2.2.10', gradleVersion: '7.6.2'),
         GradleKgpTestData(false, kgpVersion: '2.2.0', gradleVersion: '7.6.2'),
@@ -1007,6 +1013,7 @@ pluginManagement {
         ),
 
         // Kotlin version at the edge of support window.
+        KgpAgpTestData(true, kgpVersion: '2.3.10', agpVersion: '9.0.0'),
         KgpAgpTestData(true, kgpVersion: '2.3.0', agpVersion: '8.13.0'),
         KgpAgpTestData(true, kgpVersion: '2.3.0', agpVersion: '8.2.2'),
         KgpAgpTestData(true, kgpVersion: '2.2.20', agpVersion: '8.11.1'),
@@ -1016,7 +1023,7 @@ pluginManagement {
         KgpAgpTestData(true, kgpVersion: '2.1.20', agpVersion: '8.7.2'),
         KgpAgpTestData(true, kgpVersion: '2.1.20', agpVersion: '7.3.1'),
         // AGP Versions not "fully supported" by kotlin
-        KgpAgpTestData(true, kgpVersion: '2.3.0', agpVersion: '9.0'),
+        KgpAgpTestData(true, kgpVersion: '2.3.10', agpVersion: '9.1'),
         // Gradle versions inspired by
         // https://developer.android.com/build/releases/gradle-plugin#expandable-1
         KgpAgpTestData(true, kgpVersion: '2.1.5', agpVersion: '8.7'),
