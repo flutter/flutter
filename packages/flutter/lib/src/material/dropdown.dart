@@ -1835,7 +1835,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     InputDecoration? decoration,
     super.onSaved,
     super.validator,
-    Widget Function(BuildContext, String)? errorBuilder,
+    FormFieldErrorBuilder? errorBuilder,
     super.forceErrorText,
     AutovalidateMode? autovalidateMode,
     double? menuMaxHeight,

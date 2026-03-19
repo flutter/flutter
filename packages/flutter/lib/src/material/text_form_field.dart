@@ -149,7 +149,7 @@ class TextFormField extends FormField<String> {
     ValueChanged<String>? onFieldSubmitted,
     super.onSaved,
     super.validator,
-    Widget Function(BuildContext, String)? errorBuilder,
+    FormFieldErrorBuilder? errorBuilder,
     List<TextInputFormatter>? inputFormatters,
     bool? enabled,
     bool? ignorePointers,
