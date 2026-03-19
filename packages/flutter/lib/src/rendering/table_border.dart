@@ -251,6 +251,160 @@ class TableBorder {
     );
   }
 
+  /// Draws all vertical dividers between columns without checking for spans.
+  void _paintVerticalDividersUnspanned(
+    Canvas canvas,
+    Rect rect,
+    Iterable<double> columns,
+    Paint paint,
+    Path path,
+  ) {
+    if (columns.isEmpty || verticalInside.style == BorderStyle.none) {
+      return;
+    }
+
+    paint
+      ..color = verticalInside.color
+      ..strokeWidth = verticalInside.width
+      ..style = PaintingStyle.stroke;
+    path.reset();
+
+    for (final x in columns) {
+      path.moveTo(rect.left + x, rect.top);
+      path.lineTo(rect.left + x, rect.bottom);
+    }
+    canvas.drawPath(path, paint);
+  }
+
+  /// Draws all horizontal dividers between rows without checking for spans.
+  void _paintHorizontalDividersUnspanned(
+    Canvas canvas,
+    Rect rect,
+    Iterable<double> rows,
+    Paint paint,
+    Path path,
+  ) {
+    if (rows.isEmpty || horizontalInside.style == BorderStyle.none) {
+      return;
+    }
+
+    paint
+      ..color = horizontalInside.color
+      ..strokeWidth = horizontalInside.width
+      ..style = PaintingStyle.stroke;
+    path.reset();
+
+    for (final y in rows) {
+      path.moveTo(rect.left, rect.top + y);
+      path.lineTo(rect.right, rect.top + y);
+    }
+    canvas.drawPath(path, paint);
+  }
+
+  /// Draws vertical dividers between columns, skipping spanned regions.
+  void _paintVerticalDividersWithSpans(
+    Canvas canvas,
+    Rect rect,
+    List<double> columnList,
+    List<double> rowTops,
+    Uint8List colSpanHiddenCells,
+    int tableColumns,
+    bool isRTL,
+    Paint paint,
+    Path path,
+  ) {
+    if (columnList.isEmpty || verticalInside.style == BorderStyle.none) {
+      return;
+    }
+
+    paint
+      ..color = verticalInside.color
+      ..strokeWidth = verticalInside.width
+      ..style = PaintingStyle.stroke;
+    path.reset();
+
+    double yOffset = rect.top;
+
+    for (var y = 0; y < rowTops.length - 1; y++) {
+      final double nextY = yOffset + (rowTops[y + 1] - rowTops[y]);
+
+      for (var x = 0; x < columnList.length; x++) {
+        // Skip a vertical divider when a colSpan covers both the cell to its
+        // left and the cell to its right at this row.  In LTR the right cell
+        // is logical col (x+1); in RTL the "right" visual cell becomes logical
+        // col (cols-1-x) which is to the left visually.
+        final int logicalX = isRTL ? (tableColumns - 1 - x) : (x + 1);
+        final int bit = y * tableColumns + logicalX;
+        if (colSpanHiddenCells[bit >> 3] & (1 << (bit & 7)) != 0) {
+          continue;
+        }
+        final double xPos = rect.left + columnList[x];
+        path
+          ..moveTo(xPos, yOffset)
+          ..lineTo(xPos, nextY);
+      }
+
+      yOffset = nextY;
+    }
+
+    canvas.drawPath(path, paint);
+  }
+
+  /// Draws horizontal dividers between rows, skipping spanned regions.
+  void _paintHorizontalDividersWithSpans(
+    Canvas canvas,
+    Rect rect,
+    List<double> rowList,
+    List<double> columnList,
+    Uint8List rowSpanHiddenCells,
+    int tableColumns,
+    bool isRTL,
+    Paint paint,
+    Path path,
+  ) {
+    if (rowList.isEmpty || horizontalInside.style == BorderStyle.none) {
+      return;
+    }
+
+    paint
+      ..color = horizontalInside.color
+      ..strokeWidth = horizontalInside.width
+      ..style = PaintingStyle.stroke;
+    path.reset();
+
+    // Compute absolute column offsets including the left and right edges.
+    final int columnCount = columnList.length;
+    final columnOffsets = Float64List(columnCount + 2);
+    columnOffsets[0] = rect.left;
+    for (var i = 0; i < columnCount; i++) {
+      columnOffsets[i + 1] = rect.left + columnList[i];
+    }
+    columnOffsets[columnCount + 1] = rect.right;
+
+    for (var y = 0; y < rowList.length; y++) {
+      final double yPos = rect.top + rowList[y];
+
+      for (var x = 0; x < columnOffsets.length - 1; x++) {
+        // Skip a horizontal divider when a rowSpan covers both the cell above
+        // and the cell below the divider in the same column.  Only rowSpan
+        // crossings are relevant here; colSpan-hidden cells on either side do
+        // not remove a horizontal border.
+        // In LTR visual segment x maps to logical col x; in RTL it maps to
+        // logical col (cols-1-x).
+        final int logicalX = isRTL ? (tableColumns - 1 - x) : x;
+        final int bit = (y + 1) * tableColumns + logicalX;
+        if (rowSpanHiddenCells[bit >> 3] & (1 << (bit & 7)) != 0) {
+          continue;
+        }
+        path
+          ..moveTo(columnOffsets[x], yPos)
+          ..lineTo(columnOffsets[x + 1], yPos);
+      }
+    }
+
+    canvas.drawPath(path, paint);
+  }
+
   /// Paints the border around the given [Rect] on the given [Canvas], with the
   /// given rows and columns.
   ///
@@ -268,6 +422,25 @@ class TableBorder {
   /// single value, 100.0, which is the vertical position between the two
   /// columns (relative to the left edge of `rect`).
   ///
+  /// The [rowTops] list contains the absolute y-position of the top edge of
+  /// each row (plus a final entry for the bottom of the last row). Row heights
+  /// are derived from consecutive differences and never cached separately.
+  ///
+  /// The optional [colSpanHiddenCells] and [rowSpanHiddenCells] are flat
+  /// bitmaps in **logical** row-major order (`bit = y * tableColumns + x`).
+  ///
+  ///  * [colSpanHiddenCells] – a set bit means logical cell (x, y) is covered
+  ///    by a **horizontal** (colSpan) span.  Vertical inner borders that fall
+  ///    inside such a span are skipped.
+  ///  * [rowSpanHiddenCells] – a set bit means logical cell (x, y) is covered
+  ///    by a **vertical** (rowSpan) span.  Horizontal inner borders that fall
+  ///    inside such a span are skipped.
+  ///
+  /// Cells at the corner of a rectangular span have their bit set in **both**
+  /// bitmaps.  When both parameters are null, no borders are skipped.
+  /// Pass [textDirection] so the bitmaps can be interpreted correctly for RTL
+  /// tables.
+  ///
   /// The [verticalInside] border is only drawn if there are at least two
   /// columns. The [horizontalInside] border is only drawn if there are at least
   /// two rows. The horizontal borders are drawn after the vertical borders.
@@ -275,61 +448,58 @@ class TableBorder {
   /// The outer borders (in the order [top], [right], [bottom], [left], with
   /// [left] above the others) are painted after the inner borders.
   ///
-  /// The paint order is particularly notable in the case of
+  /// The paint order is particularly relevant when using
   /// partially-transparent borders.
   void paint(
     Canvas canvas,
     Rect rect, {
     required Iterable<double> rows,
     required Iterable<double> columns,
+    required List<double> rowTops,
+    Uint8List? colSpanHiddenCells,
+    Uint8List? rowSpanHiddenCells,
+    TextDirection textDirection = TextDirection.ltr,
   }) {
-    // properties can't be null
-
-    // arguments can't be null
+    // Validate row and column offsets are within the table's bounds.
     assert(rows.isEmpty || (rows.first >= 0.0 && rows.last <= rect.height));
     assert(columns.isEmpty || (columns.first >= 0.0 && columns.last <= rect.width));
 
-    if (columns.isNotEmpty || rows.isNotEmpty) {
-      final paint = Paint();
-      final path = Path();
+    final paint = Paint();
+    final path = Path();
+    final List<double> columnList = columns.toList();
 
-      if (columns.isNotEmpty) {
-        switch (verticalInside.style) {
-          case BorderStyle.solid:
-            paint
-              ..color = verticalInside.color
-              ..strokeWidth = verticalInside.width
-              ..style = PaintingStyle.stroke;
-            path.reset();
-            for (final x in columns) {
-              path.moveTo(rect.left + x, rect.top);
-              path.lineTo(rect.left + x, rect.bottom);
-            }
-            canvas.drawPath(path, paint);
-          case BorderStyle.none:
-            break;
-        }
-      }
-
-      if (rows.isNotEmpty) {
-        switch (horizontalInside.style) {
-          case BorderStyle.solid:
-            paint
-              ..color = horizontalInside.color
-              ..strokeWidth = horizontalInside.width
-              ..style = PaintingStyle.stroke;
-            path.reset();
-            for (final y in rows) {
-              path.moveTo(rect.left, rect.top + y);
-              path.lineTo(rect.right, rect.top + y);
-            }
-            canvas.drawPath(path, paint);
-          case BorderStyle.none:
-            break;
-        }
-      }
+    if (colSpanHiddenCells != null || rowSpanHiddenCells != null) {
+      final int tableColumns = columnList.length + 1;
+      final bool isRTL = textDirection == TextDirection.rtl;
+      final List<double> rowList = rows.toList();
+      _paintHorizontalDividersWithSpans(
+        canvas,
+        rect,
+        rowList,
+        columnList,
+        rowSpanHiddenCells ?? Uint8List(0),
+        tableColumns,
+        isRTL,
+        paint,
+        path,
+      );
+      _paintVerticalDividersWithSpans(
+        canvas,
+        rect,
+        columnList,
+        rowTops,
+        colSpanHiddenCells ?? Uint8List(0),
+        tableColumns,
+        isRTL,
+        paint,
+        path,
+      );
+    } else {
+      _paintHorizontalDividersUnspanned(canvas, rect, rows, paint, path);
+      _paintVerticalDividersUnspanned(canvas, rect, columns, paint, path);
     }
 
+    // Paint the outer border of the table.
     _paintTableBorder(canvas, rect);
   }
 
