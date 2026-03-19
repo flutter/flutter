@@ -155,7 +155,12 @@ class FakeDartDevelopmentServiceException implements DartDevelopmentServiceExcep
 class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice(super.device, {Stream<Uri>? vmServiceUris})
     : _vmServiceUris = vmServiceUris,
-      super(buildInfo: BuildInfo.debug, developmentShaderCompiler: const FakeShaderCompiler());
+      super(
+        generator: FakeResidentCompiler(),
+        targetPlatform: .unsupported,
+        buildInfo: BuildInfo.debug,
+        developmentShaderCompiler: const FakeShaderCompiler(),
+      );
 
   final Stream<Uri>? _vmServiceUris;
 
@@ -209,6 +214,9 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   Device? device;
+
+  @override
+  ApplicationPackage? package;
 
   @override
   Future<void> stopEchoingDeviceLog() async {}
@@ -277,6 +285,7 @@ class FakeDelegateFlutterDevice extends FlutterDevice {
     ResidentCompiler residentCompiler,
     this.fakeDevFS,
   ) : super(
+        targetPlatform: .unsupported,
         buildInfo: buildInfo,
         generator: residentCompiler,
         developmentShaderCompiler: const FakeShaderCompiler(),
@@ -360,6 +369,7 @@ class FakeDevice extends Fake implements Device {
     this.supportsHotRestart = true,
     this.supportsScreenshot = true,
     this.supportsFlutterExit = true,
+    this.name = 'FakeDevice',
   }) : _isLocalEmulator = isLocalEmulator,
        _targetPlatform = targetPlatform,
        _sdkNameAndVersion = sdkNameAndVersion;
@@ -367,6 +377,9 @@ class FakeDevice extends Fake implements Device {
   final bool _isLocalEmulator;
   final TargetPlatform _targetPlatform;
   final String _sdkNameAndVersion;
+
+  @override
+  String id = 'test-device-id';
 
   bool disposed = false;
   bool appStopped = false;
@@ -395,7 +408,7 @@ class FakeDevice extends Fake implements Device {
   Future<bool> get isLocalEmulator async => _isLocalEmulator;
 
   @override
-  String get name => 'FakeDevice';
+  String name;
 
   @override
   String get displayName => name;

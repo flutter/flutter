@@ -23,9 +23,6 @@ using PathCreator = std::function<fml::StatusOr<flutter::DlPath>()>;
 ///
 ///             This object is typically the entrypoint in the Impeller type
 ///             rendering subsystem.
-///
-/// A text frame should not be reused in multiple places within a single frame,
-/// as internally it is used as a cache for various glyph properties.
 class TextFrame {
  public:
   TextFrame();
@@ -49,7 +46,7 @@ class TextFrame {
   /// @brief      The conservative bounding box for this text frame.
   ///
   /// @return     The bounds rectangle. If there are no glyphs in this text
-  ///             frame and empty Rectangle is returned instead.
+  ///             frame an empty Rectangle is returned instead.
   ///
   Rect GetBounds() const;
 
@@ -68,26 +65,22 @@ class TextFrame {
   const std::vector<TextRun>& GetRuns() const;
 
   //----------------------------------------------------------------------------
-  /// @brief      Returns the paint color this text frame was recorded with.
+  /// @brief      Returns whether any glyph in any run in this TextFrame
+  ///             is colored and so would be cached with color already
+  ///             baked in to the colored glyph.
   ///
-  ///             Non-bitmap/COLR fonts always use a black text color here, but
+  ///             Non-bitmap/COLR fonts only store an alpha bitmap, but
   ///             COLR fonts can potentially use the paint color in the glyph
-  ///             atlas, so this color must be considered as part of the cache
-  ///             key.
+  ///             atlas, so the color the text is being rendered with must
+  ///             be considered as part of the cache key.
   bool HasColor() const;
 
   //----------------------------------------------------------------------------
   /// @brief      The type of atlas this run should be place in.
-  GlyphAtlas::Type GetAtlasType() const;
-
-  /// @brief Verifies that all glyphs in this text frame have computed bounds
-  ///        information.
-  bool IsFrameComplete() const;
-
-  /// @brief Retrieve the frame bounds for the glyph at [index].
   ///
-  /// This method is only valid if [IsFrameComplete] returns true.
-  const FrameBounds& GetFrameBounds(size_t index) const;
+  ///             This return value depends primarily on the HasColor
+  ///             property.
+  GlyphAtlas::Type GetAtlasType() const;
 
   /// @brief If this text frame contains a single glyph (such as for an Icon),
   ///        then return it, otherwise std::nullopt.
@@ -96,55 +89,13 @@ class TextFrame {
   /// @brief Return the font of the first glyph run.
   const Font& GetFont() const;
 
-  /// @brief Store text frame scale, offset, and properties for hashing in th
-  /// glyph atlas.
-  void SetPerFrameData(Rational scale,
-                       Point offset,
-                       const Matrix& transform,
-                       std::optional<GlyphProperties> properties);
-
-  // A generation id for the glyph atlas this text run was associated
-  // with. As long as the frame generation matches the atlas generation,
-  // the contents are guaranteed to be populated and do not need to be
-  // processed.
-  std::pair<size_t, intptr_t> GetAtlasGenerationAndID() const;
-
-  Rational GetScale() const;
-
-  const Matrix& GetTransform() const { return transform_; }
-
   fml::StatusOr<flutter::DlPath> GetPath() const;
 
-  Point GetOffset() const;
-
-  Matrix GetOffsetTransform() const;
-
  private:
-  friend class TypographerContextSkia;
-  friend class LazyGlyphAtlas;
-
-  std::optional<GlyphProperties> GetProperties() const;
-
-  void AppendFrameBounds(const FrameBounds& frame_bounds);
-
-  void ClearFrameBounds();
-
-  void SetAtlasGeneration(size_t value, intptr_t atlas_id);
-
   std::vector<TextRun> runs_;
   Rect bounds_;
   bool has_color_;
   const PathCreator path_creator_;
-
-  // Data that is cached when rendering the text frame and is only
-  // valid for the current atlas generation.
-  std::vector<FrameBounds> bound_values_;
-  Rational scale_ = Rational(0, 1);
-  size_t generation_ = 0;
-  intptr_t atlas_id_ = 0;
-  Point offset_;
-  std::optional<GlyphProperties> properties_;
-  Matrix transform_;
 };
 
 }  // namespace impeller

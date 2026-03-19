@@ -4048,7 +4048,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required bool? readOnly,
     required bool? focusable,
     required bool? focused,
-    required AccessiblityFocusBlockType? accessiblityFocusBlockType,
+    required AccessibilityFocusBlockType? accessibilityFocusBlockType,
     required bool? inMutuallyExclusiveGroup,
     required bool? obscured,
     required bool? multiline,
@@ -4136,7 +4136,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
            readOnly: readOnly,
            focusable: focusable,
            focused: focused,
-           accessiblityFocusBlockType: accessiblityFocusBlockType,
+           accessibilityFocusBlockType: accessibilityFocusBlockType,
            inMutuallyExclusiveGroup: inMutuallyExclusiveGroup,
            obscured: obscured,
            multiline: multiline,
@@ -4223,6 +4223,9 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
   /// If [container] is true, this widget will introduce a new
   /// node in the semantics tree. Otherwise, the semantics will be
   /// merged with the semantics of any ancestors (if the ancestor allows that).
+  ///
+  /// Setting [SemanticsProperties.identifier] also implicitly introduces a new
+  /// node, even if [container] is false.
   ///
   /// Whether descendants of this widget can add their semantic information to the
   /// [SemanticsNode] introduced by this configuration is controlled by
@@ -4384,7 +4387,7 @@ class SliverSemantics extends _SemanticsBase {
     super.readOnly,
     super.focusable,
     super.focused,
-    super.accessiblityFocusBlockType,
+    super.accessibilityFocusBlockType,
     super.inMutuallyExclusiveGroup,
     super.obscured,
     super.multiline,
@@ -7969,7 +7972,7 @@ class Semantics extends _SemanticsBase {
     super.readOnly,
     super.focusable,
     super.focused,
-    super.accessiblityFocusBlockType,
+    super.accessibilityFocusBlockType,
     super.inMutuallyExclusiveGroup,
     super.obscured,
     super.multiline,

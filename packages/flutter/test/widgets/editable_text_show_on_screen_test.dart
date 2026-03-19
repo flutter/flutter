@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/foundation/constants.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'editable_text_tester.dart';
+import 'widgets_app_tester.dart';
 
 class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   _TestSliverPersistentHeaderDelegate({
@@ -41,6 +44,9 @@ class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate
 void main() {
   const textStyle = TextStyle();
   const cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
+  const kGreyColor = Color(0xFFAAAAAA);
+  const kRedColor = Color(0xFFFF0000);
+  const kGreenColor = Color(0xFF00FF00);
 
   late TextEditingController controller;
   late FocusNode focusNode;
@@ -62,7 +68,7 @@ void main() {
     addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Center(
           child: SizedBox(
             height: 300.0,
@@ -70,7 +76,7 @@ void main() {
               controller: scrollController,
               children: <Widget>[
                 EditableText(
-                  backgroundCursorColor: Colors.grey,
+                  backgroundCursorColor: kGreyColor,
                   controller: controller,
                   focusNode: focusNode,
                   style: textStyle,
@@ -102,7 +108,7 @@ void main() {
     addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Center(
           child: SizedBox(
             height: 300.0,
@@ -111,7 +117,7 @@ void main() {
               children: <Widget>[
                 const SizedBox(height: 200.0),
                 EditableText(
-                  backgroundCursorColor: Colors.grey,
+                  backgroundCursorColor: kGreyColor,
                   scrollPadding: const EdgeInsets.all(50.0),
                   controller: controller,
                   focusNode: focusNode,
@@ -147,7 +153,7 @@ void main() {
     addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Center(
           child: SizedBox(
             height: 300.0,
@@ -156,7 +162,7 @@ void main() {
               children: <Widget>[
                 const SizedBox(height: 350.0),
                 EditableText(
-                  backgroundCursorColor: Colors.grey,
+                  backgroundCursorColor: kGreyColor,
                   controller: controller,
                   focusNode: focusNode,
                   style: textStyle,
@@ -194,7 +200,7 @@ void main() {
     addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Center(
           child: SizedBox(
             height: 300.0,
@@ -204,7 +210,7 @@ void main() {
               children: <Widget>[
                 const SizedBox(height: 350.0),
                 EditableText(
-                  backgroundCursorColor: Colors.grey,
+                  backgroundCursorColor: kGreyColor,
                   controller: controller,
                   focusNode: focusNode,
                   style: textStyle,
@@ -240,23 +246,21 @@ void main() {
     addTearDown(pageController.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: MediaQuery(
           data: const MediaQueryData(),
           child: Directionality(
             textDirection: TextDirection.ltr,
-            child: Material(
-              child: PageView(
-                controller: pageController,
-                children: <Widget>[
-                  Container(color: Colors.red),
-                  ColoredBox(
-                    color: Colors.green,
-                    child: TextField(controller: controller),
-                  ),
-                  Container(color: Colors.red),
-                ],
-              ),
+            child: PageView(
+              controller: pageController,
+              children: <Widget>[
+                Container(color: kRedColor),
+                ColoredBox(
+                  color: kGreenColor,
+                  child: TestTextField(controller: controller),
+                ),
+                Container(color: kRedColor),
+              ],
             ),
           ),
         ),
@@ -284,7 +288,7 @@ void main() {
     controller.text = "Start${'\n' * 39}End";
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Center(
           child: SizedBox(
             height: 300.0,
@@ -292,7 +296,7 @@ void main() {
               controller: scrollController,
               children: <Widget>[
                 EditableText(
-                  backgroundCursorColor: Colors.grey,
+                  backgroundCursorColor: kGreyColor,
                   maxLines: null, // multiline
                   controller: controller,
                   focusNode: focusNode,
@@ -343,7 +347,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: Center(
             child: SizedBox(
               height: 300.0,
@@ -351,7 +355,7 @@ void main() {
                 controller: scrollController,
                 children: <Widget>[
                   EditableText(
-                    backgroundCursorColor: Colors.grey,
+                    backgroundCursorColor: kGreyColor,
                     maxLines: null, // multiline
                     controller: controller,
                     focusNode: focusNode,
@@ -400,7 +404,7 @@ void main() {
     const container = Key('container');
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Align(
           alignment: Alignment.bottomCenter,
           child: SizedBox(
@@ -410,7 +414,7 @@ void main() {
               children: <Widget>[
                 const SizedBox(key: container, height: 200.0),
                 EditableText(
-                  backgroundCursorColor: Colors.grey,
+                  backgroundCursorColor: kGreyColor,
                   scrollPadding: const EdgeInsets.only(bottom: 300.0),
                   controller: controller,
                   focusNode: focusNode,
@@ -442,11 +446,10 @@ void main() {
       const headerKey = Key('header');
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: Center(
-            child: SizedBox(
-              height: 600.0,
-              width: 600.0,
+            child: SizedBox.square(
+              dimension: 600.0,
               child: CustomScrollView(
                 controller: scrollController,
                 slivers: List<Widget>.generate(50, (int i) {
@@ -460,7 +463,7 @@ void main() {
                               alignment: Alignment.topCenter,
                               child: EditableText(
                                 key: headerKey,
-                                backgroundCursorColor: Colors.grey,
+                                backgroundCursorColor: kGreyColor,
                                 controller: controller,
                                 focusNode: focusNode,
                                 style: textStyle,
@@ -498,11 +501,10 @@ void main() {
 
       const headerKey = Key('header');
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: Center(
-            child: SizedBox(
-              height: 600.0,
-              width: 600.0,
+            child: SizedBox.square(
+              dimension: 600.0,
               child: CustomScrollView(
                 controller: scrollController,
                 slivers: List<Widget>.generate(50, (int i) {
@@ -517,7 +519,7 @@ void main() {
                               alignment: Alignment.topCenter,
                               child: EditableText(
                                 key: headerKey,
-                                backgroundCursorColor: Colors.grey,
+                                backgroundCursorColor: kGreyColor,
                                 controller: controller,
                                 focusNode: focusNode,
                                 style: textStyle,
@@ -570,28 +572,26 @@ void main() {
         ScrollController? scrollController,
         ScrollController? editableScrollController,
       }) {
-        return MaterialApp(
-          home: Scaffold(
-            body: ListView(
-              controller: scrollController,
-              cacheExtent: 1000,
-              children: <Widget>[
-                // The text field is not fully visible.
-                const SizedBox(height: 599),
-                EditableText(
-                  backgroundCursorColor: Colors.grey,
-                  controller: controller,
-                  scrollController: editableScrollController,
-                  inputFormatters: <TextInputFormatter>[
-                    if (rejectUserInputs) rejectEverythingFormatter,
-                  ],
-                  focusNode: focusNode,
-                  style: textStyle,
-                  cursorColor: cursorColor,
-                  readOnly: readOnly,
-                ),
-              ],
-            ),
+        return TestWidgetsApp(
+          home: ListView(
+            controller: scrollController,
+            cacheExtent: 1000,
+            children: <Widget>[
+              // The text field is not fully visible.
+              const SizedBox(height: 599),
+              EditableText(
+                backgroundCursorColor: kGreyColor,
+                controller: controller,
+                scrollController: editableScrollController,
+                inputFormatters: <TextInputFormatter>[
+                  if (rejectUserInputs) rejectEverythingFormatter,
+                ],
+                focusNode: focusNode,
+                style: textStyle,
+                cursorColor: cursorColor,
+                readOnly: readOnly,
+              ),
+            ],
           ),
         );
       }
@@ -770,16 +770,14 @@ void main() {
         EditableText.debugDeterministicCursor = false;
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: EditableText(
-                backgroundCursorColor: Colors.grey,
-                controller: controller,
-                scrollController: editableScrollController,
-                focusNode: focusNode,
-                style: textStyle,
-                cursorColor: cursorColor,
-              ),
+          TestWidgetsApp(
+            home: EditableText(
+              backgroundCursorColor: kGreyColor,
+              controller: controller,
+              scrollController: editableScrollController,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
             ),
           ),
         );

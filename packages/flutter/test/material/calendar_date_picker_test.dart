@@ -540,6 +540,79 @@ void main() {
       );
     });
 
+    testWidgets('Non-null todayBorder color should be respected over foreground color', (
+      WidgetTester tester,
+    ) async {
+      const Color customBorderColor = Colors.red;
+      await tester.pumpWidget(
+        calendarDatePicker(
+          initialDate: DateTime(2016, 1, 15),
+          currentDate: DateTime(2016, 1, 2),
+          theme: ThemeData(
+            datePickerTheme: DatePickerThemeData(
+              todayBorder: const BorderSide(color: customBorderColor),
+              todayForegroundColor: WidgetStateProperty.all(Colors.blue),
+            ),
+          ),
+        ),
+      );
+      expect(
+        Material.of(tester.element(find.text('2'))),
+        // The current day should be painted with the custom border color.
+        paints..circle(color: customBorderColor, style: PaintingStyle.stroke, strokeWidth: 1.0),
+      );
+    });
+
+    testWidgets('Non-null todayBorder color is used even when disabled', (
+      WidgetTester tester,
+    ) async {
+      const Color customBorderColor = Colors.red;
+      await tester.pumpWidget(
+        calendarDatePicker(
+          firstDate: DateTime(2016, 1, 3),
+          lastDate: DateTime(2016, 1, 31),
+          currentDate: DateTime(2016, 1, 2), // not between first and last
+          initialDate: DateTime(2016, 1, 5),
+          theme: ThemeData(
+            datePickerTheme: DatePickerThemeData(
+              todayBorder: const BorderSide(color: customBorderColor),
+              todayForegroundColor: WidgetStateProperty.all(Colors.blue),
+            ),
+          ),
+        ),
+      );
+      expect(
+        Material.of(tester.element(find.text('2'))),
+        // The current day should be painted with the custom border color,
+        // not with foreground color opacity applied, even it's disabled day.
+        paints..circle(color: customBorderColor, style: PaintingStyle.stroke, strokeWidth: 1.0),
+      );
+    });
+
+    testWidgets('Transparent todayBorder should fall back to foreground color', (
+      WidgetTester tester,
+    ) async {
+      const Color customForegroundColor = Colors.green;
+      await tester.pumpWidget(
+        calendarDatePicker(
+          initialDate: DateTime(2016, 1, 15),
+          currentDate: DateTime(2016, 1, 2),
+          theme: ThemeData(
+            datePickerTheme: DatePickerThemeData(
+              todayBorder: const BorderSide(color: Color(0x00000000)),
+              todayForegroundColor: WidgetStateProperty.all(customForegroundColor),
+            ),
+          ),
+        ),
+      );
+      expect(
+        Material.of(tester.element(find.text('2'))),
+        // The current day should use the foreground color since
+        // todayBorder color is transparent.
+        paints..circle(color: customForegroundColor, style: PaintingStyle.stroke, strokeWidth: 1.0),
+      );
+    });
+
     testWidgets('Selecting date does not switch picker to year selection', (
       WidgetTester tester,
     ) async {
@@ -1635,6 +1708,221 @@ void main() {
       expect((outerMaterial as dynamic).debugInkFeatures, isNull);
       expect((innerMaterial as dynamic).debugInkFeatures, hasLength(31));
     });
+  });
+
+  group('when supportsAnnounce is true, check announcement', () {
+    testWidgets('Initial date announcement', (WidgetTester tester) async {
+      final SemanticsHandle semantics = tester.ensureSemantics();
+      const localizations = DefaultMaterialLocalizations();
+      final initialDate = DateTime(2016, DateTime.january, 15);
+      final String expectedLabel = localizations.formatFullDate(initialDate);
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(supportsAnnounce: true),
+          child: calendarDatePicker(initialDate: initialDate),
+        ),
+      );
+
+      expect(tester.takeAnnouncements(), [
+        isAccessibilityAnnouncement(expectedLabel, textDirection: TextDirection.ltr),
+      ]);
+
+      semantics.dispose();
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+    testWidgets(
+      'Month navigation announcement on Android',
+      (WidgetTester tester) async {
+        final SemanticsHandle semantics = tester.ensureSemantics();
+        final initialDate = DateTime(2016, DateTime.january, 15);
+
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(supportsAnnounce: true),
+            child: calendarDatePicker(initialDate: initialDate),
+          ),
+        );
+
+        // Clear any initial announcements.
+        tester.takeAnnouncements();
+
+        // Tap next month.
+        await tester.tap(nextMonthIcon);
+        await tester.pumpAndSettle();
+
+        const expectedLabel = 'February 2016';
+        expect(tester.takeAnnouncements(), [
+          isAccessibilityAnnouncement(expectedLabel, textDirection: TextDirection.ltr),
+        ]);
+
+        semantics.dispose();
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
+
+    testWidgets(
+      'Mode toggle announcement on Android',
+      (WidgetTester tester) async {
+        final SemanticsHandle semantics = tester.ensureSemantics();
+        final initialDate = DateTime(2016, DateTime.january, 15);
+
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(supportsAnnounce: true),
+            child: calendarDatePicker(initialDate: initialDate),
+          ),
+        );
+
+        // Clear any initial announcements.
+        tester.takeAnnouncements();
+
+        // Switch to year mode.
+        final Finder modeToggleButton = find.byWidgetPredicate(
+          (Widget widget) => widget.runtimeType.toString() == '_DatePickerModeToggleButton',
+        );
+        await tester.tap(modeToggleButton);
+        await tester.pumpAndSettle();
+
+        const yearLabel = '2016';
+        expect(tester.takeAnnouncements(), [
+          isAccessibilityAnnouncement(yearLabel, textDirection: TextDirection.ltr),
+        ]);
+
+        // Switch back to day mode.
+        await tester.tap(modeToggleButton);
+        await tester.pumpAndSettle();
+
+        const dayLabel = 'January 2016';
+        expect(tester.takeAnnouncements(), [
+          isAccessibilityAnnouncement(dayLabel, textDirection: TextDirection.ltr),
+        ]);
+
+        semantics.dispose();
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
+  });
+
+  group('when supportsAnnounce is false, use live region to announce', () {
+    testWidgets('Initial date announcement', (WidgetTester tester) async {
+      final SemanticsHandle semantics = tester.ensureSemantics();
+      const localizations = DefaultMaterialLocalizations();
+      final initialDate = DateTime(2016, DateTime.january, 15);
+      final String expectedLabel = localizations.formatFullDate(initialDate);
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: calendarDatePicker(initialDate: initialDate),
+        ),
+      );
+
+      // Verify that the live region exists and has the correct label.
+      final Finder liveRegionFinder = find.byWidgetPredicate(
+        (Widget widget) =>
+            widget is Semantics &&
+            widget.properties.label == expectedLabel &&
+            (widget.properties.liveRegion ?? false),
+      );
+      expect(
+        tester.getSemantics(liveRegionFinder),
+        matchesSemantics(label: expectedLabel, isLiveRegion: true),
+      );
+
+      semantics.dispose();
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+    testWidgets(
+      'Month navigation announcement on Android',
+      (WidgetTester tester) async {
+        final SemanticsHandle semantics = tester.ensureSemantics();
+        final initialDate = DateTime(2016, DateTime.january, 15);
+
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(),
+            child: calendarDatePicker(initialDate: initialDate),
+          ),
+        );
+
+        // Tap next month.
+        await tester.tap(nextMonthIcon);
+        await tester.pumpAndSettle();
+
+        // The _MonthPicker live region should be updated.
+        // Verify that the live region exists and has the correct label.
+        const expectedLabel = 'February 2016';
+        final Finder liveRegionFinder = find.byWidgetPredicate(
+          (Widget widget) =>
+              widget is Semantics &&
+              widget.properties.label == expectedLabel &&
+              (widget.properties.liveRegion ?? false),
+        );
+        expect(
+          tester.getSemantics(liveRegionFinder),
+          matchesSemantics(label: expectedLabel, isLiveRegion: true),
+        );
+
+        semantics.dispose();
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
+
+    testWidgets(
+      'Mode toggle announcement on Android',
+      (WidgetTester tester) async {
+        final SemanticsHandle semantics = tester.ensureSemantics();
+        final initialDate = DateTime(2016, DateTime.january, 15);
+
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(),
+            child: calendarDatePicker(initialDate: initialDate),
+          ),
+        );
+
+        // Switch to year mode.
+        final Finder modeToggleButton = find.byWidgetPredicate(
+          (Widget widget) => widget.runtimeType.toString() == '_DatePickerModeToggleButton',
+        );
+        await tester.tap(modeToggleButton);
+        await tester.pumpAndSettle();
+
+        // Verify that the live region exists and has the correct label.
+        const yearLabel = '2016';
+        final Finder yearLiveRegionFinder = find.byWidgetPredicate(
+          (Widget widget) =>
+              widget is Semantics &&
+              widget.properties.label == yearLabel &&
+              (widget.properties.liveRegion ?? false),
+        );
+        expect(
+          tester.getSemantics(yearLiveRegionFinder),
+          matchesSemantics(label: yearLabel, isLiveRegion: true),
+        );
+
+        // Switch back to day mode.
+        await tester.tap(modeToggleButton);
+        await tester.pumpAndSettle();
+
+        // Verify that the live region exists and has the correct label.
+        const dayLabel = 'January 2016';
+        final Finder dayLiveRegionFinder = find.byWidgetPredicate(
+          (Widget widget) =>
+              widget is Semantics &&
+              widget.properties.label == dayLabel &&
+              (widget.properties.liveRegion ?? false),
+        );
+        expect(
+          tester.getSemantics(dayLiveRegionFinder),
+          matchesSemantics(label: dayLabel, isLiveRegion: true),
+        );
+
+        semantics.dispose();
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
   });
 
   group('YearPicker', () {

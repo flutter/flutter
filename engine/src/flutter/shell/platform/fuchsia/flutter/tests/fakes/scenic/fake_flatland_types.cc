@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "fake_flatland_types.h"
+#include "flutter/shell/platform/fuchsia/flutter/tests/fakes/scenic/fake_flatland_types.h"
 
 #include <lib/fidl/cpp/clone.h>
 #include <lib/zx/channel.h>

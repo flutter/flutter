@@ -38,7 +38,7 @@ size_t DlRuntimeEffectImpeller::uniform_size() const {
 
   size_t total = 0;
   for (const auto& uniform : runtime_stage_->GetUniforms()) {
-    total += uniform.GetSize();
+    total += uniform.GetGPUSize();
   }
   return total;
 }

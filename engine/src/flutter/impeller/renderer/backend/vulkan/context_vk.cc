@@ -141,6 +141,10 @@ Context::BackendType ContextVK::GetBackendType() const {
   return Context::BackendType::kVulkan;
 }
 
+/* version 2.0.0 */
+static constexpr uint32_t kImpellerEngineVersion =
+    VK_MAKE_API_VERSION(0, 2, 0, 0);
+
 void ContextVK::Setup(Settings settings) {
   TRACE_EVENT0("impeller", "ContextVK::Setup");
 
@@ -206,19 +210,18 @@ void ContextVK::Setup(Settings settings) {
 
   vk::ApplicationInfo application_info;
 
-  // Use the same encoding macro as vulkan versions, but otherwise application
+  // Use the same encoding macro as vulkan versions, but otherwise engine
   // version is intended to be the version of the Impeller engine. This version
   // information, along with the application name below is provided to allow
   // IHVs to make optimizations and/or disable functionality based on knowledge
   // of the engine version (for example, to work around bugs). We don't tie this
   // to the overall Flutter version as that version is not yet defined when the
-  // engine is compiled. Instead we can manually bump it occassionally.
+  // engine is compiled. Instead we can manually bump it occasionally.
   //
   // variant, major, minor, patch
-  application_info.setApplicationVersion(
-      VK_MAKE_API_VERSION(0, 2, 0, 0) /*version 2.0.0*/);
+  application_info.setApplicationVersion(VK_API_VERSION_1_0);
   application_info.setApiVersion(VK_API_VERSION_1_1);
-  application_info.setEngineVersion(VK_API_VERSION_1_0);
+  application_info.setEngineVersion(kImpellerEngineVersion);
   application_info.setPEngineName("Impeller");
   application_info.setPApplicationName("Impeller");
 

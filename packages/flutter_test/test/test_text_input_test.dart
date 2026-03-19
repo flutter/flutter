@@ -116,6 +116,7 @@ void main() {
         final client = _PerformSelectorInputClient();
 
         final focusNode = FocusNode();
+        addTearDown(focusNode.dispose);
 
         await tester.pumpWidget(
           Directionality(

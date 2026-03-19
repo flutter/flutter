@@ -76,12 +76,18 @@ void main() {
             .childFile('Package.swift');
         expect(generatedSwiftPackage, isNot(exists));
 
+        // Create a plugin and convert it to legacy CocoaPods structure to simulate
+        // a plugin created before SwiftPM was introduced.
         final SwiftPackageManagerPlugin createdCocoaPodsPlugin =
             await SwiftPackageManagerUtils.createPlugin(
               flutterBin,
               workingDirectoryPath,
               platform: platformName,
             );
+        SwiftPackageManagerUtils.convertToLegacyCocoaPodsPlugin(
+          createdCocoaPodsPlugin,
+          platform: platformName,
+        );
 
         // Rebuild app with Swift Package Manager enabled, migrating the app and using the Swift Package Manager version of
         // integration_test.
@@ -101,15 +107,19 @@ void main() {
             .childDirectory(createdSwiftPMPlugin.pluginName)
             .childFile('Package.swift');
         final String manifestContents = swiftPMPluginPackageManifest.readAsStringSync();
+        const flutterFrameworkPackageDep =
+            '.package(name: "FlutterFramework", path: "../FlutterFramework")';
+        const flutterFrameworkTargetDep =
+            '.product(name: "FlutterFramework", package: "FlutterFramework")';
         swiftPMPluginPackageManifest.writeAsStringSync(
           manifestContents
               .replaceFirst(
-                'dependencies: []',
-                'dependencies: [.package(name: "${integrationTestPlugin.pluginName}", path: "../${integrationTestPlugin.pluginName}")]',
+                flutterFrameworkPackageDep,
+                '$flutterFrameworkPackageDep,\n.package(name: "${integrationTestPlugin.pluginName}", path: "../${integrationTestPlugin.pluginName}")',
               )
               .replaceFirst(
-                'dependencies: []',
-                'dependencies: [.product(name: "${integrationTestPlugin.pluginName.replaceAll('_', '-')}", package: "${integrationTestPlugin.pluginName}")]',
+                flutterFrameworkTargetDep,
+                '$flutterFrameworkTargetDep,\n.product(name: "${integrationTestPlugin.pluginName.replaceAll('_', '-')}", package: "${integrationTestPlugin.pluginName}")',
               ),
         );
         final File swiftPMPluginPodspec = fileSystem
@@ -304,7 +314,13 @@ void main() {
       await SwiftPackageManagerUtils.buildApp(
         flutterBin,
         appDirectoryPath,
-        options: <String>['$platformName-framework', '--no-debug', '--no-profile', '-v'],
+        options: <String>[
+          '$platformName-framework',
+          '--no-debug',
+          '--no-profile',
+          '--no-codesign',
+          '-v',
+        ],
         expectedLines: <String>[
           'Swift Package Manager does not yet support this command. CocoaPods will be used instead.',
         ],
@@ -382,9 +398,8 @@ void main() {
             '-dXcodeBuildScript=prepare',
             '$unpackTarget: Starting due to',
             '-dXcodeBuildScript=build',
-            'Skipping target: $unpackTarget',
           ],
-          unexpectedLines: <String>[],
+          unexpectedLines: <String>['Skipping target: $unpackTarget'],
         );
 
         await SwiftPackageManagerUtils.buildApp(
@@ -475,7 +490,7 @@ void main() {
     await SwiftPackageManagerUtils.buildApp(
       flutterBin,
       appDirectoryPath,
-      options: <String>['ios-framework', '--no-debug', '--no-profile', '-v'],
+      options: <String>['ios-framework', '--no-debug', '--no-profile', '--no-codesign', '-v'],
       unexpectedLines: <String>[
         'Adding Swift Package Manager integration...',
         'Swift Package Manager does not yet support this command. CocoaPods will be used instead.',
@@ -528,7 +543,14 @@ void main() {
     await SwiftPackageManagerUtils.buildApp(
       flutterBin,
       appDirectoryPath,
-      options: <String>['ios-framework', '--xcframework', '--no-debug', '--no-profile', '-v'],
+      options: <String>[
+        'ios-framework',
+        '--xcframework',
+        '--no-debug',
+        '--no-profile',
+        '--no-codesign',
+        '-v',
+      ],
       expectedLines: <String>[
         'Swift Package Manager does not yet support this command. CocoaPods will be used instead.',
       ],

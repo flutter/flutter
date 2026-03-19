@@ -834,9 +834,8 @@ void main() {
     Widget buildMenuAnchor({EdgeInsets? expandedInsets}) {
       return MaterialApp(
         home: Scaffold(
-          body: SizedBox(
-            width: parentWidth,
-            height: parentWidth,
+          body: SizedBox.square(
+            dimension: parentWidth,
             child: DropdownMenu<ShortMenu>(
               expandedInsets: expandedInsets,
               dropdownMenuEntries: shortMenuItems,
@@ -902,9 +901,8 @@ void main() {
     Widget buildMenuAnchor({EdgeInsetsGeometry? expandedInsets}) {
       return MaterialApp(
         home: Scaffold(
-          body: SizedBox(
-            width: parentWidth,
-            height: parentWidth,
+          body: SizedBox.square(
+            dimension: parentWidth,
             child: DropdownMenu<ShortMenu>(
               expandedInsets: expandedInsets,
               dropdownMenuEntries: shortMenuItems,
@@ -5333,6 +5331,49 @@ void main() {
       shouldFocusPrevious: textInputAction == TextInputAction.previous,
     );
   }, variant: focusVariants);
+
+  // Regression test for https://github.com/flutter/flutter/issues/180121.
+  testWidgets('Allow null entry to clear selection', (WidgetTester tester) async {
+    final controller = TextEditingController();
+    addTearDown(controller.dispose);
+
+    const selectNoneLabel = 'Select none';
+    final nullableMenuItems = <DropdownMenuEntry<String?>>[
+      const DropdownMenuEntry<String?>(value: null, label: selectNoneLabel),
+      const DropdownMenuEntry<String?>(value: 'a', label: 'A'),
+      const DropdownMenuEntry<String?>(value: 'b', label: 'B'),
+    ];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return DropdownMenu<String?>(
+                controller: controller,
+                requestFocusOnTap: true,
+                enableFilter: true,
+                dropdownMenuEntries: nullableMenuItems,
+                onSelected: (_) {
+                  setState(() {});
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Open the menu.
+    await tester.tap(find.byType(DropdownMenu<String?>));
+    await tester.pump();
+
+    // Select the 'None' item.
+    await tester.tap(findMenuItemButton(selectNoneLabel));
+    await tester.pumpAndSettle();
+
+    expect(controller.text, selectNoneLabel);
+  });
 }
 
 enum TestMenu {

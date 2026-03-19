@@ -50,6 +50,7 @@
 #include "lib/ui/semantics/semantics_node.h"
 #include "third_party/rapidjson/include/rapidjson/writer.h"
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
+#include "third_party/skia/include/gpu/ganesh/mock/GrMockTypes.h"
 #include "third_party/tonic/converter/dart_converter.h"
 
 #ifdef SHELL_ENABLE_VULKAN
@@ -1725,17 +1726,16 @@ TEST_F(ShellTest, MultipleFluttersSetResourceCacheBytes) {
       [task_runners, main_context](flutter::Shell& shell) {
         auto result = std::make_unique<TestPlatformView>(shell, task_runners);
         ON_CALL(*result, CreateRenderingSurface())
-            .WillByDefault(::testing::Invoke([main_context] {
+            .WillByDefault([main_context] {
               auto surface = std::make_unique<MockSurface>();
               ON_CALL(*surface, GetContext())
                   .WillByDefault(Return(main_context.get()));
               ON_CALL(*surface, IsValid()).WillByDefault(Return(true));
-              ON_CALL(*surface, MakeRenderContextCurrent())
-                  .WillByDefault(::testing::Invoke([] {
-                    return std::make_unique<GLContextDefaultResult>(true);
-                  }));
+              ON_CALL(*surface, MakeRenderContextCurrent()).WillByDefault([] {
+                return std::make_unique<GLContextDefaultResult>(true);
+              });
               return surface;
-            }));
+            });
         return result;
       };
 
@@ -3133,9 +3133,9 @@ TEST_F(ShellTest, Spawn) {
             [&platform_view_delegate](Shell& shell) {
               auto result = std::make_unique<MockPlatformView>(
                   platform_view_delegate, shell.GetTaskRunners());
-              ON_CALL(*result, CreateRenderingSurface())
-                  .WillByDefault(::testing::Invoke(
-                      [] { return std::make_unique<MockSurface>(); }));
+              ON_CALL(*result, CreateRenderingSurface()).WillByDefault([] {
+                return std::make_unique<MockSurface>();
+              });
               return result;
             },
             [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });
@@ -3245,9 +3245,9 @@ TEST_F(ShellTest, SpawnWithDartEntrypointArgs) {
             [&platform_view_delegate](Shell& shell) {
               auto result = std::make_unique<MockPlatformView>(
                   platform_view_delegate, shell.GetTaskRunners());
-              ON_CALL(*result, CreateRenderingSurface())
-                  .WillByDefault(::testing::Invoke(
-                      [] { return std::make_unique<MockSurface>(); }));
+              ON_CALL(*result, CreateRenderingSurface()).WillByDefault([] {
+                return std::make_unique<MockSurface>();
+              });
               return result;
             },
             [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });
@@ -3308,9 +3308,9 @@ TEST_F(ShellTest, IOManagerIsSharedBetweenParentAndSpawnedShell) {
         [&platform_view_delegate](Shell& shell) {
           auto result = std::make_unique<MockPlatformView>(
               platform_view_delegate, shell.GetTaskRunners());
-          ON_CALL(*result, CreateRenderingSurface())
-              .WillByDefault(::testing::Invoke(
-                  [] { return std::make_unique<MockSurface>(); }));
+          ON_CALL(*result, CreateRenderingSurface()).WillByDefault([] {
+            return std::make_unique<MockSurface>();
+          });
           return result;
         },
         [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });
@@ -3362,9 +3362,9 @@ TEST_F(ShellTest, IOManagerInSpawnedShellIsNotNullAfterParentShellDestroyed) {
         [&platform_view_delegate](Shell& shell) {
           auto result = std::make_unique<MockPlatformView>(
               platform_view_delegate, shell.GetTaskRunners());
-          ON_CALL(*result, CreateRenderingSurface())
-              .WillByDefault(::testing::Invoke(
-                  [] { return std::make_unique<MockSurface>(); }));
+          ON_CALL(*result, CreateRenderingSurface()).WillByDefault([] {
+            return std::make_unique<MockSurface>();
+          });
           return result;
         },
         [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });
@@ -3410,9 +3410,9 @@ TEST_F(ShellTest, ImageGeneratorRegistryNotNullAfterParentShellDestroyed) {
         [&platform_view_delegate](Shell& shell) {
           auto result = std::make_unique<MockPlatformView>(
               platform_view_delegate, shell.GetTaskRunners());
-          ON_CALL(*result, CreateRenderingSurface())
-              .WillByDefault(::testing::Invoke(
-                  [] { return std::make_unique<MockSurface>(); }));
+          ON_CALL(*result, CreateRenderingSurface()).WillByDefault([] {
+            return std::make_unique<MockSurface>();
+          });
           return result;
         },
         [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });
@@ -3903,10 +3903,9 @@ TEST_F(ShellTest, SpawnWorksWithOnError) {
               auto result =
                   std::make_unique<::testing::NiceMock<MockPlatformView>>(
                       platform_view_delegate, shell.GetTaskRunners());
-              ON_CALL(*result, CreateRenderingSurface())
-                  .WillByDefault(::testing::Invoke([] {
-                    return std::make_unique<::testing::NiceMock<MockSurface>>();
-                  }));
+              ON_CALL(*result, CreateRenderingSurface()).WillByDefault([] {
+                return std::make_unique<::testing::NiceMock<MockSurface>>();
+              });
               return result;
             },
             [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });
@@ -5077,7 +5076,11 @@ TEST_F(ShellTest, ShoulDiscardLayerTreeIfFrameIsSizedIncorrectly) {
                 {},    // p_physical_display_features_bounds,
                 {},    // p_physical_display_features_type,
                 {},    // p_physical_display_features_state,
-                0      // p_display_id
+                0,     // p_display_id
+                0,     // p_physical_display_corner_radius_top_left
+                0,     // p_physical_display_corner_radius_top_right
+                0,     // p_physical_display_corner_radius_bottom_right
+                0,     // p_physical_display_corner_radius_bottom_left
             });
       });
   PumpOneFrame(shell.get());

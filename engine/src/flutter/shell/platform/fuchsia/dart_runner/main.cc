@@ -5,20 +5,17 @@
 #include <lib/async-loop/cpp/loop.h>
 #include <lib/async-loop/default.h>
 #include <lib/inspect/component/cpp/component.h>
+#include <lib/syslog/cpp/log_settings.h>
 #include <lib/trace-provider/provider.h>
 #include <lib/trace/event.h>
 
-#include "dart_runner.h"
 #include "flutter/fml/logging.h"
-#include "flutter/fml/platform/fuchsia/log_interest_listener.h"
-#include "flutter/fml/platform/fuchsia/log_state.h"
-#include "flutter/fml/trace_event.h"
-#include "logging.h"
+#include "flutter/shell/platform/fuchsia/dart_runner/dart_runner.h"
+#include "flutter/shell/platform/fuchsia/dart_runner/logging.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/build_info.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/files.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/root_inspect_node.h"
 #include "platform/utils.h"
-#include "runtime/dart/utils/build_info.h"
-#include "runtime/dart/utils/files.h"
-#include "runtime/dart/utils/root_inspect_node.h"
-#include "runtime/dart/utils/tempfs.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 
 #if !defined(DART_PRODUCT)
@@ -38,11 +35,11 @@ static void RegisterProfilerSymbols(const char* symbols_path,
 int main(int argc, const char** argv) {
   async::Loop loop(&kAsyncLoopConfigAttachToCurrentThread);
 
-  // Setup logging.
-  fml::LogState::Default().SetTags({LOG_TAG});
-  fml::LogInterestListener listener(fml::LogState::Default().TakeClientEnd(),
-                                    loop.dispatcher());
-  listener.AsyncWaitForInterestChanged();
+  // Set up logging.
+  fuchsia_logging::LogSettingsBuilder()
+      .WithTags({LOG_TAG})
+      .WithDispatcher(loop.dispatcher())
+      .BuildAndInitialize();
 
   // Create our component context which is served later.
   auto context = sys::ComponentContext::Create();

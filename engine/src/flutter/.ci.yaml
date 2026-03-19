@@ -64,7 +64,7 @@ targets:
       config_name: linux_android_emulator
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
         ]
     timeout: 90
 
@@ -231,7 +231,7 @@ targets:
       config_name: linux_host_engine
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
         ]
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
@@ -272,7 +272,7 @@ targets:
       config_name: linux_host_engine_test
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
         ]
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
@@ -474,7 +474,7 @@ targets:
       config_name: mac_host_engine
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
         ]
       $flutter/osx_sdk : >-
         {
@@ -569,7 +569,7 @@ targets:
     drone_dimensions:
       - os=Windows
 
-  - name: Windows windows_arm_host_engine
+  - name: Linux windows_arm_host_engine
     recipe: engine_v2/engine_v2
     timeout: 120
     enabled_branches:
@@ -579,8 +579,10 @@ targets:
       release_build: "true"
       add_recipes_cq: "true"
       config_name: windows_arm_host_engine
+    # Do not remove(https://github.com/flutter/flutter/issues/144644)
+    # Scheduler will fail to get the platform
     drone_dimensions:
-      - os=Windows
+      - os=Linux
 
   - name: Windows windows_unopt
     recipe: engine_v2/builder
