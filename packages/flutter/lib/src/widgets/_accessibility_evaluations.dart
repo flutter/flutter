@@ -249,10 +249,8 @@ abstract class _ContrastEvaluation extends AccessibilityEvaluation {
 
       final double ratio = 1 / renderView.flutterView.devicePixelRatio;
       final ui.Image image = await layer.toImage(renderView.paintBounds, pixelRatio: ratio);
-      final ByteData? byteData = await image.toByteData();
-      if (byteData != null) {
-        violations.addAll(await _evaluateNode(root, image, byteData, renderView));
-      }
+      final ByteData byteData = (await image.toByteData())!;
+      violations.addAll(await _evaluateNode(root, image, byteData, renderView));
       image.dispose();
     }
 
@@ -523,7 +521,7 @@ class MinimumNonTextContrastEvaluation extends _ContrastEvaluation {
   /// The minimum contrast ratio for non-text controls.
   ///
   /// Defined by http://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html
-  static const double kMinimumRatioNonText = 3.0;
+  static const double _kMinimumRatioNonText = 3.0;
 
   @override
   bool _shouldSkipNodeEvaluation(SemanticsData data) {
@@ -590,7 +588,7 @@ class MinimumNonTextContrastEvaluation extends _ContrastEvaluation {
     final report = _ContrastReport(colorHistogram);
     final double contrastRatio = report.contrastRatio();
 
-    if (contrastRatio - kMinimumRatioNonText >= _ContrastEvaluation._kContrastTolerance) {
+    if (contrastRatio - _kMinimumRatioNonText >= _ContrastEvaluation._kContrastTolerance) {
       return violations;
     }
 
@@ -598,7 +596,7 @@ class MinimumNonTextContrastEvaluation extends _ContrastEvaluation {
       Violation(
         node,
         '$node:\n'
-        'Expected non-text control contrast ratio of at least $kMinimumRatioNonText '
+        'Expected non-text control contrast ratio of at least $_kMinimumRatioNonText '
         'but found ${contrastRatio.toStringAsFixed(2)}.\n'
         'The computed colors were:\n'
         'light - ${report.lightColor}, dark - ${report.darkColor}\n'
