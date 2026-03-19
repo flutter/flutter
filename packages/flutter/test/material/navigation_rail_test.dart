@@ -3123,7 +3123,7 @@ void main() {
         )
         ..rect(rect: indicatorRect, color: const Color(0x0a6750a4))
         ..rrect(
-          rrect: RRect.fromLTRBR(12.0, 0.0, 68.0, 32.0, const Radius.circular(16)),
+          rrect: RRect.fromLTRBR(0.0, 0.0, 56.0, 32.0, const Radius.circular(16)),
           color: const Color(0xffe8def8),
         ),
     );
@@ -3185,7 +3185,7 @@ void main() {
         )
         ..rect(rect: indicatorRect, color: const Color(0x0a6750a4))
         ..rrect(
-          rrect: RRect.fromLTRBR(12.0, 6.0, 68.0, 38.0, const Radius.circular(16)),
+          rrect: RRect.fromLTRBR(0.0, 0.0, 56.0, 32.0, const Radius.circular(16)),
           color: const Color(0xffe8def8),
         ),
     );
@@ -3251,7 +3251,7 @@ void main() {
         )
         ..rect(rect: indicatorRect, color: const Color(0x0a6750a4))
         ..rrect(
-          rrect: RRect.fromLTRBR(30.0, 24.0, 86.0, 56.0, const Radius.circular(16)),
+          rrect: RRect.fromLTRBR(0.0, 0.0, 56.0, 32.0, const Radius.circular(16)),
           color: const Color(0xffe8def8),
         ),
     );
@@ -3316,7 +3316,7 @@ void main() {
         )
         ..rect(rect: indicatorRect, color: const Color(0x0a6750a4))
         ..rrect(
-          rrect: RRect.fromLTRBR(0.0, 6.0, 50.0, 38.0, const Radius.circular(16)),
+          rrect: RRect.fromLTRBR(0.0, 0.0, 50.0, 32.0, const Radius.circular(16)),
           color: const Color(0xffe8def8),
         ),
     );
@@ -3383,7 +3383,7 @@ void main() {
         )
         ..rect(rect: indicatorRect, color: const Color(0x0a6750a4))
         ..rrect(
-          rrect: RRect.fromLTRBR(140.0, 24.0, 196.0, 56.0, const Radius.circular(16)),
+          rrect: RRect.fromLTRBR(0.0, 0.0, 56.0, 32.0, const Radius.circular(16)),
           color: const Color(0xffe8def8),
         ),
     );
@@ -3423,7 +3423,6 @@ void main() {
     );
 
     // Default values from M3 specification.
-    const railMinWidth = 80.0;
     const indicatorHeight = 32.0;
     const destinationWidth = 72.0;
     const destinationHorizontalPadding = 8.0;
@@ -3438,7 +3437,6 @@ void main() {
     final indicatorRect = Rect.fromLTRB(indicatorLeft, 0.0, indicatorRight, indicatorHeight);
     final includedRect = indicatorRect;
     final Rect excludedRect = includedRect.inflate(10);
-    const double indicatorHorizontalPadding = (railMinWidth - indicatorWidth) / 2; // 12.0
 
     expect(
       inkFeatures,
@@ -3462,9 +3460,9 @@ void main() {
         ..rect(rect: indicatorRect, color: const Color(0x0a6750a4))
         ..rrect(
           rrect: RRect.fromLTRBR(
-            indicatorHorizontalPadding,
             0.0,
-            indicatorHorizontalPadding + indicatorWidth,
+            0.0,
+            indicatorWidth,
             indicatorHeight,
             const Radius.circular(16),
           ),
@@ -3537,9 +3535,6 @@ void main() {
     final includedRect = indicatorRect;
     final Rect excludedRect = includedRect.inflate(10);
 
-    // Icon height is greater than indicator height so the indicator has a vertical offset.
-    const double secondIndicatorVerticalOffset = (iconSize - indicatorHeight) / 2;
-
     expect(
       inkFeatures,
       paints
@@ -3564,10 +3559,10 @@ void main() {
         // Indicator for the selected destination (the one with 'bookmark' icon).
         ..rrect(
           rrect: RRect.fromLTRBR(
-            indicatorLeft,
-            secondIndicatorVerticalOffset,
-            indicatorRight,
-            secondIndicatorVerticalOffset + indicatorHeight,
+            0.0,
+            0.0,
+            indicatorWidth,
+            indicatorHeight,
             const Radius.circular(16),
           ),
           color: const Color(0xffe8def8),
@@ -3635,9 +3630,6 @@ void main() {
     final includedRect = indicatorRect;
     final Rect excludedRect = includedRect.inflate(10);
 
-    // Compute the vertical position for the selected destination (the one with 'bookmark' icon).
-    const double secondIndicatorVerticalOffset = verticalDestinationSpacingM3 / 2;
-
     expect(
       inkFeatures,
       paints
@@ -3662,10 +3654,10 @@ void main() {
         // Indicator for the selected destination (the one with 'bookmark' icon).
         ..rrect(
           rrect: RRect.fromLTRBR(
-            indicatorLeft,
-            secondIndicatorVerticalOffset,
-            indicatorRight,
-            secondIndicatorVerticalOffset + indicatorHeight,
+            0.0,
+            0.0,
+            indicatorWidth,
+            indicatorHeight,
             const Radius.circular(16),
           ),
           color: const Color(0xffe8def8),
