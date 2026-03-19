@@ -19,5 +19,5 @@ abstract class SkwasmObjectWrapper<T extends NativeType> {
     _ref.dispose();
   }
 
-  bool get debugDisposed => _ref.isDisposed;
+  bool get debugDisposed => _ref.debugDisposed;
 }

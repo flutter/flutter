@@ -120,6 +120,23 @@ class UniqueRef<T> {
   /// therefore can no longer be used.
   bool get isDisposed => _nativeObject == null;
 
+  /// Whether the underlying native object has been disposed.
+  ///
+  /// This is only available in debug mode.
+  bool get debugDisposed {
+    bool? result;
+    assert(() {
+      result = isDisposed;
+      return true;
+    }());
+
+    if (result != null) {
+      return result!;
+    }
+
+    throw StateError('debugDisposed is only available when asserts are enabled.');
+  }
+
   /// Disposes the underlying native object.
   void dispose() {
     assert(!isDisposed, 'A native object reference cannot be disposed more than once.');
@@ -193,6 +210,11 @@ class CountedRef<R extends StackTraceDebugger, T> {
   /// Whether the underlying [nativeObject] has been disposed and is no longer
   /// accessible.
   bool get isDisposed => _ref.isDisposed;
+
+  /// Whether the underlying native object has been disposed.
+  ///
+  /// This is only available in debug mode.
+  bool get debugDisposed => _ref.debugDisposed;
 
   /// When assertions are enabled, stores all objects that share this box.
   final Set<R> debugReferrers = <R>{};
