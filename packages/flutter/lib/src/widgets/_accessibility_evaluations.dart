@@ -596,7 +596,7 @@ class MinimumNonTextContrastEvaluation extends _ContrastEvaluation {
       Violation(
         node,
         '$node:\n'
-        'Expected non-text control contrast ratio of at least $_kMinimumRatioNonText '
+        'Expected non-text control contrast ratio of at least ${_kMinimumRatioNonText.toStringAsFixed(1)} '
         'but found ${contrastRatio.toStringAsFixed(2)}.\n'
         'The computed colors were:\n'
         'light - ${report.lightColor}, dark - ${report.darkColor}\n'
