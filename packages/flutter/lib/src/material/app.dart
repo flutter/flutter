@@ -448,7 +448,7 @@ class MaterialApp extends StatefulWidget {
 
   /// The [ThemeData] to use when 'high contrast' is requested by the system.
   ///
-  /// Some host platforms (for example, iOS) allow the users to increase
+  /// Some host platforms (for example, iOS and Android API 34+) allow the users to increase
   /// contrast through an accessibility setting.
   ///
   /// Uses [theme] instead when null.
