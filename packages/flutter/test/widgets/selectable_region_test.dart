@@ -841,6 +841,125 @@ void main() {
       expect(renderSelectionSpy.events.length, 0);
     });
 
+    testWidgets(
+      'SelectionArea + ListView: select across multiple lines and scroll does not crash',
+      (WidgetTester tester) async {
+        // Regression test: when selection spans across ListView items and user scrolls,
+        // startSelectionPoint/endSelectionPoint may be null (off-screen). Verifies that
+        // startGlyphHeight/endGlyphHeight return 0 and do not crash.
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SelectableRegion(
+              selectionControls: materialTextSelectionControls,
+              child: SizedBox(
+                height: 400,
+                child: ListView(
+                  children: List<Widget>.generate(
+                    15,
+                    (int i) => Text(
+                      'Line $i: Selectable text content for testing',
+                      style: const TextStyle(fontSize: 20),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final RenderParagraph firstParagraph = tester.renderObject<RenderParagraph>(
+          find.descendant(
+            of: find.text('Line 0: Selectable text content for testing'),
+            matching: find.byType(RichText),
+          ),
+        );
+        final RenderParagraph thirdParagraph = tester.renderObject<RenderParagraph>(
+          find.descendant(
+            of: find.text('Line 2: Selectable text content for testing'),
+            matching: find.byType(RichText),
+          ),
+        );
+
+        // Select from first line to third line (cross-line selection).
+        final TestGesture selectGesture = await tester.startGesture(
+          textOffsetToPosition(firstParagraph, 2),
+          kind: PointerDeviceKind.mouse,
+        );
+        addTearDown(selectGesture.removePointer);
+        await tester.pump();
+        await selectGesture.moveTo(textOffsetToPosition(thirdParagraph, 15));
+        await tester.pump();
+        await selectGesture.up();
+        await tester.pumpAndSettle();
+
+        // Verify selection exists.
+        expect(firstParagraph.selections.isNotEmpty, isTrue);
+        expect(thirdParagraph.selections.isNotEmpty, isTrue);
+
+        // Simulate scroll - this may cause selection points to become null when off-screen.
+        await tester.drag(find.byType(ListView), const Offset(0, -150));
+        await tester.pumpAndSettle();
+
+        // Should not throw - startGlyphHeight/endGlyphHeight return 0 when points are null.
+        expect(tester.takeException(), isNull);
+      },
+      skip: kIsWeb, // [intended] Web uses its native context menu.
+    );
+
+    testWidgets(
+      'startGlyphHeight and endGlyphHeight return 0 when startSelectionPoint/endSelectionPoint are null',
+      (WidgetTester tester) async {
+        // Directly tests the fix: when SelectionGeometry has null start/end points
+        // (e.g. selection off-screen in scrollable), startGlyphHeight and
+        // endGlyphHeight must not crash and must return 0.
+        final delegateKey = GlobalKey<NullSelectionPointDelegateWidgetState>();
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SelectableRegion(
+              selectionControls: materialTextSelectionControls,
+              child: NullSelectionPointDelegateWidget(
+                key: delegateKey,
+                child: const Column(
+                  children: <Widget>[Text('First'), Text('Second'), Text('Third')],
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+          find.descendant(of: find.text('Second'), matching: find.byType(RichText)),
+        );
+        final TestGesture gesture = await tester.startGesture(
+          textOffsetToPosition(paragraph, 2),
+          kind: PointerDeviceKind.mouse,
+        );
+        addTearDown(gesture.removePointer);
+        await gesture.moveTo(textOffsetToPosition(paragraph, 5));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        // Switch delegate to return null selection points (simulates off-screen scenario).
+        final NullSelectionPointDelegate delegate = delegateKey.currentState!.delegate;
+        delegate.useNullSelectionPoints = true;
+        delegate.notifyListeners();
+        await tester.pump();
+
+        final SelectableRegionState state = tester.state<SelectableRegionState>(
+          find.byType(SelectableRegion),
+        );
+        // Access the getters - should not throw, must return 0 when points are null.
+        expect(() => state.startGlyphHeight, returnsNormally);
+        expect(() => state.endGlyphHeight, returnsNormally);
+        expect(state.startGlyphHeight, 0);
+        expect(state.endGlyphHeight, 0);
+      },
+      skip: kIsWeb, // [intended] Web uses its native context menu.
+    );
+
     testWidgets('mouse long press does not send select-word event', (WidgetTester tester) async {
       final spy = UniqueKey();
 
@@ -6610,6 +6729,56 @@ void main() {
       SystemMouseCursors.grab,
     );
   });
+}
+
+/// A [SelectionContainerDelegate] that can return [SelectionGeometry] with null
+/// [startSelectionPoint] and [endSelectionPoint] to test off-screen selection handling.
+class NullSelectionPointDelegate extends StaticSelectionContainerDelegate {
+  bool useNullSelectionPoints = false;
+
+  @override
+  SelectionGeometry get value {
+    final SelectionGeometry geometry = super.value;
+    if (useNullSelectionPoints && geometry.hasSelection) {
+      return SelectionGeometry(
+        status: geometry.status,
+        hasContent: geometry.hasContent,
+        selectionRects: geometry.selectionRects,
+      );
+    }
+    return geometry;
+  }
+}
+
+/// Widget that holds [NullSelectionPointDelegate] for testing.
+class NullSelectionPointDelegateWidget extends StatefulWidget {
+  const NullSelectionPointDelegateWidget({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  State<NullSelectionPointDelegateWidget> createState() => NullSelectionPointDelegateWidgetState();
+}
+
+class NullSelectionPointDelegateWidgetState extends State<NullSelectionPointDelegateWidget> {
+  late final NullSelectionPointDelegate delegate;
+
+  @override
+  void initState() {
+    super.initState();
+    delegate = NullSelectionPointDelegate();
+  }
+
+  @override
+  void dispose() {
+    delegate.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SelectionContainer(delegate: delegate, child: widget.child);
+  }
 }
 
 class ColumnSelectionContainerDelegate extends StaticSelectionContainerDelegate {
