@@ -8,6 +8,7 @@
 #import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
 
+#include "flutter/common/constants.h"
 #include "flutter/fml/message_loop.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
@@ -21,8 +22,10 @@ namespace {
 
 class FakeDelegate : public PlatformView::Delegate {
  public:
-  void OnPlatformViewCreated(std::unique_ptr<Surface> surface) override {}
-  void OnPlatformViewDestroyed() override {}
+  void OnPlatformViewCreated(std::unique_ptr<Surface> surface) override {
+    on_platform_view_created_calls++;
+  }
+  void OnPlatformViewDestroyed() override { on_platform_view_destroyed_calls++; }
   void OnPlatformViewScheduleFrame() override {}
   void OnPlatformViewAddView(int64_t view_id,
                              const ViewportMetrics& viewport_metrics,
@@ -56,6 +59,8 @@ class FakeDelegate : public PlatformView::Delegate {
                                  AssetResolver::AssetResolverType type) override {}
 
   flutter::Settings settings_;
+  int on_platform_view_created_calls = 0;
+  int on_platform_view_destroyed_calls = 0;
 };
 
 }  // namespace
@@ -71,6 +76,8 @@ flutter::FakeDelegate fake_delegate;
 
 - (void)setUp {
   fml::MessageLoop::EnsureInitializedForCurrentThread();
+  fake_delegate.on_platform_view_created_calls = 0;
+  fake_delegate.on_platform_view_destroyed_calls = 0;
   auto thread_task_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
   auto sync_switch = std::make_shared<fml::SyncSwitch>();
   flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
@@ -127,6 +134,33 @@ flutter::FakeDelegate fake_delegate;
   [self waitForExpectations:@[ backgroundExpectation ] timeout:5.0];
 
   OCMVerify([mockEngine notifyLowMemory]);
+}
+
+- (void)testSetViewControllerNilDestroysImplicitSurface {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"tester"];
+  XCTAssertNotNil(engine);
+  id mockEngine = OCMPartialMock(engine);
+  id flutterViewController = OCMClassMock([FlutterViewController class]);
+  UIView* view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
+
+  OCMStub([mockEngine platformView]).andReturn(platform_view.get());
+  OCMStub([flutterViewController isViewLoaded]).andReturn(YES);
+  OCMStub([flutterViewController view]).andReturn(view);
+  OCMStub([flutterViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
+  OCMStub([flutterViewController setupViewIdentifier:flutter::kFlutterImplicitViewId]);
+
+  [engine setViewController:flutterViewController];
+  XCTAssertEqual(engine.viewController, flutterViewController);
+
+  platform_view->NotifyCreated(flutter::kFlutterImplicitViewId);
+  XCTAssertEqual(fake_delegate.on_platform_view_created_calls, 1);
+
+  [engine setViewController:nil];
+  XCTAssertNil(engine.viewController);
+  XCTAssertNil(platform_view->GetOwnerViewController());
+  XCTAssertEqual(fake_delegate.on_platform_view_destroyed_calls, 1);
+
+  [flutterViewController stopMocking];
 }
 
 @end
