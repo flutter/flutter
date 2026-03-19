@@ -853,6 +853,24 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
     if (semanticsNode.role == Role.PROGRESS_BAR.value) {
       result.setClassName("android.widget.ProgressBar");
+      if (semanticsNode.hasValue()) {
+        try {
+          float min = 0.0f;
+          float max = 100.0f;
+          if (semanticsNode.minValue != null) {
+            min = Float.parseFloat(semanticsNode.minValue);
+          }
+          if (semanticsNode.maxValue != null) {
+            max = Float.parseFloat(semanticsNode.maxValue);
+          }
+          float parsedValue = Float.parseFloat(semanticsNode.getValue());
+          result.setRangeInfo(
+              AccessibilityNodeInfo.RangeInfo.obtain(
+                  AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT, min, max, parsedValue));
+        } catch (NumberFormatException e) {
+          // Keep as indeterminate format.
+        }
+      }
     }
     if (semanticsNode.hasAction(Action.DISMISS)) {
       result.setDismissable(true);
@@ -2569,6 +2587,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     // The locale of the content of this node.
     @Nullable private String locale;
 
+    @Nullable private String minValue;
+    @Nullable private String maxValue;
+
     // The role of this node.
     private int role;
 
@@ -2802,6 +2823,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       tooltip = getStringFromBuffer(buffer, strings);
       linkUrl = getStringFromBuffer(buffer, strings);
       locale = getStringFromBuffer(buffer, strings);
+      minValue = getStringFromBuffer(buffer, strings);
+      maxValue = getStringFromBuffer(buffer, strings);
 
       headingLevel = buffer.getInt();
       textDirection = TextDirection.fromInt(buffer.getInt());

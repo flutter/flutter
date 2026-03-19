@@ -2421,6 +2421,24 @@ public class AccessibilityBridgeTest {
     assertEquals("android.widget.ProgressBar", nodeInfo.getClassName().toString());
   }
 
+  @Test
+  public void itAddsRangeInfoToProgressBar() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = 23; // SemanticsRole::kProgressBar
+    testSemanticsNode.value = "50";
+    testSemanticsNode.minValue = "0";
+    testSemanticsNode.maxValue = "100";
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.widget.ProgressBar", nodeInfo.getClassName().toString());
+    assertNotNull(nodeInfo.getRangeInfo());
+    assertEquals(0.0f, nodeInfo.getRangeInfo().getMin());
+    assertEquals(100.0f, nodeInfo.getRangeInfo().getMax());
+    assertEquals(50.0f, nodeInfo.getRangeInfo().getCurrent());
+  }
+
   @Config(sdk = API_LEVELS.API_32)
   @TargetApi(API_LEVELS.API_32)
   @Test
@@ -2939,6 +2957,8 @@ public class AccessibilityBridgeTest {
     String tooltip = null;
     String linkUrl = null;
     String locale = null;
+    String minValue = null;
+    String maxValue = null;
     int role = 0;
     int headingLevel = 0;
     int textDirection = 0;
@@ -3024,6 +3044,18 @@ public class AccessibilityBridgeTest {
         bytes.putInt(-1);
       } else {
         strings.add(locale);
+        bytes.putInt(strings.size() - 1);
+      }
+      if (minValue == null) {
+        bytes.putInt(-1);
+      } else {
+        strings.add(minValue);
+        bytes.putInt(strings.size() - 1);
+      }
+      if (maxValue == null) {
+        bytes.putInt(-1);
+      } else {
+        strings.add(maxValue);
         bytes.putInt(strings.size() - 1);
       }
       bytes.putInt(headingLevel);
