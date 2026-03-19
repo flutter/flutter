@@ -1743,6 +1743,10 @@ static BOOL FLTFlutterPluginRespondsToLegacyAppLifecycleSelectors(
   return [self.flutterEngine lookupKeyForAsset:asset fromPackage:package];
 }
 
+- (nullable NSObject*)valuePublishedByPlugin:(NSString*)pluginKey {
+  return [self.flutterEngine valuePublishedByPlugin:pluginKey];
+}
+
 @end
 
 @implementation FlutterEngineApplicationRegistrar

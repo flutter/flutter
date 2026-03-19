@@ -164,6 +164,19 @@ public interface FlutterPlugin {
     }
 
     /**
+     * Get a {@link FlutterPlugin} that has been registered to the same {@link FlutterEngine} as
+     * this binding.
+     *
+     * @param pluginClass The type of plugin.
+     * @return The instance of the requested plugin type, or null if no plugin of that type has been
+     *     registered
+     */
+    @Nullable
+    public FlutterPlugin getPlugin(@NonNull Class<? extends FlutterPlugin> pluginClass) {
+      return flutterEngine.getPlugins().get(pluginClass);
+    }
+
+    /**
      * Accessor for the {@link FlutterEngineGroup} used to create the {@link FlutterEngine} for the
      * app.
      *
