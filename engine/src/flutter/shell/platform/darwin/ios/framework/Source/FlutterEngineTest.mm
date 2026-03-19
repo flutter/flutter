@@ -634,6 +634,7 @@ FLUTTER_ASSERT_ARC
       respondsToSelector:@selector(registerViewFactory:withId:gestureRecognizersBlockingPolicy:)]);
   XCTAssertTrue([registrar respondsToSelector:@selector(viewController)]);
   XCTAssertTrue([registrar respondsToSelector:@selector(publish:)]);
+  XCTAssertTrue([registrar respondsToSelector:@selector(valuePublishedByPlugin:)]);
   XCTAssertTrue([registrar respondsToSelector:@selector(addMethodCallDelegate:channel:)]);
   XCTAssertTrue([registrar respondsToSelector:@selector(addApplicationDelegate:)]);
   XCTAssertTrue([registrar respondsToSelector:@selector(lookupKeyForAsset:)]);
@@ -660,6 +661,10 @@ FLUTTER_ASSERT_ARC
   id plugin = OCMProtocolMock(@protocol(FlutterPlugin));
   [registrar publish:plugin];
   XCTAssertEqual(mockEngine.pluginPublications[pluginKey], plugin);
+
+  // Verify lookup forwards to FlutterEngine by fetching the published plugin
+  id published = [registrar valuePublishedByPlugin:pluginKey];
+  XCTAssertEqual(plugin, published);
 
   // Verify lookupKeyForAsset:, lookupKeyForAsset:fromPackage forward to engine
   [registrar lookupKeyForAsset:assetKey];
@@ -693,6 +698,7 @@ FLUTTER_ASSERT_ARC
       respondsToSelector:@selector(registerViewFactory:withId:gestureRecognizersBlockingPolicy:)]);
   XCTAssertFalse([registrar respondsToSelector:@selector(viewController)]);
   XCTAssertFalse([registrar respondsToSelector:@selector(publish:)]);
+  XCTAssertFalse([registrar respondsToSelector:@selector(valuePublishedByPlugin:)]);
   XCTAssertFalse([registrar respondsToSelector:@selector(addMethodCallDelegate:channel:)]);
   XCTAssertFalse([registrar respondsToSelector:@selector(addApplicationDelegate:)]);
   XCTAssertFalse([registrar respondsToSelector:@selector(lookupKeyForAsset:)]);

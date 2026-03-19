@@ -5,6 +5,7 @@
 package test.io.flutter.embedding.engine;
 
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -54,6 +55,57 @@ public class PluginComponentTest {
         plugin.getAssetPathBasedOnSubpathAndPackage());
   }
 
+  @Test
+  public void pluginsAccessingUnknownPluginsReturnsNull() {
+    // Setup test.
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterJNI flutterJNI = mock(FlutterJNI.class);
+    jniAttached = false;
+    when(flutterJNI.isAttached()).thenAnswer(invocation -> jniAttached);
+    doAnswer(invocation -> jniAttached = true).when(flutterJNI).attachToNative();
+
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+
+    // Execute behavior under test.
+    FlutterEngine flutterEngine =
+        new FlutterEngine(ApplicationProvider.getApplicationContext(), flutterLoader, flutterJNI);
+
+    // As soon as our plugin is registered it will look up asset paths and store them
+    // for our verification.
+    PluginThatAccessesPlugin plugin = new PluginThatAccessesPlugin();
+    flutterEngine.getPlugins().add(plugin);
+
+    // Verify results.
+    assertNull(plugin.getAccessedPlugin());
+  }
+
+  @Test
+  public void pluginsCanAccessOtherPlugins() {
+    // Setup test.
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterJNI flutterJNI = mock(FlutterJNI.class);
+    jniAttached = false;
+    when(flutterJNI.isAttached()).thenAnswer(invocation -> jniAttached);
+    doAnswer(invocation -> jniAttached = true).when(flutterJNI).attachToNative();
+
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+
+    // Execute behavior under test.
+    FlutterEngine flutterEngine =
+        new FlutterEngine(ApplicationProvider.getApplicationContext(), flutterLoader, flutterJNI);
+
+    PluginThatIsAccessed accessedPlugin = new PluginThatIsAccessed();
+    flutterEngine.getPlugins().add(accessedPlugin);
+
+    // As soon as our plugin is registered it will look up asset paths and store them
+    // for our verification.
+    PluginThatAccessesPlugin plugin = new PluginThatAccessesPlugin();
+    flutterEngine.getPlugins().add(plugin);
+
+    // Verify results.
+    assertEquals(accessedPlugin, plugin.getAccessedPlugin());
+  }
+
   private static class PluginThatAccessesAssets implements FlutterPlugin {
     private String assetPathBasedOnName;
     private String assetPathBasedOnNameAndPackage;
@@ -90,6 +142,30 @@ public class PluginComponentTest {
           binding
               .getFlutterAssets()
               .getAssetFilePathByName("some/path/fake_asset.jpg", "fakepackage");
+    }
+
+    @Override
+    public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {}
+  }
+
+  private static class PluginThatIsAccessed implements FlutterPlugin {
+    @Override
+    public void onAttachedToEngine(@NonNull FlutterPluginBinding binding) {}
+
+    @Override
+    public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {}
+  }
+
+  private static class PluginThatAccessesPlugin implements FlutterPlugin {
+    private PluginThatIsAccessed accessedPlugin;
+
+    public PluginThatIsAccessed getAccessedPlugin() {
+      return accessedPlugin;
+    }
+
+    @Override
+    public void onAttachedToEngine(@NonNull FlutterPluginBinding binding) {
+      accessedPlugin = (PluginThatIsAccessed) binding.getPlugin(PluginThatIsAccessed.class);
     }
 
     @Override

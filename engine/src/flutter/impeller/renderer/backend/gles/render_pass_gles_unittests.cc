@@ -69,7 +69,8 @@ TEST_P(RenderPassGLESWithDiscardFrameBufferExtTest, DiscardFramebufferExt) {
   auto mock_gl_impl = std::make_unique<NiceMock<MockGLESImpl>>();
   auto& mock_gl_impl_ref = *mock_gl_impl;
   auto mock_gl =
-      MockGLES::Init(std::move(mock_gl_impl), {{"GL_EXT_discard_framebuffer"}});
+      MockGLES::Init(std::move(mock_gl_impl), {{"GL_EXT_discard_framebuffer"}},
+                     "OpenGL ES 2.0");
 
   auto context = CreateFakeGLESContext();
   auto dummy_worker = std::make_shared<MockWorker>();
@@ -113,6 +114,107 @@ INSTANTIATE_TEST_SUITE_P(
     [](const ::testing::TestParamInfo<DiscardFrameBufferParams>& info) {
       return (info.param.frame_buffer_id == 0) ? "Default" : "NonDefault";
     });
+
+TEST_P(RenderPassGLESWithDiscardFrameBufferExtTest, InvalidateFramebuffer) {
+  auto mock_gl_impl = std::make_unique<NiceMock<MockGLESImpl>>();
+  auto& mock_gl_impl_ref = *mock_gl_impl;
+  auto mock_gl =
+      MockGLES::Init(std::move(mock_gl_impl), std::nullopt, "OpenGL ES 3.0");
+
+  auto context = CreateFakeGLESContext();
+  auto dummy_worker = std::make_shared<MockWorker>();
+  context->AddReactorWorker(dummy_worker);
+  auto reactor = context->GetReactor();
+
+  const auto command_buffer =
+      std::static_pointer_cast<Context>(context)->CreateCommandBuffer();
+  auto render_target = RenderTarget{};
+  const auto description = TextureDescriptor{
+      .format = PixelFormat::kR8G8B8A8UNormInt, .size = {10, 10}};
+
+  const auto& test_params = GetParam();
+  auto framebuffer_texture =
+      TextureGLES::WrapFBO(reactor, description, test_params.frame_buffer_id);
+
+  auto color_attachment = ColorAttachment{Attachment{
+      .texture = framebuffer_texture, .store_action = StoreAction::kDontCare}};
+  render_target.SetColorAttachment(color_attachment, 0);
+  const auto render_pass = command_buffer->CreateRenderPass(render_target);
+
+  EXPECT_CALL(mock_gl_impl_ref, GetIntegerv(GL_FRAMEBUFFER_BINDING, _))
+      .WillOnce(SetArgPointee<1>(test_params.frame_buffer_id));
+
+  // InvalidateFramebuffer should be called instead of DiscardFramebufferEXT
+  EXPECT_CALL(mock_gl_impl_ref, InvalidateFramebuffer(GL_FRAMEBUFFER, _, _))
+      .With(Args<2, 1>(ElementsAreArray(test_params.expected_attachments)))
+      .Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, DiscardFramebufferEXT(GL_FRAMEBUFFER, _, _))
+      .Times(0);
+
+  ASSERT_TRUE(render_pass->EncodeCommands());
+  ASSERT_TRUE(reactor->React());
+}
+
+TEST(RenderPassGLESTest, ResolvingMultisampleTextureCachesResolveFBO) {
+  auto mock_gl_impl = std::make_unique<NiceMock<MockGLESImpl>>();
+  auto& mock_gl_impl_ref = *mock_gl_impl;
+  // Make sure implicit resolving isn't supported so we go down explicit path.
+  auto mock_gl =
+      MockGLES::Init(std::move(mock_gl_impl), std::nullopt, "OpenGL ES 3.0");
+
+  auto context = CreateFakeGLESContext();
+  auto dummy_worker = std::make_shared<MockWorker>();
+  context->AddReactorWorker(dummy_worker);
+  auto reactor = context->GetReactor();
+
+  const auto command_buffer =
+      std::static_pointer_cast<Context>(context)->CreateCommandBuffer();
+
+  const auto msaa_desc =
+      TextureDescriptor{.type = TextureType::kTexture2DMultisample,
+                        .format = PixelFormat::kR8G8B8A8UNormInt,
+                        .size = {10, 10},
+                        .usage = TextureUsage::kRenderTarget,
+                        .sample_count = SampleCount::kCount4};
+  const auto resolve_desc =
+      TextureDescriptor{.storage_mode = StorageMode::kDevicePrivate,
+                        .type = TextureType::kTexture2D,
+                        .format = PixelFormat::kR8G8B8A8UNormInt,
+                        .size = {10, 10},
+                        .usage = TextureUsage::kRenderTarget,
+                        .sample_count = SampleCount::kCount1};
+
+  auto msaa_tex = std::make_shared<TextureGLES>(reactor, msaa_desc);
+  auto resolve_tex = std::make_shared<TextureGLES>(reactor, resolve_desc);
+
+  auto render_target = RenderTarget{};
+  auto color_attachment = ColorAttachment{Attachment{
+      .texture = msaa_tex,
+      .resolve_texture = resolve_tex,
+      .load_action = LoadAction::kClear,
+      .store_action = StoreAction::kMultisampleResolve,
+  }};
+  color_attachment.clear_color = Color::Black();
+  render_target.SetColorAttachment(color_attachment, 0);
+
+  EXPECT_CALL(mock_gl_impl_ref, CheckFramebufferStatus(_))
+      .WillRepeatedly(Return(GL_FRAMEBUFFER_COMPLETE));
+
+  // Expect GenFramebuffers is called exactly once for the offscreen FBO,
+  // and exactly once for the resolve FBO over two passes.
+  EXPECT_CALL(mock_gl_impl_ref, GenFramebuffers(_, _)).Times(2);
+
+  {
+    const auto render_pass = command_buffer->CreateRenderPass(render_target);
+    ASSERT_TRUE(render_pass->EncodeCommands());
+    ASSERT_TRUE(reactor->React());
+  }
+  {
+    const auto render_pass2 = command_buffer->CreateRenderPass(render_target);
+    ASSERT_TRUE(render_pass2->EncodeCommands());
+    ASSERT_TRUE(reactor->React());
+  }
+}
 
 }  // namespace testing
 }  // namespace impeller
