@@ -75,5 +75,7 @@ config("compiler") {
     _target_triplet,
     "-swift-version",
     _swift_version,
+    "-strict-concurrency",
+    "complete",
   ]
 }

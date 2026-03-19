@@ -10,7 +10,7 @@ import XCTest
 
 /// A mock subclass of `AccessibilityFeatures` that allows override the
 /// values returned by the functions.
-class MockAccessibilityFeatures: AccessibilityFeatures {
+final class MockAccessibilityFeatures: AccessibilityFeatures {
     var mockVoiceOverRunning = false
     var mockSwitchControlRunning = false
     var mockInvertColorsEnabled = false
@@ -63,7 +63,10 @@ class MockAccessibilityFeatures: AccessibilityFeatures {
     }
 }
 
-class AccessibilityFeaturesTests: XCTestCase {
+// The AccessibilityFeatureFlag class is not entirely MainActor-isolated, but
+// it is currently only used on the main actor.
+@MainActor
+final class AccessibilityFeaturesTests: XCTestCase {
     func testAccessibilityFeatureFlagRawValuesAreCorrect() {
         XCTAssertEqual(AccessibilityFeatureFlag.accessibleNavigation.rawValue, 1 << 0)
         XCTAssertEqual(AccessibilityFeatureFlag.invertColors.rawValue, 1 << 1)
