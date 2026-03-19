@@ -288,7 +288,7 @@ Future<Uri> _writeNativeAssetsJson(
   final String nativeAssetsDartContents = _toNativeAssetsJsonFile(assets);
   final File nativeAssetsFile = fileSystem.file(nativeAssetsJsonUri);
   final Directory parentDirectory = nativeAssetsFile.parent;
-  if (!await parentDirectory.exists()) {
+  if (!parentDirectory.existsSync()) {
     await parentDirectory.create(recursive: true);
   }
   await nativeAssetsFile.writeAsString(nativeAssetsDartContents);
