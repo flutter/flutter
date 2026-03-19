@@ -67,8 +67,8 @@ void main() {
       hasSemantics(
         TestSemantics.root(
           children: <TestSemantics>[
-            TestSemantics.rootChild(label: 'parent\n2'),
             TestSemantics.rootChild(label: '1\n3'),
+            TestSemantics.rootChild(label: 'parent\n2'),
           ],
         ),
         ignoreId: true,
