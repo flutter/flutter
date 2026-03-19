@@ -569,15 +569,12 @@ static BOOL _preparedOnce = NO;
   self.delayingRecognizer.state = UIGestureRecognizerStateFailed;
 }
 
-- (BOOL)containsWebView:(UIView*)view remainingSubviewDepth:(int)remainingSubviewDepth {
-  if (remainingSubviewDepth < 0) {
-    return NO;
-  }
+- (BOOL)containsWebView:(UIView*)view {
   if ([view isKindOfClass:[WKWebView class]]) {
     return YES;
   }
   for (UIView* subview in view.subviews) {
-    if ([self containsWebView:subview remainingSubviewDepth:remainingSubviewDepth - 1]) {
+    if ([self containsWebView:subview]) {
       return YES;
     }
   }
@@ -642,13 +639,10 @@ static BOOL _preparedOnce = NO;
           [self searchAndFixWebView:self.embeddedView];
         }
       } else if (@available(iOS 18.2, *)) {
-        // This workaround is designed for WKWebView only. The 1P web view plugin provides a
-        // WKWebView itself as the platform view. However, some 3P plugins provide wrappers of
-        // WKWebView instead. So we perform DFS to search the view hierarchy (with a depth limit).
-        // Passing a limit of 0 means only searching for platform view itself; Pass 1 to include its
-        // children as well, and so on. We should be conservative and start with a small number. The
-        // AdMob banner has a WKWebView at depth 7.
-        if ([self containsWebView:self.embeddedView remainingSubviewDepth:1]) {
+        // The 1P web view plugin provides a WKWebView itself as the platform view. However, some 3P
+        // plugins provide wrappers of WKWebView instead, and AdMob banner has a WKWebView at
+        // depth 7. So we perform DFS to search the view hierarchy.
+        if ([self containsWebView:self.embeddedView]) {
           [self removeGestureRecognizer:self.delayingRecognizer];
           [self addGestureRecognizer:self.delayingRecognizer];
         }
