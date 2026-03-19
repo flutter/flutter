@@ -139,7 +139,8 @@ enum ShowValueIndicator {
   /// The value indicator is shown while dragging.
   onDrag,
 
-  /// The value indicator is always displayed.
+  /// The value indicator is always displayed as long as the slider has a
+  /// [Slider.onChanged] callback.
   alwaysVisible,
 
   /// The value indicator will never be shown.

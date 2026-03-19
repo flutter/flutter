@@ -5019,13 +5019,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 --------------------------------------------------------------------------------
-skia
-
-Copyright %s %s
-
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file.
---------------------------------------------------------------------------------
 glfw
 
 Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
@@ -12284,7 +12277,7 @@ limitations under the License.
 --------------------------------------------------------------------------------
 skia
 
-Copyright (c) 2020 Google LLC. All rights reserved.
+Copyright (c) 2020 Google LLC All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 --------------------------------------------------------------------------------
@@ -12934,6 +12927,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --------------------------------------------------------------------------------
+skia
+
+Copyright (c) 2022 Google LLC All rights reserved.
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file.
+--------------------------------------------------------------------------------
 spirv-tools
 
 Copyright (c) 2022 Google LLC.
@@ -12949,12 +12948,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
---------------------------------------------------------------------------------
-skia
-
-Copyright (c) 2022 Google LLC. All rights reserved.
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file.
 --------------------------------------------------------------------------------
 spirv-tools
 
@@ -14235,13 +14228,6 @@ tree. An additional intellectual property rights grant can be found
 in the file PATENTS. All contributing project authors may
 be found in the AUTHORS file in the root of the source tree.
 --------------------------------------------------------------------------------
-skia
-
-Copyright 2012 Google LLC
-
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file.
---------------------------------------------------------------------------------
 angle
 
 Copyright 2012 The ANGLE Project Authors. All rights reserved.
@@ -14928,27 +14914,6 @@ Copyright 2017 ARM Ltd.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 --------------------------------------------------------------------------------
-skia
-
-Copyright 2017 Google Inc.
-
-Use of this source code is governed by a BD-style license that can be
-found in the LICENSE file.
---------------------------------------------------------------------------------
-skia
-
-Copyright 2017 Google Inc.
-
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file.
---------------------------------------------------------------------------------
-skia
-
-Copyright 2017 Google Inc.
-
-Use of this source code is governed by a BSD-style license that can be found
-in the LICENSE file.
---------------------------------------------------------------------------------
 libwebp
 
 Copyright 2017 Google Inc. All Rights Reserved.
@@ -14992,6 +14957,27 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --------------------------------------------------------------------------------
+skia
+
+Copyright 2017 Google LLC
+
+Use of this source code is governed by a BD-style license that can be
+found in the LICENSE file.
+--------------------------------------------------------------------------------
+skia
+
+Copyright 2017 Google LLC
+
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file.
+--------------------------------------------------------------------------------
+skia
+
+Copyright 2017 Google LLC
+
+Use of this source code is governed by a BSD-style license that can be found
+in the LICENSE file.
+--------------------------------------------------------------------------------
 cpu_features
 
 Copyright 2017 Google LLC
@@ -15002,6 +14988,22 @@ you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+--------------------------------------------------------------------------------
+skia
+
+Copyright 2017 Google LLC All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -15219,12 +15221,6 @@ Copyright 2018 Google Inc.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 --------------------------------------------------------------------------------
-skia
-
-Copyright 2018 Google Inc.
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file.
---------------------------------------------------------------------------------
 libwebp
 
 Copyright 2018 Google Inc. All Rights Reserved.
@@ -15254,14 +15250,25 @@ limitations under the License.
 --------------------------------------------------------------------------------
 skia
 
-Copyright 2018 Google Inc. All rights reserved.
+Copyright 2018 Google LLC
+
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 --------------------------------------------------------------------------------
 skia
 
 Copyright 2018 Google LLC
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file.
+--------------------------------------------------------------------------------
+skia
 
+Copyright 2018 Google LLC
+Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
+skia
+
+Copyright 2018 Google LLC All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 --------------------------------------------------------------------------------
@@ -15280,17 +15287,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
---------------------------------------------------------------------------------
-skia
-
-Copyright 2018 Google LLC.
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file.
---------------------------------------------------------------------------------
-skia
-
-Copyright 2018 Google LLC.
-Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 --------------------------------------------------------------------------------
 skia
 
@@ -15506,19 +15502,6 @@ FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 --------------------------------------------------------------------------------
-skia
-
-Copyright 2019 Google Inc.
-
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file.
---------------------------------------------------------------------------------
-skia
-
-Copyright 2019 Google Inc.
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file.
---------------------------------------------------------------------------------
 flatbuffers
 
 Copyright 2019 Google Inc. All rights reserved.
@@ -15534,13 +15517,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
---------------------------------------------------------------------------------
-skia
-
-Copyright 2019 Google Inc. and Adobe Inc.
-
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file.
 --------------------------------------------------------------------------------
 spirv-tools
 
@@ -15573,21 +15549,15 @@ found in the LICENSE file.
 --------------------------------------------------------------------------------
 skia
 
-Copyright 2019 Google LLC.
-
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file.
---------------------------------------------------------------------------------
-skia
-
-Copyright 2019 Google LLC.
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file.
---------------------------------------------------------------------------------
-skia
-
-Copyright 2019 Google LLC.
+Copyright 2019 Google LLC
 Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
+--------------------------------------------------------------------------------
+skia
+
+Copyright 2019 Google LLC and Adobe Inc.
+
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file.
 --------------------------------------------------------------------------------
 skia
 
@@ -15839,13 +15809,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --------------------------------------------------------------------------------
-skia
-
-Copyright 2020 Google Inc.
-
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file.
---------------------------------------------------------------------------------
 benchmark
 flatbuffers
 
@@ -15872,14 +15835,7 @@ found in the LICENSE file.
 --------------------------------------------------------------------------------
 skia
 
-Copyright 2020 Google LLC.
-
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file.
---------------------------------------------------------------------------------
-skia
-
-Copyright 2020 Google LLC.
+Copyright 2020 Google LLC
 Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 --------------------------------------------------------------------------------
 skia
@@ -16045,13 +16001,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --------------------------------------------------------------------------------
-skia
-
-Copyright 2021 Google Inc.
-
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file.
---------------------------------------------------------------------------------
 libwebp
 
 Copyright 2021 Google Inc. All Rights Reserved.
@@ -16088,14 +16037,7 @@ found in the LICENSE file.
 --------------------------------------------------------------------------------
 skia
 
-Copyright 2021 Google LLC.
-
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file.
---------------------------------------------------------------------------------
-skia
-
-Copyright 2021 Google LLC.
+Copyright 2021 Google LLC
 Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 --------------------------------------------------------------------------------
 skia
@@ -16207,13 +16149,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --------------------------------------------------------------------------------
-skia
-
-Copyright 2022 Google Inc.
-
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file.
---------------------------------------------------------------------------------
 libwebp
 
 Copyright 2022 Google Inc. All Rights Reserved.
@@ -16267,18 +16202,6 @@ found in the LICENSE file.
 skia
 
 Copyright 2022 Google LLC
-Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
---------------------------------------------------------------------------------
-skia
-
-Copyright 2022 Google LLC.
-
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file.
---------------------------------------------------------------------------------
-skia
-
-Copyright 2022 Google LLC.
 Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 --------------------------------------------------------------------------------
 skia
@@ -16419,12 +16342,6 @@ Copyright 2023 Google Inc.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 --------------------------------------------------------------------------------
-skia
-
-Copyright 2023 Google Inc.
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file.
---------------------------------------------------------------------------------
 flatbuffers
 
 Copyright 2023 Google Inc. All rights reserved.
@@ -16473,14 +16390,13 @@ Use of this source code is governed by a BSD-style license that can be found in 
 skia
 
 Copyright 2023 Google LLC
-Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file.
 --------------------------------------------------------------------------------
 skia
 
-Copyright 2023 Google LLC.
-
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file.
+Copyright 2023 Google LLC
+Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 --------------------------------------------------------------------------------
 skia
 
@@ -16602,13 +16518,6 @@ vulkan-headers
 Copyright 2023-2025 The Khronos Group Inc.
 SPDX-License-Identifier: Apache-2.0
 --------------------------------------------------------------------------------
-skia
-
-Copyright 2024 Google Inc.
-
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file.
---------------------------------------------------------------------------------
 angle
 
 Copyright 2024 Google Inc.  All rights reserved.
@@ -16640,20 +16549,13 @@ found in the LICENSE file.
 --------------------------------------------------------------------------------
 skia
 
-Copyright 2024 Google LLC.
-
+Copyright 2024 Google LLC
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 --------------------------------------------------------------------------------
 skia
 
-Copyright 2024 Google LLC.
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file.
---------------------------------------------------------------------------------
-skia
-
-Copyright 2024 Google LLC.
+Copyright 2024 Google LLC
 Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 --------------------------------------------------------------------------------
 skia
@@ -16714,13 +16616,6 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
-skia
-
-Copyright 2025 Google Inc.
-
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file.
---------------------------------------------------------------------------------
 spirv-tools
 
 Copyright 2025 Google LLC
@@ -16748,13 +16643,6 @@ found in the LICENSE file.
 skia
 
 Copyright 2025 Google LLC
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file.
---------------------------------------------------------------------------------
-skia
-
-Copyright 2025 Google LLC.
-
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 --------------------------------------------------------------------------------
@@ -16822,21 +16710,7 @@ limitations under the License.
 --------------------------------------------------------------------------------
 skia
 
-Copyright 2026 Google Inc.
-
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file.
---------------------------------------------------------------------------------
-skia
-
 Copyright 2026 Google LLC
-
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file.
---------------------------------------------------------------------------------
-skia
-
-Copyright 2026 Google LLC.
 
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
