@@ -91,7 +91,7 @@ class SkwasmLineMetrics implements ui.LineMetrics {
 
 class SkwasmParagraph extends SkwasmObjectWrapper<RawParagraph> implements ui.Paragraph {
   SkwasmParagraph(ParagraphHandle handle)
-    : super(handle, (ParagraphHandle h) => paragraphDispose(h));
+    : super(handle, (ParagraphHandle h) => paragraphDispose(h), 'Paragraph');
 
   bool _hasCheckedForMissingCodePoints = false;
 
@@ -308,7 +308,7 @@ void withScopedFontList(
 
 class SkwasmNativeTextStyle extends SkwasmObjectWrapper<RawTextStyle> {
   SkwasmNativeTextStyle(TextStyleHandle handle)
-    : super(handle, (TextStyleHandle h) => textStyleDispose(h));
+    : super(handle, (TextStyleHandle h) => textStyleDispose(h), 'TextStyle');
 
   factory SkwasmNativeTextStyle.defaultTextStyle() => SkwasmNativeTextStyle(textStyleCreate());
 
@@ -921,7 +921,7 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
     ParagraphBuilderHandle handle,
     this.style,
     SkwasmNativeTextStyle baseTextStyle,
-  ) : super(handle, (ParagraphBuilderHandle h) => paragraphBuilderDispose(h)) {
+  ) : super(handle, (ParagraphBuilderHandle h) => paragraphBuilderDispose(h), 'ParagraphBuilder') {
     textStyleStack.add(baseTextStyle);
   }
 

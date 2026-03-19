@@ -6,9 +6,14 @@ import 'dart:ffi';
 
 import 'package:ui/src/engine/native_memory.dart';
 
+/// A wrapper for a native Skia object that is owned by the Skwasm renderer.
 abstract class SkwasmObjectWrapper<T extends NativeType> {
-  SkwasmObjectWrapper(Pointer<T> handle, void Function(Pointer<T>) dispose) {
-    _ref = UniqueRef<Pointer<T>>(this, handle, 'SkwasmObject', onDispose: dispose);
+  SkwasmObjectWrapper(
+    Pointer<T> handle,
+    void Function(Pointer<T>) dispose,
+    String debugOwnerLabel,
+  ) {
+    _ref = UniqueRef<Pointer<T>>(this, handle, debugOwnerLabel, onDispose: dispose);
   }
 
   late final UniqueRef<Pointer<T>> _ref;

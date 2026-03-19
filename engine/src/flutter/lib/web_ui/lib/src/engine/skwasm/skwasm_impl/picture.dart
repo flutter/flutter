@@ -84,7 +84,11 @@ class SkwasmPicture implements LayerPicture, StackTraceDebugger {
 class SkwasmPictureRecorder extends SkwasmObjectWrapper<RawPictureRecorder>
     implements LayerPictureRecorder {
   SkwasmPictureRecorder()
-    : super(pictureRecorderCreate(), (PictureRecorderHandle h) => pictureRecorderDispose(h));
+    : super(
+        pictureRecorderCreate(),
+        (PictureRecorderHandle h) => pictureRecorderDispose(h),
+        'PictureRecorder',
+      );
 
   @override
   SkwasmPicture endRecording() {
