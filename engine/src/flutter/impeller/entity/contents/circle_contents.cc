@@ -17,14 +17,14 @@ using PipelineBuilderCallback =
 using VS = CirclePipeline::VertexShader;
 using FS = CirclePipeline::FragmentShader;
 
-Scalar kAntiliasPixels = 1.0;
+Scalar kAntialiasPixels = 1.0;
 }  // namespace
 
 std::unique_ptr<CircleContents> CircleContents::Make(
     std::unique_ptr<CircleGeometry> geometry,
     Color color,
     bool stroked) {
-  geometry->SetAntialiasPadding(kAntiliasPixels);
+  geometry->SetAntialiasPadding(kAntialiasPixels);
   return std::unique_ptr<CircleContents>(
       new CircleContents(std::move(geometry), color, stroked));
 }
@@ -45,7 +45,7 @@ bool CircleContents::Render(const ContentContext& renderer,
   frag_info.center = geometry_->GetCenter();
   frag_info.radius = geometry_->GetRadius();
   frag_info.stroke_width = geometry_->GetStrokeWidth();
-  frag_info.aa_pixels = kAntiliasPixels;
+  frag_info.aa_pixels = kAntialiasPixels;
   frag_info.stroked = stroked_ ? 1.0f : 0.0f;
 
   auto geometry_result = geometry_->GetPositionBuffer(renderer, entity, pass);

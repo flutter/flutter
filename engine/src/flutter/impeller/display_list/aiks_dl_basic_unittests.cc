@@ -706,6 +706,11 @@ TEST_P(AiksTest, DrawThinStrokedCircle) {
     }
 
     flutter::DisplayListBuilder builder;
+
+    DlPaint background_paint;
+    background_paint.setColor(DlColor(1, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
+    builder.DrawPaint(background_paint);
+
     flutter::DlPaint paint;
 
     paint.setColor(flutter::DlColor::kRed().withAlpha(stroked_alpha));
