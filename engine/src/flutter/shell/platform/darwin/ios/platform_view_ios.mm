@@ -187,11 +187,24 @@ FlutterViewController* PlatformViewIOS::GetOwnerViewController() const {
 
 void PlatformViewIOS::SetOwnerViewController(__weak FlutterViewController* owner_controller) {
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
-  // Allow replacing the implicit view controller (legacy behavior).
-  if ([view_controllers_ objectForKey:@(flutter::kFlutterImplicitViewId)] != nil) {
+  FlutterViewController* existing_controller =
+      [view_controllers_ objectForKey:@(flutter::kFlutterImplicitViewId)];
+  if (existing_controller == owner_controller) {
+    ApplyLocaleToOwnerController();
+    return;
+  }
+
+  // Preserve the legacy implicit-view behavior: replacing or clearing the single attached
+  // controller synchronously tears down the implicit rendering surface before removing the owner.
+  if (existing_controller != nil) {
+    NotifyDestroyed(flutter::kFlutterImplicitViewId);
     RemoveOwnerViewController(flutter::kFlutterImplicitViewId);
   }
-  AddOwnerViewController(owner_controller);
+
+  if (owner_controller != nil) {
+    AddOwnerViewController(owner_controller);
+  }
+
   ApplyLocaleToOwnerController();
 }
 
@@ -214,8 +227,6 @@ void PlatformViewIOS::AddOwnerViewController(__weak FlutterViewController* owner
                 // Implicit copy of 'this' is fine.
                 FlutterViewController* owner_controller = (FlutterViewController*)note.object;
                 RemoveOwnerViewController(owner_controller.viewIdentifier);
-                flutter_view_controller_will_dealloc_observers_.erase(
-                    owner_controller.viewIdentifier);
               }]);
 
   if (owner_controller && owner_controller.isViewLoaded) {
@@ -231,6 +242,11 @@ void PlatformViewIOS::RemoveOwnerViewController(FlutterViewIdentifier viewIdenti
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
   std::lock_guard<std::mutex> guard(ios_surface_mutex_);
+
+  auto observer_it = flutter_view_controller_will_dealloc_observers_.find(viewIdentifier);
+  if (observer_it != flutter_view_controller_will_dealloc_observers_.end()) {
+    flutter_view_controller_will_dealloc_observers_.erase(observer_it);
+  }
 
   [view_controllers_ removeObjectForKey:@(viewIdentifier)];
   ios_surfaces_manager_->RemoveSurface(viewIdentifier);
