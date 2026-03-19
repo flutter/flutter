@@ -1896,6 +1896,37 @@ void main() {
       );
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
 
+    testWidgets('OutlineInputBorder with floating label draws rounded corners during animation', (
+      WidgetTester tester,
+    ) async {
+      // Regression test for OutlineInputBorder appearing straight instead of
+      // rounded during the floating label animation.
+      const borderRadius = 20.0;
+      const labelText = 'Label';
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isFocused: true,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: const Color(0xFF00FF00),
+            labelText: labelText,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(borderRadius)),
+          ),
+        ),
+      );
+
+      expect(find.text(labelText), findsOneWidget);
+      expect(findBorderPainter(), findsOneWidget);
+      // Verify fill then stroke path (border with gap for floating label).
+      expect(
+        findBorderPainter(),
+        paints
+          ..path(style: PaintingStyle.fill)
+          ..path(style: PaintingStyle.stroke),
+      );
+    }, skip: isBrowser);
+
     testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular border', (
       WidgetTester tester,
     ) async {
@@ -2195,6 +2226,25 @@ void main() {
           p2: Offset(100, canvasRect.height - borderWidth / 2),
           strokeWidth: borderWidth,
         ),
+      );
+    });
+
+    test('OutlineInputBorder paint with gap draws path with stroke', () {
+      const canvasRect = Rect.fromLTWH(0, 0, 200, 56);
+      const border = OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(20.0)),
+        borderSide: BorderSide(color: Colors.black),
+      );
+      expect(
+        (Canvas canvas) => border.paint(
+          canvas,
+          canvasRect,
+          gapStart: 100.0,
+          gapExtent: 50.0,
+          gapPercentage: 1.0,
+          textDirection: TextDirection.ltr,
+        ),
+        paints..path(style: PaintingStyle.stroke),
       );
     });
 
