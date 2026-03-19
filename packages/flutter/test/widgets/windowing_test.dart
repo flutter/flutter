@@ -1028,7 +1028,7 @@ void main() {
           ),
         );
 
-        expect(isActivated, equals(false));
+        expect(isActivated, equals(true));
       });
 
       testWidgets('Can access WindowScope.isActivatedOf for satellite windows', (
