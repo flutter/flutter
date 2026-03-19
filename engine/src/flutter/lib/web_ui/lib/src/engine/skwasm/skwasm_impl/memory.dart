@@ -7,12 +7,13 @@ import 'dart:ffi';
 import 'package:ui/src/engine/native_memory.dart';
 
 abstract class SkwasmObjectWrapper<T extends NativeType> {
-  SkwasmObjectWrapper(this.handle, void Function(Pointer<T>) dispose) {
+  SkwasmObjectWrapper(Pointer<T> handle, void Function(Pointer<T>) dispose) {
     _ref = UniqueRef<Pointer<T>>(this, handle, 'SkwasmObject', onDispose: dispose);
   }
 
   late final UniqueRef<Pointer<T>> _ref;
-  final Pointer<T> handle;
+
+  Pointer<T> get handle => _ref.nativeObject;
 
   void dispose() {
     _ref.dispose();
