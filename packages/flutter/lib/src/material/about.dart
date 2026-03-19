@@ -1068,7 +1068,11 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
     final String title = widget.packageName;
     final String subtitle = localizations.licensesPackageDetailText(widget.licenseEntries.length);
     final double pad = _getGutterSize(context);
-    final padding = EdgeInsets.only(left: pad, right: pad, bottom: pad);
+    final padding = EdgeInsets.only(
+      left: pad,
+      right: pad,
+      bottom: pad + MediaQuery.paddingOf(context).bottom,
+    );
     final listWidgets = <Widget>[
       ..._licenses,
       if (!_loaded)
@@ -1196,12 +1200,18 @@ Widget? _defaultApplicationIcon(BuildContext context) {
   return null;
 }
 
-const int _materialGutterThreshold = 720;
-const double _wideGutterSize = 24.0;
-const double _narrowGutterSize = 12.0;
+@visibleForTesting
+// ignore: public_member_api_docs
+const int materialGutterThreshold = 720;
+@visibleForTesting
+// ignore: public_member_api_docs
+const double wideGutterSize = 24.0;
+@visibleForTesting
+// ignore: public_member_api_docs
+const double narrowGutterSize = 12.0;
 
 double _getGutterSize(BuildContext context) =>
-    MediaQuery.widthOf(context) >= _materialGutterThreshold ? _wideGutterSize : _narrowGutterSize;
+    MediaQuery.widthOf(context) >= materialGutterThreshold ? wideGutterSize : narrowGutterSize;
 
 /// Signature for the builder callback used by [_MasterDetailFlow].
 typedef _MasterViewBuilder = Widget Function(BuildContext context, bool isLateralUI);

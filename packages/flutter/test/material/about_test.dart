@@ -307,6 +307,44 @@ void main() {
     expect(find.text('Another license'), findsOneWidget);
   });
 
+  testWidgets('_PackageLicensePage includes bottom safe area padding', (WidgetTester tester) async {
+    const safeAreaBottom = 34.0;
+
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
+      ]);
+    });
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: MediaQuery(
+          data: MediaQueryData(padding: EdgeInsets.only(bottom: safeAreaBottom)),
+          child: Center(child: LicensePage()),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Navigate to the package license page.
+    await tester.tap(find.text('AAA'));
+    await tester.pumpAndSettle();
+
+    // Find the ListView that displays license entries and verify its padding
+    // includes the bottom safe area inset.
+    final ListView listView = tester.widget<ListView>(find.byType(ListView));
+    final listPadding = listView.padding! as EdgeInsets;
+
+    // The bottom padding should include both the gutter size and the bottom
+    // safe area padding from MediaQuery.
+    final double expectedGutter =
+        MediaQuery.widthOf(tester.element(find.byType(ListView))) >= materialGutterThreshold
+        ? wideGutterSize
+        : narrowGutterSize;
+    expect(listPadding.bottom, expectedGutter + safeAreaBottom);
+  });
+
   testWidgets('Material2 - _PackageLicensePage title style without AppBarTheme', (
     WidgetTester tester,
   ) async {
