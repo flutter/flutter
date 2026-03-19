@@ -37,12 +37,13 @@ void testMain() {
       expect(ref.isDisposed, isFalse);
       expect(ref.nativeObject, nativeObject);
       expect(disposed, isFalse);
-      expect(mockFinalizer.attachedTargets, contains(owner));
+      expect(mockFinalizer.registeredPairs.single.target, same(owner));
+      expect(mockFinalizer.registeredPairs.single.value, same(ref));
 
       ref.dispose();
       expect(ref.isDisposed, isTrue);
       expect(disposed, isTrue);
-      expect(mockFinalizer.attachedTargets, isEmpty);
+      expect(mockFinalizer.registeredPairs, isEmpty);
     });
 
     test('collect calls onDispose', () {
@@ -65,7 +66,8 @@ void testMain() {
   group(CountedRef, () {
     test('reference counting', () {
       final nativeObject = _MockNativeObject();
-      var disposed = false;
+      var nativeDisposed = false;
+      var wrapperDisposed = false;
       final referrer1 = _MockStackTraceDebugger();
       final referrer2 = _MockStackTraceDebugger();
 
@@ -73,22 +75,26 @@ void testMain() {
         nativeObject,
         referrer1,
         'TestObject',
-        onDispose: (obj) => disposed = true,
+        onDispose: (obj) => nativeDisposed = true,
+        onDisposed: (referrer) => wrapperDisposed = true,
       );
 
       expect(ref.refCount, 1);
-      expect(disposed, isFalse);
+      expect(nativeDisposed, isFalse);
+      expect(wrapperDisposed, isFalse);
 
       ref.ref(referrer2);
       expect(ref.refCount, 2);
 
       ref.unref(referrer1);
       expect(ref.refCount, 1);
-      expect(disposed, isFalse);
+      expect(nativeDisposed, isFalse);
+      expect(wrapperDisposed, isFalse);
 
       ref.unref(referrer2);
       expect(ref.refCount, 0);
-      expect(disposed, isTrue);
+      expect(nativeDisposed, isTrue);
+      expect(wrapperDisposed, isTrue);
     });
   });
 }
@@ -101,19 +107,17 @@ class _MockStackTraceDebugger implements StackTraceDebugger {
 }
 
 class _MockFinalizer implements Finalizer {
-  final Set<Object> attachedTargets = <Object>{};
+  final List<({Object target, Object value, Object? detach})> _registeredPairs = [];
+
+  List<({Object target, Object value, Object? detach})> get registeredPairs => _registeredPairs;
 
   @override
   void attach(Object target, Object value, {Object? detach}) {
-    attachedTargets.add(target);
+    _registeredPairs.add((target: target, value: value, detach: detach));
   }
 
   @override
   void detach(Object detach) {
-    // In our implementation, detach is called with the UniqueRef itself
-    // We need to find which target it was attached to.
-    // For simplicity in this mock, we'll just clear everything or
-    // track by detach token if we want to be precise.
-    attachedTargets.clear();
+    _registeredPairs.removeWhere((pair) => pair.detach == detach);
   }
 }

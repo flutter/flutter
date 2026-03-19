@@ -81,10 +81,13 @@ class SkwasmPicture implements LayerPicture, StackTraceDebugger {
   bool get debugDisposed {
     bool? result;
     assert(() {
-      result = box.isDisposed;
+      result = isDisposed;
       return true;
     }());
-    return result ?? box.isDisposed;
+    if (result != null) {
+      return result!;
+    }
+    throw StateError('Picture.debugDisposed is only available when asserts are enabled.');
   }
 }
 
