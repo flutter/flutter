@@ -45,6 +45,7 @@ TEST(PlatformViewShell, UpdateSemanticsDoesFlutterViewUpdateSemantics) {
   buffer_float32[position++] = static_cast<float>(node0.scrollPosition);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMax);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMin);
+  buffer_int32[position++] = static_cast<int32_t>(node0.role);
   buffer_int32[position++] = expected_strings.size();  // node0.identifier
   expected_strings.push_back(node0.identifier);
   buffer_int32[position++] = expected_strings.size();  // node0.label
@@ -116,6 +117,7 @@ TEST(PlatformViewShell, UpdateSemanticsDoesUpdateLinkUrl) {
   buffer_float32[position++] = static_cast<float>(node0.scrollPosition);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMax);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMin);
+  buffer_int32[position++] = static_cast<int32_t>(node0.role);
   buffer_int32[position++] = expected_strings.size();  // node0.identifier
   expected_strings.push_back(node0.identifier);
   buffer_int32[position++] = expected_strings.size();  // node0.label
@@ -188,6 +190,7 @@ TEST(PlatformViewShell, UpdateSemanticsDoesUpdateLocale) {
   buffer_float32[position++] = static_cast<float>(node0.scrollPosition);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMax);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMin);
+  buffer_int32[position++] = static_cast<int32_t>(node0.role);
   buffer_int32[position++] = expected_strings.size();  // node0.identifier
   expected_strings.push_back(node0.identifier);
   buffer_int32[position++] = expected_strings.size();  // node0.label
@@ -275,6 +278,7 @@ TEST(PlatformViewShell,
   buffer_float32[position++] = static_cast<float>(node0.scrollPosition);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMax);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMin);
+  buffer_int32[position++] = static_cast<int32_t>(node0.role);
   buffer_int32[position++] = expected_strings.size();  // node0.identifier
   expected_strings.push_back(node0.identifier);
   buffer_int32[position++] = expected_strings.size();  // node0.label

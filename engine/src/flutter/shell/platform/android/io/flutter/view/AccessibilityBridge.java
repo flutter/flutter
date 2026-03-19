@@ -851,7 +851,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       // TODO(jonahwilliams): Figure out a way conform to the expected id from TalkBack's
       // CustomLabelManager. talkback/src/main/java/labeling/CustomLabelManager.java#L525
     }
-    if (semanticsNode.role == 23 /* ProgressBar */) {
+    if (semanticsNode.role == Role.PROGRESS_BAR.value) {
       result.setClassName("android.widget.ProgressBar");
     }
     if (semanticsNode.hasAction(Action.DISMISS)) {
@@ -2330,6 +2330,50 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     public final int value;
 
     Action(int value) {
+      this.value = value;
+    }
+  }
+
+  // Must match SemanticsRole in semantics.dart
+  // https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/ui/semantics.dart
+  enum Role {
+    NONE(0),
+    TAB(1),
+    TAB_BAR(2),
+    TAB_PANEL(3),
+    DIALOG(4),
+    ALERT_DIALOG(5),
+    TABLE(6),
+    CELL(7),
+    ROW(8),
+    COLUMN_HEADER(9),
+    DRAG_HANDLE(10),
+    SPIN_BUTTON(11),
+    COMBO_BOX(12),
+    MENU_BAR(13),
+    MENU(14),
+    MENU_ITEM(15),
+    MENU_ITEM_CHECKBOX(16),
+    MENU_ITEM_RADIO(17),
+    LIST(18),
+    LIST_ITEM(19),
+    FORM(20),
+    TOOLTIP(21),
+    LOADING_SPINNER(22),
+    PROGRESS_BAR(23),
+    HOTKEY(24),
+    RADIO_GROUP(25),
+    STATUS(26),
+    ALERT(27),
+    COMPLEMENTARY(28),
+    CONTENT_INFO(29),
+    MAIN(30),
+    NAVIGATION(31),
+    REGION(32);
+
+    final int value;
+
+    Role(int value) {
       this.value = value;
     }
   }
