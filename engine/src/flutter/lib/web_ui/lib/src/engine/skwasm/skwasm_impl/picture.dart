@@ -47,6 +47,10 @@ class SkwasmPicture implements LayerPicture, StackTraceDebugger {
 
   @override
   void dispose() {
+    if (_disposed) {
+      return;
+    }
+    _disposed = true;
     box.unref(this);
   }
 
@@ -75,10 +79,24 @@ class SkwasmPicture implements LayerPicture, StackTraceDebugger {
   }
 
   @override
-  bool get isDisposed => box.isDisposed;
+  bool get isDisposed => _disposed;
+
+  bool _disposed = false;
 
   @override
-  bool get debugDisposed => box.debugDisposed;
+  bool get debugDisposed {
+    bool? result;
+    assert(() {
+      result = _disposed;
+      return true;
+    }());
+
+    if (result != null) {
+      return result!;
+    }
+
+    throw StateError('Picture.debugDisposed is only available when asserts are enabled.');
+  }
 }
 
 class SkwasmPictureRecorder extends SkwasmObjectWrapper<RawPictureRecorder>

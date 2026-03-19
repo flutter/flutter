@@ -44,7 +44,19 @@ class CkPicture implements LayerPicture, StackTraceDebugger {
   int get approximateBytesUsed => skiaObject.approximateBytesUsed();
 
   @override
-  bool get debugDisposed => _ref.debugDisposed;
+  bool get debugDisposed {
+    bool? result;
+    assert(() {
+      result = _isDisposed;
+      return true;
+    }());
+
+    if (result != null) {
+      return result!;
+    }
+
+    throw StateError('Picture.debugDisposed is only available when asserts are enabled.');
+  }
 
   /// This is set to true when [dispose] is called and is never reset back to
   /// false.
