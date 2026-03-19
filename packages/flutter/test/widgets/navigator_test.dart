@@ -6396,7 +6396,6 @@ void main() {
       error.toStringDeep(),
       contains('Navigator operation requested with a locked Navigator.'),
     );
-    expect(error.toStringDeep(), contains('PopScope.onPopInvokedWithResult'));
     expect(error.toStringDeep(), contains('scheduling the navigation for the next frame'));
   });
 }

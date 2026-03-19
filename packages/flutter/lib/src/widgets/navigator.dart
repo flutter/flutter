@@ -4084,9 +4084,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           ),
           ErrorHint(
             'This can happen if a navigation method is called from a pop '
-            'callback such as PopScope.onPopInvokedWithResult. Consider '
-            'scheduling the navigation for the next frame instead of during '
-            'the current navigation update.',
+            'callback. Consider scheduling the navigation for the next frame '
+            'instead of during the current navigation update.',
           ),
           DiagnosticsProperty<NavigatorState>(
             'The Navigator was',
