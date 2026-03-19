@@ -215,7 +215,9 @@ class FlutterPlugin : Plugin<Project> {
             val releaseBuildType: BuildType = FlutterPluginUtils.getAndroidExtension(project).buildTypes.getByName("release")
             releaseBuildType.isMinifyEnabled = true
             releaseBuildType.isShrinkResources = FlutterPluginUtils.isBuiltAsApp(project)
-            releaseBuildType.proguardFiles.add(FlutterPluginUtils.getAndroidExtension(project).getDefaultProguardFile("proguard-android-optimize.txt"))
+            releaseBuildType.proguardFiles.add(
+                FlutterPluginUtils.getAndroidExtension(project).getDefaultProguardFile("proguard-android-optimize.txt")
+            )
             releaseBuildType.proguardFiles.add(flutterProguardRules)
             val proguardRulesPro = File("${project.projectDir}/proguard-rules.pro")
             if (proguardRulesPro.exists()) {
