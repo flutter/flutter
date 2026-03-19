@@ -584,6 +584,19 @@ FLUTTER_ASSERT_ARC
 #endif  // defined(TARGET_IPHONE_SIMULATOR) && TARGET_IPHONE_SIMULATOR
 }
 
+- (void)testCannotMergePlatformAndUIThreadWhenRunningInExtension {
+#if defined(TARGET_IPHONE_SIMULATOR) && TARGET_IPHONE_SIMULATOR
+  auto settings = FLTDefaultSettingsForBundle();
+  FlutterDartProject* project = [[FlutterDartProject alloc] initWithSettings:settings];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  engine.isRunningInExtension = YES;
+  [engine run];
+
+  XCTAssertNotEqual(engine.shell.GetTaskRunners().GetUITaskRunner(),
+                    engine.shell.GetTaskRunners().GetPlatformTaskRunner());
+#endif  // defined(TARGET_IPHONE_SIMULATOR) && TARGET_IPHONE_SIMULATOR
+}
+
 - (void)testAddSceneDelegateToRegistrar {
   FlutterDartProject* project = [[FlutterDartProject alloc] init];
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"engine" project:project];
