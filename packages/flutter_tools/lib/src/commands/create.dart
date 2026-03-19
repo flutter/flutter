@@ -1375,14 +1375,14 @@ void _generatePubspecLock(Directory directory) {
       package: flutterPackages[package],
   };
 
-  /// Pub will rewrite this file as yaml pretty after resolution.
+  /// We are writing json which is valid yaml. Pub will rewrite this file as pretty yaml after resolution.
   directory
       .childFile('pubspec.lock')
       .writeAsStringSync(const JsonEncoder.withIndent('  ').convert({'packages': packages}));
 }
 
-/// Find the external dependencies from the SDK packages that the package in
-/// [directory] depends on.
+/// Find the package names of external dependencies from the SDK packages that
+/// the package in [directory] depends on.
 List<String> gatherSdkPackageDependencies(Directory directory) {
   final sdkPackages = <String>[];
   final FileSystem fs = directory.fileSystem;
