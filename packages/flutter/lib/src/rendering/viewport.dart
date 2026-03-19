@@ -1195,12 +1195,24 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
         };
     }
 
+    var anchorOffset = 0.0;
+    if (this is RenderViewport) {
+      final viewport = this as RenderViewport;
+      anchorOffset =
+          viewport.anchor *
+          switch (axis) {
+            Axis.vertical => size.height,
+            Axis.horizontal => size.width,
+          };
+    }
+
     final double mainAxisExtentDifference = switch (axis) {
       Axis.horizontal => size.width - extentOfPinnedSlivers - rectLocal.width,
       Axis.vertical => size.height - extentOfPinnedSlivers - rectLocal.height,
     };
 
-    final double targetOffset = leadingScrollOffset - mainAxisExtentDifference * alignment;
+    final double targetOffset =
+        leadingScrollOffset + anchorOffset - mainAxisExtentDifference * alignment;
     final double offsetDifference = offset.pixels - targetOffset;
 
     targetRect = switch (axisDirection) {
