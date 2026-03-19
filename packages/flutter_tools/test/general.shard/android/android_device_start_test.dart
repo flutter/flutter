@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-import 'dart:io' as io;
-
 import 'package:file/memory.dart';
 
 import 'package:flutter_tools/src/android/android_builder.dart';
@@ -21,11 +18,9 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
-import '../../commands.shard/hermetic/proxied_devices_test.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../base/error_handling_io_test.dart';
 
 const kAdbVersionCommand = FakeCommand(
   command: <String>['adb', 'version'],

@@ -571,7 +571,7 @@ class AndroidDevice extends Device {
       if (route != null) ...<String>['--route=$route'],
     ]);
 
-    var shouldRegenerateEngineShellArgsManifest = true;
+    var shouldRegenerateEngineShellArgsManifest = false;
     final Set<String>? previousEngineShellArguments = package?.engineShellArgs;
     if (previousEngineShellArguments != null) {
       shouldRegenerateEngineShellArgsManifest =
@@ -580,6 +580,8 @@ class AndroidDevice extends Device {
           previousEngineShellArguments.length != androidShellArguments.length;
     }
 
+    print('CAMILLE previousEngineShellArguments: $previousEngineShellArguments');
+    print('CAMILLE androidShellArguments: $androidShellArguments');
     if (!prebuiltApplication ||
         shouldRegenerateEngineShellArgsManifest ||
         _androidSdk.licensesAvailable && _androidSdk.latestVersion == null) {
