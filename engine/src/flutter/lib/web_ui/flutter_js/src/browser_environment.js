@@ -50,9 +50,15 @@ const hasChromiumBreakIterators = () => {
 }
 
 const supportsDart2Wasm = () => {
-  // Dart2Wasm's `app.support.js` expression. It currently tests for
-  //   - WasmGC support
-  //   - `js-string` builtin support
+  // The `<app>.support.js` expression emitted by 
+  // ```
+  //   % dart compile wasm \
+  //          --extra-compiler-option=--require-js-string-builtin \
+  //          -o hello.wasm \
+  //          hello.dart
+  //   % cat hello.support.js
+  // ```
+  // It checks wasm GC support and `js-string` builtin support.
   return (WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,0,0,1,5,1,95,1,120,0]))&&!WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,0,0,1,4,1,96,0,0,2,23,1,14,119,97,115,109,58,106,115,45,115,116,114,105,110,103,4,99,97,115,116,0,0]),{"builtins":["js-string"]}));
 }
 
