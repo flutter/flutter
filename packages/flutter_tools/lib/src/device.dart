@@ -995,6 +995,7 @@ class DebuggingOptions {
     this.printDtd = false,
     this.enableLocalDiscovery = false,
     this.webDevServerConfig,
+    this.testFlag = false,
   }) : debuggingEnabled = true,
        webCrossOriginIsolation = webCrossOriginIsolation ?? webUseWasm,
        webRenderer = webRenderer ?? WebRendererMode.getDefault(useWasm: webUseWasm);
@@ -1027,6 +1028,7 @@ class DebuggingOptions {
     this.debugLogsDirectoryPath,
     this.webDevServerConfig,
     this.enableLocalDiscovery = false,
+    this.testFlag = false,
   }) : debuggingEnabled = false,
        useTestFonts = false,
        startPaused = false,
@@ -1116,7 +1118,7 @@ class DebuggingOptions {
     required this.printDtd,
     required this.enableLocalDiscovery,
     this.webDevServerConfig,
-  });
+  }) : testFlag = false;
 
   final bool debuggingEnabled;
 
@@ -1163,6 +1165,7 @@ class DebuggingOptions {
   final bool printDtd;
   final bool enableLocalDiscovery;
   final WebDevServerConfig? webDevServerConfig;
+  final bool testFlag;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
   ///

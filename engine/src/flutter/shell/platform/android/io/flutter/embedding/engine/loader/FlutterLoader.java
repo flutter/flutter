@@ -395,8 +395,9 @@ public class FlutterLoader {
             continue;
           }
 
-          // Check if a boolean value is specified and if so, use it to determine if the
-          // flags should be added. If not, assume the flag is meant to be added.
+          // Check boolean value specified and use it to determine if the flags should
+          // be added. If a boolean value is not specified, assume the flag is meant
+          // to be added.
           if (applicationMetaData.getBoolean(metadataKey, true)) {
             shellArgs.add(arg);
           }
