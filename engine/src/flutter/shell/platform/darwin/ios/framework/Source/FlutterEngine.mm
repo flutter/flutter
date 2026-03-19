@@ -629,9 +629,11 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
       dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
       // The callback should be called synchronously from platform thread.
       FML_DCHECK(removed);
+      self.platformView->RemoveOwnerViewController(viewIdentifier);
+    } else {
+      self.platformView->SetOwnerViewController(nil);
     }
   }
-  self.platformView->RemoveOwnerViewController(viewIdentifier);
 
   [_viewControllers removeObjectForKey:@(viewIdentifier)];
 
