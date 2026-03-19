@@ -37,14 +37,24 @@ final RegExp _buildSettingsTargetHeaderPattern = RegExp(
 Map<String, Map<String, String>> parseXcodeAllTargetsBuildSettings(String buildSettingsOutput) {
   final settingsByTarget = <String, Map<String, String>>{};
   String? currentTarget;
+  final List<String> currentTargetSettings = <String>[];
+
+  void flushCurrentTarget() {
+    final String? target = currentTarget;
+    if (target == null) {
+      return;
+    }
+    settingsByTarget[target] = parseXcodeBuildSettings(currentTargetSettings.join('\n'));
+    currentTargetSettings.clear();
+  }
 
   for (final String line in buildSettingsOutput.split('\n')) {
     final String settingsLine = line.trim();
 
     final RegExpMatch? headerMatch = _buildSettingsTargetHeaderPattern.firstMatch(settingsLine);
     if (headerMatch != null) {
+      flushCurrentTarget();
       currentTarget = headerMatch.group(1)!.trim();
-      settingsByTarget.putIfAbsent(currentTarget, () => <String, String>{});
       continue;
     }
 
@@ -52,17 +62,10 @@ Map<String, Map<String, String>> parseXcodeAllTargetsBuildSettings(String buildS
       continue;
     }
 
-    final RegExpMatch? keyValueMatch = RegExp(r'^([^=]+?)\s*=\s*(.*)$').firstMatch(settingsLine);
-    if (keyValueMatch == null) {
-      continue;
-    }
-    final String key = keyValueMatch.group(1)!.trim();
-    final String value = keyValueMatch.group(2)!.trim();
-    if (key.isNotEmpty) {
-      settingsByTarget[currentTarget]![key] = value;
-    }
+    currentTargetSettings.add(settingsLine);
   }
 
+  flushCurrentTarget();
   return settingsByTarget;
 }
 
