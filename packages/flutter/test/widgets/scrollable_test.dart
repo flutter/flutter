@@ -6,9 +6,9 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'button_tester.dart';
@@ -1740,22 +1740,23 @@ void main() {
       final onRespondCalls = <bool>[];
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ListView(
-              controller: verticalController,
-              children: <Widget>[
-                SizedBox(
-                  height: 200,
-                  child: ListView(
-                    controller: horizontalController,
-                    scrollDirection: Axis.horizontal,
-                    children: <Widget>[Container(width: 1000, height: 200, color: Colors.red)],
-                  ),
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListView(
+            controller: verticalController,
+            children: <Widget>[
+              SizedBox(
+                height: 200,
+                child: ListView(
+                  controller: horizontalController,
+                  scrollDirection: Axis.horizontal,
+                  children: <Widget>[
+                    Container(width: 1000, height: 200, color: const Color(0xFFFF0000)),
+                  ],
                 ),
-                Container(height: 1000, color: Colors.blue),
-              ],
-            ),
+              ),
+              Container(height: 1000, color: const Color(0xFF0000FF)),
+            ],
           ),
         ),
       );
