@@ -170,11 +170,20 @@ class AndroidStudio {
       return presetPluginsPath!;
     }
 
-    // TODO(andrewkolos): This is a bug. We shouldn't treat an unknown
-    // version as equivalent to 0.0.
-    // See https://github.com/flutter/flutter/issues/121468.
-    final int major = version?.major ?? 0;
-    final int minor = version?.minor ?? 0;
+    // JetBrains Toolbox writes plugins to a sibling directory with a ".plugins" suffix.
+    if (!globals.platform.isMacOS) {
+      final toolboxPluginsPath = '$directory.plugins';
+      if (globals.fs.directory(toolboxPluginsPath).existsSync()) {
+        return toolboxPluginsPath;
+      }
+    }
+
+    if (version == null) {
+      return null;
+    }
+
+    final int major = version!.major;
+    final int minor = version!.minor;
     final String? homeDirPath = globals.fsUtils.homeDirPath;
     if (homeDirPath == null) {
       return null;
@@ -198,13 +207,6 @@ class AndroidStudio {
         );
       }
     } else {
-      // JetBrains Toolbox write plugins here
-      final toolboxPluginsPath = '$directory.plugins';
-
-      if (globals.fs.directory(toolboxPluginsPath).existsSync()) {
-        return toolboxPluginsPath;
-      }
-
       if (major >= 4 && minor >= 1 && globals.platform.isLinux) {
         return globals.fs.path.join(
           homeDirPath,

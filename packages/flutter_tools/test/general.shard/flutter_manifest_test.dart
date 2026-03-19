@@ -1642,6 +1642,30 @@ flutter:
     expect(entry.platforms, isEmpty);
   });
 
+  testWithoutContext('FlutterManifest parses shaders with transformers', () async {
+    const manifest = '''
+name: test
+flutter:
+  shaders:
+    - path: shaders/test.frag
+      transformers:
+        - package: my_transformer
+          args: ["--foo", "bar"]
+''';
+
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    )!;
+
+    expect(flutterManifest.shaders, hasLength(1));
+    final AssetsEntry shader = flutterManifest.shaders.single;
+    expect(shader.uri.path, 'shaders/test.frag');
+    expect(shader.transformers, hasLength(1));
+    expect(shader.transformers.single.package, 'my_transformer');
+    expect(shader.transformers.single.args, <String>['--foo', 'bar']);
+  });
+
   testWithoutContext('FlutterManifest.copyWith generates a valid manifest', () async {
     const manifest = '''
 name: test
@@ -1673,7 +1697,7 @@ flutter:
           FontAsset(Uri(path: 'assetUri'), weight: 100, style: 'normal'),
         ]),
       ],
-      shaders: <Uri>[Uri(path: 'shaderUri')],
+      shaders: <AssetsEntry>[AssetsEntry(uri: Uri(path: 'shaderUri'))],
       deferredComponents: <DeferredComponent>[
         DeferredComponent(
           name: 'deferredComponent',
