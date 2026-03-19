@@ -1885,6 +1885,62 @@ void main() {
     expect(editableText.widget.focusNode.hasFocus, isTrue);
   }, skip: true);
 
+  testWidgets('does not refocus when scrolled away in a ListView', (WidgetTester tester) async {
+    final focusNode = FocusNode(debugLabel: 'EditableText Node');
+    final scrollController = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox(
+            width: 500,
+            height: 300,
+            child: ListView(
+              controller: scrollController,
+              children: [
+                EditableText(
+                  backgroundCursorColor: Colors.grey,
+                  controller: controller,
+                  focusNode: focusNode,
+                  style: textStyle,
+                  autofocus: true,
+                  cursorColor: cursorColor,
+                ),
+                for (var i = 0; i < 50; i++)
+                  Text('Line of text $i', style: const TextStyle(fontSize: 20, height: 2)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableTextState editableText = tester.state(find.byType(EditableText));
+    expect(editableText.widget.focusNode.hasFocus, isTrue);
+    editableText.connectionClosed();
+    await tester.pump();
+
+    expect(editableText.widget.focusNode.hasFocus, isFalse);
+
+    // Scroll far away from the text field.
+    final ScrollPosition position = scrollController.position;
+    scrollController.jumpTo(position.maxScrollExtent);
+    await tester.pumpAndSettle();
+
+    // The text field is unmounted, so it should not regain focus.
+    editableText.onFocusReceived();
+    await tester.pump();
+    expect(editableText.widget.focusNode.hasFocus, isFalse);
+
+    // Scroll back to the text field.
+    scrollController.jumpTo(position.minScrollExtent);
+    await tester.pumpAndSettle();
+
+    // The text field is visible again, so it should regain focus this time.
+    editableText.onFocusReceived();
+    await tester.pump();
+    expect(editableText.widget.focusNode.hasFocus, isTrue);
+  });
+
   // Test case for
   // https://github.com/flutter/flutter/issues/123523
   // https://github.com/flutter/flutter/issues/134846 .
