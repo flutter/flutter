@@ -33,6 +33,12 @@ typedef DismissDirectionCallback = void Function(DismissDirection direction);
 /// Used by [Dismissible.confirmDismiss].
 typedef ConfirmDismissCallback = Future<bool?> Function(DismissDirection direction);
 
+/// Signature used by [Dismissible] to determine whether a user gesture
+/// should qualify as a dismissal.
+///
+/// Used by [Dismissible.shouldTriggerDismiss].
+typedef TriggerDismissCallback = bool? Function(TriggerDismissDetails details);
+
 /// Signature used by [Dismissible] to indicate that the dismissible has been dragged.
 ///
 /// Used by [Dismissible.onUpdate].
@@ -81,6 +87,13 @@ enum DismissDirection {
 /// ** See code in examples/api/lib/widgets/dismissible/dismissible.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// In this sample, the [shouldTriggerDismiss] callback is used to customize the behavior
+/// of the [Dismissible] widget.
+///
+/// ** See code in examples/api/lib/widgets/dismissible/dismissible.1.dart **
+/// {@end-tool}
+///
 /// Backgrounds can be used to implement the "leave-behind" idiom. If a background
 /// is specified it is stacked behind the Dismissible's child and is exposed when
 /// the child moves.
@@ -105,6 +118,7 @@ class Dismissible extends StatefulWidget {
     this.background,
     this.secondaryBackground,
     this.confirmDismiss,
+    this.shouldTriggerDismiss,
     this.onResize,
     this.onUpdate,
     this.onDismissed,
@@ -142,6 +156,28 @@ class Dismissible extends StatefulWidget {
   /// If the returned `Future<bool?>` completes to false or null the [onResize]
   /// and [onDismissed] callbacks will not run.
   final ConfirmDismissCallback? confirmDismiss;
+
+  /// Whether a drag should be considered as a dismiss gesture.
+  ///
+  /// If `null`, defers to behavior defined in [dismissThresholds].
+  /// (This applies both when the callback returns `null`,
+  /// and when no callback is provided.)
+  ///
+  /// {@tool snippet}
+  /// By default, when the dismiss threshold is not reached, flinging the item
+  /// can still cause it to be dismissed.
+  ///
+  /// This behavior can be prevented with the following [TriggerDismissCallback]:
+  ///
+  /// ```dart
+  /// Dismissible(
+  ///   key: const ValueKey<String>('dismissible-key'),
+  ///   shouldTriggerDismiss: (TriggerDismissDetails details) => details.reached,
+  ///   child: const ListTile(title: Text('Slide me to dismiss')),
+  /// )
+  /// ```
+  /// {@end-tool}
+  final TriggerDismissCallback? shouldTriggerDismiss;
 
   /// Called when the widget changes size (i.e., when contracting before being dismissed).
   final VoidCallback? onResize;
@@ -259,6 +295,44 @@ class DismissUpdateDetails {
   final double progress;
 }
 
+/// Details for [TriggerDismissCallback].
+///
+/// See also:
+///
+///   * [Dismissible.shouldTriggerDismiss], which receives this information.
+class TriggerDismissDetails {
+  /// Create a new instance of [TriggerDismissDetails].
+  const TriggerDismissDetails({
+    required this.direction,
+    required this.reached,
+    required this.progress,
+    required this.dragExtent,
+    required this.isFling,
+    required this.velocity,
+  });
+
+  /// The direction that the dismissible is being dragged.
+  final DismissDirection direction;
+
+  /// Whether the dismiss threshold is currently reached.
+  final bool reached;
+
+  /// The offset ratio of the dismissible in its parent container.
+  ///
+  /// A value of 0.0 represents the normal position and 1.0 means the child is
+  /// completely outside its parent.
+  final double progress;
+
+  /// The amount of drag in logical pixels.
+  final double dragExtent;
+
+  /// Whether the gesture is considered a fling.
+  final bool isFling;
+
+  /// The absolute fling velocity in logical pixels per second.
+  final double velocity;
+}
+
 class _DismissibleClipper extends CustomClipper<Rect> {
   _DismissibleClipper({required this.axis, required this.moveAnimation})
     : super(reclip: moveAnimation);
@@ -320,6 +394,7 @@ class _DismissibleState extends State<Dismissible>
   bool _dragUnderway = false;
   Size? _sizePriorToCollapse;
   bool _dismissThresholdReached = false;
+  bool _forceDismiss = false;
 
   final GlobalKey _contentKey = GlobalKey();
 
@@ -502,13 +577,49 @@ class _DismissibleState extends State<Dismissible>
       return;
     }
     _dragUnderway = false;
+    _forceDismiss = false;
+
+    final double flingVelocity = _directionIsXAxis ? details.velocity.pixelsPerSecond.dx : details.velocity.pixelsPerSecond.dy;
+    final _FlingGestureKind flingGesture = _describeFlingGesture(details.velocity);
+    final bool reached = _moveController.value > _dismissThreshold;
+
+    // Use value returned by `shouldTriggerDismiss` if a callback is provided.
+    // If the callback returns null, use the default behavior.
+    if (widget.shouldTriggerDismiss != null) {
+      final triggerDismissDetails = TriggerDismissDetails(
+        direction: _dismissDirection,
+        reached: reached,
+        progress: _moveController.value,
+        dragExtent: _dragExtent,
+        isFling: flingGesture != _FlingGestureKind.none,
+        velocity: flingVelocity.abs(),
+      );
+
+      final bool? shouldDismiss = widget.shouldTriggerDismiss!(triggerDismissDetails);
+
+      if (shouldDismiss != null) {
+        if (_moveController.isDismissed) {
+          return;
+        }
+
+        _forceDismiss = shouldDismiss;
+        if (shouldDismiss) {
+          if (_moveController.isCompleted) {
+            _handleMoveCompleted();
+          } else {
+            _moveController.forward();
+          }
+        } else {
+          _moveController.reverse();
+        }
+        return;
+      }
+    }
+
     if (_moveController.isCompleted) {
       _handleMoveCompleted();
       return;
     }
-    final double flingVelocity = _directionIsXAxis
-        ? details.velocity.pixelsPerSecond.dx
-        : details.velocity.pixelsPerSecond.dy;
     switch (_describeFlingGesture(details.velocity)) {
       case _FlingGestureKind.forward:
         assert(_dragExtent != 0.0);
@@ -546,11 +657,12 @@ class _DismissibleState extends State<Dismissible>
   }
 
   Future<void> _handleMoveCompleted() async {
-    if (_dismissThreshold >= 1.0) {
+    if (_dismissThreshold >= 1.0 && !_forceDismiss) {
       _moveController.reverse();
       return;
     }
     final bool result = await _confirmStartResizeAnimation();
+    _forceDismiss = false;
     if (mounted) {
       if (result) {
         _startResizeAnimation();
