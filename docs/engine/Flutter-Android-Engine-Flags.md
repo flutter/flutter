@@ -66,8 +66,8 @@ command line flag corresponds to the metadata key
 `io.flutter.embedding.android.ImpellerLazyShaderInitialization`.
 
 For flags that take values, set the numeric, string, or boolean value (without
-the leading `--flag=` prefix). For those that do not, specify a boolean value
-to determine if the flag is used or not.
+the leading `--flag=` prefix). For those that do not take values, specify a
+boolean value to determine if the flag is used or not.
 
 ### Examples
 
