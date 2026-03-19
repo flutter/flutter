@@ -345,7 +345,7 @@ void _testRoleLifecycle() {
 }
 
 void _testEngineAccessibilityBuilder() {
-  final builder = EngineAccessibilityFeaturesBuilder(0);
+  final builder = EngineAccessibilityFeaturesBuilder();
   EngineAccessibilityFeatures features = builder.build();
 
   test('accessible navigation', () {
@@ -513,10 +513,7 @@ void _testEngineSemanticsOwner() {
   });
 
   test('accessibilityFeatures copyWith function works', () {
-    // Announce, autoPlayAnimatedImages and autoPlayVideos are inverted
-    // checks, see EngineAccessibilityFeatures. Therefore, we need to ensure
-    // that the original copy starts with false values for them.
-    const original = EngineAccessibilityFeatures(0 | 1 << 7 | 1 << 8 | 1 << 9);
+    final EngineAccessibilityFeatures original = EngineAccessibilityFeaturesBuilder(0).build();
 
     EngineAccessibilityFeatures copy = original.copyWith(accessibleNavigation: true);
     expect(copy.accessibleNavigation, true);

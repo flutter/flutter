@@ -74,7 +74,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   /// Compute accessibility features based on the current value of high contrast flag
   static EngineAccessibilityFeatures computeAccessibilityFeatures() {
-    final builder = EngineAccessibilityFeaturesBuilder(0);
+    final builder = EngineAccessibilityFeaturesBuilder();
     if (_isHighContrastEnabled) {
       builder.highContrast = true;
     }
@@ -1832,7 +1832,7 @@ class ViewConfiguration {
 
 class PlatformConfiguration {
   const PlatformConfiguration({
-    this.accessibilityFeatures = const EngineAccessibilityFeatures(0),
+    this.accessibilityFeatures = EngineAccessibilityFeatures.defaultFeatures,
     this.alwaysUse24HourFormat = false,
     this.semanticsEnabled = false,
     this.platformBrightness = ui.Brightness.light,
