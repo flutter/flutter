@@ -2524,6 +2524,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
     // The locale of the content of this node.
     @Nullable private String locale;
+
+    // The role of this node.
     private int role;
 
     // The heading level for this node (0 means not a heading).
