@@ -1773,6 +1773,45 @@ void main() {
     expect(focusNode.hasFocus, isTrue);
   });
 
+  testWidgets('can re-acquire focus in Offstage', (WidgetTester tester) async {
+    final editableTextKey = GlobalKey<EditableTextState>();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Offstage(
+            child: FocusScope(
+              node: focusScopeNode,
+              autofocus: true,
+              child: EditableText(
+                key: editableTextKey,
+                backgroundCursorColor: Colors.grey,
+                controller: controller,
+                focusNode: focusNode,
+                style: textStyle,
+                autofocus: true,
+                cursorColor: cursorColor,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(focusNode.hasFocus, isTrue);
+    final EditableTextState editableText = editableTextKey.currentState!;
+    editableText.connectionClosed();
+    await tester.pump();
+
+    expect(focusNode.hasFocus, isFalse);
+
+    editableText.onFocusReceived();
+    await tester.pump();
+
+    expect(focusNode.hasFocus, isTrue);
+  });
+
   testWidgets('does not refocus when it is unmounted', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
