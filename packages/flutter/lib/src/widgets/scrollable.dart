@@ -34,8 +34,10 @@ import 'scroll_activity.dart';
 import 'scroll_configuration.dart';
 import 'scroll_context.dart';
 import 'scroll_controller.dart';
+import 'scroll_notification.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
+import 'scroll_position_with_single_context.dart';
 import 'scrollable_helpers.dart';
 import 'selectable_region.dart';
 import 'selection_container.dart';
@@ -915,6 +917,81 @@ class ScrollableState extends State<Scrollable>
     _drag = null;
   }
 
+  // DESCENDANT OVERFLOW HANDLING
+
+  /// Handles overscroll notifications from descendant scrollables.
+  ///
+  /// When a descendant scrollable reaches its boundary and overscrolls,
+  /// this method attempts to apply the unused delta to this scrollable,
+  /// enabling seamless scroll delegation between nested scrollables.
+  ///
+  /// This behavior mirrors how [PointerScrollEvent] (mouse wheel) events
+  /// are handled, where unused scroll delta propagates to ancestor scrollables.
+  bool _handleDescendantOverscroll(OverscrollNotification notification) {
+    // Only handle notifications from descendant widgets (depth > 0)
+    if (notification.depth == 0) {
+      return false;
+    }
+
+    // Only handle if scroll directions match.
+    // This prevents horizontal inner scroll from triggering vertical parent scroll
+    // and vice versa (e.g., horizontal ListView in vertical PageView).
+    // Also prevents a reversed parent from responding to a regular child in the
+    // wrong direction.
+    if (notification.metrics.axisDirection != widget.axisDirection) {
+      return false;
+    }
+
+    // Don't interfere if we're not in a state to scroll
+    if (_position == null || _physics == null) {
+      return false;
+    }
+
+    // Don't handle if physics doesn't accept user offset
+    if (!_physics!.shouldAcceptUserOffset(position)) {
+      return false;
+    }
+
+    // Only handle if the scroll configuration allows delegation
+    if (!_configuration.delegateOverscroll) {
+      return false;
+    }
+
+    final double overscroll = notification.overscroll;
+    if (overscroll == 0.0) {
+      return false;
+    }
+
+    // Calculate if this scrollable can consume the overscroll
+    //
+    // Use applyBoundaryConditions to determine if the physics allows scrolling
+    // in the given direction.
+    // For BouncingScrollPhysics, this always returns 0.0 (allowing overscroll).
+    // For ClampingScrollPhysics, this returns the overscroll amount if at the boundary.
+    final double newPixels = position.pixels + overscroll;
+    final double acceptedDelta =
+        overscroll - position.physics.applyBoundaryConditions(position, newPixels);
+
+    final bool canScrollInDirection = acceptedDelta.abs() > precisionErrorTolerance;
+
+    if (!canScrollInDirection) {
+      // Can't scroll in this direction, let notification propagate
+      return false;
+    }
+
+    // Use applyScrollDeltaWithPhysics to allow overscroll/bounce effects.
+    // This method is available on ScrollPositionWithSingleContext, which handles
+    // the physics logic.
+    final ScrollPosition currentPosition = position;
+    if (currentPosition is ScrollPositionWithSingleContext) {
+      currentPosition.applyScrollDeltaWithPhysics(overscroll, velocity: notification.velocity);
+    } else {
+      // Fallback for other ScrollPosition implementations
+      currentPosition.pointerScroll(overscroll);
+    }
+    return true; // Consumed, don't propagate further
+  }
+
   // SCROLL WHEEL
 
   // Returns the offset that should result from applying [event] to the current
@@ -1065,6 +1142,16 @@ class ScrollableState extends State<Scrollable>
         state: this,
         position: position,
         registrar: registrar,
+        child: result,
+      );
+    }
+
+    // Wrap with NotificationListener to handle descendant overscroll events.
+    // This enables seamless scroll delegation from nested scrollables,
+    // similar to how mouse wheel events propagate to ancestor scrollables.
+    if (_configuration.delegateOverscroll) {
+      result = NotificationListener<OverscrollNotification>(
+        onNotification: _handleDescendantOverscroll,
         child: result,
       );
     }
