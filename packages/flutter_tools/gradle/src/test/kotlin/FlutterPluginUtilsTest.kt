@@ -806,6 +806,28 @@ class FlutterPluginUtilsTest {
     }
 
     @Test
+    fun `forceNdkDownload skips when invoking the ndk metadata task`() {
+        val project = mockk<Project>()
+        val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockDefaultConfig = mockk<DefaultConfig>()
+        every {
+            project.extensions
+                .findByType(BaseExtension::class.java)!!
+                .externalNativeBuild.cmake
+        } returns mockCmakeOptions
+        every { project.extensions.findByType(BaseExtension::class.java)!!.defaultConfig } returns mockDefaultConfig
+        every { mockCmakeOptions.path } returns null
+        every { project.findProperty(FlutterPluginUtils.PROP_PREPROVISIONED_NDK_VERSION) } returns null
+        every { project.gradle.startParameter.taskNames } returns listOf(FlutterPluginUtils.TASK_PRINT_NDK_VERSION)
+        every { project.extensions.findByType(AbstractAppExtension::class.java) } returns mockk(relaxed = true)
+
+        FlutterPluginUtils.forceNdkDownload(project, "/base/path")
+
+        verify(exactly = 0) { mockCmakeOptions.path(any()) }
+        verify { mockDefaultConfig wasNot called }
+    }
+
+    @Test
     fun `forceNdkDownload sets externalNativeBuild properties`() {
         val project = mockk<Project>()
         val mockCmakeOptions = mockk<CmakeOptions>()

@@ -620,7 +620,11 @@ object FlutterPluginUtils {
         gradleProject: Project,
         flutterSdkRootPath: String
     ) {
-        if (isFlutterAppProject(gradleProject) && shouldSkipForcedNdkDownload(gradleProject)) {
+        if (isFlutterAppProject(gradleProject) && isInvokingMetadataNdkVersionTask(gradleProject)) {
+            return
+        }
+
+        if (isFlutterAppProject(gradleProject) && hasPreprovisionedNdkVersion(gradleProject)) {
             return
         }
 
@@ -667,14 +671,9 @@ object FlutterPluginUtils {
     }
 
     @JvmStatic
-    @JvmName("shouldSkipForcedNdkDownload")
-    internal fun shouldSkipForcedNdkDownload(project: Project): Boolean {
-        if (isInvokingMetadataNdkVersionTask(project)) {
-            return true
-        }
-
-        return project.findProperty(PROP_PREPROVISIONED_NDK_VERSION)?.toString() != null
-    }
+    @JvmName("hasPreprovisionedNdkVersion")
+    internal fun hasPreprovisionedNdkVersion(project: Project): Boolean =
+        project.findProperty(PROP_PREPROVISIONED_NDK_VERSION)?.toString() != null
 
     @JvmStatic
     @JvmName("isInvokingMetadataNdkVersionTask")
