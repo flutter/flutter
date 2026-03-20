@@ -2087,4 +2087,172 @@ void main() {
     final IgnorePointer ignorePointerTrue = tester.widget(ignorePointerFinder);
     expect(ignorePointerTrue.ignoring, isTrue);
   });
+
+  testWidgets('ExpansionPanel hides icon but preserves space with trailingIconVisibility.hidden', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: ExpansionPanelList(
+            children: <ExpansionPanel>[
+              ExpansionPanel(
+                trailingIconVisibility: ExpansionPanelIconVisibility.hidden,
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return const ListTile(title: Text('Panel'));
+                },
+                body: const ListTile(title: Text('Content')),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Finder visibilityFinder = find
+        .ancestor(of: find.byType(ExpandIcon), matching: find.byType(Visibility))
+        .first;
+
+    final Visibility visibility = tester.widget(visibilityFinder);
+    expect(visibility.visible, isFalse);
+    expect(visibility.maintainSize, isTrue);
+    expect(visibility.maintainAnimation, isTrue);
+    expect(visibility.maintainState, isTrue);
+
+    expect(find.byType(ExpandIcon), findsOneWidget);
+  });
+
+  testWidgets('ExpansionPanel removes icon and space with trailingIconVisibility.gone', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: ExpansionPanelList(
+            children: <ExpansionPanel>[
+              ExpansionPanel(
+                trailingIconVisibility: ExpansionPanelIconVisibility.gone,
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return const ListTile(title: Text('Panel'));
+                },
+                body: const ListTile(title: Text('Content')),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Finder visibilityFinder = find
+        .ancestor(of: find.byType(ExpandIcon), matching: find.byType(Visibility))
+        .first;
+
+    final Visibility visibility = tester.widget(visibilityFinder);
+    expect(visibility.visible, isFalse);
+    expect(visibility.maintainSize, isFalse);
+    expect(visibility.maintainAnimation, isFalse);
+    expect(visibility.maintainState, isFalse);
+  });
+
+  testWidgets('ExpansionPanel shows icon by default with trailingIconVisibility.visible', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: ExpansionPanelList(
+            children: <ExpansionPanel>[
+              ExpansionPanel(
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return const ListTile(title: Text('Panel'));
+                },
+                body: const ListTile(title: Text('Content')),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Finder visibilityFinder = find
+        .ancestor(of: find.byType(ExpandIcon), matching: find.byType(Visibility))
+        .first;
+
+    final Visibility visibility = tester.widget(visibilityFinder);
+    expect(visibility.visible, isTrue);
+  });
+
+  testWidgets('ExpansionPanel disables canTapOnHeader when icon is not visible', (
+    WidgetTester tester,
+  ) async {
+    var callbackInvoked = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: ExpansionPanelList(
+            expansionCallback: (int index, bool isExpanded) {
+              callbackInvoked = true;
+            },
+            children: <ExpansionPanel>[
+              ExpansionPanel(
+                canTapOnHeader: true,
+                trailingIconVisibility: ExpansionPanelIconVisibility.hidden,
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return const ListTile(title: Text('Panel'));
+                },
+                body: const ListTile(title: Text('Content')),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(InkWell), findsNothing);
+
+    await tester.tap(find.text('Panel'));
+    await tester.pumpAndSettle();
+
+    expect(callbackInvoked, isFalse);
+  });
+
+  testWidgets('ExpansionPanel always shows icon when expanded to allow collapsing', (
+    WidgetTester tester,
+  ) async {
+    Widget buildWidget({bool isExpanded = false}) {
+      return MaterialApp(
+        home: SingleChildScrollView(
+          child: ExpansionPanelList(
+            expansionCallback: (int index, bool isExpanded) {},
+            children: <ExpansionPanel>[
+              ExpansionPanel(
+                trailingIconVisibility: ExpansionPanelIconVisibility.hidden,
+                isExpanded: isExpanded,
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return const ListTile(title: Text('Panel'));
+                },
+                body: const ListTile(title: Text('Content')),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget());
+
+    final Finder visibilityFinder = find
+        .ancestor(of: find.byType(ExpandIcon), matching: find.byType(Visibility))
+        .first;
+
+    Visibility visibility = tester.widget(visibilityFinder);
+    expect(visibility.visible, isFalse);
+
+    await tester.pumpWidget(buildWidget(isExpanded: true));
+    await tester.pumpAndSettle();
+
+    visibility = tester.widget(visibilityFinder);
+    expect(visibility.visible, isTrue);
+  });
 }

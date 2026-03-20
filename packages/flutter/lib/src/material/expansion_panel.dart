@@ -58,6 +58,20 @@ typedef ExpansionPanelCallback = void Function(int panelIndex, bool isExpanded);
 /// [ExpansionPanel] needs to rebuild.
 typedef ExpansionPanelHeaderBuilder = Widget Function(BuildContext context, bool isExpanded);
 
+/// Controls the visibility of the trailing expand/collapse icon in an
+/// [ExpansionPanel].
+enum ExpansionPanelIconVisibility {
+  /// The icon is visible and interactive.
+  visible,
+
+  /// The icon is hidden, but its layout space is preserved to maintain
+  /// alignment with other panels.
+  hidden,
+
+  /// The icon is hidden and its layout space is removed.
+  gone,
+}
+
 /// A material expansion panel. It has a header and a body and can be either
 /// expanded or collapsed. The body of the panel is only visible when it is
 /// expanded.
@@ -68,6 +82,13 @@ typedef ExpansionPanelHeaderBuilder = Widget Function(BuildContext context, bool
 /// [ExpansionPanelList].
 ///
 /// See [ExpansionPanelList] for a sample implementation.
+///
+/// {@tool dartpad}
+/// This example demonstrates how to use [trailingIconVisibility] to control
+/// the expand/collapse icon.
+///
+/// ** See code in examples/api/lib/material/expansion_panel/expansion_panel_list.1.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -84,6 +105,7 @@ class ExpansionPanel {
     this.backgroundColor,
     this.splashColor,
     this.highlightColor,
+    this.trailingIconVisibility = ExpansionPanelIconVisibility.visible,
   });
 
   /// The widget builder that builds the expansion panels' header.
@@ -130,6 +152,22 @@ class ExpansionPanel {
   ///
   /// Defaults to [ThemeData.cardColor].
   final Color? backgroundColor;
+
+  /// Controls the visibility of the trailing expand/collapse icon.
+  ///
+  /// When set to [ExpansionPanelIconVisibility.hidden], the icon is not
+  /// rendered but its layout space is preserved for alignment. When set to
+  /// [ExpansionPanelIconVisibility.gone], both the icon and its space are
+  /// removed.
+  ///
+  /// If the panel is currently expanded, the icon will remain visible
+  /// regardless of this value so that the user can collapse it.
+  ///
+  /// When this is not [ExpansionPanelIconVisibility.visible], the
+  /// [canTapOnHeader] behavior is also disabled, unless the panel is expanded.
+  ///
+  /// Defaults to [ExpansionPanelIconVisibility.visible].
+  final ExpansionPanelIconVisibility trailingIconVisibility;
 }
 
 /// An expansion panel that allows for radio-like functionality.
@@ -153,6 +191,7 @@ class ExpansionPanelRadio extends ExpansionPanel {
     super.backgroundColor,
     super.splashColor,
     super.highlightColor,
+    super.trailingIconVisibility,
   });
 
   /// The value that uniquely identifies a radio panel so that the currently
@@ -394,17 +433,29 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       final ExpansionPanel child = widget.children[index];
       final Widget headerWidget = child.headerBuilder(context, _isChildExpanded(index));
 
-      Widget expandIconPadded = Padding(
-        padding: const EdgeInsetsDirectional.only(end: 8.0),
-        child: IgnorePointer(
-          ignoring: child.canTapOnHeader,
-          child: ExpandIcon(
-            color: widget.expandIconColor,
-            isExpanded: _isChildExpanded(index),
-            padding: _kExpandIconPadding,
-            splashColor: child.splashColor,
-            highlightColor: child.highlightColor,
-            onPressed: (bool isExpanded) => _handlePressed(isExpanded, index),
+      final iconVisible =
+          child.trailingIconVisibility == ExpansionPanelIconVisibility.visible ||
+          _isChildExpanded(index);
+      final iconMaintainSize =
+          child.trailingIconVisibility == ExpansionPanelIconVisibility.hidden;
+
+      Widget expandIconPadded = Visibility(
+        visible: iconVisible,
+        maintainSize: iconMaintainSize,
+        maintainAnimation: iconMaintainSize,
+        maintainState: iconMaintainSize,
+        child: Padding(
+          padding: const EdgeInsetsDirectional.only(end: 8.0),
+          child: IgnorePointer(
+            ignoring: child.canTapOnHeader || (!iconVisible && !_isChildExpanded(index)),
+            child: ExpandIcon(
+              color: widget.expandIconColor,
+              isExpanded: _isChildExpanded(index),
+              padding: _kExpandIconPadding,
+              splashColor: child.splashColor,
+              highlightColor: child.highlightColor,
+              onPressed: (bool isExpanded) => _handlePressed(isExpanded, index),
+            ),
           ),
         ),
       );
@@ -435,7 +486,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
           expandIconPadded,
         ],
       );
-      if (child.canTapOnHeader) {
+      if (child.canTapOnHeader && iconVisible) {
         header = MergeSemantics(
           child: InkWell(
             splashColor: child.splashColor,
