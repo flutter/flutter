@@ -855,8 +855,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       result.setClassName("android.widget.ProgressBar");
       if (semanticsNode.value != null) {
         try {
-          float min = 0.0f;
-          float max = 100.0f;
+          float min = Float.NEGATIVE_INFINITY;
+          float max = Float.POSITIVE_INFINITY;
           if (semanticsNode.minValue != null) {
             min = Float.parseFloat(semanticsNode.minValue);
           }
