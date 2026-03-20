@@ -177,15 +177,15 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
   // on the scrollbar thumb and then drags the scrollbar without releasing.
 
   @override
-  void handleThumbPressStart(Offset localPosition) {
-    super.handleThumbPressStart(localPosition);
+  void handleThumbPressStart(DragStartDetails details) {
+    super.handleThumbPressStart(details);
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
       return;
     }
     _pressStartAxisPosition = switch (direction) {
-      Axis.vertical => localPosition.dy,
-      Axis.horizontal => localPosition.dx,
+      Axis.vertical => details.localPosition.dy,
+      Axis.horizontal => details.localPosition.dx,
     };
   }
 
@@ -199,16 +199,16 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
   }
 
   @override
-  void handleThumbPressEnd(Offset localPosition, Velocity velocity) {
+  void handleThumbPressEnd(DragEndDetails details) {
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
       return;
     }
     _thicknessAnimationController.reverse();
-    super.handleThumbPressEnd(localPosition, velocity);
+    super.handleThumbPressEnd(details);
     final (double axisPosition, double axisVelocity) = switch (direction) {
-      Axis.horizontal => (localPosition.dx, velocity.pixelsPerSecond.dx),
-      Axis.vertical => (localPosition.dy, velocity.pixelsPerSecond.dy),
+      Axis.horizontal => (details.localPosition.dx, details.velocity.pixelsPerSecond.dx),
+      Axis.vertical => (details.localPosition.dy, details.velocity.pixelsPerSecond.dy),
     };
     if (axisPosition != _pressStartAxisPosition && axisVelocity.abs() < 10) {
       HapticFeedback.mediumImpact();

@@ -183,6 +183,68 @@ void main() {
     tap.dispose();
   });
 
+  testGesture('Details contain the correct buttons - primary', (GestureTester tester) {
+    final tap = TapGestureRecognizer();
+
+    TapDownDetails? lastDownDetails;
+    TapUpDetails? lastUpDetails;
+
+    tap.onTapDown = (TapDownDetails details) {
+      lastDownDetails = details;
+    };
+    tap.onTapUp = (TapUpDetails details) {
+      lastUpDetails = details;
+    };
+
+    const primaryMouseDown = PointerDownEvent(pointer: 1, kind: PointerDeviceKind.mouse);
+    const primaryMouseUp = PointerUpEvent(pointer: 1, kind: PointerDeviceKind.mouse);
+
+    tap.addPointer(primaryMouseDown);
+    tester.closeArena(1);
+    tester.route(primaryMouseDown);
+    expect(lastDownDetails?.buttons, kPrimaryMouseButton);
+
+    tester.route(primaryMouseUp);
+    expect(lastUpDetails?.buttons, kPrimaryMouseButton);
+
+    tap.dispose();
+  });
+
+  testGesture('Details contain the correct buttons - secondary', (GestureTester tester) {
+    final tap = TapGestureRecognizer();
+
+    TapDownDetails? lastDownDetails;
+    TapUpDetails? lastUpDetails;
+
+    tap.onSecondaryTapDown = (TapDownDetails details) {
+      lastDownDetails = details;
+    };
+    tap.onSecondaryTapUp = (TapUpDetails details) {
+      lastUpDetails = details;
+    };
+
+    const secondaryMouseDown = PointerDownEvent(
+      pointer: 1,
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    const secondaryMouseUp = PointerUpEvent(
+      pointer: 1,
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+
+    tap.addPointer(secondaryMouseDown);
+    tester.closeArena(1);
+    tester.route(secondaryMouseDown);
+    expect(lastDownDetails?.buttons, kSecondaryMouseButton);
+
+    tester.route(secondaryMouseUp);
+    expect(lastUpDetails?.buttons, kSecondaryMouseButton);
+
+    tap.dispose();
+  });
+
   testGesture('No duplicate tap events', (GestureTester tester) {
     final tap = TapGestureRecognizer();
 
@@ -1111,7 +1173,7 @@ void main() {
     addTearDown(tap.dispose);
 
     final pointer1 = TestPointer();
-    final PointerDownEvent down = pointer1.down(Offset.zero);
+    final PointerDownEvent down = pointer1.down(Offset.zero, buttons: kPrimaryMouseButton);
     tap.addPointer(down);
     tester.closeArena(1);
     tester.route(down);
@@ -1119,11 +1181,13 @@ void main() {
     expect(tapMoveDetails, isNotNull);
     expect(tapMoveDetails!.globalPosition, const Offset(50.0, 0));
     expect(tapMoveDetails!.delta, const Offset(50.0, 0));
+    expect(tapMoveDetails!.buttons, kPrimaryMouseButton);
     tapMoveDetails = null;
 
     tester.route(pointer1.move(const Offset(60.0, 10)));
     expect(tapMoveDetails, isNotNull);
     expect(tapMoveDetails!.globalPosition, const Offset(60.0, 10));
     expect(tapMoveDetails!.delta, const Offset(10.0, 10));
+    expect(tapMoveDetails!.buttons, kPrimaryMouseButton);
   });
 }

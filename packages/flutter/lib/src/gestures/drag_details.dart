@@ -24,8 +24,12 @@ export 'velocity_tracker.dart' show Velocity;
 ///  * [DragEndDetails], the details for [GestureDragEndCallback].
 class DragDownDetails with Diagnosticable implements PositionedGestureDetails {
   /// Creates details for a [GestureDragDownCallback].
-  DragDownDetails({this.globalPosition = Offset.zero, Offset? localPosition})
-    : localPosition = localPosition ?? globalPosition;
+  DragDownDetails({
+    this.globalPosition = Offset.zero,
+    Offset? localPosition,
+    this.kind = PointerDeviceKind.unknown,
+    this.buttons = 0,
+  }) : localPosition = localPosition ?? globalPosition;
 
   /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
   @override
@@ -35,11 +39,21 @@ class DragDownDetails with Diagnosticable implements PositionedGestureDetails {
   @override
   final Offset localPosition;
 
+  /// The kind of the device that initiated the drag.
+  final PointerDeviceKind kind;
+
+  /// The buttons that were pressed when the device first contacted the screen.
+  ///
+  /// For the format of this value, see [PointerEvent.buttons].
+  final int buttons;
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
     properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
+    properties.add(EnumProperty<PointerDeviceKind>('kind', kind));
+    properties.add(IntProperty('buttons', buttons));
   }
 }
 
@@ -66,6 +80,7 @@ class DragStartDetails with Diagnosticable implements PositionedGestureDetails {
     Offset? localPosition,
     this.sourceTimeStamp,
     this.kind,
+    this.buttons = 0,
   }) : localPosition = localPosition ?? globalPosition;
 
   /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
@@ -82,8 +97,13 @@ class DragStartDetails with Diagnosticable implements PositionedGestureDetails {
   /// Could be null if triggered from proxied events such as accessibility.
   final Duration? sourceTimeStamp;
 
-  /// The kind of the device that initiated the event.
+  /// The kind of the device that initiated the drag.
   final PointerDeviceKind? kind;
+
+  /// The buttons that were pressed when the device first contacted the screen.
+  ///
+  /// For the format of this value, see [PointerEvent.buttons].
+  final int buttons;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -91,7 +111,8 @@ class DragStartDetails with Diagnosticable implements PositionedGestureDetails {
     properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
     properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(DiagnosticsProperty<Duration?>('sourceTimeStamp', sourceTimeStamp));
-    properties.add(EnumProperty<PointerDeviceKind?>('kind', kind));
+    properties.add(EnumProperty<PointerDeviceKind>('kind', kind));
+    properties.add(IntProperty('buttons', buttons));
   }
 }
 
@@ -125,6 +146,7 @@ class DragUpdateDetails with Diagnosticable implements PositionedGestureDetails 
     this.delta = Offset.zero,
     this.primaryDelta,
     this.kind,
+    this.buttons = 0,
   }) : assert(
          primaryDelta == null ||
              (primaryDelta == delta.dx && delta.dy == 0.0) ||
@@ -169,8 +191,13 @@ class DragUpdateDetails with Diagnosticable implements PositionedGestureDetails 
   /// Defaults to null if not specified in the constructor.
   final double? primaryDelta;
 
-  /// The kind of the device that initiated the event.
+  /// The kind of the device that initiated the drag.
   final PointerDeviceKind? kind;
+
+  /// The buttons that were pressed when the device first contacted the screen.
+  ///
+  /// For the format of this value, see [PointerEvent.buttons].
+  final int buttons;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -180,6 +207,8 @@ class DragUpdateDetails with Diagnosticable implements PositionedGestureDetails 
     properties.add(DiagnosticsProperty<Duration?>('sourceTimeStamp', sourceTimeStamp));
     properties.add(DiagnosticsProperty<Offset>('delta', delta));
     properties.add(DoubleProperty('primaryDelta', primaryDelta));
+    properties.add(EnumProperty<PointerDeviceKind>('kind', kind));
+    properties.add(IntProperty('buttons', buttons));
   }
 }
 
@@ -213,6 +242,8 @@ class DragEndDetails with Diagnosticable implements PositionedGestureDetails {
     Offset? localPosition,
     this.velocity = Velocity.zero,
     this.primaryVelocity,
+    this.kind,
+    this.buttons = 0,
   }) : assert(
          primaryVelocity == null ||
              (primaryVelocity == velocity.pixelsPerSecond.dx && velocity.pixelsPerSecond.dy == 0) ||
@@ -245,6 +276,14 @@ class DragEndDetails with Diagnosticable implements PositionedGestureDetails {
   /// Defaults to null if not specified in the constructor.
   final double? primaryVelocity;
 
+  /// The kind of the device that initiated the drag.
+  final PointerDeviceKind? kind;
+
+  /// The buttons that were pressed when the device first contacted the screen.
+  ///
+  /// For the format of this value, see [PointerEvent.buttons].
+  final int buttons;
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -252,5 +291,7 @@ class DragEndDetails with Diagnosticable implements PositionedGestureDetails {
     properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(DiagnosticsProperty<Velocity>('velocity', velocity));
     properties.add(DoubleProperty('primaryVelocity', primaryVelocity));
+    properties.add(EnumProperty<PointerDeviceKind>('kind', kind));
+    properties.add(IntProperty('buttons', buttons));
   }
 }

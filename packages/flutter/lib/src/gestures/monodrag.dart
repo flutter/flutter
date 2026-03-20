@@ -78,6 +78,9 @@ typedef GestureVelocityTrackerBuilder = VelocityTracker Function(PointerEvent ev
 ///  * [HorizontalDragGestureRecognizer], for left and right drags.
 ///  * [VerticalDragGestureRecognizer], for up and down drags.
 ///  * [PanGestureRecognizer], for drags that are not locked to a single axis.
+///
+/// [DragGestureRecognizer] will cancel a gesture if there are any changes
+/// to the buttons pressed during the same drag sequence.
 sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initialize the object.
   ///
@@ -420,7 +423,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         _globalDistanceMoved = 0.0;
         _lastPendingEventTimestamp = event.timeStamp;
         _lastTransform = event.transform;
-        _checkDown();
+        _checkDown(event.pointer);
       case _DragState.possible:
         break;
       case _DragState.accepted:
@@ -783,11 +786,13 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
   }
 
-  void _checkDown() {
+  void _checkDown(int pointer) {
     if (onDown != null) {
       final details = DragDownDetails(
         globalPosition: _initialPosition.global,
         localPosition: _initialPosition.local,
+        kind: getKindForPointer(pointer),
+        buttons: getButtonsForPointer(pointer),
       );
       invokeCallback<void>('onDown', () => onDown!(details));
     }
@@ -846,6 +851,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         globalPosition: _initialPosition.global,
         localPosition: _initialPosition.local,
         kind: getKindForPointer(pointer),
+        buttons: getButtonsForPointer(pointer),
       );
       invokeCallback<void>('onStart', () => onStart!(details));
     }
@@ -867,6 +873,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         globalPosition: globalPosition,
         localPosition: localPosition,
         kind: getKindForPointer(pointer),
+        buttons: getButtonsForPointer(pointer),
       );
       invokeCallback<void>('onUpdate', () => onUpdate!(details));
     }
@@ -894,6 +901,8 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       primaryVelocity: 0.0,
       globalPosition: _lastPosition.global,
       localPosition: _lastPosition.local,
+      kind: getKindForPointer(pointer),
+      buttons: _initialButtons ?? 0,
     );
 
     invokeCallback<void>('onEnd', () => onEnd!(details!), debugReport: debugReport);

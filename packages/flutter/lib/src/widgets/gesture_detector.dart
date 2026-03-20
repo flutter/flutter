@@ -1791,10 +1791,20 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
             final Offset newLocalOffset = localCenter + details.delta;
             final Offset newGlobalOffset = _transformOffsetToGlobal(renderObject, newLocalOffset);
             horizontal.onDown?.call(
-              DragDownDetails(localPosition: localCenter, globalPosition: globalCenter),
+              DragDownDetails(
+                localPosition: localCenter,
+                globalPosition: globalCenter,
+                kind: details.kind ?? PointerDeviceKind.unknown,
+                buttons: details.buttons,
+              ),
             );
             horizontal.onStart?.call(
-              DragStartDetails(localPosition: localCenter, globalPosition: globalCenter),
+              DragStartDetails(
+                localPosition: localCenter,
+                globalPosition: globalCenter,
+                kind: details.kind,
+                buttons: details.buttons,
+              ),
             );
             horizontal.onUpdate?.call(details);
             horizontal.onEnd?.call(
@@ -1802,6 +1812,8 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
                 primaryVelocity: 0.0,
                 localPosition: newLocalOffset,
                 globalPosition: newGlobalOffset,
+                kind: details.kind,
+                buttons: details.buttons,
               ),
             );
           };
@@ -1815,14 +1827,29 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
             final Offset newGlobalOffset = _transformOffsetToGlobal(renderObject, newLocalOffset);
 
             pan.onDown?.call(
-              DragDownDetails(localPosition: localCenter, globalPosition: globalCenter),
+              DragDownDetails(
+                localPosition: localCenter,
+                globalPosition: globalCenter,
+                kind: details.kind ?? PointerDeviceKind.unknown,
+                buttons: details.buttons,
+              ),
             );
             pan.onStart?.call(
-              DragStartDetails(localPosition: localCenter, globalPosition: globalCenter),
+              DragStartDetails(
+                localPosition: localCenter,
+                globalPosition: globalCenter,
+                kind: details.kind,
+                buttons: details.buttons,
+              ),
             );
             pan.onUpdate?.call(details);
             pan.onEnd?.call(
-              DragEndDetails(localPosition: newLocalOffset, globalPosition: newGlobalOffset),
+              DragEndDetails(
+                localPosition: newLocalOffset,
+                globalPosition: newGlobalOffset,
+                kind: details.kind,
+                buttons: details.buttons,
+              ),
             );
           };
 
@@ -1850,10 +1877,20 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
             final Offset newLocalOffset = localCenter + details.delta;
             final Offset newGlobalOffset = _transformOffsetToGlobal(renderObject, newLocalOffset);
             vertical.onDown?.call(
-              DragDownDetails(localPosition: localCenter, globalPosition: globalCenter),
+              DragDownDetails(
+                localPosition: localCenter,
+                globalPosition: globalCenter,
+                kind: details.kind ?? PointerDeviceKind.unknown,
+                buttons: details.buttons,
+              ),
             );
             vertical.onStart?.call(
-              DragStartDetails(localPosition: localCenter, globalPosition: globalCenter),
+              DragStartDetails(
+                localPosition: localCenter,
+                globalPosition: globalCenter,
+                kind: details.kind,
+                buttons: details.buttons,
+              ),
             );
             vertical.onUpdate?.call(details);
             vertical.onEnd?.call(
@@ -1861,6 +1898,8 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
                 primaryVelocity: 0.0,
                 localPosition: newLocalOffset,
                 globalPosition: newGlobalOffset,
+                kind: details.kind,
+                buttons: details.buttons,
               ),
             );
           };
@@ -1873,14 +1912,29 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
             final Offset newLocalOffset = localCenter + details.delta;
             final Offset newGlobalOffset = _transformOffsetToGlobal(renderObject, newLocalOffset);
             pan.onDown?.call(
-              DragDownDetails(localPosition: localCenter, globalPosition: globalCenter),
+              DragDownDetails(
+                localPosition: localCenter,
+                globalPosition: globalCenter,
+                kind: details.kind ?? PointerDeviceKind.unknown,
+                buttons: details.buttons,
+              ),
             );
             pan.onStart?.call(
-              DragStartDetails(localPosition: localCenter, globalPosition: globalCenter),
+              DragStartDetails(
+                localPosition: localCenter,
+                globalPosition: globalCenter,
+                kind: details.kind,
+                buttons: details.buttons,
+              ),
             );
             pan.onUpdate?.call(details);
             pan.onEnd?.call(
-              DragEndDetails(localPosition: newLocalOffset, globalPosition: newGlobalOffset),
+              DragEndDetails(
+                localPosition: newLocalOffset,
+                globalPosition: newGlobalOffset,
+                kind: details.kind,
+                buttons: details.buttons,
+              ),
             );
           };
 

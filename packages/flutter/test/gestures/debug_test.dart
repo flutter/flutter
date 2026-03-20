@@ -224,34 +224,44 @@ void main() {
     final pairs = <(Diagnosticable, List<String>)>[
       (
         DragDownDetails(),
-        <String>['globalPosition: Offset(0.0, 0.0)', 'localPosition: Offset(0.0, 0.0)'],
+        <String>[
+          'globalPosition: Offset(0.0, 0.0)',
+          'localPosition: Offset(0.0, 0.0)',
+          'kind: unknown',
+          'buttons: 0',
+        ],
       ),
       (
-        DragStartDetails(),
+        DragStartDetails(buttons: kPrimaryButton),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
           'localPosition: Offset(0.0, 0.0)',
           'sourceTimeStamp: null',
           'kind: null',
+          'buttons: 1',
         ],
       ),
       (
-        DragUpdateDetails(globalPosition: Offset.zero),
+        DragUpdateDetails(globalPosition: Offset.zero, buttons: kSecondaryButton),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
           'localPosition: Offset(0.0, 0.0)',
           'sourceTimeStamp: null',
           'delta: Offset(0.0, 0.0)',
           'primaryDelta: null',
+          'kind: null',
+          'buttons: 2',
         ],
       ),
       (
-        DragEndDetails(),
+        DragEndDetails(buttons: kPrimaryButton | kSecondaryButton),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
           'localPosition: Offset(0.0, 0.0)',
           'velocity: Velocity(0.0, 0.0)',
           'primaryVelocity: null',
+          'kind: null',
+          'buttons: 3',
         ],
       ),
       (
@@ -263,32 +273,45 @@ void main() {
         ],
       ),
       (
-        const LongPressDownDetails(),
+        const LongPressDownDetails(kind: PointerDeviceKind.mouse, buttons: kTertiaryButton),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
           'localPosition: Offset(0.0, 0.0)',
-          'kind: null',
+          'kind: mouse',
+          'buttons: 4',
         ],
       ),
       (
-        const LongPressStartDetails(),
-        <String>['globalPosition: Offset(0.0, 0.0)', 'localPosition: Offset(0.0, 0.0)'],
+        const LongPressStartDetails(kind: PointerDeviceKind.stylus, buttons: kMiddleMouseButton),
+        <String>[
+          'globalPosition: Offset(0.0, 0.0)',
+          'localPosition: Offset(0.0, 0.0)',
+          'kind: stylus',
+          'buttons: 4',
+        ],
       ),
       (
-        const LongPressMoveUpdateDetails(),
+        const LongPressMoveUpdateDetails(
+          kind: PointerDeviceKind.touch,
+          buttons: kPrimaryButton | kSecondaryButton,
+        ),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
           'localPosition: Offset(0.0, 0.0)',
           'offsetFromOrigin: Offset(0.0, 0.0)',
           'localOffsetFromOrigin: Offset(0.0, 0.0)',
+          'kind: touch',
+          'buttons: 3',
         ],
       ),
       (
-        const LongPressEndDetails(),
+        const LongPressEndDetails(buttons: kSecondaryButton),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
           'localPosition: Offset(0.0, 0.0)',
           'velocity: Velocity(0.0, 0.0)',
+          'kind: unknown',
+          'buttons: 2',
         ],
       ),
       (
@@ -339,11 +362,12 @@ void main() {
         <String>['velocity: Velocity(0.0, 0.0)', 'scaleVelocity: 0.0', 'pointerCount: 0'],
       ),
       (
-        TapDownDetails(kind: PointerDeviceKind.unknown),
+        TapDownDetails(kind: PointerDeviceKind.stylus),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
           'localPosition: Offset(0.0, 0.0)',
-          'kind: unknown',
+          'kind: stylus',
+          'buttons: 0',
         ],
       ),
       (
@@ -352,6 +376,7 @@ void main() {
           'globalPosition: Offset(0.0, 0.0)',
           'localPosition: Offset(0.0, 0.0)',
           'kind: unknown',
+          'buttons: 0',
         ],
       ),
       (
@@ -359,12 +384,14 @@ void main() {
           globalPosition: Offset.zero,
           localPosition: Offset.zero,
           consecutiveTapCount: 1,
+          buttons: kPrimaryButton,
         ),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
           'localPosition: Offset(0.0, 0.0)',
           'kind: null',
           'consecutiveTapCount: 1',
+          'buttons: 1',
         ],
       ),
       (
@@ -373,12 +400,14 @@ void main() {
           localPosition: Offset.zero,
           kind: PointerDeviceKind.unknown,
           consecutiveTapCount: 1,
+          buttons: kSecondaryButton,
         ),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
           'localPosition: Offset(0.0, 0.0)',
           'kind: unknown',
           'consecutiveTapCount: 1',
+          'buttons: 2',
         ],
       ),
       (
@@ -386,6 +415,7 @@ void main() {
           globalPosition: Offset.zero,
           localPosition: Offset.zero,
           consecutiveTapCount: 1,
+          buttons: kPrimaryButton | kSecondaryButton,
         ),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
@@ -393,6 +423,7 @@ void main() {
           'sourceTimeStamp: null',
           'kind: null',
           'consecutiveTapCount: 1',
+          'buttons: 3',
         ],
       ),
       (
@@ -413,16 +444,23 @@ void main() {
           'offsetFromOrigin: Offset(0.0, 0.0)',
           'localOffsetFromOrigin: Offset(0.0, 0.0)',
           'consecutiveTapCount: 1',
+          'buttons: 0',
         ],
       ),
       (
-        TapDragEndDetails(consecutiveTapCount: 1),
+        TapDragEndDetails(
+          consecutiveTapCount: 1,
+          kind: PointerDeviceKind.mouse,
+          buttons: kPrimaryButton,
+        ),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
           'localPosition: Offset(0.0, 0.0)',
           'velocity: Velocity(0.0, 0.0)',
           'primaryVelocity: null',
           'consecutiveTapCount: 1',
+          'kind: mouse',
+          'buttons: 1',
         ],
       ),
     ];
