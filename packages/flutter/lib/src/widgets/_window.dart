@@ -218,6 +218,10 @@ abstract class RegularWindowController extends BaseWindowController {
   /// The [title] argument configures the window's initial title.
   /// If omitted, some platforms might fall back to the app's name.
   ///
+  /// The [decorated] argument configures whether the window has decorations
+  /// such as title bar, borders, etc. If false, the user should provide their
+  /// own decorations.
+  ///
   /// The [delegate] argument can be used to listen to the window's
   /// lifecycle. For example, it can be used to save state before
   /// a window is closed.
@@ -228,6 +232,7 @@ abstract class RegularWindowController extends BaseWindowController {
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
+    bool decorated = true,
     RegularWindowControllerDelegate? delegate,
   }) {
     if (!isWindowingEnabled) {
@@ -244,6 +249,7 @@ abstract class RegularWindowController extends BaseWindowController {
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       title: title,
+      decorated: decorated,
     );
   }
 
@@ -505,6 +511,10 @@ abstract class DialogWindowController extends BaseWindowController {
   /// The [title] argument configures the window's initial title.
   /// If omitted, some platforms might fall back to the app's name.
   ///
+  /// The [decorated] argument configures whether the window has decorations
+  /// such as title bar, borders, etc. If false, the user should provide their
+  /// own decorations.
+  ///
   /// The [delegate] argument can be used to listen to the window's
   /// lifecycle. For example, it can be used to save state before
   /// a window is closed.
@@ -515,6 +525,7 @@ abstract class DialogWindowController extends BaseWindowController {
     BoxConstraints? preferredConstraints,
     BaseWindowController? parent,
     String? title,
+    bool decorated = true,
     DialogWindowControllerDelegate? delegate,
   }) {
     WidgetsFlutterBinding.ensureInitialized();
@@ -524,6 +535,7 @@ abstract class DialogWindowController extends BaseWindowController {
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       title: title,
+      decorated: decorated,
       parent: parent,
     );
   }
@@ -1152,6 +1164,7 @@ abstract class WindowingOwner {
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
+    bool decorated = true,
   });
 
   /// Creates a [DialogWindowController] with the provided properties.
@@ -1168,6 +1181,7 @@ abstract class WindowingOwner {
     BoxConstraints? preferredConstraints,
     BaseWindowController? parent,
     String? title,
+    bool decorated = true,
   });
 
   /// Creates a [TooltipWindowController] with the provided properties.
@@ -1251,6 +1265,7 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
+    bool decorated = true,
   }) {
     throw UnsupportedError(errorMessage);
   }
@@ -1262,6 +1277,7 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
     BoxConstraints? preferredConstraints,
     BaseWindowController? parent,
     String? title,
+    bool decorated = true,
   }) {
     throw UnsupportedError(errorMessage);
   }
