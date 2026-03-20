@@ -827,13 +827,13 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
     if (paint.style == Paint::Style::kStroke) {
       expand_size += paint.stroke.width / 2.0f;
     }
-    Rect expanded_rect = rect.Expand(expand_size);
+
+    auto geometry = std::make_unique<FillRectGeometry>(rect);
+    geometry->SetAntialiasPadding(expand_size);
 
     auto contents = UberSDFContents::MakeRect(
-        /*rect=*/rect,
         /*color=*/paint.color, /*stroke_width=*/paint.stroke.width,
-        /*stroked=*/paint.style == Paint::Style::kStroke,
-        std::make_unique<FillRectGeometry>(expanded_rect));
+        /*stroked=*/paint.style == Paint::Style::kStroke, std::move(geometry));
 
     const Geometry* geom = contents->GetGeometry();
 
@@ -1041,9 +1041,6 @@ void Canvas::DrawCircle(const Point& center,
     geometry->SetAntialiasPadding(1.0f);
 
     auto contents = UberSDFContents::MakeCircle(
-        /*rect=*/
-        Rect::MakeLTRB(center.x - radius, center.y - radius, center.x + radius,
-                       center.y + radius),
         /*color=*/paint.color, /*stroke_width=*/paint.stroke.width,
         /*stroked=*/is_stroked, std::move(geometry));
 
