@@ -760,6 +760,7 @@ mixin RendererBinding
         FlutterTimeline.finishSync();
       }
     }
+    _viewsNeedingCompositing.addAll(renderViews);
     scheduleWarmUpFrame();
     await endOfFrame;
   }
