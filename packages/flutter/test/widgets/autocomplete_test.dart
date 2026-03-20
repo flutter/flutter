@@ -3915,4 +3915,160 @@ void main() {
     // The text field should be updated to 'test'.
     expect(textCtrl.text, 'test');
   });
+
+  testWidgets('options update when selection changes', (WidgetTester tester) async {
+    final GlobalKey fieldKey = GlobalKey();
+    final GlobalKey optionsKey = GlobalKey();
+    late FocusNode focusNode;
+    late TextEditingController textEditingController;
+    Iterable<String>? lastOptions;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: RawAutocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              // An optionsBuilder that uses the selection, not just the text.
+              final int offset = textEditingValue.selection.baseOffset;
+              final String textUpToCursor = textEditingValue.text.substring(
+                0,
+                offset.clamp(0, textEditingValue.text.length),
+              );
+              return kOptions.where((String option) {
+                return option.contains(textUpToCursor.toLowerCase());
+              });
+            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  focusNode = fieldFocusNode;
+                  textEditingController = fieldTextEditingController;
+                  return TextField(
+                    key: fieldKey,
+                    focusNode: focusNode,
+                    controller: textEditingController,
+                  );
+                },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  lastOptions = options;
+                  return Container(key: optionsKey);
+                },
+          ),
+        ),
+      ),
+    );
+
+    focusNode.requestFocus();
+    await tester.enterText(find.byKey(fieldKey), 'goose');
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsOneWidget);
+    // Full text "goose" matches only "goose".
+    expect(lastOptions, <String>['goose']);
+
+    // Move the cursor to just after "go".
+    textEditingController.selection = const TextSelection.collapsed(offset: 2);
+    await tester.pump();
+    // Now text up to cursor is "go", which matches more options.
+    expect(lastOptions, <String>['dingo', 'flamingo', 'goose']);
+  });
+
+  group('RawAutocompleteController', () {
+    testWidgets('shows, updates, and hides options view', (WidgetTester tester) async {
+      final GlobalKey fieldKey = GlobalKey();
+      final GlobalKey optionsKey = GlobalKey();
+      final RawAutocompleteController<String> controller = RawAutocompleteController<String>();
+      addTearDown(controller.dispose);
+      late FocusNode focusNode;
+      late Iterable<String> lastOptions;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: RawAutocomplete<String>(
+              controller: controller,
+              fieldViewBuilder:
+                  (
+                    BuildContext context,
+                    TextEditingController fieldTextEditingController,
+                    FocusNode fieldFocusNode,
+                    VoidCallback onFieldSubmitted,
+                  ) {
+                    focusNode = fieldFocusNode;
+                    return TestTextField(
+                      key: fieldKey,
+                      focusNode: focusNode,
+                      controller: fieldTextEditingController,
+                    );
+                  },
+              optionsViewBuilder:
+                  (
+                    BuildContext context,
+                    AutocompleteOnSelected<String> onSelected,
+                    Iterable<String> options,
+                  ) {
+                    lastOptions = options;
+                    return Container(key: optionsKey);
+                  },
+            ),
+          ),
+        ),
+      );
+
+      // Set options and focus — options view shows.
+      controller.options = kOptions;
+      focusNode.requestFocus();
+      await tester.pump();
+      expect(find.byKey(optionsKey), findsOneWidget);
+      expect(lastOptions.length, kOptions.length);
+
+      // Update to a subset.
+      controller.options = <String>['aardvark', 'bobcat'];
+      await tester.pump();
+      expect(lastOptions.length, 2);
+      expect(lastOptions.elementAt(0), 'aardvark');
+      expect(lastOptions.elementAt(1), 'bobcat');
+
+      // Set to empty — options view hides.
+      controller.options = <String>[];
+      await tester.pump();
+      expect(find.byKey(optionsKey), findsNothing);
+    });
+
+    testWidgets('assertion: exactly one of optionsBuilder or controller', (WidgetTester tester) async {
+      final RawAutocompleteController<String> controller = RawAutocompleteController<String>();
+      addTearDown(controller.dispose);
+
+      final optionsViewBuilder =
+          (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+            return Container();
+          };
+
+      // Both provided.
+      expect(
+        () => RawAutocomplete<String>(
+          optionsBuilder: (TextEditingValue value) => <String>[],
+          controller: controller,
+          optionsViewBuilder: optionsViewBuilder,
+        ),
+        throwsAssertionError,
+      );
+
+      // Neither provided.
+      expect(
+        () => RawAutocomplete<String>(
+          optionsViewBuilder: optionsViewBuilder,
+        ),
+        throwsAssertionError,
+      );
+    });
+  });
 }
