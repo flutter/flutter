@@ -6284,7 +6284,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     _buildSemanticsSubtree(usedSemanticsIds: usedSemanticsIds);
 
     // At this point, the cachedSemanticsNode should be latest semantics node
-    // represeting this render object and _producedSiblingNodesAndOwners contains the latest
+    // representing this render object and _producedSiblingNodesAndOwners contains the latest
     // sibling nodes.
     if (!_needsMergingSiblingNodesIntoSelf) {
       semanticsNodes.addAll(_producedSiblingNodesAndOwners.keys);
