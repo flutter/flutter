@@ -76,4 +76,8 @@ std::optional<Rect> CircleContents::GetCoverage(const Entity& entity) const {
   return geometry_->GetCoverage(entity.GetTransform());
 }
 
+const Geometry* CircleContents::GetGeometry() const {
+  return geometry_.get();
+}
+
 }  // namespace impeller

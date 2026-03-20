@@ -68,6 +68,15 @@ BufferView RuntimeEffectContents::EmplaceUniform(
       });
 }
 
+RuntimeEffectContents::RuntimeEffectContents(const Geometry* geometry)
+    : geometry_(geometry) {}
+
+RuntimeEffectContents::~RuntimeEffectContents() = default;
+
+const Geometry* RuntimeEffectContents::GetGeometry() const {
+  return geometry_;
+}
+
 void RuntimeEffectContents::SetRuntimeStage(
     std::shared_ptr<RuntimeStage> runtime_stage) {
   runtime_stage_ = std::move(runtime_stage);

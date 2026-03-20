@@ -28,9 +28,8 @@ TEST_P(EntityTest, TiledTextureContentsRendersWithCorrectPipeline) {
       GetContext()->GetResourceAllocator()->CreateTexture(texture_desc);
 
   auto geom = Geometry::MakeCover();
-  TiledTextureContents contents;
+  TiledTextureContents contents(geom.get());
   contents.SetTexture(texture);
-  contents.SetGeometry(geom.get());
 
   auto content_context = GetContentContext();
   auto buffer = content_context->GetContext()->CreateCommandBuffer();
