@@ -855,7 +855,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       case PROGRESS_BAR:
         result.setClassName("android.widget.ProgressBar");
         if (semanticsNode.value != null) {
-
           float min = Float.NEGATIVE_INFINITY;
           float max = Float.POSITIVE_INFINITY;
           if (semanticsNode.minValue != null) {
@@ -878,8 +877,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 AccessibilityNodeInfo.RangeInfo.obtain(
                     AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT, min, max, parsedValue));
           } catch (NumberFormatException e) {
-            // Keep as indeterminate format. There is no RANGE_TYPE_INDETERMINATE, so we
-            // fallback to RANGE_TYPE_FLOAT with 0.0.
+            // Fallback to RANGE_TYPE_FLOAT with 0.0.
             result.setRangeInfo(
                 AccessibilityNodeInfo.RangeInfo.obtain(
                     AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT, 0.0f, 0.0f, 0.0f));
