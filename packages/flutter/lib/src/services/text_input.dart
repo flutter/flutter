@@ -1369,6 +1369,12 @@ mixin TextInputClient {
   /// This method will only be called on iOS.
   void showAutocorrectionPromptRect(int start, int end);
 
+  /// Notifies the client that the platform moved focus back to this input.
+  ///
+  /// This is necessary to support autofill on some browsers (e.g. iOS Safari) that blur the text
+  /// field and refocus it before autofilling.
+  void onFocusReceived() {}
+
   /// Platform notified framework of closed connection.
   ///
   /// [TextInputClient] should cleanup its connection and finalize editing.
@@ -2050,6 +2056,7 @@ class TextInput {
     assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
     _currentConnection = connection;
     _currentConfiguration = configuration;
+    _lastConnection = connection;
     _setClient(connection._client, configuration);
   }
 
@@ -2079,6 +2086,7 @@ class TextInput {
 
   TextInputConnection? _currentConnection;
   late TextInputConfiguration _currentConfiguration;
+  TextInputConnection? _lastConnection;
 
   final Map<String, ScribbleClient> _scribbleClients = <String, ScribbleClient>{};
   bool _scribbleInProgress = false;
@@ -2149,6 +2157,13 @@ class TextInput {
         return;
       case 'TextInputClient.scribbleInteractionFinished':
         _scribbleInProgress = false;
+        return;
+      case 'TextInputClient.onFocusReceived':
+        final args = methodCall.arguments as List<dynamic>;
+        final clientId = args[0] as int;
+        if (_lastConnection != null && _lastConnection!._id == clientId) {
+          _lastConnection!._client.onFocusReceived();
+        }
         return;
     }
     if (_currentConnection == null) {
