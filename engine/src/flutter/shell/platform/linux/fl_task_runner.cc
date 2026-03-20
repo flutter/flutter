@@ -88,7 +88,7 @@ static gboolean fl_task_runner_on_expired_timeout(gpointer data) {
 
   g_object_unref(self);
 
-  return FALSE;
+  return G_SOURCE_REMOVE;
 }
 
 // Returns the absolute time of next expired task (in microseconds, based on

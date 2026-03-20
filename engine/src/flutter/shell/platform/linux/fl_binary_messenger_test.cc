@@ -506,7 +506,7 @@ TEST(FlBinaryMessengerTest, ControlChannelErrorResponse) {
         g_idle_add(
             [](gpointer user_data) {
               g_main_loop_quit(static_cast<GMainLoop*>(user_data));
-              return FALSE;
+              return G_SOURCE_REMOVE;
             },
             loop);
 
