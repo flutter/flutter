@@ -527,6 +527,29 @@ void main() {
     );
   });
 
+  testWithoutContext('can launch chrome with custom binary path', () async {
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>[
+          '/custom/path/to/chrome',
+          '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+          '--remote-debugging-port=12345',
+          ...kChromeArgs,
+          'example_url',
+        ],
+        stderr: kDevtoolsStderr,
+      ),
+    );
+
+    await expectReturnsNormallyLater(
+      chromeLauncher.launch(
+        'example_url',
+        skipCheck: true,
+        chromeBinary: '/custom/path/to/chrome',
+      ),
+    );
+  });
+
   testWithoutContext('can launch chrome headless', () async {
     processManager.addCommand(
       const FakeCommand(

@@ -971,6 +971,8 @@ class DebuggingOptions {
     this.webRunHeadless = false,
     this.webBrowserDebugPort,
     this.webBrowserFlags = const <String>[],
+    this.webChromeBinary,
+    this.webNoLaunchChrome = false,
     this.webEnableExpressionEvaluation = false,
     this.webLaunchUrl,
     bool? webCrossOriginIsolation,
@@ -1009,6 +1011,8 @@ class DebuggingOptions {
     this.webRunHeadless = false,
     this.webBrowserDebugPort,
     this.webBrowserFlags = const <String>[],
+    this.webChromeBinary,
+    this.webNoLaunchChrome = false,
     this.webLaunchUrl,
     bool? webCrossOriginIsolation,
     WebRendererMode? webRenderer,
@@ -1092,6 +1096,8 @@ class DebuggingOptions {
     required this.webRunHeadless,
     required this.webBrowserDebugPort,
     required this.webBrowserFlags,
+    required this.webChromeBinary,
+    required this.webNoLaunchChrome,
     required this.webEnableExpressionEvaluation,
     required this.webLaunchUrl,
     required this.webCrossOriginIsolation,
@@ -1187,6 +1193,15 @@ class DebuggingOptions {
 
   /// Arbitrary browser flags.
   final List<String> webBrowserFlags;
+
+  /// Custom path to the Chrome executable.
+  final String? webChromeBinary;
+
+  /// Whether to skip launching Chrome when running web apps.
+  ///
+  /// This is used by `flutter drive` to prevent launching a second Chrome
+  /// instance since the driver service launches Chrome separately.
+  final bool webNoLaunchChrome;
 
   /// Enable expression evaluation for web target.
   final bool webEnableExpressionEvaluation;
@@ -1297,6 +1312,8 @@ class DebuggingOptions {
     'webRunHeadless': webRunHeadless,
     'webBrowserDebugPort': webBrowserDebugPort,
     'webBrowserFlags': webBrowserFlags,
+    'webChromeBinary': webChromeBinary,
+    'webNoLaunchChrome': webNoLaunchChrome,
     'webEnableExpressionEvaluation': webEnableExpressionEvaluation,
     'webLaunchUrl': webLaunchUrl,
     'webCrossOriginIsolation': webCrossOriginIsolation,
@@ -1368,6 +1385,8 @@ class DebuggingOptions {
         webRunHeadless: json['webRunHeadless']! as bool,
         webBrowserDebugPort: json['webBrowserDebugPort'] as int?,
         webBrowserFlags: (json['webBrowserFlags']! as List<dynamic>).cast<String>(),
+        webChromeBinary: json['webChromeBinary'] as String?,
+        webNoLaunchChrome: (json['webNoLaunchChrome'] as bool?) ?? false,
         webEnableExpressionEvaluation: json['webEnableExpressionEvaluation']! as bool,
         webLaunchUrl: json['webLaunchUrl'] as String?,
         webCrossOriginIsolation: json['webCrossOriginIsolation']! as bool,

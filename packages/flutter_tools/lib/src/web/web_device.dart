@@ -135,8 +135,7 @@ abstract class ChromiumDevice extends WebDevice {
     } else {
       url = platformArgs['uri']! as String;
     }
-    final launchChrome = platformArgs['no-launch-chrome'] != true;
-    if (launchChrome) {
+    if (!debuggingOptions.webNoLaunchChrome) {
       _chrome = await chromeLauncher.launch(
         url,
         cacheDir: _fileSystem.currentDirectory
@@ -145,9 +144,10 @@ abstract class ChromiumDevice extends WebDevice {
         headless: debuggingOptions.webRunHeadless,
         debugPort: debuggingOptions.webBrowserDebugPort,
         webBrowserFlags: debuggingOptions.webBrowserFlags,
+        chromeBinary: debuggingOptions.webChromeBinary,
       );
     }
-    _logger.sendEvent('app.webLaunchUrl', <String, Object>{'url': url, 'launched': launchChrome});
+    _logger.sendEvent('app.webLaunchUrl', <String, Object>{'url': url, 'launched': !debuggingOptions.webNoLaunchChrome});
     return LaunchResult.succeeded(vmServiceUri: Uri.parse(url));
   }
 

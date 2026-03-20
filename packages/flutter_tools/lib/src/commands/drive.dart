@@ -332,8 +332,11 @@ class DriveCommand extends RunCommandBase {
     );
     final DriverService driverService = _flutterDriverFactory!.createDriverService(web);
     final BuildInfo buildInfo = await getBuildInfo();
+    final bool isWebDevice = device is ChromiumDevice || device is WebServerDevice;
     final DebuggingOptions debuggingOptions = await createDebuggingOptions(
       webDevServerConfig: webDevServerConfig,
+      webChromeBinary: stringArg('chrome-binary'),
+      webNoLaunchChrome: isWebDevice,
     );
     final File? applicationBinary = applicationBinaryPath == null
         ? null
@@ -352,7 +355,6 @@ class DriveCommand extends RunCommandBase {
           mainPath: targetFile,
           platformArgs: <String, Object>{
             if (traceStartup) 'trace-startup': traceStartup,
-            if (web) '--no-launch-chrome': true,
           },
         );
       } else {

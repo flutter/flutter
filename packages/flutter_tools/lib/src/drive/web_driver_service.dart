@@ -86,12 +86,16 @@ class WebDriverService extends DriverService {
           ? DebuggingOptions.disabled(
               buildInfo,
               webDevServerConfig: debuggingOptions.webDevServerConfig,
+              webChromeBinary: debuggingOptions.webChromeBinary,
+              webNoLaunchChrome: debuggingOptions.webNoLaunchChrome,
               webRenderer: debuggingOptions.webRenderer,
               webUseWasm: debuggingOptions.webUseWasm,
             )
           : DebuggingOptions.enabled(
               buildInfo,
               webDevServerConfig: debuggingOptions.webDevServerConfig,
+              webChromeBinary: debuggingOptions.webChromeBinary,
+              webNoLaunchChrome: debuggingOptions.webNoLaunchChrome,
               disablePortPublication: debuggingOptions.disablePortPublication,
               webRenderer: debuggingOptions.webRenderer,
               webUseWasm: debuggingOptions.webUseWasm,

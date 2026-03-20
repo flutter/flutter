@@ -189,6 +189,7 @@ class ChromiumLauncher {
     bool skipCheck = false,
     Directory? cacheDir,
     List<String> webBrowserFlags = const <String>[],
+    String? chromeBinary,
   }) async {
     if (currentCompleter.isCompleted) {
       throwToolExit('Only one instance of chrome can be started.');
@@ -200,7 +201,7 @@ class ChromiumLauncher {
       );
     }
 
-    final String chromeExecutable = _browserFinder(_platform, _fileSystem);
+    final String chromeExecutable = chromeBinary ?? _browserFinder(_platform, _fileSystem);
 
     if (_logger.isVerbose) {
       _logger.printTrace('Will use Chromium executable at $chromeExecutable');

@@ -58,6 +58,52 @@ void main() {
     },
   );
 
+  testWithoutContext(
+    'ChromiumDevice.startApp does not launch Chrome when webNoLaunchChrome is true',
+    () async {
+      final launcher = _TrackingChromiumLauncher();
+      final chromiumDevice = _FakeChromiumDevice(
+        chromiumLauncher: launcher,
+        fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+      );
+
+      await chromiumDevice.startApp(
+        null,
+        debuggingOptions: DebuggingOptions.enabled(
+          BuildInfo.debug,
+          webNoLaunchChrome: true,
+        ),
+        platformArgs: <String, Object?>{'uri': 'http://localhost:8080'},
+      );
+
+      expect(launcher.launchCalled, isFalse);
+    },
+  );
+
+  testWithoutContext(
+    'ChromiumDevice.startApp launches Chrome when webNoLaunchChrome is false',
+    () async {
+      final launcher = _TrackingChromiumLauncher();
+      final chromiumDevice = _FakeChromiumDevice(
+        chromiumLauncher: launcher,
+        fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+      );
+
+      await chromiumDevice.startApp(
+        null,
+        debuggingOptions: DebuggingOptions.enabled(
+          BuildInfo.debug,
+          webNoLaunchChrome: false,
+        ),
+        platformArgs: <String, Object?>{'uri': 'http://localhost:8080'},
+      );
+
+      expect(launcher.launchCalled, isTrue);
+    },
+  );
+
   testWithoutContext('GoogleChromeDevice defaults', () async {
     final launcher = TestChromiumLauncher();
 
@@ -456,6 +502,7 @@ class TestChromiumLauncher implements ChromiumLauncher {
     bool skipCheck = false,
     Directory? cacheDir,
     List<String> webBrowserFlags = const <String>[],
+    String? chromeBinary,
   }) async {
     currentCompleter.complete(_launcher());
     return currentCompleter.future;
@@ -494,3 +541,44 @@ class _OnceClosableChromium extends Fake implements Chromium {
 }
 
 class _UnimplementedChromium extends Fake implements Chromium {}
+
+/// A test implementation of [ChromiumLauncher] that tracks whether launch() was called.
+class _TrackingChromiumLauncher implements ChromiumLauncher {
+  bool launchCalled = false;
+
+  @override
+  Completer<Chromium> currentCompleter = Completer<Chromium>();
+
+  @override
+  bool canFindExecutable() => true;
+
+  @override
+  Future<Chromium> get connectedInstance => currentCompleter.future;
+
+  @override
+  String findExecutable() => 'chrome';
+
+  @override
+  bool get hasChromeInstance => false;
+
+  @override
+  Future<Chromium> launch(
+    String url, {
+    bool headless = false,
+    int? debugPort,
+    bool skipCheck = false,
+    Directory? cacheDir,
+    List<String> webBrowserFlags = const <String>[],
+    String? chromeBinary,
+  }) async {
+    launchCalled = true;
+    final chromium = _UnimplementedChromium();
+    currentCompleter.complete(chromium);
+    return chromium;
+  }
+
+  @override
+  Future<Chromium> connect(Chromium chrome, bool skipCheck) {
+    return currentCompleter.future;
+  }
+}
