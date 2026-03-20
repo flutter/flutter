@@ -878,10 +878,16 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 AccessibilityNodeInfo.RangeInfo.obtain(
                     AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT, min, max, parsedValue));
           } catch (NumberFormatException e) {
-            // Fallback to RANGE_TYPE_INDETERMINATE.
-            result.setRangeInfo(
-                AccessibilityNodeInfo.RangeInfo.obtain(
-                    AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_INDETERMINATE, 0.0f, 0.0f, 0.0f));
+            if (Build.VERSION.SDK_INT >= API_LEVELS.API_36) {
+              result.setRangeInfo(
+                  AccessibilityNodeInfo.RangeInfo.obtain(
+                      AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_INDETERMINATE, 0.0f, 0.0f, 0.0f));
+            } else {
+              // Fallback to RANGE_TYPE_FLOAT with 0.0.
+              result.setRangeInfo(
+                  AccessibilityNodeInfo.RangeInfo.obtain(
+                      AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT, 0.0f, 0.0f, 0.0f));
+            }
           }
         }
         break;

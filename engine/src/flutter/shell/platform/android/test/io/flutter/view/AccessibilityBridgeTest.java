@@ -2491,6 +2491,8 @@ public class AccessibilityBridgeTest {
     assertEquals(50.0f, nodeInfo.getRangeInfo().getCurrent(), 1e-4f);
   }
 
+  @Config(sdk = API_LEVELS.API_34)
+  @TargetApi(API_LEVELS.API_34)
   @Test
   public void itAddsRangeInfoToProgressBar_unparseableValue() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
@@ -2504,6 +2506,31 @@ public class AccessibilityBridgeTest {
     AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
     assertEquals("android.widget.ProgressBar", nodeInfo.getClassName().toString());
     assertNotNull(nodeInfo.getRangeInfo());
+    assertEquals(
+        AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT, nodeInfo.getRangeInfo().getType());
+    assertEquals(0.0f, nodeInfo.getRangeInfo().getMin(), 1e-4f);
+    assertEquals(0.0f, nodeInfo.getRangeInfo().getMax(), 1e-4f);
+    assertEquals(0.0f, nodeInfo.getRangeInfo().getCurrent(), 1e-4f);
+  }
+
+  @Config(sdk = API_LEVELS.API_36)
+  @TargetApi(API_LEVELS.API_36)
+  @Test
+  public void itAddsRangeInfoToProgressBar_unparseableValueAPI36() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = 23; // SemanticsRole::kProgressBar
+    testSemanticsNode.value = "a";
+    testSemanticsNode.minValue = "0";
+    testSemanticsNode.maxValue = "100";
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.widget.ProgressBar", nodeInfo.getClassName().toString());
+    assertNotNull(nodeInfo.getRangeInfo());
+    assertEquals(
+        AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_INDETERMINATE,
+        nodeInfo.getRangeInfo().getType());
     assertEquals(0.0f, nodeInfo.getRangeInfo().getMin(), 1e-4f);
     assertEquals(0.0f, nodeInfo.getRangeInfo().getMax(), 1e-4f);
     assertEquals(0.0f, nodeInfo.getRangeInfo().getCurrent(), 1e-4f);
