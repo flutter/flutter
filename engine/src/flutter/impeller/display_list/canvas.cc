@@ -832,12 +832,12 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
     auto contents = UberSDFContents::Make(
         /*type=*/UberSDFContents::Type::kRect, /*rect=*/rect,
         /*color=*/paint.color, /*stroke_width=*/paint.stroke.width,
-        /*stroked=*/paint.style == Paint::Style::kStroke);
+        /*stroked=*/paint.style == Paint::Style::kStroke,
+        std::make_unique<FillRectGeometry>(expanded_rect));
 
-    FillRectGeometry expanded_geom(expanded_rect);
-    contents->SetGeometry(&expanded_geom);
+    const Geometry* geom = contents->GetGeometry();
 
-    AddRenderEntityWithFiltersToCurrentPass(entity, &expanded_geom, paint,
+    AddRenderEntityWithFiltersToCurrentPass(entity, geom, paint,
                                             /*reuse_depth=*/false,
                                             /*override_contents=*/
                                             std::move(contents));
@@ -1031,37 +1031,33 @@ void Canvas::DrawCircle(const Point& center,
   if (renderer_.GetContext()->GetFlags().use_sdfs && !paint.color_source) {
     const bool is_stroked = paint.style == Paint::Style::kStroke;
 
+    std::unique_ptr<CircleGeometry> geometry;
+    if (is_stroked) {
+      geometry =
+          std::make_unique<CircleGeometry>(center, radius, paint.stroke.width);
+    } else {
+      geometry = std::make_unique<CircleGeometry>(center, radius);
+    }
+    geometry->SetAntialiasPadding(1.0f);
+
     auto contents = UberSDFContents::Make(
         /*type=*/UberSDFContents::Type::kCircle,
         /*rect=*/
         Rect::MakeLTRB(center.x - radius, center.y - radius, center.x + radius,
                        center.y + radius),
         /*color=*/paint.color, /*stroke_width=*/paint.stroke.width,
-        /*stroked=*/is_stroked);
+        /*stroked=*/is_stroked, std::move(geometry));
 
     Entity entity;
     entity.SetTransform(GetCurrentTransform());
     entity.SetBlendMode(paint.blend_mode);
 
-    if (is_stroked) {
-      CircleGeometry expanded_geom(center, radius, paint.stroke.width);
-      expanded_geom.SetAntialiasPadding(1.0f);
-      contents->SetGeometry(&expanded_geom);
+    const Geometry* geom = contents->GetGeometry();
 
-      AddRenderEntityWithFiltersToCurrentPass(
-          entity, &expanded_geom, paint,
-          /*reuse_depth=*/false,
-          /*override_contents=*/std::move(contents));
-    } else {
-      CircleGeometry expanded_geom(center, radius);
-      expanded_geom.SetAntialiasPadding(1.0f);
-      contents->SetGeometry(&expanded_geom);
-
-      AddRenderEntityWithFiltersToCurrentPass(
-          entity, &expanded_geom, paint,
-          /*reuse_depth=*/false,
-          /*override_contents=*/std::move(contents));
-    }
+    AddRenderEntityWithFiltersToCurrentPass(
+        entity, geom, paint,
+        /*reuse_depth=*/false,
+        /*override_contents=*/std::move(contents));
     return;
   }
 
