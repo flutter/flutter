@@ -400,7 +400,7 @@ class _RenderSingleChildViewport extends RenderBox
   }
 
   void _hasScrolled() {
-    markNeedsPaint();
+    markNeedsLayout();
     markNeedsSemanticsUpdate();
   }
 
@@ -493,6 +493,8 @@ class _RenderSingleChildViewport extends RenderBox
     return constraints.constrain(childSize);
   }
 
+  static const int _maxLayoutCycles = 10;
+
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
@@ -502,17 +504,16 @@ class _RenderSingleChildViewport extends RenderBox
       child!.layout(_getInnerConstraints(constraints), parentUsesSize: true);
       size = constraints.constrain(child!.size);
     }
-
-    if (offset.hasPixels) {
-      if (offset.pixels > _maxScrollExtent) {
-        offset.correctBy(_maxScrollExtent - offset.pixels);
-      } else if (offset.pixels < _minScrollExtent) {
-        offset.correctBy(_minScrollExtent - offset.pixels);
+    for (int i = 0; i < _maxLayoutCycles; i++) {
+      final bool didAcceptViewportDimension = offset.applyViewportDimension(_viewportExtent);
+      final bool didAcceptContentDimension = offset.applyContentDimensions(
+        _minScrollExtent,
+        _maxScrollExtent,
+      );
+      if (didAcceptViewportDimension && didAcceptContentDimension) {
+        break;
       }
     }
-
-    offset.applyViewportDimension(_viewportExtent);
-    offset.applyContentDimensions(_minScrollExtent, _maxScrollExtent);
   }
 
   Offset get _paintOffset => _paintOffsetForPosition(offset.pixels);
