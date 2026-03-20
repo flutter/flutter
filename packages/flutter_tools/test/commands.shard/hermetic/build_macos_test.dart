@@ -20,7 +20,9 @@ import 'package:flutter_tools/src/commands/build_macos.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
@@ -60,6 +62,20 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
     Duration timeout = const Duration(minutes: 1),
   }) async {
     return <String, String>{...overrides, 'PRODUCT_BUNDLE_IDENTIFIER': 'com.example.test'};
+  }
+}
+
+class FakeCocoaPods extends Fake implements CocoaPods {
+  @override
+  void invalidatePodInstallOutput(XcodeBasedProject xcodeProject) {}
+
+  @override
+  Future<bool> processPods({
+    required XcodeBasedProject xcodeProject,
+    required BuildMode buildMode,
+    bool dependenciesChanged = true,
+  }) async {
+    return false;
   }
 }
 
@@ -124,6 +140,9 @@ void main() {
     void Function(List<String> command)? onRun,
     List<String>? additionalCommandArguments,
     String hostPlatformArch = 'x86_64',
+    int exitCode = 0,
+    String? stdout,
+    String? stderr,
   }) {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
@@ -151,14 +170,18 @@ void main() {
         'COMPILER_INDEX_STORE_ENABLE=NO',
         ...?additionalCommandArguments,
       ],
-      stdout: '''
+      stdout:
+          stdout ??
+          '''
 STDOUT STUFF
 note: Using new build system
 note: Planning
 note: Build preparation complete
 note: Building targets in dependency order
 ''',
-      stderr: '''
+      stderr:
+          stderr ??
+          '''
 2022-03-24 10:07:21.954 xcodebuild[2096:1927385] Requested but did not find extension point with identifier Xcode.IDEKit.ExtensionSentinelHostApplications for extension Xcode.DebuggerFoundation.AppExtensionHosts.watchOS of plug-in com.apple.dt.IDEWatchSupportCore
 2022-03-24 10:07:21.954 xcodebuild[2096:1927385] Requested but did not find extension point with identifier Xcode.IDEKit.ExtensionPointIdentifierToBundleIdentifier for extension Xcode.DebuggerFoundation.AppExtensionToBundleIdentifierMap.watchOS of plug-in com.apple.dt.IDEWatchSupportCore
 2023-11-10 10:44:58.030 xcodebuild[61115:1017566] [MT] DVTAssertions: Warning in /System/Volumes/Data/SWE/Apps/DT/BuildRoots/BuildRoot11/ActiveBuildRoot/Library/Caches/com.apple.xbs/Sources/IDEFrameworks/IDEFrameworks-22267/IDEFoundation/Provisioning/Capabilities Infrastructure/IDECapabilityQuerySelection.swift:103
@@ -168,6 +191,7 @@ Thread:   <_NSMainThread: 0x6000027c0280>{number = 1, name = main}
 Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
 STDERR STUFF
 ''',
+      exitCode: exitCode,
       onRun: (List<String> command) {
         fileSystem.file(fileSystem.path.join('macos', 'Flutter', 'ephemeral', '.app_filename'))
           ..createSync(recursive: true)
@@ -176,6 +200,35 @@ STDERR STUFF
           onRun(command);
         }
       },
+    );
+  }
+
+  void setUpSwiftPackageOnlyMacOSPlugin(String pluginName) {
+    final Directory pluginDirectory = fileSystem.directory(
+      fileSystem.path.join('plugins', pluginName),
+    )..createSync(recursive: true);
+    pluginDirectory.childFile('pubspec.yaml').writeAsStringSync('''
+name: $pluginName
+flutter:
+  plugin:
+    platforms:
+      macos:
+        pluginClass: ${pluginName}Plugin
+''');
+    pluginDirectory
+        .childFile(fileSystem.path.join('macos', pluginName, 'Package.swift'))
+        .createSync(recursive: true);
+
+    fileSystem.file('pubspec.yaml').writeAsStringSync('''
+name: my_app
+dependencies:
+  $pluginName:
+    path: plugins/$pluginName
+''');
+    writePackageConfigFiles(
+      directory: fileSystem.currentDirectory,
+      mainLibName: 'my_app',
+      packages: <String, String>{pluginName: fileSystem.path.join('plugins', pluginName)},
     );
   }
 
@@ -375,6 +428,191 @@ STDERR STUFF
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+    },
+  );
+
+  testUsingContext(
+    'macOS build prints SwiftPM minimum deployment guidance on mismatch',
+    () async {
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+      );
+      createMinimalMockProjectFiles();
+
+      await expectLater(
+        createTestCommandRunner(
+          command,
+        ).run(const <String>['build', 'macos', '--debug', '--no-pub']),
+        throwsToolExit(message: 'Build process failed'),
+      );
+
+      expect(
+        testLogger.errorText,
+        contains(
+          "To fix this error, increase your app's minimum platform version from 11.0 to at least 12.0",
+        ),
+      );
+      expect(testLogger.errorText, contains('or remove the cloud-firestore dependency.'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          'Debug',
+          exitCode: 1,
+          stderr: '''
+error: The package product 'cloud-firestore' requires minimum platform version 12.0 for the macOS platform, but this target supports 11.0 (in target 'FlutterGeneratedPluginSwiftPackage' from project 'FlutterGeneratedPluginSwiftPackage')
+''',
+        ),
+      ]),
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      FeatureFlags: () =>
+          TestFeatureFlags(isMacOSEnabled: true, isSwiftPackageManagerEnabled: true),
+      CocoaPods: () => FakeCocoaPods(),
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+    },
+  );
+
+  testUsingContext(
+    'macOS build does not print app minimum deployment guidance for non-target mismatch',
+    () async {
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+      );
+      createMinimalMockProjectFiles();
+
+      await expectLater(
+        createTestCommandRunner(
+          command,
+        ).run(const <String>['build', 'macos', '--debug', '--no-pub']),
+        throwsToolExit(message: 'Build process failed'),
+      );
+
+      expect(
+        testLogger.errorText,
+        isNot(contains("To fix this error, increase your app's minimum platform version")),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          'Debug',
+          exitCode: 1,
+          stderr: '''
+error: The package product 'cloud-firestore' requires minimum platform version 12.0 for the macOS platform, but this target supports 11.0 (in target 'cloud_firestore' from project 'cloud_firestore')
+''',
+        ),
+      ]),
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      FeatureFlags: () =>
+          TestFeatureFlags(isMacOSEnabled: true, isSwiftPackageManagerEnabled: true),
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+    },
+  );
+
+  testUsingContext(
+    'macOS build prints mixed dependency-manager guidance for duplicate modules',
+    () async {
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+      );
+      createMinimalMockProjectFiles();
+      fileSystem.file(fileSystem.path.join('macos', 'Podfile')).createSync(recursive: true);
+
+      await expectLater(
+        createTestCommandRunner(
+          command,
+        ).run(const <String>['build', 'macos', '--debug', '--no-pub']),
+        throwsToolExit(message: 'Build process failed'),
+      );
+
+      expect(
+        testLogger.errorText,
+        contains(
+          'Your project uses both CocoaPods and Swift Package Manager, which can cause the above error.',
+        ),
+      );
+      expect(testLogger.errorText, contains('for the following module(s): cloud_firestore.'));
+      expect(testLogger.errorText, contains('"macos/Podfile.lock" dependency tree'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          'Debug',
+          exitCode: 1,
+          stderr: "error: Redefinition of module 'cloud_firestore'\n",
+        ),
+      ]),
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      FeatureFlags: () =>
+          TestFeatureFlags(isMacOSEnabled: true, isSwiftPackageManagerEnabled: true),
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+    },
+  );
+
+  testUsingContext(
+    'macOS build prints SwiftPM-only plugin guidance for missing modules with CocoaPods',
+    () async {
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+      );
+      createMinimalMockProjectFiles();
+      fileSystem.file(fileSystem.path.join('macos', 'Podfile')).createSync(recursive: true);
+      setUpSwiftPackageOnlyMacOSPlugin('swift_only_plugin');
+
+      await expectLater(
+        createTestCommandRunner(
+          command,
+        ).run(const <String>['build', 'macos', '--debug', '--no-pub']),
+        throwsToolExit(message: 'Build process failed'),
+      );
+
+      expect(
+        testLogger.errorText,
+        contains('plugin(s) only support Swift Package Manager: swift_only_plugin.'),
+      );
+      expect(
+        testLogger.errorText,
+        contains(
+          'Try enabling Swift Package Manager with "flutter config --enable-swift-package-manager".',
+        ),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          'Debug',
+          exitCode: 1,
+          stderr: "error: Module 'swift_only_plugin' not found\n",
+        ),
+      ]),
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      CocoaPods: () => FakeCocoaPods(),
       OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
     },
   );

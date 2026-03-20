@@ -15,6 +15,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
+import '../darwin/xcode_build_failure_diagnostics.dart';
 import '../globals.dart' as globals;
 import '../ios/migrations/metal_api_validation_migration.dart';
 import '../ios/xcode_build_settings.dart';
@@ -180,6 +181,7 @@ Future<void> buildMacOS({
   final sw = Stopwatch()..start();
   final Status status = globals.logger.startProgress('Building macOS application...');
   int result;
+  final xcodeBuildOutput = StringBuffer();
 
   File? disabledSandboxEntitlementFile;
   if (usingCISystem) {
@@ -213,6 +215,14 @@ Future<void> buildMacOS({
   // when dependencies don't support them
   final String? excludedArches = buildSettings['EXCLUDED_ARCHS'];
 
+  String? captureAndFilterBuildOutput(String line) {
+    xcodeBuildOutput.writeln(line);
+    if (verboseLogging) {
+      return line;
+    }
+    return _filteredOutput.hasMatch(line) ? line : null;
+  }
+
   try {
     result = await globals.processUtils.stream(
       <String>[
@@ -243,15 +253,50 @@ Future<void> buildMacOS({
       ],
       trace: true,
       stdoutErrorMatcher: verboseLogging ? null : _filteredOutput,
-      mapFunction: verboseLogging
-          ? null
-          : (String line) => _filteredOutput.hasMatch(line) ? line : null,
+      mapFunction: captureAndFilterBuildOutput,
     );
   } finally {
     status.cancel();
   }
 
   if (result != 0) {
+    final XcodeBuildFailureOutputAnalysis stdoutDiagnostics =
+        XcodeBuildFailureDiagnostics.analyzeOutput(xcodeBuildOutput.toString());
+
+    if (stdoutDiagnostics.platformMismatch != null) {
+      globals.logger.printError(
+        _swiftPackageManagerMinPlatformMismatchMessage(stdoutDiagnostics.platformMismatch!),
+        emphasis: true,
+      );
+    } else {
+      final bool usesCocoapods = flutterProject.macos.podfile.existsSync();
+      final bool usesSwiftPackageManager = flutterProject.macos.usesSwiftPackageManager;
+      if (stdoutDiagnostics.duplicateModules.isNotEmpty &&
+          usesCocoapods &&
+          usesSwiftPackageManager) {
+        globals.logger.printError(
+          _mixedDependencyManagerDuplicateModulesMessage(
+            platform: FlutterDarwinPlatform.macos,
+            duplicateModules: stdoutDiagnostics.duplicateModules.toList(),
+          ),
+        );
+      } else if (stdoutDiagnostics.missingModules.isNotEmpty &&
+          usesCocoapods &&
+          !usesSwiftPackageManager) {
+        final List<String> swiftPackageOnlyPlugins =
+            await XcodeBuildFailureDiagnostics.findSwiftPackageOnlyPlugins(
+              platform: FlutterDarwinPlatform.macos,
+              project: flutterProject,
+              pluginNames: stdoutDiagnostics.missingModules.toList(),
+              fileSystem: globals.fs,
+            );
+        if (swiftPackageOnlyPlugins.isNotEmpty) {
+          globals.logger.printError(
+            _swiftPackageOnlyPluginsInCocoapodsMessage(swiftPackageOnlyPlugins),
+          );
+        }
+      }
+    }
     throwToolExit('Build process failed');
   }
   final String? applicationBundle = MacOSApp.fromMacOSProject(
@@ -279,6 +324,41 @@ Future<void> buildMacOS({
       elapsedMilliseconds: elapsedDuration.inMilliseconds,
     ),
   );
+}
+
+String _swiftPackageManagerMinPlatformMismatchMessage(
+  XcodeBuildFailurePlatformMismatch platformMismatch,
+) {
+  return '''
+To fix this error, increase your app's minimum platform version from ${platformMismatch.supportedVersion} to at least ${platformMismatch.requiredVersion} or remove the ${platformMismatch.requiredByProduct} dependency.
+
+To increase your app's minimum platform version, follow these instructions:
+  https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#how-to-use-a-swift-package-manager-flutter-plugin-that-requires-a-higher-os-version
+''';
+}
+
+String _mixedDependencyManagerDuplicateModulesMessage({
+  required FlutterDarwinPlatform platform,
+  required List<String> duplicateModules,
+}) {
+  final podfileLockPath = platform == FlutterDarwinPlatform.ios
+      ? 'ios/Podfile.lock'
+      : 'macos/Podfile.lock';
+  return 'Your project uses both CocoaPods and Swift Package Manager, which can '
+      'cause the above error. It may be caused by there being both a CocoaPod '
+      'and Swift Package Manager dependency for the following module(s): '
+      '${duplicateModules.join(', ')}.\n\n'
+      'You can try to identify which Pod the conflicting module is from by '
+      'looking at your "$podfileLockPath" dependency tree and requesting the '
+      'author add Swift Package Manager compatibility. See https://stackoverflow.com/a/27955017 '
+      'to learn more about understanding Podlock dependency tree. \n\n'
+      '$kDisableSwiftPMInstructions';
+}
+
+String _swiftPackageOnlyPluginsInCocoapodsMessage(List<String> swiftPackageOnlyPlugins) {
+  return 'Your project uses CocoaPods as a dependency manager, but the following '
+      'plugin(s) only support Swift Package Manager: ${swiftPackageOnlyPlugins.join(', ')}.\n'
+      'Try enabling Swift Package Manager with "flutter config --enable-swift-package-manager".';
 }
 
 /// Performs a size analysis of the AOT snapshot and writes to an analysis file, if configured.
