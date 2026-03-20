@@ -8,6 +8,7 @@
 library;
 
 import 'dart:async';
+import 'dart:math' show max;
 
 import 'package:crypto/crypto.dart';
 import 'package:file/memory.dart';
@@ -24,13 +25,15 @@ import 'base/io.dart'
         HttpClientResponse,
         HttpHeaders,
         HttpStatus,
-        SocketException;
+        SocketException,
+        Stdio;
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart' show OperatingSystemUtils;
 import 'base/platform.dart';
 import 'base/terminal.dart';
 import 'base/user_messages.dart';
+import 'base/utils.dart' show getElapsedAsSeconds, getSizeAsPlatformMB;
 import 'convert.dart';
 import 'features.dart';
 
@@ -152,11 +155,13 @@ class Cache {
     required FileSystem fileSystem,
     required Platform platform,
     required OperatingSystemUtils osUtils,
+    Stdio? stdio,
   }) : _rootOverride = rootOverride,
        _logger = logger,
        _fileSystem = fileSystem,
        _platform = platform,
        _osUtils = osUtils,
+       _stdio = stdio,
        _net = Net(logger: logger, platform: platform),
        _fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        _artifacts = artifacts ?? <ArtifactSet>[];
@@ -172,6 +177,7 @@ class Cache {
     Logger? logger,
     FileSystem? fileSystem,
     Platform? platform,
+    Stdio? stdio,
     required ProcessManager processManager,
   }) {
     if (rootOverride?.fileSystem != null &&
@@ -192,6 +198,7 @@ class Cache {
       logger: logger,
       fileSystem: fileSystem,
       platform: platform,
+      stdio: stdio,
       osUtils: OperatingSystemUtils(
         fileSystem: fileSystem,
         logger: logger,
@@ -207,6 +214,7 @@ class Cache {
   final OperatingSystemUtils _osUtils;
   final Directory? _rootOverride;
   final List<ArtifactSet> _artifacts;
+  final Stdio? _stdio;
   final Net _net;
   final FileSystemUtils _fsUtils;
 
@@ -228,6 +236,7 @@ class Cache {
       platform: _platform,
       httpClient: HttpClient(),
       allowedBaseUrls: <String>[storageBaseUrl, realmlessStorageBaseUrl, cipdBaseUrl],
+      stdio: _stdio,
     );
   }
 
@@ -1103,13 +1112,15 @@ class ArtifactUpdater {
     required HttpClient httpClient,
     required Platform platform,
     required List<String> allowedBaseUrls,
+    Stdio? stdio,
   }) : _operatingSystemUtils = operatingSystemUtils,
        _httpClient = httpClient,
        _logger = logger,
        _fileSystem = fileSystem,
        _tempStorage = tempStorage,
        _platform = platform,
-       _allowedBaseUrls = allowedBaseUrls;
+       _allowedBaseUrls = allowedBaseUrls,
+       _stdio = stdio;
 
   /// The number of times the artifact updater will repeat the artifact download loop.
   static const _kRetryCount = 2;
@@ -1127,6 +1138,8 @@ class ArtifactUpdater {
   /// [ArtifactUpdater] will issue a warning if an attempt to download from a
   /// non-compliant URL is made.
   final List<String> _allowedBaseUrls;
+
+  final Stdio? _stdio;
 
   /// Keep track of the files we've downloaded for this execution so we
   /// can delete them after completion. We don't delete them right after
@@ -1163,6 +1176,14 @@ class ArtifactUpdater {
     _artifactTotal = 0;
     _downloadIndex = 0;
     _downloadTotal = 0;
+  }
+
+  /// Creates the appropriate display for the current terminal capabilities.
+  _DownloadDisplay _createDisplay(String statusMessage) {
+    if (_stdio != null && _logger.supportsColor) {
+      return _ProgressBarDisplay(stdio: _stdio, statusMessage: statusMessage);
+    }
+    return _SpinnerDisplay(logger: _logger, statusMessage: statusMessage);
   }
 
   /// These filenames, should they exist after extracting an archive, should be deleted.
@@ -1220,24 +1241,27 @@ class ArtifactUpdater {
   ) async {
     final String downloadPath = flattenNameSubdirs(url, _fileSystem);
     final File tempFile = _createDownloadFile(downloadPath);
-    Status status;
     int retries = _kRetryCount;
     final String formattedMessage = formatProgressMessage(artifactName);
     _downloadIndex++;
 
     while (retries > 0) {
-      status = _logger.startProgress(formattedMessage);
+      final _DownloadDisplay display = _createDisplay(formattedMessage);
+      display.start();
+
       try {
         _ensureExists(tempFile.parent);
         if (tempFile.existsSync()) {
           tempFile.deleteSync();
         }
-        await _download(url, tempFile, status);
+        await _download(url, tempFile, display);
 
         if (!tempFile.existsSync()) {
           throw Exception('Did not find downloaded file ${tempFile.path}');
         }
+        display.finish();
       } on Exception catch (err) {
+        display.cancel();
         _logger.printTrace(err.toString());
         retries -= 1;
         if (retries == 0) {
@@ -1247,6 +1271,7 @@ class ArtifactUpdater {
         }
         continue;
       } on ArgumentError catch (error) {
+        display.cancel();
         final String? overrideUrl = _platform.environment[kFlutterStorageBaseUrl];
         if (overrideUrl != null && url.toString().contains(overrideUrl)) {
           _logger.printError(error.toString());
@@ -1261,8 +1286,6 @@ class ArtifactUpdater {
         // This error should not be hit if there was not a storage URL override, allow the
         // tool to crash.
         rethrow;
-      } finally {
-        status.stop();
       }
 
       /// Unzipping multiple file into a directory will not remove old files
@@ -1314,7 +1337,7 @@ class ArtifactUpdater {
   ///
   /// See also:
   ///   * https://cloud.google.com/storage/docs/xml-api/reference-headers#xgooghash
-  Future<void> _download(Uri url, File file, Status status) async {
+  Future<void> _download(Uri url, File file, _DownloadDisplay display) async {
     final bool isAllowedUrl = _allowedBaseUrls.any(
       (String baseUrl) => url.toString().startsWith(baseUrl),
     );
@@ -1328,12 +1351,12 @@ class ArtifactUpdater {
 
     // In production, issue a warning but allow the download to proceed.
     if (!isAllowedUrl) {
-      status.pause();
+      display.pause();
       _logger.printWarning(
         'Downloading an artifact that may not be reachable in some environments (e.g. firewalled environments): $url\n'
         'This should not have happened. This is likely a Flutter SDK bug. Please file an issue at https://github.com/flutter/flutter/issues/new?template=01_activation.yml',
       );
-      status.resume();
+      display.resume();
     }
 
     final HttpClientRequest request = await _httpClient.getUrl(url);
@@ -1350,10 +1373,12 @@ class ArtifactUpdater {
       digests = StreamController<Digest>();
       inputSink = md5.startChunkedConversion(digests);
     }
+    final int contentLength = response.contentLength;
     final RandomAccessFile randomAccessFile = file.openSync(mode: FileMode.writeOnly);
     await response.forEach((List<int> chunk) {
       inputSink?.add(chunk);
       randomAccessFile.writeFromSync(chunk);
+      display.onChunk(chunk.length, contentLength);
     });
     randomAccessFile.closeSync();
     if (inputSink != null) {
@@ -1483,3 +1508,257 @@ final _flattenNameSubstitutions = <int, List<int>>{
   r'|'.codeUnitAt(0): '@pip@'.codeUnits,
   r'?'.codeUnitAt(0): '@ques@'.codeUnits,
 };
+
+/// Abstraction for displaying download progress.
+///
+/// Two implementations exist:
+/// - [_ProgressBarDisplay]: ANSI progress bar for terminals with color support.
+/// - [_SpinnerDisplay]: Spinner-based display via [Logger.startProgress].
+abstract class _DownloadDisplay {
+  /// Called when the download begins.
+  void start();
+
+  /// Called when a chunk of data is received.
+  void onChunk(int chunkSize, int contentLength);
+
+  /// Called when the download completes successfully.
+  void finish();
+
+  /// Called when the download is cancelled or fails.
+  void cancel();
+
+  /// Pauses the display (e.g. when another status message needs the terminal).
+  void pause();
+
+  /// Resumes the display after a pause.
+  void resume();
+}
+
+/// Displays an ANSI progress bar with speed, ETA, and percentage.
+class _ProgressBarDisplay extends _DownloadDisplay {
+  _ProgressBarDisplay({required Stdio stdio, required this.statusMessage}) : _stdio = stdio;
+
+  static const int _maxTerminalWidth = 80;
+  static const int _progressUpdateIntervalMs = 100;
+
+  final Stdio _stdio;
+  final String statusMessage;
+  final DownloadProgress _progress = DownloadProgress();
+  final Stopwatch _stopwatch = Stopwatch();
+  int _lastUpdateMs = 0;
+
+  int get _terminalWidth =>
+      (_stdio.terminalColumns ?? _maxTerminalWidth).clamp(0, _maxTerminalWidth);
+
+  @override
+  void start() {
+    _stopwatch.start();
+    _stdio.stdoutWrite('$statusMessage\n');
+  }
+
+  @override
+  void onChunk(int chunkSize, int contentLength) {
+    if (_progress.totalBytes < 0) {
+      _progress.totalBytes = contentLength;
+    }
+    _progress.addBytesReceived(chunkSize);
+    final int currentMs = _stopwatch.elapsedMilliseconds;
+    if (currentMs >= _lastUpdateMs + _progressUpdateIntervalMs) {
+      _lastUpdateMs = currentMs;
+      final String line = _progress.formatProgressLine(
+        elapsed: _stopwatch.elapsed,
+        terminalWidth: _terminalWidth,
+      );
+      _stdio.stdoutWrite('${AnsiTerminal.clearAndReturnCode}$line');
+    }
+  }
+
+  void _stopAndClear() {
+    _stopwatch.stop();
+    _stdio.stdoutWrite(
+      '${AnsiTerminal.clearAndReturnCode}'
+      '${AnsiTerminal.cursorUpLineCode}'
+      '${AnsiTerminal.clearAndReturnCode}',
+    );
+  }
+
+  @override
+  void finish() {
+    _stopAndClear();
+    final String summary = _progress.formatCompletionSummary(_stopwatch.elapsed);
+    final int padding = _terminalWidth - statusMessage.length - summary.length;
+    final line = '$statusMessage${' ' * max(1, padding)}$summary';
+    _stdio.stdoutWrite('$line\n');
+  }
+
+  @override
+  void cancel() {
+    _stopAndClear();
+  }
+
+  @override
+  void pause() {}
+
+  @override
+  void resume() {}
+}
+
+/// Displays a spinner via [Logger.startProgress].
+class _SpinnerDisplay extends _DownloadDisplay {
+  _SpinnerDisplay({required Logger logger, required String statusMessage})
+    : _logger = logger,
+      _statusMessage = statusMessage;
+
+  final Logger _logger;
+  final String _statusMessage;
+  Status? _status;
+
+  @override
+  void start() {
+    _status = _logger.startProgress(_statusMessage);
+  }
+
+  @override
+  void onChunk(int chunkSize, int contentLength) {}
+
+  @override
+  void finish() {
+    _status?.stop();
+  }
+
+  @override
+  void cancel() {
+    _status?.stop();
+  }
+
+  @override
+  void pause() {
+    _status?.pause();
+  }
+
+  @override
+  void resume() {
+    _status?.resume();
+  }
+}
+
+/// Tracks download progress and provides formatted display strings.
+@visibleForTesting
+class DownloadProgress {
+  /// Total expected bytes, or -1 if unknown.
+  int totalBytes = -1;
+
+  int _bytesReceived = 0;
+  int get bytesReceived => _bytesReceived;
+
+  void addBytesReceived(int bytes) {
+    _bytesReceived += bytes;
+  }
+
+  bool get hasKnownSize => totalBytes > 0;
+
+  double get fractionReceived => hasKnownSize ? (_bytesReceived / totalBytes).clamp(0.0, 1.0) : 0.0;
+
+  int get percentReceived => (fractionReceived * 100).round();
+
+  /// Download speed in bytes per second.
+  double speedBytesPerSecond(Duration elapsed) {
+    if (elapsed.inMilliseconds == 0) {
+      return 0;
+    }
+    return _bytesReceived * 1000 / elapsed.inMilliseconds;
+  }
+
+  /// Estimated time remaining.
+  Duration? timeRemaining(Duration elapsed) {
+    final double speed = speedBytesPerSecond(elapsed);
+    if (!hasKnownSize || speed == 0) {
+      return null;
+    }
+    final int totalRemainingBytes = totalBytes - _bytesReceived;
+    return Duration(milliseconds: (totalRemainingBytes * 1000 / speed).round());
+  }
+
+  static const _subBlocks = ['▏', '▎', '▍', '▌', '▋', '▊', '▉'];
+
+  /// Renders a progress bar with sub-character precision.
+  ///
+  /// Uses 1/8-block characters for a smooth fill edge.
+  String renderProgressBar(int width) {
+    if (!hasKnownSize || width <= 0) {
+      return '';
+    }
+    final int totalEighths = (fractionReceived * width * 8).round();
+    final int fullBlocks = totalEighths ~/ 8;
+    final int remainder = totalEighths % 8;
+    final int emptyBlocks = width - fullBlocks - 1;
+    final String filled = '█' * fullBlocks;
+    final String partial = remainder > 0 ? _subBlocks[remainder - 1] : ' ';
+    final String empty = ' ' * emptyBlocks;
+    return '$filled$partial$empty';
+  }
+
+  /// Formats download speed as a human-readable string.
+  String formatSpeed(Duration elapsed) {
+    return '${getSizeAsPlatformMB(speedBytesPerSecond(elapsed).round())}/s';
+  }
+
+  /// Formats bytes received and total.
+  String formatBytes() {
+    if (hasKnownSize) {
+      return '${getSizeAsPlatformMB(_bytesReceived)}'
+          '/${getSizeAsPlatformMB(totalBytes)}';
+    }
+    return getSizeAsPlatformMB(_bytesReceived);
+  }
+
+  /// Formats estimated time remaining.
+  String formatRemaining(Duration elapsed) {
+    final Duration? rem = timeRemaining(elapsed);
+    if (rem == null) {
+      return '';
+    }
+    return 'ETA ${getElapsedAsSeconds(rem)}';
+  }
+
+  /// Formats the full progress line for terminal display.
+  String formatProgressLine({required Duration elapsed, required int terminalWidth}) {
+    final String indent = ' ' * 5;
+    final percentReceivedStr = hasKnownSize ? '${percentReceived.toString().padLeft(3)}%' : '';
+    final String bytesStr = formatBytes();
+    final String speedStr = formatSpeed(elapsed);
+    final String etaStr = formatRemaining(elapsed);
+
+    final parts = <String>[percentReceivedStr, bytesStr, speedStr, etaStr];
+    final String info = parts.where((String s) => s.isNotEmpty).join('  ');
+
+    // The progress bar is 28 characters wide and terminated on either side by
+    // thin vertical lines which take up another 2 characters. 28 characters was
+    // chosen empirically to make the progress bar take up enough space to look
+    // good while leaving enough space for the detailed info under "normal"
+    // conditions (artifact size <1GB, download speed >1MB/s).
+    const barInner = 28;
+    const int barTotal = barInner + 2; // ▕ + bar + ▏
+    final String line;
+
+    // Only show the progress bar if we have enough room to show it along with
+    // the info, otherwise just show the info right-aligned.
+    if (hasKnownSize && terminalWidth >= indent.length + barTotal + info.length) {
+      final String bar = renderProgressBar(barInner);
+      final int padding = terminalWidth - indent.length - barTotal - info.length;
+      line = '$indent▕$bar▏${' ' * padding}$info';
+    } else {
+      final int padding = terminalWidth - indent.length - info.length;
+      final unclipped = '$indent${' ' * max(0, padding)}$info';
+      line = unclipped.length <= terminalWidth ? unclipped : unclipped.substring(0, terminalWidth);
+    }
+    return line;
+  }
+
+  /// Formats the completion summary like `(21.1MB in 5.0s)`.
+  String formatCompletionSummary(Duration elapsed) {
+    final String size = getSizeAsPlatformMB(_bytesReceived);
+    final String time = getElapsedAsSeconds(elapsed);
+    return '($size in $time)';
+  }
+}
