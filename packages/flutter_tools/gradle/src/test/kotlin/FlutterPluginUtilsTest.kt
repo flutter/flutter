@@ -4,7 +4,8 @@
 
 package com.flutter.gradle
 
-import com.android.build.gradle.AbstractAppExtension
+import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.internal.dsl.CmakeOptions
 import com.android.build.gradle.internal.dsl.DefaultConfig
@@ -881,7 +882,7 @@ class FlutterPluginUtilsTest {
         every { buildType.name } returns "debug"
         every { buildType.isDebuggable } returns true
         every { project.hasProperty("local-engine-repo") } returns false
-        every { project.extensions.findByType(AbstractAppExtension::class.java) } returns mockk<AbstractAppExtension>()
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockk<ApplicationExtension>()
         every { project.hasProperty("target-platform") } returns false
         every { project.configurations.named("api") } returns mockk()
         every { project.dependencies.add(any(), any()) } returns mockk()
@@ -919,7 +920,7 @@ class FlutterPluginUtilsTest {
         every { buildType.name } returns "release"
         every { buildType.isDebuggable } returns false
         every { project.hasProperty("local-engine-repo") } returns false
-        every { project.extensions.findByType(AbstractAppExtension::class.java) } returns mockk<AbstractAppExtension>()
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockk<ApplicationExtension>()
         every { project.hasProperty("target-platform") } returns false
         every { project.configurations.named("api") } returns mockk()
         every { project.dependencies.add(any(), any()) } returns mockk()
@@ -973,7 +974,7 @@ class FlutterPluginUtilsTest {
         every { buildType.name } returns "debug"
         every { buildType.isDebuggable } returns true
         every { project.hasProperty("local-engine-repo") } returns false
-        every { project.extensions.findByType(AbstractAppExtension::class.java) } returns mockk<AbstractAppExtension>()
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockk<ApplicationExtension>()
         every { project.hasProperty("target-platform") } returns false
         every { project.configurations.named("api") } returns mockk()
         every { project.dependencies.add(any(), any()) } returns mockk()
@@ -1047,7 +1048,10 @@ class FlutterPluginUtilsTest {
     @Test
     fun `addTaskForPrintBuildVariants adds task for printing build variants`() {
         val project = mockk<Project>()
-        every { project.extensions.getByType(AbstractAppExtension::class.java) } returns mockk()
+        val androidComponents = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
+        val listProperty = mockk<org.gradle.api.provider.ListProperty<String>>()
+        every { project.extensions.getByType(AndroidComponentsExtension::class.java) } returns androidComponents
+        every { project.objects.listProperty(String::class.java) } returns listProperty
         every { project.tasks.register(any(), any<Action<Task>>()) } returns mockk()
         val captureSlot = slot<Action<Task>>()
 
