@@ -1382,6 +1382,74 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('PopupMenuButton Semantics expanded state updates when menu opens and closes', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/183432
+    const key = Key('test');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: PopupMenuButton<int>(
+            key: key,
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuItem<int>>[
+                const PopupMenuItem<int>(value: 1, child: Text('Item 1')),
+                const PopupMenuItem<int>(value: 2, child: Text('Item 2')),
+              ];
+            },
+            child: const SizedBox(height: 100.0, width: 100.0, child: Text('XXX')),
+          ),
+        ),
+      ),
+    );
+
+    // Before opening: should have expanded state but not be expanded.
+    expect(
+      tester.getSemantics(find.byType(PopupMenuButton<int>)),
+      matchesSemantics(
+        hasExpandedState: true,
+        label: 'XXX',
+        hasTapAction: true,
+        hasFocusAction: true,
+        isFocusable: true,
+      ),
+    );
+
+    // Open the menu.
+    await tester.tap(find.text('XXX'));
+    await tester.pumpAndSettle();
+
+    // While the menu is open, BlockSemantics in ModalBarrier blocks the
+    // button's semantics node (making tester.getSemantics return a stale node).
+    // Verify the Semantics widget's expanded property directly instead.
+    final Semantics expandedSemantics = tester.widget<Semantics>(
+      find.descendant(
+        of: find.byKey(key),
+        matching: find.byWidgetPredicate(
+          (Widget widget) => widget is Semantics && widget.properties.expanded != null,
+        ),
+      ),
+    );
+    expect(expandedSemantics.properties.expanded, isTrue);
+
+    // Close the menu by selecting an item.
+    await tester.tap(find.text('Item 1').last);
+    await tester.pumpAndSettle();
+
+    // After closing: should have expanded state but not be expanded.
+    expect(
+      tester.getSemantics(find.byType(PopupMenuButton<int>)),
+      matchesSemantics(
+        hasExpandedState: true,
+        label: 'XXX',
+        hasTapAction: true,
+        hasFocusAction: true,
+        isFocusable: true,
+      ),
+    );
+  });
+
   testWidgets('PopupMenuItem merges the semantics of its descendants', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
     await tester.pumpWidget(
@@ -4452,7 +4520,7 @@ void main() {
   });
 
   testWidgets("Popup menu child's InkWell borderRadius", (WidgetTester tester) async {
-    final borderRadius = BorderRadius.circular(20);
+    const borderRadius = BorderRadius.all(Radius.circular(20));
 
     Widget buildPopupMenu({required BorderRadius? borderRadius}) {
       return MaterialApp(
@@ -4708,7 +4776,7 @@ void main() {
               onSelected: (String result) {},
               child: const Text('Menu Button'),
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                PopupMenuDivider(radius: BorderRadius.circular(5)),
+                const PopupMenuDivider(radius: BorderRadius.all(Radius.circular(5))),
               ],
             ),
           ),
@@ -4818,21 +4886,21 @@ void main() {
       expect(scrollView.padding, popupMenuTheme.menuPadding);
     }
 
-    final popupMenuTheme1 = PopupMenuThemeData(
+    const popupMenuTheme1 = PopupMenuThemeData(
       elevation: 10,
       color: Colors.red,
       shadowColor: Colors.black,
       surfaceTintColor: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      menuPadding: const EdgeInsets.all(10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
+      menuPadding: EdgeInsets.all(10),
     );
-    final popupMenuTheme2 = PopupMenuThemeData(
+    const popupMenuTheme2 = PopupMenuThemeData(
       elevation: 20,
       color: Colors.blue,
       shadowColor: Colors.white,
       surfaceTintColor: Colors.black,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      menuPadding: const EdgeInsets.all(20),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+      menuPadding: EdgeInsets.all(20),
     );
 
     // Show the menu with the first theme.

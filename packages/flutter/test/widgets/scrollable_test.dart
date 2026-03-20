@@ -5,6 +5,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -1725,6 +1726,71 @@ void main() {
     expect(getScrollOffset(tester), 200);
     await gesture.up();
   });
+
+  testWidgets(
+    'Diagonal scroll in nested scrollables: horizontal handles, vertical at edge should NOT call respond(true)',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/152588
+      final verticalController = ScrollController();
+      final horizontalController = ScrollController();
+
+      addTearDown(verticalController.dispose);
+      addTearDown(horizontalController.dispose);
+
+      final onRespondCalls = <bool>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListView(
+            controller: verticalController,
+            children: <Widget>[
+              SizedBox(
+                height: 200,
+                child: ListView(
+                  controller: horizontalController,
+                  scrollDirection: Axis.horizontal,
+                  children: <Widget>[
+                    Container(width: 1000, height: 200, color: const Color(0xFFFF0000)),
+                  ],
+                ),
+              ),
+              Container(height: 1000, color: const Color(0xFF0000FF)),
+            ],
+          ),
+        ),
+      );
+
+      expect(verticalController.offset, 0.0);
+
+      final Offset location = tester.getCenter(find.byType(ListView).last);
+
+      // Simulate diagonal scroll: dx: 20, dy: -20 (trying to scroll up/back vertically, which is at edge)
+
+      final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+      testPointer.hover(location);
+
+      final event = PointerScrollEvent(
+        position: location,
+        scrollDelta: const Offset(20.0, -20.0),
+        onRespond: ({required bool allowPlatformDefault}) {
+          onRespondCalls.add(allowPlatformDefault);
+        },
+      );
+
+      await tester.sendEventToBinding(event);
+
+      expect(horizontalController.offset, 20.0);
+      expect(verticalController.offset, 0.0);
+
+      expect(
+        onRespondCalls,
+        equals([false]),
+        reason:
+            'ONLY the horizontal child should have handled the event and called respond(false). Vertical parent should NOT have called respond(true) because the event was handled by the child',
+      );
+    },
+  );
 }
 
 // ignore: must_be_immutable

@@ -16,7 +16,7 @@ class NewGalleryPerfTest extends PerfTest {
          '${flutterDirectory.path}/dev/integration_tests/new_gallery',
          'test_driver/transitions_perf.dart',
          timelineFileName,
-         createPlatforms: <String>['android', 'ios', 'web'],
+         createPlatforms: <String>['android', 'ios', 'web', 'macos'],
          enableMergedPlatformThread: true,
        );
 }

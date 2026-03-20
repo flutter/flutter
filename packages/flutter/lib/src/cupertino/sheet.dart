@@ -332,7 +332,7 @@ class CupertinoSheetTransition extends StatefulWidget {
       begin: BorderRadius.vertical(
         top: Radius.circular(roundedDeviceCorners ? deviceCornerRadius : 0),
       ),
-      end: BorderRadius.circular(12),
+      end: const BorderRadius.all(Radius.circular(12)),
     );
 
     final Animation<BorderRadiusGeometry> radiusAnimation = curvedAnimation.drive(decorationTween);
@@ -380,7 +380,7 @@ class CupertinoSheetTransition extends StatefulWidget {
                 return ClipRSuperellipse(
                   borderRadius: !secondaryAnimation.isDismissed
                       ? radiusAnimation.value
-                      : BorderRadius.circular(0),
+                      : BorderRadius.zero,
                   child: contrastedChild,
                 );
               },
