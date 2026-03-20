@@ -4013,6 +4013,957 @@ void main() {
       );
     });
 
+    testWidgets('submenu with topStart alignment opens to the left of anchor', (
+      WidgetTester tester,
+    ) async {
+      await changeSurfaceSize(tester, const Size(800, 600));
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Material(
+            child: Center(
+              child: MenuAnchor(
+                menuChildren: const <Widget>[
+                  MenuItemButton(child: Text('Item 1')),
+                  SubmenuButton(
+                    menuStyle: MenuStyle(alignment: AlignmentDirectional.topStart),
+                    menuChildren: <Widget>[
+                      MenuItemButton(child: Text('Sub Item 1')),
+                      MenuItemButton(child: Text('Sub Item 2')),
+                    ],
+                    child: Text('Submenu'),
+                  ),
+                  MenuItemButton(child: Text('Item 2')),
+                ],
+                builder: (BuildContext context, MenuController controller, Widget? child) {
+                  return FilledButton(
+                    onPressed: () {
+                      if (controller.isOpen) {
+                        controller.close();
+                      } else {
+                        controller.open();
+                      }
+                    },
+                    child: const Text('Open Menu'),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Open the main menu
+      await tester.tap(find.text('Open Menu'));
+      await tester.pump();
+
+      // Get the submenu button rect
+      final Rect submenuButtonRect = tester.getRect(find.text('Submenu'));
+
+      // Open the submenu
+      await tester.tap(find.text('Submenu'));
+      await tester.pump();
+
+      // Find the submenu panel (the one containing 'Sub Item 1')
+      final Finder subItemFinder = find.text('Sub Item 1');
+      expect(subItemFinder, findsOneWidget);
+
+      final Finder submenuPanel = find
+          .ancestor(of: subItemFinder, matching: find.byType(FocusScope))
+          .first;
+      final Rect submenuRect = tester.getRect(submenuPanel);
+
+      // The submenu's right edge should be at or to the left of the submenu button's left edge
+      expect(
+        submenuRect.right,
+        lessThanOrEqualTo(submenuButtonRect.left),
+        reason: 'Submenu with topStart alignment should open to the left of the anchor',
+      );
+    });
+
+    testWidgets('submenu with topEnd alignment opens to the right in LTR', (
+      WidgetTester tester,
+    ) async {
+      await changeSurfaceSize(tester, const Size(800, 600));
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Material(
+            child: Center(
+              child: MenuAnchor(
+                menuChildren: const <Widget>[
+                  MenuItemButton(child: Text('Item 1')),
+                  SubmenuButton(
+                    menuStyle: MenuStyle(alignment: AlignmentDirectional.topEnd),
+                    menuChildren: <Widget>[
+                      MenuItemButton(child: Text('Sub Item 1')),
+                      MenuItemButton(child: Text('Sub Item 2')),
+                    ],
+                    child: Text('Submenu'),
+                  ),
+                  MenuItemButton(child: Text('Item 2')),
+                ],
+                builder: (BuildContext context, MenuController controller, Widget? child) {
+                  return FilledButton(
+                    onPressed: () {
+                      if (controller.isOpen) {
+                        controller.close();
+                      } else {
+                        controller.open();
+                      }
+                    },
+                    child: const Text('Open Menu'),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Open the main menu
+      await tester.tap(find.text('Open Menu'));
+      await tester.pump();
+
+      // Get the submenu button rect
+      final Rect submenuButtonRect = tester.getRect(find.text('Submenu'));
+
+      // Open the submenu
+      await tester.tap(find.text('Submenu'));
+      await tester.pump();
+
+      // Find the submenu panel
+      final Finder subItemFinder = find.text('Sub Item 1');
+      expect(subItemFinder, findsOneWidget);
+
+      final Finder submenuPanel = find
+          .ancestor(of: subItemFinder, matching: find.byType(FocusScope))
+          .first;
+      final Rect submenuRect = tester.getRect(submenuPanel);
+
+      // With topEnd alignment, submenu should open to the right of anchor
+      expect(
+        submenuRect.left,
+        greaterThanOrEqualTo(submenuButtonRect.right),
+        reason: 'Submenu with topEnd alignment should open to the right of the anchor',
+      );
+    });
+
+    testWidgets('submenu flipping vertically aligns bottom to anchor bottom', (
+      WidgetTester tester,
+    ) async {
+      await changeSurfaceSize(tester, const Size(800, 600));
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Material(
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 50),
+                child: MenuAnchor(
+                  menuChildren: const <Widget>[
+                    MenuItemButton(child: Text('Item 1')),
+                    SubmenuButton(
+                      menuChildren: <Widget>[
+                        MenuItemButton(child: Text('Sub Item 1')),
+                        MenuItemButton(child: Text('Sub Item 2')),
+                        MenuItemButton(child: Text('Sub Item 3')),
+                        MenuItemButton(child: Text('Sub Item 4')),
+                        MenuItemButton(child: Text('Sub Item 5')),
+                        MenuItemButton(child: Text('Sub Item 6')),
+                      ],
+                      child: Text('Submenu'),
+                    ),
+                    MenuItemButton(child: Text('Item 2')),
+                  ],
+                  builder: (BuildContext context, MenuController controller, Widget? child) {
+                    return FilledButton(
+                      onPressed: () {
+                        if (controller.isOpen) {
+                          controller.close();
+                        } else {
+                          controller.open();
+                        }
+                      },
+                      child: const Text('Open Menu'),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Open the main menu
+      await tester.tap(find.text('Open Menu'));
+      await tester.pump();
+
+      // Get the submenu button rect before opening submenu
+      final Rect submenuButtonRect = tester.getRect(find.text('Submenu'));
+
+      // Open the submenu (should flip upward due to lack of space below)
+      await tester.tap(find.text('Submenu'));
+      await tester.pump();
+
+      // Find the submenu panel
+      final Finder subItemFinder = find.text('Sub Item 1');
+      expect(subItemFinder, findsOneWidget);
+
+      final Finder submenuPanel = find
+          .ancestor(of: subItemFinder, matching: find.byType(FocusScope))
+          .first;
+      final Rect submenuRect = tester.getRect(submenuPanel);
+
+      // When flipped, the submenu's bottom should align with the anchor's bottom
+      // Allow tolerance for padding/offset
+      expect(
+        (submenuRect.bottom - submenuButtonRect.bottom).abs(),
+        lessThan(30),
+        reason: 'Flipped submenu bottom should align with anchor bottom',
+      );
+
+      // The submenu should be above the anchor (flipped)
+      expect(
+        submenuRect.top,
+        lessThan(submenuButtonRect.top),
+        reason: 'Flipped submenu should be positioned above the anchor',
+      );
+    });
+
+    testWidgets('submenu with topStart alignment opens to the right in RTL', (
+      WidgetTester tester,
+    ) async {
+      await changeSurfaceSize(tester, const Size(800, 600));
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Material(
+              child: Center(
+                child: MenuAnchor(
+                  menuChildren: const <Widget>[
+                    MenuItemButton(child: Text('Item 1')),
+                    SubmenuButton(
+                      menuStyle: MenuStyle(alignment: AlignmentDirectional.topStart),
+                      menuChildren: <Widget>[
+                        MenuItemButton(child: Text('Sub Item 1')),
+                        MenuItemButton(child: Text('Sub Item 2')),
+                      ],
+                      child: Text('Submenu'),
+                    ),
+                    MenuItemButton(child: Text('Item 2')),
+                  ],
+                  builder: (BuildContext context, MenuController controller, Widget? child) {
+                    return FilledButton(
+                      onPressed: () {
+                        if (controller.isOpen) {
+                          controller.close();
+                        } else {
+                          controller.open();
+                        }
+                      },
+                      child: const Text('Open Menu'),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Open the main menu
+      await tester.tap(find.text('Open Menu'));
+      await tester.pump();
+
+      // Get the submenu button rect
+      final Rect submenuButtonRect = tester.getRect(find.text('Submenu'));
+
+      // Open the submenu
+      await tester.tap(find.text('Submenu'));
+      await tester.pump();
+
+      // Find the submenu panel
+      final Finder subItemFinder = find.text('Sub Item 1');
+      expect(subItemFinder, findsOneWidget);
+
+      final Finder submenuPanel = find
+          .ancestor(of: subItemFinder, matching: find.byType(FocusScope))
+          .first;
+      final Rect submenuRect = tester.getRect(submenuPanel);
+
+      // In RTL, topStart means right side (start = right in RTL)
+      // Submenu should open to the RIGHT of anchor
+      expect(
+        submenuRect.left,
+        greaterThanOrEqualTo(submenuButtonRect.right),
+        reason: 'Submenu with topStart alignment in RTL should open to the right of the anchor',
+      );
+    });
+
+    testWidgets('submenu with topEnd alignment opens to the left in RTL', (
+      WidgetTester tester,
+    ) async {
+      await changeSurfaceSize(tester, const Size(800, 600));
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Material(
+              child: Center(
+                child: MenuAnchor(
+                  menuChildren: const <Widget>[
+                    MenuItemButton(child: Text('Item 1')),
+                    SubmenuButton(
+                      menuStyle: MenuStyle(alignment: AlignmentDirectional.topEnd),
+                      menuChildren: <Widget>[
+                        MenuItemButton(child: Text('Sub Item 1')),
+                        MenuItemButton(child: Text('Sub Item 2')),
+                      ],
+                      child: Text('Submenu'),
+                    ),
+                    MenuItemButton(child: Text('Item 2')),
+                  ],
+                  builder: (BuildContext context, MenuController controller, Widget? child) {
+                    return FilledButton(
+                      onPressed: () {
+                        if (controller.isOpen) {
+                          controller.close();
+                        } else {
+                          controller.open();
+                        }
+                      },
+                      child: const Text('Open Menu'),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Open the main menu
+      await tester.tap(find.text('Open Menu'));
+      await tester.pump();
+
+      // Get the submenu button rect
+      final Rect submenuButtonRect = tester.getRect(find.text('Submenu'));
+
+      // Open the submenu
+      await tester.tap(find.text('Submenu'));
+      await tester.pump();
+
+      // Find the submenu panel
+      final Finder subItemFinder = find.text('Sub Item 1');
+      expect(subItemFinder, findsOneWidget);
+
+      final Finder submenuPanel = find
+          .ancestor(of: subItemFinder, matching: find.byType(FocusScope))
+          .first;
+      final Rect submenuRect = tester.getRect(submenuPanel);
+
+      // In RTL, topEnd means left side (end = left in RTL)
+      // Submenu should open to the LEFT of anchor
+      expect(
+        submenuRect.right,
+        lessThanOrEqualTo(submenuButtonRect.left),
+        reason: 'Submenu with topEnd alignment in RTL should open to the left of the anchor',
+      );
+    });
+
+    testWidgets('submenu flipping horizontally to left respects padding', (
+      WidgetTester tester,
+    ) async {
+      // Position menu on the right side so submenu flips to the left
+      await changeSurfaceSize(tester, const Size(800, 600));
+      const menuPadding = 16.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Material(
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 50),
+                child: MenuAnchor(
+                  menuChildren: const <Widget>[
+                    MenuItemButton(child: Text('Item 1')),
+                    SubmenuButton(
+                      menuStyle: MenuStyle(
+                        padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(menuPadding)),
+                      ),
+                      menuChildren: <Widget>[
+                        MenuItemButton(child: Text('Sub Item 1')),
+                        MenuItemButton(child: Text('Sub Item 2')),
+                      ],
+                      child: Text('Submenu'),
+                    ),
+                    MenuItemButton(child: Text('Item 2')),
+                  ],
+                  builder: (BuildContext context, MenuController controller, Widget? child) {
+                    return FilledButton(
+                      onPressed: () {
+                        if (controller.isOpen) {
+                          controller.close();
+                        } else {
+                          controller.open();
+                        }
+                      },
+                      child: const Text('Open Menu'),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Open the main menu
+      await tester.tap(find.text('Open Menu'));
+      await tester.pump();
+
+      // Get the submenu button rect
+      final Rect submenuButtonRect = tester.getRect(find.text('Submenu'));
+
+      // Open the submenu (should flip to left due to right edge proximity)
+      await tester.tap(find.text('Submenu'));
+      await tester.pump();
+
+      // Find the submenu panel
+      final Finder subItemFinder = find.text('Sub Item 1');
+      expect(subItemFinder, findsOneWidget);
+
+      final Finder submenuPanel = find
+          .ancestor(of: subItemFinder, matching: find.byType(FocusScope))
+          .first;
+      final Rect submenuRect = tester.getRect(submenuPanel);
+
+      // The submenu should be to the left with a gap
+      // With padding inside scroll, the gap is smaller
+      expect(
+        submenuButtonRect.left - submenuRect.right,
+        greaterThanOrEqualTo(menuPadding - 5), // Allow tolerance for padding inside scroll
+        reason: 'Flipped submenu should have gap from anchor',
+      );
+    });
+
+    testWidgets('submenu flipping horizontally to right respects padding', (
+      WidgetTester tester,
+    ) async {
+      // Position menu on the left side with topStart so it tries to open left,
+      // then flips to the right
+      await changeSurfaceSize(tester, const Size(800, 600));
+      const menuPadding = 16.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Material(
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 50),
+                child: MenuAnchor(
+                  menuChildren: const <Widget>[
+                    MenuItemButton(child: Text('Item 1')),
+                    SubmenuButton(
+                      menuStyle: MenuStyle(
+                        alignment: AlignmentDirectional.topStart,
+                        padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(menuPadding)),
+                      ),
+                      menuChildren: <Widget>[
+                        MenuItemButton(child: Text('Sub Item 1')),
+                        MenuItemButton(child: Text('Sub Item 2')),
+                      ],
+                      child: Text('Submenu'),
+                    ),
+                    MenuItemButton(child: Text('Item 2')),
+                  ],
+                  builder: (BuildContext context, MenuController controller, Widget? child) {
+                    return FilledButton(
+                      onPressed: () {
+                        if (controller.isOpen) {
+                          controller.close();
+                        } else {
+                          controller.open();
+                        }
+                      },
+                      child: const Text('Open Menu'),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Open the main menu
+      await tester.tap(find.text('Open Menu'));
+      await tester.pump();
+
+      // Get the submenu button rect
+      final Rect submenuButtonRect = tester.getRect(find.text('Submenu'));
+
+      // Open the submenu (should flip to right due to left edge proximity)
+      await tester.tap(find.text('Submenu'));
+      await tester.pump();
+
+      // Find the submenu panel
+      final Finder subItemFinder = find.text('Sub Item 1');
+      expect(subItemFinder, findsOneWidget);
+
+      final Finder submenuPanel = find
+          .ancestor(of: subItemFinder, matching: find.byType(FocusScope))
+          .first;
+      final Rect submenuRect = tester.getRect(submenuPanel);
+
+      // The submenu should be to the right with padding gap
+      // submenuRect.left should be at least menuPadding away from submenuButtonRect.right
+      expect(
+        submenuRect.left - submenuButtonRect.right,
+        greaterThanOrEqualTo(menuPadding - 1), // Allow 1px tolerance
+        reason: 'Flipped submenu should respect padding gap from anchor',
+      );
+    });
+
+    testWidgets('submenu respects different parent and submenu paddings', (
+      WidgetTester tester,
+    ) async {
+      // Test that submenu position accounts for parent's padding, not its own
+      await changeSurfaceSize(tester, const Size(800, 600));
+      const parentPadding = 24.0;
+      const submenuPadding = 8.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Material(
+            child: Center(
+              child: MenuAnchor(
+                style: const MenuStyle(
+                  padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(parentPadding)),
+                ),
+                menuChildren: const <Widget>[
+                  MenuItemButton(child: Text('Item 1')),
+                  SubmenuButton(
+                    menuStyle: MenuStyle(
+                      alignment: AlignmentDirectional.topEnd,
+                      padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(submenuPadding)),
+                    ),
+                    menuChildren: <Widget>[
+                      MenuItemButton(child: Text('Sub Item 1')),
+                      MenuItemButton(child: Text('Sub Item 2')),
+                    ],
+                    child: Text('Submenu'),
+                  ),
+                  MenuItemButton(child: Text('Item 2')),
+                ],
+                builder: (BuildContext context, MenuController controller, Widget? child) {
+                  return FilledButton(
+                    onPressed: () {
+                      if (controller.isOpen) {
+                        controller.close();
+                      } else {
+                        controller.open();
+                      }
+                    },
+                    child: const Text('Open Menu'),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open Menu'));
+      await tester.pump();
+
+      // Find the parent menu panel
+      final Finder parentMenuItem = find.text('Submenu');
+      final Rect submenuButtonRect = tester.getRect(parentMenuItem);
+
+      // Find the parent menu to get its right edge (button + padding)
+      final Finder parentPanel = find
+          .ancestor(of: parentMenuItem, matching: find.byType(Material))
+          .first;
+      final Rect parentMenuRect = tester.getRect(parentPanel);
+
+      await tester.tap(find.text('Submenu'));
+      await tester.pump();
+
+      final Finder subItemFinder = find.text('Sub Item 1');
+      final Finder submenuPanel = find
+          .ancestor(of: subItemFinder, matching: find.byType(FocusScope))
+          .first;
+      final Rect submenuRect = tester.getRect(submenuPanel);
+
+      // The submenu's left edge should be at or beyond the parent menu's right edge
+      // (not just the button's right edge)
+      expect(
+        submenuRect.left,
+        greaterThanOrEqualTo(parentMenuRect.right - 1), // Allow 1px tolerance
+        reason: 'Submenu should not overlap with parent menu (accounting for parent padding)',
+      );
+
+      // Verify that submenu is positioned based on parent's padding, not its own
+      // The gap should be at least parentPadding from the button
+      expect(
+        submenuRect.left - submenuButtonRect.right,
+        greaterThanOrEqualTo(parentPadding - 1),
+        reason: 'Submenu gap should respect parent menu padding',
+      );
+    });
+
+    testWidgets('submenu respects asymmetric parent padding (larger right)', (
+      WidgetTester tester,
+    ) async {
+      await changeSurfaceSize(tester, const Size(800, 600));
+      const parentLeftPadding = 8.0;
+      const parentRightPadding = 24.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Material(
+            child: Center(
+              child: MenuAnchor(
+                style: const MenuStyle(
+                  padding: WidgetStatePropertyAll<EdgeInsets>(
+                    EdgeInsets.only(
+                      left: parentLeftPadding,
+                      right: parentRightPadding,
+                      top: 8,
+                      bottom: 8,
+                    ),
+                  ),
+                ),
+                menuChildren: const <Widget>[
+                  MenuItemButton(child: Text('Item 1')),
+                  SubmenuButton(
+                    menuStyle: MenuStyle(
+                      alignment: AlignmentDirectional.topEnd,
+                      padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(8)),
+                    ),
+                    menuChildren: <Widget>[MenuItemButton(child: Text('Sub Item 1'))],
+                    child: Text('Submenu'),
+                  ),
+                ],
+                builder: (BuildContext context, MenuController controller, Widget? child) {
+                  return FilledButton(
+                    onPressed: () => controller.isOpen ? controller.close() : controller.open(),
+                    child: const Text('Open Menu'),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open Menu'));
+      await tester.pump();
+
+      final Rect submenuButtonRect = tester.getRect(find.text('Submenu'));
+
+      await tester.tap(find.text('Submenu'));
+      await tester.pump();
+
+      final Finder submenuPanel = find
+          .ancestor(of: find.text('Sub Item 1'), matching: find.byType(FocusScope))
+          .first;
+      final Rect submenuRect = tester.getRect(submenuPanel);
+
+      // Opening to the right should use parent's RIGHT padding
+      expect(
+        submenuRect.left - submenuButtonRect.right,
+        greaterThanOrEqualTo(parentRightPadding - 1),
+        reason: 'Submenu opening right should respect parent right padding',
+      );
+    });
+
+    testWidgets('submenu respects asymmetric parent padding (larger left) in RTL', (
+      WidgetTester tester,
+    ) async {
+      await changeSurfaceSize(tester, const Size(800, 600));
+      const parentLeftPadding = 24.0;
+      const parentRightPadding = 8.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Material(
+              child: Center(
+                child: MenuAnchor(
+                  style: const MenuStyle(
+                    padding: WidgetStatePropertyAll<EdgeInsets>(
+                      EdgeInsets.only(
+                        left: parentLeftPadding,
+                        right: parentRightPadding,
+                        top: 8,
+                        bottom: 8,
+                      ),
+                    ),
+                  ),
+                  menuChildren: const <Widget>[
+                    MenuItemButton(child: Text('Item 1')),
+                    SubmenuButton(
+                      menuStyle: MenuStyle(
+                        alignment: AlignmentDirectional.topEnd,
+                        padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(8)),
+                      ),
+                      menuChildren: <Widget>[MenuItemButton(child: Text('Sub Item 1'))],
+                      child: Text('Submenu'),
+                    ),
+                  ],
+                  builder: (BuildContext context, MenuController controller, Widget? child) {
+                    return FilledButton(
+                      onPressed: () => controller.isOpen ? controller.close() : controller.open(),
+                      child: const Text('Open Menu'),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open Menu'));
+      await tester.pump();
+
+      final Rect submenuButtonRect = tester.getRect(find.text('Submenu'));
+
+      await tester.tap(find.text('Submenu'));
+      await tester.pump();
+
+      final Finder submenuPanel = find
+          .ancestor(of: find.text('Sub Item 1'), matching: find.byType(FocusScope))
+          .first;
+      final Rect submenuRect = tester.getRect(submenuPanel);
+
+      // In RTL with topEnd, submenu opens to the LEFT, should use parent's LEFT padding
+      expect(
+        submenuButtonRect.left - submenuRect.right,
+        greaterThanOrEqualTo(parentLeftPadding - 1),
+        reason: 'Submenu opening left in RTL should respect parent left padding',
+      );
+    });
+
+    testWidgets('submenu with zero parent padding positions correctly', (
+      WidgetTester tester,
+    ) async {
+      await changeSurfaceSize(tester, const Size(800, 600));
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Material(
+            child: Center(
+              child: MenuAnchor(
+                style: const MenuStyle(
+                  padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.zero),
+                ),
+                menuChildren: const <Widget>[
+                  SubmenuButton(
+                    menuStyle: MenuStyle(
+                      alignment: AlignmentDirectional.topEnd,
+                      padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(16)),
+                    ),
+                    menuChildren: <Widget>[MenuItemButton(child: Text('Sub Item 1'))],
+                    child: Text('Submenu'),
+                  ),
+                ],
+                builder: (BuildContext context, MenuController controller, Widget? child) {
+                  return FilledButton(
+                    onPressed: () => controller.isOpen ? controller.close() : controller.open(),
+                    child: const Text('Open Menu'),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open Menu'));
+      await tester.pump();
+
+      final Rect submenuButtonRect = tester.getRect(find.text('Submenu'));
+
+      await tester.tap(find.text('Submenu'));
+      await tester.pump();
+
+      final Finder submenuPanel = find
+          .ancestor(of: find.text('Sub Item 1'), matching: find.byType(FocusScope))
+          .first;
+      final Rect submenuRect = tester.getRect(submenuPanel);
+
+      // With zero parent padding, submenu should start near the button's right edge
+      // (only alignmentOffset separates them)
+      expect(
+        submenuRect.left,
+        greaterThanOrEqualTo(submenuButtonRect.right - 1),
+        reason: 'Submenu with zero parent padding should not overlap button',
+      );
+    });
+
+    testWidgets('deeply nested submenus respect each parent padding', (WidgetTester tester) async {
+      await changeSurfaceSize(tester, const Size(1200, 600));
+      const level1Padding = 20.0;
+      const level2Padding = 12.0;
+      const level3Padding = 8.0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Material(
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 50),
+                child: MenuAnchor(
+                  style: const MenuStyle(
+                    padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(level1Padding)),
+                  ),
+                  menuChildren: const <Widget>[
+                    SubmenuButton(
+                      menuStyle: MenuStyle(
+                        alignment: AlignmentDirectional.topEnd,
+                        padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(level2Padding)),
+                      ),
+                      menuChildren: <Widget>[
+                        SubmenuButton(
+                          menuStyle: MenuStyle(
+                            alignment: AlignmentDirectional.topEnd,
+                            padding: WidgetStatePropertyAll<EdgeInsets>(
+                              EdgeInsets.all(level3Padding),
+                            ),
+                          ),
+                          menuChildren: <Widget>[MenuItemButton(child: Text('Deep Item'))],
+                          child: Text('Level 2'),
+                        ),
+                      ],
+                      child: Text('Level 1'),
+                    ),
+                  ],
+                  builder: (BuildContext context, MenuController controller, Widget? child) {
+                    return FilledButton(
+                      onPressed: () => controller.isOpen ? controller.close() : controller.open(),
+                      child: const Text('Open Menu'),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Open all menu levels
+      await tester.tap(find.text('Open Menu'));
+      await tester.pump();
+
+      final Rect level1ButtonRect = tester.getRect(find.text('Level 1'));
+
+      await tester.tap(find.text('Level 1'));
+      await tester.pump();
+
+      final Finder level2Panel = find
+          .ancestor(of: find.text('Level 2'), matching: find.byType(FocusScope))
+          .first;
+      final Rect level2Rect = tester.getRect(level2Panel);
+
+      // Level 2 menu should respect Level 1's padding
+      expect(
+        level2Rect.left - level1ButtonRect.right,
+        greaterThanOrEqualTo(level1Padding - 1),
+        reason: 'Level 2 submenu should respect Level 1 padding',
+      );
+
+      final Rect level2ButtonRect = tester.getRect(find.text('Level 2'));
+
+      await tester.tap(find.text('Level 2'));
+      await tester.pump();
+
+      final Finder level3Panel = find
+          .ancestor(of: find.text('Deep Item'), matching: find.byType(FocusScope))
+          .first;
+      final Rect level3Rect = tester.getRect(level3Panel);
+
+      // Level 3 menu should respect Level 2's padding
+      expect(
+        level3Rect.left - level2ButtonRect.right,
+        greaterThanOrEqualTo(level2Padding - 1),
+        reason: 'Level 3 submenu should respect Level 2 padding',
+      );
+    });
+
+    testWidgets('submenu with alignmentOffset and different paddings positions correctly', (
+      WidgetTester tester,
+    ) async {
+      await changeSurfaceSize(tester, const Size(800, 600));
+      const parentPadding = 20.0;
+      const submenuPadding = 8.0;
+      const alignmentOffsetX = 10.0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Material(
+            child: Center(
+              child: MenuAnchor(
+                style: const MenuStyle(
+                  padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(parentPadding)),
+                ),
+                menuChildren: const <Widget>[
+                  SubmenuButton(
+                    alignmentOffset: Offset(alignmentOffsetX, 0),
+                    menuStyle: MenuStyle(
+                      alignment: AlignmentDirectional.topEnd,
+                      padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(submenuPadding)),
+                    ),
+                    menuChildren: <Widget>[MenuItemButton(child: Text('Sub Item 1'))],
+                    child: Text('Submenu'),
+                  ),
+                ],
+                builder: (BuildContext context, MenuController controller, Widget? child) {
+                  return FilledButton(
+                    onPressed: () => controller.isOpen ? controller.close() : controller.open(),
+                    child: const Text('Open Menu'),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open Menu'));
+      await tester.pump();
+
+      final Rect submenuButtonRect = tester.getRect(find.text('Submenu'));
+
+      await tester.tap(find.text('Submenu'));
+      await tester.pump();
+
+      final Finder submenuPanel = find
+          .ancestor(of: find.text('Sub Item 1'), matching: find.byType(FocusScope))
+          .first;
+      final Rect submenuRect = tester.getRect(submenuPanel);
+
+      // Gap should include both parent padding AND alignment offset
+      expect(
+        submenuRect.left - submenuButtonRect.right,
+        greaterThanOrEqualTo(parentPadding + alignmentOffsetX - 1),
+        reason: 'Submenu position should account for both parent padding and alignmentOffset',
+      );
+    });
+
     testWidgets('Menu follows content position when a LayerLink is provided', (
       WidgetTester tester,
     ) async {

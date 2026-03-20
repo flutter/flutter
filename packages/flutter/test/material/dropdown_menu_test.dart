@@ -1033,9 +1033,7 @@ void main() {
       // height = height of MenuItemButton * 6 = 48 * 6
       expect(bottomRight.dy - topLeft.dy, 288.0);
 
-      final Finder menuView = find
-          .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Padding))
-          .first;
+      final Finder menuView = find.byType(SingleChildScrollView).first;
       final Size menuViewSize = tester.getSize(menuView);
       expect(menuViewSize, const Size(180.0, 304.0)); // 304 = 288 + vertical padding(2 * 8)
 
@@ -1047,9 +1045,7 @@ void main() {
       await tester.tap(find.byType(DropdownMenu<TestMenu>));
       await tester.pumpAndSettle();
 
-      final Finder updatedMenu = find
-          .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Padding))
-          .first;
+      final Finder updatedMenu = find.byType(SingleChildScrollView).first;
 
       final Size updatedMenuSize = tester.getSize(updatedMenu);
       expect(updatedMenuSize, const Size(180.0, 100.0));
@@ -1074,9 +1070,7 @@ void main() {
       // height = height of MenuItemButton * 6 = 48 * 6
       expect(bottomRight.dy - topLeft.dy, 288.0);
 
-      final Finder menuView = find
-          .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Padding))
-          .first;
+      final Finder menuView = find.byType(SingleChildScrollView).first;
       final Size menuViewSize = tester.getSize(menuView);
       expect(menuViewSize.height, equals(304.0)); // 304 = 288 + vertical padding(2 * 8)
 
@@ -1088,9 +1082,7 @@ void main() {
       await tester.tap(find.byType(DropdownMenu<TestMenu>));
       await tester.pumpAndSettle();
 
-      final Finder updatedMenu = find
-          .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Padding))
-          .first;
+      final Finder updatedMenu = find.byType(SingleChildScrollView).first;
 
       final Size updatedMenuSize = tester.getSize(updatedMenu);
       expect(updatedMenuSize.height, equals(100.0));

@@ -3357,6 +3357,8 @@ class _MenuLayout extends SingleChildLayoutDelegate {
   });
 
   // Rectangle of underlying button, relative to the overlay's dimensions.
+  // For submenus, this is expanded to include the parent menu's padding,
+  // representing the visual edge of the parent menu rather than just the button.
   final Rect anchorRect;
 
   // Whether to prefer going to the left or to the right.
@@ -3448,11 +3450,19 @@ class _MenuLayout extends SingleChildLayoutDelegate {
       desiredPosition += directionalOffset;
       x = desiredPosition.dx;
       y = desiredPosition.dy;
-      switch (textDirection) {
-        case TextDirection.rtl:
-          x -= childSize.width;
-        case TextDirection.ltr:
-          break;
+      // For submenus: shift left when RTL XOR *Start alignment.
+      // RTL+End → left, RTL+Start → right, LTR+End → right, LTR+Start → left.
+      final isRtl = textDirection == TextDirection.rtl;
+      final bool isStartAligned =
+          parentOrientation == Axis.vertical &&
+          switch (alignment) {
+            final AlignmentDirectional a => a.start < 0,
+            final Alignment a => a.x < 0,
+            _ => false,
+          };
+      final shiftLeft = isRtl != isStartAligned;
+      if (shiftLeft) {
+        x -= childSize.width;
       }
     } else {
       final Offset adjustedPosition = menuPosition! + anchorRect.topLeft;
@@ -3484,6 +3494,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
         if (parentOrientation != orientation) {
           x = allowedRect.left;
         } else {
+          // Flip to right side of anchor.
           final double newX = anchorRect.right + alignmentOffset.dx;
           if (!offRightSide(newX)) {
             x = newX;
@@ -3495,6 +3506,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
         if (parentOrientation != orientation) {
           x = allowedRect.right - childSize.width;
         } else {
+          // Flip to left side of anchor.
           final double newX = anchorRect.left - childSize.width - alignmentOffset.dx;
           if (!offLeftSide(newX)) {
             x = newX;
@@ -3516,14 +3528,14 @@ class _MenuLayout extends SingleChildLayoutDelegate {
           y = allowedRect.top;
         }
       } else if (offBottom(y)) {
-        final double newY = anchorRect.top - childSize.height;
+        // Vertical parent (submenu): align bottom to anchor bottom, accounting for padding.
+        // Horizontal parent (MenuBar): position above anchor with offset.
+        final EdgeInsets resolvedPadding = menuPadding.resolve(textDirection);
+        final double newY = parentOrientation == Axis.vertical
+            ? anchorRect.bottom - childSize.height + resolvedPadding.bottom
+            : anchorRect.top - childSize.height - alignmentOffset.dy;
         if (!offTop(newY)) {
-          // Only move the menu up if its parent is horizontal (MenuAnchor/MenuBar).
-          if (parentOrientation == Axis.horizontal) {
-            y = newY - alignmentOffset.dy;
-          } else {
-            y = newY;
-          }
+          y = newY;
         } else {
           y = allowedRect.bottom - childSize.height;
         }
@@ -3697,26 +3709,24 @@ class _MenuPanelState extends State<_MenuPanel> {
       null => false,
     };
 
-    Widget menuPanel = Padding(
-      padding: resolvedPadding,
-      child: ScrollConfiguration(
-        behavior: ScrollConfiguration.of(
-          context,
-        ).copyWith(scrollbars: false, overscroll: false, physics: const ClampingScrollPhysics()),
-        child: PrimaryScrollController(
-          controller: scrollController,
-          child: Scrollbar(
-            thumbVisibility: displayScrollbar,
-            child: SingleChildScrollView(
-              controller: scrollController,
-              scrollDirection: widget.orientation,
-              child: Flex(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                textDirection: Directionality.of(context),
-                direction: widget.orientation,
-                mainAxisSize: MainAxisSize.min,
-                children: children,
-              ),
+    Widget menuPanel = ScrollConfiguration(
+      behavior: ScrollConfiguration.of(
+        context,
+      ).copyWith(scrollbars: false, overscroll: false, physics: const ClampingScrollPhysics()),
+      child: PrimaryScrollController(
+        controller: scrollController,
+        child: Scrollbar(
+          thumbVisibility: displayScrollbar,
+          child: SingleChildScrollView(
+            controller: scrollController,
+            scrollDirection: widget.orientation,
+            padding: resolvedPadding,
+            child: Flex(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              textDirection: Directionality.of(context),
+              direction: widget.orientation,
+              mainAxisSize: MainAxisSize.min,
+              children: children,
             ),
           ),
         ),
@@ -3846,14 +3856,45 @@ class _Submenu extends StatelessWidget {
         .add(EdgeInsets.fromLTRB(dx, 0, dx, 0))
         .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
 
-    final Rect anchorRect = layerLink == null
-        ? Rect.fromLTRB(
-            menuPosition.anchorRect.left + dx,
-            menuPosition.anchorRect.top,
-            menuPosition.anchorRect.right,
-            menuPosition.anchorRect.bottom,
-          )
-        : Rect.zero;
+    // For submenus (parent is vertical), expand the anchorRect to include
+    // the parent menu's padding. This ensures the submenu is positioned
+    // outside the parent menu's visual bounds, not just outside the button.
+    final Rect anchorRect;
+    if (layerLink == null) {
+      var baseRect = Rect.fromLTRB(
+        menuPosition.anchorRect.left + dx,
+        menuPosition.anchorRect.top,
+        menuPosition.anchorRect.right,
+        menuPosition.anchorRect.bottom,
+      );
+
+      // Expand anchorRect for submenus to include parent's padding.
+      if (anchor._parent case final _MenuAnchorState parent
+          when parent._orientation == Axis.vertical) {
+        // Reuse themeStyle/defaultStyle - when parent is vertical, they're already MenuTheme-based.
+        final EdgeInsetsGeometry parentPadding =
+            parent.widget.style?.padding?.resolve(<WidgetState>{}) ??
+            themeStyle?.padding?.resolve(<WidgetState>{}) ??
+            defaultStyle.padding?.resolve(<WidgetState>{}) ??
+            EdgeInsets.zero;
+
+        final EdgeInsets resolvedParentPadding = parentPadding
+            .add(EdgeInsets.fromLTRB(dx, 0, dx, 0))
+            .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity)
+            .resolve(textDirection);
+
+        // Expand the anchor rect to include the parent menu's horizontal padding.
+        baseRect = Rect.fromLTRB(
+          baseRect.left - resolvedParentPadding.left,
+          baseRect.top,
+          baseRect.right + resolvedParentPadding.right,
+          baseRect.bottom,
+        );
+      }
+      anchorRect = baseRect;
+    } else {
+      anchorRect = Rect.zero;
+    }
 
     final Widget menuPanel = TapRegion(
       groupId: menuPosition.tapRegionGroupId,
