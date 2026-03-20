@@ -851,7 +851,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       // TODO(jonahwilliams): Figure out a way conform to the expected id from TalkBack's
       // CustomLabelManager. talkback/src/main/java/labeling/CustomLabelManager.java#L525
     }
-    switch (Role.fromInt(semanticsNode.role)) {
+    Role role = Role.values()[semanticsNode.role];
+    switch (role) {
       case PROGRESS_BAR:
         result.setClassName("android.widget.ProgressBar");
         if (semanticsNode.value != null) {
@@ -877,10 +878,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 AccessibilityNodeInfo.RangeInfo.obtain(
                     AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT, min, max, parsedValue));
           } catch (NumberFormatException e) {
-            // Fallback to RANGE_TYPE_FLOAT with 0.0.
+            // Fallback to RANGE_TYPE_INDETERMINATE.
             result.setRangeInfo(
                 AccessibilityNodeInfo.RangeInfo.obtain(
-                    AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT, 0.0f, 0.0f, 0.0f));
+                    AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_INDETERMINATE, 0.0f, 0.0f, 0.0f));
           }
         }
         break;
@@ -2408,16 +2409,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
     Role(int value) {
       this.value = value;
-    }
-
-    @NonNull
-    public static Role fromInt(int value) {
-      for (Role role : Role.values()) {
-        if (role.value == value) {
-          return role;
-        }
-      }
-      return Role.NONE;
     }
   }
 
