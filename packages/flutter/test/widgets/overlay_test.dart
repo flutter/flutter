@@ -1927,6 +1927,54 @@ void main() {
     );
   });
 
+  testWidgets(
+    'Overlay.wrap with alwaysSizeToContent is sized by child in loose constraint environment',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: UnconstrainedBox(
+            child: ConstrainedBox(
+              constraints: BoxConstraints.loose(const Size(800, 600)),
+              child: Overlay.wrap(
+                alwaysSizeToContent: true,
+                child: const SizedBox(width: 123, height: 456),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.getSize(find.byType(Overlay)), const Size(123, 456));
+    },
+  );
+
+  testWidgets('Overlay with alwaysSizeToContent throws without sizing child', (
+    WidgetTester tester,
+  ) async {
+    final errors = <FlutterErrorDetails>[];
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = errors.add;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: UnconstrainedBox(
+          child: ConstrainedBox(
+            constraints: BoxConstraints.loose(const Size(800, 600)),
+            child: const Overlay(alwaysSizeToContent: true),
+          ),
+        ),
+      ),
+    );
+    FlutterError.onError = oldHandler;
+
+    expect(
+      errors.first.toString().replaceAll('\n', ' '),
+      contains('Overlay was asked to size itself to content but does not have a suitable child.'),
+    );
+  });
+
   testWidgets('Overlay is not visible from sub-views', (WidgetTester tester) async {
     OverlayState? outsideView;
     OverlayState? insideView;
