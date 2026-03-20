@@ -97,111 +97,50 @@ static SkImageInfo GetImageInfo(const GlyphAtlas& atlas, Size size) {
   FML_UNREACHABLE();
 }
 
-/// Append as many glyphs to the texture as will fit, and return the first index
-/// of [extra_pairs] that did not fit.
-static size_t AppendToExistingAtlas(
-    const std::shared_ptr<GlyphAtlas>& atlas,
-    const std::vector<FontGlyphPair>& extra_pairs,
-    std::vector<Rect>& glyph_positions,
-    const std::vector<Rect>& glyph_sizes,
-    ISize atlas_size,
-    int64_t height_adjustment,
-    const std::shared_ptr<RectanglePacker>& rect_packer) {
-  TRACE_EVENT0("impeller", __FUNCTION__);
-  if (!rect_packer || atlas_size.IsEmpty()) {
-    return 0;
-  }
-
-  for (size_t i = 0; i < extra_pairs.size(); i++) {
-    ISize glyph_size = ISize::Ceil(glyph_sizes[i].GetSize());
-    IPoint16 location_in_atlas;
-    if (!rect_packer->AddRect(glyph_size.width + kPadding,   //
-                              glyph_size.height + kPadding,  //
-                              &location_in_atlas             //
-                              )) {
-      return i;
-    }
-    // Position the glyph in the center of the 1px padding.
-    glyph_positions.push_back(Rect::MakeXYWH(
-        location_in_atlas.x() + 1,                      //
-        location_in_atlas.y() + height_adjustment + 1,  //
-        glyph_size.width,                               //
-        glyph_size.height                               //
-        ));
-  }
-
-  return extra_pairs.size();
-}
-
-static size_t PairsFitInAtlasOfSize(
-    const std::vector<FontGlyphPair>& pairs,
-    const ISize& atlas_size,
-    std::vector<Rect>& glyph_positions,
-    const std::vector<Rect>& glyph_sizes,
-    int64_t height_adjustment,
+bool TypographerContextSkia::AppendSizesAndGrowPacker(
     const std::shared_ptr<RectanglePacker>& rect_packer,
-    size_t start_index) {
-  FML_DCHECK(!atlas_size.IsEmpty());
+    std::vector<NewGlyphData>& glyphs,
+    int max_packer_height) {
+  if (!rect_packer) {
+    // Caller should try again in the "brand new atlas" mode where they
+    // create a brand new packer and expect to create a new texture.
+    return false;
+  }
 
-  for (size_t i = start_index; i < pairs.size(); i++) {
-    ISize glyph_size = ISize::Ceil(glyph_sizes[i].GetSize());
+  FML_DCHECK(rect_packer->width() > 0 && rect_packer->height() > 0);
+  FML_DCHECK(rect_packer->height() <= max_packer_height);
+
+  size_t glyph_index = 0u;
+  while (glyph_index < glyphs.size()) {
+    ISize glyph_size = ISize::Ceil(glyphs[glyph_index].bounds.GetSize());
     IPoint16 location_in_atlas;
-    if (!rect_packer->AddRect(glyph_size.width + kPadding,   //
-                              glyph_size.height + kPadding,  //
-                              &location_in_atlas             //
-                              )) {
-      return i;
+    if (rect_packer->AddRect(glyph_size.width + kPadding,
+                             glyph_size.height + kPadding,
+                             &location_in_atlas)) {
+      // Position the glyph in the center of the 1px padding.
+      glyphs[glyph_index].position =
+          Rect::MakeXYWH(location_in_atlas.x() + 1,  //
+                         location_in_atlas.y() + 1,  //
+                         glyph_size.width,           //
+                         glyph_size.height           //
+          );
+      glyph_index++;
+      continue;
     }
-    glyph_positions.push_back(Rect::MakeXYWH(
-        location_in_atlas.x() + 1,                      //
-        location_in_atlas.y() + height_adjustment + 1,  //
-        glyph_size.width,                               //
-        glyph_size.height                               //
-        ));
+
+    int new_height = std::min(rect_packer->height() * 2, max_packer_height);
+    if (new_height > rect_packer->height()) {
+      rect_packer->GrowTo(rect_packer->width(), new_height);
+      continue;
+    }
+
+    // We failed to add all of the glyphs to the current rectangle packer
+    // even after growing it to the maximum allowed height.
+    return false;
   }
 
-  return pairs.size();
-}
-
-static ISize ComputeNextAtlasSize(
-    const std::shared_ptr<GlyphAtlasContext>& atlas_context,
-    const std::vector<FontGlyphPair>& extra_pairs,
-    std::vector<Rect>& glyph_positions,
-    const std::vector<Rect>& glyph_sizes,
-    size_t glyph_index_start,
-    int64_t max_texture_height) {
-  // Because we can't grow the skyline packer horizontally, pick a reasonable
-  // large width for all atlases.
-  static constexpr int64_t kAtlasWidth = 4096;
-  static constexpr int64_t kMinAtlasHeight = 1024;
-
-  ISize current_size = ISize(kAtlasWidth, kMinAtlasHeight);
-  if (atlas_context->GetAtlasSize().height > current_size.height) {
-    current_size.height = atlas_context->GetAtlasSize().height * 2;
-  }
-
-  auto height_adjustment = atlas_context->GetAtlasSize().height;
-  while (current_size.height <= max_texture_height) {
-    std::shared_ptr<RectanglePacker> rect_packer;
-    if (atlas_context->GetRectPacker() || glyph_index_start) {
-      rect_packer = RectanglePacker::Factory(
-          kAtlasWidth,
-          current_size.height - atlas_context->GetAtlasSize().height);
-    } else {
-      rect_packer = RectanglePacker::Factory(kAtlasWidth, current_size.height);
-    }
-    glyph_positions.erase(glyph_positions.begin() + glyph_index_start,
-                          glyph_positions.end());
-    atlas_context->UpdateRectPacker(rect_packer);
-    auto next_index = PairsFitInAtlasOfSize(
-        extra_pairs, current_size, glyph_positions, glyph_sizes,
-        height_adjustment, rect_packer, glyph_index_start);
-    if (next_index == extra_pairs.size()) {
-      return current_size;
-    }
-    current_size = ISize(current_size.width, current_size.height * 2);
-  }
-  return {};
+  FML_DCHECK(glyph_index == glyphs.size());
+  return true;
 }
 
 static Point SubpixelPositionToPoint(SubpixelPosition pos) {
@@ -262,13 +201,12 @@ static void DrawGlyph(SkCanvas* canvas,
 /// @brief Batch render to a single surface.
 ///
 /// This is only safe for use when updating a fresh texture.
-static bool BulkUpdateAtlasBitmap(const GlyphAtlas& atlas,
-                                  std::shared_ptr<BlitPass>& blit_pass,
-                                  HostBuffer& data_host_buffer,
-                                  const std::shared_ptr<Texture>& texture,
-                                  const std::vector<FontGlyphPair>& new_pairs,
-                                  size_t start_index,
-                                  size_t end_index) {
+bool TypographerContextSkia::BulkUpdateAtlasBitmap(
+    const GlyphAtlas& atlas,
+    std::shared_ptr<BlitPass>& blit_pass,
+    HostBuffer& data_host_buffer,
+    const std::shared_ptr<Texture>& texture,
+    const std::vector<NewGlyphData>& new_glyphs) {
   TRACE_EVENT0("impeller", __FUNCTION__);
 
   bool has_color = atlas.GetType() == GlyphAtlas::Type::kColorBitmap;
@@ -288,8 +226,8 @@ static bool BulkUpdateAtlasBitmap(const GlyphAtlas& atlas,
     return false;
   }
 
-  for (size_t i = start_index; i < end_index; i++) {
-    const FontGlyphPair& pair = new_pairs[i];
+  for (const NewGlyphData& new_glyph : new_glyphs) {
+    const FontGlyphPair& pair = new_glyph.pair;
     auto data = atlas.FindFontGlyphBounds(pair);
     if (!data.has_value()) {
       continue;
@@ -321,19 +259,18 @@ static bool BulkUpdateAtlasBitmap(const GlyphAtlas& atlas,
                                             texture->GetSize().height));
 }
 
-static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
-                              std::shared_ptr<BlitPass>& blit_pass,
-                              HostBuffer& data_host_buffer,
-                              const std::shared_ptr<Texture>& texture,
-                              const std::vector<FontGlyphPair>& new_pairs,
-                              size_t start_index,
-                              size_t end_index) {
+bool TypographerContextSkia::UpdateAtlasBitmap(
+    const GlyphAtlas& atlas,
+    std::shared_ptr<BlitPass>& blit_pass,
+    HostBuffer& data_host_buffer,
+    const std::shared_ptr<Texture>& texture,
+    const std::vector<NewGlyphData>& new_glyphs) {
   TRACE_EVENT0("impeller", __FUNCTION__);
 
   bool has_color = atlas.GetType() == GlyphAtlas::Type::kColorBitmap;
 
-  for (size_t i = start_index; i < end_index; i++) {
-    const FontGlyphPair& pair = new_pairs[i];
+  for (const NewGlyphData& new_glyph : new_glyphs) {
+    const FontGlyphPair& pair = new_glyph.pair;
     auto data = atlas.FindFontGlyphBounds(pair);
     if (!data.has_value()) {
       continue;
@@ -419,12 +356,11 @@ static Rect ComputeGlyphSize(const SkFont& font,
                         scaled_bounds.fBottom);
 };
 
-std::pair<std::vector<FontGlyphPair>, std::vector<Rect>>
+std::vector<TypographerContextSkia::NewGlyphData>
 TypographerContextSkia::CollectNewGlyphs(
     const std::shared_ptr<GlyphAtlas>& atlas,
     const std::vector<RenderableText>& renderable_texts) {
-  std::vector<FontGlyphPair> new_glyphs;
-  std::vector<Rect> glyph_sizes;
+  std::vector<NewGlyphData> new_glyphs;
   for (const auto& frame : renderable_texts) {
     Rational rounded_scale = TextFrame::RoundScaledFontSize(
         frame.origin_transform.GetMaxBasisLengthXY());
@@ -460,10 +396,13 @@ TypographerContextSkia::CollectNewGlyphs(
             font_glyph_atlas->FindGlyphBounds(subpixel_glyph);
 
         if (!font_glyph_bounds.has_value()) {
-          new_glyphs.push_back(FontGlyphPair{scaled_font, subpixel_glyph});
           auto glyph_bounds = ComputeGlyphSize(
               sk_font, subpixel_glyph, static_cast<Scalar>(scaled_font.scale));
-          glyph_sizes.push_back(glyph_bounds);
+
+          new_glyphs.emplace_back(NewGlyphData{
+              .pair = FontGlyphPair{scaled_font, subpixel_glyph},
+              .bounds = glyph_bounds,
+          });
 
           auto frame_bounds = FrameBounds{
               Rect::MakeLTRB(0, 0, 0, 0),  //
@@ -476,7 +415,7 @@ TypographerContextSkia::CollectNewGlyphs(
       }
     }
   }
-  return {std::move(new_glyphs), std::move(glyph_sizes)};
+  return new_glyphs;
 }
 
 std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
@@ -501,9 +440,11 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
   //         with the current atlas and reuse if possible. For each new font and
   //         glyph pair, compute the glyph size at scale.
   // ---------------------------------------------------------------------------
-  auto [new_glyphs, glyph_sizes] =
+  std::vector<NewGlyphData> new_glyphs =
       CollectNewGlyphs(last_atlas, renderable_texts);
   if (new_glyphs.size() == 0) {
+    // All of the glyphs needed in this frame were already found in the
+    // existing atlas, no further work is needed.
     return last_atlas;
   }
 
@@ -513,116 +454,77 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
   // ---------------------------------------------------------------------------
   std::vector<Rect> glyph_positions;
   glyph_positions.reserve(new_glyphs.size());
-  size_t first_missing_index = 0;
+  std::shared_ptr<RectanglePacker> packer = atlas_context->GetRectPacker();
 
-  if (last_atlas->GetTexture()) {
-    // Append all glyphs that fit into the current atlas.
-    first_missing_index = AppendToExistingAtlas(
-        last_atlas, new_glyphs, glyph_positions, glyph_sizes,
-        atlas_context->GetAtlasSize(), atlas_context->GetHeightAdjustment(),
-        atlas_context->GetRectPacker());
+  std::shared_ptr<GlyphAtlas> new_atlas = last_atlas;
+  std::shared_ptr<Texture> last_texture = last_atlas->GetTexture();
+  ISize last_atlas_size = last_texture ? last_texture->GetSize() : ISize();
+  ISize new_atlas_size = last_atlas_size;
 
-    // ---------------------------------------------------------------------------
-    // Step 3a: Record the positions in the glyph atlas of the newly added
-    //          glyphs.
-    // ---------------------------------------------------------------------------
-    for (size_t i = 0; i < first_missing_index; i++) {
-      last_atlas->AddTypefaceGlyphPositionAndBounds(
-          new_glyphs[i], glyph_positions[i], glyph_sizes[i]);
-    }
-
-    std::shared_ptr<CommandBuffer> cmd_buffer = context.CreateCommandBuffer();
-    std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
-
-    fml::ScopedCleanupClosure closure([&]() {
-      blit_pass->EncodeCommands();
-      if (!context.EnqueueCommandBuffer(std::move(cmd_buffer))) {
-        VALIDATION_LOG << "Failed to submit glyph atlas command buffer";
-      }
-    });
-
-    // ---------------------------------------------------------------------------
-    // Step 4a: Draw new font-glyph pairs into the a host buffer and encode
-    // the uploads into the blit pass.
-    // ---------------------------------------------------------------------------
-    if (!UpdateAtlasBitmap(*last_atlas, blit_pass, data_host_buffer,
-                           last_atlas->GetTexture(), new_glyphs, 0,
-                           first_missing_index)) {
-      return nullptr;
-    }
-
-    // If all glyphs fit, just return the old atlas.
-    if (first_missing_index == new_glyphs.size()) {
-      return last_atlas;
-    }
-  }
-
-  int64_t height_adjustment = atlas_context->GetAtlasSize().height;
   const int64_t max_texture_height =
       context.GetResourceAllocator()->GetMaxTextureSizeSupported().height;
 
-  // IF the current atlas size is as big as it can get, then "GC" and create an
-  // atlas with only the required glyphs. OpenGLES cannot reliably perform the
-  // blit required here, as 1) it requires attaching textures as read and write
-  // framebuffers which has substantially smaller size limits that max textures
-  // and 2) is missing a GLES 2.0 implementation and cap check.
-  bool blit_old_atlas = true;
-  std::shared_ptr<GlyphAtlas> new_atlas = last_atlas;
-  if (atlas_context->GetAtlasSize().height >= max_texture_height ||
-      context.GetBackendType() == Context::BackendType::kOpenGLES) {
-    blit_old_atlas = false;
+  // IF we cannot grow the current atlas size to fit all of the new glyphs,
+  // then we will need to "GC" and create an atlas with only the required
+  // glyphs. OpenGLES will always opt out of growing the atlas as it
+  // cannot reliably perform the blit required to keep the glyphs in the
+  // old atlas, as 1) it requires attaching textures as read and write
+  // framebuffers which has substantially smaller size limits that max
+  // textures and 2) is missing a GLES 2.0 implementation and cap check.
+  const bool can_grow_atlas =
+      (context.GetBackendType() != Context::BackendType::kOpenGLES) ||
+      last_texture == nullptr;
+
+  bool atlas_grows = false;
+  bool atlas_refreshes = false;
+
+  // If we cannot grow the atlas, then the first attempt to stuff the
+  // existing atlas with the new glyphs has to indicate that the rectangle
+  // packer is already at its maximum height. Otherwise, we allow the
+  // algorithm to grow the packer to accomodate the new glyphs up to the
+  // maximum texture height.
+  const int64_t max_growth_height =
+      can_grow_atlas ? max_texture_height : last_atlas_size.height;
+
+  if (AppendSizesAndGrowPacker(packer, new_glyphs, max_growth_height)) {
+    // We can fit the new glyphs into the existing atlas, but do we need
+    // to grow the atlas texture to do so?
+    FML_DCHECK(packer);
+    atlas_grows = (packer->height() > last_atlas_size.height);
+    if (atlas_grows) {
+      new_atlas_size = ISize(packer->width(), packer->height());
+      atlas_context->UpdateGlyphAtlas(new_atlas, new_atlas_size);
+    }
+  } else {
+    // We could not append all of the glyphs to the existing atlas,
+    // even after (potentially) growing it. So, we start over with
+    // an empty atlas and try one last time.
     new_atlas = std::make_shared<GlyphAtlas>(
         type, /*initial_generation=*/last_atlas->GetAtlasGeneration() + 1);
-
-    auto [update_glyphs, update_sizes] =
+    std::vector<NewGlyphData> update_glyphs =
         CollectNewGlyphs(new_atlas, renderable_texts);
     new_glyphs = std::move(update_glyphs);
-    glyph_sizes = std::move(update_sizes);
+
+    packer = RectanglePacker::Factory(kAtlasWidth, kMinAtlasHeight);
 
     glyph_positions.clear();
     glyph_positions.reserve(new_glyphs.size());
-    first_missing_index = 0;
 
-    height_adjustment = 0;
-    atlas_context->UpdateRectPacker(nullptr);
-    atlas_context->UpdateGlyphAtlas(new_atlas, {0, 0}, 0);
+    // Since we are recreating an atlas in this instance, we can use the
+    // max_texture_height as the growth limit - the newly created atlas
+    // can be any allocatable height.
+    if (!AppendSizesAndGrowPacker(packer, new_glyphs, max_texture_height)) {
+      // We could not append all of the glyphs even to a brand new empty
+      // atlas of maximum possible height, this frame cannot be updated
+      // for the glyphs in it.
+      return nullptr;
+    }
+
+    new_atlas_size = ISize(packer->width(), packer->height());
+    atlas_context->UpdateRectPacker(packer);
+    atlas_context->UpdateGlyphAtlas(new_atlas, new_atlas_size);
+    atlas_refreshes = true;
   }
-
-  // A new glyph atlas must be created.
-  ISize atlas_size = ComputeNextAtlasSize(atlas_context,        //
-                                          new_glyphs,           //
-                                          glyph_positions,      //
-                                          glyph_sizes,          //
-                                          first_missing_index,  //
-                                          max_texture_height    //
-  );
-
-  atlas_context->UpdateGlyphAtlas(new_atlas, atlas_size, height_adjustment);
-  if (atlas_size.IsEmpty()) {
-    return nullptr;
-  }
-  FML_DCHECK(new_glyphs.size() == glyph_positions.size());
-
-  TextureDescriptor descriptor;
-  switch (type) {
-    case GlyphAtlas::Type::kAlphaBitmap:
-      descriptor.format =
-          context.GetCapabilities()->GetDefaultGlyphAtlasFormat();
-      break;
-    case GlyphAtlas::Type::kColorBitmap:
-      descriptor.format = PixelFormat::kR8G8B8A8UNormInt;
-      break;
-  }
-  descriptor.size = atlas_size;
-  descriptor.storage_mode = StorageMode::kDevicePrivate;
-  descriptor.usage = TextureUsage::kShaderRead;
-  std::shared_ptr<Texture> new_texture =
-      context.GetResourceAllocator()->CreateTexture(descriptor);
-  if (!new_texture) {
-    return nullptr;
-  }
-
-  new_texture->SetLabel("GlyphAtlas");
 
   std::shared_ptr<CommandBuffer> cmd_buffer = context.CreateCommandBuffer();
   std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
@@ -634,39 +536,65 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
     }
   });
 
-  // Now append all remaining glyphs. This should never have any missing data...
-  auto old_texture = new_atlas->GetTexture();
-  new_atlas->SetTexture(std::move(new_texture));
+  // By one of multiple means the new glyphs have been added to a
+  // rectangle packer for an atlas. That atlas may be the existing
+  // atlas with no growth, or to a grown version of the existing atlas,
+  // or to a brand new atlas.
+  if (atlas_grows || atlas_refreshes) {
+    // Either the existing atlas can contain the new glyphs, but needs
+    // to grow in size, or we had to start over with an empty atlas.
+    TextureDescriptor descriptor;
+    switch (type) {
+      case GlyphAtlas::Type::kAlphaBitmap:
+        descriptor.format =
+            context.GetCapabilities()->GetDefaultGlyphAtlasFormat();
+        break;
+      case GlyphAtlas::Type::kColorBitmap:
+        descriptor.format = PixelFormat::kR8G8B8A8UNormInt;
+        break;
+    }
+    descriptor.size = new_atlas_size;
+    descriptor.storage_mode = StorageMode::kDevicePrivate;
+    descriptor.usage = TextureUsage::kShaderRead;
+    std::shared_ptr<Texture> new_texture =
+        context.GetResourceAllocator()->CreateTexture(descriptor);
+    if (!new_texture) {
+      return nullptr;
+    }
+
+    new_texture->SetLabel("GlyphAtlas");
+
+    if (last_texture && !atlas_refreshes) {
+      blit_pass->AddCopy(last_texture, new_texture,
+                         IRect::MakeSize(last_atlas_size), {0, 0});
+    }
+    new_atlas->SetTexture(std::move(new_texture));
+  }
 
   // ---------------------------------------------------------------------------
   // Step 3a: Record the positions in the glyph atlas of the newly added
   //          glyphs.
   // ---------------------------------------------------------------------------
-  for (size_t i = first_missing_index; i < glyph_positions.size(); i++) {
+  for (const auto& new_glyph : new_glyphs) {
     new_atlas->AddTypefaceGlyphPositionAndBounds(
-        new_glyphs[i], glyph_positions[i], glyph_sizes[i]);
+        new_glyph.pair, new_glyph.position, new_glyph.bounds);
   }
 
   // ---------------------------------------------------------------------------
   // Step 4a: Draw new font-glyph pairs into the a host buffer and encode
   // the uploads into the blit pass.
   // ---------------------------------------------------------------------------
-  if (!BulkUpdateAtlasBitmap(*new_atlas, blit_pass, data_host_buffer,
-                             new_atlas->GetTexture(), new_glyphs,
-                             first_missing_index, new_glyphs.size())) {
-    return nullptr;
+  if (atlas_refreshes) {
+    if (!BulkUpdateAtlasBitmap(*new_atlas, blit_pass, data_host_buffer,
+                               new_atlas->GetTexture(), new_glyphs)) {
+      return nullptr;
+    }
+  } else {
+    if (!UpdateAtlasBitmap(*new_atlas, blit_pass, data_host_buffer,
+                           new_atlas->GetTexture(), new_glyphs)) {
+      return nullptr;
+    }
   }
-
-  // Blit the old texture to the top left of the new atlas.
-  if (blit_old_atlas && old_texture) {
-    blit_pass->AddCopy(old_texture, new_atlas->GetTexture(),
-                       IRect::MakeSize(new_atlas->GetTexture()->GetSize()),
-                       {0, 0});
-  }
-
-  // ---------------------------------------------------------------------------
-  // Step 8b: Record the texture in the glyph atlas.
-  // ---------------------------------------------------------------------------
 
   return new_atlas;
 }
