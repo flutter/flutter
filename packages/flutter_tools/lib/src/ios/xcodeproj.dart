@@ -21,11 +21,11 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../convert.dart';
-import '../globals.dart' as globals;
 import '../reporting/reporting.dart';
 
 final _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
 final _varExpr = RegExp(r'\$\(([^)]*)\)');
+const kSwiftPackageCacheDirectoryName = 'SourcePackages';
 
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {
@@ -186,11 +186,15 @@ class XcodeProjectInterpreter {
   /// resolution or updates. This should be false when running [prefetchSwiftPackages], so packages
   /// should already be resolved, downloaded, and updated on subsquent `xcodebuild` commands.
   List<String> xcodebuildCommand(Directory buildDirectory, {bool skipPackageResolution = true}) {
+    final String cachePath = buildDirectory
+        .childDirectory(kSwiftPackageCacheDirectoryName)
+        .absolute
+        .path;
     return <String>[
       ...xcrunCommand(),
       'xcodebuild',
       '-clonedSourcePackagesDirPath',
-      buildDirectory.childDirectory('swift_package_cache').path,
+      cachePath,
       if (skipPackageResolution) ...<String>[
         '-disableAutomaticPackageResolution',
         '-skipPackageUpdates',
@@ -221,7 +225,7 @@ class XcodeProjectInterpreter {
       XcodeSdk.WatchOS || XcodeSdk.WatchSimulator => getIosBuildDirectory(),
     };
     final showBuildSettingsCommand = <String>[
-      ...xcodebuildCommand(globals.fs.directory(buildDir)),
+      ...xcodebuildCommand(_fileSystem.directory(buildDir)),
       '-project',
       _fileSystem.path.absolute(projectPath),
       if (scheme != null) ...<String>['-scheme', scheme],
@@ -371,11 +375,11 @@ class XcodeProjectInterpreter {
     bool waitForCompletion = true,
   }) async {
     Status? status;
-    final command = <String>[
-      ...xcodebuildCommand(buildDirectory, skipPackageResolution: false),
-      '-resolvePackageDependencies',
-    ];
     try {
+      final command = <String>[
+        ...xcodebuildCommand(buildDirectory, skipPackageResolution: false),
+        '-resolvePackageDependencies',
+      ];
       if (_swiftPackageFetchProcess == null) {
         // Check if process is already running from a previous Flutter command. If it is, kill it
         // so we don't have the process running twice. When this process is run twice, it'll cause
@@ -383,8 +387,10 @@ class XcodeProjectInterpreter {
         final RunResult result = await _processUtils.run(['pgrep', '-n', ...command]);
         if (result.exitCode == 0) {
           final int? pid = int.tryParse(result.stdout.trim());
-          _logger.printTrace('SwiftPM dependencies are already being fetched by PID $pid');
           if (pid != null) {
+            _logger.printTrace(
+              'Swift Package Manager dependencies are already being fetched by PID $pid',
+            );
             await _processUtils.run(['kill', '$pid']);
           }
         }
@@ -406,12 +412,12 @@ class XcodeProjectInterpreter {
               if (line.startsWith('Fetching')) {
                 status?.cancel();
                 if (!printFetchWarnings) {
-                  globals.logger.printStatus(
+                  _logger.printStatus(
                     'Xcode is fetching Swift Package Manager dependencies. This may take several minutes...',
                   );
                   printFetchWarnings = true;
                 }
-                status = globals.logger.startProgress('  $line...');
+                status = _logger.startProgress('  $line...');
               }
             });
       }
@@ -425,7 +431,7 @@ class XcodeProjectInterpreter {
         _swiftPackageFetchStderrSubscription?.cancel();
       });
       if (exitCode != 0) {
-        throwToolExit('Failed to resolve SwiftPM dependencies:\n$stderrBuffer');
+        throwToolExit('Xcode failed to resolve Swift Package Manager dependencies:\n$stderrBuffer');
       }
     } finally {
       status?.cancel();

@@ -383,10 +383,19 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }
 
   @override
-  Future<void> cleanWorkspace(String workspacePath, String scheme, {bool verbose = false}) async {}
+  Future<void> cleanWorkspace(
+    String workspacePath,
+    String scheme, {
+    required Directory buildDirectory,
+    bool verbose = false,
+  }) async {}
 
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
+  Future<XcodeProjectInfo> getInfo(
+    String projectPath, {
+    String? projectFilename,
+    required Directory buildDirectory,
+  }) async {
     return XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>[
       'Runner',
     ], BufferLogger.test());
@@ -394,6 +403,19 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
 
   @override
   List<String> xcrunCommand() => <String>['xcrun'];
+
+  @override
+  Future<void> prefetchSwiftPackages(
+    String projectPath, {
+    required Directory buildDirectory,
+    bool quiet = true,
+    bool waitForCompletion = true,
+  }) async {}
+
+  @override
+  List<String> xcodebuildCommand(Directory buildDirectory, {bool skipPackageResolution = true}) {
+    return <String>['xcrun', 'xcodebuild'];
+  }
 }
 
 /// Prevent test crashes from being reported to the crash backend.

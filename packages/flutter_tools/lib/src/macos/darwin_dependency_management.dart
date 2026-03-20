@@ -5,6 +5,7 @@
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
@@ -32,7 +33,9 @@ class DarwinDependencyManagement {
     required Analytics analytics,
     required Platform platform,
     required XcodeProjectInterpreter? xcodeProjectInterpreter,
-  }) : _xcodeProjectInterpreter = xcodeProjectInterpreter,
+    required Config? config,
+  }) : _config = config,
+       _xcodeProjectInterpreter = xcodeProjectInterpreter,
        _project = project,
        _plugins = plugins,
        _cocoapods = cocoapods,
@@ -53,6 +56,7 @@ class DarwinDependencyManagement {
   final Analytics _analytics;
   final Platform _hostPlatform;
   final XcodeProjectInterpreter? _xcodeProjectInterpreter;
+  final Config? _config;
 
   /// Generates/updates required files and project settings for Darwin
   /// Dependency Managers (CocoaPods and Swift Package Manager). Projects may
@@ -75,7 +79,7 @@ class DarwinDependencyManagement {
       await _xcodeProjectInterpreter?.prefetchSwiftPackages(
         xcodeProject.hostAppRoot.path,
         waitForCompletion: false,
-        buildDirectory: _fileSystem.directory(platform.buildDirectory()),
+        buildDirectory: _fileSystem.directory(platform.buildDirectory(_config, _fileSystem)),
       );
     } else if (xcodeProject.flutterPluginSwiftPackageInProjectSettings) {
       // If Swift Package Manager is not enabled but the project is already

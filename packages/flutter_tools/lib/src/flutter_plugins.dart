@@ -1354,6 +1354,7 @@ Future<void> injectPlugins(
           analytics: globals.analytics,
           platform: globals.platform,
           xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
+          config: globals.config,
         );
     if (iosPlatform) {
       await darwinDependencyManagerSetup.setUp(platform: FlutterDarwinPlatform.ios);

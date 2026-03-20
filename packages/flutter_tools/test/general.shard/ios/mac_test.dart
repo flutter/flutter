@@ -1227,12 +1227,21 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   List<String> schemes;
 
   @override
-  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
+  Future<XcodeProjectInfo?> getInfo(
+    String projectPath, {
+    String? projectFilename,
+    required Directory buildDirectory,
+  }) async {
     return XcodeProjectInfo(<String>[], <String>[], schemes, BufferLogger.test());
   }
 
   @override
   List<String> xcrunCommand() {
     return ['xcrun'];
+  }
+
+  @override
+  List<String> xcodebuildCommand(Directory buildDirectory, {bool skipPackageResolution = true}) {
+    return <String>['xcrun', 'xcodebuild'];
   }
 }
