@@ -680,20 +680,7 @@ void DlDispatcherBase::drawPoints(flutter::DlPointMode mode,
 
 std::shared_ptr<Texture> DlDispatcherBase::GetTexture(
     const sk_sp<flutter::DlImage>& image) {
-  if (!image) {
-    return nullptr;
-  }
-  if (image_cache_) {
-    auto it = image_cache_->find(image.get());
-    if (it != image_cache_->end()) {
-      return it->second;
-    }
-  }
-  auto texture = image->GetImpellerTexture(GetContext());
-  if (image_cache_ && texture) {
-    (*image_cache_)[image.get()] = texture;
-  }
-  return texture;
+  return GetCachedTexture(image.get(), GetContext(), image_cache_);
 }
 
 void DlDispatcherBase::drawVertices(
