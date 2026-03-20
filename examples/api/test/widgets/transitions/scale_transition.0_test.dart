@@ -52,4 +52,21 @@ void main() {
     transform = tester.widget(transformFinder);
     expect(transform.transform[0], 0);
   });
+
+  testWidgets('ScaleTransition does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    final key = Key('ScaleTransition');
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: example.ScaleTransitionExample(key: key),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byKey(key)), Size.zero);
+  });
 }

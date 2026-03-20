@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
+import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('ShrinkWrappingViewport respects clipBehavior', (WidgetTester tester) async {
@@ -55,5 +56,16 @@ void main() {
     // 4th, check that a non-default clip behavior can be sent to the painting context.
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.antiAlias));
+  });
+
+  testWidgets('ShrinkWrappingViewport does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: SizedBox.shrink(child: ShrinkWrappingViewport(offset: ViewportOffset.fixed(5))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(ShrinkWrappingViewport)), Size.zero);
   });
 }

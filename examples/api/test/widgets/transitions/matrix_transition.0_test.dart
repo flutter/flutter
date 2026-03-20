@@ -84,4 +84,19 @@ void main() {
       ),
     );
   });
+  testWidgets('MatrixTransition does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: const example.MatrixTransitionExample(),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(MatrixTransition)), Size.zero);
+  });
 }
