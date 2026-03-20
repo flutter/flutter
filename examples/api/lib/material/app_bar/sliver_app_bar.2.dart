@@ -36,7 +36,7 @@ class AppBarMediumApp extends StatelessWidget {
                 child: SizedBox(
                   height: 1200,
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 100, 8, 100),
+                    padding: const .fromLTRB(8, 100, 8, 100),
                     child: Text(
                       'Here be scrolling content...',
                       style: Theme.of(context).textTheme.headlineSmall,

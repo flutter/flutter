@@ -54,10 +54,10 @@ class RefreshIndicatorExample extends StatelessWidget {
             SliverToBoxAdapter(
               child: Container(
                 height: 100,
-                alignment: Alignment.center,
+                alignment: .center,
                 color: Colors.pink[100],
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: .center,
                   children: <Widget>[
                     Text(
                       'Pull down here',

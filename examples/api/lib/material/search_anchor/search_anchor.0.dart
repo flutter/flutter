@@ -82,7 +82,7 @@ class _SearchBarAppState extends State<SearchBarApp> {
       home: Scaffold(
         appBar: AppBar(title: const Text('Search Bar Sample')),
         body: Align(
-          alignment: Alignment.topCenter,
+          alignment: .topCenter,
           child: Column(
             children: <Widget>[
               SearchAnchor.bar(

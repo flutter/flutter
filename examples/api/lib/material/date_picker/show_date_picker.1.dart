@@ -48,7 +48,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: .min,
       spacing: 20,
       children: <Widget>[
         Text(

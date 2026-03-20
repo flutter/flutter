@@ -26,10 +26,10 @@ class FloatingActionButtonExample extends StatelessWidget {
       appBar: AppBar(title: const Text('FloatingActionButton Sample')),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: .spaceEvenly,
           children: <Widget>[
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 const Text('Small'),
                 const SizedBox(width: 16),
@@ -45,7 +45,7 @@ class FloatingActionButtonExample extends StatelessWidget {
               ],
             ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 const Text('Regular'),
                 const SizedBox(width: 16),
@@ -61,7 +61,7 @@ class FloatingActionButtonExample extends StatelessWidget {
               ],
             ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 const Text('Large'),
                 const SizedBox(width: 16),
@@ -77,7 +77,7 @@ class FloatingActionButtonExample extends StatelessWidget {
               ],
             ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 const Text('Extended'),
                 const SizedBox(width: 16),
