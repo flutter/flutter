@@ -95,7 +95,7 @@ void main() {
             (Object error, StackTrace stack) {
               expect(firstExitCode, isNotNull);
               expect(firstExitCode, isNot(0));
-              expect(error.toString(), 'Exception: test exit');
+              expect(error.toString(), 'ProcessExit: 1');
               completer.complete();
             },
           ),
@@ -270,7 +270,7 @@ void main() {
             (Object error, StackTrace stack) {
               expect(firstExitCode, isNotNull);
               expect(firstExitCode, isNot(0));
-              expect(error.toString(), 'Exception: test exit');
+              expect(error.toString(), 'ProcessExit: 1');
               completer.complete();
             },
           ),
@@ -383,7 +383,7 @@ void main() {
             (Object error, StackTrace stack) {
               expect(firstExitCode, isNotNull);
               expect(firstExitCode, isNot(0));
-              expect(error.toString(), 'Exception: test exit');
+              expect(error.toString(), 'ProcessExit: 1');
               completer.complete();
             },
           ),
@@ -492,7 +492,7 @@ void main() {
               (Object error, StackTrace stack) {
                 expect(firstExitCode, isNotNull);
                 expect(firstExitCode, isNot(0));
-                expect(error.toString(), 'Exception: test exit');
+                expect(error.toString(), 'ProcessExit: 1');
                 completer.complete();
               },
             ),
