@@ -1023,6 +1023,51 @@ class PlatformViewLayer extends Layer {
   void addToScene(ui.SceneBuilder builder) {
     builder.addPlatformView(viewId, offset: rect.topLeft, width: rect.width, height: rect.height);
   }
+
+  @override
+  void redepthChildren() {
+    assert(() {
+      _debugCheckForRasterizationConflict();
+      return true;
+    }());
+  }
+
+  void _debugCheckForRasterizationConflict() {
+    Layer? ancestor = parent;
+    final path = <Layer>[this];
+    while (ancestor != null) {
+      path.add(ancestor);
+      if (ancestor is ImageFilterLayer ||
+          ancestor is ColorFilterLayer ||
+          ancestor is ShaderMaskLayer) {
+        final propertiesBuilder = DiagnosticPropertiesBuilder();
+        ancestor.debugFillProperties(propertiesBuilder);
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('PlatformViewLayer cannot be a descendant of ${ancestor.runtimeType}'),
+          ErrorDescription(
+            'You might be wrapping a PlatformView (viewID: $viewId) inside a filter-based widget, '
+            'or using an implicit filter layer created by setting "filterQuality" on a Transform.',
+          ),
+          ErrorHint(
+            'Filters generally cannot sample pixels from platform views. '
+            'Try moving the PlatformView outside of any ImageFiltered, ColorFiltered, or ShaderMask widgets. '
+            'Also, ensure ancestor Transform or transform-related widgets '
+            '(e.g. ScaleTransition, MatrixTransition) do not have a non-null "filterQuality".',
+          ),
+          DiagnosticsBlock(
+            name: 'Conflicting ancestor details',
+            properties: propertiesBuilder.properties,
+          ),
+          DiagnosticsProperty<String>(
+            'Layer path',
+            path.reversed.map((Layer l) => l.toStringShort()).join(' ➔ '),
+            style: DiagnosticsTreeStyle.whitespace,
+          ),
+        ]);
+      }
+      ancestor = ancestor.parent;
+    }
+  }
 }
 
 /// A layer that indicates to the compositor that it should display
