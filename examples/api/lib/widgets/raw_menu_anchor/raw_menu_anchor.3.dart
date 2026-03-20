@@ -181,9 +181,6 @@ class MenuState extends State<Menu> with SingleTickerProviderStateMixin {
       return;
     }
 
-    // Animate the menu's children out of view.
-    menuController.closeChildren();
-
     // Animate the menu out of view.
     animationController.reverse().whenComplete(hideOverlay);
   }
