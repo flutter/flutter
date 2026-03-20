@@ -537,6 +537,23 @@ class PlatformConfiguration final {
   void ReportTimings(std::vector<int64_t> timings);
 
   //----------------------------------------------------------------------------
+  /// @brief      Notifies the framework that a texture has a new frame
+  ///             available.
+  ///
+  ///             This is called when the platform marks a texture as having new
+  ///             content via `MarkTextureFrameAvailable`. The framework uses
+  ///             this to mark the corresponding texture render object as
+  ///             needing paint, ensuring the view containing the texture is
+  ///             recomposited even if no other render objects are dirty.
+  ///
+  ///             This method calls the `::_textureFrameAvailable` method in
+  ///             `hooks.dart`.
+  ///
+  /// @param[in]  texture_id  The ID of the texture that has a new frame.
+  ///
+  void TextureFrameAvailable(int64_t texture_id);
+
+  //----------------------------------------------------------------------------
   /// @brief      Retrieves the viewport metrics with the given ID managed by
   ///             the `PlatformConfiguration`.
   ///
@@ -591,6 +608,7 @@ class PlatformConfiguration final {
   tonic::DartPersistentValue begin_frame_;
   tonic::DartPersistentValue draw_frame_;
   tonic::DartPersistentValue report_timings_;
+  tonic::DartPersistentValue texture_frame_available_;
 
   uint64_t last_frame_number_ = 0;
   int64_t last_microseconds_ = 0;

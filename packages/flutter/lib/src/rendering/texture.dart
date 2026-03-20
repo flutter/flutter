@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
+import 'binding.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
@@ -51,9 +52,26 @@ class TextureBox extends RenderBox {
   int _textureId;
   set textureId(int value) {
     if (value != _textureId) {
+      final int oldTextureId = _textureId;
       _textureId = value;
+      if (attached) {
+        RendererBinding.instance.unregisterTexture(oldTextureId);
+        RendererBinding.instance.registerTexture(_textureId, this);
+      }
       markNeedsPaint();
     }
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    RendererBinding.instance.registerTexture(_textureId, this);
+  }
+
+  @override
+  void detach() {
+    RendererBinding.instance.unregisterTexture(_textureId);
+    super.detach();
   }
 
   /// When true the texture will not be updated with new frames.

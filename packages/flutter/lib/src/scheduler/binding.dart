@@ -995,6 +995,14 @@ mixin SchedulerBinding on BindingBase {
 
   bool _warmUpFrame = false;
 
+  /// Whether the scheduler is currently producing a warm-up frame.
+  ///
+  /// A warm-up frame is scheduled by [scheduleWarmUpFrame] and may not
+  /// produce visible output on screen (e.g., if the rendering surface is
+  /// not yet available).
+  @protected
+  bool get isWarmUpFrame => _warmUpFrame;
+
   /// Schedule a frame to run as soon as possible, rather than waiting for
   /// the engine to request a frame in response to a system "Vsync" signal.
   ///
