@@ -12,6 +12,7 @@
 #include <utility>
 #include <vector>
 
+#include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/geometry/geometry.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/plugin_registrar.h"
@@ -139,6 +140,12 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   //
   // This completes a view resize if one is pending.
   virtual void OnFramePresented();
+
+  // Set a callback that is invoked on the platform thread after the first
+  // frame is presented for this view. The callback is called exactly once
+  // and then cleared. This can be used to defer showing the host window
+  // until the first frame is rendered, avoiding a blank window flash.
+  void SetFirstFrameCallback(fml::closure callback);
 
   // |WindowBindingHandlerDelegate|
   bool OnWindowSizeChanged(size_t width, size_t height) override;
@@ -434,6 +441,10 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   void SendPointerEventWithData(const FlutterPointerEvent& event_data,
                                 PointerState* state);
 
+  // Fires |first_frame_callback_| on the platform thread if set, then clears
+  // it. Called from the raster thread after a frame is presented.
+  void FireFirstFrameCallbackIfSet();
+
   // If true, rendering to the window should synchronize with the vsync
   // to prevent screen tearing.
   bool NeedsVsync() const;
@@ -498,6 +509,13 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
 
   // Optional sizing delegate for views that are sized to content.
   FlutterWindowsViewSizingDelegate* sizing_delegate_ = nullptr;
+
+  // Mutex protecting |first_frame_callback_|.
+  std::mutex first_frame_callback_mutex_;
+
+  // Callback invoked on the platform thread after the first frame is
+  // presented. Set via |SetFirstFrameCallback| and cleared after invocation.
+  fml::closure first_frame_callback_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterWindowsView);
 };
