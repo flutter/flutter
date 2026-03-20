@@ -305,6 +305,9 @@ class RawTooltip extends StatefulWidget {
   /// The length of time that a pointer must hover over a tooltip's widget
   /// before the tooltip will be shown.
   ///
+  /// When moving between widgets that each show a tooltip, this delay still
+  /// applies before showing the next tooltip.
+  ///
   /// Defaults to 0 milliseconds (the tooltip is shown immediately upon hover).
   /// {@endtemplate}
   final Duration hoverDelay;
