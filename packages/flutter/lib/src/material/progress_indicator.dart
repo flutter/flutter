@@ -1624,7 +1624,7 @@ class _LinearProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
   double get linearMinHeight => 4.0;
 
   @override
-  BorderRadius get borderRadius => BorderRadius.circular(4.0 / 2);
+  BorderRadius get borderRadius => const BorderRadius.all(Radius.circular(4.0 / 2));
 
   @override
   Color get stopIndicatorColor => _colors.primary;

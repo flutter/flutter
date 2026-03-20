@@ -357,8 +357,8 @@ class PluginHandlerTest {
 
         // Mock FlutterPluginUtils calls that our logic depends on
         mockkObject(FlutterPluginUtils)
-        every { FlutterPluginUtils.getAndroidExtension(project) } returns project.extensions.findByType(BaseExtension::class.java)!!
-        every { FlutterPluginUtils.getAndroidExtension(pluginProject) } returns
+        every { FlutterPluginUtils.getLegacyAndroidExtension(project) } returns project.extensions.findByType(BaseExtension::class.java)!!
+        every { FlutterPluginUtils.getLegacyAndroidExtension(pluginProject) } returns
             pluginProject.extensions.findByType(BaseExtension::class.java)!!
 
         // For app plugins, the old addAll behavior should be used
@@ -410,8 +410,8 @@ class PluginHandlerTest {
 
         // Mock FlutterPluginUtils calls that our logic depends on
         mockkObject(FlutterPluginUtils)
-        every { FlutterPluginUtils.getAndroidExtension(project) } returns project.extensions.findByType(BaseExtension::class.java)!!
-        every { FlutterPluginUtils.getAndroidExtension(pluginProject) } returns
+        every { FlutterPluginUtils.getLegacyAndroidExtension(project) } returns project.extensions.findByType(BaseExtension::class.java)!!
+        every { FlutterPluginUtils.getLegacyAndroidExtension(pluginProject) } returns
             pluginProject.extensions.findByType(BaseExtension::class.java)!!
 
         // For library plugins, individual build type creation should happen
