@@ -841,8 +841,8 @@ class _AppBarState extends State<AppBar> {
     // Reset _scrolledUnder when the scroll context is re-established (e.g. tab
     // switch). Assume a starting state of false; if the new content is already
     // scrolled, a ScrollUpdateNotification will be dispatched immediately to
-    // update the flag. Skip the reset if a drawer was open before this call,
-    // since closing a drawer does not change the scroll context.
+    // update the flag. Skip if a drawer was previously open since closing a
+    // drawer does not change the scroll context.
     if (_scrolledUnder && !_drawerWasOpen) {
       setState(() {
         _scrolledUnder = false;
