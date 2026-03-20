@@ -3694,6 +3694,72 @@ void main() {
       expect(() => creationParams.onPlatformViewCreated(creationParams.id), returnsNormally);
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/122680
+    testWidgets('PlatformViewLink placeholder does not crash when detached during fast scroll', (
+      WidgetTester tester,
+    ) async {
+      // When _PlatformViewPlaceholderBox.performLayout() runs, it schedules a
+      // postFrameCallback that calls localToGlobal(Offset.zero). During fast
+      // scrolling, RenderSliverList.performLayout() can create and lay out new
+      // children to fill gaps (calling their performLayout and scheduling the
+      // callback), then garbage-collect them in the same layout pass when they
+      // are before the scroll offset. By the time the postFrameCallback fires,
+      // the render object is detached, causing an assertion failure in
+      // getTransformTo().
+      final scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListView.builder(
+            controller: scrollController,
+            // Do NOT use itemExtent — that would use RenderSliverFixedExtentList
+            // which garbage-collects before layout. RenderSliverList (used when
+            // itemExtent is null) lays out children first, then garbage-collects,
+            // which is necessary to reproduce the bug.
+            itemCount: 200,
+            itemBuilder: (BuildContext context, int index) {
+              return SizedBox(
+                height: 100,
+                child: PlatformViewLink(
+                  viewType: 'webview',
+                  onCreatePlatformView: (PlatformViewCreationParams params) {
+                    final controller = FakeAndroidViewController(params.id, requiresSize: true);
+                    controller.create();
+                    // Do NOT call params.onPlatformViewCreated — this keeps the
+                    // placeholder in the tree so its performLayout keeps running
+                    // and scheduling postFrameCallbacks on every layout.
+                    return controller;
+                  },
+                  surfaceFactory: (BuildContext context, PlatformViewController controller) {
+                    return PlatformViewSurface(
+                      gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+                      controller: controller,
+                      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      // Jump far ahead. This causes RenderSliverList.performLayout() to create
+      // new children to fill the gap between the previously visible items and
+      // the new scroll offset. These newly created children get their first
+      // performLayout (scheduling postFrameCallbacks), but since they are
+      // before the scroll offset, they are counted as leading garbage and
+      // detached by collectGarbage() in the same layout pass. Without the
+      // `attached` guard, the postFrameCallbacks fire on detached render
+      // objects and crash.
+      scrollController.jumpTo(5000);
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('PlatformViewLink widget survives widget tree change', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
