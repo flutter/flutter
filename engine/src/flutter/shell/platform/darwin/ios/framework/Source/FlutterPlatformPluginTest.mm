@@ -5,6 +5,7 @@
 #import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
 
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
@@ -24,6 +25,7 @@ FLUTTER_ASSERT_ARC
 - (void)showShareViewController:(NSString*)content;
 - (void)playSystemSound:(NSString*)soundType;
 - (void)vibrateHapticFeedback:(NSString*)feedbackType;
+- (void)showTranslateViewController:(NSString*)term;
 @end
 
 @interface UIViewController ()
@@ -33,6 +35,33 @@ FLUTTER_ASSERT_ARC
 @end
 
 @implementation FlutterPlatformPluginTest
+
+- (void)testTranslateInvoked {
+  if (@available(iOS 17.4, *)) {
+    FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+    [engine runWithEntrypoint:nil];
+
+    XCTestExpectation* presentExpectation =
+        [self expectationWithDescription:@"Translate view hosting controller presented"];
+
+    FlutterViewController* engineViewController =
+        [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+    FlutterViewController* mockEngineViewController = OCMPartialMock(engineViewController);
+
+    FlutterPlatformPlugin* plugin = [[FlutterPlatformPlugin alloc] initWithEngine:engine];
+    FlutterPlatformPlugin* mockPlugin = OCMPartialMock(plugin);
+
+    FlutterMethodCall* methodCall = [FlutterMethodCall methodCallWithMethodName:@"Translate.invoke"
+                                                                      arguments:@"Test"];
+    FlutterResult result = ^(id result) {
+      OCMVerify([mockEngineViewController
+          addChildViewController:[OCMArg isKindOfClass:[FLTTranslateViewController class]]]);
+      [presentExpectation fulfill];
+    };
+    [mockPlugin handleMethodCall:methodCall result:result];
+    [self waitForExpectationsWithTimeout:1 handler:nil];
+  }
+}
 
 - (void)testSearchWebInvokedWithEscapedTerm {
   id mockApplication = OCMClassMock([UIApplication class]);

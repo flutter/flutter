@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Dewis y cyfan",
   "searchResultsFound": "Canfuwyd canlyniadau chwilio",
   "noResultsFound": "Ni chanfuwyd unrhyw ganlyniadau",
-  "radioButtonUnselectedLabel": "Heb ei dewis"
+  "radioButtonUnselectedLabel": "Heb ei dewis",
+  "translateButtonLabel": "Translate"
 }

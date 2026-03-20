@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Összes kijelölése",
   "searchResultsFound": "Rendelkezésre állnak keresési találatok",
   "noResultsFound": "Nincs találat",
-  "radioButtonUnselectedLabel": "Nincs kiválasztva"
+  "radioButtonUnselectedLabel": "Nincs kiválasztva",
+  "translateButtonLabel": "Translate"
 }

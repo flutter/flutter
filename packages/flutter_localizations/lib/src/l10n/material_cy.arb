@@ -157,5 +157,6 @@
   "searchWebButtonLabel": "Chwilio'r We",
   "shareButtonLabel": "Rhannu",
   "clearButtonTooltip": "Clirio'r testun",
-  "selectedDateLabel": "Wedi'i ddewis"
+  "selectedDateLabel": "Wedi'i ddewis",
+  "translateButtonLabel": "Translate"
 }

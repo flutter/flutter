@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "ཕྱོགས་བསྡུ།",
   "expansionTileCollapsedTapHint": "ཞིབ་རྒྱས་ཆེད་ཁྱབ་སྤེལ།",
   "expandedHint": "ཕྱོགས་བསྡུས།",
-  "collapsedHint": "ཁྱབ་སྤེལ་ཟིན།"
+  "collapsedHint": "ཁྱབ་སྤེལ་ཟིན།",
+  "translateButtonLabel": "Translate"
 }

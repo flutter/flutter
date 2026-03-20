@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "નાની કરો",
   "expansionTileCollapsedTapHint": "વધુ વિગતો માટે મોટી કરો",
   "expandedHint": "નાની કરી",
-  "collapsedHint": "મોટી કરી"
+  "collapsedHint": "મોટી કરી",
+  "translateButtonLabel": "Translate"
 }

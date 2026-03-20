@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "Tolestu",
   "expansionTileCollapsedTapHint": "Zabaldu hau xehetasun gehiago lortzeko",
   "expandedHint": "Tolestuta",
-  "collapsedHint": "Zabalduta"
+  "collapsedHint": "Zabalduta",
+  "translateButtonLabel": "Translate"
 }

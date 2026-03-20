@@ -183,6 +183,7 @@ void main() {
                 onLookUp: () {},
                 onSearchWeb: () {},
                 onShare: () {},
+                onTranslate: () {},
               ),
             ),
           ),

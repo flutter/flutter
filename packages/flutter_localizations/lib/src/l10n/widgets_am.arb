@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "ሁሉንም ምረጥ",
   "searchResultsFound": "የፍለጋ ውጤቶች ተገኝተዋል",
   "noResultsFound": "ምንም ውጤቶች አልተገኙም",
-  "radioButtonUnselectedLabel": "አልተመረጠም"
+  "radioButtonUnselectedLabel": "አልተመረጠም",
+  "translateButtonLabel": "Translate"
 }

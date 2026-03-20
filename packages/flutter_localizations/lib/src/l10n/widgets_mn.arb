@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Бүгдийг сонгох",
   "searchResultsFound": "Хайлтын илэрцүүд олдлоо",
   "noResultsFound": "Илэрц олдсонгүй",
-  "radioButtonUnselectedLabel": "Сонгоогүй"
+  "radioButtonUnselectedLabel": "Сонгоогүй",
+  "translateButtonLabel": "Translate"
 }

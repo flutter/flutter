@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "சுருக்கும்",
   "expansionTileCollapsedTapHint": "கூடுதல் விவரங்களுக்கு விரிவாக்கலாம்",
   "expandedHint": "சுருக்கப்பட்டது",
-  "collapsedHint": "விரிவாக்கப்பட்டது"
+  "collapsedHint": "விரிவாக்கப்பட்டது",
+  "translateButtonLabel": "Translate"
 }

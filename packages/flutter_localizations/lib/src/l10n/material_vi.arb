@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "Tìm kiếm trên web",
   "shareButtonLabel": "Chia sẻ",
   "clearButtonTooltip": "Xoá văn bản",
-  "selectedDateLabel": "Đã chọn"
+  "selectedDateLabel": "Đã chọn",
+  "translateButtonLabel": "Translate"
 }

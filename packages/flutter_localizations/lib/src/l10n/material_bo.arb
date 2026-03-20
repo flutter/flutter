@@ -145,5 +145,6 @@
   "keyboardKeyScrollLock": "གོང་འོག་འགྲོ་བྱེད།",
   "keyboardKeySelect": "འདེམས།",
   "keyboardKeyShift": "བརྗེ་སྒྱུར་མཐེབ་གནོན་ཤིབ་ཊི།",
-  "keyboardKeySpace": "བར་སྟོང་།"
+  "keyboardKeySpace": "བར་སྟོང་།",
+  "translateButtonLabel": "Translate"
 }

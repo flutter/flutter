@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "ሰብስብ",
   "expansionTileCollapsedTapHint": "ለተጨማሪ ዝርዝሮች ይዘርጉ",
   "expandedHint": "ተሰብስቧል",
-  "collapsedHint": "ተዘርግቷል"
+  "collapsedHint": "ተዘርግቷል",
+  "translateButtonLabel": "Translate"
 }

@@ -148,5 +148,6 @@
   "searchWebButtonLabel": "Tafuta kwenye Wavuti",
   "shareButtonLabel": "Tuma",
   "clearButtonTooltip": "Futa maandishi",
-  "selectedDateLabel": "Umechagua"
+  "selectedDateLabel": "Umechagua",
+  "translateButtonLabel": "Translate"
 }

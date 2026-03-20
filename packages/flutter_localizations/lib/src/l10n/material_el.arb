@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "Αναζήτηση στον ιστό",
   "shareButtonLabel": "Κοινή χρήση",
   "clearButtonTooltip": "Διαγραφή κειμένου",
-  "selectedDateLabel": "Επιλεγμένο"
+  "selectedDateLabel": "Επιλεγμένο",
+  "translateButtonLabel": "Translate"
 }

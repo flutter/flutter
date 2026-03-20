@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Выбрать все",
   "searchResultsFound": "Поиск дал результаты",
   "noResultsFound": "Ничего не найдено",
-  "radioButtonUnselectedLabel": "Не выбрано"
+  "radioButtonUnselectedLabel": "Не выбрано",
+  "translateButtonLabel": "Translate"
 }

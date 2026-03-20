@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "เลือกทั้งหมด",
   "searchResultsFound": "พบผลการค้นหา",
   "noResultsFound": "ไม่พบผลลัพธ์",
-  "radioButtonUnselectedLabel": "ไม่ได้เลือก"
+  "radioButtonUnselectedLabel": "ไม่ได้เลือก",
+  "translateButtonLabel": "Translate"
 }

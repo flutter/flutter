@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "Komprimera",
   "expansionTileCollapsedTapHint": "Utöka för mer information",
   "expandedHint": "Komprimerades",
-  "collapsedHint": "Utökades"
+  "collapsedHint": "Utökades",
+  "translateButtonLabel": "Translate"
 }

@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Hammasi",
   "searchResultsFound": "Qidiruv natijalari topildi",
   "noResultsFound": "Hech narsa topilmadi",
-  "radioButtonUnselectedLabel": "Tanlanmagan"
+  "radioButtonUnselectedLabel": "Tanlanmagan",
+  "translateButtonLabel": "Translate"
 }

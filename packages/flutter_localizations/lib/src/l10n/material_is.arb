@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "Leita á vefnum",
   "shareButtonLabel": "Deila",
   "clearButtonTooltip": "Hreinsa texta",
-  "selectedDateLabel": "Valið"
+  "selectedDateLabel": "Valið",
+  "translateButtonLabel": "Translate"
 }

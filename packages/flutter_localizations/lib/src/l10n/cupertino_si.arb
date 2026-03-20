@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "හකුළන්න",
   "expansionTileCollapsedTapHint": "වැඩි විස්තර සඳහා පුළුල් කරන්න",
   "expandedHint": "හකුළන ලදි",
-  "collapsedHint": "දිග හරින ලදි"
+  "collapsedHint": "දිග හරින ලදි",
+  "translateButtonLabel": "Translate"
 }

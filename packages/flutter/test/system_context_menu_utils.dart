@@ -16,6 +16,7 @@ IOSSystemContextMenuItemData systemContextMenuItemDataFromJson(Map<String, dynam
     'paste' => const IOSSystemContextMenuItemDataPaste(),
     'selectAll' => const IOSSystemContextMenuItemDataSelectAll(),
     'searchWeb' => IOSSystemContextMenuItemDataSearchWeb(title: title!),
+    'translate' => IOSSystemContextMenuItemDataTranslate(title: title!),
     'share' => IOSSystemContextMenuItemDataShare(title: title!),
     'lookUp' => IOSSystemContextMenuItemDataLookUp(title: title!),
     'captureTextFromCamera' => const IOSSystemContextMenuItemDataLiveText(),

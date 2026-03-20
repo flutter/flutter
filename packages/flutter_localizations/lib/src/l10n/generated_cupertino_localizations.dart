@@ -211,6 +211,9 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Vandag';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Amharic (`am`).
@@ -401,6 +404,9 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'ዛሬ';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Arabic (`ar`).
@@ -591,6 +597,9 @@ class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'اليوم';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Assamese (`as`).
@@ -781,6 +790,9 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'আজি';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Azerbaijani (`az`).
@@ -971,6 +983,9 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Bu gün';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Belarusian (`be`).
@@ -1161,6 +1176,9 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Сёння';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Bulgarian (`bg`).
@@ -1351,6 +1369,9 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Днес';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Bengali Bangla (`bn`).
@@ -1541,6 +1562,9 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'আজ';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Tibetan (`bo`).
@@ -1731,6 +1755,9 @@ class CupertinoLocalizationBo extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'དེ་རིང་།';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Bosnian (`bs`).
@@ -1921,6 +1948,9 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Danas';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Catalan Valencian (`ca`).
@@ -2111,6 +2141,9 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Avui';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Czech (`cs`).
@@ -2301,6 +2334,9 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Dnes';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Welsh (`cy`).
@@ -2491,6 +2527,9 @@ class CupertinoLocalizationCy extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Heddiw';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Danish (`da`).
@@ -2681,6 +2720,9 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'I dag';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for German (`de`).
@@ -2871,6 +2913,9 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Heute';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for German, as used in Switzerland (`de_CH`).
@@ -3089,6 +3134,9 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Σήμερα';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for English (`en`).
@@ -3279,6 +3327,9 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Today';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for English, as used in Australia (`en_AU`).
@@ -3753,6 +3804,9 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Hoy';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Spanish Castilian, as used in Latin America and the Caribbean (`es_419`).
@@ -5103,6 +5157,9 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Täna';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Basque (`eu`).
@@ -5293,6 +5350,9 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Gaur';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Persian (`fa`).
@@ -5483,6 +5543,9 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'امروز';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Finnish (`fi`).
@@ -5673,6 +5736,9 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Tänään';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Filipino Pilipino (`fil`).
@@ -5863,6 +5929,9 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Ngayon';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for French (`fr`).
@@ -6053,6 +6122,9 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => "aujourd'hui";
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for French, as used in Canada (`fr_CA`).
@@ -6298,6 +6370,9 @@ class CupertinoLocalizationGa extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Inniu';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Galician (`gl`).
@@ -6488,6 +6563,9 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Hoxe';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Swiss German Alemannic Alsatian (`gsw`).
@@ -6678,6 +6756,9 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Heute';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Gujarati (`gu`).
@@ -6868,6 +6949,9 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'આજે';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Hebrew (`he`).
@@ -7058,6 +7142,9 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'היום';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Hindi (`hi`).
@@ -7248,6 +7335,9 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'आज';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Croatian (`hr`).
@@ -7438,6 +7528,9 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Danas';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Hungarian (`hu`).
@@ -7628,6 +7721,9 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Ma';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Armenian (`hy`).
@@ -7818,6 +7914,9 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Այսօր';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Indonesian (`id`).
@@ -8008,6 +8107,9 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Hari ini';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Icelandic (`is`).
@@ -8198,6 +8300,9 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Í dag';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Italian (`it`).
@@ -8388,6 +8493,9 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Oggi';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Japanese (`ja`).
@@ -8578,6 +8686,9 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => '今日';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Georgian (`ka`).
@@ -8768,6 +8879,9 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'დღეს';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Kazakh (`kk`).
@@ -8958,6 +9072,9 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Бүгін';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Khmer Central Khmer (`km`).
@@ -9148,6 +9265,9 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'ថ្ងៃនេះ';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Kannada (`kn`).
@@ -9338,6 +9458,9 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => '\u{c87}\u{c82}\u{ca6}\u{cc1}';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Korean (`ko`).
@@ -9528,6 +9651,9 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => '오늘';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Kirghiz Kyrgyz (`ky`).
@@ -9718,6 +9844,9 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Бүгүн';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Lao (`lo`).
@@ -9908,6 +10037,9 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'ມື້ນີ້';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Lithuanian (`lt`).
@@ -10098,6 +10230,9 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Šiandien';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Latvian (`lv`).
@@ -10288,6 +10423,9 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Šodien';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Macedonian (`mk`).
@@ -10478,6 +10616,9 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Денес';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Malayalam (`ml`).
@@ -10668,6 +10809,9 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'ഇന്ന്';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Mongolian (`mn`).
@@ -10858,6 +11002,9 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Өнөөдөр';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Marathi (`mr`).
@@ -11048,6 +11195,9 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'आज';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Malay (`ms`).
@@ -11238,6 +11388,9 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Hari ini';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Burmese (`my`).
@@ -11428,6 +11581,9 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'ယနေ့';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Norwegian Bokmål (`nb`).
@@ -11618,6 +11774,9 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'I dag';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Nepali (`ne`).
@@ -11808,6 +11967,9 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'आज';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Dutch Flemish (`nl`).
@@ -11998,6 +12160,9 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Vandaag';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Norwegian (`no`).
@@ -12188,6 +12353,9 @@ class CupertinoLocalizationNo extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'I dag';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Oriya (`or`).
@@ -12378,6 +12546,9 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'ଆଜି';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Panjabi Punjabi (`pa`).
@@ -12568,6 +12739,9 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'ਅੱਜ';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Polish (`pl`).
@@ -12758,6 +12932,9 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Dziś';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Portuguese (`pt`).
@@ -12948,6 +13125,9 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Hoje';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Portuguese, as used in Portugal (`pt_PT`).
@@ -13208,6 +13388,9 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Azi';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Russian (`ru`).
@@ -13398,6 +13581,9 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Сегодня';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Sinhala Sinhalese (`si`).
@@ -13588,6 +13774,9 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'අද';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Slovak (`sk`).
@@ -13778,6 +13967,9 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Dnes';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Slovenian (`sl`).
@@ -13968,6 +14160,9 @@ class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Danes';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Albanian (`sq`).
@@ -14158,6 +14353,9 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Sot';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Serbian (`sr`).
@@ -14348,6 +14546,9 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Данас';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Serbian, using the Cyrillic script (`sr_Cyrl`).
@@ -14696,6 +14897,9 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'I dag';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Swahili (`sw`).
@@ -14886,6 +15090,9 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Leo';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Tamil (`ta`).
@@ -15076,6 +15283,9 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'இன்று';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Telugu (`te`).
@@ -15266,6 +15476,9 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'ఈరోజు';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Thai (`th`).
@@ -15456,6 +15669,9 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'วันนี้';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Tagalog (`tl`).
@@ -15646,6 +15862,9 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Ngayon';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Turkish (`tr`).
@@ -15836,6 +16055,9 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Bugün';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Uighur Uyghur (`ug`).
@@ -16026,6 +16248,9 @@ class CupertinoLocalizationUg extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'بۈگۈن';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Ukrainian (`uk`).
@@ -16216,6 +16441,9 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Сьогодні';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Urdu (`ur`).
@@ -16406,6 +16634,9 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'آج';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Uzbek (`uz`).
@@ -16596,6 +16827,9 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Bugun';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Vietnamese (`vi`).
@@ -16786,6 +17020,9 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Hôm nay';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Chinese (`zh`).
@@ -16976,6 +17213,9 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => '今天';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -17365,6 +17605,9 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Namuhla';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The set of supported languages, as language code strings.

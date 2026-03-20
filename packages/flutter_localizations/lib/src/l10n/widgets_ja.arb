@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "すべてを選択",
   "searchResultsFound": "検索結果が見つかりました",
   "noResultsFound": "一致する検索結果はありません",
-  "radioButtonUnselectedLabel": "選択されていません"
+  "radioButtonUnselectedLabel": "選択されていません",
+  "translateButtonLabel": "Translate"
 }

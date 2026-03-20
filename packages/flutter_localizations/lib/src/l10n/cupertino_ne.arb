@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "कोल्याप्स गर्नुहोस्",
   "expansionTileCollapsedTapHint": "थप विवरण हेर्न एक्स्पान्ड गर्नुहोस्",
   "expandedHint": "कोल्याप्स गरियो",
-  "collapsedHint": "एक्स्पान्ड गरियो"
+  "collapsedHint": "एक्स्पान्ड गरियो",
+  "translateButtonLabel": "Translate"
 }

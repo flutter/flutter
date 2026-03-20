@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Tout sélectionner",
   "searchResultsFound": "Résultats de recherche trouvés",
   "noResultsFound": "Aucun résultat",
-  "radioButtonUnselectedLabel": "Non sélectionné"
+  "radioButtonUnselectedLabel": "Non sélectionné",
+  "translateButtonLabel": "Translate"
 }

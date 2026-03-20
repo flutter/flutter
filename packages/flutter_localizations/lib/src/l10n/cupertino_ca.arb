@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "Replega",
   "expansionTileCollapsedTapHint": "Desplega per obtenir més informació",
   "expandedHint": "S'ha replegat",
-  "collapsedHint": "S'ha desplegat"
+  "collapsedHint": "S'ha desplegat",
+  "translateButtonLabel": "Translate"
 }

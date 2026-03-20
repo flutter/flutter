@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "Ahenda",
   "expansionTileCollapsedTapHint": "Laiendage lisateabe nägemiseks",
   "expandedHint": "Ahendatud",
-  "collapsedHint": "Laiendatud"
+  "collapsedHint": "Laiendatud",
+  "translateButtonLabel": "Translate"
 }

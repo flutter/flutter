@@ -152,5 +152,6 @@
   "searchWebButtonLabel": "Hľadať na webe",
   "shareButtonLabel": "Zdieľať",
   "clearButtonTooltip": "Vymazať text",
-  "selectedDateLabel": "Vybrané"
+  "selectedDateLabel": "Vybrané",
+  "translateButtonLabel": "Translate"
 }

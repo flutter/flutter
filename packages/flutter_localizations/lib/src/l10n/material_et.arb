@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "Otsi veebist",
   "shareButtonLabel": "Jagamine",
   "clearButtonTooltip": "Kustutage tekst",
-  "selectedDateLabel": "Valitud"
+  "selectedDateLabel": "Valitud",
+  "translateButtonLabel": "Translate"
 }

@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "ເລືອກທັງໝົດ",
   "searchResultsFound": "ພົບຜົນການຊອກຫາ",
   "noResultsFound": "ບໍ່ພົບຜົນການຊອກຫາ",
-  "radioButtonUnselectedLabel": "ບໍ່ໄດ້ເລືອກ"
+  "radioButtonUnselectedLabel": "ບໍ່ໄດ້ເລືອກ",
+  "translateButtonLabel": "Translate"
 }

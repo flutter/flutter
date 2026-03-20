@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "Søg på nettet",
   "shareButtonLabel": "Del",
   "clearButtonTooltip": "Ryd tekst",
-  "selectedDateLabel": "Valgt"
+  "selectedDateLabel": "Valgt",
+  "translateButtonLabel": "Translate"
 }

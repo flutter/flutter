@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "Σύμπτυξη",
   "expansionTileCollapsedTapHint": "Ανάπτυξη για περισσότερες λεπτομέρειες",
   "expandedHint": "Συμπτύχθηκε",
-  "collapsedHint": "Αναπτύχθηκε"
+  "collapsedHint": "Αναπτύχθηκε",
+  "translateButtonLabel": "Translate"
 }

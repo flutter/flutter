@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "Kunja",
   "expansionTileCollapsedTapHint": "Panua ili upate maelezo zaidi",
   "expandedHint": "Imekunjwa",
-  "collapsedHint": "Imepanuliwa"
+  "collapsedHint": "Imepanuliwa",
+  "translateButtonLabel": "Translate"
 }

@@ -45,5 +45,6 @@
   "expansionTileExpandedTapHint": "כיווץ",
   "expansionTileCollapsedTapHint": "ניתן להרחיב להצגת פרטים נוספים",
   "expandedHint": "מכווץ",
-  "collapsedHint": "מורחב"
+  "collapsedHint": "מורחב",
+  "translateButtonLabel": "Translate"
 }

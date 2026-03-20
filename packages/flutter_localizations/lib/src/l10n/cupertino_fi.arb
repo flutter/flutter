@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "Tiivistä",
   "expansionTileCollapsedTapHint": "Katso lisätietoja laajentamalla",
   "expandedHint": "Tiivistetty",
-  "collapsedHint": "Laajennettu"
+  "collapsedHint": "Laajennettu",
+  "translateButtonLabel": "Translate"
 }

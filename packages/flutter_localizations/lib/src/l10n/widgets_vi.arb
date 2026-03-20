@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Chọn tất cả",
   "searchResultsFound": "Có kết quả tìm kiếm",
   "noResultsFound": "Không tìm thấy kết quả",
-  "radioButtonUnselectedLabel": "Chưa chọn"
+  "radioButtonUnselectedLabel": "Chưa chọn",
+  "translateButtonLabel": "Translate"
 }

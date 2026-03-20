@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "Sesha Iwebhu",
   "shareButtonLabel": "Yabelana",
   "clearButtonTooltip": "Sula umbhalo",
-  "selectedDateLabel": "Okukhethiwe"
+  "selectedDateLabel": "Okukhethiwe",
+  "translateButtonLabel": "Translate"
 }

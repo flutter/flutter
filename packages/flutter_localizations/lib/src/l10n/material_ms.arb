@@ -147,5 +147,6 @@
   "searchWebButtonLabel": "Buat carian pada Web",
   "shareButtonLabel": "Kongsi",
   "clearButtonTooltip": "Kosongkan teks",
-  "selectedDateLabel": "Dipilih"
+  "selectedDateLabel": "Dipilih",
+  "translateButtonLabel": "Translate"
 }

@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Markera allt",
   "searchResultsFound": "Sökresultat hittades",
   "noResultsFound": "Inga resultat hittades",
-  "radioButtonUnselectedLabel": "Inte markerad"
+  "radioButtonUnselectedLabel": "Inte markerad",
+  "translateButtonLabel": "Translate"
 }

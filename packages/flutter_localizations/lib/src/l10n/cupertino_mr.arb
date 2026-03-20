@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "कोलॅप्स करा",
   "expansionTileCollapsedTapHint": "आणखी तपशिलांसाठी विस्तार करा",
   "expandedHint": "कोलॅप्स केले",
-  "collapsedHint": "विस्तार केले"
+  "collapsedHint": "विस्तार केले",
+  "translateButtonLabel": "Translate"
 }

@@ -45,5 +45,6 @@
   "expansionTileExpandedTapHint": "Sutraukti",
   "expansionTileCollapsedTapHint": "Išskleiskite, jei reikia daugiau išsamios informacijos",
   "expandedHint": "Sutraukta",
-  "collapsedHint": "Išskleista"
+  "collapsedHint": "Išskleista",
+  "translateButtonLabel": "Translate"
 }

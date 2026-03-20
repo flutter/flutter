@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "全选",
   "searchResultsFound": "找到搜索结果",
   "noResultsFound": "未找到任何结果",
-  "radioButtonUnselectedLabel": "未选择"
+  "radioButtonUnselectedLabel": "未选择",
+  "translateButtonLabel": "Translate"
 }

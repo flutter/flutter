@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "আটাইবোৰ বাছনি কৰক",
   "searchResultsFound": "সন্ধানৰ ফলাফল পোৱা গৈছে",
   "noResultsFound": "কোনো ফলাফল পোৱা নগ’ল",
-  "radioButtonUnselectedLabel": "বাছনি কৰা হোৱা নাই"
+  "radioButtonUnselectedLabel": "বাছনি কৰা হোৱা নাই",
+  "translateButtonLabel": "Translate"
 }

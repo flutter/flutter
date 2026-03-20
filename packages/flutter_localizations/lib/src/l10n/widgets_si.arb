@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "සියල්ල තෝරන්න",
   "searchResultsFound": "සෙවීම් ප්‍රතිඵල හමු විය",
   "noResultsFound": "ප්‍රතිඵල හමු නොවුණි",
-  "radioButtonUnselectedLabel": "තෝරා නොමැත"
+  "radioButtonUnselectedLabel": "තෝරා නොමැත",
+  "translateButtonLabel": "Translate"
 }

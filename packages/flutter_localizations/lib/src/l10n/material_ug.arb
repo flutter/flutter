@@ -145,5 +145,6 @@
   "keyboardKeyScrollLock": "Scroll Lock",
   "keyboardKeySelect": "تاللاش",
   "keyboardKeyShift": "Shift",
-  "keyboardKeySpace": "بوشلۇق"
+  "keyboardKeySpace": "بوشلۇق",
+  "translateButtonLabel": "Translate"
 }

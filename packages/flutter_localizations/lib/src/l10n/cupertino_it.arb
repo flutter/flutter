@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "comprimere",
   "expansionTileCollapsedTapHint": "espandere e visualizzare altri dettagli",
   "expandedHint": "Compresso",
-  "collapsedHint": "Espanso"
+  "collapsedHint": "Espanso",
+  "translateButtonLabel": "Translate"
 }
