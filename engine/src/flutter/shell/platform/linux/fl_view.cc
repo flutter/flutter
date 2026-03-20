@@ -129,6 +129,7 @@ static gboolean redraw_cb(gpointer user_data) {
     GtkWidget* toplevel =
         gtk_widget_get_toplevel(GTK_WIDGET(self->render_area));
     if (GTK_IS_WINDOW(toplevel)) {
+      // FIXME: Breaking the positioner
       // Resize to smallest size, so that the window will shrink to fit the new
       // size of the render area.
       gtk_window_resize(GTK_WINDOW(toplevel), 1, 1);
@@ -830,7 +831,8 @@ G_MODULE_EXPORT FlView* fl_view_new_sized_to_content(FlEngine* engine) {
   self->engine = FL_ENGINE(g_object_ref(engine));
 
   self->sized_to_content = TRUE;
-  size_t min_width = 1, min_height = 1, max_width = 1, max_height = 1;
+  size_t min_width = 1, min_height = 1, max_width = G_MAXSIZE,
+         max_height = G_MAXSIZE;
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   self->view_id = fl_engine_add_view(
       engine, FL_RENDERABLE(self), min_width, min_height, max_width, max_height,

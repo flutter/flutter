@@ -84,6 +84,9 @@ class WindowingOwnerLinux extends WindowingOwner {
   /// GTK windows keyed by view ID.
   final Map<int, _GtkWindow> _windows = <int, _GtkWindow>{};
 
+  /// View windows keyed by view ID.
+  final Map<int, _FlView> _views = <int, _FlView>{};
+
   @internal
   @override
   RegularWindowController createRegularWindowController({
@@ -102,6 +105,7 @@ class WindowingOwnerLinux extends WindowingOwner {
       decorated: decorated,
     );
     _windows[controller.rootView.viewId] = controller._window;
+    _views[controller.rootView.viewId] = controller._view;
     return controller;
   }
 
@@ -125,6 +129,7 @@ class WindowingOwnerLinux extends WindowingOwner {
       decorated: decorated,
     );
     _windows[controller.rootView.viewId] = controller._window;
+    _views[controller.rootView.viewId] = controller._view;
     return controller;
   }
 
@@ -138,7 +143,18 @@ class WindowingOwnerLinux extends WindowingOwner {
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
-    throw UnimplementedError('Tooltip windows are not yet implemented on Linux.');
+    final controller = TooltipWindowControllerLinux(
+      owner: this,
+      delegate: delegate,
+      preferredConstraints: preferredConstraints,
+      isSizedToContent: isSizedToContent,
+      anchorRect: anchorRect,
+      positioner: positioner,
+      parent: parent,
+    );
+    _windows[controller.rootView.viewId] = controller._window;
+    _views[controller.rootView.viewId] = controller._view;
+    return controller;
   }
 
   @internal
@@ -224,19 +240,20 @@ class RegularWindowControllerLinux extends RegularWindowController {
     }
     _window.setDecorated(decorated);
     final engine = _FlEngine.current();
-    final view = _FlView(engine);
-    final int viewId = view.getId();
+    _view = _FlView(engine);
+    final int viewId = _view.getId();
     rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
     );
-    view.show();
-    _window.add(view);
+    _view.show();
+    _window.add(_view);
     _window.present();
   }
 
   final WindowingOwnerLinux _owner;
   final RegularWindowControllerDelegate _delegate;
   final _GtkWindow _window;
+  late final _FlView _view;
   late final _FlWindowMonitor _windowMonitor;
   bool _destroyed = false;
 
@@ -254,6 +271,7 @@ class RegularWindowControllerLinux extends RegularWindowController {
     _windowMonitor.unref();
     _destroyed = true;
     _owner._windows.remove(rootView.viewId);
+    _owner._views.remove(rootView.viewId);
   }
 
   @override
@@ -405,13 +423,13 @@ class DialogWindowControllerLinux extends DialogWindowController {
     }
     _window.setDecorated(decorated);
     final engine = _FlEngine.current();
-    final view = _FlView(engine);
-    final int viewId = view.getId();
+    _view = _FlView(engine);
+    final int viewId = _view.getId();
     rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
     );
-    view.show();
-    _window.add(view);
+    _view.show();
+    _window.add(_view);
     _window.present();
   }
 
@@ -419,6 +437,7 @@ class DialogWindowControllerLinux extends DialogWindowController {
   final DialogWindowControllerDelegate _delegate;
   final _GtkWindow _window;
   final BaseWindowController? _parent;
+  late final _FlView _view;
   late final _FlWindowMonitor _windowMonitor;
   bool _destroyed = false;
 
@@ -436,6 +455,7 @@ class DialogWindowControllerLinux extends DialogWindowController {
     _windowMonitor.unref();
     _destroyed = true;
     _owner._windows.remove(rootView.viewId);
+    _owner._views.remove(rootView.viewId);
   }
 
   @override
@@ -492,6 +512,189 @@ class DialogWindowControllerLinux extends DialogWindowController {
     } else {
       _window.deiconify();
     }
+  }
+}
+
+/// Implementation of [TooltipWindowController] for the Linux platform.
+///
+/// {@macro flutter.widgets.windowing.experimental}
+///
+/// See also:
+///
+///  * [TooltipWindowController], the base class for tooltip windows.
+class TooltipWindowControllerLinux extends TooltipWindowController {
+  /// Creates a new tooltip window controller for Linux.
+  ///
+  /// When this constructor completes the native window has been created and
+  /// has a view associated with it.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  ///
+  /// See also:
+  ///
+  ///  * [TooltipWindowController], the base class for tooltip windows.
+  @internal
+  TooltipWindowControllerLinux({
+    required WindowingOwnerLinux owner,
+    required TooltipWindowControllerDelegate delegate,
+    required BoxConstraints preferredConstraints,
+    required bool isSizedToContent,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
+    required BaseWindowController parent,
+  }) : _owner = owner,
+       _delegate = delegate,
+       _parent = parent,
+       _window = _GtkWindow(_GtkWindowType.popup),
+       super.empty() {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+
+    //_window.setTypeHint(_GDK_WINDOW_TYPE_HINT_TOOLTIP);
+    _window.setDecorated(false);
+    _window.realize();
+
+    _windowMonitor = _FlWindowMonitor(
+      _window,
+      onConfigure: notifyListeners,
+      onDestroy: _delegate.onWindowDestroyed,
+    );
+    setConstraints(preferredConstraints);
+    final engine = _FlEngine.current();
+    _view = _FlView(engine, isSizedToContent: isSizedToContent);
+    final int viewId = _view.getId();
+    rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
+      (FlutterView view) => view.viewId == viewId,
+    );
+    _view.show();
+    _window.add(_view);
+
+    final _GtkWindow? parentWindow = _owner._windows[_parent.rootView.viewId];
+    if (parentWindow != null) {
+      _window.setTransientFor(parentWindow);
+    }
+    updatePosition(anchorRect: anchorRect, positioner: positioner);
+
+    _window.show();
+  }
+
+  final WindowingOwnerLinux _owner;
+  final TooltipWindowControllerDelegate _delegate;
+  final _GtkWindow _window;
+  late Rect _anchorRect;
+  late WindowPositioner _positioner;
+  final BaseWindowController _parent;
+  late final _FlView _view;
+  late final _FlWindowMonitor _windowMonitor;
+  bool _destroyed = false;
+
+  @override
+  @internal
+  Size get contentSize => _window.getSize();
+
+  @override
+  void destroy() {
+    if (_destroyed) {
+      return;
+    }
+    _window.destroy();
+    _windowMonitor.close();
+    _windowMonitor.unref();
+    _destroyed = true;
+    _owner._windows.remove(rootView.viewId);
+    _owner._views.remove(rootView.viewId);
+  }
+
+  @override
+  void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {
+    if (anchorRect != null) {
+      _anchorRect = anchorRect;
+    }
+    if (positioner != null) {
+      _positioner = positioner;
+    }
+
+    final _GtkWindow? parentWindow = _owner._windows[_parent.rootView.viewId];
+    final _FlView? view = _owner._views[_parent.rootView.viewId];
+    var offset = (0, 0);
+    if (parentWindow != null && view != null) {
+      offset = view.translateCoordinates(parentWindow, (0, 0)) ?? (0, 0);
+    }
+    _window.getWindow().moveToRect(
+      x: _anchorRect.left.toInt() + offset.$1,
+      y: _anchorRect.top.toInt() + offset.$2,
+      width: (_anchorRect.right - _anchorRect.left).toInt(),
+      height: (_anchorRect.bottom - _anchorRect.top).toInt(),
+      rectAnchor: _anchorToGravity(_positioner.parentAnchor),
+      windowAnchor: _anchorToGravity(_positioner.childAnchor),
+      anchorHints: _constraintAdjustmentToHints(_positioner.constraintAdjustment),
+      rectAnchorDx: _positioner.offset.dx.toInt(),
+      rectAnchorDy: _positioner.offset.dy.toInt(),
+    );
+  }
+
+  _GdkGravity _anchorToGravity(WindowPositionerAnchor anchor) {
+    switch (anchor) {
+      case WindowPositionerAnchor.center:
+        return _GdkGravity.center;
+      case WindowPositionerAnchor.top:
+        return _GdkGravity.north;
+      case WindowPositionerAnchor.bottom:
+        return _GdkGravity.south;
+      case WindowPositionerAnchor.left:
+        return _GdkGravity.west;
+      case WindowPositionerAnchor.right:
+        return _GdkGravity.east;
+      case WindowPositionerAnchor.topLeft:
+        return _GdkGravity.northWest;
+      case WindowPositionerAnchor.bottomLeft:
+        return _GdkGravity.southWest;
+      case WindowPositionerAnchor.topRight:
+        return _GdkGravity.northEast;
+      case WindowPositionerAnchor.bottomRight:
+        return _GdkGravity.southEast;
+    }
+  }
+
+  Set<_GdkAnchorHint> _constraintAdjustmentToHints(
+    WindowPositionerConstraintAdjustment adjustment,
+  ) {
+    final hints = <_GdkAnchorHint>{};
+    if (adjustment.flipX) {
+      hints.add(_GdkAnchorHint.flipX);
+    }
+    if (adjustment.flipY) {
+      hints.add(_GdkAnchorHint.flipY);
+    }
+    if (adjustment.slideX) {
+      hints.add(_GdkAnchorHint.slideX);
+    }
+    if (adjustment.slideY) {
+      hints.add(_GdkAnchorHint.slideY);
+    }
+    if (adjustment.resizeX) {
+      hints.add(_GdkAnchorHint.resizeX);
+    }
+    if (adjustment.resizeY) {
+      hints.add(_GdkAnchorHint.resizeY);
+    }
+    return hints;
+  }
+
+  @override
+  @internal
+  BaseWindowController get parent => _parent;
+
+  @override
+  @internal
+  void setConstraints(BoxConstraints constraints) {
+    _window.setGeometryHints(
+      minWidth: constraints.minWidth.toInt(),
+      minHeight: constraints.minHeight.toInt(),
+      maxWidth: constraints.maxWidth.isInfinite ? 0x7fffffff : constraints.maxWidth.toInt(),
+      maxHeight: constraints.maxHeight.isInfinite ? 0x7fffffff : constraints.maxHeight.toInt(),
+    );
   }
 }
 
@@ -562,6 +765,28 @@ enum _GdkWindowTypeHint {
   dnd,
 }
 
+/// Window reference points. Matches the GdkGravity enum in gdk/gdkwindow.h.
+enum _GdkGravity {
+  // ignore: unused_field
+  none,
+  northWest,
+  north,
+  northEast,
+  west,
+  center,
+  east,
+  southWest,
+  south,
+  southEast,
+  // ignore: unused_field
+  static_,
+}
+
+/// Positioning hints for aligning a window relative to a rectangle. Matches
+/// the GdkAnchorHint enum in gdk/gdkwindow.h, except these are bit positions
+/// when passed to GTK.
+enum _GdkAnchorHint { flipX, flipY, slideX, slideY, resizeX, resizeY }
+
 @ffi.Native<ffi.Pointer<ffi.NativeType> Function(ffi.Int)>(symbol: 'g_malloc0')
 external ffi.Pointer<ffi.NativeType> _gMalloc0(int count);
 
@@ -626,6 +851,11 @@ class _GtkWidget extends _GObject {
   /// Creates a wrapper to an existing [GtkWidget] in [instance].
   const _GtkWidget(super.instance);
 
+  /// Creates the GDK resources associated with a widget.
+  void realize() {
+    _gtkWidgetRealize(instance);
+  }
+
   /// Show the widget (defaults to hidden).
   void show() {
     _gtkWidgetShow(instance);
@@ -636,10 +866,35 @@ class _GtkWidget extends _GObject {
     return _GdkWindow(_gtkWidgetGetWindow(instance));
   }
 
+  /// Get the scale factor that maps window coordinates to device pixels.
+  int getScaleFactor() {
+    return _gtkWidgetGetScaleFactor(instance);
+  }
+
+  (int, int)? translateCoordinates(_GtkWidget destWidget, (int, int) src) {
+    final ffi.Pointer<ffi.Int> destX = _gMalloc0(ffi.sizeOf<ffi.Int>()).cast<ffi.Int>();
+    final ffi.Pointer<ffi.Int> destY = _gMalloc0(ffi.sizeOf<ffi.Int>()).cast<ffi.Int>();
+    final bool translated = _gtkWidgetTranslateCoordinates(
+      instance,
+      destWidget.instance,
+      src.$1,
+      src.$2,
+      destX,
+      destY,
+    );
+    final (int, int)? result = translated ? (destX.value, destY.value) : null;
+    _gFree(destX);
+    _gFree(destY);
+    return result;
+  }
+
   /// Destroy the widget.
   void destroy() {
     _gtkWindowDestroy(instance);
   }
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_widget_realize')
+  external static void _gtkWidgetRealize(ffi.Pointer<ffi.NativeType> widget);
 
   @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_widget_show')
   external static void _gtkWidgetShow(ffi.Pointer<ffi.NativeType> widget);
@@ -653,6 +908,28 @@ class _GtkWidget extends _GObject {
 
   @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_widget_destroy')
   external static void _gtkWindowDestroy(ffi.Pointer<ffi.NativeType> widget);
+
+  @ffi.Native<ffi.Int Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_widget_get_scale_factor')
+  external static int _gtkWidgetGetScaleFactor(ffi.Pointer<ffi.NativeType> widget);
+
+  @ffi.Native<
+    ffi.Bool Function(
+      ffi.Pointer<ffi.NativeType>,
+      ffi.Pointer<ffi.NativeType>,
+      ffi.Int,
+      ffi.Int,
+      ffi.Pointer<ffi.Int>,
+      ffi.Pointer<ffi.Int>,
+    )
+  >(symbol: 'gtk_widget_translate_coordinates')
+  external static bool _gtkWidgetTranslateCoordinates(
+    ffi.Pointer<ffi.NativeType> widget,
+    ffi.Pointer<ffi.NativeType> destWidget,
+    int srcX,
+    int srcY,
+    ffi.Pointer<ffi.Int> destX,
+    ffi.Pointer<ffi.Int> destY,
+  );
 }
 
 /// Wraps GdkWindow.
@@ -673,8 +950,84 @@ class _GdkWindow extends _GObject {
     return states;
   }
 
+  /// FIXME
+  void moveToRect({
+    required int x,
+    required int y,
+    required int width,
+    required int height,
+    required _GdkGravity rectAnchor,
+    required _GdkGravity windowAnchor,
+    required Set<_GdkAnchorHint> anchorHints,
+    int rectAnchorDx = 0,
+    int rectAnchorDy = 0,
+  }) {
+    final ffi.Pointer<_GdkRectangle> rect = _gMalloc0(
+      ffi.sizeOf<_GdkRectangle>(),
+    ).cast<_GdkRectangle>();
+    final _GdkRectangle r = rect.ref;
+    r.x = x;
+    r.y = y;
+    r.width = width;
+    r.height = height;
+    var anchorHintsBits = 0;
+    for (final anchor in anchorHints) {
+      anchorHintsBits |= 1 << anchor.index;
+    }
+    _gdkWindowMoveToRect(
+      instance,
+      rect,
+      rectAnchor.index,
+      windowAnchor.index,
+      anchorHintsBits,
+      rectAnchorDx,
+      rectAnchorDy,
+    );
+    _gFree(rect);
+  }
+
   @ffi.Native<ffi.Int Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gdk_window_get_state')
   external static int _gdkWindowGetState(ffi.Pointer<ffi.NativeType> window);
+
+  @ffi.Native<
+    ffi.Void Function(
+      ffi.Pointer<ffi.NativeType>,
+      ffi.Pointer<ffi.NativeType>,
+      ffi.Int,
+      ffi.Int,
+      ffi.Int,
+      ffi.Int,
+      ffi.Int,
+    )
+  >(symbol: 'gdk_window_move_to_rect')
+  external static void _gdkWindowMoveToRect(
+    ffi.Pointer<ffi.NativeType> window,
+    ffi.Pointer<ffi.NativeType> rect,
+    int rectAnchor,
+    int windowAnchor,
+    int anchorHints,
+    int rectAnchorDx,
+    int rectAnchorDy,
+  );
+}
+
+/// Wraps GdkRectangle.
+final class _GdkRectangle extends ffi.Struct {
+  factory _GdkRectangle() {
+    return ffi.Struct.create();
+  }
+
+  @ffi.Int()
+  external int x;
+
+  @ffi.Int()
+  external int y;
+
+  @ffi.Int()
+  external int width;
+
+  @ffi.Int()
+  external int height;
 }
 
 /// Wraps GdkGeometry.
@@ -950,7 +1303,12 @@ class _FlEngine extends _GObject {
 /// Wraps FlView.
 class _FlView extends _GtkWidget {
   /// Create a new FlView widget.
-  _FlView(_FlEngine engine) : super(_flViewNewForEngine(engine.instance));
+  _FlView(_FlEngine engine, {bool isSizedToContent = false})
+    : super(
+        isSizedToContent
+            ? _flViewNewSizedToContent(engine.instance)
+            : _flViewNewForEngine(engine.instance),
+      );
 
   /// Get the ID for the Flutter view being shown in this widget.
   int getId() {
@@ -961,6 +1319,13 @@ class _FlView extends _GtkWidget {
     symbol: 'fl_view_new_for_engine',
   )
   external static ffi.Pointer<ffi.NativeType> _flViewNewForEngine(
+    ffi.Pointer<ffi.NativeType> engine,
+  );
+
+  @ffi.Native<ffi.Pointer<ffi.NativeType> Function(ffi.Pointer<ffi.NativeType>)>(
+    symbol: 'fl_view_new_sized_to_content',
+  )
+  external static ffi.Pointer<ffi.NativeType> _flViewNewSizedToContent(
     ffi.Pointer<ffi.NativeType> engine,
   );
 
