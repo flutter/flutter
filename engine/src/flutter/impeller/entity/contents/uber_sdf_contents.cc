@@ -17,25 +17,29 @@ using FS = UberSDFPipeline::FragmentShader;
 Scalar kAntialiasPixels = 1.0;
 }  // namespace
 
-std::unique_ptr<UberSDFContents> UberSDFContents::Make(Type type,
-                                                       Rect rect,
-                                                       Color color,
-                                                       Scalar stroke_width,
-                                                       bool stroked) {
-  return std::unique_ptr<UberSDFContents>(
-      new UberSDFContents(type, rect, color, stroke_width, stroked));
+std::unique_ptr<UberSDFContents> UberSDFContents::Make(
+    Type type,
+    Rect rect,
+    Color color,
+    Scalar stroke_width,
+    bool stroked,
+    std::unique_ptr<Geometry> geometry) {
+  return std::unique_ptr<UberSDFContents>(new UberSDFContents(
+      type, rect, color, stroke_width, stroked, std::move(geometry)));
 }
 
 UberSDFContents::UberSDFContents(Type type,
                                  Rect rect,
                                  Color color,
                                  Scalar stroke_width,
-                                 bool stroked)
+                                 bool stroked,
+                                 std::unique_ptr<Geometry> geometry)
     : type_(type),
       rect_(rect),
       color_(color),
       stroke_width_(stroke_width),
-      stroked_(stroked) {}
+      stroked_(stroked),
+      geometry_(std::move(geometry)) {}
 
 UberSDFContents::~UberSDFContents() = default;
 
@@ -81,6 +85,10 @@ bool UberSDFContents::Render(const ContentContext& renderer,
 
 std::optional<Rect> UberSDFContents::GetCoverage(const Entity& entity) const {
   return GetGeometry()->GetCoverage(entity.GetTransform());
+}
+
+const Geometry* UberSDFContents::GetGeometry() const {
+  return geometry_.get();
 }
 
 Color UberSDFContents::GetColor() const {

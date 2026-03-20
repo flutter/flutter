@@ -18,17 +18,20 @@ class UberSDFContents : public ColorSourceContents {
     kRect,
   };
 
-  static std::unique_ptr<UberSDFContents> Make(Type type,
-                                               Rect rect,
-                                               Color color,
-                                               Scalar stroke_width,
-                                               bool stroked);
+  static std::unique_ptr<UberSDFContents> Make(
+      Type type,
+      Rect rect,
+      Color color,
+      Scalar stroke_width,
+      bool stroked,
+      std::unique_ptr<Geometry> geometry);
 
   UberSDFContents(Type type,
                   Rect rect,
                   Color color,
                   Scalar stroke_width,
-                  bool stroked);
+                  bool stroked,
+                  std::unique_ptr<Geometry> geometry);
 
   ~UberSDFContents() override;
 
@@ -42,12 +45,15 @@ class UberSDFContents : public ColorSourceContents {
 
   bool ApplyColorFilter(const ColorFilterProc& color_filter_proc) override;
 
+  const Geometry* GetGeometry() const override;
+
  private:
   Type type_ = Type::kCircle;
   Rect rect_;
   Color color_;
   Scalar stroke_width_ = 0.0f;
   bool stroked_ = false;
+  std::unique_ptr<Geometry> geometry_;
 
   UberSDFContents(const UberSDFContents&) = delete;
 
