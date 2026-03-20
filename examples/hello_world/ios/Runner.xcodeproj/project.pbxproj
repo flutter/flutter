@@ -311,7 +311,7 @@
 				DEVELOPMENT_TEAM = 26BZF448M5;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "io.flutter.examples.hello-world";
+				PRODUCT_BUNDLE_IDENTIFIER = com.lasse.trainflow;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Profile;
@@ -430,7 +430,7 @@
 				DEVELOPMENT_TEAM = 26BZF448M5;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "io.flutter.examples.hello-world";
+				PRODUCT_BUNDLE_IDENTIFIER = com.lasse.trainflow;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -443,7 +443,7 @@
 				DEVELOPMENT_TEAM = 26BZF448M5;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "io.flutter.examples.hello-world";
+				PRODUCT_BUNDLE_IDENTIFIER = com.lasse.trainflow;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

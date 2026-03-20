@@ -32,7 +32,7 @@ class WorkoutExerciseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: WorkoutUiTokens.cardBackground,
+        color: WorkoutUiTokens.exerciseCardBackground,
         borderRadius: BorderRadius.circular(WorkoutUiTokens.radiusCard),
         boxShadow: WorkoutUiTokens.softShadow(),
       ),

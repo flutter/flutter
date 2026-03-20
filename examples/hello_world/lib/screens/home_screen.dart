@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../models/active_workout_draft.dart';
@@ -29,25 +27,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  Timer? _ticker;
-
-  @override
-  void initState() {
-    super.initState();
-    _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (!mounted || !widget.controller.hasActiveWorkout) {
-        return;
-      }
-      setState(() {});
-    });
-  }
-
-  @override
-  void dispose() {
-    _ticker?.cancel();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final UserProfile user = widget.service.getUserProfile();
@@ -162,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> {
             right: 12,
             bottom: 10,
             child: MinimizedWorkoutBar(
-              elapsed: _formatElapsed(activeWorkout.startedAt),
+              startedAt: activeWorkout.startedAt,
               exerciseCount: activeWorkout.exercises.length,
               onOpen: () => _openWorkout(context),
               onFinish: () async {
@@ -188,12 +167,5 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (_) => WorkoutSessionScreen(controller: widget.controller),
       ),
     );
-  }
-
-  String _formatElapsed(DateTime startedAt) {
-    final int seconds = DateTime.now().difference(startedAt).inSeconds;
-    final int minutes = seconds ~/ 60;
-    final int remainingSeconds = seconds % 60;
-    return '${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
   }
 }

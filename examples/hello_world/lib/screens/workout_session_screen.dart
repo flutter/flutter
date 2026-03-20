@@ -2,10 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../features/workout/presentation/active_workout/data/exercise_library_repository.dart';
+import '../features/workout/presentation/active_workout/models/exercise_library_item.dart';
 import '../models/active_workout_draft.dart';
 import '../models/workout_session.dart';
 import '../services/app_controller.dart';
 import 'workout/widgets/add_exercise_button.dart';
+import 'workout/widgets/exercise_picker_sheet.dart';
 import 'workout/widgets/workout_exercise_card.dart';
 import 'workout/widgets/workout_header_bar.dart';
 import 'workout/widgets/workout_ui_tokens.dart';
@@ -25,7 +28,9 @@ class WorkoutSessionScreen extends StatefulWidget {
 class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
   late final Timer _timer;
   late final ValueNotifier<int> _elapsedSeconds;
+  final ExerciseLibraryRepository _exerciseLibraryRepository = ExerciseLibraryRepository();
   late ActiveWorkoutDraft _draft;
+  List<ExerciseLibraryItem> _exerciseLibrary = const <ExerciseLibraryItem>[];
 
   @override
   void initState() {
@@ -42,8 +47,21 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
 
     _elapsedSeconds = ValueNotifier<int>(DateTime.now().difference(_draft.startedAt).inSeconds);
 
+    _loadExerciseLibrary();
+
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       _elapsedSeconds.value = DateTime.now().difference(_draft.startedAt).inSeconds;
+    });
+  }
+
+  Future<void> _loadExerciseLibrary() async {
+    final List<ExerciseLibraryItem> library = await _exerciseLibraryRepository.loadAll();
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _exerciseLibrary = List<ExerciseLibraryItem>.from(library)
+        ..sort((ExerciseLibraryItem a, ExerciseLibraryItem b) => a.navnDa.compareTo(b.navnDa));
     });
   }
 
@@ -61,24 +79,49 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
     widget.controller.updateActiveWorkout(draft);
   }
 
-  void _addExercise() {
-    final int index = _draft.exercises.length + 1;
-    final WorkoutExerciseDraft exercise = WorkoutExerciseDraft(
-      id: 'ex-${DateTime.now().microsecondsSinceEpoch}',
-      name: 'Øvelse $index',
-      notes: '',
-      sets: <WorkoutSetDraft>[
-        WorkoutSetDraft(
-          id: 'set-${DateTime.now().microsecondsSinceEpoch}',
-          setNumber: 1,
-          reps: 10,
-          kg: 0,
-        ),
-      ],
-    );
+  Future<void> _addExercise() async {
+    if (_exerciseLibrary.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Kunne ikke indlæse øvelsesbiblioteket endnu. Prøv igen om et øjeblik.')),
+      );
+      return;
+    }
+    final ExerciseLibraryItem? selected = await _showExercisePicker();
+    if (selected == null) {
+      return;
+    }
+
+    final WorkoutExerciseDraft exercise = _createExerciseDraft(selected.navnDa);
 
     final List<WorkoutExerciseDraft> exercises = List<WorkoutExerciseDraft>.from(_draft.exercises)..add(exercise);
     _saveDraft(_draft.copyWith(exercises: exercises));
+  }
+
+  WorkoutExerciseDraft _createExerciseDraft(String name) {
+    return WorkoutExerciseDraft(
+      id: 'ex-${DateTime.now().microsecondsSinceEpoch}',
+      name: name,
+      notes: '',
+      sets: <WorkoutSetDraft>[_createSetDraft(setNumber: 1)],
+    );
+  }
+
+  WorkoutSetDraft _createSetDraft({required int setNumber}) {
+    return WorkoutSetDraft(
+      id: 'set-${DateTime.now().microsecondsSinceEpoch}',
+      setNumber: setNumber,
+      reps: 10,
+      kg: 0,
+    );
+  }
+
+  Future<ExerciseLibraryItem?> _showExercisePicker() {
+    return showModalBottomSheet<ExerciseLibraryItem>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (BuildContext context) => ExercisePickerSheet(exercises: _exerciseLibrary),
+    );
   }
 
   void _updateExercise(int exerciseIndex, WorkoutExerciseDraft updatedExercise) {
@@ -97,14 +140,7 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
     final int nextSet = exercise.sets.length + 1;
 
     final List<WorkoutSetDraft> sets = List<WorkoutSetDraft>.from(exercise.sets)
-      ..add(
-        WorkoutSetDraft(
-          id: 'set-${DateTime.now().microsecondsSinceEpoch}',
-          setNumber: nextSet,
-          reps: 10,
-          kg: 0,
-        ),
-      );
+      ..add(_createSetDraft(setNumber: nextSet));
 
     _updateExercise(exerciseIndex, exercise.copyWith(sets: sets));
   }
@@ -185,17 +221,21 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
               for (int exerciseIndex = 0; exerciseIndex < _draft.exercises.length; exerciseIndex) ...<Widget>[
                 WorkoutExerciseCard(
                   exercise: _draft.exercises[exerciseIndex],
-                  onNameChanged: (String value) =>
-                      _updateExercise(exerciseIndex, _draft.exercises[exerciseIndex].copyWith(name: value)),
-                  onNotesChanged: (String value) =>
-                      _updateExercise(exerciseIndex, _draft.exercises[exerciseIndex].copyWith(notes: value)),
+                  onNameChanged: (String value) => _updateExercise(
+                    exerciseIndex,
+                    _draft.exercises[exerciseIndex].copyWith(name: value),
+                  ),
+                  onNotesChanged: (String value) => _updateExercise(
+                    exerciseIndex,
+                    _draft.exercises[exerciseIndex].copyWith(notes: value),
+                  ),
                   onAddSet: () => _addSet(exerciseIndex),
                   onDeleteExercise: () => _deleteExercise(exerciseIndex),
                   onSetKgChanged: (int setIndex, String value) {
-                    _updateSet(exerciseIndex, setIndex, kg: double.tryParse(value.replaceAll(',', '.')) ?? 0);
+                    _updateSet(exerciseIndex, setIndex, kg: _parseKg(value));
                   },
                   onSetRepsChanged: (int setIndex, String value) {
-                    _updateSet(exerciseIndex, setIndex, reps: int.tryParse(value) ?? 0);
+                    _updateSet(exerciseIndex, setIndex, reps: _parseReps(value));
                   },
                   onSetCompletionChanged: (int setIndex, bool value) {
                     _updateSet(exerciseIndex, setIndex, completed: value);
@@ -204,18 +244,12 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
                 ),
                 const SizedBox(height: 14),
               ],
+              AddExerciseButton(
+                label: 'Tilføj øvelse',
+                onPressed: _addExercise,
+                filled: true,
+              ),
             ],
-            AddExerciseButton(
-              label: 'Tilføj øvelse',
-              onPressed: _addExercise,
-              filled: true,
-            ),
-            const SizedBox(height: 10),
-            AddExerciseButton(
-              label: 'Tilføj øvelse nederst',
-              onPressed: _addExercise,
-              filled: false,
-            ),
           ],
         ),
       ),
@@ -230,6 +264,14 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
       return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
     }
     return '${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
+  }
+
+  double _parseKg(String value) {
+    return double.tryParse(value.replaceAll(',', '.')) ?? 0;
+  }
+
+  int _parseReps(String value) {
+    return int.tryParse(value) ?? 0;
   }
 }
 
