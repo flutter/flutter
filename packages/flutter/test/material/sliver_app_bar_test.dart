@@ -143,6 +143,16 @@ void main() {
                       textDirection: TextDirection.ltr,
                       flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                     ),
+                    TestSemantics(
+                      label: 'Tile 7',
+                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                    ),
+                    TestSemantics(
+                      label: 'Tile 8',
+                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                    ),
                   ],
                 ),
               ],
@@ -185,6 +195,16 @@ void main() {
                   scrollIndex: 11,
                   children: <TestSemantics>[
                     TestSemantics(
+                      label: 'Tile 5',
+                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                    ),
+                    TestSemantics(
+                      label: 'Tile 6',
+                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                    ),
+                    TestSemantics(
                       label: 'Tile 7',
                       textDirection: TextDirection.ltr,
                       flags: <SemanticsFlag>[SemanticsFlag.isHidden],
@@ -217,6 +237,21 @@ void main() {
                     ),
                     TestSemantics(
                       label: 'Tile 18',
+                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                    ),
+                    TestSemantics(
+                      label: 'Tile 19',
+                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                    ),
+                    TestSemantics(
+                      label: 'Tile 20',
+                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                    ),
+                    TestSemantics(
+                      label: 'Tile 21',
                       textDirection: TextDirection.ltr,
                       flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                     ),

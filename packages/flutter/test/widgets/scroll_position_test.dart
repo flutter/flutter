@@ -268,7 +268,7 @@ void main() {
     );
 
     // The two visible on screen should have loaded without deferral.
-    expect(buildCount, 2);
+    expect(buildCount, 3);
     expect(loadedWithDeferral, 0);
 
     final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
@@ -277,14 +277,14 @@ void main() {
 
     // All but the first two that were loaded normally should have gotten a
     // recommendation to defer.
-    expect(buildCount, 102);
+    expect(buildCount, 103);
     expect(loadedWithDeferral, 100);
 
     position.jumpTo(height * 102);
     await tester.pump();
 
     // The smaller jump should not have recommended deferral.
-    expect(buildCount, 104);
+    expect(buildCount, 105);
     expect(loadedWithDeferral, 100);
   });
 }

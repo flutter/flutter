@@ -520,7 +520,7 @@ void main() {
         ' │   0.0, precedingScrollExtent: 0.0, remainingPaintExtent: 600.0,\n'
         ' │   crossAxisExtent: 800.0, crossAxisDirection:\n'
         ' │   AxisDirection.right, viewportMainAxisExtent: 600.0,\n'
-        ' │   remainingCacheExtent: 850.0, cacheOrigin: 0.0)\n'
+        ' │   remainingCacheExtent: 1080.0, cacheOrigin: 0.0)\n'
         ' │ geometry: SliverGeometry(scrollExtent: 200.0, paintExtent: 200.0,\n'
         ' │   maxPaintExtent: 200.0, hasVisualOverflow: true, cacheExtent:\n'
         ' │   200.0)\n'

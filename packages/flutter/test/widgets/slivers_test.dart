@@ -389,6 +389,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: CustomScrollView(
           controller: controller,
+          scrollCacheExtent: const ScrollCacheExtent.pixels(250.0),
           slivers: <Widget>[SliverFixedExtentList.list(itemExtent: 900, children: children)],
         ),
       ),
@@ -413,6 +414,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: CustomScrollView(
           controller: controller,
+          scrollCacheExtent: const ScrollCacheExtent.pixels(250.0),
           slivers: <Widget>[SliverFixedExtentList.list(itemExtent: 900, children: children)],
         ),
       ),
@@ -514,6 +516,7 @@ void main() {
     await tester.pumpWidget(
       TestWidgetsApp(
         home: CustomScrollView(
+          scrollCacheExtent: const ScrollCacheExtent.pixels(250.0),
           slivers: <Widget>[SliverList.builder(itemCount: 30, itemBuilder: buildItem)],
         ),
       ),
@@ -534,6 +537,7 @@ void main() {
     await tester.pumpWidget(
       TestWidgetsApp(
         home: CustomScrollView(
+          scrollCacheExtent: const ScrollCacheExtent.pixels(250.0),
           slivers: <Widget>[SliverList.builder(itemCount: 30, itemBuilder: buildItem)],
         ),
       ),

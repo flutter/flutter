@@ -468,10 +468,11 @@ void main() {
     }
 
     renderGroup.visitChildrenForSemantics(visitor);
-    expect(visitedChildren.length, equals(3));
-    expect(visitedChildren[0].geometry!.scrollExtent, equals(300));
-    expect(visitedChildren[1].geometry!.scrollExtent, equals(500));
-    expect(visitedChildren[2].geometry!.scrollExtent, equals(400));
+    expect(visitedChildren.length, equals(4));
+    expect(visitedChildren[0].geometry!.scrollExtent, equals(200));
+    expect(visitedChildren[1].geometry!.scrollExtent, equals(300));
+    expect(visitedChildren[2].geometry!.scrollExtent, equals(500));
+    expect(visitedChildren[3].geometry!.scrollExtent, equals(400));
   });
 
   testWidgets('SliverPinnedPersistentHeader is painted within bounds of SliverMainAxisGroup', (
@@ -849,12 +850,12 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(buildsPerGroup[0], 17); // First sliver filled the screen and cache extent
+    expect(buildsPerGroup[0], 22); // First sliver filled the screen and cache extent
     expect(buildsPerGroup[1], 1); // Second only lays out one child
     expect(buildsPerGroup[2], 1); // Third only lays out one child
     final renderGroup =
         tester.renderObject(find.byType(SliverMainAxisGroup).first) as RenderSliverMainAxisGroup;
-    expect(renderGroup.geometry!.cacheExtent, 850.0);
+    expect(renderGroup.geometry!.cacheExtent, 1080.0);
   });
 
   testWidgets('SliverMainAxisGroup has consistent cacheOrigin', (WidgetTester tester) async {
@@ -885,8 +886,8 @@ void main() {
     final sliverList =
         find.byType(SliverList).evaluate().single.findRenderObject()! as RenderSliver;
 
-    expect(sliverList.constraints.cacheOrigin, -250.0);
-    expect(sliverList.constraints.remainingCacheExtent, 1100);
+    expect(sliverList.constraints.cacheOrigin, -480.0);
+    expect(sliverList.constraints.remainingCacheExtent, 1560);
   });
 
   testWidgets('SliverMainAxisGroup correctly handles ensureVisible', (WidgetTester tester) async {
@@ -1425,23 +1426,12 @@ void main() {
           ),
         ),
       );
-
-      // Only items 12~19 are on the screen.
-      expect(find.text('item11'), findsNothing);
-      expect(find.text('item12'), findsOneWidget);
-      expect(find.text('item19'), findsOneWidget);
-      expect(find.text('item20'), findsNothing);
-
-      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
-      await tester.pump();
-
-      // Only items 10~16 are on the screen.
-      expect(find.text('item9'), findsNothing);
-      expect(find.text('item10'), findsOneWidget);
+      // Only items 9~16 are on the screen (or in cache).
+      expect(find.text('item8'), findsNothing);
+      expect(find.text('item9'), findsOneWidget);
       expect(find.text('item16'), findsOneWidget);
       expect(find.text('item17'), findsNothing);
 
-      // The inaccurate scroll offset should reach zero at this point
       await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
       await tester.pump();
 
@@ -1450,6 +1440,25 @@ void main() {
       expect(find.text('item7'), findsOneWidget);
       expect(find.text('item13'), findsOneWidget);
       expect(find.text('item14'), findsNothing);
+
+      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
+      await tester.pump();
+
+      // Only items 4~10 are on the screen.
+      expect(find.text('item3'), findsNothing);
+      expect(find.text('item4'), findsOneWidget);
+      expect(find.text('item10'), findsOneWidget);
+      expect(find.text('item11'), findsNothing);
+
+      // The inaccurate scroll offset should reach zero at this point
+      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
+      await tester.pump();
+
+      // Only items 2~8 are on the screen.
+      expect(find.text('item1'), findsNothing);
+      expect(find.text('item2'), findsOneWidget);
+      expect(find.text('item8'), findsOneWidget);
+      expect(find.text('item9'), findsNothing);
 
       // It will be corrected as we scroll, so we have to drag multiple times.
       await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
