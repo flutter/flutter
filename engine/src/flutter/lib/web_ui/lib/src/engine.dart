@@ -79,6 +79,7 @@ export 'engine/lazy_path.dart';
 export 'engine/mouse/context_menu.dart';
 export 'engine/mouse/cursor.dart';
 export 'engine/mouse/prevent_default.dart';
+export 'engine/native_memory.dart';
 export 'engine/navigation/history.dart';
 export 'engine/noto_font.dart';
 export 'engine/noto_font_encoding.dart';

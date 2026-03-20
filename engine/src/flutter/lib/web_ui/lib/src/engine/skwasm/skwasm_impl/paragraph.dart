@@ -90,12 +90,8 @@ class SkwasmLineMetrics implements ui.LineMetrics {
 }
 
 class SkwasmParagraph extends SkwasmObjectWrapper<RawParagraph> implements ui.Paragraph {
-  SkwasmParagraph(ParagraphHandle handle) : super(handle, _registry);
-
-  static final SkwasmFinalizationRegistry<RawParagraph> _registry =
-      SkwasmFinalizationRegistry<RawParagraph>(
-        (ParagraphHandle handle) => paragraphDispose(handle),
-      );
+  SkwasmParagraph(ParagraphHandle handle)
+    : super(handle, (ParagraphHandle h) => paragraphDispose(h), 'Paragraph');
 
   bool _hasCheckedForMissingCodePoints = false;
 
@@ -311,14 +307,10 @@ void withScopedFontList(
 }
 
 class SkwasmNativeTextStyle extends SkwasmObjectWrapper<RawTextStyle> {
-  SkwasmNativeTextStyle(TextStyleHandle handle) : super(handle, _registry);
+  SkwasmNativeTextStyle(TextStyleHandle handle)
+    : super(handle, (TextStyleHandle h) => textStyleDispose(h), 'TextStyle');
 
   factory SkwasmNativeTextStyle.defaultTextStyle() => SkwasmNativeTextStyle(textStyleCreate());
-
-  static final SkwasmFinalizationRegistry<RawTextStyle> _registry =
-      SkwasmFinalizationRegistry<RawTextStyle>(
-        (TextStyleHandle handle) => textStyleDispose(handle),
-      );
 
   SkwasmNativeTextStyle copy() {
     return SkwasmNativeTextStyle(textStyleCopy(handle));
@@ -929,14 +921,9 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
     ParagraphBuilderHandle handle,
     this.style,
     SkwasmNativeTextStyle baseTextStyle,
-  ) : super(handle, _registry) {
+  ) : super(handle, (ParagraphBuilderHandle h) => paragraphBuilderDispose(h), 'ParagraphBuilder') {
     textStyleStack.add(baseTextStyle);
   }
-
-  static final SkwasmFinalizationRegistry<RawParagraphBuilder> _registry =
-      SkwasmFinalizationRegistry<RawParagraphBuilder>(
-        (ParagraphBuilderHandle handle) => paragraphBuilderDispose(handle),
-      );
 
   final SkwasmParagraphStyle style;
   final List<SkwasmNativeTextStyle> textStyleStack = <SkwasmNativeTextStyle>[];

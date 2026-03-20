@@ -20,10 +20,8 @@ String _robotoUrl =
     '${configuration.fontFallbackBaseUrl}roboto/v32/KFOmCnqEu92Fr1Me4GZLCzYlKw.woff2';
 
 class SkwasmTypeface extends SkwasmObjectWrapper<RawTypeface> {
-  SkwasmTypeface(SkDataHandle data) : super(typefaceCreate(data), _registry);
-
-  static final SkwasmFinalizationRegistry<RawTypeface> _registry =
-      SkwasmFinalizationRegistry<RawTypeface>((TypefaceHandle handle) => typefaceDispose(handle));
+  SkwasmTypeface(SkDataHandle data)
+    : super(typefaceCreate(data), (TypefaceHandle h) => typefaceDispose(h), 'Typeface');
 }
 
 class SkwasmFontCollection implements FlutterFontCollection {

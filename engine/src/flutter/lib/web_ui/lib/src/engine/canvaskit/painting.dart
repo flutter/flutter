@@ -350,7 +350,7 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
   final CkFragmentProgram _program;
 
   @visibleForTesting
-  UniqueRef<SkShader>? ref;
+  CkUniqueRef<SkShader>? ref;
 
   @override
   bool get isGradient => false;
@@ -371,7 +371,7 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
       );
     }
 
-    ref = UniqueRef<SkShader>(this, result, 'FragmentShader');
+    ref = CkUniqueRef<SkShader>(this, result, 'FragmentShader');
     return result;
   }
 

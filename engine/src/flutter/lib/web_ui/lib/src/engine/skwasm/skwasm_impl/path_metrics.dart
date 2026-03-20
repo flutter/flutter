@@ -22,11 +22,10 @@ class SkwasmPathMetrics extends IterableBase<ui.PathMetric> implements Disposabl
 class SkwasmPathMetricIterator extends SkwasmObjectWrapper<RawContourMeasureIter>
     implements DisposablePathMetricIterator {
   SkwasmPathMetricIterator(SkwasmPath path, bool forceClosed)
-    : super(contourMeasureIterCreate(path.handle, forceClosed, 1.0), _registry);
-
-  static final SkwasmFinalizationRegistry<RawContourMeasureIter> _registry =
-      SkwasmFinalizationRegistry<RawContourMeasureIter>(
-        (ContourMeasureIterHandle handle) => contourMeasureIterDispose(handle),
+    : super(
+        contourMeasureIterCreate(path.handle, forceClosed, 1.0),
+        (ContourMeasureIterHandle h) => contourMeasureIterDispose(h),
+        'PathMetricIterator',
       );
 
   SkwasmPathMetric? _current;
@@ -60,12 +59,8 @@ class SkwasmPathMetricIterator extends SkwasmObjectWrapper<RawContourMeasureIter
 
 class SkwasmPathMetric extends SkwasmObjectWrapper<RawContourMeasure>
     implements DisposablePathMetric {
-  SkwasmPathMetric(ContourMeasureHandle handle, this.contourIndex) : super(handle, _registry);
-
-  static final SkwasmFinalizationRegistry<RawContourMeasure> _registry =
-      SkwasmFinalizationRegistry<RawContourMeasure>(
-        (ContourMeasureHandle handle) => contourMeasureDispose(handle),
-      );
+  SkwasmPathMetric(ContourMeasureHandle handle, this.contourIndex)
+    : super(handle, (ContourMeasureHandle h) => contourMeasureDispose(h), 'PathMetric');
 
   @override
   final int contourIndex;

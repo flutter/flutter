@@ -68,7 +68,7 @@ void testMain() {
               as CkImageShader;
       expect(imageShader, isA<CkImageShader>());
 
-      final UniqueRef<SkShader> ref = imageShader.ref!;
+      final CkUniqueRef<SkShader> ref = imageShader.ref!;
       expect(imageShader.debugDisposed, false);
       expect(imageShader.getSkShader(ui.FilterQuality.none), same(ref.nativeObject));
       expect(ref.isDisposed, false);
@@ -95,19 +95,19 @@ void testMain() {
               as CkImageShader;
       expect(imageShader, isA<CkImageShader>());
 
-      final UniqueRef<SkShader> ref1 = imageShader.ref!;
+      final CkUniqueRef<SkShader> ref1 = imageShader.ref!;
       expect(imageShader.getSkShader(ui.FilterQuality.none), same(ref1.nativeObject));
 
       // Request the same quality as the default quality (none).
       expect(imageShader.getSkShader(ui.FilterQuality.none), isNotNull);
-      final UniqueRef<SkShader> ref2 = imageShader.ref!;
+      final CkUniqueRef<SkShader> ref2 = imageShader.ref!;
       expect(ref1, same(ref2));
       expect(ref1.isDisposed, false);
       expect(image.debugDisposed, false);
 
       // Change quality to medium.
       expect(imageShader.getSkShader(ui.FilterQuality.medium), isNotNull);
-      final UniqueRef<SkShader> ref3 = imageShader.ref!;
+      final CkUniqueRef<SkShader> ref3 = imageShader.ref!;
       expect(ref1, isNot(same(ref3)));
       expect(
         ref1.isDisposed,
@@ -119,7 +119,7 @@ void testMain() {
 
       // Ask for medium again.
       expect(imageShader.getSkShader(ui.FilterQuality.medium), isNotNull);
-      final UniqueRef<SkShader> ref4 = imageShader.ref!;
+      final CkUniqueRef<SkShader> ref4 = imageShader.ref!;
       expect(ref4, same(ref3));
       expect(ref3.isDisposed, false);
       expect(image.debugDisposed, false);

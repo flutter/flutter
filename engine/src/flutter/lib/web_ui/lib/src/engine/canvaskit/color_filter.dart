@@ -15,12 +15,12 @@ import 'package:ui/ui.dart' as ui;
 ///   the lifecycle of its [SkColorFilter].
 class ManagedSkColorFilter {
   ManagedSkColorFilter(CkColorFilter ckColorFilter) : colorFilter = ckColorFilter {
-    _ref = UniqueRef<SkColorFilter>(this, colorFilter._initRawColorFilter(), 'ColorFilter');
+    _ref = CkUniqueRef<SkColorFilter>(this, colorFilter._initRawColorFilter(), 'ColorFilter');
   }
 
   final CkColorFilter colorFilter;
 
-  late final UniqueRef<SkColorFilter> _ref;
+  late final CkUniqueRef<SkColorFilter> _ref;
 
   SkColorFilter get skiaObject => _ref.nativeObject;
 

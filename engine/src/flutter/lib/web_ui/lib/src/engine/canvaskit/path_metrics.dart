@@ -23,12 +23,12 @@ class CkPathMetrics extends IterableBase<ui.PathMetric> implements DisposablePat
 
 class CkContourMeasureIter implements DisposablePathMetricIterator {
   CkContourMeasureIter(this._metrics) {
-    _skPathRef = UniqueRef<SkPath>(
+    _skPathRef = CkUniqueRef<SkPath>(
       this,
       _metrics._path.snapshotSkPath(),
       'SkContourMeasureIter:SkPath',
     );
-    _ref = UniqueRef<SkContourMeasureIter>(
+    _ref = CkUniqueRef<SkContourMeasureIter>(
       this,
       SkContourMeasureIter(_skPathRef.nativeObject, _metrics._forceClosed, 1.0),
       'CkContourMeasureIter:SkContourMeasureIter',
@@ -42,8 +42,8 @@ class CkContourMeasureIter implements DisposablePathMetricIterator {
   }
 
   final CkPathMetrics _metrics;
-  late final UniqueRef<SkContourMeasureIter> _ref;
-  late final UniqueRef<SkPath> _skPathRef;
+  late final CkUniqueRef<SkContourMeasureIter> _ref;
+  late final CkUniqueRef<SkPath> _skPathRef;
 
   SkContourMeasureIter get skiaObject => _ref.nativeObject;
 
@@ -83,7 +83,7 @@ class CkContourMeasureIter implements DisposablePathMetricIterator {
 
 class CkContourMeasure implements DisposablePathMetric {
   CkContourMeasure(this._metrics, SkContourMeasure skiaObject, this.contourIndex) {
-    _ref = UniqueRef<SkContourMeasure>(this, skiaObject, 'PathMetric');
+    _ref = CkUniqueRef<SkContourMeasure>(this, skiaObject, 'PathMetric');
   }
 
   /// The path metrics used to create this measure.
@@ -91,7 +91,7 @@ class CkContourMeasure implements DisposablePathMetric {
   /// This is used to resurrect the object if it is deleted prematurely.
   final CkPathMetrics _metrics;
 
-  late final UniqueRef<SkContourMeasure> _ref;
+  late final CkUniqueRef<SkContourMeasure> _ref;
 
   SkContourMeasure get skiaObject => _ref.nativeObject;
 
