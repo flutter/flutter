@@ -153,12 +153,11 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
        uniforms = uniforms_, texture_inputs = texture_input_copy](
           const ContentContext& renderer, const Entity& entity,
           RenderPass& pass) -> bool {
-    RuntimeEffectContents contents;
     FillRectGeometry geom(Rect::MakeSize(input_snapshot->texture->GetSize()));
+    RuntimeEffectContents contents(&geom);
     contents.SetRuntimeStage(runtime_stage);
     contents.SetUniformData(uniforms);
     contents.SetTextureInputs(texture_inputs);
-    contents.SetGeometry(&geom);
     Entity offset_entity = entity.Clone();
     offset_entity.SetTransform(entity.GetTransform() * snapshot_transform);
     return contents.Render(renderer, offset_entity, pass);

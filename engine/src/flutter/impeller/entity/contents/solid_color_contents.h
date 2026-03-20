@@ -13,7 +13,7 @@ namespace impeller {
 
 class SolidColorContents final : public ColorSourceContents {
  public:
-  SolidColorContents();
+  explicit SolidColorContents(const Geometry* geometry);
 
   ~SolidColorContents() override;
 
@@ -23,6 +23,8 @@ class SolidColorContents final : public ColorSourceContents {
 
   // |ColorSourceContents|
   bool IsSolidColor() const override;
+
+  const Geometry* GetGeometry() const override;
 
   // |Contents|
   bool IsOpaque(const Matrix& transform) const override;
@@ -43,6 +45,7 @@ class SolidColorContents final : public ColorSourceContents {
       const ColorFilterProc& color_filter_proc) override;
 
  private:
+  const Geometry* geometry_ = nullptr;
   Color color_;
 
   SolidColorContents(const SolidColorContents&) = delete;

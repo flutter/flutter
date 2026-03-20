@@ -23,6 +23,8 @@ class CircleContents : public ColorSourceContents {
 
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
+  const Geometry* GetGeometry() const override;
+
  private:
   explicit CircleContents(std::unique_ptr<CircleGeometry> geometry,
                           Color color,
