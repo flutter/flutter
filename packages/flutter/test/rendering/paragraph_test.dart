@@ -1509,6 +1509,76 @@ void main() {
     semanticsHandle.dispose();
   });
 
+  test('RenderParagraph ideographic baseline', () {
+    // Even without CJK characters, the ideographic baseline (bottom of the line)
+    // should be distinct from the alphabetic baseline.
+    var paragraph = RenderParagraph(
+      const TextSpan(text: 'Hello world', style: TextStyle(fontSize: 10.0)),
+      textDirection: TextDirection.ltr,
+    );
+    layout(paragraph);
+
+    double alphabetic = paragraph.computeDistanceToActualBaseline(TextBaseline.alphabetic);
+    double ideographic = paragraph.computeDistanceToActualBaseline(TextBaseline.ideographic);
+
+    expect(alphabetic, isNot(equals(ideographic)));
+    expect(ideographic, greaterThan(alphabetic));
+
+    // Verify that the ideographic baseline is correctly calculated based on
+    // CJK font metrics.
+    paragraph = RenderParagraph(
+      const TextSpan(text: 'こんにちは', style: TextStyle(fontSize: 10.0)),
+      textDirection: TextDirection.ltr,
+    );
+    layout(paragraph);
+
+    alphabetic = paragraph.computeDistanceToActualBaseline(TextBaseline.alphabetic);
+    ideographic = paragraph.computeDistanceToActualBaseline(TextBaseline.ideographic);
+
+    expect(alphabetic, isNot(equals(ideographic)));
+    expect(ideographic, greaterThan(alphabetic));
+
+    // Verify that the baseline calculation correctly handles mixed fonts,
+    // extending the metrics to cover both.
+    paragraph = RenderParagraph(
+      const TextSpan(text: 'Hello world こんにちは', style: TextStyle(fontSize: 10.0)),
+      textDirection: TextDirection.ltr,
+    );
+    layout(paragraph);
+
+    alphabetic = paragraph.computeDistanceToActualBaseline(TextBaseline.alphabetic);
+    ideographic = paragraph.computeDistanceToActualBaseline(TextBaseline.ideographic);
+
+    expect(alphabetic, isNot(equals(ideographic)));
+    expect(ideographic, greaterThan(alphabetic));
+  });
+
+  test('RenderParagraph computeDryBaseline ideographic baseline', () {
+    // computeDryBaseline should match computeDistanceToActualBaseline for both
+    // alphabetic and ideographic baselines.
+    final paragraph = RenderParagraph(
+      const TextSpan(text: 'Hello world', style: TextStyle(fontSize: 10.0)),
+      textDirection: TextDirection.ltr,
+    );
+    layout(paragraph);
+
+    final double alphabetic = paragraph.computeDistanceToActualBaseline(TextBaseline.alphabetic);
+    final double ideographic = paragraph.computeDistanceToActualBaseline(TextBaseline.ideographic);
+
+    final double dryAlphabetic = paragraph.computeDryBaseline(
+      const BoxConstraints(maxWidth: 800.0),
+      TextBaseline.alphabetic,
+    );
+    final double dryIdeographic = paragraph.computeDryBaseline(
+      const BoxConstraints(maxWidth: 800.0),
+      TextBaseline.ideographic,
+    );
+
+    expect(dryAlphabetic, equals(alphabetic));
+    expect(dryIdeographic, equals(ideographic));
+    expect(dryAlphabetic, isNot(equals(dryIdeographic)));
+  });
+
   group('positionInlineChildren', () {
     test('asserts when boxes length exceeds childCount', () {
       final paragraph = RenderParagraph(
