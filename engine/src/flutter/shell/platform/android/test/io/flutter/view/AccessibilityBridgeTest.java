@@ -2439,6 +2439,76 @@ public class AccessibilityBridgeTest {
     assertEquals(50.0f, nodeInfo.getRangeInfo().getCurrent(), 1e-4f);
   }
 
+  @Test
+  public void itAddsRangeInfoToProgressBar_missingMinAndMaxValue() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = 23; // SemanticsRole::kProgressBar
+    testSemanticsNode.value = "50";
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.widget.ProgressBar", nodeInfo.getClassName().toString());
+    assertNotNull(nodeInfo.getRangeInfo());
+    assertEquals(Float.NEGATIVE_INFINITY, nodeInfo.getRangeInfo().getMin(), 1e-4f);
+    assertEquals(Float.POSITIVE_INFINITY, nodeInfo.getRangeInfo().getMax(), 1e-4f);
+    assertEquals(50.0f, nodeInfo.getRangeInfo().getCurrent(), 1e-4f);
+  }
+
+  @Test
+  public void itAddsRangeInfoToProgressBar_unparseableMinValue() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = 23; // SemanticsRole::kProgressBar
+    testSemanticsNode.value = "50";
+    testSemanticsNode.minValue = "a";
+    testSemanticsNode.maxValue = "100";
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.widget.ProgressBar", nodeInfo.getClassName().toString());
+    assertNotNull(nodeInfo.getRangeInfo());
+    assertEquals(Float.NEGATIVE_INFINITY, nodeInfo.getRangeInfo().getMin(), 1e-4f);
+    assertEquals(100.0f, nodeInfo.getRangeInfo().getMax(), 1e-4f);
+    assertEquals(50.0f, nodeInfo.getRangeInfo().getCurrent(), 1e-4f);
+  }
+
+  @Test
+  public void itAddsRangeInfoToProgressBar_unparseableMaxValue() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = 23; // SemanticsRole::kProgressBar
+    testSemanticsNode.value = "50";
+    testSemanticsNode.minValue = "0";
+    testSemanticsNode.maxValue = "a";
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.widget.ProgressBar", nodeInfo.getClassName().toString());
+    assertNotNull(nodeInfo.getRangeInfo());
+    assertEquals(0.0f, nodeInfo.getRangeInfo().getMin(), 1e-4f);
+    assertEquals(Float.POSITIVE_INFINITY, nodeInfo.getRangeInfo().getMax(), 1e-4f);
+    assertEquals(50.0f, nodeInfo.getRangeInfo().getCurrent(), 1e-4f);
+  }
+
+  @Test
+  public void itAddsRangeInfoToProgressBar_unparseableValue() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = 23; // SemanticsRole::kProgressBar
+    testSemanticsNode.value = "a";
+    testSemanticsNode.minValue = "0";
+    testSemanticsNode.maxValue = "100";
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.widget.ProgressBar", nodeInfo.getClassName().toString());
+    assertNotNull(nodeInfo.getRangeInfo());
+    assertEquals(0.0f, nodeInfo.getRangeInfo().getMin(), 1e-4f);
+    assertEquals(0.0f, nodeInfo.getRangeInfo().getMax(), 1e-4f);
+    assertEquals(0.0f, nodeInfo.getRangeInfo().getCurrent(), 1e-4f);
+  }
+
   @Config(sdk = API_LEVELS.API_32)
   @TargetApi(API_LEVELS.API_32)
   @Test

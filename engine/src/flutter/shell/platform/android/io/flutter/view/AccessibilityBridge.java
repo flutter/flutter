@@ -2409,6 +2409,16 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     Role(int value) {
       this.value = value;
     }
+
+    @NonNull
+    public static Role fromInt(int value) {
+      for (Role role : Role.values()) {
+        if (role.value == value) {
+          return role;
+        }
+      }
+      return Role.NONE;
+    }
   }
 
   // Actions that are triggered by Android OS, as opposed to user-triggered actions.
