@@ -357,6 +357,45 @@ void main() {
       expect(find.byType(Image), findsOneWidget);
     });
 
+    testWidgets(
+      'keeps placeholder visible while target fades in when fadeOutPlaceholder is false',
+      (WidgetTester tester) async {
+        final placeholderProvider = TestImageProvider(placeholderImage);
+        final imageProvider = TestImageProvider(targetImage);
+
+        await tester.pumpWidget(
+          FadeInImage(
+            placeholder: placeholderProvider,
+            image: imageProvider,
+            fadeOutDuration: animationDuration,
+            fadeInDuration: animationDuration,
+            fadeOutPlaceholder: false,
+            fadeOutCurve: Curves.linear,
+            fadeInCurve: Curves.linear,
+            excludeFromSemantics: true,
+          ),
+        );
+
+        placeholderProvider.complete();
+        imageProvider.complete();
+        await tester.pump();
+
+        // During the fade-in animation, placeholder stays at full opacity
+        // while target fades in on top.
+        for (var i = 0; i < 5; i += 1) {
+          final FadeInImageParts parts = findFadeInImage(tester);
+          expect(parts.placeholder!.opacity, 1.0);
+          expect(parts.target.opacity, moreOrLessEquals(i / 5));
+          await tester.pump(const Duration(milliseconds: 10));
+        }
+
+        // After animation completes, placeholder is removed from tree.
+        await tester.pumpAndSettle();
+        expect(findFadeInImage(tester).placeholder, isNull);
+        expect(findFadeInImage(tester).target.opacity, 1.0);
+      },
+    );
+
     testWidgets("doesn't interrupt in-progress animation when animation values are updated", (
       WidgetTester tester,
     ) async {
