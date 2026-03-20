@@ -389,8 +389,7 @@ class Canvas {
                                     Scalar radius,
                                     const Paint& paint);
 
-  bool AttemptDrawAntialiasedPath(const PathSource& source,
-                                  const Paint& paint);
+  bool AttemptDrawAntialiasedPath(const PathSource& source, const Paint& paint);
 
   /// Returns the radius common to both width and height of all corners,
   /// or -1 if the radii are not uniform.

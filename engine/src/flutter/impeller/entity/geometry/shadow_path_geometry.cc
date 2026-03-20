@@ -291,7 +291,8 @@ struct ParameterizedPair {
     Scalar t = (outset.distance + d) / (inset.distance + outset.distance);
     return {
         .distance = d,
-        .parameter = (outset.parameter + t * (inset.parameter - outset.parameter)),
+        .parameter =
+            (outset.parameter + t * (inset.parameter - outset.parameter)),
     };
   }
 };

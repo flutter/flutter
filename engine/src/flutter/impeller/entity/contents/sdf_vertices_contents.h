@@ -33,8 +33,7 @@ class SDFVerticesContents final : public Contents {
               const Entity& entity,
               RenderPass& pass) const override;
 
-  explicit SDFVerticesContents(
-      const std::shared_ptr<SDFVertices>& geometry);
+  explicit SDFVerticesContents(const std::shared_ptr<SDFVertices>& geometry);
 
   ~SDFVerticesContents() override;
 

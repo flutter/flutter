@@ -21,7 +21,6 @@
 
 #include "flutter/impeller/entity/geometry/shadow_path_geometry.h"
 
-
 namespace impeller {
 namespace testing {
 
@@ -1101,17 +1100,14 @@ void DrawMesh(DisplayListBuilder& builder, const DlPath& path) {
   paint.setColor(DlColor::kRed().withAlphaF(0.25f));
 
   Tessellator tessellator;
-  auto geometry = ShadowPathGeometry::MakeSDFVertices(
-    tessellator, path, Matrix(), 1.0f);
+  auto geometry =
+      ShadowPathGeometry::MakeSDFVertices(tessellator, path, Matrix(), 1.0f);
   FML_DCHECK(geometry);
   FML_DCHECK(!geometry->IsEmpty());
 
   Point prev = geometry->GetVertices()[0];
-  int i = 0;
   for (uint16_t index : geometry->GetIndices()) {
     Point vertex = geometry->GetVertices()[index];
-    Scalar parameter = geometry->GetGaussians()[index];
-    FML_LOG(ERROR) << "vertex[" << ++i << "] == " << vertex << ", " << parameter;
     builder.DrawLine(prev, vertex, paint);
     prev = vertex;
   }
@@ -1134,8 +1130,6 @@ TEST_P(AiksTest, CanFillConvexPath) {
   path_builder.Close();
   DlPath path = path_builder.TakePath();
   ASSERT_TRUE(path.IsConvex());
-
-  FML_LOG(ERROR) << path.GetBounds();
 
   builder.DrawPath(path, paint);
 

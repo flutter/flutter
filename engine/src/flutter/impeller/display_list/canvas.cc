@@ -554,8 +554,7 @@ bool Canvas::AttemptDrawAntialiasedCircle(const Point& center,
 }
 
 bool Canvas::AttemptDrawAntialiasedPath(const PathSource& source,
-                                        const Paint& paint)
-{
+                                        const Paint& paint) {
   if (paint.style != Paint::Style::kFill || paint.HasColorFilter() ||
       paint.image_filter || paint.invert_colors || paint.color_source ||
       paint.mask_blur_descriptor.has_value()) {
