@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "Markér alt",
   "searchResultsFound": "Søgeresultater fundet",
   "noResultsFound": "Der blev ikke fundet nogen resultater",
-  "radioButtonUnselectedLabel": "Ikke valgt"
+  "radioButtonUnselectedLabel": "Ikke valgt",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "Odaberi sve",
   "searchResultsFound": "Pronađeni su rezultati pretraživanja",
   "noResultsFound": "Nema rezultata",
-  "radioButtonUnselectedLabel": "Nije odabrano"
+  "radioButtonUnselectedLabel": "Nije odabrano",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

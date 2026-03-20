@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "Избери ги сите",
   "searchResultsFound": "Најдени се резултати од пребарувањето",
   "noResultsFound": "Не се најдени резултати",
-  "radioButtonUnselectedLabel": "Не е избрано"
+  "radioButtonUnselectedLabel": "Не е избрано",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

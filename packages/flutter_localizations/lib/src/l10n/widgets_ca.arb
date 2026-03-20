@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "Selecciona-ho tot",
   "searchResultsFound": "S'han trobat resultats de cerca",
   "noResultsFound": "No s'ha trobat cap resultat",
-  "radioButtonUnselectedLabel": "No seleccionat"
+  "radioButtonUnselectedLabel": "No seleccionat",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

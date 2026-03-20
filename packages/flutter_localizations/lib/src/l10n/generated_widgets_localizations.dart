@@ -29,22 +29,40 @@ class WidgetsLocalizationAf extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationAf() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopieer';
 
   @override
   String get cutButtonLabel => 'Knip';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Kyk op';
 
   @override
-  String get noResultsFound => 'Geen resultate gekry nie';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Plak';
 
   @override
-  String get radioButtonUnselectedLabel => 'Nie gekies nie';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Skuif af';
@@ -65,7 +83,7 @@ class WidgetsLocalizationAf extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Skuif op';
 
   @override
-  String get searchResultsFound => 'Soekresultate gevind';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Deursoek web';
@@ -85,22 +103,40 @@ class WidgetsLocalizationAm extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationAm() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'ቅዳ';
 
   @override
   String get cutButtonLabel => 'ቁረጥ';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'ይመልከቱ';
 
   @override
-  String get noResultsFound => 'ምንም ውጤቶች አልተገኙም';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'ለጥፍ';
 
   @override
-  String get radioButtonUnselectedLabel => 'አልተመረጠም';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'ወደ ታች ውሰድ';
@@ -121,7 +157,7 @@ class WidgetsLocalizationAm extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'ወደ ላይ ውሰድ';
 
   @override
-  String get searchResultsFound => 'የፍለጋ ውጤቶች ተገኝተዋል';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'ድርን ፈልግ';
@@ -141,22 +177,40 @@ class WidgetsLocalizationAr extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationAr() : super(TextDirection.rtl);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'نسخ';
 
   @override
   String get cutButtonLabel => 'قص';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'بحث عام';
 
   @override
-  String get noResultsFound => 'لم يتم العثور على نتائج';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'لصق';
 
   @override
-  String get radioButtonUnselectedLabel => 'غير محدّد';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'نقل لأسفل';
@@ -177,7 +231,7 @@ class WidgetsLocalizationAr extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'نقل لأعلى';
 
   @override
-  String get searchResultsFound => 'تم العثور على نتائج بحث';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'البحث على الويب';
@@ -197,49 +251,67 @@ class WidgetsLocalizationAs extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationAs() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'প্ৰতিলিপি কৰক';
 
   @override
   String get cutButtonLabel => 'কাট কৰক';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'ওপৰলৈ চাওক';
 
   @override
-  String get noResultsFound => 'কোনো ফলাফল পোৱা নগ’ল';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => "পে'ষ্ট কৰক";
 
   @override
-  String get radioButtonUnselectedLabel => 'বাছনি কৰা হোৱা নাই';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
-  String get reorderItemDown => 'তললৈ নিয়ক';
+  String get reorderItemDown => 'তললৈ স্থানান্তৰ কৰক';
 
   @override
   String get reorderItemLeft => 'বাওঁফাললৈ স্থানান্তৰ কৰক';
 
   @override
-  String get reorderItemRight => 'সোঁফাললৈ নিয়ক';
+  String get reorderItemRight => 'সোঁফাললৈ স্থানান্তৰ কৰক';
 
   @override
-  String get reorderItemToEnd => 'শেষলৈ নিয়ক';
+  String get reorderItemToEnd => 'শেষলৈ স্থানান্তৰ কৰক';
 
   @override
-  String get reorderItemToStart => 'আৰম্ভণিলৈ নিয়ক';
+  String get reorderItemToStart => 'আৰম্ভণিলৈ স্থানান্তৰ কৰক';
 
   @override
   String get reorderItemUp => 'ওপৰলৈ নিয়ক';
 
   @override
-  String get searchResultsFound => 'সন্ধানৰ ফলাফল পোৱা গৈছে';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'ৱেবত সন্ধান কৰক';
 
   @override
-  String get selectAllButtonLabel => 'আটাইবোৰ বাছনি কৰক';
+  String get selectAllButtonLabel => 'সকলো বাছনি কৰক';
 
   @override
   String get shareButtonLabel => 'শ্বেয়াৰ কৰক';
@@ -253,22 +325,40 @@ class WidgetsLocalizationAz extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationAz() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopyalayın';
 
   @override
   String get cutButtonLabel => 'Kəsin';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Axtarın';
 
   @override
-  String get noResultsFound => 'Nəticə tapılmadı';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Yerləşdirin';
 
   @override
-  String get radioButtonUnselectedLabel => 'Seçilmədi';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Aşağı köçürün';
@@ -289,7 +379,7 @@ class WidgetsLocalizationAz extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Yuxarı köçürün';
 
   @override
-  String get searchResultsFound => 'Axtarış nəticələri tapıldı';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Vebdə axtarın';
@@ -309,22 +399,40 @@ class WidgetsLocalizationBe extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationBe() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Капіраваць';
 
   @override
   String get cutButtonLabel => 'Выразаць';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Знайсці';
 
   @override
-  String get noResultsFound => 'Вынікі не знойдзены';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Уставіць';
 
   @override
-  String get radioButtonUnselectedLabel => 'Не выбрана';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Перамясціць уніз';
@@ -345,7 +453,7 @@ class WidgetsLocalizationBe extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Перамясціць уверх';
 
   @override
-  String get searchResultsFound => 'Знойдзены вынікі пошуку';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Пошук у сетцы';
@@ -365,22 +473,40 @@ class WidgetsLocalizationBg extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationBg() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Копиране';
 
   @override
   String get cutButtonLabel => 'Изрязване';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Look Up';
 
   @override
-  String get noResultsFound => 'Няма намерени резултати';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Поставяне';
 
   @override
-  String get radioButtonUnselectedLabel => 'Не е избран';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Преместване надолу';
@@ -401,7 +527,7 @@ class WidgetsLocalizationBg extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Преместване нагоре';
 
   @override
-  String get searchResultsFound => 'Намерени резултати от търсенето';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Търсене в мрежата';
@@ -421,22 +547,40 @@ class WidgetsLocalizationBn extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationBn() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'কপি করুন';
 
   @override
   String get cutButtonLabel => 'কাট করুন';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'লুক-আপ';
 
   @override
-  String get noResultsFound => 'কোনো ফলাফল পাওয়া যায়নি';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'পেস্ট করুন';
 
   @override
-  String get radioButtonUnselectedLabel => 'বেছে নেওয়া হয়নি';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'নিচের দিকে সরান';
@@ -457,7 +601,7 @@ class WidgetsLocalizationBn extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'উপরের দিকে সরান';
 
   @override
-  String get searchResultsFound => 'সার্চ ফলাফল পাওয়া গেছে';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'ওয়েবে সার্চ করুন';
@@ -469,62 +613,6 @@ class WidgetsLocalizationBn extends GlobalWidgetsLocalizations {
   String get shareButtonLabel => 'শেয়ার করুন';
 }
 
-/// The translations for Tibetan (`bo`).
-class WidgetsLocalizationBo extends GlobalWidgetsLocalizations {
-  /// Create an instance of the translation bundle for Tibetan.
-  ///
-  /// For details on the meaning of the arguments, see [GlobalWidgetsLocalizations].
-  const WidgetsLocalizationBo() : super(TextDirection.ltr);
-
-  @override
-  String get copyButtonLabel => 'བཤུས།';
-
-  @override
-  String get cutButtonLabel => 'གཅོད།';
-
-  @override
-  String get lookUpButtonLabel => 'འཚོལ་བ།';
-
-  @override
-  String get noResultsFound => 'འཚོལ་ཞིབ·གྲུབ་འབྲས·མེད';
-
-  @override
-  String get pasteButtonLabel => 'འཕོས་པ།';
-
-  @override
-  String get radioButtonUnselectedLabel => 'འདེམ་སྒྲུག·མེད';
-
-  @override
-  String get reorderItemDown => 'འོག་ལ་འགྲོ།';
-
-  @override
-  String get reorderItemLeft => 'གཡོན་ལ་འགྲོ།';
-
-  @override
-  String get reorderItemRight => 'གཡས་ལ་འགྲོ།';
-
-  @override
-  String get reorderItemToEnd => 'མཇུག་བསྡུ་སར་འགྲོ།';
-
-  @override
-  String get reorderItemToStart => 'འགོ་འཛུགས་སར་འགྲོ།';
-
-  @override
-  String get reorderItemUp => 'སྒང་ལ་འགྲོ།';
-
-  @override
-  String get searchResultsFound => 'འཚོལ་ཞིབ·གྲུབ་འབྲས·རྙེད་ཡོད';
-
-  @override
-  String get searchWebButtonLabel => 'དྲ་ཐོག་འཚོལ་བཤེར།';
-
-  @override
-  String get selectAllButtonLabel => 'ཚང་འདེམས།';
-
-  @override
-  String get shareButtonLabel => 'མཉམ་སྤྱོད།';
-}
-
 /// The translations for Bosnian (`bs`).
 class WidgetsLocalizationBs extends GlobalWidgetsLocalizations {
   /// Create an instance of the translation bundle for Bosnian.
@@ -533,22 +621,40 @@ class WidgetsLocalizationBs extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationBs() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiraj';
 
   @override
   String get cutButtonLabel => 'Izreži';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Pogled nagore';
 
   @override
-  String get noResultsFound => 'Nije pronađen nijedan rezultat';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Zalijepi';
 
   @override
-  String get radioButtonUnselectedLabel => 'Nije odabrano';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Pomjeri nadolje';
@@ -569,7 +675,7 @@ class WidgetsLocalizationBs extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Pomjeri nagore';
 
   @override
-  String get searchResultsFound => 'Pronađeni su rezultati pretraživanja';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Pretraži Web';
@@ -589,22 +695,40 @@ class WidgetsLocalizationCa extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationCa() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Copia';
 
   @override
   String get cutButtonLabel => 'Retalla';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Mira amunt';
 
   @override
-  String get noResultsFound => "No s'ha trobat cap resultat";
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Enganxa';
 
   @override
-  String get radioButtonUnselectedLabel => 'No seleccionat';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Mou avall';
@@ -625,7 +749,7 @@ class WidgetsLocalizationCa extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Mou amunt';
 
   @override
-  String get searchResultsFound => "S'han trobat resultats de cerca";
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Cerca al web';
@@ -645,22 +769,40 @@ class WidgetsLocalizationCs extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationCs() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopírovat';
 
   @override
   String get cutButtonLabel => 'Vyjmout';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Vyhledat';
 
   @override
-  String get noResultsFound => 'Nebyly nalezeny žádné výsledky';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Vložit';
 
   @override
-  String get radioButtonUnselectedLabel => 'Nevybráno';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Přesunout dolů';
@@ -681,7 +823,7 @@ class WidgetsLocalizationCs extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Přesunout nahoru';
 
   @override
-  String get searchResultsFound => 'Byly nalezeny výsledky vyhledávání';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Vyhledávat na webu';
@@ -701,22 +843,40 @@ class WidgetsLocalizationCy extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationCy() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Copïo';
 
   @override
   String get cutButtonLabel => 'Torri';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Chwilio';
 
   @override
-  String get noResultsFound => 'Ni chanfuwyd unrhyw ganlyniadau';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Gludo';
 
   @override
-  String get radioButtonUnselectedLabel => 'Heb ei dewis';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Symud i lawr';
@@ -737,13 +897,13 @@ class WidgetsLocalizationCy extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Symud i fyny';
 
   @override
-  String get searchResultsFound => 'Canfuwyd canlyniadau chwilio';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => "Chwilio'r We";
 
   @override
-  String get selectAllButtonLabel => 'Dewis y cyfan';
+  String get selectAllButtonLabel => 'Dewis y Cyfan';
 
   @override
   String get shareButtonLabel => 'Rhannu';
@@ -757,22 +917,40 @@ class WidgetsLocalizationDa extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationDa() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiér';
 
   @override
   String get cutButtonLabel => 'Klip';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Slå op';
 
   @override
-  String get noResultsFound => 'Der blev ikke fundet nogen resultater';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Indsæt';
 
   @override
-  String get radioButtonUnselectedLabel => 'Ikke valgt';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Flyt ned';
@@ -793,7 +971,7 @@ class WidgetsLocalizationDa extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Flyt op';
 
   @override
-  String get searchResultsFound => 'Søgeresultater fundet';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Søg på nettet';
@@ -813,22 +991,40 @@ class WidgetsLocalizationDe extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationDe() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopieren';
 
   @override
   String get cutButtonLabel => 'Ausschneiden';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Nachschlagen';
 
   @override
-  String get noResultsFound => 'Keine Ergebnisse gefunden';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Einsetzen';
 
   @override
-  String get radioButtonUnselectedLabel => 'Nicht ausgewählt';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Nach unten verschieben';
@@ -849,7 +1045,7 @@ class WidgetsLocalizationDe extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Nach oben verschieben';
 
   @override
-  String get searchResultsFound => 'Suchergebnisse gefunden';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Im Web suchen';
@@ -877,22 +1073,40 @@ class WidgetsLocalizationEl extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationEl() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Αντιγραφή';
 
   @override
   String get cutButtonLabel => 'Αποκοπή';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Look Up';
 
   @override
-  String get noResultsFound => 'Δεν βρέθηκαν αποτελέσματα';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Επικόλληση';
 
   @override
-  String get radioButtonUnselectedLabel => 'Δεν έχει επιλεγεί';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Μετακίνηση προς τα κάτω';
@@ -913,7 +1127,7 @@ class WidgetsLocalizationEl extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Μετακίνηση προς τα πάνω';
 
   @override
-  String get searchResultsFound => 'Βρέθηκαν αποτελέσματα αναζήτησης';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Αναζήτηση στον ιστό';
@@ -933,10 +1147,28 @@ class WidgetsLocalizationEn extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationEn() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Copy';
 
   @override
   String get cutButtonLabel => 'Cut';
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Look Up';
@@ -1122,22 +1354,40 @@ class WidgetsLocalizationEs extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationEs() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Copiar';
 
   @override
   String get cutButtonLabel => 'Cortar';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Buscador visual';
 
   @override
-  String get noResultsFound => 'No se han encontrado resultados';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Pegar';
 
   @override
-  String get radioButtonUnselectedLabel => 'No seleccionado';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Mover hacia abajo';
@@ -1158,7 +1408,7 @@ class WidgetsLocalizationEs extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Mover hacia arriba';
 
   @override
-  String get searchResultsFound => 'Resultados de búsqueda obtenidos';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Buscar en la Web';
@@ -1178,19 +1428,10 @@ class WidgetsLocalizationEs419 extends WidgetsLocalizationEs {
   const WidgetsLocalizationEs419();
 
   @override
-  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
-
-  @override
-  String get noResultsFound => 'No se encontraron resultados';
-
-  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
-
-  @override
-  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Argentina (`es_AR`).
@@ -1201,19 +1442,10 @@ class WidgetsLocalizationEsAr extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsAr();
 
   @override
-  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
-
-  @override
-  String get noResultsFound => 'No se encontraron resultados';
-
-  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
-
-  @override
-  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Bolivia (`es_BO`).
@@ -1224,19 +1456,10 @@ class WidgetsLocalizationEsBo extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsBo();
 
   @override
-  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
-
-  @override
-  String get noResultsFound => 'No se encontraron resultados';
-
-  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
-
-  @override
-  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Chile (`es_CL`).
@@ -1247,19 +1470,10 @@ class WidgetsLocalizationEsCl extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsCl();
 
   @override
-  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
-
-  @override
-  String get noResultsFound => 'No se encontraron resultados';
-
-  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
-
-  @override
-  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Colombia (`es_CO`).
@@ -1270,19 +1484,10 @@ class WidgetsLocalizationEsCo extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsCo();
 
   @override
-  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
-
-  @override
-  String get noResultsFound => 'No se encontraron resultados';
-
-  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
-
-  @override
-  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Costa Rica (`es_CR`).
@@ -1293,19 +1498,10 @@ class WidgetsLocalizationEsCr extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsCr();
 
   @override
-  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
-
-  @override
-  String get noResultsFound => 'No se encontraron resultados';
-
-  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
-
-  @override
-  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in the Dominican Republic (`es_DO`).
@@ -1316,19 +1512,10 @@ class WidgetsLocalizationEsDo extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsDo();
 
   @override
-  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
-
-  @override
-  String get noResultsFound => 'No se encontraron resultados';
-
-  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
-
-  @override
-  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Ecuador (`es_EC`).
@@ -1339,19 +1526,10 @@ class WidgetsLocalizationEsEc extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsEc();
 
   @override
-  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
-
-  @override
-  String get noResultsFound => 'No se encontraron resultados';
-
-  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
-
-  @override
-  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Guatemala (`es_GT`).
@@ -1362,19 +1540,10 @@ class WidgetsLocalizationEsGt extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsGt();
 
   @override
-  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
-
-  @override
-  String get noResultsFound => 'No se encontraron resultados';
-
-  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
-
-  @override
-  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Honduras (`es_HN`).
@@ -1385,19 +1554,10 @@ class WidgetsLocalizationEsHn extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsHn();
 
   @override
-  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
-
-  @override
-  String get noResultsFound => 'No se encontraron resultados';
-
-  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
-
-  @override
-  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Mexico (`es_MX`).
@@ -1408,19 +1568,10 @@ class WidgetsLocalizationEsMx extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsMx();
 
   @override
-  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
-
-  @override
-  String get noResultsFound => 'No se encontraron resultados';
-
-  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
-
-  @override
-  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Nicaragua (`es_NI`).
@@ -1431,19 +1582,10 @@ class WidgetsLocalizationEsNi extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsNi();
 
   @override
-  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
-
-  @override
-  String get noResultsFound => 'No se encontraron resultados';
-
-  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
-
-  @override
-  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Panama (`es_PA`).
@@ -1454,19 +1596,10 @@ class WidgetsLocalizationEsPa extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsPa();
 
   @override
-  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
-
-  @override
-  String get noResultsFound => 'No se encontraron resultados';
-
-  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
-
-  @override
-  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Peru (`es_PE`).
@@ -1477,19 +1610,10 @@ class WidgetsLocalizationEsPe extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsPe();
 
   @override
-  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
-
-  @override
-  String get noResultsFound => 'No se encontraron resultados';
-
-  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
-
-  @override
-  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Puerto Rico (`es_PR`).
@@ -1500,19 +1624,10 @@ class WidgetsLocalizationEsPr extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsPr();
 
   @override
-  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
-
-  @override
-  String get noResultsFound => 'No se encontraron resultados';
-
-  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
-
-  @override
-  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Paraguay (`es_PY`).
@@ -1523,19 +1638,10 @@ class WidgetsLocalizationEsPy extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsPy();
 
   @override
-  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
-
-  @override
-  String get noResultsFound => 'No se encontraron resultados';
-
-  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
-
-  @override
-  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in El Salvador (`es_SV`).
@@ -1546,19 +1652,10 @@ class WidgetsLocalizationEsSv extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsSv();
 
   @override
-  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
-
-  @override
-  String get noResultsFound => 'No se encontraron resultados';
-
-  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
-
-  @override
-  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in the United States (`es_US`).
@@ -1569,19 +1666,10 @@ class WidgetsLocalizationEsUs extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsUs();
 
   @override
-  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
-
-  @override
-  String get noResultsFound => 'No se encontraron resultados';
-
-  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
-
-  @override
-  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Uruguay (`es_UY`).
@@ -1592,19 +1680,10 @@ class WidgetsLocalizationEsUy extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsUy();
 
   @override
-  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
-
-  @override
-  String get noResultsFound => 'No se encontraron resultados';
-
-  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
-
-  @override
-  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Venezuela (`es_VE`).
@@ -1615,19 +1694,10 @@ class WidgetsLocalizationEsVe extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsVe();
 
   @override
-  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
-
-  @override
-  String get noResultsFound => 'No se encontraron resultados';
-
-  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
-
-  @override
-  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Estonian (`et`).
@@ -1638,22 +1708,40 @@ class WidgetsLocalizationEt extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationEt() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopeeri';
 
   @override
   String get cutButtonLabel => 'Lõika';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Look Up';
 
   @override
-  String get noResultsFound => 'Tulemusi ei leitud';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Kleebi';
 
   @override
-  String get radioButtonUnselectedLabel => 'Pole valitud';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Teisalda alla';
@@ -1674,7 +1762,7 @@ class WidgetsLocalizationEt extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Teisalda üles';
 
   @override
-  String get searchResultsFound => 'Leiti otsingutulemusi';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Otsi veebist';
@@ -1694,22 +1782,40 @@ class WidgetsLocalizationEu extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationEu() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiatu';
 
   @override
   String get cutButtonLabel => 'Ebaki';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Bilatu';
 
   @override
-  String get noResultsFound => 'Ez da aurkitu emaitzarik';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Itsatsi';
 
   @override
-  String get radioButtonUnselectedLabel => 'Hautatu gabe';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Eraman behera';
@@ -1730,7 +1836,7 @@ class WidgetsLocalizationEu extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Eraman gora';
 
   @override
-  String get searchResultsFound => 'Bilaketa-emaitzak aurkitu dira';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Bilatu sarean';
@@ -1750,22 +1856,40 @@ class WidgetsLocalizationFa extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationFa() : super(TextDirection.rtl);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'کپی';
 
   @override
   String get cutButtonLabel => 'برش';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'جستجو';
 
   @override
-  String get noResultsFound => 'نتیجه‌ای پیدا نشد';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'جای‌گذاری';
 
   @override
-  String get radioButtonUnselectedLabel => 'انتخاب‌نشده';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'انتقال به پایین';
@@ -1786,7 +1910,7 @@ class WidgetsLocalizationFa extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'انتقال به بالا';
 
   @override
-  String get searchResultsFound => 'نتایج جستجو پیدا شد';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'جستجو در وب';
@@ -1806,22 +1930,40 @@ class WidgetsLocalizationFi extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationFi() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopioi';
 
   @override
   String get cutButtonLabel => 'Leikkaa';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Hae';
 
   @override
-  String get noResultsFound => 'Ei tuloksia';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Liitä';
 
   @override
-  String get radioButtonUnselectedLabel => 'Ei valittu';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Siirrä alas';
@@ -1842,7 +1984,7 @@ class WidgetsLocalizationFi extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Siirrä ylös';
 
   @override
-  String get searchResultsFound => 'Hakutuloksia löytyi';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Hae verkosta';
@@ -1862,22 +2004,40 @@ class WidgetsLocalizationFil extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationFil() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopyahin';
 
   @override
   String get cutButtonLabel => 'I-cut';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Tumingin sa Itaas';
 
   @override
-  String get noResultsFound => 'Walang nakitang resulta';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'I-paste';
 
   @override
-  String get radioButtonUnselectedLabel => 'Hindi napili';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Ilipat pababa';
@@ -1898,7 +2058,7 @@ class WidgetsLocalizationFil extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Ilipat pataas';
 
   @override
-  String get searchResultsFound => 'Nakakita ng mga resulta ng paghahanap';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Maghanap sa Web';
@@ -1918,22 +2078,40 @@ class WidgetsLocalizationFr extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationFr() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Copier';
 
   @override
   String get cutButtonLabel => 'Couper';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Recherche visuelle';
 
   @override
-  String get noResultsFound => 'Aucun résultat';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Coller';
 
   @override
-  String get radioButtonUnselectedLabel => 'Non sélectionné';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Déplacer vers le bas';
@@ -1954,7 +2132,7 @@ class WidgetsLocalizationFr extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Déplacer vers le haut';
 
   @override
-  String get searchResultsFound => 'Résultats de recherche trouvés';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Rechercher sur le Web';
@@ -1974,9 +2152,6 @@ class WidgetsLocalizationFrCa extends WidgetsLocalizationFr {
   const WidgetsLocalizationFrCa();
 
   @override
-  String get noResultsFound => 'Aucun résultat trouvé';
-
-  @override
   String get reorderItemToStart => 'Déplacer au début';
 
   @override
@@ -1984,62 +2159,6 @@ class WidgetsLocalizationFrCa extends WidgetsLocalizationFr {
 
   @override
   String get lookUpButtonLabel => 'Regarder en haut';
-}
-
-/// The translations for Irish (`ga`).
-class WidgetsLocalizationGa extends GlobalWidgetsLocalizations {
-  /// Create an instance of the translation bundle for Irish.
-  ///
-  /// For details on the meaning of the arguments, see [GlobalWidgetsLocalizations].
-  const WidgetsLocalizationGa() : super(TextDirection.ltr);
-
-  @override
-  String get copyButtonLabel => 'Cóipeáil';
-
-  @override
-  String get cutButtonLabel => 'Gearr';
-
-  @override
-  String get lookUpButtonLabel => 'Cuardaigh';
-
-  @override
-  String get noResultsFound => 'Níor aimsíodh aon toradh';
-
-  @override
-  String get pasteButtonLabel => 'Greamaigh';
-
-  @override
-  String get radioButtonUnselectedLabel => 'Níor roghnaíodh é';
-
-  @override
-  String get reorderItemDown => 'Bog síos';
-
-  @override
-  String get reorderItemLeft => 'Bog ar chlé';
-
-  @override
-  String get reorderItemRight => 'Bog ar dheis';
-
-  @override
-  String get reorderItemToEnd => 'Bog chuig an deireadh';
-
-  @override
-  String get reorderItemToStart => 'Bog chuig an tús';
-
-  @override
-  String get reorderItemUp => 'Bog suas';
-
-  @override
-  String get searchResultsFound => 'Aimsíodh torthaí cuardaigh';
-
-  @override
-  String get searchWebButtonLabel => 'Cuardaigh an Gréasán';
-
-  @override
-  String get selectAllButtonLabel => 'Roghnaigh gach rud';
-
-  @override
-  String get shareButtonLabel => 'Comhroinn';
 }
 
 /// The translations for Galician (`gl`).
@@ -2050,22 +2169,40 @@ class WidgetsLocalizationGl extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationGl() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Copiar';
 
   @override
   String get cutButtonLabel => 'Cortar';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Mirar cara arriba';
 
   @override
-  String get noResultsFound => 'Ningún resultado atopado';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Pegar';
 
   @override
-  String get radioButtonUnselectedLabel => 'Botón non seleccionado';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Mover cara abaixo';
@@ -2086,7 +2223,7 @@ class WidgetsLocalizationGl extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Mover cara arriba';
 
   @override
-  String get searchResultsFound => 'Resultados da busca atopados';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Buscar na Web';
@@ -2106,22 +2243,40 @@ class WidgetsLocalizationGsw extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationGsw() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopieren';
 
   @override
   String get cutButtonLabel => 'Ausschneiden';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Nachschlagen';
 
   @override
-  String get noResultsFound => 'Keine Ergebnisse gefunden';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Einsetzen';
 
   @override
-  String get radioButtonUnselectedLabel => 'Nicht ausgewählt';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Nach unten verschieben';
@@ -2142,7 +2297,7 @@ class WidgetsLocalizationGsw extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Nach oben verschieben';
 
   @override
-  String get searchResultsFound => 'Suchergebnisse gefunden';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Im Web suchen';
@@ -2162,22 +2317,40 @@ class WidgetsLocalizationGu extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationGu() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'કૉપિ કરો';
 
   @override
   String get cutButtonLabel => 'કાપો';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'શોધો';
 
   @override
-  String get noResultsFound => 'કોઈ પરિણામ મળ્યું નથી';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'પેસ્ટ કરો';
 
   @override
-  String get radioButtonUnselectedLabel => 'પસંદગી કરી નથી';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'નીચે ખસેડો';
@@ -2198,7 +2371,7 @@ class WidgetsLocalizationGu extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'ઉપર ખસેડો';
 
   @override
-  String get searchResultsFound => 'શોધ પરિણામો મળ્યાં';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'વેબ પર શોધો';
@@ -2218,22 +2391,40 @@ class WidgetsLocalizationHe extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationHe() : super(TextDirection.rtl);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'העתקה';
 
   @override
   String get cutButtonLabel => 'גזירה';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'חיפוש';
 
   @override
-  String get noResultsFound => 'לא נמצאו תוצאות';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'הדבקה';
 
   @override
-  String get radioButtonUnselectedLabel => 'לא נבחר';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'העברה למטה';
@@ -2254,7 +2445,7 @@ class WidgetsLocalizationHe extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'העברה למעלה';
 
   @override
-  String get searchResultsFound => 'נמצאו תוצאות חיפוש';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'חיפוש באינטרנט';
@@ -2274,22 +2465,40 @@ class WidgetsLocalizationHi extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationHi() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'कॉपी करें';
 
   @override
   String get cutButtonLabel => 'काटें';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'लुक अप बटन';
 
   @override
-  String get noResultsFound => 'कोई नतीजा नहीं मिला';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'चिपकाएं';
 
   @override
-  String get radioButtonUnselectedLabel => 'नहीं चुना गया';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'नीचे ले जाएं';
@@ -2310,7 +2519,7 @@ class WidgetsLocalizationHi extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'ऊपर ले जाएं';
 
   @override
-  String get searchResultsFound => 'खोज के नतीजे मिले';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'वेब पर खोजें';
@@ -2330,22 +2539,40 @@ class WidgetsLocalizationHr extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationHr() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiraj';
 
   @override
   String get cutButtonLabel => 'Izreži';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Pogled prema gore';
 
   @override
-  String get noResultsFound => 'Nema rezultata';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Zalijepi';
 
   @override
-  String get radioButtonUnselectedLabel => 'Nije odabrano';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Pomakni prema dolje';
@@ -2366,7 +2593,7 @@ class WidgetsLocalizationHr extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Pomakni prema gore';
 
   @override
-  String get searchResultsFound => 'Pronađeni su rezultati pretraživanja';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Pretraži web';
@@ -2386,22 +2613,40 @@ class WidgetsLocalizationHu extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationHu() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Másolás';
 
   @override
   String get cutButtonLabel => 'Kivágás';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Felfelé nézés';
 
   @override
-  String get noResultsFound => 'Nincs találat';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Beillesztés';
 
   @override
-  String get radioButtonUnselectedLabel => 'Nincs kiválasztva';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Áthelyezés lefelé';
@@ -2422,7 +2667,7 @@ class WidgetsLocalizationHu extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Áthelyezés felfelé';
 
   @override
-  String get searchResultsFound => 'Rendelkezésre állnak keresési találatok';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Keresés az interneten';
@@ -2442,22 +2687,40 @@ class WidgetsLocalizationHy extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationHy() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Պատճենել';
 
   @override
   String get cutButtonLabel => 'Կտրել';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Փնտրել';
 
   @override
-  String get noResultsFound => 'Ոչինչ չի գտնվել';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Տեղադրել';
 
   @override
-  String get radioButtonUnselectedLabel => 'Ընտրված չէ';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Տեղափոխել ներքև';
@@ -2478,7 +2741,7 @@ class WidgetsLocalizationHy extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Տեղափոխել վերև';
 
   @override
-  String get searchResultsFound => 'Գտնվել են արդյունքներ';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Որոնել համացանցում';
@@ -2498,22 +2761,40 @@ class WidgetsLocalizationId extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationId() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Salin';
 
   @override
   String get cutButtonLabel => 'Potong';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Cari';
 
   @override
-  String get noResultsFound => 'Tidak ditemukan hasil';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Tempel';
 
   @override
-  String get radioButtonUnselectedLabel => 'Tidak dipilih';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Turunkan';
@@ -2534,7 +2815,7 @@ class WidgetsLocalizationId extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Naikkan';
 
   @override
-  String get searchResultsFound => 'Hasil penelusuran ditemukan';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Telusuri di Web';
@@ -2554,22 +2835,40 @@ class WidgetsLocalizationIs extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationIs() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Afrita';
 
   @override
   String get cutButtonLabel => 'Klippa';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Look Up';
 
   @override
-  String get noResultsFound => 'Engar niðurstöður fundust';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Líma';
 
   @override
-  String get radioButtonUnselectedLabel => 'Ekki valið';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Færa niður';
@@ -2590,7 +2889,7 @@ class WidgetsLocalizationIs extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Færa upp';
 
   @override
-  String get searchResultsFound => 'Leitarniðurstöður fundust';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Leita á vefnum';
@@ -2610,22 +2909,40 @@ class WidgetsLocalizationIt extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationIt() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Copia';
 
   @override
   String get cutButtonLabel => 'Taglia';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Cerca';
 
   @override
-  String get noResultsFound => 'Nessun risultato trovato';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Incolla';
 
   @override
-  String get radioButtonUnselectedLabel => 'Non selezionato';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Sposta giù';
@@ -2646,7 +2963,7 @@ class WidgetsLocalizationIt extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Sposta su';
 
   @override
-  String get searchResultsFound => 'Risultati di ricerca trovati';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Cerca sul web';
@@ -2666,22 +2983,40 @@ class WidgetsLocalizationJa extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationJa() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'コピー';
 
   @override
   String get cutButtonLabel => '切り取り';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => '調べる';
 
   @override
-  String get noResultsFound => '一致する検索結果はありません';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => '貼り付け';
 
   @override
-  String get radioButtonUnselectedLabel => '選択されていません';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => '下に移動';
@@ -2702,7 +3037,7 @@ class WidgetsLocalizationJa extends GlobalWidgetsLocalizations {
   String get reorderItemUp => '上に移動';
 
   @override
-  String get searchResultsFound => '検索結果が見つかりました';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'ウェブを検索';
@@ -2722,22 +3057,40 @@ class WidgetsLocalizationKa extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationKa() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'კოპირება';
 
   @override
   String get cutButtonLabel => 'ამოჭრა';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'აიხედეთ ზემოთ';
 
   @override
-  String get noResultsFound => 'შედეგები ვერ მოიძებნა';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'ჩასმა';
 
   @override
-  String get radioButtonUnselectedLabel => 'არ არის არჩეული';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'ქვემოთ გადატანა';
@@ -2758,7 +3111,7 @@ class WidgetsLocalizationKa extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'ზემოთ გადატანა';
 
   @override
-  String get searchResultsFound => 'ძიების შედეგები ნაპოვნია';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'ვებში ძიება';
@@ -2778,22 +3131,40 @@ class WidgetsLocalizationKk extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationKk() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Көшіру';
 
   @override
   String get cutButtonLabel => 'Қию';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Іздеу';
 
   @override
-  String get noResultsFound => 'Ешбір нәтиже табылмады';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Қою';
 
   @override
-  String get radioButtonUnselectedLabel => 'Таңдалмады';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Төменге жылжыту';
@@ -2814,7 +3185,7 @@ class WidgetsLocalizationKk extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Жоғарыға жылжыту';
 
   @override
-  String get searchResultsFound => 'Табылған нәтижелер';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Интернеттен іздеу';
@@ -2834,22 +3205,40 @@ class WidgetsLocalizationKm extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationKm() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'ចម្លង';
 
   @override
   String get cutButtonLabel => 'កាត់';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'រកមើល';
 
   @override
-  String get noResultsFound => 'រក​មិន​ឃើញ​លទ្ធផលទេ';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'ដាក់​ចូល';
 
   @override
-  String get radioButtonUnselectedLabel => 'មិនបាន​ជ្រើសរើសទេ';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'ផ្លាស់ទី​ចុះ​ក្រោម';
@@ -2870,7 +3259,7 @@ class WidgetsLocalizationKm extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'ផ្លាស់ទី​ឡើង​លើ';
 
   @override
-  String get searchResultsFound => 'បាន​រក​ឃើញ​លទ្ធផល​ស្វែងរក';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'ស្វែងរក​លើបណ្ដាញ';
@@ -2890,22 +3279,40 @@ class WidgetsLocalizationKn extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationKn() : super(TextDirection.ltr);
 
   @override
-  String get copyButtonLabel => '\u{c95}\u{cbe}\u{caa}\u{cbf}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+  String get collapsedHint => 'Expanded';
+
+  @override
+  String get copyButtonLabel => '\u{ca8}\u{c95}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
   String get cutButtonLabel => '\u{c95}\u{ca4}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => '\u{cae}\u{cc7}\u{cb2}\u{cc6}\u{20}\u{ca8}\u{ccb}\u{ca1}\u{cbf}';
 
   @override
-  String get noResultsFound => '\u{caf}\u{cbe}\u{cb5}\u{cc1}\u{ca6}\u{cc7}\u{20}\u{cab}\u{cb2}\u{cbf}\u{ca4}\u{cbe}\u{c82}\u{cb6}\u{c97}\u{cb3}\u{cc1}\u{20}\u{c95}\u{c82}\u{ca1}\u{cc1}\u{cac}\u{c82}\u{ca6}\u{cbf}\u{cb2}\u{ccd}\u{cb2}';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => '\u{c85}\u{c82}\u{c9f}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get radioButtonUnselectedLabel => '\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cb2}\u{cbe}\u{c97}\u{cbf}\u{cb2}\u{ccd}\u{cb2}';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => '\u{c95}\u{cc6}\u{cb3}\u{c97}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
@@ -2926,7 +3333,7 @@ class WidgetsLocalizationKn extends GlobalWidgetsLocalizations {
   String get reorderItemUp => '\u{cae}\u{cc7}\u{cb2}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get searchResultsFound => '\u{cb9}\u{cc1}\u{ca1}\u{cc1}\u{c95}\u{cbe}\u{c9f}\u{20}\u{cab}\u{cb2}\u{cbf}\u{ca4}\u{cbe}\u{c82}\u{cb6}\u{c97}\u{cb3}\u{cc1}\u{20}\u{c95}\u{c82}\u{ca1}\u{cc1}\u{cac}\u{c82}\u{ca6}\u{cbf}\u{cb5}\u{cc6}';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => '\u{cb5}\u{cc6}\u{cac}\u{ccd}\u{200c}\u{ca8}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{20}\u{cb9}\u{cc1}\u{ca1}\u{cc1}\u{c95}\u{cbf}';
@@ -2946,22 +3353,40 @@ class WidgetsLocalizationKo extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationKo() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => '복사';
 
   @override
   String get cutButtonLabel => '잘라내기';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => '찾기';
 
   @override
-  String get noResultsFound => '검색 결과 없음';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => '붙여넣기';
 
   @override
-  String get radioButtonUnselectedLabel => '선택되지 않음';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => '아래로 이동';
@@ -2982,7 +3407,7 @@ class WidgetsLocalizationKo extends GlobalWidgetsLocalizations {
   String get reorderItemUp => '위로 이동';
 
   @override
-  String get searchResultsFound => '검색 결과 찾음';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => '웹 검색';
@@ -3002,22 +3427,40 @@ class WidgetsLocalizationKy extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationKy() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Көчүрүү';
 
   @override
   String get cutButtonLabel => 'Кесүү';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Издөө';
 
   @override
-  String get noResultsFound => 'Эч нерсе табылган жок';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Чаптоо';
 
   @override
-  String get radioButtonUnselectedLabel => 'Тандалган жок';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Төмөн жылдыруу';
@@ -3038,7 +3481,7 @@ class WidgetsLocalizationKy extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Жогору жылдыруу';
 
   @override
-  String get searchResultsFound => 'Изделген нерсе табылды';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Интернеттен издөө';
@@ -3058,22 +3501,40 @@ class WidgetsLocalizationLo extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationLo() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'ສຳເນົາ';
 
   @override
   String get cutButtonLabel => 'ຕັດ';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'ຊອກຫາຂໍ້ມູນ';
 
   @override
-  String get noResultsFound => 'ບໍ່ພົບຜົນການຊອກຫາ';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'ວາງ';
 
   @override
-  String get radioButtonUnselectedLabel => 'ບໍ່ໄດ້ເລືອກ';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'ຍ້າຍລົງ';
@@ -3094,7 +3555,7 @@ class WidgetsLocalizationLo extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'ຍ້າຍຂຶ້ນ';
 
   @override
-  String get searchResultsFound => 'ພົບຜົນການຊອກຫາ';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'ຊອກຫາຢູ່ອິນເຕີເນັດ';
@@ -3114,22 +3575,40 @@ class WidgetsLocalizationLt extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationLt() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopijuoti';
 
   @override
   String get cutButtonLabel => 'Iškirpti';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Ieškoti';
 
   @override
-  String get noResultsFound => 'Rezultatų nerasta';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Įklijuoti';
 
   @override
-  String get radioButtonUnselectedLabel => 'Nepasirinkta';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Perkelti žemyn';
@@ -3150,7 +3629,7 @@ class WidgetsLocalizationLt extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Perkelti aukštyn';
 
   @override
-  String get searchResultsFound => 'Rasta paieškos rezultatų';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Ieškoti žiniatinklyje';
@@ -3170,22 +3649,40 @@ class WidgetsLocalizationLv extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationLv() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopēt';
 
   @override
   String get cutButtonLabel => 'Izgriezt';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Meklēt';
 
   @override
-  String get noResultsFound => 'Netika atrasts neviens rezultāts';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Ielīmēt';
 
   @override
-  String get radioButtonUnselectedLabel => 'Nav atlasīts';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Pārvietot uz leju';
@@ -3206,7 +3703,7 @@ class WidgetsLocalizationLv extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Pārvietot uz augšu';
 
   @override
-  String get searchResultsFound => 'Tika atrasti meklēšanas rezultāti';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Meklēt tīmeklī';
@@ -3226,22 +3723,40 @@ class WidgetsLocalizationMk extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationMk() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Копирај';
 
   @override
   String get cutButtonLabel => 'Исечи';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Погледнете нагоре';
 
   @override
-  String get noResultsFound => 'Не се најдени резултати';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Залепи';
 
   @override
-  String get radioButtonUnselectedLabel => 'Не е избрано';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Преместете надолу';
@@ -3262,7 +3777,7 @@ class WidgetsLocalizationMk extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Преместете нагоре';
 
   @override
-  String get searchResultsFound => 'Најдени се резултати од пребарувањето';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Пребарајте на интернет';
@@ -3282,22 +3797,40 @@ class WidgetsLocalizationMl extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationMl() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'പകർത്തുക';
 
   @override
   String get cutButtonLabel => 'മുറിക്കുക';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'മുകളിലേക്ക് നോക്കുക';
 
   @override
-  String get noResultsFound => 'ഫലങ്ങളൊന്നും കണ്ടെത്തിയില്ല';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'ഒട്ടിക്കുക';
 
   @override
-  String get radioButtonUnselectedLabel => 'തിരഞ്ഞെടുത്തില്ല';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'താഴോട്ട് നീക്കുക';
@@ -3318,7 +3851,7 @@ class WidgetsLocalizationMl extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'മുകളിലോട്ട് നീക്കുക';
 
   @override
-  String get searchResultsFound => 'തിരയൽ ഫലങ്ങൾ കണ്ടെത്തി';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'വെബിൽ തിരയുക';
@@ -3338,22 +3871,40 @@ class WidgetsLocalizationMn extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationMn() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Хуулах';
 
   @override
   String get cutButtonLabel => 'Таслах';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Дээшээ харах';
 
   @override
-  String get noResultsFound => 'Илэрц олдсонгүй';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Буулгах';
 
   @override
-  String get radioButtonUnselectedLabel => 'Сонгоогүй';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Доош зөөх';
@@ -3374,7 +3925,7 @@ class WidgetsLocalizationMn extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Дээш зөөх';
 
   @override
-  String get searchResultsFound => 'Хайлтын илэрцүүд олдлоо';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Вебээс хайх';
@@ -3394,22 +3945,40 @@ class WidgetsLocalizationMr extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationMr() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'कॉपी करा';
 
   @override
   String get cutButtonLabel => 'कट करा';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'शोध घ्या';
 
   @override
-  String get noResultsFound => 'परिणाम आढळले नाहीत';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'पेस्ट करा';
 
   @override
-  String get radioButtonUnselectedLabel => 'निवडलेले नाही';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'खाली हलवा';
@@ -3430,7 +3999,7 @@ class WidgetsLocalizationMr extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'वर हलवा';
 
   @override
-  String get searchResultsFound => 'शोध परिणाम आढळले';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'वेबवर शोधा';
@@ -3450,22 +4019,40 @@ class WidgetsLocalizationMs extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationMs() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Salin';
 
   @override
   String get cutButtonLabel => 'Potong';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Lihat ke Atas';
 
   @override
-  String get noResultsFound => 'Tiada hasil carian ditemukan';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Tampal';
 
   @override
-  String get radioButtonUnselectedLabel => 'Tidak dipilih';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Alih ke bawah';
@@ -3486,7 +4073,7 @@ class WidgetsLocalizationMs extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Alih ke atas';
 
   @override
-  String get searchResultsFound => 'Hasil carian ditemukan';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Buat carian pada Web';
@@ -3506,22 +4093,40 @@ class WidgetsLocalizationMy extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationMy() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'မိတ္တူကူးရန်';
 
   @override
   String get cutButtonLabel => 'ဖြတ်ယူရန်';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'အပေါ်ကြည့်ရန်';
 
   @override
-  String get noResultsFound => 'ရလဒ်မတွေ့ပါ';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'ကူးထည့်ရန်';
 
   @override
-  String get radioButtonUnselectedLabel => 'ရွေးမထားပါ';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'အောက်သို့ရွှေ့ရန်';
@@ -3542,7 +4147,7 @@ class WidgetsLocalizationMy extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'အပေါ်သို့ ရွှေ့ရန်';
 
   @override
-  String get searchResultsFound => 'ရှာဖွေမှုရလဒ်များ တွေ့ထားသည်';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'ဝဘ်တွင်ရှာရန်';
@@ -3562,22 +4167,40 @@ class WidgetsLocalizationNb extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationNb() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiér';
 
   @override
   String get cutButtonLabel => 'Klipp ut';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Slå opp';
 
   @override
-  String get noResultsFound => 'Fant ingen resultater';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Lim inn';
 
   @override
-  String get radioButtonUnselectedLabel => 'Ikke valgt';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Flytt ned';
@@ -3598,7 +4221,7 @@ class WidgetsLocalizationNb extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Flytt opp';
 
   @override
-  String get searchResultsFound => 'Søkeresultater ble funnet';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Søk på nettet';
@@ -3618,22 +4241,40 @@ class WidgetsLocalizationNe extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationNe() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'कपी गर्नुहोस्';
 
   @override
-  String get cutButtonLabel => 'कट गर्नुहोस्';
+  String get cutButtonLabel => 'काट्नुहोस्';
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'माथितिर हेर्नुहोस्';
 
   @override
-  String get noResultsFound => 'कुनै पनि परिणाम भेटिएन';
+  String get noResultsFound => 'No results found';
 
   @override
-  String get pasteButtonLabel => 'पेस्ट गर्नुहोस्';
+  String get pasteButtonLabel => 'टाँस्नुहोस्';
 
   @override
-  String get radioButtonUnselectedLabel => 'चयन गरिएको छैन';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'तल सार्नुहोस्';
@@ -3654,7 +4295,7 @@ class WidgetsLocalizationNe extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'माथि सार्नुहोस्';
 
   @override
-  String get searchResultsFound => 'खोज परिणाम भेटिएका छन्';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'वेबमा खोज्नुहोस्';
@@ -3674,22 +4315,40 @@ class WidgetsLocalizationNl extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationNl() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiëren';
 
   @override
   String get cutButtonLabel => 'Knippen';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Opzoeken';
 
   @override
-  String get noResultsFound => 'Geen resultaten gevonden';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Plakken';
 
   @override
-  String get radioButtonUnselectedLabel => 'Niet geselecteerd';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Omlaag verplaatsen';
@@ -3710,7 +4369,7 @@ class WidgetsLocalizationNl extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Omhoog verplaatsen';
 
   @override
-  String get searchResultsFound => 'Zoekresultaten gevonden';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Op internet zoeken';
@@ -3730,22 +4389,40 @@ class WidgetsLocalizationNo extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationNo() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiér';
 
   @override
   String get cutButtonLabel => 'Klipp ut';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Slå opp';
 
   @override
-  String get noResultsFound => 'Fant ingen resultater';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Lim inn';
 
   @override
-  String get radioButtonUnselectedLabel => 'Ikke valgt';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Flytt ned';
@@ -3766,7 +4443,7 @@ class WidgetsLocalizationNo extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Flytt opp';
 
   @override
-  String get searchResultsFound => 'Søkeresultater ble funnet';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Søk på nettet';
@@ -3786,43 +4463,61 @@ class WidgetsLocalizationOr extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationOr() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'କପି କରନ୍ତୁ';
 
   @override
-  String get cutButtonLabel => 'କଟ କରନ୍ତୁ';
+  String get cutButtonLabel => 'କଟ୍ କରନ୍ତୁ';
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'ଉପରକୁ ଦେଖନ୍ତୁ';
 
   @override
-  String get noResultsFound => 'କୌଣସି ଫଳାଫଳ ମିଳିଲା ନାହିଁ';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'ପେଷ୍ଟ କରନ୍ତୁ';
 
   @override
-  String get radioButtonUnselectedLabel => 'ଚୟନ କରାଯାଇନାହିଁ';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
-  String get reorderItemDown => 'ତଳକୁ ମୁଭ କରନ୍ତୁ';
+  String get reorderItemDown => 'ତଳକୁ ଯାଆନ୍ତୁ';
 
   @override
-  String get reorderItemLeft => 'ବାମକୁ ମୁଭ କରନ୍ତୁ';
+  String get reorderItemLeft => 'ବାମକୁ ଯାଆନ୍ତୁ';
 
   @override
-  String get reorderItemRight => 'ଡାହାଣକୁ ମୁଭ କରନ୍ତୁ';
+  String get reorderItemRight => 'ଡାହାଣକୁ ଯାଆନ୍ତୁ';
 
   @override
-  String get reorderItemToEnd => 'ଶେଷକୁ ମୁଭ କରନ୍ତୁ';
+  String get reorderItemToEnd => 'ଶେଷକୁ ଯାଆନ୍ତୁ';
 
   @override
-  String get reorderItemToStart => 'ଆରମ୍ଭକୁ ମୁଭ କରନ୍ତୁ';
+  String get reorderItemToStart => 'ଆରମ୍ଭକୁ ଯାଆନ୍ତୁ';
 
   @override
-  String get reorderItemUp => 'ଉପରକୁ ମୁଭ କରନ୍ତୁ';
+  String get reorderItemUp => 'ଉପରକୁ ନିଅନ୍ତୁ';
 
   @override
-  String get searchResultsFound => 'ସର୍ଚ୍ଚ ଫଳାଫଳ ମିଳିଛି';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'ୱେବ ସର୍ଚ୍ଚ କରନ୍ତୁ';
@@ -3842,22 +4537,40 @@ class WidgetsLocalizationPa extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationPa() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'ਕਾਪੀ ਕਰੋ';
 
   @override
   String get cutButtonLabel => 'ਕੱਟ ਕਰੋ';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'ਖੋਜੋ';
 
   @override
-  String get noResultsFound => 'ਕੋਈ ਨਤੀਜਾ ਨਹੀਂ ਮਿਲਿਆ';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'ਪੇਸਟ ਕਰੋ';
 
   @override
-  String get radioButtonUnselectedLabel => 'ਚੁਣਿਆ ਨਹੀਂ ਗਿਆ';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'ਹੇਠਾਂ ਲਿਜਾਓ';
@@ -3878,7 +4591,7 @@ class WidgetsLocalizationPa extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'ਉੱਪਰ ਲਿਜਾਓ';
 
   @override
-  String get searchResultsFound => 'ਖੋਜ ਨਤੀਜੇ ਮਿਲੇ';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => "ਵੈੱਬ 'ਤੇ ਖੋਜੋ";
@@ -3898,22 +4611,40 @@ class WidgetsLocalizationPl extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationPl() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiuj';
 
   @override
   String get cutButtonLabel => 'Wytnij';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Sprawdź';
 
   @override
-  String get noResultsFound => 'Brak wyników';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Wklej';
 
   @override
-  String get radioButtonUnselectedLabel => 'Nie wybrano';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Przenieś w dół';
@@ -3934,7 +4665,7 @@ class WidgetsLocalizationPl extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Przenieś w górę';
 
   @override
-  String get searchResultsFound => 'Znaleziono wyniki wyszukiwania';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Szukaj w internecie';
@@ -3954,10 +4685,28 @@ class WidgetsLocalizationPs extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationPs() : super(TextDirection.rtl);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'کاپی';
 
   @override
   String get cutButtonLabel => 'کم کړئ';
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
 
   @override
   String get lookUpButtonLabel => 'Look Up';
@@ -4010,22 +4759,40 @@ class WidgetsLocalizationPt extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationPt() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Copiar';
 
   @override
   String get cutButtonLabel => 'Cortar';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Pesquisar';
 
   @override
-  String get noResultsFound => 'Nenhum resultado encontrado';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Colar';
 
   @override
-  String get radioButtonUnselectedLabel => 'Não selecionado';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Mover para baixo';
@@ -4046,7 +4813,7 @@ class WidgetsLocalizationPt extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Mover para cima';
 
   @override
-  String get searchResultsFound => 'Resultados da pesquisa encontrados';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Pesquisar na Web';
@@ -4066,12 +4833,6 @@ class WidgetsLocalizationPtPt extends WidgetsLocalizationPt {
   const WidgetsLocalizationPtPt();
 
   @override
-  String get searchResultsFound => 'Foram encontrados resultados da pesquisa';
-
-  @override
-  String get noResultsFound => 'Não foram encontrados resultados';
-
-  @override
   String get reorderItemToEnd => 'Mover para o fim';
 
   @override
@@ -4089,22 +4850,40 @@ class WidgetsLocalizationRo extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationRo() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Copiați';
 
   @override
   String get cutButtonLabel => 'Decupați';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Privire în sus';
 
   @override
-  String get noResultsFound => 'Niciun rezultat';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Inserați';
 
   @override
-  String get radioButtonUnselectedLabel => 'Neselectat';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Mutați în jos';
@@ -4125,7 +4904,7 @@ class WidgetsLocalizationRo extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Mutați în sus';
 
   @override
-  String get searchResultsFound => 'Am găsit rezultate ale căutării';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Căutați pe web';
@@ -4145,22 +4924,40 @@ class WidgetsLocalizationRu extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationRu() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Копировать';
 
   @override
   String get cutButtonLabel => 'Вырезать';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Найти';
 
   @override
-  String get noResultsFound => 'Ничего не найдено';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Вставить';
 
   @override
-  String get radioButtonUnselectedLabel => 'Не выбрано';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Переместить вниз';
@@ -4181,7 +4978,7 @@ class WidgetsLocalizationRu extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Переместить вверх';
 
   @override
-  String get searchResultsFound => 'Поиск дал результаты';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Искать в интернете';
@@ -4201,22 +4998,40 @@ class WidgetsLocalizationSi extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationSi() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'පිටපත් කරන්න';
 
   @override
   String get cutButtonLabel => 'කපන්න';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'උඩ බලන්න';
 
   @override
-  String get noResultsFound => 'ප්‍රතිඵල හමු නොවුණි';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'අලවන්න';
 
   @override
-  String get radioButtonUnselectedLabel => 'තෝරා නොමැත';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'පහළට ගෙන යන්න';
@@ -4237,7 +5052,7 @@ class WidgetsLocalizationSi extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'ඉහළට ගෙන යන්න';
 
   @override
-  String get searchResultsFound => 'සෙවීම් ප්‍රතිඵල හමු විය';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'වෙබය සොයන්න';
@@ -4257,22 +5072,40 @@ class WidgetsLocalizationSk extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationSk() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopírovať';
 
   @override
   String get cutButtonLabel => 'Vystrihnúť';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Pohľad nahor';
 
   @override
-  String get noResultsFound => 'Nenašli sa žiadne výsledky';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Prilepiť';
 
   @override
-  String get radioButtonUnselectedLabel => 'Nevybrané';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Presunúť nadol';
@@ -4293,7 +5126,7 @@ class WidgetsLocalizationSk extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Presunúť nahor';
 
   @override
-  String get searchResultsFound => 'Našli sa výsledky vyhľadávania';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Hľadať na webe';
@@ -4313,22 +5146,40 @@ class WidgetsLocalizationSl extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationSl() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiraj';
 
   @override
   String get cutButtonLabel => 'Izreži';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Pogled gor';
 
   @override
-  String get noResultsFound => 'Ni rezultatov';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Prilepi';
 
   @override
-  String get radioButtonUnselectedLabel => 'Ni izbrano';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Premakni navzdol';
@@ -4349,7 +5200,7 @@ class WidgetsLocalizationSl extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Premakni navzgor';
 
   @override
-  String get searchResultsFound => 'Najdeni so rezultati iskanja';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Iskanje v spletu';
@@ -4369,22 +5220,40 @@ class WidgetsLocalizationSq extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationSq() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopjo';
 
   @override
   String get cutButtonLabel => 'Prit';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Kërko';
 
   @override
-  String get noResultsFound => 'Nuk u gjet asnjë rezultat';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Ngjit';
 
   @override
-  String get radioButtonUnselectedLabel => 'Nuk është zgjedhur';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Lëvize poshtë';
@@ -4405,7 +5274,7 @@ class WidgetsLocalizationSq extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Lëvize lart';
 
   @override
-  String get searchResultsFound => 'U gjetën rezultate kërkimi';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Kërko në ueb';
@@ -4425,22 +5294,40 @@ class WidgetsLocalizationSr extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationSr() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Копирај';
 
   @override
   String get cutButtonLabel => 'Исеци';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Поглед нагоре';
 
   @override
-  String get noResultsFound => 'Није пронађен ниједан резултат';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Налепи';
 
   @override
-  String get radioButtonUnselectedLabel => 'Није изабрано';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Померите надоле';
@@ -4461,7 +5348,7 @@ class WidgetsLocalizationSr extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Померите нагоре';
 
   @override
-  String get searchResultsFound => 'Пронађени су резултати претраге';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Претражи веб';
@@ -4498,13 +5385,7 @@ class WidgetsLocalizationSrLatn extends WidgetsLocalizationSr {
   String get lookUpButtonLabel => 'Pogled nagore';
 
   @override
-  String get noResultsFound => 'Nije pronađen nijedan rezultat';
-
-  @override
   String get pasteButtonLabel => 'Nalepi';
-
-  @override
-  String get radioButtonUnselectedLabel => 'Nije izabrano';
 
   @override
   String get reorderItemDown => 'Pomerite nadole';
@@ -4525,9 +5406,6 @@ class WidgetsLocalizationSrLatn extends WidgetsLocalizationSr {
   String get reorderItemUp => 'Pomerite nagore';
 
   @override
-  String get searchResultsFound => 'Pronađeni su rezultati pretrage';
-
-  @override
   String get searchWebButtonLabel => 'Pretraži veb';
 
   @override
@@ -4545,22 +5423,40 @@ class WidgetsLocalizationSv extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationSv() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopiera';
 
   @override
   String get cutButtonLabel => 'Klipp ut';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Titta upp';
 
   @override
-  String get noResultsFound => 'Inga resultat hittades';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Klistra in';
 
   @override
-  String get radioButtonUnselectedLabel => 'Inte markerad';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Flytta nedåt';
@@ -4581,7 +5477,7 @@ class WidgetsLocalizationSv extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Flytta uppåt';
 
   @override
-  String get searchResultsFound => 'Sökresultat hittades';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Sök på webben';
@@ -4601,22 +5497,40 @@ class WidgetsLocalizationSw extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationSw() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Nakili';
 
   @override
   String get cutButtonLabel => 'Kata';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Tafuta';
 
   @override
-  String get noResultsFound => 'Hakuna matokeo yaliyopatikana';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Bandika';
 
   @override
-  String get radioButtonUnselectedLabel => 'Hayajachaguliwa';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Sogeza chini';
@@ -4637,7 +5551,7 @@ class WidgetsLocalizationSw extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Sogeza juu';
 
   @override
-  String get searchResultsFound => 'Matokeo ya utafutaji yamepatikana';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Tafuta kwenye Wavuti';
@@ -4657,22 +5571,40 @@ class WidgetsLocalizationTa extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationTa() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'நகலெடு';
 
   @override
   String get cutButtonLabel => 'வெட்டு';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'தேடு';
 
   @override
-  String get noResultsFound => 'முடிவுகள் இல்லை';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'ஒட்டு';
 
   @override
-  String get radioButtonUnselectedLabel => 'தேர்ந்தெடுக்கப்படவில்லை';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'கீழே நகர்த்தவும்';
@@ -4693,7 +5625,7 @@ class WidgetsLocalizationTa extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'மேலே நகர்த்தவும்';
 
   @override
-  String get searchResultsFound => 'தேடல் முடிவுகள் கண்டறியப்பட்டன';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'இணையத்தில் தேடு';
@@ -4713,22 +5645,40 @@ class WidgetsLocalizationTe extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationTe() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'కాపీ చేయి';
 
   @override
   String get cutButtonLabel => 'కత్తిరించండి';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'వెతకండి';
 
   @override
-  String get noResultsFound => 'ఫలితాలు ఏవీ కనుగొనబడలేదు';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'పేస్ట్ చేయండి';
 
   @override
-  String get radioButtonUnselectedLabel => 'ఎంచుకోబడలేదు';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'కిందికు జరుపు';
@@ -4749,7 +5699,7 @@ class WidgetsLocalizationTe extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'పైకి జరపండి';
 
   @override
-  String get searchResultsFound => 'సెర్చ్ ఫలితాలు కనుగొనబడ్డాయి';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'వెబ్‌లో సెర్చ్ చేయండి';
@@ -4769,22 +5719,40 @@ class WidgetsLocalizationTh extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationTh() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'คัดลอก';
 
   @override
   String get cutButtonLabel => 'ตัด';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'ค้นหา';
 
   @override
-  String get noResultsFound => 'ไม่พบผลลัพธ์';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'วาง';
 
   @override
-  String get radioButtonUnselectedLabel => 'ไม่ได้เลือก';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'ย้ายลง';
@@ -4805,7 +5773,7 @@ class WidgetsLocalizationTh extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'ย้ายขึ้น';
 
   @override
-  String get searchResultsFound => 'พบผลการค้นหา';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'ค้นหาบนอินเทอร์เน็ต';
@@ -4825,22 +5793,40 @@ class WidgetsLocalizationTl extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationTl() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopyahin';
 
   @override
   String get cutButtonLabel => 'I-cut';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Tumingin sa Itaas';
 
   @override
-  String get noResultsFound => 'Walang nakitang resulta';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'I-paste';
 
   @override
-  String get radioButtonUnselectedLabel => 'Hindi napili';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Ilipat pababa';
@@ -4861,7 +5847,7 @@ class WidgetsLocalizationTl extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Ilipat pataas';
 
   @override
-  String get searchResultsFound => 'Nakakita ng mga resulta ng paghahanap';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Maghanap sa Web';
@@ -4881,22 +5867,40 @@ class WidgetsLocalizationTr extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationTr() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopyala';
 
   @override
   String get cutButtonLabel => 'Kes';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Ara';
 
   @override
-  String get noResultsFound => 'Sonuç bulunamadı';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Yapıştır';
 
   @override
-  String get radioButtonUnselectedLabel => 'Seçili değil';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Aşağı taşı';
@@ -4917,7 +5921,7 @@ class WidgetsLocalizationTr extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Yukarı taşı';
 
   @override
-  String get searchResultsFound => 'Arama sonuçları bulundu';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => "Web'de Ara";
@@ -4929,62 +5933,6 @@ class WidgetsLocalizationTr extends GlobalWidgetsLocalizations {
   String get shareButtonLabel => 'Paylaş';
 }
 
-/// The translations for Uighur Uyghur (`ug`).
-class WidgetsLocalizationUg extends GlobalWidgetsLocalizations {
-  /// Create an instance of the translation bundle for Uighur Uyghur.
-  ///
-  /// For details on the meaning of the arguments, see [GlobalWidgetsLocalizations].
-  const WidgetsLocalizationUg() : super(TextDirection.ltr);
-
-  @override
-  String get copyButtonLabel => 'كۆچۈرۈش';
-
-  @override
-  String get cutButtonLabel => 'كېسىش';
-
-  @override
-  String get lookUpButtonLabel => 'ئىزدەش';
-
-  @override
-  String get noResultsFound => 'نەتىجە تېپىلمىدى';
-
-  @override
-  String get pasteButtonLabel => 'چاپلاش';
-
-  @override
-  String get radioButtonUnselectedLabel => 'تاللانمىدى';
-
-  @override
-  String get reorderItemDown => 'ئاستىغا يۆتكەش';
-
-  @override
-  String get reorderItemLeft => 'سولغا يۆتكەش';
-
-  @override
-  String get reorderItemRight => 'ئوڭغا يۆتكەش';
-
-  @override
-  String get reorderItemToEnd => 'ئاخىرىغا يۆتكەش';
-
-  @override
-  String get reorderItemToStart => 'باشلىنىشقا يۆتكەش';
-
-  @override
-  String get reorderItemUp => 'يۇقىرىغا يۆتكەش';
-
-  @override
-  String get searchResultsFound => 'ئىزدەش نەتىجىلىرى تېپىلدى';
-
-  @override
-  String get searchWebButtonLabel => 'توردا ئىزدەش';
-
-  @override
-  String get selectAllButtonLabel => 'ھەممىنى تاللاش';
-
-  @override
-  String get shareButtonLabel => 'ھەمبەھرلەش';
-}
-
 /// The translations for Ukrainian (`uk`).
 class WidgetsLocalizationUk extends GlobalWidgetsLocalizations {
   /// Create an instance of the translation bundle for Ukrainian.
@@ -4993,22 +5941,40 @@ class WidgetsLocalizationUk extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationUk() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Копіювати';
 
   @override
   String get cutButtonLabel => 'Вирізати';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Шукати';
 
   @override
-  String get noResultsFound => 'Результатів не знайдено';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Вставити';
 
   @override
-  String get radioButtonUnselectedLabel => 'Не вибрано';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Перемістити вниз';
@@ -5029,7 +5995,7 @@ class WidgetsLocalizationUk extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Перемістити вгору';
 
   @override
-  String get searchResultsFound => 'Знайдено результати пошуку';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Пошук в Інтернеті';
@@ -5049,22 +6015,40 @@ class WidgetsLocalizationUr extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationUr() : super(TextDirection.rtl);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'کاپی کریں';
 
   @override
   String get cutButtonLabel => 'کٹ کریں';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'تفصیل دیکھیں';
 
   @override
-  String get noResultsFound => 'کوئی نتائج نہیں ملے';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'پیسٹ کریں';
 
   @override
-  String get radioButtonUnselectedLabel => 'غیر منتخب کردہ';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'نیچے منتقل کریں';
@@ -5085,7 +6069,7 @@ class WidgetsLocalizationUr extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'اوپر منتقل کریں';
 
   @override
-  String get searchResultsFound => 'تلاش کے نتائج مل گئے';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'ویب تلاش کریں';
@@ -5105,22 +6089,40 @@ class WidgetsLocalizationUz extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationUz() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Nusxa olish';
 
   @override
   String get cutButtonLabel => 'Kesib olish';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Tepaga qarang';
 
   @override
-  String get noResultsFound => 'Hech narsa topilmadi';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Joylash';
 
   @override
-  String get radioButtonUnselectedLabel => 'Tanlanmagan';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Pastga siljitish';
@@ -5141,7 +6143,7 @@ class WidgetsLocalizationUz extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Tepaga siljitish';
 
   @override
-  String get searchResultsFound => 'Qidiruv natijalari topildi';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Internetdan qidirish';
@@ -5161,22 +6163,40 @@ class WidgetsLocalizationVi extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationVi() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Sao chép';
 
   @override
   String get cutButtonLabel => 'Cắt';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Tra cứu';
 
   @override
-  String get noResultsFound => 'Không tìm thấy kết quả';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Dán';
 
   @override
-  String get radioButtonUnselectedLabel => 'Chưa chọn';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Di chuyển xuống';
@@ -5197,7 +6217,7 @@ class WidgetsLocalizationVi extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Di chuyển lên';
 
   @override
-  String get searchResultsFound => 'Có kết quả tìm kiếm';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Tìm kiếm trên web';
@@ -5217,22 +6237,40 @@ class WidgetsLocalizationZh extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationZh() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => '复制';
 
   @override
   String get cutButtonLabel => '剪切';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => '查询';
 
   @override
-  String get noResultsFound => '未找到任何结果';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => '粘贴';
 
   @override
-  String get radioButtonUnselectedLabel => '未选择';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => '下移';
@@ -5253,7 +6291,7 @@ class WidgetsLocalizationZh extends GlobalWidgetsLocalizations {
   String get reorderItemUp => '上移';
 
   @override
-  String get searchResultsFound => '找到搜索结果';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => '搜索';
@@ -5290,13 +6328,7 @@ class WidgetsLocalizationZhHant extends WidgetsLocalizationZh {
   String get lookUpButtonLabel => '查詢';
 
   @override
-  String get noResultsFound => '搵唔到任何結果';
-
-  @override
   String get pasteButtonLabel => '貼上';
-
-  @override
-  String get radioButtonUnselectedLabel => '未揀選';
 
   @override
   String get reorderItemDown => '向下移';
@@ -5315,9 +6347,6 @@ class WidgetsLocalizationZhHant extends WidgetsLocalizationZh {
 
   @override
   String get reorderItemUp => '向上移';
-
-  @override
-  String get searchResultsFound => '搜尋到結果';
 
   @override
   String get searchWebButtonLabel => '搜尋';
@@ -5342,12 +6371,6 @@ class WidgetsLocalizationZhHantTw extends WidgetsLocalizationZhHant {
   const WidgetsLocalizationZhHantTw();
 
   @override
-  String get searchResultsFound => '已找到搜尋結果';
-
-  @override
-  String get noResultsFound => '找不到結果';
-
-  @override
   String get reorderItemToStart => '移至開頭';
 
   @override
@@ -5355,9 +6378,6 @@ class WidgetsLocalizationZhHantTw extends WidgetsLocalizationZhHant {
 
   @override
   String get selectAllButtonLabel => '全選';
-
-  @override
-  String get radioButtonUnselectedLabel => '未選取';
 }
 
 /// The translations for Zulu (`zu`).
@@ -5368,22 +6388,40 @@ class WidgetsLocalizationZu extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationZu() : super(TextDirection.ltr);
 
   @override
+  String get collapsedHint => 'Expanded';
+
+  @override
   String get copyButtonLabel => 'Kopisha';
 
   @override
   String get cutButtonLabel => 'Sika';
 
   @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
   String get lookUpButtonLabel => 'Bheka Phezulu';
 
   @override
-  String get noResultsFound => 'Ayikho imiphumela etholakele';
+  String get noResultsFound => 'No results found';
 
   @override
   String get pasteButtonLabel => 'Namathisela';
 
   @override
-  String get radioButtonUnselectedLabel => 'Ayikhethiwe';
+  String get radioButtonUnselectedLabel => 'Not selected';
 
   @override
   String get reorderItemDown => 'Iya phansi';
@@ -5404,7 +6442,7 @@ class WidgetsLocalizationZu extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Iya phezulu';
 
   @override
-  String get searchResultsFound => 'Imiphumela yokusesha itholakele';
+  String get searchResultsFound => 'Search results found';
 
   @override
   String get searchWebButtonLabel => 'Sesha Iwebhu';
@@ -5436,7 +6474,6 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
   'be', // Belarusian
   'bg', // Bulgarian
   'bn', // Bengali Bangla
-  'bo', // Tibetan
   'bs', // Bosnian
   'ca', // Catalan Valencian
   'cs', // Czech
@@ -5452,7 +6489,6 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
   'fi', // Finnish
   'fil', // Filipino Pilipino
   'fr', // French
-  'ga', // Irish
   'gl', // Galician
   'gsw', // Swiss German Alemannic Alsatian
   'gu', // Gujarati
@@ -5503,7 +6539,6 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
   'th', // Thai
   'tl', // Tagalog
   'tr', // Turkish
-  'ug', // Uighur Uyghur
   'uk', // Ukrainian
   'ur', // Urdu
   'uz', // Uzbek
@@ -5530,7 +6565,6 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
 ///  * `be` - Belarusian
 ///  * `bg` - Bulgarian
 ///  * `bn` - Bengali Bangla
-///  * `bo` - Tibetan
 ///  * `bs` - Bosnian
 ///  * `ca` - Catalan Valencian
 ///  * `cs` - Czech
@@ -5546,7 +6580,6 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
 ///  * `fi` - Finnish
 ///  * `fil` - Filipino Pilipino
 ///  * `fr` - French (plus one country variation)
-///  * `ga` - Irish
 ///  * `gl` - Galician
 ///  * `gsw` - Swiss German Alemannic Alsatian
 ///  * `gu` - Gujarati
@@ -5597,7 +6630,6 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
 ///  * `th` - Thai
 ///  * `tl` - Tagalog
 ///  * `tr` - Turkish
-///  * `ug` - Uighur Uyghur
 ///  * `uk` - Ukrainian
 ///  * `ur` - Urdu
 ///  * `uz` - Uzbek
@@ -5628,8 +6660,6 @@ GlobalWidgetsLocalizations? getWidgetsTranslation(
       return const WidgetsLocalizationBg();
     case 'bn':
       return const WidgetsLocalizationBn();
-    case 'bo':
-      return const WidgetsLocalizationBo();
     case 'bs':
       return const WidgetsLocalizationBs();
     case 'ca':
@@ -5732,8 +6762,6 @@ GlobalWidgetsLocalizations? getWidgetsTranslation(
       }
       return const WidgetsLocalizationFr();
     }
-    case 'ga':
-      return const WidgetsLocalizationGa();
     case 'gl':
       return const WidgetsLocalizationGl();
     case 'gsw':
@@ -5848,8 +6876,6 @@ GlobalWidgetsLocalizations? getWidgetsTranslation(
       return const WidgetsLocalizationTl();
     case 'tr':
       return const WidgetsLocalizationTr();
-    case 'ug':
-      return const WidgetsLocalizationUg();
     case 'uk':
       return const WidgetsLocalizationUk();
     case 'ur':

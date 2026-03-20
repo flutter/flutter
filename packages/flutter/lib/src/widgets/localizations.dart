@@ -226,6 +226,30 @@ abstract class WidgetsLocalizations {
   /// The accessibility hint for an unselected radio button.
   String get radioButtonUnselectedLabel;
 
+  /// The semantics hint to describe the tap action on an expanded
+  /// [Expansible] on iOS and macOS. This is appended to the [collapsedHint]
+  /// hint to provide a more detailed description of the action, e.g. "Expanded
+  /// double tap to collapse".
+  String get expansibleExpandedHint;
+
+  /// The semantics hint to describe the tap action on a collapsed
+  /// [Expansible] on iOS and macOS. This is appended to the [expandedHint]
+  /// hint to provide a more detailed description of the action, e.g. "Collapsed
+  /// double tap to expand".
+  String get expansibleCollapsedHint;
+
+  /// The semantics hint to describe the tap action on an expanded [Expansible].
+  String get expansibleExpandedTapHint;
+
+  /// The semantics hint to describe the tap action on a collapsed [Expansible].
+  String get expansibleCollapsedTapHint;
+
+  /// The semantics hint to describe the [Expansible] expanded state.
+  String get expandedHint;
+
+  /// The semantics hint to describe the [Expansible] collapsed state.
+  String get collapsedHint;
+
   /// The `WidgetsLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
   ///
@@ -326,6 +350,24 @@ class DefaultWidgetsLocalizations implements WidgetsLocalizations {
   String get radioButtonUnselectedLabel => 'Not selected';
   @override
   TextDirection get textDirection => TextDirection.ltr;
+
+  @override
+  String get expansibleExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansibleCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansibleExpandedTapHint => 'Collapse';
+
+  @override
+  String get expansibleCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get collapsedHint => 'Expanded';
 
   /// Creates an object that provides US English resource values for the
   /// lowest levels of the widgets library.

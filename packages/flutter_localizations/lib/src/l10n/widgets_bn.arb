@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "সব বেছে নিন",
   "searchResultsFound": "সার্চ ফলাফল পাওয়া গেছে",
   "noResultsFound": "কোনো ফলাফল পাওয়া যায়নি",
-  "radioButtonUnselectedLabel": "বেছে নেওয়া হয়নি"
+  "radioButtonUnselectedLabel": "বেছে নেওয়া হয়নি",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

@@ -7,7 +7,6 @@
 /// @docImport 'list_section.dart';
 library;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -172,19 +171,10 @@ class _CupertinoExpansionTileState extends State<CupertinoExpansionTile> {
     final String onTapHint = _tileController.isExpanded
         ? localizations.expansionTileExpandedTapHint
         : localizations.expansionTileCollapsedTapHint;
-    String? semanticsHint;
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        semanticsHint = _tileController.isExpanded
-            ? '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}'
-            : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}';
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        break;
-    }
+    final semanticsHint = _tileController.isExpanded
+        ? '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}'
+        : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}';
+
     return Semantics(
       hint: semanticsHint,
       onTapHint: onTapHint,
