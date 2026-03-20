@@ -19,21 +19,24 @@ Scalar kAntialiasPixels = 1.0;
 }  // namespace
 
 std::unique_ptr<UberSDFContents> UberSDFContents::MakeRect(
-    Rect rect,
     Color color,
     Scalar stroke_width,
     bool stroked,
     std::unique_ptr<FillRectGeometry> geometry) {
+  Rect rect = geometry->GetRect();
   return std::unique_ptr<UberSDFContents>(new UberSDFContents(
       Type::kRect, rect, color, stroke_width, stroked, std::move(geometry)));
 }
 
 std::unique_ptr<UberSDFContents> UberSDFContents::MakeCircle(
-    Rect rect,
     Color color,
     Scalar stroke_width,
     bool stroked,
     std::unique_ptr<CircleGeometry> geometry) {
+  Point center = geometry->GetCenter();
+  Scalar radius = geometry->GetRadius();
+  Rect rect = Rect::MakeXYWH(center.x - radius, center.y - radius, radius * 2,
+                             radius * 2);
   return std::unique_ptr<UberSDFContents>(new UberSDFContents(
       Type::kCircle, rect, color, stroke_width, stroked, std::move(geometry)));
 }
