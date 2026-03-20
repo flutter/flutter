@@ -2,6 +2,7 @@ package com.flutter.gradle
 
 import com.android.build.api.dsl.ApplicationDefaultConfig
 import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AbstractAppExtension
@@ -67,7 +68,13 @@ class FlutterPluginTest {
         every { project.extensions.create("flutter", any<Class<*>>()) } returns flutterExtension
         every { project.extensions.findByType(FlutterExtension::class.java) } returns flutterExtension
         val mockBaseExtension = mockk<BaseExtension>(relaxed = true)
+        val mockCommonExtension = mockk<CommonExtension<*, *, *, *, *, *>>(relaxed = true)
+        val mockDebugBuildType = mockk<com.android.build.api.dsl.BuildType>(relaxed = true)
+        val mockReleaseBuildType = mockk<com.android.build.api.dsl.BuildType>(relaxed = true)
+        every { mockCommonExtension.buildTypes.getByName("debug") } returns mockDebugBuildType
+        every { mockCommonExtension.buildTypes.getByName("release") } returns mockReleaseBuildType
         every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
+        every { project.extensions.findByType(CommonExtension::class.java) } returns mockCommonExtension
         val mockApplicationExtension = mockk<ApplicationExtension>(relaxed = true)
         every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockApplicationExtension
         every { project.extensions.getByType(ApplicationExtension::class.java) } returns mockApplicationExtension
@@ -130,7 +137,13 @@ class FlutterPluginTest {
         every { project.extensions.create("flutter", any<Class<*>>()) } returns flutterExtension
         every { project.extensions.findByType(FlutterExtension::class.java) } returns flutterExtension
         val mockBaseExtension = mockk<BaseExtension>(relaxed = true)
+        val mockCommonExtension = mockk<CommonExtension<*, *, *, *, *, *>>(relaxed = true)
+        val mockDebugBuildType = mockk<com.android.build.api.dsl.BuildType>(relaxed = true)
+        val mockReleaseBuildType = mockk<com.android.build.api.dsl.BuildType>(relaxed = true)
+        every { mockCommonExtension.buildTypes.getByName("debug") } returns mockDebugBuildType
+        every { mockCommonExtension.buildTypes.getByName("release") } returns mockReleaseBuildType
         every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
+        every { project.extensions.findByType(CommonExtension::class.java) } returns mockCommonExtension
         val mockApplicationExtension = mockk<ApplicationExtension>(relaxed = true)
         every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockApplicationExtension
         every { project.extensions.getByType(ApplicationExtension::class.java) } returns mockApplicationExtension

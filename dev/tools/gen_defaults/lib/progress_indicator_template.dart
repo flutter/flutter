@@ -63,7 +63,7 @@ class _Linear${blockName}DefaultsM3 extends ProgressIndicatorThemeData {
   double get linearMinHeight => ${getToken('md.comp.progress-indicator.track.thickness')};
 
   @override
-  BorderRadius get borderRadius => BorderRadius.circular(${getToken('md.comp.progress-indicator.track.thickness')} / 2);
+  BorderRadius get borderRadius => const BorderRadius.all(Radius.circular(${getToken('md.comp.progress-indicator.track.thickness')} / 2));
 
   @override
   Color get stopIndicatorColor => ${componentColor('md.comp.progress-indicator.stop-indicator')};

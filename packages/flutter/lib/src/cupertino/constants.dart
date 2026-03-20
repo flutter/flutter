@@ -69,11 +69,11 @@ const Map<CupertinoButtonSize, EdgeInsetsGeometry> kCupertinoButtonPadding =
 /// The border radius values for the different [CupertinoButtonSize]s.
 ///
 /// Based on the iOS (17) [Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/buttons#iOS-iPadOS).
-final Map<CupertinoButtonSize, BorderRadius> kCupertinoButtonSizeBorderRadius =
+const Map<CupertinoButtonSize, BorderRadius> kCupertinoButtonSizeBorderRadius =
     <CupertinoButtonSize, BorderRadius>{
-      CupertinoButtonSize.small: BorderRadius.circular(40),
-      CupertinoButtonSize.medium: BorderRadius.circular(40),
-      CupertinoButtonSize.large: BorderRadius.circular(12),
+      CupertinoButtonSize.small: BorderRadius.all(Radius.circular(40)),
+      CupertinoButtonSize.medium: BorderRadius.all(Radius.circular(40)),
+      CupertinoButtonSize.large: BorderRadius.all(Radius.circular(12)),
     };
 
 /// The minimum size of a [CupertinoButton] based on the [CupertinoButtonSize].

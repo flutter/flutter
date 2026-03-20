@@ -223,7 +223,7 @@ void main() {
     expect(_getIndicatorDecoration(tester)?.color, const Color(0x3d2196f3));
     expect(
       _getIndicatorDecoration(tester)?.shape,
-      RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
     );
   });
 

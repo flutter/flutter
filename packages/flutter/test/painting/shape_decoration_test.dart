@@ -28,10 +28,12 @@ void main() {
     );
     expect(
       ShapeDecoration.fromBoxDecoration(
-        BoxDecoration(borderRadius: BorderRadiusDirectional.circular(100.0)),
+        const BoxDecoration(borderRadius: BorderRadiusDirectional.all(Radius.circular(100.0))),
       ),
-      ShapeDecoration(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadiusDirectional.circular(100.0)),
+      const ShapeDecoration(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadiusDirectional.all(Radius.circular(100.0)),
+        ),
       ),
     );
     expect(
