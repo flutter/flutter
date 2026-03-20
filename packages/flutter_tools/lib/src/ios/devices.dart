@@ -572,7 +572,7 @@ class IOSDevice extends Device {
 
       if (debuggingOptions.debuggingEnabled) {
         _logger.printTrace('Debugging is enabled, connecting to vmService');
-        vmServiceDiscovery = _setupDebuggerAndVmServiceDiscovery(
+        vmServiceDiscovery = await _setupDebuggerAndVmServiceDiscovery(
           package: package,
           bundle: bundle,
           debuggingOptions: debuggingOptions,
@@ -731,7 +731,7 @@ class IOSDevice extends Device {
             iosDeployDebugger!.lostConnection) {
           _logger.printStatus('Lost connection to device. Trying to connect again...');
           await dispose();
-          vmServiceDiscovery = _setupDebuggerAndVmServiceDiscovery(
+          vmServiceDiscovery = await _setupDebuggerAndVmServiceDiscovery(
             package: package,
             bundle: bundle,
             debuggingOptions: debuggingOptions,
@@ -967,14 +967,14 @@ class IOSDevice extends Device {
     );
   }
 
-  ProtocolDiscovery _setupDebuggerAndVmServiceDiscovery({
+  Future<ProtocolDiscovery> _setupDebuggerAndVmServiceDiscovery({
     required IOSApp package,
     required Directory bundle,
     required DebuggingOptions debuggingOptions,
     required List<String> launchArguments,
     required bool uninstallFirst,
     bool skipInstall = false,
-  }) {
+  }) async {
     final DeviceLogReader deviceLogReader = getLogReader(
       app: package,
       usingCISystem: debuggingOptions.usingCISystem,
@@ -994,6 +994,12 @@ class IOSDevice extends Device {
       if (deviceLogReader is IOSDeviceLogReader) {
         deviceLogReader.debuggerStream = iosDeployDebugger;
       }
+    }
+    // Start the log reader process before subscribing to its stream so we
+    // don't miss the VM service URI the app emits on startup.
+    // See https://github.com/flutter/flutter/issues/181771.
+    if (deviceLogReader is SharedIOSDeviceLogReader) {
+      await deviceLogReader.start();
     }
     // Don't port forward if debugging with a wireless device.
     return ProtocolDiscovery.vmService(
@@ -1448,6 +1454,13 @@ abstract class SharedIOSDeviceLogReader extends DeviceLogReader {
       linesController.add(message);
     }
   }
+
+  /// Start the underlying log reader process(es).
+  ///
+  /// Must be awaited before subscribing to [logLines] to avoid a race
+  /// condition where the app launches and emits the VM service URI before the
+  /// log reader process has started. See https://github.com/flutter/flutter/issues/181771.
+  Future<void> start();
 }
 
 /// Listens to multiple logging sources to get the logs from the physical iOS device.
@@ -1554,9 +1567,11 @@ class IOSDeviceLogReader extends SharedIOSDeviceLogReader {
   @override
   @visibleForTesting
   late final linesController = StreamController<String>.broadcast(
-    onListen: _listenToSysLog,
+    onListen: _connectSyslogOutput,
     onCancel: dispose,
   );
+
+  bool _sysLogStarted = false;
 
   @visibleForTesting
   void addToLinesController(String message, IOSDeviceLogSource source) {
@@ -1799,13 +1814,38 @@ class IOSDeviceLogReader extends SharedIOSDeviceLogReader {
 
   /// Start and listen to `idevicesyslog` to get device logs for iOS versions
   /// prior to 13 or if [useSyslogLogging] and [useIOSDeployLogging] are `true`.
-  void _listenToSysLog() {
+  ///
+  /// Launches the `idevicesyslog` process and stores it. The actual connection
+  /// of the process output to the log stream is deferred to [_connectSyslogOutput],
+  /// which is called synchronously when the first listener subscribes.
+  @override
+  Future<void> start() async {
+    if (_sysLogStarted) {
+      return;
+    }
+    _sysLogStarted = true;
     if (!useSyslogLogging) {
       return;
     }
-    _iMobileDevice.startLogger(_deviceId, _isWirelesslyConnected).then<void>((Process process) {
-      process.stdout.transform(utf8LineDecoder).listen(_newSyslogLineHandler());
-      process.stderr.transform(utf8LineDecoder).listen(_newSyslogLineHandler());
+    idevicesyslogProcess = await _iMobileDevice.startLogger(_deviceId, _isWirelesslyConnected);
+  }
+
+  /// Connects the already-launched [idevicesyslogProcess] output to [linesController].
+  ///
+  /// Called synchronously when the first listener subscribes (via onListen).
+  /// `start()` must have been awaited before any listener subscribes so that
+  /// [idevicesyslogProcess] is available.
+  void _connectSyslogOutput() {
+    if (!useSyslogLogging) {
+      return;
+    }
+    final Process? process = idevicesyslogProcess;
+    if (process == null) {
+      return;
+    }
+    process.stdout.transform(utf8LineDecoder).listen(_newSyslogLineHandler());
+    process.stderr.transform(utf8LineDecoder).listen(_newSyslogLineHandler());
+    unawaited(
       process.exitCode.whenComplete(() {
         if (!linesController.hasListener) {
           return;
@@ -1817,10 +1857,8 @@ class IOSDeviceLogReader extends SharedIOSDeviceLogReader {
           return;
         }
         linesController.close();
-      });
-      assert(idevicesyslogProcess == null);
-      idevicesyslogProcess = process;
-    });
+      }),
+    );
   }
 
   @visibleForTesting
