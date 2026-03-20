@@ -418,4 +418,200 @@ void main() {
       handle.dispose();
     });
   });
+
+  group('MinimumNonTextContrastEvaluation', () {
+    late final Set<String> originalFeatureFlags;
+    setUpAll(() {
+      originalFeatureFlags = {...debugEnabledFeatureFlags};
+      debugEnabledFeatureFlags.add('accessibility_evaluations');
+    });
+    tearDownAll(() {
+      debugEnabledFeatureFlags.clear();
+      debugEnabledFeatureFlags.addAll(originalFeatureFlags);
+    });
+    const evaluation = MinimumNonTextContrastEvaluation();
+
+    testWidgets('passes for high contrast button', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SizedBox.square(
+            dimension: 100,
+            child: ColoredBox(
+              color: const Color(0xFFFFFFFF),
+              child: Center(
+                child: Semantics(
+                  button: true,
+                  container: true,
+                  child: const SizedBox.square(
+                    dimension: 50,
+                    child: ColoredBox(color: Color(0xFF000000)),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
+        return await evaluation.evaluate(tester.binding);
+      });
+      expect(result!.violations, isEmpty);
+      handle.dispose();
+    });
+
+    testWidgets('fails for low contrast button', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SizedBox.square(
+            dimension: 100,
+            child: ColoredBox(
+              color: const Color(0xFFFFFFFF),
+              child: Center(
+                child: Semantics(
+                  button: true,
+                  container: true,
+                  child: const SizedBox.square(
+                    dimension: 50,
+                    child: ColoredBox(color: Color(0xFFEEEEEE)),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
+        return await evaluation.evaluate(tester.binding);
+      });
+      expect(result!.violations, hasLength(1));
+      expect(
+        result.violations.first.reason,
+        contains('Expected non-text control contrast ratio of at least 3.0'),
+      );
+      handle.dispose();
+    });
+
+    testWidgets('passes when transparent and background is uniform', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SizedBox.square(
+            dimension: 100,
+            child: ColoredBox(
+              color: const Color(0xFFFFFFFF),
+              child: Center(
+                child: Semantics(
+                  button: true,
+                  container: true,
+                  child: const SizedBox.square(dimension: 50),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
+        return await evaluation.evaluate(tester.binding);
+      });
+      expect(result!.violations, isEmpty);
+      handle.dispose();
+    });
+
+    testWidgets('fails for low contrast slider', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SizedBox.square(
+            dimension: 100,
+            child: ColoredBox(
+              color: const Color(0xFFFFFFFF),
+              child: Center(
+                child: Semantics(
+                  slider: true,
+                  container: true,
+                  child: const SizedBox.square(
+                    dimension: 50,
+                    child: ColoredBox(color: Color(0xFFEEEEEE)),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
+        return await evaluation.evaluate(tester.binding);
+      });
+      expect(result!.violations, hasLength(1));
+      expect(
+        result.violations.first.reason,
+        contains('Expected non-text control contrast ratio of at least 3.0'),
+      );
+      handle.dispose();
+    });
+
+    testWidgets('passes for high contrast textfield', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SizedBox.square(
+            dimension: 100,
+            child: ColoredBox(
+              color: const Color(0xFFFFFFFF),
+              child: Center(
+                child: Semantics(
+                  textField: true,
+                  container: true,
+                  child: const SizedBox.square(
+                    dimension: 50,
+                    child: ColoredBox(color: Color(0xFF000000)),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
+        return await evaluation.evaluate(tester.binding);
+      });
+      expect(result!.violations, isEmpty);
+      handle.dispose();
+    });
+
+    testWidgets('fails for low contrast node with onTap', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SizedBox.square(
+            dimension: 100,
+            child: ColoredBox(
+              color: const Color(0xFFFFFFFF),
+              child: Center(
+                child: Semantics(
+                  onTap: () {},
+                  container: true,
+                  child: const SizedBox.square(
+                    dimension: 50,
+                    child: ColoredBox(color: Color(0xFFEEEEEE)),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
+        return await evaluation.evaluate(tester.binding);
+      });
+      expect(result!.violations, hasLength(1));
+      expect(
+        result.violations.first.reason,
+        contains('Expected non-text control contrast ratio of at least 3.0'),
+      );
+      handle.dispose();
+    });
+  });
 }
