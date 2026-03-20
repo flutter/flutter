@@ -4974,4 +4974,39 @@ void main() {
       'Currently, selectedItemBuilder returns a list of length 1, but items has length 2.',
     );
   });
+
+  testWidgets('DropdownButtonFormField underline is at the bottom of the expanded height', (
+    WidgetTester tester,
+  ) async {
+    const containerHeight = 200.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            height: containerHeight,
+            child: DropdownButtonFormField<int>(
+              isExpanded: true,
+              isVerticallyExpanded: true,
+              items: const [DropdownMenuItem(value: 1, child: Text('Option 1'))],
+              onChanged: (_) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder decorator = find.byType(InputDecorator);
+
+    final RenderBox box = tester.renderObject(decorator);
+    final double width = box.size.width;
+
+    expect(
+      decorator,
+      paints..line(
+        p1: const Offset(0, containerHeight - 0.5),
+        p2: Offset(width, containerHeight - 0.5),
+      ),
+    );
+  });
 }
