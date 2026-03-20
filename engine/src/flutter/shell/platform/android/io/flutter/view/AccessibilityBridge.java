@@ -851,26 +851,43 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       // TODO(jonahwilliams): Figure out a way conform to the expected id from TalkBack's
       // CustomLabelManager. talkback/src/main/java/labeling/CustomLabelManager.java#L525
     }
-    if (semanticsNode.role == Role.PROGRESS_BAR.value) {
-      result.setClassName("android.widget.ProgressBar");
-      if (semanticsNode.value != null) {
-        try {
+    switch (Role.fromInt(semanticsNode.role)) {
+      case PROGRESS_BAR:
+        result.setClassName("android.widget.ProgressBar");
+        if (semanticsNode.value != null) {
+
           float min = Float.NEGATIVE_INFINITY;
           float max = Float.POSITIVE_INFINITY;
           if (semanticsNode.minValue != null) {
-            min = Float.parseFloat(semanticsNode.minValue);
+            try {
+              min = Float.parseFloat(semanticsNode.minValue);
+            } catch (NumberFormatException e) {
+              // Fallback to default min.
+            }
           }
           if (semanticsNode.maxValue != null) {
-            max = Float.parseFloat(semanticsNode.maxValue);
+            try {
+              max = Float.parseFloat(semanticsNode.maxValue);
+            } catch (NumberFormatException e) {
+              // Fallback to default max.
+            }
           }
-          float parsedValue = Float.parseFloat(semanticsNode.value);
-          result.setRangeInfo(
-              AccessibilityNodeInfo.RangeInfo.obtain(
-                  AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT, min, max, parsedValue));
-        } catch (NumberFormatException e) {
-          // Keep as indeterminate format.
+          try {
+            float parsedValue = Float.parseFloat(semanticsNode.value);
+            result.setRangeInfo(
+                AccessibilityNodeInfo.RangeInfo.obtain(
+                    AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT, min, max, parsedValue));
+          } catch (NumberFormatException e) {
+            // Keep as indeterminate format. There is no RANGE_TYPE_INDETERMINATE, so we
+            // fallback to RANGE_TYPE_FLOAT with 0.0.
+            result.setRangeInfo(
+                AccessibilityNodeInfo.RangeInfo.obtain(
+                    AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT, 0.0f, 0.0f, 0.0f));
+          }
         }
-      }
+        break;
+      default:
+        break;
     }
     if (semanticsNode.hasAction(Action.DISMISS)) {
       result.setDismissable(true);
