@@ -3,6 +3,7 @@
 #include "impeller/entity/contents/color_source_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/pipelines.h"
+#include "impeller/entity/geometry/circle_geometry.h"
 #include "impeller/entity/geometry/rect_geometry.h"
 
 namespace impeller {
@@ -17,15 +18,24 @@ using FS = UberSDFPipeline::FragmentShader;
 Scalar kAntialiasPixels = 1.0;
 }  // namespace
 
-std::unique_ptr<UberSDFContents> UberSDFContents::Make(
-    Type type,
+std::unique_ptr<UberSDFContents> UberSDFContents::MakeRect(
     Rect rect,
     Color color,
     Scalar stroke_width,
     bool stroked,
-    std::unique_ptr<Geometry> geometry) {
+    std::unique_ptr<FillRectGeometry> geometry) {
   return std::unique_ptr<UberSDFContents>(new UberSDFContents(
-      type, rect, color, stroke_width, stroked, std::move(geometry)));
+      Type::kRect, rect, color, stroke_width, stroked, std::move(geometry)));
+}
+
+std::unique_ptr<UberSDFContents> UberSDFContents::MakeCircle(
+    Rect rect,
+    Color color,
+    Scalar stroke_width,
+    bool stroked,
+    std::unique_ptr<CircleGeometry> geometry) {
+  return std::unique_ptr<UberSDFContents>(new UberSDFContents(
+      Type::kCircle, rect, color, stroke_width, stroked, std::move(geometry)));
 }
 
 UberSDFContents::UberSDFContents(Type type,
