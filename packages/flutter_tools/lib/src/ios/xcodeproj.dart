@@ -506,13 +506,13 @@ class XcodeProjectInfo {
     return '$baseConfiguration-$scheme';
   }
 
-  /// Checks whether the [buildConfigurations] contains the specified string, without
-  /// regard to case.
-  String? _existingBuildConfigurationForBuildMode(String buildMode) {
-    buildMode = buildMode.toLowerCase();
-    for (final String name in buildConfigurations) {
-      if (name.toLowerCase() == buildMode) {
-        return name;
+  /// Finds a build configuration matching [name], ignoring case,
+  /// and returns it, or null if there is no match.
+  String? _existingBuildConfigurationWithName(String name) {
+    name = name.toLowerCase();
+    for (final String configName in buildConfigurations) {
+      if (configName.toLowerCase() == name) {
+        return configName;
       }
     }
     return null;
@@ -542,28 +542,31 @@ class XcodeProjectInfo {
     }
   }
 
-  /// Returns unique build configuration matching [buildInfo] and [scheme], or
-  /// null, if there is no unique best match.
+  /// Returns unique build configuration matching [buildInfo] and [scheme],
+  /// falling back to the base configuration, or null, if there is no unique best match.
   String? buildConfigurationFor(BuildInfo? buildInfo, String scheme) {
     if (buildInfo == null) {
       return null;
     }
     final String expectedConfiguration = expectedBuildConfigurationFor(buildInfo, scheme);
-    final String? buildConfigurationForBuildMode = _existingBuildConfigurationForBuildMode(
-      expectedConfiguration,
-    );
-    if (buildConfigurationForBuildMode != null) {
-      return buildConfigurationForBuildMode;
+    // Check for an exact match, e.g. "Debug-MyFlavor" if using a flavor or "Debug" if not.
+    final String? exactMatch = _existingBuildConfigurationWithName(expectedConfiguration);
+    // When flavor is null, an exact match is required.
+    if (exactMatch != null || buildInfo.flavor == null) {
+      return exactMatch;
     }
     final String baseConfiguration = _baseConfigurationFor(buildInfo);
-    return _uniqueMatch(buildConfigurations, (String candidate) {
+    // Check for a unique match for build mode and flavor, e.g. "debug myflavor".
+    final String? buildConfigurationForBuildModeAndFlavor = _uniqueMatch(buildConfigurations, (
+      String candidate,
+    ) {
       candidate = candidate.toLowerCase();
-      if (buildInfo.flavor == null) {
-        return candidate == expectedConfiguration.toLowerCase();
-      }
       return candidate.contains(baseConfiguration.toLowerCase()) &&
           candidate.contains(scheme.toLowerCase());
     });
+    // Fall back to the base configuration if no match or more than one match is found.
+    return buildConfigurationForBuildModeAndFlavor ??
+        _existingBuildConfigurationWithName(baseConfiguration);
   }
 
   static String _baseConfigurationFor(BuildInfo buildInfo) {
