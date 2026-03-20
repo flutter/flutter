@@ -6,6 +6,7 @@
 /// @docImport 'scroll_physics.dart';
 /// @docImport 'scroll_view.dart';
 /// @docImport 'sliver_prototype_extent_list.dart';
+/// @docImport 'viewport.dart';
 library;
 
 import 'package:flutter/foundation.dart';

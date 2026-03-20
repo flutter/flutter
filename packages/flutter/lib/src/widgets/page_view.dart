@@ -30,7 +30,9 @@ import 'scroll_position.dart';
 import 'scroll_position_with_single_context.dart';
 import 'scroll_view.dart';
 import 'scrollable.dart';
+import 'sliver.dart';
 import 'sliver_fill.dart';
+import 'sliver_layout_builder.dart';
 import 'viewport.dart';
 
 /// A controller for [PageView].
@@ -697,6 +699,7 @@ class PageView extends StatefulWidget {
     this.hitTestBehavior = HitTestBehavior.opaque,
     this.scrollBehavior,
     this.padEnds = true,
+    this.shrinkWrapCrossAxis = false,
   }) : assert(
          scrollCacheExtent == null || (scrollCacheExtent.value > 0.0) == allowImplicitScrolling,
          'scrollCacheExtent and allowImplicitScrolling must be consistent: '
@@ -751,6 +754,7 @@ class PageView extends StatefulWidget {
     this.hitTestBehavior = HitTestBehavior.opaque,
     this.scrollBehavior,
     this.padEnds = true,
+    this.shrinkWrapCrossAxis = false,
   }) : assert(
          scrollCacheExtent == null || (scrollCacheExtent.value > 0.0) == allowImplicitScrolling,
          'scrollCacheExtent and allowImplicitScrolling must be consistent: '
@@ -793,6 +797,7 @@ class PageView extends StatefulWidget {
     this.hitTestBehavior = HitTestBehavior.opaque,
     this.scrollBehavior,
     this.padEnds = true,
+    this.shrinkWrapCrossAxis = false,
   }) : assert(
          scrollCacheExtent == null || (scrollCacheExtent.value > 0.0) == allowImplicitScrolling,
          'scrollCacheExtent and allowImplicitScrolling must be consistent: '
@@ -937,6 +942,50 @@ class PageView extends StatefulWidget {
   /// This property defaults to true.
   final bool padEnds;
 
+  /// Whether the page view should shrink-wrap itself to the visible page in
+  /// the cross axis.
+  ///
+  /// When this is true, pages still fill the viewport in the scrolling
+  /// direction, but they are laid out with a loose constraint in the cross
+  /// axis. The page view then sizes itself to the visible page's size in that
+  /// axis.
+  ///
+  /// For a horizontal [PageView], this means the height adapts to the current
+  /// page. For a vertical [PageView], the width adapts.
+  ///
+  /// This is useful for carousels, columns, and bottom sheets whose pages have
+  /// varying heights or widths, but it is more expensive than the default
+  /// behavior because the viewport can change size whenever the page position
+  /// changes.
+  ///
+  /// Like any [PageView], the scrolling axis must still be bounded by the
+  /// parent. For a horizontal [PageView], this means the width must be bounded.
+  /// For a vertical [PageView], the height must be bounded.
+  ///
+  /// {@tool dartpad}
+  /// This example shows a [PageView] with [shrinkWrapCrossAxis] set to true,
+  /// placed inside a [Column]. Each page has a different height, and the
+  /// [PageView] smoothly changes its height during page transitions.
+  ///
+  /// ** See code in examples/api/lib/widgets/page_view/page_view.2.dart **
+  /// {@end-tool}
+  ///
+  /// Conceptually, the viewport resizes to match the page that is currently
+  /// visible in the cross axis:
+  ///
+  /// ```text
+  /// Before swipe:                After swipe:
+  /// ┌──────────────────────┐     ┌────────────────────────────┐
+  /// │ PageView (100 high)  │ --> │ PageView (250 high)        │
+  /// │ ┌──────────────────┐ │     │ ┌────────────────────────┐ │
+  /// │ │ Page 1           │ │     │ │ Page 2                 │ │
+  /// │ └──────────────────┘ │     │ └────────────────────────┘ │
+  /// └──────────────────────┘     └────────────────────────────┘
+  /// ```
+  ///
+  /// Defaults to false.
+  final bool shrinkWrapCrossAxis;
+
   @override
   State<PageView> createState() => _PageViewState();
 }
@@ -1023,23 +1072,49 @@ class _PageViewState extends State<PageView> {
         hitTestBehavior: widget.hitTestBehavior,
         scrollBehavior:
             widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false),
-        viewportBuilder: (BuildContext context, ViewportOffset position) {
-          return Viewport(
-            scrollCacheExtent: widget.scrollCacheExtent,
-            axisDirection: axisDirection,
-            offset: position,
-            clipBehavior: widget.clipBehavior,
-            slivers: <Widget>[
-              SliverFillViewport(
-                viewportFraction: _controller.viewportFraction,
-                delegate: widget.childrenDelegate,
-                padEnds: widget.padEnds,
-                allowImplicitScrolling: widget.allowImplicitScrolling,
-              ),
-            ],
-          );
-        },
+        viewportBuilder: (BuildContext context, ViewportOffset position) =>
+            _buildViewport(axisDirection: axisDirection, position: position),
       ),
+    );
+  }
+
+  Widget _buildPageSliver({required bool shrinkWrapCrossAxis}) {
+    if (shrinkWrapCrossAxis) {
+      return _PageViewShrinkWrappingSliverFillViewport(
+        viewportFraction: _controller.viewportFraction,
+        delegate: widget.childrenDelegate,
+        padEnds: widget.padEnds,
+        allowImplicitScrolling: widget.allowImplicitScrolling,
+      );
+    }
+    return SliverFillViewport(
+      viewportFraction: _controller.viewportFraction,
+      delegate: widget.childrenDelegate,
+      padEnds: widget.padEnds,
+      allowImplicitScrolling: widget.allowImplicitScrolling,
+    );
+  }
+
+  Widget _buildViewport({required AxisDirection axisDirection, required ViewportOffset position}) {
+    final ScrollCacheExtent scrollCacheExtent = widget.scrollCacheExtent;
+    final Widget pageSliver = _buildPageSliver(shrinkWrapCrossAxis: widget.shrinkWrapCrossAxis);
+
+    if (widget.shrinkWrapCrossAxis) {
+      return _PageViewCrossAxisShrinkWrappingViewport(
+        scrollCacheExtent: scrollCacheExtent,
+        axisDirection: axisDirection,
+        offset: position,
+        clipBehavior: widget.clipBehavior,
+        slivers: <Widget>[pageSliver],
+      );
+    }
+
+    return Viewport(
+      scrollCacheExtent: scrollCacheExtent,
+      axisDirection: axisDirection,
+      offset: position,
+      clipBehavior: widget.clipBehavior,
+      slivers: <Widget>[pageSliver],
     );
   }
 
@@ -1069,5 +1144,624 @@ class _PageViewState extends State<PageView> {
         defaultValue: ScrollCacheExtent.viewport(widget.allowImplicitScrolling ? 1.0 : 0.0),
       ),
     );
+    description.add(
+      FlagProperty(
+        'shrinkWrapCrossAxis',
+        value: widget.shrinkWrapCrossAxis,
+        ifTrue: 'cross-axis shrink-wrapping',
+      ),
+    );
+  }
+}
+
+/// Applies [SliverFillViewport]'s padding behavior while using a custom render
+/// sliver that can report the visible page's cross-axis extent back to the
+/// viewport.
+class _PageViewShrinkWrappingSliverFillViewport extends StatelessWidget {
+  const _PageViewShrinkWrappingSliverFillViewport({
+    required this.delegate,
+    required this.viewportFraction,
+    required this.padEnds,
+    required this.allowImplicitScrolling,
+  });
+
+  final SliverChildDelegate delegate;
+  final double viewportFraction;
+  final bool padEnds;
+  final bool allowImplicitScrolling;
+
+  @override
+  Widget build(BuildContext context) {
+    final double paddingFraction = padEnds ? clampDouble(1 - viewportFraction, 0, 1) / 2 : 0;
+    final Widget sliver = _PageViewSliverFillViewportRenderObjectWidget(
+      viewportFraction: viewportFraction,
+      allowImplicitScrolling: allowImplicitScrolling,
+      delegate: delegate,
+    );
+    if (paddingFraction == 0.0) {
+      return sliver;
+    }
+    return SliverLayoutBuilder(
+      builder: (BuildContext context, SliverConstraints constraints) {
+        final double paddingValue = constraints.viewportMainAxisExtent * paddingFraction;
+        return SliverPadding(
+          padding: switch (constraints.axis) {
+            Axis.horizontal => EdgeInsets.symmetric(horizontal: paddingValue),
+            Axis.vertical => EdgeInsets.symmetric(vertical: paddingValue),
+          },
+          sliver: sliver,
+        );
+      },
+    );
+  }
+}
+
+/// Creates the render sliver used by [PageView.shrinkWrapCrossAxis].
+///
+/// This mirrors [_SliverFillViewportRenderObjectWidget], but instantiates a
+/// render object that measures its children with loose cross-axis constraints
+/// and reports the interpolated visible-page extent to the viewport.
+class _PageViewSliverFillViewportRenderObjectWidget extends SliverMultiBoxAdaptorWidget {
+  const _PageViewSliverFillViewportRenderObjectWidget({
+    required super.delegate,
+    this.viewportFraction = 1.0,
+    this.allowImplicitScrolling = true,
+  }) : assert(viewportFraction > 0.0);
+
+  final double viewportFraction;
+  final bool allowImplicitScrolling;
+
+  @override
+  _RenderSliverFillViewportWithCrossAxisShrinkWrapping createRenderObject(BuildContext context) {
+    final element = context as SliverMultiBoxAdaptorElement;
+    return _RenderSliverFillViewportWithCrossAxisShrinkWrapping(
+      childManager: element,
+      viewportFraction: viewportFraction,
+      allowImplicitScrolling: allowImplicitScrolling,
+    );
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderSliverFillViewportWithCrossAxisShrinkWrapping renderObject,
+  ) {
+    renderObject
+      ..viewportFraction = viewportFraction
+      ..allowImplicitScrolling = allowImplicitScrolling;
+  }
+}
+
+/// A [RenderSliverFillViewport] that lets pages choose their cross-axis size.
+///
+/// The main axis still behaves exactly like [RenderSliverFillViewport]: each
+/// child gets the viewport fraction of the main axis and scrolls page by page.
+/// The difference is that children are laid out with loose constraints in the
+/// cross axis, and the sliver reports the visible page's cross-axis extent so
+/// the enclosing viewport can shrink-wrap to it.
+class _RenderSliverFillViewportWithCrossAxisShrinkWrapping extends RenderSliverFillViewport {
+  _RenderSliverFillViewportWithCrossAxisShrinkWrapping({
+    required super.childManager,
+    super.viewportFraction = 1.0,
+    super.allowImplicitScrolling = true,
+  });
+
+  @override
+  void performLayout() {
+    final SliverConstraints constraints = this.constraints;
+    childManager.didStartLayout();
+    childManager.setDidUnderflow(false);
+
+    final double scrollOffset = constraints.scrollOffset + constraints.cacheOrigin;
+    assert(scrollOffset >= 0.0);
+    final double remainingExtent = constraints.remainingCacheExtent;
+    assert(remainingExtent >= 0.0);
+    final double targetEndScrollOffset = scrollOffset + remainingExtent;
+
+    // TODO(Piinks): Clean up when deprecation expires.
+    const double deprecatedExtraItemExtent = -1;
+
+    final int firstIndex = getMinChildIndexForScrollOffset(scrollOffset, deprecatedExtraItemExtent);
+    final int? targetLastIndex = targetEndScrollOffset.isFinite
+        ? getMaxChildIndexForScrollOffset(targetEndScrollOffset, deprecatedExtraItemExtent)
+        : null;
+
+    if (firstChild != null) {
+      final int leadingGarbage = calculateLeadingGarbage(firstIndex: firstIndex);
+      final int trailingGarbage = targetLastIndex != null
+          ? calculateTrailingGarbage(lastIndex: targetLastIndex)
+          : 0;
+      collectGarbage(leadingGarbage, trailingGarbage);
+    } else {
+      collectGarbage(0, 0);
+    }
+
+    if (firstChild == null) {
+      final double layoutOffset = indexToLayoutOffset(deprecatedExtraItemExtent, firstIndex);
+      if (!addInitialChild(index: firstIndex, layoutOffset: layoutOffset)) {
+        final double max = firstIndex <= 0
+            ? 0.0
+            : computeMaxScrollOffset(constraints, deprecatedExtraItemExtent);
+        geometry = SliverGeometry(scrollExtent: max, maxPaintExtent: max, crossAxisExtent: 0.0);
+        childManager.didFinishLayout();
+        return;
+      }
+    }
+
+    final BoxConstraints childConstraints = _getChildConstraintsForShrinkWrapping();
+
+    RenderBox? trailingChildWithLayout;
+
+    for (int index = indexOf(firstChild!) - 1; index >= firstIndex; --index) {
+      final RenderBox? child = insertAndLayoutLeadingChild(childConstraints, parentUsesSize: true);
+      if (child == null) {
+        geometry = SliverGeometry(
+          scrollOffsetCorrection: indexToLayoutOffset(deprecatedExtraItemExtent, index),
+        );
+        return;
+      }
+      final childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
+      childParentData.layoutOffset = indexToLayoutOffset(deprecatedExtraItemExtent, index);
+      assert(childParentData.index == index);
+      trailingChildWithLayout ??= child;
+    }
+
+    if (trailingChildWithLayout == null) {
+      firstChild!.layout(childConstraints, parentUsesSize: true);
+      final childParentData = firstChild!.parentData! as SliverMultiBoxAdaptorParentData;
+      childParentData.layoutOffset = indexToLayoutOffset(deprecatedExtraItemExtent, firstIndex);
+      trailingChildWithLayout = firstChild;
+    }
+
+    double estimatedMaxScrollOffset = double.infinity;
+    for (
+      int index = indexOf(trailingChildWithLayout!) + 1;
+      targetLastIndex == null || index <= targetLastIndex;
+      ++index
+    ) {
+      RenderBox? child = childAfter(trailingChildWithLayout!);
+      if (child == null || indexOf(child) != index) {
+        child = insertAndLayoutChild(
+          childConstraints,
+          after: trailingChildWithLayout,
+          parentUsesSize: true,
+        );
+        if (child == null) {
+          estimatedMaxScrollOffset = indexToLayoutOffset(deprecatedExtraItemExtent, index);
+          break;
+        }
+      } else {
+        child.layout(childConstraints, parentUsesSize: true);
+      }
+      trailingChildWithLayout = child;
+      final childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
+      assert(childParentData.index == index);
+      childParentData.layoutOffset = indexToLayoutOffset(
+        deprecatedExtraItemExtent,
+        childParentData.index!,
+      );
+    }
+
+    final int lastIndex = indexOf(lastChild!);
+    final double leadingScrollOffset = indexToLayoutOffset(deprecatedExtraItemExtent, firstIndex);
+    final double trailingScrollOffset = indexToLayoutOffset(
+      deprecatedExtraItemExtent,
+      lastIndex + 1,
+    );
+
+    assert(
+      firstIndex == 0 || childScrollOffset(firstChild!)! - scrollOffset <= precisionErrorTolerance,
+    );
+    assert(debugAssertChildListIsNonEmptyAndContiguous());
+    assert(indexOf(firstChild!) == firstIndex);
+    assert(targetLastIndex == null || lastIndex <= targetLastIndex);
+
+    estimatedMaxScrollOffset = math.min(
+      estimatedMaxScrollOffset,
+      estimateMaxScrollOffset(
+        constraints,
+        firstIndex: firstIndex,
+        lastIndex: lastIndex,
+        leadingScrollOffset: leadingScrollOffset,
+        trailingScrollOffset: trailingScrollOffset,
+      ),
+    );
+
+    final double paintExtent = calculatePaintOffset(
+      constraints,
+      from: leadingScrollOffset,
+      to: trailingScrollOffset,
+    );
+
+    final double cacheExtent = calculateCacheOffset(
+      constraints,
+      from: leadingScrollOffset,
+      to: trailingScrollOffset,
+    );
+
+    final double targetEndScrollOffsetForPaint =
+        constraints.scrollOffset + constraints.remainingPaintExtent;
+    final int? targetLastIndexForPaint = targetEndScrollOffsetForPaint.isFinite
+        ? getMaxChildIndexForScrollOffset(targetEndScrollOffsetForPaint, deprecatedExtraItemExtent)
+        : null;
+
+    geometry = SliverGeometry(
+      scrollExtent: estimatedMaxScrollOffset,
+      paintExtent: paintExtent,
+      cacheExtent: cacheExtent,
+      maxPaintExtent: estimatedMaxScrollOffset,
+      crossAxisExtent: _currentPageCrossAxisExtent(),
+      hasVisualOverflow:
+          (targetLastIndexForPaint != null && lastIndex >= targetLastIndexForPaint) ||
+          constraints.scrollOffset > 0.0,
+    );
+
+    if (estimatedMaxScrollOffset == trailingScrollOffset) {
+      childManager.setDidUnderflow(true);
+    }
+    childManager.didFinishLayout();
+  }
+
+  BoxConstraints _getChildConstraintsForShrinkWrapping() {
+    final double extent = itemExtent;
+    return switch (constraints.axis) {
+      Axis.horizontal => BoxConstraints(
+        minWidth: extent,
+        maxWidth: extent,
+        maxHeight: constraints.crossAxisExtent,
+      ),
+      Axis.vertical => BoxConstraints(
+        maxWidth: constraints.crossAxisExtent,
+        minHeight: extent,
+        maxHeight: extent,
+      ),
+    };
+  }
+
+  RenderBox? _childForIndex(int index) {
+    RenderBox? child = firstChild;
+    while (child != null) {
+      final int childIndex = indexOf(child);
+      if (childIndex == index) {
+        return child;
+      }
+      if (childIndex > index) {
+        return null;
+      }
+      child = childAfter(child);
+    }
+    return null;
+  }
+
+  double _childCrossAxisExtent(RenderBox child) {
+    return switch (constraints.axis) {
+      Axis.horizontal => child.size.height,
+      Axis.vertical => child.size.width,
+    };
+  }
+
+  double _currentPageCrossAxisExtent() {
+    final RenderBox? firstLiveChild = firstChild;
+    if (firstLiveChild == null) {
+      return 0.0;
+    }
+
+    final double mainAxisExtent = itemExtent;
+    if (mainAxisExtent == 0.0) {
+      return _childCrossAxisExtent(firstLiveChild);
+    }
+
+    final double initialPageOffset = math.max(
+      0.0,
+      (mainAxisExtent - constraints.viewportMainAxisExtent) / 2.0,
+    );
+    final double rawPage =
+        math.max(0.0, constraints.scrollOffset - initialPageOffset) / mainAxisExtent;
+    final int lowerIndex = rawPage.floor();
+    final int upperIndex = rawPage.ceil();
+    final RenderBox? lowerChild = _childForIndex(lowerIndex);
+    final RenderBox? upperChild = _childForIndex(upperIndex);
+
+    if (lowerChild == null && upperChild == null) {
+      return _childCrossAxisExtent(firstLiveChild);
+    }
+
+    final double lowerExtent = lowerChild != null
+        ? _childCrossAxisExtent(lowerChild)
+        : _childCrossAxisExtent(upperChild!);
+    final double upperExtent = upperChild != null ? _childCrossAxisExtent(upperChild) : lowerExtent;
+    final double pageDelta = rawPage - lowerIndex;
+    return lowerExtent + (upperExtent - lowerExtent) * pageDelta;
+  }
+}
+
+/// A viewport variant that accepts cross-axis extents reported by its slivers.
+///
+/// [PageView] uses this instead of [Viewport] when [PageView.shrinkWrapCrossAxis]
+/// is enabled so the viewport can resize to the visible page while still
+/// lazily building slivers.
+class _PageViewCrossAxisShrinkWrappingViewport extends MultiChildRenderObjectWidget {
+  const _PageViewCrossAxisShrinkWrappingViewport({
+    this.axisDirection = AxisDirection.down,
+    required this.offset,
+    this.clipBehavior = Clip.hardEdge,
+    this.scrollCacheExtent,
+    List<Widget> slivers = const <Widget>[],
+  }) : super(children: slivers);
+
+  final AxisDirection axisDirection;
+  final ViewportOffset offset;
+  final Clip clipBehavior;
+  final ScrollCacheExtent? scrollCacheExtent;
+
+  @override
+  MultiChildRenderObjectElement createElement() =>
+      _PageViewCrossAxisShrinkWrappingViewportElement(this);
+
+  @override
+  _RenderPageViewCrossAxisShrinkWrappingViewport createRenderObject(BuildContext context) {
+    return _RenderPageViewCrossAxisShrinkWrappingViewport(
+      axisDirection: axisDirection,
+      crossAxisDirection: Viewport.getDefaultCrossAxisDirection(context, axisDirection),
+      offset: offset,
+      clipBehavior: clipBehavior,
+      scrollCacheExtent: scrollCacheExtent,
+    );
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderPageViewCrossAxisShrinkWrappingViewport renderObject,
+  ) {
+    renderObject
+      ..axisDirection = axisDirection
+      ..crossAxisDirection = Viewport.getDefaultCrossAxisDirection(context, axisDirection)
+      ..offset = offset
+      ..clipBehavior = clipBehavior
+      ..scrollCacheExtent = scrollCacheExtent;
+  }
+}
+
+/// Tracks onstage children for the shrink-wrapping page-view viewport.
+class _PageViewCrossAxisShrinkWrappingViewportElement extends MultiChildRenderObjectElement
+    with NotifiableElementMixin, ViewportElementMixin {
+  _PageViewCrossAxisShrinkWrappingViewportElement(
+    _PageViewCrossAxisShrinkWrappingViewport super.widget,
+  );
+
+  @override
+  void debugVisitOnstageChildren(ElementVisitor visitor) {
+    children
+        .where((Element child) {
+          final renderSliver = child.renderObject! as RenderSliver;
+          return renderSliver.geometry!.visible;
+        })
+        .forEach(visitor);
+  }
+}
+
+/// A shrink-wrapping viewport that only shrinks in the cross axis.
+///
+/// The main axis remains bounded exactly like a regular [Viewport], but the
+/// cross axis is computed from the largest visible sliver-reported extent for
+/// the current frame.
+class _RenderPageViewCrossAxisShrinkWrappingViewport extends RenderShrinkWrappingViewport {
+  _RenderPageViewCrossAxisShrinkWrappingViewport({
+    super.axisDirection,
+    required super.crossAxisDirection,
+    required super.offset,
+    super.clipBehavior,
+    super.scrollCacheExtent,
+  });
+
+  @override
+  bool debugThrowIfNotCheckingIntrinsics() {
+    assert(() {
+      if (!RenderObject.debugCheckingIntrinsics) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('$runtimeType does not support returning intrinsic dimensions.'),
+          ErrorDescription(
+            'Calculating the intrinsic dimensions would require instantiating every child of '
+            'the viewport, which defeats the point of viewports being lazy.',
+          ),
+          ErrorHint(
+            'If you are merely trying to shrink-wrap the viewport in the cross axis direction, '
+            'you should be able to achieve that effect by just giving the viewport loose '
+            'constraints, without needing to measure its intrinsic dimensions.',
+          ),
+        ]);
+      }
+      return true;
+    }());
+    return true;
+  }
+
+  late double _maxScrollExtent;
+  late double _shrinkWrapExtent;
+  late double _lastLaidOutCrossAxisExtent;
+  bool _hasReportedShrinkWrapExtent = false;
+  bool _hasVisualOverflow = false;
+
+  // Local cache extent field. The base class's _calculatedCacheExtent is
+  // library-private, so we maintain our own and override describeSemanticsClip.
+  double? _localCalculatedCacheExtent;
+
+  double _calculateCacheOffset(double mainAxisExtent) {
+    return switch (scrollCacheExtent.style) {
+      CacheExtentStyle.pixel => scrollCacheExtent.value,
+      CacheExtentStyle.viewport => scrollCacheExtent.value * mainAxisExtent,
+    };
+  }
+
+  bool _debugCheckHasBoundedMainAxis() {
+    assert(() {
+      switch (axis) {
+        case Axis.vertical:
+          if (!constraints.hasBoundedHeight) {
+            throw FlutterError(
+              'Vertical viewport was given unbounded height.\n'
+              'Cross-axis-shrinkwrapping viewports expand in the main axis to fill their '
+              'container and constrain their children to match their extent in the main axis. '
+              'In this case, a vertical cross-axis-shrinkwrapping viewport was given an '
+              'unlimited amount of vertical space in which to expand.',
+            );
+          }
+        case Axis.horizontal:
+          if (!constraints.hasBoundedWidth) {
+            throw FlutterError(
+              'Horizontal viewport was given unbounded width.\n'
+              'Cross-axis-shrinkwrapping viewports expand in the main axis to fill their '
+              'container and constrain their children to match their extent in the main axis. '
+              'In this case, a horizontal cross-axis-shrinkwrapping viewport was given an '
+              'unlimited amount of horizontal space in which to expand.',
+            );
+          }
+      }
+      return true;
+    }());
+    return true;
+  }
+
+  @override
+  Rect? describeSemanticsClip(RenderSliver? child) {
+    if (child != null &&
+        child.ensureSemantics &&
+        !(child.geometry!.visible || child.geometry!.cacheExtent > 0.0)) {
+      return null;
+    }
+    if (_localCalculatedCacheExtent == null) {
+      return semanticBounds;
+    }
+    return switch (axis) {
+      Axis.vertical => Rect.fromLTRB(
+        semanticBounds.left,
+        semanticBounds.top - _localCalculatedCacheExtent!,
+        semanticBounds.right,
+        semanticBounds.bottom + _localCalculatedCacheExtent!,
+      ),
+      Axis.horizontal => Rect.fromLTRB(
+        semanticBounds.left - _localCalculatedCacheExtent!,
+        semanticBounds.top,
+        semanticBounds.right + _localCalculatedCacheExtent!,
+        semanticBounds.bottom,
+      ),
+    };
+  }
+
+  @override
+  void performLayout() {
+    final BoxConstraints constraints = this.constraints;
+    assert(_debugCheckHasBoundedMainAxis());
+
+    final (double mainAxisExtent, double crossAxisExtent) = switch (axis) {
+      Axis.vertical => (constraints.maxHeight, constraints.maxWidth),
+      Axis.horizontal => (constraints.maxWidth, constraints.maxHeight),
+    };
+
+    offset.applyViewportDimension(mainAxisExtent);
+
+    if (firstChild == null) {
+      size = switch (axis) {
+        Axis.vertical => Size(constraints.minWidth, mainAxisExtent),
+        Axis.horizontal => Size(mainAxisExtent, constraints.minHeight),
+      };
+      _maxScrollExtent = 0.0;
+      _shrinkWrapExtent = 0.0;
+      _hasVisualOverflow = false;
+      offset.applyContentDimensions(0.0, 0.0);
+      return;
+    }
+
+    double correction;
+    while (true) {
+      correction = _attemptLayout(mainAxisExtent, crossAxisExtent, offset.pixels);
+      if (correction != 0.0) {
+        offset.correctBy(correction);
+      } else {
+        final bool didAcceptContentDimension = offset.applyContentDimensions(
+          0.0,
+          math.max(0.0, _maxScrollExtent - mainAxisExtent),
+        );
+        if (didAcceptContentDimension) {
+          break;
+        }
+      }
+    }
+
+    final double effectiveExtent = switch (axis) {
+      Axis.vertical => constraints.constrainWidth(
+        _hasReportedShrinkWrapExtent
+            ? _shrinkWrapExtent
+            : (constraints.maxWidth.isFinite ? constraints.maxWidth : 0.0),
+      ),
+      Axis.horizontal => constraints.constrainHeight(
+        _hasReportedShrinkWrapExtent
+            ? _shrinkWrapExtent
+            : (constraints.maxHeight.isFinite ? constraints.maxHeight : 0.0),
+      ),
+    };
+
+    size = switch (axis) {
+      Axis.vertical => constraints.constrainDimensions(effectiveExtent, mainAxisExtent),
+      Axis.horizontal => constraints.constrainDimensions(mainAxisExtent, effectiveExtent),
+    };
+  }
+
+  double _attemptLayout(double mainAxisExtent, double crossAxisExtent, double correctedOffset) {
+    assert(!mainAxisExtent.isNaN);
+    assert(mainAxisExtent >= 0.0);
+    assert(mainAxisExtent.isFinite);
+    assert(!crossAxisExtent.isNaN);
+    assert(crossAxisExtent >= 0.0);
+    assert(correctedOffset.isFinite);
+    _maxScrollExtent = 0.0;
+    _shrinkWrapExtent = 0.0;
+    _lastLaidOutCrossAxisExtent = crossAxisExtent;
+    _hasReportedShrinkWrapExtent = false;
+    _hasVisualOverflow = correctedOffset < 0.0;
+
+    _localCalculatedCacheExtent = _calculateCacheOffset(mainAxisExtent);
+
+    return layoutChildSequence(
+      child: firstChild,
+      scrollOffset: math.max(0.0, correctedOffset),
+      overlap: math.min(0.0, correctedOffset),
+      layoutOffset: math.max(0.0, -correctedOffset),
+      remainingPaintExtent: mainAxisExtent + math.min(0.0, correctedOffset),
+      mainAxisExtent: mainAxisExtent,
+      crossAxisExtent: crossAxisExtent,
+      growthDirection: GrowthDirection.forward,
+      advance: childAfter,
+      remainingCacheExtent: mainAxisExtent + 2 * _localCalculatedCacheExtent!,
+      cacheOrigin: -_localCalculatedCacheExtent!,
+    );
+  }
+
+  @override
+  bool get hasVisualOverflow => _hasVisualOverflow;
+
+  @override
+  void updateOutOfBandData(GrowthDirection growthDirection, SliverGeometry childLayoutGeometry) {
+    assert(growthDirection == GrowthDirection.forward);
+    _maxScrollExtent += childLayoutGeometry.scrollExtent;
+    if (childLayoutGeometry.hasVisualOverflow) {
+      _hasVisualOverflow = true;
+    }
+    if (!childLayoutGeometry.visible) {
+      return;
+    }
+    final double? childCrossAxisExtent = childLayoutGeometry.crossAxisExtent;
+    if (childCrossAxisExtent == null) {
+      if (!_lastLaidOutCrossAxisExtent.isFinite) {
+        return;
+      }
+      _hasReportedShrinkWrapExtent = true;
+      _shrinkWrapExtent = math.max(_shrinkWrapExtent, _lastLaidOutCrossAxisExtent);
+      return;
+    }
+    assert(childCrossAxisExtent.isFinite);
+    _hasReportedShrinkWrapExtent = true;
+    _shrinkWrapExtent = math.max(_shrinkWrapExtent, childCrossAxisExtent);
   }
 }

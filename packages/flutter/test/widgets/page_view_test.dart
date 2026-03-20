@@ -1206,6 +1206,20 @@ void main() {
     expect(tester.widget<SliverFillViewport>(viewportFinder()).padEnds, false);
   });
 
+  testWidgets('PageView.shrinkWrapCrossAxis switches viewport behavior', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(Directionality(textDirection: TextDirection.ltr, child: PageView()));
+
+    expect(find.byType(Viewport), findsOneWidget);
+
+    await tester.pumpWidget(
+      Directionality(textDirection: TextDirection.ltr, child: PageView(shrinkWrapCrossAxis: true)),
+    );
+
+    expect(find.byType(Viewport), findsNothing);
+  });
+
   testWidgets('PageView - precision error inside RenderSliverFixedExtentBoxAdaptor', (
     WidgetTester tester,
   ) async {

@@ -8,9 +8,54 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _MockRenderSliver extends RenderSliver {
+  _MockRenderSliver({
+    double paintExtent = 10.0,
+    double maxPaintExtent = 10.0,
+    double scrollExtent = 10.0,
+    double? crossAxisExtent,
+  }) : _paintExtent = paintExtent,
+       _maxPaintExtent = maxPaintExtent,
+       _scrollExtent = scrollExtent,
+       _crossAxisExtent = crossAxisExtent;
+
+  final double _paintExtent;
+  final double _maxPaintExtent;
+  final double _scrollExtent;
+  final double? _crossAxisExtent;
+
   @override
   void performLayout() {
-    geometry = const SliverGeometry(paintOrigin: 10, paintExtent: 10, maxPaintExtent: 10);
+    geometry = SliverGeometry(
+      paintOrigin: 10,
+      paintExtent: _paintExtent,
+      maxPaintExtent: _maxPaintExtent,
+      scrollExtent: _scrollExtent,
+      crossAxisExtent: _crossAxisExtent,
+    );
+  }
+}
+
+class _MockSliver extends LeafRenderObjectWidget {
+  const _MockSliver({
+    required this.paintExtent,
+    required this.maxPaintExtent,
+    required this.scrollExtent,
+    this.crossAxisExtent,
+  });
+
+  final double paintExtent;
+  final double maxPaintExtent;
+  final double scrollExtent;
+  final double? crossAxisExtent;
+
+  @override
+  RenderSliver createRenderObject(BuildContext context) {
+    return _MockRenderSliver(
+      paintExtent: paintExtent,
+      maxPaintExtent: maxPaintExtent,
+      scrollExtent: scrollExtent,
+      crossAxisExtent: crossAxisExtent,
+    );
   }
 }
 
@@ -341,6 +386,41 @@ void main() {
     expect(
       tester.renderObject<RenderSliverPadding>(find.byType(SliverPadding)).geometry!.paintExtent,
       150.0,
+    );
+  });
+
+  testWidgets('SliverPadding propagates crossAxisExtent from child geometry', (
+    WidgetTester tester,
+  ) async {
+    final ViewportOffset offset = ViewportOffset.fixed(0.0);
+    addTearDown(offset.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Viewport(
+          offset: offset,
+          slivers: const <Widget>[
+            SliverPadding(
+              padding: EdgeInsets.symmetric(horizontal: 12.0),
+              sliver: _MockSliver(
+                paintExtent: 40.0,
+                maxPaintExtent: 40.0,
+                scrollExtent: 40.0,
+                crossAxisExtent: 50.0,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(
+      tester
+          .renderObject<RenderSliverPadding>(find.byType(SliverPadding))
+          .geometry!
+          .crossAxisExtent,
+      74.0,
     );
   });
 
