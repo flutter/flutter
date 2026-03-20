@@ -1017,6 +1017,19 @@ class RenderParagraph extends RenderBox
       return true;
     }());
 
+    if (_lastSelectableFragments != null) {
+      if (_needsClipping) {
+        context.canvas.save();
+        context.canvas.clipRect(offset & size);
+      }
+      for (final _SelectableFragment fragment in _lastSelectableFragments!) {
+        fragment.paintSelection(context, offset);
+      }
+      if (_needsClipping) {
+        context.canvas.restore();
+      }
+    }
+
     if (_needsClipping) {
       final Rect bounds = offset & size;
       if (_overflowShader != null) {
@@ -1027,12 +1040,6 @@ class RenderParagraph extends RenderBox
         context.canvas.save();
       }
       context.canvas.clipRect(bounds);
-    }
-
-    if (_lastSelectableFragments != null) {
-      for (final _SelectableFragment fragment in _lastSelectableFragments!) {
-        fragment.paint(context, offset);
-      }
     }
 
     assert(() {
@@ -1053,6 +1060,12 @@ class RenderParagraph extends RenderBox
         context.canvas.drawRect(Offset.zero & size, paint);
       }
       context.canvas.restore();
+    }
+
+    if (_lastSelectableFragments != null) {
+      for (final _SelectableFragment fragment in _lastSelectableFragments!) {
+        fragment.paintHandles(context, offset);
+      }
     }
   }
 
@@ -3555,7 +3568,7 @@ class _SelectableFragment
     return _rect.size;
   }
 
-  void paint(PaintingContext context, Offset offset) {
+  void paintSelection(PaintingContext context, Offset offset) {
     if (_textSelectionStart == null || _textSelectionEnd == null) {
       return;
     }
@@ -3570,6 +3583,12 @@ class _SelectableFragment
       for (final TextBox textBox in paragraph.getBoxesForSelection(selection)) {
         context.canvas.drawRect(textBox.toRect().shift(offset), selectionPaint);
       }
+    }
+  }
+
+  void paintHandles(PaintingContext context, Offset offset) {
+    if (_textSelectionStart == null || _textSelectionEnd == null) {
+      return;
     }
     if (_startHandleLayerLink != null && value.startSelectionPoint != null) {
       context.pushLayer(
