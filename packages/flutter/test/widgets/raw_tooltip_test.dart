@@ -891,8 +891,8 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/141644.
-  // This allows the user to quickly explore the UI via tooltips.
-  testWidgets('Tooltip respects hover delay when the mouse moves from another tooltip', (
+  // Moving between tooltip targets should still wait for the configured hoverDelay.
+  testWidgets('Tooltip waits hover delay when moving between tooltip targets', (
     WidgetTester tester,
   ) async {
     const hoverDelay = Duration(milliseconds: 700);
