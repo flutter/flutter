@@ -3406,6 +3406,8 @@ class EditableTextState extends State<EditableText>
     if (_hasInputConnection) {
       if (oldWidget.obscureText != widget.obscureText ||
           oldWidget.keyboardType != widget.keyboardType) {
+        //reset to prevent the last character in obscure text
+        _obscureShowCharTicksPending = 0;
         _textInputConnection!.updateConfig(_effectiveAutofillClient.textInputConfiguration);
       }
     }
