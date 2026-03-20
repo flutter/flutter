@@ -44,6 +44,7 @@ class DialogWindowContent extends StatelessWidget {
                           ),
                           parent: window,
                           title: 'Dialog',
+                          decorated: windowSettings.dialogDecorated,
                         ),
                       ),
                     );
