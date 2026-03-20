@@ -507,7 +507,7 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
 // Do not edit by hand. The code between the "BEGIN GENERATED" and
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
-//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+//   dev/tools/gen_defaults_updated/bin/gen_defaults_updated.dart.
 
 // dart format off
 class _ElevatedButtonDefaultsM3 extends ButtonStyle {
@@ -529,7 +529,7 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
   WidgetStateProperty<Color?>? get backgroundColor =>
     WidgetStateProperty.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.disabled)) {
-        return _colors.onSurface.withOpacity(0.12);
+        return _colors.onSurface.withOpacity(0.1);
       }
       return _colors.surfaceContainerLow;
     });
@@ -574,9 +574,6 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
       }
       if (states.contains(WidgetState.pressed)) {
         return 1.0;
-      }
-      if (states.contains(WidgetState.hovered)) {
-        return 3.0;
       }
       if (states.contains(WidgetState.focused)) {
         return 1.0;
