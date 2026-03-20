@@ -30,9 +30,40 @@ class TypographerContextSkia : public TypographerContext {
       const std::vector<RenderableText>& renderable_texts) const override;
 
  private:
-  static std::pair<std::vector<FontGlyphPair>, std::vector<Rect>>
-  CollectNewGlyphs(const std::shared_ptr<GlyphAtlas>& atlas,
-                   const std::vector<RenderableText>& renderable_texts);
+  struct NewGlyphData {
+    FontGlyphPair pair;
+    Rect position;
+    Rect bounds;
+  };
+
+  // Because we can't grow the skyline packer horizontally, pick a reasonable
+  // large width for all atlases.
+  static constexpr int64_t kAtlasWidth = 4096;
+  static constexpr int64_t kMinAtlasHeight = 1024;
+
+  static std::vector<NewGlyphData> CollectNewGlyphs(
+      const std::shared_ptr<GlyphAtlas>& atlas,
+      const std::vector<RenderableText>& renderable_texts);
+
+  /// Append all of the glyphs to the rectangle packer, growing it as needed
+  /// to fit them all and return a boolean indicating success.
+  static bool AppendSizesAndGrowPacker(
+      const std::shared_ptr<RectanglePacker>& rect_packer,
+      std::vector<TypographerContextSkia::NewGlyphData>& glyphs,
+      int max_packer_height);
+
+  static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
+                                std::shared_ptr<BlitPass>& blit_pass,
+                                HostBuffer& data_host_buffer,
+                                const std::shared_ptr<Texture>& texture,
+                                const std::vector<NewGlyphData>& new_glyphs);
+
+  static bool BulkUpdateAtlasBitmap(
+      const GlyphAtlas& atlas,
+      std::shared_ptr<BlitPass>& blit_pass,
+      HostBuffer& data_host_buffer,
+      const std::shared_ptr<Texture>& texture,
+      const std::vector<NewGlyphData>& new_glyphs);
 
   TypographerContextSkia(const TypographerContextSkia&) = delete;
 

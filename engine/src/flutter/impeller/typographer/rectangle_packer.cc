@@ -28,10 +28,12 @@ class SkylineRectanglePacker final : public RectanglePacker {
     skyline_.push_back(SkylineSegment{0, 0, width()});
   }
 
+  bool GrowTo(int w, int h) override;
+
   bool AddRect(int w, int h, IPoint16* loc) final;
 
   Scalar PercentFull() const final {
-    return area_so_far_ / (static_cast<float>(width()) * height());
+    return 100.0f * area_so_far_ / (static_cast<float>(width()) * height());
   }
 
  private:
@@ -58,6 +60,53 @@ class SkylineRectanglePacker final : public RectanglePacker {
                        int width,
                        int height);
 };
+
+static constexpr bool kImproveEfficiency = true;
+
+bool SkylineRectanglePacker::GrowTo(int w, int h) {
+  // We might potentially be able to reduce the size of the area if there
+  // are no rectangles already packed at those edges, but really there
+  // should be no reason to shrink the packer area so we just forbit it.
+  int old_width = width();
+  int old_height = height();
+  if (w < old_width || h < old_height) {
+    return false;
+  }
+
+  if (kImproveEfficiency) {
+    // Update the skyline to match the new width before we change it.
+    if (w > old_width) {
+      SkylineSegment& last = skyline_.back();
+      if (last.y_ == 0) {
+        // There was a segment at the end of the list that still started at
+        // the bottom of the area, simply extend it to the new width.
+        last.width_ = w - last.x_;
+      } else {
+        // We have a brand new segment of empty space at the end of the list.
+        skyline_.emplace_back(old_width, 0, w - old_width);
+      }
+    }
+    // We can freely expand the height without invalidating the skyline
+    // segments.
+  } else {
+    // Just reduce the skyline to a single flat plane at the old height
+    // so all new allocations go into the new area we just added. This
+    // technique only works if we are growing it in height as it relies
+    // on recreating the skyline itself as a single "floor".
+    //
+    // This code block matches the old behavior of growing the Impeller
+    // glyph cache in which the old packer was abandoned completely and
+    // a new packer allocated that only saw the new space.
+    FML_DCHECK(h > old_height);
+    skyline_.clear();
+    skyline_.emplace_back(0, old_height, w);
+  }
+
+  width_ = w;
+  height_ = h;
+
+  return true;
+}
 
 bool SkylineRectanglePacker::AddRect(int p_width, int p_height, IPoint16* loc) {
   if (static_cast<unsigned>(p_width) > static_cast<unsigned>(width()) ||
