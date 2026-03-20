@@ -786,6 +786,7 @@ class TextPainter {
       return true;
     }());
     _layoutCache?.paragraph.dispose();
+    print('!!!! set _layoutCache to null');
     _layoutCache = null;
   }
 
@@ -1288,8 +1289,17 @@ class TextPainter {
         contentWidth,
       );
     }
+    _layoutCount++;
+    if (_layoutCount > 3) {
+      print(
+        '!!!! set _layoutCache to $newLayoutCache, ${this.runtimeType}, ${identityHashCode(this)}',
+      );
+    }
+
     _layoutCache = newLayoutCache;
   }
+
+  static int _layoutCount = 0;
 
   /// Causes the paragraph to paint the layout boxes of the text.
   ///
@@ -1707,7 +1717,16 @@ class TextPainter {
     assert(_debugAssertTextLayoutIsValid);
     assert(!_debugNeedsRelayout);
     final _TextPainterLayoutCacheWithOffset cachedLayout = _layoutCache!;
-    return cachedLayout.paragraph.getPositionForOffset(offset - cachedLayout.paintOffset);
+    final newOffset = offset - cachedLayout.paintOffset;
+    final p = cachedLayout.paragraph;
+    print('!!!! ${p.runtimeType}, ${this.runtimeType}, ${identityHashCode(this)}');
+    print('!!!! $newOffset');
+    print('!!!! ${p.height}');
+    print('!!!! ${p.width}');
+    print('!!!! ${p.longestLine}');
+    final result = p.getPositionForOffset(newOffset);
+    print('!!!! $result');
+    return result;
   }
 
   /// {@template flutter.painting.TextPainter.getWordBoundary}
@@ -1826,6 +1845,7 @@ class TextPainter {
     _layoutTemplate?.dispose();
     _layoutTemplate = null;
     _layoutCache?.paragraph.dispose();
+    print('!!!! set _layoutCache to null for dispose');
     _layoutCache = null;
     _text = null;
   }

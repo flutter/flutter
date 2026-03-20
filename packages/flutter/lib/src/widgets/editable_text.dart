@@ -274,6 +274,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// actions, not during the build, layout, or paint phases. This property can
   /// be set from a listener added to this [TextEditingController].
   set text(String newText) {
+    print('!!!!!! set text = $newText');
     value = value.copyWith(
       text: newText,
       selection: const TextSelection.collapsed(offset: -1),
@@ -281,8 +282,15 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     );
   }
 
+  int count = 0;
+
   @override
   set value(TextEditingValue newValue) {
+    count++;
+    if (count > 3) {
+      print('!!!!!! set value = $newValue');
+    }
+
     assert(
       !newValue.composing.isValid || newValue.isComposingRangeValid,
       'New TextEditingValue $newValue has an invalid non-empty composing range '
