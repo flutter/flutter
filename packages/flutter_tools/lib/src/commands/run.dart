@@ -417,11 +417,20 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       stringArg('web-tls-cert-key-path') ?? fileConfig.https?.certKeyPath,
     );
 
+    final String? baseHref = stringArg('base-href') ?? fileConfig.baseHref;
+    if (baseHref != null && !(baseHref.startsWith('/') && baseHref.endsWith('/'))) {
+      throwToolExit(
+        'Received a --base-href value of "$baseHref"\n'
+        '--base-href should start and end with /',
+      );
+    }
+
     final WebDevServerConfig webDevServerConfig = fileConfig.copyWith(
       host: stringArg('web-hostname'),
       port: webPort,
       https: httpsConfig,
       headers: extractWebHeaders(),
+      baseHref: baseHref,
     );
     return webDevServerConfig;
   }

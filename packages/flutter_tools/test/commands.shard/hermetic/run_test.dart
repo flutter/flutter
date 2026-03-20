@@ -1399,6 +1399,115 @@ server:
         },
       );
     });
+
+    group('--base-href', () {
+      late FakeWebRunnerFactory fakeWebRunnerFactory;
+
+      setUp(() {
+        fakeWebRunnerFactory = FakeWebRunnerFactory();
+
+        fileSystem.file('lib/main.dart').createSync(recursive: true);
+        fileSystem.file('pubspec.yaml').createSync();
+        fileSystem.file('.dart_tool/package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "packages": [],
+  "configVersion": 2
+}
+''');
+        final device = FakeDevice(
+          isLocalEmulator: true,
+          platformType: PlatformType.web,
+          targetPlatform: TargetPlatform.web_javascript,
+        );
+        testDeviceManager.devices = <Device>[device];
+      });
+
+      testUsingContext(
+        'passes base-href to WebDevServerConfig',
+        () async {
+          final command = RunCommand();
+          await createTestCommandRunner(
+            command,
+          ).run(<String>['run', '--no-pub', '--no-hot', '--base-href=/preview/']);
+
+          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.baseHref, '/preview/');
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
+        },
+      );
+
+      testUsingContext(
+        'throws ToolExit when base-href does not start with /',
+        () async {
+          final command = RunCommand();
+          await expectLater(
+            () => createTestCommandRunner(
+              command,
+            ).run(<String>['run', '--no-pub', '--no-hot', '--base-href=preview/']),
+            throwsToolExit(message: '--base-href should start and end with /'),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
+        },
+      );
+
+      testUsingContext(
+        'throws ToolExit when base-href does not end with /',
+        () async {
+          final command = RunCommand();
+          await expectLater(
+            () => createTestCommandRunner(
+              command,
+            ).run(<String>['run', '--no-pub', '--no-hot', '--base-href=/preview']),
+            throwsToolExit(message: '--base-href should start and end with /'),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
+        },
+      );
+
+      testUsingContext(
+        'base-href defaults to null when not provided',
+        () async {
+          final command = RunCommand();
+          await createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']);
+
+          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.baseHref, isNull);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
+        },
+      );
+    });
   });
 
   group('terminal', () {
