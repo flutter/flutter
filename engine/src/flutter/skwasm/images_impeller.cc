@@ -17,26 +17,11 @@
 #include "impeller/renderer/backend/gles/context_gles.h"
 #include "impeller/renderer/backend/gles/texture_gles.h"
 
+#include <emscripten/wasm_worker.h>
+
 extern "C" {
 void skwasm_dispatchDisposeDlImage(unsigned long thread_id, void* pointer);
 void skwasm_disposeDlImageOnWorker(void* dl_image_ptr);
-}
-
-SKWASM_EXPORT void dummyAPICalls() {
-  // TODO(jacksongardner):
-  // This function is just here so that we have references to these API
-  // functions in the build. If we don't reference them, they get LTO'd out and
-  // then emscripten gets fails to build the javascript support library. These
-  // all will eventually be actually used when we implement proper image
-  // support, at which time we can just remove this function entirely.
-  // https://github.com/flutter/flutter/issues/175371
-  SkwasmObject object = __builtin_wasm_ref_null_extern();
-  skwasm_setAssociatedObjectOnThread(0, nullptr, object);
-  skwasm_getAssociatedObject(nullptr);
-  skwasm_disposeAssociatedObjectOnThread(0, nullptr);
-  skwasm_createGlTextureFromTextureSource(object, 0, 0);
-  skwasm_dispatchDisposeDlImage(0, nullptr);
-  skwasm_disposeDlImageOnWorker(nullptr);
 }
 
 namespace Skwasm {
@@ -71,7 +56,11 @@ class DlWimpImageBase : public flutter::DlImage {
 };
 
 DlWimpImageBase::~DlWimpImageBase() {
-  skwasm_dispatchDisposeDlImage(GetRasterThread(), this);
+  if (emscripten_wasm_worker_self_id() == GetRasterThread()) {
+    skwasm_disposeDlImageOnWorker(this);
+  } else {
+    skwasm_dispatchDisposeDlImage(GetRasterThread(), this);
+  }
 }
 
 class DlWimpImageFromTexture : public DlWimpImageBase {
