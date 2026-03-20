@@ -2,13 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'test_widgets.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
+  const debugBlue = Color(0xFF0000FF);
+  const debugGreen = Color(0xFF00FF00);
+  const debugBlack = Color(0xFF000000);
+  const debugRed = Color(0xFFFF0000);
   testWidgets('ListView mount/dismount smoke test', (WidgetTester tester) async {
     final callbackTracker = <int>[];
 
@@ -248,19 +253,17 @@ void main() {
 
   testWidgets('ListView reinvoke builders', (WidgetTester tester) async {
     late StateSetter setState;
-    var themeData = ThemeData.light(useMaterial3: false);
+    var itemColor = debugBlue;
 
     Widget itemBuilder(BuildContext context, int index) {
       return Container(
         key: ValueKey<int>(index),
         width: 500.0, // this should be ignored
         height: 220.0,
-        color: Theme.of(context).primaryColor,
+        color: itemColor,
         child: Text('$index', textDirection: TextDirection.ltr),
       );
     }
-
-    final Widget viewport = ListView.builder(itemBuilder: itemBuilder);
 
     await tester.pumpWidget(
       Directionality(
@@ -268,23 +271,23 @@ void main() {
         child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setter) {
             setState = setter;
-            return Theme(data: themeData, child: viewport);
+            return ListView.builder(itemBuilder: itemBuilder);
           },
         ),
       ),
     );
 
     Container widget = tester.firstWidget(find.byType(Container));
-    expect(widget.color, equals(Colors.blue));
+    expect(widget.color, equals(debugBlue));
 
     setState(() {
-      themeData = ThemeData(primarySwatch: Colors.green, useMaterial3: false);
+      itemColor = debugGreen;
     });
 
     await tester.pump();
 
     widget = tester.firstWidget(find.byType(Container));
-    expect(widget.color, equals(Colors.green));
+    expect(widget.color, equals(debugGreen));
   });
 
   testWidgets('ListView padding', (WidgetTester tester) async {
@@ -293,7 +296,7 @@ void main() {
         key: ValueKey<int>(index),
         width: 500.0, // this should be ignored
         height: 220.0,
-        color: Colors.green[500],
+        color: debugGreen,
         child: Text('$index', textDirection: TextDirection.ltr),
       );
     }
@@ -486,14 +489,14 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: SizedBox(
+      TestWidgetsApp(
+        home: Center(
+          child: SizedBox(
             height: 500.0,
             child: CustomScrollView(
               controller: controller,
               slivers: <Widget>[
-                const SliverAppBar(expandedHeight: 250.0),
+                const SliverToBoxAdapter(child: SizedBox(height: 250.0)),
                 SliverList(
                   delegate: ListView.builder(
                     itemExtent: 100.0,
@@ -524,7 +527,7 @@ void main() {
             itemExtent: 200.0,
             itemCount: 10,
             itemBuilder: (_, int i) =>
-                Container(height: 200.0, width: 200.0, color: i.isEven ? Colors.black : Colors.red),
+                Container(height: 200.0, width: 200.0, color: i.isEven ? debugBlack : debugRed),
           ),
         ),
       ),
