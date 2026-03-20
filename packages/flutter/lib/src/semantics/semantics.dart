@@ -223,12 +223,13 @@ sealed class _DebugSemanticsRoleChecks {
       return FlutterError('A progress bar must have a maxValue');
     }
 
-    // Validate that value is within min and max range
-    try {
-      final double currentValue = double.parse(data.value);
-      final double minVal = double.parse(data.minValue!);
-      final double maxVal = double.parse(data.maxValue!);
-
+    // Validate that the value is within the min and max range if all values are
+    // valid numbers. If the value is a descriptive string (e.g., "50%"), skip
+    // numeric validation.
+    final double? currentValue = double.tryParse(data.value);
+    final double? minVal = double.tryParse(data.minValue!);
+    final double? maxVal = double.tryParse(data.maxValue!);
+    if (currentValue != null && minVal != null && maxVal != null) {
       if (currentValue < minVal || currentValue > maxVal) {
         return FlutterError(
           'Progress bar value ($currentValue) must be between minValue ($minVal) and maxValue ($maxVal)',
@@ -238,11 +239,6 @@ sealed class _DebugSemanticsRoleChecks {
       if (minVal >= maxVal) {
         return FlutterError('Progress bar minValue ($minVal) must be less than maxValue ($maxVal)');
       }
-    } catch (e) {
-      return FlutterError(
-        'Progress bar value, minValue, and maxValue must be valid numbers. '
-        'value: "${data.value}", minValue: "${data.minValue}", maxValue: "${data.maxValue}"',
-      );
     }
 
     return null;
