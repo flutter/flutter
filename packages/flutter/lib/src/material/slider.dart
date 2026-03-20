@@ -1856,32 +1856,34 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       }
     }
 
-    if (isInteractive && label != null) {
-      if ((shouldShowValueIndicatorWhenDragged && !_valueIndicatorAnimation.isDismissed) ||
-          shouldAlwaysShowValueIndicator) {
-        _state.paintValueIndicator = (PaintingContext context, Offset offset) {
-          if (attached && _labelPainter.text != null) {
-            _sliderTheme.valueIndicatorShape!.paint(
-              context,
-              offset + thumbCenter,
-              activationAnimation: shouldAlwaysShowValueIndicator
-                  ? const AlwaysStoppedAnimation<double>(1)
-                  : _valueIndicatorAnimation,
-              enableAnimation: shouldAlwaysShowValueIndicator
-                  ? const AlwaysStoppedAnimation<double>(1)
-                  : _enableAnimation,
-              isDiscrete: isDiscrete,
-              labelPainter: _labelPainter,
-              parentBox: this,
-              sliderTheme: _sliderTheme,
-              textDirection: _textDirection,
-              value: _value,
-              textScaleFactor: textScaleFactor,
-              sizeWithOverflow: screenSize.isEmpty ? size : screenSize,
-            );
-          }
-        };
-      }
+    if (isInteractive &&
+        label != null &&
+        ((shouldShowValueIndicatorWhenDragged && !_valueIndicatorAnimation.isDismissed) ||
+            shouldAlwaysShowValueIndicator)) {
+      _state.paintValueIndicator = (PaintingContext context, Offset offset) {
+        if (attached && _labelPainter.text != null) {
+          _sliderTheme.valueIndicatorShape?.paint(
+            context,
+            offset + thumbCenter,
+            activationAnimation: shouldAlwaysShowValueIndicator
+                ? const AlwaysStoppedAnimation<double>(1)
+                : _valueIndicatorAnimation,
+            enableAnimation: shouldAlwaysShowValueIndicator
+                ? const AlwaysStoppedAnimation<double>(1)
+                : _enableAnimation,
+            isDiscrete: isDiscrete,
+            labelPainter: _labelPainter,
+            parentBox: this,
+            sliderTheme: _sliderTheme,
+            textDirection: _textDirection,
+            value: _value,
+            textScaleFactor: textScaleFactor,
+            sizeWithOverflow: screenSize.isEmpty ? size : screenSize,
+          );
+        }
+      };
+    } else {
+      _state.paintValueIndicator = null;
     }
 
     _sliderTheme.thumbShape!.paint(
