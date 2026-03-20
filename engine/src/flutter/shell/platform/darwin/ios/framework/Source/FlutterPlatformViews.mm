@@ -519,13 +519,15 @@ static BOOL _preparedOnce = NO;
 @property(nonatomic, weak, readonly) UIView* embeddedView;
 @property(nonatomic, readonly) FlutterDelayingGestureRecognizer* delayingRecognizer;
 @property(nonatomic, readonly) FlutterPlatformViewGestureRecognizersBlockingPolicy blockingPolicy;
+@property(nonatomic, readonly) FlutterViewIdentifier flutterViewId;
 @end
 
 @implementation FlutterTouchInterceptingView
 - (instancetype)initWithEmbeddedView:(UIView*)embeddedView
              platformViewsController:(FlutterPlatformViewsController*)platformViewsController
     gestureRecognizersBlockingPolicy:
-        (FlutterPlatformViewGestureRecognizersBlockingPolicy)blockingPolicy {
+        (FlutterPlatformViewGestureRecognizersBlockingPolicy)blockingPolicy
+                       flutterViewId:(FlutterViewIdentifier)flutterViewId {
   self = [super initWithFrame:embeddedView.frame];
   if (self) {
     self.multipleTouchEnabled = YES;
@@ -544,6 +546,7 @@ static BOOL _preparedOnce = NO;
                                                           action:nil
                                             forwardingRecognizer:forwardingRecognizer];
     _blockingPolicy = blockingPolicy;
+    _flutterViewId = flutterViewId;
 
     [self addGestureRecognizer:_delayingRecognizer];
     [self addGestureRecognizer:forwardingRecognizer];
@@ -778,7 +781,9 @@ static BOOL _preparedOnce = NO;
     // At the start of each gesture sequence, we reset the `_flutterViewController`,
     // so that all the touch events in the same sequence are forwarded to the same
     // `_flutterViewController`.
-    _flutterViewController = _platformViewsController.flutterViewController;
+    FlutterTouchInterceptingView* touchInterceptingView = (FlutterTouchInterceptingView*)self.view;
+    _flutterViewController = [_platformViewsController
+        flutterViewControllerForIdentifier:touchInterceptingView.flutterViewId];
   }
   [_flutterViewController touchesBegan:touches withEvent:event];
   _currentTouchPointersCount += touches.count;

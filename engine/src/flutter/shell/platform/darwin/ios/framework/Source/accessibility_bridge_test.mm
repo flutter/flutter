@@ -297,7 +297,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
     id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
     OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
     std::string label = "some label";
-    flutterPlatformViewsController.flutterView = mockFlutterView;
+    [flutterPlatformViewsController attachToFlutterViewController:mockFlutterViewController];
 
     MockFlutterPlatformFactory* factory = [[MockFlutterPlatformFactory alloc] init];
     [flutterPlatformViewsController
@@ -1571,7 +1571,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   thread_task_runner->PostTask([&] {
     platform_view->SetOwnerViewController(flutterViewController);
     auto bridge =
-        std::make_unique<flutter::AccessibilityBridge>(/*view=*/nil,
+        std::make_unique<flutter::AccessibilityBridge>(/*view=*/flutterViewController,
                                                        /*platform_view=*/platform_view.get(),
                                                        /*platform_views_controller=*/nil);
     XCTAssertTrue(bridge.get());
@@ -2258,7 +2258,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   thread_task_runner->PostTask([&] {
     platform_view->SetOwnerViewController(flutterViewController);
     auto bridge =
-        std::make_unique<flutter::AccessibilityBridge>(/*view=*/nil,
+        std::make_unique<flutter::AccessibilityBridge>(/*view=*/flutterViewController,
                                                        /*platform_view=*/platform_view.get(),
                                                        /*platform_views_controller=*/nil);
     XCTAssertTrue(bridge.get());

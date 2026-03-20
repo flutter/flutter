@@ -407,6 +407,38 @@ FLUTTER_ASSERT_ARC
   OCMVerify(times(2), [mockEngine updateDisplays]);
 }
 
+- (void)testReplacingImplicitViewControllerKeepsNewControllerAfterOldDealloc {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
+  [engine createShell:@"" libraryURI:@"" initialRoute:nil];
+
+  __weak FlutterViewController* weakOldViewController = nil;
+  FlutterViewController* newViewController = nil;
+  @autoreleasepool {
+    FlutterViewController* oldViewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                     nibName:nil
+                                                                                      bundle:nil];
+    weakOldViewController = oldViewController;
+
+    newViewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                              nibName:nil
+                                                               bundle:nil];
+    XCTAssertEqual(engine.viewController, newViewController);
+
+    oldViewController = nil;
+  }
+
+  XCTAssertNil(weakOldViewController);
+
+  // Drain enqueued observer callbacks on the main queue.
+  XCTestExpectation* drainedMainQueue = [self expectationWithDescription:@"drained-main-queue"];
+  dispatch_async(dispatch_get_main_queue(), ^{
+    [drainedMainQueue fulfill];
+  });
+  [self waitForExpectations:@[ drainedMainQueue ] timeout:1.0];
+
+  XCTAssertEqual(engine.viewController, newViewController);
+}
+
 - (void)testLifeCycleNotificationDidEnterBackgroundForApplication {
   FlutterDartProject* project = [[FlutterDartProject alloc] init];
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];

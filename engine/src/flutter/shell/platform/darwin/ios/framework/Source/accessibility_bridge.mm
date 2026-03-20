@@ -54,7 +54,7 @@ AccessibilityBridge::AccessibilityBridge(
       weak_factory_(this) {
   accessibility_channel_ = [[FlutterBasicMessageChannel alloc]
          initWithName:@"flutter/accessibility"
-      binaryMessenger:platform_view->GetOwnerViewController().engine.binaryMessenger
+      binaryMessenger:view_controller_.engine.binaryMessenger
                 codec:[FlutterStandardMessageCodec sharedInstance]];
   [accessibility_channel_ setMessageHandler:^(id message, FlutterReply reply) {
     HandleEvent((NSDictionary*)message);
@@ -67,7 +67,7 @@ AccessibilityBridge::~AccessibilityBridge() {
 }
 
 UIView<UITextInput>* AccessibilityBridge::textInputView() {
-  return [[platform_view_->GetOwnerViewController().engine textInputPlugin] textInputView];
+  return [[view_controller_.engine textInputPlugin] textInputView];
 }
 
 void AccessibilityBridge::AccessibilityObjectDidBecomeFocused(int32_t id) {
@@ -239,7 +239,7 @@ void AccessibilityBridge::DispatchSemanticsAction(int32_t node_uid,
                                                   flutter::SemanticsAction action) {
   // TODO(team-ios): Remove implicit view assumption.
   // https://github.com/flutter/flutter/issues/142845
-  platform_view_->DispatchSemanticsAction(kFlutterImplicitViewId, node_uid, action, {});
+  platform_view_->DispatchSemanticsAction(view_controller_.viewIdentifier, node_uid, action, {});
 }
 
 void AccessibilityBridge::DispatchSemanticsAction(int32_t node_uid,
@@ -247,7 +247,7 @@ void AccessibilityBridge::DispatchSemanticsAction(int32_t node_uid,
                                                   fml::MallocMapping args) {
   // TODO(team-ios): Remove implicit view assumption.
   // https://github.com/flutter/flutter/issues/142845
-  platform_view_->DispatchSemanticsAction(kFlutterImplicitViewId, node_uid, action,
+  platform_view_->DispatchSemanticsAction(view_controller_.viewIdentifier, node_uid, action,
                                           std::move(args));
 }
 

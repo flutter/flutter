@@ -18,6 +18,7 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlugin.h"
+#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/overlay_layer_pool.h"
 #import "flutter/shell/platform/darwin/ios/ios_context.h"
@@ -47,7 +48,7 @@ NS_ASSUME_NONNULL_BEGIN
         (FlutterPlatformViewGestureRecognizersBlockingPolicy)gestureRecognizerBlockingPolicy;
 
 /// @brief Mark the beginning of a frame and record the size of the onscreen.
-- (void)beginFrameWithSize:(flutter::DlISize)frameSize;
+- (void)beginFrameWithSize:(flutter::DlISize)frameSize flutterViewId:(int64_t)flutterViewId;
 
 /// @brief Cancel the current frame, indicating that no platform views are composited.
 ///
@@ -96,7 +97,8 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 /// Called from the raster thread.
 - (BOOL)submitFrame:(std::unique_ptr<flutter::SurfaceFrame>)frame
-     withIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext;
+       withIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext
+    withFlutterViewId:(int64_t)flutterViewId;
 
 /// @brief Handler for platform view message channels.
 - (void)onMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
@@ -129,6 +131,15 @@ NS_ASSUME_NONNULL_BEGIN
 /// @brief Pushes the outstanding path clips to the mutator stack of each visited platform
 /// view
 - (void)pushClipPathToVisitedPlatformViews:(const flutter::DlPath&)clipPath;
+
+- (void)collectView:(int64_t)flutterViewId;
+
+- (void)attachToFlutterViewController:(__weak FlutterViewController*)controller;
+
+- (void)detachFromFlutterViewController:(int64_t)flutterViewId;
+
+- (UIViewController<FlutterViewResponder>* _Nullable)flutterViewControllerForIdentifier:
+    (FlutterViewIdentifier)viewIdentifier;
 
 @end
 
