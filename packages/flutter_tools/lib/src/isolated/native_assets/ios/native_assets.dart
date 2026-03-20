@@ -108,7 +108,7 @@ Future<List<File>> copyNativeCodeAssetsIOS(
     final Uri assetTargetUri = targetUri.resolveUri(target);
     final File dylibFile = fileSystem.file(assetTargetUri);
     final Directory frameworkDir = dylibFile.parent;
-    if (!await frameworkDir.exists()) {
+    if (!frameworkDir.existsSync()) {
       await frameworkDir.create(recursive: true);
     }
     await lipoDylibs(dylibFile, sources);

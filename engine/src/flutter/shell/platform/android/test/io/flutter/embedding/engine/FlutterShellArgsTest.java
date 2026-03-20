@@ -18,6 +18,8 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class FlutterShellArgsTest {
   @Test
+  // Annotation required because FlutterShellArgs was deprecated in favor of FlutterEngineFlags.
+  @SuppressWarnings("deprecation")
   public void itProcessesShellFlags() {
     // Setup the test.
     Intent intent = new Intent();
