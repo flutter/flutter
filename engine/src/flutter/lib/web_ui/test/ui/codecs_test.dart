@@ -11,7 +11,6 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../common/test_initialization.dart';
-import 'utils.dart';
 
 const List<String> _kTestImages = <String>[
   '16x1.png',

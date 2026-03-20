@@ -28,7 +28,6 @@ namespace impeller {
 
 class Texture;
 
-
 using DlScalar = flutter::DlScalar;
 using DlPoint = flutter::DlPoint;
 using DlRect = flutter::DlRect;
@@ -68,7 +67,7 @@ using DlPath = flutter::DlPath;
 /// operations for other specific classes.
 class DlDispatcherBase : public flutter::DlOpReceiver {
  public:
-  DlDispatcherBase(TextureCache* image_cache = nullptr)
+  explicit DlDispatcherBase(TextureCache* image_cache = nullptr)
       : image_cache_(image_cache) {}
 
   virtual ~DlDispatcherBase() = default;
