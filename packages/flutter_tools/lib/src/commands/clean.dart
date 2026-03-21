@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:meta/meta.dart';
 
 import '../../src/macos/xcode.dart';
@@ -12,6 +14,7 @@ import '../base/logger.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
+import '../macos/swift_package_manager.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 
@@ -97,7 +100,12 @@ class CleanCommand extends FlutterCommand {
           verbose: _verbose,
         );
       } else {
+        final Set<String> swiftPackagePluginSchemes = _swiftPackagePluginSchemes(xcodeProject);
         for (final String scheme in projectInfo.schemes) {
+          if (swiftPackagePluginSchemes.contains(scheme)) {
+            globals.printTrace('Skipping SwiftPM plugin scheme during clean: $scheme');
+            continue;
+          }
           await xcodeProjectInterpreter.cleanWorkspace(
             xcodeWorkspace.path,
             scheme,
@@ -114,6 +122,50 @@ class CleanCommand extends FlutterCommand {
       }
     } finally {
       xcodeStatus.stop();
+    }
+  }
+
+  Set<String> _swiftPackagePluginSchemes(XcodeBasedProject xcodeProject) {
+    final File pluginsDependenciesFile = xcodeProject.parent.flutterPluginsDependenciesFile;
+    if (!pluginsDependenciesFile.existsSync()) {
+      return const <String>{};
+    }
+
+    try {
+      final Object? decoded = json.decode(pluginsDependenciesFile.readAsStringSync());
+      if (decoded is! Map<String, Object?>) {
+        return const <String>{};
+      }
+
+      final Object? swiftPmEnabled = decoded['swift_package_manager_enabled'];
+      if (swiftPmEnabled is! Map<String, Object?> ||
+          swiftPmEnabled[xcodeProject.pluginConfigKey] != true) {
+        return const <String>{};
+      }
+
+      final Object? pluginsObject = decoded['plugins'];
+      if (pluginsObject is! Map<String, Object?>) {
+        return const <String>{};
+      }
+      final Object? platformPlugins = pluginsObject[xcodeProject.pluginConfigKey];
+      if (platformPlugins is! List<Object?>) {
+        return const <String>{};
+      }
+
+      final pluginSchemes = <String>{kFlutterGeneratedPluginSwiftPackageName};
+      for (final Object? plugin in platformPlugins) {
+        if (plugin is! Map<String, Object?>) {
+          continue;
+        }
+        final Object? name = plugin['name'];
+        if (name is String && name.isNotEmpty) {
+          pluginSchemes.add(name);
+        }
+      }
+      return pluginSchemes;
+    } on FormatException catch (error) {
+      globals.printTrace('Unable to parse ${pluginsDependenciesFile.path}: $error');
+      return const <String>{};
     }
   }
 

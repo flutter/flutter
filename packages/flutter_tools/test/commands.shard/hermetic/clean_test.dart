@@ -297,7 +297,18 @@ FlutterProject setupProjectUnderTest(Directory currentDirectory, bool setupXcode
   projectUnderTest.macos.ephemeralDirectory.createSync(recursive: true);
   projectUnderTest.macos.flutterPluginSwiftPackageDirectory.createSync(recursive: true);
   projectUnderTest.windows.ephemeralDirectory.createSync(recursive: true);
-  projectUnderTest.flutterPluginsDependenciesFile.createSync(recursive: true);
+  projectUnderTest.flutterPluginsDependenciesFile.writeAsStringSync('''
+{
+  "plugins": {
+    "ios": [{"name": "swift_package_plugin"}],
+    "macos": [{"name": "swift_package_plugin"}]
+  },
+  "swift_package_manager_enabled": {
+    "ios": true,
+    "macos": true
+  }
+}
+''');
 
   return projectUnderTest;
 }
@@ -314,6 +325,8 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
     return XcodeProjectInfo(const <String>[], const <String>[], <String>[
       'Runner',
       'custom-scheme',
+      'swift_package_plugin',
+      'FlutterGeneratedPluginSwiftPackage',
     ], BufferLogger.test());
   }
 
