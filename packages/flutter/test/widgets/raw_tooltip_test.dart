@@ -891,8 +891,8 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/141644.
-  // This allows the user to quickly explore the UI via tooltips.
-  testWidgets('Tooltip shows without delay when the mouse moves from another tooltip', (
+  // Moving between tooltip targets should still wait for the configured hoverDelay.
+  testWidgets('Tooltip waits hover delay when moving between tooltip targets', (
     WidgetTester tester,
   ) async {
     const hoverDelay = Duration(milliseconds: 700);
@@ -948,10 +948,13 @@ void main() {
     expect(find.text('first tooltip'), findsOneWidget);
     expect(find.text('last tooltip'), findsNothing);
 
-    // Move to the second tooltip and expect it to show up immediately.
+    // Move to the second tooltip and expect it to respect hoverDelay.
     await gesture.moveTo(tester.getCenter(find.byType(RawTooltip).last));
     await tester.pump();
     expect(find.text('first tooltip'), findsNothing);
+    expect(find.text('last tooltip'), findsNothing);
+
+    await tester.pump(hoverDelay);
     expect(find.text('last tooltip'), findsOneWidget);
   });
 
