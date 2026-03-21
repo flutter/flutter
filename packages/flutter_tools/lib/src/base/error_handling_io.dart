@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:io'
     as io
     show
@@ -20,7 +21,6 @@ import 'package:file/file.dart';
 import 'package:path/path.dart' as p; // flutter_ignore: package_path_import
 import 'package:process/process.dart';
 
-import '../convert.dart';
 import 'common.dart' show ToolExit, throwToolExit;
 import 'platform.dart';
 

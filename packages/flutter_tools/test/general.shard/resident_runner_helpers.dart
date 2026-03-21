@@ -216,9 +216,6 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   Device? device;
 
   @override
-  ApplicationPackage? package;
-
-  @override
   Future<void> stopEchoingDeviceLog() async {}
 
   @override
@@ -369,7 +366,6 @@ class FakeDevice extends Fake implements Device {
     this.supportsHotRestart = true,
     this.supportsScreenshot = true,
     this.supportsFlutterExit = true,
-    this.name = 'FakeDevice',
   }) : _isLocalEmulator = isLocalEmulator,
        _targetPlatform = targetPlatform,
        _sdkNameAndVersion = sdkNameAndVersion;
@@ -377,9 +373,6 @@ class FakeDevice extends Fake implements Device {
   final bool _isLocalEmulator;
   final TargetPlatform _targetPlatform;
   final String _sdkNameAndVersion;
-
-  @override
-  String id = 'test-device-id';
 
   bool disposed = false;
   bool appStopped = false;
@@ -408,7 +401,7 @@ class FakeDevice extends Fake implements Device {
   Future<bool> get isLocalEmulator async => _isLocalEmulator;
 
   @override
-  String name;
+  String get name => 'FakeDevice';
 
   @override
   String get displayName => name;
