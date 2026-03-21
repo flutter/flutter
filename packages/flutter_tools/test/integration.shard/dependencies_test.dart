@@ -4,7 +4,14 @@
 
 import 'dart:convert';
 import 'dart:io';
+
+import 'package:pub_semver/pub_semver.dart';
 import 'package:test/test.dart';
+import 'package:yaml/yaml.dart';
+
+/// These are the sdk packages living inside the Flutter SDK that apps can
+/// depend on.
+const List<String> sdkPackages = <String>['flutter', 'flutter_test', 'flutter_localizations'];
 
 /// List of allowed external packages that Flutter framework packages can depend on.
 /// Subject to review and approval when adding new packages.
@@ -61,11 +68,9 @@ Future<void> main() async {
     );
     final packageGraph = jsonDecode(packageGraphFile.readAsStringSync()) as Map<String, Object?>;
 
-    // These are the sdk packages that Flutter apps can depend on.
-    final roots = <String>['flutter', 'flutter_test', 'flutter_localizations'];
     final allowedPackages = <String>{
       // Allow depending on other Flutter framework sdk packages.
-      ...roots,
+      ...sdkPackages,
       // Allow depending on allowed external packages.
       ...allowedExternalPackages,
     };
@@ -75,9 +80,9 @@ Future<void> main() async {
         (package! as Map<String, Object?>)['name']! as String: package as Map<String, Object?>,
     };
 
-    // Do a transitive parse of the package graph rooted in `roots` to find any
+    // Do a transitive parse of the package graph rooted in `sdkPackages` to find any
     // disallowed dependencies.
-    final toVisit = <String?>[...roots];
+    final toVisit = <String?>[...sdkPackages];
     final visited = <String>{};
     final stack = <String>[];
     while (toVisit.isNotEmpty) {
@@ -116,6 +121,83 @@ ${unusedAllowedPackages.map((String package) => ' - $package').join('\n')}
 
 See: packages/flutter_tools/test/integration.shard/only_allowed_dependencies_test.dart
 ''');
+    }
+  });
+
+  test('All dependencies are locked to their lower bound', () {
+    // This test will ensure that the lower bound of the version constraints from
+    // the sdk packages, are all equal to the version of the package in the lockfile.
+    //
+    // This is to ensure that we test against the lower bounds of our dependencies.
+    // So we don't accidentally rely on features added after the lower bound version.
+    final String flutterRoot = Platform.environment['FLUTTER_ROOT']!;
+    final flutterRootDirectory = Directory(flutterRoot);
+    // These are the sdk packages that Flutter apps can depend on.
+    final lockfile = File.fromUri(flutterRootDirectory.uri.resolve('pubspec.lock'));
+    final lockfileJson = loadYaml(lockfile.readAsStringSync()) as YamlMap;
+    final lockedDependencies = lockfileJson['packages']! as YamlMap;
+
+    for (final String sdkPackage in sdkPackages) {
+      final pubspecFile = File.fromUri(
+        flutterRootDirectory.uri.resolve('packages/$sdkPackage/pubspec.yaml'),
+      );
+      final pubspec = loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
+      final dependencies = pubspec['dependencies']! as YamlMap;
+      for (final MapEntry<Object?, Object?> dependency in dependencies.entries) {
+        final dependencyName = dependency.key! as String;
+        final Object? descriptor = dependency.value;
+        final VersionConstraint constraint;
+        if (descriptor is String) {
+          constraint = VersionConstraint.parse(descriptor);
+        } else if (descriptor is YamlMap) {
+          if (descriptor['sdk'] == 'flutter') {
+            // These are allowed.
+            continue;
+          }
+          if (descriptor['hosted'] == null) {
+            fail('''
+Dependency "$dependencyName" in "${pubspecFile.path}" is not a hosted or sdkpackage.
+''');
+          }
+          final versionString = descriptor['version'] as String?;
+          if (versionString == null) {
+            fail('''
+Dependency "$dependencyName" in "${pubspecFile.path}" has no version constraint.
+''');
+          }
+          constraint = VersionConstraint.parse(versionString);
+        } else {
+          fail('''
+Dependency "$dependencyName" in "${pubspecFile.path}" is not a hosted or sdk package.
+''');
+        }
+        if (constraint is! VersionRange) {
+          fail('''
+Dependency "$dependencyName" in "${pubspecFile.path}" is not a version range.
+''');
+        }
+        if (constraint.min == null) {
+          fail('''
+Dependency "$dependencyName" in "${pubspecFile.path}" has no lower bound.
+''');
+        }
+        if (constraint.min != constraint.max) {
+          fail('''
+Dependency "$dependencyName" in "${pubspecFile.path}" is not locked at its lower bound.
+''');
+        }
+
+        final currentVersion = Version.parse(
+          (lockedDependencies[dependencyName]! as YamlMap)['version']! as String,
+        );
+
+        if (currentVersion != constraint.min) {
+          fail('''
+Dependency "$dependencyName" is not locked at its lower bound in "${pubspecFile.path}".
+Either upgrade the constraint to $currentVersion in pubspec.yaml or downgrade the version to ${constraint.min} in pubspec.lock.
+''');
+        }
+      }
     }
   });
 }
