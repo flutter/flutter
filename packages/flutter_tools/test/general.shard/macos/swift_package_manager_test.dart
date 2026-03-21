@@ -183,16 +183,13 @@ $_doubleIndent
             final fs = MemoryFileSystem();
             final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
 
-            final Directory validPlugin1Directory = fs.directory(
-              '/local/path/to/plugins/valid_plugin_1',
-            );
-            validPlugin1Directory.childFile('Package.swift').createSync(recursive: true);
-
             final validPlugin1 = FakePlugin(
               name: 'valid_plugin_1',
               platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
-              pluginSwiftPackagePath: validPlugin1Directory.path,
             );
+            fs
+                .file('${validPlugin1.path}/${platform.name}/${validPlugin1.name}/Package.swift')
+                .createSync(recursive: true);
             final spm = SwiftPackageManager(
               fileSystem: fs,
               templateRenderer: const MustacheTemplateRenderer(),
@@ -203,10 +200,13 @@ $_doubleIndent
                 ? '.iOS("13.0")'
                 : '.macOS("10.15")';
             expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
-            expect(project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1'), exists);
             expect(
-              project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1').targetSync(),
-              validPlugin1Directory.path,
+              project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1-1.0.0'),
+              exists,
+            );
+            expect(
+              project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1-1.0.0').targetSync(),
+              '${validPlugin1.path}/${platform.name}/valid_plugin_1',
             );
             expect(project.flutterPluginSwiftPackageManifest.readAsStringSync(), '''
 // swift-tools-version: 5.9
@@ -226,7 +226,7 @@ let package = Package(
         .library(name: "FlutterGeneratedPluginSwiftPackage", type: .static, targets: ["FlutterGeneratedPluginSwiftPackage"])
     ],
     dependencies: [
-        .package(name: "valid_plugin_1", path: "../.packages/valid_plugin_1"),
+        .package(name: "valid_plugin_1", path: "../.packages/valid_plugin_1-1.0.0"),
         .package(name: "FlutterFramework", path: "../.packages/FlutterFramework")
     ],
     targets: [
@@ -248,39 +248,32 @@ let package = Package(
             final nonPlatformCompatiblePlugin = FakePlugin(
               name: 'invalid_plugin_due_to_incompatible_platform',
               platforms: <String, PluginPlatform>{},
-              pluginSwiftPackagePath: '/some/path',
             );
             final pluginSwiftPackageManifestIsNull = FakePlugin(
               name: 'invalid_plugin_due_to_null_plugin_swift_package_path',
               platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
-              pluginSwiftPackagePath: null,
+              hasSwiftPackage: false,
             );
             final pluginSwiftPackageManifestNotExists = FakePlugin(
               name: 'invalid_plugin_due_to_plugin_swift_package_path_does_not_exist',
               platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
-              pluginSwiftPackagePath: '/some/path',
             );
 
-            final Directory validPlugin1Directory = fs.directory(
-              '/local/path/to/plugins/valid_plugin_1',
-            );
-            validPlugin1Directory.childFile('Package.swift').createSync(recursive: true);
             final validPlugin1 = FakePlugin(
               name: 'valid_plugin_1',
               platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
-              pluginSwiftPackagePath: validPlugin1Directory.path,
             );
-
-            final Directory validPlugin2Directory = fs.directory(
-              '/.pub-cache/plugins/valid_plugin_2',
-            );
-            validPlugin2Directory.childFile('Package.swift').createSync(recursive: true);
+            fs
+                .file('${validPlugin1.path}/${platform.name}/${validPlugin1.name}/Package.swift')
+                .createSync(recursive: true);
 
             final validPlugin2 = FakePlugin(
               name: 'valid_plugin_2',
               platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
-              pluginSwiftPackagePath: validPlugin2Directory.path,
             );
+            fs
+                .file('${validPlugin2.path}/${platform.name}/${validPlugin2.name}/Package.swift')
+                .createSync(recursive: true);
 
             final spm = SwiftPackageManager(
               fileSystem: fs,
@@ -302,15 +295,21 @@ let package = Package(
                 ? '.iOS("13.0")'
                 : '.macOS("10.15")';
             expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
-            expect(project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1'), exists);
             expect(
-              project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1').targetSync(),
-              validPlugin1Directory.path,
+              project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1-1.0.0'),
+              exists,
             );
-            expect(project.relativeSwiftPackagesDirectory.childLink('valid_plugin_2'), exists);
             expect(
-              project.relativeSwiftPackagesDirectory.childLink('valid_plugin_2').targetSync(),
-              validPlugin2Directory.path,
+              project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1-1.0.0').targetSync(),
+              '${validPlugin1.path}/${platform.name}/valid_plugin_1',
+            );
+            expect(
+              project.relativeSwiftPackagesDirectory.childLink('valid_plugin_2-1.0.0'),
+              exists,
+            );
+            expect(
+              project.relativeSwiftPackagesDirectory.childLink('valid_plugin_2-1.0.0').targetSync(),
+              '${validPlugin2.path}/${platform.name}/valid_plugin_2',
             );
             expect(project.flutterPluginSwiftPackageManifest.readAsStringSync(), '''
 // swift-tools-version: 5.9
@@ -330,8 +329,8 @@ let package = Package(
         .library(name: "FlutterGeneratedPluginSwiftPackage", type: .static, targets: ["FlutterGeneratedPluginSwiftPackage"])
     ],
     dependencies: [
-        .package(name: "valid_plugin_1", path: "../.packages/valid_plugin_1"),
-        .package(name: "valid_plugin_2", path: "../.packages/valid_plugin_2"),
+        .package(name: "valid_plugin_1", path: "../.packages/valid_plugin_1-1.0.0"),
+        .package(name: "valid_plugin_2", path: "../.packages/valid_plugin_2-1.0.0"),
         .package(name: "FlutterFramework", path: "../.packages/FlutterFramework")
     ],
     targets: [
@@ -397,28 +396,34 @@ class FakeXcodeProject extends Fake implements IosProject {
 }
 
 class FakePlugin extends Fake implements Plugin {
-  FakePlugin({required this.name, required this.platforms, required String? pluginSwiftPackagePath})
-    : _pluginSwiftPackagePath = pluginSwiftPackagePath;
-
-  final String? _pluginSwiftPackagePath;
+  FakePlugin({required this.name, required this.platforms, this.hasSwiftPackage = true})
+    : path = '/local/path/to/plugins/$name-1.0.0';
 
   @override
   final String name;
 
   @override
+  final String path;
+
+  @override
   final Map<String, PluginPlatform> platforms;
+
+  final bool hasSwiftPackage;
 
   @override
   String? pluginSwiftPackagePath(FileSystem fileSystem, String platform, {String? overridePath}) {
-    return _pluginSwiftPackagePath;
+    if (!hasSwiftPackage) {
+      return null;
+    }
+    return '$path/$platform/$name';
   }
 
   @override
   String? pluginSwiftPackageManifestPath(FileSystem fileSystem, String platform) {
-    if (_pluginSwiftPackagePath == null) {
+    if (!hasSwiftPackage) {
       return null;
     }
-    return '$_pluginSwiftPackagePath/Package.swift';
+    return '$path/$platform/$name/Package.swift';
   }
 }
 

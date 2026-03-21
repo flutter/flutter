@@ -72,6 +72,12 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
 
   Directory get hostAppRoot;
 
+  List<Plugin>? _plugins;
+  Future<List<Plugin>> get plugins async {
+    _plugins ??= await findPlugins(parent);
+    return _plugins!;
+  }
+
   /// The default 'Info.plist' file of the host app. The developer can change this location in Xcode.
   File get defaultHostInfoPlist =>
       hostAppRoot.childDirectory(_defaultHostAppName).childFile('Info.plist');
@@ -551,9 +557,8 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   /// Returns a list of targets and their associated plugin (if found) that exclude arm64 architecture.
   Future<List<({String target, String? plugin})>> _targetsExcludingArm(String buildSettings) async {
     final Map<String, List<String>> cocoapodsDependencyGraph = _cocoapodsDependencyGraph();
-    final List<Plugin> allPlugins = await findPlugins(parent);
     final pluginNames = <String>{
-      for (final Plugin plugin in allPlugins)
+      for (final Plugin plugin in await plugins)
         if (plugin.platforms.containsKey(IOSPlugin.kConfigKey)) plugin.name,
     };
     final targetHeaderPattern = RegExp(
