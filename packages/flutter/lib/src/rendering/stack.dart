@@ -343,7 +343,7 @@ enum StackFit {
 /// parameter. The left of each non-positioned child becomes the difference
 /// between the stack's width and the child's width multiplied by
 /// (alignment.x + 1.0) / 2.0. The top of each non-positioned child is computed
-/// similarly using alignment.y.
+/// similarly from the stack's height, the child's height, and `alignment.y`.
 ///
 /// So if the alignment x and y properties are -1.0, then the non-positioned
 /// children remain in the upper-left corner (the top-start). If the
