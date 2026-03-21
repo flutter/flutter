@@ -136,7 +136,7 @@ To force the Flutter Tools snapshot to be regenerated, delete these files:
 rm ../../bin/cache/flutter_tools.stamp ../../bin/cache/flutter_tools.snapshot
 ```
 
-**On windows:**
+**On Windows:**
 
 ```bat
 del ..\..\bin\cache\flutter_tools.stamp ..\..\bin\cache\flutter_tools.snapshot
