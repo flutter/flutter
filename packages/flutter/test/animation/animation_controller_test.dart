@@ -1355,6 +1355,103 @@ void main() {
       },
     );
   });
+
+  group('pauseWhenNoListeners', () {
+    test('does not schedule frames when pauseWhenNoListeners is true and no listeners', () {
+      final controller = AnimationController(
+        duration: const Duration(milliseconds: 100),
+        vsync: const TestVSync(),
+        pauseWhenNoListeners: true,
+      );
+
+      // Start animation without listeners
+      controller.forward();
+
+      // Animation should be in forward status but value should not update
+      // because ticker is muted (no frames scheduled)
+      expect(controller.status, AnimationStatus.forward);
+      expect(controller.isAnimating, isTrue);
+
+      tick(const Duration(milliseconds: 10));
+      tick(const Duration(milliseconds: 50));
+
+      // Value should still be 0 because no frames were scheduled
+      expect(controller.value, 0.0);
+
+      controller.dispose();
+    });
+
+    test('schedules frames when listener is added with pauseWhenNoListeners true', () {
+      final controller = AnimationController(
+        duration: const Duration(milliseconds: 100),
+        vsync: const TestVSync(),
+        pauseWhenNoListeners: true,
+      );
+
+      // Start animation without listeners
+      controller.forward();
+      expect(controller.value, 0.0);
+
+      // Add a listener - this should unmute the ticker
+      controller.addListener(() {});
+
+      tick(const Duration(milliseconds: 10));
+      tick(const Duration(milliseconds: 60));
+
+      // Now value should update because ticker is no longer muted
+      expect(controller.value, moreOrLessEquals(0.5));
+
+      controller.dispose();
+    });
+
+    test('stops scheduling frames when last listener is removed with pauseWhenNoListeners true', () {
+      final controller = AnimationController(
+        duration: const Duration(milliseconds: 100),
+        vsync: const TestVSync(),
+        pauseWhenNoListeners: true,
+      );
+
+      void listener() {}
+      controller.addListener(listener);
+
+      controller.forward();
+      tick(const Duration(milliseconds: 10));
+      tick(const Duration(milliseconds: 30));
+
+      // Value should update because we have a listener
+      expect(controller.value, moreOrLessEquals(0.2));
+
+      // Remove the listener
+      controller.removeListener(listener);
+
+      // Advance time - value should not change because ticker is now muted
+      final valueBeforeRemoval = controller.value;
+      tick(const Duration(milliseconds: 60));
+      tick(const Duration(milliseconds: 90));
+
+      expect(controller.value, valueBeforeRemoval);
+
+      controller.dispose();
+    });
+
+    test('default pauseWhenNoListeners is false (backward compatible)', () {
+      final controller = AnimationController(
+        duration: const Duration(milliseconds: 100),
+        vsync: const TestVSync(),
+      );
+
+      // Start animation without listeners
+      controller.forward();
+
+      tick(const Duration(milliseconds: 10));
+      tick(const Duration(milliseconds: 60));
+
+      // Value should update even without listeners (backward compatible behavior)
+      expect(controller.value, moreOrLessEquals(0.5));
+
+      controller.dispose();
+    });
+  });
 }
 
 class TestSimulation extends Simulation {

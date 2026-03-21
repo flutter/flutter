@@ -131,8 +131,8 @@ class Ticker {
   /// Whether this [Ticker] has scheduled a call to call its callback
   /// on the next frame.
   ///
-  /// A ticker that is [muted] can be active (see [isActive]) yet not be
-  /// ticking. In that case, the ticker will not call its callback, and
+  /// A ticker that is [muted] or [isPaused] can be active (see [isActive]) yet
+  /// not be ticking. In that case, the ticker will not call its callback, and
   /// [isTicking] will be false, but time will still be progressing.
   ///
   /// This will return false if the [SchedulerBinding.lifecycleState] is one
@@ -143,6 +143,9 @@ class Ticker {
       return false;
     }
     if (muted) {
+      return false;
+    }
+    if (isPaused) {
       return false;
     }
     if (SchedulerBinding.instance.framesEnabled) {
@@ -256,6 +259,57 @@ class Ticker {
   @protected
   bool get scheduled => _animationId != null;
 
+  /// Whether this ticker is currently paused by its consumer.
+  ///
+  /// A paused ticker will not schedule frames, but time continues to elapse.
+  ///
+  /// Unlike [muted], which is controlled by the [TickerProvider] (e.g., based
+  /// on [TickerMode]), this property is controlled by the ticker's consumer
+  /// (e.g., [AnimationController]) to temporarily suspend frame scheduling.
+  ///
+  /// See also:
+  ///
+  ///  * [pause], which sets this to true.
+  ///  * [resume], which sets this to false.
+  bool _isPaused = false;
+
+  /// Whether this ticker is currently paused by its consumer.
+  bool get isPaused => _isPaused;
+
+  /// Pauses frame scheduling for this ticker.
+  ///
+  /// When paused, the ticker remains active and time continues to elapse,
+  /// but no frames are scheduled and the callback is not called.
+  ///
+  /// This is typically used by [AnimationController] to suspend frame
+  /// scheduling when there are no listeners.
+  ///
+  /// See also:
+  ///
+  ///  * [resume], which resumes frame scheduling.
+  void pause() {
+    if (!_isPaused) {
+      _isPaused = true;
+      unscheduleTick();
+    }
+  }
+
+  /// Resumes frame scheduling for this ticker after a [pause].
+  ///
+  /// If [shouldScheduleTick] is true, the ticker will schedule a frame.
+  ///
+  /// See also:
+  ///
+  ///  * [pause], which pauses frame scheduling.
+  void resume() {
+    if (_isPaused) {
+      _isPaused = false;
+      if (shouldScheduleTick) {
+        scheduleTick();
+      }
+    }
+  }
+
   /// Whether a tick should be scheduled.
   ///
   /// If this is true, then calling [scheduleTick] should succeed.
@@ -265,8 +319,9 @@ class Ticker {
   /// * A tick has already been scheduled for the coming frame.
   /// * The ticker is not active ([start] has not been called).
   /// * The ticker is not ticking, e.g. because it is [muted] (see [isTicking]).
+  /// * The ticker is [isPaused].
   @protected
-  bool get shouldScheduleTick => !muted && isActive && !scheduled;
+  bool get shouldScheduleTick => !muted && !isPaused && isActive && !scheduled;
 
   void _tick(Duration timeStamp) {
     assert(isTicking);
@@ -331,6 +386,7 @@ class Ticker {
     assert(_future == null);
     assert(_startTime == null);
     assert(_animationId == null);
+    assert(!_isPaused);
     assert(
       (originalTicker._future != null) || (originalTicker._startTime == null),
       'Cannot absorb Ticker after it has been disposed.',
@@ -338,6 +394,7 @@ class Ticker {
     if (originalTicker._future != null) {
       _future = originalTicker._future;
       _startTime = originalTicker._startTime;
+      _isPaused = originalTicker._isPaused;
       if (shouldScheduleTick) {
         scheduleTick();
       }

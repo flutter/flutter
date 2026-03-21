@@ -242,6 +242,11 @@ class AnimationController extends Animation<double>
   /// * `vsync` is the required [TickerProvider] for the current context. It can
   ///   be changed by calling [resync]. See [TickerProvider] for advice on
   ///   obtaining a ticker provider.
+  ///
+  /// * [pauseWhenNoListeners] controls whether the animation controller should
+  ///   pause frame scheduling when there are no listeners. When set to true,
+  ///   the controller will not request frames (saving CPU/GPU resources) until
+  ///   a listener is added. Defaults to false for backward compatibility.
   AnimationController({
     double? value,
     this.duration,
@@ -250,6 +255,7 @@ class AnimationController extends Animation<double>
     this.lowerBound = 0.0,
     this.upperBound = 1.0,
     this.animationBehavior = AnimationBehavior.normal,
+    this.pauseWhenNoListeners = false,
     required TickerProvider vsync,
   }) : assert(upperBound >= lowerBound),
        _direction = _AnimationDirection.forward {
@@ -272,6 +278,9 @@ class AnimationController extends Animation<double>
   ///   be changed by calling [resync]. See [TickerProvider] for advice on
   ///   obtaining a ticker provider.
   ///
+  /// * [pauseWhenNoListeners] controls whether the animation controller should
+  ///   pause frame scheduling when there are no listeners. Defaults to false.
+  ///
   /// This constructor is most useful for animations that will be driven using a
   /// physics simulation, especially when the physics simulation has no
   /// pre-determined bounds.
@@ -282,6 +291,7 @@ class AnimationController extends Animation<double>
     this.debugLabel,
     required TickerProvider vsync,
     this.animationBehavior = AnimationBehavior.preserve,
+    this.pauseWhenNoListeners = false,
   }) : lowerBound = double.negativeInfinity,
        upperBound = double.infinity,
        _direction = _AnimationDirection.forward {
@@ -308,6 +318,24 @@ class AnimationController extends Animation<double>
   /// [AnimationController.unbounded] constructor.
   final AnimationBehavior animationBehavior;
 
+  /// Whether the animation controller should pause frame scheduling when there
+  /// are no listeners.
+  ///
+  /// When a listener is added, frame scheduling resumes automatically.
+  ///
+  /// Defaults to false for backward compatibility. Set to true to enable this
+  /// optimization.
+  ///
+  /// Example usage:
+  /// ```dart
+  /// final controller = AnimationController(
+  ///   vsync: this,
+  ///   duration: const Duration(seconds: 1),
+  ///   pauseWhenNoListeners: true, // Enable optimization
+  /// );
+  /// ```
+  final bool pauseWhenNoListeners;
+
   /// Returns an [Animation<double>] for this animation controller, so that a
   /// pointer to this object can be passed around without allowing users of that
   /// pointer to mutate the [AnimationController] state.
@@ -326,6 +354,44 @@ class AnimationController extends Animation<double>
   Duration? reverseDuration;
 
   Ticker? _ticker;
+
+  /// The number of registered listeners (both value and status listeners).
+  ///
+  /// This is used to pause the ticker when there are no listeners, avoiding
+  /// unnecessary frame scheduling. Only used when [pauseWhenNoListeners] is true.
+  int _listenerCount = 0;
+
+  /// Called when a listener is registered with [addListener] or [addStatusListener].
+  ///
+  /// When [pauseWhenNoListeners] is true, this resumes the ticker when the
+  /// first listener is added while the animation is running.
+  @override
+  void didRegisterListener() {
+    if (!pauseWhenNoListeners) {
+      return;
+    }
+    _listenerCount += 1;
+    if (_listenerCount > 0 && isAnimating) {
+      // Resume ticker when we get our first listener while animating.
+      _ticker?.resume();
+    }
+  }
+
+  /// Called when a listener is unregistered with [removeListener] or [removeStatusListener].
+  ///
+  /// When [pauseWhenNoListeners] is true, this pauses the ticker when the
+  /// last listener is removed while the animation is running.
+  @override
+  void didUnregisterListener() {
+    if (!pauseWhenNoListeners) {
+      return;
+    }
+    _listenerCount -= 1;
+    if (_listenerCount == 0 && isAnimating) {
+      // Pause ticker when we lose our last listener while animating.
+      _ticker?.pause();
+    }
+  }
 
   /// Recreates the [Ticker] with the new [TickerProvider].
   void resync(TickerProvider vsync) {
@@ -864,6 +930,18 @@ class AnimationController extends Animation<double>
     _lastElapsedDuration = Duration.zero;
     _value = clampDouble(simulation.x(0.0), lowerBound, upperBound);
     final TickerFuture result = _ticker!.start();
+
+    if (pauseWhenNoListeners) {
+      if (_listenerCount == 0) {
+        if (!_ticker!.isPaused) {
+          _ticker!.pause();
+        }
+      } else {
+        if (_ticker!.isPaused) {
+          _ticker!.resume();
+        }
+      }
+    }
     _status = (_direction == _AnimationDirection.forward)
         ? AnimationStatus.forward
         : AnimationStatus.reverse;
