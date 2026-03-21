@@ -170,6 +170,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       logger: globals.logger,
       fileSystem: globals.fs,
       plistParser: globals.plistParser,
+      config: globals.config,
     ),
     SwiftPackageManagerGitignoreMigration(project, globals.logger),
     MetalAPIValidationMigrator.ios(app.project, globals.logger),
@@ -290,8 +291,10 @@ Future<XcodeBuildResult> buildXcodeProject({
   final bool incrementalBuild = targetBuildDir != null && targetBuildDir.existsSync();
 
   final buildCommands = <String>[
-    ...globals.xcode!.xcrunCommand(),
-    'xcodebuild',
+    ...globals.xcode!.xcodebuildCommand(
+      globals.fs.directory(buildDirectoryPath),
+      skipPackageResolution: false,
+    ),
     '-configuration',
     configuration,
   ];

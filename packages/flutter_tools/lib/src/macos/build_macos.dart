@@ -103,6 +103,7 @@ Future<void> buildMacOS({
       logger: globals.logger,
       fileSystem: globals.fs,
       plistParser: globals.plistParser,
+      config: globals.config,
     ),
     SwiftPackageManagerGitignoreMigration(flutterProject, globals.logger),
     MetalAPIValidationMigrator.macos(flutterProject.macos, globals.logger),
@@ -127,6 +128,7 @@ Future<void> buildMacOS({
   final XcodeProjectInfo? projectInfo = await globals.xcodeProjectInterpreter?.getInfo(
     xcodeProject.parent.path,
     projectFilename: xcodeProjectName,
+    buildDirectory: flutterBuildDir,
   );
   final String? scheme = projectInfo?.schemeFor(buildInfo);
   if (scheme == null) {
@@ -217,8 +219,7 @@ Future<void> buildMacOS({
     result = await globals.processUtils.stream(
       <String>[
         '/usr/bin/env',
-        'xcrun',
-        'xcodebuild',
+        ...globals.xcode!.xcodebuildCommand(flutterProject.dartTool, skipPackageResolution: false),
         '-workspace',
         xcodeWorkspace.path,
         '-configuration',

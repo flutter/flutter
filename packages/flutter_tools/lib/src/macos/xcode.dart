@@ -231,6 +231,12 @@ class Xcode {
   /// See [XcodeProjectInterpreter.xcrunCommand].
   List<String> xcrunCommand() => _xcodeProjectInterpreter.xcrunCommand();
 
+  List<String> xcodebuildCommand(Directory dartToolDir, {bool skipPackageResolution = true}) =>
+      _xcodeProjectInterpreter.xcodebuildCommand(
+        dartToolDir,
+        skipPackageResolution: skipPackageResolution,
+      );
+
   Future<RunResult> cc(List<String> args) => _run('cc', args);
 
   Future<RunResult> clang(List<String> args) => _run('clang', args);
