@@ -148,8 +148,8 @@ class DaemonInputStreamConverter {
             _controller.add(DaemonMessage(value));
           }
         }
-      } on FormatException {
-        // Ignore malformed JSON lines and continue parsing subsequent messages.
+      } on Object {
+        // Ignore malformed daemon JSON lines and continue parsing subsequent messages.
       }
     }
 

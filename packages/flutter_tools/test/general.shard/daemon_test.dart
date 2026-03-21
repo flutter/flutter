@@ -251,7 +251,7 @@ void main() {
       () async {
         final inputStream = Stream<List<int>>.fromIterable(<List<int>>[
           testCommandBinary(10),
-          utf8.encode('[{"id":}\n'),
+          utf8.encode('[{"id":}]\n'),
           testCommandBinary(20),
         ]);
         final converter = DaemonInputStreamConverter(inputStream);
