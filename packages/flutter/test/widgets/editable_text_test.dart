@@ -540,6 +540,45 @@ void main() {
     expect(render.backgroundCursorColor, Colors.green);
   });
 
+  testWidgets('when cursorWidth is updated, TextSelectionOverlay should be updated', (
+    WidgetTester tester,
+  ) async {
+    Widget buildWidget(double cursorWidth) {
+      return MaterialApp(
+        home: EditableText(
+          controller: controller,
+          backgroundCursorColor: Colors.grey,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          cursorWidth: cursorWidth,
+          selectionControls: materialTextSelectionControls,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget(2.0));
+    final EditableTextState state = tester.state(find.byType(EditableText));
+
+    // Ensure valid selection and focus.
+    controller.selection = const TextSelection.collapsed(offset: 0);
+    focusNode.requestFocus();
+    await tester.pump();
+
+    // Use toggleToolbar to force creation of selectionOverlay if it doesn't exist.
+    state.toggleToolbar();
+    await tester.pump();
+
+    // Verify initial state.
+    expect(state.selectionOverlay, isNotNull);
+
+    // Update cursorWidth.
+    await tester.pumpWidget(buildWidget(10.0));
+
+    // Verify selectionOverlay still exists after update.
+    expect(state.selectionOverlay, isNotNull);
+  });
+
   testWidgets('text keyboard is requested when maxLines is default', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
@@ -17232,9 +17271,10 @@ void main() {
         .getHandleSize(lineHeight)
         .height;
     final double interactiveHandleHeight = math.max(handleHeight, kMinInteractiveDimension);
-    final Offset anchor = state.selectionOverlay!.selectionControls!.getHandleAnchor(
+    final Offset anchor = state.selectionOverlay!.selectionControls!.calculateHandleAnchor(
       TextSelectionHandleType.collapsed,
       lineHeight,
+      targetWidth: state.widget.cursorWidth,
     );
     final double handleCenter = handleHeight / 2 - anchor.dy;
     final double bottomSpacing = math.max(

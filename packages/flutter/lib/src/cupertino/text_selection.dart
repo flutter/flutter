@@ -153,9 +153,13 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
 
   /// Gets anchor for cupertino-style text selection handles.
   ///
-  /// See [TextSelectionControls.getHandleAnchor].
+  /// See [TextSelectionControls.calculateHandleAnchor].
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset calculateHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, {
+    required double targetWidth,
+  }) {
     final Size handleSize = getHandleSize(textLineHeight);
 
     switch (type) {
