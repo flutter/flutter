@@ -5735,4 +5735,40 @@ void main() {
     );
     await tester.pump();
   });
+
+  testWidgets(
+    'Right-click selects word on macOS SelectableText',
+    (WidgetTester tester) async {
+      const text = 'abc def ghi';
+      TextSelection? selection;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: SelectableText(
+              text,
+              onSelectionChanged: (TextSelection s, SelectionChangedCause? _) {
+                selection = s;
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Right-click in the middle of 'def'.
+      final Offset defPos = textOffsetToPosition(tester, 5);
+      final TestGesture gesture = await tester.startGesture(
+        defPos,
+        kind: PointerDeviceKind.mouse,
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Right-click should select the word under the cursor, matching NSTextView behavior.
+      expect(selection?.baseOffset, 4);
+      expect(selection?.extentOffset, 7);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.macOS}),
+  );
 }
