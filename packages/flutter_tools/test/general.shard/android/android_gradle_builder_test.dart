@@ -327,6 +327,10 @@ void main() {
             ],
           );
         }, throwsToolExit(message: 'Gradle task assembleRelease failed with exit code 1'));
+        // Allow any fire-and-forget async work (triggered via `unawaited`) to complete.
+        // Without this, analytics events scheduled on the event queue may not run
+        // before assertions, causing flaky or failing tests.
+        await Future<void>.delayed(Duration.zero);
 
         expect(logger.statusText, contains('Retrying Gradle Build: #1, wait time: 100ms'));
         expect(logger.statusText, contains('Retrying Gradle Build: #2, wait time: 200ms'));
@@ -350,7 +354,7 @@ void main() {
               success: false,
               label: 'gradle-random-event-label-failure',
               isModule: false,
-              jdkVersion: 19
+              jdkVersion: 19,
             ),
           ),
         );
@@ -434,7 +438,10 @@ void main() {
             ],
           );
         }, throwsToolExit(message: 'Gradle task assembleRelease failed with exit code 1'));
-
+        // Allow any fire-and-forget async work (triggered via `unawaited`) to complete.
+        // Without this, analytics events scheduled on the event queue may not run
+        // before assertions, causing flaky or failing tests.
+        await Future<void>.delayed(Duration.zero);
         expect(handlerCalled, isTrue);
 
         expect(fakeAnalytics.sentEvents, hasLength(4));
@@ -455,7 +462,7 @@ void main() {
               success: false,
               label: 'gradle-random-event-label-failure',
               isModule: false,
-              jdkVersion: 19
+              jdkVersion: 19,
             ),
           ),
         );

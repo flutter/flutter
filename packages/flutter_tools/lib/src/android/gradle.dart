@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
@@ -376,11 +377,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
         project: project,
         usesAndroidX: usesAndroidX,
       );
-      final String? gradleVersion = await gradle.getGradleVersion(
-        project.android.hostAppGradleRoot,
-        globals.logger,
-        globals.processManager,
-      );
+
       if (maxRetries == null || retry < maxRetries) {
         switch (status) {
           case GradleBuildStatus.retry:
@@ -410,16 +407,26 @@ class AndroidGradleBuilder implements AndroidBuilder {
                   settings: 'androidGradlePluginVersion: $agpVersion',
                 ),
               );
-              _analytics.send(
-                Event.flutterTrackAndroidDependencies(
-                  success: true,
-                  label: successEventLabel,
-                  isModule: project.isModule,
-                  agpVersion: agpVersion,
-                  jdkVersion: _java?.version?.major,
-                  gradleVersion: gradleVersion,
-                ),
+              unawaited(
+                Future(() async {
+                  final String? gradleVersion = await gradle.getGradleVersion(
+                    project.android.hostAppGradleRoot,
+                    globals.logger,
+                    globals.processManager,
+                  );
+                  _analytics.send(
+                    Event.flutterTrackAndroidDependencies(
+                      success: true,
+                      label: successEventLabel,
+                      isModule: project.isModule,
+                      agpVersion: agpVersion,
+                      jdkVersion: _java?.version?.major,
+                      gradleVersion: gradleVersion,
+                    ),
+                  );
+                }),
               );
+
               return exitCode;
             }
           case GradleBuildStatus.exit:
@@ -434,15 +441,25 @@ class AndroidGradleBuilder implements AndroidBuilder {
           settings: 'androidGradlePluginVersion: $agpVersion',
         ),
       );
-      _analytics.send(
-        Event.flutterTrackAndroidDependencies(
-          success: false,
-          label: usageLabel,
-          isModule: project.isModule,
-          agpVersion: agpVersion,
-          jdkVersion: _java?.version?.major,
-          gradleVersion: gradleVersion,
-        ),
+      unawaited(
+        Future(() async {
+          final String? gradleVersion = await gradle.getGradleVersion(
+            project.android.hostAppGradleRoot,
+            globals.logger,
+            globals.processManager,
+          );
+
+          _analytics.send(
+            Event.flutterTrackAndroidDependencies(
+              success: false,
+              label: usageLabel,
+              isModule: project.isModule,
+              agpVersion: agpVersion,
+              jdkVersion: _java?.version?.major,
+              gradleVersion: gradleVersion,
+            ),
+          );
+        }),
       );
     }
 
