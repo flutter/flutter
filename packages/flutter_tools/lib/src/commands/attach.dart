@@ -22,7 +22,6 @@ import '../daemon.dart';
 import '../device.dart';
 import '../device_vm_service_discovery_for_attach.dart';
 import '../hook_runner.dart' show hookRunner;
-import 'daemon.dart';
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
 import '../macos/macos_ipad_device.dart';
@@ -34,6 +33,7 @@ import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
 import '../vmservice.dart';
+import 'daemon.dart';
 
 /// A Flutter-command that attaches to applications that have been launched
 /// without `flutter run`.
