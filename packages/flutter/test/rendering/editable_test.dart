@@ -884,6 +884,104 @@ void main() {
     expect(endpoints[0].point.dx, 0);
   });
 
+  test('getEndpointsForSelection returns logical endpoint directions for mixed-direction text', () {
+    final TextSelectionDelegate delegate = _FakeEditableTextState();
+    const text = 'abc مرحبا';
+    final editable = RenderEditable(
+      text: const TextSpan(
+        text: text,
+        style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+      ),
+      textDirection: TextDirection.ltr,
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+    );
+
+    editable.layout(BoxConstraints.loose(const Size(200, 20)));
+
+    final List<TextSelectionPoint> endpoints = editable.getEndpointsForSelection(
+      const TextSelection(baseOffset: 0, extentOffset: text.length),
+    );
+
+    expect(endpoints.length, 2);
+    expect(endpoints[0].direction, TextDirection.ltr);
+    expect(endpoints[1].direction, TextDirection.rtl);
+  });
+
+  test('getEndpointsForSelection does not split surrogate pairs', () {
+    final TextSelectionDelegate delegate = _FakeEditableTextState();
+    const text = 'a😀b';
+    final editable = RenderEditable(
+      text: const TextSpan(
+        text: text,
+        style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+      ),
+      textDirection: TextDirection.ltr,
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+    );
+
+    editable.layout(BoxConstraints.loose(const Size(200, 20)));
+
+    final List<TextSelectionPoint> endpoints = editable.getEndpointsForSelection(
+      const TextSelection(baseOffset: 1, extentOffset: 3),
+    );
+
+    expect(endpoints, hasLength(2));
+    expect(endpoints.first.direction, TextDirection.ltr);
+    expect(endpoints.last.direction, TextDirection.ltr);
+  });
+
+  test('getEndpointsForSelection keeps wrapped RTL word endpoints tight', () {
+    final TextSelectionDelegate delegate = _FakeEditableTextState();
+    const text = 'صصصصصص صصصصصصصص صصصصصصص صصصصصصصصص صصصصصصصصصص';
+
+    RenderEditable buildEditable(BoxWidthStyle selectionWidthStyle) {
+      return RenderEditable(
+        maxLines: null,
+        text: const TextSpan(
+          text: text,
+          style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+        ),
+        textDirection: TextDirection.rtl,
+        offset: ViewportOffset.zero(),
+        textSelectionDelegate: delegate,
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        selectionWidthStyle: selectionWidthStyle,
+      );
+    }
+
+    final RenderEditable maxEditable = buildEditable(BoxWidthStyle.max);
+    maxEditable.layout(BoxConstraints.loose(const Size(240, 100)));
+    final List<TextSelectionPoint> maxEndpoints = maxEditable.getEndpointsForSelection(
+      const TextSelection(baseOffset: 8, extentOffset: 15),
+    );
+
+    final RenderEditable tightEditable = buildEditable(BoxWidthStyle.tight);
+    tightEditable.layout(BoxConstraints.loose(const Size(240, 100)));
+    final List<TextSelectionPoint> tightEndpoints = tightEditable.getEndpointsForSelection(
+      const TextSelection(baseOffset: 8, extentOffset: 15),
+    );
+
+    expect(maxEndpoints, hasLength(2));
+    expect(tightEndpoints, hasLength(2));
+    expect(maxEndpoints.first.direction, TextDirection.rtl);
+    expect(maxEndpoints.last.direction, TextDirection.rtl);
+    expect(tightEndpoints.first.direction, TextDirection.rtl);
+    expect(tightEndpoints.last.direction, TextDirection.rtl);
+    expect(
+      maxEndpoints.first.point.dx,
+      moreOrLessEquals(tightEndpoints.first.point.dx, epsilon: 0.01),
+    );
+    expect(maxEndpoints.last.point.dx, moreOrLessEquals(0.0, epsilon: 0.01));
+    expect(tightEndpoints.last.point.dx, greaterThan(0.0));
+  });
+
   test('TextSelectionPoint can compare', () {
     // ignore: prefer_const_constructors
     final first = TextSelectionPoint(Offset(1, 2), TextDirection.ltr);

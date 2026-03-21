@@ -540,22 +540,45 @@ class TextSelectionOverlay {
   }
 
   void _updateSelectionOverlay() {
+    final List<TextSelectionPoint> endpoints = renderObject.getEndpointsForSelection(_selection);
+    assert(endpoints.isNotEmpty);
+
+    late final TextSelectionHandleType startHandleType;
+    late final TextSelectionHandleType endHandleType;
+
+    if (_selection.isCollapsed) {
+      startHandleType = TextSelectionHandleType.collapsed;
+      endHandleType = TextSelectionHandleType.collapsed;
+    } else {
+      final TextDirection textDirection = renderObject.textDirection;
+      // UIKit keeps selection handles aligned with the field direction.
+      final bool useTextDirectionForSelectionHandles = defaultTargetPlatform == TargetPlatform.iOS;
+      final TextDirection startHandleDirection = useTextDirectionForSelectionHandles
+          ? textDirection
+          : endpoints.first.direction ?? textDirection;
+      final TextSelectionPoint? endPoint = endpoints.length > 1 ? endpoints.last : null;
+      final TextDirection endHandleDirection = useTextDirectionForSelectionHandles
+          ? textDirection
+          : (endPoint?.direction ?? endpoints.first.direction) ?? textDirection;
+
+      startHandleType = switch (startHandleDirection) {
+        TextDirection.ltr => TextSelectionHandleType.left,
+        TextDirection.rtl => TextSelectionHandleType.right,
+      };
+      endHandleType = switch (endHandleDirection) {
+        TextDirection.ltr => TextSelectionHandleType.right,
+        TextDirection.rtl => TextSelectionHandleType.left,
+      };
+    }
+
     _selectionOverlay
       // Update selection handle metrics.
-      ..startHandleType = _chooseType(
-        renderObject.textDirection,
-        TextSelectionHandleType.left,
-        TextSelectionHandleType.right,
-      )
+      ..startHandleType = startHandleType
       ..lineHeightAtStart = _getStartGlyphHeight()
-      ..endHandleType = _chooseType(
-        renderObject.textDirection,
-        TextSelectionHandleType.right,
-        TextSelectionHandleType.left,
-      )
+      ..endHandleType = endHandleType
       ..lineHeightAtEnd = _getEndGlyphHeight()
       // Update selection toolbar metrics.
-      ..selectionEndpoints = renderObject.getEndpointsForSelection(_selection)
+      ..selectionEndpoints = endpoints
       ..toolbarLocation = renderObject.lastSecondaryTapDownPosition;
   }
 
@@ -579,7 +602,7 @@ class TextSelectionOverlay {
   /// See also:
   ///
   ///   * [spellCheckToolbarIsVisible], which is only whether the spell check menu
-  ///     specifically is visible.
+  ///     is visible.
   bool get toolbarIsVisible => _selectionOverlay.toolbarIsVisible;
 
   /// {@macro flutter.widgets.SelectionOverlay.magnifierIsVisible}
@@ -1022,21 +1045,6 @@ class TextSelectionOverlay {
       _value.copyWith(selection: newSelection),
       SelectionChangedCause.drag,
     );
-  }
-
-  TextSelectionHandleType _chooseType(
-    TextDirection textDirection,
-    TextSelectionHandleType ltrType,
-    TextSelectionHandleType rtlType,
-  ) {
-    if (_selection.isCollapsed) {
-      return TextSelectionHandleType.collapsed;
-    }
-
-    return switch (textDirection) {
-      TextDirection.ltr => ltrType,
-      TextDirection.rtl => rtlType,
-    };
   }
 }
 

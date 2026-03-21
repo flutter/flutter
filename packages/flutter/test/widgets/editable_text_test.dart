@@ -17909,6 +17909,56 @@ void main() {
     controller.selection = const TextSelection.collapsed(offset: 0);
     await tester.pump();
   });
+
+  testWidgets(
+    'default selection width style uses tight on Android',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: EditableText(
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              backgroundCursorColor: Colors.grey,
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state(find.byType(EditableText));
+      expect(state.renderEditable.selectionWidthStyle, BoxWidthStyle.tight);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
+
+  testWidgets(
+    'default selection width style uses max on iOS',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: EditableText(
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              backgroundCursorColor: Colors.grey,
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state(find.byType(EditableText));
+      expect(state.renderEditable.selectionWidthStyle, BoxWidthStyle.max);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
 }
 
 class UnsettableController extends TextEditingController {
