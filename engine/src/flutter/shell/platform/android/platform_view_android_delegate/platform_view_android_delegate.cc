@@ -214,6 +214,7 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
       buffer_float32[position++] = static_cast<float>(node.scrollPosition);
       buffer_float32[position++] = static_cast<float>(node.scrollExtentMax);
       buffer_float32[position++] = static_cast<float>(node.scrollExtentMin);
+      buffer_int32[position++] = static_cast<int32_t>(node.role);
 
       putStringIntoBuffer(node.identifier, buffer_int32, &position, strings);
 
@@ -242,6 +243,8 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
       putStringIntoBuffer(node.tooltip, buffer_int32, &position, strings);
       putStringIntoBuffer(node.linkUrl, buffer_int32, &position, strings);
       putStringIntoBuffer(node.locale, buffer_int32, &position, strings);
+      putStringIntoBuffer(node.minValue, buffer_int32, &position, strings);
+      putStringIntoBuffer(node.maxValue, buffer_int32, &position, strings);
 
       buffer_int32[position++] = node.headingLevel;
       buffer_int32[position++] = node.textDirection;
