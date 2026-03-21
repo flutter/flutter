@@ -10910,4 +10910,37 @@ void main() {
     controller.selection = const TextSelection.collapsed(offset: 0);
     await tester.pump();
   });
+
+  testWidgets('CupertinoTextField passes enableInlinePrediction to EditableText', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const CupertinoApp(home: Center(child: CupertinoTextField(enableInlinePrediction: true))),
+    );
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.enableInlinePrediction, true);
+  });
+
+  testWidgets('CupertinoTextField enableInlinePrediction defaults to null', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const CupertinoApp(home: Center(child: CupertinoTextField())));
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.enableInlinePrediction, isNull);
+  });
+
+  testWidgets('CupertinoTextField.borderless passes enableInlinePrediction to EditableText', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(child: CupertinoTextField.borderless(enableInlinePrediction: true)),
+      ),
+    );
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.enableInlinePrediction, true);
+  });
 }

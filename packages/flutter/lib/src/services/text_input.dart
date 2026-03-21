@@ -531,6 +531,7 @@ class TextInputConfiguration {
     this.allowedMimeTypes = const <String>[],
     this.enableDeltaModel = false,
     this.hintLocales = const <Locale>[],
+    this.enableInlinePrediction,
   }) : smartDashesType =
            smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType =
@@ -702,6 +703,18 @@ class TextInputConfiguration {
   /// {@endtemplate}
   final List<Locale>? hintLocales;
 
+  /// {@template flutter.services.TextInputConfiguration.enableInlinePrediction}
+  /// Whether to enable inline predictive text.
+  ///
+  /// This feature is specific to iOS 17 and later. It has no effect on other
+  /// platforms.
+  ///
+  /// By default, this property is null, which means inline prediction is
+  /// disabled on iOS. Setting this flag overrides the platform behavior:
+  /// when true, inline prediction is enabled; when false, it is disabled.
+  /// {@endtemplate}
+  final bool? enableInlinePrediction;
+
   /// Creates a copy of this [TextInputConfiguration] with the given fields
   /// replaced with new values.
   TextInputConfiguration copyWith({
@@ -723,6 +736,7 @@ class TextInputConfiguration {
     AutofillConfiguration? autofillConfiguration,
     bool? enableDeltaModel,
     List<Locale>? hintLocales,
+    bool? enableInlinePrediction,
   }) {
     return TextInputConfiguration(
       viewId: viewId ?? this.viewId,
@@ -744,6 +758,7 @@ class TextInputConfiguration {
       autofillConfiguration: autofillConfiguration ?? this.autofillConfiguration,
       enableDeltaModel: enableDeltaModel ?? this.enableDeltaModel,
       hintLocales: hintLocales ?? this.hintLocales,
+      enableInlinePrediction: enableInlinePrediction ?? this.enableInlinePrediction,
     );
   }
 
@@ -794,6 +809,7 @@ class TextInputConfiguration {
       'autofill': ?autofill,
       'enableDeltaModel': enableDeltaModel,
       'hintLocales': hintLocales?.map((Locale locale) => locale.toLanguageTag()).toList(),
+      'enableInlinePrediction': enableInlinePrediction,
     };
   }
 
@@ -823,7 +839,8 @@ class TextInputConfiguration {
         other.enableIMEPersonalizedLearning == enableIMEPersonalizedLearning &&
         listEquals(other.allowedMimeTypes, allowedMimeTypes) &&
         other.enableDeltaModel == enableDeltaModel &&
-        other.hintLocales == hintLocales;
+        other.hintLocales == hintLocales &&
+        other.enableInlinePrediction == enableInlinePrediction;
   }
 
   @override
@@ -847,6 +864,7 @@ class TextInputConfiguration {
       Object.hashAll(allowedMimeTypes),
       enableDeltaModel,
       hintLocales,
+      enableInlinePrediction,
     );
   }
 
@@ -871,6 +889,7 @@ class TextInputConfiguration {
       'allowedMimeTypes: $allowedMimeTypes',
       'enableDeltaModel: $enableDeltaModel',
       if (hintLocales != null) 'hintLocales: $hintLocales',
+      if (enableInlinePrediction != null) 'enableInlinePrediction: $enableInlinePrediction',
     ];
     return 'TextInputConfiguration(${description.join(', ')})';
   }
