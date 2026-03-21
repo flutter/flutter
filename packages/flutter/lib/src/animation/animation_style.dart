@@ -8,7 +8,6 @@ library;
 import 'package:flutter/foundation.dart';
 
 import 'curves.dart';
-import 'tween.dart';
 
 /// Used to override the default parameters of an animation.
 ///
@@ -65,16 +64,52 @@ class AnimationStyle with Diagnosticable {
     );
   }
 
+  /// Creates a new [AnimationStyle] that is a combination of this animation style
+  /// and the given `other` animation style.
+  ///
+  /// If `other` is non-null, its non-null properties are used to override the
+  /// corresponding properties of this style.
+  ///
+  /// Returns this animation style if `other` is null.
+  AnimationStyle merge(AnimationStyle? other) {
+    if (other == null) {
+      return this;
+    }
+    return copyWith(
+      curve: other.curve,
+      duration: other.duration,
+      reverseCurve: other.reverseCurve,
+      reverseDuration: other.reverseDuration,
+    );
+  }
+
   /// Linearly interpolate between two animation styles.
   static AnimationStyle? lerp(AnimationStyle? a, AnimationStyle? b, double t) {
     if (identical(a, b)) {
       return a;
     }
     return AnimationStyle(
-      curve: t < 0.5 ? a?.curve : b?.curve,
-      duration: t < 0.5 ? a?.duration : b?.duration,
-      reverseCurve: t < 0.5 ? a?.reverseCurve : b?.reverseCurve,
-      reverseDuration: t < 0.5 ? a?.reverseDuration : b?.reverseDuration,
+      curve: _lerp(a?.curve, b?.curve, t, _LerpedCurve.new),
+      duration: _lerp(a?.duration, b?.duration, t, _lerpDuration),
+      reverseCurve: _lerp(a?.reverseCurve, b?.reverseCurve, t, _LerpedCurve.new),
+      reverseDuration: _lerp(a?.reverseDuration, b?.reverseDuration, t, _lerpDuration),
+    );
+  }
+
+  @optionalTypeArgs
+  static T? _lerp<T extends Object>(T? a, T? b, double t, T Function(T? a, T? b, double t) lerp) {
+    if (a == b || t == 0.0) {
+      return a;
+    }
+    if (t == 1.0) {
+      return b;
+    }
+    return lerp(a, b, t);
+  }
+
+  static Duration _lerpDuration(Duration? a, Duration? b, double t) {
+    return Duration(
+      microseconds: ((a?.inMicroseconds ?? 0) * (1.0 - t) + (b?.inMicroseconds ?? 0) * t).round(),
     );
   }
 
@@ -106,4 +141,36 @@ class AnimationStyle with Diagnosticable {
       DiagnosticsProperty<Duration>('reverseDuration', reverseDuration, defaultValue: null),
     );
   }
+}
+
+class _LerpedCurve extends Curve {
+  const _LerpedCurve(Curve? a, Curve? b, this._t)
+    : first = a ?? Curves.linear,
+      second = b ?? Curves.linear;
+
+  final Curve first;
+  final Curve second;
+  final double _t;
+
+  @override
+  double transform(double t) {
+    final double a = first.transform(t);
+    final double b = second.transform(t);
+
+    return a * (1.0 - _t) + b * _t;
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is _LerpedCurve &&
+        other.first == first &&
+        other.second == second &&
+        other._t == _t;
+  }
+
+  @override
+  int get hashCode => Object.hash(first, second, _t);
+
+  @override
+  String toString() => '_LerpedCurve($first, $second, t: $_t)';
 }
