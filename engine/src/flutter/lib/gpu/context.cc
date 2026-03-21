@@ -44,10 +44,8 @@ std::shared_ptr<impeller::Context> Context::GetDefaultContext(
   if (!dart_state->IsImpellerEnabled()) {
     out_error =
         "Flutter GPU requires the Impeller rendering backend, but Impeller is "
-        "not enabled. Impeller can be enabled by adding the FLTEnableImpeller "
-        "key set to true in the Info.plist on iOS/macOS, or the "
-        "io.flutter.embedding.android.EnableImpeller metadata key to true in "
-        "the AndroidManifest.xml on Android.";
+        "not enabled. For more details about where Impeller is available and "
+        "how to enable it, see: https://docs.flutter.dev/perf/impeller";
     return nullptr;
   }
   if (!dart_state->IsFlutterGPUEnabled()) {
