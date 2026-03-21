@@ -39,7 +39,7 @@ class _ReorderableListViewExampleState extends State<ReorderableExample> {
     final Color evenItemColor = colorScheme.primary.withValues(alpha: 0.15);
 
     return ReorderableListView(
-      padding: const EdgeInsets.symmetric(horizontal: 40),
+      padding: const .symmetric(horizontal: 40),
       children: <Widget>[
         for (int index = 0; index < _items.length; index += 1)
           ListTile(

@@ -92,7 +92,7 @@ class _TreeSliverExampleState extends State<TreeSliverExample> {
           // Leading icon for parent nodes
           if (isParentNode)
             DecoratedBox(
-              decoration: BoxDecoration(border: Border.all()),
+              decoration: BoxDecoration(border: .all()),
               child: SizedBox.square(
                 dimension: 20.0,
                 child: Icon(
@@ -112,7 +112,7 @@ class _TreeSliverExampleState extends State<TreeSliverExample> {
 
   Widget _getTree() {
     return DecoratedSliver(
-      decoration: BoxDecoration(border: Border.all()),
+      decoration: BoxDecoration(border: .all()),
       sliver: TreeSliver<String>(
         tree: tree,
         onNodeToggle: (TreeSliverNode<Object?> node) {
@@ -163,7 +163,7 @@ class _TreeSliverExampleState extends State<TreeSliverExample> {
             child: CustomScrollView(slivers: <Widget>[_getTree()]),
           ),
           DecoratedBox(
-            decoration: BoxDecoration(border: Border.all()),
+            decoration: BoxDecoration(border: .all()),
             child: SizedBox(
               width: screenWidth / 2,
               height: double.infinity,

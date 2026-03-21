@@ -14,7 +14,7 @@ class CupertinoButtonApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: Brightness.light),
+      theme: CupertinoThemeData(brightness: .light),
       home: CupertinoButtonExample(),
     );
   }
@@ -31,7 +31,7 @@ class CupertinoButtonExample extends StatelessWidget {
       ),
       child: Center(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
           children: <Widget>[
             const CupertinoButton(onPressed: null, child: Text('Disabled')),
             const SizedBox(height: 30),

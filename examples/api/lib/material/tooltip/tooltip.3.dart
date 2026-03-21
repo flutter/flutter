@@ -38,7 +38,7 @@ class TooltipSample extends StatelessWidget {
           // Provide a global key with the "TooltipState" type to show
           // the tooltip manually when trigger mode is set to manual.
           key: tooltipkey,
-          triggerMode: TooltipTriggerMode.manual,
+          triggerMode: .manual,
           showDuration: const Duration(seconds: 1),
           message: 'I am a Tooltip',
           child: const Text('Tap on the FAB'),

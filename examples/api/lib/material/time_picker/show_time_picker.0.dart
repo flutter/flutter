@@ -18,7 +18,7 @@ class ShowTimePickerApp extends StatefulWidget {
 }
 
 class _ShowTimePickerAppState extends State<ShowTimePickerApp> {
-  ThemeMode themeMode = ThemeMode.dark;
+  ThemeMode themeMode = .dark;
   bool useMaterial3 = true;
 
   void setThemeMode(ThemeMode mode) {
@@ -69,10 +69,10 @@ class TimePickerOptions extends StatefulWidget {
 
 class _TimePickerOptionsState extends State<TimePickerOptions> {
   TimeOfDay? selectedTime;
-  TimePickerEntryMode entryMode = TimePickerEntryMode.dial;
+  TimePickerEntryMode entryMode = .dial;
   Orientation? orientation;
-  TextDirection textDirection = TextDirection.ltr;
-  MaterialTapTargetSize tapTargetSize = MaterialTapTargetSize.padded;
+  TextDirection textDirection = .ltr;
+  MaterialTapTargetSize tapTargetSize = .padded;
   bool use24HourTime = false;
 
   void _entryModeChanged(TimePickerEntryMode? value) {
@@ -190,10 +190,10 @@ class _TimePickerOptionsState extends State<TimePickerOptions> {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 Padding(
-                  padding: const EdgeInsets.all(12.0),
+                  padding: const .all(12.0),
                   child: ElevatedButton(
                     child: const Text('Open time picker'),
                     onPressed: () async {
@@ -267,17 +267,14 @@ class ChoiceCard<T extends Object?> extends StatelessWidget {
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const .all(8.0),
             child: RadioGroup<T>(
               groupValue: value,
               onChanged: onChanged,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: .start,
                 children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(title),
-                  ),
+                  Padding(padding: const .all(8.0), child: Text(title)),
                   for (final T choice in choices)
                     RadioSelection<T>(
                       value: choice,
@@ -332,10 +329,10 @@ class RadioSelection<T extends Object?> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: .min,
       children: <Widget>[
         Padding(
-          padding: const EdgeInsetsDirectional.only(end: 8),
+          padding: const .directional(end: 8),
           child: Radio<T>(value: value),
         ),
         GestureDetector(

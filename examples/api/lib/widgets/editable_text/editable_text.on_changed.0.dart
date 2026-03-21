@@ -37,7 +37,7 @@ class _OnChangedExampleState extends State<OnChangedExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: .center,
         children: <Widget>[
           const Text('What number comes next in the sequence?'),
           const Text('1, 1, 2, 3, 5, 8...?'),

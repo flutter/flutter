@@ -46,7 +46,7 @@ class RawMenuAnchorSubmenuAnimationExample extends StatelessWidget {
           context,
         )!;
         return Align(
-          alignment: Alignment.topRight,
+          alignment: .topRight,
           child: Column(
             children: <Widget>[
               for (int i = 0; i < 4; i++)
@@ -57,7 +57,7 @@ class RawMenuAnchorSubmenuAnimationExample extends StatelessWidget {
                       child: Center(
                         child: Text(
                           'Panel $i:\n${status.name}',
-                          textAlign: TextAlign.center,
+                          textAlign: .center,
                         ),
                       ),
                     );
@@ -191,7 +191,7 @@ class MenuState extends State<Menu> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      role: SemanticsRole.menu,
+      role: .menu,
       child: RawMenuAnchor(
         controller: menuController,
         onOpenRequested: _handleMenuOpenRequest,
@@ -219,8 +219,8 @@ class MenuState extends State<Menu> with SingleTickerProviderStateMixin {
                     opacity: animation,
                     child: Material(
                       elevation: 8,
-                      clipBehavior: Clip.antiAlias,
-                      borderRadius: BorderRadius.circular(8),
+                      clipBehavior: .antiAlias,
+                      borderRadius: .circular(8),
                       shadowColor: colorScheme.shadow,
                       child: SizeTransition(
                         alignment: AlignmentDirectional(

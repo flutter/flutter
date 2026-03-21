@@ -47,7 +47,7 @@ class SafeAreaExampleApp extends StatelessWidget {
           body: const DefaultTextStyle(
             style: TextStyle(
               fontSize: 16,
-              fontWeight: FontWeight.w600,
+              fontWeight: .w600,
               color: Colors.black,
             ),
             child: Center(child: SafeAreaExample()),
@@ -209,7 +209,7 @@ class Insets extends UniqueWidget<InsetsState> {
 class InsetsState extends State<Insets> {
   static InsetsState get instance => const Insets().currentState!;
 
-  EdgeInsets insets = const EdgeInsets.fromLTRB(8, 25, 8, 12);
+  EdgeInsets insets = const .fromLTRB(8, 25, 8, 12);
   void changeInset(Inset inset, double value) {
     setState(() {
       insets = switch (inset) {
@@ -230,7 +230,7 @@ class InsetsState extends State<Insets> {
   @override
   Widget build(BuildContext context) {
     final Widget topNotch = ClipRRect(
-      borderRadius: BorderRadius.vertical(bottom: Radius.circular(insets.top)),
+      borderRadius: .vertical(bottom: Radius.circular(insets.top)),
       child: SizedBox(
         height: insets.top,
         child: const FractionallySizedBox(
@@ -275,14 +275,14 @@ class InsetsState extends State<Insets> {
     return _InsetModel(
       insets: insets,
       child: Directionality(
-        textDirection: TextDirection.ltr,
+        textDirection: .ltr,
         child: Stack(
           children: <Widget>[
             app,
-            Align(alignment: Alignment.topCenter, child: topNotch),
-            Align(alignment: Alignment.bottomCenter, child: bottomIndicator),
-            Align(alignment: Alignment.centerLeft, child: sideBar),
-            Align(alignment: Alignment.centerRight, child: sideBar),
+            Align(alignment: .topCenter, child: topNotch),
+            Align(alignment: .bottomCenter, child: bottomIndicator),
+            Align(alignment: .centerLeft, child: sideBar),
+            Align(alignment: .centerRight, child: sideBar),
           ],
         ),
       ),

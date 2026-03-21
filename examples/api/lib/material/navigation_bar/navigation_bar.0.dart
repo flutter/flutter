@@ -59,7 +59,7 @@ class _NavigationExampleState extends State<NavigationExample> {
         /// Home page
         Card(
           shadowColor: Colors.transparent,
-          margin: const EdgeInsets.all(8.0),
+          margin: const .all(8.0),
           child: SizedBox.expand(
             child: Center(
               child: Text('Home page', style: theme.textTheme.titleLarge),
@@ -69,7 +69,7 @@ class _NavigationExampleState extends State<NavigationExample> {
 
         /// Notifications page
         const Padding(
-          padding: EdgeInsets.all(8.0),
+          padding: .all(8.0),
           child: Column(
             children: <Widget>[
               Card(
@@ -97,13 +97,13 @@ class _NavigationExampleState extends State<NavigationExample> {
           itemBuilder: (BuildContext context, int index) {
             if (index == 0) {
               return Align(
-                alignment: Alignment.centerRight,
+                alignment: .centerRight,
                 child: Container(
-                  margin: const EdgeInsets.all(8.0),
-                  padding: const EdgeInsets.all(8.0),
+                  margin: const .all(8.0),
+                  padding: const .all(8.0),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.primary,
-                    borderRadius: BorderRadius.circular(8.0),
+                    borderRadius: .circular(8.0),
                   ),
                   child: Text(
                     'Hello',
@@ -115,13 +115,13 @@ class _NavigationExampleState extends State<NavigationExample> {
               );
             }
             return Align(
-              alignment: Alignment.centerLeft,
+              alignment: .centerLeft,
               child: Container(
-                margin: const EdgeInsets.all(8.0),
-                padding: const EdgeInsets.all(8.0),
+                margin: const .all(8.0),
+                padding: const .all(8.0),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.primary,
-                  borderRadius: BorderRadius.circular(8.0),
+                  borderRadius: .circular(8.0),
                 ),
                 child: Text(
                   'Hi!',

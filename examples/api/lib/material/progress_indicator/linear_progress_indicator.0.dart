@@ -57,11 +57,11 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
     return Scaffold(
       body: Column(
         spacing: 16.0,
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: .center,
         children: <Widget>[
           const Text('Determinate LinearProgressIndicator'),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const .symmetric(horizontal: 16),
             child: LinearProgressIndicator(
               // ignore: deprecated_member_use
               year2023: year2023,
@@ -70,7 +70,7 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
           ),
           const Text('Indeterminate LinearProgressIndicator'),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const .symmetric(horizontal: 16),
             // ignore: deprecated_member_use
             child: LinearProgressIndicator(year2023: year2023),
           ),

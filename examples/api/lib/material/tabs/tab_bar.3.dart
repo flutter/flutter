@@ -134,9 +134,9 @@ class LeftMask extends StatelessWidget {
               ),
             ),
             child: Align(
-              alignment: Alignment.centerLeft,
+              alignment: .centerLeft,
               child: Padding(
-                padding: EdgeInsets.only(left: 4),
+                padding: .only(left: 4),
                 child: Icon(
                   Icons.chevron_left,
                   color: Colors.black.withValues(alpha: 0.4),
@@ -175,9 +175,9 @@ class RightMask extends StatelessWidget {
               ),
             ),
             child: Align(
-              alignment: Alignment.centerRight,
+              alignment: .centerRight,
               child: Padding(
-                padding: EdgeInsets.only(right: 4),
+                padding: .only(right: 4),
                 child: Icon(
                   Icons.chevron_right,
                   color: Colors.black.withValues(alpha: 0.4),

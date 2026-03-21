@@ -14,7 +14,7 @@ class TabControllerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: Brightness.light),
+      theme: CupertinoThemeData(brightness: .light),
       home: TabControllerExample(),
     );
   }
@@ -55,7 +55,7 @@ class _TabControllerExampleState extends State<TabControllerExample> {
       tabBuilder: (BuildContext context, int index) {
         return Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: .center,
             children: <Widget>[
               Text('Content of tab $index'),
               const SizedBox(height: 10),

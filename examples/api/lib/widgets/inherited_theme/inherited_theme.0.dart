@@ -36,7 +36,7 @@ class MyAppBody extends StatelessWidget {
               // captured themes.
               return themes.wrap(
                 Container(
-                  alignment: Alignment.center,
+                  alignment: .center,
                   color: Colors.white,
                   child: const Text('Hello World'),
                 ),

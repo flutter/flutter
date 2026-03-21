@@ -51,7 +51,7 @@ class _SystemContextMenuExampleState extends State<SystemContextMenuExample> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const .all(16.0),
       child: TextField(
         controller: _controller,
         maxLines: 3,

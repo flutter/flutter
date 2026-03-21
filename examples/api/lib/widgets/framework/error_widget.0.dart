@@ -74,8 +74,8 @@ class ReleaseModeErrorWidget extends StatelessWidget {
       child: Text(
         'Error!\n${details.exception}',
         style: const TextStyle(color: Colors.yellow),
-        textAlign: TextAlign.center,
-        textDirection: TextDirection.ltr,
+        textAlign: .center,
+        textDirection: .ltr,
       ),
     );
   }

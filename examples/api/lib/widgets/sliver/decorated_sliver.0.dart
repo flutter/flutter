@@ -75,8 +75,8 @@ class SliverDecorationExample extends StatelessWidget {
                   SizedBox(
                     height: 500.0,
                     child: Container(
-                      alignment: Alignment.topCenter,
-                      padding: const EdgeInsets.only(top: 56.0),
+                      alignment: .topCenter,
+                      padding: const .only(top: 56.0),
                       child: Text(
                         'A blue sky',
                         style: Theme.of(context).textTheme.titleLarge,

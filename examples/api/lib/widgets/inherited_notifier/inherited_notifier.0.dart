@@ -81,7 +81,7 @@ class _InheritedNotifierExampleState extends State<InheritedNotifierExample>
     return SpinModel(
       notifier: _controller,
       child: const Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment: .spaceAround,
         children: <Widget>[Spinner(), Spinner(), Spinner()],
       ),
     );

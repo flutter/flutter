@@ -27,13 +27,7 @@ void main() {
       paints
         ..path(color: Colors.blue)
         ..rrect(
-          rrect: RRect.fromLTRBR(
-            786.5,
-            1.5,
-            798.5,
-            178.5,
-            const Radius.circular(6),
-          ),
+          rrect: .fromLTRBR(786.5, 1.5, 798.5, 178.5, const Radius.circular(6)),
           color: Colors.brown,
         ),
     );

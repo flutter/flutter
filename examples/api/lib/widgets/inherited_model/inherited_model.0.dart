@@ -83,7 +83,7 @@ class _InheritedModelExampleState extends State<InheritedModelExample> {
     return Scaffold(
       appBar: AppBar(title: const Text('InheritedModel Sample')),
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: .spaceEvenly,
         children: <Widget>[
           Center(
             child: LogoModel(
@@ -93,7 +93,7 @@ class _InheritedModelExampleState extends State<InheritedModelExample> {
             ),
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: .spaceEvenly,
             children: <Widget>[
               ElevatedButton(
                 onPressed: () {
@@ -145,7 +145,7 @@ class BackgroundWidget extends StatelessWidget {
     final Color color = LogoModel.backgroundColorOf(context)!;
 
     return AnimatedContainer(
-      padding: const EdgeInsets.all(12.0),
+      padding: const .all(12.0),
       color: color,
       duration: const Duration(seconds: 2),
       curve: Curves.fastOutSlowIn,
@@ -162,10 +162,10 @@ class LogoWidget extends StatelessWidget {
     final bool largeLogo = LogoModel.sizeOf(context);
 
     return AnimatedContainer(
-      padding: const EdgeInsets.all(20.0),
+      padding: const .all(20.0),
       duration: const Duration(seconds: 2),
       curve: Curves.fastLinearToSlowEaseIn,
-      alignment: Alignment.center,
+      alignment: .center,
       child: FlutterLogo(size: largeLogo ? 200.0 : 100.0),
     );
   }

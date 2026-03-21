@@ -36,7 +36,7 @@ class _DismissibleExampleState extends State<DismissibleExample> {
   Widget build(BuildContext context) {
     return ListView.builder(
       itemCount: items.length,
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const .symmetric(vertical: 16),
       itemBuilder: (BuildContext context, int index) {
         return Dismissible(
           background: Container(color: Colors.green),

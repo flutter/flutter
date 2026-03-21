@@ -45,13 +45,9 @@ class _DefaultTextStyleTransitionExampleState
       begin: const TextStyle(
         fontSize: 50,
         color: Colors.blue,
-        fontWeight: FontWeight.w900,
+        fontWeight: .w900,
       ),
-      end: const TextStyle(
-        fontSize: 50,
-        color: Colors.red,
-        fontWeight: FontWeight.w100,
-      ),
+      end: const TextStyle(fontSize: 50, color: Colors.red, fontWeight: .w100),
     );
     _curvedAnimation = CurvedAnimation(
       parent: _controller,

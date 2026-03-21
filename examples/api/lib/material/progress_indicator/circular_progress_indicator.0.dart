@@ -53,11 +53,11 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
       body: Center(
         child: Column(
           spacing: 16.0,
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             const Text('Determinate CircularProgressIndicator'),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const .symmetric(horizontal: 16),
               child: CircularProgressIndicator(
                 // ignore: deprecated_member_use
                 year2023: year2023,
@@ -66,7 +66,7 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
             ),
             const Text('Indeterminate CircularProgressIndicator'),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const .symmetric(horizontal: 16),
               // ignore: deprecated_member_use
               child: CircularProgressIndicator(year2023: year2023),
             ),

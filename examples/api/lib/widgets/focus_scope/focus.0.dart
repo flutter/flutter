@@ -89,7 +89,7 @@ class _FocusExampleState extends State<FocusExample> {
                   child: Container(
                     width: 400,
                     height: 100,
-                    alignment: Alignment.center,
+                    alignment: .center,
                     color: hasFocus ? _color : Colors.white,
                     child: Text(
                       hasFocus
