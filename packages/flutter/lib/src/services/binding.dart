@@ -485,6 +485,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   ///   respond to this message.
   /// * [WidgetsBinding.handleRequestAppExit] which overrides this method to
   ///   notify its observers.
+  @awaitNotRequired
   Future<ui.AppExitResponse> handleRequestAppExit() async {
     return ui.AppExitResponse.exit;
   }

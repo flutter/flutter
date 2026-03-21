@@ -7,6 +7,7 @@ library;
 
 import 'dart:ui' show FlutterView, PlatformDispatcher, TextDirection;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show SystemChannels;
 
 import 'semantics_event.dart' show AnnounceSemanticsEvent, Assertiveness, TooltipSemanticsEvent;
@@ -78,6 +79,7 @@ abstract final class SemanticsService {
   /// One can use [View.of] to get the current [FlutterView].
   ///
   /// {@macro flutter.semantics.service.announce}
+  @awaitNotRequired
   static Future<void> sendAnnouncement(
     FlutterView view,
     String message,

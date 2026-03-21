@@ -11,12 +11,12 @@ library;
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
-import 'framework.dart';
 import 'scroll_activity.dart';
 import 'scroll_context.dart';
 import 'scroll_notification.dart';
@@ -174,6 +174,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   }
 
   @override
+  @awaitNotRequired
   Future<void> animateTo(double to, {required Duration duration, required Curve curve}) {
     if (nearEqual(to, pixels, physics.toleranceFor(this).distance)) {
       // Skip the animation, go straight to the position as we are already close.

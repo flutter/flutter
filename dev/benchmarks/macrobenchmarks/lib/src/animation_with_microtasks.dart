@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart' show awaitNotRequired;
 import 'package:flutter/material.dart';
 
 class AnimationWithMicrotasks extends StatefulWidget {
@@ -50,6 +51,7 @@ class _ChunkedWork {
     _canceled = true;
   }
 
+  @awaitNotRequired
   Future<void> _chunkedSynchronousWork() async {
     while (!_canceled) {
       // Yield to the event loop to let engine draw frames.

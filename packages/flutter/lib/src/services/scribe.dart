@@ -138,6 +138,7 @@ abstract final class Scribe {
   ///   mirror.
   ///  * [EditableText.stylusHandwritingEnabled], which controls whether
   ///    Flutter's built-in text fields support handwriting input.
+  @awaitNotRequired
   static Future<void> startStylusHandwriting() {
     return _channel.invokeMethod<void>('Scribe.startStylusHandwriting');
   }

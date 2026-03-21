@@ -1578,6 +1578,7 @@ abstract class DarwinPlatformViewController {
   /// The [UiKitViewController] object is unusable after calling this.
   /// The `id` of the platform view cannot be reused after the view is
   /// disposed.
+  @awaitNotRequired
   Future<void> dispose() async {
     _debugDisposed = true;
     await SystemChannels.platform_views.invokeMethod<void>('dispose', id);

@@ -809,6 +809,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   ///  * [ScrollPositionAlignmentPolicy] for the way in which `alignment` is
   ///    applied, and the way the given `object` is aligned.
+  @awaitNotRequired
   Future<void> ensureVisible(
     RenderObject object, {
     double alignment = 0.0,

@@ -11,6 +11,7 @@ library;
 import 'dart:collection';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
@@ -273,6 +274,7 @@ class FixedExtentScrollController extends ScrollController {
   ///
   /// The animation lasts for the given duration and follows the given curve.
   /// The returned [Future] resolves when the animation completes.
+  @awaitNotRequired
   Future<void> animateToItem(
     int itemIndex, {
     required Duration duration,
