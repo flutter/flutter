@@ -54,23 +54,25 @@ import 'package:intl/intl.dart' as intl;
 ///
 /// ## iOS Applications
 ///
-/// iOS applications define key application metadata, including supported
-/// locales, in an Info.plist file that is built into the application bundle.
-/// To configure the locales supported by your app, you’ll need to edit this
-/// file.
+/// To ensure your entry in the App Store correctly displays the supported
+/// languages, you need to add the supported languages in the Xcode project.
 ///
-/// First, open your project’s ios/Runner.xcworkspace Xcode workspace file.
-/// Then, in the Project Navigator, open the Info.plist file under the Runner
-/// project’s Runner folder.
+/// To configure the locales supported by your app,
+/// use the following instructions:
+
+/// 1. Open your project's `ios/Runner.xcodeproj` Xcode file.
 ///
-/// Next, select the Information Property List item, select Add Item from the
-/// Editor menu, then select Localizations from the pop-up menu.
+/// 2. In the **Project Navigator**, select the `Runner` project
+///    file under **Projects**.
 ///
-/// Select and expand the newly-created Localizations item then, for each
-/// locale your application supports, add a new item and select the locale
-/// you wish to add from the pop-up menu in the Value field. This list should
-/// be consistent with the languages listed in the @(class).supportedLocales
-/// property.
+/// 3. Select the `Info` tab in the project editor.
+///
+/// 4. In the **Localizations** section, click the `Add` button
+///    (`+`) to add the supported languages and regions to your
+///    project.
+///
+/// This list should be consistent with the languages listed in the
+/// @(class).supportedLocales property.
 abstract class @(class) {
   @(class)(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
