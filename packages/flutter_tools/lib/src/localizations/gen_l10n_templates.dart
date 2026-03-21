@@ -54,12 +54,11 @@ import 'package:intl/intl.dart' as intl;
 ///
 /// ## iOS Applications
 ///
-/// To ensure your entry in the App Store correctly displays the supported
-/// languages, you need to add the supported languages in the Xcode project.
+/// To ensure the App Store entry correctly displays the supported
+/// languages, add the supported languages in the Xcode project.
 ///
-/// To configure the locales supported by your app,
-/// use the following instructions:
-
+/// To configure the locales supported by the app, follow these instructions:
+///
 /// 1. Open your project's `ios/Runner.xcodeproj` Xcode file.
 ///
 /// 2. In the **Project Navigator**, select the `Runner` project
