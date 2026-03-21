@@ -2272,8 +2272,10 @@ void main() {
         }
 
         const nonTopLocations = <FloatingActionButtonLocation>[
+          FloatingActionButtonLocation.startContained,
           FloatingActionButtonLocation.startDocked,
           FloatingActionButtonLocation.startFloat,
+          FloatingActionButtonLocation.centerContained,
           FloatingActionButtonLocation.centerDocked,
           FloatingActionButtonLocation.centerFloat,
           FloatingActionButtonLocation.endContained,

@@ -335,7 +335,37 @@ void main() {
     expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(756.0, 572.0));
   });
 
-  testWidgets('Contained floating action button locations', (WidgetTester tester) async {
+  testWidgets('Start contained floating action button location', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildFrame(
+        location: FloatingActionButtonLocation.startContained,
+        bab: const SizedBox(height: 100.0),
+        viewInsets: EdgeInsets.zero,
+      ),
+    );
+
+    // Scaffold 800x600, FAB is 56x56, BAB is 800x100, FAB's center is
+    // at the top of the BAB.
+    // Formula: scaffold height - BAB height + FAB height / 2 + BAB top & bottom margins.
+    expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(44.0, 550.0));
+  });
+
+  testWidgets('Center contained floating action button location', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildFrame(
+        location: FloatingActionButtonLocation.centerContained,
+        bab: const SizedBox(height: 100.0),
+        viewInsets: EdgeInsets.zero,
+      ),
+    );
+
+    // Scaffold 800x600, FAB is 56x56, BAB is 800x100, FAB's center is
+    // at the top of the BAB.
+    // Formula: scaffold height - BAB height + FAB height / 2 + BAB top & bottom margins.
+    expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(400.0, 550.0));
+  });
+
+  testWidgets('End contained floating action button location', (WidgetTester tester) async {
     await tester.pumpWidget(
       _buildFrame(
         location: FloatingActionButtonLocation.endContained,
@@ -517,6 +547,24 @@ void main() {
       expect(
         tester.getCenter(find.byType(FloatingActionButton)),
         const Offset(_rightOffsetX, _dockedOffsetY),
+      );
+    });
+
+    testWidgets('startContained', (WidgetTester tester) async {
+      await tester.pumpWidget(_singleFabScaffold(FloatingActionButtonLocation.startContained));
+
+      expect(
+        tester.getCenter(find.byType(FloatingActionButton)),
+        const Offset(_leftOffsetX, _containedOffsetY),
+      );
+    });
+
+    testWidgets('centerContained', (WidgetTester tester) async {
+      await tester.pumpWidget(_singleFabScaffold(FloatingActionButtonLocation.centerContained));
+
+      expect(
+        tester.getCenter(find.byType(FloatingActionButton)),
+        const Offset(_centerOffsetX, _containedOffsetY),
       );
     });
 

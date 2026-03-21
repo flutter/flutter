@@ -1208,8 +1208,10 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         FloatingActionButtonLocation.miniStartTop ||
         FloatingActionButtonLocation.miniCenterTop ||
         FloatingActionButtonLocation.miniEndTop => false,
+        FloatingActionButtonLocation.startContained ||
         FloatingActionButtonLocation.startDocked ||
         FloatingActionButtonLocation.startFloat ||
+        FloatingActionButtonLocation.centerContained ||
         FloatingActionButtonLocation.centerDocked ||
         FloatingActionButtonLocation.centerFloat ||
         FloatingActionButtonLocation.endContained ||

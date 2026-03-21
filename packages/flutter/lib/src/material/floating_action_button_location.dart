@@ -427,12 +427,28 @@ abstract class FloatingActionButtonLocation {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_location_mini_end_docked.png)
   static const FloatingActionButtonLocation miniEndDocked = _MiniEndDockedFabLocation();
 
+  /// Start-aligned [FloatingActionButton], floating over the
+  /// [Scaffold.bottomNavigationBar] so that the floating action button lines
+  /// up with the center of the bottom navigation bar.
+  ///
+  /// This is unlikely to be a useful location for for apps that have a
+  /// [BottomNavigationBar] or a non Material 3 [BottomAppBar].
+  static const FloatingActionButtonLocation startContained = _StartContainedFabLocation();
+
+  /// Centered [FloatingActionButton], floating over the
+  /// [Scaffold.bottomNavigationBar] so that the floating action button lines
+  /// up with the center of the bottom navigation bar.
+  ///
+  /// This is unlikely to be a useful location for for apps that have a
+  /// [BottomNavigationBar] or a non Material 3 [BottomAppBar].
+  static const FloatingActionButtonLocation centerContained = _CenterContainedFabLocation();
+
   /// End-aligned [FloatingActionButton], floating over the
   /// [Scaffold.bottomNavigationBar] so that the floating
   /// action button lines up with the center of the bottom navigation bar.
   ///
-  /// This is unlikely to be a useful location for apps which has a [BottomNavigationBar]
-  /// or a non material 3 [BottomAppBar].
+  /// This is unlikely to be a useful location for for apps that have a
+  /// [BottomNavigationBar] or a non Material 3 [BottomAppBar].
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_location_end_contained.png)
   static const FloatingActionButtonLocation endContained = _EndContainedFabLocation();
@@ -629,7 +645,10 @@ mixin FabDockedOffsetY on StandardFabLocation {
   }
 }
 
-/// Mixin for a "contained" floating action button location, such as [FloatingActionButtonLocation.endContained].
+/// Mixin for a "contained" floating action button location, such as
+/// [FloatingActionButtonLocation.startContained],
+/// [FloatingActionButtonLocation.centerContained], or
+/// [FloatingActionButtonLocation.endContained].
 mixin FabContainedOffsetY on StandardFabLocation {
   /// Calculates y-offset for [FloatingActionButtonLocation]s floating over the
   /// [Scaffold.bottomNavigationBar] so that the center of the floating
@@ -834,6 +853,22 @@ class _MiniEndDockedFabLocation extends StandardFabLocation
 
   @override
   String toString() => 'FloatingActionButtonLocation.miniEndDocked';
+}
+
+class _StartContainedFabLocation extends StandardFabLocation
+    with FabStartOffsetX, FabContainedOffsetY {
+  const _StartContainedFabLocation();
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.startContained';
+}
+
+class _CenterContainedFabLocation extends StandardFabLocation
+    with FabCenterOffsetX, FabContainedOffsetY {
+  const _CenterContainedFabLocation();
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.centerContained';
 }
 
 class _EndContainedFabLocation extends StandardFabLocation with FabEndOffsetX, FabContainedOffsetY {
