@@ -148,21 +148,49 @@ void drawTriangle(RenderPassState state, Vector4 color) {
 void main() async {
   final ImageComparer comparer = await ImageComparer.create();
 
-  test('gpu.context throws exception for incompatible embedders', () async {
+  test('gpu.context throws exception when Impeller is not enabled', () async {
     try {
       // ignore: unnecessary_statements
       gpu.gpuContext; // Force the context to instantiate.
       if (!impellerEnabled) {
-        fail('Exception not thrown, but no Impeller context available.');
+        fail('Exception not thrown, but Impeller is not enabled.');
       }
     } catch (e) {
       if (impellerEnabled) {
-        fail('Exception thrown even though Impeller is enabled.');
+        fail('Exception thrown even though Impeller is enabled: $e');
       }
-      expect(
-        e.toString(),
-        contains('Exception: Flutter GPU must be enabled via the Flutter GPU manifest setting'),
-      );
+      expect(e.toString(), contains('Flutter GPU requires the Impeller rendering backend'));
+    }
+  });
+
+  test('gpu.context throws exception when Flutter GPU is not enabled', () async {
+    try {
+      // ignore: unnecessary_statements
+      gpu.gpuContext; // Force the context to instantiate.
+      if (!flutterGpuEnabled) {
+        fail('Exception not thrown, but Flutter GPU is not enabled.');
+      }
+    } catch (e) {
+      if (flutterGpuEnabled && impellerEnabled) {
+        fail('Exception thrown even though Flutter GPU and Impeller are both enabled: $e');
+      }
+      if (impellerEnabled) {
+        expect(
+          e.toString(),
+          contains('Flutter GPU must be enabled via the Flutter GPU manifest setting'),
+        );
+      }
+    }
+  });
+
+  test('gpu.context is available when Impeller and Flutter GPU are enabled', () async {
+    try {
+      // ignore: unnecessary_statements
+      gpu.gpuContext; // Force the context to instantiate.
+    } catch (e) {
+      if (impellerEnabled && flutterGpuEnabled) {
+        fail('Exception thrown even though Impeller and Flutter GPU are enabled: $e');
+      }
     }
   });
 
