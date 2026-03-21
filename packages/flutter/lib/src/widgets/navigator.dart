@@ -3898,7 +3898,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       'have their RouteSettings defined with names that are defined in the '
       "app's routes table.",
     );
-    assert(!_debugLocked);
+    assert(_debugCheckCanNavigate());
     assert(() {
       _debugLocked = true;
       return true;
@@ -4073,6 +4073,32 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }());
   }
 
+  bool _debugCheckCanNavigate() {
+    assert(() {
+      if (_debugLocked) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Navigator operation requested with a locked Navigator.'),
+          ErrorDescription(
+            'A Navigator cannot be used to push, pop, or replace routes while '
+            'it is already updating its history.',
+          ),
+          ErrorHint(
+            'This can happen if a navigation method is called from a pop '
+            'callback. Consider scheduling the navigation for the next frame '
+            'instead of during the current navigation update.',
+          ),
+          DiagnosticsProperty<NavigatorState>(
+            'The Navigator was',
+            this,
+            style: DiagnosticsTreeStyle.errorProperty,
+          ),
+        ]);
+      }
+      return true;
+    }());
+    return true;
+  }
+
   @protected
   @override
   void deactivate() {
@@ -4097,7 +4123,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @protected
   @override
   void dispose() {
-    assert(!_debugLocked);
+    assert(_debugCheckCanNavigate());
     assert(() {
       _debugLocked = true;
       return true;
@@ -4658,7 +4684,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   Route<T?>? _routeNamed<T>(String name, {required Object? arguments, bool allowNull = false}) {
-    assert(!_debugLocked);
+    assert(_debugCheckCanNavigate());
     if (allowNull && widget.onGenerateRoute == null) {
       return null;
     }
@@ -5077,7 +5103,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   void _pushEntry(_RouteEntry entry) {
-    assert(!_debugLocked);
+    assert(_debugCheckCanNavigate());
     assert(() {
       _debugLocked = true;
       return true;
@@ -5209,7 +5235,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   void _pushReplacementEntry<TO extends Object?>(_RouteEntry entry, TO? result) {
-    assert(!_debugLocked);
+    assert(_debugCheckCanNavigate());
     assert(() {
       _debugLocked = true;
       return true;
@@ -5310,7 +5336,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   void _pushEntryAndRemoveUntil(_RouteEntry entry, RoutePredicate predicate) {
-    assert(!_debugLocked);
+    assert(_debugCheckCanNavigate());
     assert(() {
       _debugLocked = true;
       return true;
@@ -5347,7 +5373,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///    restored during state restoration.
   @optionalTypeArgs
   void replace<T extends Object?>({required Route<dynamic> oldRoute, required Route<T> newRoute}) {
-    assert(!_debugLocked);
+    assert(_debugCheckCanNavigate());
     assert(oldRoute._isInstalledIn(this));
     _replaceEntry(
       _RouteEntry(newRoute, pageBased: false, initialState: _RouteLifecycle.replace),
@@ -5389,7 +5415,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   void _replaceEntry(_RouteEntry entry, Route<dynamic> oldRoute) {
-    assert(!_debugLocked);
+    assert(_debugCheckCanNavigate());
     if (oldRoute == entry.route) {
       return;
     }
@@ -5477,7 +5503,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   void _replaceEntryBelow(_RouteEntry entry, Route<dynamic> anchorRoute) {
-    assert(!_debugLocked);
+    assert(_debugCheckCanNavigate());
     assert(() {
       _debugLocked = true;
       return true;
@@ -5604,7 +5630,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// {@end-tool}
   @optionalTypeArgs
   void pop<T extends Object?>([T? result]) {
-    assert(!_debugLocked);
+    assert(_debugCheckCanNavigate());
     assert(() {
       _debugLocked = true;
       return true;
@@ -5691,7 +5717,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// {@macro flutter.widgets.navigator.removeRoute}
   @optionalTypeArgs
   void removeRoute<T extends Object?>(Route<T> route, [T? result]) {
-    assert(!_debugLocked);
+    assert(_debugCheckCanNavigate());
     assert(() {
       _debugLocked = true;
       return true;
@@ -5716,7 +5742,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// {@macro flutter.widgets.navigator.removeRouteBelow}
   @optionalTypeArgs
   void removeRouteBelow<T extends Object?>(Route<T> anchorRoute, [T? result]) {
-    assert(!_debugLocked);
+    assert(_debugCheckCanNavigate());
     assert(() {
       _debugLocked = true;
       return true;
@@ -5906,7 +5932,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @protected
   @override
   Widget build(BuildContext context) {
-    assert(!_debugLocked);
+    assert(_debugCheckCanNavigate());
     assert(_history.isNotEmpty);
 
     // Hides the HeroControllerScope for the widget subtree so that the other
