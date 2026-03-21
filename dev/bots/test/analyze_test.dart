@@ -8,6 +8,7 @@ import 'package:path/path.dart' as path;
 
 import '../analyze.dart';
 import '../custom_rules/analyze.dart';
+import '../custom_rules/avoid_debug_only_rendering_getters.dart';
 import '../custom_rules/no_double_clamp.dart';
 import '../custom_rules/no_stop_watches.dart';
 import '../custom_rules/render_box_intrinsics.dart';
@@ -374,6 +375,31 @@ void main() {
         endsWith: <String>[
           '',
           'Typically the get* methods should be used to obtain the intrinsics of a RenderBox.',
+        ],
+      ),
+    );
+  });
+
+  test('analyze.dart - debug-only RenderObject getters', () async {
+    final String result = await capture(
+      () => analyzeWithRules(
+        testRootPath,
+        <AnalyzeRule>[avoidDebugOnlyRenderingGetters],
+        includePaths: <String>['packages/flutter/lib'],
+      ),
+      shouldHaveErrors: true,
+    );
+
+    final fixture = File(
+      path.join(testRootPath, 'packages', 'flutter', 'lib', 'debug_only_rendering_getters.dart'),
+    );
+    expect(
+      result,
+      matchesErrorsInFile(
+        fixture,
+        endsWith: <String>[
+          '',
+          'Debug-only getters on RenderObject (debugNeedsLayout, debugNeedsPaint, debugNeedsCompositedLayerUpdate, debugNeedsSemanticsUpdate) are only meaningful in debug mode. Only use them in asserts.',
         ],
       ),
     );
