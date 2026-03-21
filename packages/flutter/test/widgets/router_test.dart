@@ -5,12 +5,18 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import 'button_tester.dart';
+import 'test_page_tester.dart';
+import 'widgets_app_tester.dart';
+
 void main() {
+  const kWhite = Color(0xFFFFFFFF);
+
   testWidgets('Simple router basic functionality - synchronized', (WidgetTester tester) async {
     final provider = SimpleRouteInformationProvider();
     addTearDown(provider.dispose);
@@ -280,10 +286,17 @@ void main() {
     expect(find.text('initial'), findsOneWidget);
 
     // Pushes a nameless route.
-    showDialog<void>(
-      useRootNavigator: false,
-      context: delegate.navigatorKey.currentContext!,
-      builder: (BuildContext context) => const Text('dialog'),
+    Navigator.of(delegate.navigatorKey.currentContext!).push(
+      PageRouteBuilder<void>(
+        pageBuilder:
+            (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) {
+              return const Text('dialog');
+            },
+      ),
     );
     await tester.pumpAndSettle();
     expect(find.text('dialog'), findsOneWidget);
@@ -676,7 +689,12 @@ void main() {
     final delegate = SimpleRouterDelegate(reportConfiguration: true);
     addTearDown(delegate.dispose);
     delegate.builder = (BuildContext context, RouteInformation? information) {
-      return ElevatedButton(
+      // Uses _StatefulTestButton instead of TestButton because this test
+      // requires that tapping the button triggers a rebuild even when the
+      // route information doesn't change. _StatefulTestButton calls setState
+      // on tap (similar to ElevatedButton's ink effects), which causes the
+      // Router to re-evaluate and report route information.
+      return _StatefulTestButton(
         child: Text(Uri.decodeComponent(information!.uri.toString())),
         onPressed: () {
           if (isNavigating) {
@@ -714,7 +732,7 @@ void main() {
     reportedRouteInformation = null;
 
     nextRouteInformation = RouteInformation(uri: Uri.parse('update'));
-    await tester.tap(find.byType(ElevatedButton));
+    await tester.tap(find.byType(_StatefulTestButton));
     await tester.pump();
     expect(find.text('initial'), findsNothing);
     expect(find.text('update'), findsOneWidget);
@@ -727,7 +745,7 @@ void main() {
     // This should not trigger any real navigating event because the
     // nextRouteInformation does not change. However, the router should still
     // report a route information because isNavigating = true.
-    await tester.tap(find.byType(ElevatedButton));
+    await tester.tap(find.byType(_StatefulTestButton));
     await tester.pump();
     expect(reportedType, RouteInformationReportingType.navigate);
     expect(reportedRouteInformation!.uri.toString(), 'update');
@@ -754,7 +772,7 @@ void main() {
     final delegate = SimpleRouterDelegate(reportConfiguration: true);
     addTearDown(delegate.dispose);
     delegate.builder = (BuildContext context, RouteInformation? information) {
-      return ElevatedButton(
+      return TestButton(
         child: Text(Uri.decodeComponent(information!.uri.toString())),
         onPressed: () {
           Router.neglect(context, () {
@@ -784,7 +802,7 @@ void main() {
     reportingType = null;
 
     nextRouteInformation = RouteInformation(uri: Uri.parse('update'));
-    await tester.tap(find.byType(ElevatedButton));
+    await tester.tap(find.byType(TestButton));
     await tester.pump();
     expect(find.text('initial'), findsNothing);
     expect(find.text('update'), findsOneWidget);
@@ -812,7 +830,7 @@ void main() {
     final delegate = SimpleRouterDelegate(reportConfiguration: true);
     addTearDown(delegate.dispose);
     delegate.builder = (BuildContext context, RouteInformation? information) {
-      return ElevatedButton(
+      return TestButton(
         child: Text(Uri.decodeComponent(information!.uri.toString())),
         onPressed: () {
           delegate.routeInformation = nextRouteInformation;
@@ -838,7 +856,7 @@ void main() {
     reportingType = null;
 
     nextRouteInformation = RouteInformation(uri: Uri.parse('initial'), state: 'state2');
-    await tester.tap(find.byType(ElevatedButton));
+    await tester.tap(find.byType(TestButton));
     await tester.pump();
     expect(updatedRouteInformation!.uri.toString(), 'initial');
     expect(updatedRouteInformation!.state, 'state2');
@@ -865,7 +883,8 @@ void main() {
     addTearDown(delegate.dispose);
 
     await tester.pumpWidget(
-      MaterialApp.router(
+      WidgetsApp.router(
+        color: kWhite,
         routeInformationProvider: provider,
         routeInformationParser: SimpleRouteInformationParser(),
         routerDelegate: delegate,
@@ -1065,7 +1084,8 @@ void main() {
     };
 
     await tester.pumpWidget(
-      MaterialApp.router(
+      WidgetsApp.router(
+        color: kWhite,
         backButtonDispatcher: outerDispatcher,
         routeInformationProvider: provider,
         routeInformationParser: SimpleRouteInformationParser(),
@@ -1712,7 +1732,7 @@ void main() {
 }
 
 Widget buildBoilerPlate(Widget child) {
-  return MaterialApp(home: Scaffold(body: child));
+  return TestWidgetsApp(home: child);
 }
 
 typedef SimpleRouterDelegateBuilder =
@@ -1829,8 +1849,8 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation>
       pages: <Page<void>>[
         // We need at least two pages for the pop to propagate through.
         // Otherwise, the navigator will bubble the pop to the system navigator.
-        const MaterialPage<void>(child: Text('base')),
-        MaterialPage<void>(
+        const TestPage<void>(child: Text('base')),
+        TestPage<void>(
           key: ValueKey<String>(routeInformation.uri.toString()),
           child: builder(context, routeInformation),
         ),
@@ -1983,5 +2003,38 @@ class IntInheritedNotifier extends InheritedNotifier<ValueListenable<int>> {
 
   static int of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<IntInheritedNotifier>()!.notifier!.value;
+  }
+}
+
+/// A button widget that calls [setState] on tap, causing a rebuild.
+///
+/// Unlike [TestButton] (which uses a stateless [GestureDetector]), this widget
+/// has internal state that changes on tap. This is needed for tests where the
+/// [Router] relies on a rebuild being triggered by the button tap itself (e.g.,
+/// when [Router.navigate] is called but the route information doesn't change).
+class _StatefulTestButton extends StatefulWidget {
+  const _StatefulTestButton({required this.child, this.onPressed});
+
+  final Widget child;
+  final VoidCallback? onPressed;
+
+  @override
+  State<_StatefulTestButton> createState() => _StatefulTestButtonState();
+}
+
+class _StatefulTestButtonState extends State<_StatefulTestButton> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _pressed = !_pressed;
+        });
+        widget.onPressed?.call();
+      },
+      child: widget.child,
+    );
   }
 }
