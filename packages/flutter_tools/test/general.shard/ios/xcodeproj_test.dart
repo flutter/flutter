@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/ios/xcode_build_settings.dart';
+import 'package:flutter_tools/src/xcode_project.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -30,6 +31,24 @@ void main() {
     setUp(() {
       final FileSystem fileSystem = MemoryFileSystem.test();
       fileSystem.file(xcodebuild).createSync(recursive: true);
+    });
+  });
+
+  group('parseXcodeAllTargetsBuildSettings', () {
+    test('parses target build settings into a dictionary', () {
+      final Map<String, Map<String, String>> parsed = parseXcodeAllTargetsBuildSettings('''
+Build settings for action build and target bad_plugin:
+    EXCLUDED_ARCHS = i386 arm64
+    PRODUCT_NAME = bad_plugin
+
+Build settings for action build and target "good_plugin":
+    EXCLUDED_ARCHS[sdk=iphonesimulator*] = i386
+''');
+
+      expect(parsed.keys, containsAll(<String>['bad_plugin', 'good_plugin']));
+      expect(parsed['bad_plugin']!['EXCLUDED_ARCHS'], 'i386 arm64');
+      expect(parsed['bad_plugin']!['PRODUCT_NAME'], 'bad_plugin');
+      expect(parsed['good_plugin']!['EXCLUDED_ARCHS[sdk=iphonesimulator*]'], 'i386');
     });
   });
 
