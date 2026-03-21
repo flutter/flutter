@@ -32,7 +32,8 @@ Part of being a contributor is making sure our documentation is up to date, incl
 
 ### Privileges
 
-Being in the GitHub "flutter-hackers" group gives you the following:
+Being in the GitHub "flutter-hackers" group gives you the following privileges (shown as "Write" access in the GitHub UI):
+
 
 * The ability to merge your own PRs once they are reviewed (see [Tree Hygiene](Tree-hygiene.md)).
 
