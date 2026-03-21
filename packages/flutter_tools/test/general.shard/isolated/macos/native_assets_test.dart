@@ -150,6 +150,12 @@ void main() {
                 ],
               ),
               FakeCommand(
+                command: <Pattern>['xattr', '-r', '-d', 'com.apple.FinderInfo', signPathBar],
+              ),
+              FakeCommand(
+                command: <Pattern>['xattr', '-r', '-d', 'com.apple.provenance', signPathBar],
+              ),
+              FakeCommand(
                 command: <Pattern>[
                   'xcrun',
                   'codesign',
@@ -174,6 +180,12 @@ void main() {
                   signPathBuz,
                   signPathBuz,
                 ],
+              ),
+              FakeCommand(
+                command: <Pattern>['xattr', '-r', '-d', 'com.apple.FinderInfo', signPathBuz],
+              ),
+              FakeCommand(
+                command: <Pattern>['xattr', '-r', '-d', 'com.apple.provenance', signPathBuz],
               ),
               FakeCommand(
                 command: <Pattern>[

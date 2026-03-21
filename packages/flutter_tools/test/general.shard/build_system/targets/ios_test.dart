@@ -98,10 +98,8 @@ void main() {
     () async {
       environment.defines[kIosArchs] = 'x86_64';
       environment.defines[kSdkRoot] = 'path/to/iPhoneSimulator.sdk';
-      final String appFrameworkPath = environment.buildDir
-          .childDirectory('App.framework')
-          .childFile('App')
-          .path;
+      final Directory appFrameworkDir = environment.buildDir.childDirectory('App.framework');
+      final String appFrameworkPath = appFrameworkDir.childFile('App').path;
       processManager.addCommands(<FakeCommand>[
         FakeCommand(
           command: <String>[
@@ -134,10 +132,10 @@ void main() {
           ],
         ),
         FakeCommand(
-          command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', appFrameworkPath],
+          command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', appFrameworkDir.path],
         ),
         FakeCommand(
-          command: <String>['xattr', '-r', '-d', 'com.apple.provenance', appFrameworkPath],
+          command: <String>['xattr', '-r', '-d', 'com.apple.provenance', appFrameworkDir.path],
         ),
         FakeCommand(
           command: <String>[
@@ -166,10 +164,8 @@ void main() {
     () async {
       environment.defines[kIosArchs] = 'arm64';
       environment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
-      final String appFrameworkPath = environment.buildDir
-          .childDirectory('App.framework')
-          .childFile('App')
-          .path;
+      final Directory appFrameworkDir = environment.buildDir.childDirectory('App.framework');
+      final String appFrameworkPath = appFrameworkDir.childFile('App').path;
       processManager.addCommands(<FakeCommand>[
         FakeCommand(
           command: <String>[
@@ -189,10 +185,10 @@ void main() {
           ],
         ),
         FakeCommand(
-          command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', appFrameworkPath],
+          command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', appFrameworkDir.path],
         ),
         FakeCommand(
-          command: <String>['xattr', '-r', '-d', 'com.apple.provenance', appFrameworkPath],
+          command: <String>['xattr', '-r', '-d', 'com.apple.provenance', appFrameworkDir.path],
         ),
         FakeCommand(
           command: <String>[
@@ -262,10 +258,22 @@ void main() {
         ),
 
         FakeCommand(
-          command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', frameworkBinary.path],
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.FinderInfo',
+            frameworkBinary.parent.path,
+          ],
         ),
         FakeCommand(
-          command: <String>['xattr', '-r', '-d', 'com.apple.provenance', frameworkBinary.path],
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.provenance',
+            frameworkBinary.parent.path,
+          ],
         ),
         FakeCommand(
           command: <String>[
@@ -332,22 +340,10 @@ void main() {
       processManager.addCommands(<FakeCommand>[
         createPlutilFakeCommand(infoPlist),
         FakeCommand(
-          command: <String>[
-            'xattr',
-            '-r',
-            '-d',
-            'com.apple.FinderInfo',
-            frameworkDirectoryBinary.path,
-          ],
+          command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', frameworkDirectory.path],
         ),
         FakeCommand(
-          command: <String>[
-            'xattr',
-            '-r',
-            '-d',
-            'com.apple.provenance',
-            frameworkDirectoryBinary.path,
-          ],
+          command: <String>['xattr', '-r', '-d', 'com.apple.provenance', frameworkDirectory.path],
         ),
         FakeCommand(
           command: <String>[
@@ -433,22 +429,10 @@ void main() {
       processManager.addCommands(<FakeCommand>[
         createPlutilFakeCommand(infoPlist),
         FakeCommand(
-          command: <String>[
-            'xattr',
-            '-r',
-            '-d',
-            'com.apple.FinderInfo',
-            frameworkDirectoryBinary.path,
-          ],
+          command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', frameworkDirectory.path],
         ),
         FakeCommand(
-          command: <String>[
-            'xattr',
-            '-r',
-            '-d',
-            'com.apple.provenance',
-            frameworkDirectoryBinary.path,
-          ],
+          command: <String>['xattr', '-r', '-d', 'com.apple.provenance', frameworkDirectory.path],
         ),
         FakeCommand(
           command: <String>[
@@ -544,22 +528,10 @@ void main() {
         ),
         createPlutilFakeCommand(infoPlist),
         FakeCommand(
-          command: <String>[
-            'xattr',
-            '-r',
-            '-d',
-            'com.apple.FinderInfo',
-            frameworkDirectoryBinary.path,
-          ],
+          command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', frameworkDirectory.path],
         ),
         FakeCommand(
-          command: <String>[
-            'xattr',
-            '-r',
-            '-d',
-            'com.apple.provenance',
-            frameworkDirectoryBinary.path,
-          ],
+          command: <String>['xattr', '-r', '-d', 'com.apple.provenance', frameworkDirectory.path],
         ),
         FakeCommand(
           command: <String>[
@@ -629,22 +601,10 @@ void main() {
       processManager.addCommands(<FakeCommand>[
         createPlutilFakeCommand(infoPlist),
         FakeCommand(
-          command: <String>[
-            'xattr',
-            '-r',
-            '-d',
-            'com.apple.FinderInfo',
-            frameworkDirectoryBinary.path,
-          ],
+          command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', frameworkDirectory.path],
         ),
         FakeCommand(
-          command: <String>[
-            'xattr',
-            '-r',
-            '-d',
-            'com.apple.provenance',
-            frameworkDirectoryBinary.path,
-          ],
+          command: <String>['xattr', '-r', '-d', 'com.apple.provenance', frameworkDirectory.path],
         ),
         FakeCommand(
           command: <String>[
@@ -708,22 +668,10 @@ void main() {
       processManager.addCommands(<FakeCommand>[
         createPlutilFakeCommand(infoPlist),
         FakeCommand(
-          command: <String>[
-            'xattr',
-            '-r',
-            '-d',
-            'com.apple.FinderInfo',
-            frameworkDirectoryBinary.path,
-          ],
+          command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', frameworkDirectory.path],
         ),
         FakeCommand(
-          command: <String>[
-            'xattr',
-            '-r',
-            '-d',
-            'com.apple.provenance',
-            frameworkDirectoryBinary.path,
-          ],
+          command: <String>['xattr', '-r', '-d', 'com.apple.provenance', frameworkDirectory.path],
         ),
         FakeCommand(
           command: <String>['codesign', '--force', '--sign', '-', frameworkDirectoryBinary.path],
@@ -907,7 +855,7 @@ void main() {
       );
 
       xattrCommand = FakeCommand(
-        command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', binary.path],
+        command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', binary.parent.path],
       );
 
       adHocCodesignCommand = FakeCommand(

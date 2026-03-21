@@ -920,8 +920,10 @@ Future<void> _createStubAppFramework(
 }
 
 Future<void> _signFramework(Environment environment, File binary, BuildMode buildMode) async {
+  // Strip xattrs from the entire .framework directory, not just the binary.
+  // codesign validates the whole bundle. See https://github.com/flutter/flutter/issues/181103
   await removeExtendedAttributes(
-    binary,
+    binary.parent,
     ProcessUtils(processManager: environment.processManager, logger: environment.logger),
     environment.logger,
   );
