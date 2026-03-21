@@ -38,7 +38,7 @@ export interface BrowserEnvironment {
   browserEngine: BrowserEngine;
   hasImageCodecs: boolean;
   hasChromiumBreakIterators: boolean;
-  supportsWasmGC: boolean;
+  supportsDart2Wasm: boolean;
   crossOriginIsolated: boolean;
   webGLVersion: number;
   isChromeExtension: boolean;

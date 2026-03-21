@@ -10,7 +10,7 @@ import { loadCanvasKit } from './canvaskit_loader.js';
 import { loadSkwasm } from './skwasm_loader.js';
 import { getCanvaskitBaseUrl } from './utils.js';
 
-const supportsDart2Wasm = browserEnvironment.supportsWasmGC;
+const supportsDart2Wasm = browserEnvironment.supportsDart2Wasm;
 const supportsSkwasm = supportsDart2Wasm && browserEnvironment.webGLVersion > 0;
 
 /**
