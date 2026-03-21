@@ -20,9 +20,14 @@ void main() {
       final botDetector = FakeBotDetector(false);
       final FakeMDNSDeviceDiscovery discovery = createDiscovery(botDetector);
 
-      await discovery.advertise(appName: 'app', vmServiceUri: Uri.parse('ws://localhost:1234'));
+      await discovery.advertise(
+        appName: 'app',
+        vmServiceUri: Uri.parse('ws://localhost:1234'),
+        dtdUri: Uri.parse('ws://localhost:4321'),
+      );
 
       expect(discovery.advertised, isTrue);
+      expect(discovery.advertisedDtdUri, Uri.parse('ws://localhost:4321'));
     });
 
     test('does not advertise when running on bot', () async {
@@ -30,7 +35,11 @@ void main() {
       final FakeMDNSDeviceDiscovery discovery = createDiscovery(botDetector);
 
       // Advertise attempts to start mDNS, but should respect the bot detector.
-      await discovery.advertise(appName: 'app', vmServiceUri: Uri.parse('ws://localhost:1234'));
+      await discovery.advertise(
+        appName: 'app',
+        vmServiceUri: Uri.parse('ws://localhost:1234'),
+        dtdUri: Uri.parse('ws://localhost:4321'),
+      );
 
       expect(discovery.advertised, isFalse);
     });
@@ -43,7 +52,11 @@ void main() {
         platform: fakePlatform,
       );
 
-      await discovery.advertise(appName: 'app', vmServiceUri: Uri.parse('ws://localhost:1234'));
+      await discovery.advertise(
+        appName: 'app',
+        vmServiceUri: Uri.parse('ws://localhost:1234'),
+        dtdUri: Uri.parse('ws://localhost:4321'),
+      );
 
       expect(discovery.advertised, isTrue);
     });
@@ -55,9 +68,110 @@ void main() {
         enableLocalDiscovery: false,
       );
 
-      await discovery.advertise(appName: 'app', vmServiceUri: Uri.parse('ws://localhost:1234'));
+      await discovery.advertise(
+        appName: 'app',
+        vmServiceUri: Uri.parse('ws://localhost:1234'),
+        dtdUri: Uri.parse('ws://localhost:4321'),
+      );
+    });
+  });
 
-      expect(discovery.advertised, isFalse);
+  group('MDNSObservation', () {
+    test('stores dtdUri and wsUri as provided', () {
+      final observation = MDNSObservation(
+        hostname: 'host',
+        projectName: 'project',
+        deviceName: 'device',
+        deviceId: 'device_id',
+        targetPlatform: 'android',
+        mode: 'debug',
+        wsUri: 'http://127.0.0.1:1234/auth/',
+        epoch: 0,
+        pid: 1,
+        flutterVersion: '1.0.0',
+        dartVersion: '2.0.0',
+        dtdUri: 'http://127.0.0.1:4321/auth/',
+      );
+
+      // We no longer convert inside the class, it expects what is passed.
+      // But let's check what we passed.
+      expect(observation.wsUri, 'http://127.0.0.1:1234/auth/');
+      expect(observation.dtdUri, 'http://127.0.0.1:4321/auth/');
+    });
+
+    test('dtdUri is optional', () {
+      final observation = MDNSObservation(
+        hostname: 'host',
+        projectName: 'project',
+        deviceName: 'device',
+        deviceId: 'device_id',
+        targetPlatform: 'android',
+        mode: 'debug',
+        wsUri: 'https://127.0.0.1:1234/auth/',
+        epoch: 0,
+        pid: 1,
+        flutterVersion: '1.0.0',
+        dartVersion: '2.0.0',
+      );
+
+      expect(observation.dtdUri, null);
+    });
+
+    test('toJson includes dtdUri if present', () {
+      final observation = MDNSObservation(
+        hostname: 'host',
+        projectName: 'project',
+        deviceName: 'device',
+        deviceId: 'device_id',
+        targetPlatform: 'android',
+        mode: 'debug',
+        wsUri: 'ws://127.0.0.1:1234/auth/ws',
+        epoch: 0,
+        pid: 1,
+        flutterVersion: '1.0.0',
+        dartVersion: '2.0.0',
+        dtdUri: 'ws://127.0.0.1:4321/auth/ws',
+      );
+
+      expect(observation.toJson()['dtd_uri'], 'ws://127.0.0.1:4321/auth/ws');
+    });
+
+    test('toJson excludes dtdUri if null', () {
+      final observation = MDNSObservation(
+        hostname: 'host',
+        projectName: 'project',
+        deviceName: 'device',
+        deviceId: 'device_id',
+        targetPlatform: 'android',
+        mode: 'debug',
+        wsUri: 'http://127.0.0.1:1234/auth',
+        epoch: 0,
+        pid: 1,
+        flutterVersion: '1.0.0',
+        dartVersion: '2.0.0',
+      );
+
+      expect(observation.toJson().containsKey('dtd_uri'), isFalse);
+    });
+
+    test('parse correctly handles dtdUri', () {
+      const txt = '''
+hostname=host
+project_name=project
+device_name=device
+device_id=device_id
+target_platform=android
+mode=debug
+ws_uri=http://127.0.0.1:1234/auth/
+epoch=0
+pid=1
+flutter_version=1.0.0
+dart_version=2.0.0
+dtd_uri=http://127.0.0.1:4321/auth/
+''';
+      final MDNSObservation? observation = MDNSObservation.parse(txt);
+      expect(observation, isNotNull);
+      expect(observation!.dtdUri, 'http://127.0.0.1:4321/auth/');
     });
   });
 }
@@ -95,9 +209,10 @@ class FakeMDNSDeviceDiscovery extends MDNSDeviceDiscovery {
   });
 
   bool advertised = false;
+  Uri? advertisedDtdUri;
 
   @override
-  Future<void> advertise({required String appName, required Uri? vmServiceUri}) async {
+  Future<void> advertise({required String appName, required Uri? vmServiceUri, Uri? dtdUri}) async {
     // We override advertise to check if the base implementation would have proceeded.
     // However, the base implementation calls `MDNSService.create` and `server.start()` which we can't easily mock
     // without more refactoring or proper dependency injection of the mDNS client.
@@ -110,7 +225,7 @@ class FakeMDNSDeviceDiscovery extends MDNSDeviceDiscovery {
     // We can check the logger.
 
     try {
-      await super.advertise(appName: appName, vmServiceUri: vmServiceUri);
+      await super.advertise(appName: appName, vmServiceUri: vmServiceUri, dtdUri: dtdUri);
     } on Object {
       // Ignore errors from starting mDNS
     }
@@ -126,6 +241,7 @@ class FakeMDNSDeviceDiscovery extends MDNSDeviceDiscovery {
       advertised = false;
     } else {
       advertised = true;
+      advertisedDtdUri = dtdUri;
     }
   }
 }

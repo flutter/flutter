@@ -15,7 +15,6 @@ import 'base/logger.dart';
 import 'base/platform.dart';
 import 'base/time.dart';
 import 'build_info.dart';
-import 'convert.dart';
 import 'device.dart';
 import 'version.dart';
 
@@ -63,7 +62,11 @@ class MDNSDeviceDiscovery {
   /// Advertises the Flutter application via mDNS.
   ///
   /// The advertisement includes metadata about the application, device, and environment.
-  Future<void> advertise({required String appName, required Uri? vmServiceUri}) async {
+  Future<void> advertise({
+    required String appName,
+    required Uri? vmServiceUri,
+    required Uri? dtdUri,
+  }) async {
     try {
       if (_servers.isNotEmpty) {
         throw StateError(
@@ -104,6 +107,7 @@ class MDNSDeviceDiscovery {
         flutterVersion: frameworkVersion,
         dartVersion: dartVersion,
         pid: pid,
+        dtdUri: dtdUri?.toString(),
       );
 
       final List<String> txt = observation.toTxtRecord();
@@ -178,6 +182,7 @@ class MDNSObservation {
     required this.pid,
     required this.flutterVersion,
     required this.dartVersion,
+    this.dtdUri,
   });
 
   static const String _kProjectName = 'project_name';
@@ -186,6 +191,7 @@ class MDNSObservation {
   static const String _kTargetPlatform = 'target_platform';
   static const String _kMode = 'mode';
   static const String _kWsUri = 'ws_uri';
+  static const String _kDtdUri = 'dtd_uri';
   static const String _kEpoch = 'epoch';
   static const String _kPid = 'pid';
   static const String _kFlutterVersion = 'flutter_version';
@@ -203,23 +209,24 @@ class MDNSObservation {
   final int pid;
   final String flutterVersion;
   final String dartVersion;
+  final String? dtdUri;
 
-  /// Parses a raw TXT record string into an [MDNSObservation].
+  /// Parses a TXT record string into an [MDNSObservation].
   ///
-  /// Returns `null` if the record is empty or invalid.
+  /// Returns null if the TXT record is invalid or missing required fields.
   static MDNSObservation? parse(String txtRecord) {
-    final metadata = <String, String>{};
-    // The multicast_dns package joins the strings of a TXT record with newlines.
-    final Iterable<String> parts = LineSplitter.split(txtRecord);
-    for (final part in parts) {
-      final int equalsIndex = part.indexOf('=');
-      if (equalsIndex != -1) {
-        // Trim to remove any whitespace that may be around the delimiters.
-        metadata[part.substring(0, equalsIndex).trim()] = part.substring(equalsIndex + 1).trim();
-      }
-    }
-    if (metadata.isEmpty) {
+    if (txtRecord.isEmpty) {
       return null;
+    }
+    final metadata = <String, String>{};
+    for (final String line in txtRecord.split('\n')) {
+      final int equalsIndex = line.indexOf('=');
+      if (equalsIndex < 0) {
+        continue;
+      }
+      final String key = line.substring(0, equalsIndex).trim();
+      final String value = line.substring(equalsIndex + 1).trim();
+      metadata[key] = value;
     }
 
     final int? epoch = int.tryParse(metadata[_kEpoch] ?? '');
@@ -248,6 +255,7 @@ class MDNSObservation {
         pid: pid,
         flutterVersion: flutterVersion,
         dartVersion: dartVersion,
+        dtdUri: metadata[_kDtdUri],
       );
     }
 
@@ -256,21 +264,24 @@ class MDNSObservation {
 
   /// Converts the observation to a list of strings for mDNS TXT record.
   List<String> toTxtRecord() {
-    return <String>[
+    final txt = <String>[
       '$_kHostname=$hostname',
-      '$_kWsUri=$wsUri',
-      '$_kPid=$pid',
-      '$_kTargetPlatform=$targetPlatform',
-      '$_kMode=$mode',
-      '$_kEpoch=$epoch',
       '$_kProjectName=$projectName',
       '$_kDeviceName=$deviceName',
       '$_kDeviceId=$deviceId',
+      '$_kTargetPlatform=$targetPlatform',
+      '$_kMode=$mode',
+      '$_kWsUri=$wsUri',
+      '$_kEpoch=$epoch',
+      '$_kPid=$pid',
       '$_kFlutterVersion=$flutterVersion',
       '$_kDartVersion=$dartVersion',
+      if (dtdUri != null) '$_kDtdUri=$dtdUri',
     ];
+    return txt;
   }
 
+  /// Converts the observation to a JSON map.
   Map<String, String> toJson() {
     return <String, String>{
       _kHostname: hostname,
@@ -280,6 +291,7 @@ class MDNSObservation {
       _kTargetPlatform: targetPlatform,
       _kMode: mode,
       _kWsUri: wsUri,
+      if (dtdUri != null) _kDtdUri: dtdUri!,
       _kEpoch: epoch.toString(),
       _kPid: pid.toString(),
       _kFlutterVersion: flutterVersion,

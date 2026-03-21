@@ -1288,6 +1288,7 @@ abstract class ResidentRunner extends ResidentHandlers {
         await mdnsDeviceDiscovery.advertise(
           appName: appName,
           vmServiceUri: device.vmService!.httpAddress,
+          dtdUri: device.device!.dds.dtdUri,
         );
       }
 

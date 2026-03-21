@@ -10,6 +10,7 @@ import 'package:dwds/dwds.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/asset.dart';
+import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -27,8 +28,10 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
+import 'package:flutter_tools/src/mdns_device_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
@@ -262,6 +265,51 @@ name: my_app
       expect(logger.statusText, contains('Debug service listening on ws://127.0.0.1/abcd/'));
       expect(debugConnectionInfo.wsUri.toString(), 'ws://127.0.0.1/abcd/');
       expect(debugConnectionInfo.dtdUri.toString(), 'ws://127.0.0.1/efgh/');
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
+    'ResidentWebRunner uses DDS URI for mDNS advertisement when available',
+    () async {
+      final logger = BufferLogger.test();
+      final fakeMDNSDeviceDiscovery = FakeMDNSDeviceDiscovery();
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        logger: logger,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, enableLocalDiscovery: true),
+        mdnsDeviceDiscoveryFactory:
+            ({
+              required Device device,
+              required vm_service.VmService vmService,
+              required DebuggingOptions debuggingOptions,
+              required Logger logger,
+              required Platform platform,
+              required FlutterVersion flutterVersion,
+              required SystemClock systemClock,
+              required BotDetector botDetector,
+            }) {
+              return fakeMDNSDeviceDiscovery;
+            },
+      );
+      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+      setupMocks();
+
+      // Setup DDS URI
+      debugConnection.ddsUri = 'http://127.0.0.1:1234/dds/';
+
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+      unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+      await connectionInfoCompleter.future;
+
+      expect(
+        fakeMDNSDeviceDiscovery.advertisedVmServiceUri,
+        Uri.parse('http://127.0.0.1:1234/dds/'),
+      );
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -2004,6 +2052,7 @@ ResidentRunner setUpResidentRunner(
   Logger? logger,
   SystemClock? systemClock,
   DebuggingOptions? debuggingOptions,
+  MDNSDeviceDiscoveryFactory? mdnsDeviceDiscoveryFactory,
 }) {
   return ResidentWebRunner(
     flutterDevice,
@@ -2016,6 +2065,7 @@ ResidentRunner setUpResidentRunner(
     terminal: Terminal.test(),
     platform: FakePlatform(),
     outputPreferences: OutputPreferences.test(),
+    mdnsDeviceDiscoveryFactory: mdnsDeviceDiscoveryFactory,
   );
 }
 
@@ -2090,6 +2140,9 @@ class FakeDebugConnection extends Fake implements DebugConnection {
 
   @override
   late String dtdUri;
+
+  @override
+  String? ddsUri;
 
   final completer = Completer<void>();
   bool didClose = false;
@@ -2398,4 +2451,22 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {
     throw UnimplementedError();
   }
+}
+
+class FakeMDNSDeviceDiscovery extends Fake implements MDNSDeviceDiscovery {
+  Uri? advertisedVmServiceUri;
+  Uri? advertisedDtdUri;
+
+  @override
+  Future<void> advertise({
+    required String appName,
+    required Uri? vmServiceUri,
+    required Uri? dtdUri,
+  }) async {
+    advertisedVmServiceUri = vmServiceUri;
+    advertisedDtdUri = dtdUri;
+  }
+
+  @override
+  Future<void> stop() async {}
 }

@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:dds/dds.dart';
 import 'package:dwds/dwds.dart';
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
@@ -13,6 +14,7 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide
 
 import '../application_package.dart';
 import '../base/async_guard.dart';
+import '../base/bot_detector.dart';
 import '../base/command_help.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -36,6 +38,7 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_runner.dart';
 import '../run_hot.dart';
+import '../version.dart';
 import '../vmservice.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
@@ -46,6 +49,19 @@ import '../web/web_device.dart';
 import '../web/web_runner.dart';
 import 'devfs_web.dart';
 import 'web_expression_compiler.dart';
+
+/// Factory for creating an [MDNSDeviceDiscovery] instance.
+typedef MDNSDeviceDiscoveryFactory =
+    MDNSDeviceDiscovery Function({
+      required Device device,
+      required vmservice.VmService vmService,
+      required DebuggingOptions debuggingOptions,
+      required Logger logger,
+      required Platform platform,
+      required FlutterVersion flutterVersion,
+      required SystemClock systemClock,
+      required BotDetector botDetector,
+    });
 
 /// Injectable factory to create a [ResidentWebRunner].
 class DwdsWebRunnerFactory extends WebRunnerFactory {
@@ -112,6 +128,7 @@ class ResidentWebRunner extends ResidentRunner {
     required Analytics analytics,
     UrlTunneller? urlTunneller,
     Map<String, String> webDefines = const <String, String>{},
+    @visibleForTesting MDNSDeviceDiscoveryFactory? mdnsDeviceDiscoveryFactory,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
@@ -119,6 +136,7 @@ class ResidentWebRunner extends ResidentRunner {
        _analytics = analytics,
        _urlTunneller = urlTunneller,
        _webDefines = webDefines,
+       _mdnsDeviceDiscoveryFactory = mdnsDeviceDiscoveryFactory ?? MDNSDeviceDiscovery.new,
        super(
          <FlutterDevice>[device],
          target: target ?? fileSystem.path.join('lib', 'main.dart'),
@@ -138,6 +156,7 @@ class ResidentWebRunner extends ResidentRunner {
   final Analytics _analytics;
   final UrlTunneller? _urlTunneller;
   final Map<String, String> _webDefines;
+  final MDNSDeviceDiscoveryFactory _mdnsDeviceDiscoveryFactory;
 
   @override
   Logger get logger => _logger;
@@ -920,23 +939,28 @@ class ResidentWebRunner extends ResidentRunner {
           );
 
           // Start mDNS server
-          final discovery = MDNSDeviceDiscovery(
-            device: flutterDevice!.device!,
-            vmService: _vmService.service,
-            debuggingOptions: debuggingOptions,
-            logger: logger,
-            platform: _platform,
-            flutterVersion: globals.flutterVersion,
-            systemClock: _systemClock,
-            botDetector: globals.botDetector,
-          );
-          _mdnsDiscoveries.add(discovery);
-          unawaited(
-            discovery.advertise(
-              appName: flutterProject.manifest.appName,
-              vmServiceUri: _vmService.httpAddress,
-            ),
-          );
+          if (debuggingOptions.enableLocalDiscovery) {
+            final MDNSDeviceDiscovery discovery = _mdnsDeviceDiscoveryFactory(
+              device: flutterDevice!.device!,
+              vmService: _vmService.service,
+              debuggingOptions: debuggingOptions,
+              logger: logger,
+              platform: _platform,
+              flutterVersion: globals.flutterVersion,
+              systemClock: _systemClock,
+              botDetector: globals.botDetector,
+            );
+            _mdnsDiscoveries.add(discovery);
+            unawaited(
+              discovery.advertise(
+                appName: flutterProject.manifest.appName,
+                vmServiceUri: debugConnection.ddsUri != null
+                    ? Uri.parse(debugConnection.ddsUri!)
+                    : _vmService.httpAddress,
+                dtdUri: debugConnection.dtdUri?.toUri(),
+              ),
+            );
+          }
 
           final Uri websocketUri = Uri.parse(debugConnection.uri);
           flutterDevice!.vmService = _vmService;

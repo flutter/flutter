@@ -104,6 +104,55 @@ dart_version=2.0.0''',
     );
   });
 
+  testUsingContext('running-apps machine output includes dtdUri and ws_uri', () async {
+    final fakeMDnsClient = FakeMDnsClient(
+      <PtrResourceRecord>[const PtrResourceRecord('foo', 100, domainName: 'service.local')],
+      <String, List<SrvResourceRecord>>{
+        'service.local': <SrvResourceRecord>[
+          const SrvResourceRecord(
+            'service.local',
+            100,
+            port: 1234,
+            weight: 0,
+            priority: 0,
+            target: 'target.local',
+          ),
+        ],
+      },
+      <String, List<TxtResourceRecord>>{
+        'service.local': <TxtResourceRecord>[
+          const TxtResourceRecord(
+            'service.local',
+            100,
+            text: '''
+project_name=my_project
+device_name=macos
+device_id=macos
+target_platform=darwin-arm64
+mode=debug
+ws_uri=http://127.0.0.1:1234/auth_code/
+epoch=1000
+pid=123
+hostname=localhost
+flutter_version=1.0.0
+dart_version=2.0.0
+dtdUri=ws://127.0.0.1:1234/auth_code''',
+          ),
+        ],
+      },
+    );
+    final command = RunningAppsCommand(
+      mdnsClient: fakeMDnsClient,
+      logger: testLogger,
+      systemClock: SystemClock.fixed(DateTime(2015)),
+    );
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['running-apps', '--machine']);
+
+    expect(testLogger.statusText, contains('"dtdUri":"ws://127.0.0.1:1234/auth_code"'));
+    expect(testLogger.statusText, contains('"ws_uri":"http://127.0.0.1:1234/auth_code/"'));
+  });
+
   testUsingContext('running-apps finds multiple apps with formatting', () async {
     final fakeMDnsClient = FakeMDnsClient(
       <PtrResourceRecord>[
