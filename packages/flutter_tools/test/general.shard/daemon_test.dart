@@ -247,6 +247,25 @@ void main() {
     );
 
     testWithoutContext(
+      'can parse multiple messages while ignoring malformed json data in between',
+      () async {
+        final inputStream = Stream<List<int>>.fromIterable(<List<int>>[
+          testCommandBinary(10),
+          utf8.encode('[{"id":}]\n'),
+          testCommandBinary(20),
+        ]);
+        final converter = DaemonInputStreamConverter(inputStream);
+        final Stream<DaemonMessage> outputStream = converter.convertedStream;
+        final List<DaemonMessage> outputs = await outputStream.toList();
+        expect(outputs, hasLength(2));
+        expect(outputs[0].data, testCommand(10));
+        expect(outputs[0].binary, null);
+        expect(outputs[1].data, testCommand(20));
+        expect(outputs[1].binary, null);
+      },
+    );
+
+    testWithoutContext(
       'can parse multiple messages even when they are split in multiple packets',
       () async {
         final List<int> binary1 = testCommandBinary(10);
