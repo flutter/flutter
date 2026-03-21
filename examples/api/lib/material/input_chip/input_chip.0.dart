@@ -37,11 +37,11 @@ class _InputChipExampleState extends State<InputChipExample> {
       appBar: AppBar(title: const Text('InputChip Sample')),
       body: Center(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: .min,
+          mainAxisAlignment: .center,
           children: <Widget>[
             Wrap(
-              alignment: WrapAlignment.center,
+              alignment: .center,
               spacing: 5.0,
               children: List<Widget>.generate(inputs, (int index) {
                 return InputChip(

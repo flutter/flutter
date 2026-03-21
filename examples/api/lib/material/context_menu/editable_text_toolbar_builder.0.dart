@@ -73,7 +73,7 @@ class _EditableTextToolbarBuilderExampleAppState
                             color: const Color(0xffaaaa00),
                             disabledColor: const Color(0xffaaaaff),
                             onPressed: buttonItem.onPressed,
-                            padding: const EdgeInsets.all(10.0),
+                            padding: const .all(10.0),
                             pressedOpacity: 0.7,
                             child: SizedBox(
                               width: 200.0,

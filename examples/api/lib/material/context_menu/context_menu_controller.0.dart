@@ -119,13 +119,13 @@ class _ContextMenuRegionState extends State<_ContextMenuRegion> {
 
   static bool get _longPressEnabled {
     switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
+      case .android:
+      case .iOS:
         return true;
-      case TargetPlatform.macOS:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
+      case .macOS:
+      case .fuchsia:
+      case .linux:
+      case .windows:
         return false;
     }
   }

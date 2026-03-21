@@ -25,18 +25,14 @@ class DeleteIconBoxConstraintsExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: .center,
       children: <Widget>[
         RawChip(
           deleteIconBoxConstraints: const BoxConstraints.tightForFinite(),
           onDeleted: () {},
           label: const SizedBox(
             width: 150,
-            child: Text(
-              'One line text.',
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
+            child: Text('One line text.', maxLines: 3, overflow: .ellipsis),
           ),
         ),
         const SizedBox(height: 10),
@@ -48,7 +44,7 @@ class DeleteIconBoxConstraintsExample extends StatelessWidget {
             child: Text(
               'This text will wrap into two lines.',
               maxLines: 3,
-              overflow: TextOverflow.ellipsis,
+              overflow: .ellipsis,
             ),
           ),
         ),
@@ -61,7 +57,7 @@ class DeleteIconBoxConstraintsExample extends StatelessWidget {
             child: Text(
               'This is a very long text that will wrap into three lines.',
               maxLines: 3,
-              overflow: TextOverflow.ellipsis,
+              overflow: .ellipsis,
             ),
           ),
         ),

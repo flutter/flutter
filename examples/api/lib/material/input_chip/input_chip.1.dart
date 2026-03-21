@@ -50,7 +50,7 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
       body: Column(
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const .symmetric(horizontal: 16),
             child: ChipsInput<String>(
               values: _toppings,
               decoration: const InputDecoration(
@@ -247,7 +247,7 @@ class ChipsInputState<T> extends State<ChipsInput<T>> {
     return TextField(
       minLines: 1,
       maxLines: 3,
-      textInputAction: TextInputAction.done,
+      textInputAction: .done,
       style: widget.style,
       strutStyle: widget.strutStyle,
       controller: controller,
@@ -345,15 +345,15 @@ class ToppingInputChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(right: 3),
+      margin: const .only(right: 3),
       child: InputChip(
         key: ObjectKey(topping),
         label: Text(topping),
         avatar: CircleAvatar(child: Text(topping[0].toUpperCase())),
         onDeleted: () => onDeleted(topping),
         onSelected: (bool value) => onSelected(topping),
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        padding: const EdgeInsets.all(2),
+        materialTapTargetSize: .shrinkWrap,
+        padding: const .all(2),
       ),
     );
   }

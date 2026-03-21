@@ -69,10 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             children: <Widget>[
               for (final String bullet in bullets)
-                Padding(
-                  padding: const EdgeInsets.only(left: 20.0),
-                  child: Text(bullet),
-                ),
+                Padding(padding: const .only(left: 20.0), child: Text(bullet)),
             ],
           ),
         ),
@@ -364,7 +361,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     for (final MapEntry<LocalSpanRange, TextSpan> entry
                         in widgetSpanSourceMap.entries)
                       Padding(
-                        padding: const EdgeInsets.only(left: 20.0),
+                        padding: const .only(left: 20.0),
                         child: Text.rich(widgetSpanSourceMap[entry.key]!),
                       ),
                   ],
@@ -492,7 +489,7 @@ class _MySelectableTextColumnState extends State<MySelectableTextColumn> {
       selectionNotifier: widget.selectionNotifier,
       child: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             for (final MapEntry<LocalSpanRange, TextSpan> entry
                 in widget.dataSourceMap.entries)

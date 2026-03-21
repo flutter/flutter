@@ -21,7 +21,7 @@ class SelectionContainerExampleApp extends StatelessWidget {
           body: const Center(
             child: SelectionAllOrNoneContainer(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: .center,
                 children: <Widget>[Text('Row 1'), Text('Row 2'), Text('Row 3')],
               ),
             ),

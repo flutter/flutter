@@ -65,7 +65,7 @@ class _MyRadioMenuState extends State<MyRadioMenu> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: .start,
       children: <Widget>[
         MenuAnchor(
           childFocusNode: _buttonFocusNode,
