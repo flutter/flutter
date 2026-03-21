@@ -104,10 +104,11 @@ abstract mixin class WidgetsBindingObserver {
 
   /// Called at the start of a predictive back gesture.
   ///
-  /// Observers are notified in registration order until one returns true or all
-  /// observers have been notified. If an observer returns true then that
-  /// observer, and only that observer, will be notified of subsequent events in
-  /// this same gesture (for example [handleUpdateBackGestureProgress], etc.).
+  /// Observers are notified in reverse registration order until one returns
+  /// true or all observers have been notified. If an observer returns true then
+  /// that observer, and only that observer, will be notified of subsequent
+  /// events in this same gesture (for example
+  /// [handleUpdateBackGestureProgress], etc.).
   ///
   /// Observers are expected to return true if they were able to handle the
   /// notification, for example by starting a predictive back animation, and
@@ -1139,10 +1140,11 @@ mixin WidgetsBinding
   bool _handleStartBackGesture(Map<String?, Object?> arguments) {
     _backGestureObservers.clear();
     final backEvent = PredictiveBackEvent.fromMap(arguments);
-    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+    for (final observer in List<WidgetsBindingObserver>.of(_observers).reversed) {
       try {
         if (observer.handleStartBackGesture(backEvent)) {
           _backGestureObservers.add(observer);
+          break;
         }
       } catch (exception, stack) {
         FlutterError.reportError(
