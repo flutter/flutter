@@ -97,6 +97,45 @@ If you have made your own builds, you can use ndk-stack directly:
 adb logcat | ~/dev/engine/src/third_party/android_tools/ndk/prebuilt/linux-x86_64/bin/ndk-stack -sym ~/dev/engine/src/out/android_debug_unopt
 ```
 
+### Desymbolication in Google Play Console
+
+Google Play Console can automatically desymbolicate crash reports when you upload the correct native symbol files. Two libraries are involved: `libflutter.so` (the engine) and `libapp.so` (your Dart AOT code).
+
+#### `libflutter.so` symbols
+
+- **Flutter >= 3.32**: The unstripped `libflutter.so` is bundled inside the release AAB since [#161546](https://github.com/flutter/flutter/pull/161546). Play Console picks it up automatically — no manual upload required.
+- **Flutter < 3.32**: Download the symbols zip and upload it manually to Play Console:
+  ```
+  https://storage.googleapis.com/flutter_infra_release/flutter/<ENGINE_VERSION>/android-<arm|arm64|x64>-release/symbols.zip
+  ```
+  Replace `<ENGINE_VERSION>` with your engine revision (see [Get the symbols](#get-the-symbols) above) and `<arm|arm64|x64>` with your target architecture.
+
+#### `libapp.so` symbols (Dart obfuscation)
+
+When building with `--obfuscate --split-debug-info=<dir>`, Flutter generates symbol files named like `app.android-arm64.symbols`. Play Console requires a `.so` extension to accept these uploads.
+
+A [fix](https://github.com/flutter/flutter/pull/181275) for proper symbol packaging has been merged to `master` but is not yet in a stable release. In the meantime, rename each generated symbol file from `app.<arch>.symbols` to `app-<arch>.so`:
+
+```
+app.android-arm.symbols    →  app-android-arm.so
+app.android-arm64.symbols  →  app-android-arm64.so
+app.android-x64.symbols    →  app-android-x64.so
+```
+
+Then zip the renamed files together with the corresponding `libflutter.so` per ABI and upload to Play Console under **All app bundles > All app bundles > Native debug symbols**:
+
+```
+├── arm64-v8a
+│   ├── app-android-arm64.so
+│   └── libflutter.so
+├── armeabi-v7a
+│   ├── app-android-arm.so
+│   └── libflutter.so
+└── x86_64
+    ├── app-android-x64.so
+    └── libflutter.so
+```
+
 ### iOS
 
 Since Flutter 3.24, symbols can be found in the Flutter framework's artifact
