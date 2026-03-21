@@ -136,6 +136,8 @@ G_DEFINE_TYPE_WITH_CODE(
         G_IMPLEMENT_INTERFACE(fl_plugin_registry_get_type(),
                               fl_view_plugin_registry_iface_init))
 
+static GtkWidget* fl_view_get_toplevel_widget(FlView* self);
+
 // Redraw the view from the GTK thread.
 static gboolean redraw_cb(gpointer user_data) {
   FlView* self = FL_VIEW(user_data);
@@ -160,12 +162,16 @@ static gboolean redraw_cb(gpointer user_data) {
     gtk_widget_set_size_request(GTK_WIDGET(self->render_area),
                                 frame_width / scale_factor,
                                 frame_height / scale_factor);
-    GtkWidget* toplevel =
-        gtk_widget_get_toplevel(GTK_WIDGET(self->render_area));
+    GtkWidget* toplevel = fl_view_get_toplevel_widget(self);
     if (GTK_IS_WINDOW(toplevel)) {
-      // Resize to smallest size, so that the window will shrink to fit the new
-      // size of the render area.
+#if FLUTTER_LINUX_GTK4
+      gtk_window_set_default_size(
+          GTK_WINDOW(toplevel),
+          MAX(static_cast<gint>(frame_width / scale_factor), 1),
+          MAX(static_cast<gint>(frame_height / scale_factor), 1));
+#else
       gtk_window_resize(GTK_WINDOW(toplevel), 1, 1);
+#endif
     }
     return G_SOURCE_REMOVE;
   }
@@ -262,10 +268,6 @@ static FlutterPointerDeviceKind get_device_kind(GdkEvent* event) {
   return kFlutterPointerDeviceKindMouse;
 }
 
-static FlutterPointerDeviceKind get_pointer_device_kind(GdkEvent* event) {
-  return get_device_kind(event);
-}
-
 // Called when the mouse cursor changes.
 static void cursor_changed_cb(FlView* self) {
   FlMouseCursorHandler* handler =
@@ -295,14 +297,13 @@ static void setup_cursor(FlView* self) {
 }
 
 // Updates the engine with the current window metrics.
-static void handle_geometry_changed(FlView* self) {
+static void handle_geometry_changed_with_size(FlView* self,
+                                              int width,
+                                              int height) {
   // No updates required when size controlled by Flutter.
   if (self->sized_to_content) {
     return;
   }
-
-  GtkAllocation allocation;
-  gtk_widget_get_allocation(GTK_WIDGET(self), &allocation);
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
 
   if (width == 0 || height == 0) {
@@ -340,25 +341,12 @@ static void handle_geometry_changed(FlView* self) {
     display_id = fl_display_monitor_get_display_id(
         fl_engine_get_display_monitor(self->engine), monitor);
   }
-  size_t width = allocation.width, height = allocation.height;
   size_t min_width = width, min_height = height;
   size_t max_width = width, max_height = height;
   fl_engine_send_window_metrics_event(
       self->engine, display_id, self->view_id, min_width * scale_factor,
       min_height * scale_factor, max_width * scale_factor,
       max_height * scale_factor, scale_factor);
-  // fl_engine_send_window_metrics_event(self->engine, display_id, self->view_id,
-  //                                     width * scale_factor,
-  //                                     height * scale_factor, scale_factor);
-
-  // {
-  //   static bool logged_metrics = false;
-  //   if (!logged_metrics) {
-  //     logged_metrics = true;
-  //     g_warning("handle_geometry_changed: metrics %d x %d (scale %d)", width,
-  //               height, scale_factor);
-  //   }
-  // }
 }
 
 static void handle_geometry_changed(FlView* self) {
@@ -376,6 +364,8 @@ static void handle_geometry_changed(FlView* self) {
 static void view_added_cb(GObject* object,
                           GAsyncResult* result,
                           gpointer user_data) {
+  FlView* self = FL_VIEW(user_data);
+
   g_autoptr(GError) error = nullptr;
   if (!fl_engine_add_view_finish(FL_ENGINE(object), result, &error)) {
     if (g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
@@ -386,6 +376,8 @@ static void view_added_cb(GObject* object,
     // FIXME: Show on the GLArea
     return;
   }
+
+  handle_geometry_changed(self);
 }
 
 // Called when the engine updates accessibility.
@@ -500,9 +492,8 @@ static gboolean button_press_event_cb(FlView* self,
 
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   return fl_pointer_manager_handle_button_press(
-      self->pointer_manager, gdk_event_get_time(event),
-      get_pointer_device_kind(event), x * scale_factor, y * scale_factor,
-      button);
+      self->pointer_manager, gdk_event_get_time(event), get_device_kind(event),
+      x * scale_factor, y * scale_factor, button);
 }
 
 // Signal handler for GtkWidget::button-release-event
@@ -521,9 +512,8 @@ static gboolean button_release_event_cb(FlView* self,
 
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   return fl_pointer_manager_handle_button_release(
-      self->pointer_manager, gdk_event_get_time(event),
-      get_pointer_device_kind(event), x * scale_factor, y * scale_factor,
-      button);
+      self->pointer_manager, gdk_event_get_time(event), get_device_kind(event),
+      x * scale_factor, y * scale_factor, button);
 }
 
 // Signal handler for GtkWidget::scroll-event
@@ -561,8 +551,8 @@ static gboolean motion_notify_event_cb(FlView* self,
   gdk_event_get_coords(event, &x, &y);
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   return fl_pointer_manager_handle_motion(
-      self->pointer_manager, gdk_event_get_time(event),
-      get_pointer_device_kind(event), x * scale_factor, y * scale_factor);
+      self->pointer_manager, gdk_event_get_time(event), get_device_kind(event),
+      x * scale_factor, y * scale_factor);
 }
 
 // Signal handler for GtkWidget::enter-notify-event
@@ -573,8 +563,8 @@ static gboolean enter_notify_event_cb(FlView* self,
   gdk_event_get_coords(event, &x, &y);
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   return fl_pointer_manager_handle_enter(
-      self->pointer_manager, gdk_event_get_time(event),
-      get_pointer_device_kind(event), x * scale_factor, y * scale_factor);
+      self->pointer_manager, gdk_event_get_time(event), get_device_kind(event),
+      x * scale_factor, y * scale_factor);
 }
 
 // Signal handler for GtkWidget::leave-notify-event
@@ -589,8 +579,8 @@ static gboolean leave_notify_event_cb(FlView* self,
   gdk_event_get_coords(event, &x, &y);
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   return fl_pointer_manager_handle_leave(
-      self->pointer_manager, gdk_event_get_time(event),
-      get_pointer_device_kind(event), x * scale_factor, y * scale_factor);
+      self->pointer_manager, gdk_event_get_time(event), get_device_kind(event),
+      x * scale_factor, y * scale_factor);
 }
 #endif  // !FLUTTER_LINUX_GTK4
 
@@ -932,31 +922,19 @@ static gboolean draw_cb(FlView* self, cairo_t* cr) {
   }
 
   gboolean wait_for_frame = !self->sized_to_content;
-  // FlGdkSurface* surface =
-  //     fl_gtk_widget_get_surface(GTK_WIDGET(self->render_area));
-  // if (surface == nullptr) {
-  //   static bool logged_surface_null = false;
-  //   log_once(&logged_surface_null, "draw_cb: render area has no surface");
-  //   if (self->render_context) {
-  //     gdk_gl_context_clear_current();
-  //   }
-  //   return FALSE;
-  // }
+  FlGdkSurface* surface =
+      fl_gtk_widget_get_surface(GTK_WIDGET(self->render_area));
+  if (surface == nullptr) {
+    static bool logged_surface_null = false;
+    log_once(&logged_surface_null, "draw_cb: render area has no surface");
+    if (self->render_context) {
+      gdk_gl_context_clear_current();
+    }
+    return FALSE;
+  }
 
-  // {
-  //   static bool logged_surface_size = false;
-  //   if (!logged_surface_size) {
-  //     logged_surface_size = true;
-  //     g_warning("draw_cb: surface size %d x %d (scale %d)",
-  //               fl_gtk_surface_get_width(surface),
-  //               fl_gtk_surface_get_height(surface),
-  //               fl_gtk_surface_get_scale_factor(surface));
-  //   }
-  // }
-
-  gboolean result = fl_compositor_render(
-      self->compositor, cr,
-      gtk_widget_get_window(GTK_WIDGET(self->render_area)), wait_for_frame);
+  gboolean result =
+      fl_compositor_render(self->compositor, cr, surface, wait_for_frame);
 
   if (self->render_context) {
     gdk_gl_context_clear_current();

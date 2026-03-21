@@ -4,7 +4,6 @@
 
 #include "flutter/shell/platform/linux/fl_display_monitor.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
-
 struct _FlDisplayMonitor {
   GObject parent_instance;
 
@@ -119,10 +118,10 @@ static void monitors_changed_cb(GListModel* list,
                                 guint added,
                                 gpointer user_data) {
   (void)list;
+  FlDisplayMonitor* self = FL_DISPLAY_MONITOR(user_data);
   (void)position;
   (void)removed;
   (void)added;
-  FlDisplayMonitor* self = FL_DISPLAY_MONITOR(user_data);
   prune_display_ids_for_current_monitors(self);
   notify_display_update(self);
 }
